@@ -7,7 +7,7 @@
     "icon": "./assets/images/icon.png",
     "scheme": "kalpax",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
       "supportsTablet": true
     },
@@ -20,11 +20,9 @@
     },
     "web": {
       "bundler": "metro",
-      "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router",
       [
         "expo-splash-screen",
         {
@@ -32,6 +30,50 @@
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
+        }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/gelica-regular.otf",
+            "./assets/fonts/gelica-light.otf",
+            "./assets/fonts/gelica-medium.otf",
+            "./assets/fonts/gelica-bold.otf"
+          ],
+          "android": {
+            "fonts": [
+              {
+                "fontFamily": "Gelica",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/gelica-light.otf",
+                    "weight": 300
+                  },
+                  {
+                    "path": "./assets/fonts/gelica-regular.otf",
+                    "weight": 400
+                  },
+                  {
+                    "path": "./assets/fonts/gelica-medium.otf",
+                    "weight": 500
+                  },
+                  {
+                    "path": "./assets/fonts/gelica-bold.otf",
+                    "weight": 700
+                  }
+                ]
+              }
+            ]
+          },
+          "ios": {
+            "fonts": [
+              "./assets/fonts/gelica-light.otf",
+              "./assets/fonts/gelica-regular.otf",
+              "./assets/fonts/gelica-medium.otf",
+              "./assets/fonts/gelica-bold.otf"
+            ]
+          }
         }
       ]
     ],

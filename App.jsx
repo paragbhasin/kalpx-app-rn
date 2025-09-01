@@ -13,6 +13,8 @@ import TravelPlannerScreen from "./src/screens/TravelPlannerScreen";
 import Sankalp from "./src/screens/Sankalp";
 import PoojaScreen from "./src/screens/PoojaScreen"
 import RetreatsScreen from "./src/screens/RetreatsScreen"
+import Language from "./src/screens/Language";
+import "./src/config/i18n"
 
 const Stack = createNativeStackNavigator();
 
@@ -79,6 +81,11 @@ export default function App() {
         <Stack.Screen
           name="Retreat"
           component={RetreatsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Language"
+          component={Language}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

@@ -1,0 +1,97 @@
+{
+  "home": {
+    "greeting": "Hi, {{name}}",
+    "dailyHeading": "What would you like today?",
+    "kalpXHeading": "What You’ll Find on KalpX?"
+  },
+  "categories": {
+    "dharma": "Dharma",
+    "explore": "Explore",
+    "travel": "Travel",
+    "pooja": "Pooja",
+    "retreat": "Retreat"
+  },
+  "daily": {
+    "sankalpTitle": "Today Sankalp",
+    "sankalpSubtitle": "Do a small good thing",
+    "mantraTitle": "Today's Mantra",
+    "mantraSubtitle": "Calm my mind",
+    "wisdomTitle": "Today's Wisdom",
+    "wisdomSubtitle": "Keep a line of wisdom",
+    "festivalTitle": "Upcoming Festivals",
+    "festivalSubtitle": "invited you to a chat"
+  },
+  "kalpx": {
+    "learn": "Learn and Grow",
+    "explore": "Explore Videos",
+    "practice": "Daily Practice",
+    "journey": "Sacred Journeys",
+    "poojas": "Temple Poojas",
+    "retreats": "Retreats  Wellness"
+  },
+    "exploreVideos": {
+    "heading": "Explore Videos",
+    "video1": "Sanskrit Showcase · Institutes of Eminence Offering Sanskrit Courses · MadrasSanskritCollege",
+    "video2": "Learn Sanskrit · Ancient Wisdom Modern Applications · Delhi University",
+    "video3": "Spiritual Journeys · Teachings in Himalayas · Yoga Vidya Peeth"
+  },
+  "login": {
+    "brand": "KalpX",
+    "heading": "Connect to Your Roots",
+    "google": "Login With Google",
+    "cardTitleLine1": "Login in Your",
+    "cardTitleLine2": "Account",
+    "subTitle": "To Explore Divine Journey",
+    "username": "Username",
+    "password": "Password",
+    "keepLoggedIn": "Keep me logged in",
+    "forgotPassword": "Forgot password?",
+    "loginBtn": "LOGIN",
+    "otpSent": "OTP Sent ✔",
+    "footer": "No account yet?",
+    "register": "Register here",
+    "errors": {
+      "usernameRequired": "Username is required",
+      "passwordRequired": "Password is required",
+      "passwordMin": "Password must be at least 6 characters"
+    }
+  },
+  "signup": {
+    "getStarted": "Let's Get Started",
+    "createYour": "Create Your",
+    "account": "Account",
+    "connectWith": "To Connect With KalpX",
+    "email": "Email",
+    "username": "Username",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "otp": "Enter OTP",
+    "signUp": "SIGN UP",
+    "alreadyMember": "Already Member?",
+    "loginHere": "Login here"
+  },
+    "tabs": {
+    "home": "Home",
+    "notifications": "Notifications",
+    "search": "Search",
+    "profile": "Profile"
+  },
+    "welcome": {
+    "getStarted": "GET STARTED FREE",
+    "skip": "Skip"
+  },
+   "profile": {
+    "title": "Profile",
+    "name": "Neha Jais",
+    "level": "Beginner Level",
+    "menu": {
+      "saved": "Saved Messages",
+      "recent": "Recent viewed Videos",
+      "practices": "Practices",
+      "notifications": "Notifications",
+      "language": "Language",
+      "privacy": "Privacy and Security",
+      "storage": "Storage"
+    }
+  }
+}

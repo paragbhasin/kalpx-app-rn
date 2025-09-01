@@ -14,124 +14,73 @@ import {
 } from "react-native";
 import Entypo from "react-native-vector-icons/Entypo";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import ExploreVideos from "../components/ExploreVideos";
 import { useNavigation } from "@react-navigation/native";
+import ExploreVideos from "../components/ExploreVideos";
+import { useTranslation } from "react-i18next";
 
 export default function Home() {
   const navigation = useNavigation();
-  // Horizontal Categories
+  const { t } = useTranslation();
+
   const categories = [
-    { id: "1", name: "Dharma", icon: require("../../assets/Group.png") },
-    { id: "2", name: "Explore", icon: require("../../assets/Exploreicon.png") },
-    { id: "3", name: "Travel", icon: require("../../assets/darma.png") },
-    { id: "4", name: "Pooja", icon: require("../../assets/pooja.png") },
-    { id: "5", name: "Retreat", icon: require("../../assets/yoga.png") },
+    { id: "1", name: t("categories.dharma"), icon: require("../../assets/Group.png") },
+    { id: "2", name: t("categories.explore"), icon: require("../../assets/Exploreicon.png") },
+    { id: "3", name: t("categories.travel"), icon: require("../../assets/darma.png") },
+    { id: "4", name: t("categories.pooja"), icon: require("../../assets/pooja.png") },
+    { id: "5", name: t("categories.retreat"), icon: require("../../assets/yoga.png") },
   ];
 
-  // Vertical Cards
   const dailyOptions = [
     {
       id: "1",
-      title: "Today Sankalp",
+      title: t("daily.sankalpTitle"),
       route: "Sankalp",
-      subtitle: "Do a small good thing",
+      subtitle: t("daily.sankalpSubtitle"),
       icon: require("../../assets/lamp.png"),
-      color: "#f87171",
     },
     {
       id: "2",
-      title: "Todays Mantra",
+      title: t("daily.mantraTitle"),
       route: "Mantra",
-      subtitle: "Calm my mind",
+      subtitle: t("daily.mantraSubtitle"),
       icon: require("../../assets/atom.png"),
-      color: "#f59e0b",
     },
     {
       id: "3",
-      title: "Todays Wisdom",
+      title: t("daily.wisdomTitle"),
       route: "Wisdom",
-      subtitle: "Keep a line of wisdom",
+      subtitle: t("daily.wisdomSubtitle"),
       icon: require("../../assets/sun.png"),
-      color: "#eab308",
     },
     {
       id: "4",
-      title: "Upcoming Festivals",
+      title: t("daily.festivalTitle"),
       route: "UpcomingFestivals",
-      subtitle: "invited you to a chat",
+      subtitle: t("daily.festivalSubtitle"),
       icon: require("../../assets/party.png"),
-      color: "#22c55e",
     },
   ];
 
   const kalpXData = [
-    {
-      id: "1",
-      title: "Learn and Grow",
-      image: require("../../assets/learn.png"),
-    },
-    {
-      id: "2",
-      title: "Explore Videos",
-      image: require("../../assets/explore.png"),
-    },
-    {
-      id: "3",
-      title: "Daily Practice",
-      image: require("../../assets/daily.png"),
-    },
-    {
-      id: "4",
-      title: "Sacred Journeys",
-      image: require("../../assets/journey.png"),
-    },
-    {
-      id: "5",
-      title: "Temple Poojas",
-      image: require("../../assets/poojafl.png"),
-    },
-    {
-      id: "6",
-      title: "Retreats and Wellness",
-      image: require("../../assets/retreatff.png"),
-    },
+    { id: "1", title: t("kalpx.learn"), image: require("../../assets/learn.png") },
+    { id: "2", title: t("kalpx.explore"), image: require("../../assets/explore.png") },
+    { id: "3", title: t("kalpx.practice"), image: require("../../assets/daily.png") },
+    { id: "4", title: t("kalpx.journey"), image: require("../../assets/journey.png") },
+    { id: "5", title: t("kalpx.poojas"), image: require("../../assets/poojafl.png") },
+    { id: "6", title: t("kalpx.retreats"), image: require("../../assets/retreatff.png") },
   ];
 
-  const renderKalpXItem = ({ item }) => (
-    <TouchableOpacity style={styles.kalpXCard}>
-      <Image source={item.image} style={styles.kalpXImage} />
-      <Text style={styles.kalpXTitle}>{item.title.replace("and", "&")}</Text>
-    </TouchableOpacity>
-  );
-
   const renderCategory = ({ item }) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() => {
-        console.log(item?.name)
-        navigation.navigate(item?.name);
-      }}
-    >
+    <TouchableOpacity style={styles.card} onPress={() => navigation.navigate(item?.name)}>
       <Image source={item.icon} style={styles.icon} resizeMode="contain" />
       <Text style={styles.cardText}>{item.name}</Text>
     </TouchableOpacity>
   );
 
   const renderDailyOption = ({ item }) => (
-    <TouchableOpacity
-      style={styles.optionCard}
-      onPress={() => {
-        console.log("Navigating to:", item.route);
-        navigation.navigate(item.route);
-      }}
-    >
+    <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate(item.route)}>
       <View style={styles.optionIconWrapper}>
-        <Image
-          source={item.icon}
-          style={styles.optionIcon}
-          resizeMode="contain"
-        />
+        <Image source={item.icon} style={styles.optionIcon} resizeMode="contain" />
       </View>
       <View>
         <Text style={styles.optionTitle}>{item.title}</Text>
@@ -140,27 +89,25 @@ export default function Home() {
     </TouchableOpacity>
   );
 
+  const renderKalpXItem = ({ item }) => (
+    <TouchableOpacity style={styles.kalpXCard}>
+      <Image source={item.image} style={styles.kalpXImage} />
+      <Text style={styles.kalpXTitle}>{item.title}</Text>
+    </TouchableOpacity>
+  );
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-      {/* Keep UI below status bar */}
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="#fff4dd"
-        translucent={false}
-      />
+      <StatusBar barStyle="dark-content" backgroundColor="#fff4dd" translucent={false} />
 
-      <ImageBackground
-        source={require("../../assets/home.jpg")}
-        style={styles.background}
-        resizeMode="cover"
-      >
-        {/* Fixed Header */}
-        <View style={styles.header}>
+      <ImageBackground source={require("../../assets/home.jpg")} style={styles.background} resizeMode="cover">
+        {/* Header */}
+        {/* <View style={styles.header}>
           <View style={styles.leftSection}>
             <TouchableOpacity>
               <Entypo name="menu" size={28} color="black" />
             </TouchableOpacity>
-            <Text style={styles.greeting}>Hi, Neha Jaiswal</Text>
+            <Text style={styles.greeting}>{t("home.greeting", { name: "Neha Jaiswal" })}</Text>
           </View>
 
           <View style={styles.rightIcons}>
@@ -171,14 +118,10 @@ export default function Home() {
               <Entypo name="dots-three-vertical" size={20} color="black" />
             </TouchableOpacity>
           </View>
-        </View>
+        </View> */}
 
-        {/* Scrollable Content */}
-        <ScrollView
-          contentContainerStyle={{ paddingBottom: 30 }}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Horizontal Scroll Categories */}
+        <ScrollView contentContainerStyle={{ paddingBottom: 30 }} showsVerticalScrollIndicator={false}>
+          {/* ✅ Horizontal Categories restored */}
           <View style={{ marginTop: 10 }}>
             <FlatList
               data={categories}
@@ -186,44 +129,33 @@ export default function Home() {
               keyExtractor={(item) => item.id}
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{
-                paddingHorizontal: 10,
-                paddingBottom: 20,
-              }}
+              contentContainerStyle={{ paddingHorizontal: 10, paddingBottom: 20 }}
             />
           </View>
 
-          {/* Vertical List of Options */}
+          {/* Daily Section */}
           <View style={styles.dailyContainer}>
-            <Text style={styles.sectionHeading}>
-              What would you like today?
-            </Text>
+            <Text style={styles.sectionHeading}>{t("home.dailyHeading")}</Text>
             <FlatList
               data={dailyOptions}
               renderItem={renderDailyOption}
               keyExtractor={(item) => item.id}
               scrollEnabled={false}
-              contentContainerStyle={{ paddingVertical: 10 }}
             />
           </View>
 
           {/* Explore Videos */}
           <ExploreVideos />
 
-          {/* KalpX Section */}
+          {/* KalpX */}
           <View style={styles.kalpXContainer}>
-            <Text style={styles.sectionHeading}>
-              What You’ll Find on KalpX?
-            </Text>
+            <Text style={styles.sectionHeading}>{t("home.kalpXHeading")}</Text>
             <FlatList
               data={kalpXData}
               renderItem={renderKalpXItem}
               keyExtractor={(item) => item.id}
               numColumns={2}
-              columnWrapperStyle={{
-                justifyContent: "space-between",
-                marginBottom: 12,
-              }}
+              columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 12 }}
               scrollEnabled={false}
             />
           </View>

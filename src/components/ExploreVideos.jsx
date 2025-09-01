@@ -1,47 +1,32 @@
 // components/ExploreVideos.js
 import React from "react";
-import { View, Text, FlatList, Image, TouchableOpacity, StyleSheet } from "react-native";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { View, Text, FlatList, StyleSheet } from "react-native";
+import YoutubePlayer from "react-native-youtube-iframe";
+import { useTranslation } from "react-i18next";
 
 export default function ExploreVideos() {
-  // ✅ Videos live here
+  const { t } = useTranslation();
+
   const videos = [
-    {
-      id: "1",
-      title:
-        "Sanskrit Showcase · Institutes of Eminence Offering Sanskrit Courses · MadrasSanskritCollege",
-      thumbnail: require("../../assets/v1.png"),
-    },
-    {
-      id: "2",
-      title:
-        "Learn Sanskrit · Ancient Wisdom Modern Applications · Delhi University",
-      thumbnail: require("../../assets/v1.png"),
-    },
-    {
-      id: "3",
-      title: "Spiritual Journeys · Teachings in Himalayas · Yoga Vidya Peeth",
-      thumbnail: require("../../assets/v1.png"),
-    },
+    { id: "1", title: t("exploreVideos.video1"), youtubeId: "QFujtgh0tGo" },
+    { id: "2", title: t("exploreVideos.video2"), youtubeId: "QFujtgh0tGo" },
+    { id: "3", title: t("exploreVideos.video3"), youtubeId: "QFujtgh0tGo" }
   ];
 
   const renderVideo = ({ item }) => (
-    <TouchableOpacity style={styles.videoCard}>
+    <View style={styles.videoCard}>
       <View style={styles.thumbnailWrapper}>
-        <Image source={item.thumbnail} style={styles.videoThumbnail} />
-        <View style={styles.playOverlay}>
-          <MaterialCommunityIcons name="play-circle-outline" size={40} color="#fff" />
-        </View>
+        <YoutubePlayer height={140} play={false} videoId={item.youtubeId} />
       </View>
       <Text style={styles.videoTitle} numberOfLines={3}>
         {item.title}
       </Text>
-    </TouchableOpacity>
+    </View>
   );
 
   return (
     <View style={styles.videosContainer}>
-      <Text style={styles.sectionHeading}>Explore Videos</Text>
+      <Text style={styles.sectionHeading}>{t("exploreVideos.heading")}</Text>
       <FlatList
         data={videos}
         renderItem={renderVideo}
@@ -57,7 +42,7 @@ export default function ExploreVideos() {
 const styles = StyleSheet.create({
   videosContainer: {
     marginTop: 20,
-    paddingLeft: 2,
+    paddingLeft: 2
   },
   sectionHeading: {
     fontSize: 18,
@@ -66,7 +51,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 4,
     lineHeight: 20,
-    paddingLeft: 12,
+    paddingLeft: 12
   },
   videoCard: {
     backgroundColor: "#fff",
@@ -76,31 +61,18 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 1,
     borderColor: "#FFD6A5",
-    padding: 12,
+    padding: 12
   },
   thumbnailWrapper: {
     width: "100%",
     height: 140,
-    borderRadius: 12,
-    overflow: "hidden",
-  },
-  videoThumbnail: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "cover",
-  },
-  playOverlay: {
-    position: "absolute",
-    top: "40%",
-    left: "40%",
-    justifyContent: "center",
-    alignItems: "center",
+    overflow: "hidden"
   },
   videoTitle: {
     fontSize: 14,
     fontFamily: "GelicaRegular",
     color: "#000",
     padding: 10,
-    lineHeight: 18,
-  },
+    lineHeight: 18
+  }
 });

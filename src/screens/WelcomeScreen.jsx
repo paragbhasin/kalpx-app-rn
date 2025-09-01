@@ -8,13 +8,16 @@ import {
   Platform,
   StatusBar
 } from "react-native";
+import { useTranslation } from "react-i18next";
 
 export default function WelcomeScreen({ navigation }) {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.container}>
       <StatusBar
-        barStyle="dark-content" // dark icons/text
-        backgroundColor="#f1ebdf" // background color for Android
+        barStyle="dark-content"
+        backgroundColor="#f1ebdf"
       />
       <ImageBackground
         source={require("../../assets/kalpx-Recovered.png")}
@@ -27,12 +30,12 @@ export default function WelcomeScreen({ navigation }) {
         onPress={() => navigation.navigate("Login")}
         activeOpacity={0.8}
       >
-        <Text style={styles.buttonText}>GET STARTED FREE</Text>
+        <Text style={styles.buttonText}>{t("welcome.getStarted")}</Text>
       </TouchableOpacity>
 
       <View style={styles.skipContainer}>
         <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-          <Text style={styles.skipText}>Skip</Text>
+          <Text style={styles.skipText}>{t("welcome.skip")}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -48,7 +51,7 @@ const styles = StyleSheet.create({
   image: {
     flex: 1,
     width: "100%",
-    height: Platform.OS === "ios" ? 600 : 650, // Adjust height per platform
+    height: Platform.OS === "ios" ? 600 : 650,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -75,7 +78,7 @@ const styles = StyleSheet.create({
   skipText: {
     fontSize: 14,
     color: "#333",
-    fontFamily: "GelicaRegular", // custom font
-    lineHeight: 18, // prevent clipping
+    fontFamily: "GelicaRegular",
+    lineHeight: 18,
   },
 });

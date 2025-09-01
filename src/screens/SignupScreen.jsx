@@ -7,13 +7,13 @@ import {
   StyleSheet,
   ImageBackground,
   ScrollView,
-  Image,
   Dimensions,
   SafeAreaView,
   StatusBar,
 } from "react-native";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import { useTranslation } from "react-i18next";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -30,6 +30,7 @@ const SignupSchema = Yup.object().shape({
 
 export default function SignupScreen({ navigation }) {
   const [otpSent, setOtpSent] = useState(false);
+  const { t } = useTranslation();
 
   const handleSendOtp = (email) => {
     if (email) {
@@ -54,12 +55,12 @@ export default function SignupScreen({ navigation }) {
       >
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <Text style={styles.brand}>KalpX</Text>
-          <Text style={styles.heading}>Lets Get Started</Text>
+          <Text style={styles.heading}>{t("signup.getStarted")}</Text>
 
           <View style={styles.card}>
-            <Text style={styles.cardTitleLine1}>Create Your</Text>
-            <Text style={styles.cardTitleLine2}>Account</Text>
-            <Text style={styles.subTitle}>To Connect With KalpX</Text>
+            <Text style={styles.cardTitleLine1}>{t("signup.createYour")}</Text>
+            <Text style={styles.cardTitleLine2}>{t("signup.account")}</Text>
+            <Text style={styles.subTitle}>{t("signup.connectWith")}</Text>
 
             <Formik
               initialValues={{
@@ -85,7 +86,7 @@ export default function SignupScreen({ navigation }) {
                 <>
                   <TextInput
                     style={styles.input}
-                    placeholder="Email"
+                    placeholder={t("signup.email")}
                     placeholderTextColor="#9e9b97"
                     value={values.email}
                     onChangeText={handleChange("email")}
@@ -97,7 +98,7 @@ export default function SignupScreen({ navigation }) {
 
                   <TextInput
                     style={styles.input}
-                    placeholder="Username"
+                    placeholder={t("signup.username")}
                     placeholderTextColor="#9e9b97"
                     value={values.username}
                     onChangeText={handleChange("username")}
@@ -109,7 +110,7 @@ export default function SignupScreen({ navigation }) {
 
                   <TextInput
                     style={styles.input}
-                    placeholder="Password"
+                    placeholder={t("signup.password")}
                     placeholderTextColor="#9e9b97"
                     secureTextEntry
                     value={values.password}
@@ -122,7 +123,7 @@ export default function SignupScreen({ navigation }) {
 
                   <TextInput
                     style={styles.input}
-                    placeholder="Confirm Password"
+                    placeholder={t("signup.confirmPassword")}
                     placeholderTextColor="#9e9b97"
                     secureTextEntry
                     value={values.confirmPassword}
@@ -135,7 +136,7 @@ export default function SignupScreen({ navigation }) {
 
                   <TextInput
                     style={styles.input}
-                    placeholder="Enter OTP"
+                    placeholder={t("signup.otp")}
                     placeholderTextColor="#9e9b97"
                     value={values.otp}
                     onChangeText={handleChange("otp")}
@@ -149,15 +150,15 @@ export default function SignupScreen({ navigation }) {
                     style={styles.button}
                     onPress={handleSubmit}
                   >
-                    <Text style={styles.buttonText}>SIGN UP</Text>
+                    <Text style={styles.buttonText}>{t("signup.signUp")}</Text>
                   </TouchableOpacity>
 
                   <View style={styles.footerContainer}>
-                    <Text style={styles.footer}>Already Member? </Text>
+                    <Text style={styles.footer}>{t("signup.alreadyMember")} </Text>
                     <TouchableOpacity
                       onPress={() => navigation.navigate("Login")}
                     >
-                      <Text style={styles.login}>Login here</Text>
+                      <Text style={styles.login}>{t("signup.loginHere")}</Text>
                     </TouchableOpacity>
                   </View>
                 </>
@@ -173,7 +174,7 @@ export default function SignupScreen({ navigation }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#fefaf2", // matches card bg so safeArea blends in
+    backgroundColor: "#fefaf2",
   },
   background: {
     flex: 1,
@@ -286,19 +287,5 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     fontFamily: "GelicaRegular",
     lineHeight: 16,
-  },
-  success: {
-    fontSize: 12,
-    color: "green",
-    marginBottom: 10,
-    fontFamily: "GelicaRegular",
-    lineHeight: 16,
-  },
-  verifyLink: {
-    fontSize: 13,
-    color: "#000",
-    marginBottom: 10,
-    textDecorationLine: "underline",
-    fontFamily: "GelicaRegular",
   },
 });

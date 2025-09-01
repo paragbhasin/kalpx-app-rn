@@ -16,18 +16,22 @@ import {
 } from "react-native";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import { useTranslation } from "react-i18next";
 
 const screenWidth = Dimensions.get("window").width;
 
-// Validation Schema
-const LoginSchema = Yup.object().shape({
-  username: Yup.string().required("Required"),
-  password: Yup.string().min(6, "Min 6 chars").required("Required"),
-});
-
 export default function LoginScreen({ navigation }) {
+  const { t } = useTranslation();
   const [otpSent, setOtpSent] = useState(false);
   const [keepLoggedIn, setKeepLoggedIn] = useState(false);
+
+  // ✅ Validation with i18n error messages
+  const LoginSchema = Yup.object().shape({
+    username: Yup.string().required(t("login.errors.usernameRequired")),
+    password: Yup.string()
+      .min(6, t("login.errors.passwordMin"))
+      .required(t("login.errors.passwordRequired")),
+  });
 
   const handleSendOtp = (username) => {
     if (username) {
@@ -40,7 +44,6 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Keep content below status bar */}
       <StatusBar
         barStyle="dark-content"
         backgroundColor="#fff2dd"
@@ -60,8 +63,8 @@ export default function LoginScreen({ navigation }) {
             contentContainerStyle={styles.scrollContainer}
             keyboardShouldPersistTaps="handled"
           >
-            <Text style={styles.brand}>KalpX</Text>
-            <Text style={styles.heading}>Connect to Your Roots</Text>
+            <Text style={styles.brand}>{t("login.brand")}</Text>
+            <Text style={styles.heading}>{t("login.heading")}</Text>
 
             {/* Google Login Button */}
             <TouchableOpacity
@@ -72,13 +75,17 @@ export default function LoginScreen({ navigation }) {
                 source={require("../../assets/devicon_google.png")}
                 style={styles.googleIcon}
               />
-              <Text style={styles.googleText}>Login With Google</Text>
+              <Text style={styles.googleText}>{t("login.google")}</Text>
             </TouchableOpacity>
 
             <View style={styles.card}>
-              <Text style={styles.cardTitleLine1}>Login in Your</Text>
-              <Text style={styles.cardTitleLine2}>Account</Text>
-              <Text style={styles.subTitle}>To Explore Divine Journey</Text>
+              <Text style={styles.cardTitleLine1}>
+                {t("login.cardTitleLine1")}
+              </Text>
+              <Text style={styles.cardTitleLine2}>
+                {t("login.cardTitleLine2")}
+              </Text>
+              <Text style={styles.subTitle}>{t("login.subTitle")}</Text>
 
               <Formik
                 initialValues={{ username: "", password: "" }}
@@ -99,7 +106,7 @@ export default function LoginScreen({ navigation }) {
                   <>
                     <TextInput
                       style={styles.input}
-                      placeholder="Username"
+                      placeholder={t("login.username")}
                       placeholderTextColor="#9e9b97"
                       value={values.username}
                       onChangeText={handleChange("username")}
@@ -109,11 +116,13 @@ export default function LoginScreen({ navigation }) {
                       <Text style={styles.error}>{errors.username}</Text>
                     )}
 
-                    {otpSent && <Text style={styles.success}>OTP Sent ✔</Text>}
+                    {otpSent && (
+                      <Text style={styles.success}>{t("login.otpSent")}</Text>
+                    )}
 
                     <TextInput
                       style={styles.input}
-                      placeholder="Password"
+                      placeholder={t("login.password")}
                       placeholderTextColor="#9e9b97"
                       secureTextEntry
                       value={values.password}
@@ -140,12 +149,14 @@ export default function LoginScreen({ navigation }) {
                           )}
                         </View>
                         <Text style={styles.checkboxLabel}>
-                          Keep me logged in
+                          {t("login.keepLoggedIn")}
                         </Text>
                       </TouchableOpacity>
 
                       <TouchableOpacity>
-                        <Text style={styles.forgot}>Forgot password?</Text>
+                        <Text style={styles.forgot}>
+                          {t("login.forgotPassword")}
+                        </Text>
                       </TouchableOpacity>
                     </View>
 
@@ -153,15 +164,17 @@ export default function LoginScreen({ navigation }) {
                       style={styles.button}
                       onPress={handleSubmit}
                     >
-                      <Text style={styles.buttonText}>LOGIN</Text>
+                      <Text style={styles.buttonText}>
+                        {t("login.loginBtn")}
+                      </Text>
                     </TouchableOpacity>
 
                     <View style={styles.footerContainer}>
-                      <Text style={styles.footer}>No account yet? </Text>
+                      <Text style={styles.footer}>{t("login.footer")} </Text>
                       <TouchableOpacity
                         onPress={() => navigation.navigate("Signup")}
                       >
-                        <Text style={styles.login}>Register here</Text>
+                        <Text style={styles.login}>{t("login.register")}</Text>
                       </TouchableOpacity>
                     </View>
                   </>

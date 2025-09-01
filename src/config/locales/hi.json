@@ -1,0 +1,97 @@
+{
+  "home": {
+    "greeting": "नमस्ते, {{name}}",
+    "dailyHeading": "आज आप क्या चाहेंगे?",
+    "kalpXHeading": "KalpX पर आपको क्या मिलेगा?"
+  },
+  "categories": {
+    "dharma": "धर्म",
+    "explore": "खोजें",
+    "travel": "यात्रा",
+    "pooja": "पूजा",
+    "retreat": "रिट्रीट"
+  },
+  "daily": {
+    "sankalpTitle": "आज का संकल्प",
+    "sankalpSubtitle": "कोई छोटा सा अच्छा काम करें",
+    "mantraTitle": "आज का मंत्र",
+    "mantraSubtitle": "मन को शांत करें",
+    "wisdomTitle": "आज का ज्ञान",
+    "wisdomSubtitle": "ज्ञान की एक पंक्ति रखें",
+    "festivalTitle": "आगामी त्योहार",
+    "festivalSubtitle": "आपको चैट के लिए आमंत्रित किया"
+  },
+  "kalpx": {
+    "learn": "सीखें और बढ़ें",
+    "explore": "वीडियो खोजें",
+    "practice": "दैनिक अभ्यास",
+    "journey": "पवित्र यात्राएँ",
+    "poojas": "मंदिर की पूजाएँ",
+    "retreats": "रिट्रीट्स और वेलनेस"
+  },
+   "exploreVideos": {
+    "heading": "वीडियो देखें",
+    "video1": "संस्कृत प्रदर्शन · संस्कृत पाठ्यक्रम प्रदान करने वाले प्रतिष्ठित संस्थान · मद्रास संस्कृत कॉलेज",
+    "video2": "संस्कृत सीखें · प्राचीन ज्ञान आधुनिक उपयोग · दिल्ली विश्वविद्यालय",
+    "video3": "आध्यात्मिक यात्राएँ · हिमालय में शिक्षाएँ · योग विद्यापीठ"
+  },
+  "login": {
+    "brand": "KalpX",
+    "heading": "अपनी जड़ों से जुड़ें",
+    "google": "गूगल से लॉगिन करें",
+    "cardTitleLine1": "लॉगिन करें",
+    "cardTitleLine2": "अपने खाते में",
+    "subTitle": "दिव्य यात्रा का अन्वेषण करें",
+    "username": "उपयोगकर्ता नाम",
+    "password": "पासवर्ड",
+    "keepLoggedIn": "मुझे लॉगिन रखा जाए",
+    "forgotPassword": "पासवर्ड भूल गए?",
+    "loginBtn": "लॉगिन",
+    "otpSent": "ओटीपी भेजा गया ✔",
+    "footer": "अभी तक खाता नहीं है?",
+    "register": "यहाँ पंजीकरण करें",
+    "errors": {
+      "usernameRequired": "उपयोगकर्ता नाम आवश्यक है",
+      "passwordRequired": "पासवर्ड आवश्यक है",
+      "passwordMin": "पासवर्ड कम से कम 6 वर्णों का होना चाहिए"
+    }
+  },
+  "signup": {
+    "getStarted": "आइए शुरू करें",
+    "createYour": "अपना",
+    "account": "खाता बनाएं",
+    "connectWith": "KalpX से जुड़ने के लिए",
+    "email": "ईमेल",
+    "username": "उपयोगकर्ता नाम",
+    "password": "पासवर्ड",
+    "confirmPassword": "पासवर्ड की पुष्टि करें",
+    "otp": "OTP दर्ज करें",
+    "signUp": "साइन अप",
+    "alreadyMember": "पहले से सदस्य हैं?",
+    "loginHere": "यहाँ लॉगिन करें"
+  },
+   "tabs": {
+    "home": "होम",
+    "notifications": "सूचनाएँ",
+    "search": "खोजें",
+    "profile": "प्रोफ़ाइल"
+  },
+  "welcome": {
+    "getStarted": "मुफ़्त में शुरू करें",
+    "skip": "छोड़ें"
+  },
+   "profile": {
+    "title": "प्रोफ़ाइल",
+    "name": "नेहा जैस",
+    "level": "शुरुआती स्तर",
+    "menu": {
+      "saved": "सहेजे गए संदेश",
+      "recent": "हाल ही में देखे गए वीडियो",
+      "practices": "अभ्यास",
+      "notifications": "सूचनाएँ",
+      "language": "भाषा",
+      "privacy": "गोपनीयता और सुरक्षा",
+      "storage": "स्टोरेज"
+    }
+  }
+}

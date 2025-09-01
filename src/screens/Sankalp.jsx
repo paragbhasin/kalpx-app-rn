@@ -8,90 +8,106 @@ import {
   SafeAreaView,
   StatusBar,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native"; // ✅ for back
 import ExploreVideos from "../components/ExploreVideos";
 
 export default function Sankalp() {
+  const navigation = useNavigation();
+
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor="transparent"
-        translucent
-      />
-
-      {/* Top Image with curved bottom */}
-      <ImageBackground
-        source={require("../../assets/Sankalpbg.png")}
-        style={styles.headerImage}
-        imageStyle={styles.imageStyle}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
       >
-        {/* Top buttons */}
-        <View style={styles.topButtons}>
-          <TouchableOpacity style={styles.iconButton}>
-            <Ionicons name="arrow-back" size={22} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <Ionicons name="share-social-outline" size={22} color="#fff" />
-          </TouchableOpacity>
-        </View>
-      </ImageBackground>
+        <StatusBar
+          barStyle="dark-content"
+          backgroundColor="#fff4dd"
+          translucent={false}
+        />
 
-      {/* Scrollable Body */}
-      <ScrollView
-        style={styles.body}
-        contentContainerStyle={{ paddingBottom: 40 }}
-      >
-        {/* Title */}
-        <Text style={styles.title}>Todays Sankalp</Text>
-
-        {/* Sankalp Text */}
-        <View style={styles.sankalpBox}>
-          <Text style={styles.sankalpText}>
-            I will feed a being today :person, bird, animal:.
-          </Text>
-        </View>
-
-        {/* Why this matters */}
-        <View style={styles.sectionBlue}>
-          <Text style={styles.sectionTitle}>Why this matters</Text>
-          <Text style={styles.sectionLink}>
-            Feeding another, like Annapūrṇā’s grace, nourishes your soul.
-          </Text>
-        </View>
-        <View style={styles.sectionBlue}>
-          <Text style={styles.sectionTitle}>Suggested practice</Text>
-          <Text style={styles.sectionLink}>
-            Offer fruit or grain before sunset, chanting ‘Dayā’ softly.
-          </Text>
-        </View>
-
-        {/* Root + Best Times */}
-        <View style={styles.row}>
-          <View style={styles.col}>
-            <Text style={styles.label}>Root:</Text>
-            <Text style={styles.value}>🌱 Dāna • Dayā</Text>
+        {/* Top Image with curved bottom */}
+        <ImageBackground
+          source={require("../../assets/Sankalpbg.png")}
+          style={styles.headerImage}
+          imageStyle={styles.imageStyle}
+        >
+          {/* Top buttons */}
+          <View style={styles.topButtons}>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => navigation.goBack()} // ✅ back navigation
+            >
+              <Ionicons name="arrow-back" size={22} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconButton}>
+              <Ionicons name="share-social-outline" size={22} color="#fff" />
+            </TouchableOpacity>
           </View>
-          <View style={styles.col}>
-            <Text style={styles.label}>Best Times:</Text>
-            <Text style={styles.value}>☀️ Day • Evening</Text>
+        </ImageBackground>
+
+        {/* Scrollable Body */}
+        <ScrollView
+          style={styles.body}
+          contentContainerStyle={{ paddingBottom: 40 }}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Title */}
+          <Text style={styles.title}>Todays Sankalp</Text>
+
+          {/* Sankalp Text */}
+          <View style={styles.sankalpBox}>
+            <Text style={styles.sankalpText}>
+              I will feed a being today :person, bird, animal:.
+            </Text>
           </View>
-        </View>
 
-        {/* Context Tags */}
-        <View style={styles.section}>
-          <Text style={styles.label}>Context Tags:</Text>
-          <Text style={styles.value}>🏡 home 🎁 family</Text>
-        </View>
-        {/* Explore Videos */}
-        <ExploreVideos />
-      </ScrollView>
+          {/* Why this matters */}
+          <View style={styles.sectionBlue}>
+            <Text style={styles.sectionTitle}>Why this matters</Text>
+            <Text style={styles.sectionLink}>
+              Feeding another, like Annapūrṇā’s grace, nourishes your soul.
+            </Text>
+          </View>
+          <View style={styles.sectionBlue}>
+            <Text style={styles.sectionTitle}>Suggested practice</Text>
+            <Text style={styles.sectionLink}>
+              Offer fruit or grain before sunset, chanting ‘Dayā’ softly.
+            </Text>
+          </View>
 
-      {/* Bottom Button */}
-      <TouchableOpacity style={styles.doneButton}>
-        <Text style={styles.doneButtonText}>Mark as Done</Text>
-      </TouchableOpacity>
+          {/* Root + Best Times */}
+          <View style={styles.row}>
+            <View style={styles.col}>
+              <Text style={styles.label}>Root:</Text>
+              <Text style={styles.value}>🌱 Dāna • Dayā</Text>
+            </View>
+            <View style={styles.col}>
+              <Text style={styles.label}>Best Times:</Text>
+              <Text style={styles.value}>☀️ Day • Evening</Text>
+            </View>
+          </View>
+
+          {/* Context Tags */}
+          <View style={styles.section}>
+            <Text style={styles.label}>Context Tags:</Text>
+            <Text style={styles.value}>🏡 home 🎁 family</Text>
+          </View>
+
+          {/* Explore Videos */}
+          <ExploreVideos />
+        </ScrollView>
+
+        {/* Bottom Button */}
+        <TouchableOpacity style={styles.doneButton}>
+          <Text style={styles.doneButtonText}>Mark as Done</Text>
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -107,7 +123,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 15,
-    paddingTop: 40,
+    paddingTop: 20,
   },
   iconButton: {
     backgroundColor: "rgba(0,0,0,0.3)",
@@ -167,7 +183,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 16,
-    
   },
   col: { flex: 1 },
   label: {
@@ -183,7 +198,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   doneButton: {
-    backgroundColor: "#b17741",
+    backgroundColor: "#9a7548",
     paddingVertical: 14,
     alignItems: "center",
     marginHorizontal: 16,

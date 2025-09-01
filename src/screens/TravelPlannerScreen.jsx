@@ -1,20 +1,20 @@
-import React, { useMemo, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import { Check, ChevronLeft, MapPin } from "lucide-react-native";
+import { useMemo, useState } from "react";
 import {
-  View,
-  Text,
   Image,
   Pressable,
-  TextInput,
   ScrollView,
   StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
-import { ChevronLeft, MapPin, Check } from "lucide-react-native";
-
-import colors from "../theme/colors";
 import CategoryCard from "../components/CategoryCard";
 import ExperienceCard from "../components/ExperienceCard";
 import PillOption from "../components/PillOption";
 import Section from "../components/Section";
+import colors from "../theme/colors";
 
 const ALL_CATEGORIES = [
   { id: "char_dham", title: "Char Dham", subtitle: "Yatra", image: "https://picsum.photos/seed/chardham/300/200" },
@@ -55,7 +55,7 @@ export default function TravelPlannerScreen() {
     setCompanions((prev) =>
       prev.includes(label) ? prev.filter((x) => x !== label) : [...prev, label]
     );
-
+  const navigation = useNavigation();
   return (
     <ScrollView style={{ flex: 1, backgroundColor: colors.bg }}>
       {/* Header */}
@@ -66,7 +66,7 @@ export default function TravelPlannerScreen() {
           resizeMode="cover"
         />
         <View style={{ position: "absolute", top: 16, left: 16 }}>
-          <Pressable style={styles.iconBtn}>
+          <Pressable style={styles.iconBtn} onPress={() => navigation.navigate("HomePage")}>
             <ChevronLeft size={20} color={colors.primaryDark} />
           </Pressable>
         </View>

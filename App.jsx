@@ -14,6 +14,7 @@ import Sankalp from "./src/screens/Sankalp";
 import PoojaScreen from "./src/screens/PoojaScreen"
 import RetreatsScreen from "./src/screens/RetreatsScreen"
 import Language from "./src/screens/Language";
+import Explore from "./src/screens/Explore";
 import "./src/config/i18n"
 
 const Stack = createNativeStackNavigator();
@@ -86,6 +87,11 @@ export default function App() {
         <Stack.Screen
           name="Language"
           component={Language}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Explore"
+          component={Explore}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

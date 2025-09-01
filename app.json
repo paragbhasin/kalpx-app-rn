@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "kalpax",
-    "slug": "kalpax",
+    "name": "kalpx",
+    "slug": "kalpx",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "kalpax",
+    "scheme": "kalpx",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
     "ios": {

@@ -23,11 +23,36 @@ export default function Home() {
   const { t } = useTranslation();
 
   const categories = [
-    { id: "1", name: t("categories.dharma"), icon: require("../../assets/Group.png") },
-    { id: "2", name: t("categories.explore"), icon: require("../../assets/Exploreicon.png") },
-    { id: "3", name: t("categories.travel"), icon: require("../../assets/darma.png") },
-    { id: "4", name: t("categories.pooja"), icon: require("../../assets/pooja.png") },
-    { id: "5", name: t("categories.retreat"), icon: require("../../assets/yoga.png") },
+    {
+      id: "1",
+      name: t("categories.dharma"),
+      title: "Dharma",
+      icon: require("../../assets/Group.png"),
+    },
+    {
+      id: "2",
+      name: t("categories.explore"),
+      title: "Explore",
+      icon: require("../../assets/Exploreicon.png"),
+    },
+    {
+      id: "3",
+      name: t("categories.travel"),
+      title: "Travel",
+      icon: require("../../assets/darma.png"),
+    },
+    {
+      id: "4",
+      name: t("categories.pooja"),
+      title: "Pooja",
+      icon: require("../../assets/pooja.png"),
+    },
+    {
+      id: "5",
+      name: t("categories.retreat"),
+      title: "Retreat",
+      icon: require("../../assets/yoga.png"),
+    },
   ];
 
   const dailyOptions = [
@@ -62,25 +87,65 @@ export default function Home() {
   ];
 
   const kalpXData = [
-    { id: "1", title: t("kalpx.learn"), image: require("../../assets/learn.png") },
-    { id: "2", title: t("kalpx.explore"), image: require("../../assets/explore.png") },
-    { id: "3", title: t("kalpx.practice"), image: require("../../assets/daily.png") },
-    { id: "4", title: t("kalpx.journey"), image: require("../../assets/journey.png") },
-    { id: "5", title: t("kalpx.poojas"), image: require("../../assets/poojafl.png") },
-    { id: "6", title: t("kalpx.retreats"), image: require("../../assets/retreatff.png") },
+    {
+      id: "1",
+      title: t("kalpx.learn"),
+      name: "Learn",
+      image: require("../../assets/learn.png"),
+    },
+    {
+      id: "2",
+      title: t("kalpx.explore"),
+      name: "Explore",
+      image: require("../../assets/explore.png"),
+    },
+    {
+      id: "3",
+      title: t("kalpx.practice"),
+      name: "Practice",
+      image: require("../../assets/daily.png"),
+    },
+    {
+      id: "4",
+      title: t("kalpx.journey"),
+      name: "Journey",
+      image: require("../../assets/journey.png"),
+    },
+    {
+      id: "5",
+      title: t("kalpx.poojas"),
+      name: "Pooja",
+      image: require("../../assets/poojafl.png"),
+    },
+    {
+      id: "6",
+      title: t("kalpx.retreats"),
+      name: "Retreats",
+      image: require("../../assets/retreatff.png"),
+    },
   ];
 
   const renderCategory = ({ item }) => (
-    <TouchableOpacity style={styles.card} onPress={() => navigation.navigate(item?.name)}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => navigation.navigate(item?.title)}
+    >
       <Image source={item.icon} style={styles.icon} resizeMode="contain" />
       <Text style={styles.cardText}>{item.name}</Text>
     </TouchableOpacity>
   );
 
   const renderDailyOption = ({ item }) => (
-    <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate(item.route)}>
+    <TouchableOpacity
+      style={styles.optionCard}
+      onPress={() => navigation.navigate(item.route)}
+    >
       <View style={styles.optionIconWrapper}>
-        <Image source={item.icon} style={styles.optionIcon} resizeMode="contain" />
+        <Image
+          source={item.icon}
+          style={styles.optionIcon}
+          resizeMode="contain"
+        />
       </View>
       <View>
         <Text style={styles.optionTitle}>{item.title}</Text>
@@ -90,7 +155,10 @@ export default function Home() {
   );
 
   const renderKalpXItem = ({ item }) => (
-    <TouchableOpacity style={styles.kalpXCard}>
+    <TouchableOpacity
+      style={styles.kalpXCard}
+      onPress={() => navigation.navigate(item?.name)}
+    >
       <Image source={item.image} style={styles.kalpXImage} />
       <Text style={styles.kalpXTitle}>{item.title}</Text>
     </TouchableOpacity>
@@ -98,9 +166,17 @@ export default function Home() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff4dd" translucent={false} />
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor="#fff4dd"
+        translucent={false}
+      />
 
-      <ImageBackground source={require("../../assets/home.jpg")} style={styles.background} resizeMode="cover">
+      <ImageBackground
+        source={require("../../assets/home.jpg")}
+        style={styles.background}
+        resizeMode="cover"
+      >
         {/* Header */}
         {/* <View style={styles.header}>
           <View style={styles.leftSection}>
@@ -120,7 +196,10 @@ export default function Home() {
           </View>
         </View> */}
 
-        <ScrollView contentContainerStyle={{ paddingBottom: 30 }} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: 30 }}
+          showsVerticalScrollIndicator={false}
+        >
           {/* ✅ Horizontal Categories restored */}
           <View style={{ marginTop: 10 }}>
             <FlatList
@@ -129,7 +208,10 @@ export default function Home() {
               keyExtractor={(item) => item.id}
               horizontal
               showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingHorizontal: 10, paddingBottom: 20 }}
+              contentContainerStyle={{
+                paddingHorizontal: 10,
+                paddingBottom: 20,
+              }}
             />
           </View>
 
@@ -145,7 +227,9 @@ export default function Home() {
           </View>
 
           {/* Explore Videos */}
-          <ExploreVideos />
+          <View style={{ paddingLeft: 12 }}>
+            <ExploreVideos />
+          </View>
 
           {/* KalpX */}
           <View style={styles.kalpXContainer}>
@@ -155,7 +239,10 @@ export default function Home() {
               renderItem={renderKalpXItem}
               keyExtractor={(item) => item.id}
               numColumns={2}
-              columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 12 }}
+              columnWrapperStyle={{
+                justifyContent: "space-between",
+                marginBottom: 12,
+              }}
               scrollEnabled={false}
             />
           </View>

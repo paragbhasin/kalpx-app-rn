@@ -2,21 +2,37 @@
 import React from "react";
 import { View, Text, FlatList, StyleSheet } from "react-native";
 import YoutubePlayer from "react-native-youtube-iframe";
-import { useTranslation } from "react-i18next";
 
 export default function ExploreVideos() {
-  const { t } = useTranslation();
-
+  // ✅ All videos use the same YouTube ID
   const videos = [
-    { id: "1", title: t("exploreVideos.video1"), youtubeId: "QFujtgh0tGo" },
-    { id: "2", title: t("exploreVideos.video2"), youtubeId: "QFujtgh0tGo" },
-    { id: "3", title: t("exploreVideos.video3"), youtubeId: "QFujtgh0tGo" }
+    {
+      id: "1",
+      title:
+        "Sanskrit Showcase · Institutes of Eminence Offering Sanskrit Courses · MadrasSanskritCollege",
+      youtubeId: "QFujtgh0tGo",
+    },
+    {
+      id: "2",
+      title:
+        "Learn Sanskrit · Ancient Wisdom Modern Applications · Delhi University",
+      youtubeId: "QFujtgh0tGo",
+    },
+    {
+      id: "3",
+      title: "Spiritual Journeys · Teachings in Himalayas · Yoga Vidya Peeth",
+      youtubeId: "QFujtgh0tGo",
+    },
   ];
 
   const renderVideo = ({ item }) => (
     <View style={styles.videoCard}>
       <View style={styles.thumbnailWrapper}>
-        <YoutubePlayer height={140} play={false} videoId={item.youtubeId} />
+        <YoutubePlayer
+          height={140}
+          play={false}
+          videoId={item.youtubeId}
+        />
       </View>
       <Text style={styles.videoTitle} numberOfLines={3}>
         {item.title}
@@ -26,7 +42,7 @@ export default function ExploreVideos() {
 
   return (
     <View style={styles.videosContainer}>
-      <Text style={styles.sectionHeading}>{t("exploreVideos.heading")}</Text>
+      <Text style={styles.sectionHeading}>Explore Videos</Text>
       <FlatList
         data={videos}
         renderItem={renderVideo}
@@ -42,7 +58,7 @@ export default function ExploreVideos() {
 const styles = StyleSheet.create({
   videosContainer: {
     marginTop: 20,
-    paddingLeft: 2
+    paddingLeft: 2,
   },
   sectionHeading: {
     fontSize: 18,
@@ -51,7 +67,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingHorizontal: 4,
     lineHeight: 20,
-    paddingLeft: 12
+    paddingLeft: 2,
   },
   videoCard: {
     backgroundColor: "#fff",
@@ -61,18 +77,19 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 1,
     borderColor: "#FFD6A5",
-    padding: 12
+    padding: 12,
   },
   thumbnailWrapper: {
     width: "100%",
     height: 140,
-    overflow: "hidden"
+    // borderRadius: 12,
+    overflow: "hidden",
   },
   videoTitle: {
     fontSize: 14,
     fontFamily: "GelicaRegular",
     color: "#000",
-    padding: 10,
-    lineHeight: 18
-  }
+    padding: 12,
+    lineHeight: 18,
+  },
 });

@@ -69,7 +69,7 @@ export default function LoginScreen({ navigation }) {
             {/* Google Login Button */}
             <TouchableOpacity
               style={styles.googleButton}
-              onPress={() => navigation.navigate("Travel")}
+              onPress={() => navigation.navigate("HomePage")}
             >
               <Image
                 source={require("../../assets/devicon_google.png")}

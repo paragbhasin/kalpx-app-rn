@@ -11,6 +11,8 @@ import SignupScreen from "./src/screens/SignupScreen";
 import BottomMenu from "./src/components/BottomMenu";
 import TravelPlannerScreen from "./src/screens/TravelPlannerScreen";
 import Sankalp from "./src/screens/Sankalp";
+import PoojaScreen from "./src/screens/PoojaScreen"
+import RetreatsScreen from "./src/screens/RetreatsScreen"
 
 const Stack = createNativeStackNavigator();
 
@@ -67,6 +69,16 @@ export default function App() {
         <Stack.Screen
           name="HomePage"
           component={BottomMenu}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Pooja"
+          component={PoojaScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Retreat"
+          component={RetreatsScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

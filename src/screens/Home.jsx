@@ -109,7 +109,8 @@ export default function Home() {
     <TouchableOpacity
       style={styles.card}
       onPress={() => {
-        navigation.navigate(item);
+        console.log(item?.name)
+        navigation.navigate(item?.name);
       }}
     >
       <Image source={item.icon} style={styles.icon} resizeMode="contain" />

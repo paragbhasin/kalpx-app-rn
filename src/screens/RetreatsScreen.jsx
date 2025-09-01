@@ -91,11 +91,11 @@ export default function RetreatsScreen() {
       <ScrollView contentContainerStyle={{ paddingBottom: 28 }}>
         {/* Header */}
      <View style={{ position: "relative", width: "100%", height: 300 }}>
-        <Image
+        {/* <Image
           source={require("../../assets/retreats.png")}
           style={{ position: "absolute", width: "100%", height: "100%" }}
           resizeMode="cover"
-        />
+        /> */}
         <View style={{ position: "absolute", top: 16, left: 16 }}>
           <Pressable style={styles.iconBtn} onPress={() => navigation.navigate("HomePage")}>
             <ChevronLeft size={20} color={colors.primaryDark} />

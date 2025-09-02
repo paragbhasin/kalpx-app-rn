@@ -1,4 +1,3 @@
-import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import colors from "../theme/colors"; // adjust path if needed
 
@@ -37,6 +36,6 @@ const styles = StyleSheet.create({
   },
   row: { flexDirection: "row", alignItems: "center", marginBottom: 6 },
   icon: { fontSize: 14 },
-  title: { fontSize: 14, fontWeight: "800", color: colors.text, marginLeft: 6 },
+  title: { fontSize: 14,  color: colors.text, marginLeft: 6 },
   blurb: { fontSize: 12, color: colors.subtext, lineHeight: 16 },
 });

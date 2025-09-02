@@ -1,22 +1,19 @@
 // screens/Home.js
-import React from "react";
+import { useNavigation } from "@react-navigation/native";
+import { useTranslation } from "react-i18next";
 import {
-  View,
-  Text,
-  StyleSheet,
-  ImageBackground,
-  TouchableOpacity,
   FlatList,
   Image,
-  ScrollView,
+  ImageBackground,
   SafeAreaView,
+  ScrollView,
   StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import Entypo from "react-native-vector-icons/Entypo";
-import Ionicons from "react-native-vector-icons/Ionicons";
-import { useNavigation } from "@react-navigation/native";
 import ExploreVideos from "../components/ExploreVideos";
-import { useTranslation } from "react-i18next";
 
 export default function Home() {
   const navigation = useNavigation();
@@ -52,6 +49,12 @@ export default function Home() {
       name: t("categories.retreat"),
       title: "Retreat",
       icon: require("../../assets/yoga.png"),
+    },
+     {
+       id: "6",
+      name: t("categories.classes"),
+      title: "Classes",
+      icon: require("../../assets/onlinecion.png"),
     },
   ];
 
@@ -122,6 +125,12 @@ export default function Home() {
       title: t("kalpx.retreats"),
       name: "Retreats",
       image: require("../../assets/retreatff.png"),
+    },
+     {
+      id: "7",
+      title: t("kalpx.Classes"),
+      name: "Classes",
+      image: require("../../assets/onlineclass.png"),
     },
   ];
 

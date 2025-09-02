@@ -2,13 +2,13 @@ import { useNavigation } from "@react-navigation/native";
 import { ChevronLeft, MapPin } from "lucide-react-native";
 import { useState } from "react";
 import {
-    Image,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import colors from "../theme/colors";
@@ -64,12 +64,12 @@ const poojas = [
   const [selectedTemple, setSelectedTemple] = useState(null);
     const [selectedPooja, setSelectedPooja] = useState(null);
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.bg }}>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.pageBg }}>
       {/* Header */}
 
       <View style={{ position: "relative", width: "100%", height: 300 }}>
         <Image
-          source={require("../../assets/travelbg.png")}
+          source={require("../../assets/poojafl.png")}
           style={{ position: "absolute", width: "100%", height: "100%" }}
           resizeMode="cover"
         />
@@ -79,7 +79,7 @@ const poojas = [
           </Pressable>
         </View>
         <View style={{ position: "absolute", bottom: 16, left: 16 }}>
-          <Text style={styles.headerTitle}>Pooja</Text>
+          <Text style={styles.headerTitle}>Temple Pooja</Text>
           <View style={styles.locationBadge}>
             <MapPin size={14} color={colors.subtext} />
             <Text style={styles.locationText}>Hyderabad</Text>
@@ -88,8 +88,8 @@ const poojas = [
       </View>
 
       {/* Body */}
-       <ScrollView style={styles.container}>
-      <Text style={styles.heading}>Book a Pooja</Text>
+      <View style={{ padding: 16 }}>
+      <Text style={styles.title}>Book a Pooja</Text>
 
       <Text style={styles.label}>Select Temple and Pooja</Text>
       <Dropdown
@@ -123,14 +123,8 @@ const poojas = [
         value={selectedPooja}
         onChange={(item) => setSelectedPooja(item.value)}
       />
-    </ScrollView>
-      <Text style={styles.label}>Select Temple and Pooja</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Select Temple"
-        value={pooja}
-        onChangeText={setPooja}
-      />
+
+    
 
       {/* Pooja Not Listed */}
       <Pressable
@@ -210,7 +204,7 @@ const poojas = [
         value={instructions}
         onChangeText={setInstructions}
       />
-
+</View>
       {/* Submit Button */}
       <Pressable style={styles.submitButton}>
         <Text style={styles.submitButtonText}>Take the Next Step</Text>
@@ -223,11 +217,46 @@ const poojas = [
 
 
 const styles = StyleSheet.create({
+  dropdown: {
+    height: 55,
+    borderColor: colors.border,  // purple border
+    borderWidth: 2,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    backgroundColor: "#F9F9FF", // light bg
+    marginBottom: 16,
+  },
+  placeholderStyle: {
+    fontSize: 14,
+    color: "#999",
+    fontStyle: "italic",
+    fontFamily: "GelicaRegular",
+  },
+  selectedTextStyle: {
+    fontSize: 16,
+    color: "#333",
+    // fontWeight: "600",
+    fontFamily: "GelicaMedium",
+  },
+  inputSearchStyle: {
+    fontSize: 14,
+    color: "#000",
+    borderRadius: 8,
+    borderColor: "color.border",
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    fontFamily: "GelicaRegular",
+  },
+  iconStyle: {
+    width: 24,
+    height: 24,
+    tintColor: "#6C63FF", // changes dropdown arrow color
+  },
   iconBtn: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.card,
+    backgroundColor: colors.chipBg,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
@@ -237,10 +266,11 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 28,
-    fontWeight: "800",
+    // fontWeight: "800",
     color: colors.bg,
     textShadowColor: "#000",
     textShadowRadius: 6,
+    fontFamily: "GelicaBold",
   },
   locationBadge: {
     flexDirection: "row",
@@ -257,6 +287,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "700",
     color: colors.text,
+    fontFamily: "GelicaMedium",
   },
   sectionHeader: {
     fontSize: 18,
@@ -326,7 +357,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: 8,
     padding: 8,
-    fontSize: 14,
+    fontSize: 16,
     textAlignVertical: "top",
     backgroundColor: colors.card,
     color: colors.text,
@@ -342,16 +373,31 @@ const styles = StyleSheet.create({
   ctaText: { color: colors.bg, fontWeight: "700", fontSize: 16 },
   container: { flex: 1, padding: 16, backgroundColor: "#FFF8EF" },
   header: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
-  headerText: { fontSize: 18, fontWeight: "600", marginLeft: 8 },
+  headerText: { fontSize: 18, fontWeight: "600", marginLeft: 8, fontFamily: "GelicaMedium" },
   topImage: { width: "100%", height: 200, borderRadius: 8, marginBottom: 16 },
-  title: { fontSize: 20, fontWeight: "bold", marginBottom: 12 },
-  label: { fontSize: 14, fontWeight: "500", marginVertical: 6 },
+  title: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: colors.primary,
+    marginBottom: 16,
+    fontFamily: "GelicaBold",
+  },
+  label: {
+    fontSize: 16,
+    // fontWeight: "600",
+    color: colors.text,
+    marginBottom: 8,
+    fontFamily: "GelicaMedium",
+  },
+
+
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 8,
     padding: 10,
     marginBottom: 12,
+    fontFamily: "GelicaRegular",
   },
   textarea: { height: 100, textAlignVertical: "top" },
   checkboxRow: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
@@ -364,7 +410,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   checkedBox: { backgroundColor: "#444" },
-  checkboxText: { flex: 1 },
+  checkboxText: { flex: 1, fontFamily: "GelicaRegular" },
   row: { flexDirection: "row", marginBottom: 12 },
   option: {
     flex: 1,
@@ -375,9 +421,9 @@ const styles = StyleSheet.create({
     marginRight: 8,
     alignItems: "center",
   },
-  optionSelected: { backgroundColor: "#444", borderColor: "#444" },
-  optionText: { color: "#333" },
-  optionTextSelected: { color: "#fff" },
+  optionSelected: { backgroundColor: "color.chipBg",  },
+  optionText: { color: "#333", fontFamily: "GelicaRegular" },
+  optionTextSelected: { color: "#fff", fontFamily: "GelicaRegular" },
   submitButton: {
     backgroundColor: "#9C6B2F",
     padding: 14,
@@ -385,5 +431,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 16,
   },
-  submitButtonText: { color: "#fff", fontWeight: "600" },
+  submitButtonText: { color: "#fff", fontWeight: "600", fontFamily: "GelicaMedium" },
 });

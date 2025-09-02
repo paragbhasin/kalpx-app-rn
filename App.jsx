@@ -1,21 +1,22 @@
-import React, { useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
 
 // Import Screens
-import WelcomeScreen from "./src/screens/WelcomeScreen";
-import LoginScreen from "./src/screens/LoginScreen";
-import SignupScreen from "./src/screens/SignupScreen";
 import BottomMenu from "./src/components/BottomMenu";
-import TravelPlannerScreen from "./src/screens/TravelPlannerScreen";
-import Sankalp from "./src/screens/Sankalp";
-import PoojaScreen from "./src/screens/PoojaScreen"
-import RetreatsScreen from "./src/screens/RetreatsScreen"
-import Language from "./src/screens/Language";
+import "./src/config/i18n";
 import Explore from "./src/screens/Explore";
-import "./src/config/i18n"
+import Language from "./src/screens/Language";
+import LoginScreen from "./src/screens/LoginScreen";
+import OnlineclassesScreen from "./src/screens/OnlineclassesScreen";
+import PoojaScreen from "./src/screens/PoojaScreen";
+import RetreatsScreen from "./src/screens/RetreatsScreen";
+import Sankalp from "./src/screens/Sankalp";
+import SignupScreen from "./src/screens/SignupScreen";
+import TravelPlannerScreen from "./src/screens/TravelPlannerScreen";
+import WelcomeScreen from "./src/screens/WelcomeScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -92,6 +93,11 @@ export default function App() {
         <Stack.Screen
           name="Explore"
           component={Explore}
+          options={{ headerShown: false }}
+        />
+         <Stack.Screen
+          name="Classes"
+          component={OnlineclassesScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

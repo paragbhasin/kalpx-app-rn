@@ -1,23 +1,23 @@
 // screens/Profile.js
 // screens/Profile.js
-import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Image,
-  ScrollView,
-} from "react-native";
-import Ionicons from "react-native-vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 export default function Profile() {
   const navigation = useNavigation();
   const { t } = useTranslation();
 
   const menuItems = [
+     { key: "Login In", route: "loginScreen" },
     { key: "saved", route: "SavedMessages" },
     { key: "recent", route: "RecentVideos" },
     { key: "practices", route: "Practices" },

@@ -93,5 +93,184 @@
       "privacy": "Privacy and Security",
       "storage": "Storage"
     }
+  },
+  "explore": {
+    "title": "Explore Videos",
+    "kids": "Kids Hubs",
+    "search": "Search",
+    "filters": {
+      "category": "Select Category",
+      "language": "Language"
+    },
+    "subtitle": "Reconnect with Your Roots — Start Watching",
+    "subtitleTwo": "Why Explore Spiritual Videos?",
+    "modal": {
+      "category": "Select Category",
+      "language": "Select Language"
+    },
+    "faq": [
+      {
+        "title": "Why learn through Sanatan rooted classes?",
+        "description": "In Sanatan Dharma, learning is more than acquiring knowledge — it’s a sacred journey of inner refinement. KalpX Learn & Grow classes connect you with authentic teachers and timeless traditions, whether you’re exploring classical dance, mantra chanting, yoga, music, Ayurveda, or spiritual philosophy."
+      },
+      {
+        "title": "How to use Kids Hub?",
+        "description": "Kids Hub provides child-friendly content filtered for safety and learning."
+      },
+      {
+        "title": "Can I change the language?",
+        "description": "Yes, you can switch between multiple languages from the Explore page."
+      }
+    ]
+  },
+  "onlineClasses": {
+    "title": "Online Classes",
+    "selectActivities": "Select Activities",
+    "activities": {
+      "yoga": "Yoga",
+      "dance": "Dance",
+      "music": "Music"
+    },
+    "classFormat": "What Kind of Class Format Do You Prefer?",
+    "formats": {
+      "oneOnOne": "One-on-One",
+      "smallGroup": "Small Group",
+      "preRecorded": "Pre-recorded",
+      "liveQA": "Live Q&A"
+    },
+    "experienceLevel": "What Is Your Experience Level?",
+    "levels": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "city": "Pick your city",
+    "ageGroup": "What is Your Age Group?",
+    "ages": {
+      "child": "Child",
+      "teen": "Teen",
+      "adult": "Adult",
+      "above55": "Above 55"
+    },
+    "preferredTime": "Time you will prefer as per your location",
+    "times": {
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "evening": "Evening"
+    },
+    "spiritualSeeking": "What Are You Spiritually Seeking Through These Classes?",
+    "nextStep": "Take the Next Step"
+  },
+  "pooja": {
+    "header": "Temple Pooja",
+    "location": "Hyderabad",
+    "bookPooja": "Book a Pooja",
+    "selectTemple": "Select Temple",
+    "chooseTemple": "Choose Temple",
+    "selectPooja": "Select Pooja",
+    "choosePooja": "Choose Pooja",
+    "poojaNotListed": "Pooja not listed - mention in additional instructions",
+    "city": "Pick your city",
+    "enterCity": "Enter your city",
+    "participationMode": "Participation Mode",
+    "timingPreference": "Timing Preference",
+    "urgent": "Urgent (Next 7 Days)",
+    "flexible": "Flexible (Next 30 Days)",
+    "instructions": "Additional Instructions (Required)",
+    "instructionsPlaceholder": "Please provide any special instructions...",
+    "submit": "Take the Next Step",
+    "templeModalTitle": "Select Temple",
+    "poojaModalTitle": "Select Pooja"
+  },
+  "travelPlanner": {
+    "title": "Travel",
+    "city": "Hyderabad",
+    "journeyCategories": "Journey Categories",
+    "categories": {
+      "charDham": "Char Dham",
+      "yatra": "Yatra",
+      "riverine": "Riverine",
+      "pilgrimage": "Pilgrimage",
+      "shaktipeeth": "Shaktipeeth",
+      "jyotirlinga": "Jyotirlinga",
+      "darshan": "Darshan",
+      "temple": "Temple",
+      "towns": "Towns",
+      "ashrams": "Ashrams",
+      "stay": "Stay"
+    },
+    "idealDuration": "Ideal Duration",
+    "duration1": "3 Days – Weekend Devotion",
+    "duration2": "7 Days – Full Experience",
+    "duration3": "10+ Days – Soulful Immersion",
+    "experienceType": "Experience Type",
+    "experiences": {
+      "essential": "Essential",
+      "essentialBlurb": "Simplicity, affordability, dharmic focus",
+      "comfort": "Comfort",
+      "comfortBlurb": "Balanced convenience with spiritual integrity",
+      "premium": "Premium",
+      "premiumBlurb": "Boutique stays, curated guides, enhanced care"
+    },
+    "companionsTitle": "Who Will You Be Traveling With?",
+    "companions": {
+      "solo": "Solo",
+      "friendsGroup": "Friends • Group",
+      "family": "Family",
+      "spiritualGuide": "Spiritual Guide"
+    },
+    "travelIntent": "Your Travel Intent",
+    "intentPlaceholder": "Share your intent…",
+    "nextStep": "Take the Next Step"
+  },
+  "retreats": {
+    "title": "Retreats",
+    "city": "Hyderabad",
+    "healingCategories": "Healing Categories",
+    "healing": {
+      "silence": {
+        "title": "Spiritual Silence",
+        "subtitle": "Meditation, Detox, Ashram"
+      },
+      "ayurveda": {
+        "title": "Ayurveda Healing",
+        "subtitle": "Massage, Herbal, Detox"
+      },
+      "yoga": {
+        "title": "Yoga & Wellness",
+        "subtitle": "Asanas, Breathwork, Balance"
+      }
+    },
+    "preferredLocations": "Preferred Locations",
+    "locations": {
+      "himalayas": {
+        "title": "Himalayas",
+        "subtitle": "Mountains & Rivers"
+      },
+      "kerala": {
+        "title": "Kerala",
+        "subtitle": "Ayurveda, Backwaters"
+      },
+      "desert": {
+        "title": "Desert Ashrams",
+        "subtitle": "Silence & Meditation"
+      }
+    },
+    "idealDuration": "Ideal Duration",
+    "duration1": "3 Days – Weekend Devotion",
+    "duration2": "7 Days – Full Experience",
+    "duration3": "10+ Days – Soulful Immersion",
+    "experienceType": "Experience Type",
+    "experiences": {
+      "essential": "Essential",
+      "essentialBlurb": "Simplicity, affordability, dharmic focus",
+      "comfort": "Comfort",
+      "comfortBlurb": "Balanced convenience with spiritual integrity",
+      "premium": "Premium",
+      "premiumBlurb": "Boutique stays, curated guides, enhanced care"
+    },
+    "spiritualIntent": "Your Spiritual Intent",
+    "intentPlaceholder": "Share your intent…",
+    "nextStep": "Take the Next Step"
   }
 }

@@ -1,403 +1,303 @@
 import { useNavigation } from "@react-navigation/native";
-import { ChevronLeft, MapPin } from "lucide-react-native";
-import { useState } from "react";
+import { MapPin, X } from "lucide-react-native";
+import { Ionicons } from "@expo/vector-icons";
+import React, { useState } from "react";
 import {
-  Image,
+  ImageBackground,
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
-import { Dropdown } from "react-native-element-dropdown";
-import colors from "../theme/colors";
-
-
-
-const DURATION = [
-  "3 Days – Weekend Devotion",
-  "7 Days – Full Experience",
-  "10+ Days – Soulful Immersion",
-];
+import { useTranslation } from "react-i18next";
 
 export default function PoojaScreen() {
-     const [pooja, setPooja] = useState("Rudrabhishek");
+  const navigation = useNavigation();
+  const { t } = useTranslation();
+
+  const temples = [
+    { label: "Vaishno Devi Temple - Devi, Katra, Jammu & Kashmir", value: "vaishno" },
+    { label: "Amarnath Cave Temple - Shiva, Pahalgam, Jammu & Kashmir", value: "amarnath" },
+    { label: "Kheer Bhawani Temple - Devi, Ganderbal, Jammu & Kashmir", value: "kheer" },
+    { label: "Kedarnath Temple - Shiva, Kedarnath, Uttarakhand", value: "kedarnath" },
+    { label: "Badrinath Temple - Vishnu, Badrinath, Uttarakhand", value: "badrinath" },
+  ];
+
+  const poojas = [
+    { label: "Rudrabhishek", value: "rudrabhishek" },
+    { label: "Maha Mrityunjaya Jaap", value: "mahamrityunjaya" },
+    { label: "Shiva Lingam Abhishek", value: "shivlingam" },
+    { label: "Chandi Path", value: "chandi" },
+    { label: "Vaishno Devi Aarti", value: "vaishno_aarti" },
+  ];
+
+  const [selectedTemple, setSelectedTemple] = useState(null);
+  const [selectedPooja, setSelectedPooja] = useState(null);
+  const [templeModalVisible, setTempleModalVisible] = useState(false);
+  const [poojaModalVisible, setPoojaModalVisible] = useState(false);
+
   const [city, setCity] = useState("");
   const [instructions, setInstructions] = useState("");
   const [poojaNotListed, setPoojaNotListed] = useState(false);
   const [mode, setMode] = useState("Online");
   const [timing, setTiming] = useState("Urgent");
 
-
-
-
- const temples = [
-  { label: "Vaishno Devi Temple - Devi, Katra, Jammu & Kashmir", value: "vaishno" },
-  { label: "Amarnath Cave Temple - Shiva, Pahalgam, Jammu & Kashmir", value: "amarnath" },
-  { label: "Kheer Bhawani Temple - Devi, Ganderbal, Jammu & Kashmir", value: "kheer" },
-  { label: "Kedarnath Temple - Shiva, Kedarnath, Uttarakhand", value: "kedarnath" },
-  { label: "Badrinath Temple - Vishnu, Badrinath, Uttarakhand", value: "badrinath" },
-  { label: "Gangotri Temple - Devi, Gangotri, Uttarakhand", value: "gangotri" },
-  { label: "Yamunotri Temple - Devi, Yamunotri, Uttarakhand", value: "yamunotri" },
-  { label: "Kashi Vishwanath Temple - Shiva, Varanasi, Uttar Pradesh", value: "kashi" },
-  { label: "Ram Janmabhoomi Temple - Vishnu, Ayodhya, Uttar Pradesh", value: "ram" },
-  { label: "Krishna Janmabhoomi Temple - Vishnu, Mathura, Uttar Pradesh", value: "krishna" },
-  { label: "Banke Bihari Temple - Vishnu, Vrindavan, Uttar Pradesh", value: "banke" },
-  { label: "Prem Mandir - Vishnu, Vrindavan, Uttar Pradesh", value: "prem" },
-
-  // 👉 you can add the **rest of your big list** here
-];
-const poojas = [
-  { label: "Rudrabhishek", value: "rudrabhishek" },
-  { label: "Maha Mrityunjaya Jaap", value: "mahamrityunjaya" },
-  { label: "Shiva Lingam Abhishek", value: "shivlingam" },
-  { label: "Panchamrit Abhishek", value: "panchamrit" },
-  { label: "Kailash Yatra Pooja", value: "kailash" },
-  { label: "Chandi Path", value: "chandi" },
-  { label: "Devi Mahatmyam", value: "mahatmyam" },
-  { label: "Kumari Pooja", value: "kumari_pooja" },
-  { label: "Kamakhya Tantra Puja", value: "kamakhya" },
-  { label: "Vaishno Devi Aarti", value: "vaishno_aarti" },
-];
-  const navigation = useNavigation();
-  const [selectedTemple, setSelectedTemple] = useState(null);
-    const [selectedPooja, setSelectedPooja] = useState(null);
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.pageBg }}>
-      {/* Header */}
-
-      <View style={{ position: "relative", width: "100%", height: 300 }}>
-        <Image
-          source={require("../../assets/poojafl.png")}
-          style={{ position: "absolute", width: "100%", height: "100%" }}
-          resizeMode="cover"
-        />
-        <View style={{ position: "absolute", top: 16, left: 16 }}>
-          <Pressable style={styles.iconBtn} onPress={() => navigation.navigate("HomePage")}>
-            <ChevronLeft size={20} color={colors.primaryDark} />
-          </Pressable>
-        </View>
-        <View style={{ position: "absolute", bottom: 16, left: 16 }}>
-          <Text style={styles.headerTitle}>Temple Pooja</Text>
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: "#fff" }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      {/* Header Banner */}
+      <ImageBackground
+        source={require("../../assets/poojafl.png")}
+        style={styles.headerImage}
+        imageStyle={styles.imageStyle}
+      >
+        <Pressable
+          style={styles.iconButton}
+          onPress={() => navigation.navigate("HomePage")}
+        >
+          <Ionicons name="arrow-back" size={22} color="#fff" />
+        </Pressable>
+        <View style={styles.headerBottom}>
+          <Text style={styles.headerTitle}>{t("pooja.header")}</Text>
           <View style={styles.locationBadge}>
-            <MapPin size={14} color={colors.subtext} />
-            <Text style={styles.locationText}>Hyderabad</Text>
+            <MapPin size={14} color="#444" />
+            <Text style={styles.locationText}>{t("pooja.location")}</Text>
           </View>
         </View>
-      </View>
+      </ImageBackground>
 
-      {/* Body */}
-      <View style={{ padding: 16 }}>
-      <Text style={styles.title}>Book a Pooja</Text>
-
-      <Text style={styles.label}>Select Temple and Pooja</Text>
-      <Dropdown
-        style={styles.dropdown}
-        placeholderStyle={styles.placeholderStyle}
-        selectedTextStyle={styles.selectedTextStyle}
-        inputSearchStyle={styles.inputSearchStyle}
-        data={temples}
-        search
-        maxHeight={300}
-        labelField="label"
-        valueField="value"
-        placeholder="Select a Temple"
-        searchPlaceholder="Search temples..."
-        value={selectedTemple}
-        onChange={(item) => setSelectedTemple(item.value)}
-      />
-       <Text style={styles.label}>Select Pooja</Text>
-      <Dropdown
-        style={styles.dropdown}
-        placeholderStyle={styles.placeholderStyle}
-        selectedTextStyle={styles.selectedTextStyle}
-        inputSearchStyle={styles.inputSearchStyle}
-        data={poojas}
-        search
-        maxHeight={300}
-        labelField="label"
-        valueField="value"
-        placeholder="Select a Pooja"
-        searchPlaceholder="Search poojas..."
-        value={selectedPooja}
-        onChange={(item) => setSelectedPooja(item.value)}
-      />
-
-    
-
-      {/* Pooja Not Listed */}
-      <Pressable
-        style={styles.checkboxRow}
-        onPress={() => setPoojaNotListed(!poojaNotListed)}
+      {/* Scrollable Body */}
+      <ScrollView
+        contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
       >
-        <View style={[styles.checkbox, poojaNotListed && styles.checkedBox]} />
-        <Text style={styles.checkboxText}>
-          Pooja not listed - mention in additional instructions
-        </Text>
-      </Pressable>
+        <Text style={styles.title}>{t("pooja.bookPooja")}</Text>
 
-      {/* City */}
-      <Text style={styles.label}>Pick your city</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Enter your city"
-        value={city}
-        onChangeText={setCity}
-      />
+        {/* Temple Picker */}
+        <Text style={styles.label}>{t("pooja.selectTemple")}</Text>
+        <Pressable style={styles.selector} onPress={() => setTempleModalVisible(true)}>
+          <Text style={styles.selectorText}>
+            {selectedTemple
+              ? temples.find((t) => t.value === selectedTemple)?.label
+              : t("pooja.chooseTemple")}
+          </Text>
+        </Pressable>
 
-      {/* Participation Mode */}
-      <Text style={styles.label}>Participation Mode</Text>
-      <View style={styles.row}>
-        {["Online", "In-Person"].map((item) => (
-          <Pressable
-            key={item}
-            style={[
-              styles.option,
-              mode === item && styles.optionSelected,
-            ]}
-            onPress={() => setMode(item)}
-          >
-            <Text
-              style={[
-                styles.optionText,
-                mode === item && styles.optionTextSelected,
-              ]}
+        {/* Pooja Picker */}
+        <Text style={styles.label}>{t("pooja.selectPooja")}</Text>
+        <Pressable style={styles.selector} onPress={() => setPoojaModalVisible(true)}>
+          <Text style={styles.selectorText}>
+            {selectedPooja
+              ? poojas.find((p) => p.value === selectedPooja)?.label
+              : t("pooja.choosePooja")}
+          </Text>
+        </Pressable>
+
+        {/* Pooja Not Listed */}
+        <Pressable
+          style={styles.checkboxRow}
+          onPress={() => setPoojaNotListed(!poojaNotListed)}
+        >
+          <View style={[styles.checkbox, poojaNotListed && styles.checkedBox]} />
+          <Text style={styles.checkboxText}>{t("pooja.poojaNotListed")}</Text>
+        </Pressable>
+
+        {/* City */}
+        <Text style={styles.label}>{t("pooja.city")}</Text>
+        <TextInput
+          style={styles.input}
+          placeholder={t("pooja.enterCity")}
+          value={city}
+          onChangeText={setCity}
+        />
+
+        {/* Participation Mode */}
+        <Text style={styles.label}>{t("pooja.participationMode")}</Text>
+        <View style={styles.row}>
+          {[t("pooja.online", "Online"), t("pooja.inperson", "In-Person")].map((item) => (
+            <Pressable
+              key={item}
+              style={[styles.option, mode === item && styles.optionSelected]}
+              onPress={() => setMode(item)}
             >
-              {item}
-            </Text>
-          </Pressable>
-        ))}
+              <Text
+                style={[styles.optionText, mode === item && styles.optionTextSelected]}
+              >
+                {item}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+
+        {/* Timing Preference */}
+        <Text style={styles.label}>{t("pooja.timingPreference")}</Text>
+        <View style={styles.row}>
+          {[t("pooja.urgent"), t("pooja.flexible")].map((item) => (
+            <Pressable
+              key={item}
+              style={[styles.option, timing === item && styles.optionSelected]}
+              onPress={() => setTiming(item)}
+            >
+              <Text
+                style={[styles.optionText, timing === item && styles.optionTextSelected]}
+              >
+                {item}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+
+        {/* Additional Instructions */}
+        <Text style={styles.label}>{t("pooja.instructions")}</Text>
+        <TextInput
+          style={[styles.input, styles.textarea]}
+          placeholder={t("pooja.instructionsPlaceholder")}
+          multiline
+          numberOfLines={4}
+          value={instructions}
+          onChangeText={setInstructions}
+        />
+      </ScrollView>
+
+      {/* Fixed Bottom Button */}
+      <View style={styles.footer}>
+        <Pressable style={styles.submitButton}>
+          <Text style={styles.submitButtonText}>{t("pooja.submit")}</Text>
+        </Pressable>
       </View>
 
-      {/* Timing Preference */}
-      <Text style={styles.label}>Timing Preference</Text>
-      <View style={styles.row}>
-        {["Urgent (Next 7 Days)", "Flexible (Next 30 Days)"].map((item) => (
-          <Pressable
-            key={item}
-            style={[
-              styles.option,
-              timing === item && styles.optionSelected,
-            ]}
-            onPress={() => setTiming(item)}
-          >
-            <Text
-              style={[
-                styles.optionText,
-                timing === item && styles.optionTextSelected,
-              ]}
-            >
-              {item}
-            </Text>
-          </Pressable>
-        ))}
-      </View>
+      {/* Temple Modal */}
+      <Modal
+        visible={templeModalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setTempleModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>{t("pooja.templeModalTitle")}</Text>
+              <Pressable onPress={() => setTempleModalVisible(false)}>
+                <X size={20} color="#333" />
+              </Pressable>
+            </View>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {temples.map((t) => (
+                <Pressable
+                  key={t.value}
+                  style={styles.radioRow}
+                  onPress={() => {
+                    setSelectedTemple(t.value);
+                    setTempleModalVisible(false);
+                  }}
+                >
+                  <View
+                    style={[
+                      styles.radio,
+                      selectedTemple === t.value && styles.radioSelected,
+                    ]}
+                  />
+                  <Text style={styles.radioText}>{t.label}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
 
-      {/* Additional Instructions */}
-      <Text style={styles.label}>Additional Instructions (Required)</Text>
-      <TextInput
-        style={[styles.input, styles.textarea]}
-        placeholder="Please provide any special instructions..."
-        multiline
-        numberOfLines={4}
-        value={instructions}
-        onChangeText={setInstructions}
-      />
-</View>
-      {/* Submit Button */}
-      <Pressable style={styles.submitButton}>
-        <Text style={styles.submitButtonText}>Take the Next Step</Text>
-      </Pressable>
-    </ScrollView>
+      {/* Pooja Modal */}
+      <Modal
+        visible={poojaModalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setPoojaModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>{t("pooja.poojaModalTitle")}</Text>
+              <Pressable onPress={() => setPoojaModalVisible(false)}>
+                <X size={20} color="#333" />
+              </Pressable>
+            </View>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {poojas.map((p) => (
+                <Pressable
+                  key={p.value}
+                  style={styles.radioRow}
+                  onPress={() => {
+                    setSelectedPooja(p.value);
+                    setPoojaModalVisible(false);
+                  }}
+                >
+                  <View
+                    style={[
+                      styles.radio,
+                      selectedPooja === p.value && styles.radioSelected,
+                    ]}
+                  />
+                  <Text style={styles.radioText}>{p.label}</Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+    </KeyboardAvoidingView>
   );
 }
 
-
-
-
 const styles = StyleSheet.create({
-  dropdown: {
-    height: 55,
-    borderColor: colors.border,  // purple border
-    borderWidth: 2,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    backgroundColor: "#F9F9FF", // light bg
-    marginBottom: 16,
-  },
-  placeholderStyle: {
-    fontSize: 14,
-    color: "#999",
-    fontStyle: "italic",
-    fontFamily: "GelicaRegular",
-  },
-  selectedTextStyle: {
-    fontSize: 16,
-    color: "#333",
-    // fontWeight: "600",
-    fontFamily: "GelicaMedium",
-  },
-  inputSearchStyle: {
-    fontSize: 14,
-    color: "#000",
-    borderRadius: 8,
-    borderColor: "color.border",
-    borderWidth: 1,
-    paddingHorizontal: 8,
-    fontFamily: "GelicaRegular",
-  },
-  iconStyle: {
-    width: 24,
-    height: 24,
-    tintColor: "#6C63FF", // changes dropdown arrow color
-  },
-  iconBtn: {
+  headerImage: { width: "100%", height: 260, justifyContent: "space-between" },
+  imageStyle: { borderBottomLeftRadius: 20, borderBottomRightRadius: 20 },
+  iconButton: {
+    marginTop: 40,
+    marginLeft: 16,
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: colors.chipBg,
+    backgroundColor: "rgba(0,0,0,0.5)",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
-  headerTitle: {
-    fontSize: 28,
-    // fontWeight: "800",
-    color: colors.bg,
-    textShadowColor: "#000",
-    textShadowRadius: 6,
-    fontFamily: "GelicaBold",
-  },
+  headerBottom: { padding: 16 },
+  headerTitle: { fontSize: 28, fontWeight: "700", color: "#fff" },
   locationBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: colors.card,
+    backgroundColor: "#fff",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
     marginTop: 8,
-    elevation: 2,
+    alignSelf: "flex-start",
   },
-  locationText: {
-    marginLeft: 4,
-    fontSize: 12,
-    fontWeight: "700",
-    color: colors.text,
-    fontFamily: "GelicaMedium",
-  },
-  sectionHeader: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: colors.primary,
-    marginBottom: 4,
-  },
-  sectionSubtext: { color: colors.subtext, marginBottom: 16 },
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  chipWrap: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginBottom: 16,
-  },
-  chip: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.chipBg,
-    borderWidth: 1,
-    borderColor: colors.chipBorder,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-    marginRight: 4,
-    marginBottom: 4,
-  },
-  chipText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: colors.text,
-    marginLeft: 4,
-  },
-  durationBox: {
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    padding: 8,
-  },
-  durationBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 6,
-  },
-  radio: {
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.border,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 8,
-  },
-  radioOn: { backgroundColor: colors.primary, borderColor: colors.primary },
-  durationText: { fontSize: 14, color: colors.text },
-  note: { fontSize: 12, color: colors.subtext },
-  textarea: {
-    width: "100%",
-    minHeight: 120,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    padding: 8,
-    fontSize: 16,
-    textAlignVertical: "top",
-    backgroundColor: colors.card,
-    color: colors.text,
-  },
-  cta: {
-    width: "100%",
-    marginTop: 24,
-    paddingVertical: 14,
-    borderRadius: 8,
-    backgroundColor: colors.primary,
-    alignItems: "center",
-  },
-  ctaText: { color: colors.bg, fontWeight: "700", fontSize: 16 },
-  container: { flex: 1, padding: 16, backgroundColor: "#FFF8EF" },
-  header: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
-  headerText: { fontSize: 18, fontWeight: "600", marginLeft: 8, fontFamily: "GelicaMedium" },
-  topImage: { width: "100%", height: 200, borderRadius: 8, marginBottom: 16 },
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: colors.primary,
-    marginBottom: 16,
-    fontFamily: "GelicaBold",
-  },
-  label: {
-    fontSize: 16,
-    // fontWeight: "600",
-    color: colors.text,
-    marginBottom: 8,
-    fontFamily: "GelicaMedium",
-  },
+  locationText: { marginLeft: 4, fontSize: 12, fontWeight: "700", color: "#333" },
 
-
+  title: { fontSize: 24, fontWeight: "700", marginBottom: 16 },
+  label: { fontSize: 16, fontWeight: "600", marginBottom: 8 },
+  selector: {
+    borderWidth: 1,
+    borderColor: "#aaa",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+    backgroundColor: "#f9f9f9",
+  },
+  selectorText: { fontSize: 16, color: "#333" },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 8,
     padding: 10,
     marginBottom: 12,
-    fontFamily: "GelicaRegular",
   },
   textarea: { height: 100, textAlignVertical: "top" },
   checkboxRow: { flexDirection: "row", alignItems: "center", marginBottom: 12 },
@@ -410,7 +310,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   checkedBox: { backgroundColor: "#444" },
-  checkboxText: { flex: 1, fontFamily: "GelicaRegular" },
+  checkboxText: { flex: 1 },
   row: { flexDirection: "row", marginBottom: 12 },
   option: {
     flex: 1,
@@ -421,15 +321,59 @@ const styles = StyleSheet.create({
     marginRight: 8,
     alignItems: "center",
   },
-  optionSelected: { backgroundColor: "color.chipBg",  },
-  optionText: { color: "#333", fontFamily: "GelicaRegular" },
-  optionTextSelected: { color: "#fff", fontFamily: "GelicaRegular" },
+  optionSelected: { backgroundColor: "#9C6B2F" },
+  optionText: { color: "#333" },
+  optionTextSelected: { color: "#fff" },
+
+  footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#fff",
+    padding: 16,
+    borderTopWidth: 1,
+    borderColor: "#eee",
+  },
   submitButton: {
     backgroundColor: "#9C6B2F",
     padding: 14,
     borderRadius: 8,
     alignItems: "center",
-    marginTop: 16,
   },
-  submitButtonText: { color: "#fff", fontWeight: "600", fontFamily: "GelicaMedium" },
+  submitButtonText: { color: "#fff", fontWeight: "600", fontSize: 16 },
+
+  // Modal
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    maxHeight: "70%",
+    paddingBottom: 20,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    borderBottomWidth: 1,
+    borderColor: "#eee",
+  },
+  modalTitle: { fontSize: 18, fontWeight: "700" },
+  radioRow: { flexDirection: "row", alignItems: "center", padding: 16 },
+  radio: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 2,
+    borderColor: "#999",
+    marginRight: 12,
+  },
+  radioSelected: { backgroundColor: "#9C6B2F", borderColor: "#9C6B2F" },
+  radioText: { fontSize: 16, color: "#333" },
 });

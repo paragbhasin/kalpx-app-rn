@@ -1,80 +1,82 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { ChevronLeft, MapPin } from "lucide-react-native";
+import { MapPin } from "lucide-react-native";
 import { useState } from "react";
 import {
-  Image,
+  ImageBackground,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 
 import CategoryCard from "../components/CategoryCard";
 import ExperienceCard from "../components/ExperienceCard";
 import Section from "../components/Section";
 import colors from "../theme/colors";
-;
-// @ts-ignore (removed typing)
-//const headerImage = require('../../assets/images/retreats.png'); // Varanasi vibe
+import { useTranslation } from "react-i18next";
 
 const HEALING = [
   {
-    id: 'silence',
-    title: 'Spiritual Silence',
-    subtitle: 'Meditation, Detox, Ashram',
-    image: 'https://picsum.photos/seed/silence/300/200',
+    id: "silence",
+    titleKey: "retreats.healing.silence.title",
+    subtitleKey: "retreats.healing.silence.subtitle",
+    image: "https://picsum.photos/seed/silence/300/200",
   },
   {
-    id: 'ayurveda',
-    title: 'Ayurveda Healing',
-    subtitle: 'Massage, Herbal, Detox',
-    image: 'https://picsum.photos/seed/ayurveda/300/200',
+    id: "ayurveda",
+    titleKey: "retreats.healing.ayurveda.title",
+    subtitleKey: "retreats.healing.ayurveda.subtitle",
+    image: "https://picsum.photos/seed/ayurveda/300/200",
   },
   {
-    id: 'yoga',
-    title: 'Yoga & Wellness',
-    subtitle: 'Asanas, Breathwork, Balance',
-    image: 'https://picsum.photos/seed/yoga/300/200',
+    id: "yoga",
+    titleKey: "retreats.healing.yoga.title",
+    subtitleKey: "retreats.healing.yoga.subtitle",
+    image: "https://picsum.photos/seed/yoga/300/200",
   },
 ];
 
 const LOCATIONS = [
   {
-    id: 'himalayas',
-    title: 'Himalayas',
-    subtitle: 'Mountains & Rivers',
-    image: 'https://picsum.photos/seed/himalaya/300/200',
+    id: "himalayas",
+    titleKey: "retreats.locations.himalayas.title",
+    subtitleKey: "retreats.locations.himalayas.subtitle",
+    image: "https://picsum.photos/seed/himalaya/300/200",
   },
   {
-    id: 'kerala',
-    title: 'Kerala',
-    subtitle: 'Ayurveda, Backwaters',
-    image: 'https://picsum.photos/seed/kerala/300/200',
+    id: "kerala",
+    titleKey: "retreats.locations.kerala.title",
+    subtitleKey: "retreats.locations.kerala.subtitle",
+    image: "https://picsum.photos/seed/kerala/300/200",
   },
   {
-    id: 'desert',
-    title: 'Desert Ashrams',
-    subtitle: 'Silence & Meditation',
-    image: 'https://picsum.photos/seed/desert/300/200',
+    id: "desert",
+    titleKey: "retreats.locations.desert.title",
+    subtitleKey: "retreats.locations.desert.subtitle",
+    image: "https://picsum.photos/seed/desert/300/200",
   },
 ];
 
 export default function RetreatsScreen() {
-   const navigation = useNavigation();  
+  const navigation = useNavigation();
+  const { t } = useTranslation();
+
   const DURATION = [
-    '3 Days – Weekend Devotion',
-    '7 Days – Full Experience',
-    '10+ Days – Soulful Immersion',
+    { key: "duration1", text: t("retreats.duration1") },
+    { key: "duration2", text: t("retreats.duration2") },
+    { key: "duration3", text: t("retreats.duration3") },
   ];
 
-  const [healingCats, setHealingCats] = useState(['silence']);
-  const [locations, setLocations] = useState(['himalayas']);
+  const [healingCats, setHealingCats] = useState(["silence"]);
+  const [locations, setLocations] = useState(["himalayas"]);
   const [duration, setDuration] = useState(null);
-  const [experience, setExperience] = useState('Comfort');
-  const [notes, setNotes] = useState('');
+  const [experience, setExperience] = useState("Comfort");
+  const [notes, setNotes] = useState("");
 
   const toggleHealing = (id) =>
     setHealingCats((prev) =>
@@ -87,57 +89,67 @@ export default function RetreatsScreen() {
     );
 
   return (
-    
-      <ScrollView contentContainerStyle={{ paddingBottom: 28 }}>
-        {/* Header */}
-     <View style={{ position: "relative", width: "100%", height: 300 }}>
-        <Image
-          source={require("../../assets/retreats.png")}
-          style={{ position: "absolute", width: "100%", height: "100%" }}
-          resizeMode="cover"
-        />
-        <View style={{ position: "absolute", top: 16, left: 16 }}>
-          <Pressable style={styles.iconBtn} onPress={() => navigation.navigate("HomePage")}>
-            <ChevronLeft size={20} color={colors.primaryDark} />
-          </Pressable>
-        </View>
-        <View style={{ position: "absolute", bottom: 16, left: 16 }}>
-          <Text style={styles.headerTitle}>Retreats</Text>
+    <View style={styles.container}>
+      {/* Header Banner */}
+      <ImageBackground
+        source={require("../../assets/retreats.png")}
+        style={styles.headerImage}
+        imageStyle={styles.imageStyle}
+      >
+        <Pressable
+          style={styles.iconButton}
+          onPress={() => navigation.navigate("HomePage")}
+        >
+          <Ionicons name="arrow-back" size={22} color="#fff" />
+        </Pressable>
+        <View style={styles.headerBottom}>
+          <Text style={styles.headerTitle}>{t("retreats.title")}</Text>
           <View style={styles.locationBadge}>
-            <MapPin size={14} color={colors.subtext} />
-            <Text style={styles.locationText}>Hyderabad</Text>
+            <MapPin size={14} color="#444" />
+            <Text style={styles.locationText}>{t("retreats.city")}</Text>
           </View>
         </View>
-      </View>
+      </ImageBackground>
 
-        <View style={styles.body}>
+      {/* Content */}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={{ flex: 1 }}
+      >
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
+          showsVerticalScrollIndicator={false}
+        >
           {/* Healing */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.horizontalScroll}
-          >
-            <Section title="Healing Categories">
-              <View style={styles.grid}>
-                {HEALING.map((c) => (
-                  <CategoryCard
-                    key={c.id}
-                    item={c}
-                    selected={healingCats.includes(c.id)}
-                    onToggle={toggleHealing}
-                  />
-                ))}
-              </View>
-            </Section>
-          </ScrollView>
+          <Section title={t("retreats.healingCategories")}>
+            <View style={styles.grid}>
+              {HEALING.map((c) => (
+                <CategoryCard
+                  key={c.id}
+                  item={{
+                    ...c,
+                    title: t(c.titleKey),
+                    subtitle: t(c.subtitleKey),
+                  }}
+                  selected={healingCats.includes(c.id)}
+                  onToggle={toggleHealing}
+                />
+              ))}
+            </View>
+          </Section>
 
           {/* Location */}
-          <Section title="Preferred Locations">
+          <Section title={t("retreats.preferredLocations")}>
             <View style={styles.grid}>
               {LOCATIONS.map((c) => (
                 <CategoryCard
                   key={c.id}
-                  item={c}
+                  item={{
+                    ...c,
+                    title: t(c.titleKey),
+                    subtitle: t(c.subtitleKey),
+                  }}
                   selected={locations.includes(c.id)}
                   onToggle={toggleLocation}
                 />
@@ -146,22 +158,20 @@ export default function RetreatsScreen() {
           </Section>
 
           {/* Duration */}
-          <Section title="Ideal Duration">
+          <Section title={t("retreats.idealDuration")}>
             <View style={styles.durationBox}>
               {DURATION.map((opt) => {
-                const on = duration === opt;
+                const on = duration === opt.key;
                 return (
                   <Pressable
-                    key={opt}
-                    onPress={() => setDuration(opt)}
+                    key={opt.key}
+                    onPress={() => setDuration(opt.key)}
                     style={styles.durationRow}
                   >
                     <View style={[styles.checkbox, on && styles.checkboxOn]}>
-                      {on ? (
-                        <Ionicons name="checkmark" size={12} color="#fff" />
-                      ) : null}
+                      {on && <Ionicons name="checkmark" size={12} color="#fff" />}
                     </View>
-                    <Text style={styles.durationText}>{opt}</Text>
+                    <Text style={styles.durationText}>{opt.text}</Text>
                   </Pressable>
                 );
               })}
@@ -169,136 +179,179 @@ export default function RetreatsScreen() {
           </Section>
 
           {/* Experience */}
-          <Section title="Experience Type">
-            <View style={{ flexDirection: 'row' }}>
+          <Section title={t("retreats.experienceType")}>
+            <View style={styles.experienceRow}>
               <ExperienceCard
-                label="Essential"
-                blurb="Simplicity, affordability, dharmic focus"
-                active={experience === 'Essential'}
-                onPress={setExperience}
+                label={t("retreats.experiences.essential")}
+                blurb={t("retreats.experiences.essentialBlurb")}
+                active={experience === "Essential"}
+                onPress={() => setExperience("Essential")}
               />
               <ExperienceCard
-                label="Comfort"
-                blurb="Balanced convenience with spiritual integrity"
-                active={experience === 'Comfort'}
-                onPress={setExperience}
+                label={t("retreats.experiences.comfort")}
+                blurb={t("retreats.experiences.comfortBlurb")}
+                active={experience === "Comfort"}
+                onPress={() => setExperience("Comfort")}
               />
               <ExperienceCard
-                label="Premium"
-                blurb="Boutique stays, curated guides, enhanced care"
-                active={experience === 'Premium'}
-                onPress={setExperience}
+                label={t("retreats.experiences.premium")}
+                blurb={t("retreats.experiences.premiumBlurb")}
+                active={experience === "Premium"}
+                onPress={() => setExperience("Premium")}
               />
             </View>
           </Section>
 
           {/* Notes */}
-          <Section title="Your Spiritual Intent">
+          <Section title={t("retreats.spiritualIntent")}>
             <TextInput
               multiline
-              placeholder="Share your intent…"
+              placeholder={t("retreats.intentPlaceholder")}
               value={notes}
               onChangeText={setNotes}
               style={styles.textArea}
               placeholderTextColor={colors.subtext}
             />
           </Section>
+        </ScrollView>
 
-          {/* CTA */}
+        {/* Sticky Button */}
+        <View style={styles.footer}>
           <Pressable
-            style={({ pressed }) => [styles.cta, pressed && { opacity: 0.9 }]}
+            style={({ pressed }) => [
+              styles.submitButton,
+              pressed && { opacity: 0.9 },
+            ]}
             onPress={() =>
-              console.log({
-                healingCats,
-                locations,
-                duration,
-                experience,
-                notes,
-              })
+              console.log({ healingCats, locations, duration, experience, notes })
             }
           >
-            <Text style={styles.ctaText}>Take the Next Step</Text>
+            <Text style={styles.submitText}>{t("retreats.nextStep")}</Text>
           </Pressable>
         </View>
-      </ScrollView>
-  
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  horizontalScroll: {
-    paddingVertical: 8,
-    alignItems: 'center',
+  container: { flex: 1, backgroundColor: "#fffaf5" },
+  scroll: { flex: 1 },
+  headerImage: { height: 220, justifyContent: "flex-end" },
+  imageStyle: {
+    borderBottomLeftRadius: 25,
+    borderBottomRightRadius: 25,
   },
-  headerWrap: { aspectRatio: 9 / 5 },
-  headerImage: { flex: 1, width: '100%', height: 200 },
-  headerTop: { padding: 12, alignItems: 'flex-start' },
-  backBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#FFF',
-    alignItems: 'center',
-    justifyContent: 'center',
+  iconButton: {
+    backgroundColor: "rgba(0,0,0,0.3)",
+    padding: 8,
+    borderRadius: 20,
+    position: "absolute",
+    top: 16,
+    left: 16,
   },
-  headerBottom: { position: 'absolute', bottom: 12, left: 16 },
+  headerBottom: {
+    padding: 16,
+    marginBottom: 12,
+  },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: '900',
-    color: '#fff',
+    fontSize: 22,
+    fontFamily: "GelicaBold",
+    color: "#fff",
+    marginBottom: 6,
+    lineHeight: 28,
   },
-  body: { paddingHorizontal: 16, paddingTop: 16 },
+  locationBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.9)",
+    borderRadius: 20,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    alignSelf: "flex-start",
+  },
+  locationText: {
+    fontSize: 13,
+    color: "#444",
+    marginLeft: 4,
+    lineHeight: 18,
+    fontFamily: "GelicaRegular",
+  },
   grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
     marginBottom: 8,
   },
   durationBox: {
     borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 20,
+    borderColor: "#ccc",
+    borderRadius: 16,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    backgroundColor: '#FFF',
+    backgroundColor: "#fff",
   },
   durationRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
   },
   checkbox: {
     width: 18,
     height: 18,
     borderRadius: 5,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: "#aaa",
     marginRight: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFF',
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
   },
-  checkboxOn: { backgroundColor: colors.primary, borderColor: colors.primary },
-  durationText: { color: colors.text, fontSize: 14 },
+  checkboxOn: { backgroundColor: "#b97f28", borderColor: "#b97f28" },
+  durationText: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#333",
+    fontFamily: "GelicaRegular",
+  },
+  experienceRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginVertical: 10,
+  },
   textArea: {
     borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: '#FFF',
-    borderRadius: 16,
+    borderColor: "#ccc",
+    backgroundColor: "#fff",
+    borderRadius: 12,
     minHeight: 120,
     padding: 12,
-    textAlignVertical: 'top',
+    textAlignVertical: "top",
     fontSize: 14,
-    color: colors.text,
+    color: "#333",
+    fontFamily: "GelicaRegular",
+    lineHeight: 20,
   },
-  cta: {
-    height: 52,
-    borderRadius: 16,
-    backgroundColor: colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 6,
-    marginBottom: 12,
+  footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#fffaf5",
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
   },
-  ctaText: { color: '#FFF', fontWeight: '800', fontSize: 16 },
+  submitButton: {
+    backgroundColor: "#a67c52",
+    padding: 14,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  submitText: {
+    color: "#fff",
+    fontSize: 16,
+    fontFamily: "GelicaMedium",
+    lineHeight: 22,
+  },
 });

@@ -12,48 +12,76 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Platform,
 } from "react-native";
 import ExploreVideos from "../components/ExploreVideos";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Location from "expo-location";
+import { useState, useEffect } from "react";
+
+import {
+  saveUserAction,
+  getUserActions,
+  clearUserActions,
+} from "../utils/storage";
 
 export default function Home() {
   const navigation = useNavigation();
   const { t } = useTranslation();
+  const [locationData, setLocationData] = useState({
+    city: "",
+    lat: "",
+    long: "",
+    timeZone: "",
+  });
 
   const categories = [
     {
       id: "1",
       name: t("categories.dharma"),
       title: "Dharma",
+      event_type: "click_dharma_card",
+      component: "Dharma-card",
       icon: require("../../assets/Group.png"),
     },
     {
       id: "2",
       name: t("categories.explore"),
       title: "Explore",
+      event_type: "click_explore_card",
+      component: "Explore-card",
       icon: require("../../assets/Exploreicon.png"),
     },
     {
       id: "3",
       name: t("categories.travel"),
       title: "Travel",
+      event_type: "click_travel_card",
+      component: "Travel-card",
       icon: require("../../assets/darma.png"),
     },
     {
       id: "4",
       name: t("categories.pooja"),
       title: "Pooja",
+      event_type: "click_pooja_card",
+      component: "Pooja-card",
       icon: require("../../assets/pooja.png"),
     },
     {
       id: "5",
       name: t("categories.retreat"),
       title: "Retreat",
+      event_type: "click_retreat_card",
+      component: "Retreat-card",
       icon: require("../../assets/yoga.png"),
     },
-     {
-       id: "6",
+    {
+      id: "6",
       name: t("categories.classes"),
       title: "Classes",
+      event_type: "click_classes_card",
+      component: "Classes-card",
       icon: require("../../assets/onlinecion.png"),
     },
   ];
@@ -63,6 +91,8 @@ export default function Home() {
       id: "1",
       title: t("daily.sankalpTitle"),
       route: "Sankalp",
+      event_type: "view_sankalp_card",
+      component: "sankalp-card",
       subtitle: t("daily.sankalpSubtitle"),
       icon: require("../../assets/lamp.png"),
     },
@@ -70,6 +100,8 @@ export default function Home() {
       id: "2",
       title: t("daily.mantraTitle"),
       route: "Mantra",
+      event_type: "view_mantra_card",
+      component: "mantra-card",
       subtitle: t("daily.mantraSubtitle"),
       icon: require("../../assets/atom.png"),
     },
@@ -77,6 +109,8 @@ export default function Home() {
       id: "3",
       title: t("daily.wisdomTitle"),
       route: "Wisdom",
+      event_type: "view_wisdom_card",
+      component: "wisdom-card",
       subtitle: t("daily.wisdomSubtitle"),
       icon: require("../../assets/sun.png"),
     },
@@ -84,6 +118,8 @@ export default function Home() {
       id: "4",
       title: t("daily.festivalTitle"),
       route: "UpcomingFestivals",
+      event_type: "view_festival_card",
+      component: "festival-card",
       subtitle: t("daily.festivalSubtitle"),
       icon: require("../../assets/party.png"),
     },
@@ -94,50 +130,125 @@ export default function Home() {
       id: "1",
       title: t("kalpx.learn"),
       name: "Learn",
+      event_type: "click_learn_card",
+      component: "Learn-card",
       image: require("../../assets/learn.png"),
     },
     {
       id: "2",
       title: t("kalpx.explore"),
       name: "Explore",
+      event_type: "click_explore_card",
+      component: "Explore-card",
       image: require("../../assets/explore.png"),
     },
     {
       id: "3",
       title: t("kalpx.practice"),
       name: "Practice",
+      event_type: "click_practice_card",
+      component: "Practice-card",
       image: require("../../assets/daily.png"),
     },
     {
       id: "4",
       title: t("kalpx.journey"),
       name: "Journey",
+      event_type: "click_journey_card",
+      component: "Journey-card",
       image: require("../../assets/journey.png"),
     },
     {
       id: "5",
       title: t("kalpx.poojas"),
       name: "Pooja",
+      event_type: "click_pooja_card",
+      component: "Pooja-card",
       image: require("../../assets/poojafl.png"),
     },
     {
       id: "6",
       title: t("kalpx.retreats"),
       name: "Retreats",
+      event_type: "click_retreats_card",
+      component: "Retreats-card",
       image: require("../../assets/retreatff.png"),
     },
-     {
+    {
       id: "7",
       title: t("kalpx.Classes"),
       name: "Classes",
+      event_type: "click_classes_card",
+      component: "Classes-card",
       image: require("../../assets/onlineclass.png"),
     },
   ];
 
+  useEffect(() => {
+    const getLocation = async () => {
+      try {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          // Permission denied → keep empty values
+          return;
+        }
+
+        // Get coords
+        let loc = await Location.getCurrentPositionAsync({});
+        // Reverse geocode for city
+        let geo = await Location.reverseGeocodeAsync({
+          latitude: loc.coords.latitude,
+          longitude: loc.coords.longitude,
+        });
+
+        const cityName = geo.length > 0 ? geo[0].city || geo[0].region : "";
+
+        // Get timezone from device
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+        setLocationData({
+          city: cityName,
+          lat: loc.coords.latitude.toString(),
+          long: loc.coords.longitude.toString(),
+          timeZone: tz,
+        });
+      } catch (err) {
+        console.log("Location error:", err);
+      }
+    };
+
+    getLocation();
+  }, []);
+
   const renderCategory = ({ item }) => (
     <TouchableOpacity
       style={styles.card}
-      onPress={() => navigation.navigate(item?.title)}
+      onPress={async () => {
+        try {
+          const userId = await AsyncStorage.getItem("uuid");
+          await saveUserAction({
+            uuid: userId,
+            timestamp: Date.now(),
+            retryCount: 0,
+            event_type: item?.event_type,
+            event_data: {
+              component: item?.component,
+              city: locationData.city,
+              lat: locationData.lat,
+              long: locationData.long,
+              timeZone: locationData.timeZone,
+              device: Platform.OS === "ios" ? "mobile-ios" : "mobile-android",
+              screen: "home",
+            },
+          });
+          // clearUserActions()
+          const actions = await getUserActions();
+          console.log(actions);
+          navigation.navigate(item.title);
+        } catch (error) {
+          console.error("Error fetching UUID:", error);
+        }
+      }}
     >
       <Image source={item.icon} style={styles.icon} resizeMode="contain" />
       <Text style={styles.cardText}>{item.name}</Text>
@@ -147,7 +258,29 @@ export default function Home() {
   const renderDailyOption = ({ item }) => (
     <TouchableOpacity
       style={styles.optionCard}
-      onPress={() => navigation.navigate(item.route)}
+      onPress={async () => {
+        try {
+          const userId = await AsyncStorage.getItem("uuid");
+          saveUserAction({
+            uuid: userId,
+            timestamp: Date.now(),
+            retryCount: 0,
+            event_type: item?.event_type,
+            event_data: {
+              component: item?.component,
+              city: locationData.city,
+              lat: locationData.lat,
+              long: locationData.long,
+              timeZone: locationData.timeZone,
+              device: Platform.OS === "ios" ? "mobile-ios" : "mobile-android",
+              screen: "home",
+            },
+          });
+          navigation.navigate(item.route);
+        } catch (error) {
+          console.error("Error fetching UUID:", error);
+        }
+      }}
     >
       <View style={styles.optionIconWrapper}>
         <Image
@@ -166,7 +299,29 @@ export default function Home() {
   const renderKalpXItem = ({ item }) => (
     <TouchableOpacity
       style={styles.kalpXCard}
-      onPress={() => navigation.navigate(item?.name)}
+      onPress={async () => {
+        try {
+          const userId = await AsyncStorage.getItem("uuid");
+          saveUserAction({
+            uuid: userId,
+            timestamp: Date.now(),
+            retryCount: 0,
+            event_type: item?.event_type,
+            event_data: {
+              component: item?.component,
+              city: locationData.city,
+              lat: locationData.lat,
+              long: locationData.long,
+              timeZone: locationData.timeZone,
+              device: Platform.OS === "ios" ? "mobile-ios" : "mobile-android",
+              screen: "home",
+            },
+          });
+          navigation.navigate(item.name);
+        } catch (error) {
+          console.error("Error fetching UUID:", error);
+        }
+      }}
     >
       <Image source={item.image} style={styles.kalpXImage} />
       <Text style={styles.kalpXTitle}>{item.title}</Text>
@@ -186,25 +341,6 @@ export default function Home() {
         style={styles.background}
         resizeMode="cover"
       >
-        {/* Header */}
-        {/* <View style={styles.header}>
-          <View style={styles.leftSection}>
-            <TouchableOpacity>
-              <Entypo name="menu" size={28} color="black" />
-            </TouchableOpacity>
-            <Text style={styles.greeting}>{t("home.greeting", { name: "Neha Jaiswal" })}</Text>
-          </View>
-
-          <View style={styles.rightIcons}>
-            <TouchableOpacity style={styles.iconButton}>
-              <Ionicons name="notifications-outline" size={24} color="black" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.iconButton}>
-              <Entypo name="dots-three-vertical" size={20} color="black" />
-            </TouchableOpacity>
-          </View>
-        </View> */}
-
         <ScrollView
           contentContainerStyle={{ paddingBottom: 30 }}
           showsVerticalScrollIndicator={false}

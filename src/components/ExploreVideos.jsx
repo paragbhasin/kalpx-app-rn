@@ -1,10 +1,99 @@
 // components/ExploreVideos.js
-import React from "react";
-import { View, Text, FlatList, StyleSheet } from "react-native";
+import React, { useCallback, useRef, useState } from "react";
+import { View, Text, FlatList, StyleSheet, Platform } from "react-native";
 import YoutubePlayer from "react-native-youtube-iframe";
+import { saveUserAction } from "../utils/storage";
 
+// ✅ Card Component (can use hooks safely here)
+function VideoCard({ item }) {
+  const playerRef = useRef(null);
+  const [duration, setDuration] = useState(0);
+
+  const trackEvent = async (eventType, data, options = {}) => {
+    const action = {
+      event_type: eventType,
+      timestamp: Date.now(),
+      event_data: data,
+      immediate: options.immediate || false,
+    };
+    await saveUserAction(action);
+  };
+
+  const onReady = async () => {
+    try {
+      const videoDuration = await playerRef.current?.getDuration();
+      setDuration(videoDuration || 0);
+    } catch (e) {
+      console.warn("Error fetching duration", e);
+    }
+  };
+
+  const onChangeState = useCallback(
+    async (state) => {
+      if (state === "playing") {
+        trackEvent("video_start", {
+          video_id: item.youtubeId,
+          title: item.title,
+          source: "explore_video",
+          device: Platform.OS === "ios" ? "mobile-ios" : "mobile-android",
+        });
+      }
+      if (state === "paused") {
+        try {
+          const currentTime = await playerRef.current?.getCurrentTime();
+          const percent = duration
+            ? ((currentTime / duration) * 100).toFixed(2)
+            : 0;
+          trackEvent("video_progress", {
+            video_id: item.youtubeId,
+            title: item.title,
+            source: "explore_video",
+            device: Platform.OS === "ios" ? "mobile-ios" : "mobile-android",
+            position_sec: Math.floor(currentTime || 0),
+            percent,
+          });
+        } catch (e) {
+          console.warn("Error tracking progress", e);
+        }
+      }
+      if (state === "ended") {
+        trackEvent(
+          "video_complete",
+          {
+            video_id: item.youtubeId,
+            duration_sec: duration,
+            source: "explore_video",
+            device: Platform.OS === "ios" ? "mobile-ios" : "mobile-android",
+            title: item.title,
+          },
+          { immediate: true }
+        );
+      }
+    },
+    [duration]
+  );
+
+  return (
+    <View style={styles.videoCard}>
+      <View style={styles.thumbnailWrapper}>
+        <YoutubePlayer
+          ref={playerRef}
+          height={140}
+          play={false}
+          videoId={item.youtubeId}
+          onReady={onReady}
+          onChangeState={onChangeState}
+        />
+      </View>
+      <Text style={styles.videoTitle} numberOfLines={3}>
+        {item.title}
+      </Text>
+    </View>
+  );
+}
+
+// ✅ Main Component
 export default function ExploreVideos() {
-  // ✅ All videos use the same YouTube ID
   const videos = [
     {
       id: "1",
@@ -25,27 +114,12 @@ export default function ExploreVideos() {
     },
   ];
 
-  const renderVideo = ({ item }) => (
-    <View style={styles.videoCard}>
-      <View style={styles.thumbnailWrapper}>
-        <YoutubePlayer
-          height={140}
-          play={false}
-          videoId={item.youtubeId}
-        />
-      </View>
-      <Text style={styles.videoTitle} numberOfLines={3}>
-        {item.title}
-      </Text>
-    </View>
-  );
-
   return (
     <View style={styles.videosContainer}>
       <Text style={styles.sectionHeading}>Explore Videos</Text>
       <FlatList
         data={videos}
-        renderItem={renderVideo}
+        renderItem={({ item }) => <VideoCard item={item} />}
         keyExtractor={(item) => item.id}
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -82,7 +156,6 @@ const styles = StyleSheet.create({
   thumbnailWrapper: {
     width: "100%",
     height: 140,
-    // borderRadius: 12,
     overflow: "hidden",
   },
   videoTitle: {

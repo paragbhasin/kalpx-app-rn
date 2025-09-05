@@ -80,18 +80,20 @@
     "getStarted": "मुफ़्त में शुरू करें",
     "skip": "छोड़ें"
   },
-   "profile": {
+  "profile": {
     "title": "प्रोफ़ाइल",
     "name": "नेहा जैस",
     "level": "शुरुआती स्तर",
     "menu": {
-      "saved": "सहेजे गए संदेश",
-      "recent": "हाल ही में देखे गए वीडियो",
-      "practices": "अभ्यास",
+      "myProfile": "मेरा प्रोफ़ाइल",
+      "setReminders": "रिमाइंडर सेट करें",
+      "myPractices": "मेरे अभ्यास",
       "notifications": "सूचनाएँ",
+      "faqs": "सामान्य प्रश्न",
       "language": "भाषा",
-      "privacy": "गोपनीयता और सुरक्षा",
-      "storage": "स्टोरेज"
+      "privacy": "गोपनीयता . सुरक्षा",
+      "settings": "सेटिंग्स",
+      "inviteFriends": "दोस्तों को आमंत्रित करें"
     }
   },
   "explore": {

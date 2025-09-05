@@ -85,13 +85,15 @@
     "name": "Neha Jais",
     "level": "Beginner Level",
     "menu": {
-      "saved": "Saved Messages",
-      "recent": "Recent viewed Videos",
-      "practices": "Practices",
+      "myProfile": "My Profile",
+      "setReminders": "Set Reminders",
+      "myPractices": "My Practices",
       "notifications": "Notifications",
+      "faqs": "Faq’s",
       "language": "Language",
-      "privacy": "Privacy and Security",
-      "storage": "Storage"
+      "privacy": "Privacy . Security",
+      "settings": "Settings",
+      "inviteFriends": "Invite Friends"
     }
   },
   "explore": {

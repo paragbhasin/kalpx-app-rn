@@ -17,6 +17,8 @@ import {
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { useTranslation } from "react-i18next";
+import uuid from "react-native-uuid";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -69,7 +71,23 @@ export default function LoginScreen({ navigation }) {
             {/* Google Login Button */}
             <TouchableOpacity
               style={styles.googleButton}
-              onPress={() => navigation.navigate("HomePage")}
+              onPress={async () => {
+                try {
+                  let userId = await AsyncStorage.getItem("userId");
+            
+                  if (!userId) {
+                    userId = uuid.v4();
+                    await AsyncStorage.setItem("uuid", userId);
+                    console.log("New UUID stored:", userId);
+                  } else {
+                    console.log("Existing UUID:", userId);
+                  }
+            
+                  navigation.navigate("HomePage");
+                } catch (error) {
+                  console.error("Error handling UUID:", error);
+                }
+              }}
             >
               <Image
                 source={require("../../assets/devicon_google.png")}

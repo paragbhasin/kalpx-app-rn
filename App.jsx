@@ -37,6 +37,10 @@ export default function App() {
     }
   }, [fontsLoaded, error]);
 
+  if (__DEV__) {
+    require("./ReactotronConfig");
+  }
+
   if (!fontsLoaded && !error) {
     // Splash screen will stay visible until fonts are ready
     return null;

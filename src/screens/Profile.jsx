@@ -1,5 +1,4 @@
 // screens/Profile.js
-// screens/Profile.js
 import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import {
@@ -17,19 +16,24 @@ export default function Profile() {
   const { t } = useTranslation();
 
   const menuItems = [
-     { key: "Login In", route: "loginScreen" },
-    { key: "saved", route: "SavedMessages" },
-    { key: "recent", route: "RecentVideos" },
-    { key: "practices", route: "Practices" },
-    { key: "notifications", route: "Notifications" },
-    { key: "language", route: "Language" },
-    { key: "privacy", route: "Privacy" },
-    { key: "storage", route: "Storage" },
+    { key: "myProfile", icon: "person-outline", route: "ProfileDetails" },
+    { key: "setReminders", icon: "time-outline", route: "Reminders" },
+    { key: "myPractices", icon: "calendar-outline", route: "Practices" },
+    {
+      key: "notifications",
+      icon: "notifications-outline",
+      route: "Notifications",
+    },
+    { key: "faqs", icon: "help-circle-outline", route: "Faqs" },
+    { key: "language", icon: "globe-outline", route: "Language" },
+    { key: "privacy", icon: "key-outline", route: "Privacy" },
+    { key: "settings", icon: "settings-outline", route: "Settings" },
+    { key: "inviteFriends", icon: "people-outline", route: "InviteFriends" },
   ];
 
   return (
     <ScrollView style={styles.container}>
-      {/* Header Back Button */}
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="#000" />
@@ -38,8 +42,8 @@ export default function Profile() {
         <View style={{ width: 24 }} />
       </View>
 
-      {/* Profile Section */}
-      <View style={styles.profileSection}>
+      {/* Profile Card */}
+      <View style={styles.profileCard}>
         <View style={styles.avatarContainer}>
           <Image
             source={require("../../assets/Avatar.png")}
@@ -53,7 +57,7 @@ export default function Profile() {
         <Text style={styles.level}>{t("profile.level")}</Text>
       </View>
 
-      {/* Menu Options */}
+      {/* Menu Items */}
       <View style={styles.menu}>
         {menuItems.map((item, index) => (
           <TouchableOpacity
@@ -61,7 +65,12 @@ export default function Profile() {
             style={styles.menuItem}
             onPress={() => navigation.navigate(item.route)}
           >
-            <Text style={styles.menuText}>{t(`profile.menu.${item.key}`)}</Text>
+            <View style={styles.menuLeft}>
+              <Ionicons name={item.icon} size={20} color="#a67c52" />
+              <Text style={styles.menuText}>
+                {t(`profile.menu.${item.key}`)}
+              </Text>
+            </View>
             <Ionicons name="chevron-forward" size={20} color="#888" />
           </TouchableOpacity>
         ))}
@@ -86,17 +95,25 @@ const styles = StyleSheet.create({
     fontFamily: "GelicaMedium",
     color: "#000",
   },
-  profileSection: {
+  profileCard: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    margin: 16,
+    paddingVertical: 20,
     alignItems: "center",
-    marginVertical: 20,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    elevation: 2,
   },
   avatarContainer: {
     position: "relative",
   },
   avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 70,
+    height: 70,
+    borderRadius: 35,
     backgroundColor: "#cce0ff",
   },
   editIcon: {
@@ -108,17 +125,16 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   name: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: "GelicaMedium",
     color: "#000",
     marginTop: 10,
-    lineHeight: 22,
   },
   level: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: "GelicaRegular",
     color: "#666",
-    lineHeight: 18,
+    marginTop: 2,
   },
   menu: {
     marginTop: 10,
@@ -132,10 +148,15 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: "#ddd",
   },
+  menuLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
   menuText: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: "GelicaRegular",
     color: "#333",
-    lineHeight: 20,
+    lineHeight: 18,
   },
 });

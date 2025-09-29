@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { useDispatch } from "react-redux";
 import * as Yup from "yup";
+import LoadingButton from "../../components/LoadingButton";
 import ReCaptchaRuntime from "../Login/ReCaptchaRuntime";
 import { generateOtp, signupUser, verifyOtp } from "./actions";
 import styles from "./styles";
@@ -44,12 +45,12 @@ export default function SignupScreen({ navigation }) {
 
   const formikValuesRef = useRef(null);
   const [loginError, setLoginError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loadingType, setLoadingType] = useState(null); // 'requestOtp' | 'verifyOtp' | 'resendOtp' | 'signUp' | null
 
   // Request reCAPTCHA + API
   const handleRecaptchaAndApi = (actionType) => {
-    setLoading(true);
     setLoginError(null);
+    setLoadingType(actionType);
     recaptchaRef.current?.requestNewToken();
     formikValuesRef.current.actionType = actionType;
   };
@@ -86,13 +87,12 @@ export default function SignupScreen({ navigation }) {
 
   // reCAPTCHA callback
   const handleRecaptchaToken = (token) => {
-    setLoading(true);
     setLoginError(null);
     const values = formikValuesRef.current;
     const actionType = values.actionType;
     let payload = {};
 
-    if (actionType === "requestOtp") {
+    if (actionType === "requestOtp" || actionType === "resendOtp") {
       payload = {
         email: values.email,
         recaptcha_token: token,
@@ -101,7 +101,7 @@ export default function SignupScreen({ navigation }) {
       };
       dispatch(
         generateOtp(payload, (result) => {
-          setLoading(false);
+          setLoadingType(null);
           if (result.success) {
             setOtpSent(true);
             setTimer(60);
@@ -120,7 +120,7 @@ export default function SignupScreen({ navigation }) {
       };
       dispatch(
         verifyOtp(payload, (result) => {
-          setLoading(false);
+          setLoadingType(null);
           if (result.success) {
             setOtpVerified(true);
             setOtpSent(false);
@@ -147,7 +147,8 @@ export default function SignupScreen({ navigation }) {
       };
       dispatch(
         signupUser(payload, (result) => {
-          setLoading(false);
+          setLoadingType(null);
+          console.log("Signup Result:", result);
           if (result.success) {
             navigation.navigate("HomePage");
           } else {
@@ -287,27 +288,23 @@ export default function SignupScreen({ navigation }) {
                     {!otpVerified && (
                       <View style={styles.verifyOtpContainer}>
                         {!otpSent && (
-                          <TouchableOpacity
+                          <LoadingButton
+                            loading={loadingType === "requestOtp"}
+                            text={t("signup.requestOtp")}
+                            onPress={() => {
+                              formikValuesRef.current = values;
+                              handleRecaptchaAndApi("requestOtp");
+                            }}
+                            disabled={!isRequestOtpEnabled(values) || loadingType === "requestOtp"}
                             style={[
                               styles.verifyButton,
                               isRequestOtpEnabled(values)
                                 ? { backgroundColor: "#FFD600" }
                                 : { backgroundColor: "#ccc" },
                             ]}
-                            onPress={() => {
-                              formikValuesRef.current = values;
-                              handleRecaptchaAndApi("requestOtp");
-                            }}
-                            disabled={
-                              !isRequestOtpEnabled(values) || loading
-                            }
-                          >
-                            <Text style={styles.buttonText}>
-                              {loading
-                                ? t("signup.requestingOtp")
-                                : t("signup.requestOtp")}
-                            </Text>
-                          </TouchableOpacity>
+                            textStyle={styles.buttonText}
+                            width={120}
+                          />
                         )}
 
                         {otpSent && (
@@ -319,23 +316,23 @@ export default function SignupScreen({ navigation }) {
                             }}
                           >
                             {/* Verify OTP */}
-                            <TouchableOpacity
+                            <LoadingButton
+                              loading={loadingType === "verifyOtp"}
+                              text={t("signup.verifyOtp")}
+                              onPress={() => {
+                                formikValuesRef.current = values;
+                                handleRecaptchaAndApi("verifyOtp");
+                              }}
+                              disabled={!values.otp || loadingType === "verifyOtp"}
                               style={[
                                 styles.verifyButton,
                                 values.otp
                                   ? { backgroundColor: "#FFD600" }
                                   : { backgroundColor: "#ccc" },
                               ]}
-                              onPress={() => {
-                                formikValuesRef.current = values;
-                                handleRecaptchaAndApi("verifyOtp");
-                              }}
-                              disabled={!values.otp || loading}
-                            >
-                              <Text style={styles.buttonText}>
-                                {t("signup.verifyOtp")}
-                              </Text>
-                            </TouchableOpacity>
+                              textStyle={styles.buttonText}
+                              width={120}
+                            />
 
                             {/* Timer */}
                             <Text style={{ marginHorizontal: 10 }}>
@@ -343,25 +340,25 @@ export default function SignupScreen({ navigation }) {
                             </Text>
 
                             {/* Resend OTP */}
-                            <TouchableOpacity
+                            <LoadingButton
+                              loading={loadingType === "resendOtp"}
+                              text={t("signup.resendOtp")}
+                              onPress={() => {
+                                formikValuesRef.current = values;
+                                handleRecaptchaAndApi("resendOtp");
+                                setResendEnabled(false);
+                                setTimer(60);
+                              }}
+                              disabled={!resendEnabled || loadingType === "resendOtp"}
                               style={[
                                 styles.verifyButton,
                                 resendEnabled
                                   ? { backgroundColor: "#FFD600" }
                                   : { backgroundColor: "#ccc" },
                               ]}
-                              onPress={() => {
-                                formikValuesRef.current = values;
-                                handleRecaptchaAndApi("requestOtp");
-                                setResendEnabled(false);
-                                setTimer(60);
-                              }}
-                              disabled={!resendEnabled}
-                            >
-                              <Text style={styles.buttonText}>
-                                {t("signup.resendOtp")}
-                              </Text>
-                            </TouchableOpacity>
+                              textStyle={styles.buttonText}
+                              width={120}
+                            />
                           </View>
                         )}
                       </View>
@@ -377,25 +374,27 @@ export default function SignupScreen({ navigation }) {
                     )}
 
                     {/* Signup Button */}
-                    <TouchableOpacity
+                    <LoadingButton
+                      loading={loadingType === "register"}
+                      text={
+                        signupTimer > 0
+                          ? `${t("signup.signUp")} (${signupTimer}s)`
+                          : t("signup.signUp")
+                      }
+                      onPress={() => {
+                        formikValuesRef.current = values;
+                        handleRecaptchaAndApi("register");
+                      }}
+                      disabled={!otpVerified || signupTimer === 0 || loadingType === "register"}
                       style={[
                         styles.button,
                         otpVerified && signupTimer > 0
                           ? { backgroundColor: "#FFD600" }
                           : { backgroundColor: "#ccc" },
                       ]}
-                      onPress={() => {
-                        formikValuesRef.current = values;
-                        handleRecaptchaAndApi("register");
-                      }}
-                      disabled={!otpVerified || signupTimer === 0 || loading}
-                    >
-                      <Text style={styles.buttonText}>
-                        {signupTimer > 0
-                          ? `${t("signup.signUp")} (${signupTimer}s)`
-                          : t("signup.signUp")}
-                      </Text>
-                    </TouchableOpacity>
+                      textStyle={styles.buttonText}
+                      width={"100%"}
+                    />
 
                     {/* Footer */}
                     <View style={styles.footerContainer}>

@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
   },
   verifyButton: {
     backgroundColor: "#ca8a04",
-    padding: 10,
+    // padding: 10,
     borderRadius: 25,
     alignItems: "center",
     // marginTop: 20,

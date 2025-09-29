@@ -68,7 +68,10 @@
     "otp": "Enter OTP",
     "signUp": "SIGN UP",
     "alreadyMember": "Already Member?",
-    "loginHere": "Login here"
+    "loginHere": "Login here",
+    "verifyOtp":"Verify OTP",
+    "requestOtp":"Request OTP",
+    "resendOtp":"Resend OTP"
   },
     "tabs": {
     "home": "Home",

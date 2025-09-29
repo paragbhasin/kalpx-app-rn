@@ -68,7 +68,10 @@
     "otp": "OTP दर्ज करें",
     "signUp": "साइन अप",
     "alreadyMember": "पहले से सदस्य हैं?",
-    "loginHere": "यहाँ लॉगिन करें"
+    "loginHere": "यहाँ लॉगिन करें",
+    "verifyOtp":"OTP सत्यापित करें",
+    "requestOtp":"OTP का अनुरोध करें",
+    "resendOtp":"OTP पुनः भेजें"
   },
    "tabs": {
     "home": "होम",

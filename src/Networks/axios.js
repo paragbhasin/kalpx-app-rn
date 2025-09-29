@@ -1,8 +1,8 @@
 // src/lib/axios.js
-import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import BASE_URL from "./baseURL";
+import axios from "axios";
 import { v4 as uuidv4 } from "uuid"; // for guest UUID generation
+import BASE_URL from "./baseURL";
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -31,8 +31,9 @@ const getGuestUUID = async () => {
 // Request interceptor → attach token or guest UUID
 api.interceptors.request.use(
   async (config) => {
+    console.log("Request Interceptor Triggered", config);
     try {
-      const token = await AsyncStorage.getItem("token");
+      const token = await AsyncStorage.getItem("access_token");
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       } else {

@@ -3,18 +3,20 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
+import { Provider } from 'react-redux';
+import { store } from './src/store'; // Import the Redux store
 
 // Import Screens
 import BottomMenu from "./src/components/BottomMenu";
 import "./src/config/i18n";
 import Explore from "./src/screens/Explore";
 import Language from "./src/screens/Language";
-import LoginScreen from "./src/screens/LoginScreen";
+import LoginScreen from "./src/screens/Login/LoginScreen";
 import OnlineclassesScreen from "./src/screens/OnlineclassesScreen";
 import PoojaScreen from "./src/screens/PoojaScreen";
 import RetreatsScreen from "./src/screens/RetreatsScreen";
 import Sankalp from "./src/screens/Sankalp";
-import SignupScreen from "./src/screens/SignupScreen";
+import SignupScreen from "./src/screens/Signup/SignupScreen";
 import TravelPlannerScreen from "./src/screens/TravelPlannerScreen";
 import WelcomeScreen from "./src/screens/WelcomeScreen";
 
@@ -47,6 +49,7 @@ export default function App() {
   }
 
   return (
+    <Provider store={store}>
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Welcome">
         <Stack.Screen
@@ -106,5 +109,6 @@ export default function App() {
         />
       </Stack.Navigator>
     </NavigationContainer>
+    </Provider>
   );
 }

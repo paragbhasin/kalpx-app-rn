@@ -68,7 +68,10 @@
     "otp": "OTP నమోదు చేయండి",
     "signUp": "సైన్ అప్",
     "alreadyMember": "ఇప్పటికే సభ్యుడా?",
-    "loginHere": "ఇక్కడ లాగిన్ చేయండి"
+    "loginHere": "ఇక్కడ లాగిన్ చేయండి",
+    "verifyOtp":"OTPని ధృవీకరించండి",
+    "requestOtp":"OTPని అభ్యర్థించండి",
+    "resendOtp":"OTPని మళ్లీ పంపండి"
   },
     "tabs": {
     "home": "హోమ్",

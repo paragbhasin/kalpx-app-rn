@@ -56,6 +56,24 @@
       "passwordMin": "पासवर्ड कम से कम 6 वर्णों का होना चाहिए"
     }
   },
+   "forgotPassword": {
+  "enterEmail": "Enter Email Address",
+    "forgotPassword": "Forgot Password",
+    "exampleEmail": "Example@gmail.com",
+    "enterVerificationCode":"Enter Verification Code",
+    "Verification":"Verification",
+    "codeText":"If you didn’t receive a code. ",
+    "resend":"Resend",
+    "newPassword":"New Password",
+    "enterNewPassword":"Enter New Password",
+    "confirmPassword":"Confirm Password",
+    "enterPassword":"Enter Password",
+    "send":"Send",
+    "verify":"Verify",
+    "submit":"Submit",
+     "backTo":"Back to ",
+    "login":"Login"
+  },
   "signup": {
     "getStarted": "आइए शुरू करें",
     "createYour": "अपना",

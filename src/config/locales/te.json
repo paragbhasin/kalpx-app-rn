@@ -73,7 +73,25 @@
     "requestOtp":"OTPని అభ్యర్థించండి",
     "resendOtp":"OTPని మళ్లీ పంపండి"
   },
-    "tabs": {
+   "forgotPassword": {
+     "enterEmail": "Enter Email Address",
+    "forgotPassword": "Forgot Password",
+    "exampleEmail": "Example@gmail.com",
+    "enterVerificationCode":"Enter Verification Code",
+    "Verification":"Verification",
+    "codeText":"If you didn’t receive a code. ",
+    "resend":"Resend",
+    "newPassword":"New Password",
+    "enterNewPassword":"Enter New Password",
+    "confirmPassword":"Confirm Password",
+    "enterPassword":"Enter Password",
+    "send":"Send",
+    "verify":"Verify",
+    "submit":"Submit",
+     "backTo":"Back to ",
+    "login":"Login"
+  },
+  "tabs": {
     "home": "హోమ్",
     "notifications": "నోటిఫికేషన్స్",
     "search": "శోధన",

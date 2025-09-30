@@ -29,7 +29,7 @@
     "poojas": "Temple Poojas",
     "retreats": "Retreats  Wellness"
   },
-    "exploreVideos": {
+  "exploreVideos": {
     "heading": "Explore Videos",
     "video1": "Sanskrit Showcase · Institutes of Eminence Offering Sanskrit Courses · MadrasSanskritCollege",
     "video2": "Learn Sanskrit · Ancient Wisdom Modern Applications · Delhi University",
@@ -56,6 +56,24 @@
       "passwordMin": "Password must be at least 6 characters"
     }
   },
+  "forgotPassword": {
+    "enterEmail": "Enter Email Address",
+    "forgotPassword": "Forgot Password",
+    "exampleEmail": "Example@gmail.com",
+    "enterVerificationCode":"Enter Verification Code",
+    "Verification":"Verification & Reset Password",
+    "codeText":"If you didn’t receive a code. ",
+    "resend":"Resend",
+    "newPassword":"New Password",
+    "enterNewPassword":"Enter New Password",
+    "confirmPassword":"Confirm Password",
+    "enterPassword":"Enter Password",
+    "send":"Send",
+    "verify":"Verify",
+    "submit":"Submit",
+    "backTo":"Back to ",
+    "login":"Login"
+  },
   "signup": {
     "getStarted": "Let's Get Started",
     "createYour": "Create Your",
@@ -69,21 +87,21 @@
     "signUp": "SIGN UP",
     "alreadyMember": "Already Member?",
     "loginHere": "Login here",
-    "verifyOtp":"Verify OTP",
-    "requestOtp":"Request OTP",
-    "resendOtp":"Resend OTP"
+    "verifyOtp": "Verify OTP",
+    "requestOtp": "Request OTP",
+    "resendOtp": "Resend OTP"
   },
-    "tabs": {
+  "tabs": {
     "home": "Home",
     "notifications": "Notifications",
     "search": "Search",
     "profile": "Profile"
   },
-    "welcome": {
+  "welcome": {
     "getStarted": "GET STARTED FREE",
     "skip": "Skip"
   },
-   "profile": {
+  "profile": {
     "title": "Profile",
     "name": "Neha Jais",
     "level": "Beginner Level",

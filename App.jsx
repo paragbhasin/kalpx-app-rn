@@ -10,6 +10,9 @@ import { store } from './src/store'; // Import the Redux store
 import BottomMenu from "./src/components/BottomMenu";
 import "./src/config/i18n";
 import Explore from "./src/screens/Explore";
+import ForgotPassword from "./src/screens/ForgotPassword/ForgotPassword";
+import SetNewPasswordScreen from "./src/screens/ForgotPassword/SetNewPasswordScreen";
+import VerificationScreen from "./src/screens/ForgotPassword/VerificationScreen";
 import Language from "./src/screens/Language";
 import LoginScreen from "./src/screens/Login/LoginScreen";
 import OnlineclassesScreen from "./src/screens/OnlineclassesScreen";
@@ -18,7 +21,10 @@ import RetreatsScreen from "./src/screens/RetreatsScreen";
 import Sankalp from "./src/screens/Sankalp";
 import SignupScreen from "./src/screens/Signup/SignupScreen";
 import TravelPlannerScreen from "./src/screens/TravelPlannerScreen";
-import WelcomeScreen from "./src/screens/WelcomeScreen";
+import LandingScreen from "./src/screens/WelcomeScreen/LandingScreen";
+import WelcomeScreen from "./src/screens/WelcomeScreen/WelcomeScreen";
+
+
 
 const Stack = createNativeStackNavigator();
 
@@ -57,6 +63,11 @@ export default function App() {
           component={WelcomeScreen}
           options={{ headerShown: false }}
         />
+          <Stack.Screen
+          name="LandingScreen"
+          component={LandingScreen}
+          options={{ headerShown: false }}
+        />
         <Stack.Screen
           name="Login"
           component={LoginScreen}
@@ -65,6 +76,21 @@ export default function App() {
         <Stack.Screen
           name="Signup"
           component={SignupScreen}
+          options={{ headerShown: false }}
+        />
+          <Stack.Screen
+          name="ForgotPassword"
+          component={ForgotPassword}
+          options={{ headerShown: false }}
+        />
+           <Stack.Screen
+          name="VerificationScreen"
+          component={VerificationScreen}
+          options={{ headerShown: false }}
+        />
+           <Stack.Screen
+          name="SetNewPasswordScreen"
+          component={SetNewPasswordScreen}
           options={{ headerShown: false }}
         />
         <Stack.Screen

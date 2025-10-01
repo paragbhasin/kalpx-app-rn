@@ -2,6 +2,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid"; // for guest UUID generation
+import { store } from '../store';
+import { showSnackBar } from '../store/snackBarSlice';
 import BASE_URL from "./baseURL";
 
 const api = axios.create({
@@ -16,14 +18,14 @@ const api = axios.create({
 const getGuestUUID = async () => {
   try {
     let guestUUID = await AsyncStorage.getItem("uuid");
-    console.log(guestUUID, "here is the guest idddd");
+    // console.log(guestUUID, "here is the guest idddd");
     if (!guestUUID) {
       guestUUID = uuidv4();
       await AsyncStorage.setItem("guestUUID", guestUUID);
     }
     return guestUUID;
   } catch (error) {
-    console.log("Error managing guestUUID:", error);
+    // console.log("Error managing guestUUID:", error);
     return null;
   }
 };
@@ -31,7 +33,7 @@ const getGuestUUID = async () => {
 // Request interceptor → attach token or guest UUID
 api.interceptors.request.use(
   async (config) => {
-    console.log("Request Interceptor Triggered", config);
+    // console.log("Request Interceptor Triggered", config);
     try {
       const token = await AsyncStorage.getItem("access_token");
       if (token) {
@@ -51,10 +53,25 @@ api.interceptors.request.use(
 );
 
 // Response interceptor → handle global errors
+
+
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status;
+    let message = 'An error occurred';
+    if (status === 400) {
+      const data = error.response?.data;
+      message = data?.message || data?.error || 'Bad Request';
+    } else if (status) {
+      const data = error.response?.data;
+      message = data?.message || data?.error || `Error ${status}`;
+    }
+    if (status && status !== 401) {
+      store.dispatch(showSnackBar(message));
+    }
+    if (status === 401) {
       console.log("Unauthorized → maybe redirect to login");
       // Optionally clear token or navigate to login
     }

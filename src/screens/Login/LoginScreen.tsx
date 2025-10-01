@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Formik } from "formik";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dimensions,
@@ -29,7 +29,22 @@ export default function LoginScreen({ navigation }) {
   const { t } = useTranslation();
   const [otpSent, setOtpSent] = useState(false);
   const [keepLoggedIn, setKeepLoggedIn] = useState(false);
+  const [initialEmail, setInitialEmail] = useState("");
+  const [initialPassword, setInitialPassword] = useState("");
   const dispatch = useDispatch();
+  // Fetch credentials from AsyncStorage on mount
+  useEffect(() => {
+    const fetchCredentials = async () => {
+      const email = await AsyncStorage.getItem("userEmail");
+      const password = await AsyncStorage.getItem("userPassword");
+      setInitialEmail(email || "");
+      setInitialPassword(password || "");
+      if (email && password) {
+        setKeepLoggedIn(true);
+      }
+    };
+    fetchCredentials();
+  }, []);
 
   // ✅ Validation with i18n error messages
   const LoginSchema = Yup.object().shape({
@@ -51,16 +66,22 @@ export default function LoginScreen({ navigation }) {
   const handleRecaptchaToken = (token) => {
     setLoading(true);
     setLoginError(null);
-    console.log("reCAPTCHA token:", token);
     const credentials = {
-      email : formikValuesRef.current.username,
+      email: formikValuesRef.current.username,
       password: formikValuesRef.current.password,
       recaptcha_token: token,
       recaptcha_action: "login"
     };
-    dispatch(loginUser(credentials, (result) => {
+    dispatch(loginUser(credentials, async (result) => {
       setLoading(false);
       if (result && result.success) {
+        if (keepLoggedIn) {
+          await AsyncStorage.setItem("userEmail", credentials.email);
+          await AsyncStorage.setItem("userPassword", credentials.password);
+        } else {
+          await AsyncStorage.removeItem("userEmail");
+          await AsyncStorage.removeItem("userPassword");
+        }
         navigation.navigate("HomePage");
       } else {
         setLoginError(result?.error || "Login failed");
@@ -70,7 +91,7 @@ export default function LoginScreen({ navigation }) {
 
   const handleSendOtp = (username) => {
     if (username) {
-      console.log("OTP sent to:", username);
+      // console.log("OTP sent to:", username);
       setOtpSent(true);
     } else {
       console.log("Please enter username/email first!");
@@ -111,7 +132,7 @@ export default function LoginScreen({ navigation }) {
                   if (!userId) {
                     userId = uuid.v4();
                     await AsyncStorage.setItem("uuid", userId);
-                    console.log("New UUID stored:", userId);
+                    // console.log("New UUID stored:", userId);
                   } else {
                     console.log("Existing UUID:", userId);
                   }
@@ -139,13 +160,12 @@ export default function LoginScreen({ navigation }) {
               <Text style={styles.subTitle}>{t("login.subTitle")}</Text>
 
               <Formik
-                initialValues={{ username: "", password: "" }}
+                enableReinitialize
+                initialValues={{ username: initialEmail, password: initialPassword }}
                 validationSchema={LoginSchema}
                 onSubmit={(values) => {
-                  console.log("Login Data:", values);
-                    formikValuesRef.current = values;
-                    recaptchaRef.current?.requestNewToken();
-                  // navigation.navigate("HomePage");
+                  formikValuesRef.current = values;
+                  recaptchaRef.current?.requestNewToken();
                 }}
               >
                 {({
@@ -245,5 +265,3 @@ export default function LoginScreen({ navigation }) {
     </SafeAreaView>
   );
 }
-
-

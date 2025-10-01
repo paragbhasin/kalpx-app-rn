@@ -3,8 +3,10 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
-import { Provider } from 'react-redux';
-import { store } from './src/store'; // Import the Redux store
+import { Provider, useDispatch, useSelector } from 'react-redux';
+import SnackBar from './src/components/SnackBar';
+import { store } from './src/store';
+import { hideSnackBar } from './src/store/snackBarSlice';
 
 // Import Screens
 import BottomMenu from "./src/components/BottomMenu";
@@ -31,6 +33,21 @@ const Stack = createNativeStackNavigator();
 // 👇 Keep splash visible while fonts load
 SplashScreen.preventAutoHideAsync();
 
+function SnackBarContainer() {
+  const dispatch = useDispatch();
+  const { visible, message } = useSelector(state => state.snackBar);
+  useEffect(() => {
+    let timer;
+    if (visible) {
+      timer = setTimeout(() => {
+        dispatch(hideSnackBar());
+      }, 3000);
+    }
+    return () => clearTimeout(timer);
+  }, [visible, dispatch]);
+  return <SnackBar visible={visible} message={message} />;
+}
+
 export default function App() {
   const [fontsLoaded, error] = useFonts({
     GelicaRegular: require("./assets/fonts/gelica-regular.otf"),
@@ -56,85 +73,26 @@ export default function App() {
 
   return (
     <Provider store={store}>
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Welcome">
-        <Stack.Screen
-          name="Welcome"
-          component={WelcomeScreen}
-          options={{ headerShown: false }}
-        />
-          <Stack.Screen
-          name="LandingScreen"
-          component={LandingScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Signup"
-          component={SignupScreen}
-          options={{ headerShown: false }}
-        />
-          <Stack.Screen
-          name="ForgotPassword"
-          component={ForgotPassword}
-          options={{ headerShown: false }}
-        />
-           <Stack.Screen
-          name="VerificationScreen"
-          component={VerificationScreen}
-          options={{ headerShown: false }}
-        />
-           <Stack.Screen
-          name="SetNewPasswordScreen"
-          component={SetNewPasswordScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Travel"
-          component={TravelPlannerScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Sankalp"
-          component={Sankalp}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="HomePage"
-          component={BottomMenu}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Pooja"
-          component={PoojaScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Retreat"
-          component={RetreatsScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Language"
-          component={Language}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Explore"
-          component={Explore}
-          options={{ headerShown: false }}
-        />
-         <Stack.Screen
-          name="Classes"
-          component={OnlineclassesScreen}
-          options={{ headerShown: false }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Welcome">
+          <Stack.Screen name="Welcome" component={WelcomeScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="LandingScreen" component={LandingScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="Signup" component={SignupScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="ForgotPassword" component={ForgotPassword} options={{ headerShown: false }} />
+          <Stack.Screen name="VerificationScreen" component={VerificationScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="SetNewPasswordScreen" component={SetNewPasswordScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="Travel" component={TravelPlannerScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="Sankalp" component={Sankalp} options={{ headerShown: false }} />
+          <Stack.Screen name="HomePage" component={BottomMenu} options={{ headerShown: false }} />
+          <Stack.Screen name="Pooja" component={PoojaScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="Retreat" component={RetreatsScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="Language" component={Language} options={{ headerShown: false }} />
+          <Stack.Screen name="Explore" component={Explore} options={{ headerShown: false }} />
+          <Stack.Screen name="Classes" component={OnlineclassesScreen} options={{ headerShown: false }} />
+        </Stack.Navigator>
+        <SnackBarContainer />
+      </NavigationContainer>
     </Provider>
   );
 }

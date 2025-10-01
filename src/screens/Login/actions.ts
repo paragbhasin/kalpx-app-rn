@@ -3,6 +3,9 @@ import api from "../../Networks/axios"; // Adjust the import based on your proje
 export const LOGIN_REQUEST = "LOGIN_REQUEST";
 export const LOGIN_SUCCESS = "LOGIN_SUCCESS";
 export const LOGIN_FAILURE = "LOGIN_FAILURE";
+export const SOCIAL_LOGIN_REQUEST = "SOCIAL_LOGIN_REQUEST";
+export const SOCIAL_LOGIN_SUCCESS = "SOCIAL_LOGIN_SUCCESS";
+export const SOCIAL_LOGIN_FAILURE = "SOCIAL_LOGIN_FAILURE";
 
 export const loginRequest = () => ({ type: LOGIN_REQUEST });
 export const loginSuccess = (res) => ({
@@ -11,6 +14,17 @@ export const loginSuccess = (res) => ({
 });
 export const loginFailure = (error) => ({
   type: LOGIN_FAILURE,
+  payload: error,
+});
+
+
+export const socialloginRequest = () => ({ type: SOCIAL_LOGIN_REQUEST });
+export const socialLoginSuccess = (res) => ({
+  type: SOCIAL_LOGIN_SUCCESS,
+  payload: res.user,
+});
+export const socialLoginFailure = (error) => ({
+  type: SOCIAL_LOGIN_FAILURE,
   payload: error,
 });
 
@@ -28,7 +42,26 @@ export const loginUser = (credentials, callback) => async (dispatch) => {
   }
 };
 
+export const socialLoginUser = (credentials, callback) => async (dispatch) => {
+  dispatch(socialloginRequest());
+  try {
+    const response: any = await socialLoginApi(credentials);
+    AsyncStorage.setItem("access_token", response.access_token);
+    AsyncStorage.setItem("refresh_token", response.refresh_token);
+    dispatch(socialLoginSuccess(response));
+    if (callback) callback({ success: true, data: response });
+  } catch (error) {
+    dispatch(socialLoginFailure(error.message));
+    if (callback) callback({ success: false, error: error.message });
+  }
+};
+
 const loginApi = (credentials) => {
-  console.log("loginApi called with:", credentials);
+  // console.log("loginApi called with:", credentials);
   return api.post("users/login/", credentials);
+};
+
+const socialLoginApi = (credentials) => {
+  console.log("social login called with:::::::::", credentials);
+  return api.post("users/social_login/", credentials);
 };

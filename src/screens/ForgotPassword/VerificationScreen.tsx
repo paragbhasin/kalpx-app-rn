@@ -21,7 +21,7 @@ import { useDispatch } from "react-redux";
 import * as Yup from "yup";
 import LoadingButton from "../../components/LoadingButton";
 import ReCaptchaRuntime from "../Login/ReCaptchaRuntime";
-import { generateOtp } from "../Signup/actions"; // ensure path is correct
+import { generateOtp, resetPasswordOtp } from "../Signup/actions"; // ensure path is correct
 import styles from "./styles";
 
 const screenWidth = Dimensions.get("window").width;
@@ -106,7 +106,7 @@ export default function VerificationScreen({ navigation, route }) {
         recaptcha_token: token,
       };
 
-      dispatch(generateOtp(payload, (result) => {
+      dispatch(resetPasswordOtp(payload, (result) => {
         setLoading(false);
         if (result && result.success) {
           // success -> reset form + go to login

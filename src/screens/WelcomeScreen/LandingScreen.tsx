@@ -75,7 +75,9 @@ export default function LandingScreen({ navigation }) {
               renderItem={({ item }) => (
                 <View
                   style={{
-                    backgroundColor: "#FFFFFF",
+                    backgroundColor: "#FAF2E8",
+                    borderColor:"#FFD6A5",
+                    borderWidth:1,
                     marginVertical: 8,
                     marginHorizontal: 16,
                     padding: 12,

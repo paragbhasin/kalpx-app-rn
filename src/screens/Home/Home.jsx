@@ -1,29 +1,28 @@
 // screens/Home.js
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
+import * as Location from "expo-location";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   FlatList,
   Image,
   ImageBackground,
+  Platform,
   SafeAreaView,
   ScrollView,
   StatusBar,
-  StyleSheet,
   Text,
   TouchableOpacity,
-  View,
-  Platform,
+  View
 } from "react-native";
-import ExploreVideos from "../components/ExploreVideos";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as Location from "expo-location";
-import { useState, useEffect } from "react";
+import ExploreVideos from "../../components/ExploreVideos";
+import styles from "./homestyles";
 
 import {
-  saveUserAction,
   getUserActions,
-  clearUserActions,
-} from "../utils/storage";
+  saveUserAction
+} from "../../utils/storage";
 
 export default function Home() {
   const navigation = useNavigation();
@@ -35,6 +34,9 @@ export default function Home() {
     timeZone: "",
   });
 
+
+  // Define categories with translated names
+
   const categories = [
     {
       id: "1",
@@ -42,7 +44,7 @@ export default function Home() {
       title: "Dharma",
       event_type: "click_dharma_card",
       component: "Dharma-card",
-      icon: require("../../assets/Group.png"),
+      icon: require("../../../assets/Group.png"),
     },
     {
       id: "2",
@@ -50,7 +52,7 @@ export default function Home() {
       title: "Explore",
       event_type: "click_explore_card",
       component: "Explore-card",
-      icon: require("../../assets/Exploreicon.png"),
+      icon: require("../../../assets/Exploreicon.png"),
     },
     {
       id: "3",
@@ -58,7 +60,7 @@ export default function Home() {
       title: "Travel",
       event_type: "click_travel_card",
       component: "Travel-card",
-      icon: require("../../assets/darma.png"),
+      icon: require("../../../assets/darma.png"),
     },
     {
       id: "4",
@@ -66,7 +68,7 @@ export default function Home() {
       title: "Pooja",
       event_type: "click_pooja_card",
       component: "Pooja-card",
-      icon: require("../../assets/pooja.png"),
+      icon: require("../../../assets/pooja.png"),
     },
     {
       id: "5",
@@ -74,7 +76,7 @@ export default function Home() {
       title: "Retreat",
       event_type: "click_retreat_card",
       component: "Retreat-card",
-      icon: require("../../assets/yoga.png"),
+      icon: require("../../../assets/yoga.png"),
     },
     {
       id: "6",
@@ -82,7 +84,7 @@ export default function Home() {
       title: "Classes",
       event_type: "click_classes_card",
       component: "Classes-card",
-      icon: require("../../assets/onlinecion.png"),
+      icon: require("../../../assets/onlinecion.png"),
     },
   ];
 
@@ -94,7 +96,7 @@ export default function Home() {
       event_type: "view_sankalp_card",
       component: "sankalp-card",
       subtitle: t("daily.sankalpSubtitle"),
-      icon: require("../../assets/lamp.png"),
+      icon: require("../../../assets/lamp.png"),
     },
     {
       id: "2",
@@ -103,7 +105,7 @@ export default function Home() {
       event_type: "view_mantra_card",
       component: "mantra-card",
       subtitle: t("daily.mantraSubtitle"),
-      icon: require("../../assets/atom.png"),
+      icon: require("../../../assets/atom.png"),
     },
     {
       id: "3",
@@ -112,7 +114,7 @@ export default function Home() {
       event_type: "view_wisdom_card",
       component: "wisdom-card",
       subtitle: t("daily.wisdomSubtitle"),
-      icon: require("../../assets/sun.png"),
+      icon: require("../../../assets/sun.png"),
     },
     {
       id: "4",
@@ -121,7 +123,7 @@ export default function Home() {
       event_type: "view_festival_card",
       component: "festival-card",
       subtitle: t("daily.festivalSubtitle"),
-      icon: require("../../assets/party.png"),
+      icon: require("../../../assets/party.png"),
     },
   ];
 
@@ -132,7 +134,7 @@ export default function Home() {
       name: "Learn",
       event_type: "click_learn_card",
       component: "Learn-card",
-      image: require("../../assets/learn.png"),
+      image: require("../../../assets/learn.png"),
     },
     {
       id: "2",
@@ -140,7 +142,7 @@ export default function Home() {
       name: "Explore",
       event_type: "click_explore_card",
       component: "Explore-card",
-      image: require("../../assets/explore.png"),
+      image: require("../../../assets/explore.png"),
     },
     {
       id: "3",
@@ -148,7 +150,7 @@ export default function Home() {
       name: "Practice",
       event_type: "click_practice_card",
       component: "Practice-card",
-      image: require("../../assets/daily.png"),
+      image: require("../../../assets/daily.png"),
     },
     {
       id: "4",
@@ -156,7 +158,7 @@ export default function Home() {
       name: "Journey",
       event_type: "click_journey_card",
       component: "Journey-card",
-      image: require("../../assets/journey.png"),
+      image: require("../../../assets/journey.png"),
     },
     {
       id: "5",
@@ -164,7 +166,7 @@ export default function Home() {
       name: "Pooja",
       event_type: "click_pooja_card",
       component: "Pooja-card",
-      image: require("../../assets/poojafl.png"),
+      image: require("../../../assets/poojafl.png"),
     },
     {
       id: "6",
@@ -172,7 +174,7 @@ export default function Home() {
       name: "Retreats",
       event_type: "click_retreats_card",
       component: "Retreats-card",
-      image: require("../../assets/retreatff.png"),
+      image: require("../../../assets/retreatff.png"),
     },
     {
       id: "7",
@@ -180,7 +182,7 @@ export default function Home() {
       name: "Classes",
       event_type: "click_classes_card",
       component: "Classes-card",
-      image: require("../../assets/onlineclass.png"),
+      image: require("../../../assets/onlineclass.png"),
     },
   ];
 
@@ -337,7 +339,7 @@ export default function Home() {
       />
 
       <ImageBackground
-        source={require("../../assets/home.jpg")}
+        source={require("../../../assets/home.jpg")}
         style={styles.background}
         resizeMode="cover"
       >
@@ -397,100 +399,4 @@ export default function Home() {
   );
 }
 
-const styles = StyleSheet.create({
-  background: { flex: 1, resizeMode: "cover" },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  leftSection: { flexDirection: "row", alignItems: "center" },
-  greeting: {
-    fontSize: 18,
-    fontWeight: "400",
-    color: "#000",
-    marginLeft: 10,
-    fontFamily: "GelicaMedium",
-    lineHeight: 22,
-  },
-  icon: { width: 28, height: 28, marginBottom: 6 },
-  rightIcons: { flexDirection: "row", alignItems: "center" },
-  iconButton: { marginLeft: 16 },
-  card: {
-    backgroundColor: "#fff",
-    width: 64,
-    height: 59,
-    marginRight: 12,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  cardText: {
-    marginTop: 4,
-    fontSize: 12,
-    fontWeight: "400",
-    color: "#000",
-    textAlign: "center",
-    fontFamily: "GelicaRegular",
-    lineHeight: 16,
-  },
-  optionCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    width: 350,
-    height: 59,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    marginBottom: 10,
-    alignSelf: "center",
-  },
-  optionIconWrapper: { marginRight: 12 },
-  optionIcon: { width: 28, height: 28 },
-  dailyContainer: { paddingHorizontal: 16, marginTop: 10 },
-  sectionHeading: {
-    fontSize: 18,
-    fontFamily: "GelicaMedium",
-    color: "#444",
-    marginBottom: 12,
-    paddingHorizontal: 4,
-    lineHeight: 20,
-  },
-  optionTitle: {
-    fontSize: 16,
-    fontFamily: "GelicaMedium",
-    color: "#000",
-    marginBottom: 2,
-    lineHeight: 20,
-  },
-  optionSubtitle: {
-    fontSize: 13,
-    fontFamily: "GelicaRegular",
-    color: "#666",
-    lineHeight: 18,
-  },
-  kalpXContainer: { paddingHorizontal: 16, marginTop: 20 },
-  kalpXCard: {
-    width: 150,
-    height: 145,
-    backgroundColor: "#fff",
-    borderColor: "#ffd6a5",
-    borderWidth: 0.5,
-    borderRadius: 12,
-    overflow: "hidden",
-    marginBottom: 12,
-    padding: 8,
-  },
-  kalpXImage: { width: "100%", height: 100, borderRadius: 8 },
-  kalpXTitle: {
-    fontSize: 12,
-    fontFamily: "GelicaMedium",
-    color: "#000",
-    marginTop: 6,
-    marginHorizontal: 8,
-    textAlign: "left",
-    lineHeight: 18,
-  },
-});
+

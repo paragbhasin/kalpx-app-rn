@@ -299,7 +299,7 @@ export default function SignupScreen({ navigation }) {
                             style={[
                               styles.verifyButton,
                               isRequestOtpEnabled(values)
-                                ? { backgroundColor: "#FFD600" }
+                                ? { backgroundColor: "#CA8A04" }
                                 : { backgroundColor: "#ccc" },
                             ]}
                             textStyle={styles.buttonText}
@@ -327,7 +327,7 @@ export default function SignupScreen({ navigation }) {
                               style={[
                                 styles.verifyButton,
                                 values.otp
-                                  ? { backgroundColor: "#FFD600" }
+                                  ? { backgroundColor: "#CA8A04" }
                                   : { backgroundColor: "#ccc" },
                               ]}
                               textStyle={styles.buttonText}
@@ -353,7 +353,7 @@ export default function SignupScreen({ navigation }) {
                               style={[
                                 styles.verifyButton,
                                 resendEnabled
-                                  ? { backgroundColor: "#FFD600" }
+                                  ? { backgroundColor: "#CA8A04" }
                                   : { backgroundColor: "#ccc" },
                               ]}
                               textStyle={styles.buttonText}
@@ -389,7 +389,7 @@ export default function SignupScreen({ navigation }) {
                       style={[
                         styles.button,
                         otpVerified && signupTimer > 0
-                          ? { backgroundColor: "#FFD600" }
+                          ? { backgroundColor: "#CA8A04" }
                           : { backgroundColor: "#ccc" },
                       ]}
                       textStyle={styles.buttonText}

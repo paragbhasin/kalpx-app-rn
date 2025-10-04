@@ -1,6 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import colors from "../theme/colors"; // adjust path if needed
+import { StyleSheet, Text, View } from "react-native";
 
 export default function Section({ title, children }) {
   return (
@@ -17,8 +16,8 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: "700",
-    color: colors.primary, // use earthy brown instead of plain gray
+    fontWeight: "500",
+    color: "#0000000", // use earthy brown instead of plain gray
     marginBottom: 8,
   },
 });

@@ -32,10 +32,12 @@ export const loginUser = (credentials, callback) => async (dispatch) => {
   dispatch(loginRequest());
   try {
     const response: any = await loginApi(credentials);
-    AsyncStorage.setItem("access_token", response.access_token);
-    AsyncStorage.setItem("refresh_token", response.refresh_token);
-    dispatch(loginSuccess(response));
-    if (callback) callback({ success: true, data: response });
+    console.log("login response:::::", response);
+    AsyncStorage.setItem("access_token", response.data.access_token);
+    AsyncStorage.setItem("refresh_token", response.data.refresh_token);
+    AsyncStorage.setItem("user_id",`${response.data.user.id}`);
+    dispatch(loginSuccess(response.data));
+    if (callback) callback({ success: true, data: response.data});
   } catch (error) {
     dispatch(loginFailure(error.message));
     if (callback) callback({ success: false, error: error.message });
@@ -46,10 +48,11 @@ export const socialLoginUser = (credentials, callback) => async (dispatch) => {
   dispatch(socialloginRequest());
   try {
     const response: any = await socialLoginApi(credentials);
-    AsyncStorage.setItem("access_token", response.access_token);
-    AsyncStorage.setItem("refresh_token", response.refresh_token);
-    dispatch(socialLoginSuccess(response));
-    if (callback) callback({ success: true, data: response });
+    AsyncStorage.setItem("access_token", response.data.access_token);
+    AsyncStorage.setItem("refresh_token", response.data.refresh_token);
+    AsyncStorage.setItem("user_id", `${response.data.user.id}`);
+    dispatch(socialLoginSuccess(response.data));
+    if (callback) callback({ success: true, data: response.data });
   } catch (error) {
     dispatch(socialLoginFailure(error.message));
     if (callback) callback({ success: false, error: error.message });

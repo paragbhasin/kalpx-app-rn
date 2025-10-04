@@ -85,10 +85,10 @@ const styles = StyleSheet.create({
   joinText: {
     fontSize: 24,
     textAlign: "center",
-    fontWeight: "300",
+    fontWeight: "500",
     color: "#000000",
     marginBottom: 6,
-    fontFamily: "GelicaBold",
+    // fontFamily: "GelicaBold",
     lineHeight: 40,
   },
     joinSubText: {
@@ -103,8 +103,8 @@ const styles = StyleSheet.create({
   flatText: {
     fontSize: 14,
     // textAlign: "center",
-    fontWeight: "600",
-    color: "#333333",
+    fontWeight: "400",
+    color: "#000000",
     // fontFamily: "GelicaBold",
   },
 });

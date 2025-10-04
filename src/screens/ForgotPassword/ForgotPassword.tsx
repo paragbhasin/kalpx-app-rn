@@ -2,16 +2,17 @@ import { Formik } from "formik";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    Dimensions,
-    ImageBackground,
-    KeyboardAvoidingView,
-    Platform,
-    SafeAreaView,
-    ScrollView,
-    StatusBar,
-    Text,
-    TextInput,
-    View
+  Dimensions,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
 import { useDispatch } from 'react-redux';
 import * as Yup from "yup";
@@ -134,9 +135,11 @@ export default function ForgotPassword({ navigation }) {
                           <Text style={{ ...styles.subTitle, color: "#707070" }}>
                             {t("forgotPassword.backTo")}
                           </Text>
+                          <TouchableOpacity   onPress={() => navigation.navigate("Login")}>
                           <Text style={{ ...styles.subTitle, color: "#CA8A04" }}>
                             {t("forgotPassword.login")}
                           </Text>
+                          </TouchableOpacity>
                         </View>
                   </>
                 )}

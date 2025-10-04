@@ -3,6 +3,7 @@ import { Formik } from "formik";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  Button,
   Dimensions,
   Image,
   ImageBackground,
@@ -19,6 +20,8 @@ import {
 import uuid from "react-native-uuid";
 import { useDispatch } from 'react-redux';
 import * as Yup from "yup";
+import LoadingButton from "../../components/LoadingButton"; // ✅ import LoadingButton
+import SuccessModal from "../../components/SuccessModal";
 import { loginUser } from './actions';
 import ReCaptchaRuntime from "./ReCaptchaRuntime";
 import styles from './styles';
@@ -31,8 +34,10 @@ export default function LoginScreen({ navigation }) {
   const [keepLoggedIn, setKeepLoggedIn] = useState(false);
   const [initialEmail, setInitialEmail] = useState("");
   const [initialPassword, setInitialPassword] = useState("");
+    const [show, setShow] = useState(false);
   const dispatch = useDispatch();
-  // Fetch credentials from AsyncStorage on mount
+
+  // fetch stored credentials
   useEffect(() => {
     const fetchCredentials = async () => {
       const email = await AsyncStorage.getItem("userEmail");
@@ -46,7 +51,7 @@ export default function LoginScreen({ navigation }) {
     fetchCredentials();
   }, []);
 
-  // ✅ Validation with i18n error messages
+  // validation schema
   const LoginSchema = Yup.object().shape({
     username: Yup.string().required(t("login.errors.usernameRequired")),
     password: Yup.string()
@@ -55,11 +60,8 @@ export default function LoginScreen({ navigation }) {
   });
 
   const recaptchaRef = useRef(null);
-
-  // Store Formik values temporarily
   const formikValuesRef = useRef(null);
 
-  // Called when reCAPTCHA returns a token
   const [loginError, setLoginError] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -89,22 +91,9 @@ export default function LoginScreen({ navigation }) {
     }) as any);
   };
 
-  const handleSendOtp = (username) => {
-    if (username) {
-      // console.log("OTP sent to:", username);
-      setOtpSent(true);
-    } else {
-      console.log("Please enter username/email first!");
-    }
-  };
-
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar
-        barStyle="dark-content"
-        backgroundColor="#fff2dd"
-        translucent={false}
-      />
+      <StatusBar barStyle="dark-content" backgroundColor="#fff2dd" translucent={false} />
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -115,10 +104,7 @@ export default function LoginScreen({ navigation }) {
           source={require("../../../assets/hoomepagebg.jpg")}
           style={styles.background}
         >
-          <ScrollView
-            contentContainerStyle={styles.scrollContainer}
-            keyboardShouldPersistTaps="handled"
-          >
+          <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
             <Text style={styles.brand}>{t("login.brand")}</Text>
             <Text style={styles.heading}>{t("login.heading")}</Text>
 
@@ -128,35 +114,25 @@ export default function LoginScreen({ navigation }) {
               onPress={async () => {
                 try {
                   let userId = await AsyncStorage.getItem("userId");
-            
                   if (!userId) {
                     userId = uuid.v4();
                     await AsyncStorage.setItem("uuid", userId);
-                    // console.log("New UUID stored:", userId);
                   } else {
                     console.log("Existing UUID:", userId);
                   }
-            
                   navigation.navigate("HomePage");
                 } catch (error) {
                   console.error("Error handling UUID:", error);
                 }
               }}
             >
-              <Image
-                source={require("../../../assets/devicon_google.png")}
-                style={styles.googleIcon}
-              />
+              <Image source={require("../../../assets/devicon_google.png")} style={styles.googleIcon} />
               <Text style={styles.googleText}>{t("login.google")}</Text>
             </TouchableOpacity>
 
             <View style={styles.card}>
-              <Text style={styles.cardTitleLine1}>
-                {t("login.cardTitleLine1")}
-              </Text>
-              <Text style={styles.cardTitleLine2}>
-                {t("login.cardTitleLine2")}
-              </Text>
+              <Text style={styles.cardTitleLine1}>{t("login.cardTitleLine1")}</Text>
+              <Text style={styles.cardTitleLine2}>{t("login.cardTitleLine2")}</Text>
               <Text style={styles.subTitle}>{t("login.subTitle")}</Text>
 
               <Formik
@@ -168,16 +144,10 @@ export default function LoginScreen({ navigation }) {
                   recaptchaRef.current?.requestNewToken();
                 }}
               >
-                {({
-                  handleChange,
-                  handleBlur,
-                  handleSubmit,
-                  values,
-                  errors,
-                  touched,
-                }) => (
+                {({ handleChange, handleBlur, handleSubmit, values, errors, touched }) => (
                   <>
-                 <ReCaptchaRuntime ref={recaptchaRef} onToken={handleRecaptchaToken} />
+                    <ReCaptchaRuntime ref={recaptchaRef} onToken={handleRecaptchaToken} />
+
                     <TextInput
                       style={styles.input}
                       placeholder={t("login.username")}
@@ -186,13 +156,9 @@ export default function LoginScreen({ navigation }) {
                       onChangeText={handleChange("username")}
                       onBlur={handleBlur("username")}
                     />
-                    {errors.username && touched.username && (
-                      <Text style={styles.error}>{errors.username}</Text>
-                    )}
+                    {errors.username && touched.username && <Text style={styles.error}>{errors.username}</Text>}
 
-                    {otpSent && (
-                      <Text style={styles.success}>{t("login.otpSent")}</Text>
-                    )}
+                    {otpSent && <Text style={styles.success}>{t("login.otpSent")}</Text>}
 
                     <TextInput
                       style={styles.input}
@@ -203,58 +169,50 @@ export default function LoginScreen({ navigation }) {
                       onChangeText={handleChange("password")}
                       onBlur={handleBlur("password")}
                     />
-                    {errors.password && touched.password && (
-                      <Text style={styles.error}>{errors.password}</Text>
-                    )}
+                    {errors.password && touched.password && <Text style={styles.error}>{errors.password}</Text>}
 
                     <View style={styles.row}>
                       <TouchableOpacity
                         style={styles.checkboxContainer}
                         onPress={() => setKeepLoggedIn(!keepLoggedIn)}
                       >
-                        <View
-                          style={[
-                            styles.checkbox,
-                            keepLoggedIn && styles.checked,
-                          ]}
-                        >
-                          {keepLoggedIn && (
-                            <Text style={styles.checkmark}>✓</Text>
-                          )}
+                        <View style={[styles.checkbox, keepLoggedIn && styles.checked]}>
+                          {keepLoggedIn && <Text style={styles.checkmark}>✓</Text>}
                         </View>
-                        <Text style={styles.checkboxLabel}>
-                          {t("login.keepLoggedIn")}
-                        </Text>
+                        <Text style={styles.checkboxLabel}>{t("login.keepLoggedIn")}</Text>
                       </TouchableOpacity>
 
                       <TouchableOpacity onPress={() => navigation.navigate("ForgotPassword")}>
-                        <Text style={styles.forgot}>
-                          {t("login.forgotPassword")}
-                        </Text>
+                        <Text style={styles.forgot}>{t("login.forgotPassword")}</Text>
                       </TouchableOpacity>
                     </View>
 
-                    {loginError && (
-                      <Text style={styles.error}>{loginError}</Text>
-                    )}
-                    <TouchableOpacity
-                      style={styles.button}
-                      onPress={() => handleSubmit()}
+                    {loginError && <Text style={styles.error}>{loginError}</Text>}
+
+                    {/* ✅ Replaced TouchableOpacity with LoadingButton */}
+                    <LoadingButton
+                      loading={loading}
+                      text={t("login.loginBtn")}
+                      onPress={handleSubmit}
                       disabled={loading}
-                    >
-                      <Text style={styles.buttonText}>
-                        {loading ? t("login.loggingIn") : t("login.loginBtn")}
-                      </Text>
-                    </TouchableOpacity>
+                      style={styles.button}
+                      textStyle={styles.buttonText}
+                    />
 
                     <View style={styles.footerContainer}>
                       <Text style={styles.footer}>{t("login.footer")} </Text>
-                      <TouchableOpacity
-                        onPress={() => navigation.navigate("Signup")}
-                      >
+                      <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
                         <Text style={styles.login}>{t("login.register")}</Text>
                       </TouchableOpacity>
                     </View>
+                     <Button title="Show Success" onPress={() => setShow(true)} />
+
+      <SuccessModal
+        visible={show}
+        title="Success!"
+        subTitle="Your action was completed successfully 🎉"
+        onClose={() => setShow(false)}
+      />
                   </>
                 )}
               </Formik>

@@ -226,7 +226,7 @@
     "duration1": "3 Days – Weekend Devotion",
     "duration2": "7 Days – Full Experience",
     "duration3": "10+ Days – Soulful Immersion",
-    "experienceType": "Experience Type",
+    "experienceType": "What Type of Experience Are You Looking For?",
     "experiences": {
       "essential": "Essential",
       "essentialBlurb": "Simplicity, affordability, dharmic focus",
@@ -242,7 +242,7 @@
       "family": "Family",
       "spiritualGuide": "Spiritual Guide"
     },
-    "travelIntent": "Your Travel Intent",
+    "travelIntent": "What Are You Spiritually Seeking Through These Classes?",
     "intentPlaceholder": "Share your intent…",
     "nextStep": "Take the Next Step"
   },
@@ -253,30 +253,42 @@
     "healing": {
       "silence": {
         "title": "Spiritual Silence",
-        "subtitle": "Meditation, Detox, Ashram"
+        "subtitle": "Silence. Devotion. Awakening."
       },
       "ayurveda": {
         "title": "Ayurveda Healing",
-        "subtitle": "Massage, Herbal, Detox"
+        "subtitle": "Cleanse the body. Still the mind."
       },
       "yoga": {
-        "title": "Yoga & Wellness",
-        "subtitle": "Asanas, Breathwork, Balance"
+        "title": "Yoga Immersion",
+        "subtitle": "Move inward with every breath."
+      },
+       "bhakti": {
+        "title": "Bhakti & Satsang",
+        "subtitle": "Find joy in shared devotion."
       }
     },
     "preferredLocations": "Preferred Locations",
     "locations": {
       "himalayas": {
         "title": "Himalayas",
-        "subtitle": "Mountains & Rivers"
+        "subtitle": "Peace in the mountains"
       },
       "kerala": {
         "title": "Kerala",
-        "subtitle": "Ayurveda, Backwaters"
+        "subtitle": "Ayurvedic healing by the backwaters"
       },
-      "desert": {
-        "title": "Desert Ashrams",
-        "subtitle": "Silence & Meditation"
+      "forestAshram": {
+        "title": "Forest Ashram",
+        "subtitle": "Disconnect to reconnect"
+      },
+        "templeTown": {
+        "title": "Temple Town",
+        "subtitle": "Walk the path of bhakti"
+      },
+        "riverRetreats": {
+        "title": "River Retreats",
+        "subtitle": "Flow with the sacred current"
       }
     },
     "idealDuration": "Ideal Duration",

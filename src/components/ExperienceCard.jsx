@@ -1,16 +1,16 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text } from "react-native";
 import colors from "../theme/colors"; // adjust path if needed
 
-export default function ExperienceCard({ label, active, onPress, blurb }) {
+export default function ExperienceCard({ label, active, onPress, blurb ,icon}) {
   return (
     <Pressable
       onPress={() => onPress(label)}
       style={[styles.card, active && styles.active]}
     >
-      <View style={styles.row}>
-        <Text style={styles.icon}>💎</Text>
+      {/* <View style={styles.row}> */}
+        <Text style={styles.icon}>{icon}</Text>
         <Text style={styles.title}>{label}</Text>
-      </View>
+      {/* </View> */}
       <Text style={styles.blurb}>{blurb}</Text>
     </Pressable>
   );
@@ -20,11 +20,12 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     backgroundColor: colors.card,
-    borderRadius: 20,
+    borderRadius: 30,
     borderWidth: 1,
     borderColor: colors.border,
-    padding: 14,
+    padding: 12,
     marginRight: 12,
+    alignItems:"center"
   },
   active: {
     borderColor: colors.primary,
@@ -34,8 +35,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 3,
   },
-  row: { flexDirection: "row", alignItems: "center", marginBottom: 6 },
-  icon: { fontSize: 14 },
-  title: { fontSize: 14,  color: colors.text, marginLeft: 6 },
-  blurb: { fontSize: 12, color: colors.subtext, lineHeight: 16 },
+  row: { flexDirection: "row", alignItems: "center", marginBottom:4},
+  icon: { fontSize: 18,alignSelf: 'center' },
+  title: { fontSize: 16,fontWeight:"500",  color: colors.text},
+  blurb: {alignSelf:"center", marginTop:12,fontSize: 14,fontWeight:"400", color: colors.subtext },
 });

@@ -1,14 +1,13 @@
-import React from "react";
-import { TouchableOpacity } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import Icon from "react-native-vector-icons/Ionicons";
+import React from "react";
 import { useTranslation } from "react-i18next";
+import { TouchableOpacity } from "react-native";
+import Icon from "react-native-vector-icons/Ionicons";
 
-import Home from "../screens/Home";
-import Explore from "../screens/Explore";
-import Search from "../screens/Search";
-import Profile from "../screens/Profile";
+import Home from "../screens/Home/Home";
 import Notifications from "../screens/Notifications";
+import Profile from "../screens/Profile";
+import Search from "../screens/Search";
 
 const Tab = createBottomTabNavigator();
 

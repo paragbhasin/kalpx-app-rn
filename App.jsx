@@ -15,14 +15,14 @@ import Explore from "./src/screens/Explore";
 import ForgotPassword from "./src/screens/ForgotPassword/ForgotPassword";
 import SetNewPasswordScreen from "./src/screens/ForgotPassword/SetNewPasswordScreen";
 import VerificationScreen from "./src/screens/ForgotPassword/VerificationScreen";
+import PoojaScreen from "./src/screens/Home/PoojaScreen";
+import RetreatsScreen from "./src/screens/Home/RetreatsScreen";
+import TravelPlannerScreen from "./src/screens/Home/TravelPlannerScreen";
 import Language from "./src/screens/Language";
 import LoginScreen from "./src/screens/Login/LoginScreen";
 import OnlineclassesScreen from "./src/screens/OnlineclassesScreen";
-import PoojaScreen from "./src/screens/PoojaScreen";
-import RetreatsScreen from "./src/screens/RetreatsScreen";
 import Sankalp from "./src/screens/Sankalp";
 import SignupScreen from "./src/screens/Signup/SignupScreen";
-import TravelPlannerScreen from "./src/screens/TravelPlannerScreen";
 import LandingScreen from "./src/screens/WelcomeScreen/LandingScreen";
 import WelcomeScreen from "./src/screens/WelcomeScreen/WelcomeScreen";
 

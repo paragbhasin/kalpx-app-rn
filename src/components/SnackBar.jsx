@@ -15,14 +15,14 @@ const styles = StyleSheet.create({
     bottom: 40,
     left: 20,
     right: 20,
-    backgroundColor: '#323232',
+    backgroundColor: '#D9D9D9',
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',
     zIndex: 9999,
   },
   text: {
-    color: '#fff',
+    color: '#333333',
     fontSize: 16,
   },
 });

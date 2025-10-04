@@ -53,7 +53,10 @@ export default function ForgotPassword({ navigation }) {
     dispatch(generateOtp(credentials, (result) => {
       setLoading(false);
       if (result && result.success) {
-          navigation.navigate("VerificationScreen", {
+    //       navigation.navigate("VerificationScreen", {
+    //   email: formikValuesRef.current.username, // pass email here
+    // });
+      navigation.navigate("SetNewPasswordScreen", {
       email: formikValuesRef.current.username, // pass email here
     });
       } else {

@@ -13,10 +13,9 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
-  View,
+  View
 } from "react-native";
-import { CodeField, Cursor, useBlurOnFulfill, useClearByFocusCell } from "react-native-confirmation-code-field";
+import { useBlurOnFulfill, useClearByFocusCell } from "react-native-confirmation-code-field";
 import { useDispatch } from "react-redux";
 import * as Yup from "yup";
 import LoadingButton from "../../components/LoadingButton";
@@ -34,9 +33,9 @@ export default function VerificationScreen({ navigation, route }) {
 
   // Validation schema (includes code validation)
   const Schema = Yup.object().shape({
-    code: Yup.string()
-      .matches(/^\d{4}$/, t("forgotPassword.codeRequired"))
-      .required(t("forgotPassword.codeRequired")),
+    // code: Yup.string()
+    //   .matches(/^\d{4}$/, t("forgotPassword.codeRequired"))
+    //   .required(t("forgotPassword.codeRequired")),
     password1: Yup.string()
       .min(6, t("forgotPassword.passwordMin"))
       .required(t("forgotPassword.passwordRequired")),
@@ -100,8 +99,8 @@ export default function VerificationScreen({ navigation, route }) {
       setLoading(true);
       const values = formikRef.current?.values || {};
       const payload = {
-        email,
-        otp: values.code,
+        email: route.params.email,
+        otp: route.params.OTP,
         new_password: values.password1,
         recaptcha_token: token,
       };
@@ -170,7 +169,7 @@ export default function VerificationScreen({ navigation, route }) {
                       <Text style={styles.subTitle}>{t("forgotPassword.enterVerificationCode")}</Text>
 
                       {/* OTP CodeField */}
-                      <CodeField
+                      {/* <CodeField
                         ref={ref}
                         {...props}
                         value={values.code}
@@ -191,12 +190,11 @@ export default function VerificationScreen({ navigation, route }) {
                       {errors.code && touched.code && <Text style={styles.error}>{errors.code}</Text>}
                       {loginError && <Text style={styles.error}>{loginError}</Text>}
 
-                      {/* Resend OTP */}
                       <TouchableOpacity disabled={timer > 0 || resendLoading} onPress={startResendFlow}>
                         <Text style={{ ...styles.subTitle, color: timer > 0 ? "#aaa" : "#CA8A04", marginTop: 10 }}>
                           <Text style={{ ...styles.subTitle, color: "#707070" }}>{t("forgotPassword.codeText")}</Text>{timer > 0 ? `${t("forgotPassword.resend")} in ${timer}s` : t("forgotPassword.resend")}
                         </Text>
-                      </TouchableOpacity>
+                      </TouchableOpacity> */}
 
                       {/* Passwords */}
                       <Text style={{...styles.subTitle,marginTop:15}}>{t("forgotPassword.enterNewPassword")}</Text>

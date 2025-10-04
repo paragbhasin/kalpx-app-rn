@@ -3,7 +3,6 @@ import { Formik } from "formik";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-  Button,
   Dimensions,
   Image,
   ImageBackground,
@@ -21,7 +20,6 @@ import uuid from "react-native-uuid";
 import { useDispatch } from 'react-redux';
 import * as Yup from "yup";
 import LoadingButton from "../../components/LoadingButton"; // ✅ import LoadingButton
-import SuccessModal from "../../components/SuccessModal";
 import { loginUser } from './actions';
 import ReCaptchaRuntime from "./ReCaptchaRuntime";
 import styles from './styles';
@@ -34,7 +32,6 @@ export default function LoginScreen({ navigation }) {
   const [keepLoggedIn, setKeepLoggedIn] = useState(false);
   const [initialEmail, setInitialEmail] = useState("");
   const [initialPassword, setInitialPassword] = useState("");
-    const [show, setShow] = useState(false);
   const dispatch = useDispatch();
 
   // fetch stored credentials
@@ -205,14 +202,6 @@ export default function LoginScreen({ navigation }) {
                         <Text style={styles.login}>{t("login.register")}</Text>
                       </TouchableOpacity>
                     </View>
-                     <Button title="Show Success" onPress={() => setShow(true)} />
-
-      <SuccessModal
-        visible={show}
-        title="Success!"
-        subTitle="Your action was completed successfully 🎉"
-        onClose={() => setShow(false)}
-      />
                   </>
                 )}
               </Formik>

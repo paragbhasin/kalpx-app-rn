@@ -81,7 +81,7 @@ export default function Home() {
     {
       id: "6",
       name: t("categories.classes"),
-      title: "Classes",
+      title: "ClassesScreen",
       event_type: "click_classes_card",
       component: "Classes-card",
       icon: require("../../../assets/onlinecion.png"),

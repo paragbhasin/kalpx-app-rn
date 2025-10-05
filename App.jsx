@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
+import { MenuProvider } from "react-native-popup-menu";
 import { Provider, useDispatch, useSelector } from 'react-redux';
 import SnackBar from './src/components/SnackBar';
 import { store } from './src/store';
@@ -11,6 +12,8 @@ import { hideSnackBar } from './src/store/snackBarSlice';
 // Import Screens
 import BottomMenu from "./src/components/BottomMenu";
 import "./src/config/i18n";
+import ClassesScreen from "./src/screens/Classes/classesScreen";
+import ClassTutorDetailsScreen from './src/screens/Classes/ClassTutorDetailsScreen';
 import Explore from "./src/screens/Explore";
 import ForgotPassword from "./src/screens/ForgotPassword/ForgotPassword";
 import SetNewPasswordScreen from "./src/screens/ForgotPassword/SetNewPasswordScreen";
@@ -25,6 +28,7 @@ import Sankalp from "./src/screens/Sankalp";
 import SignupScreen from "./src/screens/Signup/SignupScreen";
 import LandingScreen from "./src/screens/WelcomeScreen/LandingScreen";
 import WelcomeScreen from "./src/screens/WelcomeScreen/WelcomeScreen";
+
 
 
 
@@ -72,6 +76,7 @@ export default function App() {
   }
 
   return (
+        <MenuProvider>
     <Provider store={store}>
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Welcome">
@@ -90,9 +95,12 @@ export default function App() {
           <Stack.Screen name="Language" component={Language} options={{ headerShown: false }} />
           <Stack.Screen name="Explore" component={Explore} options={{ headerShown: false }} />
           <Stack.Screen name="Classes" component={OnlineclassesScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="ClassesScreen" component={ClassesScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="ClassTutorDetailsScreen" component={ClassTutorDetailsScreen} options={{ headerShown: false }} />
         </Stack.Navigator>
         <SnackBarContainer />
       </NavigationContainer>
     </Provider>
+    </MenuProvider>
   );
 }

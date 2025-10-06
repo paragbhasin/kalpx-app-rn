@@ -12,6 +12,7 @@ import { hideSnackBar } from './src/store/snackBarSlice';
 // Import Screens
 import BottomMenu from "./src/components/BottomMenu";
 import "./src/config/i18n";
+import ClassBookingScreen from './src/screens/Classes/ClassBookingScreen';
 import ClassesScreen from "./src/screens/Classes/classesScreen";
 import ClassTutorDetailsScreen from './src/screens/Classes/ClassTutorDetailsScreen';
 import Explore from "./src/screens/Explore";
@@ -97,6 +98,7 @@ export default function App() {
           <Stack.Screen name="Classes" component={OnlineclassesScreen} options={{ headerShown: false }} />
           <Stack.Screen name="ClassesScreen" component={ClassesScreen} options={{ headerShown: false }} />
           <Stack.Screen name="ClassTutorDetailsScreen" component={ClassTutorDetailsScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="ClassBookingScreen" component={ClassBookingScreen} options={{ headerShown: false }} />
         </Stack.Navigator>
         <SnackBarContainer />
       </NavigationContainer>

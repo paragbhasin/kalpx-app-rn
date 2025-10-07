@@ -9,12 +9,17 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import { AnyAction } from "redux";
+import { ThunkDispatch } from "redux-thunk";
 import ClassBookingCard from "../../components/ClassBookingCard";
 import ClassCancelModal from "../../components/ClassCancelModal";
 import ClassDetailsModal from "../../components/ClassDetailsModal";
 import ClassEventCard from "../../components/ClassEventCard";
 import Colors from "../../components/Colors";
 import TextComponent from "../../components/TextComponent";
+import { RootState } from "../../store"; // Adjust the path based on your project structure
+import { classesBookingsList, classesExploreList } from "./actions";
 import styles from "./styles";
 
 // Interfaces for each type of card
@@ -39,6 +44,9 @@ interface BookingClass {
 
 export default function ClassesScreen({ navigation }) {
   const { t } = useTranslation();
+  const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
+  const exploreState = useSelector((state: RootState) => state.classesExploreReducer);
+  const bookingsState = useSelector((state: RootState) => state.classesBookingsReducer);
 
   // State for both tabs
   const [exploreData, setExploreData] = useState<ExploreClass[]>([]);
@@ -57,53 +65,21 @@ export default function ClassesScreen({ navigation }) {
   );
 
   // Fetch Explore Classes with pagination
-  const fetchExploreClasses = async (pageNum: number) => {
-    if (loadingExplore || !hasMoreExplore) return;
-    setLoadingExplore(true);
-
-    setTimeout(() => {
-      const newData: ExploreClass[] = Array.from({ length: 10 }, (_, i) => {
-        const id = (pageNum - 1) * 10 + i + "";
-        return {
-          id,
-          title: `Class ${id}`,
-          description:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-          duration: "60 Minutes",
-          price: "$5500",
-          imageUrl: require("../../../assets/C_Sample.png"),
-          tutor: "John Doe", // example extra prop
-        };
-      });
-
-      setExploreData((prev) => [...prev, ...newData]);
-      setHasMoreExplore(newData.length > 0);
-      setLoadingExplore(false);
-    }, 1000);
+  const fetchExploreClasses = (pageNum: number) => {
+    dispatch(classesExploreList(pageNum, 10, (response) => {
+      if (!response.success) {
+        console.error("Error fetching explore classes:", response.error);
+      }
+    }));
   };
 
   // Fetch My Bookings with pagination
-  const fetchBookings = async (pageNum: number) => {
-    if (loadingBookings || !hasMoreBookings) return;
-    setLoadingBookings(true);
-
-    setTimeout(() => {
-      const newData: BookingClass[] = Array.from({ length: 5 }, (_, i) => {
-        const id = "b" + (pageNum - 1) * 5 + i + 1;
-        return {
-          id,
-          title: `Booked Class ${id}`,
-          time: "Jan 27, 2024 1:00 am - Jan 27, 2024 1:30 am",
-          link: "The URL will be available 15 minutes before the class begins.",
-          price: "$1200",
-          imageUrl: require("../../../assets/C_Sample.png"),
-        };
-      });
-
-      setBookingsData((prev) => [...prev, ...newData]);
-      setHasMoreBookings(newData.length > 0);
-      setLoadingBookings(false);
-    }, 1000);
+  const fetchBookings = (pageNum: number) => {
+    dispatch(classesBookingsList(pageNum, 10, (response) => {
+      if (!response.success) {
+        console.error("Error fetching bookings:", response.error);
+      }
+    }));
   };
 
   useEffect(() => {
@@ -115,12 +91,15 @@ export default function ClassesScreen({ navigation }) {
   }, [bookingsPage]);
 
   const loadMoreExplore = () => {
-    if (!loadingExplore && hasMoreExplore) setExplorePage((prev) => prev + 1);
+    if (!exploreState.loading && exploreState.hasMore) {
+      setExplorePage((prev) => prev + 1);
+    }
   };
 
   const loadMoreBookings = () => {
-    if (!loadingBookings && hasMoreBookings)
+    if (!bookingsState.loading && bookingsState.hasMore) {
       setBookingsPage((prev) => prev + 1);
+    }
   };
 
   return (
@@ -178,7 +157,7 @@ export default function ClassesScreen({ navigation }) {
           >
             <TextComponent type="headerText">Explore Classes</TextComponent>
           </TouchableOpacity>
-              <TouchableOpacity
+          <TouchableOpacity
             onPress={() => setActiveTab("MyBookings")}
             style={{
               backgroundColor:
@@ -237,8 +216,8 @@ export default function ClassesScreen({ navigation }) {
       <FlatList
         data={
           activeTab === "ExploreClasses"
-            ? (exploreData as Array<ExploreClass | BookingClass>)
-            : (bookingsData as Array<ExploreClass | BookingClass>)
+            ? exploreState.data
+            : bookingsState.data
         }
         keyExtractor={(item) => item.id}
         renderItem={({ item }) =>
@@ -246,23 +225,23 @@ export default function ClassesScreen({ navigation }) {
             <ClassEventCard
               imageUrl={item.imageUrl}
               title={item.title}
-              description={(item as ExploreClass).description}
-              duration={(item as ExploreClass).duration}
-              price={item.price}
+              description={item.description}
+              duration={item.pricing.per_person.session_length_min}
+              price={item.pricing.per_person.amount.app}
               onViewDetails={() => navigation.navigate("ClassTutorDetailsScreen")}
-              onBookNow={() =>  console.log("Book Now", item.id)}
-              tutor={(item as ExploreClass).tutor}
+              onBookNow={() => console.log("Book Now", item.id)}
+              tutor={item.tutor}
             />
           ) : (
             <ClassBookingCard
               imageUrl={item.imageUrl}
               title={item.title}
-              time={(item as BookingClass).time}
-              link={(item as BookingClass).link}
+              time={item.time}
+              link={item.link}
               price={item.price}
               onDetails={() => setShowDetails(true)}
               onCancel={() => setShowCancel(true)}
-              onReschedule={() =>{ navigation.navigate("ClassRescheduleScreen")}}
+              onReschedule={() => navigation.navigate("ClassRescheduleScreen")}
             />
           )
         }
@@ -272,8 +251,8 @@ export default function ClassesScreen({ navigation }) {
         onEndReachedThreshold={0.5}
         ListFooterComponent={
           activeTab === "ExploreClasses"
-            ? loadingExplore && <ActivityIndicator />
-            : loadingBookings && <ActivityIndicator />
+            ? exploreState.loading && <ActivityIndicator />
+            : bookingsState.loading && <ActivityIndicator />
         }
         ListEmptyComponent={
           <Text style={{ textAlign: "center", marginTop: 20 }}>

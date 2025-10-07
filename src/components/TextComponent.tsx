@@ -27,6 +27,9 @@ const TextComponent = (props: any) => {
     case "semiBoldText":
       textStyle = styles.semiBoldText;
       break;
+          case "cardText":
+      textStyle = styles.cardText;
+      break;
     default:
       textStyle = styles.mediumText;
       break;
@@ -71,4 +74,9 @@ const styles = StyleSheet.create({
     fontSize: FontSize.CONSTS.FS_12,
     fontFamily: "Inter_600SemiBold",
   },
+  cardText:{
+        color: Colors.Colors.Light_black,
+    fontSize: FontSize.CONSTS.FS_14,
+    fontFamily: "Inter_600SemiBold",
+  }
 });

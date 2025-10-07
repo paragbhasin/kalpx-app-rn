@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
-    ActivityIndicator,
-    FlatList,
-    Image,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Image,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import ClassBookingCard from "../../components/ClassBookingCard";
 import ClassCancelModal from "../../components/ClassCancelModal";
@@ -250,7 +250,7 @@ export default function ClassesScreen({ navigation }) {
               duration={(item as ExploreClass).duration}
               price={item.price}
               onViewDetails={() => navigation.navigate("ClassTutorDetailsScreen")}
-              onBookNow={() => console.log("Book Now", item.id)}
+              onBookNow={() =>  console.log("Book Now", item.id)}
               tutor={(item as ExploreClass).tutor}
             />
           ) : (
@@ -262,7 +262,7 @@ export default function ClassesScreen({ navigation }) {
               price={item.price}
               onDetails={() => setShowDetails(true)}
               onCancel={() => setShowCancel(true)}
-              onReschedule={() => setShowReschedule(true)}
+              onReschedule={() =>{ navigation.navigate("ClassRescheduleScreen")}}
             />
           )
         }

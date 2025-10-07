@@ -14,6 +14,8 @@ import BottomMenu from "./src/components/BottomMenu";
 import "./src/config/i18n";
 import ClassBookingScreen from './src/screens/Classes/ClassBookingScreen';
 import ClassesScreen from "./src/screens/Classes/classesScreen";
+import ClassPaymentScreen from './src/screens/Classes/ClassPaymentScreen';
+import ClassRescheduleScreen from './src/screens/Classes/ClassRescheduleScreen';
 import ClassTutorDetailsScreen from './src/screens/Classes/ClassTutorDetailsScreen';
 import Explore from "./src/screens/Explore";
 import ForgotPassword from "./src/screens/ForgotPassword/ForgotPassword";
@@ -29,7 +31,6 @@ import Sankalp from "./src/screens/Sankalp";
 import SignupScreen from "./src/screens/Signup/SignupScreen";
 import LandingScreen from "./src/screens/WelcomeScreen/LandingScreen";
 import WelcomeScreen from "./src/screens/WelcomeScreen/WelcomeScreen";
-
 
 
 
@@ -99,6 +100,8 @@ export default function App() {
           <Stack.Screen name="ClassesScreen" component={ClassesScreen} options={{ headerShown: false }} />
           <Stack.Screen name="ClassTutorDetailsScreen" component={ClassTutorDetailsScreen} options={{ headerShown: false }} />
           <Stack.Screen name="ClassBookingScreen" component={ClassBookingScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="ClassPaymentScreen" component={ClassPaymentScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="ClassRescheduleScreen" component={ClassRescheduleScreen} options={{ headerShown: false }} />          
         </Stack.Navigator>
         <SnackBarContainer />
       </NavigationContainer>

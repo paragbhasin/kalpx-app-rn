@@ -11,6 +11,7 @@ import {
     View
 } from "react-native";
 import CalendarUI from "../../components/CalendarUI";
+import ClassSuccessModal from "../../components/ClassSuccessModal";
 import Colors from "../../components/Colors";
 import FontSize from "../../components/FontSize";
 import TextComponent from "../../components/TextComponent";
@@ -53,10 +54,11 @@ const ReadMoreText = ({ text }: { text: string }) => {
     );
 };
 
-export default function ClassBookingScreen({ navigation }) {
+export default function ClassRescheduleScreen({ navigation }) {
     const { t } = useTranslation();
     const [selectedTime, setSelectedTime] = useState<string>("");
     const [TrailListed, setTrailListed] = useState(false);
+    const [rescheduleSuccess, setRescheduleSuccess] = useState(false);
 
 
     const renderItem = ({ item }: { item: string }) => {
@@ -110,26 +112,7 @@ export default function ClassBookingScreen({ navigation }) {
                     />
                 </View>
             </TouchableOpacity>
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
-                <View style={{ alignItems: "center", }}>
-                    <View style={{ backgroundColor: Colors.Colors.App_theme, borderRadius: 20, alignItems: 'center', width: 40, height: 40 }}>
-                        <TextComponent type='headerText' style={{ color: Colors.Colors.white,AlignCenter: "center", marginTop: 10 }}>1</TextComponent>
-                    </View>
-                    {/* <TextComponent type='semiBoldText' style={{ color: Colors.Colors.BLACK }}>Slot Boking</TextComponent> */}
-                </View>
-                <View style={{ borderColor: Colors.Colors.class_bg, borderWidth: 1, width: 100 }} />
-                <View style={{ alignItems: "center" }}>
-                    <View style={{ backgroundColor: Colors.Colors.class_bg, borderRadius: 20, alignItems: 'center', width: 40, height: 40 }}>
-                        <TextComponent type='headerText' style={{ AlignCenter: "center", marginTop: 10 }}>2</TextComponent>
-                    </View>
-                    {/* <TextComponent type='semiBoldText' style={{ color: Colors.Colors.BLACK }}>Payment </TextComponent> */}
-                </View>
-            </View>
-            <View style={{ flexDirection: "row", justifyContent: "space-evenly", marginTop: 4, marginBottom: 8 }}>
-                <TextComponent type='semiBoldText' style={{ color: Colors.Colors.BLACK }}>Slot Boking</TextComponent>
-                <TextComponent type='semiBoldText' style={{ color: Colors.Colors.BLACK }}>Payment </TextComponent>
-            </View>
-            <View style={styles.row}>
+            <View style={{...styles.row,marginTop:12 }}>
                 <TextComponent type="headerText" style={styles.label}>
                     Flute Series :
                 </TextComponent>
@@ -172,6 +155,57 @@ export default function ClassBookingScreen({ navigation }) {
                 </View>
                 <TextComponent type='semiBoldText' style={{ marginLeft: 6 }}>View More Details</TextComponent>
             </View>
+                <TextComponent
+                type="boldText"
+                style={{
+                    fontSize: FontSize.CONSTS.FS_14,
+                    marginVertical: 12,
+                    color: Colors.Colors.BLACK
+                }}
+            >Current Status
+            </TextComponent>
+            <View
+  style={{
+    backgroundColor: Colors.Colors.card_bg,
+    borderColor: Colors.Colors.grey,
+    borderWidth: 1,
+    borderRadius: 4,
+    padding: 8,
+  }}
+>
+  {[
+    { label: "Class", value: "Flute Series" },
+    { label: "Status", value: "Confirmed" },
+    { label: "Start", value: "Jan 27, 2024 1:00 am" },
+    { label: "End", value: "Jan 27, 2024 1:00 am" },
+    { label: "Price", value: "$ 3500" },
+    { label: "Trial", value: "No" },
+    { label: "Group Size", value: "12" },
+    { label: "Note", value: "Text" },
+  ].map((item, index) => (
+    <View
+      key={index}
+      style={{
+        flexDirection: "row",
+        marginVertical: 4,
+      }}
+    >
+      <TextComponent
+        type="cardText"
+        style={{ width:"44%", }} // fixed width for labels
+      >
+        {item.label}
+      </TextComponent>
+      <TextComponent
+        type="cardText"
+        style={{ flex: 1, }}
+      >
+        {item.value}
+      </TextComponent>
+    </View>
+  ))}
+</View>
+
             <TextComponent
                 type="boldText"
                 style={{
@@ -264,13 +298,19 @@ export default function ClassBookingScreen({ navigation }) {
             //   value={city}
             //   onChangeText={setCity}
             />
-            <TouchableOpacity onPress={() => {navigation.navigate("ClassPaymentScreen")}}
+            <TouchableOpacity onPress={() => {setRescheduleSuccess(true)}}
              style={{ backgroundColor: Colors.Colors.App_theme, paddingVertical: 10, paddingHorizontal: 22, borderRadius: 10, alignItems: "center", marginTop: 20, alignSelf: "flex-end" }}>
                 <TextComponent style={{
                     color: Colors.Colors.white,
                     fontSize: FontSize.CONSTS.FS_12,
-                }}>Next</TextComponent>
+                }}>Reschedule</TextComponent>
             </TouchableOpacity>
+            <ClassSuccessModal
+            visible={rescheduleSuccess}
+            title="Thanks !"
+            subTitle="Your Booking Has Been Confirmed Payment Successful."
+            onClose={() => {setRescheduleSuccess(false)}}
+            />
         </ScrollView>
     );
 }

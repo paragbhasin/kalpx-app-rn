@@ -45,7 +45,7 @@ const CalendarUI: FC<CalendarDetails> = ({ startDate }) => {
                     },
                 }}
                 theme={{
-                    calendarBackground: "#F5F5F5", // <-- applies grey background
+                    backgroundColor: "#EBEBEB", // <-- applies grey background
                     textSectionTitleColor: "#3C3C43",
                     textDayFontSize: 16,
                     textMonthFontSize: 20,

@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: "row",
-    marginVertical: 2,
+    marginVertical: 8,
   },
   label: {
     fontSize: FontSize.CONSTS.FS_14

@@ -10,7 +10,8 @@ export default {
                 blue: "#0DAEFF",
                 blue_bg: "rgba(13, 174, 255, 0.1)",
                 class_bg: "#DBDBDB",
-                Time_bg: "#F3F3F4"
+                Time_bg: "#F3F3F4",
+                card_bg:"#EBEBEB"
 
         }
 }

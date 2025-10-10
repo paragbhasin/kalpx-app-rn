@@ -1,9 +1,12 @@
+import { initPaymentSheet, presentPaymentSheet, StripeProvider } from '@stripe/stripe-react-native';
+import moment from "moment";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import Colors from "../../components/Colors";
 import FontSize from "../../components/FontSize";
 import TextComponent from "../../components/TextComponent";
+import api from '../../Networks/axios';
 import styles from "./styles";
 
 const times = [
@@ -47,10 +50,54 @@ const ReadMoreText = ({ text }: { text: string }) => {
   );
 };
 
-export default function ClassPaymentScreen({ navigation }) {
+export default function ClassPaymentScreen({ navigation,route }) {
   const { t } = useTranslation();
   const [selectedTime, setSelectedTime] = useState<string>("");
   const [TrailListed, setTrailListed] = useState(false);
+
+
+     const callPaymentStripeGateway = async () => {
+        try {
+            let details = {
+             booking_id: route?.params?.data?.id
+            }
+            const result = await api.post("payments/create_intent/", details);
+            console.log("result of payment intent >>>>>>",result);
+            const res = await initPaymentSheet({
+                // customerId: result?.data?.customer,
+                // customerEphemeralKeySecret: result?.data?.ephemeralKey,
+                paymentIntentClientSecret: result?.data?.client_secret,
+                allowsDelayedPaymentMethods: true,
+                customFlow: false,
+                merchantDisplayName: 'Tele Opinion',
+                defaultBillingDetails: {
+                    name: "Sunil",
+                },
+                applePay: {
+                    merchantCountryCode: 'US'
+                },
+                googlePay: {
+                    merchantCountryCode: "US",
+                    testEnv: true
+                },
+                  returnURL: 'your-app://stripe-redirect',
+            });
+            const { error } = await presentPaymentSheet();
+            if (error) {
+                console.log(`Error code: ${error.code}`, error.message);
+            } else {
+                console.log('Success', 'Your order is confirmed!');
+                  navigation.navigate("HomePage");
+                // navigation.navigate('Payment', { DocImg: docData?.photoUpload, DocName: docData?.fullName, DocAddress: docData?.clinicName, selectedDate: selectedDate, selectedTime: selectedTime, slotBookingId: slotBookingID, slotId: selectedSlotId, specilization: docData?.specialization });
+            }
+            // let Url = `${EndPoints.STRIPE_PAYMENT}/${result?.data?.paymentIntentId}`;
+            // const Result = await api.put(Url);
+        } catch (error: any) {
+            console.log("create Initaiate Token Error===>>>", error?.response);
+        }
+    }
+
+// console.log("route of payments >>>>>>>>>",JSON.stringify(route?.params));
 
   const renderItem = ({ item }: { item: string }) => {
     const isSelected = item === selectedTime;
@@ -78,7 +125,15 @@ export default function ClassPaymentScreen({ navigation }) {
     );
   };
 
+    const publishableKey = "pk_test_51QGk8ICcC7GuO3wnhaq8gKpMr4MHzPEvqo3u8SlhZ6BTAprSD77fn4iu0dvU2yzuRYPxHkeU0ZSZFOHt8jrbZf2K00r3fSXaw9";
+
+
   return (
+     <StripeProvider
+      publishableKey={publishableKey}
+      merchantIdentifier="8X74S6KGZL"
+      urlScheme="your-url-scheme"
+    >
     <ScrollView
       contentContainerStyle={{ paddingBottom: 120 }}
       showsVerticalScrollIndicator={false}
@@ -203,7 +258,7 @@ export default function ClassPaymentScreen({ navigation }) {
         }}
       >
         <TextComponent type="mediumText">Class Name</TextComponent>
-        <TextComponent type="mediumText">Bharat Natyam</TextComponent>
+        <TextComponent type="mediumText"> {route?.params?.data?.title}</TextComponent>
       </View>
       <View
         style={{
@@ -214,7 +269,7 @@ export default function ClassPaymentScreen({ navigation }) {
       >
         <TextComponent type="mediumText">Scheduled</TextComponent>
         <TextComponent type="mediumText" style={{flexShrink: 1, textAlign: "right",marginLeft:35}}>
-          Jan 27, 2024 1:00 am - Jan 27, 2024 1:30 am
+             {`${moment(route?.params?.bookingData?.data?.start_utc).format("MMM DD, YYYY h:mm a")} - ${moment(route?.params?.bookingData?.data?.start_utc).format("MMM DD, YYYY h:mm a")}`}
         </TextComponent>
       </View>
       <View
@@ -225,7 +280,7 @@ export default function ClassPaymentScreen({ navigation }) {
         }}
       >
         <TextComponent type="mediumText">Price</TextComponent>
-        <TextComponent type="mediumText">$ 3500</TextComponent>
+        <TextComponent type="mediumText">{route?.params?.data?.pricing?.currency === "INR" ? "₹" : "$"}{" "}{route?.params?.data?.pricing?.per_person?.amount?.app ?? 0}</TextComponent>
       </View>
       <View
         style={{
@@ -239,7 +294,8 @@ export default function ClassPaymentScreen({ navigation }) {
           type="mediumText"
           style={{ color: Colors.Colors.App_theme }}
         >
-          $ 3500
+           {route?.params?.data?.pricing?.currency === "INR" ? "₹" : "$"}{" "}
+          {route?.params?.data?.pricing?.per_person?.amount?.app ?? 0}
         </TextComponent>
       </View>
       <TouchableOpacity
@@ -252,6 +308,7 @@ export default function ClassPaymentScreen({ navigation }) {
           marginTop: 20,
           alignSelf: "flex-end",
         }}
+        onPress={() => {callPaymentStripeGateway()}}
       >
         <TextComponent
           style={{
@@ -263,5 +320,6 @@ export default function ClassPaymentScreen({ navigation }) {
         </TextComponent>
       </TouchableOpacity>
     </ScrollView>
+    </StripeProvider>
   );
 }

@@ -11,7 +11,11 @@ export default {
                 blue_bg: "rgba(13, 174, 255, 0.1)",
                 class_bg: "#DBDBDB",
                 Time_bg: "#F3F3F4",
-                card_bg:"#EBEBEB"
-
+                card_bg:"#EBEBEB",
+                confiem_bg:"#E1EDDB",
+                confirm_text:"#00934F",
+                pending_bg:"#D4A0171A",
+               cancel_bg :"#FF42421A",
+               canecl:"#FF6767"
         }
 }

@@ -1,3 +1,4 @@
+import moment from "moment";
 import React from "react";
 import { Image, StyleSheet, TouchableOpacity, View } from "react-native";
 import Modal from "react-native-modal";
@@ -76,7 +77,7 @@ const ClassDetailsModal: React.FC<ClassDetailsModalProps> = ({
             Start
           </TextComponent>
           <TextComponent type="semiBoldText" style={styles.value}>
-            {details.start}
+            {moment(details.start).format("MMM DD, YYYY h:mm a")}
           </TextComponent>
         </View>
 
@@ -85,7 +86,7 @@ const ClassDetailsModal: React.FC<ClassDetailsModalProps> = ({
             End
           </TextComponent>
           <TextComponent type="semiBoldText" style={styles.value}>
-            {details.end}
+            {moment(details.end).format("MMM DD, YYYY h:mm a")}
           </TextComponent>
         </View>
 

@@ -263,7 +263,7 @@ export default function TravelPlannerScreen() {
       dispatch(
         travelIntresetUser(credentials, async (result: any) => {
           if (result && result.success) {
-            console.log("Travel interest saved>>>>>>>>>>>>>>>>>>>>>", result);
+            // console.log("Travel interest saved>>>>>>>>>>>>>>>>>>>>>", result);
             setShow(true);
             // navigation.navigate("HomePage");
           } else {

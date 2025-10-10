@@ -184,11 +184,11 @@ export default function PoojaScreen() {
         },
       };
 
-      console.log("Credentials to be sent::::::::::", credentials);
+      // console.log("Credentials to be sent::::::::::", credentials);
       dispatch(
         poojaIntresetUser(credentials, async (result: any) => {
           if (result && result.success) {
-            console.log("Travel interest saved>>>>>>>>>>>>>>>>>>>>>", result);
+            // console.log("Travel interest saved>>>>>>>>>>>>>>>>>>>>>", result);
             setShow(true)
           } else {
             setLoginError(result?.error || "Failed to save travel interest");

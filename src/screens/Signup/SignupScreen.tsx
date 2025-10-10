@@ -148,7 +148,7 @@ export default function SignupScreen({ navigation }) {
       dispatch(
         signupUser(payload, (result) => {
           setLoadingType(null);
-          console.log("Signup Result:", result);
+          // console.log("Signup Result:", result);
           if (result.success) {
             navigation.navigate("HomePage");
           } else {

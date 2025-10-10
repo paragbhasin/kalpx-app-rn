@@ -1,3 +1,4 @@
+import { debounce } from "lodash";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -12,14 +13,24 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { AnyAction } from "redux";
 import { ThunkDispatch } from "redux-thunk";
+import BookingFilterModal from "../../components/BookingsFilterModal";
 import ClassBookingCard from "../../components/ClassBookingCard";
 import ClassCancelModal from "../../components/ClassCancelModal";
 import ClassDetailsModal from "../../components/ClassDetailsModal";
 import ClassEventCard from "../../components/ClassEventCard";
 import Colors from "../../components/Colors";
+import FilterModal from "../../components/FilterModal";
 import TextComponent from "../../components/TextComponent";
 import { RootState } from "../../store"; // Adjust the path based on your project structure
-import { classesBookingsList, classesExploreList } from "./actions";
+import {
+  cancelBooking,
+  classesBookingsList,
+  classesExploreList,
+  fetchFilteredBookings,
+  filteredClassesExploreList,
+  searchBookings,
+  searchClasses,
+} from "./actions";
 import styles from "./styles";
 
 // Interfaces for each type of card
@@ -45,8 +56,12 @@ interface BookingClass {
 export default function ClassesScreen({ navigation }) {
   const { t } = useTranslation();
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
-  const exploreState = useSelector((state: RootState) => state.classesExploreReducer);
-  const bookingsState = useSelector((state: RootState) => state.classesBookingsReducer);
+  const exploreState = useSelector(
+    (state: RootState) => state.classesExploreReducer
+  );
+  const bookingsState = useSelector(
+    (state: RootState) => state.classesBookingsReducer
+  );
 
   // State for both tabs
   const [exploreData, setExploreData] = useState<ExploreClass[]>([]);
@@ -59,27 +74,86 @@ export default function ClassesScreen({ navigation }) {
   const [hasMoreBookings, setHasMoreBookings] = useState(true);
   const [showDetails, setShowDetails] = useState(false);
   const [showCancel, setShowCancel] = useState(false);
+  const [details, setDetails] = useState<any>();
+  const [tutorId, setTutorId] = useState<any>();
   const [showReschedule, setShowReschedule] = useState(false);
+  const [closeFilterModal, setCloseFilterModal] = useState(false);
   const [activeTab, setActiveTab] = useState<"MyBookings" | "ExploreClasses">(
     "ExploreClasses"
   );
 
+  const debouncedSearch = debounce((text) => handleSearch(text), 500);
+
   // Fetch Explore Classes with pagination
   const fetchExploreClasses = (pageNum: number) => {
-    dispatch(classesExploreList(pageNum, 10, (response) => {
-      if (!response.success) {
-        console.error("Error fetching explore classes:", response.error);
-      }
-    }));
+    dispatch(
+      classesExploreList(pageNum, 10, (response) => {
+        if (!response.success) {
+          console.error("Error fetching explore classes:", response.error);
+        }
+      })
+    );
   };
 
   // Fetch My Bookings with pagination
   const fetchBookings = (pageNum: number) => {
-    dispatch(classesBookingsList(pageNum, 10, (response) => {
-      if (!response.success) {
-        console.error("Error fetching bookings:", response.error);
-      }
-    }));
+    dispatch(
+      classesBookingsList(pageNum, 10, (response) => {
+        if (!response.success) {
+          console.error("Error fetching bookings:", response.error);
+        }
+      })
+    );
+  };
+
+  const FilteredExploreData = (filters) => {
+    dispatch(
+      filteredClassesExploreList(filters, 1, 10, (res) => {
+        if (res.success) {
+          console.log("✅ Filtered Classes:", res.data);
+          console.log("🌐 Request URL:", res.url);
+        } else {
+          console.error("❌ Error:", res.error);
+        }
+      })
+    );
+  };
+
+  const BookingFilteredData = (filters) => {
+    dispatch(
+      fetchFilteredBookings(filters, 1, 10, (res) => {
+        if (res.success) {
+          console.log("✅ My Bookings:", res.data);
+          console.log("🌐 Request URL:", res.url);
+        } else {
+          console.error("❌ Error:", res.error);
+        }
+      })
+    );
+  };
+
+  const handleSearch = (text) => {
+    if (activeTab === "ExploreClasses") {
+      dispatch(
+        searchClasses(text, 1, 10, (res) => {
+          if (res.success) {
+            console.log("✅ Search results:", res.data);
+          } else {
+            console.error("❌ Search error:", res.error);
+          }
+        })
+      );
+    } else {
+      dispatch(
+        searchBookings(text, 1, 10, (res) => {
+          if (res.success) {
+            console.log("✅ Booking search results:", res.data);
+          } else {
+            console.error("❌ Booking search error:", res.error);
+          }
+        })
+      );
+    }
   };
 
   useEffect(() => {
@@ -100,6 +174,21 @@ export default function ClassesScreen({ navigation }) {
     if (!bookingsState.loading && bookingsState.hasMore) {
       setBookingsPage((prev) => prev + 1);
     }
+  };
+
+  const CancelBookingCalled = (data) => {
+    dispatch(
+      cancelBooking(tutorId, data, (res) => {
+        if (res.success) {
+          console.log("Booking cancelled successfully:", res.data);
+          setShowCancel(false);
+          // optionally refresh bookings list here
+          // dispatch(classesBookingsList(1, 10));
+        } else {
+          console.error("Cancel booking failed:", res.error);
+        }
+      })
+    );
   };
 
   return (
@@ -203,13 +292,20 @@ export default function ClassesScreen({ navigation }) {
           <TextInput
             style={{ flex: 1, fontSize: 14 }}
             placeholder="Search by tag, title, Tutor.."
+            onChangeText={debouncedSearch}
           />
         </View>
-        <Image
-          source={require("../../../assets/C_Filter.png")}
-          style={{ width: 24, height: 24 }}
-          resizeMode="contain"
-        />
+        <TouchableOpacity
+          onPress={() => {
+            setCloseFilterModal(true);
+          }}
+        >
+          <Image
+            source={require("../../../assets/C_Filter.png")}
+            style={{ width: 24, height: 24 }}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
       </View>
 
       {/* Classes List */}
@@ -223,25 +319,42 @@ export default function ClassesScreen({ navigation }) {
         renderItem={({ item }) =>
           activeTab === "ExploreClasses" ? (
             <ClassEventCard
-              imageUrl={item.imageUrl}
+              imageUrl={`https://dev.kalpx.com/${item.cover_media.key}`}
               title={item.title}
               description={item.description}
               duration={item.pricing.per_person.session_length_min}
               price={item.pricing.per_person.amount.app}
-              onViewDetails={() => navigation.navigate("ClassTutorDetailsScreen")}
+              onViewDetails={() =>
+                navigation.navigate("ClassTutorDetailsScreen", { data: item })
+              }
               onBookNow={() => console.log("Book Now", item.id)}
               tutor={item.tutor}
             />
           ) : (
             <ClassBookingCard
-              imageUrl={item.imageUrl}
-              title={item.title}
-              time={item.time}
+              imageUrl={`https://dev.kalpx.com/${item.offering.cover_media.key}`}
+              title={item.offering.title}
+              start={item.start}
+              end={item.end}
               link={item.link}
-              price={item.price}
-              onDetails={() => setShowDetails(true)}
-              onCancel={() => setShowCancel(true)}
-              onReschedule={() => navigation.navigate("ClassRescheduleScreen")}
+              price={item.amount}
+              status={item.status}
+              onDetails={async () => {
+                console.log("item >>>>>>", item);
+                setDetails(item);
+                setShowDetails(true);
+              }}
+              onCancel={() => {
+                setTutorId(item?.offering?.id);
+                setShowCancel(true);
+              }}
+              onReschedule={() =>
+                navigation.navigate("ClassBookingScreen", {
+                  data: item,
+                  reschedule: true,
+                })
+              }
+              // {() => navigation.navigate("ClassRescheduleScreen")}
             />
           )
         }
@@ -268,21 +381,48 @@ export default function ClassesScreen({ navigation }) {
         visible={showDetails}
         onClose={() => setShowDetails(false)}
         details={{
-          className: "Bharat Natyam Dance",
-          status: "Confirmed",
-          start: "12/06/2020, 8:00 AM",
-          end: "12/06/2020, 9:00 AM",
-          price: "2234",
-          trial: "No",
-          groupSize: "1",
-          note: "dwgf dghdh",
+          className: details?.offering?.title || "",
+          status: details?.status || "",
+          start: details?.start || "",
+          end: details?.end || "",
+          price: details?.amount?.toString() || "",
+          trial: details?.trial_class ? "Yes" : "No",
+          groupSize: details?.group_size?.toString() || "",
+          note: details?.notes || "",
         }}
       />
       <ClassCancelModal
         visible={showCancel}
         onClose={() => setShowCancel(false)}
-        onConfirmCancel={() => setShowCancel(false)}
+        onConfirmCancel={(data) => {
+          console.log("cancel data >>>>", data);
+          CancelBookingCalled(data);
+          // setShowCancel(false);
+        }}
       />
+      {activeTab === "ExploreClasses" ? (
+        <FilterModal
+          visible={closeFilterModal}
+          onClose={() => setCloseFilterModal(false)}
+          onApply={(filters) => {
+            console.log("Selected Filters:", filters);
+            FilteredExploreData(filters);
+            // You can save it in state or send to API
+            // Example: setFilters(filters)
+          }}
+        />
+      ) : (
+        <BookingFilterModal
+          visible={closeFilterModal}
+          onClose={() => setCloseFilterModal(false)}
+          onApply={(filters) => {
+            console.log("Selected Filters:", filters);
+            BookingFilteredData(filters);
+            // You can save it in state or send to API
+            // Example: setFilters(filters)
+          }}
+        />
+      )}
     </View>
   );
 }

@@ -65,6 +65,6 @@ const loginApi = (credentials) => {
 };
 
 const socialLoginApi = (credentials) => {
-  console.log("social login called with:::::::::", credentials);
+  // console.log("social login called with:::::::::", credentials);
   return api.post("users/social_login/", credentials);
 };

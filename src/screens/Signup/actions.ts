@@ -105,21 +105,21 @@ export const resetPasswordOtp = (credentials, callback) => async (dispatch) => {
 };
 
 const signupApi = (credentials) => {
-  console.log("loginApi called with:", credentials);
+  // console.log("loginApi called with:", credentials);
   return api.post("users/register/", credentials);
 };
 
 const generateOtpApi = (credentials) => {
-  console.log("loginApi called with:", credentials);
+  // console.log("loginApi called with:", credentials);
   return api.post("users/generate_otp/", credentials);
 };
 
 const verifyOtpApi = (credentials) => {
-  console.log("loginApi called with:", credentials);
+  // console.log("loginApi called with:", credentials);
   return api.post("users/verify_otp/", credentials);
 };
 
 const resetPasswordApi = (credentials) => {
-  console.log("loginApi called with:", credentials);
+  // console.log("loginApi called with:", credentials);
   return api.post("users/reset_password/", credentials);
 };

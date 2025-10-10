@@ -77,6 +77,13 @@
             ]
           }
         }
+      ],
+       [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "8X74S6KGZL",
+          "enableGooglePay": true
+        }
       ]
     ],
     "experiments": {

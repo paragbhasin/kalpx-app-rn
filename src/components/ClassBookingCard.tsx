@@ -1,11 +1,12 @@
+import moment from "moment";
 import * as React from "react";
 import { Image, StyleSheet, View } from "react-native";
 import { Card } from "react-native-paper";
 import {
-    Menu,
-    MenuOption,
-    MenuOptions,
-    MenuTrigger,
+  Menu,
+  MenuOption,
+  MenuOptions,
+  MenuTrigger,
 } from "react-native-popup-menu";
 import Colors from "./Colors";
 import TextComponent from "./TextComponent";
@@ -14,9 +15,11 @@ import TextComponent from "./TextComponent";
 interface ClassEventCardProps {
   imageUrl: any;
   title: string;
-  time: string;
+  start:string;
+  end:string;
   link: string;
   price: string;
+  status:string;
   onReschedule?: () => void;
   onCancel?: () => void;
   onDetails?: () => void;
@@ -25,12 +28,14 @@ interface ClassEventCardProps {
 const ClassBookingCard: React.FC<ClassEventCardProps> = ({
   imageUrl,
   title,
-  time,
+  start,
+  end,
   link,
   price,
   onReschedule,
   onCancel,
   onDetails,
+  status
 }) => {
   const isRemote = typeof imageUrl === "string" && imageUrl.startsWith("http");
   return (
@@ -49,7 +54,7 @@ const ClassBookingCard: React.FC<ClassEventCardProps> = ({
             {title}
           </TextComponent>
           <TextComponent type="semiBoldText" style={styles.description}>
-            {time}
+           {`${moment(start).format("MMM DD, YYYY h:mm a")} - ${moment(end).format("MMM DD, YYYY h:mm a")}`}
           </TextComponent>
           <TextComponent type="semiBoldText" style={styles.description}>
             {link
@@ -84,7 +89,7 @@ const ClassBookingCard: React.FC<ClassEventCardProps> = ({
               </TextComponent>
               <View
                 style={{
-                  backgroundColor: Colors.Colors.blue_bg,
+                  backgroundColor: status === "confirmed" ? Colors.Colors.confiem_bg :  status === "pending" ? Colors.Colors.pending_bg : status === "requested" ? Colors.Colors.blue_bg : Colors.Colors.cancel_bg,
                   padding: 4,
                   borderRadius: 16,
                   alignItems: "center",
@@ -95,9 +100,9 @@ const ClassBookingCard: React.FC<ClassEventCardProps> = ({
               >
                 <TextComponent
                   type="boldText"
-                  style={{ color: Colors.Colors.blue }}
+                  style={{ color: status === "confirmed" ? Colors.Colors.confirm_text :  status === "pending" ?  Colors.Colors.App_theme : status === "requested" ? Colors.Colors.blue : Colors.Colors.canecl}}
                 >
-                  Requested
+                  {status}
                 </TextComponent>
               </View>
             </View>
@@ -121,6 +126,8 @@ const ClassBookingCard: React.FC<ClassEventCardProps> = ({
                   },
                 }}
               >
+                <>
+                {status === "confirmed" && 
                 <MenuOption onSelect={onReschedule} style={{ marginTop: 10 }}>
                   <TextComponent
                     type="semiBoldText"
@@ -129,6 +136,7 @@ const ClassBookingCard: React.FC<ClassEventCardProps> = ({
                     Reschedule
                   </TextComponent>
                 </MenuOption>
+}
                 <MenuOption onSelect={onDetails} style={{ marginTop: 10 }}>
                   <TextComponent
                     type="semiBoldText"
@@ -137,6 +145,7 @@ const ClassBookingCard: React.FC<ClassEventCardProps> = ({
                     Details
                   </TextComponent>
                 </MenuOption>
+{(status === "confirmed" || status === "requested") &&
                 <MenuOption
                   onSelect={onCancel}
                   style={{ marginTop: 10, marginBottom: 10 }}
@@ -145,6 +154,8 @@ const ClassBookingCard: React.FC<ClassEventCardProps> = ({
                     Cancel
                   </TextComponent>
                 </MenuOption>
+}
+                </>
               </MenuOptions>
             </Menu>
           </View>

@@ -1,3 +1,4 @@
+import { ResizeMode, Video } from "expo-av";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -9,10 +10,15 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useDispatch } from "react-redux";
+import { AnyAction } from "redux";
+import { ThunkDispatch } from "redux-thunk";
 import ClassEventCard from "../../components/ClassEventCard";
 import Colors from "../../components/Colors";
 import FontSize from "../../components/FontSize";
 import TextComponent from "../../components/TextComponent";
+import { RootState } from "../../store";
+import { tutorDataList } from "./actions";
 import styles from "./styles";
 
 // Interfaces
@@ -55,41 +61,50 @@ const ReadMoreText = ({ text }: { text: string }) => {
   );
 };
 
-export default function ClassTutorDetailsScreen({ navigation }) {
+export default function ClassTutorDetailsScreen({ navigation, route }) {
   const { t } = useTranslation();
-
-  const [exploreData, setExploreData] = useState<ExploreClass[]>([]);
+  const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
+  const [exploreData, setExploreData] = useState<any[]>([]);
   const [explorePage, setExplorePage] = useState(1);
   const [loadingExplore, setLoadingExplore] = useState(false);
   const [hasMoreExplore, setHasMoreExplore] = useState(true);
 
-  const fetchExploreClasses = async (pageNum: number) => {
+  // Map API class object to ClassEventCard props
+  const mapClassToCard = (item: any) => ({
+    id: item.id,
+    imageUrl: item.cover_media?.key ? `https://dev.kalpx.com/${item.cover_media.key}` : undefined,
+    title: item.title,
+    description: item.description,
+    duration: item.pricing?.per_person?.session_length_min,
+    price: item.pricing?.per_person?.amount?.app,
+    tutor: item.tutor,
+    raw: item,
+  });
+
+  const fetchTutorClasses = (pageNum: number) => {
     if (loadingExplore || !hasMoreExplore) return;
     setLoadingExplore(true);
-
-    setTimeout(() => {
-      const newData: ExploreClass[] = Array.from({ length: 10 }, (_, i) => {
-        const id = (pageNum - 1) * 10 + i + "";
-        return {
-          id,
-          title: `Class ${id}`,
-          description:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur blandit tempus porttitor. Integer posuere erat a ante venenatis dapibus. Vestibulum id ligula porta felis euismod semper.",
-          duration: "60 Minutes",
-          price: "$5500",
-          imageUrl: require("../../../assets/C_Sample.png"),
-          tutor: "John Doe",
-        };
-      });
-
-      setExploreData((prev) => [...prev, ...newData]);
-      setHasMoreExplore(newData.length > 0);
-      setLoadingExplore(false);
-    }, 1000);
+    dispatch(
+      tutorDataList(route?.params?.data?.creator_id, pageNum, (res: any) => {
+        setLoadingExplore(false);
+        if (res.success) {
+          const newClasses = res.data?.classes?.results || [];
+          setExploreData((prev) =>
+            pageNum === 1 ? newClasses : [...prev, ...newClasses]
+          );
+          // Pagination: if next is null, no more pages
+          setHasMoreExplore(!!res.data?.classes?.next);
+        } else {
+          setHasMoreExplore(false);
+          console.error("Tutor Data Fetch Failed:", res.error);
+        }
+      })
+    );
   };
 
   useEffect(() => {
-    fetchExploreClasses(explorePage);
+    fetchTutorClasses(explorePage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [explorePage]);
 
   const loadMoreExplore = () => {
@@ -136,19 +151,32 @@ export default function ClassTutorDetailsScreen({ navigation }) {
           marginTop: 15,
         }}
       >
-        <Image
-          source={require("../../../assets/Class_Video.png")}
-          style={{ alignSelf: "center" }}
-          resizeMode="contain"
+        <Video
+          source={{
+            uri: `https://dev.kalpx.com/${route?.params?.data?.intro_media?.key}`,
+          }}
+          style={{
+            width: "100%",
+            height: 200,
+            borderRadius: 10,
+            backgroundColor: "#000",
+          }}
+          useNativeControls
+          resizeMode={ResizeMode.CONTAIN} // ✅ correct enum usage
+          shouldPlay
+          isLooping
         />
         <View style={styles.row}>
-          <TextComponent type="headerText" style={styles.label}>
+          {/* <TextComponent type="headerText" style={styles.label}>
             Flute Series :
-          </TextComponent>
+          </TextComponent> */}
           <TextComponent type="headerText" style={styles.label}>
-            Absolute Beginner
+            {route?.params?.data?.title}
           </TextComponent>
         </View>
+        <TextComponent type="headerText" style={styles.label}>
+          {route?.params?.data?.subtitle}
+        </TextComponent>
         <View style={styles.row}>
           <TextComponent
             type="mediumText"
@@ -157,7 +185,7 @@ export default function ClassTutorDetailsScreen({ navigation }) {
             Duration :
           </TextComponent>
           <TextComponent type="mediumText" style={styles.label}>
-            60 Minutes
+            {route?.params?.data?.pricing.per_person.session_length_min} minutes
           </TextComponent>
         </View>
         <View
@@ -173,7 +201,8 @@ export default function ClassTutorDetailsScreen({ navigation }) {
               type="boldText"
               style={{ fontSize: FontSize.CONSTS.FS_20 }}
             >
-              $ 3500{" "}
+              {route?.params?.data?.pricing?.currency === "INR" ? "₹" : "$"}{" "}
+              {route?.params?.data?.pricing?.per_person?.amount?.app ?? 0}
             </TextComponent>
             <TextComponent
               type="mediumText"
@@ -182,7 +211,8 @@ export default function ClassTutorDetailsScreen({ navigation }) {
               / Per Person
             </TextComponent>
           </View>
-          <TouchableOpacity onPress={() => navigation.navigate("ClassBookingScreen")}
+          <TouchableOpacity
+            onPress={() => navigation.navigate("ClassBookingScreen",{data: route?.params?.data,reschedule:false})}
             style={{
               backgroundColor: Colors.Colors.App_theme,
               padding: 10,
@@ -200,7 +230,7 @@ export default function ClassTutorDetailsScreen({ navigation }) {
         </View>
 
         {/* Read More / Less */}
-        <ReadMoreText text="Orttitor in ac libe. Mauris ut vulputate ante. Ut gravida turpis quis vestibulum cursus. Praesent commodo cursus magna, vel scelerisque nisl consectetur." />
+        <ReadMoreText text={route?.params?.data?.description} />
       </View>
 
       {/* Tutor Section */}
@@ -223,16 +253,26 @@ export default function ClassTutorDetailsScreen({ navigation }) {
           marginHorizontal: 16,
         }}
       >
-        <Image
-          source={require("../../../assets/Class_Video.png")}
-          style={{ alignSelf: "center" }}
-          resizeMode="contain"
+        <Video
+          source={{
+            uri: `${route?.params?.data?.tutor?.intro_video?.url}`,
+          }}
+          style={{
+            width: "100%",
+            height: 200,
+            borderRadius: 10,
+            backgroundColor: "#000",
+          }}
+          useNativeControls
+          resizeMode={ResizeMode.CONTAIN} // ✅ correct enum usage
+          shouldPlay
+          isLooping
         />
         <TextComponent
           type="headerText"
           style={{ ...styles.label, marginTop: 4 }}
         >
-          Esther Howard
+          {route?.params?.data?.tutor?.profile_name}
         </TextComponent>
         <View style={styles.row}>
           <TextComponent
@@ -242,7 +282,7 @@ export default function ClassTutorDetailsScreen({ navigation }) {
             Experience :
           </TextComponent>
           <TextComponent type="mediumText" style={styles.label}>
-            6 Years
+            {route?.params?.data?.tutor?.attributes?.experience_years} Years
           </TextComponent>
         </View>
         <View style={styles.row}>
@@ -253,18 +293,18 @@ export default function ClassTutorDetailsScreen({ navigation }) {
             Languages :
           </TextComponent>
           <TextComponent type="mediumText" style={styles.label}>
-            English, Hindi, Telugu, Bengali, Marathi.
+            {route?.params?.data?.tutor?.languages?.join(", ")}
           </TextComponent>
         </View>
 
         {/* Read More / Less */}
-        <ReadMoreText text="Orttitor in ac libe. Mauris ut vulputate ante. Ut gravida turpis quis vestibulum cursus. Nulla vitae elit libero, a pharetra augue." />
+        <ReadMoreText text={route?.params?.data?.tutor?.description} />
       </View>
 
       {/* Explore Classes List */}
       <FlatList
-        data={exploreData}
-        keyExtractor={(item) => item.id}
+        data={exploreData.map(mapClassToCard)}
+        keyExtractor={(item) => item.id?.toString()}
         renderItem={({ item }) => (
           <ClassEventCard
             imageUrl={item.imageUrl}
@@ -272,10 +312,8 @@ export default function ClassTutorDetailsScreen({ navigation }) {
             description={item.description}
             duration={item.duration}
             price={item.price}
-            onViewDetails={() =>
-              navigation.navigate("ClassTutorDetailsScreen")
-            }
-            onBookNow={() => console.log("Book Now", item.id)}
+            onViewDetails={() => navigation.navigate("ClassTutorDetailsScreen", { data: item.raw })}
+            onBookNow={() => navigation.navigate("ClassBookingScreen", { data: item.raw })}
             tutor={item.tutor}
           />
         )}

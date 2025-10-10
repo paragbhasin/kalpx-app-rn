@@ -5,19 +5,22 @@ import { Calendar } from 'react-native-calendars';
 
 interface CalendarDetails {
     startDate: string;
+    onDayPress?: (day: any) => void;
 }
 
-const CalendarUI: FC<CalendarDetails> = ({ startDate }) => {
+
+const CalendarUI: FC<CalendarDetails> = ({ startDate, onDayPress }) => {
     const [selectedDate, setSelectedDate] = useState<string>(
         moment(startDate).isSameOrAfter(moment(), "day")
             ? startDate
             : moment().format("YYYY-MM-DD")
     );
 
-    const onDayPress = (day: any) => {
+    const handleDayPress = (day: any) => {
         const clickedDate = day.dateString;
         if (moment(clickedDate).isSameOrAfter(moment(), "day")) {
             setSelectedDate(clickedDate);
+            if (onDayPress) onDayPress(day);
         }
     };
 
@@ -25,7 +28,7 @@ const CalendarUI: FC<CalendarDetails> = ({ startDate }) => {
         <View style={{ borderRadius: 16 }}>
             <Calendar
                 enableSwipeMonths={true}
-                onDayPress={onDayPress}
+                onDayPress={handleDayPress}
                 minDate={moment().format("YYYY-MM-DD")}
                 maxDate={"2100-12-31"}
                 current={selectedDate}

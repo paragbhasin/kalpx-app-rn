@@ -37,12 +37,14 @@ interface BookingFilterModalProps {
   visible: boolean;
   onClose: () => void;
   onApply: (filters: any) => void;
+  onClear : () => void;
 }
 
 const BookingFilterModal: React.FC<BookingFilterModalProps> = ({
   visible,
   onClose,
   onApply,
+   onClear,
 }) => {
   const [status, setStatus] = useState<string | null>(null);
   const [when, setWhen] = useState<string | null>(null);
@@ -51,6 +53,13 @@ const BookingFilterModal: React.FC<BookingFilterModalProps> = ({
     setStatus("All Status");
     setWhen("All");
     setSort("Most Recent");
+     // trigger parent callback
+    if (onClear) {
+      onClear();
+    }
+
+    // optionally close modal after clear
+    onClose();
   };
 
   const handleApply = () => {

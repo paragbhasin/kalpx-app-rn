@@ -53,12 +53,14 @@ interface FilterModalProps {
   visible: boolean;
   onClose: () => void;
   onApply: (filters: any) => void;
+  onClear : () => void;
 }
 
 const FilterModal: React.FC<FilterModalProps> = ({
   visible,
   onClose,
   onApply,
+  onClear
 }) => {
   const [skillLevel, setSkillLevel] = useState<string | null>(null);
   const [classType, setClassType] = useState<string | null>(null);
@@ -76,6 +78,12 @@ const FilterModal: React.FC<FilterModalProps> = ({
     setSort(null);
     setMinPrice("");
     setMaxPrice("");
+     if (onClear) {
+      onClear();
+    }
+
+    // optionally close modal after clear
+    onClose();
   };
 
   const handleApply = () => {

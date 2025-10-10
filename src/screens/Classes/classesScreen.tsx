@@ -403,6 +403,7 @@ export default function ClassesScreen({ navigation }) {
       {activeTab === "ExploreClasses" ? (
         <FilterModal
           visible={closeFilterModal}
+          onClear={() => {}}
           onClose={() => setCloseFilterModal(false)}
           onApply={(filters) => {
             console.log("Selected Filters:", filters);
@@ -415,6 +416,7 @@ export default function ClassesScreen({ navigation }) {
         <BookingFilterModal
           visible={closeFilterModal}
           onClose={() => setCloseFilterModal(false)}
+          onClear={() => {}}
           onApply={(filters) => {
             console.log("Selected Filters:", filters);
             BookingFilteredData(filters);

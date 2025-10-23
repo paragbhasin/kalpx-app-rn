@@ -16,6 +16,7 @@ export default {
                 confirm_text:"#00934F",
                 pending_bg:"#D4A0171A",
                cancel_bg :"#FF42421A",
-               canecl:"#FF6767"
+               canecl:"#FF6767",
+               header_bg:"#FDF5E9"
         }
 }

@@ -129,6 +129,7 @@ const ALL_CATEGORIES = [
 ];
 
 const DURATION = ["3_days", "7_days", "10_plus_days"];
+                
 
 export default function TravelPlannerScreen() {
   const navigation: any = useNavigation();
@@ -265,7 +266,7 @@ export default function TravelPlannerScreen() {
           if (result && result.success) {
             // console.log("Travel interest saved>>>>>>>>>>>>>>>>>>>>>", result);
             setShow(true);
-            // navigation.navigate("HomePage");
+            // navigation.navigate('HomePage', { screen: 'Home'});
           } else {
             setLoginError(result?.error || "Failed to save travel interest");
           }
@@ -289,7 +290,10 @@ export default function TravelPlannerScreen() {
       >
         <Pressable
           style={styles.iconButton}
-          onPress={() => navigation.goBack()}
+          onPress={() => {
+            // navigation.goBack()
+            navigation.navigate('HomePage', { screen: 'Home'});
+          }}
         >
           <Ionicons name="arrow-back" size={22} color="#fff" />
         </Pressable>
@@ -504,7 +508,8 @@ export default function TravelPlannerScreen() {
         subTitle="You’ll be notified when your journey is ready."
          onClose={() => {
           setShow(false);
-            navigation.navigate("HomePage");
+          // navigation.navigate('HomePage', { screen: 'Home'});
+            navigation.navigate('HomePage', { screen: 'Home'});
         }}
       />
         </ScrollView>

@@ -216,7 +216,10 @@ export default function PoojaScreen() {
       >
         <Pressable
           style={styles.iconButton}
-          onPress={() => navigation.navigate("HomePage")}
+          onPress={() => {
+            navigation.navigate('HomePage', { screen: 'Home'});
+            // navigation.navigate("HomePage")
+          }}
         >
           <Ionicons name="arrow-back" size={22} color="#fff" />
         </Pressable>
@@ -479,7 +482,7 @@ export default function PoojaScreen() {
         subTitle="Your pooja request has been submitted. We will contact you soon with further details."
          onClose={() => {
           setShow(false);
-            navigation.navigate("HomePage");
+            navigation.navigate('HomePage', { screen: 'Home'});
         }}
       />
       {/* Pooja Modal */}

@@ -44,7 +44,7 @@ const HEALING = [
     id: "yogaImmersion",
     titleKey: "retreats.healing.yoga.title",
     subtitleKey: "retreats.healing.yoga.subtitle",
-    image: require("../../../assets/yoga.jpg"),
+    image: require("../../../assets/meditate.jpg"),
   },
   {
     id: "bhaktiSatsang",
@@ -217,7 +217,10 @@ export default function RetreatsScreen() {
       >
         <Pressable
           style={styles.iconButton}
-          onPress={() => navigation.navigate("HomePage")}
+          onPress={() => {
+            // navigation.navigate("HomePage")
+            navigation.navigate('HomePage', { screen: 'Home'});
+          }}
         >
           <Ionicons name="arrow-back" size={22} color="#fff" />
         </Pressable>
@@ -539,7 +542,7 @@ export default function RetreatsScreen() {
         subTitle="Your action was completed successfully 🎉"
         onClose={() => {
           setShow(false);
-            navigation.navigate("HomePage");
+            navigation.navigate('HomePage', { screen: 'Home'});
         }}
       />
         {/* Sticky Button */}

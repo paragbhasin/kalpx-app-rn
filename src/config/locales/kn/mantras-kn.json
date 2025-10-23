@@ -1,0 +1,1755 @@
+[
+  {
+    "id": "mantra.shiva_maha_mrityunjaya",
+    "deity": "ಶಿವ",
+    "text": "ಓಂ ತ್ರ್ಯಂಬಕಂ ಯಜಾಮಹೇ ಸುಗಂಧಿಂ ಪುಷ್ಟಿವರ್ಧನಂ ಉರ್ವಾರುಕಮಿವ ಬಂಧನಾತ್ ಮೃತ್ಯೋರ್ಮುಕ್ಷೀಯ ಮಾಮೃತಾತ್",
+    "explanation": [
+      "ಈ ಮಹಾ ಮೃತ್ಯುಂಜಯ ಮಂತ್ರವು ಶಿವನ ಗುಣಪಡಿಸುವ ಮತ್ತು ಬಿಡುಗಡೆ ನೀಡುವ (ಮುಕ್ತಿ) ಶಕ್ತಿಯನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "'ತ್ರಯಂಬಕಂ' ಎಂದರೆ ಶಿವನ ಮೂರು ಕಣ್ಣುಗಳುಳ್ಳ ಸ್ವರೂಪ, ಇದು ಜ್ಞಾನ ಮತ್ತು ಗ್ರಹಿಕೆಯನ್ನು ಸಂಕೇತಿಸುತ್ತದೆ.",
+      "ಇದು ದೈಹಿಕ ಮತ್ತು ಮಾನಸಿಕ ಆರೋಗ್ಯವನ್ನು ಹೆಚ್ಚಿಸಿ, ಮೃತ್ಯು ಭಯವನ್ನು ಕಡಿಮೆ ಮಾಡಿ, ಆತ್ಮಿಕ ವಿಮೋಚನೆಗೆ ಸಹಕರಿಸುತ್ತದೆ.",
+      "ಪ್ರತಿದಿನ ೧೦೮ ಬಾರಿ ಜಪಿಸುವುದರಿಂದ, ವಿಶೇಷವಾಗಿ ಅನಾರೋಗ್ಯ ಅಥವಾ ಒತ್ತಡದ ಸಮಯದಲ್ಲಿ, ಸಹಿಷ್ಣುತೆ ಮತ್ತು ಆಂತರಿಕ ಶಾಂತಿ ಹೆಚ್ಚುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Rig Veda",
+      "ref": "7.59.12"
+    },
+    "tags": ["healing", "liberation", "Shiva"],
+    "devanagari": "ॐ त्र्यम्बकं यजामहे सुगन्धिम् पुष्टिवर्धनम् उर्वारुकमिव बन्धनात् मृत्योर्मुक्षीय माऽमृतात्",
+    "iast": "oṃ tryambakaṃ yajāmahe sugandhiṃ puṣṭivardhanam urvārukamiva bandhanāt mṛtyormukṣīya mā’mṛtāt",
+    "simplified_pronunciation": "Om Try-am-ba-kam Ya-ja-ma-hey Su-gan-dhim Push-ti-var-dha-nam Ur-va-ru-ka-miva Ban-dha-naat Mri-tyor-muk-shee-ya Ma-am-ri-taat",
+    "suggested_reps": 108,
+    "best_times": ["dawn", "evening"],
+    "difficulty": 2,
+    "language_level": "poetic",
+    "weight": 1.4
+  },
+  {
+    "id": "mantra.gayatri_mantra",
+    "text": "ಓಂ ಭೂರ್ ಭುವಃ ಸ್ವಃ ತತ್ ಸವಿತುರ್ ವರೇಣ್ಯಂ ಭರ್ಗೋ ದೇವಸ್ಯ ಧೀಮಹಿ ಧಿಯೋ ಯೋ ನಃ ಪ್ರಚೋದಯಾತ್",
+    "explanation": [
+      "ಋಗ್ವೇದದ ಗಾಯತ್ರಿ ಮಂತ್ರವು ಸವಿತೃ ದೇವತೆಯ ದಿವ್ಯ ಪ್ರಕಾಶವನ್ನು (ಜ್ಞಾನದ ಬೆಳಕು) ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಬುದ್ಧಿಶಕ್ತಿಯನ್ನು ತೀಕ್ಷ್ಣಗೊಳಿಸಿ, ಸ್ಪಷ್ಟತೆಯನ್ನು ಹೆಚ್ಚಿಸಿ, ಮತ್ತು ಆತ್ಮಿಕ ಜಾಗೃತಿಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ಮುಂಜಾನೆ ಅಥವಾ ಮಧ್ಯಾಹ್ನ ಇದನ್ನು ಪಠಿಸುವುದರಿಂದ ಮನಸ್ಸು ವಿಶ್ವದ ಜ್ಞಾನದೊಂದಿಗೆ ಹೊಂದಿಕೊಂಡು, ಏಕಾಗ್ರತೆ ಮತ್ತು ಒಳನೋಟವನ್ನು ಪಡೆಯುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಏಕಾಗ್ರತೆ ಮತ್ತು ದೈನಂದಿನ ನಿರ್ಧಾರ ತೆಗೆದುಕೊಳ್ಳುವ ಸಾಮರ್ಥ್ಯವನ್ನು ಸುಧಾರಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Rig Veda",
+      "ref": "3.62.10"
+    },
+    "tags": ["wisdom", "clarity", "spiritual"],
+    "devanagari": "ॐ भूर्भुवः स्वः तत्सवितुर्वरेण्यं भर्गो देवस्य धीमहि धियो यो नः प्रचोदयात्",
+    "iast": "oṃ bhūr bhuvaḥ svaḥ tat savitur vareṇyaṃ bhargo devasya dhīmahi dhiyo yo naḥ pracodayāt",
+    "simplified_pronunciation": "Om Bhoor Bhu-vah Swa-ha Tat Sa-vi-tur Va-ren-yam Bhar-go De-vas-ya Dhee-ma-hi Dhi-yo Yo Nah Pra-cho-da-yat",
+    "suggested_reps": 11,
+    "best_times": ["dawn", "midday"],
+    "difficulty": 2,
+    "language_level": "poetic",
+    "weight": 1.4
+  },
+  {
+    "id": "mantra.ganesha_vakratunda",
+    "deity": "ಗಣೇಶ",
+    "text": "ವಕ್ರತುಂಡ ಮಹಾಕಾಯ ಸೂರ್ಯಕೋಟಿ ಸಮಪ್ರಭ ನಿರ್ವಿಘ್ನಂ ಕುರು ಮೇ ದೇವ ಸರ್ವ ಕಾರ್ಯೇಷು ಸರ್ವದಾ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ವಿಘ್ನ ನಿವಾರಕನಾದ ಗಣೇಶನನ್ನು ಆಹ್ವಾನಿಸಿ, ಎಲ್ಲಾ ಪ್ರಯತ್ನಗಳಲ್ಲಿ ಯಶಸ್ಸಿಗಾಗಿ ಪ್ರಾರ್ಥಿಸುತ್ತದೆ.",
+      "'ವಕ್ರತುಂಡ' ಎಂದರೆ ಅವನ ಬಾಗಿದ ಸೊಂಡಿಲು, ಇದು ಹೊಂದಿಕೊಳ್ಳುವಿಕೆಯನ್ನು ಸಂಕೇತಿಸುತ್ತದೆ; 'ಮಹಾಕಾಯ' ಅವನ ಅಗಾಧ ಶಕ್ತಿಯನ್ನು ಸೂಚಿಸುತ್ತದೆ.",
+      "ಹೊಸ ಕೆಲಸಗಳನ್ನು ಪ್ರಾರಂಭಿಸುವ ಮೊದಲು ಇದನ್ನು ಪಠಿಸುವುದರಿಂದ ಮಾನಸಿಕ ಮತ್ತು ಬಾಹ್ಯ ಅಡೆತಡೆಗಳು ನಿವಾರಣೆಯಾಗಿ, ಆತ್ಮವಿಶ್ವಾಸ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ಇದು ವಿದ್ಯಾರ್ಥಿಗಳು, ವೃತ್ತಿಪರರು ಅಥವಾ ಯಾವುದೇ ಯೋಜನೆ ಪ್ರಾರಂಭಿಸುವವರಿಗೆ ಸೂಕ್ತವಾಗಿದೆ, ಇದು ಏಕಾಗ್ರತೆ ಮತ್ತು ಗುರಿ ಸಾಧನೆಗೆ ಉತ್ತೇಜನ ನೀಡುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Smārta tradition"
+    },
+    "tags": ["success", "obstacles", "Ganesha"],
+    "devanagari": "वक्रतुण्ड महाकाय सूर्यकोटि समप्रभ निर्विघ्नं कुरु मे देव सर्व कार्येषु सर्वदा",
+    "iast": "vakratuṇḍa mahākāya sūryakoṭi samaprabha nirvighnaṃ kuru me deva sarva kāryeṣu sarvadā",
+    "simplified_pronunciation": "Vak-ra-tun-da Maha-kaa-ya Soor-ya-ko-ti Sa-ma-pra-bha Nir-vigh-nam Ku-ru Mey De-va Sar-va Kaar-ye-shu Sar-va-da",
+    "suggested_reps": 11,
+    "best_times": ["morning", "midday"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "weight": 1.1
+  },
+  {
+    "id": "mantra.durga_ya_devi",
+    "deity": "ದುರ್ಗಾ",
+    "text": "ಯಾ ದೇವೀ ಸರ್ವಭೂತೇಷು ಶಕ್ತಿ ರೂಪೇಣ ಸಂಸ್ಥಿತಾ ನಮಸ್ತಸ್ಯೈ ನಮಸ್ತಸ್ಯೈ ನಮಸ್ತಸ್ಯೈ ನಮೋ ನಮಃ",
+    "explanation": [
+      "ದೇವಿ ಮಹಾತ್ಮ್ಯದ ಈ ಮಂತ್ರವು ದುರ್ಗಾ ಮಾತೆಯು ದೈವಿಕ ಶಕ್ತಿಯ ರೂಪದಲ್ಲಿ ಎಲ್ಲೆಡೆ ಇರುವಿಕೆಯನ್ನು ಗೌರವಿಸುತ್ತದೆ.",
+      "ಇದು ಆಂತರಿಕ ಮತ್ತು ಬಾಹ್ಯ ಸವಾಲುಗಳ ವಿರುದ್ಧ ಶಕ್ತಿ, ಧೈರ್ಯ ಮತ್ತು ರಕ್ಷಣೆಯನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ನವರಾತ್ರಿ ಅಥವಾ ಕಷ್ಟದ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದರಿಂದ ಸಹಿಷ್ಣುತೆ ಮತ್ತು ನಿರ್ಭೀತ ನಿರ್ಧಾರ ಶಕ್ತಿ ಬರುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಆಂತರಿಕ ಆತ್ಮವಿಶ್ವಾಸ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಬಲವನ್ನು ಬೆಳೆಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Devi Mahatmyam"
+    },
+    "tags": ["strength", "protection", "Durga"],
+    "devanagari": "या देवी सर्वभूतेषु शक्तिरूपेण संस्थिता नमस्तस्यै नमस्तस्यै नमस्तस्यै नमो नमः",
+    "iast": "yā devī sarvabhūteṣu śaktirūpeṇa saṃsthitā namastasyai namastasyai namastasyai namo namaḥ",
+    "simplified_pronunciation": "Ya De-vee Sar-va-bhoo-te-shu Shak-ti-roo-pe-na Sam-sthi-ta Na-mas-tas-yai Na-mas-tas-yai Na-mas-tas-yai Na-mo Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["morning", "sunset"],
+    "difficulty": 2,
+    "language_level": "poetic",
+    "season": ["navratri"],
+    "weight": 1.3
+  },
+  {
+    "id": "mantra.krishna_om_namo_bhagavate",
+    "deity": "ಕೃಷ್ಣ",
+    "text": "ಓಂ ನಮೋ ಭಗವತೇ ವಾಸುದೇವಾಯ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಪರಮ ದೈವಿಕನಾದ ವಾಸುದೇವ (ಶ್ರೀಕೃಷ್ಣ)ನನ್ನು ಆಹ್ವಾನಿಸಿ, ಪ್ರೀತಿ ಮತ್ತು ಭಕ್ತಿಯನ್ನು ಬೆಳೆಸುತ್ತದೆ.",
+      "ಇದು ಆಧ್ಯಾತ್ಮಿಕ ಸಂಪರ್ಕವನ್ನು ಹೆಚ್ಚಿಸಿ, ಆಂತರಿಕ ಸಂತೋಷವನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ ಮತ್ತು ಹೃದಯವನ್ನು ಕರುಣೆಯೊಂದಿಗೆ ಜೋಡಿಸುತ್ತದೆ.",
+      "ಧ್ಯಾನ ಅಥವಾ ಭಕ್ತಿ ಅಭ್ಯಾಸಗಳ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದರಿಂದ ಕೃತಜ್ಞತೆ ಮತ್ತು ಭಾವನಾತ್ಮಕ ಸಮತೋಲನ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ದೈವಿಕ ಉಪಸ್ಥಿತಿ ಮತ್ತು ಜೀವನದ ಉದ್ದೇಶದ ಅರಿವನ್ನು ಬೆಳೆಸಲು ದೈನಂದಿನ ಬಳಕೆಗೆ ಇದು ಸೂಕ್ತವಾಗಿದೆ."
+    ],
+    "source": {
+      "title": "Vaiṣṇava tradition"
+    },
+    "tags": ["devotion", "love", "Krishna"],
+    "devanagari": "ॐ नमो भगवते वासुदेवाय",
+    "iast": "oṃ namo bhagavate vāsudevāya",
+    "simplified_pronunciation": "Om Na-mo Bha-ga-va-tey Vaa-su-de-va-ya",
+    "suggested_reps": 108,
+    "best_times": ["morning", "evening"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "weight": 1.1
+  },
+  {
+    "id": "mantra.lakshmi_om_hreem",
+    "deity": "ಲಕ್ಷ್ಮಿ",
+    "text": "ಓಂ ಹ್ರೀಂ ಮಹಾಲಕ್ಷ್ಮ್ಯೈ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಸಮೃದ್ಧಿಯ ದೇವತೆ ಲಕ್ಷ್ಮಿಯನ್ನು ಆಹ್ವಾನಿಸಿ, ಸಂಪತ್ತು ಮತ್ತು ಆಂತರಿಕ ಶಾಂತಿಗಾಗಿ ಪ್ರಾರ್ಥಿಸುತ್ತದೆ.",
+      "'ಹ್ರೀಂ' ಒಂದು ಬೀಜಾಕ್ಷರವಾಗಿದ್ದು, ಸಮೃದ್ಧಿ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಬೆಳವಣಿಗೆಯನ್ನು ವರ್ಧಿಸುತ್ತದೆ.",
+      "ದೀಪಾವಳಿ ಸಮಯದಲ್ಲಿ ಅಥವಾ ಪ್ರತಿದಿನ ಜಪಿಸುವುದರಿಂದ ಸಕಾರಾತ್ಮಕ ಶಕ್ತಿ ಮತ್ತು ಭೌತಿಕ ಸುಖ ಸಮೃದ್ಧಿ ಆಕರ್ಷಿತವಾಗುತ್ತದೆ.",
+      "ಇದು ಕೃತಜ್ಞತೆಯನ್ನು ಬೆಳೆಸಿ, ಕೊರತೆಯ ಮನಸ್ಥಿತಿಯನ್ನು ಕಡಿಮೆ ಮಾಡಿ, ಮತ್ತು ಭಾವನಾತ್ಮಕ ಸ್ಥಿರತೆಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Śākta tradition"
+    },
+    "tags": ["prosperity", "peace", "Lakshmi"],
+    "devanagari": "ॐ ह्रीं महालक्ष्म्यै नमः",
+    "iast": "oṃ hrīṃ mahālakṣmyai namaḥ",
+    "simplified_pronunciation": "Om Hreem Maha-laksh-myai Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["morning", "evening"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "season": ["diwali"],
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.hanuman_manojavam",
+    "deity": "ಹನುಮಂತ",
+    "text": "ಮನೋಜವಂ ಮರುತತುಲ್ಯವೇಗಂ ಜಿತೇಂದ್ರಿಯಂ ಬುದ್ಧಿಮತಾಂ ವರಿಷ್ಠಂ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಹನುಮಂತನ ವೇಗದ ಮನಸ್ಸು, ಶಕ್ತಿ ಮತ್ತು ಜ್ಞಾನವನ್ನು ಹೊಗಳಿ, ಅವನ ಕ್ರಿಯಾಶೀಲ ಶಕ್ತಿಯನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ದೃಢಸಂಕಲ್ಪ, ಮಾನಸಿಕ ಸ್ಪಷ್ಟತೆ ಮತ್ತು ಸವಾಲುಗಳನ್ನು ತ್ವರಿತವಾಗಿ ಜಯಿಸುವ ಸಾಮರ್ಥ್ಯವನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ.",
+      "ಏಕಾಗ್ರತೆ ಅಥವಾ ದೈಹಿಕ ಶ್ರಮದ ಅಗತ್ಯವಿರುವ ಕಾರ್ಯಗಳ ಮೊದಲು ಜಪಿಸುವುದರಿಂದ ಶಕ್ತಿ ಮತ್ತು ಶಿಸ್ತು ಹೆಚ್ಚಾಗುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಧೈರ್ಯ, ಆತ್ಮ ನಿಯಂತ್ರಣ ಮತ್ತು ಬೌದ್ಧಿಕ ತೀಕ್ಷ್ಣತೆಯನ್ನು ಬೆಳೆಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Vaiṣṇava tradition"
+    },
+    "tags": ["strength", "clarity", "Hanuman"],
+    "devanagari": "मनोजवं मारुततुल्यवेगं जितेन्द्रियं बुद्धिमतां वरिष्ठम्",
+    "iast": "manojavaṃ mārutatulyavegaṃ jitendriyaṃ buddhimatāṃ variṣṭham",
+    "simplified_pronunciation": "Ma-no-ja-vam Maa-ru-ta-tul-ya-ve-gam Ji-ten-dri-yam Bud-dhi-ma-taam Va-rish-tham",
+    "suggested_reps": 21,
+    "best_times": ["morning", "afternoon"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "weight": 1.1
+  },
+  {
+    "id": "mantra.saraswati_om_aim",
+    "deity": "ಸರಸ್ವತಿ",
+    "text": "ಓಂ ಐಂ ಸರಸ್ವತ್ಯೈ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಜ್ಞಾನದ ದೇವತೆ ಸರಸ್ವತಿಯನ್ನು ಆಹ್ವಾನಿಸಿ, ವಿವೇಕ ಮತ್ತು ಸೃಜನಾತ್ಮಕ ಸ್ಪೂರ್ತಿಗಾಗಿ ಪ್ರಾರ್ಥಿಸುತ್ತದೆ.",
+      "'ಐಂ' ಒಂದು ಬೀಜಾಕ್ಷರವಾಗಿದ್ದು, ಬುದ್ಧಿಶಕ್ತಿ ಮತ್ತು ಕಲಾತ್ಮಕ ಅಭಿವ್ಯಕ್ತಿಯನ್ನು ವರ್ಧಿಸುತ್ತದೆ.",
+      "ಅಧ್ಯಯನ ಅಥವಾ ಸೃಜನಾತ್ಮಕ ಕೆಲಸದ ಮೊದಲು ಜಪಿಸುವುದರಿಂದ ಏಕಾಗ್ರತೆ ತೀಕ್ಷ್ಣಗೊಂಡು, ಮಾನಸಿಕ ಸ್ಪಷ್ಟತೆ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಶೈಕ್ಷಣಿಕ ಯಶಸ್ಸು, ನಿರರ್ಗಳ ಸಂವಹನ ಮತ್ತು ನವೀನ ಚಿಂತನೆಗೆ ಬೆಂಬಲ ನೀಡುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Śākta tradition"
+    },
+    "tags": ["wisdom", "creativity", "Saraswati"],
+    "devanagari": "ॐ ऐं सरस्वत्यै नमः",
+    "iast": "oṃ aiṃ sarasvatyai namaḥ",
+    "simplified_pronunciation": "Om Aim Sa-ras-wa-tyai Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["morning", "midday"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.rama_tarangini",
+    "deity": "ರಾಮ",
+    "text": "ಶ್ರೀ ರಾಮ ತಾರಕಂ ಮಂತ್ರ ಜಪ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಸತ್ಯ ಮತ್ತು ಕರುಣೆಯ ಸಂಕೇತವಾದ ರಾಮನನ್ನು ಆಹ್ವಾನಿಸಿ, ಧರ್ಮದೊಂದಿಗೆ ಹೊಂದಿಕೊಳ್ಳಲು ಸಹಾಯ ಮಾಡುತ್ತದೆ.",
+      "'ತಾರಕಂ' ಎಂದರೆ ವಿಮೋಚನೆ ನೀಡುವವನು, ಇದು ಪಠಿಸುವವರನ್ನು ಸದಾಚಾರದ ಕಡೆಗೆ ಮಾರ್ಗದರ್ಶಿಸುತ್ತದೆ.",
+      "ಜಪಿಸುವುದರಿಂದ ಆಂತರಿಕ ಶಾಂತಿ, ನೈತಿಕ ಸ್ಪಷ್ಟತೆ ಮತ್ತು ದೈನಂದಿನ ಜೀವನದಲ್ಲಿ ಒಂದು ಉದ್ದೇಶದ ಅರಿವು ಹೆಚ್ಚುತ್ತದೆ.",
+      "ದಯೆ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಶಕ್ತಿಯನ್ನು ಬೆಳೆಸಲು ಬೆಳಿಗ್ಗೆ ಅಥವಾ ಸಂಜೆ ಅಭ್ಯಾಸ ಮಾಡಲು ಇದು ಸೂಕ್ತವಾಗಿದೆ."
+    ],
+    "source": {
+      "title": "Vaiṣṇava tradition"
+    },
+    "tags": ["truth", "compassion", "Rama"],
+    "devanagari": "श्री राम तारक मंत्र जप",
+    "iast": "śrī rāma tāraka mantra japa",
+    "simplified_pronunciation": "Shree Raam Taa-ra-ka Man-tra Ja-pa",
+    "suggested_reps": 21,
+    "best_times": ["morning", "evening"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.shanti_purnam",
+    "text": "ಓಂ ಪೂರ್ಣಮದಃ ಪೂರ್ಣಮಿದಂ ಪೂರ್ಣಾತ್ ಪೂರ್ಣಮುದಚ್ಯತೇ ಪೂರ್ಣಸ್ಯ ಪೂರ್ಣಮಾದಾಯ ಪೂರ್ಣಮೇವಾವಶಿಷ್ಯತೇ",
+    "explanation": [
+      "ಈಶೋಪನಿಷತ್ತಿನ ಈ ಮಂತ್ರವು ದೈವಿಕತೆ ಮತ್ತು ಸೃಷ್ಟಿಯ ಸಂಪೂರ್ಣತೆಯನ್ನು ದೃಢೀಕರಿಸುತ್ತದೆ.",
+      "ಇದು ಸಮಗ್ರತೆಯ ಭಾವವನ್ನು ಬೆಳೆಸಿ, ಕೊರತೆ ಅಥವಾ ಪ್ರತ್ಯೇಕತೆಯ ಭಾವನೆಗಳನ್ನು ಕಡಿಮೆ ಮಾಡುತ್ತದೆ.",
+      "ದಿನದ ಕೊನೆಯಲ್ಲಿ ಜಪಿಸುವುದರಿಂದ ಆಂತರಿಕ ಶಾಂತಿ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ತೃಪ್ತಿ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಕೃತಜ್ಞತೆ ಮತ್ತು ವಿಶ್ವದೊಂದಿಗೆ ಆಳವಾದ ಸಂಪರ್ಕವನ್ನು ಬೆಳೆಸಲು ಸಹಾಯ ಮಾಡುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Isha Upanishad"
+    },
+    "tags": ["completeness", "peace", "spiritual"],
+    "devanagari": "ॐ पूर्णमदः पूर्णमिदं पूर्णात् पूर्णमुदच्यते पूर्णस्य पूर्णमादाय पूर्णमेवावशिष्यते",
+    "iast": "oṃ pūrṇamadaḥ pūrṇamidaṃ pūrṇāt pūrṇamudacyate pūrṇasya pūrṇamādāya pūrṇamevāvaśiṣyate",
+    "simplified_pronunciation": "Om Poor-nam-a-dah Poor-nam-i-dam Poor-naat Poor-nam-u-dach-ya-te Poor-nas-ya Poor-nam-aada-ya Poor-nam-eva-va-shish-ya-te",
+    "suggested_reps": 11,
+    "best_times": ["evening", "night"],
+    "difficulty": 2,
+    "language_level": "poetic",
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.vishnu_om_namo_narayanaya",
+    "deity": "ವಿಷ್ಣು",
+    "text": "ಓಂ ನಮೋ ನಾರಾಯಣಾಯ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ರಕ್ಷಕನಾದ ವಿಷ್ಣುವನ್ನು (ನಾರಾಯಣ) ಆಹ್ವಾನಿಸಿ, ರಕ್ಷಣೆ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಸಮತೋಲನಕ್ಕಾಗಿ ಪ್ರಾರ್ಥಿಸುತ್ತದೆ.",
+      "'ನಾರಾಯಣಾಯ' ಎಂದರೆ ಎಲ್ಲಾ ಜೀವಿಗಳ ಆಶ್ರಯದಾತನಾದ ವಿಷ್ಣು, ಇದು ಸುರಕ್ಷತೆ ಮತ್ತು ಸಾಮರಸ್ಯವನ್ನು ಬೆಳೆಸುತ್ತದೆ.",
+      "ಏಕಾದಶಿಯಂದು ಅಥವಾ ಪ್ರತಿದಿನ ಜಪಿಸುವುದರಿಂದ ಆಂತರಿಕ ಶಾಂತಿ ಮತ್ತು ದೈವಿಕ ಸಂಪರ್ಕ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ಇದು ಆತಂಕವನ್ನು ಕಡಿಮೆ ಮಾಡಿ, ಪಠಿಸುವವರನ್ನು ವಿಶ್ವದ ಕ್ರಮ ಮತ್ತು ಸ್ಥಿರತೆಯೊಂದಿಗೆ ಜೋಡಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Vaiṣṇava tradition"
+    },
+    "tags": ["protection", "balance", "Vishnu"],
+    "devanagari": "ॐ नमो नारायणाय",
+    "iast": "oṃ namo nārāyaṇāya",
+    "simplified_pronunciation": "Om Na-mo Na-ra-ya-na-ya",
+    "suggested_reps": 108,
+    "best_times": ["morning", "evening"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "season": ["ekadashi"],
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.durga_om_aim_hreem",
+    "deity": "ದುರ್ಗಾ",
+    "text": "ಓಂ ಐಂ ಹ್ರೀಂ ಕ್ಲೀಂ ಚಾಮುಂಡಾಯೈ ವಿಚ್ಚೇ",
+    "explanation": [
+      "ಈ ಪ್ರಬಲ ಮಂತ್ರವು ದುರ್ಗೆಯ ಉಗ್ರ ಶಕ್ತಿಯನ್ನು ರಕ್ಷಣೆ ಮತ್ತು ಸಬಲೀಕರಣಕ್ಕಾಗಿ ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "'ಐಂ,' 'ಹ್ರೀಂ,' ಮತ್ತು 'ಕ್ಲೀಂ' ಬೀಜಾಕ್ಷರಗಳು ಜ್ಞಾನ, ಶಕ್ತಿ ಮತ್ತು ಇಚ್ಛಾಶಕ್ತಿಯನ್ನು ವರ್ಧಿಸುತ್ತವೆ.",
+      "ನವರಾತ್ರಿ ಅಥವಾ ಸವಾಲಿನ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದರಿಂದ ಧೈರ್ಯ ಮತ್ತು ಮಾನಸಿಕ ಸ್ಪಷ್ಟತೆ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಸಹಿಷ್ಣುತೆ, ಆತ್ಮವಿಶ್ವಾಸ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಶಕ್ತಿಯನ್ನು ಬೆಳೆಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Śākta tradition"
+    },
+    "tags": ["protection", "empowerment", "Durga"],
+    "devanagari": "ॐ ऐं ह्रीं क्लीं चामुण्डायै विच्चे",
+    "iast": "oṃ aiṃ hrīṃ klīṃ cāmuṇḍāyai vicce",
+    "simplified_pronunciation": "Om Aim Hreem Kleem Cha-mun-da-yai Vi-chey",
+    "suggested_reps": 21,
+    "best_times": ["morning", "sunset"],
+    "difficulty": 2,
+    "language_level": "simple",
+    "season": ["navratri"],
+    "weight": 1.3
+  },
+  {
+    "id": "mantra.krishna_govinda_jaya",
+    "deity": "ಕೃಷ್ಣ",
+    "text": "ಗೋವಿಂದ ಜಯ ಜಯ ಗೋಪಾಲ ಜಯ ಜಯ",
+    "explanation": [
+      "ಈ ಸಂತೋಷದ ಮಂತ್ರವು ಶ್ರೀಕೃಷ್ಣನನ್ನು ಗೋವಿಂದ ಮತ್ತು ಗೋಪಾಲನಾಗಿ (ದಿವ್ಯ ಗೋಪಾಲಕ) ಕೊಂಡಾಡುತ್ತದೆ.",
+      "ಇದು ಮನಸ್ಸಿಗೆ ಉಲ್ಲಾಸ ನೀಡಿ, ಪ್ರೀತಿ, ಕೃತಜ್ಞತೆ ಮತ್ತು ದೈವಿಕ ಸಂಪರ್ಕವನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ.",
+      "ಭಕ್ತಿ ಅಭ್ಯಾಸಗಳು ಅಥವಾ ಹಬ್ಬಗಳ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದರಿಂದ ಭಾವನಾತ್ಮಕ ಹಗುರತೆ ಮತ್ತು ಸಂತೋಷ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಬಳಕೆಯು ಸಕಾರಾತ್ಮಕ ದೃಷ್ಟಿಕೋನವನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಭಕ್ತಿಯನ್ನು ಗಾಢಗೊಳಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Vaiṣṇava tradition"
+    },
+    "tags": ["joy", "devotion", "Krishna"],
+    "devanagari": "गोविन्द जय जय गोपाल जय जय",
+    "iast": "govinda jaya jaya gopāla jaya jaya",
+    "simplified_pronunciation": "Go-vin-da Ja-ya Ja-ya Go-pa-la Ja-ya Ja-ya",
+    "suggested_reps": 21,
+    "best_times": ["morning", "evening"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.shanti_saha_navavatu",
+    "text": "ಓಂ ಸಹ ನಾವವತು ಸಹ ನೌ ಭುನಕ್ತು ಸಹ ವೀರ್ಯಂ ಕರವಾವಹೈ ತೇಜಸ್ವಿ ನಾವಧೀತಮಸ್ತು ಮಾ ವಿದ್ವಿಷಾವಹೈ",
+    "explanation": [
+      "ತೈತ್ತಿರೀಯ ಉಪನಿಷತ್ತಿನ ಈ ಮಂತ್ರವು ಗುರು ಮತ್ತು ಶಿಷ್ಯರಿಗೆ ಶಾಂತಿ ಮತ್ತು ಸಾಮರಸ್ಯವನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಪರಸ್ಪರ ಶಕ್ತಿ, ಜ್ಞಾನ ಮತ್ತು ಸಂಘರ್ಷ-ರಹಿತ ವಾತಾವರಣವನ್ನು ಬೆಳೆಸುತ್ತದೆ.",
+      "ಕಲಿಕಾ ಅವಧಿಗಳ ಪ್ರಾರಂಭದಲ್ಲಿ ಜಪಿಸುವುದರಿಂದ ಸಹಕಾರ ಮತ್ತು ಮಾನಸಿಕ ಸ್ಪಷ್ಟತೆ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಗುಂಪಿನಲ್ಲಿ ಸಾಮರಸ್ಯ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಬೆಳವಣಿಗೆಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Taittiriya Upanishad"
+    },
+    "tags": ["peace", "harmony", "learning"],
+    "devanagari": "ॐ सह नाववतु सह नौ भुनक्तु सह वीर्यं करवावहै तेजस्वि नावधीतमस्तु मा विद्विषावहै",
+    "iast": "oṃ saha nāvavatu saha nau bhunaktu saha vīryaṃ karavāvahai tejasvi nāvadhītamastu mā vidviṣāvahai",
+    "simplified_pronunciation": "Om Sa-ha Na-va-va-tu Sa-ha Nau Bhu-nak-tu Sa-ha Veer-yam Ka-ra-va-va-hai Te-jas-vi Na-va-dhee-tam-as-tu Ma Vid-vish-a-va-hai",
+    "suggested_reps": 11,
+    "best_times": ["dawn", "evening"],
+    "difficulty": 2,
+    "language_level": "poetic",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.ganesha_om_gam",
+    "deity": "ಗಣೇಶ",
+    "text": "ಓಂ ಗಂ ಗಣಪತಯೇ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಗಣೇಶನನ್ನು ಆಹ್ವಾನಿಸಿ, ಅಡೆತಡೆಗಳನ್ನು ತೆಗೆದುಹಾಕಲು ಮತ್ತು ಪ್ರಯತ್ನಗಳಲ್ಲಿ ಯಶಸ್ಸು ನೀಡಲು ಪ್ರಾರ್ಥಿಸುತ್ತದೆ.",
+      "'ಗಂ' ಗಣೇಶನ ಬೀಜಾಕ್ಷರವಾಗಿದ್ದು, ಮಾನಸಿಕ ಮತ್ತು ದೈಹಿಕ ಅಡೆತಡೆಗಳನ್ನು ನಿವಾರಿಸಲು ಅವನ ಶಕ್ತಿಯನ್ನು ವರ್ಧಿಸುತ್ತದೆ.",
+      "ಯೋಜನೆಗಳನ್ನು ಪ್ರಾರಂಭಿಸುವ ಮೊದಲು ಅಥವಾ ಸವಾಲುಗಳ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದರಿಂದ ಏಕಾಗ್ರತೆ ಮತ್ತು ಆತ್ಮವಿಶ್ವಾಸ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಸ್ಪಷ್ಟತೆ, ದೃಢಸಂಕಲ್ಪ ಮತ್ತು ಕಾರ್ಯಗಳಲ್ಲಿ ಸುಗಮ ಪ್ರಗತಿಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Smārta tradition"
+    },
+    "tags": ["success", "obstacles", "Ganesha"],
+    "devanagari": "ॐ गं गणपतये नमः",
+    "iast": "oṃ gaṃ gaṇapataye namaḥ",
+    "simplified_pronunciation": "Om Gam Ga-na-pa-ta-ye Na-mah",
+    "suggested_reps": 11,
+    "best_times": ["morning", "midday"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "weight": 1.1
+  },
+  {
+    "id": "mantra.lakshmi_om_shreem_maha",
+    "deity": "ಲಕ್ಷ್ಮಿ",
+    "text": "ಓಂ ಶ್ರೀಂ ಮಹಾಲಕ್ಷ್ಮ್ಯೈ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಲಕ್ಷ್ಮಿಯನ್ನು ಆಹ್ವಾನಿಸಿ, ಸಮೃದ್ಧಿ, ಸಂಪತ್ತು ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಸಂಪತ್ತಿಗಾಗಿ ಪ್ರಾರ್ಥಿಸುತ್ತದೆ.",
+      "'ಶ್ರೀಂ' ಒಂದು ಬೀಜಾಕ್ಷರವಾಗಿದ್ದು, ಸಕಾರಾತ್ಮಕ ಶಕ್ತಿ ಮತ್ತು ಭೌತಿಕ ಸುಖವನ್ನು ಆಕರ್ಷಿಸುತ್ತದೆ.",
+      "ದೀಪಾವಳಿ ಸಮಯದಲ್ಲಿ ಅಥವಾ ಪ್ರತಿದಿನ ಜಪಿಸುವುದರಿಂದ ಕೃತಜ್ಞತೆ ಮತ್ತು ಆರ್ಥಿಕ ಸ್ಥಿರತೆ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ಇದು ಸಮೃದ್ಧಿಯ ಮನಸ್ಥಿತಿ ಮತ್ತು ಭಾವನಾತ್ಮಕ ಶಾಂತಿಯನ್ನು ಬೆಳೆಸಲು ಸಹಾಯ ಮಾಡುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Śākta tradition"
+    },
+    "tags": ["prosperity", "abundance", "Lakshmi"],
+    "devanagari": "ॐ श्रीं महालक्ष्म्यै नमः",
+    "iast": "oṃ śrīṃ mahālakṣmyai namaḥ",
+    "simplified_pronunciation": "Om Shreem Maha-laksh-myai Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["morning", "evening"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "season": ["diwali"],
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.shiva_om_namah_shivaya",
+    "deity": "ಶಿವ",
+    "text": "ಓಂ ನಮಃ ಶಿವಾಯ",
+    "explanation": [
+      "ಪಂಚಾಕ್ಷರಿ ಎಂದು ಕರೆಯಲ್ಪಡುವ ಈ ಐದು ಅಕ್ಷರಗಳ ಮಂತ್ರವು ಶಿವನ ಪರಿವರ್ತಕ (ಬದಲಾವಣೆ ತರುವ) ಶಕ್ತಿಯನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಆಂತರಿಕ ಶಾಂತಿಯನ್ನು ಬೆಳೆಸಿ, ನಕಾರಾತ್ಮಕತೆಯನ್ನು ಬಿಡುಗಡೆ ಮಾಡಿ, ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಬೆಳವಣಿಗೆಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ಪ್ರತಿದಿನ ೧೦೮ ಬಾರಿ, ವಿಶೇಷವಾಗಿ ಮುಂಜಾನೆ ಜಪಿಸುವುದರಿಂದ ಮನಸ್ಸು ಶಾಂತವಾಗುತ್ತದೆ ಮತ್ತು ಸಹಿಷ್ಣುತೆ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ಸ್ಪಷ್ಟತೆ ಮತ್ತು ಭಾವನಾತ್ಮಕ ಸಮತೋಲನವನ್ನು ಸಾಧಿಸಲು ಧ್ಯಾನಕ್ಕಾಗಿ ಇದು ಸೂಕ್ತವಾಗಿದೆ."
+    ],
+    "source": {
+      "title": "Śaiva tradition"
+    },
+    "tags": ["peace", "transformation", "Shiva"],
+    "devanagari": "ॐ नमः शिवाय",
+    "iast": "oṃ namaḥ śivāya",
+    "simplified_pronunciation": "Om Na-mah Shi-vai-ya",
+    "suggested_reps": 108,
+    "best_times": ["dawn", "evening"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.krishna_hare_krishna",
+    "deity": "ಕೃಷ್ಣ",
+    "text": "ಹರೇ ಕೃಷ್ಣ ಹರೇ ಕೃಷ್ಣ ಕೃಷ್ಣ ಕೃಷ್ಣ ಹರೇ ಹರೇ ಹರೇ ರಾಮ ಹರೇ ರಾಮ ರಾಮ ರಾಮ ಹರೇ ಹರೇ",
+    "explanation": [
+      "ಮಹಾ ಮಂತ್ರ ಎಂದು ಕರೆಯಲ್ಪಡುವ ಇದು, ದೈವಿಕ ಪ್ರೀತಿ ಮತ್ತು ಭಕ್ತಿಗಾಗಿ ಕೃಷ್ಣ ಮತ್ತು ರಾಮನನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಹೃದಯವನ್ನು ಉಲ್ಲಾಸಗೊಳಿಸಿ, ಕರುಣೆಯನ್ನು ಬೆಳೆಸಿ, ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಸಂಪರ್ಕವನ್ನು ಗಾಢಗೊಳಿಸುತ್ತದೆ.",
+      "ಪ್ರತಿದಿನ ೧೦೮ ಬಾರಿ ಜಪಿಸುವುದರಿಂದ ಸಂತೋಷ, ಕೃತಜ್ಞತೆ ಮತ್ತು ಇತರರೊಂದಿಗೆ ಏಕತೆ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ಭಾವನಾತ್ಮಕ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಸಾಮರಸ್ಯವನ್ನು ಬೆಳೆಸಲು ಭಕ್ತಿ ಅಭ್ಯಾಸಗಳಿಗೆ ಇದು ಸೂಕ್ತವಾಗಿದೆ."
+    ],
+    "source": {
+      "title": "Vaiṣṇava tradition"
+    },
+    "tags": ["love", "devotion", "Krishna"],
+    "devanagari": "हरे कृष्ण हरे कृष्ण कृष्ण कृष्ण हरे हरे हरे राम हरे राम राम राम हरे हरे",
+    "iast": "hare kṛṣṇa hare kṛṣṇa kṛṣṇa kṛṣṇa hare hare hare rāma hare rāma rāma rāma hare hare",
+    "simplified_pronunciation": "Ha-rey Krishna Ha-rey Krishna Krishna Krishna Ha-rey Ha-rey Ha-rey Raam Ha-rey Raam Raam Raam Ha-rey Ha-rey",
+    "suggested_reps": 108,
+    "best_times": ["morning", "evening"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "weight": 1.1
+  },
+  {
+    "id": "mantra.durga_om_dum",
+    "deity": "ದುರ್ಗಾ",
+    "text": "ಓಂ ದುಂ ದುರ್ಗಾಯೈ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಧೈರ್ಯಕ್ಕಾಗಿ ದುರ್ಗೆಯ ರಕ್ಷಕ ಮತ್ತು ಸಬಲೀಕರಣ ಶಕ್ತಿಯನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "'ದುಂ' ಒಂದು ಬೀಜಾಕ್ಷರವಾಗಿದ್ದು, ಅಡೆತಡೆಗಳನ್ನು ಜಯಿಸಲು ಅವಳ ಶಕ್ತಿಯನ್ನು ಪ್ರವಹಿಸುತ್ತದೆ.",
+      "ನವರಾತ್ರಿ ಅಥವಾ ಪ್ರತಿದಿನ ಜಪಿಸುವುದರಿಂದ ಸಹಿಷ್ಣುತೆ ಮತ್ತು ನಿರ್ಭಯತೆ ಬೆಳೆಯುತ್ತದೆ.",
+      "ಇದು ಆಂತರಿಕ ಆತ್ಮವಿಶ್ವಾಸವನ್ನು ಬೆಳೆಸುತ್ತದೆ ಮತ್ತು ನಕಾರಾತ್ಮಕ ಶಕ್ತಿಗಳಿಂದ ರಕ್ಷಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Śākta tradition"
+    },
+    "tags": ["courage", "protection", "Durga"],
+    "devanagari": "ॐ दूं दुर्गायै नमः",
+    "iast": "oṃ dūṃ durgāyai namaḥ",
+    "simplified_pronunciation": "Om Doom Dur-ga-yai Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["morning", "sunset"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "season": ["navratri"],
+    "weight": 1.3
+  },
+  {
+    "id": "mantra.shanti_om_shanti",
+    "text": "ಓಂ ಶಾಂತಿ ಶಾಂತಿ ಶಾಂತಿಃ",
+    "explanation": [
+      "ಉಪನಿಷತ್ತುಗಳಿಂದ ಬಂದಿರುವ ಈ ಮಂತ್ರವು ಮನಸ್ಸು, ದೇಹ ಮತ್ತು ಆತ್ಮಕ್ಕೆ ಸಾರ್ವತ್ರಿಕ ಶಾಂತಿಯನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಮೂರು ಬಾರಿ ಪುನರಾವರ್ತನೆಯು ದೈಹಿಕ, ಮಾನಸಿಕ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಮಟ್ಟದಲ್ಲಿ ಶಾಂತಿಯನ್ನು ಉದ್ದೇಶಿಸುತ್ತದೆ.",
+      "ದಿನದ ಕೊನೆಯಲ್ಲಿ ಜಪಿಸುವುದರಿಂದ ಸಂಘರ್ಷಗಳು ಕಡಿಮೆಯಾಗಿ, ಆಂತರಿಕ ಶಾಂತಿ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಸಂಬಂಧಗಳಲ್ಲಿ ಸಾಮರಸ್ಯ ಮತ್ತು ವೈಯಕ್ತಿಕ ನೆಮ್ಮದಿಯನ್ನು ಬೆಳೆಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Upaniṣads"
+    },
+    "tags": ["peace", "calm", "harmony"],
+    "devanagari": "ॐ शान्तिः शान्तिः शान्तिः",
+    "iast": "oṃ śāntiḥ śāntiḥ śāntiḥ",
+    "simplified_pronunciation": "Om Shaan-tee Shaan-tee Shaan-tee",
+    "suggested_reps": 11,
+    "best_times": ["evening", "night"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.hanuman_om_hum",
+    "deity": "ಹನುಮಂತ",
+    "text": "ಓಂ ಹುಂ ಹನುಮತೇ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಧೈರ್ಯ ಮತ್ತು ಸೇವೆಗಾಗಿ ಹನುಮಂತನ ಶಕ್ತಿ ಮತ್ತು ಭಕ್ತಿಯನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "'ಹುಂ' ಒಂದು ಬೀಜಾಕ್ಷರವಾಗಿದ್ದು, ಶಕ್ತಿ ಮತ್ತು ದೃಢಸಂಕಲ್ಪವನ್ನು ವರ್ಧಿಸುತ್ತದೆ.",
+      "ಸವಾಲಿನ ಕಾರ್ಯಗಳ ಮೊದಲು ಜಪಿಸುವುದರಿಂದ ಆತ್ಮವಿಶ್ವಾಸ ಮತ್ತು ನಿಸ್ವಾರ್ಥ ಸಮರ್ಪಣೆ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ದೈಹಿಕ ಮತ್ತು ಮಾನಸಿಕ ಸಹಿಷ್ಣುತೆಯನ್ನು ಹೆಚ್ಚಿಸಿ, ನಿಷ್ಠೆಯನ್ನು ಬೆಳೆಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Vaiṣṇava tradition"
+    },
+    "tags": ["courage", "devotion", "Hanuman"],
+    "devanagari": "ॐ हुं हनुमते नमः",
+    "iast": "oṃ huṃ hanumate namaḥ",
+    "simplified_pronunciation": "Om Hum Ha-nu-ma-tey Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["morning", "afternoon"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "weight": 1.1
+  },
+  {
+    "id": "mantra.rama_om_shri_rama",
+    "deity": "ರಾಮ",
+    "text": "ಓಂ ಶ್ರೀ ರಾಮಾಯ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಧರ್ಮದ ಸಾಕಾರಮೂರ್ತಿಯಾದ ರಾಮನನ್ನು ಆಹ್ವಾನಿಸಿ, ಸತ್ಯ ಮತ್ತು ಧರ್ಮನಿಷ್ಠೆಗಾಗಿ ಪ್ರಾರ್ಥಿಸುತ್ತದೆ.",
+      "ಇದು ನೈತಿಕ ಸ್ಪಷ್ಟತೆ, ಆಂತರಿಕ ಶಕ್ತಿ ಮತ್ತು ತಮ್ಮ ಕರ್ತವ್ಯಗಳೊಂದಿಗೆ ಹೊಂದಾಣಿಕೆಯನ್ನು ಬೆಳೆಸುತ್ತದೆ.",
+      "ಪ್ರತಿದಿನ ಜಪಿಸುವುದರಿಂದ ಶಾಂತಿ, ಶಿಸ್ತು ಮತ್ತು ಕರುಣಾಜನಕ ಕಾರ್ಯ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ಪ್ರಾಮಾಣಿಕತೆ ಮತ್ತು ಉದ್ದೇಶದಿಂದ ಬದುಕಲು ಬಯಸುವವರಿಗೆ ಇದು ಸೂಕ್ತವಾಗಿದೆ."
+    ],
+    "source": {
+      "title": "Vaiṣṇava tradition"
+    },
+    "tags": ["truth", "dharma", "Rama"],
+    "devanagari": "ॐ श्री रामाय नमः",
+    "iast": "oṃ śrī rāmāya namaḥ",
+    "simplified_pronunciation": "Om Shree Ra-ma-ya Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["morning", "evening"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.vedanta_om_tat_sat",
+    "text": "ಓಂ ತತ್ ಸತ್",
+    "explanation": [
+      "ಭಗವದ್ಗೀತೆಯಿಂದ ಬಂದ ಈ ಮಂತ್ರವು ಅಸ್ತಿತ್ವದ ಶಾಶ್ವತ ಸತ್ಯವನ್ನು ದೃಢೀಕರಿಸುತ್ತದೆ.",
+      "'ತತ್' ಎಂದರೆ 'ಅದು' ಮತ್ತು 'ಸತ್' ಎಂದರೆ 'ಸತ್ಯ', ಇದು ಪಠಿಸುವವರನ್ನು ದೈವಿಕ ವಾಸ್ತವದೊಂದಿಗೆ ಸಂಪರ್ಕಿಸುತ್ತದೆ.",
+      "ಧ್ಯಾನದ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದರಿಂದ ಆಧ್ಯಾತ್ಮಿಕ ಏಕಾಗ್ರತೆ ಮತ್ತು ಉದ್ದೇಶದ ಸ್ಪಷ್ಟತೆ ಗಾಢವಾಗುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಸಾರ್ವತ್ರಿಕ ಸತ್ಯದೊಂದಿಗೆ ಏಕತೆಯ ಭಾವನೆಯನ್ನು ಬೆಳೆಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Bhagavad Gita",
+      "ref": "17.23"
+    },
+    "tags": ["truth", "clarity", "vedanta"],
+    "devanagari": "ॐ तत् सत्",
+    "iast": "oṃ tat sat",
+    "simplified_pronunciation": "Om Tat Sat",
+    "suggested_reps": 11,
+    "best_times": ["dawn", "midday"],
+    "difficulty": 2,
+    "language_level": "simple",
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.saraswati_om_saraswati",
+    "deity": "ಸರಸ್ವತಿ",
+    "text": "ಓಂ ಸರಸ್ವತಿ ನಮಃ",
+    "explanation": [
+      "ಈ ಸರಳ ಮಂತ್ರವು ವಿವೇಕ, ಸೃಜನಶೀಲತೆ ಮತ್ತು ನಿರರ್ಗಳ ಮಾತುಗಾರಿಕೆಗಾಗಿ ಸರಸ್ವತಿಯನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಮಾನಸಿಕ ಸ್ಪಷ್ಟತೆ, ಕಲಿಕೆಯ ಸಾಮರ್ಥ್ಯ ಮತ್ತು ಕಲಾತ್ಮಕ ಅಭಿವ್ಯಕ್ತಿಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ.",
+      "ಶೈಕ್ಷಣಿಕ ಅಥವಾ ಸೃಜನಾತ್ಮಕ ಕಾರ್ಯಗಳ ಮೊದಲು ಜಪಿಸುವುದರಿಂದ ಏಕಾಗ್ರತೆ ತೀಕ್ಷ್ಣಗೊಂಡು, ಆತ್ಮವಿಶ್ವಾಸ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಬೌದ್ಧಿಕ ಬೆಳವಣಿಗೆ ಮತ್ತು ಪರಿಣಾಮಕಾರಿ ಸಂವಹನಕ್ಕೆ ಬೆಂಬಲ ನೀಡುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Śākta tradition"
+    },
+    "tags": ["wisdom", "creativity", "Saraswati"],
+    "devanagari": "ॐ सरस्वति नमः",
+    "iast": "oṃ sarasvati namaḥ",
+    "simplified_pronunciation": "Om Sa-ras-wa-tee Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["morning", "midday"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.vishnu_om_namo_vishnave",
+    "deity": "ವಿಷ್ಣು",
+    "text": "ಓಂ ನಮೋ ವಿಷ್ಣವೇ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ರಕ್ಷಣೆ, ಸಾಮರಸ್ಯ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಸಮತೋಲನಕ್ಕಾಗಿ ವಿಷ್ಣುವನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಸುರಕ್ಷತೆ ಮತ್ತು ವಿಶ್ವದ ದೈವಿಕ ಕ್ರಮದೊಂದಿಗೆ ಹೊಂದಾಣಿಕೆಯ ಭಾವವನ್ನು ಬೆಳೆಸುತ್ತದೆ.",
+      "ಏಕಾದಶಿಯಂದು ಅಥವಾ ಪ್ರತಿದಿನ ಜಪಿಸುವುದರಿಂದ ಆಂತರಿಕ ಶಾಂತಿ ಮತ್ತು ಸ್ಥಿರತೆ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಬಳಕೆಯು ಒತ್ತಡವನ್ನು ಕಡಿಮೆ ಮಾಡಲು ಮತ್ತು ದೈವಿಕ ಕಾಳಜಿಯ ಭಾವನೆಯನ್ನು ಬೆಳೆಸಲು ಸಹಾಯ ಮಾಡುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Vaiṣṇava tradition"
+    },
+    "tags": ["protection", "harmony", "Vishnu"],
+    "devanagari": "ॐ नमो विष्णवे",
+    "iast": "oṃ namo viṣṇave",
+    "simplified_pronunciation": "Om Na-mo Vish-na-vey",
+    "suggested_reps": 108,
+    "best_times": ["morning", "evening"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "season": ["ekadashi"],
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.shiva_om_tryambakam",
+    "deity": "ಶಿವ",
+    "text": "ಓಂ ತ್ರ್ಯಂಬಕಂ ಯಜಾಮಹೇ",
+    "explanation": [
+      "ಮಹಾ ಮೃತ್ಯುಂಜಯದ ಒಂದು ಚಿಕ್ಕ ರೂಪವಾದ ಈ ಮಂತ್ರವು ಗುಣಪಡಿಸಲು ಶಿವನನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "'ತ್ರಯಂಬಕಂ' ಎಂದರೆ ಶಿವನ ಸರ್ವಜ್ಞಾನದ ವಿವೇಕ, ಇದು ಭಾವನಾತ್ಮಕ ಮತ್ತು ದೈಹಿಕ ಆರೋಗ್ಯವನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ಒತ್ತಡ ಅಥವಾ ಅನಾರೋಗ್ಯದ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದರಿಂದ ಸಹಿಷ್ಣುತೆ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ವಿಮೋಚನೆ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಆಂತರಿಕ ಶಕ್ತಿಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ ಮತ್ತು ಭಯವನ್ನು ಕಡಿಮೆ ಮಾಡುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Rig Veda",
+      "ref": "7.59.12"
+    },
+    "tags": ["healing", "liberation", "Shiva"],
+    "devanagari": "ॐ त्र्यम्बकं यजामहे",
+    "iast": "oṃ tryambakaṃ yajāmahe",
+    "simplified_pronunciation": "Om Try-am-ba-kam Ya-ja-ma-hey",
+    "suggested_reps": 108,
+    "best_times": ["dawn", "evening"],
+    "difficulty": 2,
+    "language_level": "simple",
+    "weight": 1.3
+  },
+  {
+    "id": "mantra.lakshmi_om_shri_lakshmi",
+    "deity": "ಲಕ್ಷ್ಮಿ",
+    "text": "ಓಂ ಶ್ರೀ ಲಕ್ಷ್ಮ್ಯೈ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಸಮೃದ್ಧಿ, ಸಂತೋಷ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಸಂಪತ್ತಿಗಾಗಿ ಲಕ್ಷ್ಮಿಯನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಕೃತಜ್ಞತೆಯನ್ನು ಬೆಳೆಸಿ, ಸಕಾರಾತ್ಮಕ ಶಕ್ತಿಯನ್ನು ಆಕರ್ಷಿಸುತ್ತದೆ ಮತ್ತು ಭೌತಿಕ ಸುಖವನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ದೀಪಾವಳಿ ಸಮಯದಲ್ಲಿ ಅಥವಾ ಪ್ರತಿದಿನ ಜಪಿಸುವುದರಿಂದ ಸಮೃದ್ಧಿಯ ಮನಸ್ಥಿತಿ ಬೆಳೆಯುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಬಳಕೆಯು ಭಾವನಾತ್ಮಕ ಸ್ಥಿರತೆ ಮತ್ತು ದೈವಿಕ ಕೃಪೆಯ ಭಾವನೆಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Śākta tradition"
+    },
+    "tags": ["abundance", "joy", "Lakshmi"],
+    "devanagari": "ॐ श्री लक्ष्म्यै नमः",
+    "iast": "oṃ śrī lakṣmyai namaḥ",
+    "simplified_pronunciation": "Om Shree Laksh-myai Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["morning", "evening"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "season": ["diwali"],
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.ganesha_om_ganapataye",
+    "deity": "ಗಣೇಶ",
+    "text": "ಓಂ ಗಣಪತಯೇ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಗಣೇಶನನ್ನು ಆಹ್ವಾನಿಸಿ, ಅಡೆತಡೆಗಳನ್ನು ನಿವಾರಿಸಿ ಪ್ರಯತ್ನಗಳಲ್ಲಿ ಯಶಸ್ಸು ನೀಡಲು ಪ್ರಾರ್ಥಿಸುತ್ತದೆ.",
+      "ಇದು ಹೊಸ ಕೆಲಸಗಳು ಅಥವಾ ಸವಾಲುಗಳಲ್ಲಿ ಏಕಾಗ್ರತೆ, ಆತ್ಮವಿಶ್ವಾಸ ಮತ್ತು ಸುಗಮ ಪ್ರಗತಿಯನ್ನು ಬೆಳೆಸುತ್ತದೆ.",
+      "ಯೋಜನೆಗಳನ್ನು ಪ್ರಾರಂಭಿಸುವ ಮೊದಲು ಅಥವಾ ಪರಿವರ್ತನೆಯ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದರಿಂದ ಸ್ಪಷ್ಟತೆ ಮತ್ತು ದೃಢಸಂಕಲ್ಪ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಸಮಸ್ಯೆಗಳನ್ನು ಪರಿಹರಿಸುವ ಕೌಶಲ್ಯ ಮತ್ತು ಮಾನಸಿಕ ಸಹಿಷ್ಣುತೆಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Smārta tradition"
+    },
+    "tags": ["success", "obstacles", "Ganesha"],
+    "devanagari": "ॐ गणपतये नमः",
+    "iast": "oṃ gaṇapataye namaḥ",
+    "simplified_pronunciation": "Om Ga-na-pa-ta-ye Na-mah",
+    "suggested_reps": 11,
+    "best_times": ["morning", "midday"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "weight": 1.1
+  },
+  {
+    "id": "mantra.shanti_om_saha",
+    "text": "ಓಂ ಸಹ ನಾವವತು",
+    "explanation": [
+      "ತೈತ್ತಿರೀಯ ಉಪನಿಷತ್ತಿನ ಒಂದು ಚಿಕ್ಕ ರೂಪವಾದ ಈ ಮಂತ್ರವು ಶಾಂತಿ ಮತ್ತು ಸಾಮರಸ್ಯವನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಪರಸ್ಪರ ತಿಳುವಳಿಕೆ ಮತ್ತು ಸಹಕಾರವನ್ನು ಬೆಳೆಸುತ್ತದೆ, ಗುಂಪು ಅಥವಾ ಕಲಿಕಾ ಪರಿಸರಕ್ಕೆ ಸೂಕ್ತವಾಗಿದೆ.",
+      "ದಿನದ ಅಥವಾ ಅವಧಿಗಳ ಪ್ರಾರಂಭದಲ್ಲಿ ಜಪಿಸುವುದರಿಂದ ಶಾಂತಿ ಮತ್ತು ಸಾಮೂಹಿಕ ಶಕ್ತಿ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಅಂತರವೈಯಕ್ತಿಕ ಸಾಮರಸ್ಯ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಹೊಂದಾಣಿಕೆಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Taittiriya Upanishad"
+    },
+    "tags": ["peace", "harmony", "collaboration"],
+    "devanagari": "ॐ सह नाववतु",
+    "iast": "oṃ saha nāvavatu",
+    "simplified_pronunciation": "Om Sa-ha Na-va-va-tu",
+    "suggested_reps": 11,
+    "best_times": ["dawn", "evening"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.hanuman_om_han",
+    "deity": "ಹನುಮಂತ",
+    "text": "ಓಂ ಹನ್ ಹನುಮತೇ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಶಕ್ತಿ, ಭಕ್ತಿ ಮತ್ತು ನಿರ್ಭೀತ ಸೇವೆಗಾಗಿ ಹನುಮಂತನನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "'ಹನ್' ಒಂದು ಬೀಜಾಕ್ಷರವಾಗಿದ್ದು, ಶಕ್ತಿ ಮತ್ತು ದೃಢಸಂಕಲ್ಪವನ್ನು ವರ್ಧಿಸುತ್ತದೆ.",
+      "ಧೈರ್ಯ ಅಥವಾ ಸಮರ್ಪಣೆ ಅಗತ್ಯವಿರುವ ಕಾರ್ಯಗಳ ಮೊದಲು ಜಪಿಸುವುದರಿಂದ ಆತ್ಮವಿಶ್ವಾಸ ಮತ್ತು ಏಕಾಗ್ರತೆ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಸಹಿಷ್ಣುತೆ, ನಿಷ್ಠೆ ಮತ್ತು ನಿಸ್ವಾರ್ಥ ಕಾರ್ಯವನ್ನು ಬೆಳೆಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Vaiṣṇava tradition"
+    },
+    "tags": ["strength", "devotion", "Hanuman"],
+    "devanagari": "ॐ हं हनुमते नमः",
+    "iast": "oṃ haṃ hanumate namaḥ",
+    "simplified_pronunciation": "Om Ham Ha-nu-ma-tey Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["morning", "afternoon"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "weight": 1.1
+  },
+  {
+    "id": "mantra.rama_om_shri_dharma",
+    "deity": "ರಾಮ",
+    "text": "ಓಂ ಶ್ರೀ ರಾಮಾಯ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಸತ್ಯ, ಕರ್ತವ್ಯ ಮತ್ತು ಧರ್ಮನಿಷ್ಠೆಯೊಂದಿಗೆ ಹೊಂದಾಣಿಕೆಗಾಗಿ ರಾಮನನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ನೈತಿಕ ಸ್ಪಷ್ಟತೆ, ಆಂತರಿಕ ಶಾಂತಿ ಮತ್ತು ಶಿಸ್ತಿನ ಕಾರ್ಯವನ್ನು ಬೆಳೆಸುತ್ತದೆ.",
+      "ಪ್ರತಿದಿನ ಜಪಿಸುವುದರಿಂದ ಉದ್ದೇಶದ ಅರಿವು ಮತ್ತು ಕರುಣಾಜನಕ ನಡವಳಿಕೆ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ಪ್ರಾಮಾಣಿಕತೆ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಶಕ್ತಿಯೊಂದಿಗೆ ಬದುಕಲು ಬಯಸುವವರಿಗೆ ಇದು ಸೂಕ್ತವಾಗಿದೆ."
+    ],
+    "source": {
+      "title": "Vaiṣṇava tradition"
+    },
+    "tags": ["truth", "dharma", "Rama"],
+    "devanagari": "ॐ श्री रामाय नमः",
+    "iast": "oṃ śrī rāmāya namaḥ",
+    "simplified_pronunciation": "Om Shree Ra-ma-ya Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["morning", "evening"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.saraswati_om_aim_namah",
+    "deity": "ಸರಸ್ವತಿ",
+    "text": "ಓಂ ಐಂ ನಮಃ",
+    "explanation": [
+      "ಈ ಸಂಕ್ಷಿಪ್ತ ಮಂತ್ರವು ವಿವೇಕ ಮತ್ತು ಸೃಜನಾತ್ಮಕ ಸ್ಪೂರ್ತಿಗಾಗಿ ಸರಸ್ವತಿಯನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "'ಐಂ' ಒಂದು ಬೀಜಾಕ್ಷರವಾಗಿದ್ದು, ಬೌದ್ಧಿಕ ಸ್ಪಷ್ಟತೆ ಮತ್ತು ಕಲಾತ್ಮಕ ಅಭಿವ್ಯಕ್ತಿಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ.",
+      "ಅಧ್ಯಯನ ಅಥವಾ ಸೃಜನಾತ್ಮಕ ಕಾರ್ಯಗಳ ಮೊದಲು ಜಪಿಸುವುದರಿಂದ ಏಕಾಗ್ರತೆ ಮತ್ತು ಮಾನಸಿಕ ತೀಕ್ಷ್ಣತೆ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಶೈಕ್ಷಣಿಕ ಯಶಸ್ಸು ಮತ್ತು ಪರಿಣಾಮಕಾರಿ ಸಂವಹನಕ್ಕೆ ಬೆಂಬಲ ನೀಡುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Śākta tradition"
+    },
+    "tags": ["wisdom", "creativity", "Saraswati"],
+    "devanagari": "ॐ ऐं नमः",
+    "iast": "oṃ aiṃ namaḥ",
+    "simplified_pronunciation": "Om Aim Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["morning", "midday"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.lakshmi_om_shri_peace",
+    "deity": "ಲಕ್ಷ್ಮಿ",
+    "text": "ಓಂ ಶ್ರೀ ಲಕ್ಷ್ಮ್ಯೈ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಶಾಂತಿ, ಸಮೃದ್ಧಿ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಸಂಪತ್ತಿಗಾಗಿ ಲಕ್ಷ್ಮಿಯನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಕೃತಜ್ಞತೆಯನ್ನು ಬೆಳೆಸಿ, ಸಕಾರಾತ್ಮಕ ಶಕ್ತಿಯನ್ನು ಆಕರ್ಷಿಸುತ್ತದೆ ಮತ್ತು ಭಾವನಾತ್ಮಕ ಸ್ಥಿರತೆಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ದೀಪಾವಳಿ ಸಮಯದಲ್ಲಿ ಅಥವಾ ಪ್ರತಿದಿನ ಜಪಿಸುವುದರಿಂದ ಸಮೃದ್ಧಿಯ ಮನಸ್ಥಿತಿ ಬೆಳೆಯುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಬಳಕೆಯು ಸಂತೋಷ ಮತ್ತು ಜೀವನದಲ್ಲಿ ದೈವಿಕ ಕೃಪೆಯ ಭಾವನೆಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Śākta tradition"
+    },
+    "tags": ["peace", "prosperity", "Lakshmi"],
+    "devanagari": "ॐ श्री लक्ष्म्यै नमः",
+    "iast": "oṃ śrī lakṣmyai namaḥ",
+    "simplified_pronunciation": "Om Shree Laksh-myai Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["morning", "evening"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "season": ["diwali"],
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.ganesha_om_gam_success",
+    "deity": "ಗಣೇಶ",
+    "text": "ಓಂ ಗಂ ಗಣಪತಯೇ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಗಣೇಶನನ್ನು ಆಹ್ವಾನಿಸಿ, ಅಡೆತಡೆಗಳನ್ನು ನಿವಾರಿಸಿ ಪ್ರಯತ್ನಗಳಲ್ಲಿ ಯಶಸ್ಸು ನೀಡಲು ಪ್ರಾರ್ಥಿಸುತ್ತದೆ.",
+      "'ಗಂ' ಒಂದು ಪ್ರಬಲ ಬೀಜಾಕ್ಷರವಾಗಿದ್ದು, ಏಕಾಗ್ರತೆ ಮತ್ತು ದೃಢಸಂಕಲ್ಪವನ್ನು ವರ್ಧಿಸುತ್ತದೆ.",
+      "ಹೊಸ ಕೆಲಸಗಳು ಅಥವಾ ಸವಾಲುಗಳ ಮೊದಲು ಜಪಿಸುವುದರಿಂದ ಸ್ಪಷ್ಟತೆ ಮತ್ತು ಆತ್ಮವಿಶ್ವಾಸ ಹೆಚ್ಚುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಸಮಸ್ಯೆಗಳನ್ನು ಪರಿಹರಿಸುವ ಕೌಶಲ್ಯ ಮತ್ತು ಮಾನಸಿಕ ಸಹಿಷ್ಣುತೆಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "Smārta tradition"
+    },
+    "tags": ["success", "obstacles", "Ganesha"],
+    "devanagari": "ॐ गं गणपतये नमः",
+    "iast": "oṃ gaṃ gaṇapataye namaḥ",
+    "simplified_pronunciation": "Om Gam Ga-na-pa-ta-ye Na-mah",
+    "suggested_reps": 11,
+    "best_times": ["morning", "midday"],
+    "difficulty": 1,
+    "language_level": "simple",
+    "weight": 1.1
+  },
+  {
+    "id": "mantra.shanti_om_saha_harmony",
+    "text": "ಓಂ ಸಹ ನಾವವತು",
+    "explanation": [
+      "ತೈತ್ತಿರೀಯ ಉಪನಿಷತ್ತಿನ ಈ ಮಂತ್ರವು ಎಲ್ಲರಿಗೂ ಸಮರಸ್ಯ ಮತ್ತು ಶಾಂತಿಯನ್ನು ಕರೆಯುತ್ತದೆ.",
+      "ಇದು ಗುಂಪು ಅಥವಾ ಅಧ್ಯಯನ ಸಂದರ್ಭಗಳಲ್ಲಿ ಸಹಕಾರ ಮತ್ತು ಪರಸ್ಪರ ಅರ್ಥೈಸಿಕೊಳ್ಳುವಿಕೆಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ದಿನವನ್ನು ಪ್ರಾರಂಭಿಸುವ ಮೊದಲು ಜಪಿಸುವುದು ಶಾಂತಿ ಮತ್ತು ಸಾಮೂಹಿಕ ಶಕ್ತಿಯನ್ನು ನೀಡುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಪರಸ್ಪರ ಸಮರಸ್ಯ ಮತ್ತು ಆತ್ಮಿಕ ಹೊಂದಾಣಿಕೆಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ತೈತ್ತಿರೀಯ ಉಪನಿಷತ್"
+    },
+    "tags": ["ಸಮರಸ್ಯ", "ಶಾಂತಿ", "ಸಹಕಾರ"],
+    "devanagari": "ॐ सह नाववतु",
+    "iast": "oṃ saha nāvavatu",
+    "simplified_pronunciation": "Om Sa-ha Na-va-va-tu",
+    "suggested_reps": 11,
+    "best_times": ["ಪ್ರಭಾತ", "ಸಂಜೆ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.hanuman_om_han_devotion",
+    "deity": "ಹನುಮಾನ್",
+    "text": "ಓಂ ಹಂ ಹನುಮತೇ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಹನುಮಂತನನ್ನು ಭಕ್ತಿ, ಶಕ್ತಿ ಮತ್ತು ನಿಸ್ವಾರ್ಥ ಸೇವೆಗೆ ಆಮಂತ್ರಿಸುತ್ತದೆ.",
+      "‘ಹಂ’ ಎಂಬ ಬೀಜಾಕ್ಷರವು ಶಕ್ತಿ ಮತ್ತು ದೃಢನಿಶ್ಚಯವನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ.",
+      "ಧೈರ್ಯ ಅಥವಾ ಸಮರ್ಪಣೆ ಅಗತ್ಯವಿರುವ ಕಾರ್ಯಗಳ ಮೊದಲು ಜಪಿಸುವುದು ಆತ್ಮವಿಶ್ವಾಸ ಮತ್ತು ಏಕಾಗ್ರತೆಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಸ್ಥೈರ್ಯ, ನಿಷ್ಠೆ ಮತ್ತು ಆತ್ಮಿಕ ಬದ್ಧತೆಯನ್ನು ಬೆಳೆಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ವೈಷ್ಣವ ಪರಂಪರೆ"
+    },
+    "tags": ["ಭಕ್ತಿ", "ಶಕ್ತಿ", "ಹನುಮಾನ್"],
+    "devanagari": "ॐ हं हनुमते नमः",
+    "iast": "oṃ haṃ hanumate namaḥ",
+    "simplified_pronunciation": "Om Ham Ha-nu-ma-tey Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಮಧ್ಯಾಹ್ನ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.1
+  },
+  {
+    "id": "mantra.vishnu_om_namo_peace",
+    "deity": "ವಿಷ್ಣು",
+    "text": "ಓಂ ನಮೋ ನಾರಾಯಣಾಯ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ವಿಷ್ಣುವನ್ನು ಶಾಂತಿ, ರಕ್ಷಣಾ ಮತ್ತು ಆತ್ಮಿಕ ಸಮತೋಲನಕ್ಕಾಗಿ ಆಮಂತ್ರಿಸುತ್ತದೆ.",
+      "ಇದು ದೈವಿಕ ಕಾಳಜಿ ಮತ್ತು ವಿಶ್ವ ಸಮರಸ್ಯದೊಂದಿಗೆ ಹೊಂದಾಣಿಕೆಯನ್ನು ಉಂಟುಮಾಡುತ್ತದೆ.",
+      "ಏಕಾದಶಿ ಅಥವಾ ದೈನಂದಿನ ಅಭ್ಯಾಸದ ಸಂದರ್ಭದಲ್ಲಿ ಜಪಿಸುವುದು ಅಂತರಂಗದ ಶಾಂತಿ ಮತ್ತು ಸ್ಥಿರತೆಯನ್ನು ನೀಡುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಜಪವು ಒತ್ತಡವನ್ನು ಕಡಿಮೆಮಾಡಿ ದೈವಿಕ ಸಂಪರ್ಕವನ್ನು ಬೆಳೆಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ವೈಷ್ಣವ ಪರಂಪರೆ"
+    },
+    "tags": ["ಶಾಂತಿ", "ರಕ್ಷಣಾ", "ವಿಷ್ಣು"],
+    "devanagari": "ॐ नमो नारायणाय",
+    "iast": "oṃ namo nārāyaṇāya",
+    "simplified_pronunciation": "Om Na-mo Na-ra-ya-na-ya",
+    "suggested_reps": 108,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಸಂಜೆ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "season": ["ಏಕಾದಶಿ"],
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.saraswati_om_aim_wisdom",
+    "deity": "ಸರಸ್ವತಿ",
+    "text": "ಓಂ ಐಂ ಸರಸ್ವತ್ಯೈ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಸರಸ್ವತಿಯನ್ನು ಜ್ಞಾನ, ಪ್ರಜ್ಞೆ ಮತ್ತು ಸೃಜನಾತ್ಮಕ ಪ್ರೇರಣೆಗೆ ಆಮಂತ್ರಿಸುತ್ತದೆ.",
+      "‘ಐಂ’ ಎಂಬ ಬೀಜಾಕ್ಷರವು ಬುದ್ಧಿಶಕ್ತಿ ಮತ್ತು ಕಲಾತ್ಮಕ ಅಭಿವ್ಯಕ್ತಿಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ.",
+      "ಅಧ್ಯಯನ ಅಥವಾ ಸೃಜನಾತ್ಮಕ ಕಾರ್ಯಗಳ ಮೊದಲು ಜಪಿಸುವುದು ಏಕಾಗ್ರತೆ ಮತ್ತು ಮನಸ್ಸಿನ ತೀಕ್ಷ್ಣತೆಯನ್ನು ನೀಡುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ವಿದ್ಯಾಭ್ಯಾಸದಲ್ಲಿ ಯಶಸ್ಸು ಮತ್ತು ಉತ್ತಮ ಸಂವಹನವನ್ನು ಬೆಳೆಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ಶಾಕ್ತ ಪರಂಪರೆ"
+    },
+    "tags": ["ಜ್ಞಾನ", "ಪ್ರಜ್ಞೆ", "ಸರಸ್ವತಿ"],
+    "devanagari": "ॐ ऐं सरस्वत्यै नमः",
+    "iast": "oṃ aiṃ sarasvatyai namaḥ",
+    "simplified_pronunciation": "Om Aim Sa-ras-wa-tyai Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಮಧ್ಯಾಹ್ನ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.shiva_om_namah_peace",
+    "deity": "ಶಿವ",
+    "text": "ಓಂ ನಮಃ ಶಿವಾಯ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಶಿವನನ್ನು ಅಂತರಂಗ ಶಾಂತಿ, ಸ್ಪಷ್ಟತೆ ಮತ್ತು ಆತ್ಮಿಕ ಪರಿವರ್ತನೆಗಾಗಿ ಆಮಂತ್ರಿಸುತ್ತದೆ.",
+      "ಇದು ನಕಾರಾತ್ಮಕತೆಯನ್ನು ಬಿಡಿಸಲು ಸಹಾಯಮಾಡಿ ಭಾವನಾತ್ಮಕ ಸಮತೋಲನವನ್ನು ಬೆಳೆಸುತ್ತದೆ.",
+      "ಪ್ರತಿದಿನ 108 ಬಾರಿ, ವಿಶೇಷವಾಗಿ ಪ್ರಭಾತದಲ್ಲಿ ಜಪಿಸುವುದು ಮನಸ್ಸಿಗೆ ಶಾಂತಿ ಮತ್ತು ಆತ್ಮಿಕ ಬೆಳವಣಿಗೆಯನ್ನು ನೀಡುತ್ತದೆ.",
+      "ಧ್ಯಾನಕ್ಕಾಗಿ ಅತ್ಯುತ್ತಮ, ಮನಸ್ಸಿನ ಸ್ಪಷ್ಟತೆ ಮತ್ತು ಭಾವನಾತ್ಮಕ ಸ್ಥಿರತೆಯನ್ನು ಉಂಟುಮಾಡುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ಶೈವ ಪರಂಪರೆ"
+    },
+    "tags": ["ಶಾಂತಿ", "ಸ್ಪಷ್ಟತೆ", "ಶಿವ"],
+    "devanagari": "ॐ नमः शिवाय",
+    "iast": "oṃ namaḥ śivāya",
+    "simplified_pronunciation": "Om Na-mah Shi-vai-ya",
+    "suggested_reps": 108,
+    "best_times": ["ಪ್ರಭಾತ", "ಸಂಜೆ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.krishna_hare_krishna_peace",
+    "deity": "ಕೃಷ್ಣ",
+    "text": "हरे कृष्ण हरे कृष्ण कृष्ण कृष्ण हरे हरे हरे राम हरे राम राम राम हरे हरे",
+    "explanation": [
+      "ಈ ಮಹಾಮಂತ್ರವು ಕೃಷ್ಣ ಮತ್ತು ರಾಮರನ್ನು ಶಾಂತಿ, ಭಕ್ತಿ ಮತ್ತು ಆನಂದಕ್ಕಾಗಿ ಆಮಂತ್ರಿಸುತ್ತದೆ.",
+      "ಇದು ಕರುಣೆ, ಕೃತಜ್ಞತೆ ಮತ್ತು ದೈವಿಕ ಸಂಪರ್ಕವನ್ನು ಬೆಳೆಸುತ್ತದೆ.",
+      "ಪ್ರತಿದಿನ 108 ಬಾರಿ ಜಪಿಸುವುದು ಭಾವನಾತ್ಮಕ ಸಮತೋಲನ ಮತ್ತು ಆತ್ಮಿಕ ಉತ್ತೇಜನವನ್ನು ನೀಡುತ್ತದೆ.",
+      "ಭಕ್ತಿಪರ ಅಭ್ಯಾಸಗಳಿಗೆ ಅತ್ಯುತ್ತಮ, ಪ್ರೀತಿ ಮತ್ತು ಶಾಂತಿಯನ್ನು ಬೆಳೆಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ವೈಷ್ಣವ ಪರಂಪರೆ"
+    },
+    "tags": ["ಶಾಂತಿ", "ಭಕ್ತಿ", "ಕೃಷ್ಣ"],
+    "devanagari": "हरे कृष्ण हरे कृष्ण कृष्ण कृष्ण हरे हरे हरे राम हरे राम राम राम हरे हरे",
+    "iast": "hare kṛṣṇa hare kṛṣṇa kṛṣṇa kṛṣṇa hare hare hare rāma hare rāma rāma rāma hare hare",
+    "simplified_pronunciation": "Ha-rey Krishna Ha-rey Krishna Krishna Krishna Ha-rey Ha-rey Ha-rey Raam Ha-rey Raam Raam Raam Ha-rey Ha-rey",
+    "suggested_reps": 108,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಸಂಜೆ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.1
+  },
+  {
+    "id": "mantra.durga_om_dum_strength",
+    "deity": "ದುರ್ಗಾ",
+    "text": "ಓಂ ದೂಂ ದುರ್ಗಾಯೈ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ದುರ್ಗೆಯನ್ನು ಶಕ್ತಿ, ಧೈರ್ಯ ಮತ್ತು ರಕ್ಷಣೆಗೆ ಆಮಂತ್ರಿಸುತ್ತದೆ.",
+      "‘ದೂಂ’ ಎಂಬ ಬೀಜಾಕ್ಷರವು ಅವಳ ಶಕ್ತಿಯನ್ನು ಸಂಕಷ್ಟಗಳನ್ನು ಗೆಲ್ಲಲು ಚಾನಲ್ ಮಾಡುತ್ತದೆ.",
+      "ನವರಾತ್ರಿ ಅಥವಾ ದೈನಂದಿನ ಅಭ್ಯಾಸದಲ್ಲಿ ಜಪಿಸುವುದು ಸ್ಥೈರ್ಯ ಮತ್ತು ನಿರ್ಭಯತೆಯನ್ನು ಬೆಳೆಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಜಪವು ಆತ್ಮವಿಶ್ವಾಸವನ್ನು ಹೆಚ್ಚಿಸಿ ನಕಾರಾತ್ಮಕ ಶಕ್ತಿಗಳಿಂದ ರಕ್ಷಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ಶಾಕ್ತ ಪರಂಪರೆ"
+    },
+    "tags": ["ಶಕ್ತಿ", "ಧೈರ್ಯ", "ದುರ್ಗಾ"],
+    "devanagari": "ॐ दूं दुर्गायै नमः",
+    "iast": "oṃ dūṃ durgāyai namaḥ",
+    "simplified_pronunciation": "Om Doom Dur-ga-yai Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಸೂರ್ಯಾಸ್ತ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "season": ["ನವರಾತ್ರಿ"],
+    "weight": 1.3
+  },
+  {
+    "id": "mantra.gayatri_om_tat_savitur",
+    "text": "ಓಂ ತತ್ ಸವಿತುರ್ವರೆಣ್ಯಂ",
+    "explanation": [
+      "ಗಾಯತ್ರಿ ಮಂತ್ರದ ಸಂಕ್ಷಿಪ್ತ ರೂಪ, ಇದು ದೈವಿಕ ಜ್ಞಾನ ಮತ್ತು ಪ್ರಭೆಯನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಮನಸ್ಸಿನ ಸ್ಪಷ್ಟತೆಯನ್ನು ತೀವ್ರಗೊಳಿಸಿ ಆತ್ಮಿಕ ಜ್ಞಾನ ಮತ್ತು ಏಕಾಗ್ರತೆಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ.",
+      "ಪ್ರಭಾತ ಅಥವಾ ಮಧ್ಯಾಹ್ನ ಜಪಿಸುವುದು ಬೌದ್ಧಿಕ ಬೆಳವಣಿಗೆ ಮತ್ತು ನಿರ್ಧಾರಶಕ್ತಿಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಏಕಾಗ್ರತೆ ಮತ್ತು ಆತ್ಮಿಕ ಜಾಗೃತಿಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ಋಗ್ವೇದ",
+      "ref": "3.62.10"
+    },
+    "tags": ["ಜ್ಞಾನ", "ಪ್ರಭೆ", "ಆತ್ಮಿಕ"],
+    "devanagari": "ॐ तत्सवितुर्वरेण्यं",
+    "iast": "oṃ tat savitur vareṇyaṃ",
+    "simplified_pronunciation": "Om Tat Sa-vi-tur Va-ren-yam",
+    "suggested_reps": 11,
+    "best_times": ["ಪ್ರಭಾತ", "ಮಧ್ಯಾಹ್ನ"],
+    "difficulty": 2,
+    "language_level": "ಕಾವ್ಯಾತ್ಮಕ",
+    "weight": 1.4
+  },
+  {
+    "id": "mantra.rama_om_shri_peace",
+    "deity": "ರಾಮ",
+    "text": "ಓಂ ಶ್ರೀ ರಾಮಾಯ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ರಾಮನನ್ನು ಶಾಂತಿ, ಸತ್ಯ ಮತ್ತು ಧರ್ಮದ ಹೊಂದಾಣಿಕೆಗಾಗಿ ಆಮಂತ್ರಿಸುತ್ತದೆ.",
+      "ಇದು ಅಂತರಂಗ ಶಾಂತಿ, ನೀತಿಯ ಸ್ಪಷ್ಟತೆ ಮತ್ತು ಶಿಸ್ತಿನ ಕ್ರಿಯೆಯನ್ನು ಬೆಳೆಸುತ್ತದೆ.",
+      "ಪ್ರತಿದಿನ ಜಪಿಸುವುದು ಗುರಿಯ ಭಾವನೆ ಮತ್ತು ಕರುಣೆಯ ವರ್ತನೆಯನ್ನು ಬೆಳೆಸುತ್ತದೆ.",
+      "ನೈತಿಕತೆ ಮತ್ತು ಆತ್ಮಿಕ ಶಕ್ತಿಯೊಂದಿಗೆ ಬದುಕಲು ಬಯಸುವವರಿಗೆ ಇದು ಸೂಕ್ತ."
+    ],
+    "source": {
+      "title": "ವೈಷ್ಣವ ಪರಂಪರೆ"
+    },
+    "tags": ["ಶಾಂತಿ", "ಧರ್ಮ", "ರಾಮ"],
+    "devanagari": "ॐ श्री रामाय नमः",
+    "iast": "oṃ śrī rāmāya namaḥ",
+    "simplified_pronunciation": "Om Shree Ra-ma-ya Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಸಂಜೆ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.lakshmi_om_shri_joy",
+    "deity": "ಲಕ್ಷ್ಮೀ",
+    "text": "ಓಂ ಶ್ರೀ ಲಕ್ಷ್ಮ್ಯೈ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಲಕ್ಷ್ಮಿಯನ್ನು ಆನಂದ, ಸಮೃದ್ಧಿ ಮತ್ತು ಆತ್ಮಿಕ ಐಶ್ವರ್ಯಕ್ಕಾಗಿ ಆಮಂತ್ರಿಸುತ್ತದೆ.",
+      "ಇದು ಕೃತಜ್ಞತೆಯನ್ನು ಬೆಳೆಸಿ, ಸಕಾರಾತ್ಮಕ ಶಕ್ತಿಯನ್ನು ಆಕರ್ಷಿಸಿ ಭಾವನಾತ್ಮಕ ಸ್ಥಿರತೆಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ದೀಪಾವಳಿ ಅಥವಾ ದೈನಂದಿನ ಅಭ್ಯಾಸದಲ್ಲಿ ಜಪಿಸುವುದು ಸಮೃದ್ಧಿಯ ಮನೋಭಾವವನ್ನು ಬೆಳೆಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಜಪವು ಆನಂದ ಮತ್ತು ದೈವಿಕ ಕೃಪೆಯ ಅನುಭವವನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ಶಾಕ್ತ ಪರಂಪರೆ"
+    },
+    "tags": ["ಆನಂದ", "ಸಮೃದ್ಧಿ", "ಲಕ್ಷ್ಮೀ"],
+    "devanagari": "ॐ श्री लक्ष्म्यै नमः",
+    "iast": "oṃ śrī lakṣmyai namaḥ",
+    "simplified_pronunciation": "Om Shree Laksh-myai Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಸಂಜೆ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "season": ["ದೀಪಾವಳಿ"],
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.ganesha_om_gam_clarity",
+    "deity": "ಗಣೇಶ",
+    "text": "ಓಂ ಗಂ ಗಣಪತಯೇ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಗಣೇಶನನ್ನು ಸ್ಪಷ್ಟತೆ, ಯಶಸ್ಸು ಮತ್ತು ವಿಘ್ನ ನಿವಾರಣೆಗೆ ಆಮಂತ್ರಿಸುತ್ತದೆ.",
+      "‘ಗಂ’ ಎಂಬ ಬೀಜಾಕ್ಷರವು ಏಕಾಗ್ರತೆ ಮತ್ತು ದೃಢನಿಶ್ಚಯವನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ.",
+      "ಹೊಸ ಕಾರ್ಯಗಳು ಅಥವಾ ಸವಾಲುಗಳ ಮೊದಲು ಜಪಿಸುವುದು ಆತ್ಮವಿಶ್ವಾಸ ಮತ್ತು ಮನಸ್ಸಿನ ಸ್ಪಷ್ಟತೆಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಸಮಸ್ಯೆ ಪರಿಹಾರ ಕೌಶಲ್ಯ ಮತ್ತು ಸುಗಮ ಪ್ರಗತಿಯನ್ನು ನೀಡುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ಸ್ಮಾರ್ತ ಪರಂಪರೆ"
+    },
+    "tags": ["ಸ್ಪಷ್ಟತೆ", "ಯಶಸ್ಸು", "ಗಣೇಶ"],
+    "devanagari": "ॐ गं गणपतये नमः",
+    "iast": "oṃ gaṃ gaṇapataye namaḥ",
+    "simplified_pronunciation": "Om Gam Ga-na-pa-ta-ye Na-mah",
+    "suggested_reps": 11,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಮಧ್ಯಾಹ್ನ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.1
+  },
+  {
+    "id": "mantra.shanti_om_shantih",
+    "text": "ಓಂ ಶಾಂತಿಃ",
+    "explanation": [
+      "ಈ ಸರಳ ಮಂತ್ರವು ಮನಸ್ಸು, ದೇಹ ಮತ್ತು ಆತ್ಮಕ್ಕೆ ಶಾಂತಿಯನ್ನು ಕರೆಯುತ್ತದೆ.",
+      "ಇದು ಮನಸ್ಸಿನ ಅಶಾಂತಿಯನ್ನು ತಣಿಸಿ ಶಾಂತಿ ಮತ್ತು ಸಮರಸ್ಯವನ್ನು ಬೆಳೆಸುತ್ತದೆ.",
+      "ದಿನಾಂತ್ಯದಲ್ಲಿ ಜಪಿಸುವುದು ವಿಶ್ರಾಂತಿ ಮತ್ತು ಆತ್ಮಿಕ ಶಾಂತಿಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಅಂತರಂಗ ಶಾಂತಿ ಮತ್ತು ಒತ್ತಡದ ಶಮನವನ್ನು ನೀಡುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ಉಪನಿಷತ್ತುಗಳು"
+    },
+    "tags": ["ಶಾಂತಿ", "ಶಮನ", "ಸಮರಸ್ಯ"],
+    "devanagari": "ॐ शान्तिः",
+    "iast": "oṃ śāntiḥ",
+    "simplified_pronunciation": "Om Shaan-tee",
+    "suggested_reps": 11,
+    "best_times": ["ಸಂಜೆ", "ರಾತ್ರಿ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.vishnu_shantakaram",
+    "deity": "ವಿಷ್ಣು",
+    "text": "ಶಾಂತಾಕಾರಂ ಭುಜಗಶಯನಂ ಪದ್ಮನಾಭಂ ಸುರೇಶಂ ವಿಶ್ವಾಧಾರಂ ಗಗನಸದೃಶಂ ಮೇಘವರ್ಣಂ ಶುಭಾಙ್ಗಮ್",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ವಿಷ್ಣುವಿನ ಶಾಂತ ಸ್ವರೂಪವನ್ನು ಹೊಗಳುತ್ತದೆ, ಅವನು ಅನಂತ ಸರ್ಪದ ಮೇಲೆ ಮಲಗಿರುವುದು, ಇದು ಬ್ರಹ್ಮಾಂಡ ಸಮತೋಲನವನ್ನು ಸಂಕೇತಿಸುತ್ತದೆ.",
+      "ಇದು ಆಂತರಿಕ ಶಾಂತಿ, ರಕ್ಷಣೆ ಮತ್ತು ಸಾರ್ವತ್ರಿಕ ಸಾಮರಸ್ಯದೊಂದಿಗೆ ಹೊಂದಾಣಿಕೆಯನ್ನು ಬೆಳೆಸುತ್ತದೆ.",
+      "ಧ್ಯಾನ ಅಥವಾ ಏಕಾದಶಿಯ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದು ಆಧ್ಯಾತ್ಮಿಕ ಸ್ಥಿರತೆ ಮತ್ತು ಭಕ್ತಿಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಶಾಂತಿ, ಒತ್ತಡವನ್ನು ಕಡಿಮೆ ಮಾಡುತ್ತದೆ ಮತ್ತು ದೈವಿಕ ಸಂಪರ್ಕವನ್ನು ಗಾಢಗೊಳಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ವೈಷ್ಣವ ಪರಂಪರೆ"
+    },
+    "tags": ["ಶಾಂತಿ", "ರಕ್ಷಣೆ", "ವಿಷ್ಣು"],
+    "devanagari": "शान्ताकारं भुजगशयनं पद्मनाभं सुरेशं विश्वाधारं गगनसदृशं मेघवर्णं शुभाङ्गम्",
+    "iast": "śāntākāraṃ bhujagaśayanaṃ padmanābhaṃ sureśaṃ viśvādhāraṃ gaganasadṛśaṃ meghavarṇaṃ śubhāṅgam",
+    "simplified_pronunciation": "Shaan-taa-kaa-ram Bhu-ja-ga-sha-ya-nam Pad-ma-naa-bham Su-re-sham Vish-vaa-dhaa-ram Ga-ga-na-sa-drisham Me-gha-var-nam Shu-bhaan-gam",
+    "suggested_reps": 11,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಸಂಜೆ"],
+    "difficulty": 2,
+    "language_level": "ಕಾವ್ಯಾತ್ಮಕ",
+    "season": ["ಏಕಾದಶಿ"],
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.kali_om_krim",
+    "deity": "ಕಾಳಿ",
+    "text": "ಓಂ ಕ್ರೀಂ ಕಾಳಿಕಾಯೈ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಕಾಳಿಯನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ, ಪರಿವರ್ತನೆಯ ಉಗ್ರ ದೇವತೆ, ನಕಾರಾತ್ಮಕತೆ ಮತ್ತು ಭಯವನ್ನು ತೆಗೆದುಹಾಕಲು.",
+      "'ಕ್ರೀಂ' ಒಂದು ಬೀಜಾಕ್ಷರವಾಗಿದ್ದು, ಆಧ್ಯಾತ್ಮಿಕ ಶುದ್ಧೀಕರಣಕ್ಕಾಗಿ ಅವಳ ತೀವ್ರ ಶಕ್ತಿಯನ್ನು ಪ್ರವಹಿಸುತ್ತದೆ.",
+      "ಸವಾಲಿನ ಸಮಯಗಳಲ್ಲಿ ಅಥವಾ ತಾಂತ್ರಿಕ ಅಭ್ಯಾಸಗಳ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದು ಧೈರ್ಯ ಮತ್ತು ವಿಮೋಚನೆಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಆಳವಾದ ಭಯಗಳನ್ನು ಬಿಡುಗಡೆ ಮಾಡಲು ಮತ್ತು ಆಂತರಿಕ ಶಕ್ತಿಯನ್ನು ಉತ್ತೇಜಿಸಲು ಸಹಾಯ ಮಾಡುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ಶಾಕ್ತ ಪರಂಪರೆ"
+    },
+    "tags": ["ಪರಿವರ್ತನೆ", "ರಕ್ಷಣೆ", "ಕಾಳಿ"],
+    "devanagari": "ॐ क्रीं कालिकायै नमः",
+    "iast": "oṃ krīṃ kālikāyai namaḥ",
+    "simplified_pronunciation": "Om Kreem Kaa-lee-kaa-yai Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["ರಾತ್ರಿ", "ಮಧ್ಯರಾತ್ರಿ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.3
+  },
+  {
+    "id": "mantra.bhuvaneshwari_om_hrim",
+    "deity": "ಭುವನೇಶ್ವರಿ",
+    "text": "ಓಂ ಹ್ರೀಂ ಭುವನೇಶ್ವರ್ಯೈ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಭುವನೇಶ್ವರಿಯನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ, ಬ್ರಹ್ಮಾಂಡದ ದೇವತೆ, ಬ್ರಹ್ಮಾಂಡ ಸಾಮರಸ್ಯ ಮತ್ತು ಸಮೃದ್ಧಿಗಾಗಿ.",
+      "'ಹ್ರೀಂ' ಒಂದು ಬೀಜಾಕ್ಷರವಾಗಿದ್ದು, ಆಧ್ಯಾತ್ಮಿಕ ಮತ್ತು ಭೌತಿಕ ಸಮೃದ್ಧಿಯನ್ನು ವರ್ಧಿಸುತ್ತದೆ.",
+      "ಜಪಿಸುವುದು ಬ್ರಹ್ಮಾಂಡದೊಂದಿಗೆ ಸಂಪರ್ಕದ ಭಾವನೆ ಮತ್ತು ಆಂತರಿಕ ತೃಪ್ತಿಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ಸಮತೋಲನ ಮತ್ತು ಸಾರ್ವತ್ರಿಕ ಅರಿವನ್ನು ಬೆಳೆಸಲು ದೈನಂದಿನ ಅಭ್ಯಾಸಕ್ಕೆ ಇದು ಸೂಕ್ತವಾಗಿದೆ."
+    ],
+    "source": {
+      "title": "ಶಾಕ್ತ ಪರಂಪರೆ"
+    },
+    "tags": ["ಸಾಮರಸ್ಯ", "ಸಮೃದ್ಧಿ", "ಭುವನೇಶ್ವರಿ"],
+    "devanagari": "ॐ ह्रीं भुवनेश्वर्यै नमः",
+    "iast": "oṃ hrīṃ bhuvaneśvaryai namaḥ",
+    "simplified_pronunciation": "Om Hreem Bhu-va-nesh-va-ryai Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಸಂಜೆ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.surya_om_hraam",
+    "deity": "ಸೂರ್ಯ",
+    "text": "ಓಂ ಹ್ರಾಂ ಹ್ರೀಂ ಹ್ರೌಂ ಸಃ ಸೂರ್ಯಾಯ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಸೂರ್ಯ ದೇವತೆಯನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ, ಶಕ್ತಿ, ಆರೋಗ್ಯ ಮತ್ತು ಜ್ಞಾನೋದಯಕ್ಕಾಗಿ.",
+      "ಬೀಜಾಕ್ಷರಗಳು 'ಹ್ರಾಂ,' 'ಹ್ರೀಂ,' ಮತ್ತು 'ಹ್ರೌಂ' ಸೌರ ಶಕ್ತಿ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಬೆಳಕನ್ನು ವರ್ಧಿಸುತ್ತವೆ.",
+      "ಸೂರ್ಯೋದಯದಲ್ಲಿ ಜಪಿಸುವುದು ದೈಹಿಕ ಶಕ್ತಿ, ಮಾನಸಿಕ ಸ್ಪಷ್ಟತೆ ಮತ್ತು ನಾಯಕತ್ವ ಗುಣಗಳನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಆತ್ಮವಿಶ್ವಾಸ, ಆರೋಗ್ಯ ಮತ್ತು ಸಕಾರಾತ್ಮಕ ದೃಷ್ಟಿಕೋನವನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ವೈದಿಕ ಪರಂಪರೆ"
+    },
+    "tags": ["ಶಕ್ತಿ", "ಸ್ಪಷ್ಟತೆ", "ಸೂರ್ಯ"],
+    "devanagari": "ॐ ह्रां ह्रीं ह्रौं सः सूर्याय नमः",
+    "iast": "oṃ hrāṃ hrīṃ hrauṃ saḥ sūryāya namaḥ",
+    "simplified_pronunciation": "Om Hraam Hreem Hraum Sah Soor-yaa-ya Na-mah",
+    "suggested_reps": 11,
+    "best_times": ["ಸೂರ್ಯೋದಯ"],
+    "difficulty": 2,
+    "language_level": "ಸರಳ",
+    "weight": 1.1
+  },
+  {
+    "id": "mantra.chandra_om_chandraya",
+    "deity": "ಚಂದ್ರ",
+    "text": "ಓಂ ಚಂದ್ರಾಯ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಚಂದ್ರ ದೇವತೆಯನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ, ಭಾವನಾತ್ಮಕ ಸಮತೋಲನ ಮತ್ತು ಅಂತರ್ದೃಷ್ಟಿಗಾಗಿ.",
+      "ಇದು ಮನಸ್ಸನ್ನು ಶಾಂತಗೊಳಿಸುತ್ತದೆ, ಸೃಜನಶೀಲತೆಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ ಮತ್ತು ಭಾವನಾತ್ಮಕ ಸ್ಥಿರತೆಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ಹುಣ್ಣಿಮೆಯಲ್ಲಿ ಅಥವಾ ಸಂಜೆಯಲ್ಲಿ ಜಪಿಸುವುದು ಶಾಂತಿ ಮತ್ತು ಆಂತರಿಕ ಪ್ರತಿಬಿಂಬವನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಮಾನಸಿಕ ಶಾಂತಿ ಮತ್ತು ಅಂತರ್ದೃಷ್ಟಿ ಸ್ಪಷ್ಟತೆಯನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ವೈದಿಕ ಪರಂಪರೆ"
+    },
+    "tags": ["ಸಮತೋಲನ", "ಅಂತರ್ದೃಷ್ಟಿ", "ಚಂದ್ರ"],
+    "devanagari": "ॐ चन्द्राय नमः",
+    "iast": "oṃ candrāya namaḥ",
+    "simplified_pronunciation": "Om Chan-draa-ya Na-mah",
+    "suggested_reps": 11,
+    "best_times": ["ಸಂಜೆ", "ಹುಣ್ಣಿಮೆ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.mangala_om_mangalaya",
+    "deity": "ಮಂಗಳ",
+    "text": "ಓಂ ಮಂಗಳಾಯ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಮಂಗಳ (ಮಂಗಳ ಗ್ರಹ) ಅನ್ನು ಧೈರ್ಯ, ಶಕ್ತಿ ಮತ್ತು ದೃಢಸಂಕಲ್ಪಕ್ಕಾಗಿ ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ದೈಹಿಕ ಶಕ್ತಿ, ನಿರ್ಣಯಶಕ್ತಿ ಮತ್ತು ಸವಾಲುಗಳನ್ನು ಜಯಿಸುವ ಸಾಮರ್ಥ್ಯವನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ.",
+      "ಮಂಗಳವಾರ ಅಥವಾ ಸಂಘರ್ಷಗಳ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದು ಸಹಿಷ್ಣುತೆ ಮತ್ತು ನಿರ್ಣಾಯಕ ಕ್ರಿಯೆಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಆತ್ಮವಿಶ್ವಾಸವನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ ಮತ್ತು ಆವೇಗಶೀಲತೆಯಿಂದ ರಕ್ಷಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ನವಗ್ರಹ ಪರಂಪರೆ"
+    },
+    "tags": ["ಧೈರ್ಯ", "ಶಕ್ತಿ", "ಮಂಗಳ"],
+    "devanagari": "ॐ मङ्गलाय नमः",
+    "iast": "oṃ maṅgalāya namaḥ",
+    "simplified_pronunciation": "Om Man-ga-laa-ya Na-mah",
+    "suggested_reps": 11,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಮಂಗಳವಾರ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.budha_om_budhaya",
+    "deity": "ಬುಧ",
+    "text": "ಓಂ ಬುಧಾಯ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಬುಧ (ಬುಧ ಗ್ರಹ) ಅನ್ನು ಬುದ್ಧಿಶಕ್ತಿ, ಸಂವಹನ ಮತ್ತು ಹೊಂದಿಕೊಳ್ಳುವಿಕೆಗಾಗಿ ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಮಾನಸಿಕ ಚತುರತೆ, ವಾಗ್ಮಿತೆ ಮತ್ತು ಸಮಸ್ಯೆ ಪರಿಹಾರ ಕೌಶಲ್ಯಗಳನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ.",
+      "ಬುಧವಾರ ಅಥವಾ ಬೌದ್ಧಿಕ ಕಾರ್ಯಗಳ ಮೊದಲು ಜಪಿಸುವುದು ಏಕಾಗ್ರತೆ ಮತ್ತು ಸ್ಪಷ್ಟತೆಯನ್ನು ತೀಕ್ಷ್ಣಗೊಳಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಪರಿಣಾಮಕಾರಿ ಸಂವಹನ ಮತ್ತು ಮಾನಸಿಕ ನಮ್ಯತೆಯನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ನವಗ್ರಹ ಪರಂಪರೆ"
+    },
+    "tags": ["ಬುದ್ಧಿಶಕ್ತಿ", "ಸಂವಹನ", "ಬುಧ"],
+    "devanagari": "ॐ बुद्धाय नमः",
+    "iast": "oṃ budhāya namaḥ",
+    "simplified_pronunciation": "Om Bu-dhaa-ya Na-mah",
+    "suggested_reps": 11,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಬುಧವಾರ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.brihaspati_om_brihaspataye",
+    "deity": "ಬೃಹಸ್ಪತಿ",
+    "text": "ಓಂ ಬೃಹಸ್ಪತಯೇ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಬೃಹಸ್ಪತಿ (ಗುರು ಗ್ರಹ) ಅನ್ನು ಜ್ಞಾನ, ಸಮೃದ್ಧಿ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಮಾರ್ಗದರ್ಶನಕ್ಕಾಗಿ ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಜ್ಞಾನ, ನೈತಿಕ ತೀರ್ಪು ಮತ್ತು ಜೀವನದಲ್ಲಿ ಸಮೃದ್ಧಿಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ಗುರುವಾರ ಅಥವಾ ಅಧ್ಯಯನದ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದು ಸ್ಪಷ್ಟತೆ ಮತ್ತು ದೈವಿಕ ಮಾರ್ಗದರ್ಶನವನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಆಶಾವಾದ, ಕಲಿಕೆ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಬೆಳವಣಿಗೆಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ನವಗ್ರಹ ಪರಂಪರೆ"
+    },
+    "tags": ["ಜ್ಞಾನ", "ಸಮೃದ್ಧಿ", "ಬೃಹಸ್ಪತಿ"],
+    "devanagari": "ॐ बृहस्पतये नमः",
+    "iast": "oṃ bṛhaspataye namaḥ",
+    "simplified_pronunciation": "Om Bri-has-pa-ta-ye Na-mah",
+    "suggested_reps": 11,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಗುರುವಾರ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.shukra_om_shukraya",
+    "deity": "ಶುಕ್ರ",
+    "text": "ಓಂ ಶುಕ್ರಾಯ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಶುಕ್ರ (ಶುಕ್ರ ಗ್ರಹ) ಅನ್ನು ಪ್ರೀತಿ, ಸೌಂದರ್ಯ ಮತ್ತು ಭೌತಿಕ ಸುಖಕ್ಕಾಗಿ ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಸಂಬಂಧಗಳಲ್ಲಿ ಸಾಮರಸ್ಯ, ಸೃಜನಶೀಲತೆ ಮತ್ತು ಸೌಂದರ್ಯದ ಪ್ರಶಂಸೆಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ಶುಕ್ರವಾರ ಅಥವಾ ಸಾಮಾಜಿಕ ಕಾರ್ಯಕ್ರಮಗಳ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದು ಮೋಹಕತೆ ಮತ್ತು ಭಾವನಾತ್ಮಕ ಸಮತೋಲನವನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಆನಂದ, ಕಲಾತ್ಮಕ ಅಭಿವ್ಯಕ್ತಿ ಮತ್ತು ಸಂಬಂಧ ಸಾಮರಸ್ಯವನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ನವಗ್ರಹ ಪರಂಪರೆ"
+    },
+    "tags": ["ಪ್ರೀತಿ", "ಸೌಂದರ್ಯ", "ಶುಕ್ರ"],
+    "devanagari": "ॐ शुक्राय नमः",
+    "iast": "oṃ śukrāya namaḥ",
+    "simplified_pronunciation": "Om Shu-kraa-ya Na-mah",
+    "suggested_reps": 11,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಶುಕ್ರವಾರ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.shani_om_shanaye",
+    "deity": "ಶನಿ",
+    "text": "ಓಂ ಶನಯೇ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಶನಿ (ಶನಿ ಗ್ರಹ) ಅನ್ನು ಶಿಸ್ತು, ತಾಳ್ಮೆ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಬೆಳವಣಿಗೆಗಾಗಿ ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಅಡೆತಡೆಗಳನ್ನು ಜಯಿಸಲು, ಸಹಿಷ್ಣುತೆಯನ್ನು ಉತ್ತೇಜಿಸಲು ಮತ್ತು ವಿನಮ್ರತೆಯನ್ನು ಉತ್ತೇಜಿಸಲು ಸಹಾಯ ಮಾಡುತ್ತದೆ.",
+      "ಶನಿವಾರ ಅಥವಾ ಸವಾಲುಗಳ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದು ಪರಿಣಾಮಕಾರಿತೆ ಮತ್ತು ಆಂತರಿಕ ಶಕ್ತಿಯನ್ನು ಬೆಳೆಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಕರ್ಮವನ್ನು ಸಮತೋಲನಗೊಳಿಸುತ್ತದೆ ಮತ್ತು ದೀರ್ಘಕಾಲಿಕ ಗುರಿಗಳನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ನವಗ್ರಹ ಪರಂಪರೆ"
+    },
+    "tags": ["ಶಿಸ್ತು", "ತಾಳ್ಮೆ", "ಶನಿ"],
+    "devanagari": "ॐ शनये नमः",
+    "iast": "oṃ śanaye namaḥ",
+    "simplified_pronunciation": "Om Sha-na-ye Na-mah",
+    "suggested_reps": 11,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಶನಿವಾರ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.rahu_om_rahave",
+    "deity": "ರಾಹು",
+    "text": "ಓಂ ರಾಹವೇ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ರಾಹು, ಚಂದ್ರ ಗ್ರಹಣವನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ, ಗೊಂದಲ ಮತ್ತು ಭ್ರಮೆಯಿಂದ ರಕ್ಷಣೆಗಾಗಿ.",
+      "ಇದು ಸ್ಪಷ್ಟತೆ, ಮಹತ್ವಾಕಾಂಕ್ಷೆ ಮತ್ತು ಸಂಕೀರ್ಣ ಸಂದರ್ಭಗಳನ್ನು ನ್ಯಾವಿಗೇಟ್ ಮಾಡುವ ಸಾಮರ್ಥ್ಯವನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ಶನಿವಾರ ಅಥವಾ ಅನಿಶ್ಚಿತತೆಯ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದು ಏಕಾಗ್ರತೆ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ನೆಲೆಗಟ್ಟುವಿಕೆಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ವಂಚನಾತ್ಮಕ ಪ್ರಭಾವಗಳನ್ನು ಜಯಿಸಲು ಮತ್ತು ದೃಢಸಂಕಲ್ಪವನ್ನು ಹೆಚ್ಚಿಸಲು ಸಹಾಯ ಮಾಡುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ನವಗ್ರಹ ಪರಂಪರೆ"
+    },
+    "tags": ["ಸ್ಪಷ್ಟತೆ", "ರಕ್ಷಣೆ", "ರಾಹು"],
+    "devanagari": "ॐ राहवे नमः",
+    "iast": "oṃ rāhave namaḥ",
+    "simplified_pronunciation": "Om Raa-ha-ve Na-mah",
+    "suggested_reps": 11,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಶನಿವಾರ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.ketu_om_ketave",
+    "deity": "ಕೇತು",
+    "text": "ಓಂ ಕೇತವೇ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಕೇತು, ಚಂದ್ರ ಗ್ರಹಣವನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ, ಆಧ್ಯಾತ್ಮಿಕ ಅಂತರ್ದೃಷ್ಟಿ ಮತ್ತು ವಿಮೋಚನೆಗಾಗಿ.",
+      "ಇದು ವಿಶ್ಲೇಷಣೆ, ಅಂತರ್ದೃಷ್ಟಿ ಮತ್ತು ಭೌತಿಕ ಅಂಟಿಕೊಳ್ಳುವಿಕೆಗಳಿಂದ ಸ್ವಾತಂತ್ರ್ಯವನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ಮಂಗಳವಾರ ಅಥವಾ ಧ್ಯಾನದ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದು ಆಧ್ಯಾತ್ಮಿಕ ಅರಿವು ಮತ್ತು ಸ್ಪಷ್ಟತೆಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಆಂತರಿಕ ಬೆಳವಣಿಗೆ ಮತ್ತು ಕರ್ಮದ ಹೊರೆಗಳಿಂದ ಬಿಡುಗಡೆಯನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ನವಗ್ರಹ ಪರಂಪರೆ"
+    },
+    "tags": ["ಅಂತರ್ದೃಷ್ಟಿ", "ವಿಮೋಚನೆ", "ಕೇತು"],
+    "devanagari": "ॐ केतवे नमः",
+    "iast": "oṃ ketave namaḥ",
+    "simplified_pronunciation": "Om Ke-ta-ve Na-mah",
+    "suggested_reps": 11,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಮಂಗಳವಾರ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.tara_om_tare",
+    "deity": "ತಾರಾ",
+    "text": "ಓಂ ತಾರೇ ತುತ್ತಾರೇ ತುರೇ ಸ್ವಾಹಾ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ತಾರಾ, ಕರುಣೆಯ ದೇವತೆಯನ್ನು ರಕ್ಷಣೆ ಮತ್ತು ವಿಮೋಚನೆಗಾಗಿ ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಕರುಣೆ, ಅಡೆತಡೆಗಳನ್ನು ತೆಗೆದುಹಾಕುತ್ತದೆ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಸ್ವಾತಂತ್ರ್ಯವನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ಸವಾಲುಗಳ ಸಮಯದಲ್ಲಿ ಅಥವಾ ಧ್ಯಾನದಲ್ಲಿ ಜಪಿಸುವುದು ಆಂತರಿಕ ಶಕ್ತಿ ಮತ್ತು ಸಹಾನುಭೂತಿಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಕರುಣಾಜನಕ ಹೃದಯ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಸಹಿಷ್ಣುತೆಯನ್ನು ಬೆಳೆಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ಶಾಕ್ತ ಪರಂಪರೆ"
+    },
+    "tags": ["ಕರುಣೆ", "ರಕ್ಷಣೆ", "ತಾರಾ"],
+    "devanagari": "ॐ तारे तुत्तारे तुरे स्वाहा",
+    "iast": "oṃ tāre tuttāre ture svāhā",
+    "simplified_pronunciation": "Om Taa-re Tut-taa-re Tu-re Svaa-haa",
+    "suggested_reps": 21,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಸಂಜೆ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.pavamana_asato_ma",
+    "text": "ಅಸತೋ ಮಾ ಸದ್ಗಮಯ ತಮಸೋ ಮಾ ಜ್ಯೋತಿರ್ಗಮಯ ಮೃತ್ಯೋರ್ಮಾ ಅಮೃತಂ ಗಮಯ",
+    "explanation": [
+      "ಬೃಹದಾರಣ್ಯಕ ಉಪನಿಷತ್ತಿನಿಂದ ಬಂದ ಈ ಮಂತ್ರವು ಅಜ್ಞಾನದಿಂದ ಸತ್ಯಕ್ಕೆ ಮಾರ್ಗದರ್ಶನವನ್ನು ಬೇಡುತ್ತದೆ.",
+      "ಇದು ಸ್ಪಷ್ಟತೆ, ಆಧ್ಯಾತ್ಮಿಕ ಜಾಗೃತಿ ಮತ್ತು ಮೃತ್ಯು ಭಯದಿಂದ ವಿಮೋಚನೆಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ಧ್ಯಾನ ಅಥವಾ ಪರಿವರ್ತನೆಗಳ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದು ಜ್ಞಾನ ಮತ್ತು ಆಂತರಿಕ ಬೆಳಕನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಆಧ್ಯಾತ್ಮಿಕ ಬೆಳವಣಿಗೆ ಮತ್ತು ಮಾನಸಿಕ ಸ್ಪಷ್ಟತೆಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ಬೃಹದಾರಣ್ಯಕ ಉಪನಿಷತ್",
+      "ref": "1.3.28"
+    },
+    "tags": ["ಸತ್ಯ", "ಸ್ಪಷ್ಟತೆ", "ವಿಮೋಚನೆ"],
+    "devanagari": "असतो मा सद्गमय तमसो मा ज्योतिर्गमय मृत्योर्मा अमृतं गमय",
+    "iast": "asato mā sadgamaya tamaso mā jyotirgamaya mṛtyormā amṛtaṃ gamaya",
+    "simplified_pronunciation": "A-sa-to Maa Sad-ga-ma-ya Ta-ma-so Maa Jyo-tir-ga-ma-ya Mri-tyor-maa Am-ri-tam Ga-ma-ya",
+    "suggested_reps": 11,
+    "best_times": ["ಪ್ರಭಾತ", "ಸಂಜೆ"],
+    "difficulty": 2,
+    "language_level": "ಕಾವ್ಯಾತ್ಮಕ",
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.sarvesham_svastir",
+    "text": "ಓಂ ಸರ್ವೇಷಾಂ ಸ್ವಸ್ತಿರ್ ಭವತು ಸರ್ವೇಷಾಂ ಶಾಂತಿರ್ ಭವತು ಸರ್ವೇಷಾಂ ಪೂರ್ಣಂ ಭವತು ಸರ್ವೇಷಾಂ ಮಂಗಳಂ ಭವತು",
+    "explanation": [
+      "ಈ ವೈದಿಕ ಮಂತ್ರವು ಎಲ್ಲರಿಗೂ ಶುಭ, ಶಾಂತಿ, ಸಂಪೂರ್ಣತೆ ಮತ್ತು ಮಂಗಳವನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಸಾರ್ವತ್ರಿಕ ಸಾಮರಸ್ಯ, ಕರುಣೆ ಮತ್ತು ಸಾಮೂಹಿಕ ಸಮೃದ್ಧಿಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ಗುಂಪು ಪ್ರಾರ್ಥನೆ ಅಥವಾ ಧ್ಯಾನದ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದು ಏಕತೆ ಮತ್ತು ಸಕಾರಾತ್ಮಕ ಶಕ್ತಿಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಸಹಾನುಭೂತಿ ಮತ್ತು ಇತರರೊಂದಿಗೆ ಆಧ್ಯಾತ್ಮಿಕ ಸಂಪರ್ಕವನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ವೈದಿಕ ಪರಂಪರೆ"
+    },
+    "tags": ["ಸಾಮರಸ್ಯ", "ಶಾಂತಿ", "ಮಂಗಳ"],
+    "devanagari": "ॐ सर्वं विश्वतिर्भवतु सर्वं शान्तिर्भवतु सर्वं पूर्णं भवतु सर्वं मङ्गलं भवतु",
+    "iast": "oṃ sarveṣāṃ svastir bhavatu sarveṣāṃ śāntir bhavatu sarveṣāṃ pūrṇaṃ bhavatu sarveṣāṃ maṅgalaṃ bhavatu",
+    "simplified_pronunciation": "Om Sar-ve-shaam Svas-tir Bha-va-tu Sar-ve-shaam Shaan-tir Bha-va-tu Sar-ve-shaam Poor-nam Bha-va-tu Sar-ve-shaam Man-ga-lam Bha-va-tu",
+    "suggested_reps": 11,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಸಂಜೆ"],
+    "difficulty": 2,
+    "language_level": "ಕಾವ್ಯಾತ್ಮಕ",
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.sarve_bhavantu",
+    "text": "ಓಂ ಸರ್ವೇ ಭವಂತು ಸುಖಿನಃ ಸರ್ವೇ ಸಂತು ನಿರಾಮಯಾಃ ಸರ್ವೇ ಭದ್ರಾಣಿ ಪಶ್ಯಂತು ಮಾ ಕಶ್ಚಿದ್ ದುಃಖಭಾಗ್ಭವೇತ್",
+    "explanation": [
+      "ಈ ವೈದಿಕ ಮಂತ್ರವು ಸಾರ್ವತ್ರಿಕ ಸುಖ, ಆರೋಗ್ಯ ಮತ್ತು ದುಃಖದಿಂದ ಸ್ವಾತಂತ್ರ್ಯಕ್ಕಾಗಿ ಪ್ರಾರ್ಥಿಸುತ್ತದೆ.",
+      "ಇದು ಕರುಣೆ, ಒಳ್ಳೆಯ ಇಚ್ಛೆ ಮತ್ತು ಜಾಗತಿಕ ಏಕತೆಯ ಭಾವನೆಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ಗುಂಪು ಪ್ರಾರ್ಥನೆ ಅಥವಾ ಧ್ಯಾನದ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದು ಸಹಾನುಭೂತಿ ಮತ್ತು ಸಕಾರಾತ್ಮಕ ಉದ್ದೇಶಗಳನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಪರೋಪಕಾರ ಭಾವನೆಗಳು ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಸಾಮರಸ್ಯವನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ವೈದಿಕ ಪರಂಪರೆ"
+    },
+    "tags": ["ಸುಖ", "ಆರೋಗ್ಯ", "ಕರುಣೆ"],
+    "devanagari": "ॐ सर्वे भवन्तु सुखिनः सर्वे सन्तु निरामयाः सर्वे भद्राणि पश्यन्तु मा कश्चिद् दुखभाग्भवेत्",
+    "iast": "oṃ sarve bhavantu sukhinah sarve santu nirāmayāḥ sarve bhadrāṇi paśyantu mā kaścid duḥkhabhāgbhavet",
+    "simplified_pronunciation": "Om Sar-ve Bha-van-tu Su-khi-nah Sar-ve San-tu Ni-raa-ma-yaah Sar-ve Bha-draa-ni Pash-yan-tu Maa Kash-chid Du-kha-bhaag-bha-vet",
+    "suggested_reps": 11,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಸಂಜೆ"],
+    "difficulty": 2,
+    "language_level": "ಕಾವ್ಯಾತ್ಮಕ",
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.bhadram_karnebhih",
+    "text": "ಓಂ ಭದ್ರಂ ಕರ್ಣೇಭಿಃ ಶೃಣುಯಾಮ ದೇವಾಃ ಭದ್ರಂ ಪಶ್ಯೇಮಾಕ್ಷಭಿರ್ಯಜತ್ರಾಃ",
+    "explanation": [
+      "ಋಗ್ವೇದದಿಂದ ಬಂದ ಈ ಮಂತ್ರವು ಶುಭ ಕೇಳುವಿಕೆ ಮತ್ತು ನೋಡುವಿಕೆಗಾಗಿ ದೈವಿಕ ಆಶೀರ್ವಾದಗಳನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಗ್ರಹಿಕೆಯ ಸ್ಪಷ್ಟತೆ, ಆಧ್ಯಾತ್ಮಿಕ ಅರಿವು ಮತ್ತು ದೈವಿಕ ರಕ್ಷಣೆಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ಧ್ಯಾನ ಅಥವಾ ವೈದಿಕ ಆಚರಣೆಗಳ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದು ಇಂದ್ರಿಯ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಸ್ಪಷ್ಟತೆಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಮನಸ್ಸಿನ ಸ್ಥಿತಿ ಮತ್ತು ದೈವಿಕ ಮಾರ್ಗದರ್ಶನಕ್ಕೆ ಸ್ವೀಕಾರಶೀಲತೆಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ಋಗ್ವೇದ",
+      "ref": "1.89.8"
+    },
+    "tags": ["ಸ್ಪಷ್ಟತೆ", "ರಕ್ಷಣೆ", "ಅರಿವು"],
+    "devanagari": "ॐ भद्रं कर्णेभिः श्रृणुयाम देवाः भद्रं पश्येमाक्षभिर्यजत्राः",
+    "iast": "oṃ bhadraṃ karṇebhiḥ śṛṇuyāma devāḥ bhadraṃ paśyemākṣabhiryajatrāḥ",
+    "simplified_pronunciation": "Om Bha-dram Kar-ne-bhih Shree-nu-yaa-ma De-vaah Bha-dram Pa-shye-maak-sha-bhir-ya-ja-traah",
+    "suggested_reps": 11,
+    "best_times": ["ಪ್ರಭಾತ", "ಮಧ್ಯಾಹ್ನ"],
+    "difficulty": 2,
+    "language_level": "ಕಾವ್ಯಾತ್ಮಕ",
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.shamno_mitrah",
+    "text": "ಓಂ ಶಂ ನೋ ಮಿತ್ರಃ ಶಂ ವರುಣಃ ಶಂ ನೋ ಭವತ್ವರ್ಯಮಾ",
+    "explanation": [
+      "ತೈತ್ತಿರೀಯ ಉಪನಿಷತ್ತಿನಿಂದ ಬಂದ ಈ ಮಂತ್ರವು ಶಾಂತಿ ಮತ್ತು ರಕ್ಷಣೆಗಾಗಿ ದೈವಿಕ ಶಕ್ತಿಗಳನ್ನು ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಬ್ರಹ್ಮಾಂಡೀಯ ಶಕ್ತಿಗಳೊಂದಿಗೆ ಸಾಮರಸ್ಯ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಶುಭಾಶಯವನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ವೈದಿಕ ಆಚರಣೆಗಳು ಅಥವಾ ಧ್ಯಾನದ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದು ಆಂತರಿಕ ಶಾಂತಿ ಮತ್ತು ದೈವಿಕ ಸಂಪರ್ಕವನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಸಮತೋಲನ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಹೊಂದಾಣಿಕೆಯನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ತೈತ್ತಿರೀಯ ಉಪನಿಷತ್"
+    },
+    "tags": ["ಶಾಂತಿ", "ರಕ್ಷಣೆ", "ಸಾಮರಸ್ಯ"],
+    "devanagari": "ॐ शं नो मित्रः शं वरुणः शं नो भवत्वर्यमा",
+    "iast": "oṃ śaṃ no mitraḥ śaṃ varuṇaḥ śaṃ no bhavatvaryamā",
+    "simplified_pronunciation": "Om Sham No Mi-trah Sham Va-ru-nah Sham No Bha-vat-vary-a-maa",
+    "suggested_reps": 11,
+    "best_times": ["ಪ್ರಭಾತ", "ಸಂಜೆ"],
+    "difficulty": 2,
+    "language_level": "ಕಾವ್ಯಾತ್ಮಕ",
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.vang_me_manasi",
+    "text": "ಓಂ ವಾಙ್ ಮೇ ಮನಸಿ ಪ್ರತಿಷ್ಠಿತಾ ಮನೋ ಮೇ ವಾಚಿ ಪ್ರತಿಷ್ಠಿತಮ್",
+    "explanation": [
+      "ಋಗ್ವೇದದಿಂದ ಬಂದ ಈ ಮಂತ್ರವು ಮಾತು ಮತ್ತು ಮನಸ್ಸನ್ನು ದೈವಿಕ ಸತ್ಯದೊಂದಿಗೆ ಹೊಂದಾಣಿಕೆಗಾಗಿ ಬೇಡುತ್ತದೆ.",
+      "ಇದು ವಾಗ್ಮಿತೆ, ಮಾನಸಿಕ ಸ್ಪಷ್ಟತೆ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಏಕಾಗ್ರತೆಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ಮಾತನಾಡುವ ಮೊದಲು ಅಥವಾ ಅಧ್ಯಯನದ ಮೊದಲು ಜಪಿಸುವುದು ಉಚ್ಚಾರಣೆ ಮತ್ತು ಬೌದ್ಧಿಕ ತೀಕ್ಷ್ಣತೆಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಸತ್ಯವಾದ ಅಭಿವ್ಯಕ್ತಿ ಮತ್ತು ಮಾನಸಿಕ ಶಿಸ್ತನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ಋಗ್ವೇದ"
+    },
+    "tags": ["ಸ್ಪಷ್ಟತೆ", "ಸಂವಹನ", "ಸತ್ಯ"],
+    "devanagari": "ॐ वाङ् मे मनसि प्रतिष्ठिता मनो मे वाचि प्रतिष्ठितम्",
+    "iast": "oṃ vāṅ me manasi pratiṣṭhitā mano me vāci pratiṣṭhitam",
+    "simplified_pronunciation": "Om Vaang Me Ma-na-si Pra-tish-thi-taa Ma-no Me Vaa-chi Pra-tish-thi-tam",
+    "suggested_reps": 11,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಮಧ್ಯಾಹ್ನ"],
+    "difficulty": 2,
+    "language_level": "ಕಾವ್ಯಾತ್ಮಕ",
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.narasimha_om_narasimhaya",
+    "deity": "ನರಸಿಂಹ",
+    "text": "ಓಂ ನಮೋ ನರಸಿಂಹಾಯ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ನರಸಿಂಹ, ವಿಷ್ಣುವಿನ ಉಗ್ರ ಅವತಾರವನ್ನು ರಕ್ಷಣೆ ಮತ್ತು ಧೈರ್ಯಕ್ಕಾಗಿ ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ನಕಾರಾತ್ಮಕ ಶಕ್ತಿಗಳಿಂದ ರಕ್ಷಿಸುತ್ತದೆ ಮತ್ತು ನಿರ್ಭಯ ದೃಢಸಂಕಲ್ಪವನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ಸವಾಲುಗಳ ಸಮಯದಲ್ಲಿ ಅಥವಾ ಧ್ಯಾನದಲ್ಲಿ ಜಪಿಸುವುದು ಆಂತರಿಕ ಶಕ್ತಿ ಮತ್ತು ದೈವಿಕ ಸುರಕ್ಷತೆಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಸಹಿಷ್ಣುತೆ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಶಕ್ತಿಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ವೈಷ್ಣವ ಪರಂಪರೆ"
+    },
+    "tags": ["ರಕ್ಷಣೆ", "ಧೈರ್ಯ", "ನರಸಿಂಹ"],
+    "devanagari": "ॐ नमो नरसिंहाय",
+    "iast": "oṃ namo narasiṃhāya",
+    "simplified_pronunciation": "Om Na-mo Na-ra-sim-haa-ya",
+    "suggested_reps": 21,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಸಂಜೆ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.kubera_om_kuberaya",
+    "deity": "ಕುಬೇರ",
+    "text": "ಓಂ ಕುಬೇರಾಯ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಕುಬೇರ, ಸಂಪತ್ತಿನ ದೇವತೆಯನ್ನು ಸಮೃದ್ಧಿ ಮತ್ತು ಹಣಕಾಸಿನ ಸ್ಥಿರತೆಗಾಗಿ ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಸಮೃದ್ಧಿ, ಕೃತಜ್ಞತೆ ಮತ್ತು ಬುದ್ಧಿವಂತ ಸಂಪನ್ಮೂಲ ನಿರ್ವಹಣೆಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ಹಣಕಾಸು ಯೋಜನೆ ಅಥವಾ ದೀಪಾವಳಿಯ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದು ಸಕಾರಾತ್ಮಕ ಶಕ್ತಿ ಮತ್ತು ಸಂಪತ್ತನ್ನು ಆಕರ್ಷಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಸಮೃದ್ಧಿಯ ಮನಸ್ಥಿತಿ ಮತ್ತು ಹಣಕಾಸಿನ ಶಿಸ್ತನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ವೈದಿಕ ಪರಂಪರೆ"
+    },
+    "tags": ["ಸಂಪತ್ತು", "ಸಮೃದ್ಧಿ", "ಕುಬೇರ"],
+    "devanagari": "ॐ कुबेराय नमः",
+    "iast": "oṃ kuberāya namaḥ",
+    "simplified_pronunciation": "Om Ku-be-raa-ya Na-mah",
+    "suggested_reps": 11,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಸಂಜೆ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "season": ["ದೀಪಾವಳಿ"],
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.dhanvantari_om_dhanvantaraye",
+    "deity": "ಧನ್ವಂತರಿ",
+    "text": "ಓಂ ನಮೋ ಧನ್ವಂತರಯೇ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಧನ್ವಂತರಿ, ಆಯುರ್ವೇದದ ದೇವತೆಯನ್ನು ಆರೋಗ್ಯ ಮತ್ತು ಗುಣಪಡಿಸುವಿಕೆಗಾಗಿ ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ದೈಹಿಕ ಶುಭಾಶಯ, ಭಾವನಾತ್ಮಕ ಸಮತೋಲನ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಶಕ್ತಿಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ಅನಾರೋಗ್ಯ ಅಥವಾ ಶುಭಾಶಯ ಅಭ್ಯಾಸಗಳ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದು ವಿಮೋಚನೆ ಮತ್ತು ಶಕ್ತಿಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಸಮಗ್ರ ಆರೋಗ್ಯ ಮತ್ತು ದೈವಿಕ ಗುಣಪಡಿಸುವ ಶಕ್ತಿಯನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ವೈದಿಕ ಪರಂಪರೆ"
+    },
+    "tags": ["ಆರೋಗ್ಯ", "ಗುಣಪಡಿಸುವಿಕೆ", "ಧನ್ವಂತರಿ"],
+    "devanagari": "ॐ नमो धन्वन्तरये नमः",
+    "iast": "oṃ namo dhanvantaraye namaḥ",
+    "simplified_pronunciation": "Om Na-mo Dhan-van-ta-ra-ye Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಸಂಜೆ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.1
+  },
+  {
+    "id": "mantra.guru_brahma",
+    "text": "ಗುರುರ್ಬ್ರಹ್ಮಾ ಗುರುರ್ವಿಷ್ಣುರ್ಗುರುರ್ದೇವೋ ಮಹೇಶ್ವರಃ ಗುರುಃ ಸಾಕ್ಷಾತ್ ಪರಂ ಬ್ರಹ್ಮ ತಸ್ಮೈ ಶ್ರೀ ಗುರವೇ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಗುರುವನ್ನು ಬ್ರಹ್ಮ, ವಿಷ್ಣು ಮತ್ತು ಶಿವರ ಸಾಕಾರಮೂರ್ತಿಯಾಗಿ ಗೌರವಿಸುತ್ತದೆ.",
+      "ಇದು ಗೌರವ, ಜ್ಞಾನ ಮತ್ತು ಶಿಕ್ಷಕನಿಂದ ಆಧ್ಯಾತ್ಮಿಕ ಮಾರ್ಗದರ್ಶನವನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ಕಲಿಕೆ ಅಥವಾ ಧ್ಯಾನದ ಮೊದಲು ಜಪಿಸುವುದು ಗೌರವ ಮತ್ತು ಜ್ಞಾನಕ್ಕೆ ಸ್ವೀಕಾರಶೀಲತೆಯನ್ನು ಗಾಢಗೊಳಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಆಧ್ಯಾತ್ಮಿಕ ಬೆಳವಣಿಗೆ ಮತ್ತು ದೈವಿಕ ಜ್ಞಾನದೊಂದಿಗೆ ಸಂಪರ್ಕವನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ವೈದಿಕ ಪರಂಪರೆ"
+    },
+    "tags": ["ಜ್ಞಾನ", "ಮಾರ್ಗದರ್ಶನ", "ಗುರು"],
+    "devanagari": "गुरुर्ब्रह्मा गुरुर्विष्णुर्गुरुर्देवो महेश्वरः गुरुः साक्षात्परं ब्रह्म तस्मै श्री गुरवे नमः",
+    "iast": "gururbrahmā gururviṣṇurgururdevo maheśvaraḥ guruḥ sākṣātparaṃ brahma tasmai śrī gurave namaḥ",
+    "simplified_pronunciation": "Gu-rur-brah-maa Gu-rur-vish-nu Gu-rur-de-vo Ma-hesh-va-rah Gu-ruh Saak-shaat Pa-ram Brah-ma Tas-mai Shree Gu-ra-ve Na-mah",
+    "suggested_reps": 11,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಕಲಿಕೆ ಮೊದಲು"],
+    "difficulty": 2,
+    "language_level": "ಕಾವ್ಯಾತ್ಮಕ",
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.ayyappa_swamiye",
+    "deity": "ಅಯ್ಯಪ್ಪ",
+    "text": "ಸ್ವಾಮಿಯೇ ಶರಣಂ ಅಯ್ಯಪ್ಪ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಅಯ್ಯಪ್ಪ, ಶಿಸ್ತಿನ ದೇವತೆಯನ್ನು ರಕ್ಷಣೆ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಏಕಾಗ್ರತೆಗಾಗಿ ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಸಮರ್ಪಣೆ, ಶಿಸ್ತು ಮತ್ತು ದೈವಿಕ ಭಕ್ತಿಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ತೀರ್ಥಯಾತ್ರೆ ಅಥವಾ ಧ್ಯಾನದ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದು ಆಧ್ಯಾತ್ಮಿಕ ಸ್ಪಷ್ಟತೆ ಮತ್ತು ಶಕ್ತಿಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಬದ್ಧತೆ ಮತ್ತು ಆಂತರಿಕ ಶಾಂತಿಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ದಕ್ಷಿಣ ಭಾರತೀಯ ಪರಂಪರೆ"
+    },
+    "tags": ["ರಕ್ಷಣೆ", "ಭಕ್ತಿ", "ಅಯ್ಯಪ್ಪ"],
+    "devanagari": "स्वामिये शरणं अय्यप्पा",
+    "iast": "svāmiye śaraṇaṃ ayyappā",
+    "simplified_pronunciation": "Svaa-mi-ye Sha-ra-nam Ay-yap-paa",
+    "suggested_reps": 21,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಸಂಜೆ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.dattatreya_om_dattatreyaya",
+    "deity": "ದತ್ತಾತ್ರೇಯ",
+    "text": "ಓಂ ದತ್ತಾತ್ರೇಯಾಯ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ದತ್ತಾತ್ರೇಯ, ಬ್ರಹ್ಮ, ವಿಷ್ಣು ಮತ್ತು ಶಿವರ ಸಂಯುಕ್ತ ರೂಪವನ್ನು ಆಧ್ಯಾತ್ಮಿಕ ಜ್ಞಾನಕ್ಕಾಗಿ ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಏಕತೆ, ಜ್ಞಾನ ಮತ್ತು ಭೌತಿಕ ಅಂಟಿಕೊಳ್ಳುವಿಕೆಗಳಿಂದ ವಿಮೋಚನೆಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ಧ್ಯಾನ ಅಥವಾ ಆಧ್ಯಾತ್ಮಿಕ ಅಭ್ಯಾಸದ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದು ದೈವಿಕ ಅಂತರ್ದೃಷ್ಟಿ ಮತ್ತು ಸಮತೋಲನವನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಆಧ್ಯಾತ್ಮಿಕ ಬೆಳವಣಿಗೆ ಮತ್ತು ಆಂತರಿಕ ಸಾಮರಸ್ಯವನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ವೈದಿಕ ಪರಂಪರೆ"
+    },
+    "tags": ["ಜ್ಞಾನ", "ವಿಮೋಚನೆ", "ದತ್ತಾತ್ರೇಯ"],
+    "devanagari": "ॐ दत्तात्रेयाय नमः",
+    "iast": "oṃ dattātreyāya namaḥ",
+    "simplified_pronunciation": "Om Dat-taa-tre-yaa-ya Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಸಂಜೆ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.bhairava_om_bhairavaya",
+    "deity": "ಭೈರವ",
+    "text": "ಓಂ ಭೈರವಾಯ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಭೈರವ, ಶಿವನ ಉಗ್ರ ರೂಪವನ್ನು ರಕ್ಷಣೆ ಮತ್ತು ಪರಿವರ್ತನೆಗಾಗಿ ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಧೈರ್ಯ, ಭಯವನ್ನು ತೆಗೆದುಹಾಕುತ್ತದೆ ಮತ್ತು ನಕಾರಾತ್ಮಕ ಶಕ್ತಿಗಳನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸುತ್ತದೆ.",
+      "ಸವಾಲುಗಳ ಸಮಯದಲ್ಲಿ ಅಥವಾ ತಾಂತ್ರಿಕ ಅಭ್ಯಾಸಗಳಲ್ಲಿ ಜಪಿಸುವುದು ಶಕ್ತಿ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಶುದ್ಧೀಕರಣವನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಸಹಿಷ್ಣುತೆ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಶಕ್ತಿಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ಶೈವ ಪರಂಪರೆ"
+    },
+    "tags": ["ರಕ್ಷಣೆ", "ಪರಿವರ್ತನೆ", "ಭೈರವ"],
+    "devanagari": "ॐ भैरवाय नमः",
+    "iast": "oṃ bhairavāya namaḥ",
+    "simplified_pronunciation": "Om Bhai-ra-vaa-ya Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["ರಾತ್ರಿ", "ಮಧ್ಯರಾತ್ರಿ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.1
+  },
+  {
+    "id": "mantra.tripura_sundari_om_klim",
+    "deity": "ತ್ರಿಪುರ ಸುಂದರಿ",
+    "text": "ಓಂ ಕ್ಲೀಂ ತ್ರಿಪುರಸುಂದರ್ಯೈ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ತ್ರಿಪುರ ಸುಂದರಿ, ಸೌಂದರ್ಯ ಮತ್ತು ಆನಂದದ ದೇವತೆಯನ್ನು ದೈವಿಕ ಸಾಮರಸ್ಯಕ್ಕಾಗಿ ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "'ಕ್ಲೀಂ' ಒಂದು ಬೀಜಾಕ್ಷರವಾಗಿದ್ದು, ಪ್ರೀತಿ, ಸೃಜನಶೀಲತೆ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ತೃಪ್ತಿಯನ್ನು ವರ್ಧಿಸುತ್ತದೆ.",
+      "ಜಪಿಸುವುದು ಆಂತರಿಕ ಆನಂದ, ಸೌಂದರ್ಯದ ಪ್ರಶಂಸೆ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಸಮತೋಲನವನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಭಾವನಾತ್ಮಕ ಸಾಮರಸ್ಯ ಮತ್ತು ದೈವಿಕ ಸಂಪರ್ಕವನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ಶಾಕ್ತ ಪರಂಪರೆ"
+    },
+    "tags": ["ಸೌಂದರ್ಯ", "ಸಾಮರಸ್ಯ", "ತ್ರಿಪುರ ಸುಂದರಿ"],
+    "devanagari": "ॐ क्लीं त्रिपुरसुन्दर्यै नमः",
+    "iast": "oṃ klīṃ tripurasundaryai namaḥ",
+    "simplified_pronunciation": "Om Kleem Tri-pu-ra-sun-da-ryai Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಸಂಜೆ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.ganga_om_gangaya",
+    "deity": "ಗಂಗಾ",
+    "text": "ಓಂ ಗಂಗಾಯೈ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಗಂಗಾ, ಶುದ್ಧೀಕರಣದ ದೇವತೆಯನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸುವಿಕೆ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ನವೀಕರಣಕ್ಕಾಗಿ ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಮನಸ್ಸು, ದೇಹ ಮತ್ತು ಆತ್ಮದ ಶುದ್ಧತೆಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ, ಭಾವನಾತ್ಮಕ ಸ್ಪಷ್ಟತೆಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ನೀರಿನ ಹತ್ತಿರ ಅಥವಾ ಆಚರಣೆಗಳ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದು ಆಧ್ಯಾತ್ಮಿಕ ಶುದ್ಧೀಕರಣ ಮತ್ತು ಶಾಂತಿಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಆಂತರಿಕ ಶುದ್ಧೀಕರಣ ಮತ್ತು ದೈವಿಕ ಸಂಪರ್ಕವನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ವೈದಿಕ ಪರಂಪರೆ"
+    },
+    "tags": ["ಶುದ್ಧೀಕರಣ", "ಸ್ಪಷ್ಟತೆ", "ಗಂಗಾ"],
+    "devanagari": "ॐ गङ्गायै नमः",
+    "iast": "oṃ gaṅgāyai namaḥ",
+    "simplified_pronunciation": "Om Gan-gaa-yai Na-mah",
+    "suggested_reps": 11,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ನೀರಿನ ಹತ್ತಿರ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.0
+  },
+  {
+    "id": "mantra.rudra_om_namo_bhagavate",
+    "deity": "ಶಿವ",
+    "text": "ಓಂ ನಮೋ ಭಗವತೇ ರುದ್ರಾಯ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಶಿವನನ್ನು ರುದ್ರನಾಗಿ, ಉಗ್ರ ಆದರೆ ಕರುಣಾಜನಕ ದೇವತೆಯಾಗಿ ಪರಿವರ್ತನೆಗಾಗಿ ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಆಧ್ಯಾತ್ಮಿಕ ಶಕ್ತಿ, ನಕಾರಾತ್ಮಕತೆಯನ್ನು ತೆಗೆದುಹಾಕುತ್ತದೆ ಮತ್ತು ಆಂತರಿಕ ಶಾಂತಿಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ಧ್ಯಾನ ಅಥವಾ ಸವಾಲುಗಳ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದು ಸಹಿಷ್ಣುತೆ ಮತ್ತು ದೈವಿಕ ರಕ್ಷಣೆಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಆಧ್ಯಾತ್ಮಿಕ ಬೆಳವಣಿಗೆ ಮತ್ತು ಭಾವನಾತ್ಮಕ ಸಮತೋಲನವನ್ನು ಬೆಂಬಲಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ಶೈವ ಪರಂಪರೆ"
+    },
+    "tags": ["ಪರಿವರ್ತನೆ", "ರಕ್ಷಣೆ", "ಶಿವ"],
+    "devanagari": "ॐ नमो भगवते रुद्राय",
+    "iast": "oṃ namo bhagavate rudrāya",
+    "simplified_pronunciation": "Om Na-mo Bha-ga-va-te Rud-raa-ya",
+    "suggested_reps": 21,
+    "best_times": ["ಪ್ರಭಾತ", "ಸಂಜೆ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.2
+  },
+  {
+    "id": "mantra.lakshmana_om_lakshmanaya",
+    "deity": "ಲಕ್ಷ್ಮಣ",
+    "text": "ಓಂ ಲಕ್ಷ್ಮಣಾಯ ನಮಃ",
+    "explanation": [
+      "ಈ ಮಂತ್ರವು ಲಕ್ಷ್ಮಣ, ರಾಮನ ಭಕ್ತ ಸಹೋದರನನ್ನು ನಿಷ್ಠೆ ಮತ್ತು ರಕ್ಷಣೆಗಾಗಿ ಆಹ್ವಾನಿಸುತ್ತದೆ.",
+      "ಇದು ಸಂಬಂಧಗಳಲ್ಲಿ ಸಮರ್ಪಣೆ, ಶಕ್ತಿ ಮತ್ತು ನಿಸ್ವಾರ್ಥ ಸೇವೆಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ಭಕ್ತಿ ಅಭ್ಯಾಸಗಳ ಸಮಯದಲ್ಲಿ ಜಪಿಸುವುದು ನಿಷ್ಠೆ ಮತ್ತು ಆಧ್ಯಾತ್ಮಿಕ ಬದ್ಧತೆಯನ್ನು ಉತ್ತೇಜಿಸುತ್ತದೆ.",
+      "ನಿಯಮಿತ ಅಭ್ಯಾಸವು ಆಂತರಿಕ ಶಕ್ತಿ ಮತ್ತು ಭಕ್ತಿಯನ್ನು ಹೆಚ್ಚಿಸುತ್ತದೆ."
+    ],
+    "source": {
+      "title": "ವೈಷ್ಣವ ಪರಂಪರೆ"
+    },
+    "tags": ["ನಿಷ್ಠೆ", "ರಕ್ಷಣೆ", "ಲಕ್ಷ್ಮಣ"],
+    "devanagari": "ॐ लक्ष्मणाय नमः",
+    "iast": "oṃ lakṣmaṇāya namaḥ",
+    "simplified_pronunciation": "Om Lak-shma-naa-ya Na-mah",
+    "suggested_reps": 21,
+    "best_times": ["ಬೆಳಿಗ್ಗೆ", "ಸಂಜೆ"],
+    "difficulty": 1,
+    "language_level": "ಸರಳ",
+    "weight": 1.0
+  }
+]

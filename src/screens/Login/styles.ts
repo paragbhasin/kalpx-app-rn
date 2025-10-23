@@ -1,4 +1,4 @@
-import { Dimensions, StyleSheet } from "react-native";
+import { Dimensions, Platform, StyleSheet } from "react-native";
 
 const screenWidth = Dimensions.get("window").width;
 const  styles = StyleSheet.create({
@@ -188,6 +188,18 @@ const  styles = StyleSheet.create({
     fontFamily: "GelicaRegular",
     lineHeight: 16,
   },
+    skipContainer: {
+      width: "100%",
+      alignItems: "flex-end",
+      paddingRight: 20,
+      marginBottom: Platform.OS === "ios" ? 40 : 50,
+    },
+    skipText: {
+      fontSize: 14,
+      color: "#333",
+      fontFamily: "GelicaRegular",
+      lineHeight: 18,
+    },
 });
 
 export default styles;

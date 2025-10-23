@@ -81,7 +81,9 @@ export default function LoginScreen({ navigation }) {
           await AsyncStorage.removeItem("userEmail");
           await AsyncStorage.removeItem("userPassword");
         }
-        navigation.navigate("HomePage");
+        // navigation.navigate('HomePage', { screen: 'Home'});
+                // navigation.navigate('HomePage', { screen: 'Home'});
+                navigation.navigate("AppDrawer");
       } else {
         setLoginError(result?.error || "Login failed");
       }
@@ -117,7 +119,10 @@ export default function LoginScreen({ navigation }) {
                   } else {
                     console.log("Existing UUID:", userId);
                   }
-                  navigation.navigate("HomePage");
+                  // navigation.navigate('HomePage', { screen: 'Home'});
+                // navigation.navigate('HomePage', { screen: 'Home' });
+                navigation.navigate("AppDrawer");
+
                 } catch (error) {
                   console.error("Error handling UUID:", error);
                 }
@@ -206,6 +211,12 @@ export default function LoginScreen({ navigation }) {
                 )}
               </Formik>
             </View>
+
+      {/* <View style={styles.skipContainer}>
+        <TouchableOpacity onPress={() =>   navigation.navigate("AppDrawer")}>
+          <Text style={styles.skipText}>{t("welcome.skip")}</Text>
+        </TouchableOpacity>
+      </View> */}
           </ScrollView>
         </ImageBackground>
       </KeyboardAvoidingView>

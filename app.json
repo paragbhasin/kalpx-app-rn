@@ -2,7 +2,7 @@
   "expo": {
     "name": "kalpx",
     "slug": "kalpx",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "kalpx",
@@ -13,6 +13,7 @@
       "bundleIdentifier": "com.app.kalpx"
     },
     "android": {
+       "versionCode": 3,
       "package": "com.kalpx.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
@@ -78,16 +79,21 @@
           }
         }
       ],
-       [
+      [
         "@stripe/stripe-react-native",
         {
-          "merchantIdentifier": "8X74S6KGZL",
+          "merchantIdentifier": "",
           "enableGooglePay": true
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7461904f-1bca-4590-bc3b-c839d2768e44"
+      }
     }
   }
 }

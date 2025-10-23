@@ -150,7 +150,7 @@ export default function SignupScreen({ navigation }) {
           setLoadingType(null);
           // console.log("Signup Result:", result);
           if (result.success) {
-            navigation.navigate("HomePage");
+            navigation.navigate('HomePage', { screen: 'Home'});
           } else {
             setLoginError(result.error || "Signup failed");
           }

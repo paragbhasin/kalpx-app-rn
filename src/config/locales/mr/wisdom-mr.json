@@ -1,0 +1,1457 @@
+[
+  {
+    "id": "wis.stillness_is_strength",
+    "text": "**स्थिरता ही अंतर्मुख शक्ती आहे.**",
+    "explanation": [
+      "एक मंद श्वास घ्या.",
+      "विचारांना प्रकाशातील धुळीच्या कणांसारखे स्थिर होऊ द्या.",
+      "शांततेत, हृदय स्वतःची खोली आठवते.",
+      "आज दोन मिनिटांनी सुरुवात करा."
+    ],
+    "source": {
+      "title": "ध्यान उपदेश (सारांश)"
+    },
+    "tags": ["stillness", "focus", "practice"],
+    "deities": ["Shiva"],
+    "mood": "calm",
+    "difficulty": 1,
+    "weight": 1.1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.speak_truth_kindly",
+    "text": "**करुणेने सत्य बोला, जेणेकरून ते ऐकले जाईल.**",
+    "explanation": [
+      "काळजीशिवायचे सत्य हृदयाला कठोर करू शकते.",
+      "सत्याशिवायची काळजी मार्ग अस्पष्ट करू शकते.",
+      "तुमच्या पुढील संभाषणात दोघांना जोडा.",
+      "थांबा, नंतर सर्वात कोमल सत्य शब्द निवडा."
+    ],
+    "source": {
+      "title": "Gītā ethics (paraphrase)",
+      "ref": "17.15"
+    },
+    "tags": ["truth", "ahimsa", "speech"],
+    "mood": "clarity",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.devotion_softens_ego",
+    "text": "**भक्ती अहंकाराला शांत करते, मार्गाला प्रकाशित करते.**",
+    "explanation": [
+      "'हक्काने' नाही, तर प्रेमाने आठवण करा.",
+      "एका क्षणासाठी 'मी' ऐवजी कृतज्ञता वापरा.",
+      "आज एक छोटी सेवा करा.",
+      "हृदय किती हलके वाटते याकडे लक्ष द्या."
+    ],
+    "source": {
+      "title": "Bhakti wisdom (paraphrase)"
+    },
+    "tags": ["devotion", "gratitude", "seva"],
+    "deities": ["Krishna", "Rama"],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.discernment_before_action",
+    "text": "**तुमच्या कार्याआधी विवेक जागृत होतो.**",
+    "explanation": [
+      "विचारा: हे धर्माला मदत करेल की भरकटवेल?",
+      "एक श्वास शहाण्या निवडीसाठी जागा बनवतो.",
+      "जिथे घाई कमी होते, तिथे स्पष्टता वाढते.",
+      "वादळाच्या दबावाने नाही, तर दृढतेने कार्य करा."
+    ],
+    "source": {
+      "title": "Vedānta teaching (paraphrase)"
+    },
+    "tags": ["discernment", "dharma", "focus"],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.shakti_is_tender_strength",
+    "text": "**शक्ती हे कोमल बळ आहे: दृढ, दयाळू आणि जागरूक.**",
+    "explanation": [
+      "कठोरतेशिवायची शक्ती; दुर्बळतेशिवायची करुणा.",
+      "आज प्रेमाने एक मर्यादा निश्चित करा.",
+      "तुमच्या आतील आणि सभोवतालच्या गोष्टींचे रक्षण करा.",
+      "शक्तीचा एक कोमल चेहरा असू शकतो."
+    ],
+    "source": {
+      "title": "Shakti wisdom (paraphrase)"
+    },
+    "tags": ["shakti", "boundary", "courage", "compassion"],
+    "deities": ["Durga", "Lakshmi"],
+    "mood": "courage",
+    "difficulty": 2,
+    "season": ["navratri"],
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.dharma_guides_duty",
+    "text": "**धर्म केवळ इच्छेऐवजी कर्तव्याला मार्गदर्शन करतो.**",
+    "explanation": [
+      "केवळ गरजेसाठी नाही, तर उच्च कल्याणासाठी कार्य करा.",
+      "आज सत्याची सेवा कशात आहे, याचा विचार करा.",
+      "लहान कार्ये देखील शाश्वत नियमांशी जोडलेली आहेत.",
+      "प्रेमाने केलेले कर्तव्य आंतरिक शांती आणते."
+    ],
+    "source": {
+      "title": "Bhagavad Gītā (paraphrase)",
+      "ref": "2.47"
+    },
+    "tags": ["dharma", "duty", "selfless"],
+    "deities": ["Krishna"],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.serve_with_open_heart",
+    "text": "**खुल्या मनाने सेवा करा; कशाचीही अपेक्षा करू नका.**",
+    "explanation": [
+      "कोणताही गुप्त उद्देश न ठेवता द्या.",
+      "मदत करण्यात आनंद शोधा.",
+      "आज एक लहान, निःस्वार्थ कार्याची सुरुवात करा.",
+      "त्यामुळे येणारी हलकेपणाची भावना पाहा."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": ["seva", "compassion", "selfless"],
+    "deities": ["Rama", "Hanuman"],
+    "mood": "compassion",
+    "difficulty": 1,
+    "weight": 1.0,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.clarity_in_silence",
+    "text": "**स्पष्टता मौनाच्या बागेत फुलते.**",
+    "explanation": [
+      "बोलणे थांबवा आणि मनाला विश्रांती घेऊ द्या.",
+      "सत्य शांत क्षणांमध्ये हळूवारपणे बोलते.",
+      "आज पाच मिनिटे शांत राहण्याचा प्रयत्न करा.",
+      "कोणते ज्ञान आत जागृत होते ते पाहा."
+    ],
+    "source": {
+      "title": "Yoga Sutra (paraphrase)"
+    },
+    "tags": ["stillness", "clarity", "practice"],
+    "deities": ["Shiva"],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "poetic"
+  },
+  {
+    "id": "wis.courage_to_release",
+    "text": "**साहस अनावश्यक गोष्टींना मुक्त करण्याचा मार्ग मोकळा करतो.**",
+    "explanation": [
+      "जुन्या ओझ्यांना करुणेने जाऊ द्या.",
+      "विचारा: हे माझ्या सत्याशी जुळते का?",
+      "एक छोटी मुक्ती हृदयाला मुक्त करू शकते.",
+      "वाढीसाठी जी जागा तयार होते, त्यावर विश्वास ठेवा."
+    ],
+    "source": {
+      "title": "Vedānta wisdom (paraphrase)"
+    },
+    "tags": ["detachment", "courage", "growth"],
+    "mood": "courage",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.gratitude_opens_eyes",
+    "text": "**कृतज्ञता जीवनाची समृद्धी पाहण्यासाठी डोळे उघडते.**",
+    "explanation": [
+      "तुम्ही कृतज्ञ असलेल्या तीन गोष्टींची नावे सांगा.",
+      "प्रत्येक क्षणामध्ये लपलेली देणगी असते.",
+      "कृतज्ञ हृदय सर्वत्र सौंदर्य पाहते.",
+      "आज एका साध्या 'धन्यवाद'ने सुरुवात करा."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": ["gratitude", "awareness", "devotion"],
+    "deities": ["Lakshmi"],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "weight": 1.2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.patience_is_power",
+    "text": "**धैर्य ही वेळेचा मान राखणारी शक्ती आहे.**",
+    "explanation": [
+      "निष्कर्षांवर दबाव न टाकता प्रतीक्षा करा.",
+      "सत्य प्रकट करण्यासाठी जीवनाच्या लयीवर विश्वास ठेवा.",
+      "आज एका कार्यात धैर्याचा सराव करा.",
+      "स्थिर सहनशीलतेत शक्ती वाढते."
+    ],
+    "source": {
+      "title": "Smārta teaching (paraphrase)"
+    },
+    "tags": ["patience", "endurance", "focus"],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.kindness_is_strength",
+    "text": "**दया ही शांतपणे बरे करणारी शक्ती आहे.**",
+    "explanation": [
+      "एक दयाळू शब्द कोणाचाही दिवस बदलू शकतो.",
+      "कोमल कार्यात शक्ती दडलेली आहे.",
+      "कोणतीही अपेक्षा न ठेवता दया द्या.",
+      "ते तुमच्या हृदयाला कसे शांत करते याकडे लक्ष द्या."
+    ],
+    "source": {
+      "title": "Dharma ethics (paraphrase)"
+    },
+    "tags": ["ahimsa", "compassion", "love"],
+    "deities": ["Rama"],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_seeks_balance",
+    "text": "**ज्ञान अतिरेक नाही, तर संतुलन शोधते.**",
+    "explanation": [
+      "विचार किंवा कार्यात अतिरेक टाळा.",
+      "एका आव्हानात मध्यम मार्ग शोधा.",
+      "संतुलन स्पष्टता आणि शांती आणते.",
+      "आज एका निवडीत त्याचा अनुभव घ्या."
+    ],
+    "source": {
+      "title": "Yoga Darśana (paraphrase)"
+    },
+    "tags": ["balance", "discernment", "clarity"],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.surrender_to_flow",
+    "text": "**ईश्वराच्या प्रवाहापुढे आत्मसमर्पण करा.**",
+    "explanation": [
+      "सर्वकाही नियंत्रित करण्याच्या गरजेतून मुक्त व्हा.",
+      "ब्रह्मांडाच्या सखोल योजनेवर विश्वास ठेवा.",
+      "आज एका लहान क्षणात सोडून देण्याचा प्रयत्न करा.",
+      "जीवनासोबत वाहण्याची सहजता अनुभवा."
+    ],
+    "source": {
+      "title": "Bhakti wisdom (paraphrase)"
+    },
+    "tags": ["surrender", "devotion", "trust"],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.action_with_purpose",
+    "text": "**सत्यात स्थिर राहून, हेतूने कार्य करा.**",
+    "explanation": [
+      "प्रत्येक कार्य तुमचा मार्ग बनवते.",
+      "विचारा: हे धर्माशी जुळते का?",
+      "आज एक उद्देशपूर्ण कार्य निवडा.",
+      "सत्याला तुमच्या पावलांचे मार्गदर्शन करू द्या."
+    ],
+    "source": {
+      "title": "Bhagavad Gītā (paraphrase)",
+      "ref": "3.25"
+    },
+    "tags": ["dharma", "purpose", "karma"],
+    "deities": ["Krishna"],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.breath_is_anchor",
+    "text": "**श्वास वर्तमानाचा आधार आहे.**",
+    "explanation": [
+      "एक दीर्घ श्वास तुम्हाला त्वरित परत आणतो.",
+      "मन भटकते; श्वास त्याला घरी परत आणतो.",
+      "घाईच्या वेळी तीन मंद श्वास घ्या.",
+      "ती जी शांती पुनर्संचयित करते, ते पाहा."
+    ],
+    "source": {
+      "title": "Yoga practice (paraphrase)"
+    },
+    "tags": ["breath", "present", "calm"],
+    "mood": "calm",
+    "difficulty": 1,
+    "weight": 1.0,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_without_clinging",
+    "text": "**आसक्तीशिवाय प्रेम करा; त्याला मुक्तपणे वाहू द्या.**",
+    "explanation": [
+      "प्रेमाला हलकेच धरा, घट्ट चिकटून राहू नका.",
+      "मुक्त प्रेम अधिक सखोलपणे आणि खरे वाढते.",
+      "एका अपेक्षेला सोडून देण्याचा सराव करा.",
+      "स्वातंत्र्यात प्रेम कसे श्वास घेते ते पाहा."
+    ],
+    "source": {
+      "title": "Bhakti wisdom (paraphrase)"
+    },
+    "tags": ["love", "detachment", "devotion"],
+    "deities": ["Radha", "Krishna"],
+    "mood": "compassion",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.humility_invites_wisdom",
+    "text": "**नम्रता हृदयात ज्ञानाला आमंत्रित करते.**",
+    "explanation": [
+      "अहंकार अडवतो; नम्रता दरवाजे उघडते.",
+      "आज बोलण्यापेक्षा जास्त ऐका.",
+      "एका अनपेक्षित व्यक्तीकडून शिका.",
+      "नम्र हृदयात शहाणपण वाढते."
+    ],
+    "source": {
+      "title": "Smārta wisdom (paraphrase)"
+    },
+    "tags": ["humility", "wisdom", "listening"],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.seva_lights_path",
+    "text": "**सेवा दैवी जोडणीचा मार्ग प्रकाशित करते.**",
+    "explanation": [
+      "ईश्वराची सेवा करण्यासाठी इतरांची सेवा करा.",
+      "एक लहान मदतीचे कार्य आनंद जागृत करते.",
+      "आज वेळ किंवा लक्ष द्या.",
+      "निःस्वार्थ दानाचा प्रकाश अनुभवा."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": ["seva", "devotion", "compassion"],
+    "deities": ["Hanuman"],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.steady_mind_wins",
+    "text": "**स्थिर मन जीवनातील वादळांवर विजय मिळवते.**",
+    "explanation": [
+      "कोणत्याही आव्हानाचा सामना करण्यासाठी मनाला शांत करा.",
+      "चिंता वाढल्यावर एक मंद श्वास घ्या.",
+      "एका क्षणात दृढतेचा सराव करा.",
+      "आंतरिक शांती बाह्य गोंधळापेक्षा जास्त टिकते."
+    ],
+    "source": {
+      "title": "Yoga Sutra (paraphrase)"
+    },
+    "tags": ["focus", "calm", "resilience"],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.acceptance_frees_heart",
+    "text": "**स्वीकृती हृदयाला संघर्षातून मुक्त करते.**",
+    "explanation": [
+      "जे आहे त्याला विरोध दुःख निर्माण करतो.",
+      "वर्तमानाला जसे ते प्रकट होते तसे स्वीकारा.",
+      "आज एका लहान सत्याला स्वीकारा.",
+      "त्याला राहण्याची परवानगी देण्याची शांती अनुभवा."
+    ],
+    "source": {
+      "title": "Vedānta teaching (paraphrase)"
+    },
+    "tags": ["acceptance", "peace", "surrender"],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.knowledge_is_light",
+    "text": "**ज्ञान तो प्रकाश आहे जो शंका दूर करतो.**",
+    "explanation": [
+      "भ्रम दूर करण्यासाठी सत्याचा शोध घ्या.",
+      "वाचा, मनन करा किंवा एक प्रश्न विचारा.",
+      "ज्ञान जिज्ञासू पावलांनी वाढते.",
+      "आज समजुतीचा एक प्रकाश प्रज्वलित करा."
+    ],
+    "source": {
+      "title": "Upaniṣads (paraphrase)"
+    },
+    "tags": ["knowledge", "clarity", "truth"],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.joy_in_simplicity",
+    "text": "**आनंद वर्तमानातील साधेपणात लपलेला आहे.**",
+    "explanation": [
+      "आज एका लहान क्षणाचा आनंद घ्या.",
+      "कमी गोंधळ अधिक शांती प्रकट करतो.",
+      "एका सामान्य वस्तूत सौंदर्य शोधा.",
+      "जिथे लक्ष केंद्रित होते, तिथे आनंद वाढतो."
+    ],
+    "source": {
+      "title": "Smārta teaching (paraphrase)"
+    },
+    "tags": ["simplicity", "joy", "present"],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.faith_in_journey",
+    "text": "**प्रवासावरचा विश्वास हृदयाला शांत करतो.**",
+    "explanation": [
+      "जरी मार्ग अस्पष्ट असला तरी, प्रवासावर विश्वास ठेवा.",
+      "प्रत्येक पाऊल पुढील मार्ग प्रकट करते.",
+      "आज एका आव्हानात विश्वासाला धरून ठेवा.",
+      "हृदय दैवी वेळेत विश्रांती घेते."
+    ],
+    "source": {
+      "title": "Bhakti wisdom (paraphrase)"
+    },
+    "tags": ["faith", "surrender", "devotion"],
+    "deities": ["Rama"],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.strength_in_silence",
+    "text": "**शक्ती तुमच्या स्वतःच्या शांततेत वाढते.**",
+    "explanation": [
+      "आंतरिक शक्ती शोधण्यासाठी मनाला शांत करा.",
+      "आज एक क्षणाकरिता शांत बसा.",
+      "मौन तुमची खरी शक्ती प्रकट करते.",
+      "त्याला तुमच्या पुढील पावलाचे मार्गदर्शन करू द्या."
+    ],
+    "source": {
+      "title": "Śaiva teaching (paraphrase)"
+    },
+    "tags": ["stillness", "strength", "practice"],
+    "deities": ["Shiva"],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.compassion_heals_all",
+    "text": "**करुणा देणारा आणि घेणारा दोघांनाही बरे करते.**",
+    "explanation": [
+      "ज्याला गरज आहे त्याला प्रेम द्या.",
+      "ते तुमच्या हृदयात जी ऊब आणते, ती अनुभवा.",
+      "करुणा सर्व विभाजनांवर एक पूल बांधते.",
+      "आज एका कोमल कार्याचा प्रयत्न करा."
+    ],
+    "source": {
+      "title": "Dharma teaching (paraphrase)"
+    },
+    "tags": ["compassion", "ahimsa", "healing"],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.focus_shapes_destiny",
+    "text": "**लक्ष तुमच्या कार्यांच्या नशिबाला आकार देते.**",
+    "explanation": [
+      "विखुरलेले मन निष्कर्षांना विखुरते.",
+      "एक कार्य निवडा आणि त्याला तुमचे सर्वस्व द्या.",
+      "लक्ष एक स्थिर मार्ग बनवते.",
+      "दहा मिनिटांच्या ध्यानाने सुरुवात करा."
+    ],
+    "source": {
+      "title": "Yoga Sutra (paraphrase)"
+    },
+    "tags": ["focus", "discipline", "destiny"],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.grace_in_surrender",
+    "text": "**सत्यासमोर आत्मसमर्पण केल्याने कृपा बरसते.**",
+    "explanation": [
+      "जे आहे त्याला विरोध करणे सोडून द्या.",
+      "जेव्हा स्वीकारले जाते, तेव्हा सत्य शांती आणते.",
+      "आज एका क्षणात आत्मसमर्पण करा.",
+      "स्वीकृतीची कृपा अनुभवा."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": ["surrender", "grace", "truth"],
+    "deities": ["Krishna"],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.awareness_is_freedom",
+    "text": "**जागरूकता आंतरिक स्वातंत्र्याची किल्ली आहे.**",
+    "explanation": [
+      "निर्णयाशिवाय तुमचे विचार पाहा.",
+      "जागरूकता त्यांचे बंधन सैल करते.",
+      "आज एका भावनेला पूर्णपणे पाहा.",
+      "स्पष्ट दृष्टीमध्ये स्वातंत्र्य वाढते."
+    ],
+    "source": {
+      "title": "Vedānta wisdom (paraphrase)"
+    },
+    "tags": ["awareness", "freedom", "discernment"],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.devotion_is_strength",
+    "text": "**भक्ती ही कधीही न क्षीण होणारी शक्ती आहे.**",
+    "explanation": [
+      "ईश्वरावरील प्रेम हृदयाला बळकट करते.",
+      "आज एक प्रार्थना किंवा विचार अर्पण करा.",
+      "भक्ती तुम्हाला वादळातून पार करते.",
+      "शांत क्षणांमध्ये त्याची शक्ती अनुभवा."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": ["devotion", "strength", "faith"],
+    "deities": ["Krishna", "Rama"],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.truth_cuts_illusion",
+    "text": "**सत्य मायेचा पडदा कापून टाकते.**",
+    "explanation": [
+      "जे दिसत नाही, पण जे सत्य आहे ते शोधा.",
+      "आज एका गृहितकावर प्रश्न करा.",
+      "सत्य एक स्पष्ट मार्ग प्रकट करते.",
+      "साहस आणि काळजीने त्यावर चाला."
+    ],
+    "source": {
+      "title": "Upaniṣads (paraphrase)"
+    },
+    "tags": ["truth", "discernment", "clarity"],
+    "mood": "clarity",
+    "difficulty": 3,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.joy_in_service",
+    "text": "**निःस्वार्थ सेवेत आनंद मुक्तपणे वाहतो.**",
+    "explanation": [
+      "कोणतीही अपेक्षा न ठेवता इतरांना मदत करा.",
+      "उदारपणे देण्यात आनंद जागृत होतो.",
+      "आज एका सेवेच्या कार्याचा प्रयत्न करा.",
+      "तुमचे हृदय कसे विस्तारते ते पाहा."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": ["seva", "joy", "compassion"],
+    "deities": ["Hanuman"],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.calm_in_chaos",
+    "text": "**जीवनाच्या गोंधळाच्या हृदयात शांती शोधा.**",
+    "explanation": [
+      "गोंधळ परीक्षा घेतो, पण तुम्हाला तोडू शकत नाही.",
+      "वादळाच्या मध्यभागी एक दीर्घ श्वास घ्या.",
+      "आंतरिक शांततेचा एक क्षण शोधा.",
+      "शांती तुम्हाला सत्याशी जोडते."
+    ],
+    "source": {
+      "title": "Yoga teaching (paraphrase)"
+    },
+    "tags": ["peace", "resilience", "calm"],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.honesty_clears_path",
+    "text": "**सत्यता आंतरिक सत्याचा मार्ग साफ करते.**",
+    "explanation": [
+      "सर्वप्रथम, स्वतःशी खरे बोला.",
+      "एक प्रामाणिक क्षण दृष्टिकोन बदलतो.",
+      "आज एका लहान निवडीत सत्यवादी बना.",
+      "प्रामाणिक हृदयाला स्पष्टता अनुसरण करते."
+    ],
+    "source": {
+      "title": "Dharma ethics (paraphrase)"
+    },
+    "tags": ["truth", "honesty", "clarity"],
+    "mood": "clarity",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_is_eternal",
+    "text": "**प्रेम अस्तित्वाचा शाश्वत धागा आहे.**",
+    "explanation": [
+      "प्रेम सर्व प्राणी आणि क्षणांना जोडते.",
+      "आज एका लहान प्रकारे प्रेम व्यक्त करा.",
+      "ते सर्व क्षणिक गोष्टींच्या पलीकडे जाते.",
+      "आत त्याची कालातीत ऊब अनुभवा."
+    ],
+    "source": {
+      "title": "Bhakti wisdom (paraphrase)"
+    },
+    "tags": ["love", "devotion", "connection"],
+    "deities": ["Radha", "Krishna"],
+    "mood": "compassion",
+    "difficulty": 2,
+    "language_level": "poetic"
+  },
+  {
+    "id": "wis.discipline_shapes_freedom",
+    "text": "**शिस्त स्वातंत्र्याचा मार्ग मोकळा करते.**",
+    "explanation": [
+      "लहान, स्थिर पाऊले शक्ती निर्माण करतात.",
+      "आज एका सरावासाठी वचनबद्ध व्हा.",
+      "शिस्त तुम्हाला अराजकतेतून मुक्त करते.",
+      "ती जी स्पष्टता आणते ते पाहा."
+    ],
+    "source": {
+      "title": "Yoga Sutra (paraphrase)"
+    },
+    "tags": ["discipline", "freedom", "focus"],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.gratitude_transforms",
+    "text": "**कृतज्ञता हळूवारपणे वेदनेला शांतीत रूपांतरित करते.**",
+    "explanation": [
+      "कृतज्ञता वाटेल अशी एक गोष्ट शोधा.",
+      "कृतज्ञता हृदयाची दृष्टी बदलते.",
+      "वेदनेतही देणग्या दडलेल्या आहेत.",
+      "आज एका कठीण क्षणात त्याचा प्रयत्न करा."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": ["gratitude", "peace", "transform"],
+    "deities": ["Lakshmi"],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.courage_to_be",
+    "text": "**साहस तुम्हाला तुम्ही जसे आहात तसेच राहू देते.**",
+    "explanation": [
+      "भीती तुमचा खरा 'मी' लपवते; तिचा सामना करा.",
+      "तुमच्या अद्वितीयतेकडे एक पाऊल उचला.",
+      "जेव्हा तुम्ही सत्यवादी असता तेव्हा तुमचे सार तेजस्वी होते.",
+      "तुम्ही असण्याचे स्वातंत्र्य अनुभवा."
+    ],
+    "source": {
+      "title": "Śaiva wisdom (paraphrase)"
+    },
+    "tags": ["courage", "unique", "truth"],
+    "deities": ["Shiva"],
+    "mood": "courage",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.peace_in_surrender",
+    "text": "**नियंत्रण सोडल्याने शांती वाहते.**",
+    "explanation": [
+      "नियंत्रित करण्याची इच्छा सोडून द्या.",
+      "आज दैवी व्यवस्थेवर विश्वास ठेवा.",
+      "आत्मसमर्पण एक शांत हृदय आणते.",
+      "एका क्षणात त्याचा प्रयत्न करा."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": ["surrender", "peace", "trust"],
+    "deities": ["Krishna"],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_in_listening",
+    "text": "**ऐकल्याने ज्ञान वाढते.**",
+    "explanation": [
+      "खुल्या मनाने इतरांना ऐका.",
+      "आज उत्तर देण्यापूर्वी थांबा.",
+      "ऐकणे लपलेली सत्ये प्रकट करते.",
+      "एका संभाषणातून शिका."
+    ],
+    "source": {
+      "title": "Smārta teaching (paraphrase)"
+    },
+    "tags": ["listening", "wisdom", "humility"],
+    "mood": "clarity",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.strength_in_gentleness",
+    "text": "**कोमलतामध्ये शक्ती तेजस्वीपणे चमकते.**",
+    "explanation": [
+      "शक्तीला सिद्ध करण्यासाठी कठोरतेची गरज नाही.",
+      "आज एका जोडणीत कोमल बना.",
+      "कोमलता निःशस्त्र करते आणि उत्थान करते.",
+      "तिची शांत, चिरस्थायी शक्ती अनुभवा."
+    ],
+    "source": {
+      "title": "Shakti wisdom (paraphrase)"
+    },
+    "tags": ["gentleness", "strength", "compassion"],
+    "deities": ["Lakshmi"],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.faith_over_fear",
+    "text": "**श्रद्धा हृदयाच्या प्रकाशाने भयाला दूर करते.**",
+    "explanation": [
+      "जेव्हा तुम्ही ईश्वरावर विश्वास ठेवता तेव्हा भीती नाहीशी होते.",
+      "एका अनिश्चित क्षणात विश्वासाला धरून ठेवा.",
+      "त्याला शंकांमधून तुमचे मार्गदर्शन करू द्या.",
+      "हृदयाचे साहस जागृत होताना अनुभवा."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": ["faith", "courage", "surrender"],
+    "deities": ["Rama"],
+    "mood": "courage",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.clarity_in_purpose",
+    "text": "**हेतूची स्पष्टता मनाला बळकट करते.**",
+    "explanation": [
+      "कार्य करण्यापूर्वी, तुम्ही ते का करत आहात हे जाणून घ्या.",
+      "आज एका हेतूवर विचार करा.",
+      "हेतू हृदय आणि कार्याला संरेखित करतो.",
+      "दृढता आणि शांतीने चाला."
+    ],
+    "source": {
+      "title": "Bhagavad Gītā (paraphrase)",
+      "ref": "2.50"
+    },
+    "tags": ["purpose", "clarity", "focus"],
+    "deities": ["Krishna"],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.joy_in_presence",
+    "text": "**आनंद वर्तमानातील पूर्णत्वात राहतो.**",
+    "explanation": [
+      "आत्तापुरते भूतकाळ आणि भविष्य सोडून द्या.",
+      "तुमच्या सर्व इंद्रियांसह या क्षणाचा अनुभव घ्या.",
+      "एका साध्या श्वासात आनंद शोधा.",
+      "वर्तमान जीवनाचे सौंदर्य प्रकट करते."
+    ],
+    "source": {
+      "title": "Yoga teaching (paraphrase)"
+    },
+    "tags": ["present", "joy", "awareness"],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_unites_all",
+    "text": "**प्रेम प्रत्येक वस्तूला दैवी सुसंवादात एक करते.**",
+    "explanation": [
+      "प्रत्येक जीवामध्ये दैवीला पाहा.",
+      "एका लहान हावभावात प्रेम द्या.",
+      "प्रेम विभाजनाच्या भिंती तोडते.",
+      "जोडण्याची तिची शक्ती अनुभवा."
+    ],
+    "source": {
+      "title": "Bhakti wisdom (paraphrase)"
+    },
+    "tags": ["love", "unity", "devotion"],
+    "deities": ["Radha", "Krishna"],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_in_patience",
+    "text": "**ज्ञान धैर्याच्या जमिनीत उगवते.**",
+    "explanation": [
+      "स्पष्टता येण्यासाठी जागरूकपणे प्रतीक्षा करा.",
+      "घाई ढग निर्माण करते; धैर्य सत्य प्रकट करते.",
+      "आज एका कार्यात धैर्याचा सराव करा.",
+      "स्थिर वेळेत ज्ञान वाढते."
+    ],
+    "source": {
+      "title": "Smārta teaching (paraphrase)"
+    },
+    "tags": ["patience", "wisdom", "calm"],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.courage_in_truth",
+    "text": "**सत्यातील साहस आत्म्याचा मार्ग प्रकाशित करते.**",
+    "explanation": [
+      "जरी कठीण असले तरी, सत्य बोला.",
+      "एक प्रामाणिक शब्द एका क्षणाला बदलतो.",
+      "सत्य तुमच्या आंतरिक केंद्राला बळकट करते.",
+      "आज करुणेने त्याचा प्रयत्न करा."
+    ],
+    "source": {
+      "title": "Dharma ethics (paraphrase)"
+    },
+    "tags": ["truth", "courage", "honesty"],
+    "mood": "courage",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.peace_in_simplicity",
+    "text": "**शांती साधेपणाच्या हृदयात राहते.**",
+    "explanation": [
+      "आज एक अतिरिक्त इच्छा सोडून द्या.",
+      "एका साध्या कार्यात शांती शोधा.",
+      "साधेपणा मनाचा गोंधळ दूर करतो.",
+      "जिथे कमी पुरेसे आहे, तिथे शांती वाढते."
+    ],
+    "source": {
+      "title": "Yoga teaching (paraphrase)"
+    },
+    "tags": ["simplicity", "peace", "calm"],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.devotion_is_joy",
+    "text": "**भक्ती हे समर्पित हृदयाचे आनंद आहे.**",
+    "explanation": [
+      "आज तुमचे हृदय दैवीला अर्पण करा.",
+      "निःस्वार्थ प्रेमातून आनंद वाहतो.",
+      "भक्तीच्या एका लहान कार्याचा प्रयत्न करा.",
+      "त्यामुळे येणारी हलकेपणाची भावना अनुभवा."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": ["devotion", "joy", "surrender"],
+    "deities": ["Krishna"],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.strength_in_service",
+    "text": "**इतरांच्या सेवेत शक्ती वाढते.**",
+    "explanation": [
+      "तुमची स्वतःची शक्ती शोधण्यासाठी कोणाला तरी मदत करा.",
+      "आज दयेचे एक कार्य करा.",
+      "सेवा अविश्वसनीय शक्ती निर्माण करते.",
+      "त्याची मुळे तुमच्या हृदयात अनुभवा."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": ["seva", "strength", "compassion"],
+    "deities": ["Hanuman"],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.harmony_in_action",
+    "text": "**जीवनाच्या पवित्र प्रवाहाशी सुसंवादात कार्य करा.**",
+    "explanation": [
+      "तुमच्या कार्यांना सार्वत्रिक सत्याशी संरेखित करा.",
+      "वर्तमानाची लय अनुभवण्यासाठी थांबा.",
+      "एक जागरूक कार्य संतुलन पुनर्संचयित करते.",
+      "सुसंवाद हृदयात शांती आणतो."
+    ],
+    "source": {
+      "title": "Yoga teaching (paraphrase)"
+    },
+    "tags": ["harmony", "karma", "balance"],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.devotion_is_peace",
+    "text": "**भक्ती ही आत्म्याला बळकट करणारी शांती आहे.**",
+    "explanation": [
+      "आज तुमचे हृदय दैवीला अर्पण करा.",
+      "प्रेम अशांत मनाला शांत करते.",
+      "भक्तीच्या एका कार्यात शांती अनुभवा.",
+      "आत्मा पवित्र विश्वासात विश्रांती घेतो."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": ["devotion", "peace", "faith"],
+    "deities": ["Krishna"],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.courage_to_serve",
+    "text": "**सेवेचे साहस सर्व हृदयांना उत्थान देते.**",
+    "explanation": [
+      "लहान प्रकारेही साहसाने सेवा करा.",
+      "एक निःस्वार्थ कार्य बदलाला प्रज्वलित करते.",
+      "सेवेत साहस जीवन बदलून टाकते.",
+      "देण्याची शक्ती अनुभवा."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": ["seva", "courage", "compassion"],
+    "deities": ["Hanuman"],
+    "mood": "courage",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.clarity_in_breath",
+    "text": "**प्रत्येक जागरूक श्वासासोबत स्पष्टता वाढते.**",
+    "explanation": [
+      "मनाला साफ करण्यासाठी एक मंद श्वास घ्या.",
+      "एक श्वास तुमचे लक्ष बदलू शकतो.",
+      "शांत हृदयात सत्य चमकते.",
+      "जागरूकपणे तीन श्वास घेण्याचा प्रयत्न करा."
+    ],
+    "source": {
+      "title": "Yoga practice (paraphrase)"
+    },
+    "tags": ["breath", "clarity", "present"],
+    "mood": "clarity",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.gratitude_is_light",
+    "text": "**कृतज्ञता तो प्रकाश आहे जो आत्म्याला प्रकाशित करतो.**",
+    "explanation": [
+      "एका लहान क्षणासाठी 'धन्यवाद' म्हणा.",
+      "कृतज्ञता लपलेले सौंदर्य प्रकट करते.",
+      "ते हृदयाचा दृष्टिकोन बदलतो.",
+      "आज एका 'धन्यवाद'ने सुरुवात करा."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": ["gratitude", "joy", "awareness"],
+    "deities": ["Lakshmi"],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.stillness_is_power",
+    "text": "**स्थिरता ही स्वतःला मजबूत ठेवण्याची शक्ती आहे.**",
+    "explanation": [
+      "आंतरिक शक्ती शोधण्यासाठी थांबा.",
+      "एका क्षणाकरिता मनाला शांत करा.",
+      "स्थिरता अविचल शांती टिकवून ठेवते.",
+      "आज त्याला मौनात शोधा."
+    ],
+    "source": {
+      "title": "Śaiva teaching (paraphrase)"
+    },
+    "tags": ["stillness", "strength", "calm"],
+    "deities": ["Shiva"],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.kindness_is_bridge",
+    "text": "**दया सर्व हृदयांमध्ये पूल आहे.**",
+    "explanation": [
+      "एक दयाळू कार्य तुम्हाला इतरांशी जोडते.",
+      "कोणतीही अपेक्षा न ठेवता कोमलता द्या.",
+      "दया शांतपणे बरे करते आणि एकत्र करते.",
+      "आज एका जोडणीत त्याचा प्रयत्न करा."
+    ],
+    "source": {
+      "title": "Dharma teaching (paraphrase)"
+    },
+    "tags": ["love", "ahimsa", "compassion"],
+    "deities": ["Rama"],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.dharma_is_strength",
+    "text": "**धर्म तुमची मार्गदर्शक शक्ती आहे.**",
+    "explanation": [
+      "सत्याला तुमचा आधार घेऊन कार्य करा.",
+      "विचारा: हे उच्च कल्याणाची सेवा करते का?",
+      "धर्म तुमच्या प्रत्येक पावलाला बळकट करतो.",
+      "आज एक धार्मिक कार्य निवडा."
+    ],
+    "source": {
+      "title": "Bhagavad Gītā (paraphrase)",
+      "ref": "3.8"
+    },
+    "tags": ["dharma", "strength", "duty"],
+    "deities": ["Krishna"],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.surrender_is_calm",
+    "text": "**आत्मसमर्पण ती शांती आहे जी हृदयाला मुक्त करते.**",
+    "explanation": [
+      "नियंत्रणाची गरज सोडून द्या.",
+      "जीवनाच्या दैवी प्रवाहावर विश्वास ठेवा.",
+      "आत्मसमर्पण एक शांत शक्ती आणते.",
+      "एका क्षणात त्याचा अनुभव घ्या."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": ["surrender", "peace", "trust"],
+    "deities": ["Krishna"],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_in_patience",
+    "text": "**ज्ञान वेळेच्या धैर्यात फुलते.**",
+    "explanation": [
+      "स्पष्टता येण्यासाठी जागरूकपणे प्रतीक्षा करा.",
+      "घाई ढग निर्माण करते; धैर्य प्रकट करते.",
+      "आज एका कार्यात धैर्याचा प्रयत्न करा.",
+      "स्थिर क्षणात ज्ञान वाढते."
+    ],
+    "source": {
+      "title": "Smārta teaching (paraphrase)"
+    },
+    "tags": ["patience", "wisdom", "calm"],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_is_connection",
+    "text": "**प्रेम तो जोडणी आहे जो सर्व जीवांना बांधतो.**",
+    "explanation": [
+      "आज सर्वांमध्ये दैवीला पाहा.",
+      "एका कोमल कार्यात प्रेम सामायिक करा.",
+      "प्रेम सर्व विभागांच्या पलीकडे जाऊन एकत्र करते.",
+      "तुमच्या हृदयात त्याची ऊब अनुभवा."
+    ],
+    "source": {
+      "title": "Bhakti wisdom (paraphrase)"
+    },
+    "tags": ["love", "unity", "devotion"],
+    "deities": ["Radha", "Krishna"],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.courage_in_truth",
+    "text": "**सत्यातील साहस आत्म्याचा मार्ग प्रकाशित करते.**",
+    "explanation": [
+      "कोमल शक्तीने एक सत्य बोला.",
+      "प्रामाणिकपणा आंतरिक सावल्यांना दूर करतो.",
+      "सत्य निर्भय स्पष्टतेने मार्गदर्शन करते.",
+      "आज एका लहान क्षणात त्याचा प्रयत्न करा."
+    ],
+    "source": {
+      "title": "Dharma ethics (paraphrase)"
+    },
+    "tags": ["truth", "courage", "clarity"],
+    "mood": "courage",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.steadiness_in_chaos",
+    "text": "**गोंधळात स्थिरता खरी शक्ती प्रकट करते.**",
+    "explanation": [
+      "वादळ तुम्हाला घेरते तेव्हा शांत राहा.",
+      "तुमच्या हृदयाला स्थिर करण्यासाठी श्वास घ्या.",
+      "स्थिरता क्षणिक गोंधळाच्या पलीकडे जाते.",
+      "एका कठीण क्षणात त्याला शोधा."
+    ],
+    "source": {
+      "title": "Yoga Sutra (paraphrase)"
+    },
+    "tags": ["resilience", "calm", "strength"],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.gratitude_is_peace",
+    "text": "**कृतज्ञता ती शांती आहे जी हृदयाला शांत करते.**",
+    "explanation": [
+      "आज तुमच्या जीवनातील एका गोष्टीसाठी 'धन्यवाद' म्हणा.",
+      "कृतज्ञता अशांत मनाला शांत करते.",
+      "ते प्रत्येक क्षणात प्रकाश पाहते.",
+      "आत त्याची कोमल ऊब अनुभवा."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": ["gratitude", "peace", "joy"],
+    "deities": ["Lakshmi"],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.silence_is_wisdom",
+    "text": "**मौन हे ज्ञानाचे शांत आश्रयस्थान आहे.**",
+    "explanation": [
+      "आंतरिक सत्य ऐकण्यासाठी बोलणे थांबवा.",
+      "मौन तो गोंधळ प्रकट करते जो लपवतो.",
+      "आज एका क्षणाकरिता मौनाचा प्रयत्न करा.",
+      "स्थिरतेत ज्ञान बोलते."
+    ],
+    "source": {
+      "title": "Śaiva teaching (paraphrase)"
+    },
+    "tags": ["silence", "wisdom", "stillness"],
+    "deities": ["Shiva"],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "poetic"
+  },
+  {
+    "id": "wis.seva_is_joy",
+    "text": "**सेवा तो आनंद आहे जो देण्यातून वाहतो.**",
+    "explanation": [
+      "कोणतेही बक्षीस न शोधता सेवा करा.",
+      "एक निःस्वार्थ कार्य आनंद जागृत करते.",
+      "सेवा तुम्हाला दैवीशी जोडते.",
+      "देण्यात त्याचा प्रकाश अनुभवा."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": ["seva", "joy", "compassion"],
+    "deities": ["Hanuman"],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.dharma_is_clarity",
+    "text": "**धर्म तुमच्या कार्यांची मार्गदर्शक स्पष्टता आहे.**",
+    "explanation": [
+      "सत्याला तुमचा होकायंत्र घेऊन कार्य करा.",
+      "विचारा: हे माझ्या हेतूची सेवा करते का?",
+      "धर्म पुढील मार्ग प्रकाशित करतो.",
+      "आज एक स्पष्ट कार्य निवडा."
+    ],
+    "source": {
+      "title": "Bhagavad Gītā (paraphrase)",
+      "ref": "2.31"
+    },
+    "tags": ["dharma", "clarity", "duty"],
+    "deities": ["Krishna"],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.kindness_is_strength",
+    "text": "**दया ही शांतपणे बरे करणारी शक्ती आहे.**",
+    "explanation": [
+      "एक दयाळू कार्य कोणत्याही हृदयाला बदलू शकते.",
+      "कोणतीही अपेक्षा न ठेवता कोमलता द्या.",
+      "दया हे शक्तीचे कोमल स्वरूप आहे.",
+      "आज एका दयाळू कार्याचा प्रयत्न करा."
+    ],
+    "source": {
+      "title": "Dharma teaching (paraphrase)"
+    },
+    "tags": ["love", "ahimsa", "compassion"],
+    "deities": ["Rama"],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.breath_is_presence",
+    "text": "**श्वास तो वर्तमान आहे जो आत्म्याला स्थिर करतो.**",
+    "explanation": [
+      "एक मंद श्वास तुम्हाला त्वरित परत आणतो.",
+      "तुमच्या श्वासात जीवनाचा ठोका अनुभवा.",
+      "व्यस्त क्षणात मनाने श्वास घ्या.",
+      "वर्तमान तुमच्या हृदयाला स्थिर करतो."
+    ],
+    "source": {
+      "title": "Yoga practice (paraphrase)"
+    },
+    "tags": ["breath", "present", "calm"],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.surrender_is_trust",
+    "text": "**आत्मसमर्पण दैवी प्रकटीकरणावरचा विश्वास आहे.**",
+    "explanation": [
+      "एका लहान प्रकारे नियंत्रण सोडून द्या.",
+      "जीवनाच्या योजनेच्या प्रवाहावर विश्वास ठेवा.",
+      "आत्मसमर्पण हृदयाचा भार हलका करतो.",
+      "आज ती जी शांती आणते ती अनुभवा."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": ["surrender", "trust", "peace"],
+    "deities": ["Krishna"],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_in_stillness",
+    "text": "**ज्ञान मनाच्या स्थिरतेत वाढते.**",
+    "explanation": [
+      "विचारांना शांतपणे स्थिर होऊ द्या.",
+      "स्थिरता सखोल सत्ये प्रकट करते.",
+      "आज एका क्षणाकरिता मौनाचा प्रयत्न करा.",
+      "शहाणपणाचा प्रकाश स्थिरतेत चमकतो."
+    ],
+    "source": {
+      "title": "Śaiva teaching (paraphrase)"
+    },
+    "tags": ["wisdom", "stillness", "clarity"],
+    "deities": ["Shiva"],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_is_unity",
+    "text": "**प्रेम ती एकता आहे जी सर्व जीवांना बांधते.**",
+    "explanation": [
+      "आज सर्वांमध्ये दैवीला पाहा.",
+      "एका कोमल कार्यात प्रेम सामायिक करा.",
+      "प्रेम सर्व विभाजनांना विरघळवते.",
+      "जोडण्याची तिची शक्ती अनुभवा."
+    ],
+    "source": {
+      "title": "Bhakti wisdom (paraphrase)"
+    },
+    "tags": ["love", "unity", "devotion"],
+    "deities": ["Radha", "Krishna"],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.patience_is_calm",
+    "text": "**धैर्य ती शांती आहे जी हृदयाला बळकट करते.**",
+    "explanation": [
+      "निष्कर्षांवर दबाव न टाकता प्रतीक्षा करा.",
+      "धैर्य आंतरिक शक्ती निर्माण करते.",
+      "आज एका क्षणात त्याचा प्रयत्न करा.",
+      "शांती मौन सहनशीलतेत वाढते."
+    ],
+    "source": {
+      "title": "Smārta teaching (paraphrase)"
+    },
+    "tags": ["patience", "peace", "strength"],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.courage_in_silence",
+    "text": "**मौनातील साहस आंतरिक सत्य प्रकट करते.**",
+    "explanation": [
+      "तुमच्या आंतरिक विचारांचा सामना करण्यासाठी थांबा.",
+      "मौन शूर हृदयाला बळकट करते.",
+      "आज एका शांत क्षणाचा प्रयत्न करा.",
+      "सत्य निर्भय शांततेत चमकते."
+    ],
+    "source": {
+      "title": "Śaiva teaching (paraphrase)"
+    },
+    "tags": ["courage", "silence", "truth"],
+    "deities": ["Shiva"],
+    "mood": "courage",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.gratitude_is_joy",
+    "text": "**कृतज्ञता हे हृदय उघडण्याचे आनंद आहे.**",
+    "explanation": [
+      "एका साध्या गोष्टीसाठी 'धन्यवाद' म्हणा.",
+      "कृतज्ञता जीवनाचे सौंदर्य प्रकट करते.",
+      "ते प्रत्येक क्षणाचे रूपांतर करते.",
+      "आज त्याची ऊब अनुभवा."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": ["gratitude", "joy", "awareness"],
+    "deities": ["Lakshmi"],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.stillness_is_clarity",
+    "text": "**स्थिरता ही शांततेत जन्मलेली स्पष्टता आहे.**",
+    "explanation": [
+      "मनाला विश्रांती देण्यासाठी थांबा.",
+      "मौनात स्पष्टता प्रकट होते.",
+      "आज एक स्थिर क्षणाचा प्रयत्न करा.",
+      "शांत हृदयात सत्य पाहा."
+    ],
+    "source": {
+      "title": "Yoga Sutra (paraphrase)"
+    },
+    "tags": ["stillness", "clarity", "peace"],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "poetic"
+  },
+  {
+    "id": "wis.seva_is_connection",
+    "text": "**सेवा दैवी अग्नीशी जोडणी आहे.**",
+    "explanation": [
+      "शाश्वताला स्पर्श करण्यासाठी इतरांची सेवा करा.",
+      "एक निःस्वार्थ कार्य हृदयांना बांधते.",
+      "सेवा उत्थान करते आणि शुद्ध करते.",
+      "आज देण्यात त्याचा आनंद अनुभवा."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": ["seva", "connection", "compassion"],
+    "deities": ["Hanuman"],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.dharma_is_peace",
+    "text": "**धर्म आत्म्याला संरेखित करण्याची शांती आहे.**",
+    "explanation": [
+      "सत्याला तुमचा मार्गदर्शक घेऊन कार्य करा.",
+      "धर्म हृदय आणि कर्तव्याला संतुलित करतो.",
+      "आज एक धार्मिक कार्य निवडा.",
+      "न्यायपूर्ण मार्गाला शांती अनुसरण करते."
+    ],
+    "source": {
+      "title": "Bhagavad Gītā (paraphrase)",
+      "ref": "2.38"
+    },
+    "tags": ["dharma", "peace", "duty"],
+    "deities": ["Krishna"],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.kindness_is_healing",
+    "text": "**दया तो उपचार आहे जो सर्व वेदना शांत करतो.**",
+    "explanation": [
+      "एक दयाळू शब्द किंवा कार्य द्या.",
+      "दया तुटलेल्या हृदयांना सुधारते.",
+      "ते तुमच्या दृष्टीकोनाच्या पलीकडेही पसरते.",
+      "त्याच्या उपचारात्मक स्पर्शाला अनुभवा."
+    ],
+    "source": {
+      "title": "Dharma teaching (paraphrase)"
+    },
+    "tags": ["love", "healing", "compassion"],
+    "deities": ["Rama"],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.surrender_is_strength",
+    "text": "**आत्मसमर्पण हे नियंत्रण सोडण्याची शक्ती आहे.**",
+    "explanation": [
+      "एका आव्हानावरची तुमची पकड सोडून द्या.",
+      "तुमचा विश्वास दैवी प्रवाहावर ठेवा.",
+      "आत्मसमर्पण तुम्हाला आतून बळकट करते.",
+      "आज त्याची शांत शक्ती अनुभवा."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": ["surrender", "strength", "trust"],
+    "deities": ["Krishna"],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_in_peace",
+    "text": "**शांततेतील ज्ञान जीवनाचे सत्य प्रकट करते.**",
+    "explanation": [
+      "स्पष्टपणे पाहण्यासाठी शांती शोधा.",
+      "एका शांत क्षणाकरिता थांबा.",
+      "स्थिर हृदयात ज्ञान चमकते.",
+      "आज एका निवडीत त्याचा प्रयत्न करा."
+    ],
+    "source": {
+      "title": "Vedānta teaching (paraphrase)"
+    },
+    "tags": ["wisdom", "peace", "clarity"],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_is_light",
+    "text": "**प्रेम तो प्रकाश आहे जो सर्व मार्गांना तेजस्वी करतो.**",
+    "explanation": [
+      "एका कोमल कार्यात प्रेम सामायिक करा.",
+      "प्रेम प्रत्येक हृदयाला प्रकाशित करते.",
+      "ते सर्व क्षणिक क्षणांच्या पलीकडे जाते.",
+      "देण्यात त्याचा प्रकाश अनुभवा."
+    ],
+    "source": {
+      "title": "Bhakti wisdom (paraphrase)"
+    },
+    "tags": ["love", "light", "devotion"],
+    "deities": ["Radha", "Krishna"],
+    "mood": "compassion",
+    "difficulty": 2,
+    "language_level": "poetic"
+  }
+]

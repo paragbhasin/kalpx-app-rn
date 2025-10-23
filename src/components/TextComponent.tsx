@@ -30,6 +30,9 @@ const TextComponent = (props: any) => {
           case "cardText":
       textStyle = styles.cardText;
       break;
+         case "streakText":
+      textStyle = styles.streakText;
+      break;
     default:
       textStyle = styles.mediumText;
       break;
@@ -78,5 +81,10 @@ const styles = StyleSheet.create({
         color: Colors.Colors.Light_black,
     fontSize: FontSize.CONSTS.FS_14,
     fontFamily: "Inter_600SemiBold",
-  }
+  },
+    streakText: {
+    color: Colors.Colors.App_theme,
+    fontSize: FontSize.CONSTS.FS_10,
+    fontFamily: "Inter_500Medium",
+  },
 });

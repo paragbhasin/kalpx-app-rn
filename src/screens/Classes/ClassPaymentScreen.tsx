@@ -87,7 +87,7 @@ export default function ClassPaymentScreen({ navigation,route }) {
                 console.log(`Error code: ${error.code}`, error.message);
             } else {
                 console.log('Success', 'Your order is confirmed!');
-                  navigation.navigate("HomePage");
+                  navigation.navigate('HomePage', { screen: 'Home'});
                 // navigation.navigate('Payment', { DocImg: docData?.photoUpload, DocName: docData?.fullName, DocAddress: docData?.clinicName, selectedDate: selectedDate, selectedTime: selectedTime, slotBookingId: slotBookingID, slotId: selectedSlotId, specilization: docData?.specialization });
             }
             // let Url = `${EndPoints.STRIPE_PAYMENT}/${result?.data?.paymentIntentId}`;
@@ -131,7 +131,7 @@ export default function ClassPaymentScreen({ navigation,route }) {
   return (
      <StripeProvider
       publishableKey={publishableKey}
-      merchantIdentifier="8X74S6KGZL"
+      merchantIdentifier=""
       urlScheme="your-url-scheme"
     >
     <ScrollView

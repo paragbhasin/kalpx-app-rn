@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from "react";
+import { useNavigation } from "@react-navigation/native";
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
   ScrollView,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import { useNavigation } from "@react-navigation/native";
-import { useTranslation } from "react-i18next";
+import styles from "./languageStyle";
 
-export default function Language() {
-  const navigation = useNavigation();
+
+ const Language = () =>  {
+  const navigation : any= useNavigation();
   const { i18n } = useTranslation();
 
   // Available languages
@@ -65,39 +66,5 @@ export default function Language() {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fffaf5",
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    padding: 16,
-  },
-  headerText: {
-    fontSize: 16,
-    fontFamily: "GelicaMedium",
-    color: "#000",
-    lineHeight: 20,
-  },
-  menu: {
-    marginTop: 10,
-  },
-  menuItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 14,
-    paddingHorizontal: 20,
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#ddd",
-  },
-  menuText: {
-    fontSize: 16,
-    fontFamily: "GelicaRegular",
-    color: "#333",
-    lineHeight: 20,
-  },
-});
+export default Language;
+

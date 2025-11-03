@@ -5,14 +5,16 @@ import ClassesScreen from "../../screens/Classes/classesScreen";
 import ClassPaymentScreen from "../../screens/Classes/ClassPaymentScreen";
 import ClassRescheduleScreen from "../../screens/Classes/ClassRescheduleScreen";
 import ClassTutorDetailsScreen from "../../screens/Classes/ClassTutorDetailsScreen";
-import Explore from "../../screens/Explore";
 import ForgotPassword from "../../screens/ForgotPassword/ForgotPassword";
 import SetNewPasswordScreen from "../../screens/ForgotPassword/SetNewPasswordScreen";
 import VerificationScreen from "../../screens/ForgotPassword/VerificationScreen";
 import Dharma from "../../screens/Home/DailyDharma";
+import Explore from "../../screens/Home/Explore";
 import Home from "../../screens/Home/Home";
+import LearnMore from "../../screens/Home/LearnMore";
 import MySadana from "../../screens/Home/MySadana";
 import PoojaScreen from "../../screens/Home/PoojaScreen";
+import RelatedVideosScreen from "../../screens/Home/RelatedVideosScreen";
 import RetreatsScreen from "../../screens/Home/RetreatsScreen";
 import SadanaTrackerScreen from "../../screens/Home/SadanaTrackerScreen";
 import SubmitMantraScreen from "../../screens/Home/SubmitMantraScreen";
@@ -20,6 +22,7 @@ import TravelPlannerScreen from "../../screens/Home/TravelPlannerScreen";
 import LoginScreen from "../../screens/Login/LoginScreen";
 import OnlineclassesScreen from "../../screens/OnlineclassesScreen";
 import Language from "../../screens/Profile/Language";
+import Privacy from "../../screens/Profile/Privacy";
 import ProfileDetails from "../../screens/Profile/ProfileDetails";
 import Sankalp from "../../screens/Sankalp";
 import SignupScreen from "../../screens/Signup/SignupScreen";
@@ -62,6 +65,9 @@ const Routes = ({ initialRouteName = "Welcome" }) => {
       <Stack.Screen name="SadanaTrackerScreen" component={SadanaTrackerScreen} />
       <Stack.Screen name="Dharma" component={Dharma} />
       <Stack.Screen name="ProfileDetails" component={ProfileDetails} />
+      <Stack.Screen name="LearnMore" component={LearnMore} />
+      <Stack.Screen name="RelatedVideosScreen" component={RelatedVideosScreen} />
+      <Stack.Screen name="Privacy" component={Privacy} />
     </Stack.Navigator>
   );
 };

@@ -4,9 +4,11 @@ import colors from "../theme/colors"; // adjust path if needed
  
 export default function CategoryCard({ item, selected, onToggle }) {
    const isRemote = typeof item.image === "string" && item.image.startsWith("http");
+    const uniqueKey = item?.key ?? item?.id ?? item?.name;
+
   return (
     <Pressable
-      onPress={() => onToggle(item.id)}
+      onPress={() => onToggle(uniqueKey)}
       style={[styles.card, selected && styles.selected]}
     >
       {/* <Image source={{ uri: item.image }} style={styles.image} /> */}

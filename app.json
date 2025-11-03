@@ -4,19 +4,24 @@
     "slug": "kalpx",
     "version": "1.0.1",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/AppIconImg.jpeg",
     "scheme": "kalpx",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+      "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD", 
+      "fallbackToCacheTimeout": 0
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.app.kalpx"
     },
     "android": {
-       "versionCode": 3,
+       "versionCode": 6,
       "package": "com.kalpx.app",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/AppIconImg.jpeg",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true

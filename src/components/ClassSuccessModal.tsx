@@ -15,8 +15,8 @@ const ClassSuccessModal: React.FC<SuccessModalProps> = ({ visible, title, subTit
   return (
     <Modal
       isVisible={visible}
-      onBackdropPress={() => {}} // ❌ disable closing on backdrop
-      onBackButtonPress={() => {}} // ❌ disable Android back button
+      onBackdropPress={() => {}} 
+      onBackButtonPress={() => {}}
       backdropOpacity={0.6}
       animationIn="zoomIn"
       animationOut="zoomOut"

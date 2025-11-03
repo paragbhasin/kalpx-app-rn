@@ -33,6 +33,8 @@ const TextComponent = (props: any) => {
          case "streakText":
       textStyle = styles.streakText;
       break;
+      case "headerBoldText":
+        textStyle = styles.headerBoldText
     default:
       textStyle = styles.mediumText;
       break;
@@ -87,4 +89,9 @@ const styles = StyleSheet.create({
     fontSize: FontSize.CONSTS.FS_10,
     fontFamily: "Inter_500Medium",
   },
+  headerBoldText:{
+        color: Colors.Colors.Light_black,
+    fontSize: FontSize.CONSTS.FS_20,
+    fontFamily: "Inter_700Bold",
+  }
 });

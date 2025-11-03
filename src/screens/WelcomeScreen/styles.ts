@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     fontFamily: "GelicaMedium",
-    lineHeight: 20,
+      // lineHeight: 20,
   },
   skipContainer: {
     width: "100%",
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#333",
     fontFamily: "GelicaRegular",
-    lineHeight: 18,
+    // lineHeight: 18,
   },
     brand: {
     fontSize: 38,
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
     color: "#9A7548",
     marginBottom: 6,
     fontFamily: "GelicaBold",
-    lineHeight: 40,
+    // lineHeight: 40,
   },
   heading: {
     fontSize: 18,
@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: "#66605a",
     fontFamily: "GelicaRegular",
-    lineHeight: 40,
+    // lineHeight: 40,
   },
   welcome:{
     fontSize: 44,
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     color: "#9A7548",
     fontFamily: "GelicaBold",
     marginVertical:8,
-    lineHeight: 40,
+    // lineHeight: 40,
   },
     heading2: {
     fontSize: 22,
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     color: "#000000",
     marginBottom: 6,
     // fontFamily: "GelicaBold",
-    lineHeight: 40,
+    // lineHeight: 40,
   },
     joinSubText: {
     fontSize: 14,

@@ -17,6 +17,8 @@ export default {
                 pending_bg:"#D4A0171A",
                cancel_bg :"#FF42421A",
                canecl:"#FF6767",
-               header_bg:"#FDF5E9"
+               header_bg:"#FDF5E9",
+               button_bg:"#EEEDE9",
+               black_edge:"#1E1E1E"
         }
 }

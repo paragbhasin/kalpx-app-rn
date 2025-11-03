@@ -26,47 +26,50 @@ import styles from "./homestyles";
 import { AnyAction } from "@reduxjs/toolkit";
 import { useDispatch } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
+import i18n from "../../config/i18n";
 import { SANATAN_PRACTICES_FINAL } from "../../data/sanatanPractices";
 import { RootState } from "../../store";
 import { getDailyDharmaTracker } from "./actions";
 
 const { width } = Dimensions.get("window");
 
-const sadanaLevels = [
-  {
-    id: 1,
-    title: "Beginner",
-    subtitle: "New to spiritual practices",
-    options: [
-      "5-10 minute sessions",
-      "Simple mantras",
-      "Basic breathing",
-      "Gentle guidance",
-    ],
-  },
-  {
-    id: 2,
-    title: "Intermediate",
-    subtitle: "Some experience with practices",
-    options: [
-      "10-20 minute sessions",
-      "Traditional mantras",
-      "Meditation techniques",
-      "Structured guidance",
-    ],
-  },
-  {
-    id: 3,
-    title: "Advanced",
-    subtitle: "Deeply engaged in spiritual practices",
-    options: [
-      "20+ minute sessions",
-      "Complex mantras",
-      "Advanced techniques",
-      "Self-directed practice",
-    ],
-  },
-];
+// const sadanaLevels = [
+//   {
+//     id: 1,
+//     title: "Beginner",
+//     subtitle: "New to spiritual practices",
+//     options: [
+//       "5-10 minute sessions",
+//       "Simple mantras",
+//       "Basic breathing",
+//       "Gentle guidance",
+//     ],
+//   },
+//   {
+//     id: 2,
+//     title: "Intermediate",
+//     subtitle: "Some experience with practices",
+//     options: [
+//       "10-20 minute sessions",
+//       "Traditional mantras",
+//       "Meditation techniques",
+//       "Structured guidance",
+//     ],
+//   },
+//   {
+//     id: 3,
+//     title: "Advanced",
+//     subtitle: "Deeply engaged in spiritual practices",
+//     options: [
+//       "20+ minute sessions",
+//       "Complex mantras",
+//       "Advanced techniques",
+//       "Self-directed practice",
+//     ],
+//   },
+// ];
+
+
 
 const PAGE_SIZE = 5;
 
@@ -85,7 +88,41 @@ const [chosenLevel, setChosenLevel] = useState("Beginner");
   console.log("selectedmantra >>>>>>",preselectedMantra);
      const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
 
-
+const sadanaLevels = [
+  {
+    id: 1,
+    title: t("mySadhana.levels.beginner.title"),
+    subtitle: t("mySadhana.levels.beginner.subtitle"),
+    options: [
+      t("mySadhana.levels.beginner.option1"),
+      t("mySadhana.levels.beginner.option2"),
+      t("mySadhana.levels.beginner.option3"),
+      t("mySadhana.levels.beginner.option4"),
+    ],
+  },
+  {
+    id: 2,
+    title: t("mySadhana.levels.intermediate.title"),
+    subtitle: t("mySadhana.levels.intermediate.subtitle"),
+    options: [
+      t("mySadhana.levels.intermediate.option1"),
+      t("mySadhana.levels.intermediate.option2"),
+      t("mySadhana.levels.intermediate.option3"),
+      t("mySadhana.levels.intermediate.option4"),
+    ],
+  },
+  {
+    id: 3,
+    title: t("mySadhana.levels.advanced.title"),
+    subtitle: t("mySadhana.levels.advanced.subtitle"),
+    options: [
+      t("mySadhana.levels.advanced.option1"),
+      t("mySadhana.levels.advanced.option2"),
+      t("mySadhana.levels.advanced.option3"),
+      t("mySadhana.levels.advanced.option4"),
+    ],
+  },
+];
 
 // useEffect(() => {
 //   dispatch(
@@ -276,42 +313,82 @@ useEffect(() => {
 };
 
 
-  const selectedLevel = sadanaLevels[activeIndex].title.toLowerCase();
+  // const selectedLevel = sadanaLevels[activeIndex].title.toLowerCase();
+
+const LEVEL_KEYS = ["beginner", "intermediate", "advanced"];
+const selectedLevel = LEVEL_KEYS[activeIndex];
 
   const filteredPractices = useMemo(() => {
-    let practices = SANATAN_PRACTICES_FINAL;
+  let practices = SANATAN_PRACTICES_FINAL;
 
-    // Filter by level
-    practices = practices.filter(
-      (p: any) => p.level.toLowerCase() === selectedLevel
-    );
+  // ✅ Filter by level
+  practices = practices.filter(
+    (p: any) => p.level?.toLowerCase() === selectedLevel
+  );
 
-    // Apply search filter
-    if (searchText) {
-      practices = practices.filter(
-        (p: any) =>
-          p.name.toLowerCase().includes(searchText) ||
-          p.description.toLowerCase().includes(searchText) ||
-          (p.deity && p.deity.toLowerCase().includes(searchText))
+  // ✅ Apply translated search
+  if (searchText) {
+    practices = practices.filter((p: any) => {
+      const translatedName = t(`practices.${p.id}.name`)?.toLowerCase() || "";
+      const translatedDesc = t(`practices.${p.id}.description`)?.toLowerCase() || "";
+
+      return (
+        translatedName.includes(searchText) || translatedDesc.includes(searchText)
       );
-    }
+    });
+  }
 
-    // ✅ Ensure preselected mantra appears first in list
-    if (preselectedMantra) {
-      const existing = practices.find((p) => p.id === preselectedMantra.id);
-      if (!existing) {
-        practices = [preselectedMantra, ...practices];
-      } else {
-        // Move it to the top if already present
-        practices = [
-          existing,
-          ...practices.filter((p) => p.id !== preselectedMantra.id),
-        ];
-      }
+  // ✅ Ensure preselected mantra appears first
+  if (preselectedMantra) {
+    const existing = practices.find((p) => p.id === preselectedMantra.id);
+    if (!existing) {
+      practices = [preselectedMantra, ...practices];
+    } else {
+      practices = [
+        existing,
+        ...practices.filter((p) => p.id !== preselectedMantra.id),
+      ];
     }
+  }
 
-    return practices;
-  }, [selectedLevel, searchText, preselectedMantra]);
+  return practices;
+}, [selectedLevel, searchText, preselectedMantra, t, i18n.language]);
+
+
+  // const filteredPractices = useMemo(() => {
+  //   let practices = SANATAN_PRACTICES_FINAL;
+
+  //   // Filter by level
+  //   practices = practices.filter(
+  //     (p: any) => p.level.toLowerCase() === selectedLevel
+  //   );
+
+  //   // Apply search filter
+  //   if (searchText) {
+  //     practices = practices.filter(
+  //       (p: any) =>
+  //         p.name.toLowerCase().includes(searchText) ||
+  //         p.description.toLowerCase().includes(searchText) ||
+  //         (p.deity && p.deity.toLowerCase().includes(searchText))
+  //     );
+  //   }
+
+  //   // ✅ Ensure preselected mantra appears first in list
+  //   if (preselectedMantra) {
+  //     const existing = practices.find((p) => p.id === preselectedMantra.id);
+  //     if (!existing) {
+  //       practices = [preselectedMantra, ...practices];
+  //     } else {
+  //       // Move it to the top if already present
+  //       practices = [
+  //         existing,
+  //         ...practices.filter((p) => p.id !== preselectedMantra.id),
+  //       ];
+  //     }
+  //   }
+
+  //   return practices;
+  // }, [selectedLevel, searchText, preselectedMantra]);
 
   const totalPages = Math.ceil(filteredPractices.length / PAGE_SIZE);
 
@@ -348,7 +425,7 @@ useEffect(() => {
           type="cardText"
           style={{ textAlign: "center", marginTop: 15 }}
         >
-          Find Peace and Clarity with Daily Practices
+         {t("mySadhana.findPeace")}
         </TextComponent>
 
         <TextComponent
@@ -360,7 +437,7 @@ useEffect(() => {
             marginHorizontal: 30,
           }}
         >
-          Simple routines to support your well-being, tailored for you
+           {t("mySadhana.simpleRoutines")}
         </TextComponent>
 
         {/* Carousel for Sadana Levels */}
@@ -523,7 +600,7 @@ useEffect(() => {
                     fontSize: FontSize.CONSTS.FS_14,
                   }}
                 >
-                  Choose
+               {t("mySadhana.choose")}
                 </TextComponent>
               </View>
             </TouchableOpacity>
@@ -823,13 +900,15 @@ useEffect(() => {
                 type="cardText"
                 style={{ color: Colors.Colors.BLACK }}
               >
-                Selected Practices 
+             {t("mySadhana.selectedPractices")}
               </TextComponent>
-               {selectedPractices.length > 0 ? (
-            selectedPractices.map((p) => (
-              <TouchableOpacity style={{flexDirection:"row",alignItems:"center"}}      key={p.id}
-                onPress={() => togglePractice(p)}
-                >
+              {selectedPractices.length > 0 ? (
+    selectedPractices.map((p) => (
+      <TouchableOpacity
+        key={p.id || p.practice_id}
+        style={{ flexDirection: "row", alignItems: "center" }}
+        onPress={() => togglePractice(p)}
+      >
                 <View style={{
                   // backgroundColor: "#FFF8E1",
                   borderRadius: 6,
@@ -849,13 +928,14 @@ useEffect(() => {
                     />
               </View>
                 <TextComponent type="mediumText" style={{ color: "#333" }}>
-                  {p.name || p.text || p.short_text } ({p.level || "custom"})
+                  {t(`practices.${p.id}.name`, { defaultValue: p.name || p.text || p.short_text })}{" "}
+          ({p.level || "custom"})
                 </TextComponent>
               </TouchableOpacity>
             ))
           ) : (
             <TextComponent type="streakText" style={{ color: "#777" }}>
-              No practices selected yet
+             {t("mySadhana.noPractices")}
             </TextComponent>
           )}
 </View>
@@ -869,13 +949,13 @@ useEffect(() => {
                 type="cardText"
                 style={{ color: Colors.Colors.BLACK }}
               >
-                Select from List
+               {t("mySadhana.selectFromList")}
               </TextComponent>
               <TextComponent
                 type="streakText"
                 style={{ color: Colors.Colors.Light_black, width: "60%" }}
               >
-                Based on your experience level. Select 1–3 practices.
+                {t("mySadhana.selectSubtitle")}
               </TextComponent>
             </View>
             <View style={{ marginLeft: -20 }}>
@@ -893,7 +973,7 @@ useEffect(() => {
                   type="cardText"
                   style={{ color: Colors.Colors.BLACK }}
                 >
-                  Create Practice
+                 {t("mySadhana.createPractice")}
                 </TextComponent>
               </TouchableOpacity>
             </View>
@@ -919,7 +999,7 @@ useEffect(() => {
           />
           <TextInput
             style={{ flex: 1, fontSize: 14 }}
-            placeholder="Search by tag, title, Tutor..."
+          placeholder={t("mySadhana.searchPlaceholder")}
             onChangeText={debouncedSearch}
           />
         </View>
@@ -974,7 +1054,8 @@ useEffect(() => {
                     type="cardText"
                     style={{ color: Colors.Colors.BLACK }}
                   >
-                    {practice.name ? practice.name : practice.text ? practice.text : practice.short_text}
+                      {t(`practices.${practice.id}.name`)}
+                    {/* {practice.name ? practice.name : practice.text ? practice.text : practice.short_text} */}
                   </TextComponent>
                   <TextComponent
                     type="mediumText"
@@ -983,8 +1064,9 @@ useEffect(() => {
                       fontSize: FontSize.CONSTS.FS_14,
                     }}
                   >
-                    {practice.description ? practice.description : practice.explanation ? practice.explanation : practice.tooltip}{"\n"}
-                    {practice.suggested_practice &&  practice.suggested_practice}
+                      {t(`practices.${practice.id}.description`)}
+                    {/* {practice.description ? practice.description : practice.explanation ? practice.explanation : practice.tooltip}{"\n"}
+                    {practice.suggested_practice &&  practice.suggested_practice} */}
                   </TextComponent>
                 </View>
               </View>
@@ -1003,13 +1085,13 @@ useEffect(() => {
           }}
         >
           <TouchableOpacity onPress={handlePrev}>
-            <TextComponent type="mediumText">Prev</TextComponent>
+            <TextComponent type="mediumText">{t("mySadhana.prev")}</TextComponent>
           </TouchableOpacity>
           <TextComponent type="mediumText">
-            Page {currentPage + 1} of {totalPages || 1}
+         {t("mySadhana.page", { current: currentPage + 1, total: totalPages || 1 })}
           </TextComponent>
           <TouchableOpacity onPress={handleNext}>
-            <TextComponent type="mediumText">Next</TextComponent>
+            <TextComponent type="mediumText">{t("mySadhana.next")}</TextComponent>
           </TouchableOpacity>
         </View>
 
@@ -1031,7 +1113,7 @@ useEffect(() => {
               type="cardText"
               style={{ color: Colors.Colors.BLACK }}
             >
-              Confirm My Practices
+           {t("mySadhana.confirmPractices")}
             </TextComponent>
           </TouchableOpacity>
         </View>

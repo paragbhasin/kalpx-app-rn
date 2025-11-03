@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: "GelicaRegular",
     color: "#333",
-    lineHeight: 18,
+      // lineHeight: 18,
   },
 });
 

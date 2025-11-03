@@ -1,6 +1,6 @@
 // components/ExploreVideos.js
-import React, { useCallback, useRef, useState } from "react";
-import { View, Text, FlatList, StyleSheet, Platform } from "react-native";
+import { useCallback, useRef, useState } from "react";
+import { FlatList, Platform, StyleSheet, Text, View } from "react-native";
 import YoutubePlayer from "react-native-youtube-iframe";
 import { saveUserAction } from "../utils/storage";
 
@@ -140,7 +140,7 @@ const styles = StyleSheet.create({
     color: "#444",
     marginBottom: 12,
     paddingHorizontal: 4,
-    lineHeight: 20,
+    // lineHeight: 20,
     paddingLeft: 2,
   },
   videoCard: {
@@ -163,6 +163,6 @@ const styles = StyleSheet.create({
     fontFamily: "GelicaRegular",
     color: "#000",
     padding: 12,
-    lineHeight: 18,
+    // lineHeight: 18,
   },
 });

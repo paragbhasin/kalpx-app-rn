@@ -19,7 +19,7 @@ export default function LandingScreen({ navigation }) {
 
   const features = [
     "Practice Daily Dharma with guided checklists and streak tracking.",
-    "Mark your SankalpX (intentions), journal progress, and revisit past vows.",
+    "Mark your Sankalp (intentions), journal progress, and revisit past vows.",
     "Keep a history of videos watched, resume anytime, and get personalized recommendations.",
     "Join live and recorded classes — Dance, Music, Yoga, Ayurveda, and Sanatan Teachings.",
     "Book spiritual retreats and yatras with clear itineraries and reminders.",
@@ -65,7 +65,7 @@ export default function LandingScreen({ navigation }) {
 
             <Text style={styles.joinText}>Join KalpX</Text>
             <Text style={styles.joinSubText}>
-              Create your account to practice Daily Dharma, track SankalpX, learn
+              Create your account to practice Daily Dharma, track Sankalp, learn
               through classes, and explore sacred journeys.
             </Text>
 

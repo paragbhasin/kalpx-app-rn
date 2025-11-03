@@ -5,17 +5,20 @@ import ClassesScreen from "../screens/Classes/classesScreen";
 import ClassPaymentScreen from "../screens/Classes/ClassPaymentScreen";
 import ClassRescheduleScreen from "../screens/Classes/ClassRescheduleScreen";
 import ClassTutorDetailsScreen from "../screens/Classes/ClassTutorDetailsScreen";
-import Explore from "../screens/Explore";
 import Dharma from "../screens/Home/DailyDharma";
+import Explore from "../screens/Home/Explore";
 import Home from "../screens/Home/Home";
+import LearnMore from "../screens/Home/LearnMore";
 import MySadana from "../screens/Home/MySadana";
 import PoojaScreen from "../screens/Home/PoojaScreen";
+import RelatedVideosScreen from "../screens/Home/RelatedVideosScreen";
 import RetreatsScreen from "../screens/Home/RetreatsScreen";
 import SadanaTrackerScreen from "../screens/Home/SadanaTrackerScreen";
 import SubmitMantraScreen from "../screens/Home/SubmitMantraScreen";
 import TravelPlannerScreen from "../screens/Home/TravelPlannerScreen";
 import OnlineclassesScreen from "../screens/OnlineclassesScreen";
 import Language from "../screens/Profile/Language";
+import Privacy from "../screens/Profile/Privacy";
 import Profile from "../screens/Profile/Profile";
 import ProfileDetails from "../screens/Profile/ProfileDetails";
 import Sankalp from "../screens/Sankalp";
@@ -94,6 +97,8 @@ export const HomeStackNavigator = () => (
       <Stack.Screen name="SubmitMantraScreen" component={SubmitMantraScreen} options={{ headerShown: false }} />
       <Stack.Screen name="SadanaTrackerScreen" component={SadanaTrackerScreen} options={{ headerShown: false }}/>
       <Stack.Screen name="Dharma" component={Dharma} options={{ headerShown: false }} />
+      <Stack.Screen name="LearnMore" component={LearnMore}  options={{ headerShown: false }}  />
+      <Stack.Screen name="RelatedVideosScreen" component={RelatedVideosScreen}   options={{ headerShown: false }} />
   </Stack.Navigator>
 );
 
@@ -108,6 +113,7 @@ export const ProfileStackNavigator = () => (
       <Stack.Screen name="Profile" component={Profile}  options={{ headerShown: false }}/>
       <Stack.Screen name="ProfileDetails" component={ProfileDetails}  options={{ headerShown: false }}/>
      <Stack.Screen name="Language" component={Language}  options={{ headerShown: false }} />
+     <Stack.Screen name="Privacy" component={Privacy}  options={{ headerShown: false }} />
   </Stack.Navigator>
 );
 

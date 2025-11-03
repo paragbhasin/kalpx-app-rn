@@ -24,7 +24,7 @@ import TextComponent from "../../components/TextComponent";
 import { useUserLocation } from "../../components/useUserLocation";
 import { RootState } from "../../store";
 import { fetchDailyPractice, fetchPracticeHistory } from "../Streak/actions";
-import { trackDailyPractice } from "./actions";
+import { getDailyDharmaTracker, trackDailyPractice } from "./actions";
 import styles from "./homestyles";
 
 const { width } = Dimensions.get("window");
@@ -34,17 +34,45 @@ const SadanaTrackerScreen = () => {
   const [reason, setReason] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState(moment().format("YYYY-MM-DD"));
   const [showPractiseModal, setShowPractiseModal] = useState(false);
+  const [trackerData, setTrackerData] = useState<any>(null);
 
   const { t } = useTranslation();
   const { locationData, loading: locationLoading, error } = useUserLocation();
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
+  const { data: streakData } = useSelector((state: RootState) => state.practiceStreaksReducer);
 
+    useEffect(() => {
+      dispatch(
+        getDailyDharmaTracker((res) => {
+          if (res.success) setTrackerData(res.data);
+        })
+      );
+    }, [dispatch]);
+  
   const rememberdata = [
-    { label: "Schedule conflict", value: "schedule_conflict" },
-    { label: "No longer interested", value: "no_longer_interested" },
-    { label: "Technical issue", value: "technical_issue" },
-    { label: "Other", value: "other" },
+    { label: t("sadanaTracker.reminder.schedule_conflict"), value: "schedule_conflict" },
+    { label: t("sadanaTracker.reminder.no_longer_interested"), value: "no_longer_interested" },
+    { label: t("sadanaTracker.reminder.technical_issue"), value: "technical_issue" },
+    { label: t("sadanaTracker.reminder.other"), value: "other" },
   ];
+
+  const milestones = [
+    { days: 9, name: t("streakScreen.milestones.blessing") },
+    { days: 27, name: t("streakScreen.milestones.tapasya") },
+    { days: 54, name: t("streakScreen.milestones.sadhana") },
+    { days: 108, name: t("streakScreen.milestones.dharmaLight") },
+  ];
+
+  const sankalpCount = streakData?.sankalp || 0;
+  // const sankalpCount : any = 10;
+ const trackerCount = trackerData?.streak_count || 0;
+  const mantraCount = streakData?.mantra || 0;
+
+  const highestStreak = Math.max(sankalpCount ?? 0, mantraCount ?? 0);
+  const currentMilestone =
+    milestones.slice().reverse().find((m) => highestStreak >= m.days) || null;
+  const nextMilestone = milestones.find((m) => highestStreak < m.days) || null;
+  const remainingDays = nextMilestone ? nextMilestone.days - highestStreak : 0;
 
   const dailyPractice: any = useSelector(
     (state: RootState) => state.dailyPracticeReducer
@@ -156,7 +184,7 @@ const SadanaTrackerScreen = () => {
             color: Colors.Colors.BLACK,
           }}
         >
-          Honor Your Daily Rituals
+         {t("sadanaTracker.title")}
         </TextComponent>
 
         <TextComponent
@@ -168,9 +196,8 @@ const SadanaTrackerScreen = () => {
             marginHorizontal: 30,
           }}
         >
-          Simple steps to cultivate peace and mindfulness each day.
+         {t("sadanaTracker.subtitle")}
         </TextComponent>
-
         <View
           style={{
             backgroundColor: "#F6F6F6",
@@ -185,8 +212,10 @@ const SadanaTrackerScreen = () => {
               color: Colors.Colors.BLACK,
               fontSize: FontSize.CONSTS.FS_18,
             }}
-          >
-            No Blessing Badge Earned Yet
+          >     
+ {currentMilestone
+    ? t("streakScreen.youEarned", { badge: currentMilestone.name })
+    : t("sadanaTracker.noBadge")}
           </TextComponent>
           <View
             style={{
@@ -195,7 +224,7 @@ const SadanaTrackerScreen = () => {
               marginVertical: 12,
             }}
           >
-            <TextComponent type="mediumText">0 days streak</TextComponent>
+            <TextComponent type="mediumText">  {t("sadanaTracker.streakCount", { count: trackerCount })}</TextComponent>
             <Image
               source={require("../../../assets/Streak_A1.png")}
               style={{ height: 20, width: 20, marginLeft: 4 }}
@@ -208,7 +237,7 @@ const SadanaTrackerScreen = () => {
               fontSize: FontSize.CONSTS.FS_14,
             }}
           >
-            Welcome to your profile. Edit your details and Practices
+           {t("sadanaTracker.welcomeText")}
           </TextComponent>
           <TextComponent
             type="mediumText"
@@ -218,8 +247,15 @@ const SadanaTrackerScreen = () => {
               marginTop: 12,
             }}
           >
-            {" "}
-            1/1 practices completed on 10/3/2025
+             {t("sadanaTracker.progressSummary", {
+  completed: dailyPractice?.data?.completed_today?.length || 0,
+  total: dailyPractice?.data?.active_practices?.length || 0,
+  date: moment().format("MM/DD/YYYY"),
+})}
+            {/* {" "}
+           {`${dailyPractice?.data?.completed_today?.length || 0}/${
+    dailyPractice?.data?.active_practices?.length || 0
+  } practices completed on ${moment().format("MM/DD/YYYY")}`} */}
           </TextComponent>
           <View
             style={{
@@ -240,8 +276,7 @@ const SadanaTrackerScreen = () => {
     fontFamily: "Inter_700Bold",
               }}
             >
-              {" "}
-              Add Practices
+                 {t("sadanaTracker.addPractices")}
             </TextComponent>
           </View>
 
@@ -253,7 +288,11 @@ const SadanaTrackerScreen = () => {
               marginBottom: 12,
             }}
           >
-            6 Days to earn your next Blessing Badge
+    {t("streakScreen.moreDays", {
+              count: remainingDays,
+              nextBadge: nextMilestone ? nextMilestone.name : "",
+            })}
+            {/* 6 Days to earn your next Blessing Badge */}
           </TextComponent>
         </View>
 
@@ -261,7 +300,7 @@ const SadanaTrackerScreen = () => {
           type="cardText"
           style={{ marginBottom: 10, marginLeft: 20 }}
         >
-          Complete Today's Practices
+       {t("sadanaTracker.completeTodaysPractices")}
         </TextComponent>
 
         <FlatList
@@ -304,10 +343,14 @@ const SadanaTrackerScreen = () => {
                     color: Colors.Colors.Light_black,
                   }}
                 >
-                  Mantra:{" "}
+                   {t("sadanaTracker.mantraLabel")}{" "}
                   {item.details?.devanagari ||
                     item.mantra ||
-                    "No mantra available"}
+                    t("sadanaTracker.noMantra")}
+                  {/* Mantra:{" "}
+                  {item.details?.devanagari ||
+                    item.mantra ||
+                    "No mantra available"} */}
                 </TextComponent>
 
                 <TextComponent
@@ -318,7 +361,7 @@ const SadanaTrackerScreen = () => {
                     color: Colors.Colors.Light_black,
                   }}
                 >
-                  Trigger: {item.trigger}
+                 {t("sadanaTracker.triggerLabel")} {item.trigger}
                 </TextComponent>
 
                 <TextComponent
@@ -329,7 +372,7 @@ const SadanaTrackerScreen = () => {
                     color: Colors.Colors.Light_black,
                   }}
                 >
-                  Last Practice:{" "}
+                 {t("sadanaTracker.lastPracticeLabel")}{" "}
                   {item.last_practice_date
                     ? moment(item.last_practice_date).format("DD/MM/YYYY")
                     : "—"}
@@ -385,7 +428,7 @@ const SadanaTrackerScreen = () => {
                       fontSize: FontSize.CONSTS.FS_14,
                     }}
                   >
-                    {isCompleted ? "Completed" : "Mark as Done"}
+              {isCompleted ? t("sadanaTracker.completedButton") : t("sadanaTracker.markAsDone")}
                   </TextComponent>
                 </TouchableOpacity>
               </View>
@@ -399,7 +442,7 @@ const SadanaTrackerScreen = () => {
             data={rememberdata}
             labelField="label"
             valueField="value"
-            placeholder="Remainders and Settings"
+           placeholder={t("sadanaTracker.reminder.placeholder")}
             value={reason}
             onChange={(item) => setReason(item.value)}
             style={styles.dropdown}
@@ -417,7 +460,7 @@ const SadanaTrackerScreen = () => {
               marginTop: 10,
             }}
           >
-            Dharma Progress Calendar
+         {t("sadanaTracker.calendarTitle")}
           </TextComponent>
           <TextComponent
             type="mediumText"
@@ -426,7 +469,7 @@ const SadanaTrackerScreen = () => {
               marginTop: 10,
             }}
           >
-            Your Daily practice Tracker
+           {t("sadanaTracker.calendarSubtitle")}
           </TextComponent>
           <View
             style={{
@@ -435,7 +478,7 @@ const SadanaTrackerScreen = () => {
               alignItems: "center",
             }}
           >
-            <TextComponent type="cardText">Completed (1)</TextComponent>
+            <TextComponent type="cardText">   {t("sadanaTracker.completedLabel", {count: dailyPractice?.data?.completed_today?.length || 0})}</TextComponent>
             <View
               style={{
                 width: 20,
@@ -446,7 +489,11 @@ const SadanaTrackerScreen = () => {
               }}
             />
             <TextComponent type="cardText" style={{ marginLeft: 20 }}>
-              Not Done (0)
+            {t("sadanaTracker.notDoneLabel", {
+  count:
+    (dailyPractice?.data?.active_practices?.length || 0) -
+    (dailyPractice?.data?.completed_today?.length || 0),
+})}
             </TextComponent>
           </View>
           <TextComponent
@@ -457,13 +504,12 @@ const SadanaTrackerScreen = () => {
               marginVertical: 15,
             }}
           >
-            {" "}
-            Selected date :{" "}
+               {t("sadanaTracker.selectedDateLabel")}{" "}
             <TextComponent
               type="cardText"
               style={{ color: Colors.Colors.BLACK }}
             >
-              03/10/2025
+               {moment(selectedDate).format("DD/MM/YYYY")}
             </TextComponent>
           </TextComponent>
         </View>

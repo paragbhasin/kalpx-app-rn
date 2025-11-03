@@ -1,212 +1,2945 @@
-{
-    "wisdom.monday.theme": "शिव और चंद्र • शांति का नृत्य, चंद्रमा की अमृतमयी मुक्ति",
-    "wisdom.tuesday.theme": "हनुमान, स्कंद और मंगल • पवित्र साहस, तेजस्वी संकल्प, निःस्वार्थ सेवा",
-    "wisdom.wednesday.theme": "कृष्ण, विष्णु और बुध • दिव्य लीला, शांत संनाद, स्पष्ट अभिव्यक्ति",
-    "wisdom.thursday.theme": "गुरु, बृहस्पति और दत्तात्रेय • शाश्वत ज्ञान, मौन मार्गदर्शन, एकीकृत सत्य",
-    "wisdom.friday.theme": "लक्ष्मी, दुर्गा और शुक्र • दिव्य समृद्धि, कोमल शक्ति, सामंजस्यपूर्ण अनुग्रह",
-    "wisdom.saturday.theme": "शनि, हनुमान और भैरव • धैर्यपूर्ण धर्म, अटल साहस, कालातीत स्पष्टता",
-    "wisdom.sunday.theme": "सूर्य और आदित्य • तेजस्वी आत्मा, जीवंत इच्छा, शाश्वत प्रकाश",
-    "ui.emoji.shiva": "शिव प्रतीक",
-    "ui.emoji.hanuman": "अग्नि प्रतीक",
-    "ui.emoji.krishna": "पंख प्रतीक",
-    "ui.emoji.guru": "दीपक प्रतीक",
-    "ui.emoji.lakshmi": "पुष्प प्रतीक",
-    "ui.emoji.shani": "पत्थर प्रतीक",
-    "ui.emoji.surya": "सूर्य प्रतीक",
-    "ui.emoji.fallback": "प्रार्थना हाथ प्रतीक",
-    "ui.chip.shiva_calm": "शिव • शांति",
-    "ui.chip.hanuman_courage": "हनुमान • साहस",
-    "ui.chip.krishna_clarity": "कृष्ण • स्पष्टता",
-    "ui.chip.guru_insight": "गुरु • अंतर्दृष्टि",
-    "ui.chip.lakshmi_grace": "लक्ष्मी • अनुग्रह",
-    "ui.chip.shani_steadiness": "शनि • स्थिरता",
-    "ui.chip.surya_vitality": "सूर्य • जीवनशक्ति",
-    "ui.chip.fallback": "डिफ़ॉल्ट • शांति",
-    "ui.reps_unit": "×",
-    "ui.learn_more": "और जानें",
-    "ui.cta_set_sankalp": "संकल्प लें",
-    "accessibility.pronunciation_note": "IAST सटीक उच्चारण दिखाता है; यदि स्वरचिह्न अपरिचित हों तो धीरे-धीरे उच्चारण करें।",
-    "wisdom.mon.stillness_cuts_noise": "शांति शिव का तलवार है, जो मन के अशांति को काटती है।",
-    "wisdom.mon.stillness_cuts_noise.explanation": "शांत सरोवर की तरह, शिव की शांति व्यस्त मन को शुद्ध करती है। एक पल के लिए शांत बैठें, जैसा कि प्राचीन ग्रंथ सिखाता है।",
-    "wisdom.mon.stillness_cuts_noise.source": "श्वेताश्वतर उपनिषद, प्राचीन ज्ञान ग्रंथ",
-    "wisdom.mon.release_to_renew": "त्याग हृदय को सत्य की नई शुरुआत के लिए खोलता है।",
-    "wisdom.mon.release_to_renew.explanation": "छोटे भय छोड़ें, जैसे पवित्र मंत्र, हृदय को चिंता से मुक्त करता है। हल्का और नया अनुभव करें।",
-    "wisdom.mon.release_to_renew.source": "मृत्युंजय मंत्र, पवित्र उपचार मंत्र",
-    "wisdom.mon.moonlight_mind": "चंद्र की रोशनी मन को शीतल स्पष्टता देती है।",
-    "wisdom.mon.moonlight_mind.explanation": "चंद्रमा की रोशनी बेचैन मन को शांत करती है। चंद्रमा को देखें या धीरे साँस लें।",
-    "wisdom.mon.moonlight_mind.source": "ऋग्वेद, प्राचीन भक्ति भजन संग्रह",
-    "wisdom.mon.silence_teaches": "मौन वह सिखाता है जो शब्द छिपाते हैं।",
-    "wisdom.mon.silence_teaches.explanation": "शांत क्षण सत्य दिखाते हैं, जैसा प्राचीन ग्रंथ कहता है। रुकें और भीतर सुनें।",
-    "wisdom.mon.silence_teaches.source": "मुंडक उपनिषद, आंतरिक ज्ञान का ग्रंथ",
-    "wisdom.mon.ego_softens": "शिव को नमन करें; भक्ति की ज्वाला में अहंकार पिघलता है।",
-    "wisdom.mon.ego_softens.explanation": "शिव की भक्ति अहंकार को नरम करती है। छोटी प्रार्थना करें, विनम्रता अनुभव करें।",
-    "wisdom.mon.ego_softens.source": "शिव पुराण, भगवान शिव की कथाएँ",
-    "wisdom.mon.see_the_seer": "भीतर के द्रष्टा को खोजें; आपकी आत्मा में स्पष्टता है।",
-    "wisdom.mon.see_the_seer.explanation": "आपका सच्चा स्वरूप स्पष्ट है। ‘मैं कौन हूँ?’ पूछें और शांति पाएँ।",
-    "wisdom.mon.see_the_seer.source": "अद्वैत वेदांत, आत्म-ज्ञान का मार्ग",
-    "wisdom.mon.lunar_rest": "चंद्र की रोशनी में विश्राम करें; शांति हृदय को ठीक करती है।",
-    "wisdom.mon.lunar_rest.explanation": "चंद्रमा की शांति तनाव ठीक करती है। चाँदनी में विश्राम करें या धीरे साँस लें।",
-    "wisdom.mon.lunar_rest.source": "सोम सूक्त, चंद्रमा का भजन",
-    "wisdom.mon.still_dance": "शिव का नृत्य मन को ब्रह्मांडीय लय में शांत करता है।",
-    "wisdom.mon.still_dance.explanation": "शिव का नृत्य मन को स्थिर करता है। ब्रह्मांडीय लय की कल्पना करें।",
-    "wisdom.mon.still_dance.source": "नटराज तत्त्व, शिव के नृत्य की शिक्षा",
-    "wisdom.tue.courage_serves": "हनुमान का साहस निःस्वार्थ सेवा में चमकता है।",
-    "wisdom.tue.courage_serves.explanation": "हनुमान की वीरता दूसरों की मदद करती है। बिना प्रशंसा की चाह के दया करें।",
-    "wisdom.tue.courage_serves.source": "रामचरितमानस, भक्ति की कथा",
-    "wisdom.tue.act_with_dharma": "धर्म के प्रकाश में कर्म करें; प्रयास मार्ग पाता है।",
-    "wisdom.tue.act_with_dharma.explanation": "सही कार्य दिशा देता है। छोटे कार्यों में ईमानदारी चुनें।",
-    "wisdom.tue.act_with_dharma.source": "भगवद् गीता, सही कर्म का मार्गदर्शन",
-    "wisdom.tue.fire_within_lamp": "मंगल की अग्नि धर्म के दीपक में स्थिर चमकती है।",
-    "wisdom.tue.fire_within_lamp.explanation": "मंगल की ऊर्जा को केंद्रित करें। अच्छे कार्यों में प्रयास करें।",
-    "wisdom.tue.fire_within_lamp.source": "नवग्रह, ग्रहों के भजन",
-    "wisdom.tue.strength_with_tenderness": "करुणा के स्पर्श से शक्ति खिलती है।",
-    "wisdom.tue.strength_with_tenderness.explanation": "शक्ति और दया प्रभाव डालते हैं। दूसरों की मदद में कोमल रहें।",
-    "wisdom.tue.strength_with_tenderness.source": "हनुमान चालीसा, भक्ति भजन",
-    "wisdom.tue.begin_decide": "स्कंद का भाला पहली संकल्प में विजय लाता है।",
-    "wisdom.tue.begin_decide.explanation": "स्कंद का ध्यान सफलता शुरू करता है। लक्ष्य की ओर एक कदम लें।",
-    "wisdom.tue.begin_decide.source": "स्कंद पुराण, भगवान स्कंद की कथाएँ",
-    "wisdom.tue.serve_not_self": "हनुमान की तरह सेवा करें; अहंकार को स्थान नहीं।",
-    "wisdom.tue.serve_not_self.explanation": "हनुमान की सेवा निःस्वार्थ है। चुपचाप दूसरों की मदद करें।",
-    "wisdom.tue.serve_not_self.source": "रामायण, कर्तव्य की महाकथा",
-    "wisdom.tue.warrior_heart": "स्कंद का हृदय कर्म को धर्म के सत्य तक ले जाता है।",
-    "wisdom.tue.warrior_heart.explanation": "स्कंद की वीरता सत्य का अनुसरण करती है। अच्छे हृदय से कार्य करें।",
-    "wisdom.tue.warrior_heart.source": "कुमारसंभव, स्कंद के जन्म की कविता",
-    "wisdom.tue.fire_of_purpose": "मंगल की शक्ति से उद्देश्य की ज्योति प्रज्वलित करें।",
-    "wisdom.tue.fire_of_purpose.explanation": "मंगल की शक्ति उद्देश्य देती है। स्पष्ट लक्ष्य के साथ कार्य करें।",
-    "wisdom.tue.fire_of_purpose.source": "नवग्रह, ग्रहों के भजन",
-    "wisdom.wed.joy_is_wise": "कृष्ण की लीला आनंद को ज्ञान के साथ बुनती है।",
-    "wisdom.wed.joy_is_wise.explanation": "कृष्ण का खेल आनंद और ज्ञान मिलाता है। मुस्कुराएँ और दया करें।",
-    "wisdom.wed.joy_is_wise.source": "भागवत पुराण, भगवान कृष्ण की कथाएँ",
-    "wisdom.wed.speak_to_heal": "बुध के शब्द हृदय को जोड़ते हैं, तोड़ते नहीं।",
-    "wisdom.wed.speak_to_heal.explanation": "बुध की वाणी ठीक करती है। दूसरों को उठाने के लिए कोमल शब्द बोलें।",
-    "wisdom.wed.speak_to_heal.source": "नीति शास्त्र, बुद्धिमान जीवन की शिक्षा",
-    "wisdom.wed.stability_in_flow": "विष्णु जीवन की नदी में हृदय को स्थिर रखते हैं।",
-    "wisdom.wed.stability_in_flow.explanation": "विष्णु की शांति संतुलन देती है। व्यस्त समय में गहरी साँस लें।",
-    "wisdom.wed.stability_in_flow.source": "विष्णु पुराण, भगवान विष्णु की कथाएँ",
-    "wisdom.wed.remember_the_source": "नारायण को स्मरण करें; कार्य उनकी लीला में संरेखित होते हैं।",
-    "wisdom.wed.remember_the_source.explanation": "ईश्वर का स्मरण कार्य सरल करता है। स्पष्टता के लिए रुकें और प्रार्थना करें।",
-    "wisdom.wed.remember_the_source.source": "नाम स्मरण, भगवान के नाम जप की प्रथा",
-    "wisdom.wed.mind_as_flute": "मन को कृष्ण की बाँसुरी बनाएँ, उनकी साँस के लिए खाली।",
-    "wisdom.wed.mind_as_flute.explanation": "कृष्ण का प्रेम खुले मन में बहता है। चिंताएँ छोड़ें, उनकी शांति पाएँ।",
-    "wisdom.wed.mind_as_flute.source": "गोपी गीत, कृष्ण भक्तों के भजन",
-    "wisdom.wed.learn_then_lighten": "गहराई से सीखें, फिर बुध की सहजता से छोड़ दें।",
-    "wisdom.wed.learn_then_lighten.explanation": "बिना चिपके सीखें। अच्छे से पढ़ें, फिर हल्के रहें।",
-    "wisdom.wed.learn_then_lighten.source": "भगवद् गीता, संतुलित जीवन का मार्गदर्शन",
-    "wisdom.wed.harmony_in_speech": "बुध की कृपा से बोलें; शब्द सत्य के रूप में खिलते हैं।",
-    "wisdom.wed.harmony_in_speech.explanation": "बुध की कृपा शब्दों को सत्य बनाती है। शांति के लिए कोमल बोलें।",
-    "wisdom.wed.harmony_in_speech.source": "नीति शास्त्र, दैनिक जीवन का ज्ञान",
-    "wisdom.wed.lila_of_heart": "कृष्ण की लीला समर्पित हृदय में नृत्य करती है।",
-    "wisdom.wed.lila_of_heart.explanation": "कृष्ण का आनंद खुले हृदय में बसता है। प्रेम करें और सुख पाएँ।",
-    "wisdom.wed.lila_of_heart.source": "भागवत पुराण, कृष्ण के प्रेम की कथाएँ",
-    "wisdom.thu.gratitude_opens": "कृतज्ञता गुरु के दिखाए मार्ग को रोशन करती है।",
-    "wisdom.thu.gratitude_opens.explanation": "कृतज्ञता ज्ञान का द्वार खोलती है। छोटी चीजों के लिए आभार करें।",
-    "wisdom.thu.gratitude_opens.source": "गुरु गीता, गुरु को समर्पित भजन",
-    "wisdom.thu.sit_to_know": "मौन में बैठें; सत्य शांत हृदय को ढूँढता है।",
-    "wisdom.thu.sit_to_know.explanation": "मौन सत्य दिखाता है। एक पल शांत बैठकर आंतरिक ज्ञान पाएँ।",
-    "wisdom.thu.sit_to_know.source": "दक्षिणामूर्ति स्तोत्र, शिव के शिक्षक रूप का भजन",
-    "wisdom.thu.wisdom_is_kind": "बृहस्पति का ज्ञान कोमल सत्य से चमकता है।",
-    "wisdom.thu.wisdom_is_kind.explanation": "बृहस्पति का प्रकाश दयालु है। स्पष्ट सोचें और कोमलता से कार्य करें।",
-    "wisdom.thu.wisdom_is_kind.source": "नवग्रह, ग्रहों के भजन",
-    "wisdom.thu.learn_from_all": "दत्तात्रेय हर साँस में गुरु ढूँढते हैं।",
-    "wisdom.thu.learn_from_all.explanation": "दत्तात्रेय जीवन से सीखते हैं। दैनिक क्षणों में सबक देखें।",
-    "wisdom.thu.learn_from_all.source": "अवधूत गीता, दत्तात्रेय की शिक्षाएँ",
-    "wisdom.thu.bow_and_rise": "गुरु को नमन करें; धर्म के प्रकाश में उठें।",
-    "wisdom.thu.bow_and_rise.explanation": "विनम्रता आपको उठाती है। सम्मान करें, सत्य के साथ बढ़ें।",
-    "wisdom.thu.bow_and_rise.source": "गुरु परंपरा, शिक्षकों की परंपरा",
-    "wisdom.thu.listen_beyond_words": "मौन सुनें, जहाँ ज्ञान अकेले बोलता है।",
-    "wisdom.thu.listen_beyond_words.explanation": "सत्य शांत में है। शब्दों के पार सुनें, हृदय का गहरा ज्ञान पाएँ।",
-    "wisdom.thu.listen_beyond_words.source": "ईशा उपनिषद, शाश्वत सत्य का ग्रंथ",
-    "wisdom.thu.truth_in_one": "सब गुरु है; जीवन के एक प्रवाह में सत्य देखें।",
-    "wisdom.thu.truth_in_one.explanation": "दत्तात्रेय सबको गुरु मानते हैं। जीवन के क्षणों में एक सत्य पाएँ।",
-    "wisdom.thu.truth_in_one.source": "दत्तात्रेय उपासना, दत्तात्रेय की भक्ति",
-    "wisdom.thu.light_of_viveka": "बृहस्पति विवेक की ज्योति प्रज्वलित करते हैं।",
-    "wisdom.thu.light_of_viveka.explanation": "बृहस्पति का ज्ञान सही चयन देता है। कार्य से पहले सोचें।",
-    "wisdom.thu.light_of_viveka.source": "नवग्रह, ग्रहों के भजन",
-    "wisdom.fri.grace_is_order": "लक्ष्मी की कृपा धर्म में समृद्धि बुनती है।",
-    "wisdom.fri.grace_is_order.explanation": "लक्ष्मी की कृपा सामंजस्य लाती है। दया से बाँटें, जीवन की समृद्धि पाएँ।",
-    "wisdom.fri.grace_is_order.source": "श्री सूक्त, देवी लक्ष्मी का भजन",
-    "wisdom.fri.strength_with_softness": "दुर्गा की शक्ति कोमलता के आलिंगन में खिलती है।",
-    "wisdom.fri.strength_with_softness.explanation": "दुर्गा की शक्ति कोमल है। मजबूत रहें, दूसरों को उठाएँ।",
-    "wisdom.fri.strength_with_softness.source": "देवी माहात्म्य, देवी दुर्गा की कथाएँ",
-    "wisdom.fri.beauty_with_ethics": "शुक्र सुंदरता को हृदय के धर्म से जोड़ता है।",
-    "wisdom.fri.beauty_with_ethics.explanation": "शुक्र की कृपा में अच्छाई चाहिए। सही हृदय से सुंदरता बनाएँ।",
-    "wisdom.fri.beauty_with_ethics.source": "नवग्रह, ग्रहों के भजन",
-    "wisdom.fri.share_and_suffice": "लक्ष्मी के उपहार बाँटें; देने से पूर्णता बढ़ती है।",
-    "wisdom.fri.share_and_suffice.explanation": "देने से पर्याप्तता मिलती है। दूसरों के साथ बाँटकर पूर्ण अनुभव करें।",
-    "wisdom.fri.share_and_suffice.source": "अन्नपूर्णा स्तोत्र, देवी अन्नपूर्णा का भजन",
-    "wisdom.fri.tend_little_lamps": "छोटे दीप जलाएँ; घर पवित्र स्थान बनता है।",
-    "wisdom.fri.tend_little_lamps.explanation": "घर को पवित्र बनाएँ। रोज़ दीप जलाएँ या प्रार्थना करें।",
-    "wisdom.fri.tend_little_lamps.source": "गृहस्थ धर्म, पारिवारिक जीवन की शिक्षा",
-    "wisdom.fri.gentle_wins_long": "शुक्र का कोमल स्पर्श बल से अधिक टिकता है।",
-    "wisdom.fri.gentle_wins_long.explanation": "शुक्र की धैर्यता बंधन बनाती है। रिश्तों में कोमल रहें।",
-    "wisdom.fri.gentle_wins_long.source": "नवग्रह, ग्रहों के भजन",
-    "wisdom.fri.nourish_with_love": "अन्नपूर्णा प्रेम की समृद्धि से सबको पोषित करती हैं।",
-    "wisdom.fri.nourish_with_love.explanation": "अन्नपूर्णा प्रेम से खिलाती हैं। दया से दूसरों की देखभाल करें।",
-    "wisdom.fri.nourish_with_love.source": "अन्नपूर्णा अष्टकम, अन्नपूर्णा की प्रशंसा",
-    "wisdom.fri.shield_of_grace": "दुर्गा की ढाल करुणामयी शक्ति से रक्षा करती है।",
-    "wisdom.fri.shield_of_grace.explanation": "दुर्गा प्रेम से रक्षा करती हैं। चुनौतियों का सामना दया से करें।",
-    "wisdom.fri.shield_of_grace.source": "दुर्गा सप्तशती, दुर्गा की शक्ति का ग्रंथ",
-    "wisdom.sat.go_slower_go_deeper": "शनि की गति हृदय के धर्म को गहरा करती है।",
-    "wisdom.sat.go_slower_go_deeper.explanation": "शनि की धीमी चाल शक्ति देती है। कार्यों में समय लें, सच्चे उद्देश्य पाएँ।",
-    "wisdom.sat.go_slower_go_deeper.source": "नवग्रह, ग्रहों के भजन",
-    "wisdom.sat.keep_the_promise": "अपने वचन का सम्मान करें; धर्म हृदय देखता है।",
-    "wisdom.sat.keep_the_promise.explanation": "वचन निभाना हृदय की सच्चाई दिखाता है। अपने शब्दों पर अडिग रहें।",
-    "wisdom.sat.keep_the_promise.source": "धर्म शास्त्र, कर्तव्य की शिक्षा",
-    "wisdom.sat.trim_the_excess": "अतिरिक्त छोड़ें; शनि आत्मा का प्रकाश मुक्त करता है।",
-    "wisdom.sat.trim_the_excess.explanation": "सादगी मुक्ति देती है। अतिरिक्त चीजें छोड़ें, शनि की स्वतंत्रता पाएँ।",
-    "wisdom.sat.trim_the_excess.source": "यम-नियम, अनुशासित जीवन के सिद्धांत",
-    "wisdom.sat.courage_is_quiet": "हनुमान का साहस शांत सेवा में चमकता है।",
-    "wisdom.sat.courage_is_quiet.explanation": "हनुमान की सेवा शांत है। विनम्रता से मदद करें, सच्चा साहस पाएँ।",
-    "wisdom.sat.courage_is_quiet.source": "रामचरितमानस, भक्ति की कथा",
-    "wisdom.sat.face_dawn_and_dusk": "भैरव प्रभात और संध्या को एक दृष्टि से देखते हैं।",
-    "wisdom.sat.face_dawn_and_dusk.explanation": "भैरव सबको एक मानते हैं। जीवन के बदलावों का शांत हृदय से सामना करें।",
-    "wisdom.sat.face_dawn_and_dusk.source": "कालभैरव अष्टकम, भैरव का भजन",
-    "wisdom.sat.learn_from_friction": "कर्म का घर्षण आत्मा की स्पष्टता को आकार देता है।",
-    "wisdom.sat.learn_from_friction.explanation": "चुनौतियाँ सबक हैं। कठिन समय से सीखें, स्पष्टता पाएँ।",
-    "wisdom.sat.learn_from_friction.source": "भगवद् गीता, सही कर्म का मार्गदर्शन",
-    "wisdom.sat.steady_in_storm": "शनि जीवन के तूफानों में हृदय को स्थिर करता है।",
-    "wisdom.sat.steady_in_storm.explanation": "शनि अशांति में शांति सिखाता है। कठिन समय में धैर्य रखें।",
-    "wisdom.sat.steady_in_storm.source": "शनि स्तोत्र, भगवान शनि की प्रशंसा",
-    "wisdom.sat.fearless_transition": "भैरव निर्भय प्रकाश से परिवर्तन का मार्गदर्शन करते हैं।",
-    "wisdom.sat.fearless_transition.explanation": "भैरव बदलाव में मदद करते हैं। उनके प्रकाश पर भरोसा करें, नन्हें बढ़ें।",
-    "wisdom.sat.fearless_transition.source": "कालभैरव उपासना, भैरव की भक्ति",
-    "wisdom.sun.begin_bright_begin_true": "सूर्य का प्रकाश हर प्रभात में सत्य जगाता है।",
-    "wisdom.sun.begin_bright_begin_true.explanation": "सूर्य दिन को सत्य से शुरू करता है। सुबह स्पष्ट, ईमानदार लक्ष्य बनाएँ।",
-    "wisdom.sun.begin_bright_begin_true.source": "सूर्य सूक्त, सूर्य का भजन",
-    "wisdom.sun.warmth_is_dharma": "मित्र की गर्मी प्रेम के रूप में धर्म बाँटती है।",
-    "wisdom.sun.warmth_is_dharma.explanation": "मित्र प्रेम को कर्तव्य बनाते हैं। दूसरों के लिए दया करें।",
-    "wisdom.sun.warmth_is_dharma.source": "ऋग्वेद, प्राचीन भजन संग्रह",
-    "wisdom.sun.light_your_actions": "सूर्य की किरणें कर्मों को मार्गदर्शन करें, स्वप्नों को नहीं।",
-    "wisdom.sun.light_your_actions.explanation": "सूर्य कर्मों को सत्य बनाता है। अपने कार्यों में उसका प्रकाश बिखेरें।",
-    "wisdom.sun.light_your_actions.source": "भगवद् गीता, सही कर्म का मार्गदर्शन",
-    "wisdom.sun.clarity_with_care": "सत्य अहिंसा की देखभाल से सबसे उज्ज्वल चमकता है।",
-    "wisdom.sun.clarity_with_care.explanation": "सत्य को दया चाहिए। स्पष्ट बोलें, पर दूसरों को ठेस न पहुँचाएँ।",
-    "wisdom.sun.clarity_with_care.source": "यम-नियम, नैतिक जीवन के सिद्धांत",
-    "wisdom.sun.stand_straight_inside": "आत्मा में अडिग रहें; विश्व संरेखित होगा।",
-    "wisdom.sun.stand_straight_inside.explanation": "अंदर की सच्चाई पर भरोसा करें। सत्य में रहें, जीवन संतुलित होगा।",
-    "wisdom.sun.stand_straight_inside.source": "स्वधर्म, व्यक्तिगत कर्तव्य की शिक्षा",
-    "wisdom.sun.share_the_light": "सूर्य का प्रकाश अपने हृदय से बाँटें।",
-    "wisdom.sun.share_the_light.explanation": "सूर्य का तेज बाँटें। दया से दूसरों की मदद करें।",
-    "wisdom.sun.share_the_light.source": "सेवा धर्म, सेवा की शिक्षा",
-    "wisdom.sun.dawn_of_purpose": "रवि की प्रभात आत्मा में उद्देश्य जगाती है।",
-    "wisdom.sun.dawn_of_purpose.explanation": "रवि दिन को उद्देश्य देता है। सूर्योदय पर सरल लक्ष्य बनाएँ।",
-    "wisdom.sun.dawn_of_purpose.source": "सूर्य उपासना, सूर्य की भक्ति",
-    "wisdom.sun.light_of_unity": "आदित्य का तेज सबको एक सत्य में जोड़ता है।",
-    "wisdom.sun.light_of_unity.source": "आदित्य हृदयम, सूर्य का भजन",
-    "wisdomCard.iconAria": "ज्ञान प्रतीक",
-    "wisdomCard.title": "आज का ज्ञान",
-    "common.showLess": "कम दिखाएँ",
-    "wisdomCard.knowMore": "अधिक जानें",
-    "wisdomCard.shareAria": "ज्ञान साझा करें",
-    "wisdomCard.share": "साझा करें",
-    "wisdomCard.showVideosAria": "सम्बन्धित वीडियो दिखाएँ",
-    "wisdomCard.showVideos": "वीडियो दिखाएँ",
-    "wisdomCard.explanation": "व्याख्या",
-    "wisdomCard.source": "स्रोत",
-    "wisdomCard.videoModalAria": "ज्ञान वीडियो",
-    "wisdomCard.relatedVideos": "सम्बन्धित वीडियो",
-    "common.close": "बन्द करें",
-    "wisdomCard.place.snapshot": "स्नैपशॉट",
-    "wisdomCard.place.hero": "मुख्य उपशीर्षक",
-    "wisdomCard.place.sticky": "स्थायी सुझाव"
-}
+[
+  {
+    "id": "wis.stillness_is_strength",
+    "text": "शांत रहना भीतर की शक्ति है।",
+    "explanation": [
+      "एक कोमल सांस के लिए रुकें।",
+      "विचारों को प्रकाश में धूल की तरह शांत होने दें।",
+      "शांति में, हृदय अपनी गहराई को याद करता है।",
+      "आज दो मिनट से शुरू करें।"
+    ],
+    "source": {
+      "title": "ध्यान साधना (परिवर्तित)"
+    },
+    "tags": [
+      "शांति",
+      "एकाग्रता",
+      "साधना"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "weight": 1.1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.speak_truth_kindly",
+    "text": "सत्य को दया से बोलें ताकि वह सुना जाए।",
+    "explanation": [
+      "दया रहित सत्य हृदय को कठोर बना सकता है।",
+      "सत्य रहित दया मार्ग को धुंधला कर सकती है।",
+      "अगली बातचीत में दोनों को जोड़ें।",
+      "रुकें, फिर सबसे कोमल सच्चे शब्द चुनें।"
+    ],
+    "source": {
+      "title": "गीता नीति (परिवर्तित)",
+      "ref": "17.15"
+    },
+    "tags": [
+      "सत्य",
+      "अहिंसा",
+      "वाणी"
+    ],
+    "mood": "clarity",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.devotion_softens_ego",
+    "text": "भक्ति अहंकार को नरम करती है और मार्ग को उज्ज्वल बनाती है।",
+    "explanation": [
+      "प्रेम से याद करें, मांग से नहीं।",
+      "कृतज्ञता से 'मैं' को थोड़ी देर के लिए बदलें।",
+      "आज एक छोटी सेवा का कार्य करें।",
+      "नोटिस करें कि हृदय कितना हल्का महसूस करता है।"
+    ],
+    "source": {
+      "title": "भक्ति चिंतन (परिवर्तित)"
+    },
+    "tags": [
+      "भक्ति",
+      "कृतज्ञता",
+      "सेवा"
+    ],
+    "deities": [
+      "Krishna",
+      "Rama"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.discernment_before_action",
+    "text": "कार्य से पहले विवेक को उभरने दें।",
+    "explanation": [
+      "पूछें: क्या यह धर्म की सेवा करेगा या भटकाएगा?",
+      "एक सांस विवेकपूर्ण चुनाव के लिए स्थान बनाती है।",
+      "स्पष्टता वहाँ बढ़ती है जहाँ जल्दबाजी ढीली पड़ती है।",
+      "तूफान से नहीं, स्थिरता से कार्य करें।"
+    ],
+    "source": {
+      "title": "वेदांत मार्गदर्शन (परिवर्तित)"
+    },
+    "tags": [
+      "विवेक",
+      "धर्म",
+      "एकाग्रता"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.shakti_is_tender_strength",
+    "text": "शक्ति कोमल शक्ति है: दृढ़, दयालु, जागृत।",
+    "explanation": [
+      "कठोरता रहित शक्ति; ढहावे रहित दया।",
+      "आज गर्माहट के साथ एक सीमा निर्धारित करें।",
+      "भीतर और बाहर जो पवित्र है, उसकी रक्षा करें।",
+      "शक्ति नरम चेहरा पहन सकती है।"
+    ],
+    "source": {
+      "title": "शाक्त दृष्टि (परिवर्तित)"
+    },
+    "tags": [
+      "शक्ति",
+      "सीमाएं",
+      "साहस",
+      "करुणा"
+    ],
+    "deities": [
+      "Durga",
+      "Lakshmi"
+    ],
+    "mood": "courage",
+    "difficulty": 2,
+    "season": [
+      "navratri"
+    ],
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.dharma_guides_duty",
+    "text": "धर्म कर्तव्य को मात्र इच्छा से आगे मार्गदर्शन करता है।",
+    "explanation": [
+      "मात्र चाहत के लिए नहीं, बड़े भले के लिए कार्य करें।",
+      "आज सोचें कि क्या सत्य की सेवा करता है।",
+      "छोटे कदम अनंत व्यवस्था से जुड़ते हैं।",
+      "प्रेम से कर्तव्य आंतरिक शांति लाता है।"
+    ],
+    "source": {
+      "title": "भगवद्गीता (परिवर्तित)",
+      "ref": "2.47"
+    },
+    "tags": [
+      "धर्म",
+      "कर्तव्य",
+      "निःस्वार्थता"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.serve_with_open_heart",
+    "text": "खुले हृदय से सेवा करें, कुछ न अपेक्षित करें।",
+    "explanation": [
+      "छिपी मंशा रहित दान करें।",
+      "मदद के कार्य में आनंद खोजें।",
+      "एक छोटा निस्वार्थ कार्य से शुरू करें।",
+      "नोटिस करें कि यह कितनी हल्कीपन लाता है।"
+    ],
+    "source": {
+      "title": "भक्ति शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "सेवा",
+      "करुणा",
+      "निःस्वार्थता"
+    ],
+    "deities": [
+      "Rama",
+      "Hanuman"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "weight": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.clarity_in_silence",
+    "text": "स्पष्टता मौन के बगीचे में खिलती है।",
+    "explanation": [
+      "वाणी रोकें, मन को विश्राम दें।",
+      "सत्य शांत क्षणों में कोमलता से बोलता है।",
+      "आज पाँच मिनट मौन आज़माएँ।",
+      "देखें कि भीतर क्या बुद्धि उभरती है।"
+    ],
+    "source": {
+      "title": "योग सूत्र (परिवर्तित)"
+    },
+    "tags": [
+      "शांति",
+      "स्पष्टता",
+      "साधना"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "poetic"
+  },
+  {
+    "id": "wis.courage_to_release",
+    "text": "साहस जो अब सेवा न करे, उसे छोड़ देता है।",
+    "explanation": [
+      "पुराने बोझ को कृपा से छोड़ें।",
+      "पूछें: क्या यह मेरे सत्य से जुड़ता है?",
+      "एक छोटा छोड़ना हृदय को मुक्त कर सकता है।",
+      "विकास के लिए यह स्थान बनाने पर भरोसा करें।"
+    ],
+    "source": {
+      "title": "वेदांत बुद्धि (परिवर्तित)"
+    },
+    "tags": [
+      "वैराग्य",
+      "साहस",
+      "विकास"
+    ],
+    "mood": "courage",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.gratitude_opens_eyes",
+    "text": "कृतज्ञता जीवन की प्रचुरता के लिए आँखें खोलती है।",
+    "explanation": [
+      "तीन चीजें नाम करें जिनके लिए आप कृतज्ञ हैं।",
+      "प्रत्येक क्षण छिपे उपहार रखता है।",
+      "कृतज्ञ हृदय हर जगह सौंदर्य देखता है।",
+      "आज एक साधारण धन्यवाद से शुरू करें।"
+    ],
+    "source": {
+      "title": "भक्ति अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "कृतज्ञता",
+      "जागरूकता",
+      "भक्ति"
+    ],
+    "deities": [
+      "Lakshmi"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "weight": 1.2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.patience_is_power",
+    "text": "धैर्य वह शक्ति है जिसका समय सम्मान करता है।",
+    "explanation": [
+      "परिणाम को जबरदस्ती न करें, प्रतीक्षा करें।",
+      "जीवन की लय पर भरोसा करें जो सत्य खोलती है।",
+      "आज एक कार्य में धैर्य अभ्यास करें।",
+      "स्थिर सहनशीलता में शक्ति बढ़ती है।"
+    ],
+    "source": {
+      "title": "स्मार्त शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "धैर्य",
+      "सहनशीलता",
+      "एकाग्रता"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.kindness_is_strength",
+    "text": "दया वह शक्ति है जो शांतिपूर्वक ठीक करती है।",
+    "explanation": [
+      "एक दयालु शब्द किसी का दिन बदल सकता है।",
+      "शक्ति कोमल कार्यों में निहित है।",
+      "अपेक्षा रहित दया दें।",
+      "नोटिस करें कि यह आपके हृदय को कितना नरम करती है।"
+    ],
+    "source": {
+      "title": "धर्म नीति (परिवर्तित)"
+    },
+    "tags": [
+      "अहिंसा",
+      "करुणा",
+      "दया"
+    ],
+    "deities": [
+      "Rama"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_seeks_balance",
+    "text": "बुद्धि संतुलन की खोज करती है, चरमों की नहीं।",
+    "explanation": [
+      "विचार या कार्य में अतिरिक्त से बचें।",
+      "एक चुनौती में मध्य मार्ग खोजें।",
+      "संतुलन स्पष्टता और शांति लाता है।",
+      "आज एक चुनाव में इसे परखें।"
+    ],
+    "source": {
+      "title": "योग दर्शन (परिवर्तित)"
+    },
+    "tags": [
+      "संतुलन",
+      "विवेक",
+      "स्पष्टता"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.surrender_to_flow",
+    "text": "दिव्य इच्छा के प्रवाह में समर्पण करें।",
+    "explanation": [
+      "सब कुछ नियंत्रित करने की आवश्यकता छोड़ें।",
+      "ब्रह्मांड की गहरी योजना पर भरोसा करें।",
+      "आज एक छोटे क्षण में छोड़ें।",
+      "जीवन के साथ बहने की आसानी महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति बुद्धि (परिवर्तित)"
+    },
+    "tags": [
+      "समर्पण",
+      "भक्ति",
+      "विश्वास"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.action_with_purpose",
+    "text": "सत्य में जड़ित उद्देश्य से कार्य करें।",
+    "explanation": [
+      "हर कार्य आपका मार्ग आकार देता है।",
+      "पूछें: क्या यह धर्म से जुड़ता है?",
+      "आज एक उद्देश्यपूर्ण कार्य चुनें।",
+      "सत्य आपके कदमों का मार्गदर्शन करे।"
+    ],
+    "source": {
+      "title": "भगवद्गीता (परिवर्तित)",
+      "ref": "3.25"
+    },
+    "tags": [
+      "धर्म",
+      "उद्देश्य",
+      "कार्य"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.breath_is_anchor",
+    "text": "सांस वर्तमान का लंगर है।",
+    "explanation": [
+      "एक गहरी सांस आपको अब में लौटाती है।",
+      "मन भटकता है; सांस इसे घर लाती है।",
+      "जल्दबाजी में तीन धीमी सांसें आज़माएँ।",
+      "नोटिस करें कि यह कितनी शांति बहाल करती है।"
+    ],
+    "source": {
+      "title": "योग अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "श्वास",
+      "उपस्थिति",
+      "शांति"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "weight": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_without_clinging",
+    "text": "लिपटाव रहित प्रेम करें; इसे स्वतंत्र बहने दें।",
+    "explanation": [
+      "प्रेम को हल्के से पकड़ें, पकड़ से नहीं।",
+      "स्वतंत्र प्रेम गहरा और सच्चा बढ़ता है।",
+      "एक अपेक्षा को छोड़ने का अभ्यास करें।",
+      "देखें कि प्रेम स्वतंत्रता में कैसे सांस लेता है।"
+    ],
+    "source": {
+      "title": "भक्ति दृष्टि (परिवर्तित)"
+    },
+    "tags": [
+      "प्रेम",
+      "वैराग्य",
+      "भक्ति"
+    ],
+    "deities": [
+      "Radha",
+      "Krishna"
+    ],
+    "mood": "compassion",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.humility_invites_wisdom",
+    "text": "विनम्रता हृदय में बुद्धि को आमंत्रित करती है।",
+    "explanation": [
+      "अहंकार अवरुद्ध करता है; विनम्रता द्वार खोलती है।",
+      "आज बोलने से अधिक सुनें।",
+      "किसी अप्रत्याशित से सीखें।",
+      "विनम्र हृदय में बुद्धि बढ़ती है।"
+    ],
+    "source": {
+      "title": "स्मार्त बुद्धि (परिवर्तित)"
+    },
+    "tags": [
+      "विनम्रता",
+      "ज्ञान",
+      "सुनना"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.seva_lights_path",
+    "text": "सेवा दिव्य संबंध के मार्ग को रोशन करती है।",
+    "explanation": [
+      "दूसरों की सेवा दिव्य की सेवा है।",
+      "मदद का छोटा कार्य आनंद की चिंगारी जगाता है।",
+      "आज समय या देखभाल दें।",
+      "निस्वार्थ देने की चमक महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "सेवा",
+      "भक्ति",
+      "करुणा"
+    ],
+    "deities": [
+      "Hanuman"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.steady_mind_wins",
+    "text": "स्थिर मन जीवन के तूफानों पर विजय पाता है।",
+    "explanation": [
+      "किसी भी चुनौती का सामना करने के लिए मन शांत करें।",
+      "तनाव बढ़ने पर धीरे सांस लें।",
+      "एक क्षण में स्थिरता अभ्यास करें।",
+      "आंतरिक शांति बाहरी अराजकता से अधिक टिकती है।"
+    ],
+    "source": {
+      "title": "योग सूत्र (परिवर्तित)"
+    },
+    "tags": [
+      "एकाग्रता",
+      "शांति",
+      "लचीलापन"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.acceptance_frees_heart",
+    "text": "स्वीकृति संघर्ष से हृदय को मुक्त करती है।",
+    "explanation": [
+      "जो है उसका विरोध दर्द पैदा करता है।",
+      "वर्तमान को जैसे है वैसा अपनाएँ।",
+      "आज एक छोटे सत्य को स्वीकार करें।",
+      "होने देने की शांति महसूस करें।"
+    ],
+    "source": {
+      "title": "वेदांत शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "acceptance",
+      "शांति",
+      "समर्पण"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.knowledge_is_light",
+    "text": "ज्ञान वह प्रकाश है जो संदेह मिटाता है।",
+    "explanation": [
+      "भ्रम मिटाने के लिए सत्य खोजें।",
+      "पढ़ें, चिंतन करें या एक प्रश्न पूछें।",
+      "ज्ञान जिज्ञासु कदमों से बढ़ता है।",
+      "आज समझ की एक चिंगारी जलाएँ।"
+    ],
+    "source": {
+      "title": "उपनिषद (परिवर्तित)"
+    },
+    "tags": [
+      "knowledge",
+      "स्पष्टता",
+      "सत्य"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.joy_in_simplicity",
+    "text": "आनंद अब की सरलता में छिपा है।",
+    "explanation": [
+      "आज एक छोटे क्षण का आनंद लें।",
+      "कम अव्यवस्था अधिक शांति प्रकट करती है।",
+      "एक साधारण चीज में सौंदर्य खोजें।",
+      "आनंद वहाँ बढ़ता है जहाँ ध्यान टिकता है।"
+    ],
+    "source": {
+      "title": "स्मार्त शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "सरलता",
+      "आनंद",
+      "उपस्थिति"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.faith_in_journey",
+    "text": "यात्रा में विश्वास हृदय को शांत करता है।",
+    "explanation": [
+      "मार्ग अस्पष्ट हो तो भी भरोसा रखें।",
+      "प्रत्येक कदम अगला प्रकट करता है।",
+      "आज एक चुनौती में विश्वास पकड़ें।",
+      "हृदय दिव्य समय में विश्राम करता है।"
+    ],
+    "source": {
+      "title": "भक्ति बुद्धि (परिवर्तित)"
+    },
+    "tags": [
+      "आस्था",
+      "विश्वास",
+      "भक्ति"
+    ],
+    "deities": [
+      "Rama"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.strength_in_silence",
+    "text": "शक्ति स्वयं के मौन में बढ़ती है।",
+    "explanation": [
+      "आंतरिक शक्ति खोजने के लिए मन शांत करें।",
+      "आज एक क्षण स्थिर बैठें।",
+      "मौन आपकी सच्ची शक्ति प्रकट करता है।",
+      "इसे आपके अगले कदम का मार्गदर्शन करने दें।"
+    ],
+    "source": {
+      "title": "शैव शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "शांति",
+      "शक्ति",
+      "साधना"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.compassion_heals_all",
+    "text": "करुणा देने वाले और लेने वाले दोनों को ठीक करती है।",
+    "explanation": [
+      "प्रयोजन में किसी को दया दें।",
+      "इसकी गर्माहट आपके हृदय को महसूस करें।",
+      "करुणा सभी विभाजनों को जोड़ती है।",
+      "आज एक कोमल कार्य आज़माएँ।"
+    ],
+    "source": {
+      "title": "धर्म शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "करुणा",
+      "अहिंसा",
+      "चिकित्सा"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.focus_shapes_destiny",
+    "text": "ध्यान आपके कार्यों की नियति को आकार देता है।",
+    "explanation": [
+      "बिखरा मन परिणाम बिखेरता है।",
+      "एक कार्य चुनें और उसे सब कुछ दें।",
+      "ध्यान स्थिर मार्ग बनाता है।",
+      "दस मिनट ध्यान से शुरू करें।"
+    ],
+    "source": {
+      "title": "योग सूत्र (परिवर्तित)"
+    },
+    "tags": [
+      "एकाग्रता",
+      "अनुशासन",
+      "destiny"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.grace_in_surrender",
+    "text": "सत्य में समर्पण करने पर कृपा बहती है।",
+    "explanation": [
+      "जो है उसका विरोध छोड़ें।",
+      "अपनाने पर सत्य शांति लाता है।",
+      "आज एक क्षण में समर्पण करें।",
+      "स्वीकृति की कृपा महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "समर्पण",
+      "कृपा",
+      "सत्य"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.awareness_is_freedom",
+    "text": "जागरूकता आंतरिक स्वतंत्रता की कुंजी है।",
+    "explanation": [
+      "विचारों को बिना निर्णय के नोटिस करें।",
+      "जागरूकता उनकी पकड़ ढीली कर देती है।",
+      "आज एक भावना को पूर्णतः देखें।",
+      "स्पष्ट दर्शन में स्वतंत्रता बढ़ती है।"
+    ],
+    "source": {
+      "title": "वेदांत दृष्टि (परिवर्तित)"
+    },
+    "tags": [
+      "जागरूकता",
+      "स्वतंत्रता",
+      "विवेक"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.devotion_is_strength",
+    "text": "भक्ति वह शक्ति है जो कभी डगमगाती नहीं।",
+    "explanation": [
+      "दिव्य के प्रति प्रेम हृदय को स्थिर करता है।",
+      "आज एक प्रार्थना या विचार दें।",
+      "भक्ति तूफानों से आपको पार ले जाती है।",
+      "शांत क्षणों में इसकी शक्ति महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "भक्ति",
+      "शक्ति",
+      "आस्था"
+    ],
+    "deities": [
+      "Krishna",
+      "Rama"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.truth_cuts_illusion",
+    "text": "सत्य भ्रम के पर्दे को काटता है।",
+    "explanation": [
+      "जो प्रतीत होता है उसकी नहीं, जो वास्तविक है उसकी खोज करें।",
+      "आज एक धारणा पर सवाल करें।",
+      "सत्य स्पष्ट मार्ग प्रकट करता है।",
+      "साहस और देखभाल से इसे चलें।"
+    ],
+    "source": {
+      "title": "उपनिषद (परिवर्तित)"
+    },
+    "tags": [
+      "सत्य",
+      "विवेक",
+      "स्पष्टता"
+    ],
+    "mood": "clarity",
+    "difficulty": 3,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.joy_in_service",
+    "text": "निस्वार्थ सेवा में आनंद स्वतंत्र बहता है।",
+    "explanation": [
+      "पुरस्कार न खोजकर दूसरे की मदद करें।",
+      "स्वतंत्र देने से आनंद उभरता है।",
+      "आज एक सेवा कार्य आज़माएँ।",
+      "नोटिस करें कि आपका हृदय कैसे विस्तारित होता है।"
+    ],
+    "source": {
+      "title": "भक्ति अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "सेवा",
+      "आनंद",
+      "करुणा"
+    ],
+    "deities": [
+      "Hanuman"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.calm_in_chaos",
+    "text": "जीवन के अराजकता के हृदय में शांति खोजें।",
+    "explanation": [
+      "अराजकता परीक्षा लेती है लेकिन तोड़ नहीं सकती।",
+      "तूफान के बीच गहराई से सांस लें।",
+      "एक आंतरिक शांति का क्षण खोजें।",
+      "शांति आपको सत्य से जोड़ती है।"
+    ],
+    "source": {
+      "title": "योग शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "शांति",
+      "लचीलापन",
+      "शांति"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.honesty_clears_path",
+    "text": "ईमानदारी आंतरिक सत्य के मार्ग को साफ करती है।",
+    "explanation": [
+      "सबसे पहले स्वयं से सत्य बोलें।",
+      "एक ईमानदार क्षण दृष्टिकोण बदलता है।",
+      "आज एक छोटे चुनाव में सत्यपूर्ण रहें।",
+      "ईमानदार हृदय के बाद स्पष्टता आती है।"
+    ],
+    "source": {
+      "title": "धर्म नीति (परिवर्तित)"
+    },
+    "tags": [
+      "सत्य",
+      "ईमानदारी",
+      "स्पष्टता"
+    ],
+    "mood": "clarity",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_is_eternal",
+    "text": "प्रेम अस्तित्व का अनंत धागा है।",
+    "explanation": [
+      "प्रेम सभी प्राणियों और क्षणों को जोड़ता है।",
+      "आज एक छोटे तरीके से प्रेम व्यक्त करें।",
+      "यह सभी क्षणिक चीजों से अधिक टिकता है।",
+      "भीतर इसकी कालातीत गर्माहट महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति बुद्धि (परिवर्तित)"
+    },
+    "tags": [
+      "प्रेम",
+      "भक्ति",
+      "संबंध"
+    ],
+    "deities": [
+      "Radha",
+      "Krishna"
+    ],
+    "mood": "compassion",
+    "difficulty": 2,
+    "language_level": "poetic"
+  },
+  {
+    "id": "wis.discipline_shapes_freedom",
+    "text": "अनुशासन स्वतंत्रता के मार्ग को आकार देता है।",
+    "explanation": [
+      "छोटे, स्थिर कदम शक्ति बनाते हैं।",
+      "आज एक अभ्यास के प्रति प्रतिबद्ध हों।",
+      "अनुशासन आपको अराजकता से मुक्त करता है।",
+      "इसकी स्पष्टता नोटिस करें।"
+    ],
+    "source": {
+      "title": "योग सूत्र (परिवर्तित)"
+    },
+    "tags": [
+      "अनुशासन",
+      "स्वतंत्रता",
+      "एकाग्रता"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.gratitude_transforms",
+    "text": "कृतज्ञता दर्द को शांति में बदल देती है।",
+    "explanation": [
+      "एक चीज खोजें जिसके लिए कृतज्ञ हों।",
+      "कृतज्ञता हृदय के लेंस को बदलती है।",
+      "कठिनाई में भी उपहार होते हैं।",
+      "आज कठिन क्षण में इसे आज़माएँ।"
+    ],
+    "source": {
+      "title": "भक्ति अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "कृतज्ञता",
+      "शांति",
+      "परिवर्तन"
+    ],
+    "deities": [
+      "Lakshmi"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.courage_to_be",
+    "text": "साहस आपको वास्तव में जो हैं, वह बनने देता है।",
+    "explanation": [
+      "भय आपका सच्चा स्वरूप छिपाता है; सामना करें।",
+      "प्रामाणिकता की ओर एक कदम लें।",
+      "आपका सार सच्चे होने पर चमकता है।",
+      "आप होने की स्वतंत्रता महसूस करें।"
+    ],
+    "source": {
+      "title": "शैव बुद्धि (परिवर्तित)"
+    },
+    "tags": [
+      "साहस",
+      "प्रामाणिकता",
+      "सत्य"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "courage",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.peace_in_surrender",
+    "text": "नियंत्रण समर्पण करने पर शांति बहती है।",
+    "explanation": [
+      "जीवन के परिणामों को जबरदस्ती न करें।",
+      "आज दिव्य व्यवस्था पर भरोसा करें।",
+      "समर्पण शांत हृदय लाता है।",
+      "एक छोटे क्षण में इसे आज़माएँ।"
+    ],
+    "source": {
+      "title": "भक्ति शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "समर्पण",
+      "शांति",
+      "विश्वास"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_in_listening",
+    "text": "बुद्धि सुनने के कार्य में बढ़ती है।",
+    "explanation": [
+      "दूसरों को खुले हृदय से सुनें।",
+      "आज उत्तर देने से पहले रुकें।",
+      "सुनना छिपे सत्य प्रकट करता है।",
+      "एक बातचीत से सीखें।"
+    ],
+    "source": {
+      "title": "स्मार्त शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "सुनना",
+      "ज्ञान",
+      "विनम्रता"
+    ],
+    "mood": "clarity",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.strength_in_gentleness",
+    "text": "शक्ति कोमलता में सबसे अधिक चमकती है।",
+    "explanation": [
+      "शक्ति को सिद्ध करने के लिए कठोरता की आवश्यकता नहीं।",
+      "आज एक अंतर्क्रिया में कोमल रहें।",
+      "कोमलता निरस्त्र करती और ऊँचा उठाती है।",
+      "इसकी शांत, सहनशील शक्ति महसूस करें।"
+    ],
+    "source": {
+      "title": "शाक्त बुद्धि (परिवर्तित)"
+    },
+    "tags": [
+      "कोमलता",
+      "शक्ति",
+      "करुणा"
+    ],
+    "deities": [
+      "Lakshmi"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.faith_over_fear",
+    "text": "विश्वास हृदय के प्रकाश में भय को घोल देता है।",
+    "explanation": [
+      "दिव्य पर भरोसा करने पर भय मिटता है।",
+      "एक अनिश्चित क्षण में विश्वास पकड़ें।",
+      "यह आपको संदेह से मार्गदर्शन करे।",
+      "हृदय का साहस उभरता महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "आस्था",
+      "साहस",
+      "विश्वास"
+    ],
+    "deities": [
+      "Rama"
+    ],
+    "mood": "courage",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.clarity_in_purpose",
+    "text": "उद्देश्य की स्पष्टता मन को स्थिर करती है।",
+    "explanation": [
+      "कार्य करने से पहले जानें कि क्यों।",
+      "आज एक लक्ष्य पर चिंतन करें।",
+      "उद्देश्य हृदय और कार्य को जोड़ता है।",
+      "इरादे और शांति से चलें।"
+    ],
+    "source": {
+      "title": "भगवद्गीता (परिवर्तित)",
+      "ref": "2.50"
+    },
+    "tags": [
+      "उद्देश्य",
+      "स्पष्टता",
+      "एकाग्रता"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.joy_in_presence",
+    "text": "आनंद वर्तमान की पूर्णता में रहता है।",
+    "explanation": [
+      "अतीत और भविष्य को अब के लिए छोड़ें।",
+      "सभी इंद्रियों से क्षण महसूस करें।",
+      "एक साधारण सांस में आनंद खोजें।",
+      "वर्तमान जीवन की सुंदरता प्रकट करता है।"
+    ],
+    "source": {
+      "title": "योग शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "उपस्थिति",
+      "आनंद",
+      "जागरूकता"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_unites_all",
+    "text": "प्रेम सभी को दिव्य सामंजस्य में एकजुट करता है।",
+    "explanation": [
+      "हर प्राणी में दिव्य को देखें।",
+      "एक छोटे इशारे में प्रेम दें।",
+      "प्रेम अलगाव की दीवारें घोल देता है।",
+      "इसकी जोड़ने की शक्ति महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति बुद्धि (परिवर्तित)"
+    },
+    "tags": [
+      "प्रेम",
+      "एकता",
+      "भक्ति"
+    ],
+    "deities": [
+      "Krishna",
+      "Radha"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_in_patience",
+    "text": "बुद्धि धैर्य की मिट्टी में बढ़ती है।",
+    "explanation": [
+      "जल्दबाजी धुंधला करती है; धैर्य सत्य प्रकट करता है।",
+      "आज एक क्षण में सजग प्रतीक्षा करें।",
+      "बुद्धि स्थिर समय में खुलती है।",
+      "विकास की प्रक्रिया पर भरोसा करें।"
+    ],
+    "source": {
+      "title": "स्मार्त शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "धैर्य",
+      "ज्ञान",
+      "शांति"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.courage_in_truth",
+    "text": "सत्य में साहस आत्मा के मार्ग को रोशन करता है।",
+    "explanation": [
+      "सत्य बोलें, भले ही कठिन हो।",
+      "एक ईमानदार शब्द क्षण बदल सकता है।",
+      "सत्य आपके आंतरिक केंद्र को मजबूत करता है।",
+      "आज दया से इसे आज़माएँ।"
+    ],
+    "source": {
+      "title": "धर्म नीति (परिवर्तित)"
+    },
+    "tags": [
+      "सत्य",
+      "साहस",
+      "ईमानदारी"
+    ],
+    "mood": "courage",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.peace_in_simplicity",
+    "text": "शांति सरलता के हृदय में निवास करती है।",
+    "explanation": [
+      "आज अतिरिक्त चाहतों को छोड़ दें।",
+      "एक साधारण कार्य में शांति खोजें।",
+      "सरलता मन की अव्यवस्था साफ करती है।",
+      "शांति वहाँ बढ़ती है जहाँ कम पर्याप्त हो।"
+    ],
+    "source": {
+      "title": "योग शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "सरलता",
+      "शांति",
+      "शांति"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.devotion_is_joy",
+    "text": "भक्ति समर्पित हृदय का आनंद है।",
+    "explanation": [
+      "आज अपना हृदय दिव्य को अर्पित करें।",
+      "निस्वार्थ प्रेम से आनंद बहता है।",
+      "एक छोटी भक्ति का कार्य आज़माएँ।",
+      "इसकी हल्कीपन महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "भक्ति",
+      "आनंद",
+      "समर्पण"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.strength_in_service",
+    "text": "शक्ति दूसरों की सेवा में बढ़ती है।",
+    "explanation": [
+      "अपनी शक्ति खोजने के लिए दूसरे की मदद करें।",
+      "आज एक दयालु कार्य दें।",
+      "सेवा अटल शक्ति बनाती है।",
+      "इसकी जड़ें अपने हृदय में महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "सेवा",
+      "शक्ति",
+      "करुणा"
+    ],
+    "deities": [
+      "Hanuman"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.harmony_in_action",
+    "text": "जीवन के पवित्र प्रवाह के साथ सामंजस्य में कार्य करें।",
+    "explanation": [
+      "अपने कार्यों को सार्वभौमिक सत्य से जोड़ें।",
+      "अब की लय महसूस करने के लिए रुकें।",
+      "एक सजग कार्य संतुलन बहाल करता है।",
+      "सामंजस्य हृदय को शांति लाता है।"
+    ],
+    "source": {
+      "title": "योग शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "सामंजस्य",
+      "कार्य",
+      "संतुलन"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.devotion_is_peace",
+    "text": "भक्ति वह शांति है जो आत्मा को स्थिर करती है।",
+    "explanation": [
+      "आज अपना हृदय दिव्य को अर्पित करें।",
+      "प्रेम बेचैन मन को शांत करता है।",
+      "एक भक्ति के कार्य में शांति महसूस करें।",
+      "आत्मा पवित्र भरोसे में विश्राम करती है।"
+    ],
+    "source": {
+      "title": "भक्ति शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "भक्ति",
+      "शांति",
+      "विश्वास"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.courage_to_serve",
+    "text": "सेवा का साहस सभी हृदयों को ऊँचा उठाता है।",
+    "explanation": [
+      "छोटे तरीकों से भी साहसपूर्वक सेवा करें।",
+      "एक निस्वार्थ कार्य बदलाव की चिंगारी जगाता है।",
+      "सेवा में साहस जीवन बदलता है।",
+      "देने की शक्ति महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "सेवा",
+      "साहस",
+      "करुणा"
+    ],
+    "deities": [
+      "Hanuman"
+    ],
+    "mood": "courage",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.clarity_in_breath",
+    "text": "स्पष्टता प्रत्येक सजग सांस के साथ उभरती है।",
+    "explanation": [
+      "मन साफ करने के लिए धीरे सांस लें।",
+      "एक सांस आपका ध्यान बदल सकती है।",
+      "शांत हृदय में सत्य चमकता है।",
+      "जागरूकता के साथ तीन सांसें आज़माएँ।"
+    ],
+    "source": {
+      "title": "योग अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "श्वास",
+      "स्पष्टता",
+      "उपस्थिति"
+    ],
+    "mood": "clarity",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.gratitude_is_light",
+    "text": "कृतज्ञता वह प्रकाश है जो आत्मा को उज्ज्वल बनाता है।",
+    "explanation": [
+      "एक छोटे क्षण के लिए धन्यवाद दें।",
+      "कृतज्ञता छिपी सुंदरता प्रकट करती है।",
+      "यह हृदय की दृष्टि बदलता है।",
+      "आज एक धन्यवाद से शुरू करें।"
+    ],
+    "source": {
+      "title": "भक्ति अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "कृतज्ञता",
+      "आनंद",
+      "जागरूकता"
+    ],
+    "deities": [
+      "Lakshmi"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.stillness_is_power",
+    "text": "शांतता वह शक्ति है जो स्वयं को लंगर करती है।",
+    "explanation": [
+      "भीतर शक्ति खोजने के लिए रुकें।",
+      "एक क्षण के लिए मन शांत करें।",
+      "शांतता अटल शांति रखती है।",
+      "आज मौन में इसे खोजें।"
+    ],
+    "source": {
+      "title": "शैव शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "शांति",
+      "शक्ति",
+      "शांति"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.kindness_is_bridge",
+    "text": "दया सभी हृदयों के बीच पुल है।",
+    "explanation": [
+      "एक दयालु कार्य आपको दूसरों से जोड़ता है।",
+      "अपेक्षा रहित कोमलता दें।",
+      "दया शांतिपूर्वक ठीक करती और एकजुट करती है।",
+      "आज एक अंतर्क्रिया में इसे आज़माएँ।"
+    ],
+    "source": {
+      "title": "धर्म शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "दया",
+      "अहिंसा",
+      "करुणा"
+    ],
+    "deities": [
+      "Rama"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.dharma_is_strength",
+    "text": "धर्म वह शक्ति है जो आपके मार्ग का मार्गदर्शन करती है।",
+    "explanation": [
+      "सत्य को अपनी नींव बनाकर कार्य करें।",
+      "पूछें: क्या यह बड़े भले की सेवा करता है?",
+      "धर्म आपके हर कदम को स्थिर करता है।",
+      "आज एक धार्मिक कार्य चुनें।"
+    ],
+    "source": {
+      "title": "भगवद्गीता (परिवर्तित)",
+      "ref": "3.8"
+    },
+    "tags": [
+      "धर्म",
+      "शक्ति",
+      "कर्तव्य"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.surrender_is_calm",
+    "text": "समर्पण वह शांति है जो हृदय को मुक्त करती है।",
+    "explanation": [
+      "नियंत्रित करने की एक आवश्यकता छोड़ दें।",
+      "जीवन की दिव्य धारा पर भरोसा करें।",
+      "समर्पण शांत शक्ति लाता है।",
+      "एक क्षण में इसे महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "समर्पण",
+      "शांति",
+      "विश्वास"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_in_patience",
+    "text": "बुद्धि समय के धैर्य में खिलती है।",
+    "explanation": [
+      "स्पष्टता उभरने के लिए सजग प्रतीक्षा करें।",
+      "जल्दबाजी धुंधला करती है; धैर्य प्रकट करता है।",
+      "आज एक कार्य में धैर्य आज़माएँ।",
+      "बुद्धि स्थिर क्षणों में बढ़ती है।"
+    ],
+    "source": {
+      "title": "स्मार्त शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "धैर्य",
+      "ज्ञान",
+      "शांति"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_is_connection",
+    "text": "प्रेम वह संबंध है जो सभी जीवन को बाँधता है।",
+    "explanation": [
+      "हर प्राणी में दिव्य को देखें।",
+      "एक छोटे कार्य में प्रेम साझा करें।",
+      "प्रेम सभी विभाजनों से परे एकजुट करता है।",
+      "अपने हृदय में इसकी गर्माहट महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति बुद्धि (परिवर्तित)"
+    },
+    "tags": [
+      "प्रेम",
+      "एकता",
+      "भक्ति"
+    ],
+    "deities": [
+      "Radha",
+      "Krishna"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.courage_in_truth",
+    "text": "सत्य में साहस आत्मा के मार्ग को रोशन करता है।",
+    "explanation": [
+      "कोमल शक्ति से एक सत्य बोलें।",
+      "ईमानदारी आंतरिक छायाओं को साफ करती है।",
+      "सत्य निडर स्पष्टता से मार्गदर्शन करता है।",
+      "आज एक छोटे क्षण में इसे आज़माएँ।"
+    ],
+    "source": {
+      "title": "धर्म नीति (परिवर्तित)"
+    },
+    "tags": [
+      "सत्य",
+      "साहस",
+      "स्पष्टता"
+    ],
+    "mood": "courage",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.steadiness_in_chaos",
+    "text": "अराजकता में स्थिरता सच्ची शक्ति प्रकट करती है।",
+    "explanation": [
+      "जब तूफान घेर लें, तो शांत रहें।",
+      "हृदय को लंगर करने के लिए सांस लें।",
+      "स्थिरता क्षणिक अराजकता से अधिक चमकती है।",
+      "एक कठिन क्षण में इसे खोजें।"
+    ],
+    "source": {
+      "title": "योग सूत्र (परिवर्तित)"
+    },
+    "tags": [
+      "लचीलापन",
+      "शांति",
+      "शक्ति"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.gratitude_is_peace",
+    "text": "कृतज्ञता वह शांति है जो हृदय को नरम करती है।",
+    "explanation": [
+      "आज अपनी जिंदगी की एक चीज के लिए धन्यवाद दें।",
+      "कृतज्ञता बेचैन मन को शांत करती है।",
+      "यह हर क्षण में प्रकाश खोजती है।",
+      "भीतर इसकी कोमल गर्माहट महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "कृतज्ञता",
+      "शांति",
+      "आनंद"
+    ],
+    "deities": [
+      "Lakshmi"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.silence_is_wisdom",
+    "text": "मौन बुद्धि का शांत आश्रय है।",
+    "explanation": [
+      "आंतरिक सत्य सुनने के लिए शब्दों को रोकें।",
+      "मौन वह प्रकट करता है जो शोर छिपाता है।",
+      "आज एक शांत क्षण आज़माएँ।",
+      "बुद्धि शांतता में बोलती है।"
+    ],
+    "source": {
+      "title": "शैव शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "मौन",
+      "ज्ञान",
+      "शांति"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "poetic"
+  },
+  {
+    "id": "wis.seva_is_joy",
+    "text": "सेवा वह आनंद है जो देने से बहता है।",
+    "explanation": [
+      "किसी पुरस्कार की खोज रहित सेवा करें।",
+      "एक निस्वार्थ कार्य खुशी की चिंगारी जगाता है।",
+      "सेवा आपको दिव्य से जोड़ती है।",
+      "अपने हृदय में इसका प्रकाश महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "सेवा",
+      "आनंद",
+      "करुणा"
+    ],
+    "deities": [
+      "Hanuman"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.dharma_is_clarity",
+    "text": "धर्म वह स्पष्टता है जो आपके कार्यों का मार्गदर्शन करती है।",
+    "explanation": [
+      "सत्य को अपना कम्पास बनाकर कार्य करें।",
+      "पूछें: क्या यह मेरे उद्देश्य की सेवा करता है?",
+      "धर्म आगे का मार्ग रोशन करता है।",
+      "आज एक स्पष्ट कार्य चुनें।"
+    ],
+    "source": {
+      "title": "भगवद्गीता (परिवर्तित)",
+      "ref": "2.31"
+    },
+    "tags": [
+      "धर्म",
+      "स्पष्टता",
+      "कर्तव्य"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.kindness_is_strength",
+    "text": "दया वह शक्ति है जो शांतिपूर्वक ठीक करती है।",
+    "explanation": [
+      "एक दयालु कार्य किसी भी हृदय को बदल सकता है।",
+      "पुरस्कार रहित कोमलता दें।",
+      "दया नरम रूप में शक्ति है।",
+      "आज एक दयालु कार्य आज़माएँ।"
+    ],
+    "source": {
+      "title": "धर्म शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "दया",
+      "अहिंसा",
+      "करुणा"
+    ],
+    "deities": [
+      "Rama"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.breath_is_presence",
+    "text": "सांस वह वर्तमान है जो आत्मा को जमी हुई रखती है।",
+    "explanation": [
+      "एक धीमी सांस आपको अब में लाती है।",
+      "अपनी सांस में जीवन की नाड़ी महसूस करें।",
+      "व्यस्त क्षण में सजग सांस लें।",
+      "वर्तमान आपके हृदय को लंगर करता है।"
+    ],
+    "source": {
+      "title": "योग अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "श्वास",
+      "उपस्थिति",
+      "शांति"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.surrender_is_trust",
+    "text": "समर्पण दिव्य खुलाव में भरोसा है।",
+    "explanation": [
+      "एक छोटे तरीके से नियंत्रण छोड़ दें।",
+      "जीवन की योजना के प्रवाह पर भरोसा करें।",
+      "समर्पण हृदय के बोझ को हल्का करता है।",
+      "आज इसकी शांति महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "समर्पण",
+      "विश्वास",
+      "शांति"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_in_stillness",
+    "text": "बुद्धि मन की शांतता में बढ़ती है।",
+    "explanation": [
+      "विचारों को शांत होने के लिए रुकें।",
+      "शांतता गहरे सत्य प्रकट करती है।",
+      "आज एक शांत क्षण आज़माएँ।",
+      "बुद्धि मौन में चमकती है।"
+    ],
+    "source": {
+      "title": "शैव शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "ज्ञान",
+      "शांति",
+      "स्पष्टता"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_is_unity",
+    "text": "प्रेम वह एकता है जो सभी प्राणियों को बाँधती है।",
+    "explanation": [
+      "आज सभी में दिव्य को देखें।",
+      "एक कोमल कार्य में प्रेम साझा करें।",
+      "प्रेम सभी अलगाव घोल देता है।",
+      "इसकी जोड़ने की शक्ति महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति बुद्धि (परिवर्तित)"
+    },
+    "tags": [
+      "प्रेम",
+      "एकता",
+      "भक्ति"
+    ],
+    "deities": [
+      "Radha",
+      "Krishna"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.patience_is_calm",
+    "text": "धैर्य वह शांति है जो हृदय को स्थिर करती है।",
+    "explanation": [
+      "परिणाम को जबरदस्ती न करें, प्रतीक्षा करें।",
+      "धैर्य आंतरिक शक्ति बनाता है।",
+      "आज एक क्षण में इसे आज़माएँ।",
+      "शांत सहनशीलता में शांति बढ़ती है।"
+    ],
+    "source": {
+      "title": "स्मार्त शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "धैर्य",
+      "शांति",
+      "शक्ति"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.courage_in_silence",
+    "text": "मौन में साहस आंतरिक सत्य प्रकट करता है।",
+    "explanation": [
+      "अपने आंतरिक विचारों का सामना करने के लिए रुकें।",
+      "मौन साहसी हृदय को मजबूत करता है।",
+      "आज एक शांत क्षण आज़माएँ।",
+      "निडर शांति में सत्य चमकता है।"
+    ],
+    "source": {
+      "title": "शैव शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "साहस",
+      "मौन",
+      "सत्य"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "courage",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.gratitude_is_joy",
+    "text": "कृतज्ञता वह आनंद है जो हृदय को खोलता है।",
+    "explanation": [
+      "एक साधारण चीज के लिए धन्यवाद दें।",
+      "कृतज्ञता जीवन की सुंदरता प्रकट करती है।",
+      "यह हर क्षण को बदलता है।",
+      "आज इसकी गर्माहट महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "कृतज्ञता",
+      "आनंद",
+      "जागरूकता"
+    ],
+    "deities": [
+      "Lakshmi"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.stillness_is_clarity",
+    "text": "शांतता मौन से जन्मी स्पष्टता है।",
+    "explanation": [
+      "मन को विश्राम देने के लिए रुकें।",
+      "स्पष्टता मौन में उभरती है।",
+      "आज एक स्थिर क्षण आज़माएँ।",
+      "शांत हृदय में सत्य देखें।"
+    ],
+    "source": {
+      "title": "योग सूत्र (परिवर्तित)"
+    },
+    "tags": [
+      "शांति",
+      "स्पष्टता",
+      "शांति"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "poetic"
+  },
+  {
+    "id": "wis.seva_is_connection",
+    "text": "सेवा दिव्य चिंगारी से संबंध है।",
+    "explanation": [
+      "शाश्वत को छूने के लिए दूसरों की सेवा करें।",
+      "एक निस्वार्थ कार्य हृदयों को बाँधता है।",
+      "सेवा ऊँचा उठाती और शुद्ध करती है।",
+      "आज देने में इसका आनंद महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "सेवा",
+      "संबंध",
+      "करुणा"
+    ],
+    "deities": [
+      "Hanuman"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.dharma_is_peace",
+    "text": "धर्म वह शांति है जो आत्मा को जोड़ती है।",
+    "explanation": [
+      "सत्य को अपना मार्गदर्शक बनाकर कार्य करें।",
+      "धर्म हृदय और कर्तव्य को संतुलित करता है।",
+      "आज एक धार्मिक कार्य चुनें।",
+      "शांति धर्मी मार्ग का अनुसरण करती है।"
+    ],
+    "source": {
+      "title": "भगवद्गीता (परिवर्तित)",
+      "ref": "2.38"
+    },
+    "tags": [
+      "धर्म",
+      "शांति",
+      "कर्तव्य"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.kindness_is_healing",
+    "text": "दया वह ठीक करने वाली है जो सभी दर्द को शांत करती है।",
+    "explanation": [
+      "एक दयालु शब्द या कार्य दें।",
+      "दया टूटे हृदयों को जोड़ती है।",
+      "यह आपकी दृष्टि से परे तरंगें बनाती है।",
+      "देने में इसकी शक्ति महसूस करें।"
+    ],
+    "source": {
+      "title": "धर्म शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "दया",
+      "अहिंसा",
+      "चिकित्सा"
+    ],
+    "deities": [
+      "Rama"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.breath_is_calm",
+    "text": "सांस वह शांति है जो वर्तमान को लंगर करती है।",
+    "explanation": [
+      "एक धीमी सांस आपको अब में लौटाती है।",
+      "हर सांस में जीवन की लय महसूस करें।",
+      "जल्दबाजी में सजग सांस लें।",
+      "शांति वहाँ बहती है जहाँ सांस ले जाती है।"
+    ],
+    "source": {
+      "title": "योग अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "श्वास",
+      "शांति",
+      "उपस्थिति"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.surrender_is_peace",
+    "text": "समर्पण वह शांति है जो आत्मा को मुक्त करती है।",
+    "explanation": [
+      "नियंत्रित करने की एक आवश्यकता छोड़ दें।",
+      "इस क्षण में दिव्य पर भरोसा करें।",
+      "समर्पण हृदय को हल्का करता है।",
+      "आज इसकी शांति महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "समर्पण",
+      "शांति",
+      "विश्वास"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_in_action",
+    "text": "कार्य में बुद्धि अनंत सत्य की सेवा करती है।",
+    "explanation": [
+      "स्पष्टता से कार्य करें, जल्दबाजी से नहीं।",
+      "पूछें: क्या यह सत्य से जुड़ता है?",
+      "एक बुद्धिमान कार्य आपका मार्ग आकार देता है।",
+      "आज देखभाल से चुनें।"
+    ],
+    "source": {
+      "title": "वेदांत शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "ज्ञान",
+      "कार्य",
+      "विवेक"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_is_eternal",
+    "text": "प्रेम अनंत है, सभी अस्तित्व को बाँधता है।",
+    "explanation": [
+      "प्रेम समय और स्थान से परे जोड़ता है।",
+      "एक छोटे इशारे में प्रेम साझा करें।",
+      "यह सभी क्षणिक चीजों से अधिक टिकता है।",
+      "इसकी कालातीत गर्माहट महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति बुद्धि (परिवर्तित)"
+    },
+    "tags": [
+      "प्रेम",
+      "भक्ति",
+      "एकता"
+    ],
+    "deities": [
+      "Radha",
+      "Krishna"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "poetic"
+  },
+  {
+    "id": "wis.patience_is_power",
+    "text": "धैर्य वह शक्ति है जो सभी परीक्षाओं को सहन करती है।",
+    "explanation": [
+      "जीवन के खुलाव के लिए शांत प्रतीक्षा करें।",
+      "धैर्य अटल शक्ति बनाता है।",
+      "आज एक क्षण में इसे आज़माएँ।",
+      "शक्ति स्थिर प्रतीक्षा में बढ़ती है।"
+    ],
+    "source": {
+      "title": "स्मार्त शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "धैर्य",
+      "शक्ति",
+      "शांति"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.courage_in_honesty",
+    "text": "ईमानदारी में साहस आत्मा के मार्ग को साफ करता है।",
+    "explanation": [
+      "कोमल शक्ति से एक सत्य बोलें।",
+      "ईमानदारी हृदय को भय से मुक्त करती है।",
+      "आज एक छोटे क्षण में सत्यपूर्ण रहें।",
+      "आत्मा की स्पष्टता चमकती महसूस करें।"
+    ],
+    "source": {
+      "title": "धर्म नीति (परिवर्तित)"
+    },
+    "tags": [
+      "ईमानदारी",
+      "साहस",
+      "सत्य"
+    ],
+    "mood": "courage",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.steadiness_is_strength",
+    "text": "स्थिरता वह शक्ति है जो तूफानों से अधिक टिकती है।",
+    "explanation": [
+      "जीवन की उथल-पुथल में शांत रहें।",
+      "हृदय को लंगर करने के लिए सांस लें।",
+      "स्थिरता सहनशील शक्ति बनाती है।",
+      "आज एक चुनौती में इसे खोजें।"
+    ],
+    "source": {
+      "title": "योग सूत्र (परिवर्तित)"
+    },
+    "tags": [
+      "स्थिरता",
+      "शक्ति",
+      "लचीलापन"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.gratitude_is_clarity",
+    "text": "कृतज्ञता वह स्पष्टता है जो हृदय को रोशन करती है।",
+    "explanation": [
+      "अपनी दृष्टि बदलने के लिए एक चीज के लिए धन्यवाद दें।",
+      "कृतज्ञता जीवन के उपहार प्रकट करती है।",
+      "यह मन की भ्रम साफ करती है।",
+      "आज एक क्षण में इसे आज़माएँ।"
+    ],
+    "source": {
+      "title": "भक्ति अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "कृतज्ञता",
+      "स्पष्टता",
+      "आनंद"
+    ],
+    "deities": [
+      "Lakshmi"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.silence_is_strength",
+    "text": "मौन वह शक्ति है जो आत्मा को शांत करती है।",
+    "explanation": [
+      "भीतर शक्ति खोजने के लिए रुकें।",
+      "मौन बेचैन मन को स्थिर करता है।",
+      "आज एक शांत क्षण आज़माएँ।",
+      "शक्ति आंतरिक शांति में बढ़ती है।"
+    ],
+    "source": {
+      "title": "शैव शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "मौन",
+      "शक्ति",
+      "शांति"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.seva_is_light",
+    "text": "सेवा वह प्रकाश है जो सभी मार्गों को उज्ज्वल बनाता है।",
+    "explanation": [
+      "दिव्य आनंद की चिंगारी जगाने के लिए दूसरों की सेवा करें।",
+      "एक निस्वार्थ कार्य हृदयों को ऊँचा उठाता है।",
+      "सेवा आपको अनंत से जोड़ती है।",
+      "आज देने में इसकी चमक महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "सेवा",
+      "प्रकाश",
+      "करुणा"
+    ],
+    "deities": [
+      "Hanuman"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.dharma_is_guide",
+    "text": "धर्म धर्मी जीवन का मार्गदर्शक है।",
+    "explanation": [
+      "सत्य को अपना कम्पास बनाकर कार्य करें।",
+      "धर्म हृदय और कार्य को जोड़ता है।",
+      "आज एक धार्मिक कार्य चुनें।",
+      "यह स्थायी शांति की ओर ले जाता है।"
+    ],
+    "source": {
+      "title": "भगवद्गीता (परिवर्तित)",
+      "ref": "3.3"
+    },
+    "tags": [
+      "धर्म",
+      "मार्गदर्शन",
+      "कर्तव्य"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.kindness_is_power",
+    "text": "दया वह शक्ति है जो हृदयों को बदलती है।",
+    "explanation": [
+      "एक दयालु कार्य क्षण बदल सकता है।",
+      "पुरस्कार रहित कोमलता दें।",
+      "दया सभी को ठीक करती और ऊँचा उठाती है।",
+      "एक अंतर्क्रिया में इसे आज़माएँ।"
+    ],
+    "source": {
+      "title": "धर्म शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "दया",
+      "अहिंसा",
+      "करुणा"
+    ],
+    "deities": [
+      "Rama"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.breath_is_life",
+    "text": "सांस हर क्षण में जीवन की नाड़ी है।",
+    "explanation": [
+      "अब खोजने के लिए अपनी सांस महसूस करें।",
+      "एक धीमी सांस शांति बहाल करती है।",
+      "जीवन प्रत्येक सजग सांस से बहता है।",
+      "व्यस्त क्षण में इसे आज़माएँ।"
+    ],
+    "source": {
+      "title": "योग अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "श्वास",
+      "जीवन",
+      "उपस्थिति"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.surrender_is_freedom",
+    "text": "समर्पण आंतरिक जंजीरों से स्वतंत्रता है।",
+    "explanation": [
+      "नियंत्रित करने की एक आवश्यकता छोड़ दें।",
+      "जीवन की दिव्य धारा पर भरोसा करें।",
+      "समर्पण हृदय को हल्का करता है।",
+      "आज इसकी शांति महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "समर्पण",
+      "स्वतंत्रता",
+      "विश्वास"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_in_silence",
+    "text": "मौन में बुद्धि अनंत सत्य प्रकट करती है।",
+    "explanation": [
+      "आत्मा की शांत आवाज सुनने के लिए रुकें।",
+      "मौन मन की अव्यवस्था साफ करता है।",
+      "आज एक स्थिर क्षण आज़माएँ।",
+      "बुद्धि शांति में चमकती है।"
+    ],
+    "source": {
+      "title": "शैव शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "ज्ञान",
+      "मौन",
+      "स्पष्टता"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_is_divine",
+    "text": "प्रेम हर हृदय में दिव्य चिंगारी है।",
+    "explanation": [
+      "आज सभी प्राणियों में प्रेम देखें।",
+      "एक कोमल देखभाल का कार्य साझा करें।",
+      "प्रेम आपको अनंत से जोड़ता है।",
+      "देने में इसकी गर्माहट महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति बुद्धि (परिवर्तित)"
+    },
+    "tags": [
+      "प्रेम",
+      "भक्ति",
+      "एकता"
+    ],
+    "deities": [
+      "Radha",
+      "Krishna"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.patience_is_clarity",
+    "text": "धैर्य वह स्पष्टता है जो मन को स्थिर करती है।",
+    "explanation": [
+      "सत्य खुलने के लिए शांत प्रतीक्षा करें।",
+      "धैर्य हृदय की धुंध साफ करता है।",
+      "आज एक क्षण में इसे आज़माएँ।",
+      "स्पष्टता स्थिर प्रतीक्षा में बढ़ती है।"
+    ],
+    "source": {
+      "title": "स्मार्त शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "धैर्य",
+      "स्पष्टता",
+      "शांति"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.courage_in_devotion",
+    "text": "भक्ति में साहस आत्मा को बदलता है।",
+    "explanation": [
+      "अपना हृदय साहसपूर्वक दिव्य को अर्पित करें।",
+      "भक्ति आंतरिक संकल्प को मजबूत करती है।",
+      "आज एक विश्वास का कार्य आज़माएँ।",
+      "आत्मा का निडर प्रकाश महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "साहस",
+      "भक्ति",
+      "आस्था"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "courage",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.gratitude_is_strength",
+    "text": "कृतज्ञता वह शक्ति है जो हृदय को ऊँचा उठाती है।",
+    "explanation": [
+      "अपनी दृष्टि बदलने के लिए एक चीज के लिए धन्यवाद दें।",
+      "कृतज्ञता आंतरिक सहनशीलता बनाती है।",
+      "यह हर क्षण में प्रकाश खोजती है।",
+      "आज एक चुनौती में इसे आज़माएँ।"
+    ],
+    "source": {
+      "title": "भक्ति अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "कृतज्ञता",
+      "शक्ति",
+      "आनंद"
+    ],
+    "deities": [
+      "Lakshmi"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.stillness_is_peace",
+    "text": "शांतता वह शांति है जो आत्मा को शांत करती है।",
+    "explanation": [
+      "भीतर शांति खोजने के लिए रुकें।",
+      "शांतता बेचैन मन को शांत करती है।",
+      "आज एक शांत क्षण आज़माएँ।",
+      "शांति आंतरिक मौन में बढ़ती है।"
+    ],
+    "source": {
+      "title": "शैव शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "शांति",
+      "शांति",
+      "शांति"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.seva_is_unity",
+    "text": "सेवा वह एकता है जो सभी हृदयों को बाँधती है।",
+    "explanation": [
+      "दिव्य से जुड़ने के लिए सेवा करें।",
+      "एक निस्वार्थ कार्य आत्माओं को जोड़ता है।",
+      "सेवा ऊँचा उठाती और शुद्ध करती है।",
+      "आज देने में इसका आनंद महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "सेवा",
+      "एकता",
+      "करुणा"
+    ],
+    "deities": [
+      "Hanuman"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.dharma_is_harmony",
+    "text": "धर्म वह सामंजस्य है जो आत्मा का मार्गदर्शन करता है।",
+    "explanation": [
+      "सत्य को अपनी नींव बनाकर कार्य करें।",
+      "धर्म हृदय और उद्देश्य को जोड़ता है।",
+      "आज एक धर्मी कार्य चुनें।",
+      "सामंजस्य धर्मी मार्ग का अनुसरण करता है।"
+    ],
+    "source": {
+      "title": "भगवद्गीता (परिवर्तित)",
+      "ref": "2.50"
+    },
+    "tags": [
+      "धर्म",
+      "सामंजस्य",
+      "कर्तव्य"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.kindness_is_light",
+    "text": "दया वह प्रकाश है जो सभी हृदयों को ठीक करता है।",
+    "explanation": [
+      "एक दयालु कार्य क्षण बदल सकता है।",
+      "पुरस्कार रहित कोमलता दें।",
+      "दया हर आत्मा में चमकती है।",
+      "एक अंतर्क्रिया में इसे आज़माएँ।"
+    ],
+    "source": {
+      "title": "धर्म शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "दया",
+      "अहिंसा",
+      "चिकित्सा"
+    ],
+    "deities": [
+      "Rama"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.breath_is_strength",
+    "text": "सांस वह शक्ति है जो हृदय को स्थिर करती है।",
+    "explanation": [
+      "एक धीमी सांस आंतरिक शक्ति बनाती है।",
+      "हर सांस में जीवन की नाड़ी महसूस करें।",
+      "जल्दबाजी में सजग सांस लें।",
+      "शक्ति वहाँ बहती है जहाँ सांस ले जाती है।"
+    ],
+    "source": {
+      "title": "योग अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "श्वास",
+      "शक्ति",
+      "उपस्थिति"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.surrender_is_light",
+    "text": "समर्पण वह प्रकाश है जो आत्मा को मुक्त करता है।",
+    "explanation": [
+      "नियंत्रित करने की एक आवश्यकता छोड़ दें।",
+      "इस क्षण में दिव्य पर भरोसा करें।",
+      "समर्पण हृदय को उज्ज्वल बनाता है।",
+      "आज इसकी शांति महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "समर्पण",
+      "प्रकाश",
+      "विश्वास"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_in_patience",
+    "text": "धैर्य में बुद्धि स्पष्ट सत्य प्रकट करती है।",
+    "explanation": [
+      "अंतर्दृष्टि उभरने के लिए शांत प्रतीक्षा करें।",
+      "धैर्य मन की धुंध साफ करता है।",
+      "आज एक धैर्यपूर्ण क्षण आज़माएँ।",
+      "बुद्धि स्थिर समय में चमकती है।"
+    ],
+    "source": {
+      "title": "स्मार्त शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "ज्ञान",
+      "धैर्य",
+      "स्पष्टता"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_is_strength",
+    "text": "प्रेम वह शक्ति है जो सभी आत्माओं को ऊँचा उठाती है।",
+    "explanation": [
+      "एक कोमल कार्य में प्रेम साझा करें।",
+      "प्रेम वहाँ सहन करता है जहाँ बल असफल होता है।",
+      "यह हृदयों को दिव्य एकता में बाँधता है।",
+      "देने में इसकी शक्ति महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति बुद्धि (परिवर्तित)"
+    },
+    "tags": [
+      "प्रेम",
+      "शक्ति",
+      "भक्ति"
+    ],
+    "deities": [
+      "Radha",
+      "Krishna"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.courage_in_peace",
+    "text": "शांति में साहस आंतरिक तूफानों को बदलता है।",
+    "explanation": [
+      "आंतरिक उथल-पुथल के बीच शांति खोजें।",
+      "एक साहसी रुकावट स्पष्टता बहाल करती है।",
+      "शांति साहसी हृदय को मजबूत करती है।",
+      "एक कठिन क्षण में इसे आज़माएँ।"
+    ],
+    "source": {
+      "title": "शैव शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "साहस",
+      "शांति",
+      "शांति"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "courage",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.gratitude_is_peace",
+    "text": "कृतज्ञता वह शांति है जो हृदय को ठीक करती है।",
+    "explanation": [
+      "अपनी दृष्टि बदलने के लिए एक चीज के लिए धन्यवाद दें।",
+      "कृतज्ञता आंतरिक दर्द को शांत करती है।",
+      "यह हर क्षण में प्रकाश खोजती है।",
+      "आज एक चुनौती में इसे आज़माएँ।"
+    ],
+    "source": {
+      "title": "भक्ति अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "कृतज्ञता",
+      "शांति",
+      "चिकित्सा"
+    ],
+    "deities": [
+      "Lakshmi"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.silence_is_clarity",
+    "text": "मौन वह स्पष्टता है जो सत्य प्रकट करती है।",
+    "explanation": [
+      "आत्मा की आवाज सुनने के लिए रुकें।",
+      "मौन मन के शोर को साफ करता है।",
+      "आज एक शांत क्षण आज़माएँ।",
+      "स्पष्टता शांतता में चमकती है।"
+    ],
+    "source": {
+      "title": "शैव शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "मौन",
+      "स्पष्टता",
+      "शांति"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.seva_is_strength",
+    "text": "सेवा निस्वार्थ प्रेम से जन्मी शक्ति है।",
+    "explanation": [
+      "किसी लाभ की खोज रहित सेवा करें।",
+      "एक निस्वार्थ कार्य शक्ति बनाता है।",
+      "सेवा आपको सभी से जोड़ती है।",
+      "देने में इसकी शक्ति महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "सेवा",
+      "शक्ति",
+      "करुणा"
+    ],
+    "deities": [
+      "Hanuman"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.dharma_is_light",
+    "text": "धर्म वह प्रकाश है जो आपके मार्ग का मार्गदर्शन करता है।",
+    "explanation": [
+      "सत्य को अपना मार्गदर्शक बनाकर कार्य करें।",
+      "धर्म मार्ग को रोशन करता है।",
+      "आज एक धर्मी कार्य चुनें।",
+      "प्रकाश धर्मी हृदय का अनुसरण करता है।"
+    ],
+    "source": {
+      "title": "भगवद्गीता (परिवर्तित)",
+      "ref": "3.20"
+    },
+    "tags": [
+      "धर्म",
+      "प्रकाश",
+      "कर्तव्य"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.kindness_is_unity",
+    "text": "दया वह एकता है जो सभी विभाजनों को ठीक करती है।",
+    "explanation": [
+      "एक दयालु कार्य किसी भी अंतर को जोड़ सकता है।",
+      "पुरस्कार रहित कोमलता दें।",
+      "दया हृदयों को एक साथ बाँधती है।",
+      "आज एक क्षण में इसे आज़माएँ।"
+    ],
+    "source": {
+      "title": "धर्म शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "दया",
+      "अहिंसा",
+      "एकता"
+    ],
+    "deities": [
+      "Rama"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.breath_is_peace",
+    "text": "सांस वह शांति है जो मन को शांत करती है।",
+    "explanation": [
+      "एक धीमी सांस शांति बहाल करती है।",
+      "अपनी सांस में जीवन की लय महसूस करें।",
+      "जल्दबाजी में सजग सांस लें।",
+      "शांति वहाँ बहती है जहाँ सांस ले जाती है।"
+    ],
+    "source": {
+      "title": "योग अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "श्वास",
+      "शांति",
+      "शांति"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.surrender_is_grace",
+    "text": "समर्पण वह कृपा है जो हृदय को मुक्त करती है।",
+    "explanation": [
+      "नियंत्रित करने की एक आवश्यकता छोड़ दें।",
+      "इस क्षण में दिव्य पर भरोसा करें।",
+      "समर्पण कोमल शांति लाता है।",
+      "आज इसकी कृपा महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "समर्पण",
+      "कृपा",
+      "विश्वास"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_in_clarity",
+    "text": "स्पष्टता में बुद्धि जीवन के सत्य को प्रकट करती है।",
+    "explanation": [
+      "सत्य देखने के लिए मन साफ करें।",
+      "एक सजग क्षण के लिए रुकें।",
+      "बुद्धि शांत हृदय में चमकती है।",
+      "आज एक चुनाव में इसे आज़माएँ।"
+    ],
+    "source": {
+      "title": "वेदांत शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "ज्ञान",
+      "स्पष्टता",
+      "विवेक"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_is_peace",
+    "text": "प्रेम वह शांति है जो सभी आत्माओं को एकजुट करती है।",
+    "explanation": [
+      "एक कोमल कार्य में प्रेम साझा करें।",
+      "प्रेम शांत करता और हृदयों को जोड़ता है।",
+      "यह सभी क्षणिक क्षणों से अधिक टिकता है।",
+      "देने में इसकी शांति महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति बुद्धि (परिवर्तित)"
+    },
+    "tags": [
+      "प्रेम",
+      "शांति",
+      "भक्ति"
+    ],
+    "deities": [
+      "Radha",
+      "Krishna"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.patience_is_peace",
+    "text": "धैर्य वह शांति है जो आत्मा को स्थिर करती है।",
+    "explanation": [
+      "जीवन के खुलाव के लिए शांत प्रतीक्षा करें।",
+      "धैर्य आंतरिक शांति लाता है।",
+      "आज एक क्षण में इसे आज़माएँ।",
+      "शांति स्थिर प्रतीक्षा में बढ़ती है।"
+    ],
+    "source": {
+      "title": "स्मार्त शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "धैर्य",
+      "शांति",
+      "शांति"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.courage_in_clarity",
+    "text": "स्पष्टता में साहस सच्चा मार्ग रोशन करता है।",
+    "explanation": [
+      "साहसी हृदय से एक सत्य का सामना करें।",
+      "स्पष्टता आपके संकल्प को मजबूत करती है।",
+      "आज एक क्षण में स्पष्ट रहें।",
+      "साहस आत्मा के मार्ग का मार्गदर्शन करता है।"
+    ],
+    "source": {
+      "title": "धर्म नीति (परिवर्तित)"
+    },
+    "tags": [
+      "साहस",
+      "स्पष्टता",
+      "सत्य"
+    ],
+    "mood": "courage",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.gratitude_is_light",
+    "text": "कृतज्ञता वह प्रकाश है जो दर्द को बदलता है।",
+    "explanation": [
+      "अपना हृदय बदलने के लिए एक चीज के लिए धन्यवाद दें।",
+      "कृतज्ञता कठिनाई में आनंद खोजती है।",
+      "यह आत्मा की दृष्टि उज्ज्वल बनाता है।",
+      "आज एक क्षण में इसे आज़माएँ।"
+    ],
+    "source": {
+      "title": "भक्ति अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "कृतज्ञता",
+      "प्रकाश",
+      "आनंद"
+    ],
+    "deities": [
+      "Lakshmi"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.silence_is_peace",
+    "text": "मौन वह शांति है जो हृदय को ठीक करता है।",
+    "explanation": [
+      "भीतर शांति खोजने के लिए रुकें।",
+      "मौन बेचैन मन को शांत करता है।",
+      "आज एक शांत क्षण आज़माएँ।",
+      "शांति आंतरिक शांतता में बढ़ती है।"
+    ],
+    "source": {
+      "title": "शैव शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "मौन",
+      "शांति",
+      "शांति"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.seva_is_peace",
+    "text": "सेवा वह शांति है जो सभी आत्माओं को ऊँचा उठाती है।",
+    "explanation": [
+      "पुरस्कार की खोज रहित सेवा करें।",
+      "एक निस्वार्थ कार्य हृदय को शांत करता है।",
+      "सेवा आपको दिव्य से जोड़ती है।",
+      "आज देने में इसकी शांति महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "सेवा",
+      "शांति",
+      "करुणा"
+    ],
+    "deities": [
+      "Hanuman"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.dharma_is_strength",
+    "text": "धर्म वह शक्ति है जो आपके हृदय का मार्गदर्शन करती है।",
+    "explanation": [
+      "सत्य को अपनी नींव बनाकर कार्य करें।",
+      "धर्म अटल संकल्प बनाता है।",
+      "आज एक धर्मी कार्य चुनें।",
+      "शक्ति धर्मी मार्ग का अनुसरण करती है।"
+    ],
+    "source": {
+      "title": "भगवद्गीता (परिवर्तित)",
+      "ref": "2.40"
+    },
+    "tags": [
+      "धर्म",
+      "शक्ति",
+      "कर्तव्य"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.kindness_is_peace",
+    "text": "दया वह शांति है जो सभी हृदयों को ठीक करती है।",
+    "explanation": [
+      "एक दयालु कार्य किसी भी आत्मा को शांत कर सकता है।",
+      "पुरस्कार रहित कोमलता दें।",
+      "दया सभी को शांति लाती है।",
+      "आज एक क्षण में इसे आज़माएँ।"
+    ],
+    "source": {
+      "title": "धर्म शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "दया",
+      "अहिंसा",
+      "शांति"
+    ],
+    "deities": [
+      "Rama"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.breath_is_clarity",
+    "text": "सांस वह स्पष्टता है जो मन को स्थिर करती है।",
+    "explanation": [
+      "एक धीमी सांस आपके विचारों को साफ करती है।",
+      "हर सांस में जीवन की नाड़ी महसूस करें।",
+      "जल्दबाजी में सजग सांस लें।",
+      "स्पष्टता वहाँ बहती है जहाँ सांस ले जाती है।"
+    ],
+    "source": {
+      "title": "योग अभ्यास (परिवर्तित)"
+    },
+    "tags": [
+      "श्वास",
+      "स्पष्टता",
+      "उपस्थिति"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.surrender_is_strength",
+    "text": "समर्पण वह शक्ति है जो हृदय को मुक्त करती है।",
+    "explanation": [
+      "नियंत्रित करने की एक आवश्यकता छोड़ दें।",
+      "इस क्षण में दिव्य पर भरोसा करें।",
+      "समर्पण आंतरिक शक्ति बनाता है।",
+      "आज इसकी शक्ति महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "समर्पण",
+      "शक्ति",
+      "विश्वास"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_in_peace",
+    "text": "शांति में बुद्धि जीवन के सत्य को प्रकट करती है।",
+    "explanation": [
+      "स्पष्ट देखने के लिए शांति खोजें।",
+      "एक शांत क्षण के लिए रुकें।",
+      "बुद्धि स्थिर हृदय में चमकती है।",
+      "आज एक चुनाव में इसे आज़माएँ।"
+    ],
+    "source": {
+      "title": "वेदांत शिक्षण (परिवर्तित)"
+    },
+    "tags": [
+      "ज्ञान",
+      "शांति",
+      "स्पष्टता"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_is_light",
+    "text": "प्रेम वह प्रकाश है जो सभी मार्गों को उज्ज्वल बनाता है।",
+    "explanation": [
+      "एक कोमल कार्य में प्रेम साझा करें।",
+      "प्रेम हर हृदय को रोशन करता है।",
+      "यह सभी क्षणिक क्षणों से अधिक टिकता है।",
+      "देने में इसका प्रकाश महसूस करें।"
+    ],
+    "source": {
+      "title": "भक्ति बुद्धि (परिवर्तित)"
+    },
+    "tags": [
+      "प्रेम",
+      "प्रकाश",
+      "भक्ति"
+    ],
+    "deities": [
+      "Radha",
+      "Krishna"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  }
+]

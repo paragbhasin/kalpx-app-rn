@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontFamily: "GelicaMedium",
-    lineHeight: 22,
+    // lineHeight: 22,
   },
 });
 

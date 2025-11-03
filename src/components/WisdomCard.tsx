@@ -1,8 +1,10 @@
 import { useNavigation } from "@react-navigation/native";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
+import i18next from "i18next";
 import moment from "moment";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Image, ImageBackground, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Card } from "react-native-paper";
 import Swiper from "react-native-swiper";
@@ -14,17 +16,18 @@ import TextComponent from "./TextComponent";
 
 const ITEMS_PER_DAY = 5;
 
-const MOTIVATIONAL_QUOTES = [
-  "🪔 Let this wisdom illuminate your day.",
-  "🌿 Ancient truth. Timeless light.",
-  "💫 Reflect. Awaken. Grow with purpose.",
-  "🌸 Every verse holds a seed of peace.",
-  "🔥 A moment of wisdom can change your world.",
-];
+// const MOTIVATIONAL_QUOTES = [
+//   "🪔 Let this wisdom illuminate your day.",
+//   "🌿 Ancient truth. Timeless light.",
+//   "💫 Reflect. Awaken. Grow with purpose.",
+//   "🌸 Every verse holds a seed of peace.",
+//   "🔥 A moment of wisdom can change your world.",
+// ];
 
 
 const WisdomCard = () => {
   const navigation: any = useNavigation();
+      const { i18n , t} = useTranslation();
   const swiperRef = useRef<Swiper>(null);
     const shareRef = useRef(null);
   const [wisdomData, setWisdomData] = useState<any[]>([]);
@@ -34,26 +37,25 @@ const WisdomCard = () => {
   const [activeIndex, setActiveIndex] = useState(0);
     const [shareVisible, setShareVisible] = useState(false);
 
-  useEffect(() => {
-    const allWisdoms = getLocalizedWisdom();
-    setWisdomData(allWisdoms);
+    const MOTIVATIONAL_QUOTES: any = t("wisdomCard.shareQuotes", { returnObjects: true });
 
-    if (allWisdoms.length > 0) {
-      const dayOfYear = moment().dayOfYear(); // 1–365
-      const totalBatches = Math.ceil(allWisdoms.length / ITEMS_PER_DAY);
-      const batchIndex = (dayOfYear - 1) % totalBatches; // loops each day
+ useEffect(() => {
+  const allWisdoms = getLocalizedWisdom();
+  setWisdomData(allWisdoms);
 
-      const start = batchIndex * ITEMS_PER_DAY;
-      const end = start + ITEMS_PER_DAY;
-      const todayBatch = allWisdoms.slice(start, end);
+  if (allWisdoms.length > 0) {
+    const dayOfYear = moment().dayOfYear();
+    const totalBatches = Math.ceil(allWisdoms.length / ITEMS_PER_DAY);
+    const batchIndex = (dayOfYear - 1) % totalBatches;
+    const start = batchIndex * ITEMS_PER_DAY;
+    const end = start + ITEMS_PER_DAY;
+    setCurrentBatch(allWisdoms.slice(start, end));
+    setActiveIndex(0);
+  }
 
-      setCurrentBatch(todayBatch);
-      setActiveIndex(0);
-      setLoading(false);
-    } else {
-      setLoading(false);
-    }
-  }, []);
+  setLoading(false);
+}, [i18next.language]); // 👈 re-run when language changes
+
 
   const handleShareWisdom = async () => {
     try {
@@ -67,12 +69,12 @@ const WisdomCard = () => {
       setShareVisible(false);
 
       if (!(await Sharing.isAvailableAsync())) {
-        alert("Sharing is not available on this device.");
+    alert(t("wisdomCard.shareNotAvailable"));
         return;
       }
 
       await Sharing.shareAsync(fileUri, {
-        dialogTitle: "Share this Wisdom",
+        dialogTitle: t("wisdomCard.shareTitle"),
         mimeType: "image/png",
         UTI: "image/png",
       });
@@ -86,7 +88,7 @@ const WisdomCard = () => {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color={Colors.Colors.App_theme} />
-        <TextComponent>Loading daily wisdom...</TextComponent>
+         <TextComponent>{t("wisdomCard.loading")}</TextComponent>
       </View>
     );
   }
@@ -98,7 +100,7 @@ const WisdomCard = () => {
           type="semiBoldText"
           style={{ color: Colors.Colors.App_theme, textAlign: "center" }}
         >
-          No Wisdom Available
+         {t("wisdomCard.noWisdomTitle")}
         </TextComponent>
         <TextComponent
           type="mediumText"
@@ -108,7 +110,7 @@ const WisdomCard = () => {
             color: Colors.Colors.Light_black,
           }}
         >
-          Check back tomorrow for daily Sanatan wisdom 🌞
+         {t("wisdomCard.noWisdomSubtitle")}
         </TextComponent>
       </Card>
     );
@@ -134,10 +136,11 @@ const WisdomCard = () => {
     >
       {currentBatch.map((wisdom, index) => {
         const isCompleted = completedIds.includes(wisdom.id);
-  const quote =
-          MOTIVATIONAL_QUOTES[
-            Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)
-          ];
+const quote =
+  MOTIVATIONAL_QUOTES[
+    Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)
+  ];
+
         return (
           <View
             key={index}
@@ -177,13 +180,13 @@ const WisdomCard = () => {
             >
               <View>
                 <TextComponent type="semiBoldText" style={{ alignSelf: "flex-end" }}>
-                  Spread the eternal truth, inspire every soul.
+                 {t("wisdomCard.spreadTruth")}
                 </TextComponent>
 
                 {/* Header */}
                 <View style={styles.headerRow}>
                   <TextComponent type="semiBoldText" style={{ color: Colors.Colors.BLACK }}>
-                    Daily Wisdom
+              {t("wisdomCard.dailyWisdom")}
                   </TextComponent>
                   <TouchableOpacity onPress={() => {handleShareWisdom()}} style={{ flexDirection: "row", alignItems: "center" }} >
                     <Image source={require("../../assets/Streak_S1.png")} style={styles.streakIcon} />
@@ -209,7 +212,7 @@ const WisdomCard = () => {
                   type="semiBoldText"
                   style={{ color: Colors.Colors.Light_black, marginVertical: 6 }}
                 >
-                  Source
+              {t("wisdomCard.source")}
                 </TextComponent>
                 {Array.isArray(wisdom.source.title)
                   ? wisdom.source.title.map((line, idx) => (
@@ -237,7 +240,7 @@ const WisdomCard = () => {
                     onPress={() => navigation.navigate("MySadana")}
                   >
                     <TextComponent type="semiBoldText" style={{ textAlign: "center" }}>
-                      Set Up Daily Routine
+                    {t("wisdomCard.setRoutine")}
                     </TextComponent>
                   </TouchableOpacity>
                 </View>
@@ -245,7 +248,7 @@ const WisdomCard = () => {
                 {/* Footer */}
                 <View style={styles.footer}>
                   <TextComponent type="semiBoldText" style={{ color: Colors.Colors.Light_grey }}>
-                    Finish today to keep your streak
+                   {t("wisdomCard.finishStreak")}
                   </TextComponent>
                   <Image
                     source={require("../../assets/Streak_A1.png")}

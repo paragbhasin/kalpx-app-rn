@@ -24,7 +24,7 @@ const styles = StyleSheet.create({
     color: "#6c4b2f",
     marginBottom: 6,
     fontFamily: "GelicaBold",
-    lineHeight: 40,
+      // lineHeight: 40,
   },
   heading: {
     fontSize: 18,
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: "#66605a",
     fontFamily: "GelicaRegular",
-    lineHeight: 40,
+      // lineHeight: 40,
   },
   card: {
     width: screenWidth * 0.85,
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
     color: "#000",
     fontFamily: "GelicaLight",
     fontWeight: "300",
-    lineHeight: 40,
+      // lineHeight: 40,
   },
   cardTitleLine2: {
     fontSize: 32,
@@ -60,14 +60,14 @@ const styles = StyleSheet.create({
     color: "#000",
     fontFamily: "GelicaLight",
     fontWeight: "300",
-    lineHeight: 40,
+      // lineHeight: 40,
   },
   subTitle: {
     fontSize: 14,
     marginBottom: 20,
     color: "#666461",
     fontFamily: "GelicaLight",
-    lineHeight: 18,
+      // lineHeight: 18,
   },
   input: {
     borderWidth: 1,
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     color: "#000",
     fontFamily: "GelicaRegular",
     fontSize: 14,
-    lineHeight: 18,
+      // lineHeight: 18,
   },
   button: {
     backgroundColor: "#ca8a04",
@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     fontFamily: "GelicaMedium",
-    lineHeight: 20,
+      // lineHeight: 20,
   },
   footerContainer: {
     flexDirection: "row",
@@ -111,20 +111,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "GelicaRegular",
     color: "#666360",
-    lineHeight: 18,
+      // lineHeight: 18,
   },
   login: {
     fontSize: 14,
     fontFamily: "GelicaRegular",
     color: "#666360",
-    lineHeight: 18,
+      // lineHeight: 18,
   },
   error: {
     fontSize: 12,
     color: "red",
     marginBottom: 5,
     fontFamily: "GelicaRegular",
-    lineHeight: 16,
+      // lineHeight: 16,
   },
   verifyOtpContainer:{
     flexDirection: "row",

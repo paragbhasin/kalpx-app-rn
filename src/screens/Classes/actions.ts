@@ -32,7 +32,9 @@ export const SEARCH_CLASSES_FAILURE = "SEARCH_CLASSES_FAILURE";
 export const SEARCH_BOOKINGS_REQUEST = "SEARCH_BOOKINGS_REQUEST";
 export const SEARCH_BOOKINGS_SUCCESS = "SEARCH_BOOKINGS_SUCCESS";
 export const SEARCH_BOOKINGS_FAILURE = "SEARCH_BOOKINGS_FAILURE";
-
+export const RELEASE_HOLD_REQUEST = "RELEASE_HOLD_REQUEST";
+export const RELEASE_HOLD_SUCCESS = "RELEASE_HOLD_SUCCESS";
+export const RELEASE_HOLD_FAILURE = "RELEASE_HOLD_FAILURE";
 
 
 
@@ -144,6 +146,16 @@ export const searchBookingsSuccess = (data, hasMore) => ({
 });
 export const searchBookingsFailure = (error) => ({
   type: SEARCH_BOOKINGS_FAILURE,
+  payload: error,
+});
+
+export const releaseHoldRequest = () => ({ type: RELEASE_HOLD_REQUEST });
+export const releaseHoldSuccess = (data) => ({
+  type: RELEASE_HOLD_SUCCESS,
+  payload: data,
+});
+export const releaseHoldFailure = (error) => ({
+  type: RELEASE_HOLD_FAILURE,
   payload: error,
 });
 
@@ -398,5 +410,21 @@ export const searchBookings =
   };
 
 
+export const releaseHoldAction = (tutorId, callback) => async (dispatch) => {
+  console.log("🚀 Dispatching releaseHoldAction for tutorId:", tutorId);
+  dispatch({ type: "RELEASE_HOLD_REQUEST" });
+  try {
+    const payload = { id: tutorId };
+    const response = await api.post(`bookings/tutor/${tutorId}/release_hold/`, payload);
+    console.log("✅ API response:", response.data);
+    dispatch({ type: "RELEASE_HOLD_SUCCESS", payload: response.data });
+    if (callback) callback({ success: true, data: response.data });
+  } catch (error) {
+    console.log("❌ API error:", error);
+    const message = error.response?.data?.detail || error.message;
+    dispatch({ type: "RELEASE_HOLD_FAILURE", payload: message });
+    if (callback) callback({ success: false, error: message });
+  }
+};
 
 

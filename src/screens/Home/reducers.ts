@@ -29,12 +29,21 @@ import {
   TRAVEL_FAILURE,
   TRAVEL_REQUEST,
   TRAVEL_SUCCESS,
+  VIDEO_CATEGORIES_FAILURE,
+  VIDEO_CATEGORIES_REQUEST,
+  VIDEO_CATEGORIES_SUCCESS,
+  VIDEOS_FAILURE,
+  VIDEOS_REQUEST,
+  VIDEOS_RESET,
+  VIDEOS_SUCCESS,
 } from './actions';
 
 const initialState = {
   loading: false,
-  user: null,
+  data: [],
   error: null,
+  page: 1,
+  hasMore: true,
 };
 
 const initialPracticeState = {
@@ -78,6 +87,23 @@ const initialStreaksState = {
   loading: false,
   data: { sankalp: 0, mantra: 0 },
   error: null,
+};
+
+const initialVideoCategoriesState = {
+  loading: false,
+  data: {
+    categories: [],
+    all_languages: [],
+  },
+  error: null,
+};
+
+const initialVideosState = {
+  loading: false,
+  data: [],
+  error: null,
+  page: 1,
+  hasMore: true,
 };
 
 export const travelReducer = (state = initialState, action) => {
@@ -204,6 +230,44 @@ export const practiceStreaksReducer = (state = initialStreaksState, action) => {
     case STREAKS_SUCCESS:
       return { ...state, loading: false, data: action.payload };
     case STREAKS_FAILURE:
+      return { ...state, loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const videoCategoriesReducer = (state = initialVideoCategoriesState, action) => {
+  switch (action.type) {
+    case VIDEO_CATEGORIES_REQUEST:
+      return { ...state, loading: true, error: null };
+    case VIDEO_CATEGORIES_SUCCESS:
+      return { ...state, loading: false, data: action.payload };
+    case VIDEO_CATEGORIES_FAILURE:
+      return { ...state, loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const videosReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case VIDEOS_RESET:
+      return initialState;
+    case VIDEOS_REQUEST:
+      return { ...state, loading: true, error: null };
+    case VIDEOS_SUCCESS:
+      const newData =
+        action.payload.page === 1
+          ? action.payload.data
+          : [...state.data, ...action.payload.data];
+      return {
+        ...state,
+        loading: false,
+        data: newData,
+        page: action.payload.page,
+        hasMore: action.payload.data.length > 0,
+      };
+    case VIDEOS_FAILURE:
       return { ...state, loading: false, error: action.payload };
     default:
       return state;

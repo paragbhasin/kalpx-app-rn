@@ -1,2945 +1,2945 @@
 [
-    {
-        "id": "wis.stillness_is_strength",
-        "text": "Stillness is strength turned inward.",
-        "explanation": [
-            "Pause for one soft breath.",
-            "Let thoughts settle like dust in light.",
-            "In quiet, the heart remembers its depth.",
-            "Begin with two minutes today."
-        ],
-        "source": {
-            "title": "Meditative teaching (paraphrase)"
-        },
-        "tags": [
-            "stillness",
-            "focus",
-            "practice"
-        ],
-        "deities": [
-            "Shiva"
-        ],
-        "mood": "calm",
-        "difficulty": 1,
-        "weight": 1.1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.speak_truth_kindly",
-        "text": "Speak truth with kindness so it can be heard.",
-        "explanation": [
-            "Truth without care can harden the heart.",
-            "Care without truth can blur the way.",
-            "Join both in your next conversation.",
-            "Pause, then choose the gentlest true words."
-        ],
-        "source": {
-            "title": "Gītā ethics (paraphrase)",
-            "ref": "17.15"
-        },
-        "tags": [
-            "truth",
-            "ahimsa",
-            "speech"
-        ],
-        "mood": "clarity",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.devotion_softens_ego",
-        "text": "Devotion softens the ego and brightens the path.",
-        "explanation": [
-            "Remember with love, not demand.",
-            "Let gratitude replace ‘I’ for a moment.",
-            "Offer a small act of service today.",
-            "Notice how the heart feels lighter."
-        ],
-        "source": {
-            "title": "Bhakti reflections (paraphrase)"
-        },
-        "tags": [
-            "devotion",
-            "gratitude",
-            "seva"
-        ],
-        "deities": [
-            "Krishna",
-            "Rama"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.discernment_before_action",
-        "text": "Let discernment rise before your action.",
-        "explanation": [
-            "Ask: Will this serve dharma or distract?",
-            "A breath creates space for wise choice.",
-            "Clarity grows where haste loosens.",
-            "Act from steadiness, not from storm."
-        ],
-        "source": {
-            "title": "Vedānta guidance (paraphrase)"
-        },
-        "tags": [
-            "viveka",
-            "dharma",
-            "focus"
-        ],
-        "mood": "clarity",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.shakti_is_tender_strength",
-        "text": "Shakti is tender strength: firm, kind, awake.",
-        "explanation": [
-            "Power without harshness; kindness without collapse.",
-            "Set one boundary with warmth today.",
-            "Protect what is sacred within and around.",
-            "Strength can wear a gentle face."
-        ],
-        "source": {
-            "title": "Śākta insight (paraphrase)"
-        },
-        "tags": [
-            "shakti",
-            "boundaries",
-            "courage",
-            "compassion"
-        ],
-        "deities": [
-            "Durga",
-            "Lakshmi"
-        ],
-        "mood": "courage",
-        "difficulty": 2,
-        "season": [
-            "navratri"
-        ],
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.dharma_guides_duty",
-        "text": "Dharma guides duty beyond mere desire.",
-        "explanation": [
-            "Act for the greater good, not just want.",
-            "Reflect on what serves truth today.",
-            "Small steps align with eternal order.",
-            "Duty with love brings inner peace."
-        ],
-        "source": {
-            "title": "Bhagavad Gītā (paraphrase)",
-            "ref": "2.47"
-        },
-        "tags": [
-            "dharma",
-            "duty",
-            "selflessness"
-        ],
-        "deities": [
-            "Krishna"
-        ],
-        "mood": "focus",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.serve_with_open_heart",
-        "text": "Serve with an open heart, expect nothing.",
-        "explanation": [
-            "Give without a hidden agenda.",
-            "Find joy in the act of helping.",
-            "Start with a small, selfless deed.",
-            "Notice the lightness it brings."
-        ],
-        "source": {
-            "title": "Bhakti teachings (paraphrase)"
-        },
-        "tags": [
-            "seva",
-            "compassion",
-            "selflessness"
-        ],
-        "deities": [
-            "Rama",
-            "Hanuman"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "weight": 1.0,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.clarity_in_silence",
-        "text": "Clarity blooms in the garden of silence.",
-        "explanation": [
-            "Pause speech, let the mind rest.",
-            "Truth speaks softly in quiet moments.",
-            "Try five minutes of silence today.",
-            "See what wisdom rises within."
-        ],
-        "source": {
-            "title": "Yoga Sūtras (paraphrase)"
-        },
-        "tags": [
-            "stillness",
-            "clarity",
-            "practice"
-        ],
-        "deities": [
-            "Shiva"
-        ],
-        "mood": "calm",
-        "difficulty": 1,
-        "language_level": "poetic"
-    },
-    {
-        "id": "wis.courage_to_release",
-        "text": "Courage releases what no longer serves.",
-        "explanation": [
-            "Let go of old burdens with grace.",
-            "Ask: Does this align with my truth?",
-            "One small release can free the heart.",
-            "Trust the space it creates for growth."
-        ],
-        "source": {
-            "title": "Vedānta wisdom (paraphrase)"
-        },
-        "tags": [
-            "vairāgya",
-            "courage",
-            "growth"
-        ],
-        "mood": "courage",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.gratitude_opens_eyes",
-        "text": "Gratitude opens eyes to life’s abundance.",
-        "explanation": [
-            "Name three things you’re thankful for.",
-            "Each moment holds hidden gifts.",
-            "A grateful heart sees beauty everywhere.",
-            "Start with a simple thank you today."
-        ],
-        "source": {
-            "title": "Bhakti practice (paraphrase)"
-        },
-        "tags": [
-            "gratitude",
-            "awareness",
-            "devotion"
-        ],
-        "deities": [
-            "Lakshmi"
-        ],
-        "mood": "gratitude",
-        "difficulty": 1,
-        "weight": 1.2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.patience_is_power",
-        "text": "Patience is power that time respects.",
-        "explanation": [
-            "Wait without forcing the outcome.",
-            "Trust life’s rhythm to unfold truth.",
-            "Practice patience in one task today.",
-            "Strength grows in steady endurance."
-        ],
-        "source": {
-            "title": "Smārta teaching (paraphrase)"
-        },
-        "tags": [
-            "patience",
-            "endurance",
-            "focus"
-        ],
-        "mood": "calm",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.kindness_is_strength",
-        "text": "Kindness is strength that heals quietly.",
-        "explanation": [
-            "A kind word can shift someone’s day.",
-            "Strength lies in gentle actions.",
-            "Offer kindness without expectation.",
-            "Notice how it softens your heart."
-        ],
-        "source": {
-            "title": "Dharma ethics (paraphrase)"
-        },
-        "tags": [
-            "ahimsa",
-            "compassion",
-            "kindness"
-        ],
-        "deities": [
-            "Rama"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.wisdom_seeks_balance",
-        "text": "Wisdom seeks balance, not extremes.",
-        "explanation": [
-            "Avoid excess in thought or action.",
-            "Find the middle path in a challenge.",
-            "Balance brings clarity and peace.",
-            "Test it in one choice today."
-        ],
-        "source": {
-            "title": "Yoga philosophy (paraphrase)"
-        },
-        "tags": [
-            "balance",
-            "viveka",
-            "clarity"
-        ],
-        "mood": "clarity",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.surrender_to_flow",
-        "text": "Surrender to the flow of divine will.",
-        "explanation": [
-            "Release the need to control all.",
-            "Trust the universe’s deeper plan.",
-            "Let go in one small moment today.",
-            "Feel the ease of moving with life."
-        ],
-        "source": {
-            "title": "Bhakti wisdom (paraphrase)"
-        },
-        "tags": [
-            "surrender",
-            "devotion",
-            "trust"
-        ],
-        "deities": [
-            "Krishna"
-        ],
-        "mood": "calm",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.action_with_purpose",
-        "text": "Act with purpose, rooted in truth.",
-        "explanation": [
-            "Every action shapes your path.",
-            "Ask: Does this align with dharma?",
-            "Choose one purposeful act today.",
-            "Let truth guide your steps."
-        ],
-        "source": {
-            "title": "Bhagavad Gītā (paraphrase)",
-            "ref": "3.25"
-        },
-        "tags": [
-            "dharma",
-            "purpose",
-            "action"
-        ],
-        "deities": [
-            "Krishna"
-        ],
-        "mood": "focus",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.breath_is_anchor",
-        "text": "Breath is the anchor of the present.",
-        "explanation": [
-            "One deep breath returns you to now.",
-            "Mind wanders; breath brings it home.",
-            "Try three slow breaths in a rush.",
-            "Notice the calm it restores."
-        ],
-        "source": {
-            "title": "Yoga practice (paraphrase)"
-        },
-        "tags": [
-            "breath",
-            "presence",
-            "calm"
-        ],
-        "mood": "calm",
-        "difficulty": 1,
-        "weight": 1.0,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.love_without_clinging",
-        "text": "Love without clinging; let it flow free.",
-        "explanation": [
-            "Hold love lightly, not with a grip.",
-            "Free love grows deeper and true.",
-            "Practice letting go of one expectation.",
-            "See how love breathes in freedom."
-        ],
-        "source": {
-            "title": "Bhakti insight (paraphrase)"
-        },
-        "tags": [
-            "love",
-            "vairāgya",
-            "devotion"
-        ],
-        "deities": [
-            "Radha",
-            "Krishna"
-        ],
-        "mood": "compassion",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.humility_invites_wisdom",
-        "text": "Humility invites wisdom to the heart.",
-        "explanation": [
-            "Ego blocks; humility opens doors.",
-            "Listen more than you speak today.",
-            "Learn from someone unexpected.",
-            "Wisdom grows in a humble heart."
-        ],
-        "source": {
-            "title": "Smārta wisdom (paraphrase)"
-        },
-        "tags": [
-            "humility",
-            "wisdom",
-            "listening"
-        ],
-        "mood": "clarity",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.seva_lights_path",
-        "text": "Seva lights the path to divine connection.",
-        "explanation": [
-            "Serve others to serve the divine.",
-            "A small act of help sparks joy.",
-            "Offer time or care today.",
-            "Feel the glow of selfless giving."
-        ],
-        "source": {
-            "title": "Bhakti practice (paraphrase)"
-        },
-        "tags": [
-            "seva",
-            "devotion",
-            "compassion"
-        ],
-        "deities": [
-            "Hanuman"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.steady_mind_wins",
-        "text": "A steady mind conquers life’s storms.",
-        "explanation": [
-            "Calm the mind to face any challenge.",
-            "Breathe slowly when tension rises.",
-            "Practice steadiness in one moment.",
-            "Inner calm outlasts outer chaos."
-        ],
-        "source": {
-            "title": "Yoga Sūtras (paraphrase)"
-        },
-        "tags": [
-            "focus",
-            "calm",
-            "resilience"
-        ],
-        "mood": "focus",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.acceptance_frees_heart",
-        "text": "Acceptance frees the heart from struggle.",
-        "explanation": [
-            "Resisting what is creates pain.",
-            "Embrace the present as it unfolds.",
-            "Accept one small truth today.",
-            "Feel the peace of letting be."
-        ],
-        "source": {
-            "title": "Vedānta teaching (paraphrase)"
-        },
-        "tags": [
-            "acceptance",
-            "peace",
-            "surrender"
-        ],
-        "mood": "calm",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.knowledge_is_light",
-        "text": "Knowledge is the light that clears doubt.",
-        "explanation": [
-            "Seek truth to dissolve confusion.",
-            "Read, reflect, or ask one question.",
-            "Knowledge grows with curious steps.",
-            "Light one spark of understanding today."
-        ],
-        "source": {
-            "title": "Upaniṣads (paraphrase)"
-        },
-        "tags": [
-            "knowledge",
-            "clarity",
-            "truth"
-        ],
-        "mood": "clarity",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.joy_in_simplicity",
-        "text": "Joy hides in the simplicity of now.",
-        "explanation": [
-            "Savor a small moment today.",
-            "Less clutter reveals more peace.",
-            "Find beauty in one simple thing.",
-            "Joy grows where attention rests."
-        ],
-        "source": {
-            "title": "Smārta teaching (paraphrase)"
-        },
-        "tags": [
-            "simplicity",
-            "joy",
-            "presence"
-        ],
-        "mood": "gratitude",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.faith_in_journey",
-        "text": "Faith in the journey calms the heart.",
-        "explanation": [
-            "Trust the path, even when unclear.",
-            "Each step reveals the next one.",
-            "Hold faith in one challenge today.",
-            "The heart rests in divine timing."
-        ],
-        "source": {
-            "title": "Bhakti wisdom (paraphrase)"
-        },
-        "tags": [
-            "faith",
-            "trust",
-            "devotion"
-        ],
-        "deities": [
-            "Rama"
-        ],
-        "mood": "calm",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.strength_in_silence",
-        "text": "Strength grows in the silence of the self.",
-        "explanation": [
-            "Quiet the mind to find inner power.",
-            "Sit still for a moment today.",
-            "Silence reveals your true strength.",
-            "Let it guide your next step."
-        ],
-        "source": {
-            "title": "Śaiva teaching (paraphrase)"
-        },
-        "tags": [
-            "stillness",
-            "strength",
-            "practice"
-        ],
-        "deities": [
-            "Shiva"
-        ],
-        "mood": "calm",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.compassion_heals_all",
-        "text": "Compassion heals both giver and receiver.",
-        "explanation": [
-            "Offer kindness to someone in need.",
-            "Feel the warmth it brings your heart.",
-            "Compassion bridges all divides.",
-            "Try one gentle act today."
-        ],
-        "source": {
-            "title": "Dharma teaching (paraphrase)"
-        },
-        "tags": [
-            "compassion",
-            "ahimsa",
-            "healing"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.focus_shapes_destiny",
-        "text": "Focus shapes the destiny of your actions.",
-        "explanation": [
-            "A scattered mind scatters results.",
-            "Choose one task and give it your all.",
-            "Focus builds a steady path.",
-            "Start with ten minutes of attention."
-        ],
-        "source": {
-            "title": "Yoga Sūtras (paraphrase)"
-        },
-        "tags": [
-            "focus",
-            "discipline",
-            "destiny"
-        ],
-        "mood": "focus",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.grace_in_surrender",
-        "text": "Grace flows when you surrender to truth.",
-        "explanation": [
-            "Let go of resistance to what is.",
-            "Truth brings peace when embraced.",
-            "Surrender in one moment today.",
-            "Feel the grace of acceptance."
-        ],
-        "source": {
-            "title": "Bhakti teaching (paraphrase)"
-        },
-        "tags": [
-            "surrender",
-            "grace",
-            "truth"
-        ],
-        "deities": [
-            "Krishna"
-        ],
-        "mood": "calm",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.awareness_is_freedom",
-        "text": "Awareness is the key to inner freedom.",
-        "explanation": [
-            "Notice your thoughts without judgment.",
-            "Awareness loosens their grip.",
-            "Observe one feeling fully today.",
-            "Freedom grows in clear seeing."
-        ],
-        "source": {
-            "title": "Vedānta insight (paraphrase)"
-        },
-        "tags": [
-            "awareness",
-            "freedom",
-            "viveka"
-        ],
-        "mood": "clarity",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.devotion_is_strength",
-        "text": "Devotion is strength that never wavers.",
-        "explanation": [
-            "Love for the divine steadies the heart.",
-            "Offer a prayer or thought today.",
-            "Devotion carries you through storms.",
-            "Feel its power in quiet moments."
-        ],
-        "source": {
-            "title": "Bhakti teaching (paraphrase)"
-        },
-        "tags": [
-            "devotion",
-            "strength",
-            "faith"
-        ],
-        "deities": [
-            "Krishna",
-            "Rama"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.truth_cuts_illusion",
-        "text": "Truth cuts through the veil of illusion.",
-        "explanation": [
-            "Seek what is real, not what seems.",
-            "Question one assumption today.",
-            "Truth reveals a clearer path.",
-            "Walk it with courage and care."
-        ],
-        "source": {
-            "title": "Upaniṣads (paraphrase)"
-        },
-        "tags": [
-            "truth",
-            "viveka",
-            "clarity"
-        ],
-        "mood": "clarity",
-        "difficulty": 3,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.joy_in_service",
-        "text": "Joy flows freely in selfless service.",
-        "explanation": [
-            "Help another without seeking reward.",
-            "Joy arises from giving freely.",
-            "Try one act of service today.",
-            "Notice how your heart expands."
-        ],
-        "source": {
-            "title": "Bhakti practice (paraphrase)"
-        },
-        "tags": [
-            "seva",
-            "joy",
-            "compassion"
-        ],
-        "deities": [
-            "Hanuman"
-        ],
-        "mood": "gratitude",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.calm_in_chaos",
-        "text": "Find calm in the heart of life’s chaos.",
-        "explanation": [
-            "Chaos tests but cannot break you.",
-            "Breathe deeply amid the storm.",
-            "Seek one moment of inner peace.",
-            "Calm anchors you to truth."
-        ],
-        "source": {
-            "title": "Yoga teaching (paraphrase)"
-        },
-        "tags": [
-            "calm",
-            "resilience",
-            "peace"
-        ],
-        "mood": "calm",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.honesty_clears_path",
-        "text": "Honesty clears the path to inner truth.",
-        "explanation": [
-            "Speak truth to yourself first.",
-            "One honest moment shifts perspective.",
-            "Be truthful in a small choice today.",
-            "Clarity follows an honest heart."
-        ],
-        "source": {
-            "title": "Dharma ethics (paraphrase)"
-        },
-        "tags": [
-            "truth",
-            "honesty",
-            "clarity"
-        ],
-        "mood": "clarity",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.love_is_eternal",
-        "text": "Love is the eternal thread of existence.",
-        "explanation": [
-            "Love connects all beings and moments.",
-            "Express love in one small way today.",
-            "It outlasts all fleeting things.",
-            "Feel its timeless warmth within."
-        ],
-        "source": {
-            "title": "Bhakti wisdom (paraphrase)"
-        },
-        "tags": [
-            "love",
-            "devotion",
-            "connection"
-        ],
-        "deities": [
-            "Radha",
-            "Krishna"
-        ],
-        "mood": "compassion",
-        "difficulty": 2,
-        "language_level": "poetic"
-    },
-    {
-        "id": "wis.discipline_shapes_freedom",
-        "text": "Discipline shapes the path to freedom.",
-        "explanation": [
-            "Small, steady steps build strength.",
-            "Commit to one practice today.",
-            "Discipline frees you from chaos.",
-            "Notice the clarity it brings."
-        ],
-        "source": {
-            "title": "Yoga Sūtras (paraphrase)"
-        },
-        "tags": [
-            "discipline",
-            "freedom",
-            "focus"
-        ],
-        "mood": "focus",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.gratitude_transforms",
-        "text": "Gratitude transforms pain into peace.",
-        "explanation": [
-            "Find one thing to be thankful for.",
-            "Gratitude shifts the heart’s lens.",
-            "Even in hardship, gifts exist.",
-            "Try it in a tough moment today."
-        ],
-        "source": {
-            "title": "Bhakti practice (paraphrase)"
-        },
-        "tags": [
-            "gratitude",
-            "peace",
-            "transformation"
-        ],
-        "deities": [
-            "Lakshmi"
-        ],
-        "mood": "gratitude",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.courage_to_be",
-        "text": "Courage lets you be who you truly are.",
-        "explanation": [
-            "Fear hides your true self; face it.",
-            "Take one step toward authenticity.",
-            "Your essence shines when you’re true.",
-            "Feel the freedom of being you."
-        ],
-        "source": {
-            "title": "Śaiva wisdom (paraphrase)"
-        },
-        "tags": [
-            "courage",
-            "authenticity",
-            "truth"
-        ],
-        "deities": [
-            "Shiva"
-        ],
-        "mood": "courage",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.peace_in_surrender",
-        "text": "Peace flows when you surrender control.",
-        "explanation": [
-            "Let go of forcing life’s outcomes.",
-            "Trust the divine order today.",
-            "Surrender brings a quiet heart.",
-            "Try it in one small moment."
-        ],
-        "source": {
-            "title": "Bhakti teaching (paraphrase)"
-        },
-        "tags": [
-            "surrender",
-            "peace",
-            "trust"
-        ],
-        "deities": [
-            "Krishna"
-        ],
-        "mood": "calm",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.wisdom_in_listening",
-        "text": "Wisdom grows in the act of listening.",
-        "explanation": [
-            "Hear others with an open heart.",
-            "Pause before responding today.",
-            "Listening reveals hidden truths.",
-            "Learn from one conversation."
-        ],
-        "source": {
-            "title": "Smārta teaching (paraphrase)"
-        },
-        "tags": [
-            "listening",
-            "wisdom",
-            "humility"
-        ],
-        "mood": "clarity",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.strength_in_gentleness",
-        "text": "Strength shines brightest in gentleness.",
-        "explanation": [
-            "Power needs no harshness to prove itself.",
-            "Be gentle in one interaction today.",
-            "Gentleness disarms and uplifts.",
-            "Feel its quiet, enduring strength."
-        ],
-        "source": {
-            "title": "Śākta wisdom (paraphrase)"
-        },
-        "tags": [
-            "gentleness",
-            "strength",
-            "compassion"
-        ],
-        "deities": [
-            "Lakshmi"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.faith_over_fear",
-        "text": "Faith dissolves fear in the heart’s light.",
-        "explanation": [
-            "Fear fades when you trust the divine.",
-            "Hold faith in one uncertain moment.",
-            "Let it guide you through doubt.",
-            "Feel the heart’s courage rise."
-        ],
-        "source": {
-            "title": "Bhakti teaching (paraphrase)"
-        },
-        "tags": [
-            "faith",
-            "courage",
-            "trust"
-        ],
-        "deities": [
-            "Rama"
-        ],
-        "mood": "courage",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.clarity_in_purpose",
-        "text": "Clarity of purpose steadies the mind.",
-        "explanation": [
-            "Know why you act before you do.",
-            "Reflect on one goal today.",
-            "Purpose aligns heart and action.",
-            "Move with intention and calm."
-        ],
-        "source": {
-            "title": "Bhagavad Gītā (paraphrase)",
-            "ref": "2.50"
-        },
-        "tags": [
-            "purpose",
-            "clarity",
-            "focus"
-        ],
-        "deities": [
-            "Krishna"
-        ],
-        "mood": "focus",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.joy_in_presence",
-        "text": "Joy lives in the fullness of the present.",
-        "explanation": [
-            "Let go of past and future for now.",
-            "Feel the moment with all your senses.",
-            "Find joy in one simple breath.",
-            "Presence reveals life’s beauty."
-        ],
-        "source": {
-            "title": "Yoga teaching (paraphrase)"
-        },
-        "tags": [
-            "presence",
-            "joy",
-            "awareness"
-        ],
-        "mood": "gratitude",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.love_unites_all",
-        "text": "Love unites all in divine harmony.",
-        "explanation": [
-            "See the divine in every being.",
-            "Offer love in one small gesture.",
-            "Love dissolves walls of separation.",
-            "Feel its power to connect."
-        ],
-        "source": {
-            "title": "Bhakti wisdom (paraphrase)"
-        },
-        "tags": [
-            "love",
-            "unity",
-            "devotion"
-        ],
-        "deities": [
-            "Krishna",
-            "Radha"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.wisdom_in_patience",
-        "text": "Wisdom grows in the soil of patience.",
-        "explanation": [
-            "Haste clouds; patience reveals truth.",
-            "Wait mindfully in one moment today.",
-            "Wisdom unfolds in steady time.",
-            "Trust the process of growth."
-        ],
-        "source": {
-            "title": "Smārta teaching (paraphrase)"
-        },
-        "tags": [
-            "patience",
-            "wisdom",
-            "calm"
-        ],
-        "mood": "calm",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.courage_in_truth",
-        "text": "Courage in truth lights the soul’s path.",
-        "explanation": [
-            "Speak truth, even when it’s hard.",
-            "One honest word can shift a moment.",
-            "Truth strengthens your inner core.",
-            "Try it with kindness today."
-        ],
-        "source": {
-            "title": "Dharma ethics (paraphrase)"
-        },
-        "tags": [
-            "truth",
-            "courage",
-            "honesty"
-        ],
-        "mood": "courage",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.peace_in_simplicity",
-        "text": "Peace dwells in the heart of simplicity.",
-        "explanation": [
-            "Let go of excess wants today.",
-            "Find calm in one simple act.",
-            "Simplicity clears the mind’s clutter.",
-            "Peace grows where less is enough."
-        ],
-        "source": {
-            "title": "Yoga teaching (paraphrase)"
-        },
-        "tags": [
-            "simplicity",
-            "peace",
-            "calm"
-        ],
-        "mood": "calm",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.devotion_is_joy",
-        "text": "Devotion is the joy of a surrendered heart.",
-        "explanation": [
-            "Offer your heart to the divine today.",
-            "Joy flows from selfless love.",
-            "Try a small act of devotion.",
-            "Feel the lightness it brings."
-        ],
-        "source": {
-            "title": "Bhakti teaching (paraphrase)"
-        },
-        "tags": [
-            "devotion",
-            "joy",
-            "surrender"
-        ],
-        "deities": [
-            "Krishna"
-        ],
-        "mood": "gratitude",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.strength_in_service",
-        "text": "Strength grows in service to others.",
-        "explanation": [
-            "Help another to find your own power.",
-            "Offer one act of kindness today.",
-            "Service builds unshakable strength.",
-            "Feel its roots in your heart."
-        ],
-        "source": {
-            "title": "Bhakti practice (paraphrase)"
-        },
-        "tags": [
-            "seva",
-            "strength",
-            "compassion"
-        ],
-        "deities": [
-            "Hanuman"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.harmony_in_action",
-        "text": "Act in harmony with life’s sacred flow.",
-        "explanation": [
-            "Align your deeds with universal truth.",
-            "Pause to sense the rhythm of now.",
-            "One mindful act restores balance.",
-            "Harmony brings peace to the heart."
-        ],
-        "source": {
-            "title": "Yoga teaching (paraphrase)"
-        },
-        "tags": [
-            "harmony",
-            "action",
-            "balance"
-        ],
-        "mood": "calm",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.devotion_is_peace",
-        "text": "Devotion is peace that steadies the soul.",
-        "explanation": [
-            "Offer your heart to the divine today.",
-            "Love calms the restless mind.",
-            "Feel peace in one act of devotion.",
-            "The soul rests in sacred trust."
-        ],
-        "source": {
-            "title": "Bhakti teaching (paraphrase)"
-        },
-        "tags": [
-            "devotion",
-            "peace",
-            "trust"
-        ],
-        "deities": [
-            "Krishna"
-        ],
-        "mood": "calm",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.courage_to_serve",
-        "text": "Courage to serve uplifts all hearts.",
-        "explanation": [
-            "Serve boldly, even in small ways.",
-            "One selfless act sparks change.",
-            "Courage in seva transforms lives.",
-            "Feel the strength of giving."
-        ],
-        "source": {
-            "title": "Bhakti practice (paraphrase)"
-        },
-        "tags": [
-            "seva",
-            "courage",
-            "compassion"
-        ],
-        "deities": [
-            "Hanuman"
-        ],
-        "mood": "courage",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.clarity_in_breath",
-        "text": "Clarity rises with each mindful breath.",
-        "explanation": [
-            "Breathe slowly to clear the mind.",
-            "One breath can shift your focus.",
-            "Truth shines in a calm heart.",
-            "Try three breaths with awareness."
-        ],
-        "source": {
-            "title": "Yoga practice (paraphrase)"
-        },
-        "tags": [
-            "breath",
-            "clarity",
-            "presence"
-        ],
-        "mood": "clarity",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.gratitude_is_light",
-        "text": "Gratitude is light that brightens the soul.",
-        "explanation": [
-            "Give thanks for one small moment.",
-            "Gratitude reveals hidden beauty.",
-            "It transforms the heart’s vision.",
-            "Start with one thank you today."
-        ],
-        "source": {
-            "title": "Bhakti practice (paraphrase)"
-        },
-        "tags": [
-            "gratitude",
-            "joy",
-            "awareness"
-        ],
-        "deities": [
-            "Lakshmi"
-        ],
-        "mood": "gratitude",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.stillness_is_power",
-        "text": "Stillness is power that anchors the self.",
-        "explanation": [
-            "Pause to find strength within.",
-            "Quiet the mind for one moment.",
-            "Stillness holds unshakable calm.",
-            "Discover it in silence today."
-        ],
-        "source": {
-            "title": "Śaiva teaching (paraphrase)"
-        },
-        "tags": [
-            "stillness",
-            "power",
-            "calm"
-        ],
-        "deities": [
-            "Shiva"
-        ],
-        "mood": "calm",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.kindness_is_bridge",
-        "text": "Kindness is a bridge between all hearts.",
-        "explanation": [
-            "One kind act connects you to others.",
-            "Offer gentleness without expectation.",
-            "Kindness heals and unites silently.",
-            "Try it in one interaction today."
-        ],
-        "source": {
-            "title": "Dharma teaching (paraphrase)"
-        },
-        "tags": [
-            "kindness",
-            "ahimsa",
-            "compassion"
-        ],
-        "deities": [
-            "Rama"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.dharma_is_strength",
-        "text": "Dharma is strength that guides your path.",
-        "explanation": [
-            "Act with truth as your foundation.",
-            "Ask: Does this serve the greater good?",
-            "Dharma steadies your every step.",
-            "Choose one dharmic act today."
-        ],
-        "source": {
-            "title": "Bhagavad Gītā (paraphrase)",
-            "ref": "3.8"
-        },
-        "tags": [
-            "dharma",
-            "strength",
-            "duty"
-        ],
-        "deities": [
-            "Krishna"
-        ],
-        "mood": "focus",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.surrender_is_calm",
-        "text": "Surrender is calm that frees the heart.",
-        "explanation": [
-            "Let go of one need to control.",
-            "Trust the divine flow of life.",
-            "Surrender brings quiet strength.",
-            "Feel it in a single moment."
-        ],
-        "source": {
-            "title": "Bhakti teaching (paraphrase)"
-        },
-        "tags": [
-            "surrender",
-            "calm",
-            "trust"
-        ],
-        "deities": [
-            "Krishna"
-        ],
-        "mood": "calm",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.wisdom_in_patience",
-        "text": "Wisdom blooms in the patience of time.",
-        "explanation": [
-            "Wait mindfully for clarity to rise.",
-            "Haste clouds; patience reveals.",
-            "Try patience in one task today.",
-            "Wisdom grows in steady moments."
-        ],
-        "source": {
-            "title": "Smārta teaching (paraphrase)"
-        },
-        "tags": [
-            "patience",
-            "wisdom",
-            "calm"
-        ],
-        "mood": "calm",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.love_is_connection",
-        "text": "Love is connection that binds all life.",
-        "explanation": [
-            "See the divine in every being.",
-            "Share love in one small act.",
-            "Love unites beyond all divides.",
-            "Feel its warmth in your heart."
-        ],
-        "source": {
-            "title": "Bhakti wisdom (paraphrase)"
-        },
-        "tags": [
-            "love",
-            "unity",
-            "devotion"
-        ],
-        "deities": [
-            "Radha",
-            "Krishna"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.courage_in_truth",
-        "text": "Courage in truth lights the soul’s way.",
-        "explanation": [
-            "Speak one truth with gentle strength.",
-            "Honesty clears inner shadows.",
-            "Truth guides with fearless clarity.",
-            "Try it in a small moment today."
-        ],
-        "source": {
-            "title": "Dharma ethics (paraphrase)"
-        },
-        "tags": [
-            "truth",
-            "courage",
-            "clarity"
-        ],
-        "mood": "courage",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.steadiness_in_chaos",
-        "text": "Steadiness in chaos reveals true strength.",
-        "explanation": [
-            "Stay calm when storms surround you.",
-            "Breathe to anchor your heart.",
-            "Steadiness outshines fleeting chaos.",
-            "Find it in one tough moment."
-        ],
-        "source": {
-            "title": "Yoga Sūtras (paraphrase)"
-        },
-        "tags": [
-            "resilience",
-            "calm",
-            "strength"
-        ],
-        "mood": "focus",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.gratitude_is_peace",
-        "text": "Gratitude is peace that softens the heart.",
-        "explanation": [
-            "Thank one thing in your life today.",
-            "Gratitude calms the restless mind.",
-            "It finds light in every moment.",
-            "Feel its gentle warmth within."
-        ],
-        "source": {
-            "title": "Bhakti practice (paraphrase)"
-        },
-        "tags": [
-            "gratitude",
-            "peace",
-            "joy"
-        ],
-        "deities": [
-            "Lakshmi"
-        ],
-        "mood": "gratitude",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.silence_is_wisdom",
-        "text": "Silence is wisdom’s quiet sanctuary.",
-        "explanation": [
-            "Pause words to hear inner truth.",
-            "Silence reveals what noise hides.",
-            "Try a moment of quiet today.",
-            "Wisdom speaks in the stillness."
-        ],
-        "source": {
-            "title": "Śaiva teaching (paraphrase)"
-        },
-        "tags": [
-            "silence",
-            "wisdom",
-            "stillness"
-        ],
-        "deities": [
-            "Shiva"
-        ],
-        "mood": "calm",
-        "difficulty": 2,
-        "language_level": "poetic"
-    },
-    {
-        "id": "wis.seva_is_joy",
-        "text": "Seva is joy that flows from giving.",
-        "explanation": [
-            "Serve without seeking any reward.",
-            "One selfless act sparks happiness.",
-            "Seva connects you to the divine.",
-            "Feel its light in your heart."
-        ],
-        "source": {
-            "title": "Bhakti practice (paraphrase)"
-        },
-        "tags": [
-            "seva",
-            "joy",
-            "compassion"
-        ],
-        "deities": [
-            "Hanuman"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.dharma_is_clarity",
-        "text": "Dharma is clarity that guides your deeds.",
-        "explanation": [
-            "Act with truth as your compass.",
-            "Ask: Does this serve my purpose?",
-            "Dharma lights the path ahead.",
-            "Choose one clear act today."
-        ],
-        "source": {
-            "title": "Bhagavad Gītā (paraphrase)",
-            "ref": "2.31"
-        },
-        "tags": [
-            "dharma",
-            "clarity",
-            "duty"
-        ],
-        "deities": [
-            "Krishna"
-        ],
-        "mood": "focus",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.kindness_is_strength",
-        "text": "Kindness is strength that heals quietly.",
-        "explanation": [
-            "A kind act can shift any heart.",
-            "Offer gentleness without expectation.",
-            "Kindness is power in soft form.",
-            "Try one kind deed today."
-        ],
-        "source": {
-            "title": "Dharma teaching (paraphrase)"
-        },
-        "tags": [
-            "kindness",
-            "ahimsa",
-            "compassion"
-        ],
-        "deities": [
-            "Rama"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.breath_is_presence",
-        "text": "Breath is presence that grounds the soul.",
-        "explanation": [
-            "One slow breath brings you to now.",
-            "Feel life’s pulse in your breath.",
-            "Breathe mindfully in a busy moment.",
-            "Presence anchors your heart."
-        ],
-        "source": {
-            "title": "Yoga practice (paraphrase)"
-        },
-        "tags": [
-            "breath",
-            "presence",
-            "calm"
-        ],
-        "mood": "calm",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.surrender_is_trust",
-        "text": "Surrender is trust in divine unfolding.",
-        "explanation": [
-            "Release control in one small way.",
-            "Trust the flow of life’s plan.",
-            "Surrender frees the heart’s burden.",
-            "Feel the calm it brings today."
-        ],
-        "source": {
-            "title": "Bhakti teaching (paraphrase)"
-        },
-        "tags": [
-            "surrender",
-            "trust",
-            "calm"
-        ],
-        "deities": [
-            "Krishna"
-        ],
-        "mood": "calm",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.wisdom_in_stillness",
-        "text": "Wisdom grows in the stillness of mind.",
-        "explanation": [
-            "Pause to let thoughts settle quietly.",
-            "Stillness reveals deeper truths.",
-            "Try a moment of calm today.",
-            "Wisdom shines in the silence."
-        ],
-        "source": {
-            "title": "Śaiva teaching (paraphrase)"
-        },
-        "tags": [
-            "wisdom",
-            "stillness",
-            "clarity"
-        ],
-        "deities": [
-            "Shiva"
-        ],
-        "mood": "clarity",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.love_is_unity",
-        "text": "Love is unity that binds all beings.",
-        "explanation": [
-            "See the divine in everyone today.",
-            "Share love in one gentle act.",
-            "Love dissolves all separation.",
-            "Feel its power to connect."
-        ],
-        "source": {
-            "title": "Bhakti wisdom (paraphrase)"
-        },
-        "tags": [
-            "love",
-            "unity",
-            "devotion"
-        ],
-        "deities": [
-            "Radha",
-            "Krishna"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.patience_is_calm",
-        "text": "Patience is calm that steadies the heart.",
-        "explanation": [
-            "Wait without forcing the outcome.",
-            "Patience builds inner strength.",
-            "Try it in one moment today.",
-            "Calm grows in quiet endurance."
-        ],
-        "source": {
-            "title": "Smārta teaching (paraphrase)"
-        },
-        "tags": [
-            "patience",
-            "calm",
-            "strength"
-        ],
-        "mood": "calm",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.courage_in_silence",
-        "text": "Courage in silence reveals inner truth.",
-        "explanation": [
-            "Pause to face your inner thoughts.",
-            "Silence strengthens the brave heart.",
-            "Try one quiet moment today.",
-            "Truth shines in fearless calm."
-        ],
-        "source": {
-            "title": "Śaiva teaching (paraphrase)"
-        },
-        "tags": [
-            "courage",
-            "silence",
-            "truth"
-        ],
-        "deities": [
-            "Shiva"
-        ],
-        "mood": "courage",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.gratitude_is_joy",
-        "text": "Gratitude is joy that opens the heart.",
-        "explanation": [
-            "Give thanks for one simple thing.",
-            "Gratitude reveals life’s beauty.",
-            "It transforms every moment.",
-            "Feel its warmth today."
-        ],
-        "source": {
-            "title": "Bhakti practice (paraphrase)"
-        },
-        "tags": [
-            "gratitude",
-            "joy",
-            "awareness"
-        ],
-        "deities": [
-            "Lakshmi"
-        ],
-        "mood": "gratitude",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.stillness_is_clarity",
-        "text": "Stillness is clarity born of quiet.",
-        "explanation": [
-            "Pause to let the mind rest.",
-            "Clarity emerges in silence.",
-            "Try one still moment today.",
-            "See truth in the quiet heart."
-        ],
-        "source": {
-            "title": "Yoga Sūtras (paraphrase)"
-        },
-        "tags": [
-            "stillness",
-            "clarity",
-            "calm"
-        ],
-        "mood": "calm",
-        "difficulty": 1,
-        "language_level": "poetic"
-    },
-    {
-        "id": "wis.seva_is_connection",
-        "text": "Seva is connection to the divine spark.",
-        "explanation": [
-            "Serve others to touch the eternal.",
-            "One selfless act binds hearts.",
-            "Seva uplifts and purifies.",
-            "Feel its joy in giving today."
-        ],
-        "source": {
-            "title": "Bhakti practice (paraphrase)"
-        },
-        "tags": [
-            "seva",
-            "connection",
-            "compassion"
-        ],
-        "deities": [
-            "Hanuman"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.dharma_is_peace",
-        "text": "Dharma is peace that aligns the soul.",
-        "explanation": [
-            "Act with truth as your guide.",
-            "Dharma balances heart and duty.",
-            "Choose one dharmic act today.",
-            "Peace follows a righteous path."
-        ],
-        "source": {
-            "title": "Bhagavad Gītā (paraphrase)",
-            "ref": "2.38"
-        },
-        "tags": [
-            "dharma",
-            "peace",
-            "duty"
-        ],
-        "deities": [
-            "Krishna"
-        ],
-        "mood": "focus",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.kindness_is_healing",
-        "text": "Kindness is healing that soothes all pain.",
-        "explanation": [
-            "Offer one kind word or deed.",
-            "Kindness mends broken hearts.",
-            "It ripples beyond what you see.",
-            "Feel its power in giving."
-        ],
-        "source": {
-            "title": "Dharma teaching (paraphrase)"
-        },
-        "tags": [
-            "kindness",
-            "ahimsa",
-            "healing"
-        ],
-        "deities": [
-            "Rama"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.breath_is_calm",
-        "text": "Breath is calm that anchors the present.",
-        "explanation": [
-            "One slow breath returns you to now.",
-            "Feel life’s rhythm in each breath.",
-            "Breathe mindfully in a rush.",
-            "Calm flows where breath leads."
-        ],
-        "source": {
-            "title": "Yoga practice (paraphrase)"
-        },
-        "tags": [
-            "breath",
-            "calm",
-            "presence"
-        ],
-        "mood": "calm",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.surrender_is_peace",
-        "text": "Surrender is peace that frees the soul.",
-        "explanation": [
-            "Let go of one need to control.",
-            "Trust the divine in this moment.",
-            "Surrender lightens the heart.",
-            "Feel its calm today."
-        ],
-        "source": {
-            "title": "Bhakti teaching (paraphrase)"
-        },
-        "tags": [
-            "surrender",
-            "peace",
-            "trust"
-        ],
-        "deities": [
-            "Krishna"
-        ],
-        "mood": "calm",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.wisdom_in_action",
-        "text": "Wisdom in action serves eternal truth.",
-        "explanation": [
-            "Act with clarity, not with haste.",
-            "Ask: Does this align with truth?",
-            "One wise act shapes your path.",
-            "Choose with care today."
-        ],
-        "source": {
-            "title": "Vedānta teaching (paraphrase)"
-        },
-        "tags": [
-            "wisdom",
-            "action",
-            "viveka"
-        ],
-        "mood": "clarity",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.love_is_eternal",
-        "text": "Love is eternal, binding all existence.",
-        "explanation": [
-            "Love connects beyond time and space.",
-            "Share love in one small gesture.",
-            "It outlasts all fleeting things.",
-            "Feel its timeless warmth."
-        ],
-        "source": {
-            "title": "Bhakti wisdom (paraphrase)"
-        },
-        "tags": [
-            "love",
-            "devotion",
-            "unity"
-        ],
-        "deities": [
-            "Radha",
-            "Krishna"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "poetic"
-    },
-    {
-        "id": "wis.patience_is_power",
-        "text": "Patience is power that endures all trials.",
-        "explanation": [
-            "Wait calmly for life’s unfolding.",
-            "Patience builds unshakable strength.",
-            "Try it in one moment today.",
-            "Power grows in steady waiting."
-        ],
-        "source": {
-            "title": "Smārta teaching (paraphrase)"
-        },
-        "tags": [
-            "patience",
-            "power",
-            "calm"
-        ],
-        "mood": "calm",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.courage_in_honesty",
-        "text": "Courage in honesty clears the soul’s path.",
-        "explanation": [
-            "Speak one truth with gentle strength.",
-            "Honesty frees the heart from fear.",
-            "Be true in a small moment today.",
-            "Feel the soul’s clarity shine."
-        ],
-        "source": {
-            "title": "Dharma ethics (paraphrase)"
-        },
-        "tags": [
-            "honesty",
-            "courage",
-            "truth"
-        ],
-        "mood": "courage",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.steadiness_is_strength",
-        "text": "Steadiness is strength that outlasts storms.",
-        "explanation": [
-            "Stay calm in life’s turbulence.",
-            "Breathe to anchor your heart.",
-            "Steadiness builds enduring power.",
-            "Find it in one challenge today."
-        ],
-        "source": {
-            "title": "Yoga Sūtras (paraphrase)"
-        },
-        "tags": [
-            "steadiness",
-            "strength",
-            "resilience"
-        ],
-        "mood": "focus",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.gratitude_is_clarity",
-        "text": "Gratitude is clarity that lights the heart.",
-        "explanation": [
-            "Thank one thing to shift your view.",
-            "Gratitude reveals life’s gifts.",
-            "It clears the mind’s confusion.",
-            "Try it in one moment today."
-        ],
-        "source": {
-            "title": "Bhakti practice (paraphrase)"
-        },
-        "tags": [
-            "gratitude",
-            "clarity",
-            "joy"
-        ],
-        "deities": [
-            "Lakshmi"
-        ],
-        "mood": "gratitude",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.silence_is_strength",
-        "text": "Silence is strength that calms the soul.",
-        "explanation": [
-            "Pause to find power within.",
-            "Silence steadies the restless mind.",
-            "Try one quiet moment today.",
-            "Strength grows in inner calm."
-        ],
-        "source": {
-            "title": "Śaiva teaching (paraphrase)"
-        },
-        "tags": [
-            "silence",
-            "strength",
-            "calm"
-        ],
-        "deities": [
-            "Shiva"
-        ],
-        "mood": "calm",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.seva_is_light",
-        "text": "Seva is light that brightens all paths.",
-        "explanation": [
-            "Serve others to spark divine joy.",
-            "One selfless act uplifts hearts.",
-            "Seva connects you to eternity.",
-            "Feel its glow in giving today."
-        ],
-        "source": {
-            "title": "Bhakti practice (paraphrase)"
-        },
-        "tags": [
-            "seva",
-            "light",
-            "compassion"
-        ],
-        "deities": [
-            "Hanuman"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.dharma_is_guide",
-        "text": "Dharma is the guide to a righteous life.",
-        "explanation": [
-            "Act with truth as your compass.",
-            "Dharma aligns heart and action.",
-            "Choose one dharmic deed today.",
-            "It leads to lasting peace."
-        ],
-        "source": {
-            "title": "Bhagavad Gītā (paraphrase)",
-            "ref": "3.3"
-        },
-        "tags": [
-            "dharma",
-            "guidance",
-            "duty"
-        ],
-        "deities": [
-            "Krishna"
-        ],
-        "mood": "focus",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.kindness_is_power",
-        "text": "Kindness is power that transforms hearts.",
-        "explanation": [
-            "One kind act can shift a moment.",
-            "Offer gentleness without reward.",
-            "Kindness heals and uplifts all.",
-            "Try it in one interaction."
-        ],
-        "source": {
-            "title": "Dharma teaching (paraphrase)"
-        },
-        "tags": [
-            "kindness",
-            "ahimsa",
-            "compassion"
-        ],
-        "deities": [
-            "Rama"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.breath_is_life",
-        "text": "Breath is life’s pulse in every moment.",
-        "explanation": [
-            "Feel your breath to find the now.",
-            "One slow breath restores calm.",
-            "Life flows through each mindful breath.",
-            "Try it in a busy moment."
-        ],
-        "source": {
-            "title": "Yoga practice (paraphrase)"
-        },
-        "tags": [
-            "breath",
-            "life",
-            "presence"
-        ],
-        "mood": "calm",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.surrender_is_freedom",
-        "text": "Surrender is freedom from inner chains.",
-        "explanation": [
-            "Let go of one need to control.",
-            "Trust the divine flow of life.",
-            "Surrender lightens the heart.",
-            "Feel its peace today."
-        ],
-        "source": {
-            "title": "Bhakti teaching (paraphrase)"
-        },
-        "tags": [
-            "surrender",
-            "freedom",
-            "trust"
-        ],
-        "deities": [
-            "Krishna"
-        ],
-        "mood": "calm",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.wisdom_in_silence",
-        "text": "Wisdom in silence reveals eternal truth.",
-        "explanation": [
-            "Pause to hear the soul’s quiet voice.",
-            "Silence clears the mind’s clutter.",
-            "Try one still moment today.",
-            "Wisdom shines in the calm."
-        ],
-        "source": {
-            "title": "Śaiva teaching (paraphrase)"
-        },
-        "tags": [
-            "wisdom",
-            "silence",
-            "clarity"
-        ],
-        "deities": [
-            "Shiva"
-        ],
-        "mood": "clarity",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.love_is_divine",
-        "text": "Love is divine spark in every heart.",
-        "explanation": [
-            "See love in all beings today.",
-            "Share one gentle act of care.",
-            "Love connects you to eternity.",
-            "Feel its warmth in giving."
-        ],
-        "source": {
-            "title": "Bhakti wisdom (paraphrase)"
-        },
-        "tags": [
-            "love",
-            "devotion",
-            "unity"
-        ],
-        "deities": [
-            "Radha",
-            "Krishna"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.patience_is_clarity",
-        "text": "Patience is clarity that steadies the mind.",
-        "explanation": [
-            "Wait calmly for truth to unfold.",
-            "Patience clears the heart’s fog.",
-            "Try it in one moment today.",
-            "Clarity grows in steady waiting."
-        ],
-        "source": {
-            "title": "Smārta teaching (paraphrase)"
-        },
-        "tags": [
-            "patience",
-            "clarity",
-            "calm"
-        ],
-        "mood": "calm",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.courage_in_devotion",
-        "text": "Courage in devotion transforms the soul.",
-        "explanation": [
-            "Offer your heart boldly to the divine.",
-            "Devotion strengthens inner resolve.",
-            "Try one act of faith today.",
-            "Feel the soul’s fearless light."
-        ],
-        "source": {
-            "title": "Bhakti teaching (paraphrase)"
-        },
-        "tags": [
-            "courage",
-            "devotion",
-            "faith"
-        ],
-        "deities": [
-            "Krishna"
-        ],
-        "mood": "courage",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.gratitude_is_strength",
-        "text": "Gratitude is strength that lifts the heart.",
-        "explanation": [
-            "Thank one thing to shift your view.",
-            "Gratitude builds inner resilience.",
-            "It finds light in every moment.",
-            "Try it in one challenge today."
-        ],
-        "source": {
-            "title": "Bhakti practice (paraphrase)"
-        },
-        "tags": [
-            "gratitude",
-            "strength",
-            "joy"
-        ],
-        "deities": [
-            "Lakshmi"
-        ],
-        "mood": "gratitude",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.stillness_is_peace",
-        "text": "Stillness is peace that calms the soul.",
-        "explanation": [
-            "Pause to find calm within.",
-            "Stillness soothes the restless mind.",
-            "Try one quiet moment today.",
-            "Peace grows in inner silence."
-        ],
-        "source": {
-            "title": "Śaiva teaching (paraphrase)"
-        },
-        "tags": [
-            "stillness",
-            "peace",
-            "calm"
-        ],
-        "deities": [
-            "Shiva"
-        ],
-        "mood": "calm",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.seva_is_unity",
-        "text": "Seva is unity that binds all hearts.",
-        "explanation": [
-            "Serve to connect with the divine.",
-            "One selfless act joins souls.",
-            "Seva uplifts and purifies.",
-            "Feel its joy in giving today."
-        ],
-        "source": {
-            "title": "Bhakti practice (paraphrase)"
-        },
-        "tags": [
-            "seva",
-            "unity",
-            "compassion"
-        ],
-        "deities": [
-            "Hanuman"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.dharma_is_harmony",
-        "text": "Dharma is harmony that guides the soul.",
-        "explanation": [
-            "Act with truth as your foundation.",
-            "Dharma aligns heart and purpose.",
-            "Choose one righteous act today.",
-            "Harmony follows a dharmic path."
-        ],
-        "source": {
-            "title": "Bhagavad Gītā (paraphrase)",
-            "ref": "2.50"
-        },
-        "tags": [
-            "dharma",
-            "harmony",
-            "duty"
-        ],
-        "deities": [
-            "Krishna"
-        ],
-        "mood": "focus",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.kindness_is_light",
-        "text": "Kindness is light that heals all hearts.",
-        "explanation": [
-            "One kind act can shift a moment.",
-            "Offer gentleness without reward.",
-            "Kindness shines in every soul.",
-            "Try it in one interaction."
-        ],
-        "source": {
-            "title": "Dharma teaching (paraphrase)"
-        },
-        "tags": [
-            "kindness",
-            "ahimsa",
-            "healing"
-        ],
-        "deities": [
-            "Rama"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.breath_is_strength",
-        "text": "Breath is strength that steadies the heart.",
-        "explanation": [
-            "One slow breath builds inner power.",
-            "Feel life’s pulse in each breath.",
-            "Breathe mindfully in a rush.",
-            "Strength flows where breath leads."
-        ],
-        "source": {
-            "title": "Yoga practice (paraphrase)"
-        },
-        "tags": [
-            "breath",
-            "strength",
-            "presence"
-        ],
-        "mood": "calm",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.surrender_is_light",
-        "text": "Surrender is light that frees the soul.",
-        "explanation": [
-            "Let go of one need to control.",
-            "Trust the divine in this moment.",
-            "Surrender brightens the heart.",
-            "Feel its peace today."
-        ],
-        "source": {
-            "title": "Bhakti teaching (paraphrase)"
-        },
-        "tags": [
-            "surrender",
-            "light",
-            "trust"
-        ],
-        "deities": [
-            "Krishna"
-        ],
-        "mood": "calm",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.wisdom_in_patience",
-        "text": "Wisdom in patience reveals clear truth.",
-        "explanation": [
-            "Wait calmly for insight to rise.",
-            "Patience clears the mind’s fog.",
-            "Try one patient moment today.",
-            "Wisdom shines in steady time."
-        ],
-        "source": {
-            "title": "Smārta teaching (paraphrase)"
-        },
-        "tags": [
-            "wisdom",
-            "patience",
-            "clarity"
-        ],
-        "mood": "clarity",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.love_is_strength",
-        "text": "Love is strength that uplifts all souls.",
-        "explanation": [
-            "Share love in one gentle act.",
-            "Love endures where force fails.",
-            "It binds hearts in divine unity.",
-            "Feel its power in giving."
-        ],
-        "source": {
-            "title": "Bhakti wisdom (paraphrase)"
-        },
-        "tags": [
-            "love",
-            "strength",
-            "devotion"
-        ],
-        "deities": [
-            "Radha",
-            "Krishna"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.courage_in_peace",
-        "text": "Courage in peace transforms inner storms.",
-        "explanation": [
-            "Find calm amid inner turmoil.",
-            "One brave pause restores clarity.",
-            "Peace strengthens the bold heart.",
-            "Try it in one tough moment."
-        ],
-        "source": {
-            "title": "Śaiva teaching (paraphrase)"
-        },
-        "tags": [
-            "courage",
-            "peace",
-            "calm"
-        ],
-        "deities": [
-            "Shiva"
-        ],
-        "mood": "courage",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.gratitude_is_peace",
-        "text": "Gratitude is peace that heals the heart.",
-        "explanation": [
-            "Thank one thing to shift your view.",
-            "Gratitude soothes inner pain.",
-            "It finds light in every moment.",
-            "Try it in one challenge today."
-        ],
-        "source": {
-            "title": "Bhakti practice (paraphrase)"
-        },
-        "tags": [
-            "gratitude",
-            "peace",
-            "healing"
-        ],
-        "deities": [
-            "Lakshmi"
-        ],
-        "mood": "gratitude",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.silence_is_clarity",
-        "text": "Silence is clarity that reveals truth.",
-        "explanation": [
-            "Pause to hear the soul’s voice.",
-            "Silence clears the mind’s noise.",
-            "Try one quiet moment today.",
-            "Clarity shines in stillness."
-        ],
-        "source": {
-            "title": "Śaiva teaching (paraphrase)"
-        },
-        "tags": [
-            "silence",
-            "clarity",
-            "stillness"
-        ],
-        "deities": [
-            "Shiva"
-        ],
-        "mood": "clarity",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.seva_is_strength",
-        "text": "Seva is strength born of selfless love.",
-        "explanation": [
-            "Serve without seeking any gain.",
-            "One selfless act builds power.",
-            "Seva connects you to all.",
-            "Feel its strength in giving."
-        ],
-        "source": {
-            "title": "Bhakti practice (paraphrase)"
-        },
-        "tags": [
-            "seva",
-            "strength",
-            "compassion"
-        ],
-        "deities": [
-            "Hanuman"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.dharma_is_light",
-        "text": "Dharma is light that guides your path.",
-        "explanation": [
-            "Act with truth as your guide.",
-            "Dharma illuminates the way.",
-            "Choose one righteous act today.",
-            "Light follows a dharmic heart."
-        ],
-        "source": {
-            "title": "Bhagavad Gītā (paraphrase)",
-            "ref": "3.20"
-        },
-        "tags": [
-            "dharma",
-            "light",
-            "duty"
-        ],
-        "deities": [
-            "Krishna"
-        ],
-        "mood": "focus",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.kindness_is_unity",
-        "text": "Kindness is unity that heals all divides.",
-        "explanation": [
-            "One kind act bridges any gap.",
-            "Offer gentleness without reward.",
-            "Kindness binds hearts together.",
-            "Try it in one moment today."
-        ],
-        "source": {
-            "title": "Dharma teaching (paraphrase)"
-        },
-        "tags": [
-            "kindness",
-            "ahimsa",
-            "unity"
-        ],
-        "deities": [
-            "Rama"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.breath_is_peace",
-        "text": "Breath is peace that calms the mind.",
-        "explanation": [
-            "One slow breath restores calm.",
-            "Feel life’s rhythm in your breath.",
-            "Breathe mindfully in a rush.",
-            "Peace flows where breath leads."
-        ],
-        "source": {
-            "title": "Yoga practice (paraphrase)"
-        },
-        "tags": [
-            "breath",
-            "peace",
-            "calm"
-        ],
-        "mood": "calm",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.surrender_is_grace",
-        "text": "Surrender is grace that frees the heart.",
-        "explanation": [
-            "Let go of one need to control.",
-            "Trust the divine in this moment.",
-            "Surrender brings gentle peace.",
-            "Feel its grace today."
-        ],
-        "source": {
-            "title": "Bhakti teaching (paraphrase)"
-        },
-        "tags": [
-            "surrender",
-            "grace",
-            "trust"
-        ],
-        "deities": [
-            "Krishna"
-        ],
-        "mood": "calm",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.wisdom_in_clarity",
-        "text": "Wisdom in clarity reveals life’s truth.",
-        "explanation": [
-            "Clear the mind to see truth.",
-            "Pause for one mindful moment.",
-            "Wisdom shines in a calm heart.",
-            "Try it in one choice today."
-        ],
-        "source": {
-            "title": "Vedānta teaching (paraphrase)"
-        },
-        "tags": [
-            "wisdom",
-            "clarity",
-            "viveka"
-        ],
-        "mood": "clarity",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.love_is_peace",
-        "text": "Love is peace that unites all souls.",
-        "explanation": [
-            "Share love in one gentle act.",
-            "Love calms and connects hearts.",
-            "It outlasts all fleeting moments.",
-            "Feel its peace in giving."
-        ],
-        "source": {
-            "title": "Bhakti wisdom (paraphrase)"
-        },
-        "tags": [
-            "love",
-            "peace",
-            "devotion"
-        ],
-        "deities": [
-            "Radha",
-            "Krishna"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.patience_is_peace",
-        "text": "Patience is peace that steadies the soul.",
-        "explanation": [
-            "Wait calmly for life’s unfolding.",
-            "Patience brings inner calm.",
-            "Try it in one moment today.",
-            "Peace grows in steady waiting."
-        ],
-        "source": {
-            "title": "Smārta teaching (paraphrase)"
-        },
-        "tags": [
-            "patience",
-            "peace",
-            "calm"
-        ],
-        "mood": "calm",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.courage_in_clarity",
-        "text": "Courage in clarity lights the true path.",
-        "explanation": [
-            "Face one truth with bold heart.",
-            "Clarity strengthens your resolve.",
-            "Be clear in one moment today.",
-            "Courage guides the soul’s way."
-        ],
-        "source": {
-            "title": "Dharma ethics (paraphrase)"
-        },
-        "tags": [
-            "courage",
-            "clarity",
-            "truth"
-        ],
-        "mood": "courage",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.gratitude_is_light",
-        "text": "Gratitude is light that transforms pain.",
-        "explanation": [
-            "Thank one thing to shift your heart.",
-            "Gratitude finds joy in hardship.",
-            "It brightens the soul’s vision.",
-            "Try it in one moment today."
-        ],
-        "source": {
-            "title": "Bhakti practice (paraphrase)"
-        },
-        "tags": [
-            "gratitude",
-            "light",
-            "joy"
-        ],
-        "deities": [
-            "Lakshmi"
-        ],
-        "mood": "gratitude",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.silence_is_peace",
-        "text": "Silence is peace that heals the heart.",
-        "explanation": [
-            "Pause to find calm within.",
-            "Silence soothes the restless mind.",
-            "Try one quiet moment today.",
-            "Peace grows in inner stillness."
-        ],
-        "source": {
-            "title": "Śaiva teaching (paraphrase)"
-        },
-        "tags": [
-            "silence",
-            "peace",
-            "calm"
-        ],
-        "deities": [
-            "Shiva"
-        ],
-        "mood": "calm",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.seva_is_peace",
-        "text": "Seva is peace that uplifts all souls.",
-        "explanation": [
-            "Serve without seeking reward.",
-            "One selfless act calms the heart.",
-            "Seva connects you to the divine.",
-            "Feel its peace in giving today."
-        ],
-        "source": {
-            "title": "Bhakti practice (paraphrase)"
-        },
-        "tags": [
-            "seva",
-            "peace",
-            "compassion"
-        ],
-        "deities": [
-            "Hanuman"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.dharma_is_strength",
-        "text": "Dharma is strength that guides your heart.",
-        "explanation": [
-            "Act with truth as your foundation.",
-            "Dharma builds unshakable resolve.",
-            "Choose one righteous act today.",
-            "Strength follows a dharmic path."
-        ],
-        "source": {
-            "title": "Bhagavad Gītā (paraphrase)",
-            "ref": "2.40"
-        },
-        "tags": [
-            "dharma",
-            "strength",
-            "duty"
-        ],
-        "deities": [
-            "Krishna"
-        ],
-        "mood": "focus",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.kindness_is_peace",
-        "text": "Kindness is peace that heals all hearts.",
-        "explanation": [
-            "One kind act soothes any soul.",
-            "Offer gentleness without reward.",
-            "Kindness brings calm to all.",
-            "Try it in one moment today."
-        ],
-        "source": {
-            "title": "Dharma teaching (paraphrase)"
-        },
-        "tags": [
-            "kindness",
-            "ahimsa",
-            "peace"
-        ],
-        "deities": [
-            "Rama"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.breath_is_clarity",
-        "text": "Breath is clarity that steadies the mind.",
-        "explanation": [
-            "One slow breath clears your thoughts.",
-            "Feel life’s pulse in each breath.",
-            "Breathe mindfully in a rush.",
-            "Clarity flows where breath leads."
-        ],
-        "source": {
-            "title": "Yoga practice (paraphrase)"
-        },
-        "tags": [
-            "breath",
-            "clarity",
-            "presence"
-        ],
-        "mood": "calm",
-        "difficulty": 1,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.surrender_is_strength",
-        "text": "Surrender is strength that frees the heart.",
-        "explanation": [
-            "Let go of one need to control.",
-            "Trust the divine in this moment.",
-            "Surrender builds inner power.",
-            "Feel its strength today."
-        ],
-        "source": {
-            "title": "Bhakti teaching (paraphrase)"
-        },
-        "tags": [
-            "surrender",
-            "strength",
-            "trust"
-        ],
-        "deities": [
-            "Krishna"
-        ],
-        "mood": "calm",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.wisdom_in_peace",
-        "text": "Wisdom in peace reveals life’s truth.",
-        "explanation": [
-            "Find calm to see clearly.",
-            "Pause for one quiet moment.",
-            "Wisdom shines in a still heart.",
-            "Try it in one choice today."
-        ],
-        "source": {
-            "title": "Vedānta teaching (paraphrase)"
-        },
-        "tags": [
-            "wisdom",
-            "peace",
-            "clarity"
-        ],
-        "mood": "clarity",
-        "difficulty": 2,
-        "language_level": "simple"
-    },
-    {
-        "id": "wis.love_is_light",
-        "text": "Love is light that brightens all paths.",
-        "explanation": [
-            "Share love in one gentle act.",
-            "Love illuminates every heart.",
-            "It outlasts all fleeting moments.",
-            "Feel its light in giving."
-        ],
-        "source": {
-            "title": "Bhakti wisdom (paraphrase)"
-        },
-        "tags": [
-            "love",
-            "light",
-            "devotion"
-        ],
-        "deities": [
-            "Radha",
-            "Krishna"
-        ],
-        "mood": "compassion",
-        "difficulty": 1,
-        "language_level": "simple"
-    }
+  {
+    "id": "wis.stillness_is_strength",
+    "text": "Stillness is strength turned inward.",
+    "explanation": [
+      "Pause for one soft breath.",
+      "Let thoughts settle like dust in light.",
+      "In quiet, the heart remembers its depth.",
+      "Begin with two minutes today."
+    ],
+    "source": {
+      "title": "Meditative teaching (paraphrase)"
+    },
+    "tags": [
+      "Stillness",
+      "Focus",
+      "Practice"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "weight": 1.1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.speak_truth_kindly",
+    "text": "Speak truth with kindness so it can be heard.",
+    "explanation": [
+      "Truth without care can harden the heart.",
+      "Care without truth can blur the way.",
+      "Join both in your next conversation.",
+      "Pause, then choose the gentlest true words."
+    ],
+    "source": {
+      "title": "Gītā ethics (paraphrase)",
+      "ref": "17.15"
+    },
+    "tags": [
+      "Truth",
+      "Ahimsa",
+      "Speech"
+    ],
+    "mood": "clarity",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.devotion_softens_ego",
+    "text": "Devotion softens the ego and brightens the path.",
+    "explanation": [
+      "Remember with love, not demand.",
+      "Let gratitude replace ‘I’ for a moment.",
+      "Offer a small act of service today.",
+      "Notice how the heart feels lighter."
+    ],
+    "source": {
+      "title": "Bhakti reflections (paraphrase)"
+    },
+    "tags": [
+      "Devotion",
+      "Gratitude",
+      "Seva"
+    ],
+    "deities": [
+      "Krishna",
+      "Rama"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.discernment_before_action",
+    "text": "Let discernment rise before your action.",
+    "explanation": [
+      "Ask: Will this serve dharma or distract?",
+      "A breath creates space for wise choice.",
+      "Clarity grows where haste loosens.",
+      "Act from steadiness, not from storm."
+    ],
+    "source": {
+      "title": "Vedānta guidance (paraphrase)"
+    },
+    "tags": [
+      "Viveka",
+      "Dharma",
+      "Focus"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.shakti_is_tender_strength",
+    "text": "Shakti is tender strength: firm, kind, awake.",
+    "explanation": [
+      "Power without harshness; kindness without collapse.",
+      "Set one boundary with warmth today.",
+      "Protect what is sacred within and around.",
+      "Strength can wear a gentle face."
+    ],
+    "source": {
+      "title": "Śākta insight (paraphrase)"
+    },
+    "tags": [
+      "Shakti",
+      "Boundaries",
+      "Courage",
+      "Compassion"
+    ],
+    "deities": [
+      "Durga",
+      "Lakshmi"
+    ],
+    "mood": "courage",
+    "difficulty": 2,
+    "season": [
+      "navratri"
+    ],
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.dharma_guides_duty",
+    "text": "Dharma guides duty beyond mere desire.",
+    "explanation": [
+      "Act for the greater good, not just want.",
+      "Reflect on what serves truth today.",
+      "Small steps align with eternal order.",
+      "Duty with love brings inner peace."
+    ],
+    "source": {
+      "title": "Bhagavad Gītā (paraphrase)",
+      "ref": "2.47"
+    },
+    "tags": [
+      "Dharma",
+      "Duty",
+      "Selflessness"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.serve_with_open_heart",
+    "text": "Serve with an open heart, expect nothing.",
+    "explanation": [
+      "Give without a hidden agenda.",
+      "Find joy in the act of helping.",
+      "Start with a small, selfless deed.",
+      "Notice the lightness it brings."
+    ],
+    "source": {
+      "title": "Bhakti teachings (paraphrase)"
+    },
+    "tags": [
+      "Seva",
+      "Compassion",
+      "Selflessness"
+    ],
+    "deities": [
+      "Rama",
+      "Hanuman"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "weight": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.clarity_in_silence",
+    "text": "Clarity blooms in the garden of silence.",
+    "explanation": [
+      "Pause speech, let the mind rest.",
+      "Truth speaks softly in quiet moments.",
+      "Try five minutes of silence today.",
+      "See what wisdom rises within."
+    ],
+    "source": {
+      "title": "Yoga Sūtras (paraphrase)"
+    },
+    "tags": [
+      "Stillness",
+      "Clarity",
+      "Practice"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "poetic"
+  },
+  {
+    "id": "wis.courage_to_release",
+    "text": "Courage releases what no longer serves.",
+    "explanation": [
+      "Let go of old burdens with grace.",
+      "Ask: Does this align with my truth?",
+      "One small release can free the heart.",
+      "Trust the space it creates for growth."
+    ],
+    "source": {
+      "title": "Vedānta wisdom (paraphrase)"
+    },
+    "tags": [
+      "Vairāgya",
+      "Courage",
+      "Growth"
+    ],
+    "mood": "courage",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.gratitude_opens_eyes",
+    "text": "Gratitude opens eyes to life’s abundance.",
+    "explanation": [
+      "Name three things you’re thankful for.",
+      "Each moment holds hidden gifts.",
+      "A grateful heart sees beauty everywhere.",
+      "Start with a simple thank you today."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": [
+      "Gratitude",
+      "awareness",
+      "Devotion"
+    ],
+    "deities": [
+      "Lakshmi"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "weight": 1.2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.patience_is_power",
+    "text": "Patience is power that time respects.",
+    "explanation": [
+      "Wait without forcing the outcome.",
+      "Trust life’s rhythm to unfold truth.",
+      "Practice patience in one task today.",
+      "Strength grows in steady endurance."
+    ],
+    "source": {
+      "title": "Smārta teaching (paraphrase)"
+    },
+    "tags": [
+      "patience",
+      "endurance",
+      "Focus"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.kindness_is_strength",
+    "text": "Kindness is strength that heals quietly.",
+    "explanation": [
+      "A kind word can shift someone’s day.",
+      "Strength lies in gentle actions.",
+      "Offer kindness without expectation.",
+      "Notice how it softens your heart."
+    ],
+    "source": {
+      "title": "Dharma ethics (paraphrase)"
+    },
+    "tags": [
+      "Ahimsa",
+      "Compassion",
+      "kindness"
+    ],
+    "deities": [
+      "Rama"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_seeks_balance",
+    "text": "Wisdom seeks balance, not extremes.",
+    "explanation": [
+      "Avoid excess in thought or action.",
+      "Find the middle path in a challenge.",
+      "Balance brings clarity and peace.",
+      "Test it in one choice today."
+    ],
+    "source": {
+      "title": "Yoga philosophy (paraphrase)"
+    },
+    "tags": [
+      "balance",
+      "Viveka",
+      "Clarity"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.surrender_to_flow",
+    "text": "Surrender to the flow of divine will.",
+    "explanation": [
+      "Release the need to control all.",
+      "Trust the universe’s deeper plan.",
+      "Let go in one small moment today.",
+      "Feel the ease of moving with life."
+    ],
+    "source": {
+      "title": "Bhakti wisdom (paraphrase)"
+    },
+    "tags": [
+      "surrender",
+      "Devotion",
+      "trust"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.action_with_purpose",
+    "text": "Act with purpose, rooted in truth.",
+    "explanation": [
+      "Every action shapes your path.",
+      "Ask: Does this align with dharma?",
+      "Choose one purposeful act today.",
+      "Let truth guide your steps."
+    ],
+    "source": {
+      "title": "Bhagavad Gītā (paraphrase)",
+      "ref": "3.25"
+    },
+    "tags": [
+      "Dharma",
+      "purpose",
+      "action"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.breath_is_anchor",
+    "text": "Breath is the anchor of the present.",
+    "explanation": [
+      "One deep breath returns you to now.",
+      "Mind wanders; breath brings it home.",
+      "Try three slow breaths in a rush.",
+      "Notice the calm it restores."
+    ],
+    "source": {
+      "title": "Yoga practice (paraphrase)"
+    },
+    "tags": [
+      "breath",
+      "presence",
+      "Calm"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "weight": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_without_clinging",
+    "text": "Love without clinging; let it flow free.",
+    "explanation": [
+      "Hold love lightly, not with a grip.",
+      "Free love grows deeper and true.",
+      "Practice letting go of one expectation.",
+      "See how love breathes in freedom."
+    ],
+    "source": {
+      "title": "Bhakti insight (paraphrase)"
+    },
+    "tags": [
+      "love",
+      "Vairāgya",
+      "Devotion"
+    ],
+    "deities": [
+      "Radha",
+      "Krishna"
+    ],
+    "mood": "compassion",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.humility_invites_wisdom",
+    "text": "Humility invites wisdom to the heart.",
+    "explanation": [
+      "Ego blocks; humility opens doors.",
+      "Listen more than you speak today.",
+      "Learn from someone unexpected.",
+      "Wisdom grows in a humble heart."
+    ],
+    "source": {
+      "title": "Smārta wisdom (paraphrase)"
+    },
+    "tags": [
+      "humility",
+      "Wisdom",
+      "listening"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.seva_lights_path",
+    "text": "Seva lights the path to divine connection.",
+    "explanation": [
+      "Serve others to serve the divine.",
+      "A small act of help sparks joy.",
+      "Offer time or care today.",
+      "Feel the glow of selfless giving."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": [
+      "Seva",
+      "Devotion",
+      "Compassion"
+    ],
+    "deities": [
+      "Hanuman"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.steady_mind_wins",
+    "text": "A steady mind conquers life’s storms.",
+    "explanation": [
+      "Calm the mind to face any challenge.",
+      "Breathe slowly when tension rises.",
+      "Practice steadiness in one moment.",
+      "Inner calm outlasts outer chaos."
+    ],
+    "source": {
+      "title": "Yoga Sūtras (paraphrase)"
+    },
+    "tags": [
+      "Focus",
+      "Calm",
+      "resilience"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.acceptance_frees_heart",
+    "text": "Acceptance frees the heart from struggle.",
+    "explanation": [
+      "Resisting what is creates pain.",
+      "Embrace the present as it unfolds.",
+      "Accept one small truth today.",
+      "Feel the peace of letting be."
+    ],
+    "source": {
+      "title": "Vedānta teaching (paraphrase)"
+    },
+    "tags": [
+      "acceptance",
+      "Peace",
+      "surrender"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.knowledge_is_light",
+    "text": "Knowledge is the light that clears doubt.",
+    "explanation": [
+      "Seek truth to dissolve confusion.",
+      "Read, reflect, or ask one question.",
+      "Knowledge grows with curious steps.",
+      "Light one spark of understanding today."
+    ],
+    "source": {
+      "title": "Upaniṣads (paraphrase)"
+    },
+    "tags": [
+      "knowledge",
+      "Clarity",
+      "Truth"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.joy_in_simplicity",
+    "text": "Joy hides in the simplicity of now.",
+    "explanation": [
+      "Savor a small moment today.",
+      "Less clutter reveals more peace.",
+      "Find beauty in one simple thing.",
+      "Joy grows where attention rests."
+    ],
+    "source": {
+      "title": "Smārta teaching (paraphrase)"
+    },
+    "tags": [
+      "simplicity",
+      "joy",
+      "presence"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.faith_in_journey",
+    "text": "Faith in the journey calms the heart.",
+    "explanation": [
+      "Trust the path, even when unclear.",
+      "Each step reveals the next one.",
+      "Hold faith in one challenge today.",
+      "The heart rests in divine timing."
+    ],
+    "source": {
+      "title": "Bhakti wisdom (paraphrase)"
+    },
+    "tags": [
+      "faith",
+      "trust",
+      "Devotion"
+    ],
+    "deities": [
+      "Rama"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.strength_in_silence",
+    "text": "Strength grows in the silence of the self.",
+    "explanation": [
+      "Quiet the mind to find inner power.",
+      "Sit still for a moment today.",
+      "Silence reveals your true strength.",
+      "Let it guide your next step."
+    ],
+    "source": {
+      "title": "Śaiva teaching (paraphrase)"
+    },
+    "tags": [
+      "Stillness",
+      "strength",
+      "Practice"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.compassion_heals_all",
+    "text": "Compassion heals both giver and receiver.",
+    "explanation": [
+      "Offer kindness to someone in need.",
+      "Feel the warmth it brings your heart.",
+      "Compassion bridges all divides.",
+      "Try one gentle act today."
+    ],
+    "source": {
+      "title": "Dharma teaching (paraphrase)"
+    },
+    "tags": [
+      "Compassion",
+      "Ahimsa",
+      "healing"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.focus_shapes_destiny",
+    "text": "Focus shapes the destiny of your actions.",
+    "explanation": [
+      "A scattered mind scatters results.",
+      "Choose one task and give it your all.",
+      "Focus builds a steady path.",
+      "Start with ten minutes of attention."
+    ],
+    "source": {
+      "title": "Yoga Sūtras (paraphrase)"
+    },
+    "tags": [
+      "Focus",
+      "discipline",
+      "destiny"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.grace_in_surrender",
+    "text": "Grace flows when you surrender to truth.",
+    "explanation": [
+      "Let go of resistance to what is.",
+      "Truth brings peace when embraced.",
+      "Surrender in one moment today.",
+      "Feel the grace of acceptance."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": [
+      "surrender",
+      "grace",
+      "Truth"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.awareness_is_freedom",
+    "text": "Awareness is the key to inner freedom.",
+    "explanation": [
+      "Notice your thoughts without judgment.",
+      "Awareness loosens their grip.",
+      "Observe one feeling fully today.",
+      "Freedom grows in clear seeing."
+    ],
+    "source": {
+      "title": "Vedānta insight (paraphrase)"
+    },
+    "tags": [
+      "awareness",
+      "freedom",
+      "Viveka"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.devotion_is_strength",
+    "text": "Devotion is strength that never wavers.",
+    "explanation": [
+      "Love for the divine steadies the heart.",
+      "Offer a prayer or thought today.",
+      "Devotion carries you through storms.",
+      "Feel its power in quiet moments."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": [
+      "Devotion",
+      "strength",
+      "faith"
+    ],
+    "deities": [
+      "Krishna",
+      "Rama"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.truth_cuts_illusion",
+    "text": "Truth cuts through the veil of illusion.",
+    "explanation": [
+      "Seek what is real, not what seems.",
+      "Question one assumption today.",
+      "Truth reveals a clearer path.",
+      "Walk it with courage and care."
+    ],
+    "source": {
+      "title": "Upaniṣads (paraphrase)"
+    },
+    "tags": [
+      "Truth",
+      "Viveka",
+      "Clarity"
+    ],
+    "mood": "clarity",
+    "difficulty": 3,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.joy_in_service",
+    "text": "Joy flows freely in selfless service.",
+    "explanation": [
+      "Help another without seeking reward.",
+      "Joy arises from giving freely.",
+      "Try one act of service today.",
+      "Notice how your heart expands."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": [
+      "Seva",
+      "joy",
+      "Compassion"
+    ],
+    "deities": [
+      "Hanuman"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.calm_in_chaos",
+    "text": "Find calm in the heart of life’s chaos.",
+    "explanation": [
+      "Chaos tests but cannot break you.",
+      "Breathe deeply amid the storm.",
+      "Seek one moment of inner peace.",
+      "Calm anchors you to truth."
+    ],
+    "source": {
+      "title": "Yoga teaching (paraphrase)"
+    },
+    "tags": [
+      "Calm",
+      "resilience",
+      "Peace"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.honesty_clears_path",
+    "text": "Honesty clears the path to inner truth.",
+    "explanation": [
+      "Speak truth to yourself first.",
+      "One honest moment shifts perspective.",
+      "Be truthful in a small choice today.",
+      "Clarity follows an honest heart."
+    ],
+    "source": {
+      "title": "Dharma ethics (paraphrase)"
+    },
+    "tags": [
+      "Truth",
+      "honesty",
+      "Clarity"
+    ],
+    "mood": "clarity",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_is_eternal",
+    "text": "Love is the eternal thread of existence.",
+    "explanation": [
+      "Love connects all beings and moments.",
+      "Express love in one small way today.",
+      "It outlasts all fleeting things.",
+      "Feel its timeless warmth within."
+    ],
+    "source": {
+      "title": "Bhakti wisdom (paraphrase)"
+    },
+    "tags": [
+      "love",
+      "Devotion",
+      "connection"
+    ],
+    "deities": [
+      "Radha",
+      "Krishna"
+    ],
+    "mood": "compassion",
+    "difficulty": 2,
+    "language_level": "poetic"
+  },
+  {
+    "id": "wis.discipline_shapes_freedom",
+    "text": "Discipline shapes the path to freedom.",
+    "explanation": [
+      "Small, steady steps build strength.",
+      "Commit to one practice today.",
+      "Discipline frees you from chaos.",
+      "Notice the clarity it brings."
+    ],
+    "source": {
+      "title": "Yoga Sūtras (paraphrase)"
+    },
+    "tags": [
+      "discipline",
+      "freedom",
+      "Focus"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.gratitude_transforms",
+    "text": "Gratitude transforms pain into peace.",
+    "explanation": [
+      "Find one thing to be thankful for.",
+      "Gratitude shifts the heart’s lens.",
+      "Even in hardship, gifts exist.",
+      "Try it in a tough moment today."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": [
+      "Gratitude",
+      "Peace",
+      "transformation"
+    ],
+    "deities": [
+      "Lakshmi"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.courage_to_be",
+    "text": "Courage lets you be who you truly are.",
+    "explanation": [
+      "Fear hides your true self; face it.",
+      "Take one step toward authenticity.",
+      "Your essence shines when you’re true.",
+      "Feel the freedom of being you."
+    ],
+    "source": {
+      "title": "Śaiva wisdom (paraphrase)"
+    },
+    "tags": [
+      "Courage",
+      "authenticity",
+      "Truth"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "courage",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.peace_in_surrender",
+    "text": "Peace flows when you surrender control.",
+    "explanation": [
+      "Let go of forcing life’s outcomes.",
+      "Trust the divine order today.",
+      "Surrender brings a quiet heart.",
+      "Try it in one small moment."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": [
+      "surrender",
+      "Peace",
+      "trust"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_in_listening",
+    "text": "Wisdom grows in the act of listening.",
+    "explanation": [
+      "Hear others with an open heart.",
+      "Pause before responding today.",
+      "Listening reveals hidden truths.",
+      "Learn from one conversation."
+    ],
+    "source": {
+      "title": "Smārta teaching (paraphrase)"
+    },
+    "tags": [
+      "listening",
+      "Wisdom",
+      "humility"
+    ],
+    "mood": "clarity",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.strength_in_gentleness",
+    "text": "Strength shines brightest in gentleness.",
+    "explanation": [
+      "Power needs no harshness to prove itself.",
+      "Be gentle in one interaction today.",
+      "Gentleness disarms and uplifts.",
+      "Feel its quiet, enduring strength."
+    ],
+    "source": {
+      "title": "Śākta wisdom (paraphrase)"
+    },
+    "tags": [
+      "gentleness",
+      "strength",
+      "Compassion"
+    ],
+    "deities": [
+      "Lakshmi"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.faith_over_fear",
+    "text": "Faith dissolves fear in the heart’s light.",
+    "explanation": [
+      "Fear fades when you trust the divine.",
+      "Hold faith in one uncertain moment.",
+      "Let it guide you through doubt.",
+      "Feel the heart’s courage rise."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": [
+      "faith",
+      "Courage",
+      "trust"
+    ],
+    "deities": [
+      "Rama"
+    ],
+    "mood": "courage",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.clarity_in_purpose",
+    "text": "Clarity of purpose steadies the mind.",
+    "explanation": [
+      "Know why you act before you do.",
+      "Reflect on one goal today.",
+      "Purpose aligns heart and action.",
+      "Move with intention and calm."
+    ],
+    "source": {
+      "title": "Bhagavad Gītā (paraphrase)",
+      "ref": "2.50"
+    },
+    "tags": [
+      "purpose",
+      "Clarity",
+      "Focus"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.joy_in_presence",
+    "text": "Joy lives in the fullness of the present.",
+    "explanation": [
+      "Let go of past and future for now.",
+      "Feel the moment with all your senses.",
+      "Find joy in one simple breath.",
+      "Presence reveals life’s beauty."
+    ],
+    "source": {
+      "title": "Yoga teaching (paraphrase)"
+    },
+    "tags": [
+      "presence",
+      "joy",
+      "awareness"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_unites_all",
+    "text": "Love unites all in divine harmony.",
+    "explanation": [
+      "See the divine in every being.",
+      "Offer love in one small gesture.",
+      "Love dissolves walls of separation.",
+      "Feel its power to connect."
+    ],
+    "source": {
+      "title": "Bhakti wisdom (paraphrase)"
+    },
+    "tags": [
+      "love",
+      "unity",
+      "Devotion"
+    ],
+    "deities": [
+      "Krishna",
+      "Radha"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_in_patience",
+    "text": "Wisdom grows in the soil of patience.",
+    "explanation": [
+      "Haste clouds; patience reveals truth.",
+      "Wait mindfully in one moment today.",
+      "Wisdom unfolds in steady time.",
+      "Trust the process of growth."
+    ],
+    "source": {
+      "title": "Smārta teaching (paraphrase)"
+    },
+    "tags": [
+      "patience",
+      "Wisdom",
+      "Calm"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.courage_in_truth",
+    "text": "Courage in truth lights the soul’s path.",
+    "explanation": [
+      "Speak truth, even when it’s hard.",
+      "One honest word can shift a moment.",
+      "Truth strengthens your inner core.",
+      "Try it with kindness today."
+    ],
+    "source": {
+      "title": "Dharma ethics (paraphrase)"
+    },
+    "tags": [
+      "Truth",
+      "Courage",
+      "honesty"
+    ],
+    "mood": "courage",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.peace_in_simplicity",
+    "text": "Peace dwells in the heart of simplicity.",
+    "explanation": [
+      "Let go of excess wants today.",
+      "Find calm in one simple act.",
+      "Simplicity clears the mind’s clutter.",
+      "Peace grows where less is enough."
+    ],
+    "source": {
+      "title": "Yoga teaching (paraphrase)"
+    },
+    "tags": [
+      "simplicity",
+      "Peace",
+      "Calm"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.devotion_is_joy",
+    "text": "Devotion is the joy of a surrendered heart.",
+    "explanation": [
+      "Offer your heart to the divine today.",
+      "Joy flows from selfless love.",
+      "Try a small act of devotion.",
+      "Feel the lightness it brings."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": [
+      "Devotion",
+      "joy",
+      "surrender"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.strength_in_service",
+    "text": "Strength grows in service to others.",
+    "explanation": [
+      "Help another to find your own power.",
+      "Offer one act of kindness today.",
+      "Service builds unshakable strength.",
+      "Feel its roots in your heart."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": [
+      "Seva",
+      "strength",
+      "Compassion"
+    ],
+    "deities": [
+      "Hanuman"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.harmony_in_action",
+    "text": "Act in harmony with life’s sacred flow.",
+    "explanation": [
+      "Align your deeds with universal truth.",
+      "Pause to sense the rhythm of now.",
+      "One mindful act restores balance.",
+      "Harmony brings peace to the heart."
+    ],
+    "source": {
+      "title": "Yoga teaching (paraphrase)"
+    },
+    "tags": [
+      "harmony",
+      "action",
+      "balance"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.devotion_is_peace",
+    "text": "Devotion is peace that steadies the soul.",
+    "explanation": [
+      "Offer your heart to the divine today.",
+      "Love calms the restless mind.",
+      "Feel peace in one act of devotion.",
+      "The soul rests in sacred trust."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": [
+      "Devotion",
+      "Peace",
+      "trust"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.courage_to_serve",
+    "text": "Courage to serve uplifts all hearts.",
+    "explanation": [
+      "Serve boldly, even in small ways.",
+      "One selfless act sparks change.",
+      "Courage in seva transforms lives.",
+      "Feel the strength of giving."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": [
+      "Seva",
+      "Courage",
+      "Compassion"
+    ],
+    "deities": [
+      "Hanuman"
+    ],
+    "mood": "courage",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.clarity_in_breath",
+    "text": "Clarity rises with each mindful breath.",
+    "explanation": [
+      "Breathe slowly to clear the mind.",
+      "One breath can shift your focus.",
+      "Truth shines in a calm heart.",
+      "Try three breaths with awareness."
+    ],
+    "source": {
+      "title": "Yoga practice (paraphrase)"
+    },
+    "tags": [
+      "breath",
+      "Clarity",
+      "presence"
+    ],
+    "mood": "clarity",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.gratitude_is_light",
+    "text": "Gratitude is light that brightens the soul.",
+    "explanation": [
+      "Give thanks for one small moment.",
+      "Gratitude reveals hidden beauty.",
+      "It transforms the heart’s vision.",
+      "Start with one thank you today."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": [
+      "Gratitude",
+      "joy",
+      "awareness"
+    ],
+    "deities": [
+      "Lakshmi"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.stillness_is_power",
+    "text": "Stillness is power that anchors the self.",
+    "explanation": [
+      "Pause to find strength within.",
+      "Quiet the mind for one moment.",
+      "Stillness holds unshakable calm.",
+      "Discover it in silence today."
+    ],
+    "source": {
+      "title": "Śaiva teaching (paraphrase)"
+    },
+    "tags": [
+      "Stillness",
+      "Power",
+      "Calm"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.kindness_is_bridge",
+    "text": "Kindness is a bridge between all hearts.",
+    "explanation": [
+      "One kind act connects you to others.",
+      "Offer gentleness without expectation.",
+      "Kindness heals and unites silently.",
+      "Try it in one interaction today."
+    ],
+    "source": {
+      "title": "Dharma teaching (paraphrase)"
+    },
+    "tags": [
+      "kindness",
+      "Ahimsa",
+      "Compassion"
+    ],
+    "deities": [
+      "Rama"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.dharma_is_strength",
+    "text": "Dharma is strength that guides your path.",
+    "explanation": [
+      "Act with truth as your foundation.",
+      "Ask: Does this serve the greater good?",
+      "Dharma steadies your every step.",
+      "Choose one dharmic act today."
+    ],
+    "source": {
+      "title": "Bhagavad Gītā (paraphrase)",
+      "ref": "3.8"
+    },
+    "tags": [
+      "Dharma",
+      "strength",
+      "Duty"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.surrender_is_calm",
+    "text": "Surrender is calm that frees the heart.",
+    "explanation": [
+      "Let go of one need to control.",
+      "Trust the divine flow of life.",
+      "Surrender brings quiet strength.",
+      "Feel it in a single moment."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": [
+      "surrender",
+      "Calm",
+      "trust"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_in_patience",
+    "text": "Wisdom blooms in the patience of time.",
+    "explanation": [
+      "Wait mindfully for clarity to rise.",
+      "Haste clouds; patience reveals.",
+      "Try patience in one task today.",
+      "Wisdom grows in steady moments."
+    ],
+    "source": {
+      "title": "Smārta teaching (paraphrase)"
+    },
+    "tags": [
+      "patience",
+      "Wisdom",
+      "Calm"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_is_connection",
+    "text": "Love is connection that binds all life.",
+    "explanation": [
+      "See the divine in every being.",
+      "Share love in one small act.",
+      "Love unites beyond all divides.",
+      "Feel its warmth in your heart."
+    ],
+    "source": {
+      "title": "Bhakti wisdom (paraphrase)"
+    },
+    "tags": [
+      "love",
+      "unity",
+      "Devotion"
+    ],
+    "deities": [
+      "Radha",
+      "Krishna"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.courage_in_truth",
+    "text": "Courage in truth lights the soul’s way.",
+    "explanation": [
+      "Speak one truth with gentle strength.",
+      "Honesty clears inner shadows.",
+      "Truth guides with fearless clarity.",
+      "Try it in a small moment today."
+    ],
+    "source": {
+      "title": "Dharma ethics (paraphrase)"
+    },
+    "tags": [
+      "Truth",
+      "Courage",
+      "Clarity"
+    ],
+    "mood": "courage",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.steadiness_in_chaos",
+    "text": "Steadiness in chaos reveals true strength.",
+    "explanation": [
+      "Stay calm when storms surround you.",
+      "Breathe to anchor your heart.",
+      "Steadiness outshines fleeting chaos.",
+      "Find it in one tough moment."
+    ],
+    "source": {
+      "title": "Yoga Sūtras (paraphrase)"
+    },
+    "tags": [
+      "resilience",
+      "Calm",
+      "strength"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.gratitude_is_peace",
+    "text": "Gratitude is peace that softens the heart.",
+    "explanation": [
+      "Thank one thing in your life today.",
+      "Gratitude calms the restless mind.",
+      "It finds light in every moment.",
+      "Feel its gentle warmth within."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": [
+      "Gratitude",
+      "Peace",
+      "joy"
+    ],
+    "deities": [
+      "Lakshmi"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.silence_is_wisdom",
+    "text": "Silence is wisdom’s quiet sanctuary.",
+    "explanation": [
+      "Pause words to hear inner truth.",
+      "Silence reveals what noise hides.",
+      "Try a moment of quiet today.",
+      "Wisdom speaks in the stillness."
+    ],
+    "source": {
+      "title": "Śaiva teaching (paraphrase)"
+    },
+    "tags": [
+      "Silence",
+      "Wisdom",
+      "Stillness"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "poetic"
+  },
+  {
+    "id": "wis.seva_is_joy",
+    "text": "Seva is joy that flows from giving.",
+    "explanation": [
+      "Serve without seeking any reward.",
+      "One selfless act sparks happiness.",
+      "Seva connects you to the divine.",
+      "Feel its light in your heart."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": [
+      "Seva",
+      "joy",
+      "Compassion"
+    ],
+    "deities": [
+      "Hanuman"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.dharma_is_clarity",
+    "text": "Dharma is clarity that guides your deeds.",
+    "explanation": [
+      "Act with truth as your compass.",
+      "Ask: Does this serve my purpose?",
+      "Dharma lights the path ahead.",
+      "Choose one clear act today."
+    ],
+    "source": {
+      "title": "Bhagavad Gītā (paraphrase)",
+      "ref": "2.31"
+    },
+    "tags": [
+      "Dharma",
+      "Clarity",
+      "Duty"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.kindness_is_strength",
+    "text": "Kindness is strength that heals quietly.",
+    "explanation": [
+      "A kind act can shift any heart.",
+      "Offer gentleness without expectation.",
+      "Kindness is power in soft form.",
+      "Try one kind deed today."
+    ],
+    "source": {
+      "title": "Dharma teaching (paraphrase)"
+    },
+    "tags": [
+      "kindness",
+      "Ahimsa",
+      "Compassion"
+    ],
+    "deities": [
+      "Rama"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.breath_is_presence",
+    "text": "Breath is presence that grounds the soul.",
+    "explanation": [
+      "One slow breath brings you to now.",
+      "Feel life’s pulse in your breath.",
+      "Breathe mindfully in a busy moment.",
+      "Presence anchors your heart."
+    ],
+    "source": {
+      "title": "Yoga practice (paraphrase)"
+    },
+    "tags": [
+      "breath",
+      "presence",
+      "Calm"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.surrender_is_trust",
+    "text": "Surrender is trust in divine unfolding.",
+    "explanation": [
+      "Release control in one small way.",
+      "Trust the flow of life’s plan.",
+      "Surrender frees the heart’s burden.",
+      "Feel the calm it brings today."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": [
+      "surrender",
+      "trust",
+      "Calm"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_in_stillness",
+    "text": "Wisdom grows in the stillness of mind.",
+    "explanation": [
+      "Pause to let thoughts settle quietly.",
+      "Stillness reveals deeper truths.",
+      "Try a moment of calm today.",
+      "Wisdom shines in the silence."
+    ],
+    "source": {
+      "title": "Śaiva teaching (paraphrase)"
+    },
+    "tags": [
+      "Wisdom",
+      "Stillness",
+      "Clarity"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_is_unity",
+    "text": "Love is unity that binds all beings.",
+    "explanation": [
+      "See the divine in everyone today.",
+      "Share love in one gentle act.",
+      "Love dissolves all separation.",
+      "Feel its power to connect."
+    ],
+    "source": {
+      "title": "Bhakti wisdom (paraphrase)"
+    },
+    "tags": [
+      "love",
+      "unity",
+      "Devotion"
+    ],
+    "deities": [
+      "Radha",
+      "Krishna"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.patience_is_calm",
+    "text": "Patience is calm that steadies the heart.",
+    "explanation": [
+      "Wait without forcing the outcome.",
+      "Patience builds inner strength.",
+      "Try it in one moment today.",
+      "Calm grows in quiet endurance."
+    ],
+    "source": {
+      "title": "Smārta teaching (paraphrase)"
+    },
+    "tags": [
+      "patience",
+      "Calm",
+      "strength"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.courage_in_silence",
+    "text": "Courage in silence reveals inner truth.",
+    "explanation": [
+      "Pause to face your inner thoughts.",
+      "Silence strengthens the brave heart.",
+      "Try one quiet moment today.",
+      "Truth shines in fearless calm."
+    ],
+    "source": {
+      "title": "Śaiva teaching (paraphrase)"
+    },
+    "tags": [
+      "Courage",
+      "Silence",
+      "Truth"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "courage",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.gratitude_is_joy",
+    "text": "Gratitude is joy that opens the heart.",
+    "explanation": [
+      "Give thanks for one simple thing.",
+      "Gratitude reveals life’s beauty.",
+      "It transforms every moment.",
+      "Feel its warmth today."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": [
+      "Gratitude",
+      "joy",
+      "awareness"
+    ],
+    "deities": [
+      "Lakshmi"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.stillness_is_clarity",
+    "text": "Stillness is clarity born of quiet.",
+    "explanation": [
+      "Pause to let the mind rest.",
+      "Clarity emerges in silence.",
+      "Try one still moment today.",
+      "See truth in the quiet heart."
+    ],
+    "source": {
+      "title": "Yoga Sūtras (paraphrase)"
+    },
+    "tags": [
+      "Stillness",
+      "Clarity",
+      "Calm"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "poetic"
+  },
+  {
+    "id": "wis.seva_is_connection",
+    "text": "Seva is connection to the divine spark.",
+    "explanation": [
+      "Serve others to touch the eternal.",
+      "One selfless act binds hearts.",
+      "Seva uplifts and purifies.",
+      "Feel its joy in giving today."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": [
+      "Seva",
+      "connection",
+      "Compassion"
+    ],
+    "deities": [
+      "Hanuman"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.dharma_is_peace",
+    "text": "Dharma is peace that aligns the soul.",
+    "explanation": [
+      "Act with truth as your guide.",
+      "Dharma balances heart and duty.",
+      "Choose one dharmic act today.",
+      "Peace follows a righteous path."
+    ],
+    "source": {
+      "title": "Bhagavad Gītā (paraphrase)",
+      "ref": "2.38"
+    },
+    "tags": [
+      "Dharma",
+      "Peace",
+      "Duty"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.kindness_is_healing",
+    "text": "Kindness is healing that soothes all pain.",
+    "explanation": [
+      "Offer one kind word or deed.",
+      "Kindness mends broken hearts.",
+      "It ripples beyond what you see.",
+      "Feel its power in giving."
+    ],
+    "source": {
+      "title": "Dharma teaching (paraphrase)"
+    },
+    "tags": [
+      "kindness",
+      "Ahimsa",
+      "healing"
+    ],
+    "deities": [
+      "Rama"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.breath_is_calm",
+    "text": "Breath is calm that anchors the present.",
+    "explanation": [
+      "One slow breath returns you to now.",
+      "Feel life’s rhythm in each breath.",
+      "Breathe mindfully in a rush.",
+      "Calm flows where breath leads."
+    ],
+    "source": {
+      "title": "Yoga practice (paraphrase)"
+    },
+    "tags": [
+      "breath",
+      "Calm",
+      "presence"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.surrender_is_peace",
+    "text": "Surrender is peace that frees the soul.",
+    "explanation": [
+      "Let go of one need to control.",
+      "Trust the divine in this moment.",
+      "Surrender lightens the heart.",
+      "Feel its calm today."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": [
+      "surrender",
+      "Peace",
+      "trust"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_in_action",
+    "text": "Wisdom in action serves eternal truth.",
+    "explanation": [
+      "Act with clarity, not with haste.",
+      "Ask: Does this align with truth?",
+      "One wise act shapes your path.",
+      "Choose with care today."
+    ],
+    "source": {
+      "title": "Vedānta teaching (paraphrase)"
+    },
+    "tags": [
+      "Wisdom",
+      "action",
+      "Viveka"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_is_eternal",
+    "text": "Love is eternal, binding all existence.",
+    "explanation": [
+      "Love connects beyond time and space.",
+      "Share love in one small gesture.",
+      "It outlasts all fleeting things.",
+      "Feel its timeless warmth."
+    ],
+    "source": {
+      "title": "Bhakti wisdom (paraphrase)"
+    },
+    "tags": [
+      "love",
+      "Devotion",
+      "unity"
+    ],
+    "deities": [
+      "Radha",
+      "Krishna"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "poetic"
+  },
+  {
+    "id": "wis.patience_is_power",
+    "text": "Patience is power that endures all trials.",
+    "explanation": [
+      "Wait calmly for life’s unfolding.",
+      "Patience builds unshakable strength.",
+      "Try it in one moment today.",
+      "Power grows in steady waiting."
+    ],
+    "source": {
+      "title": "Smārta teaching (paraphrase)"
+    },
+    "tags": [
+      "patience",
+      "Power",
+      "Calm"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.courage_in_honesty",
+    "text": "Courage in honesty clears the soul’s path.",
+    "explanation": [
+      "Speak one truth with gentle strength.",
+      "Honesty frees the heart from fear.",
+      "Be true in a small moment today.",
+      "Feel the soul’s clarity shine."
+    ],
+    "source": {
+      "title": "Dharma ethics (paraphrase)"
+    },
+    "tags": [
+      "honesty",
+      "Courage",
+      "Truth"
+    ],
+    "mood": "courage",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.steadiness_is_strength",
+    "text": "Steadiness is strength that outlasts storms.",
+    "explanation": [
+      "Stay calm in life’s turbulence.",
+      "Breathe to anchor your heart.",
+      "Steadiness builds enduring power.",
+      "Find it in one challenge today."
+    ],
+    "source": {
+      "title": "Yoga Sūtras (paraphrase)"
+    },
+    "tags": [
+      "steadiness",
+      "strength",
+      "resilience"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.gratitude_is_clarity",
+    "text": "Gratitude is clarity that lights the heart.",
+    "explanation": [
+      "Thank one thing to shift your view.",
+      "Gratitude reveals life’s gifts.",
+      "It clears the mind’s confusion.",
+      "Try it in one moment today."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": [
+      "Gratitude",
+      "Clarity",
+      "joy"
+    ],
+    "deities": [
+      "Lakshmi"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.silence_is_strength",
+    "text": "Silence is strength that calms the soul.",
+    "explanation": [
+      "Pause to find power within.",
+      "Silence steadies the restless mind.",
+      "Try one quiet moment today.",
+      "Strength grows in inner calm."
+    ],
+    "source": {
+      "title": "Śaiva teaching (paraphrase)"
+    },
+    "tags": [
+      "Silence",
+      "strength",
+      "Calm"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.seva_is_light",
+    "text": "Seva is light that brightens all paths.",
+    "explanation": [
+      "Serve others to spark divine joy.",
+      "One selfless act uplifts hearts.",
+      "Seva connects you to eternity.",
+      "Feel its glow in giving today."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": [
+      "Seva",
+      "light",
+      "Compassion"
+    ],
+    "deities": [
+      "Hanuman"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.dharma_is_guide",
+    "text": "Dharma is the guide to a righteous life.",
+    "explanation": [
+      "Act with truth as your compass.",
+      "Dharma aligns heart and action.",
+      "Choose one dharmic deed today.",
+      "It leads to lasting peace."
+    ],
+    "source": {
+      "title": "Bhagavad Gītā (paraphrase)",
+      "ref": "3.3"
+    },
+    "tags": [
+      "Dharma",
+      "guidance",
+      "Duty"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.kindness_is_power",
+    "text": "Kindness is power that transforms hearts.",
+    "explanation": [
+      "One kind act can shift a moment.",
+      "Offer gentleness without reward.",
+      "Kindness heals and uplifts all.",
+      "Try it in one interaction."
+    ],
+    "source": {
+      "title": "Dharma teaching (paraphrase)"
+    },
+    "tags": [
+      "kindness",
+      "Ahimsa",
+      "Compassion"
+    ],
+    "deities": [
+      "Rama"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.breath_is_life",
+    "text": "Breath is life’s pulse in every moment.",
+    "explanation": [
+      "Feel your breath to find the now.",
+      "One slow breath restores calm.",
+      "Life flows through each mindful breath.",
+      "Try it in a busy moment."
+    ],
+    "source": {
+      "title": "Yoga practice (paraphrase)"
+    },
+    "tags": [
+      "breath",
+      "life",
+      "presence"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.surrender_is_freedom",
+    "text": "Surrender is freedom from inner chains.",
+    "explanation": [
+      "Let go of one need to control.",
+      "Trust the divine flow of life.",
+      "Surrender lightens the heart.",
+      "Feel its peace today."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": [
+      "surrender",
+      "freedom",
+      "trust"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_in_silence",
+    "text": "Wisdom in silence reveals eternal truth.",
+    "explanation": [
+      "Pause to hear the soul’s quiet voice.",
+      "Silence clears the mind’s clutter.",
+      "Try one still moment today.",
+      "Wisdom shines in the calm."
+    ],
+    "source": {
+      "title": "Śaiva teaching (paraphrase)"
+    },
+    "tags": [
+      "Wisdom",
+      "Silence",
+      "Clarity"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_is_divine",
+    "text": "Love is divine spark in every heart.",
+    "explanation": [
+      "See love in all beings today.",
+      "Share one gentle act of care.",
+      "Love connects you to eternity.",
+      "Feel its warmth in giving."
+    ],
+    "source": {
+      "title": "Bhakti wisdom (paraphrase)"
+    },
+    "tags": [
+      "love",
+      "Devotion",
+      "unity"
+    ],
+    "deities": [
+      "Radha",
+      "Krishna"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.patience_is_clarity",
+    "text": "Patience is clarity that steadies the mind.",
+    "explanation": [
+      "Wait calmly for truth to unfold.",
+      "Patience clears the heart’s fog.",
+      "Try it in one moment today.",
+      "Clarity grows in steady waiting."
+    ],
+    "source": {
+      "title": "Smārta teaching (paraphrase)"
+    },
+    "tags": [
+      "patience",
+      "Clarity",
+      "Calm"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.courage_in_devotion",
+    "text": "Courage in devotion transforms the soul.",
+    "explanation": [
+      "Offer your heart boldly to the divine.",
+      "Devotion strengthens inner resolve.",
+      "Try one act of faith today.",
+      "Feel the soul’s fearless light."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": [
+      "Courage",
+      "Devotion",
+      "faith"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "courage",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.gratitude_is_strength",
+    "text": "Gratitude is strength that lifts the heart.",
+    "explanation": [
+      "Thank one thing to shift your view.",
+      "Gratitude builds inner resilience.",
+      "It finds light in every moment.",
+      "Try it in one challenge today."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": [
+      "Gratitude",
+      "strength",
+      "joy"
+    ],
+    "deities": [
+      "Lakshmi"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.stillness_is_peace",
+    "text": "Stillness is peace that calms the soul.",
+    "explanation": [
+      "Pause to find calm within.",
+      "Stillness soothes the restless mind.",
+      "Try one quiet moment today.",
+      "Peace grows in inner silence."
+    ],
+    "source": {
+      "title": "Śaiva teaching (paraphrase)"
+    },
+    "tags": [
+      "Stillness",
+      "Peace",
+      "Calm"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.seva_is_unity",
+    "text": "Seva is unity that binds all hearts.",
+    "explanation": [
+      "Serve to connect with the divine.",
+      "One selfless act joins souls.",
+      "Seva uplifts and purifies.",
+      "Feel its joy in giving today."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": [
+      "Seva",
+      "unity",
+      "Compassion"
+    ],
+    "deities": [
+      "Hanuman"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.dharma_is_harmony",
+    "text": "Dharma is harmony that guides the soul.",
+    "explanation": [
+      "Act with truth as your foundation.",
+      "Dharma aligns heart and purpose.",
+      "Choose one righteous act today.",
+      "Harmony follows a dharmic path."
+    ],
+    "source": {
+      "title": "Bhagavad Gītā (paraphrase)",
+      "ref": "2.50"
+    },
+    "tags": [
+      "Dharma",
+      "harmony",
+      "Duty"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.kindness_is_light",
+    "text": "Kindness is light that heals all hearts.",
+    "explanation": [
+      "One kind act can shift a moment.",
+      "Offer gentleness without reward.",
+      "Kindness shines in every soul.",
+      "Try it in one interaction."
+    ],
+    "source": {
+      "title": "Dharma teaching (paraphrase)"
+    },
+    "tags": [
+      "kindness",
+      "Ahimsa",
+      "healing"
+    ],
+    "deities": [
+      "Rama"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.breath_is_strength",
+    "text": "Breath is strength that steadies the heart.",
+    "explanation": [
+      "One slow breath builds inner power.",
+      "Feel life’s pulse in each breath.",
+      "Breathe mindfully in a rush.",
+      "Strength flows where breath leads."
+    ],
+    "source": {
+      "title": "Yoga practice (paraphrase)"
+    },
+    "tags": [
+      "breath",
+      "strength",
+      "presence"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.surrender_is_light",
+    "text": "Surrender is light that frees the soul.",
+    "explanation": [
+      "Let go of one need to control.",
+      "Trust the divine in this moment.",
+      "Surrender brightens the heart.",
+      "Feel its peace today."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": [
+      "surrender",
+      "light",
+      "trust"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_in_patience",
+    "text": "Wisdom in patience reveals clear truth.",
+    "explanation": [
+      "Wait calmly for insight to rise.",
+      "Patience clears the mind’s fog.",
+      "Try one patient moment today.",
+      "Wisdom shines in steady time."
+    ],
+    "source": {
+      "title": "Smārta teaching (paraphrase)"
+    },
+    "tags": [
+      "Wisdom",
+      "patience",
+      "Clarity"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_is_strength",
+    "text": "Love is strength that uplifts all souls.",
+    "explanation": [
+      "Share love in one gentle act.",
+      "Love endures where force fails.",
+      "It binds hearts in divine unity.",
+      "Feel its power in giving."
+    ],
+    "source": {
+      "title": "Bhakti wisdom (paraphrase)"
+    },
+    "tags": [
+      "love",
+      "strength",
+      "Devotion"
+    ],
+    "deities": [
+      "Radha",
+      "Krishna"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.courage_in_peace",
+    "text": "Courage in peace transforms inner storms.",
+    "explanation": [
+      "Find calm amid inner turmoil.",
+      "One brave pause restores clarity.",
+      "Peace strengthens the bold heart.",
+      "Try it in one tough moment."
+    ],
+    "source": {
+      "title": "Śaiva teaching (paraphrase)"
+    },
+    "tags": [
+      "Courage",
+      "Peace",
+      "Calm"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "courage",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.gratitude_is_peace",
+    "text": "Gratitude is peace that heals the heart.",
+    "explanation": [
+      "Thank one thing to shift your view.",
+      "Gratitude soothes inner pain.",
+      "It finds light in every moment.",
+      "Try it in one challenge today."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": [
+      "Gratitude",
+      "Peace",
+      "healing"
+    ],
+    "deities": [
+      "Lakshmi"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.silence_is_clarity",
+    "text": "Silence is clarity that reveals truth.",
+    "explanation": [
+      "Pause to hear the soul’s voice.",
+      "Silence clears the mind’s noise.",
+      "Try one quiet moment today.",
+      "Clarity shines in stillness."
+    ],
+    "source": {
+      "title": "Śaiva teaching (paraphrase)"
+    },
+    "tags": [
+      "Silence",
+      "Clarity",
+      "Stillness"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.seva_is_strength",
+    "text": "Seva is strength born of selfless love.",
+    "explanation": [
+      "Serve without seeking any gain.",
+      "One selfless act builds power.",
+      "Seva connects you to all.",
+      "Feel its strength in giving."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": [
+      "Seva",
+      "strength",
+      "Compassion"
+    ],
+    "deities": [
+      "Hanuman"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.dharma_is_light",
+    "text": "Dharma is light that guides your path.",
+    "explanation": [
+      "Act with truth as your guide.",
+      "Dharma illuminates the way.",
+      "Choose one righteous act today.",
+      "Light follows a dharmic heart."
+    ],
+    "source": {
+      "title": "Bhagavad Gītā (paraphrase)",
+      "ref": "3.20"
+    },
+    "tags": [
+      "Dharma",
+      "light",
+      "Duty"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.kindness_is_unity",
+    "text": "Kindness is unity that heals all divides.",
+    "explanation": [
+      "One kind act bridges any gap.",
+      "Offer gentleness without reward.",
+      "Kindness binds hearts together.",
+      "Try it in one moment today."
+    ],
+    "source": {
+      "title": "Dharma teaching (paraphrase)"
+    },
+    "tags": [
+      "kindness",
+      "Ahimsa",
+      "unity"
+    ],
+    "deities": [
+      "Rama"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.breath_is_peace",
+    "text": "Breath is peace that calms the mind.",
+    "explanation": [
+      "One slow breath restores calm.",
+      "Feel life’s rhythm in your breath.",
+      "Breathe mindfully in a rush.",
+      "Peace flows where breath leads."
+    ],
+    "source": {
+      "title": "Yoga practice (paraphrase)"
+    },
+    "tags": [
+      "breath",
+      "Peace",
+      "Calm"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.surrender_is_grace",
+    "text": "Surrender is grace that frees the heart.",
+    "explanation": [
+      "Let go of one need to control.",
+      "Trust the divine in this moment.",
+      "Surrender brings gentle peace.",
+      "Feel its grace today."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": [
+      "surrender",
+      "grace",
+      "trust"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_in_clarity",
+    "text": "Wisdom in clarity reveals life’s truth.",
+    "explanation": [
+      "Clear the mind to see truth.",
+      "Pause for one mindful moment.",
+      "Wisdom shines in a calm heart.",
+      "Try it in one choice today."
+    ],
+    "source": {
+      "title": "Vedānta teaching (paraphrase)"
+    },
+    "tags": [
+      "Wisdom",
+      "Clarity",
+      "Viveka"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_is_peace",
+    "text": "Love is peace that unites all souls.",
+    "explanation": [
+      "Share love in one gentle act.",
+      "Love calms and connects hearts.",
+      "It outlasts all fleeting moments.",
+      "Feel its peace in giving."
+    ],
+    "source": {
+      "title": "Bhakti wisdom (paraphrase)"
+    },
+    "tags": [
+      "love",
+      "Peace",
+      "Devotion"
+    ],
+    "deities": [
+      "Radha",
+      "Krishna"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.patience_is_peace",
+    "text": "Patience is peace that steadies the soul.",
+    "explanation": [
+      "Wait calmly for life’s unfolding.",
+      "Patience brings inner calm.",
+      "Try it in one moment today.",
+      "Peace grows in steady waiting."
+    ],
+    "source": {
+      "title": "Smārta teaching (paraphrase)"
+    },
+    "tags": [
+      "patience",
+      "Peace",
+      "Calm"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.courage_in_clarity",
+    "text": "Courage in clarity lights the true path.",
+    "explanation": [
+      "Face one truth with bold heart.",
+      "Clarity strengthens your resolve.",
+      "Be clear in one moment today.",
+      "Courage guides the soul’s way."
+    ],
+    "source": {
+      "title": "Dharma ethics (paraphrase)"
+    },
+    "tags": [
+      "Courage",
+      "Clarity",
+      "Truth"
+    ],
+    "mood": "courage",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.gratitude_is_light",
+    "text": "Gratitude is light that transforms pain.",
+    "explanation": [
+      "Thank one thing to shift your heart.",
+      "Gratitude finds joy in hardship.",
+      "It brightens the soul’s vision.",
+      "Try it in one moment today."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": [
+      "Gratitude",
+      "light",
+      "joy"
+    ],
+    "deities": [
+      "Lakshmi"
+    ],
+    "mood": "gratitude",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.silence_is_peace",
+    "text": "Silence is peace that heals the heart.",
+    "explanation": [
+      "Pause to find calm within.",
+      "Silence soothes the restless mind.",
+      "Try one quiet moment today.",
+      "Peace grows in inner stillness."
+    ],
+    "source": {
+      "title": "Śaiva teaching (paraphrase)"
+    },
+    "tags": [
+      "Silence",
+      "Peace",
+      "Calm"
+    ],
+    "deities": [
+      "Shiva"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.seva_is_peace",
+    "text": "Seva is peace that uplifts all souls.",
+    "explanation": [
+      "Serve without seeking reward.",
+      "One selfless act calms the heart.",
+      "Seva connects you to the divine.",
+      "Feel its peace in giving today."
+    ],
+    "source": {
+      "title": "Bhakti practice (paraphrase)"
+    },
+    "tags": [
+      "Seva",
+      "Peace",
+      "Compassion"
+    ],
+    "deities": [
+      "Hanuman"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.dharma_is_strength",
+    "text": "Dharma is strength that guides your heart.",
+    "explanation": [
+      "Act with truth as your foundation.",
+      "Dharma builds unshakable resolve.",
+      "Choose one righteous act today.",
+      "Strength follows a dharmic path."
+    ],
+    "source": {
+      "title": "Bhagavad Gītā (paraphrase)",
+      "ref": "2.40"
+    },
+    "tags": [
+      "Dharma",
+      "strength",
+      "Duty"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "focus",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.kindness_is_peace",
+    "text": "Kindness is peace that heals all hearts.",
+    "explanation": [
+      "One kind act soothes any soul.",
+      "Offer gentleness without reward.",
+      "Kindness brings calm to all.",
+      "Try it in one moment today."
+    ],
+    "source": {
+      "title": "Dharma teaching (paraphrase)"
+    },
+    "tags": [
+      "kindness",
+      "Ahimsa",
+      "Peace"
+    ],
+    "deities": [
+      "Rama"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.breath_is_clarity",
+    "text": "Breath is clarity that steadies the mind.",
+    "explanation": [
+      "One slow breath clears your thoughts.",
+      "Feel life’s pulse in each breath.",
+      "Breathe mindfully in a rush.",
+      "Clarity flows where breath leads."
+    ],
+    "source": {
+      "title": "Yoga practice (paraphrase)"
+    },
+    "tags": [
+      "breath",
+      "Clarity",
+      "presence"
+    ],
+    "mood": "calm",
+    "difficulty": 1,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.surrender_is_strength",
+    "text": "Surrender is strength that frees the heart.",
+    "explanation": [
+      "Let go of one need to control.",
+      "Trust the divine in this moment.",
+      "Surrender builds inner power.",
+      "Feel its strength today."
+    ],
+    "source": {
+      "title": "Bhakti teaching (paraphrase)"
+    },
+    "tags": [
+      "surrender",
+      "strength",
+      "trust"
+    ],
+    "deities": [
+      "Krishna"
+    ],
+    "mood": "calm",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.wisdom_in_peace",
+    "text": "Wisdom in peace reveals life’s truth.",
+    "explanation": [
+      "Find calm to see clearly.",
+      "Pause for one quiet moment.",
+      "Wisdom shines in a still heart.",
+      "Try it in one choice today."
+    ],
+    "source": {
+      "title": "Vedānta teaching (paraphrase)"
+    },
+    "tags": [
+      "Wisdom",
+      "Peace",
+      "Clarity"
+    ],
+    "mood": "clarity",
+    "difficulty": 2,
+    "language_level": "simple"
+  },
+  {
+    "id": "wis.love_is_light",
+    "text": "Love is light that brightens all paths.",
+    "explanation": [
+      "Share love in one gentle act.",
+      "Love illuminates every heart.",
+      "It outlasts all fleeting moments.",
+      "Feel its light in giving."
+    ],
+    "source": {
+      "title": "Bhakti wisdom (paraphrase)"
+    },
+    "tags": [
+      "love",
+      "light",
+      "Devotion"
+    ],
+    "deities": [
+      "Radha",
+      "Krishna"
+    ],
+    "mood": "compassion",
+    "difficulty": 1,
+    "language_level": "simple"
+  }
 ]

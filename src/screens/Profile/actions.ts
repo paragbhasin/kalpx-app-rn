@@ -13,6 +13,10 @@ export const UPDATE_PROFILE_REQUEST = "UPDATE_PROFILE_REQUEST";
 export const UPDATE_PROFILE_SUCCESS = "UPDATE_PROFILE_SUCCESS";
 export const UPDATE_PROFILE_FAILURE = "UPDATE_PROFILE_FAILURE";
 
+export const DELETE_ACCOUNT_REQUEST = "DELETE_ACCOUNT_REQUEST";
+export const DELETE_ACCOUNT_SUCCESS = "DELETE_ACCOUNT_SUCCESS";
+export const DELETE_ACCOUNT_FAILURE = "DELETE_ACCOUNT_FAILURE";
+
 // 🔹 Action Creators
 export const profileOptionsRequest = () => ({ type: PROFILE_OPTIONS_REQUEST });
 export const profileOptionsSuccess = (data) => ({
@@ -44,10 +48,21 @@ export const updateProfileFailure = (error) => ({
   payload: error,
 });
 
+export const deleteAccountRequest = () => ({ type: DELETE_ACCOUNT_REQUEST });
+export const deleteAccountSuccess = (data) => ({
+  type: DELETE_ACCOUNT_SUCCESS,
+  payload: data,
+});
+export const deleteAccountFailure = (error) => ({
+  type: DELETE_ACCOUNT_FAILURE,
+  payload: error,
+});
+
 // 🔹 API Calls
 const fetchProfileOptionsApi = () => api.get("users/profile/profile_options/");
 const fetchProfileDetailsApi = () => api.get("users/profile/profile_details/");
-const updateProfileApi = (data) => api.post("users/profile/update_profile/", data); 
+const updateProfileApi = (data) => api.patch("users/profile/update_profile/", data); 
+const deleteAccountApi = (data) => api.post("/users/delete_account/", data);
 
 // 🔹 Thunks (same structure as ClassesScreen)
 export const fetchProfileOptions = (callback) => async (dispatch) => {
@@ -95,6 +110,30 @@ export const updateProfile = (profileData, callback) => async (dispatch) => {
     const errorMsg =
       error?.response?.data?.message || error?.message || "Failed to update profile.";
     dispatch(updateProfileFailure(errorMsg));
+    callback?.({ success: false, error: errorMsg });
+  }
+};
+
+export const deleteUserAccount = (deleteData, callback) => async (dispatch) => {
+  dispatch(deleteAccountRequest());
+  try {
+    console.log("deleteData delete>>>>>>>>>>",JSON.stringify(deleteData));
+    const response = await deleteAccountApi(deleteData);
+    console.log("response delete>>>>>>>>>>",JSON.stringify(response));
+       console.log("✅ Response full object >>>>>>>>>>>");
+    console.log("Status:", response.status);
+    console.log("Headers:", JSON.stringify(response.headers, null, 2));
+    console.log("Data:", JSON.stringify(response.data, null, 2));
+    const payload = response?.data || {};
+    dispatch(deleteAccountSuccess(payload));
+    callback?.({ success: true, data: payload });
+  } catch (error) {
+    const errorMsg =
+      error?.response?.data?.error ||
+      error?.response?.data?.message ||
+      error?.message ||
+      "Failed to delete account.";
+    dispatch(deleteAccountFailure(errorMsg));
     callback?.({ success: false, error: errorMsg });
   }
 };

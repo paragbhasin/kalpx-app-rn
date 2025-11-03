@@ -69,14 +69,14 @@ const StreakScreen = ({ navigation, route }) => {
   }, [dispatch, locationData.timezone, locationLoading]);
 
   const milestones = [
-    { days: 9, name: "Blessing Badge" },
-    { days: 27, name: "Tapasya Badge" },
-    { days: 54, name: "Sadhana Badge" },
-    { days: 108, name: "Dharma Light Badge" },
+    { days: 9, name: t("streakScreen.milestones.blessing") },
+    { days: 27, name: t("streakScreen.milestones.tapasya") },
+    { days: 54, name: t("streakScreen.milestones.sadhana") },
+    { days: 108, name: t("streakScreen.milestones.dharmaLight") },
   ];
 
-  // const sankalpCount = streakData?.sankalp || 0;
-  const sankalpCount : any = 10;
+  const sankalpCount = streakData?.sankalp || 0;
+  // const sankalpCount : any = 10;
 
   const mantraCount = streakData?.mantra || 0;
   const trackerCount = trackerData?.streak_count || 0;
@@ -141,8 +141,13 @@ const StreakScreen = ({ navigation, route }) => {
 
       const message =
         selected === "badge"
-          ? `🌟 I just earned my Blessing Badge on Kalpx!\n\nKalpX — Connect to Your Roots\nhttps://kalpx.com\nhttps://dev.kalpx.com/`
-          : `🔥 I’m on a spiritual streak with Kalpx!\n\nKalpX — Connect to Your Roots\nhttps://kalpx.com\nhttps://dev.kalpx.com/`;
+          ? t("streakScreen.share.badge")
+          : t("streakScreen.share.streak");
+
+      // const message =
+      //   selected === "badge"
+      //     ? `🌟 I just earned my Blessing Badge on Kalpx!\n\nKalpX — Connect to Your Roots\nhttps://kalpx.com\nhttps://dev.kalpx.com/`
+      //     : `🔥 I’m on a spiritual streak with Kalpx!\n\nKalpX — Connect to Your Roots\nhttps://kalpx.com\nhttps://dev.kalpx.com/`;
 
       if (!(await Sharing.isAvailableAsync())) {
         alert("Sharing is not available on this device.");
@@ -262,7 +267,7 @@ const StreakScreen = ({ navigation, route }) => {
             type="cardText"
             style={{ color: selectedTab === "sankalp" ? Colors.Colors.BLACK : Colors.Colors.Light_grey }}
           >
-            Sankalp & Mantra
+        {t("streakScreen.tabs.sankalp")}
           </TextComponent>
         </TouchableOpacity>
 
@@ -282,7 +287,7 @@ const StreakScreen = ({ navigation, route }) => {
             type="cardText"
             style={{ color: selectedTab === "daily" ? Colors.Colors.BLACK : Colors.Colors.Light_grey }}
           >
-            Daily Practices
+        {t("streakScreen.tabs.daily")}
           </TextComponent>
         </TouchableOpacity>
       </View>
@@ -290,7 +295,7 @@ const StreakScreen = ({ navigation, route }) => {
             type="mediumText"
             style={{ color: Colors.Colors.BLACK, marginVertical: 20 }}
           >
-            Streaks are updated daily based on your practice completions.
+        {t("streakScreen.streakInfo")}
           </TextComponent>
           <View
   style={{
@@ -327,7 +332,7 @@ const StreakScreen = ({ navigation, route }) => {
         fontSize: FontSize.CONSTS.FS_14,
       }}
         >
-          Keep Going!
+         {t("streakScreen.keepGoing")}
         </TextComponent>
 
         <TextComponent
@@ -338,7 +343,7 @@ const StreakScreen = ({ navigation, route }) => {
             marginTop:4
           }}
         >
-          You have earned the {currentMilestone.name}.
+          {t("streakScreen.youEarned", { badge: currentMilestone.name })}
         </TextComponent>
 
         {nextMilestone && (
@@ -350,7 +355,7 @@ const StreakScreen = ({ navigation, route }) => {
             marginTop:4
             }}
           >
-            {remainingDays} more days to your {nextMilestone.name}.
+          {t("streakScreen.moreDays", { count: remainingDays, nextBadge: nextMilestone.name })}
           </TextComponent>
         )}
       </>
@@ -363,7 +368,7 @@ const StreakScreen = ({ navigation, route }) => {
         fontSize: FontSize.CONSTS.FS_14,
       }}
         >
-          Keep Going!
+       {t("streakScreen.keepGoing")}
         </TextComponent>
         <TextComponent
           type="mediumText"
@@ -373,7 +378,7 @@ const StreakScreen = ({ navigation, route }) => {
             marginTop:4
           }}
         >
-          You have not earned any badge yet.
+        {t("streakScreen.noBadge")}
         </TextComponent>
         <TextComponent
           type="mediumText"
@@ -383,8 +388,9 @@ const StreakScreen = ({ navigation, route }) => {
             marginTop:4
           }}
         >
-          {remainingDays || milestones[0].days - highestStreak} more days to your{" "}
-          {milestones[0].name}.
+            {t("streakScreen.daysToFirst", { days: milestones[0].days - highestStreak, badge: milestones[0].name })}
+          {/* {remainingDays || milestones[0].days - highestStreak} more days to your{" "}
+          {milestones[0].name}. */}
         </TextComponent>
       </>
     )}
@@ -452,7 +458,7 @@ const StreakScreen = ({ navigation, route }) => {
                 style={{ height: 20, width: 20, marginRight: 8 }}
               />
               <TextComponent type="cardText" style={styles.count}>
-                Sankalp Streaks : {streakData?.sankalp ?? 0}
+                {t("streakScreen.sankalpStreaks")} : {streakData?.sankalp ?? 0}
               </TextComponent>
             </View>
             <View
@@ -467,7 +473,7 @@ const StreakScreen = ({ navigation, route }) => {
                 style={{ height: 20, width: 20, marginRight: 8 }}
               />
               <TextComponent type="cardText" style={styles.count}>
-                Mantra Streaks : {streakData?.mantra ?? 0}
+             {t("streakScreen.mantraStreaks")} : {streakData?.mantra ?? 0}
               </TextComponent>
             </View>
           </View>
@@ -487,7 +493,7 @@ const StreakScreen = ({ navigation, route }) => {
                 style={{ height: 20, width: 20, marginRight: 8 }}
               /> */}
               <TextComponent type="cardText" style={styles.count}>
-                Practice Streaks :  {trackerData?.streak_count ?? 0}
+               {t("streakScreen.practiceStreaks")} : {trackerData?.streak_count ?? 0}
               </TextComponent>
             </View>
           </View>
@@ -512,7 +518,7 @@ const StreakScreen = ({ navigation, route }) => {
                       : Colors.Colors.BLACK,
                 }}
               >
-                Your Badge
+               {t("streakScreen.yourBadge")}
               </TextComponent>
             </TouchableOpacity>
 
@@ -536,7 +542,7 @@ const StreakScreen = ({ navigation, route }) => {
                       : Colors.Colors.BLACK,
                 }}
               >
-                Your Streak
+              {t("streakScreen.yourStreak")}
               </TextComponent>
             </TouchableOpacity>
 {((selected === "badge" && hasBadge) || (selected === "streak" && hasStreak)) && (
@@ -552,9 +558,9 @@ const StreakScreen = ({ navigation, route }) => {
     }}
   >
     <TextComponent type="streakText" style={{}}>
-      {selected === "badge"
-        ? "Download Badge Card"
-        : "Download Streak Card"}
+       {selected === "badge"
+          ? t("streakScreen.downloadBadge")
+          : t("streakScreen.downloadStreak")}
     </TextComponent>
     <Image
       source={require("../../../assets/Download.png")}
@@ -588,10 +594,10 @@ const StreakScreen = ({ navigation, route }) => {
             {((selectedTab === "sankalp" &&  mantraCount === 0 && sankalpCount === 0) || (selectedTab === "daily" && trackerCount === 0 ) ) &&
             <>
             <View style={{borderColor:Colors.Colors.Light_grey,borderWidth:0.6,borderRadius:4,padding:20,marginVertical:15}}>
-<TextComponent type="cardText" style={{textAlign:"center",color:Colors.Colors.Light_grey,fontSize:FontSize.CONSTS.FS_16}}><TextComponent type="cardText" style={{textAlign:"center",color:Colors.Colors.App_theme,fontSize:FontSize.CONSTS.FS_16}}>No Badges</TextComponent> on KalpX yet — but you’re just <TextComponent type="cardText" style={{textAlign:"center",color:Colors.Colors.BLACK,fontSize:FontSize.CONSTS.FS_16}}>9 </TextComponent>days away.</TextComponent>
-<TextComponent type="cardText" style={{textAlign:"center",fontSize:FontSize.CONSTS.FS_16}}> Complete 9 days in a row to earn your first <TextComponent type="cardText" style={{textAlign:"center",color:Colors.Colors.App_theme,fontSize:FontSize.CONSTS.FS_16}}>Blessing Badge!</TextComponent></TextComponent>
+<TextComponent type="cardText" style={{textAlign:"center",color:Colors.Colors.Light_grey,fontSize:FontSize.CONSTS.FS_16}}><TextComponent type="cardText" style={{textAlign:"center",color:Colors.Colors.App_theme,fontSize:FontSize.CONSTS.FS_16}}> {t("streakScreen.noBadgesTitle")}</TextComponent> {t("streakScreen.noBadgesMessage")}<TextComponent type="cardText" style={{textAlign:"center",color:Colors.Colors.BLACK,fontSize:FontSize.CONSTS.FS_16}}>9 </TextComponent>{t("streakScreen.dayText")}</TextComponent>
+<TextComponent type="cardText" style={{textAlign:"center",fontSize:FontSize.CONSTS.FS_16}}>{t("streakScreen.noBadgesAction")}  <TextComponent type="cardText" style={{textAlign:"center",color:Colors.Colors.App_theme,fontSize:FontSize.CONSTS.FS_16}}>{t("streakScreen.blessedText")}</TextComponent></TextComponent>
 <View style={{backgroundColor:Colors.Colors.App_theme,padding:12,alignItems:"center",marginVertical:12,borderRadius:4}}>
-  <TextComponent type="cardText" style={{color:Colors.Colors.white,fontSize:FontSize.CONSTS.FS_16}}>Start Your Journey</TextComponent>
+  <TextComponent type="cardText" style={{color:Colors.Colors.white,fontSize:FontSize.CONSTS.FS_16}}>{t("streakScreen.startJourney")}</TextComponent>
 </View>
             </View>
             </>
@@ -622,7 +628,7 @@ const StreakScreen = ({ navigation, route }) => {
                         fontSize: FontSize.CONSTS.FS_14,
                       }}
                     >
-                      Feeling Blessed
+                   {t("streakScreen.feelingBlessed")}
                     </TextComponent>
                     <Image
                       source={require("../../../assets/Feeling_blessed.png")}
@@ -635,7 +641,7 @@ const StreakScreen = ({ navigation, route }) => {
                   >
                       {selectedTab === "sankalp"
     ? (mantraCount >= sankalpCount ? mantraCount : sankalpCount)
-    : trackerCount}{" "} days {currentMilestone?.name}
+    : trackerCount}{" "} {t("streakScreen.days")} {currentMilestone?.name}
                   </TextComponent>
                   <Image
                     source={require("../../../assets/streak_1.png")}
@@ -645,7 +651,7 @@ const StreakScreen = ({ navigation, route }) => {
                     type="boldText"
                     style={{ color: "#925910", fontSize: 18 ,textAlign:"center"}}
                   >
-                   Your commitment to growth is a gift to all beings.{" "}
+                    {t("streakScreen.commitmentGift")} {" "}
                   </TextComponent>
                   {/* <TextComponent
                     type="boldText"
@@ -693,9 +699,9 @@ const StreakScreen = ({ navigation, route }) => {
                 {(selectedTab === "sankalp" &&  mantraCount === 0 && sankalpCount === 0 ) &&
             <>
                         <View style={{borderColor:Colors.Colors.Light_grey,borderWidth:0.6,borderRadius:4,padding:20,marginVertical:15}}>
- <TextComponent type="cardText" style={{textAlign:"center"}}>Every great journey begins with a single intention. Set your Sankalp or start your Mantra practice today — the first step leads to a thousand blessings.</TextComponent>
+ <TextComponent type="cardText" style={{textAlign:"center"}}>{t("streakScreen.cardData")}</TextComponent>
  <TouchableOpacity style={{backgroundColor:Colors.Colors.App_theme,padding:12,alignItems:"center",marginVertical:12,borderRadius:4}} onPress={() => {navigation.navigate('HomePage', { screen: 'Home'})}}>
-  <TextComponent type="cardText" style={{color:Colors.Colors.white}}>Begin Your Sacred Journey</TextComponent>
+  <TextComponent type="cardText" style={{color:Colors.Colors.white}}>{t("streakScreen.beginJourney")}</TextComponent>
  </TouchableOpacity>
              </View>
             </>
@@ -703,7 +709,7 @@ const StreakScreen = ({ navigation, route }) => {
                  {(selectedTab === "daily" && trackerCount === 0  ) &&
             <>
              <View style={{borderColor:Colors.Colors.Light_grey,borderWidth:0.6,borderRadius:4,padding:20,marginVertical:15}}>
-<TextComponent type="cardText" style={{textAlign:"center"}}>Your spiritual path awaits you. Create your first daily practice and begin your journey toward balance and clarity.</TextComponent>
+<TextComponent type="cardText" style={{textAlign:"center"}}>{t("streakScreen.spiritualText")}</TextComponent>
 <TouchableOpacity 
 onPress={() => {
   if(trackerData?.active_practices?.length > 0){
@@ -713,7 +719,7 @@ navigation.navigate("Dharma");
   }
 }}
 style={{backgroundColor:Colors.Colors.App_theme,padding:12,alignItems:"center",marginVertical:12,borderRadius:4}}>
-  <TextComponent type="cardText" style={{color:Colors.Colors.white}}>Set Up Your Practice</TextComponent>
+  <TextComponent type="cardText" style={{color:Colors.Colors.white}}>{t("streakScreen.setUp")}</TextComponent>
 </TouchableOpacity>
             </View>
             </>
@@ -745,7 +751,7 @@ style={{backgroundColor:Colors.Colors.App_theme,padding:12,alignItems:"center",m
                         marginTop: 25,
                       }}
                     >
-                      Streaks
+                         {t("streakScreen.Streaks")}
                     </TextComponent>
                   </View>
                   {sankalpCount !== 0 &&
@@ -762,7 +768,7 @@ style={{backgroundColor:Colors.Colors.App_theme,padding:12,alignItems:"center",m
                         marginTop: 12,
                       }}
                     >
-                      Sankalp Streaks : {sankalpCount ?? 0}
+                      {t("streakScreen.StreakCount")} : {sankalpCount ?? 0}
                     </TextComponent>
                   </View>
 }
@@ -781,7 +787,7 @@ style={{backgroundColor:Colors.Colors.App_theme,padding:12,alignItems:"center",m
                       type="cardText"
                       style={{ ...styles.count, color: "#925910" }}
                     >
-                      Mantra Streaks : {mantraCount ?? 0}
+                      {t("streakScreen.mantraCount")} : {mantraCount ?? 0}
                     </TextComponent>
                   </View>
 }
@@ -794,7 +800,7 @@ style={{backgroundColor:Colors.Colors.App_theme,padding:12,alignItems:"center",m
                         textAlign: "center",
                       }}
                     >
-                      "Every day you show
+                    {t("streakScreen.card1")}
                     </TextComponent>
                     <TextComponent
                       type="boldText"
@@ -805,7 +811,7 @@ style={{backgroundColor:Colors.Colors.App_theme,padding:12,alignItems:"center",m
                         marginTop: 8,
                       }}
                     >
-                      up, your spirit shines
+                    {t("streakScreen.card2")}
                     </TextComponent>
                     <TextComponent
                       type="boldText"
@@ -816,7 +822,7 @@ style={{backgroundColor:Colors.Colors.App_theme,padding:12,alignItems:"center",m
                         marginTop: 8,
                       }}
                     >
-                      brighter."
+                    {t("streakScreen.card3")}
                     </TextComponent>
                   </View>
                   <TextComponent
@@ -869,7 +875,7 @@ style={{backgroundColor:Colors.Colors.App_theme,padding:12,alignItems:"center",m
                 marginRight: 12,
               }}
             >
-              Share
+            {t("streakScreen.shareText")}
             </TextComponent>
             <TouchableOpacity onPress={handleShare}>
             <Image
@@ -900,7 +906,7 @@ style={{backgroundColor:Colors.Colors.App_theme,padding:12,alignItems:"center",m
           {selectedTab === "sankalp" && (
   <>
     {loading ? (
-      <TextComponent>Loading...</TextComponent>
+      <TextComponent>{t("streakScreen.load")}</TextComponent>
     ) : (
       <FlatList
         data={Array.from({ length: moment().daysInMonth() }, (_, i) => {
@@ -997,6 +1003,7 @@ style={{backgroundColor:Colors.Colors.App_theme,padding:12,alignItems:"center",m
               : Colors.Colors.Light_grey,
           }}
         >
+           {/* {`${t(`months.${moment(item.fullDate).format("MMM").toLowerCase()}`)} ${item.day}`} */}
             {moment(item.fullDate).format("MMM D")}
           {/* {item.day} */}
         </TextComponent>

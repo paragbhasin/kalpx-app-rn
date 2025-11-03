@@ -24,114 +24,117 @@ import ExperienceCard from "../../components/ExperienceCard";
 import LoadingButton from "../../components/LoadingButton";
 import Section from "../../components/Section";
 import SuccessModal from "../../components/SuccessModal";
+import { ensureLoggedIn } from "../../utils/authHelpers";
 import { travelIntresetUser } from "./actions";
 import styles from "./travelstyles";
 
-const ALL_CATEGORIES = [
-  {
-    id: "charDham",
-    title: "Char Dham Yatra",
-    subtitle:
-      "Connect with the ultimate spiritual circuit across India’s divine corners.",
-    image: "https://dev.kalpx.com/img/char-dham.137cfaf5.jpg",
-  },
-  {
-    id: "riverine",
-    title: "Riverine Pilgrimage",
-    subtitle:
-      "Immerse yourself in the purifying embrace of India’s sacred rivers and their holy confluence points.",
-    image: "https://dev.kalpx.com/img/riverine.9c0993b7.jpg",
-  },
-  {
-    id: "shaktipeeth",
-    title: "Shaktipeeth Yatra",
-    subtitle:
-      "Awaken the divine feminine power by honoring the sacred abodes of the Mother Goddess.",
-    image: "https://dev.kalpx.com/img/shaktipeeth.d335333c.jpg",
-  },
-  {
-    id: "ramayana",
-    title: "Ramayana Circuit",
-    subtitle:
-      "Walk the footsteps of Shri Ram, retracing his epic journey of dharma and devotion.",
-    image: "https://dev.kalpx.com/img/ramayana.68fbbb93.jpg",
-  },
-  {
-    id: "krishna",
-    title: "Krishna Bhumi Trail",
-    subtitle:
-      "Where every step echoes 'Radhe Radhe' – a joyous immersion into the land of divine play and love.",
-    image: "https://dev.kalpx.com/img/krishna.a507ab5b.jpg",
-  },
-  {
-    id: "himalayanTemples",
-    title: "Himalayan Temples",
-    subtitle:
-      "Seek profound silence and spiritual elevation amidst the majestic and mystical heights of the Himalayas.",
-    image: "https://dev.kalpx.com/img/himalayan-temples.7c855222.jpg",
-  },
-  {
-    id: "southIndian",
-    title: "South Indian Mandirs",
-    subtitle:
-      "Uncover the mystic traditions and ancient glory of South India’s timeless Dravidian temples.",
-    image: "https://dev.kalpx.com/img/south-indian.56a0c53f.jpg",
-  },
-  {
-    id: "sunriseDarshan",
-    title: "Sunrise Darshan Sites",
-    subtitle:
-      "Begin your day with devotion – witness awe-inspiring darshans as the sun rises over sacred shores.",
-    image: "https://dev.kalpx.com/img/sunrise-darshan.7201189c.jpg",
-  },
-  {
-    id: "jyotirlinga",
-    title: "Jyotirlinga Darshan",
-    subtitle:
-      "Connect with the 12 luminous forms of Lord Shiva, radiating divine light across the subcontinent.",
-    image: "https://dev.kalpx.com/img/jyotirlinga.da3a8f7c.jpg",
-  },
-  {
-    id: "saintGuru",
-    title: "Saint & Guru Dhams",
-    subtitle:
-      "Follow the spiritual footsteps of revered saints and enlightened masters who guided humanity.",
-    image: "https://dev.kalpx.com/img/saint-guru.0cea2711.jpg",
-  },
-  {
-    id: "ganesha",
-    title: "Ganesha Pilgrimage",
-    subtitle:
-      "Seek blessings and remove obstacles by visiting the potent abodes of the benevolent Ganesha.",
-    image: "https://dev.kalpx.com/img/ganesha.0a059365.jpg",
-  },
-  {
-    id: "natureDevotion",
-    title: "Nature & Devotion",
-    subtitle:
-      "Experience spiritual awakening amidst the pristine beauty of nature’s sacred sanctuaries.",
-    image: "https://dev.kalpx.com/img/nature-devotion.fa40d80e.jpg",
-  },
-  {
-    id: "murugan",
-    title: "Murugan Kshetras",
-    subtitle:
-      "Embark on a divine quest to the powerful abodes of Lord Murugan, the valiant Kartikeya.",
-    image: "https://dev.kalpx.com/img/murugan.3ed31501.jpg",
-  },
-  {
-    id: "heritage",
-    title: "Ancient Heritage Sites",
-    subtitle:
-      "Explore timeless temples that stand as testaments to India’s rich history and architectural genius.",
-    image: "https://dev.kalpx.com/img/heritage.776cd106.jpg",
-  },
-];
+
+
+// const ALL_CATEGORIES = [
+//   {
+//     id: "charDham",
+//     title: "Char Dham Yatra",
+//     subtitle:
+//       "Connect with the ultimate spiritual circuit across India’s divine corners.",
+//     image: "https://dev.kalpx.com/img/char-dham.137cfaf5.jpg",
+//   },
+//   {
+//     id: "riverine",
+//     title: "Riverine Pilgrimage",
+//     subtitle:
+//       "Immerse yourself in the purifying embrace of India’s sacred rivers and their holy confluence points.",
+//     image: "https://dev.kalpx.com/img/riverine.9c0993b7.jpg",
+//   },
+//   {
+//     id: "shaktipeeth",
+//     title: "Shaktipeeth Yatra",
+//     subtitle:
+//       "Awaken the divine feminine power by honoring the sacred abodes of the Mother Goddess.",
+//     image: "https://dev.kalpx.com/img/shaktipeeth.d335333c.jpg",
+//   },
+//   {
+//     id: "ramayana",
+//     title: "Ramayana Circuit",
+//     subtitle:
+//       "Walk the footsteps of Shri Ram, retracing his epic journey of dharma and devotion.",
+//     image: "https://dev.kalpx.com/img/ramayana.68fbbb93.jpg",
+//   },
+//   {
+//     id: "krishna",
+//     title: "Krishna Bhumi Trail",
+//     subtitle:
+//       "Where every step echoes 'Radhe Radhe' – a joyous immersion into the land of divine play and love.",
+//     image: "https://dev.kalpx.com/img/krishna.a507ab5b.jpg",
+//   },
+//   {
+//     id: "himalayanTemples",
+//     title: "Himalayan Temples",
+//     subtitle:
+//       "Seek profound silence and spiritual elevation amidst the majestic and mystical heights of the Himalayas.",
+//     image: "https://dev.kalpx.com/img/himalayan-temples.7c855222.jpg",
+//   },
+//   {
+//     id: "southIndian",
+//     title: "South Indian Mandirs",
+//     subtitle:
+//       "Uncover the mystic traditions and ancient glory of South India’s timeless Dravidian temples.",
+//     image: "https://dev.kalpx.com/img/south-indian.56a0c53f.jpg",
+//   },
+//   {
+//     id: "sunriseDarshan",
+//     title: "Sunrise Darshan Sites",
+//     subtitle:
+//       "Begin your day with devotion – witness awe-inspiring darshans as the sun rises over sacred shores.",
+//     image: "https://dev.kalpx.com/img/sunrise-darshan.7201189c.jpg",
+//   },
+//   {
+//     id: "jyotirlinga",
+//     title: "Jyotirlinga Darshan",
+//     subtitle:
+//       "Connect with the 12 luminous forms of Lord Shiva, radiating divine light across the subcontinent.",
+//     image: "https://dev.kalpx.com/img/jyotirlinga.da3a8f7c.jpg",
+//   },
+//   {
+//     id: "saintGuru",
+//     title: "Saint & Guru Dhams",
+//     subtitle:
+//       "Follow the spiritual footsteps of revered saints and enlightened masters who guided humanity.",
+//     image: "https://dev.kalpx.com/img/saint-guru.0cea2711.jpg",
+//   },
+//   {
+//     id: "ganesha",
+//     title: "Ganesha Pilgrimage",
+//     subtitle:
+//       "Seek blessings and remove obstacles by visiting the potent abodes of the benevolent Ganesha.",
+//     image: "https://dev.kalpx.com/img/ganesha.0a059365.jpg",
+//   },
+//   {
+//     id: "natureDevotion",
+//     title: "Nature & Devotion",
+//     subtitle:
+//       "Experience spiritual awakening amidst the pristine beauty of nature’s sacred sanctuaries.",
+//     image: "https://dev.kalpx.com/img/nature-devotion.fa40d80e.jpg",
+//   },
+//   {
+//     id: "murugan",
+//     title: "Murugan Kshetras",
+//     subtitle:
+//       "Embark on a divine quest to the powerful abodes of Lord Murugan, the valiant Kartikeya.",
+//     image: "https://dev.kalpx.com/img/murugan.3ed31501.jpg",
+//   },
+//   {
+//     id: "heritage",
+//     title: "Ancient Heritage Sites",
+//     subtitle:
+//       "Explore timeless temples that stand as testaments to India’s rich history and architectural genius.",
+//     image: "https://dev.kalpx.com/img/heritage.776cd106.jpg",
+//   },
+// ];
 
 const DURATION = ["3_days", "7_days", "10_plus_days"];
                 
 
-export default function TravelPlannerScreen() {
+export default function TravelPlannerScreen({route}) {
   const navigation: any = useNavigation();
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -144,6 +147,7 @@ export default function TravelPlannerScreen() {
   const [notes, setNotes] = useState("");
   const [loginError, setLoginError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isRestored, setIsRestored] = useState(false);
   const [locationData, setLocationData] = useState({
     city: "",
     country: "",
@@ -153,6 +157,94 @@ export default function TravelPlannerScreen() {
   });
   const [userCity, setUserCity] = useState("");
     const [errors, setErrors] = useState<string[]>([]); // track missing fields
+
+
+    const ALL_CATEGORIES = [
+  {
+    id: "charDham",
+    title: t("travelPlanner.travelCard.charDham.title"),
+    subtitle: t("travelPlanner.travelCard.charDham.subtitle"),
+    image: "https://dev.kalpx.com/img/char-dham.137cfaf5.jpg",
+  },
+  {
+    id: "riverine",
+    title: t("travelPlanner.travelCard.riverine.title"),
+    subtitle: t("travelPlanner.travelCard.riverine.subtitle"),
+    image: "https://dev.kalpx.com/img/riverine.9c0993b7.jpg",
+  },
+  {
+    id: "shaktipeeth",
+    title: t("travelPlanner.travelCard.shaktipeeth.title"),
+    subtitle: t("travelPlanner.travelCard.shaktipeeth.subtitle"),
+    image: "https://dev.kalpx.com/img/shaktipeeth.d335333c.jpg",
+  },
+  {
+    id: "ramayana",
+    title: t("travelPlanner.travelCard.ramayana.title"),
+    subtitle: t("travelPlanner.travelCard.ramayana.subtitle"),
+    image: "https://dev.kalpx.com/img/ramayana.68fbbb93.jpg",
+  },
+  {
+    id: "krishna",
+    title: t("travelPlanner.travelCard.krishna.title"),
+    subtitle: t("travelPlanner.travelCard.krishna.subtitle"),
+    image: "https://dev.kalpx.com/img/krishna.a507ab5b.jpg",
+  },
+  {
+    id: "himalayanTemples",
+    title: t("travelPlanner.travelCard.himalayanTemples.title"),
+    subtitle: t("travelPlanner.travelCard.himalayanTemples.subtitle"),
+    image: "https://dev.kalpx.com/img/himalayan-temples.7c855222.jpg",
+  },
+  {
+    id: "southIndian",
+    title: t("travelPlanner.travelCard.southIndian.title"),
+    subtitle: t("travelPlanner.travelCard.southIndian.subtitle"),
+    image: "https://dev.kalpx.com/img/south-indian.56a0c53f.jpg",
+  },
+  {
+    id: "sunriseDarshan",
+    title: t("travelPlanner.travelCard.sunriseDarshan.title"),
+    subtitle: t("travelPlanner.travelCard.sunriseDarshan.subtitle"),
+    image: "https://dev.kalpx.com/img/sunrise-darshan.7201189c.jpg",
+  },
+  {
+    id: "jyotirlinga",
+    title: t("travelPlanner.travelCard.jyotirlinga.title"),
+    subtitle: t("travelPlanner.travelCard.jyotirlinga.subtitle"),
+    image: "https://dev.kalpx.com/img/jyotirlinga.da3a8f7c.jpg",
+  },
+  {
+    id: "saintGuru",
+    title: t("travelPlanner.travelCard.saintGuru.title"),
+    subtitle: t("travelPlanner.travelCard.saintGuru.subtitle"),
+    image: "https://dev.kalpx.com/img/saint-guru.0cea2711.jpg",
+  },
+  {
+    id: "ganesha",
+    title: t("travelPlanner.travelCard.ganesha.title"),
+    subtitle: t("travelPlanner.travelCard.ganesha.subtitle"),
+    image: "https://dev.kalpx.com/img/ganesha.0a059365.jpg",
+  },
+  {
+    id: "natureDevotion",
+    title: t("travelPlanner.travelCard.natureDevotion.title"),
+    subtitle: t("travelPlanner.travelCard.natureDevotion.subtitle"),
+    image: "https://dev.kalpx.com/img/nature-devotion.fa40d80e.jpg",
+  },
+  {
+    id: "murugan",
+    title: t("travelPlanner.travelCard.murugan.title"),
+    subtitle: t("travelPlanner.travelCard.murugan.subtitle"),
+    image: "https://dev.kalpx.com/img/murugan.3ed31501.jpg",
+  },
+  {
+    id: "heritage",
+    title: t("travelPlanner.travelCard.heritage.title"),
+    subtitle: t("travelPlanner.travelCard.heritage.subtitle"),
+    image: "https://dev.kalpx.com/img/heritage.776cd106.jpg",
+  },
+];
 
   // check if all required fields are filled
   const allValid =
@@ -171,6 +263,48 @@ export default function TravelPlannerScreen() {
   const toggleCompanion = (label: string) => {
     setCompanions([label]); // always one selected
   };
+
+  // ✅ Restore pending travel data if coming from login
+useEffect(() => {
+  if (!route.params?.resumeData) return;
+
+  const data = route.params.resumeData;
+  console.log("📩 Received travel resumeData:", data);
+
+  setSelectedCats(data.selectedCats || []);
+  setDuration(data.duration || null);
+  setExperience(data.experience || "comfort");
+  setCompanions(data.companions || ["solo"]);
+  setNotes(data.notes || "");
+  setUserCity(data.userCity || "");
+
+  setLocationData({
+    city: data.geolocationCity || "",
+    country: data.country || "",
+    timezone: data.timezone || "",
+    latitude: data.latitude || null,
+    longitude: data.longitude || null,
+  });
+
+  // ✅ delay marking ready until states update
+  setTimeout(() => setIsRestored(true), 300);
+}, [route.params?.resumeData]);
+
+// ✅ Auto-submit once all restored data is ready
+useEffect(() => {
+  if (
+    isRestored &&
+    selectedCats.length > 0 &&
+    companions.length > 0 &&
+    duration &&
+    notes.trim() !== ""
+  ) {
+    console.log("🚀 Auto-submitting travel after restore");
+    handleSubmit();
+  }
+}, [isRestored]);
+
+
 
   // fetch location
   useEffect(() => {
@@ -210,6 +344,30 @@ export default function TravelPlannerScreen() {
     setErrors(newErrors);
 
     if (newErrors.length > 0) return;
+
+    // ✅ Store pending data if user not logged in
+const pendingData = {
+  selectedCats,
+  duration,
+  experience,
+  companions,
+  notes,
+  userCity,
+  geolocationCity: locationData.city,
+  country: locationData.country,
+  timezone: locationData.timezone,
+  latitude: locationData.latitude,
+  longitude: locationData.longitude,
+};
+
+const canProceed = await ensureLoggedIn(
+  navigation,
+  "pending_travel_data",
+  pendingData
+);
+if (!canProceed) return;
+
+
     setLoading(true);
     setLoginError(null);
 
@@ -266,6 +424,7 @@ export default function TravelPlannerScreen() {
           if (result && result.success) {
             // console.log("Travel interest saved>>>>>>>>>>>>>>>>>>>>>", result);
             setShow(true);
+              await AsyncStorage.removeItem("pending_travel_data");
             // navigation.navigate('HomePage', { screen: 'Home'});
           } else {
             setLoginError(result?.error || "Failed to save travel interest");
@@ -317,11 +476,11 @@ export default function TravelPlannerScreen() {
           contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
           showsVerticalScrollIndicator={false}
         >
-          <Text style={styles.planText}>Plan Your Sacred Journey</Text>
+          <Text style={styles.planText}>{t("travelPlanner.travelText")}</Text>
           <Text style={styles.subText}>
-            What Type of Journey Are You Seeking?
+           {t("travelPlanner.travelSubText")}
           </Text>
-          <Text style={styles.subText}>Select all that apply</Text>
+          <Text style={styles.subText}>{t("travelPlanner.selectText")}</Text>
           {/* Categories */}
           <Section title="">
             <FlatList
@@ -367,7 +526,7 @@ export default function TravelPlannerScreen() {
           {/* City */}
           <View style={{ marginTop: 16, marginBottom: 8 }}>
             <Text style={{ fontSize: 16, fontWeight: "500", color:"#000000",marginBottom: 4 }}>
-              Your City
+            {t("travelPlanner.yourCity")}
             </Text>
             <TextInput
               style={{
@@ -383,7 +542,7 @@ export default function TravelPlannerScreen() {
               }}
               value={userCity}
               onChangeText={setUserCity}
-              placeholder="Enter your city"
+              placeholder={t("travelPlanner.enterCity")}
             />
           </View>
           {/* Duration */}
@@ -393,10 +552,10 @@ export default function TravelPlannerScreen() {
                 const on = duration === opt;
                 let label =
                   opt === "3_days"
-                    ? "3 Days – Weekend Devotion"
+                    ? t("travelPlanner.duration1")
                     : opt === "7_days"
-                    ? "7 Days – Full Experience"
-                    : "10+ Days – Soulful Immersion";
+                    ? t("travelPlanner.duration2")
+                    : t("travelPlanner.duration3");
                 return (
                   <Pressable
                     key={opt}
@@ -448,12 +607,12 @@ export default function TravelPlannerScreen() {
       const on = companions[0] === opt; // single select
       let label =
         opt === "solo"
-          ? "Solo"
+          ? t("travelPlanner.companions.solo")
           : opt === "family"
-          ? "Family"
+          ? t("travelPlanner.companions.family")
           : opt === "friends_group"
-          ? "Friends Group"
-          : "Spiritual Guide";
+          ? t("travelPlanner.companions.friendsGroup")
+          : t("travelPlanner.companions.spiritualGuide");
 
       return (
         <Pressable

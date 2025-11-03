@@ -30,7 +30,27 @@ export const TRACKER_FAILURE = "TRACKER_FAILURE";
 export const STREAKS_REQUEST = "STREAKS_REQUEST";
 export const STREAKS_SUCCESS = "STREAKS_SUCCESS";
 export const STREAKS_FAILURE = "STREAKS_FAILURE";
+export const VIDEO_CATEGORIES_REQUEST = "VIDEO_CATEGORIES_REQUEST";
+export const VIDEO_CATEGORIES_SUCCESS = "VIDEO_CATEGORIES_SUCCESS";
+export const VIDEO_CATEGORIES_FAILURE = "VIDEO_CATEGORIES_FAILURE";
+export const VIDEOS_REQUEST = "VIDEOS_REQUEST";
+export const VIDEOS_SUCCESS = "VIDEOS_SUCCESS";
+export const VIDEOS_FAILURE = "VIDEOS_FAILURE";
+export const VIDEOS_RESET = "VIDEOS_RESET";
 
+
+const LANGUAGE_CODE_MAP: Record<string, string> = {
+  Bengali: "bn",
+  English: "en",
+  Gujarati: "gu",
+  Hindi: "hi",
+  Kannada: "kn",
+  Malayalam: "ml",
+  Marathi: "mr",
+  Odia: "or",
+  Tamil: "ta",
+  Telugu: "te",
+};
 
 export const travelRequest = () => ({ type: TRAVEL_REQUEST });
 export const travelSuccess = (res) => ({
@@ -104,6 +124,31 @@ export const trackerFailure = (error) => ({
   type: TRACKER_FAILURE,
   payload: error,
 });
+export const videoCategoriesRequest = () => ({
+  type: VIDEO_CATEGORIES_REQUEST,
+});
+
+export const videoCategoriesSuccess = (data) => ({
+  type: VIDEO_CATEGORIES_SUCCESS,
+  payload: data,
+});
+
+export const videoCategoriesFailure = (error) => ({
+  type: VIDEO_CATEGORIES_FAILURE,
+  payload: error,
+});
+
+
+export const videosRequest = () => ({ type: VIDEOS_REQUEST });
+export const videosSuccess = (data, page) => ({
+  type: VIDEOS_SUCCESS,
+  payload: { data, page },
+});
+export const videosFailure = (error) => ({
+  type: VIDEOS_FAILURE,
+  payload: error,
+});
+export const videosReset = () => ({ type: VIDEOS_RESET });
 
 export const streaksRequest = () => ({ type: STREAKS_REQUEST });
 export const streaksSuccess = (data) => ({ type: STREAKS_SUCCESS, payload: data });
@@ -272,4 +317,118 @@ export const getPracticeStreaks = (callback) => async (dispatch) => {
     if (callback) callback({ success: false, error: message });
   }
 };
+
+export const getVideoCategoriesWithLanguages = (callback) => async (dispatch) => {
+  dispatch(videoCategoriesRequest());
+  try {
+    const response = await api.get("videos/categories_with_languages/?_cacheBuster=" + Date.now());
+    dispatch(videoCategoriesSuccess(response.data));
+
+    console.log("🎥 Video Categories with Languages >>>", response.data);
+    if (callback) callback({ success: true, data: response.data });
+  } catch (error) {
+    const message = error?.response?.data?.message || error.message || "Something went wrong";
+    console.error("❌ Error fetching video categories:", message);
+    dispatch(videoCategoriesFailure(message));
+    if (callback) callback({ success: false, error: message });
+  }
+};
+
+
+export const getVideos =
+  (filters, callback) =>
+  async (dispatch, getState) => {
+    const {
+      page = 1,
+      per_page = 22, // ✅ updated per_page
+      category = "All",
+      language = "All",
+      search = "",
+      kidsHub = false,
+    } = filters || {};
+
+    const cacheBuster = Date.now();
+    const isDefaultFeed =
+      category === "All" && language === "All" && !search?.trim();
+
+    if (page === 1) dispatch({ type: VIDEOS_RESET });
+    dispatch({ type: VIDEOS_REQUEST });
+
+    try {
+      let url = "";
+
+      // 🟢 Case 1: Default All / All Feed
+      if (isDefaultFeed) {
+        url = `videos/list_videos/?paginate=true&per_page=${per_page}&page=${page}&_cacheBuster=${cacheBuster}`;
+      } else {
+        // 🟡 Case 2: Filtered or Search Feed
+        url = `videos/list_videos/?paginate=true&per_page=${per_page}&page=${page}&_cacheBuster=${cacheBuster}`;
+        url += `&child_anime_filter=${kidsHub ? "true" : "false"}`;
+
+        // Fetch categories from store
+        const { videoCategoriesReducer } = getState();
+        const categories = videoCategoriesReducer?.data?.categories || [];
+
+        // Match category_name → category_id
+        const matchedCategory = categories.find(
+          (c) => c.category_name === category
+        );
+        const categoryId = matchedCategory?.category_id;
+
+        // Map language → short code
+        const LANGUAGE_CODE_MAP = {
+          Bengali: "bn",
+          English: "en",
+          Gujarati: "gu",
+          Hindi: "hi",
+          Kannada: "kn",
+          Malayalam: "ml",
+          Marathi: "mr",
+          Odia: "or",
+          Tamil: "ta",
+          Telugu: "te",
+        };
+
+        const languageCode =
+          LANGUAGE_CODE_MAP[language] || language.toLowerCase();
+
+        if (categoryId) url += `&category=${encodeURIComponent(categoryId)}`;
+        if (language && language !== "All")
+          url += `&language=${encodeURIComponent(languageCode)}`;
+        if (search?.trim())
+          url += `&search=${encodeURIComponent(search.trim())}`;
+      }
+
+      console.log("🌐 Fetching videos from:", url);
+
+      const response = await api.get(url);
+      const videos = response?.data?.results?.kalpx_videos || [];
+
+      dispatch({
+        type: VIDEOS_SUCCESS,
+        payload: { data: videos, page },
+      });
+
+      console.log(
+        `🎞️ ${videos.length} videos fetched (page ${page}) → ${
+          isDefaultFeed
+            ? "Default Feed"
+            : search
+            ? "Search Results"
+            : "Filtered Feed"
+        }`
+      );
+
+      if (callback) callback({ success: true, data: videos });
+    } catch (error) {
+      const message =
+        error?.response?.data?.message ||
+        error.message ||
+        "Something went wrong while fetching videos.";
+      console.error("❌ Error fetching videos:", message);
+
+      dispatch({ type: VIDEOS_FAILURE, payload: message });
+      if (callback) callback({ success: false, error: message });
+    }
+  };
 

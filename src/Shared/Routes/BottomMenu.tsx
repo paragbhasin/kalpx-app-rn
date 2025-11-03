@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import { TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 
-import Notifications from "../../screens/Notifications";
 import { HomeStackNavigator, ProfileStackNavigator } from "../StackNavigator";
 
 const Tab = createBottomTabNavigator();
@@ -30,7 +29,7 @@ const BottomMenu = () => {
         tabBarInactiveTintColor: "#000",
         tabBarLabelStyle: {
           fontSize: 12,
-          marginBottom: 5,
+          // marginBottom: 5,
         },
         tabBarButton: (props) => (
           <TouchableOpacity {...props} activeOpacity={0.7} />
@@ -47,7 +46,7 @@ const BottomMenu = () => {
           ),
         }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Notifications"
         component={Notifications}
         options={{
@@ -60,7 +59,7 @@ const BottomMenu = () => {
             />
           ),
         }}
-      />
+      /> */}
       <Tab.Screen
         name="Profile"
         component={ProfileStackNavigator}
@@ -85,7 +84,7 @@ const BottomMenu = () => {
           },
         }}
         options={{
-          tabBarLabel: "Menu",
+          tabBarLabel:  t("tabs.Menu"),
           tabBarIcon: ({ color, focused }) => (
             <Icon name="menu" size={28} color={color} />
             // <Icon

@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Formik } from "formik";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -85,6 +86,88 @@ export default function SignupScreen({ navigation }) {
     return () => clearInterval(interval);
   }, [otpVerified, signupTimer]);
 
+
+  const resumePendingIfAny = async () => {
+  try {
+    console.log("🔎 Checking for pending protected actions after login...");
+
+    const pendingKeys = [
+      "pending_pooja_data",
+      "pending_retreat_data",
+      "pending_travel_data",
+      "pending_astrology_data",
+    ];
+
+    for (const key of pendingKeys) {
+      const pending = await AsyncStorage.getItem(key);
+      console.log(`📦 Checking key: ${key} →`, pending ? "Found data" : "No data");
+
+      if (pending) {
+        const data = JSON.parse(pending);
+        await AsyncStorage.removeItem(key);
+        console.log(`🧹 Cleared ${key} from AsyncStorage.`);
+
+        const targetScreenMap = {
+          pending_pooja_data: "Pooja",
+          pending_retreat_data: "Retreat",
+          pending_travel_data: "Travel",
+          pending_astrology_data: "Astrology",
+        };
+
+        const targetScreen = targetScreenMap[key];
+        console.log("🎯 Target screen identified:", targetScreen);
+
+        // ✅ Step 1️⃣ Mount AppDrawer (this ensures drawer exists)
+        navigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: "AppDrawer",
+              state: {
+                routes: [
+                  {
+                    name: "HomePage", // bottom tab
+                    state: {
+                      routes: [
+                        {
+                          name: "HomePage", // tab screen containing HomeStack
+                          state: {
+                            routes: [
+                              {
+                                name: targetScreen,
+                                params: { resumeData: data },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        });
+
+        console.log("✅ Drawer + BottomTab + TargetScreen mounted →", targetScreen);
+        return;
+      }
+    }
+
+    console.log("🚫 No pending data found → Navigating to AppDrawer");
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "AppDrawer" }],
+    });
+  } catch (err) {
+    console.error("❌ Error resuming pending action:", err);
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "AppDrawer" }],
+    });
+  }
+};
+
   // reCAPTCHA callback
   const handleRecaptchaToken = (token) => {
     setLoginError(null);
@@ -146,11 +229,13 @@ export default function SignupScreen({ navigation }) {
         recaptcha_action: "register",
       };
       dispatch(
-        signupUser(payload, (result) => {
+        signupUser(payload, async (result) => {
           setLoadingType(null);
           // console.log("Signup Result:", result);
           if (result.success) {
-            navigation.navigate('HomePage', { screen: 'Home'});
+                     await AsyncStorage.setItem("showLocationConfirm", "true");
+         await resumePendingIfAny();
+            // navigation.navigate('HomePage', { screen: 'Home'});
           } else {
             setLoginError(result.error || "Signup failed");
           }

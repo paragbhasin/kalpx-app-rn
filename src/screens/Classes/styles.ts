@@ -1,4 +1,5 @@
 import { StyleSheet } from "react-native";
+import Colors from "../../components/Colors";
 import FontSize from "../../components/FontSize";
 
 
@@ -10,7 +11,7 @@ const styles = StyleSheet.create({
     fontFamily: "GelicaMedium",
     color: "#000",
     marginVertical: 12,
-    lineHeight: 22,
+    // lineHeight: 22,
   },
   row: {
     flexDirection: "row",
@@ -44,6 +45,16 @@ const styles = StyleSheet.create({
     height: 100,
     marginTop: 10
   },
+   card: {
+    marginVertical:12,
+      borderRadius: 6,
+      overflow: "hidden",
+      elevation: 3,
+      backgroundColor: "#FFF7E8",
+      padding: 16,
+      borderWidth:1,
+      borderColor:Colors.Colors.App_theme
+    },
 });
 
 export default styles;

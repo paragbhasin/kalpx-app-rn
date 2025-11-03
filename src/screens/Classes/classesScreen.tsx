@@ -5,6 +5,8 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
+  SafeAreaView,
+  StatusBar,
   Text,
   TextInput,
   TouchableOpacity,
@@ -20,6 +22,7 @@ import ClassDetailsModal from "../../components/ClassDetailsModal";
 import ClassEventCard from "../../components/ClassEventCard";
 import Colors from "../../components/Colors";
 import FilterModal from "../../components/FilterModal";
+import Header from "../../components/Header";
 import TextComponent from "../../components/TextComponent";
 import { RootState } from "../../store"; // Adjust the path based on your project structure
 import {
@@ -31,7 +34,6 @@ import {
   searchBookings,
   searchClasses,
 } from "./actions";
-import styles from "./styles";
 
 // Interfaces for each type of card
 interface ExploreClass {
@@ -192,11 +194,16 @@ export default function ClassesScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
+     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.Colors.white }}>
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor={Colors.Colors.header_bg}
+        translucent={false}
+      />
+      <Header />
       <View
         style={{
-          marginTop: 60,
+          marginTop: 10,
           marginHorizontal: 16,
           flexDirection: "row",
           alignItems: "center",
@@ -327,7 +334,12 @@ export default function ClassesScreen({ navigation }) {
               onViewDetails={() =>
                 navigation.navigate("ClassTutorDetailsScreen", { data: item })
               }
-              onBookNow={() => console.log("Book Now", item.id)}
+              onBookNow={() =>{
+                console.log("called >>>>>");
+              navigation.navigate("ClassBookingScreen",{data: item,reschedule:false})
+            }}
+                
+              // onBookNow={() => console.log("Book Now", item.id)}
               tutor={item.tutor}
             />
           ) : (
@@ -425,6 +437,6 @@ export default function ClassesScreen({ navigation }) {
           }}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }

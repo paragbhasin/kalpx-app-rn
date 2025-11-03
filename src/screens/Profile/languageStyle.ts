@@ -7,7 +7,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFFFFF",
   },
-
+  menu: {
+    marginTop: 10,
+  },
+  menuItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderBottomWidth: 0.5,
+    borderBottomColor: "#ddd",
+  },
+  menuText: {
+    fontSize: 16,
+    fontFamily: "GelicaRegular",
+    color: "#333",
+      // lineHeight: 20,
+  },
   // 🔹 Header
   header: {
     flexDirection: "row",

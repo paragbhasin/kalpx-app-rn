@@ -2,6 +2,7 @@ import { useNavigation } from "@react-navigation/native";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import React, { useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Image,
   ImageBackground,
@@ -19,38 +20,39 @@ import FontSize from "./FontSize";
 import TextComponent from "./TextComponent";
 
 // 🌿 Stage-based text
-const stage1 = [
-  { p: "This sankalp found me today.", s: "Maybe it's meant for you too — discover yours on KalpX." },
-  { p: "Sometimes, the right intention finds you.", s: "Pause. Reflect. Commit. Your sankalp might be waiting on KalpX." },
-  { p: "This intention spoke to me today.", s: "Find your own moment of purpose — start on KalpX." },
-  { p: "A single commitment can change your day.", s: "Take today's sankalp and feel the shift within — KalpX." },
-  { p: "The power of intention begins with awareness.", s: "Discover the sankalp that speaks to you today — KalpX." },
-  { p: "Not every intention is heard — some are felt.", s: "Find yours and begin your journey on KalpX." },
-  { p: "This sankalp touched something within.", s: "Maybe it'll do the same for you — explore KalpX." },
-];
+// const stage1 = [
+//   { p: "This sankalp found me today.", s: "Maybe it's meant for you too — discover yours on KalpX." },
+//   { p: "Sometimes, the right intention finds you.", s: "Pause. Reflect. Commit. Your sankalp might be waiting on KalpX." },
+//   { p: "This intention spoke to me today.", s: "Find your own moment of purpose — start on KalpX." },
+//   { p: "A single commitment can change your day.", s: "Take today's sankalp and feel the shift within — KalpX." },
+//   { p: "The power of intention begins with awareness.", s: "Discover the sankalp that speaks to you today — KalpX." },
+//   { p: "Not every intention is heard — some are felt.", s: "Find yours and begin your journey on KalpX." },
+//   { p: "This sankalp touched something within.", s: "Maybe it'll do the same for you — explore KalpX." },
+// ];
 
-const stage2 = [
-  { p: "I've taken today's sankalp as my commitment.", s: "Commit to your sankalp today — a few moments of purpose await." },
-  { p: "Today, I choose intention through this sankalp.", s: "Choose yours and begin your daily rhythm on KalpX." },
-  { p: "One sankalp. One intention. One new start.", s: "Start your sankalp practice today — KalpX awaits your first step." },
-  { p: "I'm doing this sankalp today — for purpose, for presence.", s: "Do yours and feel the shift — KalpX makes it easy." },
-  { p: "Every commitment begins with a choice.", s: "Make yours today — find your sankalp on KalpX." },
-  { p: "This is my sankalp today.", s: "Take yours too — a few breaths can change your day." },
-  { p: "I've begun my sankalp practice for today.", s: "Start yours now and begin your journey toward purpose." },
-];
+// const stage2 = [
+//   { p: "I've taken today's sankalp as my commitment.", s: "Commit to your sankalp today — a few moments of purpose await." },
+//   { p: "Today, I choose intention through this sankalp.", s: "Choose yours and begin your daily rhythm on KalpX." },
+//   { p: "One sankalp. One intention. One new start.", s: "Start your sankalp practice today — KalpX awaits your first step." },
+//   { p: "I'm doing this sankalp today — for purpose, for presence.", s: "Do yours and feel the shift — KalpX makes it easy." },
+//   { p: "Every commitment begins with a choice.", s: "Make yours today — find your sankalp on KalpX." },
+//   { p: "This is my sankalp today.", s: "Take yours too — a few breaths can change your day." },
+//   { p: "I've begun my sankalp practice for today.", s: "Start yours now and begin your journey toward purpose." },
+// ];
 
-const stage3 = [
-  { p: "Sankalp done for today 🙏 Feeling purposeful and aligned.", s: "Do yours today on KalpX and start your own streak of intention." },
-  { p: "I completed my sankalp — purpose feels sacred again.", s: "Start your streak today — one small commitment at a time on KalpX." },
-  { p: "Purpose isn't found — it's practiced. Today, I practiced.", s: "Begin your sankalp streak today — one small commitment at a time on KalpX." },
-  { p: "One sankalp closer to purpose. One step deeper in dharma.", s: "Join me — do today's sankalp on KalpX and start your streak." },
-  { p: "Today's sankalp complete 🌸 My heart feels aligned.", s: "Start your daily practice today — purpose grows with each commitment." },
-  { p: "I've done my sankalp for today — a few minutes, lifelong purpose.", s: "Do yours and begin your streak of intention on KalpX." },
-  { p: "Sankalp done ✅ Commitment renewed.", s: "Start your streak on KalpX and feel the power of daily intention." },
-];
+// const stage3 = [
+//   { p: "Sankalp done for today 🙏 Feeling purposeful and aligned.", s: "Do yours today on KalpX and start your own streak of intention." },
+//   { p: "I completed my sankalp — purpose feels sacred again.", s: "Start your streak today — one small commitment at a time on KalpX." },
+//   { p: "Purpose isn't found — it's practiced. Today, I practiced.", s: "Begin your sankalp streak today — one small commitment at a time on KalpX." },
+//   { p: "One sankalp closer to purpose. One step deeper in dharma.", s: "Join me — do today's sankalp on KalpX and start your streak." },
+//   { p: "Today's sankalp complete 🌸 My heart feels aligned.", s: "Start your daily practice today — purpose grows with each commitment." },
+//   { p: "I've done my sankalp for today — a few minutes, lifelong purpose.", s: "Do yours and begin your streak of intention on KalpX." },
+//   { p: "Sankalp done ✅ Commitment renewed.", s: "Start your streak on KalpX and feel the power of daily intention." },
+// ];
 
 const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp }) => {
   const navigation: any = useNavigation();
+  const { t, i18n } = useTranslation();
   const swiperRef = useRef<Swiper>(null);
     const shareRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -64,12 +66,17 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
   const shareStage = doneSankalp ? 3 : startedSankalp ? 2 : 1;
 
   // ✅ Pick random text based on stage
-  const { p: primaryText, s: secondaryText } = useMemo(() => {
-    const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
-    if (shareStage === 3) return pick(stage3);
-    if (shareStage === 2) return pick(stage2);
-    return pick(stage1);
-  }, [shareStage]);
+const { p: primaryText, s: secondaryText } = useMemo(() => {
+  const s1: any = t("sankalpCard.stage1", { returnObjects: true });
+  const s2: any = t("sankalpCard.stage2", { returnObjects: true });
+  const s3 : any= t("sankalpCard.stage3", { returnObjects: true });
+
+  const pick = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
+  if (shareStage === 3) return pick(s3);
+  if (shareStage === 2) return pick(s2);
+  return pick(s1);
+}, [shareStage, i18n.language]);
+
 
   // ✅ Only 5 Sankalps at a time
   const filteredSankalps = useMemo(() => {
@@ -97,7 +104,7 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
       }
 
       await Sharing.shareAsync(fileUri, {
-        dialogTitle: "Share your Sankalp",
+        dialogTitle:t('sankalpCard.shareDialogTitle'),
         mimeType: "image/png",
         UTI: "image/png",
       });
@@ -110,10 +117,11 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
   if (!filteredSankalps || filteredSankalps.length === 0) {
     return (
       <View style={{ padding: 20 }}>
-        <TextComponent>No Sankalps found for today.</TextComponent>
+        <TextComponent>{t('sankalpCard.noSankalps')}</TextComponent>
       </View>
     );
   }
+  
 
   return (
     <Swiper
@@ -163,12 +171,12 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
           <Card style={styles.card}>
             <View>
               <TextComponent type="semiBoldText" style={{ alignSelf: "flex-end" }}>
-                🎯 Set your Sankalp, manifest your path.
+               {t('sankalpCard.shareHeader')}
               </TextComponent>
 
               <View style={styles.header}>
-                <TextComponent type="semiBoldText" style={{ color: Colors.Colors.BLACK }}>
-                  Daily Sankalp
+                <TextComponent type="semiBoldText" style={{ color: Colors.Colors.BLACK,fontSize: FontSize.CONSTS.FS_16 }}>
+                {t('sankalpCard.dailySankalp')}
                 </TextComponent>
                 <TouchableOpacity onPress={() => {handleShareSankalp()}} style={{ flexDirection: "row", alignItems: "center" }} >
                   <Image source={require("../../assets/Streak_S1.png")} style={styles.streakIcon} />
@@ -178,55 +186,87 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                 </TouchableOpacity>
               </View>
 
-              <TextComponent type="semiBoldText" style={{ color: Colors.Colors.Light_black }}>
-                {currentSankalp.short_text}
+              <TextComponent type="semiBoldText" style={{ color: Colors.Colors.Light_black ,fontSize: FontSize.CONSTS.FS_14}}>
+                 {t(currentSankalp.i18n?.short) || currentSankalp.short_text}
               </TextComponent>
 
               <TextComponent
                 type="semiBoldText"
-                style={{ color: Colors.Colors.Light_black, marginVertical: 6 }}
+                style={{ color: Colors.Colors.Light_black, marginVertical: 6,fontSize: FontSize.CONSTS.FS_14 }}
               >
-                Why this matters
+              {t('sankalpCard.whyThisMatters')}
               </TextComponent>
-              <TextComponent>{currentSankalp.tooltip}</TextComponent>
+              <TextComponent style={{fontSize: FontSize.CONSTS.FS_14}}>{t(currentSankalp.i18n?.tooltip) || currentSankalp.tooltip}</TextComponent>
 
               <TextComponent
                 type="semiBoldText"
-                style={{ color: Colors.Colors.Light_black, marginVertical: 6 }}
+                style={{ color: Colors.Colors.Light_black, marginVertical: 6,fontSize: FontSize.CONSTS.FS_14 }}
               >
-                Suggested practice
+               {t('sankalpCard.suggestedPractice')}
               </TextComponent>
-              <TextComponent>{currentSankalp.suggested_practice}</TextComponent>
+              <TextComponent style={{fontSize: FontSize.CONSTS.FS_14}} >{t(currentSankalp.i18n?.suggested) || currentSankalp.suggested_practice}</TextComponent>
 
               <View style={styles.row}>
                 <TextComponent type="semiBoldText" style={styles.root}>
-                  Root :
+                   {t('sankalpCard.root')}
                 </TextComponent>
-                <TextComponent type="semiBoldText" style={{ color: Colors.Colors.Light_grey }}>
-                  {currentSankalp.root}
+                <TextComponent type="semiBoldText" style={{ color: Colors.Colors.Light_grey ,fontSize: FontSize.CONSTS.FS_14}}>
+                {t(`sankalps.${currentSankalp.id}.root`) || currentSankalp.root}
                 </TextComponent>
               </View>
+{/* Time of Day */}
+{currentSankalp.meta?.timeOfDay && (
+  <View style={styles.row}>
+    <TextComponent type="semiBoldText" style={styles.root}>
+      {t('sankalpCard.bestTimes')}
+    </TextComponent>
 
-              {/* Time of Day */}
-              {currentSankalp.meta?.timeOfDay && (
+    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      {currentSankalp.meta.timeOfDay.map((tag, i) => (
+        <View key={i} style={styles.tag}>
+          <TextComponent
+            type="semiBoldText"
+            style={{ color: Colors.Colors.Light_grey, fontSize: FontSize.CONSTS.FS_14 }}
+          >
+            {/* ✅ Correct key path */}
+            {t(`sankalpCard.best.${tag}`, { defaultValue: tag })}
+          </TextComponent>
+        </View>
+      ))}
+    </ScrollView>
+  </View>
+)}
+
+{currentSankalp.meta?.context && (
+  <View style={styles.row}>
+    <TextComponent type="semiBoldText" style={styles.root}>
+      {t('context')}
+    </TextComponent>
+
+    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      {currentSankalp.meta.context.map((tag, i) => (
+        <View key={i} style={styles.tag}>
+          <TextComponent
+            type="semiBoldText"
+            style={{ color: Colors.Colors.App_theme, fontSize: FontSize.CONSTS.FS_14 }}
+          >
+            #{t(`context.${tag}`, { defaultValue: tag })}
+          </TextComponent>
+        </View>
+      ))}
+    </ScrollView>
+  </View>
+)}
+
+
                 <View style={styles.row}>
-                  <TextComponent type="semiBoldText" style={styles.root}>
-                    Best Times :
-                  </TextComponent>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    {currentSankalp.meta.timeOfDay.map((tag, i) => (
-                      <View key={i} style={styles.tag}>
-                        <TextComponent
-                          type="semiBoldText"
-                          style={{ color: Colors.Colors.Light_grey }}
-                        >
-                          {tag}
-                        </TextComponent>
-                      </View>
-                    ))}
-                  </ScrollView>
-                </View>
-              )}
+                <TextComponent type="semiBoldText" style={styles.root}>
+                {t('sankalpCard.source')}
+                </TextComponent>
+                <TextComponent type="semiBoldText" style={{ color: Colors.Colors.App_theme ,fontSize: FontSize.CONSTS.FS_14}}>
+                 {t(`sankalps.${currentSankalp.id}.source`) || currentSankalp.source}
+                </TextComponent>
+              </View>
 
               {/* Buttons */}
               <View style={styles.buttonRow}>
@@ -235,8 +275,8 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                     style={styles.startBtn}
                     onPress={() => onPressStartSankalp(currentSankalp)}
                   >
-                    <TextComponent type="semiBoldText" style={{ textAlign: "center" }}>
-                      I will do this sankalp today
+                    <TextComponent type="semiBoldText" style={{ textAlign: "center" ,}}>
+                    {t('sankalpCard.iWillDo')}
                     </TextComponent>
                   </TouchableOpacity>
                 ) : (
@@ -256,7 +296,7 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                         }}
                       />
                     )}
-                    <TextComponent>{doneSankalp ? "Done" : "Mark Sankalp Done"}</TextComponent>
+                    <TextComponent>{doneSankalp ? t('sankalpCard.done') : t('sankalpCard.markDone')}</TextComponent>
                   </TouchableOpacity>
                 )}
 
@@ -270,14 +310,14 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                     type="boldText"
                     style={{ color: Colors.Colors.Light_black, textAlign: "center" }}
                   >
-                    Add to my daily practice
+                 {t('sankalpCard.addToDaily')}
                   </TextComponent>
                 </TouchableOpacity>
               </View>
 
               <View style={styles.footer}>
                 <TextComponent type="semiBoldText" style={{ color: Colors.Colors.Light_grey }}>
-                  Finish today to keep streak
+                {t('sankalpCard.finishStreak')}
                 </TextComponent>
                 <Image
                   source={require("../../assets/Streak_A1.png")}
@@ -405,7 +445,7 @@ const styles = StyleSheet.create({
     marginVertical: 12,
   },
   streakIcon: { height: 20, width: 20, marginRight: 8 },
-  row: { flexDirection: "row", alignItems: "center" },
+  row: { flexDirection: "row", alignItems: "center" ,marginTop:6},
   tag: { paddingHorizontal: 4, paddingVertical: 4, marginRight: 4 },
   root: { color: Colors.Colors.BLACK, fontSize: FontSize.CONSTS.FS_14, marginRight: 6 },
   buttonRow: {
@@ -413,6 +453,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "stretch",
     marginVertical: 15,
+    fontSize: FontSize.CONSTS.FS_14
   },
   startBtn: {
     flex: 1,

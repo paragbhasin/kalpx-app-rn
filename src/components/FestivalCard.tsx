@@ -4,6 +4,7 @@ import * as Sharing from "expo-sharing";
 import i18next from "i18next";
 import moment from "moment";
 import React, { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ActivityIndicator, Image, ImageBackground, StyleSheet, TouchableOpacity, View } from "react-native";
 import { Card } from "react-native-paper";
 import Swiper from "react-native-swiper";
@@ -15,6 +16,7 @@ import TextComponent from "./TextComponent";
 
 const FestivalCard = () => {
   const navigation: any = useNavigation();
+      const { i18n , t} = useTranslation();
   const swiperRef = useRef<Swiper>(null);
     const shareRef = useRef(null);
   const [festivals, setFestivals] = useState<Festival[]>([]);
@@ -49,12 +51,12 @@ const FestivalCard = () => {
       setShareVisible(false);
 
       if (!(await Sharing.isAvailableAsync())) {
-        alert("Sharing is not available on this device.");
+         alert(t("festivalCard.sharingNotAvailable"));
         return;
       }
 
       await Sharing.shareAsync(fileUri, {
-        dialogTitle: "Share this Festival",
+      dialogTitle: t("festivalCard.shareDialogTitle"),
         mimeType: "image/png",
         UTI: "image/png",
       });
@@ -68,7 +70,7 @@ const FestivalCard = () => {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color={Colors.Colors.App_theme} />
-        <TextComponent>Loading today's festivals...</TextComponent>
+        <TextComponent>{t("festivalCard.loading")}</TextComponent>
       </View>
     );
   }
@@ -77,13 +79,13 @@ const FestivalCard = () => {
     return (
       <Card style={styles.card}>
         <TextComponent type="semiBoldText" style={{ color: Colors.Colors.App_theme, textAlign: "center" }}>
-          No Festival Today
+           {t("festivalCard.noFestival")}
         </TextComponent>
         <TextComponent
           type="mediumText"
           style={{ marginTop: 8, textAlign: "center", color: Colors.Colors.Light_black }}
         >
-          Check back tomorrow for upcoming Sanatan festivals 🌞
+           {t("festivalCard.checkTomorrow")}
         </TextComponent>
       </Card>
     );
@@ -139,13 +141,14 @@ const FestivalCard = () => {
             <Card style={[styles.card, isCompleted && { backgroundColor: Colors.Colors.Light_grey }]}>
               <View>
                 <TextComponent type="semiBoldText" style={{ alignSelf: "flex-end" }}>
-                  “May your soul dance in divine light.”
+                   {t("festivalCard.blessingQuote")}
                 </TextComponent>
 
                 {/* Header */}
                 <View style={styles.headerRow}>
                   <TextComponent type="semiBoldText" style={{ color: Colors.Colors.BLACK }}>
-                    {moment(festival.date).isSame(moment(), "day") ? "Today’s Festival" : "Upcoming Festival"}
+                                        {moment(festival.date).isSame(moment(), "day") ? t("festivalCard.todayFestival") : t("festivalCard.upcomingFestival")}
+                    {/* {moment(festival.date).isSame(moment(), "day") ? "Today’s Festival" : "Upcoming Festival"} */}
                   </TextComponent>
                   <TouchableOpacity onPress={() => {handleShareFestival(festival)}}  style={{ flexDirection: "row", alignItems: "center" }}>
                     <Image source={require("../../assets/Streak_S1.png")} style={styles.streakIcon} />
@@ -178,28 +181,28 @@ const FestivalCard = () => {
 
                 {/* Info Sections */}
                 <TextComponent type="cardText" style={styles.sectionTitle}>
-                  Fasting Rules
+                            {t("festivalCard.fastingRules")}
                 </TextComponent>
                 <TextComponent type="mediumText" style={styles.sectionText}>
                   {festival.fasting.rules}
                 </TextComponent>
 
                 <TextComponent type="cardText" style={styles.sectionTitle}>
-                  Fasting Significance
+                {t("festivalCard.fastingSignificance")}
                 </TextComponent>
                 <TextComponent type="mediumText" style={styles.sectionText}>
                   {festival.fasting.significance}
                 </TextComponent>
 
                 <TextComponent type="cardText" style={styles.sectionTitle}>
-                  Spiritual Benefit
+             {t("festivalCard.spiritualBenefit")}
                 </TextComponent>
                 <TextComponent type="mediumText" style={styles.sectionText}>
                   {festival.spiritualBenefit}
                 </TextComponent>
 
                 <TextComponent type="cardText" style={styles.sectionTitle}>
-                  Sanatan Reference
+            {t("festivalCard.reference")}
                 </TextComponent>
                 <TextComponent type="mediumText" style={styles.sectionText}>
                   {festival.mythology.story}
@@ -208,7 +211,7 @@ const FestivalCard = () => {
                   type="mediumText"
                   style={{ color: Colors.Colors.Light_grey, marginTop: 4 }}
                 >
-                  Reference: {festival.mythology.reference}
+                 {t("festivalCard.referenceLabel")}:{festival.mythology.reference}
                 </TextComponent>
 
                 {/* Deity + Observers */}
@@ -223,43 +226,48 @@ const FestivalCard = () => {
                 </TextComponent>
 
                 {/* Celebration, Foods, Symbols */}
-                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                  {["celebrationPractices", "traditionalFoods", "symbols"].map((key, index) => (
-                    <View key={index} style={{ flex: 1, marginHorizontal: 4 }}>
-                      <TextComponent
-                        type="cardText"
-                        style={{
-                          color: Colors.Colors.Light_black,
-                          textAlign: "center",
-                          marginBottom: 6,
-                        }}
-                      >
-                        {key === "celebrationPractices"
-                          ? "Celebration Practices"
-                          : key === "traditionalFoods"
-                          ? "Traditional Foods"
-                          : "Symbols"}
-                      </TextComponent>
-                      {(festival as any)[key]?.map((item: string, idx: number) => (
-                        <TextComponent
-                          key={idx}
-                          type="mediumText"
-                          style={{
-                            color: Colors.Colors.App_theme,
-                            textAlign: "center",
-                            marginBottom: 4,
-                          }}
-                        >
-                          {item}
-                        </TextComponent>
-                      ))}
-                    </View>
-                  ))}
-                </View>
+            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+  {["celebrationPractices", "traditionalFoods", "symbols"].map((key, index) => (
+    <View key={index} style={{ flex: 1, marginHorizontal: 4 }}>
+      <TextComponent
+        type="cardText"
+        style={{
+          color: Colors.Colors.Light_black,
+          textAlign: "center",
+          marginBottom: 6,
+        }}
+      >
+        {t(`festivalCard.${key}`, {
+          defaultValue:
+            key === "celebrationPractices"
+              ? "Celebration Practices"
+              : key === "traditionalFoods"
+              ? "Traditional Foods"
+              : "Symbols",
+        })}
+      </TextComponent>
+
+      {(festival as any)[key]?.map((item: string, idx: number) => (
+        <TextComponent
+          key={idx}
+          type="mediumText"
+          style={{
+            color: Colors.Colors.App_theme,
+            textAlign: "center",
+            marginBottom: 4,
+          }}
+        >
+          {item}
+        </TextComponent>
+      ))}
+    </View>
+  ))}
+</View>
+
 
                 {/* Regional Customs */}
                 <TextComponent type="cardText" style={styles.sectionTitle}>
-                  Regional Customs
+                  {t("festivalCard.regionalCustoms", { defaultValue: "Regional Customs" })}
                 </TextComponent>
                 <TextComponent type="mediumText" style={styles.sectionText}>
                   {typeof festival.regionalCustoms === "object"
@@ -275,14 +283,14 @@ const FestivalCard = () => {
                     style={styles.outlineBtn}
                     onPress={() => navigation.navigate("MySadana")}
                   >
-                    <TextComponent type="semiBoldText">Set Up Daily Practice</TextComponent>
+                    <TextComponent type="semiBoldText">{t("festivalCard.setupPractice")}</TextComponent>
                   </TouchableOpacity>
                 </View>
 
                 {/* Footer */}
                 <View style={styles.footer}>
                   <TextComponent type="semiBoldText" style={{ color: Colors.Colors.Light_grey }}>
-                    Finish today to keep streak
+                  {t("festivalCard.finishStreak")}
                   </TextComponent>
                   <Image source={require("../../assets/Streak_A1.png")} style={{ height: 20, width: 20, marginLeft: 4 }} />
                 </View>

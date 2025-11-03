@@ -62,6 +62,92 @@ export default function LoginScreen({ navigation }) {
   const [loginError, setLoginError] = useState(null);
   const [loading, setLoading] = useState(false);
 
+
+const resumePendingIfAny = async () => {
+  try {
+    console.log("🔎 Checking for pending protected actions after login...");
+
+    const pendingKeys = [
+      "pending_pooja_data",
+      "pending_retreat_data",
+      "pending_travel_data",
+      "pending_astrology_data",
+    ];
+
+    for (const key of pendingKeys) {
+      const pending = await AsyncStorage.getItem(key);
+      console.log(`📦 Checking key: ${key} →`, pending ? "Found data" : "No data");
+
+      if (pending) {
+        const data = JSON.parse(pending);
+        await AsyncStorage.removeItem(key);
+        console.log(`🧹 Cleared ${key} from AsyncStorage.`);
+
+        const targetScreenMap = {
+          pending_pooja_data: "Pooja",
+          pending_retreat_data: "Retreat",
+          pending_travel_data: "Travel",
+          pending_astrology_data: "Astrology",
+        };
+
+        const targetScreen = targetScreenMap[key];
+        console.log("🎯 Target screen identified:", targetScreen);
+
+        // ✅ Step 1️⃣ Mount AppDrawer (this ensures drawer exists)
+        navigation.reset({
+          index: 0,
+          routes: [
+            {
+              name: "AppDrawer",
+              state: {
+                routes: [
+                  {
+                    name: "HomePage", // bottom tab
+                    state: {
+                      routes: [
+                        {
+                          name: "HomePage", // tab screen containing HomeStack
+                          state: {
+                            routes: [
+                              {
+                                name: targetScreen,
+                                params: { resumeData: data },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        });
+
+        console.log("✅ Drawer + BottomTab + TargetScreen mounted →", targetScreen);
+        return;
+      }
+    }
+
+    console.log("🚫 No pending data found → Navigating to AppDrawer");
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "AppDrawer" }],
+    });
+  } catch (err) {
+    console.error("❌ Error resuming pending action:", err);
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "AppDrawer" }],
+    });
+  }
+};
+
+
+
+
+
   const handleRecaptchaToken = (token) => {
     setLoading(true);
     setLoginError(null);
@@ -81,9 +167,11 @@ export default function LoginScreen({ navigation }) {
           await AsyncStorage.removeItem("userEmail");
           await AsyncStorage.removeItem("userPassword");
         }
+         await AsyncStorage.setItem("showLocationConfirm", "true");
+         await resumePendingIfAny();
         // navigation.navigate('HomePage', { screen: 'Home'});
                 // navigation.navigate('HomePage', { screen: 'Home'});
-                navigation.navigate("AppDrawer");
+                // navigation.navigate("AppDrawer");
       } else {
         setLoginError(result?.error || "Login failed");
       }
@@ -211,12 +299,14 @@ export default function LoginScreen({ navigation }) {
                 )}
               </Formik>
             </View>
-
-      {/* <View style={styles.skipContainer}>
-        <TouchableOpacity onPress={() =>   navigation.navigate("AppDrawer")}>
+      <View style={styles.skipContainer}>
+        <TouchableOpacity onPress={async () =>  {
+        //  await AsyncStorage.setItem("showLocationConfirm", "true");
+          navigation.navigate("AppDrawer");
+          }}>
           <Text style={styles.skipText}>{t("welcome.skip")}</Text>
         </TouchableOpacity>
-      </View> */}
+      </View>
           </ScrollView>
         </ImageBackground>
       </KeyboardAvoidingView>

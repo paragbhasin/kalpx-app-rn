@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { FlatList, Pressable, StyleSheet, View } from "react-native";
 import Modal from "react-native-modal";
 import Colors from "./Colors";
@@ -23,6 +24,8 @@ interface PracticeDailyModalProps {
 
 const PracticeDailyModal: React.FC<PracticeDailyModalProps> = ({ visible, date, dailyPractice, onClose }) => {
   const { active_practices, completed_today } = dailyPractice;
+    const { t } = useTranslation();
+  
 
   // Completed practices
   const completed = active_practices.filter(p => completed_today.includes(p.practice_id));
@@ -52,11 +55,11 @@ const PracticeDailyModal: React.FC<PracticeDailyModalProps> = ({ visible, date, 
       useNativeDriver
     >
       <View style={styles.modalContent}>
-        <TextComponent type='boldText' style={styles.title}>Practice Status for {date}</TextComponent>
+        <TextComponent type='boldText' style={styles.title}>{t("streakScreen.practiceText")} {date}</TextComponent>
 
         {completed.length > 0 && (
           <>
-            <TextComponent type='cardText' style={styles.subTitle}>Completed Practices : </TextComponent>
+            <TextComponent type='cardText' style={styles.subTitle}>{t("streakScreen.CompletedText")} </TextComponent>
             <FlatList
               data={completed}
               keyExtractor={(item) => item.practice_id}
@@ -68,7 +71,7 @@ const PracticeDailyModal: React.FC<PracticeDailyModalProps> = ({ visible, date, 
 
         {notDone.length > 0 && (
           <>
-            <TextComponent type='cardText' style={styles.subTitle}>Not Done Practices : </TextComponent>
+            <TextComponent type='cardText' style={styles.subTitle}>{t("streakScreen.notDoneText")}  </TextComponent>
             <FlatList
               data={notDone}
               keyExtractor={(item) => item.practice_id}
@@ -79,7 +82,7 @@ const PracticeDailyModal: React.FC<PracticeDailyModalProps> = ({ visible, date, 
         )}
 
         <Pressable style={styles.closeBtn} onPress={onClose}>
-          <TextComponent type='cardText' style={styles.closeBtnText}>Close</TextComponent>
+          <TextComponent type='cardText' style={styles.closeBtnText}>{t("streakScreen.Close")}</TextComponent>
         </Pressable>
       </View>
     </Modal>

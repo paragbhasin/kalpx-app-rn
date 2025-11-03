@@ -1,14 +1,22 @@
-import React, { useState } from "react";
-import {
-  View, Text, StyleSheet, ImageBackground, SafeAreaView,
-  StatusBar, TextInput, Switch, TouchableOpacity, ScrollView,
-  Modal, Pressable
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import ExploreVideos from "../components/ExploreVideos";
+import {
+  ImageBackground,
+  Modal, Pressable,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
+} from "react-native";
 import Accordion from "../components/Accordion";
+import ExploreVideos from "../components/ExploreVideos";
 
 export default function Explore() {
   const navigation = useNavigation();
@@ -161,14 +169,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: "GelicaMedium",
     color: "#000",
-    lineHeight: 22,
+    // lineHeight: 22,
   },
   kidsText: {
     marginRight: 8,
     fontSize: 14,
     fontFamily: "GelicaRegular",
     color: "#000",
-    lineHeight: 18,
+    // lineHeight: 18,
   },
   searchBar: {
     flexDirection: "row",
@@ -187,7 +195,7 @@ const styles = StyleSheet.create({
     color: "#000",
     fontFamily: "GelicaRegular",
     fontSize: 14,
-    lineHeight: 18,
+    // lineHeight: 18,
   },
   filterRow: {
     flexDirection: "row",
@@ -208,13 +216,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#000",
     marginRight: 4,
-    lineHeight: 18,
+    // lineHeight: 18,
   },
   subtitle: {
     fontSize: 13,
     fontFamily: "GelicaRegular",
     color: "#666",
-    lineHeight: 18,
+    // lineHeight: 18,
     marginTop: 8,
     textAlign: "center",
   },
@@ -222,7 +230,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: "GelicaRegular",
     color: "#000",
-    lineHeight: 20,
+    // lineHeight: 20,
     marginTop: 26,
     textAlign: "left",
   },
@@ -244,7 +252,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 10,
   },
-  modalTitle: { fontSize: 18, fontFamily: "GelicaMedium", lineHeight: 22 },
+  modalTitle: { fontSize: 18, fontFamily: "GelicaMedium", 
+    // lineHeight: 22 
+  },
   radioRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -255,6 +265,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "GelicaRegular",
     color: "#000",
-    lineHeight: 18,
+    // lineHeight: 18,
   },
 });

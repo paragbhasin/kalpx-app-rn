@@ -2,6 +2,12 @@
   "name": "kalpax",
   "main": "expo/AppEntry.js",
   "version": "1.0.0",
+  "android": {
+    "package": "com.kalpx.app"
+  },
+  "ios": {
+    "bundleIdentifier": "com.kalpx.app"
+  },
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -42,6 +48,7 @@
     "expo-status-bar": "~2.2.3",
     "expo-symbols": "~0.4.5",
     "expo-system-ui": "~5.0.11",
+    "expo-updates": "~0.28.17",
     "expo-web-browser": "~14.2.0",
     "formik": "^2.4.6",
     "i18next": "^25.4.2",
@@ -58,7 +65,7 @@
     "react-native-confirmation-code-field": "^8.0.1",
     "react-native-element-dropdown": "^2.12.4",
     "react-native-gesture-handler": "~2.24.0",
-    "react-native-get-random-values": "^1.11.0",
+    "react-native-get-random-values": "~1.11.0",
     "react-native-modal": "^14.0.0-rc.1",
     "react-native-paper": "^5.14.5",
     "react-native-popup-menu": "^0.17.0",
@@ -70,12 +77,14 @@
     "react-native-swiper": "^1.6.0",
     "react-native-swiper-flatlist": "^3.2.5",
     "react-native-uuid": "^2.0.3",
+    "react-native-version-check-expo": "^3.5.0",
     "react-native-view-shot": "^4.0.3",
     "react-native-web": "~0.20.0",
     "react-native-webview": "13.13.5",
     "react-native-youtube-iframe": "^2.4.1",
     "react-redux": "^9.2.0",
     "redux-thunk": "^3.1.0",
+    "uuid": "^8.3.2",
     "yup": "^1.7.0",
     "zustand": "^5.0.8"
   },

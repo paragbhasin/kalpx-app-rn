@@ -67,7 +67,7 @@ const ClassEventCard: React.FC<ClassEventCardProps> = ({
             <TouchableOpacity onPress={onViewDetails}>
               <TextComponent type="semiBoldText">View Details</TextComponent>
             </TouchableOpacity>
-              <TouchableOpacity onPress={onViewDetails} style={{backgroundColor:Colors.Colors.App_theme,padding:8,borderRadius:6,marginLeft:10}}>
+              <TouchableOpacity onPress={onBookNow} style={{backgroundColor:Colors.Colors.App_theme,padding:8,borderRadius:6,marginLeft:10}}>
               <TextComponent type="semiBoldText" style={{color:Colors.Colors.white}}>Book Now</TextComponent>
             </TouchableOpacity>
           </View>

@@ -1,15 +1,15 @@
 // components/Accordion.js
-import React, { useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
   LayoutAnimation,
   Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
   UIManager,
+  View,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "GelicaMedium",
     color: "#000",
-    lineHeight: 20,
+    // lineHeight: 20,
   },
   body: {
     paddingHorizontal: 16,
@@ -91,6 +91,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "GelicaRegular",
     color: "#444",
-    lineHeight: 20,
+    // lineHeight: 20,
   },
 });

@@ -1,15 +1,16 @@
 // screens/Notifications.js
+import { useNavigation } from "@react-navigation/native";
 import React from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
   Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import Header from "../components/Header";
 
 export default function Notifications() {
   const navigation = useNavigation();
@@ -55,6 +56,8 @@ export default function Notifications() {
 
   return (
     <View style={styles.container}>
+            <Header />
+      
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -142,12 +145,12 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "GelicaRegular",
     color: "#888",
-    lineHeight: 18,
+    // lineHeight: 18,
   },
   message: {
     fontSize: 13,
     fontFamily: "GelicaRegular",
     color: "#444",
-    lineHeight: 18,
+    // lineHeight: 18,
   },
 });

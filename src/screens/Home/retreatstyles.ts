@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
     fontFamily: "GelicaBold",
     color: "#fff",
     marginBottom: 6,
-    lineHeight: 28,
+    // lineHeight: 28,
   },
   locationBadge: {
     flexDirection: "row",
@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#444",
     marginLeft: 4,
-    lineHeight: 18,
+      // lineHeight: 18,
     fontFamily: "GelicaRegular",
   },
   grid: {
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   checkboxOn: { backgroundColor: "#b97f28", borderColor: "#b97f28" },
   durationText: {
     fontSize: 14,
-    lineHeight: 20,
+      // lineHeight: 20,
     color: "#333",
     fontFamily: "GelicaRegular",
   },
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#333",
     fontFamily: "GelicaRegular",
-    lineHeight: 20,
+      // lineHeight: 20,
     borderWidth:1,
   },
   footer: {
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontFamily: "GelicaMedium",
-    lineHeight: 22,
+      // lineHeight: 22,
   },
 });
 

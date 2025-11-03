@@ -6,5 +6,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-, "src/screens/PoojaScreen.jsx", "App.tsx", "src/components/BottomMenu.tsx", "src/components/BottomMenu.tsx" ]
+, "src/screens/PoojaScreen.jsx", "App.tsx", "src/components/BottomMenu.tsx", "src/components/BottomMenu.tsx", "src/Networks/axios.js" ]
 }

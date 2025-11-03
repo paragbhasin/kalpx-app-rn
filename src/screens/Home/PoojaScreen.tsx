@@ -21,10 +21,11 @@ import { useDispatch } from "react-redux";
 import LoadingButton from "../../components/LoadingButton";
 import SuccessModal from "../../components/SuccessModal";
 import { RITUALS, TEMPLE_LIST } from "../../components/temples";
+import { ensureLoggedIn } from "../../utils/authHelpers";
 import { poojaIntresetUser } from "./actions";
 import styles from "./poojastyles";
 
-export default function PoojaScreen() {
+export default function PoojaScreen({route}) {
   const navigation: any = useNavigation();
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -55,6 +56,8 @@ export default function PoojaScreen() {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
+  const [isRestored, setIsRestored] = useState(false);
+
 
   // ✅ check if all required are filled
   const allValid =
@@ -89,6 +92,82 @@ export default function PoojaScreen() {
       }
     })();
   }, []);
+
+// ✅ Populate values
+useEffect(() => {
+  if (!route.params?.resumeData) return;
+
+  const data = route.params.resumeData;
+  console.log("📩 Received resumeData:", data);
+
+  setSelectedTemple(data.selectedTemple);
+  setSelectedPooja(data.selectedPooja);
+  setMode(data.mode);
+  setTiming(data.timing);
+  setInstructions(data.instructions);
+  setLatitude(data.latitude);
+  setLongitude(data.longitude);
+  setUserCity(data.userCity);
+  setGeolocationCity(data.geolocationCity);
+  setCountry(data.country);
+  setTimezone(data.timezone);
+  setPoojaNotListed(data.poojaNotListed);
+  setCity(data.userCity || data.geolocationCity || "");
+
+  // ✅ wait briefly and then mark restored
+  setTimeout(() => setIsRestored(true), 300);
+}, [route.params?.resumeData]);
+
+
+// ✅ Auto-submit once all restored data is ready
+useEffect(() => {
+  if (
+    isRestored &&
+    selectedTemple &&
+    selectedPooja &&
+    instructions.trim() !== ""
+  ) {
+    console.log("🚀 Auto-submitting after restore");
+    handleSubmit();
+  }
+}, [isRestored]);
+
+
+useEffect(() => {
+  console.log("🧩 State snapshot:", {
+    isRestored,
+    selectedTemple,
+    selectedPooja,
+    instructions,
+  });
+}, [isRestored, selectedTemple, selectedPooja, instructions]);
+
+
+
+// useEffect(() => {
+//   if (!route.params?.resumeData) return;
+
+//   const unsubscribe = navigation.addListener("focus", () => {
+//     setTimeout(() => {
+//       if (selectedTemple && selectedPooja && instructions.trim() !== "") {
+//         console.log("✅ Auto-submitting with restored data");
+//         handleSubmit();
+//       } else {
+//         console.log("⚠️ Data not ready for auto-submit");
+//       }
+//     }, 500);
+//   });
+
+//   return unsubscribe;
+// }, [
+//   navigation,
+//   route.params?.resumeData,
+//   selectedTemple,
+//   selectedPooja,
+//   instructions,
+// ]);
+
+
 
   // Filtered temples based on search
   const filteredTemples = useMemo(() => {
@@ -141,6 +220,25 @@ export default function PoojaScreen() {
     setErrors(newErrors);
 
     if (newErrors.length > 0) return;
+
+    const pendingData = {
+    selectedTemple,
+    selectedPooja,
+    mode,
+    timing,
+    instructions,
+    latitude,
+    longitude,
+    userCity,
+    geolocationCity,
+    country,
+    timezone,
+    poojaNotListed,
+  };
+
+  const canProceed = await ensureLoggedIn(navigation, "pending_pooja_data", pendingData);
+  if (!canProceed) return;
+  
     setLoading(true);
     setLoginError(null);
     try {
@@ -183,13 +281,21 @@ export default function PoojaScreen() {
           otherPoojaChecked: poojaNotListed,
         },
       };
+console.log("🔥 handleSubmit called with:::::::::::::::::", {
+  selectedTemple,
+  selectedPooja,
+  mode,
+  timing,
+  instructions,
+});
 
       // console.log("Credentials to be sent::::::::::", credentials);
       dispatch(
         poojaIntresetUser(credentials, async (result: any) => {
           if (result && result.success) {
             // console.log("Travel interest saved>>>>>>>>>>>>>>>>>>>>>", result);
-            setShow(true)
+            setShow(true);
+            await AsyncStorage.removeItem("pending_pooja_data");
           } else {
             setLoginError(result?.error || "Failed to save travel interest");
           }
@@ -295,7 +401,10 @@ export default function PoojaScreen() {
           style={styles.input}
           placeholder={t("pooja.enterCity")}
           value={city}
-          onChangeText={setCity}
+         onChangeText={(text) => {
+    setCity(text);
+    setUserCity(text);
+  }}
         />
 
         {/* Mode */}
@@ -376,53 +485,6 @@ export default function PoojaScreen() {
           onPress={handleSubmit}
         />
       </View>
-
-      {/* Submit */}
-      {/* <View style={styles.footer}>
-        <Pressable
-          style={styles.submitButton}
-          onPress={async () => {
-  const createdAt = new Date().toISOString();
-  const selectedTempleObj = TEMPLE_LIST.find(t => t.key === selectedTemple);
-
-  const category = selectedTempleObj?.category || "";
-  const poojaTranslated = selectedPooja || "";
-
-  const dataToSend = {
-    id: 52,
-    user: 4070,
-    guest_uuid: null,
-    type: "pooja",
-    data: {
-      temple: selectedTemple,
-      templeTranslated: selectedTemple ? t(`temples.${selectedTemple}`) : "",
-      location: geolocationCity,
-      locationTranslated: selectedTemple ? t(`locations.${selectedTemple}`) : "",
-      category: category,
-      categoryTranslated: category.replace(/\(.*?\)/g, "").replace(/,/g, ", "),
-      pooja: selectedPooja,
-      poojaTranslated: selectedPooja ? t(`rituals.${selectedPooja}`) : "",
-      participationMode: mode,
-      timingPreference: timing.toLowerCase(),
-      comments: instructions,
-      userCity,
-      geolocationCity,
-      country,
-      timezone,
-      latitude,
-      longitude,
-      otherPoojaChecked: poojaNotListed,
-    },
-    created_at: createdAt,
-  };
-
-  console.log(dataToSend);
-}}
-        >
-          <Text style={styles.submitButtonText}>{t("pooja.submit")}</Text>
-        </Pressable>
-      </View> */}
-
       {/* Temple Modal */}
       <Modal
         visible={templeModalVisible}

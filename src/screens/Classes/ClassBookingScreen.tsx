@@ -6,7 +6,9 @@ import {
   FlatList,
   Image,
   Pressable,
+  SafeAreaView,
   ScrollView,
+  StatusBar,
   Text,
   TextInput,
   View,
@@ -16,6 +18,7 @@ import { ThunkDispatch } from "redux-thunk";
 import CalendarUI from "../../components/CalendarUI";
 import Colors from "../../components/Colors";
 import FontSize from "../../components/FontSize";
+import Header from "../../components/Header";
 import LoadingButton from "../../components/LoadingButton"; // ✅ Import LoadingButton
 import TextComponent from "../../components/TextComponent";
 import { RootState } from "../../store";
@@ -173,13 +176,20 @@ export default function ClassBookingScreen({ navigation, route }) {
   };
 
   return (
+        <SafeAreaView style={{ flex: 1, backgroundColor: Colors.Colors.white }}>
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor={Colors.Colors.header_bg}
+        translucent={false}
+      />
+      <Header />
     <ScrollView
       contentContainerStyle={{ paddingBottom: 120 }}
       showsVerticalScrollIndicator={false}
       style={{ paddingHorizontal: 24 }}
     >
       {/* 🔙 Back Button */}
-      <Pressable style={{ marginTop: 60 }} onPress={() => navigation.goBack()}>
+      <Pressable style={{ marginTop: 10 }} onPress={() => navigation.goBack()}>
         <View
           style={{
             backgroundColor: "#D9D9D9",
@@ -195,14 +205,14 @@ export default function ClassBookingScreen({ navigation, route }) {
           />
         </View>
       </Pressable>
-
+<View style={{marginTop:-10}}>
       {/* Progress bar */}
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "center",
-          marginTop: 10,
+          // marginTop: 10,
         }}
       >
         <View style={{ alignItems: "center" }}>
@@ -269,7 +279,7 @@ export default function ClassBookingScreen({ navigation, route }) {
           Payment
         </TextComponent>
       </View>
-
+</View>
       {/* Class Info */}
       <TextComponent type="headerText" style={styles.label}>
         {route?.params?.reschedule
@@ -476,6 +486,7 @@ export default function ClassBookingScreen({ navigation, route }) {
         }}
       />
     </ScrollView>
+    </SafeAreaView>
   );
 }
 

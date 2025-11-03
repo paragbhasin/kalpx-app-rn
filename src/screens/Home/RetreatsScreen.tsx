@@ -24,6 +24,7 @@ import LoadingButton from "../../components/LoadingButton";
 import Section from "../../components/Section";
 import SuccessModal from "../../components/SuccessModal";
 import colors from "../../theme/colors";
+import { ensureLoggedIn } from "../../utils/authHelpers";
 import { retreatIntresetUser } from "./actions";
 import styles from "./retreatstyles";
 
@@ -87,7 +88,7 @@ const LOCATIONS = [
   },
 ];
 
-export default function RetreatsScreen() {
+export default function RetreatsScreen({route}) {
   const navigation: any = useNavigation();
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -103,6 +104,8 @@ export default function RetreatsScreen() {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
     const [show, setShow] = useState(false);
+    const [isRestored, setIsRestored] = useState(false);
+
   const [locationData, setLocationData] = useState({
     city: "",
     country: "",
@@ -119,6 +122,49 @@ export default function RetreatsScreen() {
     duration &&
     experience &&
     notes.trim() !== "";
+
+
+    // ✅ Populate values if coming from login (resumeData)
+useEffect(() => {
+  if (!route.params?.resumeData) return;
+
+  const data = route.params.resumeData;
+  console.log("📩 Received retreat resumeData:", data);
+
+  setHealingCats(data.healingCats || []);
+  setLocations(data.locations || []);
+  setDuration(data.duration || null);
+  setExperience(data.experience || "comfort");
+  setNotes(data.notes || "");
+  setUserCity(data.userCity || "");
+  setLocationData({
+    city: data.geolocationCity || "",
+    country: data.country || "",
+    timezone: data.timezone || "",
+    latitude: data.latitude || null,
+    longitude: data.longitude || null,
+  });
+
+  // wait until React finishes updating states
+  setTimeout(() => setIsRestored(true), 300);
+}, [route.params?.resumeData]);
+
+// ✅ Auto-submit after restore
+useEffect(() => {
+  if (
+    isRestored &&
+    healingCats.length > 0 &&
+    locations.length > 0 &&
+    duration &&
+    experience &&
+    notes.trim() !== ""
+  ) {
+    console.log("🚀 Auto-submitting retreat after restore");
+    handleSubmit();
+  }
+}, [isRestored]);
+
+
 
   useEffect(() => {
     (async () => {
@@ -163,6 +209,30 @@ export default function RetreatsScreen() {
     setErrors(newErrors);
 
     if (newErrors.length > 0) return;
+
+    // Store data if user not logged in
+const pendingData = {
+  healingCats,
+  locations,
+  duration,
+  experience,
+  notes,
+  userCity,
+  geolocationCity: locationData.city,
+  country: locationData.country,
+  timezone: locationData.timezone,
+  latitude: locationData.latitude,
+  longitude: locationData.longitude,
+};
+
+const canProceed = await ensureLoggedIn(
+  navigation,
+  "pending_retreat_data",
+  pendingData
+);
+if (!canProceed) return;
+
+
     setLoading(true);
     setLoginError(null);
     try {
@@ -193,7 +263,8 @@ export default function RetreatsScreen() {
         retreatIntresetUser(credentials, async (result: any) => {
           if (result && result.success) {
             // console.log("Travel interest saved>>>>>>>>>>>>>>>>>>>>>", result);
-             setShow(true)
+             setShow(true);
+               await AsyncStorage.removeItem("pending_retreat_data");
           } else {
             setLoginError(result?.error || "Failed to save travel interest");
           }
@@ -232,7 +303,7 @@ export default function RetreatsScreen() {
           </View>
         </View> */}
       </ImageBackground>
-      <Text style={styles.title}>Plan Your Retreat</Text>
+      <Text style={styles.title}>{t("retreats.title")}</Text>
       {/* Content */}
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -244,7 +315,7 @@ export default function RetreatsScreen() {
           showsVerticalScrollIndicator={false}
         >
           <Text style={styles.titlesubText}>
-           What Are You Seeking?  (Select all that apply)
+        {t("retreats.healing.header")}
           </Text>
           <FlatList
             data={HEALING}
@@ -311,7 +382,7 @@ export default function RetreatsScreen() {
 
           {/* Location */}
           <Text style={styles.titlesubText}>
-            Where Would You Like to Go? (Select all that apply)
+            {t("retreats.locations.header")}
           </Text>
 
           <FlatList
@@ -447,16 +518,16 @@ export default function RetreatsScreen() {
               })}
             </View>
           </Section> */}
-          <Section title={t("travelPlanner.idealDuration")}>
+          <Section title={t("retreats.idealDuration")}>
             <View style={styles.durationBox}>
               {DURATION.map((opt) => {
                 const on = duration === opt;
                 let label =
                   opt === "3_days"
-                    ? "3 Days – Weekend Devotion"
+                    ? t("retreats.duration1")
                     : opt === "7_days"
-                    ? "7 Days – Full Experience"
-                    : "10+ Days – Soulful Immersion";
+                    ? t("retreats.duration2")
+                    : t("retreats.duration3");
                 return (
                   <Pressable
                     key={opt}

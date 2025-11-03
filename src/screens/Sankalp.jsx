@@ -1,18 +1,18 @@
-import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ImageBackground,
-  TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native"; // ✅ for back
+import React from "react";
+import {
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import ExploreVideos from "../components/ExploreVideos";
 
 export default function Sankalp() {
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 14,
     color: "#000",
-    lineHeight: 30,
+    // lineHeight: 30,
   },
   sankalpBox: {
     backgroundColor: "#ffffff",
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     fontFamily: "GelicaMedium",
     color: "#6a4c2a",
     textAlign: "center",
-    lineHeight: 20,
+    // lineHeight: 20,
   },
   sectionBlue: {
     backgroundColor: "#feedd8",
@@ -165,19 +165,19 @@ const styles = StyleSheet.create({
     fontFamily: "GelicaMedium",
     color: "#000",
     marginBottom: 6,
-    lineHeight: 20,
+    // lineHeight: 20,
   },
   sectionLink: {
     fontSize: 14,
     fontFamily: "GelicaRegular",
     color: "#000",
-    lineHeight: 20,
+    // lineHeight: 20,
   },
   sectionText: {
     fontSize: 14,
     fontFamily: "GelicaRegular",
     color: "#444",
-    lineHeight: 20,
+    // lineHeight: 20,
   },
   row: {
     flexDirection: "row",
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "GelicaRegular",
     color: "#333",
-    lineHeight: 20,
+    // lineHeight: 20,
   },
   doneButton: {
     backgroundColor: "#9a7548",

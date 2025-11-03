@@ -5,7 +5,9 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
+  SafeAreaView,
   ScrollView,
+  StatusBar,
   Text,
   TouchableOpacity,
   View,
@@ -16,6 +18,7 @@ import { ThunkDispatch } from "redux-thunk";
 import ClassEventCard from "../../components/ClassEventCard";
 import Colors from "../../components/Colors";
 import FontSize from "../../components/FontSize";
+import Header from "../../components/Header";
 import TextComponent from "../../components/TextComponent";
 import { RootState } from "../../store";
 import { tutorDataList } from "./actions";
@@ -112,6 +115,13 @@ export default function ClassTutorDetailsScreen({ navigation, route }) {
   };
 
   return (
+       <SafeAreaView style={{ flex: 1, backgroundColor: Colors.Colors.white }}>
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor={Colors.Colors.header_bg}
+        translucent={false}
+      />
+      <Header />
     <ScrollView
       contentContainerStyle={{ paddingBottom: 120 }}
       showsVerticalScrollIndicator={false}
@@ -119,7 +129,7 @@ export default function ClassTutorDetailsScreen({ navigation, route }) {
       {/* Back Button */}
       <TouchableOpacity
         style={{
-          marginTop: 60,
+          marginTop: 10,
           marginHorizontal: 16,
         }}
         onPress={() => navigation.goBack()}
@@ -329,5 +339,6 @@ export default function ClassTutorDetailsScreen({ navigation, route }) {
         contentContainerStyle={{ padding: 16 }}
       />
     </ScrollView>
+    </SafeAreaView>
   );
 }

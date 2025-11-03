@@ -17,6 +17,9 @@ import {
   MY_BOOKINGS_FAILURE,
   MY_BOOKINGS_REQUEST,
   MY_BOOKINGS_SUCCESS,
+  RELEASE_HOLD_FAILURE,
+  RELEASE_HOLD_REQUEST,
+  RELEASE_HOLD_SUCCESS,
   RESCHEDULE_FAILURE,
   RESCHEDULE_REQUEST,
   RESCHEDULE_SUCCESS,
@@ -83,6 +86,12 @@ const initialMyBookingsState = {
 };
 
 const initialCancelState = {
+  data: null,
+  loading: false,
+  error: null,
+};
+
+const initialReleaseHoldState = {
   data: null,
   loading: false,
   error: null,
@@ -305,6 +314,19 @@ export const searchBookingsReducer = (
     case SEARCH_BOOKINGS_FAILURE:
       return { ...state, loading: false, error: action.payload };
 
+    default:
+      return state;
+  }
+};
+
+export const releaseHoldReducer = (state = initialReleaseHoldState, action) => {
+  switch (action.type) {
+    case RELEASE_HOLD_REQUEST:
+      return { ...state, loading: true, error: null };
+    case RELEASE_HOLD_SUCCESS:
+      return { ...state, loading: false, data: action.payload };
+    case RELEASE_HOLD_FAILURE:
+      return { ...state, loading: false, error: action.payload };
     default:
       return state;
   }

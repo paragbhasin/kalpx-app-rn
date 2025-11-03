@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     marginBottom: 16,
     marginLeft: 16,
-    lineHeight: 28,
+    // lineHeight: 28,
   },
   scroll: { flex: 1 },
   sectionTitle: {
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
     fontFamily: "GelicaMedium",
     color: "#000",
     marginVertical: 12,
-    lineHeight: 22,
+    // lineHeight: 22,
   },
   checkboxRow: {
     flexDirection: "row",
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: "GelicaRegular",
     color: "#333",
-    lineHeight: 22,
+    // lineHeight: 22,
   },
   optionsRow: {
     flexDirection: "row",
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
   chipText: {
     fontFamily: "GelicaRegular",
     fontSize: 14,
-    lineHeight: 20,
+    // lineHeight: 20,
     color: "#333",
   },
   chipTextSelected: { color: "#fff", fontFamily: "GelicaMedium" },
@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
     padding: 10,
     fontFamily: "GelicaRegular",
     fontSize: 14,
-    lineHeight: 20,
+    // lineHeight: 20,
     backgroundColor: "#fff",
     marginBottom: 16,
   },
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
     padding: 12,
     fontFamily: "GelicaRegular",
     fontSize: 14,
-    lineHeight: 20,
+    // lineHeight: 20,
     backgroundColor: "#fff",
     textAlignVertical: "top",
   },
@@ -318,6 +318,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontFamily: "GelicaMedium",
-    lineHeight: 22,
+    // lineHeight: 22,
   },
 });

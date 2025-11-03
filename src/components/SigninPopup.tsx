@@ -1,31 +1,51 @@
-import React from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { useEffect, useState } from "react";
 import {
-    Image,
-    StyleSheet,
-    TouchableOpacity,
-    View
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import Modal from "react-native-modal";
 import Colors from "./Colors";
+import FontSize from "./FontSize";
 import TextComponent from "./TextComponent";
 
 interface SigninPopupProps {
   visible: boolean;
   onClose: () => void;
   onConfirmCancel: (practice: any) => void;
+  /** 🔹 Text values (to customize for each use case) */
+  title: string;
+  subText: string;
+  infoTexts: string[]; // e.g. ["Get daily reminders", "Track your streak", ...]
+  bottomText: string; // last line like "Want a gentle reminder..."
 }
 
 const SigninPopup: React.FC<SigninPopupProps> = ({
   visible,
   onConfirmCancel,
   onClose,
+  title,
+  subText,
+  infoTexts,
+  bottomText,
 }) => {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const checkLogin = async () => {
+      try {
+        const token = await AsyncStorage.getItem("access_token");
+        setIsLoggedIn(!!token);
+      } catch (error) {
+        console.log("Error checking login:", error);
+      }
+    };
+    checkLogin();
+  }, [visible]);
 
   const handleClose = () => {
-    onClose();
-  };
-
-  const handleConfirm = () => {
     onClose();
   };
 
@@ -40,6 +60,7 @@ const SigninPopup: React.FC<SigninPopupProps> = ({
       useNativeDriver
     >
       <View style={styles.modalContent}>
+        {/* 🔹 Close Button */}
         <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
           <Image
             source={require("../../assets/Cross.png")}
@@ -47,9 +68,53 @@ const SigninPopup: React.FC<SigninPopupProps> = ({
             resizeMode="cover"
           />
         </TouchableOpacity>
-        <TextComponent type="boldText" style={styles.title}>
-          Create Your Own Practice
+
+        {/* 🔹 Header Section */}
+        <View style={styles.headerBox}>
+          <TextComponent type="boldText" style={styles.title}>
+            {title}
+          </TextComponent>
+          <TextComponent type="boldText" style={styles.subText}>
+            {subText}
+          </TextComponent>
+        </View>
+
+        {/* 🔹 Info Texts */}
+        {infoTexts.map((text, index) => (
+          <TextComponent key={index} type="boldText" style={styles.layerText}>
+            {text}
+          </TextComponent>
+        ))}
+
+        {/* 🔹 Bottom Info */}
+        {bottomText &&
+        <TextComponent
+          type="boldText"
+          style={{
+            ...styles.layerText,
+            marginTop: 8,
+            color: Colors.Colors.Light_black,
+          }}
+        >
+          {bottomText}
         </TextComponent>
+}
+        {/* 🔹 Buttons — only if not logged in */}
+        {!isLoggedIn && (
+          <View style={styles.buttonRow}>
+            <TouchableOpacity style={styles.loginButton}>
+              <TextComponent type="boldText" style={styles.buttonTitle}>
+                Log In
+              </TextComponent>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.signupButton}>
+              <TextComponent type="boldText" style={styles.buttonTitle}>
+                Sign Up
+              </TextComponent>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </Modal>
   );
@@ -72,33 +137,51 @@ const styles = StyleSheet.create({
     borderRadius: 18,
   },
   closeIcon: {},
-  title: {
-    fontSize: 14,
-    alignSelf: "center",
-    marginTop: -18,
-    color: Colors.Colors.BLACK,
-  },
-  label: {
-    color: Colors.Colors.Light_black,
-  },
-  input: {
-    marginTop: 4,
+  headerBox: {
+    borderColor: Colors.Colors.App_theme,
     borderWidth: 1,
-    borderColor: "#BDC4CD",
-    borderRadius: 6,
-    padding: 10,
-    marginBottom: 5,
+    backgroundColor:"#FFF7E8",
+    padding: 14,
+    alignItems: "center",
+    marginVertical: 15,
+    borderRadius: 10,
+  },
+  title: {
+    color: Colors.Colors.Light_black,
+    fontSize: FontSize.CONSTS.FS_18,
+    textAlign: "center",
+  },
+  subText: {
+    marginTop: 6,
+    fontSize: FontSize.CONSTS.FS_14,
+    textAlign: "center",
+  },
+  layerText: {
+    color: Colors.Colors.Light_grey,
+    fontSize: FontSize.CONSTS.FS_14,
+    textAlign: "center",
+    marginTop: 4,
   },
   buttonRow: {
-    marginTop: 10,
     flexDirection: "row",
-    alignSelf: "center",
+    justifyContent: "space-between",
+    marginVertical: 20,
   },
-  confirmBtn: {
+  loginButton: {
     backgroundColor: Colors.Colors.App_theme,
-    padding: 10,
-    borderRadius: 6,
-    flex: 1,
-    alignItems: "center",
+    borderRadius: 10,
+    width: "46%",
+    paddingVertical: 12,
+  },
+  signupButton: {
+    backgroundColor: Colors.Colors.button_bg,
+    borderRadius: 10,
+    width: "46%",
+    paddingVertical: 12,
+  },
+  buttonTitle: {
+    color: Colors.Colors.BLACK,
+    fontSize: FontSize.CONSTS.FS_20,
+    textAlign: "center",
   },
 });

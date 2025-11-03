@@ -3,7 +3,9 @@ import {
   cancelBookingReducer,
   classesBookingsReducer,
   classesExploreReducer,
+  classesFilterExploreReducer,
   myBookingsFilterReducer,
+  releaseHoldReducer,
   rescheduleReducer,
   searchBookingsReducer,
   searchClassesReducer,
@@ -17,9 +19,11 @@ import {
   startMantraReducer,
   submitDharmaReducer,
   trackPracticeReducer,
+  videoCategoriesReducer,
+  videosReducer,
 } from "../screens/Home/reducers";
 import { loginReducer } from "../screens/Login/reducers";
-import { profileDetailsReducer, profileOptionsReducer, updateProfileReducer } from "../screens/Profile/reducers";
+import { deleteAccountReducer, profileDetailsReducer, profileOptionsReducer, updateProfileReducer } from "../screens/Profile/reducers";
 import { dailyPracticeReducer, practiceReducer } from "../screens/Streak/reducers";
 import snackBarReducer from "./snackBarSlice";
 
@@ -46,7 +50,12 @@ const appReducer = combineReducers({
   practiceStreaksReducer,
   profileOptionsReducer,
   profileDetailsReducer,
-  updateProfileReducer
+  updateProfileReducer,
+  deleteAccountReducer,
+  videoCategoriesReducer,
+  videosReducer,
+  releaseHoldReducer,
+  classesFilterExploreReducer
 });
 
 // 2️⃣ Add a root reducer that can reset everything on logout

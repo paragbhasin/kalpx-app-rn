@@ -28,25 +28,25 @@ import styles from "./homestyles";
 
 const { width } = Dimensions.get("window");
 
-// Dropdown options
-const rememberdata = [
-  { label: "At Sunrise", value: "sunrise" },
-  { label: "After Waking Up", value: "wakingUp" },
-  { label: "Morning", value: "morning" },
-  { label: "During Commute", value: "commute" },
-  { label: "Before Starting Work or Study", value: "workStart" },
-  { label: "Mid-Day Break", value: "midDay" },
-  { label: "At Lunch", value: "lunch" },
-  { label: "After Returning Home", value: "returnHome" },
-  { label: "At Sunset", value: "sunset" },
-  { label: "At Dinner", value: "dinner" },
-  { label: "Before Bed", value: "bedtime" },
-  { label: "Brahma Muhurta (Pre-Dawn Sacred Time)", value: "brahmaMuhurta" },
-];
 
 const SubmitMantraScreen = ({ route }) => {
   const navigation: any = useNavigation();
   const { t } = useTranslation();
+// Dropdown options
+const rememberdata = [
+  { label: t("reminder.sunrise"), value: "sunrise" },
+  { label: t("reminder.wakingUp"), value: "wakingUp" },
+  { label: t("reminder.morning"), value: "morning" },
+  { label: t("reminder.commute"), value: "commute" },
+  { label: t("reminder.workStart"), value: "workStart" },
+  { label: t("reminder.midDay"), value: "midDay" },
+  { label: t("reminder.lunch"), value: "lunch" },
+  { label: t("reminder.returnHome"), value: "returnHome" },
+  { label: t("reminder.sunset"), value: "sunset" },
+  { label: t("reminder.dinner"), value: "dinner" },
+  { label: t("reminder.bedtime"), value: "bedtime" },
+  { label: t("reminder.brahmaMuhurta"), value: "brahmaMuhurta" },
+];
 
    const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
 
@@ -98,24 +98,43 @@ const SubmitMantraScreen = ({ route }) => {
     },
   });
 
-  // Renders each mantra block
-  const renderMantraItem = ({ item, index }) => {
-    const error =
-      formik.touched?.mantras?.[index]?.trigger &&
-      formik.errors?.mantras?.[index]?.trigger;
 
-    return (
-      <View
+const renderMantraItem = ({ item, index }) => {
+  const error =
+    formik.touched?.mantras?.[index]?.trigger &&
+    formik.errors?.mantras?.[index]?.trigger;
+
+  return (
+    <View
+      style={{
+        borderRadius: 6,
+        elevation: 3,
+        backgroundColor: Colors.Colors.white,
+        padding: 16,
+        borderColor: Colors.Colors.Light_grey,
+        borderWidth: 1,
+        marginVertical: 10,
+        marginHorizontal: 15,
+      }}
+    >
+      {/* ✅ Translated name */}
+      <TextComponent
+        type="boldText"
         style={{
-          borderRadius: 6,
-          elevation: 3,
-          backgroundColor: Colors.Colors.white,
-          padding: 16,
-          borderColor: Colors.Colors.Light_grey,
-          borderWidth: 1,
-          marginVertical: 10,
-          marginHorizontal: 15,
+          color: Colors.Colors.BLACK,
+          fontSize: FontSize.CONSTS.FS_14,
         }}
+      >
+        {item.icon}{" "}
+        {t(`practices.${item.id}.name`, {
+          defaultValue: item.name || item.text || "",
+        })}
+      </TextComponent>
+
+      {/* ✅ Description */}
+      <TextComponent
+        type="semiBoldText"
+        style={{ color: Colors.Colors.Light_black, marginVertical: 6 }}
       >
         <TextComponent
           type="boldText"
@@ -124,66 +143,158 @@ const SubmitMantraScreen = ({ route }) => {
             fontSize: FontSize.CONSTS.FS_14,
           }}
         >
-          {item.icon} {item.name ? item.name  :item.text}
-        </TextComponent>
+          {t("submitPractice.descriptionLabel")}
+        </TextComponent>{" "}
+        {t(`practices.${item.id}.description`, {
+          defaultValue: item.description || item.explanation || "",
+        })}
+      </TextComponent>
 
-        <TextComponent
-          type="semiBoldText"
-          style={{ color: Colors.Colors.Light_black, marginVertical: 6 }}
-        >
-          <TextComponent
-            type="boldText"
-            style={{
-              color: Colors.Colors.BLACK,
-              fontSize: FontSize.CONSTS.FS_14,
-            }}
-          >
-            Description:
-          </TextComponent>{" "}
-          {item.description ? item.description: item.explanation}
-        </TextComponent>
+      {/* ✅ Time label */}
+      <TextComponent
+        type="boldText"
+        style={{
+          color: Colors.Colors.BLACK,
+          fontSize: FontSize.CONSTS.FS_14,
+          marginBottom: 6,
+        }}
+      >
+        {t("submitPractice.timeLabel")}
+      </TextComponent>
 
+      {/* ✅ Dropdown */}
+      <View style={styles.setupcontainer}>
+        <Dropdown
+          data={[
+            { label: t("submitPractice.reminder.sunrise"), value: "sunrise" },
+            { label: t("submitPractice.reminder.wakingUp"), value: "wakingUp" },
+            { label: t("submitPractice.reminder.morning"), value: "morning" },
+            { label: t("submitPractice.reminder.commute"), value: "commute" },
+            { label: t("submitPractice.reminder.workStart"), value: "workStart" },
+            { label: t("submitPractice.reminder.midDay"), value: "midDay" },
+            { label: t("submitPractice.reminder.lunch"), value: "lunch" },
+            { label: t("submitPractice.reminder.returnHome"), value: "returnHome" },
+            { label: t("submitPractice.reminder.sunset"), value: "sunset" },
+            { label: t("submitPractice.reminder.dinner"), value: "dinner" },
+            { label: t("submitPractice.reminder.bedtime"), value: "bedtime" },
+            { label: t("submitPractice.reminder.brahmaMuhurta"), value: "brahmaMuhurta" },
+          ]}
+          labelField="label"
+          valueField="value"
+          placeholder={t("submitPractice.selectTime")}
+          value={formik.values.mantras[index].trigger}
+          onChange={(val) =>
+            formik.setFieldValue(`mantras[${index}].trigger`, val.value)
+          }
+          style={styles.setupdropdown}
+          selectedTextStyle={styles.selectedText}
+          placeholderStyle={styles.placeholder}
+        />
+      </View>
+
+      {error && (
         <TextComponent
-          type="boldText"
           style={{
-            color: Colors.Colors.BLACK,
-            fontSize: FontSize.CONSTS.FS_14,
-            marginBottom: 6,
+            color: "red",
+            marginTop: 4,
+            fontSize: 12,
           }}
         >
-          Time
+          {error}
         </TextComponent>
+      )}
+    </View>
+  );
+};
 
-        <View style={styles.setupcontainer}>
-          <Dropdown
-            data={rememberdata}
-            labelField="label"
-            valueField="value"
-            placeholder="Select Time"
-            value={formik.values.mantras[index].trigger}
-            onChange={(val) =>
-              formik.setFieldValue(`mantras[${index}].trigger`, val.value)
-            }
-            style={styles.setupdropdown}
-            selectedTextStyle={styles.selectedText}
-            placeholderStyle={styles.placeholder}
-          />
-        </View>
 
-        {error && (
-          <TextComponent
-            style={{
-              color: "red",
-              marginTop: 4,
-              fontSize: 12,
-            }}
-          >
-            {error}
-          </TextComponent>
-        )}
-      </View>
-    );
-  };
+
+  // Renders each mantra block
+//   const renderMantraItem = ({ item, index }) => {
+//     const error =
+//       formik.touched?.mantras?.[index]?.trigger &&
+//       formik.errors?.mantras?.[index]?.trigger;
+
+//     return (
+//       <View
+//         style={{
+//           borderRadius: 6,
+//           elevation: 3,
+//           backgroundColor: Colors.Colors.white,
+//           padding: 16,
+//           borderColor: Colors.Colors.Light_grey,
+//           borderWidth: 1,
+//           marginVertical: 10,
+//           marginHorizontal: 15,
+//         }}
+//       >
+//         <TextComponent
+//           type="boldText"
+//           style={{
+//             color: Colors.Colors.BLACK,
+//             fontSize: FontSize.CONSTS.FS_14,
+//           }}
+//         >
+//           {item.icon} {item.name ? item.name  :item.text}
+//         </TextComponent>
+
+//         <TextComponent
+//           type="semiBoldText"
+//           style={{ color: Colors.Colors.Light_black, marginVertical: 6 }}
+//         >
+//           <TextComponent
+//             type="boldText"
+//             style={{
+//               color: Colors.Colors.BLACK,
+//               fontSize: FontSize.CONSTS.FS_14,
+//             }}
+//           >
+//             Description:
+//           </TextComponent>{" "}
+//           {item.description ? item.description: item.explanation}
+//         </TextComponent>
+
+//         <TextComponent
+//           type="boldText"
+//           style={{
+//             color: Colors.Colors.BLACK,
+//             fontSize: FontSize.CONSTS.FS_14,
+//             marginBottom: 6,
+//           }}
+//         >
+//           Time
+//         </TextComponent>
+
+//         <View style={styles.setupcontainer}>
+//         <Dropdown
+//   data={rememberdata}
+//   labelField="label"
+//   valueField="value"
+//   placeholder={t("selectTime") || "Select Time"}
+//   value={formik.values.mantras[index].trigger}
+//   onChange={(val) =>
+//     formik.setFieldValue(`mantras[${index}].trigger`, val.value)
+//   }
+//   style={styles.setupdropdown}
+//   selectedTextStyle={styles.selectedText}
+//   placeholderStyle={styles.placeholder}
+// />
+//         </View>
+
+//         {error && (
+//           <TextComponent
+//             style={{
+//               color: "red",
+//               marginTop: 4,
+//               fontSize: 12,
+//             }}
+//           >
+//             {error}
+//           </TextComponent>
+//         )}
+//       </View>
+//     );
+//   };
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.Colors.white }}>
@@ -207,7 +318,7 @@ const SubmitMantraScreen = ({ route }) => {
             color: Colors.Colors.BLACK,
           }}
         >
-          Level Beginner
+          {t("submitPractice.levelBeginner")}
         </TextComponent>
 
         <TextComponent
@@ -219,7 +330,7 @@ const SubmitMantraScreen = ({ route }) => {
             marginHorizontal: 30,
           }}
         >
-          Your Daily Practice Tracker
+             {t("submitPractice.yourDailyPractice")}
         </TextComponent>
 
         {/* Buttons */}
@@ -243,7 +354,7 @@ const SubmitMantraScreen = ({ route }) => {
               type="cardText"
               style={{ color: Colors.Colors.BLACK }}
             >
-              Submit My Practice
+               {t("submitPractice.submitMyPractice")}
             </TextComponent>
           </TouchableOpacity>
 
@@ -264,7 +375,7 @@ const SubmitMantraScreen = ({ route }) => {
               type="cardText"
               style={{ color: Colors.Colors.App_theme }}
             >
-              Edit Details
+               {t("submitPractice.editDetails")}
             </TextComponent>
             <Image
               source={require("../../../assets/edit_icon.png")}

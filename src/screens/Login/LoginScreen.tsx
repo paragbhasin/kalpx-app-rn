@@ -22,6 +22,7 @@ import { useDispatch } from 'react-redux';
 import { ThunkDispatch } from "redux-thunk";
 import * as Yup from "yup";
 import LoadingButton from "../../components/LoadingButton"; // ✅ import LoadingButton
+import LoadingOverlay from "../../components/LoadingOverlay";
 import TextComponent from "../../components/TextComponent";
 import { RootState } from "../../store";
 import { loginUser, socialLoginUser } from './actions';
@@ -341,8 +342,9 @@ const signInWithGoogle = async () => {
                       disabled={loading}
                       style={styles.button}
                       textStyle={styles.buttonText}
+                      showGlobalLoader={true}
                     />
-
+<LoadingOverlay visible={loading} text="Signing in..." />
                     <View style={styles.footerContainer}>
                        <TextComponent type="cardText" style={styles.footer}>{t("login.footer")} </TextComponent>
                       <TouchableOpacity onPress={() => navigation.navigate("Signup")}>

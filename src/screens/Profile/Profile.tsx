@@ -14,6 +14,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { useDispatch } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
 import Header from "../../components/Header";
+import LogoutPopup from "../../components/LogoutPopup";
 import TextComponent from "../../components/TextComponent";
 import store, { RootState } from "../../store";
 import { deleteUserAccount } from "./actions";
@@ -24,12 +25,15 @@ const  Profile = () => {
   const navigation: any = useNavigation();
   const { t } = useTranslation();
     const [showPrivacy, setShowPrivacy] = useState(false);
+    const [showLogoutPopup, setShowLogoutPopup] = useState(false);
+const [showDeletePopup, setShowDeletePopup] = useState(false);
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
 
      const handleLogout = async () => {
   await AsyncStorage.clear();
   store.dispatch({ type: "RESET_APP" });
-
+// await GoogleSignin.signOut();
+// await GoogleSignin.revokeAccess();
   const parentNav = navigation.getParent();
   parentNav?.reset({
     index: 0,
@@ -57,55 +61,72 @@ const handleDelete = () => {
             );
   };
 
+// const menuItems = [
+//   { key: "myProfile", icon: "person-outline", route: "ProfileDetails" },
+//   { key: "language", icon: "globe-outline", route: "Language" },
+//   { key: "privacy", icon: "key-outline", route: "Privacy" },
+//     // action: () => setShowPrivacy(true) },
+
+//   // New items below 👇
+//  {
+//       key: "logout",
+//       icon: "log-out-outline",
+//       action: () => {
+//         Alert.alert(
+//           t("profile.menu.logout"),
+//           t(
+//             "profile.menu.logoutConfirm",
+//             "Are you sure you want to log out?"
+//           ),
+//           [
+//             { text: t("common.cancel", "Cancel"), style: "cancel" },
+//             {
+//               text: t("common.yes", "Yes"),
+//               style: "destructive",
+//               onPress: handleLogout,
+//             },
+//           ]
+//         );
+//       },
+//     },
+//    {
+//       key: "deleteAccount",
+//       icon: "trash-outline",
+//       action: () => {
+//         Alert.alert(
+//           t("profile.menu.deleteAccount"),
+//           t(
+//             "profile.menu.deleteAccountConfirm",
+//             "This action is permanent. Do you really want to delete your account?"
+//           ),
+//           [
+//             { text: t("common.cancel", "Cancel"), style: "cancel" },
+//             {
+//               text: t("common.delete", "Delete"),
+//               style: "destructive",
+//               onPress: handleDelete,
+//             },
+//           ]
+//         );
+//       },
+//     },
+// ];
+
 const menuItems = [
   { key: "myProfile", icon: "person-outline", route: "ProfileDetails" },
   { key: "language", icon: "globe-outline", route: "Language" },
   { key: "privacy", icon: "key-outline", route: "Privacy" },
-    // action: () => setShowPrivacy(true) },
 
-  // New items below 👇
- {
-      key: "logout",
-      icon: "log-out-outline",
-      action: () => {
-        Alert.alert(
-          t("profile.menu.logout"),
-          t(
-            "profile.menu.logoutConfirm",
-            "Are you sure you want to log out?"
-          ),
-          [
-            { text: t("common.cancel", "Cancel"), style: "cancel" },
-            {
-              text: t("common.yes", "Yes"),
-              style: "destructive",
-              onPress: handleLogout,
-            },
-          ]
-        );
-      },
-    },
-   {
-      key: "deleteAccount",
-      icon: "trash-outline",
-      action: () => {
-        Alert.alert(
-          t("profile.menu.deleteAccount"),
-          t(
-            "profile.menu.deleteAccountConfirm",
-            "This action is permanent. Do you really want to delete your account?"
-          ),
-          [
-            { text: t("common.cancel", "Cancel"), style: "cancel" },
-            {
-              text: t("common.delete", "Delete"),
-              style: "destructive",
-              onPress: handleDelete,
-            },
-          ]
-        );
-      },
-    },
+  {
+    key: "logout",
+    icon: "log-out-outline",
+    action: () => setShowLogoutPopup(true),
+  },
+  {
+    key: "deleteAccount",
+    icon: "trash-outline",
+    action: () => setShowDeletePopup(true),
+  },
 ];
 
 
@@ -157,6 +178,40 @@ const menuItems = [
           </TouchableOpacity>
         ))}
       </View>
+      <LogoutPopup
+  visible={showLogoutPopup}
+  headerText={t("profile.menu.logout")}
+  subText={t(
+    "profile.menu.logoutConfirm",
+    "Are you sure you want to log out of your account?"
+  )}
+  cancelText={t("common.cancel", "Cancel")}
+  confirmText={t("common.yes", "Yes")}
+  onCancel={() => setShowLogoutPopup(false)}
+  onConfirm={() => {
+    setShowLogoutPopup(false);
+    handleLogout();
+  }}
+  onClose={() => setShowLogoutPopup(false)}
+/>
+
+<LogoutPopup
+  visible={showDeletePopup}
+  headerText={t("profile.menu.deleteAccount")}
+  subText={t(
+    "profile.menu.deleteAccountConfirm",
+    "This action is permanent. Do you really want to delete your account?"
+  )}
+  cancelText={t("common.cancel", "Cancel")}
+  confirmText={t("common.delete", "Delete")}
+  onCancel={() => setShowDeletePopup(false)}
+  onConfirm={() => {
+    setShowDeletePopup(false);
+    handleDelete();
+  }}
+  onClose={() => setShowDeletePopup(false)}
+/>
+
  {showPrivacy && <Privacy onClose={() => setShowPrivacy(false)} />}
     </ScrollView>
   );

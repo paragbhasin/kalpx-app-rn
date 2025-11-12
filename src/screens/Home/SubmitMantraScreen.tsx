@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { AnyAction } from "@reduxjs/toolkit";
 import { useFormik } from "formik";
-import React from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dimensions,
@@ -21,6 +21,7 @@ import * as Yup from "yup";
 import Colors from "../../components/Colors";
 import FontSize from "../../components/FontSize";
 import Header from "../../components/Header";
+import LoadingOverlay from "../../components/LoadingOverlay";
 import TextComponent from "../../components/TextComponent";
 import { CATALOGS } from "../../data/mantras"; // ✅ make sure this import exists
 import { RootState } from "../../store";
@@ -107,6 +108,7 @@ const getDisplayContent = (p: any, t: any, i18n: any) => {
 const SubmitMantraScreen = ({ route }) => {
   const navigation: any = useNavigation();
   const { t, i18n } = useTranslation();
+  const [loading, setLoading] = useState(false);
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
 
   const mantraData = route?.params?.mantraData || [];
@@ -131,6 +133,7 @@ const SubmitMantraScreen = ({ route }) => {
     initialValues,
     validationSchema,
     onSubmit: async (values) => {
+    setLoading(true);
       const token = await AsyncStorage.getItem("refresh_token");
       const payload = {
         practices: values.mantras,
@@ -150,6 +153,7 @@ const SubmitMantraScreen = ({ route }) => {
 
       dispatch(
         submitDailyDharmaSetup(payload, (res) => {
+    setLoading(false);
           if (res.success) {
             console.log("✅ Dharma setup success:", res.data);
             navigation.navigate("SadanaTrackerScreen");
@@ -377,6 +381,7 @@ const SubmitMantraScreen = ({ route }) => {
             />
           </TouchableOpacity>
         </View>
+<LoadingOverlay visible={loading} text="Signing in..." />
       </ScrollView>
     </SafeAreaView>
   );

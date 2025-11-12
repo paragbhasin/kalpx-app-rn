@@ -18,6 +18,7 @@ import { ThunkDispatch } from "redux-thunk";
 import Colors from "../../components/Colors";
 import FontSize from "../../components/FontSize";
 import Header from "../../components/Header";
+import LoadingOverlay from "../../components/LoadingOverlay";
 import PracticeDailyModal from "../../components/PracticeDailyModal";
 import TextComponent from "../../components/TextComponent";
 import { useUserLocation } from "../../components/useUserLocation";
@@ -34,7 +35,7 @@ const SadanaTrackerScreen = () => {
   const [selectedDate, setSelectedDate] = useState(moment().format("YYYY-MM-DD"));
   const [showPractiseModal, setShowPractiseModal] = useState(false);
   const [trackerData, setTrackerData] = useState<any>(null);
-
+  const [fetchLoading, setLoading] = useState(false);
   const { t } = useTranslation();
   const { locationData, loading: locationLoading, error } = useUserLocation();
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
@@ -581,6 +582,7 @@ const displayMeaning = isSankalp
           }}
           disabled={isCompleted}
           onPress={() => {
+    setLoading(true);
             if (!isCompleted && locationData?.timezone) {
               const payload = {
                 practice_id: item.practice_id,
@@ -591,6 +593,7 @@ const displayMeaning = isSankalp
               console.log("📤 Submitting track payload:", payload);
               dispatch(
                 trackDailyPractice(payload, (res) => {
+    setLoading(false);
                   if (res.success) {
                     console.log("✅ Practice marked complete:", res.data);
                     dispatch(
@@ -771,6 +774,7 @@ const displayMeaning = isSankalp
           }}
           onClose={() => setShowPractiseModal(false)}
         />
+<LoadingOverlay visible={fetchLoading} text="Signing in..." />
       </ScrollView>
     </SafeAreaView>
   );

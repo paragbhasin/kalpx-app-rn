@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import React from "react";
 import { useTranslation } from "react-i18next";
@@ -110,7 +111,8 @@ const CustomDrawerContent = (props: any) => {
  const handleLogout = async () => {
   await AsyncStorage.clear();
   store.dispatch({ type: "RESET_APP" });
-
+await GoogleSignin.signOut();
+await GoogleSignin.revokeAccess();
   const parentNav = props.navigation.getParent();
   parentNav?.reset({
     index: 0,

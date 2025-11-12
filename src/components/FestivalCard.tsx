@@ -337,8 +337,61 @@ const FestivalCard = () => {
                   >
                     {festival.fasting.observers}
                   </TextComponent>
+<View
+  style={{
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginVertical: 10,
+  }}
+>
+  {["celebrationPractices", "traditionalFoods", "symbols"].map((key, idx) => (
+    <View
+      key={idx}
+      style={{
+        flex: 1,
+        marginHorizontal: 4,
+        alignItems:"center"
+      }}
+    >
+      {/* Header */}
+      <TextComponent
+        type="cardText"
+        style={{
+          color: Colors.Colors.Light_black,
+          textAlign: "center",
+          marginBottom: 8, // gives consistent space before items start
+          minHeight: 50,   // ✅ ensures all headers take same vertical space
+          justifyContent: "center",
+          textAlignVertical: "center",
+          alignSelf:"center"
+        }}
+      >
+        {t(`festivalCard.${key}`)}
+      </TextComponent>
 
-                  <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+      {/* Items */}
+      <View style={{ alignItems: "center" }}>
+        {(festival as any)[key]?.map((item: string, i: number) => (
+          <TextComponent
+            key={i}
+            type="mediumText"
+            style={{
+              color: Colors.Colors.App_theme,
+              textAlign: "center",
+              marginBottom: 4,
+            }}
+          >
+            {item}
+          </TextComponent>
+        ))}
+      </View>
+    </View>
+  ))}
+</View>
+
+
+                  {/* <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                     {["celebrationPractices", "traditionalFoods", "symbols"].map((key, idx) => (
                       <View key={idx} style={{ flex: 1, marginHorizontal: 4 }}>
                         <TextComponent
@@ -366,7 +419,7 @@ const FestivalCard = () => {
                         ))}
                       </View>
                     ))}
-                  </View>
+                  </View> */}
 
                   <TextComponent type="cardText" style={styles.sectionTitle}>
                     {t("festivalCard.regionalCustoms")}

@@ -1171,15 +1171,23 @@ console.log("displayName,displayDescription >>>>",displayName,displayDescription
             margin: 20,
           }}
         >
+          {currentPage > 0 ? (
           <TouchableOpacity onPress={handlePrev} style={{borderColor:Colors.Colors.Light_grey,borderRadius:4,borderWidth:1,padding:8}}>
             <TextComponent type="mediumText" style={{marginHorizontal:6}}>{t("mySadhana.prev")}</TextComponent>
           </TouchableOpacity>
+          ): (
+    <View style={{ width: 70 }} /> // keeps layout balanced
+  )}
           <TextComponent type="mediumText">
          {t("mySadhana.page", { current: currentPage + 1, total: totalPages || 1 })}
           </TextComponent>
+          {currentPage < totalPages - 1 ? (
           <TouchableOpacity onPress={handleNext} style={{borderColor:Colors.Colors.Light_grey,borderRadius:4,borderWidth:1,padding:8}}>
             <TextComponent type="mediumText" style={{marginHorizontal:6}} >{t("mySadhana.next")}</TextComponent>
           </TouchableOpacity>
+          ) : (
+    <View style={{ width: 70 }} /> // keeps layout balanced
+  )}
         </View>
 
         {/* Confirm Button */}

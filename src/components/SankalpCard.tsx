@@ -387,7 +387,9 @@ console.log("tags >>>>>>>>>>>>",tags);
                     style={{
                       color: Colors.Colors.App_theme,
                       fontSize: FontSize.CONSTS.FS_14,
-                      paddingLeft:10
+                      // paddingLeft:10,
+                        flexShrink: 1,
+      flexWrap: "wrap",
                     }}
                   >
                     {t(`sankalps.${currentSankalp.id}.source`) || currentSankalp.source}

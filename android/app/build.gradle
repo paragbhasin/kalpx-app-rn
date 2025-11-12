@@ -1,6 +1,7 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
+apply plugin: 'com.google.gms.google-services'
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
@@ -95,15 +96,20 @@ android {
         versionCode 12
         versionName "1.0.3"
     }
-signingConfigs {
+  signingConfigs {
     debug {
-        storeFile file('debug.keystore')
+           storeFile file('debug.keystore')
         storePassword 'android'
         keyAlias 'androiddebugkey'
         keyPassword 'android'
+    //    storeFile file(MYAPP_UPLOAD_STORE_FILE)
+    //         storePassword MYAPP_UPLOAD_STORE_PASSWORD
+    //         keyAlias MYAPP_UPLOAD_KEY_ALIAS
+    //         keyPassword MYAPP_UPLOAD_KEY_PASSWORD
     }
+
     release {
-        if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
+        if (project.hasProperty("MYAPP_UPLOAD_STORE_FILE")) {
             storeFile file(MYAPP_UPLOAD_STORE_FILE)
             storePassword MYAPP_UPLOAD_STORE_PASSWORD
             keyAlias MYAPP_UPLOAD_KEY_ALIAS
@@ -111,7 +117,6 @@ signingConfigs {
         }
     }
 }
-
 
 buildTypes {
     debug {

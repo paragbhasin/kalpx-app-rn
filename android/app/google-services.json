@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "512739212793",
+    "project_id": "kalpx-10eb1",
+    "storage_bucket": "kalpx-10eb1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:512739212793:android:3cb93328f5c451e10b1128",
+        "android_client_info": {
+          "package_name": "com.kalpx.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwm6d770dxrKckYL77PseY963MmCqVA6Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

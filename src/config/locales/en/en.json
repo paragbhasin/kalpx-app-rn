@@ -1,0 +1,918 @@
+{
+  "home": {
+    "greeting": "Hi, {{name}}",
+    "dailyHeading": "What would you like today?",
+    "kalpXHeading": "What You’ll Find on KalpX?"
+  },
+  "categories": {
+    "dharma": "Daily Practice",
+    "sadana":"My Sadhana",
+    "explore": "Explore",
+    "travel": "Travel",
+    "pooja": "Pooja",
+    "retreat": "Retreat",
+    "classes":"Classes"
+  },
+  "streak":{
+   "sankalp":"Sankalp",
+"mantra":"Mantra",
+"DailyPractice":"Daily Practice",
+"stepText":"Step Into Today With Purpose"
+  },
+  "cards":{
+"mantra":"Mantra",
+  "sankalp":"Sankalp",
+  "festival":"Festival",
+  "wisdom":"Wisdom",
+    "sankalp_card": {
+    "title": "Chant Today’s Mantra",
+    "subtitle": "Feel the peace unfold within start your day by chanting today’s mantra."
+  },
+  "mantra_card": {
+    "title": "Set Your Sankalp",
+    "subtitle": "Set a sacred intension that connects your heart to your purpose."
+  },
+  "festival_card": {
+    "title": "Explore Festivals",
+    "subtitle": "Discover upcoming festivals and their significance."
+  },
+  "wisdom_card": {
+    "title": "Reflect on Wisdom",
+    "subtitle": "Find inspiration in timeless sanatan insights."
+  },
+  "kalpxTitle": "KalpX – Connect to Your Roots",
+  "kalpxText": "Discover the soul of Sanatan Dharma through Explore Videos, Daily Practice, Live Darshan, Temple Poojas, Retreats, Satsang Circles, Mantra Chanting, and Sacred Journeys.",
+  "kalpxSubText": "Whether you’re seeking knowledge, devotion, or inner balance — your journey begins here.",
+  "explore": "Explore Videos",
+  "show": "Show More"
+  },
+  "dailyDharma": {
+  "heading": "Begin Your Journey to Inner Peace",
+  "subHeading": "Discover daily practices crafted to nurture your mind and spirit.",
+  "findPeaceTitle": "Find Peace and Clarity with Daily Practices",
+  "findPeaceSubtitle1": "Simple routines to support your well-being, tailored for you.",
+  "findPeaceSubtitle2": "Make dharma a part of your daily rhythm. This space offers bite-sized practices — chants, affirmations, reflections, and mindful rituals — designed to ground you in inner peace and purpose. Start your day with spiritual clarity and return whenever your soul needs a reset.",
+  "startPractice": "Start Daily Practice",
+  "yourPathTitle": "Your Daily Practice Path",
+  "yourPathSubtitle": "Take the first step toward a calmer, healthier life.",
+  "step1Title": "Choose Your Practice",
+  "step1Subtitle": "Select practices that align with your spiritual goals, based on your experience level.",
+  "step2Title": "Create Your Daily Routine",
+  "step2Subtitle": "Pick 1–3 daily rituals to build a simple practice that fits your life.",
+  "step3Title": "Track Your Journey",
+  "step3Subtitle": "Stay consistent and reflect on your growth through gentle daily tracking.",
+  "signInTitle": "Sign in to KalpX to personalize your daily practice.",
+  "quote": "“With a pure heart, every moment becomes a sacred practice.”",
+  "faqHeading": "Daily Practice",
+  "faqSubHeading": "Simple moments. Sacred meaning.",
+  "faqDescription": "KalpX Daily Practice. Show up every day — and watch the shift begin.",
+  "familyTitle": "A Family Practice",
+  "familySubtitle1": "Come together in devotion before meals, growing in spirit as a family.",
+  "familySubtitle2": "Strengthen family bonds through shared rituals that connect you to Sanatan Dharma, fostering love, gratitude, and cultural heritage in every meal.",
+  "familyButton": "Start Our Family Practice",
+  "familyFooter": "Create a shared journey for peace and connection!",
+  "faq1Title": "Why build a daily spiritual practice?",
+  "faq1Desc": "In a world of constant noise, daily spiritual practice is a quiet anchor. It grounds your energy, purifies your intent, and gently brings you back to what matters. KalpX offers simple, accessible practices — from morning chants and breathwork to evening reflection and gratitude — so that spirituality becomes not a task, but a rhythm.\n\nWhether you light a diya before work, repeat a mantra on your commute, or take 2 minutes to sit in silence before sleep — these small rituals create big shifts over time. Consistency becomes connection. Repetition becomes realization.\n\nLet KalpX help you infuse your everyday with purpose, presence, and peace.",
+
+  "faq2Title": "What you’ll find in Daily Practice",
+  "faq2Desc": "✔ Morning invocations, chants, and affirmations to start the day\n✔ Guided meditations for clarity, energy, and calm\n✔ Breathwork and grounding techniques based in yogic science\n✔ Short reflections on dharma, gratitude, and intention-setting\n✔ Evening wind-down rituals and sacred closing prayers\n✔ Bite-sized stories and teachings for daily inspiration\n✔ Practices designed for all ages, including children and elders",
+
+  "faq3Title": "Who is Daily Practice for?",
+  "faq3Desc": "✔ Anyone looking to cultivate inner calm and consistency\n✔ Beginners unsure where to start with spiritual habits\n✔ Parents wanting simple rituals to share with their kids\n✔ Professionals needing short, grounding pauses in their day\n✔ Seekers seeking structure without pressure\n✔ Elders returning to daily devotion",
+
+  "faq4Title": "How to integrate Daily Practice",
+  "faq4Desc": "🪔 Choose one simple practice to begin with — and stay consistent\n⏰ Set a regular time (sunrise, lunch break, before bed)\n📿 Use malas, bells, or incense to engage the senses\n📱 Bookmark your favorite KalpX routines for easy access\n👨‍👩‍👧 Create a shared family ritual to build cultural memory",
+
+  "faq5Title": "What makes KalpX Daily Practice different?",
+  "faq5Desc": "✔ Spiritually potent, yet simple and practical\n✔ Crafted for modern life — short formats, flexible timing\n✔ Deeply rooted in Sanatan Dharma’s daily rhythm\n✔ Accessible to all — no prior knowledge required\n✔ A blend of devotion, discipline, and discovery"
+},
+  "daily": {
+    "sankalpTitle": "Today Sankalp",
+    "sankalpSubtitle": "Do a small good thing",
+    "mantraTitle": "Today's Mantra",
+    "mantraSubtitle": "Calm my mind",
+    "wisdomTitle": "Today's Wisdom",
+    "wisdomSubtitle": "Keep a line of wisdom",
+    "festivalTitle": "Upcoming Festivals",
+    "festivalSubtitle": "invited you to a chat"
+  },
+  "kalpx": {
+    "learn": "Learn and Grow",
+    "explore": "Explore Videos",
+    "practice": "Daily Practice",
+    "journey": "Sacred Journeys",
+    "poojas": "Temple Poojas",
+    "retreats": "Retreats  Wellness",
+    "Classes":"Classes"
+  },
+  "exploreVideos": {
+    "heading": "Explore Videos",
+    "video1": "Sanskrit Showcase · Institutes of Eminence Offering Sanskrit Courses · MadrasSanskritCollege",
+    "video2": "Learn Sanskrit · Ancient Wisdom Modern Applications · Delhi University",
+    "video3": "Spiritual Journeys · Teachings in Himalayas · Yoga Vidya Peeth"
+  },
+  "login": {
+    "brand": "KalpX",
+    "heading": "Connect to Your Roots",
+    "google": "Login With Google",
+    "cardTitleLine1": "Login in Your",
+    "cardTitleLine2": "Account",
+    "subTitle": "To Explore Divine Journey",
+    "username": "Username",
+    "password": "Password",
+    "keepLoggedIn": "Keep me logged in",
+    "forgotPassword": "Forgot password?",
+    "loginBtn": "LOGIN",
+    "otpSent": "OTP Sent ✔",
+    "footer": "No account yet?",
+    "register": "Register here",
+    "errors": {
+      "usernameRequired": "Username is required",
+      "passwordRequired": "Password is required",
+      "passwordMin": "Password must be at least 6 characters"
+    }
+  },
+  "forgotPassword": {
+    "enterEmail": "Enter Email Address",
+    "forgotPassword": "Forgot Password",
+    "exampleEmail": "Example@gmail.com",
+    "enterVerificationCode":"Enter Verification Code",
+    "Verification":"Verification & Reset Password",
+    "codeText":"If you didn’t receive a code. ",
+    "resend":"Resend",
+    "newPassword":"New Password",
+    "enterNewPassword":"Enter New Password",
+    "confirmPassword":"Confirm Password",
+    "enterPassword":"Enter Password",
+    "send":"Send",
+    "verify":"Verify",
+    "submit":"Submit",
+    "backTo":"Back to ",
+    "login":"Login",
+    "3333444":"Code Required"
+  },
+  "signup": {
+    "getStarted": "Let's Get Started",
+    "createYour": "Create Your",
+    "account": "Account",
+    "connectWith": "To Connect With KalpX",
+    "email": "Email",
+    "username": "Username",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "otp": "Enter OTP",
+    "signUp": "SIGN UP",
+    "alreadyMember": "Already Member?",
+    "loginHere": "Login here",
+    "verifyOtp": "Verify OTP",
+    "requestOtp": "Request OTP",
+    "resendOtp": "Resend OTP"
+  },
+  "tabs": {
+    "home": "Home",
+    "notifications": "Notifications",
+    "search": "Search",
+    "profile": "Profile",
+    "Menu":"Menu"
+  },
+  "welcome": {
+    "getStarted": "GET STARTED FREE",
+    "skip": "Skip"
+  },
+  "profile": {
+    "title": "Profile",
+    "name": "Neha Jais",
+    "level": "Beginner Level",
+    "menu": {
+      "myProfile": "My Profile",
+      "setReminders": "Set Reminders",
+      "myPractices": "My Practices",
+      "notifications": "Notifications",
+      "faqs": "Faq’s",
+      "language": "Language",
+      "privacy": "⁠⁠Privacy Policy",
+      "settings": "Settings",
+      "inviteFriends": "Invite Friends",
+      "logout":"LogOut",
+        "logoutConfirm": "Are you sure you want to log out?",
+      "deleteAccount":"Delete Account",
+    "deleteAccountConfirm": "This action is permanent. Do you really want to delete your account?"
+    }
+  },
+  "common": {
+  "cancel": "Cancel",
+  "yes": "Yes",
+  "delete": "Delete"
+},
+  "explore": {
+    "title": "Explore Videos",
+    "kids": "Kids Hubs",
+    "search": "Search",
+    "filters": {
+      "category": "Select Category",
+      "language": "Language"
+    },
+    "subtitle": "Reconnect with Your Roots — Start Watching",
+    "subtitleTwo": "Why Explore Spiritual Videos?",
+    "modal": {
+      "category": "Select Category",
+      "language": "Select Language"
+    },
+"faq": [
+  {
+    "title": "Why Explore Spiritual Videos?",
+    "description": "In a fast-moving world, we often forget to pause and reflect. KalpX Videos offer a moment to reconnect — with timeless wisdom, inspiring stories, sacred movement, and devotional depth — wherever you are. Whether you’re watching a classical Bharatanatyam performance, a sacred mantra chant, a ritual from a temple, or a short teaching on karma or consciousness, each video opens a window into Sanatan Dharma’s living heartbeat. You’ll also find guided meditations, yoga practices, spiritual music, and cultural storytelling — all curated to help you grow in awareness, devotion, and joy. Let these visuals transport you beyond the screen — into a space of reverence, inquiry, and inner clarity. Watch alone, with family, or as part of your daily spiritual rhythm."
+  },
+  {
+    "title": "What You’ll Find in Explore Videos",
+    "description": "• ✔ Teachings on dharma, consciousness, and inner peace\n• ✔ Rituals and poojas from sacred temples across Bharat\n• ✔ Classical Indian dance (Bharatanatyam, Odissi, Kathak & more)\n• ✔ Guided yoga, meditation, and breathwork rooted in tradition\n• ✔ Devotional music, bhajans, kirtans, and mantra chanting\n• ✔ Stories from the Ramayana, Mahabharata, and Puranas\n• ✔ Culturally rich videos for children and families\n• ✔ Dialogues with gurus, yogis, artists, and wisdom keepers"
+  },
+  {
+    "title": "Who Are Curated KalpX Videos For?",
+    "description": "• ✔ Spiritual seekers and lifelong learners\n• ✔ Diaspora audiences reconnecting with their heritage\n• ✔ Artists, dancers, yogis, and musicians honoring sacred traditions\n• ✔ Parents introducing dharma to children in engaging ways\n• ✔ Anyone looking for screen time that uplifts, educates, and transforms"
+  },
+  {
+    "title": "What Makes Curated KalpX Videos Different?",
+    "description": "• ✔ Authentic, lineage-rooted content curated with care\n• ✔ Visuals that inspire devotion, stillness, and self-inquiry\n• ✔ Diverse voices, regional traditions, and cultural depth\n• ✔ Made for transformation — not just passive viewing"
+  },
+  {
+    "title": "How Can I Find Videos That Interest Me?",
+    "description": "• ✔ Use the search bar to find specific topics.\n• ✔ Filter by category, language, or tags to narrow down your selection.\n• ✔ Toggle the Kids Hub for family-friendly content."
+  },
+  {
+    "title": "Are the Videos Available in Multiple Languages?",
+    "description": "• ✔ Yes, videos are available in languages like English, Hindi, Tamil, Telugu, and more.\n• ✔ Select your preferred language from the filters to view relevant content."
+  }
+]
+  },
+  "onlineClasses": {
+    "title": "Online Classes",
+    "selectActivities": "Select Activities",
+    "activities": {
+      "yoga": "Yoga",
+      "dance": "Dance",
+      "music": "Music"
+    },
+    "classFormat": "What Kind of Class Format Do You Prefer?",
+    "formats": {
+      "oneOnOne": "One-on-One",
+      "smallGroup": "Small Group",
+      "preRecorded": "Pre-recorded",
+      "liveQA": "Live Q&A"
+    },
+    "experienceLevel": "What Is Your Experience Level?",
+    "levels": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "city": "Pick your city",
+    "ageGroup": "What is Your Age Group?",
+    "ages": {
+      "child": "Child",
+      "teen": "Teen",
+      "adult": "Adult",
+      "above55": "Above 55"
+    },
+    "preferredTime": "Time you will prefer as per your location",
+    "times": {
+      "morning": "Morning",
+      "afternoon": "Afternoon",
+      "evening": "Evening"
+    },
+    "spiritualSeeking": "What Are You Spiritually Seeking Through These Classes?",
+    "nextStep": "Take the Next Step"
+  },
+  "pooja": {
+    "header": "Temple Pooja",
+    "location": "Hyderabad",
+    "bookPooja": "Book a Pooja",
+    "selectTemple": "Select Temple",
+    "chooseTemple": "Choose Temple",
+    "selectPooja": "Select Pooja",
+    "choosePooja": "Choose Pooja",
+    "poojaNotListed": "Pooja not listed - mention in additional instructions",
+    "city": "Pick your city",
+    "enterCity": "Enter your city",
+    "participationMode": "Participation Mode",
+    "timingPreference": "Timing Preference",
+    "urgent": "Urgent (Next 7 Days)",
+    "flexible": "Flexible (Next 30 Days)",
+    "instructions": "Additional Instructions (Required)",
+    "instructionsPlaceholder": "Please provide any special instructions...",
+    "submit": "Take the Next Step",
+    "templeModalTitle": "Select Temple",
+    "poojaModalTitle": "Select Pooja",
+    "online":"Online",
+    "inperson":"In-Person"
+  },
+  "travelPlanner": {
+    "title": "Travel",
+    "city": "Hyderabad",
+    "journeyCategories": "Journey Categories",
+    "travelText":"Plan Your Sacred Journey",
+    "travelSubText":"What Type of Journey Are You Seeking?",
+    "selectText":"Select all that apply",
+    "categories": {
+      "charDham": "Char Dham",
+      "yatra": "Yatra",
+      "riverine": "Riverine",
+      "pilgrimage": "Pilgrimage",
+      "shaktipeeth": "Shaktipeeth",
+      "jyotirlinga": "Jyotirlinga",
+      "darshan": "Darshan",
+      "temple": "Temple",
+      "towns": "Towns",
+      "ashrams": "Ashrams",
+      "stay": "Stay"
+    },
+    "yourCity":"Your City",
+    "enterCity":"Enter your city",
+    "travelCard": {
+  "charDham": {
+    "title": "Char Dham Yatra",
+    "subtitle": "Connect with the ultimate spiritual circuit across India’s divine corners."
+  },
+  "riverine": {
+    "title": "Riverine Pilgrimage",
+    "subtitle": "Immerse yourself in the purifying embrace of India’s sacred rivers and their holy confluence points."
+  },
+  "shaktipeeth": {
+    "title": "Shaktipeeth Yatra",
+    "subtitle": "Awaken the divine feminine power by honoring the sacred abodes of the Mother Goddess."
+  },
+  "ramayana": {
+    "title": "Ramayana Circuit",
+    "subtitle": "Walk the footsteps of Shri Ram, retracing his epic journey of dharma and devotion."
+  },
+  "krishna": {
+    "title": "Krishna Bhumi Trail",
+    "subtitle": "Where every step echoes 'Radhe Radhe' – a joyous immersion into the land of divine play and love."
+  },
+  "himalayanTemples": {
+    "title": "Himalayan Temples",
+    "subtitle": "Seek profound silence and spiritual elevation amidst the majestic and mystical heights of the Himalayas."
+  },
+  "southIndian": {
+    "title": "South Indian Mandirs",
+    "subtitle": "Uncover the mystic traditions and ancient glory of South India’s timeless Dravidian temples."
+  },
+  "sunriseDarshan": {
+    "title": "Sunrise Darshan Sites",
+    "subtitle": "Begin your day with devotion – witness awe-inspiring darshans as the sun rises over sacred shores."
+  },
+  "jyotirlinga": {
+    "title": "Jyotirlinga Darshan",
+    "subtitle": "Connect with the 12 luminous forms of Lord Shiva, radiating divine light across the subcontinent."
+  },
+  "saintGuru": {
+    "title": "Saint & Guru Dhams",
+    "subtitle": "Follow the spiritual footsteps of revered saints and enlightened masters who guided humanity."
+  },
+  "ganesha": {
+    "title": "Ganesha Pilgrimage",
+    "subtitle": "Seek blessings and remove obstacles by visiting the potent abodes of the benevolent Ganesha."
+  },
+  "natureDevotion": {
+    "title": "Nature & Devotion",
+    "subtitle": "Experience spiritual awakening amidst the pristine beauty of nature’s sacred sanctuaries."
+  },
+  "murugan": {
+    "title": "Murugan Kshetras",
+    "subtitle": "Embark on a divine quest to the powerful abodes of Lord Murugan, the valiant Kartikeya."
+  },
+  "heritage": {
+    "title": "Ancient Heritage Sites",
+    "subtitle": "Explore timeless temples that stand as testaments to India’s rich history and architectural genius."
+  }
+},
+    "idealDuration": "Ideal Duration",
+    "duration1": "3 Days – Weekend Devotion",
+    "duration2": "7 Days – Full Experience",
+    "duration3": "10+ Days – Soulful Immersion",
+    "experienceType": "What Type of Experience Are You Looking For?",
+    "experiences": {
+      "essential": "Essential",
+      "essentialBlurb": "Simplicity, affordability, dharmic focus",
+      "comfort": "Comfort",
+      "comfortBlurb": "Balanced convenience with spiritual integrity",
+      "premium": "Premium",
+      "premiumBlurb": "Boutique stays, curated guides, enhanced care"
+    },
+    "companionsTitle": "Who Will You Be Traveling With?",
+    "companions": {
+      "solo": "Solo",
+      "friendsGroup": "Friends • Group",
+      "family": "Family",
+      "spiritualGuide": "Spiritual Guide"
+    },
+    "travelIntent": "What Are You Spiritually Seeking Through These Classes?",
+    "intentPlaceholder": "Share your intent…",
+    "nextStep": "Take the Next Step"
+  },
+  "retreats": {
+    "title": "Plan Your Retreat",
+    "city": "Hyderabad",
+    "healingCategories": "Healing Categories",
+    "healing": {
+      "header":" What Are You Seeking?  (Select all that apply)",
+      "silence": {
+        "title": "Spiritual Silence",
+        "subtitle": "Silence. Devotion. Awakening."
+      },
+      "ayurveda": {
+        "title": "Ayurveda Healing",
+        "subtitle": "Cleanse the body. Still the mind."
+      },
+      "yoga": {
+        "title": "Yoga Immersion",
+        "subtitle": "Move inward with every breath."
+      },
+       "bhakti": {
+        "title": "Bhakti & Satsang",
+        "subtitle": "Find joy in shared devotion."
+      }
+    },
+    "preferredLocations": "Preferred Locations",
+    "locations": {
+      "header":" Where Would You Like to Go? (Select all that apply)",
+      "himalayas": {
+        "title": "Himalayas",
+        "subtitle": "Peace in the mountains"
+      },
+      "kerala": {
+        "title": "Kerala",
+        "subtitle": "Ayurvedic healing by the backwaters"
+      },
+      "forestAshram": {
+        "title": "Forest Ashram",
+        "subtitle": "Disconnect to reconnect"
+      },
+        "templeTown": {
+        "title": "Temple Town",
+        "subtitle": "Walk the path of bhakti"
+      },
+        "riverRetreats": {
+        "title": "River Retreats",
+        "subtitle": "Flow with the sacred current"
+      }
+    },
+    "yourCity":"Your City",
+    "enterCity":"Enter your city",
+    "idealDuration": "Ideal Duration",
+    "duration1": "3 Days – Weekend Devotion",
+    "duration2": "7 Days – Full Experience",
+    "duration3": "10+ Days – Soulful Immersion",
+    "experienceType": "Experience Type",
+    "experiences": {
+      "essential": "Essential",
+      "essentialBlurb": "Simplicity, affordability, dharmic focus",
+      "comfort": "Comfort",
+      "comfortBlurb": "Balanced convenience with spiritual integrity",
+      "premium": "Premium",
+      "premiumBlurb": "Boutique stays, curated guides, enhanced care"
+    },
+    "spiritualIntent": "Your Spiritual Intent",
+    "intentPlaceholder": "Share your intent…",
+    "nextStep": "Take the Next Step"
+  },
+  "learnMore": {
+  "title": "Plan Your Learning Journey",
+  "whatLearn": "What Would You Love to Learn? (Select all that apply)",
+  "classFormat": "What Kind of Class Format Do You Prefer? (Select all that apply)",
+  "experienceLevel": "What Is Your Experience Level?",
+  "ageGroup": "What Is Your Age Group? (Optional)",
+  "timeAndCity": "Pick your city and time you will prefer as per your location. (Select all that apply)",
+  "yourCity": "Your City",
+  "enterCity": "Enter your city",
+  "spiritualIntent": "Your Spiritual Intent",
+  "intentPlaceholder": "What motivates your spiritual journey?",
+  "submit": "Submit",
+  "successTitle": "Thank you! You'll be among the first to know when classes matching your preferences go live.",
+  "successSubTitle": "Thank you for your interest! We will get back to you soon.",
+
+  "subjects": {
+    "yoga": {
+      "name": "Yoga",
+      "caption": "Strengthen your body. Calm your mind."
+    },
+    "music": {
+      "name": "Indian Classical Music",
+      "caption": "Connect through sound and devotion."
+    },
+    "dance": {
+      "name": "Indian Classical Dance",
+      "caption": "Let every step express the sacred."
+    },
+    "chanting": {
+      "name": "Mantra Chanting",
+      "caption": "Chant. Center. Awaken."
+    },
+    "vedas": {
+      "name": "Vedas & Upanishads",
+      "caption": "Decode ancient wisdom for modern life."
+    },
+    "sanatan": {
+      "name": "Sanatan Teachings",
+      "caption": "Timeless truths made accessible."
+    },
+    "vedanta": {
+      "name": "Everyday Vedanta",
+      "caption": "Live dharma in daily life."
+    }
+  },
+
+  "formats": {
+    "one_on_one": "One-on-One",
+    "small_group": "Small Group (2–6 people)",
+    "large_group": "Larger Interactive Session",
+    "pre_recorded": "Pre-recorded + Live Q&A"
+  },
+
+  "levels": {
+    "beginner": "Beginner – I’m curious and just starting",
+    "intermediate": "Intermediate – I have some practice",
+    "advanced": "Advanced – I’ve been learning for years"
+  },
+
+  "ages": {
+    "child": "Child (under 12)",
+    "teen": "Teen (13–17)",
+    "adult": "Adult (18–59)",
+    "senior": "Senior (60+)"
+  },
+
+  "times": {
+    "early_morning": "Early Morning (5am–8am)",
+    "morning": "Morning (8am–12pm)",
+    "afternoon": "Afternoon (12pm–4pm)",
+    "evening": "Evening (4pm–8pm)",
+    "night": "Night (8pm–10pm)"
+  },
+
+  "errors": {
+    "selectSubject": "Please select at least one subject.",
+    "selectFormat": "Please select at least one class format.",
+    "selectLevel": "Please select your experience level.",
+    "enterIntent": "Please enter your spiritual intent.",
+    "selectTime": "Please select at least one preferred time slot.",
+    "failed": "Failed to save interest.",
+    "tryAgain": "Something went wrong. Please try again."
+  }
+},
+"streakScreen": {
+  "tabs": {
+    "sankalp": "Sankalp & Mantra",
+    "daily": "Daily Practices"
+  },
+  "streakInfo": "Streaks are updated daily based on your practice completions.",
+  "keepGoing": "Keep Going!",
+  "youEarned": "You have earned the {{badge}}.",
+  "moreDays": "{{count}} more days to your {{nextBadge}}.",
+  "noBadge": "You have not earned any badge yet.",
+  "daysToFirst": "{{days}} more days to your first {{badge}}.",
+  "milestones": {
+    "blessing": "Blessing Badge",
+    "tapasya": "Tapasya Badge",
+    "sadhana": "Sadhana Badge",
+    "dharmaLight": "Dharma Light Badge"
+  },
+  "alert": {
+    "permissionTitle": "Permission required",
+    "permissionMessage": "Please allow access to save images.",
+    "savedTitle": "✅ Saved!",
+    "savedMessage": "Your card has been saved to your gallery.",
+    "errorTitle": "Error",
+    "errorMessage": "Unable to save image."
+  },
+  "share": {
+    "title": "Share your Kalpx card",
+    "badge": "🌟 I just earned my Blessing Badge on Kalpx!\n\nKalpX — Connect to Your Roots\nhttps://kalpx.com",
+    "streak": "🔥 I’m on a spiritual streak with Kalpx!\n\nKalpX — Connect to Your Roots\nhttps://kalpx.com",
+    "unavailable": "Sharing is not available on this device.",
+    "error": "Error while sharing."
+  },
+    "sankalpStreaks": "Sankalp Streaks",
+  "mantraStreaks": "Mantra Streaks",
+  "practiceStreaks": "Practice Streaks",
+  "yourBadge": "Your Badge",
+  "yourStreak": "Your Streak",
+  "downloadBadge": "Download Badge Card",
+  "downloadStreak": "Download Streak Card",
+  "noBadgesTitle": "No Badges",
+  "noBadgesMessage": "on KalpX yet — but you’re just ",
+  "9":"9",
+  "dayText":"days away.",
+  "noBadgesAction": "Complete 9 days in a row to earn your first ",
+  "blessedText":"Blessing Badge!",
+  "startJourney": "Start Your Journey",
+  "commitmentGift": "Your commitment to growth is a gift to all beings.",
+  "shareText": "Share",
+  "feelingBlessed":"Feeling Blessed",
+  "days":"days",
+  "cardData":"Every great journey begins with a single intention. Set your Sankalp or start your Mantra practice today — the first step leads to a thousand blessings.",
+  "beginJourney":"Begin Your Sacred Journey",
+  "spiritualText":"Your spiritual path awaits you. Create your first daily practice and begin your journey toward balance and clarity.",
+  "setUp":"Set Up Your Practice",
+  "Streaks":"Streaks",
+  "StreakCount":"Sankalp Streaks ",
+  "mantraCount":"Mantra Streaks",
+  "card1":"Every day you show",
+  "card2":" up, your spirit shines",
+  "card3":"brighter.",
+  "load":"Loading...",
+  "months": {
+  "jan": "Jan",
+  "feb": "Feb",
+  "mar": "Mar",
+  "apr": "Apr",
+  "may": "May",
+  "jun": "Jun",
+  "jul": "Jul",
+  "aug": "Aug",
+  "sep": "Sep",
+  "oct": "Oct",
+  "nov": "Nov",
+  "dec": "Dec"
+},
+"practiceText":"Practice Status for",
+"CompletedText":"Completed Practices : ",
+"notDoneText":"Not Done Practices : ",
+"Close":"Close"
+},
+"profileScreen":{
+  "myProfile": "My Profile",
+  "profileName":"Profile Name",
+  "ageGroup":"Age Group",
+  "categories":"Categories",
+  "languages":"Languages",
+  "updateProfile":"UPDATE PROFILE",
+  "chooseTZ":"Choose Your Timezone",
+  "languageInstruction":"All notifications will be sent in chosen language",
+  "Reminders":"Reminders",
+  "emailNotifications":"Email Notifications",
+  "pushNotifications":"Push Notifications",
+  "continue":"Continue",
+  "chooseHeader":"Choose Language & Timezone"
+},
+"mySadhana": {
+  "findPeace": "Find Peace and Clarity with Daily Practices",
+  "simpleRoutines": "Simple routines to support your well-being, tailored for you",
+  "choose": "Choose",
+  "selectedPractices": "Selected Practices",
+  "noPractices": "No practices selected yet",
+  "selectFromList": "Select from List",
+  "selectSubtitle": "Based on your experience level. Select 1–3 practices.",
+  "createPractice": "Create Practice",
+  "searchPlaceholder": "Search by tag, title, Tutor...",
+  "prev": "Prev",
+  "next": "Next",
+  "page": "Page {{current}} of {{total}}",
+  "confirmPractices": "Confirm My Practices",
+  "levels": {
+    "beginner": {
+      "title": "Beginner",
+      "subtitle": "New to spiritual practices",
+      "option1": "5-10 minute sessions",
+      "option2": "Simple mantras",
+      "option3": "Basic breathing",
+      "option4": "Gentle guidance"
+    },
+    "intermediate": {
+      "title": "Intermediate",
+      "subtitle": "Some experience with practices",
+      "option1": "10-20 minute sessions",
+      "option2": "Traditional mantras",
+      "option3": "Meditation techniques",
+      "option4": "Structured guidance"
+    },
+    "advanced": {
+      "title": "Advanced",
+      "subtitle": "Deeply engaged in spiritual practices",
+      "option1": "20+ minute sessions",
+      "option2": "Complex mantras",
+      "option3": "Advanced techniques",
+      "option4": "Self-directed practice"
+    }
+  }
+},
+"submitPractice":{
+    "descriptionLabel": "Description:",
+  "timeLabel": "Time",
+  "selectTime": "Select Time",
+  "submitMyPractice": "Submit My Practice",
+  "editDetails": "Edit Details",
+  "yourDailyPractice": "Your Daily Practice Tracker",
+  "levelBeginner": "Level Beginner",
+  "reminder" :{
+  "sunrise": "At Sunrise",
+  "wakingUp": "After Waking Up",
+  "morning": "In the Morning",
+  "commute": "During Commute",
+  "workStart": "Before Starting Work or Study",
+  "midDay": "Mid-Day Break",
+  "lunch": "At Lunch",
+  "returnHome": "After Returning Home",
+  "sunset": "At Sunset",
+  "dinner": "At Dinner",
+  "bedtime": "Before Bed",
+  "brahmaMuhurta": "Brahma Muhurta (Pre-Dawn Sacred Time)"
+}
+},
+  "sadanaTracker": {
+    "title": "Honor Your Daily Rituals",
+    "subtitle": "Simple steps to cultivate peace and mindfulness each day.",
+    "noBadge": "No Blessing Badge Earned Yet",
+    "streakCount": "{{count}} days streak",
+    "welcomeText": "Welcome to your profile. Edit your details and Practices",
+    "progressSummary": "{{completed}}/{{total}} practices completed on {{date}}",
+    "addPractices": "Add Practices",
+    "completeTodaysPractices": "Complete Today's Practices",
+    "mantraTitle": "Mantra",
+    "mantraLabel": "Mantra:",
+    "noMantra": "No mantra available",
+    "triggerLabel": "Trigger:",
+    "lastPracticeLabel": "Last Practice:",
+    "suggestedReps": "Suggested reps",
+    "markAsDone": "Mark as Done",
+    "completedButton": "Completed",
+    "reminder": {
+      "schedule_conflict": "Schedule conflict",
+      "no_longer_interested": "No longer interested",
+      "technical_issue": "Technical issue",
+      "other": "Other",
+      "placeholder": "Remainders and Settings"
+    },
+    "calendarTitle": "Dharma Progress Calendar",
+    "calendarSubtitle": "Your Daily practice Tracker",
+    "completedLabel": "Completed ({{count}})",
+    "notDoneLabel": "Not Done ({{count}})",
+    "selectedDateLabel": "Selected date :"
+  },
+  "mantraCard": {
+  "shareSadana": "Share your sādhanā, awaken another heart.",
+  "dailyMantra": "Daily Mantra",
+  "suggestedReps": "Suggested reps:",
+  "willChant": "I will chant this mantra today",
+  "done": "Done",
+  "markDone": "Mark Mantra Done",
+  "doDaily": "Do this mantra daily",
+  "finishToKeepStreak": "Finish today to keep streak",
+  "loading": "Loading your daily mantras...",
+  "noMantras": "No mantras found for today.",
+  "shareDialogTitle": "Share your mantra",
+  
+  "stage1": [
+    { "p": "This sankalp found me today.", "s": "Maybe it's meant for you too — discover yours on KalpX." },
+    { "p": "Sometimes, the right intention finds you.", "s": "Pause. Reflect. Commit. Your sankalp might be waiting on KalpX." },
+    { "p": "This intention spoke to me today.", "s": "Find your own moment of purpose — start on KalpX." },
+    { "p": "A single commitment can change your day.", "s": "Take today's sankalp and feel the shift within — KalpX." },
+    { "p": "The power of intention begins with awareness.", "s": "Discover the sankalp that speaks to you today — KalpX." },
+    { "p": "Not every intention is heard — some are felt.", "s": "Find yours and begin your journey on KalpX." },
+    { "p": "This sankalp touched something within.", "s": "Maybe it'll do the same for you — explore KalpX." }
+  ],
+  
+  "stage2": [
+    { "p": "I've taken today's sankalp as my commitment.", "s": "Commit to your sankalp today — a few moments of purpose await." },
+    { "p": "Today, I choose intention through this sankalp.", "s": "Choose yours and begin your daily rhythm on KalpX." },
+    { "p": "One sankalp. One intention. One new start.", "s": "Start your sankalp practice today — KalpX awaits your first step." },
+    { "p": "I'm doing this sankalp today — for purpose, for presence.", "s": "Do yours and feel the shift — KalpX makes it easy." },
+    { "p": "Every commitment begins with a choice.", "s": "Make yours today — find your sankalp on KalpX." },
+    { "p": "This is my sankalp today.", "s": "Take yours too — a few breaths can change your day." },
+    { "p": "I've begun my sankalp practice for today.", "s": "Start yours now and begin your journey toward purpose." }
+  ],
+  
+  "stage3": [
+    { "p": "Sankalp done for today 🙏 Feeling purposeful and aligned.", "s": "Do yours today on KalpX and start your own streak of intention." },
+    { "p": "I completed my sankalp — purpose feels sacred again.", "s": "Start your streak today — one small commitment at a time on KalpX." },
+    { "p": "Purpose isn't found — it's practiced. Today, I practiced.", "s": "Begin your sankalp streak today — one small commitment at a time on KalpX." },
+    { "p": "One sankalp closer to purpose. One step deeper in dharma.", "s": "Join me — do today's sankalp on KalpX and start your streak." },
+    { "p": "Today's sankalp complete 🌸 My heart feels aligned.", "s": "Start your daily practice today — purpose grows with each commitment." },
+    { "p": "I've done my sankalp for today — a few minutes, lifelong purpose.", "s": "Do yours and begin your streak of intention on KalpX." },
+    { "p": "Sankalp done ✅ Commitment renewed.", "s": "Start your streak on KalpX and feel the power of daily intention." }
+  ]
+},
+"sankalpCard": {
+  "shareHeader": "🎯 Set your Sankalp, manifest your path.",
+  "dailySankalp": "Daily Sankalp",
+  "whyThisMatters": "Why this matters",
+  "suggestedPractice": "Suggested practice",
+  "bestTimes": "Best Times :",
+  "context": "Context :",
+  "source": "Source :",
+  "iWillDo": "I will do this sankalp today",
+  "done": "Done",
+  "markDone": "Mark Sankalp Done",
+  "addToDaily": "Add to my daily practice",
+  "finishStreak": "Finish today to keep streak",
+  "noSankalps": "No Sankalps found for today.",
+  "shareDialogTitle": "Share your Sankalp",
+"root": "Root :",
+  "stage1": [
+    { "p": "This sankalp found me today.", "s": "Maybe it's meant for you too — discover yours on KalpX." },
+    { "p": "Sometimes, the right intention finds you.", "s": "Pause. Reflect. Commit. Your sankalp might be waiting on KalpX." },
+    { "p": "This intention spoke to me today.", "s": "Find your own moment of purpose — start on KalpX." },
+    { "p": "A single commitment can change your day.", "s": "Take today's sankalp and feel the shift within — KalpX." },
+    { "p": "The power of intention begins with awareness.", "s": "Discover the sankalp that speaks to you today — KalpX." },
+    { "p": "Not every intention is heard — some are felt.", "s": "Find yours and begin your journey on KalpX." },
+    { "p": "This sankalp touched something within.", "s": "Maybe it'll do the same for you — explore KalpX." }
+  ],
+
+  "stage2": [
+    { "p": "I've taken today's sankalp as my commitment.", "s": "Commit to your sankalp today — a few moments of purpose await." },
+    { "p": "Today, I choose intention through this sankalp.", "s": "Choose yours and begin your daily rhythm on KalpX." },
+    { "p": "One sankalp. One intention. One new start.", "s": "Start your sankalp practice today — KalpX awaits your first step." },
+    { "p": "I'm doing this sankalp today — for purpose, for presence.", "s": "Do yours and feel the shift — KalpX makes it easy." },
+    { "p": "Every commitment begins with a choice.", "s": "Make yours today — find your sankalp on KalpX." },
+    { "p": "This is my sankalp today.", "s": "Take yours too — a few breaths can change your day." },
+    { "p": "I've begun my sankalp practice for today.", "s": "Start yours now and begin your journey toward purpose." }
+  ],
+
+  "stage3": [
+    { "p": "Sankalp done for today 🙏 Feeling purposeful and aligned.", "s": "Do yours today on KalpX and start your own streak of intention." },
+    { "p": "I completed my sankalp — purpose feels sacred again.", "s": "Start your streak today — one small commitment at a time on KalpX." },
+    { "p": "Purpose isn't found — it's practiced. Today, I practiced.", "s": "Begin your sankalp streak today — one small commitment at a time on KalpX." },
+    { "p": "One sankalp closer to purpose. One step deeper in dharma.", "s": "Join me — do today's sankalp on KalpX and start your streak." },
+    { "p": "Today's sankalp complete 🌸 My heart feels aligned.", "s": "Start your daily practice today — purpose grows with each commitment." },
+    { "p": "I've done my sankalp for today — a few minutes, lifelong purpose.", "s": "Do yours and begin your streak of intention on KalpX." },
+    { "p": "Sankalp done ✅ Commitment renewed.", "s": "Start your streak on KalpX and feel the power of daily intention." }
+  ]
+},
+  "festivalCard": {
+    "loading": "Loading today's festivals...",
+    "noFestival": "No Festival Today",
+    "checkTomorrow": "Check back tomorrow for upcoming Sanatan festivals 🌞",
+    "todayFestival": "Today’s Festival",
+    "upcomingFestival": "Upcoming Festival",
+    "blessingQuote": "“May your soul dance in divine light.”",
+    "sharingNotAvailable": "Sharing is not available on this device.",
+    "shareDialogTitle": "Share this Festival",
+    "fastingRules": "Fasting Rules",
+    "fastingSignificance": "Fasting Significance",
+    "spiritualBenefit": "Spiritual Benefit",
+    "reference": "Sanatan Reference",
+    "referenceLabel": "Reference",
+    "setupPractice": "Set Up Daily Practice",
+    "finishStreak": "Finish today to keep streak",
+    "connectRoots": "Connect to Your Roots",
+    "celebrationPractices": "Celebration Practices",
+    "traditionalFoods": "Traditional Foods",
+    "symbols": "Symbols",
+     "regionalCustoms": "Regional Customs"
+  },
+  "wisdomCard": {
+    "loading": "Loading daily wisdom...",
+    "noWisdomTitle": "No Wisdom Available",
+    "noWisdomSubtitle": "Check back tomorrow for daily Sanatan wisdom 🌞",
+    "spreadTruth": "Spread the eternal truth, inspire every soul.",
+    "dailyWisdom": "Daily Wisdom",
+    "source": "Source",
+    "setRoutine": "Set Up Daily Routine",
+    "finishStreak": "Finish today to keep your streak",
+    "connectRoots": "Connect to Your Roots",
+    "shareTitle": "Share this Wisdom",
+    "shareNotAvailable": "Sharing is not available on this device.",
+    "shareQuotes": [
+      "🪔 Let this wisdom illuminate your day.",
+      "🌿 Ancient truth. Timeless light.",
+      "💫 Reflect. Awaken. Grow with purpose.",
+      "🌸 Every verse holds a seed of peace.",
+      "🔥 A moment of wisdom can change your world."
+    ]
+  },
+  "DailyDharmaCard":{
+    "dailyPracticeTitle": "Start Your Daily Practice!",
+    "startButton":"Start Daily Practice",
+    "socialProofQuote1": "🕉️ One mindful pause anchors your day. Start with KalpX.",
+    "socialProofQuote2": "🌱 Bring calm to your commute. Daily rituals with KalpX.",
+    "socialProofQuote3": "🙏 Mark your daily mantra, earn blessings. Begin with KalpX.",
+    "socialProofQuote4": "📖 Tiny spiritual acts, huge shifts. KalpX guides you.",
+    "socialProofQuote5": "🪔 Even one pause can change your day. Practice with KalpX.",
+    "socialProofQuote6": "🌸 Daily mindfulness, big impact. Join KalpX’s journey.",
+    "socialProofQuote7": "🌼 Thousands find peace daily with KalpX’s rituals.",
+    "socialProofQuote8": "🛕 Center your day with small spiritual steps on KalpX.",
+    "socialProofQuote9": "🌍 Start your daily practice, reconnect with your roots.",
+    "socialProofQuote10": "💫 KalpX: Your guide to daily mindfulness and growth."
+  },
+  "privacy": {
+    "title": "Privacy Policy",
+    "effectiveDate": "Effective Date: May 5, 2025",
+    "intro": "KalpX (\"we\", \"our\", or \"us\") values your privacy. This Privacy Policy explains how we collect, use, store, and protect your information when you access or use the KalpX platform, including through our website or mobile applications.",
+    "section1Title": "1. Information We Collect",
+    "section1Content": "Information You Provide: Name, email, optional profile info.\nAutomatically Collected: UUID, video events, IP, browser, etc.",
+    "section2Title": "2. How We Use Your Information",
+    "section2Content": "To authenticate users, personalize content, track engagement, improve KalpX, and comply with legal obligations.",
+    "section3Title": "3. Data Sharing and Third Parties",
+    "section3Content": "We do not sell your data. We may share it with hosting, analytics, or legal entities as needed.",
+    "section4Title": "4. Cookies and Tracking",
+    "section4Content": "Used to remember your preferences, track engagement anonymously, and improve recommendations.",
+    "section5Title": "5. How We Protect Your Data",
+    "section5Content": "SSL, authentication controls, and limited access are used to keep your data safe.",
+    "section6Title": "6. Your Rights",
+    "section6Content": "You can access, update, or delete your data. Contact us any time.",
+    "section7Title": "7. Data Deletion",
+    "section7Content": "To delete your KalpX account and data, email us at support@kalpx.com with subject line: \"Delete My KalpX Account\".",
+    "section8Title": "8. Contact Us",
+    "section8Content": "Email: support@kalpx.com"
+  }
+}

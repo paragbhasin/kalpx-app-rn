@@ -1,0 +1,70 @@
+{
+  "expo": {
+    "name": "kalpx",
+    "slug": "kalpx",
+    "version": "1.0.3",
+    "orientation": "portrait",
+    "icon": "./assets/AppIconImg.jpeg",
+    "scheme": "kalpx",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": false,
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.kalpx.app"
+    },
+    "android": {
+      "versionCode": 12,
+      "package": "com.kalpx.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/AppIconImg.jpeg",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ],
+      [
+        "@stripe/stripe-react-native",
+        {
+          "merchantIdentifier": "",
+          "enableGooglePay": true
+        }
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.473187060791-96pucdifumqrnn7lb5l6bboqladmarat",
+          "webClientId": "473187060791-pqas4l17udkmt37re2l3fkdfs585onqt.apps.googleusercontent.com"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7461904f-1bca-4590-bc3b-c839d2768e44"
+      }
+    },
+    "scripts": {
+      "postinstall": "patch-package"
+    }
+  }
+}

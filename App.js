@@ -1,0 +1,211 @@
+// ✅ Must be the very first import
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { NavigationContainer } from "@react-navigation/native";
+import { useFonts } from "expo-font";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect, useState } from "react";
+import 'react-native-get-random-values';
+import { MenuProvider } from "react-native-popup-menu";
+import { Provider, useDispatch, useSelector } from "react-redux";
+
+import SnackBar from "./src/components/SnackBar";
+import "./src/config/i18n";
+import { navigationRef } from "./src/Shared/Routes/NavigationService";
+import Routes from "./src/Shared/Routes/Routes";
+import { store } from "./src/store";
+import { hideSnackBar } from "./src/store/snackBarSlice";
+
+SplashScreen.preventAutoHideAsync().catch(() => {});
+
+function SnackBarContainer() {
+  const dispatch = useDispatch();
+  const { visible, message } = useSelector((state) => state.snackBar);
+
+  useEffect(() => {
+    if (!visible) return;
+    const timer = setTimeout(() => dispatch(hideSnackBar()), 3000);
+    return () => clearTimeout(timer);
+  }, [visible, dispatch]);
+
+  return <SnackBar visible={visible} message={message} />;
+}
+
+export default function App() {
+  const [fontsLoaded, error] = useFonts({
+    GelicaRegular: require("./assets/fonts/gelica-regular.otf"),
+    GelicaLight: require("./assets/fonts/gelica-light.otf"),
+    GelicaMedium: require("./assets/fonts/gelica-medium.otf"),
+    GelicaBold: require("./assets/fonts/gelica-bold.otf"),
+  });
+
+const [initialRoute, setInitialRoute] = useState(null);
+
+
+
+GoogleSignin.configure({
+  webClientId: '473187060791-pqas4l17udkmt37re2l3fkdfs585onqt.apps.googleusercontent.com',
+  iosClientId: '473187060791-96pucdifumqrnn7lb5l6bboqladmarat.apps.googleusercontent.com',
+    offlineAccess: true,
+});
+
+
+
+
+
+  // useEffect(() => {
+  //   GoogleSignin.configure({
+  //     webClientId: '473187060791-pqas4l17udkmt37re2l3fkdfs585onqt.apps.googleusercontent.com',
+  //     offlineAccess: true,
+  //   });
+  // }, []);
+
+  useEffect(() => {
+    const init = async () => {
+      if (!fontsLoaded && !error) return;
+      try {
+        const accessToken = await AsyncStorage.getItem("access_token");
+        const refreshToken = await AsyncStorage.getItem("refresh_token");
+        setInitialRoute(accessToken && refreshToken ? "AppDrawer" : "Welcome");
+        await new Promise(res => setTimeout(res, 300));
+      } catch {
+        setInitialRoute("Welcome");
+      } finally {
+        await SplashScreen.hideAsync().catch(() => {});
+      }
+    };
+    init();
+  }, [fontsLoaded, error]);
+
+  if (!fontsLoaded || initialRoute === null) return null;
+
+  return (
+    <MenuProvider>
+      <Provider store={store}>
+        <NavigationContainer ref={navigationRef}>
+          <Routes initialRouteName={initialRoute} />
+          <SnackBarContainer />
+        </NavigationContainer>
+      </Provider>
+    </MenuProvider>
+  );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+// // ✅ Must be the very first import in the entire file
+// // This ensures crypto.getRandomValues() is available for uuid
+// import 'react-native-get-random-values';
+
+// import AsyncStorage from "@react-native-async-storage/async-storage";
+// import { GoogleSignin } from '@react-native-google-signin/google-signin';
+// import { NavigationContainer } from "@react-navigation/native";
+// import { useFonts } from "expo-font";
+// import * as SplashScreen from "expo-splash-screen";
+// import React, { useEffect, useState } from "react";
+// import { MenuProvider } from "react-native-popup-menu";
+// import { Provider, useDispatch, useSelector } from "react-redux";
+// import SnackBar from "./src/components/SnackBar";
+// import "./src/config/i18n";
+// import { navigationRef } from "./src/Shared/Routes/NavigationService";
+// import Routes from "./src/Shared/Routes/Routes";
+// import { store } from "./src/store";
+// import { hideSnackBar } from "./src/store/snackBarSlice";
+
+// // ✅ Prevent splash from auto-hiding immediately
+// SplashScreen.preventAutoHideAsync().catch(() => {});
+
+// function SnackBarContainer() {
+//   const dispatch = useDispatch();
+//   const { visible, message } = useSelector((state: any) => state.snackBar);
+
+//   useEffect(() => {
+//     let timer: NodeJS.Timeout;
+//     if (visible) {
+//       timer = setTimeout(() => dispatch(hideSnackBar()), 3000);
+//     }
+//     return () => clearTimeout(timer);
+//   }, [visible, dispatch]);
+
+//   return <SnackBar visible={visible} message={message} />;
+// }
+
+// export default function App() {
+//   const [fontsLoaded, error] = useFonts({
+//     GelicaRegular: require("./assets/fonts/gelica-regular.otf"),
+//     GelicaLight: require("./assets/fonts/gelica-light.otf"),
+//     GelicaMedium: require("./assets/fonts/gelica-medium.otf"),
+//     GelicaBold: require("./assets/fonts/gelica-bold.otf"),
+//   });
+
+//   const [initialRoute, setInitialRoute] = useState<string | null>(null);
+
+//   useEffect(() => {
+//   GoogleSignin.configure({
+//     webClientId: '473187060791-pqas4l17udkmt37re2l3fkdfs585onqt.apps.googleusercontent.com', // from Google Cloud
+//     offlineAccess: true,
+//   });
+// }, []);
+
+//   useEffect(() => {
+//     const init = async () => {
+//       try {
+//         // ⏳ Wait for fonts first
+//         if (!fontsLoaded && !error) return;
+
+//         // 🔑 Retrieve tokens
+//         const accessToken = await AsyncStorage.getItem("access_token");
+//         const refreshToken = await AsyncStorage.getItem("refresh_token");
+
+//         console.log("🔥 Startup Tokens:", { accessToken, refreshToken });
+
+//         // 🚪 Decide initial route
+//         if (accessToken && refreshToken) {
+//           setInitialRoute("AppDrawer");
+//         } else {
+//           setInitialRoute("Welcome");
+//         }
+
+//         // 🕒 Small delay ensures NavigationContainer initializes properly
+//         await new Promise((res) => setTimeout(res, 300));
+//       } catch (err) {
+//         console.log("Error checking tokens:", err);
+//         setInitialRoute("Welcome");
+//       } finally {
+//         // ✅ Hide splash when everything is ready
+//         await SplashScreen.hideAsync().catch(() => {});
+//       }
+//     };
+
+//     init();
+//   }, [fontsLoaded, error]);
+
+//   // ⏸️ Wait until fonts + token check complete
+//   if (!fontsLoaded || initialRoute === null) {
+//     return null;
+//   }
+
+//   return (
+//     <MenuProvider>
+//       <Provider store={store}>
+//         <NavigationContainer ref={navigationRef}>
+//           <Routes initialRouteName={initialRoute} />
+//           <SnackBarContainer />
+//         </NavigationContainer>
+//       </Provider>
+//     </MenuProvider>
+//   );
+// }
+
+
+

@@ -187,38 +187,37 @@ const FestivalCard = () => {
               <View>
                   <ScrollView
                   showsVerticalScrollIndicator={true}
-                  style={{ maxHeight: 420, marginTop: 8 }}
+                  style={{ maxHeight: 520}}
                   contentContainerStyle={{ paddingBottom: 10 }}
                 >
-                <TextComponent type="semiBoldText" style={{ alignSelf: "flex-end" }}>
+                       <ImageBackground
+                                                      source={require("../../assets/CardBG.png")}
+                                                      // resizeMode="center"
+                                                      style={styles.partialBgContainer}
+                                                      imageStyle={styles.partialBgImage}
+                                                    >
+                <TextComponent type="semiBoldText" style={{  color:Colors.Colors.App_theme }}>
                   {t("festivalCard.blessingQuote")}
                 </TextComponent>
 
                 {/* Header */}
                 <View style={styles.headerRow}>
-                  <TextComponent type="semiBoldText" style={{ color: Colors.Colors.BLACK }}>
+                  <TextComponent       type="cardHeaderText"
+                    style={{marginLeft: 25}}>
                     {moment(festival.date).isSame(moment(), "day")
                       ? t("festivalCard.todayFestival")
                       : t("festivalCard.upcomingFestival")}
                   </TextComponent>
                   <TouchableOpacity onPress={() => handleShareFestival(festival)} style={{ flexDirection: "row", alignItems: "center" }}>
-                    <Image source={require("../../assets/Streak_S1.png")} style={styles.streakIcon} />
+                    {/* <Image source={require("../../assets/Streak_S1.png")} style={styles.streakIcon} />
                     <Image source={require("../../assets/Streak_S2.png")} style={styles.streakIcon} />
-                    <Image source={require("../../assets/Streak_S3.png")} style={styles.streakIcon} />
+                    <Image source={require("../../assets/Streak_S3.png")} style={styles.streakIcon} /> */}
                     <Image source={require("../../assets/Streak_S4.png")} style={styles.streakIcon} />
-                  </TouchableOpacity>
-                </View>
-
-                {/* Name + Date + Video */}
-                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                  <TextComponent type="semiBoldText" style={{ color: Colors.Colors.App_theme }}>
-                    {festival.name}
-                  </TextComponent>
-                  <TouchableOpacity
+                      <TouchableOpacity
                     style={{
                       marginLeft: 8,
                       padding: 6,
-                      backgroundColor: Colors.Colors.App_theme,
+                      backgroundColor: Colors.Colors.Yellow,
                       borderRadius: 50,
                       justifyContent: "center",
                       alignItems: "center",
@@ -274,70 +273,83 @@ const FestivalCard = () => {
                   >
                     <Icon name="videocam-outline" size={18} color="#fff" />
                   </TouchableOpacity>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Name + Date + Video */}
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+                  <TextComponent                type="cardText"
+                                      style={{ color: Colors.Colors.blue_text,textAlign:"center",marginHorizontal:10 }}>
+                    {festival.name}
+                  </TextComponent>
+                
                 </View>
 
                 <TextComponent
-                  type="semiBoldText"
-                  style={{ color: Colors.Colors.App_theme, marginVertical: 6 }}
+  type="semiBoldText"
+                    style={{
+                      color: Colors.Colors.blue_text,
+                      marginVertical: 6,textAlign:"center",marginHorizontal:10
+                    }}
                 >
                   {moment(festival.date, "YYYY-MM-DD").format("MMM DD, YYYY")}
                 </TextComponent>
-
-                {/* Quote */}
-                <View style={styles.quoteBox}>
-                  <TextComponent type="mediumText" style={styles.quoteText}>
+</ImageBackground>
+<View style={{marginHorizontal:6,alignItems:"center"}}>
+                {/* <View style={styles.quoteBox}> */}
+                  <TextComponent type="streakSadanaText" style={{textAlign:"center"}}>
                     {festival.quote.text}
                   </TextComponent>
-                  <TextComponent type="mediumText" style={styles.quoteSource}>
+                  <TextComponent type="headerSubBoldText" style={{alignSelf:"flex-end"}}>
                     — {festival.quote.source}
                   </TextComponent>
-                </View>
+                {/* </View> */}
 
                 {/* ✅ ScrollView starts at Fasting Rules */}
-                  <TextComponent type="cardText" style={styles.sectionTitle}>
+                  <TextComponent type="headerSubBoldText" style={{}}>
                     {t("festivalCard.fastingRules")}
                   </TextComponent>
-                  <TextComponent type="mediumText" style={styles.sectionText}>
+                  <TextComponent type="streakSadanaText" style={{textAlign:"center"}}>
                     {festival.fasting.rules}
                   </TextComponent>
 
-                  <TextComponent type="cardText" style={styles.sectionTitle}>
+                  <TextComponent type="headerSubBoldText" style={{marginTop:4}}>
                     {t("festivalCard.fastingSignificance")}
                   </TextComponent>
-                  <TextComponent type="mediumText" style={styles.sectionText}>
+                  <TextComponent type="streakSadanaText" style={{textAlign:"center"}}>
                     {festival.fasting.significance}
                   </TextComponent>
 
-                  <TextComponent type="cardText" style={styles.sectionTitle}>
+                  <TextComponent type="headerSubBoldText" style={{marginTop:4}}>
                     {t("festivalCard.spiritualBenefit")}
                   </TextComponent>
-                  <TextComponent type="mediumText" style={styles.sectionText}>
+                  <TextComponent type="streakSadanaText" style={{textAlign:"center"}}>
                     {festival.spiritualBenefit}
                   </TextComponent>
 
-                  <TextComponent type="cardText" style={styles.sectionTitle}>
-                    {t("festivalCard.reference")}
+                  <TextComponent type="headerSubBoldText" style={{marginTop:4}}>
+                    {t("festivalCard.story")}
                   </TextComponent>
-                  <TextComponent type="mediumText" style={styles.sectionText}>
+                  <TextComponent type="streakSadanaText" style={{textAlign:"center"}}>
                     {festival.mythology.story}
                   </TextComponent>
                   <TextComponent
-                    type="mediumText"
-                    style={{ color: Colors.Colors.Light_grey, marginTop: 4 }}
+                    type="headerSubBoldText"
+                    style={{ marginTop: 4 }}
                   >
-                    {t("festivalCard.referenceLabel")}:{festival.mythology.reference}
+                  {t("festivalCard.source")} :<TextComponent type="streakSadanaText" >{festival.mythology.reference}</TextComponent>
                   </TextComponent>
 
-                  <TextComponent type="mediumText" style={{ marginTop: 4 }}>
+                  <TextComponent type="streakSadanaText" style={{textAlign:"center"}}>
                     {Array.isArray(festival.deity) ? festival.deity.join(", ") : festival.deity}
                   </TextComponent>
-                  <TextComponent
-                    type="mediumText"
-                    style={{ color: Colors.Colors.App_theme, marginTop: 2, marginBottom: 8 }}
+                   <TextComponent type="streakSadanaText"
+                    style={{ textAlign:"center",color: Colors.Colors.blue_text, marginTop: 2, marginBottom: 8 }}
                   >
                     {festival.fasting.observers}
                   </TextComponent>
-<View
+                  </View>
+{/* <View
   style={{
     flexDirection: "row",
     justifyContent: "space-between",
@@ -354,14 +366,13 @@ const FestivalCard = () => {
         alignItems:"center"
       }}
     >
-      {/* Header */}
       <TextComponent
         type="cardText"
         style={{
           color: Colors.Colors.Light_black,
           textAlign: "center",
-          marginBottom: 8, // gives consistent space before items start
-          minHeight: 50,   // ✅ ensures all headers take same vertical space
+          marginBottom: 8,
+          minHeight: 50, 
           justifyContent: "center",
           textAlignVertical: "center",
           alignSelf:"center"
@@ -369,8 +380,6 @@ const FestivalCard = () => {
       >
         {t(`festivalCard.${key}`)}
       </TextComponent>
-
-      {/* Items */}
       <View style={{ alignItems: "center" }}>
         {(festival as any)[key]?.map((item: string, i: number) => (
           <TextComponent
@@ -388,8 +397,53 @@ const FestivalCard = () => {
       </View>
     </View>
   ))}
-</View>
+</View> */}
 
+<View style={{
+  // borderRadius: 6,
+    overflow: "hidden",
+    marginVertical: 10,
+    backgroundColor: "#FFF4CE",
+    // borderWidth: 1,
+    // borderColor: Colors.Colors.App_theme,
+    // ✅ elevation + shadow
+    elevation: 3,
+    shadowColor: Colors.Colors.App_theme,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+}}>
+  <View style={{    flexDirection: "row",backgroundColor:"#FFF4CE",borderBottomWidth: 1,borderBottomColor: Colors.Colors.App_theme}}>
+    {["celebrationPractices", "traditionalFoods", "symbols"].map((key, idx) => (
+      <View key={idx} style={{ flex: 1,alignItems: "center",justifyContent: "center", paddingVertical: 8,paddingHorizontal: 4,}}>
+        <TextComponent type="cardText" style={styles.headerText}>
+          {t(`festivalCard.${key}`)}
+        </TextComponent>
+      </View>
+    ))}
+  </View>
+  {Array.from(
+    { length: Math.max(
+      (festival.celebrationPractices?.length || 0),
+      (festival.traditionalFoods?.length || 0),
+      (festival.symbols?.length || 0)
+    ) }
+  ).map((_, rowIndex) => (
+    <View key={rowIndex} style={{flexDirection: "row",backgroundColor:"#FFF4CE",flex:1}}>
+      {["celebrationPractices", "traditionalFoods", "symbols"].map((key, colIndex) => {
+        const items = (festival as any)[key] || [];
+        const value = items[rowIndex] || "";
+        return (
+          <View key={colIndex} style={[styles.tableCell, styles.dataCell]}>
+            <TextComponent type="mediumText" style={styles.cellText}>
+              {value || "—"}
+            </TextComponent>
+          </View>
+        );
+      })}
+    </View>
+  ))}
+</View>
 
                   {/* <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                     {["celebrationPractices", "traditionalFoods", "symbols"].map((key, idx) => (
@@ -420,34 +474,36 @@ const FestivalCard = () => {
                       </View>
                     ))}
                   </View> */}
+<View style={{marginHorizontal:2,alignItems:"center"}}>
 
-                  <TextComponent type="cardText" style={styles.sectionTitle}>
+                  <TextComponent type="streakSadanaText" style={{marginTop:6}}>
                     {t("festivalCard.regionalCustoms")}
                   </TextComponent>
-                  <TextComponent type="mediumText" style={styles.sectionText}>
+                  <TextComponent type="mediumText" style={{marginTop:4,textAlign:"center",color:Colors.Colors.BLACK}}>
                     {typeof festival.regionalCustoms === "object"
                       ? Object.entries(festival.regionalCustoms)
                           .map(([region, desc]) => `${region}: ${desc}`)
                           .join("\n")
                       : festival.regionalCustoms || "—"}
                   </TextComponent>
+                  </View>
                 </ScrollView>
                 {/* ✅ ScrollView ends before buttons */}
 
                 {/* Buttons */}
-                <View style={styles.buttonRow}>
+                {/* <View style={styles.buttonRow}> */}
                   <TouchableOpacity
                     style={styles.outlineBtn}
                     onPress={() => navigation.navigate("MySadana")}
                   >
-                    <TextComponent type="semiBoldText">
+                    <TextComponent type="semiBoldText" style={{ color: Colors.Colors.white}}>
                       {t("festivalCard.setupPractice")}
                     </TextComponent>
                   </TouchableOpacity>
-                </View>
+                {/* </View> */}
 
                 {/* Footer */}
-                <View style={styles.footer}>
+                {/* <View style={styles.footer}>
                   <TextComponent type="semiBoldText" style={{ color: Colors.Colors.Light_grey }}>
                     {t("festivalCard.finishStreak")}
                   </TextComponent>
@@ -455,7 +511,7 @@ const FestivalCard = () => {
                     source={require("../../assets/Streak_A1.png")}
                     style={{ height: 20, width: 20, marginLeft: 4 }}
                   />
-                </View>
+                </View> */}
               </View>
             </Card>
 
@@ -570,9 +626,11 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 6,
     elevation: 3,
-    backgroundColor: Colors.Colors.white,
-    padding: 16,
+     backgroundColor: "#FFFCF7",
     width: FontSize.CONSTS.DEVICE_WIDTH * 0.91,
+        overflow: "hidden",
+            borderWidth:1,
+            borderColor:Colors.Colors.App_theme
   },
   arrowButton: {
     position: "absolute",
@@ -585,8 +643,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     zIndex: 99,
   },
-  headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginVertical: 12 },
-  streakIcon: { height: 20, width: 20, marginRight: 8 },
+  headerRow: {     flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginVertical: 6,},
+   streakIcon: { height: 30, width: 30, marginLeft: 25,marginRight:15 },
   quoteBox: {
     backgroundColor: "#FDFBF6",
     borderRadius: 6,
@@ -602,16 +663,78 @@ const styles = StyleSheet.create({
   sectionText: { marginTop: 4, color: Colors.Colors.BLACK },
   buttonRow: { flexDirection: "row", justifyContent: "space-between", marginVertical: 15 },
   outlineBtn: {
-    flex: 1,
-    borderColor: Colors.Colors.Yellow,
-    borderWidth: 1,
+    // flex: 1,
+    backgroundColor: Colors.Colors.Yellow,
+    //  borderWidth: 1,
     borderRadius: 6,
-    paddingVertical: 10,
-    marginRight: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+       marginHorizontal:16,
+    // marginLeft: 8,
     justifyContent: "center",
     alignItems: "center",
+    marginVertical:15
   },
   footer: { alignSelf: "center", alignItems: "center", flexDirection: "row" },
+    partialBgContainer: {
+        alignSelf: "center",
+        justifyContent: "center",
+        alignItems: "center",
+        paddingVertical: 8,
+        paddingHorizontal: 10,
+        borderTopRightRadius: 16,
+        borderTopLeftRadius:16,
+        // marginTop: 8,
+        width: FontSize.CONSTS.DEVICE_WIDTH ,
+      },
+      partialBgImage: {
+         borderTopRightRadius: 16,
+        borderTopLeftRadius:16,
+        alignSelf: "center",
+        justifyContent: "center",
+        alignItems: "center",
+        // resizeMode: "center",
+        // opacity: 0.9, // optional: adjust background intensity
+      },
+      tableContainer: {
+    borderRadius: 4,
+    overflow: "hidden",
+    // marginHorizontal: 6,
+    marginVertical: 10,
+    backgroundColor:"#FFF4CE"
+  },
+  tableRow: {
+    flexDirection: "row",
+    backgroundColor:"#FFF4CE",
+  },
+  tableHeader: {
+    backgroundColor: "red", // light header background
+  },
+  tableCell: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 4,
+    backgroundColor:""
+    // borderRightWidth: 1,
+    // borderColor: Colors.Colors.BLACK,
+  },
+  headerCell: {
+    // borderRightWidth: 1,
+    // borderColor: Colors.Colors.BLACK,
+  },
+  dataCell: {
+    backgroundColor: "#FFF4CE",
+  },
+   headerText: {
+    color: Colors.Colors.App_theme,
+    textAlign: "center",
+  },
+  cellText: {
+    color: Colors.Colors.BLACK,
+    textAlign: "center",
+  },
 });
 
 

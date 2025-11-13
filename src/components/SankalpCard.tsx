@@ -200,20 +200,22 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
             <View>
                  <ScrollView
                 showsVerticalScrollIndicator={true}
-                style={{ maxHeight: 350, marginTop: 5 }}
+                style={{ maxHeight: 350}}
                 contentContainerStyle={{ paddingBottom: 10 }}
               >
-              <TextComponent type="semiBoldText" style={{ alignSelf: "flex-end" }}>
-                {t("sankalpCard.shareHeader")}
-              </TextComponent>
+                      <ImageBackground
+                                    source={require("../../assets/CardBG.png")}
+                                    // resizeMode="center"
+                                    style={styles.partialBgContainer}
+                                    imageStyle={styles.partialBgImage}
+                                  >
+              <TextComponent type="semiBoldText" style={{  color:Colors.Colors.App_theme }}>
+{t("sankalpCard.shareHeader")} </TextComponent>
 
               <View style={styles.header}>
                 <TextComponent
-                  type="semiBoldText"
-                  style={{
-                    color: Colors.Colors.BLACK,
-                    fontSize: FontSize.CONSTS.FS_16,
-                  }}
+                   type="cardHeaderText"
+                    style={{marginLeft: 25}}
                 >
                   {t("sankalpCard.dailySankalp")}
                 </TextComponent>
@@ -221,36 +223,11 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                   onPress={() => handleShareSankalp()}
                   style={{ flexDirection: "row", alignItems: "center" }}
                 >
-                  <Image source={require("../../assets/Streak_S1.png")} style={styles.streakIcon} />
+                  {/* <Image source={require("../../assets/Streak_S1.png")} style={styles.streakIcon} />
                   <Image source={require("../../assets/Streak_S2.png")} style={styles.streakIcon} />
-                  <Image source={require("../../assets/Streak_S3.png")} style={styles.streakIcon} />
+                  <Image source={require("../../assets/Streak_S3.png")} style={styles.streakIcon} /> */}
                   <Image source={require("../../assets/Streak_S4.png")} style={styles.streakIcon} />
-                </TouchableOpacity>
-              </View>
-{/* <TouchableOpacity
-  onPress={() => {
-    // Always use English text for parsing tags
-    const englishSankalp = DAILY_SANKALPS.find(s => s.id === currentSankalp.id);
-    const englishSource = englishSankalp?.source || currentSankalp.source;
-
-    const tags = parseSourceToTags(englishSource, currentSankalp.id);
-console.log("tags >>>>>>>>>>>>",tags);
-    // 🔹 Just send the array as-is
-    navigation.navigate("RelatedVideosScreen", { tag: tags });
-  }}
-  style={{
-    marginLeft: 8,
-    padding: 6,
-    backgroundColor: Colors.Colors.App_theme,
-    borderRadius: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    alignSelf: "flex-end",
-  }}
->
-  <Icon name="videocam-outline" size={18} color="#fff" />
-</TouchableOpacity> */}
-<TouchableOpacity
+                  <TouchableOpacity
   onPress={() => {
   // ✅ always get English source text, regardless of app language
     const englishSource = getEnglishSourceForSankalp(currentSankalp.id);
@@ -266,7 +243,7 @@ console.log("tags >>>>>>>>>>>>",tags);
   style={{
     marginLeft: 8,
     padding: 6,
-    backgroundColor: Colors.Colors.App_theme,
+    backgroundColor: Colors.Colors.Yellow,
     borderRadius: 50,
     justifyContent: "center",
     alignItems: "center",
@@ -275,142 +252,145 @@ console.log("tags >>>>>>>>>>>>",tags);
 >
   <Icon name="videocam-outline" size={18} color="#fff" />
 </TouchableOpacity>
-
-
-              {/* Scroll content */}
-           
-                <TextComponent
-                  type="semiBoldText"
-                  style={{
-                    color: Colors.Colors.Light_black,
-                    fontSize: FontSize.CONSTS.FS_14,
-                  }}
+                </TouchableOpacity>
+              </View>
+<TextComponent
+                                 type="cardText"
+                                 style={{ color: Colors.Colors.blue_text,textAlign:"center",marginHorizontal:10 }}
                 >
                   {t(currentSankalp.i18n?.short) || currentSankalp.short_text}
                 </TextComponent>
-
+</ImageBackground>
+  <View style={{paddingHorizontal:16,alignItems:"center"}}>
                 <TextComponent
-                  type="semiBoldText"
+                  type="streakSadanaText"
                   style={{
-                    color: Colors.Colors.Light_black,
-                    marginVertical: 6,
-                    fontSize: FontSize.CONSTS.FS_14,
+                    color: Colors.Colors.BLACK,
                   }}
                 >
                   {t("sankalpCard.whyThisMatters")}
                 </TextComponent>
-                <TextComponent style={{ fontSize: FontSize.CONSTS.FS_14 }}>
-                  {t(currentSankalp.i18n?.tooltip) || currentSankalp.tooltip}
-                </TextComponent>
-
-                <TextComponent
-                  type="semiBoldText"
+                <TextComponent  type="mediumText"
                   style={{
                     color: Colors.Colors.Light_black,
-                    marginVertical: 6,
-                    fontSize: FontSize.CONSTS.FS_14,
+                    marginVertical:2,textAlign:"center"
+                  }}
+                >
+                  {t(currentSankalp.i18n?.tooltip) || currentSankalp.tooltip}
+                </TextComponent>
+                <TextComponent
+                   type="streakSadanaText"
+                  style={{
+                    color: Colors.Colors.BLACK,
                   }}
                 >
                   {t("sankalpCard.suggestedPractice")}
                 </TextComponent>
-                <TextComponent style={{ fontSize: FontSize.CONSTS.FS_14 }}>
+                <TextComponent type="mediumText"
+                  style={{
+                    color: Colors.Colors.Light_black,
+                    marginVertical:2,textAlign:"center"
+                  }}>
                   {t(currentSankalp.i18n?.suggested) || currentSankalp.suggested_practice}
                 </TextComponent>
-
                 <View style={styles.row}>
-                  <TextComponent type="semiBoldText" style={styles.root}>
+                  <TextComponent type="headerSubBoldText" style={styles.root}>
                     {t("sankalpCard.root")}
                   </TextComponent>
                   <TextComponent
-                    type="semiBoldText"
+                    type="headerSubBoldText"
                     style={{
-                      color: Colors.Colors.Light_grey,
-                      fontSize: FontSize.CONSTS.FS_14,
+                      color: Colors.Colors.BLACK,
                     }}
                   >
                     {t(`sankalps.${currentSankalp.id}.root`) || currentSankalp.root}
                   </TextComponent>
                 </View>
+         {currentSankalp.meta?.timeOfDay && (
+  <View style={styles.bestTimeWrapper}>
+    <View style={styles.bestTimeInner}>
+      <TextComponent type="headerSubBoldText" style={styles.root}>
+        {t("sankalpCard.bestTimes")}
+      </TextComponent>
 
-                {currentSankalp.meta?.timeOfDay && (
-                  <View style={styles.row}>
-                    <TextComponent type="semiBoldText" style={styles.root}>
-                      {t("sankalpCard.bestTimes")}
-                    </TextComponent>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                      {currentSankalp.meta.timeOfDay.map((tag, i) => (
-                        <View key={i} style={styles.tag}>
-                          <TextComponent
-                            type="semiBoldText"
-                            style={{
-                              color: Colors.Colors.Light_grey,
-                              fontSize: FontSize.CONSTS.FS_14,
-                            }}
-                          >
-                            {t(`sankalpCard.best.${tag}`, { defaultValue: tag })}
-                          </TextComponent>
-                        </View>
-                      ))}
-                    </ScrollView>
-                  </View>
-                )}
+      <View style={styles.tagsRow}>
+        {currentSankalp.meta.timeOfDay.map((tag, i) => (
+          <View key={i} style={styles.tag}>
+            <TextComponent
+              type="headerSubBoldText"
+              style={{ color: Colors.Colors.BLACK }}
+            >
+              {t(`sankalpCard.best.${tag}`, { defaultValue: tag })}
+            </TextComponent>
+          </View>
+        ))}
+      </View>
+    </View>
+  </View>
+)}
+{currentSankalp.meta?.context && (
+  <View style={styles.bestTimeWrapper}>
+    <View style={styles.bestTimeInner}>
+      <TextComponent type="headerSubBoldText" style={{...styles.root,color: Colors.Colors.blue_text,}}>
+        {t("context")} : 
+      </TextComponent>
 
-                {currentSankalp.meta?.context && (
-                  <View style={styles.row}>
-                    <TextComponent type="semiBoldText" style={styles.root}>
-                      {t("context")}
-                    </TextComponent>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                      {currentSankalp.meta.context.map((tag, i) => (
-                        <View key={i} style={styles.tag}>
-                          <TextComponent
-                            type="semiBoldText"
-                            style={{
-                              color: Colors.Colors.App_theme,
-                              fontSize: FontSize.CONSTS.FS_14,
-                            }}
-                          >
-                            #{t(`context.${tag}`, { defaultValue: tag })}
-                          </TextComponent>
-                        </View>
-                      ))}
-                    </ScrollView>
-                  </View>
-                )}
-
-                <View style={styles.row}>
-                  <TextComponent type="semiBoldText" style={styles.root}>
+      <View style={styles.tagsRow}>
+        {currentSankalp.meta.context.map((tag, i) => (
+          <View key={i} style={styles.tag}>
+            <TextComponent
+              type="headerSubBoldText"
+              style={{
+                color: Colors.Colors.blue_text,
+              }}
+            >
+              #{t(`context.${tag}`, { defaultValue: tag })}
+            </TextComponent>
+          </View>
+        ))}
+      </View>
+    </View>
+  </View>
+)}
+                <View style={{alignItems:"center"}}>
+                  <TextComponent type="headerSubBoldText" style={{...styles.root,color: Colors.Colors.blue_text,}}>
                     {t("sankalpCard.source")}
                   </TextComponent>
                   <TextComponent
-                    type="semiBoldText"
+                    type="streakSadanaText"
                     style={{
-                      color: Colors.Colors.App_theme,
-                      fontSize: FontSize.CONSTS.FS_14,
-                      // paddingLeft:10,
-                        flexShrink: 1,
-      flexWrap: "wrap",
+                      color: Colors.Colors.blue_text,
+                      textAlign:"center",
                     }}
                   >
                     {t(`sankalps.${currentSankalp.id}.source`) || currentSankalp.source}
                   </TextComponent>
                 </View>
+                </View>
               </ScrollView>
 
               {/* Buttons */}
-              <View style={styles.buttonRow}>
+              {/* <View style={styles.buttonRow}> */}
                 {!startedSankalp ? (
                   <TouchableOpacity
                     style={styles.startBtn}
                     onPress={() => onPressStartSankalp(currentSankalp)}
                   >
-                    <TextComponent type="semiBoldText" style={{ textAlign: "center" }}>
+                    <TextComponent     type="semiBoldText"
+                                            style={{ textAlign: "center",color:Colors.Colors.white }}>
                       {t("sankalpCard.iWillDo")}
                     </TextComponent>
                   </TouchableOpacity>
                 ) : (
                   <TouchableOpacity
-                    style={{ marginRight: 25, flexDirection: "row", marginTop: 10 }}
+                    style={{
+                        // marginRight: 25,
+                        flexDirection: "row",
+                        marginTop: 10,
+                        alignItems: "center",
+                        justifyContent:"center"
+                        // width: "45%",
+                      }}
                     onPress={() => onCompleteSankalp(currentSankalp)}
                   >
                     {!doneSankalp && (
@@ -418,14 +398,14 @@ console.log("tags >>>>>>>>>>>>",tags);
                         style={{
                           width: 15,
                           height: 15,
-                          borderColor: Colors.Colors.Light_grey,
+                          borderColor: Colors.Colors.BLACK,
                           borderWidth: 1,
                           borderRadius: 4,
                           marginRight: 10,
                         }}
                       />
                     )}
-                    <TextComponent>
+                    <TextComponent type="streakSadanaText">
                       {doneSankalp
                         ? t("sankalpCard.done")
                         : t("sankalpCard.markDone")}
@@ -440,14 +420,13 @@ console.log("tags >>>>>>>>>>>>",tags);
                   }
                 >
                   <TextComponent
-                    type="boldText"
-                    style={{ color: Colors.Colors.Light_black, textAlign: "center" }}
+                 type="boldText"
+                  style={{ color: Colors.Colors.Light_black }}
                   >
                     {t("sankalpCard.addToDaily")}
                   </TextComponent>
                 </TouchableOpacity>
-              </View>
-
+              {/* </View> */}
               <View style={styles.footer}>
                 <TextComponent type="semiBoldText" style={{ color: Colors.Colors.Light_grey }}>
                   {t("sankalpCard.finishStreak")}
@@ -582,12 +561,14 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     overflow: "hidden",
     elevation: 3,
-    backgroundColor: Colors.Colors.white,
-    padding: 16,
+   backgroundColor: "#FFFCF7",
+    // padding: 16,
     width: FontSize.CONSTS.DEVICE_WIDTH * 0.91,
     maxHeight: 550,
     marginBottom: 40,
     zIndex: 99,
+        borderWidth:1,
+        borderColor:Colors.Colors.App_theme
   },
   arrowButton: {
     position: "absolute",
@@ -604,12 +585,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginVertical: 12,
+    marginVertical: 6,
   },
-  streakIcon: { height: 20, width: 20, marginRight: 8 },
-  row: { flexDirection: "row", alignItems: "center", marginTop: 6 },
-  tag: { paddingHorizontal: 4, paddingVertical: 4, marginRight: 4 },
-  root: { color: Colors.Colors.BLACK, fontSize: FontSize.CONSTS.FS_14, marginRight: 6 },
+   streakIcon: { height: 30, width: 30, marginLeft: 25,marginRight:15 },
+  row: {   flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",},
+  // tag: { paddingHorizontal: 4, paddingVertical: 4, marginRight: 4 },
+  // root: { color: Colors.Colors.BLACK, 
+  //   // fontSize: FontSize.CONSTS.FS_14, 
+  //   // marginRight: 6
+  //  },
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -618,27 +604,78 @@ const styles = StyleSheet.create({
     fontSize: FontSize.CONSTS.FS_14,
   },
   startBtn: {
-    flex: 1,
-    borderColor: Colors.Colors.Yellow,
-    borderWidth: 1,
-    borderRadius: 6,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    marginRight: 8,
-    justifyContent: "center",
-    alignItems: "center",
+    // flex: 1,
+     backgroundColor: Colors.Colors.Yellow,
+     // borderWidth: 1,
+     borderRadius: 6,
+     paddingVertical: 8,
+     paddingHorizontal: 8,
+     marginHorizontal:16,
+     justifyContent: "center",
+     alignItems: "center",
+     marginTop:20
   },
   dailyBtn: {
-    flex: 1,
-    backgroundColor: Colors.Colors.Yellow,
+   // flex: 1,
+    borderColor: Colors.Colors.Yellow,
+     borderWidth: 1,
     borderRadius: 6,
-    paddingVertical: 10,
+    paddingVertical: 6,
     paddingHorizontal: 8,
-    marginLeft: 8,
+       marginHorizontal:16,
+    // marginLeft: 8,
     justifyContent: "center",
     alignItems: "center",
+    marginTop:20
+    // width: "45%",
   },
-  footer: { alignSelf: "center", alignItems: "center", flexDirection: "row" },
+  footer: { alignSelf: "center", alignItems: "center", flexDirection: "row" ,marginVertical:12 },
+    partialBgContainer: {
+      alignSelf: "center",
+      justifyContent: "center",
+      alignItems: "center",
+      paddingVertical: 8,
+      paddingHorizontal: 10,
+      borderTopRightRadius: 16,
+      borderTopLeftRadius:16,
+      // marginTop: 8,
+      width: FontSize.CONSTS.DEVICE_WIDTH ,
+    },
+    partialBgImage: {
+       borderTopRightRadius: 16,
+      borderTopLeftRadius:16,
+      alignSelf: "center",
+      justifyContent: "center",
+      alignItems: "center",
+      // resizeMode: "center",
+      // opacity: 0.9, // optional: adjust background intensity
+    },
+bestTimeWrapper: {
+    alignItems: "center", // centers the entire block inside the card
+    justifyContent: "center",
+    // marginTop: 10,
+  },
+  bestTimeInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    flexWrap: "wrap", // allows tags to wrap if needed
+  },
+  tagsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    flexWrap: "wrap",
+  },
+  tag: {
+    // paddingHorizontal: 6,
+    // paddingVertical: 4,
+    marginHorizontal: 3,
+  },
+  root: {
+    color: Colors.Colors.BLACK,
+    marginRight: 6,
+  },
 });
 
 

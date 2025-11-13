@@ -172,7 +172,12 @@ const TextComponent = (props: any) => {
         case "streakSadanaText":
       textStyle = styles.streakSadanaText;
       break;
-
+       case "cardHeaderText":
+      textStyle = styles.cardHeaderText;
+      break;
+    case "subScrollText":
+      textStyle = styles.subScrollText;
+      break;
       
       
     default:
@@ -333,6 +338,16 @@ const styles = StyleSheet.create({
     color: Colors.Colors.BLACK,
     fontSize: FontSize.CONSTS.FS_14,
     fontFamily: "Inter_500Medium",
+  },
+  cardHeaderText:{
+    color: Colors.Colors.card_text,
+    fontSize: FontSize.CONSTS.FS_18,
+    fontFamily: "Inter_500Medium",
+  },
+    subScrollText: {
+    color: Colors.Colors.blue_text,
+    fontSize: FontSize.CONSTS.FS_14,
+    fontFamily: "Inter_400Regular",
   },
 });
 

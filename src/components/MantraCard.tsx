@@ -5,6 +5,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Image,
+  ImageBackground,
   StyleSheet,
   TouchableOpacity,
   View
@@ -192,63 +193,38 @@ const MantraCard = ({
               <View>
                  <ScrollView
                   showsVerticalScrollIndicator={true}
-                  style={{ maxHeight: 440, marginTop: 5 }}
+                  style={{ maxHeight: 440, 
+                    // marginTop: 5 
+                  }}
                 >
+                     <ImageBackground
+                    source={require("../../assets/CardBG.png")}
+                    // resizeMode="center"
+                    style={styles.partialBgContainer}
+                    imageStyle={styles.partialBgImage}
+                  >
                 <TextComponent
                   type="semiBoldText"
-                  style={{ alignSelf: "flex-end" }}
+                  style={{ color:Colors.Colors.App_theme}}
                 >
                   {t("mantraCard.shareSadana")}
                 </TextComponent>
-
                 <View style={styles.headerRow}>
                   <TextComponent
-                    type="semiBoldText"
-                    style={{
-                      color: Colors.Colors.BLACK,
-                      fontSize: FontSize.CONSTS.FS_16,
-                    }}
+                    type="cardHeaderText"
+                    style={{textTransform: "uppercase",}}
                   >
                     {t("mantraCard.dailyMantra")}
                   </TextComponent>
                   <TouchableOpacity
                     onPress={handleShareMantra}
-                    style={{ flexDirection: "row", alignItems: "center" }}
+                    style={{ flexDirection: "row", alignItems: "center" ,left:22}}
                   >
-                    <Image
-                      source={require("../../assets/Streak_S1.png")}
-                      style={styles.streakIcon}
-                    />
-                    <Image
-                      source={require("../../assets/Streak_S2.png")}
-                      style={styles.streakIcon}
-                    />
-                    <Image
-                      source={require("../../assets/Streak_S3.png")}
-                      style={styles.streakIcon}
-                    />
                     <Image
                       source={require("../../assets/Streak_S4.png")}
                       style={styles.streakIcon}
                     />
-                  </TouchableOpacity>
-                </View>
-
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <TextComponent
-                    type="semiBoldText"
-                    style={{ color: Colors.Colors.Light_black }}
-                  >
-                    {currentMantra.devanagari}
-                  </TextComponent>
-                </View>
-
-                <TouchableOpacity
+                       <TouchableOpacity
                   onPress={() => {
                     const englishMantra = CATALOGS.en.find(
                       (m) => m.id === currentMantra.id
@@ -262,52 +238,68 @@ const MantraCard = ({
                   style={{
                     marginLeft: 8,
                     padding: 6,
-                    backgroundColor: Colors.Colors.App_theme,
+                    backgroundColor: Colors.Colors.Yellow,
                     borderRadius: 50,
                     justifyContent: "center",
                     alignItems: "center",
-                    alignSelf: "flex-end",
+                    left:15
+                    // alignSelf: "flex-end",
                   }}
                 >
                   <Icon name="videocam-outline" size={18} color="#fff" />
                 </TouchableOpacity>
+                  </TouchableOpacity>
+                </View>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <TextComponent
+                    type="cardText"
+                    style={{ color: Colors.Colors.blue_text,textAlign:"center",marginHorizontal:10 }}
+                  >
+                    {currentMantra.devanagari}
+                  </TextComponent>
+                </View>
                   <TextComponent
                     type="semiBoldText"
                     style={{
-                      color: Colors.Colors.Light_black,
-                      marginVertical: 6,
+                      color: Colors.Colors.blue_text,
+                      marginVertical: 6,textAlign:"center",marginHorizontal:10
                     }}
                   >
                     {currentMantra.iast}
                   </TextComponent>
-
+                </ImageBackground>
+            <View style={{paddingHorizontal:16,}}>
                   {Array.isArray(currentMantra.explanation) ? (
                     currentMantra.explanation.map((line, idx) => (
-                      <TextComponent key={idx} style={{ marginTop: 4 }}>
+                      <TextComponent type="mediumText" key={idx} style={{ marginTop: 4 ,color:Colors.Colors.card_subtext,textAlign:"center"}}>
                         {line}
                       </TextComponent>
                     ))
                   ) : (
-                    <TextComponent>{currentMantra.explanation}</TextComponent>
+                    <TextComponent type="mediumText" STYLE={{marginTop: 4 ,color:Colors.Colors.card_subtext,textAlign:"center"}}>{currentMantra.explanation}</TextComponent>
                   )}
-
                   <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    style={{ marginVertical: 8 }}
+                    style={{ marginVertical: 4 ,alignSelf:"center"}}
                   >
                     {currentMantra.tags?.map((tag, i) => (
                       <View key={i} style={styles.tag}>
-                        <TextComponent type="semiBoldText">
+                        <TextComponent type="subScrollText">
                           # {tag}
                         </TextComponent>
                       </View>
                     ))}
                   </ScrollView>
-
-                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <View style={{borderColor:Colors.Colors.App_theme,borderTopWidth:0.6,marginHorizontal:-16,}}/>
+                  <View style={{ alignItems: "center" }}>
                     <TextComponent
-                      type="semiBoldText"
+                      type="cardText"
                       style={styles.repLabel}
                     >
                       {t("mantraCard.suggestedReps")}
@@ -339,9 +331,11 @@ const MantraCard = ({
                       ))}
                     </ScrollView>
                   </View>
+                  <View style={{borderColor:Colors.Colors.App_theme,borderTopWidth:0.6,marginHorizontal:-16,}}/>
+                  </View>
                 </ScrollView>
-
-                <View style={styles.buttonRow}>
+                
+                {/* <View style={styles.buttonRow}> */}
                   {!startedMantra ? (
                     <TouchableOpacity
                       style={styles.startBtn}
@@ -349,7 +343,7 @@ const MantraCard = ({
                     >
                       <TextComponent
                         type="semiBoldText"
-                        style={{ textAlign: "center" }}
+                        style={{ textAlign: "center",color:Colors.Colors.white }}
                       >
                         {t("mantraCard.willChant")}
                       </TextComponent>
@@ -357,10 +351,12 @@ const MantraCard = ({
                   ) : (
                     <TouchableOpacity
                       style={{
-                        marginRight: 25,
+                        // marginRight: 25,
                         flexDirection: "row",
                         marginTop: 10,
-                        width: "45%",
+                        alignItems: "center",
+                        justifyContent:"center"
+                        // width: "45%",
                       }}
                       onPress={() => DoneMantraCalled(currentMantra)}
                     >
@@ -369,14 +365,14 @@ const MantraCard = ({
                           style={{
                             width: 15,
                             height: 15,
-                            borderColor: Colors.Colors.Light_grey,
+                            borderColor: Colors.Colors.BLACK,
                             borderWidth: 1,
                             borderRadius: 4,
                             marginRight: 10,
                           }}
                         />
                       )}
-                      <TextComponent>
+                      <TextComponent type="streakSadanaText">
                         {endMantra
                           ? t("mantraCard.done")
                           : t("mantraCard.markDone")}
@@ -399,8 +395,7 @@ const MantraCard = ({
                       {t("mantraCard.doDaily")}
                     </TextComponent>
                   </TouchableOpacity>
-                </View>
-
+                {/* </View> */}
                 <View style={styles.footer}>
                   <TextComponent
                     type="semiBoldText"
@@ -453,12 +448,14 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 6,
     elevation: 3,
-    backgroundColor: Colors.Colors.white,
-    padding: 16,
+    backgroundColor: "#FFFCF7",
+    // padding: 16,
     width: FontSize.CONSTS.DEVICE_WIDTH * 0.91,
     maxHeight: 620,
     marginBottom: 40,
     zIndex: 99,
+    borderWidth:1,
+    borderColor:Colors.Colors.App_theme
   },
   arrowButton: {
     position: "absolute",
@@ -473,15 +470,18 @@ const styles = StyleSheet.create({
   },
   headerRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    alignSelf:"center",
+    justifyContent:"center",
+    // justifyContent: "space-between",
     alignItems: "center",
-    marginVertical: 12,
+    marginVertical: 10,
   },
   tag: { paddingHorizontal: 6, paddingVertical: 6, marginRight: 4 },
   repLabel: {
-    color: Colors.Colors.Light_grey,
-    fontSize: FontSize.CONSTS.FS_10,
-    marginRight: 6,
+    color: Colors.Colors.blue_text,
+    // fontSize: FontSize.CONSTS.FS_10,
+    // marginRight: 6,
+marginVertical:4
   },
   repBox: {
     paddingVertical: 8,
@@ -497,29 +497,56 @@ const styles = StyleSheet.create({
     marginVertical: 15,
   },
   startBtn: {
-    flex: 1,
-    borderColor: Colors.Colors.Yellow,
-    borderWidth: 1,
+    // flex: 1,
+    backgroundColor: Colors.Colors.Yellow,
+    // borderWidth: 1,
     borderRadius: 6,
-    paddingVertical: 10,
+    paddingVertical: 8,
     paddingHorizontal: 8,
-    marginRight: 8,
+    marginHorizontal:16,
     justifyContent: "center",
     alignItems: "center",
+    marginTop:20
   },
   dailyBtn: {
-    flex: 1,
-    backgroundColor: Colors.Colors.Yellow,
+    // flex: 1,
+    borderColor: Colors.Colors.Yellow,
+     borderWidth: 1,
     borderRadius: 6,
-    paddingVertical: 10,
+    paddingVertical: 6,
     paddingHorizontal: 8,
-    marginLeft: 8,
+       marginHorizontal:16,
+    // marginLeft: 8,
     justifyContent: "center",
     alignItems: "center",
-    width: "45%",
+    marginTop:20
+    // width: "45%",
   },
-  footer: { alignSelf: "center", alignItems: "center", flexDirection: "row" },
-  streakIcon: { height: 20, width: 20, marginRight: 8 },
+  footer: { alignSelf: "center", alignItems: "center", flexDirection: "row" ,marginVertical:12},
+  streakIcon: { height: 30, width: 30, 
+    // marginLeft: 25,
+    // marginRight:15 
+  },
+    partialBgContainer: {
+    alignSelf: "center",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderTopRightRadius: 16,
+    borderTopLeftRadius:16,
+    // marginTop: 8,
+    width: FontSize.CONSTS.DEVICE_WIDTH ,
+  },
+  partialBgImage: {
+     borderTopRightRadius: 16,
+    borderTopLeftRadius:16,
+    alignSelf: "center",
+    justifyContent: "center",
+    alignItems: "center",
+    // resizeMode: "center",
+    // opacity: 0.9, // optional: adjust background intensity
+  },
 });
 
 

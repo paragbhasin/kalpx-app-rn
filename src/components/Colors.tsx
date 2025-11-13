@@ -19,6 +19,9 @@ export default {
                canecl:"#FF6767",
                header_bg:"#FDF5E9",
                button_bg:"#EEEDE9",
-               black_edge:"#1E1E1E"
+               black_edge:"#1E1E1E",
+               blue_text:"#1B1EBB",
+               card_text:"#2B0C01",
+               card_subtext:"#2B2B2B"
         }
 }

@@ -858,7 +858,9 @@
     "celebrationPractices": "Celebration Practices",
     "traditionalFoods": "Traditional Foods",
     "symbols": "Symbols",
-     "regionalCustoms": "Regional Customs"
+     "regionalCustoms": "Regional Customs",
+     "story":"Sanatan Story",
+     "source":"Sanatan Source"
   },
   "wisdomCard": {
     "loading": "Loading daily wisdom...",

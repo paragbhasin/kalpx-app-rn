@@ -63,8 +63,8 @@ const SadanaTrackerScreen = () => {
     { days: 108, name: t("streakScreen.milestones.dharmaLight") },
   ];
 
-  const sankalpCount = streakData?.sankalp || 0;
-  // const sankalpCount : any = 10;
+  // const sankalpCount = streakData?.sankalp || 0;
+  const sankalpCount : any = 10;
  const trackerCount = trackerData?.streak_count || 0;
   const mantraCount = streakData?.mantra || 0;
 

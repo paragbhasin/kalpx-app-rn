@@ -38,7 +38,9 @@ const WisdomCard = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [shareVisible, setShareVisible] = useState(false);
 
-  const MOTIVATIONAL_QUOTES: any = t("wisdomCard.shareQuotes", { returnObjects: true });
+  const MOTIVATIONAL_QUOTES: any = t("wisdomCard.shareQuotes", {
+    returnObjects: true,
+  });
 
   useEffect(() => {
     const allWisdoms = getLocalizedWisdom();
@@ -63,7 +65,9 @@ const WisdomCard = () => {
       await new Promise((resolve) => setTimeout(resolve, 400));
 
       const uri = await captureRef(shareRef, { format: "png", quality: 1 });
-      const fileUri = `${FileSystem.cacheDirectory}wisdom_share_${Date.now()}.png`;
+      const fileUri = `${
+        FileSystem.cacheDirectory
+      }wisdom_share_${Date.now()}.png`;
       await FileSystem.copyAsync({ from: uri, to: fileUri });
 
       setShareVisible(false);
@@ -137,7 +141,9 @@ const WisdomCard = () => {
       {currentBatch.map((wisdom, index) => {
         const isCompleted = completedIds.includes(wisdom.id);
         const quote =
-          MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
+          MOTIVATIONAL_QUOTES[
+            Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)
+          ];
 
         return (
           <View
@@ -177,27 +183,39 @@ const WisdomCard = () => {
               ]}
             >
               <View>
-                   <ScrollView
+                <ScrollView
                   showsVerticalScrollIndicator={true}
-                  style={{ maxHeight: 320, marginTop: 5 }}
+                  style={{ maxHeight: 320 }}
                   contentContainerStyle={{ paddingBottom: 10 }}
                 >
-                <TextComponent type="semiBoldText" style={{ alignSelf: "flex-end" }}>
-                  {t("wisdomCard.spreadTruth")}
-                </TextComponent>
-
-                {/* Header */}
-                <View style={styles.headerRow}>
-                  <TextComponent type="semiBoldText" style={{ color: Colors.Colors.BLACK }}>
-                    {t("wisdomCard.dailyWisdom")}
-                  </TextComponent>
-                  <TouchableOpacity
-                    onPress={() => {
-                      handleShareWisdom();
-                    }}
-                    style={{ flexDirection: "row", alignItems: "center" }}
+                  <ImageBackground
+                    source={require("../../assets/CardBG.png")}
+                    // resizeMode="center"
+                    style={styles.partialBgContainer}
+                    imageStyle={styles.partialBgImage}
                   >
-                    <Image
+                    <TextComponent
+                      type="semiBoldText"
+                      style={{ color: Colors.Colors.App_theme }}
+                    >
+                      {t("wisdomCard.spreadTruth")}
+                    </TextComponent>
+
+                    {/* Header */}
+                    <View style={styles.headerRow}>
+                      <TextComponent
+                        type="cardHeaderText"
+                        style={{ marginLeft: 25 }}
+                      >
+                        {t("wisdomCard.dailyWisdom")}
+                      </TextComponent>
+                      <TouchableOpacity
+                        onPress={() => {
+                          handleShareWisdom();
+                        }}
+                        style={{ flexDirection: "row", alignItems: "center" }}
+                      >
+                        {/* <Image
                       source={require("../../assets/Streak_S1.png")}
                       style={styles.streakIcon}
                     />
@@ -208,101 +226,171 @@ const WisdomCard = () => {
                     <Image
                       source={require("../../assets/Streak_S3.png")}
                       style={styles.streakIcon}
-                    />
-                    <Image
-                      source={require("../../assets/Streak_S4.png")}
-                      style={styles.streakIcon}
-                    />
-                  </TouchableOpacity>
-                </View>
+                    /> */}
+                        <Image
+                          source={require("../../assets/Streak_S4.png")}
+                          style={styles.streakIcon}
+                        />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={{
+                          marginLeft: 8,
+                          padding: 6,
+                          backgroundColor: Colors.Colors.Yellow,
+                          borderRadius: 50,
+                          justifyContent: "center",
+                          alignItems: "center",
+                          alignSelf: "flex-end",
+                        }}
+                        onPress={() => {
+                          try {
+                            // 🔍 Find the English wisdom item by its ID
+                            const englishWisdom = require("../config/locales/en/wisdom-en.json");
 
-                {/* Fixed Video Icon */}
-             <TouchableOpacity
-  style={{
-    marginLeft: 8,
-    padding: 6,
-    backgroundColor: Colors.Colors.App_theme,
-    borderRadius: 50,
-    justifyContent: "center",
-    alignItems: "center",
-    alignSelf: "flex-end",
-  }}
-  onPress={() => {
-    try {
-      // 🔍 Find the English wisdom item by its ID
-      const englishWisdom = require("../config/locales/en/wisdom-en.json");
+                            const matchedWisdom = englishWisdom.find(
+                              (item: any) => item.id === wisdom.id
+                            );
 
-      const matchedWisdom = englishWisdom.find(
-        (item: any) => item.id === wisdom.id
-      );
+                            if (!matchedWisdom) {
+                              console.warn(
+                                `⚠️ No English wisdom found for ID: ${wisdom.id}`
+                              );
+                              return;
+                            }
 
-      if (!matchedWisdom) {
-        console.warn(`⚠️ No English wisdom found for ID: ${wisdom.id}`);
-        return;
-      }
+                            // 🎯 Extract tags
+                            const englishTags = matchedWisdom.tags || [];
 
-      // 🎯 Extract tags
-      const englishTags = matchedWisdom.tags || [];
+                            if (!englishTags.length) {
+                              console.warn(
+                                `⚠️ No English tags found for wisdom: ${wisdom.id}`
+                              );
+                              return;
+                            }
 
-      if (!englishTags.length) {
-        console.warn(`⚠️ No English tags found for wisdom: ${wisdom.id}`);
-        return;
-      }
+                            // 🧩 Format search query
+                            const searchQuery = englishTags
+                              .map((kw) => `"${kw}"`)
+                              .join(" ");
 
-      // 🧩 Format search query
-      const searchQuery = englishTags.map((kw) => `"${kw}"`).join(" ");
+                            console.log(
+                              "🎥 Navigating with wisdom tags:",
+                              englishTags,
+                              searchQuery
+                            );
 
-      console.log("🎥 Navigating with wisdom tags:", englishTags, searchQuery);
+                            // 🚀 Navigate to video screen
+                            navigation.navigate("RelatedVideosScreen", {
+                              tag: englishTags,
+                              search: searchQuery,
+                            });
+                          } catch (error) {
+                            console.error(
+                              "❌ Error fetching English wisdom tags:",
+                              error
+                            );
+                          }
+                        }}
+                      >
+                        <Icon name="videocam-outline" size={18} color="#fff" />
+                      </TouchableOpacity>
+                    </View>
+                    <TextComponent
+                      type="cardText"
+                      style={{
+                        color: Colors.Colors.blue_text,
+                        textAlign: "center",
+                        marginHorizontal: 10,
+                      }}
+                    >
+                      {t(wisdom.text)}
+                    </TextComponent>
+                    {/* Fixed Video Icon */}
+                  </ImageBackground>
 
-      // 🚀 Navigate to video screen
-      navigation.navigate("RelatedVideosScreen", {
-        tag: englishTags,
-        search: searchQuery,
-      });
-    } catch (error) {
-      console.error("❌ Error fetching English wisdom tags:", error);
-    }
-  }}
->
-  <Icon name="videocam-outline" size={18} color="#fff" />
-</TouchableOpacity>
+                  {/* ✅ Scrollable content starts here */}
 
-
-                {/* ✅ Scrollable content starts here */}
-             
                   {/* Explanation */}
-                  {Array.isArray(wisdom.explanation)
-                    ? wisdom.explanation.map((line, idx) => (
-                        <TextComponent key={idx} style={{ marginTop: 4 }}>
-                          {line}
-                        </TextComponent>
-                      ))
-                    : (
-                      <TextComponent>{wisdom.explanation}</TextComponent>
-                    )}
+                  {Array.isArray(wisdom.explanation) ? (
+                    wisdom.explanation.map((line, idx) => (
+                      <TextComponent
+                        type="mediumText"
+                        style={{
+                          color: Colors.Colors.Light_black,
+                          marginVertical: 2,
+                          textAlign: "center",
+                        }}
+                        key={idx}
+                      >
+                        {line}
+                      </TextComponent>
+                    ))
+                  ) : (
+                    <TextComponent
+                      type="mediumText"
+                      style={{
+                        color: Colors.Colors.Light_black,
+                        marginVertical: 2,
+                        textAlign: "center",
+                      }}
+                    >
+                      {wisdom.explanation}
+                    </TextComponent>
+                  )}
 
                   {/* Source */}
                   <TextComponent
-                    type="semiBoldText"
-                    style={{ color: Colors.Colors.Light_black, marginVertical: 6 }}
+                    type="headerSubBoldText"
+                    style={{
+                      color: Colors.Colors.blue_text,
+                      alignSelf: "center",
+                    }}
                   >
-                    {t("wisdomCard.source")}
+                    {t("wisdomCard.source")} :
                   </TextComponent>
-                  {Array.isArray(wisdom.source.title)
-                    ? wisdom.source.title.map((line, idx) => (
-                        <TextComponent key={idx} style={{ marginTop: 4 }}>
-                          {line}
-                        </TextComponent>
-                      ))
-                    : (
-                      <TextComponent>{wisdom.source.title}</TextComponent>
-                    )}
+                  {Array.isArray(wisdom.source.title) ? (
+                    wisdom.source.title.map((line, idx) => (
+                      <TextComponent
+                        type="streakSadanaText"
+                        style={{
+                          color: Colors.Colors.blue_text,
+                          textAlign: "center",
+                        }}
+                        key={idx}
+                      >
+                        {line}
+                      </TextComponent>
+                    ))
+                  ) : (
+                    <TextComponent
+                      type="streakSadanaText"
+                      style={{
+                        color: Colors.Colors.blue_text,
+                        textAlign: "center",
+                      }}
+                    >
+                      {wisdom.source.title}
+                    </TextComponent>
+                  )}
 
                   {/* Tags */}
-                  <View style={{ flexDirection: "row", marginVertical: 8, flexWrap: "wrap" }}>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      marginVertical: 6,
+                      flexWrap: "wrap",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
                     {wisdom.tags?.map((tag: string, i: number) => (
                       <View key={i} style={styles.tag}>
-                        <TextComponent type="semiBoldText"># {tag}</TextComponent>
+                        <TextComponent
+                          type="streakSadanaText"
+                          style={{ color: Colors.Colors.blue_text }}
+                        >
+                          #{tag}
+                        </TextComponent>
                       </View>
                     ))}
                   </View>
@@ -310,20 +398,26 @@ const WisdomCard = () => {
                 {/* ✅ ScrollView ends before buttons */}
 
                 {/* Buttons */}
-                <View style={styles.buttonRow}>
+                {/* <View style={styles.buttonRow}> */}
                   <TouchableOpacity
                     style={styles.outlineBtn}
                     onPress={() => navigation.navigate("MySadana")}
                   >
-                    <TextComponent type="semiBoldText" style={{ textAlign: "center" }}>
+                    <TextComponent
+                      type="semiBoldText"
+                      style={{ textAlign: "center" ,color:Colors.Colors.white}}
+                    >
                       {t("wisdomCard.setRoutine")}
                     </TextComponent>
                   </TouchableOpacity>
-                </View>
+                {/* </View> */}
 
                 {/* Footer */}
                 <View style={styles.footer}>
-                  <TextComponent type="semiBoldText" style={{ color: Colors.Colors.Light_grey }}>
+                  <TextComponent
+                    type="semiBoldText"
+                    style={{ color: Colors.Colors.Light_grey }}
+                  >
                     {t("wisdomCard.finishStreak")}
                   </TextComponent>
                   <Image
@@ -344,7 +438,10 @@ const WisdomCard = () => {
                 }}
                 pointerEvents="none"
               >
-                <ViewShot ref={shareRef} options={{ format: "png", quality: 1 }}>
+                <ViewShot
+                  ref={shareRef}
+                  options={{ format: "png", quality: 1 }}
+                >
                   <ImageBackground
                     source={require("../../assets/Streak_bg.png")}
                     style={{
@@ -368,24 +465,24 @@ const WisdomCard = () => {
                       {quote}
                     </TextComponent>
 
-                    {Array.isArray(wisdom.explanation)
-                      ? wisdom.explanation.map((line, idx) => (
-                          <TextComponent
-                            key={idx}
-                            type="semiBoldText"
-                            style={{
-                              color: "#925910",
-                              fontSize: FontSize.CONSTS.FS_18,
-                              textAlign: "center",
-                              marginBottom: 16,
-                            }}
-                          >
-                            {line}
-                          </TextComponent>
-                        ))
-                      : (
-                        <TextComponent>{wisdom.explanation}</TextComponent>
-                      )}
+                    {Array.isArray(wisdom.explanation) ? (
+                      wisdom.explanation.map((line, idx) => (
+                        <TextComponent
+                          key={idx}
+                          type="semiBoldText"
+                          style={{
+                            color: "#925910",
+                            fontSize: FontSize.CONSTS.FS_18,
+                            textAlign: "center",
+                            marginBottom: 16,
+                          }}
+                        >
+                          {line}
+                        </TextComponent>
+                      ))
+                    ) : (
+                      <TextComponent>{wisdom.explanation}</TextComponent>
+                    )}
 
                     <TextComponent
                       type="semiBoldText"
@@ -439,14 +536,20 @@ const WisdomCard = () => {
 export default WisdomCard;
 
 const styles = StyleSheet.create({
-  centered: { flex: 1, justifyContent: "center", alignItems: "center", paddingVertical: 40 },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 40,
+  },
   card: {
     borderRadius: 6,
     overflow: "hidden",
     elevation: 3,
-    backgroundColor: Colors.Colors.white,
-    padding: 16,
+    backgroundColor: "#FFFCF7",
     width: FontSize.CONSTS.DEVICE_WIDTH * 0.91,
+    borderWidth: 1,
+    borderColor: Colors.Colors.App_theme,
   },
   arrowButton: {
     position: "absolute",
@@ -459,11 +562,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     zIndex: 99,
   },
-  headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginVertical: 12 },
-  streakIcon: { height: 20, width: 20, marginRight: 8 },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginVertical: 6,
+  },
+  streakIcon: { height: 30, width: 30, marginLeft: 25, marginRight: 15 },
   tag: {
-    paddingVertical: 6,
-    paddingHorizontal: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 4,
     marginRight: 4,
   },
   buttonRow: {
@@ -473,14 +581,15 @@ const styles = StyleSheet.create({
     marginVertical: 15,
   },
   outlineBtn: {
-    flex: 1,
-    borderColor: Colors.Colors.Yellow,
-    borderWidth: 1,
+    // flex: 1,
+    backgroundColor: Colors.Colors.Yellow,
+    // borderWidth: 1,
     borderRadius: 6,
-    paddingVertical: 10,
-    marginRight: 8,
+    paddingVertical: 8,
+    // marginRight: 8,
     justifyContent: "center",
     alignItems: "center",
+    marginHorizontal:22
   },
   fillBtn: {
     flex: 1,
@@ -491,24 +600,28 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  footer: { alignSelf: "center", alignItems: "center", flexDirection: "row" },
+  footer: { alignSelf: "center", alignItems: "center", flexDirection: "row" ,marginVertical:12},
+  partialBgContainer: {
+    alignSelf: "center",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderTopRightRadius: 16,
+    borderTopLeftRadius: 16,
+    // marginTop: 8,
+    width: FontSize.CONSTS.DEVICE_WIDTH,
+  },
+  partialBgImage: {
+    borderTopRightRadius: 16,
+    borderTopLeftRadius: 16,
+    alignSelf: "center",
+    justifyContent: "center",
+    alignItems: "center",
+    // resizeMode: "center",
+    // opacity: 0.9, // optional: adjust background intensity
+  },
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // import { useNavigation } from "@react-navigation/native";
 // import * as FileSystem from "expo-file-system";
@@ -536,7 +649,6 @@ const styles = StyleSheet.create({
 // //   "🌸 Every verse holds a seed of peace.",
 // //   "🔥 A moment of wisdom can change your world.",
 // // ];
-
 
 // const WisdomCard = () => {
 //   const navigation: any = useNavigation();
@@ -568,7 +680,6 @@ const styles = StyleSheet.create({
 
 //   setLoading(false);
 // }, [i18next.language]); // 👈 re-run when language changes
-
 
 //   const handleShareWisdom = async () => {
 //     try {
@@ -838,7 +949,6 @@ const styles = StyleSheet.create({
 //                   : (
 //                     <TextComponent>{wisdom.explanation}</TextComponent>
 //                   )}
-                 
 
 //                     <TextComponent
 //                       type="semiBoldText"

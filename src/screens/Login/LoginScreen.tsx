@@ -1,12 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { AnyAction } from "@reduxjs/toolkit";
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { Formik } from "formik";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dimensions,
-  Image,
   ImageBackground,
   KeyboardAvoidingView,
   Platform,
@@ -25,6 +25,7 @@ import LoadingButton from "../../components/LoadingButton"; // ✅ import Loadin
 import LoadingOverlay from "../../components/LoadingOverlay";
 import TextComponent from "../../components/TextComponent";
 import { RootState } from "../../store";
+import { registerDeviceToBackend } from "../../utils/registerDevice";
 import { loginUser, socialLoginUser } from './actions';
 import ReCaptchaRuntime from "./ReCaptchaRuntime";
 import styles from './styles';
@@ -78,6 +79,7 @@ const resumePendingIfAny = async () => {
       "pending_retreat_data",
       "pending_travel_data",
       "pending_astrology_data",
+      "pending_classes_data"
     ];
 
     for (const key of pendingKeys) {
@@ -94,6 +96,7 @@ const resumePendingIfAny = async () => {
           pending_retreat_data: "Retreat",
           pending_travel_data: "Travel",
           pending_astrology_data: "Astrology",
+          pending_classes_data: "ClassBookingScreen",
         };
 
         const targetScreen = targetScreenMap[key];
@@ -193,8 +196,110 @@ const signInWithGoogle = async () => {
   }
 };
 
+const handleSignInApple = async () => {
+  try {
+    const credential = await AppleAuthentication.signInAsync({
+      requestedScopes: [
+        AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+        AppleAuthentication.AppleAuthenticationScope.EMAIL,
+      ],
+    });
+
+    console.log("🍎 Apple Credential:", credential);
+
+    // 1️⃣ Extract JWT identity token
+    const id_token = credential.identityToken;
+
+    if (!id_token) {
+      throw new Error("Missing Apple identity token");
+    }
+
+    console.log("🍏 Apple ID Token (JWT):", id_token);
+
+    // 2️⃣ Send ONLY the JWT to backend
+    dispatch(
+      socialLoginUser(
+        {
+          provider: "apple",
+          id_token: id_token, 
+          user_type: "user",
+        },
+        async (res) => {
+          if (res.success) {
+            await AsyncStorage.setItem("showLocationConfirm", "true");
+            await resumePendingIfAny();
+          } else {
+            setLoginError(res.error || "Apple login failed");
+          }
+        }
+      )
+    );
+
+  } catch (e) {
+    console.log("🛑 Apple login error:", e);
+    setLoginError("Apple login failed");
+  }
+};
 
 
+// const handleSignInApple = async () => {
+//   try {
+//     const credential = await AppleAuthentication.signInAsync({
+//       requestedScopes: [
+//         AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+//         AppleAuthentication.AppleAuthenticationScope.EMAIL,
+//       ],
+//     });
+
+//     console.log("🍎 Apple Credential:", credential);
+
+//     dispatch(
+//       socialLoginUser(
+//         {
+//           provider: "apple",
+//           apple_user_id: credential.user,
+//           identity_token: credential.identityToken,
+//           authorization_code: credential.authorizationCode,
+//           email: credential.email,
+//           name: credential.fullName,
+//         },
+//         async (res) => {
+//           if (res.success) {
+//             await AsyncStorage.setItem("showLocationConfirm", "true");
+//             await resumePendingIfAny();
+//           } else {
+//             setLoginError(res.error || "Apple login failed");
+//           }
+//         }
+//       )
+//     );
+
+//   } catch (e) {
+//     console.log("🛑 Apple login error:", e);
+//   }
+// };
+
+
+
+//  const handleSignInApple = async () => {
+//     try {
+//       const credential = await AppleAuthentication.signInAsync({
+//         requestedScopes: [
+//           AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+//           AppleAuthentication.AppleAuthenticationScope.EMAIL,
+//         ],
+//       });
+//       // signed in
+//       console.log(credential);
+//       // sample response provided below
+//     } catch (e) {
+//       if (e.code === 'ERR_REQUEST_CANCELED') {
+//         // handle that the user canceled the sign-in flow
+//       } else {
+//         // handle other errors
+//       }
+//     }
+//   };
 
   const handleRecaptchaToken = (token) => {
     setLoading(true);
@@ -244,13 +349,28 @@ const signInWithGoogle = async () => {
             <TextComponent type="cardText" style={styles.heading}>{t("login.heading")}</TextComponent>
 
             {/* Google Login Button */}
-            <TouchableOpacity
+            {/* <TouchableOpacity
               style={styles.googleButton}
               onPress={() => {signInWithGoogle()}}
             >
               <Image source={require("../../../assets/devicon_google.png")} style={styles.googleIcon} />
                <TextComponent type="headerText" style={styles.googleText}>{t("login.google")}</TextComponent>
             </TouchableOpacity>
+            <AppleAuthentication.AppleAuthenticationButton
+    buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+    buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+    cornerRadius={8}
+    style={{ width: "98%", height: 40, marginVertical: 12 ,marginHorizontal:12}}
+    onPress={handleSignInApple}
+/> */}
+
+              {/* <TouchableOpacity
+              style={styles.googleButton}
+              onPress={() => {handleSignInApple()}}
+            >
+              <Image source={require("../../../assets/devicon_apple.png")} style={styles.appleIcon} resizeMode="contain"/>
+               <TextComponent type="headerText" style={styles.googleText}>{t("login.apple")}</TextComponent>
+            </TouchableOpacity> */}
 
             <View style={styles.card}>
               <TextComponent type="loginHeaderText" style={styles.cardTitleLine1}>{t("login.cardTitleLine1")}</TextComponent>
@@ -358,6 +478,8 @@ const signInWithGoogle = async () => {
       <View style={styles.skipContainer}>
         <TouchableOpacity onPress={async () =>  {
         //  await AsyncStorage.setItem("showLocationConfirm", "true");
+          //  await unregisterDeviceFromBackend();
+                await registerDeviceToBackend();
           navigation.navigate("AppDrawer");
           }}>
            <TextComponent type="headerText" style={styles.skipText}>{t("welcome.skip")}</TextComponent>

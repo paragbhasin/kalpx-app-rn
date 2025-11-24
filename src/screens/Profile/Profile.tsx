@@ -2,7 +2,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { AnyAction } from "@reduxjs/toolkit";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Alert,
@@ -17,6 +17,7 @@ import Header from "../../components/Header";
 import LogoutPopup from "../../components/LogoutPopup";
 import TextComponent from "../../components/TextComponent";
 import store, { RootState } from "../../store";
+import unregisterDeviceFromBackend from '../../utils/unregisterDevice';
 import { deleteUserAccount } from "./actions";
 import Privacy from "./Privacy";
 import styles from "./styles";
@@ -27,10 +28,24 @@ const  Profile = () => {
     const [showPrivacy, setShowPrivacy] = useState(false);
     const [showLogoutPopup, setShowLogoutPopup] = useState(false);
 const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
+
+    useEffect(() => {
+    const checkLogin = async () => {
+      try {
+        const token = await AsyncStorage.getItem("access_token");
+        setIsLoggedIn(!!token);
+      } catch (error) {
+        console.log("Error checking login:", error);
+      }
+    };
+    checkLogin();
+  }, []);
 
      const handleLogout = async () => {
   await AsyncStorage.clear();
+  await unregisterDeviceFromBackend();
   store.dispatch({ type: "RESET_APP" });
 // await GoogleSignin.signOut();
 // await GoogleSignin.revokeAccess();
@@ -42,15 +57,16 @@ const [showDeletePopup, setShowDeletePopup] = useState(false);
 };
 
 
-const handleDelete = () => {
+const handleDelete =  () => {
      dispatch(
-              deleteUserAccount({ confirm_deletion: true, force: true }, (res) => {
+              deleteUserAccount({ confirm_deletion: true, force: true }, async (res) => {
                 console.log("res delete>>>>>>>>>>",JSON.stringify(res));
        console.log("✅ Response full object >>>>>>>>>>>");
     console.log("Status:", res.status);
     console.log("Headers:", JSON.stringify(res.headers, null, 2));
     console.log("Data:", JSON.stringify(res.data, null, 2));
                 if (res.success) {
+  await unregisterDeviceFromBackend();
                   handleLogout();
                   Alert.alert("✅ Account deleted successfully!");
                   // Optionally navigate to login or clear AsyncStorage here
@@ -112,11 +128,32 @@ const handleDelete = () => {
 //     },
 // ];
 
-const menuItems = [
-  { key: "myProfile", icon: "person-outline", route: "ProfileDetails" },
-  { key: "language", icon: "globe-outline", route: "Language" },
-  { key: "privacy", icon: "key-outline", route: "Privacy" },
+// const menuItems = [
+//   { key: "myProfile", icon: "person-outline", route: "ProfileDetails" },
+//   { key: "language", icon: "globe-outline", route: "Language" },
+//   { key: "privacy", icon: "key-outline", route: "Privacy" },
 
+//   {
+//     key: "logout",
+//     icon: "log-out-outline",
+//     action: () => setShowLogoutPopup(true),
+//   },
+//   {
+//     key: "deleteAccount",
+//     icon: "trash-outline",
+//     action: () => setShowDeletePopup(true),
+//   },
+// ];
+
+// const baseMenuItems = [
+//   { key: "language", icon: "globe-outline", route: "Language" },
+//   { key: "privacy", icon: "key-outline", route: "Privacy" },
+// ];
+
+const loggedInItems = [
+  { key: "myProfile", icon: "person-outline", route: "ProfileDetails" },
+    { key: "language", icon: "globe-outline", route: "Language" },
+  { key: "privacy", icon: "key-outline", route: "Privacy" },
   {
     key: "logout",
     icon: "log-out-outline",
@@ -128,6 +165,21 @@ const menuItems = [
     action: () => setShowDeletePopup(true),
   },
 ];
+
+const guestItems = [
+  {
+    key: "login",
+    icon: "log-in-outline",
+    route: "Login",
+  },
+    { key: "language", icon: "globe-outline", route: "Language" },
+  { key: "privacy", icon: "key-outline", route: "Privacy" },
+];
+
+const menuItems = isLoggedIn
+  ? [...loggedInItems]
+  : [...guestItems];
+
 
 
   return (
@@ -159,7 +211,7 @@ const menuItems = [
 
       {/* Menu Items */}
       <View style={styles.menu}>
-        {menuItems.map((item, index) => (
+        {menuItems.map((item: any, index) => (
           <TouchableOpacity
             key={index}
             style={styles.menuItem}

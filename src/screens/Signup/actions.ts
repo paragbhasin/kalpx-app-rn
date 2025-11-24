@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../Networks/axios";
+import { registerDeviceToBackend } from "../../utils/registerDevice";
 
 export const SIGNUP_REQUEST = "SIGNUP_REQUEST";
 export const SIGNUP_SUCCESS = "SIGNUP_SUCCESS";
@@ -60,6 +61,7 @@ export const signupUser = (credentials, callback) => async (dispatch) => {
     const response: any = await signupApi(credentials);
     AsyncStorage.setItem("access_token", response.access_token);
     AsyncStorage.setItem("refresh_token", response.refresh_token);
+       await registerDeviceToBackend();
     dispatch(signupSuccess(response));
     if (callback) callback({ success: true, data: response });
   } catch (error) {

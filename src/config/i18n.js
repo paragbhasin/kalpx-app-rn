@@ -14,6 +14,7 @@ import wisdomBn from "./locales/bn/wisdom-bn.json";
 import en from "./locales/en/en.json";
 import festivalsEn from "./locales/en/festivals-en.json";
 import mantrasEn from "./locales/en/mantras-en.json";
+import { PEACE_CALM_PRACTICES, PEACE_CALM_SANKALPS, peaceCalmMantras } from "./locales/en/PeaceCalm";
 import practicesEn from "./locales/en/practices-en.json";
 import sankalpsEn from "./locales/en/sankalps-en.json";
 import templesEn from "./locales/en/temples_en.json";
@@ -70,15 +71,31 @@ import templesTe from "./locales/te/temples_te.json";
 import wisdomTe from "./locales/te/wisdom-te.json";
 
 
+
 // Safely get device language
 const deviceLanguage =
   Array.isArray(Localization.getLocales()) && Localization.getLocales().length > 0
     ? Localization.getLocales()[0].languageCode // e.g. "en"
     : "en";
 
+    const convertArrayToTranslation = (arr) => {
+  const obj = {};
+  arr.forEach(item => {
+    if (item.id) obj[item.id] = item;
+  });
+  return obj;
+};
+
+const PeaceCalmTranslations = {
+  ...convertArrayToTranslation(PEACE_CALM_PRACTICES),
+  ...convertArrayToTranslation(peaceCalmMantras),
+  ...convertArrayToTranslation(PEACE_CALM_SANKALPS)
+};
+
+
 // ✅ Deep merge translations to avoid overwriting nested objects
 const translations = {
-  en: merge({}, en, templesEn, mantrasEn, festivalsEn, sankalpsEn, wisdomEn, practicesEn),
+  en: merge({}, en, templesEn, mantrasEn, festivalsEn, sankalpsEn, wisdomEn, practicesEn,PeaceCalmTranslations),
   hi: merge({}, hi, templesHi, mantrasHi, festivalsHi, sankalpsHi, wisdomHi, practicesHi),
   te: merge({}, te, templesTe, mantrasTe, sankalpsTe, festivalsTe, wisdomTe, practicesTe),
   ta: merge({}, ta, mantrasTa, sankalpsTa, festivalsTa, wisdomTa, practicesTa),

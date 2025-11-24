@@ -6,6 +6,7 @@ import {
   classesBookingsReducer,
   classesExploreReducer,
   classesFilterExploreReducer,
+  classesTutorListReducer,
   myBookingsFilterReducer,
   releaseHoldReducer,
   rescheduleReducer,
@@ -45,6 +46,7 @@ import {
 } from "../screens/Streak/reducers";
 
 // ================= COMMON =================
+import { notificationsReducer } from "../screens/Notifications/reducers";
 import snackBarReducer from "./snackBarSlice";
 
 // =============================================================
@@ -90,6 +92,8 @@ const appReducer = combineReducers({
 
   // Login
   socialLoginReducer,
+  classesTutorListReducer,
+  notificationsReducer
 });
 
 // =============================================================

@@ -5,6 +5,8 @@ import ClassesScreen from "../screens/Classes/classesScreen";
 import ClassPaymentScreen from "../screens/Classes/ClassPaymentScreen";
 import ClassRescheduleScreen from "../screens/Classes/ClassRescheduleScreen";
 import ClassTutorDetailsScreen from "../screens/Classes/ClassTutorDetailsScreen";
+import DailyPracticeList from "../screens/DailyPractice/DailyPracticeList";
+import DailyPracticeSelectList from "../screens/DailyPractice/DailyPracticeSelectList";
 import Dharma from "../screens/Home/DailyDharma";
 import Explore from "../screens/Home/Explore";
 import Home from "../screens/Home/Home";
@@ -16,6 +18,7 @@ import RetreatsScreen from "../screens/Home/RetreatsScreen";
 import SadanaTrackerScreen from "../screens/Home/SadanaTrackerScreen";
 import SubmitMantraScreen from "../screens/Home/SubmitMantraScreen";
 import TravelPlannerScreen from "../screens/Home/TravelPlannerScreen";
+import Notifications from "../screens/Notifications/Notifications";
 import OnlineclassesScreen from "../screens/OnlineclassesScreen";
 import Language from "../screens/Profile/Language";
 import Privacy from "../screens/Profile/Privacy";
@@ -99,11 +102,15 @@ export const HomeStackNavigator = () => (
       <Stack.Screen name="Dharma" component={Dharma} options={{ headerShown: false }} />
       <Stack.Screen name="LearnMore" component={LearnMore}  options={{ headerShown: false }}  />
       <Stack.Screen name="RelatedVideosScreen" component={RelatedVideosScreen}   options={{ headerShown: false }} />
+      <Stack.Screen name="DailyPracticeList" component={DailyPracticeList}   options={{ headerShown: false }} />
+      <Stack.Screen name="DailyPracticeSelectList" component={DailyPracticeSelectList}  options={{ headerShown: false }} />
+
   </Stack.Navigator>
 );
 
 export const NotificationStackNavigator = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Notifications" component={Notifications}  options={{ headerShown: false }}/>
     {/* Add notification screens here */}
   </Stack.Navigator>
 );

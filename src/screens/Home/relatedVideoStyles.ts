@@ -75,6 +75,21 @@ const styles: any = StyleSheet.create({
     lineHeight: 18,
     fontFamily: "GelicaRegular",
   },
+    button1: {
+    backgroundColor: "#ca8a04",
+    paddingVertical: 14,
+    borderRadius: 25,
+    alignItems: "center",
+    marginTop: 10,
+
+  },
+  buttonText1: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+    fontFamily: "GelicaMedium",
+      // lineHeight: 20,
+  },
 });
 
 export default styles

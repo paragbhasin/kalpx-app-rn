@@ -20,6 +20,7 @@ import Colors from "../../components/Colors";
 import FontSize from "../../components/FontSize";
 import Header from "../../components/Header";
 import TextComponent from "../../components/TextComponent";
+import { BASE_IMAGE_URL } from "../../Networks/baseURL";
 import { RootState } from "../../store";
 import { tutorDataList } from "./actions";
 import styles from "./styles";
@@ -64,6 +65,8 @@ const ReadMoreText = ({ text }: { text: string }) => {
   );
 };
 
+console.log("BASE_IMAGE_URL >>>>",BASE_IMAGE_URL);
+
 export default function ClassTutorDetailsScreen({ navigation, route }) {
   const { t } = useTranslation();
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
@@ -75,7 +78,7 @@ export default function ClassTutorDetailsScreen({ navigation, route }) {
   // Map API class object to ClassEventCard props
   const mapClassToCard = (item: any) => ({
     id: item.id,
-    imageUrl: item.cover_media?.key ? `https://dev.kalpx.com/${item.cover_media.key}` : undefined,
+    imageUrl: item.cover_media?.key ? `${BASE_IMAGE_URL}/${item.cover_media.key}` : undefined,
     title: item.title,
     description: item.description,
     duration: item.pricing?.per_person?.session_length_min,
@@ -163,7 +166,7 @@ export default function ClassTutorDetailsScreen({ navigation, route }) {
       >
         <Video
           source={{
-            uri: `https://dev.kalpx.com/${route?.params?.data?.intro_media?.key}`,
+            uri: `${BASE_IMAGE_URL}/${route?.params?.data?.intro_media?.key}`,
           }}
           style={{
             width: "100%",
@@ -335,7 +338,7 @@ export default function ClassTutorDetailsScreen({ navigation, route }) {
             No classes available.
           </Text>
         }
-        scrollEnabled={false} // disable FlatList scroll because ScrollView is parent
+        // scrollEnabled={false} // disable FlatList scroll because ScrollView is parent
         contentContainerStyle={{ padding: 16 }}
       />
     </ScrollView>

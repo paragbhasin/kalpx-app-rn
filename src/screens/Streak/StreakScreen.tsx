@@ -42,7 +42,11 @@ const StreakScreen = ({ navigation, route }) => {
   const [selectedDate, setSelectedDate] = useState(moment().format("YYYY-MM-DD"));
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
   const [trackerData, setTrackerData] = useState<any>(null);
-
+  const [selectedDayData, setSelectedDayData] = useState({
+    notCompleted:[],
+  completed: [],
+  status: "not_done",
+});
   const practiceHistory: any = useSelector((state: RootState) => state.practiceReducer);
   const dailyPractice: any = useSelector((state: RootState) => state.dailyPracticeReducer);
   const { locationData, loading: locationLoading } = useUserLocation();
@@ -69,6 +73,13 @@ const StreakScreen = ({ navigation, route }) => {
       dispatch(fetchPracticeHistory(locationData.timezone));
     }
   }, [dispatch, locationData.timezone, locationLoading]);
+
+    useEffect(() => {
+      if (!locationLoading && locationData.timezone) {
+        const today = moment().format("YYYY-MM-DD");
+        dispatch(fetchDailyPractice(today, locationData.timezone));
+      }
+    }, [dispatch, locationData.timezone, locationLoading]);
 
   const milestones = [
     { days: 9, name: t("streakScreen.milestones.blessing") },
@@ -965,33 +976,55 @@ style={{backgroundColor:Colors.Colors.App_theme,padding:12,alignItems:"center",m
           </>
 } */}
 {selectedTab === "daily" && (
-  <FlatList
-    data={Array.from({ length: moment().daysInMonth() }, (_, i) => {
-      const date = moment().startOf("month").add(i, "days");
-      return {
-        day: date.date(),
-        fullDate: date.format("YYYY-MM-DD"),
-        isPastOrToday: date.isSameOrBefore(moment(), "day"),
-      };
-    })}
-    keyExtractor={(item) => item.fullDate}
-    numColumns={4} // 4 per row
-    contentContainerStyle={{
-      alignItems: "center",
-      justifyContent: "center",
-      paddingBottom: 100,
-    }}
-    renderItem={({ item }) => (
+<FlatList
+  data={Array.from({ length: moment().daysInMonth() }, (_, i) => {
+    const date = moment().startOf("month").add(i, "days");
+    return {
+      day: date.date(),
+      fullDate: date.format("YYYY-MM-DD"),
+      isPastOrToday: date.isSameOrBefore(moment(), "day"),
+    };
+  })}
+  keyExtractor={(item) => item.fullDate}
+  numColumns={4}
+  contentContainerStyle={{
+    alignItems: "center",
+    justifyContent: "center",
+    paddingBottom: 100,
+  }}
+  renderItem={({ item }) => {
+    const dayData = dailyPractice?.data?.calendar_days?.[item.fullDate] || {};
+    const status = dayData.status || "not_done";
+
+    // 🎨 Status background color mapping
+    let bgColor = "#FFE1E1"; // default = not_done (pink)
+
+    if (status === "completed") bgColor = "#DBFCE7";       // completed = green
+    else if (status === "partial") bgColor = "#F7FCC4";    // partial = yellow
+    else if (status === "not_done") bgColor = "#FFE1E1";   // not done = pink
+    else if (status === "disabled") bgColor = "#F3F3F5";   // future = gray
+
+    const isDisabled = status === "disabled";
+
+    const isCompleted = status === "completed";
+
+    // 📝 Text color
+    const textColor = isDisabled ? Colors.Colors.BLACK : isCompleted ? "green" : "#DB0000";
+
+    return (
       <TouchableOpacity
-        disabled={!item.isPastOrToday}
-        onPress={() => {
-          console.log("Pressed >>>>>>>>");
-              setSelectedDate(item.fullDate);
-  if (!locationLoading && locationData.timezone) {
-    dispatch(fetchDailyPractice(item.fullDate, locationData.timezone));
-    console.log("practiceHistory >>>>>>>",JSON.stringify(practiceHistory));
-    setShowPractiseModal(true);
-  }
+        disabled={isDisabled}
+        onPress={async () => {
+         setSelectedDate(item.fullDate);
+  const dayData = dailyPractice?.data?.calendar_days?.[item.fullDate] || {};
+
+  setSelectedDayData({
+    notCompleted: dayData?.active || [],
+    completed: dayData?.completed || [],
+    status: dayData?.status || "not_done",
+  });
+
+  setShowPractiseModal(true);
         }}
         style={{
           width: 70,
@@ -1000,37 +1033,37 @@ style={{backgroundColor:Colors.Colors.App_theme,padding:12,alignItems:"center",m
           borderRadius: 4,
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: item.isPastOrToday ? "#FFE6E4" : "#FFFFFF",
-          borderColor:
-            item.fullDate === selectedDate ? "#D4A017" : "#707070",
-          borderWidth: item.isPastOrToday  ? 1 : 0.5,
+          backgroundColor: bgColor,
+          // borderColor:
+          //   item.fullDate === selectedDate ? "#D4A017" : "#707070",
+          // borderWidth: 1,
         }}
       >
         <TextComponent
           type="streakText"
           style={{
-            color: item.isPastOrToday
-              ? Colors.Colors.BLACK
-              : Colors.Colors.Light_grey,
+            color: textColor,
           }}
         >
-           {/* {`${t(`months.${moment(item.fullDate).format("MMM").toLowerCase()}`)} ${item.day}`} */}
-            {moment(item.fullDate).format("MMM D")}
-          {/* {item.day} */}
+          {moment(item.fullDate).format("MMM D")}
         </TextComponent>
       </TouchableOpacity>
-    )}
-  />
-)}
-<PracticeDailyModal
-  visible={showPractiseModal}
-  date={selectedDate}
-  dailyPractice={{
-    active_practices: dailyPractice.data.active_practices || [],
-    completed_today: dailyPractice.data.completed_today || [],
+    );
   }}
-  onClose={() => setShowPractiseModal(false)}
 />
+)}
+   <PracticeDailyModal
+          visible={showPractiseModal}
+          date={selectedDate}
+          dailyPractice={{
+            active_practices: selectedDayData.notCompleted || [],
+           completed_today: selectedDayData.completed || [],
+           status: selectedDayData.status || "not_done"
+            //   active_practices: dailyPractice.data.active_practices || [],
+            // completed_today: dailyPractice.data.completed_today || [],
+          }}
+          onClose={() => setShowPractiseModal(false)}
+        />
         </ScrollView>
       </SafeAreaView>
     </SafeAreaProvider>

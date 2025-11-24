@@ -17,11 +17,13 @@ export default {
                 pending_bg:"#D4A0171A",
                cancel_bg :"#FF42421A",
                canecl:"#FF6767",
-               header_bg:"#FDF5E9",
+               header_bg:"#F7F0DD",
                button_bg:"#EEEDE9",
                black_edge:"#1E1E1E",
                blue_text:"#1B1EBB",
                card_text:"#2B0C01",
-               card_subtext:"#2B2B2B"
+               card_subtext:"#2B2B2B",
+               Daily_BG:"#F3E9D9",
+               Daily_black:"#282828"
         }
 }

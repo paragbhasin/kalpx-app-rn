@@ -5,12 +5,13 @@ import ClassesScreen from "../../screens/Classes/classesScreen";
 import ClassPaymentScreen from "../../screens/Classes/ClassPaymentScreen";
 import ClassRescheduleScreen from "../../screens/Classes/ClassRescheduleScreen";
 import ClassTutorDetailsScreen from "../../screens/Classes/ClassTutorDetailsScreen";
+import DailyPracticeList from "../../screens/DailyPractice/DailyPracticeList";
+import DailyPracticeSelectList from "../../screens/DailyPractice/DailyPracticeSelectList";
 import ForgotPassword from "../../screens/ForgotPassword/ForgotPassword";
 import SetNewPasswordScreen from "../../screens/ForgotPassword/SetNewPasswordScreen";
 import VerificationScreen from "../../screens/ForgotPassword/VerificationScreen";
 import Dharma from "../../screens/Home/DailyDharma";
 import Explore from "../../screens/Home/Explore";
-import Home from "../../screens/Home/Home";
 import LearnMore from "../../screens/Home/LearnMore";
 import MySadana from "../../screens/Home/MySadana";
 import PoojaScreen from "../../screens/Home/PoojaScreen";
@@ -29,7 +30,6 @@ import SignupScreen from "../../screens/Signup/SignupScreen";
 import StreakScreen from "../../screens/Streak/StreakScreen";
 import LandingScreen from "../../screens/WelcomeScreen/LandingScreen";
 import WelcomeScreen from "../../screens/WelcomeScreen/WelcomeScreen";
-import BottomMenu from "./BottomMenu";
 import AppDrawerNavigator from "./DrawerNavigator";
 
 const Stack: any = createNativeStackNavigator();
@@ -44,8 +44,8 @@ const Routes = ({ initialRouteName = "Welcome" }) => {
       <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
       <Stack.Screen name="VerificationScreen" component={VerificationScreen} />
       <Stack.Screen name="SetNewPasswordScreen" component={SetNewPasswordScreen} />
-      <Stack.Screen name="HomePage" component={BottomMenu} />
-    <Stack.Screen name="Home" component={Home}/>
+      {/* <Stack.Screen name="HomePage" component={BottomMenu} /> */}
+    {/* <Stack.Screen name="Home" component={Home}/> */}
       <Stack.Screen name="Travel" component={TravelPlannerScreen} />
       <Stack.Screen name="Pooja" component={PoojaScreen} />
       <Stack.Screen name="Retreat" component={RetreatsScreen} />
@@ -68,6 +68,8 @@ const Routes = ({ initialRouteName = "Welcome" }) => {
       <Stack.Screen name="LearnMore" component={LearnMore} />
       <Stack.Screen name="RelatedVideosScreen" component={RelatedVideosScreen} />
       <Stack.Screen name="Privacy" component={Privacy} />
+      <Stack.Screen name="DailyPracticeList" component={DailyPracticeList} />
+      <Stack.Screen name="DailyPracticeSelectList" component={DailyPracticeSelectList} />
     </Stack.Navigator>
   );
 };

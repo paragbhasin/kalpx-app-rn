@@ -32,6 +32,9 @@ import {
   SLOTS_FAILURE,
   SLOTS_REQUEST,
   SLOTS_SUCCESS,
+  TUTOR_LIST_FAILURE,
+  TUTOR_LIST_REQUEST,
+  TUTOR_LIST_SUCCESS,
 } from "./actions";
 
 // ======================
@@ -48,6 +51,13 @@ const singleState = {
   loading: false,
   error: null,
 };
+
+const tutorList = {
+    data: [],
+    loading: false,
+    error: null,
+    hasMore: true,
+  }
 
 // =============================================================
 // EXPLORE CLASSES REDUCER
@@ -76,6 +86,7 @@ export const classesExploreReducer = (state = listState, action: any) => {
 // =============================================================
 // MY BOOKINGS REDUCER
 // =============================================================
+
 export const classesBookingsReducer = (state = listState, action: any) => {
   switch (action.type) {
     case BOOKINGS_REQUEST:
@@ -267,6 +278,30 @@ export const releaseHoldReducer = (state = singleState, action: any) => {
     case RELEASE_HOLD_SUCCESS:
       return { ...state, loading: false, data: action.payload };
     case RELEASE_HOLD_FAILURE:
+      return { ...state, loading: false, error: action.payload };
+    default:
+      return state;
+  }
+};
+
+export const classesTutorListReducer = (
+  state = tutorList,
+  action
+) => {
+  switch (action.type) {
+    case TUTOR_LIST_REQUEST:
+      return { ...state, loading: true, error: null };
+  case TUTOR_LIST_SUCCESS:
+  return {
+    ...state,
+    loading: false,
+    data: [
+      ...state.data,
+      ...((action.payload.data?.classes?.results) || [])
+    ],
+    hasMore: action.payload.hasMore,
+  };
+    case TUTOR_LIST_FAILURE:
       return { ...state, loading: false, error: action.payload };
     default:
       return state;

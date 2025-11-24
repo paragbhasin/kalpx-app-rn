@@ -196,24 +196,28 @@ const FestivalCard = () => {
                                                       style={styles.partialBgContainer}
                                                       imageStyle={styles.partialBgImage}
                                                     >
-                <TextComponent type="semiBoldText" style={{  color:Colors.Colors.App_theme }}>
+                <TextComponent type="semiBoldText" style={{  color:Colors.Colors.App_theme,marginBottom:4 }}>
                   {t("festivalCard.blessingQuote")}
                 </TextComponent>
 
                 {/* Header */}
                 <View style={styles.headerRow}>
                   <TextComponent       type="cardHeaderText"
-                    style={{marginLeft: 25}}>
+                    style={{marginRight: 25,marginBottom:8}}>
                     {moment(festival.date).isSame(moment(), "day")
                       ? t("festivalCard.todayFestival")
                       : t("festivalCard.upcomingFestival")}
                   </TextComponent>
-                  <TouchableOpacity onPress={() => handleShareFestival(festival)} style={{ flexDirection: "row", alignItems: "center" }}>
+                
+                </View>
+              <View style={{flexDirection:"row",alignSelf:"flex-end",right:18,marginTop:-40}}>
+  <TouchableOpacity onPress={() => handleShareFestival(festival)} style={{ flexDirection: "row", alignItems: "center" }}>
                     {/* <Image source={require("../../assets/Streak_S1.png")} style={styles.streakIcon} />
                     <Image source={require("../../assets/Streak_S2.png")} style={styles.streakIcon} />
                     <Image source={require("../../assets/Streak_S3.png")} style={styles.streakIcon} /> */}
                     <Image source={require("../../assets/Streak_S4.png")} style={styles.streakIcon} />
-                      <TouchableOpacity
+                  </TouchableOpacity>
+                       <TouchableOpacity
                     style={{
                       marginLeft: 8,
                       padding: 6,
@@ -273,13 +277,11 @@ const FestivalCard = () => {
                   >
                     <Icon name="videocam-outline" size={18} color="#fff" />
                   </TouchableOpacity>
-                  </TouchableOpacity>
-                </View>
-
+</View>
                 {/* Name + Date + Video */}
                 <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                   <TextComponent                type="cardText"
-                                      style={{ color: Colors.Colors.blue_text,textAlign:"center",marginHorizontal:10 }}>
+                                      style={{ color: Colors.Colors.blue_text,textAlign:"center",marginHorizontal:10,marginTop:4 }}>
                     {festival.name}
                   </TextComponent>
                 
@@ -647,7 +649,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginVertical: 6,},
-   streakIcon: { height: 30, width: 30, marginLeft: 25,marginRight:15 },
+   streakIcon: { height: 30, width: 30, marginLeft: 5,marginRight:5 },
   quoteBox: {
     backgroundColor: "#FDFBF6",
     borderRadius: 6,

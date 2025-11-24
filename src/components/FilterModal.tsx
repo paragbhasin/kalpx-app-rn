@@ -155,7 +155,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
         <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
           <Image source={require("../../assets/Cross.png")} resizeMode="cover" />
         </TouchableOpacity>
-
+            {renderDropdown("Language", languageData, language, setLanguage)}
         {renderDropdown("Skill Level", skillLevelData, skillLevel, setSkillLevel)}
         {renderDropdown("Class Type", classTypeData, classType, setClassType)}
         {renderDropdown("Schedule", scheduleData, schedule, setSchedule)}
@@ -185,7 +185,6 @@ const FilterModal: React.FC<FilterModalProps> = ({
           />
         </View>
 
-            {renderDropdown("Language", languageData, language, setLanguage)}
         {renderDropdown("Sort", sortData, sort, setSort)}
 
         <View style={styles.actionContainer}>

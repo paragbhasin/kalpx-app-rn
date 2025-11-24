@@ -42,16 +42,22 @@ const  styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#fff",
-    paddingVertical: 12,
+    paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: "#ffdeb6",
-    marginBottom: 30,
+    marginTop:12,
+    // marginBottom: 30,
     width: screenWidth * 0.85,
     justifyContent: "center",
   },
   googleIcon: {
+    width: 20,
+    height: 20,
+    marginRight: 10,
+  },
+   appleIcon: {
     width: 20,
     height: 20,
     marginRight: 10,
@@ -74,6 +80,7 @@ const  styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 5,
     marginBottom: 40,
+    marginTop:20
   },
   cardTitleLine1: {
     // fontSize:24,

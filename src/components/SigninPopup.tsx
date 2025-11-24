@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
+import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from "react";
 import {
   Image,
@@ -12,15 +13,19 @@ import Colors from "./Colors";
 import FontSize from "./FontSize";
 import TextComponent from "./TextComponent";
 
+
 interface SigninPopupProps {
   visible: boolean;
   onClose: () => void;
   onConfirmCancel: (practice: any) => void;
+  onSadhanPress?: () => void;
   /** 🔹 Text values (to customize for each use case) */
   title: string;
   subText: string;
+  subTitle?: string;
+  MantraButtonTitle?: string;
   infoTexts: string[]; // e.g. ["Get daily reminders", "Track your streak", ...]
-  bottomText: string; // last line like "Want a gentle reminder..."
+  bottomText?: string; // last line like "Want a gentle reminder..."
 }
 
 const SigninPopup: React.FC<SigninPopupProps> = ({
@@ -31,6 +36,9 @@ const SigninPopup: React.FC<SigninPopupProps> = ({
   subText,
   infoTexts,
   bottomText,
+  subTitle,
+  MantraButtonTitle,
+  onSadhanPress
 }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const navigation: any = useNavigation();
@@ -61,6 +69,13 @@ const SigninPopup: React.FC<SigninPopupProps> = ({
       animationOut="zoomOut"
       useNativeDriver
     >
+        <LinearGradient
+     colors={["#EBDCBA", "#E0C06F"]}  // 🟡 Your gradient
+  locations={[0, 0.5]}   // 50% top, 50% bottom
+  start={{ x: 0, y: 0 }}
+  end={{ x: 0, y: 1 }} 
+    style={styles.gradientBox}
+  >
       <View style={styles.modalContent}>
         {/* 🔹 Close Button */}
         <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
@@ -70,20 +85,35 @@ const SigninPopup: React.FC<SigninPopupProps> = ({
             resizeMode="cover"
           />
         </TouchableOpacity>
-
-        {/* 🔹 Header Section */}
-        <View style={styles.headerBox}>
-          <TextComponent type="boldText" style={styles.title}>
+ <Image
+            source={require("../../assets/lotus_icon.png")}
+            style={{
+    height: 50,
+    width: 50,
+    alignSelf: "center",
+    // backgroundColor:"red",
+    marginTop:-30
+  }}
+  resizeMode="contain"
+          />
+            <TextComponent type="headerSubBoldText" style={styles.title}>
             {title}
           </TextComponent>
-          <TextComponent type="boldText" style={styles.subText}>
+          {subTitle &&
+           <TextComponent type="headerSubBoldText" style={{...styles.title,marginVertical:4}}>
+            {subTitle}
+          </TextComponent>
+}
+        {/* 🔹 Header Section */}
+        <View style={styles.headerBox}> 
+          <TextComponent type="semiBoldText" style={styles.subText}>
             {subText}
           </TextComponent>
         </View>
 
         {/* 🔹 Info Texts */}
         {infoTexts.map((text, index) => (
-          <TextComponent key={index} type="boldText" style={styles.layerText}>
+          <TextComponent key={index} type="mediumText" style={styles.layerText}>
             {text}
           </TextComponent>
         ))}
@@ -104,20 +134,44 @@ const SigninPopup: React.FC<SigninPopupProps> = ({
         {/* 🔹 Buttons — only if not logged in */}
         {!isLoggedIn && (
           <View style={styles.buttonRow}>
-            <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate("Login")}>
-              <TextComponent type="boldText" style={styles.buttonTitle}>
+            <TouchableOpacity style={styles.loginButton} onPress={() => {
+              onClose();
+              navigation.navigate("Login");
+              }}>
+              <TextComponent type="headerSubBoldText" style={styles.buttonTitle}>
                 Log In
               </TextComponent>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.signupButton} onPress={() => navigation.navigate("Signup")}>
-              <TextComponent type="boldText" style={styles.buttonTitle}>
+            <TouchableOpacity style={styles.signupButton} onPress={() => {
+              onClose();
+              navigation.navigate("Signup");
+              }}>
+              <TextComponent type="headerSubBoldText" style={styles.buttonLeftTitle}>
                 Sign Up
               </TextComponent>
             </TouchableOpacity>
           </View>
         )}
+         {isLoggedIn && (
+          <View style={styles.buttonRow}>
+            <TouchableOpacity style={{
+                  backgroundColor: "#D4A017",
+    borderRadius: 10,
+    width: "100%",
+    paddingVertical: 12,
+            }} onPress={() => {
+              onClose();
+              onSadhanPress();
+              }}>
+              <TextComponent type="headerSubBoldText" style={styles.buttonTitle}>
+              {MantraButtonTitle}
+              </TextComponent>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
+      </LinearGradient>
     </Modal>
   );
 };
@@ -126,7 +180,7 @@ export default SigninPopup;
 
 const styles = StyleSheet.create({
   modalContent: {
-    backgroundColor: "white",
+    // backgroundColor: "white",
     borderRadius: 16,
     padding: 20,
     width: "100%",
@@ -139,51 +193,85 @@ const styles = StyleSheet.create({
     borderRadius: 18,
   },
   closeIcon: {},
+  // headerBox: {
+  //   borderColor: Colors.Colors.App_theme,
+  //   borderWidth: 1,
+  //   backgroundColor:"#FFF7E8",
+  //   padding: 14,
+  //   alignItems: "center",
+  //   marginVertical: 15,
+  //   borderRadius: 10,
+  // },
   headerBox: {
-    borderColor: Colors.Colors.App_theme,
-    borderWidth: 1,
-    backgroundColor:"#FFF7E8",
-    padding: 14,
-    alignItems: "center",
-    marginVertical: 15,
-    borderRadius: 10,
-  },
+  backgroundColor: "#FFF7E8",
+  padding: 14,
+  alignItems: "center",
+  marginVertical: 10,
+  borderRadius: 10,
+
+  // 🌟 Android elevation
+  elevation: 6,
+
+  // 🌟 iOS shadow
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 3 },
+  shadowOpacity: 0.25,
+  shadowRadius: 4,
+},
   title: {
-    color: Colors.Colors.Light_black,
-    fontSize: FontSize.CONSTS.FS_18,
+    // color: Colors.Colors.Light_black,
+    // fontSize: FontSize.CONSTS.FS_18,
     textAlign: "center",
   },
   subText: {
-    marginTop: 6,
-    fontSize: FontSize.CONSTS.FS_14,
+    marginTop: 2,
+    color:Colors.Colors.blue_text,
+    // fontSize: FontSize.CONSTS.FS_14,
     textAlign: "center",
   },
   layerText: {
-    color: Colors.Colors.Light_grey,
-    fontSize: FontSize.CONSTS.FS_14,
+    color: "#282828",
+    // fontSize: FontSize.CONSTS.FS_14,
     textAlign: "center",
     marginTop: 4,
   },
   buttonRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "space-around",
     marginVertical: 20,
   },
   loginButton: {
-    backgroundColor: Colors.Colors.App_theme,
+    backgroundColor: "#D4A017",
     borderRadius: 10,
-    width: "46%",
+    width: "42%",
     paddingVertical: 12,
   },
   signupButton: {
-    backgroundColor: Colors.Colors.button_bg,
+    backgroundColor: "#FFFCF6",
+    borderWidth:1,
+    borderColor:Colors.Colors.App_theme,
     borderRadius: 10,
-    width: "46%",
+    width: "42%",
     paddingVertical: 12,
   },
   buttonTitle: {
-    color: Colors.Colors.BLACK,
+    color: Colors.Colors.white,
     fontSize: FontSize.CONSTS.FS_20,
     textAlign: "center",
   },
+    buttonLeftTitle: {
+    color: Colors.Colors.App_theme,
+    fontSize: FontSize.CONSTS.FS_20,
+    textAlign: "center",
+  },
+  gradientBox: {
+  borderRadius: 16,
+  padding: 2, // outer padding for smoother gradient
+},
+innerBox: {
+  backgroundColor: "white",
+  borderRadius: 16,
+  padding: 20,
+},
+
 });

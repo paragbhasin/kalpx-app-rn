@@ -24,112 +24,11 @@ import ExperienceCard from "../../components/ExperienceCard";
 import LoadingButton from "../../components/LoadingButton";
 import Section from "../../components/Section";
 import SuccessModal from "../../components/SuccessModal";
+import { BASE_IMAGE_URL } from "../../Networks/baseURL";
 import { ensureLoggedIn } from "../../utils/authHelpers";
 import { travelIntresetUser } from "./actions";
 import styles from "./travelstyles";
 
-
-
-// const ALL_CATEGORIES = [
-//   {
-//     id: "charDham",
-//     title: "Char Dham Yatra",
-//     subtitle:
-//       "Connect with the ultimate spiritual circuit across India’s divine corners.",
-//     image: "https://dev.kalpx.com/img/char-dham.137cfaf5.jpg",
-//   },
-//   {
-//     id: "riverine",
-//     title: "Riverine Pilgrimage",
-//     subtitle:
-//       "Immerse yourself in the purifying embrace of India’s sacred rivers and their holy confluence points.",
-//     image: "https://dev.kalpx.com/img/riverine.9c0993b7.jpg",
-//   },
-//   {
-//     id: "shaktipeeth",
-//     title: "Shaktipeeth Yatra",
-//     subtitle:
-//       "Awaken the divine feminine power by honoring the sacred abodes of the Mother Goddess.",
-//     image: "https://dev.kalpx.com/img/shaktipeeth.d335333c.jpg",
-//   },
-//   {
-//     id: "ramayana",
-//     title: "Ramayana Circuit",
-//     subtitle:
-//       "Walk the footsteps of Shri Ram, retracing his epic journey of dharma and devotion.",
-//     image: "https://dev.kalpx.com/img/ramayana.68fbbb93.jpg",
-//   },
-//   {
-//     id: "krishna",
-//     title: "Krishna Bhumi Trail",
-//     subtitle:
-//       "Where every step echoes 'Radhe Radhe' – a joyous immersion into the land of divine play and love.",
-//     image: "https://dev.kalpx.com/img/krishna.a507ab5b.jpg",
-//   },
-//   {
-//     id: "himalayanTemples",
-//     title: "Himalayan Temples",
-//     subtitle:
-//       "Seek profound silence and spiritual elevation amidst the majestic and mystical heights of the Himalayas.",
-//     image: "https://dev.kalpx.com/img/himalayan-temples.7c855222.jpg",
-//   },
-//   {
-//     id: "southIndian",
-//     title: "South Indian Mandirs",
-//     subtitle:
-//       "Uncover the mystic traditions and ancient glory of South India’s timeless Dravidian temples.",
-//     image: "https://dev.kalpx.com/img/south-indian.56a0c53f.jpg",
-//   },
-//   {
-//     id: "sunriseDarshan",
-//     title: "Sunrise Darshan Sites",
-//     subtitle:
-//       "Begin your day with devotion – witness awe-inspiring darshans as the sun rises over sacred shores.",
-//     image: "https://dev.kalpx.com/img/sunrise-darshan.7201189c.jpg",
-//   },
-//   {
-//     id: "jyotirlinga",
-//     title: "Jyotirlinga Darshan",
-//     subtitle:
-//       "Connect with the 12 luminous forms of Lord Shiva, radiating divine light across the subcontinent.",
-//     image: "https://dev.kalpx.com/img/jyotirlinga.da3a8f7c.jpg",
-//   },
-//   {
-//     id: "saintGuru",
-//     title: "Saint & Guru Dhams",
-//     subtitle:
-//       "Follow the spiritual footsteps of revered saints and enlightened masters who guided humanity.",
-//     image: "https://dev.kalpx.com/img/saint-guru.0cea2711.jpg",
-//   },
-//   {
-//     id: "ganesha",
-//     title: "Ganesha Pilgrimage",
-//     subtitle:
-//       "Seek blessings and remove obstacles by visiting the potent abodes of the benevolent Ganesha.",
-//     image: "https://dev.kalpx.com/img/ganesha.0a059365.jpg",
-//   },
-//   {
-//     id: "natureDevotion",
-//     title: "Nature & Devotion",
-//     subtitle:
-//       "Experience spiritual awakening amidst the pristine beauty of nature’s sacred sanctuaries.",
-//     image: "https://dev.kalpx.com/img/nature-devotion.fa40d80e.jpg",
-//   },
-//   {
-//     id: "murugan",
-//     title: "Murugan Kshetras",
-//     subtitle:
-//       "Embark on a divine quest to the powerful abodes of Lord Murugan, the valiant Kartikeya.",
-//     image: "https://dev.kalpx.com/img/murugan.3ed31501.jpg",
-//   },
-//   {
-//     id: "heritage",
-//     title: "Ancient Heritage Sites",
-//     subtitle:
-//       "Explore timeless temples that stand as testaments to India’s rich history and architectural genius.",
-//     image: "https://dev.kalpx.com/img/heritage.776cd106.jpg",
-//   },
-// ];
 
 const DURATION = ["3_days", "7_days", "10_plus_days"];
                 
@@ -158,93 +57,95 @@ export default function TravelPlannerScreen({route}) {
   const [userCity, setUserCity] = useState("");
     const [errors, setErrors] = useState([]); // track missing fields
 
-
-    const ALL_CATEGORIES = [
+    
+const ALL_CATEGORIES = [
   {
     id: "charDham",
     title: t("travelPlanner.travelCard.charDham.title"),
     subtitle: t("travelPlanner.travelCard.charDham.subtitle"),
-    image: "https://dev.kalpx.com/img/char-dham.137cfaf5.jpg",
+    image: `${BASE_IMAGE_URL}/img/char-dham.137cfaf5.jpg`,
   },
   {
     id: "riverine",
     title: t("travelPlanner.travelCard.riverine.title"),
     subtitle: t("travelPlanner.travelCard.riverine.subtitle"),
-    image: "https://dev.kalpx.com/img/riverine.9c0993b7.jpg",
+    image: `${BASE_IMAGE_URL}/img/riverine.9c0993b7.jpg`,
   },
   {
     id: "shaktipeeth",
     title: t("travelPlanner.travelCard.shaktipeeth.title"),
     subtitle: t("travelPlanner.travelCard.shaktipeeth.subtitle"),
-    image: "https://dev.kalpx.com/img/shaktipeeth.d335333c.jpg",
+    image: `${BASE_IMAGE_URL}/img/shaktipeeth.d335333c.jpg`,
   },
   {
     id: "ramayana",
     title: t("travelPlanner.travelCard.ramayana.title"),
     subtitle: t("travelPlanner.travelCard.ramayana.subtitle"),
-    image: "https://dev.kalpx.com/img/ramayana.68fbbb93.jpg",
+    image: `${BASE_IMAGE_URL}/img/ramayana.68fbbb93.jpg`,
   },
   {
     id: "krishna",
     title: t("travelPlanner.travelCard.krishna.title"),
     subtitle: t("travelPlanner.travelCard.krishna.subtitle"),
-    image: "https://dev.kalpx.com/img/krishna.a507ab5b.jpg",
+    image: `${BASE_IMAGE_URL}/img/krishna.a507ab5b.jpg`,
   },
   {
     id: "himalayanTemples",
     title: t("travelPlanner.travelCard.himalayanTemples.title"),
     subtitle: t("travelPlanner.travelCard.himalayanTemples.subtitle"),
-    image: "https://dev.kalpx.com/img/himalayan-temples.7c855222.jpg",
+    image: `${BASE_IMAGE_URL}/img/himalayan-temples.7c855222.jpg`,
   },
   {
     id: "southIndian",
     title: t("travelPlanner.travelCard.southIndian.title"),
     subtitle: t("travelPlanner.travelCard.southIndian.subtitle"),
-    image: "https://dev.kalpx.com/img/south-indian.56a0c53f.jpg",
+    image: `${BASE_IMAGE_URL}/img/south-indian.56a0c53f.jpg`,
   },
   {
     id: "sunriseDarshan",
     title: t("travelPlanner.travelCard.sunriseDarshan.title"),
     subtitle: t("travelPlanner.travelCard.sunriseDarshan.subtitle"),
-    image: "https://dev.kalpx.com/img/sunrise-darshan.7201189c.jpg",
+    image: `${BASE_IMAGE_URL}/img/sunrise-darshan.7201189c.jpg`,
   },
   {
     id: "jyotirlinga",
     title: t("travelPlanner.travelCard.jyotirlinga.title"),
     subtitle: t("travelPlanner.travelCard.jyotirlinga.subtitle"),
-    image: "https://dev.kalpx.com/img/jyotirlinga.da3a8f7c.jpg",
+    image: `${BASE_IMAGE_URL}/img/jyotirlinga.da3a8f7c.jpg`,
   },
   {
     id: "saintGuru",
     title: t("travelPlanner.travelCard.saintGuru.title"),
     subtitle: t("travelPlanner.travelCard.saintGuru.subtitle"),
-    image: "https://dev.kalpx.com/img/saint-guru.0cea2711.jpg",
+    image: `${BASE_IMAGE_URL}/img/saint-guru.0cea2711.jpg`,
   },
   {
     id: "ganesha",
     title: t("travelPlanner.travelCard.ganesha.title"),
     subtitle: t("travelPlanner.travelCard.ganesha.subtitle"),
-    image: "https://dev.kalpx.com/img/ganesha.0a059365.jpg",
+    image: `${BASE_IMAGE_URL}/img/ganesha.0a059365.jpg`,
   },
   {
     id: "natureDevotion",
     title: t("travelPlanner.travelCard.natureDevotion.title"),
     subtitle: t("travelPlanner.travelCard.natureDevotion.subtitle"),
-    image: "https://dev.kalpx.com/img/nature-devotion.fa40d80e.jpg",
+    image: `${BASE_IMAGE_URL}/img/nature-devotion.fa40d80e.jpg`,
   },
   {
     id: "murugan",
     title: t("travelPlanner.travelCard.murugan.title"),
     subtitle: t("travelPlanner.travelCard.murugan.subtitle"),
-    image: "https://dev.kalpx.com/img/murugan.3ed31501.jpg",
+    image: `${BASE_IMAGE_URL}/img/murugan.3ed31501.jpg`,
   },
   {
     id: "heritage",
     title: t("travelPlanner.travelCard.heritage.title"),
     subtitle: t("travelPlanner.travelCard.heritage.subtitle"),
-    image: "https://dev.kalpx.com/img/heritage.776cd106.jpg",
+    image: `${BASE_IMAGE_URL}/img/heritage.776cd106.jpg`,
   },
 ];
+
+    
 
   // check if all required fields are filled
   const allValid =

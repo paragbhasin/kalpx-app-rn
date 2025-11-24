@@ -15,6 +15,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "flex-start",
     marginVertical: 10,
+    backgroundColor: Colors.Colors.white 
   },
   tab: {
     marginRight: 20,

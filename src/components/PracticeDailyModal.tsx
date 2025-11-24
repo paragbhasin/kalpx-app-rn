@@ -7,7 +7,8 @@ import Colors from "./Colors";
 import TextComponent from "./TextComponent";
 
 interface Practice {
-  practice_id: string;
+  id?: string;
+  practice_id?: string;
   name: string;
   icon: string;
   source?: string;
@@ -19,7 +20,8 @@ interface PracticeDailyModalProps {
   date: string;
   dailyPractice: {
     active_practices: Practice[];
-    completed_today: string[];
+    completed_today: any[]; // array of objects from API
+    status: string;
   };
   onClose: () => void;
 }
@@ -30,18 +32,32 @@ const PracticeDailyModal: React.FC<PracticeDailyModalProps> = ({
   dailyPractice,
   onClose,
 }) => {
+
+  console.log("Daily Practice Modal Data:", JSON.stringify(dailyPractice));
+
   const { active_practices, completed_today } = dailyPractice;
   const { t } = useTranslation();
 
-  // ✅ Separate completed and not done
-  const completed = active_practices.filter((p) =>
-    completed_today.includes(p.practice_id)
-  );
-  const notDone = active_practices.filter(
-    (p) => !completed_today.includes(p.practice_id)
-  );
+  /**
+   * FIXED:
+   * completed_today from API = Array of OBJECTS
+   * We must extract IDs before comparing
+   */
+  const completedIds = completed_today.map((item: any) => item.id);
 
-  // ✅ Render each item — only name (no description)
+  // Completed list
+  const completed = active_practices.filter((p: any) => {
+    const pid = p.id || p.practice_id;
+    return completedIds.includes(pid);
+  });
+
+  // Not done list
+  const notDone = active_practices.filter((p: any) => {
+    const pid = p.id || p.practice_id;
+    return !completedIds.includes(pid);
+  });
+
+  // Render item
   const renderPracticeItem = (item: Practice) => {
     let displayName = "";
 
@@ -83,12 +99,13 @@ const PracticeDailyModal: React.FC<PracticeDailyModalProps> = ({
           {t("streakScreen.practiceText")} {date}
         </TextComponent>
 
-        {/* ✅ Scrollable content area */}
+        {/* Scrollable content */}
         <ScrollView
           style={styles.scrollArea}
           showsVerticalScrollIndicator={true}
           nestedScrollEnabled
         >
+          {/* Completed */}
           {completed.length > 0 && (
             <>
               <TextComponent type="cardText" style={styles.subTitle}>
@@ -96,13 +113,14 @@ const PracticeDailyModal: React.FC<PracticeDailyModalProps> = ({
               </TextComponent>
               <FlatList
                 data={completed}
-                keyExtractor={(item) => item.practice_id}
+                keyExtractor={(item: any) => item.id || item.practice_id}
                 renderItem={({ item }) => renderPracticeItem(item)}
                 scrollEnabled={false}
               />
             </>
           )}
 
+          {/* Not Done */}
           {notDone.length > 0 && (
             <>
               <TextComponent type="cardText" style={styles.subTitle}>
@@ -110,7 +128,7 @@ const PracticeDailyModal: React.FC<PracticeDailyModalProps> = ({
               </TextComponent>
               <FlatList
                 data={notDone}
-                keyExtractor={(item) => item.practice_id}
+                keyExtractor={(item: any) => item.id || item.practice_id}
                 renderItem={({ item }) => renderPracticeItem(item)}
                 scrollEnabled={false}
               />
@@ -118,7 +136,7 @@ const PracticeDailyModal: React.FC<PracticeDailyModalProps> = ({
           )}
         </ScrollView>
 
-        {/* ✅ Close Button */}
+        {/* Close Button */}
         <Pressable style={styles.closeBtn} onPress={onClose}>
           <TextComponent type="cardText" style={styles.closeBtnText}>
             {t("streakScreen.Close")}
@@ -137,7 +155,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 20,
     alignItems: "center",
-    maxHeight: "80%", // ✅ Prevents overflow
+    maxHeight: "80%",
     width: "90%",
   },
   title: {
@@ -190,16 +208,18 @@ const styles = StyleSheet.create({
 
 // import React from "react";
 // import { useTranslation } from "react-i18next";
-// import { FlatList, Pressable, StyleSheet, View } from "react-native";
+// import { FlatList, Pressable, ScrollView, StyleSheet, View } from "react-native";
 // import Modal from "react-native-modal";
+// import { getTranslatedPractice } from "../utils/getTranslatedPractice";
 // import Colors from "./Colors";
 // import TextComponent from "./TextComponent";
 
 // interface Practice {
 //   practice_id: string;
 //   name: string;
-//   description: string;
 //   icon: string;
+//   source?: string;
+//   details?: any;
 // }
 
 // interface PracticeDailyModalProps {
@@ -208,33 +228,55 @@ const styles = StyleSheet.create({
 //   dailyPractice: {
 //     active_practices: Practice[];
 //     completed_today: string[];
+//     status: string;
 //   };
 //   onClose: () => void;
 // }
 
-// const PracticeDailyModal: React.FC<PracticeDailyModalProps> = ({ visible, date, dailyPractice, onClose }) => {
+// const PracticeDailyModal: React.FC<PracticeDailyModalProps> = ({
+//   visible,
+//   date,
+//   dailyPractice,
+//   onClose,
+// }) => {
 //   const { active_practices, completed_today } = dailyPractice;
-//     const { t } = useTranslation();
-  
+//   const { t } = useTranslation();
 
-//   // Completed practices
-//   const completed = active_practices.filter(p => completed_today.includes(p.practice_id));
-
-//   // Not done practices
-//   const notDone = active_practices.filter(p => !completed_today.includes(p.practice_id));
-
-//   const renderPracticeItem = (item: Practice) => (
-//     <View style={styles.itemContainer}>
-//         <View style={{width:10,height:10,borderRadius:8,backgroundColor:Colors.Colors.App_theme}}/>
-//         <TextComponent type='cardText' style={styles.name}>{item.name}</TextComponent>
-
-//       {/* <TextComponent style={styles.icon}>{item.icon}</TextComponent>
-//       <View style={styles.textContainer}>
-//         <TextComponent type='cardText' style={styles.name}>{item.name}</TextComponent>
-//         <TextComponent type='cardText' style={styles.description}>{item.description}</TextComponent>
-//       </View> */}
-//     </View>
+//   // ✅ Separate completed and not done
+//   const completed = active_practices.filter((p) =>
+//     completed_today.includes(p.practice_id)
 //   );
+//   const notDone = active_practices.filter(
+//     (p) => !completed_today.includes(p.practice_id)
+//   );
+
+//   // ✅ Render each item — only name (no description)
+//   const renderPracticeItem = (item: Practice) => {
+//     let displayName = "";
+
+//     if (item.source === "custom") {
+//       displayName = item.name?.trim() || "Custom Practice";
+//     } else {
+//       const translated = getTranslatedPractice(item.details || item, t);
+//       displayName = translated.name || item.name || "Unnamed Practice";
+//     }
+
+//     return (
+//       <View style={styles.itemContainer}>
+//         <View
+//           style={{
+//             width: 10,
+//             height: 10,
+//             borderRadius: 8,
+//             backgroundColor: Colors.Colors.App_theme,
+//           }}
+//         />
+//         <TextComponent type="cardText" style={styles.name}>
+//           {item.icon} {displayName}
+//         </TextComponent>
+//       </View>
+//     );
+//   };
 
 //   return (
 //     <Modal
@@ -243,36 +285,53 @@ const styles = StyleSheet.create({
 //       animationIn="zoomIn"
 //       animationOut="zoomOut"
 //       useNativeDriver
+//       style={{ margin: 0, justifyContent: "center", alignItems: "center" }}
 //     >
 //       <View style={styles.modalContent}>
-//         <TextComponent type='boldText' style={styles.title}>{t("streakScreen.practiceText")} {date}</TextComponent>
+//         <TextComponent type="boldText" style={styles.title}>
+//           {t("streakScreen.practiceText")} {date}
+//         </TextComponent>
 
-//         {completed.length > 0 && (
-//           <>
-//             <TextComponent type='cardText' style={styles.subTitle}>{t("streakScreen.CompletedText")} </TextComponent>
-//             <FlatList
-//               data={completed}
-//               keyExtractor={(item) => item.practice_id}
-//               renderItem={({ item }) => renderPracticeItem(item)}
-//               scrollEnabled={false}
-//             />
-//           </>
-//         )}
+//         {/* ✅ Scrollable content area */}
+//         <ScrollView
+//           style={styles.scrollArea}
+//           showsVerticalScrollIndicator={true}
+//           nestedScrollEnabled
+//         >
+//           {completed.length > 0 && (
+//             <>
+//               <TextComponent type="cardText" style={styles.subTitle}>
+//                 {t("streakScreen.CompletedText")}
+//               </TextComponent>
+//               <FlatList
+//                 data={completed}
+//                 keyExtractor={(item) => item.practice_id}
+//                 renderItem={({ item }) => renderPracticeItem(item)}
+//                 scrollEnabled={false}
+//               />
+//             </>
+//           )}
 
-//         {notDone.length > 0 && (
-//           <>
-//             <TextComponent type='cardText' style={styles.subTitle}>{t("streakScreen.notDoneText")}  </TextComponent>
-//             <FlatList
-//               data={notDone}
-//               keyExtractor={(item) => item.practice_id}
-//               renderItem={({ item }) => renderPracticeItem(item)}
-//               scrollEnabled={false}
-//             />
-//           </>
-//         )}
+//           {notDone.length > 0 && (
+//             <>
+//               <TextComponent type="cardText" style={styles.subTitle}>
+//                 {t("streakScreen.notDoneText")}
+//               </TextComponent>
+//               <FlatList
+//                 data={notDone}
+//                 keyExtractor={(item) => item.practice_id}
+//                 renderItem={({ item }) => renderPracticeItem(item)}
+//                 scrollEnabled={false}
+//               />
+//             </>
+//           )}
+//         </ScrollView>
 
+//         {/* ✅ Close Button */}
 //         <Pressable style={styles.closeBtn} onPress={onClose}>
-//           <TextComponent type='cardText' style={styles.closeBtnText}>{t("streakScreen.Close")}</TextComponent>
+//           <TextComponent type="cardText" style={styles.closeBtnText}>
+//             {t("streakScreen.Close")}
+//           </TextComponent>
 //         </Pressable>
 //       </View>
 //     </Modal>
@@ -283,46 +342,43 @@ const styles = StyleSheet.create({
 
 // const styles = StyleSheet.create({
 //   modalContent: {
-//     backgroundColor: "white",
+//     backgroundColor: Colors.Colors.white,
 //     borderRadius: 16,
 //     padding: 20,
 //     alignItems: "center",
+//     maxHeight: "80%", // ✅ Prevents overflow
+//     width: "90%",
 //   },
 //   title: {
 //     alignSelf: "center",
 //     marginVertical: 6,
-//     color:Colors.Colors.BLACK,
-//     fontSize:16
+//     color: Colors.Colors.BLACK,
+//     fontSize: 16,
 //   },
 //   subTitle: {
 //     alignSelf: "flex-start",
 //     marginTop: 10,
-//     fontSize:16
+//     fontSize: 16,
+//   },
+//   scrollArea: {
+//     width: "100%",
+//     marginTop: 10,
 //   },
 //   itemContainer: {
 //     flexDirection: "row",
-//     alignSelf:"flex-start",
+//     alignSelf: "flex-start",
 //     paddingVertical: 6,
-//     alignItems:"center",
-//   },
-//   icon: {
-//     fontSize: 24,
-//     marginRight: 10,
-//   },
-//   textContainer: {
-//     flex: 1,
+//     alignItems: "center",
 //   },
 //   name: {
-//     marginLeft:12
-//   },
-//   description: {
-//     color: "#555",
+//     marginLeft: 12,
+//     color: Colors.Colors.BLACK,
+//     fontSize: 14,
 //   },
 //   closeBtn: {
 //     width: "100%",
 //     backgroundColor: Colors.Colors.App_theme,
 //     paddingVertical: 10,
-//     paddingHorizontal: 20,
 //     borderRadius: 14,
 //     borderColor: "#FAD38C",
 //     borderWidth: 1,

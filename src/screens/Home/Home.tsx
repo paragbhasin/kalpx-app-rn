@@ -70,12 +70,19 @@ export default function Home() {
 
   const [showVideo, setShowVideo] = useState(false);
   const [showMantraTaken, setShowMantraTaken] = useState(false);
+  const [showLoginMantraTaken, setShowLoginMantraTaken] = useState(false);
   const [showMantraComplete, setShowMantraComplete] = useState(false);
+  const [showLoginMantraComplete, setShowLoginMantraComplete] = useState(false);
   const [showSankalpTaken, setShowSankalpTaken] = useState(false);
+  const [showLoginSankalpTaken, setShowLoginSankalpTaken] = useState(false);
   const [showSankalpComplete, setShowSankalpComplete] = useState(false);
+  const [showLoginSankalpComplete, setShowLoginSankalpComplete] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
 const [updateType, setUpdateType] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { setDailyMantras } = usePracticeStore();
+  const [selectedMantraForPopup, setSelectedMantraForPopup] = useState(null);
+  const [selectedSankalpForPopup, setSelectedSankalpForPopup] = useState(null);
  const currentLang = i18n.language.split("-")[0];
   const youtubeUrl = "https://www.youtube.com/watch?v=INS2diQXIjA";
   const videoId = youtubeUrl.split("v=")[1];
@@ -91,6 +98,18 @@ const [updateType, setUpdateType] = useState("");
   const { data: exploreVideos, loading: exploreLoading, page, hasMore } = useSelector(
     (state: RootState) => state.videosReducer
   );
+
+      useEffect(() => {
+    const checkLogin = async () => {
+      try {
+        const token = await AsyncStorage.getItem("access_token");
+        setIsLoggedIn(!!token);
+      } catch (error) {
+        console.log("Error checking login:", error);
+      }
+    };
+    checkLogin();
+  }, []);
 
 useEffect(() => {
   const checkForUpdates = async () => {
@@ -254,8 +273,6 @@ useEffect(() => {
     (state: RootState) => state.practiceTodayReducer
   );
 
-
-
   useEffect(() => {
     dispatch(
       getPracticeToday((res) => {
@@ -282,7 +299,8 @@ useEffect(() => {
         trackerData?.active_practices?.length > 0
           ? t("categories.sadana")
           : t("categories.dharma"),
-      title: trackerData?.active_practices?.length > 0 ? "MySadana" : "Dharma",
+      title: trackerData?.active_practices?.length > 0 ? "SadanaTrackerScreen" : "Dharma",
+      // title: trackerData?.active_practices?.length > 0 ? "DailyPracticeList" : "Dharma",
       event_type: "click_dharma_card",
       component: "Dharma-card",
       icon: require("../../../assets/Group.png"),
@@ -319,14 +337,14 @@ useEffect(() => {
       component: "Retreat-card",
       icon: require("../../../assets/yoga.png"),
     },
-    // {
-    //   id: "6",
-    //   name: t("categories.classes"),
-    //   title: "ClassesScreen",
-    //   event_type: "click_classes_card",
-    //   component: "Classes-card",
-    //   icon: require("../../../assets/onlinecion.png"),
-    // },
+    {
+      id: "6",
+      name: t("categories.classes"),
+      title: "ClassesScreen",
+      event_type: "click_classes_card",
+      component: "Classes-card",
+      icon: require("../../../assets/onlinecion.png"),
+    },
   ];
 
   const dailyOptions = [
@@ -367,7 +385,6 @@ useEffect(() => {
     icon: require("../../../assets/party.png"),
   },
 ];
-
 
   // const dailyOptions = [
   //   {
@@ -414,7 +431,8 @@ useEffect(() => {
     {
       id: "1",
       title: t("kalpx.learn"),
-      name: "LearnMore",
+       name: "ClassesScreen",
+      // name: "LearnMore",
       event_type: "click_learn_card",
       component: "Learn-card",
       image: require("../../../assets/learn.png"),
@@ -436,38 +454,38 @@ useEffect(() => {
       component: "Practice-card",
       image: require("../../../assets/daily.png"),
     },
-    {
-      id: "4",
-      title: t("kalpx.journey"),
-      name: "Travel",
-      event_type: "click_journey_card",
-      component: "Journey-card",
-      image: require("../../../assets/journey.png"),
-    },
-    {
-      id: "5",
-      title: t("kalpx.poojas"),
-      name: "Pooja",
-      event_type: "click_pooja_card",
-      component: "Pooja-card",
-      image: require("../../../assets/poojafl.png"),
-    },
-    {
-      id: "6",
-      title: t("kalpx.retreats"),
-      name: "Retreat",
-      event_type: "click_retreats_card",
-      component: "Retreats-card",
-      image: require("../../../assets/retreatff.png"),
-    },
-    {
-      id: "7",
-      title: t("kalpx.Classes"),
-      name: "ClassesScreen",
-      event_type: "click_classes_card",
-      component: "Classes-card",
-      image: require("../../../assets/onlineclass.png"),
-    },
+    // {
+    //   id: "4",
+    //   title: t("kalpx.journey"),
+    //   name: "Travel",
+    //   event_type: "click_journey_card",
+    //   component: "Journey-card",
+    //   image: require("../../../assets/journey.png"),
+    // },
+    // {
+    //   id: "5",
+    //   title: t("kalpx.poojas"),
+    //   name: "Pooja",
+    //   event_type: "click_pooja_card",
+    //   component: "Pooja-card",
+    //   image: require("../../../assets/poojafl.png"),
+    // },
+    // {
+    //   id: "6",
+    //   title: t("kalpx.retreats"),
+    //   name: "Retreat",
+    //   event_type: "click_retreats_card",
+    //   component: "Retreats-card",
+    //   image: require("../../../assets/retreatff.png"),
+    // },
+    // {
+    //   id: "7",
+    //   title: t("kalpx.Classes"),
+    //   name: "ClassesScreen",
+    //   event_type: "click_classes_card",
+    //   component: "Classes-card",
+    //   image: require("../../../assets/onlineclass.png"),
+    // },
   ];
 
   const handleStartMantra = (mantra) => {
@@ -484,7 +502,11 @@ useEffect(() => {
       startMantraPractice(payload, (res) => {
         console.log("🎯 Mantra start callback:", res);
         if (res.success) {
+          if(!isLoggedIn){
           setShowMantraTaken(true);
+          }else{
+            setShowLoginMantraTaken(true);
+          }
           dispatch(getPracticeToday(() => {}));
         }
       })
@@ -505,7 +527,11 @@ useEffect(() => {
     dispatch(
       completeMantra(payload, (res) => {
         if (res.success) {
+           if(!isLoggedIn){
           setShowMantraComplete(true);
+           } else{
+             setShowLoginMantraComplete(true);
+           }
           dispatch(getPracticeToday(() => {}));
         }
       })
@@ -523,7 +549,11 @@ useEffect(() => {
     dispatch(
       startMantraPractice(payload, (res) => {
         if (res.success) {
+          if(!isLoggedIn){
           setShowSankalpTaken(true);
+          }else{
+            setShowLoginSankalpTaken(true);
+          }
           dispatch(getPracticeToday(() => {}));
         }
       })
@@ -542,7 +572,11 @@ useEffect(() => {
     dispatch(
       completeMantra(payload, (res) => {
         if (res.success) {
+            if(!isLoggedIn){
           setShowSankalpComplete(true);
+            }else{
+          setShowLoginSankalpComplete(true);
+            }
           dispatch(getPracticeToday(() => {}));
         }
       })
@@ -647,8 +681,12 @@ useEffect(() => {
         <View style={{ marginTop: 10, zIndex: 999, height:640 }}>
            <MantraCard
           practiceTodayData={practiceTodayData}
-          onPressChantMantra={(mantra) => handleStartMantra(mantra)}
+          onPressChantMantra={(mantra) => {
+            setSelectedMantraForPopup(mantra);
+            handleStartMantra(mantra);
+          }}
           DoneMantraCalled={(mantra) => {
+            setSelectedMantraForPopup(mantra);
             DoneMantraCalled(mantra);
           }}
         />
@@ -658,8 +696,14 @@ useEffect(() => {
         <View style={{ marginTop: 10, zIndex: 999, height: 560 }}>
           <SankalpCard
             practiceTodayData={practiceTodayData}
-            onPressStartSankalp={(sankalp) => handleStartSankalp(sankalp)}
-            onCompleteSankalp={(sankalp) => DoneSankalpCalled(sankalp)}
+            onPressStartSankalp={(sankalp) => {
+            setSelectedSankalpForPopup(sankalp);
+              handleStartSankalp(sankalp);
+            }}
+            onCompleteSankalp={(sankalp) =>{
+            setSelectedSankalpForPopup(sankalp);
+          DoneSankalpCalled(sankalp);
+        }}
           />
         </View>
       )}
@@ -1070,76 +1114,130 @@ useEffect(() => {
     contentContainerStyle={{ paddingBottom: 20 }}
   />
 </View>
-        {/* Popups */}
-        <SigninPopup
-          visible={showMantraTaken}
-          onClose={() => setShowMantraTaken(false)}
-          onConfirmCancel={() => {}}
-          title="🌟 Mantra Taken!"
-          subText='"One small step, one powerful shift. You’ve committed to building your inner strength today."'
-          infoTexts={[
-            "Get daily reminders",
-            "Track your Mantra streak",
-            "Make this part of your daily spiritual practice",
-            // "Make this my Daily Mantra",
-          ]}
-          bottomText="Want a gentle reminder to complete your Mantra by day's end?"
-        />
-           <SigninPopup
-          visible={showMantraTaken}
-          onClose={() => setShowMantraTaken(false)}
-          onConfirmCancel={() => {}}
-          title="🌟 Great job taking your Mantra!"
-          subText='"Your journey toward inner strength is on track. Tap below to repeat this intention every day and build your streak."'
-          infoTexts={[
-          "Want to make this your Daily Mantra?",
-"You'll get reminders and track how many days you stay committed!"
-          ]}
-          bottomText="Want a gentle reminder to complete your Mantra by day's end?"
-        />
-
-        <SigninPopup
-          visible={showMantraComplete}
-          onClose={() => setShowMantraComplete(false)}
-          onConfirmCancel={() => {}}
-          title="🌼 Beautiful! You've completed your Mantra today."
-          subText='"But your progress isn’t being saved."'
-          infoTexts={[
-            "Keep your Mantra streak alive",
-            "Receive gentle nudges to stay on track",
-            "View your growth over time",
-          ]}
-          bottomText=""
-        />
-
-          <SigninPopup
-          visible={showMantraComplete}
-          onClose={() => setShowMantraComplete(false)}
-          onConfirmCancel={() => {}}
-          title="🌼 Well done!"
-          subText='"Every time you complete your Mantra, you nurture your inner self."'
-          infoTexts={[
-           "You're keeping your streak alive!",
-"See you tomorrow for your next step on this journey."
-          ]}
-          bottomText=""
-        />
-
-        <SigninPopup
-          visible={showSankalpTaken}
-          onClose={() => setShowSankalpTaken(false)}
-          onConfirmCancel={() => {}}
-          title="Sankalp Taken!"
-          subText={
-            "One small step, one powerful shift. You've committed to building your inner strength today."
-          }
-          infoTexts={[
-            "Get daily reminders",
-            "Track your Sankalp streak",
-            "Make this part of your daily spiritual practice",
-          ]}
-          bottomText="Want a gentle reminder to complete your Sankalp by day's end?"
-        />
+<SigninPopup
+  visible={showMantraTaken}
+  onClose={() => setShowMantraTaken(false)}
+  onConfirmCancel={() => setShowMantraTaken(false)}
+  title={t("popup.mantraTaken_title1")}
+  subTitle={t("popup.mantraTaken_subtitle1")}
+  subText={t("popup.mantraTaken_sub1")}
+  infoTexts={[
+    t("popup.mantraTaken_info1.0"),
+    t("popup.mantraTaken_info1.1"),
+    t("popup.mantraTaken_info1.2"),
+  ]}
+  bottomText={t("popup.mantraTaken_bottom")}
+/>
+<SigninPopup
+  visible={showLoginMantraTaken}
+  onClose={() => setShowLoginMantraTaken(false)}
+  onConfirmCancel={() => setShowLoginMantraTaken(false)}
+  title={t("popup.mantraTaken_title2")}
+  subTitle={t("popup.mantraTaken_subtitle1")}
+  subText={t("popup.mantraTaken_sub2")}
+  infoTexts={[
+    t("popup.mantraTaken_info2.0"),
+    t("popup.mantraTaken_info2.1"),
+  ]}
+  // bottomText={t("popup.mantraTaken_bottom")}
+  MantraButtonTitle={t("popup.mantraTaken_button")}
+  onSadhanPress={() => {
+    setShowLoginMantraTaken(false);
+    if (selectedMantraForPopup) {
+      navigation.navigate("MySadana", {
+        selectedmantra: selectedMantraForPopup,
+      });
+    }
+  }}
+/>
+<SigninPopup
+  visible={showMantraComplete}
+  onClose={() => setShowMantraComplete(false)}
+  onConfirmCancel={() => setShowMantraComplete(false)}
+  title={t("popup.mantraComplete_title1")}
+    subTitle={t("popup.mantraTaken_subtitle1")}
+  subText={t("popup.mantraComplete_sub1")}
+  infoTexts={[
+    t("popup.mantraComplete_info1.0"),
+    t("popup.mantraComplete_info1.1"),
+    t("popup.mantraComplete_info1.2"),
+  ]}
+/>
+<SigninPopup
+  visible={showLoginMantraComplete}
+  onClose={() => setShowLoginMantraComplete(false)}
+  onConfirmCancel={() => {}}
+  title={t("popup.mantraComplete_title2")}
+  subText={t("popup.mantraComplete_sub2")}
+  infoTexts={[
+    t("popup.mantraComplete_info2.0"),
+    t("popup.mantraComplete_info2.1"),
+  ]}
+    MantraButtonTitle={t("popup.mantraTaken_Continue")}
+  onSadhanPress={() => setShowLoginMantraComplete(false)}
+/>
+<SigninPopup
+  visible={showSankalpTaken}
+  onClose={() => setShowSankalpTaken(false)}
+  onConfirmCancel={() => setShowMantraTaken(false)}
+  title={t("popup.sankalpTaken_title")}
+  subText={t("popup.sankalpTaken_sub")}
+  infoTexts={[
+    t("popup.sankalpTaken_info.0"),
+    t("popup.sankalpTaken_info.1"),
+    t("popup.sankalpTaken_info.2"),
+  ]}
+  bottomText={t("popup.sankalpTaken_bottom")}
+/>
+<SigninPopup
+  visible={showLoginSankalpTaken}
+  onClose={() => setShowLoginSankalpTaken(false)}
+  onConfirmCancel={() => setShowLoginMantraTaken(false)}
+  title={t("popup.sankalpTaken_title3")}
+  subTitle={t("popup.mantraTaken_subtitle1")}
+  subText={t("popup.mantraTaken_sub2")}
+  infoTexts={[
+    t("popup.sankalpTaken_info2.0"),
+    t("popup.sankalpTaken_info2.1"),
+  ]}
+    MantraButtonTitle={t("popup.sankalpTaken_button")}
+   onSadhanPress={() => {
+    setShowLoginSankalpTaken(false);
+    if (selectedSankalpForPopup) {
+      navigation.navigate("MySadana", {
+        selectedmantra: selectedSankalpForPopup,
+      });
+    }
+  }}
+  // bottomText={t("popup.sankalpTaken_bottom")}
+/>
+<SigninPopup
+  visible={showSankalpComplete}
+  onClose={() => setShowSankalpComplete(false)}
+  onConfirmCancel={() => {}}
+  title={t("popup.sankalpComplete_title")}
+  subText={t("popup.sankalpComplete_sub")}
+  infoTexts={[
+    t("popup.sankalpComplete_info.0"),
+    t("popup.sankalpComplete_info.1"),
+    t("popup.sankalpComplete_info.2"),
+  ]}
+  bottomText=""
+/>
+<SigninPopup
+  visible={showLoginSankalpComplete}
+  onClose={() => setShowLoginSankalpComplete(false)}
+  onConfirmCancel={() => setShowLoginSankalpComplete(false)}
+  title={t("popup.mantraComplete_title2")}
+  subText={t("popup.sankalpComplete_sub2")}
+  infoTexts={[
+    t("popup.sankalpComplete_info2.0"),
+    t("popup.sankalpComplete_info2.1"),
+  ]}
+  bottomText=""
+      MantraButtonTitle={t("popup.mantraTaken_Continue")}
+  onSadhanPress={() => setShowLoginSankalpComplete(false)}
+/>
   <LanguageTimezoneModal
     visible={showLangTZModal}
     onClose={() => setShowLangTZModal(false)}
@@ -1165,20 +1263,6 @@ useEffect(() => {
     }
   }}
 />
-
-        <SigninPopup
-          visible={showSankalpComplete}
-          onClose={() => setShowSankalpComplete(false)}
-          onConfirmCancel={() => {}}
-          title="🌼 Beautiful! You've completed your Sankalp today."
-          subText={"But your progress isn't being saved."}
-          infoTexts={[
-            "• Keep your Sankalp streak alive",
-            "• Receive gentle nudges to stay on track",
-            "• View your growth over time",
-          ]}
-          bottomText=""
-        />
          {/* <LoadingOverlay visible={true} text="Processing..." /> */}
       </ScrollView>
     </SafeAreaView>

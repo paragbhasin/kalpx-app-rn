@@ -45,6 +45,10 @@ export const RELEASE_HOLD_REQUEST = "RELEASE_HOLD_REQUEST";
 export const RELEASE_HOLD_SUCCESS = "RELEASE_HOLD_SUCCESS";
 export const RELEASE_HOLD_FAILURE = "RELEASE_HOLD_FAILURE";
 
+export const TUTOR_LIST_REQUEST = "TUTOR_LIST_REQUEST";
+export const TUTOR_LIST_SUCCESS = "TUTOR_LIST_SUCCESS";
+export const TUTOR_LIST_FAILURE = "TUTOR_LIST_FAILURE";
+
 // =============== HELPERS ===============
 const computeHasMore = (
   count: number,
@@ -56,53 +60,129 @@ const computeHasMore = (
   return fetched < count;
 };
 
-// =============== EXPLORE (BASE) ===============
 export const classesExploreList =
-  (page = 1, pageSize = 10, callback?: (res: any) => void) =>
+  (page = 1, pageSize = 10, subject = "", timezone = "", callback) =>
   async (dispatch) => {
     dispatch({ type: EXPLORE_REQUEST });
+
     try {
-      const url = `public/classes/?status=published&ordering=-updated_at&page=${page}&page_size=${pageSize}`;
+      let url = `public/classes/?status=published&ordering=-updated_at&page=${page}&page_size=${pageSize}`;
+
+      // send only if NOT All
+      if (subject && subject !== "") {
+        url += `&subject=${encodeURIComponent(subject)}`;
+      }
+
+      // always send timezone
+      if (timezone) {
+        url += `&user_timezone=${encodeURIComponent(timezone)}`;
+      }
+
       const res = await api.get(url);
       const results = res.data?.results || [];
       const count = Number(res.data?.count || 0);
-      const hasMore = computeHasMore(count, page, pageSize, results.length);
+      const hasMore = count > page * pageSize;
 
       dispatch({
         type: EXPLORE_SUCCESS,
         payload: { data: results, hasMore, page },
       });
-      callback?.({ success: true, data: results, page });
-    } catch (error: any) {
-      const message = error?.response?.data?.detail || error?.message || "Error";
-      dispatch({ type: EXPLORE_FAILURE, payload: message });
-      callback?.({ success: false, error: message });
+
+      callback?.({ success: true, data: results });
+    } catch (error) {
+      dispatch({
+        type: EXPLORE_FAILURE,
+        payload: error?.response?.data?.detail || "Error",
+      });
+      callback?.({ success: false });
     }
   };
 
-// =============== MY BOOKINGS (BASE) ===============
+
+
+// =============== EXPLORE (BASE) ===============
+// export const classesExploreList =
+//   (page = 1, pageSize = 10, callback?: (res: any) => void) =>
+//   async (dispatch) => {
+//     dispatch({ type: EXPLORE_REQUEST });
+//     try {
+//       const url = `public/classes/?status=published&ordering=-updated_at&page=${page}&page_size=${pageSize}`;
+//       const res = await api.get(url);
+//       const results = res.data?.results || [];
+//       const count = Number(res.data?.count || 0);
+//       const hasMore = computeHasMore(count, page, pageSize, results.length);
+
+//       dispatch({
+//         type: EXPLORE_SUCCESS,
+//         payload: { data: results, hasMore, page },
+//       });
+//       callback?.({ success: true, data: results, page });
+//     } catch (error: any) {
+//       const message = error?.response?.data?.detail || error?.message || "Error";
+//       dispatch({ type: EXPLORE_FAILURE, payload: message });
+//       callback?.({ success: false, error: message });
+//     }
+//   };
+
 export const classesBookingsList =
-  (page = 1, pageSize = 10, callback?: (res: any) => void) =>
+  (
+    page = 1,
+    pageSize = 10,
+    status: string = "",
+    timezone: string = "",
+    callback?: (res: any) => void
+  ) =>
   async (dispatch) => {
     dispatch({ type: BOOKINGS_REQUEST });
     try {
-      const url = `public/my/bookings/?when=all&ordering=-updated_at&page=${page}&page_size=${pageSize}`;
+      let url = `public/my/bookings/?when=all&ordering=-updated_at&page=${page}&page_size=${pageSize}`;
+
+      if (status) url += `&status=${status}`;
+      if (timezone) url += `&user_timezone=${encodeURIComponent(timezone)}`;
+
       const res = await api.get(url);
       const results = res.data?.results || [];
       const count = Number(res.data?.count || 0);
-      const hasMore = computeHasMore(count, page, pageSize, results.length);
+      const hasMore = count > page * pageSize;
 
       dispatch({
         type: BOOKINGS_SUCCESS,
         payload: { data: results, hasMore, page },
       });
-      callback?.({ success: true, data: results, page });
+
+      callback?.({ success: true, data: results });
     } catch (error: any) {
-      const message = error?.response?.data?.detail || error?.message || "Error";
+      const message =
+        error?.response?.data?.detail || error?.message || "Error";
       dispatch({ type: BOOKINGS_FAILURE, payload: message });
       callback?.({ success: false, error: message });
     }
   };
+
+
+// =============== MY BOOKINGS (BASE) ===============
+// export const classesBookingsList =
+//   (page = 1, pageSize = 10, callback?: (res: any) => void) =>
+//   async (dispatch) => {
+//     dispatch({ type: BOOKINGS_REQUEST });
+//     try {
+//       const url = `public/my/bookings/?when=all&ordering=-updated_at&page=${page}&page_size=${pageSize}`;
+//       const res = await api.get(url);
+//       const results = res.data?.results || [];
+//       const count = Number(res.data?.count || 0);
+//       const hasMore = computeHasMore(count, page, pageSize, results.length);
+
+//       dispatch({
+//         type: BOOKINGS_SUCCESS,
+//         payload: { data: results, hasMore, page },
+//       });
+//       callback?.({ success: true, data: results, page });
+//     } catch (error: any) {
+//       const message = error?.response?.data?.detail || error?.message || "Error";
+//       dispatch({ type: BOOKINGS_FAILURE, payload: message });
+//       callback?.({ success: false, error: message });
+//     }
+//   };
 
 // =============== EXPLORE (FILTER) ===============
 export const filteredClassesExploreList =
@@ -346,3 +426,32 @@ export const releaseHoldAction =
       callback?.({ success: false, error: message });
     }
   };
+
+
+  export const tutorListRequest = () => ({ type: TUTOR_LIST_REQUEST });
+export const tutorListSuccess = (data, hasMore) => ({
+  type: TUTOR_LIST_SUCCESS,
+  payload: { data, hasMore },
+});
+export const tutorListFailure = (error) => ({
+  type: TUTOR_LIST_FAILURE,
+  payload: error,
+});
+
+
+
+  export const tutorDataList = (tutorId, page, callback) => async (dispatch) => {
+  dispatch(tutorListRequest());
+  try {
+    // console.log(`Fetching Tutor Data: tutorId=${tutorId}, page=${page}`);
+    const response = await api.get(`public/tutors/${tutorId}/?page=${page}`);
+    // console.log("Tutor Data Response:", response.data);
+    const hasMore = !!response.data.next; // Check if there's more data
+    dispatch(tutorListSuccess(response.data, hasMore));
+    if (callback) callback({ success: true, data: response.data });
+  } catch (error) {
+    console.error("Tutor Data API Error:", error);
+    dispatch(tutorListFailure(error.message));
+    if (callback) callback({ success: false, error: error.message });
+  }
+};

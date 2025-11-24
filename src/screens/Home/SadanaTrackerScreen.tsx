@@ -36,6 +36,12 @@ const SadanaTrackerScreen = () => {
   const [showPractiseModal, setShowPractiseModal] = useState(false);
   const [trackerData, setTrackerData] = useState<any>(null);
   const [fetchLoading, setLoading] = useState(false);
+  const [selectedDayData, setSelectedDayData] = useState({
+    notCompleted:[],
+  completed: [],
+  status: "not_done",
+});
+
   const { t } = useTranslation();
   const { locationData, loading: locationLoading, error } = useUserLocation();
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
@@ -270,17 +276,14 @@ const SadanaTrackerScreen = () => {
             }}
           >
             <TextComponent
-              type="mediumText"
+              type="headerSubBoldText"
               style={{
                 color: Colors.Colors.Yellow,
-                fontSize: FontSize.CONSTS.FS_18,
-    fontFamily: "Inter_700Bold",
               }}
             >
                  {t("sadanaTracker.addPractices")}
             </TextComponent>
           </TouchableOpacity>
-
           <TextComponent
             type="mediumText"
             style={{
@@ -302,137 +305,7 @@ const SadanaTrackerScreen = () => {
           style={{ marginBottom: 10, marginLeft: 20 }}
         >
        {t("sadanaTracker.completeTodaysPractices")}
-        </TextComponent>
-
-        {/* <FlatList
-          data={dailyPractice?.data?.active_practices || []}
-          keyExtractor={(item) => item.practice_id}
-          contentContainerStyle={{
-            paddingBottom: 20,
-          }}
-          renderItem={({ item }) => {
-            const isCompleted =
-              dailyPractice?.data?.completed_today?.includes(item.practice_id);
-
-            return (
-              <View
-                style={{
-                  borderColor: Colors.Colors.Light_grey,
-                  borderWidth: 1,
-                  borderRadius: 10,
-                  padding: 12,
-                  marginHorizontal: 20,
-                  marginVertical: 10,
-                  backgroundColor: Colors.Colors.white,
-                }}
-              >
-                <TextComponent
-                  type="mediumText"
-                  style={{ fontSize: FontSize.CONSTS.FS_14 }}
-                >
-                  {item.icon}{" "}
-                  {item.name === "Unnamed Practice"
-                    ? item.details.text
-                    : item.name}
-                </TextComponent>
-
-                <TextComponent
-                  type="mediumText"
-                  style={{
-                    fontSize: FontSize.CONSTS.FS_14,
-                    marginTop: 4,
-                    color: Colors.Colors.Light_black,
-                  }}
-                >
-                   {t("sadanaTracker.mantraLabel")}{" "}
-                  {item.details?.devanagari ||
-                    item.mantra ||
-                    t("sadanaTracker.noMantra")}
-                </TextComponent>
-
-                <TextComponent
-                  type="mediumText"
-                  style={{
-                    fontSize: FontSize.CONSTS.FS_14,
-                    marginTop: 4,
-                    color: Colors.Colors.Light_black,
-                  }}
-                >
-                 {t("sadanaTracker.triggerLabel")} {item.trigger}
-                </TextComponent>
-
-                <TextComponent
-                  type="mediumText"
-                  style={{
-                    fontSize: FontSize.CONSTS.FS_14,
-                    marginTop: 4,
-                    color: Colors.Colors.Light_black,
-                  }}
-                >
-                 {t("sadanaTracker.lastPracticeLabel")}{" "}
-                  {item.last_practice_date
-                    ? moment(item.last_practice_date).format("DD/MM/YYYY")
-                    : "—"}
-                </TextComponent>
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: isCompleted
-                      ? "#36AE68"
-                      : Colors.Colors.Yellow,
-                    padding: 12,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginVertical: 10,
-                    borderRadius: 10,
-                  }}
-                  disabled={isCompleted}
-                  onPress={() => {
-                    if (!isCompleted && locationData?.timezone) {
-                      const payload = {
-                        practice_id: item.practice_id,
-                        date: moment().format("YYYY-MM-DD"),
-                        timezone: locationData.timezone,
-                      };
-
-                      console.log("📤 Submitting track payload:", payload);
-                      dispatch(
-                        trackDailyPractice(payload, (res) => {
-                          if (res.success) {
-                            console.log("✅ Practice marked complete:", res.data);
-                            // 🔁 Refresh the daily practice list
-                            dispatch(
-                              fetchDailyPractice(
-                                moment().format("YYYY-MM-DD"),
-                                locationData.timezone
-                              )
-                            );
-                          } else {
-                            console.log("❌ Failed to mark complete:", res.error);
-                          }
-                        })
-                      );
-                    }
-                  }}
-                >
-                  <TextComponent
-                    type="mediumText"
-                    style={{
-                      color: isCompleted
-                        ? Colors.Colors.white
-                        : Colors.Colors.BLACK,
-                      fontSize: FontSize.CONSTS.FS_14,
-                    }}
-                  >
-              {isCompleted ? t("sadanaTracker.completedButton") : t("sadanaTracker.markAsDone")}
-                  </TextComponent>
-                </TouchableOpacity>
-              </View>
-            );
-          }}
-        /> */}
-
-
-        
+        </TextComponent>       
 <FlatList
   data={dailyPractice?.data?.active_practices || []}
   keyExtractor={(item) => item.practice_id}
@@ -628,8 +501,6 @@ const displayMeaning = isSankalp
     );
   }}
 />
-
-
         {/* Remainders & Calendar Section (unchanged) */}
         {/* <View style={styles.container}>
           <Dropdown
@@ -647,7 +518,6 @@ const displayMeaning = isSankalp
   containerStyle={styles.dropdownContainer}
           />
         </View> */}
-
         <View style={{ marginHorizontal: 20 }}>
           <TextComponent
             type="cardText"
@@ -710,8 +580,84 @@ const displayMeaning = isSankalp
             </TextComponent>
           </TextComponent>
         </View>
+<FlatList
+  data={Array.from({ length: moment().daysInMonth() }, (_, i) => {
+    const date = moment().startOf("month").add(i, "days");
+    return {
+      day: date.date(),
+      fullDate: date.format("YYYY-MM-DD"),
+      isPastOrToday: date.isSameOrBefore(moment(), "day"),
+    };
+  })}
+  keyExtractor={(item) => item.fullDate}
+  numColumns={4}
+  contentContainerStyle={{
+    alignItems: "center",
+    justifyContent: "center",
+    paddingBottom: 100,
+  }}
+  renderItem={({ item }) => {
+    const dayData = dailyPractice?.data?.calendar_days?.[item.fullDate] || {};
+    const status = dayData.status || "not_done";
 
-        <FlatList
+    // 🎨 Status background color mapping
+    let bgColor = "#FFE1E1"; // default = not_done (pink)
+
+    if (status === "completed") bgColor = "#DBFCE7";       // completed = green
+    else if (status === "partial") bgColor = "#F7FCC4";    // partial = yellow
+    else if (status === "not_done") bgColor = "#FFE1E1";   // not done = pink
+    else if (status === "disabled") bgColor = "#F3F3F5";   // future = gray
+
+    const isDisabled = status === "disabled";
+
+    const isCompleted = status === "completed";
+
+    // 📝 Text color
+    const textColor = isDisabled ? Colors.Colors.BLACK : isCompleted ? "green" : "#DB0000";
+
+    return (
+      <TouchableOpacity
+        disabled={isDisabled}
+        onPress={async () => {
+         setSelectedDate(item.fullDate);
+  const dayData = dailyPractice?.data?.calendar_days?.[item.fullDate] || {};
+
+  setSelectedDayData({
+    notCompleted: dayData?.active || [],
+    completed: dayData?.completed || [],
+    status: dayData?.status || "not_done",
+  });
+
+  setShowPractiseModal(true);
+        }}
+        style={{
+          width: 70,
+          height: 70,
+          margin: 4,
+          borderRadius: 4,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: bgColor,
+          // borderColor:
+          //   item.fullDate === selectedDate ? "#D4A017" : "#707070",
+          // borderWidth: 1,
+        }}
+      >
+        <TextComponent
+          type="streakText"
+          style={{
+            color: textColor,
+          }}
+        >
+          {moment(item.fullDate).format("MMM D")}
+        </TextComponent>
+      </TouchableOpacity>
+    );
+  }}
+/>
+
+
+        {/* <FlatList
           data={Array.from({ length: moment().daysInMonth() }, (_, i) => {
             const date = moment().startOf("month").add(i, "days");
             return {
@@ -730,14 +676,26 @@ const displayMeaning = isSankalp
           renderItem={({ item }) => (
             <TouchableOpacity
               disabled={!item.isPastOrToday}
-              onPress={() => {
-                setSelectedDate(item.fullDate);
-                if (!locationLoading && locationData.timezone) {
-                  dispatch(fetchDailyPractice(item.fullDate, locationData.timezone));
-                  console.log("practiceHistory >>>>>>>", JSON.stringify(practiceHistory));
-                  setShowPractiseModal(true);
-                }
-              }}
+              onPress={async() => {
+  setSelectedDate(item.fullDate);
+  const dayData = await dailyPractice?.data?.calendar_days?.[item.fullDate];
+  console.log("Selected Day Data:",item.fullDate, JSON.stringify(dayData));
+  setShowPractiseModal(true);
+  setSelectedDayData({
+    notCompleted: dayData?.active || [],
+    completed: dayData?.completed || [],
+    status: dayData?.status || "not_done",
+  });
+}}
+
+              // onPress={() => {
+              //   setSelectedDate(item.fullDate);
+              //   if (!locationLoading && locationData.timezone) {
+              //     dispatch(fetchDailyPractice(item.fullDate, locationData.timezone));
+              //     console.log("practiceHistory >>>>>>>", JSON.stringify(practiceHistory));
+              //     setShowPractiseModal(true);
+              //   }
+              // }}
               style={{
                 width: 70,
                 height: 70,
@@ -763,18 +721,21 @@ const displayMeaning = isSankalp
               </TextComponent>
             </TouchableOpacity>
           )}
-        />
+        /> */}
 
         <PracticeDailyModal
           visible={showPractiseModal}
           date={selectedDate}
           dailyPractice={{
-            active_practices: dailyPractice.data.active_practices || [],
-            completed_today: dailyPractice.data.completed_today || [],
+            active_practices: selectedDayData.notCompleted || [],
+           completed_today: selectedDayData.completed || [],
+           status: selectedDayData.status || "not_done"
+            //   active_practices: dailyPractice.data.active_practices || [],
+            // completed_today: dailyPractice.data.completed_today || [],
           }}
           onClose={() => setShowPractiseModal(false)}
         />
-<LoadingOverlay visible={fetchLoading} text="Signing in..." />
+<LoadingOverlay visible={fetchLoading} text="Submitting..." />
       </ScrollView>
     </SafeAreaView>
   );

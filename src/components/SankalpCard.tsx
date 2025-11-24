@@ -4,11 +4,13 @@ import * as Sharing from "expo-sharing";
 import React, { useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  ActivityIndicator,
   Image,
   ImageBackground,
   StyleSheet,
+  Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { Card } from "react-native-paper";
@@ -82,7 +84,7 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
   const shareRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [shareVisible, setShareVisible] = useState(false);
-
+const [loading, setLoading] = useState(true);
   const startedSankalp = practiceTodayData?.started?.sankalp;
   const doneSankalp = practiceTodayData?.done?.sankalp;
   const sankalpId = practiceTodayData?.ids?.sankalp;
@@ -109,6 +111,12 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
     const shuffled = seededShuffle(DAILY_SANKALPS, getTodaySeed());
     return shuffled.slice(0, 5);
   }, [startedSankalp, sankalpId, i18n.language]);
+
+  React.useEffect(() => {
+  if (filteredSankalps && filteredSankalps.length > 0) {
+    setLoading(false);
+  }
+}, [filteredSankalps]);
 
   const handleShareSankalp = async () => {
     try {
@@ -149,6 +157,17 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
   const key = `sankalps.${sankalpId}.source`;
   return enSankalps[key] || "";
 };
+
+// 🟡 Show loader while preparing sankalps
+if (loading) {
+  return (
+    <View style={styles.centered}>
+      <ActivityIndicator size="large" color={Colors.Colors.App_theme} />
+      {/* <TextComponent>{t("sankalpCard.loading")}</TextComponent> */}
+    </View>
+  );
+}
+
 
 
   return (
@@ -219,7 +238,9 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                 >
                   {t("sankalpCard.dailySankalp")}
                 </TextComponent>
-                <TouchableOpacity
+              </View>
+                         <View style={{flexDirection:"row",alignSelf:"flex-end",right:20,marginTop:-30}}>
+                    <TouchableOpacity
                   onPress={() => handleShareSankalp()}
                   style={{ flexDirection: "row", alignItems: "center" }}
                 >
@@ -227,6 +248,7 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                   <Image source={require("../../assets/Streak_S2.png")} style={styles.streakIcon} />
                   <Image source={require("../../assets/Streak_S3.png")} style={styles.streakIcon} /> */}
                   <Image source={require("../../assets/Streak_S4.png")} style={styles.streakIcon} />
+                </TouchableOpacity>
                   <TouchableOpacity
   onPress={() => {
   // ✅ always get English source text, regardless of app language
@@ -247,12 +269,11 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
     borderRadius: 50,
     justifyContent: "center",
     alignItems: "center",
-    alignSelf: "flex-end",
+    // alignSelf: "flex-end",
   }}
 >
   <Icon name="videocam-outline" size={18} color="#fff" />
 </TouchableOpacity>
-                </TouchableOpacity>
               </View>
 <TextComponent
                                  type="cardText"
@@ -293,7 +314,7 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                   }}>
                   {t(currentSankalp.i18n?.suggested) || currentSankalp.suggested_practice}
                 </TextComponent>
-                <View style={styles.row}>
+                <View style={{...styles.row,marginTop:4}}>
                   <TextComponent type="headerSubBoldText" style={styles.root}>
                     {t("sankalpCard.root")}
                   </TextComponent>
@@ -352,7 +373,7 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
     </View>
   </View>
 )}
-                <View style={{alignItems:"center"}}>
+                <View style={{alignItems:"center",marginTop:4}}>
                   <TextComponent type="headerSubBoldText" style={{...styles.root,color: Colors.Colors.blue_text,}}>
                     {t("sankalpCard.source")}
                   </TextComponent>
@@ -371,7 +392,7 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
 
               {/* Buttons */}
               {/* <View style={styles.buttonRow}> */}
-                {!startedSankalp ? (
+                {/* {!startedSankalp ? (
                   <TouchableOpacity
                     style={styles.startBtn}
                     onPress={() => onPressStartSankalp(currentSankalp)}
@@ -411,7 +432,62 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                         : t("sankalpCard.markDone")}
                     </TextComponent>
                   </TouchableOpacity>
-                )}
+                )} */}
+{!startedSankalp ? (
+  <TouchableOpacity
+    style={styles.startBtn}
+    onPress={() => onPressStartSankalp(currentSankalp)}
+  >
+    <TextComponent
+      type="semiBoldText"
+      style={{ textAlign: "center", color: Colors.Colors.white }}
+    >
+      {t("sankalpCard.iWillDo")}
+    </TextComponent>
+  </TouchableOpacity>
+) : (
+  <TouchableOpacity
+    style={{
+      flexDirection: "row",
+      marginTop: 10,
+      alignItems: "center",
+      justifyContent: "center",
+    }}
+    onPress={() => onCompleteSankalp(currentSankalp)}
+  >
+    {/* ✅ Checkbox logic */}
+    {doneSankalp ? (
+      <View
+        style={{
+          width: 18,
+          height: 18,
+          borderRadius: 4,
+          marginRight: 10,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "green",
+        }}
+      >
+        <Text style={{ color: "white", fontSize: 12, fontWeight: "bold" }}>✓</Text>
+      </View>
+    ) : (
+      <View
+        style={{
+          width: 15,
+          height: 15,
+          borderColor: Colors.Colors.BLACK,
+          borderWidth: 1,
+          borderRadius: 4,
+          marginRight: 10,
+        }}
+      />
+    )}
+
+    <TextComponent type="streakSadanaText">
+      {doneSankalp ? t("sankalpCard.done") : t("sankalpCard.markDone")}
+    </TextComponent>
+  </TouchableOpacity>
+)}
 
                 <TouchableOpacity
                   style={styles.dailyBtn}
@@ -557,6 +633,12 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
 export default React.memo(SankalpCard);
 
 const styles = StyleSheet.create({
+    centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 40,
+  },
   card: {
     borderRadius: 6,
     overflow: "hidden",
@@ -587,7 +669,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: 6,
   },
-   streakIcon: { height: 30, width: 30, marginLeft: 25,marginRight:15 },
+   streakIcon: { height: 30, width: 30 },
   row: {   flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",},
@@ -653,7 +735,7 @@ const styles = StyleSheet.create({
 bestTimeWrapper: {
     alignItems: "center", // centers the entire block inside the card
     justifyContent: "center",
-    // marginTop: 10,
+    marginTop: 4,
   },
   bestTimeInner: {
     flexDirection: "row",

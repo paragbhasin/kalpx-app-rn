@@ -14,6 +14,7 @@ import {
 import { Card } from "react-native-paper";
 import { useDispatch } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
+import { BASE_IMAGE_URL } from "../Networks/baseURL";
 import { getDailyDharmaTracker } from "../screens/Home/actions";
 import { RootState } from "../store";
 import Colors from "./Colors";
@@ -142,12 +143,12 @@ const ExploreVideosVertical = ({
 
   // 🌞 Social proof
   const socialProofImages = [
-    "https://dev.kalpx.com/images/social-proof/slide1.jpeg",
-    "https://dev.kalpx.com/images/social-proof/slide2.jpeg",
-    "https://dev.kalpx.com/images/social-proof/slide3.jpeg",
-    "https://dev.kalpx.com/images/social-proof/slide4.jpeg",
-    "https://dev.kalpx.com/images/social-proof/slide5.jpeg",
-    "https://dev.kalpx.com/images/social-proof/slide6.jpeg",
+   `${BASE_IMAGE_URL}/images/social-proof/slide1.jpeg`,
+   `${BASE_IMAGE_URL}/images/social-proof/slide2.jpeg`,
+   `${BASE_IMAGE_URL}/images/social-proof/slide3.jpeg`,
+   `${BASE_IMAGE_URL}/images/social-proof/slide4.jpeg`,
+   `${BASE_IMAGE_URL}/images/social-proof/slide5.jpeg`,
+   `${BASE_IMAGE_URL}/images/social-proof/slide6.jpeg`,
   ];
   const socialProofQuotes = [
     t("DailyDharmaCard.socialProofQuote1"),

@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -23,20 +24,26 @@ import Colors from "../../components/Colors";
 import FilterModal from "../../components/FilterModal";
 import Header from "../../components/Header";
 import TextComponent from "../../components/TextComponent";
+import { useUserLocation } from "../../components/useUserLocation";
+import { BASE_IMAGE_URL } from "../../Networks/baseURL";
 import { RootState } from "../../store";
 import {
   cancelBooking,
   classesBookingsList,
   classesExploreList,
-  fetchFilteredBookings,
   filteredClassesExploreList,
   searchBookings,
-  searchClasses,
+  searchClasses
 } from "./actions";
 
-export default function ClassesScreen({ navigation }) {
+
+
+export default function ClassesScreen({ navigation ,route}) {
   const { t } = useTranslation();
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
+
+  const { locationData } = useUserLocation();
+const userTimezone = locationData?.timezone || "Asia/Kolkata";
 
   // ========== REDUX STATES ==========
   const exploreState = useSelector((state: RootState) => state.classesExploreReducer);
@@ -59,26 +66,136 @@ export default function ClassesScreen({ navigation }) {
   const [bookingsPage, setBookingsPage] = useState(1);
   const [isSearching, setIsSearching] = useState(false);
   const [isFiltering, setIsFiltering] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+const [selectedSubject, setSelectedSubject] = useState("All");
+const [selectedBookingStatus, setSelectedBookingStatus] = useState<string[]>([
+  "requested",
+  "confirmed",
+]);
+
+
+
+const statusData = [
+  { label: "Requested", value: "requested" },
+  { label: "Confirmed", value: "confirmed" },
+  { label: "Completed", value: "completed" },
+  { label: "Rejected", value: "rejected" },
+  { label: "Cancelled", value: "cancelled" },
+  { label: "Pending", value: "pending" },
+];
+
+
+
+const subjectOptions = [
+  { value: "All", label: "All" },
+  { value: "Yoga", label: "Yoga" },
+  { value: "Indian Classical Music", label: "Indian Classical Music" },
+  { value: "Indian Classical Dance", label: "Indian Classical Dance" },
+  { value: "Mantra Chanting", label: "Mantra Chanting" },
+  { value: "Vedas & Upanishads", label: "Vedas & Upanishads" },
+  { value: "Sanatan Teachings", label: "Sanatan Teachings" },
+  { value: "Everyday Vedanta", label: "Everyday Vedanta" },
+];
+
+const fetchLoading =
+  exploreState.loading ||
+  searchExploreState.loading ||
+  filterExploreState.loading;
+
+  useEffect(() => {
+  if (route?.params?.openTab === "MyBookings") {
+    setActiveTab("MyBookings");
+  }
+}, [route?.params?.openTab]);
+
+
+
 
   const flatListRef = useRef<FlatList>(null);
+  
+      useEffect(() => {
+      const checkLogin = async () => {
+        try {
+          const token = await AsyncStorage.getItem("access_token");
+          setIsLoggedIn(!!token);
+        } catch (error) {
+          console.log("Error checking login:", error);
+        }
+      };
+      checkLogin();
+    }, []);
+
+
+      const loadDefaultBookingStatuses = async () => {
+    let finalResults: any[] = [];
+
+    // 1️⃣ load requested
+    await dispatch(
+      classesBookingsList(1, 10, "requested", userTimezone, (res) => {
+        if (res.success) {
+          finalResults = [...finalResults, ...res.data];
+        }
+      })
+    );
+
+    // 2️⃣ load confirmed
+    await dispatch(
+      classesBookingsList(1, 10, "confirmed", userTimezone, (res) => {
+        if (res.success) {
+          finalResults = [...finalResults, ...res.data];
+        }
+      })
+    );
+
+    // Remove duplicates & sort by updated_at
+    finalResults = finalResults
+      .filter((v, i, arr) => arr.findIndex((a) => a.id === v.id) === i)
+      .sort(
+        (a, b) =>
+          new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+      );
+
+    dispatch({
+      type: "MY_BOOKINGS_SUCCESS", // 👈 this must match your BOOKINGS reducer's SUCCESS type (probably MY_BOOKINGS_SUCCESS or BOOKINGS_SUCCESS)
+      payload: { data: finalResults, hasMore: false, page: 1 },
+    });
+  };
+
+  const resetToDefaultList = () => {
+  setIsSearching(false);
+  setIsFiltering(false);
+  setSearchText("");
+  setFilters({});
+  setExplorePage(1);
+  setBookingsPage(1);
+
+  if (activeTab === "ExploreClasses") {
+    dispatch(classesExploreList(1, 10, "", userTimezone));
+  } else {
+    // MyBookings → do not load anything here
+  }
+
+  flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+};
+
 
   // ✅ RESET FUNCTION (Fix for your bug)
-  const resetToDefaultList = () => {
-    setIsSearching(false);
-    setIsFiltering(false);
-    setSearchText("");
-    setFilters({});
-    setExplorePage(1);
-    setBookingsPage(1);
+  // const resetToDefaultList = () => {
+  //   setIsSearching(false);
+  //   setIsFiltering(false);
+  //   setSearchText("");
+  //   setFilters({});
+  //   setExplorePage(1);
+  //   setBookingsPage(1);
 
-    if (activeTab === "ExploreClasses") {
-      dispatch(classesExploreList(1, 10));
-    } else {
-      dispatch(classesBookingsList(1, 10));
-    }
+  //   if (activeTab === "ExploreClasses") {
+  //  dispatch(classesExploreList(1, 10, "", userTimezone));
+  //   } else {
+  //     dispatch(classesBookingsList(1, 10));
+  //   }
 
-    flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
-  };
+  //   flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+  // };
 
   // ========== SEARCH (Smooth 2s delay logic) ==========
   useEffect(() => {
@@ -113,25 +230,72 @@ export default function ClassesScreen({ navigation }) {
     if (activeTab === "ExploreClasses") {
       dispatch(filteredClassesExploreList(selectedFilters, 1, 10));
     } else {
-      dispatch(fetchFilteredBookings(selectedFilters, 1, 10));
+       setSelectedBookingStatus(["requested", "confirmed"]);
+  setBookingsPage(1);
+  loadDefaultBookingStatuses();
     }
 
     setCloseFilterModal(false);
     flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
   };
 
+const handleLoadMore = () => {
+  // ---------------------------
+  // 🔹 PAGINATION: Explore Tab
+  // ---------------------------
+  if (
+    activeTab === "ExploreClasses" &&
+    exploreState.hasMore &&
+    !exploreState.loading
+  ) {
+    const nextPage = explorePage + 1;
+    setExplorePage(nextPage);
+    dispatch(classesExploreList(nextPage, 10));
+    return;
+  }
+
+  // ---------------------------
+  // 🔹 PAGINATION: MyBookings Tab (Requested + Confirmed)
+  // ---------------------------
+  if (
+    activeTab === "MyBookings" &&
+    bookingsState.hasMore &&
+    !bookingsState.loading
+  ) {
+    const nextPage = bookingsPage + 1;
+    setBookingsPage(nextPage);
+
+    console.log("📌 Loading MyBookings page:", nextPage);
+
+    // 🔥 Load BOTH at same time
+    Promise.all([
+      dispatch(
+        classesBookingsList(nextPage, 10, "requested", userTimezone, () => {})
+      ),
+      dispatch(
+        classesBookingsList(nextPage, 10, "confirmed", userTimezone, () => {})
+      ),
+    ]).then(() => {
+      console.log("⚡ Loaded Requested + Confirmed page:", nextPage);
+    });
+
+    return;
+  }
+};
+
+
   // ========== PAGINATION / REFRESH ==========
-  const handleLoadMore = () => {
-    if (activeTab === "ExploreClasses" && exploreState.hasMore && !exploreState.loading) {
-      const nextPage = explorePage + 1;
-      setExplorePage(nextPage);
-      dispatch(classesExploreList(nextPage, 10));
-    } else if (activeTab === "MyBookings" && bookingsState.hasMore && !bookingsState.loading) {
-      const nextPage = bookingsPage + 1;
-      setBookingsPage(nextPage);
-      dispatch(classesBookingsList(nextPage, 10));
-    }
-  };
+  // const handleLoadMore = () => {
+  //   if (activeTab === "ExploreClasses" && exploreState.hasMore && !exploreState.loading) {
+  //     const nextPage = explorePage + 1;
+  //     setExplorePage(nextPage);
+  //     dispatch(classesExploreList(nextPage, 10));
+  //   } else if (activeTab === "MyBookings" && bookingsState.hasMore && !bookingsState.loading) {
+  //     const nextPage = bookingsPage + 1;
+  //     setBookingsPage(nextPage);
+  //     dispatch(classesBookingsList(nextPage, 10));
+  //   }
+  // };
 
   const handleRefresh = () => {
     resetToDefaultList(); // unified refresh
@@ -150,15 +314,60 @@ export default function ClassesScreen({ navigation }) {
     );
   };
 
+const fetchMyBookings = async (page = 1) => {
+  let allResults: any[] = [];
+
+  const statuses = ["requested", "confirmed"];
+
+  for (const status of statuses) {
+    await dispatch(
+      classesBookingsList(page, 10, status, userTimezone, (res) => {
+        if (res.success) allResults.push(...res.data);
+      })
+    );
+  }
+
+  // Deduplicate + sort
+  allResults = allResults
+    .filter((v, i, arr) => arr.findIndex((a) => a.id === v.id) === i)
+    .sort(
+      (a, b) =>
+        new Date(b.updated_at).getTime() -
+        new Date(a.updated_at).getTime()
+    );
+
+  // Send to reducer
+  dispatch({
+    type: "MY_BOOKINGS_SUCCESS",
+    payload: { data: allResults, page, hasMore: false },
+  });
+};
+
+
+
   // ========== INITIAL LOAD ==========
   useEffect(() => {
-    dispatch(classesExploreList(1, 10));
-    dispatch(classesBookingsList(1, 10));
+   dispatch(classesExploreList(1, 10, "", userTimezone));
+    // dispatch(classesBookingsList(1, 10));
   }, [dispatch]);
 
-  useEffect(() => {
-    resetToDefaultList(); // reset when switching tabs
-  }, [activeTab]);
+useEffect(() => {
+  if (activeTab === "MyBookings") {
+    // default: requested + confirmed
+    setSelectedBookingStatus(["requested", "confirmed"]);
+    setBookingsPage(1);
+    fetchMyBookings(1);
+    // loadDefaultBookingStatuses();
+  } else {
+    // Explore tab — use your existing reset logic
+    resetToDefaultList();
+  }
+}, [activeTab]);
+
+
+  // useEffect(() => {
+  //   resetToDefaultList(); // reset when switching tabs
+  // }, [activeTab]);
 
   // ========== RENDER ITEMS ==========
   const renderItem = ({ item }: any) => {
@@ -167,7 +376,7 @@ export default function ClassesScreen({ navigation }) {
         <ClassEventCard
           imageUrl={
             item?.cover_media?.key
-              ? `https://dev.kalpx.com/${item.cover_media.key}`
+              ? `${BASE_IMAGE_URL}/${item.cover_media.key}`
               : null
           }
           title={item?.title}
@@ -188,13 +397,14 @@ export default function ClassesScreen({ navigation }) {
         <ClassBookingCard
           imageUrl={
             item?.offering?.cover_media?.key
-              ? `https://dev.kalpx.com/${item.offering.cover_media.key}`
+              ? `${BASE_IMAGE_URL}/${item.offering.cover_media.key}`
               : null
           }
+          joinUrl={item.join_url} 
           title={item?.offering?.title}
           start={item?.start}
           end={item?.end}
-          link={item?.link}
+          link={item?.join_url}
           price={item?.amount}
           status={item?.status}
           onDetails={() => {
@@ -252,7 +462,7 @@ export default function ClassesScreen({ navigation }) {
           alignItems: "center",
         }}
       >
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => navigation.navigate('HomePage', { screen: 'Home'})}>
           <View
             style={{
               backgroundColor: "#D9D9D9",
@@ -296,9 +506,9 @@ export default function ClassesScreen({ navigation }) {
               paddingHorizontal: 12,
             }}
           >
-            <TextComponent type="headerText">Explore Classes</TextComponent>
+            <TextComponent type="headerSubBoldText" style={{color:activeTab === "MyBookings" ? Colors.Colors.BLACK : Colors.Colors.white}}>Explore Classes</TextComponent>
           </TouchableOpacity>
-
+{isLoggedIn &&
           <TouchableOpacity
             onPress={() => {
               setActiveTab("MyBookings");
@@ -314,8 +524,9 @@ export default function ClassesScreen({ navigation }) {
               paddingHorizontal: 12,
             }}
           >
-            <TextComponent type="headerText">My Bookings</TextComponent>
+            <TextComponent type="headerSubBoldText" style={{color:activeTab === "MyBookings" ? Colors.Colors.white : Colors.Colors.BLACK}}>My Bookings</TextComponent>
           </TouchableOpacity>
+}
         </View>
       </View>
 
@@ -360,7 +571,151 @@ export default function ClassesScreen({ navigation }) {
           />
         </TouchableOpacity>
       </View>
+      {activeTab === "ExploreClasses" &&
+     <View style={{ marginTop: 10 }}>
+  <FlatList
+    data={subjectOptions}
+    horizontal
+    showsHorizontalScrollIndicator={false}
+    keyExtractor={(item) => item.value}
+    contentContainerStyle={{ paddingHorizontal: 16 }}
+    renderItem={({ item }) => {
+      const isSelected = selectedSubject === item.value;
 
+      return (
+        <TouchableOpacity
+          onPress={() => {
+            setSelectedSubject(item.value);
+            setExplorePage(1);
+
+            const subjectToSend = item.value === "All" ? "" : item.value;
+            dispatch(classesExploreList(1, 10, subjectToSend, userTimezone));
+          }}
+          style={{
+            paddingVertical: 8,
+            paddingHorizontal: 16,
+            backgroundColor: isSelected ? Colors.Colors.Yellow : "#EEE",
+            borderRadius: 20,
+            marginRight: 10,
+            minWidth: 70,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {/* 🔥 Loader only on selected chip */}
+          {fetchLoading && isSelected ? (
+            <ActivityIndicator
+              size="small"
+              color={isSelected ? Colors.Colors.white : Colors.Colors.Light_black}
+            />
+          ) : (
+            <TextComponent
+              type="cardText"
+              style={{
+                color: isSelected
+                  ? Colors.Colors.white
+                  : Colors.Colors.Light_black,
+              }}
+            >
+              {item.label}
+            </TextComponent>
+          )}
+        </TouchableOpacity>
+      );
+    }}
+  />
+</View>
+}
+{/* FILTER CHIPS BELOW SEARCH BAR */}
+{activeTab === "MyBookings" && (
+  <View style={{ marginTop: 10 }}>
+    <FlatList
+      data={statusData}
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      keyExtractor={(item) => item.value}
+      contentContainerStyle={{ paddingHorizontal: 16 }}
+      renderItem={({ item }: any) => {
+            const isSelected = selectedBookingStatus.includes(item.value);
+        return (
+          <TouchableOpacity
+            onPress={() => {
+  // now only this one is active
+  setSelectedBookingStatus([item.value]);
+  setBookingsPage(1);
+
+  dispatch(
+    classesBookingsList(1, 10, item.value, userTimezone)
+  );
+}}
+            style={{
+              paddingVertical: 8,
+              paddingHorizontal: 16,
+              backgroundColor: isSelected ? Colors.Colors.Yellow : "#EEE",
+              borderRadius: 20,
+              marginRight: 10,
+              minWidth: 90,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            {fetchLoading && isSelected ? (
+              <ActivityIndicator
+                size="small"
+                color={isSelected ? Colors.Colors.white : Colors.Colors.Light_black}
+              />
+            ) : (
+              <TextComponent
+                type="cardText"
+                style={{
+                  color: isSelected
+                    ? Colors.Colors.white
+                    : Colors.Colors.Light_black,
+                }}
+              >
+                {item.label}
+              </TextComponent>
+            )}
+          </TouchableOpacity>
+        );
+      }}
+    />
+  </View>
+)}
+
+
+{/* <View style={{ marginTop: 10 }}>
+  <FlatList
+    data={subjectOptions}
+    horizontal
+    showsHorizontalScrollIndicator={false}
+    keyExtractor={(item) => item.value}
+    contentContainerStyle={{ paddingHorizontal: 16 }}
+    renderItem={({ item }) => (
+    <TouchableOpacity
+    onPress={() => {
+  setSelectedSubject(item.value);
+  setExplorePage(1);
+  const subjectToSend = item.value === "All" ? "" : item.value;
+  dispatch(classesExploreList(1, 10, subjectToSend, userTimezone));
+}}
+
+      style={{
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        backgroundColor:
+          selectedSubject === item.value ? Colors.Colors.Yellow : "#EEE",
+        borderRadius: 20,
+        marginRight: 10,
+      }}
+    >
+      <TextComponent type="cardText" style={{color: selectedSubject === item.value ? Colors.Colors.white : Colors.Colors.Light_black}}>
+        {item.label}
+      </TextComponent>
+    </TouchableOpacity>
+  )}
+/>
+</View> */}
       {/* List */}
       <FlatList
         ref={flatListRef}
@@ -422,6 +777,7 @@ export default function ClassesScreen({ navigation }) {
           onClear={resetToDefaultList}
         />
       )}
+{/* <LoadingOverlay visible={fetchLoading} text="Loading ..." /> */}
     </SafeAreaView>
   );
 }

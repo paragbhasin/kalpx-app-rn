@@ -196,7 +196,7 @@ const WisdomCard = () => {
                   >
                     <TextComponent
                       type="semiBoldText"
-                      style={{ color: Colors.Colors.App_theme }}
+                      style={{ color: Colors.Colors.App_theme ,marginBottom:8}}
                     >
                       {t("wisdomCard.spreadTruth")}
                     </TextComponent>
@@ -205,11 +205,13 @@ const WisdomCard = () => {
                     <View style={styles.headerRow}>
                       <TextComponent
                         type="cardHeaderText"
-                        style={{ marginLeft: 25 }}
+                        style={{ marginBottom:10 }}
                       >
                         {t("wisdomCard.dailyWisdom")}
                       </TextComponent>
-                      <TouchableOpacity
+                    </View>
+                  <View style={{flexDirection:"row",alignSelf:"flex-end",right:20,marginTop:-46}}>
+  <TouchableOpacity
                         onPress={() => {
                           handleShareWisdom();
                         }}
@@ -294,13 +296,14 @@ const WisdomCard = () => {
                       >
                         <Icon name="videocam-outline" size={18} color="#fff" />
                       </TouchableOpacity>
-                    </View>
+                      </View>
                     <TextComponent
                       type="cardText"
                       style={{
                         color: Colors.Colors.blue_text,
                         textAlign: "center",
                         marginHorizontal: 10,
+                        marginTop:8
                       }}
                     >
                       {t(wisdom.text)}
@@ -568,7 +571,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: 6,
   },
-  streakIcon: { height: 30, width: 30, marginLeft: 25, marginRight: 15 },
+  streakIcon: { height: 30, width: 30, marginLeft: 15, marginRight: 15 },
   tag: {
     paddingVertical: 4,
     paddingHorizontal: 4,

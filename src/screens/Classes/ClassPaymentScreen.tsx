@@ -37,6 +37,8 @@ const  ClassPaymentScreen = ({ navigation,route }) => {
   const [TrailListed, setTrailListed] = useState(false);
 const [timeLeft, setTimeLeft] = useState(600); // 10 minutes = 600 seconds
 const [elapsedTime, setElapsedTime] = useState(0);
+const [loading, setLoading] = useState(false);
+const [isPaymentDone, setIsPaymentDone] = useState(false);
 const intervalRef: any = useRef<NodeJS.Timeout | null>(null);
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
 
@@ -45,21 +47,25 @@ const tutorId = route?.params?.bookingData?.data?.booking_id
 
 // ⏱ when timer completes
 const onTimerComplete = () => {
+  if (!isPaymentDone) {
   dispatch(releaseHoldAction(tutorId, (res) => {
         console.log("res >>>>>>>",res);
     if (res.success) {
       navigation.navigate("HomePage", { screen: "Home" });
     }
   }));
+}
 };
 
 // 🔙 handle Android back press
 useEffect(() => {
   const backAction = () => {
+    if (!isPaymentDone) {
     dispatch(releaseHoldAction(tutorId, (res) => {
         console.log("res >>>>>>>",res);
       navigation.goBack();
     }));
+  }
     return true;
   };
   const backHandler = BackHandler.addEventListener("hardwareBackPress", backAction);
@@ -70,12 +76,14 @@ useEffect(() => {
 // 🧭 handle navigation blur (user taps another tab)
 useEffect(() => {
   const unsubscribe = navigation.addListener("blur", () => {
+     if (!isPaymentDone) { 
     dispatch(releaseHoldAction(tutorId, (res) => {
         console.log("res >>>>>>>",res);
     if (res.success) {
       navigation.navigate("HomePage", { screen: "Home" });
     }
   }));
+}
   });
   return unsubscribe;
 }, [navigation, tutorId]);
@@ -83,7 +91,9 @@ useEffect(() => {
 // 📱 handle app state change (background/kill)
 useEffect(() => {
   const subscription = AppState.addEventListener("change", (nextState) => {
-    if (nextState === "background" || nextState === "inactive") {
+  if (!isPaymentDone &&
+   (nextState === "background" || nextState === "inactive")
+) {
       dispatch(releaseHoldAction(tutorId, (res) => {
         console.log("res >>>>>>>",res);
     if (res.success) {
@@ -121,49 +131,84 @@ useEffect(() => {
 }, []);
 
 
+const callPaymentStripeGateway = async () => {
+  try {
+    setLoading(true); // ⭐ show loader
+    console.log("route?.params?.data?.id >>>>>", JSON.stringify(route?.params));
+
+    let details = {
+      booking_id: route?.params?.bookingData?.data?.booking_id,
+    };
+
+    const result = await api.post("payments/create_intent/", details);
+
+    const res = await initPaymentSheet({
+      paymentIntentClientSecret: result?.data?.client_secret,
+      allowsDelayedPaymentMethods: true,
+      merchantDisplayName: 'Tele Opinion',
+      defaultBillingDetails: { name: "Sunil" },
+      applePay: { merchantCountryCode: 'US' },
+      googlePay: { merchantCountryCode: "US", testEnv: true },
+      returnURL: 'your-app://stripe-redirect',
+    });
+
+    const { error } = await presentPaymentSheet();
+
+    if (!error) {
+        setIsPaymentDone(true);   // 🚀 stop all release actions
+  clearInterval(intervalRef.current);
+    navigation.navigate("ClassesScreen", { openTab: "MyBookings" });
+      // navigation.navigate("HomePage", { screen: "Home" });
+    }
+  } catch (error) {
+    console.log("create Initaiate Token Error===>>>", error?.response);
+  } finally {
+    setLoading(false); // ⭐ hide loader
+  }
+};
 
  
-     const callPaymentStripeGateway = async () => {
-      console.log("route?.params?.data?.id >>>>>",JSON.stringify(route?.params));
-        try {
-            let details = {
-             booking_id: route?.params?.bookingData?.data?.booking_id
-            }
-            const result = await api.post("payments/create_intent/", details);
-            console.log("result of payment intent >>>>>>",result);
-            const res = await initPaymentSheet({
-                // customerId: result?.data?.customer,
-                // customerEphemeralKeySecret: result?.data?.ephemeralKey,
-                paymentIntentClientSecret: result?.data?.client_secret,
-                allowsDelayedPaymentMethods: true,
-                customFlow: false,
-                merchantDisplayName: 'Tele Opinion',
-                defaultBillingDetails: {
-                    name: "Sunil",
-                },
-                applePay: {
-                    merchantCountryCode: 'US'
-                },
-                googlePay: {
-                    merchantCountryCode: "US",
-                    testEnv: true
-                },
-                  returnURL: 'your-app://stripe-redirect',
-            });
-            const { error } = await presentPaymentSheet();
-            if (error) {
-                console.log(`Error code: ${error.code}`, error.message);
-            } else {
-                console.log('Success', 'Your order is confirmed!');
-                  navigation.navigate('HomePage', { screen: 'Home'});
-                // navigation.navigate('Payment', { DocImg: docData?.photoUpload, DocName: docData?.fullName, DocAddress: docData?.clinicName, selectedDate: selectedDate, selectedTime: selectedTime, slotBookingId: slotBookingID, slotId: selectedSlotId, specilization: docData?.specialization });
-            }
-            // let Url = `${EndPoints.STRIPE_PAYMENT}/${result?.data?.paymentIntentId}`;
-            // const Result = await api.put(Url);
-        } catch (error: any) {
-            console.log("create Initaiate Token Error===>>>", error?.response);
-        }
-    }
+    //  const callPaymentStripeGateway = async () => {
+    //   console.log("route?.params?.data?.id >>>>>",JSON.stringify(route?.params));
+    //     try {
+    //         let details = {
+    //          booking_id: route?.params?.bookingData?.data?.booking_id
+    //         }
+    //         const result = await api.post("payments/create_intent/", details);
+    //         console.log("result of payment intent >>>>>>",result);
+    //         const res = await initPaymentSheet({
+    //             // customerId: result?.data?.customer,
+    //             // customerEphemeralKeySecret: result?.data?.ephemeralKey,
+    //             paymentIntentClientSecret: result?.data?.client_secret,
+    //             allowsDelayedPaymentMethods: true,
+    //             customFlow: false,
+    //             merchantDisplayName: 'Tele Opinion',
+    //             defaultBillingDetails: {
+    //                 name: "Sunil",
+    //             },
+    //             applePay: {
+    //                 merchantCountryCode: 'US'
+    //             },
+    //             googlePay: {
+    //                 merchantCountryCode: "US",
+    //                 testEnv: true
+    //             },
+    //               returnURL: 'your-app://stripe-redirect',
+    //         });
+    //         const { error } = await presentPaymentSheet();
+    //         if (error) {
+    //             console.log(`Error code: ${error.code}`, error.message);
+    //         } else {
+    //             console.log('Success', 'Your order is confirmed!');
+    //               navigation.navigate('HomePage', { screen: 'Home'});
+    //             // navigation.navigate('Payment', { DocImg: docData?.photoUpload, DocName: docData?.fullName, DocAddress: docData?.clinicName, selectedDate: selectedDate, selectedTime: selectedTime, slotBookingId: slotBookingID, slotId: selectedSlotId, specilization: docData?.specialization });
+    //         }
+    //         // let Url = `${EndPoints.STRIPE_PAYMENT}/${result?.data?.paymentIntentId}`;
+    //         // const Result = await api.put(Url);
+    //     } catch (error: any) {
+    //         console.log("create Initaiate Token Error===>>>", error?.response);
+    //     }
+    // }
 
 // console.log("route of payments >>>>>>>>>",JSON.stringify(route?.params));
 
@@ -192,7 +237,9 @@ useEffect(() => {
       </TouchableOpacity>
     );
   };
-    const publishableKey = "pk_test_51QGk8ICcC7GuO3wnhaq8gKpMr4MHzPEvqo3u8SlhZ6BTAprSD77fn4iu0dvU2yzuRYPxHkeU0ZSZFOHt8jrbZf2K00r3fSXaw9";
+    // const publishableKey = "pk_test_51QGk8ICcC7GuO3wnhaq8gKpMr4MHzPEvqo3u8SlhZ6BTAprSD77fn4iu0dvU2yzuRYPxHkeU0ZSZFOHt8jrbZf2K00r3fSXaw9";
+    const publishableKey = "pk_live_51I6KtQD0bc08Jx2avwsIu8didzBKMDB5NVDqnaXkSI5bjZ3citDSq0uCUBolX47mbIa85EW32S8tOAkeDD0b4D8p00eS94Q7sy";
+
 
   return (
      <StripeProvider
@@ -341,10 +388,10 @@ useEffect(() => {
       }}
     >
       <TextComponent
-        type="headerBoldText"
+        type="headerSubBoldText"
         style={{
           color: Colors.Colors.white,
-          fontSize: FontSize.CONSTS.FS_18,
+          // fontSize: FontSize.CONSTS.FS_18,
         }}
       >
         {Math.floor(timeLeft / 60)
@@ -358,10 +405,10 @@ useEffect(() => {
     {/* Text Section */}
     <View style={{ marginLeft: 12, flex: 1 }}>
       <TextComponent
-        type="headerBoldText"
+        type="headerSubBoldText"
         style={{
           color: Colors.Colors.BLACK,
-          fontSize: FontSize.CONSTS.FS_16,
+          // fontSize: FontSize.CONSTS.FS_16,
         }}
         numberOfLines={1}
         ellipsizeMode="tail"
@@ -369,20 +416,20 @@ useEffect(() => {
         Complete Your Payment
       </TextComponent>
 <TextComponent
-        type="headerBoldText"
+        type="headerSubBoldText"
         style={{
           color: Colors.Colors.Light_black,
-          fontSize: FontSize.CONSTS.FS_14,
+          // fontSize: FontSize.CONSTS.FS_14,
           flexWrap: "wrap",
           flexShrink: 1,
         }}
       >
         Please complete your payment within{" "}
         <TextComponent
-          type="headerBoldText"
+          type="headerSubBoldText"
           style={{
             color: "red",
-            fontSize: FontSize.CONSTS.FS_14,
+            // fontSize: FontSize.CONSTS.FS_14,
           }}
         >
           {Math.floor(timeLeft / 60)
@@ -471,7 +518,7 @@ useEffect(() => {
           {route?.params?.data?.pricing?.per_person?.amount?.app ?? 0}
         </TextComponent>
       </View>
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={{
           backgroundColor: Colors.Colors.App_theme,
           paddingVertical: 10,
@@ -491,8 +538,43 @@ useEffect(() => {
         >
           Make Payment
         </TextComponent>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </ScrollView>
+    <View
+  style={{
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 16,
+    backgroundColor: Colors.Colors.white,
+    borderTopWidth: 1,
+    borderColor: "#eee",
+  }}
+>
+  <TouchableOpacity
+    disabled={loading}
+    onPress={callPaymentStripeGateway}
+    style={{
+      width: "100%",
+      backgroundColor: loading ? "#ccc" : Colors.Colors.App_theme,
+      paddingVertical: 14,
+      borderRadius: 10,
+      alignItems: "center",
+      justifyContent: "center",
+    }}
+  >
+    <TextComponent
+      type="semiBoldText"
+      style={{
+        color: Colors.Colors.white,
+        fontSize: FontSize.CONSTS.FS_14,
+      }}
+    >
+      {loading ? "Processing..." : "Make Payment"}
+    </TextComponent>
+  </TouchableOpacity>
+</View>
     </SafeAreaView>
     </StripeProvider>
   );

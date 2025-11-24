@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AnyAction } from "@reduxjs/toolkit";
 import { Formik } from "formik";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,9 +15,11 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useDispatch } from "react-redux";
+import { ThunkDispatch } from "redux-thunk";
 import * as Yup from "yup";
 import LoadingButton from "../../components/LoadingButton";
 import TextComponent from "../../components/TextComponent";
+import { RootState } from "../../store";
 import ReCaptchaRuntime from "../Login/ReCaptchaRuntime";
 import { generateOtp, signupUser, verifyOtp } from "./actions";
 import styles from "./styles";
@@ -44,10 +47,10 @@ export default function SignupScreen({ navigation }) {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const { t } = useTranslation();
-  const dispatch = useDispatch();
+  const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
   const recaptchaRef = useRef(null);
 
-  const formikValuesRef = useRef<any>(null);
+  const formikValuesRef = useRef(null);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [loadingType, setLoadingType] = useState<string | null>(null); // 'requestOtp' | 'verifyOtp' | 'resendOtp' | 'signUp' | null
 
@@ -476,7 +479,7 @@ export default function SignupScreen({ navigation }) {
                                   : { backgroundColor: "#ccc" },
                               ]}
                               textStyle={styles.buttonText}
-                              width={170}
+                              width={130}
                             />
 
                             {/* Timer */}

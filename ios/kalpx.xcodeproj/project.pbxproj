@@ -9,11 +9,11 @@
 /* Begin PBXBuildFile section */
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		5F75EA8254428315152DDD52 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 864285EDB651BE8905781584 /* PrivacyInfo.xcprivacy */; };
-		A7861610599394D0489E8490 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 992E7A6FE10FF25D2B1DA7E3 /* ExpoModulesProvider.swift */; };
+		9293EC2E8CE58888E3163CA1 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C15CBB15019BF452C1D1C925 /* PrivacyInfo.xcprivacy */; };
+		AEBC26037DCE11BBE448C109 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = F5A29FFB037A1A1EF541B887 /* ExpoModulesProvider.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
-		C1A6A4A2DCDD47CEB39C59BE /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ED95B5185414A79AED4B9F5 /* noop-file.swift */; };
-		EE04ED3D0721F4CA91AD3A7F /* libPods-kalpx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A653CECF890C121B3AA02E89 /* libPods-kalpx.a */; };
+		CB985B2A681C4271B6C7E050 /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC5CCE357C944F22B0EC4B47 /* noop-file.swift */; };
+		E62810143FA52313B7559917 /* libPods-kalpx.a in Frameworks */ = {isa = PBXBuildFile; fileRef = FAF7517C3194BC4E0396DEA0 /* libPods-kalpx.a */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
@@ -21,17 +21,17 @@
 		13B07F961A680F5B00A75B9A /* kalpx.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = kalpx.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = kalpx/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = kalpx/Info.plist; sourceTree = "<group>"; };
-		2ED95B5185414A79AED4B9F5 /* noop-file.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; name = "noop-file.swift"; path = "kalpx/noop-file.swift"; sourceTree = "<group>"; };
-		864285EDB651BE8905781584 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = kalpx/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		992E7A6FE10FF25D2B1DA7E3 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-kalpx/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		A653CECF890C121B3AA02E89 /* libPods-kalpx.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-kalpx.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		A8E508B0528F3F27C757D0BF /* Pods-kalpx.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kalpx.release.xcconfig"; path = "Target Support Files/Pods-kalpx/Pods-kalpx.release.xcconfig"; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = kalpx/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
-		BCDCABB2D7286AEA8E928C47 /* Pods-kalpx.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kalpx.debug.xcconfig"; path = "Target Support Files/Pods-kalpx/Pods-kalpx.debug.xcconfig"; sourceTree = "<group>"; };
+		C15CBB15019BF452C1D1C925 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = kalpx/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		DC5CCE357C944F22B0EC4B47 /* noop-file.swift */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = sourcecode.swift; name = "noop-file.swift"; path = "kalpx/noop-file.swift"; sourceTree = "<group>"; };
+		E9EE2F05B41C6AC567BFF4DE /* Pods-kalpx.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kalpx.debug.xcconfig"; path = "Target Support Files/Pods-kalpx/Pods-kalpx.debug.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = kalpx/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* kalpx-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "kalpx-Bridging-Header.h"; path = "kalpx/kalpx-Bridging-Header.h"; sourceTree = "<group>"; };
+		F5A29FFB037A1A1EF541B887 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-kalpx/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		FAF7517C3194BC4E0396DEA0 /* libPods-kalpx.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-kalpx.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		FC0AD8821945A8BD89739D63 /* Pods-kalpx.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-kalpx.release.xcconfig"; path = "Target Support Files/Pods-kalpx/Pods-kalpx.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,21 +39,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EE04ED3D0721F4CA91AD3A7F /* libPods-kalpx.a in Frameworks */,
+				E62810143FA52313B7559917 /* libPods-kalpx.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		0040389002A6884347E3C8E3 /* kalpx */ = {
-			isa = PBXGroup;
-			children = (
-				992E7A6FE10FF25D2B1DA7E3 /* ExpoModulesProvider.swift */,
-			);
-			name = kalpx;
-			sourceTree = "<group>";
-		};
 		13B07FAE1A68108700A75B9A /* kalpx */ = {
 			isa = PBXGroup;
 			children = (
@@ -63,8 +55,8 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				2ED95B5185414A79AED4B9F5 /* noop-file.swift */,
-				864285EDB651BE8905781584 /* PrivacyInfo.xcprivacy */,
+				DC5CCE357C944F22B0EC4B47 /* noop-file.swift */,
+				C15CBB15019BF452C1D1C925 /* PrivacyInfo.xcprivacy */,
 			);
 			name = kalpx;
 			sourceTree = "<group>";
@@ -73,17 +65,18 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				A653CECF890C121B3AA02E89 /* libPods-kalpx.a */,
+				FAF7517C3194BC4E0396DEA0 /* libPods-kalpx.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		781FD9D2086EB853E000F00A /* ExpoModulesProviders */ = {
+		357D9F85CD9C851CE7AD3295 /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				0040389002A6884347E3C8E3 /* kalpx */,
+				E9EE2F05B41C6AC567BFF4DE /* Pods-kalpx.debug.xcconfig */,
+				FC0AD8821945A8BD89739D63 /* Pods-kalpx.release.xcconfig */,
 			);
-			name = ExpoModulesProviders;
+			path = Pods;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
@@ -100,8 +93,8 @@
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				90FBCC07D50B17584927FF60 /* Pods */,
-				781FD9D2086EB853E000F00A /* ExpoModulesProviders */,
+				357D9F85CD9C851CE7AD3295 /* Pods */,
+				C25A8AD24348F21E91C80BF8 /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -116,16 +109,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		90FBCC07D50B17584927FF60 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				BCDCABB2D7286AEA8E928C47 /* Pods-kalpx.debug.xcconfig */,
-				A8E508B0528F3F27C757D0BF /* Pods-kalpx.release.xcconfig */,
-			);
-			name = Pods;
-			path = Pods;
-			sourceTree = "<group>";
-		};
 		BB2F792B24A3F905000567C9 /* Supporting */ = {
 			isa = PBXGroup;
 			children = (
@@ -133,6 +116,22 @@
 			);
 			name = Supporting;
 			path = kalpx/Supporting;
+			sourceTree = "<group>";
+		};
+		C25A8AD24348F21E91C80BF8 /* ExpoModulesProviders */ = {
+			isa = PBXGroup;
+			children = (
+				EB41AB5E5380B460E65E1954 /* kalpx */,
+			);
+			name = ExpoModulesProviders;
+			sourceTree = "<group>";
+		};
+		EB41AB5E5380B460E65E1954 /* kalpx */ = {
+			isa = PBXGroup;
+			children = (
+				F5A29FFB037A1A1EF541B887 /* ExpoModulesProvider.swift */,
+			);
+			name = kalpx;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -143,13 +142,13 @@
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "kalpx" */;
 			buildPhases = (
 				08A4A3CD28434E44B6B9DE2E /* [CP] Check Pods Manifest.lock */,
-				AD2FACF5799C5391242A6FE0 /* [Expo] Configure project */,
+				9326A299AD98721D52AE75AA /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
 				800E24972A6A228C8D4807E9 /* [CP] Copy Pods Resources */,
-				FE87BACF8541DCE8708E5B92 /* [CP] Embed Pods Frameworks */,
+				B9EFA9B6A2E2A4086FC9B477 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -199,7 +198,7 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				5F75EA8254428315152DDD52 /* PrivacyInfo.xcprivacy in Resources */,
+				9293EC2E8CE58888E3163CA1 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -319,7 +318,7 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-kalpx/Pods-kalpx-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		AD2FACF5799C5391242A6FE0 /* [Expo] Configure project */ = {
+		9326A299AD98721D52AE75AA /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -338,7 +337,7 @@
 			shellPath = /bin/sh;
 			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-kalpx/expo-configure-project.sh\"\n";
 		};
-		FE87BACF8541DCE8708E5B92 /* [CP] Embed Pods Frameworks */ = {
+		B9EFA9B6A2E2A4086FC9B477 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -364,8 +363,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				C1A6A4A2DCDD47CEB39C59BE /* noop-file.swift in Sources */,
-				A7861610599394D0489E8490 /* ExpoModulesProvider.swift in Sources */,
+				CB985B2A681C4271B6C7E050 /* noop-file.swift in Sources */,
+				AEBC26037DCE11BBE448C109 /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -374,24 +373,26 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = BCDCABB2D7286AEA8E928C47 /* Pods-kalpx.debug.xcconfig */;
+			baseConfigurationReference = E9EE2F05B41C6AC567BFF4DE /* Pods-kalpx.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = kalpx/kalpx.entitlements;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 9G5NZ5LBRU;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
 					"FB_SONARKIT_ENABLED=1",
 				);
 				INFOPLIST_FILE = kalpx/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = KalpX;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.3;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -399,7 +400,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.kalpx.app;
-				PRODUCT_NAME = kalpx;
+				PRODUCT_NAME = "kalpx";
 				SWIFT_OBJC_BRIDGING_HEADER = "kalpx/kalpx-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -410,19 +411,21 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A8E508B0528F3F27C757D0BF /* Pods-kalpx.release.xcconfig */;
+			baseConfigurationReference = FC0AD8821945A8BD89739D63 /* Pods-kalpx.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = kalpx/kalpx.entitlements;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 9G5NZ5LBRU;
 				INFOPLIST_FILE = kalpx/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = KalpX;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.3;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -430,7 +433,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.kalpx.app;
-				PRODUCT_NAME = kalpx;
+				PRODUCT_NAME = "kalpx";
 				SWIFT_OBJC_BRIDGING_HEADER = "kalpx/kalpx-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

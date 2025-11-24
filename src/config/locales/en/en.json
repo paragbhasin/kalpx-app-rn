@@ -5,9 +5,9 @@
     "kalpXHeading": "What You’ll Find on KalpX?"
   },
   "categories": {
-    "dharma": "Daily Practice",
-    "sadana":"My Sadhana",
-    "explore": "Explore",
+    "dharma": "Practice",
+    "sadana":"Sadhana",
+    "explore": "Videos",
     "travel": "Travel",
     "pooja": "Pooja",
     "retreat": "Retreat",
@@ -16,7 +16,7 @@
   "streak":{
    "sankalp":"Sankalp",
 "mantra":"Mantra",
-"DailyPractice":"Daily Practice",
+"DailyPractice":"Practice",
 "stepText":"Step Into Today With Purpose"
   },
   "cards":{
@@ -115,6 +115,7 @@
     "brand": "KalpX",
     "heading": "Connect to Your Roots",
     "google": "Login With Google",
+    "apple": "Login With Apple",
     "cardTitleLine1": "Login in Your",
     "cardTitleLine2": "Account",
     "subTitle": "To Explore Divine Journey",
@@ -184,6 +185,7 @@
     "name": "Neha Jais",
     "level": "Beginner Level",
     "menu": {
+      "login" : "Login",
       "myProfile": "My Profile",
       "setReminders": "Set Reminders",
       "myPractices": "My Practices",
@@ -645,7 +647,7 @@
   "profileName":"Profile Name",
   "ageGroup":"Age Group",
   "categories":"Categories",
-  "languages":"Languages",
+  "languages":"Notification Language",
   "updateProfile":"UPDATE PROFILE",
   "chooseTZ":"Choose Your Timezone",
   "languageInstruction":"All notifications will be sent in chosen language",
@@ -916,5 +918,68 @@
     "section7Content": "To delete your KalpX account and data, email us at support@kalpx.com with subject line: \"Delete My KalpX Account\".",
     "section8Title": "8. Contact Us",
     "section8Content": "Email: support@kalpx.com"
+  },
+  "popup": {
+    "mantraTaken_title1": "🌟 Mantra Taken!",
+    "mantraTaken_sub1": "One small step, one powerful shift. You’ve committed to building your inner strength today.",
+    "mantraTaken_info1": [
+      "Get daily reminders",
+      "Track your Mantra streak",
+      "Make this part of your daily spiritual practice"
+    ],
+    "mantraTaken_bottom": "Want a gentle reminder to complete your Mantra by day's end?",
+
+    "mantraTaken_title2": "🌟 Great job taking your Mantra!",
+    "mantraTaken_sub2": "Your journey toward inner strength is on track. Tap below to repeat this intention every day and build your streak.",
+    "mantraTaken_info2": [
+      "Want to make this your Daily Mantra?",
+      "You'll get reminders and track how many days you stay committed!"
+    ],
+
+    "mantraComplete_title1": "🌼 Beautiful! You've completed your Mantra today.",
+    "mantraComplete_sub1": "But your progress isn’t being saved.",
+    "mantraComplete_info1": [
+      "Keep your Mantra streak alive",
+      "Receive gentle nudges to stay on track",
+      "View your growth over time"
+    ],
+
+    "mantraComplete_title2": "🌼 Well done!",
+    "mantraComplete_sub2": "Every time you complete your Mantra, you nurture your inner self.",
+    "mantraComplete_info2": [
+      "You're keeping your streak alive!",
+      "See you tomorrow for your next step on this journey."
+    ],
+
+    "sankalpTaken_title": "Sankalp Taken!",
+    "sankalpTaken_sub": "One small step, one powerful shift. You've committed to building your inner strength today.",
+    "sankalpTaken_info": [
+      "Get daily reminders",
+      "Track your Sankalp streak",
+      "Make this part of your daily spiritual practice"
+    ],
+    "sankalpTaken_bottom": "Want a gentle reminder to complete your Sankalp by day's end?",
+
+    "sankalpComplete_title": "🌼 Beautiful! You've completed your Sankalp today.",
+    "sankalpComplete_sub": "But your progress isn't being saved.",
+    "sankalpComplete_info": [
+      "Keep your Sankalp streak alive",
+      "Receive gentle nudges to stay on track",
+      "View your growth over time"
+    ],
+    "mantraTaken_button":"Make this my Daily Mantra",
+     "mantraTaken_Continue":"Continue",
+     "mantraTaken_subtitle1":"Mark it done once you are finished",
+     "sankalpTaken_title3": "🌟 Great job taking your Sankalp!",
+     "sankalpTaken_info2":[
+      "🔥 Want to make this your Daily Sankalp?",
+     "💡 You'll get reminders and track how many days you stay committed!"
+     ],
+     "sankalpTaken_button":"Make this my Daily Sankalp",
+     "sankalpComplete_sub2":"Every time you complete your Sankalp, you nurture your inner self.",
+      "sankalpComplete_info2":[
+        "🌟 You're keeping your streak alive!",
+        "🙏 See you tomorrow for your next step on this journey."
+      ]
   }
 }

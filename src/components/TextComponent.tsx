@@ -181,7 +181,12 @@ const TextComponent = (props: any) => {
          case "DailyHeaderText":
       textStyle = styles.DailyHeaderText;
       break;
-      
+           case "DailyDetailheaderText":
+      textStyle = styles.DailyDetailheaderText;
+      break;
+        case "DailyboldText":
+      textStyle = styles.DailyboldText;
+      break;
     default:
       textStyle = styles.mediumText;
   }
@@ -355,5 +360,15 @@ const styles = StyleSheet.create({
     color: Colors.Colors.Daily_black,
     fontSize: FontSize.CONSTS.FS_16,
     fontFamily: "Inter_500Medium",
+  },
+      DailyDetailheaderText:{
+    color: Colors.Colors.Daily_black,
+    fontSize: FontSize.CONSTS.FS_18,
+    fontFamily: "Inter_500Medium",
+  },
+    DailyboldText: {
+    color: Colors.Colors.Daily_black,
+    fontSize: FontSize.CONSTS.FS_16,
+    fontFamily: "Inter_700Bold",
   },
 });

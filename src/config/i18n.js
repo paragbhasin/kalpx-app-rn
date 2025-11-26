@@ -11,12 +11,20 @@ import mantrasBn from "./locales/bn/mantras-bn.json";
 import practicesBn from "./locales/bn/practices-bn.json";
 import sankalpsBn from "./locales/bn/sankalps-bn.json";
 import wisdomBn from "./locales/bn/wisdom-bn.json";
+import { CARRER_ABUNDANCE_MANTRAS, CARRER_ABUNDANCE_PRACTICES, CARRER_ABUNDANCE_SANKALPS } from "./locales/en/CareerProsperity";
+import { EMOTIONAL_HEALING_MANTRAS, EMOTIONAL_HEALING_PRACTICES, EMOTIONAL_HEALING_SANKALPS } from "./locales/en/EmotionalHealing";
 import en from "./locales/en/en.json";
 import festivalsEn from "./locales/en/festivals-en.json";
+import { FOCUS_MOTIVATION_MANTRAS, FOCUS_MOTIVATION_PRACTICES, FOCUS_MOTIVATION_SANKALPS } from "./locales/en/FocusMotivation";
+import { GRATITUDE_POSTIVITY_MANTRAS, GRATITUDE_POSTIVITY_PRACTICES, GRATITUDE_POSTIVITY_SANKALPS } from "./locales/en/GratitudePositivity";
+import { HEALTH_WELL_BEING_MANTRASS, HEALTH_WELL_BEING_PRACTICES, HEALTH_WELL_BEING_SANKALPS } from "./locales/en/HealthWellbeing";
 import mantrasEn from "./locales/en/mantras-en.json";
-import { PEACE_CALM_PRACTICES, PEACE_CALM_SANKALPS, peaceCalmMantras } from "./locales/en/PeaceCalm";
+import { PEACE_CALM_MANTRAS, PEACE_CALM_PRACTICES, PEACE_CALM_SANKALPS } from "./locales/en/PeaceCalm";
 import practicesEn from "./locales/en/practices-en.json";
 import sankalpsEn from "./locales/en/sankalps-en.json";
+import { SPIRITUAL_GROWTH_MANTRAS, SPIRITUAL_GROWTH_PRACTICES, SPIRITUAL_GROWTH_SANKALPS } from "./locales/en/SpiritualGrowth";
+
+
 import templesEn from "./locales/en/temples_en.json";
 import wisdomEn from "./locales/en/wisdom-en.json";
 import festivalsGu from "./locales/gu/festivals-gu.json";
@@ -78,24 +86,64 @@ const deviceLanguage =
     ? Localization.getLocales()[0].languageCode // e.g. "en"
     : "en";
 
-    const convertArrayToTranslation = (arr) => {
+const convertArrayToTranslation = (arr, categoryKey) => {
   const obj = {};
   arr.forEach(item => {
-    if (item.id) obj[item.id] = item;
+    if (item.id) obj[item.id] = { ...item, category: categoryKey };
   });
   return obj;
 };
 
+
 const PeaceCalmTranslations = {
-  ...convertArrayToTranslation(PEACE_CALM_PRACTICES),
-  ...convertArrayToTranslation(peaceCalmMantras),
-  ...convertArrayToTranslation(PEACE_CALM_SANKALPS)
+  ...convertArrayToTranslation(PEACE_CALM_PRACTICES, "peace-calm"),
+  ...convertArrayToTranslation(PEACE_CALM_MANTRAS, "peace-calm"),
+  ...convertArrayToTranslation(PEACE_CALM_SANKALPS, "peace-calm")
 };
+
+const SpiritualTranslations = {
+  ...convertArrayToTranslation(SPIRITUAL_GROWTH_MANTRAS, "spiritual-growth"),
+  ...convertArrayToTranslation(SPIRITUAL_GROWTH_SANKALPS, "spiritual-growth"),
+  ...convertArrayToTranslation(SPIRITUAL_GROWTH_PRACTICES, "spiritual-growth")
+};
+
+const CareerTranslations = {
+  ...convertArrayToTranslation(CARRER_ABUNDANCE_PRACTICES, "career"),
+  ...convertArrayToTranslation(CARRER_ABUNDANCE_MANTRAS, "career"),
+  ...convertArrayToTranslation(CARRER_ABUNDANCE_SANKALPS, "career")
+};
+
+const FocusTranslations = {
+  ...convertArrayToTranslation(FOCUS_MOTIVATION_PRACTICES, "focus"),
+  ...convertArrayToTranslation(FOCUS_MOTIVATION_MANTRAS, "focus"),
+  ...convertArrayToTranslation(FOCUS_MOTIVATION_SANKALPS, "focus")
+};
+
+const EmotionalTranslations = {
+  ...convertArrayToTranslation(EMOTIONAL_HEALING_PRACTICES, "healing"),
+  ...convertArrayToTranslation(EMOTIONAL_HEALING_MANTRAS, "healing"),
+  ...convertArrayToTranslation(EMOTIONAL_HEALING_SANKALPS, "healing")
+};
+
+const GratitudeTranslations = {
+  ...convertArrayToTranslation(GRATITUDE_POSTIVITY_PRACTICES, "gratitude"),
+  ...convertArrayToTranslation(GRATITUDE_POSTIVITY_MANTRAS, "gratitude"),
+  ...convertArrayToTranslation(GRATITUDE_POSTIVITY_SANKALPS, "gratitude")
+};
+
+const HealthTranslations = {
+  ...convertArrayToTranslation(HEALTH_WELL_BEING_PRACTICES, "health"),
+  ...convertArrayToTranslation(HEALTH_WELL_BEING_MANTRASS, "health"),
+  ...convertArrayToTranslation(HEALTH_WELL_BEING_SANKALPS, "health")
+};
+
 
 
 // ✅ Deep merge translations to avoid overwriting nested objects
 const translations = {
-  en: merge({}, en, templesEn, mantrasEn, festivalsEn, sankalpsEn, wisdomEn, practicesEn,PeaceCalmTranslations),
+  en: merge({}, en, templesEn, mantrasEn, festivalsEn, sankalpsEn, wisdomEn, practicesEn,
+          PeaceCalmTranslations, SpiritualTranslations, CareerTranslations, FocusTranslations,
+          EmotionalTranslations, GratitudeTranslations, HealthTranslations),
   hi: merge({}, hi, templesHi, mantrasHi, festivalsHi, sankalpsHi, wisdomHi, practicesHi),
   te: merge({}, te, templesTe, mantrasTe, sankalpsTe, festivalsTe, wisdomTe, practicesTe),
   ta: merge({}, ta, mantrasTa, sankalpsTa, festivalsTa, wisdomTa, practicesTa),

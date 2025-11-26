@@ -55,7 +55,8 @@ const styles = StyleSheet.create({
   optionIcon: { width: 28, height: 28 },
   dailyContainer: {
     //  paddingHorizontal: 16, 
-     marginTop: 10 },
+    //  marginTop: 10 
+    },
   sectionHeading: {
   alignSelf:"center",
   marginVertical:14,
@@ -105,9 +106,10 @@ fontSize:FontSize.CONSTS.FS_10,
    borderRadius: 4,
         overflow: "hidden",
         elevation: 3,
-        backgroundColor: "#F7F0DD",
+        // backgroundColor: "#F7F0DD",
+        backgroundColor: "#FFFFFF",
         borderColor:Colors.Colors.App_theme,
-        borderWidth:1,
+        borderWidth:1.25,
         // marginHorizontal:16,
         padding:10,
         marginVertical:8,
@@ -268,7 +270,16 @@ streakScrollContainer: {
 streakItem: {
   flexDirection: "row",
   alignItems: "center",
-  marginRight: 12,
+  // marginRight: 12,
+    borderRadius: 7,
+  overflow: "hidden",
+  elevation: 3,
+  backgroundColor: Colors.Colors.white,
+  borderColor: Colors.Colors.App_theme,
+  borderWidth: 1,
+  marginHorizontal: 6,
+  paddingVertical: 10,
+  paddingHorizontal: 8,
 },
 
 streakIcon: {
@@ -284,7 +295,60 @@ count: {
 streakText: {
   flexShrink: 0,
 },
+  partialBgContainer: {
+    width: FontSize.CONSTS.DEVICE_WIDTH,
+    maxHeight:200
+  },
+  partialBgImage: {
+      width: FontSize.CONSTS.DEVICE_WIDTH,
+    maxHeight:200
+    // resizeMode: "center",
+    // opacity: 0.9, // optional: adjust background intensity
+  },
+  image: {
+    height: 220,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
+  label: {
+    position: "absolute",
+    textAlign: "center",
+    color: "#000000",
+    // fontSize: 16,
+    // fontWeight: "600",
+  },
+
+  leftLabel: {
+    left: 50,
+    top: 100,
+  },
+
+  centerLabel: {
+    top: 90,
+  },
+
+  rightLabel: {
+    right: 50,
+    top: 100,
+  },
+    circleButton: {
+    height: 30,
+    width: 30,
+    borderRadius: 15,
+    backgroundColor: "#C59A2D",   // golden color
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 3,
+marginLeft:12,
+    // Outer glow like your image
+    borderWidth: 8,
+    borderColor: "#F7EED1",
+  },
 });
 
 export default styles;

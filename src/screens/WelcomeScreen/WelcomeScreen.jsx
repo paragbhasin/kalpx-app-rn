@@ -6,7 +6,9 @@ import {
   View
 } from "react-native";
 import TextComponent from "../../components/TextComponent";
+import { registerDeviceToBackend } from "../../utils/registerDevice";
 import styles from "./styles";
+
 
 export default function WelcomeScreen({ navigation }) {
   const { t } = useTranslation();
@@ -25,7 +27,12 @@ export default function WelcomeScreen({ navigation }) {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate("LandingScreen")}
+        onPress={async () => {
+ await registerDeviceToBackend();
+          navigation.navigate("AppDrawer");
+          // navigation.navigate("LandingScreen")
+        }
+        }
         activeOpacity={0.8}
       >
         <TextComponent type="headerText" style={styles.buttonText}>{t("welcome.getStarted")}</TextComponent>

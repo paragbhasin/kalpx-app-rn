@@ -7,8 +7,8 @@
 
 
 // MANUAL SWITCH
-// const ENV = "dev";
-const ENV = "prod";
+const ENV = "dev";
+// const ENV = "prod";
 
 // API URLs
 const DEV_URL = "https://dev.kalpx.com/api";

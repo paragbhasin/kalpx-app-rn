@@ -1,6 +1,6 @@
 import messaging from '@react-native-firebase/messaging';
 import * as Notifications from 'expo-notifications';
-import { Alert, Platform } from 'react-native';
+import { Platform } from 'react-native';
 
 // Ask for permission + get FCM token
 export async function requestPushPermission() {
@@ -49,10 +49,10 @@ export function foregroundNotificationListener() {
     console.log("📩 Foreground Notification Received:", remoteMessage);
 
     // Show Alert Popup
-    Alert.alert(
-      remoteMessage.notification?.title || "New Notification",
-      remoteMessage.notification?.body || "You have a new message"
-    );
+    // Alert.alert(
+    //   remoteMessage.notification?.title || "New Notification",
+    //   remoteMessage.notification?.body || "You have a new message"
+    // );
 
     // Optional: also show system-style in-app banner
     Notifications.scheduleNotificationAsync({
@@ -74,20 +74,20 @@ export function notificationOpenListener() {
     .then((remoteMessage) => {
       if (remoteMessage) {
         console.log("📌 App opened from QUIT state:", remoteMessage);
-        Alert.alert(
-          remoteMessage.notification?.title || "Opened Notification",
-          remoteMessage.notification?.body || ""
-        );
+        // Alert.alert(
+        //   remoteMessage.notification?.title || "Opened Notification",
+        //   remoteMessage.notification?.body || ""
+        // );
       }
     });
 
   // Background state
   return messaging().onNotificationOpenedApp((remoteMessage) => {
     console.log("📌 App opened from BACKGROUND:", remoteMessage);
-    Alert.alert(
-      remoteMessage.notification?.title || "Opened Notification",
-      remoteMessage.notification?.body || ""
-    );
+    // Alert.alert(
+    //   remoteMessage.notification?.title || "Opened Notification",
+    //   remoteMessage.notification?.body || ""
+    // );
   });
 }
 

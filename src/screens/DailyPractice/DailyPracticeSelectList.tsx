@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useNavigation } from "@react-navigation/native";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Image, View } from "react-native";
+import { Image, TouchableOpacity, View } from "react-native";
 import { Card } from "react-native-paper";
 import Colors from "../../components/Colors";
 import DailyPracticeMantraCard from "../../components/DailyPracticeMantraCard";
@@ -11,75 +12,69 @@ import TextComponent from "../../components/TextComponent";
 import i18n from "../../config/i18n";
 import styles from "./DailyPracticeSelectListStyles";
 
-
-const categories = [
-  {
-    category: "Peace & Stress Relief",
-    options: [
-      { count: 9, label: "Quick Calm" },
-      { count: 27, label: "Stress Release" },
-      { count: 54, label: "Deep Peace" },
-      { count: 108, label: "Inner Serenity" },
-    ],
-  },
-  {
-    category: "Focus & Motivation",
-    options: [
-      { count: 9, label: "Quick Focus" },
-      { count: 27, label: "Mental Clarity" },
-      { count: 54, label: "Steady Concentration" },
-      { count: 108, label: "Unshakable Focus" },
-    ],
-  },
-  {
-    category: "Emotional Healing",
-    options: [
-      { count: 9, label: "Gentle Relief" },
-      { count: 27, label: "Emotional Balance" },
-      { count: 54, label: "Heart Healing" },
-      { count: 108, label: "Inner Renewal" },
-    ],
-  }
-];
-
-const arrowIcon = require("../../../assets/arrow_home.png");
-
 const backIcon = require("../../../assets/C_Arrow_back.png");
 
-const filterByPrefix = (obj, prefix) => {
-  return Object.values(obj).filter((item: any) => item?.id?.startsWith(prefix));
-};
-
-const DailyPracticeSelectList = () => {
+const DailyPracticeSelectList = ({ route }) => {
+  const navigation: any = useNavigation();
   const { t } = useTranslation();
 
+  const isLocked = route?.params?.isLocked ?? false;
+
+  const categoryItem = route?.params?.item;
+  const selectedCategory = categoryItem?.key;
+
+  const allData = i18n.getResourceBundle(i18n.language, "translation");
+
+  // Filter with category + type
+  const mantraList = useMemo(() => {
+    return Object.values(allData).filter(
+      (item: any) =>
+        item?.category === selectedCategory && item?.id?.startsWith("mantra.")
+    );
+  }, [selectedCategory]);
+
+  const sankalpList = useMemo(() => {
+    return Object.values(allData).filter(
+      (item: any) =>
+        item?.category === selectedCategory && item?.id?.startsWith("sankalp.")
+    );
+  }, [selectedCategory]);
+
+  const practiceList = useMemo(() => {
+    return Object.values(allData).filter(
+      (item: any) =>
+        item?.category === selectedCategory && item?.id?.startsWith("practice.")
+    );
+  }, [selectedCategory]);
+
+  // Rotating indexes
   const [mantraIndex, setMantraIndex] = useState(0);
   const [sankalpIndex, setSankalpIndex] = useState(0);
   const [practiceIndex, setPracticeIndex] = useState(0);
 
-  // get full translation dataset
-const allData = i18n.getResourceBundle(i18n.language, "translation");
+  const nextMantra = () =>
+    setMantraIndex((prev) => (prev + 1) % mantraList.length);
 
+  const nextSankalp = () =>
+    setSankalpIndex((prev) => (prev + 1) % sankalpList.length);
 
-  const mantraList = filterByPrefix(allData, "mantra.");
-  const sankalpList = filterByPrefix(allData, "sankalp.");
-  const practiceList = filterByPrefix(allData, "practice.");
-
-  const nextMantra = () => setMantraIndex(prev => (prev + 1) % mantraList.length);
-  const nextSankalp = () => setSankalpIndex(prev => (prev + 1) % sankalpList.length);
-  const nextPractice = () => setPracticeIndex(prev => (prev + 1) % practiceList.length);
-
+  const nextPractice = () =>
+    setPracticeIndex((prev) => (prev + 1) % practiceList.length);
 
   return (
     <View style={styles.container}>
       <Header />
-      <View style={{marginHorizontal:16}}>
- <Image
-                  source={backIcon}
-                  style={styles.backIcon}
-                  resizeMode="contain"
-                />
-                 <TextComponent
+
+      <View style={{ marginHorizontal: 16 }}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Image
+            source={backIcon}
+            style={styles.backIcon}
+            resizeMode="contain"
+          />
+        </TouchableOpacity>
+
+        <TextComponent
           type="loginHeaderText"
           style={{
             marginTop: -15,
@@ -87,45 +82,91 @@ const allData = i18n.getResourceBundle(i18n.language, "translation");
             alignSelf: "center",
           }}
         >
-       Peace & Stress Relief
+          {categoryItem?.name}
         </TextComponent>
-          <TextComponent
+
+        <TextComponent
           type="streakSadanaText"
-          style={{ marginVertical:6, alignSelf: "center" }}
+          style={{ marginVertical: 6, alignSelf: "center" }}
         >
-     Wisdom lies in remaining still amid turmoil
+          {categoryItem?.description}
         </TextComponent>
       </View>
+
       <Card style={styles.card2}>
-<View style={{width:FontSize.CONSTS.DEVICE_WIDTH *0.82}}>
-      <DailyPracticeMantraCard 
-      data={mantraList[mantraIndex]}
-      onChange={nextMantra}
-      tag="Mantra"
-    />
-
-    <DailyPracticeMantraCard 
-      data={sankalpList[sankalpIndex]}
-      onChange={nextSankalp}
-      tag="Sankalp"
-    />
-
-    <DailyPracticeMantraCard 
-      data={practiceList[practiceIndex]}
-      onChange={nextPractice}
-      tag="Practice"
-    />
-  </View>
-  </Card>
-     <LoadingButton
-                      loading={false}
-                      text="Confirm"
-                      onPress={() => {}}
-                      disabled={false}
-                      style={styles.button}
-                      textStyle={styles.buttonText}
-                      showGlobalLoader={true}
-                    />
+        <View style={{ width: FontSize.CONSTS.DEVICE_WIDTH * 0.82 }}>
+          {mantraList.length > 0 && (
+            <DailyPracticeMantraCard
+              data={mantraList[mantraIndex]}
+              onChange={isLocked ? undefined : nextMantra}
+              tag="Mantra"
+              showIcons={!isLocked}
+              onPress={() =>
+                navigation.navigate("DailyPracticeDetailSelectedPractice", {
+                  item: categoryItem,
+                  selectedType: "mantra",
+                  fullList: mantraList,
+                  startingIndex: mantraIndex,
+                  onUpdateSelection: (newIndex) => setMantraIndex(newIndex),
+                  isLocked: isLocked, // ⭐ ADD THIS
+                })
+              }
+            />
+          )}
+          {sankalpList.length > 0 && (
+            <DailyPracticeMantraCard
+              data={sankalpList[sankalpIndex]}
+              onChange={isLocked ? undefined : nextSankalp}
+              tag="Sankalp"
+              showIcons={!isLocked}
+              onPress={() =>
+                navigation.navigate("DailyPracticeDetailSelectedPractice", {
+                  item: categoryItem,
+                  selectedType: "sankalp",
+                  fullList: sankalpList,
+                  startingIndex: sankalpIndex,
+                  onUpdateSelection: (newIndex) => setSankalpIndex(newIndex),
+                  isLocked: isLocked, // ⭐ ADD THIS
+                })
+              }
+            />
+          )}
+          {practiceList.length > 0 && (
+            <DailyPracticeMantraCard
+              data={practiceList[practiceIndex]}
+              onChange={isLocked ? undefined : nextPractice}
+              tag="Practice"
+              showIcons={!isLocked}
+              onPress={() =>
+                navigation.navigate("DailyPracticeDetailSelectedPractice", {
+                  item: categoryItem,
+                  selectedType: "practice",
+                  fullList: practiceList,
+                  startingIndex: practiceIndex,
+                  onUpdateSelection: (newIndex) => setPracticeIndex(newIndex),
+                  isLocked: isLocked, // ⭐ ADD THIS
+                })
+              }
+            />
+          )}
+        </View>
+      </Card>
+      
+      <LoadingButton
+        loading={false}
+         text={isLocked ? "Confirm" : "Submit"}
+        onPress={() => {
+          if (!isLocked) {
+      navigation.setParams({ isLocked: true }); 
+    } else {
+      console.log("CONFIRM API CALL");
+    }
+        }}
+        disabled={false}
+        style={styles.button}
+        textStyle={styles.buttonText}
+        showGlobalLoader={true}
+      />
     </View>
   );
 };

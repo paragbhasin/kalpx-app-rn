@@ -5,6 +5,7 @@ import ClassesScreen from "../screens/Classes/classesScreen";
 import ClassPaymentScreen from "../screens/Classes/ClassPaymentScreen";
 import ClassRescheduleScreen from "../screens/Classes/ClassRescheduleScreen";
 import ClassTutorDetailsScreen from "../screens/Classes/ClassTutorDetailsScreen";
+import DailyPracticeDetailSelectedPractice from "../screens/DailyPractice/DailyPracticeDetailSelectedPractice";
 import DailyPracticeList from "../screens/DailyPractice/DailyPracticeList";
 import DailyPracticeSelectList from "../screens/DailyPractice/DailyPracticeSelectList";
 import Dharma from "../screens/Home/DailyDharma";
@@ -26,6 +27,7 @@ import Profile from "../screens/Profile/Profile";
 import ProfileDetails from "../screens/Profile/ProfileDetails";
 import Sankalp from "../screens/Sankalp";
 import StreakScreen from "../screens/Streak/StreakScreen";
+import TrackerScreen from "../screens/Tracker/TrackerScreen";
 
 const Stack: any = createNativeStackNavigator();
 
@@ -104,7 +106,8 @@ export const HomeStackNavigator = () => (
       <Stack.Screen name="RelatedVideosScreen" component={RelatedVideosScreen}   options={{ headerShown: false }} />
       <Stack.Screen name="DailyPracticeList" component={DailyPracticeList}   options={{ headerShown: false }} />
       <Stack.Screen name="DailyPracticeSelectList" component={DailyPracticeSelectList}  options={{ headerShown: false }} />
-
+      <Stack.Screen name="DailyPracticeDetailSelectedPractice" component={DailyPracticeDetailSelectedPractice}  options={{ headerShown: false }} />
+      <Stack.Screen name="TrackerScreen" component={TrackerScreen}  options={{ headerShown: false }} />
   </Stack.Navigator>
 );
 

@@ -112,4 +112,5 @@ export default StyleSheet.create({
     fontFamily: "GelicaMedium",
       // lineHeight: 20,
   },
+  
 });

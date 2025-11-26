@@ -1,15 +1,17 @@
 // screens/Home.js
+import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { AnyAction } from "@reduxjs/toolkit";
 import * as Updates from "expo-updates";
 import moment from "moment";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dimensions,
   FlatList,
   Image,
+  ImageBackground,
   Linking,
   Platform,
   SafeAreaView,
@@ -36,7 +38,6 @@ import TextComponent from "../../components/TextComponent";
 import UpdateAppModal from "../../components/UpdateModal";
 import { useUserLocation } from "../../components/useUserLocation";
 import WisdomCard from "../../components/WisdomCard";
-import YoutubeModal from "../../components/youtubeModal";
 import { CATALOGS } from "../../data/mantras";
 import { usePracticeStore } from "../../data/Practice";
 import { RootState } from "../../store";
@@ -99,7 +100,14 @@ const [updateType, setUpdateType] = useState("");
     (state: RootState) => state.videosReducer
   );
 
-      useEffect(() => {
+  useFocusEffect(
+  React.useCallback(() => {
+    // Reset expanded card when navigating back to Home
+    setExpandedItemId(null);
+  }, [])
+);
+
+  useEffect(() => {
     const checkLogin = async () => {
       try {
         const token = await AsyncStorage.getItem("access_token");
@@ -292,60 +300,131 @@ useEffect(() => {
     setExpandedItemId((prev) => (prev === id ? null : id));
   };
 
-  const categories = [
-    {
-      id: "1",
-      name:
-        trackerData?.active_practices?.length > 0
-          ? t("categories.sadana")
-          : t("categories.dharma"),
-      title: trackerData?.active_practices?.length > 0 ? "SadanaTrackerScreen" : "Dharma",
-      // title: trackerData?.active_practices?.length > 0 ? "DailyPracticeList" : "Dharma",
-      event_type: "click_dharma_card",
-      component: "Dharma-card",
-      icon: require("../../../assets/Group.png"),
-    },
-    {
-      id: "2",
-      name: t("categories.explore"),
-      title: "Explore",
-      event_type: "click_explore_card",
-      component: "Explore-card",
-      icon: require("../../../assets/Exploreicon.png"),
-    },
-    // {
-    //   id: "3",
-    //   name: t("categories.travel"),
-    //   title: "Travel",
-    //   event_type: "click_travel_card",
-    //   component: "Travel-card",
-    //   icon: require("../../../assets/darma.png"),
-    // },
-    // {
-    //   id: "4",
-    //   name: t("categories.pooja"),
-    //   title: "Pooja",
-    //   event_type: "click_pooja_card",
-    //   component: "Pooja-card",
-    //   icon: require("../../../assets/pooja.png"),
-    // },
-    {
-      id: "5",
-      name: t("categories.retreat"),
-      title: "Retreat",
-      event_type: "click_retreat_card",
-      component: "Retreat-card",
-      icon: require("../../../assets/yoga.png"),
-    },
-    {
-      id: "6",
-      name: t("categories.classes"),
-      title: "ClassesScreen",
-      event_type: "click_classes_card",
-      component: "Classes-card",
-      icon: require("../../../assets/onlinecion.png"),
-    },
-  ];
+  // const categories = [
+  //   {
+  //   id: "1",
+  //   name:
+  //     trackerData?.active_practices?.length > 0
+  //       ? t("categories.sadana")
+  //       : t("categories.dharma"),
+  //   title: trackerData?.active_practices?.length > 0 ? "SadanaTrackerScreen" : "Dharma",
+  //   iconType: "image",
+  //   icon: require("../../../assets/Group.png"),
+  //   event_type: "click_dharma_card",
+  //   component: "Dharma-card",
+  // },
+  // {
+  //   id: "2",
+  //   name: t("categories.explore"),
+  //   title: "Explore",
+  //   iconType: "image",
+  //   icon: require("../../../assets/Exploreicon.png"),
+  //   event_type: "click_explore_card",
+  //   component: "Explore-card",
+  // },
+  // {
+  //   id: "6",
+  //   name: t("categories.classes"),
+  //   title: "ClassesScreen",
+  //   iconType: "image",
+  //   icon: require("../../../assets/onlinecion.png"),
+  //   event_type: "click_classes_card",
+  //   component: "Classes-card",
+  // },
+  //   // {
+  //   //   id: "3",
+  //   //   name: t("categories.travel"),
+  //   //   title: "Travel",
+  //   //   event_type: "click_travel_card",
+  //   //   component: "Travel-card",
+  //   //   icon: require("../../../assets/darma.png"),
+  //   // },
+  //   // {
+  //   //   id: "4",
+  //   //   name: t("categories.pooja"),
+  //   //   title: "Pooja",
+  //   //   event_type: "click_pooja_card",
+  //   //   component: "Pooja-card",
+  //   //   icon: require("../../../assets/pooja.png"),
+  //   // },
+  //   // {
+  //   //   id: "5",
+  //   //   name: t("categories.retreat"),
+  //   //   title: "Retreat",
+  //   //   event_type: "click_retreat_card",
+  //   //   component: "Retreat-card",
+  //   //   icon: require("../../../assets/yoga.png"),
+  //   // },
+  //   // {
+  //   //   id: "6",
+  //   //   name: t("categories.classes"),
+  //   //   title: "ClassesScreen",
+  //   //   event_type: "click_classes_card",
+  //   //   component: "Classes-card",
+  //   //   icon: require("../../../assets/onlinecion.png"),
+  //   // },
+  //    {
+  //   id: "7",
+  //   name: t("forgotPassword.login"),
+  //   title: "Login",
+  //   iconType: "vector",
+  //   icon: "log-in-outline",      // Ionicons icon
+  //   event_type: "click_login_card",
+  //   component: "Login-card",
+  // },
+  // ];
+
+  const baseCategories = [
+  {
+    id: "1",
+    name:
+      trackerData?.active_practices?.length > 0
+        ? t("categories.sadana")
+        : t("categories.dharma"),
+    title: trackerData?.active_practices?.length > 0
+      ? "SadanaTrackerScreen"
+      : "Dharma",
+      // title: trackerData?.active_practices?.length > 0 ? "DailyPracticeList" : "DailyPracticeList",
+    iconType: "image",
+    icon: require("../../../assets/Group.png"),
+    event_type: "click_dharma_card",
+    component: "Dharma-card",
+  },
+  {
+    id: "2",
+    name: t("categories.explore"),
+    title: "Explore",
+    iconType: "image",
+    icon: require("../../../assets/Exploreicon.png"),
+    event_type: "click_explore_card",
+    component: "Explore-card",
+  },
+  {
+    id: "6",
+    name: t("categories.classes"),
+    title: "ClassesScreen",
+    iconType: "image",
+    icon: require("../../../assets/onlinecion.png"),
+    event_type: "click_classes_card",
+    component: "Classes-card",
+  },
+];
+
+const categories = isLoggedIn
+  ? baseCategories // hide login
+  : [
+      ...baseCategories,
+      {
+        id: "7",
+        name: t("forgotPassword.login"),
+        title: "Login",
+        iconType: "vector",
+        icon: "log-in-outline",
+        event_type: "click_login_card",
+        component: "Login-card",
+      },
+    ];
+
 
   const dailyOptions = [
   {
@@ -584,36 +663,86 @@ useEffect(() => {
   };
 
   const renderCategory = ({ item }) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={async () => {
-        try {
-          const userId = await AsyncStorage.getItem("uuid");
-          await saveUserAction({
-            uuid: userId,
-            timestamp: Date.now(),
-            retryCount: 0,
-            event_type: item?.event_type,
-            event_data: {
-              component: item?.component,
-              city: locationData.city,
-              lat: locationData.latitude,
-              long: locationData.longitude,
-              timeZone: locationData.timezone,
-              device: Platform.OS === "ios" ? "mobile-ios" : "mobile-android",
-              screen: "home",
-            },
-          });
-          navigation.navigate(item.title);
-        } catch (error) {
-          console.error("Error fetching UUID:", error);
-        }
-      }}
-    >
+  <TouchableOpacity
+    style={styles.card}
+    onPress={async () => {
+      try {
+        const userId = await AsyncStorage.getItem("uuid");
+        await saveUserAction({
+          uuid: userId,
+          timestamp: Date.now(),
+          retryCount: 0,
+          event_type: item?.event_type,
+          event_data: {
+            component: item?.component,
+            city: locationData.city,
+            lat: locationData.latitude,
+            long: locationData.longitude,
+            timeZone: locationData.timezone,
+            device: Platform.OS === "ios" ? "mobile-ios" : "mobile-android",
+            screen: "home",
+          },
+        });
+
+        navigation.navigate(item.title);
+      } catch (error) {
+        console.error("Error fetching UUID:", error);
+      }
+    }}
+  >
+    {/* ⭐ VECTOR ICON */}
+    {item.iconType === "vector" && (
+      <Ionicons
+        name={item.icon}
+        size={28}
+        color="#9A7548"
+        style={styles.icon}
+      />
+    )}
+
+    {/* ⭐ PNG ICON */}
+    {item.iconType === "image" && (
       <Image source={item.icon} style={styles.icon} resizeMode="contain" />
-      <TextComponent type="headerSubBoldText" style={styles.cardText}>{item.name}</TextComponent>
-    </TouchableOpacity>
-  );
+    )}
+
+    <TextComponent type="headerSubBoldText" style={styles.cardText}>
+      {item.name}
+    </TextComponent>
+  </TouchableOpacity>
+);
+
+
+  // const renderCategory = ({ item }) => (
+  //   <TouchableOpacity
+  //     style={styles.card}
+  //     onPress={async () => {
+  //       try {
+  //         const userId = await AsyncStorage.getItem("uuid");
+  //         await saveUserAction({
+  //           uuid: userId,
+  //           timestamp: Date.now(),
+  //           retryCount: 0,
+  //           event_type: item?.event_type,
+  //           event_data: {
+  //             component: item?.component,
+  //             city: locationData.city,
+  //             lat: locationData.latitude,
+  //             long: locationData.longitude,
+  //             timeZone: locationData.timezone,
+  //             device: Platform.OS === "ios" ? "mobile-ios" : "mobile-android",
+  //             screen: "home",
+  //           },
+  //         });
+  //         navigation.navigate(item.title);
+  //       } catch (error) {
+  //         console.error("Error fetching UUID:", error);
+  //       }
+  //     }}
+  //   >
+  //     <Image source={item.icon} style={styles.icon} resizeMode="contain" />
+  //     <TextComponent type="headerSubBoldText" style={styles.cardText}>{item.name}</TextComponent>
+  //   </TouchableOpacity>
+  // );
 
   const renderDailyOption = ({ item }) => (
     <>
@@ -721,8 +850,6 @@ useEffect(() => {
     </>
   );
 
-
-
   const renderKalpXItem = ({ item }) => (
   <TouchableOpacity
     style={[styles.kalpXCard, { width: CARD_WIDTH }]} // ✅ dynamic width applied
@@ -770,7 +897,7 @@ useEffect(() => {
         showsVerticalScrollIndicator={false}
       >
         {/* ✅ Horizontal Categories */}
-        <View style={{ marginTop: 15,alignItems:"center"}}>
+        <View style={{ marginTop: 0,alignItems:"center"}}>
           <FlatList
             data={categories}
             renderItem={renderCategory}
@@ -783,19 +910,20 @@ useEffect(() => {
             }}
           />
         </View>
-        <Card
-  style={styles.streakCard}
-  onPress={() => navigation.navigate("StreakScreen")}
->
+        {isLoggedIn &&
+//         <Card
+//   style={styles.streakCard}
+//   onPress={() => navigation.navigate("StreakScreen")}
+// >
   <View style={{alignItems:"center"}}>
-  {/* ✅ Scrollable single-row layout */}
   <ScrollView
     horizontal
     showsHorizontalScrollIndicator={false}
     contentContainerStyle={styles.streakScrollContainer}
   >
     {/* 🔹 Sankalp */}
-    <View style={styles.streakItem}>
+    <Card style={styles.streakItem}>
+      <View style={{flexDirection:"row"}}>
       <Image
         source={require("../../../assets/streak1.png")}
         style={styles.streakIcon}
@@ -806,10 +934,12 @@ useEffect(() => {
       <TextComponent type="streakSubText" style={styles.streakText}>
         {t("streak.sankalp")}
       </TextComponent>
-    </View>
+      </View>
+    </Card>
 
     {/* 🔹 Mantra */}
-    <View style={styles.streakItem}>
+    <Card style={styles.streakItem}>
+      <View style={{flexDirection:"row"}}>
       <Image
         source={require("../../../assets/streak2.png")}
         style={styles.streakIcon}
@@ -820,10 +950,12 @@ useEffect(() => {
       <TextComponent type="streakSubText" style={styles.streakText}>
         {t("streak.mantra")}
       </TextComponent>
-    </View>
+      </View>
+    </Card>
 
     {/* 🔹 Daily Practice */}
-    <View style={styles.streakItem}>
+    <Card style={styles.streakItem}>
+      <View style={{flexDirection:"row"}}>
       <Image
         source={require("../../../assets/streak3.png")}
         style={styles.streakIcon}
@@ -834,10 +966,12 @@ useEffect(() => {
       <TextComponent type="streakSubText" style={styles.streakText}>
         {t("streak.DailyPractice")}
       </TextComponent>
-    </View>
+      </View>
+    </Card>
   </ScrollView>
   </View>
-</Card>
+// </Card>
+}
 {/* 
      <Card
   style={styles.streakCard}
@@ -925,15 +1059,49 @@ useEffect(() => {
     </View>
   </View>
 </Card> */}
-
-
+   {/* <Image source={require("../../../assets/locus.png")} style={{height:200,width:"88%",alignSelf:"center"}}  /> */}
+     <TouchableOpacity style={{ alignItems: "center", marginTop: 20 }} onPress={() => {navigation.navigate("DailyPracticeList")}}>
+      <ImageBackground
+        source={require("../../../assets/locus.png")}
+        style={styles.image}
+        resizeMode="contain"
+      >
+        <TextComponent type="semiBoldText" style={[styles.label, styles.leftLabel]}>
+          Peace {"\n"}& Calm
+        </TextComponent>
+       <TextComponent type="semiBoldText" style={[styles.label, styles.centerLabel]}>
+          Career {"\n"}& Prosperity
+        </TextComponent>
+        <TextComponent type="semiBoldText" style={[styles.label, styles.rightLabel]}>
+          Spiritual {"\n"}Growth
+        </TextComponent>
+      </ImageBackground>
+    </TouchableOpacity>
+    <TouchableOpacity style={{ flexDirection:"row",alignSelf: "center", marginTop: 4, alignItems: "center",marginLeft:30 }} onPress={() => {navigation.navigate("DailyPracticeList")}}>
+        <TextComponent
+    type="cardText"
+    style={{
+      color: Colors.Colors.BLACK,
+      textDecorationLine: "underline",
+      marginTop: 6,
+    }}
+  >
+    View More
+  </TextComponent>
+  <TouchableOpacity style={styles.circleButton}>
+    <Ionicons name="arrow-forward" size={12} color="#FFF6DA" />
+  </TouchableOpacity>
+</TouchableOpacity>
         <View style={styles.dailyContainer}>
           <TextComponent type="headerText" style={styles.sectionHeading}>
-                                                    {t("streak.stepText")}
+            {t("streak.stepText")}
           </TextComponent>
-
-          {expandedItemId && (
-            <View style={{ marginVertical: 10 }}>
+            <View style={{ 
+                  height: expandedItemId ? 'auto' : 0,
+    opacity: expandedItemId ? 1 : 0,
+    overflow: 'hidden', 
+    marginVertical: expandedItemId ? 10 : 0,
+             }}>
               <FlatList
                 data={topChips}
                 keyExtractor={(item) => item.id}
@@ -973,7 +1141,7 @@ useEffect(() => {
                 }}
               />
             </View>
-          )}
+          {/* )} */}
 
           <FlatList
             data={
@@ -990,21 +1158,18 @@ useEffect(() => {
           />
         </View>
 
-        <View style={{ margin: 16 }}>
+        {/* <View style={{ margin: 16 }}>
           <TouchableOpacity
   activeOpacity={0.8}
   style={{ marginTop: 16, borderRadius: 10, overflow: "hidden" }}
   onPress={() => setShowVideo(true)}
 >
   <View style={{ position: "relative" }}>
-    {/* 🎥 Thumbnail */}
     <Image
       source={{ uri: thumbnailUrl }}
       style={{ width: "100%", height: 200, borderRadius: 8 }}
       resizeMode="cover"
     />
-
-    {/* ▶️ Centered Play Button */}
     <Image
       source={require("../../../assets/videopaly.png")}
       style={{
@@ -1020,18 +1185,6 @@ useEffect(() => {
     />
   </View>
 </TouchableOpacity>
-
-          {/* <TouchableOpacity
-            activeOpacity={0.8}
-            style={{ marginTop: 16, borderRadius: 10, overflow: "hidden" }}
-            onPress={() => setShowVideo(true)}
-          >
-            <Image
-              source={{ uri: thumbnailUrl }}
-              style={{ width: "100%", height: 200, borderRadius: 8 }}
-              resizeMode="cover"
-            />
-          </TouchableOpacity> */}
           <TextComponent
             type="boldText"
             style={{
@@ -1065,9 +1218,9 @@ useEffect(() => {
             onClose={() => setShowVideo(false)}
             youtubeUrl="https://www.youtube.com/watch?v=INS2diQXIjA"
           />
-        </View>
+        </View> */}
 
-        <View style={{ paddingHorizontal: 12 }}>
+        <View style={{ paddingHorizontal: 12,marginTop:12 }}>
           <ExploreVideos
       videos={exploreVideos}
       onLoadMore={handleLoadMore}
@@ -1257,7 +1410,7 @@ useEffect(() => {
     } else {
       const storeUrl =
         Platform.OS === "ios"
-          ? "itms-apps://apps.apple.com/app/YOUR_APP_ID"
+          ? "https://apps.apple.com/app/kalpx/id6755144623"
           : "market://details?id=com.kalpx.app";
       Linking.openURL(storeUrl);
     }

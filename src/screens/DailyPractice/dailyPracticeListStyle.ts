@@ -11,7 +11,7 @@ export default StyleSheet.create({
   card: {
     borderRadius: 14,
     elevation: 3,
-    backgroundColor: Colors.Colors.Daily_BG,
+    backgroundColor: Colors.Colors.header_bg,
     height: FontSize.CONSTS.DEVICE_HEIGHT * 0.65, 
     marginHorizontal: 18,
     alignItems: "center",

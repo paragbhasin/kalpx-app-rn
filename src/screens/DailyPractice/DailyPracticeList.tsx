@@ -9,67 +9,39 @@ import styles from "./dailyPracticeListStyle";
 
 const categories = [
   {
-    category: "Peace & Stress Relief",
-    options: [
-      { count: 9, label: "Quick Calm" },
-      { count: 27, label: "Stress Release" },
-      { count: 54, label: "Deep Peace" },
-      { count: 108, label: "Inner Serenity" },
-    ],
+    name: "Peace & Calm",
+    key: "peace-calm",
+    description: "Find calm in the breath.",
   },
   {
-    category: "Focus & Motivation",
-    options: [
-      { count: 9, label: "Quick Focus" },
-      { count: 27, label: "Mental Clarity" },
-      { count: 54, label: "Steady Concentration" },
-      { count: 108, label: "Unshakable Focus" },
-    ],
+    name: "Focus & Motivation",
+    key: "focus",
+    description: "Align. Focus. Rise.",
   },
   {
-    category: "Emotional Healing",
-    options: [
-      { count: 9, label: "Gentle Relief" },
-      { count: 27, label: "Emotional Balance" },
-      { count: 54, label: "Heart Healing" },
-      { count: 108, label: "Inner Renewal" },
-    ],
+    name: "Emotional Healing",
+    key: "healing",
+    description: "Let go. Begin again.",
   },
   {
-    category: "Gratitude & Positivity",
-    options: [
-      { count: 9, label: "Quick Gratitude" },
-      { count: 27, label: "Positive Shift" },
-      { count: 54, label: "Joy Expansion" },
-      { count: 108, label: "Radiant Positivity" },
-    ],
+    name: "Gratitude & Positivity",
+    key: "gratitude",
+    description: "Gratitude transforms everything.",
   },
   {
-    category: "Spiritual Growth",
-    options: [
-      { count: 9, label: "Spiritual Touch" },
-      { count: 27, label: "Divine Connection" },
-      { count: 54, label: "Inner Awakening" },
-      { count: 108, label: "Higher Alignment" },
-    ],
+    name: "Spiritual Growth",
+    key: "spiritual-growth",
+    description: "Grow through awareness.",
   },
   {
-    category: "Health & Well-Being",
-    options: [
-      { count: 9, label: "Vital Boost" },
-      { count: 27, label: "Body Harmony" },
-      { count: 54, label: "Deep Healing" },
-      { count: 108, label: "Life Force Renewal" },
-    ],
+    name: "Health & Well-Being",
+    key: "health",
+    description: "Balance builds strength.",
   },
   {
-    category: "Career & Prosperity",
-    options: [
-      { count: 9, label: "Quick Boost" },
-      { count: 27, label: "Success Flow" },
-      { count: 54, label: "Prosperity Alignment" },
-      { count: 108, label: "Abundance Activation" },
-    ],
+    name: "Career & Prosperity",
+    key: "career",
+    description: "Opportunity follows action.",
   },
 ];
 
@@ -112,7 +84,7 @@ const DailyPracticeList = () => {
             <TouchableOpacity
   key={index}
   activeOpacity={0.9}
-  onPress={() => navigation.navigate("DailyPracticeSelectList")}
+  onPress={() => navigation.navigate("DailyPracticeSelectList",{item: item})}
 >
             <Card key={index} style={styles.subCard}>
               <View
@@ -124,7 +96,7 @@ const DailyPracticeList = () => {
                 }}
               >
                 <TextComponent type="DailyHeaderText">
-                  {item.category}
+                  {item.name}
                 </TextComponent>
 
                 <Image

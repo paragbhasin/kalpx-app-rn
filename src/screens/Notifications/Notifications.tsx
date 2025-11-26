@@ -11,6 +11,7 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useDispatch, useSelector } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
+import FontSize from "../../components/FontSize";
 import TextComponent from "../../components/TextComponent";
 import { RootState } from "../../store";
 import {
@@ -85,8 +86,34 @@ const { data, loading, page, hasMore } = useSelector(
                 <TextComponent type="headerText" style={styles.headerText}>Notifications</TextComponent>
         <View style={{ width: 24 }} />
       </View>
-
-      <FlatList
+{loading && data.length === 0 ? (
+  // Initial Loading State (optional)
+  <ActivityIndicator style={{ marginTop: 40 }} />
+) : data.length === 0 ? (
+  // 🚫 NO NOTIFICATIONS
+  <View style={{ marginTop: FontSize.CONSTS.DEVICE_HEIGHT*0.25, alignItems: "center",justifyContent:"center" }}>
+    <Ionicons name="notifications-off-outline" size={50} color="#999" />
+    <TextComponent  style={{ marginTop: 10, }} type="streakSadanaText">No Notification</TextComponent>
+    <TextComponent
+      type="mediumText"
+      style={{ marginTop: 10, color: "#999",textAlign:"center",marginHorizontal:30 }}
+    >
+   We’ll let you know when there will be something to update you.
+    </TextComponent>
+  </View>
+) : (
+  // 📌 NOTIFICATION LIST
+  <FlatList
+    data={data}
+    renderItem={renderItem}
+    onEndReached={loadMore}
+    onEndReachedThreshold={0.3}
+    ListFooterComponent={
+      loading ? <ActivityIndicator style={{ margin: 20 }} /> : null
+    }
+  />
+)}
+      {/* <FlatList
         data={data}
         renderItem={renderItem}
         // keyExtractor={(item) => item.id.toString()}
@@ -95,7 +122,7 @@ const { data, loading, page, hasMore } = useSelector(
         ListFooterComponent={
           loading ? <ActivityIndicator style={{ margin: 20 }} /> : null
         }
-      />
+      /> */}
     </View>
   );
 }

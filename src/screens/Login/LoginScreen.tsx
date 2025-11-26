@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dimensions,
+  Image,
   ImageBackground,
   KeyboardAvoidingView,
   Platform,
@@ -349,7 +350,7 @@ const handleSignInApple = async () => {
             <TextComponent type="cardText" style={styles.heading}>{t("login.heading")}</TextComponent>
 
             {/* Google Login Button */}
-            {/* <TouchableOpacity
+            <TouchableOpacity
               style={styles.googleButton}
               onPress={() => {signInWithGoogle()}}
             >
@@ -362,7 +363,7 @@ const handleSignInApple = async () => {
     cornerRadius={8}
     style={{ width: "98%", height: 40, marginVertical: 12 ,marginHorizontal:12}}
     onPress={handleSignInApple}
-/> */}
+/>
 
               {/* <TouchableOpacity
               style={styles.googleButton}

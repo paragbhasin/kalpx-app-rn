@@ -68,17 +68,18 @@ export const classesExploreList =
     try {
       let url = `public/classes/?status=published&ordering=-updated_at&page=${page}&page_size=${pageSize}`;
 
-      // send only if NOT All
-      if (subject && subject !== "") {
+      // subject support
+      if (subject) {
         url += `&subject=${encodeURIComponent(subject)}`;
       }
 
-      // always send timezone
+      // timezone support
       if (timezone) {
         url += `&user_timezone=${encodeURIComponent(timezone)}`;
       }
 
       const res = await api.get(url);
+
       const results = res.data?.results || [];
       const count = Number(res.data?.count || 0);
       const hasMore = count > page * pageSize;
@@ -94,9 +95,11 @@ export const classesExploreList =
         type: EXPLORE_FAILURE,
         payload: error?.response?.data?.detail || "Error",
       });
+
       callback?.({ success: false });
     }
   };
+
 
 
 
@@ -186,9 +189,10 @@ export const classesBookingsList =
 
 // =============== EXPLORE (FILTER) ===============
 export const filteredClassesExploreList =
-  (filters: any = {}, page = 1, pageSize = 10, callback?: (res: any) => void) =>
+  (filters: any = {}, page = 1, pageSize = 10, subject = "", callback) =>
   async (dispatch) => {
     dispatch({ type: FILTERED_EXPLORE_REQUEST });
+
     try {
       const params = new URLSearchParams({
         status: "published",
@@ -197,7 +201,7 @@ export const filteredClassesExploreList =
         page_size: String(pageSize),
       });
 
-      // add only provided filters
+      // apply filters
       if (filters?.skillLevel) params.append("skill_level", filters.skillLevel);
       if (filters?.classType) params.append("type", filters.classType);
       if (filters?.language) params.append("language", filters.language);
@@ -205,23 +209,34 @@ export const filteredClassesExploreList =
       if (filters?.minPrice) params.append("price_min", String(filters.minPrice));
       if (filters?.maxPrice) params.append("price_max", String(filters.maxPrice));
 
+      // ⭐ add subject
+      if (subject) {
+        params.append("subject", subject);
+      }
+
       const url = `public/classes/?${params.toString()}`;
+
       const res = await api.get(url);
       const results = res.data?.results || [];
       const count = Number(res.data?.count || 0);
-      const hasMore = computeHasMore(count, page, pageSize, results.length);
+      const hasMore = count > page * pageSize;
 
       dispatch({
         type: FILTERED_EXPLORE_SUCCESS,
         payload: { data: results, hasMore, page },
       });
+
       callback?.({ success: true, data: results, url, page });
-    } catch (error: any) {
-      const message = error?.response?.data?.detail || error?.message || "Error";
+    } catch (error) {
+      const message =
+        error?.response?.data?.detail || error?.message || "Error";
+
       dispatch({ type: FILTERED_EXPLORE_FAILURE, payload: message });
+
       callback?.({ success: false, error: message });
     }
   };
+
 
 // =============== MY BOOKINGS (FILTER) ===============
 export const fetchFilteredBookings =
@@ -259,31 +274,44 @@ export const fetchFilteredBookings =
 
 // =============== SEARCH CLASSES ===============
 export const searchClasses =
-  (query = "", page = 1, pageSize = 10, callback?: (res: any) => void) =>
+  (query = "", page = 1, pageSize = 10, subject = "", callback) =>
   async (dispatch) => {
     dispatch({ type: SEARCH_CLASSES_REQUEST });
+
     try {
       const q = query.trim();
-      const url = `public/classes/?q=${encodeURIComponent(
+
+      let url = `public/classes/?q=${encodeURIComponent(
         q
       )}&status=published&ordering=-updated_at&page=${page}&page_size=${pageSize}`;
 
+      // Add subject in search
+      if (subject) {
+        url += `&subject=${encodeURIComponent(subject)}`;
+      }
+
       const res = await api.get(url);
+
       const results = res.data?.results || [];
       const count = Number(res.data?.count || 0);
-      const hasMore = computeHasMore(count, page, pageSize, results.length);
+      const hasMore = count > page * pageSize;
 
       dispatch({
         type: SEARCH_CLASSES_SUCCESS,
         payload: { data: results, hasMore, page },
       });
+
       callback?.({ success: true, data: results, url, page });
-    } catch (error: any) {
-      const message = error?.response?.data?.detail || error?.message || "Error";
+    } catch (error) {
+      const message =
+        error?.response?.data?.detail || error?.message || "Error";
+
       dispatch({ type: SEARCH_CLASSES_FAILURE, payload: message });
+
       callback?.({ success: false, error: message });
     }
   };
+
 
 // =============== SEARCH BOOKINGS ===============
 export const searchBookings =

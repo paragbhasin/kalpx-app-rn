@@ -3,6 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { AnyAction } from "@reduxjs/toolkit";
+import * as Notifications from 'expo-notifications';
 import * as Updates from "expo-updates";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
@@ -31,7 +32,9 @@ import FestivalCard from "../../components/FestivalCard";
 import FontSize from "../../components/FontSize";
 import Header from "../../components/Header";
 import LanguageTimezoneModal from "../../components/LanguageTimezoneModal";
+import LoadingOverlay from "../../components/LoadingOverlay";
 import MantraCard from "../../components/MantraCard";
+import NotificationPermissionModal from "../../components/NotificationPermissionModal";
 import SankalpCard from "../../components/SankalpCard";
 import SigninPopup from "../../components/SigninPopup";
 import TextComponent from "../../components/TextComponent";
@@ -52,6 +55,7 @@ import {
 } from "./actions";
 import styles from "./homestyles";
 
+
 const { width } = Dimensions.get("window");
 const CARD_MARGIN = 14;
 const CARD_WIDTH = (width - CARD_MARGIN * 3) / 2; 
@@ -68,7 +72,7 @@ export default function Home() {
 
   // ✅ Use our reusable hook
   const { locationData, loading: locationLoading, error: locationError } = useUserLocation();
-
+const [showNotificationPopup, setShowNotificationPopup] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [showMantraTaken, setShowMantraTaken] = useState(false);
   const [showLoginMantraTaken, setShowLoginMantraTaken] = useState(false);
@@ -82,6 +86,7 @@ export default function Home() {
 const [updateType, setUpdateType] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { setDailyMantras } = usePracticeStore();
+  const [apiloading, setApiLoading] = useState(false);
   const [selectedMantraForPopup, setSelectedMantraForPopup] = useState(null);
   const [selectedSankalpForPopup, setSelectedSankalpForPopup] = useState(null);
  const currentLang = i18n.language.split("-")[0];
@@ -99,6 +104,23 @@ const [updateType, setUpdateType] = useState("");
   const { data: exploreVideos, loading: exploreLoading, page, hasMore } = useSelector(
     (state: RootState) => state.videosReducer
   );
+
+  useFocusEffect(
+  React.useCallback(() => {
+    const checkNotificationPermission = async () => {
+      const settings = await Notifications.getPermissionsAsync();
+
+      if (settings.status !== "granted") {
+        setShowNotificationPopup(true);  // Show popup
+      } else {
+        setShowNotificationPopup(false); // Hide popup
+      }
+    };
+
+    checkNotificationPermission();
+  }, [])
+);
+
 
   useFocusEffect(
   React.useCallback(() => {
@@ -290,8 +312,8 @@ useEffect(() => {
   }, [dispatch]);
 
   const topChips = [
-    { id: "1", label: t("cards.mantra") },
-    { id: "2", label: t("cards.sankalp") },
+    { id: "1", label: t("cards.sankalp") },
+    { id: "2", label: t("cards.mantra") },
     { id: "3", label:t("cards.festival")  },
     { id: "4", label:t("cards.wisdom") },
   ];
@@ -377,13 +399,16 @@ useEffect(() => {
   const baseCategories = [
   {
     id: "1",
-    name:
-      trackerData?.active_practices?.length > 0
-        ? t("categories.sadana")
-        : t("categories.dharma"),
-    title: trackerData?.active_practices?.length > 0
-      ? "SadanaTrackerScreen"
-      : "Dharma",
+    name: t("categories.sadana"),
+      // trackerData?.active_practices?.length > 0
+      //   ? t("categories.sadana")
+      //   : t("categories.dharma"),
+    // title: trackerData?.active_practices?.length > 0
+    //   ? "SadanaTrackerScreen"
+    //   : "Dharma",
+      title: trackerData?.active_practices?.length > 0
+      ? "TrackerTabs"
+      : "DailyPracticeList",
       // title: trackerData?.active_practices?.length > 0 ? "DailyPracticeList" : "DailyPracticeList",
     iconType: "image",
     icon: require("../../../assets/Group.png"),
@@ -427,23 +452,23 @@ const categories = isLoggedIn
 
 
   const dailyOptions = [
-  {
+      {
     id: "1",
-    title: t("cards.sankalp_card.title"),
-    subtitle: t("cards.sankalp_card.subtitle"),
-    route: "Sankalp",
-    event_type: "view_sankalp_card",
-    component: "sankalp-card",
-    icon: require("../../../assets/lamp.png"),
-  },
-  {
-    id: "2",
     title: t("cards.mantra_card.title"),
     subtitle: t("cards.mantra_card.subtitle"),
     route: "Mantra",
     event_type: "view_mantra_card",
     component: "mantra-card",
     icon: require("../../../assets/atom.png"),
+  },
+  {
+    id: "2",
+    title: t("cards.sankalp_card.title"),
+    subtitle: t("cards.sankalp_card.subtitle"),
+    route: "Sankalp",
+    event_type: "view_sankalp_card",
+    component: "sankalp-card",
+    icon: require("../../../assets/lamp.png"),
   },
   {
     id: "3",
@@ -606,6 +631,9 @@ const categories = isLoggedIn
     dispatch(
       completeMantra(payload, (res) => {
         if (res.success) {
+              dispatch(getPracticeStreaks((res) => {
+        console.log("✅ Streaks fetched:", res);
+      }))
            if(!isLoggedIn){
           setShowMantraComplete(true);
            } else{
@@ -651,6 +679,9 @@ const categories = isLoggedIn
     dispatch(
       completeMantra(payload, (res) => {
         if (res.success) {
+            dispatch(getPracticeStreaks((res) => {
+        console.log("✅ Streaks fetched:", res);
+      }))
             if(!isLoggedIn){
           setShowSankalpComplete(true);
             }else{
@@ -805,23 +836,7 @@ const categories = isLoggedIn
           />
         </View>
       </Card>
-
       {expandedItemId === item.id && item.id === "1" && (
-        <View style={{ marginTop: 10, zIndex: 999, height:640 }}>
-           <MantraCard
-          practiceTodayData={practiceTodayData}
-          onPressChantMantra={(mantra) => {
-            setSelectedMantraForPopup(mantra);
-            handleStartMantra(mantra);
-          }}
-          DoneMantraCalled={(mantra) => {
-            setSelectedMantraForPopup(mantra);
-            DoneMantraCalled(mantra);
-          }}
-        />
-        </View>
-      )}
-      {expandedItemId === item.id && item.id === "2" && (
         <View style={{ marginTop: 10, zIndex: 999, height: 560 }}>
           <SankalpCard
             practiceTodayData={practiceTodayData}
@@ -834,6 +849,21 @@ const categories = isLoggedIn
           DoneSankalpCalled(sankalp);
         }}
           />
+        </View>
+      )}
+      {expandedItemId === item.id && item.id === "2" && (
+        <View style={{ marginTop: 10, zIndex: 999, height:640 }}>
+           <MantraCard
+          practiceTodayData={practiceTodayData}
+          onPressChantMantra={(mantra) => {
+            setSelectedMantraForPopup(mantra);
+            handleStartMantra(mantra);
+          }}
+          DoneMantraCalled={(mantra) => {
+            setSelectedMantraForPopup(mantra);
+            DoneMantraCalled(mantra);
+          }}
+        />
         </View>
       )}
       {expandedItemId === item.id && item.id === "4" && (
@@ -922,7 +952,7 @@ const categories = isLoggedIn
     contentContainerStyle={styles.streakScrollContainer}
   >
     {/* 🔹 Sankalp */}
-    <Card style={styles.streakItem}>
+    <Card style={styles.streakItem}  onPress={() => navigation.navigate("StreakScreen")}>
       <View style={{flexDirection:"row"}}>
       <Image
         source={require("../../../assets/streak1.png")}
@@ -936,9 +966,7 @@ const categories = isLoggedIn
       </TextComponent>
       </View>
     </Card>
-
-    {/* 🔹 Mantra */}
-    <Card style={styles.streakItem}>
+    <Card style={styles.streakItem}  onPress={() => navigation.navigate("StreakScreen")}>
       <View style={{flexDirection:"row"}}>
       <Image
         source={require("../../../assets/streak2.png")}
@@ -952,9 +980,7 @@ const categories = isLoggedIn
       </TextComponent>
       </View>
     </Card>
-
-    {/* 🔹 Daily Practice */}
-    <Card style={styles.streakItem}>
+    <Card style={styles.streakItem}  onPress={() => navigation.navigate("StreakScreen")}>
       <View style={{flexDirection:"row"}}>
       <Image
         source={require("../../../assets/streak3.png")}
@@ -1392,7 +1418,7 @@ const categories = isLoggedIn
   onSadhanPress={() => setShowLoginSankalpComplete(false)}
 />
   <LanguageTimezoneModal
-    visible={showLangTZModal}
+    visible={false}
     onClose={() => setShowLangTZModal(false)}
   />
   <UpdateAppModal
@@ -1416,7 +1442,11 @@ const categories = isLoggedIn
     }
   }}
 />
-         {/* <LoadingOverlay visible={true} text="Processing..." /> */}
+<NotificationPermissionModal
+  visible={showNotificationPopup}
+  onClose={() => setShowNotificationPopup(false)}
+/>
+         <LoadingOverlay visible={apiloading} text="Processing..." />
       </ScrollView>
     </SafeAreaView>
   );

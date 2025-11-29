@@ -50,6 +50,28 @@ const BottomMenu = () => {
             <Icon name={focused ? "home" : "home-outline"} size={24} color={color} />
           ),
         }}
+        listeners={({ navigation, route }) => ({
+          tabPress: e => {
+            // Prevent default action
+            e.preventDefault();
+
+            // Reset the stack of the current tab to its initial route
+            // navigation.dispatch(
+            //   StackActions.popToTop()
+            // );
+
+            // Navigate to the tab
+            navigation.navigate("AppDrawer", {
+            screen: "HomePage", // bottom tab
+            params: {
+              screen: "HomePage", // tab screen containing HomeStack
+              params: {
+                screen: "Home"
+              },
+            },
+          });
+          },
+        })}
       />
       <Tab.Screen
         name="Notifications"

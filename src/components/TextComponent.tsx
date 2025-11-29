@@ -184,6 +184,9 @@ const TextComponent = (props: any) => {
            case "DailyDetailheaderText":
       textStyle = styles.DailyDetailheaderText;
       break;
+         case "subDailyText":
+      textStyle = styles.subDailyText;
+      break;
         case "DailyboldText":
       textStyle = styles.DailyboldText;
       break;
@@ -370,5 +373,10 @@ const styles = StyleSheet.create({
     color: Colors.Colors.Daily_black,
     fontSize: FontSize.CONSTS.FS_16,
     fontFamily: "Inter_700Bold",
+  },
+      subDailyText: {
+    color: Colors.Colors.Daily_black,
+    fontSize: FontSize.CONSTS.FS_12,
+    fontFamily: "Inter_400Regular",
   },
 });

@@ -72,7 +72,7 @@ const DailyPracticeList = () => {
           type="cardHeaderText"
           style={{ marginTop: 6, alignSelf: "center" }}
         >
-          Daily Practices for :
+         Set your routine for :
         </TextComponent>
 
         {/* Scrollable Inner Section */}

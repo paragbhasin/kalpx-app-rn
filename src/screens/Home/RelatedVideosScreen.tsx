@@ -190,8 +190,20 @@ const RelatedVideosScreen = ({ route }: any) => {
           )
         }
       />
-                <LoadingButton
-                      loading={loading}
+      {/* Initial Loader */}
+      {loading && videos.length === 0 && (
+        <View style={styles.loader}>
+          <ActivityIndicator size="large" color={Colors.Colors.App_theme} />
+          <Text
+            allowFontScaling={false}
+            style={{  color: Colors.Colors.Light_black }}
+          >
+            Loading videos...
+          </Text>
+        </View>
+      )}
+         <LoadingButton
+                      loading={false}
                       text="Explore More Videos"
                   onPress={() => navigation.navigate("Explore")}
                       disabled={false}
@@ -199,18 +211,6 @@ const RelatedVideosScreen = ({ route }: any) => {
                       textStyle={styles.buttonText1}
                       showGlobalLoader={true}
                     />
-      {/* Initial Loader */}
-      {loading && videos.length === 0 && (
-        <View style={styles.loader}>
-          <ActivityIndicator size="large" color={Colors.Colors.App_theme} />
-          <Text
-            allowFontScaling={false}
-            style={{ marginTop: 10, color: Colors.Colors.Light_black }}
-          >
-            Loading videos...
-          </Text>
-        </View>
-      )}
     </View>
   );
 };

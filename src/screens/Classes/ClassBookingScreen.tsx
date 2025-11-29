@@ -20,7 +20,9 @@ import Colors from "../../components/Colors";
 import FontSize from "../../components/FontSize";
 import Header from "../../components/Header";
 import LoadingButton from "../../components/LoadingButton"; // ✅ Import LoadingButton
+import LoadingOverlay from "../../components/LoadingOverlay";
 import TextComponent from "../../components/TextComponent";
+import api from "../../Networks/axios";
 import { RootState } from "../../store";
 import { ensureLoggedIn } from "../../utils/authHelpers";
 import { bookSlot, rescheduleBooking, slotsList } from "./actions";
@@ -39,37 +41,94 @@ export default function ClassBookingScreen({ navigation, route }) {
   const [note, setNote] = useState("");
   const [loadingNext, setLoadingNext] = useState(false); // ✅ For LoadingButton
 const [isRestored, setIsRestored] = useState(false);
+const [monthSlotsData, setMonthSlotsData] = useState<any[]>([]);
+const [loadingMonth, setLoadingMonth] = useState(true);
 
 
-  const classInfo =
-    route?.params?.data ||
-    route?.params?.resumeData?.classData ||
-    null;
+
+  // const classInfo =
+  //   route?.params?.data ||
+  //   route?.params?.resumeData?.classData ||
+  //   null;
+
+    // CORRECT CLASS INFO FOR BOOKING + RESCHEDULE
+const bookingData = route?.params?.data;
+
+const classInfo = route?.params?.reschedule
+  ? bookingData?.offering
+  : bookingData;
+
+const classSlug = classInfo?.slug;
+
+const [highlightDates, setHighlightDates] = useState<string[]>([]);
+
 
     // console.log("classInfo >>>>", JSON.stringify(classInfo)); 
 
-const allowedWeekdays =
-  classInfo?.class_availability?.weekly
-    ?.filter(d => d.slots.length > 0)
-    ?.map(d => d.weekday) || [];
+// const allowedWeekdays =
+//   classInfo?.class_availability?.weekly
+//     ?.filter(d => d.slots.length > 0)
+//     ?.map(d => d.weekday) || [];
 
-    const highlightDates = classInfo?.available_slots?.map(s => s.date) || [];
+    // const highlightDates = classInfo?.available_slots?.map(s => s.date) || [];
 
 
-    console.log("classInfo >>>>", JSON.stringify(highlightDates),JSON.stringify(highlightDates)); 
+    // console.log("classInfo >>>>", JSON.stringify(highlightDates),JSON.stringify(highlightDates)); 
+// const [highlightDates, setHighlightDates] = useState<string[]>(
+//   classInfo?.available_slots?.map(s => s.date) || []
+// );
 
 
  const userTimezone =
     Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata";
 
-    useEffect(() => {
-  const firstDate = classInfo?.available_slots?.[0]?.date;
-  const today = moment().format("YYYY-MM-DD");
+//     useEffect(() => {
+//   const year = moment().year();
+//   const month = moment().month() + 1;
+//   fetchMonthSlots(year, month);
+// }, []);
 
-  const initialDate = firstDate || today;
 
-  setSelectedDate(initialDate);
-  fetchSlots(initialDate);
+//     useEffect(() => {
+//   const firstDate = classInfo?.available_slots?.[0]?.date;
+//   const today = moment().format("YYYY-MM-DD");
+
+//   const initialDate = firstDate || today;
+
+//   setSelectedDate(initialDate);
+//   fetchSlots(initialDate);
+// }, []);
+
+// useEffect(() => {
+//   const year = moment().year();
+//   const month = moment().month() + 1;
+
+//   fetchMonthSlots(year, month);
+
+//   const today = moment().format("YYYY-MM-DD");
+//   setSelectedDate(today);
+// }, []);
+
+useEffect(() => {
+  const year = moment().year();
+  const month = moment().month() + 1;
+
+  const loadInitial = async () => {
+    await fetchMonthSlots(year, month);
+
+    setTimeout(() => {
+      const firstDate = monthSlotsData.length
+        ? monthSlotsData[0].date
+        : moment().format("YYYY-MM-DD");
+
+      setSelectedDate(firstDate);
+
+      const slots = monthSlotsData.find(d => d.date === firstDate);
+      setAvailableSlots(slots?.slots || []);
+    }, 50);
+  };
+
+  loadInitial();
 }, []);
 
 
@@ -108,108 +167,200 @@ const allowedWeekdays =
     }
   }, [isRestored, loadingSlots]);
 
-  console.log("route >>>>>>>>>", classInfo?.id);
+  console.log("route >>>>>>>>>", JSON.stringify(route?.params));
 
 
-//   useEffect(() => {
-//   const firstDate = classInfo?.available_slots?.[0]?.date;
-//   const today = new Date().toISOString().split("T")[0];
+  const fetchSlots = (date: string): Promise<any[]> => {
+  return new Promise((resolve) => {
+    if (!date) return resolve([]);
 
-//   const initialDate = firstDate || today;
-
-//   console.log("📌 Initial selected date:", initialDate);
-
-//   setSelectedDate(initialDate);
-//   fetchSlots(initialDate);
-// }, []);
-
-
-  //   useEffect(() => {
-  //   if (!isRestored) return;
-  //   if (!selectedSlotUTC) return;
-
-  //   const exists = availableSlots.some(s => s.start_utc === selectedSlotUTC);
-  //   if (exists) {
-  //     const slot = availableSlots.find(s => s.start_utc === selectedSlotUTC);
-  //     setSelectedTime(slot.start_user);
-  //   }
-  // }, [availableSlots]);
-
-
-
- 
-
-  // ✅ Fetch available slots
-  const fetchSlots = (date: string) => {
-    if (!date) return;
     setLoadingSlots(true);
 
     const offeringId = route?.params?.reschedule
-      ? classInfo?.offering?.id
-      : classInfo?.id;
-    const tutor_timezone = route?.params?.reschedule
-      ? classInfo?.offering?.tutor?.timezone
-      : classInfo?.tutor?.timezone;
+      ? bookingData?.offering?.id      // ⭐ Correct
+      : bookingData?.id;               // ⭐ Correct
 
-    console.log(
-      "info >>>>>>>>>",
-      offeringId,
-      date,
-      userTimezone,
-      tutor_timezone
-    );
+    const tutor_timezone = route?.params?.reschedule
+      ? bookingData?.offering?.tutor?.timezone
+      : bookingData?.tutor?.timezone;
+
     dispatch(
       slotsList(offeringId, date, userTimezone, tutor_timezone, (res: any) => {
         setLoadingSlots(false);
-        if (res.success) {
-          setAvailableSlots(res.data.slots || []);
-        } else {
-          setAvailableSlots([]);
-        }
+        resolve(res.success ? res.data.slots || [] : []);
       })
     );
-  };
+  });
+};
 
- 
+  // ✅ Fetch available slots
+// const fetchSlots = (date: string): Promise<any[]> => {
+//   return new Promise((resolve) => {
+//     if (!date) return resolve([]);
+
+//     setLoadingSlots(true);
+// const offeringId = route?.params?.reschedule
+//   ? bookingData?.offering?.id     // Correct for reschedule
+//   : bookingData?.id;  
+    
+//     // const offeringId = route?.params?.reschedule
+//     //   ? classInfo?.offering?.id
+//     //   : classInfo?.id;
+
+//     const tutor_timezone = route?.params?.reschedule
+//       ? classInfo?.offering?.tutor?.timezone
+//       : classInfo?.tutor?.timezone;
+
+//     dispatch(
+//       slotsList(offeringId, date, userTimezone, tutor_timezone, (res: any) => {
+//         setLoadingSlots(false);
+//         resolve(res.success ? res.data.slots || [] : []);
+//       })
+//     );
+//   });
+// };
+
+const fetchMonthSlots = async (year: number, month: number) => {
+  if (!classSlug) return;
+ setLoadingMonth(true); 
+  const start = moment({ year, month: month - 1 }).startOf("month").format("YYYY-MM-DD");
+  const end = moment({ year, month: month - 1 }).endOf("month").format("YYYY-MM-DD");
+
+  const url = `public/classes/${classSlug}/?user_timezone=${encodeURIComponent(userTimezone)}&start_date=${start}&end_date=${end}`;
+
+  console.log("📡 Fetching Month Slots:", url);
+
+  try {
+    const res = await api.get(url);
+    const slots = res.data?.available_slots || [];
+
+    setMonthSlotsData(slots);               // full month
+    setHighlightDates(slots.map(s => s.date)); // calendar highlights
+  } catch (err) {
+    console.log("❌ Month Slots Error", err);
+  }
+    setLoadingMonth(false); 
+};
+
+
+// Return first slot date in that month
+const slotsFirstAvailable = (year: number, month: number) => {
+  if (!monthSlotsData.length) return null;
+
+  return monthSlotsData
+    .map(d => d.date)
+    .find(date => moment(date).month() + 1 === month);
+};
+
+// const fetchMonthSlots = async (year: number, month: number) => {
+//   const start = moment({ year, month: month - 1 }).startOf("month").format("YYYY-MM-DD");
+//   const end = moment({ year, month: month - 1 }).endOf("month").format("YYYY-MM-DD");
+
+//   const slug = classInfo?.slug;
+//   if (!slug) return;
+
+//   const url = `public/classes/${slug}/?user_timezone=${encodeURIComponent(userTimezone)}&start_date=${start}&end_date=${end}`;
+
+//   console.log("📡 Fetching Month Slots:", url);
+
+//   try {
+//     const res = await api.get(url);
+//     const slots = res.data?.available_slots || [];
+
+//     // store entire list including slot arrays
+//     setMonthSlotsData(slots);
+
+//     // store just dates for calendar UI
+//     setHighlightDates(slots.map((s) => s.date));
+
+//   } catch (err) {
+//     console.log("❌ Month Slots Error", err);
+//   }
+// };
+
+const renderItem = ({ item }) => {
+  const isSelected = item.start_user === selectedTime;
+
+  return (
+    <Pressable
+      onPress={() => {
+        setSelectedTime(item.start_user);
+        setSelectedSlotUTC(item.start_utc);
+      }}
+      style={[
+        styles.timeContainer,
+        {
+          width: "30%",             // 🔥 FIXED WIDTH (3 per row)
+          height: 40,               // 🔥 FIXED HEIGHT
+          marginBottom: 12,         // spacing
+          justifyContent: "center",
+          marginHorizontal:6,
+          alignItems: "center",
+          backgroundColor: isSelected
+            ? Colors.Colors.App_theme
+            : Colors.Colors.class_bg,
+        },
+      ]}
+    >
+      <TextComponent
+        type="semiBoldText"
+        style={{
+          color: isSelected ? Colors.Colors.white : Colors.Colors.BLACK,
+        }}
+      >
+        {moment(item.start_user).format("hh:mm A")}
+      </TextComponent>
+    </Pressable>
+  );
+};
+
 
   // ✅ Slot time render
-  const renderItem = ({ item }: { item: any }) => {
-    const isSelected = item.start_user === selectedTime;
-    return (
-      <Pressable
-        onPress={() => {
-          setSelectedTime(item.start_user);
-          setSelectedSlotUTC(item.start_utc);
-        }}
-        style={[
-          styles.timeContainer,
-          {
-            backgroundColor: isSelected
-              ? Colors.Colors.App_theme
-              : Colors.Colors.class_bg,
-          },
-        ]}
-      >
-        <TextComponent
-          type="semiBoldText"
-          style={{
-            color: isSelected ? Colors.Colors.white : Colors.Colors.BLACK,
-          }}
-        >
-          {moment(item.start_user).format("hh:mm A")}
-        </TextComponent>
-      </Pressable>
-    );
-  };
+  // const renderItem = ({ item }: { item: any }) => {
+  //   const isSelected = item.start_user === selectedTime;
+  //   return (
+  //     <Pressable
+  //       onPress={() => {
+  //         setSelectedTime(item.start_user);
+  //         setSelectedSlotUTC(item.start_utc);
+  //       }}
+  //       style={[
+  //         styles.timeContainer,
+  //         {
+  //           backgroundColor: isSelected
+  //             ? Colors.Colors.App_theme
+  //             : Colors.Colors.class_bg,
+  //         },
+  //       ]}
+  //     >
+  //       <TextComponent
+  //         type="semiBoldText"
+  //         style={{
+  //           color: isSelected ? Colors.Colors.white : Colors.Colors.BLACK,
+  //         }}
+  //       >
+  //         {moment(item.start_user).format("hh:mm A")}
+  //       </TextComponent>
+  //     </Pressable>
+  //   );
+  // };
 
   const handleNext = async () => {
     if (!selectedSlotUTC) {
       if (!isRestoringRef.current) {
-        alert("Please select a slot before continuing.");
+        alert("The chosen slot is unavailable. Kindly select a different slot to proceed.");
       }
       return false;
     }
+  const todaySlots = await fetchSlots(selectedDate);
+  const stillExists = todaySlots.some((s) => s.start_utc === selectedSlotUTC);
 
+  if (!stillExists) {
+    alert("This slot is no longer available. Please select another slot.");
+    setSelectedSlotUTC("");
+    setSelectedTime("");
+    return;
+  }
     const pendingData = {
       selectedDate,
       selectedSlotUTC,
@@ -250,57 +401,26 @@ const allowedWeekdays =
             data: classInfo,
           });
         } else {
-          alert("Failed to confirm slot. Please try again.");
+          alert("The chosen slot is unavailable. Kindly select a different slot to proceed.");
         }
       })
     );
   };
 
 
-  // ✅ Handle Next with loader + API call
-  // const handleNext = () => {
-  //   if (!selectedSlotUTC) {
-  //     alert("Please select a slot before continuing.");
-  //     return;
-  //   }
-
-  //   setLoadingNext(true);
-
-  //   // Prepare booking payload
-  //   const payload = {
-  //     offering_id: classInfo?.id,
-  //     scheduled_at: selectedSlotUTC,
-  //     user_timezone: userTimezone,
-  //     tutor_timezone: classInfo?.tutor?.timezone,
-  //     note,
-  //     trial_selected: trailListed,
-  //   };
-
-  //   console.log("Booking payload >>>", payload);
-
-  //   // Simulate API or dispatch your thunk
-  //   dispatch(
-  //     bookSlot(payload, (res: any) => {
-  //       setLoadingNext(false);
-  //       if (res.success) {
-  //         console.log("res of Book slot >>>>>", res);
-  //         navigation.navigate("ClassPaymentScreen", {
-  //           bookingData: res,
-  //           data: classInfo,
-  //         });
-  //       } else {
-  //         alert("Failed to fetch slot confirmation, please try again.");
-  //       }
-  //     })
-  //   );
-  // };
-
-  const handleReschedule = () => {
+  const handleReschedule = async () => {
     if (!selectedSlotUTC) {
       alert("Please select a slot before continuing.");
       return;
     }
-
+  const todaySlots = await fetchSlots(selectedDate);
+  const stillExists = todaySlots.some((s) => s.start_utc === selectedSlotUTC);
+  if (!stillExists) {
+    alert("This slot is no longer available. Please select another slot.");
+    setSelectedSlotUTC("");
+    setSelectedTime("");
+    return;
+  }
     setLoadingNext(true);
 
     // Prepare booking payload
@@ -308,7 +428,7 @@ const allowedWeekdays =
       new_time: selectedSlotUTC,
     };
 
-    console.log("Booking payload >>>", payload);
+    console.log("Booking reschedule payload >>>", classInfo,JSON.stringify(payload));
 
     dispatch(
       rescheduleBooking(classInfo?.id, payload, (res) => {
@@ -473,8 +593,8 @@ const allowedWeekdays =
             ? "₹"
             : "$"}{" "}
           {(route?.params?.reschedule
-            ? classInfo?.offering?.pricing?.per_person?.amount?.app
-            : classInfo?.pricing?.per_person?.amount?.app) ?? 0}
+            ? classInfo?.offering?.pricing?.per_person?.amount?.web
+            : classInfo?.pricing?.per_person?.amount?.web) ?? 0}
         </TextComponent>
         <TextComponent
           type="mediumText"
@@ -495,16 +615,49 @@ const allowedWeekdays =
       >
         Slot Booking
       </TextComponent>
-
-    <CalendarUI
+<CalendarUI
   startDate={selectedDate}
-  allowedWeekdays={allowedWeekdays}
   highlightDates={highlightDates}
   onDayPress={(day) => {
-    setSelectedDate(day.dateString);
-    fetchSlots(day.dateString);
+    const date = day.dateString;
+    setSelectedDate(date);
+
+    const findSlots = monthSlotsData.find(d => d.date === date);
+    setAvailableSlots(findSlots?.slots || []);
   }}
+onMonthChange={async (m) => {
+  await fetchMonthSlots(m.year, m.month);
+
+  // After fetching month slots, auto-select first available day
+  const firstDate = slotsFirstAvailable(m.year, m.month);
+  if (firstDate) {
+    setSelectedDate(firstDate);
+
+    const daySlots = monthSlotsData.find(d => d.date === firstDate);
+    setAvailableSlots(daySlots?.slots || []);
+  }
+}}
+
 />
+
+
+    {/* <CalendarUI
+  startDate={selectedDate}
+  // allowedWeekdays={allowedWeekdays}
+  highlightDates={highlightDates}
+onDayPress={(day) => {
+  const date = day.dateString;
+  setSelectedDate(date);
+
+  const daySlots = monthSlotsData.find((d) => d.date === date);
+
+  setAvailableSlots(daySlots?.slots || []);
+}}
+   onMonthChange={(m) => {
+    console.log("📅 Month Changed:", m);
+    fetchMonthSlots(m.year, m.month);
+  }}
+/> */}
 
 
       {/* Available Slots */}
@@ -528,7 +681,7 @@ const allowedWeekdays =
           keyExtractor={(_, idx) => idx.toString()}
           numColumns={3}
           columnWrapperStyle={{
-            justifyContent: "space-between",
+            // justifyContent: "space-between",
             marginBottom: 8,
           }}
           ListEmptyComponent={<Text  allowFontScaling={false}>No slots available.</Text>}
@@ -616,27 +769,6 @@ const allowedWeekdays =
         value={note}
         onChangeText={setNote}
       />
-      {/* ✅ Replaced TouchableOpacity with LoadingButton */}
-      {/* <LoadingButton
-        loading={loadingNext}
-        text={route?.params?.reschedule ? "Reschedule" : "Next"}
-        onPress={route?.params?.reschedule ? handleReschedule : handleNext}
-        disabled={loadingNext}
-        style={{
-          backgroundColor: Colors.Colors.App_theme,
-          paddingVertical: 10,
-          paddingHorizontal: 22,
-          borderRadius: 10,
-          alignItems: "center",
-          marginTop: 20,
-          alignSelf: "flex-end",
-          width: "40%",
-        }}
-        textStyle={{
-          color: Colors.Colors.white,
-          fontSize: FontSize.CONSTS.FS_12,
-        }}
-      /> */}
     </ScrollView>
     <View
   style={{
@@ -671,6 +803,7 @@ const allowedWeekdays =
     }}
   />
 </View>
+                    <LoadingOverlay visible={loadingMonth} text="Fetching slots..." />
     </SafeAreaView>
   );
 }

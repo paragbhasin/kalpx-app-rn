@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { View } from "react-native";
 import DailyPracticeDetailsCard from "../../components/DailyPracticeDetailsCard";
+import Header from "../../components/Header";
 
 const DailyPracticeDetailSelectedPractice = ({ route, navigation }) => {
   const { item, fullList, startingIndex, onUpdateSelection } = route.params;
@@ -20,6 +21,7 @@ const DailyPracticeDetailSelectedPractice = ({ route, navigation }) => {
 
   return (
     <View style={{ marginHorizontal: 16 }}>
+      <Header/>
       <DailyPracticeDetailsCard
         data={fullList[currentIndex]}
         item={item}

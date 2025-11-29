@@ -90,6 +90,20 @@ const [loading, setLoading] = useState(true);
   const sankalpId = practiceTodayData?.ids?.sankalp;
 
   const shareStage = doneSankalp ? 3 : startedSankalp ? 2 : 1;
+  const uiStage = doneSankalp ? 3 : startedSankalp ? 2 : 1;
+
+  const uiHeaderText = useMemo(() => {
+  const s1 = t("sankalpHeaderText.uiStage1", { returnObjects: true });
+  const s2 = t("sankalpHeaderText.uiStage2", { returnObjects: true });
+  const s3 = t("sankalpHeaderText.uiStage3", { returnObjects: true });
+
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+  if (uiStage === 3) return pick(s3);
+  if (uiStage === 2) return pick(s2);
+  return pick(s1);
+}, [uiStage, i18n.language]);
+
 
   const { p: primaryText, s: secondaryText } = useMemo(() => {
     const s1: any = t("sankalpCard.stage1", { returnObjects: true });
@@ -229,7 +243,9 @@ if (loading) {
                                     imageStyle={styles.partialBgImage}
                                   >
               <TextComponent type="semiBoldText" style={{  color:Colors.Colors.App_theme }}>
-{t("sankalpCard.shareHeader")} </TextComponent>
+{/* {t("sankalpCard.shareHeader")}  */}
+{uiHeaderText}
+</TextComponent>
 
               <View style={styles.header}>
                 <TextComponent
@@ -492,8 +508,15 @@ if (loading) {
                 <TouchableOpacity
                   style={styles.dailyBtn}
                   onPress={() =>
-                    navigation.navigate("MySadana", { selectedmantra: currentSankalp })
+                     navigation.navigate("TrackerTabs", {
+  screen: "History",
+  params: {
+    selectedmantra: currentSankalp,
+  }
+})
+                    // navigation.navigate("MySadana", { selectedmantra: currentSankalp })
                   }
+                  
                 >
                   <TextComponent
                  type="boldText"
@@ -535,7 +558,7 @@ if (loading) {
                     justifyContent: "center",
                     padding: 40,
                   }}
-                  resizeMode="cover"
+                 resizeMode="contain"
                 >
                   <TextComponent
                     type="boldText"

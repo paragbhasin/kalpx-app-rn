@@ -12,14 +12,14 @@ import TextComponent from "./TextComponent";
 
 // Dropdown data
 const statusData = [
-  { label: "All Status", value: "" },
   { label: "Requested", value: "requested" },
   { label: "Confirmed", value: "confirmed" },
   { label: "Completed", value: "completed" },
   { label: "Rejected", value: "rejected" },
-  { label: "Cancelled", value: "Cancelled" },
+  { label: "Cancelled", value: "cancelled" },   // FIXED
   { label: "Pending", value: "pending" },
 ];
+
 
 const whenData = [
   { label: "All", value: "all" },
@@ -46,30 +46,49 @@ const BookingFilterModal: React.FC<BookingFilterModalProps> = ({
   onApply,
    onClear,
 }) => {
-  const [status, setStatus] = useState<string | null>(null);
-  const [when, setWhen] = useState<string | null>(null);
-  const [sort, setSort] = useState<string | null>(null);
+  // const [status, setStatus] = useState<string | null>(null);
+  // const [when, setWhen] = useState<string | null>(null);
+  // const [sort, setSort] = useState<string | null>(null);
+  const [status, setStatus] = useState("requested");  // default
+const [when, setWhen] = useState("all");            // default
+const [sort, setSort] = useState("updated_at");     // default
+
+  // const handleClearAll = () => {
+  //   setStatus("All Status");
+  //   setWhen("All");
+  //   setSort("Most Recent");
+  //    // trigger parent callback
+  //   if (onClear) {
+  //     onClear();
+  //   }
+
+  //   // optionally close modal after clear
+  //   onClose();
+  // };
+
   const handleClearAll = () => {
-    setStatus("All Status");
-    setWhen("All");
-    setSort("Most Recent");
-     // trigger parent callback
-    if (onClear) {
-      onClear();
-    }
+  setStatus("requested");   // reset
+  setWhen("all");           // reset
+  setSort("updated_at");    // reset
+  onClear && onClear();
+  onClose();
+};
 
-    // optionally close modal after clear
-    onClose();
-  };
 
-  const handleApply = () => {
-    onApply({
-      status: status || "",
-      when: when || "",
-      sort: sort || "",
-    });
-    onClose();
-  };
+const handleApply = () => {
+  onApply({ status, when, sort });
+  onClose();
+};
+
+
+  // const handleApply = () => {
+  //   onApply({
+  //     status: status || "",
+  //     when: when || "",
+  //     sort: sort || "",
+  //   });
+  //   onClose();
+  // };
 
   const renderDropdown = (
     label: string,

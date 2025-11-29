@@ -11,6 +11,9 @@ interface ClassEventCardProps {
   description: string;
   duration: string;
   price: string;
+  currency: string;
+  trailenabled: string;
+  trailAmt: string;
   onViewDetails?: () => void;
   onBookNow?: () => void;
   tutor?: string; // Added tutor property
@@ -24,6 +27,9 @@ const ClassEventCard: React.FC<ClassEventCardProps> = ({
   price,
   onViewDetails,
   onBookNow,
+  currency,
+  trailenabled,
+  trailAmt
 }) => {
   const isRemote = typeof imageUrl === "string" && imageUrl.startsWith("http");
   return (
@@ -48,7 +54,17 @@ const ClassEventCard: React.FC<ClassEventCardProps> = ({
           >
             {description}
           </TextComponent>
-          <TextComponent type="mediumText">
+          {trailenabled &&
+          <>
+              <TextComponent type="mediumText" style={{color:Colors.Colors.blue_text}}>
+            Trail :{" "}
+            <TextComponent type="mediumText" style={{color:Colors.Colors.blue_text}}>
+              {currency === "INR" ? "₹" :"$"} {trailAmt}
+            </TextComponent>
+          </TextComponent>
+           </>
+          }
+          <TextComponent type="mediumText" >
             Duration :{" "}
             <TextComponent type="mediumText" style={styles.bold}>
               {duration}
@@ -56,7 +72,7 @@ const ClassEventCard: React.FC<ClassEventCardProps> = ({
           </TextComponent>
 
           <TextComponent type="boldText" style={styles.price}>
-            {price}{" "}
+            {currency === "INR" ? "₹" :"$"} {price}{" "}
             <TextComponent type="mediumText" style={styles.perPerson}>
               / Per Person
             </TextComponent>

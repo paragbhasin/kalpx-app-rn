@@ -90,14 +90,14 @@ const styles = StyleSheet.create({
   },
   selectedText: {
     color: "#000000",
-    fontSize: 12, // smaller text for compact fit
+    fontSize: 14, // smaller text for compact fit
   },
   placeholder: {
     color: "#96A0AD",
-    fontSize: 12,
+    fontSize: 14,
   },
   itemText: {
-    fontSize: 13,
+    fontSize: 14,
     color: "#000",
   },
   dropdownItemText: {

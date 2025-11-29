@@ -21,11 +21,14 @@ const styles = StyleSheet.create({
     fontSize: FontSize.CONSTS.FS_14
   },
   timeContainer: {
-    flex: 1,
-    paddingVertical: 12,
-    marginHorizontal: 4,
-    borderRadius: 8,
-    alignItems: 'center',
+      paddingVertical: 12,
+  borderRadius: 8,
+  alignItems: 'center',
+    // flex: 1,
+    // paddingVertical: 12,
+    // marginHorizontal: 4,
+    // borderRadius: 8,
+    // alignItems: 'center',
   },
   checkbox: {
     width: 20,

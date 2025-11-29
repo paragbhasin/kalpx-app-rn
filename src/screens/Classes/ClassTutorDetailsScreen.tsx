@@ -1,5 +1,5 @@
 import { ResizeMode, Video } from "expo-av";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import { useDispatch } from "react-redux";
 import { AnyAction } from "redux";
 import { ThunkDispatch } from "redux-thunk";
@@ -40,7 +41,6 @@ interface ExploreClass {
 const ReadMoreText = ({ text }: { text: string }) => {
   const [expanded, setExpanded] = useState(false);
   const [showReadMore, setShowReadMore] = useState(false);
-
   return (
     <Text  allowFontScaling={false}
       style={{ color: Colors.Colors.Light_black, marginTop: 6 }}
@@ -74,6 +74,24 @@ export default function ClassTutorDetailsScreen({ navigation, route }) {
   const [explorePage, setExplorePage] = useState(1);
   const [loadingExplore, setLoadingExplore] = useState(false);
   const [hasMoreExplore, setHasMoreExplore] = useState(true);
+  const videoRef1 = useRef<Video>(null);
+  const videoRef2 = useRef<Video>(null);
+const [isPlaying1, setIsPlaying1] = useState(false);
+const [isPlaying2, setIsPlaying2] = useState(false);
+
+const scrollRef = useRef<ScrollView>(null);
+
+useEffect(() => {
+  // Scroll to top
+  scrollRef.current?.scrollTo({ y: 0, animated: true });
+
+  // Stop both videos when screen data changes
+  setIsPlaying1(false);
+  setIsPlaying2(false);
+  videoRef1.current?.pauseAsync();
+  videoRef2.current?.pauseAsync();
+}, [route?.params?.data]);
+
 
   // Map API class object to ClassEventCard props
   const mapClassToCard = (item: any) => ({
@@ -82,10 +100,12 @@ export default function ClassTutorDetailsScreen({ navigation, route }) {
     title: item.title,
     description: item.description,
     duration: item.pricing?.per_person?.session_length_min,
-    price: item.pricing?.per_person?.amount?.app,
+    price: item.pricing?.per_person?.amount?.web,
     tutor: item.tutor,
     raw: item,
   });
+
+  
 
   const fetchTutorClasses = (pageNum: number) => {
     if (loadingExplore || !hasMoreExplore) return;
@@ -126,6 +146,7 @@ export default function ClassTutorDetailsScreen({ navigation, route }) {
       />
       <Header />
     <ScrollView
+      ref={scrollRef}
       contentContainerStyle={{ paddingBottom: 120 }}
       showsVerticalScrollIndicator={false}
     >
@@ -164,7 +185,47 @@ export default function ClassTutorDetailsScreen({ navigation, route }) {
           marginTop: 15,
         }}
       >
-        <Video
+        <View style={{ position: "relative" }}>
+  <Video
+    ref={videoRef1}
+    source={{ uri: `${BASE_IMAGE_URL}/${route?.params?.data?.intro_media?.key}` }}
+    style={{
+      width: "100%",
+      height: 200,
+      borderRadius: 10,
+      backgroundColor: "#000",
+    }}
+    resizeMode={ResizeMode.CONTAIN}
+    shouldPlay={isPlaying1}
+    useNativeControls={isPlaying1}
+    isLooping={false}
+    onPlaybackStatusUpdate={(status: any) => {
+      if (status.isPlaying) {
+        setIsPlaying2(false);
+        videoRef2.current?.pauseAsync();
+      }
+    }}
+  />
+
+  {!isPlaying1 && (
+    <TouchableOpacity
+      onPress={() => {
+        setIsPlaying1(true);
+        setIsPlaying2(false);
+        videoRef2.current?.pauseAsync();
+      }}
+      style={{
+        position: "absolute",
+        top: "40%",
+        left: "45%",
+        zIndex: 10,
+      }}
+    >
+      <Ionicons name="play-circle" size={60} color="#ffffffcc" />
+    </TouchableOpacity>
+  )}
+</View>
+        {/* <Video
           source={{
             uri: `${BASE_IMAGE_URL}/${route?.params?.data?.intro_media?.key}`,
           }}
@@ -174,11 +235,11 @@ export default function ClassTutorDetailsScreen({ navigation, route }) {
             borderRadius: 10,
             backgroundColor: "#000",
           }}
-          useNativeControls
+          useNativeControls={true}
           resizeMode={ResizeMode.CONTAIN} // ✅ correct enum usage
-          shouldPlay
+          // shouldPlay
           isLooping
-        />
+        /> */}
         <View style={styles.row}>
           {/* <TextComponent type="headerText" style={styles.label}>
             Flute Series :
@@ -215,7 +276,7 @@ export default function ClassTutorDetailsScreen({ navigation, route }) {
               style={{ fontSize: FontSize.CONSTS.FS_20 }}
             >
               {route?.params?.data?.pricing?.currency === "INR" ? "₹" : "$"}{" "}
-              {route?.params?.data?.pricing?.per_person?.amount?.app ?? 0}
+              {route?.params?.data?.pricing?.per_person?.amount?.web ?? 0}
             </TextComponent>
             <TextComponent
               type="mediumText"
@@ -266,7 +327,8 @@ export default function ClassTutorDetailsScreen({ navigation, route }) {
           marginHorizontal: 16,
         }}
       >
-        <Video
+        {/* <Video
+         ref={videoRef2}
           source={{
             uri: `${route?.params?.data?.tutor?.intro_video?.url}`,
           }}
@@ -276,11 +338,56 @@ export default function ClassTutorDetailsScreen({ navigation, route }) {
             borderRadius: 10,
             backgroundColor: "#000",
           }}
-          useNativeControls
+          useNativeControls={true}
           resizeMode={ResizeMode.CONTAIN} // ✅ correct enum usage
-          shouldPlay
+          // shouldPlay
           isLooping
-        />
+             onPlaybackStatusUpdate={(status: any) => {
+          if (status.isPlaying) {
+            videoRef1.current?.pauseAsync(); // 🔴 Pause video 1 when 2 plays
+          }
+        }}
+        /> */}
+        <View style={{ position: "relative" }}>
+  <Video
+    ref={videoRef2}
+    source={{ uri: `${route?.params?.data?.tutor?.intro_video?.url}` }}
+    style={{
+      width: "100%",
+      height: 200,
+      borderRadius: 10,
+      backgroundColor: "#000",
+    }}
+    resizeMode={ResizeMode.CONTAIN}
+    shouldPlay={isPlaying2}
+    useNativeControls={isPlaying2}
+    isLooping={false}
+    onPlaybackStatusUpdate={(status: any) => {
+      if (status.isPlaying) {
+        setIsPlaying1(false);
+        videoRef1.current?.pauseAsync();
+      }
+    }}
+  />
+
+  {!isPlaying2 && (
+    <TouchableOpacity
+      onPress={() => {
+        setIsPlaying2(true);
+        setIsPlaying1(false);
+        videoRef1.current?.pauseAsync();
+      }}
+      style={{
+        position: "absolute",
+        top: "40%",
+        left: "45%",
+        zIndex: 10,
+      }}
+    >
+      <Ionicons name="play-circle" size={60} color="#ffffffcc" />
+    </TouchableOpacity>
+  )}
+</View>
         <TextComponent
           type="headerText"
           style={{ ...styles.label, marginTop: 4 }}
@@ -318,7 +425,7 @@ export default function ClassTutorDetailsScreen({ navigation, route }) {
       <FlatList
         data={exploreData.map(mapClassToCard)}
         keyExtractor={(item) => item.id?.toString()}
-        renderItem={({ item }) => (
+        renderItem={({ item }: any) => (
           <ClassEventCard
             imageUrl={item.imageUrl}
             title={item.title}
@@ -328,6 +435,9 @@ export default function ClassTutorDetailsScreen({ navigation, route }) {
             onViewDetails={() => navigation.navigate("ClassTutorDetailsScreen", { data: item.raw })}
             onBookNow={() => navigation.navigate("ClassBookingScreen", { data: item.raw })}
             tutor={item.tutor}
+            currency={item?.pricing?.currency}
+  trailenabled={item?.pricing?.trial?.enabled}
+  trailAmt={item?.pricing?.trial?.amount}
           />
         )}
         onEndReached={loadMoreExplore}

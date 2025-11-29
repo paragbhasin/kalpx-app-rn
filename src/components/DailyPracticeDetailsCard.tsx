@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
+  Animated,
   ImageBackground,
   ScrollView,
   StyleSheet,
@@ -143,6 +144,8 @@ const ChantOptionItem = ({ item, onSelect, selected }) => (
   </TouchableOpacity>
 );
 
+
+
 const DailyPracticeDetailsCard = ({
   data,
   item,
@@ -154,7 +157,34 @@ const DailyPracticeDetailsCard = ({
   const [showPronunciation, setShowPronunciation] = useState(false);
   const [isDevanagariLong, setIsDevanagariLong] = useState(false);
   const [showDevanagariModal, setShowDevanagariModal] = useState(false);
+
+    const slideAnim = useRef(new Animated.Value(0)).current;
+
+  const handleSwipeChange = () => {
+    // 1. Slide OUT to LEFT
+    Animated.timing(slideAnim, {
+      toValue: -400,
+      duration: 200,
+      useNativeDriver: true,
+    }).start(() => {
+      // 2. Update index (parent logic)
+      onChange && onChange();
+
+      // 3. Reset card to RIGHT offscreen
+      slideAnim.setValue(400);
+
+      // 4. Slide IN to CENTER
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    });
+  };
+  
+
   return (
+        <Animated.View style={{ transform: [{ translateX: slideAnim }] }}>
     <Card style={styles.cardContainer}>
       <ScrollView
         showsVerticalScrollIndicator={false}
@@ -171,7 +201,8 @@ const DailyPracticeDetailsCard = ({
                 name="repeat-outline"
                 size={30}
                 color="#D4A017"
-                onPress={onChange}
+                onPress={handleSwipeChange}
+                // onPress={onChange}
               />
             )}
             <Ionicons
@@ -364,7 +395,10 @@ const DailyPracticeDetailsCard = ({
       </ScrollView>
       {!isLocked && (
         <View style={styles.fixedButtons}>
-          <TouchableOpacity style={styles.changeButton} onPress={onChange}>
+          <TouchableOpacity style={styles.changeButton} 
+                onPress={handleSwipeChange}
+          // onPress={onChange}
+          >
             <Ionicons
               name="repeat-outline"
               size={22}
@@ -383,6 +417,7 @@ const DailyPracticeDetailsCard = ({
         </View>
       )}
     </Card>
+    </Animated.View>
   );
 };
 

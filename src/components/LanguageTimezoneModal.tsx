@@ -130,7 +130,7 @@ const LanguageTimezoneModal = ({ visible, onClose }) => {
             <TextComponent type="mediumText"  style={styles.errorText}>{formik.errors.language}</TextComponent>
           )}
 
-        <TextComponent type="headerText" style={{ marginTop: 10 ,fontSize:14}}>{t("profileScreen.languageInstruction")}</TextComponent>
+        <TextComponent type="semiBoldText" style={{ marginTop: 10,color:Colors.Colors.BLACK}}>{t("profileScreen.languageInstruction")}</TextComponent>
           
 
           <TextComponent type="mediumText" style={styles.label}>{t("profileScreen.chooseTZ")}</TextComponent>

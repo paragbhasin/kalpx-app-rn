@@ -478,7 +478,7 @@ const callPaymentStripeGateway = async () => {
         }}
       >
         <TextComponent type="mediumText">Class Name</TextComponent>
-        <TextComponent type="mediumText"> {route?.params?.data?.title}</TextComponent>
+        <TextComponent type="mediumText" style={{flexShrink: 1, textAlign: "right",marginLeft:35}}> {route?.params?.data?.title}</TextComponent>
       </View>
       <View
         style={{
@@ -500,7 +500,7 @@ const callPaymentStripeGateway = async () => {
         }}
       >
         <TextComponent type="mediumText">Price</TextComponent>
-        <TextComponent type="mediumText">{route?.params?.data?.pricing?.currency === "INR" ? "₹" : "$"}{" "}{route?.params?.data?.pricing?.per_person?.amount?.app ?? 0}</TextComponent>
+        <TextComponent type="mediumText">{route?.params?.data?.pricing?.currency === "INR" ? "₹" : "$"}{" "}{route?.params?.data?.pricing?.per_person?.amount?.web ?? 0}</TextComponent>
       </View>
       <View
         style={{
@@ -515,7 +515,7 @@ const callPaymentStripeGateway = async () => {
           style={{ color: Colors.Colors.App_theme }}
         >
            {route?.params?.data?.pricing?.currency === "INR" ? "₹" : "$"}{" "}
-          {route?.params?.data?.pricing?.per_person?.amount?.app ?? 0}
+          {route?.params?.data?.pricing?.per_person?.amount?.web ?? 0}
         </TextComponent>
       </View>
       {/* <TouchableOpacity

@@ -73,6 +73,20 @@ const MantraCard = ({
   const mantraId = practiceTodayData?.ids?.mantra;
 
   const shareStage = endMantra ? 3 : startedMantra ? 2 : 1;
+  const uiStage = endMantra ? 3 : startedMantra ? 2 : 1;
+
+  const uiHeaderText = useMemo(() => {
+  const s1 = t("mantraHeaderText.stageHeader1", { returnObjects: true });
+  const s2 = t("mantraHeaderText.stageHeader2", { returnObjects: true });
+  const s3 = t("mantraHeaderText.stageHeader3", { returnObjects: true });
+
+  const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+  if (uiStage === 3) return pick(s3);
+  if (uiStage === 2) return pick(s2);
+  return pick(s1);
+}, [uiStage, i18n.language]);
+
 
   const { p: primaryText, s: secondaryText } = useMemo(() => {
     const s1: any = t("mantraCard.stage1", { returnObjects: true });
@@ -240,7 +254,8 @@ const MantraCard = ({
                   type="semiBoldText"
                   style={{ color:Colors.Colors.App_theme}}
                 >
-                  {t("mantraCard.shareSadana")}
+                  {uiHeaderText}
+                  {/* {t("mantraCard.shareSadana")} */}
                 </TextComponent>
                 <View style={styles.headerRow}>
                   <TextComponent
@@ -493,9 +508,16 @@ const MantraCard = ({
                   <TouchableOpacity
                     style={styles.dailyBtn}
                     onPress={() => {
-                      navigation.navigate("MySadana", {
-                        selectedmantra: currentMantra,
-                      });
+                        navigation.navigate("TrackerTabs", {
+  screen: "History",
+  params: {
+    selectedmantra: currentMantra,
+  },
+});
+
+                      // navigation.navigate("MySadana", {
+                      //   selectedmantra: currentMantra,
+                      // });
                     }}
                   >
                     <TextComponent
@@ -543,7 +565,7 @@ const MantraCard = ({
           justifyContent: "center",
           padding: 40,
         }}
-        resizeMode="cover"
+        resizeMode="contain"
       >
 
         {/* Primary text */}

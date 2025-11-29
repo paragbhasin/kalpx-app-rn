@@ -404,7 +404,7 @@ const WisdomCard = () => {
                 {/* <View style={styles.buttonRow}> */}
                   <TouchableOpacity
                     style={styles.outlineBtn}
-                    onPress={() => navigation.navigate("MySadana")}
+                    onPress={() => navigation.navigate("DailyPracticeList")}
                   >
                     <TextComponent
                       type="semiBoldText"
@@ -454,7 +454,7 @@ const WisdomCard = () => {
                       justifyContent: "center",
                       padding: 40,
                     }}
-                    resizeMode="cover"
+                   resizeMode="contain"
                   >
                     <TextComponent
                       type="boldText"

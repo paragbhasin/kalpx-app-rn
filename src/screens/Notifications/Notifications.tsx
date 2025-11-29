@@ -1,7 +1,7 @@
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { AnyAction } from "@reduxjs/toolkit";
 import moment from "moment";
-import React, { useEffect } from "react";
+import React, { useCallback } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -29,11 +29,21 @@ const { data, loading, page, hasMore } = useSelector(
 );
 
 
-  useEffect(() => {
-    dispatch(fetchNotifications(1));
-  }, []);
+  // useEffect(() => {
+  //   dispatch(fetchNotifications(1));
+  // }, []);
 
-  // console.log("Notifiaction data >>>>>>>",JSON.stringify(data));
+const listRef = React.useRef(null);
+
+useFocusEffect(
+  useCallback(() => {
+    dispatch({ type: "RESET_NOTIFICATIONS" });  // clear list first
+    dispatch(fetchNotifications(1));
+    listRef.current?.scrollToOffset({ offset: 0, animated: false });
+  }, [dispatch])
+);
+
+
 
 
   const loadMore = () => {
@@ -104,6 +114,7 @@ const { data, loading, page, hasMore } = useSelector(
 ) : (
   // 📌 NOTIFICATION LIST
   <FlatList
+    ref={listRef}
     data={data}
     renderItem={renderItem}
     onEndReached={loadMore}

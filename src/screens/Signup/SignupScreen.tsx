@@ -116,6 +116,7 @@ export default function SignupScreen({ navigation }) {
         "pending_retreat_data",
         "pending_travel_data",
         "pending_astrology_data",
+        "pending_daily_practice_data"
       ];
 
       for (const key of pendingKeys) {
@@ -132,6 +133,7 @@ export default function SignupScreen({ navigation }) {
             pending_retreat_data: "Retreat",
             pending_travel_data: "Travel",
             pending_astrology_data: "Astrology",
+            pending_daily_practice_data:"DailyPracticeSelectList"
           };
 
           const targetScreen = targetScreenMap[key];

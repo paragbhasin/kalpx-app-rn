@@ -27,103 +27,180 @@ import Profile from "../screens/Profile/Profile";
 import ProfileDetails from "../screens/Profile/ProfileDetails";
 import Sankalp from "../screens/Sankalp";
 import StreakScreen from "../screens/Streak/StreakScreen";
+import TopTabsNavigator from "../screens/Tracker/TopTabsNavigator";
+import TrackerEdit from "../screens/Tracker/TrackerEdit";
+import TrackerProgress from "../screens/Tracker/TrackerProgress";
 import TrackerScreen from "../screens/Tracker/TrackerScreen";
 
 const Stack: any = createNativeStackNavigator();
 
-export const HomeStackNavigator = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false}} >
+export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
+  <Stack.Navigator
+    initialRouteName={initialRouteName}
+    screenOptions={{ headerShown: false }}
+  >
     <Stack.Screen
-        name="Home"
-        component={Home}
-        options={{ headerShown: false }}
-      />
-     <Stack.Screen
-        name="Travel"
-        component={TravelPlannerScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Sankalp"
-        component={Sankalp}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Pooja"
-        component={PoojaScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Retreat"
-        component={RetreatsScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Explore"
-        component={Explore}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="Classes"
-        component={OnlineclassesScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="ClassesScreen"
-        component={ClassesScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="ClassTutorDetailsScreen"
-        component={ClassTutorDetailsScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="ClassBookingScreen"
-        component={ClassBookingScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="ClassPaymentScreen"
-        component={ClassPaymentScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="ClassRescheduleScreen"
-        component={ClassRescheduleScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="StreakScreen"
-        component={StreakScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen name="MySadana" component={MySadana}    options={{ headerShown: false }}/>
-      <Stack.Screen name="SubmitMantraScreen" component={SubmitMantraScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="SadanaTrackerScreen" component={SadanaTrackerScreen} options={{ headerShown: false }}/>
-      <Stack.Screen name="Dharma" component={Dharma} options={{ headerShown: false }} />
-      <Stack.Screen name="LearnMore" component={LearnMore}  options={{ headerShown: false }}  />
-      <Stack.Screen name="RelatedVideosScreen" component={RelatedVideosScreen}   options={{ headerShown: false }} />
-      <Stack.Screen name="DailyPracticeList" component={DailyPracticeList}   options={{ headerShown: false }} />
-      <Stack.Screen name="DailyPracticeSelectList" component={DailyPracticeSelectList}  options={{ headerShown: false }} />
-      <Stack.Screen name="DailyPracticeDetailSelectedPractice" component={DailyPracticeDetailSelectedPractice}  options={{ headerShown: false }} />
-      <Stack.Screen name="TrackerScreen" component={TrackerScreen}  options={{ headerShown: false }} />
+      name="Home"
+      component={Home}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="Travel"
+      component={TravelPlannerScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="Sankalp"
+      component={Sankalp}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="Pooja"
+      component={PoojaScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="Retreat"
+      component={RetreatsScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="Explore"
+      component={Explore}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="Classes"
+      component={OnlineclassesScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="ClassesScreen"
+      component={ClassesScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="ClassTutorDetailsScreen"
+      component={ClassTutorDetailsScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="ClassBookingScreen"
+      component={ClassBookingScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="ClassPaymentScreen"
+      component={ClassPaymentScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="ClassRescheduleScreen"
+      component={ClassRescheduleScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="StreakScreen"
+      component={StreakScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="MySadana"
+      component={MySadana}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="SubmitMantraScreen"
+      component={SubmitMantraScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="SadanaTrackerScreen"
+      component={SadanaTrackerScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="Dharma"
+      component={Dharma}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="LearnMore"
+      component={LearnMore}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="RelatedVideosScreen"
+      component={RelatedVideosScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="DailyPracticeList"
+      component={DailyPracticeList}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="DailyPracticeSelectList"
+      component={DailyPracticeSelectList}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="DailyPracticeDetailSelectedPractice"
+      component={DailyPracticeDetailSelectedPractice}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="TrackerScreen"
+      component={TrackerScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen name="TrackerTabs" component={TopTabsNavigator} />
+    <Stack.Screen
+      name="TrackerProgress"
+      component={TrackerProgress}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="TrackerEdit"
+      component={TrackerEdit}
+      options={{ headerShown: false }}
+    />
   </Stack.Navigator>
 );
 
 export const NotificationStackNavigator = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Notifications" component={Notifications}  options={{ headerShown: false }}/>
+    <Stack.Screen
+      name="Notifications"
+      component={Notifications}
+      options={{ headerShown: false }}
+    />
     {/* Add notification screens here */}
   </Stack.Navigator>
 );
 
 export const ProfileStackNavigator = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Profile" component={Profile}  options={{ headerShown: false }}/>
-      <Stack.Screen name="ProfileDetails" component={ProfileDetails}  options={{ headerShown: false }}/>
-     <Stack.Screen name="Language" component={Language}  options={{ headerShown: false }} />
-     <Stack.Screen name="Privacy" component={Privacy}  options={{ headerShown: false }} />
+    <Stack.Screen
+      name="Profile"
+      component={Profile}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="ProfileDetails"
+      component={ProfileDetails}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="Language"
+      component={Language}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="Privacy"
+      component={Privacy}
+      options={{ headerShown: false }}
+    />
   </Stack.Navigator>
 );
 

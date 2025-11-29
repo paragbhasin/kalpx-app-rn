@@ -6,7 +6,7 @@
   },
   "categories": {
     "dharma": "Practice",
-    "sadana":"Sadhana",
+    "sadana":"My Routine",
     "explore": "Videos",
     "travel": "Travel",
     "pooja": "Pooja",
@@ -565,7 +565,7 @@
 "streakScreen": {
   "tabs": {
     "sankalp": "Sankalp & Mantra",
-    "daily": "Daily Practices"
+    "daily": "Daily Routine"
   },
   "streakInfo": "Streaks are updated daily based on your practice completions.",
   "keepGoing": "Keep Going!",
@@ -599,8 +599,8 @@
   "practiceStreaks": "Practice Streaks",
   "yourBadge": "Your Badge",
   "yourStreak": "Your Streak",
-  "downloadBadge": "Download Badge Card",
-  "downloadStreak": "Download Streak Card",
+  "downloadBadge": "Badge Card",
+  "downloadStreak": "Streak Card",
   "noBadgesTitle": "No Badges",
   "noBadgesMessage": "on KalpX yet — but you’re just ",
   "9":"9",
@@ -981,5 +981,50 @@
         "🌟 You're keeping your streak alive!",
         "🙏 See you tomorrow for your next step on this journey."
       ]
-  }
+  },
+"sankalpHeaderText": {
+  "uiStage1": [
+ "🌱 Plant your intention, watch it bloom.",
+"🎯 Set your Sankalp, manifest your path.",
+"🌟 Your intention shapes your reality.",
+"💫 Begin with purpose, end with peace."
+  ],
+  "uiStage2": [
+"🙏 Intention in motion, transformation in progress.",
+"🔥 My Sankalp guides me forward.",
+"🌊 Flowing with purpose, growing with grace.",
+"✨ Living my intention, one breath at a time.",
+"🌿 Rooted in resolve, reaching for dharma."
+  ],
+  "uiStage3": [
+"🏆 Sankalp complete, soul aligned.",
+"🪷 Intention fulfilled, heart at peace.",
+ "🌞 My resolve today, inspiration for tomorrow.",
+"💎 Commitment kept, spirit strengthened.",
+ "🕉️ Promise honored, dharma deepened."
+  ]
+},
+"mantraHeaderText": {
+  "stageHeader1": [
+       "✨ Let your mantra light another soul.",
+       "🌼 Let others taste the joy of chanting.",
+        "🌞 Share your sādhanā, awaken another heart.",
+         "🌺 Let your chant become someone's start."
+  ],
+  "stageHeader2": [
+        "🕉️ Chant. Share. Inspire.",
+        "🙏 Your devotion can spark another's journey.",
+         "🔔 Echo your mantra — let dharma flow.",
+         "🌿 Share your mantra, sow the seeds of peace.",
+         "🕊️ Pass the prayer, grow the grace."
+  ],
+  "stageHeader3": [
+      "Spread divinity, share your vibration.",
+       "💫 Share your bhakti, multiply the bliss.",
+      "🔥 Spread the glow of your tapasya.",
+       "🪔 Your light can awaken another soul.",
+         "🌞 Dharma grows when shared."
+  ]
+}
+
 }

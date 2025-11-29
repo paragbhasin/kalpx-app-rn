@@ -95,16 +95,18 @@ const PracticeDailyModal: React.FC<PracticeDailyModalProps> = ({
       style={{ margin: 0, justifyContent: "center", alignItems: "center" }}
     >
       <View style={styles.modalContent}>
-        <TextComponent type="boldText" style={styles.title}>
+        <View style={{width:"100%",backgroundColor:"#FDF5E9",padding:20,borderTopRightRadius:16,borderTopLeftRadius:16}}>
+        <TextComponent type="headerText" style={styles.title}>
           {t("streakScreen.practiceText")} {date}
         </TextComponent>
-
+</View>
         {/* Scrollable content */}
         <ScrollView
           style={styles.scrollArea}
           showsVerticalScrollIndicator={true}
           nestedScrollEnabled
         >
+          <View style={{marginHorizontal:16}}>
           {/* Completed */}
           {completed.length > 0 && (
             <>
@@ -134,6 +136,7 @@ const PracticeDailyModal: React.FC<PracticeDailyModalProps> = ({
               />
             </>
           )}
+          </View>
         </ScrollView>
 
         {/* Close Button */}
@@ -153,7 +156,7 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: Colors.Colors.white,
     borderRadius: 16,
-    padding: 20,
+    // padding: 20,
     alignItems: "center",
     maxHeight: "80%",
     width: "90%",
@@ -161,8 +164,8 @@ const styles = StyleSheet.create({
   title: {
     alignSelf: "center",
     marginVertical: 6,
-    color: Colors.Colors.BLACK,
-    fontSize: 16,
+    // color: Colors.Colors.BLACK,
+    // fontSize: 16,
   },
   subTitle: {
     alignSelf: "flex-start",
@@ -185,17 +188,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   closeBtn: {
-    width: "100%",
+    // width: "100%",
     backgroundColor: Colors.Colors.App_theme,
-    paddingVertical: 10,
+    padding: 10,
     borderRadius: 14,
     borderColor: "#FAD38C",
     borderWidth: 1,
     alignItems: "center",
-    marginTop: 20,
+    marginVertical: 20,
   },
   closeBtnText: {
     color: Colors.Colors.white,
+    paddingHorizontal:6
   },
 });
 

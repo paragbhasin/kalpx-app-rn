@@ -66,9 +66,11 @@ const FilterModal: React.FC<FilterModalProps> = ({
   const [classType, setClassType] = useState<string | null>(null);
   const [schedule, setSchedule] = useState<string | null>(null);
   const [language, setLanguage] = useState<string | null>(null);
-  const [sort, setSort] = useState<string | null>(null);
+  // const [sort, setSort] = useState<string | null>(null);
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
+  const [sort, setSort] = useState<string>("-updated_at");  // default sort
+
 
   const handleClearAll = () => {
     setSkillLevel(null);
@@ -233,6 +235,7 @@ const styles = StyleSheet.create({
     height: 46,
     backgroundColor: "#fff",
     width: "48%",
+    paddingHorizontal: 12,
   },
   closeBtn: {
     backgroundColor: Colors.Colors.App_theme,

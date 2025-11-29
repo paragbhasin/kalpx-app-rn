@@ -16,7 +16,14 @@ const initialState = {
 export const notificationsReducer = (state = initialState, action) => {
   switch (action.type) {
     case NOTIFICATIONS_REQUEST:
-      return { ...state, loading: true };
+  return {
+    ...state,
+    loading: true,
+    data: state.page === 1 ? [] : state.data,
+  };
+
+    // case NOTIFICATIONS_REQUEST:
+    //   return { ...state, loading: true };
 
   case NOTIFICATIONS_SUCCESS:
   return {

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Alert,
+  Linking,
   ScrollView,
   TouchableOpacity,
   View
@@ -69,86 +70,12 @@ const handleDelete =  () => {
   await unregisterDeviceFromBackend();
                   handleLogout();
                   Alert.alert("✅ Account deleted successfully!");
-                  // Optionally navigate to login or clear AsyncStorage here
                 } else {
                   Alert.alert("❌ Failed", res.error);
                 }
               })
             );
   };
-
-// const menuItems = [
-//   { key: "myProfile", icon: "person-outline", route: "ProfileDetails" },
-//   { key: "language", icon: "globe-outline", route: "Language" },
-//   { key: "privacy", icon: "key-outline", route: "Privacy" },
-//     // action: () => setShowPrivacy(true) },
-
-//   // New items below 👇
-//  {
-//       key: "logout",
-//       icon: "log-out-outline",
-//       action: () => {
-//         Alert.alert(
-//           t("profile.menu.logout"),
-//           t(
-//             "profile.menu.logoutConfirm",
-//             "Are you sure you want to log out?"
-//           ),
-//           [
-//             { text: t("common.cancel", "Cancel"), style: "cancel" },
-//             {
-//               text: t("common.yes", "Yes"),
-//               style: "destructive",
-//               onPress: handleLogout,
-//             },
-//           ]
-//         );
-//       },
-//     },
-//    {
-//       key: "deleteAccount",
-//       icon: "trash-outline",
-//       action: () => {
-//         Alert.alert(
-//           t("profile.menu.deleteAccount"),
-//           t(
-//             "profile.menu.deleteAccountConfirm",
-//             "This action is permanent. Do you really want to delete your account?"
-//           ),
-//           [
-//             { text: t("common.cancel", "Cancel"), style: "cancel" },
-//             {
-//               text: t("common.delete", "Delete"),
-//               style: "destructive",
-//               onPress: handleDelete,
-//             },
-//           ]
-//         );
-//       },
-//     },
-// ];
-
-// const menuItems = [
-//   { key: "myProfile", icon: "person-outline", route: "ProfileDetails" },
-//   { key: "language", icon: "globe-outline", route: "Language" },
-//   { key: "privacy", icon: "key-outline", route: "Privacy" },
-
-//   {
-//     key: "logout",
-//     icon: "log-out-outline",
-//     action: () => setShowLogoutPopup(true),
-//   },
-//   {
-//     key: "deleteAccount",
-//     icon: "trash-outline",
-//     action: () => setShowDeletePopup(true),
-//   },
-// ];
-
-// const baseMenuItems = [
-//   { key: "language", icon: "globe-outline", route: "Language" },
-//   { key: "privacy", icon: "key-outline", route: "Privacy" },
-// ];
 
 const loggedInItems = [
   { key: "myProfile", icon: "person-outline", route: "ProfileDetails" },
@@ -183,6 +110,7 @@ const menuItems = isLoggedIn
 
 
   return (
+      <View style={{ flex: 1 ,backgroundColor:"#fffaf5"}}>
     <ScrollView style={styles.container}>
       {/* Header */}
       <Header/>
@@ -193,23 +121,6 @@ const menuItems = isLoggedIn
         <TextComponent type="headerText" style={styles.headerText}>{t("profile.title")}</TextComponent>
         <View style={{ width: 24 }} />
       </View>
-
-      {/* Profile Card */}
-      {/* <View style={styles.profileCard}>
-        <View style={styles.avatarContainer}>
-          <Image
-            source={require("../../../assets/Avatar.png")}
-            style={styles.avatar}
-          />
-          <TouchableOpacity style={styles.editIcon}>
-            <Ionicons name="pencil" size={14} color="#fff" />
-          </TouchableOpacity>
-        </View>
-        <Text style={styles.name}>{t("profile.name")}</Text>
-        <Text style={styles.level}>{t("profile.level")}</Text>
-      </View> */}
-
-      {/* Menu Items */}
       <View style={styles.menu}>
         {menuItems.map((item: any, index) => (
           <TouchableOpacity
@@ -266,6 +177,32 @@ const menuItems = isLoggedIn
 
  {showPrivacy && <Privacy onClose={() => setShowPrivacy(false)} />}
     </ScrollView>
+     {/* Follow Us Section */}
+<View style={{ marginBottom: 50, alignItems: "center",backgroundColor:"#fffaf5"}}>
+  <View style={{ flexDirection: "row", gap: 25 ,alignItems:"center"}}>
+  <TextComponent
+    type="streakSadanaText"
+    style={{ fontSize: 18, color: "#000"}}
+  >
+    {t("profile.followUs", "Follow us")}
+  </TextComponent>
+
+    {/* Facebook */}
+    <TouchableOpacity
+      onPress={() => Linking.openURL("https://www.facebook.com/KalpxOfficial/")}
+    >
+      <Ionicons name="logo-facebook" size={34} color="#4267B2" />
+    </TouchableOpacity>
+
+    {/* Instagram */}
+    <TouchableOpacity
+      onPress={() => Linking.openURL("https://www.instagram.com/kalpxofficial")}
+    >
+      <Ionicons name="logo-instagram" size={34} color="#C13584" />
+    </TouchableOpacity>
+  </View>
+</View>
+</View>
   );
 }
 

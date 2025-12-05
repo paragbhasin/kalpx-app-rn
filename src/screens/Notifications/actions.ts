@@ -14,8 +14,6 @@ export const fetchNotifications = (page = 1, limit = 20) => async (dispatch) => 
   try {
     const res = await api.get(`/notifications/?page=${page}&page_size=${limit}`);
 
-    console.log("noti data 222 >>>>>",res.data?.results?.notifications)
-
     dispatch({
       type: NOTIFICATIONS_SUCCESS,
       payload: {
@@ -31,29 +29,6 @@ export const fetchNotifications = (page = 1, limit = 20) => async (dispatch) => 
     });
   }
 };
-
-
-
-// export const fetchNotifications = (page = 1, limit = 20) => async (dispatch) => {
-//   dispatch({ type: NOTIFICATIONS_REQUEST });
-
-//   try {
-//     const res = await api.get(`/notifications/?page=${page}&page_size=${limit}`);
-
-//     dispatch({
-//       type: NOTIFICATIONS_SUCCESS,
-//       payload: {
-//         data: res.data,
-//         page,
-//       },
-//     });
-//   } catch (error) {
-//     dispatch({
-//       type: NOTIFICATIONS_FAILURE,
-//       payload: error.message,
-//     });
-//   }
-// };
 
 export const markNotificationsRead = (ids) => async (dispatch) => {
   dispatch({ type: MARK_READ_REQUEST });

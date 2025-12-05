@@ -99,8 +99,13 @@ useEffect(() => {
     imageUrl: item.cover_media?.key ? `${BASE_IMAGE_URL}/${item.cover_media.key}` : undefined,
     title: item.title,
     description: item.description,
-    duration: item.pricing?.per_person?.session_length_min,
-    price: item.pricing?.per_person?.amount?.web,
+    duration: item?.pricing?.trial?.session_length_min ? item?.pricing?.trial?.session_length_min : item?.pricing?.per_person?.session_length_min,
+    // price: item.pricing?.per_person?.amount?.web,
+    price: (
+  item?.pricing?.type === "per_group"
+    ? item?.pricing?.per_group?.amount?.web
+    : item?.pricing?.per_person?.amount?.web
+) ?? 0,
     tutor: item.tutor,
     raw: item,
   });
@@ -115,6 +120,7 @@ useEffect(() => {
         setLoadingExplore(false);
         if (res.success) {
           const newClasses = res.data?.classes?.results || [];
+          console.log("Fetched Tutor Classes:", JSON.stringify(newClasses));
           setExploreData((prev) =>
             pageNum === 1 ? newClasses : [...prev, ...newClasses]
           );
@@ -272,12 +278,24 @@ useEffect(() => {
         >
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <TextComponent
+  type="boldText"
+  style={{ fontSize: FontSize.CONSTS.FS_20 }}
+>
+  {route?.params?.data?.pricing?.currency === "INR" ? "₹" : "$"}{" "}
+  {
+    route?.params?.data?.pricing?.type === "per_group"
+      ? route?.params?.data?.pricing?.per_group?.amount?.web
+      : route?.params?.data?.pricing?.per_person?.amount?.web
+  ?? 0}
+</TextComponent>
+
+            {/* <TextComponent
               type="boldText"
               style={{ fontSize: FontSize.CONSTS.FS_20 }}
             >
               {route?.params?.data?.pricing?.currency === "INR" ? "₹" : "$"}{" "}
               {route?.params?.data?.pricing?.per_person?.amount?.web ?? 0}
-            </TextComponent>
+            </TextComponent> */}
             <TextComponent
               type="mediumText"
               style={{ fontSize: FontSize.CONSTS.FS_14 }}

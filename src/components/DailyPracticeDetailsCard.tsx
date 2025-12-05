@@ -18,73 +18,153 @@ const categoryChantOptions = {
   "peace-calm": {
     category: "Peace & Stress Relief",
     options: [
-      { count: 9, label: "Calm Now" }, // 7 chars
-      { count: 27, label: "Ease Stress" }, // 11 chars
-      { count: 54, label: "Deep Calm" }, // 9 chars
-      { count: 108, label: "Soft Peace" }, // 10 chars
+      { count: 3, label: "Micro Calm" },
+      { count: 9, label: "Calm Now" },
+      { count: 27, label: "Ease Stress" },
+      { count: 54, label: "Deep Calm" },
+      { count: 108, label: "Soft Peace" },
     ],
   },
 
   focus: {
     category: "Focus & Motivation",
     options: [
-      { count: 9, label: "Quick Focus" }, // 11 chars
-      { count: 27, label: "Mind Clear" }, // 10 chars
-      { count: 54, label: "Stay Sharp" }, // 10 chars
-      { count: 108, label: "Full Focus" }, // 10 chars
+      { count: 3, label: "Micro Focus" },
+      { count: 9, label: "Quick Focus" },
+      { count: 27, label: "Mind Clear" },
+      { count: 54, label: "Stay Sharp" },
+      { count: 108, label: "Full Focus" },
     ],
   },
 
   healing: {
     category: "Emotional Healing",
     options: [
-      { count: 9, label: "Gentle Heal" }, // 11 chars
-      { count: 27, label: "Emotional Ease" }, // 11 chars
-      { count: 54, label: "Heart Heal" }, // 10 chars
-      { count: 108, label: "Inner Renew" }, // 11 chars
+      { count: 3, label: "Tiny Heal" },
+      { count: 9, label: "Gentle Heal" },
+      { count: 27, label: "Emotional Ease" },
+      { count: 54, label: "Heart Heal" },
+      { count: 108, label: "Inner Renew" },
     ],
   },
 
   gratitude: {
     category: "Gratitude & Positivity",
     options: [
-      { count: 9, label: "Quick Thanks" }, // 11 chars
-      { count: 27, label: "Feel Good" }, // 9 chars
-      { count: 54, label: "Joy Rise" }, // 7 chars
-      { count: 108, label: "Bright Mind" }, // 11 chars
+      { count: 3, label: "Micro Thanks" },
+      { count: 9, label: "Quick Thanks" },
+      { count: 27, label: "Feel Good" },
+      { count: 54, label: "Joy Rise" },
+      { count: 108, label: "Bright Mind" },
     ],
   },
 
   "spiritual-growth": {
     category: "Spiritual Growth",
     options: [
-      { count: 9, label: "Spirit Lift" }, // 10 chars
-      { count: 27, label: "Divine Touch" }, // 12 chars
-      { count: 54, label: "Inner Light" }, // 11 chars
-      { count: 108, label: "Soul Align" }, // 10 chars
+      { count: 3, label: "Tiny Lift" },
+      { count: 9, label: "Spirit Lift" },
+      { count: 27, label: "Divine Touch" },
+      { count: 54, label: "Inner Light" },
+      { count: 108, label: "Soul Align" },
     ],
   },
 
   health: {
     category: "Health & Well-Being",
     options: [
-      { count: 9, label: "Vital Boost" }, // 11 chars
-      { count: 27, label: "Body Heal" }, // 9 chars
-      { count: 54, label: "Deep Heal" }, // 9 chars
-      { count: 108, label: "Life Renew" }, // 10 chars
+      { count: 3, label: "Mini Boost" },
+      { count: 9, label: "Vital Boost" },
+      { count: 27, label: "Body Heal" },
+      { count: 54, label: "Deep Heal" },
+      { count: 108, label: "Life Renew" },
     ],
   },
 
   career: {
     category: "Career & Prosperity",
     options: [
-      { count: 9, label: "Quick Boost" }, // 11 chars
-      { count: 27, label: "Goal Flow" }, // 8 chars
-      { count: 54, label: "Prosper Path" }, // 12 chars
-      { count: 108, label: "Wealth Rise" }, // 11 chars
+      { count: 3, label: "Mini Boost" },
+      { count: 9, label: "Quick Boost" },
+      { count: 27, label: "Goal Flow" },
+      { count: 54, label: "Prosper Path" },
+      { count: 108, label: "Wealth Rise" },
     ],
   },
 };
+
+
+// const categoryChantOptions = {
+//   "peace-calm": {
+//     category: "Peace & Stress Relief",
+//     options: [
+//       { count: 9, label: "Calm Now" }, // 7 chars
+//       { count: 27, label: "Ease Stress" }, // 11 chars
+//       { count: 54, label: "Deep Calm" }, // 9 chars
+//       { count: 108, label: "Soft Peace" }, // 10 chars
+//     ],
+//   },
+
+//   focus: {
+//     category: "Focus & Motivation",
+//     options: [
+//       { count: 9, label: "Quick Focus" }, // 11 chars
+//       { count: 27, label: "Mind Clear" }, // 10 chars
+//       { count: 54, label: "Stay Sharp" }, // 10 chars
+//       { count: 108, label: "Full Focus" }, // 10 chars
+//     ],
+//   },
+
+//   healing: {
+//     category: "Emotional Healing",
+//     options: [
+//       { count: 9, label: "Gentle Heal" }, // 11 chars
+//       { count: 27, label: "Emotional Ease" }, // 11 chars
+//       { count: 54, label: "Heart Heal" }, // 10 chars
+//       { count: 108, label: "Inner Renew" }, // 11 chars
+//     ],
+//   },
+
+//   gratitude: {
+//     category: "Gratitude & Positivity",
+//     options: [
+//       { count: 9, label: "Quick Thanks" }, // 11 chars
+//       { count: 27, label: "Feel Good" }, // 9 chars
+//       { count: 54, label: "Joy Rise" }, // 7 chars
+//       { count: 108, label: "Bright Mind" }, // 11 chars
+//     ],
+//   },
+
+//   "spiritual-growth": {
+//     category: "Spiritual Growth",
+//     options: [
+//       { count: 9, label: "Spirit Lift" }, // 10 chars
+//       { count: 27, label: "Divine Touch" }, // 12 chars
+//       { count: 54, label: "Inner Light" }, // 11 chars
+//       { count: 108, label: "Soul Align" }, // 10 chars
+//     ],
+//   },
+
+//   health: {
+//     category: "Health & Well-Being",
+//     options: [
+//       { count: 9, label: "Vital Boost" }, // 11 chars
+//       { count: 27, label: "Body Heal" }, // 9 chars
+//       { count: 54, label: "Deep Heal" }, // 9 chars
+//       { count: 108, label: "Life Renew" }, // 10 chars
+//     ],
+//   },
+
+//   career: {
+//     category: "Career & Prosperity",
+//     options: [
+//       { count: 9, label: "Quick Boost" }, // 11 chars
+//       { count: 27, label: "Goal Flow" }, // 8 chars
+//       { count: 54, label: "Prosper Path" }, // 12 chars
+//       { count: 108, label: "Wealth Rise" }, // 11 chars
+//     ],
+//   },
+// };
 
 const DownUpIcon = ({ expanded }) => (
   <Ionicons
@@ -152,13 +232,51 @@ const DailyPracticeDetailsCard = ({
   onChange,
   onBackPress,
   isLocked,
+    selectedCount,
+  onSelectCount,
+  mode
 }) => {
   const [selectedChant, setSelectedChant] = useState(null);
   const [showPronunciation, setShowPronunciation] = useState(false);
   const [isDevanagariLong, setIsDevanagariLong] = useState(false);
   const [showDevanagariModal, setShowDevanagariModal] = useState(false);
-
     const slideAnim = useRef(new Animated.Value(0)).current;
+
+
+    console.log("DailyPracticeDetailsCard rendered with data:", data, "and item:", item);
+
+      // Normalize chantOptions
+const getNormalizedChantOptions = (options) => {
+  if (!options || options.length === 0) return [];
+  return typeof options[0] === "number"
+    ? options.map((n) => ({ count: n, label: `${n} chants` }))
+    : options;
+};
+
+const normalizedOptions = React.useMemo(
+  () => getNormalizedChantOptions(data?.chantOptions),
+  [data?.chantOptions]
+);
+
+// lowest count
+const getDefaultChant = (options) =>
+  options.length
+    ? options.reduce((min, c) => (c.count < min.count ? c : min))
+    : null;
+
+    React.useEffect(() => {
+  const lowest = getDefaultChant(normalizedOptions);
+  setSelectedChant(lowest);
+  onSelectCount?.(lowest?.count);
+}, [normalizedOptions]);
+
+// Sync with parent when parent changes
+React.useEffect(() => {
+  if (selectedCount) {
+    const found = normalizedOptions.find(o => o.count === selectedCount);
+    if (found) setSelectedChant(found);
+  }
+}, [selectedCount, normalizedOptions]);
 
   const handleSwipeChange = () => {
     // 1. Slide OUT to LEFT
@@ -181,7 +299,46 @@ const DailyPracticeDetailsCard = ({
       }).start();
     });
   };
+
+  const categoryKey =
+  item?.key ||
+  data?.category_key ||
+  data?.category ||
+  null;
+
   
+// Full category options (always source of truth for label)
+const fullCategoryOptions = categoryKey
+  ? categoryChantOptions[categoryKey]?.options || []
+  : [];
+
+
+// Filter category options based on API counts (if any)
+const chantOptions = React.useMemo(() => {
+  if (!data?.chantOptions || data.chantOptions.length === 0) {
+    return fullCategoryOptions; // fallback to full list
+  }
+
+  // API may send [count] or [{count, label}]
+  const apiCounts = data.chantOptions.map(c =>
+    typeof c === "number" ? c : c.count
+  );
+
+  return fullCategoryOptions.filter(opt => apiCounts.includes(opt.count));
+}, [data?.chantOptions, item.key]);
+
+React.useEffect(() => {
+  if (chantOptions.length > 0) {
+    const lowest = chantOptions.reduce(
+      (min, o) => (o.count < min.count ? o : min),
+      chantOptions[0]
+    );
+
+    setSelectedChant(lowest);
+    onSelectCount?.(lowest.count);
+  }
+}, [chantOptions]);
+
 
   return (
         <Animated.View style={{ transform: [{ translateX: slideAnim }] }}>
@@ -216,7 +373,7 @@ const DailyPracticeDetailsCard = ({
             type="DailyDetailheaderText"
             style={styles.headerTitle}
           >
-            {data?.title}
+            {data?.title || data?.text || data?.name || data?.short_text}
           </TextComponent>
           {data?.tags && (
             <View style={styles.tagsCenterWrapper}>
@@ -238,7 +395,7 @@ const DailyPracticeDetailsCard = ({
               {data?.line}
             </TextComponent>
           )}
-          {data?.devanagari && (
+          {(data?.devanagari || data?.mantra) && (
             <View style={styles.devanagariRow}>
               <TextComponent
                 type="headerText"
@@ -251,7 +408,7 @@ const DailyPracticeDetailsCard = ({
                   }
                 }}
               >
-                {data?.devanagari}
+                {data?.devanagari || data?.mantra}
               </TextComponent>
               <TouchableOpacity onPress={() => setShowDevanagariModal(true)}>
                 <Ionicons
@@ -263,7 +420,7 @@ const DailyPracticeDetailsCard = ({
               </TouchableOpacity>
             </View>
           )}
-          {data?.iast && (
+          {(data?.iast || data?.name) && (
             <View style={styles.pronunciationRow}>
               <TextComponent type="cardText" style={styles.pronunciationText}>
                 Pronunciation Guide (English)
@@ -278,8 +435,11 @@ const DailyPracticeDetailsCard = ({
             </View>
           )}
         </ImageBackground>
-        {data?.summary && (
+          {data?.summary && (
           <ExpandableText title="" text={data?.summary} numberOfLines={2} />
+        )}
+        {data?.suggested_practice && (
+          <ExpandableText title="" text={data?.suggested_practice} numberOfLines={2} />
         )}
         {data?.steps && (
           <Card style={styles.meaningCard}>
@@ -326,7 +486,7 @@ const DailyPracticeDetailsCard = ({
         {/* {data?.essence?.text || data?.essence &&
         <ExpandableText title="Essence" text={data?.essence?.text || data?.essence} numberOfLines={3} />
 } */}
-        {data?.essence && (
+        {/* {data?.essence && (
           <ExpandableText
             title="Essence"
             text={
@@ -336,7 +496,7 @@ const DailyPracticeDetailsCard = ({
             }
             numberOfLines={3}
           />
-        )}
+        )} */}
         {data?.essence && (
           <ExpandableText
             title="Essence"
@@ -356,7 +516,7 @@ const DailyPracticeDetailsCard = ({
             numberOfLines={3}
           />
         )}
-        {data?.id?.includes("mantra") &&
+        {data?.id?.includes("mantra") && mode === "new" &&
           item?.key &&
           categoryChantOptions[item.key] && (
             <View style={styles.chantMainWrapper}>
@@ -368,14 +528,28 @@ const DailyPracticeDetailsCard = ({
               </TextComponent>
 
               <View style={styles.chantGrid}>
-                {categoryChantOptions[item.key].options.map((option) => (
+                {chantOptions.map((option) => (
+  <ChantOptionItem
+    key={option.count}
+    item={option}
+    selected={selectedChant}
+    onSelect={(opt) => {
+      setSelectedChant(opt);
+      onSelectCount(opt.count);
+    }}
+  />
+))}
+                {/* {categoryChantOptions[item.key].options.map((option) => (
                   <ChantOptionItem
                     key={option.count}
                     item={option}
                     selected={selectedChant}
-                    onSelect={setSelectedChant}
+                 onSelect={(opt) => {
+  setSelectedChant(opt);
+  onSelectCount(opt.count);
+}}
                   />
-                ))}
+                ))} */}
               </View>
             </View>
           )}
@@ -393,8 +567,8 @@ const DailyPracticeDetailsCard = ({
           iast={data?.devanagari}
         />
       </ScrollView>
-      {!isLocked && (
         <View style={styles.fixedButtons}>
+      {!isLocked && (
           <TouchableOpacity style={styles.changeButton} 
                 onPress={handleSwipeChange}
           // onPress={onChange}
@@ -409,13 +583,16 @@ const DailyPracticeDetailsCard = ({
               Change
             </TextComponent>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.selectButton} onPress={onBackPress}>
+)}
+      {mode === "new" && (
+          <TouchableOpacity style={mode === "new" ? styles.selectButton : styles.selectNewButton } onPress={onBackPress}>
             <TextComponent type="headerText" style={styles.selectText}>
               Select
             </TextComponent>
           </TouchableOpacity>
-        </View>
       )}
+        </View>
+      
     </Card>
     </Animated.View>
   );
@@ -551,6 +728,13 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     paddingVertical: 10,
     paddingHorizontal: 20,
+  },
+  selectNewButton:{
+      backgroundColor: "#D4A017",
+    borderRadius: 4,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+alignSelf:"flex-end"
   },
   selectText: {
     color: "#FFFFFF",

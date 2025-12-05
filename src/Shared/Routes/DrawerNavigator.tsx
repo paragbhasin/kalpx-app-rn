@@ -9,12 +9,14 @@ import {
   Dimensions,
   FlatList,
   Image,
+  Linking,
   TouchableOpacity,
   View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useDispatch } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
+import Colors from "../../components/Colors";
 import TextComponent from "../../components/TextComponent";
 import { getDailyDharmaTracker } from "../../screens/Home/actions";
 import store, { RootState } from "../../store";
@@ -299,6 +301,34 @@ const renderCategory = ({ item }) => (
           paddingVertical: 15,
         }}
       >
+          <View style={{ marginBottom: 20, alignItems: "center",backgroundColor:Colors.Colors.white}}>
+  <View style={{ flexDirection: "row", gap: 25 ,alignItems:"center"}}>
+  <TextComponent
+    type="streakSadanaText"
+    style={{ color: "#000"}}
+  >
+    {t("profile.followUs", "Follow us")}
+  </TextComponent>
+
+    {/* Facebook */}
+    <TouchableOpacity
+      onPress={() => {
+         props.navigation.closeDrawer(); 
+        Linking.openURL("https://www.facebook.com/KalpxOfficial/")}}
+    >
+      <Ionicons name="logo-facebook" size={34} color="#4267B2" />
+    </TouchableOpacity>
+
+    {/* Instagram */}
+    <TouchableOpacity
+      onPress={() => {
+         props.navigation.closeDrawer(); 
+        Linking.openURL("https://www.instagram.com/kalpxofficial")}}
+    >
+      <Ionicons name="logo-instagram" size={34} color="#C13584" />
+    </TouchableOpacity>
+  </View>
+</View>
         <TextComponent type="streakText"
           allowFontScaling={false}
           style={{ textAlign: "center", color: "#999", fontSize: 12 }}

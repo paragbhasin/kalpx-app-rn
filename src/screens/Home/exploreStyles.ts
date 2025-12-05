@@ -70,14 +70,14 @@ const styles = StyleSheet.create({
   filterButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fbeedc",
+    backgroundColor: "#D4A017",
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 8,
     marginRight: 12,
   },
   filterText: {
-    color: Colors.Colors.black_edge,
+    color: Colors.Colors.white,
     // fontSize: FontSize.CONSTS.FS_16,
     marginRight: 4,
   },

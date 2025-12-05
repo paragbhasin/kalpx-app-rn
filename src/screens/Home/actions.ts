@@ -198,17 +198,42 @@ const interestApi = (credentials) => {
 export const getPracticeToday = (callback) => async (dispatch) => {
   dispatch(practiceTodayRequest());
   try {
+    // Get device timezone dynamically
+    const tz =
+      Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata";
+
     const response = await api.get(
-      "practice/today/?tz=Asia/Calcutta&locale=en"
+      `practice/today/?tz=${encodeURIComponent(tz)}&locale=en`
     );
-    console.log("practice today res >>>>>>>>",response.data);
+
+    console.log("practice today res >>>>>>>>", response.data);
     dispatch(practiceTodaySuccess(response.data));
+
     if (callback) callback({ success: true, data: response.data });
-  } catch (error) {
-    dispatch(practiceTodayFailure(error.message));
-    if (callback) callback({ success: false, error: error.message });
+  } catch (error: any) {
+    const message =
+      error?.response?.data?.message || error.message || "Something went wrong";
+
+    dispatch(practiceTodayFailure(message));
+    if (callback) callback({ success: false, error: message });
   }
 };
+
+
+// export const getPracticeToday = (callback) => async (dispatch) => {
+//   dispatch(practiceTodayRequest());
+//   try {
+//     const response = await api.get(
+//       "practice/today/?tz=Asia/Calcutta&locale=en"
+//     );
+//     console.log("practice today res >>>>>>>>",response.data);
+//     dispatch(practiceTodaySuccess(response.data));
+//     if (callback) callback({ success: true, data: response.data });
+//   } catch (error) {
+//     dispatch(practiceTodayFailure(error.message));
+//     if (callback) callback({ success: false, error: error.message });
+//   }
+// };
 
 export const startMantraPractice = (payload, callback) => async (dispatch) => {
   dispatch(startMantraRequest());

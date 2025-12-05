@@ -37,6 +37,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
 
   },
+    classescard: {
+      elevation: 3,
+      backgroundColor: Colors.Colors.white,
+      padding: 20,
+      width: "96%",
+      alignSelf: "center",
+      borderRadius: 10,
+    },
   cardText: {
     marginTop: 4,
     // fontSize: 12,

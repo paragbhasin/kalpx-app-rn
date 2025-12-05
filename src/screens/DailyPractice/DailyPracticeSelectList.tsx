@@ -25,6 +25,8 @@ const DailyPracticeSelectList = ({ route }) => {
   const navigation: any = useNavigation();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const [mantraReps, setMantraReps] = useState(null);
+
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
 
   // ---------------------------------------------------
@@ -57,40 +59,76 @@ const DailyPracticeSelectList = ({ route }) => {
   // 🔥 STEP 2: AUTO SUBMIT IF RETURNING FROM LOGIN
   // ---------------------------------------------------
 
+  // useEffect(() => {
+  //   const checkPendingDailyPractice = async () => {
+  //     const pending = await AsyncStorage.getItem("pending_daily_practice_data");
+  //     if (pending) {
+  //       console.log("📥 Found pending daily practice data");
+  //       await AsyncStorage.removeItem("pending_daily_practice_data");
+
+  //       const { payload } = JSON.parse(pending);
+
+  //       console.log("🚀 Auto API call:", payload);
+
+  //       setLoading(true);
+  //       dispatch(
+  //         submitDailyDharmaSetup(payload, (res) => {
+  //           setLoading(false);
+
+  //           if (res.success) {
+  //             navigation.navigate("TrackerTabs", { screen: "Tracker" });
+  //           } else {
+  //             console.log("❌ Auto-submit failed:", res.error);
+  //           }
+  //         })
+  //       );
+  //     }
+  //   };
+
+  //   checkPendingDailyPractice();
+  // }, []);
+
   useEffect(() => {
-    const checkPendingDailyPractice = async () => {
-      const pending = await AsyncStorage.getItem("pending_daily_practice_data");
-      if (pending) {
-        console.log("📥 Found pending daily practice data");
-        await AsyncStorage.removeItem("pending_daily_practice_data");
+  const restoreAndSubmit = async () => {
+    let pending = await AsyncStorage.getItem("pending_daily_practice_data");
 
-        const { payload } = JSON.parse(pending);
+    // 1️⃣ If no pending in storage, check route resumeData
+    if (!pending && route?.params?.resumeData) {
+      pending = JSON.stringify(route.params.resumeData);
+    }
 
-        console.log("🚀 Auto API call:", payload);
+    if (!pending) return;
 
-        setLoading(true);
-        dispatch(
-          submitDailyDharmaSetup(payload, (res) => {
-            setLoading(false);
+    const { payload } = JSON.parse(pending);
 
-            if (res.success) {
-              navigation.navigate("TrackerTabs", { screen: "Tracker" });
-            } else {
-              console.log("❌ Auto-submit failed:", res.error);
-            }
-          })
-        );
-      }
-    };
+    // 2️⃣ Remove after using
+    await AsyncStorage.removeItem("pending_daily_practice_data");
 
-    checkPendingDailyPractice();
-  }, []);
+    // 3️⃣ Submit automatically
+    console.log("🚀 Auto-submitting Daily Practice:", payload);
+    setLoading(true);
+
+    dispatch(
+      submitDailyDharmaSetup(payload, (res) => {
+        setLoading(false);
+        if (res.success) {
+          navigation.navigate("TrackerTabs", { screen: "Tracker" });
+        } else {
+          console.log("❌ Auto-submit failed:", res.error);
+        }
+      })
+    );
+  };
+
+  restoreAndSubmit();
+}, []);
+
 
   // ---------------------------------------------------
   // 🔥 STEP 3: FILTER LISTS ONLY IF CATEGORY EXISTS
   // ---------------------------------------------------
 
-  const mantraList = useMemo(() => {
+  const mantraList : any= useMemo(() => {
     if (!selectedCategory) return [];
     return Object.values(allData).filter(
       (item: any) =>
@@ -130,32 +168,73 @@ const DailyPracticeSelectList = ({ route }) => {
   // 🔥 STEP 4: BUILD PAYLOAD
   // ---------------------------------------------------
 
-  const buildPayload = () => {
-    const selectedItems = [
-      mantraList[mantraIndex],
-      sankalpList[sankalpIndex],
-      practiceList[practiceIndex],
-    ].filter(Boolean);
+  // const buildPayload = () => {
+  //   const selectedItems = [
+  //     mantraList[mantraIndex],
+  //     sankalpList[sankalpIndex],
+  //     practiceList[practiceIndex],
+  //   ].filter(Boolean);
 
-    const practices = selectedItems.map((p: any) => ({
+  //   const practices = selectedItems.map((p: any) => ({
+  //     practice_id: p.id,
+  //     source: p.id.startsWith("mantra.")
+  //       ? "mantra"
+  //       : p.id.startsWith("sankalp.")
+  //       ? "sankalp"
+  //       : "practice",
+  //     category: categoryItem?.name ?? "",
+  //     name: p.title,
+  //     description: p.description || p.summary || p.meaning || "",
+  //     benefits: p.benefits || [],
+  //     ...(p.id.startsWith("mantra.") && p.reps
+  // ? { reps: p.reps }
+  // : {}),
+  //   }));
+
+  //   return {
+  //     practices,
+  //     is_authenticated: true,
+  //     recaptcha_token: "not_available",
+  //   };
+  // };
+
+  const buildPayload = () => {
+  const selectedItems = [
+    mantraList[mantraIndex]
+      ? { ...mantraList[mantraIndex], reps: mantraReps }
+      : null,
+
+    sankalpList[sankalpIndex] || null,
+    practiceList[practiceIndex] || null,
+  ].filter(Boolean);
+
+  const practices = selectedItems.map((p: any) => {
+    const source = p.id.startsWith("mantra.")
+      ? "mantra"
+      : p.id.startsWith("sankalp.")
+      ? "sankalp"
+      : "practice";
+
+    return {
       practice_id: p.id,
-      source: p.id.startsWith("mantra.")
-        ? "mantra"
-        : p.id.startsWith("sankalp.")
-        ? "sankalp"
-        : "practice",
+      source,
       category: categoryItem?.name ?? "",
       name: p.title,
       description: p.description || p.summary || p.meaning || "",
       benefits: p.benefits || [],
-    }));
 
-    return {
-      practices,
-      is_authenticated: true,
-      recaptcha_token: "not_available",
+      // ✔ add reps only if mantra
+      ...(source === "mantra" && p.reps ? { reps: p.reps } : {}),
     };
+  });
+
+  return {
+    practices,
+    is_authenticated: true,
+    recaptcha_token: "not_available",
   };
+};
+
 
   // ---------------------------------------------------
   // 🔥 STEP 5: RENDER UI
@@ -205,7 +284,10 @@ const DailyPracticeSelectList = ({ route }) => {
                   selectedType: "mantra",
                   fullList: mantraList,
                   startingIndex: mantraIndex,
-                  onUpdateSelection: (i) => setMantraIndex(i),
+               onUpdateSelection: (i, reps) => {
+  setMantraIndex(i);
+  setMantraReps(reps);   // ⬅️ NEW
+},
                   isLocked,
                 })
               }
@@ -266,7 +348,7 @@ const DailyPracticeSelectList = ({ route }) => {
 
           const payload = buildPayload();
           const token = await AsyncStorage.getItem("access_token");
-
+console.log("🚀 FINAL PAYLOAD:", payload);
           if (!token) {
             await AsyncStorage.setItem(
               "pending_daily_practice_data",

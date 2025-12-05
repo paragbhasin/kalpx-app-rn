@@ -44,14 +44,8 @@ const [isRestored, setIsRestored] = useState(false);
 const [monthSlotsData, setMonthSlotsData] = useState<any[]>([]);
 const [loadingMonth, setLoadingMonth] = useState(true);
 
+const submittingRef = useRef(false);
 
-
-  // const classInfo =
-  //   route?.params?.data ||
-  //   route?.params?.resumeData?.classData ||
-  //   null;
-
-    // CORRECT CLASS INFO FOR BOOKING + RESCHEDULE
 const bookingData = route?.params?.data;
 
 const classInfo = route?.params?.reschedule
@@ -62,74 +56,53 @@ const classSlug = classInfo?.slug;
 
 const [highlightDates, setHighlightDates] = useState<string[]>([]);
 
-
-    // console.log("classInfo >>>>", JSON.stringify(classInfo)); 
-
-// const allowedWeekdays =
-//   classInfo?.class_availability?.weekly
-//     ?.filter(d => d.slots.length > 0)
-//     ?.map(d => d.weekday) || [];
-
-    // const highlightDates = classInfo?.available_slots?.map(s => s.date) || [];
-
-
-    // console.log("classInfo >>>>", JSON.stringify(highlightDates),JSON.stringify(highlightDates)); 
-// const [highlightDates, setHighlightDates] = useState<string[]>(
-//   classInfo?.available_slots?.map(s => s.date) || []
-// );
-
-
  const userTimezone =
     Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata";
-
-//     useEffect(() => {
-//   const year = moment().year();
-//   const month = moment().month() + 1;
-//   fetchMonthSlots(year, month);
-// }, []);
-
-
-//     useEffect(() => {
-//   const firstDate = classInfo?.available_slots?.[0]?.date;
-//   const today = moment().format("YYYY-MM-DD");
-
-//   const initialDate = firstDate || today;
-
-//   setSelectedDate(initialDate);
-//   fetchSlots(initialDate);
-// }, []);
 
 // useEffect(() => {
 //   const year = moment().year();
 //   const month = moment().month() + 1;
 
-//   fetchMonthSlots(year, month);
+//   const loadInitial = async () => {
+//     await fetchMonthSlots(year, month);
 
-//   const today = moment().format("YYYY-MM-DD");
-//   setSelectedDate(today);
+//     setTimeout(() => {
+//       const firstDate = monthSlotsData.length
+//         ? monthSlotsData[0].date
+//         : moment().format("YYYY-MM-DD");
+
+//       setSelectedDate(firstDate);
+
+//       const slots = monthSlotsData.find(d => d.date === firstDate);
+//       setAvailableSlots(slots?.slots || []);
+//     }, 50);
+//   };
+
+//   loadInitial();
 // }, []);
 
 useEffect(() => {
   const year = moment().year();
   const month = moment().month() + 1;
-
-  const loadInitial = async () => {
-    await fetchMonthSlots(year, month);
-
-    setTimeout(() => {
-      const firstDate = monthSlotsData.length
-        ? monthSlotsData[0].date
-        : moment().format("YYYY-MM-DD");
-
-      setSelectedDate(firstDate);
-
-      const slots = monthSlotsData.find(d => d.date === firstDate);
-      setAvailableSlots(slots?.slots || []);
-    }, 50);
-  };
-
-  loadInitial();
+  fetchMonthSlots(year, month);
 }, []);
+
+
+// AUTO-SELECT FIRST AVAILABLE DATE AFTER monthSlotsData LOADED
+useEffect(() => {
+  if (!monthSlotsData.length) return;
+
+  // clone → sort safe
+  const sorted = [...monthSlotsData].sort(
+    (a, b) => moment(a.date).valueOf() - moment(b.date).valueOf()
+  );
+
+  const firstDate = sorted[0].date;
+
+  setSelectedDate(firstDate);
+  setAvailableSlots(sorted[0].slots || []);
+}, [monthSlotsData]);
+
 
 
  useEffect(() => {
@@ -252,32 +225,6 @@ const slotsFirstAvailable = (year: number, month: number) => {
     .find(date => moment(date).month() + 1 === month);
 };
 
-// const fetchMonthSlots = async (year: number, month: number) => {
-//   const start = moment({ year, month: month - 1 }).startOf("month").format("YYYY-MM-DD");
-//   const end = moment({ year, month: month - 1 }).endOf("month").format("YYYY-MM-DD");
-
-//   const slug = classInfo?.slug;
-//   if (!slug) return;
-
-//   const url = `public/classes/${slug}/?user_timezone=${encodeURIComponent(userTimezone)}&start_date=${start}&end_date=${end}`;
-
-//   console.log("📡 Fetching Month Slots:", url);
-
-//   try {
-//     const res = await api.get(url);
-//     const slots = res.data?.available_slots || [];
-
-//     // store entire list including slot arrays
-//     setMonthSlotsData(slots);
-
-//     // store just dates for calendar UI
-//     setHighlightDates(slots.map((s) => s.date));
-
-//   } catch (err) {
-//     console.log("❌ Month Slots Error", err);
-//   }
-// };
-
 const renderItem = ({ item }) => {
   const isSelected = item.start_user === selectedTime;
 
@@ -345,13 +292,106 @@ const renderItem = ({ item }) => {
   //   );
   // };
 
-  const handleNext = async () => {
-    if (!selectedSlotUTC) {
-      if (!isRestoringRef.current) {
-        alert("The chosen slot is unavailable. Kindly select a different slot to proceed.");
-      }
-      return false;
+//   const handleNext = async () => {
+//  if (!selectedSlotUTC) {
+//   if (isRestoringRef.current) {
+//     // 🔥 IMPORTANT: stop the auto-submit loop when restoring pending data
+//     setIsRestored(false);
+//     isRestoringRef.current = false;
+//   } else {
+//     alert("The chosen slot is unavailable. Kindly select a different slot to proceed.");
+//   }
+//   return false;
+// }
+
+//   const todaySlots = await fetchSlots(selectedDate);
+//   const stillExists = todaySlots.some((s) => s.start_utc === selectedSlotUTC);
+
+// if (!stillExists) {
+//   alert("This slot is no longer available. Please select another slot.");
+//   setSelectedSlotUTC("");
+//   setSelectedTime("");
+
+//   // 🔥 Prevent infinite auto-submit after login restore
+//   setIsRestored(false);
+//   isRestoringRef.current = false;
+
+//   return;
+// }
+
+//     const pendingData = {
+//       selectedDate,
+//       selectedSlotUTC,
+//       selectedTime,
+//       trailListed,
+//       note,
+//       classData: classInfo,
+//     };
+
+//     const canProceed = await ensureLoggedIn(
+//   navigation,
+//   "pending_classes_data",
+//   pendingData,
+//   "ClassBookingScreen"      // ⭐ very important
+// );
+
+
+//     // const canProceed = await ensureLoggedIn(
+//     //   navigation,
+//     //   "pending_classes_data",
+//     //   pendingData
+//     // );
+
+//     if (!canProceed) {
+//       console.log("⛔ No token, stopping API call.");
+//       return false;
+//     }
+
+//     setLoadingNext(true);
+
+//     const payload = {
+//       offering_id: classInfo?.id,
+//       scheduled_at: selectedSlotUTC,
+//       user_timezone: userTimezone,
+//       tutor_timezone: classInfo?.tutor?.timezone,
+//       note,
+//       trial_selected: trailListed,
+//     };
+
+//     dispatch(
+//       bookSlot(payload, (res) => {
+//         setLoadingNext(false);
+//         if (res.success) {
+//           navigation.navigate("ClassPaymentScreen", {
+//             bookingData: res,
+//             data: classInfo,
+//           });
+//         } else {
+//           alert("The chosen slot is unavailable. Kindly select a different slot to proceed.");
+//         }
+//       })
+//     );
+//   };
+
+const handleNext = async () => {
+  // 🔥 Prevent double submit
+  if (submittingRef.current) {
+    console.log("⏳ Prevented duplicate submission");
+    return;
+  }
+  submittingRef.current = true;
+
+  if (!selectedSlotUTC) {
+    if (isRestoringRef.current) {
+      setIsRestored(false);
+      isRestoringRef.current = false;
+    } else {
+      alert("The chosen slot is unavailable. Kindly select a different slot to proceed.");
     }
+    submittingRef.current = false;  // reset
+    return false;
+  }
+
   const todaySlots = await fetchSlots(selectedDate);
   const stillExists = todaySlots.some((s) => s.start_utc === selectedSlotUTC);
 
@@ -359,53 +399,60 @@ const renderItem = ({ item }) => {
     alert("This slot is no longer available. Please select another slot.");
     setSelectedSlotUTC("");
     setSelectedTime("");
+    setIsRestored(false);
+    isRestoringRef.current = false;
+    submittingRef.current = false;  // reset
     return;
   }
-    const pendingData = {
-      selectedDate,
-      selectedSlotUTC,
-      selectedTime,
-      trailListed,
-      note,
-      classData: classInfo,
-    };
 
-    const canProceed = await ensureLoggedIn(
-      navigation,
-      "pending_classes_data",
-      pendingData
-    );
-
-    if (!canProceed) {
-      console.log("⛔ No token, stopping API call.");
-      return false;
-    }
-
-    setLoadingNext(true);
-
-    const payload = {
-      offering_id: classInfo?.id,
-      scheduled_at: selectedSlotUTC,
-      user_timezone: userTimezone,
-      tutor_timezone: classInfo?.tutor?.timezone,
-      note,
-      trial_selected: trailListed,
-    };
-
-    dispatch(
-      bookSlot(payload, (res) => {
-        setLoadingNext(false);
-        if (res.success) {
-          navigation.navigate("ClassPaymentScreen", {
-            bookingData: res,
-            data: classInfo,
-          });
-        } else {
-          alert("The chosen slot is unavailable. Kindly select a different slot to proceed.");
-        }
-      })
-    );
+  const pendingData = {
+    selectedDate,
+    selectedSlotUTC,
+    selectedTime,
+    trailListed,
+    note,
+    classData: classInfo,
   };
+
+  const canProceed = await ensureLoggedIn(
+    navigation,
+    "pending_classes_data",
+    pendingData,
+    "ClassBookingScreen"
+  );
+
+  if (!canProceed) {
+    submittingRef.current = false; // reset
+    return false;
+  }
+
+  setLoadingNext(true);
+
+  const payload = {
+    offering_id: classInfo?.id,
+    scheduled_at: selectedSlotUTC,
+    user_timezone: userTimezone,
+    tutor_timezone: classInfo?.tutor?.timezone,
+    note,
+    trial_selected: trailListed,
+  };
+
+  dispatch(
+    bookSlot(payload, (res) => {
+      setLoadingNext(false);
+      submittingRef.current = false; // reset
+
+      if (res.success) {
+        navigation.navigate("ClassPaymentScreen", {
+          bookingData: res,
+          data: classInfo,
+        });
+      } else {
+        alert("The chosen slot is unavailable. Kindly select a different slot to proceed.");
+      }
+    })
+  );
+};
 
 
   const handleReschedule = async () => {
@@ -592,9 +639,24 @@ const renderItem = ({ item }) => {
             : classInfo?.pricing?.currency) === "INR"
             ? "₹"
             : "$"}{" "}
-          {(route?.params?.reschedule
+            {
+  route?.params?.reschedule
+    ? (
+        classInfo?.offering?.pricing?.type === "per_group"
+          ? classInfo?.offering?.pricing?.per_group?.amount?.web
+          : classInfo?.offering?.pricing?.per_person?.amount?.web
+      )
+    : (
+        classInfo?.pricing?.type === "per_group"
+          ? classInfo?.pricing?.per_group?.amount?.web
+          : classInfo?.pricing?.per_person?.amount?.web
+      )
+  ?? 0
+}
+
+          {/* {(route?.params?.reschedule
             ? classInfo?.offering?.pricing?.per_person?.amount?.web
-            : classInfo?.pricing?.per_person?.amount?.web) ?? 0}
+            : classInfo?.pricing?.per_person?.amount?.web) ?? 0} */}
         </TextComponent>
         <TextComponent
           type="mediumText"
@@ -625,18 +687,22 @@ const renderItem = ({ item }) => {
     const findSlots = monthSlotsData.find(d => d.date === date);
     setAvailableSlots(findSlots?.slots || []);
   }}
-onMonthChange={async (m) => {
+  onMonthChange={async (m) => {
   await fetchMonthSlots(m.year, m.month);
-
-  // After fetching month slots, auto-select first available day
-  const firstDate = slotsFirstAvailable(m.year, m.month);
-  if (firstDate) {
-    setSelectedDate(firstDate);
-
-    const daySlots = monthSlotsData.find(d => d.date === firstDate);
-    setAvailableSlots(daySlots?.slots || []);
-  }
 }}
+
+// onMonthChange={async (m) => {
+//   await fetchMonthSlots(m.year, m.month);
+
+//   // After fetching month slots, auto-select first available day
+//   const firstDate = slotsFirstAvailable(m.year, m.month);
+//   if (firstDate) {
+//     setSelectedDate(firstDate);
+
+//     const daySlots = monthSlotsData.find(d => d.date === firstDate);
+//     setAvailableSlots(daySlots?.slots || []);
+//   }
+// }}
 
 />
 

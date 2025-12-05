@@ -17,7 +17,7 @@ export default StyleSheet.create({
     alignItems: "center",
     padding: 12,
     justifyContent: "center",
-    marginTop: 45,
+    // marginTop: 45,
   },
 
   innerScroll: {
@@ -36,5 +36,12 @@ export default StyleSheet.create({
     arrowIcon: {
     width: 12,
     height: 12,
+  },
+     backIcon: {
+    width: 28,
+    height: 28,
+    marginLeft:16,
+    marginVertical:16
+    // marginTop:20,
   },
 });

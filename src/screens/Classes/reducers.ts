@@ -59,9 +59,6 @@ const tutorList = {
     hasMore: true,
   }
 
-// =============================================================
-// EXPLORE CLASSES REDUCER
-// =============================================================
 export const classesExploreReducer = (state = listState, action: any) => {
   switch (action.type) {
     case EXPLORE_REQUEST:
@@ -82,10 +79,6 @@ export const classesExploreReducer = (state = listState, action: any) => {
       return state;
   }
 };
-
-// =============================================================
-// MY BOOKINGS REDUCER
-// =============================================================
 
 export const classesBookingsReducer = (state = listState, action: any) => {
   switch (action.type) {
@@ -108,9 +101,7 @@ export const classesBookingsReducer = (state = listState, action: any) => {
   }
 };
 
-// =============================================================
-// FILTERED EXPLORE CLASSES
-// =============================================================
+
 export const classesFilterExploreReducer = (state = listState, action: any) => {
   switch (action.type) {
     case FILTERED_EXPLORE_REQUEST:

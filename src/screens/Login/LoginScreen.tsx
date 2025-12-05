@@ -79,6 +79,7 @@ const resumePendingIfAny = async () => {
       "pending_astrology_data",
       "pending_classes_data",
       "pending_daily_practice_data",
+      "pending_tracker_edit_data"
     ];
 
     for (const key of pendingKeys) {
@@ -88,13 +89,50 @@ const resumePendingIfAny = async () => {
         const data = JSON.parse(pending);
         await AsyncStorage.removeItem(key);
 
+     if (key === "pending_tracker_edit_data") {
+  navigation.navigate("AppDrawer", {
+    screen: "HomePage",
+    params: {
+      screen: "HomePage", 
+      params: {
+        screen: "TrackerTabs",
+        params: {
+          screen: "History",
+          resumeData: data,
+        },
+      },
+    },
+  });
+  return;
+}
+
+if (key === "pending_classes_data") {
+  navigation.navigate("AppDrawer", {
+    screen: "HomePage",
+    params: {
+      screen: "HomePage",
+      params: {
+        screen: "ClassBookingScreen",
+        params: {
+          resumeData: data,
+          data: data.classData,          // ⭐ supply full classInfo again
+          reschedule: false,
+        },
+      },
+    },
+  });
+  return;
+}
+
+
         const targetScreenMap = {
           pending_pooja_data: "Pooja",
           pending_retreat_data: "Retreat",
           pending_travel_data: "Travel",
           pending_astrology_data: "Astrology",
-          pending_classes_data: "ClassBookingScreen",
+          // pending_classes_data: "ClassBookingScreen",
           pending_daily_practice_data: "DailyPracticeSelectList",
+          // pending_tracker_edit_data:"TrackerTabs"
         };
 
         const targetScreen = targetScreenMap[key];

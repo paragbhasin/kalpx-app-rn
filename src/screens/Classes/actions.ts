@@ -483,3 +483,43 @@ export const tutorListFailure = (error) => ({
     if (callback) callback({ success: false, error: error.message });
   }
 };
+
+export const classesHomeList =
+  (page = 1, timezone = "", callback) =>
+  async () => {
+    try {
+      // Hardcoded subjects
+      const SUBJECTS = [
+        "Everyday Vedanta",
+        "Mantra Chanting",
+        "Sanatan Teaching/",
+      ];
+
+      let url = `/public/classes/?status=published&ordering=updated_at&page=${page}&page_size=15`;
+
+      SUBJECTS.forEach((s) => {
+        url += `&subject=${encodeURIComponent(s)}`;
+      });
+
+      if (timezone) {
+        url += `&user_timezone=${encodeURIComponent(timezone)}`;
+      }
+
+      console.log("🏠 HOME API URL:", url);
+
+      const res = await api.get(url);
+
+      const results = res.data?.results || [];
+
+      callback?.({
+        success: true,
+        data: results,
+      });
+    } catch (error) {
+      callback?.({
+        success: false,
+        error: error?.response?.data || error?.message,
+      });
+    }
+  };
+

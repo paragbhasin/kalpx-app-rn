@@ -500,7 +500,16 @@ const callPaymentStripeGateway = async () => {
         }}
       >
         <TextComponent type="mediumText">Price</TextComponent>
-        <TextComponent type="mediumText">{route?.params?.data?.pricing?.currency === "INR" ? "₹" : "$"}{" "}{route?.params?.data?.pricing?.per_person?.amount?.web ?? 0}</TextComponent>
+        <TextComponent type="mediumText">
+  {route?.params?.data?.pricing?.currency === "INR" ? "₹" : "$"}{" "}
+  {
+    route?.params?.data?.pricing?.type === "per_group"
+      ? route?.params?.data?.pricing?.per_group?.amount?.web
+      : route?.params?.data?.pricing?.per_person?.amount?.web
+  ?? 0}
+</TextComponent>
+
+        {/* <TextComponent type="mediumText">{route?.params?.data?.pricing?.currency === "INR" ? "₹" : "$"}{" "}{route?.params?.data?.pricing?.per_person?.amount?.web ?? 0}</TextComponent> */}
       </View>
       <View
         style={{
@@ -511,12 +520,24 @@ const callPaymentStripeGateway = async () => {
       >
         <TextComponent type="mediumText">Total</TextComponent>
         <TextComponent
+  type="mediumText"
+  style={{ color: Colors.Colors.App_theme }}
+>
+  {route?.params?.data?.pricing?.currency === "INR" ? "₹" : "$"}{" "}
+  {
+    route?.params?.data?.pricing?.type === "per_group"
+      ? route?.params?.data?.pricing?.per_group?.amount?.web
+      : route?.params?.data?.pricing?.per_person?.amount?.web
+  ?? 0}
+</TextComponent>
+{/* 
+        <TextComponent
           type="mediumText"
           style={{ color: Colors.Colors.App_theme }}
         >
            {route?.params?.data?.pricing?.currency === "INR" ? "₹" : "$"}{" "}
           {route?.params?.data?.pricing?.per_person?.amount?.web ?? 0}
-        </TextComponent>
+        </TextComponent> */}
       </View>
       {/* <TouchableOpacity
         style={{

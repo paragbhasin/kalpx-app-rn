@@ -62,6 +62,7 @@ const styles = StyleSheet.create({
     color: "#D32F2F",
     fontSize: 13,
     marginTop: 4,
+    alignSelf:"flex-end"
   },
 
   // 🔹 Dropdowns

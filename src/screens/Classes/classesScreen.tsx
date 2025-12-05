@@ -80,13 +80,13 @@ export default function ClassesScreen({ navigation, route }) {
 
   const subjectOptions = [
     { value: "All", label: "All" },
-    { value: "Yoga", label: "Yoga" },
-    { value: "Indian Classical Music", label: "Indian Classical Music" },
-    { value: "Indian Classical Dance", label: "Indian Classical Dance" },
     { value: "Mantra Chanting", label: "Mantra Chanting" },
-    { value: "Vedas & Upanishads", label: "Vedas & Upanishads" },
     { value: "Sanatan Teachings", label: "Sanatan Teachings" },
     { value: "Everyday Vedanta", label: "Everyday Vedanta" },
+    { value: "Yoga", label: "Yoga" },
+    { value: "Indian Classical Dance", label: "Indian Classical Dance" },
+    { value: "Indian Classical Music", label: "Indian Classical Music" },
+    { value: "Vedas & Upanishads", label: "Vedas & Upanishads" },
   ];
 
   const statusData = [
@@ -177,30 +177,57 @@ useEffect(() => {
     flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
   };
 
-  // =============================
-  // SEARCH (uses subjectQuery)
-  // =============================
-  useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      if (searchText.trim()) {
-        setIsSearching(true);
-        setIsFiltering(false);
 
-        if (activeTab === "ExploreClasses") {
-          dispatch(searchClasses(searchText, 1, 10, subjectQuery, (res) => {
+  useEffect(() => {
+  const delayDebounce = setTimeout(() => {
+    if (searchText.trim()) {
+      setIsSearching(true);
+      setIsFiltering(false);
+
+      if (activeTab === "ExploreClasses") {
+           dispatch(searchClasses(searchText, 1, 10, subjectQuery, (res) => {
     // console.log("📡 ExploreClasses API Response:", res);
   })
 );
-        } else {
-          dispatch(searchBookings(searchText, 1, 10));
-        }
       } else {
+        dispatch(searchBookings(searchText, 1, 10));
+      }
+    } else if (searchText === "") {
+      // reset ONLY when clearing search, not on subject change
+      if (!isFiltering) {
         resetToDefaultList();
       }
-    }, 800);
+    }
+  }, 600);
 
-    return () => clearTimeout(delayDebounce);
-  }, [searchText, activeTab, subjectQuery]);
+  return () => clearTimeout(delayDebounce);
+}, [searchText, activeTab]);   // ❌ removed subjectQuery
+
+
+  // =============================
+  // SEARCH (uses subjectQuery)
+  // =============================
+//   useEffect(() => {
+//     const delayDebounce = setTimeout(() => {
+//       if (searchText.trim()) {
+//         setIsSearching(true);
+//         setIsFiltering(false);
+
+//         if (activeTab === "ExploreClasses") {
+//           dispatch(searchClasses(searchText, 1, 10, subjectQuery, (res) => {
+//     // console.log("📡 ExploreClasses API Response:", res);
+//   })
+// );
+//         } else {
+//           dispatch(searchBookings(searchText, 1, 10));
+//         }
+//       } else {
+//         resetToDefaultList();
+//       }
+//     }, 800);
+
+//     return () => clearTimeout(delayDebounce);
+//   }, [searchText, activeTab, subjectQuery]);
 
   // =============================
   // FILTER APPLY
@@ -384,9 +411,14 @@ const fetchMyBookings = async (page = 1) => {
               : null
           }
           title={item?.title}
-          description={item?.description}
-          duration={item?.pricing?.per_person?.session_length_min}
-          price={item?.pricing?.per_person?.amount?.web}
+          description={item?.subtitle}
+          duration={item?.pricing?.trial?.session_length_min ? item?.pricing?.trial?.session_length_min : item?.pricing?.per_person?.session_length_min}
+          // price={item?.pricing?.per_person?.amount?.web}
+          price={
+  (item?.pricing?.type === "per_group"
+    ? item?.pricing?.per_group?.amount?.web
+    : item?.pricing?.per_person?.amount?.web) ?? 0
+}
           onViewDetails={() =>
             navigation.navigate("ClassTutorDetailsScreen", { data: item })
           }
@@ -690,16 +722,20 @@ const displayedData =
         keyExtractor={(item, index) => `${item?.id || index}`}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
-        ListFooterComponent={() =>
-          isLoading ? <ActivityIndicator style={{ marginVertical: 16 }} /> : null
-        }
-        ListEmptyComponent={
-          <Text allowFontScaling={false} style={{ textAlign: "center", marginTop: 30 }}>
-            {activeTab === "ExploreClasses"
-              ? "No classes available."
-              : "You have no bookings yet."}
-          </Text>
-        }
+    ListEmptyComponent={
+  isLoading ? (
+    <ActivityIndicator style={{ marginTop: 40 }} size="large" />
+  ) : (
+    <Text
+      allowFontScaling={false}
+      style={{ textAlign: "center", marginTop: 30 }}
+    >
+      {activeTab === "ExploreClasses"
+        ? "No classes available."
+        : "You have no bookings yet."}
+    </Text>
+  )
+}
         refreshing={isLoading}
         onRefresh={resetToDefaultList}
         showsVerticalScrollIndicator={false}

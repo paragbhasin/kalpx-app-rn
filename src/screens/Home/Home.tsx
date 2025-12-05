@@ -9,6 +9,7 @@ import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  ActivityIndicator,
   Dimensions,
   FlatList,
   Image,
@@ -26,12 +27,11 @@ import { Card } from "react-native-paper";
 import VersionCheck from "react-native-version-check-expo";
 import { useDispatch, useSelector } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
+import ClassHomeCard from "../../components/ClassHomeCard";
 import Colors from "../../components/Colors";
-import ExploreVideos from "../../components/ExploreVideos";
 import FestivalCard from "../../components/FestivalCard";
 import FontSize from "../../components/FontSize";
 import Header from "../../components/Header";
-import LanguageTimezoneModal from "../../components/LanguageTimezoneModal";
 import LoadingOverlay from "../../components/LoadingOverlay";
 import MantraCard from "../../components/MantraCard";
 import NotificationPermissionModal from "../../components/NotificationPermissionModal";
@@ -43,8 +43,10 @@ import { useUserLocation } from "../../components/useUserLocation";
 import WisdomCard from "../../components/WisdomCard";
 import { CATALOGS } from "../../data/mantras";
 import { usePracticeStore } from "../../data/Practice";
+import { BASE_IMAGE_URL } from "../../Networks/baseURL";
 import { RootState } from "../../store";
 import { saveUserAction } from "../../utils/storage";
+import { classesHomeList } from "../Classes/actions";
 import {
   completeMantra,
   getDailyDharmaTracker,
@@ -55,12 +57,11 @@ import {
 } from "./actions";
 import styles from "./homestyles";
 
-
 const { width } = Dimensions.get("window");
 const CARD_MARGIN = 14;
 const CARD_WIDTH = (width - CARD_MARGIN * 3) / 2; 
 
-
+export const collapseControl = { avoidCollapse: false };
 
 export default function Home() {
   const navigation: any = useNavigation();
@@ -69,9 +70,7 @@ export default function Home() {
   const [trackerData, setTrackerData] = useState<any>(null);
   const [expandedItemId, setExpandedItemId] = useState<string | null>(null);
   const [showLangTZModal, setShowLangTZModal] = useState(false);
-
-  // ✅ Use our reusable hook
-  const { locationData, loading: locationLoading, error: locationError } = useUserLocation();
+    const { locationData, loading: locationLoading, error: locationError } = useUserLocation();
 const [showNotificationPopup, setShowNotificationPopup] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [showMantraTaken, setShowMantraTaken] = useState(false);
@@ -87,6 +86,10 @@ const [updateType, setUpdateType] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { setDailyMantras } = usePracticeStore();
   const [apiloading, setApiLoading] = useState(false);
+  const [classPage, setClassPage] = useState(1);
+const [homeClasses, setHomeClasses] = useState([]);
+const [classHasMore, setClassHasMore] = useState(true);
+const [loadingClasses, setLoadingClasses] = useState(false);
   const [selectedMantraForPopup, setSelectedMantraForPopup] = useState(null);
   const [selectedSankalpForPopup, setSelectedSankalpForPopup] = useState(null);
  const currentLang = i18n.language.split("-")[0];
@@ -96,35 +99,31 @@ const [updateType, setUpdateType] = useState("");
 
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
 
-  const { data: streakData, loading: streakLoading } = useSelector(
-    (state: RootState) => state.practiceStreaksReducer
-  );
+  const { data: streakData, loading: streakLoading } = useSelector((state: RootState) => state.practiceStreaksReducer);
 
-    // ✅ New states for Explore videos
-  const { data: exploreVideos, loading: exploreLoading, page, hasMore } = useSelector(
-    (state: RootState) => state.videosReducer
-  );
+  const { data: exploreVideos, loading: exploreLoading, page, hasMore } = useSelector((state: RootState) => state.videosReducer);
 
   useFocusEffect(
   React.useCallback(() => {
     const checkNotificationPermission = async () => {
       const settings = await Notifications.getPermissionsAsync();
-
       if (settings.status !== "granted") {
-        setShowNotificationPopup(true);  // Show popup
+        setShowNotificationPopup(true);
       } else {
-        setShowNotificationPopup(false); // Hide popup
+        setShowNotificationPopup(false);
       }
     };
-
     checkNotificationPermission();
   }, [])
 );
 
 
-  useFocusEffect(
+useFocusEffect(
   React.useCallback(() => {
-    // Reset expanded card when navigating back to Home
+    if (collapseControl.avoidCollapse) {
+      collapseControl.avoidCollapse = false;
+      return;
+    }
     setExpandedItemId(null);
   }, [])
 );
@@ -144,25 +143,18 @@ const [updateType, setUpdateType] = useState("");
 useEffect(() => {
   const checkForUpdates = async () => {
     console.log("🔍 Checking for updates...");
-
     try {
-      // Check Expo OTA updates
       const update = await Updates.checkForUpdateAsync();
       console.log("🟡 OTA Update Check Result:", update);
-
       if (update.isAvailable) {
         setUpdateType("OTA");
         setShowUpdateModal(true);
         console.log("🚀 OTA update available!");
         return;
       }
-
-      // Check Store versions
       const latestVersion = await VersionCheck.getLatestVersion();
       const currentVersion = await VersionCheck.getCurrentVersion();
-
       console.log("📱 App Versions:", { latestVersion, currentVersion });
-
       if (latestVersion && latestVersion !== currentVersion) {
         console.log("🆕 Store update available!");
         setUpdateType("STORE");
@@ -178,18 +170,11 @@ useEffect(() => {
   checkForUpdates();
 }, []);
 
-// useEffect(() => {
-//   console.log("Manually showing update modal for testing...");
-//   setShowUpdateModal(true);
-// }, []);
-
-
 useEffect(() => {
   const checkShowLocation = async () => {
     const shouldShow = await AsyncStorage.getItem("showLocationConfirm");
     if (shouldShow === "true") {
       setShowLangTZModal(true);
-      // ✅ remove flag so it shows only once
       await AsyncStorage.removeItem("showLocationConfirm");
     }
   };
@@ -200,16 +185,11 @@ useEffect(() => {
   const preloadMantras = () => {
     const langKey = currentLang.toLowerCase();
     const allMantras = CATALOGS[langKey] || CATALOGS.en;
-
-    // 🗓️ Determine day index since a fixed start (like Jan 1, 2025)
     const startOfCycle = moment('2025-01-01');
     const today = moment().startOf('day');
-    const dayIndex = today.diff(startOfCycle, 'days'); // number of days since start
-
-    // 📦 Get next 5 mantras cyclically
+    const dayIndex = today.diff(startOfCycle, 'days'); 
     const startIndex = (dayIndex * 5) % allMantras.length;
     const endIndex = startIndex + 5;
-
     const dailyFive =
       endIndex <= allMantras.length
         ? allMantras.slice(startIndex, endIndex)
@@ -217,7 +197,6 @@ useEffect(() => {
             ...allMantras.slice(startIndex),
             ...allMantras.slice(0, endIndex - allMantras.length),
           ];
-
     console.log("🔁 Today's Mantras:", dailyFive.map(m => m.id));
     setDailyMantras(dailyFive);
   };
@@ -225,8 +204,6 @@ useEffect(() => {
   preloadMantras();
 }, [currentLang]);
 
-
-  // ✅ Reload instantly when language changes
   useEffect(() => {
     const langKey = currentLang.toLowerCase();
     const allMantras = CATALOGS[langKey] || CATALOGS.en;
@@ -234,7 +211,6 @@ useEffect(() => {
     setDailyMantras(dailyFive);
   }, [currentLang]);
 
-  // ✅ Fetch All/All explore videos
   useEffect(() => {
     dispatch(
       getVideos(
@@ -255,7 +231,6 @@ useEffect(() => {
     );
   }, [dispatch]);
 
-  // ✅ Load more for Explore videos
   const handleLoadMore = () => {
     if (!exploreLoading && hasMore) {
       dispatch(
@@ -303,10 +278,82 @@ useEffect(() => {
     (state: RootState) => state.practiceTodayReducer
   );
 
+  const loadHomeClasses = (pageNo = 1) => {
+  if (loadingClasses || !classHasMore) return;
+
+  setLoadingClasses(true);
+
+  dispatch(
+    classesHomeList(pageNo, locationData?.timezone, (res) => {
+      console.log("classes Home Response >>>>>>>>>>",JSON.stringify(res));
+      if (res.success) {
+        const onlyAvailable = res.data.filter(
+          (item) => item?.available_slots?.length > 0
+        );
+
+        if (res.data.length === 0) {
+          setClassHasMore(false);
+        }
+
+        const newList =
+          pageNo === 1 ? onlyAvailable : [...homeClasses, ...onlyAvailable];
+
+        setHomeClasses(newList);
+      } else {
+        setClassHasMore(false);
+      }
+
+      setLoadingClasses(false);
+    })
+  );
+};
+
+
+// const loadHomeClasses = (pageNo = 1) => {
+//   if (loadingClasses || !classHasMore) return;
+
+//   setLoadingClasses(true);
+
+//   dispatch(
+//     classesExploreList(pageNo, 10, "", locationData?.timezone, (res) => {
+//       if (res.success) {
+//         const onlyAvailable = res.data.filter(
+//           (item) => item?.available_slots?.length > 0
+//         );
+
+//         // STOP PAGINATION ONLY WHEN NO DATA
+//     if (res.data.length === 0) {   // stop only when API truly has no data
+//   setClassHasMore(false);
+// }
+
+
+//         const newList =
+//           pageNo === 1 ? onlyAvailable : [...homeClasses, ...onlyAvailable];
+
+//        setHomeClasses(newList);   // NO slicing
+
+
+//       } else {
+//         setClassHasMore(false);
+//       }
+
+//       setLoadingClasses(false);
+//     })
+//   );
+// };
+
+
+
+
+// First load
+useEffect(() => {
+  loadHomeClasses(1);
+}, []);
+
   useEffect(() => {
     dispatch(
       getPracticeToday((res) => {
-        console.log("✅ Practice Today Callback Response:::::::::>>>>>>>>>>>>>", res);
+        console.log("✅ practiceTodayData Practice Today Callback Response:::::::::>>>>>>>>>>>>>", practiceTodayData);
       })
     );
   }, [dispatch]);
@@ -321,80 +368,6 @@ useEffect(() => {
   const handleChipPress = (id: string) => {
     setExpandedItemId((prev) => (prev === id ? null : id));
   };
-
-  // const categories = [
-  //   {
-  //   id: "1",
-  //   name:
-  //     trackerData?.active_practices?.length > 0
-  //       ? t("categories.sadana")
-  //       : t("categories.dharma"),
-  //   title: trackerData?.active_practices?.length > 0 ? "SadanaTrackerScreen" : "Dharma",
-  //   iconType: "image",
-  //   icon: require("../../../assets/Group.png"),
-  //   event_type: "click_dharma_card",
-  //   component: "Dharma-card",
-  // },
-  // {
-  //   id: "2",
-  //   name: t("categories.explore"),
-  //   title: "Explore",
-  //   iconType: "image",
-  //   icon: require("../../../assets/Exploreicon.png"),
-  //   event_type: "click_explore_card",
-  //   component: "Explore-card",
-  // },
-  // {
-  //   id: "6",
-  //   name: t("categories.classes"),
-  //   title: "ClassesScreen",
-  //   iconType: "image",
-  //   icon: require("../../../assets/onlinecion.png"),
-  //   event_type: "click_classes_card",
-  //   component: "Classes-card",
-  // },
-  //   // {
-  //   //   id: "3",
-  //   //   name: t("categories.travel"),
-  //   //   title: "Travel",
-  //   //   event_type: "click_travel_card",
-  //   //   component: "Travel-card",
-  //   //   icon: require("../../../assets/darma.png"),
-  //   // },
-  //   // {
-  //   //   id: "4",
-  //   //   name: t("categories.pooja"),
-  //   //   title: "Pooja",
-  //   //   event_type: "click_pooja_card",
-  //   //   component: "Pooja-card",
-  //   //   icon: require("../../../assets/pooja.png"),
-  //   // },
-  //   // {
-  //   //   id: "5",
-  //   //   name: t("categories.retreat"),
-  //   //   title: "Retreat",
-  //   //   event_type: "click_retreat_card",
-  //   //   component: "Retreat-card",
-  //   //   icon: require("../../../assets/yoga.png"),
-  //   // },
-  //   // {
-  //   //   id: "6",
-  //   //   name: t("categories.classes"),
-  //   //   title: "ClassesScreen",
-  //   //   event_type: "click_classes_card",
-  //   //   component: "Classes-card",
-  //   //   icon: require("../../../assets/onlinecion.png"),
-  //   // },
-  //    {
-  //   id: "7",
-  //   name: t("forgotPassword.login"),
-  //   title: "Login",
-  //   iconType: "vector",
-  //   icon: "log-in-outline",      // Ionicons icon
-  //   event_type: "click_login_card",
-  //   component: "Login-card",
-  // },
-  // ];
 
   const baseCategories = [
   {
@@ -490,47 +463,6 @@ const categories = isLoggedIn
   },
 ];
 
-  // const dailyOptions = [
-  //   {
-  //     id: "1",
-  //     title: "Chant Today’s Mantra",
-  //     route: "Sankalp",
-  //     event_type: "view_sankalp_card",
-  //     component: "sankalp-card",
-  //     subtitle:
-  //       "Feel the peace unfold within start your day by chanting today’s mantra.",
-  //     icon: require("../../../assets/lamp.png"),
-  //   },
-  //   {
-  //     id: "2",
-  //     title: "Set Your Sankalp",
-  //     route: "Mantra",
-  //     event_type: "view_mantra_card",
-  //     component: "mantra-card",
-  //     subtitle:
-  //       "Set a sacred intension that connects your heart to your purpose.",
-  //     icon: require("../../../assets/atom.png"),
-  //   },
-  //   {
-  //     id: "3",
-  //     title: "Explore Festivals",
-  //     route: "Wisdom",
-  //     event_type: "view_wisdom_card",
-  //     component: "wisdom-card",
-  //     subtitle: "Discover upcoming festivals and their significance.",
-  //     icon: require("../../../assets/sun.png"),
-  //   },
-  //   {
-  //     id: "4",
-  //     title: "Reflect on Wisdom",
-  //     route: "UpcomingFestivals",
-  //     event_type: "view_festival_card",
-  //     component: "festival-card",
-  //     subtitle: "Find inspiration in timeless sanatan insights.",
-  //     icon: require("../../../assets/party.png"),
-  //   },
-  // ];
-
   const kalpXData = [
     {
       id: "1",
@@ -553,7 +485,10 @@ const categories = isLoggedIn
       id: "3",
       title:  trackerData?.active_practices?.length > 0 ? t("categories.sadana"): t("categories.dharma"),
       // title: t("kalpx.practice"),
-      name: trackerData?.active_practices?.length > 0 ? "MySadana" : "Dharma",
+      name: trackerData?.active_practices?.length > 0
+      ? "TrackerTabs"
+      : "DailyPracticeList",
+      // trackerData?.active_practices?.length > 0 ? "MySadana" : "Dharma",
       event_type: "click_practice_card",
       component: "Practice-card",
       image: require("../../../assets/daily.png"),
@@ -592,12 +527,13 @@ const categories = isLoggedIn
     // },
   ];
 
-  const handleStartMantra = (mantra) => {
+  const handleStartMantra = (mantra,reps) => {
     const payload = {
       kind: "mantra",
       practice_id: mantra.id,
       date_local: moment().format("YYYY-MM-DD"),
       tz: locationData?.timezone,
+      reps:reps
     };
 
     console.log("payload >>>>>>>>>", payload);
@@ -721,7 +657,6 @@ const categories = isLoggedIn
       }
     }}
   >
-    {/* ⭐ VECTOR ICON */}
     {item.iconType === "vector" && (
       <Ionicons
         name={item.icon}
@@ -730,50 +665,14 @@ const categories = isLoggedIn
         style={styles.icon}
       />
     )}
-
-    {/* ⭐ PNG ICON */}
     {item.iconType === "image" && (
       <Image source={item.icon} style={styles.icon} resizeMode="contain" />
     )}
-
     <TextComponent type="headerSubBoldText" style={styles.cardText}>
       {item.name}
     </TextComponent>
   </TouchableOpacity>
 );
-
-
-  // const renderCategory = ({ item }) => (
-  //   <TouchableOpacity
-  //     style={styles.card}
-  //     onPress={async () => {
-  //       try {
-  //         const userId = await AsyncStorage.getItem("uuid");
-  //         await saveUserAction({
-  //           uuid: userId,
-  //           timestamp: Date.now(),
-  //           retryCount: 0,
-  //           event_type: item?.event_type,
-  //           event_data: {
-  //             component: item?.component,
-  //             city: locationData.city,
-  //             lat: locationData.latitude,
-  //             long: locationData.longitude,
-  //             timeZone: locationData.timezone,
-  //             device: Platform.OS === "ios" ? "mobile-ios" : "mobile-android",
-  //             screen: "home",
-  //           },
-  //         });
-  //         navigation.navigate(item.title);
-  //       } catch (error) {
-  //         console.error("Error fetching UUID:", error);
-  //       }
-  //     }}
-  //   >
-  //     <Image source={item.icon} style={styles.icon} resizeMode="contain" />
-  //     <TextComponent type="headerSubBoldText" style={styles.cardText}>{item.name}</TextComponent>
-  //   </TouchableOpacity>
-  // );
 
   const renderDailyOption = ({ item }) => (
     <>
@@ -837,7 +736,7 @@ const categories = isLoggedIn
         </View>
       </Card>
       {expandedItemId === item.id && item.id === "1" && (
-        <View style={{ marginTop: 10, zIndex: 999, height: 560 }}>
+        <View style={{ marginTop: 10, zIndex: 999,}}>
           <SankalpCard
             practiceTodayData={practiceTodayData}
             onPressStartSankalp={(sankalp) => {
@@ -852,14 +751,16 @@ const categories = isLoggedIn
         </View>
       )}
       {expandedItemId === item.id && item.id === "2" && (
-        <View style={{ marginTop: 10, zIndex: 999, height:640 }}>
+        <View style={{ marginTop: 10, zIndex: 999,}}>
            <MantraCard
           practiceTodayData={practiceTodayData}
-          onPressChantMantra={(mantra) => {
+          onPressChantMantra={(mantra,reps) => {
+            console.log("Selected Mantra for Start:", mantra,reps);
             setSelectedMantraForPopup(mantra);
-            handleStartMantra(mantra);
+            handleStartMantra(mantra,reps);
           }}
           DoneMantraCalled={(mantra) => {
+            console.log("confirm Mantra for Start:", mantra);
             setSelectedMantraForPopup(mantra);
             DoneMantraCalled(mantra);
           }}
@@ -867,13 +768,13 @@ const categories = isLoggedIn
         </View>
       )}
       {expandedItemId === item.id && item.id === "4" && (
-        <View style={{ marginTop: 10, zIndex: 999, height: 500 }}>
+        <View style={{ marginTop: 10, zIndex: 999, }}>
           <WisdomCard />
         </View>
       )}
 
       {expandedItemId === item.id && item.id === "3" && (
-        <View style={{ marginTop: 10, zIndex: 999, height: 640}}>
+        <View style={{ marginTop: 10, zIndex: 999,}}>
           <FestivalCard />
         </View>
       )}
@@ -882,7 +783,7 @@ const categories = isLoggedIn
 
   const renderKalpXItem = ({ item }) => (
   <TouchableOpacity
-    style={[styles.kalpXCard, { width: CARD_WIDTH }]} // ✅ dynamic width applied
+    style={[styles.kalpXCard, { width: CARD_WIDTH }]} 
     onPress={async () => {
       try {
         const userId = await AsyncStorage.getItem("uuid");
@@ -926,7 +827,6 @@ const categories = isLoggedIn
         contentContainerStyle={{ paddingBottom: 30 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* ✅ Horizontal Categories */}
         <View style={{ marginTop: 0,alignItems:"center"}}>
           <FlatList
             data={categories}
@@ -941,18 +841,13 @@ const categories = isLoggedIn
           />
         </View>
         {isLoggedIn &&
-//         <Card
-//   style={styles.streakCard}
-//   onPress={() => navigation.navigate("StreakScreen")}
-// >
   <View style={{alignItems:"center"}}>
   <ScrollView
     horizontal
     showsHorizontalScrollIndicator={false}
     contentContainerStyle={styles.streakScrollContainer}
   >
-    {/* 🔹 Sankalp */}
-    <Card style={styles.streakItem}  onPress={() => navigation.navigate("StreakScreen")}>
+        <Card style={styles.streakItem}  onPress={() => navigation.navigate("StreakScreen")}>
       <View style={{flexDirection:"row"}}>
       <Image
         source={require("../../../assets/streak1.png")}
@@ -996,96 +891,7 @@ const categories = isLoggedIn
     </Card>
   </ScrollView>
   </View>
-// </Card>
 }
-{/* 
-     <Card
-  style={styles.streakCard}
-  onPress={() => {
-    navigation.navigate("StreakScreen");
-  }}
->
-  <View
-    style={{
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
-      flexWrap: "wrap", // ✅ allow multiple lines
-    }}
-  >
-    <View style={{ flexDirection: "row", alignItems: "center", flexShrink: 1 }}>
-      <Image
-        source={require("../../../assets/streak1.png")}
-        style={{ height: 20, width: 20 }}
-      />
-      <TextComponent
-        type="streakSubText"
-        style={[styles.count, { flexShrink: 1 }]} // ✅ allow shrinking
-      >
-        {streakData?.sankalp ?? 0}
-      </TextComponent>
-      <TextComponent
-        type="streakSubText"
-        style={[styles.streakText, { flexWrap: "wrap", flexShrink: 1, maxWidth: 80 }]} // ✅ wrap text
-      >
-        {t("streak.sankalp")}
-      </TextComponent>
-    </View>
-
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        marginLeft: 20,
-        flexShrink: 1,
-      }}
-    >
-      <Image
-        source={require("../../../assets/streak2.png")}
-        style={{ height: 20, width: 20 }}
-      />
-      <TextComponent
-        type="streakSubText"
-        style={[styles.count, { flexShrink: 1 }]}
-      >
-        {streakData?.mantra ?? 0}
-      </TextComponent>
-      <TextComponent
-        type="streakSubText"
-        style={[styles.streakText, { flexWrap: "wrap", flexShrink: 1, maxWidth: 80 }]}
-      >
-        {t("streak.mantra")}
-      </TextComponent>
-    </View>
-
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        marginLeft: 20,
-        flexShrink: 1,
-      }}
-    >
-      <Image
-        source={require("../../../assets/streak3.png")}
-        style={{ height: 20, width: 20 }}
-      />
-      <TextComponent
-        type="streakSubText"
-        style={[styles.count, { flexShrink: 1 }]}
-      >
-        {trackerData?.streak_count ?? 0}
-      </TextComponent>
-      <TextComponent
-        type="streakSubText"
-        style={[styles.streakText, { flexWrap: "wrap", flexShrink: 1, maxWidth: 80 }]} // ✅ wraps text
-      >
-        {t("streak.DailyPractice")}
-      </TextComponent>
-    </View>
-  </View>
-</Card> */}
-   {/* <Image source={require("../../../assets/locus.png")} style={{height:200,width:"88%",alignSelf:"center"}}  /> */}
      <TouchableOpacity style={{ alignItems: "center", marginTop: 20 }} onPress={() => {navigation.navigate("DailyPracticeList")}}>
       <ImageBackground
         source={require("../../../assets/locus.png")}
@@ -1167,7 +973,6 @@ const categories = isLoggedIn
                 }}
               />
             </View>
-          {/* )} */}
 
           <FlatList
             data={
@@ -1246,14 +1051,14 @@ const categories = isLoggedIn
           />
         </View> */}
 
-        <View style={{ paddingHorizontal: 12,marginTop:12 }}>
+        {/* <View style={{ paddingHorizontal: 12,marginTop:12 }}>
           <ExploreVideos
       videos={exploreVideos}
       onLoadMore={handleLoadMore}
       loading={exploreLoading}
       home={true}
     />
-        </View>
+        </View> */}
 
         {/* <View style={styles.kalpXContainer}>
           <Text style={styles.sectionHeading}>{t("home.kalpXHeading")}</Text>
@@ -1269,6 +1074,87 @@ const categories = isLoggedIn
             scrollEnabled={false}
           />
         </View> */}
+        {/* ===================== EXPLORE CLASSES ===================== */}
+<View style={{ marginTop: 25,marginHorizontal:16 }}>
+  <View style={{ 
+    flexDirection: "row", 
+    justifyContent: "space-between", 
+    // paddingRight: 16 
+  }}>
+    <TextComponent type="headerText" style={{ fontSize: 16 }}>
+      Explore Classes
+    </TextComponent>
+
+    <TouchableOpacity onPress={() => navigation.navigate("ClassesScreen")}>
+      <TextComponent type="mediumText" style={{ color: Colors.Colors.App_theme }}>
+        Show All
+      </TextComponent>
+    </TouchableOpacity>
+  </View>
+    <FlatList
+      data={homeClasses}
+      horizontal
+      keyExtractor={(item) => item.id.toString()}
+      showsHorizontalScrollIndicator={false}
+      contentContainerStyle={{  marginTop: 10}}
+      renderItem={({ item }) => (
+          <ClassHomeCard
+          fromHome = {true}
+          imageUrl={
+            item?.cover_media?.key
+              ? `${BASE_IMAGE_URL}/${item.cover_media.key}`
+              : null
+          }
+          title={item?.title}
+          description={item?.subtitle || item?.description}
+          duration={item?.pricing?.per_person?.session_length_min}
+          // price={item?.pricing?.per_person?.amount?.web}
+          price={
+  item?.pricing?.type === "per_group"
+    ? item?.pricing?.per_group?.amount?.web
+    : item?.pricing?.per_person?.amount?.web
+}
+          onViewDetails={() =>
+            navigation.navigate("ClassTutorDetailsScreen", { data: item })
+          }
+          onBookNow={() =>
+            navigation.navigate("ClassBookingScreen", { data: item, reschedule: false })
+          }
+          tutor={item?.tutor}
+            currency={item?.pricing?.currency}
+  trailenabled={item?.pricing?.trial?.enabled}
+  trailAmt={item?.pricing?.trial?.amount}
+        />
+      )}
+
+      scrollEventThrottle={16}
+      onScroll={({ nativeEvent }) => {
+        const scrollX = nativeEvent.contentOffset.x;
+        const contentWidth = nativeEvent.contentSize.width;
+        const viewWidth = nativeEvent.layoutMeasurement.width;
+
+        if (contentWidth <= viewWidth) return;
+
+        // Trigger pagination when scrolled more than 30%
+        const progress = scrollX / (contentWidth - viewWidth);
+
+        if (progress > 0.3 && !loadingClasses && classHasMore) {
+          const next = classPage + 1;
+          setClassPage(next);
+          loadHomeClasses(next);
+        }
+      }}
+
+      ListFooterComponent={
+        loadingClasses ? (
+          <ActivityIndicator size="small" style={{ marginLeft: 10 }} />
+        ) : null
+      }
+    />
+  {/* </View> */}
+  {/* </Card> */}
+</View>
+
 <View style={styles.kalpXContainer}>
   <TextComponent
             type="headerText"
@@ -1417,10 +1303,10 @@ const categories = isLoggedIn
       MantraButtonTitle={t("popup.mantraTaken_Continue")}
   onSadhanPress={() => setShowLoginSankalpComplete(false)}
 />
-  <LanguageTimezoneModal
-    visible={false}
+  {/* <LanguageTimezoneModal
+    visible={showLangTZModal}
     onClose={() => setShowLangTZModal(false)}
-  />
+  /> */}
   <UpdateAppModal
   visible={showUpdateModal}
   onLater={() => setShowUpdateModal(false)}

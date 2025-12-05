@@ -15,28 +15,29 @@ const initialState = {
 
 export const notificationsReducer = (state = initialState, action) => {
   switch (action.type) {
+
+    case "RESET_NOTIFICATIONS":
+      return {
+        ...initialState,
+      };
+
     case NOTIFICATIONS_REQUEST:
-  return {
-    ...state,
-    loading: true,
-    data: state.page === 1 ? [] : state.data,
-  };
+      return {
+        ...state,
+        loading: true,
+      };
 
-    // case NOTIFICATIONS_REQUEST:
-    //   return { ...state, loading: true };
-
-  case NOTIFICATIONS_SUCCESS:
-  return {
-    ...state,
-    loading: false,
-    data:
-      action.payload.page === 1
-        ? action.payload.data
-        : [...state.data, ...action.payload.data],
-    page: action.payload.page,
-    hasMore: action.payload.data.length > 0,
-  };
-
+    case NOTIFICATIONS_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        data:
+          action.payload.page === 1
+            ? action.payload.data
+            : [...state.data, ...action.payload.data],
+        page: action.payload.page,
+        hasMore: action.payload.data.length > 0,
+      };
 
     case NOTIFICATIONS_FAILURE:
       return { ...state, loading: false, error: action.payload };
@@ -45,9 +46,7 @@ export const notificationsReducer = (state = initialState, action) => {
       return {
         ...state,
         data: state.data.map((n) =>
-          action.payload.includes(n.id)
-            ? { ...n, read: true }
-            : n
+          action.payload.includes(n.id) ? { ...n, read: true } : n
         ),
       };
 

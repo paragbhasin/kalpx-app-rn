@@ -2,9 +2,9 @@
   "expo": {
     "name": "kalpx",
     "slug": "kalpx",
-    "version": "1.0.5",
+    "version": "1.0.8",
     "orientation": "portrait",
-    "icon": "./assets/AppIconImg.jpeg",
+    "icon": "./assets/AppIconImg.png",
     "scheme": "kalpx",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
@@ -14,6 +14,7 @@
       "fallbackToCacheTimeout": 0
     },
     "ios": {
+      "icon": "./assets/AppIconImg.png",
       "supportsTablet": false,
       "bundleIdentifier": "com.kalpx.app",
       "usesAppleSignIn": true,
@@ -27,7 +28,7 @@
       "versionCode": 12,
       "package": "com.kalpx.app",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/AppIconImg.jpeg",
+        "foregroundImage": "./assets/AppIconImg.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true

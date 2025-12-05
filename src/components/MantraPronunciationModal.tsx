@@ -1,10 +1,10 @@
 import React from "react";
 import {
-    Dimensions,
-    ImageBackground,
-    ScrollView,
-    StyleSheet,
-    View
+  Dimensions,
+  ImageBackground,
+  ScrollView,
+  StyleSheet,
+  View
 } from "react-native";
 import Modal from "react-native-modal";
 import TextComponent from "./TextComponent";
@@ -48,7 +48,7 @@ const MantraPronunciationModal: React.FC<Props> = ({
           </TouchableOpacity> */}
 
           {/* TITLE */}
-          <TextComponent type="headerSubBoldText" style={styles.title}>
+          <TextComponent type="DailyboldText" style={styles.title}>
             {title}
           </TextComponent>
 
@@ -58,7 +58,7 @@ const MantraPronunciationModal: React.FC<Props> = ({
             style={styles.scrollArea}
             contentContainerStyle={{ paddingBottom: 40 }}
           >
-            <TextComponent type="boldText" style={styles.iastText}>
+            <TextComponent type="headerSubBoldText" style={styles.iastText}>
               {iast}
             </TextComponent>
           </ScrollView>
@@ -119,7 +119,7 @@ const styles = StyleSheet.create({
   iastText: {
     color: "#A94D01",
     textAlign: "center",
-    lineHeight: 26,
-    paddingHorizontal: 10,
+    // lineHeight: 26,
+    paddingHorizontal: 50,
   },
 });

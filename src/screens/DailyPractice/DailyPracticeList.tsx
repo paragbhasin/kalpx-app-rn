@@ -45,6 +45,9 @@ const categories = [
   },
 ];
 
+const backIcon = require("../../../assets/C_Arrow_back.png");
+
+
 const arrowIcon = require("../../../assets/arrow_home.png");
 
 const DailyPracticeList = () => {
@@ -54,7 +57,9 @@ const DailyPracticeList = () => {
   return (
     <View style={styles.container}>
       <Header />
-
+  <TouchableOpacity onPress={() => navigation.navigate("HomePage", { screen: "Home" })}>
+          <Image source={backIcon} style={styles.backIcon} resizeMode="contain" />
+        </TouchableOpacity>
       {/* Fixed Card Centered */}
       <Card style={styles.card}>
         <TextComponent

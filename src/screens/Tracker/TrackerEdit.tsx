@@ -1,5 +1,6 @@
 /* --- PART 1 START --- */
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { AnyAction } from "@reduxjs/toolkit";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -27,6 +28,7 @@ import LoadingOverlay from "../../components/LoadingOverlay";
 import TextComponent from "../../components/TextComponent";
 import i18n from "../../config/i18n";
 import { RootState } from "../../store";
+import { getRawPracticeObject } from "../../utils/getPracticeObjectById";
 import { submitDailyDharmaSetup } from "../Home/actions";
 import styles from "./TrackerEditStyles";
 
@@ -84,7 +86,14 @@ const selectedmantra = route?.params?.selectedmantra;
   const [detailsIndex, setDetailsIndex] = useState(0);
   const [detailsCategoryItem, setDetailsCategoryItem] = useState(null);
     const [loading, setLoading] = useState(false);
+    // ⬅️ Add this at top inside TrackerEdit()
+const [selectedCount, setSelectedCount] = useState(null);
+
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
+
+  const resumeData = route?.params?.resumeData;
+
+console.log("resumeData :::", resumeData);
 
   const dailyPractice: any = useSelector(
     (state: RootState) => state.dailyPracticeReducer
@@ -128,86 +137,50 @@ const selectedmantra = route?.params?.selectedmantra;
       );
   }, [selectedCategory, searchText]);
 
-  // --- NORMALIZE FUNCTION ---
 const normalizePractice = (p: any) => ({
   ...p,
-  id: p?.id || p?.practice_id,        // UI expects id
+  id: p?.id || p?.practice_id,       
   practice_id: p?.practice_id || p?.id,
-  title: p?.title || p?.name,         // UI expects title
-  name: p?.name || p?.title,
-  icon: p?.icon || "",              // fallback
-  category: p.category || "",  // safe fallback
+  title: p?.title || p?.name || p?.short_text,      
+  name: p?.name || p?.title || p?.tooltip,
+  icon: p?.icon || "",              
+  category: p.category || "",  
 });
 
-// --- LOAD API PRACTICES + KEEP EXISTING ITEMS ---
+const mergedPractices = useMemo(() => {
+  const apiList =
+    dailyPractice?.data?.active_practices?.map(normalizePractice) || [];
+
+  // Support both possible structures
+const resumePractices =
+  resumeData?.pendingPractices ||
+  resumeData?.payload?.pendingPractices ||
+  [];
+
+const resumeList = resumePractices.map(normalizePractice);
+
+
+
+  // const resumeList =
+  //   resumeData?.payload?.pendingPractices?.map(normalizePractice) || [];
+
+  const selectedList =
+    selectedmantra ? [normalizePractice(selectedmantra)] : [];
+
+  const map = new Map();
+
+  apiList.forEach(p => map.set(p.practice_id, p));
+  resumeList.forEach(p => map.set(p.practice_id, p));
+  selectedList.forEach(p => map.set(p.practice_id, p));
+
+  return Array.from(map.values());
+}, [dailyPractice, resumeData, selectedmantra]);
+
+console.log("🟪 Merged Practices:", JSON.stringify(mergedPractices));
+
 useEffect(() => {
-  if (dailyPractice?.data?.active_practices) {
-    const normalizedAPI = dailyPractice.data.active_practices.map(normalizePractice);
-
-    setLocalPractices((prev) => {
-      if (prev.length === 0) {
-        return normalizedAPI; // first load → fill UI
-      }
-
-      // Merge API + already selected without duplicates
-      const merged = [
-        ...normalizedAPI,
-        ...prev.filter((p) => 
-          !normalizedAPI.some((api) => api.practice_id === p.practice_id)
-        ),
-      ];
-
-      return merged;
-    });
-  }
-}, [dailyPractice?.data?.active_practices]);
-
-
-// --- ADD selectedmantra AFTER NORMALIZATION ---
-useEffect(() => {
-  if (selectedmantra) {
-    console.log("🔥 Adding selected mantra to TrackerEdit:", selectedmantra);
-
-    const normalized = normalizePractice(selectedmantra);
-
-    setLocalPractices((prev) => {
-      const exists = prev.some(
-        (p) => p.practice_id === normalized.practice_id
-      );
-      if (exists) return prev;
-
-      return [...prev, normalized];
-    });
-  }
-}, [selectedmantra]);
-
-
-//   useEffect(() => {
-//   if (selectedmantra) {
-//     console.log("🔥 Adding selected mantra to TrackerEdit:", selectedmantra);
-
-//     setLocalPractices(prev => {
-//       // Avoid duplicates
-//       const exists = prev.some(p => p.practice_id === selectedmantra.practice_id);
-//       if (exists) return prev;
-
-//       return [...prev, selectedmantra];
-//     });
-//   }
-// }, [selectedmantra]);
-
-
-//   useEffect(() => {
-//     if (dailyPractice?.data?.active_practices) {
-//       setLocalPractices((prev) => {
-//         // Prevent overwriting if user already added items
-//         if (prev.length === 0) {
-//           return dailyPractice.data.active_practices;
-//         }
-//         return prev;
-//       });
-//     }
-//   }, [dailyPractice?.data?.active_practices]);
+  setLocalPractices(mergedPractices);
+}, [mergedPractices]);
 
   const toggleAddItem = (item) => {
     const exists = localPractices.find((x) => x.id === item.id);
@@ -223,21 +196,23 @@ useEffect(() => {
 
   const apiPractices = dailyPractice?.data?.active_practices ?? [];
 
+  // const recentlyAdded = localPractices.filter(
+  //   (item) => !apiPractices.some((x) => x.id === item.id)
+  // );
+
   const recentlyAdded = localPractices.filter(
-    (item) => !apiPractices.some((x) => x.id === item.id)
-  );
+  (item) =>
+    !apiPractices.some((x) => x.practice_id === item.practice_id)
+);
+
 
   const submitCartToServer = (practicesList) => {
   console.log("🟦 [API] Preparing payload from list:", practicesList);
-
-  // REMOVE DUPLICATES BY `id`
   const unique = Array.from(
     new Map(practicesList.map((p) => [p.id || p.practice_id, p])).values()
   );
 
   console.log("🟩 [CART] Unique Items:", unique);
-
-  // BUILD PAYLOAD
   const payload = {
     practices: unique.map((p: any) => ({
       practice_id: p.id || p.practice_id,
@@ -247,17 +222,15 @@ useEffect(() => {
         ? "sankalp"
         : "library",
       category: p.category || detailsCategoryItem?.name || "",
-      name: p.title || p.name || "",
+      name: p.title || p.name || p.text || "",
       description: p.description || p.summary || p.meaning || "",
       benefits: p.benefits || [],
+      reps : p.reps || null
     })),
     is_authenticated: true,
     recaptcha_token: "not_available",
   };
-
   console.log("📦 [PAYLOAD]:", JSON.stringify(payload, null, 2));
-
-  // AUTO SCROLL TO TOP
   try {
     categoryRef.current?.scrollToOffset({ offset: 0, animated: true });
   } catch (err) {
@@ -271,10 +244,8 @@ useEffect(() => {
 
       if (res.success) {
         console.log("✅ Saved successfully!");
-
-        // Redirect to first tab
         navigation.navigate("TrackerTabs", {
-          screen: "Tracker", // Change this to your first tab name
+          screen: "Tracker",
         });
       } else {
         console.log("❌ Error saving:", res.error);
@@ -282,22 +253,6 @@ useEffect(() => {
     })
   );
 };
-
-const getPracticeById = (practice_id) => {
-  try {
-    const bundle = i18n.getResourceBundle(i18n.language, "translation");
-
-    if (!bundle) return null;
-
-    // Direct key lookup - because translation keys match practice_id
-    return bundle[practice_id] || null;
-  } catch (e) {
-    console.log("❌ getPracticeById error:", e);
-    return null;
-  }
-};
-
-
 
   const handleCategoryPress = (item, index) => {
     setSelectedCategory(item.key);
@@ -347,12 +302,19 @@ const getPracticeById = (practice_id) => {
             //     isLocked: false,
             //   })
             // }
-            onPress={() => {
-              setDetailsCategoryItem(categoryItem);
-              setDetailsList([item]); // single item list
-              setDetailsIndex(0);
-              setShowDetails(true); // open card
-            }}
+          onPress={() => {
+  const selectedCat = categoryItem || initialCategories[0];
+
+  setDetailsCategoryItem({
+    ...selectedCat,
+    key: selectedCat.key   // ensure key ALWAYS exists
+  });
+
+  setDetailsList([item]);
+  setDetailsIndex(0);
+  setShowDetails(true);
+}}
+
             style={{ marginLeft: 14 }}
           >
             <Ionicons
@@ -444,55 +406,85 @@ const getPracticeById = (practice_id) => {
     </Modal>
   );
 
-  const renderDetailsCard = () => {
-    if (!showDetails) return null;
-    const item = detailsList[detailsIndex];
-    const nextItem = () => {
-      const updatedIndex = (detailsIndex + 1) % detailsList.length;
-      setDetailsIndex(updatedIndex);
-    };
-    return (
-      <View
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: "#FFFFFF",
-          zIndex: 999,
-          flex: 1,
-        }}
-      >
-        <View style={{ paddingHorizontal: 16, paddingTop: 10 }}>
-          <Ionicons
-            name="arrow-back"
-            size={26}
-            color="#000"
-            onPress={() => setShowDetails(false)}
-          />
-        </View>
-        <ScrollView
-          style={{ flex: 1, marginTop: 10 }}
-          contentContainerStyle={{ paddingHorizontal: 16 }}
-          showsVerticalScrollIndicator={false}
-        >
-          <DailyPracticeDetailsCard
-            data={item}
-            item={detailsCategoryItem}
-            onChange={nextItem}
-            onBackPress={() => setShowDetails(false)}
-            isLocked={true}
-          />
-        </ScrollView>
-      </View>
-    );
+const renderDetailsCard = () => {
+  if (!showDetails) return null;
+
+  // ⭐ Always hydrate full practice object
+  const raw = detailsList[detailsIndex];
+  const item = getRawPracticeObject(raw?.practice_id, raw);
+
+  const nextItem = () => {
+    const updatedIndex = (detailsIndex + 1) % detailsList.length;
+    setDetailsIndex(updatedIndex);
   };
+
+  const isEditMode = localPractices.some(
+    (p) => p.practice_id === item.practice_id
+  );
+
+  return (
+    <View
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "#FFFFFF",
+        zIndex: 999,
+        flex: 1,
+      }}
+    >
+      <View style={{ paddingHorizontal: 16, paddingTop: 10 }}>
+        <Ionicons
+          name="arrow-back"
+          size={26}
+          color="#000"
+          onPress={() => setShowDetails(false)}
+        />
+      </View>
+
+      <ScrollView
+        style={{ flex: 1, marginTop: 10 }}
+        contentContainerStyle={{ paddingHorizontal: 16 }}
+        showsVerticalScrollIndicator={false}
+      >
+        <DailyPracticeDetailsCard
+          mode={isEditMode ? "edit" : "new"}
+          data={item}
+          item={detailsCategoryItem}
+          onChange={nextItem}
+          onBackPress={() => {
+            const updatedItem = {
+              ...item,
+              reps: selectedCount ?? item.reps ?? null,
+            };
+
+            if (!isEditMode) {
+              setLocalPractices((prev) => {
+                const exists = prev.some(
+                  (p) => p.practice_id === updatedItem.practice_id
+                );
+                if (exists) return prev;
+                return [...prev, updatedItem];
+              });
+            }
+
+            setShowDetails(false);
+          }}
+          isLocked={true}
+          selectedCount={selectedCount}
+          onSelectCount={setSelectedCount}
+        />
+      </ScrollView>
+    </View>
+  );
+};
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" />
-      {/* <ScrollView showsVerticalScrollIndicator={false}> */}
       {CartModal()}
       {renderDetailsCard()}
       {isAddMoreScreen ? (
@@ -501,7 +493,6 @@ const getPracticeById = (practice_id) => {
             showsVerticalScrollIndicator={false}
             style={{ marginBottom: 50 }}
           >
-     {/* HEADER ROW */}
 <View
   style={{
     flexDirection: "row",
@@ -511,12 +502,9 @@ const getPracticeById = (practice_id) => {
     marginTop: 10,
   }}
 >
-  {/* BACK ARROW */}
   <TouchableOpacity onPress={() => setIsAddMoreScreen(false)}>
     <Ionicons name="arrow-back" size={26} color="#000" />
   </TouchableOpacity>
-
-  {/* TITLE */}
   <TextComponent
     type="DailyHeaderText"
     style={{
@@ -528,13 +516,10 @@ const getPracticeById = (practice_id) => {
   >
     Add To My Practice
   </TextComponent>
-
-  {/* CART + BADGE */}
   <TouchableOpacity
     onPress={() => setCartModalVisible(true)}
     style={{ position: "relative" }}
   >
-    {/* BADGE */}
     <View
       style={{
         position: "absolute",
@@ -644,7 +629,27 @@ const getPracticeById = (practice_id) => {
             <LoadingButton
               loading={false}
               text="Confirm"
-           onPress={() => {
+        onPress={async () => {
+  const token = await AsyncStorage.getItem("access_token");
+
+  if (!token) {
+    await AsyncStorage.setItem(
+      "pending_tracker_edit_data",
+      JSON.stringify({
+        pendingPractices: localPractices,
+        from: "TrackerEdit",
+      })
+    );
+await AsyncStorage.setItem("resume_tracker_flow", "true");
+
+    navigation.navigate("Login", {
+      redirect_to: "TrackerEdit",
+      selectedmantra,
+      goToHistory: true,
+    });
+
+    return;
+  }
   submitCartToServer(localPractices);
 }}
               disabled={false}
@@ -657,7 +662,6 @@ const getPracticeById = (practice_id) => {
       ) : (
         <ScrollView showsVerticalScrollIndicator={false}> 
         <>
-      {/* HEADER ROW */}
 <View
   style={{
     flexDirection: "row",
@@ -667,10 +671,7 @@ const getPracticeById = (practice_id) => {
     marginTop: 10,
   }}
 >
-  {/* LEFT EMPTY SPACE (to keep title centered) */}
   <View style={{ width: 30 }} />
-
-  {/* CENTER TITLE */}
   <TextComponent
     type="DailyHeaderText"
     style={{
@@ -681,13 +682,10 @@ const getPracticeById = (practice_id) => {
   >
    Your Daily Routine
   </TextComponent>
-
-  {/* RIGHT CART ICON WITH BADGE */}
   <TouchableOpacity
     onPress={() => setCartModalVisible(true)}
     style={{ position: "relative", width: 30, height: 30 }}
   >
-    {/* BADGE */}
     <View
       style={{
         position: "absolute",
@@ -769,15 +767,6 @@ const getPracticeById = (practice_id) => {
                       flex: 1,
                     }}
                   >
-                    {/* <TextComponent
-                      type="mediumText"
-                      style={{
-                        fontSize: FontSize.CONSTS.FS_14,
-                        color: Colors.Colors.BLACK,
-                      }}
-                    >
-                      {item.icon}
-                    </TextComponent> */}
                     <TextComponent
                       type="mediumText"
                       numberOfLines={1}
@@ -795,41 +784,27 @@ const getPracticeById = (practice_id) => {
                         "Practice"}
                     </TextComponent>
                   </View>
-
                   <Ionicons
                     name="information-circle-outline"
                     size={18}
                     color="#6E5C2E"
                     style={{ marginLeft: 6 }}
                     onPress={() => {
-  // 1️⃣ Fetch full details from i18n using practice_id
-  const fullData = getPracticeById(item.practice_id);
-
-  // 2️⃣ If nothing found, fallback to API item
+                      const fullData = getRawPracticeObject(item.practice_id, item);
+  // const fullData = getPracticeById(item.practice_id);
   const detailsData = fullData ? { ...fullData, practice_id: item.practice_id } : item;
-
-  // 3️⃣ Fix category if missing
   const categoryItem = initialCategories.find(
     (c) => c.key === detailsData.category || c.key === item.category
   );
 
-  setDetailsCategoryItem(categoryItem);
+setDetailsCategoryItem(
+  categoryItem || initialCategories[0]
+);
+
   setDetailsList([detailsData]);
   setDetailsIndex(0);
   setShowDetails(true);
 }}
-
-                    // onPress={() => {
-                    //   const categoryItem = initialCategories.find(
-                    //     (c) =>
-                    //       c.key === item.category || c.key === selectedCategory
-                    //   );
-
-                    //   setDetailsCategoryItem(categoryItem);
-                    //   setDetailsList([item]);
-                    //   setDetailsIndex(0);
-                    //   setShowDetails(true);
-                    // }}
                   />
                 </View>
               </Card>
@@ -887,10 +862,28 @@ const getPracticeById = (practice_id) => {
               marginTop: 30,
               paddingHorizontal: 30,
             }}
-            onPress={() => {
+    onPress={async () => {
+  const token = await AsyncStorage.getItem("access_token");
+
+  if (!token) {
+    await AsyncStorage.setItem(
+      "pending_tracker_edit_data",
+      JSON.stringify({
+        pendingPractices: localPractices,
+        from: "TrackerEdit",
+      })
+    );
+await AsyncStorage.setItem("resume_tracker_flow", "true");
+
+    navigation.navigate("Login", {
+      redirect_to: "TrackerEdit",
+      selectedmantra,
+      goToHistory: true,
+    });
+    return;
+  }
   submitCartToServer(localPractices);
 }}
-
           >
             <TextComponent
               type="headerSubBoldText"

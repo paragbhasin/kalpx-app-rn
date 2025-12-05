@@ -3,7 +3,6 @@ import { AnyAction } from "@reduxjs/toolkit";
 import moment from "moment";
 import React, { useCallback } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   TouchableOpacity,
   View
@@ -12,6 +11,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { useDispatch, useSelector } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
 import FontSize from "../../components/FontSize";
+import LoadingOverlay from "../../components/LoadingOverlay";
 import TextComponent from "../../components/TextComponent";
 import { RootState } from "../../store";
 import {
@@ -22,48 +22,35 @@ import styles from "./styles";
 
 export default function Notifications() {
   const navigation = useNavigation();
-    const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
+  const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
 
-const { data, loading, page, hasMore } = useSelector(
-  (state: RootState) => state.notificationsReducer
-);
+  const { data, loading, page, hasMore } = useSelector(
+    (state: RootState) => state.notificationsReducer
+  );
 
+  const listRef = React.useRef<FlatList>(null);
 
-  // useEffect(() => {
-  //   dispatch(fetchNotifications(1));
-  // }, []);
+  // 📌 Load fresh page 1 every time screen becomes active
+  useFocusEffect(
+    useCallback(() => {
+      dispatch({ type: "RESET_NOTIFICATIONS" });
+      dispatch(fetchNotifications(1));
+      listRef.current?.scrollToOffset({ offset: 0, animated: false });
+    }, [])
+  );
 
-const listRef = React.useRef(null);
-
-useFocusEffect(
-  useCallback(() => {
-    dispatch({ type: "RESET_NOTIFICATIONS" });  // clear list first
-    dispatch(fetchNotifications(1));
-    listRef.current?.scrollToOffset({ offset: 0, animated: false });
-  }, [dispatch])
-);
-
-
-
-
+  // 📌 Pagination
   const loadMore = () => {
     if (!loading && hasMore) {
       dispatch(fetchNotifications(page + 1));
     }
   };
 
+  // 📌 Mark single notification read
   const openNotification = (item) => {
     if (!item.read) {
       dispatch(markNotificationsRead([item.id]));
     }
-
-
-    // Navigate based on type
-    // if (item.type === "class") navigation.navigate("ClassBookingScreen");
-    // if (item.type === "practice") navigation.navigate("DailyPracticeScreen");
-    // if (item.type === "pooja") navigation.navigate("Pooja");
-
-    // Add others as needed
   };
 
   const renderItem = ({ item }) => (
@@ -71,18 +58,18 @@ useFocusEffect(
       style={[styles.row, !item.read && styles.unread]}
       onPress={() => openNotification(item)}
     >
-      {/* <Image source={require("../../assets/not.png")} style={styles.icon} /> */}
-
       <View style={styles.textContainer}>
         <View style={styles.titleRow}>
-          <TextComponent type="streakSadanaText" style={styles.title}>{item.title}</TextComponent>
+          <TextComponent type="streakSadanaText" style={styles.title}>
+            {item.title}
+          </TextComponent>
           <TextComponent type="mediumText" style={styles.time}>
-  {moment(item.timestamp).format("MMM D, YYYY")}
-</TextComponent>
-
-          {/* <TextComponent type="mediumText" style={styles.time}>{new Date(item.timestamp).toLocaleDateString()}</TextComponent> */}
+            {moment(item.timestamp).format("MMM D, YYYY")}
+          </TextComponent>
         </View>
-        <TextComponent type="mediumText" style={styles.message}>{item.message}</TextComponent>
+        <TextComponent type="mediumText" style={styles.message}>
+          {item.message}
+        </TextComponent>
       </View>
     </TouchableOpacity>
   );
@@ -93,47 +80,58 @@ useFocusEffect(
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
-                <TextComponent type="headerText" style={styles.headerText}>Notifications</TextComponent>
+        <TextComponent type="headerText" style={styles.headerText}>
+          Notifications
+        </TextComponent>
         <View style={{ width: 24 }} />
       </View>
-{loading && data.length === 0 ? (
-  // Initial Loading State (optional)
-  <ActivityIndicator style={{ marginTop: 40 }} />
-) : data.length === 0 ? (
-  // 🚫 NO NOTIFICATIONS
-  <View style={{ marginTop: FontSize.CONSTS.DEVICE_HEIGHT*0.25, alignItems: "center",justifyContent:"center" }}>
-    <Ionicons name="notifications-off-outline" size={50} color="#999" />
-    <TextComponent  style={{ marginTop: 10, }} type="streakSadanaText">No Notification</TextComponent>
-    <TextComponent
-      type="mediumText"
-      style={{ marginTop: 10, color: "#999",textAlign:"center",marginHorizontal:30 }}
-    >
-   We’ll let you know when there will be something to update you.
-    </TextComponent>
-  </View>
-) : (
-  // 📌 NOTIFICATION LIST
-  <FlatList
-    ref={listRef}
-    data={data}
-    renderItem={renderItem}
-    onEndReached={loadMore}
-    onEndReachedThreshold={0.3}
-    ListFooterComponent={
-      loading ? <ActivityIndicator style={{ margin: 20 }} /> : null
-    }
-  />
-)}
-      {/* <FlatList
-        data={data}
-        renderItem={renderItem}
-        // keyExtractor={(item) => item.id.toString()}
-        onEndReached={loadMore}
-        onEndReachedThreshold={0.3}
-        ListFooterComponent={
-          loading ? <ActivityIndicator style={{ margin: 20 }} /> : null
-        }
-      /> */}
+      {loading && data.length === 0 ? (
+        // <ActivityIndicator style={{ marginTop: 40 }} />
+                    <LoadingOverlay visible={loading} text="Fetching Data..." />
+      ) : data.length === 0 ? (
+        <View style={{
+          marginTop: FontSize.CONSTS.DEVICE_HEIGHT * 0.25,
+          alignItems: "center",
+          justifyContent: "center"
+        }}>
+          <Ionicons name="notifications-off-outline" size={50} color="#999" />
+          <TextComponent style={{ marginTop: 10 }} type="streakSadanaText">
+            No Notification
+          </TextComponent>
+          <TextComponent
+            type="mediumText"
+            style={{
+              marginTop: 10,
+              color: "#999",
+              textAlign: "center",
+              marginHorizontal: 30,
+            }}
+          >
+            We’ll let you know when there will be something to update you.
+          </TextComponent>
+        </View>
+
+      ) : (
+        // Main list
+        <FlatList
+          ref={listRef}
+          data={data}
+          renderItem={renderItem}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.3}
+          refreshing={loading && page === 1}
+          onRefresh={() => {
+            dispatch({ type: "RESET_NOTIFICATIONS" });
+            dispatch(fetchNotifications(1));
+          }}
+          ListFooterComponent={
+            loading && page > 1 ? (
+                    <LoadingOverlay visible={loading} text="Fetching Data..." />
+              // <ActivityIndicator style={{ margin: 20 }} />
+            ) : null
+          }
+        />
+      )}
     </View>
   );
 }

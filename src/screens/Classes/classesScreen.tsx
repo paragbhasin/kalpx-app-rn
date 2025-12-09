@@ -412,7 +412,8 @@ const fetchMyBookings = async (page = 1) => {
           }
           title={item?.title}
           description={item?.subtitle}
-          duration={item?.pricing?.trial?.session_length_min ? item?.pricing?.trial?.session_length_min : item?.pricing?.per_person?.session_length_min}
+          trialDuration={item?.pricing?.trial?.session_length_min}
+          duration={item?.pricing?.type === "per_person" ? item?.pricing?.per_person?.session_length_min : item?.pricing?.per_group?.session_length_min}
           // price={item?.pricing?.per_person?.amount?.web}
           price={
   (item?.pricing?.type === "per_group"

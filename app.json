@@ -2,7 +2,7 @@
   "expo": {
     "name": "kalpx",
     "slug": "kalpx",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "orientation": "portrait",
     "icon": "./assets/AppIconImg.png",
     "scheme": "kalpx",
@@ -31,7 +31,8 @@
         "foregroundImage": "./assets/AppIconImg.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",

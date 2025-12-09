@@ -14,6 +14,7 @@ interface ClassEventCardProps {
   currency: string;
   trailenabled: string;
   trailAmt: string;
+  trialDuration?: string;
   onViewDetails?: () => void;
   onBookNow?: () => void;
   tutor?: string; // Added tutor property
@@ -29,7 +30,8 @@ const ClassEventCard: React.FC<ClassEventCardProps> = ({
   onBookNow,
   currency,
   trailenabled,
-  trailAmt
+  trailAmt,
+  trialDuration
 }) => {
   const isRemote = typeof imageUrl === "string" && imageUrl.startsWith("http");
   return (
@@ -56,26 +58,26 @@ const ClassEventCard: React.FC<ClassEventCardProps> = ({
           </TextComponent>
           {trailenabled &&
           <>
-              <TextComponent type="mediumText" style={{color:Colors.Colors.blue_text}}>
-            Trail :{" "}
-            <TextComponent type="mediumText" style={{color:Colors.Colors.blue_text}}>
+              <TextComponent type="semiBoldText" style={{color:Colors.Colors.blue_text}}>
+            Trial :  {currency === "INR" ? "₹" :"$"} {trailAmt} / {trialDuration} m
+            {/* <TextComponent type="mediumText" style={{color:Colors.Colors.blue_text}}>
               {currency === "INR" ? "₹" :"$"} {trailAmt}
-            </TextComponent>
+            </TextComponent> */}
           </TextComponent>
            </>
           }
-          <TextComponent type="mediumText" >
+          {/* <TextComponent type="mediumText" >
             Duration :{" "}
             <TextComponent type="mediumText" style={styles.bold}>
               {duration}
             </TextComponent>
-          </TextComponent>
+          </TextComponent> */}
 
-          <TextComponent type="boldText" style={styles.price}>
-            {currency === "INR" ? "₹" :"$"} {price}{" "}
-            <TextComponent type="mediumText" style={styles.perPerson}>
-              / Per Person
-            </TextComponent>
+          <TextComponent type="headerSubBoldText" style={styles.price}>
+            {currency === "INR" ? "₹" :"$"} {price}{" "} / Per Person . {duration} m
+            {/* <TextComponent type="mediumText" style={styles.perPerson}>
+              / Per Person . {duration} m
+            </TextComponent> */}
           </TextComponent>
 
           {/* Buttons row */}
@@ -127,6 +129,7 @@ const styles = StyleSheet.create({
   },
   price: {
     marginVertical: 4,
+    color:Colors.Colors.App_theme
   },
   perPerson: {
     fontSize: 12,

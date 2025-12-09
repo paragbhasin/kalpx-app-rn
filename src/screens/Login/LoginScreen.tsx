@@ -26,6 +26,7 @@ import LoadingButton from "../../components/LoadingButton"; // ✅ import Loadin
 import LoadingOverlay from "../../components/LoadingOverlay";
 import TextComponent from "../../components/TextComponent";
 import { RootState } from "../../store";
+import { trackPixelEvent } from "../../utils/facebookEvents";
 import { registerDeviceToBackend } from "../../utils/registerDevice";
 import { loginUser, socialLoginUser } from "./actions";
 import ReCaptchaRuntime from "./ReCaptchaRuntime";
@@ -239,6 +240,10 @@ if (key === "pending_classes_data") {
         socialLoginUser({ provider: "google", access_token }, async (res) => {
           setLoading(false);
           if (res.success) {
+              trackPixelEvent("GoogleLoginSuccess", {
+  user_id: res.data?.user?.id,
+  email: res.data?.user?.email,
+});
             console.log("🎉 Google login success:", res.data);
             if (keepLoggedIn) {
               await AsyncStorage.setItem("userEmail", result.data.user.email);
@@ -292,6 +297,10 @@ if (key === "pending_classes_data") {
           },
           async (res) => {
             if (res.success) {
+               trackPixelEvent("AppleLoginSuccess", {
+    user_id: res.data?.user?.id,
+    email: res.data?.user?.email,
+  });
               await AsyncStorage.setItem("showLocationConfirm", "true");
               await resumePendingIfAny();
             } else {
@@ -378,6 +387,10 @@ if (key === "pending_classes_data") {
       loginUser(credentials, async (result) => {
         setLoading(false);
         if (result && result.success) {
+            trackPixelEvent("LoginSuccess", {
+    user_id: result.data?.user?.id,
+    email: result.data?.user?.email,
+  });
           if (keepLoggedIn) {
             await AsyncStorage.setItem("userEmail", credentials.email);
             await AsyncStorage.setItem("userPassword", credentials.password);

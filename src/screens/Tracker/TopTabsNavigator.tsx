@@ -99,7 +99,7 @@ useFocusEffect(
           return {
             swipeEnabled: !shouldRestrictTabs,
             tabBarActiveTintColor: isRestricted ? "#A9A9A9" : "#D4A017",
-            tabBarInactiveTintColor: "#A9A9A9",
+            tabBarInactiveTintColor: "#000000",
             tabBarIndicatorStyle: {
               backgroundColor: isRestricted ? "transparent" : "#D4A017",
               height: 3,

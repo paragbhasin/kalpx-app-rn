@@ -99,6 +99,7 @@ useEffect(() => {
     imageUrl: item.cover_media?.key ? `${BASE_IMAGE_URL}/${item.cover_media.key}` : undefined,
     title: item.title,
     description: item.description,
+      trialDuration:item?.pricing?.trial?.session_length_min,
     duration: item?.pricing?.trial?.session_length_min ? item?.pricing?.trial?.session_length_min : item?.pricing?.per_person?.session_length_min,
     // price: item.pricing?.per_person?.amount?.web,
     price: (
@@ -106,7 +107,10 @@ useEffect(() => {
     ? item?.pricing?.per_group?.amount?.web
     : item?.pricing?.per_person?.amount?.web
 ) ?? 0,
-    tutor: item.tutor,
+  tutor: item.tutor,
+  currency:item?.pricing?.currency,
+  trailenabled:item?.pricing?.trial?.enabled,
+  trailAmt:item?.pricing?.trial?.amount,
     raw: item,
   });
 
@@ -453,9 +457,10 @@ useEffect(() => {
             onViewDetails={() => navigation.navigate("ClassTutorDetailsScreen", { data: item.raw })}
             onBookNow={() => navigation.navigate("ClassBookingScreen", { data: item.raw })}
             tutor={item.tutor}
-            currency={item?.pricing?.currency}
-  trailenabled={item?.pricing?.trial?.enabled}
-  trailAmt={item?.pricing?.trial?.amount}
+      currency={item.currency}
+      trailenabled={item.trailenabled}
+      trailAmt={item.trailAmt}
+      trialDuration={item.trialDuration}
           />
         )}
         onEndReached={loadMoreExplore}

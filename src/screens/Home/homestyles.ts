@@ -5,6 +5,12 @@ import FontSize from "../../components/FontSize";
 const screenWidth = Dimensions.get("window").width;
 
 const styles = StyleSheet.create({
+    pageTitle: {
+    color: "#000",
+    flex: 1,
+    textAlign: "center",
+    fontSize: 18,
+  },
   background: { flex: 1, resizeMode: "cover" },
   header: {
     flexDirection: "row",

@@ -1,8 +1,3 @@
-// ================================================
-// Peace, Calm & Stress Relief – Abhyas / Practices
-// KalpX Official Dataset (12 Abhyas)
-// ================================================
-
 export const PEACE_CALM_PRACTICES = [
   // 1. Shanti Breath Cycle
   {
@@ -481,7 +476,6 @@ export const PEACE_CALM_PRACTICES = [
   },
 ];
 
-// src/data/PeaceCalm.js
 export const PEACE_CALM_MANTRAS = [
   // 1. Om Shanti Om
   {
@@ -772,11 +766,6 @@ export const PEACE_CALM_MANTRAS = [
     videoUrl: "",
   },
 ];
-
-// ===============================
-// Peace, Calm & Stress Relief – Sankalps
-// KalpX Official Dataset (14 Sankalps)
-// ===============================
 
 export const PEACE_CALM_SANKALPS = [
   // 1. Stillness Over Reaction

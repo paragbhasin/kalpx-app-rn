@@ -826,7 +826,7 @@ export const CARRER_ABUNDANCE_MANTRAS = [
     chantOptions: [9, 27, 54, 108],
     video: "",
   },
-  /* 1. Durga Suktam */
+  /* 18. Durga Suktam */
   {
     id: "mantra.durga_suktam",
     title: "Durga Sūktam",
@@ -872,7 +872,7 @@ export const CARRER_ABUNDANCE_MANTRAS = [
     chantOptions: [9, 27, 54, 108],
     video: "",
   },
-  /* 3. Kubera Mantra (Padma Purana) */
+  /* 19. Kubera Mantra (Padma Purana) */
   {
     id: "mantra.kubera_padma_purana",
     title: "Kubera Mantra (Padma Purāṇa)",
@@ -906,7 +906,7 @@ export const CARRER_ABUNDANCE_MANTRAS = [
     chantOptions: [9, 27, 54, 108],
     video: "",
   },
-  /* 2. Shri Suktam */
+  /* 20. Shri Suktam */
   {
     id: "mantra.shri_suktam",
     title: "Śrī Sūktam",

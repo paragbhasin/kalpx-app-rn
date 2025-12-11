@@ -26,6 +26,8 @@ import Privacy from "../screens/Profile/Privacy";
 import Profile from "../screens/Profile/Profile";
 import ProfileDetails from "../screens/Profile/ProfileDetails";
 import Sankalp from "../screens/Sankalp";
+import SocialExplore from "../screens/Social/SocialExplore";
+import SocialPostDetailScreen from "../screens/Social/SocialPostDetailScreen";
 import StreakScreen from "../screens/Streak/StreakScreen";
 import TopTabsNavigator from "../screens/Tracker/TopTabsNavigator";
 import TrackerEdit from "../screens/Tracker/TrackerEdit";
@@ -163,6 +165,16 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen
       name="TrackerEdit"
       component={TrackerEdit}
+      options={{ headerShown: false }}
+    />
+      <Stack.Screen
+      name="SocialExplore"
+      component={SocialExplore}
+      options={{ headerShown: false }}
+    />
+      <Stack.Screen
+      name="SocialPostDetailScreen"
+      component={SocialPostDetailScreen}
       options={{ headerShown: false }}
     />
   </Stack.Navigator>

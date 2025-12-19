@@ -98,11 +98,11 @@ export default StyleSheet.create({
   },
     button: {
     backgroundColor: "#ca8a04",
-    paddingVertical: 14,
-    borderRadius: 25,
+    paddingVertical: 10,
+    borderRadius: 5,
     alignItems: "center",
     marginTop: 20,
-    width:"45%",
+    width:"70%",
     alignSelf:"center"
   },
     buttonText: {

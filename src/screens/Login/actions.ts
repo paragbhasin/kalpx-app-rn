@@ -59,7 +59,7 @@ export const socialLoginUser = (credentials, callback) => async (dispatch) => {
     await AsyncStorage.setItem("access_token", response.data.access_token);
     await AsyncStorage.setItem("refresh_token", response.data.refresh_token);
     await AsyncStorage.setItem("user_id", `${response.data.user.id}`);
-await registerDeviceToBackend();
+// await registerDeviceToBackend();
     dispatch(socialLoginSuccess(response.data));
     callback?.({ success: true, data: response.data });
   } catch (error) {

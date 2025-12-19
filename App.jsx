@@ -12,6 +12,7 @@ import { Provider, useDispatch, useSelector } from "react-redux";
 
 import SnackBar from "./src/components/SnackBar";
 import "./src/config/i18n";
+import { CartProvider } from "./src/context/CartContext";
 import { navigationRef } from "./src/Shared/Routes/NavigationService";
 import Routes from "./src/Shared/Routes/Routes";
 import { store } from "./src/store";
@@ -103,10 +104,12 @@ export default function App() {
   return (
     <MenuProvider>
       <Provider store={store}>
+         <CartProvider>
         <NavigationContainer ref={navigationRef}>
           <Routes initialRouteName={initialRoute} />
           <SnackBarContainer />
         </NavigationContainer>
+        </CartProvider>
       </Provider>
     </MenuProvider>
   );

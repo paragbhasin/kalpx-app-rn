@@ -241,6 +241,7 @@ const DailyPracticeDetailsCard = ({
   const [isDevanagariLong, setIsDevanagariLong] = useState(false);
   const [showDevanagariModal, setShowDevanagariModal] = useState(false);
     const slideAnim = useRef(new Animated.Value(0)).current;
+const scrollRef = useRef<ScrollView>(null);
 
 
     console.log("DailyPracticeDetailsCard rendered with data:", data, "and item:", item);
@@ -279,6 +280,7 @@ React.useEffect(() => {
 }, [selectedCount, normalizedOptions]);
 
   const handleSwipeChange = () => {
+      scrollRef.current?.scrollTo({ y: 0, animated: false });
     // 1. Slide OUT to LEFT
     Animated.timing(slideAnim, {
       toValue: -400,
@@ -344,6 +346,7 @@ React.useEffect(() => {
         <Animated.View style={{ transform: [{ translateX: slideAnim }] }}>
     <Card style={styles.cardContainer}>
       <ScrollView
+        ref={scrollRef}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 150 }}
       >

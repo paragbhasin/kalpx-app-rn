@@ -421,7 +421,10 @@ if (loading) {
                      navigation.navigate("TrackerTabs", {
   screen: "History",
   params: {
-    selectedmantra: currentSankalp,
+     from: "sankalp",
+    selectedSankalp: currentSankalp,
+    autoSelectCategory: "daily-sankalp",
+    // selectedmantra: currentSankalp,
   }
 })
                   }

@@ -1,6 +1,5 @@
 import { StyleSheet } from "react-native";
 import Colors from "../../components/Colors";
-import FontSize from "../../components/FontSize";
 
 export default StyleSheet.create({
   container: {
@@ -12,7 +11,7 @@ export default StyleSheet.create({
     borderRadius: 14,
     elevation: 3,
     backgroundColor: Colors.Colors.header_bg,
-    height: FontSize.CONSTS.DEVICE_HEIGHT * 0.65, 
+    // height: FontSize.CONSTS.DEVICE_HEIGHT * 0.65, 
     marginHorizontal: 18,
     alignItems: "center",
     padding: 12,
@@ -28,10 +27,11 @@ export default StyleSheet.create({
     borderRadius: 6,
     padding: 12,
      marginVertical: 8,
-    backgroundColor: Colors.Colors.white,
-    marginHorizontal: 4,
+    backgroundColor: "#F7F0DD",
+    marginHorizontal:16,
     // width:FontSize.CONSTS.DEVICE_WIDTH*0.8,
     alignItems:"center",
+    justifyContent:"center"
   },
     arrowIcon: {
     width: 12,

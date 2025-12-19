@@ -240,6 +240,7 @@ if (key === "pending_classes_data") {
         socialLoginUser({ provider: "google", access_token }, async (res) => {
           setLoading(false);
           if (res.success) {
+                  await registerDeviceToBackend();
               trackPixelEvent("GoogleLoginSuccess", {
   user_id: res.data?.user?.id,
   email: res.data?.user?.email,

@@ -69,6 +69,7 @@ const PracticeDailyModal: React.FC<PracticeDailyModalProps> = ({
     }
 
     return (
+      <>
       <View style={styles.itemContainer}>
         <View
           style={{
@@ -76,12 +77,23 @@ const PracticeDailyModal: React.FC<PracticeDailyModalProps> = ({
             height: 10,
             borderRadius: 8,
             backgroundColor: Colors.Colors.App_theme,
+            // borderBottomColor:Colors.Colors.Light_grey,
+            // borderBottomWidth:0.5
           }}
         />
         <TextComponent type="cardText" style={styles.name}>
-          {item.icon} {displayName}
+        {displayName}
         </TextComponent>
       </View>
+       <View
+      style={{
+        width: "100%",
+        height: 1.25,
+        backgroundColor: Colors.Colors.Time_bg,
+        marginTop: 6,
+      }}
+    />
+    </>
     );
   };
 

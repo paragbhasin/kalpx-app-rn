@@ -2,53 +2,62 @@ import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 import { Image, ScrollView, TouchableOpacity, View } from "react-native";
 import { Card } from "react-native-paper";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import Colors from "../../components/Colors";
 import Header from "../../components/Header";
 import TextComponent from "../../components/TextComponent";
 import styles from "./dailyPracticeListStyle";
 
+// Rooted practices aligned with dharma
+
 const categories = [
   {
     name: "Peace & Calm",
     key: "peace-calm",
-    description: "Find calm in the breath.",
+    description: "Restore balance and release daily stress",
+    image: require("../../../assets/DP_1.png"),
   },
   {
     name: "Focus & Motivation",
     key: "focus",
-    description: "Align. Focus. Rise.",
+    description: "Move from intention to action",
+    image: require("../../../assets/DP_2.png"),
   },
   {
     name: "Emotional Healing",
     key: "healing",
-    description: "Let go. Begin again.",
+    description: "Cultivate inner peace and resilience",
+    image: require("../../../assets/DP_3.png"),
   },
   {
     name: "Gratitude & Positivity",
     key: "gratitude",
-    description: "Gratitude transforms everything.",
+    description: "Shift into mindfulness and appreciation",
+    image: require("../../../assets/DP_4.png"),
   },
   {
     name: "Spiritual Growth",
     key: "spiritual-growth",
-    description: "Grow through awareness.",
+    description: "Deepen sadhana and devotional discipline",
+    image: require("../../../assets/DP_5.png"),
   },
   {
     name: "Health & Well-Being",
     key: "health",
-    description: "Balance builds strength.",
+    description: "Support vitality, energy, and balance",
+    image: require("../../../assets/DP_6.png"),
   },
   {
     name: "Career & Prosperity",
     key: "career",
-    description: "Opportunity follows action.",
+    description: "Build confidence, focus, and consistency",
+    image: require("../../../assets/DP_7.png"),
   },
 ];
 
-const backIcon = require("../../../assets/C_Arrow_back.png");
-
-
-const arrowIcon = require("../../../assets/arrow_home.png");
+const sanatanImage = require("../../../assets/DP_8.png");
+const createOwnImage = require("../../../assets/DP_9.png");
+const arrowIcon = require("../../../assets/card_arrow.png");
 
 const DailyPracticeList = () => {
   const navigation : any= useNavigation();
@@ -56,65 +65,144 @@ const DailyPracticeList = () => {
 
   return (
     <View style={styles.container}>
+         {/* <ImageBackground
+                  source={require("../../../assets/Tracker_BG.png")}
+                  style={{
+                    flex: 1,
+                    width: FontSize.CONSTS.DEVICE_WIDTH,
+                    alignSelf: "center",
+                    justifyContent: "flex-start",
+                  }}
+                  imageStyle={{
+                    borderTopLeftRadius: 16,
+                    borderTopRightRadius: 16,
+                  }}
+                > */}
       <Header />
-  <TouchableOpacity onPress={() => navigation.navigate("HomePage", { screen: "Home" })}>
-          <Image source={backIcon} style={styles.backIcon} resizeMode="contain" />
+         <ScrollView
+          style={styles.innerScroll}
+          showsVerticalScrollIndicator={false}
+        >
+  <TouchableOpacity 
+    onPress={() => navigation.goBack()}
+  // onPress={() => navigation.navigate("HomePage", { screen: "Home" })} 
+  style={{marginHorizontal:16,marginBottom:10}}>
+  <Ionicons name="arrow-back" size={26} color="#000" />
         </TouchableOpacity>
       {/* Fixed Card Centered */}
-      <Card style={styles.card}>
+      {/* <Card style={styles.card}> */}
         <TextComponent
           type="mediumBigText"
           style={{
-            marginTop: 6,
+            marginTop: -30,
             color: Colors.Colors.Daily_black,
             alignSelf: "center",
           }}
         >
-          How can we help ?
+         Let’s get started
         </TextComponent>
 
         <TextComponent
-          type="cardHeaderText"
-          style={{ marginTop: 6, alignSelf: "center" }}
+          type="subDailyText"
+          style={{ marginTop: 6, alignSelf: "center",textAlign:"center" }}
         >
-         Set your routine for :
+      Choose a long-term goal, and we’ll guide you step by step or begin with what feels most important to you today.
         </TextComponent>
-
+        {/* <View style={{flexDirection:"row",alignItems:"center",marginVertical:10}}> */}
+<TextComponent type="mediumText" style={{ marginVertical: 6, alignSelf: "center",textAlign:"center" ,color:Colors.Colors.blue_text}} >*Tap any category to explore its guided routine.*</TextComponent>
+           {/* <Image
+        source={arrowIcon}
+        style={[styles.arrowIcon, { marginLeft: 6 }]}
+        resizeMode="contain"
+      /> */}
+      {/* </View> */}
         {/* Scrollable Inner Section */}
-        <ScrollView
-          style={styles.innerScroll}
-          showsVerticalScrollIndicator={false}
-        >
           {categories.map((item, index) => (
             <TouchableOpacity
   key={index}
   activeOpacity={0.9}
   onPress={() => navigation.navigate("DailyPracticeSelectList",{item: item})}
 >
-            <Card key={index} style={styles.subCard}>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  width: "100%",
-                }}
-              >
-                <TextComponent type="DailyHeaderText">
-                  {item.name}
-                </TextComponent>
+       <Card key={index} style={styles.subCard}>
+  <View style={{ flexDirection: "row", alignItems: "center" ,justifyContent:"space-between",width:"100%"}}>
+    {/* Category Image */}
+    <Image
+      source={item.image}
+      style={{ width: 40, height: 40 }}
+      resizeMode="contain"
+    />
 
-                <Image
-                  source={arrowIcon}
-                  style={styles.arrowIcon}
-                  resizeMode="contain"
-                />
-              </View>
-            </Card>
+    <View style={{width:"80%"}}>
+      <TextComponent type="cardText">
+        {item.name}
+      </TextComponent>
+
+      <TextComponent
+        type="mediumText"
+        style={{ color: Colors.Colors.Daily_black, marginTop: 4 }}
+      >
+        {item.description}
+      </TextComponent>
+    </View>
+
+    <Image
+      source={arrowIcon}
+      style={styles.arrowIcon}
+      resizeMode="contain"
+    />
+  </View>
+</Card>
+
             </TouchableOpacity>
           ))}
+      {/* </Card> */}
+      {/* ---- Sanatan Practices Card ---- */}
+<TouchableOpacity
+  activeOpacity={0.9}
+  onPress={() => navigation.navigate("SanatanPractice")}
+>
+  <Card style={styles.subCard}>
+    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+
+      <Image source={sanatanImage} style={{ width: 40, height: 40 }} resizeMode="contain" />
+
+      <View style={{ width: "80%" }}>
+        <TextComponent type="cardText">Sanatan Practices</TextComponent>
+        <TextComponent type="mediumText" style={{ color: Colors.Colors.Daily_black, marginTop: 4 }}>
+          Explore ancient dharmic practices & rituals.
+        </TextComponent>
+      </View>
+
+      <Image source={arrowIcon} style={styles.arrowIcon} resizeMode="contain" />
+    </View>
+  </Card>
+</TouchableOpacity>
+
+
+{/* ---- Create Your Own Card ---- */}
+<TouchableOpacity
+  activeOpacity={0.9}
+  onPress={() => navigation.navigate("CreateOwnPractice")}
+>
+  <Card style={styles.subCard}>
+    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+      
+      <Image source={createOwnImage} style={{ width: 40, height: 40 }} resizeMode="contain" />
+
+      <View style={{ width: "80%" }}>
+        <TextComponent type="cardText">Create Your Own</TextComponent>
+        <TextComponent type="mediumText" style={{ color: Colors.Colors.Daily_black, marginTop: 4 }}>
+          Build your personalized spiritual routine.
+        </TextComponent>
+      </View>
+
+      <Image source={arrowIcon} style={styles.arrowIcon} resizeMode="contain" />
+    </View>
+  </Card>
+</TouchableOpacity>
+<TextComponent type="mediumText" style={{alignSelf: "center",textAlign:"center" ,color:Colors.Colors.blue_text,marginBottom:30}} >You can add, change, or explore more anytime.</TextComponent>
         </ScrollView>
-      </Card>
+        {/* </ImageBackground> */}
     </View>
   );
 };

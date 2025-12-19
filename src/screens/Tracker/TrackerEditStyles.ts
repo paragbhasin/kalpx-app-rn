@@ -39,14 +39,14 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     fontSize: 14,
     color: Colors.Colors.BLACK,
-    backgroundColor: "#FFFCF5",
+    backgroundColor: "#F7F0DD",
   },
 
   /* ---------- CATEGORY CHIPS ---------- */
   categoryList: {
     paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 4,
+    paddingTop: 6,
+    // paddingBottom: 4,
   },
   categoryChip: {
     marginRight: 10,
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "#F0E0B8",
   },
   typeTab: {
-    paddingVertical: 8,
+    paddingVertical: 2,
     paddingHorizontal: 18,
     borderBottomWidth: 2,
     borderBottomColor: "transparent",
@@ -100,10 +100,10 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   simpleCard: {
-    backgroundColor: "#FFF8E6",
+    backgroundColor: "#FFFFFF",
     borderRadius: 10,
     paddingVertical: 12,
-    paddingHorizontal: 14,
+    paddingHorizontal: 8,
     borderWidth: 1,
     borderColor: "#D4A017",
     marginBottom: 12,
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     color: Colors.Colors.BLACK,
-    fontSize: 14,
+    // fontSize: 14,
   },
   cardSubtitle: {
     marginTop: 4,
@@ -120,9 +120,9 @@ const styles = StyleSheet.create({
     color: "#6E5C2E",
   },
   cardRightIcons: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginLeft: 10,
+    // flexDirection: "row",
+    // alignItems: "center",
+    // marginLeft: 10,
   },
 
   /* ---------- MAIN SCREEN (CURRENT PRACTICES) ---------- */
@@ -238,8 +238,8 @@ divider: {
   marginHorizontal: -20,
 },
   button: {
-    backgroundColor: "#ca8a04",
-    paddingVertical: 14,
+    backgroundColor: "#D4A017",
+    paddingVertical: 12,
     borderRadius: 25,
     alignItems: "center",
     // marginTop: 20,
@@ -252,14 +252,15 @@ divider: {
       // lineHeight: 20,
   },
   bottomButtonContainer: {
-  position: "absolute",
-  bottom: 0,
-  left: 0,
-  right: 0,
-  padding: 16,
-  backgroundColor: "#FFFFFF",
-  borderTopColor: "#EEE4C6",
-  borderTopWidth: 1,
+  // position: "absolute",
+  // bottom: 0,
+  // left: 0,
+  // right: 0,
+  padding: 10,
+  // marginTop:12
+  // backgroundColor: "#FFFFFF",
+  // borderTopColor: "#EEE4C6",
+  // borderTopWidth: 1,
 },
 
 });

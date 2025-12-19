@@ -62,24 +62,46 @@ useFocusEffect(
 
 
   /** CONDITIONS */
+  // const hasActivePractices =
+  //   trackerData?.active_practices?.length > 0 ? true : false;
+
   const hasActivePractices =
-    trackerData?.active_practices?.length > 0 ? true : false;
+  trackerData === null
+    ? true   // ⛔️ assume allowed until data arrives
+    : trackerData.active_practices?.length > 0;
+
 
   const shouldRestrictTabs = !isLoggedIn || !hasActivePractices;
 
-  /** 🔥 AUTO-REDIRECT IF USER TRIES TO OPEN BLOCKED TABS */
   useEffect(() => {
-    if (!navState || navState.routes.length === 0) return;
+  if (!trackerData) return; // ⛔️ WAIT
 
-    const currentScreen = navState.routes[navState.index]?.name;
+  if (!navState || navState.routes.length === 0) return;
 
-    if (
-      shouldRestrictTabs &&
-      (currentScreen === "Tracker" || currentScreen === "Stats")
-    ) {
-      navigation.navigate("History");
-    }
-  }, [shouldRestrictTabs, navState]);
+  const currentScreen = navState.routes[navState.index]?.name;
+
+  if (
+    shouldRestrictTabs &&
+    (currentScreen === "Tracker" || currentScreen === "Stats")
+  ) {
+    navigation.navigate("History");
+  }
+}, [shouldRestrictTabs, navState, trackerData]);
+
+
+  // /** 🔥 AUTO-REDIRECT IF USER TRIES TO OPEN BLOCKED TABS */
+  // useEffect(() => {
+  //   if (!navState || navState.routes.length === 0) return;
+
+  //   const currentScreen = navState.routes[navState.index]?.name;
+
+  //   if (
+  //     shouldRestrictTabs &&
+  //     (currentScreen === "Tracker" || currentScreen === "Stats")
+  //   ) {
+  //     navigation.navigate("History");
+  //   }
+  // }, [shouldRestrictTabs, navState]);
 
   return (
     <View style={styles.container}>

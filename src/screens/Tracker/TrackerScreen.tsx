@@ -5,6 +5,7 @@ import React, { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   FlatList,
+  Image,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -65,37 +66,62 @@ const TrackerScreen = () => {
         backgroundColor={Colors.Colors.header_bg}
         translucent={false}
       />
-
+  {/* <ImageBackground
+                    source={require("../../../assets/Tracker_BG.png")}
+                    style={{
+                      alignSelf: "center",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          paddingVertical: 8,
+                          paddingHorizontal: 10,
+                          borderTopRightRadius: 16,
+                          borderTopLeftRadius: 16,
+                          width: FontSize.CONSTS.DEVICE_WIDTH,
+                    }}
+                    imageStyle={{
+                          borderTopRightRadius: 16,
+    borderTopLeftRadius: 16,
+    alignSelf: "center",
+    justifyContent: "center",
+    alignItems: "center",
+                    }}
+                  > */}
       <ScrollView
-        contentContainerStyle={{ paddingBottom: 30 }}
+        contentContainerStyle={{ paddingBottom: 30 ,marginHorizontal:10}}
         showsVerticalScrollIndicator={false}
       >
-        
-        {/* ----------- HEADER TITLE ------------ */}
-        <TextComponent
-          type="cardHeaderText"
+                <TextComponent
+          type="DailyboldText"
           style={{ alignSelf: "center", marginTop: 15, color: Colors.Colors.BLACK }}
         >
           {t("sadanaTracker.completeTodaysPractices")}
         </TextComponent>
-
-        {/* ----------- PROGRESS SUMMARY ------------ */}
+    {/* // "progressSummary": "{{completed}}/{{total}} practices completed on {{date}}", */}
         <TextComponent
-          type="subScrollText"
+          type="subDailyText"
           style={{
             color: Colors.Colors.BLACK,
-            marginTop: 12,
+            marginTop: 2,
             alignSelf: "center",
           }}
         >
           {t("sadanaTracker.progressSummary", {
             completed: dailyPractice?.data?.completed_today?.length || 0,
             total: dailyPractice?.data?.active_practices?.length || 0,
-            date: moment().format("MM/DD/YYYY"),
           })}
         </TextComponent>
-
-        {/* ----------- PRACTICES LIST ------------ */}
+          <TextComponent
+          type="subDailyText"
+          style={{
+            color: Colors.Colors.BLACK,
+            marginTop: 2,
+            alignSelf: "center",
+          }}
+        >
+          {t("sadanaTracker.progressSummaryDate", {
+            date: moment().format("MMM D, YYYY"),
+          })}
+        </TextComponent>
         <FlatList
           data={sortedPractices}
           keyExtractor={(item) => item.practice_id}
@@ -118,83 +144,69 @@ if (id.startsWith("mantra.")) {
      let HeadertextTitle = fullObj?.title || fullObj?.text || fullObj?.short_text || fullObj?.name;
      let subTextCard = fullObj?.iast || fullObj?.line || fullObj?.summary || fullObj?.tooltip || fullObj?.description;
      let mantraMeaning = fullObj?.meaning;
-            console.log("🔍for sankalp Practice Full Object:", JSON.stringify(fullObj));
-
-            // let displayName = "";
-            // let displayDescription = "";
-
-            // if (item.source === "custom") {
-            //   displayName = item.name?.trim() || "Custom Practice";
-            //   displayDescription = item.description?.trim() || "";
-            // } else {
-            //   const translated = getTranslatedPractice(item.details || item, t);
-            //   displayName = translated.name || item.name || "Practice";
-            //   displayDescription =
-            //     translated.desc ||
-            //     item.description ||
-            //     item.details?.description ||
-            //     "";
-            // }
-
+     let lastPracticeDate = item?.last_practice_date;
             const isCompleted = dailyPractice?.data?.completed_today?.includes(
               item.practice_id
             );
-
-            // const mantraText =
-            //   item.details?.devanagari ||
-            //   item.mantra ||
-            //   t(`practices.${item.details?.id}.mantra`, { defaultValue: "" });
-
-            // const isSankalp =
-            //   item.type === "sankalp" ||
-            //   item.details?.type === "sankalp" ||
-            //   item.details?.id?.startsWith("sankalp_");
-
-            // const displayMeaning = isSankalp
-            //   ? item.details?.short_text || item.short_text || ""
-            //   : t(`practices.${item.details?.id}.meaning`, {
-            //       defaultValue: item.meaning || "",
-            //     });
-
                 const reps = item.details?.reps
+                const day = item.details?.day; 
+                let practiceTypeKey = id.startsWith("mantra.")
+  ? "mantra"
+  : id.startsWith("sankalp.")
+  ? "sankalp"
+  : id.startsWith("practice.")
+  ? "practice"
+  : "";
+
+let defaultReps =
+  practiceTypeKey === "mantra"
+    ? "9X"
+    : practiceTypeKey === "sankalp"
+    ? "1X"
+    : practiceTypeKey === "practice"
+    ? "1X"
+    : "";
+
+    const displayReps = reps
+  ? reps.toString().toUpperCase().endsWith("X")
+    ? reps.toString().toUpperCase()
+    : `${reps}X`
+  : defaultReps;
+
+// let displayReps = reps ? `${reps}X` : defaultReps;
+let displayDay = day ? day : "Daily";
 
             return (
               <Card
                 style={{
-                  borderColor: "#D4A01724",
-                  borderWidth: 2,
-                  borderRadius: 10,
-                  padding: 12,
-                  marginHorizontal: 20,
+                  borderColor: Colors.Colors.Yellow,
+                  borderWidth: 1,
+                  borderRadius: 20,
                   marginVertical: 10,
-                  backgroundColor: Colors.Colors.header_bg,
+                  backgroundColor: Colors.Colors.white,
                 }}
               >
-                {/* NAME */}
                 <TextComponent
-                  type="mediumText"
+                  type="DailyboldText"
                   style={{
-                    fontSize: FontSize.CONSTS.FS_14,
-                    color: Colors.Colors.BLACK,
+                    margin:12
                   }}
                 >
-                  {/* {displayName} */}
                   {HeadertextTitle}
                 </TextComponent>
+               <View
+  style={{
+    height: 0.5,
+    backgroundColor: "#616161",
+  }}
+/>
 
-                <View
-                  style={{
-                    borderBottomColor: "#616161",
-                    borderBottomWidth: 0.25,
-                    marginVertical: 4,
-                  }}
-                />
-
- <TextComponent
+                <View style={{margin:12}}>
+                <TextComponent
                     type="mediumText"
                     style={{
                       fontSize: FontSize.CONSTS.FS_13,
-                      marginTop: 4,
+                      // marginTop: 4,
                       color: Colors.Colors.Light_black,
                     }}
                   >
@@ -216,7 +228,7 @@ if (id.startsWith("mantra.")) {
                     {mantraMeaning}
                   </TextComponent>
                 ) : null}
-                {/* {displayDescription ? (
+                  {lastPracticeDate ? (
                   <TextComponent
                     type="mediumText"
                     style={{
@@ -225,51 +237,24 @@ if (id.startsWith("mantra.")) {
                       color: Colors.Colors.Light_black,
                     }}
                   >
-                    {displayDescription}
+                    Last Practice : {lastPracticeDate}
                   </TextComponent>
                 ) : null}
-
-                {mantraText ? (
-                  <TextComponent
-                    type="mediumText"
-                    style={{
-                      fontSize: FontSize.CONSTS.FS_14,
-                      marginTop: 6,
-                      color: Colors.Colors.Light_black,
-                    }}
-                  >
-                    {t("sadanaTracker.mantraLabel")} {mantraText}
-                  </TextComponent>
-                ) : null}
-
-                {displayMeaning?.trim()?.length > 0 && (
-                  <TextComponent
-                    type="mediumText"
-                    style={{
-                      fontSize: FontSize.CONSTS.FS_13,
-                      marginTop: 4,
-                      color: Colors.Colors.Light_black,
-                    }}
-                  >
-                    {displayMeaning}
-                  </TextComponent>
-                )} */}
-{reps &&
-<TextComponent type="semiBoldText" >Selected Reps : <TextComponent type="headerSubBoldText" style={{color:Colors.Colors.App_theme}}>{reps}</TextComponent></TextComponent>}
-                {/* MARK-AS-DONE BUTTON */}
+<View style={{backgroundColor:"#F7F0DD",borderColor:"#CC9B2F",borderWidth:1,alignSelf:"flex-start",marginTop:6,padding:4,borderRadius:4}}>
+  <TextComponent type="boldText" style={{color:Colors.Colors.BLACK}}>{displayDay} - {displayReps} </TextComponent>
+</View>
                 <TouchableOpacity
                   style={{
-                    backgroundColor: isCompleted ? "#36AE68" : Colors.Colors.white,
-                    padding: 12,
+                    backgroundColor: Colors.Colors.white,
+                    padding: 6,
                     alignItems: "center",
                     justifyContent: "center",
                     marginVertical: 10,
-                    borderRadius: 30,
+                    borderRadius: 5,
                     alignSelf: "center",
-                    borderColor: isCompleted
-                      ? "#36AE68"
-                      : Colors.Colors.Yellow,
+                    borderColor: Colors.Colors.Yellow,
                     borderWidth: 1,
+                    flexDirection:"row"
                   }}
                   disabled={isCompleted}
                   onPress={() => {
@@ -298,12 +283,16 @@ if (id.startsWith("mantra.")) {
                     }
                   }}
                 >
+                  {!isCompleted &&  <Image
+                                    source={require("../../../assets/CheckBox_Inactive.png")}
+                                    style={{ }}
+                                    resizeMode="contain"
+                                  />}
                   <TextComponent
                     type="headerSubBoldText"
                     style={{
-                      color: isCompleted
-                        ? Colors.Colors.white
-                        : Colors.Colors.Yellow,
+                      color:isCompleted ? Colors.Colors.Yellow : Colors.Colors.BLACK,
+                        marginLeft:6
                     }}
                   >
                     {isCompleted
@@ -311,6 +300,7 @@ if (id.startsWith("mantra.")) {
                       : t("sadanaTracker.markAsDone")}
                   </TextComponent>
                 </TouchableOpacity>
+                </View>
               </Card>
             );
           }}
@@ -318,6 +308,7 @@ if (id.startsWith("mantra.")) {
 
         <LoadingOverlay visible={fetchLoading} text="Submitting..." />
       </ScrollView>
+      {/* </ImageBackground> */}
     </SafeAreaView>
   );
 };

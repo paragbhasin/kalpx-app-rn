@@ -517,12 +517,21 @@ console.log("practiceTodayData >>>>",JSON.stringify(practiceTodayData))
                   <TouchableOpacity
                     style={styles.dailyBtn}
                     onPress={() => {
-                        navigation.navigate("TrackerTabs", {
+                      navigation.navigate("TrackerTabs", {
   screen: "History",
   params: {
-    selectedmantra: currentMantra,
+    from: "mantra",
+    selectedMantra: currentMantra,
+    autoSelectCategory: "daily-mantra",
   },
 });
+
+//                         navigation.navigate("TrackerTabs", {
+//   screen: "History",
+//   params: {
+//     selectedmantra: currentMantra,
+//   },
+// });
 
                       // navigation.navigate("MySadana", {
                       //   selectedmantra: currentMantra,

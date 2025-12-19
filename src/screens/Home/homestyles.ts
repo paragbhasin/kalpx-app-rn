@@ -66,14 +66,14 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
   optionIconWrapper: { marginRight: 12 },
-  optionIcon: { width: 28, height: 28 },
+  optionIcon: { width: 32, height: 32 },
   dailyContainer: {
     //  paddingHorizontal: 16, 
     //  marginTop: 10 
     },
   sectionHeading: {
   alignSelf:"center",
-  marginVertical:14,
+  marginTop:14,
   color:Colors.Colors.BLACK,
   fontSize:FontSize.CONSTS.FS_16
   },
@@ -81,6 +81,7 @@ const styles = StyleSheet.create({
     color:Colors.Colors.BLACK,
   },
   optionSubtitle: {
+  marginTop:4,
 fontSize:FontSize.CONSTS.FS_10,
     color:Colors.Colors.Light_black,
   },
@@ -116,21 +117,27 @@ fontSize:FontSize.CONSTS.FS_10,
   //       marginHorizontal:16,
   //       padding:10
   // },
-  dailyCard:{
-   borderRadius: 4,
-        overflow: "hidden",
-        elevation: 3,
-        // backgroundColor: "#F7F0DD",
-        backgroundColor: "#FFFFFF",
-        borderColor:Colors.Colors.App_theme,
-        borderWidth:1.25,
-        // marginHorizontal:16,
-        padding:10,
-        marginVertical:8,
-        marginHorizontal: 16, 
-        minHeight:60,
-        justifyContent:"center"
-  },
+ dailyCard: {
+  borderRadius: 8,
+  backgroundColor: "#FFFFFF",
+  borderColor: Colors.Colors.App_theme,
+  borderWidth: 1.25,
+  marginVertical: 8,
+  marginHorizontal: 16,
+  padding: 10,
+  minHeight: 60,
+  justifyContent: "center",
+
+  // --- Android Elevation ---
+  elevation: 4,
+
+  // --- iOS Shadow ---
+  shadowColor: "#000",
+  shadowOffset: { width: 2, height: 2 },
+  shadowOpacity: 0.15,
+  shadowRadius: 4,
+},
+
   // count:{
   //       // color: Colors.Colors.BLACK,
   //       // fontSize: FontSize.CONSTS.FS_12,
@@ -173,14 +180,13 @@ sadanaCard:{
   },
   checkedBox: { backgroundColor: "#444" ,  marginTop:8},
   itemCard:{
-    borderRadius: 14,
-    overflow: "hidden",
-    marginBottom: 8,
-    elevation: 3,
-    // alignItems:"center",
-    margin:20,
+    borderRadius: 5,
+    marginBottom: 4,
+    margin:16,
     backgroundColor:Colors.Colors.white,
-    padding:16
+    borderColor:Colors.Colors.Yellow,
+    borderWidth:1,
+    padding:6
   },
   container: { width: "90%", margin:20,justifyContent:"center",},
    setupcontainer: { width: "90%",justifyContent:"center",marginTop:4},
@@ -223,12 +229,12 @@ sadanaCard:{
 },
 
 kalpXCard: {
-  backgroundColor: "#FFF7E8",
-  borderColor: "#FFD6A5",
-  borderWidth: 2,
+  // backgroundColor: "#FFF7E8",
+  borderColor: "#D4A017",
+  borderWidth: 1,
   borderRadius: 14,
-  overflow: "hidden",
-  padding: 8,
+  // overflow: "hidden",
+  padding:6,
   // height: 158,
   alignItems: "center",
   justifyContent: "flex-start",
@@ -242,13 +248,13 @@ kalpXCard: {
 kalpXImage: {
   width: "100%",
   height: 100,
-  borderRadius: 10,
+  borderRadius: 5,
 },
 
 kalpXTitle: {
- color: "#925910",
+ color: "#000000",
     // fontSize: FontSize.CONSTS.FS_12,
-  marginTop: 6,
+  // marginTop: 2,
   textAlign: "left",
   alignSelf: "flex-start",
   // lineHeight: 18,
@@ -335,7 +341,7 @@ streakText: {
   },
 
   leftLabel: {
-    left: 50,
+    left: 30,
     top: 100,
   },
 
@@ -344,7 +350,7 @@ streakText: {
   },
 
   rightLabel: {
-    right: 50,
+    right: 20,
     top: 100,
   },
     circleButton: {

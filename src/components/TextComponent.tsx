@@ -190,6 +190,12 @@ const TextComponent = (props: any) => {
         case "DailyboldText":
       textStyle = styles.DailyboldText;
       break;
+         case "ButtonBottomText":
+      textStyle = styles.ButtonBottomText;
+      break;
+       case "cardSubTitleText":
+      textStyle = styles.cardSubTitleText;
+      break;
     default:
       textStyle = styles.mediumText;
   }
@@ -379,4 +385,14 @@ const styles = StyleSheet.create({
     fontSize: FontSize.CONSTS.FS_12,
     fontFamily: "Inter_400Regular",
   },
+     ButtonBottomText: {
+    color: Colors.Colors.BLACK,
+    fontSize: FontSize.CONSTS.FS_10,
+    fontFamily: "Inter_600SemiBold",
+  },
+  cardSubTitleText :{
+      color: Colors.Colors.BLACK,
+    fontSize: FontSize.CONSTS.FS_14,
+    fontFamily: "Inter_300Light_Italic",
+  }
 });

@@ -30,7 +30,7 @@ console.log("fcmToken >>>>>>>>>>",fcmToken);
       guest_uuid: guestUUID
     };
 
-    console.log("📡 Registering Device →", payload);
+    console.log("📡 Registering Device 8→", payload);
 
     // 4️⃣ POST request
     const res = await api.post(

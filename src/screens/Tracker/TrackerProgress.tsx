@@ -6,12 +6,11 @@ import { useTranslation } from "react-i18next";
 import {
   Dimensions,
   FlatList,
-  Image,
   SafeAreaView,
   ScrollView,
   StatusBar,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { Card } from "react-native-paper";
 import { useDispatch, useSelector } from "react-redux";
@@ -26,6 +25,30 @@ import { getDailyDharmaTracker } from "../Home/actions";
 import { fetchDailyPractice, fetchPracticeHistory } from "../Streak/actions";
 
 const { width } = Dimensions.get("window");
+const BOX_SIZE = Dimensions.get("window").width / 9.5;
+
+const startOfMonth = moment().startOf("month");
+const daysInMonth = moment().daysInMonth();
+const firstDayWeekIndex = startOfMonth.day(); // 0 = Sun, 6 = Sat
+
+// Create leading empty placeholders before day 1
+const emptyDays = Array.from({ length: firstDayWeekIndex }, () => ({
+  empty: true,
+  key: Math.random().toString(),
+}));
+
+// Create actual date boxes
+const dateDays = Array.from({ length: daysInMonth }, (_, i) => {
+  const date = startOfMonth.clone().add(i, "days");
+  return {
+    day: date.date(),
+    fullDate: date.format("YYYY-MM-DD"),
+    empty: false,
+  };
+});
+
+// Final Calendar List
+const calendarData = [...emptyDays, ...dateDays];
 
 const TrackerProgress = () => {
   const navigation: any = useNavigation();
@@ -94,49 +117,83 @@ const weekDays = dailyPractice?.data?.week_days || {};
         backgroundColor={Colors.Colors.header_bg}
         translucent={false}
       />
+        {/* <ImageBackground
+                          source={require("../../../assets/Tracker_BG.png")}
+                          style={{
+                            alignSelf: "center",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                paddingVertical: 8,
+                                // paddingHorizontal: 10,
+                                borderTopRightRadius: 16,
+                                borderTopLeftRadius: 16,
+                                width: FontSize.CONSTS.DEVICE_WIDTH,
+                          }}
+                          imageStyle={{
+                                borderTopRightRadius: 16,
+          borderTopLeftRadius: 16,
+          alignSelf: "center",
+          justifyContent: "center",
+          alignItems: "center",
+                          }}
+                        > */}
       <ScrollView
         contentContainerStyle={{ paddingBottom: 30 }}
         showsVerticalScrollIndicator={false}
       >
-       <TextComponent type="DailyHeaderText" style={{alignSelf:"center",marginTop:10}} >     
+        <TextComponent type="headerSubBoldText" style={{alignSelf:"center"}}>Your Progress</TextComponent>
+        <TextComponent type="mediumText" style={{alignSelf:"center",textAlign:"center",color:"#282828"}}>A gentle reminder of how your practice is unfolding.</TextComponent>
+       <TextComponent type="streakSadanaText" style={{alignSelf:"center",marginTop:5}} >     
            {currentMilestone ? t("streakScreen.youEarned", { badge: currentMilestone.name }): t("sadanaTracker.noBadge")}
        </TextComponent>
              <View
             style={{
               flexDirection: "row",
               alignItems: "center",
-              marginVertical: 6,
+              marginTop:6,
               alignSelf:"center"
             }}
           >
-            <TextComponent type="DailyHeaderText">  {t("sadanaTracker.streakCount", { count: trackerCount })}</TextComponent>
-            <Image
+            <TextComponent type="streakSadanaText">  {t("sadanaTracker.streakCount", { count: trackerCount })}</TextComponent>
+            {/* <Image
               source={require("../../../assets/Streak_A1.png")}
               style={{ height: 20, width: 20, marginLeft: 4 }}
-            />
+            /> */}
           </View>
 <Card
   style={{
-    backgroundColor: Colors.Colors.header_bg,
-    marginHorizontal: 16,
+    backgroundColor: Colors.Colors.white,
+    marginHorizontal: 14,
     marginTop: 20,
-    borderColor: "#D4A01724",
-    borderWidth: 2,
+    borderColor: "#D4A017",
+    borderWidth: 1,
     paddingBottom: 16,
   }}
 >
   <TextComponent
-    type="headerIncreaseText"
-    style={{ color: Colors.Colors.BLACK, marginTop: 10, marginLeft: 12 }}
+    type="DailyboldText"
+    style={{ color: Colors.Colors.BLACK,margin:8}}
   >
     Current Week Status
   </TextComponent>
-
+<View style={{flexDirection:"row",justifyContent:"space-between",marginHorizontal:10,marginVertical:5}}>
+  <View style={{flexDirection:"row",alignItems:"center"}}>
+    <View style={{backgroundColor:"#36BD00",width:30,height:24,borderRadius:5,marginRight:6}}/>
+<TextComponent type="mediumText" style={{color:Colors.Colors.Daily_black}}>Completed</TextComponent>
+  </View>
+   <View style={{flexDirection:"row",alignItems:"center"}}>
+    <View style={{backgroundColor:"#E4E437",width:30,height:24,borderRadius:5,marginRight:6}}/>
+<TextComponent type="mediumText" style={{color:Colors.Colors.Daily_black}}>Incomplete</TextComponent>
+  </View>
+   <View style={{flexDirection:"row",alignItems:"center"}}>
+    <View style={{backgroundColor:"#bb3f3f",width:30,height:24,borderRadius:5,marginRight:6}}/>
+<TextComponent type="mediumText" style={{color:Colors.Colors.Daily_black}}>Missed</TextComponent>
+  </View>
+</View>
   <View
     style={{
       borderBottomColor: "#616161",
       borderBottomWidth: 0.35,
-      marginVertical: 8,
     }}
   />
 
@@ -145,7 +202,7 @@ const weekDays = dailyPractice?.data?.week_days || {};
       flexDirection: "row",
       flexWrap: "wrap",
       // justifyContent: "space-between",
-      paddingHorizontal: 16,
+      paddingHorizontal: 6,
       marginTop: 10,
     }}
   >
@@ -157,10 +214,10 @@ const weekDays = dailyPractice?.data?.week_days || {};
       const status = info?.status || "not_done";
 
       let bgColor = "#FFE1E1";
-      if (status === "completed") bgColor = "#DBFCE7";
-      else if (status === "partial") bgColor = "#F7FCC4";
-      else if (status === "not_done") bgColor = "#FFE1E1";
-      else if (status === "disabled") bgColor = "#F3F3F5";
+      if (status === "completed") bgColor = "#36BD00";
+      else if (status === "partial") bgColor = "#E4E437";
+      else if (status === "not_done") bgColor = "#bb3f3f";
+      else if (status === "disabled") bgColor = "#F2F3F5";
 
       const isDisabled = status === "disabled";
 
@@ -178,18 +235,21 @@ const weekDays = dailyPractice?.data?.week_days || {};
             setShowPractiseModal(true);
           }}
           style={{
-            padding:10,
-            marginVertical: 6,
+            // padding:10,
+            // marginVertical: 6,
             borderRadius: 8,
             backgroundColor: bgColor,
             alignItems: "center",
             justifyContent: "center",
-            borderWidth: isSelected ? 2 : 0,
-            borderColor: isSelected ? "#D4A017" : "transparent",
-            marginRight:16
+            borderWidth: isSelected ? 1 : 0,
+            borderColor: isSelected ? "#282828" : "transparent",
+            width:50,
+            height:36,
+            margin:4
+            // marginRight:16
           }}
         >
-          <TextComponent type="headerText" style={{ color: Colors.Colors.BLACK }}>
+          <TextComponent type="semiBoldText" style={{ color: isDisabled ? "#616161" : Colors.Colors.white }}>
             {dayName}
           </TextComponent>
         </TouchableOpacity>
@@ -199,99 +259,120 @@ const weekDays = dailyPractice?.data?.week_days || {};
 </Card>
 
 
-<Card style={{backgroundColor:Colors.Colors.header_bg,marginHorizontal:16, marginTop:20,       borderColor: "#D4A01724",
-          borderWidth: 2,}}>
+<Card style={{backgroundColor:Colors.Colors.white,marginHorizontal:16, marginTop:20,borderColor:Colors.Colors.Yellow, borderWidth: 1,}}>
           <TextComponent
-            type="headerIncreaseText"
+            type="DailyboldText"
             style={{
               color: Colors.Colors.BLACK,
-              marginTop: 10,marginLeft:12
+              marginTop: 10,alignSelf:"center"
             }}
           >
          {t("sadanaTracker.calendarTitle")}
           </TextComponent>
-          <View style={{borderBottomColor:"#616161",borderBottomWidth:0.35,marginVertical:8}} />
+          <View style={{borderBottomColor:Colors.Colors.Yellow,borderBottomWidth:1,marginVertical:8}} />
         <View style={{ marginHorizontal:16}}>
-          <TextComponent
-            type="streakSadanaText"
-            style={{
-              color:"#616161",
-              marginTop:6
-            }}
-          >
-            Track Your journey every day
-           {/* {t("sadanaTracker.calendarSubtitle")} */}
-          </TextComponent>
           <View
             style={{
               flexDirection: "row",
               alignItems: "center",
-              justifyContent:"space-between",
-              marginTop:6
+              justifyContent:"center",
             }}
           >
-            <TextComponent type="streakSadanaText" style={{color:"#616161", marginTop:6}}>{t("sadanaTracker.completedLabel", {count: dailyPractice?.data?.completed_today?.length || 0})}</TextComponent>
-            <TextComponent type="streakSadanaText" style={{color:"#616161", marginTop:6}}>{t("sadanaTracker.notDoneLabel", {count: (dailyPractice?.data?.active_practices?.length || 0) - (dailyPractice?.data?.completed_today?.length || 0),})}
+            <TextComponent type="semiBoldText" style={{color:Colors.Colors.BLACK}}>{t("sadanaTracker.completedLabel", {count: dailyPractice?.data?.completed_today?.length || 0})}</TextComponent>
+            <TextComponent type="semiBoldText" style={{color:Colors.Colors.BLACK,marginLeft:20}}>{t("sadanaTracker.notDoneLabel", {count: (dailyPractice?.data?.active_practices?.length || 0) - (dailyPractice?.data?.completed_today?.length || 0),})}
             </TextComponent>
           </View>
-          <TextComponent  type="streakSadanaText"  style={{ color:"#616161", marginTop:6}} >
-            {t("sadanaTracker.selectedDateLabel")}{" "}<TextComponent type="streakSadanaText" style={{ color: Colors.Colors.BLACK }}>{moment(selectedDate).format("DD/MM/YYYY")}</TextComponent>
-          </TextComponent>
-             <TextComponent  type="streakSadanaText"  style={{ color:"#616161", marginTop:6,marginBottom:10}} >
-           Today date : {" "}<TextComponent type="streakSadanaText" style={{ color: Colors.Colors.BLACK }}>{moment(selectedDate).format("DD/MM/YYYY")}</TextComponent>
-          </TextComponent>
+          <TextComponent  type="subDailyText"  style={{ color:"#000000", marginTop:6,alignSelf:"center"}} >{t("sadanaTracker.selectedDateLabel")}{" "}{moment(selectedDate).format("DD MMM YYYY")}</TextComponent>
+          <TextComponent  type="subDailyText"  style={{ color:"#000000", marginTop:6, textDecorationLine: "underline",paddingBottom:4,alignSelf:"center"}} >Today:{" "}{moment(selectedDate).format("DD MMM YYYY")}</TextComponent>
         </View>
+        <View style={{backgroundColor:"#FDF5E9",borderColor:"#000000",borderWidth:0.5,alignSelf:"center",padding:4,margin:4,borderRadius:6}}>
+          <TextComponent type="streakSadanaText">{moment().format("MMMM")}</TextComponent>
+        </View>
+       <View
+  style={{
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 10,
+  }}
+>
+  {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+    <View
+      key={day}
+      style={{
+        width: BOX_SIZE,
+        height: 28,
+        margin: 3,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor:"#FDF5E9",
+        borderColor:Colors.Colors.Yellow,
+        borderWidth:1,
+        borderRadius:4,
+      }}
+    >
+      <TextComponent type="subDailyText" style={{ color: "#000", fontWeight: "600" }}>
+        {day}
+      </TextComponent>
+    </View>
+  ))}
+</View>
 <FlatList
-  data={Array.from({ length: moment().daysInMonth() }, (_, i) => {
-    const date = moment().startOf("month").add(i, "days");
-    return {
-      day: date.date(),
-      fullDate: date.format("YYYY-MM-DD"),
-      isPastOrToday: date.isSameOrBefore(moment(), "day"),
-    };
-  })}
-  keyExtractor={(item) => item.fullDate}
-  numColumns={6}
+  data={calendarData}
+  keyExtractor={(item:any, index) => item.fullDate || `empty-${index}`}
+  numColumns={7}
   contentContainerStyle={{
     alignItems: "center",
     justifyContent: "center",
     paddingBottom: 20,
   }}
-  renderItem={({ item }) => {
+  renderItem={({ item }: any) => {
+    if (item.empty) {
+      return (
+        <View
+          style={{
+            width: BOX_SIZE,
+            height: BOX_SIZE,
+            margin: 3,
+          }}
+        />
+      );
+    }
+
+    // Actual dates
     const dayData = dailyPractice?.data?.calendar_days?.[item.fullDate] || {};
     const status = dayData.status || "not_done";
-    let bgColor = "#FFE1E1"; 
-    if (status === "completed") bgColor = "#DBFCE7";       
-    else if (status === "partial") bgColor = "#F7FCC4";   
-    else if (status === "not_done") bgColor = "#FFE1E1";  
-    else if (status === "disabled") bgColor = "#F3F3F5"; 
 
-    const isDisabled = status === "disabled";
+    let bgColor = "#FDF5E9";
+    if (status === "completed") bgColor = "#36BD00";
+    else if (status === "partial") bgColor = "#E4E437";
+    else if (status === "not_done") bgColor = "#bb3f3f";
+    else if (status === "disabled") bgColor = "#E5E7EB";
 
-    const isCompleted = status === "completed";
-
-    // 📝 Text color
-    const textColor = isDisabled ? Colors.Colors.BLACK : isCompleted ? "green" : "#DB0000";
+    const textColor =
+      status === "disabled"
+        ? "#6B7280"
+        : "#FFFFFF";
 
     return (
       <TouchableOpacity
-        disabled={isDisabled}
-        onPress={async () => {
-         setSelectedDate(item.fullDate);
-  const dayData = dailyPractice?.data?.calendar_days?.[item.fullDate] || {};
+        disabled={status === "disabled"}
+        onPress={() => {
+          setSelectedDate(item.fullDate);
+          const d = dailyPractice?.data?.calendar_days?.[item.fullDate] || {};
 
-  setSelectedDayData({
-    notCompleted: dayData?.active || [],
-    completed: dayData?.completed || [],
-    status: dayData?.status || "not_done",
-  });
+          setSelectedDayData({
+            notCompleted: d?.active || [],
+            completed: d?.completed || [],
+            status: d?.status || "not_done",
+          });
 
-  setShowPractiseModal(true);
+          setShowPractiseModal(true);
         }}
         style={{
-          width: 50,
-          height: 50,
-          margin: 4,
+          width: BOX_SIZE,
+          height: BOX_SIZE,
+          margin: 3,
           borderRadius: 4,
           alignItems: "center",
           justifyContent: "center",
@@ -301,13 +382,8 @@ const weekDays = dailyPractice?.data?.week_days || {};
           borderWidth: 1,
         }}
       >
-        <TextComponent
-          type="streakText"
-          style={{
-            color: textColor,
-          }}
-        >
-          {moment(item.fullDate).format("D")}
+        <TextComponent type="cardText" style={{ color: textColor }}>
+          {item.day}
         </TextComponent>
       </TouchableOpacity>
     );
@@ -326,6 +402,7 @@ const weekDays = dailyPractice?.data?.week_days || {};
         />
 <LoadingOverlay visible={fetchLoading} text="Submitting..." />
       </ScrollView>
+      {/* </ImageBackground> */}
     </SafeAreaView>
   );
 };

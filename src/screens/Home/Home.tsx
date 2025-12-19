@@ -59,7 +59,9 @@ import styles from "./homestyles";
 
 const { width } = Dimensions.get("window");
 const CARD_MARGIN = 14;
-const CARD_WIDTH = (width - CARD_MARGIN * 3) / 2; 
+const CARD_WIDTH = FontSize.CONSTS.DEVICE_WIDTH * 0.65; // 70% width
+
+// const CARD_WIDTH = (width - CARD_MARGIN * 3) / 2; 
 
 export const collapseControl = { avoidCollapse: false };
 
@@ -381,7 +383,7 @@ useEffect(() => {
     //   : "Dharma",
       title: trackerData?.active_practices?.length > 0
       ? "TrackerTabs"
-      : "DailyPracticeList",
+      : "DailyPracticeLogin",
       // title: trackerData?.active_practices?.length > 0 ? "DailyPracticeList" : "DailyPracticeList",
     iconType: "image",
     icon: require("../../../assets/Group.png"),
@@ -477,23 +479,31 @@ const categories = isLoggedIn
     {
       id: "1",
       title: t("kalpx.learn"),
+            subTitle:"Your Path Unfolds",
+      description :"Explore Classes in dance, music, mantras, yoga and scripture- at your pace",
        name: "ClassesScreen",
       // name: "LearnMore",
       event_type: "click_learn_card",
       component: "Learn-card",
       image: require("../../../assets/learn.png"),
+      icon: require("../../../assets/EV_1.png"),
     },
     {
       id: "2",
       title: t("categories.explore"),
+      subTitle:"Visiual Wisdom",
+description: "Watch guided videos on culture, wisdom, rituals, and spiritual practices—anytime, anywhere",
       name: "Explore",
       event_type: "click_explore_card",
       component: "Explore-card",
       image: require("../../../assets/explore.png"),
+      icon: require("../../../assets/EV_2.png"),
     },
     {
       id: "3",
       title:  trackerData?.active_practices?.length > 0 ? t("categories.sadana"): t("categories.dharma"),
+            subTitle:"sacred Rituals",
+description: "Discover meaningful rituals, daily practices, and devotional routines to deepen your spiritual journey",
       // title: t("kalpx.practice"),
       name: trackerData?.active_practices?.length > 0
       ? "TrackerTabs"
@@ -502,6 +512,7 @@ const categories = isLoggedIn
       event_type: "click_practice_card",
       component: "Practice-card",
       image: require("../../../assets/daily.png"),
+      icon: require("../../../assets/EV_3.png"),
     },
     // {
     //   id: "4",
@@ -792,9 +803,15 @@ const categories = isLoggedIn
   );
 
   const renderKalpXItem = ({ item }) => (
-  <TouchableOpacity
+  <View
     style={[styles.kalpXCard, { width: CARD_WIDTH }]} 
-    onPress={async () => {
+  >
+     <Image source={item.icon} style={{ width: 40, height: 40,alignSelf:"flex-start" }} resizeMode="contain" />
+    <TextComponent type="headerSubBoldText" style={styles.kalpXTitle}>{item.title}</TextComponent>
+     <TextComponent type="streakSubText" style={{color:Colors.Colors.Light_grey,alignSelf:"flex-start" ,marginVertical:4}}>{item.subTitle}</TextComponent>
+    <Image source={item.image} style={styles.kalpXImage} resizeMode="cover" />
+     <TextComponent type="subDailyText" style={{textAlign:"center",marginVertical:6}}>{item.description}</TextComponent>
+     <TouchableOpacity style={{backgroundColor:"#D4A017",padding:6,borderRadius:5,justifyContent:"flex-end"}}     onPress={async () => {
       try {
         const userId = await AsyncStorage.getItem("uuid");
         await saveUserAction({
@@ -816,11 +833,10 @@ const categories = isLoggedIn
       } catch (error) {
         console.error("Error fetching UUID:", error);
       }
-    }}
-  >
-    <Image source={item.image} style={styles.kalpXImage} resizeMode="cover" />
-    <TextComponent type="semiBoldText" style={styles.kalpXTitle}>{item.title}</TextComponent>
-  </TouchableOpacity>
+    }}>
+      <TextComponent type="boldText" style={{color:"#FFFFFF"}}>Begin your journey</TextComponent>
+     </TouchableOpacity>
+  </View>
 );
 
 
@@ -831,6 +847,19 @@ const categories = isLoggedIn
         backgroundColor={Colors.Colors.header_bg}
         translucent={false}
       />
+        {/* <ImageBackground
+                        source={require("../../../assets/Tracker_BG.png")}
+                        style={{
+                          flex: 1,
+                          width: FontSize.CONSTS.DEVICE_WIDTH,
+                          alignSelf: "center",
+                          justifyContent: "flex-start",
+                        }}
+                        imageStyle={{
+                          borderTopLeftRadius: 16,
+                          borderTopRightRadius: 16,
+                        }}
+                      > */}
       <Header />
       <ScrollView
         nestedScrollEnabled={true}
@@ -902,24 +931,27 @@ const categories = isLoggedIn
   </ScrollView>
   </View>
 }
-     <TouchableOpacity style={{ alignItems: "center", marginTop: 20 }} onPress={() => {navigation.navigate("DailyPracticeList")}}>
+<View style={{borderColor:Colors.Colors.Yellow,borderWidth:1.25,borderRadius:6,marginHorizontal:10,padding:4,marginVertical:6,marginTop:10}}>
+<TextComponent type="DailyboldText" style={{alignSelf:"center",marginTop: 20}}>How can we help?</TextComponent>
+<TextComponent type="cardSubTitleText" style={{alignSelf:"center",marginTop: 10,textAlign:"center"}}>We've curated guided paths rooted in Vedic wisdom to support your long term growth and inner balance.</TextComponent>
+     <TouchableOpacity style={{ alignItems: "center",marginTop:8 }} onPress={() => {navigation.navigate("DailyPracticeList")}}>
       <ImageBackground
         source={require("../../../assets/locus.png")}
         style={styles.image}
         resizeMode="contain"
       >
-        <TextComponent type="semiBoldText" style={[styles.label, styles.leftLabel]}>
+        <TextComponent type="cardText" style={[styles.label, styles.leftLabel]}>
           Peace {"\n"}& Calm
         </TextComponent>
-       <TextComponent type="semiBoldText" style={[styles.label, styles.centerLabel]}>
+       <TextComponent type="cardText" style={[styles.label, styles.centerLabel]}>
           Career {"\n"}& Prosperity
         </TextComponent>
-        <TextComponent type="semiBoldText" style={[styles.label, styles.rightLabel]}>
+        <TextComponent type="cardText" style={[styles.label, styles.rightLabel]}>
           Spiritual {"\n"}Growth
         </TextComponent>
       </ImageBackground>
     </TouchableOpacity>
-    <TouchableOpacity style={{ flexDirection:"row",alignSelf: "center", marginTop: 4, alignItems: "center",marginLeft:30 }} onPress={() => {navigation.navigate("DailyPracticeList")}}>
+    <TouchableOpacity style={{ flexDirection:"row",alignSelf: "center", marginTop: 4, alignItems: "center",marginLeft:30,marginBottom:20 }} onPress={() => {navigation.navigate("DailyPracticeList")}}>
         <TextComponent
     type="cardText"
     style={{
@@ -928,16 +960,18 @@ const categories = isLoggedIn
       marginTop: 6,
     }}
   >
-    View More
+  Tap to Explore More & Start
   </TextComponent>
   <TouchableOpacity style={styles.circleButton}>
     <Ionicons name="arrow-forward" size={12} color="#FFF6DA" />
   </TouchableOpacity>
 </TouchableOpacity>
+</View>
         <View style={styles.dailyContainer}>
           <TextComponent type="headerText" style={styles.sectionHeading}>
             {t("streak.stepText")}
           </TextComponent>
+         <TextComponent type="cardSubTitleText" style={{alignSelf:"center",textAlign:"center",marginBottom:10,marginTop:4,marginHorizontal:12}}>Try a simple Vedic practice below to bring clarity, balance, and purpose into your day.</TextComponent>
             <View style={{ 
                   height: expandedItemId ? 'auto' : 0,
     opacity: expandedItemId ? 1 : 0,
@@ -1172,11 +1206,11 @@ const categories = isLoggedIn
               color: Colors.Colors.BLACK,
               fontSize: FontSize.CONSTS.FS_16,
                 alignSelf:"center",
-                marginVertical:14,
+                marginTop:10,
             }}
           >{t("home.kalpXHeading")}</TextComponent>
-
-  <FlatList
+<TextComponent type="mediumText" style={{textAlign:"center",marginVertical:10}}>Begin your transformative journey with timeless wisdom and modern guidance</TextComponent>
+  {/* <FlatList
     data={kalpXData}
     renderItem={renderKalpXItem}
     keyExtractor={(item) => item.id}
@@ -1187,7 +1221,20 @@ const categories = isLoggedIn
       marginBottom: 12,
     }}
     contentContainerStyle={{ paddingBottom: 20 }}
-  />
+  /> */}
+  <FlatList
+  data={kalpXData}
+  renderItem={renderKalpXItem}
+  keyExtractor={(item) => item.id}
+  horizontal
+  showsHorizontalScrollIndicator={false}
+  contentContainerStyle={{
+    // paddingLeft: 16,
+    paddingRight: 16,
+  }}
+  ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
+/>
+
 </View>
 <SigninPopup
   visible={showMantraTaken}
@@ -1344,6 +1391,7 @@ const categories = isLoggedIn
 />
          <LoadingOverlay visible={apiloading} text="Processing..." />
       </ScrollView>
+      {/* </ImageBackground> */}
     </SafeAreaView>
   );
 }

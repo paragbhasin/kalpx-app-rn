@@ -5,9 +5,16 @@ import ClassesScreen from "../screens/Classes/classesScreen";
 import ClassPaymentScreen from "../screens/Classes/ClassPaymentScreen";
 import ClassRescheduleScreen from "../screens/Classes/ClassRescheduleScreen";
 import ClassTutorDetailsScreen from "../screens/Classes/ClassTutorDetailsScreen";
+import ConfirmDailyPractices from "../screens/DailyPractice/ConfirmDailyPractices";
+import ConfirmSanatanPractices from "../screens/DailyPractice/ConfirmSanatanPractices";
+import CreateOwnPractice from "../screens/DailyPractice/CreateOwnPractice";
 import DailyPracticeDetailSelectedPractice from "../screens/DailyPractice/DailyPracticeDetailSelectedPractice";
 import DailyPracticeList from "../screens/DailyPractice/DailyPracticeList";
+import DailyPracticeLogin from "../screens/DailyPractice/DailyPracticeLogin";
+import DailyPracticeMantra from "../screens/DailyPractice/DailyPracticeMantra";
 import DailyPracticeSelectList from "../screens/DailyPractice/DailyPracticeSelectList";
+import SanatanPractice from "../screens/DailyPractice/SanatanPractice";
+import SubmitDailyPracticesScreen from "../screens/DailyPractice/SubmitDailyPracticesScreen";
 import Dharma from "../screens/Home/DailyDharma";
 import Explore from "../screens/Home/Explore";
 import Home from "../screens/Home/Home";
@@ -175,6 +182,40 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
       <Stack.Screen
       name="SocialPostDetailScreen"
       component={SocialPostDetailScreen}
+      />
+      <Stack.Screen
+      name="CreateOwnPractice"
+      component={CreateOwnPractice}
+      options={{ headerShown: false }}
+    />
+      <Stack.Screen
+      name="SanatanPractice"
+      component={SanatanPractice}
+      options={{ headerShown: false }}
+    />
+          <Stack.Screen
+      name="ConfirmSanatanPractices"
+      component={ConfirmSanatanPractices}
+      options={{ headerShown: false }}
+    />
+           <Stack.Screen
+      name="ConfirmDailyPractices"
+      component={ConfirmDailyPractices}
+      options={{ headerShown: false }}
+    />
+           <Stack.Screen
+      name="SubmitDailyPracticesScreen"
+      component={SubmitDailyPracticesScreen}
+      options={{ headerShown: false }}
+    />
+     <Stack.Screen
+      name="DailyPracticeLogin"
+      component={DailyPracticeLogin}
+      options={{ headerShown: false }}
+    />
+       <Stack.Screen
+      name="DailyPracticeMantra"
+      component={DailyPracticeMantra}
       options={{ headerShown: false }}
     />
   </Stack.Navigator>

@@ -18,7 +18,7 @@
    "sankalp":"Sankalp",
 "mantra":"Mantra",
 "DailyPractice":"Practice",
-"stepText":"Step Into Today With Purpose"
+"stepText":"Pick a Gentle Practice for Today"
   },
   "cards":{
 "mantra":"Mantra",
@@ -27,11 +27,11 @@
   "wisdom":"Wisdom",
     "sankalp_card": {
     "title": "Chant Today’s Mantra",
-    "subtitle": "Feel the peace unfold within start your day by chanting today’s mantra."
+    "subtitle": "Strengthen focus, clarity, and inner energy through sacred sound."
   },
   "mantra_card": {
     "title": "Set Your Sankalp",
-    "subtitle": "Set a sacred intension that connects your heart to your purpose."
+    "subtitle": "Choose a sankalp to guide your thoughts and actions today."
   },
   "festival_card": {
     "title": "Explore Festivals",
@@ -39,7 +39,7 @@
   },
   "wisdom_card": {
     "title": "Reflect on Wisdom",
-    "subtitle": "Find inspiration in timeless sanatan insights."
+    "subtitle": "Vedic wisdom for modern clarity. Pause. Reflect. Rise"
   },
   "kalpxTitle": "KalpX – Connect to Your Roots",
   "kalpxText": "Discover the soul of Sanatan Dharma through Explore Videos, Daily Practice, Live Darshan, Temple Poojas, Retreats, Satsang Circles, Mantra Chanting, and Sacred Journeys.",
@@ -572,7 +572,7 @@
   "keepGoing": "Keep Going!",
   "youEarned": "You have earned the {{badge}}.",
   "moreDays": "{{count}} more days to your {{nextBadge}}.",
-  "noBadge": "You have not earned any badge yet.",
+  "noBadge": "No Blessing Badge Earned Yet",
   "daysToFirst": "{{days}} more days to your first {{badge}}.",
   "milestones": {
     "blessing": "Blessing Badge",
@@ -728,7 +728,8 @@
     "noBadge": "No Blessing Badge Earned Yet",
     "streakCount": "{{count}} days streak",
     "welcomeText": "Welcome to your profile. Edit your details and Practices",
-    "progressSummary": "{{completed}}/{{total}} practices completed on {{date}}",
+        "progressSummary": "{{completed}}/{{total}} practices completed today",
+        "progressSummaryDate": "Today : {{date}}",
     "addPractices": "Add Practices",
     "completeTodaysPractices": "Complete Today's Practices",
     "mantraTitle": "Mantra",
@@ -738,7 +739,7 @@
     "lastPracticeLabel": "Last Practice:",
     "suggestedReps": "Suggested reps",
     "markAsDone": "Mark as Done",
-    "completedButton": "Completed",
+    "completedButton": "Done",
     "reminder": {
       "schedule_conflict": "Schedule conflict",
       "no_longer_interested": "No longer interested",
@@ -748,8 +749,8 @@
     },
     "calendarTitle": "Dharma Progress Calendar",
     "calendarSubtitle": "Your Daily practice Tracker",
-    "completedLabel": "Completed ({{count}})",
-    "notDoneLabel": "Not Done ({{count}})",
+    "completedLabel": "Completed : {{count}}",
+    "notDoneLabel": "Not Done : {{count}}",
     "selectedDateLabel": "Selected date :"
   },
   "mantraCard": {

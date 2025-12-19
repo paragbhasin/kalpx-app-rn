@@ -2,7 +2,7 @@
   "expo": {
     "name": "kalpx",
     "slug": "kalpx",
-    "version": "1.0.9",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/AppIconImg.png",
     "scheme": "kalpx",
@@ -25,7 +25,7 @@
       }
     },
     "android": {
-      "versionCode": 12,
+      "versionCode": 13,
       "package": "com.kalpx.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/AppIconImg.png",

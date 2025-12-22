@@ -48,13 +48,19 @@ const ConfirmDailyPractices = ({ route }) => {
   const { addPractice, setCartModalVisible } = useCart();
 
   const { locationData, loading: locationLoading } = useUserLocation();
+  const didFetchRef = useRef(false);
+
 
 useEffect(() => {
+  if (didFetchRef.current) return;
+
   if (!locationLoading && locationData?.timezone) {
+    didFetchRef.current = true;
     const today = moment().format("YYYY-MM-DD");
     dispatch(fetchDailyPractice(today, locationData.timezone));
   }
 }, [locationLoading, locationData?.timezone]);
+
 
 const dailyPractice = useSelector(
   (state: RootState) => state.dailyPracticeReducer
@@ -91,29 +97,11 @@ const source = normalizeSource(item.source);
     return {
       ...item,
       source, // 🔥 normalized source
-
-      // ✅ Mantra → default 9
       reps: source === "mantra" ? "9" : "",
-
-      // ✅ Practice & Sankalp → EMPTY
       day: item.day || "Daily",
     };
   }),
 };
-
-
-
-
-
-// const initialValues = {
-//   list: practices.map((item) => ({
-//     ...item,
-//     reps: item.reps || "",
-//     day: item.day || "Daily",
-//     source: item.source,   // ✅ REQUIRED
-//   })),
-// };
-
 
 const validationSchema = Yup.object().shape({
   list: Yup.array().of(
@@ -137,7 +125,7 @@ const validationSchema = Yup.object().shape({
   const formik = useFormik({
     initialValues,
     validationSchema,
-     enableReinitialize: true, 
+     enableReinitialize: false, 
     validateOnChange: true,
     validateOnBlur: true,
     onSubmit: async () => {
@@ -145,19 +133,10 @@ const validationSchema = Yup.object().shape({
 
   const token = await AsyncStorage.getItem("refresh_token");
 
-  // 1) Take what CartModal returned
-  // const rawList: any[] = finalSubmitRef.current || [];
-
-  // 1️⃣ User-confirmed practices
 const rawList: any[] = finalSubmitRef.current || [];
 
-
-
-
-// 2️⃣ Normalize API practices
 const normalizedActive = activeApiPractices.map(normalizeApiPractice);
 
-// 3️⃣ Remove duplicates (route overrides API)
 const filteredUser = rawList.filter((rp) => {
   const rpid = rp.practice_id || rp.id;
   return !normalizedActive.some(
@@ -165,19 +144,11 @@ const filteredUser = rawList.filter((rp) => {
   );
 });
 
-// 4️⃣ Final merged list
 const mergedList = [
   ...normalizedActive,
   ...filteredUser,
 ];
 
-
-  // 2) Ensure uniqueness by id / practice_id
-  // const uniqueList = Array.from(
-  //   new Map(
-  //     rawList.map((p) => [p.id || p.practice_id, p])
-  //   ).values()
-  // );
 
   const uniqueList = Array.from(
   new Map(
@@ -186,7 +157,6 @@ const mergedList = [
 );
 
 
-  // 3) Build SAME payload shape as TrackerEdit.submitCartToServer
   const practicesPayload = uniqueList.map((p: any) => {
     const pid = p.id || p.practice_id;
 
@@ -207,8 +177,6 @@ const mergedList = [
         "",
       benefits: p.benefits || [],
       reps: p.reps || p.full_item?.reps || null,
-      // if your backend stores day as well, keep this;
-      // if not, remove it
       day: p.day || p.details?.day || p.full_item?.day || "Daily",
     };
   });
@@ -231,29 +199,6 @@ const mergedList = [
     })
   );
 },
-
-    // onSubmit: async () => {
-    //   setLoading(true);
-
-    //   const token = await AsyncStorage.getItem("refresh_token");
-
-    //   const payload = {
-    //     practices: finalSubmitRef.current,
-    //     dharma_level: "beginner",
-    //     is_authenticated: true,
-    //     recaptcha_token: token,
-    //   };
-
-    //   console.log("📤 FINAL SUBMIT:", JSON.stringify(payload));
-
-    //   dispatch(
-    //     submitDailyDharmaSetup(payload, (res) => {
-    //       setLoading(false);
-    //       if (res.success)
-    //         navigation.navigate("TrackerTabs", { screen: "Tracker" });
-    //     })
-    //   );
-    // },
   });
 
 const openCartForSubmit = async () => {
@@ -272,7 +217,6 @@ const openCartForSubmit = async () => {
     return;
   }
 
-  // VALID → ADD TO CART
   formik.values.list.forEach((item) => {
     addPractice({
       id: item.practice_id,
@@ -299,9 +243,6 @@ const openCartForSubmit = async () => {
     description: item?.description,
     category: item?.category,
   }));
-//  navigation.navigate("SubmitDailyPracticesScreen", {
-//     practices: finalList,
-//   });
 if(route?.params?.trackerEdit){
  navigation.navigate("SubmitDailyPracticesScreen", {
     practices: finalList,
@@ -314,9 +255,6 @@ navigation.navigate("DailyPracticeSelectList", {
    item: route?.params?.categoryItem,                   // force showing “Submit” button
 });
 }
-
-
-  // setCartModalVisible(true);
 };
 
 

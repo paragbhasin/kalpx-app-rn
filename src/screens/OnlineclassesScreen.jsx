@@ -1,17 +1,3 @@
-<<<<<<< HEAD
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-  TextInput,
-  ImageBackground,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useTranslation } from "react-i18next"; // ✅ import hook
-=======
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next"; // ✅ import hook
@@ -24,7 +10,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
 
 export default function OnlineclassesScreen({ navigation }) {
   const { t } = useTranslation(); // ✅ initialize translation
@@ -45,11 +30,9 @@ export default function OnlineclassesScreen({ navigation }) {
   };
 
   const SectionTitle = ({ children }) => (
-<<<<<<< HEAD
-    <Text style={styles.sectionTitle}>{children}</Text>
-=======
-    <Text  allowFontScaling={false} style={styles.sectionTitle}>{children}</Text>
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
+    <Text allowFontScaling={false} style={styles.sectionTitle}>
+      {children}
+    </Text>
   );
 
   return (
@@ -66,11 +49,9 @@ export default function OnlineclassesScreen({ navigation }) {
         >
           <Ionicons name="arrow-back" size={22} color="#fff" />
         </TouchableOpacity>
-<<<<<<< HEAD
-        <Text style={styles.headerTitle}>{t("onlineClasses.title")}</Text>
-=======
-        <Text  allowFontScaling={false} style={styles.headerTitle}>{t("onlineClasses.title")}</Text>
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
+        <Text allowFontScaling={false} style={styles.headerTitle}>
+          {t("onlineClasses.title")}
+        </Text>
       </ImageBackground>
 
       {/* Content */}
@@ -86,24 +67,25 @@ export default function OnlineclassesScreen({ navigation }) {
             key={activity}
             style={styles.checkboxRow}
             onPress={() =>
-              toggleSelection(selectedActivities, setSelectedActivities, activity)
+              toggleSelection(
+                selectedActivities,
+                setSelectedActivities,
+                activity
+              )
             }
           >
             <View
               style={[
                 styles.checkbox,
-                selectedActivities.includes(activity) && styles.checkboxSelected,
+                selectedActivities.includes(activity) &&
+                  styles.checkboxSelected,
               ]}
             >
               {selectedActivities.includes(activity) && (
                 <Ionicons name="checkmark" size={16} color="#fff" />
               )}
             </View>
-<<<<<<< HEAD
-            <Text style={styles.checkboxLabel}>
-=======
-            <Text  allowFontScaling={false} style={styles.checkboxLabel}>
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
+            <Text allowFontScaling={false} style={styles.checkboxLabel}>
               {t(`onlineClasses.activities.${activity}`)}
             </Text>
           </TouchableOpacity>
@@ -119,13 +101,12 @@ export default function OnlineclassesScreen({ navigation }) {
                 styles.chip,
                 selectedFormats.includes(opt) && styles.chipSelected,
               ]}
-              onPress={() => toggleSelection(selectedFormats, setSelectedFormats, opt)}
+              onPress={() =>
+                toggleSelection(selectedFormats, setSelectedFormats, opt)
+              }
             >
-<<<<<<< HEAD
               <Text
-=======
-              <Text  allowFontScaling={false}
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
+                allowFontScaling={false}
                 style={[
                   styles.chipText,
                   selectedFormats.includes(opt) && styles.chipTextSelected,
@@ -143,14 +124,14 @@ export default function OnlineclassesScreen({ navigation }) {
           {["beginner", "intermediate", "advanced"].map((opt) => (
             <TouchableOpacity
               key={opt}
-              style={[styles.chip, experienceLevel === opt && styles.chipSelected]}
+              style={[
+                styles.chip,
+                experienceLevel === opt && styles.chipSelected,
+              ]}
               onPress={() => setExperienceLevel(opt)}
             >
-<<<<<<< HEAD
               <Text
-=======
-              <Text  allowFontScaling={false}
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
+                allowFontScaling={false}
                 style={[
                   styles.chipText,
                   experienceLevel === opt && styles.chipTextSelected,
@@ -165,10 +146,7 @@ export default function OnlineclassesScreen({ navigation }) {
         {/* City */}
         <SectionTitle>{t("onlineClasses.city")}</SectionTitle>
         <TextInput
-<<<<<<< HEAD
-=======
-        allowFontScaling={false}
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
+          allowFontScaling={false}
           style={styles.input}
           placeholder={t("onlineClasses.city")}
           value={city}
@@ -184,11 +162,8 @@ export default function OnlineclassesScreen({ navigation }) {
               style={[styles.chip, ageGroup === opt && styles.chipSelected]}
               onPress={() => setAgeGroup(opt)}
             >
-<<<<<<< HEAD
               <Text
-=======
-              <Text  allowFontScaling={false}
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
+                allowFontScaling={false}
                 style={[
                   styles.chipText,
                   ageGroup === opt && styles.chipTextSelected,
@@ -206,14 +181,14 @@ export default function OnlineclassesScreen({ navigation }) {
           {["morning", "afternoon", "evening"].map((opt) => (
             <TouchableOpacity
               key={opt}
-              style={[styles.chip, preferredTime === opt && styles.chipSelected]}
+              style={[
+                styles.chip,
+                preferredTime === opt && styles.chipSelected,
+              ]}
               onPress={() => setPreferredTime(opt)}
             >
-<<<<<<< HEAD
               <Text
-=======
-              <Text  allowFontScaling={false}
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
+                allowFontScaling={false}
                 style={[
                   styles.chipText,
                   preferredTime === opt && styles.chipTextSelected,
@@ -228,10 +203,7 @@ export default function OnlineclassesScreen({ navigation }) {
         {/* Spiritual Seeking */}
         <SectionTitle>{t("onlineClasses.spiritualSeeking")}</SectionTitle>
         <TextInput
-<<<<<<< HEAD
-=======
-        allowFontScaling={false}
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
+          allowFontScaling={false}
           style={styles.textarea}
           placeholder={t("onlineClasses.spiritualSeeking")}
           multiline
@@ -244,11 +216,9 @@ export default function OnlineclassesScreen({ navigation }) {
       {/* Sticky Button */}
       <View style={styles.footer}>
         <TouchableOpacity style={styles.submitButton}>
-<<<<<<< HEAD
-          <Text style={styles.submitText}>{t("onlineClasses.nextStep")}</Text>
-=======
-          <Text  allowFontScaling={false} style={styles.submitText}>{t("onlineClasses.nextStep")}</Text>
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
+          <Text allowFontScaling={false} style={styles.submitText}>
+            {t("onlineClasses.nextStep")}
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -276,11 +246,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     marginBottom: 16,
     marginLeft: 16,
-<<<<<<< HEAD
-    lineHeight: 28,
-=======
     // lineHeight: 28,
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
   },
   scroll: { flex: 1 },
   sectionTitle: {
@@ -288,11 +254,7 @@ const styles = StyleSheet.create({
     fontFamily: "GelicaMedium",
     color: "#000",
     marginVertical: 12,
-<<<<<<< HEAD
-    lineHeight: 22,
-=======
     // lineHeight: 22,
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
   },
   checkboxRow: {
     flexDirection: "row",
@@ -317,11 +279,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: "GelicaRegular",
     color: "#333",
-<<<<<<< HEAD
-    lineHeight: 22,
-=======
     // lineHeight: 22,
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
   },
   optionsRow: {
     flexDirection: "row",
@@ -339,11 +297,7 @@ const styles = StyleSheet.create({
   chipText: {
     fontFamily: "GelicaRegular",
     fontSize: 14,
-<<<<<<< HEAD
-    lineHeight: 20,
-=======
     // lineHeight: 20,
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
     color: "#333",
   },
   chipTextSelected: { color: "#fff", fontFamily: "GelicaMedium" },
@@ -354,11 +308,7 @@ const styles = StyleSheet.create({
     padding: 10,
     fontFamily: "GelicaRegular",
     fontSize: 14,
-<<<<<<< HEAD
-    lineHeight: 20,
-=======
     // lineHeight: 20,
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
     backgroundColor: "#fff",
     marginBottom: 16,
   },
@@ -369,11 +319,7 @@ const styles = StyleSheet.create({
     padding: 12,
     fontFamily: "GelicaRegular",
     fontSize: 14,
-<<<<<<< HEAD
-    lineHeight: 20,
-=======
     // lineHeight: 20,
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
     backgroundColor: "#fff",
     textAlignVertical: "top",
   },
@@ -397,10 +343,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontFamily: "GelicaMedium",
-<<<<<<< HEAD
-    lineHeight: 22,
-=======
     // lineHeight: 22,
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
   },
 });

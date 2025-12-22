@@ -1,14 +1,3 @@
-<<<<<<< HEAD
-import i18n from "i18next";
-import { initReactI18next } from "react-i18next";
-import * as Localization from "expo-localization";
-
-import en from "./locales/en.json";
-import hi from "./locales/hi.json";
-import te from "./locales/te.json";
-
-// ✅ Safely get the device language
-=======
 // src/i18n.ts
 import * as Localization from "expo-localization";
 import i18n from "i18next";
@@ -22,19 +11,46 @@ import mantrasBn from "./locales/bn/mantras-bn.json";
 import practicesBn from "./locales/bn/practices-bn.json";
 import sankalpsBn from "./locales/bn/sankalps-bn.json";
 import wisdomBn from "./locales/bn/wisdom-bn.json";
-import { CARRER_ABUNDANCE_MANTRAS, CARRER_ABUNDANCE_PRACTICES, CARRER_ABUNDANCE_SANKALPS } from "./locales/en/CareerProsperity";
-import { EMOTIONAL_HEALING_MANTRAS, EMOTIONAL_HEALING_PRACTICES, EMOTIONAL_HEALING_SANKALPS } from "./locales/en/EmotionalHealing";
+import {
+  CARRER_ABUNDANCE_MANTRAS,
+  CARRER_ABUNDANCE_PRACTICES,
+  CARRER_ABUNDANCE_SANKALPS,
+} from "./locales/en/CareerProsperity";
+import {
+  EMOTIONAL_HEALING_MANTRAS,
+  EMOTIONAL_HEALING_PRACTICES,
+  EMOTIONAL_HEALING_SANKALPS,
+} from "./locales/en/EmotionalHealing";
 import en from "./locales/en/en.json";
 import festivalsEn from "./locales/en/festivals-en.json";
-import { FOCUS_MOTIVATION_MANTRAS, FOCUS_MOTIVATION_PRACTICES, FOCUS_MOTIVATION_SANKALPS } from "./locales/en/FocusMotivation";
-import { GRATITUDE_POSTIVITY_MANTRAS, GRATITUDE_POSTIVITY_PRACTICES, GRATITUDE_POSTIVITY_SANKALPS } from "./locales/en/GratitudePositivity";
-import { HEALTH_WELL_BEING_MANTRASS, HEALTH_WELL_BEING_PRACTICES, HEALTH_WELL_BEING_SANKALPS } from "./locales/en/HealthWellbeing";
+import {
+  FOCUS_MOTIVATION_MANTRAS,
+  FOCUS_MOTIVATION_PRACTICES,
+  FOCUS_MOTIVATION_SANKALPS,
+} from "./locales/en/FocusMotivation";
+import {
+  GRATITUDE_POSTIVITY_MANTRAS,
+  GRATITUDE_POSTIVITY_PRACTICES,
+  GRATITUDE_POSTIVITY_SANKALPS,
+} from "./locales/en/GratitudePositivity";
+import {
+  HEALTH_WELL_BEING_MANTRASS,
+  HEALTH_WELL_BEING_PRACTICES,
+  HEALTH_WELL_BEING_SANKALPS,
+} from "./locales/en/HealthWellbeing";
 import mantrasEn from "./locales/en/mantras-en.json";
-import { PEACE_CALM_MANTRAS, PEACE_CALM_PRACTICES, PEACE_CALM_SANKALPS } from "./locales/en/PeaceCalm";
+import {
+  PEACE_CALM_MANTRAS,
+  PEACE_CALM_PRACTICES,
+  PEACE_CALM_SANKALPS,
+} from "./locales/en/PeaceCalm";
 import practicesEn from "./locales/en/practices-en.json";
 import sankalpsEn from "./locales/en/sankalps-en.json";
-import { SPIRITUAL_GROWTH_MANTRAS, SPIRITUAL_GROWTH_PRACTICES, SPIRITUAL_GROWTH_SANKALPS } from "./locales/en/SpiritualGrowth";
-
+import {
+  SPIRITUAL_GROWTH_MANTRAS,
+  SPIRITUAL_GROWTH_PRACTICES,
+  SPIRITUAL_GROWTH_SANKALPS,
+} from "./locales/en/SpiritualGrowth";
 
 import templesEn from "./locales/en/temples_en.json";
 import wisdomEn from "./locales/en/wisdom-en.json";
@@ -89,89 +105,102 @@ import te from "./locales/te/te.json";
 import templesTe from "./locales/te/temples_te.json";
 import wisdomTe from "./locales/te/wisdom-te.json";
 
-
-
 // Safely get device language
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
 const deviceLanguage =
-  Array.isArray(Localization.getLocales()) && Localization.getLocales().length > 0
+  Array.isArray(Localization.getLocales()) &&
+  Localization.getLocales().length > 0
     ? Localization.getLocales()[0].languageCode // e.g. "en"
     : "en";
 
-<<<<<<< HEAD
-i18n.use(initReactI18next).init({
-  compatibilityJSON: "v3",
-  lng: deviceLanguage, // use safe fallback
-  fallbackLng: "en",
-  resources: {
-    en: { translation: en },
-    hi: { translation: hi },
-    te: { translation: te },
-  },
-  interpolation: {
-    escapeValue: false,
-  },
-=======
 const convertArrayToTranslation = (arr, categoryKey) => {
   const obj = {};
-  arr.forEach(item => {
+  arr.forEach((item) => {
     if (item.id) obj[item.id] = { ...item, category: categoryKey };
   });
   return obj;
 };
 
-
 const PeaceCalmTranslations = {
   ...convertArrayToTranslation(PEACE_CALM_PRACTICES, "peace-calm"),
   ...convertArrayToTranslation(PEACE_CALM_MANTRAS, "peace-calm"),
-  ...convertArrayToTranslation(PEACE_CALM_SANKALPS, "peace-calm")
+  ...convertArrayToTranslation(PEACE_CALM_SANKALPS, "peace-calm"),
 };
 
 const SpiritualTranslations = {
   ...convertArrayToTranslation(SPIRITUAL_GROWTH_MANTRAS, "spiritual-growth"),
   ...convertArrayToTranslation(SPIRITUAL_GROWTH_SANKALPS, "spiritual-growth"),
-  ...convertArrayToTranslation(SPIRITUAL_GROWTH_PRACTICES, "spiritual-growth")
+  ...convertArrayToTranslation(SPIRITUAL_GROWTH_PRACTICES, "spiritual-growth"),
 };
 
 const CareerTranslations = {
   ...convertArrayToTranslation(CARRER_ABUNDANCE_PRACTICES, "career"),
   ...convertArrayToTranslation(CARRER_ABUNDANCE_MANTRAS, "career"),
-  ...convertArrayToTranslation(CARRER_ABUNDANCE_SANKALPS, "career")
+  ...convertArrayToTranslation(CARRER_ABUNDANCE_SANKALPS, "career"),
 };
 
 const FocusTranslations = {
   ...convertArrayToTranslation(FOCUS_MOTIVATION_PRACTICES, "focus"),
   ...convertArrayToTranslation(FOCUS_MOTIVATION_MANTRAS, "focus"),
-  ...convertArrayToTranslation(FOCUS_MOTIVATION_SANKALPS, "focus")
+  ...convertArrayToTranslation(FOCUS_MOTIVATION_SANKALPS, "focus"),
 };
 
 const EmotionalTranslations = {
   ...convertArrayToTranslation(EMOTIONAL_HEALING_PRACTICES, "healing"),
   ...convertArrayToTranslation(EMOTIONAL_HEALING_MANTRAS, "healing"),
-  ...convertArrayToTranslation(EMOTIONAL_HEALING_SANKALPS, "healing")
+  ...convertArrayToTranslation(EMOTIONAL_HEALING_SANKALPS, "healing"),
 };
 
 const GratitudeTranslations = {
   ...convertArrayToTranslation(GRATITUDE_POSTIVITY_PRACTICES, "gratitude"),
   ...convertArrayToTranslation(GRATITUDE_POSTIVITY_MANTRAS, "gratitude"),
-  ...convertArrayToTranslation(GRATITUDE_POSTIVITY_SANKALPS, "gratitude")
+  ...convertArrayToTranslation(GRATITUDE_POSTIVITY_SANKALPS, "gratitude"),
 };
 
 const HealthTranslations = {
   ...convertArrayToTranslation(HEALTH_WELL_BEING_PRACTICES, "health"),
   ...convertArrayToTranslation(HEALTH_WELL_BEING_MANTRASS, "health"),
-  ...convertArrayToTranslation(HEALTH_WELL_BEING_SANKALPS, "health")
+  ...convertArrayToTranslation(HEALTH_WELL_BEING_SANKALPS, "health"),
 };
-
-
 
 // ✅ Deep merge translations to avoid overwriting nested objects
 const translations = {
-  en: merge({}, en, templesEn, mantrasEn, festivalsEn, sankalpsEn, wisdomEn, practicesEn,
-          PeaceCalmTranslations, SpiritualTranslations, CareerTranslations, FocusTranslations,
-          EmotionalTranslations, GratitudeTranslations, HealthTranslations),
-  hi: merge({}, hi, templesHi, mantrasHi, festivalsHi, sankalpsHi, wisdomHi, practicesHi),
-  te: merge({}, te, templesTe, mantrasTe, sankalpsTe, festivalsTe, wisdomTe, practicesTe),
+  en: merge(
+    {},
+    en,
+    templesEn,
+    mantrasEn,
+    festivalsEn,
+    sankalpsEn,
+    wisdomEn,
+    practicesEn,
+    PeaceCalmTranslations,
+    SpiritualTranslations,
+    CareerTranslations,
+    FocusTranslations,
+    EmotionalTranslations,
+    GratitudeTranslations,
+    HealthTranslations
+  ),
+  hi: merge(
+    {},
+    hi,
+    templesHi,
+    mantrasHi,
+    festivalsHi,
+    sankalpsHi,
+    wisdomHi,
+    practicesHi
+  ),
+  te: merge(
+    {},
+    te,
+    templesTe,
+    mantrasTe,
+    sankalpsTe,
+    festivalsTe,
+    wisdomTe,
+    practicesTe
+  ),
   ta: merge({}, ta, mantrasTa, sankalpsTa, festivalsTa, wisdomTa, practicesTa),
   bn: merge({}, bn, mantrasBn, sankalpsBn, festivalsBn, wisdomBn, practicesBn),
   gu: merge({}, gu, mantrasGu, sankalpsGu, festivalsGu, wisdomGu, practicesGu),
@@ -180,7 +209,6 @@ const translations = {
   mr: merge({}, mr, mantrasMr, sankalpsMr, festivalsMr, wisdomMr, practicesMr),
   or: merge({}, or, mantrasOr, sankalpsOr, festivalsOr, wisdomOr, practicesOr),
 };
-
 
 i18n.use(initReactI18next).init({
   compatibilityJSON: "v3",
@@ -194,16 +222,15 @@ i18n.use(initReactI18next).init({
     ta: { translation: translations.ta },
     bn: { translation: translations.bn },
     gu: { translation: translations.gu },
-    kn: { translation: translations.kn},
+    kn: { translation: translations.kn },
     ml: { translation: translations.ml },
-    mr: { translation: translations.mr},
-    or: { translation: translations.or},
+    mr: { translation: translations.mr },
+    or: { translation: translations.or },
   },
   interpolation: {
     escapeValue: false, // react already escapes
   },
   saveMissing: true, // optional: sends missing keys to console
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
 });
 
 export default i18n;

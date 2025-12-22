@@ -9,7 +9,7 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
     <key>CFBundleDisplayName</key>
-    <string>kalpX</string>
+    <string>kalpx</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
@@ -60,8 +60,14 @@
     </dict>
     <key>NSCameraUsageDescription</key>
     <string>We use the camera only if needed for future features. Currently, the app does not capture photos or videos.</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Allow $(PRODUCT_NAME) to access your location</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Allow $(PRODUCT_NAME) to access your location</string>
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>We use your location to personalize your daily practice reminders based on your region and local time. For example, we use your city and timezone to schedule reminders correctly.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Allow $(PRODUCT_NAME) to access your microphone</string>
     <key>NSPhotoLibraryAddUsageDescription</key>
     <string>We save your streak cards to your photo gallery.</string>
     <key>NSPhotoLibraryUsageDescription</key>

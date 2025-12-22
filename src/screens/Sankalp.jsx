@@ -1,20 +1,3 @@
-<<<<<<< HEAD
-import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ImageBackground,
-  TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native"; // ✅ for back
-=======
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native"; // ✅ for back
 import React from "react";
@@ -30,7 +13,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
 import ExploreVideos from "../components/ExploreVideos";
 
 export default function Sankalp() {
@@ -76,43 +58,31 @@ export default function Sankalp() {
           showsVerticalScrollIndicator={false}
         >
           {/* Title */}
-<<<<<<< HEAD
-          <Text style={styles.title}>Todays Sankalp</Text>
+          <Text allowFontScaling={false} style={styles.title}>
+            Todays Sankalp
+          </Text>
 
           {/* Sankalp Text */}
           <View style={styles.sankalpBox}>
-            <Text style={styles.sankalpText}>
-=======
-          <Text  allowFontScaling={false} style={styles.title}>Todays Sankalp</Text>
-
-          {/* Sankalp Text */}
-          <View style={styles.sankalpBox}>
-            <Text  allowFontScaling={false} style={styles.sankalpText}>
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
+            <Text allowFontScaling={false} style={styles.sankalpText}>
               I will feed a being today :person, bird, animal:.
             </Text>
           </View>
 
           {/* Why this matters */}
           <View style={styles.sectionBlue}>
-<<<<<<< HEAD
-            <Text style={styles.sectionTitle}>Why this matters</Text>
-            <Text style={styles.sectionLink}>
-=======
-            <Text  allowFontScaling={false} style={styles.sectionTitle}>Why this matters</Text>
-            <Text  allowFontScaling={false} style={styles.sectionLink}>
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
+            <Text allowFontScaling={false} style={styles.sectionTitle}>
+              Why this matters
+            </Text>
+            <Text allowFontScaling={false} style={styles.sectionLink}>
               Feeding another, like Annapūrṇā’s grace, nourishes your soul.
             </Text>
           </View>
           <View style={styles.sectionBlue}>
-<<<<<<< HEAD
-            <Text style={styles.sectionTitle}>Suggested practice</Text>
-            <Text style={styles.sectionLink}>
-=======
-            <Text  allowFontScaling={false} style={styles.sectionTitle}>Suggested practice</Text>
-            <Text  allowFontScaling={false} style={styles.sectionLink}>
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
+            <Text allowFontScaling={false} style={styles.sectionTitle}>
+              Suggested practice
+            </Text>
+            <Text allowFontScaling={false} style={styles.sectionLink}>
               Offer fruit or grain before sunset, chanting ‘Dayā’ softly.
             </Text>
           </View>
@@ -120,33 +90,31 @@ export default function Sankalp() {
           {/* Root + Best Times */}
           <View style={styles.row}>
             <View style={styles.col}>
-<<<<<<< HEAD
-              <Text style={styles.label}>Root:</Text>
-              <Text style={styles.value}>🌱 Dāna • Dayā</Text>
+              <Text allowFontScaling={false} style={styles.label}>
+                Root:
+              </Text>
+              <Text allowFontScaling={false} style={styles.value}>
+                🌱 Dāna • Dayā
+              </Text>
             </View>
             <View style={styles.col}>
-              <Text style={styles.label}>Best Times:</Text>
-              <Text style={styles.value}>☀️ Day • Evening</Text>
-=======
-              <Text  allowFontScaling={false} style={styles.label}>Root:</Text>
-              <Text  allowFontScaling={false} style={styles.value}>🌱 Dāna • Dayā</Text>
-            </View>
-            <View style={styles.col}>
-              <Text  allowFontScaling={false} style={styles.label}>Best Times:</Text>
-              <Text  allowFontScaling={false} style={styles.value}>☀️ Day • Evening</Text>
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
+              <Text allowFontScaling={false} style={styles.label}>
+                Best Times:
+              </Text>
+              <Text allowFontScaling={false} style={styles.value}>
+                ☀️ Day • Evening
+              </Text>
             </View>
           </View>
 
           {/* Context Tags */}
           <View style={styles.section}>
-<<<<<<< HEAD
-            <Text style={styles.label}>Context Tags:</Text>
-            <Text style={styles.value}>🏡 home 🎁 family</Text>
-=======
-            <Text  allowFontScaling={false} style={styles.label}>Context Tags:</Text>
-            <Text  allowFontScaling={false} style={styles.value}>🏡 home 🎁 family</Text>
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
+            <Text allowFontScaling={false} style={styles.label}>
+              Context Tags:
+            </Text>
+            <Text allowFontScaling={false} style={styles.value}>
+              🏡 home 🎁 family
+            </Text>
           </View>
 
           {/* Explore Videos */}
@@ -187,11 +155,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 14,
     color: "#000",
-<<<<<<< HEAD
-    lineHeight: 30,
-=======
     // lineHeight: 30,
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
   },
   sankalpBox: {
     backgroundColor: "#ffffff",
@@ -205,11 +169,7 @@ const styles = StyleSheet.create({
     fontFamily: "GelicaMedium",
     color: "#6a4c2a",
     textAlign: "center",
-<<<<<<< HEAD
-    lineHeight: 20,
-=======
     // lineHeight: 20,
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
   },
   sectionBlue: {
     backgroundColor: "#feedd8",
@@ -223,31 +183,19 @@ const styles = StyleSheet.create({
     fontFamily: "GelicaMedium",
     color: "#000",
     marginBottom: 6,
-<<<<<<< HEAD
-    lineHeight: 20,
-=======
     // lineHeight: 20,
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
   },
   sectionLink: {
     fontSize: 14,
     fontFamily: "GelicaRegular",
     color: "#000",
-<<<<<<< HEAD
-    lineHeight: 20,
-=======
     // lineHeight: 20,
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
   },
   sectionText: {
     fontSize: 14,
     fontFamily: "GelicaRegular",
     color: "#444",
-<<<<<<< HEAD
-    lineHeight: 20,
-=======
     // lineHeight: 20,
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
   },
   row: {
     flexDirection: "row",
@@ -265,11 +213,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "GelicaRegular",
     color: "#333",
-<<<<<<< HEAD
-    lineHeight: 20,
-=======
     // lineHeight: 20,
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
   },
   doneButton: {
     backgroundColor: "#9a7548",

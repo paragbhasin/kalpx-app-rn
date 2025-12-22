@@ -1,0 +1,232 @@
+import { Dimensions, Platform, StyleSheet } from "react-native";
+import Colors from "../../components/Colors";
+
+const screenWidth = Dimensions.get("window").width;
+const  styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fefaf2", // matches card background
+  },
+  background: {
+    flex: 1,
+    resizeMode: "cover",
+  },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  brand: {
+    textAlign: "center",
+    fontSize: 38,
+    // textAlign: "center",
+    // fontWeight: "400",
+    // color: "#6c4b2f",
+    // marginBottom: 6,
+    // fontFamily: "GelicaBold",
+    //   // lineHeight: 40,
+  },
+  heading: {
+      //  fontSize: 18,
+    textAlign: "center",
+    // fontSize: 18,
+    // textAlign: "center",
+    // fontWeight: "400",
+    marginBottom: 20,
+    // color: "#66605a",
+    // fontFamily: "GelicaRegular",
+      // lineHeight: 40,
+  },
+  googleButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#ffdeb6",
+    marginTop:12,
+    // marginBottom: 30,
+    width: screenWidth * 0.85,
+    justifyContent: "center",
+  },
+  googleIcon: {
+    width: 20,
+    height: 20,
+    marginRight: 10,
+  },
+   appleIcon: {
+    width: 20,
+    height: 20,
+    marginRight: 10,
+  },
+  googleText: {
+    fontSize: 16,
+    color: "#000",
+    // fontWeight: "500",
+    // fontFamily: "GelicaMedium",
+      // lineHeight: 20,
+  },
+  card: {
+    width: screenWidth * 0.85,
+    backgroundColor: "#fefaf2",
+    borderRadius: 20,
+    padding: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 5,
+    marginBottom: 40,
+    marginTop:20
+  },
+  cardTitleLine1: {
+    // fontSize:24,
+    // color: "#000",
+    // fontFamily: "GelicaLight",
+    // fontWeight: "300",
+      // lineHeight: 40,
+  },
+  cardTitleLine2: {
+    // fontSize: 24,
+    // marginBottom: 8,
+    // color: "#000",
+    // fontFamily: "GelicaLight",
+    // fontWeight: "300",
+      // lineHeight: 40,
+  },
+  subTitle: {
+    // fontSize: 14,
+    marginBottom: 12,
+    color: "#666461",
+    // fontFamily: "GelicaLight",
+      // lineHeight: 18,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#9e9c98",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 4,
+    backgroundColor: "#fefaf2",
+    color: "#000",
+ fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
+    fontSize: 14,
+    includeFontPadding: false,  
+      // lineHeight: 18,
+  },
+  button: {
+    backgroundColor: "#ca8a04",
+    paddingVertical: 14,
+    borderRadius: 25,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  buttonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+    fontFamily: "GelicaMedium",
+      // lineHeight: 20,
+  },
+  footerContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 18,
+  },
+  footer: {
+    // fontSize: 14,
+    // fontFamily: "GelicaRegular",
+    color: "#666360",
+      // lineHeight: 18,
+  },
+  login: {
+    // fontSize: 14,
+    // fontFamily: "GelicaRegular",
+    color: Colors.Colors.App_theme,
+    textDecorationLine:"underline"
+      // lineHeight: 18,
+  },
+  error: {
+    alignSelf:"flex-end",
+    fontSize: 12,
+    color: "red",
+    marginBottom: 8,
+    // fontFamily: "GelicaRegular",
+      // lineHeight: 16,
+  },
+  success: {
+    fontSize: 12,
+    color: "green",
+    marginBottom: 10,
+    // fontFamily: "GelicaRegular",
+      // lineHeight: 16,
+  },
+  row: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginVertical: 8,
+  },
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  checkbox: {
+    width: 16,
+    height: 16,
+    borderWidth: 1,
+    borderColor: "#000",
+    marginRight: 4,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  checked: {
+    backgroundColor: "#000",
+  },
+  checkmark: {
+    color: "#fff",
+    fontSize: 10,
+  },
+  checkboxLabel: {
+    // fontSize: 12,
+    color: "#000",
+    // fontFamily: "GelicaRegular",
+      // lineHeight: 16,
+  },
+  forgot: {
+    // fontSize: 14,
+    color: "black",
+    // fontFamily: "GelicaRegular",
+      // lineHeight: 16,
+  },
+    skipContainer: {
+      width: "100%",
+      alignItems: "flex-end",
+      paddingRight: 20,
+      marginBottom: Platform.OS === "ios" ? 40 : 50,
+    },
+    skipText: {
+      fontSize: 18,
+      textDecorationLine:"underline"
+      // color: "#333",
+      // fontFamily: "GelicaRegular",
+        // lineHeight: 18,
+    },
+    passwordContainer: {
+  flexDirection: "row",
+  alignItems: "center",
+  borderWidth: 1,
+  borderColor: "#9e9c98",
+  borderRadius: 8,
+  backgroundColor: "#fefaf2",
+  paddingHorizontal: 10,
+  marginBottom:4,
+  marginTop:12
+},
+
+});
+
+export default styles;

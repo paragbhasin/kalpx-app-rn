@@ -1,0 +1,103 @@
+import { Platform, StyleSheet } from "react-native";
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#f1ebdf",
+    alignItems: "center",
+  },
+  image: {
+    flex: 1,
+    width: "100%",
+    height: Platform.OS === "ios" ? 600 : 650,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop:60
+  },
+  button: {
+    backgroundColor: "#ac8a5d",
+    paddingVertical: Platform.OS === "ios" ? 16 : 14,
+    paddingHorizontal: 40,
+    borderRadius: 30,
+    marginBottom: Platform.OS === "ios" ? 80 : 100,
+  },
+  buttonText: {
+    color: "#fff",
+    // fontSize: 16,
+    // fontWeight: "600",
+    // fontFamily: "GelicaMedium",
+      // lineHeight: 20,
+  },
+  skipContainer: {
+    width: "100%",
+    alignItems: "flex-end",
+    paddingRight: 20,
+    marginBottom: Platform.OS === "ios" ? 40 : 50,
+  },
+  skipText: {
+    fontSize: 14,
+    color: "#333",
+    fontFamily: "GelicaRegular",
+    // lineHeight: 18,
+  },
+    brand: {
+    fontSize: 38,
+    textAlign: "center",
+    fontWeight: "400",
+    color: "#9A7548",
+    marginBottom: 6,
+    fontFamily: "GelicaBold",
+    // lineHeight: 40,
+  },
+  heading: {
+    fontSize: 18,
+    textAlign: "center",
+    fontWeight: "400",
+    marginBottom: 20,
+    color: "#66605a",
+    fontFamily: "GelicaRegular",
+    // lineHeight: 40,
+  },
+  welcome:{
+    fontSize: 40,
+    textAlign: "center",
+    color: "#000000",
+  },
+  kalpText: {
+    textAlign: "center",
+  },
+    heading2: {
+    fontSize: 22,
+    textAlign: "center",
+    // fontWeight: "300",
+    // color: "#000000",
+    // fontFamily: "GelicaRegular",
+  },
+  joinText: {
+    // fontSize: 24,
+    textAlign: "center",
+    // fontWeight: "500",
+    color: "#000000",
+    marginBottom: 6,
+    // fontFamily: "GelicaBold",
+    // lineHeight: 40,
+  },
+    joinSubText: {
+    fontSize: 14,
+    textAlign: "center",
+    // fontWeight: "400",
+    color: "#333333",
+    marginBottom: 6,
+    // fontFamily: "GelicaBold",
+    marginHorizontal:16
+  },
+  flatText: {
+    fontSize: 14,
+    // textAlign: "center",
+    // fontWeight: "400",
+    color: "#000000",
+    // fontFamily: "GelicaBold",
+  },
+});
+
+export default styles;

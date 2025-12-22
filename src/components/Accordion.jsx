@@ -1,4 +1,5 @@
 // components/Accordion.js
+<<<<<<< HEAD
 import React, { useState } from "react";
 import {
   View,
@@ -10,6 +11,19 @@ import {
   UIManager,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+=======
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
+import {
+  LayoutAnimation,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  UIManager,
+  View,
+} from "react-native";
+>>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -35,7 +49,11 @@ export default function Accordion({ data = [] }) {
             activeOpacity={0.7}
           >
             <View style={styles.headerContent}>
+<<<<<<< HEAD
               <Text style={styles.title}>{item.title}</Text>
+=======
+              <Text  allowFontScaling={false} style={styles.title}>{item.title}</Text>
+>>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
               <Ionicons
                 name={activeIndex === index ? "chevron-up" : "chevron-down"}
                 size={20}
@@ -47,7 +65,11 @@ export default function Accordion({ data = [] }) {
           {/* Body */}
           {activeIndex === index && (
             <View style={styles.body}>
+<<<<<<< HEAD
               <Text style={styles.description}>{item.description}</Text>
+=======
+              <Text  allowFontScaling={false} style={styles.description}>{item.description}</Text>
+>>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
             </View>
           )}
         </View>
@@ -80,7 +102,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "GelicaMedium",
     color: "#000",
+<<<<<<< HEAD
     lineHeight: 20,
+=======
+    // lineHeight: 20,
+>>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
   },
   body: {
     paddingHorizontal: 16,
@@ -91,6 +117,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: "GelicaRegular",
     color: "#444",
+<<<<<<< HEAD
     lineHeight: 20,
+=======
+    // lineHeight: 20,
+>>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
   },
 });

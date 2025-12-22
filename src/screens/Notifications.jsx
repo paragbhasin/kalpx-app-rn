@@ -1,4 +1,5 @@
 // screens/Notifications.js
+<<<<<<< HEAD
 import React from "react";
 import {
   View,
@@ -9,6 +10,18 @@ import {
   Image,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+=======
+import { useNavigation } from "@react-navigation/native";
+import React from "react";
+import {
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+>>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 export default function Notifications() {

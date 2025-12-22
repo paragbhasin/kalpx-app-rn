@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 import React from "react";
+=======
+>>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
 import { Pressable, StyleSheet, Text } from "react-native";
 import colors from "../theme/colors"; // adjust path if needed
 
@@ -8,7 +11,11 @@ export default function PillOption({ label, selected, onToggle }) {
       onPress={() => onToggle(label)}
       style={[styles.pill, selected && styles.pillOn]}
     >
+<<<<<<< HEAD
       <Text style={[styles.text, selected && styles.textOn]}>{label}</Text>
+=======
+      <Text  allowFontScaling={false} style={[styles.text, selected && styles.textOn]}>{label}</Text>
+>>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
     </Pressable>
   );
 }

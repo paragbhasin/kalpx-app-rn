@@ -2,27 +2,45 @@
   "expo": {
     "name": "kalpx",
     "slug": "kalpx",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/AppIconImg.png",
     "scheme": "kalpx",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": false,
+    "updates": {
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    },
     "ios": {
-      "supportsTablet": true
+      "icon": "./assets/AppIconImg.png",
+      "supportsTablet": false,
+      "bundleIdentifier": "com.kalpx.app",
+      "usesAppleSignIn": true,
+      "appleTeamId": "9G5NZ5LBRU",
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "entitlements": {
+        "aps-environment": "development"
+      }
     },
     "android": {
+      "versionCode": 13,
+      "package": "com.kalpx.app",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/AppIconImg.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      "@react-native-firebase/app",
+      "@react-native-firebase/messaging",
       [
         "expo-splash-screen",
         {
@@ -33,52 +51,30 @@
         }
       ],
       [
-        "expo-font",
+        "@stripe/stripe-react-native",
         {
-          "fonts": [
-            "./assets/fonts/gelica-regular.otf",
-            "./assets/fonts/gelica-light.otf",
-            "./assets/fonts/gelica-medium.otf",
-            "./assets/fonts/gelica-bold.otf"
-          ],
-          "android": {
-            "fonts": [
-              {
-                "fontFamily": "Gelica",
-                "fontDefinitions": [
-                  {
-                    "path": "./assets/fonts/gelica-light.otf",
-                    "weight": 300
-                  },
-                  {
-                    "path": "./assets/fonts/gelica-regular.otf",
-                    "weight": 400
-                  },
-                  {
-                    "path": "./assets/fonts/gelica-medium.otf",
-                    "weight": 500
-                  },
-                  {
-                    "path": "./assets/fonts/gelica-bold.otf",
-                    "weight": 700
-                  }
-                ]
-              }
-            ]
-          },
-          "ios": {
-            "fonts": [
-              "./assets/fonts/gelica-light.otf",
-              "./assets/fonts/gelica-regular.otf",
-              "./assets/fonts/gelica-medium.otf",
-              "./assets/fonts/gelica-bold.otf"
-            ]
-          }
+          "merchantIdentifier": "",
+          "enableGooglePay": true
         }
-      ]
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.473187060791-96pucdifumqrnn7lb5l6bboqladmarat"
+        }
+      ],
+      ["expo-apple-authentication"]
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7461904f-1bca-4590-bc3b-c839d2768e44"
+      }
+    },
+    "scripts": {
+      "postinstall": "patch-package"
     }
   }
 }

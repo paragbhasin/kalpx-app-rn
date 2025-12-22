@@ -1,0 +1,2374 @@
+[
+    {
+        "id": "mantra.shiva_maha_mrityunjaya",
+        "deity": "Shiva",
+        "text": "Om Tryambakam Yajamahe Sugandhim Pushtivardhanam Urvarukamiva Bandhanat Mrityormukshiya Mamritat",
+        "explanation": [
+            "This mantra, known as the Maha Mrityunjaya, invokes Shiva’s healing and liberating energy.",
+            "‘Tryambakam’ refers to Shiva’s three-eyed form, symbolizing wisdom and perception.",
+            "It promotes physical and emotional healing, reduces fear of death, and fosters spiritual liberation.",
+            "Chanting 108 times daily, especially during illness or stress, enhances resilience and inner peace."
+        ],
+        "source": {
+            "title": "Rig Veda",
+            "ref": "7.59.12"
+        },
+        "tags": [
+            "healing",
+            "liberation",
+            "Shiva"
+        ],
+        "devanagari": "ॐ त्र्यम्बकं यजामहे सुगन्धिम् पुष्टिवर्धनम् उर्वारुकमिव बन्धनात् मृत्योर्मुक्षीय माऽमृतात्",
+        "iast": "oṃ tryambakaṃ yajāmahe sugandhiṃ puṣṭivardhanam urvārukamiva bandhanāt mṛtyormukṣīya mā’mṛtāt",
+        "simplified_pronunciation": "Om Try-am-ba-kam Ya-ja-ma-hey Su-gan-dhim Push-ti-var-dha-nam Ur-va-ru-ka-miva Ban-dha-naat Mri-tyor-muk-shee-ya Ma-am-ri-taat",
+        "suggested_reps": 108,
+        "best_times": [
+            "dawn",
+            "evening"
+        ],
+        "difficulty": 2,
+        "language_level": "poetic",
+        "weight": 1.4
+    },
+    {
+        "id": "mantra.gayatri_mantra",
+        "text": "Om Bhur Bhuvah Svah Tat Savitur Varenyam Bhargo Devasya Dhimahi Dhiyo Yo Nah Prachodayat",
+        "explanation": [
+            "The Gayatri Mantra, from the Rig Veda, invokes the divine light of Savitur, the sun god.",
+            "It sharpens intellect, enhances clarity, and fosters spiritual awakening.",
+            "Chanting at dawn or midday aligns the mind with universal wisdom, promoting focus and insight.",
+            "Regular practice improves concentration and decision-making in daily life."
+        ],
+        "source": {
+            "title": "Rig Veda",
+            "ref": "3.62.10"
+        },
+        "tags": [
+            "wisdom",
+            "clarity",
+            "spiritual"
+        ],
+        "devanagari": "ॐ भूर्भुवः स्वः तत्सवितुर्वरेण्यं भर्गो देवस्य धीमहि धियो यो नः प्रचोदयात्",
+        "iast": "oṃ bhūr bhuvaḥ svaḥ tat savitur vareṇyaṃ bhargo devasya dhīmahi dhiyo yo naḥ pracodayāt",
+        "simplified_pronunciation": "Om Bhoor Bhu-vah Swa-ha Tat Sa-vi-tur Va-ren-yam Bhar-go De-vas-ya Dhee-ma-hi Dhi-yo Yo Nah Pra-cho-da-yat",
+        "suggested_reps": 11,
+        "best_times": [
+            "dawn",
+            "midday"
+        ],
+        "difficulty": 2,
+        "language_level": "poetic",
+        "weight": 1.4
+    },
+    {
+        "id": "mantra.ganesha_vakratunda",
+        "deity": "Ganesha",
+        "text": "Vakratunda Mahakaya Suryakoti Samaprabha Nirvighnam Kuru Me Deva Sarva Karyeshu Sarvada",
+        "explanation": [
+            "This mantra invokes Ganesha, the remover of obstacles, for success in all endeavors.",
+            "‘Vakratunda’ refers to his curved trunk, symbolizing adaptability; ‘Mahakaya’ denotes his vast power.",
+            "Chanting before new ventures clears mental and external barriers, fostering confidence.",
+            "It’s ideal for students, professionals, or anyone starting a project, promoting focus and achievement."
+        ],
+        "source": {
+            "title": "Smārta tradition"
+        },
+        "tags": [
+            "success",
+            "obstacles",
+            "Ganesha"
+        ],
+        "devanagari": "वक्रतुण्ड महाकाय सूर्यकोटि समप्रभ निर्विघ्नं कुरु मे देव सर्व कार्येषु सर्वदा",
+        "iast": "vakratuṇḍa mahākāya sūryakoṭi samaprabha nirvighnaṃ kuru me deva sarva kāryeṣu sarvadā",
+        "simplified_pronunciation": "Vak-ra-tun-da Maha-kaa-ya Soor-ya-ko-ti Sa-ma-pra-bha Nir-vigh-nam Ku-ru Mey De-va Sar-va Kaar-ye-shu Sar-va-da",
+        "suggested_reps": 11,
+        "best_times": [
+            "morning",
+            "midday"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.1
+    },
+    {
+        "id": "mantra.durga_ya_devi",
+        "deity": "Durga",
+        "text": "Ya Devi Sarvabhuteshu Shakti Rupena Samsthita Namastasyei Namastasyei Namastasyei Namo Namah",
+        "explanation": [
+            "From the Devi Mahatmyam, this mantra honors Durga’s universal presence as divine energy.",
+            "It invokes strength, courage, and protection against challenges, both internal and external.",
+            "Chanting during Navratri or tough times empowers resilience and fosters fearless determination.",
+            "Regular practice cultivates inner confidence and spiritual fortitude."
+        ],
+        "source": {
+            "title": "Devi Mahatmyam"
+        },
+        "tags": [
+            "strength",
+            "protection",
+            "Durga"
+        ],
+        "devanagari": "या देवी सर्वभूतेषु शक्तिरूपेण संस्थिता नमस्तस्यै नमस्तस्यै नमस्तस्यै नमो नमः",
+        "iast": "yā devī sarvabhūteṣu śaktirūpeṇa saṃsthitā namastasyai namastasyai namastasyai namo namaḥ",
+        "simplified_pronunciation": "Ya De-vee Sar-va-bhoo-te-shu Shak-ti-roo-pe-na Sam-sthi-ta Na-mas-tas-yai Na-mas-tas-yai Na-mas-tas-yai Na-mo Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "sunset"
+        ],
+        "difficulty": 2,
+        "language_level": "poetic",
+        "season": [
+            "navratri"
+        ],
+        "weight": 1.3
+    },
+    {
+        "id": "mantra.krishna_om_namo_bhagavate",
+        "deity": "Krishna",
+        "text": "Om Namo Bhagavate Vasudevaya",
+        "explanation": [
+            "This mantra invokes Krishna as Vasudeva, the supreme divine being, fostering love and devotion.",
+            "It deepens spiritual connection, promotes inner joy, and aligns the heart with compassion.",
+            "Chanting during meditation or devotional practices enhances gratitude and emotional balance.",
+            "Ideal for daily use to cultivate a sense of divine presence and purpose."
+        ],
+        "source": {
+            "title": "Vaiṣṇava tradition"
+        },
+        "tags": [
+            "devotion",
+            "love",
+            "Krishna"
+        ],
+        "devanagari": "ॐ नमो भगवते वासुदेवाय",
+        "iast": "oṃ namo bhagavate vāsudevāya",
+        "simplified_pronunciation": "Om Na-mo Bha-ga-va-tey Vaa-su-de-va-ya",
+        "suggested_reps": 108,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.1
+    },
+    {
+        "id": "mantra.lakshmi_om_hreem",
+        "deity": "Lakshmi",
+        "text": "Om Hreem Mahalakshmyai Namah",
+        "explanation": [
+            "This mantra invokes Lakshmi, goddess of wealth, for prosperity and inner peace.",
+            "‘Hreem’ is a seed sound that amplifies abundance and spiritual growth.",
+            "Chanting during Diwali or daily practice attracts positive energy and material well-being.",
+            "It fosters gratitude, reduces scarcity mindset, and promotes emotional stability."
+        ],
+        "source": {
+            "title": "Śākta tradition"
+        },
+        "tags": [
+            "prosperity",
+            "peace",
+            "Lakshmi"
+        ],
+        "devanagari": "ॐ ह्रीं महालक्ष्म्यै नमः",
+        "iast": "oṃ hrīṃ mahālakṣmyai namaḥ",
+        "simplified_pronunciation": "Om Hreem Maha-laksh-myai Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "season": [
+            "diwali"
+        ],
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.hanuman_manojavam",
+        "deity": "Hanuman",
+        "text": "Manojavam Marutatulyavegam Jitendriyam Buddhimatam Varishtham",
+        "explanation": [
+            "This mantra praises Hanuman’s swift mind, strength, and wisdom, invoking his dynamic energy.",
+            "It boosts determination, mental clarity, and the ability to overcome challenges quickly.",
+            "Chanting before tasks requiring focus or physical effort enhances energy and discipline.",
+            "Regular practice cultivates courage, self-control, and intellectual sharpness."
+        ],
+        "source": {
+            "title": "Vaiṣṇava tradition"
+        },
+        "tags": [
+            "strength",
+            "clarity",
+            "Hanuman"
+        ],
+        "devanagari": "मनोजवं मारुततुल्यवेगं जितेन्द्रियं बुद्धिमतां वरिष्ठम्",
+        "iast": "manojavaṃ mārutatulyavegaṃ jitendriyaṃ buddhimatāṃ variṣṭham",
+        "simplified_pronunciation": "Ma-no-ja-vam Maa-ru-ta-tul-ya-ve-gam Ji-ten-dri-yam Bud-dhi-ma-taam Va-rish-tham",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "afternoon"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.1
+    },
+    {
+        "id": "mantra.saraswati_om_aim",
+        "deity": "Saraswati",
+        "text": "Om Aim Saraswatyai Namah",
+        "explanation": [
+            "This mantra invokes Saraswati, goddess of knowledge, for wisdom and creative inspiration.",
+            "‘Aim’ is a seed sound that enhances intellect and artistic expression.",
+            "Chanting before studying or creative work sharpens focus and boosts mental clarity.",
+            "Regular practice supports academic success, eloquent communication, and innovative thinking."
+        ],
+        "source": {
+            "title": "Śākta tradition"
+        },
+        "tags": [
+            "wisdom",
+            "creativity",
+            "Saraswati"
+        ],
+        "devanagari": "ॐ ऐं सरस्वत्यै नमः",
+        "iast": "oṃ aiṃ sarasvatyai namaḥ",
+        "simplified_pronunciation": "Om Aim Sa-ras-wa-tyai Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "midday"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.rama_tarangini",
+        "deity": "Rama",
+        "text": "Shri Rama Tarakam Mantra Japa",
+        "explanation": [
+            "This mantra invokes Rama, symbol of truth and compassion, to align with dharma.",
+            "‘Tarakam’ signifies liberation, guiding the chanter toward righteous actions.",
+            "Chanting fosters inner peace, ethical clarity, and a sense of purpose in daily life.",
+            "Ideal for morning or evening practice to cultivate kindness and spiritual strength."
+        ],
+        "source": {
+            "title": "Vaiṣṇava tradition"
+        },
+        "tags": [
+            "truth",
+            "compassion",
+            "Rama"
+        ],
+        "devanagari": "श्री राम तारक मंत्र जप",
+        "iast": "śrī rāma tāraka mantra japa",
+        "simplified_pronunciation": "Shree Raam Taa-ra-ka Man-tra Ja-pa",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.shanti_purnam",
+        "text": "Om Purnamadah Purnamidam Purnat Purnamudachyate Purnasya Purnamadaya Purnameva Vashishyate",
+        "explanation": [
+            "From the Isha Upanishad, this mantra affirms the completeness of the divine and creation.",
+            "It fosters a sense of wholeness, reducing feelings of lack or separation.",
+            "Chanting at the end of the day promotes inner peace and spiritual contentment.",
+            "Regular practice helps cultivate gratitude and a deeper connection to the universe."
+        ],
+        "source": {
+            "title": "Isha Upanishad"
+        },
+        "tags": [
+            "completeness",
+            "peace",
+            "spiritual"
+        ],
+        "devanagari": "ॐ पूर्णमदः पूर्णमिदं पूर्णात् पूर्णमुदच्यते पूर्णस्य पूर्णमादाय पूर्णमेवावशिष्यते",
+        "iast": "oṃ pūrṇamadaḥ pūrṇamidaṃ pūrṇāt pūrṇamudacyate pūrṇasya pūrṇamādāya pūrṇamevāvaśiṣyate",
+        "simplified_pronunciation": "Om Poor-nam-a-dah Poor-nam-i-dam Poor-naat Poor-nam-u-dach-ya-te Poor-nas-ya Poor-nam-aada-ya Poor-nam-eva-va-shish-ya-te",
+        "suggested_reps": 11,
+        "best_times": [
+            "evening",
+            "night"
+        ],
+        "difficulty": 2,
+        "language_level": "poetic",
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.vishnu_om_namo_narayanaya",
+        "deity": "Vishnu",
+        "text": "Om Namo Narayanaya",
+        "explanation": [
+            "This mantra invokes Vishnu, the preserver, for protection and spiritual balance.",
+            "‘Narayanaya’ refers to Vishnu as the refuge of all beings, fostering safety and harmony.",
+            "Chanting during Ekadashi or daily practice promotes inner calm and divine connection.",
+            "It helps reduce anxiety and aligns the chanter with universal order and stability."
+        ],
+        "source": {
+            "title": "Vaiṣṇava tradition"
+        },
+        "tags": [
+            "protection",
+            "balance",
+            "Vishnu"
+        ],
+        "devanagari": "ॐ नमो नारायणाय",
+        "iast": "oṃ namo nārāyaṇāya",
+        "simplified_pronunciation": "Om Na-mo Na-ra-ya-na-ya",
+        "suggested_reps": 108,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "season": [
+            "ekadashi"
+        ],
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.durga_om_aim_hreem",
+        "deity": "Durga",
+        "text": "Om Aim Hreem Kleem Chamundayai Vicche",
+        "explanation": [
+            "This powerful mantra invokes Durga’s fierce energy for protection and empowerment.",
+            "The seed sounds ‘Aim,’ ‘Hreem,’ and ‘Kleem’ amplify wisdom, energy, and desire fulfillment.",
+            "Chanting during Navratri or challenging times builds courage and mental clarity.",
+            "Regular practice fosters resilience, confidence, and spiritual strength."
+        ],
+        "source": {
+            "title": "Śākta tradition"
+        },
+        "tags": [
+            "protection",
+            "empowerment",
+            "Durga"
+        ],
+        "devanagari": "ॐ ऐं ह्रीं क्लीं चामुण्डायै विच्चे",
+        "iast": "oṃ aiṃ hrīṃ klīṃ cāmuṇḍāyai vicce",
+        "simplified_pronunciation": "Om Aim Hreem Kleem Cha-mun-da-yai Vi-chey",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "sunset"
+        ],
+        "difficulty": 2,
+        "language_level": "simple",
+        "season": [
+            "navratri"
+        ],
+        "weight": 1.3
+    },
+    {
+        "id": "mantra.krishna_govinda_jaya",
+        "deity": "Krishna",
+        "text": "Govinda Jaya Jaya Gopala Jaya Jaya",
+        "explanation": [
+            "This joyful mantra celebrates Krishna as Govinda and Gopala, the divine cowherd.",
+            "It uplifts the spirit, fostering love, gratitude, and connection to the divine.",
+            "Chanting during devotional practices or festivals enhances emotional lightness and joy.",
+            "Regular use promotes a positive outlook and deepens spiritual devotion."
+        ],
+        "source": {
+            "title": "Vaiṣṇava tradition"
+        },
+        "tags": [
+            "joy",
+            "devotion",
+            "Krishna"
+        ],
+        "devanagari": "गोविन्द जय जय गोपाल जय जय",
+        "iast": "govinda jaya jaya gopāla jaya jaya",
+        "simplified_pronunciation": "Go-vin-da Ja-ya Ja-ya Go-pa-la Ja-ya Ja-ya",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.shanti_saha_navavatu",
+        "text": "Om Saha Navavatu Saha Nau Bhunaktu Saha Viryam Karavavahai Tejasvi Navadhitamastu Ma Vidvishavahai",
+        "explanation": [
+            "From the Taittiriya Upanishad, this mantra invokes peace and harmony for teacher and student.",
+            "It fosters mutual strength, wisdom, and a conflict-free environment.",
+            "Chanting at the start of learning sessions promotes collaboration and mental clarity.",
+            "Regular practice enhances group harmony and spiritual growth."
+        ],
+        "source": {
+            "title": "Taittiriya Upanishad"
+        },
+        "tags": [
+            "peace",
+            "harmony",
+            "learning"
+        ],
+        "devanagari": "ॐ सह नाववतु सह नौ भुनक्तु सह वीर्यं करवावहै तेजस्वि नावधीतमस्तु मा विद्विषावहै",
+        "iast": "oṃ saha nāvavatu saha nau bhunaktu saha vīryaṃ karavāvahai tejasvi nāvadhītamastu mā vidviṣāvahai",
+        "simplified_pronunciation": "Om Sa-ha Na-va-va-tu Sa-ha Nau Bhu-nak-tu Sa-ha Veer-yam Ka-ra-va-va-hai Te-jas-vi Na-va-dhee-tam-as-tu Ma Vid-vish-a-va-hai",
+        "suggested_reps": 11,
+        "best_times": [
+            "dawn",
+            "evening"
+        ],
+        "difficulty": 2,
+        "language_level": "poetic",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.ganesha_om_gam",
+        "deity": "Ganesha",
+        "text": "Om Gam Ganapataye Namah",
+        "explanation": [
+            "This mantra invokes Ganesha to remove obstacles and ensure success in endeavors.",
+            "‘Gam’ is Ganesha’s seed sound, amplifying his energy to clear mental and physical barriers.",
+            "Chanting before starting projects or during challenges fosters focus and confidence.",
+            "Regular practice promotes clarity, determination, and smooth progress in tasks."
+        ],
+        "source": {
+            "title": "Smārta tradition"
+        },
+        "tags": [
+            "success",
+            "obstacles",
+            "Ganesha"
+        ],
+        "devanagari": "ॐ गं गणपतये नमः",
+        "iast": "oṃ gaṃ gaṇapataye namaḥ",
+        "simplified_pronunciation": "Om Gam Ga-na-pa-ta-ye Na-mah",
+        "suggested_reps": 11,
+        "best_times": [
+            "morning",
+            "midday"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.1
+    },
+    {
+        "id": "mantra.lakshmi_om_shreem_maha",
+        "deity": "Lakshmi",
+        "text": "Om Shreem Mahalakshmyai Namah",
+        "explanation": [
+            "This mantra invokes Lakshmi for abundance, prosperity, and spiritual wealth.",
+            "‘Shreem’ is a seed sound that attracts positive energy and material well-being.",
+            "Chanting during Diwali or daily practice fosters gratitude and financial stability.",
+            "It helps cultivate a mindset of abundance and emotional peace."
+        ],
+        "source": {
+            "title": "Śākta tradition"
+        },
+        "tags": [
+            "prosperity",
+            "abundance",
+            "Lakshmi"
+        ],
+        "devanagari": "ॐ श्रीं महालक्ष्म्यै नमः",
+        "iast": "oṃ śrīṃ mahālakṣmyai namaḥ",
+        "simplified_pronunciation": "Om Shreem Maha-laksh-myai Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "season": [
+            "diwali"
+        ],
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.shiva_om_namah_shivaya",
+        "deity": "Shiva",
+        "text": "Om Namah Shivaya",
+        "explanation": [
+            "This five-syllable mantra, known as Panchakshara, invokes Shiva’s transformative energy.",
+            "It fosters inner peace, releases negativity, and promotes spiritual growth.",
+            "Chanting 108 times daily, especially at dawn, calms the mind and enhances resilience.",
+            "Ideal for meditation to achieve clarity and emotional balance."
+        ],
+        "source": {
+            "title": "Śaiva tradition"
+        },
+        "tags": [
+            "peace",
+            "transformation",
+            "Shiva"
+        ],
+        "devanagari": "ॐ नमः शिवाय",
+        "iast": "oṃ namaḥ śivāya",
+        "simplified_pronunciation": "Om Na-mah Shi-vai-ya",
+        "suggested_reps": 108,
+        "best_times": [
+            "dawn",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.krishna_hare_krishna",
+        "deity": "Krishna",
+        "text": "Hare Krishna Hare Krishna Krishna Krishna Hare Hare Hare Rama Hare Rama Rama Rama Hare Hare",
+        "explanation": [
+            "Known as the Maha Mantra, it invokes Krishna and Rama for divine love and devotion.",
+            "It uplifts the heart, fosters compassion, and deepens spiritual connection.",
+            "Chanting 108 times daily promotes joy, gratitude, and unity with others.",
+            "Ideal for devotional practices to cultivate emotional and spiritual harmony."
+        ],
+        "source": {
+            "title": "Vaiṣṇava tradition"
+        },
+        "tags": [
+            "love",
+            "devotion",
+            "Krishna"
+        ],
+        "devanagari": "हरे कृष्ण हरे कृष्ण कृष्ण कृष्ण हरे हरे हरे राम हरे राम राम राम हरे हरे",
+        "iast": "hare kṛṣṇa hare kṛṣṇa kṛṣṇa kṛṣṇa hare hare hare rāma hare rāma rāma rāma hare hare",
+        "simplified_pronunciation": "Ha-rey Krishna Ha-rey Krishna Krishna Krishna Ha-rey Ha-rey Ha-rey Raam Ha-rey Raam Raam Raam Ha-rey Ha-rey",
+        "suggested_reps": 108,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.1
+    },
+    {
+        "id": "mantra.durga_om_dum",
+        "deity": "Durga",
+        "text": "Om Dum Durgayai Namah",
+        "explanation": [
+            "This mantra invokes Durga’s protective and empowering energy for courage.",
+            "‘Dum’ is a seed sound that channels her strength to overcome obstacles.",
+            "Chanting during Navratri or daily practice builds resilience and fearlessness.",
+            "It fosters inner confidence and shields against negative energies."
+        ],
+        "source": {
+            "title": "Śākta tradition"
+        },
+        "tags": [
+            "courage",
+            "protection",
+            "Durga"
+        ],
+        "devanagari": "ॐ दूं दुर्गायै नमः",
+        "iast": "oṃ dūṃ durgāyai namaḥ",
+        "simplified_pronunciation": "Om Doom Dur-ga-yai Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "sunset"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "season": [
+            "navratri"
+        ],
+        "weight": 1.3
+    },
+    {
+        "id": "mantra.shanti_om_shanti",
+        "text": "Om Shanti Shanti Shantih",
+        "explanation": [
+            "This mantra, from the Upanishads, invokes universal peace for mind, body, and spirit.",
+            "The triple repetition addresses peace on physical, mental, and spiritual levels.",
+            "Chanting at the end of the day soothes conflicts and promotes inner calm.",
+            "Regular practice fosters harmony in relationships and personal tranquility."
+        ],
+        "source": {
+            "title": "Upaniṣads"
+        },
+        "tags": [
+            "peace",
+            "calm",
+            "harmony"
+        ],
+        "devanagari": "ॐ शान्तिः शान्तिः शान्तिः",
+        "iast": "oṃ śāntiḥ śāntiḥ śāntiḥ",
+        "simplified_pronunciation": "Om Shaan-tee Shaan-tee Shaan-tee",
+        "suggested_reps": 11,
+        "best_times": [
+            "evening",
+            "night"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.hanuman_om_hum",
+        "deity": "Hanuman",
+        "text": "Om Hum Hanumate Namah",
+        "explanation": [
+            "This mantra invokes Hanuman’s strength and devotion for courage and service.",
+            "‘Hum’ is a seed sound that amplifies energy and determination.",
+            "Chanting before challenging tasks boosts confidence and selfless dedication.",
+            "Regular practice enhances physical and mental endurance, fostering loyalty."
+        ],
+        "source": {
+            "title": "Vaiṣṇava tradition"
+        },
+        "tags": [
+            "courage",
+            "devotion",
+            "Hanuman"
+        ],
+        "devanagari": "ॐ हुं हनुमते नमः",
+        "iast": "oṃ huṃ hanumate namaḥ",
+        "simplified_pronunciation": "Om Hum Ha-nu-ma-tey Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "afternoon"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.1
+    },
+    {
+        "id": "mantra.rama_om_shri_rama",
+        "deity": "Rama",
+        "text": "Om Shri Ramaya Namah",
+        "explanation": [
+            "This mantra invokes Rama, the embodiment of dharma, for truth and righteousness.",
+            "It fosters ethical clarity, inner strength, and alignment with one’s duties.",
+            "Chanting daily promotes peace, discipline, and compassionate action.",
+            "Ideal for those seeking to live with integrity and purpose."
+        ],
+        "source": {
+            "title": "Vaiṣṇava tradition"
+        },
+        "tags": [
+            "truth",
+            "dharma",
+            "Rama"
+        ],
+        "devanagari": "ॐ श्री रामाय नमः",
+        "iast": "oṃ śrī rāmāya namaḥ",
+        "simplified_pronunciation": "Om Shree Ra-ma-ya Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.vedanta_om_tat_sat",
+        "text": "Om Tat Sat",
+        "explanation": [
+            "From the Bhagavad Gita, this mantra affirms the eternal truth of existence.",
+            "‘Tat’ means ‘that,’ and ‘Sat’ means ‘truth,’ connecting the chanter to divine reality.",
+            "Chanting during meditation deepens spiritual focus and clarity of purpose.",
+            "Regular practice fosters a sense of unity with the universal truth."
+        ],
+        "source": {
+            "title": "Bhagavad Gita",
+            "ref": "17.23"
+        },
+        "tags": [
+            "truth",
+            "clarity",
+            "vedanta"
+        ],
+        "devanagari": "ॐ तत् सत्",
+        "iast": "oṃ tat sat",
+        "simplified_pronunciation": "Om Tat Sat",
+        "suggested_reps": 11,
+        "best_times": [
+            "dawn",
+            "midday"
+        ],
+        "difficulty": 2,
+        "language_level": "simple",
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.saraswati_om_saraswati",
+        "deity": "Saraswati",
+        "text": "Om Saraswati Namah",
+        "explanation": [
+            "This simple mantra invokes Saraswati for wisdom, creativity, and eloquent speech.",
+            "It enhances mental clarity, learning ability, and artistic expression.",
+            "Chanting before academic or creative tasks sharpens focus and boosts confidence.",
+            "Regular practice supports intellectual growth and effective communication."
+        ],
+        "source": {
+            "title": "Śākta tradition"
+        },
+        "tags": [
+            "wisdom",
+            "creativity",
+            "Saraswati"
+        ],
+        "devanagari": "ॐ सरस्वति नमः",
+        "iast": "oṃ sarasvati namaḥ",
+        "simplified_pronunciation": "Om Sa-ras-wa-tee Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "midday"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.vishnu_om_namo_vishnave",
+        "deity": "Vishnu",
+        "text": "Om Namo Vishnave",
+        "explanation": [
+            "This mantra invokes Vishnu for protection, harmony, and spiritual balance.",
+            "It fosters a sense of safety and alignment with the divine order of the universe.",
+            "Chanting during Ekadashi or daily practice promotes inner peace and stability.",
+            "Regular use helps reduce stress and cultivates a sense of divine care."
+        ],
+        "source": {
+            "title": "Vaiṣṇava tradition"
+        },
+        "tags": [
+            "protection",
+            "harmony",
+            "Vishnu"
+        ],
+        "devanagari": "ॐ नमो विष्णवे",
+        "iast": "oṃ namo viṣṇave",
+        "simplified_pronunciation": "Om Na-mo Vish-na-vey",
+        "suggested_reps": 108,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "season": [
+            "ekadashi"
+        ],
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.shiva_om_tryambakam",
+        "deity": "Shiva",
+        "text": "Om Tryambakam Yajamahe",
+        "explanation": [
+            "A shorter form of the Maha Mrityunjaya, this mantra invokes Shiva for healing.",
+            "‘Tryambakam’ refers to Shiva’s all-seeing wisdom, promoting emotional and physical health.",
+            "Chanting during times of stress or illness fosters resilience and spiritual liberation.",
+            "Regular practice enhances inner strength and reduces fear."
+        ],
+        "source": {
+            "title": "Rig Veda",
+            "ref": "7.59.12"
+        },
+        "tags": [
+            "healing",
+            "liberation",
+            "Shiva"
+        ],
+        "devanagari": "ॐ त्र्यम्बकं यजामहे",
+        "iast": "oṃ tryambakaṃ yajāmahe",
+        "simplified_pronunciation": "Om Try-am-ba-kam Ya-ja-ma-hey",
+        "suggested_reps": 108,
+        "best_times": [
+            "dawn",
+            "evening"
+        ],
+        "difficulty": 2,
+        "language_level": "simple",
+        "weight": 1.3
+    },
+    {
+        "id": "mantra.lakshmi_om_shri_lakshmi",
+        "deity": "Lakshmi",
+        "text": "Om Shri Lakshmyai Namah",
+        "explanation": [
+            "This mantra invokes Lakshmi for abundance, joy, and spiritual prosperity.",
+            "It fosters gratitude, attracts positive energy, and promotes material well-being.",
+            "Chanting during Diwali or daily practice cultivates a mindset of abundance.",
+            "Regular use enhances emotional stability and a sense of divine grace."
+        ],
+        "source": {
+            "title": "Śākta tradition"
+        },
+        "tags": [
+            "abundance",
+            "joy",
+            "Lakshmi"
+        ],
+        "devanagari": "ॐ श्री लक्ष्म्यै नमः",
+        "iast": "oṃ śrī lakṣmyai namaḥ",
+        "simplified_pronunciation": "Om Shree Laksh-myai Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "season": [
+            "diwali"
+        ],
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.ganesha_om_ganapataye",
+        "deity": "Ganesha",
+        "text": "Om Ganapataye Namah",
+        "explanation": [
+            "This mantra invokes Ganesha to clear obstacles and ensure success in endeavors.",
+            "It fosters focus, confidence, and smooth progress in new ventures or challenges.",
+            "Chanting before starting projects or during transitions promotes clarity and determination.",
+            "Regular practice enhances problem-solving skills and mental resilience."
+        ],
+        "source": {
+            "title": "Smārta tradition"
+        },
+        "tags": [
+            "success",
+            "obstacles",
+            "Ganesha"
+        ],
+        "devanagari": "ॐ गणपतये नमः",
+        "iast": "oṃ gaṇapataye namaḥ",
+        "simplified_pronunciation": "Om Ga-na-pa-ta-ye Na-mah",
+        "suggested_reps": 11,
+        "best_times": [
+            "morning",
+            "midday"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.1
+    },
+    {
+        "id": "mantra.shanti_om_saha",
+        "text": "Om Saha Navavatu",
+        "explanation": [
+            "A shorter form from the Taittiriya Upanishad, this mantra invokes peace and harmony.",
+            "It fosters mutual understanding and collaboration, ideal for group or learning settings.",
+            "Chanting at the start of the day or sessions promotes calm and collective strength.",
+            "Regular practice enhances interpersonal harmony and spiritual alignment."
+        ],
+        "source": {
+            "title": "Taittiriya Upanishad"
+        },
+        "tags": [
+            "peace",
+            "harmony",
+            "collaboration"
+        ],
+        "devanagari": "ॐ सह नाववतु",
+        "iast": "oṃ saha nāvavatu",
+        "simplified_pronunciation": "Om Sa-ha Na-va-va-tu",
+        "suggested_reps": 11,
+        "best_times": [
+            "dawn",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.hanuman_om_han",
+        "deity": "Hanuman",
+        "text": "Om Han Hanumate Namah",
+        "explanation": [
+            "This mantra invokes Hanuman for strength, devotion, and fearless service.",
+            "‘Han’ is a seed sound that amplifies energy and determination.",
+            "Chanting before tasks requiring courage or dedication boosts confidence and focus.",
+            "Regular practice fosters resilience, loyalty, and selfless action."
+        ],
+        "source": {
+            "title": "Vaiṣṇava tradition"
+        },
+        "tags": [
+            "strength",
+            "devotion",
+            "Hanuman"
+        ],
+        "devanagari": "ॐ हं हनुमते नमः",
+        "iast": "oṃ haṃ hanumate namaḥ",
+        "simplified_pronunciation": "Om Ham Ha-nu-ma-tey Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "afternoon"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.1
+    },
+    {
+        "id": "mantra.rama_om_shri_dharma",
+        "deity": "Rama",
+        "text": "Om Shri Ramaya Namah",
+        "explanation": [
+            "This mantra invokes Rama for alignment with truth, duty, and righteousness.",
+            "It fosters ethical clarity, inner peace, and disciplined action.",
+            "Chanting daily promotes a sense of purpose and compassionate behavior.",
+            "Ideal for those seeking to live with integrity and spiritual strength."
+        ],
+        "source": {
+            "title": "Vaiṣṇava tradition"
+        },
+        "tags": [
+            "truth",
+            "dharma",
+            "Rama"
+        ],
+        "devanagari": "ॐ श्री रामाय नमः",
+        "iast": "oṃ śrī rāmāya namaḥ",
+        "simplified_pronunciation": "Om Shree Ra-ma-ya Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.saraswati_om_aim_namah",
+        "deity": "Saraswati",
+        "text": "Om Aim Namah",
+        "explanation": [
+            "This concise mantra invokes Saraswati for wisdom and creative inspiration.",
+            "‘Aim’ is a seed sound that enhances intellectual clarity and artistic expression.",
+            "Chanting before study or creative tasks boosts focus and mental sharpness.",
+            "Regular practice supports academic success and effective communication."
+        ],
+        "source": {
+            "title": "Śākta tradition"
+        },
+        "tags": [
+            "wisdom",
+            "creativity",
+            "Saraswati"
+        ],
+        "devanagari": "ॐ ऐं नमः",
+        "iast": "oṃ aiṃ namaḥ",
+        "simplified_pronunciation": "Om Aim Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "midday"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.lakshmi_om_shri_peace",
+        "deity": "Lakshmi",
+        "text": "Om Shri Lakshmyai Namah",
+        "explanation": [
+            "This mantra invokes Lakshmi for peace, prosperity, and spiritual abundance.",
+            "It fosters gratitude, attracts positive energy, and promotes emotional stability.",
+            "Chanting during Diwali or daily practice cultivates a mindset of abundance.",
+            "Regular use enhances joy and a sense of divine grace in life."
+        ],
+        "source": {
+            "title": "Śākta tradition"
+        },
+        "tags": [
+            "peace",
+            "prosperity",
+            "Lakshmi"
+        ],
+        "devanagari": "ॐ श्री लक्ष्म्यै नमः",
+        "iast": "oṃ śrī lakṣmyai namaḥ",
+        "simplified_pronunciation": "Om Shree Laksh-myai Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "season": [
+            "diwali"
+        ],
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.ganesha_om_gam_success",
+        "deity": "Ganesha",
+        "text": "Om Gam Ganapataye Namah",
+        "explanation": [
+            "This mantra invokes Ganesha to clear obstacles and ensure success in endeavors.",
+            "‘Gam’ is a powerful seed sound that amplifies focus and determination.",
+            "Chanting before new ventures or challenges promotes clarity and confidence.",
+            "Regular practice enhances problem-solving skills and mental resilience."
+        ],
+        "source": {
+            "title": "Smārta tradition"
+        },
+        "tags": [
+            "success",
+            "obstacles",
+            "Ganesha"
+        ],
+        "devanagari": "ॐ गं गणपतये नमः",
+        "iast": "oṃ gaṃ gaṇapataye namaḥ",
+        "simplified_pronunciation": "Om Gam Ga-na-pa-ta-ye Na-mah",
+        "suggested_reps": 11,
+        "best_times": [
+            "morning",
+            "midday"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.1
+    },
+    {
+        "id": "mantra.shanti_om_saha_harmony",
+        "text": "Om Saha Navavatu",
+        "explanation": [
+            "This mantra from the Taittiriya Upanishad invokes harmony and peace for all.",
+            "It fosters collaboration and mutual understanding in group or learning settings.",
+            "Chanting at the start of the day promotes calm and collective strength.",
+            "Regular practice enhances interpersonal harmony and spiritual alignment."
+        ],
+        "source": {
+            "title": "Taittiriya Upanishad"
+        },
+        "tags": [
+            "harmony",
+            "peace",
+            "collaboration"
+        ],
+        "devanagari": "ॐ सह नाववतु",
+        "iast": "oṃ saha nāvavatu",
+        "simplified_pronunciation": "Om Sa-ha Na-va-va-tu",
+        "suggested_reps": 11,
+        "best_times": [
+            "dawn",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.hanuman_om_han_devotion",
+        "deity": "Hanuman",
+        "text": "Om Han Hanumate Namah",
+        "explanation": [
+            "This mantra invokes Hanuman for devotion, strength, and selfless service.",
+            "‘Han’ is a seed sound that amplifies energy and determination.",
+            "Chanting before tasks requiring courage or dedication boosts confidence and focus.",
+            "Regular practice fosters resilience, loyalty, and spiritual commitment."
+        ],
+        "source": {
+            "title": "Vaiṣṇava tradition"
+        },
+        "tags": [
+            "devotion",
+            "strength",
+            "Hanuman"
+        ],
+        "devanagari": "ॐ हं हनुमते नमः",
+        "iast": "oṃ haṃ hanumate namaḥ",
+        "simplified_pronunciation": "Om Ham Ha-nu-ma-tey Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "afternoon"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.1
+    },
+    {
+        "id": "mantra.vishnu_om_namo_peace",
+        "deity": "Vishnu",
+        "text": "Om Namo Narayanaya",
+        "explanation": [
+            "This mantra invokes Vishnu for peace, protection, and spiritual balance.",
+            "It fosters a sense of divine care and alignment with universal harmony.",
+            "Chanting during Ekadashi or daily practice promotes inner calm and stability.",
+            "Regular use reduces stress and cultivates a sense of divine connection."
+        ],
+        "source": {
+            "title": "Vaiṣṇava tradition"
+        },
+        "tags": [
+            "peace",
+            "protection",
+            "Vishnu"
+        ],
+        "devanagari": "ॐ नमो नारायणाय",
+        "iast": "oṃ namo nārāyaṇāya",
+        "simplified_pronunciation": "Om Na-mo Na-ra-ya-na-ya",
+        "suggested_reps": 108,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "season": [
+            "ekadashi"
+        ],
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.saraswati_om_aim_wisdom",
+        "deity": "Saraswati",
+        "text": "Om Aim Saraswatyai Namah",
+        "explanation": [
+            "This mantra invokes Saraswati for wisdom, insight, and creative inspiration.",
+            "‘Aim’ is a seed sound that enhances intellectual clarity and artistic expression.",
+            "Chanting before study or creative tasks boosts focus and mental sharpness.",
+            "Regular practice supports academic success and effective communication."
+        ],
+        "source": {
+            "title": "Śākta tradition"
+        },
+        "tags": [
+            "wisdom",
+            "insight",
+            "Saraswati"
+        ],
+        "devanagari": "ॐ ऐं सरस्वत्यै नमः",
+        "iast": "oṃ aiṃ sarasvatyai namaḥ",
+        "simplified_pronunciation": "Om Aim Sa-ras-wa-tyai Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "midday"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.shiva_om_namah_peace",
+        "deity": "Shiva",
+        "text": "Om Namah Shivaya",
+        "explanation": [
+            "This mantra invokes Shiva for inner peace, clarity, and spiritual transformation.",
+            "It helps release negativity and fosters emotional balance and resilience.",
+            "Chanting 108 times daily, especially at dawn, promotes mental calm and spiritual growth.",
+            "Ideal for meditation to achieve clarity and emotional stability."
+        ],
+        "source": {
+            "title": "Śaiva tradition"
+        },
+        "tags": [
+            "peace",
+            "clarity",
+            "Shiva"
+        ],
+        "devanagari": "ॐ नमः शिवाय",
+        "iast": "oṃ namaḥ śivāya",
+        "simplified_pronunciation": "Om Na-mah Shi-vai-ya",
+        "suggested_reps": 108,
+        "best_times": [
+            "dawn",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.krishna_hare_krishna_peace",
+        "deity": "Krishna",
+        "text": "Hare Krishna Hare Krishna Krishna Krishna Hare Hare Hare Rama Hare Rama Rama Rama Hare Hare",
+        "explanation": [
+            "This Maha Mantra invokes Krishna and Rama for peace, devotion, and spiritual joy.",
+            "It fosters compassion, gratitude, and a deep connection to the divine.",
+            "Chanting 108 times daily promotes emotional harmony and spiritual upliftment.",
+            "Ideal for devotional practices to cultivate love and serenity."
+        ],
+        "source": {
+            "title": "Vaiṣṇava tradition"
+        },
+        "tags": [
+            "peace",
+            "devotion",
+            "Krishna"
+        ],
+        "devanagari": "हरे कृष्ण हरे कृष्ण कृष्ण कृष्ण हरे हरे हरे राम हरे राम राम राम हरे हरे",
+        "iast": "hare kṛṣṇa hare kṛṣṇa kṛṣṇa kṛṣṇa hare hare hare rāma hare rāma rāma rāma hare hare",
+        "simplified_pronunciation": "Ha-rey Krishna Ha-rey Krishna Krishna Krishna Ha-rey Ha-rey Ha-rey Raam Ha-rey Raam Raam Raam Ha-rey Ha-rey",
+        "suggested_reps": 108,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.1
+    },
+    {
+        "id": "mantra.durga_om_dum_strength",
+        "deity": "Durga",
+        "text": "Om Dum Durgayai Namah",
+        "explanation": [
+            "This mantra invokes Durga for strength, courage, and protection.",
+            "‘Dum’ is a seed sound that channels her fierce energy to overcome challenges.",
+            "Chanting during Navratri or daily practice builds resilience and fearlessness.",
+            "Regular use fosters confidence and shields against negative energies."
+        ],
+        "source": {
+            "title": "Śākta tradition"
+        },
+        "tags": [
+            "strength",
+            "courage",
+            "Durga"
+        ],
+        "devanagari": "ॐ दूं दुर्गायै नमः",
+        "iast": "oṃ dūṃ durgāyai namaḥ",
+        "simplified_pronunciation": "Om Doom Dur-ga-yai Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "sunset"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "season": [
+            "navratri"
+        ],
+        "weight": 1.3
+    },
+    {
+        "id": "mantra.gayatri_om_tat_savitur",
+        "text": "Om Tat Savitur Varenyam",
+        "explanation": [
+            "A shorter form of the Gayatri Mantra, it invokes divine wisdom and light.",
+            "It sharpens mental clarity and fosters spiritual insight and focus.",
+            "Chanting at dawn or midday promotes intellectual growth and decision-making.",
+            "Regular practice enhances concentration and spiritual awareness."
+        ],
+        "source": {
+            "title": "Rig Veda",
+            "ref": "3.62.10"
+        },
+        "tags": [
+            "wisdom",
+            "light",
+            "spiritual"
+        ],
+        "devanagari": "ॐ तत्सवितुर्वरेण्यं",
+        "iast": "oṃ tat savitur vareṇyaṃ",
+        "simplified_pronunciation": "Om Tat Sa-vi-tur Va-ren-yam",
+        "suggested_reps": 11,
+        "best_times": [
+            "dawn",
+            "midday"
+        ],
+        "difficulty": 2,
+        "language_level": "poetic",
+        "weight": 1.4
+    },
+    {
+        "id": "mantra.rama_om_shri_peace",
+        "deity": "Rama",
+        "text": "Om Shri Ramaya Namah",
+        "explanation": [
+            "This mantra invokes Rama for peace, truth, and alignment with dharma.",
+            "It fosters inner calm, ethical clarity, and disciplined action.",
+            "Chanting daily promotes a sense of purpose and compassionate behavior.",
+            "Ideal for those seeking to live with integrity and spiritual strength."
+        ],
+        "source": {
+            "title": "Vaiṣṇava tradition"
+        },
+        "tags": [
+            "peace",
+            "dharma",
+            "Rama"
+        ],
+        "devanagari": "ॐ श्री रामाय नमः",
+        "iast": "oṃ śrī rāmāya namaḥ",
+        "simplified_pronunciation": "Om Shree Ra-ma-ya Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.lakshmi_om_shri_joy",
+        "deity": "Lakshmi",
+        "text": "Om Shri Lakshmyai Namah",
+        "explanation": [
+            "This mantra invokes Lakshmi for joy, abundance, and spiritual prosperity.",
+            "It fosters gratitude, attracts positive energy, and promotes emotional stability.",
+            "Chanting during Diwali or daily practice cultivates a mindset of abundance.",
+            "Regular use enhances emotional joy and a sense of divine grace."
+        ],
+        "source": {
+            "title": "Śākta tradition"
+        },
+        "tags": [
+            "joy",
+            "abundance",
+            "Lakshmi"
+        ],
+        "devanagari": "ॐ श्री लक्ष्म्यै नमः",
+        "iast": "oṃ śrī lakṣmyai namaḥ",
+        "simplified_pronunciation": "Om Shree Laksh-myai Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "season": [
+            "diwali"
+        ],
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.ganesha_om_gam_clarity",
+        "deity": "Ganesha",
+        "text": "Om Gam Ganapataye Namah",
+        "explanation": [
+            "This mantra invokes Ganesha for clarity, success, and obstacle removal.",
+            "‘Gam’ is a seed sound that amplifies focus and determination.",
+            "Chanting before new ventures or challenges promotes confidence and mental clarity.",
+            "Regular practice enhances problem-solving skills and smooth progress."
+        ],
+        "source": {
+            "title": "Smārta tradition"
+        },
+        "tags": [
+            "clarity",
+            "success",
+            "Ganesha"
+        ],
+        "devanagari": "ॐ गं गणपतये नमः",
+        "iast": "oṃ gaṃ gaṇapataye namaḥ",
+        "simplified_pronunciation": "Om Gam Ga-na-pa-ta-ye Na-mah",
+        "suggested_reps": 11,
+        "best_times": [
+            "morning",
+            "midday"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.1
+    },
+    {
+        "id": "mantra.shanti_om_shantih",
+        "text": "Om Shantih",
+        "explanation": [
+            "This simple mantra invokes peace for the mind, body, and spirit.",
+            "It soothes mental restlessness and fosters a sense of calm and harmony.",
+            "Chanting at the end of the day promotes relaxation and spiritual tranquility.",
+            "Regular practice enhances inner peace and reduces stress."
+        ],
+        "source": {
+            "title": "Upaniṣads"
+        },
+        "tags": [
+            "peace",
+            "calm",
+            "harmony"
+        ],
+        "devanagari": "ॐ शान्तिः",
+        "iast": "oṃ śāntiḥ",
+        "simplified_pronunciation": "Om Shaan-tee",
+        "suggested_reps": 11,
+        "best_times": [
+            "evening",
+            "night"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.vishnu_shantakaram",
+        "deity": "Vishnu",
+        "text": "Shantakaram Bhujagashayanam Padmanabham Suresham Vishvadharam Gaganasadrisham Meghavarnam Shubhangam",
+        "explanation": [
+            "This mantra praises Vishnu’s serene form, reclining on the serpent Ananta, symbolizing cosmic balance.",
+            "It fosters inner peace, protection, and alignment with universal harmony.",
+            "Chanting during meditation or Ekadashi enhances spiritual stability and devotion.",
+            "Regular practice promotes calmness, reduces stress, and deepens divine connection."
+        ],
+        "source": {
+            "title": "Vaiṣṇava tradition"
+        },
+        "tags": [
+            "peace",
+            "protection",
+            "Vishnu"
+        ],
+        "devanagari": "शान्ताकारं भुजगशयनं पद्मनाभं सुरेशं विश्वाधारं गगनसदृशं मेघवर्णं शुभाङ्गम्",
+        "iast": "śāntākāraṃ bhujagaśayanaṃ padmanābhaṃ sureśaṃ viśvādhāraṃ gaganasadṛśaṃ meghavarṇaṃ śubhāṅgam",
+        "simplified_pronunciation": "Shaan-taa-kaa-ram Bhu-ja-ga-sha-ya-nam Pad-ma-naa-bham Su-re-sham Vish-vaa-dhaa-ram Ga-ga-na-sa-drisham Me-gha-var-nam Shu-bhaan-gam",
+        "suggested_reps": 11,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 2,
+        "language_level": "poetic",
+        "season": [
+            "ekadashi"
+        ],
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.kali_om_krim",
+        "deity": "Kali",
+        "text": "Om Krim Kalikayai Namah",
+        "explanation": [
+            "This mantra invokes Kali, the fierce goddess of transformation, to remove negativity and fear.",
+            "‘Krim’ is a seed sound that channels her intense energy for spiritual cleansing.",
+            "Chanting during challenging times or tantric practices fosters courage and liberation.",
+            "Regular practice helps release deep-seated fears and promotes inner strength."
+        ],
+        "source": {
+            "title": "Śākta tradition"
+        },
+        "tags": [
+            "transformation",
+            "protection",
+            "Kali"
+        ],
+        "devanagari": "ॐ क्रीं कालिकायै नमः",
+        "iast": "oṃ krīṃ kālikāyai namaḥ",
+        "simplified_pronunciation": "Om Kreem Kaa-lee-kaa-yai Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "night",
+            "midnight"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.3
+    },
+    {
+        "id": "mantra.bhuvaneshwari_om_hrim",
+        "deity": "Bhuvaneshwari",
+        "text": "Om Hrim Bhuvaneshvaryai Namah",
+        "explanation": [
+            "This mantra invokes Bhuvaneshwari, the goddess of the universe, for cosmic harmony and abundance.",
+            "‘Hrim’ is a seed sound that amplifies spiritual and material prosperity.",
+            "Chanting fosters a sense of connection to the universe and inner fulfillment.",
+            "Ideal for daily practice to cultivate balance and universal awareness."
+        ],
+        "source": {
+            "title": "Śākta tradition"
+        },
+        "tags": [
+            "harmony",
+            "abundance",
+            "Bhuvaneshwari"
+        ],
+        "devanagari": "ॐ ह्रीं भुवनेश्वर्यै नमः",
+        "iast": "oṃ hrīṃ bhuvaneśvaryai namaḥ",
+        "simplified_pronunciation": "Om Hreem Bhu-va-nesh-va-ryai Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.surya_om_hraam",
+        "deity": "Surya",
+        "text": "Om Hraam Hreem Hraum Sah Suryaya Namah",
+        "explanation": [
+            "This mantra invokes Surya, the sun god, for vitality, health, and enlightenment.",
+            "The seed sounds ‘Hraam,’ ‘Hreem,’ and ‘Hraum’ amplify solar energy and spiritual light.",
+            "Chanting at sunrise enhances physical energy, mental clarity, and leadership qualities.",
+            "Regular practice promotes confidence, health, and a positive outlook."
+        ],
+        "source": {
+            "title": "Vedic tradition"
+        },
+        "tags": [
+            "vitality",
+            "clarity",
+            "Surya"
+        ],
+        "devanagari": "ॐ ह्रां ह्रीं ह्रौं सः सूर्याय नमः",
+        "iast": "oṃ hrāṃ hrīṃ hrauṃ saḥ sūryāya namaḥ",
+        "simplified_pronunciation": "Om Hraam Hreem Hraum Sah Soor-yaa-ya Na-mah",
+        "suggested_reps": 11,
+        "best_times": [
+            "sunrise"
+        ],
+        "difficulty": 2,
+        "language_level": "simple",
+        "weight": 1.1
+    },
+    {
+        "id": "mantra.chandra_om_chandraya",
+        "deity": "Chandra",
+        "text": "Om Chandraya Namah",
+        "explanation": [
+            "This mantra invokes Chandra, the moon god, for emotional balance and intuition.",
+            "It soothes the mind, enhances creativity, and fosters emotional stability.",
+            "Chanting during the full moon or evening promotes calmness and inner reflection.",
+            "Regular practice supports mental peace and intuitive clarity."
+        ],
+        "source": {
+            "title": "Vedic tradition"
+        },
+        "tags": [
+            "balance",
+            "intuition",
+            "Chandra"
+        ],
+        "devanagari": "ॐ चन्द्राय नमः",
+        "iast": "oṃ candrāya namaḥ",
+        "simplified_pronunciation": "Om Chan-draa-ya Na-mah",
+        "suggested_reps": 11,
+        "best_times": [
+            "evening",
+            "full moon"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.mangala_om_mangalaya",
+        "deity": "Mangala",
+        "text": "Om Mangalaya Namah",
+        "explanation": [
+            "This mantra invokes Mangala (Mars) for courage, energy, and determination.",
+            "It boosts physical strength, assertiveness, and the ability to overcome challenges.",
+            "Chanting on Tuesdays or during conflicts promotes resilience and decisive action.",
+            "Regular practice enhances confidence and protects against impulsiveness."
+        ],
+        "source": {
+            "title": "Navagraha tradition"
+        },
+        "tags": [
+            "courage",
+            "energy",
+            "Mangala"
+        ],
+        "devanagari": "ॐ मङ्गलाय नमः",
+        "iast": "oṃ maṅgalāya namaḥ",
+        "simplified_pronunciation": "Om Man-ga-laa-ya Na-mah",
+        "suggested_reps": 11,
+        "best_times": [
+            "morning",
+            "Tuesday"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.budha_om_budhaya",
+        "deity": "Budha",
+        "text": "Om Budhaya Namah",
+        "explanation": [
+            "This mantra invokes Budha (Mercury) for intellect, communication, and adaptability.",
+            "It enhances mental agility, eloquence, and problem-solving skills.",
+            "Chanting on Wednesdays or before intellectual tasks sharpens focus and clarity.",
+            "Regular practice supports effective communication and mental flexibility."
+        ],
+        "source": {
+            "title": "Navagraha tradition"
+        },
+        "tags": [
+            "intellect",
+            "communication",
+            "Budha"
+        ],
+        "devanagari": "ॐ बुद्धाय नमः",
+        "iast": "oṃ budhāya namaḥ",
+        "simplified_pronunciation": "Om Bu-dhaa-ya Na-mah",
+        "suggested_reps": 11,
+        "best_times": [
+            "morning",
+            "Wednesday"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.brihaspati_om_brihaspataye",
+        "deity": "Brihaspati",
+        "text": "Om Brihaspataye Namah",
+        "explanation": [
+            "This mantra invokes Brihaspati (Jupiter) for wisdom, prosperity, and spiritual guidance.",
+            "It fosters knowledge, ethical judgment, and abundance in life.",
+            "Chanting on Thursdays or during study promotes clarity and divine guidance.",
+            "Regular practice enhances optimism, learning, and spiritual growth."
+        ],
+        "source": {
+            "title": "Navagraha tradition"
+        },
+        "tags": [
+            "wisdom",
+            "prosperity",
+            "Brihaspati"
+        ],
+        "devanagari": "ॐ बृहस्पतये नमः",
+        "iast": "oṃ bṛhaspataye namaḥ",
+        "simplified_pronunciation": "Om Bri-has-pa-ta-ye Na-mah",
+        "suggested_reps": 11,
+        "best_times": [
+            "morning",
+            "Thursday"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.shukra_om_shukraya",
+        "deity": "Shukra",
+        "text": "Om Shukraya Namah",
+        "explanation": [
+            "This mantra invokes Shukra (Venus) for love, beauty, and material comforts.",
+            "It fosters harmony in relationships, creativity, and appreciation of aesthetics.",
+            "Chanting on Fridays or during social events promotes charm and emotional balance.",
+            "Regular practice enhances joy, artistic expression, and relational harmony."
+        ],
+        "source": {
+            "title": "Navagraha tradition"
+        },
+        "tags": [
+            "love",
+            "beauty",
+            "Shukra"
+        ],
+        "devanagari": "ॐ शुक्राय नमः",
+        "iast": "oṃ śukrāya namaḥ",
+        "simplified_pronunciation": "Om Shu-kraa-ya Na-mah",
+        "suggested_reps": 11,
+        "best_times": [
+            "morning",
+            "Friday"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.shani_om_shanaye",
+        "deity": "Shani",
+        "text": "Om Shanaye Namah",
+        "explanation": [
+            "This mantra invokes Shani (Saturn) for discipline, patience, and spiritual growth.",
+            "It helps overcome obstacles, fosters resilience, and promotes humility.",
+            "Chanting on Saturdays or during challenges cultivates perseverance and inner strength.",
+            "Regular practice balances karma and supports long-term goals."
+        ],
+        "source": {
+            "title": "Navagraha tradition"
+        },
+        "tags": [
+            "discipline",
+            "patience",
+            "Shani"
+        ],
+        "devanagari": "ॐ शनये नमः",
+        "iast": "oṃ śanaye namaḥ",
+        "simplified_pronunciation": "Om Sha-na-ye Na-mah",
+        "suggested_reps": 11,
+        "best_times": [
+            "morning",
+            "Saturday"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.rahu_om_rahave",
+        "deity": "Rahu",
+        "text": "Om Rahave Namah",
+        "explanation": [
+            "This mantra invokes Rahu, the lunar node, for protection against confusion and illusion.",
+            "It fosters clarity, ambition, and the ability to navigate complex situations.",
+            "Chanting on Saturdays or during uncertainty promotes focus and spiritual grounding.",
+            "Regular practice helps overcome deceptive influences and boosts determination."
+        ],
+        "source": {
+            "title": "Navagraha tradition"
+        },
+        "tags": [
+            "clarity",
+            "protection",
+            "Rahu"
+        ],
+        "devanagari": "ॐ राहवे नमः",
+        "iast": "oṃ rāhave namaḥ",
+        "simplified_pronunciation": "Om Raa-ha-ve Na-mah",
+        "suggested_reps": 11,
+        "best_times": [
+            "morning",
+            "Saturday"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.ketu_om_ketave",
+        "deity": "Ketu",
+        "text": "Om Ketave Namah",
+        "explanation": [
+            "This mantra invokes Ketu, the lunar node, for spiritual insight and liberation.",
+            "It fosters detachment, intuition, and freedom from material attachments.",
+            "Chanting on Tuesdays or during meditation enhances spiritual awareness and clarity.",
+            "Regular practice supports inner growth and release from karmic burdens."
+        ],
+        "source": {
+            "title": "Navagraha tradition"
+        },
+        "tags": [
+            "insight",
+            "liberation",
+            "Ketu"
+        ],
+        "devanagari": "ॐ केतवे नमः",
+        "iast": "oṃ ketave namaḥ",
+        "simplified_pronunciation": "Om Ke-ta-ve Na-mah",
+        "suggested_reps": 11,
+        "best_times": [
+            "morning",
+            "Tuesday"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.tara_om_tare",
+        "deity": "Tara",
+        "text": "Om Tare Tuttare Ture Svaha",
+        "explanation": [
+            "This mantra invokes Tara, the goddess of compassion, for protection and liberation.",
+            "It fosters compassion, removes obstacles, and promotes spiritual freedom.",
+            "Chanting during challenges or meditation enhances inner strength and empathy.",
+            "Regular practice cultivates a compassionate heart and spiritual resilience."
+        ],
+        "source": {
+            "title": "Śākta tradition"
+        },
+        "tags": [
+            "compassion",
+            "protection",
+            "Tara"
+        ],
+        "devanagari": "ॐ तारे तुत्तारे तुरे स्वाहा",
+        "iast": "oṃ tāre tuttāre ture svāhā",
+        "simplified_pronunciation": "Om Taa-re Tut-taa-re Tu-re Svaa-haa",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.pavamana_asato_ma",
+        "text": "Asato Ma Sadgamaya Tamaso Ma Jyotirgamaya Mrityorma Amritam Gamaya",
+        "explanation": [
+            "From the Brihadaranyaka Upanishad, this mantra seeks guidance from ignorance to truth.",
+            "It fosters clarity, spiritual awakening, and liberation from fear of death.",
+            "Chanting during meditation or transitions promotes wisdom and inner light.",
+            "Regular practice enhances spiritual growth and mental clarity."
+        ],
+        "source": {
+            "title": "Brihadaranyaka Upanishad",
+            "ref": "1.3.28"
+        },
+        "tags": [
+            "truth",
+            "clarity",
+            "liberation"
+        ],
+        "devanagari": "असतो मा सद्गमय तमसो मा ज्योतिर्गमय मृत्योर्मा अमृतं गमय",
+        "iast": "asato mā sadgamaya tamaso mā jyotirgamaya mṛtyormā amṛtaṃ gamaya",
+        "simplified_pronunciation": "A-sa-to Maa Sad-ga-ma-ya Ta-ma-so Maa Jyo-tir-ga-ma-ya Mri-tyor-maa Am-ri-tam Ga-ma-ya",
+        "suggested_reps": 11,
+        "best_times": [
+            "dawn",
+            "evening"
+        ],
+        "difficulty": 2,
+        "language_level": "poetic",
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.sarvesham_svastir",
+        "text": "Om Sarvesham Svastir Bhavatu Sarvesham Shantir Bhavatu Sarvesham Purnam Bhavatu Sarvesham Mangalam Bhavatu",
+        "explanation": [
+            "This Vedic mantra invokes well-being, peace, completeness, and auspiciousness for all.",
+            "It fosters universal harmony, compassion, and collective prosperity.",
+            "Chanting during group prayers or meditation promotes unity and positive energy.",
+            "Regular practice enhances empathy and spiritual connection with others."
+        ],
+        "source": {
+            "title": "Vedic tradition"
+        },
+        "tags": [
+            "harmony",
+            "peace",
+            "auspiciousness"
+        ],
+        "devanagari": "ॐ सर्वं विश्वतिर्भवतु सर्वं शान्तिर्भवतु सर्वं पूर्णं भवतु सर्वं मङ्गलं भवतु",
+        "iast": "oṃ sarveṣāṃ svastir bhavatu sarveṣāṃ śāntir bhavatu sarveṣāṃ pūrṇaṃ bhavatu sarveṣāṃ maṅgalaṃ bhavatu",
+        "simplified_pronunciation": "Om Sar-ve-shaam Svas-tir Bha-va-tu Sar-ve-shaam Shaan-tir Bha-va-tu Sar-ve-shaam Poor-nam Bha-va-tu Sar-ve-shaam Man-ga-lam Bha-va-tu",
+        "suggested_reps": 11,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 2,
+        "language_level": "poetic",
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.sarve_bhavantu",
+        "text": "Om Sarve Bhavantu Sukhinah Sarve Santu Niramayah Sarve Bhadrani Pashyantu Ma Kashchid Dukhabhagbhavet",
+        "explanation": [
+            "This Vedic mantra prays for universal happiness, health, and freedom from suffering.",
+            "It fosters compassion, goodwill, and a sense of global unity.",
+            "Chanting during group prayers or meditation promotes empathy and positive intentions.",
+            "Regular practice enhances altruistic feelings and spiritual harmony."
+        ],
+        "source": {
+            "title": "Vedic tradition"
+        },
+        "tags": [
+            "happiness",
+            "health",
+            "compassion"
+        ],
+        "devanagari": "ॐ सर्वे भवन्तु सुखिनः सर्वे सन्तु निरामयाः सर्वे भद्राणि पश्यन्तु मा कश्चिद् दुखभाग्भवेत्",
+        "iast": "oṃ sarve bhavantu sukhinah sarve santu nirāmayāḥ sarve bhadrāṇi paśyantu mā kaścid duḥkhabhāgbhavet",
+        "simplified_pronunciation": "Om Sar-ve Bha-van-tu Su-khi-nah Sar-ve San-tu Ni-raa-ma-yaah Sar-ve Bha-draa-ni Pash-yan-tu Maa Kash-chid Du-kha-bhaag-bha-vet",
+        "suggested_reps": 11,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 2,
+        "language_level": "poetic",
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.bhadram_karnebhih",
+        "text": "Om Bhadram Karnebhih Shrinuyama Devah Bhadram Pashyemakshabhiryajatrah",
+        "explanation": [
+            "From the Rig Veda, this mantra invokes divine blessings for auspicious hearing and seeing.",
+            "It fosters clarity of perception, spiritual awareness, and divine protection.",
+            "Chanting during meditation or Vedic rituals enhances sensory and spiritual clarity.",
+            "Regular practice promotes mindfulness and receptivity to divine guidance."
+        ],
+        "source": {
+            "title": "Rig Veda",
+            "ref": "1.89.8"
+        },
+        "tags": [
+            "clarity",
+            "protection",
+            "awareness"
+        ],
+        "devanagari": "ॐ भद्रं कर्णेभिः श्रृणुयाम देवाः भद्रं पश्येमाक्षभिर्यजत्राः",
+        "iast": "oṃ bhadraṃ karṇebhiḥ śṛṇuyāma devāḥ bhadraṃ paśyemākṣabhiryajatrāḥ",
+        "simplified_pronunciation": "Om Bha-dram Kar-ne-bhih Shree-nu-yaa-ma De-vaah Bha-dram Pa-shye-maak-sha-bhir-ya-ja-traah",
+        "suggested_reps": 11,
+        "best_times": [
+            "dawn",
+            "midday"
+        ],
+        "difficulty": 2,
+        "language_level": "poetic",
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.shamno_mitrah",
+        "text": "Om Shamno Mitrah Sham Varunah Shamno Bhavatvaryama",
+        "explanation": [
+            "From the Taittiriya Upanishad, this mantra invokes divine beings for peace and protection.",
+            "It fosters harmony with cosmic forces and promotes spiritual well-being.",
+            "Chanting during Vedic rituals or meditation enhances inner calm and divine connection.",
+            "Regular practice supports balance and spiritual alignment."
+        ],
+        "source": {
+            "title": "Taittiriya Upanishad"
+        },
+        "tags": [
+            "peace",
+            "protection",
+            "harmony"
+        ],
+        "devanagari": "ॐ शं नो मित्रः शं वरुणः शं नो भवत्वर्यमा",
+        "iast": "oṃ śaṃ no mitraḥ śaṃ varuṇaḥ śaṃ no bhavatvaryamā",
+        "simplified_pronunciation": "Om Sham No Mi-trah Sham Va-ru-nah Sham No Bha-vat-vary-a-maa",
+        "suggested_reps": 11,
+        "best_times": [
+            "dawn",
+            "evening"
+        ],
+        "difficulty": 2,
+        "language_level": "poetic",
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.vang_me_manasi",
+        "text": "Om Vang Me Manasi Pratisthita Mano Me Vachi Pratisthitam",
+        "explanation": [
+            "From the Rig Veda, this mantra seeks alignment of speech and mind with divine truth.",
+            "It fosters eloquent communication, mental clarity, and spiritual focus.",
+            "Chanting before speaking or studying enhances articulation and intellectual sharpness.",
+            "Regular practice promotes truthful expression and mental discipline."
+        ],
+        "source": {
+            "title": "Rig Veda"
+        },
+        "tags": [
+            "clarity",
+            "communication",
+            "truth"
+        ],
+        "devanagari": "ॐ वाङ् मे मनसि प्रतिष्ठिता मनो मे वाचि प्रतिष्ठितम्",
+        "iast": "oṃ vāṅ me manasi pratiṣṭhitā mano me vāci pratiṣṭhitam",
+        "simplified_pronunciation": "Om Vaang Me Ma-na-si Pra-tish-thi-taa Ma-no Me Vaa-chi Pra-tish-thi-tam",
+        "suggested_reps": 11,
+        "best_times": [
+            "morning",
+            "midday"
+        ],
+        "difficulty": 2,
+        "language_level": "poetic",
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.narasimha_om_narasimhaya",
+        "deity": "Narasimha",
+        "text": "Om Namo Narasimhaya",
+        "explanation": [
+            "This mantra invokes Narasimha, Vishnu’s fierce avatar, for protection and courage.",
+            "It shields against negative energies and fosters fearless determination.",
+            "Chanting during challenges or meditation promotes inner strength and divine safety.",
+            "Regular practice enhances resilience and spiritual fortitude."
+        ],
+        "source": {
+            "title": "Vaiṣṇava tradition"
+        },
+        "tags": [
+            "protection",
+            "courage",
+            "Narasimha"
+        ],
+        "devanagari": "ॐ नमो नरसिंहाय",
+        "iast": "oṃ namo narasiṃhāya",
+        "simplified_pronunciation": "Om Na-mo Na-ra-sim-haa-ya",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.kubera_om_kuberaya",
+        "deity": "Kubera",
+        "text": "Om Kuberaya Namah",
+        "explanation": [
+            "This mantra invokes Kubera, the god of wealth, for prosperity and financial stability.",
+            "It fosters abundance, gratitude, and wise resource management.",
+            "Chanting during financial planning or Diwali attracts positive energy and wealth.",
+            "Regular practice promotes a mindset of abundance and financial discipline."
+        ],
+        "source": {
+            "title": "Vedic tradition"
+        },
+        "tags": [
+            "wealth",
+            "prosperity",
+            "Kubera"
+        ],
+        "devanagari": "ॐ कुबेराय नमः",
+        "iast": "oṃ kuberāya namaḥ",
+        "simplified_pronunciation": "Om Ku-be-raa-ya Na-mah",
+        "suggested_reps": 11,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "season": [
+            "diwali"
+        ],
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.dhanvantari_om_dhanvantaraye",
+        "deity": "Dhanvantari",
+        "text": "Om Namo Dhanvantaraye Namah",
+        "explanation": [
+            "This mantra invokes Dhanvantari, the god of Ayurveda, for health and healing.",
+            "It promotes physical well-being, emotional balance, and spiritual vitality.",
+            "Chanting during illness or wellness practices enhances recovery and energy.",
+            "Regular practice supports holistic health and divine healing energy."
+        ],
+        "source": {
+            "title": "Vedic tradition"
+        },
+        "tags": [
+            "health",
+            "healing",
+            "Dhanvantari"
+        ],
+        "devanagari": "ॐ नमो धन्वन्तरये नमः",
+        "iast": "oṃ namo dhanvantaraye namaḥ",
+        "simplified_pronunciation": "Om Na-mo Dhan-van-ta-ra-ye Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.1
+    },
+    {
+        "id": "mantra.guru_brahma",
+        "text": "Guru Brahma Guru Vishnu Guru Devo Maheshwarah Guru Sakshat Param Brahma Tasmai Shri Gurave Namah",
+        "explanation": [
+            "This mantra honors the Guru as the embodiment of Brahma, Vishnu, and Shiva.",
+            "It fosters reverence, wisdom, and spiritual guidance from a teacher.",
+            "Chanting before learning or meditation deepens respect and receptivity to knowledge.",
+            "Regular practice enhances spiritual growth and connection to divine wisdom."
+        ],
+        "source": {
+            "title": "Vedic tradition"
+        },
+        "tags": [
+            "wisdom",
+            "guidance",
+            "guru"
+        ],
+        "devanagari": "गुरुर्ब्रह्मा गुरुर्विष्णुर्गुरुर्देवो महेश्वरः गुरुः साक्षात्परं ब्रह्म तस्मै श्री गुरवे नमः",
+        "iast": "gururbrahmā gururviṣṇurgururdevo maheśvaraḥ guruḥ sākṣātparaṃ brahma tasmai śrī gurave namaḥ",
+        "simplified_pronunciation": "Gu-rur-brah-maa Gu-rur-vish-nu Gu-rur-de-vo Ma-hesh-va-rah Gu-ruh Saak-shaat Pa-ram Brah-ma Tas-mai Shree Gu-ra-ve Na-mah",
+        "suggested_reps": 11,
+        "best_times": [
+            "morning",
+            "before learning"
+        ],
+        "difficulty": 2,
+        "language_level": "poetic",
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.ayyappa_swamiye",
+        "deity": "Ayyappa",
+        "text": "Swamiye Saranam Ayyappa",
+        "explanation": [
+            "This mantra invokes Ayyappa, the god of discipline, for protection and spiritual focus.",
+            "It fosters surrender, discipline, and devotion to the divine.",
+            "Chanting during pilgrimage or meditation promotes spiritual clarity and strength.",
+            "Regular practice enhances commitment and inner peace."
+        ],
+        "source": {
+            "title": "South Indian tradition"
+        },
+        "tags": [
+            "protection",
+            "devotion",
+            "Ayyappa"
+        ],
+        "devanagari": "स्वामिये शरणं अय्यप्पा",
+        "iast": "svāmiye śaraṇaṃ ayyappā",
+        "simplified_pronunciation": "Svaa-mi-ye Sha-ra-nam Ay-yap-paa",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.dattatreya_om_dattatreyaya",
+        "deity": "Dattatreya",
+        "text": "Om Dattatreyaya Namah",
+        "explanation": [
+            "This mantra invokes Dattatreya, the combined form of Brahma, Vishnu, and Shiva, for spiritual wisdom.",
+            "It fosters unity, knowledge, and liberation from worldly attachments.",
+            "Chanting during meditation or spiritual practice promotes divine insight and balance.",
+            "Regular practice enhances spiritual growth and inner harmony."
+        ],
+        "source": {
+            "title": "Vedic tradition"
+        },
+        "tags": [
+            "wisdom",
+            "liberation",
+            "Dattatreya"
+        ],
+        "devanagari": "ॐ दत्तात्रेयाय नमः",
+        "iast": "oṃ dattātreyāya namaḥ",
+        "simplified_pronunciation": "Om Dat-taa-tre-yaa-ya Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.bhairava_om_bhairavaya",
+        "deity": "Bhairava",
+        "text": "Om Bhairavaya Namah",
+        "explanation": [
+            "This mantra invokes Bhairava, Shiva’s fierce form, for protection and transformation.",
+            "It fosters courage, removes fear, and clears negative energies.",
+            "Chanting during challenges or tantric practices promotes strength and spiritual cleansing.",
+            "Regular practice enhances resilience and spiritual fortitude."
+        ],
+        "source": {
+            "title": "Śaiva tradition"
+        },
+        "tags": [
+            "protection",
+            "transformation",
+            "Bhairava"
+        ],
+        "devanagari": "ॐ भैरवाय नमः",
+        "iast": "oṃ bhairavāya namaḥ",
+        "simplified_pronunciation": "Om Bhai-ra-vaa-ya Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "night",
+            "midnight"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.1
+    },
+    {
+        "id": "mantra.tripura_sundari_om_klim",
+        "deity": "Tripura Sundari",
+        "text": "Om Klim Tripura Sundaryai Namah",
+        "explanation": [
+            "This mantra invokes Tripura Sundari, the goddess of beauty and bliss, for divine harmony.",
+            "‘Klim’ is a seed sound that amplifies love, creativity, and spiritual fulfillment.",
+            "Chanting fosters inner joy, aesthetic appreciation, and spiritual balance.",
+            "Regular practice enhances emotional harmony and divine connection."
+        ],
+        "source": {
+            "title": "Śākta tradition"
+        },
+        "tags": [
+            "beauty",
+            "harmony",
+            "Tripura Sundari"
+        ],
+        "devanagari": "ॐ क्लीं त्रिपुरसुन्दर्यै नमः",
+        "iast": "oṃ klīṃ tripurasundaryai namaḥ",
+        "simplified_pronunciation": "Om Kleem Tri-pu-ra-sun-da-ryai Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.ganga_om_gangaya",
+        "deity": "Ganga",
+        "text": "Om Gangaya Namah",
+        "explanation": [
+            "This mantra invokes Ganga, the goddess of purification, for cleansing and spiritual renewal.",
+            "It fosters purity of mind, body, and spirit, promoting emotional clarity.",
+            "Chanting near water or during rituals enhances spiritual purification and peace.",
+            "Regular practice supports inner cleansing and divine connection."
+        ],
+        "source": {
+            "title": "Vedic tradition"
+        },
+        "tags": [
+            "purification",
+            "clarity",
+            "Ganga"
+        ],
+        "devanagari": "ॐ गङ्गायै नमः",
+        "iast": "oṃ gaṅgāyai namaḥ",
+        "simplified_pronunciation": "Om Gan-gaa-yai Na-mah",
+        "suggested_reps": 11,
+        "best_times": [
+            "morning",
+            "near water"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.rudra_om_namo_bhagavate",
+        "deity": "Shiva",
+        "text": "Om Namo Bhagavate Rudraya",
+        "explanation": [
+            "This mantra invokes Shiva as Rudra, the fierce yet compassionate deity, for transformation.",
+            "It fosters spiritual strength, removes negativity, and promotes inner peace.",
+            "Chanting during meditation or challenges enhances resilience and divine protection.",
+            "Regular practice supports spiritual growth and emotional balance."
+        ],
+        "source": {
+            "title": "Śaiva tradition"
+        },
+        "tags": [
+            "transformation",
+            "protection",
+            "Shiva"
+        ],
+        "devanagari": "ॐ नमो भगवते रुद्राय",
+        "iast": "oṃ namo bhagavate rudrāya",
+        "simplified_pronunciation": "Om Na-mo Bha-ga-va-te Rud-raa-ya",
+        "suggested_reps": 21,
+        "best_times": [
+            "dawn",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.2
+    },
+    {
+        "id": "mantra.lakshmana_om_lakshmanaya",
+        "deity": "Lakshmana",
+        "text": "Om Lakshmanaya Namah",
+        "explanation": [
+            "This mantra invokes Lakshmana, Rama’s devoted brother, for loyalty and protection.",
+            "It fosters dedication, strength, and selfless service in relationships.",
+            "Chanting during devotional practices promotes loyalty and spiritual commitment.",
+            "Regular practice enhances inner strength and devotion."
+        ],
+        "source": {
+            "title": "Vaiṣṇava tradition"
+        },
+        "tags": [
+            "loyalty",
+            "protection",
+            "Lakshmana"
+        ],
+        "devanagari": "ॐ लक्ष्मणाय नमः",
+        "iast": "oṃ lakṣmaṇāya namaḥ",
+        "simplified_pronunciation": "Om Lak-shma-naa-ya Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.sankarshana_om_sankarshanaya",
+        "deity": "Sankarshana",
+        "text": "Om Sankarshanaya Namah",
+        "explanation": [
+            "This mantra invokes Sankarshana, a form of Vishnu, for strength and spiritual grounding.",
+            "It fosters resilience, balance, and connection to divine energy.",
+            "Chanting during meditation or challenges promotes inner stability and fortitude.",
+            "Regular practice enhances spiritual strength and divine alignment."
+        ],
+        "source": {
+            "title": "Vaiṣṇava tradition"
+        },
+        "tags": [
+            "strength",
+            "balance",
+            "Sankarshana"
+        ],
+        "devanagari": "ॐ सङ्कर्षणाय नमः",
+        "iast": "oṃ saṅkarṣaṇāya namaḥ",
+        "simplified_pronunciation": "Om San-kar-sha-naa-ya Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    },
+    {
+        "id": "mantra.pradyumna_om_pradyumnaya",
+        "deity": "Pradyumna",
+        "text": "Om Pradyumnaya Namah",
+        "explanation": [
+            "This mantra invokes Pradyumna, a form of Vishnu, for love, charm, and spiritual attraction.",
+            "It fosters emotional harmony, charisma, and divine connection.",
+            "Chanting during meditation or social interactions enhances charm and positivity.",
+            "Regular practice promotes emotional balance and spiritual allure."
+        ],
+        "source": {
+            "title": "Vaiṣṇava tradition"
+        },
+        "tags": [
+            "love",
+            "charm",
+            "Pradyumna"
+        ],
+        "devanagari": "ॐ प्रद्युम्नाय नमः",
+        "iast": "oṃ pradyumnāya namaḥ",
+        "simplified_pronunciation": "Om Pra-dyum-naa-ya Na-mah",
+        "suggested_reps": 21,
+        "best_times": [
+            "morning",
+            "evening"
+        ],
+        "difficulty": 1,
+        "language_level": "simple",
+        "weight": 1.0
+    }
+]

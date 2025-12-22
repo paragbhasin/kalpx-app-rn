@@ -1,27 +1,53 @@
+// MUST be first import
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useFonts } from "expo-font";
+import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import "react-native-get-random-values";
+import { MenuProvider } from "react-native-popup-menu";
+import { Provider, useDispatch, useSelector } from "react-redux";
 
-// Import Screens
-import BottomMenu from "./src/components/BottomMenu";
+import SnackBar from "./src/components/SnackBar";
 import "./src/config/i18n";
-import Explore from "./src/screens/Explore";
-import Language from "./src/screens/Language";
-import LoginScreen from "./src/screens/LoginScreen";
-import OnlineclassesScreen from "./src/screens/OnlineclassesScreen";
-import PoojaScreen from "./src/screens/PoojaScreen";
-import RetreatsScreen from "./src/screens/RetreatsScreen";
-import Sankalp from "./src/screens/Sankalp";
-import SignupScreen from "./src/screens/SignupScreen";
-import TravelPlannerScreen from "./src/screens/TravelPlannerScreen";
-import WelcomeScreen from "./src/screens/WelcomeScreen";
+import { CartProvider } from "./src/context/CartContext";
+import { navigationRef } from "./src/Shared/Routes/NavigationService";
+import Routes from "./src/Shared/Routes/Routes";
+import { store } from "./src/store";
+import { hideSnackBar } from "./src/store/snackBarSlice";
 
-const Stack = createNativeStackNavigator();
+// 📌 Push Notification Service
+import {
+  foregroundNotificationListener,
+  notificationOpenListener,
+  requestPushPermission,
+} from "./src/service/pushNotifications";
 
-// 👇 Keep splash visible while fonts load
-SplashScreen.preventAutoHideAsync();
+SplashScreen.preventAutoHideAsync().catch(() => {});
+
+// Always show notifications when app is open
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
+
+function SnackBarContainer() {
+  const dispatch = useDispatch();
+  const { visible, message } = useSelector((state) => state.snackBar);
+
+  useEffect(() => {
+    if (!visible) return;
+    const timer = setTimeout(() => dispatch(hideSnackBar()), 3000);
+    return () => clearTimeout(timer);
+  }, [visible, dispatch]);
+
+  return <SnackBar visible={visible} message={message} />;
+}
 
 export default function App() {
   const [fontsLoaded, error] = useFonts({
@@ -31,80 +57,62 @@ export default function App() {
     GelicaBold: require("./assets/fonts/gelica-bold.otf"),
   });
 
+  const [initialRoute, setInitialRoute] = useState(null);
+
+  // Google login setup
+  GoogleSignin.configure({
+    webClientId:
+      "473187060791-pqas4l17udkmt37re2l3fkdfs585onqt.apps.googleusercontent.com",
+    iosClientId:
+      "473187060791-96pucdifumqrnn7lb5l6bboqladmarat.apps.googleusercontent.com",
+    offlineAccess: true,
+  });
+
+  // Push Notification setup
   useEffect(() => {
-    if (fontsLoaded || error) {
-      SplashScreen.hideAsync();
-    }
+    // request push permissions
+    requestPushPermission();
+
+    // listeners
+    const unsubForeground = foregroundNotificationListener();
+    const unsubOpen = notificationOpenListener();
+
+    return () => {
+      unsubForeground();
+      unsubOpen();
+    };
+  }, []);
+
+  // Initial Route Logic
+  useEffect(() => {
+    const init = async () => {
+      if (!fontsLoaded && !error) return;
+      try {
+        const accessToken = await AsyncStorage.getItem("access_token");
+        const refreshToken = await AsyncStorage.getItem("refresh_token");
+        setInitialRoute(accessToken && refreshToken ? "AppDrawer" : "Welcome");
+        await new Promise((res) => setTimeout(res, 300));
+      } catch {
+        setInitialRoute("Welcome");
+      } finally {
+        await SplashScreen.hideAsync().catch(() => {});
+      }
+    };
+    init();
   }, [fontsLoaded, error]);
 
-  if (__DEV__) {
-    require("./ReactotronConfig");
-  }
-
-  if (!fontsLoaded && !error) {
-    // Splash screen will stay visible until fonts are ready
-    return null;
-  }
+  if (!fontsLoaded || initialRoute === null) return null;
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Welcome">
-        <Stack.Screen
-          name="Welcome"
-          component={WelcomeScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Login"
-          component={LoginScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Signup"
-          component={SignupScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Travel"
-          component={TravelPlannerScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Sankalp"
-          component={Sankalp}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="HomePage"
-          component={BottomMenu}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Pooja"
-          component={PoojaScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Retreat"
-          component={RetreatsScreen}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Language"
-          component={Language}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Explore"
-          component={Explore}
-          options={{ headerShown: false }}
-        />
-         <Stack.Screen
-          name="Classes"
-          component={OnlineclassesScreen}
-          options={{ headerShown: false }}
-        />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <MenuProvider>
+      <Provider store={store}>
+        <CartProvider>
+          <NavigationContainer ref={navigationRef}>
+            <Routes initialRouteName={initialRoute} />
+            <SnackBarContainer />
+          </NavigationContainer>
+        </CartProvider>
+      </Provider>
+    </MenuProvider>
   );
 }

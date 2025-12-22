@@ -1,6 +1,11 @@
 // components/ExploreVideos.js
+<<<<<<< HEAD
 import React, { useCallback, useRef, useState } from "react";
 import { View, Text, FlatList, StyleSheet, Platform } from "react-native";
+=======
+import { useCallback, useRef, useState } from "react";
+import { FlatList, Platform, StyleSheet, Text, View } from "react-native";
+>>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
 import YoutubePlayer from "react-native-youtube-iframe";
 import { saveUserAction } from "../utils/storage";
 
@@ -85,7 +90,11 @@ function VideoCard({ item }) {
           onChangeState={onChangeState}
         />
       </View>
+<<<<<<< HEAD
       <Text style={styles.videoTitle} numberOfLines={3}>
+=======
+      <Text  allowFontScaling={false} style={styles.videoTitle} numberOfLines={3}>
+>>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
         {item.title}
       </Text>
     </View>
@@ -116,7 +125,11 @@ export default function ExploreVideos() {
 
   return (
     <View style={styles.videosContainer}>
+<<<<<<< HEAD
       <Text style={styles.sectionHeading}>Explore Videos</Text>
+=======
+      <Text  allowFontScaling={false} style={styles.sectionHeading}>Explore Videos</Text>
+>>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
       <FlatList
         data={videos}
         renderItem={({ item }) => <VideoCard item={item} />}
@@ -140,7 +153,11 @@ const styles = StyleSheet.create({
     color: "#444",
     marginBottom: 12,
     paddingHorizontal: 4,
+<<<<<<< HEAD
     lineHeight: 20,
+=======
+    // lineHeight: 20,
+>>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
     paddingLeft: 2,
   },
   videoCard: {
@@ -163,6 +180,10 @@ const styles = StyleSheet.create({
     fontFamily: "GelicaRegular",
     color: "#000",
     padding: 12,
+<<<<<<< HEAD
     lineHeight: 18,
+=======
+    // lineHeight: 18,
+>>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
   },
 });

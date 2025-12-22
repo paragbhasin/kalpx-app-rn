@@ -1,0 +1,1131 @@
+{
+  "vaikuntha_ekadashi": {
+    "name": "Vaikuntha Ekadashi",
+    "date": "2025-01-10",
+    "deity": "Vishnu",
+    "fasting": {
+      "observers": "Vaishnavites, devotees of Vishnu",
+      "rules": "No grains or beans Aldo; water-only or fruits and milk allowed",
+      "significance": "Purifies body and mind, aligns devotee with Vishnu’s divine grace"
+    },
+    "mythology": {
+      "story": "Celebrates Vishnu’s divine abode opening its gates. Devotees believe fasting and chanting on this day grant moksha (liberation). The Puranas describe Vishnu granting blessings to those who observe this fast with devotion.",
+      "reference": "Bhagavata Purana"
+    },
+    "spiritualBenefit": "Fosters devotion and spiritual discipline, aiming for liberation from the cycle of birth and death.",
+    "traditionalFoods": ["Fruits", "Milk", "Sabudana khichdi"],
+    "celebrationPractices": [
+      "Chanting Vishnu Sahasranama",
+      "Temple visits",
+      "Lighting lamps"
+    ],
+    "regionalCustoms": {
+      "southIndia": "Special pujas at Vishnu temples, especially in Tirupati",
+      "northIndia": "Night-long bhajans and fasting"
+    },
+    "videoKeywords": [
+      "Vaikuntha Ekadashi puja",
+      "Vishnu bhajans",
+      "Ekadashi fasting guide"
+    ],
+    "symbols": ["Conch", "Lotus", "Vishnu Yantra"],
+    "quote": {
+      "text": "“He who observes Ekadashi with devotion attains my eternal abode.”",
+      "source": "Vishnu, Padma Purana"
+    }
+  },
+  "arudra_darshan": {
+    "name": "Arudra Darshan",
+    "date": "2025-01-13",
+    "deity": "Shiva as Nataraja",
+    "fasting": {
+      "observers": "Shaivites, devotees of Shiva",
+      "rules": "Partial fasting with fruits or milk; some observe full fast",
+      "significance": "Honors Shiva’s cosmic dance, symbolizing creation and destruction"
+    },
+    "mythology": {
+      "story": "Celebrates Shiva’s cosmic dance as Nataraja in Chidambaram. The festival marks the day when Shiva performed the Ananda Tandava, symbolizing the universe’s rhythm. Devotees honor this through temple processions.",
+      "reference": "Shiva Purana"
+    },
+    "spiritualBenefit": "Encourages surrender to the divine rhythm and cosmic balance.",
+    "traditionalFoods": ["Payasam", "Coconut rice", "Vadai"],
+    "celebrationPractices": [
+      "Temple processions",
+      "Abhishekam",
+      "Lighting lamps"
+    ],
+    "regionalCustoms": {
+      "tamilNadu": "Grand celebrations at Chidambaram Nataraja temple",
+      "southIndia": "Night-long Shiva bhajans"
+    },
+    "videoKeywords": [
+      "Arudra Darshan Chidambaram",
+      "Nataraja bhajans",
+      "Shiva Tandava"
+    ],
+    "symbols": ["Nataraja", "Trishul", "Damru"],
+    "quote": {
+      "text": "“In the dance of Shiva, the universe finds its rhythm.”",
+      "source": "Tirumantiram"
+    }
+  },
+  "makara_sankranti": {
+    "name": "Makara Sankranti",
+    "date": "2025-01-14",
+    "deity": "Surya",
+    "fasting": {
+      "observers": "General devotees, farmers",
+      "rules": "Light meals, often sesame and jaggery-based foods",
+      "significance": "Honors the Sun God for prosperity and harvest blessings"
+    },
+    "mythology": {
+      "story": "Marks the Sun’s transition into Capricorn, symbolizing longer days. Mythologically, it’s linked to Surya’s journey and his son Shani’s reconciliation. Celebrated as a harvest festival across India.",
+      "reference": "Skanda Purana"
+    },
+    "spiritualBenefit": "Encourages gratitude for nature’s abundance and cosmic harmony.",
+    "traditionalFoods": ["Tilgul", "Pongal", "Khichdi", "Sugarcane"],
+    "celebrationPractices": [
+      "Kite flying",
+      "Sun worship",
+      "Charity and donations"
+    ],
+    "regionalCustoms": {
+      "tamilNadu": "Known as Pongal, with kolam designs and sugarcane offerings",
+      "punjab": "Celebrated as Lohri with bonfires and bhangra",
+      "gujarat": "Uttarayan with kite festivals"
+    },
+    "videoKeywords": [
+      "Makara Sankranti kite flying",
+      "Pongal celebration",
+      "Surya puja"
+    ],
+    "symbols": ["Sun", "Kite", "Sesame seeds"],
+    "quote": {
+      "text": "“The Sun is the soul of the universe; worship it with devotion.”",
+      "source": "Rig Veda"
+    }
+  },
+  "pongal": {
+    "name": "Pongal",
+    "date": "2025-01-14",
+    "deity": "Surya, Indra",
+    "fasting": {
+      "observers": "Farmers, Tamil devotees",
+      "rules": "No strict fasting; focus on preparing special dishes",
+      "significance": "Expresses gratitude for the harvest and divine blessings"
+    },
+    "mythology": {
+      "story": "Celebrates the harvest and Surya’s blessings. Linked to Indra, the rain god, and the legend of Mount Govardhan in some traditions. The festival honors agricultural abundance.",
+      "reference": "Local Tamil traditions"
+    },
+    "spiritualBenefit": "Promotes gratitude and connection to nature’s cycles.",
+    "traditionalFoods": ["Sweet Pongal", "Ven Pongal", "Sugarcane", "Turmeric"],
+    "celebrationPractices": [
+      "Cooking Pongal dish",
+      "Kolam designs",
+      "Cattle worship"
+    ],
+    "regionalCustoms": {
+      "tamilNadu": "Four-day festival with Bhogi, Surya Pongal, Mattu Pongal, and Kaanum Pongal",
+      "andhraPradesh": "Similar celebrations with pedda panduga"
+    },
+    "videoKeywords": ["Pongal kolam", "Sweet Pongal recipe", "Mattu Pongal"],
+    "symbols": ["Pongal pot", "Sugarcane", "Kolam"],
+    "quote": {
+      "text": "“Offer the first harvest to the divine, and abundance follows.”",
+      "source": "Tamil proverb"
+    }
+  },
+  "vasant_panchami": {
+    "name": "Vasant Panchami",
+    "date": "2025-02-02",
+    "deity": "Saraswati",
+    "fasting": {
+      "observers": "Students, artists, devotees of Saraswati",
+      "rules": "Light fasting or vegetarian meals",
+      "significance": "Seeks wisdom and creative inspiration"
+    },
+    "mythology": {
+      "story": "Celebrates Saraswati, the goddess of knowledge and arts. Mythologically, she emerged from Brahma’s mind to bring order to creation. The festival marks the onset of spring.",
+      "reference": "Devi Bhagavata Purana"
+    },
+    "spiritualBenefit": "Enhances intellectual clarity and artistic expression.",
+    "traditionalFoods": ["Kesari", "Sweet rice", "Khichdi"],
+    "celebrationPractices": [
+      "Saraswati puja",
+      "Wearing yellow",
+      "Initiating studies"
+    ],
+    "regionalCustoms": {
+      "northIndia": "Children begin learning; books and instruments worshipped",
+      "bengal": "Known as Saraswati Puja with cultural events"
+    },
+    "videoKeywords": [
+      "Saraswati puja",
+      "Vasant Panchami rituals",
+      "Saraswati vandana"
+    ],
+    "symbols": ["Veena", "Swan", "Book"],
+    "quote": {
+      "text": "“Knowledge is the light that dispels ignorance.”",
+      "source": "Swami Vivekananda"
+    }
+  },
+  "ratha_saptami": {
+    "name": "Ratha Saptami",
+    "date": "2025-02-04",
+    "deity": "Surya",
+    "fasting": {
+      "observers": "Devotees of Surya",
+      "rules": "Fasting until noon; light vegetarian meals",
+      "significance": "Honors Surya for health and vitality"
+    },
+    "mythology": {
+      "story": "Marks Surya’s chariot turning northward, symbolizing the sun’s journey. Surya is said to ride his seven-horse chariot, driven by Aruna. The day is auspicious for sun worship.",
+      "reference": "Bhavishya Purana"
+    },
+    "spiritualBenefit": "Promotes vitality and gratitude for the life-giving sun.",
+    "traditionalFoods": ["Khichdi", "Sweets made with jaggery"],
+    "celebrationPractices": [
+      "Sunrise puja",
+      "Bathing with seven leaves",
+      "Charity"
+    ],
+    "regionalCustoms": {
+      "southIndia": "Arka leaves in bath; Surya temples visited",
+      "northIndia": "Morning sun worship with offerings"
+    },
+    "videoKeywords": ["Ratha Saptami puja", "Surya namaskar", "Sun worship"],
+    "symbols": ["Sun", "Chariot", "Seven horses"],
+    "quote": {
+      "text": "“Salute the Sun, for it sustains all life.”",
+      "source": "Atharva Veda"
+    }
+  },
+  "thaipusam": {
+    "name": "Thaipusam",
+    "date": "2025-02-16",
+    "deity": "Murugan (Kartikeya)",
+    "fasting": {
+      "observers": "Tamil devotees, Murugan worshippers",
+      "rules": "Strict vegetarian fasting for days prior",
+      "significance": "Purifies body for devotion and penance"
+    },
+    "mythology": {
+      "story": "Commemorates Murugan receiving his divine spear to defeat demon Tarakasura. Devotees undertake penance to honor his valor. The festival is vibrant in Tamil communities.",
+      "reference": "Skanda Purana"
+    },
+    "spiritualBenefit": "Encourages courage, discipline, and devotion to divine purpose.",
+    "traditionalFoods": ["Payasam", "Sundal", "Rice dishes"],
+    "celebrationPractices": [
+      "Kavadi processions",
+      "Piercing rituals",
+      "Temple visits"
+    ],
+    "regionalCustoms": {
+      "tamilNadu": "Kavadi dance and processions to Palani temple",
+      "malaysia": "Massive celebrations at Batu Caves"
+    },
+    "videoKeywords": ["Thaipusam kavadi", "Murugan bhajans", "Palani temple"],
+    "symbols": ["Vel (spear)", "Peacock", "Kavadi"],
+    "quote": {
+      "text": "“With Murugan’s spear, pierce through ignorance.”",
+      "source": "Tirumurugatrupadai"
+    }
+  },
+  "maha_shivaratri": {
+    "name": "Maha Shivaratri",
+    "date": "2025-02-26",
+    "deity": "Shiva",
+    "fasting": {
+      "observers": "Shaivites, general devotees",
+      "rules": "No food or water until night puja; some allow fruits",
+      "significance": "Purifies soul, invokes Shiva’s grace for liberation"
+    },
+    "mythology": {
+      "story": "Commemorates Shiva’s cosmic dance and his marriage to Parvati. Also linked to Shiva drinking poison to save the universe during Samudra Manthan. Devotees stay awake, chanting his name.",
+      "reference": "Shiva Purana"
+    },
+    "spiritualBenefit": "Fosters detachment and spiritual awakening through meditation.",
+    "traditionalFoods": ["Fruits", "Sabudana khichdi", "Milk-based sweets"],
+    "celebrationPractices": [
+      "Night-long vigil",
+      "Abhishekam",
+      "Chanting Om Namah Shivaya"
+    ],
+    "regionalCustoms": {
+      "northIndia": "Temple visits and Rudra puja",
+      "southIndia": "Lingam worship with bilva leaves"
+    },
+    "videoKeywords": [
+      "Maha Shivaratri puja",
+      "Shiva bhajans",
+      "Rudra abhishekam"
+    ],
+    "symbols": ["Shivalinga", "Bilva leaves", "Trishul"],
+    "quote": {
+      "text": "“Shiva is the essence of consciousness; meditate on him.”",
+      "source": "Adi Shankaracharya"
+    }
+  },
+  "holi": {
+    "name": "Holi",
+    "date": "2025-03-14",
+    "deity": "Krishna, Vishnu",
+    "fasting": {
+      "observers": "Optional, mainly devotees of Krishna",
+      "rules": "Light fasting or no specific restrictions; some avoid non-vegetarian food",
+      "significance": "Cleanses negativity, prepares for joyous celebration"
+    },
+    "mythology": {
+      "story": "Celebrates the triumph of Prahlad’s devotion over Holika’s evil. Krishna’s playful color-throwing with Radha in Vrindavan popularized the festival. It signifies good over evil and the arrival of spring.",
+      "reference": "Bhagavata Purana"
+    },
+    "spiritualBenefit": "Symbolizes the victory of inner purity over ego and illusion, encouraging forgiveness and renewal.",
+    "traditionalFoods": ["Gujiya", "Thandai", "Malpua", "Puran poli"],
+    "celebrationPractices": [
+      "Throwing colored powders",
+      "Bonfires (Holika Dahan)",
+      "Rangoli designs"
+    ],
+    "regionalCustoms": {
+      "uttarPradesh": "Lathmar Holi in Barsana with stick-play",
+      "westBengal": "Known as Dol Jatra, with Krishna idol swings",
+      "punjab": "Hola Mohalla with martial displays"
+    },
+    "videoKeywords": [
+      "Holi celebration",
+      "Holika Dahan",
+      "Krishna Holi bhajans"
+    ],
+    "symbols": ["Colors", "Fire", "Pichkari"],
+    "quote": {
+      "text": "“Burn your ego in the fire of devotion, and let love color your life.”",
+      "source": "Swami Chidananda"
+    }
+  },
+  "chaitra_navratri": {
+    "name": "Chaitra Navratri, Gudi Padwa, Ugadi",
+    "date": "2025-03-30",
+    "deity": "Durga, various forms",
+    "fasting": {
+      "observers": "Devotees of Shakti, especially women",
+      "rules": "Fasting with fruits, milk, or specific grains like buckwheat",
+      "significance": "Purifies body and mind, invokes divine feminine energy"
+    },
+    "mythology": {
+      "story": "Celebrates Durga’s nine-day battle against Mahishasura. Each day honors a different form of the goddess. Gudi Padwa and Ugadi mark the New Year in some regions.",
+      "reference": "Devi Mahatmyam"
+    },
+    "spiritualBenefit": "Strengthens inner resolve and devotion to the divine feminine.",
+    "traditionalFoods": ["Sabudana vada", "Kheer", "Puran poli"],
+    "celebrationPractices": [
+      "Garba/Dandiya dance",
+      "Golu displays",
+      "Durga puja"
+    ],
+    "regionalCustoms": {
+      "gujarat": "Garba and Dandiya nights",
+      "tamilNadu": "Golu doll arrangements",
+      "westBengal": "Grand Durga Puja celebrations"
+    },
+    "videoKeywords": ["Navratri Garba", "Durga puja", "Gudi Padwa rituals"],
+    "symbols": ["Trident", "Lotus", "Gudi flag"],
+    "quote": {
+      "text": "“The divine mother protects those who surrender to her.”",
+      "source": "Devi Mahatmyam"
+    }
+  },
+  "rama_navami": {
+    "name": "Rama Navami",
+    "date": "2025-04-06",
+    "deity": "Rama",
+    "fasting": {
+      "observers": "Devotees of Rama",
+      "rules": "Fasting until noon; fruits, milk, or light meals",
+      "significance": "Honors Rama’s virtues, seeking righteousness and devotion"
+    },
+    "mythology": {
+      "story": "Celebrates the birth of Lord Rama, born to King Dasharatha in Ayodhya. Rama is the seventh avatar of Vishnu, embodying dharma. His life inspires moral and ethical living.",
+      "reference": "Ramayana"
+    },
+    "spiritualBenefit": "Inspires adherence to truth, duty, and compassion.",
+    "traditionalFoods": ["Panakam", "Kosambari", "Neer mor"],
+    "celebrationPractices": [
+      "Rama Tarak mantra",
+      "Temple visits",
+      "Ramayana recitations"
+    ],
+    "regionalCustoms": {
+      "northIndia": "Rama temple pujas and processions",
+      "southIndia": "Home-based Rama worship"
+    },
+    "videoKeywords": ["Rama Navami puja", "Ram bhajans", "Ramayana katha"],
+    "symbols": ["Bow and arrow", "Lotus", "Ayodhya"],
+    "quote": {
+      "text": "“Follow the path of dharma like Rama, and peace will follow.”",
+      "source": "Valmiki Ramayana"
+    }
+  },
+  "hanuman_jayanti": {
+    "name": "Hanuman Jayanti",
+    "date": "2025-04-12",
+    "deity": "Hanuman",
+    "fasting": {
+      "observers": "Devotees of Hanuman, Rama devotees",
+      "rules": "Fasting until evening; vegetarian meals",
+      "significance": "Seeks strength, devotion, and protection"
+    },
+    "mythology": {
+      "story": "Celebrates the birth of Hanuman, the devoted follower of Rama. Born to Anjana with Vayu’s blessings, he embodies strength and loyalty. His feats in the Ramayana inspire devotees.",
+      "reference": "Ramayana"
+    },
+    "spiritualBenefit": "Fosters selfless service, courage, and devotion.",
+    "traditionalFoods": ["Ladoo", "Sundal", "Banana offerings"],
+    "celebrationPractices": [
+      "Hanuman Chalisa recitation",
+      "Temple visits",
+      "Charity"
+    ],
+    "regionalCustoms": {
+      "northIndia": "Hanuman temple pujas",
+      "southIndia": "Recitation of Sundara Kanda"
+    },
+    "videoKeywords": [
+      "Hanuman Chalisa",
+      "Hanuman Jayanti puja",
+      "Hanuman bhajans"
+    ],
+    "symbols": ["Mace", "Monkey", "Rama’s ring"],
+    "quote": {
+      "text": "“With devotion like Hanuman’s, all obstacles are overcome.”",
+      "source": "Tulsidas"
+    }
+  },
+  "mesha_sankranti": {
+    "name": "Mesha Sankranti",
+    "date": "2025-04-14",
+    "deity": "Surya",
+    "fasting": {
+      "observers": "General devotees",
+      "rules": "Light vegetarian meals",
+      "significance": "Honors the solar transition for renewal"
+    },
+    "mythology": {
+      "story": "Marks the Sun’s entry into Aries, beginning the solar year. Associated with Surya’s cosmic journey. Celebrated as a time of renewal and charity.",
+      "reference": "Vedic traditions"
+    },
+    "spiritualBenefit": "Promotes renewal and alignment with cosmic cycles.",
+    "traditionalFoods": ["Pana", "Khichdi", "Sweets"],
+    "celebrationPractices": ["Sun worship", "Charity", "Bathing rituals"],
+    "regionalCustoms": {
+      "kerala": "Known as Vishu with Vishukkani displays",
+      "odisha": "Pana Sankranti with sweet drinks"
+    },
+    "videoKeywords": [
+      "Mesha Sankranti puja",
+      "Vishu celebration",
+      "Surya worship"
+    ],
+    "symbols": ["Sun", "Zodiac wheel", "Pana"],
+    "quote": {
+      "text": "“The Sun renews life with each dawn.”",
+      "source": "Rig Veda"
+    }
+  },
+  "tamil_new_year_vishu": {
+    "name": "Tamil New Year, Vishu",
+    "date": "2025-04-14",
+    "deity": "Vishnu, Surya",
+    "fasting": {
+      "observers": "Tamil and Malayali devotees",
+      "rules": "No strict fasting; focus on festive meals",
+      "significance": "Celebrates renewal and prosperity"
+    },
+    "mythology": {
+      "story": "Marks the solar New Year and Vishnu’s blessings. Vishu is linked to Krishna’s prosperity. Celebrated with auspicious sightings and feasts.",
+      "reference": "Local traditions"
+    },
+    "spiritualBenefit": "Encourages optimism and new beginnings.",
+    "traditionalFoods": ["Sadhya", "Payasam", "Mango pachadi"],
+    "celebrationPractices": ["Vishukkani display", "Temple visits", "Feasting"],
+    "regionalCustoms": {
+      "kerala": "Vishukkani with rice, gold, and mirror",
+      "tamilNadu": "Puthandu with kolam and new clothes"
+    },
+    "videoKeywords": [
+      "Vishu celebration",
+      "Puthandu rituals",
+      "Sadhya preparation"
+    ],
+    "symbols": ["Mirror", "Kolam", "Banana"],
+    "quote": {
+      "text": "“Begin anew with the blessings of the divine.”",
+      "source": "Tamil proverb"
+    }
+  },
+  "akshaya_tritiya": {
+    "name": "Akshaya Tritiya",
+    "date": "2025-04-30",
+    "deity": "Lakshmi, Vishnu",
+    "fasting": {
+      "observers": "General devotees",
+      "rules": "Optional light fasting; vegetarian meals",
+      "significance": "Seeks everlasting prosperity"
+    },
+    "mythology": {
+      "story": "Considered an auspicious day when Vishnu’s avatar Parashurama was born. The day is ideal for starting new ventures. Gold purchases symbolize eternal wealth.",
+      "reference": "Mahabharata"
+    },
+    "spiritualBenefit": "Promotes prosperity and auspicious beginnings.",
+    "traditionalFoods": ["Payasam", "Puri", "Chana dal"],
+    "celebrationPractices": ["Gold purchases", "Charity", "Pujas"],
+    "regionalCustoms": {
+      "northIndia": "Buying gold and performing pujas",
+      "southIndia": "Charity and temple visits"
+    },
+    "videoKeywords": [
+      "Akshaya Tritiya puja",
+      "Lakshmi worship",
+      "Gold purchase rituals"
+    ],
+    "symbols": ["Gold", "Lotus", "Conch"],
+    "quote": {
+      "text": "“True wealth is the grace of the divine.”",
+      "source": "Swami Sivananda"
+    }
+  },
+  "narasimha_jayanti": {
+    "name": "Narasimha Jayanti",
+    "date": "2025-05-11",
+    "deity": "Narasimha (Vishnu)",
+    "fasting": {
+      "observers": "Vaishnavites, devotees of Vishnu",
+      "rules": "Fasting until evening; fruits and milk",
+      "significance": "Seeks protection and divine ferocity against evil"
+    },
+    "mythology": {
+      "story": "Celebrates Vishnu’s Narasimha avatar slaying Hiranyakashipu to protect Prahlad. Narasimha’s lion-man form symbolizes divine protection. The festival emphasizes faith.",
+      "reference": "Bhagavata Purana"
+    },
+    "spiritualBenefit": "Inspires courage and trust in divine protection.",
+    "traditionalFoods": ["Panakam", "Kosambari", "Sweets"],
+    "celebrationPractices": ["Narasimha puja", "Temple visits", "Chanting"],
+    "regionalCustoms": {
+      "southIndia": "Special pujas at Narasimha temples",
+      "northIndia": "Recitation of Narasimha mantras"
+    },
+    "videoKeywords": [
+      "Narasimha Jayanti puja",
+      "Narasimha bhajans",
+      "Vishnu worship"
+    ],
+    "symbols": ["Lion", "Conch", "Chakra"],
+    "quote": {
+      "text": "“The Lord protects the devoted in any form.”",
+      "source": "Bhagavata Purana"
+    }
+  },
+  "jagannath_rath_yatra": {
+    "name": "Jagannath Rath Yatra",
+    "date": "2025-06-27",
+    "deity": "Jagannath (Krishna), Balabhadra, Subhadra",
+    "fasting": {
+      "observers": "Devotees of Jagannath",
+      "rules": "Optional fasting until procession; vegetarian meals",
+      "significance": "Expresses devotion through participation in the divine journey"
+    },
+    "mythology": {
+      "story": "Commemorates Lord Jagannath’s journey from his temple to Gundicha temple. The massive chariot procession symbolizes Krishna’s grace. It unites millions in devotion.",
+      "reference": "Skanda Purana"
+    },
+    "spiritualBenefit": "Fosters unity and surrender to divine will.",
+    "traditionalFoods": ["Khichdi", "Puri", "Halwa"],
+    "celebrationPractices": ["Chariot pulling", "Bhajans", "Temple visits"],
+    "regionalCustoms": {
+      "odisha": "Massive Rath Yatra in Puri",
+      "gujarat": "Smaller chariot processions"
+    },
+    "videoKeywords": [
+      "Jagannath Rath Yatra",
+      "Puri Rath Yatra",
+      "Jagannath bhajans"
+    ],
+    "symbols": ["Chariot", "Jagannath face", "Conch"],
+    "quote": {
+      "text": "“In the chariot of devotion, reach the divine.”",
+      "source": "Chaitanya Mahaprabhu"
+    }
+  },
+  "guru_purnima": {
+    "name": "Guru Purnima",
+    "date": "2025-07-10",
+    "deity": "Vyasa, spiritual gurus",
+    "fasting": {
+      "observers": "Disciples, spiritual seekers",
+      "rules": "Optional fasting; light vegetarian meals",
+      "significance": "Honors the guru for spiritual guidance"
+    },
+    "mythology": {
+      "story": "Celebrates the birth of Veda Vyasa, who compiled the Vedas. Gurus are revered as guides to enlightenment. The day emphasizes guru-disciple relationships.",
+      "reference": "Mahabharata"
+    },
+    "spiritualBenefit": "Deepens gratitude and commitment to spiritual learning.",
+    "traditionalFoods": ["Kheer", "Halwa", "Fruits"],
+    "celebrationPractices": ["Guru puja", "Satsang", "Charity"],
+    "regionalCustoms": {
+      "northIndia": "Guru worship and spiritual gatherings",
+      "southIndia": "Vyasa puja and discourses"
+    },
+    "videoKeywords": ["Guru Purnima", "Vyasa puja", "Spiritual discourses"],
+    "symbols": ["Book", "Lotus", "Lamp"],
+    "quote": {
+      "text": "“The guru is the ladder to the divine.”",
+      "source": "Kabir"
+    }
+  },
+  "naga_panchami": {
+    "name": "Naga Panchami",
+    "date": "2025-07-29",
+    "deity": "Serpent deities",
+    "fasting": {
+      "observers": "General devotees, farmers",
+      "rules": "Light fasting; milk offerings to snakes",
+      "significance": "Seeks protection from snake-related harm"
+    },
+    "mythology": {
+      "story": "Honors serpent deities like Vasuki and Ananta. Linked to Krishna’s defeat of Kaliya. Milk offerings symbolize reverence for nature’s forces.",
+      "reference": "Bhagavata Purana"
+    },
+    "spiritualBenefit": "Promotes harmony with nature and divine protection.",
+    "traditionalFoods": ["Milk", "Sweets", "Rice dishes"],
+    "celebrationPractices": ["Snake idol worship", "Milk offerings", "Pujas"],
+    "regionalCustoms": {
+      "southIndia": "Snake temple visits",
+      "maharashtra": "Offerings at snake pits"
+    },
+    "videoKeywords": ["Naga Panchami puja", "Snake worship", "Kaliya Krishna"],
+    "symbols": ["Snake", "Milk", "Shiva"],
+    "quote": {
+      "text": "“Respect all beings, for they are divine.”",
+      "source": "Bhagavad Gita"
+    }
+  },
+  "varalakshmi_vratham": {
+    "name": "Varalakshmi Vratham",
+    "date": "2025-08-08",
+    "deity": "Lakshmi",
+    "fasting": {
+      "observers": "Married women, devotees of Lakshmi",
+      "rules": "Fasting until puja completion; vegetarian meals",
+      "significance": "Seeks prosperity and family well-being"
+    },
+    "mythology": {
+      "story": "Celebrates Lakshmi’s blessings for wealth and happiness. Originated from a woman’s devotion to Lakshmi in a dream. The vratham ensures familial prosperity.",
+      "reference": "Local traditions"
+    },
+    "spiritualBenefit": "Fosters gratitude and devotion for abundance.",
+    "traditionalFoods": ["Payasam", "Sundal", "Pongal"],
+    "celebrationPractices": [
+      "Lakshmi puja",
+      "Kalasha worship",
+      "Singing bhajans"
+    ],
+    "regionalCustoms": {
+      "southIndia": "Elaborate home pujas with kalasha",
+      "andhraPradesh": "Community Lakshmi worship"
+    },
+    "videoKeywords": [
+      "Varalakshmi Vratham puja",
+      "Lakshmi bhajans",
+      "Kalasha ritual"
+    ],
+    "symbols": ["Lotus", "Kalasha", "Gold"],
+    "quote": {
+      "text": "“Lakshmi resides in the heart of the grateful.”",
+      "source": "Swami Sivananda"
+    }
+  },
+  "raksha_bandhan": {
+    "name": "Raksha Bandhan",
+    "date": "2025-08-09",
+    "deity": "None (familial festival)",
+    "fasting": {
+      "observers": "Sisters and brothers",
+      "rules": "No strict fasting; festive meals",
+      "significance": "Strengthens sibling bonds"
+    },
+    "mythology": {
+      "story": "Celebrates the bond between siblings, inspired by Draupadi tying a rakhi to Krishna. The rakhi symbolizes protection. Sisters tie threads on brothers’ wrists.",
+      "reference": "Mahabharata"
+    },
+    "spiritualBenefit": "Promotes love, protection, and family unity.",
+    "traditionalFoods": ["Kheer", "Puri", "Sweets"],
+    "celebrationPractices": [
+      "Rakhi tying",
+      "Gift exchange",
+      "Family gatherings"
+    ],
+    "regionalCustoms": {
+      "northIndia": "Elaborate rakhi ceremonies",
+      "southIndia": "Simpler sibling celebrations"
+    },
+    "videoKeywords": ["Raksha Bandhan", "Rakhi tying", "Sibling bond"],
+    "symbols": ["Rakhi", "Sweets", "Family"],
+    "quote": {
+      "text": "“The bond of love protects all.”",
+      "source": "Traditional saying"
+    }
+  },
+  "shravana_purnima": {
+    "name": "Shravana Purnima",
+    "date": "2025-08-09",
+    "deity": ["Vishnu", "Shiva"],
+    "fasting": {
+      "observers": "General devotees",
+      "rules": "Fasting until evening; light meals",
+      "significance": "Seeks spiritual purification"
+    },
+    "mythology": {
+      "story": "Marks the full moon of Shravana, sacred to Vishnu and Shiva. Associated with the churning of the ocean. The day is auspicious for spiritual practices.",
+      "reference": "Vishnu Purana"
+    },
+    "spiritualBenefit": "Enhances spiritual clarity and devotion.",
+    "traditionalFoods": ["Kheer", "Fruits", "Sabudana"],
+    "celebrationPractices": ["Pujas", "Moon worship", "Charity"],
+    "regionalCustoms": {
+      "northIndia": "Rakhi celebrations overlap",
+      "southIndia": "Vishnu and Shiva pujas"
+    },
+    "videoKeywords": [
+      "Shravana Purnima puja",
+      "Vishnu bhajans",
+      "Moon worship"
+    ],
+    "symbols": ["Moon", "Conch", "Shivalinga"],
+    "quote": {
+      "text": "The full moon illuminates the path to truth.",
+      "source": "Upanishads"
+    }
+  },
+  "krishna_janmashtami": {
+    "name": "Krishna Janmashtami",
+    "date": "2025-08-16",
+    "deity": "Krishna",
+    "fasting": {
+      "observers": "Vaishnavites, Krishna devotees",
+      "rules": "Fasting until midnight; fruits and milk",
+      "significance": "Honors Krishna’s birth, seeking divine love"
+    },
+    "mythology": {
+      "story": "Celebrates Krishna’s birth in Mathura to Devaki and Vasudeva. Krishna, Vishnu’s eighth avatar, defeated Kamsa. The festival reenacts his playful childhood.",
+      "reference": "Bhagavata Purana"
+    },
+    "spiritualBenefit": "Fosters divine love and playful devotion.",
+    "traditionalFoods": ["Makhan", "Panjiri", "Peda"],
+    "celebrationPractices": ["Dahi Handi", "Midnight puja", "Bhajans"],
+    "regionalCustoms": {
+      "northIndia": "Dahi Handi events",
+      "maharashtra": "Grand Gopalakala celebrations"
+    },
+    "videoKeywords": ["Krishna Janmashtami", "Dahi Handi", "Krishna bhajans"],
+    "symbols": ["Flute", "Peacock feather", "Butter"],
+    "quote": {
+      "text": "“Krishna’s love is the essence of life.”",
+      "source": "Chaitanya Mahaprabhu"
+    }
+  },
+  "ganesh_chaturthi": {
+    "name": "Ganesh Chaturthi",
+    "date": "2025-08-27",
+    "deity": "Ganesha",
+    "fasting": {
+      "observers": "Devotees of Ganesha, especially in Maharashtra",
+      "rules": "Partial fasting with fruits, milk, or modak offerings",
+      "significance": "Removes obstacles and invokes Ganesha’s blessings"
+    },
+    "mythology": {
+      "story": "Celebrates Ganesha’s birth, created by Parvati from sandalwood paste. Ganesha’s head was restored by Shiva with an elephant’s after a divine mishap. The festival honors his wisdom.",
+      "reference": "Shiva Purana"
+    },
+    "spiritualBenefit": "Encourages humility, wisdom, and overcoming obstacles.",
+    "traditionalFoods": ["Modak", "Ladoo", "Coconut rice"],
+    "celebrationPractices": ["Ganesha idol installation", "Aarti", "Visarjan"],
+    "regionalCustoms": {
+      "maharashtra": "Grand pandal setups",
+      "tamilNadu": "Simple home pujas with clay idols"
+    },
+    "videoKeywords": [
+      "Ganesh Chaturthi puja",
+      "Modak recipe",
+      "Ganesha bhajans"
+    ],
+    "symbols": ["Elephant", "Modak", "Trishul"],
+    "quote": {
+      "text": "“O Ganesha, remove obstacles and grant wisdom.”",
+      "source": "Ganapati Atharvashirsha"
+    }
+  },
+  "onam": {
+    "name": "Onam",
+    "date": "2025-09-05",
+    "deity": "Vishnu (Vamana)",
+    "fasting": {
+      "observers": "Malayali devotees",
+      "rules": "No strict fasting; focus on festive feasts",
+      "significance": "Celebrates prosperity and unity"
+    },
+    "mythology": {
+      "story": "Commemorates King Mahabali’s return, welcomed by Vishnu’s Vamana avatar. Onam celebrates Kerala’s golden age. The festival unites communities through feasts and dances.",
+      "reference": "Bhagavata Purana"
+    },
+    "spiritualBenefit": "Promotes unity, humility, and gratitude.",
+    "traditionalFoods": ["Sadhya", "Payasam", "Avial"],
+    "celebrationPractices": [
+      "Pookalam (flower rangoli)",
+      "Onam sadhya",
+      "Snake boat races"
+    ],
+    "regionalCustoms": {
+      "kerala": "Ten-day festival with Thiruvonam as the main day",
+      "diaspora": "Community Onam celebrations"
+    },
+    "videoKeywords": [
+      "Onam sadhya",
+      "Pookalam designs",
+      "Vallamkali boat race"
+    ],
+    "symbols": ["Pookalam", "Banana leaf", "Boat"],
+    "quote": {
+      "text": "“Unity and love make every day Onam.”",
+      "source": "Kerala proverb"
+    }
+  },
+  "maha_saptami": {
+    "name": "Maha Saptami",
+    "date": "2025-09-29",
+    "deity": "Durga",
+    "fasting": {
+      "observers": "Devotees of Durga",
+      "rules": "Fasting with fruits or light meals",
+      "significance": "Invokes Durga’s strength and protection"
+    },
+    "mythology": {
+      "story": "Seventh day of Navratri, honoring Durga’s battle against Mahishasura. Focuses on her fierce Kalaratri form. Devotees seek her protective energy.",
+      "reference": "Devi Mahatmyam"
+    },
+    "spiritualBenefit": "Empowers strength and fearlessness.",
+    "traditionalFoods": ["Sabudana", "Kheer", "Fruits"],
+    "celebrationPractices": ["Durga puja", "Aarti", "Garba"],
+    "regionalCustoms": {
+      "westBengal": "Elaborate Durga Puja pandals",
+      "gujarat": "Garba dance events"
+    },
+    "videoKeywords": ["Maha Saptami puja", "Durga bhajans", "Navratri rituals"],
+    "symbols": ["Trident", "Lion", "Lotus"],
+    "quote": {
+      "text": "“Durga’s strength resides in the devoted heart.”",
+      "source": "Devi Mahatmyam"
+    }
+  },
+  "maha_ashtami": {
+    "name": "Maha Ashtami",
+    "date": "2025-09-30",
+    "deity": "Durga",
+    "fasting": {
+      "observers": "Devotees of Durga",
+      "rules": "Strict fasting or light meals",
+      "significance": "Seeks Durga’s victory over evil"
+    },
+    "mythology": {
+      "story": "Eighth day of Navratri, celebrating Durga’s triumph over Mahishasura. Known for Kumari Puja, worshipping young girls as divine. It’s a day of intense devotion.",
+      "reference": "Devi Mahatmyam"
+    },
+    "spiritualBenefit": "Inspires victory over inner demons.",
+    "traditionalFoods": ["Puri", "Halwa", "Chana"],
+    "celebrationPractices": ["Kumari Puja", "Sandhi Puja", "Aarti"],
+    "regionalCustoms": {
+      "westBengal": "Grand Durga Puja celebrations",
+      "northIndia": "Kanya bhoj (feeding girls)"
+    },
+    "videoKeywords": ["Maha Ashtami puja", "Kumari Puja", "Durga aarti"],
+    "symbols": ["Goddess idol", "Trident", "Conch"],
+    "quote": {
+      "text": "“The divine feminine conquers all evil.”",
+      "source": "Devi Mahatmyam"
+    }
+  },
+  "maha_navmi": {
+    "name": "Maha Navmi, Saraswati Pooja",
+    "date": "2025-10-01",
+    "deity": "Durga, Saraswati",
+    "fasting": {
+      "observers": "Devotees of Durga and Saraswati",
+      "rules": "Fasting until puja; light vegetarian meals",
+      "significance": "Seeks wisdom and victory"
+    },
+    "mythology": {
+      "story": "Ninth day of Navratri, marking Durga’s final victory. Also honors Saraswati for knowledge. The day concludes Navratri’s spiritual journey.",
+      "reference": "Devi Mahatmyam"
+    },
+    "spiritualBenefit": "Combines strength and wisdom for spiritual growth.",
+    "traditionalFoods": ["Kheer", "Puri", "Sweets"],
+    "celebrationPractices": ["Saraswati puja", "Weapon worship", "Aarti"],
+    "regionalCustoms": {
+      "southIndia": "Ayudha and Saraswati puja",
+      "westBengal": "Durga immersion preparations"
+    },
+    "videoKeywords": ["Maha Navmi puja", "Saraswati puja", "Navratri aarti"],
+    "symbols": ["Veena", "Trident", "Book"],
+    "quote": {
+      "text": "“Wisdom and strength are the gifts of the goddess.”",
+      "source": "Swami Vivekananda"
+    }
+  },
+  "dussehra": {
+    "name": "Dussehra, Vijayadashami",
+    "date": "2025-10-02",
+    "deity": "Rama, Durga",
+    "fasting": {
+      "observers": "General devotees",
+      "rules": "Optional fasting; festive meals",
+      "significance": "Celebrates victory of good over evil"
+    },
+    "mythology": {
+      "story": "Marks Rama’s victory over Ravana and Durga’s over Mahishasura. Effigies of Ravana are burned to symbolize triumph. The day signifies dharma’s success.",
+      "reference": "Ramayana, Devi Mahatmyam"
+    },
+    "spiritualBenefit": "Inspires righteousness and courage.",
+    "traditionalFoods": ["Jalebi", "Fafda", "Puri"],
+    "celebrationPractices": ["Ravana effigy burning", "Processions", "Pujas"],
+    "regionalCustoms": {
+      "northIndia": "Ramlila performances and effigy burning",
+      "southIndia": "Ayudha puja and processions"
+    },
+    "videoKeywords": [
+      "Dussehra Ramlila",
+      "Ravana burning",
+      "Vijayadashami puja"
+    ],
+    "symbols": ["Bow and arrow", "Effigy", "Trident"],
+    "quote": {
+      "text": "“Good always triumphs over evil.”",
+      "source": "Ramayana"
+    }
+  },
+  "dhanteras": {
+    "name": "Dhanteras",
+    "date": "2025-10-18",
+    "deity": "Lakshmi, Dhanvantari",
+    "fasting": {
+      "observers": "General devotees",
+      "rules": "Optional light fasting; vegetarian meals",
+      "significance": "Seeks wealth and health"
+    },
+    "mythology": {
+      "story": "Marks Dhanvantari’s emergence with the nectar of immortality. Also associated with Lakshmi’s worship for prosperity. The day is ideal for buying metals.",
+      "reference": "Vishnu Purana"
+    },
+    "spiritualBenefit": "Promotes prosperity and well-being.",
+    "traditionalFoods": ["Sweets", "Puri", "Dal"],
+    "celebrationPractices": [
+      "Buying gold/silver",
+      "Lakshmi puja",
+      "Lighting lamps"
+    ],
+    "regionalCustoms": {
+      "northIndia": "Purchase of utensils and jewelry",
+      "southIndia": "Home pujas and lamp lighting"
+    },
+    "videoKeywords": ["Dhanteras puja", "Lakshmi worship", "Dhanvantari"],
+    "symbols": ["Diya", "Gold", "Ayurveda"],
+    "quote": {
+      "text": "“Health and wealth are divine blessings.”",
+      "source": "Swami Sivananda"
+    }
+  },
+  "diwali": {
+    "name": "Diwali/Deepavali",
+    "date": "2025-10-20",
+    "deity": "Lakshmi, Ganesha, Rama",
+    "fasting": {
+      "observers": "Optional, mainly devotees of Lakshmi",
+      "rules": "Light fasting or vegetarian meals before puja",
+      "significance": "Purifies the home and heart for wealth and prosperity"
+    },
+    "mythology": {
+      "story": "Marks Lord Rama’s return to Ayodhya after defeating Ravana, welcomed with lamps. Also celebrates Lakshmi emerging from the ocean of milk. It signifies light overcoming darkness.",
+      "reference": "Ramayana, Vishnu Purana"
+    },
+    "spiritualBenefit": "Ignites inner light, fostering prosperity, unity, and spiritual awakening.",
+    "traditionalFoods": ["Ladoo", "Barfi", "Chakli", "Shrikhand"],
+    "celebrationPractices": [
+      "Lighting diyas",
+      "Rangoli designs",
+      "Lakshmi puja",
+      "Fireworks"
+    ],
+    "regionalCustoms": {
+      "northIndia": "Focus on Rama and Lakshmi worship",
+      "southIndia": "Early morning oil baths and new clothes",
+      "gujarat": "Celebrated as New Year with Chopda Pujan"
+    },
+    "videoKeywords": ["Diwali puja", "Lakshmi aarti", "Rangoli tutorial"],
+    "symbols": ["Diya", "Lotus", "Swastika"],
+    "quote": {
+      "text": "“Light the lamp of knowledge within and darkness will vanish.”",
+      "source": "Ramana Maharshi"
+    }
+  },
+  "kartika_purnima": {
+    "name": "Kartika Purnima",
+    "date": "2025-11-05",
+    "deity": "Vishnu, Shiva",
+    "fasting": {
+      "observers": "General devotees",
+      "rules": "Fasting until evening; light meals",
+      "significance": "Seeks spiritual purification and enlightenment"
+    },
+    "mythology": {
+      "story": "Marks Vishnu’s Matsya avatar saving the Vedas and Shiva’s destruction of Tripurasura. Celebrated with lamps on rivers. The full moon signifies divine light.",
+      "reference": "Bhagavata Purana"
+    },
+    "spiritualBenefit": "Promotes enlightenment and divine connection.",
+    "traditionalFoods": ["Kheer", "Puri", "Sweets"],
+    "celebrationPractices": ["Lighting lamps", "Boating with lamps", "Pujas"],
+    "regionalCustoms": {
+      "odisha": "Boita Bandana with miniature boats",
+      "northIndia": "River lamp offerings"
+    },
+    "videoKeywords": ["Kartika Purnima", "Boita Bandana", "Vishnu puja"],
+    "symbols": ["Lamp", "Boat", "Moon"],
+    "quote": {
+      "text": "“The light of devotion dispels all darkness.”",
+      "source": "Bhagavad Gita"
+    }
+  },
+  "kalabhairav_jayanti": {
+    "name": "Kalabhairav Jayanti",
+    "date": "2025-11-12",
+    "deity": "Kalabhairava (Shiva)",
+    "fasting": {
+      "observers": "Shaivites, devotees of Kalabhairava",
+      "rules": "Fasting until puja; vegetarian meals",
+      "significance": "Seeks protection and discipline"
+    },
+    "mythology": {
+      "story": "Celebrates Kalabhairava, Shiva’s fierce form, who destroyed ego and ignorance. He guards sacred sites like Kashi. The festival invokes his protective energy.",
+      "reference": "Shiva Purana"
+    },
+    "spiritualBenefit": "Promotes fearlessness and spiritual discipline.",
+    "traditionalFoods": ["Fruits", "Sabudana", "Sweets"],
+    "celebrationPractices": ["Kalabhairava puja", "Temple visits", "Chanting"],
+    "regionalCustoms": {
+      "northIndia": "Pujas at Kalabhairava temples",
+      "southIndia": "Home-based worship"
+    },
+    "videoKeywords": [
+      "Kalabhairav puja",
+      "Shiva bhajans",
+      "Kalabhairava mantra"
+    ],
+    "symbols": ["Dog", "Trident", "Skull"],
+    "quote": {
+      "text": "“Kalabhairava destroys fear and grants liberation.”",
+      "source": "Shiva Purana"
+    }
+  },
+  "karthigai_deepam": {
+    "name": "Karthigai Deepam",
+    "date": "2025-12-04",
+    "deity": "Shiva, Kartikeya",
+    "fasting": {
+      "observers": "Shaivites, Tamil devotees",
+      "rules": "Light fasting or vegetarian meals",
+      "significance": "Honors divine light and spiritual awakening"
+    },
+    "mythology": {
+      "story": "Commemorates Shiva appearing as an infinite flame to settle a dispute between Brahma and Vishnu. Kartikeya is also worshipped. Lamps symbolize divine light.",
+      "reference": "Shiva Purana"
+    },
+    "spiritualBenefit": "Ignites spiritual awareness and devotion.",
+    "traditionalFoods": ["Pori urundai", "Payasam", "Appam"],
+    "celebrationPractices": [
+      "Lighting oil lamps",
+      "Temple processions",
+      "Pujas"
+    ],
+    "regionalCustoms": {
+      "tamilNadu": "Massive lamp lighting at Arunachala",
+      "southIndia": "Home lamp decorations"
+    },
+    "videoKeywords": ["Karthigai Deepam", "Arunachala lamp", "Shiva puja"],
+    "symbols": ["Lamp", "Lingam", "Hill"],
+    "quote": {
+      "text": "“The eternal flame of Shiva burns within all.”",
+      "source": "Tirumantiram"
+    }
+  },
+  "vaikuntha_ekadashi_2": {
+    "name": "Vaikuntha Ekadashi",
+    "date": "2025-12-31",
+    "deity": "Vishnu",
+    "fasting": {
+      "observers": "Vaishnavites, devotees of Vishnu",
+      "rules": "No grains or beans; water-only or fruits and milk",
+      "significance": "Purifies body and mind, aligns with Vishnu’s grace"
+    },
+    "mythology": {
+      "story": "Celebrates the opening of Vishnu’s heavenly abode. Fasting and devotion on this day are believed to grant moksha. The Puranas emphasize its spiritual potency.",
+      "reference": "Padma Purana"
+    },
+    "spiritualBenefit": "Fosters liberation and divine connection.",
+    "traditionalFoods": ["Fruits", "Milk", "Sabudana khichdi"],
+    "celebrationPractices": [
+      "Chanting Vishnu Sahasranama",
+      "Temple visits",
+      "Lighting lamps"
+    ],
+    "regionalCustoms": {
+      "southIndia": "Pujas at Vishnu temples",
+      "northIndia": "Night-long bhajans"
+    },
+    "videoKeywords": [
+      "Vaikuntha Ekadashi puja",
+      "Vishnu bhajans",
+      "Ekadashi fasting"
+    ],
+    "symbols": ["Conch", "Lotus", "Vishnu Yantra"],
+    "quote": {
+      "text": "“Devotion to Vishnu opens the gates of liberation.”",
+      "source": "Bhagavata Purana"
+    }
+  },
+  "festivalCard": {
+    "reference": "Reference",
+    "date": "Date",
+    "deity": "Deity",
+    "observers": "Observers",
+    "fastingRules": "Fasting Rules",
+    "fastingSignificance": "Fasting Significance",
+    "spiritualBenefit": "Spiritual Benefit",
+    "mythology": "Mythology",
+    "foods": "Traditional Foods",
+    "practices": "Celebration Practices",
+    "regionalCustoms": "Regional Customs",
+    "symbols": "Symbols",
+    "showVideos": "Show videos",
+    "showVideosAria": "Show related videos",
+    "copySummary": "Copy summary",
+    "knowMore": "Know More",
+    "fasting": "Fasting Guidelines",
+    "doToday": "What to Do Today",
+    "shareAria": "Share festival details",
+    "share": "Share",
+    "sanatanReference": "Sanatan Reference",
+    "videoModalAria": "Festival videos",
+    "relatedVideos": "Related Videos",
+    "noUpcoming": "No Upcoming Festivals",
+    "noFestival": "No Festival Today"
+  }
+}

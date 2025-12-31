@@ -38,27 +38,27 @@ const TopTabsNavigator = () => {
   }, []);
 
   /** FETCH TRACKER DATA */
- /** CHECK LOGIN */
-useEffect(() => {
-  const checkLogin = async () => {
-    const token = await AsyncStorage.getItem("access_token");
-    setIsLoggedIn(!!token);
-  };
-  checkLogin();
-}, []);
+  /** CHECK LOGIN */
+  useEffect(() => {
+    const checkLogin = async () => {
+      const token = await AsyncStorage.getItem("access_token");
+      setIsLoggedIn(!!token);
+    };
+    checkLogin();
+  }, []);
 
-/** 🔥 REFETCH TRACKER DATA WHENEVER SCREEN IS FOCUSED */
-useFocusEffect(
-  React.useCallback(() => {
-    dispatch(
-      getDailyDharmaTracker((res) => {
-        if (res.success) {
-          setTrackerData(res.data);
-        }
-      })
-    );
-  }, [])
-);
+  /** 🔥 REFETCH TRACKER DATA WHENEVER SCREEN IS FOCUSED */
+  useFocusEffect(
+    React.useCallback(() => {
+      dispatch(
+        getDailyDharmaTracker((res) => {
+          if (res.success) {
+            setTrackerData(res.data);
+          }
+        })
+      );
+    }, [])
+  );
 
 
   /** CONDITIONS */
@@ -66,27 +66,27 @@ useFocusEffect(
   //   trackerData?.active_practices?.length > 0 ? true : false;
 
   const hasActivePractices =
-  trackerData === null
-    ? true   // ⛔️ assume allowed until data arrives
-    : trackerData.active_practices?.length > 0;
+    trackerData === null
+      ? true   // ⛔️ assume allowed until data arrives
+      : trackerData.active_practices?.length > 0;
 
 
-  const shouldRestrictTabs = !isLoggedIn || !hasActivePractices;
+  const shouldRestrictTabs = (!isLoggedIn || !hasActivePractices) && !route?.params?.fromSetup;
 
   useEffect(() => {
-  if (!trackerData) return; // ⛔️ WAIT
+    if (!trackerData) return; // ⛔️ WAIT
 
-  if (!navState || navState.routes.length === 0) return;
+    if (!navState || navState.routes.length === 0) return;
 
-  const currentScreen = navState.routes[navState.index]?.name;
+    const currentScreen = navState.routes[navState.index]?.name;
 
-  if (
-    shouldRestrictTabs &&
-    (currentScreen === "Tracker" || currentScreen === "Stats")
-  ) {
-    navigation.navigate("History");
-  }
-}, [shouldRestrictTabs, navState, trackerData]);
+    if (
+      shouldRestrictTabs &&
+      (currentScreen === "Tracker" || currentScreen === "Stats")
+    ) {
+      navigation.navigate("History");
+    }
+  }, [shouldRestrictTabs, navState, trackerData]);
 
 
   // /** 🔥 AUTO-REDIRECT IF USER TRIES TO OPEN BLOCKED TABS */
@@ -109,7 +109,7 @@ useFocusEffect(
 
       <Tab.Navigator
         key={shouldRestrictTabs ? "restricted" : "full"}
-        
+
         /** ⭐ STEP 2 — APPLY INITIAL TAB LOGIC */
         initialRouteName={shouldRestrictTabs ? "History" : initialTab}
 
@@ -138,9 +138,9 @@ useFocusEffect(
           <Tab.Screen
             name="History"
             component={TrackerEdit}
-             initialParams={route.params}
+            initialParams={route.params}
             options={{ title: "Edit Routine" }}
-              key={route?.params?.resumeData ? "history-restore" : "history-normal"}
+            key={route?.params?.resumeData ? "history-restore" : "history-normal"}
           />
         ) : (
           <>
@@ -159,7 +159,7 @@ useFocusEffect(
               initialParams={route.params}
               component={TrackerEdit}
               options={{ title: "Edit Routine" }}
-                key={route?.params?.resumeData ? "history-restore" : "history-normal"}
+              key={route?.params?.resumeData ? "history-restore" : "history-normal"}
             />
           </>
         )}

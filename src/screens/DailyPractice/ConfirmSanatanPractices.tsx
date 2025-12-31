@@ -152,21 +152,21 @@ const ConfirmSanatanPractices = ({ route }) => {
 
       const payload = {
         // practices: values.mantras,
-       practices: finalSubmitRef.current,// coming from cart
+        practices: finalSubmitRef.current,// coming from cart
         dharma_level:
           route?.params?.selectedIndex === 0
             ? "beginner"
             : route?.params?.selectedIndex === 1
-            ? "intermediate"
-            : "advanced",
+              ? "intermediate"
+              : "advanced",
         is_authenticated: true,
         recaptcha_token: token,
       };
-      console.log("FINAL SUBMIT PAYLOAD:",JSON.stringify(payload) );
+      console.log("FINAL SUBMIT PAYLOAD:", JSON.stringify(payload));
       dispatch(
         submitDailyDharmaSetup(payload, (res) => {
           setLoading(false);
-          if (res.success)  navigation.navigate("TrackerTabs", { screen: "Tracker" });
+          if (res.success) navigation.navigate("TrackerTabs", { screen: "Tracker" });
         })
       );
     },
@@ -176,61 +176,61 @@ const ConfirmSanatanPractices = ({ route }) => {
   /* 🛒 CART MODAL */
   /* ----------------------------------------------- */
 
-//   const CartModal = () => (
-//     <Modal
-//       isVisible={cartModalVisible}
-//       backdropOpacity={0.5}
-//       onBackdropPress={() => setCartModalVisible(false)}
-//     >
-//       <View
-//         style={{
-//           backgroundColor: "#fff",
-//           padding: 16,
-//           borderRadius: 14,
-//           maxHeight: 450,
-//         }}
-//       >
-//         <View
-//           style={{
-//             flexDirection: "row",
-//             justifyContent: "space-between",
-//             marginBottom: 12,
-//           }}
-//         >
-//           <TextComponent type="headerBoldText">
-//             Added Practices ({localPractices.length})
-//           </TextComponent>
+  //   const CartModal = () => (
+  //     <Modal
+  //       isVisible={cartModalVisible}
+  //       backdropOpacity={0.5}
+  //       onBackdropPress={() => setCartModalVisible(false)}
+  //     >
+  //       <View
+  //         style={{
+  //           backgroundColor: "#fff",
+  //           padding: 16,
+  //           borderRadius: 14,
+  //           maxHeight: 450,
+  //         }}
+  //       >
+  //         <View
+  //           style={{
+  //             flexDirection: "row",
+  //             justifyContent: "space-between",
+  //             marginBottom: 12,
+  //           }}
+  //         >
+  //           <TextComponent type="headerBoldText">
+  //             Added Practices ({localPractices.length})
+  //           </TextComponent>
 
-//           <Ionicons
-//             name="close"
-//             size={28}
-//             onPress={() => setCartModalVisible(false)}
-//           />
-//         </View>
+  //           <Ionicons
+  //             name="close"
+  //             size={28}
+  //             onPress={() => setCartModalVisible(false)}
+  //           />
+  //         </View>
 
-//         <ScrollView>
-//           {localPractices.map((p) => (
-//             <View
-//               key={p.id}
-//               style={{
-//                 flexDirection: "row",
-//                 justifyContent: "space-between",
-//                 marginBottom: 10,
-//               }}
-//             >
-//               <TextComponent>{p.title}</TextComponent>
+  //         <ScrollView>
+  //           {localPractices.map((p) => (
+  //             <View
+  //               key={p.id}
+  //               style={{
+  //                 flexDirection: "row",
+  //                 justifyContent: "space-between",
+  //                 marginBottom: 10,
+  //               }}
+  //             >
+  //               <TextComponent>{p.title}</TextComponent>
 
-//               <TouchableOpacity onPress={() => removePractice(p.id)}>
-//                 <Ionicons name="close-circle" size={24} color="red" />
-//               </TouchableOpacity>
-//             </View>
-//           ))}
-//         </ScrollView>
-//       </View>
-//     </Modal>
-//   );
+  //               <TouchableOpacity onPress={() => removePractice(p.id)}>
+  //                 <Ionicons name="close-circle" size={24} color="red" />
+  //               </TouchableOpacity>
+  //             </View>
+  //           ))}
+  //         </ScrollView>
+  //       </View>
+  //     </Modal>
+  //   );
 
-const finalSubmitRef = useRef([]);
+  const finalSubmitRef = useRef([]);
 
   const renderMantraItem = ({ item, index }) => {
     const error = formik.errors?.mantras?.[index];
@@ -251,7 +251,7 @@ const finalSubmitRef = useRef([]);
       >
         <TextComponent
           type="headerText"
-          style={{  }}
+          style={{}}
         >
           {item.icon} {displayName}
         </TextComponent>
@@ -270,19 +270,19 @@ const finalSubmitRef = useRef([]);
         )}
         <TextComponent
           type="cardText"
-          style={{ marginVertical:4}}
+          style={{ marginVertical: 4 }}
         >
-        Reps (1 - 1000)
+          Reps (1 - 1000)
         </TextComponent>
 
         <TextInput
           style={{
-              marginTop: 4,
-    borderWidth: 1,
-  borderColor: "#BDC4CD",
-    borderRadius: 6,
-    padding: 10,
-    backgroundColor:"#FFFFFF"
+            marginTop: 4,
+            borderWidth: 1,
+            borderColor: "#BDC4CD",
+            borderRadius: 6,
+            padding: 10,
+            backgroundColor: "#FFFFFF"
           }}
           placeholder="Enter reps"
           keyboardType="number-pad"
@@ -292,15 +292,15 @@ const finalSubmitRef = useRef([]);
           }
         />
         {error?.reps && (
-          <TextComponent style={{ color: "red", marginTop: 4 ,alignSelf:"flex-end"}}>
+          <TextComponent style={{ color: "red", marginTop: 4, alignSelf: "flex-end" }}>
             {error.reps}
           </TextComponent>
         )}
         <TextComponent
           type="cardText"
-          style={{ marginVertical:4 }}
+          style={{ marginVertical: 4 }}
         >
-        Days
+          Days
         </TextComponent>
         <Dropdown
           data={[
@@ -315,7 +315,7 @@ const finalSubmitRef = useRef([]);
           ]}
           labelField="label"
           valueField="value"
-          style={{...styles.setupdropdown, backgroundColor:"#FFFFFF"}}
+          style={{ ...styles.setupdropdown, backgroundColor: "#FFFFFF" }}
           value={formik.values.mantras[index].day}
           onChange={(item) =>
             formik.setFieldValue(`mantras[${index}].day`, item.value)
@@ -336,55 +336,54 @@ const finalSubmitRef = useRef([]);
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.Colors.white }}>
       <StatusBar barStyle="dark-content" />
-<ImageBackground
-      source={require("../../../assets/Tracker_BG.png")}
-      style={{
-        flex: 1,
-        width: FontSize.CONSTS.DEVICE_WIDTH,
-        alignSelf: "center",
-        justifyContent: "flex-start",
-        paddingBottom: 80, // 👈 allows bottom button overlay while bg covers it
-      }}
-      imageStyle={{
-        borderTopRightRadius: 16,
-        borderTopLeftRadius: 16,
-      }}
-    >
-      <Header />
-<CartModal 
-onConfirm={async (list) => {
-  return new Promise<void>((resolve) => {
-    finalSubmitRef.current = list;
-
-    formik.submitForm().then(() => {
-      resolve();
-    });
-  });
-}}
-/>
-
-
-      <ScrollView
-        contentContainerStyle={{ paddingBottom: 120 }}
-        showsVerticalScrollIndicator={false}
+      <ImageBackground
+        style={{
+          flex: 1,
+          width: FontSize.CONSTS.DEVICE_WIDTH,
+          alignSelf: "center",
+          justifyContent: "flex-start",
+          paddingBottom: 80,
+        }}
+        imageStyle={{
+          borderTopRightRadius: 16,
+          borderTopLeftRadius: 16,
+        }}
       >
-        {/* Top Bar */}
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            paddingHorizontal: 20,
-            marginTop: 10,
+        <Header />
+        <CartModal
+          onConfirm={async (list) => {
+            return new Promise<void>((resolve) => {
+              finalSubmitRef.current = list;
+
+              formik.submitForm().then(() => {
+                resolve();
+              });
+            });
           }}
+        />
+
+
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: 120 }}
+          showsVerticalScrollIndicator={false}
         >
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Ionicons name="arrow-back" size={26} color="#000" />
-          </TouchableOpacity>
-          <TextComponent type="DailyDetailheaderText" style={styles.pageTitle}>
+          {/* Top Bar */}
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              paddingHorizontal: 20,
+              marginTop: 10,
+            }}
+          >
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Ionicons name="arrow-back" size={26} color="#000" />
+            </TouchableOpacity>
+            <TextComponent type="DailyDetailheaderText" style={styles.pageTitle}>
             Set Sanatan Practices
-          </TextComponent>
-          <CartIcon />
-          {/* <TouchableOpacity
+            </TextComponent>
+            <CartIcon />
+            {/* <TouchableOpacity
             onPress={() => setCartModalVisible(true)}
             style={{ position: "relative", width: 30, height: 30 }}
           >
@@ -416,70 +415,78 @@ onConfirm={async (list) => {
               resizeMode="contain"
             />
           </TouchableOpacity> */}
-        </View>
-        <TextComponent type="subText" style={{color:Colors.Colors.BLACK,textAlign:"center",marginHorizontal:10}}>Set how often you want to do each part of your routine.</TextComponent>
-        <TextComponent type="subDailyText" style={{color:Colors.Colors.BLACK,textAlign:"center",marginHorizontal:10,marginTop:12}}>Choose your frequency and repetition count for each step</TextComponent>
+          </View>
+          <TextComponent type="subText" style={{ color: Colors.Colors.BLACK, textAlign: "center", marginHorizontal: 10 }}>Set how often you want to do each part of your routine.</TextComponent>
+          <TextComponent type="subDailyText" style={{ color: Colors.Colors.BLACK, textAlign: "center", marginHorizontal: 10, marginTop: 12 }}>Review your practices before adding them to your routine</TextComponent>
 
-        <FlatList
-          data={formik.values.mantras}
-          renderItem={renderMantraItem}
-          keyExtractor={(item) =>
-            item.id || item.practice_id || String(Math.random())
-          }
-          scrollEnabled={false}
-        />
-          <View
-        style={{
-          // position: "absolute",
-          // bottom: 0,
-          // left: 0,
-          // right: 0,
-          padding: 16,
-          // backgroundColor: "#fff",
-          // borderTopWidth: 1,
-          // borderTopColor: "#ddd",
-        }}
-      >
-        <TouchableOpacity
-          // onPress={() => {formik.handleSubmit()}}
-           onPress={() => {
-    // 1️⃣ Add all configured practices to GLOBAL CART
-    formik.values.mantras.forEach((item) => {
-      addPractice({
-        id: item.id || item.practice_id || Date.now() + Math.random(),
-        name: item.name || item.text || item.title,
-        reps: item.reps,
-        day: item.day,
-        icon: item.icon,
-        description: item.description,
-        source: "confirm-screen",
-        full_item: item,
-      });
-    });
-navigation.navigate("SubmitDailyPracticesScreen", {
-  practices: formik.values.mantras,
-  custom: true,
-});
-
-    // 2️⃣ Open cart
-    // setCartModalVisible(true);
-  }}
-          style={{
-            backgroundColor: Colors.Colors.App_theme,
-            paddingVertical: 8,
-            borderRadius: 8,
-            alignItems: "center",
-          }}
-        >
-          <TextComponent type="cardText" style={{ color: "#fff" }}>
-          Confirm
+          <TextComponent type="DailyHeaderText" style={{ marginHorizontal: 16, marginTop: 20 }}>
+            Added Practices ({formik.values.mantras.length})
           </TextComponent>
-        </TouchableOpacity>
-      </View>
-      </ScrollView>
-    
+          <TextComponent type="subDailyText" style={{ color: Colors.Colors.BLACK, marginHorizontal: 16, marginTop: 4 }}>
+            These will become part of your routine
+          </TextComponent>
 
-      <LoadingOverlay visible={loading} text="Saving..." />
+          <FlatList
+            data={formik.values.mantras}
+            renderItem={renderMantraItem}
+            keyExtractor={(item) =>
+              item.id || item.practice_id || String(Math.random())
+            }
+            scrollEnabled={false}
+          />
+          <View
+            style={{
+              // position: "absolute",
+              // bottom: 0,
+              // left: 0,
+              // right: 0,
+              padding: 16,
+              // backgroundColor: "#fff",
+              // borderTopWidth: 1,
+              // borderTopColor: "#ddd",
+            }}
+          >
+            <TouchableOpacity
+              // onPress={() => {formik.handleSubmit()}}
+              onPress={() => {
+                // 1️⃣ Add all configured practices to GLOBAL CART
+                formik.values.mantras.forEach((item) => {
+                  addPractice({
+                    id: item.id || item.practice_id || Date.now() + Math.random(),
+                    name: item.name || item.text || item.title,
+                    reps: item.reps,
+                    day: item.day,
+                    icon: item.icon,
+                    description: item.description,
+                    source: "confirm-screen",
+                    full_item: item,
+                  });
+                });
+                navigation.navigate("SubmitDailyPracticesScreen", {
+                  practices: formik.values.mantras,
+                  custom: true,
+                  sanatan: true,
+                });
+
+                // 2️⃣ Open cart
+                // setCartModalVisible(true);
+              }}
+              style={{
+                backgroundColor: Colors.Colors.App_theme,
+                paddingVertical: 8,
+                borderRadius: 8,
+                alignItems: "center",
+              }}
+            >
+              <TextComponent type="cardText" style={{ color: "#fff" }}>
+                Confirm
+              </TextComponent>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+
+
+        <LoadingOverlay visible={loading} text="Saving..." />
       </ImageBackground>
     </SafeAreaView>
   );

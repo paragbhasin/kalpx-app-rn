@@ -408,15 +408,15 @@ useEffect(() => {
     event_type: "click_classes_card",
     component: "Classes-card",
   },
-  {
-  id: "8",
-  name: t("categories.socialExplore"),
-  title: "SocialExplore",
-  iconType: "vector",
-  icon: "people-outline",   // 🔥 posts/feed icon
-  event_type: "click_social_explore",
-  component: "SocialExplore-card",
-}
+//   {
+//   id: "8",
+//   name: t("categories.socialExplore"),
+//   title: "SocialExplore",
+//   iconType: "vector",
+//   icon: "people-outline",   
+//   event_type: "click_social_explore",
+//   component: "SocialExplore-card",
+// }
 
 ];
 

@@ -1,7 +1,10 @@
 import { useState } from "react";
-import { View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import Colors from "../../components/Colors";
 import DailyPracticeDetailsCard from "../../components/DailyPracticeDetailsCard";
 import Header from "../../components/Header";
+import TextComponent from "../../components/TextComponent";
 
 const DailyPracticeDetailSelectedPractice = ({ route, navigation }) => {
   const { item, fullList, startingIndex, onUpdateSelection } = route.params;
@@ -17,23 +20,60 @@ const DailyPracticeDetailSelectedPractice = ({ route, navigation }) => {
   };
 
   const closeScreen = () => {
-    onUpdateSelection(currentIndex,selectedCount);
+    onUpdateSelection(currentIndex, selectedCount);
     navigation.goBack();
   };
 
   return (
-    <View style={{ marginHorizontal: 16 }}>
+    <View style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
       <Header />
-      <DailyPracticeDetailsCard
-      mode="new"
-        data={fullList[currentIndex]}
-        item={item}
-        onChange={nextItem}
-        onBackPress={closeScreen}
-        isLocked={isLocked}
-        selectedCount={selectedCount}       // ⬅️ parent → child
-        onSelectCount={setSelectedCount}    // ⬅️ child → parent
-      />
+
+      {/* FIXED HEADER WITH BACK BUTTON */}
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          marginHorizontal: 16,
+          marginTop: 4,
+          paddingVertical: 8,
+        }}
+      >
+        <TouchableOpacity
+          onPress={closeScreen}
+          style={{
+            padding: 6,
+            zIndex: 100,
+          }}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons name="arrow-back" size={28} color="#000" />
+        </TouchableOpacity>
+
+        <TextComponent
+          type="loginHeaderText"
+          style={{
+            color: Colors.Colors.Daily_black,
+            flex: 1,
+            textAlign: "center",
+            marginLeft: -32,
+          }}
+        >
+          {item?.name ?? "Practice Details"}
+        </TextComponent>
+      </View>
+
+      <View style={{ marginHorizontal: 16, flex: 1 }}>
+        <DailyPracticeDetailsCard
+          mode="new"
+          data={fullList[currentIndex]}
+          item={item}
+          onChange={nextItem}
+          onBackPress={closeScreen}
+          isLocked={isLocked}
+          selectedCount={selectedCount}
+          onSelectCount={setSelectedCount}
+        />
+      </View>
     </View>
   );
 };

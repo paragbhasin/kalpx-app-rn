@@ -56,45 +56,45 @@ const SubmitDailyPracticesScreen = ({ route }) => {
   const [detailsItem, setDetailsItem] = useState<any>(null);
   const [detailsCategoryItem, setDetailsCategoryItem] = useState<any>(null);
 
-const { locationData, loading: locationLoading } = useUserLocation();
+  const { locationData, loading: locationLoading } = useUserLocation();
 
 
 
-useEffect(() => {
-  if (!locationLoading && locationData?.timezone) {
-    const today = moment().format("YYYY-MM-DD");
-    dispatch(fetchDailyPractice(today, locationData.timezone));
-  }
-}, [locationLoading, locationData?.timezone]);
+  useEffect(() => {
+    if (!locationLoading && locationData?.timezone) {
+      const today = moment().format("YYYY-MM-DD");
+      dispatch(fetchDailyPractice(today, locationData.timezone));
+    }
+  }, [locationLoading, locationData?.timezone]);
 
-const dailyPractice = useSelector(
-  (state: RootState) => state.dailyPracticeReducer
-);
-
-// ✅ ADD THIS
-const activeApiPractices =
-  dailyPractice?.data?.active_practices || [];
-
-useEffect(() => {
-  console.log(
-    "🔥 ACTIVE API PRACTICES IN SUBMIT SCREEN >>>",
-    dailyPractice?.data?.active_practices
+  const dailyPractice = useSelector(
+    (state: RootState) => state.dailyPracticeReducer
   );
-}, [dailyPractice?.data?.active_practices]);
+
+  // ✅ ADD THIS
+  const activeApiPractices =
+    dailyPractice?.data?.active_practices || [];
+
+  useEffect(() => {
+    console.log(
+      "🔥 ACTIVE API PRACTICES IN SUBMIT SCREEN >>>",
+      dailyPractice?.data?.active_practices
+    );
+  }, [dailyPractice?.data?.active_practices]);
 
   const normalizeApiPractice = (ap: any) => ({
-  practice_id: ap.practice_id ?? ap.id,
-  source: ap.source,
-  category: ap.category,
-  name: ap.name,
-  description: ap.description ?? "",
-  benefits: ap.details?.benefits ?? [],
-  day: ap.details?.day ?? "Daily",
-  reps:
-    ap.source === "sankalp"
-      ? 1
-      : Number(ap.details?.reps ?? 1),
-});
+    practice_id: ap.practice_id ?? ap.id,
+    source: ap.source,
+    category: ap.category,
+    name: ap.name,
+    description: ap.description ?? "",
+    benefits: ap.details?.benefits ?? [],
+    day: ap.details?.day ?? "Daily",
+    reps:
+      ap.source === "sankalp"
+        ? 1
+        : Number(ap.details?.reps ?? 1),
+  });
 
 
   // ----------------------------
@@ -142,15 +142,15 @@ useEffect(() => {
           style={{ flex: 1 }}
           contentContainerStyle={{ paddingHorizontal: 16 }}
         >
-            <DailyPracticeDetailsCard
+          <DailyPracticeDetailsCard
             mode={"edit"}
             data={item}
             item={detailsCategoryItem}
-            onChange={() => {}}
+            onChange={() => { }}
             onBackPress={() => setShowDetails(false)}
             isLocked={true}
             selectedCount={item.reps}
-            onSelectCount={() => {}}
+            onSelectCount={() => { }}
           />
         </ScrollView>
       </View>
@@ -183,45 +183,45 @@ useEffect(() => {
   // };
 
   const handleSubmit = async () => {
-  setLoading(true);
+    setLoading(true);
 
-  const token = await AsyncStorage.getItem("refresh_token");
+    const token = await AsyncStorage.getItem("refresh_token");
 
-  // 1️⃣ Normalize active API practices
-  const normalizedActive = activeApiPractices.map(normalizeApiPractice);
+    // 1️⃣ Normalize active API practices
+    const normalizedActive = activeApiPractices.map(normalizeApiPractice);
 
-  // 2️⃣ Remove duplicates (route overrides API)
-  const filteredRoute = routePractices.filter(
-    (rp) =>
-      !normalizedActive.some(
-        (ap) => ap.practice_id === rp.practice_id
-      )
-  );
+    // 2️⃣ Remove duplicates (route overrides API)
+    const filteredRoute = routePractices.filter(
+      (rp) =>
+        !normalizedActive.some(
+          (ap) => ap.practice_id === rp.practice_id
+        )
+    );
 
-  // 3️⃣ Final merged list
-  const finalPractices = [
-    ...normalizedActive,
-    ...filteredRoute,
-  ];
+    // 3️⃣ Final merged list
+    const finalPractices = [
+      ...normalizedActive,
+      ...filteredRoute,
+    ];
 
-  console.log("✅ FINAL SUBMIT PRACTICES >>>", finalPractices);
+    console.log("✅ FINAL SUBMIT PRACTICES >>>", finalPractices);
 
-  const payload = {
-    practices: finalPractices,
-    dharma_level: "beginner",
-    is_authenticated: true,
-    recaptcha_token: token,
+    const payload = {
+      practices: finalPractices,
+      dharma_level: "beginner",
+      is_authenticated: true,
+      recaptcha_token: token,
+    };
+
+    dispatch(
+      submitDailyDharmaSetup(payload, (res) => {
+        setLoading(false);
+        if (res.success) {
+          navigation.navigate("TrackerTabs", { screen: "Tracker", fromSetup: true });
+        }
+      })
+    );
   };
-
-  dispatch(
-    submitDailyDharmaSetup(payload, (res) => {
-      setLoading(false);
-      if (res.success) {
-        navigation.navigate("TrackerTabs", { screen: "Tracker" });
-      }
-    })
-  );
-};
 
 
   return (
@@ -229,7 +229,7 @@ useEffect(() => {
       <StatusBar barStyle="dark-content" />
 
       <ImageBackground
-        source={require("../../../assets/Tracker_BG.png")}
+
         style={{
           flex: 1,
           width: FontSize.CONSTS.DEVICE_WIDTH,
@@ -258,10 +258,13 @@ useEffect(() => {
               type="cardHeaderText"
               style={{ flex: 1, textAlign: "center" }}
             >
-              {route?.params?.custom
-                ? "Create Your Own Practice"
-                : "Save my Practices"}
+              {route?.params?.sanatan
+                ? "Save Sanatan Practices"
+                : route?.params?.custom
+                  ? "Create Your Own Practice"
+                  : "Save my Practices"}
             </TextComponent>
+            
 
             <CartIcon />
           </View>

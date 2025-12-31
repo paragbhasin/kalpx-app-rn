@@ -207,13 +207,13 @@ const selectedLevel = LEVEL_KEYS[activeIndex];
         translucent={false}
       />
           <ImageBackground
-      source={require("../../../assets/Tracker_BG.png")}
+
       style={{
         flex: 1,
         width: FontSize.CONSTS.DEVICE_WIDTH,
         alignSelf: "center",
         justifyContent: "flex-start",
-        paddingBottom: 80, // 👈 allows bottom button overlay while bg covers it
+        paddingBottom: 80, 
       }}
       imageStyle={{
         borderTopRightRadius: 16,

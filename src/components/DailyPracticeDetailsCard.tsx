@@ -232,7 +232,7 @@ const DailyPracticeDetailsCard = ({
   onChange,
   onBackPress,
   isLocked,
-    selectedCount,
+  selectedCount,
   onSelectCount,
   mode
 }) => {
@@ -240,47 +240,47 @@ const DailyPracticeDetailsCard = ({
   const [showPronunciation, setShowPronunciation] = useState(false);
   const [isDevanagariLong, setIsDevanagariLong] = useState(false);
   const [showDevanagariModal, setShowDevanagariModal] = useState(false);
-    const slideAnim = useRef(new Animated.Value(0)).current;
-const scrollRef = useRef<ScrollView>(null);
+  const slideAnim = useRef(new Animated.Value(0)).current;
+  const scrollRef = useRef<ScrollView>(null);
 
 
-    console.log("DailyPracticeDetailsCard rendered with data:", data, "and item:", item);
+  console.log("DailyPracticeDetailsCard rendered with data:", data, "and item:", item);
 
-      // Normalize chantOptions
-const getNormalizedChantOptions = (options) => {
-  if (!options || options.length === 0) return [];
-  return typeof options[0] === "number"
-    ? options.map((n) => ({ count: n, label: `${n} chants` }))
-    : options;
-};
+  // Normalize chantOptions
+  const getNormalizedChantOptions = (options) => {
+    if (!options || options.length === 0) return [];
+    return typeof options[0] === "number"
+      ? options.map((n) => ({ count: n, label: `${n} chants` }))
+      : options;
+  };
 
-const normalizedOptions = React.useMemo(
-  () => getNormalizedChantOptions(data?.chantOptions),
-  [data?.chantOptions]
-);
+  const normalizedOptions = React.useMemo(
+    () => getNormalizedChantOptions(data?.chantOptions),
+    [data?.chantOptions]
+  );
 
-// lowest count
-const getDefaultChant = (options) =>
-  options.length
-    ? options.reduce((min, c) => (c.count < min.count ? c : min))
-    : null;
+  // lowest count
+  const getDefaultChant = (options) =>
+    options.length
+      ? options.reduce((min, c) => (c.count < min.count ? c : min))
+      : null;
 
-    React.useEffect(() => {
-  const lowest = getDefaultChant(normalizedOptions);
-  setSelectedChant(lowest);
-  onSelectCount?.(lowest?.count);
-}, [normalizedOptions]);
+  React.useEffect(() => {
+    const lowest = getDefaultChant(normalizedOptions);
+    setSelectedChant(lowest);
+    onSelectCount?.(lowest?.count);
+  }, [normalizedOptions]);
 
-// Sync with parent when parent changes
-React.useEffect(() => {
-  if (selectedCount) {
-    const found = normalizedOptions.find(o => o.count === selectedCount);
-    if (found) setSelectedChant(found);
-  }
-}, [selectedCount, normalizedOptions]);
+  // Sync with parent when parent changes
+  React.useEffect(() => {
+    if (selectedCount) {
+      const found = normalizedOptions.find(o => o.count === selectedCount);
+      if (found) setSelectedChant(found);
+    }
+  }, [selectedCount, normalizedOptions]);
 
   const handleSwipeChange = () => {
-      scrollRef.current?.scrollTo({ y: 0, animated: false });
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
     // 1. Slide OUT to LEFT
     Animated.timing(slideAnim, {
       toValue: -400,
@@ -303,193 +303,193 @@ React.useEffect(() => {
   };
 
   const categoryKey =
-  item?.key ||
-  data?.category_key ||
-  data?.category ||
-  null;
-
-  
-// Full category options (always source of truth for label)
-const fullCategoryOptions = categoryKey
-  ? categoryChantOptions[categoryKey]?.options || []
-  : [];
+    item?.key ||
+    data?.category_key ||
+    data?.category ||
+    null;
 
 
-// Filter category options based on API counts (if any)
-const chantOptions = React.useMemo(() => {
-  if (!data?.chantOptions || data.chantOptions.length === 0) {
-    return fullCategoryOptions; // fallback to full list
-  }
+  // Full category options (always source of truth for label)
+  const fullCategoryOptions = categoryKey
+    ? categoryChantOptions[categoryKey]?.options || []
+    : [];
 
-  // API may send [count] or [{count, label}]
-  const apiCounts = data.chantOptions.map(c =>
-    typeof c === "number" ? c : c.count
-  );
 
-  return fullCategoryOptions.filter(opt => apiCounts.includes(opt.count));
-}, [data?.chantOptions, item.key]);
+  // Filter category options based on API counts (if any)
+  const chantOptions = React.useMemo(() => {
+    if (!data?.chantOptions || data.chantOptions.length === 0) {
+      return fullCategoryOptions; // fallback to full list
+    }
 
-React.useEffect(() => {
-  if (chantOptions.length > 0) {
-    const lowest = chantOptions.reduce(
-      (min, o) => (o.count < min.count ? o : min),
-      chantOptions[0]
+    // API may send [count] or [{count, label}]
+    const apiCounts = data.chantOptions.map(c =>
+      typeof c === "number" ? c : c.count
     );
 
-    setSelectedChant(lowest);
-    onSelectCount?.(lowest.count);
-  }
-}, [chantOptions]);
+    return fullCategoryOptions.filter(opt => apiCounts.includes(opt.count));
+  }, [data?.chantOptions, item?.key]);
+
+  React.useEffect(() => {
+    if (chantOptions.length > 0) {
+      const lowest = chantOptions.reduce(
+        (min, o) => (o.count < min.count ? o : min),
+        chantOptions[0]
+      );
+
+      setSelectedChant(lowest);
+      onSelectCount?.(lowest.count);
+    }
+  }, [chantOptions]);
 
 
   return (
-        <Animated.View style={{ transform: [{ translateX: slideAnim }] }}>
-    <Card style={styles.cardContainer}>
-      <ScrollView
-        ref={scrollRef}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 150 }}
-      >
-        <ImageBackground
-          source={require("../../assets/CardBG.png")}
-          style={styles.headerImage}
-          imageStyle={styles.headerImageInside}
+    <Animated.View style={{ transform: [{ translateX: slideAnim }] }}>
+      <Card style={styles.cardContainer}>
+        <ScrollView
+          ref={scrollRef}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 150 }}
         >
-          <View style={styles.headerIcons}>
-            {!isLocked && (
-              <Ionicons
-                name="repeat-outline"
-                size={30}
-                color="#D4A017"
-                onPress={handleSwipeChange}
-                // onPress={onChange}
-              />
-            )}
-            <Ionicons
-              name="close"
-              size={30}
-              color="#000000"
-              onPress={onBackPress}
-            />
-          </View>
-          <TextComponent
-            type="DailyDetailheaderText"
-            style={styles.headerTitle}
+          <ImageBackground
+            source={require("../../assets/CardBG.png")}
+            style={styles.headerImage}
+            imageStyle={styles.headerImageInside}
           >
-            {data?.title || data?.text || data?.name || data?.short_text}
-          </TextComponent>
-          {data?.tags && (
-            <View style={styles.tagsCenterWrapper}>
-              {data?.tags?.map((item) => (
-                <TagItem key={item} item={item} />
-              ))}
+            <View style={styles.headerIcons}>
+              {!isLocked && (
+                <Ionicons
+                  name="repeat-outline"
+                  size={30}
+                  color="#D4A017"
+                  onPress={handleSwipeChange}
+                // onPress={onChange}
+                />
+              )}
+              <Ionicons
+                name="close"
+                size={30}
+                color="#000000"
+                onPress={onBackPress}
+              />
             </View>
-          )}
-          {data?.line && (
             <TextComponent
-              type="headerText"
-              style={{
-                color: "#D79239",
-                textAlign: "center",
-                marginHorizontal: 20,
-              }}
-              ellipsizeMode="tail"
+              type="DailyDetailheaderText"
+              style={styles.headerTitle}
             >
-              {data?.line}
+              {data?.title || data?.text || data?.name || data?.short_text}
             </TextComponent>
-          )}
-          {(data?.devanagari || data?.mantra) && (
-            <View style={styles.devanagariRow}>
+            {data?.tags && (
+              <View style={styles.tagsCenterWrapper}>
+                {data?.tags?.map((item) => (
+                  <TagItem key={item} item={item} />
+                ))}
+              </View>
+            )}
+            {data?.line && (
               <TextComponent
                 type="headerText"
-                style={styles.devanagariText}
-                numberOfLines={2}
-                ellipsizeMode="tail"
-                onTextLayout={(e) => {
-                  if (e.nativeEvent.lines.length > 2) {
-                    setIsDevanagariLong(true);
-                  }
+                style={{
+                  color: "#D79239",
+                  textAlign: "center",
+                  marginHorizontal: 20,
                 }}
+                ellipsizeMode="tail"
               >
-                {data?.devanagari || data?.mantra}
+                {data?.line}
               </TextComponent>
-              <TouchableOpacity onPress={() => setShowDevanagariModal(true)}>
+            )}
+            {(data?.devanagari || data?.mantra) && (
+              <View style={styles.devanagariRow}>
+                <TextComponent
+                  type="headerText"
+                  style={styles.devanagariText}
+                  numberOfLines={2}
+                  ellipsizeMode="tail"
+                  onTextLayout={(e) => {
+                    if (e.nativeEvent.lines.length > 2) {
+                      setIsDevanagariLong(true);
+                    }
+                  }}
+                >
+                  {data?.devanagari || data?.mantra}
+                </TextComponent>
+                <TouchableOpacity onPress={() => setShowDevanagariModal(true)}>
+                  <Ionicons
+                    name="information-circle-outline"
+                    size={20}
+                    color="#D79239"
+                    style={{ marginLeft: 4 }}
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
+            {(data?.iast || data?.name) && (
+              <View style={styles.pronunciationRow}>
+                <TextComponent type="cardText" style={styles.pronunciationText}>
+                  Pronunciation Guide (English)
+                </TextComponent>
                 <Ionicons
                   name="information-circle-outline"
                   size={20}
                   color="#D79239"
-                  style={{ marginLeft: 4 }}
+                  style={{ marginLeft: 6 }}
+                  onPress={() => setShowPronunciation(true)}
                 />
-              </TouchableOpacity>
-            </View>
-          )}
-          {(data?.iast || data?.name) && (
-            <View style={styles.pronunciationRow}>
-              <TextComponent type="cardText" style={styles.pronunciationText}>
-                Pronunciation Guide (English)
-              </TextComponent>
-              <Ionicons
-                name="information-circle-outline"
-                size={20}
-                color="#D79239"
-                style={{ marginLeft: 6 }}
-                onPress={() => setShowPronunciation(true)}
-              />
-            </View>
-          )}
-        </ImageBackground>
-          {data?.summary && (
-          <ExpandableText title="" text={data?.summary} numberOfLines={2} />
-        )}
-        {data?.suggested_practice && (
-          <ExpandableText title="" text={data?.suggested_practice} numberOfLines={2} />
-        )}
-        {data?.steps && (
-          <Card style={styles.meaningCard}>
-            <ExpandableText
-              title="Steps"
-              text={data?.steps}
-              numberOfLines={2}
-            />
-            {data?.duration && (
-              <TextComponent
-                type="boldText"
-                style={{ ...styles.titleCenter, color: Colors.Colors.BLACK }}
-              >
-                Time needed : {data?.duration}
-              </TextComponent>
+              </View>
             )}
-          </Card>
-        )}
-        {data?.insight && (
-          <ExpandableText
-            title={
-              data?.id?.includes("practice")
-                ? "Why This Works"
-                : "The Power of Sankalp"
-            }
-            text={data?.insight}
-            numberOfLines={3}
-          />
-        )}
-        {data?.meaning && (
-          <Card style={styles.meaningCard}>
-            <ExpandableText title="" text={data?.meaning} numberOfLines={2} />
-          </Card>
-        )}
-        {data?.howToLive && (
-          <Card style={styles.meaningCard}>
+          </ImageBackground>
+          {data?.summary && (
+            <ExpandableText title="" text={data?.summary} numberOfLines={2} />
+          )}
+          {data?.suggested_practice && (
+            <ExpandableText title="" text={data?.suggested_practice} numberOfLines={2} />
+          )}
+          {data?.steps && (
+            <Card style={styles.meaningCard}>
+              <ExpandableText
+                title="Steps"
+                text={data?.steps}
+                numberOfLines={2}
+              />
+              {data?.duration && (
+                <TextComponent
+                  type="boldText"
+                  style={{ ...styles.titleCenter, color: Colors.Colors.BLACK }}
+                >
+                  Time needed : {data?.duration}
+                </TextComponent>
+              )}
+            </Card>
+          )}
+          {data?.insight && (
             <ExpandableText
-              title="How To Live This Today"
-              text={data?.howToLive}
+              title={
+                data?.id?.includes("practice")
+                  ? "Why This Works"
+                  : "The Power of Sankalp"
+              }
+              text={data?.insight}
               numberOfLines={3}
             />
-          </Card>
-        )}
-        {/* {data?.essence?.text || data?.essence &&
+          )}
+          {data?.meaning && (
+            <Card style={styles.meaningCard}>
+              <ExpandableText title="" text={data?.meaning} numberOfLines={2} />
+            </Card>
+          )}
+          {data?.howToLive && (
+            <Card style={styles.meaningCard}>
+              <ExpandableText
+                title="How To Live This Today"
+                text={data?.howToLive}
+                numberOfLines={3}
+              />
+            </Card>
+          )}
+          {/* {data?.essence?.text || data?.essence &&
         <ExpandableText title="Essence" text={data?.essence?.text || data?.essence} numberOfLines={3} />
 } */}
-        {/* {data?.essence && (
+          {/* {data?.essence && (
           <ExpandableText
             title="Essence"
             text={
@@ -500,49 +500,49 @@ React.useEffect(() => {
             numberOfLines={3}
           />
         )} */}
-        {data?.essence && (
-          <ExpandableText
-            title="Essence"
-            text={
-              typeof data.essence === "string"
-                ? data.essence
-                : data.essence?.text || ""
-            }
-            numberOfLines={3}
-          />
-        )}
+          {data?.essence && (
+            <ExpandableText
+              title="Essence"
+              text={
+                typeof data.essence === "string"
+                  ? data.essence
+                  : data.essence?.text || ""
+              }
+              numberOfLines={3}
+            />
+          )}
 
-        {data?.benefits && (
-          <ExpandableText
-            title="Benefits"
-            text={data?.benefits}
-            numberOfLines={3}
-          />
-        )}
-        {data?.id?.includes("mantra") && mode === "new" &&
-          item?.key &&
-          categoryChantOptions[item.key] && (
-            <View style={styles.chantMainWrapper}>
-              <TextComponent
-                type="DailyboldText"
-                style={{ alignSelf: "center" }}
-              >
-                Count
-              </TextComponent>
+          {data?.benefits && (
+            <ExpandableText
+              title="Benefits"
+              text={data?.benefits}
+              numberOfLines={3}
+            />
+          )}
+          {data?.id?.includes("mantra") && mode === "new" &&
+            item?.key &&
+            categoryChantOptions[item.key] && (
+              <View style={styles.chantMainWrapper}>
+                <TextComponent
+                  type="DailyboldText"
+                  style={{ alignSelf: "center" }}
+                >
+                  Count
+                </TextComponent>
 
-              <View style={styles.chantGrid}>
-                {chantOptions.map((option) => (
-  <ChantOptionItem
-    key={option.count}
-    item={option}
-    selected={selectedChant}
-    onSelect={(opt) => {
-      setSelectedChant(opt);
-      onSelectCount(opt.count);
-    }}
-  />
-))}
-                {/* {categoryChantOptions[item.key].options.map((option) => (
+                <View style={styles.chantGrid}>
+                  {chantOptions.map((option) => (
+                    <ChantOptionItem
+                      key={option.count}
+                      item={option}
+                      selected={selectedChant}
+                      onSelect={(opt) => {
+                        setSelectedChant(opt);
+                        onSelectCount(opt.count);
+                      }}
+                    />
+                  ))}
+                  {/* {categoryChantOptions[item.key].options.map((option) => (
                   <ChantOptionItem
                     key={option.count}
                     item={option}
@@ -553,50 +553,50 @@ React.useEffect(() => {
 }}
                   />
                 ))} */}
+                </View>
               </View>
-            </View>
-          )}
+            )}
 
-        <MantraPronunciationModal
-          visible={showPronunciation}
-          onClose={() => setShowPronunciation(false)}
-          title={data?.title}
-          iast={data?.iast}
-        />
-        <MantraPronunciationModal
-          visible={showDevanagariModal}
-          onClose={() => setShowDevanagariModal(false)}
-          title={data?.title}
-          iast={data?.devanagari}
-        />
-      </ScrollView>
+          <MantraPronunciationModal
+            visible={showPronunciation}
+            onClose={() => setShowPronunciation(false)}
+            title={data?.title}
+            iast={data?.iast}
+          />
+          <MantraPronunciationModal
+            visible={showDevanagariModal}
+            onClose={() => setShowDevanagariModal(false)}
+            title={data?.title}
+            iast={data?.devanagari}
+          />
+        </ScrollView>
         <View style={styles.fixedButtons}>
-      {!isLocked && (
-          <TouchableOpacity style={styles.changeButton} 
-                onPress={handleSwipeChange}
-          // onPress={onChange}
-          >
-            <Ionicons
-              name="repeat-outline"
-              size={22}
-              color="#D4A017"
-              style={{ marginRight: 10 }}
-            />
-            <TextComponent type="headerText" style={styles.changeText}>
-              Change
-            </TextComponent>
-          </TouchableOpacity>
-)}
-      {mode === "new" && (
-          <TouchableOpacity style={mode === "new" ? styles.selectButton : styles.selectNewButton } onPress={onBackPress}>
-            <TextComponent type="headerText" style={styles.selectText}>
-              Select
-            </TextComponent>
-          </TouchableOpacity>
-      )}
+          {!isLocked && (
+            <TouchableOpacity style={styles.changeButton}
+              onPress={handleSwipeChange}
+            // onPress={onChange}
+            >
+              <Ionicons
+                name="repeat-outline"
+                size={22}
+                color="#D4A017"
+                style={{ marginRight: 10 }}
+              />
+              <TextComponent type="headerText" style={styles.changeText}>
+                Change
+              </TextComponent>
+            </TouchableOpacity>
+          )}
+          {mode === "new" && (
+            <TouchableOpacity style={mode === "new" ? styles.selectButton : styles.selectNewButton} onPress={onBackPress}>
+              <TextComponent type="headerText" style={styles.selectText}>
+                Select
+              </TextComponent>
+            </TouchableOpacity>
+          )}
         </View>
-      
-    </Card>
+
+      </Card>
     </Animated.View>
   );
 };
@@ -611,7 +611,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.Colors.App_theme,
     height: "92%",
-    marginTop: 25,
+    marginTop: 10,
     overflow: "hidden",
   },
   headerImage: {
@@ -732,12 +732,12 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
   },
-  selectNewButton:{
-      backgroundColor: "#D4A017",
+  selectNewButton: {
+    backgroundColor: "#D4A017",
     borderRadius: 4,
     paddingVertical: 10,
     paddingHorizontal: 20,
-alignSelf:"flex-end"
+    alignSelf: "flex-end"
   },
   selectText: {
     color: "#FFFFFF",

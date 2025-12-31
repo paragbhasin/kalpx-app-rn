@@ -501,7 +501,46 @@ const buildFinalPractices = () => {
                         }}
                       > */}
       <Header />
-  <ScrollView
+
+      {/* HEADER + CART ICON - FIXED AT TOP */}
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginHorizontal: 16,
+          marginTop: 4,
+          paddingVertical: 8,
+          backgroundColor: "#FFFFFF",
+        }}
+      >
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          style={{
+            padding: 6,
+            marginTop: 6,
+            zIndex: 100,
+          }}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          <Ionicons name="arrow-back" size={28} color="#000" />
+        </TouchableOpacity>
+
+        {/* TITLE */}
+        <TextComponent
+          type="loginHeaderText"
+          style={{
+            color: Colors.Colors.Daily_black,
+            flex: 1,
+            textAlign: "center",
+            marginLeft: -32, // keeps centered
+          }}
+        >
+          {categoryItem?.name ?? "Daily Routine"}
+        </TextComponent>
+      </View>
+
+      <ScrollView
         nestedScrollEnabled={true}
         contentContainerStyle={{ paddingBottom: 30 }}
         showsVerticalScrollIndicator={false}
@@ -542,77 +581,6 @@ const buildFinalPractices = () => {
           }
         }}
       />
-
-      {/* HEADER + CART ICON */}
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginHorizontal: 16,
-          marginTop: 4,
-        }}
-      >
-  <TouchableOpacity
-  onPress={() => navigation.navigate("DailyPracticeList")}
-  style={{
-    padding: 6,
-    marginTop: 6,
-    zIndex: 100,
-  }}
-  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
->
-  <Ionicons name="chevron-back" size={28} color="#000" />
-</TouchableOpacity>
-
-
-
-        {/* TITLE */}
-        <TextComponent
-          type="loginHeaderText"
-          style={{
-            color: Colors.Colors.Daily_black,
-            flex: 1,
-            textAlign: "center",
-            marginLeft: -32, // keeps centered with cart icon
-          }}
-        >
-          {categoryItem?.name ?? "Daily Routine"}
-        </TextComponent>
-
-        {/* ⭐ CART ICON */}
-        {/* <TouchableOpacity
-          onPress={() => setCartModalVisible(true)}
-          style={{ position: "relative", width: 32, height: 32 }}
-        >
-          {localPractices.length > 0 && (
-            <View
-              style={{
-                position: "absolute",
-                top: -6,
-                right: -6,
-                backgroundColor: "#1877F2",
-                minWidth: 18,
-                height: 18,
-                borderRadius: 9,
-                alignItems: "center",
-                justifyContent: "center",
-                zIndex: 10,
-              }}
-            >
-              <TextComponent type="semiBoldText" style={{ color: "#fff", fontSize: 11 }}>
-                {localPractices.length}
-              </TextComponent>
-            </View>
-          )}
-
-          <Image
-            source={cartIcon}
-            style={{ width: 30, height: 30 }}
-            resizeMode="contain"
-          />
-        </TouchableOpacity> */}
-      </View>
 
       {/* DESCRIPTION */}
       <TextComponent
@@ -772,7 +740,7 @@ console.log("payload >>>>>>",JSON.stringify(payload));
   dispatch(
     submitDailyDharmaSetup(payload, (res) => {
       if (res.success) {
-        navigation.navigate("TrackerTabs", { screen: "Tracker" });
+        navigation.navigate("TrackerTabs", { screen: "Tracker", fromSetup: true });
       }
     })
   );

@@ -20,8 +20,9 @@
       "usesAppleSignIn": true,
       "appleTeamId": "9G5NZ5LBRU",
       "googleServicesFile": "./GoogleService-Info.plist",
+      "buildNumber": "2",
       "entitlements": {
-        "aps-environment": "development"
+        "aps-environment": "production"
       }
     },
     "android": {

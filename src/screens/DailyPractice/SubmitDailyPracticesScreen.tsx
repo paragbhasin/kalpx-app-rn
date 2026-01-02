@@ -264,16 +264,31 @@ const SubmitDailyPracticesScreen = ({ route }) => {
                   ? "Create Your Own Practice"
                   : "Save my Practices"}
             </TextComponent>
-            
 
+      
             <CartIcon />
           </View>
+                <TextComponent
+            type="subDailyText"
+                      style={{
+                        color: Colors.Colors.BLACK,
+                        textAlign: "center",
+                        marginHorizontal: 10,
+                        marginTop: 12,
+                      }}
+            >
+                         Review your practices before adding them to your routine
+
+            </TextComponent>
 
           <TextComponent
             type="DailyHeaderText"
             style={{ marginHorizontal: 16, marginTop: 20 }}
           >
-            Selected Practices ({routePractices.length})
+            Added Practices ({routePractices.length})
+          </TextComponent>
+                    <TextComponent type="subDailyText" style={{ color: Colors.Colors.BLACK, marginHorizontal: 16, marginTop: 4 }}>
+            These will become part of your routine
           </TextComponent>
 
           {/* PRACTICE CARDS — ROUTE ONLY */}
@@ -397,6 +412,9 @@ const SubmitDailyPracticesScreen = ({ route }) => {
               {route?.params?.custom ? "Save my Practices" : "Next"}
             </TextComponent>
           </TouchableOpacity>
+            <TextComponent type="subDailyText" style={{ color: Colors.Colors.BLACK, marginHorizontal: 16, marginTop: 4 }}>
+   You can edit them anytime
+          </TextComponent>
         </View>
 
         <LoadingOverlay visible={loading} text="Saving..." />

@@ -212,6 +212,7 @@ const MantraCard = ({
         // ];
 
         return (
+     
           <View
             key={index}
             style={{
@@ -260,6 +261,7 @@ const MantraCard = ({
                   style={styles.partialBgContainer}
                   imageStyle={styles.partialBgImage}
                 >
+                   {!viewOnly && (
                   <TextComponent
                     type="semiBoldText"
                     style={{ color: Colors.Colors.App_theme }}
@@ -267,6 +269,8 @@ const MantraCard = ({
                     {uiHeaderText}
                     {/* {t("mantraCard.shareSadana")} */}
                   </TextComponent>
+                   )}
+                      {!viewOnly && (
                   <View style={styles.headerRow}>
                     <TextComponent
                       type="cardHeaderText"
@@ -275,6 +279,8 @@ const MantraCard = ({
                       {t("mantraCard.dailyMantra")}
                     </TextComponent>
                   </View>
+                    )}
+ {!viewOnly && (
                   <View style={{ flexDirection: "row", alignSelf: "flex-end", right: 20, marginTop: -37 }}>
                     <TouchableOpacity
                       onPress={handleShareMantra}
@@ -309,6 +315,7 @@ const MantraCard = ({
                       <Icon name="videocam-outline" size={18} color="#fff" />
                     </TouchableOpacity>
                   </View>
+ )}
                   <View
                     style={{
                       flexDirection: "row",
@@ -355,104 +362,84 @@ const MantraCard = ({
                       </View>
                     ))}
                   </ScrollView>
-                  <View style={{ borderColor: Colors.Colors.App_theme, borderTopWidth: 0.6, marginHorizontal: -16, }} />
-                  <View style={{ alignItems: "center" }}>
-                    <TextComponent
-                      type="cardText"
-                      style={styles.repLabel}
-                    >
-                      {t("mantraCard.suggestedReps")}
-                    </TextComponent>
-                    <ScrollView
-                      horizontal
-                      showsHorizontalScrollIndicator={false}
-                      style={{ marginVertical: 8 }}
-                    >
-                      {/* {repsOrdered.map((rep, i) => {
-  const selected = selectedReps[currentMantra.id]
-    ? selectedReps[currentMantra.id] === rep
-    : rep === currentMantra.suggested_reps;
+                  {!viewOnly && (
+                    <>
+                      <View
+                        style={{
+                          borderColor: Colors.Colors.App_theme,
+                          borderTopWidth: 0.6,
+                          marginHorizontal: -16,
+                        }}
+                      />
 
-  return (
-    <TouchableOpacity
-      key={i}
-      onPress={() => {
-        setSelectedReps((prev) => ({
-          ...prev,
-          [currentMantra.id]: rep,
-        }));
-      }}
-      style={[
-        styles.repBox,
-        selected && {
-          backgroundColor: "#D4A0174A",
-          borderColor: Colors.Colors.Yellow,
-          borderWidth: 1,
-        },
-      ]}
-    >
-      <TextComponent
-        type="semiBoldText"
-        style={{ color: Colors.Colors.BLACK }}
-      >
-        X{rep}
-      </TextComponent>
-    </TouchableOpacity>
-  );
-})} */}
-                      {repsOrdered.map((rep, i) => {
+                      <View style={{ alignItems: "center" }}>
+                        <TextComponent type="cardText" style={styles.repLabel}>
+                          {t("mantraCard.suggestedReps")}
+                        </TextComponent>
 
-                        // If mantra already started, lock selection & highlight only API reps
-                        const isLocked = startedMantra;
-                        const apiSelected = selectedAPIReps === rep;
+                        <ScrollView
+                          horizontal
+                          showsHorizontalScrollIndicator={false}
+                          style={{ marginVertical: 8 }}
+                        >
+                          {repsOrdered.map((rep, i) => {
+                            const isLocked = startedMantra;
+                            const apiSelected = selectedAPIReps === rep;
 
-                        const selected = isLocked
-                          ? apiSelected
-                          : selectedReps[currentMantra.id]
-                            ? selectedReps[currentMantra.id] === rep
-                            : rep === currentMantra.suggested_reps;
+                            const selected = isLocked
+                              ? apiSelected
+                              : selectedReps[currentMantra.id]
+                              ? selectedReps[currentMantra.id] === rep
+                              : rep === currentMantra.suggested_reps;
 
-                        return (
-                          <TouchableOpacity
-                            key={i}
-                            disabled={isLocked}   // 🔥 disable all touches when running mantra
-                            onPress={() => {
-                              if (!isLocked) {
-                                setSelectedReps((prev) => ({
-                                  ...prev,
-                                  [currentMantra.id]: rep,
-                                }));
-                              }
-                            }}
-                            style={[
-                              styles.repBox,
-                              selected && {
-                                backgroundColor: "#D4A0174A",
-                                borderColor: Colors.Colors.Yellow,
-                                borderWidth: 1,
-                              },
-                              isLocked && !selected && {
-                                opacity: 0.3,  // 🔥 Grey out unselected reps once API reps is set
-                              }
-                            ]}
-                          >
-                            <TextComponent
-                              type="semiBoldText"
-                              style={{
-                                color: Colors.Colors.BLACK,
-                                opacity: isLocked && !selected ? 0.5 : 1,
-                              }}
-                            >
-                              X{rep}
-                            </TextComponent>
-                          </TouchableOpacity>
-                        );
-                      })}
+                            return (
+                              <TouchableOpacity
+                                key={i}
+                                disabled={isLocked}
+                                onPress={() => {
+                                  if (!isLocked) {
+                                    setSelectedReps((prev) => ({
+                                      ...prev,
+                                      [currentMantra.id]: rep,
+                                    }));
+                                  }
+                                }}
+                                style={[
+                                  styles.repBox,
+                                  selected && {
+                                    backgroundColor: "#D4A0174A",
+                                    borderColor: Colors.Colors.Yellow,
+                                    borderWidth: 1,
+                                  },
+                                  isLocked && !selected && {
+                                    opacity: 0.3,
+                                  },
+                                ]}
+                              >
+                                <TextComponent
+                                  type="semiBoldText"
+                                  style={{
+                                    color: Colors.Colors.BLACK,
+                                    opacity: isLocked && !selected ? 0.5 : 1,
+                                  }}
+                                >
+                                  X{rep}
+                                </TextComponent>
+                              </TouchableOpacity>
+                            );
+                          })}
+                        </ScrollView>
+                      </View>
 
-
-                    </ScrollView>
-                  </View>
-                  <View style={{ borderColor: Colors.Colors.App_theme, borderTopWidth: 0.6, marginHorizontal: -16, }} />
+                      <View
+                        style={{
+                          borderColor: Colors.Colors.App_theme,
+                          borderTopWidth: 0.6,
+                          marginHorizontal: -16,
+                        }}
+                      />
+                    </>
+                  )}
                 </View>
                 {/* </ScrollView> */}
                 {!viewOnly && (

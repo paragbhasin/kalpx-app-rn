@@ -868,7 +868,7 @@ const TrackerEdit = ({ route }) => {
 
           <ScrollView
             style={{ flex: 1, marginTop: 10 }}
-            contentContainerStyle={{ paddingHorizontal: 16 }}
+            contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
             showsVerticalScrollIndicator={false}
           >
             <MantraCard
@@ -910,7 +910,7 @@ const TrackerEdit = ({ route }) => {
 
           <ScrollView
             style={{ flex: 1, marginTop: 10 }}
-            contentContainerStyle={{ paddingHorizontal: 16 }}
+            contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
             showsVerticalScrollIndicator={false}
           >
             <SankalpCard

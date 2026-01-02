@@ -166,17 +166,7 @@ const categoryChantOptions = {
 //   },
 // };
 
-const DownUpIcon = ({ expanded }) => (
-  <Ionicons
-    name={expanded ? "caret-up" : "caret-down"}
-    size={22}
-    color={Colors.Colors.BLACK}
-  />
-);
-
-const ExpandableText = ({ title, text, numberOfLines }) => {
-  const [expanded, setExpanded] = useState(false);
-
+const ExpandableText = ({ title, text }) => {
   return (
     <View style={styles.expandableContainer}>
       {title !== "" && (
@@ -184,19 +174,13 @@ const ExpandableText = ({ title, text, numberOfLines }) => {
           {title}
         </TextComponent>
       )}
-      <TouchableOpacity onPress={() => setExpanded(!expanded)}>
-        <TextComponent
-          type="streakSadanaText"
-          style={styles.expandText}
-          numberOfLines={expanded ? undefined : numberOfLines}
-        >
-          {Array.isArray(text) ? text.map((t) => "• " + t).join("\n") : text}
-        </TextComponent>
 
-        <View style={styles.arrowIconContainer}>
-          <DownUpIcon expanded={expanded} />
-        </View>
-      </TouchableOpacity>
+      <TextComponent
+        type="streakSadanaText"
+        style={styles.expandText}
+      >
+        {Array.isArray(text) ? text.map((t) => "• " + t).join("\n") : text}
+      </TextComponent>
     </View>
   );
 };
@@ -439,17 +423,16 @@ const DailyPracticeDetailsCard = ({
             )}
           </ImageBackground>
           {data?.summary && (
-            <ExpandableText title="" text={data?.summary} numberOfLines={2} />
+            <ExpandableText title="" text={data?.summary} />
           )}
           {data?.suggested_practice && (
-            <ExpandableText title="" text={data?.suggested_practice} numberOfLines={2} />
+            <ExpandableText title="" text={data?.suggested_practice} />
           )}
           {data?.steps && (
             <Card style={styles.meaningCard}>
               <ExpandableText
                 title="Steps"
                 text={data?.steps}
-                numberOfLines={2}
               />
               {data?.duration && (
                 <TextComponent
@@ -469,12 +452,11 @@ const DailyPracticeDetailsCard = ({
                   : "The Power of Sankalp"
               }
               text={data?.insight}
-              numberOfLines={3}
             />
           )}
           {data?.meaning && (
             <Card style={styles.meaningCard}>
-              <ExpandableText title="" text={data?.meaning} numberOfLines={2} />
+              <ExpandableText title="" text={data?.meaning} />
             </Card>
           )}
           {data?.howToLive && (
@@ -482,7 +464,6 @@ const DailyPracticeDetailsCard = ({
               <ExpandableText
                 title="How To Live This Today"
                 text={data?.howToLive}
-                numberOfLines={3}
               />
             </Card>
           )}
@@ -508,7 +489,6 @@ const DailyPracticeDetailsCard = ({
                   ? data.essence
                   : data.essence?.text || ""
               }
-              numberOfLines={3}
             />
           )}
 
@@ -516,10 +496,9 @@ const DailyPracticeDetailsCard = ({
             <ExpandableText
               title="Benefits"
               text={data?.benefits}
-              numberOfLines={3}
             />
           )}
-          {data?.id?.includes("mantra") && mode === "new" &&
+          {/* {data?.id?.includes("mantra") && mode === "new" &&
             item?.key &&
             categoryChantOptions[item.key] && (
               <View style={styles.chantMainWrapper}>
@@ -542,22 +521,12 @@ const DailyPracticeDetailsCard = ({
                       }}
                     />
                   ))}
-                  {/* {categoryChantOptions[item.key].options.map((option) => (
-                  <ChantOptionItem
-                    key={option.count}
-                    item={option}
-                    selected={selectedChant}
-                 onSelect={(opt) => {
-  setSelectedChant(opt);
-  onSelectCount(opt.count);
-}}
-                  />
-                ))} */}
+           
                 </View>
               </View>
-            )}
+            )} */}
 
-          <MantraPronunciationModal
+          {/* <MantraPronunciationModal
             visible={showPronunciation}
             onClose={() => setShowPronunciation(false)}
             title={data?.title}
@@ -568,10 +537,11 @@ const DailyPracticeDetailsCard = ({
             onClose={() => setShowDevanagariModal(false)}
             title={data?.title}
             iast={data?.devanagari}
-          />
+          /> */}
         </ScrollView>
         <View style={styles.fixedButtons}>
           {!isLocked && (
+            <>
             <TouchableOpacity style={styles.changeButton}
               onPress={handleSwipeChange}
             // onPress={onChange}
@@ -586,7 +556,7 @@ const DailyPracticeDetailsCard = ({
                 Change
               </TextComponent>
             </TouchableOpacity>
-          )}
+       
           {mode === "new" && (
             <TouchableOpacity style={mode === "new" ? styles.selectButton : styles.selectNewButton} onPress={onBackPress}>
               <TextComponent type="headerText" style={styles.selectText}>
@@ -594,6 +564,8 @@ const DailyPracticeDetailsCard = ({
               </TextComponent>
             </TouchableOpacity>
           )}
+          </>
+             )}
         </View>
 
       </Card>
@@ -672,10 +644,6 @@ const styles = StyleSheet.create({
   expandText: {
     width: "90%",
     alignSelf: "center",
-  },
-  arrowIconContainer: {
-    alignSelf: "flex-end",
-    marginRight: 10,
   },
   meaningCard: {
     backgroundColor: Colors.Colors.white,

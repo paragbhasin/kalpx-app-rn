@@ -417,14 +417,29 @@ const ConfirmSanatanPractices = ({ route }) => {
           </TouchableOpacity> */}
           </View>
           <TextComponent type="subText" style={{ color: Colors.Colors.BLACK, textAlign: "center", marginHorizontal: 10 }}>Set how often you want to do each part of your routine.</TextComponent>
-          <TextComponent type="subDailyText" style={{ color: Colors.Colors.BLACK, textAlign: "center", marginHorizontal: 10, marginTop: 12 }}>Review your practices before adding them to your routine</TextComponent>
-
+          {route?.name !== "ConfirmSanatanPractices" && (
+            <TextComponent
+              type="subDailyText"
+              style={{
+                color: Colors.Colors.BLACK,
+                textAlign: "center",
+                marginHorizontal: 10,
+                marginTop: 12,
+              }}
+            >
+              Review your practices before adding them to your routine
+            </TextComponent>
+          )}
+{ route?.name !== "ConfirmSanatanPractices" && (
+  <>
           <TextComponent type="DailyHeaderText" style={{ marginHorizontal: 16, marginTop: 20 }}>
             Added Practices ({formik.values.mantras.length})
           </TextComponent>
           <TextComponent type="subDailyText" style={{ color: Colors.Colors.BLACK, marginHorizontal: 16, marginTop: 4 }}>
             These will become part of your routine
           </TextComponent>
+          </>
+          )}
 
           <FlatList
             data={formik.values.mantras}
@@ -479,9 +494,23 @@ const ConfirmSanatanPractices = ({ route }) => {
               }}
             >
               <TextComponent type="cardText" style={{ color: "#fff" }}>
-                Confirm
+             {route?.name === "ConfirmSanatanPractices" ?'Next': "Confirm" }  
               </TextComponent>
+        
             </TouchableOpacity>
+                  { route?.name === "ConfirmSanatanPractices" && (
+         <TextComponent
+  type="subDailyText"
+  style={{
+    color: Colors.Colors.BLACK,
+    marginHorizontal: 16,
+    marginTop: 4,
+    textAlign: "center",
+  }}
+>
+  These settings will shape your routine
+</TextComponent>
+              )}
           </View>
         </ScrollView>
 

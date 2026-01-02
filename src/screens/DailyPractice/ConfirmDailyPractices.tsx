@@ -84,7 +84,7 @@ const ConfirmDailyPractices = ({ route }) => {
   });
 
   const normalizeSource = (source?: string) => {
-    if (!source) return "practice";
+    if (!source || typeof source !== "string") return "practice";
     if (source.includes("mantra")) return "mantra";
     if (source.includes("sankalp")) return "sankalp";
     return "practice";

@@ -171,7 +171,7 @@ const customPractices = localPractices.filter(
   }}
 />
   <ImageBackground
-                    source={require("../../../assets/Tracker_BG.png")}
+                
                     style={{
                       alignSelf: "center",
                           justifyContent: "center",

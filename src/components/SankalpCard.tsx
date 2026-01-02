@@ -206,6 +206,8 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                 style={styles.partialBgContainer}
                 imageStyle={styles.partialBgImage}
               >
+                 {!viewOnly && (
+                <>
                 <TextComponent type="semiBoldText" style={{ color: Colors.Colors.App_theme }}>
                   {uiHeaderText}
                 </TextComponent>
@@ -245,6 +247,8 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                     <Icon name="videocam-outline" size={18} color="#fff" />
                   </TouchableOpacity>
                 </View>
+                </>
+                 )}
                 <TextComponent
                   type="cardText"
                   style={{ color: Colors.Colors.blue_text, textAlign: "center", marginHorizontal: 10 }}

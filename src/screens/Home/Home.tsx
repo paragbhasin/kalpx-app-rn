@@ -4,7 +4,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { AnyAction } from "@reduxjs/toolkit";
 import * as Notifications from 'expo-notifications';
-import * as Updates from "expo-updates";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -144,25 +143,13 @@ useFocusEffect(
 
 useEffect(() => {
   const checkForUpdates = async () => {
-    console.log("🔍 Checking for updates...");
     try {
-      const update = await Updates.checkForUpdateAsync();
-      console.log("🟡 OTA Update Check Result:", update);
-      if (update.isAvailable) {
-        setUpdateType("OTA");
-        setShowUpdateModal(true);
-        console.log("🚀 OTA update available!");
-        return;
-      }
       const latestVersion = await VersionCheck.getLatestVersion();
       const currentVersion = await VersionCheck.getCurrentVersion();
-      console.log("📱 App Versions:", { latestVersion, currentVersion });
+
       if (latestVersion && latestVersion !== currentVersion) {
-        console.log("🆕 Store update available!");
         setUpdateType("STORE");
         setShowUpdateModal(true);
-      } else {
-        console.log("✅ App is up to date.");
       }
     } catch (err) {
       console.log("❌ Error checking updates:", err);
@@ -1368,21 +1355,11 @@ description: "Discover meaningful rituals, daily practices, and devotional routi
   visible={showUpdateModal}
   onLater={() => setShowUpdateModal(false)}
   onUpdateNow={async () => {
-    console.log("updateType >>>>>>",updateType);
-    if (updateType === "OTA") {
-      try {
-        await Updates.fetchUpdateAsync();
-        await Updates.reloadAsync(); // restarts with new OTA update
-      } catch (e) {
-        console.log("OTA update failed:", e);
-      }
-    } else {
-      const storeUrl =
-        Platform.OS === "ios"
-          ? "https://apps.apple.com/app/kalpx/id6755144623"
-          : "market://details?id=com.kalpx.app";
-      Linking.openURL(storeUrl);
-    }
+    const storeUrl =
+      Platform.OS === "ios"
+        ? "https://apps.apple.com/app/kalpx/id6755144623"
+        : "market://details?id=com.kalpx.app";
+    Linking.openURL(storeUrl);
   }}
 />
 <NotificationPermissionModal

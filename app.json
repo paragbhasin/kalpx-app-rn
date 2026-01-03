@@ -31,8 +31,7 @@
         "NSPhotoLibraryUsageDescription": "KalpX needs access to your photo library so you can upload images you choose.",
         "NSPhotoLibraryAddUsageDescription": "KalpX may save images to your photo library when you choose to download or share content.",
         "NSMicrophoneUsageDescription": "KalpX uses the microphone for audio or video related features.",
-        "NSLocationWhenInUseUsageDescription": "KalpX uses location to personalize classes and content.",
-        "NSUserTrackingUsageDescription": "This helps us improve app experience and analytics."
+        "NSLocationWhenInUseUsageDescription": "KalpX uses location to personalize classes and content."
       }
     },
     "android": {

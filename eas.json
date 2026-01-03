@@ -7,6 +7,9 @@
       "env": {
         "EXPO_UPDATES_DISABLED": "1"
       },
+      "ios": {
+        "autoIncrement": false
+      },
       "android": {
         "buildType": "app-bundle"
       }

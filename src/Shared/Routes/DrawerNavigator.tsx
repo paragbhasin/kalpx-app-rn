@@ -58,7 +58,7 @@ const CustomDrawerContent = (props) => {
 
 
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
-   const [trackerData, setTrackerData] = React.useState(null);  // ✅ ADD THIS
+  const [trackerData, setTrackerData] = React.useState(null);  // ✅ ADD THIS
 
   // -----------------------------
   // ✅ FETCH DAILY DHARMA TRACKER HERE
@@ -103,129 +103,129 @@ const CustomDrawerContent = (props) => {
     props.navigation.navigate("Login");
   };
 
-//   const categories = [
-//     {
-//       id: "1",
-//     name:  trackerData?.active_practices?.length > 0 ? t("categories.sadana"): t("categories.dharma"),
-//     title: trackerData?.active_practices?.length > 0 ? "SadanaTrackerScreen" : "Dharma",
-//       icon: require("../../../assets/Group.png"),
-//     },
-//     {
-//       id: "2",
-//       name: t("categories.explore"),
-//       title: "Explore",
-//       icon: require("../../../assets/Exploreicon.png"),
-//     },
-//     // {
-//     //   id: "3",
-//     //   name: t("categories.travel"),
-//     //   title: "Travel",
-//     //   icon: require("../../../assets/darma.png"),
-//     // },
-//     // {
-//     //   id: "4",
-//     //   name: t("categories.pooja"),
-//     //   title: "Pooja",
-//     //   icon: require("../../../assets/pooja.png"),
-//     // },
-//     // {
-//     //   id: "5",
-//     //   name: t("categories.retreat"),
-//     //   title: "Retreat",
-//     //   icon: require("../../../assets/yoga.png"),
-//     // },
-//     {
-//       id: "6",
-//       name: t("categories.classes"),
-//       title: "ClassesScreen",
-//       icon: require("../../../assets/onlinecion.png"),
-//     },
-// {
-//   id: "7",
-//   name: t("tabs.profile"),
-//   title: "Profile",
-//   icon: "person-outline",
-//   activeIcon: "person"
-// },
+  //   const categories = [
+  //     {
+  //       id: "1",
+  //     name:  trackerData?.active_practices?.length > 0 ? t("categories.sadana"): t("categories.dharma"),
+  //     title: trackerData?.active_practices?.length > 0 ? "SadanaTrackerScreen" : "Dharma",
+  //       icon: require("../../../assets/Group.png"),
+  //     },
+  //     {
+  //       id: "2",
+  //       name: t("categories.explore"),
+  //       title: "Explore",
+  //       icon: require("../../../assets/Exploreicon.png"),
+  //     },
+  //     // {
+  //     //   id: "3",
+  //     //   name: t("categories.travel"),
+  //     //   title: "Travel",
+  //     //   icon: require("../../../assets/darma.png"),
+  //     // },
+  //     // {
+  //     //   id: "4",
+  //     //   name: t("categories.pooja"),
+  //     //   title: "Pooja",
+  //     //   icon: require("../../../assets/pooja.png"),
+  //     // },
+  //     // {
+  //     //   id: "5",
+  //     //   name: t("categories.retreat"),
+  //     //   title: "Retreat",
+  //     //   icon: require("../../../assets/yoga.png"),
+  //     // },
+  //     {
+  //       id: "6",
+  //       name: t("categories.classes"),
+  //       title: "ClassesScreen",
+  //       icon: require("../../../assets/onlinecion.png"),
+  //     },
+  // {
+  //   id: "7",
+  //   name: t("tabs.profile"),
+  //   title: "Profile",
+  //   icon: "person-outline",
+  //   activeIcon: "person"
+  // },
 
-//   ];
+  //   ];
 
   const categories = [
-  {
-    id: "1",
-    name: trackerData?.active_practices?.length > 0 ? t("categories.sadana") : t("categories.dharma"),
-    title: trackerData?.active_practices?.length > 0 ? "SadanaTrackerScreen" : "Dharma",
-    iconType: "image",
-    icon: require("../../../assets/Group.png"),
-  },
-  {
-    id: "2",
-    name: t("categories.explore"),
-    title: "Explore",
-    iconType: "image",
-    icon: require("../../../assets/Exploreicon.png"),
-  },
-  {
-    id: "6",
-    name: t("categories.classes"),
-    title: "ClassesScreen",
-    iconType: "image",
-    icon: require("../../../assets/onlinecion.png"),
-  },
-  {
-    id: "7",
-    name: t("tabs.profile"),
-    title: "Profile",
-    iconType: "vector",
-    icon: "person-outline",
-    activeIcon: "person-outline",
-  },
-];
+    {
+      id: "1",
+      name: 'My Routine',
+      title: trackerData?.active_practices?.length > 0 ? "TrackerTabs" : "DailyPracticeLogin",
+      iconType: "image",
+      icon: require("../../../assets/Group.png"),
+    },
+    {
+      id: "2",
+      name: t("categories.explore"),
+      title: "Explore",
+      iconType: "image",
+      icon: require("../../../assets/Exploreicon.png"),
+    },
+    {
+      id: "6",
+      name: t("categories.classes"),
+      title: "ClassesScreen",
+      iconType: "image",
+      icon: require("../../../assets/onlinecion.png"),
+    },
+    {
+      id: "7",
+      name: t("tabs.profile"),
+      title: "Profile",
+      iconType: "vector",
+      icon: "person-outline",
+      activeIcon: "person-outline",
+    },
+  ];
 
 
-const renderCategory = ({ item }) => (
-  <TouchableOpacity
-    style={{ flexDirection: "row", alignItems: "center", padding: 12 }}
-    onPress={() => {
+  const renderCategory = ({ item }) => (
+    <TouchableOpacity
+      style={{ flexDirection: "row", alignItems: "center", padding: 12 }}
+      onPress={() => {
 
-      if (item.title === "Profile") {
-        props.navigation.navigate("HomePage", {
-          screen: "Profile",
-        });
-      } else {
-        props.navigation.navigate("HomePage", {
-          screen: "HomePage",
-          params: { screen: item.title },
-        });
-      }
+        if (item.title === "Profile") {
+          props.navigation.navigate("HomePage", {
+            screen: "Profile",
+          });
+        } else {
+          props.navigation.navigate("HomePage", {
+            screen: "HomePage",
+            params: { screen: item.title },
+          });
+        }
 
-      props.navigation.closeDrawer();
-    }}
-  >
+        props.navigation.closeDrawer();
+      }}
+    >
 
-    {/* 🔥 Handle VECTOR icon */}
-    {item.iconType === "vector" && (
-      <Ionicons
-        name={item.icon}
-        size={22}
-        color="#CA8A04"
-        style={{ marginRight: 15 }}
-      />
-    )}
+      {/* 🔥 Handle VECTOR icon */}
+      {item.iconType === "vector" && (
+        <Ionicons
+          name={item.icon}
+          size={22}
+          color="#CA8A04"
+          style={{ marginRight: 15 }}
+        />
+      )}
 
-    {/* 🔥 Handle PNG IMAGE icon */}
-    {item.iconType === "image" && (
-      <Image
-        source={item.icon}
-        style={{ width: 24, height: 24, marginRight: 15 }}
-      />
-    )}
+      {/* 🔥 Handle PNG IMAGE icon */}
+      {item.iconType === "image" && (
+        <Image
+          source={item.icon}
+          style={{ width: 24, height: 24, marginRight: 15 }}
+        />
+      )}
 
-    <TextComponent type="headerText" allowFontScaling={false} style={{ }}>
-      {item.name}
-    </TextComponent>
-  </TouchableOpacity>
-);
+      <TextComponent type="headerText" allowFontScaling={false} style={{}}>
+        {item.name}
+      </TextComponent>
+    </TouchableOpacity>
+  );
 
 
   return (
@@ -264,13 +264,13 @@ const renderCategory = ({ item }) => (
         {isLoggedIn ? (
           // LOGOUT
           <TouchableOpacity
-            style={{ flexDirection: "row", alignItems: "center", paddingVertical: 10,marginBottom:10 }}
+            style={{ flexDirection: "row", alignItems: "center", paddingVertical: 10, marginBottom: 10 }}
             onPress={handleLogout}
           >
             <Ionicons name="log-out-outline" size={22} color="red" />
             <TextComponent type="headerText"
               allowFontScaling={false}
-              style={{ marginLeft: 10, color: "red"}}
+              style={{ marginLeft: 10, color: "red" }}
             >
               Logout
             </TextComponent>
@@ -301,39 +301,41 @@ const renderCategory = ({ item }) => (
           paddingVertical: 15,
         }}
       >
-          <View style={{ marginBottom: 20, alignItems: "center",backgroundColor:Colors.Colors.white}}>
-  <View style={{ flexDirection: "row", gap: 25 ,alignItems:"center"}}>
-  <TextComponent
-    type="streakSadanaText"
-    style={{ color: "#000"}}
-  >
-    {t("profile.followUs", "Follow us")}
-  </TextComponent>
+        <View style={{ marginBottom: 20, alignItems: "center", backgroundColor: Colors.Colors.white }}>
+          <View style={{ flexDirection: "row", gap: 25, alignItems: "center" }}>
+            <TextComponent
+              type="streakSadanaText"
+              style={{ color: "#000" }}
+            >
+              {t("profile.followUs", "Follow us")}
+            </TextComponent>
 
-    {/* Facebook */}
-    <TouchableOpacity
-      onPress={() => {
-         props.navigation.closeDrawer(); 
-        Linking.openURL("https://www.facebook.com/KalpxOfficial/")}}
-    >
-      <Ionicons name="logo-facebook" size={34} color="#4267B2" />
-    </TouchableOpacity>
+            {/* Facebook */}
+            <TouchableOpacity
+              onPress={() => {
+                props.navigation.closeDrawer();
+                Linking.openURL("https://www.facebook.com/KalpxOfficial/")
+              }}
+            >
+              <Ionicons name="logo-facebook" size={34} color="#4267B2" />
+            </TouchableOpacity>
 
-    {/* Instagram */}
-    <TouchableOpacity
-      onPress={() => {
-         props.navigation.closeDrawer(); 
-        Linking.openURL("https://www.instagram.com/kalpxofficial")}}
-    >
-      <Ionicons name="logo-instagram" size={34} color="#C13584" />
-    </TouchableOpacity>
-  </View>
-</View>
+            {/* Instagram */}
+            <TouchableOpacity
+              onPress={() => {
+                props.navigation.closeDrawer();
+                Linking.openURL("https://www.instagram.com/kalpxofficial")
+              }}
+            >
+              <Ionicons name="logo-instagram" size={34} color="#C13584" />
+            </TouchableOpacity>
+          </View>
+        </View>
         <TextComponent type="streakText"
           allowFontScaling={false}
           style={{ textAlign: "center", color: "#999", fontSize: 12 }}
         >
-       © 2025 KalpX. All rights reserved.
+          © 2025 KalpX. All rights reserved.
         </TextComponent>
       </View>
     </View>

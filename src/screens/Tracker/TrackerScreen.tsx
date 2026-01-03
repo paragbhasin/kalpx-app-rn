@@ -23,6 +23,7 @@ import LoadingOverlay from "../../components/LoadingOverlay";
 import MantraCard from "../../components/MantraCard";
 import SankalpCard from "../../components/SankalpCard";
 import DailyPracticeDetailsCard from "../../components/DailyPracticeDetailsCard";
+import ShimmerPlaceholder from "../../components/ShimmerPlaceholder";
 import TextComponent from "../../components/TextComponent";
 import { useUserLocation } from "../../components/useUserLocation";
 import { RootState } from "../../store";
@@ -132,10 +133,38 @@ const TrackerScreen = () => {
           })}
         </TextComponent>
         <FlatList
-          data={sortedPractices}
-          keyExtractor={(item) => item.practice_id}
+          data={dailyPractice?.loading ? [1, 2, 3, 4, 5] : sortedPractices}
+          keyExtractor={(item, index) => dailyPractice?.loading ? index.toString() : item.practice_id}
           contentContainerStyle={{ paddingBottom: 20 }}
           renderItem={({ item }) => {
+            if (dailyPractice?.loading) {
+              return (
+                <Card
+                  style={{
+                    borderColor: Colors.Colors.Yellow,
+                    borderWidth: 1,
+                    borderRadius: 20,
+                    marginVertical: 10,
+                    backgroundColor: Colors.Colors.white,
+                    padding: 12,
+                  }}
+                >
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                    <ShimmerPlaceholder width={200} height={24} style={{ borderRadius: 4 }} />
+                    <ShimmerPlaceholder width={26} height={26} style={{ borderRadius: 13 }} />
+                  </View>
+                  <View style={{ height: 0.5, backgroundColor: "#616161", marginBottom: 12 }} />
+                  <ShimmerPlaceholder width="80%" height={16} style={{ marginBottom: 8, borderRadius: 4 }} />
+                  <ShimmerPlaceholder width="60%" height={16} style={{ marginBottom: 12, borderRadius: 4 }} />
+
+                  <ShimmerPlaceholder width={100} height={24} style={{ marginBottom: 16, borderRadius: 4 }} />
+
+                  <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+                    <ShimmerPlaceholder width="100%" height={40} style={{ borderRadius: 5 }} />
+                  </View>
+                </Card>
+              );
+            }
             const id = item.practice_id;
 
             let practiceType = "";
@@ -415,7 +444,7 @@ const TrackerScreen = () => {
                 <SankalpCard
                   practiceTodayData={{
                     started: { sankalp: true },
-                    ids: { sankalp: practiceId }
+                    ids: { sankalp: (() => { console.log("✅ TrackerScreen Sankalp ID:", practiceId); return practiceId; })() }
                   }}
                   onPressStartSankalp={() => { }}
                   onCompleteSankalp={() => { }}

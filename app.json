@@ -35,7 +35,7 @@
       }
     },
     "android": {
-      "versionCode": 15,
+      "versionCode": 16,
       "package": "com.kalpx.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/AppIconImg.png",

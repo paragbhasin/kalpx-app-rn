@@ -62,9 +62,9 @@ export default function App() {
   // Google login setup
   GoogleSignin.configure({
     webClientId:
-      "473187060791-pqas4l17udkmt37re2l3fkdfs585onqt.apps.googleusercontent.com",
+      "512739212793-3vj38kfs32dt51gn54iuupgptqecq33k.apps.googleusercontent.com",
     iosClientId:
-      "473187060791-96pucdifumqrnn7lb5l6bboqladmarat.apps.googleusercontent.com",
+      "800459558908-5bt6k0ihh1vh1o003m43ffltrkhhlnu1.apps.googleusercontent.com",
     offlineAccess: true,
   });
 

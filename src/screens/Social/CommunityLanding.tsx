@@ -1,16 +1,30 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import Ionicons from "react-native-vector-icons/Ionicons";
-import Colors from "../../components/Colors";
+import { useDispatch, useSelector } from "react-redux";
+// import Colors from "../../components/Colors"; // Check if this import is needed or if styles serve enough
 import SocialExplore from "./SocialExplore";
+import FeedScreen from "../Feed/FeedScreen";
+import { fetchCommunities, fetchTopCommunities } from "./actions"; // Import actions from local actions file (or alias)
 
 const CommunityLanding = () => {
+    const dispatch = useDispatch();
     const [selectedCategory, setSelectedCategory] = useState("Home");
+
+
+    const { data: communities, loading } = useSelector((state: any) => state.communities);
+
+    useEffect(() => {
+        if (selectedCategory === "Home") {
+            dispatch(fetchCommunities(1) as any);
+        }
+    }, [dispatch, selectedCategory]);
+
 
     const categories = [
         { label: "Home", value: "Home" },
-        { label: "Top", value: "Top" },
+        { label: "Top", value: "Top" }, // Renders SocialExplore
         { label: "Popular", value: "Popular" },
         { label: "Explore", value: "Explore" },
     ];
@@ -54,12 +68,17 @@ const CommunityLanding = () => {
     const renderContent = () => {
         switch (selectedCategory) {
             case "Top":
+                // "Top" renders the SocialExplore component which has its own logic for now.
+                // If we want to move SocialExplore to Redux, that's a bigger Refactor. 
+                // For now, keep it as is, because `SocialExplore` is working.
                 return <SocialExplore showHeader={false} />;
+
             case "Home":
+                return <FeedScreen />;
+
             case "Popular":
             case "Explore":
             default:
-                // Placeholder for other tabs
                 return (
                     <View style={styles.placeholderContainer}>
                         <Text style={styles.placeholderText}>{selectedCategory} Content Coming Soon</Text>
@@ -100,13 +119,13 @@ const styles = StyleSheet.create({
         marginRight: 10,
     },
     dropdown: {
-        width: 90, // compact width
+        width: 90,
         marginLeft: 0,
     },
     selectedTextStyle: {
         fontSize: 16,
         color: "#000",
-        textDecorationLine: "underline", // mimic the mock style
+        textDecorationLine: "underline",
         fontWeight: "500",
     },
     placeholderStyle: {

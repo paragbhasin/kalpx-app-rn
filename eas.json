@@ -1,7 +1,6 @@
 {
   "cli": {
-    "version": ">= 0.53.0",
-    "appVersionSource": "remote"
+    "version": ">= 0.53.0"
   },
   "build": {
     "production": {
@@ -9,11 +8,10 @@
         "EXPO_UPDATES_DISABLED": "1"
       },
       "ios": {
-        "autoIncrement": true
+        "autoIncrement": false
       },
       "android": {
-        "buildType": "app-bundle",
-        "autoIncrement": true
+        "buildType": "app-bundle"
       }
     }
   },

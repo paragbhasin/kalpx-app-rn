@@ -7,6 +7,7 @@ import {
     StyleSheet,
     Dimensions,
     Pressable,
+    ImageBackground,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -17,6 +18,46 @@ import { useNavigation } from "@react-navigation/native";
 import ReportModal from "./ReportModal";
 
 const { width: screenWidth } = Dimensions.get("window");
+const COMMUNITY_BACKGROUNDS: { [key: string]: any } = {
+    "daily-dharma-reflections": require("../../assets/community-bg/daily-dharma-reflections.jpeg"),
+    "festivals-rituals": require("../../assets/community-bg/festival.jpeg"),
+    "mantra-chanting-circle": require("../../assets/community-bg/mantraandchanting.jpeg"),
+    "yoga-pranayama": require("../../assets/community-bg/yoga-pranaya.jpeg"),
+    "meditation-mindfulness": require("../../assets/community-bg/meditationanmindfulness.jpeg"),
+    "ayurveda-healing": require("../../assets/community-bg/ayurveda-healing.jpeg"),
+    "dance-as-devotion": require("../../assets/community-bg/dance-devotion.jpeg"),
+    "music-bhajans": require("../../assets/community-bg/music-bhajans.jpeg"),
+    "ramayana-insights": require("../../assets/community-bg/ramayana-insights.jpeg"),
+    "mahabharata-dialogues": require("../../assets/community-bg/mahabharatadialogues.jpeg"),
+    "bhakti-devotion": require("../../assets/community-bg/bhakthianddevotion.jpeg"),
+    "children-dharma": require("../../assets/community-bg/children-dharma.jpeg"),
+    "sacred-stories": require("../../assets/community-bg/sacred-stories.jpeg"),
+    "sanatan-modern-life": require("../../assets/community-bg/sanatan-modernlife.jpeg"),
+    "sanatan-science-philosophy": require("../../assets/community-bg/sanatan-science-philosophy.jpeg"),
+    "spiritual-travel": require("../../assets/community-bg/spiritual-travel.jpeg"),
+    "temple-experiences": require("../../assets/community-bg/temple-experiences.jpeg"),
+    "women-in-sanatan-dharma": require("../../assets/community-bg/women-in-santandharma.jpeg"),
+    "yoga-pranaya": require("../../assets/community-bg/yoga-pranaya.jpeg"),
+    "bhakthi-devotion": require("../../assets/community-bg/bhakthianddevotion.jpeg"),
+    "festival": require("../../assets/community-bg/festival.jpeg"),
+    "mantra-chanting": require("../../assets/community-bg/mantraandchanting.jpeg"),
+    "sanatan-modernlife": require("../../assets/community-bg/sanatan-modernlife.jpeg"),
+    "mahabharata-dialog": require("../../assets/community-bg/mahabharatadialogues.jpeg"),
+    "meditation-and-mindfulness": require("../../assets/community-bg/meditationanmindfulness.jpeg"),
+    // ID Mapping Fallbacks
+    "1": require("../../assets/community-bg/daily-dharma-reflections.jpeg"),
+    "2": require("../../assets/community-bg/festival.jpeg"),
+    "3": require("../../assets/community-bg/mantraandchanting.jpeg"),
+    "4": require("../../assets/community-bg/yoga-pranaya.jpeg"),
+    "5": require("../../assets/community-bg/meditationanmindfulness.jpeg"),
+    "6": require("../../assets/community-bg/ayurveda-healing.jpeg"),
+    "7": require("../../assets/community-bg/dance-devotion.jpeg"),
+    "8": require("../../assets/community-bg/music-bhajans.jpeg"),
+    "9": require("../../assets/community-bg/ramayana-insights.jpeg"),
+    "10": require("../../assets/community-bg/mahabharatadialogues.jpeg"),
+    "11": require("../../assets/community-bg/bhakthianddevotion.jpeg"),
+    "12": require("../../assets/community-bg/children-dharma.jpeg"),
+};
 
 
 interface SocialPostCardProps {
@@ -138,12 +179,28 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
             {/* Header */}
             <View style={[styles.header, { zIndex: showMenu ? 1001 : 1 }]}>
                 <TouchableOpacity onPress={onUserPress} style={styles.userInfo}>
-                    <Image
-                        source={{
-                            uri: post.community?.icon || post.creator?.avatar || "https://via.placeholder.com/40",
-                        }}
-                        style={styles.avatar}
-                    />
+                    <View style={styles.avatarContainer}>
+                        <ImageBackground
+                            source={
+                                COMMUNITY_BACKGROUNDS[post.community?.slug] ||
+                                COMMUNITY_BACKGROUNDS[post.community_slug] ||
+                                COMMUNITY_BACKGROUNDS[post.community?.id?.toString()] ||
+                                (typeof post.community === 'string' ? COMMUNITY_BACKGROUNDS[post.community] : null) ||
+                                (post.slug ? COMMUNITY_BACKGROUNDS[post.slug] : null) ||
+                                (post.community_name ? COMMUNITY_BACKGROUNDS[post.community_name.toLowerCase().replace(/ & /g, '-').replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')] : null)
+                            }
+                            style={styles.avatarBackground}
+                            imageStyle={{ borderRadius: 24 }}
+                            resizeMode="cover"
+                        >
+                            <Image
+                                source={{
+                                    uri: post.community?.icon || post.creator?.avatar || "https://via.placeholder.com/40",
+                                }}
+                                style={styles.avatar}
+                            />
+                        </ImageBackground>
+                    </View>
                     <View>
                         <Text style={styles.communityName}>
                             {post.community_name || "Community Name"}
@@ -364,12 +421,26 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
     },
-    avatar: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+    avatarContainer: {
+        width: 48,
+        height: 48,
+        justifyContent: "center",
+        alignItems: "center",
         marginRight: 10,
-        backgroundColor: "#eee",
+        borderRadius: 24,
+        overflow: "hidden",
+    },
+    avatarBackground: {
+        width: 48,
+        height: 48,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    avatar: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: "transparent",
     },
     communityName: {
         fontSize: 14,

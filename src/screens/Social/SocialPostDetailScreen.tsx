@@ -24,7 +24,11 @@ import {
   updateComment,
   deleteComment,
   votePostDetail,
-  voteComment
+  voteComment,
+  savePostDetail,
+  unsavePostDetail,
+  hidePostDetail,
+  reportContent
 } from "../PostDetail/actions";
 import moment from "moment";
 
@@ -33,6 +37,7 @@ const screenWidth = Dimensions.get("window").width;
 const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.content);
+  const [showMenu, setShowMenu] = useState(false);
 
   const handleUpdate = () => {
     onEdit(comment.id, editContent);
@@ -40,7 +45,7 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote }) => {
   };
 
   return (
-    <View style={{ padding: 12, borderLeftWidth: comment.parent ? 1 : 0, borderLeftColor: '#eee', marginLeft: comment.parent ? 15 : 0 }}>
+    <View style={{ padding: 12, borderLeftWidth: comment.parent ? 1 : 0, borderLeftColor: '#eee', marginLeft: comment.parent ? 15 : 0, zIndex: showMenu ? 10 : 1 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
         <Image
           source={{ uri: comment.creator?.avatar || "https://via.placeholder.com/24" }}
@@ -81,13 +86,66 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote }) => {
           <Text style={{ fontSize: 12, color: '#666' }}>Reply</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => setIsEditing(true)} style={{ marginRight: 15 }}>
-          <Text style={{ fontSize: 12, color: '#666' }}>Edit</Text>
-        </TouchableOpacity>
+        <View style={{ position: 'relative' }}>
+          <TouchableOpacity onPress={() => setShowMenu(true)}>
+            <Ionicons name="ellipsis-horizontal" size={20} color="#666" />
+          </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => onDelete(comment.id)}>
-          <Text style={{ fontSize: 12, color: 'red' }}>Delete</Text>
-        </TouchableOpacity>
+          {showMenu && (
+            <>
+              <TouchableOpacity
+                style={{
+                  position: 'absolute',
+                  top: -Dimensions.get('window').height,
+                  bottom: -Dimensions.get('window').height,
+                  left: -Dimensions.get('window').width,
+                  right: -Dimensions.get('window').width,
+                  zIndex: 999,
+                }}
+                onPress={() => setShowMenu(false)}
+              />
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 25,
+                  right: 0,
+                  backgroundColor: '#fff',
+                  borderRadius: 12,
+                  paddingVertical: 8,
+                  paddingHorizontal: 12,
+                  minWidth: 100,
+                  zIndex: 1000,
+                  elevation: 5,
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 4,
+                  borderWidth: 1,
+                  borderColor: '#f0f0f0',
+                }}
+              >
+                <TouchableOpacity
+                  onPress={() => {
+                    setIsEditing(true);
+                    setShowMenu(false);
+                  }}
+                  style={{ paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#f5f5f5' }}
+                >
+                  <Text style={{ fontSize: 14, color: '#333' }}>Edit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    onDelete(comment.id);
+                    setShowMenu(false);
+                  }}
+                  style={{ paddingVertical: 8 }}
+                >
+                  <Text style={{ fontSize: 14, color: '#FF3B30' }}>Delete</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
+        </View>
       </View>
 
       {comment.children && comment.children.map(child => (
@@ -192,6 +250,16 @@ export default function SocialPostDetailScreen() {
                     navigation.setParams({ isQuestion: true });
                   }
                 }}
+                onSave={() => dispatch(savePostDetail(post.id) as any)}
+                onUnsave={() => dispatch(unsavePostDetail(post.id) as any)}
+                onHide={() => {
+                  dispatch(hidePostDetail(post.id) as any);
+                  navigation.goBack();
+                }}
+                onReport={(reason, details) => {
+                  dispatch(reportContent('post', post.id, reason, details) as any);
+                  Alert.alert("Reported", "Thank you for reporting. We will review this post.");
+                }}
               />
             )}
             <View style={{ padding: 15, backgroundColor: '#f9f9f9' }}>
@@ -219,6 +287,7 @@ export default function SocialPostDetailScreen() {
             <ActivityIndicator style={{ padding: 40 }} color="#D69E2E" />
           )
         }
+        contentContainerStyle={{ paddingBottom: 100 }}
       />
 
       {/* Comment Input */}

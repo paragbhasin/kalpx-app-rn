@@ -2,7 +2,8 @@ import React, { useEffect, useState, useCallback } from "react";
 import { View, FlatList, ActivityIndicator, RefreshControl, StyleSheet, Text } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { fetchFeed, upvotePost, downvotePost } from "./actions"; // Import from local actions
+import { fetchFeed, upvotePost, downvotePost, savePost, unsavePost, hidePost } from "./actions"; // Import from local actions
+import { reportContent } from "../PostDetail/actions";
 import SocialPostCard from "../../components/SocialPostCard";
 
 const FeedScreen = () => {
@@ -44,6 +45,15 @@ const FeedScreen = () => {
             // Share logic
         } else if (type === 'askQuestion') {
             (navigation as any).navigate('SocialPostDetailScreen', { post: post, isQuestion: true });
+        } else if (type === 'save') {
+            dispatch(savePost(post.id) as any);
+        } else if (type === 'unsave') {
+            dispatch(unsavePost(post.id) as any);
+        } else if (type === 'hide') {
+            dispatch(hidePost(post.id) as any);
+        } else if (type === 'report') {
+            const { reason, details } = post.reportData;
+            dispatch(reportContent('post', post.id, reason, details) as any);
         }
     };
 
@@ -63,6 +73,10 @@ const FeedScreen = () => {
                 onJoin={() => {
                     // dispatch join community
                 }}
+                onSave={() => handleInteraction('save', item)}
+                onUnsave={() => handleInteraction('unsave', item)}
+                onHide={() => handleInteraction('hide', item)}
+                onReport={(reason, details) => handleInteraction('report', { ...item, reportData: { reason, details } })}
             />
         );
     };

@@ -131,6 +131,11 @@ export const unsavePostDetail = (postId: string | number) => async (dispatch: an
     try { await api.post(`/posts/${postId}/unsave/`); } catch (err) { console.error(err); }
 }
 
+export const hidePostDetail = (postId: string | number) => async (dispatch: any) => {
+    dispatch({ type: POST_DETAIL_INTERACTION_SUCCESS, payload: { type: 'hide' } });
+    try { await api.post(`/posts/${postId}/hide/`); } catch (err) { console.error(err); }
+}
+
 // Interactions on Comments
 export const voteComment = (commentId: number, type: 'upvote' | 'downvote') => async (dispatch: any) => {
     dispatch({ type: COMMENT_INTERACTION_SUCCESS, payload: { id: commentId, type } });

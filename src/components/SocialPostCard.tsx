@@ -14,8 +14,10 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
 import moment from "moment";
 import { useNavigation } from "@react-navigation/native";
+import ReportModal from "./ReportModal";
 
 const { width: screenWidth } = Dimensions.get("window");
+
 
 interface SocialPostCardProps {
     post: any;
@@ -27,7 +29,38 @@ interface SocialPostCardProps {
     onMenu?: () => void;
     onUserPress?: () => void;
     onAskQuestion?: () => void;
+    onSave?: () => void;
+    onUnsave?: () => void;
+    onHide?: () => void;
+    onReport?: (reason: string, details: string) => void;
 }
+
+const getLinkedItemText = (linkedItem: any) => {
+    if (!linkedItem || !linkedItem.type) return "";
+
+    const typeParts = linkedItem.type.split(":");
+    const category = typeParts[0]?.trim().toLowerCase();
+    const itemType = typeParts[1]?.trim().toLowerCase();
+
+    // Check if it's from general or a specific category
+    const isGeneral = category === "general";
+
+    if (itemType === "mantra") {
+        return isGeneral
+            ? "Do this mantra today - let intention become action"
+            : `Add this to your daily practice - progress happens gently`;
+    } else if (itemType === "sankalp") {
+        return isGeneral
+            ? "Take this sankalp today - shape your inner resolve"
+            : `Add this to your daily practice -  progress happens gently`;
+    } else if (itemType === "practice") {
+        return isGeneral
+            ? "Add this to your daily practice - progress happens gently"
+            : `Add this to your daily practice - progress happens gently`;
+    }
+
+    return "Add this to your daily practice - progress happens gently";
+};
 
 const SocialPostCard: React.FC<SocialPostCardProps> = ({
     post,
@@ -39,10 +72,15 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     onMenu,
     onUserPress,
     onAskQuestion,
+    onSave,
+    onUnsave,
+    onHide,
+    onReport,
 }) => {
     const navigation: any = useNavigation();
     const [isExpanded, setIsExpanded] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
+    const [isReportModalVisible, setIsReportModalVisible] = useState(false);
 
     // formatted date
     const timeAgo = post.created_at ? moment(post.created_at).fromNow() : "";
@@ -133,15 +171,35 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                             onPress={() => setShowMenu(false)}
                         />
                         <View style={styles.menuContainer}>
-                            <TouchableOpacity style={styles.menuItem} onPress={() => setShowMenu(false)}>
-                                <Ionicons name="bookmark-outline" size={20} color="#333" />
-                                <Text style={styles.menuItemText}>Save</Text>
+                            <TouchableOpacity
+                                style={styles.menuItem}
+                                onPress={() => {
+                                    setShowMenu(false);
+                                    post.is_saved ? onUnsave?.() : onSave?.();
+                                }}
+                            >
+                                <Ionicons name={post.is_saved ? "bookmark" : "bookmark-outline"} size={20} color={post.is_saved ? "#D69E2E" : "#333"} />
+                                <Text style={[styles.menuItemText, post.is_saved && { color: "#D69E2E" }]}>
+                                    {post.is_saved ? "Saved" : "Save"}
+                                </Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.menuItem} onPress={() => setShowMenu(false)}>
+                            <TouchableOpacity
+                                style={styles.menuItem}
+                                onPress={() => {
+                                    setShowMenu(false);
+                                    onHide?.();
+                                }}
+                            >
                                 <Ionicons name="eye-off-outline" size={20} color="#333" />
                                 <Text style={styles.menuItemText}>Hide</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={[styles.menuItem, { borderBottomWidth: 0 }]} onPress={() => setShowMenu(false)}>
+                            <TouchableOpacity
+                                style={[styles.menuItem, { borderBottomWidth: 0 }]}
+                                onPress={() => {
+                                    setShowMenu(false);
+                                    setIsReportModalVisible(true);
+                                }}
+                            >
                                 <Ionicons name="flag-outline" size={20} color="#FF3B30" />
                                 <Text style={[styles.menuItemText, { color: "#FF3B30" }]}>Report</Text>
                             </TouchableOpacity>
@@ -149,6 +207,15 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                     </>
                 )}
             </View>
+
+            <ReportModal
+                isVisible={isReportModalVisible}
+                onClose={() => setIsReportModalVisible(false)}
+                onSubmit={(reason, details) => {
+                    onReport?.(reason, details);
+                    setIsReportModalVisible(false);
+                }}
+            />
 
             {/* Title */}
             {post.title && <Text style={styles.title}>{post.title}</Text>}
@@ -247,7 +314,30 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                     <Text style={styles.askButtonText}>Ask question</Text>
                 </TouchableOpacity>
             </View>
+            {/* Linked Item Card */}
+            {post.linked_item && (
+                <TouchableOpacity style={styles.linkedItemCard}>
+                    <View style={styles.linkedItemContent}>
+                        <View style={styles.linkedItemTitleRow}>
+                            <MaterialCommunityIcons
+                                name="hand-pointing-right"
+                                size={18}
+                                color="#CC9933"
+                                style={styles.linkedItemInlineIcon}
+                            />
+                            <Text style={styles.linkedItemTitleText}>
+                                {post.linked_item.name}
+                            </Text>
+                        </View>
+                        <Text style={styles.linkedItemSubtitle}>
+                            {getLinkedItemText(post.linked_item)}
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+            )}
+
         </View>
+
     );
 };
 
@@ -494,7 +584,41 @@ const styles = StyleSheet.create({
         marginLeft: 4,
         fontSize: 12,
         color: '#333',
-    }
+    },
+    linkedItemCard: {
+        backgroundColor: "#FFFCF0",
+        borderWidth: 1,
+        borderColor: "#CC9933",
+        borderRadius: 20,
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        marginTop: 15,
+        marginHorizontal: 4,
+    },
+    linkedItemTitleRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 4,
+    },
+    linkedItemInlineIcon: {
+        marginRight: 6,
+        marginTop: 1,
+    },
+    linkedItemContent: {
+        flex: 1,
+    },
+    linkedItemTitleText: {
+        fontSize: 16,
+        fontWeight: "bold",
+        color: "#000",
+        textDecorationLine: "underline",
+    },
+    linkedItemSubtitle: {
+        fontSize: 14,
+        color: "#333",
+        lineHeight: 20,
+        marginLeft: 24, // aligns subtitle under title text, not icon
+    },
 });
 
 export default SocialPostCard;

@@ -170,9 +170,9 @@ export default function SocialExplore({ showHeader = true }) {
           style={{
             flexDirection: "row",
             justifyContent: "space-between",
-            paddingHorizontal: 10,
+            paddingHorizontal: 15,
             paddingTop: 10,
-            paddingBottom: 20,
+            paddingBottom: 10,
           }}
         >
           <View style={{ width: COLUMN_WIDTH }}>

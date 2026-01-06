@@ -38,11 +38,9 @@ export default function Profile() {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
-<<<<<<< HEAD
-        <Text style={styles.headerText}>{t("profile.title")}</Text>
-=======
-        <Text  allowFontScaling={false} style={styles.headerText}>{t("profile.title")}</Text>
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
+        <Text allowFontScaling={false} style={styles.headerText}>
+          {t("profile.title")}
+        </Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -57,13 +55,12 @@ export default function Profile() {
             <Ionicons name="pencil" size={14} color="#fff" />
           </TouchableOpacity>
         </View>
-<<<<<<< HEAD
-        <Text style={styles.name}>{t("profile.name")}</Text>
-        <Text style={styles.level}>{t("profile.level")}</Text>
-=======
-        <Text  allowFontScaling={false} style={styles.name}>{t("profile.name")}</Text>
-        <Text  allowFontScaling={false} style={styles.level}>{t("profile.level")}</Text>
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
+        <Text allowFontScaling={false} style={styles.name}>
+          {t("profile.name")}
+        </Text>
+        <Text allowFontScaling={false} style={styles.level}>
+          {t("profile.level")}
+        </Text>
       </View>
 
       {/* Menu Items */}
@@ -76,11 +73,7 @@ export default function Profile() {
           >
             <View style={styles.menuLeft}>
               <Ionicons name={item.icon} size={20} color="#a67c52" />
-<<<<<<< HEAD
-              <Text style={styles.menuText}>
-=======
-              <Text  allowFontScaling={false} style={styles.menuText}>
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
+              <Text allowFontScaling={false} style={styles.menuText}>
                 {t(`profile.menu.${item.key}`)}
               </Text>
             </View>
@@ -170,10 +163,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: "GelicaRegular",
     color: "#333",
-<<<<<<< HEAD
-    lineHeight: 18,
-=======
     // lineHeight: 18,
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
   },
 });

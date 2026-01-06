@@ -2,7 +2,7 @@
   "expo": {
     "name": "kalpx",
     "slug": "kalpx",
-    "version": "1.1.13",
+    "version": "1.1.14",
     "orientation": "portrait",
     "icon": "./assets/AppIconImg.png",
     "scheme": "kalpx",
@@ -19,7 +19,7 @@
       "appleTeamId": "9G5NZ5LBRU",
       "googleServicesFile": "./GoogleService-Info.plist",
 
-      "buildNumber": "2",
+      "buildNumber": "1",
 
       "entitlements": {
         "aps-environment": "production"

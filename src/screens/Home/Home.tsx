@@ -66,13 +66,13 @@ export const collapseControl = { avoidCollapse: false };
 
 export default function Home() {
   const navigation: any = useNavigation();
-  const { t,i18n } = useTranslation();
-    const userLang = i18n.language.split("-")[0]; 
+  const { t, i18n } = useTranslation();
+  const userLang = i18n.language.split("-")[0];
   const [trackerData, setTrackerData] = useState<any>(null);
   const [expandedItemId, setExpandedItemId] = useState<string | null>(null);
   const [showLangTZModal, setShowLangTZModal] = useState(false);
-    const { locationData, loading: locationLoading, error: locationError } = useUserLocation();
-const [showNotificationPopup, setShowNotificationPopup] = useState(false);
+  const { locationData, loading: locationLoading, error: locationError } = useUserLocation();
+  const [showNotificationPopup, setShowNotificationPopup] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [showMantraTaken, setShowMantraTaken] = useState(false);
   const [showLoginMantraTaken, setShowLoginMantraTaken] = useState(false);
@@ -83,17 +83,17 @@ const [showNotificationPopup, setShowNotificationPopup] = useState(false);
   const [showSankalpComplete, setShowSankalpComplete] = useState(false);
   const [showLoginSankalpComplete, setShowLoginSankalpComplete] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
-const [updateType, setUpdateType] = useState("");
+  const [updateType, setUpdateType] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { setDailyMantras } = usePracticeStore();
   const [apiloading, setApiLoading] = useState(false);
   const [classPage, setClassPage] = useState(1);
-const [homeClasses, setHomeClasses] = useState([]);
-const [classHasMore, setClassHasMore] = useState(true);
-const [loadingClasses, setLoadingClasses] = useState(false);
+  const [homeClasses, setHomeClasses] = useState([]);
+  const [classHasMore, setClassHasMore] = useState(true);
+  const [loadingClasses, setLoadingClasses] = useState(false);
   const [selectedMantraForPopup, setSelectedMantraForPopup] = useState(null);
   const [selectedSankalpForPopup, setSelectedSankalpForPopup] = useState(null);
- const currentLang = i18n.language.split("-")[0];
+  const currentLang = i18n.language.split("-")[0];
   const youtubeUrl = "https://www.youtube.com/watch?v=INS2diQXIjA";
   const videoId = youtubeUrl.split("v=")[1];
   const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/sddefault.jpg`;
@@ -105,29 +105,29 @@ const [loadingClasses, setLoadingClasses] = useState(false);
   const { data: exploreVideos, loading: exploreLoading, page, hasMore } = useSelector((state: RootState) => state.videosReducer);
 
   useFocusEffect(
-  React.useCallback(() => {
-    const checkNotificationPermission = async () => {
-      const settings = await Notifications.getPermissionsAsync();
-      if (settings.status !== "granted") {
-        setShowNotificationPopup(true);
-      } else {
-        setShowNotificationPopup(false);
+    React.useCallback(() => {
+      const checkNotificationPermission = async () => {
+        const settings = await Notifications.getPermissionsAsync();
+        if (settings.status !== "granted") {
+          setShowNotificationPopup(true);
+        } else {
+          setShowNotificationPopup(false);
+        }
+      };
+      checkNotificationPermission();
+    }, [])
+  );
+
+
+  useFocusEffect(
+    React.useCallback(() => {
+      if (collapseControl.avoidCollapse) {
+        collapseControl.avoidCollapse = false;
+        return;
       }
-    };
-    checkNotificationPermission();
-  }, [])
-);
-
-
-useFocusEffect(
-  React.useCallback(() => {
-    if (collapseControl.avoidCollapse) {
-      collapseControl.avoidCollapse = false;
-      return;
-    }
-    setExpandedItemId(null);
-  }, [])
-);
+      setExpandedItemId(null);
+    }, [])
+  );
 
   useEffect(() => {
     const checkLogin = async () => {
@@ -141,57 +141,57 @@ useFocusEffect(
     checkLogin();
   }, []);
 
-useEffect(() => {
-  const checkForUpdates = async () => {
-    try {
-      const latestVersion = await VersionCheck.getLatestVersion();
-      const currentVersion = await VersionCheck.getCurrentVersion();
+  useEffect(() => {
+    const checkForUpdates = async () => {
+      try {
+        const latestVersion = await VersionCheck.getLatestVersion();
+        const currentVersion = await VersionCheck.getCurrentVersion();
 
-      if (latestVersion && latestVersion !== currentVersion) {
-        setUpdateType("STORE");
-        setShowUpdateModal(true);
+        if (latestVersion && latestVersion !== currentVersion) {
+          setUpdateType("STORE");
+          setShowUpdateModal(true);
+        }
+      } catch (err) {
+        console.log("❌ Error checking updates:", err);
       }
-    } catch (err) {
-      console.log("❌ Error checking updates:", err);
-    }
-  };
+    };
 
-  checkForUpdates();
-}, []);
+    checkForUpdates();
+  }, []);
 
-useEffect(() => {
-  const checkShowLocation = async () => {
-    const shouldShow = await AsyncStorage.getItem("showLocationConfirm");
-    if (shouldShow === "true") {
-      setShowLangTZModal(true);
-      await AsyncStorage.removeItem("showLocationConfirm");
-    }
-  };
-  checkShowLocation();
-}, []);
+  useEffect(() => {
+    const checkShowLocation = async () => {
+      const shouldShow = await AsyncStorage.getItem("showLocationConfirm");
+      if (shouldShow === "true") {
+        setShowLangTZModal(true);
+        await AsyncStorage.removeItem("showLocationConfirm");
+      }
+    };
+    checkShowLocation();
+  }, []);
 
-useEffect(() => {
-  const preloadMantras = () => {
-    const langKey = currentLang.toLowerCase();
-    const allMantras = CATALOGS[langKey] || CATALOGS.en;
-    const startOfCycle = moment('2025-01-01');
-    const today = moment().startOf('day');
-    const dayIndex = today.diff(startOfCycle, 'days'); 
-    const startIndex = (dayIndex * 5) % allMantras.length;
-    const endIndex = startIndex + 5;
-    const dailyFive =
-      endIndex <= allMantras.length
-        ? allMantras.slice(startIndex, endIndex)
-        : [
+  useEffect(() => {
+    const preloadMantras = () => {
+      const langKey = currentLang.toLowerCase();
+      const allMantras = CATALOGS[langKey] || CATALOGS.en;
+      const startOfCycle = moment('2025-01-01');
+      const today = moment().startOf('day');
+      const dayIndex = today.diff(startOfCycle, 'days');
+      const startIndex = (dayIndex * 5) % allMantras.length;
+      const endIndex = startIndex + 5;
+      const dailyFive =
+        endIndex <= allMantras.length
+          ? allMantras.slice(startIndex, endIndex)
+          : [
             ...allMantras.slice(startIndex),
             ...allMantras.slice(0, endIndex - allMantras.length),
           ];
-    console.log("🔁 Today's Mantras:", dailyFive.map(m => m.id));
-    setDailyMantras(dailyFive);
-  };
+      console.log("🔁 Today's Mantras:", dailyFive.map(m => m.id));
+      setDailyMantras(dailyFive);
+    };
 
-  preloadMantras();
-}, [currentLang]);
+    preloadMantras();
+  }, [currentLang]);
 
   useEffect(() => {
     const langKey = currentLang.toLowerCase();
@@ -268,76 +268,76 @@ useEffect(() => {
   );
 
   const loadHomeClasses = (pageNo = 1) => {
-  if (loadingClasses || !classHasMore) return;
+    if (loadingClasses || !classHasMore) return;
 
-  setLoadingClasses(true);
+    setLoadingClasses(true);
 
-  dispatch(
-    classesHomeList(pageNo, locationData?.timezone, (res) => {
-      console.log("classes Home Response >>>>>>>>>>",JSON.stringify(res));
-      if (res.success) {
-        const onlyAvailable = res.data.filter(
-          (item) => item?.available_slots?.length > 0
-        );
+    dispatch(
+      classesHomeList(pageNo, locationData?.timezone, (res) => {
+        console.log("classes Home Response >>>>>>>>>>", JSON.stringify(res));
+        if (res.success) {
+          const onlyAvailable = res.data.filter(
+            (item) => item?.available_slots?.length > 0
+          );
 
-        if (res.data.length === 0) {
+          if (res.data.length === 0) {
+            setClassHasMore(false);
+          }
+
+          const newList =
+            pageNo === 1 ? onlyAvailable : [...homeClasses, ...onlyAvailable];
+
+          setHomeClasses(newList);
+        } else {
           setClassHasMore(false);
         }
 
-        const newList =
-          pageNo === 1 ? onlyAvailable : [...homeClasses, ...onlyAvailable];
-
-        setHomeClasses(newList);
-      } else {
-        setClassHasMore(false);
-      }
-
-      setLoadingClasses(false);
-    })
-  );
-};
+        setLoadingClasses(false);
+      })
+    );
+  };
 
 
-// const loadHomeClasses = (pageNo = 1) => {
-//   if (loadingClasses || !classHasMore) return;
+  // const loadHomeClasses = (pageNo = 1) => {
+  //   if (loadingClasses || !classHasMore) return;
 
-//   setLoadingClasses(true);
+  //   setLoadingClasses(true);
 
-//   dispatch(
-//     classesExploreList(pageNo, 10, "", locationData?.timezone, (res) => {
-//       if (res.success) {
-//         const onlyAvailable = res.data.filter(
-//           (item) => item?.available_slots?.length > 0
-//         );
+  //   dispatch(
+  //     classesExploreList(pageNo, 10, "", locationData?.timezone, (res) => {
+  //       if (res.success) {
+  //         const onlyAvailable = res.data.filter(
+  //           (item) => item?.available_slots?.length > 0
+  //         );
 
-//         // STOP PAGINATION ONLY WHEN NO DATA
-//     if (res.data.length === 0) {   // stop only when API truly has no data
-//   setClassHasMore(false);
-// }
-
-
-//         const newList =
-//           pageNo === 1 ? onlyAvailable : [...homeClasses, ...onlyAvailable];
-
-//        setHomeClasses(newList);   // NO slicing
+  //         // STOP PAGINATION ONLY WHEN NO DATA
+  //     if (res.data.length === 0) {   // stop only when API truly has no data
+  //   setClassHasMore(false);
+  // }
 
 
-//       } else {
-//         setClassHasMore(false);
-//       }
+  //         const newList =
+  //           pageNo === 1 ? onlyAvailable : [...homeClasses, ...onlyAvailable];
 
-//       setLoadingClasses(false);
-//     })
-//   );
-// };
+  //        setHomeClasses(newList);   // NO slicing
+
+
+  //       } else {
+  //         setClassHasMore(false);
+  //       }
+
+  //       setLoadingClasses(false);
+  //     })
+  //   );
+  // };
 
 
 
 
-// First load
-useEffect(() => {
-  loadHomeClasses(1);
-}, []);
+  // First load
+  useEffect(() => {
+    loadHomeClasses(1);
+  }, []);
 
   useEffect(() => {
     dispatch(
@@ -350,8 +350,8 @@ useEffect(() => {
   const topChips = [
     { id: "1", label: t("cards.sankalp") },
     { id: "2", label: t("cards.mantra") },
-    { id: "3", label:t("cards.festival")  },
-    { id: "4", label:t("cards.wisdom") },
+    { id: "3", label: t("cards.festival") },
+    { id: "4", label: t("cards.wisdom") },
   ];
 
   const handleChipPress = (id: string) => {
@@ -359,57 +359,57 @@ useEffect(() => {
   };
 
   const baseCategories = [
-  {
-    id: "1",
-    name: t("categories.sadana"),
+    {
+      id: "1",
+      name: t("categories.sadana"),
       // trackerData?.active_practices?.length > 0
       //   ? t("categories.sadana")
       //   : t("categories.dharma"),
-    // title: trackerData?.active_practices?.length > 0
-    //   ? "SadanaTrackerScreen"
-    //   : "Dharma",
+      // title: trackerData?.active_practices?.length > 0
+      //   ? "SadanaTrackerScreen"
+      //   : "Dharma",
       title: trackerData?.active_practices?.length > 0
-      ? "TrackerTabs"
-      : "DailyPracticeLogin",
+        ? "TrackerTabs"
+        : "DailyPracticeLogin",
       // title: trackerData?.active_practices?.length > 0 ? "DailyPracticeList" : "DailyPracticeList",
-    iconType: "image",
-    icon: require("../../../assets/Group.png"),
-    event_type: "click_dharma_card",
-    component: "Dharma-card",
-  },
-  {
-    id: "2",
-    name: t("categories.explore"),
-    title: "Explore",
-    iconType: "image",
-    icon: require("../../../assets/Exploreicon.png"),
-    event_type: "click_explore_card",
-    component: "Explore-card",
-  },
-  {
-    id: "6",
-    name: t("categories.classes"),
-    title: "ClassesScreen",
-    iconType: "image",
-    icon: require("../../../assets/onlinecion.png"),
-    event_type: "click_classes_card",
-    component: "Classes-card",
-  },
-//   {
-//   id: "8",
-//   name: t("categories.socialExplore"),
-//   title: "SocialExplore",
-//   iconType: "vector",
-//   icon: "people-outline",   
-//   event_type: "click_social_explore",
-//   component: "SocialExplore-card",
-// }
+      iconType: "image",
+      icon: require("../../../assets/Group.png"),
+      event_type: "click_dharma_card",
+      component: "Dharma-card",
+    },
+    {
+      id: "2",
+      name: t("categories.explore"),
+      title: "Explore",
+      iconType: "image",
+      icon: require("../../../assets/Exploreicon.png"),
+      event_type: "click_explore_card",
+      component: "Explore-card",
+    },
+    {
+      id: "6",
+      name: t("categories.classes"),
+      title: "ClassesScreen",
+      iconType: "image",
+      icon: require("../../../assets/onlinecion.png"),
+      event_type: "click_classes_card",
+      component: "Classes-card",
+    },
+    {
+      id: "8",
+      name: 'Community',
+      title: "CommunityLanding",
+      iconType: "image",
+      icon: require('../../../assets/community.png'),
+      event_type: "click_social_explore",
+      component: "SocialExplore-card",
+    }
 
-];
+  ];
 
-const categories = isLoggedIn
-  ? baseCategories // hide login
-  : [
+  const categories = isLoggedIn
+    ? baseCategories // hide login
+    : [
       ...baseCategories,
       {
         id: "7",
@@ -424,51 +424,51 @@ const categories = isLoggedIn
 
 
   const dailyOptions = [
-      {
-    id: "1",
-    title: t("cards.mantra_card.title"),
-    subtitle: t("cards.mantra_card.subtitle"),
-    route: "Mantra",
-    event_type: "view_mantra_card",
-    component: "mantra-card",
-    icon: require("../../../assets/atom.png"),
-  },
-  {
-    id: "2",
-    title: t("cards.sankalp_card.title"),
-    subtitle: t("cards.sankalp_card.subtitle"),
-    route: "Sankalp",
-    event_type: "view_sankalp_card",
-    component: "sankalp-card",
-    icon: require("../../../assets/lamp.png"),
-  },
-  {
-    id: "3",
-    title: t("cards.festival_card.title"),
-    subtitle: t("cards.festival_card.subtitle"),
-    route: "Wisdom",
-    event_type: "view_wisdom_card",
-    component: "wisdom-card",
-    icon: require("../../../assets/sun.png"),
-  },
-  {
-    id: "4",
-    title: t("cards.wisdom_card.title"),
-    subtitle: t("cards.wisdom_card.subtitle"),
-    route: "UpcomingFestivals",
-    event_type: "view_festival_card",
-    component: "festival-card",
-    icon: require("../../../assets/party.png"),
-  },
-];
+    {
+      id: "1",
+      title: t("cards.mantra_card.title"),
+      subtitle: t("cards.mantra_card.subtitle"),
+      route: "Mantra",
+      event_type: "view_mantra_card",
+      component: "mantra-card",
+      icon: require("../../../assets/atom.png"),
+    },
+    {
+      id: "2",
+      title: t("cards.sankalp_card.title"),
+      subtitle: t("cards.sankalp_card.subtitle"),
+      route: "Sankalp",
+      event_type: "view_sankalp_card",
+      component: "sankalp-card",
+      icon: require("../../../assets/lamp.png"),
+    },
+    {
+      id: "3",
+      title: t("cards.festival_card.title"),
+      subtitle: t("cards.festival_card.subtitle"),
+      route: "Wisdom",
+      event_type: "view_wisdom_card",
+      component: "wisdom-card",
+      icon: require("../../../assets/sun.png"),
+    },
+    {
+      id: "4",
+      title: t("cards.wisdom_card.title"),
+      subtitle: t("cards.wisdom_card.subtitle"),
+      route: "UpcomingFestivals",
+      event_type: "view_festival_card",
+      component: "festival-card",
+      icon: require("../../../assets/party.png"),
+    },
+  ];
 
   const kalpXData = [
     {
       id: "1",
       title: t("kalpx.learn"),
-            subTitle:"Your Path Unfolds",
-      description :"Explore Classes in dance, music, mantras, yoga and scripture- at your pace",
-       name: "ClassesScreen",
+      subTitle: "Your Path Unfolds",
+      description: "Explore Classes in dance, music, mantras, yoga and scripture- at your pace",
+      name: "ClassesScreen",
       // name: "LearnMore",
       event_type: "click_learn_card",
       component: "Learn-card",
@@ -478,8 +478,8 @@ const categories = isLoggedIn
     {
       id: "2",
       title: t("categories.explore"),
-      subTitle:"Visiual Wisdom",
-description: "Watch guided videos on culture, wisdom, rituals, and spiritual practices—anytime, anywhere",
+      subTitle: "Visiual Wisdom",
+      description: "Watch guided videos on culture, wisdom, rituals, and spiritual practices—anytime, anywhere",
       name: "Explore",
       event_type: "click_explore_card",
       component: "Explore-card",
@@ -488,13 +488,13 @@ description: "Watch guided videos on culture, wisdom, rituals, and spiritual pra
     },
     {
       id: "3",
-      title:  trackerData?.active_practices?.length > 0 ? t("categories.sadana"): t("categories.dharma"),
-            subTitle:"sacred Rituals",
-description: "Discover meaningful rituals, daily practices, and devotional routines to deepen your spiritual journey",
+      title: trackerData?.active_practices?.length > 0 ? t("categories.sadana") : t("categories.dharma"),
+      subTitle: "sacred Rituals",
+      description: "Discover meaningful rituals, daily practices, and devotional routines to deepen your spiritual journey",
       // title: t("kalpx.practice"),
       name: trackerData?.active_practices?.length > 0
-      ? "TrackerTabs"
-      : "DailyPracticeList",
+        ? "TrackerTabs"
+        : "DailyPracticeList",
       // trackerData?.active_practices?.length > 0 ? "MySadana" : "Dharma",
       event_type: "click_practice_card",
       component: "Practice-card",
@@ -535,13 +535,13 @@ description: "Discover meaningful rituals, daily practices, and devotional routi
     // },
   ];
 
-  const handleStartMantra = (mantra,reps) => {
+  const handleStartMantra = (mantra, reps) => {
     const payload = {
       kind: "mantra",
       practice_id: mantra.id,
       date_local: moment().format("YYYY-MM-DD"),
       tz: locationData?.timezone,
-      reps:reps
+      reps: reps
     };
 
     console.log("payload >>>>>>>>>", payload);
@@ -550,12 +550,12 @@ description: "Discover meaningful rituals, daily practices, and devotional routi
       startMantraPractice(payload, (res) => {
         console.log("🎯 Mantra start callback:", res);
         if (res.success) {
-          if(!isLoggedIn){
-          setShowMantraTaken(true);
-          }else{
+          if (!isLoggedIn) {
+            setShowMantraTaken(true);
+          } else {
             setShowLoginMantraTaken(true);
           }
-          dispatch(getPracticeToday(() => {}));
+          dispatch(getPracticeToday(() => { }));
         }
       })
     );
@@ -575,15 +575,15 @@ description: "Discover meaningful rituals, daily practices, and devotional routi
     dispatch(
       completeMantra(payload, (res) => {
         if (res.success) {
-              dispatch(getPracticeStreaks((res) => {
-        console.log("✅ Streaks fetched:", res);
-      }))
-           if(!isLoggedIn){
-          setShowMantraComplete(true);
-           } else{
-             setShowLoginMantraComplete(true);
-           }
-          dispatch(getPracticeToday(() => {}));
+          dispatch(getPracticeStreaks((res) => {
+            console.log("✅ Streaks fetched:", res);
+          }))
+          if (!isLoggedIn) {
+            setShowMantraComplete(true);
+          } else {
+            setShowLoginMantraComplete(true);
+          }
+          dispatch(getPracticeToday(() => { }));
         }
       })
     );
@@ -600,12 +600,12 @@ description: "Discover meaningful rituals, daily practices, and devotional routi
     dispatch(
       startMantraPractice(payload, (res) => {
         if (res.success) {
-          if(!isLoggedIn){
-          setShowSankalpTaken(true);
-          }else{
+          if (!isLoggedIn) {
+            setShowSankalpTaken(true);
+          } else {
             setShowLoginSankalpTaken(true);
           }
-          dispatch(getPracticeToday(() => {}));
+          dispatch(getPracticeToday(() => { }));
         }
       })
     );
@@ -623,64 +623,64 @@ description: "Discover meaningful rituals, daily practices, and devotional routi
     dispatch(
       completeMantra(payload, (res) => {
         if (res.success) {
-            dispatch(getPracticeStreaks((res) => {
-        console.log("✅ Streaks fetched:", res);
-      }))
-            if(!isLoggedIn){
-          setShowSankalpComplete(true);
-            }else{
-          setShowLoginSankalpComplete(true);
-            }
-          dispatch(getPracticeToday(() => {}));
+          dispatch(getPracticeStreaks((res) => {
+            console.log("✅ Streaks fetched:", res);
+          }))
+          if (!isLoggedIn) {
+            setShowSankalpComplete(true);
+          } else {
+            setShowLoginSankalpComplete(true);
+          }
+          dispatch(getPracticeToday(() => { }));
         }
       })
     );
   };
 
   const renderCategory = ({ item }) => (
-  <TouchableOpacity
-    style={styles.card}
-    onPress={async () => {
-      try {
-        const userId = await AsyncStorage.getItem("uuid");
-        await saveUserAction({
-          uuid: userId,
-          timestamp: Date.now(),
-          retryCount: 0,
-          event_type: item?.event_type,
-          event_data: {
-            component: item?.component,
-            city: locationData.city,
-            lat: locationData.latitude,
-            long: locationData.longitude,
-            timeZone: locationData.timezone,
-            device: Platform.OS === "ios" ? "mobile-ios" : "mobile-android",
-            screen: "home",
-          },
-        });
+    <TouchableOpacity
+      style={styles.card}
+      onPress={async () => {
+        try {
+          const userId = await AsyncStorage.getItem("uuid");
+          await saveUserAction({
+            uuid: userId,
+            timestamp: Date.now(),
+            retryCount: 0,
+            event_type: item?.event_type,
+            event_data: {
+              component: item?.component,
+              city: locationData.city,
+              lat: locationData.latitude,
+              long: locationData.longitude,
+              timeZone: locationData.timezone,
+              device: Platform.OS === "ios" ? "mobile-ios" : "mobile-android",
+              screen: "home",
+            },
+          });
 
-        navigation.navigate(item.title);
-      } catch (error) {
-        console.error("Error fetching UUID:", error);
-      }
-    }}
-  >
-    {item.iconType === "vector" && (
-      <Ionicons
-        name={item.icon}
-        size={28}
-        color="#9A7548"
-        style={styles.icon}
-      />
-    )}
-    {item.iconType === "image" && (
-      <Image source={item.icon} style={styles.icon} resizeMode="contain" />
-    )}
-    <TextComponent type="headerSubBoldText" style={styles.cardText}>
-      {item.name}
-    </TextComponent>
-  </TouchableOpacity>
-);
+          navigation.navigate(item.title);
+        } catch (error) {
+          console.error("Error fetching UUID:", error);
+        }
+      }}
+    >
+      {item.iconType === "vector" && (
+        <Ionicons
+          name={item.icon}
+          size={28}
+          color="#9A7548"
+          style={styles.icon}
+        />
+      )}
+      {item.iconType === "image" && (
+        <Image source={item.icon} style={styles.icon} resizeMode="contain" />
+      )}
+      <TextComponent type="headerSubBoldText" style={styles.cardText}>
+        {item.name}
+      </TextComponent>
+    </TouchableOpacity>
+  );
 
   const renderDailyOption = ({ item }) => (
     <>
@@ -731,48 +731,48 @@ description: "Discover meaningful rituals, daily practices, and devotional routi
           </View>
           <Image
             source={require("../../../assets/card_arrow.png")}
-         style={[
-    styles.arrowIcon,
-    {
-      transform: [
-        { rotate: expandedItemId === item.id ? "270deg" : "0deg" },
-      ],
-    },
-  ]}
+            style={[
+              styles.arrowIcon,
+              {
+                transform: [
+                  { rotate: expandedItemId === item.id ? "270deg" : "0deg" },
+                ],
+              },
+            ]}
             resizeMode="contain"
           />
         </View>
       </Card>
       {expandedItemId === item.id && item.id === "1" && (
-        <View style={{ marginTop: 10, zIndex: 999,}}>
+        <View style={{ marginTop: 10, zIndex: 999, }}>
           <SankalpCard
             practiceTodayData={practiceTodayData}
             onPressStartSankalp={(sankalp) => {
-            setSelectedSankalpForPopup(sankalp);
+              setSelectedSankalpForPopup(sankalp);
               handleStartSankalp(sankalp);
             }}
-            onCompleteSankalp={(sankalp) =>{
-            setSelectedSankalpForPopup(sankalp);
-          DoneSankalpCalled(sankalp);
-        }}
+            onCompleteSankalp={(sankalp) => {
+              setSelectedSankalpForPopup(sankalp);
+              DoneSankalpCalled(sankalp);
+            }}
           />
         </View>
       )}
       {expandedItemId === item.id && item.id === "2" && (
-        <View style={{ marginTop: 10, zIndex: 999,}}>
-           <MantraCard
-          practiceTodayData={practiceTodayData}
-          onPressChantMantra={(mantra,reps) => {
-            console.log("Selected Mantra for Start:", mantra,reps);
-            setSelectedMantraForPopup(mantra);
-            handleStartMantra(mantra,reps);
-          }}
-          DoneMantraCalled={(mantra) => {
-            console.log("confirm Mantra for Start:", mantra);
-            setSelectedMantraForPopup(mantra);
-            DoneMantraCalled(mantra);
-          }}
-        />
+        <View style={{ marginTop: 10, zIndex: 999, }}>
+          <MantraCard
+            practiceTodayData={practiceTodayData}
+            onPressChantMantra={(mantra, reps) => {
+              console.log("Selected Mantra for Start:", mantra, reps);
+              setSelectedMantraForPopup(mantra);
+              handleStartMantra(mantra, reps);
+            }}
+            DoneMantraCalled={(mantra) => {
+              console.log("confirm Mantra for Start:", mantra);
+              setSelectedMantraForPopup(mantra);
+              DoneMantraCalled(mantra);
+            }}
+          />
         </View>
       )}
       {expandedItemId === item.id && item.id === "4" && (
@@ -782,7 +782,7 @@ description: "Discover meaningful rituals, daily practices, and devotional routi
       )}
 
       {expandedItemId === item.id && item.id === "3" && (
-        <View style={{ marginTop: 10, zIndex: 999,}}>
+        <View style={{ marginTop: 10, zIndex: 999, }}>
           <FestivalCard />
         </View>
       )}
@@ -790,41 +790,41 @@ description: "Discover meaningful rituals, daily practices, and devotional routi
   );
 
   const renderKalpXItem = ({ item }) => (
-  <View
-    style={[styles.kalpXCard, { width: CARD_WIDTH }]} 
-  >
-     <Image source={item.icon} style={{ width: 40, height: 40,alignSelf:"flex-start" }} resizeMode="contain" />
-    <TextComponent type="headerSubBoldText" style={styles.kalpXTitle}>{item.title}</TextComponent>
-     <TextComponent type="streakSubText" style={{color:Colors.Colors.Light_grey,alignSelf:"flex-start" ,marginVertical:4}}>{item.subTitle}</TextComponent>
-    <Image source={item.image} style={styles.kalpXImage} resizeMode="cover" />
-     <TextComponent type="subDailyText" style={{textAlign:"center",marginVertical:6}}>{item.description}</TextComponent>
-     <TouchableOpacity style={{backgroundColor:"#D4A017",padding:6,borderRadius:5,justifyContent:"flex-end"}}     onPress={async () => {
-      try {
-        const userId = await AsyncStorage.getItem("uuid");
-        await saveUserAction({
-          uuid: userId,
-          timestamp: Date.now(),
-          retryCount: 0,
-          event_type: item?.event_type,
-          event_data: {
-            component: item?.component,
-            city: locationData.city,
-            lat: locationData.latitude,
-            long: locationData.longitude,
-            timeZone: locationData.timezone,
-            device: Platform.OS === "ios" ? "mobile-ios" : "mobile-android",
-            screen: "home",
-          },
-        });
-        navigation.navigate(item.name);
-      } catch (error) {
-        console.error("Error fetching UUID:", error);
-      }
-    }}>
-      <TextComponent type="boldText" style={{color:"#FFFFFF"}}>Begin your journey</TextComponent>
-     </TouchableOpacity>
-  </View>
-);
+    <View
+      style={[styles.kalpXCard, { width: CARD_WIDTH }]}
+    >
+      <Image source={item.icon} style={{ width: 40, height: 40, alignSelf: "flex-start" }} resizeMode="contain" />
+      <TextComponent type="headerSubBoldText" style={styles.kalpXTitle}>{item.title}</TextComponent>
+      <TextComponent type="streakSubText" style={{ color: Colors.Colors.Light_grey, alignSelf: "flex-start", marginVertical: 4 }}>{item.subTitle}</TextComponent>
+      <Image source={item.image} style={styles.kalpXImage} resizeMode="cover" />
+      <TextComponent type="subDailyText" style={{ textAlign: "center", marginVertical: 6 }}>{item.description}</TextComponent>
+      <TouchableOpacity style={{ backgroundColor: "#D4A017", padding: 6, borderRadius: 5, justifyContent: "flex-end" }} onPress={async () => {
+        try {
+          const userId = await AsyncStorage.getItem("uuid");
+          await saveUserAction({
+            uuid: userId,
+            timestamp: Date.now(),
+            retryCount: 0,
+            event_type: item?.event_type,
+            event_data: {
+              component: item?.component,
+              city: locationData.city,
+              lat: locationData.latitude,
+              long: locationData.longitude,
+              timeZone: locationData.timezone,
+              device: Platform.OS === "ios" ? "mobile-ios" : "mobile-android",
+              screen: "home",
+            },
+          });
+          navigation.navigate(item.name);
+        } catch (error) {
+          console.error("Error fetching UUID:", error);
+        }
+      }}>
+        <TextComponent type="boldText" style={{ color: "#FFFFFF" }}>Begin your journey</TextComponent>
+      </TouchableOpacity>
+    </View>
+  );
 
 
   return (
@@ -834,7 +834,7 @@ description: "Discover meaningful rituals, daily practices, and devotional routi
         backgroundColor={Colors.Colors.header_bg}
         translucent={false}
       />
-        {/* <ImageBackground
+      {/* <ImageBackground
                         source={require("../../../assets/Tracker_BG.png")}
                         style={{
                           flex: 1,
@@ -853,7 +853,7 @@ description: "Discover meaningful rituals, daily practices, and devotional routi
         contentContainerStyle={{ paddingBottom: 30 }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={{ marginTop: 0,alignItems:"center"}}>
+        <View style={{ marginTop: 0, alignItems: "center" }}>
           <FlatList
             data={categories}
             renderItem={renderCategory}
@@ -867,151 +867,151 @@ description: "Discover meaningful rituals, daily practices, and devotional routi
           />
         </View>
         {isLoggedIn &&
-  <View style={{alignItems:"center"}}>
-  <ScrollView
-    horizontal
-    showsHorizontalScrollIndicator={false}
-    contentContainerStyle={styles.streakScrollContainer}
-  >
-        <Card style={styles.streakItem}  onPress={() => navigation.navigate("StreakScreen")}>
-      <View style={{flexDirection:"row"}}>
-      <Image
-        source={require("../../../assets/streak1.png")}
-        style={styles.streakIcon}
-      />
-      <TextComponent type="streakSubText" style={styles.count}>
-        {streakData?.sankalp ?? 0}
-      </TextComponent>
-      <TextComponent type="streakSubText" style={styles.streakText}>
-        {t("streak.sankalp")}
-      </TextComponent>
-      </View>
-    </Card>
-    <Card style={styles.streakItem}  onPress={() => navigation.navigate("StreakScreen")}>
-      <View style={{flexDirection:"row"}}>
-      <Image
-        source={require("../../../assets/streak2.png")}
-        style={styles.streakIcon}
-      />
-      <TextComponent type="streakSubText" style={styles.count}>
-        {streakData?.mantra ?? 0}
-      </TextComponent>
-      <TextComponent type="streakSubText" style={styles.streakText}>
-        {t("streak.mantra")}
-      </TextComponent>
-      </View>
-    </Card>
-    <Card style={styles.streakItem}  onPress={() => navigation.navigate("StreakScreen")}>
-      <View style={{flexDirection:"row"}}>
-      <Image
-        source={require("../../../assets/streak3.png")}
-        style={styles.streakIcon}
-      />
-      <TextComponent type="streakSubText" style={styles.count}>
-        {trackerData?.streak_count ?? 0}
-      </TextComponent>
-      <TextComponent type="streakSubText" style={styles.streakText}>
-        {t("streak.DailyPractice")}
-      </TextComponent>
-      </View>
-    </Card>
-  </ScrollView>
-  </View>
-}
-<View style={{borderColor:Colors.Colors.Yellow,borderWidth:1.25,borderRadius:6,marginHorizontal:10,padding:4,marginVertical:6,marginTop:10}}>
-<TextComponent type="DailyboldText" style={{alignSelf:"center",marginTop: 20}}>How can we help?</TextComponent>
-<TextComponent type="cardSubTitleText" style={{alignSelf:"center",marginTop: 10,textAlign:"center"}}>We've curated guided paths rooted in Vedic wisdom to support your long term growth and inner balance.</TextComponent>
-     <TouchableOpacity style={{ alignItems: "center",marginTop:8 }} onPress={() => {navigation.navigate("DailyPracticeList")}}>
-      <ImageBackground
-        source={require("../../../assets/locus.png")}
-        style={styles.image}
-        resizeMode="contain"
-      >
-        <TextComponent type="cardText" style={[styles.label, styles.leftLabel]}>
-          Peace {"\n"}& Calm
-        </TextComponent>
-       <TextComponent type="cardText" style={[styles.label, styles.centerLabel]}>
-          Career {"\n"}& Prosperity
-        </TextComponent>
-        <TextComponent type="cardText" style={[styles.label, styles.rightLabel]}>
-          Spiritual {"\n"}Growth
-        </TextComponent>
-      </ImageBackground>
-    </TouchableOpacity>
-    <TouchableOpacity style={{ flexDirection:"row",alignSelf: "center", marginTop: 4, alignItems: "center",marginLeft:30,marginBottom:20 }} onPress={() => {navigation.navigate("DailyPracticeList")}}>
-        <TextComponent
-    type="cardText"
-    style={{
-      color: Colors.Colors.BLACK,
-      textDecorationLine: "underline",
-      marginTop: 6,
-    }}
-  >
-  Tap to Explore More & Start
-  </TextComponent>
-  <TouchableOpacity style={styles.circleButton}>
-    <Ionicons name="arrow-forward" size={12} color="#FFF6DA" />
-  </TouchableOpacity>
-</TouchableOpacity>
-</View>
+          <View style={{ alignItems: "center" }}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.streakScrollContainer}
+            >
+              <Card style={styles.streakItem} onPress={() => navigation.navigate("StreakScreen")}>
+                <View style={{ flexDirection: "row" }}>
+                  <Image
+                    source={require("../../../assets/streak1.png")}
+                    style={styles.streakIcon}
+                  />
+                  <TextComponent type="streakSubText" style={styles.count}>
+                    {streakData?.sankalp ?? 0}
+                  </TextComponent>
+                  <TextComponent type="streakSubText" style={styles.streakText}>
+                    {t("streak.sankalp")}
+                  </TextComponent>
+                </View>
+              </Card>
+              <Card style={styles.streakItem} onPress={() => navigation.navigate("StreakScreen")}>
+                <View style={{ flexDirection: "row" }}>
+                  <Image
+                    source={require("../../../assets/streak2.png")}
+                    style={styles.streakIcon}
+                  />
+                  <TextComponent type="streakSubText" style={styles.count}>
+                    {streakData?.mantra ?? 0}
+                  </TextComponent>
+                  <TextComponent type="streakSubText" style={styles.streakText}>
+                    {t("streak.mantra")}
+                  </TextComponent>
+                </View>
+              </Card>
+              <Card style={styles.streakItem} onPress={() => navigation.navigate("StreakScreen")}>
+                <View style={{ flexDirection: "row" }}>
+                  <Image
+                    source={require("../../../assets/streak3.png")}
+                    style={styles.streakIcon}
+                  />
+                  <TextComponent type="streakSubText" style={styles.count}>
+                    {trackerData?.streak_count ?? 0}
+                  </TextComponent>
+                  <TextComponent type="streakSubText" style={styles.streakText}>
+                    {t("streak.DailyPractice")}
+                  </TextComponent>
+                </View>
+              </Card>
+            </ScrollView>
+          </View>
+        }
+        <View style={{ borderColor: Colors.Colors.Yellow, borderWidth: 1.25, borderRadius: 6, marginHorizontal: 10, padding: 4, marginVertical: 6, marginTop: 10 }}>
+          <TextComponent type="DailyboldText" style={{ alignSelf: "center", marginTop: 20 }}>How can we help?</TextComponent>
+          <TextComponent type="cardSubTitleText" style={{ alignSelf: "center", marginTop: 10, textAlign: "center" }}>We've curated guided paths rooted in Vedic wisdom to support your long term growth and inner balance.</TextComponent>
+          <TouchableOpacity style={{ alignItems: "center", marginTop: 8 }} onPress={() => { navigation.navigate("DailyPracticeList") }}>
+            <ImageBackground
+              source={require("../../../assets/locus.png")}
+              style={styles.image}
+              resizeMode="contain"
+            >
+              <TextComponent type="cardText" style={[styles.label, styles.leftLabel]}>
+                Peace {"\n"}& Calm
+              </TextComponent>
+              <TextComponent type="cardText" style={[styles.label, styles.centerLabel]}>
+                Career {"\n"}& Prosperity
+              </TextComponent>
+              <TextComponent type="cardText" style={[styles.label, styles.rightLabel]}>
+                Spiritual {"\n"}Growth
+              </TextComponent>
+            </ImageBackground>
+          </TouchableOpacity>
+          <TouchableOpacity style={{ flexDirection: "row", alignSelf: "center", marginTop: 4, alignItems: "center", marginLeft: 30, marginBottom: 20 }} onPress={() => { navigation.navigate("DailyPracticeList") }}>
+            <TextComponent
+              type="cardText"
+              style={{
+                color: Colors.Colors.BLACK,
+                textDecorationLine: "underline",
+                marginTop: 6,
+              }}
+            >
+              Tap to Explore More & Start
+            </TextComponent>
+            <TouchableOpacity style={styles.circleButton}>
+              <Ionicons name="arrow-forward" size={12} color="#FFF6DA" />
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </View>
         <View style={styles.dailyContainer}>
           <TextComponent type="headerText" style={styles.sectionHeading}>
             {t("streak.stepText")}
           </TextComponent>
-         <TextComponent type="cardSubTitleText" style={{alignSelf:"center",textAlign:"center",marginBottom:10,marginTop:4,marginHorizontal:12}}>Try a simple Vedic practice below to bring clarity, balance, and purpose into your day.</TextComponent>
-            <View style={{ 
-                  height: expandedItemId ? 'auto' : 0,
-    opacity: expandedItemId ? 1 : 0,
-    overflow: 'hidden', 
-    marginVertical: expandedItemId ? 10 : 0,
-             }}>
-              <FlatList
-                data={topChips}
-                keyExtractor={(item) => item.id}
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingHorizontal: 10 }}
-                renderItem={({ item }) => {
-                  const isActive = expandedItemId === item.id;
-                  return (
-                    <TouchableOpacity
-                      onPress={() => handleChipPress(item.id)}
-                      activeOpacity={0.8}
+          <TextComponent type="cardSubTitleText" style={{ alignSelf: "center", textAlign: "center", marginBottom: 10, marginTop: 4, marginHorizontal: 12 }}>Try a simple Vedic practice below to bring clarity, balance, and purpose into your day.</TextComponent>
+          <View style={{
+            height: expandedItemId ? 'auto' : 0,
+            opacity: expandedItemId ? 1 : 0,
+            overflow: 'hidden',
+            marginVertical: expandedItemId ? 10 : 0,
+          }}>
+            <FlatList
+              data={topChips}
+              keyExtractor={(item) => item.id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingHorizontal: 10 }}
+              renderItem={({ item }) => {
+                const isActive = expandedItemId === item.id;
+                return (
+                  <TouchableOpacity
+                    onPress={() => handleChipPress(item.id)}
+                    activeOpacity={0.8}
+                    style={{
+                      backgroundColor: isActive
+                        ? Colors.Colors.App_theme
+                        : Colors.Colors.white,
+                      borderColor: Colors.Colors.App_theme,
+                      borderWidth: 1,
+                      borderRadius: 20,
+                      paddingHorizontal: 14,
+                      paddingVertical: 6,
+                      marginRight: 10,
+                    }}
+                  >
+                    <TextComponent
+                      type="cardText"
                       style={{
-                        backgroundColor: isActive
-                          ? Colors.Colors.App_theme
-                          : Colors.Colors.white,
-                        borderColor: Colors.Colors.App_theme,
-                        borderWidth: 1,
-                        borderRadius: 20,
-                        paddingHorizontal: 14,
-                        paddingVertical: 6,
-                        marginRight: 10,
+                        color: isActive
+                          ? Colors.Colors.white
+                          : Colors.Colors.App_theme,
                       }}
                     >
-                      <TextComponent
-                        type="cardText"
-                        style={{
-                          color: isActive
-                            ? Colors.Colors.white
-                            : Colors.Colors.App_theme,
-                        }}
-                      >
-                        {item.label}
-                      </TextComponent>
-                    </TouchableOpacity>
-                  );
-                }}
-              />
-            </View>
+                      {item.label}
+                    </TextComponent>
+                  </TouchableOpacity>
+                );
+              }}
+            />
+          </View>
 
           <FlatList
             data={
               expandedItemId
                 ? [
-                    dailyOptions.find((x) => x.id === expandedItemId),
-                    ...dailyOptions.filter((x) => x.id !== expandedItemId),
-                  ]
+                  dailyOptions.find((x) => x.id === expandedItemId),
+                  ...dailyOptions.filter((x) => x.id !== expandedItemId),
+                ]
                 : dailyOptions
             }
             renderItem={renderDailyOption}
@@ -1106,98 +1106,98 @@ description: "Discover meaningful rituals, daily practices, and devotional routi
           />
         </View> */}
         {/* ===================== EXPLORE CLASSES ===================== */}
-<View style={{ marginTop: 25,marginHorizontal:16 }}>
-  <View style={{ 
-    flexDirection: "row", 
-    justifyContent: "space-between", 
-    // paddingRight: 16 
-  }}>
-    <TextComponent type="headerText" style={{ fontSize: 16 }}>
-      Explore Classes
-    </TextComponent>
+        <View style={{ marginTop: 25, marginHorizontal: 16 }}>
+          <View style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            // paddingRight: 16 
+          }}>
+            <TextComponent type="headerText" style={{ fontSize: 16 }}>
+              Explore Classes
+            </TextComponent>
 
-    <TouchableOpacity onPress={() => navigation.navigate("ClassesScreen")}>
-      <TextComponent type="mediumText" style={{ color: Colors.Colors.App_theme }}>
-        Show All
-      </TextComponent>
-    </TouchableOpacity>
-  </View>
-    <FlatList
-      data={homeClasses}
-      horizontal
-      keyExtractor={(item) => item.id.toString()}
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={{  marginTop: 10}}
-      renderItem={({ item }) => (
-          <ClassHomeCard
-          fromHome = {true}
-          imageUrl={
-            item?.cover_media?.key
-              ? `${BASE_IMAGE_URL}/${item.cover_media.key}`
-              : null
-          }
-          title={item?.title}
-          description={item?.subtitle || item?.description}
-          duration={item?.pricing?.per_person?.session_length_min}
-          // price={item?.pricing?.per_person?.amount?.web}
-          price={
-  item?.pricing?.type === "per_group"
-    ? item?.pricing?.per_group?.amount?.web
-    : item?.pricing?.per_person?.amount?.web
-}
-          onViewDetails={() =>
-            navigation.navigate("ClassTutorDetailsScreen", { data: item })
-          }
-          onBookNow={() =>
-            navigation.navigate("ClassBookingScreen", { data: item, reschedule: false })
-          }
-          tutor={item?.tutor}
-            currency={item?.pricing?.currency}
-  trailenabled={item?.pricing?.trial?.enabled}
-  trailAmt={item?.pricing?.trial?.amount}
-        />
-      )}
+            <TouchableOpacity onPress={() => navigation.navigate("ClassesScreen")}>
+              <TextComponent type="mediumText" style={{ color: Colors.Colors.App_theme }}>
+                Show All
+              </TextComponent>
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            data={homeClasses}
+            horizontal
+            keyExtractor={(item) => item.id.toString()}
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ marginTop: 10 }}
+            renderItem={({ item }) => (
+              <ClassHomeCard
+                fromHome={true}
+                imageUrl={
+                  item?.cover_media?.key
+                    ? `${BASE_IMAGE_URL}/${item.cover_media.key}`
+                    : null
+                }
+                title={item?.title}
+                description={item?.subtitle || item?.description}
+                duration={item?.pricing?.per_person?.session_length_min}
+                // price={item?.pricing?.per_person?.amount?.web}
+                price={
+                  item?.pricing?.type === "per_group"
+                    ? item?.pricing?.per_group?.amount?.web
+                    : item?.pricing?.per_person?.amount?.web
+                }
+                onViewDetails={() =>
+                  navigation.navigate("ClassTutorDetailsScreen", { data: item })
+                }
+                onBookNow={() =>
+                  navigation.navigate("ClassBookingScreen", { data: item, reschedule: false })
+                }
+                tutor={item?.tutor}
+                currency={item?.pricing?.currency}
+                trailenabled={item?.pricing?.trial?.enabled}
+                trailAmt={item?.pricing?.trial?.amount}
+              />
+            )}
 
-      scrollEventThrottle={16}
-      onScroll={({ nativeEvent }) => {
-        const scrollX = nativeEvent.contentOffset.x;
-        const contentWidth = nativeEvent.contentSize.width;
-        const viewWidth = nativeEvent.layoutMeasurement.width;
+            scrollEventThrottle={16}
+            onScroll={({ nativeEvent }) => {
+              const scrollX = nativeEvent.contentOffset.x;
+              const contentWidth = nativeEvent.contentSize.width;
+              const viewWidth = nativeEvent.layoutMeasurement.width;
 
-        if (contentWidth <= viewWidth) return;
+              if (contentWidth <= viewWidth) return;
 
-        // Trigger pagination when scrolled more than 30%
-        const progress = scrollX / (contentWidth - viewWidth);
+              // Trigger pagination when scrolled more than 30%
+              const progress = scrollX / (contentWidth - viewWidth);
 
-        if (progress > 0.3 && !loadingClasses && classHasMore) {
-          const next = classPage + 1;
-          setClassPage(next);
-          loadHomeClasses(next);
-        }
-      }}
+              if (progress > 0.3 && !loadingClasses && classHasMore) {
+                const next = classPage + 1;
+                setClassPage(next);
+                loadHomeClasses(next);
+              }
+            }}
 
-      ListFooterComponent={
-        loadingClasses ? (
-          <ActivityIndicator size="small" style={{ marginLeft: 10 }} />
-        ) : null
-      }
-    />
-  {/* </View> */}
-  {/* </Card> */}
-</View>
+            ListFooterComponent={
+              loadingClasses ? (
+                <ActivityIndicator size="small" style={{ marginLeft: 10 }} />
+              ) : null
+            }
+          />
+          {/* </View> */}
+          {/* </Card> */}
+        </View>
 
-<View style={styles.kalpXContainer}>
-  <TextComponent
+        <View style={styles.kalpXContainer}>
+          <TextComponent
             type="headerText"
             style={{
               color: Colors.Colors.BLACK,
               fontSize: FontSize.CONSTS.FS_16,
-                alignSelf:"center",
-                marginTop:10,
+              alignSelf: "center",
+              marginTop: 10,
             }}
           >{t("home.kalpXHeading")}</TextComponent>
-<TextComponent type="mediumText" style={{textAlign:"center",marginVertical:10}}>Begin your transformative journey with timeless wisdom and modern guidance</TextComponent>
-  {/* <FlatList
+          <TextComponent type="mediumText" style={{ textAlign: "center", marginVertical: 10 }}>Begin your transformative journey with timeless wisdom and modern guidance</TextComponent>
+          {/* <FlatList
     data={kalpXData}
     renderItem={renderKalpXItem}
     keyExtractor={(item) => item.id}
@@ -1209,164 +1209,164 @@ description: "Discover meaningful rituals, daily practices, and devotional routi
     }}
     contentContainerStyle={{ paddingBottom: 20 }}
   /> */}
-  <FlatList
-  data={kalpXData}
-  renderItem={renderKalpXItem}
-  keyExtractor={(item) => item.id}
-  horizontal
-  showsHorizontalScrollIndicator={false}
-  contentContainerStyle={{
-    // paddingLeft: 16,
-    paddingRight: 16,
-  }}
-  ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
-/>
+          <FlatList
+            data={kalpXData}
+            renderItem={renderKalpXItem}
+            keyExtractor={(item) => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{
+              // paddingLeft: 16,
+              paddingRight: 16,
+            }}
+            ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
+          />
 
-</View>
-<SigninPopup
-  visible={showMantraTaken}
-  onClose={() => setShowMantraTaken(false)}
-  onConfirmCancel={() => setShowMantraTaken(false)}
-  title={t("popup.mantraTaken_title1")}
-  subTitle={t("popup.mantraTaken_subtitle1")}
-  subText={t("popup.mantraTaken_sub1")}
-  infoTexts={[
-    t("popup.mantraTaken_info1.0"),
-    t("popup.mantraTaken_info1.1"),
-    t("popup.mantraTaken_info1.2"),
-  ]}
-  bottomText={t("popup.mantraTaken_bottom")}
-/>
-<SigninPopup
-  visible={showLoginMantraTaken}
-  onClose={() => setShowLoginMantraTaken(false)}
-  onConfirmCancel={() => setShowLoginMantraTaken(false)}
-  title={t("popup.mantraTaken_title2")}
-  subTitle={t("popup.mantraTaken_subtitle1")}
-  subText={t("popup.mantraTaken_sub2")}
-  infoTexts={[
-    t("popup.mantraTaken_info2.0"),
-    t("popup.mantraTaken_info2.1"),
-  ]}
-  // bottomText={t("popup.mantraTaken_bottom")}
-  MantraButtonTitle={t("popup.mantraTaken_button")}
-  onSadhanPress={() => {
-    setShowLoginMantraTaken(false);
-    if (selectedMantraForPopup) {
-      navigation.navigate("MySadana", {
-        selectedmantra: selectedMantraForPopup,
-      });
-    }
-  }}
-/>
-<SigninPopup
-  visible={showMantraComplete}
-  onClose={() => setShowMantraComplete(false)}
-  onConfirmCancel={() => setShowMantraComplete(false)}
-  title={t("popup.mantraComplete_title1")}
-    subTitle={t("popup.mantraTaken_subtitle1")}
-  subText={t("popup.mantraComplete_sub1")}
-  infoTexts={[
-    t("popup.mantraComplete_info1.0"),
-    t("popup.mantraComplete_info1.1"),
-    t("popup.mantraComplete_info1.2"),
-  ]}
-/>
-<SigninPopup
-  visible={showLoginMantraComplete}
-  onClose={() => setShowLoginMantraComplete(false)}
-  onConfirmCancel={() => {}}
-  title={t("popup.mantraComplete_title2")}
-  subText={t("popup.mantraComplete_sub2")}
-  infoTexts={[
-    t("popup.mantraComplete_info2.0"),
-    t("popup.mantraComplete_info2.1"),
-  ]}
-    MantraButtonTitle={t("popup.mantraTaken_Continue")}
-  onSadhanPress={() => setShowLoginMantraComplete(false)}
-/>
-<SigninPopup
-  visible={showSankalpTaken}
-  onClose={() => setShowSankalpTaken(false)}
-  onConfirmCancel={() => setShowMantraTaken(false)}
-  title={t("popup.sankalpTaken_title")}
-  subText={t("popup.sankalpTaken_sub")}
-  infoTexts={[
-    t("popup.sankalpTaken_info.0"),
-    t("popup.sankalpTaken_info.1"),
-    t("popup.sankalpTaken_info.2"),
-  ]}
-  bottomText={t("popup.sankalpTaken_bottom")}
-/>
-<SigninPopup
-  visible={showLoginSankalpTaken}
-  onClose={() => setShowLoginSankalpTaken(false)}
-  onConfirmCancel={() => setShowLoginMantraTaken(false)}
-  title={t("popup.sankalpTaken_title3")}
-  subTitle={t("popup.mantraTaken_subtitle1")}
-  subText={t("popup.mantraTaken_sub2")}
-  infoTexts={[
-    t("popup.sankalpTaken_info2.0"),
-    t("popup.sankalpTaken_info2.1"),
-  ]}
-    MantraButtonTitle={t("popup.sankalpTaken_button")}
-   onSadhanPress={() => {
-    setShowLoginSankalpTaken(false);
-    if (selectedSankalpForPopup) {
-      navigation.navigate("MySadana", {
-        selectedmantra: selectedSankalpForPopup,
-      });
-    }
-  }}
-  // bottomText={t("popup.sankalpTaken_bottom")}
-/>
-<SigninPopup
-  visible={showSankalpComplete}
-  onClose={() => setShowSankalpComplete(false)}
-  onConfirmCancel={() => {}}
-  title={t("popup.sankalpComplete_title")}
-  subText={t("popup.sankalpComplete_sub")}
-  infoTexts={[
-    t("popup.sankalpComplete_info.0"),
-    t("popup.sankalpComplete_info.1"),
-    t("popup.sankalpComplete_info.2"),
-  ]}
-  bottomText=""
-/>
-<SigninPopup
-  visible={showLoginSankalpComplete}
-  onClose={() => setShowLoginSankalpComplete(false)}
-  onConfirmCancel={() => setShowLoginSankalpComplete(false)}
-  title={t("popup.mantraComplete_title2")}
-  subText={t("popup.sankalpComplete_sub2")}
-  infoTexts={[
-    t("popup.sankalpComplete_info2.0"),
-    t("popup.sankalpComplete_info2.1"),
-  ]}
-  bottomText=""
-      MantraButtonTitle={t("popup.mantraTaken_Continue")}
-  onSadhanPress={() => setShowLoginSankalpComplete(false)}
-/>
-  {/* <LanguageTimezoneModal
+        </View>
+        <SigninPopup
+          visible={showMantraTaken}
+          onClose={() => setShowMantraTaken(false)}
+          onConfirmCancel={() => setShowMantraTaken(false)}
+          title={t("popup.mantraTaken_title1")}
+          subTitle={t("popup.mantraTaken_subtitle1")}
+          subText={t("popup.mantraTaken_sub1")}
+          infoTexts={[
+            t("popup.mantraTaken_info1.0"),
+            t("popup.mantraTaken_info1.1"),
+            t("popup.mantraTaken_info1.2"),
+          ]}
+          bottomText={t("popup.mantraTaken_bottom")}
+        />
+        <SigninPopup
+          visible={showLoginMantraTaken}
+          onClose={() => setShowLoginMantraTaken(false)}
+          onConfirmCancel={() => setShowLoginMantraTaken(false)}
+          title={t("popup.mantraTaken_title2")}
+          subTitle={t("popup.mantraTaken_subtitle1")}
+          subText={t("popup.mantraTaken_sub2")}
+          infoTexts={[
+            t("popup.mantraTaken_info2.0"),
+            t("popup.mantraTaken_info2.1"),
+          ]}
+          // bottomText={t("popup.mantraTaken_bottom")}
+          MantraButtonTitle={t("popup.mantraTaken_button")}
+          onSadhanPress={() => {
+            setShowLoginMantraTaken(false);
+            if (selectedMantraForPopup) {
+              navigation.navigate("MySadana", {
+                selectedmantra: selectedMantraForPopup,
+              });
+            }
+          }}
+        />
+        <SigninPopup
+          visible={showMantraComplete}
+          onClose={() => setShowMantraComplete(false)}
+          onConfirmCancel={() => setShowMantraComplete(false)}
+          title={t("popup.mantraComplete_title1")}
+          subTitle={t("popup.mantraTaken_subtitle1")}
+          subText={t("popup.mantraComplete_sub1")}
+          infoTexts={[
+            t("popup.mantraComplete_info1.0"),
+            t("popup.mantraComplete_info1.1"),
+            t("popup.mantraComplete_info1.2"),
+          ]}
+        />
+        <SigninPopup
+          visible={showLoginMantraComplete}
+          onClose={() => setShowLoginMantraComplete(false)}
+          onConfirmCancel={() => { }}
+          title={t("popup.mantraComplete_title2")}
+          subText={t("popup.mantraComplete_sub2")}
+          infoTexts={[
+            t("popup.mantraComplete_info2.0"),
+            t("popup.mantraComplete_info2.1"),
+          ]}
+          MantraButtonTitle={t("popup.mantraTaken_Continue")}
+          onSadhanPress={() => setShowLoginMantraComplete(false)}
+        />
+        <SigninPopup
+          visible={showSankalpTaken}
+          onClose={() => setShowSankalpTaken(false)}
+          onConfirmCancel={() => setShowMantraTaken(false)}
+          title={t("popup.sankalpTaken_title")}
+          subText={t("popup.sankalpTaken_sub")}
+          infoTexts={[
+            t("popup.sankalpTaken_info.0"),
+            t("popup.sankalpTaken_info.1"),
+            t("popup.sankalpTaken_info.2"),
+          ]}
+          bottomText={t("popup.sankalpTaken_bottom")}
+        />
+        <SigninPopup
+          visible={showLoginSankalpTaken}
+          onClose={() => setShowLoginSankalpTaken(false)}
+          onConfirmCancel={() => setShowLoginMantraTaken(false)}
+          title={t("popup.sankalpTaken_title3")}
+          subTitle={t("popup.mantraTaken_subtitle1")}
+          subText={t("popup.mantraTaken_sub2")}
+          infoTexts={[
+            t("popup.sankalpTaken_info2.0"),
+            t("popup.sankalpTaken_info2.1"),
+          ]}
+          MantraButtonTitle={t("popup.sankalpTaken_button")}
+          onSadhanPress={() => {
+            setShowLoginSankalpTaken(false);
+            if (selectedSankalpForPopup) {
+              navigation.navigate("MySadana", {
+                selectedmantra: selectedSankalpForPopup,
+              });
+            }
+          }}
+        // bottomText={t("popup.sankalpTaken_bottom")}
+        />
+        <SigninPopup
+          visible={showSankalpComplete}
+          onClose={() => setShowSankalpComplete(false)}
+          onConfirmCancel={() => { }}
+          title={t("popup.sankalpComplete_title")}
+          subText={t("popup.sankalpComplete_sub")}
+          infoTexts={[
+            t("popup.sankalpComplete_info.0"),
+            t("popup.sankalpComplete_info.1"),
+            t("popup.sankalpComplete_info.2"),
+          ]}
+          bottomText=""
+        />
+        <SigninPopup
+          visible={showLoginSankalpComplete}
+          onClose={() => setShowLoginSankalpComplete(false)}
+          onConfirmCancel={() => setShowLoginSankalpComplete(false)}
+          title={t("popup.mantraComplete_title2")}
+          subText={t("popup.sankalpComplete_sub2")}
+          infoTexts={[
+            t("popup.sankalpComplete_info2.0"),
+            t("popup.sankalpComplete_info2.1"),
+          ]}
+          bottomText=""
+          MantraButtonTitle={t("popup.mantraTaken_Continue")}
+          onSadhanPress={() => setShowLoginSankalpComplete(false)}
+        />
+        {/* <LanguageTimezoneModal
     visible={showLangTZModal}
     onClose={() => setShowLangTZModal(false)}
   /> */}
-  <UpdateAppModal
-  visible={showUpdateModal}
-  onLater={() => setShowUpdateModal(false)}
-  onUpdateNow={async () => {
-    const storeUrl =
-      Platform.OS === "ios"
-        ? "https://apps.apple.com/app/kalpx/id6755144623"
-        : "market://details?id=com.kalpx.app";
-    Linking.openURL(storeUrl);
-  }}
-/>
-<NotificationPermissionModal
-  visible={showNotificationPopup}
-  onClose={() => setShowNotificationPopup(false)}
-/>
-         <LoadingOverlay visible={apiloading} text="Processing..." />
+        <UpdateAppModal
+          visible={showUpdateModal}
+          onLater={() => setShowUpdateModal(false)}
+          onUpdateNow={async () => {
+            const storeUrl =
+              Platform.OS === "ios"
+                ? "https://apps.apple.com/app/kalpx/id6755144623"
+                : "market://details?id=com.kalpx.app";
+            Linking.openURL(storeUrl);
+          }}
+        />
+        <NotificationPermissionModal
+          visible={showNotificationPopup}
+          onClose={() => setShowNotificationPopup(false)}
+        />
+        <LoadingOverlay visible={apiloading} text="Processing..." />
       </ScrollView>
       {/* </ImageBackground> */}
     </SafeAreaView>

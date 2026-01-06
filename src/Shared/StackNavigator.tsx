@@ -34,6 +34,7 @@ import Profile from "../screens/Profile/Profile";
 import ProfileDetails from "../screens/Profile/ProfileDetails";
 import Sankalp from "../screens/Sankalp";
 import SocialExplore from "../screens/Social/SocialExplore";
+import CommunityLanding from "../screens/Social/CommunityLanding";
 import SocialPostDetailScreen from "../screens/Social/SocialPostDetailScreen";
 import StreakScreen from "../screens/Streak/StreakScreen";
 import TopTabsNavigator from "../screens/Tracker/TopTabsNavigator";
@@ -174,46 +175,51 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
       component={TrackerEdit}
       options={{ headerShown: false }}
     />
-      <Stack.Screen
+    <Stack.Screen
       name="SocialExplore"
       component={SocialExplore}
       options={{ headerShown: false }}
     />
-      <Stack.Screen
+    <Stack.Screen
+      name="CommunityLanding"
+      component={CommunityLanding}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
       name="SocialPostDetailScreen"
       component={SocialPostDetailScreen}
-      />
-      <Stack.Screen
+    />
+    <Stack.Screen
       name="CreateOwnPractice"
       component={CreateOwnPractice}
       options={{ headerShown: false }}
     />
-      <Stack.Screen
+    <Stack.Screen
       name="SanatanPractice"
       component={SanatanPractice}
       options={{ headerShown: false }}
     />
-          <Stack.Screen
+    <Stack.Screen
       name="ConfirmSanatanPractices"
       component={ConfirmSanatanPractices}
       options={{ headerShown: false }}
     />
-           <Stack.Screen
+    <Stack.Screen
       name="ConfirmDailyPractices"
       component={ConfirmDailyPractices}
       options={{ headerShown: false }}
     />
-           <Stack.Screen
+    <Stack.Screen
       name="SubmitDailyPracticesScreen"
       component={SubmitDailyPracticesScreen}
       options={{ headerShown: false }}
     />
-     <Stack.Screen
+    <Stack.Screen
       name="DailyPracticeLogin"
       component={DailyPracticeLogin}
       options={{ headerShown: false }}
     />
-       <Stack.Screen
+    <Stack.Screen
       name="DailyPracticeMantra"
       component={DailyPracticeMantra}
       options={{ headerShown: false }}

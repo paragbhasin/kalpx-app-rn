@@ -17,37 +17,66 @@ import styles from "./SocialExplorestyles";
 const screenWidth = Dimensions.get("window").width;
 const COLUMN_WIDTH = screenWidth / 2 - 20;
 
-export default function SocialExplore() {
+export default function SocialExplore({ showHeader = true }) {
   const navigation: any = useNavigation();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
 
-  const fetchExplore = async () => {
+  const fetchExplore = async (pageNo = 1) => {
     try {
-      setLoading(true);
+      if (pageNo === 1) {
+        setLoading(true);
+      } else {
+        setIsFetchingMore(true);
+      }
 
-      const res = await api.get("/public/explore-posts/");
-      const result = res.data || [];
+      // construct URL with pagination
+      const res = await api.get(`/public/explore-posts/?paginate=true&page=${pageNo}&page_size=10`);
+      let result = res.data || [];
+
+      // Handle paginated response or wrapped data
+      if (!Array.isArray(result)) {
+        if (result.results && Array.isArray(result.results)) {
+          result = result.results;
+        } else if (result.data && Array.isArray(result.data)) {
+          result = result.data;
+        } else {
+          console.warn("Unexpected API response structure:", result);
+          result = [];
+        }
+      }
+
+      if (result.length < 10) {
+        setHasMore(false);
+      }
 
       // Preload image sizes to create masonry layout
       const mapped = await Promise.all(
         result.map(
           (item) =>
             new Promise((resolve) => {
-              Image.getSize(
-                item.hook_image,
-                (w, h) => resolve({ ...item, aspect: w / h }),
-                () => resolve({ ...item, aspect: 1 }) // fallback
-              );
+              if (item.hook_image) {
+                Image.getSize(
+                  item.hook_image,
+                  (w, h) => resolve({ ...item, aspect: w / h }),
+                  () => resolve({ ...item, aspect: 1 }) // fallback
+                );
+              } else {
+                resolve({ ...item, aspect: 1 });
+              }
             })
         )
       );
 
-      setItems(mapped);
+      setItems(prev => pageNo === 1 ? mapped : [...prev, ...mapped]);
     } catch (e) {
       console.log("❌ Fetch Explore Error:", e);
     } finally {
       setLoading(false);
+      setIsFetchingMore(false);
     }
   };
 
@@ -58,8 +87,16 @@ export default function SocialExplore() {
   // );
 
   useEffect(() => {
-  fetchExplore();
-}, []);
+    fetchExplore(1);
+  }, []);
+
+  const handleLoadMore = () => {
+    if (!loading && !isFetchingMore && hasMore) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      fetchExplore(nextPage);
+    }
+  };
 
 
   // Split into two columns (masonry)
@@ -109,71 +146,26 @@ export default function SocialExplore() {
 
   return (
     <View style={styles.container}>
-      <Header />
+      {showHeader && <Header />}
 
-      {/* 👇 Everything inside this ScrollView scrolls,
-          but child index 1 (like/share row) stays sticky */}
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         stickyHeaderIndices={[1]} // 0 = Explore block, 1 = like/share bar
+        onScroll={({ nativeEvent }) => {
+          const paddingToBottom = 20;
+          const isCloseToBottom =
+            nativeEvent.layoutMeasurement.height + nativeEvent.contentOffset.y >=
+            nativeEvent.contentSize.height - paddingToBottom;
+
+          if (isCloseToBottom) {
+            handleLoadMore();
+          }
+        }}
+        scrollEventThrottle={400}
       >
-        {/* 0️⃣ EXPLORE TITLE + SUBTITLE (scrolls away) */}
-        <View style={{ padding: 16, paddingBottom: 8, backgroundColor: "#fff" }}>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <Ionicons name="chevron-back" size={24} color="#000" />
-            </TouchableOpacity>
 
-            <Text
-              style={{
-                fontSize: 24,
-                fontWeight: "700",
-                marginLeft: 6,
-              }}
-            >
-              Explore Posts
-            </Text>
-          </View>
 
-          <Text
-            style={{
-              color: "#555",
-              marginTop: 6,
-              fontSize: 15,
-            }}
-          >
-            Dive into Sanatan-rooted insights, stories, and timeless wisdom.
-          </Text>
-        </View>
-
-        {/* 1️⃣ LIKE / SHARE / COMMENT / ASK – STICKY BELOW HEADER */}
-        <View
-          style={{
-            paddingHorizontal: 16,
-            paddingVertical: 10,
-            backgroundColor: "#fff",
-            borderBottomWidth: 1,
-            borderBottomColor: "#eee",
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              flexWrap: "wrap",
-              alignItems: "center",
-            }}
-          >
-            <Text>👉 Like</Text>
-            <Text style={{ marginHorizontal: 6 }}>•</Text>
-            <Text>👉 Share</Text>
-            <Text style={{ marginHorizontal: 6 }}>•</Text>
-            <Text>👉 Comment</Text>
-            <Text style={{ marginHorizontal: 6 }}>•</Text>
-            <Text>👉 Ask Question</Text>
-          </View>
-        </View>
-
-        {/* 2️⃣ GRID CONTENT (scrolls under sticky row) */}
         <View
           style={{
             flexDirection: "row",
@@ -194,6 +186,13 @@ export default function SocialExplore() {
       </ScrollView>
 
       {loading && <LoadingOverlay visible={true} text="Loading Explore..." />}
+      {isFetchingMore && (
+        <View style={{ padding: 20, alignItems: 'center' }}>
+          <LoadingOverlay visible={false} text="" />
+
+          <Text>Loading more...</Text>
+        </View>
+      )}
     </View>
   );
 }

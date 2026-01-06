@@ -8,10 +8,11 @@
         "EXPO_UPDATES_DISABLED": "1"
       },
       "ios": {
-        "autoIncrement": false
+        "autoIncrement": true
       },
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "app-bundle",
+        "autoIncrement": true
       }
     }
   },

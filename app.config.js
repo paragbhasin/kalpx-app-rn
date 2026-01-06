@@ -1,4 +1,25 @@
-{
+const fs = require('fs');
+
+const IS_EAS_BUILD = process.env.EAS_BUILD_ID;
+
+if (IS_EAS_BUILD) {
+  if (process.env.GOOGLE_SERVICE_INFO_PLIST) {
+    fs.writeFileSync(
+      './GoogleService-Info.plist',
+      Buffer.from(process.env.GOOGLE_SERVICE_INFO_PLIST, 'base64')
+    );
+  }
+
+  if (process.env.GOOGLE_SERVICES_JSON) {
+    fs.writeFileSync(
+      './google-services.json',
+      Buffer.from(process.env.GOOGLE_SERVICES_JSON, 'base64')
+    );
+  }
+}
+
+
+module.exports = {
   "expo": {
     "name": "kalpx",
     "slug": "kalpx",
@@ -18,13 +39,10 @@
       "usesAppleSignIn": true,
       "appleTeamId": "9G5NZ5LBRU",
       "googleServicesFile": "./GoogleService-Info.plist",
-
       "buildNumber": "1",
-
       "entitlements": {
         "aps-environment": "production"
       },
-
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "KalpX uses the camera only when you choose to capture or upload photos or videos.",
@@ -96,4 +114,4 @@
       "postinstall": "patch-package"
     }
   }
-}
+};

@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import {  useRoute } from "@react-navigation/native";
+
 import {
     View,
     Text,
@@ -79,6 +81,8 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     onReport,
 }) => {
     const navigation: any = useNavigation();
+        const route = useRoute();
+    
     const [isExpanded, setIsExpanded] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
     const [isReportModalVisible, setIsReportModalVisible] = useState(false);
@@ -181,16 +185,21 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                         <Text style={styles.timeAgo}>{timeAgo}</Text>
                     </View>
                 </TouchableOpacity>
-
                 <View style={styles.headerActions}>
+                {route.name !== 'CommunityDetail' && (
+
                     <TouchableOpacity
                         style={[styles.joinButton, post.is_joined && styles.joinedButton]}
                         onPress={onJoin}
                     >
                         <Text style={[styles.joinButtonText, post.is_joined && styles.joinedText]}>
                             {post.is_joined ? "Joined" : "Join"}
+
+
                         </Text>
                     </TouchableOpacity>
+                )}
+
                     <TouchableOpacity onPress={() => setShowMenu(!showMenu)}>
 
                         <Ionicons name="ellipsis-horizontal" size={24} color="#333" />
@@ -304,7 +313,26 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                     )}
                 </View>
             ) : null}
-
+   {post.linked_item && (
+                <TouchableOpacity style={styles.linkedItemCard}>
+                    <View style={styles.linkedItemContent}>
+                        <View style={styles.linkedItemTitleRow}>
+                            <MaterialCommunityIcons
+                                name="hand-pointing-right"
+                                size={18}
+                                color="#CC9933"
+                                style={styles.linkedItemInlineIcon}
+                            />
+                            <Text style={styles.linkedItemTitleText}>
+                                {post.linked_item.name}
+                            </Text>
+                        </View>
+                        <Text style={styles.linkedItemSubtitle}>
+                            {getLinkedItemText(post.linked_item)}
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+            )}
             {/* Footer / Interaction Bar */}
             <View style={styles.footer}>
                 <View style={styles.leftActions}>
@@ -385,27 +413,8 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                     <Text style={styles.askButtonText}>Ask question</Text>
                 </TouchableOpacity>
             </View>
-            {/* Linked Item Card */}
-            {post.linked_item && (
-                <TouchableOpacity style={styles.linkedItemCard}>
-                    <View style={styles.linkedItemContent}>
-                        <View style={styles.linkedItemTitleRow}>
-                            <MaterialCommunityIcons
-                                name="hand-pointing-right"
-                                size={18}
-                                color="#CC9933"
-                                style={styles.linkedItemInlineIcon}
-                            />
-                            <Text style={styles.linkedItemTitleText}>
-                                {post.linked_item.name}
-                            </Text>
-                        </View>
-                        <Text style={styles.linkedItemSubtitle}>
-                            {getLinkedItemText(post.linked_item)}
-                        </Text>
-                    </View>
-                </TouchableOpacity>
-            )}
+      
+         
 
         </View>
 
@@ -682,7 +691,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: "#CC9933",
         borderRadius: 20,
-        paddingVertical: 10,
+        paddingVertical: 12,
         paddingHorizontal: 12,
         marginTop: 15,
         marginHorizontal: 4,
@@ -700,15 +709,14 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     linkedItemTitleText: {
-        fontSize: 16,
-        fontWeight: "bold",
+        fontSize: 14,
         color: "#000",
         textDecorationLine: "underline",
     },
     linkedItemSubtitle: {
-        fontSize: 14,
+        fontSize: 12,
         color: "#333",
-        lineHeight: 20,
+
         marginLeft: 24, // aligns subtitle under title text, not icon
     },
 });

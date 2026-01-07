@@ -79,11 +79,7 @@ const CommunityDetail = () => {
 
     const renderHeader = () => (
         <View style={styles.communityHeader}>
-            <Image
-                source={COMMUNITY_BACKGROUNDS[slug] || { uri: "https://via.placeholder.com/400x150" }}
-                style={styles.banner}
-                resizeMode="cover"
-            />
+         
             <View style={styles.headerContent}>
                 <View style={styles.avatarWrapper}>
                     <View style={styles.avatarContainer}>
@@ -269,7 +265,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "flex-start",
         paddingHorizontal: 16,
-        marginTop: -40,
+marginTop:15,
     },
     avatarWrapper: {
         shadowColor: "#000",
@@ -296,32 +292,34 @@ const styles = StyleSheet.create({
     communityInfo: {
         flex: 1,
         marginLeft: 16,
-        marginTop: 45,
+        marginTop: 15,
     },
     communityName: {
-        fontSize: 24,
+        fontSize: 14,
         fontWeight: "bold",
         color: "#2D3748",
     },
     statsRow: {
         flexDirection: "row",
         marginTop: 2,
+justifyContent:'center'
     },
     statsText: {
-        fontSize: 15,
+        fontSize: 13,
         color: "#718096",
         fontWeight: "600",
     },
     joinButton: {
         backgroundColor: "#D69E2E",
-        paddingHorizontal: 20,
-        paddingVertical: 10,
+        paddingHorizontal: 10,
+        paddingVertical: 5,
         borderRadius: 12,
         marginTop: 12,
-        alignSelf: "flex-start",
+justifyContent:'center',
+  
         minWidth: 120,
         alignItems: "center",
-        justifyContent: "center",
+
     },
     joinedButton: {
         backgroundColor: "#E2E8F0",
@@ -339,10 +337,10 @@ const styles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: "#FFF",
         borderWidth: 1,
-        borderColor: "#EEE",
+        borderColor: "#D4A017",
         borderRadius: 20,
-        paddingHorizontal: 16,
-        paddingVertical: 8,
+        paddingHorizontal: 10,
+        paddingVertical: 4,
         alignSelf: "flex-start",
         marginHorizontal: 16,
         marginTop: 20,

@@ -45,14 +45,23 @@ const CommunityDetail = () => {
     const posts = communityPosts.data;
     const loading = communityDetail.loading || (communityPosts.loading && communityPosts.pagination.currentPage === 1);
 
-    const isJoined = followed_communities.data.some((c: any) => c.slug === slug || c.id === community?.id);
+    const isJoined = followed_communities.data.some((c: any) => {
+        const cSlug = c.slug?.toLowerCase();
+        const itemSlug = slug?.toLowerCase();
+        const cId = c.id?.toString();
+        const itemId = community?.id?.toString();
 
-    const handleJoin = () => {
+        return (cSlug && itemSlug && cSlug === itemSlug) || (cId && itemId && cId === itemId);
+    });
+
+    const handleJoin = async () => {
         if (isJoined) {
-            dispatch(unfollowCommunity(slug) as any);
+            await dispatch(unfollowCommunity(slug) as any);
         } else {
-            dispatch(followCommunity(slug) as any);
+            await dispatch(followCommunity(slug) as any);
         }
+        // Refresh followed communities to sync state
+        dispatch(fetchUserActivity("followed_communities") as any);
     };
 
     const handleLoadMore = () => {
@@ -79,12 +88,12 @@ const CommunityDetail = () => {
 
     const renderHeader = () => (
         <View style={styles.communityHeader}>
-         
+
             <View style={styles.headerContent}>
                 <View style={styles.avatarWrapper}>
                     <View style={styles.avatarContainer}>
                         <Image
-                source={COMMUNITY_BACKGROUNDS[slug] || { uri: "https://via.placeholder.com/400x150" }}
+                            source={COMMUNITY_BACKGROUNDS[slug] || { uri: "https://via.placeholder.com/400x150" }}
                             style={styles.avatar}
                         />
                     </View>
@@ -265,7 +274,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "flex-start",
         paddingHorizontal: 16,
-marginTop:15,
+        marginTop: 15,
     },
     avatarWrapper: {
         shadowColor: "#000",
@@ -302,7 +311,7 @@ marginTop:15,
     statsRow: {
         flexDirection: "row",
         marginTop: 2,
-justifyContent:'center'
+        justifyContent: 'center'
     },
     statsText: {
         fontSize: 13,
@@ -315,8 +324,8 @@ justifyContent:'center'
         paddingVertical: 5,
         borderRadius: 12,
         marginTop: 12,
-justifyContent:'center',
-  
+        justifyContent: 'center',
+
         minWidth: 120,
         alignItems: "center",
 

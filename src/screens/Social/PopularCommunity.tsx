@@ -1,20 +1,23 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { View, FlatList, ActivityIndicator, RefreshControl, StyleSheet, Text } from "react-native";
+import { View, FlatList, ActivityIndicator, RefreshControl, StyleSheet, Text, Dimensions, Image, TouchableOpacity } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import Carousel from "react-native-reanimated-carousel";
+import Ionicons from "react-native-vector-icons/Ionicons";
+
 import { fetchPopularPosts, upvotePost, downvotePost, savePost, unsavePost, hidePost } from "../Feed/actions"
 import { reportContent } from "../PostDetail/actions";
 import { followCommunity, unfollowCommunity } from "../Social/actions";
 import { fetchUserActivity } from "../UserActivity/actions";
 import SocialPostCard from "../../components/SocialPostCard";
 
-
 import ShimmerPlaceholder from "../../components/ShimmerPlaceholder";
+
+const { width } = Dimensions.get("window");
 
 const PopularCommunity = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation();
-
 
     const {
         popularPosts: posts,
@@ -26,13 +29,10 @@ const PopularCommunity = () => {
     const { followed_communities } = useSelector((state: any) => state.userActivity);
     const [refreshing, setRefreshing] = useState(false);
 
-
-
     useEffect(() => {
         loadFeed();
         dispatch(fetchUserActivity("followed_communities") as any);
     }, []);
-
 
     const loadFeed = (page = 1) => {
         dispatch(fetchPopularPosts(page) as any);
@@ -49,7 +49,6 @@ const PopularCommunity = () => {
             dispatch(fetchPopularPosts(pagination.currentPage + 1) as any);
         }
     };
-
 
     const handleInteraction = (type: string, post: any) => {
         // Dispatch actions based on type
@@ -82,9 +81,7 @@ const PopularCommunity = () => {
                 }
             }
         }
-
     };
-
 
     const renderItem = ({ item }: { item: any }) => {
         const isJoined = item.is_joined ||
@@ -96,7 +93,6 @@ const PopularCommunity = () => {
 
                 return (cSlug && itemSlug && cSlug === itemSlug) || (cId && itemId && cId === itemId);
             });
-
 
         return (
             <SocialPostCard
@@ -119,7 +115,6 @@ const PopularCommunity = () => {
         );
     };
 
-
     const renderShimmer = () => (
         <View style={{ marginBottom: 20 }}>
             <ShimmerPlaceholder width="100%" height={250} style={{ borderRadius: 12 }} />
@@ -130,6 +125,76 @@ const PopularCommunity = () => {
             </View>
         </View>
     );
+
+    const getPostImage = (post: any) => {
+        if (post.images && post.images.length > 0) {
+            const first = post.images[0];
+            return first.image_url || first.image || (typeof first === 'string' ? first : null);
+        }
+        return post.hook_image || null;
+    };
+
+    const CarouselItem = ({ item }: { item: any }) => {
+        const imageUrl = getPostImage(item);
+        if (!imageUrl) return null;
+
+        return (
+            <TouchableOpacity
+                style={styles.carouselItem}
+                onPress={() => (navigation as any).navigate('SocialPostDetailScreen', { post: item })}
+            >
+                <Image source={{ uri: imageUrl }} style={styles.carouselImage} />
+                {/* <View style={styles.carouselOverlay}>
+                    <Text style={styles.carouselTitle} numberOfLines={2}>{item.title}</Text>
+                </View> */}
+            </TouchableOpacity>
+        );
+    };
+
+    const CarouselHeader = () => {
+        // Filter posts that have at least one valid image
+        const carouselPosts = posts.filter((p: any) => !!getPostImage(p)).slice(0, 5);
+        const carouselRef = React.useRef(null);
+
+        if (carouselPosts.length === 0) return null;
+
+        return (
+            <View style={styles.carouselContainer}>
+                <View style={styles.carouselWrapper}>
+                    <Carousel
+                        ref={carouselRef}
+                        loop
+                        width={width}
+                        height={240}
+                        autoPlay={false}
+                        data={carouselPosts}
+                        scrollAnimationDuration={500}
+                        renderItem={({ item }) => <CarouselItem item={item} />}
+                        mode="parallax"
+                        modeConfig={{
+                            parallaxScrollingScale: 0.9,
+                            parallaxScrollingOffset: 80,
+                        }}
+                    />
+                    {/* Left Arrow */}
+                    <TouchableOpacity
+                        style={[styles.arrowButton, styles.leftArrow]}
+                        onPress={() => (carouselRef.current as any)?.prev()}
+                    >
+                        <Ionicons name="chevron-back" size={28} color="#333" />
+                    </TouchableOpacity>
+
+                    {/* Right Arrow */}
+                    <TouchableOpacity
+                        style={[styles.arrowButton, styles.rightArrow]}
+                        onPress={() => (carouselRef.current as any)?.next()}
+                    >
+                        <Ionicons name="chevron-forward" size={28} color="#333" />
+                    </TouchableOpacity>
+                </View>
+            </View>
+        );
+    };
 
     const Footer = () => {
         if (loadingMore) {
@@ -154,10 +219,9 @@ const PopularCommunity = () => {
 
     return (
         <View style={styles.container}>
-            {/* If you want a header here, include it */}
-
             <FlatList
                 data={posts}
+                ListHeaderComponent={CarouselHeader}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id.toString()}
                 refreshControl={
@@ -175,14 +239,69 @@ const PopularCommunity = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#f5f5f5", // Light gray background
+        backgroundColor: "#f5f5f5",
     },
     center: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
     },
+    carouselContainer: {
+        paddingVertical: 16,
+    },
+    carouselWrapper: {
+        width: '100%',
+        height: 240,
+    },
+    carouselItem: {
+        width: width * 0.82,   // show side peek
+        height: 240,
+        borderRadius: 24,
+        overflow: 'hidden',
+        backgroundColor: '#eee',
+        marginHorizontal: 8,
+    },
+    carouselImage: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
+    },
+    carouselOverlay: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        padding: 14,
+        backgroundColor: 'rgba(0,0,0,0.35)',
+    },
+    carouselTitle: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 14,
+    },
+    arrowButton: {
+        position: 'absolute',
+        top: '50%',
+        transform: [{ translateY: -22 }],
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: '#FFFFFF',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 20,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 6,
+        elevation: 6,
+    },
+    leftArrow: {
+        left: 16,
+    },
+    rightArrow: {
+        right: 16,
+    },
 });
 
 export default PopularCommunity;
-

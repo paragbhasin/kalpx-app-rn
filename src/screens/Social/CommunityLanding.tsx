@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#FFF",
     },
     headerTitle: {
-        fontSize: 22,
+        fontSize: 20,
         fontWeight: "700",
         color: "#000",
         marginRight: 10,

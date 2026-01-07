@@ -166,7 +166,7 @@ const FeedScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#f5f5f5", // Light gray background
+        backgroundColor: '#ffffffff'
     },
     center: {
         flex: 1,

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     SafeAreaView,
     StyleSheet,
@@ -18,7 +18,7 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import { Dropdown } from "react-native-element-dropdown";
 import * as ImagePicker from "expo-image-picker";
-import { createPost, uploadMedia } from "./actions";
+import { createPost, uploadMedia, fetchCommunities } from "./actions";
 
 const CreateSocialPost = () => {
     const dispatch = useDispatch<any>();
@@ -38,6 +38,10 @@ const CreateSocialPost = () => {
     const [tempLink, setTempLink] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [postError, setPostError] = useState<string | null>(null);
+
+    useEffect(() => {
+        dispatch(fetchCommunities());
+    }, [dispatch]);
 
     const communityData = (communities || []).map((c: any) => ({
         label: c.name,
@@ -308,13 +312,13 @@ const CreateSocialPost = () => {
                             autoFocus
                         />
                         <View style={styles.modalActions}>
-                            <TouchableOpacity
+                            <TouchableOpacity 
                                 onPress={() => setIsLinkModalVisible(false)}
                                 style={styles.modalButton}
                             >
                                 <Text style={styles.modalButtonText}>Cancel</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity
+                            <TouchableOpacity 
                                 onPress={addLink}
                                 style={[styles.modalButton, styles.modalButtonPrimary]}
                             >

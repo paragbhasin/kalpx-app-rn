@@ -173,7 +173,11 @@ const CreateSocialPost = () => {
                     )}
                 </TouchableOpacity>
             </View>
-
+    <View style={styles.header} >
+                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                        <Ionicons name="arrow-back" size={24} color="#000" />
+                    </TouchableOpacity>
+                </View>
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={{ flex: 1 }}

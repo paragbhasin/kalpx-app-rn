@@ -16,6 +16,7 @@ import FeedScreen from "../Feed/FeedScreen";
 import Popular from "../Social/PopularCommunity";
 import { fetchCommunities, fetchTopCommunities } from "./actions";
 import TopCommunities from "./TopCommunities";
+import UserActivityScreen from "../UserActivity/UserActivityScreen";
 
 const CommunityLanding = () => {
     const navigation = useNavigation<any>();
@@ -37,7 +38,9 @@ const CommunityLanding = () => {
         { label: "KalpX Rules", value: "kalpxRules" },
         { label: "Privacy Policy", value: "privacyPolicy" },
         { label: "User agreements", value: "userAgreements" },
-        { label: "About KalpX", value: "aboutKalpx" }
+        { label: "About KalpX", value: "aboutKalpx" },
+        { label: "Your Activity", value: "yourActivity" }
+
     ];
 
     useEffect(() => {
@@ -444,6 +447,8 @@ const CommunityLanding = () => {
                 return renderPrivacyPolicy();
             case "aboutKalpx":
                 return renderAboutKalpx();
+            case "yourActivity":
+                return <UserActivityScreen />;
             default:
                 return (
                     <View style={styles.placeholderContainer}>

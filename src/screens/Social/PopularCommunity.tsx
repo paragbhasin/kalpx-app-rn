@@ -153,7 +153,7 @@ const PopularCommunity = () => {
 
     const CarouselHeader = () => {
         // Filter posts that have at least one valid image
-        const carouselPosts = posts.filter((p: any) => !!getPostImage(p)).slice(0, 5);
+        const carouselPosts = posts.filter((p: any) => !!getPostImage(p));
         const carouselRef = React.useRef(null);
 
         if (carouselPosts.length === 0) return null;
@@ -172,8 +172,8 @@ const PopularCommunity = () => {
                         renderItem={({ item }) => <CarouselItem item={item} />}
                         mode="parallax"
                         modeConfig={{
-                            parallaxScrollingScale: 0.9,
-                            parallaxScrollingOffset: 80,
+                            parallaxScrollingScale: 0.88,
+                            parallaxScrollingOffset: 150,
                         }}
                     />
                     {/* Left Arrow */}
@@ -251,15 +251,16 @@ const styles = StyleSheet.create({
     },
     carouselWrapper: {
         width: '100%',
-        height: 240,
+        // height: 200,
     },
     carouselItem: {
-        width: width * 0.82,   // show side peek
-        height: 240,
-        borderRadius: 24,
+        width: 280,
+        height: 220,
+        borderRadius: 16,
         overflow: 'hidden',
-        backgroundColor: '#eee',
+        backgroundColor: '#000',
         marginHorizontal: 8,
+        position: 'relative',
     },
     carouselImage: {
         width: '100%',
@@ -283,8 +284,8 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: '50%',
         transform: [{ translateY: -22 }],
-        width: 44,
-        height: 44,
+        width: 30,
+        height: 30,
         borderRadius: 22,
         backgroundColor: '#FFFFFF',
         justifyContent: 'center',

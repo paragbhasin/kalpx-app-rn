@@ -3,6 +3,8 @@ import {
     FETCH_USER_ACTIVITY_REQUEST,
     FETCH_USER_ACTIVITY_SUCCESS,
 } from "./actions";
+import { FOLLOW_COMMUNITY_SUCCESS, UNFOLLOW_COMMUNITY_SUCCESS } from "../Social/actions";
+
 
 const initialUserActivityState = {
     upvotes: { loading: false, data: [], error: null },
@@ -36,6 +38,30 @@ export const userActivityReducer = (state = initialUserActivityState, action: an
                 ...state,
                 [action.payload.activityType]: { ...state[action.payload.activityType], loading: false, error: action.payload.error },
             };
+        case FOLLOW_COMMUNITY_SUCCESS:
+            // payload in Social/actions.ts is { id: idOrSlug, data: res.data }
+            const communityObj = action.payload.data?.community || action.payload.data;
+            if (communityObj && !state.followed_communities.data.find((c: any) => c.slug === action.payload.id || c.id?.toString() === action.payload.id)) {
+                return {
+                    ...state,
+                    followed_communities: {
+                        ...state.followed_communities,
+                        data: [...state.followed_communities.data, communityObj]
+                    }
+                };
+            }
+            return state;
+
+        case UNFOLLOW_COMMUNITY_SUCCESS:
+            // Remove from followed_communities
+            return {
+                ...state,
+                followed_communities: {
+                    ...state.followed_communities,
+                    data: state.followed_communities.data.filter((c: any) => c.slug !== action.payload.id && c.id?.toString() !== action.payload.id)
+                }
+            };
+
         default:
             return state;
     }

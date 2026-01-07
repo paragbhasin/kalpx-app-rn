@@ -81,6 +81,7 @@ export const fetchPopularPosts = (page = 1, locale = "en") => async (dispatch) =
             lang: locale,
         });
         const res = await api.get(`/posts/?${params.toString()}`);
+        console.log("Popular Posts Response:", res.data);
 
         dispatch({
             type: FETCH_POPULAR_SUCCESS,

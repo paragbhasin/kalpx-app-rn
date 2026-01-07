@@ -50,7 +50,6 @@ const initialCommunitiesState = {
 export const communitiesReducer = (state = initialCommunitiesState, action) => {
   switch (action.type) {
     case FETCH_COMMUNITIES_REQUEST:
-    case FETCH_TOP_COMMUNITIES_REQUEST:
       return {
         ...state,
         loading: true,
@@ -58,8 +57,16 @@ export const communitiesReducer = (state = initialCommunitiesState, action) => {
         data: action.payload.page === 1 ? [] : state.data
       };
 
+    case FETCH_TOP_COMMUNITIES_REQUEST:
+      return {
+        ...state,
+        loading: true,
+        error: null,
+        data: [] // Always clear for page navigation in Top Communities
+      };
+
+
     case FETCH_COMMUNITIES_SUCCESS:
-    case FETCH_TOP_COMMUNITIES_SUCCESS:
       return {
         ...state,
         loading: false,
@@ -70,6 +77,19 @@ export const communitiesReducer = (state = initialCommunitiesState, action) => {
           totalCount: action.payload.count
         }
       };
+
+    case FETCH_TOP_COMMUNITIES_SUCCESS:
+      return {
+        ...state,
+        loading: false,
+        data: action.payload.results, // Always replace for Top Communities page navigation
+        pagination: {
+          currentPage: action.payload.page,
+          totalPages: action.payload.totalPages,
+          totalCount: action.payload.count
+        }
+      };
+
 
     case FETCH_COMMUNITIES_FAILURE:
     case FETCH_TOP_COMMUNITIES_FAILURE:

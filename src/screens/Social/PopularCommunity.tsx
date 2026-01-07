@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { View, FlatList, ActivityIndicator, RefreshControl, StyleSheet, Text } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
-import { fetchFeed, upvotePost, downvotePost, savePost, unsavePost, hidePost } from "./actions"; // Import from local actions
+import { fetchPopularPosts, upvotePost, downvotePost, savePost, unsavePost, hidePost } from "../Feed/actions"
 import { reportContent } from "../PostDetail/actions";
 import { followCommunity, unfollowCommunity } from "../Social/actions";
 import { fetchUserActivity } from "../UserActivity/actions";
@@ -11,13 +11,21 @@ import SocialPostCard from "../../components/SocialPostCard";
 
 import ShimmerPlaceholder from "../../components/ShimmerPlaceholder";
 
-const FeedScreen = () => {
+const PopularCommunity = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation();
 
-    const { posts, loading, loadingMore, error, pagination } = useSelector((state: any) => state.feed);
+
+    const {
+        popularPosts: posts,
+        loadingPopular: loading,
+        loadingMorePopular: loadingMore,
+        error,
+        popularPagination: pagination
+    } = useSelector((state: any) => state.feed);
     const { followed_communities } = useSelector((state: any) => state.userActivity);
     const [refreshing, setRefreshing] = useState(false);
+
 
 
     useEffect(() => {
@@ -27,20 +35,21 @@ const FeedScreen = () => {
 
 
     const loadFeed = (page = 1) => {
-        dispatch(fetchFeed(page) as any);
+        dispatch(fetchPopularPosts(page) as any);
     };
 
     const onRefresh = async () => {
         setRefreshing(true);
-        await dispatch(fetchFeed(1) as any);
+        await dispatch(fetchPopularPosts(1) as any);
         setRefreshing(false);
     };
 
     const onLoadMore = () => {
         if (!loading && !loadingMore && pagination.currentPage < pagination.totalPages) {
-            dispatch(fetchFeed(pagination.currentPage + 1) as any);
+            dispatch(fetchPopularPosts(pagination.currentPage + 1) as any);
         }
     };
+
 
     const handleInteraction = (type: string, post: any) => {
         // Dispatch actions based on type
@@ -175,4 +184,5 @@ const styles = StyleSheet.create({
     },
 });
 
-export default FeedScreen;
+export default PopularCommunity;
+

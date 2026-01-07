@@ -47,8 +47,19 @@ export const fetchUserActivity = (type: string) => async (dispatch: any) => {
                     return item;
                 });
         } else if (type === "followed_communities") {
-            data = Array.isArray(data) ? data.filter((c: any) => c && c.slug) : [];
+            data = Array.isArray(data) ? data.map((item: any) => {
+                const community = item.community || item;
+                // Resiliently extract slug and id
+                const slug = community.slug || community.community_slug || (typeof item === 'string' ? item : null);
+                const id = community.id || community.community_id || community.community;
+                if (slug || id) {
+                    return { ...community, slug, id: id?.toString() };
+                }
+                return null;
+            }).filter(Boolean) : [];
         } else if (type === "saved_posts") {
+
+
             data = data.map((item: any) => {
                 if (item.post) {
                     return {

@@ -25,7 +25,9 @@ const ExploreCommunities = () => {
 
     useEffect(() => {
         loadCommunities();
+        dispatch(fetchUserActivity("followed_communities") as any);
     }, [dispatch]);
+
 
     useEffect(() => {
         if (activeTab === "followed") {
@@ -54,12 +56,24 @@ const ExploreCommunities = () => {
     };
 
     const handleFollowToggle = (community: any) => {
-        if (community.is_followed) {
+        const isFollowed = community.is_followed ||
+            followed_communities.data.some((c: any) => {
+                const cSlug = c.slug?.toLowerCase();
+                const itemSlug = (community.slug || community.community_slug)?.toLowerCase();
+                const cId = c.id?.toString();
+                const itemId = (community.id || community.community_id || community.community)?.toString();
+
+                return (cSlug && itemSlug && cSlug === itemSlug) || (cId && itemId && cId === itemId);
+            });
+
+
+        if (isFollowed) {
             dispatch(unfollowCommunity(community.slug) as any);
         } else {
             dispatch(followCommunity(community.slug) as any);
         }
     };
+
 
     const filteredCommunities = activeTab === "all"
         ? communities
@@ -79,14 +93,34 @@ const ExploreCommunities = () => {
                 <TouchableOpacity
                     style={[
                         styles.joinButton,
-                        item.is_followed && styles.joinedButton,
+                        (item.is_followed || followed_communities.data.some((c: any) => {
+                            const cSlug = c.slug?.toLowerCase();
+                            const itemSlug = (item.slug || item.community_slug)?.toLowerCase();
+                            const cId = c.id?.toString();
+                            const itemId = (item.id || item.community_id || item.community)?.toString();
+                            return (cSlug && itemSlug && cSlug === itemSlug) || (cId && itemId && cId === itemId);
+                        })) && styles.joinedButton,
                     ]}
                     onPress={() => handleFollowToggle(item)}
                 >
-                    <Text style={[styles.joinText, item.is_followed && styles.joinedText]}>
-                        {item.is_followed ? "Joined" : "Join"}
+                    <Text style={[styles.joinText, (item.is_followed || followed_communities.data.some((c: any) => {
+                        const cSlug = c.slug?.toLowerCase();
+                        const itemSlug = (item.slug || item.community_slug)?.toLowerCase();
+                        const cId = c.id?.toString();
+                        const itemId = (item.id || item.community_id || item.community)?.toString();
+                        return (cSlug && itemSlug && cSlug === itemSlug) || (cId && itemId && cId === itemId);
+                    })) && styles.joinedText]}>
+                        {(item.is_followed || followed_communities.data.some((c: any) => {
+                            const cSlug = c.slug?.toLowerCase();
+                            const itemSlug = (item.slug || item.community_slug)?.toLowerCase();
+                            const cId = c.id?.toString();
+                            const itemId = (item.id || item.community_id || item.community)?.toString();
+                            return (cSlug && itemSlug && cSlug === itemSlug) || (cId && itemId && cId === itemId);
+                        })) ? "Joined" : "Join"}
                     </Text>
                 </TouchableOpacity>
+
+
             </View>
             <Text style={styles.description} numberOfLines={3}>
                 {item.description || "Share festival memories, meanings, and ways to keep their sacred essence alive."}

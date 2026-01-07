@@ -15,7 +15,11 @@ import api from "../../Networks/axios";
 import SocialPostCard from "../../components/SocialPostCard";
 import ShimmerPlaceholder from "../../components/ShimmerPlaceholder";
 import { FlatList, ActivityIndicator } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchUserActivity } from "../UserActivity/actions";
+import { followCommunity, unfollowCommunity } from "./actions";
 import styles from "./SocialExplorestyles";
+
 
 const screenWidth = Dimensions.get("window").width;
 const COLUMN_WIDTH = screenWidth / 2 - 20;
@@ -27,11 +31,16 @@ interface SocialExploreProps {
 
 export default function SocialExplore({ showHeader = true, viewMode = "grid" }: SocialExploreProps) {
   const navigation: any = useNavigation();
+  const dispatch = useDispatch();
   const [items, setItems] = useState([]);
+
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
+
+  const { followed_communities } = useSelector((state: any) => state.userActivity);
+
 
   const fetchExplore = async (pageNo = 1) => {
     try {
@@ -96,7 +105,9 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid" }: 
 
   useEffect(() => {
     fetchExplore(1);
+    dispatch(fetchUserActivity("followed_communities") as any);
   }, []);
+
 
   const handleLoadMore = () => {
     if (!loading && !isFetchingMore && hasMore) {
@@ -111,8 +122,18 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid" }: 
       navigation.navigate('SocialPostDetailScreen', { post: post });
     } else if (type === 'askQuestion') {
       navigation.navigate('SocialPostDetailScreen', { post: post, isQuestion: true });
+    } else if (type === 'followToggle') {
+      const communityId = post.community?.slug || post.community_slug || post.community?.id?.toString();
+      if (communityId) {
+        if (post.is_joined) {
+          dispatch(unfollowCommunity(communityId) as any);
+        } else {
+          dispatch(followCommunity(communityId) as any);
+        }
+      }
     }
   };
+
 
 
   // Split into two columns (masonry)
@@ -174,15 +195,28 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid" }: 
       community_name: item.community_name || item.community_post?.community_name || "Community",
     };
 
+    const isJoined = mergedPost.is_joined ||
+      followed_communities.data.some((c: any) => {
+        const cSlug = c.slug?.toLowerCase();
+        const itemSlug = (mergedPost.community_slug || mergedPost.community?.slug || mergedPost.slug)?.toLowerCase();
+        const cId = c.id?.toString();
+        const itemId = (mergedPost.community_id || mergedPost.community?.id || mergedPost.community || mergedPost.id)?.toString();
+
+        return (cSlug && itemSlug && cSlug === itemSlug) || (cId && itemId && cId === itemId);
+      });
+
+
     return (
       <SocialPostCard
-        post={mergedPost}
+        post={{ ...mergedPost, is_joined: isJoined }}
         onComment={() => handleInteraction('comment', item)}
         onAskQuestion={() => handleInteraction('askQuestion', item)}
+        onJoin={() => handleInteraction('followToggle', { ...mergedPost, is_joined: isJoined })}
         onUserPress={() => { }} // Handle if needed
       />
     );
   };
+
 
   const renderShimmer = (height: number) => (
     <View

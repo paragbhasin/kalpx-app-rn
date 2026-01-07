@@ -15,6 +15,8 @@ import {
     HIDE_POST_SUCCESS,
     UNHIDE_POST_SUCCESS
 } from "./actions";
+import { FOLLOW_COMMUNITY_SUCCESS, UNFOLLOW_COMMUNITY_SUCCESS } from "../Social/actions";
+
 
 const initialFeedState = {
     posts: [],
@@ -27,7 +29,9 @@ const initialFeedState = {
         totalCount: 0,
     },
     popularPosts: [],
-    loadingPopular: false, // loadingMore logic for popular can reuse loadingMore or adding specific one logic
+    loadingPopular: false,
+    loadingMorePopular: false,
+
     // user hook had 'loading' and 'loadingMore' shared or distinct? 
     // "loading" was shared unless specifically guarded. 
     // In Redux it's cleaner to separate if needed.
@@ -83,12 +87,19 @@ export const feedReducer = (state = initialFeedState, action) => {
             return { ...state, loading: false, loadingMore: false, error: action.payload };
 
         case FETCH_POPULAR_REQUEST:
-            return { ...state, loadingPopular: true };
+            return {
+                ...state,
+                loadingPopular: !action.payload.isAppend,
+                loadingMorePopular: action.payload.isAppend
+            };
+
         case FETCH_POPULAR_SUCCESS:
             return {
                 ...state,
                 loadingPopular: false,
+                loadingMorePopular: false,
                 popularPosts: action.payload.page === 1 ? action.payload.results : [...state.popularPosts, ...action.payload.results],
+
                 popularPagination: {
                     currentPage: action.payload.page,
                     totalPages: action.payload.totalPages,
@@ -135,6 +146,35 @@ export const feedReducer = (state = initialFeedState, action) => {
                 posts: state.posts.filter(p => p.id !== action.payload.id),
                 popularPosts: state.popularPosts.filter(p => p.id !== action.payload.id),
             };
+        case FOLLOW_COMMUNITY_SUCCESS:
+            return {
+                ...state,
+                posts: state.posts.map(p =>
+                    (p.community?.slug === action.payload.id || p.community_slug === action.payload.id || p.community?.id?.toString() === action.payload.id)
+                        ? { ...p, is_joined: true }
+                        : p
+                ),
+                popularPosts: state.popularPosts.map(p =>
+                    (p.community?.slug === action.payload.id || p.community_slug === action.payload.id || p.community?.id?.toString() === action.payload.id)
+                        ? { ...p, is_joined: true }
+                        : p
+                ),
+            };
+        case UNFOLLOW_COMMUNITY_SUCCESS:
+            return {
+                ...state,
+                posts: state.posts.map(p =>
+                    (p.community?.slug === action.payload.id || p.community_slug === action.payload.id || p.community?.id?.toString() === action.payload.id)
+                        ? { ...p, is_joined: false }
+                        : p
+                ),
+                popularPosts: state.popularPosts.map(p =>
+                    (p.community?.slug === action.payload.id || p.community_slug === action.payload.id || p.community?.id?.toString() === action.payload.id)
+                        ? { ...p, is_joined: false }
+                        : p
+                ),
+            };
+
         default:
             return state;
     }

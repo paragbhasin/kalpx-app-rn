@@ -3,12 +3,14 @@ import { SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View } fro
 import { Dropdown } from "react-native-element-dropdown";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useDispatch, useSelector } from "react-redux";
-// import Colors from "../../components/Colors"; // Check if this import is needed or if styles serve enough
+
 import SocialExplore from "./SocialExplore";
 import ExploreCommunities from "./ExploreCommunities";
 import Header from "../../components/Header";
 import FeedScreen from "../Feed/FeedScreen";
-import { fetchCommunities, fetchTopCommunities } from "./actions"; // Import actions from local actions file (or alias)
+import Popular from "../Social/PopularCommunity";
+import { fetchCommunities, fetchTopCommunities } from "./actions";
+import TopCommunities from "./TopCommunities";
 
 const CommunityLanding = () => {
     const dispatch = useDispatch();
@@ -30,71 +32,77 @@ const CommunityLanding = () => {
         { label: "Top", value: "Top" }, // Renders SocialExplore
         { label: "Popular", value: "Popular" },
         { label: "Explore", value: "Explore" },
+        { label: "Communities", value: "Communities" },
+        { label: "KalpX Rules", value: "kalpxRules" },
+        { label: "Privacy Policy", value: "privacyPolicy" },
+        { label: "User agreements", value: "userAgreements" },
+        { label: "About KalpX", value: "aboutKalpx" }
+
     ];
 
     const renderHeader = () => (
-    
+
         <View >
-          <Header />
-<View style={styles.headerContainer}>
-            {/* Title */}
-            <Text style={styles.headerTitle}>Community</Text>
+            <Header />
+            <View style={styles.headerContainer}>
+                {/* Title */}
+                <Text style={styles.headerTitle}>Community</Text>
 
-            {/* Dropdown */}
-            <Dropdown
-                style={styles.dropdownTrigger}
-                containerStyle={styles.dropdownContainer}
-                data={categories}
-                labelField="label"
-                valueField="value"
-                value={selectedCategory}
-                onChange={(item) => setSelectedCategory(item.value)}
-                selectedTextStyle={styles.selectedTextStyle}
-                placeholderStyle={styles.placeholderStyle}
-                iconStyle={styles.iconStyle}
-                dropdownPosition="bottom"
-                showsVerticalScrollIndicator={false}
-                renderRightIcon={() => (
-                    <Ionicons name="caret-down-outline" size={12} color="#000" style={{ marginLeft: 4 }} />
-                )}
-            />
+                {/* Dropdown */}
+                <Dropdown
+                    style={styles.dropdownTrigger}
+                    containerStyle={styles.dropdownContainer}
+                    data={categories}
+                    labelField="label"
+                    valueField="value"
+                    value={selectedCategory}
+                    onChange={(item) => setSelectedCategory(item.value)}
+                    selectedTextStyle={styles.selectedTextStyle}
+                    placeholderStyle={styles.placeholderStyle}
+                    iconStyle={styles.iconStyle}
+                    dropdownPosition="bottom"
+                    showsVerticalScrollIndicator={false}
+                    renderRightIcon={() => (
+                        <Ionicons name="caret-down-outline" size={12} color="#000" style={{ marginLeft: 4 }} />
+                    )}
+                />
 
-            <View style={{ flex: 1 }} />
+                <View style={{ flex: 1 }} />
 
-            {/* Action Icons */}
-            <View style={styles.actionIcons}>
-                {selectedCategory === "Top" && (
-                    <>
-                        <TouchableOpacity
-                            style={styles.iconButton}
-                            onPress={() => setViewMode("list")}
-                        >
-                            <Ionicons
-                                name="list-outline"
-                                size={24}
-                                color={viewMode === "list" ? "#D69E2E" : "#000"}
-                            />
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.iconButton}
-                            onPress={() => setViewMode("grid")}
-                        >
-                            <Ionicons
-                                name="grid-outline"
-                                size={24}
-                                color={viewMode === "grid" ? "#D69E2E" : "#000"}
-                            />
-                        </TouchableOpacity>
-                    </>
-                )}
-                <TouchableOpacity style={styles.iconButton}>
-                    <Ionicons name="search-outline" size={24} color="#000" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.iconButton}>
-                    <Ionicons name="add-circle-outline" size={24} color="#000" />
-                </TouchableOpacity>
+                {/* Action Icons */}
+                <View style={styles.actionIcons}>
+                    {selectedCategory === "Top" && (
+                        <>
+                            <TouchableOpacity
+                                style={styles.iconButton}
+                                onPress={() => setViewMode("list")}
+                            >
+                                <Ionicons
+                                    name="list-outline"
+                                    size={24}
+                                    color={viewMode === "list" ? "#D69E2E" : "#000"}
+                                />
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.iconButton}
+                                onPress={() => setViewMode("grid")}
+                            >
+                                <Ionicons
+                                    name="grid-outline"
+                                    size={24}
+                                    color={viewMode === "grid" ? "#D69E2E" : "#000"}
+                                />
+                            </TouchableOpacity>
+                        </>
+                    )}
+                    <TouchableOpacity style={styles.iconButton}>
+                        <Ionicons name="search-outline" size={24} color="#000" />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.iconButton}>
+                        <Ionicons name="add-circle-outline" size={24} color="#000" />
+                    </TouchableOpacity>
+                </View>
             </View>
-        </View>
         </View>
     );
 
@@ -108,8 +116,11 @@ const CommunityLanding = () => {
                 return <FeedScreen />;
 
             case "Popular":
+                return <Popular />;
             case "Explore":
                 return <ExploreCommunities />;
+            case "Communities":
+                return <TopCommunities />;
             default:
                 return (
                     <View style={styles.placeholderContainer}>
@@ -157,7 +168,7 @@ const styles = StyleSheet.create({
         alignSelf: "flex-start",
     },
     dropdownContainer: {
-        width: 220,          
+        width: 220,
         borderRadius: 12,
     },
     selectedTextStyle: {

@@ -16,48 +16,10 @@ import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
 import moment from "moment";
 import { useNavigation } from "@react-navigation/native";
 import ReportModal from "./ReportModal";
+import { COMMUNITY_BACKGROUNDS } from "../utils/CommunityAssets";
 
 const { width: screenWidth } = Dimensions.get("window");
-const COMMUNITY_BACKGROUNDS: { [key: string]: any } = {
-    "daily-dharma-reflections": require("../../assets/community-bg/daily-dharma-reflections.jpeg"),
-    "festivals-rituals": require("../../assets/community-bg/festival.jpeg"),
-    "mantra-chanting-circle": require("../../assets/community-bg/mantraandchanting.jpeg"),
-    "yoga-pranayama": require("../../assets/community-bg/yoga-pranaya.jpeg"),
-    "meditation-mindfulness": require("../../assets/community-bg/meditationanmindfulness.jpeg"),
-    "ayurveda-healing": require("../../assets/community-bg/ayurveda-healing.jpeg"),
-    "dance-as-devotion": require("../../assets/community-bg/dance-devotion.jpeg"),
-    "music-bhajans": require("../../assets/community-bg/music-bhajans.jpeg"),
-    "ramayana-insights": require("../../assets/community-bg/ramayana-insights.jpeg"),
-    "mahabharata-dialogues": require("../../assets/community-bg/mahabharatadialogues.jpeg"),
-    "bhakti-devotion": require("../../assets/community-bg/bhakthianddevotion.jpeg"),
-    "children-dharma": require("../../assets/community-bg/children-dharma.jpeg"),
-    "sacred-stories": require("../../assets/community-bg/sacred-stories.jpeg"),
-    "sanatan-modern-life": require("../../assets/community-bg/sanatan-modernlife.jpeg"),
-    "sanatan-science-philosophy": require("../../assets/community-bg/sanatan-science-philosophy.jpeg"),
-    "spiritual-travel": require("../../assets/community-bg/spiritual-travel.jpeg"),
-    "temple-experiences": require("../../assets/community-bg/temple-experiences.jpeg"),
-    "women-in-sanatan-dharma": require("../../assets/community-bg/women-in-santandharma.jpeg"),
-    "yoga-pranaya": require("../../assets/community-bg/yoga-pranaya.jpeg"),
-    "bhakthi-devotion": require("../../assets/community-bg/bhakthianddevotion.jpeg"),
-    "festival": require("../../assets/community-bg/festival.jpeg"),
-    "mantra-chanting": require("../../assets/community-bg/mantraandchanting.jpeg"),
-    "sanatan-modernlife": require("../../assets/community-bg/sanatan-modernlife.jpeg"),
-    "mahabharata-dialog": require("../../assets/community-bg/mahabharatadialogues.jpeg"),
-    "meditation-and-mindfulness": require("../../assets/community-bg/meditationanmindfulness.jpeg"),
-    // ID Mapping Fallbacks
-    "1": require("../../assets/community-bg/daily-dharma-reflections.jpeg"),
-    "2": require("../../assets/community-bg/festival.jpeg"),
-    "3": require("../../assets/community-bg/mantraandchanting.jpeg"),
-    "4": require("../../assets/community-bg/yoga-pranaya.jpeg"),
-    "5": require("../../assets/community-bg/meditationanmindfulness.jpeg"),
-    "6": require("../../assets/community-bg/ayurveda-healing.jpeg"),
-    "7": require("../../assets/community-bg/dance-devotion.jpeg"),
-    "8": require("../../assets/community-bg/music-bhajans.jpeg"),
-    "9": require("../../assets/community-bg/ramayana-insights.jpeg"),
-    "10": require("../../assets/community-bg/mahabharatadialogues.jpeg"),
-    "11": require("../../assets/community-bg/bhakthianddevotion.jpeg"),
-    "12": require("../../assets/community-bg/children-dharma.jpeg"),
-};
+
 
 
 interface SocialPostCardProps {
@@ -210,12 +172,16 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                 </TouchableOpacity>
 
                 <View style={styles.headerActions}>
-                    {!post.is_joined && (
-                        <TouchableOpacity style={styles.joinButton} onPress={onJoin}>
-                            <Text style={styles.joinButtonText}>Join</Text>
-                        </TouchableOpacity>
-                    )}
+                    <TouchableOpacity
+                        style={[styles.joinButton, post.is_joined && styles.joinedButton]}
+                        onPress={onJoin}
+                    >
+                        <Text style={[styles.joinButtonText, post.is_joined && styles.joinedText]}>
+                            {post.is_joined ? "Joined" : "Join"}
+                        </Text>
+                    </TouchableOpacity>
                     <TouchableOpacity onPress={() => setShowMenu(!showMenu)}>
+
                         <Ionicons name="ellipsis-horizontal" size={24} color="#333" />
                     </TouchableOpacity>
                 </View>
@@ -507,6 +473,13 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         fontSize: 12,
     },
+    joinedButton: {
+        backgroundColor: "#E8E8E8",
+    },
+    joinedText: {
+        color: "#666",
+    },
+
     title: {
         fontSize: 14,
         fontWeight: "bold",

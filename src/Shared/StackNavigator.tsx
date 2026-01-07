@@ -37,6 +37,7 @@ import SocialExplore from "../screens/Social/SocialExplore";
 import CommunityLanding from "../screens/Social/CommunityLanding";
 import CommunityDetail from "../screens/Social/CommunityDetail";
 import SocialPostDetailScreen from "../screens/Social/SocialPostDetailScreen";
+import CreateSocialPost from "../screens/Social/CreateSocialPost";
 import StreakScreen from "../screens/Streak/StreakScreen";
 import TopTabsNavigator from "../screens/Tracker/TopTabsNavigator";
 import TrackerEdit from "../screens/Tracker/TrackerEdit";
@@ -194,6 +195,11 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen
       name="SocialPostDetailScreen"
       component={SocialPostDetailScreen}
+    />
+    <Stack.Screen
+      name="CreateSocialPost"
+      component={CreateSocialPost}
+      options={{ headerShown: false }}
     />
     <Stack.Screen
       name="CreateOwnPractice"

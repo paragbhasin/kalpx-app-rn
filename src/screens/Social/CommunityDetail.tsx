@@ -25,7 +25,7 @@ const { width } = Dimensions.get("window");
 
 const CommunityDetail = () => {
     const dispatch = useDispatch();
-    const navigation = useNavigation();
+    const navigation = useNavigation<any>();
     const route = useRoute();
     const { slug } = route.params as { slug: string };
 
@@ -115,7 +115,10 @@ const CommunityDetail = () => {
                 </View>
             </View>
 
-            <TouchableOpacity style={styles.createPostButton}>
+            <TouchableOpacity
+                style={styles.createPostButton}
+                onPress={() => navigation.navigate("CreateSocialPost", { communitySlug: slug })}
+            >
                 <Ionicons name="add" size={20} color="#000" />
                 <Text style={styles.createPostText}>create post</Text>
             </TouchableOpacity>

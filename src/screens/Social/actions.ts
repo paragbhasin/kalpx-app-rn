@@ -13,6 +13,10 @@ export const FETCH_COMMUNITY_POSTS_REQUEST = "FETCH_COMMUNITY_POSTS_REQUEST";
 export const FETCH_COMMUNITY_POSTS_SUCCESS = "FETCH_COMMUNITY_POSTS_SUCCESS";
 export const FETCH_COMMUNITY_POSTS_FAILURE = "FETCH_COMMUNITY_POSTS_FAILURE";
 
+export const CREATE_POST_REQUEST = "CREATE_POST_REQUEST";
+export const CREATE_POST_SUCCESS = "CREATE_POST_SUCCESS";
+export const CREATE_POST_FAILURE = "CREATE_POST_FAILURE";
+
 
 export const fetchExplorePosts = () => async (dispatch) => {
   dispatch({ type: EXPLORE_REQUEST });
@@ -197,6 +201,65 @@ export const fetchCommunityPosts = (slug: string, page = 1) => async (dispatch: 
       type: FETCH_COMMUNITY_POSTS_FAILURE,
       payload: err?.message || "Failed to fetch community posts",
     });
+  }
+};
+
+export const uploadMedia = (file: { uri: string; name: string; type: string; size: number }) => async (dispatch: any) => {
+  try {
+    // Stage 1: Get Presigned URL
+    const presignRes = await api.post("/media/presign/", {
+      type: "post_gallery",
+      filename: file.name || `image_${Date.now()}.jpg`,
+      contentType: file.type || "image/jpeg",
+      size: file.size || 0,
+    });
+
+    const { url, fields, publicUrl, key } = presignRes.data;
+
+    // Stage 2: Upload to S3
+    const formData = new FormData();
+    Object.entries(fields).forEach(([k, v]) => {
+      formData.append(k, v as string);
+    });
+    // @ts-ignore
+    formData.append("file", {
+      uri: file.uri,
+      name: file.name || `image_${Date.now()}.jpg`,
+      type: file.type || "image/jpeg",
+    });
+
+    const response = await fetch(url, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error("S3 Upload failed");
+    }
+
+    return { publicUrl, key };
+  } catch (err: any) {
+    console.error("Upload error:", err);
+    throw err;
+  }
+};
+
+export const createPost = (postData: any) => async (dispatch: any) => {
+  dispatch({ type: CREATE_POST_REQUEST });
+  try {
+    const res = await api.post("/posts/", postData);
+    dispatch({
+      type: CREATE_POST_SUCCESS,
+      payload: res.data,
+    });
+    return res.data;
+  } catch (err: any) {
+    const errorMsg = err?.response?.data?.message || err?.message || "Failed to create post";
+    dispatch({
+      type: CREATE_POST_FAILURE,
+      payload: errorMsg,
+    });
+    throw new Error(errorMsg);
   }
 };
 

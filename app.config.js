@@ -106,6 +106,13 @@ module.exports = {
         },
       ],
       ["expo-apple-authentication"],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow KalpX to access your photos",
+          "cameraPermission": "Allow KalpX to access your camera"
+        }
+      ]
     ],
     experiments: {
       typedRoutes: true,

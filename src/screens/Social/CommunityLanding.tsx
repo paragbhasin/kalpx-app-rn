@@ -4,6 +4,7 @@ import { Image } from "expo-image";
 import { Dropdown } from "react-native-element-dropdown";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
 
 import SocialExplore from "./SocialExplore";
 import ExploreCommunities from "./ExploreCommunities";
@@ -14,6 +15,7 @@ import { fetchCommunities, fetchTopCommunities } from "./actions";
 import TopCommunities from "./TopCommunities";
 
 const CommunityLanding = () => {
+    const navigation = useNavigation<any>();
     const dispatch = useDispatch();
     const [selectedCategory, setSelectedCategory] = useState("Home");
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -99,7 +101,10 @@ const CommunityLanding = () => {
                     <TouchableOpacity style={styles.iconButton}>
                         <Ionicons name="search-outline" size={24} color="#000" />
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.iconButton}>
+                    <TouchableOpacity
+                        style={styles.iconButton}
+                        onPress={() => navigation.navigate("CreateSocialPost")}
+                    >
                         <Ionicons name="add-circle-outline" size={24} color="#000" />
                     </TouchableOpacity>
                 </View>
@@ -279,17 +284,17 @@ const CommunityLanding = () => {
                 <View style={styles.phoneContainer}>
                     <View style={styles.phoneWrapper}>
                         {/* Placeholder for about-phone.svg since it's missing */}
-                           <Image
-                        source={require("../../../assets/about-kalpx4.png")}
-                        style={styles.sectionImage}
-                        contentFit="contain"
-                    />
+                        <Image
+                            source={require("../../../assets/about-kalpx4.png")}
+                            style={styles.sectionImage}
+                            contentFit="contain"
+                        />
 
                         {/* Floating Comments */}
                         <View style={[styles.commentBubble, styles.leftComment]}>
                             <Text style={styles.commentText}>I Like the fact that everyone is here is so spiritual</Text>
                         </View>
-                    
+
                         <View style={[styles.commentBubble, styles.rightComment]}>
                             <Text style={styles.commentText}>Pure devotion, pure strength. This story never fails to touch the heart.</Text>
                         </View>

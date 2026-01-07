@@ -17,6 +17,7 @@ import Popular from "../Social/PopularCommunity";
 import { fetchCommunities, fetchTopCommunities } from "./actions";
 import TopCommunities from "./TopCommunities";
 import UserActivityScreen from "../UserActivity/UserActivityScreen";
+import UserAgreements from "./UserAgreements";
 
 const CommunityLanding = () => {
     const navigation = useNavigation<any>();
@@ -444,6 +445,8 @@ const CommunityLanding = () => {
                 return renderPrivacyPolicy();
             case "aboutKalpx":
                 return renderAboutKalpx();
+            case "userAgreements":
+                return <UserAgreements />;
             case "yourActivity":
                 return <UserActivityScreen />;
             default:

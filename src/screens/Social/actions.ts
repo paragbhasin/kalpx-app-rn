@@ -175,14 +175,14 @@ export const fetchCommunityDetail = (slug: string) => async (dispatch: any) => {
   }
 };
 
-export const fetchCommunityPosts = (slug: string, page = 1) => async (dispatch: any) => {
+export const fetchCommunityPosts = (slug: string, page = 1 ,sort ='new') => async (dispatch: any) => {
   dispatch({ type: FETCH_COMMUNITY_POSTS_REQUEST, payload: { page } });
   try {
     const params = new URLSearchParams({
       page: page.toString(),
       page_size: "10",
       community: slug,
-      sort: "new",
+      sort: sort,
       t: Date.now().toString(),
       lang: "en",
     });

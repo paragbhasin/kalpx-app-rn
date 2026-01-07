@@ -85,11 +85,13 @@ const CommunityDetail = () => {
                 resizeMode="cover"
             />
             <View style={styles.headerContent}>
-                <View style={styles.avatarContainer}>
-                    <Image
-                        source={{ uri: community?.icon || "https://via.placeholder.com/80" }}
-                        style={styles.avatar}
-                    />
+                <View style={styles.avatarWrapper}>
+                    <View style={styles.avatarContainer}>
+                        <Image
+                source={COMMUNITY_BACKGROUNDS[slug] || { uri: "https://via.placeholder.com/400x150" }}
+                            style={styles.avatar}
+                        />
+                    </View>
                 </View>
                 <View style={styles.communityInfo}>
                     <Text style={styles.communityName}>{community?.name || "Community"}</Text>
@@ -97,15 +99,15 @@ const CommunityDetail = () => {
                         <Text style={styles.statsText}>Followers:{community?.follower_count || 0}</Text>
                         <Text style={[styles.statsText, { marginLeft: 16 }]}>Posts:{community?.post_count || 0}</Text>
                     </View>
+                    <TouchableOpacity
+                        style={[styles.joinButton, isJoined && styles.joinedButton]}
+                        onPress={handleJoin}
+                    >
+                        <Text style={[styles.joinButtonText, isJoined && styles.joinedButtonText]}>
+                            {isJoined ? "Joined" : "Join"}
+                        </Text>
+                    </TouchableOpacity>
                 </View>
-                <TouchableOpacity
-                    style={[styles.joinButton, isJoined && styles.joinedButton]}
-                    onPress={handleJoin}
-                >
-                    <Text style={[styles.joinButtonText, isJoined && styles.joinedButtonText]}>
-                        {isJoined ? "Joined" : "Join"}
-                    </Text>
-                </TouchableOpacity>
             </View>
 
             <TouchableOpacity style={styles.createPostButton}>
@@ -132,7 +134,7 @@ const CommunityDetail = () => {
                 </TouchableOpacity>
             </View>
 
-            {activeTab === "Feed" && highlightPosts.length > 0 && (
+            {/* {activeTab === "Feed" && highlightPosts.length > 0 && (
                 <View style={styles.highlightsSection}>
                     <View style={styles.highlightsHeader}>
                         <Ionicons name="pin-outline" size={20} color="#333" />
@@ -146,7 +148,7 @@ const CommunityDetail = () => {
                         ))}
                     </ScrollView>
                 </View>
-            )}
+            )} */}
         </View>
     );
 
@@ -265,15 +267,24 @@ const styles = StyleSheet.create({
     },
     headerContent: {
         flexDirection: "row",
-        alignItems: "center",
+        alignItems: "flex-start",
         paddingHorizontal: 16,
-        marginTop: -30,
+        marginTop: -40,
+    },
+    avatarWrapper: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 5,
+        borderRadius: 50,
+        backgroundColor: "transparent",
     },
     avatarContainer: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        borderWidth: 4,
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        borderWidth: 5,
         borderColor: "#FFF",
         overflow: "hidden",
         backgroundColor: "#EEE",
@@ -284,39 +295,44 @@ const styles = StyleSheet.create({
     },
     communityInfo: {
         flex: 1,
-        marginLeft: 12,
-        marginTop: 30,
+        marginLeft: 16,
+        marginTop: 45,
     },
     communityName: {
-        fontSize: 22,
+        fontSize: 24,
         fontWeight: "bold",
-        color: "#333",
+        color: "#2D3748",
     },
     statsRow: {
         flexDirection: "row",
-        marginTop: 4,
+        marginTop: 2,
     },
     statsText: {
-        fontSize: 14,
-        color: "#666",
+        fontSize: 15,
+        color: "#718096",
+        fontWeight: "600",
     },
     joinButton: {
         backgroundColor: "#D69E2E",
-        paddingHorizontal: 24,
+        paddingHorizontal: 20,
         paddingVertical: 10,
-        borderRadius: 24,
-        marginTop: 30,
+        borderRadius: 12,
+        marginTop: 12,
+        alignSelf: "flex-start",
+        minWidth: 120,
+        alignItems: "center",
+        justifyContent: "center",
     },
     joinedButton: {
-        backgroundColor: "#EEE",
+        backgroundColor: "#E2E8F0",
     },
     joinButtonText: {
         color: "#FFF",
         fontWeight: "bold",
-        fontSize: 16,
+        fontSize: 17,
     },
     joinedButtonText: {
-        color: "#333",
+        color: "#4A5568",
     },
     createPostButton: {
         flexDirection: "row",

@@ -85,6 +85,11 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     const [showMenu, setShowMenu] = useState(false);
     const [isReportModalVisible, setIsReportModalVisible] = useState(false);
 
+    // Random initial counts for upvotes and shares
+    const [upvoteCount, setUpvoteCount] = useState(post.upvote_count || Math.floor(Math.random() * 950) + 50); // 50-1000
+    const [shareCount, setShareCount] = useState(post.share_count || Math.floor(Math.random() * 20) + 10); // 10-500
+    const [hasUserVoted, setHasUserVoted] = useState<'up' | 'down' | null>(null);
+
     // formatted date
     const timeAgo = post.created_at ? moment(post.created_at).fromNow() : "";
 
@@ -299,20 +304,54 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                 <View style={styles.leftActions}>
                     <View style={styles.voteGroup}>
 
-                        <TouchableOpacity style={styles.actionButton} onPress={onUpvote}>
+                        <TouchableOpacity style={styles.actionButton} onPress={() => {
+                            if (hasUserVoted === 'up') {
+                                // User is un-upvoting
+                                setUpvoteCount(prev => Math.max(0, prev - 1));
+                                setHasUserVoted(null);
+                            } else {
+                                // User is upvoting
+                                if (hasUserVoted === 'down') {
+                                    // Remove downvote first, then add upvote (net +2)
+                                    setUpvoteCount(prev => prev + 2);
+                                } else {
+                                    // Just add upvote
+                                    setUpvoteCount(prev => prev + 1);
+                                }
+                                setHasUserVoted('up');
+                            }
+                            onUpvote?.();
+                        }}>
                             <MaterialCommunityIcons
-                                name={post.is_upvoted ? "arrow-up-bold" : "arrow-up-bold-outline"}
+                                name={hasUserVoted === 'up' ? "arrow-up-bold" : "arrow-up-bold-outline"}
                                 size={24}
-                                color={post.is_upvoted ? "#D69E2E" : "#666"}
+                                color={hasUserVoted === 'up' ? "#D69E2E" : "#666"}
                             />
-                            <Text style={styles.voteactionText}>{post.upvote_count || 332}</Text>
+                            <Text style={styles.voteactionText}>{upvoteCount}</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.actionButton} onPress={onDownvote}>
+                        <TouchableOpacity style={styles.actionButton} onPress={() => {
+                            if (hasUserVoted === 'down') {
+                                // User is un-downvoting
+                                setUpvoteCount(prev => prev + 1);
+                                setHasUserVoted(null);
+                            } else {
+                                // User is downvoting
+                                if (hasUserVoted === 'up') {
+                                    // Remove upvote first, then add downvote (net -2)
+                                    setUpvoteCount(prev => Math.max(0, prev - 2));
+                                } else {
+                                    // Just subtract for downvote
+                                    setUpvoteCount(prev => Math.max(0, prev - 1));
+                                }
+                                setHasUserVoted('down');
+                            }
+                            onDownvote?.();
+                        }}>
                             <MaterialCommunityIcons
-                                name={post.is_downvoted ? "arrow-down-bold" : "arrow-down-bold-outline"}
+                                name={hasUserVoted === 'down' ? "arrow-down-bold" : "arrow-down-bold-outline"}
                                 size={24}
-                                color={post.is_downvoted ? "#D69E2E" : "#666"}
+                                color={hasUserVoted === 'down' ? "#D69E2E" : "#666"}
                             />
                         </TouchableOpacity>
                     </View>
@@ -325,9 +364,12 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                         </TouchableOpacity>
                     </View>
                     <View style={styles.voteGroup}>
-                        <TouchableOpacity style={styles.actionButton} onPress={onShare}>
+                        <TouchableOpacity style={styles.actionButton} onPress={() => {
+                            setShareCount(prev => prev + 1);
+                            onShare?.();
+                        }}>
                             <Ionicons name="share-social-outline" size={22} color="#666" />
-                            <Text style={styles.actionText}>{post.share_count || 0}</Text>
+                            <Text style={styles.actionText}>{shareCount}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

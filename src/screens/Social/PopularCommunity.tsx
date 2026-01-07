@@ -151,50 +151,6 @@ const PopularCommunity = () => {
         );
     };
 
-    const CarouselHeader = () => {
-        // Filter posts that have at least one valid image
-        const carouselPosts = posts.filter((p: any) => !!getPostImage(p));
-        const carouselRef = React.useRef(null);
-
-        if (carouselPosts.length === 0) return null;
-
-        return (
-            <View style={styles.carouselContainer}>
-                <View style={styles.carouselWrapper}>
-                    <Carousel
-                        ref={carouselRef}
-                        loop
-                        width={width}
-                        height={240}
-                        autoPlay={false}
-                        data={carouselPosts}
-                        scrollAnimationDuration={500}
-                        renderItem={({ item }) => <CarouselItem item={item} />}
-                        mode="parallax"
-                        modeConfig={{
-                            parallaxScrollingScale: 0.88,
-                            parallaxScrollingOffset: 150,
-                        }}
-                    />
-                    {/* Left Arrow */}
-                    <TouchableOpacity
-                        style={[styles.arrowButton, styles.leftArrow]}
-                        onPress={() => (carouselRef.current as any)?.prev()}
-                    >
-                        <Ionicons name="chevron-back" size={28} color="#333" />
-                    </TouchableOpacity>
-
-                    {/* Right Arrow */}
-                    <TouchableOpacity
-                        style={[styles.arrowButton, styles.rightArrow]}
-                        onPress={() => (carouselRef.current as any)?.next()}
-                    >
-                        <Ionicons name="chevron-forward" size={28} color="#333" />
-                    </TouchableOpacity>
-                </View>
-            </View>
-        );
-    };
 
     const Footer = () => {
         if (loadingMore) {
@@ -221,7 +177,7 @@ const PopularCommunity = () => {
         <View style={styles.container}>
             <FlatList
                 data={posts}
-                ListHeaderComponent={CarouselHeader}
+
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id.toString()}
                 refreshControl={

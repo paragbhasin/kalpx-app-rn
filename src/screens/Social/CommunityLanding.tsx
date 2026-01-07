@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View, ScrollView } from "react-native";
+import { SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View, ScrollView, TextInput, FlatList, ActivityIndicator } from "react-native";
 import { Image } from "expo-image";
 import { Dropdown } from "react-native-element-dropdown";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
+
+import { useGlobalSearch } from "../../hooks/useGlobalSearch";
+import Colors from "../../components/Colors";
 
 import SocialExplore from "./SocialExplore";
 import ExploreCommunities from "./ExploreCommunities";
@@ -19,16 +22,11 @@ const CommunityLanding = () => {
     const dispatch = useDispatch();
     const [selectedCategory, setSelectedCategory] = useState("Home");
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+    const [isSearching, setIsSearching] = useState(false);
 
+    const { searchQuery, setSearchQuery, results, loading, error } = useGlobalSearch();
 
-    const { data: communities, loading } = useSelector((state: any) => state.communities);
-
-    useEffect(() => {
-        if (selectedCategory === "Home") {
-            dispatch(fetchCommunities(1) as any);
-        }
-    }, [dispatch, selectedCategory]);
-
+    const { data: communities, loading: communitiesLoading } = useSelector((state: any) => state.communities);
 
     const categories = [
         { label: "Home", value: "Home" },
@@ -40,74 +38,106 @@ const CommunityLanding = () => {
         { label: "Privacy Policy", value: "privacyPolicy" },
         { label: "User agreements", value: "userAgreements" },
         { label: "About KalpX", value: "aboutKalpx" }
-
     ];
 
-    const renderHeader = () => (
+    useEffect(() => {
+        if (selectedCategory === "Home") {
+            dispatch(fetchCommunities(1) as any);
+        }
+    }, [dispatch, selectedCategory]);
 
-        <View >
+    const renderHeader = () => (
+        <View>
             <Header />
             <View style={styles.headerContainer}>
-                {/* Title */}
-                <Text style={styles.headerTitle}>Community</Text>
+                {isSearching ? (
+                    <View style={styles.searchBarContainer}>
+                        <TouchableOpacity onPress={() => {
+                            setIsSearching(false);
+                            setSearchQuery("");
+                        }} style={styles.backButton}>
+                            <Ionicons name="arrow-back" size={24} color="#000" />
+                        </TouchableOpacity>
+                        <TextInput
+                            style={styles.searchInput}
+                            placeholder="Search communities, posts, users..."
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            autoFocus
+                        />
+                        {searchQuery.length > 0 && (
+                            <TouchableOpacity onPress={() => setSearchQuery("")} style={styles.clearButton}>
+                                <Ionicons name="close-circle" size={20} color="#999" />
+                            </TouchableOpacity>
+                        )}
+                    </View>
+                ) : (
+                    <>
+                        {/* Title */}
+                        <Text style={styles.headerTitle}>Community</Text>
 
-                {/* Dropdown */}
-                <Dropdown
-                    style={styles.dropdownTrigger}
-                    containerStyle={styles.dropdownContainer}
-                    data={categories}
-                    labelField="label"
-                    valueField="value"
-                    value={selectedCategory}
-                    onChange={(item) => setSelectedCategory(item.value)}
-                    selectedTextStyle={styles.selectedTextStyle}
-                    placeholderStyle={styles.placeholderStyle}
-                    iconStyle={styles.iconStyle}
-                    dropdownPosition="bottom"
-                    showsVerticalScrollIndicator={false}
-                    renderRightIcon={() => (
-                        <Ionicons name="caret-down-outline" size={12} color="#000" style={{ marginLeft: 4 }} />
-                    )}
-                />
+                        {/* Dropdown */}
+                        <Dropdown
+                            style={styles.dropdownTrigger}
+                            containerStyle={styles.dropdownContainer}
+                            data={categories}
+                            labelField="label"
+                            valueField="value"
+                            value={selectedCategory}
+                            onChange={(item) => setSelectedCategory(item.value)}
+                            selectedTextStyle={styles.selectedTextStyle}
+                            placeholderStyle={styles.placeholderStyle}
+                            iconStyle={styles.iconStyle}
+                            dropdownPosition="bottom"
+                            showsVerticalScrollIndicator={false}
+                            renderRightIcon={() => (
+                                <Ionicons name="caret-down-outline" size={12} color="#000" style={{ marginLeft: 4 }} />
+                            )}
+                        />
 
-                <View style={{ flex: 1 }} />
+                        <View style={{ flex: 1 }} />
 
-                {/* Action Icons */}
-                <View style={styles.actionIcons}>
-                    {selectedCategory === "Top" && (
-                        <>
+                        {/* Action Icons */}
+                        <View style={styles.actionIcons}>
+                            {selectedCategory === "Top" && (
+                                <>
+                                    <TouchableOpacity
+                                        style={styles.iconButton}
+                                        onPress={() => setViewMode("list")}
+                                    >
+                                        <Ionicons
+                                            name="list-outline"
+                                            size={24}
+                                            color={viewMode === "list" ? "#D69E2E" : "#000"}
+                                        />
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={styles.iconButton}
+                                        onPress={() => setViewMode("grid")}
+                                    >
+                                        <Ionicons
+                                            name="grid-outline"
+                                            size={24}
+                                            color={viewMode === "grid" ? "#D69E2E" : "#000"}
+                                        />
+                                    </TouchableOpacity>
+                                </>
+                            )}
                             <TouchableOpacity
                                 style={styles.iconButton}
-                                onPress={() => setViewMode("list")}
+                                onPress={() => setIsSearching(true)}
                             >
-                                <Ionicons
-                                    name="list-outline"
-                                    size={24}
-                                    color={viewMode === "list" ? "#D69E2E" : "#000"}
-                                />
+                                <Ionicons name="search-outline" size={24} color="#000" />
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={styles.iconButton}
-                                onPress={() => setViewMode("grid")}
+                                onPress={() => navigation.navigate("CreateSocialPost")}
                             >
-                                <Ionicons
-                                    name="grid-outline"
-                                    size={24}
-                                    color={viewMode === "grid" ? "#D69E2E" : "#000"}
-                                />
+                                <Ionicons name="add-circle-outline" size={24} color="#000" />
                             </TouchableOpacity>
-                        </>
-                    )}
-                    <TouchableOpacity style={styles.iconButton}>
-                        <Ionicons name="search-outline" size={24} color="#000" />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={styles.iconButton}
-                        onPress={() => navigation.navigate("CreateSocialPost")}
-                    >
-                        <Ionicons name="add-circle-outline" size={24} color="#000" />
-                    </TouchableOpacity>
-                </View>
+                        </View>
+                    </>
+                )}
             </View>
         </View>
     );
@@ -326,7 +356,77 @@ const CommunityLanding = () => {
         </ScrollView>
     );
 
+    const renderSearchResultItem = ({ item }: { item: any }) => {
+        if (item.type === 'header') {
+            return (
+                <View style={styles.searchSectionHeader}>
+                    <Text style={styles.searchSectionTitle}>{item.title}</Text>
+                </View>
+            );
+        }
+
+        const iconName = item.type === 'community' ? 'people-outline'
+            : item.type === 'post' ? 'document-text-outline'
+                : 'person-outline';
+
+        return (
+            <TouchableOpacity
+                style={styles.searchResultItem}
+                onPress={() => {
+                    if (item.type === 'community') {
+                        navigation.navigate("CommunityDetail", { slug: item.slug });
+                    } else if (item.type === 'post') {
+                        navigation.navigate("SocialPostDetailScreen", { post: item });
+                    }
+                }}
+            >
+                <View style={styles.searchIconCircle}>
+                    <Ionicons name={iconName} size={20} color={Colors.Colors.App_theme} />
+                </View>
+                <View style={styles.searchTextContainer}>
+                    <Text style={styles.searchItemTitle} numberOfLines={1}>
+                        {item.name || item.title || item.content || item.username || "Result"}
+                    </Text>
+                    <Text style={styles.searchItemSubtitle}>
+                        {item.type === 'community' ? `${item.member_count || 0} members`
+                            : item.type === 'post' ? `in ${item.community_name || "Community"}`
+                                : 'User'}
+                    </Text>
+                </View>
+            </TouchableOpacity>
+        );
+    };
+
+    const renderSearchResults = () => {
+        const combinedData = [
+            ...(results.communities.length > 0 ? [{ type: 'header', title: 'Communities', id: 'h-comm' }, ...results.communities.map(i => ({ ...i, type: 'community' }))] : []),
+            ...(results.posts.length > 0 ? [{ type: 'header', title: 'Posts', id: 'h-posts' }, ...results.posts.map(i => ({ ...i, type: 'post' }))] : []),
+            ...(results.users.length > 0 ? [{ type: 'header', title: 'Users', id: 'h-users' }, ...results.users.map(i => ({ ...i, type: 'user' }))] : []),
+        ];
+
+        return (
+            <View style={styles.searchResultsContainer}>
+                {loading && searchQuery.length > 0 && (
+                    <ActivityIndicator style={{ marginTop: 20 }} color={Colors.Colors.App_theme} />
+                )}
+                {error && <Text style={styles.errorText}>{error}</Text>}
+                {!loading && searchQuery.length > 0 && combinedData.length === 0 && (
+                    <Text style={styles.noResultsText}>No results found for "{searchQuery}"</Text>
+                )}
+                <FlatList
+                    data={combinedData}
+                    keyExtractor={(item, index) => item.id?.toString() || `search-${index}`}
+                    renderItem={renderSearchResultItem}
+                    keyboardShouldPersistTaps="handled"
+                    contentContainerStyle={{ paddingBottom: 20 }}
+                />
+            </View>
+        );
+    };
+
     const renderContent = () => {
+        if (isSearching) return renderSearchResults();
+
         switch (selectedCategory) {
             case "Top":
                 return <SocialExplore showHeader={false} viewMode={viewMode} />;
@@ -619,6 +719,88 @@ const styles = StyleSheet.create({
         fontWeight: "bold",
         color: "#1A202C",
         marginHorizontal: 8,
+    },
+    // Search Styles
+    searchBarContainer: {
+        flex: 1,
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#f0f0f0",
+        borderRadius: 20,
+        paddingHorizontal: 12,
+        height: 40,
+    },
+    backButton: {
+        marginRight: 8,
+    },
+    searchInput: {
+        flex: 1,
+        fontSize: 15,
+        color: "#000",
+        height: "100%",
+        padding: 0,
+    },
+    clearButton: {
+        padding: 4,
+    },
+    searchResultsContainer: {
+        flex: 1,
+        backgroundColor: "#fff",
+    },
+    searchSectionHeader: {
+        backgroundColor: "#f8f8f8",
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderBottomWidth: 1,
+        borderBottomColor: "#eee",
+    },
+    searchSectionTitle: {
+        fontSize: 12,
+        fontWeight: "bold",
+        color: "#666",
+        textTransform: "uppercase",
+    },
+    searchResultItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        padding: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: "#f0f0f0",
+    },
+    searchIconCircle: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: "#f9f9f9",
+        justifyContent: "center",
+        alignItems: "center",
+        marginRight: 15,
+        borderWidth: 1,
+        borderColor: "#eee",
+    },
+    searchTextContainer: {
+        flex: 1,
+    },
+    searchItemTitle: {
+        fontSize: 16,
+        fontWeight: "500",
+        color: "#333",
+    },
+    searchItemSubtitle: {
+        fontSize: 13,
+        color: "#888",
+        marginTop: 2,
+    },
+    noResultsText: {
+        textAlign: "center",
+        marginTop: 40,
+        color: "#999",
+        fontSize: 15,
+    },
+    errorText: {
+        textAlign: "center",
+        marginTop: 20,
+        color: "#e53e3e",
     },
 });
 

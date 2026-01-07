@@ -300,7 +300,6 @@ useEffect(() => {
                     <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                         <Ionicons name="arrow-back" size={24} color="#000" />
                     </TouchableOpacity>
-                    <Text style={styles.navHeaderTitle}>Community</Text>
                 </View>
             </View>
             <FlatList

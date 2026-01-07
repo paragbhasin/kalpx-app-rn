@@ -43,6 +43,7 @@ import TopTabsNavigator from "../screens/Tracker/TopTabsNavigator";
 import TrackerEdit from "../screens/Tracker/TrackerEdit";
 import TrackerProgress from "../screens/Tracker/TrackerProgress";
 import TrackerScreen from "../screens/Tracker/TrackerScreen";
+import GlobalSearchScreen from "../screens/Social/GlobalSearchScreen";
 
 const Stack: any = createNativeStackNavigator();
 
@@ -234,6 +235,11 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen
       name="DailyPracticeMantra"
       component={DailyPracticeMantra}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="GlobalSearchScreen"
+      component={GlobalSearchScreen}
       options={{ headerShown: false }}
     />
   </Stack.Navigator>

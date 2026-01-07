@@ -97,9 +97,6 @@ const CommunityLanding = () => {
                                 <Ionicons name="caret-down-outline" size={12} color="#000" style={{ marginLeft: 4 }} />
                             )}
                         />
-
-                        <View style={{ flex: 1 }} />
-
                         {/* Action Icons */}
                         <View style={styles.actionIcons}>
                             {selectedCategory === "Top" && (
@@ -490,33 +487,35 @@ const styles = StyleSheet.create({
         marginRight: 10,
     },
     dropdownTrigger: {
-        marginLeft: 6,
-        paddingHorizontal: 4,
+        flexDirection: "row",
+        alignItems: "center",
+        paddingHorizontal: 6,
         paddingVertical: 2,
-        alignSelf: "flex-start",
+        maxWidth: 140,
     },
     dropdownContainer: {
         width: 220,
         borderRadius: 12,
     },
     selectedTextStyle: {
-        fontSize: 16,
+        fontSize: 14,
         color: "#000",
-        textDecorationLine: "underline",
         fontWeight: "500",
-        flexShrink: 1,            // ⬅️ text-based width
-        minWidth: 60,
+        marginRight: 4,
+        flexShrink: 1,
     },
     placeholderStyle: {
         fontSize: 16,
         color: "#888",
     },
     iconStyle: {
-        width: 20,
-        height: 20,
+        width: 12,
+        height: 12,
     },
     actionIcons: {
         flexDirection: "row",
+        alignItems: "center",
+        marginLeft: "auto",
     },
     iconButton: {
         marginLeft: 16,

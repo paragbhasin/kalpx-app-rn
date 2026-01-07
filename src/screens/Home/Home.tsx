@@ -5,7 +5,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { AnyAction } from "@reduxjs/toolkit";
 import * as Notifications from 'expo-notifications';
 import moment from "moment";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
@@ -19,7 +19,8 @@ import {
   // ScrollView,
   StatusBar,
   TouchableOpacity,
-  View
+  View,
+  Animated,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { Card } from "react-native-paper";
@@ -44,6 +45,7 @@ import { CATALOGS } from "../../data/mantras";
 import { usePracticeStore } from "../../data/Practice";
 import { BASE_IMAGE_URL } from "../../Networks/baseURL";
 import { RootState } from "../../store";
+import { useScrollContext } from "../../context/ScrollContext";
 import { saveUserAction } from "../../utils/storage";
 import { classesHomeList } from "../Classes/actions";
 import {
@@ -70,6 +72,9 @@ export default function Home() {
   const userLang = i18n.language.split("-")[0];
   const [trackerData, setTrackerData] = useState<any>(null);
   const [expandedItemId, setExpandedItemId] = useState<string | null>(null);
+
+  const { handleScroll } = useScrollContext();
+
   const [showLangTZModal, setShowLangTZModal] = useState(false);
   const { locationData, loading: locationLoading, error: locationError } = useUserLocation();
   const [showNotificationPopup, setShowNotificationPopup] = useState(false);
@@ -847,11 +852,12 @@ export default function Home() {
                           borderTopRightRadius: 16,
                         }}
                       > */}
-      <Header />
       <ScrollView
         nestedScrollEnabled={true}
-        contentContainerStyle={{ paddingBottom: 30 }}
+        contentContainerStyle={{ paddingBottom: 30, paddingTop: 50 }} // Add padding for global header
         showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       >
         <View style={{ marginTop: 0, alignItems: "center" }}>
           <FlatList

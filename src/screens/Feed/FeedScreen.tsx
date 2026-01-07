@@ -5,6 +5,7 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { fetchFeed, upvotePost, downvotePost, savePost, unsavePost, hidePost } from "./actions"; // Import from local actions
 import { reportContent } from "../PostDetail/actions";
 import SocialPostCard from "../../components/SocialPostCard";
+import ShimmerPlaceholder from "../../components/ShimmerPlaceholder";
 
 const FeedScreen = () => {
     const dispatch = useDispatch();
@@ -81,6 +82,17 @@ const FeedScreen = () => {
         );
     };
 
+    const renderShimmer = () => (
+        <View style={{ marginBottom: 20 }}>
+            <ShimmerPlaceholder width="100%" height={250} style={{ borderRadius: 12 }} />
+            <View style={{ padding: 15 }}>
+                <ShimmerPlaceholder width="60%" height={20} style={{ marginBottom: 10 }} />
+                <ShimmerPlaceholder width="90%" height={16} style={{ marginBottom: 6 }} />
+                <ShimmerPlaceholder width="40%" height={16} />
+            </View>
+        </View>
+    );
+
     const Footer = () => {
         if (loadingMore) {
             return <ActivityIndicator style={{ padding: 20 }} size="small" color="#D69E2E" />;
@@ -90,8 +102,14 @@ const FeedScreen = () => {
 
     if (loading && !refreshing && posts.length === 0) {
         return (
-            <View style={styles.center}>
-                <ActivityIndicator size="large" color="#D69E2E" />
+            <View style={styles.container}>
+                <FlatList
+                    data={[1, 2, 3]}
+                    renderItem={renderShimmer}
+                    keyExtractor={(it) => it.toString()}
+                    contentContainerStyle={{ paddingBottom: 20 }}
+                    scrollEnabled={false}
+                />
             </View>
         );
     }

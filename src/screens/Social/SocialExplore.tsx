@@ -12,12 +12,20 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import Header from "../../components/Header";
 import LoadingOverlay from "../../components/LoadingOverlay";
 import api from "../../Networks/axios";
+import SocialPostCard from "../../components/SocialPostCard";
+import ShimmerPlaceholder from "../../components/ShimmerPlaceholder";
+import { FlatList, ActivityIndicator } from "react-native";
 import styles from "./SocialExplorestyles";
 
 const screenWidth = Dimensions.get("window").width;
 const COLUMN_WIDTH = screenWidth / 2 - 20;
 
-export default function SocialExplore({ showHeader = true }) {
+interface SocialExploreProps {
+  showHeader?: boolean;
+  viewMode?: "grid" | "list";
+}
+
+export default function SocialExplore({ showHeader = true, viewMode = "grid" }: SocialExploreProps) {
   const navigation: any = useNavigation();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -98,6 +106,14 @@ export default function SocialExplore({ showHeader = true }) {
     }
   };
 
+  const handleInteraction = (type: string, post: any) => {
+    if (type === 'comment') {
+      navigation.navigate('SocialPostDetailScreen', { post: post });
+    } else if (type === 'askQuestion') {
+      navigation.navigate('SocialPostDetailScreen', { post: post, isQuestion: true });
+    }
+  };
+
 
   // Split into two columns (masonry)
   const leftColumn: any[] = [];
@@ -144,46 +160,134 @@ export default function SocialExplore({ showHeader = true }) {
     </TouchableOpacity>
   );
 
+  const renderListItem = ({ item }: { item: any }) => {
+    // Merge the top-level explore item with the nested community_post
+    // community_post usually contains more details like linked_item, full content, etc.
+    const mergedPost = {
+      ...item,
+      ...(item.community_post || {}),
+      // Ensure content and images are in the format SocialPostCard expects
+      content: item.community_post?.content || item.base_text || item.summary,
+      images: item.community_post?.images?.length
+        ? item.community_post.images
+        : (item.slides?.map((s: any) => ({ image: s.image_url })) || [{ image: item.hook_image }]),
+      community_name: item.community_name || item.community_post?.community_name || "Community",
+    };
+
+    return (
+      <SocialPostCard
+        post={mergedPost}
+        onComment={() => handleInteraction('comment', item)}
+        onAskQuestion={() => handleInteraction('askQuestion', item)}
+        onUserPress={() => { }} // Handle if needed
+      />
+    );
+  };
+
+  const renderShimmer = (height: number) => (
+    <View
+      style={{
+        marginBottom: 12,
+        borderRadius: 12,
+        overflow: "hidden",
+        width: COLUMN_WIDTH,
+      }}
+    >
+      <ShimmerPlaceholder width={COLUMN_WIDTH} height={height} style={{ borderRadius: 12 }} />
+    </View>
+  );
+
+  const renderListShimmer = () => (
+    <View style={{ marginBottom: 20 }}>
+      <ShimmerPlaceholder width="100%" height={250} style={{ borderRadius: 12 }} />
+      <View style={{ padding: 15 }}>
+        <ShimmerPlaceholder width="60%" height={20} style={{ marginBottom: 10 }} />
+        <ShimmerPlaceholder width="90%" height={16} style={{ marginBottom: 6 }} />
+        <ShimmerPlaceholder width="40%" height={16} />
+      </View>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
       {showHeader && <Header />}
 
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        stickyHeaderIndices={[1]} // 0 = Explore block, 1 = like/share bar
-        onScroll={({ nativeEvent }) => {
-          const paddingToBottom = 20;
-          const isCloseToBottom =
-            nativeEvent.layoutMeasurement.height + nativeEvent.contentOffset.y >=
-            nativeEvent.contentSize.height - paddingToBottom;
+      {loading && items.length === 0 ? (
+        viewMode === "grid" ? (
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              paddingHorizontal: 15,
+              paddingTop: 10,
+            }}
+          >
+            <View style={{ width: COLUMN_WIDTH }}>
+              {[200, 250, 180].map((h, i) => <View key={i}>{renderShimmer(h)}</View>)}
+            </View>
+            <View style={{ width: COLUMN_WIDTH }}>
+              {[240, 190, 220].map((h, i) => <View key={i}>{renderShimmer(h)}</View>)}
+            </View>
+          </View>
+        ) : (
+          <FlatList
+            data={[1, 2, 3]}
+            renderItem={() => renderListShimmer()}
+            keyExtractor={(it) => it.toString()}
+            contentContainerStyle={{ padding: 15 }}
+            scrollEnabled={false}
+          />
+        )
+      ) : viewMode === "grid" ? (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          onScroll={({ nativeEvent }) => {
+            const paddingToBottom = 20;
+            const isBottom = nativeEvent.layoutMeasurement.height + nativeEvent.contentOffset.y >= nativeEvent.contentSize.height - paddingToBottom;
 
-          if (isCloseToBottom) {
-            handleLoadMore();
-          }
-        }}
-        scrollEventThrottle={400}
-      >
-
-
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            paddingHorizontal: 15,
-            paddingTop: 10,
-            paddingBottom: 10,
+            if (isBottom) {
+              handleLoadMore();
+            }
           }}
+          scrollEventThrottle={400}
         >
-          <View style={{ width: COLUMN_WIDTH }}>
-            {leftColumn.map(renderItem)}
-          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              paddingHorizontal: 15,
+              paddingTop: 10,
+              paddingBottom: 10,
+            }}
+          >
+            <View style={{ width: COLUMN_WIDTH }}>
+              {leftColumn.map((item) => renderItem(item))}
+            </View>
 
-          <View style={{ width: COLUMN_WIDTH }}>
-            {rightColumn.map(renderItem)}
+            <View style={{ width: COLUMN_WIDTH }}>
+              {rightColumn.map((item) => renderItem(item))}
+            </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      ) : (
+        <FlatList
+          data={items}
+          renderItem={renderListItem}
+          keyExtractor={(item) => item.id.toString()}
+          onEndReached={handleLoadMore}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={() =>
+            isFetchingMore ? (
+              <View style={{ padding: 20, alignItems: 'center' }}>
+                <ActivityIndicator size="small" color="#D69E2E" />
+                <Text style={{ marginTop: 10 }}>Loading more...</Text>
+              </View>
+            ) : <View style={{ height: 20 }} />
+          }
+          showsVerticalScrollIndicator={false}
+        />
+      )}
 
       {loading && <LoadingOverlay visible={true} text="Loading Explore..." />}
       {isFetchingMore && (

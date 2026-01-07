@@ -5,12 +5,15 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { useDispatch, useSelector } from "react-redux";
 // import Colors from "../../components/Colors"; // Check if this import is needed or if styles serve enough
 import SocialExplore from "./SocialExplore";
+import ExploreCommunities from "./ExploreCommunities";
+import Header from "../../components/Header";
 import FeedScreen from "../Feed/FeedScreen";
 import { fetchCommunities, fetchTopCommunities } from "./actions"; // Import actions from local actions file (or alias)
 
 const CommunityLanding = () => {
     const dispatch = useDispatch();
     const [selectedCategory, setSelectedCategory] = useState("Home");
+    const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
 
     const { data: communities, loading } = useSelector((state: any) => state.communities);
@@ -30,22 +33,27 @@ const CommunityLanding = () => {
     ];
 
     const renderHeader = () => (
-        <View style={styles.headerContainer}>
+    
+        <View >
+          <Header />
+<View style={styles.headerContainer}>
             {/* Title */}
             <Text style={styles.headerTitle}>Community</Text>
 
             {/* Dropdown */}
             <Dropdown
-                style={styles.dropdown}
+                style={styles.dropdownTrigger}
+                containerStyle={styles.dropdownContainer}
                 data={categories}
                 labelField="label"
                 valueField="value"
-                placeholder="Select"
                 value={selectedCategory}
                 onChange={(item) => setSelectedCategory(item.value)}
                 selectedTextStyle={styles.selectedTextStyle}
                 placeholderStyle={styles.placeholderStyle}
                 iconStyle={styles.iconStyle}
+                dropdownPosition="bottom"
+                showsVerticalScrollIndicator={false}
                 renderRightIcon={() => (
                     <Ionicons name="caret-down-outline" size={12} color="#000" style={{ marginLeft: 4 }} />
                 )}
@@ -55,6 +63,30 @@ const CommunityLanding = () => {
 
             {/* Action Icons */}
             <View style={styles.actionIcons}>
+                {selectedCategory === "Top" && (
+                    <>
+                        <TouchableOpacity
+                            style={styles.iconButton}
+                            onPress={() => setViewMode("list")}
+                        >
+                            <Ionicons
+                                name="list-outline"
+                                size={24}
+                                color={viewMode === "list" ? "#D69E2E" : "#000"}
+                            />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.iconButton}
+                            onPress={() => setViewMode("grid")}
+                        >
+                            <Ionicons
+                                name="grid-outline"
+                                size={24}
+                                color={viewMode === "grid" ? "#D69E2E" : "#000"}
+                            />
+                        </TouchableOpacity>
+                    </>
+                )}
                 <TouchableOpacity style={styles.iconButton}>
                     <Ionicons name="search-outline" size={24} color="#000" />
                 </TouchableOpacity>
@@ -63,21 +95,21 @@ const CommunityLanding = () => {
                 </TouchableOpacity>
             </View>
         </View>
+        </View>
     );
 
     const renderContent = () => {
         switch (selectedCategory) {
             case "Top":
-                // "Top" renders the SocialExplore component which has its own logic for now.
-                // If we want to move SocialExplore to Redux, that's a bigger Refactor. 
-                // For now, keep it as is, because `SocialExplore` is working.
-                return <SocialExplore showHeader={false} />;
+
+                return <SocialExplore showHeader={false} viewMode={viewMode} />;
 
             case "Home":
                 return <FeedScreen />;
 
             case "Popular":
             case "Explore":
+                return <ExploreCommunities />;
             default:
                 return (
                     <View style={styles.placeholderContainer}>
@@ -118,15 +150,23 @@ const styles = StyleSheet.create({
         color: "#000",
         marginRight: 10,
     },
-    dropdown: {
-        width: 90,
-        marginLeft: 0,
+    dropdownTrigger: {
+        marginLeft: 6,
+        paddingHorizontal: 4,
+        paddingVertical: 2,
+        alignSelf: "flex-start",
+    },
+    dropdownContainer: {
+        width: 220,          
+        borderRadius: 12,
     },
     selectedTextStyle: {
         fontSize: 16,
         color: "#000",
         textDecorationLine: "underline",
         fontWeight: "500",
+        flexShrink: 1,            // ⬅️ text-based width
+        minWidth: 60,
     },
     placeholderStyle: {
         fontSize: 16,

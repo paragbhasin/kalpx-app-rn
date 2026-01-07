@@ -21,7 +21,10 @@ import SocialPostCard from "../../components/SocialPostCard";
 import { upvotePost, downvotePost, savePost, unsavePost, hidePost } from "../Feed/actions";
 import { reportContent } from "../PostDetail/actions";
 import { followCommunity, unfollowCommunity } from "../Social/actions";
+import { RootState } from "../../store";
+
 import Colors from "../../components/Colors";
+
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -33,7 +36,7 @@ const UserActivityScreen = () => {
 
     // Memoize the state selections to prevent unnecessary re-renders or potential errors
     const userActivity = useSelector((state: any) => state.userActivity || {});
-    const profileDetails = useSelector((state: any) => state.profileDetailsReducer || {});
+    const profileDetails = useSelector((state: RootState) => state.profileDetailsReducer);
 
     const stats = userActivity?.stats?.data || {};
 
@@ -50,8 +53,8 @@ const UserActivityScreen = () => {
     ];
 
     useEffect(() => {
-        // Only fetch if necessary or when tab changes
-        if (!profileDetails.data) {
+
+        console.log("Fetching profile details...", profileDetails.data); if (!profileDetails.data) {
             dispatch(fetchProfileDetails(() => { }) as any);
         }
         dispatch(fetchUserActivity("stats") as any);
@@ -150,7 +153,7 @@ const UserActivityScreen = () => {
         );
     };
 
-    const user = profileDetails.data || {};
+    const userProfile = profileDetails.data?.profile || {};
 
     const filteredActivity = () => {
         const typeMap: any = {
@@ -198,12 +201,12 @@ const UserActivityScreen = () => {
                         <View style={styles.profileHeader}>
                             <View style={styles.profileInfo}>
                                 <Image
-                                    source={{ uri: user.thumbnail || `https://ui-avatars.com/api/?name=${user.full_name || user.username || 'User'}` }}
+                                    source={{ uri: userProfile.avatar || `https://ui-avatars.com/api/?name=${userProfile.profile_name || 'User'}` }}
                                     style={styles.avatar}
                                 />
                                 <View>
-                                    <Text style={styles.displayName}>{user.full_name || user.username || "User"}</Text>
-                                    <Text style={styles.usernameText}>{user.username || "user"}</Text>
+                                    <Text style={styles.displayName}>{userProfile.profile_name || "User"}</Text>
+                                    <Text style={styles.usernameText}>{userProfile.user?.username || "user"}</Text>
                                 </View>
                             </View>
                             <TouchableOpacity style={styles.createPostBtn} onPress={() => navigation.navigate("CreateSocialPost")}>

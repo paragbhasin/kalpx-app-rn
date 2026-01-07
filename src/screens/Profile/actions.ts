@@ -85,6 +85,7 @@ export const fetchProfileDetails = (callback) => async (dispatch) => {
   try {
     const response = await fetchProfileDetailsApi();
     const payload = response?.data?.data || response?.data || {};
+    console.log("Profile Details Payload:", payload);
     dispatch(profileDetailsSuccess(payload));
     callback?.({ success: true, data: payload });
   } catch (error) {

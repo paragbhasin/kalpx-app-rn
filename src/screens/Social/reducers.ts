@@ -11,6 +11,12 @@ import {
   FETCH_TOP_COMMUNITIES_FAILURE,
   FOLLOW_COMMUNITY_SUCCESS,
   UNFOLLOW_COMMUNITY_SUCCESS,
+  FETCH_COMMUNITY_DETAIL_REQUEST,
+  FETCH_COMMUNITY_DETAIL_SUCCESS,
+  FETCH_COMMUNITY_DETAIL_FAILURE,
+  FETCH_COMMUNITY_POSTS_REQUEST,
+  FETCH_COMMUNITY_POSTS_SUCCESS,
+  FETCH_COMMUNITY_POSTS_FAILURE,
 } from "./actions";
 
 const initialState = {
@@ -45,7 +51,23 @@ const initialCommunitiesState = {
     totalCount: 0,
   },
   error: null,
+  communityDetail: {
+    loading: false,
+    data: null,
+    error: null,
+  },
+  communityPosts: {
+    loading: false,
+    data: [],
+    pagination: {
+      currentPage: 1,
+      totalPages: 1,
+      totalCount: 0,
+    },
+    error: null,
+  }
 };
+
 
 export const communitiesReducer = (state = initialCommunitiesState, action) => {
   switch (action.type) {
@@ -113,6 +135,52 @@ export const communitiesReducer = (state = initialCommunitiesState, action) => {
             ? { ...c, is_followed: false, follower_count: Math.max(0, (c.follower_count || 0) - 1) }
             : c
         )
+      };
+
+    case FETCH_COMMUNITY_DETAIL_REQUEST:
+      return {
+        ...state,
+        communityDetail: { ...state.communityDetail, loading: true, error: null }
+      };
+    case FETCH_COMMUNITY_DETAIL_SUCCESS:
+      return {
+        ...state,
+        communityDetail: { loading: false, data: action.payload, error: null }
+      };
+    case FETCH_COMMUNITY_DETAIL_FAILURE:
+      return {
+        ...state,
+        communityDetail: { ...state.communityDetail, loading: false, error: action.payload }
+      };
+
+    case FETCH_COMMUNITY_POSTS_REQUEST:
+      return {
+        ...state,
+        communityPosts: {
+          ...state.communityPosts,
+          loading: true,
+          error: null,
+          data: action.payload.page === 1 ? [] : state.communityPosts.data
+        }
+      };
+    case FETCH_COMMUNITY_POSTS_SUCCESS:
+      return {
+        ...state,
+        communityPosts: {
+          loading: false,
+          data: action.payload.page === 1 ? action.payload.results : [...state.communityPosts.data, ...action.payload.results],
+          pagination: {
+            currentPage: action.payload.page,
+            totalPages: action.payload.totalPages,
+            totalCount: action.payload.count
+          },
+          error: null
+        }
+      };
+    case FETCH_COMMUNITY_POSTS_FAILURE:
+      return {
+        ...state,
+        communityPosts: { ...state.communityPosts, loading: false, error: action.payload }
       };
 
     default:

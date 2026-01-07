@@ -35,6 +35,7 @@ import ProfileDetails from "../screens/Profile/ProfileDetails";
 import Sankalp from "../screens/Sankalp";
 import SocialExplore from "../screens/Social/SocialExplore";
 import CommunityLanding from "../screens/Social/CommunityLanding";
+import CommunityDetail from "../screens/Social/CommunityDetail";
 import SocialPostDetailScreen from "../screens/Social/SocialPostDetailScreen";
 import StreakScreen from "../screens/Streak/StreakScreen";
 import TopTabsNavigator from "../screens/Tracker/TopTabsNavigator";
@@ -183,6 +184,11 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen
       name="CommunityLanding"
       component={CommunityLanding}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="CommunityDetail"
+      component={CommunityDetail}
       options={{ headerShown: false }}
     />
     <Stack.Screen

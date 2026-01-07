@@ -13,8 +13,11 @@ import { fetchUserActivity } from "../UserActivity/actions";
 import ShimmerPlaceholder from "../../components/ShimmerPlaceholder";
 import styles from "./ExploreCommunitiesStyles";
 
+import { useNavigation } from "@react-navigation/native";
+
 const ExploreCommunities = () => {
     const dispatch = useDispatch();
+    const navigation = useNavigation<any>();
     const [activeTab, setActiveTab] = useState<"all" | "followed">("all");
     const [refreshing, setRefreshing] = useState(false);
 
@@ -84,12 +87,15 @@ const ExploreCommunities = () => {
     const renderCommunityCard = ({ item }: { item: any }) => (
         <View style={styles.card}>
             <View style={styles.cardHeader}>
-                <View style={styles.communityInfo}>
+                <TouchableOpacity
+                    style={styles.communityInfo}
+                    onPress={() => navigation.navigate("CommunityDetail", { slug: item.slug })}
+                >
                     <Text style={styles.communityName}>{item.name}</Text>
                     <Text style={styles.visitorCount}>
                         {item.weekly_visitors || Math.floor(Math.random() * 50 + 50)}k weekly visitors
                     </Text>
-                </View>
+                </TouchableOpacity>
                 <TouchableOpacity
                     style={[
                         styles.joinButton,
@@ -122,11 +128,16 @@ const ExploreCommunities = () => {
 
 
             </View>
-            <Text style={styles.description} numberOfLines={3}>
-                {item.description || "Share festival memories, meanings, and ways to keep their sacred essence alive."}
-            </Text>
+            <TouchableOpacity
+                onPress={() => navigation.navigate("CommunityDetail", { slug: item.slug })}
+            >
+                <Text style={styles.description} numberOfLines={3}>
+                    {item.description || "Share festival memories, meanings, and ways to keep their sacred essence alive."}
+                </Text>
+            </TouchableOpacity>
         </View>
     );
+
 
     const renderShimmer = () => (
         <View style={styles.card}>

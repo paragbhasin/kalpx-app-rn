@@ -15,8 +15,12 @@ import { COMMUNITY_BACKGROUNDS } from "../../utils/CommunityAssets";
 import styles from "./TopCommunitiesStyles";
 
 
+import { useNavigation } from "@react-navigation/native";
+
+
 const TopCommunities = () => {
     const dispatch = useDispatch();
+    const navigation = useNavigation<any>();
     const [page, setPage] = useState(1);
 
     const { data: communities, loading, pagination } = useSelector(
@@ -28,7 +32,10 @@ const TopCommunities = () => {
     }, [dispatch, page]);
 
     const renderItem = ({ item }: { item: any }) => (
-        <View style={styles.row}>
+        <TouchableOpacity
+            style={styles.row}
+            onPress={() => navigation.navigate("CommunityDetail", { slug: item.slug })}
+        >
             <Text style={styles.rankText}>{item.rank || "-"}</Text>
             <Image
                 source={
@@ -41,8 +48,9 @@ const TopCommunities = () => {
             <Text style={styles.communityName} numberOfLines={1}>
                 {item.name}
             </Text>
-        </View>
+        </TouchableOpacity>
     );
+
 
 
     const renderPagination = () => {

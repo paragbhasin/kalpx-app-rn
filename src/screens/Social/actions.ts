@@ -5,6 +5,15 @@ export const EXPLORE_REQUEST = "EXPLORE_REQUEST";
 export const EXPLORE_SUCCESS = "EXPLORE_SUCCESS";
 export const EXPLORE_FAILURE = "EXPLORE_FAILURE";
 
+export const FETCH_COMMUNITY_DETAIL_REQUEST = "FETCH_COMMUNITY_DETAIL_REQUEST";
+export const FETCH_COMMUNITY_DETAIL_SUCCESS = "FETCH_COMMUNITY_DETAIL_SUCCESS";
+export const FETCH_COMMUNITY_DETAIL_FAILURE = "FETCH_COMMUNITY_DETAIL_FAILURE";
+
+export const FETCH_COMMUNITY_POSTS_REQUEST = "FETCH_COMMUNITY_POSTS_REQUEST";
+export const FETCH_COMMUNITY_POSTS_SUCCESS = "FETCH_COMMUNITY_POSTS_SUCCESS";
+export const FETCH_COMMUNITY_POSTS_FAILURE = "FETCH_COMMUNITY_POSTS_FAILURE";
+
+
 export const fetchExplorePosts = () => async (dispatch) => {
   dispatch({ type: EXPLORE_REQUEST });
 
@@ -145,3 +154,49 @@ export const unfollowCommunity = (idOrSlug) => async (dispatch) => {
     });
   }
 }
+
+export const fetchCommunityDetail = (slug: string) => async (dispatch: any) => {
+  dispatch({ type: FETCH_COMMUNITY_DETAIL_REQUEST });
+  try {
+    const res = await api.get(`/communities/${slug}/`);
+    dispatch({
+      type: FETCH_COMMUNITY_DETAIL_SUCCESS,
+      payload: res.data,
+    });
+  } catch (err: any) {
+    dispatch({
+      type: FETCH_COMMUNITY_DETAIL_FAILURE,
+      payload: err?.message || "Failed to fetch community details",
+    });
+  }
+};
+
+export const fetchCommunityPosts = (slug: string, page = 1) => async (dispatch: any) => {
+  dispatch({ type: FETCH_COMMUNITY_POSTS_REQUEST, payload: { page } });
+  try {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      page_size: "10",
+      community: slug,
+      sort: "new",
+      t: Date.now().toString(),
+      lang: "en",
+    });
+    const res = await api.get(`/posts/?${params.toString()}`);
+    dispatch({
+      type: FETCH_COMMUNITY_POSTS_SUCCESS,
+      payload: {
+        results: res.data.results || [],
+        count: res.data.count,
+        page,
+        totalPages: res.data.count ? Math.ceil(res.data.count / 10) : 1,
+      },
+    });
+  } catch (err: any) {
+    dispatch({
+      type: FETCH_COMMUNITY_POSTS_FAILURE,
+      payload: err?.message || "Failed to fetch community posts",
+    });
+  }
+};
+

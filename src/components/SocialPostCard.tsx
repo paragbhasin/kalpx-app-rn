@@ -10,9 +10,7 @@ import {
     ImageBackground,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
-import Ionicons from "react-native-vector-icons/Ionicons";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import SimpleLineIcons from "react-native-vector-icons/SimpleLineIcons";
+import { Ionicons, MaterialCommunityIcons, SimpleLineIcons } from "@expo/vector-icons";
 import moment from "moment";
 import { useNavigation } from "@react-navigation/native";
 import ReportModal from "./ReportModal";
@@ -145,7 +143,15 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
         >
             {/* Header */}
             <View style={[styles.header, { zIndex: showMenu ? 1001 : 1 }]}>
-                <TouchableOpacity onPress={onUserPress} style={styles.userInfo}>
+                <TouchableOpacity
+                    onPress={() => {
+                        const slug = post.community?.slug || post.community_slug || post.slug;
+                        if (slug) {
+                            navigation.navigate('CommunityDetail', { slug });
+                        }
+                    }}
+                    style={styles.userInfo}
+                >
                     <View style={styles.avatarContainer}>
                         <ImageBackground
                             source={

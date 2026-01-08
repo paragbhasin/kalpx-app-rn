@@ -11,7 +11,8 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  Alert
+  Alert,
+  Modal
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -40,6 +41,8 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote, onUseful, onR
   const [editContent, setEditContent] = useState(comment.content);
   const [showMenu, setShowMenu] = useState(false);
   const [showUsefulMessage, setShowUsefulMessage] = useState(false);
+  const [menuPos, setMenuPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 });
+  const menuButtonRef = React.useRef<any>(null);
 
   const isOtherUser = currentUserId && comment.creator?.id !== currentUserId;
 
@@ -55,32 +58,32 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote, onUseful, onR
   };
 
   return (
-    <View style={{ padding: 12, borderLeftWidth: comment.parent ? 1 : 0, borderLeftColor: '#eee', marginLeft: comment.parent ? 15 : 0, zIndex: showMenu ? 10 : 1 }}>
+    <View style={{ padding: 12, borderLeftWidth: comment.parent ? 1 : 0, borderLeftColor: '#eee', marginLeft: comment.parent ? 15 : 0 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-       {comment.creator?.avatar ? (
-    <Image
-      source={{ uri: comment.creator.avatar }}
-      style={{ width: 24, height: 24, borderRadius: 12, marginRight: 8 }}
-    />
-  ) : (
-    <View
-      style={{
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        backgroundColor: '#D69E2E',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginRight: 8,
-      }}
-    >
-      <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>
-        {(
-          comment.creator?.username?.split('@')[0]?.charAt(0) || 'A'
-        ).toUpperCase()}
-      </Text>
-    </View>
-  )}
+        {comment.creator?.avatar ? (
+          <Image
+            source={{ uri: comment.creator.avatar }}
+            style={{ width: 24, height: 24, borderRadius: 12, marginRight: 8 }}
+          />
+        ) : (
+          <View
+            style={{
+              width: 24,
+              height: 24,
+              borderRadius: 12,
+              backgroundColor: '#D69E2E',
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginRight: 8,
+            }}
+          >
+            <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>
+              {(
+                comment.creator?.username?.split('@')[0]?.charAt(0) || 'A'
+              ).toUpperCase()}
+            </Text>
+          </View>
+        )}
         <Text style={{ fontWeight: 'bold', fontSize: 13, color: '#333' }}>
           {(comment.creator.username && comment.creator.username.split('@')[0]) || 'Anonymous'}
         </Text>
@@ -153,93 +156,104 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote, onUseful, onR
           </TouchableOpacity>
         )}
 
-        <View style={{ position: 'relative' }}>
-          <TouchableOpacity onPress={() => setShowMenu(true)}>
-            <Ionicons name="ellipsis-horizontal" size={20} color="#666" />
-          </TouchableOpacity>
+        <TouchableOpacity
+          ref={menuButtonRef}
+          onPress={() => {
+            menuButtonRef.current?.measureInWindow((x, y, width, height) => {
+              setMenuPos({
+                top: y + height + 4,
+                right: Dimensions.get('window').width - x - width,
+              });
+              setShowMenu(true);
+            });
+          }}
+        >
+          <Ionicons name="ellipsis-horizontal" size={20} color="#666" />
+        </TouchableOpacity>
 
-          {showMenu && (
-            <>
-              <TouchableOpacity
-                style={{
-                  position: 'absolute',
-                  top: -Dimensions.get('window').height,
-                  bottom: -Dimensions.get('window').height,
-                  left: -Dimensions.get('window').width,
-                  right: -Dimensions.get('window').width,
-                  zIndex: 999,
-                }}
-                onPress={() => setShowMenu(false)}
-              />
-            <View
-              style={{
-                position: 'absolute',
-                  top: 25,
-                right: 0,
-                backgroundColor: '#fff',
-                borderRadius: 12,
-                paddingVertical: 8,
-                paddingHorizontal: 12,
-                minWidth: 100,
-                  zIndex: 1000,
-                  elevation: 5,
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.2,
-                shadowRadius: 4,
-                borderWidth: 1,
-                borderColor: '#f0f0f0',
-              }}
-            >
-              {!isOtherUser ? (
-                <>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setIsEditing(true);
-                      setShowMenu(false);
-                    }}
-                    style={{ paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#f5f5f5' }}
-                  >
-                    <Text style={{ fontSize: 14, color: '#333' }}>Edit</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => {
-                      onDelete(comment.id);
-                      setShowMenu(false);
-                    }}
-                    style={{ paddingVertical: 8 }}
-                  >
-                    <Text style={{ fontSize: 14, color: '#FF3B30' }}>Delete</Text>
-                  </TouchableOpacity>
-                </>
-              ) : (
+        <Modal
+          visible={showMenu}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowMenu(false)}
+        >
+          <TouchableOpacity
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            }}
+            activeOpacity={1}
+            onPress={() => setShowMenu(false)}
+          />
+          <View
+            style={{
+              position: 'absolute',
+              top: menuPos.top,
+              right:menuPos.right,
+              backgroundColor: '#fff',
+              borderRadius: 12,
+              paddingVertical: 8,
+              paddingHorizontal: 12,
+              minWidth: 60,
+              elevation: 5,
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.2,
+              shadowRadius: 4,
+              borderWidth: 1,
+              borderColor: '#f0f0f0',
+            }}
+          >
+            {!isOtherUser ? (
+              <>
                 <TouchableOpacity
                   onPress={() => {
+                    setIsEditing(true);
                     setShowMenu(false);
-                    // For now, directly call onReport with a placeholder reason/details
-                    // In a real app, this would open a modal for user to select reason/details
-                    Alert.alert(
-                      "Report Comment",
-                      "Are you sure you want to report this comment?",
-                      [
-                        { text: "Cancel", style: "cancel" },
-                        {
-                          text: "Report",
-                          style: "destructive",
-                          onPress: () => onReport(comment.id, "spam", "User reported as spam from menu.")
-                        }
-                      ]
-                    );
+                  }}
+                  style={{ paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#f5f5f5' }}
+                >
+                  <Text style={{ fontSize: 14, color: '#333' }}>Edit</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    onDelete(comment.id);
+                    setShowMenu(false);
                   }}
                   style={{ paddingVertical: 8 }}
                 >
-                  <Text style={{ fontSize: 14, color: '#FF3B30' }}>Report</Text>
+                  <Text style={{ fontSize: 14, color: '#FF3B30' }}>Delete</Text>
                 </TouchableOpacity>
-              )}
-            </View>
-            </>
-          )}
-        </View>
+              </>
+            ) : (
+              <TouchableOpacity
+                onPress={() => {
+                  setShowMenu(false);
+                  // For now, directly call onReport with a placeholder reason/details
+                  // In a real app, this would open a modal for user to select reason/details
+                  Alert.alert(
+                    "Report Comment",
+                    "Are you sure you want to report this comment?",
+                    [
+                      { text: "Cancel", style: "cancel" },
+                      {
+                        text: "Report",
+                        style: "destructive",
+                        onPress: () => onReport(comment.id, "spam", "User reported as spam from menu.")
+                      }
+                    ]
+                  );
+                }}
+                style={{ paddingVertical: 8 }}
+              >
+                <Text style={{ fontSize: 14, color: '#FF3B30' }}>Report</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </Modal>
       </View>
 
       {showUsefulMessage && (

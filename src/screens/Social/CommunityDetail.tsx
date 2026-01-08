@@ -23,10 +23,12 @@ import SocialPostCard from "../../components/SocialPostCard";
 import Header from "../../components/Header";
 import { COMMUNITY_BACKGROUNDS } from "../../utils/CommunityAssets";
 import { fetchUserActivity } from "../UserActivity/actions";
+import { useScrollContext } from "../../context/ScrollContext";
 
 const { width } = Dimensions.get("window");
 
 const CommunityDetail = () => {
+    const { handleScroll } = useScrollContext();
     const dispatch = useDispatch();
     const navigation = useNavigation<any>();
     const [showMenu, setShowMenu] = useState(false);
@@ -325,13 +327,13 @@ const CommunityDetail = () => {
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" />
-            <View>
-                <Header />
-                <View style={styles.navHeader}>
-                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={24} color="#000" />
-                    </TouchableOpacity>
-                </View>
+            <View style={{ height: 0 }}>
+                {/* Global header handles logo. Use a minimal back button if needed, but here it might overlap */}
+            </View>
+            <View style={styles.navHeader}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                    <Ionicons name="arrow-back" size={24} color="#000" />
+                </TouchableOpacity>
             </View>
             <FlatList
                 data={activeTab === "Feed" ? posts : []}
@@ -353,8 +355,11 @@ const CommunityDetail = () => {
                     />
                 )}
                 keyExtractor={(item) => item.id.toString()}
+                onScroll={handleScroll}
+                scrollEventThrottle={16}
                 onEndReached={handleLoadMore}
                 onEndReachedThreshold={0.5}
+                contentContainerStyle={{ paddingTop: 64 }}
                 ListFooterComponent={() =>
                     communityPosts.loading && communityPosts.pagination.currentPage > 1 ? (
                         <ActivityIndicator style={{ padding: 20 }} color="#D69E2E" />

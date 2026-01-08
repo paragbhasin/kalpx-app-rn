@@ -15,8 +15,10 @@ import {
   Platform,
 } from "react-native";
 import { useTranslation } from "react-i18next";
+import { useScrollContext } from "../context/ScrollContext";
 
 export default function PoojaScreen() {
+  const { handleScroll } = useScrollContext();
   const navigation = useNavigation();
   const { t } = useTranslation();
 
@@ -75,8 +77,10 @@ export default function PoojaScreen() {
 
       {/* Scrollable Body */}
       <ScrollView
-        contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 100, paddingTop: 50 }}
         showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       >
         <Text style={styles.title}>{t("pooja.bookPooja")}</Text>
 

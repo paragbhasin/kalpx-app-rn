@@ -14,8 +14,10 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 import { useGlobalSearch } from "../../hooks/useGlobalSearch";
 import Colors from "../../components/Colors";
+import { useScrollContext } from "../../context/ScrollContext";
 
 const GlobalSearchScreen = () => {
+    const { handleScroll } = useScrollContext();
     const navigation = useNavigation<any>();
     const inputRef = useRef<TextInput>(null);
     const { searchQuery, setSearchQuery, results, loading, error } = useGlobalSearch();
@@ -147,8 +149,10 @@ const GlobalSearchScreen = () => {
                     if (item.type === 'user') return renderUserItem({ item });
                     return null;
                 }}
+                onScroll={handleScroll}
+                scrollEventThrottle={16}
                 keyboardShouldPersistTaps="handled"
-                contentContainerStyle={styles.listContent}
+                contentContainerStyle={[styles.listContent, { paddingTop: 50 }]}
                 showsVerticalScrollIndicator={false}
             />
         </SafeAreaView>

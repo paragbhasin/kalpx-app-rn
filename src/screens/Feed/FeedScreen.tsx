@@ -11,7 +11,7 @@ import SocialPostCard from "../../components/SocialPostCard";
 
 import ShimmerPlaceholder from "../../components/ShimmerPlaceholder";
 
-const FeedScreen = () => {
+const FeedScreen = ({ onScroll }: { onScroll?: (event: any) => void }) => {
     const dispatch = useDispatch();
     const navigation = useNavigation();
 
@@ -157,7 +157,9 @@ const FeedScreen = () => {
                 onEndReached={onLoadMore}
                 onEndReachedThreshold={0.5}
                 ListFooterComponent={Footer}
-                contentContainerStyle={{ paddingBottom: 20 }}
+                contentContainerStyle={{ paddingBottom: 20, paddingTop: 110 }}
+                onScroll={onScroll}
+                scrollEventThrottle={16}
             />
         </View>
     );

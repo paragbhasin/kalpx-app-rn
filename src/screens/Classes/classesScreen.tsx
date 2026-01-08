@@ -36,7 +36,10 @@ import {
   searchClasses
 } from "./actions";
 
+import { useScrollContext } from "../../context/ScrollContext";
+
 export default function ClassesScreen({ navigation, route }) {
+  const { handleScroll } = useScrollContext();
   const { t } = useTranslation();
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
   const flatListRef = useRef<FlatList>(null);
@@ -401,118 +404,12 @@ const fetchMyBookings = async (page = 1) => {
   // =============================
   // RENDER ITEMS
   // =============================
-  const renderItem = ({ item }: any) => {
-    if (activeTab === "ExploreClasses") {
-      return (
-        <ClassEventCard
-          imageUrl={
-            item?.cover_media?.key
-              ? `${BASE_IMAGE_URL}/${item.cover_media.key}`
-              : null
-          }
-          title={item?.title}
-          description={item?.subtitle}
-          trialDuration={item?.pricing?.trial?.session_length_min}
-          duration={item?.pricing?.type === "per_person" ? item?.pricing?.per_person?.session_length_min : item?.pricing?.per_group?.session_length_min}
-          // price={item?.pricing?.per_person?.amount?.web}
-          price={
-  (item?.pricing?.type === "per_group"
-    ? item?.pricing?.per_group?.amount?.web
-    : item?.pricing?.per_person?.amount?.web) ?? 0
-}
-          onViewDetails={() =>
-            navigation.navigate("ClassTutorDetailsScreen", { data: item })
-          }
-          onBookNow={() =>
-            navigation.navigate("ClassBookingScreen", { data: item, reschedule: false })
-          }
-          tutor={item?.tutor}
-            currency={item?.pricing?.currency}
-  trailenabled={item?.pricing?.trial?.enabled}
-  trailAmt={item?.pricing?.trial?.amount}
-        />
-      );
-    }
-
-    // My Bookings Card
-    return (
-      <ClassBookingCard
-        imageUrl={
-          item?.offering?.cover_media?.key
-            ? `${BASE_IMAGE_URL}/${item.offering.cover_media.key}`
-            : null
-        }
-        joinUrl={item.join_url}
-        title={item?.offering?.title}
-        start={item?.start}
-        end={item?.end}
-        link={item?.join_url}
-        price={item?.amount}
-        status={item?.status}
-        onDetails={() => {
-          setDetails(item);
-          setShowDetails(true);
-        }}
-        onCancel={() => {
-          setTutorId(item?.offering?.id);
-          setShowCancel(true);
-        }}
-        onReschedule={() =>
-          navigation.navigate("ClassBookingScreen", { data: item, reschedule: true })
-        }
-      />
-    );
-  };
-
-  let rawData =
-  activeTab === "ExploreClasses"
-    ? isSearching
-      ? searchExploreState.data
-      : isFiltering
-      ? filterExploreState.data
-      : exploreState.data
-    : isSearching
-    ? searchBookingsState.data
-    : bookingsState.data;   // 🔥 ALWAYS USE THIS FOR MyBookings
-
-
-// let rawData =
-//   activeTab === "ExploreClasses"
-//     ? isSearching
-//       ? searchExploreState.data
-//       : isFiltering
-//       ? filterExploreState.data
-//       : exploreState.data
-//     : isSearching
-//     ? searchBookingsState.data
-//     : isFiltering
-//     ? filterBookingsState.data
-//     : bookingsState.data;
-
-// 🚫 Filter out cards where available_slots is empty
-const displayedData =
-  activeTab === "ExploreClasses"
-    ? rawData.filter(item => item?.available_slots && item.available_slots.length > 0)
-    : rawData;
-
-
-  const isLoading =
-    activeTab === "ExploreClasses"
-      ? exploreState.loading ||
-        searchExploreState.loading ||
-        filterExploreState.loading
-      : bookingsState.loading ||
-        searchBookingsState.loading ||
-        filterBookingsState.loading;
-
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.Colors.white }}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.Colors.header_bg} />
-      <Header />
-
+  const renderHeader = () => (
+    <View style={{ backgroundColor: Colors.Colors.white }}>
+      <View style={{ height: 60 }} />
       {/* Tabs */}
       <View style={{ marginTop: 10, marginHorizontal: 16, flexDirection: "row", alignItems: "center" }}>
-        <TouchableOpacity onPress={() => navigation.navigate('HomePage', { screen: 'Home'})}>
+        <TouchableOpacity onPress={() => navigation.navigate('HomePage', { screen: 'Home' })}>
           <View style={{ backgroundColor: "#D9D9D9", padding: 10, borderRadius: 25 }}>
             <Image source={require("../../../assets/C_Arrow_back.png")} style={{ width: 20, height: 20 }} />
           </View>
@@ -630,9 +527,9 @@ const displayedData =
                     });
 
                     dispatch(classesExploreList(1, 10, subjectToSend, userTimezone, (res) => {
-    // console.log("📡 ExploreClasses API Response:", res);
-  })
-);
+                      // console.log("📡 ExploreClasses API Response:", res);
+                    })
+                    );
                   }}
                   style={{
                     paddingVertical: 8,
@@ -646,23 +543,13 @@ const displayedData =
                   }}
                 >
                   <TextComponent
-  type="cardText"
-  style={{
-    color: isSelected ? Colors.Colors.white : Colors.Colors.Light_black,
-  }}
->
-  {item.label}
-</TextComponent>
-
-                  {/* {fetchLoading && isSelected ? (
-                    <ActivityIndicator size="small" color={isSelected ? Colors.Colors.white : Colors.Colors.Light_black} />
-                  ) : (
-                    <TextComponent type="cardText" style={{
-                      color: isSelected ? Colors.Colors.white : Colors.Colors.Light_black
-                    }}>
-                      {item.label}
-                    </TextComponent>
-                  )} */}
+                    type="cardText"
+                    style={{
+                      color: isSelected ? Colors.Colors.white : Colors.Colors.Light_black,
+                    }}
+                  >
+                    {item.label}
+                  </TextComponent>
                 </TouchableOpacity>
               );
             }}
@@ -714,6 +601,118 @@ const displayedData =
           />
         </View>
       )}
+    </View>
+  );
+
+  const renderItem = ({ item }: any) => {
+    if (activeTab === "ExploreClasses") {
+      return (
+        <ClassEventCard
+          imageUrl={
+            item?.cover_media?.key
+              ? `${BASE_IMAGE_URL}/${item.cover_media.key}`
+              : null
+          }
+          title={item?.title}
+          description={item?.subtitle}
+          trialDuration={item?.pricing?.trial?.session_length_min}
+          duration={item?.pricing?.type === "per_person" ? item?.pricing?.per_person?.session_length_min : item?.pricing?.per_group?.session_length_min}
+          // price={item?.pricing?.per_person?.amount?.web}
+          price={
+  (item?.pricing?.type === "per_group"
+    ? item?.pricing?.per_group?.amount?.web
+    : item?.pricing?.per_person?.amount?.web) ?? 0
+}
+          onViewDetails={() =>
+            navigation.navigate("ClassTutorDetailsScreen", { data: item })
+          }
+          onBookNow={() =>
+            navigation.navigate("ClassBookingScreen", { data: item, reschedule: false })
+          }
+          tutor={item?.tutor}
+            currency={item?.pricing?.currency}
+  trailenabled={item?.pricing?.trial?.enabled}
+  trailAmt={item?.pricing?.trial?.amount}
+        />
+      );
+    }
+
+    // My Bookings Card
+    return (
+      <ClassBookingCard
+        imageUrl={
+          item?.offering?.cover_media?.key
+            ? `${BASE_IMAGE_URL}/${item.offering.cover_media.key}`
+            : null
+        }
+        joinUrl={item.join_url}
+        title={item?.offering?.title}
+        start={item?.start}
+        end={item?.end}
+        link={item?.join_url}
+        price={item?.amount}
+        status={item?.status}
+        onDetails={() => {
+          setDetails(item);
+          setShowDetails(true);
+        }}
+        onCancel={() => {
+          setTutorId(item?.offering?.id);
+          setShowCancel(true);
+        }}
+        onReschedule={() =>
+          navigation.navigate("ClassBookingScreen", { data: item, reschedule: true })
+        }
+      />
+    );
+  };
+
+  let rawData =
+  activeTab === "ExploreClasses"
+    ? isSearching
+      ? searchExploreState.data
+      : isFiltering
+      ? filterExploreState.data
+      : exploreState.data
+    : isSearching
+    ? searchBookingsState.data
+    : bookingsState.data;   // 🔥 ALWAYS USE THIS FOR MyBookings
+
+
+// let rawData =
+//   activeTab === "ExploreClasses"
+//     ? isSearching
+//       ? searchExploreState.data
+//       : isFiltering
+//       ? filterExploreState.data
+//       : exploreState.data
+//     : isSearching
+//     ? searchBookingsState.data
+//     : isFiltering
+//     ? filterBookingsState.data
+//     : bookingsState.data;
+
+// 🚫 Filter out cards where available_slots is empty
+const displayedData =
+  activeTab === "ExploreClasses"
+    ? rawData.filter(item => item?.available_slots && item.available_slots.length > 0)
+    : rawData;
+
+
+  const isLoading =
+    activeTab === "ExploreClasses"
+      ? exploreState.loading ||
+        searchExploreState.loading ||
+        filterExploreState.loading
+      : bookingsState.loading ||
+        searchBookingsState.loading ||
+        filterBookingsState.loading;
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: Colors.Colors.white }}>
+      <StatusBar barStyle="dark-content" backgroundColor={Colors.Colors.header_bg} />
+
+      {/* Headers are now in ListHeaderComponent */}
 
       {/* DATA LIST */}
       <FlatList
@@ -739,8 +738,11 @@ const displayedData =
 }
         refreshing={isLoading}
         onRefresh={resetToDefaultList}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
+        ListHeaderComponent={renderHeader}
+        contentContainerStyle={{ paddingBottom: 120 }}
       />
 
       {/* MODALS */}

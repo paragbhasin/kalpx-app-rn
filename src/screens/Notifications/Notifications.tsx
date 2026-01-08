@@ -19,8 +19,10 @@ import {
   markNotificationsRead,
 } from "./actions";
 import styles from "./styles";
+import { useScrollContext } from "../../context/ScrollContext";
 
 export default function Notifications() {
+  const { handleScroll } = useScrollContext();
   const navigation = useNavigation();
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
 
@@ -76,6 +78,8 @@ export default function Notifications() {
 
   return (
     <View style={styles.container}>
+      {/* Standard header can stay if you want, or you can hide it with the global one */}
+      {/* If you want it to hide with global one, wrap it in Animated.View or just remove it if redundant */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="#000" />
@@ -87,7 +91,7 @@ export default function Notifications() {
       </View>
       {loading && data.length === 0 ? (
         // <ActivityIndicator style={{ marginTop: 40 }} />
-                    <LoadingOverlay visible={loading} text="Fetching Data..." />
+        <LoadingOverlay visible={loading} text="Fetching Data..." />
       ) : data.length === 0 ? (
         <View style={{
           marginTop: FontSize.CONSTS.DEVICE_HEIGHT * 0.25,
@@ -119,14 +123,17 @@ export default function Notifications() {
           renderItem={renderItem}
           onEndReached={loadMore}
           onEndReachedThreshold={0.3}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
           refreshing={loading && page === 1}
           onRefresh={() => {
             dispatch({ type: "RESET_NOTIFICATIONS" });
             dispatch(fetchNotifications(1));
           }}
+          contentContainerStyle={{ paddingTop: 50, paddingBottom: 20 }}
           ListFooterComponent={
             loading && page > 1 ? (
-                    <LoadingOverlay visible={loading} text="Fetching Data..." />
+              <LoadingOverlay visible={loading} text="Fetching Data..." />
               // <ActivityIndicator style={{ margin: 20 }} />
             ) : null
           }

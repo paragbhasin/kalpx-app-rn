@@ -41,7 +41,10 @@ const LANGUAGE_CODE_MAP: Record<string, string> = {
 
 const PER_PAGE = 12;
 
+import { useScrollContext } from "../../context/ScrollContext";
+
 const Explore = () => {
+  const { handleScroll } = useScrollContext();
   const navigation = useNavigation();
   const { t } = useTranslation();
 
@@ -253,89 +256,91 @@ const Explore = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#fff4dd" />
-      <Header />
       <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
-        {/* Top Section */}
-        <View style={styles.rowBetween}>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <View style={styles.iconButton}>
-              <Ionicons name="arrow-back" size={22} color="#fff" onPress={() => navigation.goBack()} />
-            </View>
-            <TextComponent type="headerSubBoldText" style={styles.title}>
-              {t("explore.title")}
-            </TextComponent>
-          </View>
-
-          <View style={styles.row}>
-            <TextComponent type="headerSubBoldText" style={styles.kidsText}>
-              {t("explore.kids")}
-            </TextComponent>
-            <Switch
-              value={kidsHub}
-              onValueChange={setKidsHub}
-              thumbColor="#fff"
-              trackColor={{ false: "#ccc", true: "#b97f28" }}
-            />
-          </View>
-        </View>
- <ScrollView
-          ref={(r) => (scrollRef.current = r)}
-          style={{ marginTop:0 }}
+        <ScrollView
+          ref={(r) => { scrollRef.current = r; }}
+          style={{ marginTop: 0 }}
           contentContainerStyle={{ paddingBottom: 20 }}
           showsVerticalScrollIndicator={false}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
         >
-        {/* Search Bar */}
-        <View style={styles.searchBar}>
-          <TextInput
-            allowFontScaling={false}
-            placeholder={t("explore.search")}
-            placeholderTextColor="#999"
-            style={[styles.searchInput, { flex: 1 }]}
-            value={searchText}
-            onChangeText={setSearchText}
-            onSubmitEditing={handleSearch}
-            returnKeyType="search"
-          />
-          {searchText.length > 0 && (
-            <Pressable onPress={handleClearSearch}>
-              <Ionicons name="close-circle" size={20} color="#999" style={{ marginHorizontal: 6 }} />
-            </Pressable>
-          )}
-          <Pressable onPress={handleSearch}>
-            <Ionicons name="search" size={22} color="#b97f28" />
-          </Pressable>
-        </View>
-        {/* Filters */}
-        <View style={styles.filterRow}>
-          <TouchableOpacity style={styles.filterButton} onPress={() => setCategoryModalVisible(true)}>
-            <TextComponent type="headerSubBoldText" style={styles.filterText}>
-              {t("explore.filters.category")}
-            </TextComponent>
-            <Ionicons name="chevron-down" size={16} color="#FFFFFF" />
-          </TouchableOpacity>
+          <View style={{ height: 60 }} />
+          {/* Top Section */}
+          <View style={styles.rowBetween}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <View style={styles.iconButton}>
+                <Ionicons name="arrow-back" size={22} color="#fff" onPress={() => navigation.goBack()} />
+              </View>
+              <TextComponent type="headerSubBoldText" style={styles.title}>
+                {t("explore.title")}
+              </TextComponent>
+            </View>
 
-          <TouchableOpacity style={styles.filterButton} onPress={() => setLanguageModalVisible(true)}>
-            <TextComponent type="headerSubBoldText" style={styles.filterText}>
-              {t("explore.filters.language")}
-            </TextComponent>
-            <Ionicons name="chevron-down" size={16} color="#FFFFFF" />
-          </TouchableOpacity>
-        </View>
-        {/* Active Filters */}
-        {showCombinedFilter && (
-          <View style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 8, alignSelf: "center" }}>
-            <View style={styles.activeFilterTag}>
-              <TextComponent type="headerSubBoldText" style={styles.activeFilterText}>{filterLabel}</TextComponent>
-              <Pressable onPress={resetFilters}>
-                <Ionicons name="close" size={20} color="#fff" />
-              </Pressable>
+            <View style={styles.row}>
+              <TextComponent type="headerSubBoldText" style={styles.kidsText}>
+                {t("explore.kids")}
+              </TextComponent>
+              <Switch
+                value={kidsHub}
+                onValueChange={setKidsHub}
+                thumbColor="#fff"
+                trackColor={{ false: "#ccc", true: "#b97f28" }}
+              />
             </View>
           </View>
-        )}
-        {/* Videos */}
-        <TextComponent type="headerSubBoldText" style={styles.subtitle}>
-          {t("explore.subtitle")}
-        </TextComponent>
+          {/* Search Bar */}
+          <View style={styles.searchBar}>
+            <TextInput
+              allowFontScaling={false}
+              placeholder={t("explore.search")}
+              placeholderTextColor="#999"
+              style={[styles.searchInput, { flex: 1 }]}
+              value={searchText}
+              onChangeText={setSearchText}
+              onSubmitEditing={handleSearch}
+              returnKeyType="search"
+            />
+            {searchText.length > 0 && (
+              <Pressable onPress={handleClearSearch}>
+                <Ionicons name="close-circle" size={20} color="#999" style={{ marginHorizontal: 6 }} />
+              </Pressable>
+            )}
+            <Pressable onPress={handleSearch}>
+              <Ionicons name="search" size={22} color="#b97f28" />
+            </Pressable>
+          </View>
+          {/* Filters */}
+          <View style={styles.filterRow}>
+            <TouchableOpacity style={styles.filterButton} onPress={() => setCategoryModalVisible(true)}>
+              <TextComponent type="headerSubBoldText" style={styles.filterText}>
+                {t("explore.filters.category")}
+              </TextComponent>
+              <Ionicons name="chevron-down" size={16} color="#FFFFFF" />
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.filterButton} onPress={() => setLanguageModalVisible(true)}>
+              <TextComponent type="headerSubBoldText" style={styles.filterText}>
+                {t("explore.filters.language")}
+              </TextComponent>
+              <Ionicons name="chevron-down" size={16} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
+          {/* Active Filters */}
+          {showCombinedFilter && (
+            <View style={{ flexDirection: "row", flexWrap: "wrap", marginBottom: 8, alignSelf: "center" }}>
+              <View style={styles.activeFilterTag}>
+                <TextComponent type="headerSubBoldText" style={styles.activeFilterText}>{filterLabel}</TextComponent>
+                <Pressable onPress={resetFilters}>
+                  <Ionicons name="close" size={20} color="#fff" />
+                </Pressable>
+              </View>
+            </View>
+          )}
+          {/* Videos */}
+          <TextComponent type="headerSubBoldText" style={styles.subtitle}>
+            {t("explore.subtitle")}
+          </TextComponent>
           <ExploreVideosVertical
             videos={videoData}
             loading={videoLoading}
@@ -344,14 +349,14 @@ const Explore = () => {
             onNext={handleNextPage}
             onPrev={handlePrevPage}
           />
-{!videoLoading && 
-<>
-          <TextComponent type="headerSubBoldText" style={styles.subtitleTwo}>
-            {t("explore.subtitleTwo")}
-          </TextComponent>
-          <Accordion data={t("explore.faq", { returnObjects: true })} />
-          </>
-}
+          {!videoLoading &&
+            <>
+              <TextComponent type="headerSubBoldText" style={styles.subtitleTwo}>
+                {t("explore.subtitleTwo")}
+              </TextComponent>
+              <Accordion data={t("explore.faq", { returnObjects: true })} />
+            </>
+          }
         </ScrollView>
       </Animated.View>
 

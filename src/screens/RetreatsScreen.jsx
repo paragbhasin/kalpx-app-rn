@@ -62,7 +62,11 @@ const LOCATIONS = [
   },
 ];
 
+import { useTranslation } from "react-i18next";
+import { useScrollContext } from "../context/ScrollContext";
+
 export default function RetreatsScreen() {
+  const { handleScroll } = useScrollContext();
   const navigation = useNavigation();
   const { t } = useTranslation();
 
@@ -118,8 +122,10 @@ export default function RetreatsScreen() {
       >
         <ScrollView
           style={styles.scroll}
-          contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
+          contentContainerStyle={{ padding: 16, paddingBottom: 120, paddingTop: 50 }}
           showsVerticalScrollIndicator={false}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
         >
           {/* Healing */}
           <Section title={t("retreats.healingCategories")}>

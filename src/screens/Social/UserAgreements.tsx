@@ -7,11 +7,14 @@ import {
   Image,
 } from "react-native";
 
-const UserAgreements = () => {
+const UserAgreements = ({ onScroll }: { onScroll?: (event: any) => void }) => {
   return (
     <ScrollView
       style={styles.container}
       showsVerticalScrollIndicator={false}
+      onScroll={onScroll}
+      scrollEventThrottle={16}
+      contentContainerStyle={{ paddingBottom: 40, paddingTop: 110 }}
     >
       <View style={styles.contentWrapper}>
         {/* LEFT CONTENT */}

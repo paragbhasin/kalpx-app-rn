@@ -15,7 +15,7 @@ import styles from "./ExploreCommunitiesStyles";
 
 import { useNavigation } from "@react-navigation/native";
 
-const ExploreCommunities = () => {
+const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) => {
     const dispatch = useDispatch();
     const navigation = useNavigation<any>();
     const [activeTab, setActiveTab] = useState<"all" | "followed">("all");
@@ -196,7 +196,7 @@ const ExploreCommunities = () => {
                     data={[1, 2, 3, 4, 5]}
                     renderItem={renderShimmer}
                     keyExtractor={(it) => it.toString()}
-                    contentContainerStyle={styles.listContent}
+                    contentContainerStyle={[styles.listContent, { paddingTop: 110 }]}
                     scrollEnabled={false}
                 />
             ) : (
@@ -204,9 +204,11 @@ const ExploreCommunities = () => {
                     data={filteredCommunities}
                     renderItem={renderCommunityCard}
                     keyExtractor={(item) => (item.id || item.slug).toString()}
-                    contentContainerStyle={styles.listContent}
+                    contentContainerStyle={[styles.listContent, { paddingTop: 110 }]}
                     onEndReached={activeTab === "all" ? handleLoadMore : null}
                     onEndReachedThreshold={0.5}
+                    onScroll={onScroll}
+                    scrollEventThrottle={16}
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}

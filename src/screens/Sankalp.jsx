@@ -14,8 +14,10 @@ import {
   View,
 } from "react-native";
 import ExploreVideos from "../components/ExploreVideos";
+import { useScrollContext } from "../context/ScrollContext";
 
 export default function Sankalp() {
+  const { handleScroll } = useScrollContext();
   const navigation = useNavigation();
 
   return (
@@ -31,32 +33,36 @@ export default function Sankalp() {
           translucent={false}
         />
 
-        {/* Top Image with curved bottom */}
-        <ImageBackground
-          source={require("../../assets/Sankalpbg.png")}
-          style={styles.headerImage}
-          imageStyle={styles.imageStyle}
-        >
-          {/* Top buttons */}
-          <View style={styles.topButtons}>
-            <TouchableOpacity
-              style={styles.iconButton}
-              onPress={() => navigation.goBack()} // ✅ back navigation
-            >
-              <Ionicons name="arrow-back" size={22} color="#fff" />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.iconButton}>
-              <Ionicons name="share-social-outline" size={22} color="#fff" />
-            </TouchableOpacity>
-          </View>
-        </ImageBackground>
+        {/* Content moved inside ScrollView */}
 
         {/* Scrollable Body */}
         <ScrollView
           style={styles.body}
           contentContainerStyle={{ paddingBottom: 40 }}
           showsVerticalScrollIndicator={false}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
         >
+          <View style={{ height: 60 }} />
+          {/* Top Image with curved bottom */}
+          <ImageBackground
+            source={require("../../assets/Sankalpbg.png")}
+            style={styles.headerImage}
+            imageStyle={styles.imageStyle}
+          >
+            {/* Top buttons */}
+            <View style={styles.topButtons}>
+              <TouchableOpacity
+                style={styles.iconButton}
+                onPress={() => navigation.goBack()} // ✅ back navigation
+              >
+                <Ionicons name="arrow-back" size={22} color="#fff" />
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.iconButton}>
+                <Ionicons name="share-social-outline" size={22} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          </ImageBackground>
           {/* Title */}
           <Text allowFontScaling={false} style={styles.title}>
             Todays Sankalp

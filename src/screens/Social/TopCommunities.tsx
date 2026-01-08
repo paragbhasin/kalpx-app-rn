@@ -18,7 +18,7 @@ import styles from "./TopCommunitiesStyles";
 import { useNavigation } from "@react-navigation/native";
 
 
-const TopCommunities = () => {
+const TopCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) => {
     const dispatch = useDispatch();
     const navigation = useNavigation<any>();
     const [page, setPage] = useState(1);
@@ -97,8 +97,10 @@ const TopCommunities = () => {
                 data={communities}
                 renderItem={renderItem}
                 keyExtractor={(item) => (item.id || item.slug).toString()}
-                contentContainerStyle={styles.listContent}
+                contentContainerStyle={[styles.listContent, { paddingTop: 110 }]}
                 ListFooterComponent={renderPagination}
+                onScroll={onScroll}
+                scrollEventThrottle={16}
                 showsVerticalScrollIndicator={false}
             />
         </View>

@@ -28,7 +28,7 @@ import Colors from "../../components/Colors";
 
 const { width: screenWidth } = Dimensions.get("window");
 
-const UserActivityScreen = () => {
+const UserActivityScreen = ({ onScroll }: { onScroll?: (event: any) => void }) => {
     // Proactive hook calls
     const dispatch = useDispatch();
     const navigation = useNavigation<any>();
@@ -269,6 +269,9 @@ const UserActivityScreen = () => {
                         </View>
                     )
                 }
+                onScroll={onScroll}
+                scrollEventThrottle={16}
+                contentContainerStyle={{ paddingBottom: 20, paddingTop: 110 }}
             />
         </View>
     );

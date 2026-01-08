@@ -15,7 +15,7 @@ import ShimmerPlaceholder from "../../components/ShimmerPlaceholder";
 
 const { width } = Dimensions.get("window");
 
-const PopularCommunity = () => {
+const PopularCommunity = ({ onScroll }: { onScroll?: (event: any) => void }) => {
     const dispatch = useDispatch();
     const navigation = useNavigation();
 
@@ -186,7 +186,9 @@ const PopularCommunity = () => {
                 onEndReached={onLoadMore}
                 onEndReachedThreshold={0.5}
                 ListFooterComponent={Footer}
-                contentContainerStyle={{ paddingBottom: 20 }}
+                contentContainerStyle={{ paddingBottom: 20, paddingTop: 110 }}
+                onScroll={onScroll}
+                scrollEventThrottle={16}
             />
         </View>
     );
@@ -195,7 +197,7 @@ const PopularCommunity = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-            backgroundColor: '#ffffffff'
+        backgroundColor: '#ffffffff'
 
     },
     center: {

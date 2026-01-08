@@ -28,11 +28,14 @@ const COLUMN_WIDTH = screenWidth / 2 - 20;
 interface SocialExploreProps {
   showHeader?: boolean;
   viewMode?: "grid" | "list";
+  onScroll?: (event: any) => void;
 }
 
-export default function SocialExplore({ showHeader = true, viewMode = "grid" }: SocialExploreProps) {
+export default function SocialExplore({ showHeader = true, viewMode = "grid", onScroll }: SocialExploreProps) {
   const navigation: any = useNavigation();
   const dispatch = useDispatch();
+  const { handleScroll: contextHandleScroll } = require("../../context/ScrollContext").useScrollContext();
+  const activeHandleScroll = onScroll || contextHandleScroll;
   const [items, setItems] = useState([]);
 
   const [loading, setLoading] = useState(false);
@@ -344,15 +347,17 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid" }: 
       ) : viewMode === "grid" ? (
         <ScrollView
           showsVerticalScrollIndicator={false}
-          onScroll={({ nativeEvent }) => {
+          onScroll={(e) => {
+            activeHandleScroll?.(e);
             const paddingToBottom = 20;
-            const isBottom = nativeEvent.layoutMeasurement.height + nativeEvent.contentOffset.y >= nativeEvent.contentSize.height - paddingToBottom;
+            const isBottom = e.nativeEvent.layoutMeasurement.height + e.nativeEvent.contentOffset.y >= e.nativeEvent.contentSize.height - paddingToBottom;
 
             if (isBottom) {
               handleLoadMore();
             }
           }}
-          scrollEventThrottle={400}
+          scrollEventThrottle={16}
+          contentContainerStyle={{ paddingTop: 110 }}
         >
           <View
             style={{
@@ -379,6 +384,9 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid" }: 
           keyExtractor={(item) => item.id.toString()}
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.5}
+          onScroll={activeHandleScroll}
+          scrollEventThrottle={16}
+          contentContainerStyle={{ paddingTop: 110 }}
           ListFooterComponent={() =>
             isFetchingMore ? (
               <View style={{ padding: 20, alignItems: 'center' }}>

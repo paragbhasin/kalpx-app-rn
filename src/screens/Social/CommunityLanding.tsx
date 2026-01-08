@@ -19,7 +19,11 @@ import TopCommunities from "./TopCommunities";
 import UserActivityScreen from "../UserActivity/UserActivityScreen";
 import UserAgreements from "./UserAgreements";
 
+import { useScrollContext } from "../../context/ScrollContext";
+import { Animated } from "react-native";
+
 const CommunityLanding = () => {
+    const { handleScroll, headerY } = useScrollContext();
     const navigation = useNavigation<any>();
     const dispatch = useDispatch();
     const [selectedCategory, setSelectedCategory] = useState("Home");
@@ -51,8 +55,7 @@ const CommunityLanding = () => {
     }, [dispatch, selectedCategory]);
 
     const renderHeader = () => (
-        <View>
-            <Header />
+        <Animated.View style={[styles.animatedHeader, { transform: [{ translateY: headerY }] }]}>
             <View style={styles.headerContainer}>
                 {isSearching ? (
                     <View style={styles.searchBarContainer}>
@@ -140,7 +143,7 @@ const CommunityLanding = () => {
                     </>
                 )}
             </View>
-        </View>
+        </Animated.View>
     );
 
     const renderKalpxRules = () => (
@@ -430,15 +433,15 @@ const CommunityLanding = () => {
 
         switch (selectedCategory) {
             case "Top":
-                return <SocialExplore showHeader={false} viewMode={viewMode} />;
+                return <SocialExplore showHeader={false} viewMode={viewMode} onScroll={handleScroll} />;
             case "Home":
-                return <FeedScreen />;
+                return <FeedScreen onScroll={handleScroll} />;
             case "Popular":
-                return <Popular />;
+                return <Popular onScroll={handleScroll} />;
             case "Explore":
-                return <ExploreCommunities />;
+                return <ExploreCommunities onScroll={handleScroll} />;
             case "Communities":
-                return <TopCommunities />;
+                return <TopCommunities onScroll={handleScroll} />;
             case "kalpxRules":
                 return renderKalpxRules();
             case "privacyPolicy":
@@ -446,9 +449,9 @@ const CommunityLanding = () => {
             case "aboutKalpx":
                 return renderAboutKalpx();
             case "userAgreements":
-                return <UserAgreements />;
+                return <UserAgreements onScroll={handleScroll} />;
             case "yourActivity":
-                return <UserActivityScreen />;
+                return <UserActivityScreen onScroll={handleScroll} />;
             default:
                 return (
                     <View style={styles.placeholderContainer}>
@@ -461,9 +464,11 @@ const CommunityLanding = () => {
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
-            {renderHeader()}
-            <View style={styles.contentContainer}>
-                {renderContent()}
+            <View style={styles.mainLayout}>
+                {renderHeader()}
+                <View style={styles.contentContainer}>
+                    {renderContent()}
+                </View>
             </View>
         </SafeAreaView>
     );
@@ -479,9 +484,21 @@ const styles = StyleSheet.create({
         alignItems: "center",
         paddingHorizontal: 16,
         paddingVertical: 12,
+        backgroundColor: "#FFF",
+    },
+    animatedHeader: {
+        position: 'absolute',
+        top: 40, // Below Global Header (~54px)
+        left: 0,
+        right: 0,
+        zIndex: 10,
+        backgroundColor: "#FFF",
         borderBottomWidth: 1,
         borderBottomColor: "#eee",
-        backgroundColor: "#FFF",
+    },
+    mainLayout: {
+        flex: 1,
+        position: 'relative',
     },
     headerTitle: {
         fontSize: 20,

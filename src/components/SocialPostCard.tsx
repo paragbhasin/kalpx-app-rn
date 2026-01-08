@@ -11,8 +11,10 @@ import {
     Pressable,
     ImageBackground,
     ScrollView,
+    Platform,
     Modal,
     SafeAreaView,
+    Share,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import { Ionicons, MaterialCommunityIcons, SimpleLineIcons } from "@expo/vector-icons";
@@ -243,6 +245,51 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
             selectedmantra: practice,
             autoSelectCategory: type === 'mantra' ? 'daily-mantra' : type === 'sankalp' ? 'daily-sankalp' : (practice.category || 'sanatan')
         });
+    };
+
+    const handleShare = async () => {
+        try {
+            let shareUrl;
+
+            // If post has explore_post_id, use explore URL
+            if (post.explore_post_id) {
+                shareUrl = `https://kalpx.com/og/render?path=/explore/${post.explore_post_id}`;
+            } else {
+                const communitySlug =
+                    post.community_slug || post.community?.slug || post.slug || (route.params as any)?.slug;
+                const currentView = "home"; // Default to home since RN doesn't typically use query params for view state
+                shareUrl = `https://kalpx.com/og/render?path=/community/${communitySlug}/post/${post.id}?view=${currentView}`;
+            }
+
+            const title = post.title || "KalpX Community Post";
+            const currentContent = post.content || "";
+            const text = currentContent
+                ? `${title} - ${currentContent.slice(0, 100)}...`
+                : title;
+
+            const result = await Share.share({
+                title: title,
+                message: `${text}\n${shareUrl}`, // Android: Text + URL
+                url: shareUrl, // iOS: URL field
+            });
+
+            if (result.action === Share.sharedAction) {
+                // On iOS, result.activityType indicates if it was actually shared or just an action was taken
+                // On Android, sharedAction is returned even if the user just invokes the sheet usually, but strictly it means 'completed'
+                // We'll increment only if we think it succeeded.
+                if (result.activityType) {
+                    // Shared with activity type of result.activityType
+                    setShareCount(prev => prev + 1);
+                    onShare?.();
+                } else {
+                    // Shared
+                    setShareCount(prev => prev + 1);
+                    onShare?.();
+                }
+            }
+        } catch (error: any) {
+            console.error("Share failed:", error.message);
+        }
     };
 
     return (
@@ -510,10 +557,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                         </TouchableOpacity>
                     </View>
                     <View style={styles.voteGroup}>
-                        <TouchableOpacity style={styles.actionButton} onPress={() => {
-                            setShareCount(prev => prev + 1);
-                            onShare?.();
-                        }}>
+                        <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
                             <Ionicons name="share-social-outline" size={22} color="#666" />
                             <Text style={styles.actionText}>{shareCount}</Text>
                         </TouchableOpacity>

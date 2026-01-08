@@ -173,11 +173,7 @@ const CreateSocialPost = () => {
                     )}
                 </TouchableOpacity>
             </View>
-    <View style={styles.header} >
-                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={24} color="#000" />
-                    </TouchableOpacity>
-                </View>
+
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={{ flex: 1 }}
@@ -349,6 +345,7 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         borderBottomWidth: 1,
         borderBottomColor: "#EEE",
+        marginTop: 45
     },
     headerIcon: {
         padding: 4,

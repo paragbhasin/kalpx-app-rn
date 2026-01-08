@@ -424,18 +424,24 @@ const styles = StyleSheet.create({
     },
     communityInfo: {
         flex: 1,
+        flexDirection: "column",
+        justifyContent: "center",
         marginLeft: 16,
-        marginTop: 15,
+        paddingRight: 16,
     },
     communityName: {
-        fontSize: 14,
-        fontWeight: "bold",
+        fontSize: 16,
+        fontWeight: "700",
         color: "#2D3748",
+        textAlign:'center'
     },
     statsRow: {
         flexDirection: "row",
-        marginTop: 2,
-        justifyContent: 'center'
+        alignItems: "center",
+        marginTop: 6,
+        textAlign:'center',
+        justifyContent:'center'
+
     },
     statsText: {
         fontSize: 13,
@@ -444,15 +450,13 @@ const styles = StyleSheet.create({
     },
     joinButton: {
         backgroundColor: "#D69E2E",
-        paddingHorizontal: 10,
-        paddingVertical: 5,
-        borderRadius: 12,
+        paddingVertical: 10,
+        paddingHorizontal: 32,
+        borderRadius: 24,
         marginTop: 12,
-        justifyContent: 'center',
-
-        minWidth: 120,
+        alignSelf: "center",
         alignItems: "center",
-
+        justifyContent: "center",
     },
     joinedButton: {
         backgroundColor: "#E2E8F0",

@@ -43,7 +43,7 @@ export const ScrollProvider = ({ children }: any) => {
 
     const headerY = scrollAnim.interpolate({
         inputRange: [0, 1],
-        outputRange: [0, -150], // Moves header out of view
+        outputRange: [0, -100], // Moves header out of view
     });
 
     return (

@@ -20,6 +20,8 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useDispatch, useSelector } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
+import { useScrollContext } from "../../context/ScrollContext";
+import { Animated } from "react-native";
 import AddPracticeInputModal from "../../components/AddPracticeInputModal";
 import CartModal from "../../components/CartModal";
 import Colors from "../../components/Colors";
@@ -95,6 +97,7 @@ const initialCategories = [
 ];
 
 const TrackerEdit = ({ route }) => {
+  const { handleScroll } = useScrollContext();
   const navigation: any = useNavigation();
   const { t } = useTranslation();
   const categoryRef = useRef<any>(null);
@@ -1365,9 +1368,11 @@ const TrackerEdit = ({ route }) => {
 
       {isAddMoreScreen ? (
         <>
-          <ScrollView
+          <Animated.ScrollView
             showsVerticalScrollIndicator={false}
             style={{ marginBottom: 10 }}
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
           >
             {/* Header */}
             <View
@@ -1560,11 +1565,14 @@ const TrackerEdit = ({ route }) => {
               />
               <TextComponent type="ButtonBottomText" style={{ textAlign: "center", marginTop: 6 }}>You can adjust repetition and frequency in the next step</TextComponent>
             </View>
-          </ScrollView>
-
+          </Animated.ScrollView>
         </>
       ) : (
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <Animated.ScrollView
+          showsVerticalScrollIndicator={false}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+        >
           <>
             <View
               style={{
@@ -1575,11 +1583,11 @@ const TrackerEdit = ({ route }) => {
                 marginTop: 10,
               }}
             >
-              {selectedmantra  && (
-              <TouchableOpacity onPress={() => navigation.goBack()} style={{ width: 30 }}>
-                <Ionicons name="arrow-back" size={26} color="#000" />
-              </TouchableOpacity>
-)}
+              {selectedmantra && (
+                <TouchableOpacity onPress={() => navigation.goBack()} style={{ width: 30 }}>
+                  <Ionicons name="arrow-back" size={26} color="#000" />
+                </TouchableOpacity>
+              )}
               <TextComponent
                 type="DailyboldText"
                 style={{
@@ -1838,7 +1846,7 @@ const TrackerEdit = ({ route }) => {
             </TouchableOpacity>
             <TextComponent type="boldText" style={{ color: Colors.Colors.BLACK, alignSelf: "center", textAlign: "center", marginTop: 10, marginBottom: 20 }}>Your updated routine will reflect from tomorrow morning</TextComponent>
           </>
-        </ScrollView>
+        </Animated.ScrollView>
       )}
       <ConfirmDiscardModal
         visible={discardModalVisible}

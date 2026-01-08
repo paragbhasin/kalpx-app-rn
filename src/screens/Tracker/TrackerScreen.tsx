@@ -30,9 +30,12 @@ import { RootState } from "../../store";
 import { getRawPracticeObject } from "../../utils/getPracticeObjectById";
 import { trackDailyPractice } from "../Home/actions";
 import { fetchDailyPractice, fetchPracticeHistory } from "../Streak/actions";
+import { useScrollContext } from "../../context/ScrollContext";
+import { Animated } from "react-native";
 
 
 const TrackerScreen = () => {
+  const { handleScroll } = useScrollContext();
   const [fetchLoading, setLoading] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [selectedPractice, setSelectedPractice] = useState<any>(null);
@@ -95,10 +98,12 @@ const TrackerScreen = () => {
     alignItems: "center",
                     }}
                   > */}
-      <ScrollView
+      <Animated.ScrollView
         ref={scrollViewRef}
-        contentContainerStyle={{ paddingBottom: 30, marginHorizontal: 10 }}
+        contentContainerStyle={{ marginHorizontal: 10  }}
         showsVerticalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       >
         <TextComponent
           type="DailyboldText"
@@ -359,7 +364,7 @@ const TrackerScreen = () => {
             );
           }}
         />
-      </ScrollView>
+      </Animated.ScrollView>
       {/* </ImageBackground> */}
 
       {/* Card Overlays - Rendered outside ScrollView for full screen coverage */}

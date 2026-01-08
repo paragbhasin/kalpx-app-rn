@@ -3,7 +3,8 @@ import { createMaterialTopTabNavigator } from "@react-navigation/material-top-ta
 import { useFocusEffect, useNavigation, useNavigationState, useRoute } from "@react-navigation/native";
 import { AnyAction } from "@reduxjs/toolkit";
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, Animated } from "react-native";
+import { useScrollContext } from "../../context/ScrollContext";
 import { useDispatch } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
 import Header from "../../components/Header";
@@ -19,6 +20,7 @@ const TopTabsNavigator = () => {
   const navigation: any = useNavigation();
   const route: any = useRoute();   // ⭐ added
   const navState = useNavigationState((state) => state);
+  const { headerY } = useScrollContext();
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [trackerData, setTrackerData] = useState(null);
@@ -105,65 +107,62 @@ const TopTabsNavigator = () => {
 
   return (
     <View style={styles.container}>
-      <Header />
-
-      <Tab.Navigator
-        key={shouldRestrictTabs ? "restricted" : "full"}
-
-        /** ⭐ STEP 2 — APPLY INITIAL TAB LOGIC */
-        initialRouteName={shouldRestrictTabs ? "History" : initialTab}
-
-        screenOptions={({ route }) => {
-          const isRestricted =
-            (route.name === "Tracker" || route.name === "Stats") &&
-            shouldRestrictTabs;
-
-          return {
-            swipeEnabled: !shouldRestrictTabs,
-            tabBarActiveTintColor: isRestricted ? "#A9A9A9" : "#D4A017",
-            tabBarInactiveTintColor: "#000000",
-            tabBarIndicatorStyle: {
-              backgroundColor: isRestricted ? "transparent" : "#D4A017",
-              height: 3,
-            },
-            tabBarLabelStyle: { fontSize: 16, fontWeight: "600" },
-            tabBarStyle: { backgroundColor: "#FFFFFF" },
-            tabBarPress: (e) => {
-              if (isRestricted) e.preventDefault();
-            },
-          };
-        }}
-      >
-        {shouldRestrictTabs ? (
-          <Tab.Screen
-            name="History"
-            component={TrackerEdit}
-            initialParams={route.params}
-            options={{ title: "Edit Routine" }}
-            key={route?.params?.resumeData ? "history-restore" : "history-normal"}
-          />
-        ) : (
-          <>
-            <Tab.Screen
-              name="Tracker"
-              component={TrackerScreen}
-              options={{ title: "My Routine" }}
-            />
-            <Tab.Screen
-              name="Stats"
-              component={TrackerProgress}
-              options={{ title: "Progress" }}
-            />
+      <Animated.View style={{ flex: 1, transform: [{ translateY: headerY }], marginBottom: -100 }}>
+        <Tab.Navigator
+          key={shouldRestrictTabs ? "restricted" : "full"}
+          /** ⭐ STEP 2 — APPLY INITIAL TAB LOGIC */
+          initialRouteName={shouldRestrictTabs ? "History" : initialTab}
+          screenOptions={({ route }) => {
+            const isRestricted =
+              (route.name === "Tracker" || route.name === "Stats") &&
+              shouldRestrictTabs;
+            return {
+              swipeEnabled: !shouldRestrictTabs,
+              tabBarActiveTintColor: isRestricted ? "#A9A9A9" : "#D4A017",
+              tabBarInactiveTintColor: "#000000",
+              tabBarIndicatorStyle: {
+                backgroundColor: isRestricted ? "transparent" : "#D4A017",
+                height: 3,
+              },
+              tabBarLabelStyle: { fontSize: 16, fontWeight: "600" },
+              tabBarStyle: { backgroundColor: "#FFFFFF" },
+              tabBarPress: (e) => {
+                if (isRestricted) e.preventDefault();
+              },
+            };
+          }}
+        >
+          {shouldRestrictTabs ? (
             <Tab.Screen
               name="History"
-              initialParams={route.params}
               component={TrackerEdit}
+              initialParams={route.params}
               options={{ title: "Edit Routine" }}
               key={route?.params?.resumeData ? "history-restore" : "history-normal"}
             />
-          </>
-        )}
-      </Tab.Navigator>
+          ) : (
+            <>
+              <Tab.Screen
+                name="Tracker"
+                component={TrackerScreen}
+                options={{ title: "My Routine" }}
+              />
+              <Tab.Screen
+                name="Stats"
+                component={TrackerProgress}
+                options={{ title: "Progress" }}
+              />
+              <Tab.Screen
+                name="History"
+                initialParams={route.params}
+                component={TrackerEdit}
+                options={{ title: "Edit Routine" }}
+                key={route?.params?.resumeData ? "history-restore" : "history-normal"}
+              />
+            </>
+          )}
+        </Tab.Navigator>
+      </Animated.View>
     </View>
   );
 };
@@ -174,6 +173,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFF",
+    paddingTop: 54, // Space for the global absolute header
   },
 });
 

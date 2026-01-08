@@ -156,41 +156,6 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
 
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>Explore Communities</Text>
-
-            <View style={styles.tabContainer}>
-                <TouchableOpacity
-                    style={[styles.tab, activeTab === "all" && styles.activeTab]}
-                    onPress={() => setActiveTab("all")}
-                >
-                    <Text
-                        style={[
-                            styles.tabText,
-                            activeTab === "all" && styles.activeTabText,
-                        ]}
-                    >
-                        All
-                    </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    style={[styles.tab, activeTab === "followed" && styles.activeTab]}
-                    onPress={() => setActiveTab("followed")}
-                >
-                    <Text
-                        style={[
-                            styles.tabText,
-                            activeTab === "followed" && styles.activeTabText,
-                        ]}
-                    >
-                        Followed by me
-                    </Text>
-                </TouchableOpacity>
-            </View>
-
-            <Text style={styles.sectionTitle}>
-                {activeTab === "all" ? "Recommended for you" : "Communities you follow"}
-            </Text>
-
             {isLoading && filteredCommunities.length === 0 ? (
                 <FlatList
                     data={[1, 2, 3, 4, 5]}
@@ -198,6 +163,42 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
                     keyExtractor={(it) => it.toString()}
                     contentContainerStyle={[styles.listContent, { paddingTop: 110 }]}
                     scrollEnabled={false}
+                    ListHeaderComponent={
+                        <>
+                            <View style={styles.tabContainer}>
+                                <TouchableOpacity
+                                    style={[styles.tab, activeTab === "all" && styles.activeTab]}
+                                    onPress={() => setActiveTab("all")}
+                                >
+                                    <Text
+                                        style={[
+                                            styles.tabText,
+                                            activeTab === "all" && styles.activeTabText,
+                                        ]}
+                                    >
+                                        All
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.tab, activeTab === "followed" && styles.activeTab]}
+                                    onPress={() => setActiveTab("followed")}
+                                >
+                                    <Text
+                                        style={[
+                                            styles.tabText,
+                                            activeTab === "followed" && styles.activeTabText,
+                                        ]}
+                                    >
+                                        Followed by me
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            <Text style={styles.sectionTitle}>
+                                {activeTab === "all" ? "Recommended for you" : "Communities you follow"}
+                            </Text>
+                        </>
+                    }
                 />
             ) : (
                 <FlatList
@@ -215,6 +216,42 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
                             onRefresh={onRefresh}
                             colors={["#D69E2E"]}
                         />
+                    }
+                    ListHeaderComponent={
+                        <>
+                            <View style={styles.tabContainer}>
+                                <TouchableOpacity
+                                    style={[styles.tab, activeTab === "all" && styles.activeTab]}
+                                    onPress={() => setActiveTab("all")}
+                                >
+                                    <Text
+                                        style={[
+                                            styles.tabText,
+                                            activeTab === "all" && styles.activeTabText,
+                                        ]}
+                                    >
+                                        All
+                                    </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                    style={[styles.tab, activeTab === "followed" && styles.activeTab]}
+                                    onPress={() => setActiveTab("followed")}
+                                >
+                                    <Text
+                                        style={[
+                                            styles.tabText,
+                                            activeTab === "followed" && styles.activeTabText,
+                                        ]}
+                                    >
+                                        Followed by me
+                                    </Text>
+                                </TouchableOpacity>
+                            </View>
+
+                            <Text style={styles.sectionTitle}>
+                                {activeTab === "all" ? "Recommended for you" : "Communities you follow"}
+                            </Text>
+                        </>
                     }
                     ListEmptyComponent={
                         <View style={styles.emptyContainer}>

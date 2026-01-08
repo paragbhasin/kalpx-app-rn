@@ -209,10 +209,10 @@ const UserActivityScreen = ({ onScroll }: { onScroll?: (event: any) => void }) =
                                     <Text style={styles.usernameText}>{userProfile.user?.username || "user"}</Text>
                                 </View>
                             </View>
-                            <TouchableOpacity style={styles.createPostBtn} onPress={() => navigation.navigate("CreateSocialPost")}>
+                            {/* <TouchableOpacity style={styles.createPostBtn} onPress={() => navigation.navigate("CreateSocialPost")}>
                                 <Text style={styles.plusSign}>+</Text>
                                 <Text style={styles.createPostText}>Create post</Text>
-                            </TouchableOpacity>
+                            </TouchableOpacity> */}
                         </View>
 
                         {/* Stats Row */}
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
     },
     headerContainer: {
         paddingHorizontal: 16,
-        paddingTop: 16,
+        // paddingTop: 16,
     },
     listHeader: {
         marginBottom: 8,

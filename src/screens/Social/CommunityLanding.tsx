@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View, ScrollView, TextInput, FlatList, ActivityIndicator } from "react-native";
 import { Image } from "expo-image";
 import { Dropdown } from "react-native-element-dropdown";
@@ -18,9 +18,11 @@ import { fetchCommunities, fetchTopCommunities } from "./actions";
 import TopCommunities from "./TopCommunities";
 import UserActivityScreen from "../UserActivity/UserActivityScreen";
 import UserAgreements from "./UserAgreements";
+import { fetchUserActivity } from "../UserActivity/actions";
 
 import { useScrollContext } from "../../context/ScrollContext";
 import { Animated } from "react-native";
+import { COMMUNITY_BACKGROUNDS } from "../../utils/CommunityAssets";
 
 const CommunityLanding = () => {
     const { handleScroll, headerY } = useScrollContext();
@@ -33,6 +35,9 @@ const CommunityLanding = () => {
     const { searchQuery, setSearchQuery, results, loading, error } = useGlobalSearch();
 
     const { data: communities, loading: communitiesLoading } = useSelector((state: any) => state.communities);
+    const { followed_communities } = useSelector((state: any) => state.userActivity);
+
+    const dropdownRef = useRef<any>(null);
 
     const categories = [
         { label: "Home", value: "Home" },
@@ -53,6 +58,10 @@ const CommunityLanding = () => {
             dispatch(fetchCommunities(1) as any);
         }
     }, [dispatch, selectedCategory]);
+
+    useEffect(() => {
+        dispatch(fetchUserActivity("followed_communities") as any);
+    }, [dispatch]);
 
     const renderHeader = () => (
         <Animated.View style={[styles.animatedHeader, { transform: [{ translateY: headerY }] }]}>
@@ -85,6 +94,7 @@ const CommunityLanding = () => {
 
                         {/* Dropdown */}
                         <Dropdown
+                            ref={dropdownRef}
                             style={styles.dropdownTrigger}
                             containerStyle={styles.dropdownContainer}
                             data={categories}
@@ -97,9 +107,64 @@ const CommunityLanding = () => {
                             iconStyle={styles.iconStyle}
                             dropdownPosition="bottom"
                             showsVerticalScrollIndicator={false}
+                            selectedTextProps={{ numberOfLines: 1, ellipsizeMode: 'tail' }}
                             renderRightIcon={() => (
                                 <Ionicons name="caret-down-outline" size={12} color="#000" style={{ marginLeft: 4 }} />
                             )}
+                            renderItem={(item) => {
+                                // Check if this is the position where RECENT should be inserted
+                                const isAfterExplore = item.value === "Communities";
+                                const isYourActivity = item.value === "yourActivity";
+
+                                return (
+                                    <>
+                                        {isAfterExplore && followed_communities?.data?.length > 0 && (
+                                            <View>
+                                                <Text style={styles.dropdownSectionHeader}>RECENT</Text>
+                                                {followed_communities.data.slice(0, 5).map((community: any, index: number) => (
+                                                    <TouchableOpacity
+                                                        key={`recent-${index}`}
+                                                        style={styles.dropdownRecentItem}
+                                                        onPress={() => {
+                                                            dropdownRef.current?.close();
+                                                            navigation.navigate("CommunityDetail", { slug: community.slug });
+                                                        }}
+                                                    >
+                                                        <Image
+                                                            source={COMMUNITY_BACKGROUNDS[community.slug] || COMMUNITY_BACKGROUNDS[community.id] || require("../../../assets/Exploreicon.png")}
+                                                            style={styles.dropdownRecentIcon}
+                                                        />
+                                                        <Text style={styles.dropdownRecentText} numberOfLines={1} ellipsizeMode="tail">
+                                                            {community.name || community.slug}
+                                                        </Text>
+                                                    </TouchableOpacity>
+                                                ))}
+                                            </View>
+                                        )}
+                                        {isYourActivity && (
+                                            <View>
+                                                <Text style={styles.dropdownSectionHeader}>YOUR ACTIVITY</Text>
+                                            </View>
+                                        )}
+                                        {item.value === "Communities" && (
+                                            <View>
+                                                <Text style={styles.dropdownSectionHeader}>RESOURCES</Text>
+                                            </View>
+                                        )}
+                                        <TouchableOpacity
+                                            style={styles.dropdownItem}
+                                            onPress={() => {
+                                                dropdownRef.current?.close();
+                                                setSelectedCategory(item.value);
+                                            }}
+                                        >
+                                            <Text style={styles.dropdownItemText} numberOfLines={1} ellipsizeMode="tail">
+                                                {item.label}
+                                            </Text>
+                                        </TouchableOpacity>
+                                    </>
+                                );
+                            }}
                         />
                         {/* Action Icons */}
                         <View style={styles.actionIcons}>
@@ -511,7 +576,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
         paddingHorizontal: 6,
         paddingVertical: 2,
-        maxWidth: 140,
+        maxWidth: 150,
+        minWidth: 60,
     },
     dropdownContainer: {
         width: 220,
@@ -521,8 +587,8 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: "#000",
         fontWeight: "500",
-        marginRight: 4,
         flexShrink: 1,
+        maxWidth: 60,
     },
     placeholderStyle: {
         fontSize: 16,
@@ -531,6 +597,40 @@ const styles = StyleSheet.create({
     iconStyle: {
         width: 12,
         height: 12,
+    },
+    dropdownSectionHeader: {
+        fontSize: 11,
+        fontWeight: "600",
+        color: "#888",
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        backgroundColor: "#f8f8f8",
+        textTransform: "uppercase",
+    },
+    dropdownItem: {
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+    },
+    dropdownItemText: {
+        fontSize: 14,
+        color: "#000",
+    },
+    dropdownRecentItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+    },
+    dropdownRecentIcon: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        marginRight: 10,
+    },
+    dropdownRecentText: {
+        fontSize: 14,
+        color: "#000",
+        flex: 1,
     },
     actionIcons: {
         flexDirection: "row",
@@ -555,6 +655,7 @@ const styles = StyleSheet.create({
     rulesContainer: {
         flex: 1,
         backgroundColor: "#FFF",
+        marginTop:80
     },
     rulesContent: {
         padding: 20,
@@ -615,6 +716,7 @@ const styles = StyleSheet.create({
     aboutKalpxContainer: {
         flex: 1,
         backgroundColor: "#FFF",
+        marginTop:80
     },
     aboutHero: {
         padding: 24,

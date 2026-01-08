@@ -14,7 +14,7 @@ const UserAgreements = ({ onScroll }: { onScroll?: (event: any) => void }) => {
       showsVerticalScrollIndicator={false}
       onScroll={onScroll}
       scrollEventThrottle={16}
-      contentContainerStyle={{ paddingBottom: 40, paddingTop: 110 }}
+      contentContainerStyle={{ paddingBottom: 40, paddingTop: 80 }}
     >
       <View style={styles.contentWrapper}>
         {/* LEFT CONTENT */}

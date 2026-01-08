@@ -13,6 +13,7 @@ import {
     ScrollView,
     Modal,
     Alert,
+    Animated,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -28,7 +29,7 @@ import { useScrollContext } from "../../context/ScrollContext";
 const { width } = Dimensions.get("window");
 
 const CommunityDetail = () => {
-    const { handleScroll } = useScrollContext();
+    const { handleScroll, headerY } = useScrollContext();
     const dispatch = useDispatch();
     const navigation = useNavigation<any>();
     const [showMenu, setShowMenu] = useState(false);
@@ -330,11 +331,11 @@ const CommunityDetail = () => {
             <View style={{ height: 0 }}>
                 {/* Global header handles logo. Use a minimal back button if needed, but here it might overlap */}
             </View>
-            <View style={styles.navHeader}>
+            <Animated.View style={[styles.navHeader, { transform: [{ translateY: headerY }] }]}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={24} color="#000" />
                 </TouchableOpacity>
-            </View>
+            </Animated.View>
             <FlatList
                 data={activeTab === "Feed" ? posts : []}
                 ListHeaderComponent={renderHeader}
@@ -359,7 +360,7 @@ const CommunityDetail = () => {
                 scrollEventThrottle={16}
                 onEndReached={handleLoadMore}
                 onEndReachedThreshold={0.5}
-                contentContainerStyle={{ paddingTop: 64 }}
+                contentContainerStyle={{ paddingTop:100 }}
                 ListFooterComponent={() =>
                     communityPosts.loading && communityPosts.pagination.currentPage > 1 ? (
                         <ActivityIndicator style={{ padding: 20 }} color="#D69E2E" />
@@ -397,7 +398,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "flex-start",
         paddingHorizontal: 16,
-        marginTop: 15,
+        // marginTop: 100,
     },
     avatarWrapper: {
         shadowColor: "#000",
@@ -629,6 +630,11 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     navHeader: {
+        position: 'absolute',
+        top: 40,
+        left: 0,
+        right: 0,
+        zIndex: 10,
         flexDirection: "row",
         alignItems: "center",
         paddingHorizontal: 16,

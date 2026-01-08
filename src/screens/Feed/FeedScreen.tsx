@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { View, FlatList, ActivityIndicator, RefreshControl, StyleSheet, Text } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { fetchFeed, upvotePost, downvotePost, savePost, unsavePost, hidePost } from "./actions"; // Import from local actions
@@ -12,6 +13,7 @@ import SocialPostCard from "../../components/SocialPostCard";
 import ShimmerPlaceholder from "../../components/ShimmerPlaceholder";
 
 const FeedScreen = ({ onScroll }: { onScroll?: (event: any) => void }) => {
+    const { i18n } = useTranslation();
     const dispatch = useDispatch();
     const navigation = useNavigation();
 
@@ -23,22 +25,21 @@ const FeedScreen = ({ onScroll }: { onScroll?: (event: any) => void }) => {
     useEffect(() => {
         loadFeed();
         dispatch(fetchUserActivity("followed_communities") as any);
-    }, []);
-
+    }, [i18n.language]);
 
     const loadFeed = (page = 1) => {
-        dispatch(fetchFeed(page) as any);
+        dispatch(fetchFeed(page, "hot", i18n.language) as any);
     };
 
     const onRefresh = async () => {
         setRefreshing(true);
-        await dispatch(fetchFeed(1) as any);
+        await dispatch(fetchFeed(1, "hot", i18n.language) as any);
         setRefreshing(false);
     };
 
     const onLoadMore = () => {
         if (!loading && !loadingMore && pagination.currentPage < pagination.totalPages) {
-            dispatch(fetchFeed(pagination.currentPage + 1) as any);
+            dispatch(fetchFeed(pagination.currentPage + 1, "hot", i18n.language) as any);
         }
     };
 

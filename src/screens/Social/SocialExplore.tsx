@@ -1,5 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dimensions,
   Image,
@@ -32,6 +33,7 @@ interface SocialExploreProps {
 }
 
 export default function SocialExplore({ showHeader = true, viewMode = "grid", onScroll }: SocialExploreProps) {
+  const { i18n } = useTranslation();
   const navigation: any = useNavigation();
   const dispatch = useDispatch();
   const { handleScroll: contextHandleScroll } = require("../../context/ScrollContext").useScrollContext();
@@ -55,7 +57,7 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
       }
 
       // construct URL with pagination
-      const res = await api.get(`/public/explore-posts/?paginate=true&page=${pageNo}&page_size=10`);
+      const res = await api.get(`/public/explore-posts/?paginate=true&page=${pageNo}&page_size=10&lang=${i18n.language}`);
       let result = res.data || [];
 
       // Handle paginated response or wrapped data
@@ -110,7 +112,7 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
   useEffect(() => {
     fetchExplore(1);
     dispatch(fetchUserActivity("followed_communities") as any);
-  }, []);
+  }, [i18n.language]);
 
 
   const handleLoadMore = () => {

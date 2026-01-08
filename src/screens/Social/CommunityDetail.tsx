@@ -15,6 +15,7 @@ import {
     Alert,
     Animated,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
@@ -29,6 +30,7 @@ import { useScrollContext } from "../../context/ScrollContext";
 const { width } = Dimensions.get("window");
 
 const CommunityDetail = () => {
+    const { i18n } = useTranslation();
     const { handleScroll, headerY } = useScrollContext();
     const dispatch = useDispatch();
     const navigation = useNavigation<any>();
@@ -45,11 +47,21 @@ const CommunityDetail = () => {
     const [activeTab, setActiveTab] = useState<"Feed" | "About">("Feed");
     const [expandedRules, setExpandedRules] = useState<number[]>([]);
     useEffect(() => {
-        dispatch(fetchCommunityDetail(slug) as any);
-        dispatch(fetchCommunityPosts(slug, 1, sortBy) as any);
-    }, [dispatch, slug, sortBy]);
+        dispatch(fetchCommunityDetail(slug, i18n.language) as any);
+        dispatch(fetchCommunityPosts(slug, 1, sortBy, i18n.language) as any);
+    }, [dispatch, slug, sortBy, i18n.language]);
+
+    const getTranslatedContent = (item: any, field: string) => {
+        const language = i18n.language;
+        if (language === "en" || !item[`resolved_${field}`]) {
+            return item[field];
+        }
+        return item[`resolved_${field}`] || item[field];
+    };
 
     const community = communityDetail.data;
+    const translatedCommunityName = community ? getTranslatedContent(community, 'name') : "Community";
+    const translatedCommunityDescription = community ? getTranslatedContent(community, 'description') : "";
     const posts = communityPosts.data;
     const loading = communityDetail.loading || (communityPosts.loading && communityPosts.pagination.currentPage === 1);
 
@@ -74,7 +86,7 @@ const CommunityDetail = () => {
 
     const handleLoadMore = () => {
         if (!communityPosts.loading && communityPosts.pagination.currentPage < communityPosts.pagination.totalPages) {
-            dispatch(fetchCommunityPosts(slug, communityPosts.pagination.currentPage + 1) as any);
+            dispatch(fetchCommunityPosts(slug, communityPosts.pagination.currentPage + 1, sortBy, i18n.language) as any);
         }
     };
 
@@ -136,7 +148,7 @@ const CommunityDetail = () => {
                     </View>
                 </View>
                 <View style={styles.communityInfo}>
-                    <Text style={styles.communityName}>{community?.name || "Community"}</Text>
+                    <Text style={styles.communityName}>{translatedCommunityName}</Text>
                     <View style={styles.statsRow}>
                         <Text style={styles.statsText}>Followers:{community?.follower_count || 0}</Text>
                         <Text style={[styles.statsText, { marginLeft: 16 }]}>Posts:{community?.post_count || 0}</Text>
@@ -276,8 +288,8 @@ const CommunityDetail = () => {
 
         return (
             <View style={styles.aboutContainer}>
-                <Text style={styles.aboutCommunityName}>{community?.name}</Text>
-                <Text style={styles.aboutDescription}>{community?.description || "No description available."}</Text>
+                <Text style={styles.aboutCommunityName}>{translatedCommunityName}</Text>
+                <Text style={styles.aboutDescription}>{translatedCommunityDescription || "No description available."}</Text>
 
                 <View style={styles.createdRow}>
                     <Ionicons name="document-outline" size={20} color="#666" />
@@ -360,7 +372,7 @@ const CommunityDetail = () => {
                 scrollEventThrottle={16}
                 onEndReached={handleLoadMore}
                 onEndReachedThreshold={0.5}
-                contentContainerStyle={{ paddingTop:100 }}
+                contentContainerStyle={{ paddingTop: 100 }}
                 ListFooterComponent={() =>
                     communityPosts.loading && communityPosts.pagination.currentPage > 1 ? (
                         <ActivityIndicator style={{ padding: 20 }} color="#D69E2E" />
@@ -433,14 +445,14 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "700",
         color: "#2D3748",
-        textAlign:'center'
+        textAlign: 'center'
     },
     statsRow: {
         flexDirection: "row",
         alignItems: "center",
         marginTop: 6,
-        textAlign:'center',
-        justifyContent:'center'
+        textAlign: 'center',
+        justifyContent: 'center'
 
     },
     statsText: {

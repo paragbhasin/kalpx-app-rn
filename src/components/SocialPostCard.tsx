@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useRoute } from "@react-navigation/native";
+import { useTranslation } from "react-i18next";
 
 import {
     View,
@@ -89,8 +90,23 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     onHide,
     onReport,
 }) => {
+    const { i18n } = useTranslation();
     const navigation: any = useNavigation();
     const route = useRoute();
+
+    const getTranslatedContent = (item: any, field: string) => {
+        const language = i18n.language;
+        // If current locale is English or no translation available, return original
+        if (language === "en" || !item[`resolved_${field}`]) {
+            return item[field];
+        }
+        // Return translated content if available
+        return item[`resolved_${field}`] || item[field];
+    };
+
+    const translatedTitle = getTranslatedContent(post, 'title');
+    const translatedContent = getTranslatedContent(post, 'content');
+    const translatedCommunityName = getTranslatedContent(post, 'community_name') || post.community?.name;
 
     const [isExpanded, setIsExpanded] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
@@ -128,18 +144,30 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     // formatted date
     const timeAgo = post.created_at ? moment(post.created_at).fromNow() : "";
 
-    // images for carousel
-    const imagesData = post.resolved_slide_layouts || post.slide_layouts || post.images || (post.hook_image ? [{ image: post.hook_image }] : []);
+    // images/slides resolution
+    const getImagesData = () => {
+        const language = i18n.language;
+        if (language !== "en" && post.resolved_slide_layouts && post.resolved_slide_layouts.length > 0) {
+            return post.resolved_slide_layouts;
+        }
+        if (post.slide_layouts && post.slide_layouts.length > 0) return post.slide_layouts;
+        if (post.slides && post.slides.length > 0) return post.slides;
+        if (post.ai_output?.slides && post.ai_output.slides.length > 0) return post.ai_output.slides;
+        if (post.images && post.images.length > 0) return post.images;
+        if (post.hook_image) return [{ image: post.hook_image }];
+        return [];
+    };
+
+    const imagesData = getImagesData();
 
     // truncated content
-    const content = post.content || "";
+    const content = translatedContent || "";
     const shouldTruncate = content.length > 100;
 
     const [cardWidth, setCardWidth] = useState(screenWidth - 8); // Updated base width for padding: 4
     const [activeIndex, setActiveIndex] = useState(0);
 
-    // Aspect ratio calculation from slide_layouts as shown in user JSON
-    const initialSlide = post.slide_layouts?.[0] || post.resolved_slide_layouts?.[0];
+    const initialSlide = imagesData[0];
     const aspectRatioString = initialSlide?.layout?.aspect_ratio || post.layout?.aspect_ratio || "1:1";
     let aspectRatio = 1;
 
@@ -153,8 +181,61 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     // Dynamic height based on measured width and strict ratio
     const imageHeight = cardWidth / aspectRatio;
 
-    const renderCarouselItem = ({ item }: { item: any }) => {
-        const blocks = item.layout?.blocks || item.resolved_blocks || item.blocks || [];
+    const getSlideBlocks = (slideIndex: number) => {
+        const language = i18n.language;
+
+        // 1. Check for resolved_slide_layouts (translated content)
+        if (
+            language !== "en" &&
+            post.resolved_slide_layouts &&
+            post.resolved_slide_layouts[slideIndex] &&
+            post.resolved_slide_layouts[slideIndex].resolved_blocks
+        ) {
+            return post.resolved_slide_layouts[slideIndex].resolved_blocks;
+        }
+
+        // 2. Check if post has slide_layouts (new structure from community posts)
+        if (
+            post.slide_layouts &&
+            post.slide_layouts[slideIndex] &&
+            post.slide_layouts[slideIndex].layout &&
+            post.slide_layouts[slideIndex].layout.blocks
+        ) {
+            return post.slide_layouts[slideIndex].layout.blocks;
+        }
+
+        // 3. Check if post has slides with layout blocks (from explore posts)
+        if (
+            post.slides &&
+            post.slides[slideIndex] &&
+            post.slides[slideIndex].layout &&
+            post.slides[slideIndex].layout.blocks
+        ) {
+            return post.slides[slideIndex].layout.blocks;
+        }
+
+        // 4. Check if post has ai_output with slides (alternative structure)
+        if (
+            post.ai_output &&
+            post.ai_output.slides &&
+            post.ai_output.slides[slideIndex] &&
+            post.ai_output.slides[slideIndex].layout &&
+            post.ai_output.slides[slideIndex].layout.blocks
+        ) {
+            return post.ai_output.slides[slideIndex].layout.blocks;
+        }
+
+        // Fallback to item itself if it has blocks (for single image slides/images field)
+        const item = imagesData[slideIndex];
+        if (item) {
+            return item.resolved_blocks || item.layout?.blocks || item.blocks || [];
+        }
+
+        return [];
+    };
+
+    const renderCarouselItem = ({ item, index: slideIndex }: { item: any; index: number }) => {
+        const blocks = getSlideBlocks(slideIndex);
         const imageUrl = item.image_url || item.image || (typeof item === 'string' ? item : null);
 
         return (
@@ -336,7 +417,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                     </View>
                     <View>
                         <Text style={styles.communityName}>
-                            {post.community_name || "Community Name"}
+                            {translatedCommunityName || "Community Name"}
                         </Text>
                         <Text style={styles.timeAgo}>{timeAgo}</Text>
                     </View>
@@ -417,7 +498,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
             />
 
             {/* Title */}
-            {post.title && <Text style={styles.title}>{post.title}</Text>}
+            {translatedTitle && <Text style={styles.title}>{translatedTitle}</Text>}
 
             {/* Carousel or Single Image */}
             {imagesData.length > 0 && (

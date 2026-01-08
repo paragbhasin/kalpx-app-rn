@@ -14,6 +14,7 @@ import {
   Alert,
   Modal
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Header from "../../components/Header";
@@ -192,7 +193,7 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote, onUseful, onR
             style={{
               position: 'absolute',
               top: menuPos.top,
-              right:menuPos.right,
+              right: menuPos.right,
               backgroundColor: '#fff',
               borderRadius: 12,
               paddingVertical: 8,
@@ -278,6 +279,7 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote, onUseful, onR
 };
 
 export default function SocialPostDetailScreen() {
+  const { i18n } = useTranslation();
   const route: any = useRoute();
   const navigation: any = useNavigation();
   const dispatch = useDispatch();
@@ -292,10 +294,10 @@ export default function SocialPostDetailScreen() {
 
   useEffect(() => {
     if (initialPost?.id) {
-      dispatch(fetchPostDetail(initialPost.id) as any);
-      dispatch(fetchComments(initialPost.id, 1, isQuestion) as any);
+      dispatch(fetchPostDetail(initialPost.id, i18n.language) as any);
+      dispatch(fetchComments(initialPost.id, 1, isQuestion, i18n.language) as any);
     }
-  }, [initialPost?.id, dispatch, isQuestion]);
+  }, [initialPost?.id, dispatch, isQuestion, i18n.language]);
 
   const handlePostComment = async () => {
     if (!commentText.trim()) return;

@@ -56,7 +56,7 @@ export const UNFOLLOW_COMMUNITY_FAILURE = "UNFOLLOW_COMMUNITY_FAILURE";
 
 const PAGE_SIZE = 12;
 
-export const fetchCommunities = (page = 1, searchQuery = "") => async (dispatch) => {
+export const fetchCommunities = (page = 1, searchQuery = "", locale = "en") => async (dispatch) => {
   dispatch({ type: FETCH_COMMUNITIES_REQUEST, payload: { page } });
 
   try {
@@ -64,6 +64,7 @@ export const fetchCommunities = (page = 1, searchQuery = "") => async (dispatch)
       page: page.toString(),
       page_size: PAGE_SIZE.toString(),
       t: Date.now().toString(),
+      lang: locale,
     });
     if (searchQuery) {
       params.append("q", searchQuery);
@@ -95,13 +96,14 @@ export const fetchCommunities = (page = 1, searchQuery = "") => async (dispatch)
   }
 };
 
-export const fetchTopCommunities = (page = 1) => async (dispatch) => {
+export const fetchTopCommunities = (page = 1, locale = "en") => async (dispatch) => {
   dispatch({ type: FETCH_TOP_COMMUNITIES_REQUEST, payload: { page } });
   try {
     const params = new URLSearchParams({
       page: page.toString(),
       page_size: PAGE_SIZE.toString(),
       t: Date.now().toString(),
+      lang: locale,
     });
     const res = await api.get(`/communities/top/?${params.toString()}`);
     const results = (res.data.results || res.data || []).map((c, i) => ({
@@ -159,10 +161,10 @@ export const unfollowCommunity = (idOrSlug) => async (dispatch) => {
   }
 }
 
-export const fetchCommunityDetail = (slug: string) => async (dispatch: any) => {
+export const fetchCommunityDetail = (slug: string, locale = "en") => async (dispatch: any) => {
   dispatch({ type: FETCH_COMMUNITY_DETAIL_REQUEST });
   try {
-    const res = await api.get(`/communities/${slug}/`);
+    const res = await api.get(`/communities/${slug}/?lang=${locale}`);
     dispatch({
       type: FETCH_COMMUNITY_DETAIL_SUCCESS,
       payload: res.data,
@@ -175,7 +177,7 @@ export const fetchCommunityDetail = (slug: string) => async (dispatch: any) => {
   }
 };
 
-export const fetchCommunityPosts = (slug: string, page = 1 ,sort ='new') => async (dispatch: any) => {
+export const fetchCommunityPosts = (slug: string, page = 1, sort = 'new', locale = "en") => async (dispatch: any) => {
   dispatch({ type: FETCH_COMMUNITY_POSTS_REQUEST, payload: { page } });
   try {
     const params = new URLSearchParams({
@@ -184,7 +186,7 @@ export const fetchCommunityPosts = (slug: string, page = 1 ,sort ='new') => asyn
       community: slug,
       sort: sort,
       t: Date.now().toString(),
-      lang: "en",
+      lang: locale,
     });
     const res = await api.get(`/posts/?${params.toString()}`);
     dispatch({

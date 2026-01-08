@@ -17,7 +17,7 @@ const languages = [
   { label: "ಕನ್ನಡ", value: "kn" },
   { label: "മലയാളം", value: "ml" },
   { label: "தமிழ்", value: "ta" },
-  { label: "ଓଡିଆ", value: "or" },
+ 
   { label: "తెలుగు", value: "te" }
 ];
 

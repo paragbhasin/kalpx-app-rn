@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { View, FlatList, ActivityIndicator, RefreshControl, StyleSheet, Text, Dimensions, Image, TouchableOpacity } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import Carousel from "react-native-reanimated-carousel";
@@ -16,6 +17,7 @@ import ShimmerPlaceholder from "../../components/ShimmerPlaceholder";
 const { width } = Dimensions.get("window");
 
 const PopularCommunity = ({ onScroll }: { onScroll?: (event: any) => void }) => {
+    const { i18n } = useTranslation();
     const dispatch = useDispatch();
     const navigation = useNavigation();
 
@@ -32,21 +34,21 @@ const PopularCommunity = ({ onScroll }: { onScroll?: (event: any) => void }) => 
     useEffect(() => {
         loadFeed();
         dispatch(fetchUserActivity("followed_communities") as any);
-    }, []);
+    }, [i18n.language]);
 
     const loadFeed = (page = 1) => {
-        dispatch(fetchPopularPosts(page) as any);
+        dispatch(fetchPopularPosts(page, i18n.language) as any);
     };
 
     const onRefresh = async () => {
         setRefreshing(true);
-        await dispatch(fetchPopularPosts(1) as any);
+        await dispatch(fetchPopularPosts(1, i18n.language) as any);
         setRefreshing(false);
     };
 
     const onLoadMore = () => {
         if (!loading && !loadingMore && pagination.currentPage < pagination.totalPages) {
-            dispatch(fetchPopularPosts(pagination.currentPage + 1) as any);
+            dispatch(fetchPopularPosts(pagination.currentPage + 1, i18n.language) as any);
         }
     };
 

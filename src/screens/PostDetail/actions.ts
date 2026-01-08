@@ -23,10 +23,10 @@ const PAGE_SIZE = 10;
 
 // 🔹 Thunks
 
-export const fetchPostDetail = (postId: string | number) => async (dispatch: any) => {
+export const fetchPostDetail = (postId: string | number, locale = "en") => async (dispatch: any) => {
     dispatch({ type: FETCH_POST_DETAIL_REQUEST });
     try {
-        const res = await api.get(`/posts/${postId}/`);
+        const res = await api.get(`/posts/${postId}/?lang=${locale}`);
         // We might need to fetch community name if missing, similar to Vue 'fetchCommunityName'
         // But for Redux, let's assume component or selector handles derived data or we just store what we get.
         // If critical, we can chain requests.
@@ -42,13 +42,14 @@ export const fetchPostDetail = (postId: string | number) => async (dispatch: any
     }
 };
 
-export const fetchComments = (postId: string | number, page = 1, isQuestion = false) => async (dispatch: any) => {
+export const fetchComments = (postId: string | number, page = 1, isQuestion = false, locale = "en") => async (dispatch: any) => {
     dispatch({ type: FETCH_COMMENTS_REQUEST, payload: { page } });
     try {
         const params = new URLSearchParams({
             post: postId.toString(),
             page: page.toString(),
             t: Date.now().toString(),
+            lang: locale,
         });
         if (isQuestion) {
             params.append("is_question", "true");

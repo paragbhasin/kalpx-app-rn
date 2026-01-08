@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {  useRoute } from "@react-navigation/native";
+import { useRoute } from "@react-navigation/native";
 
 import {
     View,
@@ -10,6 +10,9 @@ import {
     Dimensions,
     Pressable,
     ImageBackground,
+    ScrollView,
+    Modal,
+    SafeAreaView,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import { Ionicons, MaterialCommunityIcons, SimpleLineIcons } from "@expo/vector-icons";
@@ -17,6 +20,10 @@ import moment from "moment";
 import { useNavigation } from "@react-navigation/native";
 import ReportModal from "./ReportModal";
 import { COMMUNITY_BACKGROUNDS } from "../utils/CommunityAssets";
+import { getRawPracticeObject } from "../utils/getPracticeObjectById";
+import MantraCard from "./MantraCard";
+import SankalpCard from "./SankalpCard";
+import DailyPracticeDetailsCard from "./DailyPracticeDetailsCard";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -81,8 +88,8 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     onReport,
 }) => {
     const navigation: any = useNavigation();
-        const route = useRoute();
-    
+    const route = useRoute();
+
     const [isExpanded, setIsExpanded] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
     const [isReportModalVisible, setIsReportModalVisible] = useState(false);
@@ -91,6 +98,9 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     const [upvoteCount, setUpvoteCount] = useState(post.upvote_count || Math.floor(Math.random() * 950) + 50); // 50-1000
     const [shareCount, setShareCount] = useState(post.share_count || Math.floor(Math.random() * 20) + 10); // 10-500
     const [hasUserVoted, setHasUserVoted] = useState<'up' | 'down' | null>(null);
+    const [showLinkedDetail, setShowLinkedDetail] = useState(false);
+    const [selectedLinkedPractice, setSelectedLinkedPractice] = useState<any>(null);
+    const [linkedCardType, setLinkedCardType] = useState<'mantra' | 'sankalp' | 'practice' | null>(null);
 
     // formatted date
     const timeAgo = post.created_at ? moment(post.created_at).fromNow() : "";
@@ -135,6 +145,25 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
             )}
         </View>
     );
+
+    const handleLinkedItemPress = () => {
+        if (!post.linked_item || !post.linked_item.type || !post.linked_item.id) return;
+
+        const { type, id } = post.linked_item;
+        const practiceData = getRawPracticeObject(id, post.linked_item);
+
+        setSelectedLinkedPractice(practiceData);
+
+        if (type.includes("mantra")) {
+            setLinkedCardType('mantra');
+        } else if (type.includes("sankalp")) {
+            setLinkedCardType('sankalp');
+        } else {
+            setLinkedCardType('practice');
+        }
+
+        setShowLinkedDetail(true);
+    };
 
     return (
         <View
@@ -186,19 +215,19 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                     </View>
                 </TouchableOpacity>
                 <View style={styles.headerActions}>
-                {route.name !== 'CommunityDetail' && (
+                    {route.name !== 'CommunityDetail' && (
 
-                    <TouchableOpacity
-                        style={[styles.joinButton, post.is_joined && styles.joinedButton]}
-                        onPress={onJoin}
-                    >
-                        <Text style={[styles.joinButtonText, post.is_joined && styles.joinedText]}>
-                            {post.is_joined ? "Joined" : "Join"}
+                        <TouchableOpacity
+                            style={[styles.joinButton, post.is_joined && styles.joinedButton]}
+                            onPress={onJoin}
+                        >
+                            <Text style={[styles.joinButtonText, post.is_joined && styles.joinedText]}>
+                                {post.is_joined ? "Joined" : "Join"}
 
 
-                        </Text>
-                    </TouchableOpacity>
-                )}
+                            </Text>
+                        </TouchableOpacity>
+                    )}
 
                     <TouchableOpacity onPress={() => setShowMenu(!showMenu)}>
 
@@ -313,8 +342,11 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                     )}
                 </View>
             ) : null}
-   {post.linked_item && (
-                <TouchableOpacity style={styles.linkedItemCard}>
+            {post.linked_item && (
+                <TouchableOpacity
+                    style={styles.linkedItemCard}
+                    onPress={handleLinkedItemPress}
+                >
                     <View style={styles.linkedItemContent}>
                         <View style={styles.linkedItemTitleRow}>
                             <MaterialCommunityIcons
@@ -413,8 +445,75 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                     <Text style={styles.askButtonText}>Ask question</Text>
                 </TouchableOpacity>
             </View>
-      
-         
+
+            {/* Full Screen Linked Item Modal */}
+            <Modal
+                visible={showLinkedDetail}
+                animationType="slide"
+                transparent={false}
+                onRequestClose={() => setShowLinkedDetail(false)}
+            >
+                <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+                    <View style={styles.overlayHeader}>
+                        <TouchableOpacity
+                            onPress={() => setShowLinkedDetail(false)}
+                            style={styles.backButton}
+                        >
+                            <Ionicons name="arrow-back" size={26} color="#000" />
+                        </TouchableOpacity>
+                    </View>
+
+                    <ScrollView
+                        style={{ flex: 1 }}
+                        contentContainerStyle={styles.overlayScrollContent}
+                        showsVerticalScrollIndicator={false}
+                    >
+                        {selectedLinkedPractice && (
+                            <>
+                                {linkedCardType === 'mantra' && (
+                                    <MantraCard
+                                        practiceTodayData={{
+                                            started: { mantra: true },
+                                            ids: { mantra: selectedLinkedPractice.id }
+                                        }}
+                                        onPressChantMantra={() => { }}
+                                        DoneMantraCalled={() => { }}
+                                        viewOnly={true}
+                                    />
+                                )}
+                                {linkedCardType === 'sankalp' && (
+                                    <SankalpCard
+                                        practiceTodayData={{
+                                            started: { sankalp: true },
+                                            ids: { sankalp: selectedLinkedPractice.id }
+                                        }}
+                                        onPressStartSankalp={() => { }}
+                                        onCompleteSankalp={() => { }}
+                                        viewOnly={true}
+                                    />
+                                )}
+                                {linkedCardType === 'practice' && (
+                                    <DailyPracticeDetailsCard
+                                        mode="view"
+                                        data={selectedLinkedPractice}
+                                        item={{
+                                            name: post.linked_item?.category || "Practice",
+                                            key: post.linked_item?.category
+                                        }}
+                                        onChange={() => { }}
+                                        onBackPress={() => setShowLinkedDetail(false)}
+                                        isLocked={true}
+                                        selectedCount={null}
+                                        onSelectCount={() => { }}
+                                    />
+                                )}
+                            </>
+                        )}
+                    </ScrollView>
+                </SafeAreaView>
+            </Modal>
+
+
 
         </View>
 
@@ -718,6 +817,20 @@ const styles = StyleSheet.create({
         color: "#333",
 
         marginLeft: 24, // aligns subtitle under title text, not icon
+    },
+    overlayHeader: {
+        paddingHorizontal: 16,
+        paddingTop: 10,
+        paddingBottom: 5,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+    },
+    backButton: {
+        padding: 4,
+    },
+    overlayScrollContent: {
+        paddingBottom: 40,
+        alignItems: 'center',
     },
 });
 

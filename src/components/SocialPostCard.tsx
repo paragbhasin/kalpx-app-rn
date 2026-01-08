@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRoute } from "@react-navigation/native";
 
 import {
@@ -94,10 +94,31 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     const [showMenu, setShowMenu] = useState(false);
     const [isReportModalVisible, setIsReportModalVisible] = useState(false);
 
-    // Random initial counts for upvotes and shares
-    const [upvoteCount, setUpvoteCount] = useState(post.upvote_count || Math.floor(Math.random() * 950) + 50); // 50-1000
-    const [shareCount, setShareCount] = useState(post.share_count || Math.floor(Math.random() * 20) + 10); // 10-500
-    const [hasUserVoted, setHasUserVoted] = useState<'up' | 'down' | null>(null);
+    // Use post.score if available, otherwise fallback to a stable random number for realistic look
+    // We use a ref or state that initializes once to keep the random number stable for this post instance
+    const [randomUpvotes] = useState(() => Math.floor(Math.random() * 950) + 50);
+    const [randomShares] = useState(() => Math.floor(Math.random() * 20) + 10);
+
+    const getEffectiveUpvotes = (p: any) => {
+        const val = p.score !== undefined ? p.score : (p.upvote_count || 0);
+        return val || randomUpvotes;
+    };
+
+    const getEffectiveShares = (p: any) => {
+        return p.share_count || randomShares;
+    };
+
+    const [upvoteCount, setUpvoteCount] = useState(() => getEffectiveUpvotes(post));
+    const [shareCount, setShareCount] = useState(() => getEffectiveShares(post));
+    const [hasUserVoted, setHasUserVoted] = useState<'up' | 'down' | null>(
+        post.user_vote === 1 ? 'up' : post.user_vote === -1 ? 'down' : null
+    );
+
+    useEffect(() => {
+        setUpvoteCount(getEffectiveUpvotes(post));
+        setShareCount(getEffectiveShares(post));
+        setHasUserVoted(post.user_vote === 1 ? 'up' : post.user_vote === -1 ? 'down' : null);
+    }, [post.score, post.upvote_count, post.share_count, post.user_vote]);
     const [showLinkedDetail, setShowLinkedDetail] = useState(false);
     const [selectedLinkedPractice, setSelectedLinkedPractice] = useState<any>(null);
     const [linkedCardType, setLinkedCardType] = useState<'mantra' | 'sankalp' | 'practice' | null>(null);

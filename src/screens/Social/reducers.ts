@@ -18,6 +18,7 @@ import {
   FETCH_COMMUNITY_POSTS_SUCCESS,
   FETCH_COMMUNITY_POSTS_FAILURE,
 } from "./actions";
+import { POST_DETAIL_INTERACTION_SUCCESS } from "../PostDetail/actions";
 
 const initialState = {
   loading: false,
@@ -182,6 +183,51 @@ export const communitiesReducer = (state = initialCommunitiesState, action) => {
         ...state,
         communityPosts: { ...state.communityPosts, loading: false, error: action.payload }
       };
+
+    case POST_DETAIL_INTERACTION_SUCCESS: {
+      const { id, type: interaction } = action.payload;
+      const updatePost = (p) => {
+        if (p.id !== id) return p;
+        let updatedPost = { ...p };
+
+        if (interaction === 'upvote') {
+          if (updatedPost.user_vote === 1) {
+            updatedPost.score = (updatedPost.score || 0) - 1;
+            updatedPost.user_vote = 0;
+          } else if (updatedPost.user_vote === -1) {
+            updatedPost.score = (updatedPost.score || 0) + 2;
+            updatedPost.user_vote = 1;
+          } else {
+            updatedPost.score = (updatedPost.score || 0) + 1;
+            updatedPost.user_vote = 1;
+          }
+        } else if (interaction === 'downvote') {
+          if (updatedPost.user_vote === -1) {
+            updatedPost.score = (updatedPost.score || 0) + 1;
+            updatedPost.user_vote = 0;
+          } else if (updatedPost.user_vote === 1) {
+            updatedPost.score = (updatedPost.score || 0) - 2;
+            updatedPost.user_vote = -1;
+          } else {
+            updatedPost.score = (updatedPost.score || 0) - 1;
+            updatedPost.user_vote = -1;
+          }
+        } else if (interaction === 'save') {
+          updatedPost.is_saved = true;
+        } else if (interaction === 'unsave') {
+          updatedPost.is_saved = false;
+        }
+        return updatedPost;
+      };
+
+      return {
+        ...state,
+        communityPosts: {
+          ...state.communityPosts,
+          data: state.communityPosts.data.map(updatePost)
+        }
+      };
+    }
 
     default:
       return state;

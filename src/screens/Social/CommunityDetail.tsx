@@ -12,11 +12,13 @@ import {
     Dimensions,
     ScrollView,
     Modal,
+    Alert,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { fetchCommunityDetail, fetchCommunityPosts, followCommunity, unfollowCommunity } from "./actions";
+import { votePostDetail, savePostDetail, unsavePostDetail, hidePostDetail, reportContent } from "../PostDetail/actions";
 import SocialPostCard from "../../components/SocialPostCard";
 import Header from "../../components/Header";
 import { COMMUNITY_BACKGROUNDS } from "../../utils/CommunityAssets";
@@ -27,9 +29,9 @@ const { width } = Dimensions.get("window");
 const CommunityDetail = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation<any>();
-        const [showMenu, setShowMenu] = useState(false);
+    const [showMenu, setShowMenu] = useState(false);
     const [menuPos, setMenuPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 });
-    const filterRef = useRef<TouchableOpacity>(null);
+    const filterRef = useRef<any>(null);
     const [sortBy, setSortBy] = useState<'new' | 'top' | 'hot'>('new');
     const route = useRoute();
     const { slug } = route.params as { slug: string };
@@ -39,10 +41,10 @@ const CommunityDetail = () => {
 
     const [activeTab, setActiveTab] = useState<"Feed" | "About">("Feed");
     const [expandedRules, setExpandedRules] = useState<number[]>([]);
-useEffect(() => {
-  dispatch(fetchCommunityDetail(slug) as any);
-  dispatch(fetchCommunityPosts(slug, 1, sortBy) as any);
-}, [dispatch, slug, sortBy]);
+    useEffect(() => {
+        dispatch(fetchCommunityDetail(slug) as any);
+        dispatch(fetchCommunityPosts(slug, 1, sortBy) as any);
+    }, [dispatch, slug, sortBy]);
 
     const community = communityDetail.data;
     const posts = communityPosts.data;
@@ -77,6 +79,35 @@ useEffect(() => {
         setExpandedRules((prev) =>
             prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
         );
+    };
+
+    const handleInteraction = (type: string, post: any) => {
+        switch (type) {
+            case 'comment':
+                navigation.navigate('SocialPostDetailScreen', { post: post });
+                break;
+            case 'askQuestion':
+                navigation.navigate('SocialPostDetailScreen', { post: post, isQuestion: true });
+                break;
+            case 'upvote':
+                dispatch(votePostDetail(post.id, 'upvote') as any);
+                break;
+            case 'downvote':
+                dispatch(votePostDetail(post.id, 'downvote') as any);
+                break;
+            case 'save':
+                dispatch(savePostDetail(post.id) as any);
+                break;
+            case 'unsave':
+                dispatch(unsavePostDetail(post.id) as any);
+                break;
+            case 'hide':
+                dispatch(hidePostDetail(post.id) as any);
+                break;
+            case 'report':
+                // report is handled via onReport prop which receives reason and details
+                break;
+        }
     };
 
     const getPostImage = (post: any) => {
@@ -141,75 +172,75 @@ useEffect(() => {
                 </TouchableOpacity>
                 <View style={{ flex: 1 }} />
                 <TouchableOpacity
-                  ref={filterRef}
-                  style={styles.filterButton}
-                  onPress={() => {
-                    filterRef.current?.measureInWindow((x, y, width, height) => {
-                      setMenuPos({
-                        top: y + height + 6,
-                        right: 16,
-                      });
-                      setShowMenu(true);
-                    });
-                  }}
+                    ref={filterRef}
+                    style={styles.filterButton}
+                    onPress={() => {
+                        filterRef.current?.measureInWindow((x, y, width, height) => {
+                            setMenuPos({
+                                top: y + height + 6,
+                                right: 16,
+                            });
+                            setShowMenu(true);
+                        });
+                    }}
                 >
                     <Ionicons name="filter" size={20} color="#000" />
                 </TouchableOpacity>
             </View>
             <Modal
-              visible={showMenu}
-              transparent
-              animationType="fade"
-              onRequestClose={() => setShowMenu(false)}
+                visible={showMenu}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setShowMenu(false)}
             >
-              <TouchableOpacity
-                style={styles.menuBackdrop}
-                activeOpacity={1}
-                onPress={() => setShowMenu(false)}
-              />
+                <TouchableOpacity
+                    style={styles.menuBackdrop}
+                    activeOpacity={1}
+                    onPress={() => setShowMenu(false)}
+                />
 
-              <View style={[styles.menuContainer, { top: menuPos.top, right: menuPos.right }]}>
-            <TouchableOpacity
-  style={styles.menuItem}
-  onPress={() => {
-    setSortBy('new');
-    setShowMenu(false);
-  }}
->
-  <Text  style={[
-    styles.menuItemText,
-    sortBy === 'new' && { color: '#D69E2E', fontWeight: '700' },
-  ]}
-  
-  >New</Text>
-</TouchableOpacity>
+                <View style={[styles.menuContainer, { top: menuPos.top, right: menuPos.right }]}>
+                    <TouchableOpacity
+                        style={styles.menuItem}
+                        onPress={() => {
+                            setSortBy('new');
+                            setShowMenu(false);
+                        }}
+                    >
+                        <Text style={[
+                            styles.menuItemText,
+                            sortBy === 'new' && { color: '#D69E2E', fontWeight: '700' },
+                        ]}
 
-<TouchableOpacity
-  style={styles.menuItem}
-  onPress={() => {
-    setSortBy('top');
-    setShowMenu(false);
-  }}
->
-  <Text  style={[
-    styles.menuItemText,
-    sortBy === 'top' && { color: '#D69E2E', fontWeight: '700' },
-  ]}>Top</Text>
-</TouchableOpacity>
+                        >New</Text>
+                    </TouchableOpacity>
 
-<TouchableOpacity
-  style={[styles.menuItem, { borderBottomWidth: 0 }]}
-  onPress={() => {
-    setSortBy('hot');
-    setShowMenu(false);
-  }}
->
-  <Text  style={[
-    styles.menuItemText,
-    sortBy === 'hot' && { color: '#D69E2E', fontWeight: '700' },
-  ]}>Hot</Text>
-</TouchableOpacity>
-              </View>
+                    <TouchableOpacity
+                        style={styles.menuItem}
+                        onPress={() => {
+                            setSortBy('top');
+                            setShowMenu(false);
+                        }}
+                    >
+                        <Text style={[
+                            styles.menuItemText,
+                            sortBy === 'top' && { color: '#D69E2E', fontWeight: '700' },
+                        ]}>Top</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={[styles.menuItem, { borderBottomWidth: 0 }]}
+                        onPress={() => {
+                            setSortBy('hot');
+                            setShowMenu(false);
+                        }}
+                    >
+                        <Text style={[
+                            styles.menuItemText,
+                            sortBy === 'hot' && { color: '#D69E2E', fontWeight: '700' },
+                        ]}>Hot</Text>
+                    </TouchableOpacity>
+                </View>
             </Modal>
 
             {/* {activeTab === "Feed" && highlightPosts.length > 0 && (
@@ -305,7 +336,22 @@ useEffect(() => {
             <FlatList
                 data={activeTab === "Feed" ? posts : []}
                 ListHeaderComponent={renderHeader}
-                renderItem={({ item }) => <SocialPostCard post={item} />}
+                renderItem={({ item }) => (
+                    <SocialPostCard
+                        post={item}
+                        onComment={() => handleInteraction('comment', item)}
+                        onAskQuestion={() => handleInteraction('askQuestion', item)}
+                        onUpvote={() => handleInteraction('upvote', item)}
+                        onDownvote={() => handleInteraction('downvote', item)}
+                        onSave={() => handleInteraction('save', item)}
+                        onUnsave={() => handleInteraction('unsave', item)}
+                        onHide={() => handleInteraction('hide', item)}
+                        onReport={(reason, details) => {
+                            dispatch(reportContent('post', item.id, reason, details) as any);
+                            Alert.alert("Reported", "Thank you for reporting. We will review this post.");
+                        }}
+                    />
+                )}
                 keyExtractor={(item) => item.id.toString()}
                 onEndReached={handleLoadMore}
                 onEndReachedThreshold={0.5}
@@ -610,7 +656,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#f0f0f0',
     },
-       menuBackdrop: {
+    menuBackdrop: {
         position: 'absolute',
         top: 0,
         left: 0,

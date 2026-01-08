@@ -112,7 +112,7 @@ export const deleteComment = (commentId: number) => async (dispatch: any) => {
 // Interactions on Post
 export const votePostDetail = (postId: string | number, type: 'upvote' | 'downvote') => async (dispatch: any) => {
     // Optimistic dispatch could happen here
-    dispatch({ type: POST_DETAIL_INTERACTION_SUCCESS, payload: { type } });
+    dispatch({ type: POST_DETAIL_INTERACTION_SUCCESS, payload: { id: postId, type } });
     try {
         await api.post(`/posts/${postId}/${type}/`);
     } catch (err) {
@@ -122,17 +122,17 @@ export const votePostDetail = (postId: string | number, type: 'upvote' | 'downvo
 }
 
 export const savePostDetail = (postId: string | number) => async (dispatch: any) => {
-    dispatch({ type: POST_DETAIL_INTERACTION_SUCCESS, payload: { type: 'save' } });
+    dispatch({ type: POST_DETAIL_INTERACTION_SUCCESS, payload: { id: postId, type: 'save' } });
     try { await api.post(`/posts/${postId}/save/`); } catch (err) { console.error(err); }
 }
 
 export const unsavePostDetail = (postId: string | number) => async (dispatch: any) => {
-    dispatch({ type: POST_DETAIL_INTERACTION_SUCCESS, payload: { type: 'unsave' } });
+    dispatch({ type: POST_DETAIL_INTERACTION_SUCCESS, payload: { id: postId, type: 'unsave' } });
     try { await api.post(`/posts/${postId}/unsave/`); } catch (err) { console.error(err); }
 }
 
 export const hidePostDetail = (postId: string | number) => async (dispatch: any) => {
-    dispatch({ type: POST_DETAIL_INTERACTION_SUCCESS, payload: { type: 'hide' } });
+    dispatch({ type: POST_DETAIL_INTERACTION_SUCCESS, payload: { id: postId, type: 'hide' } });
     try { await api.post(`/posts/${postId}/hide/`); } catch (err) { console.error(err); }
 }
 

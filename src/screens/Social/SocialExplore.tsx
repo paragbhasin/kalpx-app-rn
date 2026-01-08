@@ -14,10 +14,11 @@ import LoadingOverlay from "../../components/LoadingOverlay";
 import api from "../../Networks/axios";
 import SocialPostCard from "../../components/SocialPostCard";
 import ShimmerPlaceholder from "../../components/ShimmerPlaceholder";
-import { FlatList, ActivityIndicator } from "react-native";
+import { FlatList, ActivityIndicator, Alert } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUserActivity } from "../UserActivity/actions";
 import { followCommunity, unfollowCommunity } from "./actions";
+import { votePostDetail, savePostDetail, unsavePostDetail, hidePostDetail, reportContent } from "../PostDetail/actions";
 import styles from "./SocialExplorestyles";
 
 
@@ -131,6 +132,64 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid" }: 
           dispatch(followCommunity(communityId) as any);
         }
       }
+    } else if (type === 'upvote' || type === 'downvote' || type === 'save' || type === 'unsave') {
+      // Optimistic local update for SocialExplore's local items state
+      const interaction = type;
+      setItems(prevItems => prevItems.map(item => {
+        const mergedPostId = item.community_post?.id || item.id;
+        if (mergedPostId !== post.id) return item;
+
+        let updatedItem = { ...item };
+        let updatedPost = { ...(item.community_post || {}), ...item }; // handle both structures
+
+        if (interaction === 'upvote') {
+          const userVote = updatedPost.user_vote || 0;
+          if (userVote === 1) {
+            updatedPost.score = (updatedPost.score || 0) - 1;
+            updatedPost.user_vote = 0;
+          } else if (userVote === -1) {
+            updatedPost.score = (updatedPost.score || 0) + 2;
+            updatedPost.user_vote = 1;
+          } else {
+            updatedPost.score = (updatedPost.score || 0) + 1;
+            updatedPost.user_vote = 1;
+          }
+        } else if (interaction === 'downvote') {
+          const userVote = updatedPost.user_vote || 0;
+          if (userVote === -1) {
+            updatedPost.score = (updatedPost.score || 0) + 1;
+            updatedPost.user_vote = 0;
+          } else if (userVote === 1) {
+            updatedPost.score = (updatedPost.score || 0) - 2;
+            updatedPost.user_vote = -1;
+          } else {
+            updatedPost.score = (updatedPost.score || 0) - 1;
+            updatedPost.user_vote = -1;
+          }
+        } else if (interaction === 'save') {
+          updatedPost.is_saved = true;
+        } else if (interaction === 'unsave') {
+          updatedPost.is_saved = false;
+        }
+
+        // Sync back to the specific structure
+        if (updatedItem.community_post) {
+          updatedItem.community_post = { ...updatedItem.community_post, ...updatedPost };
+        } else {
+          updatedItem = { ...updatedItem, ...updatedPost };
+        }
+        return updatedItem;
+      }));
+
+      // Dispatch Redux action for backend sync and other components
+      if (type === 'upvote') dispatch(votePostDetail(post.id, 'upvote') as any);
+      else if (type === 'downvote') dispatch(votePostDetail(post.id, 'downvote') as any);
+      else if (type === 'save') dispatch(savePostDetail(post.id) as any);
+      else if (type === 'unsave') dispatch(unsavePostDetail(post.id) as any);
+
+    } else if (type === 'hide') {
+      setItems(prev => prev.filter(item => (item.community_post?.id || item.id) !== post.id));
+      dispatch(hidePostDetail(post.id) as any);
     }
   };
 
@@ -209,9 +268,18 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid" }: 
     return (
       <SocialPostCard
         post={{ ...mergedPost, is_joined: isJoined }}
-        onComment={() => handleInteraction('comment', item)}
-        onAskQuestion={() => handleInteraction('askQuestion', item)}
+        onComment={() => handleInteraction('comment', mergedPost)}
+        onAskQuestion={() => handleInteraction('askQuestion', mergedPost)}
         onJoin={() => handleInteraction('followToggle', { ...mergedPost, is_joined: isJoined })}
+        onUpvote={() => handleInteraction('upvote', mergedPost)}
+        onDownvote={() => handleInteraction('downvote', mergedPost)}
+        onSave={() => handleInteraction('save', mergedPost)}
+        onUnsave={() => handleInteraction('unsave', mergedPost)}
+        onHide={() => handleInteraction('hide', mergedPost)}
+        onReport={(reason, details) => {
+          dispatch(reportContent('post', mergedPost.id, reason, details) as any);
+          Alert.alert("Reported", "Thank you for reporting. We will review this post.");
+        }}
         onUserPress={() => { }} // Handle if needed
       />
     );

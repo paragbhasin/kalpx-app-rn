@@ -25,6 +25,7 @@ import {
   deleteComment,
   votePostDetail,
   voteComment,
+  markCommentUseful,
   savePostDetail,
   unsavePostDetail,
   hidePostDetail,
@@ -34,10 +35,19 @@ import moment from "moment";
 
 const screenWidth = Dimensions.get("window").width;
 
-const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote }) => {
+const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote, onUseful, onReport, currentUserId }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.content);
   const [showMenu, setShowMenu] = useState(false);
+  const [showUsefulMessage, setShowUsefulMessage] = useState(false);
+
+  const isOtherUser = currentUserId && comment.creator?.id !== currentUserId;
+
+  const handleUseful = () => {
+    onUseful(comment.id);
+    setShowUsefulMessage(true);
+    setTimeout(() => setShowUsefulMessage(false), 2000);
+  };
 
   const handleUpdate = () => {
     onEdit(comment.id, editContent);
@@ -47,12 +57,40 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote }) => {
   return (
     <View style={{ padding: 12, borderLeftWidth: comment.parent ? 1 : 0, borderLeftColor: '#eee', marginLeft: comment.parent ? 15 : 0, zIndex: showMenu ? 10 : 1 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-        <Image
-          source={{ uri: comment.creator?.avatar || "https://via.placeholder.com/24" }}
-          style={{ width: 24, height: 24, borderRadius: 12, marginRight: 8 }}
-        />
-        <Text style={{ fontWeight: 'bold', fontSize: 13, color: '#333' }}>{comment.creator_name || 'Anonymous'}</Text>
+       {comment.creator?.avatar ? (
+    <Image
+      source={{ uri: comment.creator.avatar }}
+      style={{ width: 24, height: 24, borderRadius: 12, marginRight: 8 }}
+    />
+  ) : (
+    <View
+      style={{
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: '#D69E2E',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 8,
+      }}
+    >
+      <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>
+        {(
+          comment.creator?.username?.split('@')[0]?.charAt(0) || 'A'
+        ).toUpperCase()}
+      </Text>
+    </View>
+  )}
+        <Text style={{ fontWeight: 'bold', fontSize: 13, color: '#333' }}>
+          {(comment.creator.username && comment.creator.username.split('@')[0]) || 'Anonymous'}
+        </Text>
         <Text style={{ fontSize: 11, color: '#999', marginLeft: 8 }}>{moment(comment.created_at).fromNow()}</Text>
+        {comment.useful_count > 0 && (
+          <View style={{ marginLeft: 'auto', backgroundColor: '#FFFDF0', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#FDF5E9' }}>
+            <Ionicons name="star" size={12} color="#D69E2E" />
+            <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#D69E2E', marginLeft: 4 }}>{comment.useful_count} Useful</Text>
+          </View>
+        )}
       </View>
 
       {isEditing ? (
@@ -77,14 +115,43 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote }) => {
       )}
 
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <TouchableOpacity style={{ flexDirection: 'row', alignItems: 'center', marginRight: 15 }} onPress={() => onVote(comment.id, 'upvote')}>
-          <Ionicons name={comment.is_upvoted ? "arrow-up-circle" : "arrow-up-circle-outline"} size={16} color={comment.is_upvoted ? "#D69E2E" : "#666"} />
-          <Text style={{ marginLeft: 4, fontSize: 12 }}>{comment.upvote_count || 0}</Text>
-        </TouchableOpacity>
+        {/* <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#f5f5f5', borderRadius: 20, paddingHorizontal: 8, paddingVertical: 4, marginRight: 15 }}>
+          <TouchableOpacity onPress={() => onVote(comment.id, 'upvote')} style={{ paddingRight: 8 }}>
+            <Ionicons
+              name={comment.user_vote === 1 ? "arrow-up-bold" : "arrow-up-outline"}
+              size={18}
+              color={comment.user_vote === 1 ? "#D69E2E" : "#666"}
+            />
+          </TouchableOpacity>
+          <Text style={{ fontSize: 12, fontWeight: 'bold', color: comment.user_vote === 1 ? "#D69E2E" : comment.user_vote === -1 ? "#946100" : "#666" }}>
+            {comment.score || 0}
+          </Text>
+          <TouchableOpacity onPress={() => onVote(comment.id, 'downvote')} style={{ paddingLeft: 8 }}>
+            <Ionicons
+              name={comment.user_vote === -1 ? "arrow-down-bold" : "arrow-down-outline"}
+              size={18}
+              color={comment.user_vote === -1 ? "#946100" : "#666"}
+            />
+          </TouchableOpacity>
+        </View> */}
 
         <TouchableOpacity onPress={() => onReply(comment)} style={{ marginRight: 15 }}>
           <Text style={{ fontSize: 12, color: '#666' }}>Reply</Text>
         </TouchableOpacity>
+
+        {isOtherUser && (
+          <TouchableOpacity
+            style={{ flexDirection: 'row', alignItems: 'center', marginRight: 15 }}
+            onPress={handleUseful}
+          >
+            <Ionicons
+              name={comment.is_useful_marked ? "star" : "star-outline"}
+              size={18}
+              color={comment.is_useful_marked ? "#D69E2E" : "#666"}
+            />
+            <Text style={{ marginLeft: 4, fontSize: 12, color: comment.is_useful_marked ? "#D69E2E" : "#666", fontWeight: comment.is_useful_marked ? 'bold' : 'normal' }}>Useful</Text>
+          </TouchableOpacity>
+        )}
 
         <View style={{ position: 'relative' }}>
           <TouchableOpacity onPress={() => setShowMenu(true)}>
@@ -104,49 +171,80 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote }) => {
                 }}
                 onPress={() => setShowMenu(false)}
               />
-              <View
-                style={{
-                  position: 'absolute',
+            <View
+              style={{
+                position: 'absolute',
                   top: 25,
-                  right: 0,
-                  backgroundColor: '#fff',
-                  borderRadius: 12,
-                  paddingVertical: 8,
-                  paddingHorizontal: 12,
-                  minWidth: 100,
+                right: 0,
+                backgroundColor: '#fff',
+                borderRadius: 12,
+                paddingVertical: 8,
+                paddingHorizontal: 12,
+                minWidth: 100,
                   zIndex: 1000,
                   elevation: 5,
-                  shadowColor: '#000',
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.2,
-                  shadowRadius: 4,
-                  borderWidth: 1,
-                  borderColor: '#f0f0f0',
-                }}
-              >
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.2,
+                shadowRadius: 4,
+                borderWidth: 1,
+                borderColor: '#f0f0f0',
+              }}
+            >
+              {!isOtherUser ? (
+                <>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setIsEditing(true);
+                      setShowMenu(false);
+                    }}
+                    style={{ paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#f5f5f5' }}
+                  >
+                    <Text style={{ fontSize: 14, color: '#333' }}>Edit</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => {
+                      onDelete(comment.id);
+                      setShowMenu(false);
+                    }}
+                    style={{ paddingVertical: 8 }}
+                  >
+                    <Text style={{ fontSize: 14, color: '#FF3B30' }}>Delete</Text>
+                  </TouchableOpacity>
+                </>
+              ) : (
                 <TouchableOpacity
                   onPress={() => {
-                    setIsEditing(true);
                     setShowMenu(false);
-                  }}
-                  style={{ paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#f5f5f5' }}
-                >
-                  <Text style={{ fontSize: 14, color: '#333' }}>Edit</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    onDelete(comment.id);
-                    setShowMenu(false);
+                    // For now, directly call onReport with a placeholder reason/details
+                    // In a real app, this would open a modal for user to select reason/details
+                    Alert.alert(
+                      "Report Comment",
+                      "Are you sure you want to report this comment?",
+                      [
+                        { text: "Cancel", style: "cancel" },
+                        {
+                          text: "Report",
+                          style: "destructive",
+                          onPress: () => onReport(comment.id, "spam", "User reported as spam from menu.")
+                        }
+                      ]
+                    );
                   }}
                   style={{ paddingVertical: 8 }}
                 >
-                  <Text style={{ fontSize: 14, color: '#FF3B30' }}>Delete</Text>
+                  <Text style={{ fontSize: 14, color: '#FF3B30' }}>Report</Text>
                 </TouchableOpacity>
-              </View>
+              )}
+            </View>
             </>
           )}
         </View>
       </View>
+
+      {showUsefulMessage && (
+        <Text style={{ fontSize: 12, color: '#2E7D32', marginTop: 4, fontWeight: '500' }}>Marked as useful!</Text>
+      )}
 
       {comment.children && comment.children.map(child => (
         <CommentItem
@@ -156,6 +254,9 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote }) => {
           onEdit={onEdit}
           onDelete={onDelete}
           onVote={onVote}
+          onUseful={onUseful}
+          onReport={onReport}
+          currentUserId={currentUserId}
         />
       ))}
     </View>
@@ -169,6 +270,8 @@ export default function SocialPostDetailScreen() {
 
   const { post: initialPost, isQuestion } = route.params || {};
   const { post, comments, loadingComments, loadingPost } = useSelector((state: any) => state.postDetail);
+  const profileDetails = useSelector((state: any) => state.profileDetailsReducer);
+  const currentUserId = profileDetails?.data?.id;
 
   const [commentText, setCommentText] = useState("");
   const [replyingTo, setReplyingTo] = useState<any>(null);
@@ -205,6 +308,15 @@ export default function SocialPostDetailScreen() {
 
   const handleVoteComment = (id, type) => {
     dispatch(voteComment(id, type) as any);
+  };
+
+  const handleUsefulComment = (id) => {
+    dispatch(markCommentUseful(id) as any);
+  };
+
+  const handleReportComment = (id, reason, details) => {
+    dispatch(reportContent('comment', id, reason, details) as any);
+    Alert.alert("Reported", "Thank you for reporting. We will review this comment.");
   };
 
   if (!post && loadingPost) {
@@ -274,6 +386,9 @@ export default function SocialPostDetailScreen() {
             onEdit={handleEditComment}
             onDelete={handleDeleteComment}
             onVote={handleVoteComment}
+            onUseful={handleUsefulComment}
+            onReport={handleReportComment}
+            currentUserId={currentUserId}
           />
         )}
         ListEmptyComponent={

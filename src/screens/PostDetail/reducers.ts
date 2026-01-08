@@ -103,33 +103,77 @@ export const postDetailReducer = (state = initialPostDetailState, action: any) =
 
         case POST_DETAIL_INTERACTION_SUCCESS:
             if (!state.post) return state;
-            const post: any = state.post; // cast for TS
-            let newPost = { ...post };
-            if (action.payload.type === 'upvote') {
-                newPost.score = (newPost.score || 0) + 1;
-                // maybe toggle 'is_upvoted'?
-            } else if (action.payload.type === 'downvote') {
-                newPost.score = (newPost.score || 0) - 1;
-            } else if (action.payload.type === 'save') {
-                newPost.is_saved = true;
-            } else if (action.payload.type === 'unsave') {
-                newPost.is_saved = false;
+            const targetPost: any = state.post;
+            if (action.payload.id && targetPost.id !== action.payload.id) return state;
+
+            let updatedPost = { ...targetPost };
+            const interaction = action.payload.type;
+
+            if (interaction === 'upvote') {
+                if (updatedPost.user_vote === 1) {
+                    updatedPost.score = (updatedPost.score || 0) - 1;
+                    updatedPost.user_vote = 0;
+                } else if (updatedPost.user_vote === -1) {
+                    updatedPost.score = (updatedPost.score || 0) + 2;
+                    updatedPost.user_vote = 1;
+                } else {
+                    updatedPost.score = (updatedPost.score || 0) + 1;
+                    updatedPost.user_vote = 1;
+                }
+            } else if (interaction === 'downvote') {
+                if (updatedPost.user_vote === -1) {
+                    updatedPost.score = (updatedPost.score || 0) + 1;
+                    updatedPost.user_vote = 0;
+                } else if (updatedPost.user_vote === 1) {
+                    updatedPost.score = (updatedPost.score || 0) - 2;
+                    updatedPost.user_vote = -1;
+                } else {
+                    updatedPost.score = (updatedPost.score || 0) - 1;
+                    updatedPost.user_vote = -1;
+                }
+            } else if (interaction === 'save') {
+                updatedPost.is_saved = true;
+            } else if (interaction === 'unsave') {
+                updatedPost.is_saved = false;
             }
-            return { ...state, post: newPost };
+            return { ...state, post: updatedPost };
 
         case COMMENT_INTERACTION_SUCCESS:
             return {
                 ...state,
                 comments: updateCommentResursively(state.comments, action.payload.id, (c) => {
                     const type = action.payload.type;
-                    let score = c.score || 0;
-                    if (type === 'upvote') score++;
-                    if (type === 'downvote') score--;
-                    // useful mark logic
-                    let isUseful = c.is_useful_marked;
-                    if (type === 'useful') isUseful = !isUseful; // toggle
+                    let updatedComment = { ...c };
 
-                    return { ...c, score, is_useful_marked: isUseful };
+                    if (type === 'upvote') {
+                        if (updatedComment.user_vote === 1) {
+                            updatedComment.score = (updatedComment.score || 0) - 1;
+                            updatedComment.user_vote = 0;
+                        } else if (updatedComment.user_vote === -1) {
+                            updatedComment.score = (updatedComment.score || 0) + 2;
+                            updatedComment.user_vote = 1;
+                        } else {
+                            updatedComment.score = (updatedComment.score || 0) + 1;
+                            updatedComment.user_vote = 1;
+                        }
+                    } else if (type === 'downvote') {
+                        if (updatedComment.user_vote === -1) {
+                            updatedComment.score = (updatedComment.score || 0) + 1;
+                            updatedComment.user_vote = 0;
+                        } else if (updatedComment.user_vote === 1) {
+                            updatedComment.score = (updatedComment.score || 0) - 2;
+                            updatedComment.user_vote = -1;
+                        } else {
+                            updatedComment.score = (updatedComment.score || 0) - 1;
+                            updatedComment.user_vote = -1;
+                        }
+                    } else if (type === 'useful') {
+                        const wasUseful = updatedComment.is_useful_marked;
+                        updatedComment.is_useful_marked = !wasUseful;
+                        updatedComment.useful_count = (updatedComment.useful_count || 0) + (wasUseful ? -1 : 1);
+                    }
+
+                    return updatedComment;
                 })
             };
 

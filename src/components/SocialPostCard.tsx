@@ -106,7 +106,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     const timeAgo = post.created_at ? moment(post.created_at).fromNow() : "";
 
     // images for carousel
-    const images = post.images || (post.hook_image ? [{ image: post.hook_image }] : []);
+    const imagesData = post.resolved_slide_layouts || post.slide_layouts || post.images || (post.hook_image ? [{ image: post.hook_image }] : []);
 
     // truncated content
     const content = post.content || "";
@@ -130,21 +130,72 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     // Dynamic height based on measured width and strict ratio
     const imageHeight = cardWidth / aspectRatio;
 
-    const renderCarouselItem = ({ item }: { item: any }) => (
-        <View style={[styles.imageContainer, { width: cardWidth }]}>
-            <Image
-                source={{ uri: item.image_url || item.image || item }}
-                style={styles.postImage}
-                resizeMode="contain"
-            />
-            {item.overlayText && (
-                <View style={styles.overlay}>
-                    <Text style={styles.overlayTitle}>{item.overlayTitle}</Text>
-                    <Text style={styles.overlaySubtitle}>{item.overlaySubtitle}</Text>
-                </View>
-            )}
-        </View>
-    );
+    const renderCarouselItem = ({ item }: { item: any }) => {
+        const blocks = item.layout?.blocks || item.resolved_blocks || item.blocks || [];
+        const imageUrl = item.image_url || item.image || (typeof item === 'string' ? item : null);
+
+        return (
+            <View style={[styles.imageContainer, { width: cardWidth }]}>
+                {imageUrl && (
+                    <Image
+                        source={{ uri: imageUrl }}
+                        style={styles.postImage}
+                        resizeMode="cover"
+                    />
+                )}
+                {blocks.map((block: any, index: number) => {
+                    const blockText = block.resolved_text || block.text;
+                    if (!blockText) return null;
+
+                    const scaledFontSize = (block.fontSize || 24) * (cardWidth / 420);
+                    const isCentered = block.align === 'center';
+                    const lineCount = blockText.split('\n').length;
+
+                    return (
+                        <View
+                            key={block.id || index}
+                            style={{
+                                position: 'absolute',
+                                left: isCentered ? 0 : `${block.x}%`,
+                                top: `${block.y}%`,
+                                width: isCentered ? cardWidth : `${Math.max(40, 100 - block.x)}%`,
+                                pointerEvents: 'none',
+                                transform: [
+                                    { translateY: -(scaledFontSize * lineCount * 0.6) }
+                                ],
+                                paddingHorizontal: 15, // Side padding to prevent edge touching
+                                justifyContent: 'center',
+                                alignItems: isCentered ? 'center' : block.align === 'right' ? 'flex-end' : 'flex-start',
+                            }}
+                        >
+                            <Text
+                                style={{
+                                    color: block.color || '#ffffff',
+                                    fontSize: scaledFontSize,
+                                    textAlign: block.align || 'center',
+                                    fontFamily: block.fontFamily || 'System',
+                                    fontWeight: '700',
+                                    textShadowColor: 'rgba(0,0,0,1)',
+                                    textShadowOffset: { width: 1, height: 1 },
+                                    textShadowRadius: 6,
+                                    opacity: (block.opacity || 100) / 100,
+                                    lineHeight: scaledFontSize * 1.2,
+                                }}
+                            >
+                                {blockText}
+                            </Text>
+                        </View>
+                    );
+                })}
+                {item.overlayText && !blocks.length && (
+                    <View style={styles.overlay}>
+                        <Text style={styles.overlayTitle}>{item.overlayTitle}</Text>
+                        <Text style={styles.overlaySubtitle}>{item.overlaySubtitle}</Text>
+                    </View>
+                )}
+            </View>
+        );
+    };
 
     const handleLinkedItemPress = () => {
         if (!post.linked_item || !post.linked_item.type || !post.linked_item.id) return;
@@ -301,21 +352,21 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
             {post.title && <Text style={styles.title}>{post.title}</Text>}
 
             {/* Carousel or Single Image */}
-            {images.length > 0 && (
+            {imagesData.length > 0 && (
                 <View style={{ height: imageHeight, width: "100%", marginTop: 0 }}>
                     <Carousel
                         loop={false}
                         width={cardWidth}
                         height={imageHeight}
-                        data={images}
+                        data={imagesData}
                         scrollAnimationDuration={1000}
                         onSnapToItem={(index) => setActiveIndex(index)}
                         renderItem={renderCarouselItem}
                     />
                     {/* Dot Indicators - Reddit Style */}
-                    {images.length > 1 && (
+                    {imagesData.length > 1 && (
                         <View style={styles.paginationContainer}>
-                            {images.map((_: any, index: number) => (
+                            {imagesData.map((_: any, index: number) => (
                                 <View
                                     key={index}
                                     style={[
@@ -328,9 +379,9 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                     )}
 
                     {/* Slide Counter - Reddit Style (Bottom Right) */}
-                    {images.length > 1 && (
+                    {imagesData.length > 1 && (
                         <View style={styles.slideCounter}>
-                            <Text style={styles.slideCounterText}>{activeIndex + 1}/{images.length}</Text>
+                            <Text style={styles.slideCounterText}>{activeIndex + 1}/{imagesData.length}</Text>
                         </View>
                     )}
                 </View>

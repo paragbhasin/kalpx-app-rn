@@ -44,12 +44,13 @@ const CommunityLanding = () => {
         { label: "Top", value: "Top" }, // Renders SocialExplore
         { label: "Popular", value: "Popular" },
         { label: "Explore", value: "Explore" },
+                { label: "Your Activity", value: "yourActivity" },
         { label: "Communities", value: "Communities" },
         { label: "KalpX Rules", value: "kalpxRules" },
         { label: "Privacy Policy", value: "privacyPolicy" },
         { label: "User agreements", value: "userAgreements" },
         { label: "About KalpX", value: "aboutKalpx" },
-        { label: "Your Activity", value: "yourActivity" }
+
 
     ];
 
@@ -141,11 +142,12 @@ const CommunityLanding = () => {
                                                 ))}
                                             </View>
                                         )}
-                                        {isYourActivity && (
+                                             {isYourActivity && (
                                             <View>
                                                 <Text style={styles.dropdownSectionHeader}>YOUR ACTIVITY</Text>
                                             </View>
                                         )}
+                                   
                                         {item.value === "Communities" && (
                                             <View>
                                                 <Text style={styles.dropdownSectionHeader}>RESOURCES</Text>

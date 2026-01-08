@@ -31,6 +31,7 @@ const MantraCard = ({
   onPressChantMantra,
   DoneMantraCalled,
   viewOnly = false,
+  onAddToMyPractice = null,
 }) => {
   const navigation: any = useNavigation();
   const { i18n, t } = useTranslation();
@@ -212,7 +213,7 @@ const MantraCard = ({
         // ];
 
         return (
-     
+
           <View
             key={index}
             style={{
@@ -261,61 +262,61 @@ const MantraCard = ({
                   style={styles.partialBgContainer}
                   imageStyle={styles.partialBgImage}
                 >
-                   {!viewOnly && (
-                  <TextComponent
-                    type="semiBoldText"
-                    style={{ color: Colors.Colors.App_theme }}
-                  >
-                    {uiHeaderText}
-                    {/* {t("mantraCard.shareSadana")} */}
-                  </TextComponent>
-                   )}
-                      {!viewOnly && (
-                  <View style={styles.headerRow}>
+                  {!viewOnly && (
                     <TextComponent
-                      type="cardHeaderText"
-                      style={{ textTransform: "uppercase", }}
+                      type="semiBoldText"
+                      style={{ color: Colors.Colors.App_theme }}
                     >
-                      {t("mantraCard.dailyMantra")}
+                      {uiHeaderText}
+                      {/* {t("mantraCard.shareSadana")} */}
                     </TextComponent>
-                  </View>
-                    )}
- {!viewOnly && (
-                  <View style={{ flexDirection: "row", alignSelf: "flex-end", right: 20, marginTop: -37 }}>
-                    <TouchableOpacity
-                      onPress={handleShareMantra}
-                      style={{ flexDirection: "row", alignItems: "center" }}
-                    >
-                      <Image
-                        source={require("../../assets/Streak_S4.png")}
-                        style={styles.streakIcon}
-                      />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => {
-                        const englishMantra = CATALOGS.en.find(
-                          (m) => m.id === currentMantra.id
-                        );
-                        const englishTags = englishMantra?.tags || [];
-                        console.log("tages >>>>>", englishTags);
-                        navigation.navigate("RelatedVideosScreen", {
-                          tag: englishTags,
-                        });
-                      }}
-                      style={{
-                        marginLeft: 8,
-                        padding: 6,
-                        backgroundColor: Colors.Colors.Yellow,
-                        borderRadius: 50,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        // alignSelf: "flex-end",
-                      }}
-                    >
-                      <Icon name="videocam-outline" size={18} color="#fff" />
-                    </TouchableOpacity>
-                  </View>
- )}
+                  )}
+                  {!viewOnly && (
+                    <View style={styles.headerRow}>
+                      <TextComponent
+                        type="cardHeaderText"
+                        style={{ textTransform: "uppercase", }}
+                      >
+                        {t("mantraCard.dailyMantra")}
+                      </TextComponent>
+                    </View>
+                  )}
+                  {!viewOnly && (
+                    <View style={{ flexDirection: "row", alignSelf: "flex-end", right: 20, marginTop: -37 }}>
+                      <TouchableOpacity
+                        onPress={handleShareMantra}
+                        style={{ flexDirection: "row", alignItems: "center" }}
+                      >
+                        <Image
+                          source={require("../../assets/Streak_S4.png")}
+                          style={styles.streakIcon}
+                        />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => {
+                          const englishMantra = CATALOGS.en.find(
+                            (m) => m.id === currentMantra.id
+                          );
+                          const englishTags = englishMantra?.tags || [];
+                          console.log("tages >>>>>", englishTags);
+                          navigation.navigate("RelatedVideosScreen", {
+                            tag: englishTags,
+                          });
+                        }}
+                        style={{
+                          marginLeft: 8,
+                          padding: 6,
+                          backgroundColor: Colors.Colors.Yellow,
+                          borderRadius: 50,
+                          justifyContent: "center",
+                          alignItems: "center",
+                          // alignSelf: "flex-end",
+                        }}
+                      >
+                        <Icon name="videocam-outline" size={18} color="#fff" />
+                      </TouchableOpacity>
+                    </View>
+                  )}
                   <View
                     style={{
                       flexDirection: "row",
@@ -389,8 +390,8 @@ const MantraCard = ({
                             const selected = isLocked
                               ? apiSelected
                               : selectedReps[currentMantra.id]
-                              ? selectedReps[currentMantra.id] === rep
-                              : rep === currentMantra.suggested_reps;
+                                ? selectedReps[currentMantra.id] === rep
+                                : rep === currentMantra.suggested_reps;
 
                             return (
                               <TouchableOpacity
@@ -549,6 +550,19 @@ const MantraCard = ({
                       />
                     </View>
                   </>
+                )}
+                {viewOnly && onAddToMyPractice && (
+                  <TouchableOpacity
+                    style={styles.startBtn}
+                    onPress={onAddToMyPractice}
+                  >
+                    <TextComponent
+                      type="semiBoldText"
+                      style={{ textAlign: "center", color: Colors.Colors.white,marginBottom:2 }}
+                    >
+                      Add this to my practice
+                    </TextComponent>
+                  </TouchableOpacity>
                 )}
               </View>
             </Card>

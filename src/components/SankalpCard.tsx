@@ -39,7 +39,7 @@ function seededShuffle(array, seed) {
   return result;
 }
 
-const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp, viewOnly = false }) => {
+const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp, viewOnly = false, onAddToMyPractice = null }) => {
   const navigation: any = useNavigation();
   const { t, i18n } = useTranslation();
   const swiperRef = useRef<Swiper>(null);
@@ -206,49 +206,49 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                 style={styles.partialBgContainer}
                 imageStyle={styles.partialBgImage}
               >
-                 {!viewOnly && (
-                <>
-                <TextComponent type="semiBoldText" style={{ color: Colors.Colors.App_theme }}>
-                  {uiHeaderText}
-                </TextComponent>
+                {!viewOnly && (
+                  <>
+                    <TextComponent type="semiBoldText" style={{ color: Colors.Colors.App_theme }}>
+                      {uiHeaderText}
+                    </TextComponent>
 
-                <View style={styles.header}>
-                  <TextComponent
-                    type="cardHeaderText"
-                    style={{ marginLeft: 25 }}
-                  >
-                    {t("sankalpCard.dailySankalp")}
-                  </TextComponent>
-                </View>
-                <View style={{ flexDirection: "row", alignSelf: "flex-end", right: 20, marginTop: -30 }}>
-                  <TouchableOpacity
-                    onPress={() => handleShareSankalp()}
-                    style={{ flexDirection: "row", alignItems: "center" }}
-                  >
-                    <Image source={require("../../assets/Streak_S4.png")} style={styles.streakIcon} />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => {
-                      const englishSource = getEnglishSourceForSankalp(currentSankalp.id);
-                      const { tags, searchQuery } = parseSourceToTags(englishSource, currentSankalp.id);
-                      console.log("🔍 Tags:", tags);
-                      console.log("🔎 Search Query:", searchQuery);
-                      navigation.navigate("RelatedVideosScreen", { tag: tags, search: searchQuery });
-                    }}
-                    style={{
-                      marginLeft: 8,
-                      padding: 6,
-                      backgroundColor: Colors.Colors.Yellow,
-                      borderRadius: 50,
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Icon name="videocam-outline" size={18} color="#fff" />
-                  </TouchableOpacity>
-                </View>
-                </>
-                 )}
+                    <View style={styles.header}>
+                      <TextComponent
+                        type="cardHeaderText"
+                        style={{ marginLeft: 25 }}
+                      >
+                        {t("sankalpCard.dailySankalp")}
+                      </TextComponent>
+                    </View>
+                    <View style={{ flexDirection: "row", alignSelf: "flex-end", right: 20, marginTop: -30 }}>
+                      <TouchableOpacity
+                        onPress={() => handleShareSankalp()}
+                        style={{ flexDirection: "row", alignItems: "center" }}
+                      >
+                        <Image source={require("../../assets/Streak_S4.png")} style={styles.streakIcon} />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => {
+                          const englishSource = getEnglishSourceForSankalp(currentSankalp.id);
+                          const { tags, searchQuery } = parseSourceToTags(englishSource, currentSankalp.id);
+                          console.log("🔍 Tags:", tags);
+                          console.log("🔎 Search Query:", searchQuery);
+                          navigation.navigate("RelatedVideosScreen", { tag: tags, search: searchQuery });
+                        }}
+                        style={{
+                          marginLeft: 8,
+                          padding: 6,
+                          backgroundColor: Colors.Colors.Yellow,
+                          borderRadius: 50,
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Icon name="videocam-outline" size={18} color="#fff" />
+                      </TouchableOpacity>
+                    </View>
+                  </>
+                )}
                 <TextComponent
                   type="cardText"
                   style={{ color: Colors.Colors.blue_text, textAlign: "center", marginHorizontal: 10 }}
@@ -453,6 +453,19 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                     />
                   </View>
                 </>
+              )}
+              {viewOnly && onAddToMyPractice && (
+                <TouchableOpacity
+               style={[styles.startBtn, { marginBottom: 8 }]}
+                  onPress={onAddToMyPractice}
+                >
+                  <TextComponent
+                    type="semiBoldText"
+                    style={{ textAlign: "center", color: Colors.Colors.white,marginBottom:2 }}
+                  >
+                    Add this to my practice
+                  </TextComponent>
+                </TouchableOpacity>
               )}
             </View>
           </Card>

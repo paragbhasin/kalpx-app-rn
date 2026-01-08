@@ -1297,10 +1297,10 @@ const TrackerEdit = ({ route }) => {
       });
       return;
     }
-    const newItemsOnly = selectedPractices.map((p) =>
+    const itemsToConfirm = isAddMoreScreen ? selectedPractices : recentlyAdded;
+    const newItemsOnly = itemsToConfirm.map((p) =>
       normalizeForConfirm(p)
     );
-    // const newItemsOnly = recentlyAdded.map((p) => normalizeForConfirm(p));
 
     navigation.navigate("ConfirmDailyPractices", {
       practices: newItemsOnly,
@@ -1575,13 +1575,18 @@ const TrackerEdit = ({ route }) => {
                 marginTop: 10,
               }}
             >
-              <View style={{ width: 30 }} />
+              {selectedmantra  && (
+              <TouchableOpacity onPress={() => navigation.goBack()} style={{ width: 30 }}>
+                <Ionicons name="arrow-back" size={26} color="#000" />
+              </TouchableOpacity>
+)}
               <TextComponent
                 type="DailyboldText"
                 style={{
                   color: Colors.Colors.BLACK,
                   textAlign: "center",
                   flex: 1,
+                  marginTop: selectedmantra ? 100 : 0,
                 }}
               >
                 Your Daily Routine

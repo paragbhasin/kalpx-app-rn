@@ -218,7 +218,8 @@ const DailyPracticeDetailsCard = ({
   isLocked,
   selectedCount,
   onSelectCount,
-  mode
+  mode,
+  onAddToMyPractice = null,
 }) => {
   const [selectedChant, setSelectedChant] = useState(null);
   const [showPronunciation, setShowPronunciation] = useState(false);
@@ -542,31 +543,58 @@ const DailyPracticeDetailsCard = ({
         <View style={styles.fixedButtons}>
           {!isLocked && (
             <>
-            <TouchableOpacity style={styles.changeButton}
-              onPress={handleSwipeChange}
-            // onPress={onChange}
-            >
-              <Ionicons
-                name="repeat-outline"
-                size={22}
-                color="#D4A017"
-                style={{ marginRight: 10 }}
-              />
-              <TextComponent type="headerText" style={styles.changeText}>
-                Change
-              </TextComponent>
-            </TouchableOpacity>
-       
-          {mode === "new" && (
-            <TouchableOpacity style={mode === "new" ? styles.selectButton : styles.selectNewButton} onPress={onBackPress}>
-              <TextComponent type="headerText" style={styles.selectText}>
-                Select
-              </TextComponent>
-            </TouchableOpacity>
+              <TouchableOpacity style={styles.changeButton}
+                onPress={handleSwipeChange}
+              // onPress={onChange}
+              >
+                <Ionicons
+                  name="repeat-outline"
+                  size={22}
+                  color="#D4A017"
+                  style={{ marginRight: 10 }}
+                />
+                <TextComponent type="headerText" style={styles.changeText}>
+                  Change
+                </TextComponent>
+              </TouchableOpacity>
+
+              {mode === "new" && (
+                <TouchableOpacity style={mode === "new" ? styles.selectButton : styles.selectNewButton} onPress={onBackPress}>
+                  <TextComponent type="headerText" style={styles.selectText}>
+                    Select
+                  </TextComponent>
+                </TouchableOpacity>
+              )}
+            </>
           )}
-          </>
-             )}
+     
         </View>
+   <View
+    style={[
+      styles.selectButton,
+      {
+        marginBottom: 8,
+        padding: 10,
+        justifyContent: "center",
+        alignItems: "center",
+              marginHorizontal: 12,
+      },
+    ]}
+  >
+    {mode === "view" && onAddToMyPractice && (
+      <TouchableOpacity
+        onPress={onAddToMyPractice}
+        style={{ justifyContent: "center", alignItems: "center" }}
+      >
+        <TextComponent
+          type="headerText"
+          style={styles.practiceSelectText}
+        >
+          Add this to my practice
+        </TextComponent>
+      </TouchableOpacity>
+    )}
+  </View>
 
       </Card>
     </Animated.View>
@@ -709,6 +737,11 @@ const styles = StyleSheet.create({
   },
   selectText: {
     color: "#FFFFFF",
+  },
+  practiceSelectText:{
+    color: "#FFFFFF",
+    marginBottom: 2
+
   },
   tagsContent: {
     justifyContent: "center",

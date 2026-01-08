@@ -165,6 +165,14 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
         setShowLinkedDetail(true);
     };
 
+    const handleAddToMyPractice = (practice: any, type: string) => {
+        setShowLinkedDetail(false);
+        navigation.navigate('TrackerEdit', {
+            selectedmantra: practice,
+            autoSelectCategory: type === 'mantra' ? 'daily-mantra' : type === 'sankalp' ? 'daily-sankalp' : (practice.category || 'sanatan')
+        });
+    };
+
     return (
         <View
             style={styles.card}
@@ -479,6 +487,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                                         onPressChantMantra={() => { }}
                                         DoneMantraCalled={() => { }}
                                         viewOnly={true}
+                                        onAddToMyPractice={() => handleAddToMyPractice(selectedLinkedPractice, 'mantra')}
                                     />
                                 )}
                                 {linkedCardType === 'sankalp' && (
@@ -490,6 +499,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                                         onPressStartSankalp={() => { }}
                                         onCompleteSankalp={() => { }}
                                         viewOnly={true}
+                                        onAddToMyPractice={() => handleAddToMyPractice(selectedLinkedPractice, 'sankalp')}
                                     />
                                 )}
                                 {linkedCardType === 'practice' && (
@@ -505,6 +515,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                                         isLocked={true}
                                         selectedCount={null}
                                         onSelectCount={() => { }}
+                                        onAddToMyPractice={() => handleAddToMyPractice(selectedLinkedPractice, 'practice')}
                                     />
                                 )}
                             </>

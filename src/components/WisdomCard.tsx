@@ -287,32 +287,39 @@ const WisdomCard = () => {
                       {t(wisdom.text)}
                     </TextComponent>
                   </ImageBackground>
-                  {Array.isArray(wisdom.explanation) ? (
-                    wisdom.explanation.map((line, idx) => (
-                      <TextComponent
-                        type="mediumText"
-                        style={{
-                          color: Colors.Colors.Light_black,
-                          marginVertical: 2,
-                          textAlign: "center",
-                        }}
-                        key={idx}
-                      >
-                        {line}
-                      </TextComponent>
-                    ))
-                  ) : (
-                    <TextComponent
-                      type="mediumText"
-                      style={{
-                        color: Colors.Colors.Light_black,
-                        marginVertical: 2,
-                        textAlign: "center",
-                      }}
-                    >
-                      {wisdom.explanation}
-                    </TextComponent>
-                  )}
+              {Array.isArray(wisdom.explanation) &&
+  wisdom.explanation.map((line, idx) => (
+    <View
+      key={idx}
+      style={{
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",  
+        marginVertical: 6,
+        paddingHorizontal: 16,
+      }}
+    >
+      <Image
+        source={require("../../assets/Check-wisdom.png")}
+        style={{
+          height: 18,
+          width: 18,
+          marginRight: 8,
+        }}
+      />
+
+    <TextComponent
+        type="mediumText"
+        style={{
+          color: Colors.Colors.Light_black,
+          flex: 1,          
+          textAlign: "left" 
+        }}
+      >
+        {line}
+      </TextComponent>
+    </View>
+  ))}
                   <TextComponent
                     type="headerSubBoldText"
                     style={{

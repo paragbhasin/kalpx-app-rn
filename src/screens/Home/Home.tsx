@@ -1171,12 +1171,12 @@ export default function Home() {
             // paddingRight: 16 
           }}>
             <TextComponent type="headerText" style={{ fontSize: 16 }}>
-              Explore Classes
+              Explore our Classes
             </TextComponent>
 
             <TouchableOpacity onPress={() => navigation.navigate("ClassesScreen")}>
               <TextComponent type="mediumText" style={{ color: Colors.Colors.App_theme }}>
-                Show All
+                View More
               </TextComponent>
             </TouchableOpacity>
           </View>

@@ -60,45 +60,49 @@ const finalSource = isRemote
 
         {/* Right content */}
         <View style={styles.content}>
-          <TextComponent
-            type="boldText"
-            style={styles.title}
-            numberOfLines={1}
-            ellipsizeMode="tail"
-          >
-            {title}
-          </TextComponent>
+          <View style={styles.textBlock}>
+            <TextComponent
+              type="boldText"
+              style={styles.title}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {title}
+            </TextComponent>
 
-          <TextComponent
-            type="mediumText"
-            style={styles.description}
-            numberOfLines={1}
-            ellipsizeMode="tail"
-          >
-            {description}
-          </TextComponent>
+            <TextComponent
+              type="mediumText"
+              style={styles.description}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {description}
+            </TextComponent>
+
+            <TextComponent
+              type="smalltext"
+              style={styles.description}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {currency === "INR" ? "₹" :"$"} {price}{" "}/- per person
+            </TextComponent>
+
+            {  trailenabled && (
               <TextComponent
-            type="smalltext"
-            style={styles.description}
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            >
-            {currency === "INR" ? "₹" :"$"} {price}{" "}/- per person
-          </TextComponent>
-          {  trailenabled && (
-                    <TextComponent
-            type="smalltext"
-            style={[styles.description,{
-     color: '#1877F2',
+                type="smalltext"
+                style={[styles.description,{
+          color: '#1877F2',
 
-            }]}
-            numberOfLines={1}
-            ellipsizeMode="tail"
-            >
-            (Trial - {currency === "INR" ? "₹" :"$"}{trailAmt})
-          </TextComponent>
-          )}
-          <View style={{flexDirection:'row',justifyContent:'end',alignItems:'center'}}>
+                }]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                >
+                (Trial - {currency === "INR" ? "₹" :"$"}{trailAmt})
+              </TextComponent>
+            )}
+          </View>
+          <View style={styles.buttonRow}>
           <TouchableOpacity
             onPress={onViewDetails}
             style={styles.detailsButton}
@@ -128,40 +132,55 @@ const styles = StyleSheet.create({
     elevation: 3,
     backgroundColor: Colors.Colors.white,
     marginRight: 16,
-    marginLeft:2,
-    //  width: SCREEN_WIDTH * 0.75, 
+    marginLeft: 2,
+    minHeight: 160,
   },
   container: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "stretch",
+    padding: 8,
   },
   image: {
     width: 120,
-    height: "100%",
+    height: 140,
+    borderRadius: 8,
+    backgroundColor: "#F2F2F2",
   },
   content: {
-    width: SCREEN_WIDTH * 0.65,
-    padding: 10,
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+      width: SCREEN_WIDTH * 0.65,
+    justifyContent: "flex-start",
   },
   title: {
-    marginBottom: 6,
-    color:Colors.Colors.BLACK
+    marginBottom: 4,
+    color: Colors.Colors.BLACK,
   },
   description: {
-    marginBottom: 8,
+    marginBottom: 4,
+  },
+  textBlock: {
+    flexGrow: 1,
+  },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    marginTop: 8,
   },
   detailsButton: {
-    borderColor: '#E6E6E6',
+    borderColor: "#E6E6E6",
     borderWidth: 1,
-    borderRadius: 4,
-    padding: 6,
-    marginVertical:4,
-    marginRight:6
+    borderRadius: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    marginRight: 8,
   },
-  booknowButton:{
-    backgroundColor: '#f3e1bf',
-    borderRadius: 4,
-    padding: 6,
-    marginVertical:4
+  booknowButton: {
+    backgroundColor: "#F3E1BF",
+    borderRadius: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 14,
   }
 });

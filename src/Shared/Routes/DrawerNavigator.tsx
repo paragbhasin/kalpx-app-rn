@@ -166,6 +166,14 @@ const CustomDrawerContent = (props) => {
       icon: require("../../../assets/Exploreicon.png"),
     },
     {
+      id: "3",
+      name: "Community",
+      title: "CommunityLanding",
+      iconType: "vector",
+      icon: "people-outline",
+      activeIcon: "people",
+    },
+    {
       id: "6",
       name: t("categories.classes"),
       title: "ClassesScreen",

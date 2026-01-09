@@ -34,14 +34,17 @@ import FontSize from "../../components/FontSize";
 import Header from "../../components/Header";
 import LoadingOverlay from "../../components/LoadingOverlay";
 import MantraCard from "../../components/MantraCard";
+import SimpleMantraCard from "../../components/SimpleMantraCard";
 import NotificationPermissionModal from "../../components/NotificationPermissionModal";
 import SankalpCard from "../../components/SankalpCard";
+import SimpleSankalpCard from "../../components/SimpleSankalpCard";
 import SigninPopup from "../../components/SigninPopup";
 import TextComponent from "../../components/TextComponent";
 import UpdateAppModal from "../../components/UpdateModal";
 import { useUserLocation } from "../../components/useUserLocation";
 import WisdomCard from "../../components/WisdomCard";
 import { CATALOGS } from "../../data/mantras";
+import { DAILY_SANKALPS } from "../../data/sankalps";
 import { usePracticeStore } from "../../data/Practice";
 import { BASE_IMAGE_URL } from "../../Networks/baseURL";
 import { RootState } from "../../store";
@@ -924,6 +927,55 @@ export default function Home() {
             </ScrollView>
           </View>
         }
+
+        {/* Today's Practice Cards Section */}
+        {(practiceTodayData?.started?.mantra || practiceTodayData?.started?.sankalp) && (() => {
+          // Get the actual mantra/sankalp data from catalogs
+          const langKey = currentLang.toLowerCase();
+          const allMantras = CATALOGS[langKey] || CATALOGS.en;
+          const currentMantra = practiceTodayData?.started?.mantra && practiceTodayData?.ids?.mantra
+            ? allMantras.find((m) => m.id === practiceTodayData.ids.mantra)
+            : null;
+
+          const currentSankalp = practiceTodayData?.started?.sankalp && practiceTodayData?.ids?.sankalp
+            ? DAILY_SANKALPS.find((s) => s.id === practiceTodayData.ids.sankalp)
+            : null;
+
+          return (
+            <View style={{ marginTop: 10 }}>
+      
+
+              {/* Active Sankalp Card */}
+              {currentSankalp && (
+                <View style={{ marginBottom: 10 }}>
+                  <SimpleSankalpCard
+                    sankalp={currentSankalp}
+                    isDone={!!practiceTodayData?.done?.sankalp}
+                    onMarkDone={() => {
+                      setSelectedSankalpForPopup(currentSankalp);
+                      DoneSankalpCalled(currentSankalp);
+                    }}
+                  />
+                </View>
+              )}
+
+              {/* Active Mantra Card */}
+              {currentMantra && (
+                <View style={{ marginBottom: 10 }}>
+                  <SimpleMantraCard
+                    mantra={currentMantra}
+                    isDone={!!practiceTodayData?.done?.mantra}
+                    onMarkDone={() => {
+                      setSelectedMantraForPopup(currentMantra);
+                      DoneMantraCalled(currentMantra);
+                    }}
+                  />
+                </View>
+              )}
+            </View>
+          );
+        })()}
+
         <View style={{ borderColor: Colors.Colors.Yellow, borderWidth: 1.25, borderRadius: 6, marginHorizontal: 10, padding: 4, marginVertical: 6, marginTop: 10 }}>
           <TextComponent type="DailyboldText" style={{ alignSelf: "center", marginTop: 20 }}>How can we help?</TextComponent>
           <TextComponent type="cardSubTitleText" style={{ alignSelf: "center", marginTop: 10, textAlign: "center" }}>We've curated guided paths rooted in Vedic wisdom to support your long term growth and inner balance.</TextComponent>

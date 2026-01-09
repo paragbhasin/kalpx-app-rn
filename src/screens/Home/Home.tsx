@@ -59,6 +59,9 @@ import {
   getVideos,
   startMantraPractice,
 } from "./actions";
+import { fetchFeaturedHomePosts } from "../Feed/actions";
+import { followCommunity, unfollowCommunity } from "../Social/actions";
+import { fetchUserActivity } from "../UserActivity/actions";
 import styles from "./homestyles";
 
 const { width } = Dimensions.get("window");
@@ -111,6 +114,9 @@ export default function Home() {
   const { data: streakData, loading: streakLoading } = useSelector((state: RootState) => state.practiceStreaksReducer);
 
   const { data: exploreVideos, loading: exploreLoading, page, hasMore } = useSelector((state: RootState) => state.videosReducer);
+
+  const { featuredPosts, loadingFeatured } = useSelector((state: any) => state.feed);
+  const { followed_communities } = useSelector((state: any) => state.userActivity);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -269,6 +275,11 @@ export default function Home() {
         console.log("✅ Streaks fetched:", res);
       })
     );
+  }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(fetchFeaturedHomePosts() as any);
+    dispatch(fetchUserActivity("followed_communities") as any);
   }, [dispatch]);
 
   const { data: practiceTodayData, loading } = useSelector(
@@ -645,6 +656,24 @@ export default function Home() {
     );
   };
 
+  const handleJoinToggle = (post: any) => {
+    // Try to get community ID from various possible properties
+    const communityId = post.community?.slug ||
+      post.community_slug ||
+      post.slug ||
+      post.community?.id?.toString() ||
+      post.community_id?.toString() ||
+      post.id?.toString();
+
+    if (communityId) {
+      if (post.is_joined) {
+        dispatch(unfollowCommunity(communityId) as any);
+      } else {
+        dispatch(followCommunity(communityId) as any);
+      }
+    }
+  };
+
   const renderCategory = ({ item }) => (
     <TouchableOpacity
       style={styles.card}
@@ -943,7 +972,7 @@ export default function Home() {
 
           return (
             <View style={{ marginTop: 10 }}>
-      
+
 
               {/* Active Sankalp Card */}
               {currentSankalp && (
@@ -1148,21 +1177,138 @@ export default function Home() {
       home={true}
     />
         </View> */}
+        {/* ===================== JOIN OUR CIRCLE ===================== */}
+        <View style={{ backgroundColor: '#F7F0DD', padding: 16, marginHorizontal: -16, marginBottom: 20 }}>
+     
 
-        {/* <View style={styles.kalpXContainer}>
-          <Text style={styles.sectionHeading}>{t("home.kalpXHeading")}</Text>
-          <FlatList
-            data={kalpXData}
-            renderItem={renderKalpXItem}
-            keyExtractor={(item) => item.id}
-            numColumns={2}
-            columnWrapperStyle={{
-              justifyContent: "space-between",
-              marginBottom: 12,
-            }}
-            scrollEnabled={false}
-          />
-        </View> */}
+             <View style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginHorizontal: 16
+            // paddingRight: 16 
+          }}>
+            <TextComponent type="headerText" style={{ fontSize: 16 }}>
+       Join our circle
+            </TextComponent>
+
+            <TouchableOpacity onPress={() => navigation.navigate("CommunityLanding")}>
+              <TextComponent type="mediumText" style={{ color: Colors.Colors.App_theme }}>
+                View More
+              </TextComponent>
+            </TouchableOpacity>
+          </View>
+
+          {/* Community slider shimmer */}
+          {loadingFeatured ? (
+            <View style={{ paddingVertical: 4 }}>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <View key={n} style={{ width: 220, marginRight: 16, backgroundColor: '#fff', borderRadius: 8, overflow: 'hidden' }}>
+                    <View style={{ height: 220, backgroundColor: '#E0E0E0' }} />
+                    <View style={{ padding: 16, alignItems: 'center', gap: 8 }}>
+                      <View style={{ height: 24, width: '75%', backgroundColor: '#E0E0E0', borderRadius: 4 }} />
+                      <View style={{ height: 16, width: '50%', backgroundColor: '#E0E0E0', borderRadius: 4 }} />
+                      <View style={{ height: 40, width: '100%', backgroundColor: '#E0E0E0', borderRadius: 8, marginTop: 8 }} />
+                    </View>
+                  </View>
+                ))}
+              </ScrollView>
+            </View>
+          ) : featuredPosts && featuredPosts.length > 0 ? (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ paddingVertical: 4 }}>
+              {featuredPosts.map((community: any) => {
+                const imageUrl = community.hook_image ||
+                  (community.images && community.images.length > 0
+                    ? (community.images[0].image_url || community.images[0].image || community.images[0])
+                    : null);
+
+                // Check if user is already following this community
+                const isJoined = community.is_joined ||
+                  (followed_communities?.data || []).some((c: any) => {
+                    const cSlug = c.slug?.toLowerCase();
+                    const itemSlug = (community.community_slug || community.community?.slug || community.slug)?.toLowerCase();
+                    const cId = c.id?.toString();
+                    const itemId = (community.community_id || community.community?.id || community.id)?.toString();
+
+                    return (cSlug && itemSlug && cSlug === itemSlug) || (cId && itemId && cId === itemId);
+                  });
+
+                return (
+                  <TouchableOpacity
+                    key={community.id}
+                    style={{
+                      width: 220,
+                      backgroundColor: '#fff',
+                      borderRadius: 8,
+                      marginRight: 16,
+                      shadowColor: '#000',
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.1,
+                      shadowRadius: 4,
+                      elevation: 3,
+                      overflow: 'hidden'
+                    }}
+                    onPress={() => {
+                      const slug = community.community_slug || community.slug || community.community?.slug;
+                      if (slug) {
+                        navigation.navigate('CommunityDetail', { slug });
+                      }
+                    }}
+                  >
+                    {/* Image Section */}
+                    <View style={{ height: 220, width: 220, overflow: 'hidden' }}>
+                      {imageUrl ? (
+                        <Image
+                          source={{ uri: imageUrl }}
+                          style={{ height: '100%', width: '100%' }}
+                          resizeMode="cover"
+                        />
+                      ) : (
+                        <View style={{ height: '100%', width: '100%', backgroundColor: '#E0E0E0', justifyContent: 'center', alignItems: 'center' }}>
+                          <TextComponent type="mediumText" style={{ color: '#999' }}>No Image</TextComponent>
+                        </View>
+                      )}
+                    </View>
+
+                    {/* Info Section */}
+                    <View style={{ paddingTop: 8, alignItems: 'center' }}>
+                      <TextComponent type="boldText" style={{ fontSize: 16, color: '#2D3748', marginBottom: 4, textAlign: 'center' }} numberOfLines={1}>
+                        {community.community_name || community.title || 'Community'}
+                      </TextComponent>
+                      <TextComponent type="mediumText" style={{ fontSize: 14, color: '#A0AEC0', marginBottom: 8 }}>
+                        {community.follower_count || 0} Weekly visitors
+                      </TextComponent>
+                      <TouchableOpacity
+                        style={{
+                          paddingVertical: 4,
+                          paddingHorizontal: 32,
+                          marginBottom: 8,
+                          borderRadius: 8,
+                          backgroundColor: isJoined ? '#E0E0E0' : '#C89A2B',
+                        }}
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          handleJoinToggle({ ...community, is_joined: isJoined });
+                        }}
+                      >
+                        <TextComponent
+                          type="boldText"
+                          style={{
+                            color: isJoined ? '#4A5568' : '#fff',
+                            fontSize: 14,
+                          }}
+                        >
+                          {isJoined ? 'Joined' : 'Join'}
+                        </TextComponent>
+                      </TouchableOpacity>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          ) : null}
+        </View>
+
         {/* ===================== EXPLORE CLASSES ===================== */}
         <View style={{ marginTop: 25, marginHorizontal: 16 }}>
           <View style={{

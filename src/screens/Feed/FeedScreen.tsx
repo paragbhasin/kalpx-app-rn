@@ -27,6 +27,15 @@ const FeedScreen = ({ onScroll }: { onScroll?: (event: any) => void }) => {
         dispatch(fetchUserActivity("followed_communities") as any);
     }, [i18n.language]);
 
+    useFocusEffect(
+        useCallback(() => {
+            // Ensure feed is loaded when screen comes into focus
+            if (posts.length === 0) {
+                loadFeed();
+            }
+        }, [posts.length])
+    );
+
     const loadFeed = (page = 1) => {
         dispatch(fetchFeed(page, "hot", i18n.language) as any);
     };
@@ -149,6 +158,7 @@ const FeedScreen = ({ onScroll }: { onScroll?: (event: any) => void }) => {
             {/* If you want a header here, include it */}
 
             <FlatList
+                key={`feed-${posts.length}`}
                 data={posts}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id.toString()}
@@ -161,6 +171,8 @@ const FeedScreen = ({ onScroll }: { onScroll?: (event: any) => void }) => {
                 contentContainerStyle={{ paddingBottom: 20, paddingTop: 110 }}
                 onScroll={onScroll}
                 scrollEventThrottle={16}
+                removeClippedSubviews={false}
+                maintainVisibleContentPosition={null}
             />
         </View>
     );

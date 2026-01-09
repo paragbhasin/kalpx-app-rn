@@ -178,6 +178,7 @@ const PopularCommunity = ({ onScroll }: { onScroll?: (event: any) => void }) => 
     return (
         <View style={styles.container}>
             <FlatList
+                key={`popular-${posts.length}`}
                 data={posts}
 
                 renderItem={renderItem}
@@ -191,6 +192,8 @@ const PopularCommunity = ({ onScroll }: { onScroll?: (event: any) => void }) => 
                 contentContainerStyle={{ paddingBottom: 20, paddingTop: 110 }}
                 onScroll={onScroll}
                 scrollEventThrottle={16}
+                removeClippedSubviews={false}
+                maintainVisibleContentPosition={null}
             />
         </View>
     );

@@ -381,6 +381,7 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
         </ScrollView>
       ) : (
         <FlatList
+          key={`explore-list-${items.length}`}
           data={items}
           renderItem={renderListItem}
           keyExtractor={(item) => item.id.toString()}
@@ -389,6 +390,8 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
           onScroll={activeHandleScroll}
           scrollEventThrottle={16}
           contentContainerStyle={{ paddingTop: 110 }}
+          removeClippedSubviews={false}
+          maintainVisibleContentPosition={null}
           ListFooterComponent={() =>
             isFetchingMore ? (
               <View style={{ padding: 20, alignItems: 'center' }}>

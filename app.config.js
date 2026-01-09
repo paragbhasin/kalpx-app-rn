@@ -22,7 +22,7 @@ module.exports = {
   expo: {
     name: "kalpx",
     slug: "kalpx",
-    version: "1.1.15",
+    version: "1.1.16",
     orientation: "portrait",
     icon: "./assets/AppIconImg.png",
     scheme: "kalpx",
@@ -38,7 +38,7 @@ module.exports = {
       usesAppleSignIn: true,
       appleTeamId: "9G5NZ5LBRU",
       googleServicesFile: "./GoogleService-Info.plist",
-      buildNumber: "2",
+      buildNumber: "1",
       entitlements: {
         "aps-environment": "production",
       },
@@ -109,10 +109,10 @@ module.exports = {
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow KalpX to access your photos",
-          "cameraPermission": "Allow KalpX to access your camera"
-        }
-      ]
+          photosPermission: "Allow KalpX to access your photos",
+          cameraPermission: "Allow KalpX to access your camera",
+        },
+      ],
     ],
     experiments: {
       typedRoutes: true,

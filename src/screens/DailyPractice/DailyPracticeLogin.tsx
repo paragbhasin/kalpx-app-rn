@@ -8,6 +8,7 @@ import {
   ScrollView,
   StatusBar,
   TouchableOpacity,
+  ImageBackground,
   View
 } from "react-native";
 
@@ -36,54 +37,187 @@ const DailyPracticeLogin = ({ route }) => {
     > */}
       <Header />
 
-            <ScrollView  keyboardShouldPersistTaps="handled"
+      <ScrollView keyboardShouldPersistTaps="handled"
         nestedScrollEnabled={true} contentContainerStyle={{ paddingBottom: 120 }}>
-      <View style={{alignItems:"center",marginHorizontal:12}}>
-      <TextComponent type="DailyDetailheaderText" style={{marginTop:20,marginBottom:10}}>How would you like to begin?</TextComponent>
-      <TextComponent type="subText" style={{textAlign:"center"}}>KalpX supports both daily grounding and long-term growth — choose what feels right today.</TextComponent>
-      <View style={{borderColor:"#CC9B2F",borderWidth:1,borderRadius:10,width:"100%",marginVertical:20}}>
-   <Image
-              source={require("../../../assets/decorative_BG.png")}
-              style={{ alignSelf:"flex-end" ,width:72,height:72}}
-              resizeMode="contain"
-            />
-            <View style={{marginTop:-70,alignItems:"center"}}>
-               <Image
+        <View style={{ alignItems: "center" }}>
+          <ImageBackground
+            source={require("../../../assets/setup-bg.jpg")}
+            style={{
+              width: "100%",
+              alignItems: "center",
+              justifyContent: "flex-start", // content from top
+              paddingTop: 32,               // space from top of image
+              paddingBottom: 24,
+            }}
+            resizeMode="cover"
+          >
+            <Image
               source={require("../../../assets/DailyOm.png")}
-              style={{width:37,height:37,alignSelf:"center" }}
+              style={{ width: 37, height: 37, marginBottom: 6 }}
               resizeMode="contain"
             />
-            <TextComponent type="DailyboldText" style={{marginVertical:6}}>Try a Vedic Practice Today</TextComponent>
-            <TextComponent type="subText" style={{textAlign:"center"}}>A mantra, sankalp, or reflection to bring clarity and balance today.</TextComponent>
-           <TouchableOpacity onPress={() => navigation.navigate("DailyPracticeMantra")} style={{backgroundColor:"#CC9B2F",padding:8,borderRadius:5,paddingHorizontal:40,marginTop:12}}>
-            <TextComponent type="headerSubBoldText" style={{color:Colors.Colors.white}}>Begin Today’s Practice →</TextComponent>
+
+            <TextComponent type="DailyboldText" style={{ marginVertical: 6 }}>
+              Daily practice for Balanced life
+            </TextComponent>
+
+            <TextComponent
+              type="subText"
+              style={{ textAlign: "center", paddingHorizontal: 20 }}
+            >
+              Short Mantras, Sankalp and Practice to bring clarity and balance today
+            </TextComponent>
+
+            <TouchableOpacity
+              onPress={() => navigation.navigate("DailyPracticeMantra")}
+              style={{
+                backgroundColor: "#CC9B2F",
+                paddingVertical: 10,
+                paddingHorizontal: 40,
+                borderRadius: 5,
+                marginTop: 12,
+              }}
+            >
+              <TextComponent type="headerSubBoldText" style={{ color: Colors.Colors.white }}>
+                Try Today’s Practice →
+              </TextComponent>
             </TouchableOpacity>
-            <TextComponent type="subDailyText" style={{color:"#1B1EBB",marginTop:6,marginBottom:20}}>Small gentle steps to big shifts.</TextComponent>
-            </View>
-      </View>
-          <View style={{borderColor:"#CC9B2F",borderWidth:1,borderRadius:10,width:"100%"}}>
-   <Image
-              source={require("../../../assets/decorative_BG.png")}
-              style={{ alignSelf:"flex-end" ,width:72,height:72}}
+
+            <TextComponent
+              type="subDailyText"
+              style={{ marginTop: 6 }}
+            >
+              Simple vedic practice to bring clarity
+            </TextComponent>
+          </ImageBackground>
+          <View style={{ paddingHorizontal: 20, paddingVertical: 40 }}>
+
+            <View style={{
+              borderRadius: 12,
+              padding: 20,
+              borderColor:'#FEEBB6',
+                  borderWidth: 1, 
+              
+           
+            }}>
+              {/* Header */}
+              <View style={{ alignItems: "center", marginBottom: 20 }}>
+                <Image
+                  source={require("../../../assets/DailyBird.png")}
+                  style={{ width: 40, height: 40, marginBottom: 12 }}
+                  resizeMode="contain"
+                />
+                <TextComponent type="DailyboldText" style={{ marginBottom: 8, fontSize: 20 }}>
+                  Start a Growth Path
+                </TextComponent>
+                <TextComponent type="subText" style={{ textAlign: "center", color: "#666", paddingHorizontal: 10 }}>
+                  Follow a guided routine to build consistency over time.
+                </TextComponent>
+              </View>
+
+              {/* Feature Cards */}
+                 <TouchableOpacity
+                onPress={() => navigation.navigate("DailyPracticeList")}>
+              <View style={{ gap: 12, marginBottom: 20 }}>
+                {/* Card 1 */}
+                <View style={{
+                  backgroundColor: "#FFF9E6",
+                  borderRadius: 8,
+                  padding: 16,
+                  flexDirection: "row",
+                  alignItems: "flex-start"
+                }}>
+                  <TextComponent style={{ fontSize: 24, marginRight: 12 }}>
+                                 <Image
+              source={require("../../../assets/sap.png")}
+              style={{ width: 37, height: 37, marginBottom: 6 }}
               resizeMode="contain"
             />
-            <View style={{marginTop:-70,alignItems:"center"}}>
-               <Image
-              source={require("../../../assets/DailyBird.png")}
-              style={{width:37,height:37,alignSelf:"center" }}
+                  </TextComponent>
+                  <TextComponent type="subText" style={{ flex: 1, color: "#333", lineHeight: 20 }}>
+                    Step-by-step practices with clear direction.
+                  </TextComponent>
+                </View>
+
+                {/* Card 2 */}
+                <View style={{
+                  backgroundColor: "#FFF9E6",
+                  borderRadius: 8,
+                  padding: 16,
+                  flexDirection: "row",
+                  alignItems: "flex-start"
+                }}>
+                  <TextComponent style={{ fontSize: 24, marginRight: 12 }}>
+                                 <Image
+              source={require("../../../assets/yoga (1).png")}
+              style={{ width: 37, height: 37, marginBottom: 6 }}
               resizeMode="contain"
             />
-            <TextComponent type="DailyboldText" style={{marginVertical:6}}>Start a Growth Path</TextComponent>
-            <TextComponent type="subText" style={{textAlign:"center"}}>Follow a guided routine to build consistency over time.</TextComponent>
-            <TouchableOpacity onPress={() => navigation.navigate("DailyPracticeList")} style={{backgroundColor:"#CC9B2F",padding:8,borderRadius:5,paddingHorizontal:40,marginTop:12}}>
-            <TextComponent type="headerSubBoldText" style={{color:Colors.Colors.white}}>Explore Growth Paths →</TextComponent>
-            </TouchableOpacity>
-            <TextComponent type="subDailyText" style={{color:"#1B1EBB",marginTop:6,marginBottom:20}}>For long-term personal growth</TextComponent>
+                  </TextComponent>
+                  <View style={{ flex: 1 }}>
+                    <TextComponent type="subText" style={{ color: "#333", lineHeight: 20 }}>
+                      Build habits through a guided{" "}
+                      <TextComponent style={{ backgroundColor: "#FFD700", paddingHorizontal: 4, color: "#333" }}>
+                        daily
+                      </TextComponent>
+                      {" "}routine.
+                    </TextComponent>
+                  </View>
+                </View>
+
+                {/* Card 3 */}
+                <View style={{
+                  backgroundColor: "#FFF9E6",
+                  borderRadius: 8,
+                  padding: 16,
+                  flexDirection: "row",
+                  alignItems: "flex-start"
+                }}>
+                  <TextComponent style={{ fontSize: 24, marginRight: 12 }}>
+                       <Image
+              source={require("../../../assets/growth-graph.png")}
+              style={{ width: 37, height: 37, marginBottom: 6 }}
+              resizeMode="contain"
+            />
+                  </TextComponent>
+                  <TextComponent type="subText" style={{ flex: 1, color: "#333", lineHeight: 20 }}>
+                    Grow through mindful practice rooted in balance
+                  </TextComponent>
+                </View>
+              </View>
+</TouchableOpacity>
+              {/* Button */}
+              <TouchableOpacity
+                onPress={() => navigation.navigate("DailyPracticeList")}
+                style={{
+                  borderWidth: 2,
+                  borderColor: "#CC9B2F",
+                  borderRadius: 8,
+                  paddingVertical: 12,
+                  paddingHorizontal: 24,
+                  alignItems: "center",
+                  marginBottom: 12
+                }}
+              >
+                <TextComponent type="headerSubBoldText" style={{ color: "#CC9B2F" }}>
+                  Explore our Growth Paths  →
+                </TextComponent>
+              </TouchableOpacity>
+
+              {/* Subtitle */}
+              <TextComponent type="subDailyText" style={{ color: "#1B1EBB", textAlign: "center" }}>
+                For long-term personal growth
+              </TextComponent>
+
+           
             </View>
-      </View>
-      <TextComponent type="subText" style={{textAlign:"center",marginTop:10}}>This is your journey. You can explore at your own pace.</TextComponent>
-      <View style={{backgroundColor:"#F7F0DD",height:2.5,width:"100%",marginTop:10}}/>
-      </View>
+                  <TextComponent type="subDailyText" style={{ textAlign: "center", marginTop: 20, color: "#666" }}>
+                With KalpX, consistency begins with wisdom. Start small. Grow at your own space.
+              </TextComponent>
+          </View>
+       
+
+        </View>
       </ScrollView>
       {/* </ImageBackground> */}
     </SafeAreaView>

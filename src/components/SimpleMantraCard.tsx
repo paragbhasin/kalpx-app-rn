@@ -62,7 +62,7 @@ const SimpleMantraCard: React.FC<SimpleMantraCardProps> = ({
 const styles = StyleSheet.create({
     card: {
         borderRadius: 6,
-        backgroundColor: "#FFFCF7",
+        backgroundColor: "#F9F3E4",
         borderWidth: 1,
         borderColor: Colors.Colors.App_theme,
         marginHorizontal: 10,

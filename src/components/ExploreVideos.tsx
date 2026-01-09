@@ -195,14 +195,14 @@ const combinedData = useMemo(() => {
   return (
     <>
       {home ? (
-        <Card style={styles.card}>
+        <View  style={{marginTop:10}}>
           <View style={styles.headerRow}>
             <TextComponent type="headerText" style={styles.sectionHeading}>
-              {t("cards.explore")}
+         Visit our Wisdom Videos
             </TextComponent>
             <TouchableOpacity onPress={() => navigation.navigate("Explore")}>
-              <TextComponent type="mediumText" style={styles.sectionHeadingRow}>
-                {t("cards.show")}
+              <TextComponent type="semiBoldText" >
+       View More
               </TextComponent>
             </TouchableOpacity>
           </View>
@@ -219,7 +219,7 @@ const combinedData = useMemo(() => {
             ListEmptyComponent={renderEmpty}
             contentContainerStyle={{  }}
           />
-        </Card>
+        </View>
       ) : (
         <FlatList
           data={combinedData}
@@ -242,12 +242,12 @@ export default ExploreVideos;
 
 const styles : any= StyleSheet.create({
   card: {
-    elevation: 3,
+    // elevation: 3,
     backgroundColor: Colors.Colors.white,
-    padding: 20,
-    width: "96%",
-    alignSelf: "center",
-    borderRadius: 10,
+    // padding: 20,
+    // width: "96%",
+    // alignSelf: "center",
+    // borderRadius: 10,
   },
   headerRow: {
     marginBottom: 12,
@@ -265,21 +265,29 @@ const styles : any= StyleSheet.create({
     textDecorationLine: "underline",
   },
   videoCard: {
-    backgroundColor: "#FFF7E8",
-    borderRadius: 12,
-    marginRight: 16,
     width: 250,
-    overflow: "hidden",
-    borderWidth: 2,
-    borderColor: "#FFD6A5",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    marginRight: 16,
     padding: 12,
+
+    // shadow for iOS
+    shadowColor: "#000",
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 6 },
+marginTop:10,
+marginBottom:10,
+
+    // elevation for Android
+    elevation: 5,
   },
   thumbnailWrapper: {
     width: "100%",
     height: 140,
+    borderRadius: 14,
     overflow: "hidden",
-    borderRadius: 10,
-    backgroundColor: "#eee",
+    backgroundColor: "#F2F2F2",
   },
   playButton: {
     position: "absolute",
@@ -311,7 +319,7 @@ dailyCard: {
   backgroundColor: "#FFF8E7", // soft cream tone
   borderWidth: 2,
   borderColor: "#E8C27E",
-  marginRight: 16,
+  // marginRight: 16,
   overflow: "hidden",
   shadowColor: "#000",
   shadowOpacity: 0.1,

@@ -7,6 +7,7 @@ import * as Notifications from 'expo-notifications';
 import moment from "moment";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import ExploreVideos from "../../components/ExploreVideos";
 import {
   ActivityIndicator,
   Dimensions,
@@ -1106,8 +1107,8 @@ export default function Home() {
             scrollEnabled={false}
           />
         </View>
-
-        {/* <View style={{ margin: 16 }}>
+{/* 
+        <View style={{ margin: 16 }}>
           <TouchableOpacity
   activeOpacity={0.8}
   style={{ marginTop: 16, borderRadius: 10, overflow: "hidden" }}
@@ -1169,14 +1170,14 @@ export default function Home() {
           />
         </View> */}
 
-        {/* <View style={{ paddingHorizontal: 12,marginTop:12 }}>
+        <View style={{ marginTop:12, marginBottom:12 }}>
           <ExploreVideos
       videos={exploreVideos}
       onLoadMore={handleLoadMore}
       loading={exploreLoading}
       home={true}
     />
-        </View> */}
+        </View>
         {/* ===================== JOIN OUR CIRCLE ===================== */}
         <View style={{ backgroundColor: '#F7F0DD', padding: 16, marginHorizontal: -16, marginBottom: 20 }}>
      

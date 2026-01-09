@@ -142,6 +142,9 @@ const TextComponent = (props: any) => {
     case "cardText":
       textStyle = styles.cardText;
       break;
+       case "semiBoldBlackText":
+      textStyle = styles.semiBoldBlackText;
+      break;
     case "streakText":
       textStyle = styles.streakText;
       break;
@@ -297,6 +300,11 @@ const styles = StyleSheet.create({
   },
   semiBoldText: {
     color: Colors.Colors.App_theme,
+    fontSize: FontSize.CONSTS.FS_12,
+    fontFamily: "Inter_600SemiBold",
+  },
+  semiBoldBlackText: {
+    color: Colors.Colors.Light_black,
     fontSize: FontSize.CONSTS.FS_12,
     fontFamily: "Inter_600SemiBold",
   },

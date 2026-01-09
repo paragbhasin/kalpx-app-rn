@@ -77,13 +77,41 @@ const finalSource = isRemote
           >
             {description}
           </TextComponent>
+              <TextComponent
+            type="smalltext"
+            style={styles.description}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            >
+            {currency === "INR" ? "₹" :"$"} {price}{" "}/- per person
+          </TextComponent>
+          {  trailenabled && (
+                    <TextComponent
+            type="smalltext"
+            style={[styles.description,{
+     color: '#1877F2',
 
+            }]}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            >
+            (Trial - {currency === "INR" ? "₹" :"$"}{trailAmt})
+          </TextComponent>
+          )}
+          <View style={{flexDirection:'row',justifyContent:'end',alignItems:'center'}}>
           <TouchableOpacity
             onPress={onViewDetails}
             style={styles.detailsButton}
           >
-            <TextComponent type="semiBoldText">View Details</TextComponent>
+            <TextComponent type="semiBoldBlackText" >View Details</TextComponent>
           </TouchableOpacity>
+             <TouchableOpacity
+            onPress={onBookNow}
+            style={styles.booknowButton}
+          >
+            <TextComponent type="semiBoldBlackText">Book now</TextComponent>
+          </TouchableOpacity>
+        </View>
         </View>
       </View>
     </Card>
@@ -101,7 +129,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.Colors.white,
     marginRight: 16,
     marginLeft:2,
-     width: SCREEN_WIDTH * 0.75, 
+    //  width: SCREEN_WIDTH * 0.75, 
   },
   container: {
     flexDirection: "row",
@@ -112,7 +140,7 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   content: {
-    width: SCREEN_WIDTH * 0.47, // 🔥 FIXED 70% WIDTH
+    width: SCREEN_WIDTH * 0.65,
     padding: 10,
   },
   title: {
@@ -123,12 +151,17 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   detailsButton: {
-    borderColor: Colors.Colors.App_theme,
+    borderColor: '#E6E6E6',
     borderWidth: 1,
     borderRadius: 4,
-    alignSelf: "flex-end",
     padding: 6,
     marginVertical:4,
     marginRight:6
   },
+  booknowButton:{
+    backgroundColor: '#f3e1bf',
+    borderRadius: 4,
+    padding: 6,
+    marginVertical:4
+  }
 });

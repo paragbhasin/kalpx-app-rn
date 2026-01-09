@@ -1188,7 +1188,7 @@ export default function Home() {
             contentContainerStyle={{ marginTop: 10 }}
             renderItem={({ item }) => (
               <ClassHomeCard
-                fromHome={true}
+                fromHome={false}
                 imageUrl={
                   item?.cover_media?.key
                     ? `${BASE_IMAGE_URL}/${item.cover_media.key}`

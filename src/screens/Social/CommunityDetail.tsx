@@ -378,11 +378,27 @@ const CommunityDetail = () => {
                         <ActivityIndicator style={{ padding: 20 }} color="#D69E2E" />
                     ) : <View style={{ height: 20 }} />
                 }
-                ListEmptyComponent={() => activeTab === "About" ? renderAbout() : (
-                    <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyText}>No posts available.</Text>
-                    </View>
-                )}
+                ListEmptyComponent={() => {
+                    if (activeTab === "About") {
+                        return renderAbout();
+                    }
+
+                    // Show loading spinner when posts are being fetched
+                    if (communityPosts.loading && communityPosts.pagination.currentPage === 1) {
+                        return (
+                            <View style={styles.emptyContainer}>
+                                <ActivityIndicator size="large" color="#D69E2E" />
+                            </View>
+                        );
+                    }
+
+                    // Show empty state when no posts are available
+                    return (
+                        <View style={styles.emptyContainer}>
+                            <Text style={styles.emptyText}>No posts available.</Text>
+                        </View>
+                    );
+                }}
             />
         </SafeAreaView>
     );

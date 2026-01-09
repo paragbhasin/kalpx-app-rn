@@ -64,6 +64,7 @@ import { fetchFeaturedHomePosts } from "../Feed/actions";
 import { followCommunity, unfollowCommunity } from "../Social/actions";
 import { fetchUserActivity } from "../UserActivity/actions";
 import styles from "./homestyles";
+import { TextAlignCenter } from "lucide-react-native";
 
 const { width } = Dimensions.get("window");
 const CARD_MARGIN = 14;
@@ -118,6 +119,37 @@ export default function Home() {
 
   const { featuredPosts, loadingFeatured } = useSelector((state: any) => state.feed);
   const { followed_communities } = useSelector((state: any) => state.userActivity);
+
+  const testimonialReviews = [
+    {
+      author: "Rahul Mehta",
+      location: "Mumbai",
+      text: "I like how KalpX focuses on daily life, not just theory. The Sankalp helps me stay mindful throughout the day.",
+    },
+    {
+      author: "Sandeep Patel",
+      location: "Ahmedabad",
+      text: "The daily sankalp practices bring a gentle structure to my routine. It doesn't feel heavy, just gently guiding.",
+    },
+    {
+      author: "Ananya Sharma",
+      location: "Delhi",
+      text: "Beautiful interface and even more beautiful content. The wisdom videos are a great way to start my morning.",
+    },
+    {
+      author: "Vikram Singh",
+      location: "Bangalore",
+      text: "I've tried many meditation apps, but KalpX's focus on Sanatan Dharma makes it unique and deeply meaningful.",
+    },
+    {
+      author: "Priya Iyer",
+      location: "Chennai",
+      text: "The community features help me stay connected with like-minded people. It's a very supportive environment.",
+    },
+  ];
+
+  // Animation for testimonials scroll
+  const scrollX = useRef(new Animated.Value(0)).current;
 
   useFocusEffect(
     React.useCallback(() => {
@@ -214,6 +246,25 @@ export default function Home() {
     const dailyFive = allMantras.slice(0, 5);
     setDailyMantras(dailyFive);
   }, [currentLang]);
+
+  // Auto-scroll animation for testimonials
+  useEffect(() => {
+    const CARD_WIDTH = 300;
+    const GAP = 16;
+    const totalWidth = (CARD_WIDTH + GAP) * testimonialReviews.length;
+
+    const animation = Animated.loop(
+      Animated.timing(scrollX, {
+        toValue: -totalWidth,
+        duration: 40000, // 40 seconds for full scroll
+        useNativeDriver: true,
+      })
+    );
+
+    animation.start();
+
+    return () => animation.stop();
+  }, []);
 
   useEffect(() => {
     dispatch(
@@ -1107,7 +1158,7 @@ export default function Home() {
             scrollEnabled={false}
           />
         </View>
-{/* 
+        {/* 
         <View style={{ margin: 16 }}>
           <TouchableOpacity
   activeOpacity={0.8}
@@ -1170,26 +1221,26 @@ export default function Home() {
           />
         </View> */}
 
-        <View style={{ marginTop:12, marginBottom:12 }}>
+        <View style={{ marginTop: 12, marginBottom: 12 }}>
           <ExploreVideos
-      videos={exploreVideos}
-      onLoadMore={handleLoadMore}
-      loading={exploreLoading}
-      home={true}
-    />
+            videos={exploreVideos}
+            onLoadMore={handleLoadMore}
+            loading={exploreLoading}
+            home={true}
+          />
         </View>
         {/* ===================== JOIN OUR CIRCLE ===================== */}
         <View style={{ backgroundColor: '#F7F0DD', padding: 16, marginHorizontal: -16, marginBottom: 20 }}>
-     
 
-             <View style={{
+
+          <View style={{
             flexDirection: "row",
             justifyContent: "space-between",
             marginHorizontal: 16
             // paddingRight: 16 
           }}>
             <TextComponent type="headerText" style={{ fontSize: 16 }}>
-       Join our circle
+              Join our circle
             </TextComponent>
 
             <TouchableOpacity onPress={() => navigation.navigate("CommunityLanding")}>
@@ -1391,43 +1442,93 @@ export default function Home() {
           {/* </Card> */}
         </View>
 
-        <View style={styles.kalpXContainer}>
-          <TextComponent
-            type="headerText"
-            style={{
-              color: Colors.Colors.BLACK,
-              fontSize: FontSize.CONSTS.FS_16,
-              alignSelf: "center",
-              marginTop: 10,
-            }}
-          >{t("home.kalpXHeading")}</TextComponent>
-          <TextComponent type="mediumText" style={{ textAlign: "center", marginVertical: 10 }}>Begin your transformative journey with timeless wisdom and modern guidance</TextComponent>
-          {/* <FlatList
-    data={kalpXData}
-    renderItem={renderKalpXItem}
-    keyExtractor={(item) => item.id}
-    numColumns={2}
-    showsVerticalScrollIndicator={false}
-    columnWrapperStyle={{
-      justifyContent: "space-between",
-      marginBottom: 12,
+        <View style={{ backgroundColor: '#F1F1F1', marginHorizontal: -16, paddingVertical: 32 }}>
+       <View
+  style={{
+    paddingHorizontal: 16,
+    marginBottom: 24,
+    alignItems: 'center',   
+  }}
+>
+  <TextComponent
+    type="headerText"
+    style={{
+      fontSize: 24,
+      color: '#303030',
+      textAlign: 'center', // 👈 center text itself
     }}
-    contentContainerStyle={{ paddingBottom: 20 }}
-  /> */}
-          <FlatList
-            data={kalpXData}
-            renderItem={renderKalpXItem}
-            keyExtractor={(item) => item.id}
+  >
+    What People Are Saying about us
+  </TextComponent>
+</View>
+
+          {/* Scrolling Reviews Container */}
+          <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{
-              // paddingLeft: 16,
-              paddingRight: 16,
-            }}
-            ItemSeparatorComponent={() => <View style={{ width: 12 }} />}
-          />
-
+            scrollEnabled={false}
+          >
+            <Animated.View
+              style={{
+                flexDirection: 'row',
+                gap: 16,
+                paddingHorizontal: 16,
+                transform: [{ translateX: scrollX }],
+              }}
+            >
+              {/* Render reviews twice for seamless loop */}
+              {[...testimonialReviews, ...testimonialReviews].map((review, idx) => (
+                <View
+                  key={idx}
+                  style={{
+                    backgroundColor: '#fff',
+                    borderRadius: 12,
+                    padding: 24,
+                    shadowColor: '#000',
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.05,
+                    shadowRadius: 4,
+                    elevation: 2,
+                    minWidth: 300,
+                    maxWidth: 300,
+                  }}
+                >
+                  <TextComponent
+                    type="mediumText"
+                    style={{
+                      fontSize: 14,
+                      color: '#4A5568',
+                      lineHeight: 22,
+                      fontStyle: 'italic',
+                      marginBottom: 16,
+                    }}
+                  >
+                    "{review.text}"
+                  </TextComponent>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <View>
+                      <TextComponent type="boldText" style={{ fontSize: 14, color: '#2D3748' }}>
+                        {review.author}
+                      </TextComponent>
+                      <TextComponent type="mediumText" style={{ fontSize: 12, color: '#A0AEC0', marginTop: 2 }}>
+                        {review.location}
+                      </TextComponent>
+                    </View>
+                    <View style={{ flexDirection: 'row' }}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <TextComponent key={star} style={{ color: '#F4B400', fontSize: 14 }}>
+                          ★
+                        </TextComponent>
+                      ))}
+                    </View>
+                  </View>
+                </View>
+              ))}
+            </Animated.View>
+          </ScrollView>
         </View>
+
+
         <SigninPopup
           visible={showMantraTaken}
           onClose={() => setShowMantraTaken(false)}

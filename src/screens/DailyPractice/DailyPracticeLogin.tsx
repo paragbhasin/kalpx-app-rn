@@ -149,7 +149,7 @@ const DailyPracticeLogin = ({ route }) => {
                 }}>
                   <TextComponent style={{ fontSize: 24, marginRight: 12 }}>
                                  <Image
-              source={require("../../../assets/yoga (1).png")}
+              source={require("../../../assets/setup-yoga.png")}
               style={{ width: 37, height: 37, marginBottom: 6 }}
               resizeMode="contain"
             />

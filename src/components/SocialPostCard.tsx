@@ -27,6 +27,7 @@ import { getRawPracticeObject } from "../utils/getPracticeObjectById";
 import MantraCard from "./MantraCard";
 import SankalpCard from "./SankalpCard";
 import DailyPracticeDetailsCard from "./DailyPracticeDetailsCard";
+import VideoPostPlayer from "./VideoPostPlayer";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -237,15 +238,25 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     const renderCarouselItem = ({ item, index: slideIndex }: { item: any; index: number }) => {
         const blocks = getSlideBlocks(slideIndex);
         const imageUrl = item.image_url || item.image || (typeof item === 'string' ? item : null);
+        const isVideo = imageUrl?.toLowerCase().endsWith('.mp4');
 
         return (
             <View style={[styles.imageContainer, { width: cardWidth }]}>
                 {imageUrl && (
-                    <Image
-                        source={{ uri: imageUrl }}
-                        style={styles.postImage}
-                        resizeMode="cover"
-                    />
+                    isVideo ? (
+                        <VideoPostPlayer
+                            url={imageUrl}
+                            aspectRatio={aspectRatio}
+                            width={cardWidth}
+                            shouldPlay={activeIndex === slideIndex}
+                        />
+                    ) : (
+                        <Image
+                            source={{ uri: imageUrl }}
+                            style={styles.postImage}
+                            resizeMode="cover"
+                        />
+                    )
                 )}
                 {blocks.map((block: any, index: number) => {
                     const blockText = block.resolved_text || block.text;

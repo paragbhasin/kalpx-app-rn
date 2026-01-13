@@ -169,6 +169,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
 
     const [cardWidth, setCardWidth] = useState(screenWidth - 8); // Updated base width for padding: 4
     const [activeIndex, setActiveIndex] = useState(0);
+    const [loadedIndices, setLoadedIndices] = useState<number[]>([0]);
 
     const initialSlide = imagesData[0];
     const aspectRatioString = initialSlide?.layout?.aspect_ratio || post.layout?.aspect_ratio || "1:1";
@@ -241,10 +242,11 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
         const blocks = getSlideBlocks(slideIndex);
         const imageUrl = item.image_url || item.image || (typeof item === 'string' ? item : null);
         const isVideo = imageUrl?.toLowerCase().endsWith('.mp4') || imageUrl?.toLowerCase().endsWith('.mov');
+        const isLoaded = loadedIndices.includes(slideIndex);
 
         return (
             <View style={[styles.imageContainer, { width: cardWidth }]}>
-                {imageUrl && (
+                {imageUrl && isLoaded && (
                     isVideo ? (
                         <VideoPostPlayer
                             url={imageUrl}
@@ -522,7 +524,12 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                         height={imageHeight}
                         data={imagesData}
                         scrollAnimationDuration={1000}
-                        onSnapToItem={(index) => setActiveIndex(index)}
+                        onSnapToItem={(index) => {
+                            setActiveIndex(index);
+                            if (!loadedIndices.includes(index)) {
+                                setLoadedIndices(prev => [...prev, index]);
+                            }
+                        }}
                         renderItem={renderCarouselItem}
                     />
                     {/* Dot Indicators - Reddit Style */}

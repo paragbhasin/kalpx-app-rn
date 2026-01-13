@@ -1,0 +1,79 @@
+{
+  "project_info": {
+    "project_number": "800459558908",
+    "project_id": "kalpx-production",
+    "storage_bucket": "kalpx-production.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:800459558908:android:3bd192278e42967608ec79",
+        "android_client_info": {
+          "package_name": "com.kalpx.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "800459558908-ag2bhh4oqqtl6deaeg7jhn5muimg6p3t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kalpx.app",
+            "certificate_hash": "e8110efae8743d8d56881902b7fa051bcad8f927"
+          }
+        },
+        {
+          "client_id": "800459558908-d5hnrbc5p86db6csi1mf7hn2kk4i1hj9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kalpx.app",
+            "certificate_hash": "bf910cabfc9f8256a988019f7a6ab67385dbc57a"
+          }
+        },
+        {
+          "client_id": "800459558908-o82qn6rinh2aq3pr9iq1b6o9evj7ov9p.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kalpx.app",
+            "certificate_hash": "a169b49829e4c045e654790f1d10ba5750911d18"
+          }
+        },
+        {
+          "client_id": "800459558908-sn6puqmafbds7ubol5hu63arqoq79hjh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kalpx.app",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "800459558908-gi4poj40ulaoc3a0gkc3rbaevfubt4vm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDaPm15oVe2bx-f428DUzsrserwpZaR_Rs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "800459558908-gi4poj40ulaoc3a0gkc3rbaevfubt4vm.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "800459558908-5bt6k0ihh1vh1o003m43ffltrkhhlnu1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.kalpx.app",
+                "app_store_id": "6755144623"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

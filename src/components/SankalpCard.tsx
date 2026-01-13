@@ -273,6 +273,7 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                 >
                   {t(currentSankalp.i18n?.tooltip) || currentSankalp.tooltip}
                 </TextComponent>
+                              <View style={{ marginTop: 20, alignItems: "center" }}>
                 <TextComponent
                   type="streakSadanaText"
                   style={{
@@ -288,7 +289,8 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                   }}>
                   {t(currentSankalp.i18n?.suggested) || currentSankalp.suggested_practice}
                 </TextComponent>
-                <View style={{ ...styles.row, marginTop: 4 }}>
+                </View>
+                {/* <View style={{ ...styles.row, marginTop: 4 }}>
                   <TextComponent type="headerSubBoldText" style={styles.root}>
                     {t("sankalpCard.root")}
                   </TextComponent>
@@ -346,7 +348,7 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                       </View>
                     </View>
                   </View>
-                )}
+                )} */}
                 <View style={{ alignItems: "center", marginTop: 4 }}>
                   <TextComponent type="headerSubBoldText" style={{ ...styles.root, color: Colors.Colors.blue_text, }}>
                     {t("sankalpCard.source")}

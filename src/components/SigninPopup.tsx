@@ -70,7 +70,7 @@ const SigninPopup: React.FC<SigninPopupProps> = ({
       useNativeDriver
     >
         <LinearGradient
-     colors={["#EBDCBA", "#E0C06F"]}  // 🟡 Your gradient
+     colors={["#ffffffff", "#ffffffff"]}  // 🟡 Your gradient
   locations={[0, 0.5]}   // 50% top, 50% bottom
   start={{ x: 0, y: 0 }}
   end={{ x: 0, y: 1 }} 

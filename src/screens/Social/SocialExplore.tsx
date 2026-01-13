@@ -260,12 +260,20 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
           overflow: "hidden",
           backgroundColor: '#f0f0f0', // Placeholder color
         }}
-        onPress={() =>
+        onPress={() => {
+          const mergedPost = {
+            ...item,
+            ...(item.community_post || {}),
+            content: item.community_post?.content || item.base_text || item.summary,
+            images: item.community_post?.images?.length
+              ? item.community_post.images
+              : (item.slides?.map((s: any) => ({ image: s.image_url })) || [{ image: item.hook_image }]),
+            community_name: item.community_name || item.community_post?.community_name || "Community",
+          };
           navigation.navigate("SocialPostDetailScreen", {
-            post: item, // clicked post
-            allPosts: items,
-          })
-        }
+            post: mergedPost,
+          });
+        }}
       >
         {isVideo ? (
           <View style={{ width: COLUMN_WIDTH, height: item.height }}>

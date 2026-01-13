@@ -56,7 +56,7 @@ const initializeComment = (c: any) => ({
 export const postDetailReducer = (state = initialPostDetailState, action: any) => {
     switch (action.type) {
         case FETCH_POST_DETAIL_REQUEST:
-            return { ...state, loadingPost: true, errorPost: null };
+            return { ...state, loadingPost: true, errorPost: null, post: null, comments: [] };
         case FETCH_POST_DETAIL_SUCCESS:
             return { ...state, loadingPost: false, post: action.payload };
         case FETCH_POST_DETAIL_FAILURE:

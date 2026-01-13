@@ -335,7 +335,7 @@ export default function SocialPostDetailScreen() {
     Alert.alert("Reported", "Thank you for reporting. We will review this comment.");
   };
 
-  if (!post && loadingPost) {
+  if (!post && !initialPost && loadingPost) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#D69E2E" />
@@ -363,11 +363,11 @@ export default function SocialPostDetailScreen() {
         keyExtractor={(item) => item.id.toString()}
         ListHeaderComponent={
           <>
-            {post && (
+            {(post || initialPost) && (
               <SocialPostCard
-                post={post}
-                onUpvote={() => dispatch(votePostDetail(post.id, 'upvote') as any)}
-                onDownvote={() => dispatch(votePostDetail(post.id, 'downvote') as any)}
+                post={post || initialPost}
+                onUpvote={() => dispatch(votePostDetail((post || initialPost).id, 'upvote') as any)}
+                onDownvote={() => dispatch(votePostDetail((post || initialPost).id, 'downvote') as any)}
                 onComment={() => {
                   if (isQuestion) {
                     navigation.setParams({ isQuestion: false });
@@ -378,14 +378,14 @@ export default function SocialPostDetailScreen() {
                     navigation.setParams({ isQuestion: true });
                   }
                 }}
-                onSave={() => dispatch(savePostDetail(post.id) as any)}
-                onUnsave={() => dispatch(unsavePostDetail(post.id) as any)}
+                onSave={() => dispatch(savePostDetail((post || initialPost).id) as any)}
+                onUnsave={() => dispatch(unsavePostDetail((post || initialPost).id) as any)}
                 onHide={() => {
-                  dispatch(hidePostDetail(post.id) as any);
+                  dispatch(hidePostDetail((post || initialPost).id) as any);
                   navigation.goBack();
                 }}
                 onReport={(reason, details) => {
-                  dispatch(reportContent('post', post.id, reason, details) as any);
+                  dispatch(reportContent('post', (post || initialPost).id, reason, details) as any);
                   Alert.alert("Reported", "Thank you for reporting. We will review this post.");
                 }}
               />

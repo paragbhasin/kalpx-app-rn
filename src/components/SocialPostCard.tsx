@@ -47,6 +47,7 @@ interface SocialPostCardProps {
     onUnsave?: () => void;
     onHide?: () => void;
     onReport?: (reason: string, details: string) => void;
+    isVisible?: boolean;
 }
 
 const getLinkedItemText = (linkedItem: any) => {
@@ -90,6 +91,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     onUnsave,
     onHide,
     onReport,
+    isVisible,
 }) => {
     const { i18n } = useTranslation();
     const navigation: any = useNavigation();
@@ -238,7 +240,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     const renderCarouselItem = ({ item, index: slideIndex }: { item: any; index: number }) => {
         const blocks = getSlideBlocks(slideIndex);
         const imageUrl = item.image_url || item.image || (typeof item === 'string' ? item : null);
-        const isVideo = imageUrl?.toLowerCase().endsWith('.mp4');
+        const isVideo = imageUrl?.toLowerCase().endsWith('.mp4') || imageUrl?.toLowerCase().endsWith('.mov');
 
         return (
             <View style={[styles.imageContainer, { width: cardWidth }]}>
@@ -248,7 +250,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                             url={imageUrl}
                             aspectRatio={aspectRatio}
                             width={cardWidth}
-                            shouldPlay={activeIndex === slideIndex}
+                            shouldPlay={isVisible && activeIndex === slideIndex}
                         />
                     ) : (
                         <Image

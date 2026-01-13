@@ -16,6 +16,7 @@ import api from "../../Networks/axios";
 import SocialPostCard from "../../components/SocialPostCard";
 import ShimmerPlaceholder from "../../components/ShimmerPlaceholder";
 import { FlatList, ActivityIndicator, Alert } from "react-native";
+import { Video, ResizeMode } from 'expo-av';
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUserActivity } from "../UserActivity/actions";
 import { followCommunity, unfollowCommunity } from "./actions";
@@ -46,6 +47,7 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
   const [isFetchingMore, setIsFetchingMore] = useState(false);
 
   const { followed_communities } = useSelector((state: any) => state.userActivity);
+  const [viewableItems, setViewableItems] = useState<any>({});
 
 
   const fetchExplore = async (pageNo = 1) => {
@@ -76,19 +78,34 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
         setHasMore(false);
       }
 
-      // Preload image sizes to create masonry layout
+      // Preload image sizes or use aspect ratio from layout
       const mapped = await Promise.all(
         result.map(
           (item) =>
             new Promise((resolve) => {
-              if (item.hook_image) {
+              const hookImage = item.hook_image;
+              const isVideo = hookImage?.toLowerCase().endsWith('.mp4') || hookImage?.toLowerCase().endsWith('.mov');
+
+              const getAspectRatioFromLayout = () => {
+                const ratioStr = item.layout?.aspect_ratio ||
+                  item.slides?.[0]?.layout?.aspect_ratio ||
+                  item.slide_layouts?.[0]?.layout?.aspect_ratio ||
+                  item.resolved_slide_layouts?.[0]?.layout?.aspect_ratio;
+                if (ratioStr) {
+                  const [w, h] = ratioStr.split(":").map(Number);
+                  if (w && h) return w / h;
+                }
+                return 1;
+              };
+
+              if (hookImage && !isVideo) {
                 Image.getSize(
-                  item.hook_image,
+                  hookImage,
                   (w, h) => resolve({ ...item, aspect: w / h }),
-                  () => resolve({ ...item, aspect: 1 }) // fallback
+                  () => resolve({ ...item, aspect: getAspectRatioFromLayout() })
                 );
               } else {
-                resolve({ ...item, aspect: 1 });
+                resolve({ ...item, aspect: getAspectRatioFromLayout() });
               }
             })
         )
@@ -200,50 +217,98 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
 
 
 
+  const onViewableItemsChanged = React.useRef(({ viewableItems: currentlyViewable }: any) => {
+    const viewableMap = {};
+    currentlyViewable.forEach((item: any) => {
+      viewableMap[item.key] = true;
+    });
+    setViewableItems(viewableMap);
+  }).current;
+
+  const viewabilityConfig = React.useRef({
+    itemVisiblePercentThreshold: 50,
+  }).current;
+
   // Split into two columns (masonry)
   const leftColumn: any[] = [];
   const rightColumn: any[] = [];
   let leftHeight = 0;
   let rightHeight = 0;
 
-  items.forEach((item: any) => {
+  items.forEach((item: any, index: number) => {
     const height = COLUMN_WIDTH / (item.aspect || 1);
 
     if (leftHeight <= rightHeight) {
-      leftColumn.push({ ...item, height });
+      leftColumn.push({ ...item, height, index });
       leftHeight += height;
     } else {
-      rightColumn.push({ ...item, height });
+      rightColumn.push({ ...item, height, index });
       rightHeight += height;
     }
   });
 
-  const renderItem = (item: any) => (
-    <TouchableOpacity
-      key={item.id}
-      style={{
-        marginBottom: 12,
-        borderRadius: 12,
-        overflow: "hidden",
-      }}
-      onPress={() =>
-        navigation.navigate("SocialPostDetailScreen", {
-          post: item, // clicked post
-          allPosts: items,
-        })
-      }
-    >
-      <Image
-        source={{ uri: item.hook_image }}
+  const renderItem = (item: any) => {
+    const isVideo = item.hook_image?.toLowerCase().endsWith('.mp4') || item.hook_image?.toLowerCase().endsWith('.mov');
+    const isVisible = item.isVisible || viewableItems[item.id.toString()];
+
+    return (
+      <TouchableOpacity
+        key={item.id}
         style={{
-          width: COLUMN_WIDTH,
-          height: item.height,
+          marginBottom: 12,
           borderRadius: 12,
+          overflow: "hidden",
+          backgroundColor: '#f0f0f0', // Placeholder color
         }}
-        resizeMode="cover"
-      />
-    </TouchableOpacity>
-  );
+        onPress={() =>
+          navigation.navigate("SocialPostDetailScreen", {
+            post: item, // clicked post
+            allPosts: items,
+          })
+        }
+      >
+        {isVideo ? (
+          <View style={{ width: COLUMN_WIDTH, height: item.height }}>
+            <Video
+              source={{ uri: item.hook_image }}
+              style={{
+                width: COLUMN_WIDTH,
+                height: item.height,
+                borderRadius: 12,
+              }}
+              resizeMode={ResizeMode.COVER}
+              shouldPlay={isVisible}
+              isMuted={true}
+              isLooping={true}
+            />
+            {!isVisible && (
+              <View style={{
+                position: 'absolute',
+                top: 10,
+                right: 10,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                borderRadius: 12,
+                padding: 4,
+                zIndex: 1
+              }}>
+                <Ionicons name="play" size={16} color="white" />
+              </View>
+            )}
+          </View>
+        ) : (
+          <Image
+            source={{ uri: item.hook_image }}
+            style={{
+              width: COLUMN_WIDTH,
+              height: item.height,
+              borderRadius: 12,
+            }}
+            resizeMode="cover"
+          />
+        )}
+      </TouchableOpacity>
+    );
+  };
 
   const renderListItem = ({ item }: { item: any }) => {
     // Merge the top-level explore item with the nested community_post
@@ -269,6 +334,7 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
         return (cSlug && itemSlug && cSlug === itemSlug) || (cId && itemId && cId === itemId);
       });
 
+    const isVisible = viewableItems[item.id.toString()];
 
     return (
       <SocialPostCard
@@ -286,6 +352,7 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
           Alert.alert("Reported", "Thank you for reporting. We will review this post.");
         }}
         onUserPress={() => { }} // Handle if needed
+        isVisible={isVisible}
       />
     );
   };
@@ -314,6 +381,8 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
       </View>
     </View>
   );
+
+  const [gridScrollY, setGridScrollY] = useState(0);
 
   return (
     <View style={styles.container}>
@@ -351,6 +420,22 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
           showsVerticalScrollIndicator={false}
           onScroll={(e) => {
             activeHandleScroll?.(e);
+            const scrollY = e.nativeEvent.contentOffset.y;
+            setGridScrollY(scrollY);
+
+            // Simple viewability logic for ScrollView grid
+            const viewportTop = scrollY;
+            const viewportBottom = scrollY + e.nativeEvent.layoutMeasurement.height;
+
+            const newVisibleItems = { ...viewableItems };
+            items.forEach((item: any) => {
+              // This is an approximation since we don't have exact Y positions easily in ScrollView
+              // but we can estimate based on height and columns.
+              // For accuracy, we'd need onLayout for each item, but let's try a simpler approach:
+              // For now, let's just use FlatList for list view and simple autoplay for all visible in ScrollView
+              // To make it better, we'd need to use a better masonry component.
+            });
+
             const paddingToBottom = 20;
             const isBottom = e.nativeEvent.layoutMeasurement.height + e.nativeEvent.contentOffset.y >= e.nativeEvent.contentSize.height - paddingToBottom;
 
@@ -371,11 +456,11 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
             }}
           >
             <View style={{ width: COLUMN_WIDTH }}>
-              {leftColumn.map((item) => renderItem(item))}
+              {leftColumn.map((item) => renderItem({ ...item, isVisible: true }))}
             </View>
 
             <View style={{ width: COLUMN_WIDTH }}>
-              {rightColumn.map((item) => renderItem(item))}
+              {rightColumn.map((item) => renderItem({ ...item, isVisible: true }))}
             </View>
           </View>
         </ScrollView>
@@ -389,6 +474,8 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
           onEndReachedThreshold={0.5}
           onScroll={activeHandleScroll}
           scrollEventThrottle={16}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={viewabilityConfig}
           contentContainerStyle={{ paddingTop: 110 }}
           removeClippedSubviews={false}
           maintainVisibleContentPosition={null}

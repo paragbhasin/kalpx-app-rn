@@ -36,13 +36,32 @@ export const loginUser = (credentials, callback) => async (dispatch) => {
     console.log("login response:::::", response);
     AsyncStorage.setItem("access_token", response.data.access_token);
     AsyncStorage.setItem("refresh_token", response.data.refresh_token);
-    AsyncStorage.setItem("user_id",`${response.data.user.id}`);
-      await registerDeviceToBackend();
+    AsyncStorage.setItem("user_id", `${response.data.user.id}`);
+    await registerDeviceToBackend();
     dispatch(loginSuccess(response.data));
-    if (callback) callback({ success: true, data: response.data});
+    if (callback) callback({ success: true, data: response.data });
   } catch (error) {
-    dispatch(loginFailure(error.message));
-    if (callback) callback({ success: false, error: error.message });
+    let errorMessage = error.message;
+
+    // Extract detailed error from response if available (e.g., {"email": ["Enter a valid email address."]})
+    if (error.response && error.response.data) {
+      const data = error.response.data;
+      if (typeof data === 'object') {
+        // Flatten object errors: {"email": ["msg"]} -> "email: msg"
+        errorMessage = Object.keys(data)
+          .map(key => {
+            const val = data[key];
+            const message = Array.isArray(val) ? val.join(", ") : val;
+            return `${key}: ${message}`;
+          })
+          .join("\n");
+      } else if (typeof data === 'string') {
+        errorMessage = data;
+      }
+    }
+
+    dispatch(loginFailure(errorMessage));
+    if (callback) callback({ success: false, error: errorMessage });
   }
 };
 
@@ -59,13 +78,30 @@ export const socialLoginUser = (credentials, callback) => async (dispatch) => {
     await AsyncStorage.setItem("access_token", response.data.access_token);
     await AsyncStorage.setItem("refresh_token", response.data.refresh_token);
     await AsyncStorage.setItem("user_id", `${response.data.user.id}`);
-// await registerDeviceToBackend();
+    // await registerDeviceToBackend();
     dispatch(socialLoginSuccess(response.data));
     callback?.({ success: true, data: response.data });
   } catch (error) {
     console.error("❌ API Error:", error);
-    dispatch(socialLoginFailure(error.message));
-    callback?.({ success: false, error: error.message });
+    let errorMessage = error.message;
+
+    if (error.response && error.response.data) {
+      const data = error.response.data;
+      if (typeof data === 'object') {
+        errorMessage = Object.keys(data)
+          .map(key => {
+            const val = data[key];
+            const message = Array.isArray(val) ? val.join(", ") : val;
+            return `${key}: ${message}`;
+          })
+          .join("\n");
+      } else if (typeof data === 'string') {
+        errorMessage = data;
+      }
+    }
+
+    dispatch(socialLoginFailure(errorMessage));
+    callback?.({ success: false, error: errorMessage });
   }
 };
 

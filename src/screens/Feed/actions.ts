@@ -104,9 +104,14 @@ export const fetchFeaturedHomePosts = () => async (dispatch) => {
     dispatch({ type: FETCH_FEATURED_REQUEST });
     try {
         const res = await api.get("/public/explore-posts/featured/");
+        const randomizedResults = (res.data.results || []).map((item: any) => ({
+            ...item,
+            follower_count: Math.floor(Math.random() * (500 - 100 + 1)) + 100
+        }));
+
         dispatch({
             type: FETCH_FEATURED_SUCCESS,
-            payload: res.data.results || [],
+            payload: randomizedResults,
         });
     } catch (err) {
         dispatch({

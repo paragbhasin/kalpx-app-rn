@@ -30,6 +30,8 @@ import DailyPracticeDetailsCard from "./DailyPracticeDetailsCard";
 import VideoPostPlayer from "./VideoPostPlayer";
 
 const { width: screenWidth } = Dimensions.get("window");
+const MEDIA_WIDTH = screenWidth - 24;
+const MEDIA_MARGIN = 12;
 
 
 
@@ -245,13 +247,13 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
         const isLoaded = loadedIndices.includes(slideIndex);
 
         return (
-            <View style={[styles.imageContainer, { width: cardWidth }]}>
+            <View style={[styles.imageContainer, { width: MEDIA_WIDTH }]}>
                 {imageUrl && isLoaded && (
                     isVideo ? (
                         <VideoPostPlayer
                             url={imageUrl}
                             aspectRatio={aspectRatio}
-                            width={cardWidth}
+                            width={MEDIA_WIDTH}
                             shouldPlay={isVisible && activeIndex === slideIndex}
                         />
                     ) : (
@@ -266,7 +268,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                     const blockText = block.resolved_text || block.text;
                     if (!blockText) return null;
 
-                    const scaledFontSize = (block.fontSize || 24) * (cardWidth / 420);
+                    const scaledFontSize = (block.fontSize || 24) * (MEDIA_WIDTH / 420);
                     const isCentered = block.align === 'center';
                     const lineCount = blockText.split('\n').length;
 
@@ -277,7 +279,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                                 position: 'absolute',
                                 left: isCentered ? 0 : `${block.x}%`,
                                 top: `${block.y}%`,
-                                width: isCentered ? cardWidth : `${Math.max(40, 100 - block.x)}%`,
+                                width: isCentered ? MEDIA_WIDTH : `${Math.max(40, 100 - block.x)}%`,
                                 pointerEvents: 'none',
                                 transform: [
                                     { translateY: -(scaledFontSize * lineCount * 0.6) }
@@ -393,8 +395,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
             style={styles.card}
             onLayout={(event) => {
                 const { width } = event.nativeEvent.layout;
-
-                setCardWidth(width - 8);
+                setCardWidth(width);
             }}
         >
             {/* Header */}
@@ -446,8 +447,6 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                         >
                             <Text style={[styles.joinButtonText, post.is_joined && styles.joinedText]}>
                                 {post.is_joined ? "Joined" : "Join"}
-
-
                             </Text>
                         </TouchableOpacity>
                     )}
@@ -517,10 +516,10 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
 
             {/* Carousel or Single Image */}
             {imagesData.length > 0 && (
-                <View style={{ height: imageHeight, width: "100%", marginTop: 0 }}>
+                <View style={{ height: imageHeight, width: MEDIA_WIDTH, marginHorizontal: MEDIA_MARGIN, marginTop: 4, borderRadius: 16, overflow: 'hidden' }}>
                     <Carousel
                         loop={false}
-                        width={cardWidth}
+                        width={MEDIA_WIDTH}
                         height={imageHeight}
                         data={imagesData}
                         scrollAnimationDuration={1000}
@@ -597,19 +596,14 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
             <View style={styles.footer}>
                 <View style={styles.leftActions}>
                     <View style={styles.voteGroup}>
-
-                        <TouchableOpacity style={styles.actionButton} onPress={() => {
+                        <TouchableOpacity style={styles.voteButton} onPress={() => {
                             if (hasUserVoted === 'up') {
-                                // User is un-upvoting
                                 setUpvoteCount(prev => Math.max(0, prev - 1));
                                 setHasUserVoted(null);
                             } else {
-                                // User is upvoting
                                 if (hasUserVoted === 'down') {
-                                    // Remove downvote first, then add upvote (net +2)
                                     setUpvoteCount(prev => prev + 2);
                                 } else {
-                                    // Just add upvote
                                     setUpvoteCount(prev => prev + 1);
                                 }
                                 setHasUserVoted('up');
@@ -618,24 +612,21 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                         }}>
                             <MaterialCommunityIcons
                                 name={hasUserVoted === 'up' ? "arrow-up-bold" : "arrow-up-bold-outline"}
-                                size={24}
-                                color={hasUserVoted === 'up' ? "#D69E2E" : "#666"}
+                                size={22}
+                                color={hasUserVoted === 'up' ? "#FF4500" : "#666"}
                             />
-                            <Text style={styles.voteactionText}>{upvoteCount}</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.actionButton} onPress={() => {
+                        <Text style={styles.voteCountText}>{upvoteCount}</Text>
+
+                        <TouchableOpacity style={styles.voteButton} onPress={() => {
                             if (hasUserVoted === 'down') {
-                                // User is un-downvoting
                                 setUpvoteCount(prev => prev + 1);
                                 setHasUserVoted(null);
                             } else {
-                                // User is downvoting
                                 if (hasUserVoted === 'up') {
-                                    // Remove upvote first, then add downvote (net -2)
                                     setUpvoteCount(prev => Math.max(0, prev - 2));
                                 } else {
-                                    // Just subtract for downvote
                                     setUpvoteCount(prev => Math.max(0, prev - 1));
                                 }
                                 setHasUserVoted('down');
@@ -644,25 +635,22 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                         }}>
                             <MaterialCommunityIcons
                                 name={hasUserVoted === 'down' ? "arrow-down-bold" : "arrow-down-bold-outline"}
-                                size={24}
-                                color={hasUserVoted === 'down' ? "#D69E2E" : "#666"}
+                                size={22}
+                                color={hasUserVoted === 'down' ? "#7193FF" : "#666"}
                             />
                         </TouchableOpacity>
                     </View>
-                    <View style={styles.voteGroup}>
-                        <TouchableOpacity style={styles.actionButton} onPress={onComment}>
 
-                            {/* Or Ionicons chatbubble-outline */}
-                            <Ionicons name="chatbubble-outline" size={22} color="#666" />
-                            <Text style={styles.actionText}>{post.comment_count || 0}</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.voteGroup}>
-                        <TouchableOpacity style={styles.actionButton} onPress={handleShare}>
-                            <Ionicons name="share-social-outline" size={22} color="#666" />
-                            <Text style={styles.actionText}>{shareCount}</Text>
-                        </TouchableOpacity>
-                    </View>
+                    <TouchableOpacity style={styles.pillButton} onPress={onComment}>
+                        <Ionicons name="chatbubble-outline" size={18} color="#666" />
+                        <Text style={styles.pillButtonText}>{post.comment_count || 0}</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity style={styles.pillButton} onPress={handleShare}>
+                        <Ionicons name="share-social-outline" size={18} color="#666" />
+                         <Text style={styles.pillButtonText}>{shareCount}</Text>
+
+                    </TouchableOpacity>
                 </View>
 
                 <TouchableOpacity style={styles.askButton} onPress={onAskQuestion}>
@@ -750,56 +738,56 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
 
 const styles = StyleSheet.create({
     card: {
-
-        borderRadius: 12,
-        marginVertical: 8,
-        marginHorizontal: 16,
-        padding: 2,
-        elevation: 2, // Android shadow
-
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
+        backgroundColor: "#fff",
+        marginVertical: 0,
+        marginHorizontal: 0,
+        paddingBottom: 4,
+        borderBottomWidth: 8,
+        borderBottomColor: "#F0F2F5",
     },
     header: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 8,
+        paddingHorizontal: 12,
+        paddingTop: 12,
+        marginBottom: 4,
     },
     userInfo: {
         flexDirection: "row",
         alignItems: "center",
+        flex: 1,
     },
     avatarContainer: {
-        width: 48,
-        height: 48,
+        width: 32, // Smaller avatar like Reddit
+        height: 32,
         justifyContent: "center",
         alignItems: "center",
-        marginRight: 10,
-        borderRadius: 24,
+        marginRight: 8,
+        borderRadius: 16,
         overflow: "hidden",
     },
     avatarBackground: {
-        width: 48,
-        height: 48,
+        width: 32,
+        height: 32,
         justifyContent: "center",
         alignItems: "center",
     },
     avatar: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
+        width: 24,
+        height: 24,
+        borderRadius: 12,
         backgroundColor: "transparent",
     },
     communityName: {
-        fontSize: 14,
-        fontWeight: "bold",
-        color: "#333",
+        fontSize: 13,
+        fontWeight: "700",
+        color: "#1c1c1c",
     },
     timeAgo: {
         fontSize: 12,
-        color: "#888",
+        color: "#7c7c7c",
+        marginLeft: 4,
     },
     headerActions: {
         flexDirection: "row",
@@ -848,34 +836,36 @@ const styles = StyleSheet.create({
     joinButton: {
         backgroundColor: "#D69E2E", // Gold/Mustard color from image
         paddingHorizontal: 16,
-        paddingVertical: 6,
+        paddingVertical: 4,
         borderRadius: 20,
-        marginRight: 10,
+        marginRight: 8,
     },
     joinButtonText: {
         color: "#fff",
-        fontWeight: "600",
+        fontWeight: "700",
         fontSize: 12,
     },
     joinedButton: {
-        backgroundColor: "#E8E8E8",
+        backgroundColor: "#EDEFF1",
     },
     joinedText: {
-        color: "#666",
+        color: "#1c1c1c",
     },
 
     title: {
-        fontSize: 14,
-        fontWeight: "bold",
-        color: "#000",
-
-        lineHeight: 22,
+        fontSize: 18, // Reddit style bold title
+        fontWeight: "700",
+        color: "#1c1c1c",
+        lineHeight: 24,
+        marginHorizontal: 12,
+        marginBottom: 8,
+        marginTop: 4,
     },
     imageContainer: {
         flex: 1, // Fill the carousel item height
-        borderRadius: 12,
+        borderRadius: 16, // Reddit style rounded media
         overflow: "hidden",
-        backgroundColor: "#000", // Reddit-style black background for images
+        backgroundColor: "#F6F7F8",
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -920,6 +910,7 @@ const styles = StyleSheet.create({
     postImage: {
         width: "100%",
         height: "100%",
+        borderRadius: 16,
     },
     overlay: {
         position: "absolute",
@@ -945,12 +936,13 @@ const styles = StyleSheet.create({
         textShadowRadius: 3,
     },
     contentContainer: {
-        marginTop: 10,
+        marginTop: 8,
+        paddingHorizontal: 12,
     },
     content: {
-        fontSize: 14,
-        color: "#333",
-        lineHeight: 20,
+        fontSize: 13,
+        color: "#1c1c1c",
+        lineHeight: 18,
     },
     showMore: {
         color: "#D69E2E",
@@ -962,34 +954,45 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        marginTop: 15,
-        paddingTop: 10,
-        borderTopWidth: 1,
-        borderTopColor: "#eee",
+        marginTop: 8,
+        paddingBottom: 8,
+        paddingHorizontal: 12,
     },
     leftActions: {
         flexDirection: "row",
         alignItems: "center",
+        gap: 8, // Pill gap
     },
     voteGroup: {
         flexDirection: "row",
         alignItems: "center",
-        marginRight: 16,
-        borderWidth: 1,
-        borderColor: "#DFDADA",
-        borderRadius: 8, // 
-        padding: 5
+        backgroundColor: "#EDEFF1",
+        borderRadius: 20,
+        paddingHorizontal: 4,
+        paddingVertical: 2,
     },
-    actionButton: {
+    voteButton: {
+        padding: 6,
+    },
+    voteCountText: {
+        fontSize: 13,
+        fontWeight: "700",
+        color: "#1c1c1c",
+        marginHorizontal: 2,
+    },
+    pillButton: {
         flexDirection: "row",
         alignItems: "center",
-
+        backgroundColor: "#EDEFF1",
+        borderRadius: 20,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
     },
-    actionText: {
-        marginLeft: 4,
-        fontSize: 12,
-        color: "#666",
-        fontWeight: '500',
+    pillButtonText: {
+        marginLeft: 6,
+        fontSize: 13,
+        fontWeight: "700",
+        color: "#1c1c1c",
     },
     voteactionText: {
         marginLeft: 2,
@@ -1017,11 +1020,11 @@ const styles = StyleSheet.create({
         backgroundColor: "#FFFCF0",
         borderWidth: 1,
         borderColor: "#CC9933",
-        borderRadius: 20,
+        borderRadius: 12, // slightly less rounded for reddit feel
         paddingVertical: 12,
         paddingHorizontal: 12,
         marginTop: 15,
-        marginHorizontal: 4,
+        marginHorizontal: 16,
     },
     linkedItemTitleRow: {
         flexDirection: "row",

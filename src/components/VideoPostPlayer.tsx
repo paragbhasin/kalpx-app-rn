@@ -88,11 +88,11 @@ const VideoPostPlayer: React.FC<VideoPostPlayerProps> = ({
             {poster && (
                 <Image
                     source={{ uri: poster }}
-                    style={StyleSheet.absoluteFill}
+                    style={[StyleSheet.absoluteFill, { borderRadius: 16 }]}
                     blurRadius={20}
                 />
             )}
-            <BlurView intensity={30} style={StyleSheet.absoluteFill} tint="dark" />
+            <BlurView intensity={30} style={[StyleSheet.absoluteFill, { borderRadius: 16, overflow: 'hidden' }]} tint="dark" />
 
             <Video
                 ref={videoRef}
@@ -192,15 +192,18 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         justifyContent: 'center',
         alignItems: 'center',
+        borderRadius: 16,
     },
     video: {
         width: '100%',
         height: '100%',
+        borderRadius: 16,
     },
     overlay: {
         ...StyleSheet.absoluteFillObject,
         justifyContent: 'center',
         alignItems: 'center',
+        borderRadius: 16,
     },
     centerControl: {
         justifyContent: 'center',

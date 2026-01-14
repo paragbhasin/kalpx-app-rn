@@ -1238,7 +1238,10 @@ const TrackerEdit = ({ route }) => {
                 onChangeText={setSearchText}
               />
               <TextComponent type="mediumText" style={{ marginHorizontal: 16, marginVertical: 4, color: Colors.Colors.BLACK, marginTop: 10 }}>
-                {t(initialCategories.find((c) => c.key === selectedCategory)?.description || "")}
+                {t("sadanaTracker.sadanatext", { defaultValue: "Practices to settle the mind and restore balance." })}
+
+
+                {/* {t(initialCategories.find((c) => c.key === selectedCategory)?.description || "")} */}
               </TextComponent>
               <FlatList
                 ref={categoryRef}

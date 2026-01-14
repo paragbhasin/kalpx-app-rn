@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { TouchableOpacity, View } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Colors from "../../components/Colors";
@@ -7,6 +8,7 @@ import Header from "../../components/Header";
 import TextComponent from "../../components/TextComponent";
 
 const DailyPracticeDetailSelectedPractice = ({ route, navigation }) => {
+  const { t } = useTranslation();
   const { item, fullList, startingIndex, onUpdateSelection } = route.params;
   const isLocked = route?.params?.isLocked ?? false;
 
@@ -58,7 +60,7 @@ const DailyPracticeDetailSelectedPractice = ({ route, navigation }) => {
             marginLeft: -32,
           }}
         >
-          {item?.name ?? "Practice Details"}
+          {item?.key ? t(`dailyPracticeList.categories.${item.key}.name`) : (item?.name ?? t("confirmDailyPractices.header"))}
         </TextComponent>
       </View>
 

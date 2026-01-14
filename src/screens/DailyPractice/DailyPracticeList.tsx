@@ -60,12 +60,12 @@ const createOwnImage = require("../../../assets/DP_9.png");
 const arrowIcon = require("../../../assets/card_arrow.png");
 
 const DailyPracticeList = () => {
-  const navigation : any= useNavigation();
+  const navigation: any = useNavigation();
   const { t } = useTranslation();
 
   return (
     <View style={styles.container}>
-         {/* <ImageBackground
+      {/* <ImageBackground
                   source={require("../../../assets/Tracker_BG.png")}
                   style={{
                     flex: 1,
@@ -79,18 +79,18 @@ const DailyPracticeList = () => {
                   }}
                 > */}
       <Header />
-         <ScrollView
-          style={styles.innerScroll}
-          showsVerticalScrollIndicator={false}
-        >
-  <TouchableOpacity 
-    onPress={() => navigation.goBack()}
-  // onPress={() => navigation.navigate("HomePage", { screen: "Home" })} 
-  style={{marginHorizontal:16,marginBottom:10}}>
-  <Ionicons name="arrow-back" size={26} color="#000" />
+      <ScrollView
+        style={styles.innerScroll}
+        showsVerticalScrollIndicator={false}
+      >
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          // onPress={() => navigation.navigate("HomePage", { screen: "Home" })} 
+          style={{ marginHorizontal: 16, marginBottom: 10 }}>
+          <Ionicons name="arrow-back" size={26} color="#000" />
         </TouchableOpacity>
-      {/* Fixed Card Centered */}
-      {/* <Card style={styles.card}> */}
+        {/* Fixed Card Centered */}
+        {/* <Card style={styles.card}> */}
         <TextComponent
           type="mediumBigText"
           style={{
@@ -99,110 +99,110 @@ const DailyPracticeList = () => {
             alignSelf: "center",
           }}
         >
-         Let’s get started
+          {t('dailyPracticeList.getStarted')}
         </TextComponent>
 
         <TextComponent
           type="subDailyText"
-          style={{ marginTop: 6, alignSelf: "center",textAlign:"center" }}
+          style={{ marginTop: 6, alignSelf: "center", textAlign: "center" }}
         >
-      Choose a long-term goal, and we’ll guide you step by step or begin with what feels most important to you today.
+          {t('dailyPracticeList.description')}
         </TextComponent>
         {/* <View style={{flexDirection:"row",alignItems:"center",marginVertical:10}}> */}
-<TextComponent type="mediumText" style={{ marginVertical: 6, alignSelf: "center",textAlign:"center" ,color:Colors.Colors.blue_text}} >*Tap any category to explore its guided routine.*</TextComponent>
-           {/* <Image
+        <TextComponent type="mediumText" style={{ marginVertical: 6, alignSelf: "center", textAlign: "center", color: Colors.Colors.blue_text }} >{t('dailyPracticeList.tapCategory')}</TextComponent>
+        {/* <Image
         source={arrowIcon}
         style={[styles.arrowIcon, { marginLeft: 6 }]}
         resizeMode="contain"
       /> */}
-      {/* </View> */}
+        {/* </View> */}
         {/* Scrollable Inner Section */}
-          {categories.map((item, index) => (
-            <TouchableOpacity
-  key={index}
-  activeOpacity={0.9}
-  onPress={() => navigation.navigate("DailyPracticeSelectList",{item: item})}
->
-       <Card key={index} style={styles.subCard}>
-  <View style={{ flexDirection: "row", alignItems: "center" ,justifyContent:"space-between",width:"100%"}}>
-    {/* Category Image */}
-    <Image
-      source={item.image}
-      style={{ width: 40, height: 40 }}
-      resizeMode="contain"
-    />
+        {categories.map((item, index) => (
+          <TouchableOpacity
+            key={index}
+            activeOpacity={0.9}
+            onPress={() => navigation.navigate("DailyPracticeSelectList", { item: item })}
+          >
+            <Card key={index} style={styles.subCard}>
+              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+                {/* Category Image */}
+                <Image
+                  source={item.image}
+                  style={{ width: 40, height: 40 }}
+                  resizeMode="contain"
+                />
 
-    <View style={{width:"80%"}}>
-      <TextComponent type="cardText">
-        {item.name}
-      </TextComponent>
+                <View style={{ width: "80%" }}>
+                  <TextComponent type="cardText">
+                    {t(`dailyPracticeList.categories.${item.key}.name`)}
+                  </TextComponent>
 
-      <TextComponent
-        type="mediumText"
-        style={{ color: Colors.Colors.Daily_black, marginTop: 4 }}
-      >
-        {item.description}
-      </TextComponent>
-    </View>
+                  <TextComponent
+                    type="mediumText"
+                    style={{ color: Colors.Colors.Daily_black, marginTop: 4 }}
+                  >
+                    {t(`dailyPracticeList.categories.${item.key}.description`)}
+                  </TextComponent>
+                </View>
 
-    <Image
-      source={arrowIcon}
-      style={styles.arrowIcon}
-      resizeMode="contain"
-    />
-  </View>
-</Card>
+                <Image
+                  source={arrowIcon}
+                  style={styles.arrowIcon}
+                  resizeMode="contain"
+                />
+              </View>
+            </Card>
 
-            </TouchableOpacity>
-          ))}
-      {/* </Card> */}
-      {/* ---- Sanatan Practices Card ---- */}
-<TouchableOpacity
-  activeOpacity={0.9}
-  onPress={() => navigation.navigate("SanatanPractice")}
->
-  <Card style={styles.subCard}>
-    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+          </TouchableOpacity>
+        ))}
+        {/* </Card> */}
+        {/* ---- Sanatan Practices Card ---- */}
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => navigation.navigate("SanatanPractice")}
+        >
+          <Card style={styles.subCard}>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
 
-      <Image source={sanatanImage} style={{ width: 40, height: 40 }} resizeMode="contain" />
+              <Image source={sanatanImage} style={{ width: 40, height: 40 }} resizeMode="contain" />
 
-      <View style={{ width: "80%" }}>
-        <TextComponent type="cardText">Sanatan Practices</TextComponent>
-        <TextComponent type="mediumText" style={{ color: Colors.Colors.Daily_black, marginTop: 4 }}>
-          Explore ancient dharmic practices & rituals.
-        </TextComponent>
-      </View>
+              <View style={{ width: "80%" }}>
+                <TextComponent type="cardText">{t('dailyPracticeList.sanatanPractices')}</TextComponent>
+                <TextComponent type="mediumText" style={{ color: Colors.Colors.Daily_black, marginTop: 4 }}>
+                  {t('dailyPracticeList.sanatanPracticesDesc')}
+                </TextComponent>
+              </View>
 
-      <Image source={arrowIcon} style={styles.arrowIcon} resizeMode="contain" />
-    </View>
-  </Card>
-</TouchableOpacity>
+              <Image source={arrowIcon} style={styles.arrowIcon} resizeMode="contain" />
+            </View>
+          </Card>
+        </TouchableOpacity>
 
 
-{/* ---- Create Your Own Card ---- */}
-<TouchableOpacity
-  activeOpacity={0.9}
-  onPress={() => navigation.navigate("CreateOwnPractice")}
->
-  <Card style={styles.subCard}>
-    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-      
-      <Image source={createOwnImage} style={{ width: 40, height: 40 }} resizeMode="contain" />
+        {/* ---- Create Your Own Card ---- */}
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => navigation.navigate("CreateOwnPractice")}
+        >
+          <Card style={styles.subCard}>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
 
-      <View style={{ width: "80%" }}>
-        <TextComponent type="cardText">Create Your Own</TextComponent>
-        <TextComponent type="mediumText" style={{ color: Colors.Colors.Daily_black, marginTop: 4 }}>
-          Build your personalized spiritual routine.
-        </TextComponent>
-      </View>
+              <Image source={createOwnImage} style={{ width: 40, height: 40 }} resizeMode="contain" />
 
-      <Image source={arrowIcon} style={styles.arrowIcon} resizeMode="contain" />
-    </View>
-  </Card>
-</TouchableOpacity>
-<TextComponent type="mediumText" style={{alignSelf: "center",textAlign:"center" ,color:Colors.Colors.blue_text,marginBottom:30}} >You can add, change, or explore more anytime.</TextComponent>
-        </ScrollView>
-        {/* </ImageBackground> */}
+              <View style={{ width: "80%" }}>
+                <TextComponent type="cardText">{t('dailyPracticeList.createYourOwn')}</TextComponent>
+                <TextComponent type="mediumText" style={{ color: Colors.Colors.Daily_black, marginTop: 4 }}>
+                  {t('dailyPracticeList.createYourOwnDesc')}
+                </TextComponent>
+              </View>
+
+              <Image source={arrowIcon} style={styles.arrowIcon} resizeMode="contain" />
+            </View>
+          </Card>
+        </TouchableOpacity>
+        <TextComponent type="mediumText" style={{ alignSelf: "center", textAlign: "center", color: Colors.Colors.blue_text, marginBottom: 30 }} >{t('dailyPracticeList.footerNote')}</TextComponent>
+      </ScrollView>
+      {/* </ImageBackground> */}
     </View>
   );
 };

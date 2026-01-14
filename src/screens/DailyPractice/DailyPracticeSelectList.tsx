@@ -536,7 +536,7 @@ const buildFinalPractices = () => {
             marginLeft: -32, // keeps centered
           }}
         >
-          {categoryItem?.name ?? "Daily Routine"}
+          {categoryItem ? t(`dailyPracticeList.categories.${categoryItem.key}.name`) : t("dailyPracticeSelectList.dailyRoutine")}
         </TextComponent>
       </View>
 
@@ -587,9 +587,9 @@ const buildFinalPractices = () => {
         type="streakSadanaText"
         style={{ marginVertical: 2, alignSelf: "center" }}
       >
-        {categoryItem?.description ?? ""}
+        {categoryItem ? t(`dailyPracticeList.categories.${categoryItem.key}.description`) : ""}
       </TextComponent>
-<TextComponent type="subDailyText" style={{marginHorizontal:16,marginVertical:6}}>→ Tap each card to view details.</TextComponent>
+<TextComponent type="subDailyText" style={{marginHorizontal:16,marginVertical:6}}>{t('dailyPracticeSelectList.tapCard')}</TextComponent>
       {/* CARD WITH ALL PRACTICES */}
       {/* <Card style={styles.card2}> */}
         <View style={{ marginHorizontal:16 }}>
@@ -684,7 +684,7 @@ const buildFinalPractices = () => {
       {/* SUBMIT BUTTON — ORIGINAL FLOW */}
       <LoadingButton
         loading={false}
-        text={isLocked ? "Confirm" : "Set my plan"}
+        text={isLocked ? t("common.confirm") : t("dailyPracticeSelectList.setMyPlan")}
         onPress={async () => {
   // 1️⃣ First click → Go directly to ConfirmDailyPractices
   if (!isLocked) {
@@ -693,8 +693,8 @@ const buildFinalPractices = () => {
     navigation.navigate("ConfirmDailyPractices", {
       practices: payload.practices,
       categoryItem,
-      title: categoryItem?.name,
-      description: categoryItem?.description,
+      title: categoryItem ? t(`dailyPracticeList.categories.${categoryItem.key}.name`) : t('dailyPracticeSelectList.dailyRoutine'),
+      description: categoryItem ? t(`dailyPracticeList.categories.${categoryItem.key}.description`) : "",
       growth: true,
     });
 
@@ -842,8 +842,8 @@ console.log("payload >>>>>>",JSON.stringify(payload));
         textStyle={styles.buttonText}
         showGlobalLoader={true}
       />
-<TextComponent type="subDailyText" style={{textAlign:"center",marginTop:10}}>These will form your routine for <TextComponent type="boldText" style={{color:"#000000"}}>{categoryItem?.name ?? "Daily Routine"}</TextComponent></TextComponent>
-      <LoadingOverlay visible={loading} text="Submitting..." />
+<TextComponent type="subDailyText" style={{textAlign:"center",marginTop:10}}>{t('dailyPracticeSelectList.routineFor')}<TextComponent type="boldText" style={{color:"#000000"}}>{categoryItem ? t(`dailyPracticeList.categories.${categoryItem.key}.name`) : t('dailyPracticeSelectList.dailyRoutine')}</TextComponent></TextComponent>
+      <LoadingOverlay visible={loading} text={t('common.submitting')} />
       </ScrollView>
       {/* </ImageBackground> */}
     </View>

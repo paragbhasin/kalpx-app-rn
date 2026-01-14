@@ -32,8 +32,11 @@ import { useCart } from "../../context/CartContext";
 import { RootState } from "../../store";
 import { submitDailyDharmaSetup } from "../Home/actions";
 import { fetchDailyPractice } from "../Streak/actions";
+import { useTranslation } from "react-i18next";
+import { getTranslatedPractice } from "../../utils/getTranslatedPractice";
 
 const ConfirmDailyPractices = ({ route }) => {
+  const { t } = useTranslation();
   const navigation: any = useNavigation();
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
   const [loading, setLoading] = useState(false);
@@ -110,11 +113,11 @@ const ConfirmDailyPractices = ({ route }) => {
           is: (src: string) => src === "mantra" || src === "practice",
           then: (schema) =>
             schema
-              .required("Reps are required")
-              .matches(/^[0-9]+$/, "Digits only"),
+              .required(t('confirmDailyPractices.repsRequired'))
+              .matches(/^[0-9]+$/, t('confirmDailyPractices.digitsOnly')),
           otherwise: (schema) => schema.notRequired(),
         }),
-        day: Yup.string().required("Day required"),
+        day: Yup.string().required(t('confirmDailyPractices.dayRequired')),
       })
     ),
   });
@@ -311,34 +314,34 @@ const ConfirmDailyPractices = ({ route }) => {
           }}
         >
           <TextComponent type="boldText" style={{ color: "#000" }}>
-            ● {item.source === "mantra" ? "Mantra" : item.source === "sankalp" ? "Sankalp" : "Practice"}
+            ● {t(`sadanaTracker.${item.source}Title`)}
           </TextComponent>
         </View>
 
         {/* TITLE */}
         <TextComponent type="headerIncreaseText" style={{ textAlign: "center" }}>
-          {item.name}
+          {getTranslatedPractice(item, t).name || item.name}
         </TextComponent>
 
         {/* DESCRIPTION */}
-        {/* {!!item.description && (
+        {!!getTranslatedPractice(item, t).desc && (
           <TextComponent
             type="semiBoldText"
             style={{ marginTop: 10, textAlign: "center", color: Colors.Colors.Light_black }}
           >
-            {item.description}
+            {getTranslatedPractice(item, t).desc}
           </TextComponent>
-        )} */}
+        )}
         {/* REPS */}
         {(item.source === "mantra" ||
           item.source === "practice") && (
             <>
               <TextComponent type="streakSadanaText" style={{ marginTop: 8, color: "#000" }}>
-                Reps
+                {t('confirmDailyPractices.reps')}
               </TextComponent>
 
               <TextComponent type="mediumText" style={{ color: "#979797", marginBottom: 6 }}>
-                How many times would you repeat this?
+                {t('confirmDailyPractices.repsHint')}
               </TextComponent>
 
               {/* 🔹 MANTRA → HORIZONTAL SELECT */}
@@ -383,7 +386,7 @@ const ConfirmDailyPractices = ({ route }) => {
               {(item.source === "practice" || item.source === "sankalp") && (
                 <TextInput
                   keyboardType="number-pad"
-                  placeholder="e.g., 9, 27, 108"
+                  placeholder={t('confirmDailyPractices.repsPlaceholder')}
                   value={formik.values.list[index].reps}
                   onChangeText={(v) =>
                     formik.setFieldValue(`list[${index}].reps`, v)
@@ -439,19 +442,19 @@ const ConfirmDailyPractices = ({ route }) => {
 
         {/* DAY SELECT */}
         <TextComponent type="streakSadanaText" style={{ marginTop: 10 }}>
-          Frequency
+          {t('confirmDailyPractices.frequency')}
         </TextComponent>
-        <TextComponent type="mediumText" style={{ color: "#979797" }}>How often will you do this?</TextComponent>
+        <TextComponent type="mediumText" style={{ color: "#979797" }}>{t('confirmDailyPractices.frequencyHint')}</TextComponent>
         <Dropdown
           data={[
-            { label: "Daily", value: "Daily" },
-            { label: "Monday", value: "Mon" },
-            { label: "Tuesday", value: "Tue" },
-            { label: "Wednesday", value: "Wed" },
-            { label: "Thursday", value: "Thu" },
-            { label: "Friday", value: "Fri" },
-            { label: "Saturday", value: "Sat" },
-            { label: "Sunday", value: "Sun" },
+            { label: t("confirmDailyPractices.days.Daily"), value: "Daily" },
+            { label: t("confirmDailyPractices.days.Mon"), value: "Mon" },
+            { label: t("confirmDailyPractices.days.Tue"), value: "Tue" },
+            { label: t("confirmDailyPractices.days.Wed"), value: "Wed" },
+            { label: t("confirmDailyPractices.days.Thu"), value: "Thu" },
+            { label: t("confirmDailyPractices.days.Fri"), value: "Fri" },
+            { label: t("confirmDailyPractices.days.Sat"), value: "Sat" },
+            { label: t("confirmDailyPractices.days.Sun"), value: "Sun" },
           ]}
           labelField="label"
           valueField="value"
@@ -527,12 +530,18 @@ const ConfirmDailyPractices = ({ route }) => {
           </TouchableOpacity>
 
           <TextComponent type="cardHeaderText" style={{ textAlign: "center", flex: 1 }}>
-            {route?.params?.growth ? route?.params?.title : "Set My Practices"}
+            {route?.params?.categoryItem
+              ? t(`dailyPracticeList.categories.${route.params.categoryItem.key}.name`)
+              : (route?.params?.title || t('confirmDailyPractices.header'))}
           </TextComponent>
           {!route?.params?.growth && <CartIcon />}
         </View>
-        <TextComponent type="subText" style={{ marginHorizontal: 16, textAlign: "center" }}>Set how often you want to do each part of your routine.</TextComponent>
-        <TextComponent type="streakText" style={{ marginHorizontal: 16, textAlign: "center", color: "#282828", marginTop: 10 }}>{route?.params?.growth ? route?.params?.description : "Choose your frequency and repetition count for each step"}</TextComponent>
+        <TextComponent type="subText" style={{ marginHorizontal: 16, textAlign: "center" }}>{t('confirmDailyPractices.subheader')}</TextComponent>
+        <TextComponent type="streakText" style={{ marginHorizontal: 16, textAlign: "center", color: "#282828", marginTop: 10 }}>
+          {route?.params?.categoryItem
+            ? t(`dailyPracticeList.categories.${route.params.categoryItem.key}.description`)
+            : (route?.params?.description || t('confirmDailyPractices.instruction'))}
+        </TextComponent>
         {/* LIST */}
         <FlatList
           data={formik.values.list}
@@ -564,17 +573,17 @@ const ConfirmDailyPractices = ({ route }) => {
             }}
           >
             <TextComponent type="cardText" style={{ color: "#FFF" }}>
-              Next
+              {t('confirmDailyPractices.next')}
             </TextComponent>
           </TouchableOpacity>
-          <TextComponent type="subDailyText" style={{ alignSelf: "center", textAlign: "center", marginVertical: 6 }}>These settings will shape your routine.</TextComponent>
+          <TextComponent type="subDailyText" style={{ alignSelf: "center", textAlign: "center", marginVertical: 6 }}>{t('confirmDailyPractices.footer')}</TextComponent>
         </View>
       </ScrollView>
 
       {/* CONFIRM BUTTON */}
 
 
-      <LoadingOverlay visible={loading} text="Saving..." />
+      <LoadingOverlay visible={loading} text={t('confirmDailyPractices.saving')} />
       {/* </ImageBackground> */}
     </SafeAreaView>
   );

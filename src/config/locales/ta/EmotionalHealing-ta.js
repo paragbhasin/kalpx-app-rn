@@ -873,4 +873,4 @@ export const EMOTIONAL_HEALING_SANKALPS_TA = [
       "ஆழ்ந்த இணக்க உணர்வு",
     ],
   },
-];
+];export const EMOTIONAL_HEALING_PRACTICES = [];

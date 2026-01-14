@@ -40,59 +40,60 @@ import { SANATAN_PRACTICES_FINAL } from "../../data/sanatanPractices";
 import { DAILY_SANKALPS } from "../../data/sankalps";
 import { RootState } from "../../store";
 import { getRawPracticeObject } from "../../utils/getPracticeObjectById";
+import { getTranslatedPractice } from "../../utils/getTranslatedPractice";
 import { getDailyDharmaTracker, submitDailyDharmaSetup } from "../Home/actions";
 import styles from "./TrackerEditStyles";
 
 const initialCategories = [
   {
-    name: "Peace & Calm",
+    name: "sadanaTracker.categories.peace-calm.name",
     key: "peace-calm",
-    description: "Find calm in the breath.",
+    description: "sadanaTracker.categories.peace-calm.description",
   },
   {
-    name: "Focus & Motivation",
+    name: "sadanaTracker.categories.focus.name",
     key: "focus",
-    description: "Align. Focus. Rise.",
+    description: "sadanaTracker.categories.focus.description",
   },
   {
-    name: "Emotional Healing",
+    name: "sadanaTracker.categories.healing.name",
     key: "healing",
-    description: "Let go. Begin again.",
+    description: "sadanaTracker.categories.healing.description",
   },
   {
-    name: "Gratitude & Positivity",
+    name: "sadanaTracker.categories.gratitude.name",
     key: "gratitude",
-    description: "Gratitude transforms everything.",
+    description: "sadanaTracker.categories.gratitude.description",
   },
   {
-    name: "Spiritual Growth",
+    name: "sadanaTracker.categories.spiritual-growth.name",
     key: "spiritual-growth",
-    description: "Grow through awareness.",
+    description: "sadanaTracker.categories.spiritual-growth.description",
   },
   {
-    name: "Health & Well-Being",
+    name: "sadanaTracker.categories.health.name",
     key: "health",
-    description: "Balance builds strength.",
+    description: "sadanaTracker.categories.health.description",
   },
   {
-    name: "Career & Prosperity",
+    name: "sadanaTracker.categories.career.name",
     key: "career",
-    description: "Opportunity follows action.",
+    description: "sadanaTracker.categories.career.description",
   },
   {
-    name: "Sanatan",
+    name: "sadanaTracker.categories.sanatan.name",
     key: "sanatan",
-    description: "Ancient traditions & timeless wisdom.",
+    description: "sadanaTracker.categories.sanatan.description",
   },
   {
-    name: "Daily Mantra",
+    name: "sadanaTracker.categories.daily-mantra.name",
     key: "daily-mantra",
-    description: "Sacred mantras for daily practice.",
+    description: "sadanaTracker.categories.daily-mantra.description",
   },
   {
-    name: "Daily Sankalp",
+    name: "sadanaTracker.categories.daily-sankalp.name",
     key: "daily-sankalp",
-    description: "Daily intentions to guide your path.",
+    description: "sadanaTracker.categories.daily-sankalp.description",
   },
 ];
 
@@ -291,26 +292,17 @@ const TrackerEdit = ({ route }) => {
     reps: p.details?.reps ?? p.reps ?? "",
   });
 
-  const normalizeForMantraCard = (item: any) => ({
-    ...item,
-    title:
-      item.title ||
-      item.name ||
-      item.iast ||
-      item.short_text ||
-      "Practice",
-
-    description:
-      item.description ||
-      item.summary ||
-      item.meaning ||
-      item.tooltip ||
-      "",
-
-    category: item.category,
-    day: item.day ?? item.details?.day,
-    reps: item.reps ?? item.details?.reps,
-  });
+  const normalizeForMantraCard = (item: any) => {
+    const translated = getTranslatedPractice(item, t);
+    return {
+      ...item,
+      title: translated.name,
+      description: translated.desc,
+      category: item.category,
+      day: item.day ?? item.details?.day,
+      reps: item.reps ?? item.details?.reps,
+    };
+  };
 
 
   const mergedPractices = useMemo(() => {
@@ -389,26 +381,32 @@ const TrackerEdit = ({ route }) => {
     });
   }, [searchText]);
 
-  const normalizedMantras = dailyMantraList.map((m: any, index) => ({
-    ...m,
-    id: m.id || `mantra_${index}`,
-    practice_id: m.id || `mantra_${index}`,
-    title: m.title || m.iast,
-    description: m.explanation,
-    category: "daily-mantra",
-  })).filter(
+  const normalizedMantras = dailyMantraList.map((m: any, index) => {
+    const translated = getTranslatedPractice(m, t);
+    return {
+      ...m,
+      id: m.id || `mantra_${index}`,
+      practice_id: m.id || `mantra_${index}`,
+      title: translated.name,
+      description: translated.desc,
+      category: "daily-mantra",
+    };
+  }).filter(
     (m: any) => !apiPracticeIdSet.has(m.practice_id)
   );;
 
 
-  const normalizedSankalps = dailySankalpList.map((s: any, index) => ({
-    ...s,
-    id: s.id || `sankalp_${index}`,
-    practice_id: s.id || `sankalp_${index}`,
-    title: s.short_text,
-    description: s.tooltip,
-    category: "daily-sankalp",
-  })).filter(
+  const normalizedSankalps = dailySankalpList.map((s: any, index) => {
+    const translated = getTranslatedPractice(s, t);
+    return {
+      ...s,
+      id: s.id || `sankalp_${index}`,
+      practice_id: s.id || `sankalp_${index}`,
+      title: translated.name,
+      description: translated.desc,
+      category: "daily-sankalp",
+    };
+  }).filter(
     (s: any) => !apiPracticeIdSet.has(s.practice_id)
   );;
 
@@ -766,8 +764,10 @@ const TrackerEdit = ({ route }) => {
 
   const SimplePracticeCard = ({ item, categoryItem }: any) => {
     const added = isAdded(item);
-    const displayMeaning =
-      item.meaning || item.summary || item.line || item.description;
+    // Use the translation utility instead of raw item fields
+    const translated = getTranslatedPractice(item, t);
+    const displayName = translated.name || item.title || item.name || "Unnamed Practice";
+    const displayDescription = translated.desc || item.description || "";
 
     return (
       <View style={styles.simpleCard}>
@@ -792,11 +792,11 @@ const TrackerEdit = ({ route }) => {
 
         <View style={{ flex: 1, marginLeft: 14 }}>
           <TextComponent type="boldText" style={styles.cardTitle}>
-            {item.title}
+            {displayName}
           </TextComponent>
 
           <TextComponent style={styles.cardSubtitle} numberOfLines={2}>
-            {displayMeaning}
+            {displayDescription}
           </TextComponent>
         </View>
 
@@ -1038,14 +1038,9 @@ const TrackerEdit = ({ route }) => {
               (item.id || item.practice_id)
           );
 
-          const displayName = t(`practices.${item.id}.name`, {
-            defaultValue: item.name,
-          });
-
-          const displayDescription = t(
-            `practices.${item.id}.description`,
-            { defaultValue: item.description }
-          );
+          const translated = getTranslatedPractice(item, t);
+          const displayName = translated.name;
+          const displayDescription = translated.desc;
 
           return (
             <View
@@ -1201,14 +1196,14 @@ const TrackerEdit = ({ route }) => {
                     style={styles.cardTitle}
                     numberOfLines={1}
                   >
-                    {item.title}
+                    {getTranslatedPractice(item, t).name}
                   </TextComponent>
 
                   <TextComponent
                     style={styles.cardSubtitle}
                     numberOfLines={2}
                   >
-                    {item.description || ""}
+                    {getTranslatedPractice(item, t).desc}
                   </TextComponent>
                 </View>
 
@@ -1262,22 +1257,25 @@ const TrackerEdit = ({ route }) => {
     setHasUnsavedChanges(true);
   };
 
-  const normalizeForConfirm = (item) => ({
-    practice_id: item.practice_id ?? item.id,
-    id: item.id ?? item.practice_id,
-    name: item.name || item.title || item.line || "",
-    title: item.title || item.name || "",
-    description: item.description || item.summary || item.meaning || item.line || "",
-    source: item.source ||
-      (item.id?.startsWith("mantra.") ? "mantra" :
-        item.id?.startsWith("sankalp.") ? "sankalp" : "practice"),
-    category: item.category || "",
-    reps: item.reps || "",
-    day: item.day || "Daily",
-    benefits: item.benefits || [],
-    details: item.details || {},
-    full_item: item,
-  });
+  const normalizeForConfirm = (item) => {
+    const translated = getTranslatedPractice(item, t);
+    return {
+      practice_id: item.practice_id ?? item.id,
+      id: item.id ?? item.practice_id,
+      name: translated.name,
+      title: translated.name,
+      description: translated.desc,
+      source: item.source ||
+        (item.id?.startsWith("mantra.") ? "mantra" :
+          item.id?.startsWith("sankalp.") ? "sankalp" : "practice"),
+      category: item.category || "",
+      reps: item.reps || "",
+      day: item.day || "Daily",
+      benefits: item.benefits || [],
+      details: item.details || {},
+      full_item: item,
+    };
+  };
 
 
   const handleConfirmPress = async () => {
@@ -1396,7 +1394,7 @@ const TrackerEdit = ({ route }) => {
                   marginHorizontal: 10,
                 }}
               >
-                Add To My Practice
+                {t("sadanaTracker.addPractices")}
               </TextComponent>
               <TouchableOpacity
                 onPress={() => setCartModalVisible(true)}
@@ -1432,16 +1430,20 @@ const TrackerEdit = ({ route }) => {
                 />
               </TouchableOpacity>
             </View>
-            <TextComponent type="mediumText" style={{ color: Colors.Colors.BLACK, textAlign: "center", marginHorizontal: 3 }}>Select mantra or practices to add to your routine</TextComponent>
+            <TextComponent type="mediumText" style={{ color: Colors.Colors.BLACK, textAlign: "center", marginHorizontal: 3 }}>
+              {t("sadanaTracker.setupInstruction", { defaultValue: "Select mantra or practices to add to your routine" })}
+            </TextComponent>
 
             <TextInput
-              placeholder="e.g., Shiva Ashtakam, Vishnu, Tulsi Pooja "
+              placeholder={t("sadanaTracker.searchPlaceholder", { defaultValue: "e.g., Shiva Ashtakam, Vishnu, Tulsi Pooja " })}
               placeholderTextColor="#8A8A8A"
               style={styles.searchInput}
               value={searchText}
               onChangeText={setSearchText}
             />
-            <TextComponent type="mediumText" style={{ marginHorizontal: 16, marginVertical: 4, color: Colors.Colors.BLACK }}>Practices to settle the mind and restore balance.</TextComponent>
+            <TextComponent type="mediumText" style={{ marginHorizontal: 16, marginVertical: 4, color: Colors.Colors.BLACK }}>
+              {t(initialCategories.find((c) => c.key === selectedCategory)?.description || "")}
+            </TextComponent>
             <FlatList
               ref={categoryRef}
               data={initialCategories}
@@ -1466,7 +1468,7 @@ const TrackerEdit = ({ route }) => {
                       styles.categoryChipTextSelected,
                     ]}
                   >
-                    {item.name}
+                    {t(item.name)}
                   </TextComponent>
                 </TouchableOpacity>
               )}
@@ -1491,7 +1493,7 @@ const TrackerEdit = ({ route }) => {
                         styles.typeTabTextSelected,
                       ]}
                     >
-                      {type.toUpperCase()}
+                      {t(`sadanaTracker.${type}Title`)}
                     </TextComponent>
                   </TouchableOpacity>
                 ))}

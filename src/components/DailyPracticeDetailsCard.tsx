@@ -13,82 +13,77 @@ import Colors from "./Colors";
 import FontSize from "./FontSize";
 import MantraPronunciationModal from "./MantraPronunciationModal";
 import TextComponent from "./TextComponent";
+import { getTranslatedPractice } from "../utils/getTranslatedPractice";
 
 const categoryChantOptions = {
   "peace-calm": {
     category: "Peace & Stress Relief",
     options: [
-      { count: 3, label: "Micro Calm" },
-      { count: 9, label: "Calm Now" },
-      { count: 27, label: "Ease Stress" },
-      { count: 54, label: "Deep Calm" },
-      { count: 108, label: "Soft Peace" },
+      { count: 3, label: "Micro Calm", labelKey: "microCalm" },
+      { count: 9, label: "Calm Now", labelKey: "calmNow" },
+      { count: 27, label: "Ease Stress", labelKey: "easeStress" },
+      { count: 54, label: "Deep Calm", labelKey: "deepCalm" },
+      { count: 108, label: "Soft Peace", labelKey: "softPeace" },
     ],
   },
-
   focus: {
     category: "Focus & Motivation",
     options: [
-      { count: 3, label: "Micro Focus" },
-      { count: 9, label: "Quick Focus" },
-      { count: 27, label: "Mind Clear" },
-      { count: 54, label: "Stay Sharp" },
-      { count: 108, label: "Full Focus" },
+      { count: 3, label: "Micro Focus", labelKey: "microFocus" },
+      { count: 9, label: "Quick Focus", labelKey: "quickFocus" },
+      { count: 27, label: "Mind Clear", labelKey: "mindClear" },
+      { count: 54, label: "Stay Sharp", labelKey: "staySharp" },
+      { count: 108, label: "Full Focus", labelKey: "fullFocus" },
     ],
   },
-
   healing: {
     category: "Emotional Healing",
     options: [
-      { count: 3, label: "Tiny Heal" },
-      { count: 9, label: "Gentle Heal" },
-      { count: 27, label: "Emotional Ease" },
-      { count: 54, label: "Heart Heal" },
-      { count: 108, label: "Inner Renew" },
+      { count: 3, label: "Tiny Heal", labelKey: "tinyHeal" },
+      { count: 9, label: "Gentle Heal", labelKey: "gentleHeal" },
+      { count: 27, label: "Emotional Ease", labelKey: "emotionalEase" },
+      { count: 54, label: "Heart Heal", labelKey: "heartHeal" },
+      { count: 108, label: "Inner Renew", labelKey: "innerRenew" },
     ],
   },
-
   gratitude: {
     category: "Gratitude & Positivity",
     options: [
-      { count: 3, label: "Micro Thanks" },
-      { count: 9, label: "Quick Thanks" },
-      { count: 27, label: "Feel Good" },
-      { count: 54, label: "Joy Rise" },
-      { count: 108, label: "Bright Mind" },
+      { count: 3, label: "Micro Thanks", labelKey: "microThanks" },
+      { count: 9, label: "Quick Thanks", labelKey: "quickThanks" },
+      { count: 27, label: "Feel Good", labelKey: "feelGood" },
+      { count: 54, label: "Joy Rise", labelKey: "joyRise" },
+      { count: 108, label: "Bright Mind", labelKey: "brightMind" },
     ],
   },
-
   "spiritual-growth": {
     category: "Spiritual Growth",
     options: [
-      { count: 3, label: "Tiny Lift" },
-      { count: 9, label: "Spirit Lift" },
-      { count: 27, label: "Divine Touch" },
-      { count: 54, label: "Inner Light" },
-      { count: 108, label: "Soul Align" },
+      { count: 3, label: "Tiny Lift", labelKey: "tinyLift" },
+      { count: 9, label: "Spirit Lift", labelKey: "spiritLift" },
+      { count: 27, label: "Divine Touch", labelKey: "divineTouch" },
+      { count: 54, label: "Inner Light", labelKey: "innerLight" },
+      { count: 108, label: "Soul Align", labelKey: "soulAlign" },
     ],
   },
-
   health: {
     category: "Health & Well-Being",
     options: [
-      { count: 3, label: "Mini Boost" },
-      { count: 9, label: "Vital Boost" },
-      { count: 27, label: "Body Heal" },
-      { count: 54, label: "Deep Heal" },
-      { count: 108, label: "Life Renew" },
+      { count: 3, label: "Mini Boost", labelKey: "miniBoost" },
+      { count: 9, label: "Vital Boost", labelKey: "vitalBoost" },
+      { count: 27, label: "Body Heal", labelKey: "bodyHeal" },
+      { count: 54, label: "Deep Heal", labelKey: "deepHeal" },
+      { count: 108, label: "Life Renew", labelKey: "lifeRenew" },
     ],
   },
-
   career: {
     category: "Career & Prosperity",
     options: [
-      { count: 3, label: "Mini Boost" },
-      { count: 9, label: "Quick Boost" },
-      { count: 27, label: "Goal Flow" },
-      { count: 54, label: "Prosper Path" },
-      { count: 108, label: "Wealth Rise" },
+      { count: 3, label: "Mini Boost", labelKey: "miniBoost" },
+      { count: 9, label: "Quick Boost", labelKey: "quickBoost" },
+      { count: 27, label: "Goal Flow", labelKey: "goalFlow" },
+      { count: 54, label: "Prosper Path", labelKey: "prosperPath" },
+      { count: 108, label: "Wealth Rise", labelKey: "wealthRise" },
     ],
   },
 };
@@ -193,7 +188,7 @@ const TagItem = ({ item }) => (
   </View>
 );
 
-const ChantOptionItem = ({ item, onSelect, selected }) => (
+const ChantOptionItem = ({ item, onSelect, selected, t }) => (
   <TouchableOpacity onPress={() => onSelect(item)} style={styles.chantRow}>
     <Ionicons
       name={
@@ -203,12 +198,14 @@ const ChantOptionItem = ({ item, onSelect, selected }) => (
       color={Colors.Colors.App_theme}
     />
     <TextComponent type="streakSadanaText" style={styles.chantLabel}>
-      {item.count} X - {item.label}
+      {item.count} X - {item.labelKey ? t(`sadanaTracker.detailsCard.${item.labelKey}`) : item.label}
     </TextComponent>
   </TouchableOpacity>
 );
 
 
+
+import { useTranslation } from "react-i18next";
 
 const DailyPracticeDetailsCard = ({
   data,
@@ -221,7 +218,29 @@ const DailyPracticeDetailsCard = ({
   mode,
   onAddToMyPractice = null,
 }) => {
+  const { t } = useTranslation();
   const [selectedChant, setSelectedChant] = useState(null);
+
+  // 🌟 NEW: All content should be localized via our central utility
+  const translated = getTranslatedPractice(data, t);
+  const displayData = {
+    ...data,
+    title: translated.name,
+    line: translated.line,
+    summary: translated.summary,
+    insight: translated.insight,
+    benefits: translated.benefits && translated.benefits.length > 0 ? translated.benefits : data.benefits,
+    duration: translated.duration,
+    steps: translated.steps,
+    howToLive: translated.howToLive,
+    essence: translated.essence,
+    devanagari: translated.mantra || data.devanagari || data.mantra,
+    meaning: translated.meaning,
+    iast: translated.iast || data.iast,
+    tags: translated.tags && translated.tags.length > 0 ? translated.tags : data.tags,
+    suggested_practice: translated.suggested_practice
+  };
+
   const [showPronunciation, setShowPronunciation] = useState(false);
   const [isDevanagariLong, setIsDevanagariLong] = useState(false);
   const [showDevanagariModal, setShowDevanagariModal] = useState(false);
@@ -240,8 +259,8 @@ const DailyPracticeDetailsCard = ({
   };
 
   const normalizedOptions = React.useMemo(
-    () => getNormalizedChantOptions(data?.chantOptions),
-    [data?.chantOptions]
+    () => getNormalizedChantOptions(displayData?.chantOptions),
+    [displayData?.chantOptions]
   );
 
   // lowest count
@@ -289,8 +308,8 @@ const DailyPracticeDetailsCard = ({
 
   const categoryKey =
     item?.key ||
-    data?.category_key ||
-    data?.category ||
+    displayData?.category_key ||
+    displayData?.category ||
     null;
 
 
@@ -302,17 +321,17 @@ const DailyPracticeDetailsCard = ({
 
   // Filter category options based on API counts (if any)
   const chantOptions = React.useMemo(() => {
-    if (!data?.chantOptions || data.chantOptions.length === 0) {
+    if (!displayData?.chantOptions || displayData.chantOptions.length === 0) {
       return fullCategoryOptions; // fallback to full list
     }
 
     // API may send [count] or [{count, label}]
-    const apiCounts = data.chantOptions.map(c =>
+    const apiCounts = displayData.chantOptions.map(c =>
       typeof c === "number" ? c : c.count
     );
 
     return fullCategoryOptions.filter(opt => apiCounts.includes(opt.count));
-  }, [data?.chantOptions, item?.key]);
+  }, [displayData?.chantOptions, item?.key]);
 
   React.useEffect(() => {
     if (chantOptions.length > 0) {
@@ -361,16 +380,16 @@ const DailyPracticeDetailsCard = ({
               type="DailyDetailheaderText"
               style={styles.headerTitle}
             >
-              {data?.title || data?.text || data?.name || data?.short_text}
+              {displayData?.title || displayData?.text || displayData?.name || displayData?.short_text}
             </TextComponent>
-            {data?.tags && (
+            {displayData?.tags && (
               <View style={styles.tagsCenterWrapper}>
-                {data?.tags?.map((item) => (
+                {displayData?.tags?.map((item) => (
                   <TagItem key={item} item={item} />
                 ))}
               </View>
             )}
-            {data?.line && (
+            {displayData?.line && (
               <TextComponent
                 type="headerText"
                 style={{
@@ -380,10 +399,10 @@ const DailyPracticeDetailsCard = ({
                 }}
                 ellipsizeMode="tail"
               >
-                {data?.line}
+                {displayData?.line}
               </TextComponent>
             )}
-            {(data?.devanagari || data?.mantra) && (
+            {(displayData?.devanagari || displayData?.mantra) && (
               <View style={styles.devanagariRow}>
                 <TextComponent
                   type="headerText"
@@ -396,7 +415,7 @@ const DailyPracticeDetailsCard = ({
                     }
                   }}
                 >
-                  {data?.devanagari || data?.mantra}
+                  {displayData?.devanagari || displayData?.mantra}
                 </TextComponent>
                 <TouchableOpacity onPress={() => setShowDevanagariModal(true)}>
                   <Ionicons
@@ -408,10 +427,10 @@ const DailyPracticeDetailsCard = ({
                 </TouchableOpacity>
               </View>
             )}
-            {(data?.iast || data?.name) && (
+            {(displayData?.iast || displayData?.name) && (
               <View style={styles.pronunciationRow}>
                 <TextComponent type="cardText" style={styles.pronunciationText}>
-                  Pronunciation Guide (English)
+                  {t("sadanaTracker.detailsCard.pronunciationGuide")}
                 </TextComponent>
                 <Ionicons
                   name="information-circle-outline"
@@ -423,80 +442,80 @@ const DailyPracticeDetailsCard = ({
               </View>
             )}
           </ImageBackground>
-          {data?.summary && (
-            <ExpandableText title="" text={data?.summary} />
+          {displayData?.summary && (
+            <ExpandableText title="" text={displayData?.summary} />
           )}
-          {data?.suggested_practice && (
-            <ExpandableText title="" text={data?.suggested_practice} />
+          {displayData?.suggested_practice && (
+            <ExpandableText title="" text={displayData?.suggested_practice} />
           )}
-          {data?.steps && (
+          {displayData?.steps && (
             <Card style={styles.meaningCard}>
               <ExpandableText
-                title="Steps"
-                text={data?.steps}
+                title={t("sadanaTracker.detailsCard.steps")}
+                text={displayData?.steps}
               />
-              {data?.duration && (
+              {displayData?.duration && (
                 <TextComponent
                   type="boldText"
                   style={{ ...styles.titleCenter, color: Colors.Colors.BLACK }}
                 >
-                  Time needed : {data?.duration}
+                  {t("sadanaTracker.detailsCard.timeNeeded")} {displayData?.duration}
                 </TextComponent>
               )}
             </Card>
           )}
-          {data?.insight && (
+          {displayData?.insight && (
             <ExpandableText
               title={
-                data?.id?.includes("practice")
-                  ? "Why This Works"
-                  : "The Power of Sankalp"
+                displayData?.id?.includes("practice")
+                  ? t("sadanaTracker.detailsCard.whyThisWorks")
+                  : t("sadanaTracker.detailsCard.powerOfSankalp")
               }
-              text={data?.insight}
+              text={displayData?.insight}
             />
           )}
-          {data?.meaning && (
+          {displayData?.meaning && (
             <Card style={styles.meaningCard}>
-              <ExpandableText title="" text={data?.meaning} />
+              <ExpandableText title="" text={displayData?.meaning} />
             </Card>
           )}
-          {data?.howToLive && (
+          {displayData?.howToLive && (
             <Card style={styles.meaningCard}>
               <ExpandableText
-                title="How To Live This Today"
-                text={data?.howToLive}
+                title={t("sadanaTracker.detailsCard.howToLive")}
+                text={displayData?.howToLive}
               />
             </Card>
           )}
-          {/* {data?.essence?.text || data?.essence &&
-        <ExpandableText title="Essence" text={data?.essence?.text || data?.essence} numberOfLines={3} />
+          {/* {displayData?.essence?.text || displayData?.essence &&
+        <ExpandableText title="Essence" text={displayData?.essence?.text || displayData?.essence} numberOfLines={3} />
 } */}
-          {/* {data?.essence && (
+          {/* {displayData?.essence && (
           <ExpandableText
             title="Essence"
             text={
-              typeof data.essence === "string"
-                ? data.essence
-                : data.essence?.text || ""
+              typeof displayData.essence === "string"
+                ? displayData.essence
+                : displayData.essence?.text || ""
             }
             numberOfLines={3}
           />
         )} */}
-          {data?.essence && (
+          {displayData?.essence && (
             <ExpandableText
-              title="Essence"
+              title={t("sadanaTracker.detailsCard.essence")}
               text={
-                typeof data.essence === "string"
-                  ? data.essence
-                  : data.essence?.text || ""
+                typeof displayData.essence === "string"
+                  ? displayData.essence
+                  : displayData.essence?.text || ""
               }
             />
           )}
 
-          {data?.benefits && (
+          {displayData?.benefits && (
             <ExpandableText
-              title="Benefits"
-              text={data?.benefits}
+              title={t("sadanaTracker.detailsCard.benefits")}
+              text={displayData?.benefits}
             />
           )}
           {/* {data?.id?.includes("mantra") && mode === "new" &&
@@ -554,47 +573,47 @@ const DailyPracticeDetailsCard = ({
                   style={{ marginRight: 10 }}
                 />
                 <TextComponent type="headerText" style={styles.changeText}>
-                  Change
+                  {t("sadanaTracker.detailsCard.change")}
                 </TextComponent>
               </TouchableOpacity>
 
               {mode === "new" && (
                 <TouchableOpacity style={mode === "new" ? styles.selectButton : styles.selectNewButton} onPress={onBackPress}>
                   <TextComponent type="headerText" style={styles.selectText}>
-                    Select
+                    {t("sadanaTracker.detailsCard.select")}
                   </TextComponent>
                 </TouchableOpacity>
               )}
             </>
           )}
-     
+
         </View>
-   <View
-    style={[
-      styles.selectButton,
-      {
-        marginBottom: 8,
-        padding: 10,
-        justifyContent: "center",
-        alignItems: "center",
+        <View
+          style={[
+            styles.selectButton,
+            {
+              marginBottom: 8,
+              padding: 10,
+              justifyContent: "center",
+              alignItems: "center",
               marginHorizontal: 12,
-      },
-    ]}
-  >
-    {mode === "view" && onAddToMyPractice && (
-      <TouchableOpacity
-        onPress={onAddToMyPractice}
-        style={{ justifyContent: "center", alignItems: "center" }}
-      >
-        <TextComponent
-          type="headerText"
-          style={styles.practiceSelectText}
+            },
+          ]}
         >
-          Add this to my practice
-        </TextComponent>
-      </TouchableOpacity>
-    )}
-  </View>
+          {mode === "view" && onAddToMyPractice && (
+            <TouchableOpacity
+              onPress={onAddToMyPractice}
+              style={{ justifyContent: "center", alignItems: "center" }}
+            >
+              <TextComponent
+                type="headerText"
+                style={styles.practiceSelectText}
+              >
+                {t("sadanaTracker.detailsCard.addToMyPractice")}
+              </TextComponent>
+            </TouchableOpacity>
+          )}
+        </View>
 
       </Card>
     </Animated.View>
@@ -738,7 +757,7 @@ const styles = StyleSheet.create({
   selectText: {
     color: "#FFFFFF",
   },
-  practiceSelectText:{
+  practiceSelectText: {
     color: "#FFFFFF",
     marginBottom: 2
 

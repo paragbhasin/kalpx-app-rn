@@ -873,4 +873,4 @@ export const EMOTIONAL_HEALING_SANKALPS_OR = [
       "ସମନ୍ୱୟର ଗଭୀର ଭାବନା",
     ],
   },
-];
+];export const EMOTIONAL_HEALING_PRACTICES = [];

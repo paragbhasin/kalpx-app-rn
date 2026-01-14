@@ -3,6 +3,7 @@ import { createMaterialTopTabNavigator } from "@react-navigation/material-top-ta
 import { useFocusEffect, useNavigation, useNavigationState, useRoute } from "@react-navigation/native";
 import { AnyAction } from "@reduxjs/toolkit";
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StyleSheet, View, Animated } from "react-native";
 import { useScrollContext } from "../../context/ScrollContext";
 import { useDispatch } from "react-redux";
@@ -21,6 +22,7 @@ const TopTabsNavigator = () => {
   const route: any = useRoute();   // ⭐ added
   const navState = useNavigationState((state) => state);
   const { headerY } = useScrollContext();
+  const { t } = useTranslation();
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [trackerData, setTrackerData] = useState(null);
@@ -137,7 +139,7 @@ const TopTabsNavigator = () => {
               name="History"
               component={TrackerEdit}
               initialParams={route.params}
-              options={{ title: "Edit Routine" }}
+              options={{ title: t("sadanaTracker.tabs.editRoutine") }}
               key={route?.params?.resumeData ? "history-restore" : "history-normal"}
             />
           ) : (
@@ -145,18 +147,18 @@ const TopTabsNavigator = () => {
               <Tab.Screen
                 name="Tracker"
                 component={TrackerScreen}
-                options={{ title: "My Routine" }}
+                options={{ title: t("sadanaTracker.tabs.myRoutine") }}
               />
               <Tab.Screen
                 name="Stats"
                 component={TrackerProgress}
-                options={{ title: "Progress" }}
+                options={{ title: t("sadanaTracker.tabs.progress") }}
               />
               <Tab.Screen
                 name="History"
                 initialParams={route.params}
                 component={TrackerEdit}
-                options={{ title: "Edit Routine" }}
+                options={{ title: t("sadanaTracker.tabs.editRoutine") }}
                 key={route?.params?.resumeData ? "history-restore" : "history-normal"}
               />
             </>

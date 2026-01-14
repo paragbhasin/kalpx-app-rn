@@ -28,6 +28,7 @@ import TextComponent from "../../components/TextComponent";
 import { useUserLocation } from "../../components/useUserLocation";
 import { RootState } from "../../store";
 import { getRawPracticeObject } from "../../utils/getPracticeObjectById";
+import { getTranslatedPractice } from "../../utils/getTranslatedPractice";
 import { trackDailyPractice } from "../Home/actions";
 import { fetchDailyPractice, fetchPracticeHistory } from "../Streak/actions";
 import { useScrollContext } from "../../context/ScrollContext";
@@ -100,7 +101,7 @@ const TrackerScreen = () => {
                   > */}
       <Animated.ScrollView
         ref={scrollViewRef}
-        contentContainerStyle={{ marginHorizontal: 10  }}
+        contentContainerStyle={{ marginHorizontal: 10 }}
         showsVerticalScrollIndicator={false}
         onScroll={handleScroll}
         scrollEventThrottle={16}
@@ -123,6 +124,7 @@ const TrackerScreen = () => {
           {t("sadanaTracker.progressSummary", {
             completed: dailyPractice?.data?.completed_today?.length || 0,
             total: dailyPractice?.data?.active_practices?.length || 0,
+            date: moment().format("MMM DD, YYYY")
           })}
         </TextComponent>
         <TextComponent
@@ -175,18 +177,30 @@ const TrackerScreen = () => {
             let practiceType = "";
 
             if (id.startsWith("mantra.")) {
-              practiceType = "Mantra :";
+              practiceType = t("sadanaTracker.mantraLabel");
             } else if (id.startsWith("sankalp.")) {
-              practiceType = "Sankalp :";
+              practiceType = t("sadanaTracker.sankalpLabel");
             } else if (id.startsWith("practice.")) {
-              practiceType = "Practice :";
+              practiceType = t("sadanaTracker.practiceLabel");
             } else {
               practiceType = "";
             }
             const fullObj = getRawPracticeObject(item.practice_id, item);
-            let HeadertextTitle = fullObj?.title || fullObj?.text || fullObj?.short_text || fullObj?.name;
-            let subTextCard = fullObj?.iast || fullObj?.line || fullObj?.summary || fullObj?.tooltip || fullObj?.description;
-            let mantraMeaning = fullObj?.meaning;
+
+            console.log("🧪 Item before translation:", {
+              practice_id: item.practice_id,
+              itemId: item.id,
+              detailsId: item.details?.id,
+              detailsType: item.details?.type,
+              category: item.category,
+              detailsCategory: item.details?.category
+            });
+
+            const translated = getTranslatedPractice(item, t);
+            let HeadertextTitle = translated.name || item.name || "Unnamed Practice";
+            let subTextCard = translated.desc || item.description || "";
+            let mantraText = translated.mantra || "";
+            let mantraMeaning = translated.meaning || "";
             let lastPracticeDate = item?.last_practice_date;
             const isCompleted = dailyPractice?.data?.completed_today?.includes(
               item.practice_id
@@ -203,21 +217,17 @@ const TrackerScreen = () => {
 
             let defaultReps =
               practiceTypeKey === "mantra"
-                ? "9X"
-                : practiceTypeKey === "sankalp"
-                  ? "1X"
-                  : practiceTypeKey === "practice"
-                    ? "1X"
-                    : "";
+                ? "9x"
+                : "1x";
 
             const displayReps = reps
-              ? reps.toString().toUpperCase().endsWith("X")
-                ? reps.toString().toUpperCase()
-                : `${reps}X`
+              ? reps.toString().toLowerCase().endsWith("x")
+                ? reps.toString().toLowerCase()
+                : `${reps}x`
               : defaultReps;
 
             // let displayReps = reps ? `${reps}X` : defaultReps;
-            let displayDay = day ? day : "Daily";
+            let displayDay = day ? day : t("sadanaTracker.daily");
 
             return (
               <Card
@@ -275,6 +285,22 @@ const TrackerScreen = () => {
                         color: Colors.Colors.BLACK,
                       }}>{practiceType ? practiceType : ""}</TextComponent> {subTextCard}
                   </TextComponent>
+                  {mantraText && practiceTypeKey !== "mantra" ? (
+                    <TextComponent
+                      type="mediumText"
+                      style={{
+                        fontSize: FontSize.CONSTS.FS_13,
+                        marginTop: 4,
+                        color: Colors.Colors.Light_black,
+                      }}
+                    >
+                      <TextComponent
+                        type="boldText"
+                        style={{
+                          color: Colors.Colors.BLACK,
+                        }}>{t("sadanaTracker.mantraLabel")}</TextComponent> {mantraText}
+                    </TextComponent>
+                  ) : null}
                   {mantraMeaning ? (
                     <TextComponent
                       type="mediumText"
@@ -296,7 +322,7 @@ const TrackerScreen = () => {
                         color: Colors.Colors.Light_black,
                       }}
                     >
-                      Last Practice : {lastPracticeDate}
+                      {t("sadanaTracker.lastPracticeLabel")} {lastPracticeDate}
                     </TextComponent>
                   ) : null}
                   <View style={{ backgroundColor: "#F7F0DD", borderColor: "#CC9B2F", borderWidth: 1, alignSelf: "flex-start", marginTop: 6, padding: 4, borderRadius: 4 }}>
@@ -368,7 +394,7 @@ const TrackerScreen = () => {
       {/* </ImageBackground> */}
 
       {/* Card Overlays - Rendered outside ScrollView for full screen coverage */}
-      <LoadingOverlay visible={fetchLoading} text="Submitting..." />
+      <LoadingOverlay visible={fetchLoading} text={t("sadanaTracker.submitting")} />
       {showInfo && selectedPractice && (() => {
         const raw = selectedPractice?.rawItem || selectedPractice;
         const item = selectedPractice;

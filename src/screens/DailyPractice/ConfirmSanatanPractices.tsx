@@ -32,71 +32,17 @@ import { CATALOGS } from "../../data/mantras";
 import { RootState } from "../../store";
 import { submitDailyDharmaSetup } from "../Home/actions";
 import styles from "../Home/homestyles";
+import { getTranslatedPractice } from "../../utils/getTranslatedPractice";
 
 const { width } = Dimensions.get("window");
 
 
 
-const getDisplayContent = (p: any, t: any, i18n: any) => {
-  const langKey = i18n.language?.split("-")[0]?.toLowerCase() || "en";
-
-  const isSankalp =
-    p.details?.type === "sankalp" ||
-    !!p.i18n?.short ||
-    !!p.details?.i18n?.short;
-
-  if (isSankalp) {
-    const shortKey = p.details?.i18n?.short || p.i18n?.short;
-    const suggestedKey = p.details?.i18n?.suggested || p.i18n?.suggested;
-    return {
-      title:
-        (shortKey && t(shortKey)) ||
-        p.details?.short_text ||
-        p.short_text ||
-        p.name ||
-        "",
-      description:
-        (suggestedKey && t(suggestedKey)) ||
-        p.details?.suggested_practice ||
-        p.suggested_practice ||
-        p.tooltip ||
-        p.description ||
-        "",
-    };
-  }
-
-  if ((p.id && String(p.id).startsWith("mantra.")) || p.text || p.devanagari) {
-    const localized = CATALOGS[langKey]?.find((m) => m.id === p.id);
-    const fallback = CATALOGS.en.find((m) => m.id === p.id);
-    const active = localized || fallback || p;
-
-    return {
-      title:
-        active.text ||
-        p.text ||
-        p.name ||
-        active.devanagari ||
-        p.devanagari ||
-        "",
-      description:
-        Array.isArray(active.explanation)
-          ? active.explanation.join(" ")
-          : p.explanation || p.description || "",
-    };
-  }
-
-  if (p.source === "custom" || p.source === "api") {
-    return {
-      title: p.name || "Custom Practice",
-      description: p.description || "",
-    };
-  }
-
+const getDisplayContent = (p: any, t: any) => {
+  const translated = getTranslatedPractice(p, t);
   return {
-    title: t(`practices.${p.id}.name`, { defaultValue: p.name }),
-    description: t(`practices.${p.id}.description`, {
-      defaultValue: p.description,
-    }),
+    title: translated.name || p.name || p.title || p.text || "",
+    description: translated.desc || p.description || p.meaning || "",
   };
 };
 
@@ -135,9 +81,9 @@ const ConfirmSanatanPractices = ({ route }) => {
     mantras: Yup.array().of(
       Yup.object().shape({
         reps: Yup.string()
-          .required("Reps are required")
-          .matches(/^[0-9]+$/, "Only digits allowed"),
-        day: Yup.string().required("Day is required"),
+          .required(t("confirmDailyPractices.repsRequired"))
+          .matches(/^[0-9]+$/, t("confirmDailyPractices.digitsOnly")),
+        day: Yup.string().required(t("confirmDailyPractices.dayRequired")),
       })
     ),
   });
@@ -235,7 +181,7 @@ const ConfirmSanatanPractices = ({ route }) => {
   const renderMantraItem = ({ item, index }) => {
     const error = formik.errors?.mantras?.[index];
     const { title: displayName, description: displayDescription } =
-      getDisplayContent(item, t, i18n);
+      getDisplayContent(item, t);
 
     return (
       <View
@@ -272,7 +218,7 @@ const ConfirmSanatanPractices = ({ route }) => {
           type="cardText"
           style={{ marginVertical: 4 }}
         >
-          Reps (1 - 1000)
+          {t("confirmSanatanPractices.repsRange")}
         </TextComponent>
 
         <TextInput
@@ -284,7 +230,7 @@ const ConfirmSanatanPractices = ({ route }) => {
             padding: 10,
             backgroundColor: "#FFFFFF"
           }}
-          placeholder="Enter reps"
+          placeholder={t("confirmSanatanPractices.repsPlaceholder")}
           keyboardType="number-pad"
           value={formik.values.mantras[index].reps}
           onChangeText={(val) =>
@@ -300,18 +246,18 @@ const ConfirmSanatanPractices = ({ route }) => {
           type="cardText"
           style={{ marginVertical: 4 }}
         >
-          Days
+          {t("confirmDailyPractices.frequency")}
         </TextComponent>
         <Dropdown
           data={[
-            { label: "Daily", value: "Daily" },
-            { label: "Monday", value: "Mon" },
-            { label: "Tuesday", value: "Tue" },
-            { label: "Wednesday", value: "Wed" },
-            { label: "Thursday", value: "Thu" },
-            { label: "Friday", value: "Fri" },
-            { label: "Saturday", value: "Sat" },
-            { label: "Sunday", value: "Sun" },
+            { label: t("confirmDailyPractices.days.Daily"), value: "Daily" },
+            { label: t("confirmDailyPractices.days.Mon"), value: "Mon" },
+            { label: t("confirmDailyPractices.days.Tue"), value: "Tue" },
+            { label: t("confirmDailyPractices.days.Wed"), value: "Wed" },
+            { label: t("confirmDailyPractices.days.Thu"), value: "Thu" },
+            { label: t("confirmDailyPractices.days.Fri"), value: "Fri" },
+            { label: t("confirmDailyPractices.days.Sat"), value: "Sat" },
+            { label: t("confirmDailyPractices.days.Sun"), value: "Sun" },
           ]}
           labelField="label"
           valueField="value"
@@ -380,7 +326,7 @@ const ConfirmSanatanPractices = ({ route }) => {
               <Ionicons name="arrow-back" size={26} color="#000" />
             </TouchableOpacity>
             <TextComponent type="DailyDetailheaderText" style={styles.pageTitle}>
-            Set Sanatan Practices
+              {t("confirmSanatanPractices.header")}
             </TextComponent>
             <CartIcon />
             {/* <TouchableOpacity
@@ -416,7 +362,7 @@ const ConfirmSanatanPractices = ({ route }) => {
             />
           </TouchableOpacity> */}
           </View>
-          <TextComponent type="subText" style={{ color: Colors.Colors.BLACK, textAlign: "center", marginHorizontal: 10 }}>Set how often you want to do each part of your routine.</TextComponent>
+          <TextComponent type="subText" style={{ color: Colors.Colors.BLACK, textAlign: "center", marginHorizontal: 10 }}>{t("confirmDailyPractices.subheader")}</TextComponent>
           {route?.name !== "ConfirmSanatanPractices" && (
             <TextComponent
               type="subDailyText"
@@ -427,18 +373,18 @@ const ConfirmSanatanPractices = ({ route }) => {
                 marginTop: 12,
               }}
             >
-              Review your practices before adding them to your routine
+              {t("submitDailyPractices.reviewInstruction")}
             </TextComponent>
           )}
-{ route?.name !== "ConfirmSanatanPractices" && (
-  <>
-          <TextComponent type="DailyHeaderText" style={{ marginHorizontal: 16, marginTop: 20 }}>
-            Added Practices ({formik.values.mantras.length})
-          </TextComponent>
-          <TextComponent type="subDailyText" style={{ color: Colors.Colors.BLACK, marginHorizontal: 16, marginTop: 4 }}>
-            These will become part of your routine
-          </TextComponent>
-          </>
+          {route?.name !== "ConfirmSanatanPractices" && (
+            <>
+              <TextComponent type="DailyHeaderText" style={{ marginHorizontal: 16, marginTop: 20 }}>
+                {t("submitDailyPractices.addedPractices")} ({formik.values.mantras.length})
+              </TextComponent>
+              <TextComponent type="subDailyText" style={{ color: Colors.Colors.BLACK, marginHorizontal: 16, marginTop: 4 }}>
+                {t("submitDailyPractices.routineInstruction")}
+              </TextComponent>
+            </>
           )}
 
           <FlatList
@@ -494,28 +440,28 @@ const ConfirmSanatanPractices = ({ route }) => {
               }}
             >
               <TextComponent type="cardText" style={{ color: "#fff" }}>
-             {route?.name === "ConfirmSanatanPractices" ?'Next': "Confirm" }  
+                {route?.name === "ConfirmSanatanPractices" ? t("confirmDailyPractices.next") : t("confirmSanatanPractices.confirm")}
               </TextComponent>
-        
+
             </TouchableOpacity>
-                  { route?.name === "ConfirmSanatanPractices" && (
-         <TextComponent
-  type="subDailyText"
-  style={{
-    color: Colors.Colors.BLACK,
-    marginHorizontal: 16,
-    marginTop: 4,
-    textAlign: "center",
-  }}
->
-  These settings will shape your routine
-</TextComponent>
-              )}
+            {route?.name === "ConfirmSanatanPractices" && (
+              <TextComponent
+                type="subDailyText"
+                style={{
+                  color: Colors.Colors.BLACK,
+                  marginHorizontal: 16,
+                  marginTop: 4,
+                  textAlign: "center",
+                }}
+              >
+                {t("confirmDailyPractices.footer")}
+              </TextComponent>
+            )}
           </View>
         </ScrollView>
 
 
-        <LoadingOverlay visible={loading} text="Saving..." />
+        <LoadingOverlay visible={loading} text={t("confirmSanatanPractices.saving")} />
       </ImageBackground>
     </SafeAreaView>
   );

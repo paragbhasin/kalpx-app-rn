@@ -146,8 +146,8 @@ const TrackerProgress = () => {
         onScroll={handleScroll}
         scrollEventThrottle={16}
       >
-        <TextComponent type="headerSubBoldText" style={{ alignSelf: "center" }}>Your Progress</TextComponent>
-        <TextComponent type="mediumText" style={{ alignSelf: "center", textAlign: "center", color: "#282828" }}>A gentle reminder of how your practice is unfolding.</TextComponent>
+        <TextComponent type="headerSubBoldText" style={{ alignSelf: "center" }}>{t("sadanaTracker.progress.title")}</TextComponent>
+        <TextComponent type="mediumText" style={{ alignSelf: "center", textAlign: "center", color: "#282828" }}>{t("sadanaTracker.progress.subtitle")}</TextComponent>
         <TextComponent type="streakSadanaText" style={{ alignSelf: "center", marginTop: 5 }} >
           {currentMilestone ? t("streakScreen.youEarned", { badge: currentMilestone.name }) : t("sadanaTracker.noBadge")}
         </TextComponent>
@@ -179,20 +179,20 @@ const TrackerProgress = () => {
             type="DailyboldText"
             style={{ color: Colors.Colors.BLACK, margin: 8 }}
           >
-            Current Week Status
+            {t("sadanaTracker.progress.currentWeekStatus")}
           </TextComponent>
           <View style={{ flexDirection: "row", justifyContent: "space-between", marginHorizontal: 10, marginVertical: 5 }}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <View style={{ backgroundColor: "#36BD00", width: 30, height: 24, borderRadius: 5, marginRight: 6 }} />
-              <TextComponent type="mediumText" style={{ color: Colors.Colors.Daily_black }}>Completed</TextComponent>
+              <TextComponent type="mediumText" style={{ color: Colors.Colors.Daily_black }}>{t("sadanaTracker.progress.completed")}</TextComponent>
             </View>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <View style={{ backgroundColor: "#E4E437", width: 30, height: 24, borderRadius: 5, marginRight: 6 }} />
-              <TextComponent type="mediumText" style={{ color: Colors.Colors.Daily_black }}>Incomplete</TextComponent>
+              <TextComponent type="mediumText" style={{ color: Colors.Colors.Daily_black }}>{t("sadanaTracker.progress.incomplete")}</TextComponent>
             </View>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <View style={{ backgroundColor: "#bb3f3f", width: 30, height: 24, borderRadius: 5, marginRight: 6 }} />
-              <TextComponent type="mediumText" style={{ color: Colors.Colors.Daily_black }}>Missed</TextComponent>
+              <TextComponent type="mediumText" style={{ color: Colors.Colors.Daily_black }}>{t("sadanaTracker.progress.missed")}</TextComponent>
             </View>
           </View>
           <View

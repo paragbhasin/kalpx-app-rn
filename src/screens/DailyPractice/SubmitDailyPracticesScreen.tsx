@@ -16,6 +16,7 @@ import { Card } from "react-native-paper";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useDispatch, useSelector } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
+import { useTranslation } from "react-i18next";
 
 import moment from "moment";
 import CartIcon from "../../components/CartIcon";
@@ -30,6 +31,7 @@ import { RootState } from "../../store";
 import { getRawPracticeObject } from "../../utils/getPracticeObjectById";
 import { submitDailyDharmaSetup } from "../Home/actions";
 import { fetchDailyPractice } from "../Streak/actions";
+import { getTranslatedPractice } from "../../utils/getTranslatedPractice";
 
 const initialCategories = [
   { name: "Peace & Calm", key: "peace-calm" },
@@ -44,6 +46,7 @@ const initialCategories = [
 
 const SubmitDailyPracticesScreen = ({ route }) => {
   const navigation: any = useNavigation();
+  const { t } = useTranslation();
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
 
   const [loading, setLoading] = useState(false);
@@ -259,36 +262,35 @@ const SubmitDailyPracticesScreen = ({ route }) => {
               style={{ flex: 1, textAlign: "center" }}
             >
               {route?.params?.sanatan
-                ? "Save Sanatan Practices"
+                ? t("submitDailyPractices.saveSanatan")
                 : route?.params?.custom
-                  ? "Create Your Own Practice"
-                  : "Save my Practices"}
+                  ? t("submitDailyPractices.createOwn")
+                  : t("submitDailyPractices.saveMyPractices")}
             </TextComponent>
 
-      
+
             <CartIcon />
           </View>
-                <TextComponent
+          <TextComponent
             type="subDailyText"
-                      style={{
-                        color: Colors.Colors.BLACK,
-                        textAlign: "center",
-                        marginHorizontal: 10,
-                        marginTop: 12,
-                      }}
-            >
-                         Review your practices before adding them to your routine
-
-            </TextComponent>
+            style={{
+              color: Colors.Colors.BLACK,
+              textAlign: "center",
+              marginHorizontal: 10,
+              marginTop: 12,
+            }}
+          >
+            {t("submitDailyPractices.reviewInstruction")}
+          </TextComponent>
 
           <TextComponent
             type="DailyHeaderText"
             style={{ marginHorizontal: 16, marginTop: 20 }}
           >
-            Added Practices ({routePractices.length})
+            {t("submitDailyPractices.addedPractices")} ({routePractices.length})
           </TextComponent>
-                    <TextComponent type="subDailyText" style={{ color: Colors.Colors.BLACK, marginHorizontal: 16, marginTop: 4 }}>
-            These will become part of your routine
+          <TextComponent type="subDailyText" style={{ color: Colors.Colors.BLACK, marginHorizontal: 16, marginTop: 4 }}>
+            {t("submitDailyPractices.routineInstruction")}
           </TextComponent>
 
           {/* PRACTICE CARDS — ROUTE ONLY */}
@@ -344,7 +346,7 @@ const SubmitDailyPracticesScreen = ({ route }) => {
                   }}
                 >
                   <TextComponent type="boldText" style={{ color: "#FFF" }}>
-                    {item.day} • {item.reps}x
+                    {t(`confirmDailyPractices.days.${item.day || "Daily"}`)} • {item.reps}x
                   </TextComponent>
                 </View>
 
@@ -361,7 +363,7 @@ const SubmitDailyPracticesScreen = ({ route }) => {
                     type="mediumText"
                     style={{ flex: 1 }}
                   >
-                    {item.name}
+                    {getTranslatedPractice(item, t).name || item.name}
                   </TextComponent>
 
                   <TouchableOpacity
@@ -409,15 +411,15 @@ const SubmitDailyPracticesScreen = ({ route }) => {
             }}
           >
             <TextComponent type="cardText" style={{ color: "#FFF" }}>
-              {route?.params?.custom ? "Save my Practices" : "Next"}
+              {route?.params?.custom ? t("submitDailyPractices.save") : t("submitDailyPractices.next")}
             </TextComponent>
           </TouchableOpacity>
-            <TextComponent type="subDailyText" style={{ color: Colors.Colors.BLACK, marginHorizontal: 16, marginTop: 4 }}>
-   You can edit them anytime
+          <TextComponent type="subDailyText" style={{ color: Colors.Colors.BLACK, marginHorizontal: 16, marginTop: 4 }}>
+            {t("submitDailyPractices.footer")}
           </TextComponent>
         </View>
 
-        <LoadingOverlay visible={loading} text="Saving..." />
+        <LoadingOverlay visible={loading} text={t("submitDailyPractices.saving")} />
       </ImageBackground>
     </SafeAreaView>
   );

@@ -556,7 +556,9 @@ const categories = isLoggedIn
           <TextComponent type="headerText" style={styles.sectionHeading}>
             {t("streak.stepText")}
           </TextComponent>
-         <TextComponent type="cardSubTitleText" style={{alignSelf:"center",textAlign:"center",marginBottom:10,marginTop:4,marginHorizontal:12}}>Try a simple Vedic practice below to bring clarity, balance, and purpose into your day.</TextComponent>
+         <TextComponent type="cardSubTitleText" style={{alignSelf:"center",textAlign:"center",marginBottom:10,marginTop:4,marginHorizontal:12}}>
+                 {t("dailyPracticeLogin.vedictext")}
+         </TextComponent>
             <View style={{ 
                   height: expandedItemId ? 'auto' : 0,
     opacity: expandedItemId ? 1 : 0,
@@ -617,8 +619,8 @@ const categories = isLoggedIn
             scrollEnabled={false}
           />
         </View>
-              <TextComponent type="mediumText" style={{alignSelf: "center",textAlign:"center" ,color:Colors.Colors.blue_text,marginTop:20}} >“Pick one for today — consistency grows over time.”</TextComponent>
-      <TextComponent type="mediumText" style={{alignSelf: "center",textAlign:"center" ,color:Colors.Colors.blue_text,marginBottom:30}} >These are simple practices you can choose for the day.</TextComponent>
+              <TextComponent type="mediumText" style={{alignSelf: "center",textAlign:"center" ,color:Colors.Colors.blue_text,marginTop:20}} >“{t("dailyPracticeLogin.todaytext")}”</TextComponent>
+      <TextComponent type="mediumText" style={{alignSelf: "center",textAlign:"center" ,color:Colors.Colors.blue_text,marginBottom:30}} > {t("dailyPracticeLogin.simplepractce")}</TextComponent>
 <SigninPopup
   visible={showMantraTaken}
   onClose={() => setShowMantraTaken(false)}

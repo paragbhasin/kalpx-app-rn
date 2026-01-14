@@ -873,4 +873,4 @@ export const EMOTIONAL_HEALING_SANKALPS = [
       "সারিবদ্ধতার গভীর অনুভূতি",
     ],
   },
-];
+];export const EMOTIONAL_HEALING_PRACTICES = [];

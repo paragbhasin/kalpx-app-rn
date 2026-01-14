@@ -873,4 +873,4 @@ export const EMOTIONAL_HEALING_SANKALPS = [
       "સંરેખણની ગહન ભાવના",
     ],
   },
-];
+];export const EMOTIONAL_HEALING_PRACTICES = [];

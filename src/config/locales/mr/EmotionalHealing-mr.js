@@ -873,4 +873,4 @@ export const EMOTIONAL_HEALING_SANKALPS_MR = [
       "गहन समरूपतेची भावना",
     ],
   },
-];
+];export const EMOTIONAL_HEALING_PRACTICES = [];

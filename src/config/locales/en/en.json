@@ -1,4 +1,12 @@
 {
+  "drawer": {
+    "myRoutine": "My Routine",
+    "community": "Community",
+    "logout": "Logout",
+    "login": "Log In",
+    "followUs": "Follow us",
+    "allRightsReserved": "© 2025 KalpX. All rights reserved."
+  },
   "home": {
     "greeting": "Hi, {{name}}",
     "dailyHeading": "What would you like today?",

@@ -68,7 +68,6 @@ const CustomDrawerContent = (props) => {
       getDailyDharmaTracker((res) => {
         if (res.success) {
           setTrackerData(res.data);
-          console.log("📘 Tracker Loaded in Drawer:", res.data);
         } else {
           console.log("❌ Failed to load tracker:", res.error);
         }
@@ -153,7 +152,7 @@ const CustomDrawerContent = (props) => {
   const categories = [
     {
       id: "1",
-      name: 'My Routine',
+      name: t("drawer.myRoutine"),
       title: trackerData?.active_practices?.length > 0 ? "TrackerTabs" : "DailyPracticeLogin",
       iconType: "image",
       icon: require("../../../assets/Group.png"),
@@ -167,7 +166,7 @@ const CustomDrawerContent = (props) => {
     },
     {
       id: "3",
-      name: "Community",
+      name: t("drawer.community"),
       title: "CommunityLanding",
       iconType: "vector",
       icon: "people-outline",
@@ -280,7 +279,7 @@ const CustomDrawerContent = (props) => {
               allowFontScaling={false}
               style={{ marginLeft: 10, color: "red" }}
             >
-              Logout
+              {t("drawer.logout")}
             </TextComponent>
           </TouchableOpacity>
         ) : (
@@ -294,7 +293,7 @@ const CustomDrawerContent = (props) => {
               allowFontScaling={false}
               style={{ marginLeft: 10 }}
             >
-              Log In
+              {t("drawer.login")}
             </TextComponent>
           </TouchableOpacity>
         )}
@@ -315,7 +314,7 @@ const CustomDrawerContent = (props) => {
               type="streakSadanaText"
               style={{ color: "#000" }}
             >
-              {t("profile.followUs", "Follow us")}
+              {t("drawer.followUs")}
             </TextComponent>
 
             {/* Facebook */}
@@ -343,7 +342,7 @@ const CustomDrawerContent = (props) => {
           allowFontScaling={false}
           style={{ textAlign: "center", color: "#999", fontSize: 12 }}
         >
-          © 2025 KalpX. All rights reserved.
+          {t("drawer.allRightsReserved")}
         </TextComponent>
       </View>
     </View>

@@ -1,4 +1,12 @@
 {
+  "drawer": {
+    "myRoutine": "मेरी दिनचर्या",
+    "community": "समुदाय",
+    "logout": "लॉग आउट",
+    "login": "लॉग इन",
+    "followUs": "हमें फॉलो करें",
+    "allRightsReserved": "© 2025 KalpX. सर्वाधिकार सुरक्षित।"
+  },
   "home": {
     "greeting": "नमस्ते, {{name}}",
     "dailyHeading": "आज आप क्या करना चाहेंगे?",

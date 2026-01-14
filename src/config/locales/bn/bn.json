@@ -1,4 +1,12 @@
 {
+  "drawer": {
+    "myRoutine": "আমার রুটিন",
+    "community": "সম্প্রদায়",
+    "logout": "লগ আউট",
+    "login": "লগ ইন",
+    "followUs": "আমাদের অনুসরণ করুন",
+    "allRightsReserved": "© 2025 KalpX. সর্বস্বত্ব সংরক্ষিত।"
+  },
   "home": {
     "greeting": "নমস্তে, {{name}}",
     "dailyHeading": "আজ আপনি কী করতে চান?",

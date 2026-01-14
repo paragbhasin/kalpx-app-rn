@@ -769,6 +769,26 @@
     }
   },
   "sadanaTracker": {
+    "unnamedPractice": "പേരില്ലാത്ത പരിശീലനം",
+    "mantraTag": "മന്ത്രം",
+    "sankalpTag": "സങ്കല്പം",
+    "practiceTag": "സാധന",
+    "dailyLabel": "പ്രതിദിനം",
+    "addSelectedToRoutine": "തിരഞ്ഞെടുത്ത സാധനകൾ എന്റെ ദിനചര്യയിൽ ചേർക്കുക",
+    "adjustNextStep": "അടുത്ത ഘട്ടത്തിൽ നിങ്ങൾക്ക് ആവർത്തനവും ആവൃത്തിയും ക്രമീകരിക്കാം",
+    "yourDailyRoutine": "നിങ്ങളുടെ ദിനചര്യ",
+    "updateRoutineDesc": "നിങ്ങളുടെ വളർച്ചാ യാത്രയുമായി ബന്ധം നിലനിർത്താൻ ദിനചര്യ പുതുക്കുക.",
+    "activePracticesLabel": "സജീവ പരിശീലനങ്ങൾ ({{count}})",
+    "activePracticesDesc": "ഇവ നേരത്തെ തന്നെ നിങ്ങളുടെ ദിനചര്യയുടെ ഭാഗമാണ്",
+    "addedPracticesLabel": "ചേർത്ത പരിശീലനങ്ങൾ ({{count}})",
+    "addedPracticesDesc": "സേവ് ചെയ്ത ശേഷം ഇവ ചേർക്കപ്പെടും",
+    "addedTag": "ചേർത്തു",
+    "readyToExpand": "പരിശീലനം വിപുലീകരിക്കാൻ തയ്യാറാണോ?",
+    "expandDesc": "നിങ്ങളുടെ ദിനചര്യ ആഴത്തിലാക്കാൻ പുതിയ മന്ത്രങ്ങളോ പരിശീലനങ്ങളോ ചേർക്കുക.",
+    "addMorePractice": "കൂടുതൽ പരിശീലനങ്ങൾ ചേർക്കുക",
+    "createCustomPractice": "പുതിയ പരിശീലനം സൃഷ്ടിക്കുക",
+    "saveRoutine": "ദിനചര്യ സേവ് ചെയ്യുക",
+    "saveRoutineNotice": "മാറ്റം വരുത്തിയ ദിനചര്യ നാളെ രാവിലെ മുതൽ കാണാം",
     "categories": {
       "peace-calm": {
         "name": "ശാന്തിയും സമാധാനവും",

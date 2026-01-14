@@ -769,6 +769,26 @@
     }
   },
   "sadanaTracker": {
+    "unnamedPractice": "અનામી અભ્યાસ",
+    "mantraTag": "મંત્ર",
+    "sankalpTag": "સંકલ્પ",
+    "practiceTag": "સાધના",
+    "dailyLabel": "દૈનિક",
+    "addSelectedToRoutine": "પસંદ કરેલી સાધનાઓને મારી દિનચર્યામાં ઉમેરો",
+    "adjustNextStep": "તમે આગલા સ્ટેપમાં પુનરાવર્તન અને આવર્તનને સમાયોજિત કરી શકો છો",
+    "yourDailyRoutine": "તમારી દૈનિક દિનચર્યા",
+    "updateRoutineDesc": "તમારી પ્રગતિની યાત્રા સાથે જોડાયેલા રહેવા માટે તમારી દિનચર્યા અપડેટ કરો.",
+    "activePracticesLabel": "સક્રિય અભ્યાસ ({{count}})",
+    "activePracticesDesc": "આ પહેલેથી જ તમારી દિનચર્યાનો ભાગ છે",
+    "addedPracticesLabel": "ઉમેરાયેલ અભ્યાસ ({{count}})",
+    "addedPracticesDesc": "સેવ કર્યા પછી આ ઉમેરવામાં આવશે",
+    "addedTag": "ઉમેરાયું",
+    "readyToExpand": "તમારા અભ્યાસને વિસ્તારવા માટે તૈયાર છો?",
+    "expandDesc": "તમારી દિનચર્યાને વધુ ગહન બનાવવા માટે નવા મંત્રો અથવા અભ્યાસ ઉમેરો.",
+    "addMorePractice": "વધુ અભ્યાસ ઉમેરો",
+    "createCustomPractice": "કસ્ટમ અભ્યાસ બનાવો",
+    "saveRoutine": "મારી દિનચર્યા સેવ કરો",
+    "saveRoutineNotice": "તમારી અપડેટ કરેલી દિનચર્યા આવતીકાલ સવારથી દેખાશે",
     "categories": {
       "peace-calm": {
         "name": "શાંતિ અને સ્થિરતા",

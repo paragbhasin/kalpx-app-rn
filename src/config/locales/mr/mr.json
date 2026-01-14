@@ -770,6 +770,26 @@
     }
   },
   "sadanaTracker": {
+    "unnamedPractice": "अनामिक सराव",
+    "mantraTag": "मंत्र",
+    "sankalpTag": "संकल्प",
+    "practiceTag": "साधना",
+    "dailyLabel": "दैनिक",
+    "addSelectedToRoutine": "निवडलेल्या साधना माझ्या दिनचर्येत जोडा",
+    "adjustNextStep": "तुम्ही पुढील चरणात पुनरावृत्ती आणि वारंवारता समायोजित करू शकता",
+    "yourDailyRoutine": "तुमची दैनिक दिनचर्या",
+    "updateRoutineDesc": "तुमच्या प्रगतीच्या प्रवासाशी जोडलेले राहण्यासाठी तुमची दिनचर्या अपडेट करा.",
+    "activePracticesLabel": "सक्रिय सराव ({{count}})",
+    "activePracticesDesc": "हे आधीच तुमच्या दिनचर्येचा भाग आहेत",
+    "addedPracticesLabel": "जोडलेले सराव ({{count}})",
+    "addedPracticesDesc": "सेव्ह केल्यानंतर हे जोडले जातील",
+    "addedTag": "जोडले",
+    "readyToExpand": "तुमचा सराव वाढवण्यासाठी तयार आहात का?",
+    "expandDesc": "तुमची दिनचर्या अधिक सखोल करण्यासाठी नवीन मंत्र किंवा सराव जोडा.",
+    "addMorePractice": "आणखी सराव जोडा",
+    "createCustomPractice": "कस्टम सराव तयार करा",
+    "saveRoutine": "माझी दिनचर्या सेव्ह करा",
+    "saveRoutineNotice": "तुमची अपडेट केलेली दिनचर्या उद्या सकाळपासून दिसेल",
     "categories": {
       "peace-calm": {
         "name": "शांती आणि स्थिरता",

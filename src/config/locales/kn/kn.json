@@ -769,6 +769,26 @@
     }
   },
   "sadanaTracker": {
+    "unnamedPractice": "ಹೆಸರಿಲ್ಲದ ಅಭ್ಯಾಸ",
+    "mantraTag": "ಮಂತ್ರ",
+    "sankalpTag": "ಸಂಕಲ್ಪ",
+    "practiceTag": "ಸಾಧನಾ",
+    "dailyLabel": "ದೈನಂದಿನ",
+    "addSelectedToRoutine": "ಆಯ್ದ ಸಾಧನೆಗಳನ್ನು ನನ್ನ ದಿನಚರಿಗೆ ಸೇರಿಸಿ",
+    "adjustNextStep": "ಮುಂದಿನ ಹಂತದಲ್ಲಿ ನೀವು ಪುನರಾವರ್ತನೆ ಮತ್ತು ಆವರ್ತನವನ್ನು ಸರಿಹೊಂದಿಸಬಹುದು",
+    "yourDailyRoutine": "ನಿಮ್ಮ ದೈನಂದಿನ ದಿನಚರಿ",
+    "updateRoutineDesc": "ನಿಮ್ಮ ಬೆಳವಣಿಗೆಯ ಪ್ರಯಾಣದೊಂದಿಗೆ ಸಂಪರ್ಕದಲ್ಲಿರಲು ನಿಮ್ಮ ದಿನಚರಿಯನ್ನು ನವೀಕರಿಸಿ.",
+    "activePracticesLabel": "ಸಕ್ರಿಯ ಅಭ್ಯಾಸಗಳು ({{count}})",
+    "activePracticesDesc": "ಇವು ಈಗಾಗಲೇ ನಿಮ್ಮ ದಿನಚರಿಯ ಭಾಗವಾಗಿವೆ",
+    "addedPracticesLabel": "ಸೇರಿಸಲಾದ ಅಭ್ಯಾಸಗಳು ({{count}})",
+    "addedPracticesDesc": "ಉಳಿಸಿದ ನಂತರ ಇವುಗಳನ್ನು ಸೇರಿಸಲಾಗುವುದು",
+    "addedTag": "ಸೇರಿಸಲಾಗಿದೆ",
+    "readyToExpand": "ನಿಮ್ಮ ಅಭ್ಯಾಸವನ್ನು ವಿಸ್ತರಿಸಲು ಸಿದ್ಧರಿದ್ದೀರಾ?",
+    "expandDesc": "ನಿಮ್ಮ ದಿನಚರಿಯನ್ನು ಆಳಗೊಳಿಸಲು ಹೊಸ ಮಂತ್ರಗಳು ಅಥವಾ ಅಭ್ಯಾಸಗಳನ್ನು ಸೇರಿಸಿ.",
+    "addMorePractice": "ಇನ್ನಷ್ಟು ಅಭ್ಯಾಸಗಳನ್ನು ಸೇರಿಸಿ",
+    "createCustomPractice": "ಕಸ್ಟಮ್ ಅಭ್ಯಾಸವನ್ನು ರಚಿಸಿ",
+    "saveRoutine": "ನನ್ನ ದಿನಚರಿಯನ್ನು ಉಳಿಸಿ",
+    "saveRoutineNotice": "ನಿಮ್ಮ ನವೀಕರಿಸಿದ ದಿನಚರಿಯು ನಾಳೆ ಬೆಳಿಗ್ಗೆಯಿಂದ ಕಾಣಿಸಿಕೊಳ್ಳುತ್ತದೆ",
     "categories": {
       "peace-calm": {
         "name": "ಶಾಂತಿ ಮತ್ತು ನೆಮ್ಮದಿ",

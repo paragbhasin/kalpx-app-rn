@@ -770,6 +770,26 @@
     }
   },
   "sadanaTracker": {
+    "unnamedPractice": "নামহীন অভ্যাস",
+    "mantraTag": "মন্ত্র",
+    "sankalpTag": "সংকল্প",
+    "practiceTag": "সাধনা",
+    "dailyLabel": "দৈনিক",
+    "addSelectedToRoutine": "নির্বাচিত সাধনাগুলি আমার রুটিনে যোগ করুন",
+    "adjustNextStep": "আপনি পরবর্তী ধাপে পুনরাবৃত্তি এবং ফ্রিকোয়েন্সি সামঞ্জস্য করতে পারেন",
+    "yourDailyRoutine": "আপনার দৈনিক রুটিন",
+    "updateRoutineDesc": "আপনার উন্নতির যাত্রার সাথে যুক্ত থাকতে আপনার রুটিন আপডেট করুন।",
+    "activePracticesLabel": "সক্রিয় অভ্যাস ({{count}})",
+    "activePracticesDesc": "এগুলি ইতিমধ্যে আপনার রুটিনের অংশ",
+    "addedPracticesLabel": "যুক্ত করা অভ্যাস ({{count}})",
+    "addedPracticesDesc": "সেভ করার পরে এগুলি যোগ করা হবে",
+    "addedTag": "যুক্ত করা হয়েছে",
+    "readyToExpand": "আপনার অভ্যাসকে আরও প্রসারিত করতে প্রস্তুত?",
+    "expandDesc": "আপনার রুটিনকে আরও গভীর করতে নতুন মন্ত্র বা অভ্যাস যোগ করুন।",
+    "addMorePractice": "আরও অভ্যাস যোগ করুন",
+    "createCustomPractice": "কাস্টম অভ্যাস তৈরি করুন",
+    "saveRoutine": "আমার রুটিন সেভ করুন",
+    "saveRoutineNotice": "আপনার আপডেট করা রুটিন আগামীকাল সকাল থেকে দেখা যাবে",
     "categories": {
       "peace-calm": {
         "name": "শান্তি ও স্থিরতা",

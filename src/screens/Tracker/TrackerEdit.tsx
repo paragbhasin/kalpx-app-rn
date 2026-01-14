@@ -48,7 +48,7 @@ import styles from "./TrackerEditStyles";
 
 const PracticeCardItem = memo(({ item, isAdded, onToggle, onInfo, t, capsuleHeight }: any) => {
   const translated = getTranslatedPractice(item, t);
-  const displayName = translated.name || item.title || item.name || "Unnamed Practice";
+  const displayName = translated.name || item.title || item.name || t("sadanaTracker.unnamedPractice");
   const displayDescription = translated.desc || item.description || "";
   const isMantraOrSankalp = ["daily-mantra", "daily-sankalp"].includes(item.category);
 
@@ -244,17 +244,17 @@ const TrackerEdit = ({ route }) => {
       item.source === "mantra" ||
       item.id?.startsWith("mantra.")
     ) {
-      return "Mantra";
+      return "mantra";
     }
 
     if (
       item.source === "sankalp" ||
       item.id?.startsWith("sankalp.")
     ) {
-      return "Sankalp";
+      return "sankalp";
     }
 
-    return "Practice";
+    return "practice";
   };
 
   useEffect(() => {
@@ -365,11 +365,11 @@ const TrackerEdit = ({ route }) => {
 
     details: {
       ...(p.details || {}),
-      day: p.details?.day ?? p.day ?? "Daily",
+      day: p.details?.day ?? p.day ?? t("sadanaTracker.dailyLabel"),
       reps: p.details?.reps ?? p.reps ?? "",
     },
 
-    day: p.details?.day ?? p.day ?? "Daily",
+    day: p.details?.day ?? p.day ?? t("sadanaTracker.dailyLabel"),
     reps: p.details?.reps ?? p.reps ?? "",
   });
 
@@ -380,7 +380,7 @@ const TrackerEdit = ({ route }) => {
       title: translated.name,
       description: translated.desc,
       category: item.category,
-      day: item.day ?? item.details?.day,
+      day: item.day ?? item.details?.day ?? t("sadanaTracker.dailyLabel"),
       reps: item.reps ?? item.details?.reps,
     };
   };
@@ -527,7 +527,7 @@ const TrackerEdit = ({ route }) => {
       addPractice({
         ...normalizedItem,
         unified_id: unifiedId,
-        day: "Daily",
+        day: t("sadanaTracker.dailyLabel"),
         reps: "",
       });
     }
@@ -570,7 +570,7 @@ const TrackerEdit = ({ route }) => {
       addPractice({
         ...normalizedItem,
         unified_id: unifiedId,
-        day: "Daily",
+        day: t("sadanaTracker.dailyLabel"),
         reps: "",
       });
     }
@@ -705,7 +705,7 @@ const TrackerEdit = ({ route }) => {
           ...item,
           unified_id: unifiedId,
           reps: "",
-          day: "Daily",
+          day: t("sadanaTracker.dailyLabel"),
         },
       ];
     });
@@ -1064,7 +1064,7 @@ const TrackerEdit = ({ route }) => {
           item.id?.startsWith("sankalp.") ? "sankalp" : "practice"),
       category: item.category || "",
       reps: item.reps || "",
-      day: item.day || "Daily",
+      day: item.day || t("sadanaTracker.dailyLabel"),
       benefits: item.benefits || [],
       details: item.details || {},
       full_item: item,
@@ -1166,7 +1166,7 @@ const TrackerEdit = ({ route }) => {
           onScroll={handleScroll}
           scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{paddingBottom: 170, paddingTop: 10 }}
+          contentContainerStyle={{ paddingBottom: 170, paddingTop: 10 }}
           ListHeaderComponent={
             <View onStartShouldSetResponder={() => true}>
               {/* Header */}
@@ -1317,7 +1317,7 @@ const TrackerEdit = ({ route }) => {
             <View style={[styles.bottomButtonContainer, { paddingHorizontal: 16 }]}>
               <LoadingButton
                 loading={false}
-                text="Add Selected Practices to My Routine"
+                text={t("sadanaTracker.addSelectedToRoutine")}
                 disabled={!hasSelectionInCurrentCategory}
                 onPress={async () => {
                   await handleConfirmPress();
@@ -1330,7 +1330,7 @@ const TrackerEdit = ({ route }) => {
                 textStyle={styles.buttonText}
                 showGlobalLoader={true}
               />
-              <TextComponent type="ButtonBottomText" style={{ textAlign: "center", marginTop: 6, marginBottom: 20 }}>You can adjust repetition and frequency in the next step</TextComponent>
+              <TextComponent type="ButtonBottomText" style={{ textAlign: "center", marginTop: 6, marginBottom: 20 }}>{t("sadanaTracker.adjustNextStep")}</TextComponent>
             </View>
           }
         />
@@ -1365,7 +1365,7 @@ const TrackerEdit = ({ route }) => {
                   marginTop: selectedmantra ? 100 : 0,
                 }}
               >
-                Your Daily Routine
+                {t("sadanaTracker.yourDailyRoutine")}
               </TextComponent>
               <TouchableOpacity
                 onPress={() => setCartModalVisible(true)}
@@ -1402,15 +1402,15 @@ const TrackerEdit = ({ route }) => {
               </TouchableOpacity>
             </View>
             <View style={{ marginHorizontal: 16 }}>
-              <TextComponent type="subDailyText" style={{}}>Update your routine to stay aligned with your growth journey.</TextComponent>
+              <TextComponent type="subDailyText" style={{}}>{t("sadanaTracker.updateRoutineDesc")}</TextComponent>
               {/* <TextComponent type="DailyHeaderText">Active Practices ({localPractices.length})</TextComponent>
             <TextComponent type="subDailyText">These will become part of your routine</TextComponent> */}
               {/* ACTIVE API PRACTICES */}
               <TextComponent type="DailyHeaderText">
-                Active Practices ({activeApiPractices.length})
+                {t("sadanaTracker.activePracticesLabel", { count: activeApiPractices.length })}
               </TextComponent>
               <TextComponent type="subDailyText">
-                These are already part of your routine
+                {t("sadanaTracker.activePracticesDesc")}
               </TextComponent>
 
               <View style={{ marginTop: 10 }}>
@@ -1467,10 +1467,10 @@ const TrackerEdit = ({ route }) => {
                     type="DailyHeaderText"
                     style={{ marginTop: 20 }}
                   >
-                    Added Practices ({addedLocalPractices.length})
+                    {t("sadanaTracker.addedPracticesLabel", { count: addedLocalPractices.length })}
                   </TextComponent>
                   <TextComponent type="subDailyText">
-                    These will be added once you save
+                    {t("sadanaTracker.addedPracticesDesc")}
                   </TextComponent>
 
                   <View style={{ marginTop: 10 }}>
@@ -1483,7 +1483,7 @@ const TrackerEdit = ({ route }) => {
                             onChange={undefined}
                             isedit={true}
                             data={data}
-                            tag="Added"
+                            tag="added"
                             showIcons={false}
                             isSelected={false}
                             onToggleSelect={() => { }}
@@ -1537,14 +1537,14 @@ const TrackerEdit = ({ route }) => {
                 type="headerSubBoldText"
                 style={{ color: "#282828", textAlign: "center" }}
               >
-                Ready to expand your practice?
+                {t("sadanaTracker.readyToExpand")}
               </TextComponent>
 
               <TextComponent
                 type="subDailyText"
                 style={{ marginTop: 4, textAlign: "center" }}
               >
-                Add new mantras or practices to deepen your routine.
+                {t("sadanaTracker.expandDesc")}
               </TextComponent>
 
               <TouchableOpacity
@@ -1566,7 +1566,7 @@ const TrackerEdit = ({ route }) => {
                   type="headerSubBoldText"
                   style={{ color: "#CC9B2F" }}
                 >
-                  Add More Practice
+                  {t("sadanaTracker.addMorePractice")}
                 </TextComponent>
               </TouchableOpacity>
               <TouchableOpacity
@@ -1588,7 +1588,7 @@ const TrackerEdit = ({ route }) => {
                   type="headerSubBoldText"
                   style={{ color: "#FFFFFF" }}
                 >
-                  Create Custom Practice
+                  {t("sadanaTracker.createCustomPractice")}
                 </TextComponent>
               </TouchableOpacity>
             </View>
@@ -1609,10 +1609,10 @@ const TrackerEdit = ({ route }) => {
                 type="headerSubBoldText"
                 style={{ color: "#FFFFFF" }}
               >
-                Save my routine
+                {t("sadanaTracker.saveRoutine")}
               </TextComponent>
             </TouchableOpacity>
-            <TextComponent type="boldText" style={{ color: Colors.Colors.BLACK, alignSelf: "center", textAlign: "center", marginTop: 10, marginBottom: 20 }}>Your updated routine will reflect from tomorrow morning</TextComponent>
+            <TextComponent type="boldText" style={{ color: Colors.Colors.BLACK, alignSelf: "center", textAlign: "center", marginTop: 10, marginBottom: 20 }}>{t("sadanaTracker.saveRoutineNotice")}</TextComponent>
           </>
         </Animated.ScrollView>
       )}
@@ -1643,7 +1643,7 @@ const TrackerEdit = ({ route }) => {
           setInputModalVisible(false);
         }}
       />
-      <LoadingOverlay visible={loading} text="Submitting..." />
+      <LoadingOverlay visible={loading} text={t("sadanaTracker.submitting")} />
       {/* </ImageBackground> */}
     </SafeAreaView>
   );

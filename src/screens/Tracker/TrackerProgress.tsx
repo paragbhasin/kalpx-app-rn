@@ -141,7 +141,7 @@ const TrackerProgress = () => {
                           }}
                         > */}
       <Animated.ScrollView
-        contentContainerStyle={{ paddingBottom: 30 }}
+        contentContainerStyle={{ paddingBottom: 170 }}
         showsVerticalScrollIndicator={false}
         onScroll={handleScroll}
         scrollEventThrottle={16}

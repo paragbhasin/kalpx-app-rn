@@ -5,7 +5,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { AnyAction } from "@reduxjs/toolkit";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, memo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   FlatList,
@@ -43,6 +43,67 @@ import { getRawPracticeObject } from "../../utils/getPracticeObjectById";
 import { getTranslatedPractice } from "../../utils/getTranslatedPractice";
 import { getDailyDharmaTracker, submitDailyDharmaSetup } from "../Home/actions";
 import styles from "./TrackerEditStyles";
+
+// --- Sub-components for better performance ---
+
+const PracticeCardItem = memo(({ item, isAdded, onToggle, onInfo, t, capsuleHeight }: any) => {
+  const translated = getTranslatedPractice(item, t);
+  const displayName = translated.name || item.title || item.name || "Unnamed Practice";
+  const displayDescription = translated.desc || item.description || "";
+  const isMantraOrSankalp = ["daily-mantra", "daily-sankalp"].includes(item.category);
+
+  return (
+    <View style={[
+      styles.simpleCard,
+      {
+        height: isMantraOrSankalp ? capsuleHeight : undefined,
+        backgroundColor: "#FFFFFF",
+        borderColor: "#CC9B2F",
+        borderWidth: 1,
+        marginBottom: 12,
+      }
+    ]}>
+      <TouchableOpacity
+        onPress={() => onToggle(item)}
+        style={{
+          width: 22,
+          height: 22,
+          borderWidth: 1,
+          borderColor: isAdded ? "#D4A017" : "#000000",
+          borderRadius: 4,
+          backgroundColor: isAdded ? "#D4A017" : "#FFFFFF",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        {isAdded && (
+          <Ionicons name="checkmark" size={16} color="#FFFFFF" />
+        )}
+      </TouchableOpacity>
+
+      <View style={{ flex: 1, marginLeft: 14 }}>
+        <TextComponent type="boldText" style={styles.cardTitle} numberOfLines={1}>
+          {item.category === 'sanatan' && item.icon ? `${item.icon} ` : ""}
+          {displayName}
+        </TextComponent>
+
+        <TextComponent style={styles.cardSubtitle} numberOfLines={2}>
+          {displayDescription}
+        </TextComponent>
+      </View>
+
+      <View style={styles.cardRightIcons}>
+        <TouchableOpacity onPress={() => onInfo(item)}>
+          <Ionicons
+            name="information-circle-outline"
+            size={26}
+            color="#D4A017"
+          />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+});
 
 const initialCategories = [
   {
@@ -139,7 +200,7 @@ const TrackerEdit = ({ route }) => {
   const [removedApiOnce, setRemovedApiOnce] = useState(false);
 
 
-  const [sanatanRenderCount, setSanatanRenderCount] = useState(15);
+  // const [sanatanRenderCount, setSanatanRenderCount] = useState(15);
 
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
   const resumeData = route?.params?.resumeData;
@@ -206,11 +267,11 @@ const TrackerEdit = ({ route }) => {
     return unsubscribe;
   }, [hasUnsavedChanges, navigation]);
 
-  useEffect(() => {
-    if (selectedCategory === "sanatan") {
-      setSanatanRenderCount(15);
-    }
-  }, [selectedCategory, searchText]);
+  // useEffect(() => {
+  //   if (selectedCategory === "sanatan") {
+  //     setSanatanRenderCount(15);
+  //   }
+  // }, [selectedCategory, searchText]);
 
   const safeAddPractice = (p: any) => {
     setAllowHydrate(false);
@@ -226,6 +287,26 @@ const TrackerEdit = ({ route }) => {
     );
   }, [dailyPractice]);
 
+  const sanatanList = useMemo(() => {
+    const safeList = SANATAN_PRACTICES_FINAL.map((p: any, index) => ({
+      ...p,
+      id: p.id ?? `sanatan_${index}`,
+      practice_id: p.practice_id ?? p.id ?? `sanatan_${index}`,
+      category: 'sanatan'
+    }));
+
+    return safeList.filter(
+      (p: any) =>
+        !apiPracticeIdSet.has(p.practice_id)
+    ).filter((practice) => {
+      const nameKey = `practices.${practice.id}.name`;
+      const n = t(nameKey, { defaultValue: practice.name ?? "" }).toLowerCase();
+      const d = t(`practices.${practice.id}.description`, { defaultValue: practice.description ?? "" }).toLowerCase();
+      const s = searchText.toLowerCase();
+      return n.includes(s) || d.includes(s);
+    });
+  }, [apiPracticeIdSet, searchText, t]);
+
   const mantraList = useMemo(() => {
     return Object.values(allData)
       .filter(
@@ -236,7 +317,7 @@ const TrackerEdit = ({ route }) => {
       )
       .filter((item: any) =>
         item.title?.toLowerCase().includes(searchText.toLowerCase())
-      );
+      ).map((item: any) => ({ ...item, category: selectedCategory }));
   }, [allData, selectedCategory, searchText, apiPracticeIdSet]);
 
   // const hasSelectionInCurrentCategory = useMemo(() => {
@@ -257,7 +338,7 @@ const TrackerEdit = ({ route }) => {
       )
       .filter((item: any) =>
         item.title?.toLowerCase().includes(searchText.toLowerCase())
-      );
+      ).map((item: any) => ({ ...item, category: selectedCategory }));
   }, [allData, selectedCategory, searchText, apiPracticeIdSet]);
 
   const practiceList = useMemo(() => {
@@ -270,7 +351,7 @@ const TrackerEdit = ({ route }) => {
       )
       .filter((item: any) =>
         item.title?.toLowerCase().includes(searchText.toLowerCase())
-      );
+      ).map((item: any) => ({ ...item, category: selectedCategory }));
   }, [allData, selectedCategory, searchText, apiPracticeIdSet]);
 
   const normalizePractice = (p: any) => ({
@@ -381,34 +462,38 @@ const TrackerEdit = ({ route }) => {
     });
   }, [searchText]);
 
-  const normalizedMantras = dailyMantraList.map((m: any, index) => {
-    const translated = getTranslatedPractice(m, t);
-    return {
-      ...m,
-      id: m.id || `mantra_${index}`,
-      practice_id: m.id || `mantra_${index}`,
-      title: translated.name,
-      description: translated.desc,
-      category: "daily-mantra",
-    };
-  }).filter(
-    (m: any) => !apiPracticeIdSet.has(m.practice_id)
-  );;
+  const normalizedMantras = useMemo(() => {
+    return dailyMantraList.map((m: any, index) => {
+      const translated = getTranslatedPractice(m, t);
+      return {
+        ...m,
+        id: m.id || `mantra_${index}`,
+        practice_id: m.id || `mantra_${index}`,
+        title: translated.name,
+        description: translated.desc,
+        category: "daily-mantra",
+      };
+    }).filter(
+      (m: any) => !apiPracticeIdSet.has(m.practice_id)
+    );
+  }, [dailyMantraList, apiPracticeIdSet, t]);
 
 
-  const normalizedSankalps = dailySankalpList.map((s: any, index) => {
-    const translated = getTranslatedPractice(s, t);
-    return {
-      ...s,
-      id: s.id || `sankalp_${index}`,
-      practice_id: s.id || `sankalp_${index}`,
-      title: translated.name,
-      description: translated.desc,
-      category: "daily-sankalp",
-    };
-  }).filter(
-    (s: any) => !apiPracticeIdSet.has(s.practice_id)
-  );;
+  const normalizedSankalps = useMemo(() => {
+    return dailySankalpList.map((s: any, index) => {
+      const translated = getTranslatedPractice(s, t);
+      return {
+        ...s,
+        id: s.id || `sankalp_${index}`,
+        practice_id: s.id || `sankalp_${index}`,
+        title: translated.name,
+        description: translated.desc,
+        category: "daily-sankalp",
+      };
+    }).filter(
+      (s: any) => !apiPracticeIdSet.has(s.practice_id)
+    );
+  }, [dailySankalpList, apiPracticeIdSet, t]);
 
   useEffect(() => {
     if (
@@ -636,6 +721,18 @@ const TrackerEdit = ({ route }) => {
     );
   };
 
+  const addMoreData = useMemo(() => {
+    if (selectedCategory === "sanatan") return sanatanList;
+    if (selectedCategory === "daily-mantra") return normalizedMantras;
+    if (selectedCategory === "daily-sankalp") return normalizedSankalps;
+
+    return selectedType === "mantra"
+      ? mantraList
+      : selectedType === "sankalp"
+        ? sankalpList
+        : practiceList;
+  }, [selectedCategory, selectedType, sanatanList, normalizedMantras, normalizedSankalps, mantraList, sankalpList, practiceList]);
+
   const hasSelectionInCurrentCategory = useMemo(() => {
     return selectedPractices.some(
       (p) => p.category === selectedCategory
@@ -762,71 +859,15 @@ const TrackerEdit = ({ route }) => {
     });
   };
 
-  const SimplePracticeCard = ({ item, categoryItem }: any) => {
-    const added = isAdded(item);
-    // Use the translation utility instead of raw item fields
-    const translated = getTranslatedPractice(item, t);
-    const displayName = translated.name || item.title || item.name || "Unnamed Practice";
-    const displayDescription = translated.desc || item.description || "";
-
-    return (
-      <View style={styles.simpleCard}>
-        <TouchableOpacity
-          onPress={() => toggleAddItem(item)}
-          style={{
-            width: 22,
-            height: 22,
-            borderWidth: 1,
-            borderColor: added ? "#D4A017" : "#D4A017",
-            borderRadius: 4,
-            backgroundColor: added ? "#D4A017" : "#FFFFFF",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          {added && (
-            <Ionicons name="checkmark" size={16} color="#FFFFFF" />
-          )}
-        </TouchableOpacity>
-
-
-        <View style={{ flex: 1, marginLeft: 14 }}>
-          <TextComponent type="boldText" style={styles.cardTitle}>
-            {displayName}
-          </TextComponent>
-
-          <TextComponent style={styles.cardSubtitle} numberOfLines={2}>
-            {displayDescription}
-          </TextComponent>
-        </View>
-
-        <View style={styles.cardRightIcons}>
-          <TouchableOpacity
-            onPress={() => {
-              const selectedCat = categoryItem || initialCategories[0];
-
-              setDetailsCategoryItem({
-                ...selectedCat,
-                key: selectedCat.key,
-              });
-
-              setDetailsList([item]);
-              setDetailsIndex(0);
-              setShowDetails(true);
-            }}
-            style={{
-              // marginLeft: 14 
-            }}
-          >
-            <Ionicons
-              name="information-circle-outline"
-              size={26}
-              color="#D4A017"
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
+  const onShowDetails = (item: any, categoryItem?: any) => {
+    const selectedCat = categoryItem || initialCategories.find(c => c.key === (item.category || selectedCategory)) || initialCategories[0];
+    setDetailsCategoryItem({
+      ...selectedCat,
+      key: selectedCat.key,
+    });
+    setDetailsList([item]);
+    setDetailsIndex(0);
+    setShowDetails(true);
   };
 
   const renderDetailsCard = () => {
@@ -985,254 +1026,7 @@ const TrackerEdit = ({ route }) => {
     );
   };
 
-  const renderSanatanList = () => {
-    const safeList = SANATAN_PRACTICES_FINAL.map((p: any, index) => ({
-      ...p,
-      id: p.id ?? `sanatan_${index}`,
-      practice_id: p.practice_id ?? p.id ?? `sanatan_${index}`
-    }));
-
-    const fullList = safeList.filter(
-      (p: any) =>
-        !apiPracticeIdSet.has(p.practice_id)
-    ).filter((practice) => {
-      const nameKey = `practices.${practice.id}.name`;
-
-      const n = t(nameKey, {
-        defaultValue: practice.name ?? ""
-      })?.toLowerCase() ?? "";
-
-      const d = t(`practices.${practice.id}.description`, {
-        defaultValue: practice.description ?? ""
-      })?.toLowerCase() ?? "";
-
-      const s = searchText.toLowerCase();
-
-      return n.includes(s) || d.includes(s);
-    });
-
-
-    const limitedList = fullList.slice(0, sanatanRenderCount);
-
-    return (
-      <FlatList
-        data={limitedList}
-        keyExtractor={(item: any, index) =>
-          `${item.practice_id || item.id || 'sanatan'}-${index}`
-        }
-        contentContainerStyle={{
-          paddingHorizontal: 16,
-          paddingBottom: 50,
-          paddingTop: 16
-        }}
-        onEndReachedThreshold={0.3}
-        onEndReached={() => {
-          if (sanatanRenderCount < fullList.length) {
-            setSanatanRenderCount((prev) => prev + 15);
-          }
-        }}
-        renderItem={({ item }) => {
-          const isSelected = localPractices.some(
-            (p: any) =>
-              (p.id || p.practice_id) ===
-              (item.id || item.practice_id)
-          );
-
-          const translated = getTranslatedPractice(item, t);
-          const displayName = translated.name;
-          const displayDescription = translated.desc;
-
-          return (
-            <View
-              style={[
-                styles.simpleCard,
-                {
-                  backgroundColor: "#FFFFFF",
-                  borderColor: "#CC9B2F",
-                  borderWidth: 1,
-                  marginBottom: 12,
-                },
-              ]}
-            >
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <TouchableOpacity
-                  onPress={() =>
-                    toggleAddItem({
-                      ...item,
-                      practice_id: item.practice_id ?? item.id,
-                    })
-                  }
-                  style={{
-                    width: 22,
-                    height: 22,
-                    borderWidth: 1,
-                    borderColor: isSelected ? "#D4A017" : "#000000",
-                    borderRadius: 4,
-                    backgroundColor: isSelected ? "#D4A017" : "#FFFFFF",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  {isSelected && (
-                    <Ionicons name="checkmark" size={18} color="#FFFFFF" />
-                  )}
-                </TouchableOpacity>
-
-                <View style={{ marginLeft: 14, width: "80%" }}>
-                  <TextComponent
-                    type="boldText"
-                    style={styles.cardTitle}
-                    numberOfLines={1}
-                  >
-                    {item.icon ? `${item.icon} ` : ""}
-                    {displayName}
-                  </TextComponent>
-
-                  <TextComponent
-                    style={styles.cardSubtitle}
-                    numberOfLines={2}
-                  >
-                    {displayDescription}
-                  </TextComponent>
-                </View>
-                <TouchableOpacity
-                  onPress={() => {
-                    setDetailsCategoryItem(
-                      initialCategories.find(
-                        (c) => c.key === "sanatan"
-                      )
-                    );
-                    setDetailsList([item]);
-                    setDetailsIndex(0);
-                    setShowDetails(true);
-                  }}
-                  style={{ marginRight: 14 }}
-                >
-                  <Ionicons
-                    name="information-circle-outline"
-                    size={26}
-                    color="#D4A017"
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-          );
-        }}
-      />
-    );
-  };
-
-  const renderCapsuleFlatList = (data: any[]) => {
-    return (
-      <FlatList
-        ref={selectedCategory === "daily-sankalp" ? sankalpListRef : null}
-        data={data}
-        keyExtractor={(item: any, index) =>
-          `${item.practice_id || item.id}-${index}`
-        }
-
-        getItemLayout={(_, index) => ({
-          length: CAPSULE_ITEM_HEIGHT,
-          offset: CAPSULE_ITEM_HEIGHT * index,
-          index,
-        })}
-
-        onScrollToIndexFailed={(info) => {
-          // fallback – scroll close and retry
-          setTimeout(() => {
-            sankalpListRef.current?.scrollToIndex({
-              index: Math.max(0, info.index - 1),
-              animated: true,
-            });
-          }, 300);
-        }}
-
-        contentContainerStyle={{
-          paddingHorizontal: 16,
-          paddingBottom: 50,
-          paddingTop: 16,
-        }}
-
-        renderItem={({ item }) => {
-          const isSelected = isAdded(item);
-
-          return (
-            <View
-              style={[
-                styles.simpleCard,
-                {
-                  height: CAPSULE_ITEM_HEIGHT, // 🔥 IMPORTANT
-                  backgroundColor: "#FFFFFF",
-                  borderColor: "#CC9B2F",
-                  borderWidth: 1,
-                  marginBottom: 12,
-                },
-              ]}
-            >
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                {/* CHECKBOX */}
-                <TouchableOpacity
-                  onPress={() => toggleAddItem(item)}
-                  style={{
-                    width: 22,
-                    height: 22,
-                    borderWidth: 1,
-                    borderColor: isSelected ? "#D4A017" : "#000",
-                    borderRadius: 4,
-                    backgroundColor: isSelected ? "#D4A017" : "#FFF",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  {isSelected && (
-                    <Ionicons name="checkmark" size={18} color="#FFF" />
-                  )}
-                </TouchableOpacity>
-
-                {/* TEXT */}
-                <View style={{ marginLeft: 14, width: "80%" }}>
-                  <TextComponent
-                    type="boldText"
-                    style={styles.cardTitle}
-                    numberOfLines={1}
-                  >
-                    {getTranslatedPractice(item, t).name}
-                  </TextComponent>
-
-                  <TextComponent
-                    style={styles.cardSubtitle}
-                    numberOfLines={2}
-                  >
-                    {getTranslatedPractice(item, t).desc}
-                  </TextComponent>
-                </View>
-
-                {/* INFO */}
-                <TouchableOpacity
-                  onPress={() => {
-                    setDetailsCategoryItem(
-                      initialCategories.find(
-                        (c) => c.key === selectedCategory
-                      )
-                    );
-                    setDetailsList([item]);
-                    setDetailsIndex(0);
-                    setShowDetails(true);
-                  }}
-                >
-                  <Ionicons
-                    name="information-circle-outline"
-                    size={26}
-                    color="#D4A017"
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-          );
-        }}
-      />
-    );
-  };
+  // Data logic moved to useMemo hooks above.
 
 
 
@@ -1365,190 +1159,159 @@ const TrackerEdit = ({ route }) => {
       {renderDetailsCard()}
 
       {isAddMoreScreen ? (
-        <>
-          <Animated.ScrollView
-            showsVerticalScrollIndicator={false}
-            style={{ marginBottom: 10 }}
-            onScroll={handleScroll}
-            scrollEventThrottle={16}
-          >
-            {/* Header */}
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-                paddingHorizontal: 16,
-                marginTop: 10,
-              }}
-            >
-              <TouchableOpacity onPress={() => setIsAddMoreScreen(false)}>
-                <Ionicons name="arrow-back" size={26} color="#000" />
-              </TouchableOpacity>
-              <TextComponent
-                type="DailyHeaderText"
+        <Animated.FlatList
+          ref={selectedCategory === "daily-sankalp" ? sankalpListRef : null}
+          data={addMoreData}
+          keyExtractor={(item, index) => `${item.practice_id || item.id}-${index}`}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{paddingBottom: 170, paddingTop: 10 }}
+          ListHeaderComponent={
+            <View onStartShouldSetResponder={() => true}>
+              {/* Header */}
+              <View
                 style={{
-                  color: Colors.Colors.BLACK,
-                  textAlign: "center",
-                  flex: 1,
-                  marginHorizontal: 10,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  paddingHorizontal: 16,
                 }}
               >
-                {t("sadanaTracker.addPractices")}
-              </TextComponent>
-              <TouchableOpacity
-                onPress={() => setCartModalVisible(true)}
-                style={{ position: "relative" }}
-              >
-                <View
+                <TouchableOpacity onPress={() => setIsAddMoreScreen(false)}>
+                  <Ionicons name="arrow-back" size={26} color="#000" />
+                </TouchableOpacity>
+                <TextComponent
+                  type="DailyHeaderText"
                   style={{
-                    position: "absolute",
-                    top: -6,
-                    right: -6,
-                    backgroundColor: "#1877F2",
-                    minWidth: 18,
-                    height: 18,
-                    borderRadius: 9,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    paddingHorizontal: 4,
-                    zIndex: 10,
+                    color: Colors.Colors.BLACK,
+                    textAlign: "center",
+                    flex: 1,
+                    marginHorizontal: 10,
                   }}
                 >
-                  <TextComponent
-                    type="semiBoldText"
-                    style={{ color: "#fff", fontSize: 11 }}
-                  >
-                    {localPractices.length}
-                  </TextComponent>
-                </View>
-
-                <Image
-                  source={require("../../../assets/cart.png")}
-                  style={{ width: 30, height: 30 }}
-                  resizeMode="contain"
-                />
-              </TouchableOpacity>
-            </View>
-            <TextComponent type="mediumText" style={{ color: Colors.Colors.BLACK, textAlign: "center", marginHorizontal: 3 }}>
-              {t("sadanaTracker.setupInstruction", { defaultValue: "Select mantra or practices to add to your routine" })}
-            </TextComponent>
-
-            <TextInput
-              placeholder={t("sadanaTracker.searchPlaceholder", { defaultValue: "e.g., Shiva Ashtakam, Vishnu, Tulsi Pooja " })}
-              placeholderTextColor="#8A8A8A"
-              style={styles.searchInput}
-              value={searchText}
-              onChangeText={setSearchText}
-            />
-            <TextComponent type="mediumText" style={{ marginHorizontal: 16, marginVertical: 4, color: Colors.Colors.BLACK }}>
-              {t(initialCategories.find((c) => c.key === selectedCategory)?.description || "")}
-            </TextComponent>
-            <FlatList
-              ref={categoryRef}
-              data={initialCategories}
-              horizontal
-              keyExtractor={(item) => item.key}
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.categoryList}
-              renderItem={({ item, index }) => (
+                  {t("sadanaTracker.addPractices")}
+                </TextComponent>
                 <TouchableOpacity
-                  onPress={() => handleCategoryPress(item, index)}
-                  style={[
-                    styles.categoryChip,
-                    selectedCategory === item.key &&
-                    styles.categoryChipSelected,
-                  ]}
+                  onPress={() => setCartModalVisible(true)}
+                  style={{ position: "relative" }}
                 >
-                  <TextComponent
-                    type="cardText"
-                    style={[
-                      styles.categoryChipText,
-                      selectedCategory === item.key &&
-                      styles.categoryChipTextSelected,
-                    ]}
+                  <View
+                    style={{
+                      position: "absolute",
+                      top: -6,
+                      right: -6,
+                      backgroundColor: "#1877F2",
+                      minWidth: 18,
+                      height: 18,
+                      borderRadius: 9,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      paddingHorizontal: 4,
+                      zIndex: 10,
+                    }}
                   >
-                    {t(item.name)}
-                  </TextComponent>
-                </TouchableOpacity>
-              )}
-            />
+                    <TextComponent
+                      type="semiBoldText"
+                      style={{ color: "#fff", fontSize: 11 }}
+                    >
+                      {localPractices.length}
+                    </TextComponent>
+                  </View>
 
-            {!["sanatan", "daily-mantra", "daily-sankalp"].includes(selectedCategory) && (
-              <View style={styles.typeTabs}>
-                {["mantra", "sankalp", "practice"].map((type) => (
+                  <Image
+                    source={require("../../../assets/cart.png")}
+                    style={{ width: 30, height: 30 }}
+                    resizeMode="contain"
+                  />
+                </TouchableOpacity>
+              </View>
+              <TextComponent type="mediumText" style={{ color: Colors.Colors.BLACK, textAlign: "center", marginHorizontal: 3, marginTop: 10 }}>
+                {t("sadanaTracker.setupInstruction", { defaultValue: "Select mantra or practices to add to your routine" })}
+              </TextComponent>
+
+              <TextInput
+                placeholder={t("sadanaTracker.searchPlaceholder", { defaultValue: "e.g., Shiva Ashtakam, Vishnu, Tulsi Pooja " })}
+                placeholderTextColor="#8A8A8A"
+                style={styles.searchInput}
+                value={searchText}
+                onChangeText={setSearchText}
+              />
+              <TextComponent type="mediumText" style={{ marginHorizontal: 16, marginVertical: 4, color: Colors.Colors.BLACK, marginTop: 10 }}>
+                {t(initialCategories.find((c) => c.key === selectedCategory)?.description || "")}
+              </TextComponent>
+              <FlatList
+                ref={categoryRef}
+                data={initialCategories}
+                horizontal
+                keyExtractor={(item) => item.key}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.categoryList}
+                renderItem={({ item, index }) => (
                   <TouchableOpacity
-                    key={type}
-                    onPress={() => setSelectedType(type)}
+                    onPress={() => handleCategoryPress(item, index)}
                     style={[
-                      styles.typeTab,
-                      selectedType === type && styles.typeTabSelected,
+                      styles.categoryChip,
+                      selectedCategory === item.key &&
+                      styles.categoryChipSelected,
                     ]}
                   >
                     <TextComponent
                       type="cardText"
                       style={[
-                        styles.typeTabText,
-                        selectedType === type &&
-                        styles.typeTabTextSelected,
+                        styles.categoryChipText,
+                        selectedCategory === item.key &&
+                        styles.categoryChipTextSelected,
                       ]}
                     >
-                      {t(`sadanaTracker.${type}Title`)}
+                      {t(item.name)}
                     </TextComponent>
                   </TouchableOpacity>
-                ))}
-              </View>
-            )}
+                )}
+              />
 
-            {selectedCategory === "sanatan" && renderSanatanList()}
-
-            {selectedCategory === "daily-mantra" &&
-              renderCapsuleFlatList(normalizedMantras)}
-
-            {selectedCategory === "daily-sankalp" &&
-              renderCapsuleFlatList(normalizedSankalps)}
-
-            {!["sanatan", "daily-mantra", "daily-sankalp"].includes(selectedCategory) && (
-              <View style={styles.itemsContainer}>
-                {(selectedType === "mantra"
-                  ? mantraList
-                  : selectedType === "sankalp"
-                    ? sankalpList
-                    : practiceList
-                ).map((item: any, idx: number) => (
-                  <SimplePracticeCard
-                    key={idx}
-                    item={item}
-                    categoryItem={initialCategories.find(
-                      (c) => c.key === selectedCategory
-                    )}
-                  />
-                ))}
-              </View>
-            )}
-
-            {/* 
-            {isSanatan ? (
-              renderSanatanList()
-            ) : (
-              <View style={styles.itemsContainer}>
-                {(selectedType === "mantra"
-                  ? mantraList
-                  : selectedType === "sankalp"
-                  ? sankalpList
-                  : practiceList
-                ).map((item: any, idx: number) => (
-                  <SimplePracticeCard
-                    key={idx}
-                    item={item}
-                    categoryItem={initialCategories.find(
-                      (c) => c.key === selectedCategory
-                    )}
-                  />
-                ))}
-              </View>
-            )} */}
-            <View style={styles.bottomButtonContainer}>
+              {!["sanatan", "daily-mantra", "daily-sankalp"].includes(selectedCategory) && (
+                <View style={styles.typeTabs}>
+                  {["mantra", "sankalp", "practice"].map((type) => (
+                    <TouchableOpacity
+                      key={type}
+                      onPress={() => setSelectedType(type)}
+                      style={[
+                        styles.typeTab,
+                        selectedType === type && styles.typeTabSelected,
+                      ]}
+                    >
+                      <TextComponent
+                        type="cardText"
+                        style={[
+                          styles.typeTabText,
+                          selectedType === type &&
+                          styles.typeTabTextSelected,
+                        ]}
+                      >
+                        {t(`sadanaTracker.${type}Title`)}
+                      </TextComponent>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              )}
+              <View style={{ height: 16 }} />
+            </View>
+          }
+          renderItem={({ item }) => (
+            <View style={{ paddingHorizontal: 16 }}>
+              <PracticeCardItem
+                item={item}
+                isAdded={isAdded(item)}
+                onToggle={toggleAddItem}
+                onInfo={onShowDetails}
+                t={t}
+                capsuleHeight={CAPSULE_ITEM_HEIGHT}
+              />
+            </View>
+          )}
+          ListFooterComponent={
+            <View style={[styles.bottomButtonContainer, { paddingHorizontal: 16 }]}>
               <LoadingButton
                 loading={false}
                 text="Add Selected Practices to My Routine"
@@ -1556,7 +1319,6 @@ const TrackerEdit = ({ route }) => {
                 onPress={async () => {
                   await handleConfirmPress();
                 }}
-                // disabled={false}
                 style={{
                   ...styles.button, backgroundColor: hasSelectionInCurrentCategory
                     ? "#D4A017"
@@ -1565,15 +1327,16 @@ const TrackerEdit = ({ route }) => {
                 textStyle={styles.buttonText}
                 showGlobalLoader={true}
               />
-              <TextComponent type="ButtonBottomText" style={{ textAlign: "center", marginTop: 6 }}>You can adjust repetition and frequency in the next step</TextComponent>
+              <TextComponent type="ButtonBottomText" style={{ textAlign: "center", marginTop: 6, marginBottom: 20 }}>You can adjust repetition and frequency in the next step</TextComponent>
             </View>
-          </Animated.ScrollView>
-        </>
+          }
+        />
       ) : (
         <Animated.ScrollView
           showsVerticalScrollIndicator={false}
           onScroll={handleScroll}
           scrollEventThrottle={16}
+          contentContainerStyle={{ paddingBottom: 170 }}
         >
           <>
             <View

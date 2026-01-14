@@ -101,7 +101,7 @@ const TrackerScreen = () => {
                   > */}
       <Animated.ScrollView
         ref={scrollViewRef}
-        contentContainerStyle={{ marginHorizontal: 10 }}
+        contentContainerStyle={{ marginHorizontal: 10, paddingBottom:150 }}
         showsVerticalScrollIndicator={false}
         onScroll={handleScroll}
         scrollEventThrottle={16}

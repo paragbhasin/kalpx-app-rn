@@ -347,7 +347,7 @@ const DailyPracticeDetailsCard = ({
 
 
   return (
-    <Animated.View style={{ transform: [{ translateX: slideAnim }] }}>
+    <Animated.View style={{ transform: [{ translateX: slideAnim }],  paddingBottom: 100 }}>
       <Card style={styles.cardContainer}>
         <ScrollView
           ref={scrollRef}
@@ -588,6 +588,7 @@ const DailyPracticeDetailsCard = ({
           )}
 
         </View>
+                {mode === "view" && onAddToMyPractice && (
         <View
           style={[
             styles.selectButton,
@@ -600,7 +601,7 @@ const DailyPracticeDetailsCard = ({
             },
           ]}
         >
-          {mode === "view" && onAddToMyPractice && (
+  
             <TouchableOpacity
               onPress={onAddToMyPractice}
               style={{ justifyContent: "center", alignItems: "center" }}
@@ -612,8 +613,9 @@ const DailyPracticeDetailsCard = ({
                 {t("sadanaTracker.detailsCard.addToMyPractice")}
               </TextComponent>
             </TouchableOpacity>
-          )}
+       
         </View>
+           )}
 
       </Card>
     </Animated.View>

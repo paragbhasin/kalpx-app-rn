@@ -13,6 +13,12 @@
     "beginJourney": "Begin your journey",
     "joinCircle": "Join our circle",
     "viewMore": "View More",
+    "classes": {
+      "perPerson": "/- per person",
+      "trial": "(Trial - {{symbol}}{{amount}})",
+      "viewDetails": "View Details",
+      "bookNow": "Book now"
+    },
     "weeklyVisitors": "{{count}} Weekly visitors",
     "join": "Join",
     "joined": "Joined",

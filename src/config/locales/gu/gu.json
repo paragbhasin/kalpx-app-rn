@@ -19,7 +19,13 @@
     "exploreClasses": "અમારા વર્ગોનું અન્વેષણ કરો",
     "whatPeopleSay": "લોકો અમારા વિશે શું કહી રહ્યા છે",
     "processing": "પ્રક્રિયા ચાલુ છે...",
-    "noImage": "કોઈ ચિત્ર નથી"
+    "noImage": "કોઈ ચિત્ર નથી",
+    "classes": {
+      "perPerson": "/- વ્યક્તિ દીઠ",
+      "trial": "(ટ્રાયલ - {{symbol}}{{amount}})",
+      "viewDetails": "વિગતો જુઓ",
+      "bookNow": "અત્યારે જ બુક કરો"
+    }
   },
   "categories": {
     "dharma": "અભ્યાસ",

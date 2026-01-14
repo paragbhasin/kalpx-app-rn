@@ -19,7 +19,13 @@
     "exploreClasses": "ನಮ್ಮ ತರಗತಿಗಳನ್ನು ಅನ್ವೇಷಿಸಿ",
     "whatPeopleSay": "ಜನರು ನಮ್ಮ ಬಗ್ಗೆ ಏನು ಹೇಳುತ್ತಿದ್ದಾರೆ",
     "processing": "ಪ್ರಕ್ರಿಯೆ ನಡೆಯುತ್ತಿದೆ...",
-    "noImage": "ಚಿತ್ರವಿಲ್ಲ"
+    "noImage": "ಚಿತ್ರವಿಲ್ಲ",
+    "classes": {
+      "perPerson": "/- ಒಬ್ಬರಿಗೆ",
+      "trial": "(ಟ್ರಯಲ್ - {{symbol}}{{amount}})",
+      "viewDetails": "ವಿವರಗಳನ್ನು ನೋಡಿ",
+      "bookNow": "ಈಗಲೇ ಬುಕ್ ಮಾಡಿ"
+    }
   },
   "categories": {
     "dharma": "ಅಭ್ಯಾಸ",

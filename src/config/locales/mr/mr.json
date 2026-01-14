@@ -19,7 +19,13 @@
     "exploreClasses": "आमच्या वर्गांचा शोध घ्या",
     "whatPeopleSay": "लोक आमच्याबद्दल काय म्हणत आहेत",
     "processing": "प्रक्रिया सुरू आहे...",
-    "noImage": "चित्र नाही"
+    "noImage": "चित्र नाही",
+    "classes": {
+      "perPerson": "/- प्रति व्यक्ती",
+      "trial": "(ट्रायल - {{symbol}}{{amount}})",
+      "viewDetails": "तपशील पहा",
+      "bookNow": "आत्ताच बुक करा"
+    }
   },
   "categories": {
     "dharma": "सराव",

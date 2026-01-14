@@ -19,7 +19,13 @@
     "exploreClasses": "మా తరగతులను అన్వేషించండి",
     "whatPeopleSay": "ప్రజలు మా గురించి ఏమంటున్నారు",
     "processing": "ప్రక్రియ జరుగుతోంది...",
-    "noImage": "చిత్రం లేదు"
+    "noImage": "చిత్రం లేదు",
+    "classes": {
+      "perPerson": "/- ఒక్కొక్కరికి",
+      "trial": "(ట్రయల్ - {{symbol}}{{amount}})",
+      "viewDetails": "వివరాలను చూడండి",
+      "bookNow": "ఇప్పుడే బుక్ చేయండి"
+    }
   },
   "categories": {
     "dharma": "సాధన",

@@ -19,7 +19,13 @@
     "exploreClasses": "আমাদের ক্লাসগুলি অন্বেষণ করুন",
     "whatPeopleSay": "মানুষ আমাদের সম্পর্কে কী বলছে",
     "processing": "প্রক্রিয়া চলছে...",
-    "noImage": "কোনো ছবি নেই"
+    "noImage": "কোনো ছবি নেই",
+    "classes": {
+      "perPerson": "/- প্রতি জন",
+      "trial": "(ট্রায়াল - {{symbol}}{{amount}})",
+      "viewDetails": "বিস্তারিত দেখুন",
+      "bookNow": "এখনই বুক করুন"
+    }
   },
   "categories": {
     "dharma": "অনুশীলন",

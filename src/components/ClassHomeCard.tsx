@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { Card } from "react-native-paper";
 import Colors from "./Colors";
 import TextComponent from "./TextComponent";
@@ -36,15 +37,16 @@ const ClassHomeCard: React.FC<ClassEventCardProps> = ({
   trailAmt,
   fromHome = false,
 }) => {
-// Check if URL
-const isRemote =
-  typeof imageUrl === "string" &&
-  (imageUrl.startsWith("http://") || imageUrl.startsWith("https://"));
+  const { t } = useTranslation();
+  // Check if URL
+  const isRemote =
+    typeof imageUrl === "string" &&
+    (imageUrl.startsWith("http://") || imageUrl.startsWith("https://"));
 
-// Final image source
-const finalSource = isRemote
-  ? { uri: imageUrl }
-  : require("../../assets/class_default.png");
+  // Final image source
+  const finalSource = isRemote
+    ? { uri: imageUrl }
+    : require("../../assets/class_default.png");
 
   // const isRemote = typeof imageUrl === "string" && imageUrl.startsWith("http");
 
@@ -85,37 +87,37 @@ const finalSource = isRemote
               numberOfLines={1}
               ellipsizeMode="tail"
             >
-              {currency === "INR" ? "₹" :"$"} {price}{" "}/- per person
+              {currency === "INR" ? "₹" : "$"} {price}{" "}{t("home.classes.perPerson")}
             </TextComponent>
 
-            {  trailenabled && (
+            {trailenabled && (
               <TextComponent
                 type="smalltext"
-                style={[styles.description,{
-          color: '#1877F2',
+                style={[styles.description, {
+                  color: '#1877F2',
 
                 }]}
                 numberOfLines={1}
                 ellipsizeMode="tail"
-                >
-                (Trial - {currency === "INR" ? "₹" :"$"}{trailAmt})
+              >
+                {t("home.classes.trial", { symbol: currency === "INR" ? "₹" : "$", amount: trailAmt })}
               </TextComponent>
             )}
           </View>
           <View style={styles.buttonRow}>
-          <TouchableOpacity
-            onPress={onViewDetails}
-            style={styles.detailsButton}
-          >
-            <TextComponent type="semiBoldBlackText" >View Details</TextComponent>
-          </TouchableOpacity>
-             <TouchableOpacity
-            onPress={onBookNow}
-            style={styles.booknowButton}
-          >
-            <TextComponent type="semiBoldBlackText">Book now</TextComponent>
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity
+              onPress={onViewDetails}
+              style={styles.detailsButton}
+            >
+              <TextComponent type="semiBoldBlackText" >{t("home.classes.viewDetails")}</TextComponent>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={onBookNow}
+              style={styles.booknowButton}
+            >
+              <TextComponent type="semiBoldBlackText">{t("home.classes.bookNow")}</TextComponent>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </Card>
@@ -150,7 +152,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 8,
     paddingHorizontal: 12,
-      width: SCREEN_WIDTH * 0.65,
+    width: SCREEN_WIDTH * 0.65,
     justifyContent: "flex-start",
   },
   title: {

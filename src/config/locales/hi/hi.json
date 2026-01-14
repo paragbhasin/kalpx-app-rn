@@ -13,6 +13,12 @@
     "beginJourney": "अपनी यात्रा शुरू करें",
     "joinCircle": "हमारे साथ जुड़ें",
     "viewMore": "और देखें",
+    "classes": {
+      "perPerson": "/- प्रति व्यक्ति",
+      "trial": "(ट्रायल - {{symbol}}{{amount}})",
+      "viewDetails": "विवरण देखें",
+      "bookNow": "अभी बुक करें"
+    },
     "weeklyVisitors": "{{count}} साप्ताहिक विज़िटर",
     "join": "जुड़ें",
     "joined": "जुड़े हुए",
@@ -1122,7 +1128,9 @@
     "celebrationPractices": "उत्सव साधनाएँ",
     "traditionalFoods": "पारंपरिक भोजन",
     "symbols": "प्रतीक",
-    "regionalCustoms": "क्षेत्रीय परंपराएँ"
+    "regionalCustoms": "क्षेत्रीय परंपराएँ",
+    "story": "सनातन कथा",
+    "source": "सनातन स्रोत"
   },
   "wisdomCard": {
     "loading": "दैनिक ज्ञान लोड हो रहा है...",

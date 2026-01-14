@@ -436,26 +436,6 @@ export const getTranslatedPractice = (p: any, t: any) => {
   }
   const item = { ...p, ...details };
 
-  // 🔬 DEBUG: Log what we received and what item looks like after merging
-  console.log("🔬 getTranslatedPractice ENTRY:", {
-    originalP: {
-      practice_id: p.practice_id,
-      id: p.id,
-      source: p.source,
-      type: p.type,
-      hasI18n: !!p.i18n,
-      hasDetails: !!p.details
-    },
-    mergedItem: {
-      practice_id: item.practice_id,
-      id: item.id,
-      source: item.source,
-      type: item.type,
-      detailsType: item.details?.type,
-      hasI18n: !!item.i18n
-    }
-  });
-
   // 🌟 UNIVERSAL SEARCH - Try finding in universal catalog first (by ID only)
   const universalCatalog = UNIVERSAL_CATALOG[langKey] || UNIVERSAL_CATALOG.en;
   const searchId = item.practice_id || item.id;
@@ -478,7 +458,6 @@ export const getTranslatedPractice = (p: any, t: any) => {
     const pMeaningKey = `practices.${cleanSearchId}.meaning`;
 
     if (sData && sData[sNameKey]) {
-      console.log("💎 Found in Master Sankalps JSON:", sNameKey);
       return {
         name: sData[sNameKey],
         desc: sData[sSuggestedKey] || sData[sDescKey] || item.description || "",
@@ -499,7 +478,6 @@ export const getTranslatedPractice = (p: any, t: any) => {
     }
 
     if (pData && pData[pNameKey]) {
-      console.log("💎 Found in Master Practices JSON:", pNameKey);
       return {
         name: pData[pNameKey],
         desc: pData[pDescKey] || item.description || "",
@@ -519,24 +497,9 @@ export const getTranslatedPractice = (p: any, t: any) => {
       };
     }
 
-    console.log("🌟 Universal Catalog Search:", {
-      langKey,
-      searchId,
-      catalogSize: universalCatalog.length
-    });
-
     const found = universalCatalog.find((entry) => entry.id === searchId);
     const fallback = UNIVERSAL_CATALOG.en.find((entry) => entry.id === searchId);
     const universalMatch = found || fallback;
-
-    console.log("✨ Universal Search Result:", {
-      found: !!universalMatch,
-      localizedFound: !!found,
-      fallbackFound: !!fallback,
-      matchId: universalMatch?.id,
-      matchTitle: universalMatch?.title,
-      matchFields: universalMatch ? Object.keys(universalMatch) : []
-    });
 
     if (universalMatch) {
       return {
@@ -574,47 +537,17 @@ export const getTranslatedPractice = (p: any, t: any) => {
     item.practice_id?.startsWith("sankalp.")
   );
 
-  console.log("🧐 Sankalp Detection:", {
-    isSankalp,
-    checks: {
-      hasI18nShort: !!item.i18n?.short,
-      typeIsSankalp: item.type === "sankalp",
-      detailsTypeIsSankalp: item.details?.type === "sankalp",
-      sourceIsSankalp: item.source === "sankalp",
-      idStartsWithSankalp_: item.id?.startsWith("sankalp_"),
-      idStartsWithSankalpDot: item.id?.startsWith("sankalp."),
-      practiceIdStartsWithSankalpDot: item.practice_id?.startsWith("sankalp.")
-    }
-  });
-
   if (isSankalp) {
     // Try to find the sankalp in the localized catalog
     const localizedSankalpsCatalog = COMBINED_SANKALPS[langKey] || COMBINED_SANKALPS.en;
     const rawId = item.practice_id || item.id || details?.id || "";
     const cleanId = rawId.replace(/^(sankalp|mantra|practice)\./, "");
 
-    console.log("🔍 Sankalp Translation Debug:", {
-      langKey,
-      rawId,
-      cleanId,
-      catalogSize: localizedSankalpsCatalog.length,
-      itemKeys: Object.keys(item),
-      firstCatalogId: localizedSankalpsCatalog[0]?.id
-    });
-
     // Find sankalp by ID in the catalog
     // Try rawId first (with prefix), then cleanId (without prefix)
     const localizedSankalp = localizedSankalpsCatalog.find((s) => s.id === rawId || s.id === cleanId);
     const fallbackSankalp = COMBINED_SANKALPS.en.find((s) => s.id === rawId || s.id === cleanId);
     const active = localizedSankalp || fallbackSankalp;
-
-    console.log("🎯 Sankalp Search Result:", {
-      found: !!active,
-      localizedFound: !!localizedSankalp,
-      fallbackFound: !!fallbackSankalp,
-      title: active?.title,
-      activeId: active?.id
-    });
 
     // If found in catalog, use those values
     if (active) {
@@ -658,47 +591,13 @@ export const getTranslatedPractice = (p: any, t: any) => {
     item.details?.type === "mantra"
   );
 
-  console.log("🔮 Mantra Detection:", {
-    isMantra,
-    checks: {
-      idStartsWithMantra: item.id?.startsWith("mantra."),
-      practiceIdStartsWithMantra: item.practice_id?.startsWith("mantra."),
-      sourceIsMantra: item.source === "mantra",
-      hasText: !!item.text,
-      hasDevanagari: !!item.devanagari,
-      detailsTypeIsMantra: item.details?.type === "mantra"
-    },
-    itemId: item.id,
-    practiceId: item.practice_id,
-    source: item.source
-  });
-
   if (isMantra) {
     const localizedCatalog = COMBINED_MANTRAS[langKey] || COMBINED_MANTRAS.en;
     const searchId = item.practice_id || item.id;
 
-    console.log("📿 Mantra Translation Debug:", {
-      langKey,
-      searchId,
-      catalogSize: localizedCatalog.length,
-      firstCatalogId: localizedCatalog[0]?.id
-    });
-
     const localizedMantra = localizedCatalog.find((m) => m.id === searchId);
     const fallbackMantra = COMBINED_MANTRAS.en.find((m) => m.id === searchId);
     const active = localizedMantra || fallbackMantra || item;
-
-    console.log("🎵 Mantra Search Result:", {
-      found: !!(localizedMantra || fallbackMantra),
-      localizedFound: !!localizedMantra,
-      fallbackFound: !!fallbackMantra,
-      text: active?.text,
-      activeId: active?.id,
-      activeFields: active ? Object.keys(active) : [],
-      title: active?.title,
-      meaning: active?.meaning,
-      devanagari: active?.devanagari
-    });
 
     const name =
       active.title ||      // Category mantras use 'title'
@@ -744,25 +643,9 @@ export const getTranslatedPractice = (p: any, t: any) => {
     const localizedPracticesCatalog = COMBINED_PRACTICES[langKey] || COMBINED_PRACTICES.en;
     const searchId = item.practice_id || item.id;
 
-    console.log("🪷 Practice Translation Debug:", {
-      langKey,
-      searchId,
-      source: item.source,
-      catalogSize: localizedPracticesCatalog.length,
-      firstCatalogId: localizedPracticesCatalog[0]?.id
-    });
-
     const localizedPractice = localizedPracticesCatalog.find((p) => p.id === searchId);
     const fallbackPractice = COMBINED_PRACTICES.en.find((p) => p.id === searchId);
     const active = localizedPractice || fallbackPractice;
-
-    console.log("🌿 Practice Search Result:", {
-      found: !!(localizedPractice || fallbackPractice),
-      localizedFound: !!localizedPractice,
-      fallbackFound: !!fallbackPractice,
-      title: active?.title,
-      activeId: active?.id
-    });
 
     if (active) {
       return {

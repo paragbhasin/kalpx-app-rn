@@ -2,7 +2,24 @@
   "home": {
     "greeting": "Hi, {{name}}",
     "dailyHeading": "What would you like today?",
-    "kalpXHeading": "What You’ll Find on KalpX?"
+    "kalpXHeading": "What You’ll Find on KalpX?",
+    "howCanWeHelp": "How can we help?",
+    "guidedPathsDesc": "We've curated guided paths rooted in Vedic wisdom to support your long term growth and inner balance.",
+    "exploreOurPaths": "Explore our Growth Paths →",
+    "exploreMore": "Tap to Explore More & Start",
+    "todaysMantra": "Today's Mantra",
+    "todaysSankalp": "Today's Sankalp",
+    "community": "Community",
+    "beginJourney": "Begin your journey",
+    "joinCircle": "Join our circle",
+    "viewMore": "View More",
+    "weeklyVisitors": "{{count}} Weekly visitors",
+    "join": "Join",
+    "joined": "Joined",
+    "exploreClasses": "Explore our Classes",
+    "whatPeopleSay": "What People Are Saying about us",
+    "processing": "Processing...",
+    "noImage": "No Image"
   },
   "categories": {
     "dharma": "Practice",
@@ -98,19 +115,49 @@
     "festivalSubtitle": "invited you to a chat"
   },
   "kalpx": {
-    "learn": "Learn and Grow",
-    "explore": "Explore Videos",
-    "practice": "Daily Practice",
-    "journey": "Sacred Journeys",
-    "poojas": "Temple Poojas",
-    "retreats": "Retreats  Wellness",
-    "Classes": "Classes"
+    "Classes": "Classes",
+    "pathTitle": "Your Path Unfolds",
+    "pathDesc": "Explore Classes in dance, music, mantras, yoga and scripture- at your pace",
+    "visualWisdom": "Visual Wisdom",
+    "visualWisdomDesc": "Watch guided videos on culture, wisdom, rituals, and spiritual practices—anytime, anywhere",
+    "sacredRituals": "Sacred Rituals",
+    "sacredRitualsDesc": "Discover meaningful rituals, daily practices, and devotional routines to deepen your spiritual journey"
   },
+  "testimonials": [
+    {
+      "author": "Rahul Mehta",
+      "location": "Mumbai",
+      "text": "I like how KalpX focuses on daily life, not just theory. The Sankalp helps me stay mindful throughout the day."
+    },
+    {
+      "author": "Sandeep Patel",
+      "location": "Ahmedabad",
+      "text": "The daily sankalp practices bring a gentle structure to my routine. It doesn't feel heavy, just gently guiding."
+    },
+    {
+      "author": "Ananya Sharma",
+      "location": "Delhi",
+      "text": "Beautiful interface and even more beautiful content. The wisdom videos are a great way to start my morning."
+    },
+    {
+      "author": "Vikram Singh",
+      "location": "Bangalore",
+      "text": "I've tried many meditation apps, but KalpX's focus on Sanatan Dharma makes it unique and deeply meaningful."
+    },
+    {
+      "author": "Priya Iyer",
+      "location": "Chennai",
+      "text": "The community features help me stay connected with like-minded people. It's a very supportive environment."
+    }
+  ],
   "exploreVideos": {
     "heading": "Explore Videos",
     "video1": "Sanskrit Showcase · Institutes of Eminence Offering Sanskrit Courses · MadrasSanskritCollege",
     "video2": "Learn Sanskrit · Ancient Wisdom Modern Applications · Delhi University",
-    "video3": "Spiritual Journeys · Teachings in Himalayas · Yoga Vidya Peeth"
+    "video3": "Spiritual Journeys · Teachings in Himalayas · Yoga Vidya Peeth",
+    "visitWisdomVideos": "Visit our Wisdom Videos",
+    "loadingMore": "Loading more...",
+    "noVideos": "No videos found."
   },
   "login": {
     "brand": "KalpX",

@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import Colors from "./Colors";
 import FontSize from "./FontSize";
 import TextComponent from "./TextComponent";
-import { black } from "react-native-paper/lib/typescript/styles/themes/v2/colors";
+import { getTranslatedPractice } from "../utils/getTranslatedPractice";
 
 interface SimpleMantraCardProps {
     mantra: any;
@@ -19,20 +19,20 @@ const SimpleMantraCard: React.FC<SimpleMantraCardProps> = ({
     onMarkDone,
 }) => {
     const { t } = useTranslation();
+    const translated = getTranslatedPractice(mantra, t);
 
     return (
         <Card style={styles.card}>
             <View style={styles.content}>
                 <TextComponent type="semiBoldText" style={styles.header}>
-                                  Today's Mantra
-
+                    {t("home.todaysMantra", { defaultValue: "Today's Mantra" })}
                 </TextComponent>
 
                 <TextComponent type="cardText" style={styles.devanagari}>
-                    {mantra?.devanagari}
+                    {translated.mantra || translated.name || mantra?.devanagari}
                 </TextComponent>
 
-    
+
 
                 <TouchableOpacity
                     style={styles.button}
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
         padding: 16,
     },
     header: {
-     color: '#1877F2',
+        color: '#1877F2',
         fontSize: FontSize.CONSTS.FS_14,
         marginBottom: 8,
     },

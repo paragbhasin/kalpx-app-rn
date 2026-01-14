@@ -120,33 +120,7 @@ export default function Home() {
   const { featuredPosts, loadingFeatured } = useSelector((state: any) => state.feed);
   const { followed_communities } = useSelector((state: any) => state.userActivity);
 
-  const testimonialReviews = [
-    {
-      author: "Rahul Mehta",
-      location: "Mumbai",
-      text: "I like how KalpX focuses on daily life, not just theory. The Sankalp helps me stay mindful throughout the day.",
-    },
-    {
-      author: "Sandeep Patel",
-      location: "Ahmedabad",
-      text: "The daily sankalp practices bring a gentle structure to my routine. It doesn't feel heavy, just gently guiding.",
-    },
-    {
-      author: "Ananya Sharma",
-      location: "Delhi",
-      text: "Beautiful interface and even more beautiful content. The wisdom videos are a great way to start my morning.",
-    },
-    {
-      author: "Vikram Singh",
-      location: "Bangalore",
-      text: "I've tried many meditation apps, but KalpX's focus on Sanatan Dharma makes it unique and deeply meaningful.",
-    },
-    {
-      author: "Priya Iyer",
-      location: "Chennai",
-      text: "The community features help me stay connected with like-minded people. It's a very supportive environment.",
-    },
-  ];
+  const testimonialReviews = t("testimonials", { returnObjects: true }) as any[] || [];
 
   // Animation for testimonials scroll
   const scrollX = useRef(new Animated.Value(0)).current;
@@ -468,7 +442,7 @@ export default function Home() {
     },
     {
       id: "8",
-      name: 'Community',
+      name: t("home.community"),
       title: "CommunityLanding",
       iconType: "image",
       icon: require('../../../assets/com.png'),
@@ -537,8 +511,8 @@ export default function Home() {
     {
       id: "1",
       title: t("kalpx.learn"),
-      subTitle: "Your Path Unfolds",
-      description: "Explore Classes in dance, music, mantras, yoga and scripture- at your pace",
+      subTitle: t("kalpx.pathTitle"),
+      description: t("kalpx.pathDesc"),
       name: "ClassesScreen",
       // name: "LearnMore",
       event_type: "click_learn_card",
@@ -549,8 +523,8 @@ export default function Home() {
     {
       id: "2",
       title: t("categories.explore"),
-      subTitle: "Visiual Wisdom",
-      description: "Watch guided videos on culture, wisdom, rituals, and spiritual practices—anytime, anywhere",
+      subTitle: t("kalpx.visualWisdom"),
+      description: t("kalpx.visualWisdomDesc"),
       name: "Explore",
       event_type: "click_explore_card",
       component: "Explore-card",
@@ -560,8 +534,8 @@ export default function Home() {
     {
       id: "3",
       title: trackerData?.active_practices?.length > 0 ? t("categories.sadana") : t("categories.dharma"),
-      subTitle: "sacred Rituals",
-      description: "Discover meaningful rituals, daily practices, and devotional routines to deepen your spiritual journey",
+      subTitle: t("kalpx.sacredRituals"),
+      description: t("kalpx.sacredRitualsDesc"),
       // title: t("kalpx.practice"),
       name: trackerData?.active_practices?.length > 0
         ? "TrackerTabs"
@@ -910,7 +884,7 @@ export default function Home() {
           console.error("Error fetching UUID:", error);
         }
       }}>
-        <TextComponent type="boldText" style={{ color: "#FFFFFF" }}>Begin your journey</TextComponent>
+        <TextComponent type="boldText" style={{ color: "#FFFFFF" }}>{t("home.beginJourney")}</TextComponent>
       </TouchableOpacity>
     </View>
   );
@@ -1058,8 +1032,8 @@ export default function Home() {
         })()}
 
         <View style={{ borderColor: Colors.Colors.Yellow, borderWidth: 1.25, borderRadius: 6, marginHorizontal: 10, padding: 4, marginVertical: 6, marginTop: 10 }}>
-          <TextComponent type="DailyboldText" style={{ alignSelf: "center", marginTop: 20 }}>How can we help?</TextComponent>
-          <TextComponent type="cardSubTitleText" style={{ alignSelf: "center", marginTop: 10, textAlign: "center" }}>We've curated guided paths rooted in Vedic wisdom to support your long term growth and inner balance.</TextComponent>
+          <TextComponent type="DailyboldText" style={{ alignSelf: "center", marginTop: 20 }}>{t("home.howCanWeHelp")}</TextComponent>
+          <TextComponent type="cardSubTitleText" style={{ alignSelf: "center", marginTop: 10, textAlign: "center" }}>{t("home.guidedPathsDesc")}</TextComponent>
           <TouchableOpacity style={{ alignItems: "center", marginTop: 8 }} onPress={() => { navigation.navigate("DailyPracticeList") }}>
             <ImageBackground
               source={require("../../../assets/locus.png")}
@@ -1067,13 +1041,13 @@ export default function Home() {
               resizeMode="contain"
             >
               <TextComponent type="cardText" style={[styles.label, styles.leftLabel]}>
-                Peace {"\n"}& Calm
+                {t("dailyPracticeList.categories.peace-calm.name").replace(" & ", "\n& ")}
               </TextComponent>
               <TextComponent type="cardText" style={[styles.label, styles.centerLabel]}>
-                Career {"\n"}& Prosperity
+                {t("dailyPracticeList.categories.career.name").replace(" & ", "\n& ")}
               </TextComponent>
               <TextComponent type="cardText" style={[styles.label, styles.rightLabel]}>
-                Spiritual {"\n"}Growth
+                {t("dailyPracticeList.categories.spiritual-growth.name").replace(" ", "\n")}
               </TextComponent>
             </ImageBackground>
           </TouchableOpacity>
@@ -1086,7 +1060,7 @@ export default function Home() {
                 marginTop: 6,
               }}
             >
-              Tap to Explore More & Start
+              {t("home.exploreMore")}
             </TextComponent>
             <TouchableOpacity style={styles.circleButton}>
               <Ionicons name="arrow-forward" size={12} color="#FFF6DA" />
@@ -1097,7 +1071,7 @@ export default function Home() {
           <TextComponent type="headerText" style={styles.sectionHeading}>
             {t("streak.stepText")}
           </TextComponent>
-          <TextComponent type="cardSubTitleText" style={{ alignSelf: "center", textAlign: "center", marginBottom: 10, marginTop: 4, marginHorizontal: 12 }}>Try a simple Vedic practice below to bring clarity, balance, and purpose into your day.</TextComponent>
+          <TextComponent type="cardSubTitleText" style={{ alignSelf: "center", textAlign: "center", marginBottom: 10, marginTop: 4, marginHorizontal: 12 }}>{t("dailyPracticeLogin.vedictext")}</TextComponent>
           <View style={{
             height: expandedItemId ? 'auto' : 0,
             opacity: expandedItemId ? 1 : 0,
@@ -1240,12 +1214,12 @@ export default function Home() {
             // paddingRight: 16 
           }}>
             <TextComponent type="headerText" style={{ fontSize: 16 }}>
-              Join our circle
+              {t("home.joinCircle")}
             </TextComponent>
 
             <TouchableOpacity onPress={() => navigation.navigate("CommunityLanding")}>
               <TextComponent type="mediumText" style={{ color: Colors.Colors.App_theme }}>
-                View More
+                {t("home.viewMore")}
               </TextComponent>
             </TouchableOpacity>
           </View>
@@ -1317,7 +1291,7 @@ export default function Home() {
                         />
                       ) : (
                         <View style={{ height: '100%', width: '100%', backgroundColor: '#E0E0E0', justifyContent: 'center', alignItems: 'center' }}>
-                          <TextComponent type="mediumText" style={{ color: '#999' }}>No Image</TextComponent>
+                          <TextComponent type="mediumText" style={{ color: '#999' }}>{t("home.noImage")}</TextComponent>
                         </View>
                       )}
                     </View>
@@ -1325,10 +1299,10 @@ export default function Home() {
                     {/* Info Section */}
                     <View style={{ paddingTop: 8, alignItems: 'center' }}>
                       <TextComponent type="boldText" style={{ fontSize: 16, color: '#2D3748', marginBottom: 4, textAlign: 'center' }} numberOfLines={1}>
-                        {community.community_name || community.title || 'Community'}
+                        {community.community_name || community.title || t("home.community")}
                       </TextComponent>
                       <TextComponent type="mediumText" style={{ fontSize: 14, color: '#A0AEC0', marginBottom: 8 }}>
-                        {community.follower_count || 0} Weekly visitors
+                        {t("home.weeklyVisitors", { count: community.follower_count || 0 })}
                       </TextComponent>
                       <TouchableOpacity
                         style={{
@@ -1350,7 +1324,7 @@ export default function Home() {
                             fontSize: 14,
                           }}
                         >
-                          {isJoined ? 'Joined' : 'Join'}
+                          {isJoined ? t("home.joined") : t("home.join")}
                         </TextComponent>
                       </TouchableOpacity>
                     </View>
@@ -1369,12 +1343,12 @@ export default function Home() {
             // paddingRight: 16 
           }}>
             <TextComponent type="headerText" style={{ fontSize: 16 }}>
-              Explore our Classes
+              {t("home.exploreClasses")}
             </TextComponent>
 
             <TouchableOpacity onPress={() => navigation.navigate("ClassesScreen")}>
               <TextComponent type="mediumText" style={{ color: Colors.Colors.App_theme }}>
-                View More
+                {t("home.viewMore")}
               </TextComponent>
             </TouchableOpacity>
           </View>
@@ -1443,24 +1417,24 @@ export default function Home() {
         </View>
 
         <View style={{ backgroundColor: '#F1F1F1', marginHorizontal: -16, paddingVertical: 32 }}>
-       <View
-  style={{
-    paddingHorizontal: 16,
-    marginBottom: 24,
-    alignItems: 'center',   
-  }}
->
-  <TextComponent
-    type="headerText"
-    style={{
-      fontSize: 24,
-      color: '#303030',
-      textAlign: 'center', // 👈 center text itself
-    }}
-  >
-    What People Are Saying about us
-  </TextComponent>
-</View>
+          <View
+            style={{
+              paddingHorizontal: 16,
+              marginBottom: 24,
+              alignItems: 'center',
+            }}
+          >
+            <TextComponent
+              type="headerText"
+              style={{
+                fontSize: 24,
+                color: '#303030',
+                textAlign: 'center', // 👈 center text itself
+              }}
+            >
+              {t("home.whatPeopleSay")}
+            </TextComponent>
+          </View>
 
           {/* Scrolling Reviews Container */}
           <ScrollView
@@ -1672,7 +1646,7 @@ export default function Home() {
           visible={showNotificationPopup}
           onClose={() => setShowNotificationPopup(false)}
         />
-        <LoadingOverlay visible={apiloading} text="Processing..." />
+        <LoadingOverlay visible={apiloading} text={t("home.processing")} />
       </ScrollView>
       {/* </ImageBackground> */}
     </SafeAreaView>

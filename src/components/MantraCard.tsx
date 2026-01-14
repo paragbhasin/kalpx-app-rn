@@ -22,6 +22,7 @@ import { CATALOGS } from "../data/mantras";
 import Colors from "./Colors";
 import FontSize from "./FontSize";
 import TextComponent from "./TextComponent";
+import { getTranslatedPractice } from "../utils/getTranslatedPractice";
 
 
 const suggestedRepsList = [11, 21, 27, 54, 108];
@@ -212,8 +213,8 @@ const MantraCard = ({
         //   ),
         // ];
 
+        const translated = getTranslatedPractice(currentMantra, t);
         return (
-
           <View
             key={index}
             style={{
@@ -250,15 +251,8 @@ const MantraCard = ({
               if (h > slideHeight) setSlideHeight(h);
             }}>
               <View>
-                {/* <ScrollView
-                  showsVerticalScrollIndicator={true}
-                  style={{ maxHeight: 440, 
-                    // marginTop: 5 
-                  }}
-                > */}
                 <ImageBackground
                   source={require("../../assets/CardBG.png")}
-                  // resizeMode="center"
                   style={styles.partialBgContainer}
                   imageStyle={styles.partialBgImage}
                 >
@@ -268,7 +262,6 @@ const MantraCard = ({
                       style={{ color: Colors.Colors.App_theme }}
                     >
                       {uiHeaderText}
-                      {/* {t("mantraCard.shareSadana")} */}
                     </TextComponent>
                   )}
                   {!viewOnly && (
@@ -298,7 +291,6 @@ const MantraCard = ({
                             (m) => m.id === currentMantra.id
                           );
                           const englishTags = englishMantra?.tags || [];
-                          console.log("tages >>>>>", englishTags);
                           navigation.navigate("RelatedVideosScreen", {
                             tag: englishTags,
                           });
@@ -310,7 +302,6 @@ const MantraCard = ({
                           borderRadius: 50,
                           justifyContent: "center",
                           alignItems: "center",
-                          // alignSelf: "flex-end",
                         }}
                       >
                         <Icon name="videocam-outline" size={18} color="#fff" />
@@ -327,7 +318,7 @@ const MantraCard = ({
                       type="cardText"
                       style={{ color: Colors.Colors.blue_text, textAlign: "center", marginHorizontal: 14, marginTop: 8 }}
                     >
-                      {currentMantra.devanagari}
+                      {translated.mantra || currentMantra.devanagari}
                     </TextComponent>
                   </View>
                   <TextComponent
@@ -337,11 +328,15 @@ const MantraCard = ({
                       marginVertical: 6, textAlign: "center", marginHorizontal: 14
                     }}
                   >
-                    {currentMantra.iast}
+                    {translated.iast || currentMantra.iast}
                   </TextComponent>
                 </ImageBackground>
                 <View style={{ paddingHorizontal: 16, }}>
-                  {Array.isArray(currentMantra.explanation) ? (
+                  {translated.desc ? (
+                    <TextComponent type="mediumText" style={{ marginTop: 4, color: Colors.Colors.card_subtext, textAlign: "center" }}>
+                      {translated.desc}
+                    </TextComponent>
+                  ) : Array.isArray(currentMantra.explanation) ? (
                     currentMantra.explanation.map((line, idx) => (
                       <TextComponent type="mediumText" key={idx} style={{ marginTop: 4, color: Colors.Colors.card_subtext, textAlign: "center" }}>
                         {line}
@@ -355,7 +350,7 @@ const MantraCard = ({
                     showsHorizontalScrollIndicator={false}
                     style={{ marginVertical: 4, alignSelf: "center" }}
                   >
-                    {currentMantra.tags?.map((tag, i) => (
+                    {(translated.tags && translated.tags.length > 0 ? translated.tags : currentMantra.tags)?.map((tag, i) => (
                       <View key={i} style={styles.tag}>
                         <TextComponent type="subScrollText">
                           # {tag}
@@ -424,7 +419,7 @@ const MantraCard = ({
                                     opacity: isLocked && !selected ? 0.5 : 1,
                                   }}
                                 >
-                                  X{rep}
+                                  {rep}X
                                 </TextComponent>
                               </TouchableOpacity>
                             );
@@ -558,7 +553,7 @@ const MantraCard = ({
                   >
                     <TextComponent
                       type="semiBoldText"
-                      style={{ textAlign: "center", color: Colors.Colors.white,marginBottom:2 }}
+                      style={{ textAlign: "center", color: Colors.Colors.white, marginBottom: 2 }}
                     >
                       Add this to my practice
                     </TextComponent>

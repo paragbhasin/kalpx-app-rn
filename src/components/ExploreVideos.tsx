@@ -73,7 +73,7 @@ const DailyDharmaCard = ({ image, quote, onPress }: any) => {
         </TextComponent>
 
         <TouchableOpacity style={styles.dailyButton} onPress={onPress}>
-          <Text  allowFontScaling={false} style={styles.dailyButtonText}>
+          <Text allowFontScaling={false} style={styles.dailyButtonText}>
             {t("DailyDharmaCard.startButton", "Start Daily Practice")}
           </Text>
         </TouchableOpacity>
@@ -87,31 +87,30 @@ const DailyDharmaCard = ({ image, quote, onPress }: any) => {
 const ExploreVideos = ({ videos = [], onLoadMore, loading, home }: any) => {
   const navigation: any = useNavigation();
   const { t } = useTranslation();
- const [trackerData, setTrackerData] = useState<any>(null);
+  const [trackerData, setTrackerData] = useState<any>(null);
 
- const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
+  const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
 
-   useEffect(() => {
-     dispatch(
-       getDailyDharmaTracker((res) => {
-         if (res.success) {
-           setTrackerData(res.data);
-           console.log("✅ Daily Dharma Tracker Data::::::::::", res.data);
-         } else {
-           console.error("❌ Failed to fetch tracker:", res.error);
-         }
-       })
-     );
-   }, [dispatch]);
+  useEffect(() => {
+    dispatch(
+      getDailyDharmaTracker((res) => {
+        if (res.success) {
+          setTrackerData(res.data);
+        } else {
+          console.error("❌ Failed to fetch tracker:", res.error);
+        }
+      })
+    );
+  }, [dispatch]);
 
-const navigationTarget = useMemo(() => {
-  if (trackerData?.active_practices?.length > 0) {
-    return "MySadana";
-  }
-  return "Dharma";
-}, [trackerData]);
- 
-   
+  const navigationTarget = useMemo(() => {
+    if (trackerData?.active_practices?.length > 0) {
+      return "MySadana";
+    }
+    return "Dharma";
+  }, [trackerData]);
+
+
   // 🌞 Social proof data
   const socialProofImages = [
     `${BASE_IMAGE_URL}/images/social-proof/slide1.jpeg`,
@@ -143,18 +142,18 @@ const navigationTarget = useMemo(() => {
   };
 
   // 🧩 Combine videos + daily card (insert after every 5 videos)
-// 🧩 Combine videos + daily card (insert once after 15 videos)
-const combinedData = useMemo(() => {
-  const data: any[] = [];
-  videos.forEach((v: any, i: number) => {
-    data.push(v);
-    // insert daily card only once after 15th video
-    if ((i + 1) === 15) {
-      data.push({ type: "dailyCard", ...dailyCardData });
-    }
-  });
-  return data;
-}, [videos, dailyCardData]);
+  // 🧩 Combine videos + daily card (insert once after 15 videos)
+  const combinedData = useMemo(() => {
+    const data: any[] = [];
+    videos.forEach((v: any, i: number) => {
+      data.push(v);
+      // insert daily card only once after 15th video
+      if ((i + 1) === 15) {
+        data.push({ type: "dailyCard", ...dailyCardData });
+      }
+    });
+    return data;
+  }, [videos, dailyCardData]);
 
 
 
@@ -176,7 +175,7 @@ const combinedData = useMemo(() => {
       loading ? (
         <View style={{ alignItems: "center", justifyContent: "center", padding: 12 }}>
           <ActivityIndicator color="#b97f28" />
-          <Text  allowFontScaling={false} style={{ fontSize: 12, color: "#666", marginTop: 4 }}>Loading more...</Text>
+          <Text allowFontScaling={false} style={{ fontSize: 12, color: "#666", marginTop: 4 }}>{t("exploreVideos.loadingMore")}</Text>
         </View>
       ) : null,
     [loading]
@@ -186,7 +185,7 @@ const combinedData = useMemo(() => {
     () =>
       !loading ? (
         <View style={{ alignItems: "center", marginTop: 20 }}>
-          <Text  allowFontScaling={false} style={{ color: "#999" }}>No videos found.</Text>
+          <Text allowFontScaling={false} style={{ color: "#999" }}>{t("exploreVideos.noVideos")}</Text>
         </View>
       ) : null,
     [loading]
@@ -195,14 +194,14 @@ const combinedData = useMemo(() => {
   return (
     <>
       {home ? (
-        <View  style={{marginTop:10}}>
+        <View style={{ marginTop: 10 }}>
           <View style={styles.headerRow}>
             <TextComponent type="headerText" style={styles.sectionHeading}>
-         Visit our Wisdom Videos
+              {t("exploreVideos.visitWisdomVideos")}
             </TextComponent>
             <TouchableOpacity onPress={() => navigation.navigate("Explore")}>
               <TextComponent type="semiBoldText" >
-       View More
+                {t("home.viewMore")}
               </TextComponent>
             </TouchableOpacity>
           </View>
@@ -217,7 +216,7 @@ const combinedData = useMemo(() => {
             onEndReachedThreshold={0.5}
             ListFooterComponent={renderFooter}
             ListEmptyComponent={renderEmpty}
-            contentContainerStyle={{  }}
+            contentContainerStyle={{}}
           />
         </View>
       ) : (
@@ -240,7 +239,7 @@ const combinedData = useMemo(() => {
 
 export default ExploreVideos;
 
-const styles : any= StyleSheet.create({
+const styles: any = StyleSheet.create({
   card: {
     // elevation: 3,
     backgroundColor: Colors.Colors.white,
@@ -276,8 +275,8 @@ const styles : any= StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 6 },
-marginTop:10,
-marginBottom:10,
+    marginTop: 10,
+    marginBottom: 10,
 
     // elevation for Android
     elevation: 5,
@@ -313,58 +312,58 @@ marginBottom:10,
     backgroundColor: "rgba(0,0,0,0.4)",
   },
   // 🌿 Daily Dharma Card Styles
-dailyCard: {
-  width: 250,
-  borderRadius: 16,
-  backgroundColor: "#FFF8E7", // soft cream tone
-  borderWidth: 2,
-  borderColor: "#E8C27E",
-  // marginRight: 16,
-  overflow: "hidden",
-  shadowColor: "#000",
-  shadowOpacity: 0.1,
-  shadowRadius: 6,
-  shadowOffset: { width: 0, height: 3 },
-  elevation: 3,
-},
+  dailyCard: {
+    width: 250,
+    borderRadius: 16,
+    backgroundColor: "#FFF8E7", // soft cream tone
+    borderWidth: 2,
+    borderColor: "#E8C27E",
+    // marginRight: 16,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 3,
+  },
 
-dailyImage: {
-  margin:10,
-  width: "92%",
-  height: 140,
- borderRadius:14
-},
+  dailyImage: {
+    margin: 10,
+    width: "92%",
+    height: 140,
+    borderRadius: 14
+  },
 
-dailyContent: {
-  padding: 12,
-  alignItems: "center",
-  justifyContent: "center",
-},
-dailyTitle: {
+  dailyContent: {
+    padding: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  dailyTitle: {
     color: Colors.Colors.BLACK,
-   fontSize: FontSize.CONSTS.FS_16,
-  textAlign: "center",
-  marginBottom: 6,
-},
+    fontSize: FontSize.CONSTS.FS_16,
+    textAlign: "center",
+    marginBottom: 6,
+  },
 
-dailyQuote: {
-  // color: Colors.Colors.BLACK,
-  // fontSize: 14,
-  textAlign: "center",
-  // fontStyle: "italic",
-  marginBottom: 10,
-},
+  dailyQuote: {
+    // color: Colors.Colors.BLACK,
+    // fontSize: 14,
+    textAlign: "center",
+    // fontStyle: "italic",
+    marginBottom: 10,
+  },
 
-dailyButton: {
-  backgroundColor: Colors.Colors.App_theme,
-  paddingVertical: 6,
-  paddingHorizontal: 16,
-  borderRadius: 8,
-},
+  dailyButton: {
+    backgroundColor: Colors.Colors.App_theme,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+  },
 
-dailyButtonText: {
-  color: Colors.Colors.white,
-  fontWeight: "700",
-  fontSize: 14,
-},
+  dailyButtonText: {
+    color: Colors.Colors.white,
+    fontWeight: "700",
+    fontSize: 14,
+  },
 });

@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import Colors from "./Colors";
 import FontSize from "./FontSize";
 import TextComponent from "./TextComponent";
+import { getTranslatedPractice } from "../utils/getTranslatedPractice";
 
 interface SimpleSankalpCardProps {
     sankalp: any;
@@ -18,16 +19,17 @@ const SimpleSankalpCard: React.FC<SimpleSankalpCardProps> = ({
     onMarkDone,
 }) => {
     const { t } = useTranslation();
+    const translated = getTranslatedPractice(sankalp, t);
 
     return (
         <Card style={styles.card}>
             <View style={styles.content}>
                 <TextComponent type="semiBoldText" style={styles.header}>
-                Today's Sankalp
+                    {t("home.todaysSankalp", { defaultValue: "Today's Sankalp" })}
                 </TextComponent>
 
                 <TextComponent type="cardText" style={styles.text}>
-                    {t(sankalp?.i18n?.short) || sankalp?.short_text}
+                    {translated.name || t(sankalp?.i18n?.short) || sankalp?.short_text}
                 </TextComponent>
 
                 <TouchableOpacity

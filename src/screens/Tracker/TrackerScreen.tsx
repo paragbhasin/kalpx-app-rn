@@ -244,13 +244,8 @@ const TrackerScreen = () => {
 
                   <TouchableOpacity
                     onPress={() => {
-                      // Scroll to top first
-                      scrollViewRef.current?.scrollTo({ y: 0, animated: true });
-                      // Small delay to let scroll complete before showing card
-                      setTimeout(() => {
-                        setSelectedPractice({ ...fullObj, rawItem: item });
-                        setShowInfo(true);
-                      }, 100);
+                      setSelectedPractice({ ...fullObj, rawItem: item });
+                      setShowInfo(true);
                     }}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   >

@@ -20,10 +20,8 @@ import FontSize from "../../components/FontSize";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 import LoadingOverlay from "../../components/LoadingOverlay";
-import MantraCard from "../../components/MantraCard";
-import SankalpCard from "../../components/SankalpCard";
-import DailyPracticeDetailsCard from "../../components/DailyPracticeDetailsCard";
 import ShimmerPlaceholder from "../../components/ShimmerPlaceholder";
+import PracticeDetailNavigator from "../../components/PracticeDetailNavigator";
 import TextComponent from "../../components/TextComponent";
 import { useUserLocation } from "../../components/useUserLocation";
 import { RootState } from "../../store";
@@ -101,7 +99,7 @@ const TrackerScreen = () => {
                   > */}
       <Animated.ScrollView
         ref={scrollViewRef}
-        contentContainerStyle={{ marginHorizontal: 10, paddingBottom:150 }}
+        contentContainerStyle={{ marginHorizontal: 10, paddingBottom: 150 }}
         showsVerticalScrollIndicator={false}
         onScroll={handleScroll}
         scrollEventThrottle={16}
@@ -395,139 +393,12 @@ const TrackerScreen = () => {
 
       {/* Card Overlays - Rendered outside ScrollView for full screen coverage */}
       <LoadingOverlay visible={fetchLoading} text={t("sadanaTracker.submitting")} />
-      {showInfo && selectedPractice && (() => {
-        const raw = selectedPractice?.rawItem || selectedPractice;
-        const item = selectedPractice;
-        const category = raw?.category || item?.category;
-        const practiceId = raw?.practice_id || item?.practice_id || item?.id;
-
-        // Check if this is a daily-mantra or daily-sankalp (matching TrackerEdit.tsx logic exactly)
-        if (category === "daily-mantra") {
-          return (
-            <View
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: "#FFFFFF",
-                zIndex: 999,
-                flex: 1,
-              }}
-            >
-              <View style={{ paddingHorizontal: 16, paddingTop: 10 }}>
-                <Ionicons
-                  name="arrow-back"
-                  size={26}
-                  color="#000"
-                  onPress={() => setShowInfo(false)}
-                />
-              </View>
-
-              <ScrollView
-                style={{ flex: 1, marginTop: 10 }}
-                contentContainerStyle={{ paddingBottom: 20 }}
-                showsVerticalScrollIndicator={false}
-              >
-                <MantraCard
-                  practiceTodayData={{
-                    started: { mantra: true },
-                    ids: { mantra: practiceId }
-                  }}
-                  onPressChantMantra={() => { }}
-                  DoneMantraCalled={() => { }}
-                  viewOnly={true}
-                />
-              </ScrollView>
-            </View>
-          );
-        }
-
-        if (category === "daily-sankalp") {
-          return (
-            <View
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: "#FFFFFF",
-                zIndex: 999,
-                flex: 1,
-              }}
-            >
-              <View style={{ paddingHorizontal: 16, paddingTop: 10 }}>
-                <Ionicons
-                  name="arrow-back"
-                  size={26}
-                  color="#000"
-                  onPress={() => setShowInfo(false)}
-                />
-              </View>
-
-              <ScrollView
-                style={{ flex: 1, marginTop: 10 }}
-                contentContainerStyle={{ paddingBottom: 20 }}
-                showsVerticalScrollIndicator={false}
-              >
-                <SankalpCard
-                  practiceTodayData={{
-                    started: { sankalp: true },
-                    ids: { sankalp: (() => { console.log("✅ TrackerScreen Sankalp ID:", practiceId); return practiceId; })() }
-                  }}
-                  onPressStartSankalp={() => { }}
-                  onCompleteSankalp={() => { }}
-                  viewOnly={true}
-                />
-              </ScrollView>
-            </View>
-          );
-        }
-
-        // Default: show DailyPracticeDetailsCard for all other practices
-        return (
-          <View
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              backgroundColor: "#FFFFFF",
-              zIndex: 999,
-              flex: 1,
-            }}
-          >
-            <View style={{ paddingHorizontal: 16, paddingTop: 10 }}>
-              <Ionicons
-                name="arrow-back"
-                size={26}
-                color="#000"
-                onPress={() => setShowInfo(false)}
-              />
-            </View>
-
-            <ScrollView
-              style={{ flex: 1, marginTop: 10 }}
-              contentContainerStyle={{ flexGrow: 1, alignItems: 'center', paddingBottom: 20 }}
-              showsVerticalScrollIndicator={false}
-            >
-              <DailyPracticeDetailsCard
-                mode="view"
-                data={item}
-                item={{ name: category || "Practice", key: category }}
-                onChange={() => { }}
-                onBackPress={() => setShowInfo(false)}
-                isLocked={true}
-                selectedCount={null}
-                onSelectCount={() => { }}
-              />
-            </ScrollView>
-          </View>
-        );
-      })()}
+      {showInfo && selectedPractice && (
+        <PracticeDetailNavigator
+          selectedPractice={selectedPractice}
+          onClose={() => setShowInfo(false)}
+        />
+      )}
     </SafeAreaView>
   );
 };

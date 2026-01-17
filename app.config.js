@@ -6,14 +6,14 @@ if (IS_EAS_BUILD) {
   if (process.env.GOOGLE_SERVICE_INFO_PLIST) {
     fs.writeFileSync(
       "./GoogleService-Info.plist",
-      Buffer.from(process.env.GOOGLE_SERVICE_INFO_PLIST, "base64")
+      Buffer.from(process.env.GOOGLE_SERVICE_INFO_PLIST, "base64"),
     );
   }
 
   if (process.env.GOOGLE_SERVICES_JSON) {
     fs.writeFileSync(
       "./google-services.json",
-      Buffer.from(process.env.GOOGLE_SERVICES_JSON, "base64")
+      Buffer.from(process.env.GOOGLE_SERVICES_JSON, "base64"),
     );
   }
 }
@@ -22,7 +22,7 @@ module.exports = {
   expo: {
     name: "kalpx",
     slug: "kalpx",
-    version: "1.1.17",
+    version: "1.1.18",
     orientation: "portrait",
     icon: "./assets/AppIconImg.png",
     scheme: "kalpx",

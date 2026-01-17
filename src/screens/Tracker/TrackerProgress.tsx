@@ -255,7 +255,7 @@ const TrackerProgress = () => {
                   }}
                 >
                   <TextComponent type="semiBoldText" style={{ color: isDisabled ? "#616161" : Colors.Colors.white }}>
-                    {dayName}
+                    {t(`common.shortDays.${moment(dateKey).format("ddd").toLowerCase()}`)}
                   </TextComponent>
                 </TouchableOpacity>
               );
@@ -288,11 +288,9 @@ const TrackerProgress = () => {
               </TextComponent>
             </View>
             <TextComponent type="subDailyText" style={{ color: "#000000", marginTop: 6, alignSelf: "center" }} >{t("sadanaTracker.selectedDateLabel")}{" "}{moment(selectedDate).format("DD MMM YYYY")}</TextComponent>
-            <TextComponent type="subDailyText" style={{ color: "#000000", marginTop: 6, textDecorationLine: "underline", paddingBottom: 4, alignSelf: "center" }} >Today:{" "}{moment(selectedDate).format("DD MMM YYYY")}</TextComponent>
+            <TextComponent type="subDailyText" style={{ color: "#000000", marginTop: 6, textDecorationLine: "underline", paddingBottom: 4, alignSelf: "center" }} >{t("common.today")}:{" "}{moment(selectedDate).format("DD MMM YYYY")}</TextComponent>
           </View>
-          <View style={{ backgroundColor: "#FDF5E9", borderColor: "#000000", borderWidth: 0.5, alignSelf: "center", padding: 4, margin: 4, borderRadius: 6 }}>
-            <TextComponent type="streakSadanaText">{moment().format("MMMM")}</TextComponent>
-          </View>
+
           <View
             style={{
               flexDirection: "row",
@@ -301,7 +299,7 @@ const TrackerProgress = () => {
               marginTop: 10,
             }}
           >
-            {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+            {["sun", "mon", "tue", "wed", "thu", "fri", "sat"].map((day) => (
               <View
                 key={day}
                 style={{
@@ -317,7 +315,7 @@ const TrackerProgress = () => {
                 }}
               >
                 <TextComponent type="subDailyText" style={{ color: "#000", fontWeight: "600" }}>
-                  {day}
+                  {t(`common.shortDays.${day}`)}
                 </TextComponent>
               </View>
             ))}
@@ -405,7 +403,7 @@ const TrackerProgress = () => {
           }}
           onClose={() => setShowPractiseModal(false)}
         />
-        <LoadingOverlay visible={fetchLoading} text="Submitting..." />
+        <LoadingOverlay visible={fetchLoading} text={t("common.submitting")} />
       </Animated.ScrollView>
       {/* </ImageBackground> */}
     </SafeAreaView>

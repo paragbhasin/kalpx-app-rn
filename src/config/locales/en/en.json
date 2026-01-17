@@ -268,7 +268,17 @@
     "yes": "Yes",
     "delete": "Delete",
     "confirm": "Confirm",
-    "submitting": "Submitting..."
+    "submitting": "Submitting...",
+    "today": "Today",
+    "shortDays": {
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat"
+    }
   },
   "explore": {
     "title": "Explore Videos",
@@ -822,8 +832,8 @@
     "saveRoutine": "Save my routine",
     "saveRoutineNotice": "Your updated routine will reflect from tomorrow morning",
     "sankalpTitle": "Sankalp",
-    "mantraTitle": "Mantra",
     "practiceTitle": "Practice",
+    "mantraTitle": "Mantra",
     "addedTag": "Added",
     "sankalpLabel": "Sankalp:",
     "sanatanPracticeTitle": "Sanatan Practice",

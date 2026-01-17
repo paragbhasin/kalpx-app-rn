@@ -631,7 +631,7 @@ const styles = StyleSheet.create({
     width: FontSize.CONSTS.DEVICE_WIDTH * 0.92,
     borderWidth: 1,
     borderColor: Colors.Colors.App_theme,
-    height: "92%",
+    height: "105%",
     marginTop: 10,
     overflow: "hidden",
   },

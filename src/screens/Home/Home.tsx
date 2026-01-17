@@ -1040,13 +1040,35 @@ export default function Home() {
               style={styles.image}
               resizeMode="contain"
             >
-              <TextComponent type="cardText" style={[styles.label, styles.leftLabel]}>
-                {t("dailyPracticeList.categories.peace-calm.name").replace(" & ", "\n& ")}
+              <TextComponent type="semiBoldBlackText" style={[styles.label, styles.leftLabel]} numberOfLines={2}>
+                {t("dailyPracticeList.categories.peace-calm.name")
+                  .replace(" & ", "\n& ")
+                  .replace(" और ", "\nऔर ")
+                  .replace(" आणि ", "\nआणि ")
+                  .replace(" மற்றும் ", "\nமற்றும் ")
+                  .replace(" మరియు ", "\nమరియు ")
+                  .replace(" ಮತ್ತು ", "\nಮತ್ತು ")
+                  .replace(" യും ", "\nയും ")
+                  .replace(" এবং ", "\nএবং ")
+                  .replace(" અને ", "\nઅને ")
+                  .replace(" ଏବଂ ", "\nଏବଂ ")
+                  }
               </TextComponent>
-              <TextComponent type="cardText" style={[styles.label, styles.centerLabel]}>
-                {t("dailyPracticeList.categories.career.name").replace(" & ", "\n& ")}
+              <TextComponent type="semiBoldBlackText" style={[styles.label, styles.centerLabel]} numberOfLines={2}>
+                {t("dailyPracticeList.categories.career.name")
+                  .replace(" & ", "\n& ")
+                  .replace(" और ", "\nऔर ")
+                  .replace(" आणि ", "\nआणि ")
+                  .replace(" மற்றும் ", "\nமற்றும் ")
+                  .replace(" మరియు ", "\nమరియు ")
+                  .replace(" ಮತ್ತು ", "\nಮತ್ತು ")
+                  .replace(" യും ", "\nയും ")
+                  .replace(" এবং ", "\nএবং ")
+                  .replace(" અને ", "\nઅને ")
+                  .replace(" ଏବଂ ", "\nଏବଂ ")
+                  }
               </TextComponent>
-              <TextComponent type="cardText" style={[styles.label, styles.rightLabel]}>
+              <TextComponent type="semiBoldBlackText" style={[styles.label, styles.rightLabel]} numberOfLines={2}>
                 {t("dailyPracticeList.categories.spiritual-growth.name").replace(" ", "\n")}
               </TextComponent>
             </ImageBackground>

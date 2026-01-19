@@ -874,7 +874,7 @@ const TrackerEdit = ({ route }) => {
     if (!showDetails) return null;
 
     const raw = detailsList[detailsIndex];
-    const item = getRawPracticeObject(raw?.practice_id, raw);
+    const { data: item } = getRawPracticeObject(raw?.practice_id, raw);
     const category = raw?.category || item?.category;
 
     const nextItem = () => {
@@ -1428,7 +1428,7 @@ const TrackerEdit = ({ route }) => {
                         isSelected={false}
                         onToggleSelect={() => { }}
                         onPress={() => {
-                          const fullData = getRawPracticeObject(
+                          const { data: fullData } = getRawPracticeObject(
                             item.practice_id,
                             item
                           );
@@ -1488,7 +1488,7 @@ const TrackerEdit = ({ route }) => {
                             isSelected={false}
                             onToggleSelect={() => { }}
                             onPress={() => {
-                              const fullData = getRawPracticeObject(
+                              const { data: fullData } = getRawPracticeObject(
                                 item.practice_id,
                                 item
                               );

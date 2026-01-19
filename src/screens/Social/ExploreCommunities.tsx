@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     View,
     Text,
@@ -16,6 +17,7 @@ import styles from "./ExploreCommunitiesStyles";
 import { useNavigation } from "@react-navigation/native";
 
 const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) => {
+    const { t } = useTranslation();
     const dispatch = useDispatch();
     const navigation = useNavigation<any>();
     const [activeTab, setActiveTab] = useState<"all" | "followed">("all");
@@ -93,7 +95,7 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
                 >
                     <Text style={styles.communityName}>{item.name}</Text>
                     <Text style={styles.visitorCount}>
-                        {item.weekly_visitors || Math.floor(Math.random() * 50 + 50)}k weekly visitors
+                        {t("community.weeklyVisitors", { count: item.weekly_visitors || Math.floor(Math.random() * 50 + 50) })}
                     </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -122,7 +124,7 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
                             const cId = c.id?.toString();
                             const itemId = (item.id || item.community_id || item.community)?.toString();
                             return (cSlug && itemSlug && cSlug === itemSlug) || (cId && itemId && cId === itemId);
-                        })) ? "Joined" : "Join"}
+                        })) ? t("community.joined") : t("community.join")}
                     </Text>
                 </TouchableOpacity>
 
@@ -177,6 +179,7 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
                                         ]}
                                     >
                                         All
+                                        {t("community.tabs.all")}
                                     </Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
@@ -190,12 +193,13 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
                                         ]}
                                     >
                                         Followed by me
+                                        {t("community.tabs.followed")}
                                     </Text>
                                 </TouchableOpacity>
                             </View>
 
                             <Text style={styles.sectionTitle}>
-                                {activeTab === "all" ? "Recommended for you" : "Communities you follow"}
+                                {activeTab === "all" ? t("community.sections.recommended") : t("community.sections.following")}
                             </Text>
                         </>
                     }
@@ -231,6 +235,7 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
                                         ]}
                                     >
                                         All
+                                        {t("community.tabs.all")}
                                     </Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
@@ -244,12 +249,13 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
                                         ]}
                                     >
                                         Followed by me
+                                        {t("community.tabs.followed")}
                                     </Text>
                                 </TouchableOpacity>
                             </View>
 
                             <Text style={styles.sectionTitle}>
-                                {activeTab === "all" ? "Recommended for you" : "Communities you follow"}
+                                {activeTab === "all" ? t("community.sections.recommended") : t("community.sections.following")}
                             </Text>
                         </>
                     }
@@ -257,8 +263,8 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
                         <View style={styles.emptyContainer}>
                             <Text style={styles.emptyText}>
                                 {activeTab === "followed"
-                                    ? "You haven't followed any communities yet."
-                                    : "No communities found."}
+                                    ? t("community.empty.noFollowed")
+                                    : t("community.empty.noResults")}
                             </Text>
                         </View>
                     }

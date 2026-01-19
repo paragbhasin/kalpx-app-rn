@@ -133,6 +133,7 @@ const FeedScreen = ({ onScroll }: { onScroll?: (event: any) => void }) => {
     );
 
     const Footer = () => {
+        const { t } = useTranslation();
         if (loadingMore) {
             return <ActivityIndicator style={{ padding: 20 }} size="small" color="#D69E2E" />;
         }
@@ -158,7 +159,6 @@ const FeedScreen = ({ onScroll }: { onScroll?: (event: any) => void }) => {
             {/* If you want a header here, include it */}
 
             <FlatList
-                key={`feed-${posts.length}`}
                 data={posts}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id.toString()}

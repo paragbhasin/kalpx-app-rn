@@ -115,7 +115,7 @@ const SubmitDailyPracticesScreen = ({ route }) => {
   const renderDetailsCard = () => {
     if (!showDetails || !detailsItem) return null;
 
-    const item = getRawPracticeObject(
+    const { data: item } = getRawPracticeObject(
       detailsItem.practice_id,
       detailsItem
     );

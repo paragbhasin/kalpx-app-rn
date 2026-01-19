@@ -52,7 +52,7 @@ interface SocialPostCardProps {
     isVisible?: boolean;
 }
 
-const getLinkedItemText = (linkedItem: any) => {
+const getLinkedItemText = (linkedItem: any, t: any) => {
     if (!linkedItem || !linkedItem.type) return "";
 
     const typeParts = linkedItem.type.split(":");
@@ -64,19 +64,19 @@ const getLinkedItemText = (linkedItem: any) => {
 
     if (itemType === "mantra") {
         return isGeneral
-            ? "Do this mantra today - let intention become action"
-            : `Add this to your daily practice - progress happens gently`;
+            ? t("community.post.linkedMantraGeneral")
+            : t("community.post.linkedPracticeSpecific");
     } else if (itemType === "sankalp") {
         return isGeneral
-            ? "Take this sankalp today - shape your inner resolve"
-            : `Add this to your daily practice -  progress happens gently`;
+            ? t("community.post.linkedSankalpGeneral")
+            : t("community.post.linkedSankalpSpecific");
     } else if (itemType === "practice") {
         return isGeneral
-            ? "Add this to your daily practice - progress happens gently"
-            : `Add this to your daily practice - progress happens gently`;
+            ? t("community.post.linkedPracticeGeneral")
+            : t("community.post.linkedPracticeSpecific");
     }
 
-    return "Add this to your daily practice - progress happens gently";
+    return t("community.post.linkedPracticeSpecific");
 };
 
 const SocialPostCard: React.FC<SocialPostCardProps> = ({
@@ -95,7 +95,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     onReport,
     isVisible,
 }) => {
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
     const navigation: any = useNavigation();
     const route = useRoute();
 
@@ -319,21 +319,13 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     };
 
     const handleLinkedItemPress = () => {
-        if (!post.linked_item || !post.linked_item.type || !post.linked_item.id) return;
+        if (!post.linked_item || !post.linked_item.id) return;
 
-        const { type, id } = post.linked_item;
-        const practiceData = getRawPracticeObject(id, post.linked_item);
+        const { id } = post.linked_item;
+        const { data: practiceData, type: resolvedType } = getRawPracticeObject(id, post.linked_item);
 
         setSelectedLinkedPractice(practiceData);
-
-        if (type.includes("mantra")) {
-            setLinkedCardType('mantra');
-        } else if (type.includes("sankalp")) {
-            setLinkedCardType('sankalp');
-        } else {
-            setLinkedCardType('practice');
-        }
-
+        setLinkedCardType(resolvedType);
         setShowLinkedDetail(true);
     };
 
@@ -433,7 +425,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                     </View>
                     <View>
                         <Text style={styles.communityName}>
-                            {translatedCommunityName || "Community Name"}
+                            {translatedCommunityName || t("community.defaultCommunityName")}
                         </Text>
                         <Text style={styles.timeAgo}>{timeAgo}</Text>
                     </View>
@@ -446,7 +438,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                             onPress={onJoin}
                         >
                             <Text style={[styles.joinButtonText, post.is_joined && styles.joinedText]}>
-                                {post.is_joined ? "Joined" : "Join"}
+                                {post.is_joined ? t("community.joined") : t("community.join")}
                             </Text>
                         </TouchableOpacity>
                     )}
@@ -474,7 +466,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                             >
                                 <Ionicons name={post.is_saved ? "bookmark" : "bookmark-outline"} size={20} color={post.is_saved ? "#D69E2E" : "#333"} />
                                 <Text style={[styles.menuItemText, post.is_saved && { color: "#D69E2E" }]}>
-                                    {post.is_saved ? "Saved" : "Save"}
+                                    {post.is_saved ? t("community.postMenu.unsave") : t("community.postMenu.save")}
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
@@ -485,7 +477,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                                 }}
                             >
                                 <Ionicons name="eye-off-outline" size={20} color="#333" />
-                                <Text style={styles.menuItemText}>Hide</Text>
+                                <Text style={styles.menuItemText}>{t("community.postMenu.hide")}</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={[styles.menuItem, { borderBottomWidth: 0 }]}
@@ -495,7 +487,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                                 }}
                             >
                                 <Ionicons name="flag-outline" size={20} color="#FF3B30" />
-                                <Text style={[styles.menuItemText, { color: "#FF3B30" }]}>Report</Text>
+                                <Text style={[styles.menuItemText, { color: "#FF3B30" }]}>{t("community.postMenu.report")}</Text>
                             </TouchableOpacity>
                         </View>
                     </>
@@ -517,20 +509,24 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
             {/* Carousel or Single Image */}
             {imagesData.length > 0 && (
                 <View style={{ height: imageHeight, width: MEDIA_WIDTH, marginHorizontal: MEDIA_MARGIN, marginTop: 4, borderRadius: 16, overflow: 'hidden' }}>
-                    <Carousel
-                        loop={false}
-                        width={MEDIA_WIDTH}
-                        height={imageHeight}
-                        data={imagesData}
-                        scrollAnimationDuration={1000}
-                        onSnapToItem={(index) => {
-                            setActiveIndex(index);
-                            if (!loadedIndices.includes(index)) {
-                                setLoadedIndices(prev => [...prev, index]);
-                            }
-                        }}
-                        renderItem={renderCarouselItem}
-                    />
+                    {imagesData.length > 1 ? (
+                        <Carousel
+                            loop={false}
+                            width={MEDIA_WIDTH}
+                            height={imageHeight}
+                            data={imagesData}
+                            scrollAnimationDuration={1000}
+                            onSnapToItem={(index) => {
+                                setActiveIndex(index);
+                                if (!loadedIndices.includes(index)) {
+                                    setLoadedIndices(prev => [...prev, index]);
+                                }
+                            }}
+                            renderItem={renderCarouselItem}
+                        />
+                    ) : (
+                        renderCarouselItem({ item: imagesData[0], index: 0 })
+                    )}
                     {/* Dot Indicators - Reddit Style */}
                     {imagesData.length > 1 && (
                         <View style={styles.paginationContainer}>
@@ -564,7 +560,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                     </Text>
                     {shouldTruncate && (
                         <TouchableOpacity onPress={() => setIsExpanded(!isExpanded)}>
-                            <Text style={styles.showMore}>{isExpanded ? "Show less" : "Show more"}</Text>
+                            <Text style={styles.showMore}>{isExpanded ? t("community.post.showLess") : t("community.post.showMore")}</Text>
                         </TouchableOpacity>
                     )}
                 </View>
@@ -587,7 +583,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                             </Text>
                         </View>
                         <Text style={styles.linkedItemSubtitle}>
-                            {getLinkedItemText(post.linked_item)}
+                            {getLinkedItemText(post.linked_item, t)}
                         </Text>
                     </View>
                 </TouchableOpacity>
@@ -648,14 +644,14 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
 
                     <TouchableOpacity style={styles.pillButton} onPress={handleShare}>
                         <Ionicons name="share-social-outline" size={18} color="#666" />
-                         <Text style={styles.pillButtonText}>{shareCount}</Text>
+                        <Text style={styles.pillButtonText}>{shareCount}</Text>
 
                     </TouchableOpacity>
                 </View>
 
                 <TouchableOpacity style={styles.askButton} onPress={onAskQuestion}>
                     <Ionicons name="help-circle-outline" size={20} color="#333" />
-                    <Text style={styles.askButtonText}>Ask question</Text>
+                    <Text style={styles.askButtonText}>{t("community.post.askQuestion")}</Text>
                 </TouchableOpacity>
             </View>
 

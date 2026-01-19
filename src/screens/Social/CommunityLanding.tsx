@@ -3,6 +3,7 @@ import { SafeAreaView, StatusBar, StyleSheet, Text, TouchableOpacity, View, Scro
 import { Image } from "expo-image";
 import { Dropdown } from "react-native-element-dropdown";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 
@@ -25,6 +26,7 @@ import { Animated } from "react-native";
 import { COMMUNITY_BACKGROUNDS } from "../../utils/CommunityAssets";
 
 const CommunityLanding = () => {
+    const { t } = useTranslation();
     const { handleScroll, headerY } = useScrollContext();
     const navigation = useNavigation<any>();
     const dispatch = useDispatch();
@@ -40,16 +42,16 @@ const CommunityLanding = () => {
     const dropdownRef = useRef<any>(null);
 
     const categories = [
-        { label: "Home", value: "Home" },
-        { label: "Top", value: "Top" }, // Renders SocialExplore
-        { label: "Popular", value: "Popular" },
-        { label: "Explore", value: "Explore" },
-                { label: "Your Activity", value: "yourActivity" },
-        { label: "Communities", value: "Communities" },
-        { label: "KalpX Rules", value: "kalpxRules" },
-        { label: "Privacy Policy", value: "privacyPolicy" },
-        { label: "User agreements", value: "userAgreements" },
-        { label: "About KalpX", value: "aboutKalpx" },
+        { label: t("communityLanding.sections.home"), value: "Home" },
+        { label: t("communityLanding.sections.top"), value: "Top" }, // Renders SocialExplore
+        { label: t("communityLanding.sections.popular"), value: "Popular" },
+        { label: t("communityLanding.sections.explore"), value: "Explore" },
+        { label: t("communityLanding.sections.yourActivity"), value: "yourActivity" },
+        { label: t("communityLanding.sections.communities"), value: "Communities" },
+        { label: t("communityLanding.sections.kalpxRules"), value: "kalpxRules" },
+        { label: t("communityLanding.sections.privacyPolicy"), value: "privacyPolicy" },
+        { label: t("communityLanding.sections.userAgreements"), value: "userAgreements" },
+        { label: t("communityLanding.sections.aboutKalpx"), value: "aboutKalpx" },
 
 
     ];
@@ -77,7 +79,7 @@ const CommunityLanding = () => {
                         </TouchableOpacity>
                         <TextInput
                             style={styles.searchInput}
-                            placeholder="Search communities, posts, users..."
+                            placeholder={t("communityLanding.header.searchPlaceholder")}
                             value={searchQuery}
                             onChangeText={setSearchQuery}
                             autoFocus
@@ -91,7 +93,7 @@ const CommunityLanding = () => {
                 ) : (
                     <>
                         {/* Title */}
-                        <Text style={styles.headerTitle}>Community</Text>
+                        <Text style={styles.headerTitle}>{t("communityLanding.header.title")}</Text>
 
                         {/* Dropdown */}
                         <Dropdown
@@ -121,7 +123,7 @@ const CommunityLanding = () => {
                                     <>
                                         {isAfterExplore && followed_communities?.data?.length > 0 && (
                                             <View>
-                                                <Text style={styles.dropdownSectionHeader}>RECENT</Text>
+                                                <Text style={styles.dropdownSectionHeader}>{t("communityLanding.dropdown.recent")}</Text>
                                                 {followed_communities.data.slice(0, 5).map((community: any, index: number) => (
                                                     <TouchableOpacity
                                                         key={`recent-${index}`}
@@ -142,12 +144,12 @@ const CommunityLanding = () => {
                                                 ))}
                                             </View>
                                         )}
-                                             {isYourActivity && (
+                                        {isYourActivity && (
                                             <View>
-                                                <Text style={styles.dropdownSectionHeader}>YOUR ACTIVITY</Text>
+                                                <Text style={styles.dropdownSectionHeader}>{t("communityLanding.dropdown.yourActivity")}</Text>
                                             </View>
                                         )}
-                                   
+
                                         {item.value === "Communities" && (
                                             <View>
                                                 <Text style={styles.dropdownSectionHeader}>RESOURCES</Text>
@@ -216,50 +218,40 @@ const CommunityLanding = () => {
     const renderKalpxRules = () => (
         <ScrollView style={styles.rulesContainer} showsVerticalScrollIndicator={false}>
             <View style={styles.rulesContent}>
-                <Text style={styles.mainHeading}>KalpX Community Rules</Text>
+                <Text style={styles.mainHeading}>{t("communityLanding.rules.title")}</Text>
 
                 <View style={styles.ruleItem}>
-                    <Text style={styles.ruleTitle}>1. Respect for Dharma (Righteousness)</Text>
+                    <Text style={styles.ruleTitle}>{t("communityLanding.rules.rule1.title")}</Text>
                     <Text style={styles.normalText}>
-                        We uphold truth, compassion, and non-violence (Ahimsa) in all our
-                        interactions. Speak with kindness and integrity. Adhere to the
-                        principles of Dharma in your conduct within the community.
+                        {t("communityLanding.rules.rule1.text")}
                     </Text>
                 </View>
 
                 <View style={styles.ruleItem}>
-                    <Text style={styles.ruleTitle}>2. Authenticity of Scripture</Text>
+                    <Text style={styles.ruleTitle}>{t("communityLanding.rules.rule2.title")}</Text>
                     <Text style={styles.normalText}>
-                        When discussing Shastras, Vedas, Puranas, or other sacred texts,
-                        please cite your sources respectfully and accurately. Misleading
-                        interpretations or fabricating information is discouraged.
+                        {t("communityLanding.rules.rule2.text")}
                     </Text>
                 </View>
 
                 <View style={styles.ruleItem}>
-                    <Text style={styles.ruleTitle}>3. No Hate Speech or Adharmic Conduct</Text>
+                    <Text style={styles.ruleTitle}>{t("communityLanding.rules.rule3.title")}</Text>
                     <Text style={styles.normalText}>
-                        We have zero tolerance for malice, blasphemy, discrimination, or
-                        intent to harm others. Any speech that spreads hatred or division
-                        is considered Adharmic and will be removed.
+                        {t("communityLanding.rules.rule3.text")}
                     </Text>
                 </View>
 
                 <View style={styles.ruleItem}>
-                    <Text style={styles.ruleTitle}>4. Constructive Debate (Shastrartha)</Text>
+                    <Text style={styles.ruleTitle}>{t("communityLanding.rules.rule4.title")}</Text>
                     <Text style={styles.normalText}>
-                        Debates should be grounded in the spirit of Jigyasa (seeking
-                        truth), not Ahankara (ego). Engage in discussions to learn and
-                        share knowledge, not to prove superiority.
+                        {t("communityLanding.rules.rule4.text")}
                     </Text>
                 </View>
 
                 <View style={styles.ruleItem}>
-                    <Text style={styles.ruleTitle}>5. Respect for Deities and Gurus</Text>
+                    <Text style={styles.ruleTitle}>{t("communityLanding.rules.rule5.title")}</Text>
                     <Text style={styles.normalText}>
-                        Maintain reverence when speaking of Deities, Gurus, and spiritual
-                        teachers. Constructive discussion is welcome, but disrespect is
-                        not tolerated.
+                        {t("communityLanding.rules.rule5.text")}
                     </Text>
                 </View>
 
@@ -272,10 +264,10 @@ const CommunityLanding = () => {
                             resizeMode="contain"
                         />
                         <Text style={styles.quoteText}>
-                            "Dharmo Rakshati Rakshitah"
+                            {t("communityLanding.rules.quote")}
                         </Text>
                         <Text style={styles.quoteTranslation}>
-                            Dharma protects those who protect it.
+                            {t("communityLanding.rules.quoteTranslation")}
                         </Text>
                     </View>
                 </View>
@@ -286,52 +278,40 @@ const CommunityLanding = () => {
     const renderPrivacyPolicy = () => (
         <ScrollView style={styles.rulesContainer} showsVerticalScrollIndicator={false}>
             <View style={styles.rulesContent}>
-                <Text style={styles.mainHeading}>Privacy Policy</Text>
+                <Text style={styles.mainHeading}>{t("communityLanding.privacy.title")}</Text>
 
                 <View style={styles.ruleItem}>
-                    <Text style={styles.ruleTitle}>1. Sanctity of Your Data</Text>
+                    <Text style={styles.ruleTitle}>{t("communityLanding.privacy.section1.title")}</Text>
                     <Text style={styles.normalText}>
-                        We consider your personal sadhana data, journal entries, and
-                        spiritual progress as sacred and private. We treat your
-                        information with the highest level of confidentiality and respect.
+                        {t("communityLanding.privacy.section1.text")}
                     </Text>
                 </View>
 
                 <View style={styles.ruleItem}>
-                    <Text style={styles.ruleTitle}>2. Data Collection</Text>
+                    <Text style={styles.ruleTitle}>{t("communityLanding.privacy.section2.title")}</Text>
                     <Text style={styles.normalText}>
-                        We collect minimal data necessary to provide you with a
-                        personalized spiritual experience. This includes your username,
-                        email (for account recovery), and your interactions within the
-                        community to improve content recommendations.
+                        {t("communityLanding.privacy.section2.text")}
                     </Text>
                 </View>
 
                 <View style={styles.ruleItem}>
-                    <Text style={styles.ruleTitle}>3. Usage of Information</Text>
+                    <Text style={styles.ruleTitle}>{t("communityLanding.privacy.section3.title")}</Text>
                     <Text style={styles.normalText}>
-                        Your data is used solely to enhance your journey on KalpX. We do
-                        not sell your personal information to third-party advertisers. We
-                        believe your spiritual growth is not a product.
+                        {t("communityLanding.privacy.section3.text")}
                     </Text>
                 </View>
 
                 <View style={styles.ruleItem}>
-                    <Text style={styles.ruleTitle}>4. Third-Party Services</Text>
+                    <Text style={styles.ruleTitle}>{t("communityLanding.privacy.section4.title")}</Text>
                     <Text style={styles.normalText}>
-                        We may use trusted third-party services for hosting, analytics,
-                        and communication. These partners are bound by strict
-                        confidentiality agreements and are only provided with data
-                        necessary to perform their functions.
+                        {t("communityLanding.privacy.section4.text")}
                     </Text>
                 </View>
 
                 <View style={styles.ruleItem}>
-                    <Text style={styles.ruleTitle}>5. Security</Text>
+                    <Text style={styles.ruleTitle}>{t("communityLanding.privacy.section5.title")}</Text>
                     <Text style={styles.normalText}>
-                        We employ industry-standard security measures to protect your data
-                        from unauthorized access, alteration, or disclosure. However, no
-                        method of transmission over the internet is 100% secure.
+                        {t("communityLanding.privacy.section5.text")}
                     </Text>
                 </View>
 
@@ -344,13 +324,9 @@ const CommunityLanding = () => {
         <ScrollView style={styles.aboutKalpxContainer} showsVerticalScrollIndicator={false}>
             {/* HERO SECTION */}
             <View style={styles.aboutHero}>
-                <Text style={styles.aboutHeroHeading}>The heart of your inner journey</Text>
+                <Text style={styles.aboutHeroHeading}>{t("communityLanding.about.heroHeading")}</Text>
                 <Text style={styles.aboutHeroText}>
-                    KalpX is home to countless paths for personal growth, mindful
-                    practices, and genuine self-discovery. Whether you’re exploring
-                    meditation, building inner resilience, seeking clarity in your
-                    career, or simply nurturing calm in daily life, there’s a guided
-                    journey on KalpX for you.
+                    {t("communityLanding.about.heroText")}
                 </Text>
                 <Image
                     source={require("../../../assets/about-kalpx3.png")}
@@ -361,10 +337,9 @@ const CommunityLanding = () => {
 
             {/* POST SECTION */}
             <View style={styles.sectionContainer}>
-                <Text style={styles.sectionHeading}>Post</Text>
+                <Text style={styles.sectionHeading}>{t("communityLanding.about.postTitle")}</Text>
                 <Text style={styles.sectionText}>
-                    The Community can share content by posting stories, links, image, and
-                    Videos.
+                    {t("communityLanding.about.postText")}
                 </Text>
                 <View style={styles.imageContainer}>
                     <Image
@@ -377,10 +352,9 @@ const CommunityLanding = () => {
 
             {/* COMMENT SECTION */}
             <View style={styles.sectionContainer}>
-                <Text style={styles.sectionHeading}>Comment</Text>
+                <Text style={styles.sectionHeading}>{t("communityLanding.about.commentTitle")}</Text>
                 <Text style={styles.sectionText}>
-                    The Community can share content by posting stories, links, images, and
-                    videos.
+                    {t("communityLanding.about.commentText")}
                 </Text>
                 <View style={styles.phoneContainer}>
                     <View style={styles.phoneWrapper}>
@@ -393,11 +367,11 @@ const CommunityLanding = () => {
 
                         {/* Floating Comments */}
                         <View style={[styles.commentBubble, styles.leftComment]}>
-                            <Text style={styles.commentText}>I Like the fact that everyone is here is so spiritual</Text>
+                            <Text style={styles.commentText}>{t("communityLanding.about.commentBubble1")}</Text>
                         </View>
 
                         <View style={[styles.commentBubble, styles.rightComment]}>
-                            <Text style={styles.commentText}>Pure devotion, pure strength. This story never fails to touch the heart.</Text>
+                            <Text style={styles.commentText}>{t("communityLanding.about.commentBubble2")}</Text>
                         </View>
                     </View>
                 </View>
@@ -405,10 +379,9 @@ const CommunityLanding = () => {
 
             {/* VOTE SECTION */}
             <View style={styles.sectionContainer}>
-                <Text style={styles.sectionHeading}>Vote</Text>
+                <Text style={styles.sectionHeading}>{t("communityLanding.about.voteTitle")}</Text>
                 <Text style={styles.sectionText}>
-                    Components & posts can be Upvoted or downvoted. The most interesting
-                    content rises to the top.
+                    {t("communityLanding.about.voteText")}
                 </Text>
                 <View style={styles.voteContainer}>
                     <Image
@@ -418,7 +391,7 @@ const CommunityLanding = () => {
                     />
                     <View style={styles.voteBadge}>
                         <Ionicons name="arrow-down" size={14} color="#D69E2E" />
-                        <Text style={styles.voteBadgeText}>Vote</Text>
+                        <Text style={styles.voteBadgeText}>{t("communityLanding.about.voteTitle")}</Text>
                         <Ionicons name="arrow-up" size={14} color="#D69E2E" />
                     </View>
                 </View>
@@ -431,7 +404,7 @@ const CommunityLanding = () => {
         if (item.type === 'header') {
             return (
                 <View style={styles.searchSectionHeader}>
-                    <Text style={styles.searchSectionTitle}>{item.title}</Text>
+                    <Text style={styles.searchSectionTitle}>{t(`communityLanding.search.${item.title.toLowerCase()}`)}</Text>
                 </View>
             );
         }
@@ -456,12 +429,12 @@ const CommunityLanding = () => {
                 </View>
                 <View style={styles.searchTextContainer}>
                     <Text style={styles.searchItemTitle} numberOfLines={1}>
-                        {item.name || item.title || item.content || item.username || "Result"}
+                        {item.name || item.title || item.content || item.username || t("communityLanding.search.result")}
                     </Text>
                     <Text style={styles.searchItemSubtitle}>
-                        {item.type === 'community' ? `${item.member_count || 0} members`
-                            : item.type === 'post' ? `in ${item.community_name || "Community"}`
-                                : 'User'}
+                        {item.type === 'community' ? t("communityLanding.search.members", { count: item.member_count || 0 })
+                            : item.type === 'post' ? `${t("communityLanding.search.in")} ${item.community_name || "Community"}`
+                                : t("communityLanding.search.users").slice(0, -1)}
                     </Text>
                 </View>
             </TouchableOpacity>
@@ -482,7 +455,7 @@ const CommunityLanding = () => {
                 )}
                 {error && <Text style={styles.errorText}>{error}</Text>}
                 {!loading && searchQuery.length > 0 && combinedData.length === 0 && (
-                    <Text style={styles.noResultsText}>No results found for "{searchQuery}"</Text>
+                    <Text style={styles.noResultsText}>{t("communityLanding.search.noResults", { query: searchQuery })}</Text>
                 )}
                 <FlatList
                     data={combinedData}
@@ -522,7 +495,7 @@ const CommunityLanding = () => {
             default:
                 return (
                     <View style={styles.placeholderContainer}>
-                        <Text style={styles.placeholderText}>{selectedCategory} Content Coming Soon</Text>
+                        <Text style={styles.placeholderText}>{t("communityLanding.placeholder.comingSoon", { category: selectedCategory })}</Text>
                     </View>
                 );
         }
@@ -657,7 +630,7 @@ const styles = StyleSheet.create({
     rulesContainer: {
         flex: 1,
         backgroundColor: "#FFF",
-        marginTop:80
+        marginTop: 80
     },
     rulesContent: {
         padding: 20,
@@ -718,7 +691,7 @@ const styles = StyleSheet.create({
     aboutKalpxContainer: {
         flex: 1,
         backgroundColor: "#FFF",
-        marginTop:80
+        marginTop: 80
     },
     aboutHero: {
         padding: 24,

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
     View,
     Text,
@@ -29,7 +30,7 @@ import Colors from "../../components/Colors";
 const { width: screenWidth } = Dimensions.get("window");
 
 const UserActivityScreen = ({ onScroll }: { onScroll?: (event: any) => void }) => {
-    // Proactive hook calls
+    const { t } = useTranslation();
     const dispatch = useDispatch();
     const navigation = useNavigation<any>();
     const [activeTab, setActiveTab] = useState("overview");
@@ -41,15 +42,15 @@ const UserActivityScreen = ({ onScroll }: { onScroll?: (event: any) => void }) =
     const stats = userActivity?.stats?.data || {};
 
     const tabs = [
-        { id: "overview", label: "Overview" },
-        { id: "post", label: "Post" },
-        { id: "questions", label: "My Questions" },
-        { id: "comments", label: "Comments" },
-        { id: "useful", label: "Useful" },
-        { id: "saved", label: "Saved" },
-        { id: "hidden", label: "Hidden" },
-        { id: "upvoted", label: "Upvoted" },
-        { id: "downvoted", label: "Downvoted" },
+        { id: "overview", label: t("community.activity.tabs.overview") },
+        { id: "post", label: t("community.activity.tabs.post") },
+        { id: "questions", label: t("community.activity.tabs.questions") },
+        { id: "comments", label: t("community.activity.tabs.comments") },
+        { id: "useful", label: t("community.activity.tabs.useful") },
+        { id: "saved", label: t("community.activity.tabs.saved") },
+        { id: "hidden", label: t("community.activity.tabs.hidden") },
+        { id: "upvoted", label: t("community.activity.tabs.upvoted") },
+        { id: "downvoted", label: t("community.activity.tabs.downvoted") },
     ];
 
     useEffect(() => {
@@ -128,7 +129,7 @@ const UserActivityScreen = ({ onScroll }: { onScroll?: (event: any) => void }) =
                 {item.is_useful_mark && (
                     <View style={styles.usefulMarkHeader}>
                         <View style={styles.usefulMarkRow}>
-                            <Text style={styles.usefulMarkTitle}>★ MARKED AS USEFUL</Text>
+                            <Text style={styles.usefulMarkTitle}>{t("community.activity.markedUseful")}</Text>
                             <Text style={styles.dotSeparator}>•</Text>
                             <Text style={styles.markedTime}>{moment(item.marked_useful_at).fromNow()}</Text>
                         </View>
@@ -219,21 +220,21 @@ const UserActivityScreen = ({ onScroll }: { onScroll?: (event: any) => void }) =
                         <View style={styles.statsRow}>
                             <View style={styles.statItem}>
                                 <Text style={styles.statValue}>{stats.karma || 1}</Text>
-                                <Text style={styles.statLabel}>Karma</Text>
+                                <Text style={styles.statLabel}>{t("community.activity.stats.karma")}</Text>
                             </View>
                             <View style={styles.statItem}>
                                 <Text style={styles.statValue}>{(stats.posts_count || 0) + (stats.comments_count || 0) || 1}</Text>
-                                <Text style={styles.statLabel}>Contribution</Text>
+                                <Text style={styles.statLabel}>{t("community.activity.stats.contribution")}</Text>
                             </View>
                             <View style={styles.statItem}>
                                 <Text style={styles.statValue}>{stats.days_active ?? 0} d</Text>
-                                <Text style={styles.statLabel}>On Kalpx</Text>
+                                <Text style={styles.statLabel}>{t("community.activity.stats.onKalpx")}</Text>
                             </View>
                             <View style={styles.statItem}>
                                 <View style={styles.activeInRow}>
                                     <Text style={styles.statValue}>{stats.communities_active || 0}</Text>
                                 </View>
-                                <Text style={styles.statLabel}>Active in {'>'}</Text>
+                                <Text style={styles.statLabel}>{t("community.activity.stats.activeIn")} {'>'}</Text>
                             </View>
                         </View>
 
@@ -260,10 +261,9 @@ const UserActivityScreen = ({ onScroll }: { onScroll?: (event: any) => void }) =
                     ) : (
                         <View style={styles.emptyContainer}>
                             <View style={styles.emptyBox}>
-                                <Text style={styles.emptyTitle}>You haven’t posted anything</Text>
+                                <Text style={styles.emptyTitle}>{t("community.activity.empty.title")}</Text>
                                 <Text style={styles.emptySubtitle}>
-                                    Your shared posts will show up here over time. You’re free to manage
-                                    their visibility whenever you like.
+                                    {t("community.activity.empty.subtitle")}
                                 </Text>
                             </View>
                         </View>

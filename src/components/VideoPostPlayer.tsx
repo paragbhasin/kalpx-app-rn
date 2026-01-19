@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Dimensions, Image } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Dimensions, Image, Pressable } from 'react-native';
 import { Video, ResizeMode, Audio } from 'expo-av';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
@@ -22,24 +22,29 @@ const VideoPostPlayer: React.FC<VideoPostPlayerProps> = ({
     const videoRef = useRef<Video>(null);
     const [status, setStatus] = useState<any>({});
     const [isMuted, setIsMuted] = useState(true);
-    const [isPlaying, setIsPlaying] = useState(initialShouldPlay);
+    const [isPlaying, setIsPlaying] = useState(false); // Default to false to avoid autoplay
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Ensure audio works in silent mode on iOS
+        // Ensure audio works correctly
         Audio.setAudioModeAsync({
             playsInSilentModeIOS: true,
             allowsRecordingIOS: false,
-            interruptionModeIOS: 1, // InterruptionModeIOS.DoNotMix
+            interruptionModeIOS: 1, // DoNotMix
             shouldDuckAndroid: true,
-            interruptionModeAndroid: 1, // InterruptionModeAndroid.DoNotMix
-            playThroughEarpieceAndroid: false
+            interruptionModeAndroid: 1, // DoNotMix
+            playThroughEarpieceAndroid: false,
+            staysActiveInBackground: false,
         });
     }, []);
 
+    // Effect to handle external play/pause commands (e.g. from parent visibility)
+    // Removed to ensure explicit user play action as requested
+    /*
     useEffect(() => {
         setIsPlaying(initialShouldPlay);
     }, [initialShouldPlay]);
+    */
 
     const handlePlayPause = async () => {
         if (videoRef.current) {
@@ -47,6 +52,11 @@ const VideoPostPlayer: React.FC<VideoPostPlayerProps> = ({
                 await videoRef.current.pauseAsync();
                 setIsPlaying(false);
             } else {
+                // User wants volume on play
+                if (isMuted) {
+                    await videoRef.current.setIsMutedAsync(false);
+                    setIsMuted(false);
+                }
                 await videoRef.current.playAsync();
                 setIsPlaying(true);
             }
@@ -54,7 +64,7 @@ const VideoPostPlayer: React.FC<VideoPostPlayerProps> = ({
     };
 
     const toggleMute = async (e: any) => {
-        e.stopPropagation();
+        if (e && e.stopPropagation) e.stopPropagation();
         if (videoRef.current) {
             const newMuteState = !isMuted;
             await videoRef.current.setIsMutedAsync(newMuteState);
@@ -119,8 +129,7 @@ const VideoPostPlayer: React.FC<VideoPostPlayerProps> = ({
                 onLoad={() => setIsLoading(false)}
             />
 
-            <TouchableOpacity
-                activeOpacity={1}
+            <Pressable
                 style={styles.overlay}
                 onPress={handlePlayPause}
             >
@@ -132,37 +141,48 @@ const VideoPostPlayer: React.FC<VideoPostPlayerProps> = ({
 
                 {!isPlaying && !isLoading && (
                     <View style={styles.centerContainer}>
-                        <TouchableOpacity onPress={() => handleSkip(-10000)} style={styles.skipButton}>
+                        <Pressable
+                            onPress={(e) => {
+                                e.stopPropagation();
+                                handleSkip(-10000);
+                            }}
+                            style={styles.skipButton}
+                        >
                             <Ionicons name="play-back" size={24} color="#fff" />
-                        </TouchableOpacity>
+                        </Pressable>
 
                         <View style={styles.centerPlayButton}>
                             <Ionicons name="play" size={40} color="#fff" style={{ marginLeft: 5 }} />
                         </View>
 
-                        <TouchableOpacity onPress={() => handleSkip(10000)} style={styles.skipButton}>
+                        <Pressable
+                            onPress={(e) => {
+                                e.stopPropagation();
+                                handleSkip(10000);
+                            }}
+                            style={styles.skipButton}
+                        >
                             <Ionicons name="play-forward" size={24} color="#fff" />
-                        </TouchableOpacity>
+                        </Pressable>
                     </View>
                 )}
 
                 <View style={styles.bottomControls}>
-                    <TouchableOpacity onPress={toggleMute} style={styles.controlButton}>
+                    <Pressable onPress={toggleMute} style={styles.controlButton}>
                         <Ionicons
                             name={isMuted ? "volume-mute" : "volume-high"}
                             size={18}
                             color="#fff"
                         />
-                    </TouchableOpacity>
+                    </Pressable>
 
-                    <TouchableOpacity onPress={handleMaximize} style={[styles.controlButton, { marginLeft: 10 }]}>
+                    <Pressable onPress={handleMaximize} style={[styles.controlButton, { marginLeft: 10 }]}>
                         <Ionicons name="expand" size={18} color="#fff" />
-                    </TouchableOpacity>
+                    </Pressable>
                 </View>
 
                 {status.isLoaded && (
-                    <TouchableOpacity
-                        activeOpacity={1}
+                    <Pressable
                         style={styles.progressBarContainer}
                         onPress={(e) => {
                             // Simple scrubbing logic: click on progress bar to jump
@@ -179,9 +199,9 @@ const VideoPostPlayer: React.FC<VideoPostPlayerProps> = ({
                                 { width: `${(status.positionMillis / status.durationMillis) * 100}%` }
                             ]}
                         />
-                    </TouchableOpacity>
+                    </Pressable>
                 )}
-            </TouchableOpacity>
+            </Pressable>
         </View>
     );
 };

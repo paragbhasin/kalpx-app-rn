@@ -3,30 +3,32 @@ import { CATALOGS } from "../data/mantras";
 import { SANATAN_PRACTICES_FINAL } from "../data/sanatanPractices";
 import { DAILY_SANKALPS } from "../data/sankalps";
 
-export const getRawPracticeObject = (id: string, item: any) => {
+export const getRawPracticeObject = (id: string, item: any): { data: any, type: 'mantra' | 'sankalp' | 'practice' } => {
   const lang = i18n.language;
-  const bundle = i18n.getResourceBundle(lang, "translation");
 
-  /** 1️⃣ Check i18n bundle */
-  if (bundle?.[id]) return bundle[id];
+  /** 1️⃣ Check Mantra Catalog - If found here, we can safely use MantraCard */
+  const localizedMantra = CATALOGS[lang]?.find((m) => m.id === id);
+  if (localizedMantra) return { data: localizedMantra, type: 'mantra' };
 
-  /** 2️⃣ Check Mantra Catalog */
-  const localized = CATALOGS[lang]?.find((m) => m.id === id);
-  if (localized) return localized;
+  const fallbackMantra = CATALOGS.en?.find((m) => m.id === id);
+  if (fallbackMantra) return { data: fallbackMantra, type: 'mantra' };
 
-  const fallback = CATALOGS.en?.find((m) => m.id === id);
-  if (fallback) return fallback;
-
-  /** 3️⃣ Check Sankalps */
+  /** 2️⃣ Check Sankalps - If found here, we can safely use SankalpCard */
   const sankalp = DAILY_SANKALPS?.find((s) => s.id === id);
-  if (sankalp) return sankalp;
+  if (sankalp) return { data: sankalp, type: 'sankalp' };
 
-  /** ⭐️ 4️⃣ Check Sanatan Practice Library */
+  /** 3️⃣ Check Sanatan Practice Library */
   const sanatan = SANATAN_PRACTICES_FINAL?.find((p) => p.id === id);
-  if (sanatan) return sanatan;
+  if (sanatan) return { data: sanatan, type: 'practice' };
 
-  /** 5️⃣ If none matched: return original API item */
-  return item;
+  /** 4️⃣ Check i18n bundle - Default to 'practice' type for generic display */
+  const bundle = i18n.getResourceBundle(lang, "translation");
+  if (bundle?.[id]) {
+    return { data: bundle[id], type: 'practice' };
+  }
+
+  /** 5️⃣ If none matched: return original API item and default to 'practice' */
+  return { data: item, type: 'practice' };
 };
 
 

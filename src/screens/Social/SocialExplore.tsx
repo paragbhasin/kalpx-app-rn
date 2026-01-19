@@ -34,7 +34,7 @@ interface SocialExploreProps {
 }
 
 export default function SocialExplore({ showHeader = true, viewMode = "grid", onScroll }: SocialExploreProps) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigation: any = useNavigation();
   const dispatch = useDispatch();
   const { handleScroll: contextHandleScroll } = require("../../context/ScrollContext").useScrollContext();
@@ -357,7 +357,7 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
         onHide={() => handleInteraction('hide', mergedPost)}
         onReport={(reason, details) => {
           dispatch(reportContent('post', mergedPost.id, reason, details) as any);
-          Alert.alert("Reported", "Thank you for reporting. We will review this post.");
+          Alert.alert(t("community.reportedTitle"), t("community.reportedMessage"));
         }}
         onUserPress={() => { }} // Handle if needed
         isVisible={isVisible}
@@ -474,7 +474,6 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
         </ScrollView>
       ) : (
         <FlatList
-          key={`explore-list-${items.length}`}
           data={items}
           renderItem={renderListItem}
           keyExtractor={(item) => item.id.toString()}
@@ -491,7 +490,7 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
             isFetchingMore ? (
               <View style={{ padding: 20, alignItems: 'center' }}>
                 <ActivityIndicator size="small" color="#D69E2E" />
-                <Text style={{ marginTop: 10 }}>Loading more...</Text>
+                <Text style={{ marginTop: 10 }}>{t("community.loadingMore")}</Text>
               </View>
             ) : <View style={{ height: 20 }} />
           }
@@ -499,12 +498,12 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
         />
       )}
 
-      {loading && <LoadingOverlay visible={true} text="Loading Explore..." />}
+      {loading && <LoadingOverlay visible={true} text={t("community.loadingExplore")} />}
       {isFetchingMore && (
         <View style={{ padding: 20, alignItems: 'center' }}>
           <LoadingOverlay visible={false} text="" />
 
-          <Text>Loading more...</Text>
+          <Text>{t("community.loadingMore")}</Text>
         </View>
       )}
     </View>

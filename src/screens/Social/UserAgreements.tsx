@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import {
   View,
   Text,
@@ -8,6 +9,7 @@ import {
 } from "react-native";
 
 const UserAgreements = ({ onScroll }: { onScroll?: (event: any) => void }) => {
+  const { t } = useTranslation();
   return (
     <ScrollView
       style={styles.container}
@@ -19,52 +21,40 @@ const UserAgreements = ({ onScroll }: { onScroll?: (event: any) => void }) => {
       <View style={styles.contentWrapper}>
         {/* LEFT CONTENT */}
         <View style={styles.leftContent}>
-          <Text style={styles.mainHeading}>User Agreements</Text>
+          <Text style={styles.mainHeading}>{t("communityLanding.agreements.title")}</Text>
 
           <View style={styles.section}>
-            <Text style={styles.title}>1. Acceptance of Terms</Text>
+            <Text style={styles.title}>{t("communityLanding.agreements.section1.title")}</Text>
             <Text style={styles.text}>
-              By accessing and using KalpX, you agree to abide by our specific
-              Terms of Service and Community Rules. Participation in this
-              platform implies a commitment to the Dharmic values we uphold.
+              {t("communityLanding.agreements.section1.text")}
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.title}>2. Content Ownership & License</Text>
+            <Text style={styles.title}>{t("communityLanding.agreements.section2.title")}</Text>
             <Text style={styles.text}>
-              You retain ownership of the content you post on KalpX. However, by
-              posting, you grant KalpX a non-exclusive, royalty-free license to
-              display, distribute, and promote your content within the platform
-              and its related services.
+              {t("communityLanding.agreements.section2.text")}
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.title}>3. Moderation & Adharmic Content</Text>
+            <Text style={styles.title}>{t("communityLanding.agreements.section3.title")}</Text>
             <Text style={styles.text}>
-              KalpX reserves the right to review and remove any content that
-              violates our Community Rules or is deemed Adharmic (against the
-              principles of righteousness and truth). We strive to maintain a
-              pure and positive environment.
+              {t("communityLanding.agreements.section3.text")}
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.title}>4. Termination</Text>
+            <Text style={styles.title}>{t("communityLanding.agreements.section4.title")}</Text>
             <Text style={styles.text}>
-              We reserve the right to suspend or terminate accounts that
-              repeatedly violate these agreements or engage in harmful behavior.
-              This is to protect the sanctity of the community.
+              {t("communityLanding.agreements.section4.text")}
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.title}>5. Changes to Agreements</Text>
+            <Text style={styles.title}>{t("communityLanding.agreements.section5.title")}</Text>
             <Text style={styles.text}>
-              These agreements may be updated to reflect the evolving needs of
-              our growing spiritual community. Continued use of the platform
-              after changes implies acceptance of the new terms.
+              {t("communityLanding.agreements.section5.text")}
             </Text>
           </View>
         </View>

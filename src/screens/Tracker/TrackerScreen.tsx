@@ -170,20 +170,11 @@ const TrackerScreen = () => {
                 </Card>
               );
             }
+            const { data: fullObj, type: resolvedType } = getRawPracticeObject(item.practice_id, item);
             const id = item.practice_id;
-
-            let practiceType = "";
-
-            if (id.startsWith("mantra.")) {
-              practiceType = t("sadanaTracker.mantraLabel");
-            } else if (id.startsWith("sankalp.")) {
-              practiceType = t("sadanaTracker.sankalpLabel");
-            } else if (id.startsWith("practice.")) {
-              practiceType = t("sadanaTracker.practiceLabel");
-            } else {
-              practiceType = "";
-            }
-            const fullObj = getRawPracticeObject(item.practice_id, item);
+            const practiceType = resolvedType === 'mantra' ? t("sadanaTracker.mantraLabel")
+              : resolvedType === 'sankalp' ? t("sadanaTracker.sankalpLabel")
+                : resolvedType === 'practice' ? t("sadanaTracker.practiceLabel") : "";
 
             console.log("🧪 Item before translation:", {
               practice_id: item.practice_id,
@@ -205,13 +196,7 @@ const TrackerScreen = () => {
             );
             const reps = item.details?.reps
             const day = item.details?.day;
-            let practiceTypeKey = id.startsWith("mantra.")
-              ? "mantra"
-              : id.startsWith("sankalp.")
-                ? "sankalp"
-                : id.startsWith("practice.")
-                  ? "practice"
-                  : "";
+            let practiceTypeKey = resolvedType;
 
             let defaultReps =
               practiceTypeKey === "mantra"

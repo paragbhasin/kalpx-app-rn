@@ -155,6 +155,7 @@ const PopularCommunity = ({ onScroll }: { onScroll?: (event: any) => void }) => 
 
 
     const Footer = () => {
+        const { t } = useTranslation();
         if (loadingMore) {
             return <ActivityIndicator style={{ padding: 20 }} size="small" color="#D69E2E" />;
         }
@@ -178,7 +179,6 @@ const PopularCommunity = ({ onScroll }: { onScroll?: (event: any) => void }) => 
     return (
         <View style={styles.container}>
             <FlatList
-                key={`popular-${posts.length}`}
                 data={posts}
 
                 renderItem={renderItem}

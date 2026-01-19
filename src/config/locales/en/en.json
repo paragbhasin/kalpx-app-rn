@@ -1536,5 +1536,184 @@
     "repsRange": "Reps (1 - 1000)",
     "repsPlaceholder": "Enter reps",
     "confirm": "Confirm"
+  },
+  "community": {
+    "loadingMore": "Loading more...",
+    "loadingExplore": "Loading Explore...",
+    "reportedTitle": "Reported",
+    "reportedMessage": "Thank you for reporting. We will review this post.",
+    "weeklyVisitors": "{{count}}k weekly visitors",
+    "join": "Join",
+    "joined": "Joined",
+    "tabs": {
+      "all": "All",
+      "followed": "Followed by me"
+    },
+    "sections": {
+      "recommended": "Recommended for you",
+      "following": "Communities you follow"
+    },
+    "empty": {
+      "noFollowed": "You haven't followed any communities yet.",
+      "noResults": "No communities found."
+    },
+    "activity": {
+      "tabs": {
+        "overview": "Overview",
+        "post": "Post",
+        "questions": "My Questions",
+        "comments": "Comments",
+        "useful": "Useful",
+        "saved": "Saved",
+        "hidden": "Hidden",
+        "upvoted": "Upvoted",
+        "downvoted": "Downvoted"
+      },
+      "markedUseful": "★ MARKED AS USEFUL",
+      "stats": {
+        "karma": "Karma",
+        "contribution": "Contribution",
+        "onKalpx": "On Kalpx",
+        "activeIn": "Active in"
+      },
+      "empty": {
+        "title": "You haven’t posted anything",
+        "subtitle": "Your shared posts will show up here over time. You’re free to manage their visibility whenever you like."
+      }
+    },
+    "agreements": {
+      "title": "User Agreements",
+      "section1": {
+        "title": "1. Acceptance of Terms",
+        "text": "By accessing and using KalpX, you agree to abide by our specific Terms of Service and Community Rules. Participation in this platform implies a commitment to the Dharmic values we uphold."
+      },
+      "section2": {
+        "title": "2. Content Ownership & License",
+        "text": "You retain ownership of the content you post on KalpX. However, by posting, you grant KalpX a non-exclusive, royalty-free license to display, distribute, and promote your content within the platform and its related services."
+      },
+      "section3": {
+        "title": "3. Moderation & Adharmic Content",
+        "text": "KalpX reserves the right to review and remove any content that violates our Community Rules or is deemed Adharmic (against the principles of righteousness and truth). We strive to maintain a pure and positive environment."
+      },
+      "section4": {
+        "title": "4. Termination",
+        "text": "We reserve the right to suspend or terminate accounts that repeatedly violate these agreements or engage in harmful behavior. This is to protect the sanctity of the community."
+      },
+      "section5": {
+        "title": "5. Changes to Agreements",
+        "text": "These agreements may be updated to reflect the evolving needs of our growing spiritual community. Continued use of the platform after changes implies acceptance of the new terms."
+      }
+    },
+    "post": {
+      "save": "Save",
+      "saved": "Saved",
+      "hide": "Hide",
+      "report": "Report",
+      "showMore": "Show more",
+      "showLess": "Show less",
+      "askQuestion": "Ask question",
+      "linkedMantraGeneral": "Do this mantra today - let intention become action",
+      "linkedMantraSpecific": "Add this to your daily practice - progress happens gently",
+      "linkedSankalpGeneral": "Take this sankalp today - shape your inner resolve",
+      "linkedSankalpSpecific": "Add this to your daily practice - progress happens gently",
+      "linkedPracticeGeneral": "Add this to your daily practice - progress happens gently",
+      "linkedPracticeSpecific": "Add this to your daily practice - progress happens gently"
+    }
+  },
+  "communityLanding": {
+    "sections": {
+      "home": "Home",
+      "top": "Top",
+      "popular": "Popular",
+      "explore": "Explore",
+      "yourActivity": "Your Activity",
+      "communities": "Communities",
+      "kalpxRules": "KalpX Rules",
+      "privacyPolicy": "Privacy Policy",
+      "userAgreements": "User agreements",
+      "aboutKalpx": "About KalpX"
+    },
+    "header": {
+      "searchPlaceholder": "Search communities, posts, users...",
+      "title": "Community"
+    },
+    "dropdown": {
+      "recent": "RECENT",
+      "yourActivity": "YOUR ACTIVITY",
+      "resources": "RESOURCES"
+    },
+    "placeholder": {
+      "comingSoon": "{{category}} Content Coming Soon"
+    },
+    "search": {
+      "communities": "Communities",
+      "posts": "Posts",
+      "users": "Users",
+      "result": "Result",
+      "members": "{{count}} members",
+      "in": "in",
+      "noResults": "No results found for \"{{query}}\""
+    },
+    "rules": {
+      "title": "KalpX Community Rules",
+      "rule1": {
+        "title": "1. Respect for Dharma (Righteousness)",
+        "text": "We uphold truth, compassion, and non-violence (Ahimsa) in all our interactions. Speak with kindness and integrity. Adhere to the principles of Dharma in your conduct within the community."
+      },
+      "rule2": {
+        "title": "2. Authenticity of Scripture",
+        "text": "When discussing Shastras, Vedas, Puranas, or other sacred texts, please cite your sources respectfully and accurately. Misleading interpretations or fabricating information is discouraged."
+      },
+      "rule3": {
+        "title": "3. No Hate Speech or Adharmic Conduct",
+        "text": "We have zero tolerance for malice, blasphemy, discrimination, or intent to harm others. Any speech that spreads hatred or division is considered Adharmic and will be removed."
+      },
+      "rule4": {
+        "title": "4. Constructive Debate (Shastrartha)",
+        "text": "Debates should be grounded in the spirit of Jigyasa (seeking truth), not Ahankara (ego). Engage in discussions to learn and share knowledge, not to prove superiority."
+      },
+      "rule5": {
+        "title": "5. Respect for Deities and Gurus",
+        "text": "Maintain reverence when speaking of Deities, Gurus, and spiritual teachers. Constructive discussion is welcome, but disrespect is not tolerated."
+      },
+      "quote": "\"Dharmo Rakshati Rakshitah\"",
+      "quoteTranslation": "Dharma protects those who protect it."
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "section1": {
+        "title": "1. Sanctity of Your Data",
+        "text": "We consider your personal sadhana data, journal entries, and spiritual progress as sacred and private. We treat your information with the highest level of confidentiality and respect."
+      },
+      "section2": {
+        "title": "2. Data Collection",
+        "text": "We collect minimal data necessary to provide you with a personalized spiritual experience. This includes your username, email (for account recovery), and your interactions within the community to improve content recommendations."
+      },
+      "section3": {
+        "title": "3. Usage of Information",
+        "text": "Your data is used solely to enhance your journey on KalpX. We do not sell your personal information to third-party advertisers. We believe your spiritual growth is not a product."
+      },
+      "section4": {
+        "title": "4. Third-Party Services",
+        "text": "We may use trusted third-party services for hosting, analytics, and communication. These partners are bound by strict confidentiality agreements and are only provided with data necessary to perform their functions."
+      },
+      "section5": {
+        "title": "5. Security",
+        "text": "We employ industry-standard security measures to protect your data from unauthorized access, alteration, or disclosure. However, no method of transmission over the internet is 100% secure."
+      }
+    },
+    "about": {
+      "heroHeading": "The heart of your inner journey",
+      "heroText": "KalpX is home to countless paths for personal growth, mindful practices, and genuine self-discovery. Whether you’re exploring meditation, building inner resilience, seeking clarity in your career, or simply nurturing calm in daily life, there’s a guided journey on KalpX for you.",
+      "postTitle": "Post",
+      "postText": "The Community can share content by posting stories, links, image, and Videos.",
+      "commentTitle": "Comment",
+      "commentText": "The Community can share content by posting stories, links, images, and videos.",
+      "commentBubble1": "I Like the fact that everyone is here is so spiritual",
+      "commentBubble2": "Pure devotion, pure strength. This story never fails to touch the heart.",
+      "voteTitle": "Vote",
+      "voteText": "Components & posts can be Upvoted or downvoted. The most interesting content rises to the top."
+    }
   }
 }
+

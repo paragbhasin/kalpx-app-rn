@@ -555,7 +555,7 @@ const MantraCard = ({
                       type="semiBoldText"
                       style={{ textAlign: "center", color: Colors.Colors.white, marginBottom: 2 }}
                     >
-                      Add this to my practice
+                        {t("sadanaTracker.detailsCard.addToMyPractice")}
                     </TextComponent>
                   </TouchableOpacity>
                 )}

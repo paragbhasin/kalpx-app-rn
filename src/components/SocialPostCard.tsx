@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useRoute } from "@react-navigation/native";
 import { useTranslation } from "react-i18next";
 
@@ -28,6 +28,7 @@ import MantraCard from "./MantraCard";
 import SankalpCard from "./SankalpCard";
 import DailyPracticeDetailsCard from "./DailyPracticeDetailsCard";
 import VideoPostPlayer from "./VideoPostPlayer";
+import { getTranslatedPractice } from "../utils/getTranslatedPractice";
 
 const { width: screenWidth } = Dimensions.get("window");
 const MEDIA_WIDTH = screenWidth - 24;
@@ -112,6 +113,14 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     const translatedTitle = getTranslatedContent(post, 'title');
     const translatedContent = getTranslatedContent(post, 'content');
     const translatedCommunityName = getTranslatedContent(post, 'community_name') || post.community?.name;
+
+    const translatedLinkedItemName = useMemo(() => {
+        if (!post.linked_item || !post.linked_item.id) return post.linked_item?.name || "";
+        const { id } = post.linked_item;
+        const { data: practiceData } = getRawPracticeObject(id, post.linked_item);
+        const translated = getTranslatedPractice(practiceData, t);
+        return translated.name;
+    }, [post.linked_item, t]);
 
     const [isExpanded, setIsExpanded] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
@@ -579,7 +588,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                                 style={styles.linkedItemInlineIcon}
                             />
                             <Text style={styles.linkedItemTitleText}>
-                                {post.linked_item.name}
+                                {translatedLinkedItemName}
                             </Text>
                         </View>
                         <Text style={styles.linkedItemSubtitle}>

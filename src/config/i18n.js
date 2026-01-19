@@ -1,8 +1,19 @@
-// src/i18n.ts
 import * as Localization from "expo-localization";
 import i18n from "i18next";
 import merge from "lodash.merge"; // deep merge utility
 import { initReactI18next } from "react-i18next";
+import moment from "moment";
+
+// Import moment locales for internationalization
+import 'moment/locale/hi';
+import 'moment/locale/te';
+import 'moment/locale/ta';
+import 'moment/locale/bn';
+import 'moment/locale/gu';
+import 'moment/locale/kn';
+import 'moment/locale/ml';
+import 'moment/locale/mr';
+// Note: Skipping 'or' (Odia) per user request
 
 // Import your translations
 import bn from "./locales/bn/bn.json";
@@ -842,5 +853,31 @@ i18n.use(initReactI18next).init({
   },
   saveMissing: true, // optional: sends missing keys to console
 });
+
+// Sync moment locale on language change
+i18n.on('languageChanged', (lng) => {
+  const lang = lng.split('-')[0].toLowerCase();
+  if (lang !== 'or') { // Skip Odia as per user request
+    moment.locale(lang);
+    // Force English digits but keep localized text for Indian languages
+    moment.updateLocale(lang, {
+      postformat: (val) => val,
+      preparse: (val) => val
+    });
+  }
+});
+
+// Set initial moment locale and force English digits
+const langCode = i18n.language ? i18n.language.split('-')[0].toLowerCase() : deviceLanguage;
+if (langCode !== 'or') {
+  moment.locale(langCode);
+  const localesToFix = ['hi', 'te', 'ta', 'bn', 'gu', 'kn', 'ml', 'mr'];
+  localesToFix.forEach(lang => {
+    moment.updateLocale(lang, {
+      postformat: (val) => val,
+      preparse: (val) => val
+    });
+  });
+}
 
 export default i18n;

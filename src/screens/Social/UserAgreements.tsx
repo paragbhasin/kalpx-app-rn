@@ -21,40 +21,40 @@ const UserAgreements = ({ onScroll }: { onScroll?: (event: any) => void }) => {
       <View style={styles.contentWrapper}>
         {/* LEFT CONTENT */}
         <View style={styles.leftContent}>
-          <Text style={styles.mainHeading}>{t("communityLanding.agreements.title")}</Text>
+          <Text style={styles.mainHeading}>{t("community.agreements.title")}</Text>
 
           <View style={styles.section}>
-            <Text style={styles.title}>{t("communityLanding.agreements.section1.title")}</Text>
+            <Text style={styles.title}>{t("community.agreements.section1.title")}</Text>
             <Text style={styles.text}>
-              {t("communityLanding.agreements.section1.text")}
+              {t("community.agreements.section1.text")}
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.title}>{t("communityLanding.agreements.section2.title")}</Text>
+            <Text style={styles.title}>{t("community.agreements.section2.title")}</Text>
             <Text style={styles.text}>
-              {t("communityLanding.agreements.section2.text")}
+              {t("community.agreements.section2.text")}
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.title}>{t("communityLanding.agreements.section3.title")}</Text>
+            <Text style={styles.title}>{t("community.agreements.section3.title")}</Text>
             <Text style={styles.text}>
-              {t("communityLanding.agreements.section3.text")}
+              {t("community.agreements.section3.text")}
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.title}>{t("communityLanding.agreements.section4.title")}</Text>
+            <Text style={styles.title}>{t("community.agreements.section4.title")}</Text>
             <Text style={styles.text}>
-              {t("communityLanding.agreements.section4.text")}
+              {t("community.agreements.section4.text")}
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.title}>{t("communityLanding.agreements.section5.title")}</Text>
+            <Text style={styles.title}>{t("community.agreements.section5.title")}</Text>
             <Text style={styles.text}>
-              {t("communityLanding.agreements.section5.text")}
+              {t("community.agreements.section5.text")}
             </Text>
           </View>
         </View>

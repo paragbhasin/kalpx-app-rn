@@ -178,7 +178,7 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
                                             activeTab === "all" && styles.activeTabText,
                                         ]}
                                     >
-                                        All
+                                   
                                         {t("community.tabs.all")}
                                     </Text>
                                 </TouchableOpacity>
@@ -192,7 +192,7 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
                                             activeTab === "followed" && styles.activeTabText,
                                         ]}
                                     >
-                                        Followed by me
+                                   
                                         {t("community.tabs.followed")}
                                     </Text>
                                 </TouchableOpacity>
@@ -234,7 +234,7 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
                                             activeTab === "all" && styles.activeTabText,
                                         ]}
                                     >
-                                        All
+                                  
                                         {t("community.tabs.all")}
                                     </Text>
                                 </TouchableOpacity>
@@ -248,7 +248,7 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
                                             activeTab === "followed" && styles.activeTabText,
                                         ]}
                                     >
-                                        Followed by me
+                                       
                                         {t("community.tabs.followed")}
                                     </Text>
                                 </TouchableOpacity>

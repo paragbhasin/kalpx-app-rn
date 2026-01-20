@@ -156,7 +156,8 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     const [linkedCardType, setLinkedCardType] = useState<'mantra' | 'sankalp' | 'practice' | null>(null);
 
     // formatted date
-    const timeAgo = post.created_at ? moment(post.created_at).fromNow() : "";
+    const currentLang = i18n.language?.split("-")[0] || "en";
+    const timeAgo = post.created_at ? moment(post.created_at).locale(currentLang).fromNow() : "";
 
     // images/slides resolution
     const getImagesData = () => {

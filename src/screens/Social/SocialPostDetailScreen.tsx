@@ -58,6 +58,9 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote, onUseful, onR
     setIsEditing(false);
   };
 
+  const { i18n } = useTranslation();
+  const currentLang = i18n.language?.split("-")[0] || "en";
+
   return (
     <View style={{ padding: 12, borderLeftWidth: comment.parent ? 1 : 0, borderLeftColor: '#eee', marginLeft: comment.parent ? 15 : 0 }}>
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
@@ -88,7 +91,7 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote, onUseful, onR
         <Text style={{ fontWeight: 'bold', fontSize: 13, color: '#333' }}>
           {(comment.creator.username && comment.creator.username.split('@')[0]) || 'Anonymous'}
         </Text>
-        <Text style={{ fontSize: 11, color: '#999', marginLeft: 8 }}>{moment(comment.created_at).fromNow()}</Text>
+        <Text style={{ fontSize: 11, color: '#999', marginLeft: 8 }}>{moment(comment.created_at).locale(currentLang).fromNow()}</Text>
         {comment.useful_count > 0 && (
           <View style={{ marginLeft: 'auto', backgroundColor: '#FFFDF0', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#FDF5E9' }}>
             <Ionicons name="star" size={12} color="#D69E2E" />

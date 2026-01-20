@@ -30,7 +30,7 @@ import Colors from "../../components/Colors";
 const { width: screenWidth } = Dimensions.get("window");
 
 const UserActivityScreen = ({ onScroll }: { onScroll?: (event: any) => void }) => {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const dispatch = useDispatch();
     const navigation = useNavigation<any>();
     const [activeTab, setActiveTab] = useState("overview");
@@ -131,7 +131,7 @@ const UserActivityScreen = ({ onScroll }: { onScroll?: (event: any) => void }) =
                         <View style={styles.usefulMarkRow}>
                             <Text style={styles.usefulMarkTitle}>{t("community.activity.markedUseful")}</Text>
                             <Text style={styles.dotSeparator}>•</Text>
-                            <Text style={styles.markedTime}>{moment(item.marked_useful_at).fromNow()}</Text>
+                            <Text style={styles.markedTime}>{moment(item.marked_useful_at).locale(i18n.language?.split("-")[0] || "en").fromNow()}</Text>
                         </View>
                         <Text style={styles.usefulCommentText}>"{item.comment?.content}"</Text>
                     </View>

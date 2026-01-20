@@ -856,14 +856,21 @@ i18n.use(initReactI18next).init({
 
 // Sync moment locale on language change
 i18n.on('languageChanged', (lng) => {
+  if (!lng) return;
   const lang = lng.split('-')[0].toLowerCase();
+  
   if (lang !== 'or') { // Skip Odia as per user request
     moment.locale(lang);
-    // Force English digits but keep localized text for Indian languages
-    moment.updateLocale(lang, {
-      postformat: (val) => val,
-      preparse: (val) => val
-    });
+    
+    // For non-English languages, ensure we don't use localized digits if they were enabled
+    if (lang !== 'en') {
+      moment.updateLocale(lang, {
+        postformat: (val) => val,
+        preparse: (val) => val
+      });
+    }
+  } else {
+    moment.locale('en'); // Fallback to English for unsupported/skipped locales
   }
 });
 

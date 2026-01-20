@@ -15,6 +15,6 @@ export const getConsistentRandomStats = (postId: string | number) => {
     return {
         upvotes: Math.floor(ratio * 900) + 100, // 100 to 1000
         shares: Math.floor(ratio * 30) + 5,      // 5 to 35
-        comments: Math.floor(ratio * 40) + 2    // 2 to 42
+        comments: 0   // 2 to 42
     };
 };

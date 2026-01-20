@@ -1508,6 +1508,14 @@
     "confirm": "ಖಚಿತಪಡಿಸಿ"
   },
   "community": {
+    "postMenu": {
+      "report": "ವರದಿ ಮಾಡಿ",
+      "save": "ಉಳಿಸಿ",
+      "hide": "ಮರೆಮಾಡಿ",
+      "share": "ಹಂಚಿಕೊಳ್ಳಿ",
+      "unsave": "ಅನ್‌ಸೇವ್ ಮಾಡಿ",
+      "unhide": "ಅನ್‌ಹೈಡ್ ಮಾಡಿ"
+    },
     "loadingMore": "ಇನ್ನಷ್ಟು ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
     "loadingExplore": "ಅನ್ವೇಷಣೆ (Explore) ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
     "reportedTitle": "ವರದಿ ಮಾಡಲಾಗಿದೆ",

@@ -1511,6 +1511,14 @@
     "confirm": "নিশ্চিত করুন"
   },
   "community": {
+    "postMenu": {
+      "report": "রিপোর্ট করুন",
+      "save": "সেভ করুন",
+      "hide": "লুকান",
+      "share": "শেয়ার করুন",
+      "unsave": "আনসেভ করুন",
+      "unhide": "আনহাইড করুন"
+    },
     "loadingMore": "আরও লোড হচ্ছে...",
     "loadingExplore": "এক্সপ্লোর লোড হচ্ছে...",
     "reportedTitle": "রিপোর্ট করা হয়েছে",

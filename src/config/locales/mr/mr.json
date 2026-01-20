@@ -1510,6 +1510,14 @@
     "confirm": "पुष्टी करा"
   },
   "community": {
+    "postMenu": {
+      "report": "रिपोर्ट करा",
+      "save": "सेव्ह करा",
+      "hide": "लपवा",
+      "share": "शेअर करा",
+      "unsave": "अनसेव्ह करा",
+      "unhide": "पुन्हा दाखवा"
+    },
     "loadingMore": "आणखी लोड होत आहे...",
     "loadingExplore": "एक्सप्लोर लोड होत आहे...",
     "reportedTitle": "रिपोर्ट केले",

@@ -1514,6 +1514,14 @@
   },
 
   "community": {
+    "postMenu": {
+      "report": "रिपोर्ट करें",
+      "save": "सेव करें",
+      "hide": "छिपाएं",
+      "share": "शेयर करें",
+      "unsave": "अनसेव करें",
+      "unhide": "दिखाएं"
+    },
     "loadingMore": "और लोड हो रहा है...",
     "loadingExplore": "एक्सप्लोर लोड हो रहा है...",
     "reportedTitle": "रिपोर्ट किया गया",

@@ -1499,6 +1499,14 @@
     "confirm": "પુષ્ટિ કરો"
   },
   "community": {
+    "postMenu": {
+      "report": "રિપોર્ટ કરો",
+      "save": "સેવ કરો",
+      "hide": "છુપાવો",
+      "share": "શેર કરો",
+      "unsave": "અનસેવ કરો",
+      "unhide": "અનહાઇડ કરો"
+    },
     "loadingMore": "વધુ લોડ થઈ રહ્યું છે...",
     "loadingExplore": "એક્સપ્લોર લોડ થઈ રહ્યું છે...",
     "reportedTitle": "રિપોર્ટ કરેલ",

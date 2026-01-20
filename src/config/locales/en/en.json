@@ -1538,6 +1538,14 @@
     "confirm": "Confirm"
   },
   "community": {
+    "postMenu": {
+      "report": "Report",
+      "save": "Save",
+      "hide": "Hide",
+      "share": "Share",
+      "unsave": "Unsave",
+      "unhide": "Unhide"
+    },
     "loadingMore": "Loading more...",
     "loadingExplore": "Loading Explore...",
     "reportedTitle": "Reported",
@@ -1716,4 +1724,3 @@
     }
   }
 }
-

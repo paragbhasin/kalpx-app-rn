@@ -1515,6 +1515,14 @@
   },
 
   "community": {
+    "postMenu": {
+      "report": "புகார் செய்",
+      "save": "சேமி",
+      "hide": "மறை",
+      "share": "பகிர்",
+      "unsave": "சேமிப்பை நீக்கு",
+      "unhide": "காண்பி"
+    },
     "loadingMore": "மேலும் ஏற்றப்படுகிறது...",
     "loadingExplore": "Explore ஏற்றப்படுகிறது...",
     "reportedTitle": "புகார் செய்யப்பட்டது",

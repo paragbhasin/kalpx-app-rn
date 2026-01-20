@@ -82,8 +82,11 @@ const FeedScreen = ({ onScroll }: { onScroll?: (event: any) => void }) => {
                     dispatch(followCommunity(communityId) as any);
                 }
             }
+        } else if (type === 'edit') {
+            (navigation as any).navigate('CreateSocialPost', { post: post });
+        } else if (type === 'delete') {
+            // Add delete logic here or dispatch a delete action
         }
-
     };
 
 
@@ -116,6 +119,8 @@ const FeedScreen = ({ onScroll }: { onScroll?: (event: any) => void }) => {
                 onUnsave={() => handleInteraction('unsave', item)}
                 onHide={() => handleInteraction('hide', item)}
                 onReport={(reason, details) => handleInteraction('report', { ...item, reportData: { reason, details } })}
+                onEdit={() => handleInteraction('edit', item)}
+                onDelete={() => handleInteraction('delete', item)}
             />
         );
     };
@@ -171,7 +176,10 @@ const FeedScreen = ({ onScroll }: { onScroll?: (event: any) => void }) => {
                 contentContainerStyle={{ paddingBottom: 20, paddingTop: 110 }}
                 onScroll={onScroll}
                 scrollEventThrottle={16}
-                removeClippedSubviews={false}
+                removeClippedSubviews={true}
+                maxToRenderPerBatch={5}
+                windowSize={5}
+                initialNumToRender={3}
                 maintainVisibleContentPosition={null}
             />
         </View>

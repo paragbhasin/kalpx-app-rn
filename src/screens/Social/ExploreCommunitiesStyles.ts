@@ -50,6 +50,7 @@ const styles = StyleSheet.create({
     },
     listContent: {
         paddingBottom: 20,
+        flexGrow: 1,
     },
     card: {
         backgroundColor: "#fff",

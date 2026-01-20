@@ -152,7 +152,7 @@ const CommunityLanding = () => {
 
                                         {item.value === "Communities" && (
                                             <View>
-                                                <Text style={styles.dropdownSectionHeader}>RESOURCES</Text>
+                                                <Text style={styles.dropdownSectionHeader}>{t("communityLanding.dropdown.resources")}</Text>
                                             </View>
                                         )}
                                         <TouchableOpacity

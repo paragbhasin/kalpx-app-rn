@@ -1,9 +1,5 @@
 import api from "../../Networks/axios";
-// Helper for random stats (mock implementation if utils not available, or import)
-// Assuming utils/randomStats exists or we'll mock it here for now as requested by user logic
-// The user provided logic: initializePostWithRandomStats from "@/utils/randomStats"
-// We might need to port that utility too if it doesn't exist. 
-// For now, I will assume it renders raw data or simple random generation inline if needed.
+import { getConsistentRandomStats } from "../../utils/randomStats";
 
 // 🔹 Action Types
 export const FETCH_FEED_REQUEST = "FETCH_FEED_REQUEST";
@@ -45,11 +41,15 @@ export const fetchFeed = (page = 1, sortOption = "hot", locale = "en") => async 
         // Using axios instance 'api' which handles auth headers
         const res = await api.get(`/posts/personalized_feed/?${params.toString()}`);
 
-        const results = (res.data.results || []).map(post => ({
-            ...post,
-            // Mocking random stats intialization effectively or keeping it raw
-            // In real app, we might need a utility for this
-        }));
+        const results = (res.data.results || []).map(post => {
+            const randoms = getConsistentRandomStats(post.id);
+            return {
+                ...post,
+                upvote_count: post.upvote_count !== undefined && post.upvote_count !== null && post.upvote_count !== 0 ? post.upvote_count : randoms.upvotes,
+                share_count: post.share_count !== undefined && post.share_count !== null && post.share_count !== 0 ? post.share_count : randoms.shares,
+                comment_count: post.comment_count !== undefined && post.comment_count !== null && post.comment_count !== 0 ? post.comment_count : randoms.comments,
+            };
+        });
 
         dispatch({
             type: FETCH_FEED_SUCCESS,
@@ -83,10 +83,20 @@ export const fetchPopularPosts = (page = 1, locale = "en") => async (dispatch) =
         const res = await api.get(`/posts/?${params.toString()}`);
         console.log("Popular Posts Response:", res.data);
 
+        const results = (res.data.results || []).map(post => {
+            const randoms = getConsistentRandomStats(post.id);
+            return {
+                ...post,
+                upvote_count: post.upvote_count !== undefined && post.upvote_count !== null && post.upvote_count !== 0 ? post.upvote_count : randoms.upvotes,
+                share_count: post.share_count !== undefined && post.share_count !== null && post.share_count !== 0 ? post.share_count : randoms.shares,
+                comment_count: post.comment_count !== undefined && post.comment_count !== null && post.comment_count !== 0 ? post.comment_count : randoms.comments,
+            };
+        });
+
         dispatch({
             type: FETCH_POPULAR_SUCCESS,
             payload: {
-                results: res.data.results || [],
+                results,
                 count: res.data.count,
                 page,
                 totalPages: res.data.count ? Math.ceil(res.data.count / PAGE_SIZE) : 1

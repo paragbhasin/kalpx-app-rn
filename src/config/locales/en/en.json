@@ -1544,7 +1544,9 @@
       "hide": "Hide",
       "share": "Share",
       "unsave": "Unsave",
-      "unhide": "Unhide"
+      "unhide": "Unhide",
+      "edit": "Edit Post",
+      "delete": "Delete Post"
     },
     "loadingMore": "Loading more...",
     "loadingExplore": "Loading Explore...",

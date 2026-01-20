@@ -115,6 +115,9 @@ const VideoPostPlayer: React.FC<VideoPostPlayerProps> = ({
                 isMuted={isMuted}
                 shouldPlay={isPlaying}
                 isLooping
+                pointerEvents="none" // Pass touches to the parent list so scrolling isn't blocked
+                shouldRasterizeIOS={true}
+                renderToHardwareTextureAndroid={true}
                 onPlaybackStatusUpdate={newStatus => {
                     setStatus(newStatus);
                     if (newStatus.isLoaded) {

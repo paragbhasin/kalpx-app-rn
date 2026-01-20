@@ -33,6 +33,7 @@ import {
   hidePostDetail,
   reportContent
 } from "../PostDetail/actions";
+import { deletePost } from "../Social/actions";
 import moment from "moment";
 
 const screenWidth = Dimensions.get("window").width;
@@ -45,7 +46,6 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote, onUseful, onR
   const [menuPos, setMenuPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 });
   const menuButtonRef = React.useRef<any>(null);
 
-  const isOtherUser = currentUserId && comment.creator?.id !== currentUserId;
 
   const handleUseful = () => {
     onUseful(comment.id);
@@ -146,7 +146,7 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote, onUseful, onR
           <Text style={{ fontSize: 12, color: '#666' }}>Reply</Text>
         </TouchableOpacity>
 
-        {isOtherUser && (
+        {!comment.is_creator && (
           <TouchableOpacity
             style={{ flexDirection: 'row', alignItems: 'center', marginRight: 15 }}
             onPress={handleUseful}
@@ -211,7 +211,7 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote, onUseful, onR
               borderColor: '#f0f0f0',
             }}
           >
-            {!isOtherUser ? (
+            {comment.is_creator ? (
               <>
                 <TouchableOpacity
                   onPress={() => {
@@ -338,6 +338,29 @@ export default function SocialPostDetailScreen() {
     Alert.alert("Reported", "Thank you for reporting. We will review this comment.");
   };
 
+  const handleEditPost = () => {
+    navigation.navigate("CreateSocialPost", { post: post || initialPost });
+  };
+
+  const handleDeletePost = () => {
+    const targetPost = post || initialPost;
+    Alert.alert("Delete Post", "Are you sure you want to delete this post?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: async () => {
+          const res: any = await dispatch(deletePost(targetPost.id) as any);
+          if (res.success) {
+            navigation.goBack();
+          } else {
+            Alert.alert("Error", res.error);
+          }
+        }
+      }
+    ]);
+  };
+
   if (!post && !initialPost && loadingPost) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -391,6 +414,8 @@ export default function SocialPostDetailScreen() {
                   dispatch(reportContent('post', (post || initialPost).id, reason, details) as any);
                   Alert.alert("Reported", "Thank you for reporting. We will review this post.");
                 }}
+                onEdit={handleEditPost}
+                onDelete={handleDeletePost}
               />
             )}
             <View style={{ padding: 15, backgroundColor: '#f9f9f9' }}>

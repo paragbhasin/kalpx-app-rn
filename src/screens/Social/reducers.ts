@@ -191,25 +191,27 @@ export const communitiesReducer = (state = initialCommunitiesState, action) => {
         let updatedPost = { ...p };
 
         if (interaction === 'upvote') {
-          if (updatedPost.user_vote === 1) {
-            updatedPost.score = (updatedPost.score || 0) - 1;
+          const currentVote = updatedPost.user_vote || 0;
+          if (currentVote === 1) {
+            updatedPost.upvote_count = Math.max(0, (updatedPost.upvote_count || 0) - 1);
             updatedPost.user_vote = 0;
-          } else if (updatedPost.user_vote === -1) {
-            updatedPost.score = (updatedPost.score || 0) + 2;
+          } else if (currentVote === -1) {
+            updatedPost.upvote_count = (updatedPost.upvote_count || 0) + 2;
             updatedPost.user_vote = 1;
           } else {
-            updatedPost.score = (updatedPost.score || 0) + 1;
+            updatedPost.upvote_count = (updatedPost.upvote_count || 0) + 1;
             updatedPost.user_vote = 1;
           }
         } else if (interaction === 'downvote') {
-          if (updatedPost.user_vote === -1) {
-            updatedPost.score = (updatedPost.score || 0) + 1;
+          const currentVote = updatedPost.user_vote || 0;
+          if (currentVote === -1) {
+            updatedPost.upvote_count = (updatedPost.upvote_count || 0) + 1;
             updatedPost.user_vote = 0;
-          } else if (updatedPost.user_vote === 1) {
-            updatedPost.score = (updatedPost.score || 0) - 2;
+          } else if (currentVote === 1) {
+            updatedPost.upvote_count = Math.max(0, (updatedPost.upvote_count || 0) - 2);
             updatedPost.user_vote = -1;
           } else {
-            updatedPost.score = (updatedPost.score || 0) - 1;
+            updatedPost.upvote_count = Math.max(0, (updatedPost.upvote_count || 0) - 1);
             updatedPost.user_vote = -1;
           }
         } else if (interaction === 'save') {

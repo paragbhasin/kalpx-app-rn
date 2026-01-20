@@ -29,6 +29,7 @@ import SankalpCard from "./SankalpCard";
 import DailyPracticeDetailsCard from "./DailyPracticeDetailsCard";
 import VideoPostPlayer from "./VideoPostPlayer";
 import { getTranslatedPractice } from "../utils/getTranslatedPractice";
+import { getConsistentRandomStats } from "../utils/randomStats";
 
 const { width: screenWidth } = Dimensions.get("window");
 const MEDIA_WIDTH = screenWidth - 24;
@@ -50,6 +51,8 @@ interface SocialPostCardProps {
     onUnsave?: () => void;
     onHide?: () => void;
     onReport?: (reason: string, details: string) => void;
+    onEdit?: () => void;
+    onDelete?: () => void;
     isVisible?: boolean;
 }
 
@@ -94,6 +97,8 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     onUnsave,
     onHide,
     onReport,
+    onEdit,
+    onDelete,
     isVisible,
 }) => {
     const { t, i18n } = useTranslation();
@@ -126,14 +131,16 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     const [showMenu, setShowMenu] = useState(false);
     const [isReportModalVisible, setIsReportModalVisible] = useState(false);
 
-    // Use post.score if available, otherwise fallback to a stable random number for realistic look
-    // We use a ref or state that initializes once to keep the random number stable for this post instance
-    const [randomUpvotes] = useState(() => Math.floor(Math.random() * 950) + 50);
-    const [randomShares] = useState(() => Math.floor(Math.random() * 20) + 10);
+    // Use stable deterministic randoms based on post ID if counts are missing
+    const stableRandoms = useMemo(() => getConsistentRandomStats(post.id || post._activity_id || 0), [post.id, post._activity_id]);
+    const [randomUpvotes] = useState(stableRandoms.upvotes);
+    const [randomShares] = useState(stableRandoms.shares);
 
     const getEffectiveUpvotes = (p: any) => {
-        const val = p.score !== undefined ? p.score : (p.upvote_count || 0);
-        return val || randomUpvotes;
+        // Prioritize actual counts, then score, then our stable random
+        if (p.upvote_count !== undefined && p.upvote_count !== null && p.upvote_count !== 0) return p.upvote_count;
+        if (p.score !== undefined && p.score !== null && p.score !== 0) return p.score;
+        return randomUpvotes;
     };
 
     const getEffectiveShares = (p: any) => {
@@ -467,40 +474,71 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                             onPress={() => setShowMenu(false)}
                         />
                         <View style={styles.menuContainer}>
-                            <TouchableOpacity
-                                style={styles.menuItem}
-                                onPress={() => {
-                                    setShowMenu(false);
-                                    post.is_saved ? onUnsave?.() : onSave?.();
-                                }}
-                            >
-                                <Ionicons name={post.is_saved ? "bookmark" : "bookmark-outline"} size={20} color={post.is_saved ? "#D69E2E" : "#333"} />
-                                <Text style={[styles.menuItemText, post.is_saved && { color: "#D69E2E" }]}>
-                                    {post.is_saved ? t("community.postMenu.unsave") : t("community.postMenu.save")}
-                                </Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={styles.menuItem}
-                                onPress={() => {
-                                    setShowMenu(false);
-                                    onHide?.();
-                                }}
-                            >
-                                <Ionicons name="eye-off-outline" size={20} color="#333" />
-                                <Text style={styles.menuItemText}>{t("community.postMenu.hide")}</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.menuItem, { borderBottomWidth: 0 }]}
-                                onPress={() => {
-                                    setShowMenu(false);
-                                    setIsReportModalVisible(true);
-                                }}
-                            >
-                                <Ionicons name="flag-outline" size={20} color="#FF3B30" />
-                                <Text style={[styles.menuItemText, { color: "#FF3B30" }]}>{t("community.postMenu.report")}</Text>
-                            </TouchableOpacity>
+                            {post.is_creator ? (
+                                <>
+                                    <TouchableOpacity
+                                        style={styles.menuItem}
+                                        onPress={() => {
+                                            setShowMenu(false);
+                                            onEdit?.();
+                                        }}
+                                    >
+                                        <Ionicons name="create-outline" size={20} color="#333" />
+                                        <Text style={styles.menuItemText}>{t("community.postMenu.edit") || "Edit Post"}</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[styles.menuItem, { borderBottomWidth: 0 }]}
+                                        onPress={() => {
+                                            setShowMenu(false);
+                                            onDelete?.();
+                                        }}
+                                    >
+                                        <Ionicons name="trash-outline" size={20} color="#FF3B30" />
+                                        <Text style={[styles.menuItemText, { color: "#FF3B30" }]}>{t("community.postMenu.delete") || "Delete Post"}</Text>
+                                    </TouchableOpacity>
+                                </>
+                            ) : (
+                                <>
+                                    <TouchableOpacity
+                                        style={styles.menuItem}
+                                        onPress={() => {
+                                            setShowMenu(false);
+                                            post.is_saved ? onUnsave?.() : onSave?.();
+                                        }}
+                                    >
+                                        <Ionicons name={post.is_saved ? "bookmark" : "bookmark-outline"} size={20} color={post.is_saved ? "#D69E2E" : "#333"} />
+                                        <Text style={[styles.menuItemText, post.is_saved && { color: "#D69E2E" }]}>
+                                            {post.is_saved ? t("community.postMenu.unsave") : t("community.postMenu.save")}
+                                        </Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={styles.menuItem}
+                                        onPress={() => {
+                                            setShowMenu(false);
+                                            onHide?.();
+                                        }}
+                                    >
+                                        <Ionicons name="eye-off-outline" size={20} color="#333" />
+                                        <Text style={styles.menuItemText}>{t("community.postMenu.hide")}</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[styles.menuItem, { borderBottomWidth: 0 }]}
+                                        onPress={() => {
+                                            setShowMenu(false);
+                                            setIsReportModalVisible(true);
+                                        }}
+                                    >
+                                        <Ionicons name="flag-outline" size={20} color="#FF3B30" />
+                                        <Text style={[styles.menuItemText, { color: "#FF3B30" }]}>{t("community.postMenu.report")}</Text>
+
+                                    </TouchableOpacity>
+                                </>
+
+                            )}
                         </View>
+
                     </>
+
                 )}
             </View>
 

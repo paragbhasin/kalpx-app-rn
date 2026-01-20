@@ -9,6 +9,7 @@ import {
     ScrollView,
     ActivityIndicator,
     Dimensions,
+    Alert
 } from "react-native";
 import { Image } from "expo-image";
 import { useDispatch, useSelector } from "react-redux";
@@ -21,13 +22,23 @@ import { fetchProfileDetails } from "../Profile/actions";
 import SocialPostCard from "../../components/SocialPostCard";
 import { upvotePost, downvotePost, savePost, unsavePost, hidePost } from "../Feed/actions";
 import { reportContent } from "../PostDetail/actions";
-import { followCommunity, unfollowCommunity } from "../Social/actions";
+import { followCommunity, unfollowCommunity, deletePost } from "../Social/actions";
 import { RootState } from "../../store";
 
 import Colors from "../../components/Colors";
 
 
-const { width: screenWidth } = Dimensions.get("window");
+const TAB_TO_TYPE: Record<string, string> = {
+    overview: "my_posts",
+    post: "my_posts",
+    questions: "my_questions",
+    comments: "my_comments",
+    useful: "useful_marks",
+    saved: "saved_posts",
+    hidden: "hidden_posts",
+    upvoted: "upvotes",
+    downvoted: "downvotes"
+};
 
 const UserActivityScreen = ({ onScroll }: { onScroll?: (event: any) => void }) => {
     const { t, i18n } = useTranslation();
@@ -35,7 +46,6 @@ const UserActivityScreen = ({ onScroll }: { onScroll?: (event: any) => void }) =
     const navigation = useNavigation<any>();
     const [activeTab, setActiveTab] = useState("overview");
 
-    // Memoize the state selections to prevent unnecessary re-renders or potential errors
     const userActivity = useSelector((state: any) => state.userActivity || {});
     const profileDetails = useSelector((state: RootState) => state.profileDetailsReducer);
 
@@ -54,26 +64,15 @@ const UserActivityScreen = ({ onScroll }: { onScroll?: (event: any) => void }) =
     ];
 
     useEffect(() => {
-
-        console.log("Fetching profile details...", profileDetails.data); if (!profileDetails.data) {
+        if (!profileDetails.data) {
             dispatch(fetchProfileDetails(() => { }) as any);
         }
         dispatch(fetchUserActivity("stats") as any);
         dispatch(fetchUserActivity("followed_communities") as any);
+    }, [dispatch]);
 
-        const tabToType: any = {
-            overview: "my_posts",
-            post: "my_posts",
-            questions: "my_questions",
-            comments: "my_comments",
-            useful: "useful_marks",
-            saved: "saved_posts",
-            hidden: "hidden_posts",
-            upvoted: "upvotes",
-            downvoted: "downvotes"
-        };
-
-        const type = tabToType[activeTab];
+    useEffect(() => {
+        const type = TAB_TO_TYPE[activeTab];
         if (type) {
             dispatch(fetchUserActivity(type) as any);
         }
@@ -110,6 +109,27 @@ const UserActivityScreen = ({ onScroll }: { onScroll?: (event: any) => void }) =
                     dispatch(followCommunity(communityId) as any);
                 }
             }
+        } else if (type === 'edit') {
+            navigation.navigate('CreateSocialPost', { post: post });
+        } else if (type === 'delete') {
+            Alert.alert("Delete Post", "Are you sure you want to delete this post?", [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+                        const res: any = await dispatch(deletePost(postId) as any);
+                        if (res.success) {
+                            const typeToRefetch = TAB_TO_TYPE[activeTab];
+                            if (typeToRefetch) {
+                                dispatch(fetchUserActivity(typeToRefetch) as any);
+                            }
+                        } else {
+                            Alert.alert("Error", res.error || "Failed to delete post.");
+                        }
+                    }
+                }
+            ]);
         }
     };
 
@@ -149,6 +169,8 @@ const UserActivityScreen = ({ onScroll }: { onScroll?: (event: any) => void }) =
                     onUnsave={() => handleInteraction('unsave', item)}
                     onHide={() => handleInteraction('hide', item)}
                     onReport={(reason, details) => handleInteraction('report', { ...item, reportData: { reason, details } })}
+                    onEdit={() => handleInteraction('edit', item)}
+                    onDelete={() => handleInteraction('delete', item)}
                 />
             </View>
         );
@@ -157,34 +179,12 @@ const UserActivityScreen = ({ onScroll }: { onScroll?: (event: any) => void }) =
     const userProfile = profileDetails.data?.profile || {};
 
     const filteredActivity = () => {
-        const typeMap: any = {
-            overview: "my_posts",
-            post: "my_posts",
-            questions: "my_questions",
-            comments: "my_comments",
-            useful: "useful_marks",
-            saved: "saved_posts",
-            hidden: "hidden_posts",
-            upvoted: "upvotes",
-            downvoted: "downvotes"
-        };
-        const type = typeMap[activeTab];
+        const type = TAB_TO_TYPE[activeTab];
         return userActivity[type]?.data || [];
     };
 
     const isLoadingState = () => {
-        const typeMap: any = {
-            overview: "my_posts",
-            post: "my_posts",
-            questions: "my_questions",
-            comments: "my_comments",
-            useful: "useful_marks",
-            saved: "saved_posts",
-            hidden: "hidden_posts",
-            upvoted: "upvotes",
-            downvoted: "downvotes"
-        };
-        const type = typeMap[activeTab];
+        const type = TAB_TO_TYPE[activeTab];
         return userActivity[type]?.loading || userActivity?.stats?.loading;
     };
 
@@ -195,7 +195,7 @@ const UserActivityScreen = ({ onScroll }: { onScroll?: (event: any) => void }) =
             <FlatList
                 data={data}
                 renderItem={renderActivityItem}
-                keyExtractor={(item) => (item.id || item._activity_id || Math.random().toString()).toString()}
+                keyExtractor={(item, index) => `${item._activity_id || item.id || 'activity'}-${index}`}
                 ListHeaderComponent={
                     <View style={styles.headerContainer}>
                         {/* Profile Header */}

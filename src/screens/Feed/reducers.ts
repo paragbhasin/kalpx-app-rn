@@ -48,15 +48,39 @@ const initialFeedState = {
 const updateVote = (posts, id, type) => {
     return posts.map(p => {
         if (p.id === id) {
-            let change = 0;
+            const currentVote = p.user_vote || 0;
+            let newVote = 0;
+            let countChange = 0;
+
             if (type === 'upvote') {
-                // If already upvoted, no change (or toggle off?). Assuming naive toggle ON here
-                // Logic in Vue: toggle based on current state.
-                // Simplified: Just mark as upvoted, increment count if not already
-                return { ...p, is_upvoted: true, is_downvoted: false, upvote_count: (p.upvote_count || 0) + 1 };
+                if (currentVote === 1) {
+                    newVote = 0;
+                    countChange = -1;
+                } else if (currentVote === -1) {
+                    newVote = 1;
+                    countChange = 2;
+                } else {
+                    newVote = 1;
+                    countChange = 1;
+                }
             } else {
-                return { ...p, is_upvoted: false, is_downvoted: true, upvote_count: Math.max(0, (p.upvote_count || 0) - 1) };
+                if (currentVote === -1) {
+                    newVote = 0;
+                    countChange = 1;
+                } else if (currentVote === 1) {
+                    newVote = -1;
+                    countChange = -2;
+                } else {
+                    newVote = -1;
+                    countChange = -1;
+                }
             }
+
+            return {
+                ...p,
+                user_vote: newVote,
+                upvote_count: Math.max(0, (p.upvote_count || 0) + countChange)
+            };
         }
         return p;
     });

@@ -26,7 +26,12 @@ export const userActivityReducer = (state = initialUserActivityState, action: an
         case FETCH_USER_ACTIVITY_REQUEST:
             return {
                 ...state,
-                [action.payload.activityType]: { ...state[action.payload.activityType], loading: true, error: null },
+                [action.payload.activityType]: {
+                    ...state[action.payload.activityType],
+                    loading: true,
+                    data: [], // Clear old data to show loader during refresh
+                    error: null
+                },
             };
         case FETCH_USER_ACTIVITY_SUCCESS:
             return {

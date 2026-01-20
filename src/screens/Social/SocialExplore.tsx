@@ -19,7 +19,7 @@ import { FlatList, ActivityIndicator, Alert } from "react-native";
 import { Video, ResizeMode } from 'expo-av';
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUserActivity } from "../UserActivity/actions";
-import { followCommunity, unfollowCommunity } from "./actions";
+import { followCommunity, unfollowCommunity, deletePost } from "./actions";
 import { votePostDetail, savePostDetail, unsavePostDetail, hidePostDetail, reportContent } from "../PostDetail/actions";
 import styles from "./SocialExplorestyles";
 
@@ -212,6 +212,24 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
     } else if (type === 'hide') {
       setItems(prev => prev.filter(item => (item.community_post?.id || item.id) !== post.id));
       dispatch(hidePostDetail(post.id) as any);
+    } else if (type === 'edit') {
+      navigation.navigate('CreateSocialPost', { post });
+    } else if (type === 'delete') {
+      Alert.alert("Delete Post", "Are you sure you want to delete this post?", [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            const res: any = await dispatch(deletePost(post.id) as any);
+            if (res.success) {
+              setItems(prev => prev.filter(item => (item.community_post?.id || item.id) !== post.id));
+            } else {
+              Alert.alert("Error", res.error || "Failed to delete post");
+            }
+          }
+        }
+      ]);
     }
   };
 
@@ -289,6 +307,17 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
               isMuted={true}
               isLooping={true}
             />
+            <View style={{
+              position: 'absolute',
+              top: 8,
+              left: 8,
+              backgroundColor: 'rgba(0,0,0,0.4)',
+              borderRadius: 4,
+              padding: 4,
+              zIndex: 2
+            }}>
+              <Ionicons name="videocam" size={14} color="white" />
+            </View>
             {!isVisible && (
               <View style={{
                 position: 'absolute',
@@ -359,6 +388,8 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
           dispatch(reportContent('post', mergedPost.id, reason, details) as any);
           Alert.alert(t("community.reportedTitle"), t("community.reportedMessage"));
         }}
+        onEdit={() => handleInteraction('edit', mergedPost)}
+        onDelete={() => handleInteraction('delete', mergedPost)}
         onUserPress={() => { }} // Handle if needed
         isVisible={isVisible}
       />

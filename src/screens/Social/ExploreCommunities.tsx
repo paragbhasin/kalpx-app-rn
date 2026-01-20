@@ -40,9 +40,9 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
         }
     }, [activeTab, dispatch]);
 
-    const loadCommunities = (page = 1) => {
+    const loadCommunities = React.useCallback((page = 1) => {
         dispatch(fetchCommunities(page) as any);
-    };
+    }, [dispatch]);
 
     const onRefresh = async () => {
         setRefreshing(true);
@@ -60,88 +60,90 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
         }
     };
 
-    const handleFollowToggle = (community: any) => {
-        const isFollowed = community.is_followed ||
-            followed_communities.data.some((c: any) => {
-                const cSlug = c.slug?.toLowerCase();
-                const itemSlug = (community.slug || community.community_slug)?.toLowerCase();
-                const cId = c.id?.toString();
-                const itemId = (community.id || community.community_id || community.community)?.toString();
-
-                return (cSlug && itemSlug && cSlug === itemSlug) || (cId && itemId && cId === itemId);
+    const followedSet = React.useMemo(() => {
+        const set = new Set();
+        if (followed_communities?.data) {
+            followed_communities.data.forEach((c: any) => {
+                if (c.slug) set.add(c.slug.toLowerCase());
+                if (c.id) set.add(c.id.toString());
             });
+        }
+        return set;
+    }, [followed_communities.data]);
 
+    const filteredCommunities = React.useMemo(() => {
+        const raw = activeTab === "all"
+            ? communities
+            : (followed_communities?.data || []).map((c: any) => ({ ...c, is_followed: true }));
+
+        return raw.map((item: any) => {
+            const isFollowed = item.is_followed ||
+                followedSet.has(item.slug?.toLowerCase()) ||
+                followedSet.has(item.community_slug?.toLowerCase()) ||
+                followedSet.has(item.id?.toString()) ||
+                followedSet.has(item.community_id?.toString()) ||
+                followedSet.has(item.community?.toString());
+            return { ...item, is_followed: isFollowed };
+        });
+    }, [communities, followed_communities.data, activeTab, followedSet]);
+
+    const handleFollowToggle = React.useCallback((community: any) => {
+        const isFollowed = community.is_followed ||
+            followedSet.has(community.slug?.toLowerCase()) ||
+            followedSet.has(community.community_slug?.toLowerCase()) ||
+            followedSet.has(community.id?.toString()) ||
+            followedSet.has(community.community_id?.toString()) ||
+            followedSet.has(community.community?.toString());
 
         if (isFollowed) {
             dispatch(unfollowCommunity(community.slug) as any);
         } else {
             dispatch(followCommunity(community.slug) as any);
         }
-    };
-
-
-    const filteredCommunities = activeTab === "all"
-        ? communities
-        : followed_communities.data.map((c: any) => ({ ...c, is_followed: true }));
+    }, [dispatch, followedSet]);
 
     const isLoading = activeTab === "all" ? loading : followed_communities.loading;
 
-    const renderCommunityCard = ({ item }: { item: any }) => (
-        <View style={styles.card}>
-            <View style={styles.cardHeader}>
+    const renderCommunityCard = React.useCallback(({ item }: { item: any }) => {
+        const isFollowed = item.is_followed;
+
+        return (
+            <View style={styles.card}>
+                <View style={styles.cardHeader}>
+                    <TouchableOpacity
+                        style={styles.communityInfo}
+                        onPress={() => navigation.navigate("CommunityDetail", { slug: item.slug })}
+                    >
+                        <Text style={styles.communityName}>{item.name}</Text>
+                        <Text style={styles.visitorCount}>
+                            {t("community.weeklyVisitors", { count: item.weekly_visitors || Math.floor(Math.random() * 50 + 50) })}
+                        </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[
+                            styles.joinButton,
+                            isFollowed && styles.joinedButton,
+                        ]}
+                        onPress={() => handleFollowToggle(item)}
+                    >
+                        <Text style={[styles.joinText, isFollowed && styles.joinedText]}>
+                            {isFollowed ? t("community.joined") : t("community.join")}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
                 <TouchableOpacity
-                    style={styles.communityInfo}
                     onPress={() => navigation.navigate("CommunityDetail", { slug: item.slug })}
                 >
-                    <Text style={styles.communityName}>{item.name}</Text>
-                    <Text style={styles.visitorCount}>
-                        {t("community.weeklyVisitors", { count: item.weekly_visitors || Math.floor(Math.random() * 50 + 50) })}
+                    <Text style={styles.description} numberOfLines={3}>
+                        {item.description || "Share festival memories, meanings, and ways to keep their sacred essence alive."}
                     </Text>
                 </TouchableOpacity>
-                <TouchableOpacity
-                    style={[
-                        styles.joinButton,
-                        (item.is_followed || followed_communities.data.some((c: any) => {
-                            const cSlug = c.slug?.toLowerCase();
-                            const itemSlug = (item.slug || item.community_slug)?.toLowerCase();
-                            const cId = c.id?.toString();
-                            const itemId = (item.id || item.community_id || item.community)?.toString();
-                            return (cSlug && itemSlug && cSlug === itemSlug) || (cId && itemId && cId === itemId);
-                        })) && styles.joinedButton,
-                    ]}
-                    onPress={() => handleFollowToggle(item)}
-                >
-                    <Text style={[styles.joinText, (item.is_followed || followed_communities.data.some((c: any) => {
-                        const cSlug = c.slug?.toLowerCase();
-                        const itemSlug = (item.slug || item.community_slug)?.toLowerCase();
-                        const cId = c.id?.toString();
-                        const itemId = (item.id || item.community_id || item.community)?.toString();
-                        return (cSlug && itemSlug && cSlug === itemSlug) || (cId && itemId && cId === itemId);
-                    })) && styles.joinedText]}>
-                        {(item.is_followed || followed_communities.data.some((c: any) => {
-                            const cSlug = c.slug?.toLowerCase();
-                            const itemSlug = (item.slug || item.community_slug)?.toLowerCase();
-                            const cId = c.id?.toString();
-                            const itemId = (item.id || item.community_id || item.community)?.toString();
-                            return (cSlug && itemSlug && cSlug === itemSlug) || (cId && itemId && cId === itemId);
-                        })) ? t("community.joined") : t("community.join")}
-                    </Text>
-                </TouchableOpacity>
-
-
             </View>
-            <TouchableOpacity
-                onPress={() => navigation.navigate("CommunityDetail", { slug: item.slug })}
-            >
-                <Text style={styles.description} numberOfLines={3}>
-                    {item.description || "Share festival memories, meanings, and ways to keep their sacred essence alive."}
-                </Text>
-            </TouchableOpacity>
-        </View>
-    );
+        );
+    }, [navigation, t, handleFollowToggle]);
 
 
-    const renderShimmer = () => (
+    const renderShimmer = React.useCallback(() => (
         <View style={styles.card}>
             <View style={styles.cardHeader}>
                 <View style={styles.communityInfo}>
@@ -154,7 +156,7 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
             <ShimmerPlaceholder width="90%" height={16} style={{ marginBottom: 6 }} />
             <ShimmerPlaceholder width="40%" height={16} />
         </View>
-    );
+    ), []);
 
     return (
         <View style={styles.container}>
@@ -178,7 +180,7 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
                                             activeTab === "all" && styles.activeTabText,
                                         ]}
                                     >
-                                   
+
                                         {t("community.tabs.all")}
                                     </Text>
                                 </TouchableOpacity>
@@ -192,7 +194,7 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
                                             activeTab === "followed" && styles.activeTabText,
                                         ]}
                                     >
-                                   
+
                                         {t("community.tabs.followed")}
                                     </Text>
                                 </TouchableOpacity>
@@ -208,12 +210,19 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
                 <FlatList
                     data={filteredCommunities}
                     renderItem={renderCommunityCard}
-                    keyExtractor={(item) => (item.id || item.slug).toString()}
+                    keyExtractor={(item) => (item.id || item.slug || item.name).toString()}
+                    style={{ flex: 1 }}
                     contentContainerStyle={[styles.listContent, { paddingTop: 110 }]}
                     onEndReached={activeTab === "all" ? handleLoadMore : null}
                     onEndReachedThreshold={0.5}
                     onScroll={onScroll}
                     scrollEventThrottle={16}
+                    removeClippedSubviews={true}
+                    maxToRenderPerBatch={10}
+                    windowSize={10}
+                    initialNumToRender={5}
+                    showsVerticalScrollIndicator={false}
+                    keyboardShouldPersistTaps="handled"
                     refreshControl={
                         <RefreshControl
                             refreshing={refreshing}
@@ -234,7 +243,7 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
                                             activeTab === "all" && styles.activeTabText,
                                         ]}
                                     >
-                                  
+
                                         {t("community.tabs.all")}
                                     </Text>
                                 </TouchableOpacity>
@@ -248,7 +257,7 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
                                             activeTab === "followed" && styles.activeTabText,
                                         ]}
                                     >
-                                       
+
                                         {t("community.tabs.followed")}
                                     </Text>
                                 </TouchableOpacity>

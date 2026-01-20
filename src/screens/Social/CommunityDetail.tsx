@@ -19,7 +19,7 @@ import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { fetchCommunityDetail, fetchCommunityPosts, followCommunity, unfollowCommunity } from "./actions";
+import { fetchCommunityDetail, fetchCommunityPosts, followCommunity, unfollowCommunity, deletePost } from "./actions";
 import { votePostDetail, savePostDetail, unsavePostDetail, hidePostDetail, reportContent } from "../PostDetail/actions";
 import SocialPostCard from "../../components/SocialPostCard";
 import Header from "../../components/Header";
@@ -121,6 +121,27 @@ const CommunityDetail = () => {
                 break;
             case 'report':
                 // report is handled via onReport prop which receives reason and details
+                break;
+            case 'edit':
+                navigation.navigate('CreateSocialPost', { post: post });
+                break;
+            case 'delete':
+                Alert.alert("Delete Post", "Are you sure you want to delete this post?", [
+                    { text: "Cancel", style: "cancel" },
+                    {
+                        text: "Delete",
+                        style: "destructive",
+                        onPress: async () => {
+                            const res: any = await dispatch(deletePost(post.id) as any);
+                            if (res.success) {
+                                // Refresh posts
+                                dispatch(fetchCommunityPosts(slug, 1, sortBy, i18n.language) as any);
+                            } else {
+                                Alert.alert("Error", res.error || "Failed to delete post");
+                            }
+                        }
+                    }
+                ]);
                 break;
         }
     };
@@ -365,6 +386,8 @@ const CommunityDetail = () => {
                             dispatch(reportContent('post', item.id, reason, details) as any);
                             Alert.alert("Reported", "Thank you for reporting. We will review this post.");
                         }}
+                        onEdit={() => handleInteraction('edit', item)}
+                        onDelete={() => handleInteraction('delete', item)}
                     />
                 )}
                 keyExtractor={(item) => item.id.toString()}

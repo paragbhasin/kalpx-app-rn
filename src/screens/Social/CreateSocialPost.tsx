@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import api from "../../Networks/axios";
+import { BASE_IMAGE_URL } from "../../Networks/baseURL";
 import {
     SafeAreaView,
     StyleSheet,
@@ -10,29 +13,100 @@ import {
     Platform,
     ScrollView,
     Modal,
+    Image,
     ActivityIndicator,
 } from "react-native";
-import { Image } from "expo-image";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import { Dropdown } from "react-native-element-dropdown";
 import * as ImagePicker from "expo-image-picker";
-import { createPost, uploadMedia, fetchCommunities } from "./actions";
+import { createPost, uploadMedia, fetchCommunities, updatePost } from "./actions";
 
 const CreateSocialPost = () => {
+    const { t, i18n } = useTranslation();
     const dispatch = useDispatch<any>();
     const navigation = useNavigation<any>();
     const route = useRoute<any>();
     const { data: communities } = useSelector((state: any) => state.communities);
 
+    const editPostData = route.params?.post;
+    const isEditing = !!editPostData;
+
     // Initial community from route params (if navigated from CommunityDetail)
-    const initialCommunity = route.params?.communitySlug || "";
+    const initialCommunity = editPostData?.community?.slug || editPostData?.community_slug || route.params?.communitySlug || "";
 
     const [selectedCommunity, setSelectedCommunity] = useState(initialCommunity);
-    const [title, setTitle] = useState("");
-    const [body, setBody] = useState("");
-    const [mediaFiles, setMediaFiles] = useState<any[]>([]);
+    const [title, setTitle] = useState(editPostData?.title || "");
+    const [body, setBody] = useState(editPostData?.content || "");
+
+    const ensureAbsoluteUrl = (url: any) => {
+        if (!url || typeof url !== 'string') return "";
+        if (url.startsWith("http") || url.startsWith("data:")) return url;
+        // Prepend BASE_IMAGE_URL if it's a relative path
+        return `${BASE_IMAGE_URL}${url.startsWith("/") ? "" : "/"}${url}`;
+    };
+
+    const extractImageUrl = (img: any) => {
+        if (!img) return "";
+        if (typeof img === 'string') return img;
+        return img.image_url || img.image || img.uri || img.url || "";
+    };
+
+    const mapImages = (images: any[], mediaUrl?: string) => {
+        if (!images && !mediaUrl) return [];
+        const mapped = (images || []).map((img: any, idx: number) => {
+            const rawUrl = extractImageUrl(img);
+            const imgUrl = ensureAbsoluteUrl(rawUrl);
+            return {
+                id: `existing_${idx}`,
+                uri: imgUrl,
+                publicUrl: imgUrl,
+                status: "success",
+                type: "image/jpeg"
+            };
+        }).filter(m => m.uri);
+
+        if (mediaUrl) {
+            const videoUrl = ensureAbsoluteUrl(mediaUrl);
+            mapped.push({
+                id: "existing_video",
+                uri: videoUrl,
+                publicUrl: videoUrl,
+                status: "success",
+                type: "video/mp4"
+            });
+        }
+        return mapped;
+    };
+
+    useEffect(() => {
+        if (isEditing && editPostData?.id) {
+            const loadPostDetails = async () => {
+                setIsLoading(true);
+                try {
+                    const res = await api.get(`/posts/${editPostData.id}/?lang=${i18n.language}`);
+                    const fullPost = res.data;
+                    setTitle(fullPost.title || "");
+                    setBody(fullPost.content || "");
+                    setSelectedCommunity(fullPost.community?.slug || fullPost.community_slug || "");
+
+                    if (fullPost.images || fullPost.media_url) {
+                        setMediaFiles(mapImages(fullPost.images, fullPost.media_url));
+                    }
+                } catch (err) {
+                    console.error("Failed to load post details:", err);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            loadPostDetails();
+        }
+    }, [isEditing, editPostData?.id, i18n.language]);
+    const [mediaFiles, setMediaFiles] = useState<any[]>(() => {
+        if (!editPostData) return [];
+        return mapImages(editPostData.images, editPostData.media_url);
+    });
     const [link, setLink] = useState("");
     const [isLinkModalVisible, setIsLinkModalVisible] = useState(false);
     const [tempLink, setTempLink] = useState("");
@@ -74,12 +148,19 @@ const CreateSocialPost = () => {
             } else if (successfulMedia.length > 0) {
                 payload.images = successfulMedia.map(m => m.publicUrl);
                 payload.media_url = "";
+            } else {
+                payload.images = [];
+                payload.media_url = "";
             }
 
-            await dispatch(createPost(payload));
+            if (isEditing) {
+                await dispatch(updatePost(editPostData.id, payload));
+            } else {
+                await dispatch(createPost(payload));
+            }
             navigation.goBack();
         } catch (err: any) {
-            setPostError(err.message || "Failed to create post");
+            setPostError(err.message || "Failed to save post");
         } finally {
             setIsLoading(false);
         }
@@ -160,7 +241,7 @@ const CreateSocialPost = () => {
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerIcon}>
                     <Ionicons name="close-outline" size={28} color="#000" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Create Post</Text>
+                <Text style={styles.headerTitle}>{isEditing ? "Edit Post" : "Create Post"}</Text>
                 <TouchableOpacity
                     onPress={handlePost}
                     disabled={isPostDisabled}
@@ -230,6 +311,11 @@ const CreateSocialPost = () => {
                                 {mediaFiles.map((item) => (
                                     <View key={item.id} style={styles.imageWrapper}>
                                         <Image source={{ uri: item.uri }} style={styles.previewImage} />
+                                        {item.type?.startsWith("video/") && (
+                                            <View style={styles.videoOverlay}>
+                                                <Ionicons name="play-circle" size={40} color="#FFF" />
+                                            </View>
+                                        )}
                                         {item.status === 'uploading' && (
                                             <View style={styles.uploadOverlay}>
                                                 <ActivityIndicator size="small" color="#FFF" />
@@ -445,6 +531,17 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    videoOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0,0,0,0.2)',
+        borderRadius: 8,
     },
     removeImageButton: {
         position: "absolute",

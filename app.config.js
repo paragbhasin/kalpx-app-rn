@@ -27,7 +27,7 @@ module.exports = {
     icon: "./assets/AppIconImg.png",
     scheme: "kalpx",
     userInterfaceStyle: "automatic",
-    newArchEnabled: false,
+    newArchEnabled: true,
     updates: {
       enabled: false,
     },
@@ -82,14 +82,10 @@ module.exports = {
           backgroundColor: "#ffffff",
         },
       ],
+      "./plugins/withModularHeaders",
       [
         "expo-build-properties",
-        {
-          ios: {
-            useFrameworks: "static",
-            useModularHeaders: true,
-          },
-        },
+        {},
       ],
       [
         "@stripe/stripe-react-native",

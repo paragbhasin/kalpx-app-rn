@@ -14,7 +14,7 @@ import {
   View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
 import Colors from "../../components/Colors";
 import TextComponent from "../../components/TextComponent";
@@ -57,7 +57,8 @@ const CustomDrawerContent = (props) => {
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
 
 
-  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+  const user = useSelector((state: RootState) => state.login?.user || state.socialLoginReducer?.user);
+  const [isLoggedIn, setIsLoggedIn] = React.useState(!!user);
   const [trackerData, setTrackerData] = React.useState(null);  // ✅ ADD THIS
 
   // -----------------------------
@@ -76,12 +77,18 @@ const CustomDrawerContent = (props) => {
   }, [dispatch]);
 
   React.useEffect(() => {
+    setIsLoggedIn(!!user);
+  }, [user]);
+
+  React.useEffect(() => {
     const checkLogin = async () => {
       const token = await AsyncStorage.getItem("access_token");
-      setIsLoggedIn(!!token);
+      if (token && !isLoggedIn) {
+        setIsLoggedIn(true);
+      }
     };
     checkLogin();
-  }, []);
+  }, [isLoggedIn]);
 
   const handleLogout = async () => {
     await AsyncStorage.clear();

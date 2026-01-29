@@ -80,6 +80,7 @@ export const socialLoginUser = (credentials, callback) => async (dispatch) => {
     await AsyncStorage.setItem("user_id", `${response.data.user.id}`);
     // await registerDeviceToBackend();
     dispatch(socialLoginSuccess(response.data));
+    dispatch(loginSuccess(response.data)); // Sync with main login slice
     callback?.({ success: true, data: response.data });
   } catch (error) {
     console.error("❌ API Error:", error);

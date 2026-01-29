@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../Networks/axios";
 import { registerDeviceToBackend } from "../../utils/registerDevice";
+import { loginSuccess } from "../Login/actions";
 
 export const SIGNUP_REQUEST = "SIGNUP_REQUEST";
 export const SIGNUP_SUCCESS = "SIGNUP_SUCCESS";
@@ -37,21 +38,21 @@ export const generateOtpFailure = (error) => ({
 
 export const verifyOtpRequest = () => ({ type: VERIFY_OTP_REQUEST });
 export const verifyOtpSuccess = (res) => ({
-  type: FORGOT_PASSWORD_SUCCESS,
+  type: VERIFY_OTP_SUCCESS,
   payload: res.user,
 });
 export const verifyOtpFailure = (error) => ({
-  type: FORGOT_PASSWORD_FAILURE,
+  type: VERIFY_OTP_FAILURE,
   payload: error,
 });
 
 export const forgotPasswordRequest = () => ({ type: FORGOT_PASSWORD_REQUEST });
 export const forgotPasswordSuccess = (res) => ({
-  type: VERIFY_OTP_SUCCESS,
+  type: FORGOT_PASSWORD_SUCCESS,
   payload: res.user,
 });
 export const forgotPasswordFailure = (error) => ({
-  type: VERIFY_OTP_FAILURE,
+  type: FORGOT_PASSWORD_FAILURE,
   payload: error,
 });
 
@@ -61,9 +62,10 @@ export const signupUser = (credentials, callback) => async (dispatch) => {
     const response: any = await signupApi(credentials);
     AsyncStorage.setItem("access_token", response.access_token);
     AsyncStorage.setItem("refresh_token", response.refresh_token);
-       await registerDeviceToBackend();
-    dispatch(signupSuccess(response));
-    if (callback) callback({ success: true, data: response });
+    await registerDeviceToBackend();
+    dispatch(signupSuccess(response.data));
+    dispatch(loginSuccess(response.data)); // Sync with main login slice
+    if (callback) callback({ success: true, data: response.data });
   } catch (error) {
     dispatch(signupFailure(error.message));
     if (callback) callback({ success: false, error: error.message });

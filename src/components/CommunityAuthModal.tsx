@@ -197,44 +197,31 @@ const CommunityAuthModal: React.FC<CommunityAuthModalProps> = ({
     };
 
     const verifyOtpAndRegister = async (recaptchaToken: string) => {
-        // 1. Verify OTP
-        dispatch(verifyOtp({
+        setLoading(true);
+        // We call signupUser directly because it takes the 'otp' and handles 
+        // both verification and registration in a single request.
+        // This avoids reusing the same ReCAPTCHA token for two sequential API calls.
+        dispatch(signupUser({
             email: email.trim().toLowerCase(),
             otp: otp.trim(),
+            username: email.split("@")[0] + "_" + Math.floor(Math.random() * 1000),
+            password1: password,
+            password2: password,
+            role: "user",
             recaptcha_token: recaptchaToken,
-            recaptcha_action: "verify_otp",
-            context: "registration",
-            user_type: "user",
-        }, async (verifyRes: any) => {
-            if (verifyRes.success) {
-                // 2. Register
-                dispatch(signupUser({
-                    email: email.trim().toLowerCase(),
-                    otp: otp.trim(),
-                    username: email.split("@")[0] + "_" + Math.floor(Math.random() * 1000),
-                    password1: password,
-                    password2: password,
-                    role: "user",
-                    recaptcha_token: recaptchaToken,
-                    recaptcha_action: "register",
-                }, (regRes: any) => {
-                    setLoading(false);
-                    if (regRes.success) {
-                        dispatch(showSnackBar("Login successful"));
-                        onClose();
-                    } else {
-                        // If already exists, try to login or handle error
-                        if (regRes.error?.toLowerCase().includes("exists")) {
-                            // If it exists, they should have used proper login, but let's try to just close or show error
-                            setOtpError("Account already exists. Please log in.");
-                        } else {
-                            setOtpError(regRes.error || "Registration failed");
-                        }
-                    }
-                }));
+            recaptcha_action: "register",
+        }, (regRes: any) => {
+            setLoading(false);
+            if (regRes.success) {
+                dispatch(showSnackBar("Login successful"));
+                onClose();
             } else {
-                setLoading(false);
-                setOtpError(verifyRes.error || "Verification failed");
+                // If already exists, try to login or handle error
+                if (regRes.error?.toLowerCase().includes("exists")) {
+                    setOtpError("Account already exists. Please log in.");
+                } else {
+                    setOtpError(regRes.error || "Registration failed");
+                }
             }
         }));
     };

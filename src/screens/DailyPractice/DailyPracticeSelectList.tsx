@@ -7,21 +7,22 @@ import { ScrollView, TouchableOpacity, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
 
-import CartModal from "../../components/CartModal"; // ⭐ ADDED
+import CartModal from "../../components/CartModal";
 import Colors from "../../components/Colors";
+import CommunityAuthModal from "../../components/CommunityAuthModal";
 import DailyPracticeMantraCard from "../../components/DailyPracticeMantraCard";
 import Header from "../../components/Header";
 import LoadingButton from "../../components/LoadingButton";
 import LoadingOverlay from "../../components/LoadingOverlay";
 import TextComponent from "../../components/TextComponent";
-import { useCart } from "../../context/CartContext"; // ⭐ ADDED
+import { useCart } from "../../context/CartContext";
 
 import moment from "moment";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useUserLocation } from "../../components/useUserLocation";
 import i18n from "../../config/i18n";
 import { RootState } from "../../store";
-import { submitDailyDharmaSetup } from "../Home/actions";
+import { submitDailyDharmaSetup, getDailyDharmaTracker } from "../Home/actions";
 import { fetchDailyPractice } from "../Streak/actions";
 import styles from "./DailyPracticeSelectListStyles";
 
@@ -35,6 +36,11 @@ const DailyPracticeSelectList = ({ route }) => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [mantraReps, setMantraReps] = useState(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [pendingSubmitPayload, setPendingSubmitPayload] = useState<any>(null);
+  
+  const user = useSelector((state: RootState) => state.login?.user || state.socialLoginReducer?.user);
+  const isUserLoggedIn = !!user;
 
   const resumedSelections = route?.params?.resumedSelections ?? null;
 
@@ -103,6 +109,97 @@ useEffect(() => {
     dispatch(fetchDailyPractice(today, locationData.timezone));
   }
 }, [locationLoading, locationData?.timezone]);
+
+// Debug: Track login state changes
+useEffect(() => {
+  console.log("👤 User login state changed:", { isUserLoggedIn, user: !!user });
+}, [isUserLoggedIn]);
+
+// ✅ Auto-submit practices after authentication
+// This useEffect watches for user login state changes. When a user authenticates
+// through the CommunityAuthModal, isUserLoggedIn becomes true and this effect:
+// 1. Fetches the daily practice tracker data (to get active practices)
+// 2. Combines active practices with new practices from pendingSubmitPayload
+// 3. Submits the combined list to the setup API
+// 4. Navigates to Tracker on success
+useEffect(() => {
+  if (isUserLoggedIn && pendingSubmitPayload && !loading) {
+    console.log("🚀 Auto-submit triggered!", { isUserLoggedIn, hasPendingPayload: !!pendingSubmitPayload });
+    
+    const fetchAndSubmit = async () => {
+      setLoading(true);
+      setShowAuthModal(false); // Close modal before submitting
+      
+      console.log("📥 Fetching existing practices from tracker API...");
+      
+      // Step 1: Fetch current tracker data with callback
+      dispatch(getDailyDharmaTracker(async (trackerRes) => {
+        console.log("📊 Tracker API response:", trackerRes);
+        
+        const token = await AsyncStorage.getItem("access_token");
+        
+        if (trackerRes.success) {
+          // Step 2: Get active practices from API response
+          const currentActivePractices = trackerRes.data?.active_practices || [];
+          console.log("📊 Current active practices:", currentActivePractices.length);
+          
+          // Step 3: Normalize active practices
+          const normalizedActive = currentActivePractices.map(normalizeApiPractice);
+          
+          // Step 4: Get new practices from pending payload
+          const newPractices = pendingSubmitPayload.practices || [];
+          console.log("✨ New practices to add:", newPractices.length);
+          
+          // Step 5: Filter out duplicates (don't add if already active)
+          const filteredNew = newPractices.filter(
+            (newP) => !normalizedActive.some(
+              (activeP) => activeP.practice_id === newP.practice_id
+            )
+          );
+          
+          // Step 6: Combine active + new practices
+          const combinedPractices = [...normalizedActive, ...filteredNew];
+          console.log("🔗 Combined practices:", combinedPractices.length, "(active:", normalizedActive.length, "+ new:", filteredNew.length, ")");
+          
+          const finalPayload = {
+            practices: combinedPractices,
+            is_authenticated: true,
+            recaptcha_token: token || "not_available",
+          };
+          
+          console.log("📤 Submitting combined practices:", JSON.stringify(finalPayload));
+          
+          dispatch(submitDailyDharmaSetup(finalPayload, (res) => {
+            console.log("✅ Submit response:", res);
+            setLoading(false);
+            setPendingSubmitPayload(null);
+            if (res.success) {
+              console.log("🎯 Navigating to Tracker...");
+              navigation.navigate("TrackerTabs", { screen: "Tracker", fromSetup: true });
+            }
+          }));
+        } else {
+          // If tracker fetch fails, just submit new practices
+          console.log("⚠️ Tracker fetch failed, submitting only new practices");
+          const finalPayload = {
+            ...pendingSubmitPayload,
+            recaptcha_token: token || "not_available",
+          };
+          
+          dispatch(submitDailyDharmaSetup(finalPayload, (res) => {
+            setLoading(false);
+            setPendingSubmitPayload(null);
+            if (res.success) {
+              navigation.navigate("TrackerTabs", { screen: "Tracker", fromSetup: true });
+            }
+          }));
+        }
+      }));
+    };
+    
+    fetchAndSubmit();
+  }
+}, [isUserLoggedIn, pendingSubmitPayload]);
 
 const activeApiPractices =
   dailyPractice?.data?.active_practices || [];
@@ -707,26 +804,15 @@ const buildFinalPractices = () => {
   const token = await AsyncStorage.getItem("access_token");
 
   // 🔐 Not logged in → store FULL payload
-  if (!token) {
-    await AsyncStorage.setItem(
-      "pending_daily_practice_data",
-      JSON.stringify({
-        payload: {
-          practices: finalPractices,
-          is_authenticated: true,
-          recaptcha_token: "not_available",
-        },
-        categoryItem,
-        isLocked: true,
-      })
-    );
-
-    navigation.navigate("Login", {
-      redirect_to: "DailyPracticeSelectList",
-      categoryItem,
-      isLocked: true,
-    });
-
+  if (!isUserLoggedIn) {
+    const payload = {
+      practices: finalPractices,
+      is_authenticated: true,
+      recaptcha_token: "not_available",
+    };
+    console.log("📦 Storing pending payload:", JSON.stringify(payload));
+    setPendingSubmitPayload(payload);
+    setShowAuthModal(true);
     return;
   }
 
@@ -845,6 +931,22 @@ console.log("payload >>>>>>",JSON.stringify(payload));
 <TextComponent type="subDailyText" style={{textAlign:"center",marginTop:10}}>{t('dailyPracticeSelectList.routineFor')}<TextComponent type="boldText" style={{color:"#000000"}}>{categoryItem ? t(`dailyPracticeList.categories.${categoryItem.key}.name`) : t('dailyPracticeSelectList.dailyRoutine')}</TextComponent></TextComponent>
       <LoadingOverlay visible={loading} text={t('common.submitting')} />
       </ScrollView>
+      
+      <CommunityAuthModal
+        visible={showAuthModal}
+        onClose={() => {
+          // Just close the modal - useEffect will handle submission and cleanup
+          setShowAuthModal(false);
+        }}
+        title={t("dailyPracticeSelectList.authTitle", { defaultValue: "Save Your Daily Practice" })}
+        description={t("dailyPracticeSelectList.authDescription", { defaultValue: "Create an account" })}
+        benefits={[
+          t("dailyPracticeSelectList.authBenefit1", { defaultValue: "Save your practice routine" }),
+          t("dailyPracticeSelectList.authBenefit2", { defaultValue: "Track your progress" }),
+
+        ]}
+      />
+      
       {/* </ImageBackground> */}
     </View>
   );

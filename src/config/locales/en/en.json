@@ -1419,7 +1419,12 @@
     "dailyRoutine": "Daily Routine",
     "tapCard": "→ Tap each card to view details.",
     "setMyPlan": "Set my plan",
-    "routineFor": "These will form your routine for "
+    "routineFor": "These will form your routine for ",
+    "authTitle": "Save Your Daily Practice",
+    "authDescription": "Create an account to save and track your spiritual journey",
+    "authBenefit1": "Save your personalized practice routine",
+    "authBenefit2": "Track your progress and streaks",
+    "authBenefit3": "Access your practices across devices"
   },
   "dailyPracticeMantraCard": {
     "descriptions": {

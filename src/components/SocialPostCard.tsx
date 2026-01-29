@@ -21,6 +21,8 @@ import Carousel from "react-native-reanimated-carousel";
 import { Ionicons, MaterialCommunityIcons, SimpleLineIcons } from "@expo/vector-icons";
 import moment from "moment";
 import { useNavigation } from "@react-navigation/native";
+import { useDispatch, useSelector } from "react-redux";
+import CommunityAuthModal from "./CommunityAuthModal";
 import ReportModal from "./ReportModal";
 import { COMMUNITY_BACKGROUNDS } from "../utils/CommunityAssets";
 import { getRawPracticeObject } from "../utils/getPracticeObjectById";
@@ -130,6 +132,25 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     const [isExpanded, setIsExpanded] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
     const [isReportModalVisible, setIsReportModalVisible] = useState(false);
+    const [isAuthModalVisible, setIsAuthModalVisible] = useState(false);
+    const [authModalConfig, setAuthModalConfig] = useState({
+        title: "Join the Community",
+        description: "Be part of meaningful conversations",
+        intent: "general"
+    });
+
+    const dispatch = useDispatch();
+    const user = useSelector((state: any) => state.login?.user);
+    const isAuthenticated = !!user;
+
+    const handleProtectedAction = (action: () => void, config?: any) => {
+        if (isAuthenticated) {
+            action();
+        } else {
+            if (config) setAuthModalConfig(config);
+            setIsAuthModalVisible(true);
+        }
+    };
 
     // Use stable deterministic randoms based on post ID if counts are missing
     const stableRandoms = useMemo(() => getConsistentRandomStats(post.id || post._activity_id || 0), [post.id, post._activity_id]);
@@ -452,7 +473,11 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
 
                         <TouchableOpacity
                             style={[styles.joinButton, post.is_joined && styles.joinedButton]}
-                            onPress={onJoin}
+                            onPress={() => handleProtectedAction(() => onJoin?.(), {
+                                title: "Join this Community",
+                                description: "Connect with like-minded people and share your journey.",
+                                intent: "join_community"
+                            })}
                         >
                             <Text style={[styles.joinButtonText, post.is_joined && styles.joinedText]}>
                                 {post.is_joined ? t("community.joined") : t("community.join")}
@@ -503,7 +528,13 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                                         style={styles.menuItem}
                                         onPress={() => {
                                             setShowMenu(false);
-                                            post.is_saved ? onUnsave?.() : onSave?.();
+                                            handleProtectedAction(() => {
+                                                post.is_saved ? onUnsave?.() : onSave?.();
+                                            }, {
+                                                title: "Save for Later",
+                                                description: "Save this post to your profile to read it again anytime.",
+                                                intent: "save_post"
+                                            });
                                         }}
                                     >
                                         <Ionicons name={post.is_saved ? "bookmark" : "bookmark-outline"} size={20} color={post.is_saved ? "#D69E2E" : "#333"} />
@@ -641,18 +672,24 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                 <View style={styles.leftActions}>
                     <View style={styles.voteGroup}>
                         <TouchableOpacity style={styles.voteButton} onPress={() => {
-                            if (hasUserVoted === 'up') {
-                                setUpvoteCount(prev => Math.max(0, prev - 1));
-                                setHasUserVoted(null);
-                            } else {
-                                if (hasUserVoted === 'down') {
-                                    setUpvoteCount(prev => prev + 2);
+                            handleProtectedAction(() => {
+                                if (hasUserVoted === 'up') {
+                                    setUpvoteCount(prev => Math.max(0, prev - 1));
+                                    setHasUserVoted(null);
                                 } else {
-                                    setUpvoteCount(prev => prev + 1);
+                                    if (hasUserVoted === 'down') {
+                                        setUpvoteCount(prev => prev + 2);
+                                    } else {
+                                        setUpvoteCount(prev => prev + 1);
+                                    }
+                                    setHasUserVoted('up');
                                 }
-                                setHasUserVoted('up');
-                            }
-                            onUpvote?.();
+                                onUpvote?.();
+                            }, {
+                                title: "Upvote this Post",
+                                description: "Show your appreciation for this contribution.",
+                                intent: "upvote"
+                            });
                         }}>
                             <MaterialCommunityIcons
                                 name={hasUserVoted === 'up' ? "arrow-up-bold" : "arrow-up-bold-outline"}
@@ -664,18 +701,24 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                         <Text style={styles.voteCountText}>{upvoteCount}</Text>
 
                         <TouchableOpacity style={styles.voteButton} onPress={() => {
-                            if (hasUserVoted === 'down') {
-                                setUpvoteCount(prev => prev + 1);
-                                setHasUserVoted(null);
-                            } else {
-                                if (hasUserVoted === 'up') {
-                                    setUpvoteCount(prev => Math.max(0, prev - 2));
+                            handleProtectedAction(() => {
+                                if (hasUserVoted === 'down') {
+                                    setUpvoteCount(prev => prev + 1);
+                                    setHasUserVoted(null);
                                 } else {
-                                    setUpvoteCount(prev => Math.max(0, prev - 1));
+                                    if (hasUserVoted === 'up') {
+                                        setUpvoteCount(prev => Math.max(0, prev - 2));
+                                    } else {
+                                        setUpvoteCount(prev => Math.max(0, prev - 1));
+                                    }
+                                    setHasUserVoted('down');
                                 }
-                                setHasUserVoted('down');
-                            }
-                            onDownvote?.();
+                                onDownvote?.();
+                            }, {
+                                title: "Downvote this Post",
+                                description: "Help us keep the community quality high.",
+                                intent: "downvote"
+                            });
                         }}>
                             <MaterialCommunityIcons
                                 name={hasUserVoted === 'down' ? "arrow-down-bold" : "arrow-down-bold-outline"}
@@ -685,7 +728,11 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                         </TouchableOpacity>
                     </View>
 
-                    <TouchableOpacity style={styles.pillButton} onPress={onComment}>
+                    <TouchableOpacity style={styles.pillButton} onPress={() => handleProtectedAction(() => onComment?.(), {
+                        title: "Join the Conversation",
+                        description: "Share your thoughts and connect with others through comments.",
+                        intent: "comment"
+                    })}>
                         <Ionicons name="chatbubble-outline" size={18} color="#666" />
                         <Text style={styles.pillButtonText}>{post.comment_count || 0}</Text>
                     </TouchableOpacity>
@@ -697,7 +744,11 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                     </TouchableOpacity>
                 </View>
 
-                <TouchableOpacity style={styles.askButton} onPress={onAskQuestion}>
+                <TouchableOpacity style={styles.askButton} onPress={() => handleProtectedAction(() => onAskQuestion?.(), {
+                    title: "Ask a Question",
+                    description: "Curious about something? Ask the community!",
+                    intent: "ask_question"
+                })}>
                     <Ionicons name="help-circle-outline" size={20} color="#333" />
                     <Text style={styles.askButtonText}>{t("community.post.askQuestion")}</Text>
                 </TouchableOpacity>
@@ -773,7 +824,13 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                 </SafeAreaView>
             </Modal>
 
-
+            <CommunityAuthModal
+                visible={isAuthModalVisible}
+                onClose={() => setIsAuthModalVisible(false)}
+                title={authModalConfig.title}
+                description={authModalConfig.description}
+                intent={authModalConfig.intent}
+            />
 
         </View>
 

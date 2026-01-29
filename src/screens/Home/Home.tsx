@@ -97,7 +97,8 @@ export default function Home() {
   const [showLoginSankalpComplete, setShowLoginSankalpComplete] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [updateType, setUpdateType] = useState("");
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const user = useSelector((state: RootState) => state.login?.user || state.socialLoginReducer?.user);
+  const isLoggedIn = !!user;
   const { setDailyMantras } = usePracticeStore();
   const [apiloading, setApiLoading] = useState(false);
   const [classPage, setClassPage] = useState(1);
@@ -150,17 +151,6 @@ export default function Home() {
     }, [])
   );
 
-  useEffect(() => {
-    const checkLogin = async () => {
-      try {
-        const token = await AsyncStorage.getItem("access_token");
-        setIsLoggedIn(!!token);
-      } catch (error) {
-        console.log("Error checking login:", error);
-      }
-    };
-    checkLogin();
-  }, []);
 
   useEffect(() => {
     const checkForUpdates = async () => {
@@ -1052,7 +1042,7 @@ export default function Home() {
                   .replace(" এবং ", "\nএবং ")
                   .replace(" અને ", "\nઅને ")
                   .replace(" ଏବଂ ", "\nଏବଂ ")
-                  }
+                }
               </TextComponent>
               <TextComponent type="semiBoldBlackText" style={[styles.label, styles.centerLabel]} numberOfLines={2}>
                 {t("dailyPracticeList.categories.career.name")
@@ -1066,7 +1056,7 @@ export default function Home() {
                   .replace(" এবং ", "\nএবং ")
                   .replace(" અને ", "\nઅને ")
                   .replace(" ଏବଂ ", "\nଏବଂ ")
-                  }
+                }
               </TextComponent>
               <TextComponent type="semiBoldBlackText" style={[styles.label, styles.rightLabel]} numberOfLines={2}>
                 {t("dailyPracticeList.categories.spiritual-growth.name").replace(" ", "\n")}

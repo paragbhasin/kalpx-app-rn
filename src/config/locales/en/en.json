@@ -1415,23 +1415,8 @@
       }
     }
   },
-  "trackerEdit": {
-    "authTitle": "Save Your Routine",
-    "authDescription": "Create an account to save your routine",
-    "authBenefit1": "Track your daily practice",
-    "authBenefit2": "Save your custom routine"
-  },
-  "dailyPracticeSelectList": {
-    "dailyRoutine": "Daily Routine",
-    "tapCard": "→ Tap each card to view details.",
-    "setMyPlan": "Set my plan",
-    "routineFor": "These will form your routine for ",
-    "authTitle": "Save Your Daily Practice",
-    "authDescription": "Create an account to save and track your spiritual journey",
-    "authBenefit1": "Save your personalized practice routine",
-    "authBenefit2": "Track your progress and streaks",
-    "authBenefit3": "Access your practices across devices"
-  },
+
+
   "dailyPracticeMantraCard": {
     "descriptions": {
       "peace-calm": {
@@ -1524,22 +1509,7 @@
       "dayRequired": "Please select a day"
     }
   },
-  "submitDailyPractices": {
-    "saveSanatan": "Save Sanatan Practices",
-    "createOwn": "Create Your Own Practice",
-    "saveMyPractices": "Save my Practices",
-    "reviewInstruction": "Review your practices before adding them to your routine",
-    "addedPractices": "Added Practices",
-    "routineInstruction": "These will become part of your routine",
-    "save": "Save my Practices",
-    "next": "Next",
-    "footer": "You can edit them anytime",
-    "saving": "Saving...",
-    "authTitle": "Save Your Practice",
-    "authDescription": "Create an account to save and track your practices",
-    "authBenefit1": "Save your personalized practices",
-    "authBenefit2": "Track your daily progress"
-  },
+
   "sanatanPractice": {
     "header": "Select Sanatan Practices",
     "addSelected": "Add Selected Practices to My Routine",
@@ -1739,5 +1709,98 @@
       "voteTitle": "Vote",
       "voteText": "Components & posts can be Upvoted or downvoted. The most interesting content rises to the top."
     }
+  },
+  "communityAuth": {
+    "title": "Join the Community",
+    "description": "Be part of meaningful conversations",
+    "benefits": {
+      "upvote": "Upvote posts you love",
+      "comments": "Share your thoughts with comments",
+      "track": "Track your contributions"
+    },
+    "emailEntry": {
+      "label": "Email Address",
+      "placeholder": "Enter your email",
+      "hint": "We'll only use this to save your activity. No spam ♡",
+      "continue": "Continue with Email",
+      "or": "OR",
+      "google": "Continue with Google",
+      "alreadyAccount": "Already have an account?",
+      "login": "Log In",
+      "terms": "By continuing, you agree to our Terms & Privacy Policy."
+    },
+    "passwordEntry": {
+      "title": "Set Your Password",
+      "description": "Create a secure password to protect your account and save your progress.",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "Enter password",
+      "confirmPasswordLabel": "Confirm Password",
+      "confirmPasswordPlaceholder": "Re-enter password",
+      "changeEmail": "Change Email",
+      "forgotPassword": "Forgot Password?",
+      "continue": "Continue to OTP"
+    },
+    "otpEntry": {
+      "title": "Login Verification",
+      "description": "We've sent a 6-digit code to:",
+      "placeholder": "Enter OTP",
+      "verify": "Verify & Continue",
+      "resend": "Resend code",
+      "resendIn": "Resend in {{seconds}}s",
+      "back": "Back"
+    },
+    "errors": {
+      "emailRequired": "Email is required",
+      "invalidEmail": "Please enter a valid email address",
+      "passwordRequired": "Password is required",
+      "passwordMin": "Password must be at least 8 characters",
+      "passwordMismatch": "Passwords do not match",
+      "otpRequired": "Please enter the 6-digit code",
+      "accountExists": "Account already exists. Please log in.",
+      "registrationFailed": "Registration failed"
+    },
+    "messages": {
+      "loginSuccess": "Login successful",
+      "googleLoginFailed": "Google login failed"
+    }
+  },
+  "classBooking": {
+    "authTitle": "Sign in to Book",
+    "authDescription": "Login to secure your spot and track your classes",
+    "authBenefit1": "Book classes seamlessly",
+    "authBenefit2": "Track your schedule",
+    "authBenefit3": "Get class reminders"
+  },
+  "dailyPracticeSelectList": {
+    "dailyRoutine": "Daily Routine",
+    "setMyPlan": "Set my plan",
+    "tapCard": "Tap card to select/unselect",
+    "routineFor": "Your Routine for ",
+    "authTitle": "Save Your Daily Practice",
+    "authDescription": "Create an account",
+    "authBenefit1": "Save your practice routine",
+    "authBenefit2": "Track your progress"
+  },
+  "trackerEdit": {
+    "authTitle": "Save Your Routine",
+    "authDescription": "Create an account to save your routine",
+    "authBenefit1": "Track your daily practice",
+    "authBenefit2": "Save your custom routine"
+  },
+  "submitDailyPractices": {
+    "saveSanatan": "Save Sanatan Recommendations",
+    "createOwn": "Create Own Practice",
+    "saveMyPractices": "Save My Practices",
+    "reviewInstruction": "Review your selected practices before saving to your daily routine.",
+    "addedPractices": "Added Practices",
+    "routineInstruction": "These will be added to your daily routine.",
+    "save": "Save",
+    "next": "Next",
+    "footer": "Your commitment to growth is a gift to all beings.",
+    "saving": "Saving...",
+    "authTitle": "Save Your Practice",
+    "authDescription": "Create an account",
+    "authBenefit1": "Save your practices",
+    "authBenefit2": "Track progress"
   }
 }

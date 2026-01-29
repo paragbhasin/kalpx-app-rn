@@ -917,12 +917,12 @@ onDayPress={(day) => {
           setShowAuthModal(false);
           setWasBlocked(false);
         }}
-        title="Sign in to Book"
-        description="Login to secure your spot and track your classes"
+        title={t("classBooking.authTitle")}
+        description={t("classBooking.authDescription")}
         benefits={[
-          "Book classes seamlessly",
-          "Track your schedule",
-          "Get class reminders"
+          t("classBooking.authBenefit1"),
+          t("classBooking.authBenefit2"),
+          t("classBooking.authBenefit3")
         ]}
       />
     </SafeAreaView>

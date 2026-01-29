@@ -41,6 +41,8 @@ interface SigninPopupProps {
     bottomText?: string; // last line like "Want a gentle reminder..."
 }
 
+import { useTranslation } from "react-i18next";
+
 const SigninPopup: React.FC<SigninPopupProps> = ({
     visible,
     onConfirmCancel,
@@ -53,6 +55,7 @@ const SigninPopup: React.FC<SigninPopupProps> = ({
     MantraButtonTitle,
     onSadhanPress
 }) => {
+    const { t } = useTranslation();
     const dispatch = useDispatch<any>();
     const navigation: any = useNavigation();
     const recaptchaRef = useRef<any>(null);
@@ -127,27 +130,27 @@ const SigninPopup: React.FC<SigninPopupProps> = ({
                 access_token: tokens.accessToken,
             }, (res: any) => {
                 if (res.success) {
-                    dispatch(showSnackBar("Login successful"));
+                    dispatch(showSnackBar(t('communityAuth.messages.loginSuccess')));
                     onClose();
                 } else {
                     setLoading(false);
-                    dispatch(showSnackBar(res.error || "Google login failed"));
+                    dispatch(showSnackBar(res.error || t('communityAuth.messages.googleLoginFailed')));
                 }
             }));
         } catch (error: any) {
             console.error("Google Sign-In Error:", error);
             setLoading(false);
-            dispatch(showSnackBar("Google login failed"));
+            dispatch(showSnackBar(t('communityAuth.messages.googleLoginFailed')));
         }
     };
 
     const handleContinue = () => {
         if (!email) {
-            setEmailError("Email is required");
+            setEmailError(t('communityAuth.errors.emailRequired'));
             return;
         }
         if (!emailRegex.test(email.trim())) {
-            setEmailError("Please enter a valid email address");
+            setEmailError(t('communityAuth.errors.invalidEmail'));
             return;
         }
         setEmailError("");
@@ -156,15 +159,15 @@ const SigninPopup: React.FC<SigninPopupProps> = ({
 
     const handlePasswordContinue = async () => {
         if (!password) {
-            setPasswordError("Password is required");
+            setPasswordError(t('communityAuth.errors.passwordRequired'));
             return;
         }
         if (password.length < 8) {
-            setPasswordError("Password must be at least 8 characters");
+            setPasswordError(t('communityAuth.errors.passwordMin'));
             return;
         }
         if (password !== confirmPassword) {
-            setPasswordError("Passwords do not match");
+            setPasswordError(t('communityAuth.errors.passwordMismatch'));
             return;
         }
         setPasswordError("");
@@ -199,7 +202,7 @@ const SigninPopup: React.FC<SigninPopupProps> = ({
 
     const handleVerifyOTP = () => {
         if (!otp || otp.length < 4) {
-            setOtpError("Please enter the code");
+            setOtpError(t('communityAuth.errors.otpRequired'));
             return;
         }
         setOtpError("");
@@ -221,13 +224,13 @@ const SigninPopup: React.FC<SigninPopupProps> = ({
         }, (regRes: any) => {
             setLoading(false);
             if (regRes.success) {
-                dispatch(showSnackBar("Login successful"));
+                dispatch(showSnackBar(t('communityAuth.messages.loginSuccess')));
                 onClose();
             } else {
                 if (regRes.error?.toLowerCase().includes("exists")) {
-                    setOtpError("Account already exists. Please log in.");
+                    setOtpError(t('communityAuth.errors.accountExists'));
                 } else {
-                    setOtpError(regRes.error || "Registration failed");
+                    setOtpError(regRes.error || t('communityAuth.errors.registrationFailed'));
                 }
             }
         }));
@@ -295,11 +298,11 @@ const SigninPopup: React.FC<SigninPopupProps> = ({
                         </View>
 
                         <View style={styles.inputGroup}>
-                            <TextComponent type="semiBoldText" style={styles.label}>Email Address</TextComponent>
+                            <TextComponent type="semiBoldText" style={styles.label}>{t('communityAuth.emailEntry.label')}</TextComponent>
                             <TextInput
                                 value={email}
                                 onChangeText={setEmail}
-                                placeholder="Enter your email"
+                                placeholder={t('communityAuth.emailEntry.placeholder')}
                                 keyboardType="email-address"
                                 autoCapitalize="none"
                                 style={[styles.input, emailError ? styles.inputError : null]}
@@ -310,23 +313,23 @@ const SigninPopup: React.FC<SigninPopupProps> = ({
                         </View>
 
                         <TouchableOpacity style={[styles.primaryButton, loading && styles.disabledButton]} onPress={handleContinue} disabled={loading}>
-                            <TextComponent type="boldText" style={styles.primaryButtonText}>Continue with Email</TextComponent>
+                            <TextComponent type="boldText" style={styles.primaryButtonText}>{t('communityAuth.emailEntry.continue')}</TextComponent>
                         </TouchableOpacity>
 
                         <View style={styles.dividerRow}>
                             <View style={styles.divider} />
-                            <TextComponent type="mediumText" style={styles.dividerText}>OR</TextComponent>
+                            <TextComponent type="mediumText" style={styles.dividerText}>{t('communityAuth.emailEntry.or')}</TextComponent>
                             <View style={styles.divider} />
                         </View>
 
                         <TouchableOpacity style={styles.googleButton} onPress={handleGoogleLogin} disabled={loading}>
                             <Image source={require("../../assets/devicon_google.png")} style={styles.googleIcon} />
-                            <TextComponent type="boldText" style={styles.googleButtonText}>Continue with Google</TextComponent>
+                            <TextComponent type="boldText" style={styles.googleButtonText}>{t('communityAuth.emailEntry.google')}</TextComponent>
                         </TouchableOpacity>
 
                         <TouchableOpacity style={styles.footerLink} onPress={() => { onClose(); navigation.navigate("Login"); }}>
                             <TextComponent type="mediumText" style={styles.footerLinkText}>
-                                Already have an account? <TextComponent type="boldText" style={{ color: Colors.Colors.App_theme }}>Log In</TextComponent>
+                                {t('communityAuth.emailEntry.alreadyAccount')} <TextComponent type="boldText" style={{ color: Colors.Colors.App_theme }}>{t('communityAuth.emailEntry.login')}</TextComponent>
                             </TextComponent>
                         </TouchableOpacity>
                     </View>
@@ -339,16 +342,16 @@ const SigninPopup: React.FC<SigninPopupProps> = ({
                             <Ionicons name="arrow-back" size={24} color="#666" />
                         </TouchableOpacity>
                         <Image source={require("../../assets/lotus_icon.png")} style={styles.lotusIcon} resizeMode="contain" />
-                        <TextComponent type="headerSubBoldText" style={styles.title}>Set Password</TextComponent>
-                        <TextComponent type="mediumText" style={styles.modalDescription}>Create a password to save your progress.</TextComponent>
+                        <TextComponent type="headerSubBoldText" style={styles.title}>{t('communityAuth.passwordEntry.title')}</TextComponent>
+                        <TextComponent type="mediumText" style={styles.modalDescription}>{t('communityAuth.passwordEntry.description')}</TextComponent>
 
                         <View style={styles.inputGroup}>
-                            <TextComponent type="semiBoldText" style={styles.label}>Password</TextComponent>
+                            <TextComponent type="semiBoldText" style={styles.label}>{t('communityAuth.passwordEntry.passwordLabel')}</TextComponent>
                             <View style={styles.passwordWrapper}>
                                 <TextInput
                                     value={password}
                                     onChangeText={setPassword}
-                                    placeholder="Enter password"
+                                    placeholder={t('communityAuth.passwordEntry.passwordPlaceholder')}
                                     secureTextEntry={!showPassword}
                                     style={[styles.input, passwordError ? styles.inputError : null, { paddingRight: 50 }]}
                                     placeholderTextColor="#999"
@@ -361,11 +364,11 @@ const SigninPopup: React.FC<SigninPopupProps> = ({
                         </View>
 
                         <View style={styles.inputGroup}>
-                            <TextComponent type="semiBoldText" style={styles.label}>Confirm Password</TextComponent>
+                            <TextComponent type="semiBoldText" style={styles.label}>{t('communityAuth.passwordEntry.confirmPasswordLabel')}</TextComponent>
                             <TextInput
                                 value={confirmPassword}
                                 onChangeText={setConfirmPassword}
-                                placeholder="Re-enter password"
+                                placeholder={t('communityAuth.passwordEntry.confirmPasswordPlaceholder')}
                                 secureTextEntry={!showPassword}
                                 style={[styles.input, passwordError ? styles.inputError : null]}
                                 placeholderTextColor="#999"
@@ -375,7 +378,7 @@ const SigninPopup: React.FC<SigninPopupProps> = ({
                         </View>
 
                         <TouchableOpacity style={[styles.primaryButton, loading && styles.disabledButton]} onPress={handlePasswordContinue} disabled={loading}>
-                            {loading ? <ActivityIndicator color="#fff" /> : <TextComponent type="boldText" style={styles.primaryButtonText}>Continue to OTP</TextComponent>}
+                            {loading ? <ActivityIndicator color="#fff" /> : <TextComponent type="boldText" style={styles.primaryButtonText}>{t('communityAuth.passwordEntry.continue')}</TextComponent>}
                         </TouchableOpacity>
                     </View>
                 );
@@ -389,14 +392,14 @@ const SigninPopup: React.FC<SigninPopupProps> = ({
                         <View style={styles.otpIconCircle}>
                             <TextComponent type="boldText" style={{ fontSize: 32 }}>📧</TextComponent>
                         </View>
-                        <TextComponent type="headerSubBoldText" style={styles.title}>Verify Email</TextComponent>
-                        <TextComponent type="mediumText" style={styles.modalDescription}>We've sent a code to: {email}</TextComponent>
+                        <TextComponent type="headerSubBoldText" style={styles.title}>{t('communityAuth.otpEntry.title')}</TextComponent>
+                        <TextComponent type="mediumText" style={styles.modalDescription}>{t('communityAuth.otpEntry.description')} {email}</TextComponent>
 
                         <View style={styles.inputGroup}>
                             <TextInput
                                 value={otp}
                                 onChangeText={setOtp}
-                                placeholder="Enter OTP"
+                                placeholder={t('communityAuth.otpEntry.placeholder')}
                                 keyboardType="number-pad"
                                 maxLength={6}
                                 style={[styles.otpInput, otpError ? styles.inputError : null]}
@@ -407,13 +410,13 @@ const SigninPopup: React.FC<SigninPopupProps> = ({
                         </View>
 
                         <TouchableOpacity style={[styles.primaryButton, (loading || otp.length < 4) && styles.disabledButton]} onPress={handleVerifyOTP} disabled={loading || otp.length < 4}>
-                            {loading ? <ActivityIndicator color="#fff" /> : <TextComponent type="boldText" style={styles.primaryButtonText}>Verify & Complete</TextComponent>}
+                            {loading ? <ActivityIndicator color="#fff" /> : <TextComponent type="boldText" style={styles.primaryButtonText}>{t('communityAuth.otpEntry.verify')}</TextComponent>}
                         </TouchableOpacity>
 
                         <View style={styles.otpFooter}>
                             <TouchableOpacity onPress={handleResend} disabled={loading || cooldown > 0}>
                                 <TextComponent type="mediumText" style={[styles.resendText, cooldown > 0 && { color: '#ccc' }]}>
-                                    {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend code"}
+                                    {cooldown > 0 ? t('communityAuth.otpEntry.resendIn', { seconds: cooldown }) : t('communityAuth.otpEntry.resend')}
                                 </TextComponent>
                             </TouchableOpacity>
                         </View>

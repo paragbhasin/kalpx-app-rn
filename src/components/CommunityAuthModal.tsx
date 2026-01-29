@@ -43,15 +43,20 @@ interface CommunityAuthModalProps {
 const CommunityAuthModal: React.FC<CommunityAuthModalProps> = ({
     visible,
     onClose,
-    title = "Join the Community",
-    description = "Be part of meaningful conversations",
-    benefits = [
-        "Upvote posts you love",
-        "Share your thoughts with comments",
-        "Track your contributions",
-    ],
+    title,
+    description,
+    benefits,
 }) => {
     const { t } = useTranslation();
+
+    // Defaults using translations
+    const displayTitle = title || t('communityAuth.title');
+    const displayDescription = description || t('communityAuth.description');
+    const displayBenefits = benefits || [
+        t('communityAuth.benefits.upvote'),
+        t('communityAuth.benefits.comments'),
+        t('communityAuth.benefits.track'),
+    ];
     const dispatch = useDispatch<any>();
     const navigation = useNavigation<any>();
     const recaptchaRef = useRef<any>(null);
@@ -114,11 +119,11 @@ const CommunityAuthModal: React.FC<CommunityAuthModalProps> = ({
                 access_token: tokens.accessToken,
             }, (res: any) => {
                 if (res.success) {
-                    dispatch(showSnackBar("Login successful"));
+                    dispatch(showSnackBar(t('communityAuth.messages.loginSuccess')));
                     onClose();
                 } else {
                     setLoading(false);
-                    dispatch(showSnackBar(res.error || "Google login failed"));
+                    dispatch(showSnackBar(res.error || t('communityAuth.messages.googleLoginFailed')));
                 }
             }));
         } catch (error: any) {
@@ -130,11 +135,11 @@ const CommunityAuthModal: React.FC<CommunityAuthModalProps> = ({
 
     const handleContinue = () => {
         if (!email) {
-            setEmailError("Email is required");
+            setEmailError(t('communityAuth.errors.emailRequired'));
             return;
         }
         if (!emailRegex.test(email.trim())) {
-            setEmailError("Please enter a valid email address");
+            setEmailError(t('communityAuth.errors.invalidEmail'));
             return;
         }
         setEmailError("");
@@ -143,15 +148,15 @@ const CommunityAuthModal: React.FC<CommunityAuthModalProps> = ({
 
     const handlePasswordContinue = async () => {
         if (!password) {
-            setPasswordError("Password is required");
+            setPasswordError(t('communityAuth.errors.passwordRequired'));
             return;
         }
         if (password.length < 8) {
-            setPasswordError("Password must be at least 8 characters");
+            setPasswordError(t('communityAuth.errors.passwordMin'));
             return;
         }
         if (password !== confirmPassword) {
-            setPasswordError("Passwords do not match");
+            setPasswordError(t('communityAuth.errors.passwordMismatch'));
             return;
         }
         setPasswordError("");
@@ -188,7 +193,7 @@ const CommunityAuthModal: React.FC<CommunityAuthModalProps> = ({
 
     const handleVerifyOTP = () => {
         if (!otp || otp.length < 4) {
-            setOtpError("Please enter the 6-digit code");
+            setOtpError(t('communityAuth.errors.otpRequired'));
             return;
         }
         setOtpError("");
@@ -218,9 +223,9 @@ const CommunityAuthModal: React.FC<CommunityAuthModalProps> = ({
             } else {
                 // If already exists, try to login or handle error
                 if (regRes.error?.toLowerCase().includes("exists")) {
-                    setOtpError("Account already exists. Please log in.");
+                    setOtpError(t('communityAuth.errors.accountExists'));
                 } else {
-                    setOtpError(regRes.error || "Registration failed");
+                    setOtpError(regRes.error || t('communityAuth.errors.registrationFailed'));
                 }
             }
         }));
@@ -238,11 +243,11 @@ const CommunityAuthModal: React.FC<CommunityAuthModalProps> = ({
                 return (
                     <View style={styles.stepContainer}>
                         <Image source={require("../../assets/lotus_icon.png")} style={styles.icon} resizeMode="contain" />
-                        <TextComponent type="headerSubBoldText" style={styles.modalTitle}>{title}</TextComponent>
-                        <TextComponent type="mediumText" style={styles.modalDescription}>{description}</TextComponent>
+                        <TextComponent type="headerSubBoldText" style={styles.modalTitle}>{displayTitle}</TextComponent>
+                        <TextComponent type="mediumText" style={styles.modalDescription}>{displayDescription}</TextComponent>
 
                         <View style={styles.benefitsContainer}>
-                            {benefits.map((benefit, index) => (
+                            {displayBenefits.map((benefit, index) => (
                                 <View key={index} style={styles.benefitRow}>
                                     <View style={styles.bullet} />
                                     <TextComponent type="mediumText" style={styles.benefitText}>{benefit}</TextComponent>
@@ -251,11 +256,11 @@ const CommunityAuthModal: React.FC<CommunityAuthModalProps> = ({
                         </View>
 
                         <View style={styles.inputGroup}>
-                            <TextComponent type="semiBoldText" style={styles.label}>Email Address</TextComponent>
+                            <TextComponent type="semiBoldText" style={styles.label}>{t('communityAuth.emailEntry.label')}</TextComponent>
                             <TextInput
                                 value={email}
                                 onChangeText={setEmail}
-                                placeholder="Enter your email"
+                                placeholder={t('communityAuth.emailEntry.placeholder')}
                                 keyboardType="email-address"
                                 autoCapitalize="none"
                                 style={[styles.input, emailError ? styles.inputError : null]}
@@ -268,7 +273,7 @@ const CommunityAuthModal: React.FC<CommunityAuthModalProps> = ({
                                 </TextComponent>
                             ) : (
                                 <TextComponent type="mediumText" style={styles.hintText}>
-                                    We'll only use this to save your activity. No spam <TextComponent type="mediumText" style={{ color: '#E6B02E' }}>♡</TextComponent>
+                                    {t('communityAuth.emailEntry.hint')} <TextComponent type="mediumText" style={{ color: '#E6B02E' }}>♡</TextComponent>
                                 </TextComponent>
                             )}
                         </View>
@@ -279,13 +284,13 @@ const CommunityAuthModal: React.FC<CommunityAuthModalProps> = ({
                             disabled={loading}
                         >
                             <TextComponent type="boldText" style={styles.primaryButtonText}>
-                                {loading ? "Verifying..." : "Continue with Email"}
+                                {loading ? t('common.processing') : t('communityAuth.emailEntry.continue')}
                             </TextComponent>
                         </TouchableOpacity>
 
                         <View style={styles.dividerRow}>
                             <View style={styles.divider} />
-                            <TextComponent type="mediumText" style={styles.dividerText}>OR</TextComponent>
+                            <TextComponent type="mediumText" style={styles.dividerText}>{t('communityAuth.emailEntry.or')}</TextComponent>
                             <View style={styles.divider} />
                         </View>
 
@@ -295,7 +300,7 @@ const CommunityAuthModal: React.FC<CommunityAuthModalProps> = ({
                             disabled={loading}
                         >
                             <Image source={require("../../assets/devicon_google.png")} style={styles.googleIcon} />
-                            <TextComponent type="boldText" style={styles.googleButtonText}>Continue with Google</TextComponent>
+                            <TextComponent type="boldText" style={styles.googleButtonText}>{t('communityAuth.emailEntry.google')}</TextComponent>
                         </TouchableOpacity>
 
                         <TouchableOpacity style={styles.footerLink} onPress={() => {
@@ -303,12 +308,12 @@ const CommunityAuthModal: React.FC<CommunityAuthModalProps> = ({
                             navigation.navigate("Login");
                         }}>
                             <TextComponent type="mediumText" style={styles.footerLinkText}>
-                                Already have an account? <TextComponent type="boldText" style={{ color: Colors.Colors.App_theme }}>Log In</TextComponent>
+                                {t('communityAuth.emailEntry.alreadyAccount')} <TextComponent type="boldText" style={{ color: Colors.Colors.App_theme }}>{t('communityAuth.emailEntry.login')}</TextComponent>
                             </TextComponent>
                         </TouchableOpacity>
 
                         <TextComponent type="mediumText" style={styles.disclaimerText}>
-                            By continuing, you agree to our <TextComponent type="mediumText" style={styles.underline}>Terms</TextComponent> & <TextComponent type="mediumText" style={styles.underline}>Privacy Policy</TextComponent>.
+                            {t('communityAuth.emailEntry.terms')}
                         </TextComponent>
                     </View>
                 );
@@ -317,18 +322,18 @@ const CommunityAuthModal: React.FC<CommunityAuthModalProps> = ({
                 return (
                     <View style={styles.stepContainer}>
                         <Image source={require("../../assets/lotus_icon.png")} style={styles.icon} resizeMode="contain" />
-                        <TextComponent type="headerSubBoldText" style={styles.modalTitle}>Set Your Password</TextComponent>
+                        <TextComponent type="headerSubBoldText" style={styles.modalTitle}>{t('communityAuth.passwordEntry.title')}</TextComponent>
                         <TextComponent type="mediumText" style={styles.modalDescription}>
-                            Create a secure password to protect your account and save your progress.
+                            {t('communityAuth.passwordEntry.description')}
                         </TextComponent>
 
                         <View style={styles.inputGroup}>
-                            <TextComponent type="semiBoldText" style={styles.label}>Password</TextComponent>
+                            <TextComponent type="semiBoldText" style={styles.label}>{t('communityAuth.passwordEntry.passwordLabel')}</TextComponent>
                             <View style={styles.passwordWrapper}>
                                 <TextInput
                                     value={password}
                                     onChangeText={setPassword}
-                                    placeholder="Enter password"
+                                    placeholder={t('communityAuth.passwordEntry.passwordPlaceholder')}
                                     secureTextEntry={!showPassword}
                                     style={[styles.input, passwordError ? styles.inputError : null, { paddingRight: 50 }]}
                                     placeholderTextColor="#999"
@@ -344,11 +349,11 @@ const CommunityAuthModal: React.FC<CommunityAuthModalProps> = ({
                         </View>
 
                         <View style={[styles.inputGroup, { marginTop: 15 }]}>
-                            <TextComponent type="semiBoldText" style={styles.label}>Confirm Password</TextComponent>
+                            <TextComponent type="semiBoldText" style={styles.label}>{t('communityAuth.passwordEntry.confirmPasswordLabel')}</TextComponent>
                             <TextInput
                                 value={confirmPassword}
                                 onChangeText={setConfirmPassword}
-                                placeholder="Re-enter password"
+                                placeholder={t('communityAuth.passwordEntry.confirmPasswordPlaceholder')}
                                 secureTextEntry={!showPassword}
                                 style={[styles.input, passwordError ? styles.inputError : null]}
                                 placeholderTextColor="#999"
@@ -363,13 +368,13 @@ const CommunityAuthModal: React.FC<CommunityAuthModalProps> = ({
 
                         <View style={styles.passwordFooter}>
                             <TouchableOpacity onPress={() => setCurrentStep("EMAIL_ENTRY")}>
-                                <TextComponent type="mediumText" style={styles.backToEmail}>Change Email</TextComponent>
+                                <TextComponent type="mediumText" style={styles.backToEmail}>{t('communityAuth.passwordEntry.changeEmail')}</TextComponent>
                             </TouchableOpacity>
                             <TouchableOpacity onPress={() => {
                                 onClose();
                                 navigation.navigate("ForgotPassword");
                             }}>
-                                <TextComponent type="boldText" style={styles.forgotPassword}>Forgot Password?</TextComponent>
+                                <TextComponent type="boldText" style={styles.forgotPassword}>{t('communityAuth.passwordEntry.forgotPassword')}</TextComponent>
                             </TouchableOpacity>
                         </View>
 
@@ -378,7 +383,7 @@ const CommunityAuthModal: React.FC<CommunityAuthModalProps> = ({
                             onPress={handlePasswordContinue}
                             disabled={loading}
                         >
-                            {loading ? <ActivityIndicator color="#fff" /> : <TextComponent type="boldText" style={styles.primaryButtonText}>Continue to OTP</TextComponent>}
+                            {loading ? <ActivityIndicator color="#fff" /> : <TextComponent type="boldText" style={styles.primaryButtonText}>{t('communityAuth.passwordEntry.continue')}</TextComponent>}
                         </TouchableOpacity>
                     </View>
                 );
@@ -389,9 +394,9 @@ const CommunityAuthModal: React.FC<CommunityAuthModalProps> = ({
                         <View style={styles.otpIconCircle}>
                             <TextComponent type="boldText" style={{ fontSize: 40 }}>📧</TextComponent>
                         </View>
-                        <TextComponent type="headerSubBoldText" style={styles.modalTitle}>Login Verification</TextComponent>
+                        <TextComponent type="headerSubBoldText" style={styles.modalTitle}>{t('communityAuth.otpEntry.title')}</TextComponent>
                         <TextComponent type="mediumText" style={styles.modalDescription}>
-                            We've sent a 6-digit code to:
+                            {t('communityAuth.otpEntry.description')}
                         </TextComponent>
 
                         <View style={styles.emailBadge}>
@@ -404,7 +409,7 @@ const CommunityAuthModal: React.FC<CommunityAuthModalProps> = ({
                             <TextInput
                                 value={otp}
                                 onChangeText={setOtp}
-                                placeholder="Enter OTP"
+                                placeholder={t('communityAuth.otpEntry.placeholder')}
                                 keyboardType="number-pad"
                                 maxLength={6}
                                 style={[styles.otpInput, otpError ? styles.inputError : null]}
@@ -423,18 +428,18 @@ const CommunityAuthModal: React.FC<CommunityAuthModalProps> = ({
                             onPress={handleVerifyOTP}
                             disabled={loading || otp.length < 4}
                         >
-                            {loading ? <ActivityIndicator color="#fff" /> : <TextComponent type="boldText" style={styles.primaryButtonText}>Verify & Continue</TextComponent>}
+                            {loading ? <ActivityIndicator color="#fff" /> : <TextComponent type="boldText" style={styles.primaryButtonText}>{t('communityAuth.otpEntry.verify')}</TextComponent>}
                         </TouchableOpacity>
 
                         <View style={styles.otpFooter}>
                             <TouchableOpacity onPress={handleResend} disabled={loading || cooldown > 0}>
                                 <TextComponent type="mediumText" style={[styles.resendText, cooldown > 0 && { color: '#ccc' }]}>
-                                    {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend code"}
+                                    {cooldown > 0 ? t('communityAuth.otpEntry.resendIn', { seconds: cooldown }) : t('communityAuth.otpEntry.resend')}
                                 </TextComponent>
                             </TouchableOpacity>
                             <TextComponent type="mediumText" style={{ color: '#D4A017', marginHorizontal: 15 }}>|</TextComponent>
                             <TouchableOpacity onPress={() => setCurrentStep("PASSWORD_ENTRY")}>
-                                <TextComponent type="mediumText" style={styles.resendText}>Back</TextComponent>
+                                <TextComponent type="mediumText" style={styles.resendText}>{t('communityAuth.otpEntry.back')}</TextComponent>
                             </TouchableOpacity>
                         </View>
                     </View>

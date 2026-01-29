@@ -1390,12 +1390,7 @@
       }
     }
   },
-  "dailyPracticeSelectList": {
-    "dailyRoutine": "दैनिक दिनचर्या",
-    "tapCard": "→ विवरण देखने के लिए प्रत्येक कार्ड पर टैप करें।",
-    "setMyPlan": "मेरी योजना सेट करें",
-    "routineFor": "ये आपके लिए दिनचर्या बनाएंगे "
-  },
+
   "dailyPracticeMantraCard": {
     "descriptions": {
       "peace-calm": {
@@ -1488,18 +1483,7 @@
       "dayRequired": "कृपया एक दिन चुनें"
     }
   },
-  "submitDailyPractices": {
-    "saveSanatan": "सनातन अभ्यास सहेजें",
-    "createOwn": "अपना स्वयं का अभ्यास बनाएँ",
-    "saveMyPractices": "मेरे अभ्यास सहेजें",
-    "reviewInstruction": "अपनी दिनचर्या में जोड़ने से पहले अपने अभ्यासों की समीक्षा करें",
-    "addedPractices": "जुड़े हुए अभ्यास",
-    "routineInstruction": "ये आपकी दिनचर्या का हिस्सा बन जाएंगे",
-    "save": "मेरे अभ्यास सहेजें",
-    "next": "अगला",
-    "footer": "आप इन्हें किसी भी समय बदल सकते हैं",
-    "saving": "सहेजा जा रहा है..."
-  },
+
   "sanatanPractice": {
     "header": "सनातन अभ्यास चुनें",
     "addSelected": "चयनित अभ्यासों को मेरी दिनचर्या में जोड़ें",
@@ -1700,5 +1684,99 @@
       "voteTitle": "वोट",
       "voteText": "पोस्ट को अपवोट या डाउनवोट किया जा सकता है। सबसे दिलचस्प सामग्री सबसे ऊपर आती है।"
     }
+  },
+  "communityAuth": {
+    "title": "समुदाय में शामिल हों",
+    "description": "सार्थक बातचीत का हिस्सा बनें",
+    "benefits": {
+      "upvote": "अपनी पसंद की पोस्ट को अपवोट करें",
+      "comments": "टिप्पणियों के साथ अपने विचार साझा करें",
+      "track": "अपने योगदान को ट्रैक करें"
+    },
+    "emailEntry": {
+      "label": "ईमेल पता",
+      "placeholder": "अपना ईमेल दर्ज करें",
+      "hint": "हम इसका उपयोग केवल आपकी गतिविधि को सहेजने के लिए करेंगे। कोई स्पैम नहीं ♡",
+      "continue": "ईमेल के साथ जारी रखें",
+      "or": "या",
+      "google": "Google के साथ जारी रखें",
+      "alreadyAccount": "क्या आपके पास पहले से खाता है?",
+      "login": "लॉग इन",
+      "terms": "जारी रखकर, आप हमारी शर्तों और गोपनीयता नीति से सहमत होते हैं।"
+    },
+    "passwordEntry": {
+      "title": "अपना पासवर्ड सेट करें",
+      "description": "अपने खाते की सुरक्षा और अपनी प्रगति को सहेजने के लिए एक सुरक्षित पासवर्ड बनाएं।",
+      "passwordLabel": "पासवर्ड",
+      "passwordPlaceholder": "पासवर्ड दर्ज करें",
+      "confirmPasswordLabel": "पासवर्ड की पुष्टि करें",
+      "confirmPasswordPlaceholder": "पासवर्ड फिर से दर्ज करें",
+      "changeEmail": "ईमेल बदलें",
+      "forgotPassword": "पासवर्ड भूल गए?",
+      "continue": "OTP के लिए जारी रखें"
+    },
+    "otpEntry": {
+      "title": "लॉगिन सत्यापन",
+      "description": "हमने 6 अंकों का कोड भेजा है:",
+      "placeholder": "OTP दर्ज करें",
+      "verify": "सत्यापित करें और जारी रखें",
+      "resend": "कोड पुनः भेजें",
+      "resendIn": "{{seconds}}s में पुनः भेजें",
+      "back": "वापस"
+    },
+    "errors": {
+      "emailRequired": "ईमेल आवश्यक है",
+      "invalidEmail": "कृपया एक मान्य ईमेल पता दर्ज करें",
+      "passwordRequired": "पासवर्ड आवश्यक है",
+      "passwordMin": "पासवर्ड कम से कम 8 वर्णों का होना चाहिए",
+      "passwordMismatch": "पासवर्ड मेल नहीं खाते",
+      "otpRequired": "कृपया 6 अंकों का कोड दर्ज करें",
+      "accountExists": "खाता पहले से मौजूद है। कृपया लॉग इन करें।",
+      "registrationFailed": "पंजीकरण विफल रहा"
+    },
+    "messages": {
+      "loginSuccess": "लॉगिन सफल रहा",
+      "googleLoginFailed": "Google लॉगिन विफल रहा"
+    }
+  },
+  "classBooking": {
+    "authTitle": "बुकिंग के लिए साइन इन करें",
+    "authDescription": "अपना स्थान सुरक्षित करने और अपनी कक्षाओं को ट्रैक करने के लिए लॉगिन करें",
+    "authBenefit1": "निर्बाध रूप से कक्षाएं बुक करें",
+    "authBenefit2": "अपनी समय सारिणी ट्रैक करें",
+    "authBenefit3": "कक्षा अनुस्मारक प्राप्त करें"
+  },
+  "trackerEdit": {
+    "authTitle": "अपनी दिनचर्या सहेजें",
+    "authDescription": "अपनी दिनचर्या सहेजने के लिए खाता बनाएं",
+    "authBenefit1": "अपने दैनिक अभ्यास को ट्रैक करें",
+    "authBenefit2": "अपनी कस्टम दिनचर्या सहेजें"
+  },
+  "dailyPracticeSelectList": {
+    "dailyRoutine": "दैनिक दिनचर्या",
+    "setMyPlan": "मेरी योजना निर्धारित करें",
+    "tapCard": "चुनने/अनसेलेक्ट करने के लिए कार्ड पर टैप करें",
+    "routineFor": "आपकी दिनचर्या: ",
+    "authTitle": "अपना दैनिक अभ्यास सहेजें",
+    "authDescription": "खाता बनाएं",
+    "authBenefit1": "अपनी अभ्यास दिनचर्या सहेजें",
+    "authBenefit2": "अपनी प्रगति ट्रैक करें"
+  },
+
+  "submitDailyPractices": {
+    "saveSanatan": "सनातन अनुशंसाएँ सहेजें",
+    "createOwn": "अपना स्वयं का अभ्यास बनाएं",
+    "saveMyPractices": "मेरे अभ्यास सहेजें",
+    "reviewInstruction": "अपनी दैनिक दिनचर्या में सहेजने से पहले अपने चयनित अभ्यासों की समीक्षा करें।",
+    "addedPractices": "जोड़े गए अभ्यास",
+    "routineInstruction": "ये आपकी दैनिक दिनचर्या में जोड़े जाएंगे।",
+    "save": "सहेजें",
+    "next": "अगला",
+    "footer": "आपका विकास के प्रति समर्पण सभी प्राणियों के लिए एक उपहार है।",
+    "saving": "सहेजा जा रहा है...",
+    "authTitle": "अपना अभ्यास सहेजें",
+    "authDescription": "खाता बनाएं",
+    "authBenefit1": "अपने अभ्यास सहेजें",
+    "authBenefit2": "प्रगति ट्रैक करें"
   }
 }

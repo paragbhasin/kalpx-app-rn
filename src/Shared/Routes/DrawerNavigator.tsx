@@ -59,22 +59,24 @@ const CustomDrawerContent = (props) => {
 
   const user = useSelector((state: RootState) => state.login?.user || state.socialLoginReducer?.user);
   const [isLoggedIn, setIsLoggedIn] = React.useState(!!user);
-  const [trackerData, setTrackerData] = React.useState(null);  // ✅ ADD THIS
+  const dailyDharmaTracker = useSelector((state: RootState) => state.dailyDharmaTrackerReducer);
+  const trackerData = dailyDharmaTracker?.data;
+
+  console.log("🪵 Sidebar Debug:", {
+    isLoggedIn,
+    hasTrackerData: !!trackerData,
+    activePractices: trackerData?.active_practices?.length,
+    loading: dailyDharmaTracker?.loading
+  });
 
   // -----------------------------
   // ✅ FETCH DAILY DHARMA TRACKER HERE
   // -----------------------------
   React.useEffect(() => {
-    dispatch(
-      getDailyDharmaTracker((res) => {
-        if (res.success) {
-          setTrackerData(res.data);
-        } else {
-          console.log("❌ Failed to load tracker:", res.error);
-        }
-      })
-    );
-  }, [dispatch]);
+    if (isLoggedIn) {
+      dispatch(getDailyDharmaTracker(() => { }));
+    }
+  }, [dispatch, isLoggedIn]);
 
   React.useEffect(() => {
     setIsLoggedIn(!!user);

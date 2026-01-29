@@ -1415,6 +1415,12 @@
       }
     }
   },
+  "trackerEdit": {
+    "authTitle": "Save Your Routine",
+    "authDescription": "Create an account to save your routine",
+    "authBenefit1": "Track your daily practice",
+    "authBenefit2": "Save your custom routine"
+  },
   "dailyPracticeSelectList": {
     "dailyRoutine": "Daily Routine",
     "tapCard": "→ Tap each card to view details.",
@@ -1528,7 +1534,11 @@
     "save": "Save my Practices",
     "next": "Next",
     "footer": "You can edit them anytime",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "authTitle": "Save Your Practice",
+    "authDescription": "Create an account to save and track your practices",
+    "authBenefit1": "Save your personalized practices",
+    "authBenefit2": "Track your daily progress"
   },
   "sanatanPractice": {
     "header": "Select Sanatan Practices",

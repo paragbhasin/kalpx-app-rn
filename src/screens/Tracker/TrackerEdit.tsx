@@ -24,6 +24,7 @@ import { useScrollContext } from "../../context/ScrollContext";
 import { Animated } from "react-native";
 import AddPracticeInputModal from "../../components/AddPracticeInputModal";
 import CartModal from "../../components/CartModal";
+import CommunityAuthModal from "../../components/CommunityAuthModal";
 import Colors from "../../components/Colors";
 import ConfirmDiscardModal from "../../components/ConfirmDiscardModal";
 import DailyPracticeDetailsCard from "../../components/DailyPracticeDetailsCard";
@@ -198,6 +199,13 @@ const TrackerEdit = ({ route }) => {
   const [discardModalVisible, setDiscardModalVisible] = useState(false);
   const [allowHydrate, setAllowHydrate] = useState(true);
   const [removedApiOnce, setRemovedApiOnce] = useState(false);
+
+  // Auth modal state
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [pendingSubmitPayload, setPendingSubmitPayload] = useState<any>(null);
+
+  const user = useSelector((state: RootState) => state.login?.user || state.socialLoginReducer?.user);
+  const isUserLoggedIn = !!user;
 
 
   // const [sanatanRenderCount, setSanatanRenderCount] = useState(15);
@@ -654,6 +662,46 @@ const TrackerEdit = ({ route }) => {
     selectedSankalpFromRoute,
   ]);
 
+  // Debug: Track login state changes
+  useEffect(() => {
+    console.log("👤 TrackerEdit: User login state changed:", { isUserLoggedIn, user: !!user, hasPendingPayload: !!pendingSubmitPayload });
+  }, [isUserLoggedIn, pendingSubmitPayload]);
+
+  // ✅ Auto-submit after authentication
+  useEffect(() => {
+    if (isUserLoggedIn && pendingSubmitPayload && !loading) {
+      console.log("🚀 Auto-submit triggered (TrackerEdit)!", pendingSubmitPayload);
+
+      const handleAutoSubmit = async () => {
+        setLoading(true);
+        setShowAuthModal(false);
+
+        // CartModal submission
+        if (pendingSubmitPayload.cartList) {
+          console.log("📥 Fetching tracker data for cart submission...");
+          dispatch(getDailyDharmaTracker(async (trackerRes) => {
+            if (trackerRes.success) {
+              submitCartToServer(pendingSubmitPayload.cartList);
+            }
+            setPendingSubmitPayload(null);
+          }));
+        }
+        // Confirm navigation
+        else if (pendingSubmitPayload.practices) {
+          setPendingSubmitPayload(null);
+          navigation.navigate("ConfirmDailyPractices", {
+            practices: pendingSubmitPayload.practices,
+            trackerEdit: true
+          });
+          setLoading(false);
+        }
+      };
+
+      handleAutoSubmit();
+    }
+  }, [isUserLoggedIn, pendingSubmitPayload]);
+
+
 
   const apiPractices = dailyPractice?.data?.active_practices ?? [];
 
@@ -1073,29 +1121,15 @@ const TrackerEdit = ({ route }) => {
 
 
   const handleConfirmPress = async () => {
-    const token = await AsyncStorage.getItem("access_token");
+    const itemsToConfirm = isAddMoreScreen ? selectedPractices : recentlyAdded;
+    const newItemsOnly = itemsToConfirm.map((p) => normalizeForConfirm(p));
 
-    if (!token) {
-      await AsyncStorage.setItem(
-        "pending_tracker_edit_data",
-        JSON.stringify({
-          pendingPractices: localPractices,
-          from: "TrackerEdit",
-        })
-      );
-      await AsyncStorage.setItem("resume_tracker_flow", "true");
-
-      navigation.navigate("Login", {
-        redirect_to: "TrackerEdit",
-        selectedmantra,
-        goToHistory: true,
-      });
+    if (!isUserLoggedIn) {
+      console.log("📦 Storing pending payload (TrackerEdit Confirm):", newItemsOnly);
+      setPendingSubmitPayload({ practices: newItemsOnly, trackerEdit: true });
+      setShowAuthModal(true);
       return;
     }
-    const itemsToConfirm = isAddMoreScreen ? selectedPractices : recentlyAdded;
-    const newItemsOnly = itemsToConfirm.map((p) =>
-      normalizeForConfirm(p)
-    );
 
     navigation.navigate("ConfirmDailyPractices", {
       practices: newItemsOnly,
@@ -1132,23 +1166,10 @@ const TrackerEdit = ({ route }) => {
       {/* Cart Modal */}
       <CartModal
         onConfirm={async (list: any[]) => {
-          const token = await AsyncStorage.getItem("access_token");
-
-          if (!token) {
-            await AsyncStorage.setItem(
-              "pending_tracker_edit_data",
-              JSON.stringify({
-                pendingPractices: list,
-                from: "TrackerEdit",
-              })
-            );
-            await AsyncStorage.setItem("resume_tracker_flow", "true");
-
-            navigation.navigate("Login", {
-              redirect_to: "TrackerEdit",
-              selectedmantra,
-              goToHistory: true,
-            });
+          if (!isUserLoggedIn) {
+            console.log("📦 Storing pending payload (TrackerEdit Cart):", list);
+            setPendingSubmitPayload({ cartList: list });
+            setShowAuthModal(true);
             return;
           }
 
@@ -1644,6 +1665,19 @@ const TrackerEdit = ({ route }) => {
         }}
       />
       <LoadingOverlay visible={loading} text={t("sadanaTracker.submitting")} />
+
+      <CommunityAuthModal
+        visible={showAuthModal}
+        onClose={() => {
+          setShowAuthModal(false);
+        }}
+        title={t("trackerEdit.authTitle", { defaultValue: "Save Your Routine" })}
+        description={t("trackerEdit.authDescription", { defaultValue: "Create an account to save your routine" })}
+        benefits={[
+          t("trackerEdit.authBenefit1", { defaultValue: "Track your daily practice" }),
+          t("trackerEdit.authBenefit2", { defaultValue: "Save your custom routine" }),
+        ]}
+      />
       {/* </ImageBackground> */}
     </SafeAreaView>
   );

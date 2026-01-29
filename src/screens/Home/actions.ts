@@ -274,7 +274,13 @@ export const submitDailyDharmaSetup = (payload, callback) => async (dispatch) =>
     const response = await api.post("daily-dharma/setup/", payload);
     dispatch(submitDharmaSuccess(response.data));
     console.log("✅ Dharma setup success:", response.data);
-    if (callback) callback({ success: true, data: response.data });
+
+    // ✅ REFRESH TRACKER DATA AUTOMATICALLY
+    dispatch(getDailyDharmaTracker((res) => {
+      console.log("🔁 Tracker refreshed after setup:", res.success);
+      if (callback) callback({ success: true, data: response.data });
+    }));
+
   } catch (error) {
     console.error("❌ Dharma setup failed:", error.message);
     dispatch(submitDharmaFailure(error.message));
@@ -304,7 +310,14 @@ export const trackDailyPractice = (payload, callback) => async (dispatch: any) =
 export const getDailyDharmaTracker = (callback) => async (dispatch) => {
   dispatch(trackerRequest());
   try {
-    const response = await api.get("daily-dharma/tracker/");
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata";
+    const date = new Date().toLocaleDateString("en-CA"); // YYYY-MM-DD local
+
+    console.log("📡 Fetching Tracker (Sidebar) with:", { date, tz });
+
+    const response = await api.get(
+      `daily-dharma/tracker/?date=${date}&timezone=${encodeURIComponent(tz)}`
+    );
 
     dispatch(trackerSuccess(response.data));
 
@@ -324,7 +337,7 @@ export const getDailyDharmaTracker = (callback) => async (dispatch) => {
 export const getPracticeStreaks = (callback) => async (dispatch) => {
   dispatch(streaksRequest());
   try {
- const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     const response = await api.get(`practice/streaks/?tz=${encodeURIComponent(tz)}`);
     console.log("🔥 Practice Streaks API Response >>>>", response.data);
@@ -362,98 +375,97 @@ export const getVideoCategoriesWithLanguages = (callback) => async (dispatch) =>
 
 export const getVideos =
   (filters, callback) =>
-  async (dispatch, getState) => {
-    const {
-      page = 1,
-      per_page = 22, // ✅ updated per_page
-      category = "All",
-      language = "All",
-      search = "",
-      kidsHub = false,
-    } = filters || {};
+    async (dispatch, getState) => {
+      const {
+        page = 1,
+        per_page = 22, // ✅ updated per_page
+        category = "All",
+        language = "All",
+        search = "",
+        kidsHub = false,
+      } = filters || {};
 
-    const cacheBuster = Date.now();
-    const isDefaultFeed =
-      category === "All" && language === "All" && !search?.trim();
+      const cacheBuster = Date.now();
+      const isDefaultFeed =
+        category === "All" && language === "All" && !search?.trim();
 
-    if (page === 1) dispatch({ type: VIDEOS_RESET });
-    dispatch({ type: VIDEOS_REQUEST });
+      if (page === 1) dispatch({ type: VIDEOS_RESET });
+      dispatch({ type: VIDEOS_REQUEST });
 
-    try {
-      let url = "";
+      try {
+        let url = "";
 
-      // 🟢 Case 1: Default All / All Feed
-      if (isDefaultFeed) {
-        url = `videos/list_videos/?paginate=true&per_page=${per_page}&page=${page}&_cacheBuster=${cacheBuster}`;
-      } else {
-        // 🟡 Case 2: Filtered or Search Feed
-        url = `videos/list_videos/?paginate=true&per_page=${per_page}&page=${page}&_cacheBuster=${cacheBuster}`;
-        url += `&child_anime_filter=${kidsHub ? "true" : "false"}`;
+        // 🟢 Case 1: Default All / All Feed
+        if (isDefaultFeed) {
+          url = `videos/list_videos/?paginate=true&per_page=${per_page}&page=${page}&_cacheBuster=${cacheBuster}`;
+        } else {
+          // 🟡 Case 2: Filtered or Search Feed
+          url = `videos/list_videos/?paginate=true&per_page=${per_page}&page=${page}&_cacheBuster=${cacheBuster}`;
+          url += `&child_anime_filter=${kidsHub ? "true" : "false"}`;
 
-        // Fetch categories from store
-        const { videoCategoriesReducer } = getState();
-        const categories = videoCategoriesReducer?.data?.categories || [];
+          // Fetch categories from store
+          const { videoCategoriesReducer } = getState();
+          const categories = videoCategoriesReducer?.data?.categories || [];
 
-        // Match category_name → category_id
-        const matchedCategory = categories.find(
-          (c) => c.category_name === category
-        );
-        const categoryId = matchedCategory?.category_id;
+          // Match category_name → category_id
+          const matchedCategory = categories.find(
+            (c) => c.category_name === category
+          );
+          const categoryId = matchedCategory?.category_id;
 
-        // Map language → short code
-        const LANGUAGE_CODE_MAP = {
-          Bengali: "bn",
-          English: "en",
-          Gujarati: "gu",
-          Hindi: "hi",
-          Kannada: "kn",
-          Malayalam: "ml",
-          Marathi: "mr",
-          Odia: "or",
-          Tamil: "ta",
-          Telugu: "te",
-        };
+          // Map language → short code
+          const LANGUAGE_CODE_MAP = {
+            Bengali: "bn",
+            English: "en",
+            Gujarati: "gu",
+            Hindi: "hi",
+            Kannada: "kn",
+            Malayalam: "ml",
+            Marathi: "mr",
+            Odia: "or",
+            Tamil: "ta",
+            Telugu: "te",
+          };
 
-        const languageCode =
-          LANGUAGE_CODE_MAP[language] || language.toLowerCase();
+          const languageCode =
+            LANGUAGE_CODE_MAP[language] || language.toLowerCase();
 
-        if (categoryId) url += `&category=${encodeURIComponent(categoryId)}`;
-        if (language && language !== "All")
-          url += `&language=${encodeURIComponent(languageCode)}`;
-        if (search?.trim())
-          url += `&search=${encodeURIComponent(search.trim())}`;
-      }
+          if (categoryId) url += `&category=${encodeURIComponent(categoryId)}`;
+          if (language && language !== "All")
+            url += `&language=${encodeURIComponent(languageCode)}`;
+          if (search?.trim())
+            url += `&search=${encodeURIComponent(search.trim())}`;
+        }
 
-      console.log("🌐 Fetching videos from:", url);
+        console.log("🌐 Fetching videos from:", url);
 
-      const response = await api.get(url);
-      const videos = response?.data?.results?.kalpx_videos || [];
+        const response = await api.get(url);
+        const videos = response?.data?.results?.kalpx_videos || [];
 
-      dispatch({
-        type: VIDEOS_SUCCESS,
-        payload: { data: videos, page },
-      });
+        dispatch({
+          type: VIDEOS_SUCCESS,
+          payload: { data: videos, page },
+        });
 
-      console.log(
-        `🎞️ ${videos.length} videos fetched (page ${page}) → ${
-          isDefaultFeed
+        console.log(
+          `🎞️ ${videos.length} videos fetched (page ${page}) → ${isDefaultFeed
             ? "Default Feed"
             : search
-            ? "Search Results"
-            : "Filtered Feed"
-        }`
-      );
+              ? "Search Results"
+              : "Filtered Feed"
+          }`
+        );
 
-      if (callback) callback({ success: true, data: videos });
-    } catch (error) {
-      const message =
-        error?.response?.data?.message ||
-        error.message ||
-        "Something went wrong while fetching videos.";
-      console.error("❌ Error fetching videos:", message);
+        if (callback) callback({ success: true, data: videos });
+      } catch (error) {
+        const message =
+          error?.response?.data?.message ||
+          error.message ||
+          "Something went wrong while fetching videos.";
+        console.error("❌ Error fetching videos:", message);
 
-      dispatch({ type: VIDEOS_FAILURE, payload: message });
-      if (callback) callback({ success: false, error: message });
-    }
-  };
+        dispatch({ type: VIDEOS_FAILURE, payload: message });
+        if (callback) callback({ success: false, error: message });
+      }
+    };
 

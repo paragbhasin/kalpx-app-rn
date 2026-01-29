@@ -25,11 +25,12 @@ import DailyPracticeDetailsCard from "../../components/DailyPracticeDetailsCard"
 import FontSize from "../../components/FontSize";
 import Header from "../../components/Header";
 import LoadingOverlay from "../../components/LoadingOverlay";
+import CommunityAuthModal from "../../components/CommunityAuthModal";
 import TextComponent from "../../components/TextComponent";
 import { useUserLocation } from "../../components/useUserLocation";
 import { RootState } from "../../store";
 import { getRawPracticeObject } from "../../utils/getPracticeObjectById";
-import { submitDailyDharmaSetup } from "../Home/actions";
+import { submitDailyDharmaSetup, getDailyDharmaTracker } from "../Home/actions";
 import { fetchDailyPractice } from "../Streak/actions";
 import { getTranslatedPractice } from "../../utils/getTranslatedPractice";
 
@@ -58,6 +59,13 @@ const SubmitDailyPracticesScreen = ({ route }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [detailsItem, setDetailsItem] = useState<any>(null);
   const [detailsCategoryItem, setDetailsCategoryItem] = useState<any>(null);
+
+  // Auth modal state
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [pendingSubmitPayload, setPendingSubmitPayload] = useState<any>(null);
+
+  const user = useSelector((state: RootState) => state.login?.user || state.socialLoginReducer?.user);
+  const isUserLoggedIn = !!user;
 
   const { locationData, loading: locationLoading } = useUserLocation();
 
@@ -108,6 +116,77 @@ const SubmitDailyPracticesScreen = ({ route }) => {
       setRoutePractices(route.params.practices);
     }
   }, [route?.params?.practices]);
+
+  // ✅ Auto-submit practices after authentication
+  useEffect(() => {
+    if (isUserLoggedIn && pendingSubmitPayload && !loading) {
+      console.log("🚀 Auto-submit triggered (Submit Screen)!", { isUserLoggedIn, hasPendingPayload: !!pendingSubmitPayload });
+
+      const fetchAndSubmit = async () => {
+        setLoading(true);
+        setShowAuthModal(false);
+
+        console.log("📥 Fetching existing practices from tracker API...");
+
+        dispatch(getDailyDharmaTracker(async (trackerRes) => {
+          console.log("📊 Tracker API response (Submit):", trackerRes);
+
+          const token = await AsyncStorage.getItem("refresh_token");
+
+          if (trackerRes.success) {
+            const currentActivePractices = trackerRes.data?.active_practices || [];
+            console.log("📊 Current active practices:", currentActivePractices.length);
+
+            const normalizedActive = currentActivePractices.map(normalizeApiPractice);
+            const newPractices = pendingSubmitPayload.practices || [];
+            console.log("✨ New practices to add:", newPractices.length);
+
+            const filteredNew = newPractices.filter(
+              (newP) => !normalizedActive.some(
+                (activeP) => activeP.practice_id === newP.practice_id
+              )
+            );
+
+            const combinedPractices = [...normalizedActive, ...filteredNew];
+            console.log("🔗 Combined practices:", combinedPractices.length);
+
+            const finalPayload = {
+              ...pendingSubmitPayload,
+              practices: combinedPractices,
+              recaptcha_token: token || "not_available",
+            };
+
+            console.log("📤 Submitting combined practices (Submit):", JSON.stringify(finalPayload));
+
+            dispatch(submitDailyDharmaSetup(finalPayload, (res) => {
+              console.log("✅ Submit response:", res);
+              setLoading(false);
+              setPendingSubmitPayload(null);
+              if (res.success) {
+                console.log("🎯 Navigating to Tracker...");
+                navigation.navigate("TrackerTabs", { screen: "Tracker" });
+              }
+            }));
+          } else {
+            const finalPayload = {
+              ...pendingSubmitPayload,
+              recaptcha_token: token || "not_available",
+            };
+
+            dispatch(submitDailyDharmaSetup(finalPayload, (res) => {
+              setLoading(false);
+              setPendingSubmitPayload(null);
+              if (res.success) {
+                navigation.navigate("TrackerTabs", { screen: "Tracker" });
+              }
+            }));
+          }
+        }));
+      };
+
+      fetchAndSubmit();
+    }
+  }, [isUserLoggedIn, pendingSubmitPayload]);
 
   // ----------------------------
   // DETAILS OVERLAY
@@ -186,10 +265,6 @@ const SubmitDailyPracticesScreen = ({ route }) => {
   // };
 
   const handleSubmit = async () => {
-    setLoading(true);
-
-    const token = await AsyncStorage.getItem("refresh_token");
-
     // 1️⃣ Normalize active API practices
     const normalizedActive = activeApiPractices.map(normalizeApiPractice);
 
@@ -208,6 +283,24 @@ const SubmitDailyPracticesScreen = ({ route }) => {
     ];
 
     console.log("✅ FINAL SUBMIT PRACTICES >>>", finalPractices);
+
+    // 🔐 Not logged in → Open auth modal
+    if (!isUserLoggedIn) {
+      const payload = {
+        practices: finalPractices,
+        dharma_level: "beginner",
+        is_authenticated: true,
+        recaptcha_token: "not_available",
+      };
+      console.log("📦 Storing pending payload (Submit):", JSON.stringify(payload));
+      setPendingSubmitPayload(payload);
+      setShowAuthModal(true);
+      return;
+    }
+
+    // ✅ Logged in → Submit directly  
+    setLoading(true);
+    const token = await AsyncStorage.getItem("refresh_token");
 
     const payload = {
       practices: finalPractices,
@@ -420,6 +513,19 @@ const SubmitDailyPracticesScreen = ({ route }) => {
         </View>
 
         <LoadingOverlay visible={loading} text={t("submitDailyPractices.saving")} />
+
+        <CommunityAuthModal
+          visible={showAuthModal}
+          onClose={() => {
+            setShowAuthModal(false);
+          }}
+          title={t("submitDailyPractices.authTitle", { defaultValue: "Save Your Practice" })}
+          description={t("submitDailyPractices.authDescription", { defaultValue: "Create an account" })}
+          benefits={[
+            t("submitDailyPractices.authBenefit1", { defaultValue: "Save your practices" }),
+            t("submitDailyPractices.authBenefit2", { defaultValue: "Track progress" }),
+          ]}
+        />
       </ImageBackground>
     </SafeAreaView>
   );

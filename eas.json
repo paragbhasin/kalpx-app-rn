@@ -7,18 +7,14 @@
       "env": {
         "EXPO_UPDATES_DISABLED": "1"
       },
-      "ios": {
-        "autoIncrement": false
-      },
       "android": {
         "buildType": "app-bundle"
       }
-    }
-  },
-  "submit": {
-    "production": {
+    },
+    "preview": {
+      "extends": "production",
       "android": {
-        "track": "production"
+        "buildType": "apk"
       }
     }
   }

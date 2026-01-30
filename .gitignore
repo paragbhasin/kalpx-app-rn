@@ -39,6 +39,14 @@ yarn-error.*
 ios/
 # android/
 
+# Android build artifacts (keep source, ignore outputs)
+android/.gradle/
+android/app/build/
+android/build/
+android/app/.cxx/
+*.apk
+*.aab
+
 app-example
 
 # Google Services files

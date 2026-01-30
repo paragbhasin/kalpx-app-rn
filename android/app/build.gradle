@@ -8,42 +8,48 @@ def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
  */
-rreact {
-    // ✅ ADD THIS LINE: It tells Gradle to use the Expo entry point
-    entryFile = file(["node", "-e", "require('expo/scripts/resolveAppEntry')", projectRoot, "android", "absolute"].execute(null, rootDir).text.trim())
-
+react {
+    // Explicitly point to Expo's entry point to avoid "index.js not found"
+    entryFile = file("../../node_modules/expo/AppEntry.js")
     hermesCommand = "$projectRoot/node_modules/react-native/sdks/hermesc/%OS-BIN%/hermesc"
-    enableBundleCompression = (findProperty('android.enableBundleCompression') ?: false).toBoolean()
+    // Use Expo CLI to bundle the app - required for export:embed command
+    cliFile = new File(["node", "--print", "require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })"].execute(null, rootDir).text.trim())
     bundleCommand = "export:embed"
-
     autolinkLibrariesWithApp()
 }
 
 /**
- * Optimization for release builds.
+ * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
  */
-def enableMinifyInReleaseBuilds = (findProperty('android.enableMinifyInReleaseBuilds') ?: false).toBoolean()
+def enableProguardInReleaseBuilds = (findProperty('android.enableProguardInReleaseBuilds') ?: false).toBoolean()
+
+/**
+ * The preferred build flavor of JavaScriptCore (JSC)
+ *
+ * For example, to use the international variant, you can use:
+ * `def jscFlavor = 'org.webkit:android-jsc-intl:+'`
+ *
+ * The international variant includes ICU i18n library and necessary data
+ * allowing to use e.g. `Date.toLocaleString` and `String.localeCompare` that
+ * give correct results when using with locales other than en-US. Note that
+ * this variant is about 6MiB larger per architecture than default.
+ */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
 android {
     ndkVersion rootProject.ext.ndkVersion
+
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
     namespace 'com.kalpx.app'
- defaultConfig {
+    defaultConfig {
         applicationId 'com.kalpx.app'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        
-        // Use hardcoded fallbacks to prevent "Value is null"
-        versionCode (findProperty('android.versionCode') ? findProperty('android.versionCode').toInteger() : 25)
-        versionName (findProperty('android.versionName') ?: "1.1.20")
-
-        // Simplified field to ensure no null injection
-        buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"stable\""
+        versionCode 25
+        versionName "1.1.20"
     }
-
     signingConfigs {
         debug {
             storeFile file('debug.keystore')
@@ -51,47 +57,47 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
-        // ✅ EAS will inject your production credentials into this block
+        // EAS will inject production credentials into this block
         release {
         }
     }
-
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            // ✅ Use signingConfigs.release for production builds
-            signingConfig signingConfigs.release 
-            
-            def enableShrinkResources = findProperty('android.enableShrinkResourcesInReleaseBuilds') ?: 'false'
-            shrinkResources enableShrinkResources.toBoolean()
-            minifyEnabled enableMinifyInReleaseBuilds
+            // Use release config if EAS provides it, otherwise fallback to debug for local builds
+            signingConfig signingConfigs.release.storeFile ? signingConfigs.release : signingConfigs.debug
+            shrinkResources (findProperty('android.enableShrinkResourcesInReleaseBuilds')?.toBoolean() ?: false)
+            minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
-            def enablePngCrunchInRelease = findProperty('android.enablePngCrunchInReleaseBuilds') ?: 'true'
-            crunchPngs enablePngCrunchInRelease.toBoolean()
+            crunchPngs (findProperty('android.enablePngCrunchInReleaseBuilds')?.toBoolean() ?: true)
         }
     }
-
     packagingOptions {
         jniLibs {
-            def enableLegacyPackaging = findProperty('expo.useLegacyPackaging') ?: 'false'
-            useLegacyPackaging enableLegacyPackaging.toBoolean()
+            useLegacyPackaging (findProperty('expo.useLegacyPackaging')?.toBoolean() ?: false)
         }
     }
-
     androidResources {
         ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~'
     }
 }
 
 // Apply static values from `gradle.properties` to the `android.packagingOptions`
+// Accepts values in comma delimited lists, example:
+// android.packagingOptions.pickFirsts=/LICENSE,**/picasa.ini
 ["pickFirsts", "excludes", "merges", "doNotStrip"].each { prop ->
+    // Split option: 'foo,bar' -> ['foo', 'bar']
     def options = (findProperty("android.packagingOptions.$prop") ?: "").split(",");
+    // Trim all elements in place.
     for (i in 0..<options.size()) options[i] = options[i].trim();
+    // `[] - ""` is essentially `[""].filter(Boolean)` removing all empty strings.
     options -= ""
 
     if (options.length > 0) {
+        println "android.packagingOptions.$prop += $options ($options.length)"
+        // Ex: android.packagingOptions.pickFirsts += '**/SCCS/**'
         options.each {
             android.packagingOptions[prop] += it
         }
@@ -103,18 +109,13 @@ dependencies {
 
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";
-    def isWebpAnimatedEnabled = (findProperty('expo.webp.animated') ?: "") == "true";
 
-    // ✅ FIXED: Hardcoded version '3.2.0' to avoid 'expoLibs' being null
+    // Use hardcoded version 3.2.0 for SDK 53 to avoid expoLibs null pointer
     if (isGifEnabled) {
         implementation("com.facebook.fresco:animated-gif:3.2.0")
     }
-
     if (isWebpEnabled) {
         implementation("com.facebook.fresco:webpsupport:3.2.0")
-        if (isWebpAnimatedEnabled) {
-            implementation("com.facebook.fresco:animated-webp:3.2.0")
-        }
     }
 
     if (hermesEnabled.toBoolean()) {

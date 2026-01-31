@@ -513,6 +513,202 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
         }
     };
 
+    const renderAllPopups = () => {
+        return (
+            <>
+                <CommunityAuthModal
+                    visible={isAuthModalVisible}
+                    onClose={() => setIsAuthModalVisible(false)}
+                    title={authModalConfig.title}
+                    description={authModalConfig.description}
+                    intent={authModalConfig.intent}
+                />
+
+                <SigninPopup
+                    visible={showMantraTaken}
+                    onClose={() => {
+                        setShowMantraTaken(false);
+                        dispatch(getPracticeToday(() => { }));
+                        dispatch(getPracticeStreaks(() => { }));
+                    }}
+                    onConfirmCancel={() => setShowMantraTaken(false)}
+                    title={t("popup.mantraTaken_title1")}
+                    subTitle={t("popup.mantraTaken_subtitle1")}
+                    subText={t("popup.mantraTaken_sub1")}
+                    infoTexts={[
+                        t("popup.mantraTaken_info1.0"),
+                        t("popup.mantraTaken_info1.1"),
+                        t("popup.mantraTaken_info1.2"),
+                    ]}
+                    bottomText={t("popup.mantraTaken_bottom")}
+                />
+                <SigninPopup
+                    visible={showLoginMantraTaken}
+                    onClose={() => {
+                        setShowLoginMantraTaken(false);
+                        dispatch(getPracticeToday(() => { }));
+                        dispatch(getPracticeStreaks(() => { }));
+                    }}
+                    onConfirmCancel={() => setShowLoginMantraTaken(false)}
+                    title={t("popup.mantraTaken_title2")}
+                    subTitle={t("popup.mantraTaken_subtitle1")}
+                    subText={t("popup.mantraTaken_sub2")}
+                    infoTexts={[
+                        t("popup.mantraTaken_info2.0"),
+                        t("popup.mantraTaken_info2.1"),
+                    ]}
+                    // bottomText={t("popup.mantraTaken_bottom")}
+                    MantraButtonTitle={t("popup.mantraTaken_button")}
+                    onSadhanPress={() => {
+                        setShowLoginMantraTaken(false);
+                        if (selectedMantraForPopup) {
+                            navigation.navigate("MySadana", {
+                                selectedmantra: selectedMantraForPopup,
+                            });
+                        }
+                    }}
+                />
+                <SigninPopup
+                    visible={showMantraComplete}
+                    onClose={() => {
+                        setShowMantraComplete(false);
+                        dispatch(getPracticeToday(() => { }));
+                        dispatch(getPracticeStreaks(() => { }));
+                    }}
+                    onConfirmCancel={() => setShowMantraComplete(false)}
+                    title={t("popup.mantraComplete_title1")}
+                    subTitle={t("popup.mantraTaken_subtitle1")}
+                    subText={t("popup.mantraComplete_sub1")}
+                    infoTexts={[
+                        t("popup.mantraComplete_info1.0"),
+                        t("popup.mantraComplete_info1.1"),
+                        t("popup.mantraComplete_info1.2"),
+                    ]}
+                />
+                <SigninPopup
+                    visible={showLoginMantraComplete}
+                    onClose={() => {
+                        setShowLoginMantraComplete(false);
+                        dispatch(getPracticeToday(() => { }));
+                        dispatch(getPracticeStreaks(() => { }));
+                    }}
+                    onConfirmCancel={() => { }}
+                    title={t("popup.mantraComplete_title2")}
+                    subText={t("popup.mantraComplete_sub2")}
+                    infoTexts={[
+                        t("popup.mantraComplete_info2.0"),
+                        t("popup.mantraComplete_info2.1"),
+                    ]}
+                    MantraButtonTitle={t("popup.mantraTaken_Continue")}
+                    onSadhanPress={() => setShowLoginMantraComplete(false)}
+                />
+                <SigninPopup
+                    visible={showSankalpTaken}
+                    onClose={() => setShowSankalpTaken(false)}
+                    onConfirmCancel={() => setShowSankalpTaken(false)}
+                    title={t("popup.sankalpTaken_title")}
+                    subText={t("popup.sankalpTaken_sub")}
+                    infoTexts={[
+                        t("popup.sankalpTaken_info.0"),
+                        t("popup.sankalpTaken_info.1"),
+                        t("popup.sankalpTaken_info.2"),
+                    ]}
+                    bottomText={t("popup.sankalpTaken_bottom")}
+                />
+                <SigninPopup
+                    visible={showLoginSankalpTaken}
+                    onClose={() => setShowLoginSankalpTaken(false)}
+                    onConfirmCancel={() => setShowLoginSankalpTaken(false)}
+                    title={t("popup.sankalpTaken_title3")}
+                    subTitle={t("popup.mantraTaken_subtitle1")}
+                    subText={t("popup.mantraTaken_sub2")}
+                    infoTexts={[
+                        t("popup.sankalpTaken_info2.0"),
+                        t("popup.sankalpTaken_info2.1"),
+                    ]}
+                    MantraButtonTitle={t("popup.sankalpTaken_button")}
+                    onSadhanPress={() => {
+                        setShowLoginSankalpTaken(false);
+                        if (selectedSankalpForPopup) {
+                            navigation.navigate("MySadana", {
+                                selectedmantra: selectedSankalpForPopup,
+                            });
+                        }
+                    }}
+                />
+                <SigninPopup
+                    visible={showSankalpComplete}
+                    onClose={() => {
+                        setShowSankalpComplete(false);
+                        dispatch(getPracticeToday(() => { }));
+                        dispatch(getPracticeStreaks(() => { }));
+                    }}
+                    onConfirmCancel={() => { }}
+                    title={t("popup.sankalpComplete_title")}
+                    subText={t("popup.sankalpComplete_sub")}
+                    infoTexts={[
+                        t("popup.sankalpComplete_info.0"),
+                        t("popup.sankalpComplete_info.1"),
+                        t("popup.sankalpComplete_info.2"),
+                    ]}
+                    bottomText=""
+                />
+                <SigninPopup
+                    visible={showLoginSankalpComplete}
+                    onClose={() => {
+                        setShowLoginSankalpComplete(false);
+                        dispatch(getPracticeToday(() => { }));
+                        dispatch(getPracticeStreaks(() => { }));
+                    }}
+                    onConfirmCancel={() => setShowLoginSankalpComplete(false)}
+                    title={t("popup.mantraComplete_title2")}
+                    subText={t("popup.sankalpComplete_sub2")}
+                    infoTexts={[
+                        t("popup.sankalpComplete_info2.0"),
+                        t("popup.sankalpComplete_info2.1"),
+                    ]}
+                    bottomText=""
+                    MantraButtonTitle={t("popup.mantraTaken_Continue")}
+                    onSadhanPress={() => setShowLoginSankalpComplete(false)}
+                />
+                <SigninPopup
+                    visible={showPracticeComplete}
+                    onClose={() => {
+                        setShowPracticeComplete(false);
+                        dispatch(getPracticeToday(() => { }));
+                        dispatch(getPracticeStreaks(() => { }));
+                    }}
+                    onConfirmCancel={() => setShowPracticeComplete(false)}
+                    title={t("popup.practiceComplete_title1")}
+                    subTitle={t("popup.mantraTaken_subtitle1")}
+                    subText={t("popup.practiceComplete_sub1")}
+                    infoTexts={[
+                        t("popup.practiceComplete_info1.0"),
+                        t("popup.practiceComplete_info1.1"),
+                        t("popup.practiceComplete_info1.2"),
+                    ]}
+                />
+                <SigninPopup
+                    visible={showLoginPracticeComplete}
+                    onClose={() => {
+                        setShowLoginPracticeComplete(false);
+                        dispatch(getPracticeToday(() => { }));
+                        dispatch(getPracticeStreaks(() => { }));
+                    }}
+                    onConfirmCancel={() => setShowLoginPracticeComplete(false)}
+                    title={t("popup.practiceComplete_title2")}
+                    subText={t("popup.practiceComplete_sub2")}
+                    infoTexts={[
+                        t("popup.practiceComplete_info2.0"),
+                        t("popup.practiceComplete_info2.1"),
+                    ]}
+                    MantraButtonTitle={t("popup.mantraTaken_Continue")}
+                    onSadhanPress={() => setShowLoginPracticeComplete(false)}
+                />
+            </>
+        );
+    };
+
     return (
         <View
             style={styles.card}
@@ -910,252 +1106,11 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                             </>
                         )}
                     </ScrollView>
+                    {renderAllPopups()}
                 </SafeAreaView>
             </Modal>
 
-            <CommunityAuthModal
-                visible={isAuthModalVisible}
-                onClose={() => setIsAuthModalVisible(false)}
-                title={authModalConfig.title}
-                description={authModalConfig.description}
-                intent={authModalConfig.intent}
-            />
-
-            {/* Success Modals */}
-            <SigninPopup
-                visible={showMantraTaken}
-                onClose={() => setShowMantraTaken(false)}
-                title={t("mantraCard.mantraTaken")}
-                subTitle={`${selectedMantraForPopup?.iast || selectedMantraForPopup?.name || ""}`}
-                subText={t("mantraCard.practiceAdded")}
-                MantraButtonTitle={t("mantraCard.loginToTrack")}
-                infoTexts={[t("mantraCard.mantraProgressMsg")]}
-                onSadhanPress={() => {
-                    setShowMantraTaken(false);
-                    // Open Login
-                    setAuthModalConfig({
-                        title: t("signinPopup.title"),
-                        description: t("signinPopup.description"),
-                        intent: "general"
-                    });
-                    setIsAuthModalVisible(true);
-                }}
-                onConfirmCancel={() => setShowMantraTaken(false)}
-            />
-            <SigninPopup
-                visible={showLoginMantraTaken}
-                onClose={() => setShowLoginMantraTaken(false)}
-                title={t("mantraCard.mantraTaken")}
-                subTitle={`${selectedMantraForPopup?.iast || selectedMantraForPopup?.name || ""}`}
-                subText={t("mantraCard.practiceAdded")}
-                MantraButtonTitle={t("mantraCard.goToSadana")}
-                infoTexts={[t("mantraCard.trackProgressInTracker")]}
-                onSadhanPress={() => {
-                    setShowLoginMantraTaken(false);
-                    navigation.navigate("Tracker");
-                }}
-                onConfirmCancel={() => setShowLoginSankalpTaken(false)}
-            />
-
-            <SigninPopup
-                visible={showMantraTaken}
-                onClose={() => {
-                    setShowMantraTaken(false);
-                    dispatch(getPracticeToday(() => { }));
-                    dispatch(getPracticeStreaks(() => { }));
-                }}
-                onConfirmCancel={() => setShowMantraTaken(false)}
-                title={t("popup.mantraTaken_title1")}
-                subTitle={t("popup.mantraTaken_subtitle1")}
-                subText={t("popup.mantraTaken_sub1")}
-                infoTexts={[
-                    t("popup.mantraTaken_info1.0"),
-                    t("popup.mantraTaken_info1.1"),
-                    t("popup.mantraTaken_info1.2"),
-                ]}
-                bottomText={t("popup.mantraTaken_bottom")}
-            />
-            <SigninPopup
-                visible={showLoginMantraTaken}
-                onClose={() => {
-                    setShowLoginMantraTaken(false);
-                    dispatch(getPracticeToday(() => { }));
-                    dispatch(getPracticeStreaks(() => { }));
-                }}
-                onConfirmCancel={() => setShowLoginMantraTaken(false)}
-                title={t("popup.mantraTaken_title2")}
-                subTitle={t("popup.mantraTaken_subtitle1")}
-                subText={t("popup.mantraTaken_sub2")}
-                infoTexts={[
-                    t("popup.mantraTaken_info2.0"),
-                    t("popup.mantraTaken_info2.1"),
-                ]}
-                // bottomText={t("popup.mantraTaken_bottom")}
-                MantraButtonTitle={t("popup.mantraTaken_button")}
-                onSadhanPress={() => {
-                    setShowLoginMantraTaken(false);
-                    if (selectedMantraForPopup) {
-                        navigation.navigate("MySadana", {
-                            selectedmantra: selectedMantraForPopup,
-                        });
-                    }
-                }}
-            />
-            <SigninPopup
-                visible={showMantraComplete}
-                onClose={() => {
-                    setShowMantraComplete(false);
-                    dispatch(getPracticeToday(() => { }));
-                    dispatch(getPracticeStreaks(() => { }));
-                }}
-                onConfirmCancel={() => setShowMantraComplete(false)}
-                title={t("popup.mantraComplete_title1")}
-                subTitle={t("popup.mantraTaken_subtitle1")}
-                subText={t("popup.mantraComplete_sub1")}
-                infoTexts={[
-                    t("popup.mantraComplete_info1.0"),
-                    t("popup.mantraComplete_info1.1"),
-                    t("popup.mantraComplete_info1.2"),
-                ]}
-            />
-            <SigninPopup
-                visible={showSankalpTaken}
-                onClose={() => setShowSankalpTaken(false)}
-                title={t("sankalpCard.sankalpTaken")}
-                subTitle={`${selectedSankalpForPopup?.name || ""}`}
-                subText={t("sankalpCard.practiceAdded")}
-                MantraButtonTitle={t("sankalpCard.loginToTrack")}
-                infoTexts={[t("sankalpCard.sankalpProgressMsg")]}
-                onSadhanPress={() => {
-                    setShowSankalpTaken(false);
-                    // Open Login
-                    setAuthModalConfig({
-                        title: t("signinPopup.title"),
-                        description: t("signinPopup.description"),
-                        intent: "general"
-                    });
-                    setIsAuthModalVisible(true);
-                }}
-                onConfirmCancel={() => setShowSankalpTaken(false)}
-            />
-            <SigninPopup
-                visible={showLoginSankalpTaken}
-                onClose={() => setShowLoginSankalpTaken(false)}
-                title={t("sankalpCard.sankalpTaken")}
-                subTitle={`${selectedSankalpForPopup?.name || ""}`}
-                subText={t("sankalpCard.practiceAdded")}
-                MantraButtonTitle={t("sankalpCard.goToSadana")}
-                infoTexts={[t("sankalpCard.trackProgressInTracker")]}
-                onSadhanPress={() => {
-                    setShowLoginSankalpTaken(false);
-                    navigation.navigate("Tracker");
-                }}
-                onConfirmCancel={() => setShowLoginSankalpTaken(false)}
-            />
-
-            <SigninPopup
-                visible={showMantraComplete}
-                onClose={() => {
-                    setShowMantraComplete(false);
-                    dispatch(getPracticeToday(() => { }));
-                    dispatch(getPracticeStreaks(() => { }));
-                }}
-                onConfirmCancel={() => setShowMantraComplete(false)}
-                title={t("popup.mantraComplete_title1")}
-                subTitle={t("popup.mantraTaken_subtitle1")}
-                subText={t("popup.mantraComplete_sub1")}
-                infoTexts={[
-                    t("popup.mantraComplete_info1.0"),
-                    t("popup.mantraComplete_info1.1"),
-                    t("popup.mantraComplete_info1.2"),
-                ]}
-            />
-            <SigninPopup
-                visible={showLoginMantraComplete}
-                onClose={() => {
-                    setShowLoginMantraComplete(false);
-                    dispatch(getPracticeToday(() => { }));
-                    dispatch(getPracticeStreaks(() => { }));
-                }}
-                onConfirmCancel={() => { }}
-                title={t("popup.mantraComplete_title2")}
-                subText={t("popup.mantraComplete_sub2")}
-                infoTexts={[
-                    t("popup.mantraComplete_info2.0"),
-                    t("popup.mantraComplete_info2.1"),
-                ]}
-                MantraButtonTitle={t("popup.mantraTaken_Continue")}
-                onSadhanPress={() => setShowLoginMantraComplete(false)}
-            />
-            <SigninPopup
-                visible={showSankalpComplete}
-                onClose={() => {
-                    setShowSankalpComplete(false);
-                    dispatch(getPracticeToday(() => { }));
-                    dispatch(getPracticeStreaks(() => { }));
-                }}
-                onConfirmCancel={() => { }}
-                title={t("popup.sankalpComplete_title")}
-                subText={t("popup.sankalpComplete_sub")}
-                infoTexts={[
-                    t("popup.sankalpComplete_info.0"),
-                    t("popup.sankalpComplete_info.1"),
-                    t("popup.sankalpComplete_info.2"),
-                ]}
-                bottomText=""
-            />
-            <SigninPopup
-                visible={showLoginSankalpComplete}
-                onClose={() => {
-                    setShowLoginSankalpComplete(false);
-                    dispatch(getPracticeToday(() => { }));
-                    dispatch(getPracticeStreaks(() => { }));
-                }}
-                onConfirmCancel={() => setShowLoginSankalpComplete(false)}
-                title={t("popup.mantraComplete_title2")}
-                subText={t("popup.sankalpComplete_sub2")}
-                infoTexts={[
-                    t("popup.sankalpComplete_info2.0"),
-                    t("popup.sankalpComplete_info2.1"),
-                ]}
-                bottomText=""
-                MantraButtonTitle={t("popup.mantraTaken_Continue")}
-                onSadhanPress={() => setShowLoginSankalpComplete(false)}
-            />
-            <SigninPopup
-                visible={showPracticeComplete}
-                onClose={() => {
-                    setShowPracticeComplete(false);
-                    dispatch(getPracticeToday(() => { }));
-                    dispatch(getPracticeStreaks(() => { }));
-                }}
-                onConfirmCancel={() => setShowPracticeComplete(false)}
-                title={t("popup.practiceComplete_title1")}
-                subTitle={t("popup.mantraTaken_subtitle1")}
-                subText={t("popup.practiceComplete_sub1")}
-                infoTexts={[
-                    t("popup.practiceComplete_info1.0"),
-                    t("popup.practiceComplete_info1.1"),
-                    t("popup.practiceComplete_info1.2"),
-                ]}
-            />
-            <SigninPopup
-                visible={showLoginPracticeComplete}
-                onClose={() => {
-                    setShowLoginPracticeComplete(false);
-                    dispatch(getPracticeToday(() => { }));
-                    dispatch(getPracticeStreaks(() => { }));
-                }}
-                onConfirmCancel={() => setShowLoginPracticeComplete(false)}
-                title={t("popup.practiceComplete_title2")}
-                subText={t("popup.practiceComplete_sub2")}
-                infoTexts={[
-                    t("popup.practiceComplete_info2.0"),
-                    t("popup.practiceComplete_info2.1"),
-                ]}
-                MantraButtonTitle={t("popup.mantraTaken_Continue")}
-                onSadhanPress={() => setShowLoginPracticeComplete(false)}
-            />
+            {renderAllPopups()}
 
         </View>
 

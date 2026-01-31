@@ -971,6 +971,7 @@ const TrackerEdit = ({ route }) => {
               onPressChantMantra={() => { }}
               DoneMantraCalled={() => { }}
               viewOnly={true}
+              singleItem={item}
             />
           </ScrollView>
         </View>
@@ -1013,6 +1014,7 @@ const TrackerEdit = ({ route }) => {
               onPressStartSankalp={() => { }}
               onCompleteSankalp={() => { }}
               viewOnly={true}
+              singleItem={item}
             />
           </ScrollView>
         </View>

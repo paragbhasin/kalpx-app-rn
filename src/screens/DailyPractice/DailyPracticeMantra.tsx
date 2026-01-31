@@ -299,14 +299,17 @@ export default function DailyPracticeMantra() {
 
   const handleStartMantra = (mantra, reps) => {
     const payload = {
-      kind: "mantra",
-      practice_id: mantra.id,
-      date_local: moment().format("YYYY-MM-DD"),
+      practice_type: "mantra",
+      item_id: mantra.id,
+      source: 'mantra_card',
       tz: locationData?.timezone,
-      reps: reps
+      meta: {
+        reps: reps.value || null,
+        ui: "daily_card"
+      }
     };
 
-    console.log("payload >>>>>>>>>", payload);
+    console.log("mantra payload >>>>>>>>>", payload);
 
     dispatch(
       startMantraPractice(payload, (res) => {
@@ -327,9 +330,13 @@ export default function DailyPracticeMantra() {
     if (!mantra?.id) return;
 
     const payload = {
-      type: "mantra",
-      item_id: mantra.id,
+      practice_type: "mantra",
+      practice_id: mantra.id,
       tz: locationData?.timezone || "Asia/Kolkata",
+      meta: {
+        reps: mantra.reps || null,
+        ui: "daily_card"
+      }
     };
 
     console.log("Complete Mantra payload >>>>", payload);
@@ -352,12 +359,18 @@ export default function DailyPracticeMantra() {
   };
 
   const handleStartSankalp = (sankalp) => {
+
     const payload = {
-      kind: "sankalp",
+      practice_type: "sankalp",
       practice_id: sankalp.id,
-      date_local: moment().format("YYYY-MM-DD"),
+      source: 'sankalp_card',
       tz: locationData?.timezone,
+      meta: {
+        ui: "daily_card"
+      }
     };
+
+    console.log("sankalp payload >>>>>>>>>", payload);
 
     dispatch(
       startMantraPractice(payload, (res) => {
@@ -377,9 +390,12 @@ export default function DailyPracticeMantra() {
     if (!sankalp?.id) return;
 
     const payload = {
-      type: "sankalp",
-      item_id: sankalp.id,
+      practice_type: "sankalp",
+      practice_id: sankalp.id,
       tz: locationData?.timezone || "Asia/Kolkata",
+      meta: {
+        ui: "daily_card"
+      }
     };
 
     dispatch(

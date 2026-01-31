@@ -9,12 +9,18 @@
       },
       "android": {
         "buildType": "app-bundle"
+      },
+      "ios": {
+        "buildConfiguration": "Release"
       }
     },
     "preview": {
       "extends": "production",
       "android": {
         "buildType": "apk"
+      },
+      "ios": {
+        "simulator": false
       }
     }
   }

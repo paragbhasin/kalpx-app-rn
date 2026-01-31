@@ -68,17 +68,19 @@ const MantraCard = ({
     }
   }, []);
 
-  console.log("practiceTodayData >>>>", JSON.stringify(practiceTodayData))
 
 
   useEffect(() => {
     setActiveIndex(currentMantraIndex);
   }, [currentMantraIndex]);
 
-  const startedMantra = practiceTodayData?.started?.mantra;
-  const endMantra = practiceTodayData?.done?.mantra;
-  const mantraId = practiceTodayData?.ids?.mantra;
-  const selectedAPIReps = practiceTodayData?.daily_practice?.ui?.mantra_reps;
+  const todayItems = practiceTodayData?.items || [];
+  const activeMantraItem = todayItems.find(item => item.practice_type === "mantra");
+
+  const startedMantra = !!activeMantraItem;
+  const endMantra = !!activeMantraItem?.completed_at;
+  const mantraId = activeMantraItem?.item_id;
+  const selectedAPIReps = activeMantraItem?.meta?.reps;
 
 
   const shareStage = endMantra ? 3 : startedMantra ? 2 : 1;
@@ -141,18 +143,13 @@ const MantraCard = ({
     const langKey = currentLang.toLowerCase();
     const allMantras = CATALOGS[langKey] || CATALOGS.en;
 
-    if (startedMantra && mantraId) {
-      const found = allMantras.find((m) => m.id === mantraId);
-      return found ? [found] : [];
-    }
-
     // ✅ Use dailyMantras if already preloaded
     if (dailyMantras && dailyMantras.length > 0) {
       return dailyMantras;
     }
 
     return allMantras.slice(0, 5);
-  }, [startedMantra, mantraId, currentLang, dailyMantras]);
+  }, [currentLang, dailyMantras]);
 
   if (error) {
     return (
@@ -190,28 +187,27 @@ const MantraCard = ({
       index={activeIndex}
       showsPagination={false}
       onIndexChanged={(i) => setActiveIndex(i)}
-      scrollEnabled={!startedMantra}
+      scrollEnabled={true}
       autoplay={false}
       horizontal
       // removeClippedSubviews={false}
       style={{ height: slideHeight }}
     >
       {filteredMantras.map((currentMantra, index) => {
+        const itemRecord = todayItems.find(it => it.item_id === currentMantra.id);
+        const isStarted = !!itemRecord;
+        const isDone = !!itemRecord?.completed_at;
+        const itemSelectedReps = itemRecord?.meta?.reps;
+
         const activeMantra = filteredMantras[activeIndex];
-        const repsOrdered = activeMantra
+        const repsOrdered = currentMantra
           ? [
-            activeMantra.suggested_reps,
+            currentMantra.suggested_reps,
             ...suggestedRepsList.filter(
-              (r) => r !== activeMantra.suggested_reps
+              (r) => r !== currentMantra.suggested_reps
             ),
           ]
           : [];
-        // const repsOrdered = [
-        //   currentMantra.suggested_reps,
-        //   ...suggestedRepsList.filter(
-        //     (r) => r !== currentMantra.suggested_reps
-        //   ),
-        // ];
 
         const translated = getTranslatedPractice(currentMantra, t);
         return (
@@ -225,26 +221,26 @@ const MantraCard = ({
               paddingHorizontal: 5,
             }}
           >
-            {!startedMantra && (
-              <TouchableOpacity
-                disabled={index === 0}
-                onPress={() => swiperRef.current?.scrollBy(-1)}
-                style={[
-                  styles.arrowButton,
-                  {
-                    backgroundColor:
-                      index === 0 ? "#707070" : Colors.Colors.App_theme,
-                    left: 2,
-                    zIndex: 999,
-                  },
-                ]}
-              >
-                <Image
-                  source={require("../../assets/arrow_home.png")}
-                  style={{ transform: [{ rotate: "180deg" }] }}
-                />
-              </TouchableOpacity>
-            )}
+
+            <TouchableOpacity
+              disabled={index === 0}
+              onPress={() => swiperRef.current?.scrollBy(-1)}
+              style={[
+                styles.arrowButton,
+                {
+                  backgroundColor:
+                    index === 0 ? "#707070" : Colors.Colors.App_theme,
+                  left: 2,
+                  zIndex: 999,
+                },
+              ]}
+            >
+              <Image
+                source={require("../../assets/arrow_home.png")}
+                style={{ transform: [{ rotate: "180deg" }] }}
+              />
+            </TouchableOpacity>
+
 
             <Card style={styles.card} onLayout={(e) => {
               const h = e.nativeEvent.layout.height;
@@ -379,8 +375,8 @@ const MantraCard = ({
                           style={{ marginVertical: 8 }}
                         >
                           {repsOrdered.map((rep, i) => {
-                            const isLocked = startedMantra;
-                            const apiSelected = selectedAPIReps === rep;
+                            const isLocked = isStarted;
+                            const apiSelected = itemSelectedReps === rep;
 
                             const selected = isLocked
                               ? apiSelected
@@ -440,7 +436,7 @@ const MantraCard = ({
                 {/* </ScrollView> */}
                 {!viewOnly && (
                   <>
-                    {!startedMantra ? (
+                    {!isStarted ? (
                       <TouchableOpacity
                         style={styles.startBtn}
                         onPress={async () => {
@@ -466,7 +462,7 @@ const MantraCard = ({
                         onPress={() => DoneMantraCalled(currentMantra)}
                       >
                         {/* ✅ Checkbox logic */}
-                        {endMantra ? (
+                        {isDone ? (
                           <View
                             style={{
                               width: 18,
@@ -494,7 +490,7 @@ const MantraCard = ({
                         )}
 
                         <TextComponent type="streakSadanaText">
-                          {endMantra
+                          {isDone
                             ? t("mantraCard.done")
                             : t("mantraCard.markDone")}
                         </TextComponent>
@@ -555,7 +551,7 @@ const MantraCard = ({
                       type="semiBoldText"
                       style={{ textAlign: "center", color: Colors.Colors.white, marginBottom: 2 }}
                     >
-                        {t("sadanaTracker.detailsCard.addToMyPractice")}
+                      {t("sadanaTracker.detailsCard.addToMyPractice")}
                     </TextComponent>
                   </TouchableOpacity>
                 )}
@@ -675,24 +671,22 @@ const MantraCard = ({
                 </ViewShot>
               </View>
             )}
-            {!startedMantra && (
-              <TouchableOpacity
-                disabled={index === filteredMantras.length - 1}
-                onPress={() => swiperRef.current?.scrollBy(1)}
-                style={[
-                  styles.arrowButton,
-                  {
-                    backgroundColor:
-                      index === filteredMantras.length - 1
-                        ? "#707070"
-                        : Colors.Colors.App_theme,
-                    right: 4,
-                  },
-                ]}
-              >
-                <Image source={require("../../assets/arrow_home.png")} />
-              </TouchableOpacity>
-            )}
+            <TouchableOpacity
+              disabled={index === filteredMantras.length - 1}
+              onPress={() => swiperRef.current?.scrollBy(1)}
+              style={[
+                styles.arrowButton,
+                {
+                  backgroundColor:
+                    index === filteredMantras.length - 1
+                      ? "#707070"
+                      : Colors.Colors.App_theme,
+                  right: 4,
+                },
+              ]}
+            >
+              <Image source={require("../../assets/arrow_home.png")} />
+            </TouchableOpacity>
           </View>
         );
       })}

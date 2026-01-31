@@ -203,7 +203,7 @@ export const getPracticeToday = (callback) => async (dispatch) => {
       Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata";
 
     const response = await api.get(
-      `practice/today/?tz=${encodeURIComponent(tz)}&locale=en`
+      `practice_items/today/?tz=${encodeURIComponent(tz)}&locale=en`
     );
 
     console.log("practice today res >>>>>>>>", response.data);
@@ -224,7 +224,7 @@ export const getPracticeToday = (callback) => async (dispatch) => {
 //   dispatch(practiceTodayRequest());
 //   try {
 //     const response = await api.get(
-//       "practice/today/?tz=Asia/Calcutta&locale=en"
+//       "practice_items/today/?tz=Asia/Calcutta&locale=en"
 //     );
 //     console.log("practice today res >>>>>>>>",response.data);
 //     dispatch(practiceTodaySuccess(response.data));
@@ -238,7 +238,7 @@ export const getPracticeToday = (callback) => async (dispatch) => {
 export const startMantraPractice = (payload, callback) => async (dispatch) => {
   dispatch(startMantraRequest());
   try {
-    const response = await api.post("practice/started/", payload);
+    const response = await api.post("practice_items/assign/", payload);
     dispatch(startMantraSuccess(response.data));
 
     // After starting mantra, refresh today’s practice
@@ -255,7 +255,7 @@ export const startMantraPractice = (payload, callback) => async (dispatch) => {
 export const completeMantra = (payload, callback) => async (dispatch) => {
   dispatch(completeMantraRequest());
   try {
-    const response = await api.post("practice/complete/", payload);
+    const response = await api.post("practice_items/complete/", payload);
     dispatch(completeMantraSuccess(response.data));
 
     // Optionally refresh today's practice

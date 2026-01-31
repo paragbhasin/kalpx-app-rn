@@ -48,9 +48,13 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
   const [activeIndex, setActiveIndex] = useState(0);
   const [shareVisible, setShareVisible] = useState(false);
   const [loading, setLoading] = useState(true);
-  const startedSankalp = practiceTodayData?.started?.sankalp;
-  const doneSankalp = practiceTodayData?.done?.sankalp;
-  const sankalpId = practiceTodayData?.ids?.sankalp;
+  const todayItems = practiceTodayData?.items || [];
+  const activeSankalpItem = todayItems.find(item => item.practice_type === "sankalp");
+
+  const startedSankalp = !!activeSankalpItem;
+  const doneSankalp = !!activeSankalpItem?.completed_at;
+  const sankalpId = activeSankalpItem?.item_id;
+
   const [slideHeight, setSlideHeight] = useState(0);
   const shareStage = doneSankalp ? 3 : startedSankalp ? 2 : 1;
   const uiStage = doneSankalp ? 3 : startedSankalp ? 2 : 1;
@@ -80,13 +84,9 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
   }, [shareStage, i18n.language]);
 
   const filteredSankalps = useMemo(() => {
-    if (startedSankalp && sankalpId) {
-      const found = DAILY_SANKALPS.find((s) => s.id === sankalpId);
-      return found ? [found] : [];
-    }
     const shuffled = seededShuffle(DAILY_SANKALPS, getTodaySeed());
     return shuffled.slice(0, 5);
-  }, [startedSankalp, sankalpId, i18n.language]);
+  }, [i18n.language]);
 
   React.useEffect(() => {
     if (filteredSankalps && filteredSankalps.length > 0) {
@@ -149,7 +149,7 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
       index={activeIndex}
       showsPagination={false}
       onIndexChanged={(i) => setActiveIndex(i)}
-      scrollEnabled={!startedSankalp}
+      scrollEnabled={true}
       autoplay={false}
       horizontal
       removeClippedSubviews={false}
@@ -161,6 +161,10 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
     >
       {filteredSankalps.map((currentSankalp, index) => {
         const translated = getTranslatedPractice(currentSankalp, t);
+        const itemRecord = todayItems.find(it => it.item_id === currentSankalp.id);
+        const isStarted = !!itemRecord;
+        const isDone = !!itemRecord?.completed_at;
+
         return (
           <View
             key={index}
@@ -172,26 +176,26 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
               paddingHorizontal: 5,
             }}
           >
-            {!startedSankalp && (
-              <TouchableOpacity
-                disabled={index === 0}
-                onPress={() => swiperRef.current?.scrollBy(-1)}
-                style={[
-                  styles.arrowButton,
-                  {
-                    backgroundColor:
-                      index === 0 ? "#707070" : Colors.Colors.App_theme,
-                    left: 2,
-                    zIndex: 999,
-                  },
-                ]}
-              >
-                <Image
-                  source={require("../../assets/arrow_home.png")}
-                  style={{ transform: [{ rotate: "180deg" }] }}
-                />
-              </TouchableOpacity>
-            )}
+
+            <TouchableOpacity
+              disabled={index === 0}
+              onPress={() => swiperRef.current?.scrollBy(-1)}
+              style={[
+                styles.arrowButton,
+                {
+                  backgroundColor:
+                    index === 0 ? "#707070" : Colors.Colors.App_theme,
+                  left: 2,
+                  zIndex: 999,
+                },
+              ]}
+            >
+              <Image
+                source={require("../../assets/arrow_home.png")}
+                style={{ transform: [{ rotate: "180deg" }] }}
+              />
+            </TouchableOpacity>
+
 
             <Card style={styles.card} onLayout={(e) => {
               const h = e.nativeEvent.layout.height;
@@ -311,7 +315,7 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                 {/* </ScrollView> */}
                 {!viewOnly && (
                   <>
-                    {!startedSankalp ? (
+                    {!isStarted ? (
                       <TouchableOpacity
                         style={styles.startBtn}
                         onPress={() => onPressStartSankalp(currentSankalp)}
@@ -334,7 +338,7 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                         onPress={() => onCompleteSankalp(currentSankalp)}
                       >
                         {/* ✅ Checkbox logic */}
-                        {doneSankalp ? (
+                        {isDone ? (
                           <View
                             style={{
                               width: 18,
@@ -362,7 +366,7 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                         )}
 
                         <TextComponent type="streakSadanaText">
-                          {doneSankalp ? t("sankalpCard.done") : t("sankalpCard.markDone")}
+                          {isDone ? t("sankalpCard.done") : t("sankalpCard.markDone")}
                         </TextComponent>
                       </TouchableOpacity>
                     )}
@@ -409,7 +413,7 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                       type="semiBoldText"
                       style={{ textAlign: "center", color: Colors.Colors.white, marginBottom: 2 }}
                     >
-                         {t("sadanaTracker.detailsCard.addToMyPractice")}
+                      {t("sadanaTracker.detailsCard.addToMyPractice")}
                     </TextComponent>
                   </TouchableOpacity>
                 )}
@@ -507,24 +511,24 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
               </View>
             )}
 
-            {!startedSankalp && (
-              <TouchableOpacity
-                disabled={index === filteredSankalps.length - 1}
-                onPress={() => swiperRef.current?.scrollBy(1)}
-                style={[
-                  styles.arrowButton,
-                  {
-                    backgroundColor:
-                      index === filteredSankalps.length - 1
-                        ? "#707070"
-                        : Colors.Colors.App_theme,
-                    right: 4,
-                  },
-                ]}
-              >
-                <Image source={require("../../assets/arrow_home.png")} />
-              </TouchableOpacity>
-            )}
+
+            <TouchableOpacity
+              disabled={index === filteredSankalps.length - 1}
+              onPress={() => swiperRef.current?.scrollBy(1)}
+              style={[
+                styles.arrowButton,
+                {
+                  backgroundColor:
+                    index === filteredSankalps.length - 1
+                      ? "#707070"
+                      : Colors.Colors.App_theme,
+                  right: 4,
+                },
+              ]}
+            >
+              <Image source={require("../../assets/arrow_home.png")} />
+            </TouchableOpacity>
+
           </View>
         );
       })}

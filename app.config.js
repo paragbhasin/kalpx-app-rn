@@ -82,10 +82,14 @@ module.exports = {
           backgroundColor: "#ffffff",
         },
       ],
-      "./plugins/withModularHeaders",
+      // Removed ./plugins/withModularHeaders as static frameworks are now enabled below
       [
         "expo-build-properties",
-        {},
+        {
+          ios: {
+            useFrameworks: "static",
+          },
+        },
       ],
       [
         "@stripe/stripe-react-native",

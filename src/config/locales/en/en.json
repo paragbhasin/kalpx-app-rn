@@ -1315,6 +1315,19 @@
     "sankalpComplete_info2": [
       "🌟 You're keeping your streak alive!",
       "🙏 See you tomorrow for your next step on this journey."
+    ],
+    "practiceComplete_title1": "🌼 Beautiful! You've completed your Practice today.",
+    "practiceComplete_sub1": "But your progress isn't being saved.",
+    "practiceComplete_info1": [
+      "Keep your Practice streak alive",
+      "Receive gentle nudges to stay on track",
+      "View your growth over time"
+    ],
+    "practiceComplete_title2": "🌼 Well done!",
+    "practiceComplete_sub2": "Every time you complete your Practice, you nurture your inner self.",
+    "practiceComplete_info2": [
+      "🌟 You're keeping your streak alive!",
+      "🙏 See you tomorrow for your next step on this journey."
     ]
   },
   "sankalpHeaderText": {

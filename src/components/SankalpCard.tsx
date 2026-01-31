@@ -40,7 +40,7 @@ function seededShuffle(array, seed) {
   return result;
 }
 
-const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp, viewOnly = false, onAddToMyPractice = null }) => {
+const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp, viewOnly = false, onAddToMyPractice = null, singleItem = null }) => {
   const navigation: any = useNavigation();
   const { t, i18n } = useTranslation();
   const swiperRef = useRef<Swiper>(null);
@@ -84,9 +84,12 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
   }, [shareStage, i18n.language]);
 
   const filteredSankalps = useMemo(() => {
+    if (singleItem) {
+      return [singleItem];
+    }
     const shuffled = seededShuffle(DAILY_SANKALPS, getTodaySeed());
     return shuffled.slice(0, 5);
-  }, [i18n.language]);
+  }, [i18n.language, singleItem]);
 
   React.useEffect(() => {
     if (filteredSankalps && filteredSankalps.length > 0) {
@@ -177,24 +180,26 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
             }}
           >
 
-            <TouchableOpacity
-              disabled={index === 0}
-              onPress={() => swiperRef.current?.scrollBy(-1)}
-              style={[
-                styles.arrowButton,
-                {
-                  backgroundColor:
-                    index === 0 ? "#707070" : Colors.Colors.App_theme,
-                  left: 2,
-                  zIndex: 999,
-                },
-              ]}
-            >
-              <Image
-                source={require("../../assets/arrow_home.png")}
-                style={{ transform: [{ rotate: "180deg" }] }}
-              />
-            </TouchableOpacity>
+            {!singleItem && (
+              <TouchableOpacity
+                disabled={index === 0}
+                onPress={() => swiperRef.current?.scrollBy(-1)}
+                style={[
+                  styles.arrowButton,
+                  {
+                    backgroundColor:
+                      index === 0 ? "#707070" : Colors.Colors.App_theme,
+                    left: 2,
+                    zIndex: 999,
+                  },
+                ]}
+              >
+                <Image
+                  source={require("../../assets/arrow_home.png")}
+                  style={{ transform: [{ rotate: "180deg" }] }}
+                />
+              </TouchableOpacity>
+            )}
 
 
             <Card style={styles.card} onLayout={(e) => {
@@ -573,22 +578,24 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
             )}
 
 
-            <TouchableOpacity
-              disabled={index === filteredSankalps.length - 1}
-              onPress={() => swiperRef.current?.scrollBy(1)}
-              style={[
-                styles.arrowButton,
-                {
-                  backgroundColor:
-                    index === filteredSankalps.length - 1
-                      ? "#707070"
-                      : Colors.Colors.App_theme,
-                  right: 4,
-                },
-              ]}
-            >
-              <Image source={require("../../assets/arrow_home.png")} />
-            </TouchableOpacity>
+            {!singleItem && (
+              <TouchableOpacity
+                disabled={index === filteredSankalps.length - 1}
+                onPress={() => swiperRef.current?.scrollBy(1)}
+                style={[
+                  styles.arrowButton,
+                  {
+                    backgroundColor:
+                      index === filteredSankalps.length - 1
+                        ? "#707070"
+                        : Colors.Colors.App_theme,
+                    right: 4,
+                  },
+                ]}
+              >
+                <Image source={require("../../assets/arrow_home.png")} />
+              </TouchableOpacity>
+            )}
 
           </View>
         );

@@ -12,7 +12,7 @@ interface ActivePracticeListProps {
     todayItems: any[];
     onMarkSankalpDone: (sankalp: any) => void;
     onMarkMantraDone: (mantra: any) => void;
-    onMarkPracticeDone?: (practice: any) => void;
+    onMarkPracticeDone?: (practice: any, type: string) => void;
     filter?: (item: any) => boolean;
 }
 
@@ -56,7 +56,7 @@ const ActivePracticeList: React.FC<ActivePracticeListProps> = ({
     if (!todayItems || todayItems.length === 0) return null;
 
     let itemsToShow = todayItems.filter(item =>
-        !hiddenIds.has(item.item_id)
+        !item.completed_at || !hiddenIds.has(item.item_id)
     );
 
     if (filter) {
@@ -100,7 +100,7 @@ const ActivePracticeList: React.FC<ActivePracticeListProps> = ({
                             <SimplePracticeCard
                                 practice={practice}
                                 isDone={!!item.completed_at}
-                                onMarkDone={() => onMarkPracticeDone && onMarkPracticeDone(practice)}
+                                onMarkDone={() => onMarkPracticeDone && onMarkPracticeDone(practice, item.practice_type)}
                             />
                         </View>
                     );

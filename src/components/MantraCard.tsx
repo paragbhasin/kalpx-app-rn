@@ -33,6 +33,7 @@ const MantraCard = ({
   DoneMantraCalled,
   viewOnly = false,
   onAddToMyPractice = null,
+  singleItem = null,
 }) => {
   const navigation: any = useNavigation();
   const { i18n, t } = useTranslation();
@@ -143,6 +144,10 @@ const MantraCard = ({
     const langKey = currentLang.toLowerCase();
     const allMantras = CATALOGS[langKey] || CATALOGS.en;
 
+    if (singleItem) {
+      return [singleItem];
+    }
+
     // ✅ Use dailyMantras if already preloaded
     if (dailyMantras && dailyMantras.length > 0) {
       return dailyMantras;
@@ -222,24 +227,26 @@ const MantraCard = ({
             }}
           >
 
-            <TouchableOpacity
-              disabled={index === 0}
-              onPress={() => swiperRef.current?.scrollBy(-1)}
-              style={[
-                styles.arrowButton,
-                {
-                  backgroundColor:
-                    index === 0 ? "#707070" : Colors.Colors.App_theme,
-                  left: 2,
-                  zIndex: 999,
-                },
-              ]}
-            >
-              <Image
-                source={require("../../assets/arrow_home.png")}
-                style={{ transform: [{ rotate: "180deg" }] }}
-              />
-            </TouchableOpacity>
+            {!singleItem && (
+              <TouchableOpacity
+                disabled={index === 0}
+                onPress={() => swiperRef.current?.scrollBy(-1)}
+                style={[
+                  styles.arrowButton,
+                  {
+                    backgroundColor:
+                      index === 0 ? "#707070" : Colors.Colors.App_theme,
+                    left: 2,
+                    zIndex: 999,
+                  },
+                ]}
+              >
+                <Image
+                  source={require("../../assets/arrow_home.png")}
+                  style={{ transform: [{ rotate: "180deg" }] }}
+                />
+              </TouchableOpacity>
+            )}
 
 
             <Card style={styles.card} onLayout={(e) => {
@@ -739,22 +746,24 @@ const MantraCard = ({
                 </View>
               )
             }
-            <TouchableOpacity
-              disabled={index === filteredMantras.length - 1}
-              onPress={() => swiperRef.current?.scrollBy(1)}
-              style={[
-                styles.arrowButton,
-                {
-                  backgroundColor:
-                    index === filteredMantras.length - 1
-                      ? "#707070"
-                      : Colors.Colors.App_theme,
-                  right: 4,
-                },
-              ]}
-            >
-              <Image source={require("../../assets/arrow_home.png")} />
-            </TouchableOpacity>
+            {!singleItem && (
+              <TouchableOpacity
+                disabled={index === filteredMantras.length - 1}
+                onPress={() => swiperRef.current?.scrollBy(1)}
+                style={[
+                  styles.arrowButton,
+                  {
+                    backgroundColor:
+                      index === filteredMantras.length - 1
+                        ? "#707070"
+                        : Colors.Colors.App_theme,
+                    right: 4,
+                  },
+                ]}
+              >
+                <Image source={require("../../assets/arrow_home.png")} />
+              </TouchableOpacity>
+            )}
           </View >
         );
       })}

@@ -33,7 +33,7 @@ import VideoPostPlayer from "./VideoPostPlayer";
 import SigninPopup from "./SigninPopup";
 import { getTranslatedPractice } from "../utils/getTranslatedPractice";
 import { getConsistentRandomStats } from "../utils/randomStats";
-import { startMantraPractice, completeMantra, getPracticeToday } from "../screens/Home/actions";
+import { startMantraPractice, completeMantra, getPracticeToday, getPracticeStreaks } from "../screens/Home/actions";
 import { useUserLocation } from "./useUserLocation";
 import { RootState } from "../store";
 
@@ -229,6 +229,9 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     const [showLoginMantraComplete, setShowLoginMantraComplete] = useState(false);
     const [showSankalpComplete, setShowSankalpComplete] = useState(false);
     const [showLoginSankalpComplete, setShowLoginSankalpComplete] = useState(false);
+    const [showPracticeComplete, setShowPracticeComplete] = useState(false);
+    const [showLoginPracticeComplete, setShowLoginPracticeComplete] = useState(false);
+    const [selectedPracticeForPopup, setSelectedPracticeForPopup] = useState(null);
 
     const initialSlide = imagesData[0];
     const aspectRatioString = initialSlide?.layout?.aspect_ratio || post.layout?.aspect_ratio || "1:1";
@@ -425,7 +428,6 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                         if (!isAuthenticated) setShowMantraTaken(true);
                         else setShowLoginMantraTaken(true);
                     }
-                    dispatch(getPracticeToday(() => { }));
                 }
             })
         );
@@ -444,19 +446,23 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                 ui: "social_card_done"
             }
         };
-
         dispatch(
             completeMantra(payload, (res) => {
                 if (res.success) {
                     if (isSankalp) {
+                        setSelectedSankalpForPopup(practice);
                         if (!isAuthenticated) setShowSankalpComplete(true);
                         else setShowLoginSankalpComplete(true);
-                    } else {
-                        // Default to Mantra
+                    } else if (isMantra) {
+                        setSelectedMantraForPopup(practice);
                         if (!isAuthenticated) setShowMantraComplete(true);
                         else setShowLoginMantraComplete(true);
+                    } else {
+                        // Generic practice
+                        setSelectedPracticeForPopup(practice);
+                        if (!isAuthenticated) setShowPracticeComplete(true);
+                        else setShowLoginPracticeComplete(true);
                     }
-                    dispatch(getPracticeToday(() => { }));
                 }
             })
         );
@@ -872,6 +878,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                                         DoneMantraCalled={handleCompletePractice}
                                         viewOnly={true}
                                         onAddToMyPractice={() => handleAddToMyPractice(selectedLinkedPractice, 'mantra')}
+                                        singleItem={selectedLinkedPractice}
                                     />
                                 )}
                                 {linkedCardType === 'sankalp' && (
@@ -881,6 +888,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                                         onCompleteSankalp={handleCompletePractice}
                                         viewOnly={true}
                                         onAddToMyPractice={() => handleAddToMyPractice(selectedLinkedPractice, 'sankalp')}
+                                        singleItem={selectedLinkedPractice}
                                     />
                                 )}
                                 {linkedCardType === 'practice' && (
@@ -946,7 +954,69 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                     setShowLoginMantraTaken(false);
                     navigation.navigate("Tracker");
                 }}
+                onConfirmCancel={() => setShowLoginSankalpTaken(false)}
+            />
+
+            <SigninPopup
+                visible={showMantraTaken}
+                onClose={() => {
+                    setShowMantraTaken(false);
+                    dispatch(getPracticeToday(() => { }));
+                    dispatch(getPracticeStreaks(() => { }));
+                }}
+                onConfirmCancel={() => setShowMantraTaken(false)}
+                title={t("popup.mantraTaken_title1")}
+                subTitle={t("popup.mantraTaken_subtitle1")}
+                subText={t("popup.mantraTaken_sub1")}
+                infoTexts={[
+                    t("popup.mantraTaken_info1.0"),
+                    t("popup.mantraTaken_info1.1"),
+                    t("popup.mantraTaken_info1.2"),
+                ]}
+                bottomText={t("popup.mantraTaken_bottom")}
+            />
+            <SigninPopup
+                visible={showLoginMantraTaken}
+                onClose={() => {
+                    setShowLoginMantraTaken(false);
+                    dispatch(getPracticeToday(() => { }));
+                    dispatch(getPracticeStreaks(() => { }));
+                }}
                 onConfirmCancel={() => setShowLoginMantraTaken(false)}
+                title={t("popup.mantraTaken_title2")}
+                subTitle={t("popup.mantraTaken_subtitle1")}
+                subText={t("popup.mantraTaken_sub2")}
+                infoTexts={[
+                    t("popup.mantraTaken_info2.0"),
+                    t("popup.mantraTaken_info2.1"),
+                ]}
+                // bottomText={t("popup.mantraTaken_bottom")}
+                MantraButtonTitle={t("popup.mantraTaken_button")}
+                onSadhanPress={() => {
+                    setShowLoginMantraTaken(false);
+                    if (selectedMantraForPopup) {
+                        navigation.navigate("MySadana", {
+                            selectedmantra: selectedMantraForPopup,
+                        });
+                    }
+                }}
+            />
+            <SigninPopup
+                visible={showMantraComplete}
+                onClose={() => {
+                    setShowMantraComplete(false);
+                    dispatch(getPracticeToday(() => { }));
+                    dispatch(getPracticeStreaks(() => { }));
+                }}
+                onConfirmCancel={() => setShowMantraComplete(false)}
+                title={t("popup.mantraComplete_title1")}
+                subTitle={t("popup.mantraTaken_subtitle1")}
+                subText={t("popup.mantraComplete_sub1")}
+                infoTexts={[
+                    t("popup.mantraComplete_info1.0"),
+                    t("popup.mantraComplete_info1.1"),
+                    t("popup.mantraComplete_info1.2"),
+                ]}
             />
             <SigninPopup
                 visible={showSankalpTaken}
@@ -985,7 +1055,11 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
 
             <SigninPopup
                 visible={showMantraComplete}
-                onClose={() => setShowMantraComplete(false)}
+                onClose={() => {
+                    setShowMantraComplete(false);
+                    dispatch(getPracticeToday(() => { }));
+                    dispatch(getPracticeStreaks(() => { }));
+                }}
                 onConfirmCancel={() => setShowMantraComplete(false)}
                 title={t("popup.mantraComplete_title1")}
                 subTitle={t("popup.mantraTaken_subtitle1")}
@@ -998,7 +1072,11 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
             />
             <SigninPopup
                 visible={showLoginMantraComplete}
-                onClose={() => setShowLoginMantraComplete(false)}
+                onClose={() => {
+                    setShowLoginMantraComplete(false);
+                    dispatch(getPracticeToday(() => { }));
+                    dispatch(getPracticeStreaks(() => { }));
+                }}
                 onConfirmCancel={() => { }}
                 title={t("popup.mantraComplete_title2")}
                 subText={t("popup.mantraComplete_sub2")}
@@ -1011,7 +1089,11 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
             />
             <SigninPopup
                 visible={showSankalpComplete}
-                onClose={() => setShowSankalpComplete(false)}
+                onClose={() => {
+                    setShowSankalpComplete(false);
+                    dispatch(getPracticeToday(() => { }));
+                    dispatch(getPracticeStreaks(() => { }));
+                }}
                 onConfirmCancel={() => { }}
                 title={t("popup.sankalpComplete_title")}
                 subText={t("popup.sankalpComplete_sub")}
@@ -1024,7 +1106,11 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
             />
             <SigninPopup
                 visible={showLoginSankalpComplete}
-                onClose={() => setShowLoginSankalpComplete(false)}
+                onClose={() => {
+                    setShowLoginSankalpComplete(false);
+                    dispatch(getPracticeToday(() => { }));
+                    dispatch(getPracticeStreaks(() => { }));
+                }}
                 onConfirmCancel={() => setShowLoginSankalpComplete(false)}
                 title={t("popup.mantraComplete_title2")}
                 subText={t("popup.sankalpComplete_sub2")}
@@ -1035,6 +1121,40 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                 bottomText=""
                 MantraButtonTitle={t("popup.mantraTaken_Continue")}
                 onSadhanPress={() => setShowLoginSankalpComplete(false)}
+            />
+            <SigninPopup
+                visible={showPracticeComplete}
+                onClose={() => {
+                    setShowPracticeComplete(false);
+                    dispatch(getPracticeToday(() => { }));
+                    dispatch(getPracticeStreaks(() => { }));
+                }}
+                onConfirmCancel={() => setShowPracticeComplete(false)}
+                title={t("popup.practiceComplete_title1")}
+                subTitle={t("popup.mantraTaken_subtitle1")}
+                subText={t("popup.practiceComplete_sub1")}
+                infoTexts={[
+                    t("popup.practiceComplete_info1.0"),
+                    t("popup.practiceComplete_info1.1"),
+                    t("popup.practiceComplete_info1.2"),
+                ]}
+            />
+            <SigninPopup
+                visible={showLoginPracticeComplete}
+                onClose={() => {
+                    setShowLoginPracticeComplete(false);
+                    dispatch(getPracticeToday(() => { }));
+                    dispatch(getPracticeStreaks(() => { }));
+                }}
+                onConfirmCancel={() => setShowLoginPracticeComplete(false)}
+                title={t("popup.practiceComplete_title2")}
+                subText={t("popup.practiceComplete_sub2")}
+                infoTexts={[
+                    t("popup.practiceComplete_info2.0"),
+                    t("popup.practiceComplete_info2.1"),
+                ]}
+                MantraButtonTitle={t("popup.mantraTaken_Continue")}
+                onSadhanPress={() => setShowLoginPracticeComplete(false)}
             />
 
         </View>

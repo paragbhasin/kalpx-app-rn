@@ -106,6 +106,9 @@ export default function Home() {
   const [loadingClasses, setLoadingClasses] = useState(false);
   const [selectedMantraForPopup, setSelectedMantraForPopup] = useState(null);
   const [selectedSankalpForPopup, setSelectedSankalpForPopup] = useState(null);
+  const [showPracticeComplete, setShowPracticeComplete] = useState(false);
+  const [showLoginPracticeComplete, setShowLoginPracticeComplete] = useState(false);
+  const [selectedPracticeForPopup, setSelectedPracticeForPopup] = useState(null);
   const currentLang = i18n.language.split("-")[0];
   const youtubeUrl = "https://www.youtube.com/watch?v=INS2diQXIjA";
   const videoId = youtubeUrl.split("v=")[1];
@@ -996,9 +999,10 @@ export default function Home() {
             setSelectedMantraForPopup(mantra);
             DoneMantraCalled(mantra);
           }}
-          onMarkPracticeDone={(practice) => {
+          onMarkPracticeDone={(practice, type) => {
+            setSelectedPracticeForPopup(practice);
             const payload = {
-              practice_type: "practice",
+              practice_type: type,
               item_id: practice.id,
               tz: locationData?.timezone || "Asia/Kolkata",
               meta: {
@@ -1008,7 +1012,11 @@ export default function Home() {
             dispatch(
               completeMantra(payload, (res) => {
                 if (res.success) {
-                  dispatch(getPracticeToday(() => { }));
+                  if (!isLoggedIn) {
+                    setShowPracticeComplete(true);
+                  } else {
+                    setShowLoginPracticeComplete(true);
+                  }
                 }
               })
             );
@@ -1547,7 +1555,11 @@ export default function Home() {
         />
         <SigninPopup
           visible={showMantraComplete}
-          onClose={() => setShowMantraComplete(false)}
+          onClose={() => {
+            setShowMantraComplete(false);
+            dispatch(getPracticeToday(() => { }));
+            dispatch(getPracticeStreaks(() => { }));
+          }}
           onConfirmCancel={() => setShowMantraComplete(false)}
           title={t("popup.mantraComplete_title1")}
           subTitle={t("popup.mantraTaken_subtitle1")}
@@ -1560,7 +1572,11 @@ export default function Home() {
         />
         <SigninPopup
           visible={showLoginMantraComplete}
-          onClose={() => setShowLoginMantraComplete(false)}
+          onClose={() => {
+            setShowLoginMantraComplete(false);
+            dispatch(getPracticeToday(() => { }));
+            dispatch(getPracticeStreaks(() => { }));
+          }}
           onConfirmCancel={() => { }}
           title={t("popup.mantraComplete_title2")}
           subText={t("popup.mantraComplete_sub2")}
@@ -1608,7 +1624,11 @@ export default function Home() {
         />
         <SigninPopup
           visible={showSankalpComplete}
-          onClose={() => setShowSankalpComplete(false)}
+          onClose={() => {
+            setShowSankalpComplete(false);
+            dispatch(getPracticeToday(() => { }));
+            dispatch(getPracticeStreaks(() => { }));
+          }}
           onConfirmCancel={() => { }}
           title={t("popup.sankalpComplete_title")}
           subText={t("popup.sankalpComplete_sub")}
@@ -1621,7 +1641,11 @@ export default function Home() {
         />
         <SigninPopup
           visible={showLoginSankalpComplete}
-          onClose={() => setShowLoginSankalpComplete(false)}
+          onClose={() => {
+            setShowLoginSankalpComplete(false);
+            dispatch(getPracticeToday(() => { }));
+            dispatch(getPracticeStreaks(() => { }));
+          }}
           onConfirmCancel={() => setShowLoginSankalpComplete(false)}
           title={t("popup.mantraComplete_title2")}
           subText={t("popup.sankalpComplete_sub2")}
@@ -1632,6 +1656,40 @@ export default function Home() {
           bottomText=""
           MantraButtonTitle={t("popup.mantraTaken_Continue")}
           onSadhanPress={() => setShowLoginSankalpComplete(false)}
+        />
+        <SigninPopup
+          visible={showPracticeComplete}
+          onClose={() => {
+            setShowPracticeComplete(false);
+            dispatch(getPracticeToday(() => { }));
+            dispatch(getPracticeStreaks(() => { }));
+          }}
+          onConfirmCancel={() => setShowPracticeComplete(false)}
+          title={t("popup.practiceComplete_title1")}
+          subTitle={t("popup.mantraTaken_subtitle1")}
+          subText={t("popup.practiceComplete_sub1")}
+          infoTexts={[
+            t("popup.practiceComplete_info1.0"),
+            t("popup.practiceComplete_info1.1"),
+            t("popup.practiceComplete_info1.2"),
+          ]}
+        />
+        <SigninPopup
+          visible={showLoginPracticeComplete}
+          onClose={() => {
+            setShowLoginPracticeComplete(false);
+            dispatch(getPracticeToday(() => { }));
+            dispatch(getPracticeStreaks(() => { }));
+          }}
+          onConfirmCancel={() => setShowLoginPracticeComplete(false)}
+          title={t("popup.practiceComplete_title2")}
+          subText={t("popup.practiceComplete_sub2")}
+          infoTexts={[
+            t("popup.practiceComplete_info2.0"),
+            t("popup.practiceComplete_info2.1"),
+          ]}
+          MantraButtonTitle={t("popup.mantraTaken_Continue")}
+          onSadhanPress={() => setShowLoginPracticeComplete(false)}
         />
         {/* <LanguageTimezoneModal
     visible={showLangTZModal}

@@ -21,9 +21,11 @@ import UserActivityScreen from "../UserActivity/UserActivityScreen";
 import UserAgreements from "./UserAgreements";
 import { fetchUserActivity } from "../UserActivity/actions";
 import ActivePracticeList from "../../components/ActivePracticeList";
-import { completeMantra, getPracticeToday } from "../Home/actions";
+import { completeMantra, getPracticeToday, getPracticeStreaks } from "../Home/actions";
 import { useUserLocation } from "../../components/useUserLocation";
 import { RootState } from "../../store";
+import SigninPopup from "../../components/SigninPopup";
+import LoadingOverlay from "../../components/LoadingOverlay";
 
 import { useScrollContext } from "../../context/ScrollContext";
 import { Animated } from "react-native";
@@ -44,6 +46,19 @@ const CommunityLanding = () => {
     const { followed_communities } = useSelector((state: any) => state.userActivity);
     const practiceTodayData = useSelector((state: RootState) => state.practiceTodayReducer?.data);
     const { locationData } = useUserLocation();
+    const user = useSelector((state: any) => state.login?.user || state.socialLoginReducer?.user);
+    const isLoggedIn = !!user;
+
+    const [selectedMantraForPopup, setSelectedMantraForPopup] = useState(null);
+    const [selectedSankalpForPopup, setSelectedSankalpForPopup] = useState(null);
+    const [selectedPracticeForPopup, setSelectedPracticeForPopup] = useState(null);
+    const [showMantraComplete, setShowMantraComplete] = useState(false);
+    const [showLoginMantraComplete, setShowLoginMantraComplete] = useState(false);
+    const [showSankalpComplete, setShowSankalpComplete] = useState(false);
+    const [showLoginSankalpComplete, setShowLoginSankalpComplete] = useState(false);
+    const [showPracticeComplete, setShowPracticeComplete] = useState(false);
+    const [showLoginPracticeComplete, setShowLoginPracticeComplete] = useState(false);
+    const [apiloading, setApiLoading] = useState(false);
 
     const dropdownRef = useRef<any>(null);
 
@@ -74,6 +89,7 @@ const CommunityLanding = () => {
     }, [dispatch]);
 
     const handleMarkMantraDone = (mantra: any) => {
+        setSelectedMantraForPopup(mantra);
         const payload = {
             practice_type: "mantra",
             item_id: mantra.id,
@@ -87,13 +103,18 @@ const CommunityLanding = () => {
         dispatch(
             completeMantra(payload, (res: any) => {
                 if (res.success) {
-                    dispatch(getPracticeToday(() => { }));
+                    if (!isLoggedIn) {
+                        setShowMantraComplete(true);
+                    } else {
+                        setShowLoginMantraComplete(true);
+                    }
                 }
             }) as any
         );
     };
 
     const handleMarkSankalpDone = (sankalp: any) => {
+        setSelectedSankalpForPopup(sankalp);
         const payload = {
             practice_type: "sankalp",
             item_id: sankalp.id,
@@ -107,7 +128,11 @@ const CommunityLanding = () => {
         dispatch(
             completeMantra(payload, (res: any) => {
                 if (res.success) {
-                    dispatch(getPracticeToday(() => { }));
+                    if (!isLoggedIn) {
+                        setShowSankalpComplete(true);
+                    } else {
+                        setShowLoginSankalpComplete(true);
+                    }
                 }
             }) as any
         );
@@ -520,9 +545,10 @@ const CommunityLanding = () => {
             todayItems={practiceTodayData?.items || []}
             onMarkMantraDone={handleMarkMantraDone}
             onMarkSankalpDone={handleMarkSankalpDone}
-            onMarkPracticeDone={(practice: any) => {
+            onMarkPracticeDone={(practice: any, type: string) => {
+                setSelectedPracticeForPopup(practice);
                 const payload = {
-                    practice_type: "practice",
+                    practice_type: type,
                     item_id: practice.id,
                     tz: locationData?.timezone || "Asia/Kolkata",
                     source: 'community',
@@ -534,7 +560,11 @@ const CommunityLanding = () => {
                 dispatch(
                     completeMantra(payload, (res: any) => {
                         if (res.success) {
-                            dispatch(getPracticeToday(() => { }));
+                            if (!isLoggedIn) {
+                                setShowPracticeComplete(true);
+                            } else {
+                                setShowLoginPracticeComplete(true);
+                            }
                         }
                     }) as any
                 );
@@ -588,6 +618,112 @@ const CommunityLanding = () => {
 
                     {renderContent()}
                 </View>
+
+                {/* Popups */}
+                <SigninPopup
+                    visible={showMantraComplete}
+                    onClose={() => {
+                        setShowMantraComplete(false);
+                        dispatch(getPracticeToday(() => { }));
+                        dispatch(getPracticeStreaks(() => { }));
+                    }}
+                    onConfirmCancel={() => setShowMantraComplete(false)}
+                    title={t("popup.mantraComplete_title1")}
+                    subTitle={t("popup.mantraTaken_subtitle1")}
+                    subText={t("popup.mantraComplete_sub1")}
+                    infoTexts={[
+                        t("popup.mantraComplete_info1.0"),
+                        t("popup.mantraComplete_info1.1"),
+                        t("popup.mantraComplete_info1.2"),
+                    ]}
+                />
+                <SigninPopup
+                    visible={showLoginMantraComplete}
+                    onClose={() => {
+                        setShowLoginMantraComplete(false);
+                        dispatch(getPracticeToday(() => { }));
+                        dispatch(getPracticeStreaks(() => { }));
+                    }}
+                    onConfirmCancel={() => { }}
+                    title={t("popup.mantraComplete_title2")}
+                    subText={t("popup.mantraComplete_sub2")}
+                    infoTexts={[
+                        t("popup.mantraComplete_info2.0"),
+                        t("popup.mantraComplete_info2.1"),
+                    ]}
+                    MantraButtonTitle={t("popup.mantraTaken_Continue")}
+                    onSadhanPress={() => setShowLoginMantraComplete(false)}
+                />
+                <SigninPopup
+                    visible={showSankalpComplete}
+                    onClose={() => {
+                        setShowSankalpComplete(false);
+                        dispatch(getPracticeToday(() => { }));
+                        dispatch(getPracticeStreaks(() => { }));
+                    }}
+                    onConfirmCancel={() => { }}
+                    title={t("popup.sankalpComplete_title")}
+                    subText={t("popup.sankalpComplete_sub")}
+                    infoTexts={[
+                        t("popup.sankalpComplete_info.0"),
+                        t("popup.sankalpComplete_info.1"),
+                        t("popup.sankalpComplete_info.2"),
+                    ]}
+                    bottomText=""
+                />
+                <SigninPopup
+                    visible={showLoginSankalpComplete}
+                    onClose={() => {
+                        setShowLoginSankalpComplete(false);
+                        dispatch(getPracticeToday(() => { }));
+                        dispatch(getPracticeStreaks(() => { }));
+                    }}
+                    onConfirmCancel={() => setShowLoginSankalpComplete(false)}
+                    title={t("popup.mantraComplete_title2")}
+                    subText={t("popup.sankalpComplete_sub2")}
+                    infoTexts={[
+                        t("popup.sankalpComplete_info2.0"),
+                        t("popup.sankalpComplete_info2.1"),
+                    ]}
+                    bottomText=""
+                    MantraButtonTitle={t("popup.mantraTaken_Continue")}
+                    onSadhanPress={() => setShowLoginSankalpComplete(false)}
+                />
+                <SigninPopup
+                    visible={showPracticeComplete}
+                    onClose={() => {
+                        setShowPracticeComplete(false);
+                        dispatch(getPracticeToday(() => { }));
+                        dispatch(getPracticeStreaks(() => { }));
+                    }}
+                    onConfirmCancel={() => setShowPracticeComplete(false)}
+                    title={t("popup.practiceComplete_title1")}
+                    subTitle={t("popup.mantraTaken_subtitle1")}
+                    subText={t("popup.practiceComplete_sub1")}
+                    infoTexts={[
+                        t("popup.practiceComplete_info1.0"),
+                        t("popup.practiceComplete_info1.1"),
+                        t("popup.practiceComplete_info1.2"),
+                    ]}
+                />
+                <SigninPopup
+                    visible={showLoginPracticeComplete}
+                    onClose={() => {
+                        setShowLoginPracticeComplete(false);
+                        dispatch(getPracticeToday(() => { }));
+                        dispatch(getPracticeStreaks(() => { }));
+                    }}
+                    onConfirmCancel={() => setShowLoginPracticeComplete(false)}
+                    title={t("popup.practiceComplete_title2")}
+                    subText={t("popup.practiceComplete_sub2")}
+                    infoTexts={[
+                        t("popup.practiceComplete_info2.0"),
+                        t("popup.practiceComplete_info2.1"),
+                    ]}
+                    MantraButtonTitle={t("popup.mantraTaken_Continue")}
+                    onSadhanPress={() => setShowLoginPracticeComplete(false)}
+                />
+                <LoadingOverlay visible={apiloading} text={t("home.processing")} />
             </View>
         </SafeAreaView>
     );

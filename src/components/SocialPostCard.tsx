@@ -30,8 +30,12 @@ import MantraCard from "./MantraCard";
 import SankalpCard from "./SankalpCard";
 import DailyPracticeDetailsCard from "./DailyPracticeDetailsCard";
 import VideoPostPlayer from "./VideoPostPlayer";
+import SigninPopup from "./SigninPopup";
 import { getTranslatedPractice } from "../utils/getTranslatedPractice";
 import { getConsistentRandomStats } from "../utils/randomStats";
+import { startMantraPractice, completeMantra, getPracticeToday } from "../screens/Home/actions";
+import { useUserLocation } from "./useUserLocation";
+import { RootState } from "../store";
 
 const { width: screenWidth } = Dimensions.get("window");
 const MEDIA_WIDTH = screenWidth - 24;
@@ -139,8 +143,9 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
         intent: "general"
     });
 
-    const dispatch = useDispatch();
-    const user = useSelector((state: any) => state.login?.user);
+    const dispatch: any = useDispatch();
+    const user = useSelector((state: any) => state.login?.user || state.socialLoginReducer?.user);
+    const practiceTodayData = useSelector((state: RootState) => state.practiceTodayReducer?.data);
     const isAuthenticated = !!user;
 
     const handleProtectedAction = (action: () => void, config?: any) => {
@@ -180,6 +185,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
         setHasUserVoted(post.user_vote === 1 ? 'up' : post.user_vote === -1 ? 'down' : null);
     }, [post.score, post.upvote_count, post.share_count, post.user_vote]);
     const [showLinkedDetail, setShowLinkedDetail] = useState(false);
+    const { locationData } = useUserLocation();
     const [selectedLinkedPractice, setSelectedLinkedPractice] = useState<any>(null);
     const [linkedCardType, setLinkedCardType] = useState<'mantra' | 'sankalp' | 'practice' | null>(null);
 
@@ -210,6 +216,14 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     const [cardWidth, setCardWidth] = useState(screenWidth - 8); // Updated base width for padding: 4
     const [activeIndex, setActiveIndex] = useState(0);
     const [loadedIndices, setLoadedIndices] = useState<number[]>([0]);
+
+    // Success Modal States
+    const [showMantraTaken, setShowMantraTaken] = useState(false);
+    const [showLoginMantraTaken, setShowLoginMantraTaken] = useState(false);
+    const [showSankalpTaken, setShowSankalpTaken] = useState(false);
+    const [showLoginSankalpTaken, setShowLoginSankalpTaken] = useState(false);
+    const [selectedMantraForPopup, setSelectedMantraForPopup] = useState(null);
+    const [selectedSankalpForPopup, setSelectedSankalpForPopup] = useState(null);
 
     const initialSlide = imagesData[0];
     const aspectRatioString = initialSlide?.layout?.aspect_ratio || post.layout?.aspect_ratio || "1:1";
@@ -373,6 +387,65 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
             selectedmantra: practice,
             autoSelectCategory: type === 'mantra' ? 'daily-mantra' : type === 'sankalp' ? 'daily-sankalp' : (practice.category || 'sanatan')
         });
+    };
+
+    const handleStartPractice = (practice: any, repsCount: any) => {
+        const isMantra = practice.id?.includes("mantra");
+        const isSankalp = practice.id?.includes("sankalp");
+
+        const payload: any = {
+            practice_type: isMantra ? "mantra" : isSankalp ? "sankalp" : "library",
+            item_id: practice.id,
+            source: 'community',
+            tz: locationData?.timezone,
+            meta: {
+                ui: "social_card"
+            }
+        };
+
+        if (repsCount) {
+            payload.meta.reps = typeof repsCount === 'object' ? repsCount.count : repsCount;
+        }
+
+        dispatch(
+            startMantraPractice(payload, (res: any) => {
+                if (res.success) {
+                    if (isMantra) {
+                        setSelectedMantraForPopup(practice);
+                        if (!isAuthenticated) setShowMantraTaken(true);
+                        else setShowLoginMantraTaken(true);
+                    } else if (isSankalp) {
+                        setSelectedSankalpForPopup(practice);
+                        if (!isAuthenticated) setShowSankalpTaken(true);
+                        else setShowLoginSankalpTaken(true);
+                    }
+                    dispatch(getPracticeToday(() => { }));
+                }
+            })
+        );
+    };
+
+    const handleCompletePractice = (practice: any) => {
+        const isMantra = practice.id?.includes("mantra");
+        const isSankalp = practice.id?.includes("sankalp");
+
+        const payload = {
+            practice_type: isMantra ? "mantra" : isSankalp ? "sankalp" : "library",
+            item_id: practice.id,
+            tz: locationData?.timezone || "Asia/Kolkata",
+            source: 'community',
+            meta: {
+                ui: "social_card_done"
+            }
+        };
+
+        dispatch(
+            completeMantra(payload, (res) => {
+                if (res.success) {
+                    dispatch(getPracticeToday(() => { }));
+                }
+            })
+        );
     };
 
     const handleShare = async () => {
@@ -780,24 +853,18 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                             <>
                                 {linkedCardType === 'mantra' && (
                                     <MantraCard
-                                        practiceTodayData={{
-                                            started: { mantra: true },
-                                            ids: { mantra: selectedLinkedPractice.id }
-                                        }}
-                                        onPressChantMantra={() => { }}
-                                        DoneMantraCalled={() => { }}
+                                        practiceTodayData={practiceTodayData}
+                                        onPressChantMantra={handleStartPractice}
+                                        DoneMantraCalled={handleCompletePractice}
                                         viewOnly={true}
                                         onAddToMyPractice={() => handleAddToMyPractice(selectedLinkedPractice, 'mantra')}
                                     />
                                 )}
                                 {linkedCardType === 'sankalp' && (
                                     <SankalpCard
-                                        practiceTodayData={{
-                                            started: { sankalp: true },
-                                            ids: { sankalp: selectedLinkedPractice.id }
-                                        }}
-                                        onPressStartSankalp={() => { }}
-                                        onCompleteSankalp={() => { }}
+                                        practiceTodayData={practiceTodayData}
+                                        onPressStartSankalp={handleStartPractice}
+                                        onCompleteSankalp={handleCompletePractice}
                                         viewOnly={true}
                                         onAddToMyPractice={() => handleAddToMyPractice(selectedLinkedPractice, 'sankalp')}
                                     />
@@ -830,6 +897,76 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                 title={authModalConfig.title}
                 description={authModalConfig.description}
                 intent={authModalConfig.intent}
+            />
+
+            {/* Success Modals */}
+            <SigninPopup
+                visible={showMantraTaken}
+                onClose={() => setShowMantraTaken(false)}
+                title={t("mantraCard.mantraTaken")}
+                subTitle={`${selectedMantraForPopup?.iast || selectedMantraForPopup?.name || ""}`}
+                subText={t("mantraCard.practiceAdded")}
+                MantraButtonTitle={t("mantraCard.loginToTrack")}
+                infoTexts={[t("mantraCard.mantraProgressMsg")]}
+                onSadhanPress={() => {
+                    setShowMantraTaken(false);
+                    // Open Login
+                    setAuthModalConfig({
+                        title: t("signinPopup.title"),
+                        description: t("signinPopup.description"),
+                        intent: "general"
+                    });
+                    setIsAuthModalVisible(true);
+                }}
+                onConfirmCancel={() => setShowMantraTaken(false)}
+            />
+            <SigninPopup
+                visible={showLoginMantraTaken}
+                onClose={() => setShowLoginMantraTaken(false)}
+                title={t("mantraCard.mantraTaken")}
+                subTitle={`${selectedMantraForPopup?.iast || selectedMantraForPopup?.name || ""}`}
+                subText={t("mantraCard.practiceAdded")}
+                MantraButtonTitle={t("mantraCard.goToSadana")}
+                infoTexts={[t("mantraCard.trackProgressInTracker")]}
+                onSadhanPress={() => {
+                    setShowLoginMantraTaken(false);
+                    navigation.navigate("Tracker");
+                }}
+                onConfirmCancel={() => setShowLoginMantraTaken(false)}
+            />
+            <SigninPopup
+                visible={showSankalpTaken}
+                onClose={() => setShowSankalpTaken(false)}
+                title={t("sankalpCard.sankalpTaken")}
+                subTitle={`${selectedSankalpForPopup?.name || ""}`}
+                subText={t("sankalpCard.practiceAdded")}
+                MantraButtonTitle={t("sankalpCard.loginToTrack")}
+                infoTexts={[t("sankalpCard.sankalpProgressMsg")]}
+                onSadhanPress={() => {
+                    setShowSankalpTaken(false);
+                    // Open Login
+                    setAuthModalConfig({
+                        title: t("signinPopup.title"),
+                        description: t("signinPopup.description"),
+                        intent: "general"
+                    });
+                    setIsAuthModalVisible(true);
+                }}
+                onConfirmCancel={() => setShowSankalpTaken(false)}
+            />
+            <SigninPopup
+                visible={showLoginSankalpTaken}
+                onClose={() => setShowLoginSankalpTaken(false)}
+                title={t("sankalpCard.sankalpTaken")}
+                subTitle={`${selectedSankalpForPopup?.name || ""}`}
+                subText={t("sankalpCard.practiceAdded")}
+                MantraButtonTitle={t("sankalpCard.goToSadana")}
+                infoTexts={[t("sankalpCard.trackProgressInTracker")]}
+                onSadhanPress={() => {
+                    setShowLoginSankalpTaken(false);
+                    navigation.navigate("Tracker");
+                }}
+                onConfirmCancel={() => setShowLoginSankalpTaken(false)}
             />
 
         </View>

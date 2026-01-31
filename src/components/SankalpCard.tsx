@@ -405,17 +405,78 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                   </>
                 )}
                 {viewOnly && onAddToMyPractice && (
-                  <TouchableOpacity
-                    style={[styles.startBtn, { marginBottom: 8 }]}
-                    onPress={onAddToMyPractice}
-                  >
-                    <TextComponent
-                      type="semiBoldText"
-                      style={{ textAlign: "center", color: Colors.Colors.white, marginBottom: 2 }}
+                  <>
+                    {!isStarted ? (
+                      <TouchableOpacity
+                        style={styles.startBtn}
+                        onPress={() => onPressStartSankalp(currentSankalp)}
+                      >
+                        <TextComponent
+                          type="semiBoldText"
+                          style={{ textAlign: "center", color: Colors.Colors.white }}
+                        >
+                          {t("sankalpCard.iWillDo")}
+                        </TextComponent>
+                      </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity
+                        style={{
+                          flexDirection: "row",
+                          marginTop: 10,
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                        onPress={() => onCompleteSankalp(currentSankalp)}
+                      >
+                        {/* ✅ Checkbox logic */}
+                        {isDone ? (
+                          <View
+                            style={{
+                              width: 18,
+                              height: 18,
+                              borderRadius: 4,
+                              marginRight: 10,
+                              alignItems: "center",
+                              justifyContent: "center",
+                              backgroundColor: "green",
+                            }}
+                          >
+                            <Text style={{ color: "white", fontSize: 12, fontWeight: "bold" }}>✓</Text>
+                          </View>
+                        ) : (
+                          <View
+                            style={{
+                              width: 15,
+                              height: 15,
+                              borderColor: Colors.Colors.BLACK,
+                              borderWidth: 1,
+                              borderRadius: 4,
+                              marginRight: 10,
+                            }}
+                          />
+                        )}
+
+                        <TextComponent type="streakSadanaText">
+                          {isDone ? t("sankalpCard.done") : t("sankalpCard.markDone")}
+                        </TextComponent>
+                      </TouchableOpacity>
+                    )}
+
+                    <TouchableOpacity
+                      style={[styles.startBtn, { marginBottom: 8 }]}
+                      onPress={onAddToMyPractice}
+
                     >
-                      {t("sadanaTracker.detailsCard.addToMyPractice")}
-                    </TextComponent>
-                  </TouchableOpacity>
+                      <TextComponent
+                        type="boldText"
+                        style={{ color: Colors.Colors.Light_black }}
+                      >
+                        {t("sadanaTracker.detailsCard.addToMyPractice")}
+
+                      </TextComponent>
+                    </TouchableOpacity>
+
+                  </>
                 )}
               </View>
             </Card>

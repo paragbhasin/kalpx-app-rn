@@ -20,6 +20,10 @@ import TopCommunities from "./TopCommunities";
 import UserActivityScreen from "../UserActivity/UserActivityScreen";
 import UserAgreements from "./UserAgreements";
 import { fetchUserActivity } from "../UserActivity/actions";
+import ActivePracticeList from "../../components/ActivePracticeList";
+import { completeMantra, getPracticeToday } from "../Home/actions";
+import { useUserLocation } from "../../components/useUserLocation";
+import { RootState } from "../../store";
 
 import { useScrollContext } from "../../context/ScrollContext";
 import { Animated } from "react-native";
@@ -29,7 +33,7 @@ const CommunityLanding = () => {
     const { t } = useTranslation();
     const { handleScroll, headerY } = useScrollContext();
     const navigation = useNavigation<any>();
-    const dispatch = useDispatch();
+    const dispatch: any = useDispatch();
     const [selectedCategory, setSelectedCategory] = useState("Home");
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
     const [isSearching, setIsSearching] = useState(false);
@@ -38,6 +42,8 @@ const CommunityLanding = () => {
 
     const { data: communities, loading: communitiesLoading } = useSelector((state: any) => state.communities);
     const { followed_communities } = useSelector((state: any) => state.userActivity);
+    const practiceTodayData = useSelector((state: RootState) => state.practiceTodayReducer?.data);
+    const { locationData } = useUserLocation();
 
     const dropdownRef = useRef<any>(null);
 
@@ -64,7 +70,48 @@ const CommunityLanding = () => {
 
     useEffect(() => {
         dispatch(fetchUserActivity("followed_communities") as any);
+        dispatch(getPracticeToday(() => { }));
     }, [dispatch]);
+
+    const handleMarkMantraDone = (mantra: any) => {
+        const payload = {
+            practice_type: "mantra",
+            item_id: mantra.id,
+            tz: locationData?.timezone || "Asia/Kolkata",
+            source: 'community',
+            meta: {
+                ui: "community_landing_active_list"
+            }
+        };
+
+        dispatch(
+            completeMantra(payload, (res: any) => {
+                if (res.success) {
+                    dispatch(getPracticeToday(() => { }));
+                }
+            }) as any
+        );
+    };
+
+    const handleMarkSankalpDone = (sankalp: any) => {
+        const payload = {
+            practice_type: "sankalp",
+            item_id: sankalp.id,
+            tz: locationData?.timezone || "Asia/Kolkata",
+            source: 'community',
+            meta: {
+                ui: "community_landing_active_list"
+            }
+        };
+
+        dispatch(
+            completeMantra(payload, (res: any) => {
+                if (res.success) {
+                    dispatch(getPracticeToday(() => { }));
+                }
+            }) as any
+        );
+    };
 
     const renderHeader = () => (
         <Animated.View style={[styles.animatedHeader, { transform: [{ translateY: headerY }] }]}>
@@ -507,6 +554,14 @@ const CommunityLanding = () => {
             <View style={styles.mainLayout}>
                 {renderHeader()}
                 <View style={styles.contentContainer}>
+
+                    <ActivePracticeList
+                        todayItems={practiceTodayData?.items || []}
+                        onMarkMantraDone={handleMarkMantraDone}
+                        onMarkSankalpDone={handleMarkSankalpDone}
+                        filter={(item: any) => item.source === 'community'}
+                    />
+
                     {renderContent()}
                 </View>
             </View>

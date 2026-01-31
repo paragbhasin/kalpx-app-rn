@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useMemo } from "react";
 import {
   Animated,
   ImageBackground,
@@ -14,6 +14,12 @@ import FontSize from "./FontSize";
 import MantraPronunciationModal from "./MantraPronunciationModal";
 import TextComponent from "./TextComponent";
 import { getTranslatedPractice } from "../utils/getTranslatedPractice";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
+import { startMantraPractice, getPracticeToday, completeMantra } from "../screens/Home/actions";
+import { useUserLocation } from "./useUserLocation";
+import SigninPopup from "./SigninPopup";
+import { RootState } from "../store";
 
 const categoryChantOptions = {
   "peace-calm": {
@@ -217,9 +223,101 @@ const DailyPracticeDetailsCard = ({
   onSelectCount,
   mode,
   onAddToMyPractice = null,
+  onStartPractice = null,
 }) => {
   const { t } = useTranslation();
+  const dispatch: any = useDispatch();
+  const navigation: any = useNavigation();
+  const { locationData } = useUserLocation();
+  const user = useSelector((state: any) => state.login?.user || state.socialLoginReducer?.user);
+  const practiceTodayData = useSelector((state: RootState) => state.practiceTodayReducer?.data);
+  const isUserLoggedIn = !!user;
+
+  const todayItems = practiceTodayData?.items || [];
+  const activePracticeItem = todayItems.find(it => it.item_id === data?.id);
+
+  const isStarted = !!activePracticeItem;
+  const isCompleted = !!activePracticeItem?.completed_at;
+
   const [selectedChant, setSelectedChant] = useState(null);
+  const [showMantraTaken, setShowMantraTaken] = useState(false);
+  const [showLoginMantraTaken, setShowLoginMantraTaken] = useState(false);
+  const [showSankalpTaken, setShowSankalpTaken] = useState(false);
+  const [showLoginSankalpTaken, setShowLoginSankalpTaken] = useState(false);
+  const [selectedMantraForPopup, setSelectedMantraForPopup] = useState(null);
+  const [selectedSankalpForPopup, setSelectedSankalpForPopup] = useState(null);
+
+  const handleStartPracticeInternal = () => {
+    // If already completed, nothing to do
+    if (isCompleted) return;
+
+    const practice = data;
+    const repsCount = selectedCount;
+
+    // If started but not completed, we "Mark as done"
+    if (isStarted) {
+      const isInternalMantra = practice.id?.includes("mantra");
+      const isInternalSankalp = practice.id?.includes("sankalp");
+
+      const payload = {
+        practice_type: isInternalMantra ? "mantra" : isInternalSankalp ? "sankalp" : "library",
+        item_id: practice.id,
+        tz: locationData?.timezone || "Asia/Kolkata",
+        source: mode === 'view' ? 'community' : 'details_card',
+        meta: {
+          ui: "details_card_done"
+        }
+      };
+
+      dispatch(
+        completeMantra(payload, (res) => {
+          if (res.success) {
+            // Success logic if needed, e.g. parent callback
+            onStartPractice?.(practice, repsCount);
+            dispatch(getPracticeToday(() => { }));
+          }
+        })
+      );
+      return;
+    }
+
+    // Otherwise, "Start" (Assign)
+    const isInternalMantra = practice.id?.includes("mantra");
+    const isInternalSankalp = practice.id?.includes("sankalp");
+
+    const payload: any = {
+      practice_type: isInternalMantra ? "mantra" : isInternalSankalp ? "sankalp" : "library",
+      item_id: practice.id,
+      source: mode === 'view' ? 'community' : 'details_screen',
+      tz: locationData?.timezone,
+      meta: {
+        ui: "details_card_v2"
+      }
+    };
+
+    if (repsCount) {
+      payload.meta.reps = typeof repsCount === 'object' ? repsCount.count : repsCount;
+    }
+
+    dispatch(
+      startMantraPractice(payload, (res) => {
+        if (res.success) {
+          if (isInternalMantra) {
+            setSelectedMantraForPopup(practice);
+            if (!isUserLoggedIn) setShowMantraTaken(true);
+            else setShowLoginMantraTaken(true);
+          } else if (isInternalSankalp) {
+            setSelectedSankalpForPopup(practice);
+            if (!isUserLoggedIn) setShowSankalpTaken(true);
+            else setShowLoginSankalpTaken(true);
+          }
+          dispatch(getPracticeToday(() => { }));
+          // If parent needs to know
+          onStartPractice?.(practice, repsCount);
+        }
+      })
+    );
+  };
 
   // 🌟 NEW: All content should be localized via our central utility
   const translated = getTranslatedPractice(data, t);
@@ -237,9 +335,21 @@ const DailyPracticeDetailsCard = ({
     devanagari: translated.mantra || data.devanagari || data.mantra,
     meaning: translated.meaning,
     iast: translated.iast || data.iast,
-    tags: translated.tags && translated.tags.length > 0 ? translated.tags : data.tags,
     suggested_practice: translated.suggested_practice
   };
+
+  const isMantra = data?.id?.includes("mantra");
+  const isSankalp = data?.id?.includes("sankalp");
+
+  const startButtonText = isCompleted
+    ? t("sankalpCard.done")
+    : isStarted
+      ? t("sankalpCard.markDone")
+      : isMantra
+        ? t("mantraCard.willChant")
+        : isSankalp
+          ? t("sankalpCard.iWillDo")
+          : t("sadanaTracker.detailsCard.startToday", { defaultValue: "Start Practice Today" });
 
   const [showPronunciation, setShowPronunciation] = useState(false);
   const [isDevanagariLong, setIsDevanagariLong] = useState(false);
@@ -347,7 +457,7 @@ const DailyPracticeDetailsCard = ({
 
 
   return (
-    <Animated.View style={{ transform: [{ translateX: slideAnim }],  paddingBottom: 100 }}>
+    <Animated.View style={{ transform: [{ translateX: slideAnim }], paddingBottom: 100 }}>
       <Card style={styles.cardContainer}>
         <ScrollView
           ref={scrollRef}
@@ -588,36 +698,136 @@ const DailyPracticeDetailsCard = ({
           )}
 
         </View>
-                {mode === "view" && onAddToMyPractice && (
-        <View
-          style={[
-            styles.selectButton,
-            {
-              marginBottom: 8,
-              padding: 10,
-              justifyContent: "center",
-              alignItems: "center",
-              marginHorizontal: 12,
-            },
-          ]}
-        >
-  
-            <TouchableOpacity
-              onPress={onAddToMyPractice}
-              style={{ justifyContent: "center", alignItems: "center" }}
+        {mode === "view" && onAddToMyPractice && (
+          <View>
+            <View
+              style={[
+                styles.chantButton,
+                {
+                  marginBottom: 8,
+                  padding: 10,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginHorizontal: 12,
+                },
+              ]}
             >
-              <TextComponent
-                type="headerText"
-                style={styles.practiceSelectText}
+
+              <TouchableOpacity
+                onPress={handleStartPracticeInternal}
+                style={{ justifyContent: "center", alignItems: "center" }}
               >
-                {t("sadanaTracker.detailsCard.addToMyPractice")}
-              </TextComponent>
-            </TouchableOpacity>
-       
-        </View>
-           )}
+                <TextComponent
+                  type="headerText"
+                  style={styles.chantButtonText}
+                >
+                  {startButtonText}
+                </TextComponent>
+              </TouchableOpacity>
+
+
+            </View>
+            <View
+              style={[
+                styles.selectButton,
+                {
+                  marginBottom: 8,
+                  padding: 10,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginHorizontal: 12,
+                },
+              ]}
+            >
+
+              <TouchableOpacity
+                onPress={onAddToMyPractice}
+                style={{ justifyContent: "center", alignItems: "center" }}
+              >
+                <TextComponent
+                  type="headerText"
+                  style={styles.practiceSelectText}
+                >
+                  {t("sadanaTracker.detailsCard.addToMyPractice")}
+                </TextComponent>
+              </TouchableOpacity>
+
+
+            </View>
+          </View>
+        )}
 
       </Card>
+
+      <SigninPopup
+        visible={showMantraTaken}
+        onClose={() => setShowMantraTaken(false)}
+        onConfirmCancel={() => setShowMantraTaken(false)}
+        title={t("popup.mantraTaken_title1")}
+        subTitle={t("popup.mantraTaken_subtitle1")}
+        subText={t("popup.mantraTaken_sub1")}
+        infoTexts={[
+          t("popup.mantraTaken_info1.0"),
+          t("popup.mantraTaken_info1.1"),
+          t("popup.mantraTaken_info1.2"),
+        ]}
+        bottomText={t("popup.mantraTaken_bottom")}
+      />
+      <SigninPopup
+        visible={showLoginMantraTaken}
+        onClose={() => setShowLoginMantraTaken(false)}
+        onConfirmCancel={() => setShowLoginMantraTaken(false)}
+        title={t("popup.mantraTaken_title2")}
+        subTitle={t("popup.mantraTaken_subtitle1")}
+        subText={t("popup.mantraTaken_sub2")}
+        infoTexts={[
+          t("popup.mantraTaken_info2.0"),
+          t("popup.mantraTaken_info2.1"),
+        ]}
+        MantraButtonTitle={t("popup.mantraTaken_button")}
+        onSadhanPress={() => {
+          setShowLoginMantraTaken(false);
+          if (selectedMantraForPopup) {
+            navigation.navigate("MySadana", {
+              selectedmantra: selectedMantraForPopup,
+            });
+          }
+        }}
+      />
+      <SigninPopup
+        visible={showSankalpTaken}
+        onClose={() => setShowSankalpTaken(false)}
+        onConfirmCancel={() => setShowMantraTaken(false)}
+        title={t("popup.sankalpTaken_title")}
+        subText={t("popup.sankalpTaken_sub")}
+        infoTexts={[
+          t("popup.sankalpTaken_info.0"),
+          t("popup.sankalpTaken_info.1"),
+          t("popup.sankalpTaken_info.2"),
+        ]}
+        bottomText={t("popup.sankalpTaken_bottom")}
+      />
+      <SigninPopup
+        visible={showLoginSankalpTaken}
+        onClose={() => setShowLoginSankalpTaken(false)}
+        onConfirmCancel={() => setShowLoginMantraTaken(false)}
+        title={t("popup.sankalpTaken_title3")}
+        subTitle={t("popup.mantraTaken_subtitle1")}
+        subText={t("popup.mantraTaken_sub2")}
+        infoTexts={[
+          t("popup.sankalpTaken_info2.0"),
+          t("popup.sankalpTaken_info2.1"),
+        ]}
+        MantraButtonTitle={t("popup.sankalpTaken_button")}
+        onSadhanPress={() => {
+          setShowLoginSankalpTaken(false);
+          if (selectedSankalpForPopup) {
+            navigation.navigate("MySadana", {
+              selectedmantra: selectedSankalpForPopup,
+            });
+          }
+        }}
+      />
     </Animated.View>
   );
 };
@@ -744,10 +954,18 @@ const styles = StyleSheet.create({
     color: "#D4A017",
   },
   selectButton: {
+    borderColor: "#D4A017",
+    borderWidth: 2,
+    borderRadius: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  chantButton: {
     backgroundColor: "#D4A017",
     borderRadius: 4,
     paddingVertical: 10,
     paddingHorizontal: 20,
+
   },
   selectNewButton: {
     backgroundColor: "#D4A017",
@@ -760,9 +978,12 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
   },
   practiceSelectText: {
-    color: "#FFFFFF",
+    color: "#000000",
     marginBottom: 2
 
+  },
+  chantButtonText: {
+    color: "#FFFFFF",
   },
   tagsContent: {
     justifyContent: "center",

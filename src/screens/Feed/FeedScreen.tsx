@@ -14,7 +14,7 @@ import ShimmerPlaceholder from "../../components/ShimmerPlaceholder";
 
 const FeedScreen = ({ onScroll }: { onScroll?: (event: any) => void }) => {
     const { i18n } = useTranslation();
-    const dispatch = useDispatch();
+    const dispatch: any = useDispatch();
     const navigation = useNavigation();
 
     const { posts, loading, loadingMore, error, pagination } = useSelector((state: any) => state.feed);

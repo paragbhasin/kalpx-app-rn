@@ -16,7 +16,7 @@ import ShimmerPlaceholder from "../../components/ShimmerPlaceholder";
 
 const { width } = Dimensions.get("window");
 
-const PopularCommunity = ({ onScroll }: { onScroll?: (event: any) => void }) => {
+const PopularCommunity = ({ onScroll, headerComponent }: { onScroll?: (event: any) => void, headerComponent?: React.ReactElement }) => {
     const { i18n } = useTranslation();
     const dispatch = useDispatch();
     const navigation = useNavigation();
@@ -177,6 +177,7 @@ const PopularCommunity = ({ onScroll }: { onScroll?: (event: any) => void }) => 
                     keyExtractor={(it) => it.toString()}
                     contentContainerStyle={{ paddingBottom: 20 }}
                     scrollEnabled={false}
+                    ListHeaderComponent={headerComponent}
                 />
             </View>
         );
@@ -194,6 +195,7 @@ const PopularCommunity = ({ onScroll }: { onScroll?: (event: any) => void }) => 
                 }
                 onEndReached={onLoadMore}
                 onEndReachedThreshold={0.5}
+                ListHeaderComponent={headerComponent}
                 ListFooterComponent={Footer}
                 contentContainerStyle={{ paddingBottom: 20, paddingTop: 110 }}
                 onScroll={onScroll}

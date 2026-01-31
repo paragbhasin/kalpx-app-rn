@@ -12,7 +12,7 @@ import SocialPostCard from "../../components/SocialPostCard";
 
 import ShimmerPlaceholder from "../../components/ShimmerPlaceholder";
 
-const FeedScreen = ({ onScroll }: { onScroll?: (event: any) => void }) => {
+const FeedScreen = ({ onScroll, headerComponent }: { onScroll?: (event: any) => void, headerComponent?: React.ReactElement }) => {
     const { i18n } = useTranslation();
     const dispatch: any = useDispatch();
     const navigation = useNavigation();
@@ -154,6 +154,7 @@ const FeedScreen = ({ onScroll }: { onScroll?: (event: any) => void }) => {
                     keyExtractor={(it) => it.toString()}
                     contentContainerStyle={{ paddingBottom: 20 }}
                     scrollEnabled={false}
+                    ListHeaderComponent={headerComponent}
                 />
             </View>
         );
@@ -172,6 +173,7 @@ const FeedScreen = ({ onScroll }: { onScroll?: (event: any) => void }) => {
                 }
                 onEndReached={onLoadMore}
                 onEndReachedThreshold={0.5}
+                ListHeaderComponent={headerComponent}
                 ListFooterComponent={Footer}
                 contentContainerStyle={{ paddingBottom: 20, paddingTop: 110 }}
                 onScroll={onScroll}

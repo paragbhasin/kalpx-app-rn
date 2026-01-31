@@ -3,13 +3,16 @@ import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import SimpleSankalpCard from './SimpleSankalpCard';
 import SimpleMantraCard from './SimpleMantraCard';
+import SimplePracticeCard from './SimplePracticeCard';
 import { DAILY_SANKALPS } from '../data/sankalps';
 import { CATALOGS } from '../data/mantras';
+import { SANATAN_PRACTICES_FINAL } from '../data/sanatanPractices';
 
 interface ActivePracticeListProps {
     todayItems: any[];
     onMarkSankalpDone: (sankalp: any) => void;
     onMarkMantraDone: (mantra: any) => void;
+    onMarkPracticeDone?: (practice: any) => void;
     filter?: (item: any) => boolean;
 }
 
@@ -17,6 +20,7 @@ const ActivePracticeList: React.FC<ActivePracticeListProps> = ({
     todayItems,
     onMarkSankalpDone,
     onMarkMantraDone,
+    onMarkPracticeDone,
     filter,
 }) => {
     const { i18n } = useTranslation();
@@ -52,7 +56,7 @@ const ActivePracticeList: React.FC<ActivePracticeListProps> = ({
     if (!todayItems || todayItems.length === 0) return null;
 
     let itemsToShow = todayItems.filter(item =>
-        ((item.started_at && !item.completed_at) || item.completed_at) && !hiddenIds.has(item.item_id)
+        !hiddenIds.has(item.item_id)
     );
 
     if (filter) {
@@ -85,6 +89,18 @@ const ActivePracticeList: React.FC<ActivePracticeListProps> = ({
                                 mantra={mantra}
                                 isDone={!!item.completed_at}
                                 onMarkDone={() => onMarkMantraDone(mantra)}
+                            />
+                        </View>
+                    );
+                } else if (item.practice_type === "library" || item.practice_type === "practice") {
+                    const practice = SANATAN_PRACTICES_FINAL.find((p) => p.id === item.item_id);
+                    if (!practice) return null;
+                    return (
+                        <View key={`practice-${idx}`} style={{ marginBottom: 10 }}>
+                            <SimplePracticeCard
+                                practice={practice}
+                                isDone={!!item.completed_at}
+                                onMarkDone={() => onMarkPracticeDone && onMarkPracticeDone(practice)}
                             />
                         </View>
                     );

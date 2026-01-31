@@ -234,7 +234,7 @@ const DailyPracticeDetailsCard = ({
   const isUserLoggedIn = !!user;
 
   const todayItems = practiceTodayData?.items || [];
-  const activePracticeItem = todayItems.find(it => it.item_id === data?.id);
+  const activePracticeItem = todayItems.find(it => String(it.item_id) === String(data?.id));
 
   const isStarted = !!activePracticeItem;
   const isCompleted = !!activePracticeItem?.completed_at;
@@ -246,8 +246,13 @@ const DailyPracticeDetailsCard = ({
   const [showLoginSankalpTaken, setShowLoginSankalpTaken] = useState(false);
   const [selectedMantraForPopup, setSelectedMantraForPopup] = useState(null);
   const [selectedSankalpForPopup, setSelectedSankalpForPopup] = useState(null);
+  const [showMantraComplete, setShowMantraComplete] = useState(false);
+  const [showLoginMantraComplete, setShowLoginMantraComplete] = useState(false);
+  const [showSankalpComplete, setShowSankalpComplete] = useState(false);
+  const [showLoginSankalpComplete, setShowLoginSankalpComplete] = useState(false);
 
   const handleStartPracticeInternal = () => {
+
     // If already completed, nothing to do
     if (isCompleted) return;
 
@@ -256,8 +261,8 @@ const DailyPracticeDetailsCard = ({
 
     // If started but not completed, we "Mark as done"
     if (isStarted) {
-      const isInternalMantra = practice.id?.includes("mantra");
-      const isInternalSankalp = practice.id?.includes("sankalp");
+      const isInternalMantra = practice.id?.includes("mantra") || practice.type === "mantra" || practice.practice_type === "mantra";
+      const isInternalSankalp = practice.id?.includes("sankalp") || practice.type === "sankalp" || practice.practice_type === "sankalp";
 
       const payload = {
         practice_type: isInternalMantra ? "mantra" : isInternalSankalp ? "sankalp" : "library",
@@ -272,6 +277,16 @@ const DailyPracticeDetailsCard = ({
       dispatch(
         completeMantra(payload, (res) => {
           if (res.success) {
+
+            if (isInternalSankalp) {
+              if (!isUserLoggedIn) setShowSankalpComplete(true);
+              else setShowLoginSankalpComplete(true);
+            } else {
+              // Default to mantra popup
+              if (!isUserLoggedIn) setShowMantraComplete(true);
+              else setShowLoginMantraComplete(true);
+            }
+
             // Success logic if needed, e.g. parent callback
             onStartPractice?.(practice, repsCount);
             dispatch(getPracticeToday(() => { }));
@@ -282,8 +297,15 @@ const DailyPracticeDetailsCard = ({
     }
 
     // Otherwise, "Start" (Assign)
-    const isInternalMantra = practice.id?.includes("mantra");
-    const isInternalSankalp = practice.id?.includes("sankalp");
+    const isInternalMantra = practice.id?.includes("mantra") || practice.type === "mantra" || practice.practice_type === "mantra";
+    const isInternalSankalp = practice.id?.includes("sankalp") || practice.type === "sankalp" || practice.practice_type === "sankalp";
+
+    console.log("DEBUG: handleStartPracticeInternal", {
+      id: practice.id,
+      isInternalMantra,
+      isInternalSankalp,
+      isUserLoggedIn
+    });
 
     const payload: any = {
       practice_type: isInternalMantra ? "mantra" : isInternalSankalp ? "sankalp" : "library",
@@ -302,14 +324,19 @@ const DailyPracticeDetailsCard = ({
     dispatch(
       startMantraPractice(payload, (res) => {
         if (res.success) {
-          if (isInternalMantra) {
-            setSelectedMantraForPopup(practice);
-            if (!isUserLoggedIn) setShowMantraTaken(true);
-            else setShowLoginMantraTaken(true);
-          } else if (isInternalSankalp) {
+          // If explicitly identified as sankalp, show sankalp popup. 
+          // Otherwise, default to mantra popup (as most items are mantras) 
+          // if we can't determine, or just duplicate the check.
+          if (isInternalSankalp) {
             setSelectedSankalpForPopup(practice);
             if (!isUserLoggedIn) setShowSankalpTaken(true);
             else setShowLoginSankalpTaken(true);
+          } else {
+            // Default to Mantra popup if it's not explicitly a sankalp
+            // This covers "mantra" and unknown types which are usually mantras in this app
+            setSelectedMantraForPopup(practice);
+            if (!isUserLoggedIn) setShowMantraTaken(true);
+            else setShowLoginMantraTaken(true);
           }
           dispatch(getPracticeToday(() => { }));
           // If parent needs to know
@@ -349,7 +376,7 @@ const DailyPracticeDetailsCard = ({
         ? t("mantraCard.willChant")
         : isSankalp
           ? t("sankalpCard.iWillDo")
-          : t("sadanaTracker.detailsCard.startToday", { defaultValue: "Start Practice Today" });
+          : t("sadanaTracker.detailsCard.startToday", { defaultValue: "I will do this practice today" });
 
   const [showPronunciation, setShowPronunciation] = useState(false);
   const [isDevanagariLong, setIsDevanagariLong] = useState(false);
@@ -751,13 +778,13 @@ const DailyPracticeDetailsCard = ({
                   {t("sadanaTracker.detailsCard.addToMyPractice")}
                 </TextComponent>
               </TouchableOpacity>
-
-
             </View>
           </View>
         )}
 
       </Card>
+
+
 
       <SigninPopup
         visible={showMantraTaken}
@@ -827,6 +854,60 @@ const DailyPracticeDetailsCard = ({
             });
           }
         }}
+      />
+
+      <SigninPopup
+        visible={showMantraComplete}
+        onClose={() => setShowMantraComplete(false)}
+        onConfirmCancel={() => setShowMantraComplete(false)}
+        title={t("popup.mantraComplete_title1")}
+        subTitle={t("popup.mantraTaken_subtitle1")}
+        subText={t("popup.mantraComplete_sub1")}
+        infoTexts={[
+          t("popup.mantraComplete_info1.0"),
+          t("popup.mantraComplete_info1.1"),
+          t("popup.mantraComplete_info1.2"),
+        ]}
+      />
+      <SigninPopup
+        visible={showLoginMantraComplete}
+        onClose={() => setShowLoginMantraComplete(false)}
+        onConfirmCancel={() => { }}
+        title={t("popup.mantraComplete_title2")}
+        subText={t("popup.mantraComplete_sub2")}
+        infoTexts={[
+          t("popup.mantraComplete_info2.0"),
+          t("popup.mantraComplete_info2.1"),
+        ]}
+        MantraButtonTitle={t("popup.mantraTaken_Continue")}
+        onSadhanPress={() => setShowLoginMantraComplete(false)}
+      />
+      <SigninPopup
+        visible={showSankalpComplete}
+        onClose={() => setShowSankalpComplete(false)}
+        onConfirmCancel={() => { }}
+        title={t("popup.sankalpComplete_title")}
+        subText={t("popup.sankalpComplete_sub")}
+        infoTexts={[
+          t("popup.sankalpComplete_info.0"),
+          t("popup.sankalpComplete_info.1"),
+          t("popup.sankalpComplete_info.2"),
+        ]}
+        bottomText=""
+      />
+      <SigninPopup
+        visible={showLoginSankalpComplete}
+        onClose={() => setShowLoginSankalpComplete(false)}
+        onConfirmCancel={() => setShowLoginSankalpComplete(false)}
+        title={t("popup.mantraComplete_title2")}
+        subText={t("popup.sankalpComplete_sub2")}
+        infoTexts={[
+          t("popup.sankalpComplete_info2.0"),
+          t("popup.sankalpComplete_info2.1"),
+        ]}
+        bottomText=""
+        MantraButtonTitle={t("popup.mantraTaken_Continue")}
+        onSadhanPress={() => setShowLoginSankalpComplete(false)}
       />
     </Animated.View>
   );

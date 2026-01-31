@@ -225,6 +225,11 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     const [selectedMantraForPopup, setSelectedMantraForPopup] = useState(null);
     const [selectedSankalpForPopup, setSelectedSankalpForPopup] = useState(null);
 
+    const [showMantraComplete, setShowMantraComplete] = useState(false);
+    const [showLoginMantraComplete, setShowLoginMantraComplete] = useState(false);
+    const [showSankalpComplete, setShowSankalpComplete] = useState(false);
+    const [showLoginSankalpComplete, setShowLoginSankalpComplete] = useState(false);
+
     const initialSlide = imagesData[0];
     const aspectRatioString = initialSlide?.layout?.aspect_ratio || post.layout?.aspect_ratio || "1:1";
     let aspectRatio = 1;
@@ -390,8 +395,8 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     };
 
     const handleStartPractice = (practice: any, repsCount: any) => {
-        const isMantra = practice.id?.includes("mantra");
-        const isSankalp = practice.id?.includes("sankalp");
+        const isMantra = practice.id?.includes("mantra") || practice.type === "mantra" || practice.practice_type === "mantra";
+        const isSankalp = practice.id?.includes("sankalp") || practice.type === "sankalp" || practice.practice_type === "sankalp";
 
         const payload: any = {
             practice_type: isMantra ? "mantra" : isSankalp ? "sankalp" : "library",
@@ -410,14 +415,15 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
         dispatch(
             startMantraPractice(payload, (res: any) => {
                 if (res.success) {
-                    if (isMantra) {
-                        setSelectedMantraForPopup(practice);
-                        if (!isAuthenticated) setShowMantraTaken(true);
-                        else setShowLoginMantraTaken(true);
-                    } else if (isSankalp) {
+                    if (isSankalp) {
                         setSelectedSankalpForPopup(practice);
                         if (!isAuthenticated) setShowSankalpTaken(true);
                         else setShowLoginSankalpTaken(true);
+                    } else {
+                        // Default to Mantra
+                        setSelectedMantraForPopup(practice);
+                        if (!isAuthenticated) setShowMantraTaken(true);
+                        else setShowLoginMantraTaken(true);
                     }
                     dispatch(getPracticeToday(() => { }));
                 }
@@ -426,8 +432,8 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     };
 
     const handleCompletePractice = (practice: any) => {
-        const isMantra = practice.id?.includes("mantra");
-        const isSankalp = practice.id?.includes("sankalp");
+        const isMantra = practice.id?.includes("mantra") || practice.type === "mantra" || practice.practice_type === "mantra";
+        const isSankalp = practice.id?.includes("sankalp") || practice.type === "sankalp" || practice.practice_type === "sankalp";
 
         const payload = {
             practice_type: isMantra ? "mantra" : isSankalp ? "sankalp" : "library",
@@ -442,6 +448,14 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
         dispatch(
             completeMantra(payload, (res) => {
                 if (res.success) {
+                    if (isSankalp) {
+                        if (!isAuthenticated) setShowSankalpComplete(true);
+                        else setShowLoginSankalpComplete(true);
+                    } else {
+                        // Default to Mantra
+                        if (!isAuthenticated) setShowMantraComplete(true);
+                        else setShowLoginMantraComplete(true);
+                    }
                     dispatch(getPracticeToday(() => { }));
                 }
             })
@@ -967,6 +981,60 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                     navigation.navigate("Tracker");
                 }}
                 onConfirmCancel={() => setShowLoginSankalpTaken(false)}
+            />
+
+            <SigninPopup
+                visible={showMantraComplete}
+                onClose={() => setShowMantraComplete(false)}
+                onConfirmCancel={() => setShowMantraComplete(false)}
+                title={t("popup.mantraComplete_title1")}
+                subTitle={t("popup.mantraTaken_subtitle1")}
+                subText={t("popup.mantraComplete_sub1")}
+                infoTexts={[
+                    t("popup.mantraComplete_info1.0"),
+                    t("popup.mantraComplete_info1.1"),
+                    t("popup.mantraComplete_info1.2"),
+                ]}
+            />
+            <SigninPopup
+                visible={showLoginMantraComplete}
+                onClose={() => setShowLoginMantraComplete(false)}
+                onConfirmCancel={() => { }}
+                title={t("popup.mantraComplete_title2")}
+                subText={t("popup.mantraComplete_sub2")}
+                infoTexts={[
+                    t("popup.mantraComplete_info2.0"),
+                    t("popup.mantraComplete_info2.1"),
+                ]}
+                MantraButtonTitle={t("popup.mantraTaken_Continue")}
+                onSadhanPress={() => setShowLoginMantraComplete(false)}
+            />
+            <SigninPopup
+                visible={showSankalpComplete}
+                onClose={() => setShowSankalpComplete(false)}
+                onConfirmCancel={() => { }}
+                title={t("popup.sankalpComplete_title")}
+                subText={t("popup.sankalpComplete_sub")}
+                infoTexts={[
+                    t("popup.sankalpComplete_info.0"),
+                    t("popup.sankalpComplete_info.1"),
+                    t("popup.sankalpComplete_info.2"),
+                ]}
+                bottomText=""
+            />
+            <SigninPopup
+                visible={showLoginSankalpComplete}
+                onClose={() => setShowLoginSankalpComplete(false)}
+                onConfirmCancel={() => setShowLoginSankalpComplete(false)}
+                title={t("popup.mantraComplete_title2")}
+                subText={t("popup.sankalpComplete_sub2")}
+                infoTexts={[
+                    t("popup.sankalpComplete_info2.0"),
+                    t("popup.sankalpComplete_info2.1"),
+                ]}
+                bottomText=""
+                MantraButtonTitle={t("popup.mantraTaken_Continue")}
+                onSadhanPress={() => setShowLoginSankalpComplete(false)}
             />
 
         </View>

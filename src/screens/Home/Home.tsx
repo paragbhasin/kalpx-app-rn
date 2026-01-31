@@ -996,6 +996,23 @@ export default function Home() {
             setSelectedMantraForPopup(mantra);
             DoneMantraCalled(mantra);
           }}
+          onMarkPracticeDone={(practice) => {
+            const payload = {
+              practice_type: "practice",
+              item_id: practice.id,
+              tz: locationData?.timezone || "Asia/Kolkata",
+              meta: {
+                ui: "daily_card" // or home specific
+              }
+            };
+            dispatch(
+              completeMantra(payload, (res) => {
+                if (res.success) {
+                  dispatch(getPracticeToday(() => { }));
+                }
+              })
+            );
+          }}
         />
 
         <View style={{ borderColor: Colors.Colors.Yellow, borderWidth: 1.25, borderRadius: 6, marginHorizontal: 10, padding: 4, marginVertical: 6, marginTop: 10 }}>

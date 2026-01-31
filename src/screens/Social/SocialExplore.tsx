@@ -31,9 +31,10 @@ interface SocialExploreProps {
   showHeader?: boolean;
   viewMode?: "grid" | "list";
   onScroll?: (event: any) => void;
+  headerComponent?: React.ReactElement;
 }
 
-export default function SocialExplore({ showHeader = true, viewMode = "grid", onScroll }: SocialExploreProps) {
+export default function SocialExplore({ showHeader = true, viewMode = "grid", onScroll, headerComponent }: SocialExploreProps) {
   const { t, i18n } = useTranslation();
   const navigation: any = useNavigation();
   const dispatch = useDispatch();
@@ -517,6 +518,7 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
           contentContainerStyle={{ paddingTop: 110 }}
           removeClippedSubviews={false}
           maintainVisibleContentPosition={null}
+          ListHeaderComponent={headerComponent}
           ListFooterComponent={() =>
             isFetchingMore ? (
               <View style={{ padding: 20, alignItems: 'center' }}>

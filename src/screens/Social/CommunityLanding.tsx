@@ -515,6 +515,34 @@ const CommunityLanding = () => {
         );
     };
 
+    const activePracticeList = (
+        <ActivePracticeList
+            todayItems={practiceTodayData?.items || []}
+            onMarkMantraDone={handleMarkMantraDone}
+            onMarkSankalpDone={handleMarkSankalpDone}
+            onMarkPracticeDone={(practice: any) => {
+                const payload = {
+                    practice_type: "practice",
+                    item_id: practice.id,
+                    tz: locationData?.timezone || "Asia/Kolkata",
+                    source: 'community',
+                    meta: {
+                        ui: "community_landing_active_list"
+                    }
+                };
+
+                dispatch(
+                    completeMantra(payload, (res: any) => {
+                        if (res.success) {
+                            dispatch(getPracticeToday(() => { }));
+                        }
+                    }) as any
+                );
+            }}
+            filter={(item: any) => item.source === 'community'}
+        />
+    );
+
     const renderContent = () => {
         if (isSearching) return renderSearchResults();
 
@@ -522,9 +550,9 @@ const CommunityLanding = () => {
             case "Top":
                 return <SocialExplore showHeader={false} viewMode={viewMode} onScroll={handleScroll} />;
             case "Home":
-                return <FeedScreen onScroll={handleScroll} />;
+                return <FeedScreen onScroll={handleScroll} headerComponent={activePracticeList} />;
             case "Popular":
-                return <Popular onScroll={handleScroll} />;
+                return <Popular onScroll={handleScroll} headerComponent={activePracticeList} />;
             case "Explore":
                 return <ExploreCommunities onScroll={handleScroll} />;
             case "Communities":
@@ -555,12 +583,8 @@ const CommunityLanding = () => {
                 {renderHeader()}
                 <View style={styles.contentContainer}>
 
-                    <ActivePracticeList
-                        todayItems={practiceTodayData?.items || []}
-                        onMarkMantraDone={handleMarkMantraDone}
-                        onMarkSankalpDone={handleMarkSankalpDone}
-                        filter={(item: any) => item.source === 'community'}
-                    />
+                    {/* Render ActivePracticeList externally for screens that don't handle it internally */}
+                    {!["Home", "Popular", "Top"].includes(selectedCategory) && activePracticeList}
 
                     {renderContent()}
                 </View>

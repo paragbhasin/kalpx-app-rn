@@ -35,7 +35,14 @@ const PracticeDetailNavigator: React.FC<PracticeDetailNavigatorProps> = ({
     );
 
     const renderContent = () => {
-        if (isMantra) {
+        const type = item?.type;
+        const data = item?.data;
+
+        // Resolve data from catalogs if not explicitly provided in the wrapper
+        const resolvedSankalp = isSankalp ? DAILY_SANKALPS.find(s => s.id === cleanId || s.id === practiceId) : null;
+        const resolvedMantra = isMantra ? Object.values(CATALOGS).flat().find(m => m.id === cleanId || m.id === practiceId) : null;
+
+        if (type === 'mantra' || isMantra) {
             return (
                 <MantraCard
                     practiceTodayData={{
@@ -45,11 +52,12 @@ const PracticeDetailNavigator: React.FC<PracticeDetailNavigatorProps> = ({
                     onPressChantMantra={() => { }}
                     DoneMantraCalled={() => { }}
                     viewOnly={true}
+                    singleItem={type === 'mantra' ? data : resolvedMantra}
                 />
             );
         }
 
-        if (isSankalp) {
+        if (type === 'sankalp' || isSankalp) {
             return (
                 <SankalpCard
                     practiceTodayData={{
@@ -59,6 +67,7 @@ const PracticeDetailNavigator: React.FC<PracticeDetailNavigatorProps> = ({
                     onPressStartSankalp={() => { }}
                     onCompleteSankalp={() => { }}
                     viewOnly={true}
+                    singleItem={type === 'sankalp' ? data : resolvedSankalp}
                 />
             );
         }
@@ -67,7 +76,7 @@ const PracticeDetailNavigator: React.FC<PracticeDetailNavigatorProps> = ({
         return (
             <DailyPracticeDetailsCard
                 mode="view"
-                data={item}
+                data={type === 'practice' ? data : (item?.data || item)}
                 item={{ name: category || "Practice", key: category }}
                 onChange={() => { }}
                 onBackPress={onClose}

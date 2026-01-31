@@ -229,7 +229,7 @@ const TrackerScreen = () => {
 
                   <TouchableOpacity
                     onPress={() => {
-                      setSelectedPractice({ ...fullObj, rawItem: item });
+                      setSelectedPractice({ data: fullObj, type: resolvedType, rawItem: item });
                       setShowInfo(true);
                     }}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}

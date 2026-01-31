@@ -57,7 +57,7 @@ module.exports = {
       },
     },
     android: {
-      versionCode: 25,
+      versionCode: 26,
       package: "com.kalpx.app",
       adaptiveIcon: {
         foregroundImage: "./assets/AppIconImg.png",

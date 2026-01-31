@@ -52,3 +52,8 @@ app-example
 # Google Services files
 google-services.json
 GoogleService-Info.plist
+
+# Production credentials
+android/app/production.keystore
+credentials.json
+credentials/

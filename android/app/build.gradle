@@ -57,8 +57,17 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
-        // EAS will inject production credentials into this block
+        // EAS production credentials - read from local.properties
         release {
+            def keystoreProps = new Properties()
+            def keystorePropsFile = file('../local.properties')
+            if (keystorePropsFile.exists()) {
+                keystoreProps.load(new FileInputStream(keystorePropsFile))
+                storeFile file(keystoreProps.getProperty('RELEASE_STORE_FILE'))
+                storePassword keystoreProps.getProperty('RELEASE_STORE_PASSWORD')
+                keyAlias keystoreProps.getProperty('RELEASE_KEY_ALIAS')
+                keyPassword keystoreProps.getProperty('RELEASE_KEY_PASSWORD')
+            }
         }
     }
     buildTypes {

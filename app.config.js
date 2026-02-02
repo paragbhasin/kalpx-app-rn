@@ -63,8 +63,10 @@ module.exports = {
         foregroundImage: "./assets/AppIconImg.png",
         backgroundColor: "#ffffff",
       },
+
       edgeToEdgeEnabled: true,
-      googleServicesFile: "./google-services.json",
+      googleServicesFile:
+        process.env.GOOGLE_SERVICES_JSON || "./google-services.json",
     },
     web: {
       bundler: "metro",

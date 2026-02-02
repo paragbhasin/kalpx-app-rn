@@ -1734,6 +1734,30 @@
       "comments": "Share your thoughts with comments",
       "track": "Track your contributions"
     },
+    "upvote": {
+      "title": "Upvote this Post",
+      "description": "Show your appreciation for this contribution."
+    },
+    "downvote": {
+      "title": "Downvote this Post",
+      "description": "Help us keep the community quality high."
+    },
+    "comment": {
+      "title": "Join the Conversation",
+      "description": "Share your thoughts and connect with others through comments."
+    },
+    "askQuestion": {
+      "title": "Ask a Question",
+      "description": "Curious about something? Ask the community!"
+    },
+    "savePost": {
+      "title": "Save for Later",
+      "description": "Save this post to your profile to read it again anytime."
+    },
+    "joinCommunity": {
+      "title": "Join this Community",
+      "description": "Connect with like-minded people and share your journey."
+    },
     "emailEntry": {
       "label": "Email Address",
       "placeholder": "Enter your email",

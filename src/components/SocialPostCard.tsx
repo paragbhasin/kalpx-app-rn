@@ -138,8 +138,8 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     const [isReportModalVisible, setIsReportModalVisible] = useState(false);
     const [isAuthModalVisible, setIsAuthModalVisible] = useState(false);
     const [authModalConfig, setAuthModalConfig] = useState({
-        title: "Join the Community",
-        description: "Be part of meaningful conversations",
+        title: t('communityAuth.title'),
+        description: t('communityAuth.description'),
         intent: "general"
     });
 
@@ -763,8 +763,8 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                         <TouchableOpacity
                             style={[styles.joinButton, post.is_joined && styles.joinedButton]}
                             onPress={() => handleProtectedAction(() => onJoin?.(), {
-                                title: "Join this Community",
-                                description: "Connect with like-minded people and share your journey.",
+                                title: t('communityAuth.joinCommunity.title'),
+                                description: t('communityAuth.joinCommunity.description'),
                                 intent: "join_community"
                             })}
                         >
@@ -820,8 +820,8 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                                             handleProtectedAction(() => {
                                                 post.is_saved ? onUnsave?.() : onSave?.();
                                             }, {
-                                                title: "Save for Later",
-                                                description: "Save this post to your profile to read it again anytime.",
+                                                title: t('communityAuth.savePost.title'),
+                                                description: t('communityAuth.savePost.description'),
                                                 intent: "save_post"
                                             });
                                         }}
@@ -975,8 +975,8 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                                 }
                                 onUpvote?.();
                             }, {
-                                title: "Upvote this Post",
-                                description: "Show your appreciation for this contribution.",
+                                title: t('communityAuth.upvote.title'),
+                                description: t('communityAuth.upvote.description'),
                                 intent: "upvote"
                             });
                         }}>
@@ -1004,8 +1004,8 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                                 }
                                 onDownvote?.();
                             }, {
-                                title: "Downvote this Post",
-                                description: "Help us keep the community quality high.",
+                                title: t('communityAuth.downvote.title'),
+                                description: t('communityAuth.downvote.description'),
                                 intent: "downvote"
                             });
                         }}>
@@ -1018,8 +1018,8 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                     </View>
 
                     <TouchableOpacity style={styles.pillButton} onPress={() => handleProtectedAction(() => onComment?.(), {
-                        title: "Join the Conversation",
-                        description: "Share your thoughts and connect with others through comments.",
+                        title: t('communityAuth.comment.title'),
+                        description: t('communityAuth.comment.description'),
                         intent: "comment"
                     })}>
                         <Ionicons name="chatbubble-outline" size={18} color="#666" />
@@ -1034,8 +1034,8 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                 </View>
 
                 <TouchableOpacity style={styles.askButton} onPress={() => handleProtectedAction(() => onAskQuestion?.(), {
-                    title: "Ask a Question",
-                    description: "Curious about something? Ask the community!",
+                    title: t('communityAuth.askQuestion.title'),
+                    description: t('communityAuth.askQuestion.description'),
                     intent: "ask_question"
                 })}>
                     <Ionicons name="help-circle-outline" size={20} color="#333" />

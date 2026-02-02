@@ -4,32 +4,61 @@ const path = require("path");
 const IS_EAS_BUILD = !!process.env.EAS_BUILD_ID;
 
 if (IS_EAS_BUILD) {
+  const rootDir = __dirname;
+  const androidAppDir = path.join(rootDir, "android/app");
+
   // --- ANDROID HANDLER ---
   const androidSecret = process.env.GOOGLE_SERVICES_JSON;
   if (androidSecret) {
-    // 1. Check if the secret is a path (EAS File Secret)
+    // Ensure android/app directory exists
+    if (!fs.existsSync(androidAppDir)) {
+      fs.mkdirSync(androidAppDir, { recursive: true });
+    }
+
+    const targetPath = path.join(androidAppDir, "google-services.json");
+    const rootTargetPath = path.join(rootDir, "google-services.json");
+
     if (fs.existsSync(androidSecret)) {
-      // It is a path! Copy the actual file to the target location
-      fs.copyFileSync(androidSecret, "android/app/google-services.json");
-      console.log(
-        "✅ Successfully copied google-services.json path to android/app/",
-      );
+      // It is a path! Copy the actual file
+      fs.copyFileSync(androidSecret, targetPath);
+      fs.copyFileSync(androidSecret, rootTargetPath);
+      console.log("✅ Successfully copied google-services.json secret to native and root");
     } else {
-      // 2. Fallback: If it's a raw string (Secret type 'string')
+      // Fallback: Raw string
       const content = androidSecret.includes("project_info")
         ? androidSecret
         : Buffer.from(androidSecret, "base64");
-      fs.writeFileSync("android/app/google-services.json", content);
-      console.log("📝 Successfully wrote google-services.json from string");
+      fs.writeFileSync(targetPath, content);
+      fs.writeFileSync(rootTargetPath, content);
+      console.log("📝 Successfully wrote google-services.json from string to native and root");
     }
   }
 
-  // --- IOS HANDLER (Keep as you had it or use the same logic) ---
-  if (process.env.GOOGLE_SERVICE_INFO_PLIST) {
-    fs.writeFileSync(
-      "./GoogleService-Info.plist",
-      Buffer.from(process.env.GOOGLE_SERVICE_INFO_PLIST, "base64"),
-    );
+  // --- IOS HANDLER ---
+  const iosSecret = process.env.GOOGLE_SERVICE_INFO_PLIST;
+  if (iosSecret) {
+    const targetPath = path.join(rootDir, "GoogleService-Info.plist");
+    const nativeIosDir = path.join(rootDir, "ios");
+    
+    let content;
+    if (fs.existsSync(iosSecret)) {
+      content = fs.readFileSync(iosSecret);
+    } else {
+      content = iosSecret.includes("<?xml")
+        ? iosSecret
+        : Buffer.from(iosSecret, "base64");
+    }
+    
+    fs.writeFileSync(targetPath, content);
+    
+    // Also copy to ios/ directory if it exists (Bare workflow hint)
+    if (fs.existsSync(nativeIosDir)) {
+      // Find the app folder inside ios/ (usually has the same name as the project or 'app')
+      // For simplicity, we just put it in the root of ios/ or the project root.
+      // Expo config uses the one in project root.
+    }
+    
+    console.log("✅ Successfully handled GoogleService-Info.plist");
   }
 }
 

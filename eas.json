@@ -4,6 +4,7 @@
   },
   "build": {
     "production": {
+      "environment": "production",
       "env": {
         "EXPO_UPDATES_DISABLED": "1"
       },
@@ -16,6 +17,7 @@
     },
     "preview": {
       "extends": "production",
+      "environment": "preview",
       "android": {
         "buildType": "apk"
       },

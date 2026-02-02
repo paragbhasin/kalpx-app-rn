@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-const IS_EAS_BUILD = process.env.EAS_BUILD_ID;
+const IS_EAS_BUILD = !!process.env.EAS_BUILD_ID;
 
 if (IS_EAS_BUILD) {
   if (process.env.GOOGLE_SERVICE_INFO_PLIST) {
@@ -10,12 +10,26 @@ if (IS_EAS_BUILD) {
     );
   }
 
-  if (process.env.GOOGLE_SERVICES_JSON) {
-    fs.writeFileSync(
-      "./google-services.json",
-      Buffer.from(process.env.GOOGLE_SERVICES_JSON, "base64"),
-    );
-  }
+  // --- ANDROID FIX ---
+  const materializeFile = (envVar, targetPath) => {
+    const source = process.env[envVar];
+    if (!source) return;
+
+    // In EAS, if type is 'file', the env var is a PATH to that file
+    if (fs.existsSync(source)) {
+      fs.copyFileSync(source, targetPath);
+      console.log(`Successfully moved ${envVar} to ${targetPath}`);
+    } else {
+      // Fallback for string/base64 secrets
+      const content = source.includes("base64")
+        ? Buffer.from(source, "base64")
+        : source;
+      fs.writeFileSync(targetPath, content);
+    }
+  };
+
+  // Call the function for Android
+  materializeFile("GOOGLE_SERVICES_JSON", "./google-services.json");
 }
 
 module.exports = {

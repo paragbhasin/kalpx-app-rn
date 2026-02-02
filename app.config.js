@@ -1,8 +1,10 @@
 const fs = require("fs");
+const path = require("path");
 
 const IS_EAS_BUILD = !!process.env.EAS_BUILD_ID;
 
 if (IS_EAS_BUILD) {
+  // IOS handling remains base64 as you requested
   if (process.env.GOOGLE_SERVICE_INFO_PLIST) {
     fs.writeFileSync(
       "./GoogleService-Info.plist",
@@ -10,26 +12,30 @@ if (IS_EAS_BUILD) {
     );
   }
 
-  // --- ANDROID FIX ---
   const materializeFile = (envVar, targetPath) => {
     const source = process.env[envVar];
     if (!source) return;
 
-    // In EAS, if type is 'file', the env var is a PATH to that file
+    // Ensure the directory exists (e.g., android/app/)
+    const dir = path.dirname(targetPath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+
     if (fs.existsSync(source)) {
       fs.copyFileSync(source, targetPath);
-      console.log(`Successfully moved ${envVar} to ${targetPath}`);
+      console.log(`✅ Successfully moved ${envVar} to ${targetPath}`);
     } else {
-      // Fallback for string/base64 secrets
       const content = source.includes("base64")
         ? Buffer.from(source, "base64")
         : source;
       fs.writeFileSync(targetPath, content);
+      console.log(`📝 Successfully wrote ${envVar} to ${targetPath}`);
     }
   };
 
-  // Call the function for Android
-  materializeFile("GOOGLE_SERVICES_JSON", "./google-services.json");
+  // TARGETING THE NATIVE FOLDER
+  materializeFile("GOOGLE_SERVICES_JSON", "android/app/google-services.json");
 }
 
 module.exports = {

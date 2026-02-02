@@ -255,6 +255,23 @@ const CommunityAuthModal: React.FC<CommunityAuthModalProps> = ({
                             ))}
                         </View>
 
+
+
+
+                        <TouchableOpacity
+                            style={[styles.primaryButton, styles.googlFlex]}
+                            onPress={handleGoogleLogin}
+                            disabled={loading}
+                        >
+                            <Image source={require("../../assets/devicon_google.png")} style={styles.googleIcon} />
+                            <TextComponent type="boldText" style={styles.primaryButtonText}>{t('communityAuth.emailEntry.google')}</TextComponent>
+                        </TouchableOpacity>
+
+                        <View style={styles.dividerRow}>
+                            <View style={styles.divider} />
+                            <TextComponent type="mediumText" style={styles.dividerText}>{t('communityAuth.emailEntry.or')}</TextComponent>
+                            <View style={styles.divider} />
+                        </View>
                         <View style={styles.inputGroup}>
                             <TextComponent type="semiBoldText" style={styles.label}>{t('communityAuth.emailEntry.label')}</TextComponent>
                             <TextInput
@@ -279,29 +296,16 @@ const CommunityAuthModal: React.FC<CommunityAuthModalProps> = ({
                         </View>
 
                         <TouchableOpacity
-                            style={[styles.primaryButton, loading && styles.disabledButton]}
+                            style={[styles.googleButton, loading && styles.disabledButton]}
                             onPress={handleContinue}
                             disabled={loading}
                         >
-                            <TextComponent type="boldText" style={styles.primaryButtonText}>
+                            <TextComponent type="boldText" style={styles.googleButtonText}>
                                 {loading ? t('common.processing') : t('communityAuth.emailEntry.continue')}
                             </TextComponent>
                         </TouchableOpacity>
 
-                        <View style={styles.dividerRow}>
-                            <View style={styles.divider} />
-                            <TextComponent type="mediumText" style={styles.dividerText}>{t('communityAuth.emailEntry.or')}</TextComponent>
-                            <View style={styles.divider} />
-                        </View>
 
-                        <TouchableOpacity
-                            style={styles.googleButton}
-                            onPress={handleGoogleLogin}
-                            disabled={loading}
-                        >
-                            <Image source={require("../../assets/devicon_google.png")} style={styles.googleIcon} />
-                            <TextComponent type="boldText" style={styles.googleButtonText}>{t('communityAuth.emailEntry.google')}</TextComponent>
-                        </TouchableOpacity>
 
                         <TouchableOpacity style={styles.footerLink} onPress={() => {
                             onClose();
@@ -522,6 +526,12 @@ const styles = StyleSheet.create({
         backgroundColor: "#E6B02E",
         justifyContent: "center",
         alignItems: "center"
+    },
+    googlFlex: {
+        width: "100%",
+        flexDirection: "row",
+        justifyContent: "center",
+        alignItems: "center",
     },
     closeIcon: {
         width: 12,

@@ -4,38 +4,33 @@ const path = require("path");
 const IS_EAS_BUILD = !!process.env.EAS_BUILD_ID;
 
 if (IS_EAS_BUILD) {
-  // IOS handling remains base64 as you requested
+  // --- ANDROID HANDLER ---
+  const androidSecret = process.env.GOOGLE_SERVICES_JSON;
+  if (androidSecret) {
+    // 1. Check if the secret is a path (EAS File Secret)
+    if (fs.existsSync(androidSecret)) {
+      // It is a path! Copy the actual file to the target location
+      fs.copyFileSync(androidSecret, "android/app/google-services.json");
+      console.log(
+        "✅ Successfully copied google-services.json path to android/app/",
+      );
+    } else {
+      // 2. Fallback: If it's a raw string (Secret type 'string')
+      const content = androidSecret.includes("project_info")
+        ? androidSecret
+        : Buffer.from(androidSecret, "base64");
+      fs.writeFileSync("android/app/google-services.json", content);
+      console.log("📝 Successfully wrote google-services.json from string");
+    }
+  }
+
+  // --- IOS HANDLER (Keep as you had it or use the same logic) ---
   if (process.env.GOOGLE_SERVICE_INFO_PLIST) {
     fs.writeFileSync(
       "./GoogleService-Info.plist",
       Buffer.from(process.env.GOOGLE_SERVICE_INFO_PLIST, "base64"),
     );
   }
-
-  const materializeFile = (envVar, targetPath) => {
-    const source = process.env[envVar];
-    if (!source) return;
-
-    // Ensure the directory exists (e.g., android/app/)
-    const dir = path.dirname(targetPath);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-
-    if (fs.existsSync(source)) {
-      fs.copyFileSync(source, targetPath);
-      console.log(`✅ Successfully moved ${envVar} to ${targetPath}`);
-    } else {
-      const content = source.includes("base64")
-        ? Buffer.from(source, "base64")
-        : source;
-      fs.writeFileSync(targetPath, content);
-      console.log(`📝 Successfully wrote ${envVar} to ${targetPath}`);
-    }
-  };
-
-  // TARGETING THE NATIVE FOLDER
-  materializeFile("GOOGLE_SERVICES_JSON", "android/app/google-services.json");
 }
 
 module.exports = {
@@ -85,8 +80,7 @@ module.exports = {
       },
 
       edgeToEdgeEnabled: true,
-      googleServicesFile:
-        process.env.GOOGLE_SERVICES_JSON || "./google-services.json",
+      googleServicesFile: "./google-services.json",
     },
     web: {
       bundler: "metro",

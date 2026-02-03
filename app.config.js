@@ -22,7 +22,9 @@ if (IS_EAS_BUILD) {
       // It is a path! Copy the actual file
       fs.copyFileSync(androidSecret, targetPath);
       fs.copyFileSync(androidSecret, rootTargetPath);
-      console.log("✅ Successfully copied google-services.json secret to native and root");
+      console.log(
+        "✅ Successfully copied google-services.json secret to native and root",
+      );
     } else {
       // Fallback: Raw string
       const content = androidSecret.includes("project_info")
@@ -30,7 +32,9 @@ if (IS_EAS_BUILD) {
         : Buffer.from(androidSecret, "base64");
       fs.writeFileSync(targetPath, content);
       fs.writeFileSync(rootTargetPath, content);
-      console.log("📝 Successfully wrote google-services.json from string to native and root");
+      console.log(
+        "📝 Successfully wrote google-services.json from string to native and root",
+      );
     }
   }
 
@@ -39,7 +43,7 @@ if (IS_EAS_BUILD) {
   if (iosSecret) {
     const targetPath = path.join(rootDir, "GoogleService-Info.plist");
     const nativeIosDir = path.join(rootDir, "ios");
-    
+
     let content;
     if (fs.existsSync(iosSecret)) {
       content = fs.readFileSync(iosSecret);
@@ -48,16 +52,16 @@ if (IS_EAS_BUILD) {
         ? iosSecret
         : Buffer.from(iosSecret, "base64");
     }
-    
+
     fs.writeFileSync(targetPath, content);
-    
+
     // Also copy to ios/ directory if it exists (Bare workflow hint)
     if (fs.existsSync(nativeIosDir)) {
       // Find the app folder inside ios/ (usually has the same name as the project or 'app')
       // For simplicity, we just put it in the root of ios/ or the project root.
       // Expo config uses the one in project root.
     }
-    
+
     console.log("✅ Successfully handled GoogleService-Info.plist");
   }
 }
@@ -66,7 +70,7 @@ module.exports = {
   expo: {
     name: "kalpx",
     slug: "kalpx",
-    version: "1.1.22",
+    version: "1.1.23",
     orientation: "portrait",
     icon: "./assets/AppIconImg.png",
     scheme: "kalpx",
@@ -101,7 +105,7 @@ module.exports = {
       },
     },
     android: {
-      versionCode: 29,
+      versionCode: 30,
       package: "com.kalpx.app",
       adaptiveIcon: {
         foregroundImage: "./assets/AppIconImg.png",

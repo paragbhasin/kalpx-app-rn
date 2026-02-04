@@ -15,6 +15,9 @@ import 'moment/locale/ml';
 import 'moment/locale/mr';
 // Note: Skipping 'or' (Odia) per user request
 
+// Ensure moment defaults to English after importing other locales
+moment.locale('en');
+
 // Import your translations
 import bn from "./locales/bn/bn.json";
 import festivalsBn from "./locales/bn/festivals-bn.json";
@@ -833,7 +836,7 @@ const translations = {
 
 i18n.use(initReactI18next).init({
   compatibilityJSON: "v3",
-  lng: deviceLanguage,
+  lng: "en",
   fallbackLng: "en",
   debug: true, // optional, shows missing keys in console
   resources: {
@@ -875,7 +878,7 @@ i18n.on('languageChanged', (lng) => {
 });
 
 // Set initial moment locale and force English digits
-const langCode = i18n.language ? i18n.language.split('-')[0].toLowerCase() : deviceLanguage;
+const langCode = i18n.language ? i18n.language.split('-')[0].toLowerCase() : "en";
 if (langCode !== 'or') {
   moment.locale(langCode);
   const localesToFix = ['hi', 'te', 'ta', 'bn', 'gu', 'kn', 'ml', 'mr'];

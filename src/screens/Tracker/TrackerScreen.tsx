@@ -39,7 +39,8 @@ const TrackerScreen = () => {
   const [showInfo, setShowInfo] = useState(false);
   const [selectedPractice, setSelectedPractice] = useState<any>(null);
   const scrollViewRef = useRef<ScrollView>(null);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const currentLang = i18n.language.split("-")[0];
   const { locationData, loading: locationLoading } = useUserLocation();
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
 
@@ -122,7 +123,7 @@ const TrackerScreen = () => {
           {t("sadanaTracker.progressSummary", {
             completed: dailyPractice?.data?.completed_today?.length || 0,
             total: dailyPractice?.data?.active_practices?.length || 0,
-            date: moment().format("MMM DD, YYYY")
+            date: moment().locale(currentLang).format("MMM DD, YYYY")
           })}
         </TextComponent>
         <TextComponent
@@ -134,7 +135,7 @@ const TrackerScreen = () => {
           }}
         >
           {t("sadanaTracker.progressSummaryDate", {
-            date: moment().format("MMM D, YYYY"),
+            date: moment().locale(currentLang).format("MMM D, YYYY"),
           })}
         </TextComponent>
         <FlatList

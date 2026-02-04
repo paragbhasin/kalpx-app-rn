@@ -2,6 +2,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { AnyAction } from "@reduxjs/toolkit";
 import moment from "moment";
 import React, { useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import {
   FlatList,
   TouchableOpacity,
@@ -22,6 +23,7 @@ import styles from "./styles";
 import { useScrollContext } from "../../context/ScrollContext";
 
 export default function Notifications() {
+  const { i18n } = useTranslation();
   const { handleScroll } = useScrollContext();
   const navigation = useNavigation();
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
@@ -66,7 +68,7 @@ export default function Notifications() {
             {item.title}
           </TextComponent>
           <TextComponent type="mediumText" style={styles.time}>
-            {moment(item.timestamp).format("MMM D, YYYY")}
+            {moment(item.timestamp).locale(i18n.language.split('-')[0]).format("MMM D, YYYY")}
           </TextComponent>
         </View>
         <TextComponent type="mediumText" style={styles.message}>

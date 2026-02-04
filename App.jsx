@@ -61,8 +61,6 @@ export default function App() {
 
   // Google login setup
   GoogleSignin.configure({
-    androidClientId:
-      "800459558908-d5hnrbc5p86db6csi1mf7hn2kk4i1hj9.apps.googleusercontent.com",
     iosClientId:
       "800459558908-5bt6k0ihh1vh1o003m43ffltrkhhlnu1.apps.googleusercontent.com",
     webClientId:

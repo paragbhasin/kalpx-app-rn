@@ -56,13 +56,13 @@ const refreshAccessToken = async () => {
 
     console.log(
       "✅ Token refreshed successfully:",
-      access.slice(0, 25) + "..."
+      access.slice(0, 25) + "...",
     );
     return access;
   } catch (error) {
     console.log(
       "❌ Token refresh failed:",
-      error?.response?.data || error.message
+      error?.response?.data || error.message,
     );
     await AsyncStorage.removeItem("access_token");
     await AsyncStorage.removeItem("refresh_token");
@@ -111,7 +111,7 @@ api.interceptors.request.use(
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 /** -------------------------------------------------
@@ -119,23 +119,11 @@ api.interceptors.request.use(
  *  ------------------------------------------------- */
 api.interceptors.response.use(
   (response) => {
-    console.log("=====================================");
-    console.log("✅ API RESPONSE");
-    console.log("📡 URL:", response.config.url);
-    console.log("🔢 STATUS:", response.status);
-    console.log("📦 RESPONSE DATA:", response.data);
-    console.log("=====================================");
     return response;
   },
   async (error) => {
-    console.log("=====================================");
-    console.log("❌ API ERROR");
-    console.log("📡 URL:", error.config?.url);
-    console.log("🔢 STATUS:", error.response?.status);
-    console.log("⚠️ ERROR DATA:", error.response?.data);
-    console.log("=====================================");
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

@@ -3,13 +3,13 @@ import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { AnyAction } from "@reduxjs/toolkit";
-import * as Notifications from 'expo-notifications';
+import * as Notifications from "expo-notifications";
 import moment from "moment";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import ExploreVideos from "../../components/ExploreVideos";
 import {
   ActivityIndicator,
+  Animated,
   Dimensions,
   FlatList,
   Image,
@@ -21,18 +21,18 @@ import {
   StatusBar,
   TouchableOpacity,
   View,
-  Animated,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { Card } from "react-native-paper";
 import VersionCheck from "react-native-version-check-expo";
 import { useDispatch, useSelector } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
+import ActivePracticeList from "../../components/ActivePracticeList";
 import ClassHomeCard from "../../components/ClassHomeCard";
 import Colors from "../../components/Colors";
+import ExploreVideos from "../../components/ExploreVideos";
 import FestivalCard from "../../components/FestivalCard";
 import FontSize from "../../components/FontSize";
-import Header from "../../components/Header";
 import LoadingOverlay from "../../components/LoadingOverlay";
 import MantraCard from "../../components/MantraCard";
 import NotificationPermissionModal from "../../components/NotificationPermissionModal";
@@ -41,16 +41,17 @@ import SigninPopup from "../../components/SigninPopup";
 import TextComponent from "../../components/TextComponent";
 import UpdateAppModal from "../../components/UpdateModal";
 import { useUserLocation } from "../../components/useUserLocation";
-import ActivePracticeList from "../../components/ActivePracticeList";
 import WisdomCard from "../../components/WisdomCard";
+import { useScrollContext } from "../../context/ScrollContext";
 import { CATALOGS } from "../../data/mantras";
-import { DAILY_SANKALPS } from "../../data/sankalps";
 import { usePracticeStore } from "../../data/Practice";
 import { BASE_IMAGE_URL } from "../../Networks/baseURL";
 import { RootState } from "../../store";
-import { useScrollContext } from "../../context/ScrollContext";
 import { saveUserAction } from "../../utils/storage";
 import { classesHomeList } from "../Classes/actions";
+import { fetchFeaturedHomePosts } from "../Feed/actions";
+import { followCommunity, unfollowCommunity } from "../Social/actions";
+import { fetchUserActivity } from "../UserActivity/actions";
 import {
   completeMantra,
   getDailyDharmaTracker,
@@ -59,17 +60,13 @@ import {
   getVideos,
   startMantraPractice,
 } from "./actions";
-import { fetchFeaturedHomePosts } from "../Feed/actions";
-import { followCommunity, unfollowCommunity } from "../Social/actions";
-import { fetchUserActivity } from "../UserActivity/actions";
 import styles from "./homestyles";
-import { TextAlignCenter } from "lucide-react-native";
 
 const { width } = Dimensions.get("window");
 const CARD_MARGIN = 14;
 const CARD_WIDTH = FontSize.CONSTS.DEVICE_WIDTH * 0.65; // 70% width
 
-// const CARD_WIDTH = (width - CARD_MARGIN * 3) / 2; 
+// const CARD_WIDTH = (width - CARD_MARGIN * 3) / 2;
 
 export const collapseControl = { avoidCollapse: false };
 
@@ -83,7 +80,11 @@ export default function Home() {
   const { handleScroll } = useScrollContext();
 
   const [showLangTZModal, setShowLangTZModal] = useState(false);
-  const { locationData, loading: locationLoading, error: locationError } = useUserLocation();
+  const {
+    locationData,
+    loading: locationLoading,
+    error: locationError,
+  } = useUserLocation();
   const [showNotificationPopup, setShowNotificationPopup] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [showMantraTaken, setShowMantraTaken] = useState(false);
@@ -93,10 +94,13 @@ export default function Home() {
   const [showSankalpTaken, setShowSankalpTaken] = useState(false);
   const [showLoginSankalpTaken, setShowLoginSankalpTaken] = useState(false);
   const [showSankalpComplete, setShowSankalpComplete] = useState(false);
-  const [showLoginSankalpComplete, setShowLoginSankalpComplete] = useState(false);
+  const [showLoginSankalpComplete, setShowLoginSankalpComplete] =
+    useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [updateType, setUpdateType] = useState("");
-  const user = useSelector((state: RootState) => state.login?.user || state.socialLoginReducer?.user);
+  const user = useSelector(
+    (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
+  );
   const isLoggedIn = !!user;
   const { setDailyMantras } = usePracticeStore();
   const [apiloading, setApiLoading] = useState(false);
@@ -107,8 +111,10 @@ export default function Home() {
   const [selectedMantraForPopup, setSelectedMantraForPopup] = useState(null);
   const [selectedSankalpForPopup, setSelectedSankalpForPopup] = useState(null);
   const [showPracticeComplete, setShowPracticeComplete] = useState(false);
-  const [showLoginPracticeComplete, setShowLoginPracticeComplete] = useState(false);
-  const [selectedPracticeForPopup, setSelectedPracticeForPopup] = useState(null);
+  const [showLoginPracticeComplete, setShowLoginPracticeComplete] =
+    useState(false);
+  const [selectedPracticeForPopup, setSelectedPracticeForPopup] =
+    useState(null);
   const currentLang = i18n.language.split("-")[0];
   const youtubeUrl = "https://www.youtube.com/watch?v=INS2diQXIjA";
   const videoId = youtubeUrl.split("v=")[1];
@@ -116,14 +122,26 @@ export default function Home() {
 
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
 
-  const { data: streakData, loading: streakLoading } = useSelector((state: RootState) => state.practiceStreaksReducer);
+  const { data: streakData, loading: streakLoading } = useSelector(
+    (state: RootState) => state.practiceStreaksReducer,
+  );
 
-  const { data: exploreVideos, loading: exploreLoading, page, hasMore } = useSelector((state: RootState) => state.videosReducer);
+  const {
+    data: exploreVideos,
+    loading: exploreLoading,
+    page,
+    hasMore,
+  } = useSelector((state: RootState) => state.videosReducer);
 
-  const { featuredPosts, loadingFeatured } = useSelector((state: any) => state.feed);
-  const { followed_communities } = useSelector((state: any) => state.userActivity);
+  const { featuredPosts, loadingFeatured } = useSelector(
+    (state: any) => state.feed,
+  );
+  const { followed_communities } = useSelector(
+    (state: any) => state.userActivity,
+  );
 
-  const testimonialReviews = t("testimonials", { returnObjects: true }) as any[] || [];
+  const testimonialReviews =
+    (t("testimonials", { returnObjects: true }) as any[]) || [];
 
   // Animation for testimonials scroll
   const scrollX = useRef(new Animated.Value(0)).current;
@@ -139,9 +157,8 @@ export default function Home() {
         }
       };
       checkNotificationPermission();
-    }, [])
+    }, []),
   );
-
 
   useFocusEffect(
     React.useCallback(() => {
@@ -150,9 +167,8 @@ export default function Home() {
         return;
       }
       setExpandedItemId(null);
-    }, [])
+    }, []),
   );
-
 
   useEffect(() => {
     const checkForUpdates = async () => {
@@ -187,19 +203,22 @@ export default function Home() {
     const preloadMantras = () => {
       const langKey = currentLang.toLowerCase();
       const allMantras = CATALOGS[langKey] || CATALOGS.en;
-      const startOfCycle = moment('2025-01-01');
-      const today = moment().startOf('day');
-      const dayIndex = today.diff(startOfCycle, 'days');
+      const startOfCycle = moment("2025-01-01");
+      const today = moment().startOf("day");
+      const dayIndex = today.diff(startOfCycle, "days");
       const startIndex = (dayIndex * 5) % allMantras.length;
       const endIndex = startIndex + 5;
       const dailyFive =
         endIndex <= allMantras.length
           ? allMantras.slice(startIndex, endIndex)
           : [
-            ...allMantras.slice(startIndex),
-            ...allMantras.slice(0, endIndex - allMantras.length),
-          ];
-      console.log("🔁 Today's Mantras:", dailyFive.map(m => m.id));
+              ...allMantras.slice(startIndex),
+              ...allMantras.slice(0, endIndex - allMantras.length),
+            ];
+      console.log(
+        "🔁 Today's Mantras:",
+        dailyFive.map((m) => m.id),
+      );
       setDailyMantras(dailyFive);
     };
 
@@ -224,7 +243,7 @@ export default function Home() {
         toValue: -totalWidth,
         duration: 40000, // 40 seconds for full scroll
         useNativeDriver: true,
-      })
+      }),
     );
 
     animation.start();
@@ -247,8 +266,8 @@ export default function Home() {
           } else {
             console.error("❌ Failed to fetch Home Explore videos:", res.error);
           }
-        }
-      )
+        },
+      ),
     );
   }, [dispatch]);
 
@@ -268,8 +287,8 @@ export default function Home() {
             } else {
               console.error("❌ Pagination failed:", res.error);
             }
-          }
-        )
+          },
+        ),
       );
     }
   };
@@ -283,7 +302,7 @@ export default function Home() {
         } else {
           console.error("❌ Failed to fetch tracker:", res.error);
         }
-      })
+      }),
     );
   }, [dispatch]);
 
@@ -291,7 +310,7 @@ export default function Home() {
     dispatch(
       getPracticeStreaks((res) => {
         console.log("✅ Streaks fetched:", res);
-      })
+      }),
     );
   }, [dispatch]);
 
@@ -301,7 +320,7 @@ export default function Home() {
   }, [dispatch]);
 
   const { data: practiceTodayData, loading } = useSelector(
-    (state: RootState) => state.practiceTodayReducer
+    (state: RootState) => state.practiceTodayReducer,
   );
 
   const loadHomeClasses = (pageNo = 1) => {
@@ -311,10 +330,9 @@ export default function Home() {
 
     dispatch(
       classesHomeList(pageNo, locationData?.timezone, (res) => {
-        console.log("classes Home Response >>>>>>>>>>", JSON.stringify(res));
         if (res.success) {
           const onlyAvailable = res.data.filter(
-            (item) => item?.available_slots?.length > 0
+            (item) => item?.available_slots?.length > 0,
           );
 
           if (res.data.length === 0) {
@@ -330,10 +348,9 @@ export default function Home() {
         }
 
         setLoadingClasses(false);
-      })
+      }),
     );
   };
-
 
   // const loadHomeClasses = (pageNo = 1) => {
   //   if (loadingClasses || !classHasMore) return;
@@ -352,12 +369,10 @@ export default function Home() {
   //   setClassHasMore(false);
   // }
 
-
   //         const newList =
   //           pageNo === 1 ? onlyAvailable : [...homeClasses, ...onlyAvailable];
 
   //        setHomeClasses(newList);   // NO slicing
-
 
   //       } else {
   //         setClassHasMore(false);
@@ -368,9 +383,6 @@ export default function Home() {
   //   );
   // };
 
-
-
-
   // First load
   useEffect(() => {
     loadHomeClasses(1);
@@ -379,8 +391,11 @@ export default function Home() {
   useEffect(() => {
     dispatch(
       getPracticeToday((res) => {
-        console.log("✅ practiceTodayData Practice Today Callback Response:::::::::>>>>>>>>>>>>>", practiceTodayData);
-      })
+        console.log(
+          "✅ practiceTodayData Practice Today Callback Response:::::::::>>>>>>>>>>>>>",
+          practiceTodayData,
+        );
+      }),
     );
   }, [dispatch]);
 
@@ -405,9 +420,10 @@ export default function Home() {
       // title: trackerData?.active_practices?.length > 0
       //   ? "SadanaTrackerScreen"
       //   : "Dharma",
-      title: trackerData?.active_practices?.length > 0
-        ? "TrackerTabs"
-        : "DailyPracticeLogin",
+      title:
+        trackerData?.active_practices?.length > 0
+          ? "TrackerTabs"
+          : "DailyPracticeLogin",
       // title: trackerData?.active_practices?.length > 0 ? "DailyPracticeList" : "DailyPracticeList",
       iconType: "image",
       icon: require("../../../assets/routine.png"),
@@ -437,28 +453,26 @@ export default function Home() {
       name: t("home.community"),
       title: "CommunityLanding",
       iconType: "image",
-      icon: require('../../../assets/com.png'),
+      icon: require("../../../assets/com.png"),
       event_type: "click_social_explore",
       component: "SocialExplore-card",
-    }
-
+    },
   ];
 
   const categories = isLoggedIn
     ? baseCategories // hide login
     : [
-      ...baseCategories,
-      {
-        id: "7",
-        name: t("forgotPassword.login"),
-        title: "Login",
-        iconType: "image",
-        icon: require('../../../assets/logout.png'),
-        event_type: "click_login_card",
-        component: "Login-card",
-      },
-    ];
-
+        ...baseCategories,
+        {
+          id: "7",
+          name: t("forgotPassword.login"),
+          title: "Login",
+          iconType: "image",
+          icon: require("../../../assets/logout.png"),
+          event_type: "click_login_card",
+          component: "Login-card",
+        },
+      ];
 
   const dailyOptions = [
     {
@@ -525,13 +539,17 @@ export default function Home() {
     },
     {
       id: "3",
-      title: trackerData?.active_practices?.length > 0 ? t("categories.sadana") : t("categories.dharma"),
+      title:
+        trackerData?.active_practices?.length > 0
+          ? t("categories.sadana")
+          : t("categories.dharma"),
       subTitle: t("kalpx.sacredRituals"),
       description: t("kalpx.sacredRitualsDesc"),
       // title: t("kalpx.practice"),
-      name: trackerData?.active_practices?.length > 0
-        ? "TrackerTabs"
-        : "DailyPracticeList",
+      name:
+        trackerData?.active_practices?.length > 0
+          ? "TrackerTabs"
+          : "DailyPracticeList",
       // trackerData?.active_practices?.length > 0 ? "MySadana" : "Dharma",
       event_type: "click_practice_card",
       component: "Practice-card",
@@ -576,12 +594,12 @@ export default function Home() {
     const payload = {
       practice_type: "mantra",
       item_id: mantra.id,
-      source: 'mantra_card',
+      source: "mantra_card",
       tz: locationData?.timezone,
       meta: {
         reps: reps.value || null,
-        ui: "daily_card"
-      }
+        ui: "daily_card",
+      },
     };
 
     console.log("payload >>>>>>>>>", payload);
@@ -595,9 +613,9 @@ export default function Home() {
           } else {
             setShowLoginMantraTaken(true);
           }
-          dispatch(getPracticeToday(() => { }));
+          dispatch(getPracticeToday(() => {}));
         }
-      })
+      }),
     );
   };
 
@@ -610,8 +628,8 @@ export default function Home() {
       tz: locationData?.timezone || "Asia/Kolkata",
       meta: {
         reps: mantra.reps || null,
-        ui: "daily_card"
-      }
+        ui: "daily_card",
+      },
     };
 
     console.log("Complete Mantra payload >>>>", payload);
@@ -619,17 +637,19 @@ export default function Home() {
     dispatch(
       completeMantra(payload, (res) => {
         if (res.success) {
-          dispatch(getPracticeStreaks((res) => {
-            console.log("✅ Streaks fetched:", res);
-          }))
+          dispatch(
+            getPracticeStreaks((res) => {
+              console.log("✅ Streaks fetched:", res);
+            }),
+          );
           if (!isLoggedIn) {
             setShowMantraComplete(true);
           } else {
             setShowLoginMantraComplete(true);
           }
-          dispatch(getPracticeToday(() => { }));
+          dispatch(getPracticeToday(() => {}));
         }
-      })
+      }),
     );
   };
 
@@ -637,11 +657,11 @@ export default function Home() {
     const payload = {
       practice_type: "sankalp",
       item_id: sankalp.id,
-      source: 'sankalp_card',
+      source: "sankalp_card",
       tz: locationData?.timezone,
       meta: {
-        ui: "daily_card"
-      }
+        ui: "daily_card",
+      },
     };
 
     dispatch(
@@ -652,9 +672,9 @@ export default function Home() {
           } else {
             setShowLoginSankalpTaken(true);
           }
-          dispatch(getPracticeToday(() => { }));
+          dispatch(getPracticeToday(() => {}));
         }
-      })
+      }),
     );
   };
 
@@ -666,30 +686,33 @@ export default function Home() {
       item_id: sankalp.id,
       tz: locationData?.timezone || "Asia/Kolkata",
       meta: {
-        ui: "daily_card"
-      }
+        ui: "daily_card",
+      },
     };
 
     dispatch(
       completeMantra(payload, (res) => {
         if (res.success) {
-          dispatch(getPracticeStreaks((res) => {
-            console.log("✅ Streaks fetched:", res);
-          }))
+          dispatch(
+            getPracticeStreaks((res) => {
+              console.log("✅ Streaks fetched:", res);
+            }),
+          );
           if (!isLoggedIn) {
             setShowSankalpComplete(true);
           } else {
             setShowLoginSankalpComplete(true);
           }
-          dispatch(getPracticeToday(() => { }));
+          dispatch(getPracticeToday(() => {}));
         }
-      })
+      }),
     );
   };
 
   const handleJoinToggle = (post: any) => {
     // Try to get community ID from various possible properties
-    const communityId = post.community?.slug ||
+    const communityId =
+      post.community?.slug ||
       post.community_slug ||
       post.slug ||
       post.community?.id?.toString() ||
@@ -768,15 +791,12 @@ export default function Home() {
                 lat: locationData.latitude,
                 long: locationData.longitude,
                 timeZone: locationData.timezone,
-                device:
-                  Platform.OS === "ios" ? "mobile-ios" : "mobile-android",
+                device: Platform.OS === "ios" ? "mobile-ios" : "mobile-android",
                 screen: "home",
               },
             });
             if (item.id) {
-              setExpandedItemId((prev) =>
-                prev === item.id ? null : item.id
-              );
+              setExpandedItemId((prev) => (prev === item.id ? null : item.id));
             }
           } catch (error) {
             console.error("Error fetching UUID:", error);
@@ -812,7 +832,7 @@ export default function Home() {
         </View>
       </Card>
       {expandedItemId === item.id && item.id === "1" && (
-        <View style={{ marginTop: 10, zIndex: 999, }}>
+        <View style={{ marginTop: 10, zIndex: 999 }}>
           <SankalpCard
             practiceTodayData={practiceTodayData}
             onPressStartSankalp={(sankalp) => {
@@ -827,7 +847,7 @@ export default function Home() {
         </View>
       )}
       {expandedItemId === item.id && item.id === "2" && (
-        <View style={{ marginTop: 10, zIndex: 999, }}>
+        <View style={{ marginTop: 10, zIndex: 999 }}>
           <MantraCard
             practiceTodayData={practiceTodayData}
             onPressChantMantra={(mantra, reps) => {
@@ -844,13 +864,13 @@ export default function Home() {
         </View>
       )}
       {expandedItemId === item.id && item.id === "4" && (
-        <View style={{ marginTop: 10, zIndex: 999, }}>
+        <View style={{ marginTop: 10, zIndex: 999 }}>
           <WisdomCard />
         </View>
       )}
 
       {expandedItemId === item.id && item.id === "3" && (
-        <View style={{ marginTop: 10, zIndex: 999, }}>
+        <View style={{ marginTop: 10, zIndex: 999 }}>
           <FestivalCard />
         </View>
       )}
@@ -858,42 +878,69 @@ export default function Home() {
   );
 
   const renderKalpXItem = ({ item }) => (
-    <View
-      style={[styles.kalpXCard, { width: CARD_WIDTH }]}
-    >
-      <Image source={item.icon} style={{ width: 40, height: 40, alignSelf: "flex-start" }} resizeMode="contain" />
-      <TextComponent type="headerSubBoldText" style={styles.kalpXTitle}>{item.title}</TextComponent>
-      <TextComponent type="streakSubText" style={{ color: Colors.Colors.Light_grey, alignSelf: "flex-start", marginVertical: 4 }}>{item.subTitle}</TextComponent>
+    <View style={[styles.kalpXCard, { width: CARD_WIDTH }]}>
+      <Image
+        source={item.icon}
+        style={{ width: 40, height: 40, alignSelf: "flex-start" }}
+        resizeMode="contain"
+      />
+      <TextComponent type="headerSubBoldText" style={styles.kalpXTitle}>
+        {item.title}
+      </TextComponent>
+      <TextComponent
+        type="streakSubText"
+        style={{
+          color: Colors.Colors.Light_grey,
+          alignSelf: "flex-start",
+          marginVertical: 4,
+        }}
+      >
+        {item.subTitle}
+      </TextComponent>
       <Image source={item.image} style={styles.kalpXImage} resizeMode="cover" />
-      <TextComponent type="subDailyText" style={{ textAlign: "center", marginVertical: 6 }}>{item.description}</TextComponent>
-      <TouchableOpacity style={{ backgroundColor: "#D4A017", padding: 6, borderRadius: 5, justifyContent: "flex-end" }} onPress={async () => {
-        try {
-          const userId = await AsyncStorage.getItem("uuid");
-          await saveUserAction({
-            uuid: userId,
-            timestamp: Date.now(),
-            retryCount: 0,
-            event_type: item?.event_type,
-            event_data: {
-              component: item?.component,
-              city: locationData.city,
-              lat: locationData.latitude,
-              long: locationData.longitude,
-              timeZone: locationData.timezone,
-              device: Platform.OS === "ios" ? "mobile-ios" : "mobile-android",
-              screen: "home",
-            },
-          });
-          navigation.navigate(item.name);
-        } catch (error) {
-          console.error("Error fetching UUID:", error);
-        }
-      }}>
-        <TextComponent type="boldText" style={{ color: "#FFFFFF" }}>{t("home.beginJourney")}</TextComponent>
+      <TextComponent
+        type="subDailyText"
+        style={{ textAlign: "center", marginVertical: 6 }}
+      >
+        {item.description}
+      </TextComponent>
+      <TouchableOpacity
+        style={{
+          backgroundColor: "#D4A017",
+          padding: 6,
+          borderRadius: 5,
+          justifyContent: "flex-end",
+        }}
+        onPress={async () => {
+          try {
+            const userId = await AsyncStorage.getItem("uuid");
+            await saveUserAction({
+              uuid: userId,
+              timestamp: Date.now(),
+              retryCount: 0,
+              event_type: item?.event_type,
+              event_data: {
+                component: item?.component,
+                city: locationData.city,
+                lat: locationData.latitude,
+                long: locationData.longitude,
+                timeZone: locationData.timezone,
+                device: Platform.OS === "ios" ? "mobile-ios" : "mobile-android",
+                screen: "home",
+              },
+            });
+            navigation.navigate(item.name);
+          } catch (error) {
+            console.error("Error fetching UUID:", error);
+          }
+        }}
+      >
+        <TextComponent type="boldText" style={{ color: "#FFFFFF" }}>
+          {t("home.beginJourney")}
+        </TextComponent>
       </TouchableOpacity>
     </View>
   );
-
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.Colors.white }}>
@@ -935,14 +982,17 @@ export default function Home() {
             }}
           />
         </View>
-        {isLoggedIn &&
+        {isLoggedIn && (
           <View style={{ alignItems: "center" }}>
             <ScrollView
               horizontal
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.streakScrollContainer}
             >
-              <Card style={styles.streakItem} onPress={() => navigation.navigate("StreakScreen")}>
+              <Card
+                style={styles.streakItem}
+                onPress={() => navigation.navigate("StreakScreen")}
+              >
                 <View style={{ flexDirection: "row" }}>
                   <Image
                     source={require("../../../assets/streak1.png")}
@@ -956,7 +1006,10 @@ export default function Home() {
                   </TextComponent>
                 </View>
               </Card>
-              <Card style={styles.streakItem} onPress={() => navigation.navigate("StreakScreen")}>
+              <Card
+                style={styles.streakItem}
+                onPress={() => navigation.navigate("StreakScreen")}
+              >
                 <View style={{ flexDirection: "row" }}>
                   <Image
                     source={require("../../../assets/streak2.png")}
@@ -970,7 +1023,10 @@ export default function Home() {
                   </TextComponent>
                 </View>
               </Card>
-              <Card style={styles.streakItem} onPress={() => navigation.navigate("StreakScreen")}>
+              <Card
+                style={styles.streakItem}
+                onPress={() => navigation.navigate("StreakScreen")}
+              >
                 <View style={{ flexDirection: "row" }}>
                   <Image
                     source={require("../../../assets/streak3.png")}
@@ -986,7 +1042,7 @@ export default function Home() {
               </Card>
             </ScrollView>
           </View>
-        }
+        )}
 
         {/* Today's Practice Cards Section */}
         <ActivePracticeList
@@ -1006,8 +1062,8 @@ export default function Home() {
               item_id: practice.id,
               tz: locationData?.timezone || "Asia/Kolkata",
               meta: {
-                ui: "daily_card" // or home specific
-              }
+                ui: "daily_card", // or home specific
+              },
             };
             dispatch(
               completeMantra(payload, (res) => {
@@ -1018,21 +1074,50 @@ export default function Home() {
                     setShowLoginPracticeComplete(true);
                   }
                 }
-              })
+              }),
             );
           }}
         />
 
-        <View style={{ borderColor: Colors.Colors.Yellow, borderWidth: 1.25, borderRadius: 6, marginHorizontal: 10, padding: 4, marginVertical: 6, marginTop: 10 }}>
-          <TextComponent type="DailyboldText" style={{ alignSelf: "center", marginTop: 20 }}>{t("home.howCanWeHelp")}</TextComponent>
-          <TextComponent type="cardSubTitleText" style={{ alignSelf: "center", marginTop: 10, textAlign: "center" }}>{t("home.guidedPathsDesc")}</TextComponent>
-          <TouchableOpacity style={{ alignItems: "center", marginTop: 8 }} onPress={() => { navigation.navigate("DailyPracticeList") }}>
+        <View
+          style={{
+            borderColor: Colors.Colors.Yellow,
+            borderWidth: 1.25,
+            borderRadius: 6,
+            marginHorizontal: 10,
+            padding: 4,
+            marginVertical: 6,
+            marginTop: 10,
+          }}
+        >
+          <TextComponent
+            type="DailyboldText"
+            style={{ alignSelf: "center", marginTop: 20 }}
+          >
+            {t("home.howCanWeHelp")}
+          </TextComponent>
+          <TextComponent
+            type="cardSubTitleText"
+            style={{ alignSelf: "center", marginTop: 10, textAlign: "center" }}
+          >
+            {t("home.guidedPathsDesc")}
+          </TextComponent>
+          <TouchableOpacity
+            style={{ alignItems: "center", marginTop: 8 }}
+            onPress={() => {
+              navigation.navigate("DailyPracticeList");
+            }}
+          >
             <ImageBackground
               source={require("../../../assets/locus.png")}
               style={styles.image}
               resizeMode="contain"
             >
-              <TextComponent type="semiBoldBlackText" style={[styles.label, styles.leftLabel]} numberOfLines={2}>
+              <TextComponent
+                type="semiBoldBlackText"
+                style={[styles.label, styles.leftLabel]}
+                numberOfLines={2}
+              >
                 {t("dailyPracticeList.categories.peace-calm.name")
                   .replace(" & ", "\n& ")
                   .replace(" और ", "\nऔर ")
@@ -1043,10 +1128,13 @@ export default function Home() {
                   .replace(" യും ", "\nയും ")
                   .replace(" এবং ", "\nএবং ")
                   .replace(" અને ", "\nઅને ")
-                  .replace(" ଏବଂ ", "\nଏବଂ ")
-                }
+                  .replace(" ଏବଂ ", "\nଏବଂ ")}
               </TextComponent>
-              <TextComponent type="semiBoldBlackText" style={[styles.label, styles.centerLabel]} numberOfLines={2}>
+              <TextComponent
+                type="semiBoldBlackText"
+                style={[styles.label, styles.centerLabel]}
+                numberOfLines={2}
+              >
                 {t("dailyPracticeList.categories.career.name")
                   .replace(" & ", "\n& ")
                   .replace(" और ", "\nऔर ")
@@ -1057,15 +1145,32 @@ export default function Home() {
                   .replace(" യും ", "\nയും ")
                   .replace(" এবং ", "\nএবং ")
                   .replace(" અને ", "\nઅને ")
-                  .replace(" ଏବଂ ", "\nଏବଂ ")
-                }
+                  .replace(" ଏବଂ ", "\nଏବଂ ")}
               </TextComponent>
-              <TextComponent type="semiBoldBlackText" style={[styles.label, styles.rightLabel]} numberOfLines={2}>
-                {t("dailyPracticeList.categories.spiritual-growth.name").replace(" ", "\n")}
+              <TextComponent
+                type="semiBoldBlackText"
+                style={[styles.label, styles.rightLabel]}
+                numberOfLines={2}
+              >
+                {t(
+                  "dailyPracticeList.categories.spiritual-growth.name",
+                ).replace(" ", "\n")}
               </TextComponent>
             </ImageBackground>
           </TouchableOpacity>
-          <TouchableOpacity style={{ flexDirection: "row", alignSelf: "center", marginTop: 4, alignItems: "center", marginLeft: 30, marginBottom: 20 }} onPress={() => { navigation.navigate("DailyPracticeList") }}>
+          <TouchableOpacity
+            style={{
+              flexDirection: "row",
+              alignSelf: "center",
+              marginTop: 4,
+              alignItems: "center",
+              marginLeft: 30,
+              marginBottom: 20,
+            }}
+            onPress={() => {
+              navigation.navigate("DailyPracticeList");
+            }}
+          >
             <TextComponent
               type="cardText"
               style={{
@@ -1085,13 +1190,26 @@ export default function Home() {
           <TextComponent type="headerText" style={styles.sectionHeading}>
             {t("streak.stepText")}
           </TextComponent>
-          <TextComponent type="cardSubTitleText" style={{ alignSelf: "center", textAlign: "center", marginBottom: 10, marginTop: 4, marginHorizontal: 12 }}>{t("dailyPracticeLogin.vedictext")}</TextComponent>
-          <View style={{
-            height: expandedItemId ? 'auto' : 0,
-            opacity: expandedItemId ? 1 : 0,
-            overflow: 'hidden',
-            marginVertical: expandedItemId ? 10 : 0,
-          }}>
+          <TextComponent
+            type="cardSubTitleText"
+            style={{
+              alignSelf: "center",
+              textAlign: "center",
+              marginBottom: 10,
+              marginTop: 4,
+              marginHorizontal: 12,
+            }}
+          >
+            {t("dailyPracticeLogin.vedictext")}
+          </TextComponent>
+          <View
+            style={{
+              height: expandedItemId ? "auto" : 0,
+              opacity: expandedItemId ? 1 : 0,
+              overflow: "hidden",
+              marginVertical: expandedItemId ? 10 : 0,
+            }}
+          >
             <FlatList
               data={topChips}
               keyExtractor={(item) => item.id}
@@ -1136,9 +1254,9 @@ export default function Home() {
             data={
               expandedItemId
                 ? [
-                  dailyOptions.find((x) => x.id === expandedItemId),
-                  ...dailyOptions.filter((x) => x.id !== expandedItemId),
-                ]
+                    dailyOptions.find((x) => x.id === expandedItemId),
+                    ...dailyOptions.filter((x) => x.id !== expandedItemId),
+                  ]
                 : dailyOptions
             }
             renderItem={renderDailyOption}
@@ -1218,21 +1336,33 @@ export default function Home() {
           />
         </View>
         {/* ===================== JOIN OUR CIRCLE ===================== */}
-        <View style={{ backgroundColor: '#F7F0DD', padding: 16, marginHorizontal: -16, marginBottom: 20 }}>
-
-
-          <View style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            marginHorizontal: 16
-            // paddingRight: 16 
-          }}>
+        <View
+          style={{
+            backgroundColor: "#F7F0DD",
+            padding: 16,
+            marginHorizontal: -16,
+            marginBottom: 20,
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              marginHorizontal: 16,
+              // paddingRight: 16
+            }}
+          >
             <TextComponent type="headerText" style={{ fontSize: 16 }}>
               {t("home.joinCircle")}
             </TextComponent>
 
-            <TouchableOpacity onPress={() => navigation.navigate("CommunityLanding")}>
-              <TextComponent type="mediumText" style={{ color: Colors.Colors.App_theme }}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("CommunityLanding")}
+            >
+              <TextComponent
+                type="mediumText"
+                style={{ color: Colors.Colors.App_theme }}
+              >
                 {t("home.viewMore")}
               </TextComponent>
             </TouchableOpacity>
@@ -1243,34 +1373,84 @@ export default function Home() {
             <View style={{ paddingVertical: 4 }}>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                 {[1, 2, 3, 4, 5].map((n) => (
-                  <View key={n} style={{ width: 220, marginRight: 16, backgroundColor: '#fff', borderRadius: 8, overflow: 'hidden' }}>
-                    <View style={{ height: 220, backgroundColor: '#E0E0E0' }} />
-                    <View style={{ padding: 16, alignItems: 'center', gap: 8 }}>
-                      <View style={{ height: 24, width: '75%', backgroundColor: '#E0E0E0', borderRadius: 4 }} />
-                      <View style={{ height: 16, width: '50%', backgroundColor: '#E0E0E0', borderRadius: 4 }} />
-                      <View style={{ height: 40, width: '100%', backgroundColor: '#E0E0E0', borderRadius: 8, marginTop: 8 }} />
+                  <View
+                    key={n}
+                    style={{
+                      width: 220,
+                      marginRight: 16,
+                      backgroundColor: "#fff",
+                      borderRadius: 8,
+                      overflow: "hidden",
+                    }}
+                  >
+                    <View style={{ height: 220, backgroundColor: "#E0E0E0" }} />
+                    <View style={{ padding: 16, alignItems: "center", gap: 8 }}>
+                      <View
+                        style={{
+                          height: 24,
+                          width: "75%",
+                          backgroundColor: "#E0E0E0",
+                          borderRadius: 4,
+                        }}
+                      />
+                      <View
+                        style={{
+                          height: 16,
+                          width: "50%",
+                          backgroundColor: "#E0E0E0",
+                          borderRadius: 4,
+                        }}
+                      />
+                      <View
+                        style={{
+                          height: 40,
+                          width: "100%",
+                          backgroundColor: "#E0E0E0",
+                          borderRadius: 8,
+                          marginTop: 8,
+                        }}
+                      />
                     </View>
                   </View>
                 ))}
               </ScrollView>
             </View>
           ) : featuredPosts && featuredPosts.length > 0 ? (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ paddingVertical: 4 }}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={{ paddingVertical: 4 }}
+            >
               {featuredPosts.map((community: any) => {
-                const imageUrl = community.hook_image ||
+                const imageUrl =
+                  community.hook_image ||
                   (community.images && community.images.length > 0
-                    ? (community.images[0].image_url || community.images[0].image || community.images[0])
+                    ? community.images[0].image_url ||
+                      community.images[0].image ||
+                      community.images[0]
                     : null);
 
                 // Check if user is already following this community
-                const isJoined = community.is_joined ||
+                const isJoined =
+                  community.is_joined ||
                   (followed_communities?.data || []).some((c: any) => {
                     const cSlug = c.slug?.toLowerCase();
-                    const itemSlug = (community.community_slug || community.community?.slug || community.slug)?.toLowerCase();
+                    const itemSlug = (
+                      community.community_slug ||
+                      community.community?.slug ||
+                      community.slug
+                    )?.toLowerCase();
                     const cId = c.id?.toString();
-                    const itemId = (community.community_id || community.community?.id || community.id)?.toString();
+                    const itemId = (
+                      community.community_id ||
+                      community.community?.id ||
+                      community.id
+                    )?.toString();
 
-                    return (cSlug && itemSlug && cSlug === itemSlug) || (cId && itemId && cId === itemId);
+                    return (
+                      (cSlug && itemSlug && cSlug === itemSlug) ||
+                      (cId && itemId && cId === itemId)
+                    );
                   });
 
                 return (
@@ -1278,45 +1458,83 @@ export default function Home() {
                     key={community.id}
                     style={{
                       width: 220,
-                      backgroundColor: '#fff',
+                      backgroundColor: "#fff",
                       borderRadius: 8,
                       marginRight: 16,
-                      shadowColor: '#000',
+                      shadowColor: "#000",
                       shadowOffset: { width: 0, height: 2 },
                       shadowOpacity: 0.1,
                       shadowRadius: 4,
                       elevation: 3,
-                      overflow: 'hidden'
+                      overflow: "hidden",
                     }}
                     onPress={() => {
-                      const slug = community.community_slug || community.slug || community.community?.slug;
+                      const slug =
+                        community.community_slug ||
+                        community.slug ||
+                        community.community?.slug;
                       if (slug) {
-                        navigation.navigate('CommunityDetail', { slug });
+                        navigation.navigate("CommunityDetail", { slug });
                       }
                     }}
                   >
                     {/* Image Section */}
-                    <View style={{ height: 220, width: 220, overflow: 'hidden' }}>
+                    <View
+                      style={{ height: 220, width: 220, overflow: "hidden" }}
+                    >
                       {imageUrl ? (
                         <Image
                           source={{ uri: imageUrl }}
-                          style={{ height: '100%', width: '100%' }}
+                          style={{ height: "100%", width: "100%" }}
                           resizeMode="cover"
                         />
                       ) : (
-                        <View style={{ height: '100%', width: '100%', backgroundColor: '#E0E0E0', justifyContent: 'center', alignItems: 'center' }}>
-                          <TextComponent type="mediumText" style={{ color: '#999' }}>{t("home.noImage")}</TextComponent>
+                        <View
+                          style={{
+                            height: "100%",
+                            width: "100%",
+                            backgroundColor: "#E0E0E0",
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
+                          <TextComponent
+                            type="mediumText"
+                            style={{ color: "#999" }}
+                          >
+                            {t("home.noImage")}
+                          </TextComponent>
                         </View>
                       )}
                     </View>
 
                     {/* Info Section */}
-                    <View style={{ paddingTop: 8, alignItems: 'center' }}>
-                      <TextComponent type="boldText" style={{ fontSize: 16, color: '#2D3748', marginBottom: 4, textAlign: 'center' }} numberOfLines={1}>
-                        {community.community_name || community.title || t("home.community")}
+                    <View style={{ paddingTop: 8, alignItems: "center" }}>
+                      <TextComponent
+                        type="boldText"
+                        style={{
+                          fontSize: 16,
+                          color: "#2D3748",
+                          marginBottom: 4,
+                          textAlign: "center",
+                        }}
+                        numberOfLines={1}
+                      >
+                        {community.community_name ||
+                          community.title ||
+                          t("home.community")}
                       </TextComponent>
-                      <TextComponent type="mediumText" style={{ fontSize: 14, color: '#A0AEC0', marginBottom: 8 }}>
-                        {t("home.weeklyVisitors", { count: community.follower_count || 0 })}
+                      <TextComponent
+                        type="mediumText"
+                        style={{
+                          fontSize: 14,
+                          color: "#A0AEC0",
+                          marginBottom: 8,
+                        }}
+                      >
+                        {t("home.weeklyVisitors", {
+                          count: community.follower_count || 0,
+                        })}
                       </TextComponent>
                       <TouchableOpacity
                         style={{
@@ -1324,17 +1542,20 @@ export default function Home() {
                           paddingHorizontal: 32,
                           marginBottom: 8,
                           borderRadius: 8,
-                          backgroundColor: isJoined ? '#E0E0E0' : '#C89A2B',
+                          backgroundColor: isJoined ? "#E0E0E0" : "#C89A2B",
                         }}
                         onPress={(e) => {
                           e.stopPropagation();
-                          handleJoinToggle({ ...community, is_joined: isJoined });
+                          handleJoinToggle({
+                            ...community,
+                            is_joined: isJoined,
+                          });
                         }}
                       >
                         <TextComponent
                           type="boldText"
                           style={{
-                            color: isJoined ? '#4A5568' : '#fff',
+                            color: isJoined ? "#4A5568" : "#fff",
                             fontSize: 14,
                           }}
                         >
@@ -1351,17 +1572,24 @@ export default function Home() {
 
         {/* ===================== EXPLORE CLASSES ===================== */}
         <View style={{ marginTop: 25, marginHorizontal: 16 }}>
-          <View style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            // paddingRight: 16 
-          }}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              // paddingRight: 16
+            }}
+          >
             <TextComponent type="headerText" style={{ fontSize: 16 }}>
               {t("home.exploreClasses")}
             </TextComponent>
 
-            <TouchableOpacity onPress={() => navigation.navigate("ClassesScreen")}>
-              <TextComponent type="mediumText" style={{ color: Colors.Colors.App_theme }}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("ClassesScreen")}
+            >
+              <TextComponent
+                type="mediumText"
+                style={{ color: Colors.Colors.App_theme }}
+              >
                 {t("home.viewMore")}
               </TextComponent>
             </TouchableOpacity>
@@ -1393,7 +1621,10 @@ export default function Home() {
                   navigation.navigate("ClassTutorDetailsScreen", { data: item })
                 }
                 onBookNow={() =>
-                  navigation.navigate("ClassBookingScreen", { data: item, reschedule: false })
+                  navigation.navigate("ClassBookingScreen", {
+                    data: item,
+                    reschedule: false,
+                  })
                 }
                 tutor={item?.tutor}
                 currency={item?.pricing?.currency}
@@ -1401,7 +1632,6 @@ export default function Home() {
                 trailAmt={item?.pricing?.trial?.amount}
               />
             )}
-
             scrollEventThrottle={16}
             onScroll={({ nativeEvent }) => {
               const scrollX = nativeEvent.contentOffset.x;
@@ -1419,7 +1649,6 @@ export default function Home() {
                 loadHomeClasses(next);
               }
             }}
-
             ListFooterComponent={
               loadingClasses ? (
                 <ActivityIndicator size="small" style={{ marginLeft: 10 }} />
@@ -1430,20 +1659,26 @@ export default function Home() {
           {/* </Card> */}
         </View>
 
-        <View style={{ backgroundColor: '#F1F1F1', marginHorizontal: -16, paddingVertical: 32 }}>
+        <View
+          style={{
+            backgroundColor: "#F1F1F1",
+            marginHorizontal: -16,
+            paddingVertical: 32,
+          }}
+        >
           <View
             style={{
               paddingHorizontal: 16,
               marginBottom: 24,
-              alignItems: 'center',
+              alignItems: "center",
             }}
           >
             <TextComponent
               type="headerText"
               style={{
                 fontSize: 24,
-                color: '#303030',
-                textAlign: 'center', // 👈 center text itself
+                color: "#303030",
+                textAlign: "center", // 👈 center text itself
               }}
             >
               {t("home.whatPeopleSay")}
@@ -1458,64 +1693,84 @@ export default function Home() {
           >
             <Animated.View
               style={{
-                flexDirection: 'row',
+                flexDirection: "row",
                 gap: 16,
                 paddingHorizontal: 16,
                 transform: [{ translateX: scrollX }],
               }}
             >
               {/* Render reviews twice for seamless loop */}
-              {[...testimonialReviews, ...testimonialReviews].map((review, idx) => (
-                <View
-                  key={idx}
-                  style={{
-                    backgroundColor: '#fff',
-                    borderRadius: 12,
-                    padding: 24,
-                    shadowColor: '#000',
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: 0.05,
-                    shadowRadius: 4,
-                    elevation: 2,
-                    minWidth: 300,
-                    maxWidth: 300,
-                  }}
-                >
-                  <TextComponent
-                    type="mediumText"
+              {[...testimonialReviews, ...testimonialReviews].map(
+                (review, idx) => (
+                  <View
+                    key={idx}
                     style={{
-                      fontSize: 14,
-                      color: '#4A5568',
-                      lineHeight: 22,
-                      fontStyle: 'italic',
-                      marginBottom: 16,
+                      backgroundColor: "#fff",
+                      borderRadius: 12,
+                      padding: 24,
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.05,
+                      shadowRadius: 4,
+                      elevation: 2,
+                      minWidth: 300,
+                      maxWidth: 300,
                     }}
                   >
-                    "{review.text}"
-                  </TextComponent>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <View>
-                      <TextComponent type="boldText" style={{ fontSize: 14, color: '#2D3748' }}>
-                        {review.author}
-                      </TextComponent>
-                      <TextComponent type="mediumText" style={{ fontSize: 12, color: '#A0AEC0', marginTop: 2 }}>
-                        {review.location}
-                      </TextComponent>
-                    </View>
-                    <View style={{ flexDirection: 'row' }}>
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <TextComponent key={star} style={{ color: '#F4B400', fontSize: 14 }}>
-                          ★
+                    <TextComponent
+                      type="mediumText"
+                      style={{
+                        fontSize: 14,
+                        color: "#4A5568",
+                        lineHeight: 22,
+                        fontStyle: "italic",
+                        marginBottom: 16,
+                      }}
+                    >
+                      "{review.text}"
+                    </TextComponent>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <View>
+                        <TextComponent
+                          type="boldText"
+                          style={{ fontSize: 14, color: "#2D3748" }}
+                        >
+                          {review.author}
                         </TextComponent>
-                      ))}
+                        <TextComponent
+                          type="mediumText"
+                          style={{
+                            fontSize: 12,
+                            color: "#A0AEC0",
+                            marginTop: 2,
+                          }}
+                        >
+                          {review.location}
+                        </TextComponent>
+                      </View>
+                      <View style={{ flexDirection: "row" }}>
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <TextComponent
+                            key={star}
+                            style={{ color: "#F4B400", fontSize: 14 }}
+                          >
+                            ★
+                          </TextComponent>
+                        ))}
+                      </View>
                     </View>
                   </View>
-                </View>
-              ))}
+                ),
+              )}
             </Animated.View>
           </ScrollView>
         </View>
-
 
         <SigninPopup
           visible={showMantraTaken}
@@ -1557,8 +1812,8 @@ export default function Home() {
           visible={showMantraComplete}
           onClose={() => {
             setShowMantraComplete(false);
-            dispatch(getPracticeToday(() => { }));
-            dispatch(getPracticeStreaks(() => { }));
+            dispatch(getPracticeToday(() => {}));
+            dispatch(getPracticeStreaks(() => {}));
           }}
           onConfirmCancel={() => setShowMantraComplete(false)}
           title={t("popup.mantraComplete_title1")}
@@ -1574,10 +1829,10 @@ export default function Home() {
           visible={showLoginMantraComplete}
           onClose={() => {
             setShowLoginMantraComplete(false);
-            dispatch(getPracticeToday(() => { }));
-            dispatch(getPracticeStreaks(() => { }));
+            dispatch(getPracticeToday(() => {}));
+            dispatch(getPracticeStreaks(() => {}));
           }}
-          onConfirmCancel={() => { }}
+          onConfirmCancel={() => {}}
           title={t("popup.mantraComplete_title2")}
           subText={t("popup.mantraComplete_sub2")}
           infoTexts={[
@@ -1620,16 +1875,16 @@ export default function Home() {
               });
             }
           }}
-        // bottomText={t("popup.sankalpTaken_bottom")}
+          // bottomText={t("popup.sankalpTaken_bottom")}
         />
         <SigninPopup
           visible={showSankalpComplete}
           onClose={() => {
             setShowSankalpComplete(false);
-            dispatch(getPracticeToday(() => { }));
-            dispatch(getPracticeStreaks(() => { }));
+            dispatch(getPracticeToday(() => {}));
+            dispatch(getPracticeStreaks(() => {}));
           }}
-          onConfirmCancel={() => { }}
+          onConfirmCancel={() => {}}
           title={t("popup.sankalpComplete_title")}
           subText={t("popup.sankalpComplete_sub")}
           infoTexts={[
@@ -1643,8 +1898,8 @@ export default function Home() {
           visible={showLoginSankalpComplete}
           onClose={() => {
             setShowLoginSankalpComplete(false);
-            dispatch(getPracticeToday(() => { }));
-            dispatch(getPracticeStreaks(() => { }));
+            dispatch(getPracticeToday(() => {}));
+            dispatch(getPracticeStreaks(() => {}));
           }}
           onConfirmCancel={() => setShowLoginSankalpComplete(false)}
           title={t("popup.mantraComplete_title2")}
@@ -1661,8 +1916,8 @@ export default function Home() {
           visible={showPracticeComplete}
           onClose={() => {
             setShowPracticeComplete(false);
-            dispatch(getPracticeToday(() => { }));
-            dispatch(getPracticeStreaks(() => { }));
+            dispatch(getPracticeToday(() => {}));
+            dispatch(getPracticeStreaks(() => {}));
           }}
           onConfirmCancel={() => setShowPracticeComplete(false)}
           title={t("popup.practiceComplete_title1")}
@@ -1678,8 +1933,8 @@ export default function Home() {
           visible={showLoginPracticeComplete}
           onClose={() => {
             setShowLoginPracticeComplete(false);
-            dispatch(getPracticeToday(() => { }));
-            dispatch(getPracticeStreaks(() => { }));
+            dispatch(getPracticeToday(() => {}));
+            dispatch(getPracticeStreaks(() => {}));
           }}
           onConfirmCancel={() => setShowLoginPracticeComplete(false)}
           title={t("popup.practiceComplete_title2")}

@@ -70,7 +70,7 @@ module.exports = {
   expo: {
     name: "kalpx",
     slug: "kalpx",
-    version: "1.1.24",
+    version: "1.1.25",
     orientation: "portrait",
     icon: "./assets/AppIconImg.png",
     scheme: "kalpx",
@@ -105,7 +105,7 @@ module.exports = {
       },
     },
     android: {
-      versionCode: 31,
+      versionCode: 32,
       package: "com.kalpx.app",
       adaptiveIcon: {
         foregroundImage: "./assets/AppIconImg.png",

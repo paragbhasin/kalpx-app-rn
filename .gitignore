@@ -50,7 +50,7 @@ android/app/.cxx/
 app-example
 
 # Google Services files
-google-services.json
+# google-services.json
 GoogleService-Info.plist
 
 # Production credentials

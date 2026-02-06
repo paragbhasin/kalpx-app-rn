@@ -74,7 +74,7 @@ export const fetchComments = (postId: string | number, page = 1, isQuestion = fa
     }
 };
 
-export const createComment = (postId: string | number, content: string, parentId?: number | null, isQuestion = false) => async (dispatch: any) => {
+export const createComment = (postId: string | number, content: string, parentId?: number | null, isQuestion = false, locale = "en") => async (dispatch: any) => {
     try {
         const payload: any = { post: postId, content, parent: parentId };
         if (isQuestion) payload.is_question = true;
@@ -83,7 +83,7 @@ export const createComment = (postId: string | number, content: string, parentId
 
         dispatch({ type: CREATE_COMMENT_SUCCESS });
         // Component should react to success (e.g. clear input) or we dispatch 'fetchComments' again
-        dispatch(fetchComments(postId, 1, isQuestion));
+        dispatch(fetchComments(postId, 1, isQuestion, locale));
         return { success: true };
     } catch (err: any) {
         return { success: false, error: err?.response?.data?.detail || "Failed to post" };

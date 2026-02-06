@@ -413,11 +413,13 @@ export default function SocialPostDetailScreen() {
     if (!commentText.trim()) return;
 
     const res: any = await dispatch(
-      createComment(post.id, commentText, replyingTo?.id, isQuestion) as any,
+      createComment(post.id, commentText, replyingTo?.id, isQuestion, i18n.language) as any,
     );
     if (res.success) {
       setCommentText("");
       setReplyingTo(null);
+      // Refresh post details to update comment count
+      dispatch(fetchPostDetail(post.id, i18n.language) as any);
     } else {
       Alert.alert("Error", res.error);
     }
@@ -433,7 +435,15 @@ export default function SocialPostDetailScreen() {
       {
         text: "Delete",
         style: "destructive",
-        onPress: () => dispatch(deleteComment(id) as any),
+        onPress: async () => {
+          const res: any = await dispatch(deleteComment(id) as any);
+          if (res.success) {
+            // Refresh post details to update comment count
+            dispatch(fetchPostDetail(post.id, i18n.language) as any);
+          } else {
+            Alert.alert("Error", res.error);
+          }
+        },
       },
     ]);
   };

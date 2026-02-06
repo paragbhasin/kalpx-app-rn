@@ -145,6 +145,8 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
 
     const dispatch: any = useDispatch();
     const user = useSelector((state: any) => state.login?.user || state.socialLoginReducer?.user);
+    const profileDetails = useSelector((state: any) => state.profileDetailsReducer);
+    const currentUserId = profileDetails?.data?.profile?.user?.id || user?.id;
     const practiceTodayData = useSelector((state: RootState) => state.practiceTodayReducer?.data);
     const isAuthenticated = !!user;
 
@@ -788,7 +790,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                             onPress={() => setShowMenu(false)}
                         />
                         <View style={styles.menuContainer}>
-                            {post.is_creator ? (
+                            {post.creator?.id === currentUserId || post.is_creator ? (
                                 <>
                                     <TouchableOpacity
                                         style={styles.menuItem}

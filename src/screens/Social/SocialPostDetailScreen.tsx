@@ -1,51 +1,62 @@
 import { useNavigation, useRoute } from "@react-navigation/native";
-import React, { useState, useEffect, useCallback } from "react";
+import moment from "moment";
+import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
+  ActivityIndicator,
+  Alert,
   Dimensions,
   FlatList,
   Image,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
-  TextInput,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
-  Modal
 } from "react-native";
-import { useTranslation } from "react-i18next";
-import { useDispatch, useSelector } from "react-redux";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { useDispatch, useSelector } from "react-redux";
 import Header from "../../components/Header";
 import SocialPostCard from "../../components/SocialPostCard";
 import {
-  fetchPostDetail,
-  fetchComments,
   createComment,
-  updateComment,
   deleteComment,
-  votePostDetail,
-  voteComment,
+  fetchComments,
+  fetchPostDetail,
+  hidePostDetail,
   markCommentUseful,
+  reportContent,
   savePostDetail,
   unsavePostDetail,
-  hidePostDetail,
-  reportContent
+  updateComment,
+  voteComment,
+  votePostDetail,
 } from "../PostDetail/actions";
 import { deletePost } from "../Social/actions";
-import moment from "moment";
 
 const screenWidth = Dimensions.get("window").width;
 
-const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote, onUseful, onReport, currentUserId }) => {
+const CommentItem = ({
+  comment,
+  onReply,
+  onEdit,
+  onDelete,
+  onVote,
+  onUseful,
+  onReport,
+  currentUserId,
+}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(comment.content);
   const [showMenu, setShowMenu] = useState(false);
   const [showUsefulMessage, setShowUsefulMessage] = useState(false);
-  const [menuPos, setMenuPos] = useState<{ top: number; right: number }>({ top: 0, right: 0 });
+  const [menuPos, setMenuPos] = useState<{ top: number; right: number }>({
+    top: 0,
+    right: 0,
+  });
   const menuButtonRef = React.useRef<any>(null);
-
 
   const handleUseful = () => {
     onUseful(comment.id);
@@ -62,8 +73,17 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote, onUseful, onR
   const currentLang = i18n.language?.split("-")[0] || "en";
 
   return (
-    <View style={{ padding: 12, borderLeftWidth: comment.parent ? 1 : 0, borderLeftColor: '#eee', marginLeft: comment.parent ? 15 : 0 }}>
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+    <View
+      style={{
+        padding: 12,
+        borderLeftWidth: comment.parent ? 1 : 0,
+        borderLeftColor: "#eee",
+        marginLeft: comment.parent ? 15 : 0,
+      }}
+    >
+      <View
+        style={{ flexDirection: "row", alignItems: "center", marginBottom: 4 }}
+      >
         {comment.creator?.avatar ? (
           <Image
             source={{ uri: comment.creator.avatar }}
@@ -75,27 +95,52 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote, onUseful, onR
               width: 24,
               height: 24,
               borderRadius: 12,
-              backgroundColor: '#D69E2E',
-              justifyContent: 'center',
-              alignItems: 'center',
+              backgroundColor: "#D69E2E",
+              justifyContent: "center",
+              alignItems: "center",
               marginRight: 8,
             }}
           >
-            <Text style={{ color: '#fff', fontSize: 12, fontWeight: 'bold' }}>
+            <Text style={{ color: "#fff", fontSize: 12, fontWeight: "bold" }}>
               {(
-                comment.creator?.username?.split('@')[0]?.charAt(0) || 'A'
+                comment.creator?.username?.split("@")[0]?.charAt(0) || "A"
               ).toUpperCase()}
             </Text>
           </View>
         )}
-        <Text style={{ fontWeight: 'bold', fontSize: 13, color: '#333' }}>
-          {(comment.creator.username && comment.creator.username.split('@')[0]) || 'Anonymous'}
+        <Text style={{ fontWeight: "bold", fontSize: 13, color: "#333" }}>
+          {(comment.creator.username &&
+            comment.creator.username.split("@")[0]) ||
+            "Anonymous"}
         </Text>
-        <Text style={{ fontSize: 11, color: '#999', marginLeft: 8 }}>{moment(comment.created_at).locale(currentLang).fromNow()}</Text>
+        <Text style={{ fontSize: 11, color: "#999", marginLeft: 8 }}>
+          {moment(comment.created_at).locale(currentLang).fromNow()}
+        </Text>
         {comment.useful_count > 0 && (
-          <View style={{ marginLeft: 'auto', backgroundColor: '#FFFDF0', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#FDF5E9' }}>
+          <View
+            style={{
+              marginLeft: "auto",
+              backgroundColor: "#FFFDF0",
+              paddingHorizontal: 8,
+              paddingVertical: 4,
+              borderRadius: 8,
+              flexDirection: "row",
+              alignItems: "center",
+              borderWidth: 1,
+              borderColor: "#FDF5E9",
+            }}
+          >
             <Ionicons name="star" size={12} color="#D69E2E" />
-            <Text style={{ fontSize: 11, fontWeight: 'bold', color: '#D69E2E', marginLeft: 4 }}>{comment.useful_count} Useful</Text>
+            <Text
+              style={{
+                fontSize: 11,
+                fontWeight: "bold",
+                color: "#D69E2E",
+                marginLeft: 4,
+              }}
+            >
+              {comment.useful_count} Useful
+            </Text>
           </View>
         )}
       </View>
@@ -106,22 +151,31 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote, onUseful, onR
             value={editContent}
             onChangeText={setEditContent}
             multiline
-            style={{ borderBottomWidth: 1, borderBottomColor: '#D69E2E', marginBottom: 8 }}
+            style={{
+              borderBottomWidth: 1,
+              borderBottomColor: "#D69E2E",
+              marginBottom: 8,
+            }}
           />
-          <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
-            <TouchableOpacity onPress={() => setIsEditing(false)} style={{ marginRight: 15 }}>
-              <Text style={{ color: '#666' }}>Cancel</Text>
+          <View style={{ flexDirection: "row", justifyContent: "flex-end" }}>
+            <TouchableOpacity
+              onPress={() => setIsEditing(false)}
+              style={{ marginRight: 15 }}
+            >
+              <Text style={{ color: "#666" }}>Cancel</Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={handleUpdate}>
-              <Text style={{ color: '#D69E2E', fontWeight: 'bold' }}>Save</Text>
+              <Text style={{ color: "#D69E2E", fontWeight: "bold" }}>Save</Text>
             </TouchableOpacity>
           </View>
         </View>
       ) : (
-        <Text style={{ fontSize: 14, color: '#333', marginBottom: 8 }}>{comment.content}</Text>
+        <Text style={{ fontSize: 14, color: "#333", marginBottom: 8 }}>
+          {comment.content}
+        </Text>
       )}
 
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
         {/* <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#f5f5f5', borderRadius: 20, paddingHorizontal: 8, paddingVertical: 4, marginRight: 15 }}>
           <TouchableOpacity onPress={() => onVote(comment.id, 'upvote')} style={{ paddingRight: 8 }}>
             <Ionicons
@@ -142,13 +196,20 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote, onUseful, onR
           </TouchableOpacity>
         </View> */}
 
-        <TouchableOpacity onPress={() => onReply(comment)} style={{ marginRight: 15 }}>
-          <Text style={{ fontSize: 12, color: '#666' }}>Reply</Text>
+        <TouchableOpacity
+          onPress={() => onReply(comment)}
+          style={{ marginRight: 15 }}
+        >
+          <Text style={{ fontSize: 12, color: "#666" }}>Reply</Text>
         </TouchableOpacity>
 
-        {!comment.is_creator && (
+        {comment.creator.id !== currentUserId && (
           <TouchableOpacity
-            style={{ flexDirection: 'row', alignItems: 'center', marginRight: 15 }}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginRight: 15,
+            }}
             onPress={handleUseful}
           >
             <Ionicons
@@ -156,7 +217,16 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote, onUseful, onR
               size={18}
               color={comment.is_useful_marked ? "#D69E2E" : "#666"}
             />
-            <Text style={{ marginLeft: 4, fontSize: 12, color: comment.is_useful_marked ? "#D69E2E" : "#666", fontWeight: comment.is_useful_marked ? 'bold' : 'normal' }}>Useful</Text>
+            <Text
+              style={{
+                marginLeft: 4,
+                fontSize: 12,
+                color: comment.is_useful_marked ? "#D69E2E" : "#666",
+                fontWeight: comment.is_useful_marked ? "bold" : "normal",
+              }}
+            >
+              Useful
+            </Text>
           </TouchableOpacity>
         )}
 
@@ -166,7 +236,7 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote, onUseful, onR
             menuButtonRef.current?.measureInWindow((x, y, width, height) => {
               setMenuPos({
                 top: y + height + 4,
-                right: Dimensions.get('window').width - x - width,
+                right: Dimensions.get("window").width - x - width,
               });
               setShowMenu(true);
             });
@@ -183,7 +253,7 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote, onUseful, onR
         >
           <TouchableOpacity
             style={{
-              position: 'absolute',
+              position: "absolute",
               top: 0,
               left: 0,
               right: 0,
@@ -194,33 +264,37 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote, onUseful, onR
           />
           <View
             style={{
-              position: 'absolute',
+              position: "absolute",
               top: menuPos.top,
               right: menuPos.right,
-              backgroundColor: '#fff',
+              backgroundColor: "#fff",
               borderRadius: 12,
               paddingVertical: 8,
               paddingHorizontal: 12,
               minWidth: 60,
               elevation: 5,
-              shadowColor: '#000',
+              shadowColor: "#000",
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.2,
               shadowRadius: 4,
               borderWidth: 1,
-              borderColor: '#f0f0f0',
+              borderColor: "#f0f0f0",
             }}
           >
-            {comment.is_creator ? (
+            {comment.creator.id === currentUserId ? (
               <>
                 <TouchableOpacity
                   onPress={() => {
                     setIsEditing(true);
                     setShowMenu(false);
                   }}
-                  style={{ paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#f5f5f5' }}
+                  style={{
+                    paddingVertical: 8,
+                    borderBottomWidth: 1,
+                    borderBottomColor: "#f5f5f5",
+                  }}
                 >
-                  <Text style={{ fontSize: 14, color: '#333' }}>Edit</Text>
+                  <Text style={{ fontSize: 14, color: "#333" }}>Edit</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => {
@@ -229,7 +303,7 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote, onUseful, onR
                   }}
                   style={{ paddingVertical: 8 }}
                 >
-                  <Text style={{ fontSize: 14, color: '#FF3B30' }}>Delete</Text>
+                  <Text style={{ fontSize: 14, color: "#FF3B30" }}>Delete</Text>
                 </TouchableOpacity>
               </>
             ) : (
@@ -246,14 +320,19 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote, onUseful, onR
                       {
                         text: "Report",
                         style: "destructive",
-                        onPress: () => onReport(comment.id, "spam", "User reported as spam from menu.")
-                      }
-                    ]
+                        onPress: () =>
+                          onReport(
+                            comment.id,
+                            "spam",
+                            "User reported as spam from menu.",
+                          ),
+                      },
+                    ],
                   );
                 }}
                 style={{ paddingVertical: 8 }}
               >
-                <Text style={{ fontSize: 14, color: '#FF3B30' }}>Report</Text>
+                <Text style={{ fontSize: 14, color: "#FF3B30" }}>Report</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -261,22 +340,32 @@ const CommentItem = ({ comment, onReply, onEdit, onDelete, onVote, onUseful, onR
       </View>
 
       {showUsefulMessage && (
-        <Text style={{ fontSize: 12, color: '#2E7D32', marginTop: 4, fontWeight: '500' }}>Marked as useful!</Text>
+        <Text
+          style={{
+            fontSize: 12,
+            color: "#2E7D32",
+            marginTop: 4,
+            fontWeight: "500",
+          }}
+        >
+          Marked as useful!
+        </Text>
       )}
 
-      {comment.children && comment.children.map(child => (
-        <CommentItem
-          key={child.id}
-          comment={child}
-          onReply={onReply}
-          onEdit={onEdit}
-          onDelete={onDelete}
-          onVote={onVote}
-          onUseful={onUseful}
-          onReport={onReport}
-          currentUserId={currentUserId}
-        />
-      ))}
+      {comment.children &&
+        comment.children.map((child) => (
+          <CommentItem
+            key={child.id}
+            comment={child}
+            onReply={onReply}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            onVote={onVote}
+            onUseful={onUseful}
+            onReport={onReport}
+            currentUserId={currentUserId}
+          />
+        ))}
     </View>
   );
 };
@@ -288,9 +377,13 @@ export default function SocialPostDetailScreen() {
   const dispatch = useDispatch();
 
   const { post: initialPost, isQuestion } = route.params || {};
-  const { post, comments, loadingComments, loadingPost } = useSelector((state: any) => state.postDetail);
-  const profileDetails = useSelector((state: any) => state.profileDetailsReducer);
-  const currentUserId = profileDetails?.data?.id;
+  const { post, comments, loadingComments, loadingPost } = useSelector(
+    (state: any) => state.postDetail,
+  );
+  const profileDetails = useSelector(
+    (state: any) => state.profileDetailsReducer,
+  );
+  const currentUserId = profileDetails?.data?.profile?.user?.id;
 
   const [commentText, setCommentText] = useState("");
   const [replyingTo, setReplyingTo] = useState<any>(null);
@@ -298,14 +391,18 @@ export default function SocialPostDetailScreen() {
   useEffect(() => {
     if (initialPost?.id) {
       dispatch(fetchPostDetail(initialPost.id, i18n.language) as any);
-      dispatch(fetchComments(initialPost.id, 1, isQuestion, i18n.language) as any);
+      dispatch(
+        fetchComments(initialPost.id, 1, isQuestion, i18n.language) as any,
+      );
     }
   }, [initialPost?.id, dispatch, isQuestion, i18n.language]);
 
   const handlePostComment = async () => {
     if (!commentText.trim()) return;
 
-    const res: any = await dispatch(createComment(post.id, commentText, replyingTo?.id, isQuestion) as any);
+    const res: any = await dispatch(
+      createComment(post.id, commentText, replyingTo?.id, isQuestion) as any,
+    );
     if (res.success) {
       setCommentText("");
       setReplyingTo(null);
@@ -321,7 +418,11 @@ export default function SocialPostDetailScreen() {
   const handleDeleteComment = (id) => {
     Alert.alert("Delete", "Are you sure you want to delete this comment?", [
       { text: "Cancel" },
-      { text: "Delete", style: "destructive", onPress: () => dispatch(deleteComment(id) as any) }
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => dispatch(deleteComment(id) as any),
+      },
     ]);
   };
 
@@ -334,8 +435,11 @@ export default function SocialPostDetailScreen() {
   };
 
   const handleReportComment = (id, reason, details) => {
-    dispatch(reportContent('comment', id, reason, details) as any);
-    Alert.alert("Reported", "Thank you for reporting. We will review this comment.");
+    dispatch(reportContent("comment", id, reason, details) as any);
+    Alert.alert(
+      "Reported",
+      "Thank you for reporting. We will review this comment.",
+    );
   };
 
   const handleEditPost = () => {
@@ -356,14 +460,14 @@ export default function SocialPostDetailScreen() {
           } else {
             Alert.alert("Error", res.error);
           }
-        }
-      }
+        },
+      },
     ]);
   };
 
   if (!post && !initialPost && loadingPost) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color="#D69E2E" />
       </View>
     );
@@ -377,11 +481,21 @@ export default function SocialPostDetailScreen() {
       <Header />
 
       {/* Back Header */}
-      <View style={{ flexDirection: "row", alignItems: "center", padding: 6, borderBottomWidth: 1, borderBottomColor: '#eee' }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          padding: 6,
+          borderBottomWidth: 1,
+          borderBottomColor: "#eee",
+        }}
+      >
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={24} color="#000" />
         </TouchableOpacity>
-        <Text style={{ fontSize: 14, fontWeight: "600", marginLeft: 6, }}>Back to Feed</Text>
+        <Text style={{ fontSize: 14, fontWeight: "600", marginLeft: 6 }}>
+          Back to Feed
+        </Text>
       </View>
 
       <FlatList
@@ -392,8 +506,16 @@ export default function SocialPostDetailScreen() {
             {(post || initialPost) && (
               <SocialPostCard
                 post={post || initialPost}
-                onUpvote={() => dispatch(votePostDetail((post || initialPost).id, 'upvote') as any)}
-                onDownvote={() => dispatch(votePostDetail((post || initialPost).id, 'downvote') as any)}
+                onUpvote={() =>
+                  dispatch(
+                    votePostDetail((post || initialPost).id, "upvote") as any,
+                  )
+                }
+                onDownvote={() =>
+                  dispatch(
+                    votePostDetail((post || initialPost).id, "downvote") as any,
+                  )
+                }
                 onComment={() => {
                   if (isQuestion) {
                     navigation.setParams({ isQuestion: false });
@@ -404,22 +526,38 @@ export default function SocialPostDetailScreen() {
                     navigation.setParams({ isQuestion: true });
                   }
                 }}
-                onSave={() => dispatch(savePostDetail((post || initialPost).id) as any)}
-                onUnsave={() => dispatch(unsavePostDetail((post || initialPost).id) as any)}
+                onSave={() =>
+                  dispatch(savePostDetail((post || initialPost).id) as any)
+                }
+                onUnsave={() =>
+                  dispatch(unsavePostDetail((post || initialPost).id) as any)
+                }
                 onHide={() => {
                   dispatch(hidePostDetail((post || initialPost).id) as any);
                   navigation.goBack();
                 }}
                 onReport={(reason, details) => {
-                  dispatch(reportContent('post', (post || initialPost).id, reason, details) as any);
-                  Alert.alert("Reported", "Thank you for reporting. We will review this post.");
+                  dispatch(
+                    reportContent(
+                      "post",
+                      (post || initialPost).id,
+                      reason,
+                      details,
+                    ) as any,
+                  );
+                  Alert.alert(
+                    "Reported",
+                    "Thank you for reporting. We will review this post.",
+                  );
                 }}
                 onEdit={handleEditPost}
                 onDelete={handleDeletePost}
               />
             )}
-            <View style={{ padding: 15, backgroundColor: '#f9f9f9' }}>
-              <Text style={{ fontWeight: 'bold' }}>{isQuestion ? 'Questions' : 'All Comments'}</Text>
+            <View style={{ padding: 15, backgroundColor: "#f9f9f9" }}>
+              <Text style={{ fontWeight: "bold" }}>
+                {isQuestion ? "Questions" : "All Comments"}
+              </Text>
             </View>
           </>
         }
@@ -437,9 +575,11 @@ export default function SocialPostDetailScreen() {
         )}
         ListEmptyComponent={
           !loadingComments ? (
-            <View style={{ padding: 40, alignItems: 'center' }}>
-              <Text style={{ color: '#999' }}>
-                {isQuestion ? "No questions yet. Be the first to ask!" : "No comments yet. Be the first to say something!"}
+            <View style={{ padding: 40, alignItems: "center" }}>
+              <Text style={{ color: "#999" }}>
+                {isQuestion
+                  ? "No questions yet. Be the first to ask!"
+                  : "No comments yet. Be the first to say something!"}
               </Text>
             </View>
           ) : (
@@ -450,19 +590,46 @@ export default function SocialPostDetailScreen() {
       />
 
       {/* Comment Input */}
-      <View style={{ padding: 12, borderTopWidth: 1, borderTopColor: '#eee', backgroundColor: '#fff' }}>
+      <View
+        style={{
+          padding: 12,
+          borderTopWidth: 1,
+          borderTopColor: "#eee",
+          backgroundColor: "#fff",
+        }}
+      >
         {replyingTo && (
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 8 }}>
-            <Text style={{ fontSize: 12, color: '#666' }}>Replying to <Text style={{ fontWeight: 'bold' }}>{replyingTo.creator_name}</Text></Text>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              paddingBottom: 8,
+            }}
+          >
+            <Text style={{ fontSize: 12, color: "#666" }}>
+              Replying to{" "}
+              <Text style={{ fontWeight: "bold" }}>
+                {replyingTo.creator_name}
+              </Text>
+            </Text>
             <TouchableOpacity onPress={() => setReplyingTo(null)}>
-              <Text style={{ fontSize: 12, color: 'red' }}>Cancel</Text>
+              <Text style={{ fontSize: 12, color: "red" }}>Cancel</Text>
             </TouchableOpacity>
           </View>
         )}
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
           <TextInput
-            placeholder={isQuestion ? "Ask a question..." : "Write a comment..."}
-            style={{ flex: 1, minHeight: 40, backgroundColor: '#f0f0f0', borderRadius: 20, paddingHorizontal: 15, paddingVertical: 8 }}
+            placeholder={
+              isQuestion ? "Ask a question..." : "Write a comment..."
+            }
+            style={{
+              flex: 1,
+              minHeight: 40,
+              backgroundColor: "#f0f0f0",
+              borderRadius: 20,
+              paddingHorizontal: 15,
+              paddingVertical: 8,
+            }}
             multiline
             value={commentText}
             onChangeText={setCommentText}
@@ -472,7 +639,11 @@ export default function SocialPostDetailScreen() {
             onPress={handlePostComment}
             disabled={!commentText.trim()}
           >
-            <Ionicons name="send" size={24} color={commentText.trim() ? "#D69E2E" : "#ccc"} />
+            <Ionicons
+              name="send"
+              size={24}
+              color={commentText.trim() ? "#D69E2E" : "#ccc"}
+            />
           </TouchableOpacity>
         </View>
       </View>

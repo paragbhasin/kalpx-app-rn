@@ -123,7 +123,11 @@ const DailyPracticeMantraCard = ({
         </View>
       )}
 
-      <View style={styles.card}>
+      <TouchableOpacity
+        activeOpacity={0.9}
+        onPress={onPress}
+        style={styles.card}
+      >
         <View style={styles.row}>
 
           {/* ✅ NEW CHECKBOX HERE */}
@@ -193,22 +197,22 @@ const DailyPracticeMantraCard = ({
               />
             )}
             {isedit ?
-              <TouchableOpacity onPress={onPress}>
+              <View>
                 <Ionicons
                   name="information-circle-outline"
                   size={22}
                   color={Colors.Colors.Yellow}
                   style={{ marginLeft: 6 }}
                 />
-              </TouchableOpacity>
+              </View>
               :
-              <TouchableOpacity onPress={onPress}>
+              <View>
                 <Ionicons name="chevron-forward" size={22} color="#000000" />
-              </TouchableOpacity>
+              </View>
             }
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
     </Animated.View>
   );
 };

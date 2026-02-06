@@ -35,6 +35,7 @@ import {
   votePostDetail,
 } from "../PostDetail/actions";
 import { deletePost } from "../Social/actions";
+import { fetchProfileDetails } from "../Profile/actions";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -332,7 +333,9 @@ const CommentItem = ({
                 }}
                 style={{ paddingVertical: 8 }}
               >
-                <Text style={{ fontSize: 14, color: "#FF3B30" }}>Report</Text>
+                <Text style={{ fontSize: 14, color: "#FF3B30" }}>
+                  Report
+                </Text>
               </TouchableOpacity>
             )}
           </View>
@@ -380,10 +383,19 @@ export default function SocialPostDetailScreen() {
   const { post, comments, loadingComments, loadingPost } = useSelector(
     (state: any) => state.postDetail,
   );
+  const user = useSelector(
+    (state: any) => state.login?.user || state.socialLoginReducer?.user,
+  );
   const profileDetails = useSelector(
     (state: any) => state.profileDetailsReducer,
   );
-  const currentUserId = profileDetails?.data?.profile?.user?.id;
+  const currentUserId = profileDetails?.data?.profile?.user?.id || user?.id;
+
+  useEffect(() => {
+    if (!currentUserId && user) {
+      dispatch(fetchProfileDetails(() => { }) as any);
+    }
+  }, [currentUserId, user, dispatch]);
 
   const [commentText, setCommentText] = useState("");
   const [replyingTo, setReplyingTo] = useState<any>(null);

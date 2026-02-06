@@ -192,7 +192,7 @@ export const retreatIntresetUser = (credentials, callback) => async (dispatch) =
 
 const interestApi = (credentials) => {
   // console.log("loginApi called with:", credentials);
-  return api.post("interests/", credentials);
+  return api.post("/interests/", credentials);
 };
 
 export const getPracticeToday = (callback) => async (dispatch) => {
@@ -203,7 +203,7 @@ export const getPracticeToday = (callback) => async (dispatch) => {
       Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata";
 
     const response = await api.get(
-      `practice_items/today/?tz=${encodeURIComponent(tz)}&locale=en`
+      `/practice_items/today/?tz=${encodeURIComponent(tz)}&locale=en`
     );
 
     console.log("practice today res >>>>>>>>", response.data);
@@ -238,7 +238,7 @@ export const getPracticeToday = (callback) => async (dispatch) => {
 export const startMantraPractice = (payload, callback) => async (dispatch) => {
   dispatch(startMantraRequest());
   try {
-    const response = await api.post("practice_items/assign/", payload);
+    const response = await api.post("/practice_items/assign/", payload);
     dispatch(startMantraSuccess(response.data));
 
     // After starting mantra, refresh today’s practice
@@ -255,10 +255,11 @@ export const startMantraPractice = (payload, callback) => async (dispatch) => {
 export const completeMantra = (payload, callback) => async (dispatch) => {
   dispatch(completeMantraRequest());
   try {
-    const response = await api.post("practice_items/complete/", payload);
+    const response = await api.post("/practice_items/complete/", payload);
     dispatch(completeMantraSuccess(response.data));
 
-    // Optionally refresh today's practice
+    // Optionally refresh today's practice and streaks
+    dispatch(getPracticeStreaks(() => { }) as any);
     dispatch(getPracticeToday((res) => {
       if (callback) callback({ success: true, data: response.data, refreshed: res });
     }));
@@ -271,7 +272,7 @@ export const completeMantra = (payload, callback) => async (dispatch) => {
 export const submitDailyDharmaSetup = (payload, callback) => async (dispatch) => {
   dispatch(submitDharmaRequest());
   try {
-    const response = await api.post("daily-dharma/setup/", payload);
+    const response = await api.post("/daily-dharma/setup/", payload);
     dispatch(submitDharmaSuccess(response.data));
     console.log("✅ Dharma setup success:", response.data);
 
@@ -291,11 +292,12 @@ export const submitDailyDharmaSetup = (payload, callback) => async (dispatch) =>
 export const trackDailyPractice = (payload, callback) => async (dispatch: any) => {
   dispatch({ type: TRACK_PRACTICE_REQUEST });
   try {
-    const response = await api.post("daily-dharma/tracker/", payload);
+    const response = await api.post("/daily-dharma/tracker/", payload);
     dispatch({ type: TRACK_PRACTICE_SUCCESS, payload: response.data });
     console.log("✅ Practice tracked successfully:", response.data);
 
-    // Refresh today’s data after marking complete
+    // Refresh today’s data and streaks after marking complete
+    dispatch(getPracticeStreaks(() => { }) as any);
     dispatch(getPracticeToday((res) => {
       console.log("🔁 Refreshed after tracking:", res);
       if (callback) callback({ success: true, data: response.data, refreshed: res });
@@ -316,7 +318,7 @@ export const getDailyDharmaTracker = (callback) => async (dispatch) => {
     console.log("📡 Fetching Tracker (Sidebar) with:", { date, tz });
 
     const response = await api.get(
-      `daily-dharma/tracker/?date=${date}&timezone=${encodeURIComponent(tz)}`
+      `/daily-dharma/tracker/?date=${date}&timezone=${encodeURIComponent(tz)}`
     );
 
     dispatch(trackerSuccess(response.data));
@@ -339,7 +341,7 @@ export const getPracticeStreaks = (callback) => async (dispatch) => {
   try {
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    const response = await api.get(`practice/streaks/?tz=${encodeURIComponent(tz)}`);
+    const response = await api.get(`/practice_items/streaks/?tz=${encodeURIComponent(tz)}`);
     console.log("🔥 Practice Streaks API Response >>>>", response.data);
 
     dispatch(streaksSuccess(response.data));
@@ -359,7 +361,7 @@ export const getPracticeStreaks = (callback) => async (dispatch) => {
 export const getVideoCategoriesWithLanguages = (callback) => async (dispatch) => {
   dispatch(videoCategoriesRequest());
   try {
-    const response = await api.get("videos/categories_with_languages/?_cacheBuster=" + Date.now());
+    const response = await api.get("/videos/categories_with_languages/?_cacheBuster=" + Date.now());
     dispatch(videoCategoriesSuccess(response.data));
 
     console.log("🎥 Video Categories with Languages >>>", response.data);
@@ -397,10 +399,10 @@ export const getVideos =
 
         // 🟢 Case 1: Default All / All Feed
         if (isDefaultFeed) {
-          url = `videos/list_videos/?paginate=true&per_page=${per_page}&page=${page}&_cacheBuster=${cacheBuster}`;
+          url = `/videos/list_videos/?paginate=true&per_page=${per_page}&page=${page}&_cacheBuster=${cacheBuster}`;
         } else {
           // 🟡 Case 2: Filtered or Search Feed
-          url = `videos/list_videos/?paginate=true&per_page=${per_page}&page=${page}&_cacheBuster=${cacheBuster}`;
+          url = `/videos/list_videos/?paginate=true&per_page=${per_page}&page=${page}&_cacheBuster=${cacheBuster}`;
           url += `&child_anime_filter=${kidsHub ? "true" : "false"}`;
 
           // Fetch categories from store

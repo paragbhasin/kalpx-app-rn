@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useDispatch } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
@@ -19,6 +20,7 @@ import TextComponent from "../../components/TextComponent";
 import YoutubeModal from "../../components/youtubeModal";
 import { RootState } from "../../store";
 import { collapseControl } from "../Home/Home";
+import { useScrollContext } from "../../context/ScrollContext";
 import { getVideos } from "./actions";
 import styles from "./relatedVideoStyles";
 
@@ -100,6 +102,7 @@ const RelatedVideosScreen = ({ route }: any) => {
 
   const [videos, setVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const { toggleVisibility, handleScroll } = useScrollContext();
 
   // Fetch Videos = Tag Videos + Fallback
   const fetchVideos = useCallback(() => {
@@ -160,62 +163,65 @@ const RelatedVideosScreen = ({ route }: any) => {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={{ flexDirection: "row", alignItems: "center", marginVertical: 12 }}>
-        <Pressable
-          style={styles.iconButton}
-          onPress={() => {
-collapseControl.avoidCollapse = true;   // tell Home not to collapse
-  navigation.goBack();        // correctly return to Home
-}}
-          // onPress={() => navigation.navigate("HomePage", { screen: "Home" })}
-        >
-          <Ionicons name="arrow-back" size={22} color="#fff" />
-        </Pressable>
+      <View style={{ flex: 1 }}>
+        {/* List */}
+        <FlatList
+          data={videos}
+          ListHeaderComponent={
+            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 12, marginTop: 70 }}>
+              <Pressable
+                style={styles.iconButton}
+                onPress={() => {
+                  collapseControl.avoidCollapse = true;   // tell Home not to collapse
+                  navigation.goBack();        // correctly return to Home
+                }}
+              >
+                <Ionicons name="arrow-back" size={22} color="#fff" />
+              </Pressable>
 
-        <TextComponent type="boldText" style={styles.heading}>
-          Related Videos
-        </TextComponent>
-      </View>
-
-      {/* List */}
-      <FlatList
-        data={videos}
-        renderItem={({ item }) => <VideoCard item={item} />}
-        keyExtractor={(item, idx) => item.id?.toString() || idx.toString()}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 40 }}
-        ListEmptyComponent={
-          !loading && (
-            <View style={{ alignItems: "center", marginTop: 30 }}>
-              <Text allowFontScaling={false} style={{ color: "#777" }}>
-                No videos found.
-              </Text>
+              <TextComponent type="boldText" style={styles.heading}>
+                Related Videos
+              </TextComponent>
             </View>
-          )
-        }
-      />
-      {/* Initial Loader */}
-      {loading && videos.length === 0 && (
-        <View style={styles.loader}>
-          <ActivityIndicator size="large" color={Colors.Colors.App_theme} />
-          <Text
-            allowFontScaling={false}
-            style={{  color: Colors.Colors.Light_black }}
-          >
-            Loading videos...
-          </Text>
-        </View>
-      )}
-         <LoadingButton
-                      loading={false}
-                      text="Explore More Videos"
-                  onPress={() => navigation.navigate("Explore")}
-                      disabled={false}
-                      style={styles.button1}
-                      textStyle={styles.buttonText1}
-                      showGlobalLoader={true}
-                    />
+          }
+          renderItem={({ item }) => <VideoCard item={item} />}
+          keyExtractor={(item, idx) => item.id?.toString() || idx.toString()}
+          showsVerticalScrollIndicator={false}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+          contentContainerStyle={{ paddingBottom: 40 }}
+          ListEmptyComponent={
+            !loading && (
+              <View style={{ alignItems: "center", marginTop: 30 }}>
+                <Text allowFontScaling={false} style={{ color: "#777" }}>
+                  No videos found.
+                </Text>
+              </View>
+            )
+          }
+        />
+        {/* Initial Loader */}
+        {loading && videos.length === 0 && (
+          <View style={styles.loader}>
+            <ActivityIndicator size="large" color={Colors.Colors.App_theme} />
+            <Text
+              allowFontScaling={false}
+              style={{ color: Colors.Colors.Light_black }}
+            >
+              Loading videos...
+            </Text>
+          </View>
+        )}
+        <LoadingButton
+          loading={false}
+          text="Explore More Videos"
+          onPress={() => navigation.navigate("Explore")}
+          disabled={false}
+          style={styles.button1}
+          textStyle={styles.buttonText1}
+          showGlobalLoader={true}
+        />
+      </View>
     </View>
   );
 };

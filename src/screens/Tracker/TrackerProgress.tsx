@@ -254,8 +254,13 @@ const TrackerProgress = () => {
                     // marginRight:16
                   }}
                 >
-                  <TextComponent type="semiBoldText" style={{ color: isDisabled ? "#616161" : Colors.Colors.white }}>
-                    {t(`common.shortDays.${moment(dateKey).format("ddd").toLowerCase()}`)}
+                  <TextComponent
+                    type="semiBoldText"
+                    style={{
+                      color: (status === "partial" || status === "disabled" || !status || status === "not_done" && bgColor === "#FFE1E1") ? "#000" : Colors.Colors.white
+                    }}
+                  >
+                    {t(`common.shortDays.${moment(dateKey).locale("en").format("ddd").toLowerCase()}`)}
                   </TextComponent>
                 </TouchableOpacity>
               );
@@ -355,7 +360,9 @@ const TrackerProgress = () => {
               const textColor =
                 status === "disabled"
                   ? "#6B7280"
-                  : "#FFFFFF";
+                  : (status === "completed" || status === "not_done")
+                    ? "#FFFFFF"
+                    : "#000000";
 
               return (
                 <TouchableOpacity

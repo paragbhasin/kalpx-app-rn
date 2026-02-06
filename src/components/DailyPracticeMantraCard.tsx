@@ -29,7 +29,7 @@ const DailyPracticeMantraCard = ({
   const translated = getTranslatedPractice(data, t);
   const slideAnim = useRef(new Animated.Value(0)).current;
 
-  console.log("data >>>>", data);
+  // console.log("data >>>>", data);
 
   const handleSwipe = () => {
     Animated.timing(slideAnim, {

@@ -33,7 +33,7 @@ const PracticeDailyModal: React.FC<PracticeDailyModalProps> = ({
   onClose,
 }) => {
 
-  console.log("Daily Practice Modal Data:", JSON.stringify(dailyPractice));
+
 
   const { active_practices, completed_today } = dailyPractice;
   const { t } = useTranslation();
@@ -70,30 +70,30 @@ const PracticeDailyModal: React.FC<PracticeDailyModalProps> = ({
 
     return (
       <>
-      <View style={styles.itemContainer}>
+        <View style={styles.itemContainer}>
+          <View
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: 8,
+              backgroundColor: Colors.Colors.App_theme,
+              // borderBottomColor:Colors.Colors.Light_grey,
+              // borderBottomWidth:0.5
+            }}
+          />
+          <TextComponent type="cardText" style={styles.name}>
+            {displayName}
+          </TextComponent>
+        </View>
         <View
           style={{
-            width: 10,
-            height: 10,
-            borderRadius: 8,
-            backgroundColor: Colors.Colors.App_theme,
-            // borderBottomColor:Colors.Colors.Light_grey,
-            // borderBottomWidth:0.5
+            width: "100%",
+            height: 1.25,
+            backgroundColor: Colors.Colors.Time_bg,
+            marginTop: 6,
           }}
         />
-        <TextComponent type="cardText" style={styles.name}>
-        {displayName}
-        </TextComponent>
-      </View>
-       <View
-      style={{
-        width: "100%",
-        height: 1.25,
-        backgroundColor: Colors.Colors.Time_bg,
-        marginTop: 6,
-      }}
-    />
-    </>
+      </>
     );
   };
 
@@ -107,47 +107,47 @@ const PracticeDailyModal: React.FC<PracticeDailyModalProps> = ({
       style={{ margin: 0, justifyContent: "center", alignItems: "center" }}
     >
       <View style={styles.modalContent}>
-        <View style={{width:"100%",backgroundColor:"#FDF5E9",padding:20,borderTopRightRadius:16,borderTopLeftRadius:16}}>
-        <TextComponent type="headerText" style={styles.title}>
-          {t("streakScreen.practiceText")} {date}
-        </TextComponent>
-</View>
+        <View style={{ width: "100%", backgroundColor: "#FDF5E9", padding: 20, borderTopRightRadius: 16, borderTopLeftRadius: 16 }}>
+          <TextComponent type="headerText" style={styles.title}>
+            {t("streakScreen.practiceText")} {date}
+          </TextComponent>
+        </View>
         {/* Scrollable content */}
         <ScrollView
           style={styles.scrollArea}
           showsVerticalScrollIndicator={true}
           nestedScrollEnabled
         >
-          <View style={{marginHorizontal:16}}>
-          {/* Completed */}
-          {completed.length > 0 && (
-            <>
-              <TextComponent type="cardText" style={styles.subTitle}>
-                {t("streakScreen.CompletedText")}
-              </TextComponent>
-              <FlatList
-                data={completed}
-                keyExtractor={(item: any) => item.id || item.practice_id}
-                renderItem={({ item }) => renderPracticeItem(item)}
-                scrollEnabled={false}
-              />
-            </>
-          )}
+          <View style={{ marginHorizontal: 16 }}>
+            {/* Completed */}
+            {completed.length > 0 && (
+              <>
+                <TextComponent type="cardText" style={styles.subTitle}>
+                  {t("streakScreen.CompletedText")}
+                </TextComponent>
+                <FlatList
+                  data={completed}
+                  keyExtractor={(item: any) => item.id || item.practice_id}
+                  renderItem={({ item }) => renderPracticeItem(item)}
+                  scrollEnabled={false}
+                />
+              </>
+            )}
 
-          {/* Not Done */}
-          {notDone.length > 0 && (
-            <>
-              <TextComponent type="cardText" style={styles.subTitle}>
-                {t("streakScreen.notDoneText")}
-              </TextComponent>
-              <FlatList
-                data={notDone}
-                keyExtractor={(item: any) => item.id || item.practice_id}
-                renderItem={({ item }) => renderPracticeItem(item)}
-                scrollEnabled={false}
-              />
-            </>
-          )}
+            {/* Not Done */}
+            {notDone.length > 0 && (
+              <>
+                <TextComponent type="cardText" style={styles.subTitle}>
+                  {t("streakScreen.notDoneText")}
+                </TextComponent>
+                <FlatList
+                  data={notDone}
+                  keyExtractor={(item: any) => item.id || item.practice_id}
+                  renderItem={({ item }) => renderPracticeItem(item)}
+                  scrollEnabled={false}
+                />
+              </>
+            )}
           </View>
         </ScrollView>
 
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
   },
   closeBtnText: {
     color: Colors.Colors.white,
-    paddingHorizontal:6
+    paddingHorizontal: 6
   },
 });
 

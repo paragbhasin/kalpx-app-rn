@@ -229,7 +229,7 @@ const TrackerEdit = ({ route }) => {
     removedApiIds,   // ← ADD THIS
   } = useCart();
 
-  console.log("localPractices >>>>>", JSON.stringify(localPractices));
+  // console.log("localPractices >>>>>", JSON.stringify(localPractices));
 
   const allData = i18n.getResourceBundle(i18n.language, "translation");
 

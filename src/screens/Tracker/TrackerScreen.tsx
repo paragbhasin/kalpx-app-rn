@@ -68,7 +68,7 @@ const TrackerScreen = () => {
         return aDone === bDone ? 0 : aDone ? 1 : -1;
       }) || [];
 
-  console.log("📝 Daily Practice Data:", JSON.stringify(dailyPractice));
+
 
 
   return (

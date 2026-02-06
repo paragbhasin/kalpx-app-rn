@@ -46,7 +46,7 @@ const ConfirmDailyPractices = ({ route }) => {
   const MANTRA_REPS_OPTIONS = ["9", "27", "54", "108"];
 
 
-  console.log("Route data >>>>>", JSON.stringify(route.params))
+  // console.log("Route data >>>>>", JSON.stringify(route.params))
 
   const { addPractice, setCartModalVisible } = useCart();
 

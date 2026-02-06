@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, TouchableOpacity, Text } from "react-native";
+import { View, StyleSheet, TouchableOpacity, Text, ActivityIndicator } from "react-native";
 import { Card } from "react-native-paper";
 import { useTranslation } from "react-i18next";
 import Colors from "./Colors";
@@ -19,6 +19,7 @@ const SimpleSankalpCard: React.FC<SimpleSankalpCardProps> = ({
     onMarkDone,
 }) => {
     const { t } = useTranslation();
+    const [actionLoading, setActionLoading] = React.useState(false);
     const translated = getTranslatedPractice(sankalp, t);
 
     return (
@@ -34,11 +35,20 @@ const SimpleSankalpCard: React.FC<SimpleSankalpCardProps> = ({
 
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={onMarkDone}
-                    disabled={isDone}
+                    onPress={async () => {
+                        setActionLoading(true);
+                        try {
+                            await onMarkDone();
+                        } finally {
+                            setActionLoading(false);
+                        }
+                    }}
+                    disabled={isDone || actionLoading}
                 >
                     <View style={styles.checkboxContainer}>
-                        {isDone ? (
+                        {actionLoading ? (
+                            <ActivityIndicator color={Colors.Colors.Yellow} style={{ marginRight: 10 }} />
+                        ) : isDone ? (
                             <View style={styles.checkedBox}>
                                 <Text style={styles.checkmark}>✓</Text>
                             </View>

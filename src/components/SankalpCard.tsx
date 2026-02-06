@@ -124,6 +124,8 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
     }
   };
 
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
   if (!filteredSankalps || filteredSankalps.length === 0) {
     return (
       <View style={{ padding: 20 }}>
@@ -299,7 +301,7 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                         color: Colors.Colors.Light_black,
                         marginVertical: 2, textAlign: "center"
                       }}>
-                      {translated.suggested_practice || t(currentSankalp.i18n?.suggested) || currentSankalp.suggested_practice}
+                      {translated.suggested_practice || t(currentSankalp.i18n?.suggest) || currentSankalp.suggested_practice}
                     </TextComponent>
                   </View>
                   <View style={{ alignItems: "center", marginTop: 4 }}>
@@ -323,14 +325,26 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                     {!isStarted ? (
                       <TouchableOpacity
                         style={styles.startBtn}
-                        onPress={() => onPressStartSankalp(currentSankalp)}
+                        disabled={actionLoading === "start"}
+                        onPress={async () => {
+                          setActionLoading("start");
+                          try {
+                            await onPressStartSankalp(currentSankalp);
+                          } finally {
+                            setActionLoading(null);
+                          }
+                        }}
                       >
-                        <TextComponent
-                          type="semiBoldText"
-                          style={{ textAlign: "center", color: Colors.Colors.white }}
-                        >
-                          {t("sankalpCard.iWillDo")}
-                        </TextComponent>
+                        {actionLoading === "start" ? (
+                          <ActivityIndicator color={Colors.Colors.white} />
+                        ) : (
+                          <TextComponent
+                            type="semiBoldText"
+                            style={{ textAlign: "center", color: Colors.Colors.white }}
+                          >
+                            {t("sankalpCard.iWillDo")}
+                          </TextComponent>
+                        )}
                       </TouchableOpacity>
                     ) : (
                       <TouchableOpacity
@@ -339,40 +353,59 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                           marginTop: 10,
                           alignItems: "center",
                           justifyContent: "center",
+                          borderWidth: 1,
+                          borderColor: Colors.Colors.Yellow,
+                          borderRadius: 6,
+                          paddingVertical: 8,
+                          marginHorizontal: 16,
                         }}
-                        onPress={() => onCompleteSankalp(currentSankalp)}
+                        disabled={actionLoading === "complete"}
+                        onPress={async () => {
+                          setActionLoading("complete");
+                          try {
+                            await onCompleteSankalp(currentSankalp);
+                          } finally {
+                            setActionLoading(null);
+                          }
+                        }}
                       >
-                        {/* ✅ Checkbox logic */}
-                        {isDone ? (
-                          <View
-                            style={{
-                              width: 18,
-                              height: 18,
-                              borderRadius: 4,
-                              marginRight: 10,
-                              alignItems: "center",
-                              justifyContent: "center",
-                              backgroundColor: "green",
-                            }}
-                          >
-                            <Text style={{ color: "white", fontSize: 12, fontWeight: "bold" }}>✓</Text>
-                          </View>
+                        {actionLoading === "complete" ? (
+                          <ActivityIndicator color={Colors.Colors.Yellow} />
                         ) : (
-                          <View
-                            style={{
-                              width: 15,
-                              height: 15,
-                              borderColor: Colors.Colors.BLACK,
-                              borderWidth: 1,
-                              borderRadius: 4,
-                              marginRight: 10,
-                            }}
-                          />
-                        )}
+                          <>
+                            {/* ✅ Checkbox logic */}
+                            {isDone ? (
+                              <View
+                                style={{
+                                  width: 18,
+                                  height: 18,
+                                  borderRadius: 4,
+                                  marginRight: 10,
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  backgroundColor: "green",
+                                }}
+                              >
+                                <Text style={{ color: "white", fontSize: 12, fontWeight: "bold" }}>✓</Text>
+                              </View>
+                            ) : (
+                              <View
+                                style={{
+                                  width: 15,
+                                  height: 15,
+                                  borderColor: Colors.Colors.BLACK,
+                                  borderWidth: 1,
+                                  borderRadius: 4,
+                                  marginRight: 10,
+                                }}
+                              />
+                            )}
 
-                        <TextComponent type="streakSadanaText">
-                          {isDone ? t("sankalpCard.done") : t("sankalpCard.markDone")}
-                        </TextComponent>
+                            <TextComponent type="streakSadanaText">
+                              {isDone ? t("sankalpCard.done") : t("sankalpCard.markDone")}
+                            </TextComponent>
+                          </>
+                        )}
                       </TouchableOpacity>
                     )}
 
@@ -414,14 +447,26 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                     {!isStarted ? (
                       <TouchableOpacity
                         style={styles.startBtn}
-                        onPress={() => onPressStartSankalp(currentSankalp)}
+                        disabled={actionLoading === "start"}
+                        onPress={async () => {
+                          setActionLoading("start");
+                          try {
+                            await onPressStartSankalp(currentSankalp);
+                          } finally {
+                            setActionLoading(null);
+                          }
+                        }}
                       >
-                        <TextComponent
-                          type="semiBoldText"
-                          style={{ textAlign: "center", color: Colors.Colors.white }}
-                        >
-                          {t("sankalpCard.iWillDo")}
-                        </TextComponent>
+                        {actionLoading === "start" ? (
+                          <ActivityIndicator color={Colors.Colors.white} />
+                        ) : (
+                          <TextComponent
+                            type="semiBoldText"
+                            style={{ textAlign: "center", color: Colors.Colors.white }}
+                          >
+                            {t("sankalpCard.iWillDo")}
+                          </TextComponent>
+                        )}
                       </TouchableOpacity>
                     ) : (
                       <TouchableOpacity
@@ -430,40 +475,59 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                           marginTop: 10,
                           alignItems: "center",
                           justifyContent: "center",
+                          borderWidth: 1,
+                          borderColor: Colors.Colors.Yellow,
+                          borderRadius: 6,
+                          paddingVertical: 8,
+                          marginHorizontal: 16,
                         }}
-                        onPress={() => onCompleteSankalp(currentSankalp)}
+                        disabled={actionLoading === "complete"}
+                        onPress={async () => {
+                          setActionLoading("complete");
+                          try {
+                            await onCompleteSankalp(currentSankalp);
+                          } finally {
+                            setActionLoading(null);
+                          }
+                        }}
                       >
-                        {/* ✅ Checkbox logic */}
-                        {isDone ? (
-                          <View
-                            style={{
-                              width: 18,
-                              height: 18,
-                              borderRadius: 4,
-                              marginRight: 10,
-                              alignItems: "center",
-                              justifyContent: "center",
-                              backgroundColor: "green",
-                            }}
-                          >
-                            <Text style={{ color: "white", fontSize: 12, fontWeight: "bold" }}>✓</Text>
-                          </View>
+                        {actionLoading === "complete" ? (
+                          <ActivityIndicator color={Colors.Colors.Yellow} />
                         ) : (
-                          <View
-                            style={{
-                              width: 15,
-                              height: 15,
-                              borderColor: Colors.Colors.BLACK,
-                              borderWidth: 1,
-                              borderRadius: 4,
-                              marginRight: 10,
-                            }}
-                          />
-                        )}
+                          <>
+                            {/* ✅ Checkbox logic */}
+                            {isDone ? (
+                              <View
+                                style={{
+                                  width: 18,
+                                  height: 18,
+                                  borderRadius: 4,
+                                  marginRight: 10,
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  backgroundColor: "green",
+                                }}
+                              >
+                                <Text style={{ color: "white", fontSize: 12, fontWeight: "bold" }}>✓</Text>
+                              </View>
+                            ) : (
+                              <View
+                                style={{
+                                  width: 15,
+                                  height: 15,
+                                  borderColor: Colors.Colors.BLACK,
+                                  borderWidth: 1,
+                                  borderRadius: 4,
+                                  marginRight: 10,
+                                }}
+                              />
+                            )}
 
-                        <TextComponent type="streakSadanaText">
-                          {isDone ? t("sankalpCard.done") : t("sankalpCard.markDone")}
-                        </TextComponent>
+                            <TextComponent type="streakSadanaText">
+                              {isDone ? t("sankalpCard.done") : t("sankalpCard.markDone")}
+                            </TextComponent>
+                          </>
+                        )}
                       </TouchableOpacity>
                     )}
 

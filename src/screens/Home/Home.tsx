@@ -212,9 +212,9 @@ export default function Home() {
         endIndex <= allMantras.length
           ? allMantras.slice(startIndex, endIndex)
           : [
-              ...allMantras.slice(startIndex),
-              ...allMantras.slice(0, endIndex - allMantras.length),
-            ];
+            ...allMantras.slice(startIndex),
+            ...allMantras.slice(0, endIndex - allMantras.length),
+          ];
       console.log(
         "🔁 Today's Mantras:",
         dailyFive.map((m) => m.id),
@@ -462,17 +462,17 @@ export default function Home() {
   const categories = isLoggedIn
     ? baseCategories // hide login
     : [
-        ...baseCategories,
-        {
-          id: "7",
-          name: t("forgotPassword.login"),
-          title: "Login",
-          iconType: "image",
-          icon: require("../../../assets/logout.png"),
-          event_type: "click_login_card",
-          component: "Login-card",
-        },
-      ];
+      ...baseCategories,
+      {
+        id: "7",
+        name: t("forgotPassword.login"),
+        title: "Login",
+        iconType: "image",
+        icon: require("../../../assets/logout.png"),
+        event_type: "click_login_card",
+        component: "Login-card",
+      },
+    ];
 
   const dailyOptions = [
     {
@@ -591,122 +591,134 @@ export default function Home() {
   ];
 
   const handleStartMantra = (mantra, reps) => {
-    const payload = {
-      practice_type: "mantra",
-      item_id: mantra.id,
-      source: "mantra_card",
-      tz: locationData?.timezone,
-      meta: {
-        reps: reps.value || null,
-        ui: "daily_card",
-      },
-    };
+    return new Promise((resolve) => {
+      const payload = {
+        practice_type: "mantra",
+        item_id: mantra.id,
+        source: "mantra_card",
+        tz: locationData?.timezone,
+        meta: {
+          reps: reps.value || null,
+          ui: "daily_card",
+        },
+      };
 
-    console.log("payload >>>>>>>>>", payload);
+      console.log("payload >>>>>>>>>", payload);
 
-    dispatch(
-      startMantraPractice(payload, (res) => {
-        console.log("🎯 Mantra start callback:", res);
-        if (res.success) {
-          if (!isLoggedIn) {
-            setShowMantraTaken(true);
-          } else {
-            setShowLoginMantraTaken(true);
+      dispatch(
+        startMantraPractice(payload, (res) => {
+          console.log("🎯 Mantra start callback:", res);
+          if (res.success) {
+            if (!isLoggedIn) {
+              setShowMantraTaken(true);
+            } else {
+              setShowLoginMantraTaken(true);
+            }
+            dispatch(getPracticeToday(() => { }));
           }
-          dispatch(getPracticeToday(() => {}));
-        }
-      }),
-    );
+          resolve(res);
+        }),
+      );
+    });
   };
 
   const DoneMantraCalled = (mantra) => {
-    if (!mantra?.id) return;
+    if (!mantra?.id) return Promise.resolve();
 
-    const payload = {
-      practice_type: "mantra",
-      item_id: mantra.id,
-      tz: locationData?.timezone || "Asia/Kolkata",
-      meta: {
-        reps: mantra.reps || null,
-        ui: "daily_card",
-      },
-    };
+    return new Promise((resolve) => {
+      const payload = {
+        practice_type: "mantra",
+        item_id: mantra.id,
+        tz: locationData?.timezone || "Asia/Kolkata",
+        meta: {
+          reps: mantra.reps || null,
+          ui: "daily_card",
+        },
+      };
 
-    console.log("Complete Mantra payload >>>>", payload);
+      console.log("Complete Mantra payload >>>>", payload);
 
-    dispatch(
-      completeMantra(payload, (res) => {
-        if (res.success) {
-          dispatch(
-            getPracticeStreaks((res) => {
-              console.log("✅ Streaks fetched:", res);
-            }),
-          );
-          if (!isLoggedIn) {
-            setShowMantraComplete(true);
-          } else {
-            setShowLoginMantraComplete(true);
+      dispatch(
+        completeMantra(payload, (res) => {
+          if (res.success) {
+            dispatch(
+              getPracticeStreaks((res) => {
+                console.log("✅ Streaks fetched:", res);
+              }),
+            );
+            if (!isLoggedIn) {
+              setShowMantraComplete(true);
+            } else {
+              setShowLoginMantraComplete(true);
+            }
+            dispatch(getPracticeToday(() => { }));
           }
-          dispatch(getPracticeToday(() => {}));
-        }
-      }),
-    );
+          resolve(res);
+        }),
+      );
+    });
   };
 
   const handleStartSankalp = (sankalp) => {
-    const payload = {
-      practice_type: "sankalp",
-      item_id: sankalp.id,
-      source: "sankalp_card",
-      tz: locationData?.timezone,
-      meta: {
-        ui: "daily_card",
-      },
-    };
+    return new Promise((resolve) => {
+      const payload = {
+        practice_type: "sankalp",
+        item_id: sankalp.id,
+        source: "sankalp_card",
+        tz: locationData?.timezone,
+        meta: {
+          ui: "daily_card",
+        },
+      };
 
-    dispatch(
-      startMantraPractice(payload, (res) => {
-        if (res.success) {
-          if (!isLoggedIn) {
-            setShowSankalpTaken(true);
-          } else {
-            setShowLoginSankalpTaken(true);
+      dispatch(
+        startMantraPractice(payload, (res) => {
+          if (res.success) {
+            if (!isLoggedIn) {
+              setShowSankalpTaken(true);
+            } else {
+              setShowLoginSankalpTaken(true);
+            }
+            dispatch(getPracticeToday(() => { }));
           }
-          dispatch(getPracticeToday(() => {}));
-        }
-      }),
-    );
+          resolve(res);
+        }),
+      );
+    });
   };
 
   const DoneSankalpCalled = (sankalp) => {
-    if (!sankalp?.id) return;
+    if (!sankalp?.id) return Promise.resolve();
 
-    const payload = {
-      practice_type: "sankalp",
-      item_id: sankalp.id,
-      tz: locationData?.timezone || "Asia/Kolkata",
-      meta: {
-        ui: "daily_card",
-      },
-    };
+    return new Promise((resolve) => {
+      const payload = {
+        practice_type: "sankalp",
+        item_id: sankalp.id,
+        tz: locationData?.timezone || "Asia/Kolkata",
+        meta: {
+          ui: "daily_card",
+        },
+      };
 
-    dispatch(
-      completeMantra(payload, (res) => {
-        if (res.success) {
-          dispatch(
-            getPracticeStreaks((res) => {
-              console.log("✅ Streaks fetched:", res);
-            }),
-          );
-          if (!isLoggedIn) {
-            setShowSankalpComplete(true);
-          } else {
-            setShowLoginSankalpComplete(true);
+      dispatch(
+        completeMantra(payload, (res) => {
+          if (res.success) {
+            dispatch(
+              getPracticeStreaks((res) => {
+                console.log("✅ Streaks fetched:", res);
+              }),
+            );
+            if (!isLoggedIn) {
+              setShowSankalpComplete(true);
+            } else {
+              setShowLoginSankalpComplete(true);
+            }
+            dispatch(getPracticeToday(() => { }));
           }
-          dispatch(getPracticeToday(() => {}));
-        }
-      }),
-    );
+          resolve(res);
+        }),
+      );
+    });
   };
 
   const handleJoinToggle = (post: any) => {
@@ -837,11 +849,11 @@ export default function Home() {
             practiceTodayData={practiceTodayData}
             onPressStartSankalp={(sankalp) => {
               setSelectedSankalpForPopup(sankalp);
-              handleStartSankalp(sankalp);
+              return handleStartSankalp(sankalp);
             }}
             onCompleteSankalp={(sankalp) => {
               setSelectedSankalpForPopup(sankalp);
-              DoneSankalpCalled(sankalp);
+              return DoneSankalpCalled(sankalp);
             }}
           />
         </View>
@@ -853,12 +865,12 @@ export default function Home() {
             onPressChantMantra={(mantra, reps) => {
               console.log("Selected Mantra for Start:", mantra, reps);
               setSelectedMantraForPopup(mantra);
-              handleStartMantra(mantra, reps);
+              return handleStartMantra(mantra, reps);
             }}
             DoneMantraCalled={(mantra) => {
               console.log("confirm Mantra for Start:", mantra);
               setSelectedMantraForPopup(mantra);
-              DoneMantraCalled(mantra);
+              return DoneMantraCalled(mantra);
             }}
           />
         </View>
@@ -1049,11 +1061,11 @@ export default function Home() {
           todayItems={practiceTodayData?.items || []}
           onMarkSankalpDone={(sankalp) => {
             setSelectedSankalpForPopup(sankalp);
-            DoneSankalpCalled(sankalp);
+            return DoneSankalpCalled(sankalp);
           }}
           onMarkMantraDone={(mantra) => {
             setSelectedMantraForPopup(mantra);
-            DoneMantraCalled(mantra);
+            return DoneMantraCalled(mantra);
           }}
           onMarkPracticeDone={(practice, type) => {
             setSelectedPracticeForPopup(practice);
@@ -1254,9 +1266,9 @@ export default function Home() {
             data={
               expandedItemId
                 ? [
-                    dailyOptions.find((x) => x.id === expandedItemId),
-                    ...dailyOptions.filter((x) => x.id !== expandedItemId),
-                  ]
+                  dailyOptions.find((x) => x.id === expandedItemId),
+                  ...dailyOptions.filter((x) => x.id !== expandedItemId),
+                ]
                 : dailyOptions
             }
             renderItem={renderDailyOption}
@@ -1426,8 +1438,8 @@ export default function Home() {
                   community.hook_image ||
                   (community.images && community.images.length > 0
                     ? community.images[0].image_url ||
-                      community.images[0].image ||
-                      community.images[0]
+                    community.images[0].image ||
+                    community.images[0]
                     : null);
 
                 // Check if user is already following this community
@@ -1812,8 +1824,8 @@ export default function Home() {
           visible={showMantraComplete}
           onClose={() => {
             setShowMantraComplete(false);
-            dispatch(getPracticeToday(() => {}));
-            dispatch(getPracticeStreaks(() => {}));
+            dispatch(getPracticeToday(() => { }));
+            dispatch(getPracticeStreaks(() => { }));
           }}
           onConfirmCancel={() => setShowMantraComplete(false)}
           title={t("popup.mantraComplete_title1")}
@@ -1829,10 +1841,10 @@ export default function Home() {
           visible={showLoginMantraComplete}
           onClose={() => {
             setShowLoginMantraComplete(false);
-            dispatch(getPracticeToday(() => {}));
-            dispatch(getPracticeStreaks(() => {}));
+            dispatch(getPracticeToday(() => { }));
+            dispatch(getPracticeStreaks(() => { }));
           }}
-          onConfirmCancel={() => {}}
+          onConfirmCancel={() => { }}
           title={t("popup.mantraComplete_title2")}
           subText={t("popup.mantraComplete_sub2")}
           infoTexts={[
@@ -1875,16 +1887,16 @@ export default function Home() {
               });
             }
           }}
-          // bottomText={t("popup.sankalpTaken_bottom")}
+        // bottomText={t("popup.sankalpTaken_bottom")}
         />
         <SigninPopup
           visible={showSankalpComplete}
           onClose={() => {
             setShowSankalpComplete(false);
-            dispatch(getPracticeToday(() => {}));
-            dispatch(getPracticeStreaks(() => {}));
+            dispatch(getPracticeToday(() => { }));
+            dispatch(getPracticeStreaks(() => { }));
           }}
-          onConfirmCancel={() => {}}
+          onConfirmCancel={() => { }}
           title={t("popup.sankalpComplete_title")}
           subText={t("popup.sankalpComplete_sub")}
           infoTexts={[
@@ -1898,8 +1910,8 @@ export default function Home() {
           visible={showLoginSankalpComplete}
           onClose={() => {
             setShowLoginSankalpComplete(false);
-            dispatch(getPracticeToday(() => {}));
-            dispatch(getPracticeStreaks(() => {}));
+            dispatch(getPracticeToday(() => { }));
+            dispatch(getPracticeStreaks(() => { }));
           }}
           onConfirmCancel={() => setShowLoginSankalpComplete(false)}
           title={t("popup.mantraComplete_title2")}
@@ -1916,8 +1928,8 @@ export default function Home() {
           visible={showPracticeComplete}
           onClose={() => {
             setShowPracticeComplete(false);
-            dispatch(getPracticeToday(() => {}));
-            dispatch(getPracticeStreaks(() => {}));
+            dispatch(getPracticeToday(() => { }));
+            dispatch(getPracticeStreaks(() => { }));
           }}
           onConfirmCancel={() => setShowPracticeComplete(false)}
           title={t("popup.practiceComplete_title1")}
@@ -1933,8 +1945,8 @@ export default function Home() {
           visible={showLoginPracticeComplete}
           onClose={() => {
             setShowLoginPracticeComplete(false);
-            dispatch(getPracticeToday(() => {}));
-            dispatch(getPracticeStreaks(() => {}));
+            dispatch(getPracticeToday(() => { }));
+            dispatch(getPracticeStreaks(() => { }));
           }}
           onConfirmCancel={() => setShowLoginPracticeComplete(false)}
           title={t("popup.practiceComplete_title2")}

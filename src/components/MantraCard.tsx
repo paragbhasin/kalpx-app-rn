@@ -156,6 +156,8 @@ const MantraCard = ({
     return allMantras.slice(0, 5);
   }, [currentLang, dailyMantras]);
 
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
   if (error) {
     return (
       <View style={{ padding: 20 }}>
@@ -256,7 +258,7 @@ const MantraCard = ({
               <View>
                 <ImageBackground
                   source={require("../../assets/CardBG.png")}
-                  style={styles.partialBgContainer}
+                  style={styles.partialBgImage}
                   imageStyle={styles.partialBgImage}
                 >
                   {!viewOnly && (
@@ -446,17 +448,27 @@ const MantraCard = ({
                     {!isStarted ? (
                       <TouchableOpacity
                         style={styles.startBtn}
+                        disabled={actionLoading === "start"}
                         onPress={async () => {
                           const reps = selectedReps[currentMantra.id] ?? currentMantra.suggested_reps;
-                          onPressChantMantra(currentMantra, reps);
+                          setActionLoading("start");
+                          try {
+                            await onPressChantMantra(currentMantra, reps);
+                          } finally {
+                            setActionLoading(null);
+                          }
                         }}
                       >
-                        <TextComponent
-                          type="semiBoldText"
-                          style={{ textAlign: "center", color: Colors.Colors.white }}
-                        >
-                          {t("mantraCard.willChant")}
-                        </TextComponent>
+                        {actionLoading === "start" ? (
+                          <ActivityIndicator color={Colors.Colors.white} />
+                        ) : (
+                          <TextComponent
+                            type="semiBoldText"
+                            style={{ textAlign: "center", color: Colors.Colors.white }}
+                          >
+                            {t("mantraCard.willChant")}
+                          </TextComponent>
+                        )}
                       </TouchableOpacity>
                     ) : (
                       <TouchableOpacity
@@ -465,42 +477,61 @@ const MantraCard = ({
                           marginTop: 10,
                           alignItems: "center",
                           justifyContent: "center",
+                          borderWidth: 1,
+                          borderColor: Colors.Colors.Yellow,
+                          borderRadius: 6,
+                          paddingVertical: 8,
+                          marginHorizontal: 16,
                         }}
-                        onPress={() => DoneMantraCalled(currentMantra)}
+                        disabled={actionLoading === "complete"}
+                        onPress={async () => {
+                          setActionLoading("complete");
+                          try {
+                            await DoneMantraCalled(currentMantra);
+                          } finally {
+                            setActionLoading(null);
+                          }
+                        }}
                       >
-                        {/* ✅ Checkbox logic */}
-                        {isDone ? (
-                          <View
-                            style={{
-                              width: 18,
-                              height: 18,
-                              borderRadius: 4,
-                              marginRight: 10,
-                              alignItems: "center",
-                              justifyContent: "center",
-                              backgroundColor: "green",
-                            }}
-                          >
-                            <Text style={{ color: "white", fontSize: 12, fontWeight: "bold" }}>✓</Text>
-                          </View>
+                        {actionLoading === "complete" ? (
+                          <ActivityIndicator color={Colors.Colors.Yellow} />
                         ) : (
-                          <View
-                            style={{
-                              width: 15,
-                              height: 15,
-                              borderColor: Colors.Colors.BLACK,
-                              borderWidth: 1,
-                              borderRadius: 4,
-                              marginRight: 10,
-                            }}
-                          />
-                        )}
+                          <>
+                            {/* ✅ Checkbox logic */}
+                            {isDone ? (
+                              <View
+                                style={{
+                                  width: 18,
+                                  height: 18,
+                                  borderRadius: 4,
+                                  marginRight: 10,
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  backgroundColor: "green",
+                                }}
+                              >
+                                <Text style={{ color: "white", fontSize: 12, fontWeight: "bold" }}>✓</Text>
+                              </View>
+                            ) : (
+                              <View
+                                style={{
+                                  width: 15,
+                                  height: 15,
+                                  borderColor: Colors.Colors.BLACK,
+                                  borderWidth: 1,
+                                  borderRadius: 4,
+                                  marginRight: 10,
+                                }}
+                              />
+                            )}
 
-                        <TextComponent type="streakSadanaText">
-                          {isDone
-                            ? t("mantraCard.done")
-                            : t("mantraCard.markDone")}
-                        </TextComponent>
+                            <TextComponent type="streakSadanaText">
+                              {isDone
+                                ? t("mantraCard.done")
+                                : t("mantraCard.markDone")}
+                            </TextComponent>
+                          </>
+                        )}
                       </TouchableOpacity>
                     )}
                     <TouchableOpacity
@@ -554,17 +585,27 @@ const MantraCard = ({
                     {!isStarted ? (
                       <TouchableOpacity
                         style={styles.startBtn}
+                        disabled={actionLoading === "start"}
                         onPress={async () => {
                           const reps = selectedReps[currentMantra.id] ?? currentMantra.suggested_reps;
-                          onPressChantMantra(currentMantra, reps);
+                          setActionLoading("start");
+                          try {
+                            await onPressChantMantra(currentMantra, reps);
+                          } finally {
+                            setActionLoading(null);
+                          }
                         }}
                       >
-                        <TextComponent
-                          type="semiBoldText"
-                          style={{ textAlign: "center", color: Colors.Colors.white }}
-                        >
-                          {t("mantraCard.willChant")}
-                        </TextComponent>
+                        {actionLoading === "start" ? (
+                          <ActivityIndicator color={Colors.Colors.white} />
+                        ) : (
+                          <TextComponent
+                            type="semiBoldText"
+                            style={{ textAlign: "center", color: Colors.Colors.white }}
+                          >
+                            {t("mantraCard.willChant")}
+                          </TextComponent>
+                        )}
                       </TouchableOpacity>
                     ) : (
                       <TouchableOpacity
@@ -573,42 +614,61 @@ const MantraCard = ({
                           marginTop: 10,
                           alignItems: "center",
                           justifyContent: "center",
+                          borderWidth: 1,
+                          borderColor: Colors.Colors.Yellow,
+                          borderRadius: 6,
+                          paddingVertical: 8,
+                          marginHorizontal: 16,
                         }}
-                        onPress={() => DoneMantraCalled(currentMantra)}
+                        disabled={actionLoading === "complete"}
+                        onPress={async () => {
+                          setActionLoading("complete");
+                          try {
+                            await DoneMantraCalled(currentMantra);
+                          } finally {
+                            setActionLoading(null);
+                          }
+                        }}
                       >
-                        {/* ✅ Checkbox logic */}
-                        {isDone ? (
-                          <View
-                            style={{
-                              width: 18,
-                              height: 18,
-                              borderRadius: 4,
-                              marginRight: 10,
-                              alignItems: "center",
-                              justifyContent: "center",
-                              backgroundColor: "green",
-                            }}
-                          >
-                            <Text style={{ color: "white", fontSize: 12, fontWeight: "bold" }}>✓</Text>
-                          </View>
+                        {actionLoading === "complete" ? (
+                          <ActivityIndicator color={Colors.Colors.Yellow} />
                         ) : (
-                          <View
-                            style={{
-                              width: 15,
-                              height: 15,
-                              borderColor: Colors.Colors.BLACK,
-                              borderWidth: 1,
-                              borderRadius: 4,
-                              marginRight: 10,
-                            }}
-                          />
-                        )}
+                          <>
+                            {/* ✅ Checkbox logic */}
+                            {isDone ? (
+                              <View
+                                style={{
+                                  width: 18,
+                                  height: 18,
+                                  borderRadius: 4,
+                                  marginRight: 10,
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  backgroundColor: "green",
+                                }}
+                              >
+                                <Text style={{ color: "white", fontSize: 12, fontWeight: "bold" }}>✓</Text>
+                              </View>
+                            ) : (
+                              <View
+                                style={{
+                                  width: 15,
+                                  height: 15,
+                                  borderColor: Colors.Colors.BLACK,
+                                  borderWidth: 1,
+                                  borderRadius: 4,
+                                  marginRight: 10,
+                                }}
+                              />
+                            )}
 
-                        <TextComponent type="streakSadanaText">
-                          {isDone
-                            ? t("mantraCard.done")
-                            : t("mantraCard.markDone")}
-                        </TextComponent>
+                            <TextComponent type="streakSadanaText">
+                              {isDone
+                                ? t("mantraCard.done")
+                                : t("mantraCard.markDone")}
+                            </TextComponent>
+                          </>
+                        )}
                       </TouchableOpacity>
                     )}
                     <TouchableOpacity

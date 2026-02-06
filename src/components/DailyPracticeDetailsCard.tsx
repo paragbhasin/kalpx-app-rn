@@ -683,7 +683,7 @@ const DailyPracticeDetailsCard = ({
               </View>
             )} */}
 
-          {/* <MantraPronunciationModal
+          <MantraPronunciationModal
             visible={showPronunciation}
             onClose={() => setShowPronunciation(false)}
             title={data?.title}
@@ -694,7 +694,7 @@ const DailyPracticeDetailsCard = ({
             onClose={() => setShowDevanagariModal(false)}
             title={data?.title}
             iast={data?.devanagari}
-          /> */}
+          />
         </ScrollView>
         <View style={styles.fixedButtons}>
           {!isLocked && (
@@ -715,9 +715,9 @@ const DailyPracticeDetailsCard = ({
               </TouchableOpacity>
 
               {mode === "new" && (
-                <TouchableOpacity style={mode === "new" ? styles.selectButton : styles.selectNewButton} onPress={onBackPress}>
+                <TouchableOpacity style={styles.selectNewButton} onPress={onBackPress}>
                   <TextComponent type="headerText" style={styles.selectText}>
-                    {t("sadanaTracker.detailsCard.select")}
+                    {t("sadanaTracker.detailsCard.select", "Select")}
                   </TextComponent>
                 </TouchableOpacity>
               )}

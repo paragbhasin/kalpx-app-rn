@@ -54,8 +54,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: 20,
     backgroundColor: "#F4E6C3",
-    borderColor:Colors.Colors.Yellow,
-    borderWidth:1
+    borderColor: Colors.Colors.Yellow,
+    borderWidth: 1
   },
   categoryChipSelected: {
     backgroundColor: "#D4A017",
@@ -171,72 +171,88 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   modalOverlay: {
-  flex: 1,
-  backgroundColor: "rgba(0,0,0,0.4)",
-  justifyContent: "flex-end",
-  margin:-20
-},
-bottomSheet: {
-  borderTopLeftRadius: 20,
-  borderTopRightRadius: 20,
-  padding: 20,
-  paddingBottom: 30,
-  maxHeight: "70%",
-  backgroundColor:"#FFFFFF",
-  overflow: "hidden",  // IMPORTANT for rounded corners
-},
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "flex-end",
+    margin: -20
+  },
+  bottomSheet: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    paddingBottom: 30,
+    maxHeight: "70%",
+    backgroundColor: "#FFFFFF",
+    overflow: "hidden",  // IMPORTANT for rounded corners
+  },
 
 
-dragIndicator: {
-  width: 40,
-  height: 5,
-  backgroundColor: "#ccc",
-  borderRadius: 100,
-  alignSelf: "center",
-  marginBottom: 12,
-},
+  dragIndicator: {
+    width: 40,
+    height: 5,
+    backgroundColor: "#ccc",
+    borderRadius: 100,
+    alignSelf: "center",
+    marginBottom: 12,
+  },
 
-modalHeader: {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-  marginBottom: 10,
-},
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
 
-sectionHeader: {
-  color: "#000000",
-  marginTop: 20,
-  marginBottom: 8,
-},
+  sectionHeader: {
+    color: "#000000",
+    marginTop: 20,
+    marginBottom: 8,
+  },
 
-itemRow: {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-  paddingVertical: 10,
-  borderBottomWidth: 1,
-  borderColor: "#EFE5CC",
-  backgroundColor:"#F7F0DD",
-  marginTop:10,
-  padding:12,
-  marginHorizontal:6
-},
+  itemRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderColor: "#EFE5CC",
+    backgroundColor: "#F7F0DD",
+    marginTop: 10,
+    padding: 12,
+    marginHorizontal: 6
+  },
 
-itemType: {
-  fontSize: 12,
-  color: "#6E5C2E",
-  marginTop: 2,
-},
-modalBGImage: {
-  borderTopLeftRadius: 20,
-  borderTopRightRadius: 20,
-},
-divider: {
-  borderBottomColor: "#D4A017",
-  borderBottomWidth: 1,
-  marginTop: 20,
-  marginHorizontal: -20,
-},
+  itemType: {
+    fontSize: 12,
+    color: "#6E5C2E",
+    marginTop: 2,
+  },
+  pillContainer: {
+    backgroundColor: "#D4A017",
+    alignSelf: "flex-start",
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderTopRightRadius: 8,
+    borderTopLeftRadius: 8,
+    marginBottom: -1, // Overlap with card
+    zIndex: 1,
+  },
+  pillText: {
+    color: "#FFFFFF",
+    fontSize: 11,
+    fontWeight: "700",
+    textTransform: "uppercase",
+  },
+  modalBGImage: {
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  divider: {
+    borderBottomColor: "#D4A017",
+    borderBottomWidth: 1,
+    marginTop: 20,
+    marginHorizontal: -20,
+  },
   button: {
     backgroundColor: "#D4A017",
     paddingVertical: 12,
@@ -249,19 +265,19 @@ divider: {
     fontSize: 16,
     fontWeight: "600",
     fontFamily: "GelicaMedium",
-      // lineHeight: 20,
+    // lineHeight: 20,
   },
   bottomButtonContainer: {
-  // position: "absolute",
-  // bottom: 0,
-  // left: 0,
-  // right: 0,
-  padding: 10,
-  // marginTop:12
-  // backgroundColor: "#FFFFFF",
-  // borderTopColor: "#EEE4C6",
-  // borderTopWidth: 1,
-},
+    // position: "absolute",
+    // bottom: 0,
+    // left: 0,
+    // right: 0,
+    padding: 10,
+    // marginTop:12
+    // backgroundColor: "#FFFFFF",
+    // borderTopColor: "#EEE4C6",
+    // borderTopWidth: 1,
+  },
 
 });
 

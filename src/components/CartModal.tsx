@@ -1,11 +1,6 @@
 import moment from "moment";
 import React, { useEffect, useState } from "react";
-import {
-  ImageBackground,
-  ScrollView,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ScrollView, TouchableOpacity, View } from "react-native";
 import Modal from "react-native-modal";
 import { Card } from "react-native-paper";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -48,58 +43,51 @@ export default function CartModal({ onConfirm }) {
   }, [cartModalVisible, locationLoading, locationData?.timezone]);
 
   const dailyPractice = useSelector(
-    (state: RootState) => state.dailyPracticeReducer
+    (state: RootState) => state.dailyPracticeReducer,
   );
 
   const rawApiPractices = dailyPractice?.data?.active_practices || [];
 
   const apiPractices = rawApiPractices.filter(
-    (p: any) => !removedApiIds.has(p.practice_id ?? p.id)
+    (p: any) => !removedApiIds.has(p.practice_id ?? p.id),
   );
 
-
-
   const recentlyAdded = localPractices.filter(
-  (item) =>
-    !rawApiPractices.some(
-      (x: any) => x.practice_id === item.practice_id
-    )
-);
+    (item) =>
+      !rawApiPractices.some((x: any) => x.practice_id === item.practice_id),
+  );
 
-function getPracticeType(practiceId: string) {
-  if (!practiceId) return "";
+  function getPracticeType(practiceId: string) {
+    if (!practiceId) return "";
 
-  if (practiceId.startsWith("mantra.")) return "mantra";
-  if (practiceId.startsWith("sankalp.")) return "sankalp";
-  if (practiceId.startsWith("practice.")) return "practice";
+    if (practiceId.startsWith("mantra.")) return "mantra";
+    if (practiceId.startsWith("sankalp.")) return "sankalp";
+    if (practiceId.startsWith("practice.")) return "practice";
 
-  return "sanatan";
-}
+    return "sanatan";
+  }
 
-function extractRepsAndDay(pr) {
-  const d = pr.details ?? pr;
-  return {
-    reps: d.reps ?? "",
-    day: d.day ?? "Daily",
-  };
-}
-
-
+  function extractRepsAndDay(pr) {
+    const d = pr.details ?? pr;
+    return {
+      reps: d.reps ?? "",
+      day: d.day ?? "Daily",
+    };
+  }
 
   return (
     <Modal
       isVisible={cartModalVisible}
       onBackdropPress={() => setCartModalVisible(false)}
+      onSwipeComplete={() => setCartModalVisible(false)}
+      swipeDirection={["down"]}
+      propagateSwipe={true}
       backdropOpacity={0.4}
       animationIn="slideInUp"
       animationOut="slideOutDown"
       style={{ margin: 0, justifyContent: "flex-end" }}
     >
-      <ImageBackground
-        source={require("../../assets/CardBG.png")}
-        style={styles.bottomSheet}
-        imageStyle={styles.modalBGImage}
-      >
+      <View style={styles.bottomSheet}>
         <View style={styles.dragIndicator} />
         <View style={styles.modalHeader}>
           <TextComponent type="headerBoldText" style={{ color: "#282828" }}>
@@ -120,25 +108,30 @@ function extractRepsAndDay(pr) {
               <TextComponent type="boldText" style={styles.sectionHeader}>
                 Active Practices
               </TextComponent>
-{apiPractices.map((item: any, index: number) => {
-  const { reps, day } = extractRepsAndDay(item);
+              {apiPractices.map((item: any, index: number) => {
+                const { reps, day } = extractRepsAndDay(item);
 
-  return (
-    <Card key={`active-${index}`} style={styles.itemRow}>
-      <View style={{ flex: 1 }}>
-        <TextComponent type="mediumText">
-          {item?.name || item?.title}
-        </TextComponent>
+                return (
+                  <View key={`active-${index}`} style={{ marginTop: 15, marginHorizontal: 6 }}>
+                    <View style={styles.pillContainer}>
+                      <TextComponent style={styles.pillText}>
+                        {day} {reps ? `- ${reps}X` : ""}
+                      </TextComponent>
+                    </View>
+                    <Card style={[styles.itemRow, { marginTop: 0, marginHorizontal: 0, borderTopLeftRadius: 0 }]}>
+                      <View style={{ flex: 1 }}>
+                        <TextComponent type="mediumText">
+                          {item?.name || item?.title}
+                        </TextComponent>
 
-        <TextComponent style={styles.itemType}>
-          {getPracticeType(item.practice_id)}
-          {day ? ` • ${day}` : ""}
-          {reps ? ` • ${reps}×` : ""}
-        </TextComponent>
-      </View>
-    </Card>
-  );
-})}
+                        <TextComponent style={styles.itemType}>
+                          {getPracticeType(item.practice_id)}
+                        </TextComponent>
+                      </View>
+                    </Card>
+                  </View>
+                );
+              })}
 
               <View
                 style={{
@@ -158,35 +151,39 @@ function extractRepsAndDay(pr) {
           )}
 
           {recentlyAdded.map((item: any) => (
-            <Card key={item.unified_id ?? item.id} style={styles.itemRow}>
-              <View
-                style={{
-                  width: "100%",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <View>
-                  <TextComponent type="mediumText">
-                    {item?.title || item?.name}
-                  </TextComponent>
-<TextComponent style={styles.itemType}>
-  {getPracticeType(item.practice_id)}
-  {item?.details?.day || item?.day ? ` • ${item.details?.day ?? item.day}` : ""}
-  {item?.details?.reps || item?.reps ? ` • ${item.details?.reps ?? item.reps}×` : ""}
-</TextComponent>
-                </View>
-
-                <TouchableOpacity
-                  onPress={() =>
-                    removePractice(item.unified_id ?? item.id)
-                  }
-                >
-                  <Ionicons name="close-circle" size={26} color="#C0392B" />
-                </TouchableOpacity>
+            <View key={item.unified_id ?? item.id} style={{ marginTop: 15, marginHorizontal: 6 }}>
+              <View style={styles.pillContainer}>
+                <TextComponent style={styles.pillText}>
+                  {item?.details?.day || item?.day || "Daily"}{" "}
+                  {item?.details?.reps || item?.reps ? `- ${item.details?.reps ?? item.reps}X` : ""}
+                </TextComponent>
               </View>
-            </Card>
+              <Card style={[styles.itemRow, { marginTop: 0, marginHorizontal: 0, borderTopLeftRadius: 0 }]}>
+                <View
+                  style={{
+                    width: "100%",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <View>
+                    <TextComponent type="mediumText">
+                      {item?.title || item?.name}
+                    </TextComponent>
+                    <TextComponent style={styles.itemType}>
+                      {getPracticeType(item.practice_id)}
+                    </TextComponent>
+                  </View>
+
+                  <TouchableOpacity
+                    onPress={() => removePractice(item.unified_id ?? item.id)}
+                  >
+                    <Ionicons name="close-circle" size={26} color="#C0392B" />
+                  </TouchableOpacity>
+                </View>
+              </Card>
+            </View>
           ))}
           {apiPractices.length === 0 && recentlyAdded.length === 0 && (
             <TextComponent style={{ textAlign: "center", marginTop: 20 }}>
@@ -195,7 +192,7 @@ function extractRepsAndDay(pr) {
           )}
         </ScrollView>
         {recentlyAdded.length > 0 && (
-          <View style={{ marginTop: 20,marginBottom: 20 }}>
+          <View style={{ marginTop: 20, marginBottom: 20 }}>
             <LoadingButton
               loading={loading}
               text="Submit"
@@ -215,16 +212,6 @@ function extractRepsAndDay(pr) {
               onPress={async () => {
                 try {
                   setLoading(true);
-                  function extractRepsAndDay(pr: any) {
-  const d = pr.details ?? pr;
-
-  return {
-    reps: d.reps ?? "",
-    day: d.day ?? "Daily",
-  };
-}
-
-
                   const finalList = [
                     ...apiPractices.map((pr: any) => {
                       const { reps, day } = extractRepsAndDay(pr);
@@ -251,32 +238,32 @@ function extractRepsAndDay(pr) {
             />
           </View>
         )}
-<LoadingButton
-  loading={false}
-  text="Browse More Practices"
-  showGlobalLoader={false}
-  style={{
-    backgroundColor: "#FFFFFF",
-    paddingVertical: 14,
-    borderRadius: 25,
-    alignItems: "center",
-    borderWidth: 1.5,
-    borderColor: "#D4A017",
-    marginBottom: 20,
-  }}
-  textStyle={{
-    color: "#D4A017",
-    fontSize: 15,
-    fontWeight: "600",
-  }}
-  onPress={() => {
-    setCartModalVisible(false);
-    setTimeout(() => {
-      navigation.navigate("TrackerTabs", { screen: "History" });
-    }, 250);
-  }}
-/>
-      </ImageBackground>
+        <LoadingButton
+          loading={false}
+          text="Browse More Practices"
+          showGlobalLoader={false}
+          style={{
+            backgroundColor: "#FFFFFF",
+            paddingVertical: 14,
+            borderRadius: 25,
+            alignItems: "center",
+            borderWidth: 1.5,
+            borderColor: "#D4A017",
+            marginBottom: 20,
+          }}
+          textStyle={{
+            color: "#D4A017",
+            fontSize: 15,
+            fontWeight: "600",
+          }}
+          onPress={() => {
+            setCartModalVisible(false);
+            setTimeout(() => {
+              navigation.navigate("TrackerTabs", { screen: "History" });
+            }, 250);
+          }}
+        />
+      </View>
     </Modal>
   );
 }

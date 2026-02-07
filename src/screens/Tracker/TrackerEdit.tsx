@@ -198,7 +198,6 @@ const TrackerEdit = ({ route }) => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [discardModalVisible, setDiscardModalVisible] = useState(false);
   const [allowHydrate, setAllowHydrate] = useState(true);
-  const [removedApiOnce, setRemovedApiOnce] = useState(false);
 
   // Auth modal state
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -411,11 +410,11 @@ const TrackerEdit = ({ route }) => {
 
     const map = new Map<string | number, any>();
 
-    apiList.forEach((p) => map.set(p.practice_id, p));
-    resumeList.forEach((p) => map.set(p.practice_id, p));
-    selectedList.forEach((p) => map.set(p.practice_id, p));
+    apiList.forEach((p) => map.set(String(p.practice_id), p));
+    resumeList.forEach((p) => map.set(String(p.practice_id), p));
+    selectedList.forEach((p) => map.set(String(p.practice_id), p));
     return Array.from(map.values()).filter(
-      (p: any) => !removedApiIds.has(p.practice_id ?? p.id ?? p.unified_id)
+      (p: any) => !removedApiIds.has(String(p.practice_id ?? p.id ?? p.unified_id))
     );
 
   }, [dailyPractice, resumeData, selectedmantra]);
@@ -889,7 +888,7 @@ const TrackerEdit = ({ route }) => {
           dispatch(getDailyDharmaTracker((res) => { }));
 
           setHasUnsavedChanges(false);
-          navigation.navigate("TrackerTabs", { screen: "Tracker" });
+          navigation.navigate("TrackerTabs", { screen: "Tracker", fromSetup: true });
         }
         else {
           console.log("❌ Error saving:", res.error);
@@ -1085,13 +1084,12 @@ const TrackerEdit = ({ route }) => {
     const practiceId = item.practice_id ?? item.id ?? item.unified_id;
 
     const isApi = apiPractices.some(
-      (p: any) => (p.practice_id ?? p.id) === practiceId
+      (p: any) => String(p.practice_id ?? p.id) === String(practiceId)
     );
     if (isApi) {
       setAllowHydrate(false);          // 🔒 STOP resetFromMerged
       hasHydratedRef.current = true;  // 🔒 prevent future hydration
       removeApiPractice(practiceId);
-      setRemovedApiOnce(true);
     } else {
       removePractice(item.unified_id ?? practiceId);
     }
@@ -1123,7 +1121,12 @@ const TrackerEdit = ({ route }) => {
 
 
   const handleConfirmPress = async () => {
-    const itemsToConfirm = isAddMoreScreen ? selectedPractices : recentlyAdded;
+    if (!isAddMoreScreen) {
+      setCartModalVisible(true);
+      return;
+    }
+
+    const itemsToConfirm = selectedPractices;
     const newItemsOnly = itemsToConfirm.map((p) => normalizeForConfirm(p));
 
     if (!isUserLoggedIn) {
@@ -1140,7 +1143,7 @@ const TrackerEdit = ({ route }) => {
   };
 
   const canSaveRoutine =
-    removedApiOnce || addedLocalPractices.length > 0;
+    removedApiIds.size > 0 || addedLocalPractices.length > 0;
 
 
 

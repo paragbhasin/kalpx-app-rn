@@ -47,16 +47,17 @@ export const CartProvider = ({ children }) => {
 
   // ⭐ Special remover for API practices → also mark as "removed from API"
   const removeApiPractice = (practiceId: string | number) => {
+    const stringId = String(practiceId);
     setRemovedApiIds((prev) => {
       const next = new Set(prev);
-      next.add(practiceId);
+      next.add(stringId);
       return next;
     });
 
     setLocalPractices((prev) =>
       prev.filter(
         (p) =>
-          (p.practice_id ?? p.id ?? p.unified_id) !== practiceId
+          String(p.practice_id ?? p.id ?? p.unified_id) !== stringId
       )
     );
   };
@@ -66,30 +67,30 @@ export const CartProvider = ({ children }) => {
     setRemovedApiIds(new Set());
   };
 
-// ⭐ Used when user chooses "Leave" in ConfirmDiscardModal
-const resetFromMerged = (mergedPractices: any[]) => {
-  setLocalPractices((prev) => {
-    // 👇 Keep all custom practices that were created in CreateOwnPractice
-    const customPractices = prev.filter(
-      (item) =>
-        item.source === "custom" &&
-        item.details?.details?.isCustom &&
-        item.isSubmitted !== true
-    );
+  // ⭐ Used when user chooses "Leave" in ConfirmDiscardModal
+  const resetFromMerged = (mergedPractices: any[]) => {
+    setLocalPractices((prev) => {
+      // 👇 Keep all custom practices that were created in CreateOwnPractice
+      const customPractices = prev.filter(
+        (item) =>
+          item.source === "custom" &&
+          item.details?.details?.isCustom &&
+          item.isSubmitted !== true
+      );
 
-    // 👇 Rebuild merged API + resume list with unified_id
-    const merged = mergedPractices.map((p) => ({
-      ...p,
-      unified_id: p.unified_id ?? p.practice_id ?? p.id,
-    }));
+      // 👇 Rebuild merged API + resume list with unified_id
+      const merged = mergedPractices.map((p) => ({
+        ...p,
+        unified_id: p.unified_id ?? p.practice_id ?? p.id,
+      }));
 
-    // 🔥 Final list = API + resume + custom
-    return [...merged, ...customPractices];
-  });
+      // 🔥 Final list = API + resume + custom
+      return [...merged, ...customPractices];
+    });
 
-  // Reset removed API ids
-  setRemovedApiIds(new Set());
-};
+    // Reset removed API ids
+    setRemovedApiIds(new Set());
+  };
 
 
   return (

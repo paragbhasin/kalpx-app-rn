@@ -48,13 +48,19 @@ export default function CartModal({ onConfirm }) {
 
   const rawApiPractices = dailyPractice?.data?.active_practices || [];
 
-  const apiPractices = rawApiPractices.filter(
-    (p: any) => !removedApiIds.has(p.practice_id ?? p.id),
+  const apiPractices = localPractices.filter((item) =>
+    rawApiPractices.some(
+      (x: any) =>
+        String(x.practice_id ?? x.id) === String(item.practice_id ?? item.id),
+    ),
   );
 
   const recentlyAdded = localPractices.filter(
     (item) =>
-      !rawApiPractices.some((x: any) => x.practice_id === item.practice_id),
+      !rawApiPractices.some(
+        (x: any) =>
+          String(x.practice_id ?? x.id) === String(item.practice_id ?? item.id),
+      ),
   );
 
   function getPracticeType(practiceId: string) {
@@ -191,7 +197,7 @@ export default function CartModal({ onConfirm }) {
             </TextComponent>
           )}
         </ScrollView>
-        {recentlyAdded.length > 0 && (
+        {(recentlyAdded.length > 0 || removedApiIds.size > 0) && (
           <View style={{ marginTop: 20, marginBottom: 20 }}>
             <LoadingButton
               loading={loading}

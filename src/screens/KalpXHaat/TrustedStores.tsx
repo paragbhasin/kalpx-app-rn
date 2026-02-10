@@ -1,10 +1,18 @@
+import { useNavigation } from "@react-navigation/native";
 import React from "react";
-import { FlatList, Image, StyleSheet, Text, View } from "react-native";
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Icon from "react-native-vector-icons/Ionicons";
 
 const TrustedStores = ({ stores }) => {
+  const navigation = useNavigation<any>();
+
   const renderItem = ({ item }) => {
     return (
-      <View style={styles.cardWrapper}>
+      <TouchableOpacity
+        style={styles.cardWrapper}
+        onPress={() => navigation.navigate("StoreDetailView", { id: item.id })}
+        activeOpacity={0.9}
+      >
         <View style={styles.card}>
           {/* Image */}
           <View style={styles.imageWrapper}>
@@ -12,13 +20,16 @@ const TrustedStores = ({ stores }) => {
 
             {/* Rating badge */}
             <View style={styles.ratingBadge}>
-              <Text style={styles.ratingText}>★ {item.rating}</Text>
+              <View style={styles.ratingRow}>
+                <Icon name="star" size={10} color="#fff" />
+                <Text style={styles.ratingText}>{item.rating}</Text>
+              </View>
             </View>
           </View>
 
           {/* Info */}
           <View style={styles.info}>
-            <Text style={styles.name}>{item.name}</Text>
+            <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
 
             <Text style={styles.meta}>
               {item.time} <Text style={styles.open}> • Open</Text>
@@ -27,7 +38,7 @@ const TrustedStores = ({ stores }) => {
             <Text style={styles.distance}>{item.distance}</Text>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -114,15 +125,21 @@ const styles = StyleSheet.create({
     bottom: 10,
     left: 10,
     backgroundColor: "#2e7d32",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
     borderRadius: 6,
+  },
+
+  ratingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
   },
 
   ratingText: {
     color: "#fff",
     fontSize: 12,
-    fontWeight: "600",
+    fontWeight: "700",
   },
 
   name: {

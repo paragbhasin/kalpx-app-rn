@@ -35,6 +35,7 @@ import PaymentDetails from "../screens/KalpXHaat/PaymentDetails";
 import AddressListView from "../screens/KalpXHaat/AddressListView";
 import AddNewAddress from "../screens/KalpXHaat/AddNewAddress";
 import PackageDetails from "../screens/KalpXHaat/PackageDetails";
+import ServiceCheckout from "../screens/KalpXHaat/ServiceCheckout";
 import Notifications from "../screens/Notifications/Notifications";
 import OnlineclassesScreen from "../screens/OnlineclassesScreen";
 import Language from "../screens/Profile/Language";
@@ -144,6 +145,11 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen
       name="PackageDetails"
       component={PackageDetails}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="ServiceCheckout"
+      component={ServiceCheckout}
       options={{ headerShown: false }}
     />
     <Stack.Screen

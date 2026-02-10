@@ -239,7 +239,7 @@ const PackageDetails = () => {
                 </View>
                 <TouchableOpacity
                     style={styles.bookBtn}
-                    onPress={() => navigation.navigate("HaatCart")}
+                    onPress={() => navigation.navigate("ServiceCheckout")}
                 >
                     <Text style={styles.bookBtnText}>Book Now</Text>
                     <Icon name="arrow-forward" size={18} color="#fff" />

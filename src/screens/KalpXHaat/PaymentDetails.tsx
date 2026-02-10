@@ -39,12 +39,16 @@ const PaymentDetails = () => {
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
                 {/* Address Section */}
-                <View style={styles.addressCard}>
+                <TouchableOpacity
+                    style={styles.addressCard}
+                    onPress={() => navigation.navigate("AddressListView")}
+                    activeOpacity={0.7}
+                >
                     <View style={styles.addressHeader}>
                         <Text style={styles.sectionTitle}>Address</Text>
-                        <TouchableOpacity onPress={() => navigation.navigate("AddressListView")}>
+                        <View>
                             <Icon name="pencil" size={18} color="#1a1a1b" />
-                        </TouchableOpacity>
+                        </View>
                     </View>
                     <View style={styles.addressInfo}>
                         <Text style={styles.userName}>Banu Elson</Text>
@@ -53,7 +57,7 @@ const PaymentDetails = () => {
                         </Text>
                         <Text style={styles.mobileText}>Mobile: <Text style={styles.mobileValue}>9823456367</Text></Text>
                     </View>
-                </View>
+                </TouchableOpacity>
 
                 {/* Payment Method Selection */}
                 <Text style={styles.mainSectionTitle}>Payment Method</Text>

@@ -59,7 +59,7 @@ const AddressListView = () => {
                         <View style={styles.addressCard}>
                             <View style={styles.cardHeader}>
                                 <Text style={styles.userName}>{item.name}</Text>
-                                <TouchableOpacity>
+                                <TouchableOpacity onPress={() => navigation.navigate("AddNewAddress")}>
                                     <Icon name="pencil" size={18} color="#1a1a1b" />
                                 </TouchableOpacity>
                             </View>

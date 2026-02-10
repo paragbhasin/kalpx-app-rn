@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import ProductCard from "./ProductCard";
+import ServiceCard from "./ServiceCard";
 
 const HaatCart = () => {
     const navigation = useNavigation<any>();
@@ -22,69 +23,111 @@ const HaatCart = () => {
         }
     }, [route.params]);
 
-    const renderCartTab = () => (
-        <View style={styles.tabContent}>
-            <ProductCard fromCart={true} />
-
-            <View style={styles.offerSection}>
-                <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>Coupon & bank offer</Text>
-                    <TouchableOpacity>
-                        <Text style={styles.viewAllText}>View all</Text>
-                    </TouchableOpacity>
+    const renderPriceDetails = (total: number, discount: number, final: number) => (
+        <View style={styles.priceSection}>
+            <Text style={styles.sectionTitle}>Price Details</Text>
+            <View style={styles.priceCard}>
+                <View style={styles.priceRow}>
+                    <Text style={styles.priceLabel}>Total MRP</Text>
+                    <Text style={styles.priceValue}>₹{total.toLocaleString()}</Text>
                 </View>
-
-                <View style={styles.couponCard}>
-                    <View style={styles.couponHeader}>
-                        <View style={styles.couponTitleRow}>
-                            <Icon name="pricetag-outline" size={18} color="#1a1a1b" />
-                            <Text style={styles.couponTitle}>Extra 91.65 off</Text>
-                        </View>
-                        <Text style={styles.appliedText}>Applied</Text>
-                    </View>
-                    <Text style={styles.couponSubtext}>
-                        On minimum spend of 100. T & C
-                    </Text>
+                <View style={styles.priceRow}>
+                    <Text style={styles.priceLabel}>Discount</Text>
+                    <Text style={[styles.priceValue, styles.discountText]}>-₹{discount.toLocaleString()}</Text>
+                </View>
+                <View style={styles.priceRow}>
+                    <Text style={styles.priceLabel}>Delivery Charges</Text>
+                    <Text style={[styles.priceValue, { color: "#16a34a" }]}>Free</Text>
+                </View>
+                <View style={styles.divider} />
+                <View style={[styles.priceRow, { marginTop: 4 }]}>
+                    <Text style={styles.totalLabel}>Total Amount</Text>
+                    <Text style={styles.totalValue}>₹{final.toLocaleString()}</Text>
                 </View>
             </View>
-
-            <View style={styles.priceSection}>
-                <Text style={styles.sectionTitle}>Price Details</Text>
-                <View style={styles.priceCard}>
-                    <View style={styles.priceRow}>
-                        <Text style={styles.priceLabel}>Total MRP</Text>
-                        <Text style={styles.priceValue}>₹2,500</Text>
-                    </View>
-                    <View style={styles.priceRow}>
-                        <Text style={styles.priceLabel}>Discount</Text>
-                        <Text style={[styles.priceValue, styles.discountText]}>-₹91.65</Text>
-                    </View>
-                    <View style={styles.priceRow}>
-                        <Text style={styles.priceLabel}>Delivery Charges</Text>
-                        <Text style={[styles.priceValue, { color: "#16a34a" }]}>Free</Text>
-                    </View>
-
-                    <View style={styles.divider} />
-
-                    <View style={[styles.priceRow, { marginTop: 4 }]}>
-                        <Text style={styles.totalLabel}>Total Amount</Text>
-                        <Text style={styles.totalValue}>₹2,408.35</Text>
-                    </View>
-                </View>
-            </View>
-
-            <TouchableOpacity
-                style={styles.buyNowBtn}
-                onPress={() => navigation.navigate("PaymentDetails")}
-            >
-                <Text style={styles.buyNowText}>Buy Now</Text>
-            </TouchableOpacity>
         </View>
     );
 
+    const renderCartTab = () => {
+        if (route.params?.type === "service") {
+            return (
+                <View style={styles.tabContent}>
+                    <ServiceCard fromCart={true} />
+
+                    {/* Payment Plans specific to services */}
+                    <View style={styles.servicePlansSection}>
+                        <Text style={styles.sectionTitle}>Payment Option</Text>
+                        <TouchableOpacity style={[styles.planCard, styles.activePlanCard]}>
+                            <View style={styles.planHeader}>
+                                <View style={styles.radioRow}>
+                                    <View style={[styles.radio, styles.radioActive]}>
+                                        <View style={styles.radioInner} />
+                                    </View>
+                                    <Text style={styles.planName}>PAY DEPOSIT</Text>
+                                </View>
+                                <Text style={styles.planPrice}>2,000/-</Text>
+                            </View>
+                            <Text style={styles.planDesc}>Secure by paying deposit and pay after full amount at the event</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    {renderPriceDetails(12000, 100, 11900)}
+
+                    <TouchableOpacity
+                        style={styles.buyNowBtn}
+                        onPress={() => navigation.navigate("ServiceCheckout")}
+                    >
+                        <Text style={styles.buyNowText}>Proceed to Checkout</Text>
+                    </TouchableOpacity>
+                </View>
+            );
+        }
+
+        return (
+            <View style={styles.tabContent}>
+                <ProductCard fromCart={true} />
+
+                <View style={styles.offerSection}>
+                    <View style={styles.sectionHeader}>
+                        <Text style={styles.sectionTitle}>Coupon & bank offer</Text>
+                        <TouchableOpacity>
+                            <Text style={styles.viewAllText}>View all</Text>
+                        </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.couponCard}>
+                        <View style={styles.couponHeader}>
+                            <View style={styles.couponTitleRow}>
+                                <Icon name="pricetag-outline" size={18} color="#1a1a1b" />
+                                <Text style={styles.couponTitle}>Extra 91.65 off</Text>
+                            </View>
+                            <Text style={styles.appliedText}>Applied</Text>
+                        </View>
+                        <Text style={styles.couponSubtext}>
+                            On minimum spend of 100. T & C
+                        </Text>
+                    </View>
+                </View>
+
+                {renderPriceDetails(2500, 91.65, 2408.35)}
+
+                <TouchableOpacity
+                    style={styles.buyNowBtn}
+                    onPress={() => navigation.navigate("PaymentDetails")}
+                >
+                    <Text style={styles.buyNowText}>Buy Now</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    };
+
     const renderOrdersTab = () => (
         <View style={styles.tabContent}>
-            <ProductCard fromCart={true} fromOrder={true} />
+            {route.params?.type === "service" ? (
+                <ServiceCard fromCart={true} fromOrder={true} />
+            ) : (
+                <ProductCard fromCart={true} fromOrder={true} />
+            )}
         </View>
     );
 
@@ -286,6 +329,67 @@ const styles = StyleSheet.create({
         color: "#fff",
         fontSize: 16,
         fontWeight: "700",
+    },
+    servicePlansSection: {
+        marginTop: 24,
+    },
+    planCard: {
+        borderWidth: 1,
+        borderColor: "#f3f4f6",
+        borderRadius: 16,
+        padding: 12,
+        marginTop: 12,
+        backgroundColor: "#fff",
+    },
+    activePlanCard: {
+        borderColor: "#22c55e",
+        backgroundColor: "rgba(240, 253, 244, 0.4)",
+    },
+    planHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 4,
+    },
+    radioRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+    },
+    radio: {
+        width: 20,
+        height: 20,
+        borderRadius: 10,
+        borderWidth: 2,
+        borderColor: "#d1d5db",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    radioActive: {
+        borderColor: "#22c55e",
+    },
+    radioInner: {
+        width: 10,
+        height: 10,
+        borderRadius: 5,
+        backgroundColor: "#22c55e",
+    },
+    planName: {
+        fontSize: 14,
+        fontWeight: "800",
+        color: "#1f2937",
+    },
+    planPrice: {
+        fontSize: 18,
+        fontWeight: "800",
+        color: "#c9a24d",
+    },
+    planDesc: {
+        fontSize: 11,
+        color: "#9ca3af",
+        fontWeight: "700",
+        paddingLeft: 32,
+        lineHeight: 14,
     },
 });
 

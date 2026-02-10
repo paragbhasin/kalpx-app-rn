@@ -1,13 +1,13 @@
 import { useNavigation, useRoute } from "@react-navigation/native";
 import React from "react";
 import {
-    Dimensions,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import ReviewRatings from "./ReviewRatings";
@@ -133,7 +133,10 @@ const ProductDetails = () => {
               <Text style={styles.addToCartText}>Add to Cart</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.buyNowBtn}>
+            <TouchableOpacity
+              style={styles.buyNowBtn}
+              onPress={() => navigation.navigate("HaatCart")}
+            >
               <Text style={styles.buyNowText}>Buy Now</Text>
               <Icon
                 name="arrow-forward"

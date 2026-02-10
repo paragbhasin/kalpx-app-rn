@@ -193,7 +193,10 @@ const ServiceDetails = () => {
                             <Text style={styles.addToCartText}>Add to Cart</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity style={styles.bookNowBtn}>
+                        <TouchableOpacity
+                            style={styles.bookNowBtn}
+                            onPress={() => navigation.navigate("HaatCart")}
+                        >
                             <Text style={styles.bookNowText}>Book Now</Text>
                             <Icon name="arrow-forward" size={20} color="#fff" />
                         </TouchableOpacity>

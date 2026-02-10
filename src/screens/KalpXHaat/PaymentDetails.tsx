@@ -13,6 +13,16 @@ import Icon from "react-native-vector-icons/Ionicons";
 const PaymentDetails = () => {
     const navigation = useNavigation<any>();
     const [paymentMethod, setPaymentMethod] = useState("card");
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+    const handleBuyNow = () => {
+        setShowSuccessModal(true);
+    };
+
+    const handleTrackOrder = () => {
+        setShowSuccessModal(false);
+        navigation.navigate("HaatCart", { tab: "orders" });
+    };
 
     return (
         <View style={styles.container}>
@@ -129,12 +139,33 @@ const PaymentDetails = () => {
                 )}
             </ScrollView>
 
-            {/* Buy Now Button at Bottom */}
             <View style={styles.footer}>
-                <TouchableOpacity style={styles.buyNowBtn}>
+                <TouchableOpacity style={styles.buyNowBtn} onPress={handleBuyNow}>
                     <Text style={styles.buyNowText}>Buy Now</Text>
                 </TouchableOpacity>
             </View>
+
+            {/* Success Modal */}
+            {showSuccessModal && (
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        <View style={styles.successIconWrapper}>
+                            <View style={styles.wavyCircle}>
+                                <Icon name="checkmark" size={40} color="#fff" />
+                            </View>
+                        </View>
+
+                        <Text style={styles.congratsTitle}>Congratulation</Text>
+                        <Text style={styles.congratsSubtext}>
+                            Thank you! Your order has been successfully placed. We'll share the confirmation details with you shortly
+                        </Text>
+
+                        <TouchableOpacity style={styles.trackOrderBtn} onPress={handleTrackOrder}>
+                            <Text style={styles.trackOrderBtnText}>Track my order</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            )}
         </View>
     );
 };
@@ -284,6 +315,7 @@ const styles = StyleSheet.create({
         right: 0,
         backgroundColor: "#fff",
         padding: 16,
+        paddingBottom: 30,
         borderTopWidth: 1,
         borderTopColor: "#eee",
     },
@@ -294,6 +326,62 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     buyNowText: {
+        color: "#fff",
+        fontSize: 18,
+        fontWeight: "700",
+    },
+    modalOverlay: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0,0,0,0.5)",
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 24,
+        zIndex: 1000,
+    },
+    modalContent: {
+        backgroundColor: "#fff",
+        width: "100%",
+        borderRadius: 24,
+        padding: 30,
+        alignItems: "center",
+    },
+    successIconWrapper: {
+        marginBottom: 20,
+    },
+    wavyCircle: {
+        width: 80,
+        height: 80,
+        backgroundColor: "#55A665",
+        borderRadius: 25, // Making it slightly square-wavy like the mockup
+        justifyContent: "center",
+        alignItems: "center",
+        transform: [{ rotate: "45deg" }],
+    },
+    congratsTitle: {
+        fontSize: 22,
+        fontWeight: "700",
+        color: "#1a1a1b",
+        marginBottom: 16,
+    },
+    congratsSubtext: {
+        fontSize: 16,
+        color: "#6b7280",
+        textAlign: "center",
+        lineHeight: 24,
+        marginBottom: 24,
+    },
+    trackOrderBtn: {
+        backgroundColor: "#c9a24d",
+        width: "100%",
+        paddingVertical: 14,
+        borderRadius: 8,
+        alignItems: "center",
+    },
+    trackOrderBtnText: {
         color: "#fff",
         fontSize: 18,
         fontWeight: "700",

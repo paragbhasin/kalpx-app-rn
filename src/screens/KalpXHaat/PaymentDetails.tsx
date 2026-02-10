@@ -32,7 +32,7 @@ const PaymentDetails = () => {
                 <View style={styles.addressCard}>
                     <View style={styles.addressHeader}>
                         <Text style={styles.sectionTitle}>Address</Text>
-                        <TouchableOpacity>
+                        <TouchableOpacity onPress={() => navigation.navigate("AddressListView")}>
                             <Icon name="pencil" size={18} color="#1a1a1b" />
                         </TouchableOpacity>
                     </View>

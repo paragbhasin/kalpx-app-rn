@@ -47,7 +47,7 @@ android {
         applicationId 'com.kalpx.app'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 33
+        versionCode 34
         versionName "1.1.26"
     }
     signingConfigs {

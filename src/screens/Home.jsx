@@ -71,7 +71,7 @@ export default function Home() {
     {
       id: "5",
       name: t("categories.retreat"),
-      title: "Retreat",
+      title: "RetreatsScreen",
       event_type: "click_retreat_card",
       component: "Retreat-card",
       icon: require("../../assets/yoga.png"),
@@ -169,7 +169,7 @@ export default function Home() {
     {
       id: "6",
       title: t("kalpx.retreats"),
-      name: "Retreats",
+      name: "RetreatsScreen",
       event_type: "click_retreats_card",
       component: "Retreats-card",
       image: require("../../assets/retreatff.png"),

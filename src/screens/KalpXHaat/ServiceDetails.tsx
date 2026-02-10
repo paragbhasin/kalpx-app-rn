@@ -177,7 +177,10 @@ const ServiceDetails = () => {
                                             )}
                                         </TouchableOpacity>
 
-                                        <TouchableOpacity style={styles.pViewDetailsBtn}>
+                                        <TouchableOpacity
+                                            style={styles.pViewDetailsBtn}
+                                            onPress={() => navigation.navigate("PackageDetails", { id: pkg.id })}
+                                        >
                                             <Text style={styles.pViewDetailsText}>View Details</Text>
                                         </TouchableOpacity>
                                     </View>

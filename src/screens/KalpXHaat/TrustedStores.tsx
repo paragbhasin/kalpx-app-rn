@@ -3,7 +3,7 @@ import React from "react";
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 
-const TrustedStores = ({ stores }) => {
+const TrustedStores = ({ stores, title = "Trusted store near you" }) => {
   const navigation = useNavigation<any>();
 
   const renderItem = ({ item }) => {
@@ -16,7 +16,10 @@ const TrustedStores = ({ stores }) => {
         <View style={styles.card}>
           {/* Image */}
           <View style={styles.imageWrapper}>
-            <Image source={{ uri: item.image }} style={styles.image} />
+            <Image
+              source={typeof item.image === 'number' ? item.image : { uri: item.image }}
+              style={styles.image}
+            />
 
             {/* Rating badge */}
             <View style={styles.ratingBadge}>
@@ -45,7 +48,7 @@ const TrustedStores = ({ stores }) => {
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
-        <Text style={styles.heading}>Trusted store near you</Text>
+        <Text style={styles.heading}>{title}</Text>
         <Text style={styles.viewAll}>View all</Text>
       </View>
 

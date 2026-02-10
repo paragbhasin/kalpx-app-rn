@@ -1,7 +1,7 @@
 import React from "react";
 import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 
-const ProductView = () => {
+const ServiceView = () => {
   const categories = [
     {
       id: "1",
@@ -70,4 +70,4 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
-export default ProductView;
+export default ServiceView;

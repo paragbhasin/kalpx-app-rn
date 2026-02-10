@@ -1,5 +1,12 @@
 import React from "react";
-import { FlatList, Image, StyleSheet, Text, View } from "react-native";
+import {
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import ProductCard from "./ProductCard";
 import TrustedStores from "./TrustedStores";
 
@@ -76,7 +83,19 @@ const ProductView = () => {
         contentContainerStyle={styles.listContent}
       />
       <TrustedStores stores={trustedStores} />
-      <ProductCard />
+
+      <View style={styles.newArrivalsSection}>
+        <View style={styles.headerRow}>
+          <Text style={styles.newArrivalsHeading}>New Arrivals on Kalpx Haat</Text>
+          <TouchableOpacity>
+            <Text style={styles.viewAllText}>View all</Text>
+          </TouchableOpacity>
+        </View>
+
+        <ProductCard />
+        <ProductCard />
+        <ProductCard />
+      </View>
     </View>
   );
 };
@@ -106,6 +125,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#1a1a1b",
     textAlign: "center",
+  },
+
+  newArrivalsSection: {
+    paddingHorizontal: 16,
+    marginTop: 24,
+  },
+
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+
+  newArrivalsHeading: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1f2937",
+  },
+
+  viewAllText: {
+    fontSize: 14,
+    color: "#d4a017",
+    fontWeight: "600",
   },
 });
 export default ProductView;

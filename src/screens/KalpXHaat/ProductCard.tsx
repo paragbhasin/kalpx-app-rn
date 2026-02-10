@@ -127,14 +127,14 @@ const ProductCard: React.FC<Props> = ({
 const styles = StyleSheet.create({
   cardWrapper: {
     backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 12,
-    marginBottom: 16,
-    elevation: 3,
+    borderRadius: 24,
+    padding: 16,
+    marginBottom: 20,
+    elevation: 4,
     shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.06,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
   },
 
   statusBox: { marginBottom: 8 },
@@ -153,12 +153,12 @@ const styles = StyleSheet.create({
     color: "#16a34a",
   },
 
-  row: { flexDirection: "row", gap: 12 },
+  row: { flexDirection: "row", gap: 16 },
 
   image: {
-    width: 96,
-    height: 96,
-    borderRadius: 12,
+    width: 120,
+    height: 120,
+    borderRadius: 20,
   },
 
   content: { flex: 1 },
@@ -168,7 +168,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
 
-  title: { fontSize: 14, fontWeight: "700", color: "#1f2937" },
+  title: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#273142",
+  },
 
   vendor: { fontSize: 12, color: "#6b7280", marginTop: 4 },
 
@@ -192,35 +196,47 @@ const styles = StyleSheet.create({
   ratingRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 8,
+    marginTop: 6,
   },
 
-  rating: { marginLeft: 4, fontSize: 12 },
+  rating: {
+    marginLeft: 6,
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#1f2937",
+  },
 
-  review: { marginLeft: 6, fontSize: 10, color: "#9ca3af" },
+  review: {
+    marginLeft: 6,
+    fontSize: 13,
+    color: "#9ca3af",
+  },
 
-  offer: { marginTop: 8 },
+  offer: { marginTop: 10 },
 
   offerText: {
-    backgroundColor: "#15803d",
+    backgroundColor: "#16a34a",
     color: "#fff",
-    fontSize: 10,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
+    fontSize: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    fontWeight: "600",
     alignSelf: "flex-start",
   },
 
   price: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: "700",
-    marginTop: 8,
+    marginTop: 10,
+    color: "#000",
   },
 
   viewDetails: {
-    marginTop: 4,
-    color: "#d4a017",
-    fontWeight: "600",
+    marginTop: 6,
+    color: "#c9a24d",
+    fontSize: 16,
+    fontWeight: "700",
   },
 
   returnRow: {

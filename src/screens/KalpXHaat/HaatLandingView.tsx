@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import {
   Image,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -17,84 +18,89 @@ const HaatLandingView = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.background}>
-        {/* Title + Cart */}
-        <View style={[styles.flexContainer, styles.spaceBetween]}>
-          <Text style={styles.mainHeading}>KalpX Haat</Text>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        <View style={styles.background}>
+          {/* Title + Cart */}
+          <View style={[styles.flexContainer, styles.spaceBetween]}>
+            <Text style={styles.mainHeading}>KalpX Haat</Text>
 
-          <View style={{ position: "relative" }}>
-            <Icon name="cart-outline" size={22} color="#1a1a1b" />
-            <View style={styles.cartBadge}>
-              <Text style={styles.cartBadgeText}>0</Text>
+            <View style={{ position: "relative" }}>
+              <Icon name="cart-outline" size={22} color="#1a1a1b" />
+              <View style={styles.cartBadge}>
+                <Text style={styles.cartBadgeText}>0</Text>
+              </View>
             </View>
           </View>
-        </View>
 
-        {/* Search + Filter */}
-        <View style={styles.searchRow}>
-          <View style={styles.searchBox}>
-            <Image
-              source={require("../../../assets/C_Vector.png")}
-              style={styles.searchIcon}
-            />
-            <TextInput
-              allowFontScaling={false}
-              placeholder="Search by product, shop, service"
-              placeholderTextColor={Colors.Colors.Light_black}
-              style={styles.searchInput}
-            />
+          {/* Search + Filter */}
+          <View style={styles.searchRow}>
+            <View style={styles.searchBox}>
+              <Image
+                source={require("../../../assets/C_Vector.png")}
+                style={styles.searchIcon}
+              />
+              <TextInput
+                allowFontScaling={false}
+                placeholder="Search by product, shop, service"
+                placeholderTextColor={Colors.Colors.Light_black}
+                style={styles.searchInput}
+              />
+            </View>
+
+            <TouchableOpacity style={styles.filterBtn}>
+              <Icon name="options-outline" size={22} color="#1a1a1b" />
+            </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.filterBtn}>
-            <Icon name="options-outline" size={22} color="#1a1a1b" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Product / Service Tabs */}
-        <View style={[styles.flexContainer, styles.tabRow]}>
-          {/* Product */}
-          <TouchableOpacity
-            style={[styles.tab, activeTab === "product" && styles.activeTab]}
-            onPress={() => setActiveTab("product")}
-          >
-            <Icon
-              name="cube-outline"
-              size={20}
-              color={activeTab === "product" ? "#c9a24d" : "#999"}
-            />
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === "product" && styles.activeTabText,
-              ]}
+          {/* Product / Service Tabs */}
+          <View style={[styles.flexContainer, styles.tabRow]}>
+            {/* Product */}
+            <TouchableOpacity
+              style={[styles.tab, activeTab === "product" && styles.activeTab]}
+              onPress={() => setActiveTab("product")}
             >
-              Product
-            </Text>
-          </TouchableOpacity>
+              <Icon
+                name="cube-outline"
+                size={20}
+                color={activeTab === "product" ? "#c9a24d" : "#999"}
+              />
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === "product" && styles.activeTabText,
+                ]}
+              >
+                Product
+              </Text>
+            </TouchableOpacity>
 
-          {/* Service */}
-          <TouchableOpacity
-            style={[styles.tab, activeTab === "service" && styles.activeTab]}
-            onPress={() => setActiveTab("service")}
-          >
-            <Icon
-              name="home-outline"
-              size={20}
-              color={activeTab === "service" ? "#c9a24d" : "#999"}
-            />
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === "service" && styles.activeTabText,
-              ]}
+            {/* Service */}
+            <TouchableOpacity
+              style={[styles.tab, activeTab === "service" && styles.activeTab]}
+              onPress={() => setActiveTab("service")}
             >
-              Service
-            </Text>
-          </TouchableOpacity>
+              <Icon
+                name="home-outline"
+                size={20}
+                color={activeTab === "service" ? "#c9a24d" : "#999"}
+              />
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === "service" && styles.activeTabText,
+                ]}
+              >
+                Service
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-      {activeTab === "product" && <ProductView />}
-      {activeTab === "service" && <ServiceView />}
+        {activeTab === "product" && <ProductView />}
+        {activeTab === "service" && <ServiceView />}
+      </ScrollView>
     </View>
   );
 };
@@ -212,6 +218,9 @@ const styles = StyleSheet.create({
   activeTabText: {
     color: "#1a1a1b",
     fontWeight: "600",
+  },
+  scrollContent: {
+    paddingBottom: 40,
   },
 });
 export default HaatLandingView;

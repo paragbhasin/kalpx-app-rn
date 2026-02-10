@@ -3,23 +3,14 @@ import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 
 const ServiceView = () => {
   const categories = [
+    { name: "Pandit Booking", icon: require("../../../assets/image 221.png") },
     {
-      id: "1",
-      name: "Pooja Item",
-      icon: require("../../../assets/image 230.png"),
+      name: "Festival Decoration",
+      icon: require("../../../assets/image 224.png"),
     },
-    {
-      id: "2",
-      name: "Oil & Essential",
-      icon: require("../../../assets/image 230.png"),
-    },
-    {
-      id: "3",
-      name: "Pooja Kit",
-      icon: require("../../../assets/image 230.png"),
-    },
-  ];
 
+    { name: "Temple Offering", icon: require("../../../assets/image 225.png") },
+  ];
   const renderItem = ({ item }) => {
     return (
       <View style={styles.card}>

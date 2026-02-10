@@ -26,6 +26,7 @@ import RetreatsScreen from "../screens/Home/RetreatsScreen";
 import SadanaTrackerScreen from "../screens/Home/SadanaTrackerScreen";
 import SubmitMantraScreen from "../screens/Home/SubmitMantraScreen";
 import TravelPlannerScreen from "../screens/Home/TravelPlannerScreen";
+import HaatLandingView from "../screens/KalpXHaat/HaatLandingView";
 import Notifications from "../screens/Notifications/Notifications";
 import OnlineclassesScreen from "../screens/OnlineclassesScreen";
 import Language from "../screens/Profile/Language";
@@ -33,17 +34,17 @@ import Privacy from "../screens/Profile/Privacy";
 import Profile from "../screens/Profile/Profile";
 import ProfileDetails from "../screens/Profile/ProfileDetails";
 import Sankalp from "../screens/Sankalp";
-import SocialExplore from "../screens/Social/SocialExplore";
-import CommunityLanding from "../screens/Social/CommunityLanding";
 import CommunityDetail from "../screens/Social/CommunityDetail";
-import SocialPostDetailScreen from "../screens/Social/SocialPostDetailScreen";
+import CommunityLanding from "../screens/Social/CommunityLanding";
 import CreateSocialPost from "../screens/Social/CreateSocialPost";
+import GlobalSearchScreen from "../screens/Social/GlobalSearchScreen";
+import SocialExplore from "../screens/Social/SocialExplore";
+import SocialPostDetailScreen from "../screens/Social/SocialPostDetailScreen";
 import StreakScreen from "../screens/Streak/StreakScreen";
 import TopTabsNavigator from "../screens/Tracker/TopTabsNavigator";
 import TrackerEdit from "../screens/Tracker/TrackerEdit";
 import TrackerProgress from "../screens/Tracker/TrackerProgress";
 import TrackerScreen from "../screens/Tracker/TrackerScreen";
-import GlobalSearchScreen from "../screens/Social/GlobalSearchScreen";
 
 const Stack: any = createNativeStackNavigator();
 
@@ -90,6 +91,11 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen
       name="ClassesScreen"
       component={ClassesScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="HaatLandingView"
+      component={HaatLandingView}
       options={{ headerShown: false }}
     />
     <Stack.Screen

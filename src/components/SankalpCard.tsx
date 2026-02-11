@@ -18,6 +18,7 @@ import Icon from "react-native-vector-icons/Ionicons";
 import ViewShot, { captureRef } from "react-native-view-shot";
 import enSankalps from "../config/locales/en/sankalps-en.json"; // adjust path accordingly
 import { DAILY_SANKALPS } from "../data/sankalps";
+import { categories } from "../screens/DailyPractice/DailyPracticeList";
 import { getTranslatedPractice } from "../utils/getTranslatedPractice";
 import Colors from "./Colors";
 import FontSize from "./FontSize";
@@ -480,7 +481,7 @@ const SankalpCard = ({
 
                     <TouchableOpacity
                       style={styles.dailyBtn}
-                      onPress={() =>
+                      onPress={() => {
                         navigation.navigate("TrackerTabs", {
                           screen: "History",
                           params: {
@@ -489,8 +490,8 @@ const SankalpCard = ({
                             autoSelectCategory: "daily-sankalp",
                             // selectedmantra: currentSankalp,
                           },
-                        })
-                      }
+                        });
+                      }}
                     >
                       <TextComponent
                         type="boldText"
@@ -628,7 +629,23 @@ const SankalpCard = ({
 
                     <TouchableOpacity
                       style={[styles.startBtn, { marginBottom: 8 }]}
-                      onPress={onAddToMyPractice}
+                      onPress={() => {
+                        const categoryKey = currentSankalp.category;
+
+                        const categoryItem = categories.find(
+                          (c) => c.key === categoryKey,
+                        );
+
+                        if (categoryItem) {
+                          navigation.navigate("DailyPracticeSelectList", {
+                            item: categoryItem,
+                            scrollToId: currentSankalp.id,
+                          });
+                        } else {
+                          // Fallback to original prop if category not found
+                          if (onAddToMyPractice) onAddToMyPractice();
+                        }
+                      }}
                     >
                       <TextComponent
                         type="boldText"

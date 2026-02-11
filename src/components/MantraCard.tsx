@@ -23,6 +23,7 @@ import { getTranslatedPractice } from "../utils/getTranslatedPractice";
 import Colors from "./Colors";
 import FontSize from "./FontSize";
 import TextComponent from "./TextComponent";
+import { categories } from "../screens/DailyPractice/DailyPracticeList";
 
 const suggestedRepsList = [11, 21, 27, 54, 108];
 
@@ -202,11 +203,11 @@ const MantraCard = ({
         const activeMantra = filteredMantras[activeIndex];
         const repsOrdered = currentMantra
           ? [
-              currentMantra.suggested_reps,
-              ...suggestedRepsList.filter(
-                (r) => r !== currentMantra.suggested_reps,
-              ),
-            ]
+            currentMantra.suggested_reps,
+            ...suggestedRepsList.filter(
+              (r) => r !== currentMantra.suggested_reps,
+            ),
+          ]
           : [];
 
         const translated = getTranslatedPractice(currentMantra, t);
@@ -448,9 +449,9 @@ const MantraCard = ({
                                     borderWidth: 1,
                                   },
                                   isLocked &&
-                                    !selected && {
-                                      opacity: 0.3,
-                                    },
+                                  !selected && {
+                                    opacity: 0.3,
+                                  },
                                 ]}
                               >
                                 <TextComponent
@@ -742,7 +743,22 @@ const MantraCard = ({
                     )}
                     <TouchableOpacity
                       style={styles.dailyBtn}
-                      onPress={onAddToMyPractice}
+                      onPress={() => {
+                        const categoryKey = currentMantra.category;
+                        const categoryItem = categories.find(
+                          (c) => c.key === categoryKey,
+                        );
+
+                        if (categoryItem) {
+                          navigation.navigate("DailyPracticeSelectList", {
+                            item: categoryItem,
+                            scrollToId: currentMantra.id,
+                          });
+                        } else {
+                          // Fallback to original prop if category not found
+                          if (onAddToMyPractice) onAddToMyPractice();
+                        }
+                      }}
                     >
                       <TextComponent
                         type="boldText"

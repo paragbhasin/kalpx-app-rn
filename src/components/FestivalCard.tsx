@@ -11,7 +11,7 @@ import {
   ImageBackground,
   StyleSheet,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { Card } from "react-native-paper";
 import Swiper from "react-native-swiper";
@@ -38,7 +38,7 @@ const FestivalCard = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [shareVisible, setShareVisible] = useState(false);
   const [festivalToShare, setFestivalToShare] = useState<Festival | null>(null);
-  const [slideHeight, setSlideHeight] = useState(0);
+  const [cardHeights, setCardHeights] = useState<Record<number, number>>({});
 
   useEffect(() => {
     const today = getTodayFestival();
@@ -171,7 +171,7 @@ const FestivalCard = () => {
       autoplay={false}
       horizontal
       removeClippedSubviews={false}
-      style={{ height: slideHeight, marginBottom: 0 }}
+      style={{ height: cardHeights[activeIndex] || 400, marginBottom: 0 }}
     >
       {festivals.map((festival: any, index) => {
         const isCompleted = completedIds.includes(festival.name);
@@ -180,7 +180,7 @@ const FestivalCard = () => {
             key={index}
             style={{
               flexDirection: "row",
-              alignItems: "center",
+              alignItems: "flex-start",
               justifyContent: "center",
               width: FontSize.CONSTS.DEVICE_WIDTH,
               paddingHorizontal: 5,
@@ -208,8 +208,10 @@ const FestivalCard = () => {
             {/* CARD */}
             <Card
               onLayout={(e) => {
-                const h = e.nativeEvent.layout.height;
-                if (h > slideHeight) setSlideHeight(h);
+                const { height } = e.nativeEvent.layout;
+                if (cardHeights[index] !== height) {
+                  setCardHeights((prev) => ({ ...prev, [index]: height }));
+                }
               }}
               style={[
                 styles.card,
@@ -372,9 +374,9 @@ const FestivalCard = () => {
                         marginHorizontal: 10,
                       }}
                     >
-                      {moment(festival.date, "YYYY-MM-DD").format(
-                        "MMM DD, YYYY",
-                      )}
+                      {moment(festival.date, "YYYY-MM-DD")
+                        .locale("en")
+                        .format("MMM DD, YYYY")}
                     </TextComponent>
                   </ImageBackground>
                   <View style={{ marginHorizontal: 6, alignItems: "center" }}>
@@ -476,7 +478,7 @@ const FestivalCard = () => {
                   <View
                     style={{
                       // borderRadius: 6,
-                      overflow: "hidden",
+                      // overflow: "hidden",
                       marginVertical: 10,
                       backgroundColor: "#FFF4CE",
                       // borderWidth: 1,
@@ -526,20 +528,20 @@ const FestivalCard = () => {
                         Math.max(
                           Number(
                             festival.celebrationPractices?.length ||
-                              (festival as any).celebrationpractices?.length ||
-                              (festival as any).practices?.length ||
-                              0,
+                            (festival as any).celebrationpractices?.length ||
+                            (festival as any).practices?.length ||
+                            0,
                           ),
                           Number(
                             festival.traditionalFoods?.length ||
-                              (festival as any).traditionalfoods?.length ||
-                              (festival as any).foods?.length ||
-                              0,
+                            (festival as any).traditionalfoods?.length ||
+                            (festival as any).foods?.length ||
+                            0,
                           ),
                           Number(
                             festival.symbols?.length ||
-                              (festival as any).symbols?.length ||
-                              0,
+                            (festival as any).symbols?.length ||
+                            0,
                           ),
                           1, // Ensuring at least 1 row if we have any data (though 0 is fine if no data)
                         ) || 0,
@@ -548,20 +550,20 @@ const FestivalCard = () => {
                       const maxLen = Math.max(
                         Number(
                           festival.celebrationPractices?.length ||
-                            (festival as any).celebrationpractices?.length ||
-                            (festival as any).practices?.length ||
-                            0,
+                          (festival as any).celebrationpractices?.length ||
+                          (festival as any).practices?.length ||
+                          0,
                         ),
                         Number(
                           festival.traditionalFoods?.length ||
-                            (festival as any).traditionalfoods?.length ||
-                            (festival as any).foods?.length ||
-                            0,
+                          (festival as any).traditionalfoods?.length ||
+                          (festival as any).foods?.length ||
+                          0,
                         ),
                         Number(
                           festival.symbols?.length ||
-                            (festival as any).symbols?.length ||
-                            0,
+                          (festival as any).symbols?.length ||
+                          0,
                         ),
                       );
                       if (maxLen === 0) return null;
@@ -625,20 +627,44 @@ const FestivalCard = () => {
                     >
                       {t("festivalCard.regionalCustoms")}
                     </TextComponent>
-                    <TextComponent
-                      type="mediumText"
-                      style={{
-                        marginTop: 4,
-                        textAlign: "center",
-                        color: Colors.Colors.BLACK,
-                      }}
-                    >
-                      {typeof festival.regionalCustoms === "object"
-                        ? Object.entries(festival.regionalCustoms)
-                            .map(([region, desc]) => `${region}: ${desc}`)
-                            .join("\n")
-                        : festival.regionalCustoms || "—"}
-                    </TextComponent>
+                    {typeof festival.regionalCustoms === "object" ? (
+                      Object.entries(festival.regionalCustoms).map(
+                        ([region, desc], i) => {
+                          const capitalizedRegion =
+                            region.charAt(0).toUpperCase() + region.slice(1);
+                          return (
+                            <TextComponent
+                              key={i}
+                              type="mediumText"
+                              style={{
+                                marginTop: 4,
+                                textAlign: "center",
+                                color: Colors.Colors.BLACK,
+                              }}
+                            >
+                              <TextComponent
+                                type="boldText"
+                                style={{ color: Colors.Colors.BLACK }}
+                              >
+                                {capitalizedRegion}:
+                              </TextComponent>{" "}
+                              {desc}
+                            </TextComponent>
+                          );
+                        },
+                      )
+                    ) : (
+                      <TextComponent
+                        type="mediumText"
+                        style={{
+                          marginTop: 4,
+                          textAlign: "center",
+                          color: Colors.Colors.BLACK,
+                        }}
+                      >
+                        {festival.regionalCustoms || "—"}
+                      </TextComponent>
+                    )}
                   </View>
                 </View>
                 <TouchableOpacity
@@ -652,6 +678,12 @@ const FestivalCard = () => {
                     {t("festivalCard.setupPractice")}
                   </TextComponent>
                 </TouchableOpacity>
+
+                <View style={styles.footer}>
+                  <TextComponent style={styles.counterText}>
+                    {`(${index + 1}/${festivals.length})`}
+                  </TextComponent>
+                </View>
               </View>
             </Card>
             {shareVisible && festivalToShare && (
@@ -711,7 +743,9 @@ const FestivalCard = () => {
                         textAlign: "center",
                       }}
                     >
-                      {moment(festivalToShare.date).format("MMM DD, YYYY")}
+                      {moment(festivalToShare.date)
+                        .locale("en")
+                        .format("MMM DD, YYYY")}
                     </TextComponent>
 
                     <TextComponent
@@ -776,9 +810,10 @@ const styles = StyleSheet.create({
     elevation: 3,
     backgroundColor: "#FFFCF7",
     width: FontSize.CONSTS.DEVICE_WIDTH * 0.91,
-    overflow: "hidden",
+    // overflow: "hidden",
     borderWidth: 1,
     borderColor: Colors.Colors.App_theme,
+    paddingBottom: 15,
   },
   arrowButton: {
     position: "absolute",
@@ -833,7 +868,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: 15,
   },
-  footer: { alignSelf: "center", alignItems: "center", flexDirection: "row" },
+  footer: {
+    paddingBottom: 10,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+  },
+  centerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  counterText: {
+    position: "absolute",
+    right: 16,
+    fontSize: 14,
+    color: Colors.Colors.BLACK,
+    fontWeight: "600",
+  },
   partialBgContainer: {
     alignSelf: "center",
     justifyContent: "center",

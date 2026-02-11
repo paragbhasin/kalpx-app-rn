@@ -19,11 +19,11 @@ import Icon from "react-native-vector-icons/Ionicons";
 import ViewShot, { captureRef } from "react-native-view-shot";
 import { usePracticeStore } from "../data/Practice";
 import { CATALOGS } from "../data/mantras";
+import { categories } from "../screens/DailyPractice/DailyPracticeList";
 import { getTranslatedPractice } from "../utils/getTranslatedPractice";
 import Colors from "./Colors";
 import FontSize from "./FontSize";
 import TextComponent from "./TextComponent";
-import { categories } from "../screens/DailyPractice/DailyPracticeList";
 
 const suggestedRepsList = [11, 21, 27, 54, 108];
 
@@ -203,11 +203,11 @@ const MantraCard = ({
         const activeMantra = filteredMantras[activeIndex];
         const repsOrdered = currentMantra
           ? [
-            currentMantra.suggested_reps,
-            ...suggestedRepsList.filter(
-              (r) => r !== currentMantra.suggested_reps,
-            ),
-          ]
+              currentMantra.suggested_reps,
+              ...suggestedRepsList.filter(
+                (r) => r !== currentMantra.suggested_reps,
+              ),
+            ]
           : [];
 
         const translated = getTranslatedPractice(currentMantra, t);
@@ -250,100 +250,124 @@ const MantraCard = ({
                 if (h > slideHeight) setSlideHeight(h);
               }}
             >
-              <View>
+              <View style={{ position: "relative" }}>
                 <ImageBackground
                   source={require("../../assets/CardBG.png")}
-                  style={styles.partialBgImage}
                   imageStyle={styles.partialBgImage}
                 >
-                  {!viewOnly && (
-                    <TextComponent
-                      type="semiBoldText"
-                      style={{ color: Colors.Colors.App_theme }}
-                    >
-                      {uiHeaderText}
-                    </TextComponent>
-                  )}
-                  {!viewOnly && (
-                    <View style={styles.headerRow}>
-                      <TextComponent
-                        type="cardHeaderText"
-                        style={{ textTransform: "uppercase" }}
-                      >
-                        {t("mantraCard.dailyMantra")}{" "}
-                      </TextComponent>
-                    </View>
-                  )}
-                  {!viewOnly && (
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignSelf: "flex-end",
-                        right: 20,
-                        marginTop: -37,
-                      }}
-                    >
-                      <TouchableOpacity
-                        onPress={handleShareMantra}
-                        style={{ flexDirection: "row", alignItems: "center" }}
-                      >
-                        <Image
-                          source={require("../../assets/Streak_S4.png")}
-                          style={styles.streakIcon}
-                        />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        onPress={() => {
-                          const englishMantra = CATALOGS.en.find(
-                            (m) => m.id === currentMantra.id,
-                          );
-                          const englishTags = englishMantra?.tags || [];
-                          navigation.navigate("RelatedVideosScreen", {
-                            tag: englishTags,
-                          });
-                        }}
-                        style={{
-                          marginLeft: 8,
-                          padding: 6,
-                          backgroundColor: Colors.Colors.Yellow,
-                          borderRadius: 50,
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Icon name="videocam-outline" size={18} color="#fff" />
-                      </TouchableOpacity>
-                    </View>
-                  )}
                   <View
                     style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
+                      display: "flex",
+                      alignSelf: "center",
+                      justifyContent: "center",
+                      paddingTop: 8,
+                      paddingHorizontal: 16,
+                      width: "100%",
                     }}
                   >
-                    <TextComponent
-                      type="cardText"
+                    {!viewOnly && (
+                      <TextComponent
+                        type="semiBoldText"
+                        style={{
+                          color: Colors.Colors.App_theme,
+                          textAlign: "center",
+                        }}
+                      >
+                        {uiHeaderText}
+                      </TextComponent>
+                    )}
+                    {!viewOnly && (
+                      <View style={{ position: "relative" }}>
+                        <View style={styles.headerRow}>
+                          <TextComponent
+                            type="cardHeaderText"
+                            style={{
+                              textTransform: "uppercase",
+                              textAlign: "center",
+                            }}
+                          >
+                            {t("mantraCard.dailyMantra")}{" "}
+                          </TextComponent>
+                        </View>
+
+                        <View
+                          style={{
+                            position: "absolute",
+                            right: 0,
+                            top: 10,
+                            flexDirection: "row",
+                            alignItems: "center",
+                          }}
+                        >
+                          <TouchableOpacity
+                            onPress={handleShareMantra}
+                            style={{
+                              flexDirection: "row",
+                              alignItems: "center",
+                            }}
+                          >
+                            <Image
+                              source={require("../../assets/Streak_S4.png")}
+                              style={styles.streakIcon}
+                            />
+                          </TouchableOpacity>
+
+                          <TouchableOpacity
+                            onPress={() => {
+                              const englishMantra = CATALOGS.en.find(
+                                (m) => m.id === currentMantra.id,
+                              );
+                              const englishTags = englishMantra?.tags || [];
+                              navigation.navigate("RelatedVideosScreen", {
+                                tag: englishTags,
+                              });
+                            }}
+                            style={{
+                              marginLeft: 8,
+                              padding: 6,
+                              backgroundColor: Colors.Colors.Yellow,
+                              borderRadius: 50,
+                              justifyContent: "center",
+                              alignItems: "center",
+                            }}
+                          >
+                            <Icon
+                              name="videocam-outline"
+                              size={18}
+                              color="#fff"
+                            />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    )}
+                    <View
                       style={{
-                        color: Colors.Colors.blue_text,
-                        textAlign: "center",
-                        marginHorizontal: 14,
-                        marginTop: 8,
+                        width: "100%",
+                        alignItems: "center",
                       }}
                     >
-                      {translated.mantra || currentMantra.devanagari}
+                      <TextComponent
+                        type="cardText"
+                        style={{
+                          color: Colors.Colors.blue_text,
+                          marginVertical: 6,
+                          textAlign: "center",
+                        }}
+                      >
+                        {translated.mantra || currentMantra.devanagari}
+                      </TextComponent>
+                    </View>
+                    <TextComponent
+                      type="semiBoldText"
+                      style={{
+                        color: Colors.Colors.blue_text,
+                        marginVertical: 6,
+                        textAlign: "center",
+                      }}
+                    >
+                      {translated.iast || currentMantra.iast}
                     </TextComponent>
                   </View>
-                  <TextComponent
-                    type="semiBoldText"
-                    style={{
-                      color: Colors.Colors.blue_text,
-                      marginVertical: 6,
-                      textAlign: "center",
-                      marginHorizontal: 14,
-                    }}
-                  >
-                    {translated.iast || currentMantra.iast}
-                  </TextComponent>
                 </ImageBackground>
                 <View style={{ paddingHorizontal: 16 }}>
                   {translated.desc ? (
@@ -449,9 +473,9 @@ const MantraCard = ({
                                     borderWidth: 1,
                                   },
                                   isLocked &&
-                                  !selected && {
-                                    opacity: 0.3,
-                                  },
+                                    !selected && {
+                                      opacity: 0.3,
+                                    },
                                 ]}
                               >
                                 <TextComponent
@@ -1033,8 +1057,8 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   partialBgImage: {
-    borderTopRightRadius: 16,
-    borderTopLeftRadius: 16,
+    // borderTopRightRadius: 16,
+    // borderTopLeftRadius: 16,
     alignSelf: "center",
     justifyContent: "center",
     alignItems: "center",

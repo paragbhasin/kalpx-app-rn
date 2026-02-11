@@ -5,17 +5,27 @@ import i18next from "i18next";
 import moment from "moment";
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ActivityIndicator, Image, ImageBackground, StyleSheet, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  ImageBackground,
+  StyleSheet,
+  TouchableOpacity,
+  View
+} from "react-native";
 import { Card } from "react-native-paper";
 import Swiper from "react-native-swiper";
 import Icon from "react-native-vector-icons/Ionicons";
 import ViewShot, { captureRef } from "react-native-view-shot";
 import enFestivals from "../config/locales/en/festivals-en.json"; // Adjust path accordingly
-import { Festival, getTodayFestival, getUpcomingFestivals } from "../data/festivals";
+import {
+  Festival,
+  getTodayFestival,
+  getUpcomingFestivals,
+} from "../data/festivals";
 import Colors from "./Colors";
 import FontSize from "./FontSize";
 import TextComponent from "./TextComponent";
-
 
 const FestivalCard = () => {
   const navigation: any = useNavigation();
@@ -29,7 +39,6 @@ const FestivalCard = () => {
   const [shareVisible, setShareVisible] = useState(false);
   const [festivalToShare, setFestivalToShare] = useState<Festival | null>(null);
   const [slideHeight, setSlideHeight] = useState(0);
-
 
   useEffect(() => {
     const today = getTodayFestival();
@@ -64,53 +73,55 @@ const FestivalCard = () => {
   };
 
   const getEnglishFestivalKeywords = (festival: any): string[] => {
-  try {
-    const name = (festival?.name || "").toLowerCase().trim();
+    try {
+      const name = (festival?.name || "").toLowerCase().trim();
 
-    // 💡 1. Try exact id or key match first
-    const idKey = festival?.id || festival?.key;
-    if (idKey && (enFestivals as any)[idKey]?.videoKeywords?.length) {
-      return (enFestivals as any)[idKey].videoKeywords;
+      // 💡 1. Try exact id or key match first
+      const idKey = festival?.id || festival?.key;
+      if (idKey && (enFestivals as any)[idKey]?.videoKeywords?.length) {
+        return (enFestivals as any)[idKey].videoKeywords;
+      }
+
+      // 💡 2. Try by normalized English key pattern
+      const normalized = name.replace(/[^\w\s]/g, "").replace(/\s+/g, "_");
+      if ((enFestivals as any)[normalized]?.videoKeywords?.length) {
+        return (enFestivals as any)[normalized].videoKeywords;
+      }
+
+      // 💡 3. Try fuzzy name match (for translated names)
+      const matchKey = Object.keys(enFestivals).find((key) => {
+        const englishName = (enFestivals as any)[key]?.name
+          ?.toLowerCase()
+          ?.trim();
+        return englishName && englishName.includes(name);
+      });
+
+      if (matchKey && (enFestivals as any)[matchKey]?.videoKeywords?.length) {
+        return (enFestivals as any)[matchKey].videoKeywords;
+      }
+
+      console.warn(
+        `⚠️ No English video keywords found for festival name: ${festival.name}`,
+      );
+      return [];
+    } catch (error) {
+      console.error("❌ Error in getEnglishFestivalKeywords:", error);
+      return [];
     }
-
-    // 💡 2. Try by normalized English key pattern
-    const normalized = name.replace(/[^\w\s]/g, "").replace(/\s+/g, "_");
-    if ((enFestivals as any)[normalized]?.videoKeywords?.length) {
-      return (enFestivals as any)[normalized].videoKeywords;
-    }
-
-    // 💡 3. Try fuzzy name match (for translated names)
-    const matchKey = Object.keys(enFestivals).find((key) => {
-      const englishName = (enFestivals as any)[key]?.name?.toLowerCase()?.trim();
-      return englishName && englishName.includes(name);
-    });
-
-    if (matchKey && (enFestivals as any)[matchKey]?.videoKeywords?.length) {
-      return (enFestivals as any)[matchKey].videoKeywords;
-    }
-
-    console.warn(`⚠️ No English video keywords found for festival name: ${festival.name}`);
-    return [];
-  } catch (error) {
-    console.error("❌ Error in getEnglishFestivalKeywords:", error);
-    return [];
-  }
-};
-
+  };
 
   const getEnglishVideoKeywords = (festivalId: string): string[] => {
-  try {
-    const englishFestival = (enFestivals as any)[festivalId];
-    if (englishFestival?.videoKeywords?.length) {
-      return englishFestival.videoKeywords;
+    try {
+      const englishFestival = (enFestivals as any)[festivalId];
+      if (englishFestival?.videoKeywords?.length) {
+        return englishFestival.videoKeywords;
+      }
+      return [];
+    } catch (err) {
+      console.error("Error fetching English keywords:", err);
+      return [];
     }
-    return [];
-  } catch (err) {
-    console.error("Error fetching English keywords:", err);
-    return [];
-  }
-};
-
+  };
 
   if (loading) {
     return (
@@ -123,13 +134,20 @@ const FestivalCard = () => {
 
   if (festivals.length === 0) {
     return (
-      <Card style={styles.card} >
-        <TextComponent type="semiBoldText" style={{ color: Colors.Colors.App_theme, textAlign: "center" }}>
+      <Card style={styles.card}>
+        <TextComponent
+          type="semiBoldText"
+          style={{ color: Colors.Colors.App_theme, textAlign: "center" }}
+        >
           {t("festivalCard.noFestival")}
         </TextComponent>
         <TextComponent
           type="mediumText"
-          style={{ marginTop: 8, textAlign: "center", color: Colors.Colors.Light_black }}
+          style={{
+            marginTop: 8,
+            textAlign: "center",
+            color: Colors.Colors.Light_black,
+          }}
         >
           {t("festivalCard.checkTomorrow")}
         </TextComponent>
@@ -153,7 +171,7 @@ const FestivalCard = () => {
       autoplay={false}
       horizontal
       removeClippedSubviews={false}
-      style={{ height: slideHeight,marginBottom:0 }}
+      style={{ height: slideHeight, marginBottom: 0 }}
     >
       {festivals.map((festival: any, index) => {
         const isCompleted = completedIds.includes(festival.name);
@@ -175,255 +193,465 @@ const FestivalCard = () => {
               style={[
                 styles.arrowButton,
                 {
-                  backgroundColor: index === 0 ? "#707070" : Colors.Colors.App_theme,
+                  backgroundColor:
+                    index === 0 ? "#707070" : Colors.Colors.App_theme,
                   left: 2,
                 },
               ]}
             >
-              <Image source={require("../../assets/arrow_home.png")} style={{ transform: [{ rotate: "180deg" }] }} />
+              <Image
+                source={require("../../assets/arrow_home.png")}
+                style={{ transform: [{ rotate: "180deg" }] }}
+              />
             </TouchableOpacity>
 
             {/* CARD */}
-            <Card   onLayout={(e) => {
-    const h = e.nativeEvent.layout.height;
-    if (h > slideHeight) setSlideHeight(h);
-  }} style={[styles.card, isCompleted && { backgroundColor: Colors.Colors.Light_grey }]}>
+            <Card
+              onLayout={(e) => {
+                const h = e.nativeEvent.layout.height;
+                if (h > slideHeight) setSlideHeight(h);
+              }}
+              style={[
+                styles.card,
+                isCompleted && { backgroundColor: Colors.Colors.Light_grey },
+              ]}
+            >
               <View>
-                  {/* <ScrollView
-                  showsVerticalScrollIndicator={true}
-                  style={{ maxHeight: 520}}
-                  contentContainerStyle={{ paddingBottom: 10 }}
-                > */}
-                       <ImageBackground
-                                                      source={require("../../assets/CardBG.png")}
-                                                      // resizeMode="center"
-                                                      style={styles.partialBgContainer}
-                                                      imageStyle={styles.partialBgImage}
-                                                    >
-                <TextComponent type="semiBoldText" style={{  color:Colors.Colors.App_theme,marginBottom:4 }}>
-                  {t("festivalCard.blessingQuote")}
-                </TextComponent>
+                <View>
+                  <ImageBackground
+                    source={require("../../assets/CardBG.png")}
+                    // resizeMode="center"
+                    style={styles.partialBgContainer}
+                    imageStyle={styles.partialBgImage}
+                  >
+                    <TextComponent
+                      type="semiBoldText"
+                      style={{
+                        color: Colors.Colors.App_theme,
+                        marginBottom: 4,
+                      }}
+                    >
+                      {t("festivalCard.blessingQuote")}
+                    </TextComponent>
 
-                {/* Header */}
-                <View style={styles.headerRow}>
-                  <TextComponent       type="cardHeaderText"
-                    style={{marginRight: 25,marginBottom:8}}>
-                    {moment(festival.date).isSame(moment(), "day")
-                      ? t("festivalCard.todayFestival")
-                      : t("festivalCard.upcomingFestival")}
-                  </TextComponent>
-                
-                </View>
-              <View style={{flexDirection:"row",alignSelf:"flex-end",right:18,marginTop:-40}}>
-  <TouchableOpacity onPress={() => handleShareFestival(festival)} style={{ flexDirection: "row", alignItems: "center" }}>
-                    {/* <Image source={require("../../assets/Streak_S1.png")} style={styles.streakIcon} />
+                    {/* Header */}
+                    <View style={styles.headerRow}>
+                      <TextComponent
+                        type="cardHeaderText"
+                        style={{ marginRight: 25, marginBottom: 8 }}
+                      >
+                        {moment(festival.date).isSame(moment(), "day")
+                          ? t("festivalCard.todayFestival")
+                          : t("festivalCard.upcomingFestival")}
+                      </TextComponent>
+                    </View>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignSelf: "flex-end",
+                        right: 18,
+                        marginTop: -40,
+                      }}
+                    >
+                      <TouchableOpacity
+                        onPress={() => handleShareFestival(festival)}
+                        style={{ flexDirection: "row", alignItems: "center" }}
+                      >
+                        {/* <Image source={require("../../assets/Streak_S1.png")} style={styles.streakIcon} />
                     <Image source={require("../../assets/Streak_S2.png")} style={styles.streakIcon} />
                     <Image source={require("../../assets/Streak_S3.png")} style={styles.streakIcon} /> */}
-                    <Image source={require("../../assets/Streak_S4.png")} style={styles.streakIcon} />
-                  </TouchableOpacity>
-                       <TouchableOpacity
-                    style={{
-                      marginLeft: 8,
-                      padding: 6,
-                      backgroundColor: Colors.Colors.Yellow,
-                      borderRadius: 50,
-                      justifyContent: "center",
-                      alignItems: "center",
-                      alignSelf: "flex-end",
-                    }}
-                   onPress={() => {
-  // 1️⃣ Use the date as the only lookup key
-  const currentDate = festival?.date;
+                        <Image
+                          source={require("../../assets/Streak_S4.png")}
+                          style={styles.streakIcon}
+                        />
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={{
+                          marginLeft: 8,
+                          padding: 6,
+                          backgroundColor: Colors.Colors.Yellow,
+                          borderRadius: 50,
+                          justifyContent: "center",
+                          alignItems: "center",
+                          alignSelf: "flex-end",
+                        }}
+                        onPress={() => {
+                          // 1️⃣ Use the date as the only lookup key
+                          const currentDate = festival?.date;
 
-  if (!currentDate) {
-    console.warn("⚠️ No date found for current festival");
-    return;
-  }
+                          if (!currentDate) {
+                            console.warn(
+                              "⚠️ No date found for current festival",
+                            );
+                            return;
+                          }
 
-  // 2️⃣ Find the English festival with the same date
-  const englishFestivalKey = Object.keys(enFestivals).find((key) => {
-    const englishFestival = (enFestivals as any)[key];
-    return englishFestival?.date === currentDate;
-  });
+                          // 2️⃣ Find the English festival with the same date
+                          const englishFestivalKey = Object.keys(
+                            enFestivals,
+                          ).find((key) => {
+                            const englishFestival = (enFestivals as any)[key];
+                            return englishFestival?.date === currentDate;
+                          });
 
-  const englishFestival = englishFestivalKey
-    ? (enFestivals as any)[englishFestivalKey]
-    : null;
+                          const englishFestival = englishFestivalKey
+                            ? (enFestivals as any)[englishFestivalKey]
+                            : null;
 
-  if (!englishFestival) {
-    console.warn(`⚠️ No English festival found for date: ${currentDate}`);
-    return;
-  }
+                          if (!englishFestival) {
+                            console.warn(
+                              `⚠️ No English festival found for date: ${currentDate}`,
+                            );
+                            return;
+                          }
 
-  // 3️⃣ Extract video keywords, date, and name
-  const englishKeywords = englishFestival.videoKeywords || [];
-  const englishName = englishFestival.name;
-  const festivalDate = englishFestival.date;
+                          // 3️⃣ Extract video keywords, date, and name
+                          const englishKeywords =
+                            englishFestival.videoKeywords || [];
+                          const englishName = englishFestival.name;
+                          const festivalDate = englishFestival.date;
 
-  if (!englishKeywords.length) {
-    console.warn(`⚠️ No video keywords found for date: ${festivalDate}`);
-    return;
-  }
+                          if (!englishKeywords.length) {
+                            console.warn(
+                              `⚠️ No video keywords found for date: ${festivalDate}`,
+                            );
+                            return;
+                          }
 
-  // 4️⃣ Format keywords into search query
-  const searchQuery = englishKeywords.map((kw) => `"${kw}"`).join(" ");
+                          // 4️⃣ Format keywords into search query
+                          const searchQuery = englishKeywords
+                            .map((kw) => `"${kw}"`)
+                            .join(" ");
 
-  console.log("🎥 Navigating with English keywords:", englishKeywords, "📅 Date:", festivalDate);
+                          console.log(
+                            "🎥 Navigating with English keywords:",
+                            englishKeywords,
+                            "📅 Date:",
+                            festivalDate,
+                          );
 
-  // 5️⃣ Navigate with full English data
-  navigation.navigate("RelatedVideosScreen", {
-    tag: englishKeywords,
-    search: searchQuery,
-    date: festivalDate,
-    title: englishName,
-  });
-}}
-                  >
-                    <Icon name="videocam-outline" size={18} color="#fff" />
-                  </TouchableOpacity>
-</View>
-                {/* Name + Date + Video */}
-                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                  <TextComponent                type="cardText"
-                                      style={{ color: Colors.Colors.blue_text,textAlign:"center",marginHorizontal:10,marginTop:4 }}>
-                    {festival.name}
-                  </TextComponent>
-                
-                </View>
+                          // 5️⃣ Navigate with full English data
+                          navigation.navigate("RelatedVideosScreen", {
+                            tag: englishKeywords,
+                            search: searchQuery,
+                            date: festivalDate,
+                            title: englishName,
+                          });
+                        }}
+                      >
+                        <Icon name="videocam-outline" size={18} color="#fff" />
+                      </TouchableOpacity>
+                    </View>
+                    {/* Name + Date + Video */}
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <TextComponent
+                        type="cardText"
+                        style={{
+                          color: Colors.Colors.blue_text,
+                          textAlign: "center",
+                          marginHorizontal: 10,
+                          marginTop: 4,
+                        }}
+                      >
+                        {festival.name}
+                      </TextComponent>
+                    </View>
 
-                <TextComponent
-  type="semiBoldText"
-                    style={{
-                      color: Colors.Colors.blue_text,
-                      marginVertical: 6,textAlign:"center",marginHorizontal:10
-                    }}
-                >
-                  {moment(festival.date, "YYYY-MM-DD").format("MMM DD, YYYY")}
-                </TextComponent>
-</ImageBackground>
-<View style={{marginHorizontal:6,alignItems:"center"}}>
-                {/* <View style={styles.quoteBox}> */}
-                  <TextComponent type="streakSadanaText" style={{textAlign:"center"}}>
-                    {festival.quote.text}
-                  </TextComponent>
-                  <TextComponent type="headerSubBoldText" style={{alignSelf:"flex-end"}}>
-                    — {festival.quote.source}
-                  </TextComponent>
-                {/* </View> */}
-
-                {/* ✅ ScrollView starts at Fasting Rules */}
-                  <TextComponent type="headerSubBoldText" style={{}}>
-                    {t("festivalCard.fastingRules")}
-                  </TextComponent>
-                  <TextComponent type="streakSadanaText" style={{textAlign:"center"}}>
-                    {festival.fasting.rules}
-                  </TextComponent>
-
-                  <TextComponent type="headerSubBoldText" style={{marginTop:4}}>
-                    {t("festivalCard.fastingSignificance")}
-                  </TextComponent>
-                  <TextComponent type="streakSadanaText" style={{textAlign:"center"}}>
-                    {festival.fasting.significance}
-                  </TextComponent>
-
-                  <TextComponent type="headerSubBoldText" style={{marginTop:4}}>
-                    {t("festivalCard.spiritualBenefit")}
-                  </TextComponent>
-                  <TextComponent type="streakSadanaText" style={{textAlign:"center"}}>
-                    {festival.spiritualBenefit}
-                  </TextComponent>
-
-                  <TextComponent type="headerSubBoldText" style={{marginTop:4}}>
-                    {t("festivalCard.story")}
-                  </TextComponent>
-                  <TextComponent type="streakSadanaText" style={{textAlign:"center"}}>
-                    {festival.mythology.story}
-                  </TextComponent>
-                  <TextComponent
-                    type="headerSubBoldText"
-                    style={{ marginTop: 4 }}
-                  >
-                  {t("festivalCard.source")} :<TextComponent type="streakSadanaText" >{festival.mythology.reference}</TextComponent>
-                  </TextComponent>
-
-                  <TextComponent type="streakSadanaText" style={{textAlign:"center"}}>
-                    {Array.isArray(festival.deity) ? festival.deity.join(", ") : festival.deity}
-                  </TextComponent>
-                   <TextComponent type="streakSadanaText"
-                    style={{ textAlign:"center",color: Colors.Colors.blue_text, marginTop: 2, marginBottom: 8 }}
-                  >
-                    {festival.fasting.observers}
-                  </TextComponent>
-                  </View>
-
-
-<View style={{
-  // borderRadius: 6,
-    overflow: "hidden",
-    marginVertical: 10,
-    backgroundColor: "#FFF4CE",
-    // borderWidth: 1,
-    // borderColor: Colors.Colors.App_theme,
-    // ✅ elevation + shadow
-    elevation: 3,
-    shadowColor: Colors.Colors.App_theme,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-}}>
-  <View style={{    flexDirection: "row",backgroundColor:"#FFF4CE",borderBottomWidth: 1,borderBottomColor: Colors.Colors.App_theme}}>
-    {["celebrationPractices", "traditionalFoods", "symbols"].map((key, idx) => (
-      <View key={idx} style={{ flex: 1,alignItems: "center",justifyContent: "center", paddingVertical: 8,paddingHorizontal: 4,}}>
-        <TextComponent type="cardText" style={styles.headerText}>
-          {t(`festivalCard.${key}`)}
-        </TextComponent>
-      </View>
-    ))}
-  </View>
-  {Array.from(
-    { length: Math.max(
-      (festival.celebrationPractices?.length || 0),
-      (festival.traditionalFoods?.length || 0),
-      (festival.symbols?.length || 0)
-    ) }
-  ).map((_, rowIndex) => (
-    <View key={rowIndex} style={{flexDirection: "row",backgroundColor:"#FFF4CE",flex:1}}>
-      {["celebrationPractices", "traditionalFoods", "symbols"].map((key, colIndex) => {
-        const items = (festival as any)[key] || [];
-        const value = items[rowIndex] || "";
-        return (
-          <View key={colIndex} style={[styles.tableCell, styles.dataCell]}>
-            <TextComponent type="mediumText" style={styles.cellText}>
-              {value || "—"}
-            </TextComponent>
-          </View>
-        );
-      })}
-    </View>
-  ))}
-</View>
-<View style={{marginHorizontal:2,alignItems:"center"}}>
-
-                  <TextComponent type="streakSadanaText" style={{marginTop:6}}>
-                    {t("festivalCard.regionalCustoms")}
-                  </TextComponent>
-                  <TextComponent type="mediumText" style={{marginTop:4,textAlign:"center",color:Colors.Colors.BLACK}}>
-                    {typeof festival.regionalCustoms === "object"
-                      ? Object.entries(festival.regionalCustoms)
-                          .map(([region, desc]) => `${region}: ${desc}`)
-                          .join("\n")
-                      : festival.regionalCustoms || "—"}
-                  </TextComponent>
-                  </View>
-                {/* </ScrollView> */}
-                  <TouchableOpacity
-                    style={styles.outlineBtn}
-                    onPress={() => navigation.navigate("DailyPracticeList")}
-                  >
-                    <TextComponent type="semiBoldText" style={{ color: Colors.Colors.white}}>
-                      {t("festivalCard.setupPractice")}
+                    <TextComponent
+                      type="semiBoldText"
+                      style={{
+                        color: Colors.Colors.blue_text,
+                        marginVertical: 6,
+                        textAlign: "center",
+                        marginHorizontal: 10,
+                      }}
+                    >
+                      {moment(festival.date, "YYYY-MM-DD").format(
+                        "MMM DD, YYYY",
+                      )}
                     </TextComponent>
-                  </TouchableOpacity>
+                  </ImageBackground>
+                  <View style={{ marginHorizontal: 6, alignItems: "center" }}>
+                    {/* <View style={styles.quoteBox}> */}
+                    <TextComponent
+                      type="streakSadanaText"
+                      style={{ textAlign: "center" }}
+                    >
+                      {festival.quote.text}
+                    </TextComponent>
+                    <TextComponent
+                      type="headerSubBoldText"
+                      style={{ alignSelf: "flex-end" }}
+                    >
+                      — {festival.quote.source}
+                    </TextComponent>
+                    {/* </View> */}
+
+                    {/* ✅ ScrollView starts at Fasting Rules */}
+                    <TextComponent type="headerSubBoldText" style={{}}>
+                      {t("festivalCard.fastingRules")}
+                    </TextComponent>
+                    <TextComponent
+                      type="streakSadanaText"
+                      style={{ textAlign: "center" }}
+                    >
+                      {festival.fasting.rules}
+                    </TextComponent>
+
+                    <TextComponent
+                      type="headerSubBoldText"
+                      style={{ marginTop: 4 }}
+                    >
+                      {t("festivalCard.fastingSignificance")}
+                    </TextComponent>
+                    <TextComponent
+                      type="streakSadanaText"
+                      style={{ textAlign: "center" }}
+                    >
+                      {festival.fasting.significance}
+                    </TextComponent>
+
+                    <TextComponent
+                      type="headerSubBoldText"
+                      style={{ marginTop: 4 }}
+                    >
+                      {t("festivalCard.spiritualBenefit")}
+                    </TextComponent>
+                    <TextComponent
+                      type="streakSadanaText"
+                      style={{ textAlign: "center" }}
+                    >
+                      {festival.spiritualBenefit}
+                    </TextComponent>
+
+                    <TextComponent
+                      type="headerSubBoldText"
+                      style={{ marginTop: 4 }}
+                    >
+                      {t("festivalCard.story")}
+                    </TextComponent>
+                    <TextComponent
+                      type="streakSadanaText"
+                      style={{ textAlign: "center" }}
+                    >
+                      {festival.mythology.story}
+                    </TextComponent>
+                    <TextComponent
+                      type="headerSubBoldText"
+                      style={{ marginTop: 4 }}
+                    >
+                      {t("festivalCard.source")} :
+                      <TextComponent type="streakSadanaText">
+                        {festival.mythology.reference}
+                      </TextComponent>
+                    </TextComponent>
+
+                    <TextComponent
+                      type="streakSadanaText"
+                      style={{ textAlign: "center" }}
+                    >
+                      {Array.isArray(festival.deity)
+                        ? festival.deity.join(", ")
+                        : festival.deity}
+                    </TextComponent>
+                    <TextComponent
+                      type="streakSadanaText"
+                      style={{
+                        textAlign: "center",
+                        color: Colors.Colors.blue_text,
+                        marginTop: 2,
+                        marginBottom: 8,
+                      }}
+                    >
+                      {festival.fasting.observers}
+                    </TextComponent>
+                  </View>
+
+                  <View
+                    style={{
+                      // borderRadius: 6,
+                      overflow: "hidden",
+                      marginVertical: 10,
+                      backgroundColor: "#FFF4CE",
+                      // borderWidth: 1,
+                      // borderColor: Colors.Colors.App_theme,
+                      // ✅ elevation + shadow
+                      elevation: 3,
+                      shadowColor: Colors.Colors.App_theme,
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.25,
+                      shadowRadius: 3.84,
+                    }}
+                  >
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        backgroundColor: "#FFF4CE",
+                        borderBottomWidth: 1,
+                        borderBottomColor: Colors.Colors.App_theme,
+                      }}
+                    >
+                      {[
+                        "celebrationPractices",
+                        "traditionalFoods",
+                        "symbols",
+                      ].map((key, idx) => (
+                        <View
+                          key={idx}
+                          style={{
+                            flex: 1,
+                            alignItems: "center",
+                            justifyContent: "center",
+                            paddingVertical: 8,
+                            paddingHorizontal: 4,
+                          }}
+                        >
+                          <TextComponent
+                            type="cardText"
+                            style={styles.headerText}
+                          >
+                            {t(`festivalCard.${key}`)}
+                          </TextComponent>
+                        </View>
+                      ))}
+                    </View>
+                    {Array.from({
+                      length:
+                        Math.max(
+                          Number(
+                            festival.celebrationPractices?.length ||
+                              (festival as any).celebrationpractices?.length ||
+                              (festival as any).practices?.length ||
+                              0,
+                          ),
+                          Number(
+                            festival.traditionalFoods?.length ||
+                              (festival as any).traditionalfoods?.length ||
+                              (festival as any).foods?.length ||
+                              0,
+                          ),
+                          Number(
+                            festival.symbols?.length ||
+                              (festival as any).symbols?.length ||
+                              0,
+                          ),
+                          1, // Ensuring at least 1 row if we have any data (though 0 is fine if no data)
+                        ) || 0,
+                    }).map((_, rowIndex) => {
+                      // Only render if we actually have data at this index or if it's the first row and we have ANY data
+                      const maxLen = Math.max(
+                        Number(
+                          festival.celebrationPractices?.length ||
+                            (festival as any).celebrationpractices?.length ||
+                            (festival as any).practices?.length ||
+                            0,
+                        ),
+                        Number(
+                          festival.traditionalFoods?.length ||
+                            (festival as any).traditionalfoods?.length ||
+                            (festival as any).foods?.length ||
+                            0,
+                        ),
+                        Number(
+                          festival.symbols?.length ||
+                            (festival as any).symbols?.length ||
+                            0,
+                        ),
+                      );
+                      if (maxLen === 0) return null;
+
+                      return (
+                        <View
+                          key={rowIndex}
+                          style={{
+                            flexDirection: "row",
+                            backgroundColor: "#FFF4CE",
+                            minHeight: 40, // Ensure visibility
+                          }}
+                        >
+                          {[
+                            "celebrationPractices",
+                            "traditionalFoods",
+                            "symbols",
+                          ].map((key, colIndex) => {
+                            const items =
+                              (festival as any)[key] ||
+                              (festival as any)[key.toLowerCase()] ||
+                              (key === "celebrationPractices"
+                                ? (festival as any).practices
+                                : null) ||
+                              (key === "traditionalFoods"
+                                ? (festival as any).foods
+                                : null) ||
+                              [];
+
+                            const value = Array.isArray(items)
+                              ? items[rowIndex]
+                              : rowIndex === 0
+                                ? items
+                                : "";
+
+                            return (
+                              <View
+                                key={colIndex}
+                                style={[styles.tableCell, styles.dataCell]}
+                              >
+                                <TextComponent
+                                  type="mediumText"
+                                  style={[
+                                    styles.cellText,
+                                    { color: Colors.Colors.BLACK },
+                                  ]}
+                                >
+                                  {value || "—"}
+                                </TextComponent>
+                              </View>
+                            );
+                          })}
+                        </View>
+                      );
+                    })}
+                  </View>
+                  <View style={{ marginHorizontal: 2, alignItems: "center" }}>
+                    <TextComponent
+                      type="streakSadanaText"
+                      style={{ marginTop: 6 }}
+                    >
+                      {t("festivalCard.regionalCustoms")}
+                    </TextComponent>
+                    <TextComponent
+                      type="mediumText"
+                      style={{
+                        marginTop: 4,
+                        textAlign: "center",
+                        color: Colors.Colors.BLACK,
+                      }}
+                    >
+                      {typeof festival.regionalCustoms === "object"
+                        ? Object.entries(festival.regionalCustoms)
+                            .map(([region, desc]) => `${region}: ${desc}`)
+                            .join("\n")
+                        : festival.regionalCustoms || "—"}
+                    </TextComponent>
+                  </View>
+                </View>
+                <TouchableOpacity
+                  style={styles.outlineBtn}
+                  onPress={() => navigation.navigate("DailyPracticeList")}
+                >
+                  <TextComponent
+                    type="semiBoldText"
+                    style={{ color: Colors.Colors.white }}
+                  >
+                    {t("festivalCard.setupPractice")}
+                  </TextComponent>
+                </TouchableOpacity>
               </View>
             </Card>
             {shareVisible && festivalToShare && (
@@ -436,7 +664,10 @@ const FestivalCard = () => {
                 }}
                 pointerEvents="none"
               >
-                <ViewShot ref={shareRef} options={{ format: "png", quality: 1 }}>
+                <ViewShot
+                  ref={shareRef}
+                  options={{ format: "png", quality: 1 }}
+                >
                   <ImageBackground
                     source={require("../../assets/Streak_bg.png")}
                     style={{
@@ -446,7 +677,7 @@ const FestivalCard = () => {
                       justifyContent: "center",
                       padding: 40,
                     }}
-                resizeMode="contain"
+                    resizeMode="contain"
                   >
                     <TextComponent
                       type="boldText"
@@ -515,7 +746,9 @@ const FestivalCard = () => {
                 styles.arrowButton,
                 {
                   backgroundColor:
-                    index === festivals.length - 1 ? "#707070" : Colors.Colors.App_theme,
+                    index === festivals.length - 1
+                      ? "#707070"
+                      : Colors.Colors.App_theme,
                   right: 4,
                 },
               ]}
@@ -532,15 +765,20 @@ const FestivalCard = () => {
 export default FestivalCard;
 
 const styles = StyleSheet.create({
-  centered: { flex: 1, justifyContent: "center", alignItems: "center", paddingVertical: 40 },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 40,
+  },
   card: {
     borderRadius: 6,
     elevation: 3,
-     backgroundColor: "#FFFCF7",
+    backgroundColor: "#FFFCF7",
     width: FontSize.CONSTS.DEVICE_WIDTH * 0.91,
-        overflow: "hidden",
-            borderWidth:1,
-            borderColor:Colors.Colors.App_theme
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: Colors.Colors.App_theme,
   },
   arrowButton: {
     position: "absolute",
@@ -553,11 +791,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     zIndex: 99,
   },
-  headerRow: {     flexDirection: "row",
+  headerRow: {
+    flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginVertical: 6,},
-   streakIcon: { height: 30, width: 30, marginLeft: 5,marginRight:5 },
+    marginVertical: 6,
+  },
+  streakIcon: { height: 30, width: 30, marginLeft: 5, marginRight: 5 },
   quoteBox: {
     backgroundColor: "#FDFBF6",
     borderRadius: 6,
@@ -568,10 +808,18 @@ const styles = StyleSheet.create({
     marginVertical: 4,
   },
   quoteText: { fontSize: FontSize.CONSTS.FS_14, color: Colors.Colors.BLACK },
-  quoteSource: { fontSize: FontSize.CONSTS.FS_12, color: Colors.Colors.Light_grey, marginTop: 4 },
+  quoteSource: {
+    fontSize: FontSize.CONSTS.FS_12,
+    color: Colors.Colors.Light_grey,
+    marginTop: 4,
+  },
   sectionTitle: { color: Colors.Colors.Light_black, marginTop: 10 },
   sectionText: { marginTop: 4, color: Colors.Colors.BLACK },
-  buttonRow: { flexDirection: "row", justifyContent: "space-between", marginVertical: 15 },
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginVertical: 15,
+  },
   outlineBtn: {
     // flex: 1,
     backgroundColor: Colors.Colors.Yellow,
@@ -579,43 +827,43 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     paddingVertical: 6,
     paddingHorizontal: 8,
-       marginHorizontal:16,
+    marginHorizontal: 16,
     // marginLeft: 8,
     justifyContent: "center",
     alignItems: "center",
-    marginVertical:15
+    marginVertical: 15,
   },
   footer: { alignSelf: "center", alignItems: "center", flexDirection: "row" },
-    partialBgContainer: {
-        alignSelf: "center",
-        justifyContent: "center",
-        alignItems: "center",
-        paddingVertical: 8,
-        paddingHorizontal: 10,
-        borderTopRightRadius: 16,
-        borderTopLeftRadius:16,
-        // marginTop: 8,
-        width: FontSize.CONSTS.DEVICE_WIDTH ,
-      },
-      partialBgImage: {
-         borderTopRightRadius: 16,
-        borderTopLeftRadius:16,
-        alignSelf: "center",
-        justifyContent: "center",
-        alignItems: "center",
-        // resizeMode: "center",
-        // opacity: 0.9, // optional: adjust background intensity
-      },
-      tableContainer: {
+  partialBgContainer: {
+    alignSelf: "center",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderTopRightRadius: 16,
+    borderTopLeftRadius: 16,
+    // marginTop: 8,
+    width: FontSize.CONSTS.DEVICE_WIDTH,
+  },
+  partialBgImage: {
+    borderTopRightRadius: 16,
+    borderTopLeftRadius: 16,
+    alignSelf: "center",
+    justifyContent: "center",
+    alignItems: "center",
+    // resizeMode: "center",
+    // opacity: 0.9, // optional: adjust background intensity
+  },
+  tableContainer: {
     borderRadius: 4,
     overflow: "hidden",
     // marginHorizontal: 6,
     marginVertical: 10,
-    backgroundColor:"#FFF4CE"
+    backgroundColor: "#FFF4CE",
   },
   tableRow: {
     flexDirection: "row",
-    backgroundColor:"#FFF4CE",
+    backgroundColor: "#FFF4CE",
   },
   tableHeader: {
     backgroundColor: "red", // light header background
@@ -626,7 +874,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     paddingVertical: 8,
     paddingHorizontal: 4,
-    backgroundColor:""
+    backgroundColor: "",
     // borderRightWidth: 1,
     // borderColor: Colors.Colors.BLACK,
   },
@@ -637,7 +885,7 @@ const styles = StyleSheet.create({
   dataCell: {
     backgroundColor: "#FFF4CE",
   },
-   headerText: {
+  headerText: {
     color: Colors.Colors.App_theme,
     textAlign: "center",
   },

@@ -270,8 +270,6 @@ const MantraCard = ({
                         style={{ textTransform: "uppercase" }}
                       >
                         {t("mantraCard.dailyMantra")}{" "}
-                        {!singleItem &&
-                          `(${index + 1}/${filteredMantras.length})`}
                       </TextComponent>
                     </View>
                   )}

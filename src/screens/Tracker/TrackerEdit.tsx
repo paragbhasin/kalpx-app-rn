@@ -503,41 +503,66 @@ const TrackerEdit = ({ route }) => {
   }, [dailySankalpList, apiPracticeIdSet, t]);
 
   useEffect(() => {
+    console.log("🔍 selectedSankalpFromRoute effect running:", {
+      isAddMoreScreen,
+      selectedCategory,
+      selectedSankalpFromRoute: selectedSankalpFromRoute?.id,
+      normalizedSankalpsLength: normalizedSankalps.length,
+    });
+
     if (
       !isAddMoreScreen ||
       selectedCategory !== "daily-sankalp" ||
       !selectedSankalpFromRoute ||
       !normalizedSankalps.length
     ) {
+      console.log("⏭️ Skipping selectedSankalp effect - conditions not met");
       return;
     }
 
     const unifiedId = selectedSankalpFromRoute.id;
+    console.log("🔑 Looking for sankalp with id:", unifiedId);
 
     const normalizedItem = normalizedSankalps.find(
       (s: any) => s.id === unifiedId
     );
 
-    if (!normalizedItem) return;
-
-    const alreadyAdded = localPractices.some(
-      (p: any) =>
-        p.unified_id === unifiedId ||
-        p.practice_id === unifiedId ||
-        p.id === unifiedId
-    );
-
-    if (!alreadyAdded) {
-      setAllowHydrate(false);
-      hasHydratedRef.current = true;
-
-      addPractice({
-        ...normalizedItem,
-        unified_id: unifiedId,
-        day: t("sadanaTracker.dailyLabel"),
-        reps: "",
-      });
+    if (!normalizedItem) {
+      console.log("❌ Sankalp not found in normalizedSankalps");
+      return;
     }
+
+    console.log("✅ Found normalized item:", normalizedItem);
+
+    // Just check the checkbox - don't auto-add to cart
+    console.log("✅ Checking checkbox for sankalp:", unifiedId);
+
+    const practiceToAdd = {
+      ...normalizedItem,
+      unified_id: unifiedId,
+      day: t("sadanaTracker.dailyLabel"),
+      reps: "",
+    };
+
+    // Don't auto-add to cart - just check the checkbox
+
+    // Also add to selectedPractices to check the checkbox in Add More screen
+    setSelectedPractices((prev) => {
+      // Check if already in selectedPractices
+      const alreadySelected = prev.some(
+        (p: any) =>
+          p.unified_id === unifiedId ||
+          p.practice_id === unifiedId ||
+          p.id === unifiedId
+      );
+
+      if (!alreadySelected) {
+        console.log("✅ Adding to selectedPractices for checkbox");
+        return [...prev, practiceToAdd];
+      }
+      return prev;
+    });
+
   }, [
     isAddMoreScreen,
     selectedCategory,
@@ -563,46 +588,69 @@ const TrackerEdit = ({ route }) => {
 
     if (!normalizedItem) return;
 
-    const alreadyAdded = localPractices.some(
-      (p: any) =>
-        p.unified_id === unifiedId ||
-        p.practice_id === unifiedId ||
-        p.id === unifiedId
-    );
+    // Just check the checkbox - don't auto-add to cart
+    console.log("✅ Checking checkbox for mantra:", unifiedId);
 
-    if (!alreadyAdded) {
-      setAllowHydrate(false);
-      hasHydratedRef.current = true;
+    const practiceToSelect = {
+      ...normalizedItem,
+      unified_id: unifiedId,
+      day: t("sadanaTracker.dailyLabel"),
+      reps: "",
+    };
 
-      addPractice({
-        ...normalizedItem,
-        unified_id: unifiedId,
-        day: t("sadanaTracker.dailyLabel"),
-        reps: "",
-      });
-    }
+    // Add to selectedPractices to check the checkbox
+    setSelectedPractices((prev) => {
+      const alreadySelected = prev.some(
+        (p: any) =>
+          p.unified_id === unifiedId ||
+          p.practice_id === unifiedId ||
+          p.id === unifiedId
+      );
+
+      if (!alreadySelected) {
+        console.log("✅ Adding mantra to selectedPractices for checkbox");
+        return [...prev, practiceToSelect];
+      } else {
+        console.log("✅ Mantra already in selectedPractices");
+      }
+      return prev;
+    });
   }, [
     isAddMoreScreen,
     selectedCategory,
     normalizedMantras,
     selectedMantraFromRoute,
+    selectedPractices,
+    t,
   ]);
 
   useEffect(() => {
     if (
       !isAddMoreScreen ||
       selectedCategory !== "daily-mantra" ||
+      !selectedMantraFromRoute ||
       !normalizedMantras.length ||
       hasAutoScrolledRef.current
     ) {
       return;
     }
 
-    setTimeout(() => {
-      sankalpListRef.current?.scrollToEnd({ animated: true });
-      hasAutoScrolledRef.current = true;
-    }, 300);
-  }, [isAddMoreScreen, selectedCategory, normalizedMantras]);
+    const index = normalizedMantras.findIndex(
+      (m: any) => m.id === selectedMantraFromRoute.id
+    );
+
+    if (index >= 0) {
+      // wait for FlatList layout
+      requestAnimationFrame(() => {
+        sankalpListRef.current?.scrollToIndex({
+          index,
+          animated: true,
+          viewPosition: 0.4,
+        });
+        hasAutoScrolledRef.current = true;
+      });
+    }
+  }, [isAddMoreScreen, selectedCategory, normalizedMantras, selectedMantraFromRoute]);
 
 
   // useEffect(() => {
@@ -1192,6 +1240,15 @@ const TrackerEdit = ({ route }) => {
           onScroll={handleScroll}
           scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
+          onScrollToIndexFailed={(info) => {
+            const wait = new Promise((resolve) => setTimeout(resolve, 500));
+            wait.then(() => {
+              sankalpListRef.current?.scrollToIndex({
+                index: info.index,
+                animated: true,
+              });
+            });
+          }}
           contentContainerStyle={{ paddingBottom: 170, paddingTop: 10 }}
           ListHeaderComponent={
             <View onStartShouldSetResponder={() => true}>
@@ -1500,6 +1557,7 @@ const TrackerEdit = ({ route }) => {
                   </TextComponent>
 
                   <View style={{ marginTop: 10 }}>
+                    {console.log("📋 Rendering added practices:", addedLocalPractices.length, addedLocalPractices)}
                     {addedLocalPractices.map((item: any) => {
                       const data = normalizeForMantraCard(item);
 
@@ -1511,7 +1569,7 @@ const TrackerEdit = ({ route }) => {
                             data={data}
                             tag="added"
                             showIcons={false}
-                            isSelected={false}
+                            isSelected={true}
                             onToggleSelect={() => { }}
                             onPress={() => {
                               const { data: fullData } = getRawPracticeObject(

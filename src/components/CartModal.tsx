@@ -1,6 +1,6 @@
 import moment from "moment";
-import React, { useEffect, useState } from "react";
-import { ScrollView, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useMemo, useState } from "react";
+import { Platform, ScrollView, TouchableOpacity, View } from "react-native";
 import Modal from "react-native-modal";
 import { Card } from "react-native-paper";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -17,7 +17,7 @@ import LoadingButton from "./LoadingButton";
 import TextComponent from "./TextComponent";
 import { useUserLocation } from "./useUserLocation";
 
-export default function CartModal({ onConfirm }) {
+export default function CartModal({ onConfirm, onBrowseMore }) {
   const navigation: any = useNavigation();
 
   const {
@@ -48,19 +48,27 @@ export default function CartModal({ onConfirm }) {
 
   const rawApiPractices = dailyPractice?.data?.active_practices || [];
 
-  const apiPractices = localPractices.filter((item) =>
-    rawApiPractices.some(
-      (x: any) =>
-        String(x.practice_id ?? x.id) === String(item.practice_id ?? item.id),
-    ),
+  const apiPractices = useMemo(
+    () =>
+      localPractices.filter((item) =>
+        rawApiPractices.some(
+          (x: any) =>
+            String(x.practice_id ?? x.id) === String(item.practice_id ?? item.id),
+        ),
+      ),
+    [localPractices, rawApiPractices],
   );
 
-  const recentlyAdded = localPractices.filter(
-    (item) =>
-      !rawApiPractices.some(
-        (x: any) =>
-          String(x.practice_id ?? x.id) === String(item.practice_id ?? item.id),
+  const recentlyAdded = useMemo(
+    () =>
+      localPractices.filter(
+        (item) =>
+          !rawApiPractices.some(
+            (x: any) =>
+              String(x.practice_id ?? x.id) === String(item.practice_id ?? item.id),
+          ),
       ),
+    [localPractices, rawApiPractices],
   );
 
   function getPracticeType(practiceId: string) {
@@ -85,9 +93,6 @@ export default function CartModal({ onConfirm }) {
     <Modal
       isVisible={cartModalVisible}
       onBackdropPress={() => setCartModalVisible(false)}
-      onSwipeComplete={() => setCartModalVisible(false)}
-      swipeDirection={["down"]}
-      propagateSwipe={true}
       backdropOpacity={0.4}
       animationIn="slideInUp"
       animationOut="slideOutDown"
@@ -108,7 +113,16 @@ export default function CartModal({ onConfirm }) {
           />
         </View>
 
-        <ScrollView style={{ maxHeight: 450 }}>
+        <ScrollView
+          style={{ maxHeight: 450 }}
+          contentContainerStyle={{ paddingBottom: 20 }}
+          scrollEnabled={true}
+          nestedScrollEnabled={true}
+          showsVerticalScrollIndicator={false}
+          bounces={true}
+          scrollEventThrottle={16}
+          removeClippedSubviews={Platform.OS === 'android'}
+        >
           {apiPractices.length > 0 && (
             <>
               <TextComponent type="boldText" style={styles.sectionHeader}>
@@ -196,6 +210,37 @@ export default function CartModal({ onConfirm }) {
               No Practices Added
             </TextComponent>
           )}
+
+          <LoadingButton
+            loading={false}
+            text="Browse More Practices"
+            showGlobalLoader={false}
+            style={{
+              backgroundColor: "#FFFFFF",
+              paddingVertical: 14,
+              borderRadius: 25,
+              alignItems: "center",
+              borderWidth: 1.5,
+              borderColor: "#D4A017",
+              marginTop: 20,
+              marginBottom: 10,
+            }}
+            textStyle={{
+              color: "#D4A017",
+              fontSize: 15,
+              fontWeight: "600",
+            }}
+            onPress={() => {
+              setCartModalVisible(false);
+              if (onBrowseMore) {
+                onBrowseMore();
+              } else {
+                setTimeout(() => {
+                  navigation.navigate("DailyPracticeSelectList");
+                }, 250);
+              }
+            }}
+          />
         </ScrollView>
         {(recentlyAdded.length > 0 || removedApiIds.size > 0) && (
           <View style={{ marginTop: 20, marginBottom: 20 }}>
@@ -244,31 +289,6 @@ export default function CartModal({ onConfirm }) {
             />
           </View>
         )}
-        <LoadingButton
-          loading={false}
-          text="Browse More Practices"
-          showGlobalLoader={false}
-          style={{
-            backgroundColor: "#FFFFFF",
-            paddingVertical: 14,
-            borderRadius: 25,
-            alignItems: "center",
-            borderWidth: 1.5,
-            borderColor: "#D4A017",
-            marginBottom: 20,
-          }}
-          textStyle={{
-            color: "#D4A017",
-            fontSize: 15,
-            fontWeight: "600",
-          }}
-          onPress={() => {
-            setCartModalVisible(false);
-            setTimeout(() => {
-              navigation.navigate("TrackerTabs", { screen: "History" });
-            }, 250);
-          }}
-        />
       </View>
     </Modal>
   );

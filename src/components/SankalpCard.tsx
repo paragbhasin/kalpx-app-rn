@@ -10,7 +10,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { Card } from "react-native-paper";
 import Swiper from "react-native-swiper";
@@ -18,12 +18,11 @@ import Icon from "react-native-vector-icons/Ionicons";
 import ViewShot, { captureRef } from "react-native-view-shot";
 import enSankalps from "../config/locales/en/sankalps-en.json"; // adjust path accordingly
 import { DAILY_SANKALPS } from "../data/sankalps";
+import { getTranslatedPractice } from "../utils/getTranslatedPractice";
 import Colors from "./Colors";
 import FontSize from "./FontSize";
-import TextComponent from "./TextComponent";
-import { getTranslatedPractice } from "../utils/getTranslatedPractice";
 import { parseSourceToTags } from "./parseSourceToTags";
-
+import TextComponent from "./TextComponent";
 
 const getTodaySeed = () => new Date().toISOString().split("T")[0];
 function seededShuffle(array, seed) {
@@ -40,7 +39,14 @@ function seededShuffle(array, seed) {
   return result;
 }
 
-const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp, viewOnly = false, onAddToMyPractice = null, singleItem = null }) => {
+const SankalpCard = ({
+  practiceTodayData,
+  onPressStartSankalp,
+  onCompleteSankalp,
+  viewOnly = false,
+  onAddToMyPractice = null,
+  singleItem = null,
+}) => {
   const navigation: any = useNavigation();
   const { t, i18n } = useTranslation();
   const swiperRef = useRef<Swiper>(null);
@@ -49,7 +55,9 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
   const [shareVisible, setShareVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const todayItems = practiceTodayData?.items || [];
-  const activeSankalpItem = todayItems.find(item => item.practice_type === "sankalp");
+  const activeSankalpItem = todayItems.find(
+    (item) => item.practice_type === "sankalp",
+  );
 
   const startedSankalp = !!activeSankalpItem;
   const doneSankalp = !!activeSankalpItem?.completed_at;
@@ -70,7 +78,6 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
     if (uiStage === 2) return pick(s2);
     return pick(s1);
   }, [uiStage, i18n.language]);
-
 
   const { p: primaryText, s: secondaryText } = useMemo(() => {
     const s1: any = t("sankalpCard.stage1", { returnObjects: true });
@@ -161,12 +168,14 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
       style={{
         // height: "auto"
         // backgroundColor:"red",
-        height: slideHeight
+        height: slideHeight,
       }}
     >
       {filteredSankalps.map((currentSankalp, index) => {
         const translated = getTranslatedPractice(currentSankalp, t);
-        const itemRecord = todayItems.find(it => it.item_id === currentSankalp.id);
+        const itemRecord = todayItems.find(
+          (it) => it.item_id === currentSankalp.id,
+        );
         const isStarted = !!itemRecord;
         const isDone = !!itemRecord?.completed_at;
 
@@ -181,7 +190,6 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
               paddingHorizontal: 5,
             }}
           >
-
             {!singleItem && (
               <TouchableOpacity
                 disabled={index === 0}
@@ -203,11 +211,13 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
               </TouchableOpacity>
             )}
 
-
-            <Card style={styles.card} onLayout={(e) => {
-              const h = e.nativeEvent.layout.height;
-              if (h > slideHeight) setSlideHeight(h);
-            }}>
+            <Card
+              style={styles.card}
+              onLayout={(e) => {
+                const h = e.nativeEvent.layout.height;
+                if (h > slideHeight) setSlideHeight(h);
+              }}
+            >
               <View>
                 {/* <ScrollView
                 showsVerticalScrollIndicator={true}
@@ -222,7 +232,10 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                 >
                   {!viewOnly && (
                     <>
-                      <TextComponent type="semiBoldText" style={{ color: Colors.Colors.App_theme }}>
+                      <TextComponent
+                        type="semiBoldText"
+                        style={{ color: Colors.Colors.App_theme }}
+                      >
                         {uiHeaderText}
                       </TextComponent>
 
@@ -234,20 +247,38 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                           {t("sankalpCard.dailySankalp")}
                         </TextComponent>
                       </View>
-                      <View style={{ flexDirection: "row", alignSelf: "flex-end", right: 20, marginTop: -30 }}>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignSelf: "flex-end",
+                          right: 20,
+                          marginTop: -30,
+                        }}
+                      >
                         <TouchableOpacity
                           onPress={() => handleShareSankalp()}
                           style={{ flexDirection: "row", alignItems: "center" }}
                         >
-                          <Image source={require("../../assets/Streak_S4.png")} style={styles.streakIcon} />
+                          <Image
+                            source={require("../../assets/Streak_S4.png")}
+                            style={styles.streakIcon}
+                          />
                         </TouchableOpacity>
                         <TouchableOpacity
                           onPress={() => {
-                            const englishSource = getEnglishSourceForSankalp(currentSankalp.id);
-                            const { tags, searchQuery } = parseSourceToTags(englishSource, currentSankalp.id);
+                            const englishSource = getEnglishSourceForSankalp(
+                              currentSankalp.id,
+                            );
+                            const { tags, searchQuery } = parseSourceToTags(
+                              englishSource,
+                              currentSankalp.id,
+                            );
                             console.log("🔍 Tags:", tags);
                             console.log("🔎 Search Query:", searchQuery);
-                            navigation.navigate("RelatedVideosScreen", { tag: tags, search: searchQuery });
+                            navigation.navigate("RelatedVideosScreen", {
+                              tag: tags,
+                              search: searchQuery,
+                            });
                           }}
                           style={{
                             marginLeft: 8,
@@ -258,16 +289,26 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                             alignItems: "center",
                           }}
                         >
-                          <Icon name="videocam-outline" size={18} color="#fff" />
+                          <Icon
+                            name="videocam-outline"
+                            size={18}
+                            color="#fff"
+                          />
                         </TouchableOpacity>
                       </View>
                     </>
                   )}
                   <TextComponent
                     type="cardText"
-                    style={{ color: Colors.Colors.blue_text, textAlign: "center", marginHorizontal: 10 }}
+                    style={{
+                      color: Colors.Colors.blue_text,
+                      textAlign: "center",
+                      marginHorizontal: 10,
+                    }}
                   >
-                    {translated.name || t(currentSankalp.i18n?.short) || currentSankalp.short_text}
+                    {translated.name ||
+                      t(currentSankalp.i18n?.short) ||
+                      currentSankalp.short_text}
                   </TextComponent>
                 </ImageBackground>
                 <View style={{ paddingHorizontal: 16, alignItems: "center" }}>
@@ -279,13 +320,18 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                   >
                     {t("sankalpCard.whyThisMatters")}
                   </TextComponent>
-                  <TextComponent type="mediumText"
+                  <TextComponent
+                    type="mediumText"
                     style={{
                       color: Colors.Colors.Light_black,
-                      marginVertical: 2, textAlign: "center"
+                      marginVertical: 2,
+                      textAlign: "center",
                     }}
                   >
-                    {translated.desc || translated.summary || t(currentSankalp.i18n?.tooltip) || currentSankalp.tooltip}
+                    {translated.desc ||
+                      translated.summary ||
+                      t(currentSankalp.i18n?.tooltip) ||
+                      currentSankalp.tooltip}
                   </TextComponent>
                   <View style={{ marginTop: 20, alignItems: "center" }}>
                     <TextComponent
@@ -296,16 +342,24 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                     >
                       {t("sankalpCard.suggestedPractice")}
                     </TextComponent>
-                    <TextComponent type="mediumText"
+                    <TextComponent
+                      type="mediumText"
                       style={{
                         color: Colors.Colors.Light_black,
-                        marginVertical: 2, textAlign: "center"
-                      }}>
-                      {translated.suggested_practice || t(currentSankalp.i18n?.suggest) || currentSankalp.suggested_practice}
+                        marginVertical: 2,
+                        textAlign: "center",
+                      }}
+                    >
+                      {translated.suggested_practice ||
+                        t(currentSankalp.i18n?.suggest) ||
+                        currentSankalp.suggested_practice}
                     </TextComponent>
                   </View>
                   <View style={{ alignItems: "center", marginTop: 4 }}>
-                    <TextComponent type="headerSubBoldText" style={{ ...styles.root, color: Colors.Colors.blue_text, }}>
+                    <TextComponent
+                      type="headerSubBoldText"
+                      style={{ ...styles.root, color: Colors.Colors.blue_text }}
+                    >
                       {t("sankalpCard.source")}
                     </TextComponent>
                     <TextComponent
@@ -315,7 +369,9 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                         textAlign: "center",
                       }}
                     >
-                      {translated.line || t(`sankalps.${currentSankalp.id}.source`) || currentSankalp.source}
+                      {translated.line ||
+                        t(`sankalps.${currentSankalp.id}.source`) ||
+                        currentSankalp.source}
                     </TextComponent>
                   </View>
                 </View>
@@ -340,7 +396,10 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                         ) : (
                           <TextComponent
                             type="semiBoldText"
-                            style={{ textAlign: "center", color: Colors.Colors.white }}
+                            style={{
+                              textAlign: "center",
+                              color: Colors.Colors.white,
+                            }}
                           >
                             {t("sankalpCard.iWillDo")}
                           </TextComponent>
@@ -386,7 +445,15 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                                   backgroundColor: "green",
                                 }}
                               >
-                                <Text style={{ color: "white", fontSize: 12, fontWeight: "bold" }}>✓</Text>
+                                <Text
+                                  style={{
+                                    color: "white",
+                                    fontSize: 12,
+                                    fontWeight: "bold",
+                                  }}
+                                >
+                                  ✓
+                                </Text>
                               </View>
                             ) : (
                               <View
@@ -402,7 +469,9 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                             )}
 
                             <TextComponent type="streakSadanaText">
-                              {isDone ? t("sankalpCard.done") : t("sankalpCard.markDone")}
+                              {isDone
+                                ? t("sankalpCard.done")
+                                : t("sankalpCard.markDone")}
                             </TextComponent>
                           </>
                         )}
@@ -419,10 +488,9 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                             selectedSankalp: currentSankalp,
                             autoSelectCategory: "daily-sankalp",
                             // selectedmantra: currentSankalp,
-                          }
+                          },
                         })
                       }
-
                     >
                       <TextComponent
                         type="boldText"
@@ -432,13 +500,27 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                       </TextComponent>
                     </TouchableOpacity>
                     <View style={styles.footer}>
-                      <TextComponent type="semiBoldText" style={{ color: Colors.Colors.Light_grey }}>
-                        {t("sankalpCard.finishStreak")}
-                      </TextComponent>
-                      <Image
-                        source={require("../../assets/Streak_A1.png")}
-                        style={{ height: 20, width: 20, marginLeft: 4 }}
-                      />
+                      {/* CENTER CONTENT */}
+                      <View style={styles.centerContent}>
+                        <TextComponent
+                          type="semiBoldText"
+                          style={{ color: Colors.Colors.Light_grey }}
+                        >
+                          {t("sankalpCard.finishStreak")}
+                        </TextComponent>
+
+                        <Image
+                          source={require("../../assets/Streak_A1.png")}
+                          style={{ height: 20, width: 20, marginLeft: 4 }}
+                        />
+                      </View>
+
+                      {/* RIGHT CORNER NUMBER */}
+                      {!singleItem && (
+                        <Text style={styles.counterText}>
+                          {`(${index + 1}/${filteredSankalps.length})`}
+                        </Text>
+                      )}
                     </View>
                   </>
                 )}
@@ -462,7 +544,10 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                         ) : (
                           <TextComponent
                             type="semiBoldText"
-                            style={{ textAlign: "center", color: Colors.Colors.white }}
+                            style={{
+                              textAlign: "center",
+                              color: Colors.Colors.white,
+                            }}
                           >
                             {t("sankalpCard.iWillDo")}
                           </TextComponent>
@@ -508,7 +593,15 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                                   backgroundColor: "green",
                                 }}
                               >
-                                <Text style={{ color: "white", fontSize: 12, fontWeight: "bold" }}>✓</Text>
+                                <Text
+                                  style={{
+                                    color: "white",
+                                    fontSize: 12,
+                                    fontWeight: "bold",
+                                  }}
+                                >
+                                  ✓
+                                </Text>
                               </View>
                             ) : (
                               <View
@@ -524,7 +617,9 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                             )}
 
                             <TextComponent type="streakSadanaText">
-                              {isDone ? t("sankalpCard.done") : t("sankalpCard.markDone")}
+                              {isDone
+                                ? t("sankalpCard.done")
+                                : t("sankalpCard.markDone")}
                             </TextComponent>
                           </>
                         )}
@@ -534,17 +629,14 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                     <TouchableOpacity
                       style={[styles.startBtn, { marginBottom: 8 }]}
                       onPress={onAddToMyPractice}
-
                     >
                       <TextComponent
                         type="boldText"
                         style={{ color: Colors.Colors.Light_black }}
                       >
                         {t("sadanaTracker.detailsCard.addToMyPractice")}
-
                       </TextComponent>
                     </TouchableOpacity>
-
                   </>
                 )}
               </View>
@@ -560,7 +652,10 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                 }}
                 pointerEvents="none"
               >
-                <ViewShot ref={shareRef} options={{ format: "png", quality: 1 }}>
+                <ViewShot
+                  ref={shareRef}
+                  options={{ format: "png", quality: 1 }}
+                >
                   <ImageBackground
                     source={require("../../assets/Streak_bg.png")}
                     style={{
@@ -621,7 +716,10 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
 
                     <TextComponent
                       type="semiBoldText"
-                      style={{ color: "#925910", fontSize: FontSize.CONSTS.FS_14 }}
+                      style={{
+                        color: "#925910",
+                        fontSize: FontSize.CONSTS.FS_14,
+                      }}
                     >
                       Connect to Your Roots
                     </TextComponent>
@@ -641,7 +739,6 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
               </View>
             )}
 
-
             {!singleItem && (
               <TouchableOpacity
                 disabled={index === filteredSankalps.length - 1}
@@ -660,7 +757,6 @@ const SankalpCard = ({ practiceTodayData, onPressStartSankalp, onCompleteSankalp
                 <Image source={require("../../assets/arrow_home.png")} />
               </TouchableOpacity>
             )}
-
           </View>
         );
       })}
@@ -688,7 +784,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     zIndex: 99,
     borderWidth: 1,
-    borderColor: Colors.Colors.App_theme
+    borderColor: Colors.Colors.App_theme,
   },
   arrowButton: {
     position: "absolute",
@@ -728,7 +824,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 20
+    marginTop: 20,
   },
   dailyBtn: {
     borderColor: Colors.Colors.Yellow,
@@ -739,9 +835,29 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 20
+    marginTop: 20,
   },
-  footer: { alignSelf: "center", alignItems: "center", flexDirection: "row", marginVertical: 12 },
+
+  footer: {
+    position: "relative",
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    marginVertical: 12,
+  },
+
+  centerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  counterText: {
+    position: "absolute",
+    right: 10,
+    fontSize: 15,
+    color: Colors.Colors.BLACK,
+    fontWeight: "600",
+  },
   partialBgContainer: {
     alignSelf: "center",
     justifyContent: "center",

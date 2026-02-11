@@ -66,9 +66,8 @@ const WisdomCard = () => {
       await new Promise((resolve) => setTimeout(resolve, 400));
 
       const uri = await captureRef(shareRef, { format: "png", quality: 1 });
-      const fileUri = `${
-        FileSystem.cacheDirectory
-      }wisdom_share_${Date.now()}.png`;
+      const fileUri = `${FileSystem.cacheDirectory
+        }wisdom_share_${Date.now()}.png`;
       await FileSystem.copyAsync({ from: uri, to: fileUri });
 
       setShareVisible(false);
@@ -143,7 +142,7 @@ const WisdomCard = () => {
         const isCompleted = completedIds.includes(wisdom.id);
         const quote =
           MOTIVATIONAL_QUOTES[
-            Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)
+          Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)
           ];
 
         return (
@@ -394,23 +393,9 @@ const WisdomCard = () => {
                   </TextComponent>
                 </TouchableOpacity>
                 <View style={styles.footer}>
-                  <View style={styles.centerContent}>
-                    <TextComponent
-                      type="semiBoldText"
-                      style={{ color: Colors.Colors.Light_grey }}
-                    >
-                      {t("wisdomCard.finishStreak")}
-                    </TextComponent>
-                    <Image
-                      source={require("../../assets/Streak_A1.png")}
-                      style={{ height: 20, width: 20, marginLeft: 4 }}
-                    />
-                  </View>
-                  (
                   <Text style={styles.counterText}>
                     ({index + 1}/{currentBatch.length})
                   </Text>
-                  )
                 </View>
               </View>
             </Card>

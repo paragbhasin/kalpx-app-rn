@@ -34,7 +34,7 @@ import AppDrawerNavigator from "./DrawerNavigator";
 
 const Stack: any = createNativeStackNavigator();
 
-const Routes = ({ initialRouteName = "Welcome" }) => {
+const Routes = ({ initialRouteName = "AppDrawer" }) => {
   return (
     <Stack.Navigator initialRouteName={initialRouteName} screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
@@ -45,7 +45,7 @@ const Routes = ({ initialRouteName = "Welcome" }) => {
       <Stack.Screen name="VerificationScreen" component={VerificationScreen} />
       <Stack.Screen name="SetNewPasswordScreen" component={SetNewPasswordScreen} />
       {/* <Stack.Screen name="HomePage" component={BottomMenu} /> */}
-    {/* <Stack.Screen name="Home" component={Home}/> */}
+      {/* <Stack.Screen name="Home" component={Home}/> */}
       <Stack.Screen name="Travel" component={TravelPlannerScreen} />
       <Stack.Screen name="Pooja" component={PoojaScreen} />
       <Stack.Screen name="Retreat" component={RetreatsScreen} />

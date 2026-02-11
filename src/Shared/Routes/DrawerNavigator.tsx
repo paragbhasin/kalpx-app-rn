@@ -102,7 +102,7 @@ const CustomDrawerContent = (props) => {
     const parentNav = props.navigation.getParent();
     parentNav?.reset({
       index: 0,
-      routes: [{ name: "Welcome" }],
+      routes: [{ name: "AppDrawer" }],
     });
   };
 

@@ -16,6 +16,8 @@ import styles from "./ExploreCommunitiesStyles";
 
 import { useNavigation } from "@react-navigation/native";
 
+import { getConsistentCommunityStats } from "../../utils/randomStats";
+
 const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) => {
     const { t } = useTranslation();
     const dispatch = useDispatch();
@@ -106,6 +108,7 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
 
     const renderCommunityCard = React.useCallback(({ item }: { item: any }) => {
         const isFollowed = item.is_followed;
+        const stats = getConsistentCommunityStats(item.slug || item.id || item.name);
 
         return (
             <View style={styles.card}>
@@ -116,7 +119,7 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
                     >
                         <Text style={styles.communityName}>{item.name}</Text>
                         <Text style={styles.visitorCount}>
-                            {t("community.weeklyVisitors", { count: item.weekly_visitors || Math.floor(Math.random() * 50 + 50) })}
+                            {t("community.weeklyVisitors", { count: item.weekly_visitors || stats.weeklyVisitors })}
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity

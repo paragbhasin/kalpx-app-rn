@@ -6,14 +6,13 @@ import { Platform, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 
 import FontSize from "../../components/FontSize";
+import GlobalScrollLayout from "../../components/GlobalScrollLayout";
+import { ScrollProvider, useScrollContext } from "../../context/ScrollContext";
 import {
   HomeStackNavigator,
   NotificationStackNavigator,
   ProfileStackNavigator,
 } from "../StackNavigator";
-import { ScrollProvider } from "../../context/ScrollContext";
-import GlobalScrollLayout from "../../components/GlobalScrollLayout";
-import { useScrollContext } from "../../context/ScrollContext";
 
 const Tab = createBottomTabNavigator();
 
@@ -118,7 +117,7 @@ const BottomMenuContent = () => {
           options={{
             tabBarLabel: t("tabs.Menu"),
             tabBarIcon: ({ color, focused }) => (
-              <Icon name="menu" size={28} color={color} />
+              <Icon name="menu" size={24} color={color} />
             ),
           }}
         />

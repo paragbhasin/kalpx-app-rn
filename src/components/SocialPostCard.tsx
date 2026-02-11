@@ -885,7 +885,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
               onPress={() => setShowMenu(false)}
             />
             <View style={styles.menuContainer}>
-              {post.creator?.id === currentUserId || post.is_creator ? (
+              {post.creator?.id === currentUserId ? (
                 <>
                   <TouchableOpacity
                     style={styles.menuItem}
@@ -985,6 +985,14 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
           setIsReportModalVisible(false);
         }}
       />
+
+      {/* Debug Info */}
+      {/* <View style={{ paddingHorizontal: 12, paddingVertical: 4 }}>
+                <Text style={{ fontSize: 10, color: "#666" }}>
+                    Debug: Creator: {post.creator?.id} | You: {currentUserId} | Match:{" "}
+                    {String(post.creator?.id === currentUserId)}
+                </Text>
+            </View> */}
 
       {/* Title */}
       {translatedTitle && <Text style={styles.title}>{translatedTitle}</Text>}

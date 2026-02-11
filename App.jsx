@@ -24,6 +24,7 @@ import {
   notificationOpenListener,
   requestPushPermission,
 } from "./src/service/pushNotifications";
+import { registerDeviceToBackend } from "./src/utils/registerDevice";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -88,12 +89,12 @@ export default function App() {
     const init = async () => {
       if (!fontsLoaded && !error) return;
       try {
-        const accessToken = await AsyncStorage.getItem("access_token");
-        const refreshToken = await AsyncStorage.getItem("refresh_token");
-        setInitialRoute(accessToken && refreshToken ? "AppDrawer" : "Welcome");
+        await registerDeviceToBackend();
+        setInitialRoute("AppDrawer");
         await new Promise((res) => setTimeout(res, 300));
-      } catch {
-        setInitialRoute("Welcome");
+      } catch (err) {
+        console.log("Initialization error:", err);
+        setInitialRoute("AppDrawer");
       } finally {
         await SplashScreen.hideAsync().catch(() => {});
       }

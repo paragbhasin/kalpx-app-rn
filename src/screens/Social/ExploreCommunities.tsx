@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchCommunities, followCommunity, unfollowCommunity } from "./actions";
 import { fetchUserActivity } from "../UserActivity/actions";
 import ShimmerPlaceholder from "../../components/ShimmerPlaceholder";
+import CommunityAuthModal from "../../components/CommunityAuthModal";
 import styles from "./ExploreCommunitiesStyles";
 
 import { useNavigation } from "@react-navigation/native";
@@ -24,11 +25,21 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
     const navigation = useNavigation<any>();
     const [activeTab, setActiveTab] = useState<"all" | "followed">("all");
     const [refreshing, setRefreshing] = useState(false);
+    const [isAuthModalVisible, setIsAuthModalVisible] = useState(false);
+    const [authModalConfig, setAuthModalConfig] = useState({
+        title: t("communityAuth.title"),
+        description: t("communityAuth.description"),
+        intent: "general",
+    });
 
     const { data: communities, loading, pagination } = useSelector(
         (state: any) => state.communities
     );
     const { followed_communities } = useSelector((state: any) => state.userActivity);
+    const user = useSelector(
+        (state: any) => state.login?.user || state.socialLoginReducer?.user,
+    );
+    const isAuthenticated = !!user;
 
     useEffect(() => {
         loadCommunities();
@@ -90,6 +101,16 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
     }, [communities, followed_communities.data, activeTab, followedSet]);
 
     const handleFollowToggle = React.useCallback((community: any) => {
+        if (!isAuthenticated) {
+            setAuthModalConfig({
+                title: t("communityAuth.joinCommunity.title"),
+                description: t("communityAuth.joinCommunity.description"),
+                intent: "join_community",
+            });
+            setIsAuthModalVisible(true);
+            return;
+        }
+
         const isFollowed = community.is_followed ||
             followedSet.has(community.slug?.toLowerCase()) ||
             followedSet.has(community.community_slug?.toLowerCase()) ||
@@ -102,7 +123,7 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
         } else {
             dispatch(followCommunity(community.slug) as any);
         }
-    }, [dispatch, followedSet]);
+    }, [dispatch, followedSet, isAuthenticated, t]);
 
     const isLoading = activeTab === "all" ? loading : followed_communities.loading;
 
@@ -291,6 +312,13 @@ const ExploreCommunities = ({ onScroll }: { onScroll?: (event: any) => void }) =
                     }
                 />
             )}
+            <CommunityAuthModal
+                visible={isAuthModalVisible}
+                onClose={() => setIsAuthModalVisible(false)}
+                title={authModalConfig.title}
+                description={authModalConfig.description}
+                intent={authModalConfig.intent}
+            />
         </View>
     );
 };

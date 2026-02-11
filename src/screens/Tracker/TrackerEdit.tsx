@@ -1228,6 +1228,9 @@ const TrackerEdit = ({ route }) => {
 
           submitCartToServer(list);
         }}
+        onBrowseMore={() => {
+          setIsAddMoreScreen(true);
+        }}
       />
 
       {renderDetailsCard()}

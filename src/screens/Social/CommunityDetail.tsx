@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import {
     View,
     Text,
@@ -26,6 +26,7 @@ import Header from "../../components/Header";
 import { COMMUNITY_BACKGROUNDS } from "../../utils/CommunityAssets";
 import { fetchUserActivity } from "../UserActivity/actions";
 import { useScrollContext } from "../../context/ScrollContext";
+import { getConsistentCommunityStats } from "../../utils/randomStats";
 
 const { width } = Dimensions.get("window");
 
@@ -46,6 +47,8 @@ const CommunityDetail = () => {
 
     const [activeTab, setActiveTab] = useState<"Feed" | "About">("Feed");
     const [expandedRules, setExpandedRules] = useState<number[]>([]);
+
+    const stableStats = useMemo(() => getConsistentCommunityStats(slug), [slug]);
     useEffect(() => {
         dispatch(fetchCommunityDetail(slug, i18n.language) as any);
         dispatch(fetchCommunityPosts(slug, 1, sortBy, i18n.language) as any);
@@ -298,8 +301,7 @@ const CommunityDetail = () => {
     );
 
     const renderAbout = () => {
-        const weeklyVisitors = (Math.floor(Math.random() * 200) + 50) + "k";
-        const weeklyContribution = (Math.floor(Math.random() * 2000) + 500);
+        const { weeklyVisitors, weeklyContribution } = stableStats;
 
         const rules = [
             { title: "No Spam", content: "Do not post spam or self-promotional content." },

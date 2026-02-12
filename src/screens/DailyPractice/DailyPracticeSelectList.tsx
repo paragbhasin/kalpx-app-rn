@@ -16,6 +16,7 @@ import LoadingButton from "../../components/LoadingButton";
 import LoadingOverlay from "../../components/LoadingOverlay";
 import TextComponent from "../../components/TextComponent";
 import { useCart } from "../../context/CartContext";
+import { useToast } from "../../context/ToastContext";
 
 import moment from "moment";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -34,6 +35,7 @@ const cartIcon = require("../../../assets/cart.png");
 const DailyPracticeSelectList = ({ route }) => {
   const navigation: any = useNavigation();
   const { t } = useTranslation();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [mantraReps, setMantraReps] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -111,6 +113,12 @@ useEffect(() => {
     dispatch(fetchDailyPractice(today, locationData.timezone));
   }
 }, [locationLoading, locationData?.timezone]);
+
+useEffect(() => {
+  if (scrollToId) {
+    showToast(t("dailyPracticeSelectList.toastGuide"), 6000);
+  }
+}, [scrollToId]);
 
 // Debug: Track login state changes
 useEffect(() => {

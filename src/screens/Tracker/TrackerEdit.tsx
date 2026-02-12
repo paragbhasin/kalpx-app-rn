@@ -251,20 +251,9 @@ const TrackerEdit = ({ route }) => {
 
     if (isFromPractice) {
       setIsAddMoreScreen(true);
-      showToast(t("dailyPracticeSelectList.toastGuide"), 5000);
-    } else if (
-      route?.params?.selectedmantra ||
-      route?.params?.selectedMantra ||
-      route?.params?.selectedSankalp
-    ) {
-      showToast(t("dailyPracticeSelectList.toastGuide"), 5000);
+      // showToast(t("dailyPracticeSelectList.toastGuide"), 5000);
     }
-  }, [
-    fromRoute,
-    route?.params?.selectedmantra,
-    route?.params?.selectedMantra,
-    route?.params?.selectedSankalp,
-  ]);
+  }, [fromRoute]);
 
   useEffect(() => {
     if (autoCategory === "daily-sankalp") {

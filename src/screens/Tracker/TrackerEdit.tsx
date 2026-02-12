@@ -1532,8 +1532,8 @@ const TrackerEdit = ({ route }) => {
                         onPress={() => handleRemoveFromRoutine(item)}
                         style={{
                           position: "absolute",
-                          top: 36,
-                          right: 6,
+                          right: 2,
+                          top: 15,
                           backgroundColor: Colors.Colors.Yellow,
                           borderRadius: 6,
                           padding: 4,

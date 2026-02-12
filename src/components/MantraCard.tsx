@@ -1015,7 +1015,7 @@ const styles = StyleSheet.create({
     // marginLeft: 8,
     justifyContent: "center",
     alignItems: "center",
-    marginTop: 20,
+    marginTop: 15,
     // width: "45%",
   },
 

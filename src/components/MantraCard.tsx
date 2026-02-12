@@ -34,6 +34,7 @@ const MantraCard = ({
   viewOnly = false,
   onAddToMyPractice = null,
   singleItem = null,
+  onClose = null,
 }) => {
   const navigation: any = useNavigation();
   const { i18n, t } = useTranslation();
@@ -203,11 +204,11 @@ const MantraCard = ({
         const activeMantra = filteredMantras[activeIndex];
         const repsOrdered = currentMantra
           ? [
-              currentMantra.suggested_reps,
-              ...suggestedRepsList.filter(
-                (r) => r !== currentMantra.suggested_reps,
-              ),
-            ]
+            currentMantra.suggested_reps,
+            ...suggestedRepsList.filter(
+              (r) => r !== currentMantra.suggested_reps,
+            ),
+          ]
           : [];
 
         const translated = getTranslatedPractice(currentMantra, t);
@@ -338,6 +339,30 @@ const MantraCard = ({
                             />
                           </TouchableOpacity>
                         </View>
+                      </View>
+                    )}
+                    {viewOnly && onClose && (
+                      <View
+                        style={{
+                          position: "absolute",
+                          right: 22,
+                          top: 5,
+                          zIndex: 999,
+                        }}
+                      >
+                        <TouchableOpacity
+                          onPress={onClose}
+                          style={{
+                            width: 20,
+                            height: 20,
+                            borderRadius: 12,
+                            backgroundColor: "#333",
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
+                          <Icon name="close" size={18} color="#fff" />
+                        </TouchableOpacity>
                       </View>
                     )}
                     <View
@@ -473,9 +498,9 @@ const MantraCard = ({
                                     borderWidth: 1,
                                   },
                                   isLocked &&
-                                    !selected && {
-                                      opacity: 0.3,
-                                    },
+                                  !selected && {
+                                    opacity: 0.3,
+                                  },
                                 ]}
                               >
                                 <TextComponent

@@ -47,6 +47,7 @@ const SankalpCard = ({
   viewOnly = false,
   onAddToMyPractice = null,
   singleItem = null,
+  onClose = null,
 }) => {
   const navigation: any = useNavigation();
   const { t, i18n } = useTranslation();
@@ -298,6 +299,30 @@ const SankalpCard = ({
                         </TouchableOpacity>
                       </View>
                     </>
+                  )}
+                  {viewOnly && onClose && (
+                    <View
+                      style={{
+                        position: "absolute",
+                        right: 22,
+                        top: 5,
+                        zIndex: 999,
+                      }}
+                    >
+                      <TouchableOpacity
+                        onPress={onClose}
+                        style={{
+                          width: 20,
+                          height: 20,
+                          borderRadius: 12,
+                          backgroundColor: "#333",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Icon name="close" size={18} color="#fff" />
+                      </TouchableOpacity>
+                    </View>
                   )}
                   <TextComponent
                     type="cardText"

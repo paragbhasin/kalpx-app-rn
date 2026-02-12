@@ -2,12 +2,12 @@
 
 /* --- PART 1 START --- */
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation } from "@react-navigation/native";
 import { AnyAction } from "@reduxjs/toolkit";
-import React, { useEffect, useMemo, useRef, useState, memo } from "react";
+import React, { memo, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  Animated,
   FlatList,
   Image,
   SafeAreaView,
@@ -15,27 +15,26 @@ import {
   StatusBar,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useDispatch, useSelector } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
-import { useScrollContext } from "../../context/ScrollContext";
-import { Animated } from "react-native";
 import AddPracticeInputModal from "../../components/AddPracticeInputModal";
 import CartModal from "../../components/CartModal";
-import CommunityAuthModal from "../../components/CommunityAuthModal";
 import Colors from "../../components/Colors";
+import CommunityAuthModal from "../../components/CommunityAuthModal";
 import ConfirmDiscardModal from "../../components/ConfirmDiscardModal";
 import DailyPracticeDetailsCard from "../../components/DailyPracticeDetailsCard";
 import DailyPracticeMantraCard from "../../components/DailyPracticeMantraCard";
-import MantraCard from "../../components/MantraCard";
-import SankalpCard from "../../components/SankalpCard";
 import LoadingButton from "../../components/LoadingButton";
 import LoadingOverlay from "../../components/LoadingOverlay";
+import MantraCard from "../../components/MantraCard";
+import SankalpCard from "../../components/SankalpCard";
 import TextComponent from "../../components/TextComponent";
 import i18n from "../../config/i18n";
 import { useCart } from "../../context/CartContext";
+import { useScrollContext } from "../../context/ScrollContext";
 import { CATALOGS } from "../../data/mantras";
 import { SANATAN_PRACTICES_FINAL } from "../../data/sanatanPractices";
 import { DAILY_SANKALPS } from "../../data/sankalps";
@@ -47,64 +46,76 @@ import styles from "./TrackerEditStyles";
 
 // --- Sub-components for better performance ---
 
-const PracticeCardItem = memo(({ item, isAdded, onToggle, onInfo, t, capsuleHeight }: any) => {
-  const translated = getTranslatedPractice(item, t);
-  const displayName = translated.name || item.title || item.name || t("sadanaTracker.unnamedPractice");
-  const displayDescription = translated.desc || item.description || "";
-  const isMantraOrSankalp = ["daily-mantra", "daily-sankalp"].includes(item.category);
+const PracticeCardItem = memo(
+  ({ item, isAdded, onToggle, onInfo, t, capsuleHeight }: any) => {
+    const translated = getTranslatedPractice(item, t);
+    const displayName =
+      translated.name ||
+      item.title ||
+      item.name ||
+      t("sadanaTracker.unnamedPractice");
+    const displayDescription = translated.desc || item.description || "";
+    const isMantraOrSankalp = ["daily-mantra", "daily-sankalp"].includes(
+      item.category,
+    );
 
-  return (
-    <View style={[
-      styles.simpleCard,
-      {
-        height: isMantraOrSankalp ? capsuleHeight : undefined,
-        backgroundColor: "#FFFFFF",
-        borderColor: "#CC9B2F",
-        borderWidth: 1,
-        marginBottom: 12,
-      }
-    ]}>
-      <TouchableOpacity
-        onPress={() => onToggle(item)}
-        style={{
-          width: 22,
-          height: 22,
-          borderWidth: 1,
-          borderColor: isAdded ? "#D4A017" : "#000000",
-          borderRadius: 4,
-          backgroundColor: isAdded ? "#D4A017" : "#FFFFFF",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
+    return (
+      <View
+        style={[
+          styles.simpleCard,
+          {
+            height: isMantraOrSankalp ? capsuleHeight : undefined,
+            backgroundColor: "#FFFFFF",
+            borderColor: "#CC9B2F",
+            borderWidth: 1,
+            marginBottom: 12,
+          },
+        ]}
       >
-        {isAdded && (
-          <Ionicons name="checkmark" size={16} color="#FFFFFF" />
-        )}
-      </TouchableOpacity>
-
-      <View style={{ flex: 1, marginLeft: 14 }}>
-        <TextComponent type="boldText" style={styles.cardTitle} numberOfLines={1}>
-          {item.category === 'sanatan' && item.icon ? `${item.icon} ` : ""}
-          {displayName}
-        </TextComponent>
-
-        <TextComponent style={styles.cardSubtitle} numberOfLines={2}>
-          {displayDescription}
-        </TextComponent>
-      </View>
-
-      <View style={styles.cardRightIcons}>
-        <TouchableOpacity onPress={() => onInfo(item)}>
-          <Ionicons
-            name="information-circle-outline"
-            size={26}
-            color="#D4A017"
-          />
+        <TouchableOpacity
+          onPress={() => onToggle(item)}
+          style={{
+            width: 22,
+            height: 22,
+            borderWidth: 1,
+            borderColor: isAdded ? "#D4A017" : "#000000",
+            borderRadius: 4,
+            backgroundColor: isAdded ? "#D4A017" : "#FFFFFF",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {isAdded && <Ionicons name="checkmark" size={16} color="#FFFFFF" />}
         </TouchableOpacity>
+
+        <View style={{ flex: 1, marginLeft: 14 }}>
+          <TextComponent
+            type="boldText"
+            style={styles.cardTitle}
+            numberOfLines={1}
+          >
+            {item.category === "sanatan" && item.icon ? `${item.icon} ` : ""}
+            {displayName}
+          </TextComponent>
+
+          <TextComponent style={styles.cardSubtitle} numberOfLines={2}>
+            {displayDescription}
+          </TextComponent>
+        </View>
+
+        <View style={styles.cardRightIcons}>
+          <TouchableOpacity onPress={() => onInfo(item)}>
+            <Ionicons
+              name="information-circle-outline"
+              size={26}
+              color="#D4A017"
+            />
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
-  );
-});
+    );
+  },
+);
 
 const initialCategories = [
   {
@@ -175,12 +186,11 @@ const TrackerEdit = ({ route }) => {
 
   const CAPSULE_ITEM_HEIGHT = 96; // adjust if needed (90–110 is fine)
 
-
   // const [selectedCategory, setSelectedCategory] = useState(
   //   initialCategories[0].key
   // );
   const [selectedCategory, setSelectedCategory] = useState(
-    route?.params?.autoSelectCategory ?? initialCategories[0].key
+    route?.params?.autoSelectCategory ?? initialCategories[0].key,
   );
   const [selectedPractices, setSelectedPractices] = useState<any[]>([]);
   const [selectedType, setSelectedType] = useState("mantra");
@@ -203,9 +213,10 @@ const TrackerEdit = ({ route }) => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [pendingSubmitPayload, setPendingSubmitPayload] = useState<any>(null);
 
-  const user = useSelector((state: RootState) => state.login?.user || state.socialLoginReducer?.user);
+  const user = useSelector(
+    (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
+  );
   const isUserLoggedIn = !!user;
-
 
   // const [sanatanRenderCount, setSanatanRenderCount] = useState(15);
 
@@ -213,7 +224,7 @@ const TrackerEdit = ({ route }) => {
   const resumeData = route?.params?.resumeData;
 
   const dailyPractice: any = useSelector(
-    (state: RootState) => state.dailyPracticeReducer
+    (state: RootState) => state.dailyPracticeReducer,
   );
 
   const {
@@ -226,7 +237,7 @@ const TrackerEdit = ({ route }) => {
     resetFromMerged,
     clearCart,
     removedApiIds,
-    setRemovedApiIds,   // ← ADD THIS
+    setRemovedApiIds, // ← ADD THIS
   } = useCart();
 
   // console.log("localPractices >>>>>", JSON.stringify(localPractices));
@@ -239,8 +250,6 @@ const TrackerEdit = ({ route }) => {
     }
   }, [fromRoute]);
 
-
-
   useEffect(() => {
     if (autoCategory === "daily-sankalp") {
       setSelectedCategory("daily-sankalp");
@@ -248,17 +257,11 @@ const TrackerEdit = ({ route }) => {
   }, [autoCategory]);
 
   const getTagFromItem = (item: any) => {
-    if (
-      item.source === "mantra" ||
-      item.id?.startsWith("mantra.")
-    ) {
+    if (item.source === "mantra" || item.id?.startsWith("mantra.")) {
       return "mantra";
     }
 
-    if (
-      item.source === "sankalp" ||
-      item.id?.startsWith("sankalp.")
-    ) {
+    if (item.source === "sankalp" || item.id?.startsWith("sankalp.")) {
       return "sankalp";
     }
 
@@ -290,8 +293,8 @@ const TrackerEdit = ({ route }) => {
   const apiPracticeIdSet = useMemo(() => {
     return new Set(
       (dailyPractice?.data?.active_practices || []).map(
-        (p: any) => p.practice_id ?? p.id
-      )
+        (p: any) => p.practice_id ?? p.id,
+      ),
     );
   }, [dailyPractice]);
 
@@ -300,19 +303,22 @@ const TrackerEdit = ({ route }) => {
       ...p,
       id: p.id ?? `sanatan_${index}`,
       practice_id: p.practice_id ?? p.id ?? `sanatan_${index}`,
-      category: 'sanatan'
+      category: "sanatan",
     }));
 
-    return safeList.filter(
-      (p: any) =>
-        !apiPracticeIdSet.has(p.practice_id)
-    ).filter((practice) => {
-      const nameKey = `practices.${practice.id}.name`;
-      const n = t(nameKey, { defaultValue: practice.name ?? "" }).toLowerCase();
-      const d = t(`practices.${practice.id}.description`, { defaultValue: practice.description ?? "" }).toLowerCase();
-      const s = searchText.toLowerCase();
-      return n.includes(s) || d.includes(s);
-    });
+    return safeList
+      .filter((p: any) => !apiPracticeIdSet.has(p.practice_id))
+      .filter((practice) => {
+        const nameKey = `practices.${practice.id}.name`;
+        const n = t(nameKey, {
+          defaultValue: practice.name ?? "",
+        }).toLowerCase();
+        const d = t(`practices.${practice.id}.description`, {
+          defaultValue: practice.description ?? "",
+        }).toLowerCase();
+        const s = searchText.toLowerCase();
+        return n.includes(s) || d.includes(s);
+      });
   }, [apiPracticeIdSet, searchText, t]);
 
   const mantraList = useMemo(() => {
@@ -321,11 +327,12 @@ const TrackerEdit = ({ route }) => {
         (item: any) =>
           item?.category === selectedCategory &&
           item?.id?.startsWith("mantra.") &&
-          !apiPracticeIdSet.has(item.id)     // 🔥 FILTER
+          !apiPracticeIdSet.has(item.id), // 🔥 FILTER
       )
       .filter((item: any) =>
-        item.title?.toLowerCase().includes(searchText.toLowerCase())
-      ).map((item: any) => ({ ...item, category: selectedCategory }));
+        item.title?.toLowerCase().includes(searchText.toLowerCase()),
+      )
+      .map((item: any) => ({ ...item, category: selectedCategory }));
   }, [allData, selectedCategory, searchText, apiPracticeIdSet]);
 
   // const hasSelectionInCurrentCategory = useMemo(() => {
@@ -334,19 +341,18 @@ const TrackerEdit = ({ route }) => {
   //   );
   // }, [localPractices, selectedCategory]);
 
-
-
   const sankalpList = useMemo(() => {
     return Object.values(allData)
       .filter(
         (item: any) =>
           item?.category === selectedCategory &&
           item?.id?.startsWith("sankalp.") &&
-          !apiPracticeIdSet.has(item.id)
+          !apiPracticeIdSet.has(item.id),
       )
       .filter((item: any) =>
-        item.title?.toLowerCase().includes(searchText.toLowerCase())
-      ).map((item: any) => ({ ...item, category: selectedCategory }));
+        item.title?.toLowerCase().includes(searchText.toLowerCase()),
+      )
+      .map((item: any) => ({ ...item, category: selectedCategory }));
   }, [allData, selectedCategory, searchText, apiPracticeIdSet]);
 
   const practiceList = useMemo(() => {
@@ -355,11 +361,12 @@ const TrackerEdit = ({ route }) => {
         (item: any) =>
           item?.category === selectedCategory &&
           item?.id?.startsWith("practice.") &&
-          !apiPracticeIdSet.has(item.id)
+          !apiPracticeIdSet.has(item.id),
       )
       .filter((item: any) =>
-        item.title?.toLowerCase().includes(searchText.toLowerCase())
-      ).map((item: any) => ({ ...item, category: selectedCategory }));
+        item.title?.toLowerCase().includes(searchText.toLowerCase()),
+      )
+      .map((item: any) => ({ ...item, category: selectedCategory }));
   }, [allData, selectedCategory, searchText, apiPracticeIdSet]);
 
   const normalizePractice = (p: any) => ({
@@ -393,7 +400,6 @@ const TrackerEdit = ({ route }) => {
     };
   };
 
-
   const apiAndResumeList = useMemo(() => {
     const apiList =
       dailyPractice?.data?.active_practices?.map(normalizePractice) || [];
@@ -419,7 +425,8 @@ const TrackerEdit = ({ route }) => {
 
   const mergedPractices = useMemo(() => {
     return apiAndResumeList.filter(
-      (p: any) => !removedApiIds.has(String(p.practice_id ?? p.id ?? p.unified_id))
+      (p: any) =>
+        !removedApiIds.has(String(p.practice_id ?? p.id ?? p.unified_id)),
     );
   }, [apiAndResumeList, removedApiIds]);
 
@@ -445,18 +452,12 @@ const TrackerEdit = ({ route }) => {
     }
   }, [apiAndResumeList, allowHydrate, hasUnsavedChanges]);
 
-
   const dailyMantraList = useMemo(() => {
     const langKey = i18n.language.split("-")[0];
     const allMantras = CATALOGS[langKey] || CATALOGS.en;
 
     return allMantras.filter((m: any) => {
-      const title =
-        m.title ||
-        m.name ||
-        m.iast ||
-        m.devanagari ||
-        "";
+      const title = m.title || m.name || m.iast || m.devanagari || "";
 
       return title.toLowerCase().includes(searchText.toLowerCase());
     });
@@ -464,46 +465,42 @@ const TrackerEdit = ({ route }) => {
 
   const dailySankalpList = useMemo(() => {
     return DAILY_SANKALPS.filter((s: any) => {
-      const text =
-        s.short_text ||
-        s.tooltip ||
-        "";
+      const text = s.short_text || s.tooltip || "";
 
       return text.toLowerCase().includes(searchText.toLowerCase());
     });
   }, [searchText]);
 
   const normalizedMantras = useMemo(() => {
-    return dailyMantraList.map((m: any, index) => {
-      const translated = getTranslatedPractice(m, t);
-      return {
-        ...m,
-        id: m.id || `mantra_${index}`,
-        practice_id: m.id || `mantra_${index}`,
-        title: translated.name,
-        description: translated.desc,
-        category: "daily-mantra",
-      };
-    }).filter(
-      (m: any) => !apiPracticeIdSet.has(m.practice_id)
-    );
+    return dailyMantraList
+      .map((m: any, index) => {
+        const translated = getTranslatedPractice(m, t);
+        return {
+          ...m,
+          id: m.id || `mantra_${index}`,
+          practice_id: m.id || `mantra_${index}`,
+          title: translated.name,
+          description: translated.desc,
+          category: "daily-mantra",
+        };
+      })
+      .filter((m: any) => !apiPracticeIdSet.has(m.practice_id));
   }, [dailyMantraList, apiPracticeIdSet, t]);
 
-
   const normalizedSankalps = useMemo(() => {
-    return dailySankalpList.map((s: any, index) => {
-      const translated = getTranslatedPractice(s, t);
-      return {
-        ...s,
-        id: s.id || `sankalp_${index}`,
-        practice_id: s.id || `sankalp_${index}`,
-        title: translated.name,
-        description: translated.desc,
-        category: "daily-sankalp",
-      };
-    }).filter(
-      (s: any) => !apiPracticeIdSet.has(s.practice_id)
-    );
+    return dailySankalpList
+      .map((s: any, index) => {
+        const translated = getTranslatedPractice(s, t);
+        return {
+          ...s,
+          id: s.id || `sankalp_${index}`,
+          practice_id: s.id || `sankalp_${index}`,
+          title: translated.name,
+          description: translated.desc,
+          category: "daily-sankalp",
+        };
+      })
+      .filter((s: any) => !apiPracticeIdSet.has(s.practice_id));
   }, [dailySankalpList, apiPracticeIdSet, t]);
 
   useEffect(() => {
@@ -528,7 +525,7 @@ const TrackerEdit = ({ route }) => {
     console.log("🔑 Looking for sankalp with id:", unifiedId);
 
     const normalizedItem = normalizedSankalps.find(
-      (s: any) => s.id === unifiedId
+      (s: any) => s.id === unifiedId,
     );
 
     if (!normalizedItem) {
@@ -557,7 +554,7 @@ const TrackerEdit = ({ route }) => {
         (p: any) =>
           p.unified_id === unifiedId ||
           p.practice_id === unifiedId ||
-          p.id === unifiedId
+          p.id === unifiedId,
       );
 
       if (!alreadySelected) {
@@ -566,7 +563,6 @@ const TrackerEdit = ({ route }) => {
       }
       return prev;
     });
-
   }, [
     isAddMoreScreen,
     selectedCategory,
@@ -587,7 +583,7 @@ const TrackerEdit = ({ route }) => {
     const unifiedId = selectedMantraFromRoute.id;
 
     const normalizedItem = normalizedMantras.find(
-      (m: any) => m.id === unifiedId
+      (m: any) => m.id === unifiedId,
     );
 
     if (!normalizedItem) return;
@@ -608,7 +604,7 @@ const TrackerEdit = ({ route }) => {
         (p: any) =>
           p.unified_id === unifiedId ||
           p.practice_id === unifiedId ||
-          p.id === unifiedId
+          p.id === unifiedId,
       );
 
       if (!alreadySelected) {
@@ -640,7 +636,7 @@ const TrackerEdit = ({ route }) => {
     }
 
     const index = normalizedMantras.findIndex(
-      (m: any) => m.id === selectedMantraFromRoute.id
+      (m: any) => m.id === selectedMantraFromRoute.id,
     );
 
     if (index >= 0) {
@@ -654,8 +650,12 @@ const TrackerEdit = ({ route }) => {
         hasAutoScrolledRef.current = true;
       });
     }
-  }, [isAddMoreScreen, selectedCategory, normalizedMantras, selectedMantraFromRoute]);
-
+  }, [
+    isAddMoreScreen,
+    selectedCategory,
+    normalizedMantras,
+    selectedMantraFromRoute,
+  ]);
 
   // useEffect(() => {
   //   if (
@@ -682,17 +682,17 @@ const TrackerEdit = ({ route }) => {
 
   useEffect(() => {
     if (
-      !isAddMoreScreen ||                       // must be on Add To My Practice
+      !isAddMoreScreen || // must be on Add To My Practice
       selectedCategory !== "daily-sankalp" ||
       !selectedSankalpFromRoute ||
       !normalizedSankalps.length ||
-      hasAutoScrolledRef.current                // prevent repeat
+      hasAutoScrolledRef.current // prevent repeat
     ) {
       return;
     }
 
     const index = normalizedSankalps.findIndex(
-      (s: any) => s.id === selectedSankalpFromRoute.id
+      (s: any) => s.id === selectedSankalpFromRoute.id,
     );
 
     if (index >= 0) {
@@ -715,13 +715,20 @@ const TrackerEdit = ({ route }) => {
 
   // Debug: Track login state changes
   useEffect(() => {
-    console.log("👤 TrackerEdit: User login state changed:", { isUserLoggedIn, user: !!user, hasPendingPayload: !!pendingSubmitPayload });
+    console.log("👤 TrackerEdit: User login state changed:", {
+      isUserLoggedIn,
+      user: !!user,
+      hasPendingPayload: !!pendingSubmitPayload,
+    });
   }, [isUserLoggedIn, pendingSubmitPayload]);
 
   // ✅ Auto-submit after authentication
   useEffect(() => {
     if (isUserLoggedIn && pendingSubmitPayload && !loading) {
-      console.log("🚀 Auto-submit triggered (TrackerEdit)!", pendingSubmitPayload);
+      console.log(
+        "🚀 Auto-submit triggered (TrackerEdit)!",
+        pendingSubmitPayload,
+      );
 
       const handleAutoSubmit = async () => {
         setLoading(true);
@@ -730,19 +737,21 @@ const TrackerEdit = ({ route }) => {
         // CartModal submission
         if (pendingSubmitPayload.cartList) {
           console.log("📥 Fetching tracker data for cart submission...");
-          dispatch(getDailyDharmaTracker(async (trackerRes) => {
-            if (trackerRes.success) {
-              submitCartToServer(pendingSubmitPayload.cartList);
-            }
-            setPendingSubmitPayload(null);
-          }));
+          dispatch(
+            getDailyDharmaTracker(async (trackerRes) => {
+              if (trackerRes.success) {
+                submitCartToServer(pendingSubmitPayload.cartList);
+              }
+              setPendingSubmitPayload(null);
+            }),
+          );
         }
         // Confirm navigation
         else if (pendingSubmitPayload.practices) {
           setPendingSubmitPayload(null);
           navigation.navigate("ConfirmDailyPractices", {
             practices: pendingSubmitPayload.practices,
-            trackerEdit: true
+            trackerEdit: true,
           });
           setLoading(false);
         }
@@ -752,18 +761,12 @@ const TrackerEdit = ({ route }) => {
     }
   }, [isUserLoggedIn, pendingSubmitPayload]);
 
-
-
   const apiPractices = dailyPractice?.data?.active_practices ?? [];
-
-
-
 
   // API practices (still active, excluding removed ones)
   const activeApiPractices = useMemo(() => {
     return apiPractices.filter(
-      (api: any) =>
-        !removedApiIds.has(api.practice_id ?? api.id)
+      (api: any) => !removedApiIds.has(api.practice_id ?? api.id),
     );
   }, [apiPractices, removedApiIds]);
 
@@ -771,10 +774,7 @@ const TrackerEdit = ({ route }) => {
   const addedLocalPractices = useMemo(() => {
     return localPractices.filter(
       (lp: any) =>
-        !apiPractices.some(
-          (api: any) =>
-            api.practice_id === lp.practice_id
-        )
+        !apiPractices.some((api: any) => api.practice_id === lp.practice_id),
     );
   }, [localPractices, apiPractices]);
 
@@ -786,7 +786,7 @@ const TrackerEdit = ({ route }) => {
         (p) =>
           p.unified_id === unifiedId ||
           p.practice_id === unifiedId ||
-          p.id === unifiedId
+          p.id === unifiedId,
       );
 
       if (exists) {
@@ -794,7 +794,7 @@ const TrackerEdit = ({ route }) => {
           (p) =>
             p.unified_id !== unifiedId &&
             p.practice_id !== unifiedId &&
-            p.id !== unifiedId
+            p.id !== unifiedId,
         );
       }
 
@@ -816,7 +816,7 @@ const TrackerEdit = ({ route }) => {
       (p) =>
         p.unified_id === unifiedId ||
         p.practice_id === unifiedId ||
-        p.id === unifiedId
+        p.id === unifiedId,
     );
   };
 
@@ -830,14 +830,20 @@ const TrackerEdit = ({ route }) => {
       : selectedType === "sankalp"
         ? sankalpList
         : practiceList;
-  }, [selectedCategory, selectedType, sanatanList, normalizedMantras, normalizedSankalps, mantraList, sankalpList, practiceList]);
+  }, [
+    selectedCategory,
+    selectedType,
+    sanatanList,
+    normalizedMantras,
+    normalizedSankalps,
+    mantraList,
+    sankalpList,
+    practiceList,
+  ]);
 
   const hasSelectionInCurrentCategory = useMemo(() => {
-    return selectedPractices.some(
-      (p) => p.category === selectedCategory
-    );
+    return selectedPractices.some((p) => p.category === selectedCategory);
   }, [selectedPractices, selectedCategory]);
-
 
   //   const toggleAddItem = (item: any) => {
   //     const unifiedId = item.practice_id ?? item.id;
@@ -849,13 +855,12 @@ const TrackerEdit = ({ route }) => {
   //     x.id === unifiedId
   // );
 
-
   //     if (exists) {
   //       removePractice(unifiedId);
   //       setHasUnsavedChanges(true);
   //     } else {
   //       // Ask for reps/day
-  //        setAllowHydrate(false); 
+  //        setAllowHydrate(false);
   //          safeAddPractice({
   //     ...item,
   //     unified_id: unifiedId,
@@ -877,9 +882,7 @@ const TrackerEdit = ({ route }) => {
 
   const recentlyAdded = localPractices.filter(
     (item: any) =>
-      !apiPractices.some(
-        (x: any) => x.practice_id === item.practice_id
-      )
+      !apiPractices.some((x: any) => x.practice_id === item.practice_id),
   );
 
   const handleSavePracticeInput = ({ reps, day }: any) => {
@@ -899,9 +902,7 @@ const TrackerEdit = ({ route }) => {
   const submitCartToServer = (practicesList: any[]) => {
     return new Promise((resolve, reject) => {
       const unique = Array.from(
-        new Map(
-          practicesList.map((p) => [p.id || p.practice_id, p])
-        ).values()
+        new Map(practicesList.map((p) => [p.id || p.practice_id, p])).values(),
       );
 
       const payload = {
@@ -941,14 +942,16 @@ const TrackerEdit = ({ route }) => {
             dispatch(getDailyDharmaTracker((res) => { }));
 
             setHasUnsavedChanges(false);
-            navigation.navigate("TrackerTabs", { screen: "Tracker", fromSetup: true });
+            navigation.navigate("TrackerTabs", {
+              screen: "Tracker",
+              fromSetup: true,
+            });
             resolve(res);
-          }
-          else {
+          } else {
             console.log("❌ Error saving:", res.error);
             reject(res.error);
           }
-        })
+        }),
       );
     });
   };
@@ -963,7 +966,12 @@ const TrackerEdit = ({ route }) => {
   };
 
   const onShowDetails = (item: any, categoryItem?: any) => {
-    const selectedCat = categoryItem || initialCategories.find(c => c.key === (item.category || selectedCategory)) || initialCategories[0];
+    const selectedCat =
+      categoryItem ||
+      initialCategories.find(
+        (c) => c.key === (item.category || selectedCategory),
+      ) ||
+      initialCategories[0];
     setDetailsCategoryItem({
       ...selectedCat,
       key: selectedCat.key,
@@ -986,7 +994,7 @@ const TrackerEdit = ({ route }) => {
     };
 
     const isEditMode = localPractices.some(
-      (p: any) => p.practice_id === item.practice_id
+      (p: any) => p.practice_id === item.practice_id,
     );
 
     // Check if this is a daily-mantra or daily-sankalp
@@ -1015,18 +1023,19 @@ const TrackerEdit = ({ route }) => {
 
           <ScrollView
             style={{ flex: 1, marginTop: 10 }}
-            contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+            contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
             showsVerticalScrollIndicator={false}
           >
             <MantraCard
               practiceTodayData={{
                 started: { mantra: true },
-                ids: { mantra: raw?.practice_id || raw?.id }
+                ids: { mantra: raw?.practice_id || raw?.id },
               }}
               onPressChantMantra={() => { }}
               DoneMantraCalled={() => { }}
               viewOnly={true}
               singleItem={item}
+              onClose={() => setShowDetails(false)}
             />
           </ScrollView>
         </View>
@@ -1058,18 +1067,19 @@ const TrackerEdit = ({ route }) => {
 
           <ScrollView
             style={{ flex: 1, marginTop: 10 }}
-            contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+            contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
             showsVerticalScrollIndicator={false}
           >
             <SankalpCard
               practiceTodayData={{
                 started: { sankalp: true },
-                ids: { sankalp: raw?.practice_id || raw?.id }
+                ids: { sankalp: raw?.practice_id || raw?.id },
               }}
               onPressStartSankalp={() => { }}
               onCompleteSankalp={() => { }}
               viewOnly={true}
               singleItem={item}
+              onClose={() => setShowDetails(false)}
             />
           </ScrollView>
         </View>
@@ -1133,24 +1143,20 @@ const TrackerEdit = ({ route }) => {
 
   // Data logic moved to useMemo hooks above.
 
-
-
   const handleRemoveFromRoutine = (item: any) => {
     setAllowHydrate(false);
     const practiceId = item.practice_id ?? item.id ?? item.unified_id;
 
     const isApi = apiPractices.some(
-      (p: any) => String(p.practice_id ?? p.id) === String(practiceId)
+      (p: any) => String(p.practice_id ?? p.id) === String(practiceId),
     );
     if (isApi) {
-      setAllowHydrate(false);          // 🔒 STOP resetFromMerged
-      hasHydratedRef.current = true;  // 🔒 prevent future hydration
+      setAllowHydrate(false); // 🔒 STOP resetFromMerged
+      hasHydratedRef.current = true; // 🔒 prevent future hydration
       removeApiPractice(practiceId);
     } else {
       removePractice(item.unified_id ?? practiceId);
     }
-
-
 
     setHasUnsavedChanges(true);
   };
@@ -1163,9 +1169,13 @@ const TrackerEdit = ({ route }) => {
       name: translated.name,
       title: translated.name,
       description: translated.desc,
-      source: item.source ||
-        (item.id?.startsWith("mantra.") ? "mantra" :
-          item.id?.startsWith("sankalp.") ? "sankalp" : "practice"),
+      source:
+        item.source ||
+        (item.id?.startsWith("mantra.")
+          ? "mantra"
+          : item.id?.startsWith("sankalp.")
+            ? "sankalp"
+            : "practice"),
       category: item.category || "",
       reps: item.reps || "",
       day: item.day || t("sadanaTracker.dailyLabel"),
@@ -1175,14 +1185,15 @@ const TrackerEdit = ({ route }) => {
     };
   };
 
-
   const handleConfirmPress = async () => {
-    const itemsToConfirm = isAddMoreScreen ? selectedPractices : addedLocalPractices;
+    const itemsToConfirm = isAddMoreScreen
+      ? selectedPractices
+      : addedLocalPractices;
     console.log("🚀 handleConfirmPress triggered", {
       isAddMoreScreen,
       selectedCount: selectedPractices.length,
       addedCount: addedLocalPractices.length,
-      itemsToConfirmCount: itemsToConfirm.length
+      itemsToConfirmCount: itemsToConfirm.length,
     });
 
     if (itemsToConfirm.length > 0) {
@@ -1190,7 +1201,10 @@ const TrackerEdit = ({ route }) => {
       const newItemsOnly = itemsToConfirm.map((p) => normalizeForConfirm(p));
 
       if (!isUserLoggedIn) {
-        console.log("📦 Storing pending payload (TrackerEdit Confirm):", newItemsOnly);
+        console.log(
+          "📦 Storing pending payload (TrackerEdit Confirm):",
+          newItemsOnly,
+        );
         setPendingSubmitPayload({ practices: newItemsOnly, trackerEdit: true });
         setShowAuthModal(true);
         return;
@@ -1198,7 +1212,7 @@ const TrackerEdit = ({ route }) => {
 
       navigation.navigate("ConfirmDailyPractices", {
         practices: newItemsOnly,
-        trackerEdit: true
+        trackerEdit: true,
       });
       return;
     }
@@ -1211,8 +1225,6 @@ const TrackerEdit = ({ route }) => {
 
   const canSaveRoutine =
     removedApiIds.size > 0 || addedLocalPractices.length > 0;
-
-
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -1254,11 +1266,13 @@ const TrackerEdit = ({ route }) => {
 
       {renderDetailsCard()}
 
-      {isAddMoreScreen ? (
+      {!showDetails && (isAddMoreScreen ? (
         <Animated.FlatList
           ref={selectedCategory === "daily-sankalp" ? sankalpListRef : null}
           data={addMoreData}
-          keyExtractor={(item, index) => `${item.practice_id || item.id}-${index}`}
+          keyExtractor={(item, index) =>
+            `${item.practice_id || item.id}-${index}`
+          }
           onScroll={handleScroll}
           scrollEventThrottle={16}
           showsVerticalScrollIndicator={false}
@@ -1271,7 +1285,7 @@ const TrackerEdit = ({ route }) => {
               });
             });
           }}
-          contentContainerStyle={{ paddingBottom: 170, paddingTop: 10 }}
+          contentContainerStyle={{ paddingBottom: 170, paddingTop: 60 }}
           ListHeaderComponent={
             <View onStartShouldSetResponder={() => true}>
               {/* Header */}
@@ -1331,20 +1345,43 @@ const TrackerEdit = ({ route }) => {
                   />
                 </TouchableOpacity>
               </View>
-              <TextComponent type="mediumText" style={{ color: Colors.Colors.BLACK, textAlign: "center", marginHorizontal: 3, marginTop: 10 }}>
-                {t("sadanaTracker.setupInstruction", { defaultValue: "Select mantra or practices to add to your routine" })}
+              <TextComponent
+                type="mediumText"
+                style={{
+                  color: Colors.Colors.BLACK,
+                  textAlign: "center",
+                  marginHorizontal: 3,
+                  marginTop: 10,
+                }}
+              >
+                {t("sadanaTracker.setupInstruction", {
+                  defaultValue:
+                    "Select mantra or practices to add to your routine",
+                })}
               </TextComponent>
 
               <TextInput
-                placeholder={t("sadanaTracker.searchPlaceholder", { defaultValue: "e.g., Shiva Ashtakam, Vishnu, Tulsi Pooja " })}
+                placeholder={t("sadanaTracker.searchPlaceholder", {
+                  defaultValue: "e.g., Shiva Ashtakam, Vishnu, Tulsi Pooja ",
+                })}
                 placeholderTextColor="#8A8A8A"
                 style={styles.searchInput}
                 value={searchText}
                 onChangeText={setSearchText}
               />
-              <TextComponent type="mediumText" style={{ marginHorizontal: 16, marginVertical: 4, color: Colors.Colors.BLACK, marginTop: 10 }}>
-                {t("sadanaTracker.sadanatext", { defaultValue: "Practices to settle the mind and restore balance." })}
-
+              <TextComponent
+                type="mediumText"
+                style={{
+                  marginHorizontal: 16,
+                  marginVertical: 4,
+                  color: Colors.Colors.BLACK,
+                  marginTop: 10,
+                }}
+              >
+                {t("sadanaTracker.sadanatext", {
+                  defaultValue:
+                    "Practices to settle the mind and restore balance.",
+                })}
 
                 {/* {t(initialCategories.find((c) => c.key === selectedCategory)?.description || "")} */}
               </TextComponent>
@@ -1378,31 +1415,32 @@ const TrackerEdit = ({ route }) => {
                 )}
               />
 
-              {!["sanatan", "daily-mantra", "daily-sankalp"].includes(selectedCategory) && (
-                <View style={styles.typeTabs}>
-                  {["mantra", "sankalp", "practice"].map((type) => (
-                    <TouchableOpacity
-                      key={type}
-                      onPress={() => setSelectedType(type)}
-                      style={[
-                        styles.typeTab,
-                        selectedType === type && styles.typeTabSelected,
-                      ]}
-                    >
-                      <TextComponent
-                        type="cardText"
+              {!["sanatan", "daily-mantra", "daily-sankalp"].includes(
+                selectedCategory,
+              ) && (
+                  <View style={styles.typeTabs}>
+                    {["mantra", "sankalp", "practice"].map((type) => (
+                      <TouchableOpacity
+                        key={type}
+                        onPress={() => setSelectedType(type)}
                         style={[
-                          styles.typeTabText,
-                          selectedType === type &&
-                          styles.typeTabTextSelected,
+                          styles.typeTab,
+                          selectedType === type && styles.typeTabSelected,
                         ]}
                       >
-                        {t(`sadanaTracker.${type}Title`)}
-                      </TextComponent>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
+                        <TextComponent
+                          type="cardText"
+                          style={[
+                            styles.typeTabText,
+                            selectedType === type && styles.typeTabTextSelected,
+                          ]}
+                        >
+                          {t(`sadanaTracker.${type}Title`)}
+                        </TextComponent>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
               <View style={{ height: 16 }} />
             </View>
           }
@@ -1419,7 +1457,9 @@ const TrackerEdit = ({ route }) => {
             </View>
           )}
           ListFooterComponent={
-            <View style={[styles.bottomButtonContainer, { paddingHorizontal: 16 }]}>
+            <View
+              style={[styles.bottomButtonContainer, { paddingHorizontal: 16 }]}
+            >
               <LoadingButton
                 loading={false}
                 text={t("sadanaTracker.addSelectedToRoutine")}
@@ -1428,14 +1468,20 @@ const TrackerEdit = ({ route }) => {
                   await handleConfirmPress();
                 }}
                 style={{
-                  ...styles.button, backgroundColor: hasSelectionInCurrentCategory
+                  ...styles.button,
+                  backgroundColor: hasSelectionInCurrentCategory
                     ? "#D4A017"
                     : "#E0E0E0",
                 }}
                 textStyle={styles.buttonText}
                 showGlobalLoader={true}
               />
-              <TextComponent type="ButtonBottomText" style={{ textAlign: "center", marginTop: 6, marginBottom: 20 }}>{t("sadanaTracker.adjustNextStep")}</TextComponent>
+              <TextComponent
+                type="ButtonBottomText"
+                style={{ textAlign: "center", marginTop: 6, marginBottom: 20 }}
+              >
+                {t("sadanaTracker.adjustNextStep")}
+              </TextComponent>
             </View>
           }
         />
@@ -1457,7 +1503,10 @@ const TrackerEdit = ({ route }) => {
               }}
             >
               {selectedmantra && (
-                <TouchableOpacity onPress={() => navigation.goBack()} style={{ width: 30 }}>
+                <TouchableOpacity
+                  onPress={() => navigation.goBack()}
+                  style={{ width: 30 }}
+                >
                   <Ionicons name="arrow-back" size={26} color="#000" />
                 </TouchableOpacity>
               )}
@@ -1507,12 +1556,16 @@ const TrackerEdit = ({ route }) => {
               </TouchableOpacity>
             </View>
             <View style={{ marginHorizontal: 16 }}>
-              <TextComponent type="subDailyText" style={{}}>{t("sadanaTracker.updateRoutineDesc")}</TextComponent>
+              <TextComponent type="subDailyText" style={{}}>
+                {t("sadanaTracker.updateRoutineDesc")}
+              </TextComponent>
               {/* <TextComponent type="DailyHeaderText">Active Practices ({localPractices.length})</TextComponent>
             <TextComponent type="subDailyText">These will become part of your routine</TextComponent> */}
               {/* ACTIVE API PRACTICES */}
               <TextComponent type="DailyHeaderText">
-                {t("sadanaTracker.activePracticesLabel", { count: activeApiPractices.length })}
+                {t("sadanaTracker.activePracticesLabel", {
+                  count: activeApiPractices.length,
+                })}
               </TextComponent>
               <TextComponent type="subDailyText">
                 {t("sadanaTracker.activePracticesDesc")}
@@ -1535,10 +1588,12 @@ const TrackerEdit = ({ route }) => {
                         onPress={() => {
                           const { data: fullData } = getRawPracticeObject(
                             item.practice_id,
-                            item
+                            item,
                           );
                           setDetailsCategoryItem(
-                            initialCategories.find(c => c.key === item.category)
+                            initialCategories.find(
+                              (c) => c.key === item.category,
+                            ),
                           );
                           setDetailsList([fullData ?? item]);
                           setDetailsIndex(0);
@@ -1572,14 +1627,20 @@ const TrackerEdit = ({ route }) => {
                     type="DailyHeaderText"
                     style={{ marginTop: 20 }}
                   >
-                    {t("sadanaTracker.addedPracticesLabel", { count: addedLocalPractices.length })}
+                    {t("sadanaTracker.addedPracticesLabel", {
+                      count: addedLocalPractices.length,
+                    })}
                   </TextComponent>
                   <TextComponent type="subDailyText">
                     {t("sadanaTracker.addedPracticesDesc")}
                   </TextComponent>
 
                   <View style={{ marginTop: 10 }}>
-                    {console.log("📋 Rendering added practices:", addedLocalPractices.length, addedLocalPractices)}
+                    {console.log(
+                      "📋 Rendering added practices:",
+                      addedLocalPractices.length,
+                      addedLocalPractices,
+                    )}
                     {addedLocalPractices.map((item: any) => {
                       const data = normalizeForMantraCard(item);
 
@@ -1596,10 +1657,12 @@ const TrackerEdit = ({ route }) => {
                             onPress={() => {
                               const { data: fullData } = getRawPracticeObject(
                                 item.practice_id,
-                                item
+                                item,
                               );
                               setDetailsCategoryItem(
-                                initialCategories.find(c => c.key === item.category)
+                                initialCategories.find(
+                                  (c) => c.key === item.category,
+                                ),
                               );
                               setDetailsList([fullData ?? item]);
                               setDetailsIndex(0);
@@ -1636,7 +1699,7 @@ const TrackerEdit = ({ route }) => {
                 alignItems: "center",
                 marginHorizontal: 16,
                 padding: 8,
-                backgroundColor: Colors.Colors.white
+                backgroundColor: Colors.Colors.white,
               }}
             >
               <TextComponent
@@ -1664,10 +1727,15 @@ const TrackerEdit = ({ route }) => {
                   borderColor: "#CC9B2F",
                   borderWidth: 1,
                   flexDirection: "row",
-                  alignItems: "center"
+                  alignItems: "center",
                 }}
               >
-                <Ionicons name="add" size={20} color="#CC9B2F" style={{ marginRight: 2 }} />
+                <Ionicons
+                  name="add"
+                  size={20}
+                  color="#CC9B2F"
+                  style={{ marginRight: 2 }}
+                />
                 <TextComponent
                   type="headerSubBoldText"
                   style={{ color: "#CC9B2F" }}
@@ -1686,10 +1754,15 @@ const TrackerEdit = ({ route }) => {
                   borderRadius: 8,
                   marginTop: 14,
                   flexDirection: "row",
-                  alignItems: "center"
+                  alignItems: "center",
                 }}
               >
-                <Ionicons name="add" size={20} color="#FFFFFF" style={{ marginRight: 2 }} />
+                <Ionicons
+                  name="add"
+                  size={20}
+                  color="#FFFFFF"
+                  style={{ marginRight: 2 }}
+                />
                 <TextComponent
                   type="headerSubBoldText"
                   style={{ color: "#FFFFFF" }}
@@ -1718,10 +1791,21 @@ const TrackerEdit = ({ route }) => {
                 {t("sadanaTracker.saveRoutine")}
               </TextComponent>
             </TouchableOpacity>
-            <TextComponent type="boldText" style={{ color: Colors.Colors.BLACK, alignSelf: "center", textAlign: "center", marginTop: 10, marginBottom: 20 }}>{t("sadanaTracker.saveRoutineNotice")}</TextComponent>
+            <TextComponent
+              type="boldText"
+              style={{
+                color: Colors.Colors.BLACK,
+                alignSelf: "center",
+                textAlign: "center",
+                marginTop: 10,
+                marginBottom: 20,
+              }}
+            >
+              {t("sadanaTracker.saveRoutineNotice")}
+            </TextComponent>
           </>
         </Animated.ScrollView>
-      )}
+      ))}
       <ConfirmDiscardModal
         visible={discardModalVisible}
         onViewCart={() => {
@@ -1756,11 +1840,19 @@ const TrackerEdit = ({ route }) => {
         onClose={() => {
           setShowAuthModal(false);
         }}
-        title={t("trackerEdit.authTitle", { defaultValue: "Save Your Routine" })}
-        description={t("trackerEdit.authDescription", { defaultValue: "Create an account to save your routine" })}
+        title={t("trackerEdit.authTitle", {
+          defaultValue: "Save Your Routine",
+        })}
+        description={t("trackerEdit.authDescription", {
+          defaultValue: "Create an account to save your routine",
+        })}
         benefits={[
-          t("trackerEdit.authBenefit1", { defaultValue: "Track your daily practice" }),
-          t("trackerEdit.authBenefit2", { defaultValue: "Save your custom routine" }),
+          t("trackerEdit.authBenefit1", {
+            defaultValue: "Track your daily practice",
+          }),
+          t("trackerEdit.authBenefit2", {
+            defaultValue: "Save your custom routine",
+          }),
         ]}
       />
       {/* </ImageBackground> */}

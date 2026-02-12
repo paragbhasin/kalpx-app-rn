@@ -326,11 +326,14 @@ const SankalpCard = ({
                   )}
                   <TextComponent
                     type="cardText"
-                    style={{
-                      color: Colors.Colors.blue_text,
-                      textAlign: "center",
-                      marginHorizontal: 10,
-                    }}
+                    style={[
+                      {
+                        color: Colors.Colors.blue_text,
+                        textAlign: "center",
+                        marginHorizontal: 10,
+                      },
+                      viewOnly && { marginTop: 15 },
+                    ]}
                   >
                     {translated.name ||
                       t(currentSankalp.i18n?.short) ||

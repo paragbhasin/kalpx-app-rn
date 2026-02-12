@@ -204,11 +204,11 @@ const MantraCard = ({
         const activeMantra = filteredMantras[activeIndex];
         const repsOrdered = currentMantra
           ? [
-            currentMantra.suggested_reps,
-            ...suggestedRepsList.filter(
-              (r) => r !== currentMantra.suggested_reps,
-            ),
-          ]
+              currentMantra.suggested_reps,
+              ...suggestedRepsList.filter(
+                (r) => r !== currentMantra.suggested_reps,
+              ),
+            ]
           : [];
 
         const translated = getTranslatedPractice(currentMantra, t);
@@ -345,7 +345,7 @@ const MantraCard = ({
                       <View
                         style={{
                           position: "absolute",
-                          right: 22,
+                          right: 5,
                           top: 5,
                           zIndex: 999,
                         }}
@@ -366,10 +366,13 @@ const MantraCard = ({
                       </View>
                     )}
                     <View
-                      style={{
-                        width: "100%",
-                        alignItems: "center",
-                      }}
+                      style={[
+                        {
+                          width: "100%",
+                          alignItems: "center",
+                        },
+                        viewOnly && { marginTop: 15 },
+                      ]}
                     >
                       <TextComponent
                         type="cardText"
@@ -498,9 +501,9 @@ const MantraCard = ({
                                     borderWidth: 1,
                                   },
                                   isLocked &&
-                                  !selected && {
-                                    opacity: 0.3,
-                                  },
+                                    !selected && {
+                                      opacity: 0.3,
+                                    },
                                 ]}
                               >
                                 <TextComponent

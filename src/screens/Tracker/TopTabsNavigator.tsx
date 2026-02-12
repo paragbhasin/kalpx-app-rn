@@ -19,46 +19,40 @@ const Tab: any = createMaterialTopTabNavigator();
 
 const TopTabsNavigator = () => {
   const navigation: any = useNavigation();
-  const route: any = useRoute();   // ⭐ added
+  const route: any = useRoute();
   const navState = useNavigationState((state) => state);
   const { headerY } = useScrollContext();
   const { t } = useTranslation();
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const user = useSelector((state: RootState) => state.login?.user || state.socialLoginReducer?.user);
+  const isLoggedIn = !!user;
+
   const dailyDharmaTracker = useSelector((state: RootState) => state.dailyDharmaTrackerReducer);
   const trackerData = dailyDharmaTracker?.data;
 
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
 
   /** ⭐ STEP 1 — GET SCREEN FROM LOGIN */
-  const initialTab = route?.params?.screen || "Tracker"; // ⭐ default always Tracker
-
-  /** CHECK LOGIN */
-  useEffect(() => {
-    const checkLogin = async () => {
-      const token = await AsyncStorage.getItem("access_token");
-      setIsLoggedIn(!!token);
-    };
-    checkLogin();
-  }, []);
+  const initialTab = route?.params?.screen || "Tracker";
 
   /** 🔥 REFETCH TRACKER DATA WHENEVER SCREEN IS FOCUSED */
   useFocusEffect(
     React.useCallback(() => {
-      dispatch(getDailyDharmaTracker(() => { }));
-    }, [dispatch])
+      if (isLoggedIn) {
+        dispatch(getDailyDharmaTracker(() => { }));
+      }
+    }, [dispatch, isLoggedIn])
   );
 
   const hasActivePractices =
     trackerData === null
       ? true   // ⛔️ assume allowed until data arrives
-      : trackerData.active_practices?.length > 0;
+      : (trackerData?.active_practices?.length || 0) > 0;
 
   const shouldRestrictTabs = (!isLoggedIn || !hasActivePractices) && !route?.params?.fromSetup;
 
+  /** 🔥 AUTO-REDIRECT IF USER TRIES TO OPEN BLOCKED TABS */
   useEffect(() => {
-    if (!trackerData) return; // ⛔️ WAIT
-
     if (!navState || navState.routes.length === 0) return;
 
     const currentScreen = navState.routes[navState.index]?.name;
@@ -69,29 +63,13 @@ const TopTabsNavigator = () => {
     ) {
       navigation.navigate("History");
     }
-  }, [shouldRestrictTabs, navState, trackerData, navigation]);
-
-
-  // /** 🔥 AUTO-REDIRECT IF USER TRIES TO OPEN BLOCKED TABS */
-  // useEffect(() => {
-  //   if (!navState || navState.routes.length === 0) return;
-
-  //   const currentScreen = navState.routes[navState.index]?.name;
-
-  //   if (
-  //     shouldRestrictTabs &&
-  //     (currentScreen === "Tracker" || currentScreen === "Stats")
-  //   ) {
-  //     navigation.navigate("History");
-  //   }
-  // }, [shouldRestrictTabs, navState]);
+  }, [shouldRestrictTabs, navState, navigation]);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: shouldRestrictTabs ? 60 : 54 }]}>
       <Animated.View style={{ flex: 1, transform: [{ translateY: headerY }], marginBottom: -100 }}>
         <Tab.Navigator
           key={shouldRestrictTabs ? "restricted" : "full"}
-          /** ⭐ STEP 2 — APPLY INITIAL TAB LOGIC */
           initialRouteName={shouldRestrictTabs ? "History" : initialTab}
           screenOptions={({ route }) => {
             const isRestricted =
@@ -106,8 +84,11 @@ const TopTabsNavigator = () => {
                 height: 3,
               },
               tabBarLabelStyle: { fontSize: 16, fontWeight: "600" },
-              tabBarStyle: { backgroundColor: "#FFFFFF" },
-              tabBarPress: (e) => {
+              tabBarStyle: {
+                backgroundColor: "#FFFFFF",
+                display: shouldRestrictTabs ? 'none' : 'flex'  // 🔥 HIDE TABS IF NOT LOGGED IN
+              },
+              tabBarPress: (e: any) => {
                 if (isRestricted) e.preventDefault();
               },
             };

@@ -55,7 +55,7 @@ const Profile = () => {
     const parentNav = navigation.getParent();
     parentNav?.reset({
       index: 0,
-      routes: [{ name: "AppDrawer" }],
+      routes: [{ name: "Login" }],
     });
   };
 

@@ -1570,9 +1570,9 @@ const TrackerEdit = ({ route }) => {
                             onChange={undefined}
                             isedit={true}
                             data={data}
-                            tag="added"
+                            tag={getTagFromItem(item)}
                             showIcons={false}
-                            isSelected={true}
+                            isSelected={false}
                             onToggleSelect={() => { }}
                             onPress={() => {
                               const { data: fullData } = getRawPracticeObject(

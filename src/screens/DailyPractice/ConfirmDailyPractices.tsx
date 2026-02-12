@@ -48,7 +48,7 @@ const ConfirmDailyPractices = ({ route }) => {
 
   // console.log("Route data >>>>>", JSON.stringify(route.params))
 
-  const { addPractice, setCartModalVisible } = useCart();
+  const { addPractice, setCartModalVisible, removedApiIds } = useCart();
 
   const { locationData, loading: locationLoading } = useUserLocation();
   const didFetchRef = useRef(false);
@@ -138,7 +138,9 @@ const ConfirmDailyPractices = ({ route }) => {
 
       const rawList: any[] = finalSubmitRef.current || [];
 
-      const normalizedActive = activeApiPractices.map(normalizeApiPractice);
+      const normalizedActive = activeApiPractices
+        .filter((api: any) => !removedApiIds.has(api.practice_id ?? api.id))
+        .map(normalizeApiPractice);
 
       const filteredUser = rawList.filter((rp) => {
         const rpid = rp.practice_id || rp.id;
@@ -511,6 +513,9 @@ const ConfirmDailyPractices = ({ route }) => {
             finalSubmitRef.current = list;
             formik.submitForm().then(() => resolve());
           });
+        }}
+        onBrowseMore={() => {
+          navigation.goBack();
         }}
       />
 

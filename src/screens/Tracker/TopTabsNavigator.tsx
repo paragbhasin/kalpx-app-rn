@@ -6,7 +6,7 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, View, Animated } from "react-native";
 import { useScrollContext } from "../../context/ScrollContext";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
 import Header from "../../components/Header";
 import { RootState } from "../../store";
@@ -25,7 +25,8 @@ const TopTabsNavigator = () => {
   const { t } = useTranslation();
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [trackerData, setTrackerData] = useState(null);
+  const dailyDharmaTracker = useSelector((state: RootState) => state.dailyDharmaTrackerReducer);
+  const trackerData = dailyDharmaTracker?.data;
 
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
 
@@ -41,39 +42,17 @@ const TopTabsNavigator = () => {
     checkLogin();
   }, []);
 
-  /** FETCH TRACKER DATA */
-  /** CHECK LOGIN */
-  useEffect(() => {
-    const checkLogin = async () => {
-      const token = await AsyncStorage.getItem("access_token");
-      setIsLoggedIn(!!token);
-    };
-    checkLogin();
-  }, []);
-
   /** 🔥 REFETCH TRACKER DATA WHENEVER SCREEN IS FOCUSED */
   useFocusEffect(
     React.useCallback(() => {
-      dispatch(
-        getDailyDharmaTracker((res) => {
-          if (res.success) {
-            setTrackerData(res.data);
-          }
-        })
-      );
-    }, [])
+      dispatch(getDailyDharmaTracker(() => { }));
+    }, [dispatch])
   );
-
-
-  /** CONDITIONS */
-  // const hasActivePractices =
-  //   trackerData?.active_practices?.length > 0 ? true : false;
 
   const hasActivePractices =
     trackerData === null
       ? true   // ⛔️ assume allowed until data arrives
       : trackerData.active_practices?.length > 0;
-
 
   const shouldRestrictTabs = (!isLoggedIn || !hasActivePractices) && !route?.params?.fromSetup;
 
@@ -90,7 +69,7 @@ const TopTabsNavigator = () => {
     ) {
       navigation.navigate("History");
     }
-  }, [shouldRestrictTabs, navState, trackerData]);
+  }, [shouldRestrictTabs, navState, trackerData, navigation]);
 
 
   // /** 🔥 AUTO-REDIRECT IF USER TRIES TO OPEN BLOCKED TABS */

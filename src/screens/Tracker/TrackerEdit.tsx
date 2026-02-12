@@ -225,7 +225,8 @@ const TrackerEdit = ({ route }) => {
     setCartModalVisible,
     resetFromMerged,
     clearCart,
-    removedApiIds,   // ← ADD THIS
+    removedApiIds,
+    setRemovedApiIds,   // ← ADD THIS
   } = useCart();
 
   // console.log("localPractices >>>>>", JSON.stringify(localPractices));
@@ -393,7 +394,7 @@ const TrackerEdit = ({ route }) => {
   };
 
 
-  const mergedPractices = useMemo(() => {
+  const apiAndResumeList = useMemo(() => {
     const apiList =
       dailyPractice?.data?.active_practices?.map(normalizePractice) || [];
 
@@ -413,33 +414,36 @@ const TrackerEdit = ({ route }) => {
     apiList.forEach((p) => map.set(String(p.practice_id), p));
     resumeList.forEach((p) => map.set(String(p.practice_id), p));
     selectedList.forEach((p) => map.set(String(p.practice_id), p));
-    return Array.from(map.values()).filter(
+    return Array.from(map.values());
+  }, [dailyPractice, resumeData, selectedmantra]);
+
+  const mergedPractices = useMemo(() => {
+    return apiAndResumeList.filter(
       (p: any) => !removedApiIds.has(String(p.practice_id ?? p.id ?? p.unified_id))
     );
-
-  }, [dailyPractice, resumeData, selectedmantra]);
+  }, [apiAndResumeList, removedApiIds]);
 
   const isSanatan = selectedCategory === "sanatan";
 
   const hasHydratedRef = useRef(false);
 
   useEffect(() => {
-    if (!allowHydrate) return;       // user is editing → don't touch anything
+    if (!allowHydrate || hasUnsavedChanges) return; // Don't sync if user started editing
 
     if (!hasHydratedRef.current) {
-      if (mergedPractices?.length) {
-        resetFromMerged(mergedPractices);
+      if (apiAndResumeList?.length) {
+        resetFromMerged(apiAndResumeList);
         hasHydratedRef.current = true;
         setHasUnsavedChanges(false);
       }
       return;
     }
 
-    if (allowHydrate && mergedPractices?.length) {
-      resetFromMerged(mergedPractices);
+    if (allowHydrate && apiAndResumeList?.length) {
+      resetFromMerged(apiAndResumeList);
       setHasUnsavedChanges(false);
     }
-  }, [mergedPractices, allowHydrate]);
+  }, [apiAndResumeList, allowHydrate, hasUnsavedChanges]);
 
 
   const dailyMantraList = useMemo(() => {
@@ -893,56 +897,60 @@ const TrackerEdit = ({ route }) => {
   };
 
   const submitCartToServer = (practicesList: any[]) => {
-    const unique = Array.from(
-      new Map(
-        practicesList.map((p) => [p.id || p.practice_id, p])
-      ).values()
-    );
+    return new Promise((resolve, reject) => {
+      const unique = Array.from(
+        new Map(
+          practicesList.map((p) => [p.id || p.practice_id, p])
+        ).values()
+      );
 
-    const payload = {
-      practices: unique.map((p: any) => ({
-        practice_id: p.id || p.practice_id,
-        source: p.id?.startsWith("mantra.")
-          ? "mantra"
-          : p.id?.startsWith("sankalp.")
-            ? "sankalp"
-            : "library",
-        category: p.category || detailsCategoryItem?.name || "",
-        name: p.title || p.name || p.text || "",
-        description: p.description || p.summary || p.meaning || "",
-        benefits: p.benefits || [],
-        reps: p.reps || null,
-      })),
-      is_authenticated: true,
-      recaptcha_token: "not_available",
-    };
+      const payload = {
+        practices: unique.map((p: any) => ({
+          practice_id: p.id || p.practice_id,
+          source: p.id?.startsWith("mantra.")
+            ? "mantra"
+            : p.id?.startsWith("sankalp.")
+              ? "sankalp"
+              : "library",
+          category: p.category || detailsCategoryItem?.name || "",
+          name: p.title || p.name || p.text || "",
+          description: p.description || p.summary || p.meaning || "",
+          benefits: p.benefits || [],
+          reps: p.reps || null,
+        })),
+        is_authenticated: true,
+        recaptcha_token: "not_available",
+      };
 
-    setLoading(true);
-    try {
-      categoryRef.current?.scrollToOffset({
-        offset: 0,
-        animated: true,
-      });
-    } catch { }
+      setLoading(true);
+      try {
+        categoryRef.current?.scrollToOffset({
+          offset: 0,
+          animated: true,
+        });
+      } catch { }
 
-    dispatch(
-      submitDailyDharmaSetup(payload, (res: any) => {
-        setLoading(false);
+      dispatch(
+        submitDailyDharmaSetup(payload, (res: any) => {
+          setLoading(false);
 
-        if (res.success) {
-          setAllowHydrate(true);
+          if (res.success) {
+            setAllowHydrate(true);
 
-          // refresh API
-          dispatch(getDailyDharmaTracker((res) => { }));
+            // refresh API
+            dispatch(getDailyDharmaTracker((res) => { }));
 
-          setHasUnsavedChanges(false);
-          navigation.navigate("TrackerTabs", { screen: "Tracker", fromSetup: true });
-        }
-        else {
-          console.log("❌ Error saving:", res.error);
-        }
-      })
-    );
+            setHasUnsavedChanges(false);
+            navigation.navigate("TrackerTabs", { screen: "Tracker", fromSetup: true });
+            resolve(res);
+          }
+          else {
+            console.log("❌ Error saving:", res.error);
+            reject(res.error);
+          }
+        })
+      );
+    });
   };
 
   const handleCategoryPress = (item: any, index: number) => {
@@ -1169,25 +1177,36 @@ const TrackerEdit = ({ route }) => {
 
 
   const handleConfirmPress = async () => {
-    if (!isAddMoreScreen) {
-      setCartModalVisible(true);
-      return;
-    }
-
-    const itemsToConfirm = selectedPractices;
-    const newItemsOnly = itemsToConfirm.map((p) => normalizeForConfirm(p));
-
-    if (!isUserLoggedIn) {
-      console.log("📦 Storing pending payload (TrackerEdit Confirm):", newItemsOnly);
-      setPendingSubmitPayload({ practices: newItemsOnly, trackerEdit: true });
-      setShowAuthModal(true);
-      return;
-    }
-
-    navigation.navigate("ConfirmDailyPractices", {
-      practices: newItemsOnly,
-      trackerEdit: true
+    const itemsToConfirm = isAddMoreScreen ? selectedPractices : addedLocalPractices;
+    console.log("🚀 handleConfirmPress triggered", {
+      isAddMoreScreen,
+      selectedCount: selectedPractices.length,
+      addedCount: addedLocalPractices.length,
+      itemsToConfirmCount: itemsToConfirm.length
     });
+
+    if (itemsToConfirm.length > 0) {
+      console.log("➡️ Navigating to ConfirmDailyPractices");
+      const newItemsOnly = itemsToConfirm.map((p) => normalizeForConfirm(p));
+
+      if (!isUserLoggedIn) {
+        console.log("📦 Storing pending payload (TrackerEdit Confirm):", newItemsOnly);
+        setPendingSubmitPayload({ practices: newItemsOnly, trackerEdit: true });
+        setShowAuthModal(true);
+        return;
+      }
+
+      navigation.navigate("ConfirmDailyPractices", {
+        practices: newItemsOnly,
+        trackerEdit: true
+      });
+      return;
+    }
+
+    if (!isAddMoreScreen && removedApiIds.size > 0) {
+      console.log("🛒 Opening Cart Modal (Removals only)");
+      setCartModalVisible(true);
+    }
   };
 
   const canSaveRoutine =
@@ -1226,7 +1245,7 @@ const TrackerEdit = ({ route }) => {
             return;
           }
 
-          submitCartToServer(list);
+          await submitCartToServer(list);
         }}
         onBrowseMore={() => {
           setIsAddMoreScreen(true);
@@ -1710,7 +1729,7 @@ const TrackerEdit = ({ route }) => {
           setCartModalVisible(true);
         }}
         onLeave={() => {
-          resetFromMerged(mergedPractices);
+          resetFromMerged(apiAndResumeList, true);
           setHasUnsavedChanges(false);
           setDiscardModalVisible(false);
           navigation.goBack();

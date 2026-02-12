@@ -68,7 +68,7 @@ export const CartProvider = ({ children }) => {
   };
 
   // ⭐ Used when user chooses "Leave" in ConfirmDiscardModal
-  const resetFromMerged = (mergedPractices: any[]) => {
+  const resetFromMerged = (mergedPractices: any[], clearRemovals = false) => {
     setLocalPractices((prev) => {
       // 👇 Keep all custom practices that were created in CreateOwnPractice
       const customPractices = prev.filter(
@@ -88,8 +88,9 @@ export const CartProvider = ({ children }) => {
       return [...merged, ...customPractices];
     });
 
-    // Reset removed API ids
-    setRemovedApiIds(new Set());
+    if (clearRemovals) {
+      setRemovedApiIds((prev) => (prev.size === 0 ? prev : new Set()));
+    }
   };
 
 

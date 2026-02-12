@@ -268,6 +268,7 @@
   },
   "common": {
     "cancel": "Cancel",
+    "processing": "Processing...",
     "yes": "Yes",
     "delete": "Delete",
     "confirm": "Confirm",
@@ -1482,7 +1483,7 @@
     "frequency": "Frequency",
     "frequencyHint": "How often will you do this?",
     "next": "Next",
-    "footer": "These settings will shape your routine.",
+    "footer": "These settings help shape your daily spiritual routine.",
     "saving": "Saving...",
     "repsRequired": "Reps are required",
     "digitsOnly": "Digits only",

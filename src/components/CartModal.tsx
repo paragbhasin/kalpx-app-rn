@@ -34,13 +34,13 @@ export default function CartModal({ onConfirm, onBrowseMore }) {
   const { locationData, loading: locationLoading } = useUserLocation();
 
   useEffect(() => {
-    if (!cartModalVisible) return;
+    if (!cartModalVisible || onBrowseMore) return; // Skip fetch if in TrackerEdit
 
     if (!locationLoading && locationData?.timezone) {
       const today = moment().format("YYYY-MM-DD");
       dispatch(fetchDailyPractice(today, locationData.timezone));
     }
-  }, [cartModalVisible, locationLoading, locationData?.timezone]);
+  }, [cartModalVisible, locationLoading, locationData?.timezone, onBrowseMore]);
 
   const dailyPractice = useSelector(
     (state: RootState) => state.dailyPracticeReducer,

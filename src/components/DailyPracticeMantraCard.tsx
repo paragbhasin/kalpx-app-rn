@@ -283,7 +283,7 @@ const styles = StyleSheet.create({
   pillRow: {
     position: "absolute",
     top: -18,
-    right: 10,
+    right: 40,
     flexDirection: "row",
     alignItems: "center",
     gap: 8,

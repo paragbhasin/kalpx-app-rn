@@ -1433,7 +1433,6 @@
     }
   },
 
-
   "dailyPracticeMantraCard": {
     "descriptions": {
       "peace-calm": {
@@ -1820,7 +1819,8 @@
     "authTitle": "Save Your Daily Practice",
     "authDescription": "Create an account",
     "authBenefit1": "Save your practice routine",
-    "authBenefit2": "Track your progress"
+    "authBenefit2": "Track your progress",
+    "toastGuide": "Beautiful choice. Scroll down to finalize your practice."
   },
   "trackerEdit": {
     "authTitle": "Save Your Routine",

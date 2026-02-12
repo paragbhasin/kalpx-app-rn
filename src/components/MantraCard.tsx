@@ -24,6 +24,7 @@ import { getTranslatedPractice } from "../utils/getTranslatedPractice";
 import Colors from "./Colors";
 import FontSize from "./FontSize";
 import TextComponent from "./TextComponent";
+import { useToast } from "../context/ToastContext";
 
 const suggestedRepsList = [11, 21, 27, 54, 108];
 
@@ -38,6 +39,7 @@ const MantraCard = ({
 }) => {
   const navigation: any = useNavigation();
   const { i18n, t } = useTranslation();
+  const { showToast } = useToast();
   const currentLang = i18n.language.split("-")[0];
 
   const { dailyMantras, currentMantraIndex, error, loadToday } =
@@ -204,11 +206,11 @@ const MantraCard = ({
         const activeMantra = filteredMantras[activeIndex];
         const repsOrdered = currentMantra
           ? [
-              currentMantra.suggested_reps,
-              ...suggestedRepsList.filter(
-                (r) => r !== currentMantra.suggested_reps,
-              ),
-            ]
+            currentMantra.suggested_reps,
+            ...suggestedRepsList.filter(
+              (r) => r !== currentMantra.suggested_reps,
+            ),
+          ]
           : [];
 
         const translated = getTranslatedPractice(currentMantra, t);
@@ -501,9 +503,9 @@ const MantraCard = ({
                                     borderWidth: 1,
                                   },
                                   isLocked &&
-                                    !selected && {
-                                      opacity: 0.3,
-                                    },
+                                  !selected && {
+                                    opacity: 0.3,
+                                  },
                                 ]}
                               >
                                 <TextComponent
@@ -802,6 +804,7 @@ const MantraCard = ({
                         );
 
                         if (categoryItem) {
+                          showToast(t("dailyPracticeSelectList.toastGuide"), 5000);
                           navigation.navigate("DailyPracticeSelectList", {
                             item: categoryItem,
                             scrollToId: currentMantra.id,

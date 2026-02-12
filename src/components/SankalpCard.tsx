@@ -24,6 +24,7 @@ import Colors from "./Colors";
 import FontSize from "./FontSize";
 import { parseSourceToTags } from "./parseSourceToTags";
 import TextComponent from "./TextComponent";
+import { useToast } from "../context/ToastContext";
 
 const getTodaySeed = () => new Date().toISOString().split("T")[0];
 function seededShuffle(array, seed) {
@@ -51,6 +52,7 @@ const SankalpCard = ({
 }) => {
   const navigation: any = useNavigation();
   const { t, i18n } = useTranslation();
+  const { showToast } = useToast();
   const swiperRef = useRef<Swiper>(null);
   const shareRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -665,6 +667,7 @@ const SankalpCard = ({
                         );
 
                         if (categoryItem) {
+                          showToast(t("dailyPracticeSelectList.toastGuide"), 5000);
                           navigation.navigate("DailyPracticeSelectList", {
                             item: categoryItem,
                             scrollToId: currentSankalp.id,

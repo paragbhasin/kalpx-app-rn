@@ -497,7 +497,7 @@ const SankalpCard = ({
                         type="boldText"
                         style={{ color: Colors.Colors.Light_black }}
                       >
-                        {t("sankalpCard.addToDaily")}
+                        {t("sankalpCard.makeDaily")}
                       </TextComponent>
                     </TouchableOpacity>
                     <View style={styles.footer}>
@@ -628,7 +628,7 @@ const SankalpCard = ({
                     )}
 
                     <TouchableOpacity
-                      style={[styles.startBtn, { marginBottom: 8 }]}
+                      style={[styles.makeDaily, { marginBottom: 8 }]}
                       onPress={() => {
                         const categoryKey = currentSankalp.category;
 
@@ -651,7 +651,7 @@ const SankalpCard = ({
                         type="boldText"
                         style={{ color: Colors.Colors.Light_black }}
                       >
-                        {t("sadanaTracker.detailsCard.addToMyPractice")}
+                        {t("sankalpCard.makeDaily")}
                       </TextComponent>
                     </TouchableOpacity>
                   </>
@@ -874,6 +874,17 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: Colors.Colors.BLACK,
     fontWeight: "600",
+  },
+  makeDaily: {
+    borderColor: Colors.Colors.Yellow,
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    marginHorizontal: 16,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 10,
   },
   partialBgContainer: {
     alignSelf: "center",

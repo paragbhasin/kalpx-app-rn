@@ -1,4 +1,5 @@
-import React, { useRef, useState, useMemo } from "react";
+import { useNavigation } from "@react-navigation/native";
+import React, { useRef, useState } from "react";
 import {
   Animated,
   ImageBackground,
@@ -9,17 +10,20 @@ import {
 } from "react-native";
 import { Card } from "react-native-paper";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  completeMantra,
+  getPracticeToday,
+  startMantraPractice,
+} from "../screens/Home/actions";
+import { RootState } from "../store";
+import { getTranslatedPractice } from "../utils/getTranslatedPractice";
 import Colors from "./Colors";
 import FontSize from "./FontSize";
 import MantraPronunciationModal from "./MantraPronunciationModal";
-import TextComponent from "./TextComponent";
-import { getTranslatedPractice } from "../utils/getTranslatedPractice";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigation } from "@react-navigation/native";
-import { startMantraPractice, getPracticeToday, completeMantra } from "../screens/Home/actions";
-import { useUserLocation } from "./useUserLocation";
 import SigninPopup from "./SigninPopup";
-import { RootState } from "../store";
+import TextComponent from "./TextComponent";
+import { useUserLocation } from "./useUserLocation";
 
 const categoryChantOptions = {
   "peace-calm": {
@@ -93,7 +97,6 @@ const categoryChantOptions = {
     ],
   },
 };
-
 
 // const categoryChantOptions = {
 //   "peace-calm": {
@@ -176,10 +179,7 @@ const ExpandableText = ({ title, text }) => {
         </TextComponent>
       )}
 
-      <TextComponent
-        type="streakSadanaText"
-        style={styles.expandText}
-      >
+      <TextComponent type="streakSadanaText" style={styles.expandText}>
         {Array.isArray(text) ? text.map((t) => "• " + t).join("\n") : text}
       </TextComponent>
     </View>
@@ -204,12 +204,13 @@ const ChantOptionItem = ({ item, onSelect, selected, t }) => (
       color={Colors.Colors.App_theme}
     />
     <TextComponent type="streakSadanaText" style={styles.chantLabel}>
-      {item.count} X - {item.labelKey ? t(`sadanaTracker.detailsCard.${item.labelKey}`) : item.label}
+      {item.count} X -{" "}
+      {item.labelKey
+        ? t(`sadanaTracker.detailsCard.${item.labelKey}`)
+        : item.label}
     </TextComponent>
   </TouchableOpacity>
 );
-
-
 
 import { useTranslation } from "react-i18next";
 
@@ -229,12 +230,18 @@ const DailyPracticeDetailsCard = ({
   const dispatch: any = useDispatch();
   const navigation: any = useNavigation();
   const { locationData } = useUserLocation();
-  const user = useSelector((state: any) => state.login?.user || state.socialLoginReducer?.user);
-  const practiceTodayData = useSelector((state: RootState) => state.practiceTodayReducer?.data);
+  const user = useSelector(
+    (state: any) => state.login?.user || state.socialLoginReducer?.user,
+  );
+  const practiceTodayData = useSelector(
+    (state: RootState) => state.practiceTodayReducer?.data,
+  );
   const isUserLoggedIn = !!user;
 
   const todayItems = practiceTodayData?.items || [];
-  const activePracticeItem = todayItems.find(it => String(it.item_id) === String(data?.id));
+  const activePracticeItem = todayItems.find(
+    (it) => String(it.item_id) === String(data?.id),
+  );
 
   const isStarted = !!activePracticeItem;
   const isCompleted = !!activePracticeItem?.completed_at;
@@ -249,10 +256,10 @@ const DailyPracticeDetailsCard = ({
   const [showMantraComplete, setShowMantraComplete] = useState(false);
   const [showLoginMantraComplete, setShowLoginMantraComplete] = useState(false);
   const [showSankalpComplete, setShowSankalpComplete] = useState(false);
-  const [showLoginSankalpComplete, setShowLoginSankalpComplete] = useState(false);
+  const [showLoginSankalpComplete, setShowLoginSankalpComplete] =
+    useState(false);
 
   const handleStartPracticeInternal = () => {
-
     // If already completed, nothing to do
     if (isCompleted) return;
 
@@ -261,23 +268,32 @@ const DailyPracticeDetailsCard = ({
 
     // If started but not completed, we "Mark as done"
     if (isStarted) {
-      const isInternalMantra = practice.id?.includes("mantra") || practice.type === "mantra" || practice.practice_type === "mantra";
-      const isInternalSankalp = practice.id?.includes("sankalp") || practice.type === "sankalp" || practice.practice_type === "sankalp";
+      const isInternalMantra =
+        practice.id?.includes("mantra") ||
+        practice.type === "mantra" ||
+        practice.practice_type === "mantra";
+      const isInternalSankalp =
+        practice.id?.includes("sankalp") ||
+        practice.type === "sankalp" ||
+        practice.practice_type === "sankalp";
 
       const payload = {
-        practice_type: isInternalMantra ? "mantra" : isInternalSankalp ? "sankalp" : "library",
+        practice_type: isInternalMantra
+          ? "mantra"
+          : isInternalSankalp
+            ? "sankalp"
+            : "library",
         item_id: practice.id,
         tz: locationData?.timezone || "Asia/Kolkata",
-        source: mode === 'view' ? 'community' : 'details_card',
+        source: mode === "view" ? "community" : "details_card",
         meta: {
-          ui: "details_card_done"
-        }
+          ui: "details_card_done",
+        },
       };
 
       dispatch(
         completeMantra(payload, (res) => {
           if (res.success) {
-
             if (isInternalSankalp) {
               if (!isUserLoggedIn) setShowSankalpComplete(true);
               else setShowLoginSankalpComplete(true);
@@ -291,41 +307,52 @@ const DailyPracticeDetailsCard = ({
             onStartPractice?.(practice, repsCount);
             dispatch(getPracticeToday(() => { }));
           }
-        })
+        }),
       );
       return;
     }
 
     // Otherwise, "Start" (Assign)
-    const isInternalMantra = practice.id?.includes("mantra") || practice.type === "mantra" || practice.practice_type === "mantra";
-    const isInternalSankalp = practice.id?.includes("sankalp") || practice.type === "sankalp" || practice.practice_type === "sankalp";
+    const isInternalMantra =
+      practice.id?.includes("mantra") ||
+      practice.type === "mantra" ||
+      practice.practice_type === "mantra";
+    const isInternalSankalp =
+      practice.id?.includes("sankalp") ||
+      practice.type === "sankalp" ||
+      practice.practice_type === "sankalp";
 
     console.log("DEBUG: handleStartPracticeInternal", {
       id: practice.id,
       isInternalMantra,
       isInternalSankalp,
-      isUserLoggedIn
+      isUserLoggedIn,
     });
 
     const payload: any = {
-      practice_type: isInternalMantra ? "mantra" : isInternalSankalp ? "sankalp" : "library",
+      practice_type: isInternalMantra
+        ? "mantra"
+        : isInternalSankalp
+          ? "sankalp"
+          : "library",
       item_id: practice.id,
-      source: mode === 'view' ? 'community' : 'details_screen',
+      source: mode === "view" ? "community" : "details_screen",
       tz: locationData?.timezone,
       meta: {
-        ui: "details_card_v2"
-      }
+        ui: "details_card_v2",
+      },
     };
 
     if (repsCount) {
-      payload.meta.reps = typeof repsCount === 'object' ? repsCount.count : repsCount;
+      payload.meta.reps =
+        typeof repsCount === "object" ? repsCount.count : repsCount;
     }
 
     dispatch(
       startMantraPractice(payload, (res) => {
         if (res.success) {
-          // If explicitly identified as sankalp, show sankalp popup. 
-          // Otherwise, default to mantra popup (as most items are mantras) 
+          // If explicitly identified as sankalp, show sankalp popup.
+          // Otherwise, default to mantra popup (as most items are mantras)
           // if we can't determine, or just duplicate the check.
           if (isInternalSankalp) {
             setSelectedSankalpForPopup(practice);
@@ -342,7 +369,7 @@ const DailyPracticeDetailsCard = ({
           // If parent needs to know
           onStartPractice?.(practice, repsCount);
         }
-      })
+      }),
     );
   };
 
@@ -354,7 +381,10 @@ const DailyPracticeDetailsCard = ({
     line: translated.line,
     summary: translated.summary,
     insight: translated.insight,
-    benefits: translated.benefits && translated.benefits.length > 0 ? translated.benefits : data.benefits,
+    benefits:
+      translated.benefits && translated.benefits.length > 0
+        ? translated.benefits
+        : data.benefits,
     duration: translated.duration,
     steps: translated.steps,
     howToLive: translated.howToLive,
@@ -362,7 +392,7 @@ const DailyPracticeDetailsCard = ({
     devanagari: translated.mantra || data.devanagari || data.mantra,
     meaning: translated.meaning,
     iast: translated.iast || data.iast,
-    suggested_practice: translated.suggested_practice
+    suggested_practice: translated.suggested_practice,
   };
 
   const isMantra = data?.id?.includes("mantra");
@@ -376,7 +406,9 @@ const DailyPracticeDetailsCard = ({
         ? t("mantraCard.willChant")
         : isSankalp
           ? t("sankalpCard.iWillDo")
-          : t("sadanaTracker.detailsCard.startToday", { defaultValue: "I will do this practice today" });
+          : t("sadanaTracker.detailsCard.startToday", {
+            defaultValue: "I will do this practice today",
+          });
 
   const [showPronunciation, setShowPronunciation] = useState(false);
   const [isDevanagariLong, setIsDevanagariLong] = useState(false);
@@ -384,8 +416,12 @@ const DailyPracticeDetailsCard = ({
   const slideAnim = useRef(new Animated.Value(0)).current;
   const scrollRef = useRef<ScrollView>(null);
 
-
-  console.log("DailyPracticeDetailsCard rendered with data:", data, "and item:", item);
+  console.log(
+    "DailyPracticeDetailsCard rendered with data:",
+    data,
+    "and item:",
+    item,
+  );
 
   // Normalize chantOptions
   const getNormalizedChantOptions = (options) => {
@@ -397,7 +433,7 @@ const DailyPracticeDetailsCard = ({
 
   const normalizedOptions = React.useMemo(
     () => getNormalizedChantOptions(displayData?.chantOptions),
-    [displayData?.chantOptions]
+    [displayData?.chantOptions],
   );
 
   // lowest count
@@ -415,7 +451,7 @@ const DailyPracticeDetailsCard = ({
   // Sync with parent when parent changes
   React.useEffect(() => {
     if (selectedCount) {
-      const found = normalizedOptions.find(o => o.count === selectedCount);
+      const found = normalizedOptions.find((o) => o.count === selectedCount);
       if (found) setSelectedChant(found);
     }
   }, [selectedCount, normalizedOptions]);
@@ -444,17 +480,12 @@ const DailyPracticeDetailsCard = ({
   };
 
   const categoryKey =
-    item?.key ||
-    displayData?.category_key ||
-    displayData?.category ||
-    null;
-
+    item?.key || displayData?.category_key || displayData?.category || null;
 
   // Full category options (always source of truth for label)
   const fullCategoryOptions = categoryKey
     ? categoryChantOptions[categoryKey]?.options || []
     : [];
-
 
   // Filter category options based on API counts (if any)
   const chantOptions = React.useMemo(() => {
@@ -463,18 +494,18 @@ const DailyPracticeDetailsCard = ({
     }
 
     // API may send [count] or [{count, label}]
-    const apiCounts = displayData.chantOptions.map(c =>
-      typeof c === "number" ? c : c.count
+    const apiCounts = displayData.chantOptions.map((c) =>
+      typeof c === "number" ? c : c.count,
     );
 
-    return fullCategoryOptions.filter(opt => apiCounts.includes(opt.count));
+    return fullCategoryOptions.filter((opt) => apiCounts.includes(opt.count));
   }, [displayData?.chantOptions, item?.key]);
 
   React.useEffect(() => {
     if (chantOptions.length > 0) {
       const lowest = chantOptions.reduce(
         (min, o) => (o.count < min.count ? o : min),
-        chantOptions[0]
+        chantOptions[0],
       );
 
       setSelectedChant(lowest);
@@ -482,14 +513,15 @@ const DailyPracticeDetailsCard = ({
     }
   }, [chantOptions]);
 
-
   return (
-    <Animated.View style={{ transform: [{ translateX: slideAnim }], paddingBottom: 100 }}>
+    <Animated.View
+      style={{ transform: [{ translateX: slideAnim }], paddingBottom: 20 }}
+    >
       <Card style={styles.cardContainer}>
         <ScrollView
           ref={scrollRef}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 150 }}
+          contentContainerStyle={{ paddingBottom: 80 }}
         >
           <ImageBackground
             source={require("../../assets/CardBG.png")}
@@ -506,18 +538,23 @@ const DailyPracticeDetailsCard = ({
                 // onPress={onChange}
                 />
               )}
-              <Ionicons
-                name="close"
-                size={30}
-                color="#000000"
-                onPress={onBackPress}
-              />
+              <View style={styles.closeIconWrapper}>
+                <TouchableOpacity
+                  onPress={onBackPress}
+                  style={styles.closeCircle}
+                >
+                  <Ionicons name="close" size={18} color="#fff" />
+                </TouchableOpacity>
+              </View>
             </View>
             <TextComponent
               type="DailyDetailheaderText"
               style={styles.headerTitle}
             >
-              {displayData?.title || displayData?.text || displayData?.name || displayData?.short_text}
+              {displayData?.title ||
+                displayData?.text ||
+                displayData?.name ||
+                displayData?.short_text}
             </TextComponent>
             {displayData?.tags && (
               <View style={styles.tagsCenterWrapper}>
@@ -596,7 +633,8 @@ const DailyPracticeDetailsCard = ({
                   type="boldText"
                   style={{ ...styles.titleCenter, color: Colors.Colors.BLACK }}
                 >
-                  {t("sadanaTracker.detailsCard.timeNeeded")} {displayData?.duration}
+                  {t("sadanaTracker.detailsCard.timeNeeded")}{" "}
+                  {displayData?.duration}
                 </TextComponent>
               )}
             </Card>
@@ -699,7 +737,8 @@ const DailyPracticeDetailsCard = ({
         <View style={styles.fixedButtons}>
           {!isLocked && (
             <>
-              <TouchableOpacity style={styles.changeButton}
+              <TouchableOpacity
+                style={styles.changeButton}
                 onPress={handleSwipeChange}
               // onPress={onChange}
               >
@@ -715,7 +754,10 @@ const DailyPracticeDetailsCard = ({
               </TouchableOpacity>
 
               {mode === "new" && (
-                <TouchableOpacity style={styles.selectNewButton} onPress={onBackPress}>
+                <TouchableOpacity
+                  style={styles.selectNewButton}
+                  onPress={onBackPress}
+                >
                   <TextComponent type="headerText" style={styles.selectText}>
                     {t("sadanaTracker.detailsCard.select", "Select")}
                   </TextComponent>
@@ -723,7 +765,6 @@ const DailyPracticeDetailsCard = ({
               )}
             </>
           )}
-
         </View>
         {mode === "view" && onAddToMyPractice && (
           <View>
@@ -739,20 +780,14 @@ const DailyPracticeDetailsCard = ({
                 },
               ]}
             >
-
               <TouchableOpacity
                 onPress={handleStartPracticeInternal}
                 style={{ justifyContent: "center", alignItems: "center" }}
               >
-                <TextComponent
-                  type="headerText"
-                  style={styles.chantButtonText}
-                >
+                <TextComponent type="headerText" style={styles.chantButtonText}>
                   {startButtonText}
                 </TextComponent>
               </TouchableOpacity>
-
-
             </View>
             <View
               style={[
@@ -766,7 +801,6 @@ const DailyPracticeDetailsCard = ({
                 },
               ]}
             >
-
               <TouchableOpacity
                 onPress={onAddToMyPractice}
                 style={{ justifyContent: "center", alignItems: "center" }}
@@ -781,10 +815,7 @@ const DailyPracticeDetailsCard = ({
             </View>
           </View>
         )}
-
       </Card>
-
-
 
       <SigninPopup
         visible={showMantraTaken}
@@ -947,6 +978,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     textAlign: "center",
     marginHorizontal: 16,
+    marginTop: 16,
   },
   tagsContainer: {
     marginVertical: 6,
@@ -965,6 +997,20 @@ const styles = StyleSheet.create({
     color: "#1B1EBB",
     alignSelf: "center",
   },
+  closeIconWrapper: {
+    position: "absolute",
+    right: -10,
+    top: 1,
+    zIndex: 999,
+  },
+  closeCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 14,
+    backgroundColor: "#333",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   pronunciationRow: {
     flexDirection: "row",
     justifyContent: "center",
@@ -976,7 +1022,7 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
   },
   expandableContainer: {
-    marginTop: 4,
+    marginTop: 2,
   },
   titleCenter: {
     alignSelf: "center",
@@ -987,7 +1033,7 @@ const styles = StyleSheet.create({
   },
   meaningCard: {
     backgroundColor: Colors.Colors.white,
-    margin: 12,
+    margin: 8,
     padding: 10,
     borderRadius: 10,
   },
@@ -1021,7 +1067,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     backgroundColor: "#FFFFFF",
     paddingHorizontal: 12,
-    paddingVertical: 18,
+    paddingVertical: 12,
   },
   changeButton: {
     borderColor: "#D4A017",
@@ -1046,22 +1092,20 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     paddingVertical: 10,
     paddingHorizontal: 20,
-
   },
   selectNewButton: {
     backgroundColor: "#D4A017",
     borderRadius: 4,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    alignSelf: "flex-end"
+    alignSelf: "flex-end",
   },
   selectText: {
     color: "#FFFFFF",
   },
   practiceSelectText: {
     color: "#000000",
-    marginBottom: 2
-
+    marginBottom: 2,
   },
   chantButtonText: {
     color: "#FFFFFF",

@@ -6,25 +6,25 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import moment from "moment";
 import {
-    Dimensions,
-    Image,
-    ImageBackground,
-    Modal,
-    SafeAreaView,
-    ScrollView,
-    Share,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Dimensions,
+  Image,
+  ImageBackground,
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  Share,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import { useDispatch, useSelector } from "react-redux";
 import {
-    completeMantra,
-    getPracticeStreaks,
-    getPracticeToday,
-    startMantraPractice,
+  completeMantra,
+  getPracticeStreaks,
+  getPracticeToday,
+  startMantraPractice,
 } from "../screens/Home/actions";
 import { RootState } from "../store";
 import { COMMUNITY_BACKGROUNDS } from "../utils/CommunityAssets";
@@ -606,8 +606,8 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
           visible={showMantraTaken}
           onClose={() => {
             setShowMantraTaken(false);
-            dispatch(getPracticeToday(() => {}));
-            dispatch(getPracticeStreaks(() => {}));
+            dispatch(getPracticeToday(() => { }));
+            dispatch(getPracticeStreaks(() => { }));
           }}
           onConfirmCancel={() => setShowMantraTaken(false)}
           title={t("popup.mantraTaken_title1")}
@@ -624,8 +624,8 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
           visible={showLoginMantraTaken}
           onClose={() => {
             setShowLoginMantraTaken(false);
-            dispatch(getPracticeToday(() => {}));
-            dispatch(getPracticeStreaks(() => {}));
+            dispatch(getPracticeToday(() => { }));
+            dispatch(getPracticeStreaks(() => { }));
           }}
           onConfirmCancel={() => setShowLoginMantraTaken(false)}
           title={t("popup.mantraTaken_title2")}
@@ -650,8 +650,8 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
           visible={showMantraComplete}
           onClose={() => {
             setShowMantraComplete(false);
-            dispatch(getPracticeToday(() => {}));
-            dispatch(getPracticeStreaks(() => {}));
+            dispatch(getPracticeToday(() => { }));
+            dispatch(getPracticeStreaks(() => { }));
           }}
           onConfirmCancel={() => setShowMantraComplete(false)}
           title={t("popup.mantraComplete_title1")}
@@ -667,10 +667,10 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
           visible={showLoginMantraComplete}
           onClose={() => {
             setShowLoginMantraComplete(false);
-            dispatch(getPracticeToday(() => {}));
-            dispatch(getPracticeStreaks(() => {}));
+            dispatch(getPracticeToday(() => { }));
+            dispatch(getPracticeStreaks(() => { }));
           }}
-          onConfirmCancel={() => {}}
+          onConfirmCancel={() => { }}
           title={t("popup.mantraComplete_title2")}
           subText={t("popup.mantraComplete_sub2")}
           infoTexts={[
@@ -718,10 +718,10 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
           visible={showSankalpComplete}
           onClose={() => {
             setShowSankalpComplete(false);
-            dispatch(getPracticeToday(() => {}));
-            dispatch(getPracticeStreaks(() => {}));
+            dispatch(getPracticeToday(() => { }));
+            dispatch(getPracticeStreaks(() => { }));
           }}
-          onConfirmCancel={() => {}}
+          onConfirmCancel={() => { }}
           title={t("popup.sankalpComplete_title")}
           subText={t("popup.sankalpComplete_sub")}
           infoTexts={[
@@ -735,8 +735,8 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
           visible={showLoginSankalpComplete}
           onClose={() => {
             setShowLoginSankalpComplete(false);
-            dispatch(getPracticeToday(() => {}));
-            dispatch(getPracticeStreaks(() => {}));
+            dispatch(getPracticeToday(() => { }));
+            dispatch(getPracticeStreaks(() => { }));
           }}
           onConfirmCancel={() => setShowLoginSankalpComplete(false)}
           title={t("popup.mantraComplete_title2")}
@@ -753,8 +753,8 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
           visible={showPracticeComplete}
           onClose={() => {
             setShowPracticeComplete(false);
-            dispatch(getPracticeToday(() => {}));
-            dispatch(getPracticeStreaks(() => {}));
+            dispatch(getPracticeToday(() => { }));
+            dispatch(getPracticeStreaks(() => { }));
           }}
           onConfirmCancel={() => setShowPracticeComplete(false)}
           title={t("popup.practiceComplete_title1")}
@@ -770,8 +770,8 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
           visible={showLoginPracticeComplete}
           onClose={() => {
             setShowLoginPracticeComplete(false);
-            dispatch(getPracticeToday(() => {}));
-            dispatch(getPracticeStreaks(() => {}));
+            dispatch(getPracticeToday(() => { }));
+            dispatch(getPracticeStreaks(() => { }));
           }}
           onConfirmCancel={() => setShowLoginPracticeComplete(false)}
           title={t("popup.practiceComplete_title2")}
@@ -819,12 +819,12 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                 (post.slug ? COMMUNITY_BACKGROUNDS[post.slug] : null) ||
                 (post.community_name
                   ? COMMUNITY_BACKGROUNDS[
-                      post.community_name
-                        .toLowerCase()
-                        .replace(/ & /g, "-")
-                        .replace(/\s+/g, "-")
-                        .replace(/[^a-z0-9-]/g, "")
-                    ]
+                  post.community_name
+                    .toLowerCase()
+                    .replace(/ & /g, "-")
+                    .replace(/\s+/g, "-")
+                    .replace(/[^a-z0-9-]/g, "")
+                  ]
                   : null)
               }
               style={styles.avatarBackground}
@@ -1249,6 +1249,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                       handleAddToMyPractice(selectedLinkedPractice, "mantra")
                     }
                     singleItem={selectedLinkedPractice}
+                    onClose={() => setShowLinkedDetail(false)}
                   />
                 )}
                 {linkedCardType === "sankalp" && (
@@ -1261,6 +1262,7 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                       handleAddToMyPractice(selectedLinkedPractice, "sankalp")
                     }
                     singleItem={selectedLinkedPractice}
+                    onClose={() => setShowLinkedDetail(false)}
                   />
                 )}
                 {linkedCardType === "practice" && (
@@ -1271,11 +1273,11 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
                       name: post.linked_item?.category || "Practice",
                       key: post.linked_item?.category,
                     }}
-                    onChange={() => {}}
+                    onChange={() => { }}
                     onBackPress={() => setShowLinkedDetail(false)}
                     isLocked={true}
                     selectedCount={null}
-                    onSelectCount={() => {}}
+                    onSelectCount={() => { }}
                     onAddToMyPractice={() =>
                       handleAddToMyPractice(selectedLinkedPractice, "practice")
                     }

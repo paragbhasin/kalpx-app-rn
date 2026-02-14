@@ -5,7 +5,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { Animated, StyleSheet, View, Image } from "react-native";
 import "react-native-get-random-values";
 import { MenuProvider } from "react-native-popup-menu";
 import { Provider, useDispatch, useSelector } from "react-redux";
@@ -90,15 +91,16 @@ export default function App() {
   useEffect(() => {
     const init = async () => {
       if (!fontsLoaded && !error) return;
+      
+      // Set route and hide splash immediately to speed up launch
+      setInitialRoute("AppDrawer");
+      await SplashScreen.hideAsync().catch(() => {});
+
       try {
-        await registerDeviceToBackend();
-        setInitialRoute("AppDrawer");
-        await new Promise((res) => setTimeout(res, 300));
+        // Register device in background without blocking
+        registerDeviceToBackend();
       } catch (err) {
-        console.log("Initialization error:", err);
-        setInitialRoute("AppDrawer");
-      } finally {
-        await SplashScreen.hideAsync().catch(() => {});
+        console.log("Background initialization error:", err);
       }
     };
     init();
@@ -112,11 +114,11 @@ export default function App() {
         <ToastProvider>
           <CartProvider>
             <NavigationContainer ref={navigationRef}>
-            <Routes initialRouteName={initialRoute} />
-            <SnackBarContainer />
-          </NavigationContainer>
-          <ToastHost />
-        </CartProvider>
+              <Routes initialRouteName={initialRoute} />
+              <SnackBarContainer />
+            </NavigationContainer>
+            <ToastHost />
+          </CartProvider>
         </ToastProvider>
       </Provider>
     </MenuProvider>

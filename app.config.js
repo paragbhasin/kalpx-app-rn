@@ -58,13 +58,15 @@ module.exports = {
       [
         "expo-splash-screen",
         {
-          image: "./assets/images/splash-icon.png",
-          imageWidth: 200,
+          image: "./assets/KalpXlogo.png",
+          imageWidth: 600,
           resizeMode: "contain",
-          backgroundColor: "#ffffff",
+          backgroundColor: "#F6F0DD",
         },
       ],
       // Removed ./plugins/withModularHeaders as static frameworks are now enabled below
+
+
       [
         "expo-build-properties",
         {

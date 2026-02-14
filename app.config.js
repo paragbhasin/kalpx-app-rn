@@ -2,7 +2,7 @@ module.exports = {
   expo: {
     name: "kalpx",
     slug: "kalpx",
-    version: "1.1.31",
+    version: "1.1.32",
     orientation: "portrait",
     icon: "./assets/AppIconImg.png",
     scheme: "kalpx",
@@ -37,7 +37,7 @@ module.exports = {
       },
     },
     android: {
-      versionCode: 38,
+      versionCode: 39,
       package: "com.kalpx.app",
       adaptiveIcon: {
         foregroundImage: "./assets/AppIconImg.png",
@@ -65,7 +65,6 @@ module.exports = {
         },
       ],
       // Removed ./plugins/withModularHeaders as static frameworks are now enabled below
-
 
       [
         "expo-build-properties",

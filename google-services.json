@@ -22,6 +22,22 @@
           }
         },
         {
+          "client_id": "800459558908-nid7a89ip65me4330ebn8jg36804n39o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kalpx.app",
+            "certificate_hash": "a169b49829e4c045e654790f1d10ba5750911d18"
+          }
+        },
+        {
+          "client_id": "800459558908-qa1tv3lguhtdpbpmth0ue1atgihe8stn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kalpx.app",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
           "client_id": "800459558908-gi4poj40ulaoc3a0gkc3rbaevfubt4vm.apps.googleusercontent.com",
           "client_type": 3
         }

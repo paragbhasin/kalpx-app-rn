@@ -59,7 +59,7 @@ module.exports = {
         "expo-splash-screen",
         {
           image: "./assets/KalpXlogo.png",
-          imageWidth: 600,
+          imageWidth: 150,
           resizeMode: "contain",
           backgroundColor: "#F6F0DD",
         },

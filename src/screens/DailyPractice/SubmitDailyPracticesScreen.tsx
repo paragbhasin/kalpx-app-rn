@@ -28,6 +28,7 @@ import LoadingOverlay from "../../components/LoadingOverlay";
 import CommunityAuthModal from "../../components/CommunityAuthModal";
 import TextComponent from "../../components/TextComponent";
 import { useUserLocation } from "../../components/useUserLocation";
+import { useCart } from "../../context/CartContext";
 import { RootState } from "../../store";
 import { getRawPracticeObject } from "../../utils/getPracticeObjectById";
 import { submitDailyDharmaSetup, getDailyDharmaTracker } from "../Home/actions";
@@ -264,9 +265,13 @@ const SubmitDailyPracticesScreen = ({ route }) => {
   //   );
   // };
 
+  const { removedApiIds } = useCart();
+
   const handleSubmit = async () => {
-    // 1️⃣ Normalize active API practices
-    const normalizedActive = activeApiPractices.map(normalizeApiPractice);
+    // 1️⃣ Normalize active API practices (only those NOT removed)
+    const normalizedActive = activeApiPractices
+      .filter((api: any) => !removedApiIds.has(api.practice_id ?? api.id))
+      .map(normalizeApiPractice);
 
     // 2️⃣ Remove duplicates (route overrides API)
     const filteredRoute = routePractices.filter(

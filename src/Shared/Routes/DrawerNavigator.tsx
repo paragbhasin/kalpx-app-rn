@@ -99,13 +99,17 @@ const CustomDrawerContent = (props) => {
     await AsyncStorage.clear();
     store.dispatch({ type: "RESET_APP" });
 
-    await GoogleSignin.signOut();
-    await GoogleSignin.revokeAccess();
+    try {
+      await GoogleSignin.signOut();
+      await GoogleSignin.revokeAccess();
+    } catch (error) {
+      console.log("Google Sign-In Logout Error:", error);
+    }
 
     const parentNav = props.navigation.getParent();
     parentNav?.reset({
       index: 0,
-      routes: [{ name: "Welcome" }],
+      routes: [{ name: "Login" }],
     });
   };
 

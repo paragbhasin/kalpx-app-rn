@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import {
     View,
     Text,
@@ -23,14 +23,16 @@ import { fetchCommunityDetail, fetchCommunityPosts, followCommunity, unfollowCom
 import { votePostDetail, savePostDetail, unsavePostDetail, hidePostDetail, reportContent } from "../PostDetail/actions";
 import SocialPostCard from "../../components/SocialPostCard";
 import Header from "../../components/Header";
+import CommunityAuthModal from "../../components/CommunityAuthModal";
 import { COMMUNITY_BACKGROUNDS } from "../../utils/CommunityAssets";
 import { fetchUserActivity } from "../UserActivity/actions";
 import { useScrollContext } from "../../context/ScrollContext";
+import { getConsistentCommunityStats } from "../../utils/randomStats";
 
 const { width } = Dimensions.get("window");
 
 const CommunityDetail = () => {
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
     const { handleScroll, headerY } = useScrollContext();
     const dispatch = useDispatch();
     const navigation = useNavigation<any>();
@@ -43,9 +45,21 @@ const CommunityDetail = () => {
 
     const { communityDetail, communityPosts } = useSelector((state: any) => state.communities);
     const { followed_communities } = useSelector((state: any) => state.userActivity);
+    const user = useSelector(
+        (state: any) => state.login?.user || state.socialLoginReducer?.user,
+    );
+    const isAuthenticated = !!user;
 
     const [activeTab, setActiveTab] = useState<"Feed" | "About">("Feed");
     const [expandedRules, setExpandedRules] = useState<number[]>([]);
+    const [isAuthModalVisible, setIsAuthModalVisible] = useState(false);
+    const [authModalConfig, setAuthModalConfig] = useState({
+        title: t("communityAuth.title"),
+        description: t("communityAuth.description"),
+        intent: "general",
+    });
+
+    const stableStats = useMemo(() => getConsistentCommunityStats(slug), [slug]);
     useEffect(() => {
         dispatch(fetchCommunityDetail(slug, i18n.language) as any);
         dispatch(fetchCommunityPosts(slug, 1, sortBy, i18n.language) as any);
@@ -75,6 +89,16 @@ const CommunityDetail = () => {
     });
 
     const handleJoin = async () => {
+        if (!isAuthenticated) {
+            setAuthModalConfig({
+                title: t("communityAuth.joinCommunity.title"),
+                description: t("communityAuth.joinCommunity.description"),
+                intent: "join_community",
+            });
+            setIsAuthModalVisible(true);
+            return;
+        }
+
         if (isJoined) {
             await dispatch(unfollowCommunity(slug) as any);
         } else {
@@ -298,8 +322,7 @@ const CommunityDetail = () => {
     );
 
     const renderAbout = () => {
-        const weeklyVisitors = (Math.floor(Math.random() * 200) + 50) + "k";
-        const weeklyContribution = (Math.floor(Math.random() * 2000) + 500);
+        const { weeklyVisitors, weeklyContribution } = stableStats;
 
         const rules = [
             { title: "No Spam", content: "Do not post spam or self-promotional content." },
@@ -422,6 +445,13 @@ const CommunityDetail = () => {
                         </View>
                     );
                 }}
+            />
+            <CommunityAuthModal
+                visible={isAuthModalVisible}
+                onClose={() => setIsAuthModalVisible(false)}
+                title={authModalConfig.title}
+                description={authModalConfig.description}
+                intent={authModalConfig.intent}
             />
         </SafeAreaView>
     );

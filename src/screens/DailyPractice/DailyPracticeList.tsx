@@ -10,7 +10,7 @@ import styles from "./dailyPracticeListStyle";
 
 // Rooted practices aligned with dharma
 
-const categories = [
+export const categories = [
   {
     name: "Peace & Calm",
     key: "peace-calm",

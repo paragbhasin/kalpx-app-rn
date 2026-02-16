@@ -16,6 +16,7 @@ import LoadingButton from "../../components/LoadingButton";
 import LoadingOverlay from "../../components/LoadingOverlay";
 import TextComponent from "../../components/TextComponent";
 import { useCart } from "../../context/CartContext";
+import { useToast } from "../../context/ToastContext";
 
 import moment from "moment";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -34,6 +35,7 @@ const cartIcon = require("../../../assets/cart.png");
 const DailyPracticeSelectList = ({ route }) => {
   const navigation: any = useNavigation();
   const { t } = useTranslation();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [mantraReps, setMantraReps] = useState(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -43,8 +45,10 @@ const DailyPracticeSelectList = ({ route }) => {
   const isUserLoggedIn = !!user;
 
   const resumedSelections = route?.params?.resumedSelections ?? null;
+  const scrollToId = route?.params?.scrollToId;
 
   console.log("resumedSelections >>>>>",resumedSelections);
+  console.log("🎯 scrollToId param:", scrollToId);
 
   const selectedMap = useMemo(() => {
   const map = new Map<string, any>();
@@ -109,6 +113,12 @@ useEffect(() => {
     dispatch(fetchDailyPractice(today, locationData.timezone));
   }
 }, [locationLoading, locationData?.timezone]);
+
+useEffect(() => {
+  if (scrollToId) {
+    showToast(t("dailyPracticeSelectList.toastGuide"), 6000);
+  }
+}, [scrollToId]);
 
 // Debug: Track login state changes
 useEffect(() => {
@@ -274,6 +284,9 @@ useEffect(() => {
 
 
 useEffect(() => {
+  // 🚫 SKIP if scrollToId is present (let scrollToId effect handle it)
+  if (scrollToId) return;
+  
   if (!resumedSelections) return;
 
   // Wait until lists are fully populated
@@ -315,7 +328,8 @@ useEffect(() => {
   allData,            // <-- ensures translation bundle loaded
   mantraList.length,
   sankalpList.length,
-  practiceList.length
+  practiceList.length,
+  scrollToId,
 ]);
 
 
@@ -499,7 +513,12 @@ const resumedPractice = resumedSelections?.find(
 // ]);
 
 useEffect(() => {
-  // 🟢 NORMAL FLOW → select all
+  // � SKIP if scrollToId is present (let scrollToId effect handle it)
+  if (scrollToId) {
+    return;
+  }
+
+  // �🟢 NORMAL FLOW → select all
   if (!resumedSelections) {
     setSelectedMantra(true);
     setSelectedSankalp(true);
@@ -555,16 +574,91 @@ useEffect(() => {
   mantraList.length,
   sankalpList.length,
   practiceList.length,
+  scrollToId,
 ]);
 
-console.log(
-  "ACTIVE API PRACTICES >>>>",
-  JSON.stringify(dailyPractice?.data?.active_practices)
-);
 
+  useEffect(() => {
+    console.log("🔍 scrollToId effect running:", { scrollToId, mantraListLength: mantraList.length, sankalpListLength: sankalpList.length });
+    
+    if (!scrollToId) {
+      console.log("⏭️ No scrollToId, skipping effect");
+      return;
+    }
 
+    // Wait for lists to load
+    if (
+      mantraList.length === 0 &&
+      sankalpList.length === 0 &&
+      practiceList.length === 0
+    ) {
+      console.log("⏳ Lists not loaded yet, waiting...");
+      return;
+    }
 
-const buildFinalPractices = () => {
+    console.log("📜 Scrolling to ID:", scrollToId);
+
+    // 1. Check Mantra List
+    const mIndex = mantraList.findIndex((x) => x.id === scrollToId);
+    if (mIndex >= 0) {
+      console.log("✅ Found in Mantra List at index:", mIndex);
+      setMantraIndex(mIndex);
+      setSelectedMantra(true);
+      console.log("✅ Set selectedMantra to TRUE");
+      // Uncheck others to focus on this item
+      setSelectedSankalp(false);
+      setSelectedPractice(false);
+      console.log("✅ Unchecked other items (Sankalp, Practice)");
+      return;
+    }
+
+    // 2. Check Sankalp List
+    const sIndex = sankalpList.findIndex((x) => x.id === scrollToId);
+    if (sIndex >= 0) {
+      console.log("✅ Found in Sankalp List at index:", sIndex);
+      console.log("📋 Sankalp details:", sankalpList[sIndex]);
+      setSankalpIndex(sIndex);
+      setSelectedSankalp(true);
+      console.log("✅ Called setSelectedSankalp(true)");
+      // Uncheck others
+      setSelectedMantra(false);
+      setSelectedPractice(false);
+      console.log("✅ Unchecked other items (Mantra, Practice)");
+      return;
+    }
+
+    // 3. Check Practice List
+    const pIndex = practiceList.findIndex((x) => x.id === scrollToId);
+    if (pIndex >= 0) {
+      console.log("✅ Found in Practice List at index:", pIndex);
+      setPracticeIndex(pIndex);
+      setSelectedPractice(true);
+      console.log("✅ Set selectedPractice to TRUE");
+      // Uncheck others
+      setSelectedMantra(false);
+      setSelectedSankalp(false);
+      console.log("✅ Unchecked other items (Mantra, Sankalp)");
+      return;
+    }
+
+    console.log("❌ scrollToId not found in any list:", scrollToId);
+  }, [scrollToId, mantraList.length, sankalpList.length, practiceList.length]);
+
+  // Debug: Log when selection states change
+  useEffect(() => {
+    console.log("🎯 Selection states changed:", { 
+      selectedMantra, 
+      selectedSankalp, 
+      selectedPractice 
+    });
+  }, [selectedMantra, selectedSankalp, selectedPractice]);
+
+  console.log(
+    "ACTIVE API PRACTICES >>>>",
+    JSON.stringify(dailyPractice?.data?.active_practices)
+  );
+
+  const buildFinalPractices = () => {
   const selectedPractices = buildPayload().practices || [];
 
   const normalizedActive = activeApiPractices.map(normalizeApiPractice);

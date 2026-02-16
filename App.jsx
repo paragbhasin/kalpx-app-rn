@@ -5,7 +5,8 @@ import { NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { Animated, StyleSheet, View, Image } from "react-native";
 import "react-native-get-random-values";
 import { MenuProvider } from "react-native-popup-menu";
 import { Provider, useDispatch, useSelector } from "react-redux";
@@ -13,6 +14,8 @@ import { Provider, useDispatch, useSelector } from "react-redux";
 import SnackBar from "./src/components/SnackBar";
 import "./src/config/i18n";
 import { CartProvider } from "./src/context/CartContext";
+import { ToastProvider } from "./src/context/ToastContext";
+import ToastHost from "./src/components/ToastHost";
 import { navigationRef } from "./src/Shared/Routes/NavigationService";
 import Routes from "./src/Shared/Routes/Routes";
 import { store } from "./src/store";
@@ -24,6 +27,7 @@ import {
   notificationOpenListener,
   requestPushPermission,
 } from "./src/service/pushNotifications";
+import { registerDeviceToBackend } from "./src/utils/registerDevice";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -87,15 +91,16 @@ export default function App() {
   useEffect(() => {
     const init = async () => {
       if (!fontsLoaded && !error) return;
+      
+      // Set route and hide splash immediately to speed up launch
+      setInitialRoute("AppDrawer");
+      await SplashScreen.hideAsync().catch(() => {});
+
       try {
-        const accessToken = await AsyncStorage.getItem("access_token");
-        const refreshToken = await AsyncStorage.getItem("refresh_token");
-        setInitialRoute(accessToken && refreshToken ? "AppDrawer" : "Welcome");
-        await new Promise((res) => setTimeout(res, 300));
-      } catch {
-        setInitialRoute("Welcome");
-      } finally {
-        await SplashScreen.hideAsync().catch(() => {});
+        // Register device in background without blocking
+        registerDeviceToBackend();
+      } catch (err) {
+        console.log("Background initialization error:", err);
       }
     };
     init();
@@ -106,12 +111,15 @@ export default function App() {
   return (
     <MenuProvider>
       <Provider store={store}>
-        <CartProvider>
-          <NavigationContainer ref={navigationRef}>
-            <Routes initialRouteName={initialRoute} />
-            <SnackBarContainer />
-          </NavigationContainer>
-        </CartProvider>
+        <ToastProvider>
+          <CartProvider>
+            <NavigationContainer ref={navigationRef}>
+              <Routes initialRouteName={initialRoute} />
+              <SnackBarContainer />
+            </NavigationContainer>
+            <ToastHost />
+          </CartProvider>
+        </ToastProvider>
       </Provider>
     </MenuProvider>
   );

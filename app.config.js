@@ -1,76 +1,8 @@
-const fs = require("fs");
-const path = require("path");
-
-const IS_EAS_BUILD = !!process.env.EAS_BUILD_ID;
-
-if (IS_EAS_BUILD) {
-  const rootDir = __dirname;
-  const androidAppDir = path.join(rootDir, "android/app");
-
-  // --- ANDROID HANDLER ---
-  const androidSecret = process.env.GOOGLE_SERVICES_JSON;
-  if (androidSecret) {
-    // Ensure android/app directory exists
-    if (!fs.existsSync(androidAppDir)) {
-      fs.mkdirSync(androidAppDir, { recursive: true });
-    }
-
-    const targetPath = path.join(androidAppDir, "google-services.json");
-    const rootTargetPath = path.join(rootDir, "google-services.json");
-
-    if (fs.existsSync(androidSecret)) {
-      // It is a path! Copy the actual file
-      fs.copyFileSync(androidSecret, targetPath);
-      fs.copyFileSync(androidSecret, rootTargetPath);
-      console.log(
-        "✅ Successfully copied google-services.json secret to native and root",
-      );
-    } else {
-      // Fallback: Raw string
-      const content = androidSecret.includes("project_info")
-        ? androidSecret
-        : Buffer.from(androidSecret, "base64");
-      fs.writeFileSync(targetPath, content);
-      fs.writeFileSync(rootTargetPath, content);
-      console.log(
-        "📝 Successfully wrote google-services.json from string to native and root",
-      );
-    }
-  }
-
-  // --- IOS HANDLER ---
-  const iosSecret = process.env.GOOGLE_SERVICE_INFO_PLIST;
-  if (iosSecret) {
-    const targetPath = path.join(rootDir, "GoogleService-Info.plist");
-    const nativeIosDir = path.join(rootDir, "ios");
-
-    let content;
-    if (fs.existsSync(iosSecret)) {
-      content = fs.readFileSync(iosSecret);
-    } else {
-      content = iosSecret.includes("<?xml")
-        ? iosSecret
-        : Buffer.from(iosSecret, "base64");
-    }
-
-    fs.writeFileSync(targetPath, content);
-
-    // Also copy to ios/ directory if it exists (Bare workflow hint)
-    if (fs.existsSync(nativeIosDir)) {
-      // Find the app folder inside ios/ (usually has the same name as the project or 'app')
-      // For simplicity, we just put it in the root of ios/ or the project root.
-      // Expo config uses the one in project root.
-    }
-
-    console.log("✅ Successfully handled GoogleService-Info.plist");
-  }
-}
-
 module.exports = {
   expo: {
     name: "kalpx",
     slug: "kalpx",
-    version: "1.1.27",
+    version: "1.1.33",
     orientation: "portrait",
     icon: "./assets/AppIconImg.png",
     scheme: "kalpx",
@@ -105,7 +37,7 @@ module.exports = {
       },
     },
     android: {
-      versionCode: 34,
+      versionCode: 40,
       package: "com.kalpx.app",
       adaptiveIcon: {
         foregroundImage: "./assets/AppIconImg.png",
@@ -120,18 +52,20 @@ module.exports = {
       favicon: "./assets/images/favicon.png",
     },
     plugins: [
+      "expo-font",
       "@react-native-firebase/app",
       "@react-native-firebase/messaging",
       [
         "expo-splash-screen",
         {
-          image: "./assets/images/splash-icon.png",
-          imageWidth: 200,
+          image: "./assets/KalpXlogo.png",
+          imageWidth: 150,
           resizeMode: "contain",
-          backgroundColor: "#ffffff",
+          backgroundColor: "#F6F0DD",
         },
       ],
       // Removed ./plugins/withModularHeaders as static frameworks are now enabled below
+
       [
         "expo-build-properties",
         {

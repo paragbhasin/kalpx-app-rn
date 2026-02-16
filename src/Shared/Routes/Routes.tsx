@@ -34,7 +34,7 @@ import AppDrawerNavigator from "./DrawerNavigator";
 
 const Stack: any = createNativeStackNavigator();
 
-const Routes = ({ initialRouteName = "Welcome" }) => {
+const Routes = ({ initialRouteName = "AppDrawer" }) => {
   return (
     <Stack.Navigator initialRouteName={initialRouteName} screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Welcome" component={WelcomeScreen} />

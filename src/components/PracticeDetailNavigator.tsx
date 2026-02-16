@@ -53,6 +53,7 @@ const PracticeDetailNavigator: React.FC<PracticeDetailNavigatorProps> = ({
                     DoneMantraCalled={() => { }}
                     viewOnly={true}
                     singleItem={type === 'mantra' ? data : resolvedMantra}
+                    onClose={onClose}
                 />
             );
         }
@@ -68,6 +69,7 @@ const PracticeDetailNavigator: React.FC<PracticeDetailNavigatorProps> = ({
                     onCompleteSankalp={() => { }}
                     viewOnly={true}
                     singleItem={type === 'sankalp' ? data : resolvedSankalp}
+                    onClose={onClose}
                 />
             );
         }

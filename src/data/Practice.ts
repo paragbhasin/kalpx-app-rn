@@ -62,7 +62,7 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
   weekday: getWeekday(),
   deity: getDeityForWeekday(getWeekday()),
 
-  // 🔹 Load today’s mantras (deterministic daily generation)
+  // 🔹 Load today's mantras (day-based rotation)
   loadToday: async () => {
     try {
       set({ loading: true, error: null });
@@ -88,29 +88,9 @@ export const usePracticeStore = create<PracticeState>((set, get) => ({
         }
       }
 
-      // Generate new daily mantras (deterministic)
-      const seed = new Date(today).getTime();
-      const oldRandom = Math.random;
-      Math.random = seededRandom(seed);
-
-      const mantras: MantraItem[] = [];
-      const recentlyShown: string[] = [];
-
-      for (let i = 0; i < 5; i++) {
-        const mantra = pickMantra({
-          locale: "en",
-          recently_shown: recentlyShown,
-          slot: "any",
-          deityTag: deity,
-          mode: "weighted",
-        });
-        if (mantra) {
-          mantras.push(mantra);
-          recentlyShown.push(mantra.id);
-        }
-      }
-
-      Math.random = oldRandom;
+      // Use day-based rotation to get mantras
+      const { getDailyMantrasDayBased } = await import("../data/mantras");
+      const mantras = await getDailyMantrasDayBased({ locale: "en" });
 
       if (mantras.length === 0) {
         throw new Error("No mantras found for today.");

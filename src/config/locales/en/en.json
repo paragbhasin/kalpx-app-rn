@@ -268,6 +268,7 @@
   },
   "common": {
     "cancel": "Cancel",
+    "processing": "Processing...",
     "yes": "Yes",
     "delete": "Delete",
     "confirm": "Confirm",
@@ -1432,7 +1433,6 @@
     }
   },
 
-
   "dailyPracticeMantraCard": {
     "descriptions": {
       "peace-calm": {
@@ -1482,7 +1482,7 @@
     "frequency": "Frequency",
     "frequencyHint": "How often will you do this?",
     "next": "Next",
-    "footer": "These settings will shape your routine.",
+    "footer": "These settings help shape your daily spiritual routine.",
     "saving": "Saving...",
     "repsRequired": "Reps are required",
     "digitsOnly": "Digits only",
@@ -1819,7 +1819,8 @@
     "authTitle": "Save Your Daily Practice",
     "authDescription": "Create an account",
     "authBenefit1": "Save your practice routine",
-    "authBenefit2": "Track your progress"
+    "authBenefit2": "Track your progress",
+    "toastGuide": "Beautiful choice. Scroll down to finalize your practice."
   },
   "trackerEdit": {
     "authTitle": "Save Your Routine",

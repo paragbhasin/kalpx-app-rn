@@ -8,6 +8,7 @@ import MR from "../config/locales/mr/matras-mr.json";
 import OR from "../config/locales/or/mantras-or.json";
 import TA from "../config/locales/ta/mantras-ta.json";
 import TE from "../config/locales/te/mantras-te.json";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export interface MantraSource {
   title?: string;
@@ -93,7 +94,7 @@ export function pickMantra({
 }
 
 // Helpers
-function getCatalog(locale: string): MantraItem[] {
+export function getCatalog(locale: string): MantraItem[] {
   const key = (locale || "en").toLowerCase();
   const base = key.split("-")[0];
   return CATALOGS[base] || CATALOGS.en || [];
@@ -135,4 +136,113 @@ function chooseWeighted<T>(arr: T[], scoreFn: (item: T) => number): T | null {
     if (r <= 0) return arr[i];
   }
   return arr[0];
+}
+
+// ========================================
+// Day-Based Rotation System
+// ========================================
+
+const MANTRA_BATCH_SIZE = 5;
+const MANTRA_ROTATION_KEY = "kalpx.mantra_rotation_state";
+
+interface MantraRotationState {
+  startDate: Date;
+  order: string[];
+  locale: string;
+}
+
+/**
+ * Calculate the number of days between two dates
+ */
+function dayDiff(start: Date, end: Date): number {
+  const msPerDay = 1000 * 60 * 60 * 24;
+  const startMs = new Date(start).setHours(0, 0, 0, 0);
+  const endMs = new Date(end).setHours(0, 0, 0, 0);
+  return Math.floor((endMs - startMs) / msPerDay);
+}
+
+/**
+ * Get or initialize the mantra rotation state
+ */
+async function getMantraRotationState(locale: string = "en"): Promise<MantraRotationState> {
+  try {
+    const stored = await AsyncStorage.getItem(MANTRA_ROTATION_KEY);
+
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      // Check if locale matches
+      if (parsed.locale === locale && parsed.order && parsed.startDate) {
+        return {
+          ...parsed,
+          startDate: new Date(parsed.startDate),
+        };
+      }
+    }
+  } catch (e) {
+    console.warn("[Mantra Rotation] Failed to load state:", e);
+  }
+
+  // Initialize new rotation state
+  const catalog = getCatalog(locale);
+  const order = catalog.map((m) => m.id);
+
+  // Shuffle the order for randomness
+  for (let i = order.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+
+  const state: MantraRotationState = {
+    startDate: new Date(),
+    order,
+    locale,
+  };
+
+  try {
+    await AsyncStorage.setItem(MANTRA_ROTATION_KEY, JSON.stringify(state));
+  } catch (e) {
+    console.warn("[Mantra Rotation] Failed to save state:", e);
+  }
+
+  return state;
+}
+
+/**
+ * Get daily mantras based on day-based rotation
+ */
+export async function getDailyMantrasDayBased({ locale = "en" } = {}): Promise<MantraItem[]> {
+  const state = await getMantraRotationState(locale);
+
+  const today = new Date();
+  const userDayIndex = dayDiff(state.startDate, today);
+
+  const order = state.order;
+  const total = order.length;
+
+  if (!total) return [];
+
+  const startIndex = (userDayIndex * MANTRA_BATCH_SIZE) % total;
+
+  const ids: string[] = [];
+  for (let i = 0; i < MANTRA_BATCH_SIZE; i++) {
+    ids.push(order[(startIndex + i) % total]);
+  }
+
+  const catalog = getCatalog(locale);
+
+  const result = ids
+    .map((id) => catalog.find((m) => m.id === id))
+    .filter(Boolean)
+    .map((m) => ({
+      ...m!,
+      explanation: normalizeExplanation(m!.explanation),
+    }));
+
+  // Safety fallback — auto heal corruption
+  if (result.length < MANTRA_BATCH_SIZE) {
+    await AsyncStorage.removeItem(MANTRA_ROTATION_KEY);
+    return getDailyMantrasDayBased({ locale });
+  }
+
+  return result;
 }

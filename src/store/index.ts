@@ -12,6 +12,7 @@ import {
   searchClassesReducer,
   slotsListReducer,
 } from "../screens/Classes/reducers";
+import { feedReducer } from "../screens/Feed/reducers";
 import {
   completeMantraReducer,
   dailyDharmaTrackerReducer,
@@ -25,23 +26,27 @@ import {
 } from "../screens/Home/reducers";
 import { loginReducer, socialLoginReducer } from "../screens/Login/reducers";
 import { notificationsReducer } from "../screens/Notifications/reducers";
+import { postDetailReducer } from "../screens/PostDetail/reducers";
 import {
   deleteAccountReducer,
   profileDetailsReducer,
   profileOptionsReducer,
   updateProfileReducer,
 } from "../screens/Profile/reducers";
-import { socialExploreReducer, communitiesReducer } from "../screens/Social/reducers";
+import {
+  communitiesReducer,
+  socialExploreReducer,
+} from "../screens/Social/reducers";
 import {
   dailyPracticeReducer,
   practiceReducer,
 } from "../screens/Streak/reducers";
 import { userActivityReducer } from "../screens/UserActivity/reducers";
-import { feedReducer } from "../screens/Feed/reducers";
-import { postDetailReducer } from "../screens/PostDetail/reducers";
+import haatReducer from "../service/haatSlice";
 import snackBarReducer from "./snackBarSlice";
 
 const appReducer = combineReducers({
+  haat: haatReducer,
   login: loginReducer,
   snackBar: snackBarReducer,
   classesExploreReducer,

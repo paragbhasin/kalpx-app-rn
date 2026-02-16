@@ -1,6 +1,13 @@
 import { useNavigation } from "@react-navigation/native";
 import React from "react";
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 
 const TrustedStores = ({ stores, title = "Trusted store near you" }) => {
@@ -16,8 +23,12 @@ const TrustedStores = ({ stores, title = "Trusted store near you" }) => {
         <View style={styles.card}>
           {/* Image */}
           <View style={styles.imageWrapper}>
-            <Image
+            {/* <Image
               source={typeof item.image === 'number' ? item.image : { uri: item.image }}
+              style={styles.image}
+            /> */}
+            <Image
+              source={require("../../../assets/default-store.png")}
               style={styles.image}
             />
 
@@ -32,7 +43,9 @@ const TrustedStores = ({ stores, title = "Trusted store near you" }) => {
 
           {/* Info */}
           <View style={styles.info}>
-            <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
+            <Text style={styles.name} numberOfLines={1}>
+              {item.store_name}
+            </Text>
 
             <Text style={styles.meta}>
               {item.time} <Text style={styles.open}> • Open</Text>

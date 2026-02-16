@@ -6,13 +6,43 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 type Props = {
   fromCart?: boolean;
   fromOrder?: boolean;
+  product?: any;
+  products?: any[];
 };
 
 const ProductCard: React.FC<Props> = ({
+  products,
+  product,
   fromCart = false,
   fromOrder = false,
 }) => {
   const navigation = useNavigation<any>();
+
+  const items = products ? products : product ? [product] : [];
+
+  if (items.length === 0) return null;
+
+  return (
+    <>
+      {items.map((item: any, index: number) => (
+        <SingleProductCard
+          key={item.id || index}
+          product={item}
+          fromCart={fromCart}
+          fromOrder={fromOrder}
+          navigation={navigation}
+        />
+      ))}
+    </>
+  );
+};
+
+const SingleProductCard = ({
+  product,
+  fromCart,
+  fromOrder,
+  navigation,
+}: any) => {
   const [itemQuantity, setItemQuantity] = useState(1);
 
   const goToDetails = (id: number) => {
@@ -33,7 +63,7 @@ const ProductCard: React.FC<Props> = ({
     <TouchableOpacity
       activeOpacity={0.9}
       style={styles.cardWrapper}
-      onPress={() => goToDetails(1)}
+      onPress={() => goToDetails(product.id)}
     >
       {/* Order status */}
       {fromOrder && (
@@ -49,10 +79,10 @@ const ProductCard: React.FC<Props> = ({
         {/* Image */}
         <TouchableOpacity
           activeOpacity={0.9}
-          onPress={() => fromCart && goToDetails(1)}
+          onPress={() => fromCart && goToDetails(product.id)}
         >
           <Image
-            source={require("../../../assets/brass-deepa.png")}
+            source={{ uri: product?.images?.[0]?.url || product?.image }}
             style={styles.image}
           />
         </TouchableOpacity>
@@ -60,14 +90,16 @@ const ProductCard: React.FC<Props> = ({
         {/* Content */}
         <View style={styles.content}>
           <View style={styles.headerRow}>
-            <Text style={styles.title}>Brass Diyas</Text>
+            <Text style={styles.title}>{product.name}</Text>
 
             {fromCart && !fromOrder && (
               <Ionicons name="remove-circle-outline" size={18} color="#444" />
             )}
           </View>
 
-          {fromCart && <Text style={styles.vendor}>By Deepa Handicrafts</Text>}
+          {fromCart && (
+            <Text style={styles.vendor}>By {product.store?.store_name}</Text>
+          )}
 
           {fromOrder && <Text style={styles.meta}>Quantity: 2</Text>}
 
@@ -100,7 +132,9 @@ const ProductCard: React.FC<Props> = ({
             </View>
           )}
 
-          <Text style={styles.price}>₹120/-</Text>
+          <Text style={styles.price}>
+            ₹{product.price_minor || product.price}/-
+          </Text>
 
           {!fromCart && <Text style={styles.viewDetails}>View Details</Text>}
 

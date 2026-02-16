@@ -10,6 +10,9 @@ import {
   View,
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProductDetail } from "../../service/haatSlice";
+import { AppDispatch, RootState } from "../../store";
 import ReviewRatings from "./ReviewRatings";
 
 const { width } = Dimensions.get("window");
@@ -17,45 +20,44 @@ const { width } = Dimensions.get("window");
 const ProductDetails = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const { id } = route.params || { id: 1 };
+  const dispatch = useDispatch<AppDispatch>();
+  const { id } = route.params || {};
 
-  // Mock data matching the Vue template
-  const products = [
-    {
-      id: 1,
-      name: "Brass Diyas",
-      image:
-        "https://images.unsplash.com/photo-1620619767323-b95a89183081?q=80&w=600&h=400&auto=format&fit=crop",
-      price: "₹250",
-      rating: 4.5,
-      description: "High quality brass diyas perfect for festivals.",
-      material: "Brass",
-      size: "Medium",
-      color: "Golden",
-      weight: "500g",
-    },
-    {
-      id: 2,
-      name: "Vedic Vibes",
-      image:
-        "https://images.unsplash.com/photo-1602928321679-560bb453f190?q=80&w=600&h=400&auto=format&fit=crop",
-      price: "₹300",
-      rating: 4.2,
-      description: "Elegant brass diyas to light up your celebrations.",
-      material: "Brass",
-      size: "Large",
-      color: "Golden",
-      weight: "750g",
-    },
-  ];
+  const product = useSelector((state: RootState) => state.haat.productDetail);
+  const loading = useSelector((state: RootState) => state.haat.loading);
 
-  const product = products.find((p) => p.id === id) || products[0];
+  React.useEffect(() => {
+    if (id) {
+      dispatch(fetchProductDetail(id));
+    }
+  }, [id]);
 
-  const additionalDetails = {
-    material: product.material,
-    size: product.size,
-    color: product.color,
-    weight: product.weight,
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ marginTop: 100, textAlign: "center" }}>Loading...</Text>
+      </View>
+    );
+  }
+
+  if (!product) {
+    return (
+      <View style={styles.container}>
+        <Text style={{ marginTop: 100, textAlign: "center" }}>
+          Product not found
+        </Text>
+      </View>
+    );
+  }
+
+  const productImage = product.images?.[0]?.url || product.image;
+
+  const additionalDetails: any = {
+    // product might have different fields in API
+    material: product.material || "N/A",
+    size: product.size || "Standard",
+    color: product.color || "Default",
+    weight: product.weight || "N/A",
   };
 
   return (
@@ -63,7 +65,7 @@ const ProductDetails = () => {
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Header Section */}
         <View style={styles.header}>
-          <Image source={{ uri: product.image }} style={styles.headerImage} />
+          <Image source={{ uri: productImage }} style={styles.headerImage} />
 
           <View style={styles.topButtons}>
             <TouchableOpacity
@@ -91,7 +93,7 @@ const ProductDetails = () => {
         <View style={styles.content}>
           <View style={styles.mainInfo}>
             <Text style={styles.productName}>{product.name}</Text>
-            <Text style={styles.productPrice}>{product.price}/-</Text>
+            <Text style={styles.productPrice}>₹{product.price_minor}/-</Text>
           </View>
 
           <View style={styles.ratingRow}>
@@ -113,7 +115,7 @@ const ProductDetails = () => {
               {Object.entries(additionalDetails).map(([key, value]) => (
                 <View key={key} style={styles.detailItem}>
                   <Text style={styles.detailKey}>{key}</Text>
-                  <Text style={styles.detailValue}>{value}</Text>
+                  <Text style={styles.detailValue}>{String(value)}</Text>
                 </View>
               ))}
             </View>

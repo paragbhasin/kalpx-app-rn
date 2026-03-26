@@ -24,9 +24,16 @@ export const useScreenStore = create<ScreenStore>((set, get) => ({
   screenData: {},
 
   loadScreen: (containerId, stateId) => {
-    const container = (Containers as any)[`${containerId.charAt(0).toUpperCase() + containerId.slice(1)}Container`] || 
-                    (Containers as any)[containerId];
+    // Convert snake_case to PascalCase and add Container suffix
+    // e.g., "choice_stack" -> "ChoiceStackContainer"
+    const pascalCaseId = containerId
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join('');
     
+    const container = (Containers as any)[`${pascalCaseId}Container`] || 
+                    (Containers as any)[pascalCaseId] ||
+                    (Containers as any)[containerId];
     if (!container || !container.states[stateId]) {
       console.warn(`Screen not found: ${containerId}.${stateId}`);
       return;

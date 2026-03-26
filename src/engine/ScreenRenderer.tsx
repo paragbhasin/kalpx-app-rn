@@ -5,11 +5,13 @@ import { useScreenStore } from './ScreenStore';
 // Import Containers
 import GenericContainer from '../containers/GenericContainer';
 import PortalContainer from '../containers/PortalContainer';
+import ChoiceStackContainer from '../containers/ChoiceStackContainer'
+
 
 const containerMap: Record<string, React.ComponentType<any>> = {
   portal: PortalContainer,
   generic: GenericContainer,
-  // Add other containers as needed
+  choice_stack: ChoiceStackContainer,
 };
 
 const ScreenRenderer: React.FC = () => {

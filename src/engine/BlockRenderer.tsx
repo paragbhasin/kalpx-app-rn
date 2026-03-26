@@ -8,12 +8,14 @@ import HeadlineBlock from '../blocks/HeadlineBlock';
 import SubtextBlock from '../blocks/SubtextBlock';
 import PrimaryButtonBlock from '../blocks/PrimaryButtonBlock';
 import LotusLogoBlock from '../blocks/LotusLogoBlock';
+import ChoiceCardBlock from '../blocks/ChoiceCardBlock';
 
 const blockMap: Record<string, React.ComponentType<any>> = {
   headline: HeadlineBlock,
   subtext: SubtextBlock,
   primary_button: PrimaryButtonBlock,
   lotus_logo: LotusLogoBlock,
+  choice_card: ChoiceCardBlock,
 };
 
 interface BlockRendererProps {

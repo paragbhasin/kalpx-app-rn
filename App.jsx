@@ -1,12 +1,21 @@
 // MUST be first import
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import { NavigationContainer } from "@react-navigation/native";
+import { DefaultTheme, NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
+
+const TransparentTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: 'transparent',
+  },
+};
 import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState, useRef } from "react";
-import { Animated, StyleSheet, View, Image } from "react-native";
+import { Animated, StyleSheet, View, Image, ImageBackground, StatusBar } from "react-native";
+import { useScreenStore } from "./src/engine/ScreenStore";
 import "react-native-get-random-values";
 import { MenuProvider } from "react-native-popup-menu";
 import { Provider, useDispatch, useSelector } from "react-redux";
@@ -54,6 +63,7 @@ function SnackBarContainer() {
 }
 
 export default function App() {
+  const currentBackground = useScreenStore((state) => state.currentBackground);
   const [fontsLoaded, error] = useFonts({
     GelicaRegular: require("./assets/fonts/gelica-regular.otf"),
     GelicaLight: require("./assets/fonts/gelica-light.otf"),
@@ -113,10 +123,28 @@ export default function App() {
       <Provider store={store}>
         <ToastProvider>
           <CartProvider>
-            <NavigationContainer ref={navigationRef}>
-              <Routes initialRouteName={initialRoute} />
-              <SnackBarContainer />
-            </NavigationContainer>
+            <View style={{ flex: 1, backgroundColor: currentBackground ? 'transparent' : '#FFF' }}>
+              <StatusBar 
+                barStyle={currentBackground ? "light-content" : "dark-content"} 
+                translucent={!!currentBackground} 
+                backgroundColor="transparent" 
+              />
+              <NavigationContainer ref={navigationRef} theme={TransparentTheme}>
+                {currentBackground ? (
+                  <ImageBackground source={currentBackground} style={{ flex: 1 }} resizeMode="cover">
+                    <View style={{ flex: 1, backgroundColor: 'transparent' }}>
+                      <Routes initialRouteName={initialRoute} />
+                      <SnackBarContainer />
+                    </View>
+                  </ImageBackground>
+                ) : (
+                  <View style={{ flex: 1, backgroundColor: '#FFF' }}>
+                    <Routes initialRouteName={initialRoute} />
+                    <SnackBarContainer />
+                  </View>
+                )}
+              </NavigationContainer>
+            </View>
             <ToastHost />
           </CartProvider>
         </ToastProvider>

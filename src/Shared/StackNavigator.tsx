@@ -1,5 +1,6 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
+import ScreenRenderer from "../engine/ScreenRenderer";
 import ClassBookingScreen from "../screens/Classes/ClassBookingScreen";
 import ClassesScreen from "../screens/Classes/classesScreen";
 import ClassPaymentScreen from "../screens/Classes/ClassPaymentScreen";
@@ -50,7 +51,10 @@ const Stack: any = createNativeStackNavigator();
 export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
   <Stack.Navigator
     initialRouteName={initialRouteName}
-    screenOptions={{ headerShown: false }}
+    screenOptions={{ 
+      headerShown: false,
+      contentStyle: { backgroundColor: 'transparent' }
+    }}
   >
     <Stack.Screen
       name="Home"
@@ -242,11 +246,19 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
       component={GlobalSearchScreen}
       options={{ headerShown: false }}
     />
+    <Stack.Screen
+      name="DynamicEngine"
+      component={ScreenRenderer}
+      options={{ headerShown: false }}
+    />
   </Stack.Navigator>
 );
 
 export const NotificationStackNavigator = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
+  <Stack.Navigator screenOptions={{ 
+    headerShown: false,
+    contentStyle: { backgroundColor: 'transparent' }
+  }}>
     <Stack.Screen
       name="Notifications"
       component={Notifications}
@@ -257,7 +269,10 @@ export const NotificationStackNavigator = () => (
 );
 
 export const ProfileStackNavigator = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
+  <Stack.Navigator screenOptions={{ 
+    headerShown: false,
+    contentStyle: { backgroundColor: 'transparent' }
+  }}>
     <Stack.Screen
       name="Profile"
       component={Profile}

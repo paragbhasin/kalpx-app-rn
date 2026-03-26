@@ -1,16 +1,29 @@
 import React from 'react';
-import { Animated, StyleSheet, View } from 'react-native';
+import { Animated, StyleSheet, View, ImageBackground } from 'react-native';
 import { useScrollContext } from '../context/ScrollContext';
 import Header from './Header';
+import { useScreenStore } from '../engine/ScreenStore';
 
-const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
+const GlobalScrollLayout = ({ 
+    children, 
+}: { 
+    children: React.ReactNode,
+}) => {
     const { headerY } = useScrollContext();
+    const currentBackground = useScreenStore((state) => state.currentBackground);
+    const isHeaderHidden = useScreenStore((state) => state.isHeaderHidden);
 
     return (
         <View style={styles.container}>
-            <Animated.View style={[styles.headerContainer, { transform: [{ translateY: headerY }] }]}>
-                <Header />
-            </Animated.View>
+            {!isHeaderHidden && (
+                <Animated.View style={[
+                    styles.headerContainer, 
+                    { transform: [{ translateY: headerY }] },
+                    currentBackground && { backgroundColor: 'transparent' }
+                ]}>
+                    <Header isTransparent={!!currentBackground} />
+                </Animated.View>
+            )}
             <View style={styles.content}>
                 {children}
             </View>

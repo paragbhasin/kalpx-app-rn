@@ -20,9 +20,10 @@ const blockMap: Record<string, React.ComponentType<any>> = {
 
 interface BlockRendererProps {
   block: any;
+  textColor?: string;
 }
 
-const BlockRenderer: React.FC<BlockRendererProps> = ({ block }) => {
+const BlockRenderer: React.FC<BlockRendererProps> = ({ block, textColor }) => {
   const screenData = useScreenStore((state) => state.screenData);
   
   if (!block) return null;
@@ -52,7 +53,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block }) => {
     );
   }
 
-  return <Component block={interpolatedBlock} />;
+  return <Component block={interpolatedBlock} textColor={textColor} />;
 };
 
 const styles = StyleSheet.create({

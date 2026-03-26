@@ -1183,7 +1183,7 @@ export default function Home() {
             }}
             onPress={() => {
               useScreenStore.getState().loadScreen("portal", "portal");
-              navigation.navigate("DynamicEngine");
+              navigation.navigate("HomePage", { screen: "DynamicEngine" });
             }}
           >
             <TextComponent

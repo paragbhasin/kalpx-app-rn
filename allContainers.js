@@ -171,7 +171,7 @@ export const CompanionDashboardContainer = {
           title: "Mantra",
           description: "{{mantra_text}}",
           meta: "{{practice_chant_meta}}",
-          thumbnail: "/assets/dash_mantra.svg",
+          thumbnail: "/assets/dash_mantra.png",
           dashboard_variant: true,
           icon: "fas fa-om",
           action_label: "Start →",
@@ -198,7 +198,7 @@ export const CompanionDashboardContainer = {
           id: "practice_embody",
           title: "Sankalp",
           description: "{{sankalp_text}}",
-          thumbnail: "/assets/dash_sankalp.svg",
+          thumbnail: "/assets/dash_sankalp.png",
           dashboard_variant: true,
           icon: "fas fa-fire",
           action_label: "I Embody This →",
@@ -220,7 +220,7 @@ export const CompanionDashboardContainer = {
           title: "Mindful Action",
           description: "{{practice_title}}",
           meta: "{{practice_meta}}",
-          thumbnail: "/assets/dash_action.svg",
+          thumbnail: "/assets/dash_action.png",
           dashboard_variant: true,
           icon: "fas fa-mountain",
           action_label: "Mark Focus Complete →",
@@ -411,7 +411,7 @@ export const ChoiceStackContainer = {
             {
               id: "career",
               title: "Career",
-              icon: "/assets/career1.svg",
+              icon: "/assets/career1.png",
               tags: ["Clarity", "Growth"],
               description:
                 "Career is not just about jobs or success. In Sanatan terms, it is deeply connected to:",
@@ -419,34 +419,34 @@ export const ChoiceStackContainer = {
                 {
                   term: "Buddhi",
                   definition: "clear intellect",
-                  icon: "/assets/buddhi.svg",
+                  icon: "/assets/buddhi.png",
                 },
                 {
                   term: "Viveka",
                   definition: "right discernment",
-                  icon: "/assets/viveka.svg",
+                  icon: "/assets/viveka.png",
                 },
                 {
                   term: "Tejas",
                   definition: "confidence and radiance",
-                  icon: "/assets/tejas.svg",
+                  icon: "/assets/tejas.png",
                 },
                 {
                   term: "Shakti",
                   definition: "ability to act",
-                  icon: "/assets/shakthi.svg",
+                  icon: "/assets/shakthi.png",
                 },
                 {
                   term: "Dharma",
                   definition: "right direction in life",
-                  icon: "/assets/dharma.svg",
+                  icon: "/assets/dharma.png",
                 },
               ],
             },
             {
               id: "relationship",
               title: "Relationship",
-              icon: "/assets/relationship.svg",
+              icon: "/assets/relationship.png",
               tags: ["Connection", "Trust"],
               description:
                 "Relationships in Sanatan Dharma are not only social bonds. They are linked to:",
@@ -454,68 +454,68 @@ export const ChoiceStackContainer = {
                 {
                   term: "Prema",
                   definition: "sacred love",
-                  icon: "/assets/relation_1.svg",
+                  icon: "/assets/relation_1.png",
                 },
                 {
                   term: "Karuna",
                   definition: "compassion",
-                  icon: "/assets/relation_2.svg",
+                  icon: "/assets/relation_2.png",
                 },
                 {
                   term: "Kshama",
                   definition: "forgiveness",
-                  icon: "/assets/relation_3.svg",
+                  icon: "/assets/relation_3.png",
                 },
                 {
                   term: "Hridaya shuddhi",
                   definition: "purification of the heart",
-                  icon: "/assets/relation_4.svg",
+                  icon: "/assets/relation_4.png",
                 },
                 {
                   term: "Sambandha",
                   definition: "right relationship",
-                  icon: "/assets/relation_5.svg",
+                  icon: "/assets/relation_5.png",
                 },
               ],
             },
             {
               id: "health",
               title: "Health",
-              icon: "/assets/health.svg",
+              icon: "/assets/health.png",
               tags: ["Balance", "Energy"],
               description: "Health in Sanatan Dharma is tied to:",
               breakdown: [
                 {
                   term: "Prana",
                   definition: "life force",
-                  icon: "/assets/health_1.svg",
+                  icon: "/assets/health_1.png",
                 },
                 {
                   term: "Ojas",
                   definition: "deep vitality and reserve",
-                  icon: "/assets/health_2.svg",
+                  icon: "/assets/health_2.png",
                 },
                 {
                   term: "Tejas",
                   definition: "metabolic fire and brightness",
-                  icon: "/assets/health_3.svg",
+                  icon: "/assets/health_3.png",
                 },
                 {
                   term: "Sharira dharma",
                   definition: "right relationship with the body",
-                  icon: "/assets/health_4.svg",
+                  icon: "/assets/health_4.png",
                 },
                 {
                   term: "Arogya",
                   definition: "wholeness and healing",
-                  icon: "/assets/health_5.svg",
+                  icon: "/assets/health_5.png",
                 },
               ],
             },
             {
               id: "wealth",
               title: "Wealth",
-              icon: "/assets/wealth.svg",
+              icon: "/assets/wealth.png",
               tags: ["Stability", "Habits"],
               description:
                 "Wealth in Sanatan Dharma is not only money. It is connected to:",
@@ -523,28 +523,28 @@ export const ChoiceStackContainer = {
                 {
                   term: "Lakshmi",
                   definition: "auspicious abundance",
-                  icon: "/assets/wealth_1.svg",
+                  icon: "/assets/wealth_1.png",
                 },
                 {
                   term: "Pushti",
                   definition: "nourishment",
-                  icon: "/assets/wealth_3.svg",
+                  icon: "/assets/wealth_3.png",
                 },
                 {
                   term: "Rakshana",
                   definition: "preservation",
-                  icon: "/assets/wealth_4.svg",
+                  icon: "/assets/wealth_4.png",
                 },
                 {
                   term: "Santosha",
                   definition: "contentment",
-                  icon: "/assets/wealth_2.svg",
+                  icon: "/assets/wealth_2.png",
                 },
                 {
                   term: "Dharma of resources",
                   definition:
                     "right relationship to what one receives and holds",
-                  icon: "/assets/wealth_5.svg",
+                  icon: "/assets/wealth_5.png",
                 },
               ],
             },
@@ -652,7 +652,7 @@ export const ChoiceStackContainer = {
         {
           id: "depth_lotus_top",
           type: "image",
-          url: "/assets/level_lotus.svg",
+          url: "/assets/level_lotus.png",
           style: {
             width: "212px",
             height: "68px",
@@ -688,7 +688,7 @@ export const ChoiceStackContainer = {
               label: "Easy",
               description:
                 "Simple, gentle practices to help you begin. Perfect for easing into your routine.",
-              icon: "/assets/beginner.svg",
+              icon: "/assets/beginner.png",
               label_color: "#A2A751",
             },
             {
@@ -697,7 +697,7 @@ export const ChoiceStackContainer = {
               label: "Balanced",
               description:
                 "A balanced level to build focus and consistency. Ideal when you're ready to go a little deeper.",
-              icon: "/assets/intermediate.svg",
+              icon: "/assets/intermediate.png",
               label_color: "#D9A557",
             },
             {
@@ -706,7 +706,7 @@ export const ChoiceStackContainer = {
               label: "Deep",
               description:
                 "More immersive practices for deeper transformation. For when you feel ready to commit more fully.",
-              icon: "/assets/advanced.svg",
+              icon: "/assets/advanced.png",
               label_color: "#C57457",
             },
           ],
@@ -1674,8 +1674,8 @@ export const PracticeRunnerContainer = {
         subtext:
           "Your Sankalp is done for today. Your focus is anchored within.\nA step closer to your higher self.",
         points: [
-          { label: "Mind\nCentered", icon: "/assets/sankalp_centered.svg" },
-          { label: "Inner\nPeace", icon: "/assets/sankalp_inner_peace.svg" },
+          { label: "Mind\nCentered", icon: "/assets/sankalp_centered.png" },
+          { label: "Inner\nPeace", icon: "/assets/sankalp_inner_peace.png" },
         ],
         repeat_label: "Repeat it again",
         dashboard_label: "Return to Dashboard",
@@ -3516,25 +3516,25 @@ export const CycleTransitionsContainer = {
             {
               id: "energized",
               title: "Energized",
-              icon: "/assets/quick_1.svg",
+              icon: "/assets/quick_1.png",
               color: "#EAB308",
             },
             {
               id: "balanced",
               title: "Balanced",
-              icon: "/assets/quick_2.svg",
+              icon: "/assets/quick_2.png",
               color: "#10B981",
             },
             {
               id: "agitated",
               title: "Agitated",
-              icon: "/assets/quick_4.svg",
+              icon: "/assets/quick_4.png",
               color: "#8B5CF6",
             },
             {
               id: "drained",
               title: "Drained",
-              icon: "/assets/quick_3.svg",
+              icon: "/assets/quick_3.png",
               color: "#64748B",
             },
           ],

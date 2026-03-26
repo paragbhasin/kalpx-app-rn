@@ -5,6 +5,8 @@ interface ScreenState {
   currentContainerId: string | null;
   currentStateId: string | null;
   currentScreen: any | null;
+  currentBackground: any | null;
+  isHeaderHidden: boolean;
   history: { containerId: string; stateId: string }[];
   screenData: Record<string, any>; // Data for interpolation
 }
@@ -14,14 +16,21 @@ interface ScreenStore extends ScreenState {
   goBack: () => void;
   setScreenData: (data: Record<string, any>) => void;
   updateScreenData: (key: string, value: any) => void;
+  updateBackground: (background: any) => void;
+  updateHeaderHidden: (hidden: boolean) => void;
 }
 
 export const useScreenStore = create<ScreenStore>((set, get) => ({
   currentContainerId: null,
   currentStateId: null,
   currentScreen: null,
+  currentBackground: null,
+  isHeaderHidden: false,
   history: [],
   screenData: {},
+
+  updateBackground: (background) => set({ currentBackground: background }),
+  updateHeaderHidden: (hidden) => set({ isHeaderHidden: hidden }),
 
   loadScreen: (containerId, stateId) => {
     // Convert snake_case to PascalCase and add Container suffix

@@ -15,21 +15,24 @@ import {
 } from "../StackNavigator";
 
 const Tab = createBottomTabNavigator();
+import { useScreenStore } from "../../engine/ScreenStore";
 
 const BottomMenuContent = () => {
   const { t } = useTranslation();
   const navigation = useNavigation();
   const { isVisible } = useScrollContext();
+  const currentBackground = useScreenStore((state) => state.currentBackground);
 
   return (
     <GlobalScrollLayout>
       <Tab.Navigator
+        sceneContainerStyle={{ backgroundColor: "transparent" }}
         screenOptions={{
           headerShown: false,
           tabBarStyle: {
             display: isVisible ? "flex" : "none",
-            backgroundColor: "#FFF",
-            borderTopWidth: 0.5,
+            backgroundColor: currentBackground ? "transparent" : "#FFF",
+            borderTopWidth: currentBackground ? 0 : 0.5,
             borderTopColor: "#d1d1d1",
             elevation: 0,
             shadowOpacity: 0,

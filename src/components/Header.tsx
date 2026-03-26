@@ -4,7 +4,11 @@ import { Image, StyleSheet, View } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import Colors from "./Colors";
 
-const Header = () => {
+interface HeaderProps {
+  isTransparent?: boolean;
+}
+
+const Header: React.FC<HeaderProps> = ({ isTransparent }) => {
   const { i18n } = useTranslation();
   const [selectedLang, setSelectedLang] = useState(i18n.language);
 
@@ -32,7 +36,7 @@ const languages = [
   }, [i18n.language]);
 
   return (
-    <View style={styles.sectionWrap}>
+    <View style={[styles.sectionWrap, isTransparent && { backgroundColor: 'transparent' }]}>
       {/* Left logo */}
       <Image
         source={require("../../assets/KalpXlogo.png")}
@@ -86,7 +90,7 @@ const styles = StyleSheet.create({
     borderWidth: 0.6,
     borderRadius: 6,
     paddingHorizontal: 6,
-    backgroundColor: "#FFF",
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
   },
   selectedText: {
     color: "#000000",

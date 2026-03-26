@@ -37,7 +37,13 @@ const Stack: any = createNativeStackNavigator();
 
 const Routes = ({ initialRouteName = "AppDrawer" }) => {
   return (
-    <Stack.Navigator initialRouteName={initialRouteName} screenOptions={{ headerShown: false }}>
+    <Stack.Navigator 
+      initialRouteName={initialRouteName} 
+      screenOptions={{ 
+        headerShown: false,
+        contentStyle: { backgroundColor: 'transparent' }
+      }}
+    >
       <Stack.Screen name="Welcome" component={WelcomeScreen} />
       <Stack.Screen name="LandingScreen" component={LandingScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
@@ -71,7 +77,6 @@ const Routes = ({ initialRouteName = "AppDrawer" }) => {
       <Stack.Screen name="Privacy" component={Privacy} />
       <Stack.Screen name="DailyPracticeList" component={DailyPracticeList} />
       <Stack.Screen name="DailyPracticeSelectList" component={DailyPracticeSelectList} />
-      <Stack.Screen name="DynamicEngine" component={ScreenRenderer} />
     </Stack.Navigator>
   );
 };

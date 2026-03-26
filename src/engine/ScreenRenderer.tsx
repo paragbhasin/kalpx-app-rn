@@ -25,7 +25,7 @@ const ScreenRenderer: React.FC = () => {
 
   return (
     <View style={styles.root}>
-      <StatusBar barStyle="light-content" />
+      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
       <SafeAreaView style={styles.safeArea}>
         <Container schema={currentScreen} />
       </SafeAreaView>
@@ -36,10 +36,11 @@ const ScreenRenderer: React.FC = () => {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: 'transparent',
   },
   safeArea: {
     flex: 1,
+    backgroundColor: 'transparent',
   },
 });
 

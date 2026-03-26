@@ -2,16 +2,18 @@ import React from 'react';
 import { Text, StyleSheet } from 'react-native';
 
 interface SubtextBlockProps {
-  block: {
-    content: string;
-    variant?: string;
-    style?: any;
-  };
+  block: any;
+  textColor?: string;
 }
 
-const SubtextBlock: React.FC<SubtextBlockProps> = ({ block }) => {
+const SubtextBlock: React.FC<SubtextBlockProps> = ({ block, textColor }) => {
   return (
-    <Text style={[styles.subtext, block.variant === 'small' && styles.small, block.style]}>
+    <Text style={[
+      styles.subtext, 
+      block.variant === 'small' && styles.small, 
+      textColor ? { color: textColor } : null, 
+      block.style
+    ]}>
       {block.content}
     </Text>
   );
@@ -20,7 +22,7 @@ const SubtextBlock: React.FC<SubtextBlockProps> = ({ block }) => {
 const styles = StyleSheet.create({
   subtext: {
     fontSize: 18,
-    color: 'rgba(255, 255, 255, 0.9)',
+    color: 'rgba(67, 33, 4, 0.8)',
     lineHeight: 26,
     marginBottom: 20,
     fontFamily: 'GelicaRegular',

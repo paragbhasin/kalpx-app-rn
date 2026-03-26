@@ -34,6 +34,18 @@ interface ChoiceCardBlockProps {
   };
 }
 
+const assetMap: Record<string, any> = {
+  '/assets/career1.png': require('../../assets/career1.png'),
+  '/assets/relationship.png': require('../../assets/relationship.png'),
+  '/assets/health.png': require('../../assets/health.png'),
+  '/assets/wealth.png': require('../../assets/wealth.png'),
+};
+
+const resolveAsset = (path: string | any) => {
+  if (typeof path !== 'string') return path;
+  return assetMap[path] || { uri: path };
+};
+
 const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
   const loadScreen = useScreenStore((state) => state.loadScreen);
   const screenState = useScreenStore((state) => state.screenData);
@@ -100,7 +112,7 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
               isGrid && styles.gridCard,
               isPremiumGrid && styles.premiumGridCard,
               isSelected && styles.selectedCard,
-              { width: isGrid ? (width - 40) / numColumns - 10 : '100%' }
+              { width: isGrid ? '47%' : '100%', marginBottom: isGrid ? 10 : 0 }
             ]}
           >
             {/* Gold Accent Line for List View */}
@@ -117,9 +129,7 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
                   <View style={[styles.imageContainer, isPremiumGrid && styles.premiumImageContainer]}>
                     <Image 
                       source={
-                        typeof option.image === 'string' ? { uri: option.image } : 
-                        option.image ? option.image : 
-                        { uri: option.icon } 
+                        option.image ? resolveAsset(option.image) : resolveAsset(option.icon)
                       } 
                       style={[styles.image, isPremiumGrid && styles.premiumImage]} 
                       resizeMode="contain" 
@@ -201,7 +211,7 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   card: {
-    backgroundColor: '#FFFFFF',
+
     borderWidth: 1.5,
     borderColor: 'rgba(212, 160, 23, 0.2)',
     borderRadius: 16,
@@ -220,19 +230,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  premiumGridCard: {
-    borderRadius: 24,
-    minHeight: 156,
-    padding: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderWidth: 1.5,
-    borderColor: '#E7E0D2',
-    shadowColor: '#B8860B',
-    shadowOpacity: 0.15,
-    shadowRadius: 15,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 5,
-  },
+premiumGridCard: {
+  borderRadius: 24,
+  minHeight: 156,
+  padding: 20,
+  borderWidth: 1.5,
+  borderColor: '#C7A64B',
+  shadowColor: "#000",
+  shadowOffset: { width: 0, height: 8 }, // NOT 2,2 ❌
+  shadowOpacity: 0.15,
+  shadowRadius: 12,
+ elevation: 8, // Android
+},
   selectedCard: {
     borderColor: '#C9A84C',
     borderWidth: 2,

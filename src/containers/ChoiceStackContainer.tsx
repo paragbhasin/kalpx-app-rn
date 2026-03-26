@@ -1,6 +1,8 @@
-import React, { useMemo } from 'react';
-import { View, StyleSheet, ScrollView, ImageBackground, Dimensions, Text } from 'react-native';
+import React, { useMemo, useEffect } from 'react';
+import { View, StyleSheet, ScrollView, Dimensions, Text } from 'react-native';
 import BlockRenderer from '../engine/BlockRenderer';
+import { useScreenStore } from '../engine/ScreenStore';
+import Header from '../components/Header';
 
 const { width, height } = Dimensions.get('window');
 
@@ -21,6 +23,15 @@ interface ChoiceStackContainerProps {
 }
 
 const ChoiceStackContainer: React.FC<ChoiceStackContainerProps> = ({ schema }) => {
+  const updateBackground = useScreenStore((state) => state.updateBackground);
+  const updateHeaderHidden = useScreenStore((state) => state.updateHeaderHidden);
+
+  useEffect(() => {
+    updateBackground(require('../../assets/beige_bg.png'));
+    updateHeaderHidden(true);
+    return () => updateHeaderHidden(false);
+  }, [updateBackground, updateHeaderHidden]);
+
   const blocks = useMemo(() => schema.blocks || [], [schema.blocks]);
 
   const headerBlocks = useMemo(() => blocks.filter((b) => b.position === 'header'), [blocks]);
@@ -31,51 +42,46 @@ const ChoiceStackContainer: React.FC<ChoiceStackContainerProps> = ({ schema }) =
   const isDepthSelection = schema.id === 'depth_selection';
 
   return (
-    <ImageBackground 
-      source={require('../../assets/beige_bg.png')} // Fallback or dynamic
-      style={styles.container}
-      resizeMode="cover"
+    <ScrollView 
+      style={styles.scrollView} 
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
     >
-      <ScrollView 
-        style={styles.scrollView} 
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Header Section */}
-        <View style={styles.header}>
-          {headerBlocks.map((block, i) => (
-            <BlockRenderer key={`header-${i}`} block={block} />
+      <Header isTransparent={true} />
+      {/* Header Section */}
+      <View style={styles.header}>
+        {headerBlocks.map((block, i) => (
+          <BlockRenderer key={`header-${i}`} block={block} textColor="#432104" />
+        ))}
+      </View>
+
+      {/* Depth Selection Divider */}
+      {isDepthSelection && (
+        <View style={styles.depthDivider}>
+          <View style={styles.line} />
+          <Text style={styles.microLabel}>
+            {schema.meta?.section_label || "CHOOSE YOUR PRACTICE LEVEL"}
+          </Text>
+          <View style={styles.line} />
+        </View>
+      )}
+
+      {/* Content Section */}
+      <View style={styles.content}>
+        {contentBlocks.map((block, i) => (
+          <BlockRenderer key={`content-${i}`} block={block} textColor="#432104" />
+        ))}
+      </View>
+
+      {/* Footer Section */}
+      <View style={styles.footer}>
+        <View style={styles.actions}>
+          {footerBlocks.map((block, i) => (
+            <BlockRenderer key={`footer-${i}`} block={block} textColor="#432104" />
           ))}
         </View>
-
-        {/* Depth Selection Divider */}
-        {isDepthSelection && (
-          <View style={styles.depthDivider}>
-            <View style={styles.line} />
-            <Text style={styles.microLabel}>
-              {schema.meta?.section_label || "CHOOSE YOUR PRACTICE LEVEL"}
-            </Text>
-            <View style={styles.line} />
-          </View>
-        )}
-
-        {/* Content Section */}
-        <View style={styles.content}>
-          {contentBlocks.map((block, i) => (
-            <BlockRenderer key={`content-${i}`} block={block} />
-          ))}
-        </View>
-
-        {/* Footer Section */}
-        <View style={styles.footer}>
-          <View style={styles.actions}>
-            {footerBlocks.map((block, i) => (
-              <BlockRenderer key={`footer-${i}`} block={block} />
-            ))}
-          </View>
-        </View>
-      </ScrollView>
-    </ImageBackground>
+      </View>
+    </ScrollView>
   );
 };
 
@@ -87,13 +93,13 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+    backgroundColor: 'transparent',
   },
   scrollContent: {
     paddingBottom: 40,
-    paddingHorizontal: 15,
   },
   header: {
-    marginTop: 20,
+    marginTop: 10,
     marginBottom: 10,
     alignItems: 'center',
   },

@@ -28,7 +28,7 @@ const { width } = Dimensions.get("window");
 
 export default function AppDrawerNavigator() {
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }}>
       <Drawer.Navigator
         id="MainDrawer"
         screenOptions={{
@@ -211,7 +211,7 @@ const CustomDrawerContent = (props) => {
 
         if (item.name === t("drawer.myRoutine")) {
           useScreenStore.getState().loadScreen('portal', 'portal');
-          props.navigation.navigate("DynamicEngine");
+          props.navigation.navigate("HomePage", { screen: "DynamicEngine" });
         } else if (item.title === "Profile") {
           props.navigation.navigate("HomePage", {
             screen: "Profile",

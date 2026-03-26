@@ -688,7 +688,7 @@ export const ChoiceStackContainer = {
               label: "Easy",
               description:
                 "Simple, gentle practices to help you begin. Perfect for easing into your routine.",
-              icon: "/assets/beginner.png",
+
               label_color: "#A2A751",
             },
             {
@@ -697,7 +697,7 @@ export const ChoiceStackContainer = {
               label: "Balanced",
               description:
                 "A balanced level to build focus and consistency. Ideal when you're ready to go a little deeper.",
-              icon: "/assets/intermediate.png",
+
               label_color: "#D9A557",
             },
             {
@@ -706,7 +706,7 @@ export const ChoiceStackContainer = {
               label: "Deep",
               description:
                 "More immersive practices for deeper transformation. For when you feel ready to commit more fully.",
-              icon: "/assets/advanced.png",
+
               label_color: "#C57457",
             },
           ],
@@ -4833,7 +4833,7 @@ export const StableScanContainer = {
           label: "Set My Practice →",
           action: {
             type: "submit",
-            payload: { type: "set_baseline" },
+
             target: {
               container_id: "choice_stack",
               state_id: "depth_selection",

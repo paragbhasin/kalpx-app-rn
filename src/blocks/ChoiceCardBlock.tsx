@@ -139,7 +139,9 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
               isSelected && styles.selectedCard,
               isPremiumGrid && isSelected && styles.premiumSelectedCard,
               { 
-                width: (option.fullWidth || (isGrid && idx === options.length - 1 && options.length % 2 !== 0)) ? '100%' : '48%', 
+                width: isGrid ? 
+                  ((option.fullWidth || (idx === options.length - 1 && options.length % 2 !== 0)) ? '100%' : '48%') 
+                  : '100%', 
                 marginBottom: isGrid ? 12 : 0 
               }
             ]}
@@ -186,7 +188,7 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
                 
                 <View style={[styles.details, isPremiumGrid && styles.premiumDetails]}>
                   <View style={[styles.titleRow, isGrid && styles.gridTitleRow, isPremiumGrid && styles.premiumTitleRow]}>
-                    <Text style={[styles.title, isPremiumGrid && styles.premiumTitle]} numberOfLines={2}>{option.title || option.label}</Text>
+                    <Text style={[styles.title, isPremiumGrid && styles.premiumTitle]}>{option.title || option.label}</Text>
                     {option.label && !isGrid && (
                       <View style={[styles.labelBadge, { backgroundColor: option.label_color || '#C59B63' }]}>
                         <Text style={styles.labelText}>{option.label}</Text>
@@ -205,23 +207,19 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
                   )}
 
                   {option.description && !option.tags && (
-                    <Text style={[styles.description, (isGrid || isPremiumGrid) && styles.gridDescription]} numberOfLines={2}>
+                    <Text style={[styles.description, (isGrid || isPremiumGrid) && styles.gridDescription]}>
                       {option.description}
                     </Text>
                   )}
                 </View>
               </View>
 
-              {/* Selection Indicator */}
+              {/* Selection Indicator (Radio circle for list, hidden for premium grid) */}
               {!isPremiumGrid && (
                 <View style={styles.indicatorContainer}>
-                  {isSelected ? (
-                    <View style={styles.radioOuterSelected}>
-                      <View style={styles.radioInner} />
-                    </View>
-                  ) : (
-                    !isGrid && <View style={styles.radioOuterEmpty} />
-                  )}
+                  <View style={[styles.radioOuter, isSelected && styles.radioOuterSelected]}>
+                    {isSelected && <View style={styles.radioInner} />}
+                  </View>
                 </View>
               )}
             </View>
@@ -259,10 +257,10 @@ const styles = StyleSheet.create({
   },
   card: {
     borderWidth: 1.5,
-  borderColor: 'rgba(212, 160, 23, 0.3)',
-
-    borderRadius: 16,
-    padding: 16,
+    borderColor: 'rgba(212, 160, 23, 0.2)',
+    borderRadius: 20,
+    padding: 18,
+    backgroundColor: '#FFFDF9', // Explicit background for that premium look
     position: 'relative',
     overflow: 'hidden',
     shadowColor: '#000',
@@ -279,7 +277,7 @@ const styles = StyleSheet.create({
   },
 premiumGridCard: {
   borderRadius: 24,
-  minHeight: 120, // Slightly shorter to avoid "huge" look
+  minHeight: 120,
   padding: 16,
   borderWidth: 1.5, 
   borderColor: 'rgba(212, 160, 23, 0.2)',
@@ -338,7 +336,6 @@ premiumGridCard: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
-    gap: 16,
   },
   gridLeftPart: {
     flexDirection: 'column',
@@ -360,6 +357,7 @@ premiumGridCard: {
     height: 56,
     justifyContent: 'center',
     alignItems: 'center',
+    marginRight: 16, // Spacing for icons
   },
   premiumImageContainer: {
     width: 64,
@@ -394,8 +392,7 @@ premiumGridCard: {
     marginBottom: 2,
   },
   title: {
-    fontSize: 18,
-
+    fontSize: 20,
     color: '#432104',
     fontFamily: 'GelicaBold',
     flex: 1,
@@ -437,11 +434,12 @@ premiumGridCard: {
     opacity: 0.6,
   },
   description: {
-    fontSize: 14,
+    fontSize: 15,
     color: '#432104',
     opacity: 0.8,
-    marginTop: 2,
+    marginTop: 4,
     fontFamily: 'GelicaRegular',
+    lineHeight: 22,
   },
   gridDescription: {
     textAlign: 'center',
@@ -449,28 +447,25 @@ premiumGridCard: {
   indicatorContainer: {
     marginLeft: 8,
   },
-  radioOuterEmpty: {
-    width: 20,
-    height: 20,
+  radioOuter: {
+    width: 22,
+    height: 22,
     borderWidth: 1.5,
     borderColor: '#D4CFC7',
-    borderRadius: 10,
-  },
-  radioOuterSelected: {
-    width: 20,
-    height: 20,
-    borderWidth: 1.5,
-    borderColor: '#C9A84C',
-    borderRadius: 10,
+    borderRadius: 11,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  radioOuterSelected: {
+    borderColor: '#C9A84C',
     backgroundColor: '#FFFFFF',
   },
   radioInner: {
-    width: 12,
-    height: 12,
+    width: 14,
+    height: 14,
     backgroundColor: '#C9A84C',
-    borderRadius: 6,
+    borderRadius: 7,
   },
   cardAction: {
     marginTop: 12,

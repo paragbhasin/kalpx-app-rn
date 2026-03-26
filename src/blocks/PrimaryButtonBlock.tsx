@@ -73,8 +73,9 @@ const PrimaryButtonBlock: React.FC<PrimaryButtonBlockProps> = ({ block }) => {
       }
     }
 
-    if (block.action?.type === 'navigate' && block.action.target) {
-      loadScreen(block.action.target.container_id, block.action.target.state_id);
+    const action = block.action;
+    if (action && (action.type === 'navigate' || action.type === 'submit') && action.target) {
+      loadScreen(action.target.container_id, action.target.state_id);
     }
   };
 

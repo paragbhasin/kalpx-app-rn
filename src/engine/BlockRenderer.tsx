@@ -9,6 +9,7 @@ import SubtextBlock from '../blocks/SubtextBlock';
 import PrimaryButtonBlock from '../blocks/PrimaryButtonBlock';
 import LotusLogoBlock from '../blocks/LotusLogoBlock';
 import ChoiceCardBlock from '../blocks/ChoiceCardBlock';
+import BaselineSliderBlock from '../blocks/BaselineSliderBlock';
 
 const blockMap: Record<string, React.ComponentType<any>> = {
   headline: HeadlineBlock,
@@ -16,6 +17,8 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   primary_button: PrimaryButtonBlock,
   lotus_logo: LotusLogoBlock,
   choice_card: ChoiceCardBlock,
+  choice_grid: ChoiceCardBlock,
+  baseline_slider: BaselineSliderBlock,
 };
 
 interface BlockRendererProps {

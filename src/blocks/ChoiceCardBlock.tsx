@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions } from 'react-native';
 import { useScreenStore } from '../engine/ScreenStore';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Ionicons } from '@expo/vector-icons';
 
 const { width } = Dimensions.get('window');
 
@@ -19,12 +20,13 @@ interface Option {
   button_style?: string;
   action?: any;
   selected?: boolean;
+  fullWidth?: boolean;
 }
 
 interface ChoiceCardBlockProps {
   block: {
     id?: string;
-    type: 'choice_card';
+    type: 'choice_card' | 'choice_grid';
     options?: Option[];
     options_key?: string;
     selection_mode?: 'manual' | 'auto' | 'single_auto_advance';
@@ -39,6 +41,29 @@ const assetMap: Record<string, any> = {
   '/assets/relationship.png': require('../../assets/relationship.png'),
   '/assets/health.png': require('../../assets/health.png'),
   '/assets/wealth.png': require('../../assets/wealth.png'),
+};
+
+const FA_TO_IONICONS: Record<string, string> = {
+  'spinner': 'sync',
+  'heart-broken': 'heart-disliked',
+  'user-slash': 'person-remove',
+  'signs-post': 'map',
+  'tachometer-alt': 'speedometer',
+  'heart': 'heart',
+  'fire': 'flame',
+  'cloud': 'cloud',
+  'link-slash': 'link-outline',
+  'tint': 'water',
+  'battery-quarter': 'battery-dead',
+  'bed': 'bed',
+  'compress-arrows-alt': 'contract',
+  'walking': 'walk',
+  'pills': 'medkit',
+  'money-bill-wave': 'cash',
+  'hand-holding-usd': 'wallet',
+  'chart-line': 'trending-up',
+  'piggy-bank': 'save',
+  'coins': 'cash-outline',
 };
 
 const resolveAsset = (path: string | any) => {
@@ -92,14 +117,14 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
     }
   };
 
-  const isGrid = block.variant?.includes('grid');
+  const isGrid = block.type === 'choice_grid' || block.variant?.includes('grid');
   const isGrid3 = block.variant === 'grid_3';
-  const isPremiumGrid = block.variant === 'premium-grid';
+  const isPremiumGrid = block.type === 'choice_grid' || block.variant === 'premium-grid';
   const numColumns = isGrid3 ? 3 : isGrid ? 2 : 1;
 
   return (
     <View style={[styles.container, isGrid && styles.gridContainer]}>
-      {options.map((option) => {
+      {options.map((option, idx) => {
         const isSelected = selectedId === option.id;
         
         return (
@@ -112,7 +137,11 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
               isGrid && styles.gridCard,
               isPremiumGrid && styles.premiumGridCard,
               isSelected && styles.selectedCard,
-              { width: isGrid ? '47%' : '100%', marginBottom: isGrid ? 10 : 0 }
+              isPremiumGrid && isSelected && styles.premiumSelectedCard,
+              { 
+                width: (option.fullWidth || (isGrid && idx === options.length - 1 && options.length % 2 !== 0)) ? '100%' : '48%', 
+                marginBottom: isGrid ? 12 : 0 
+              }
             ]}
           >
             {/* Gold Accent Line for List View */}
@@ -123,23 +152,41 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
               />
             )}
 
-            <View style={[styles.cardContent, isGrid && styles.gridCardContent, isPremiumGrid && styles.premiumGridContent]}>
-              <View style={[styles.leftPart, isGrid && styles.gridLeftPart, isPremiumGrid && styles.premiumGridLeftPart]}>
+            <View style={[
+              styles.cardContent, 
+              isGrid && styles.gridCardContent, 
+              isPremiumGrid && styles.premiumGridContent,
+              isGrid && option.fullWidth && styles.gridFullWidthContent
+            ]}>
+              <View style={[
+                styles.leftPart, 
+                isGrid && styles.gridLeftPart, 
+                isPremiumGrid && styles.premiumGridLeftPart,
+                isGrid && option.fullWidth && styles.gridFullWidthLeftPart
+              ]}>
                 {option.image || option.icon ? (
                   <View style={[styles.imageContainer, isPremiumGrid && styles.premiumImageContainer]}>
-                    <Image 
-                      source={
-                        option.image ? resolveAsset(option.image) : resolveAsset(option.icon)
-                      } 
-                      style={[styles.image, isPremiumGrid && styles.premiumImage]} 
-                      resizeMode="contain" 
-                    />
+                    {option.icon && !option.image && !option.icon.startsWith('/') ? (
+                      <Ionicons 
+                        name={(FA_TO_IONICONS[option.icon.replace('fas fa-', '')] || 'help-circle') as any} 
+                        size={isPremiumGrid ? 32 : 24} 
+                        color="#432104" 
+                      />
+                    ) : (
+                      <Image 
+                        source={
+                          option.image ? resolveAsset(option.image) : resolveAsset(option.icon)
+                        } 
+                        style={[styles.image, isPremiumGrid && styles.premiumImage]} 
+                        resizeMode="contain" 
+                      />
+                    )}
                   </View>
                 ) : null}
                 
                 <View style={[styles.details, isPremiumGrid && styles.premiumDetails]}>
                   <View style={[styles.titleRow, isGrid && styles.gridTitleRow, isPremiumGrid && styles.premiumTitleRow]}>
-                    <Text style={[styles.title, isPremiumGrid && styles.premiumTitle]} numberOfLines={2}>{option.title}</Text>
+                    <Text style={[styles.title, isPremiumGrid && styles.premiumTitle]} numberOfLines={2}>{option.title || option.label}</Text>
                     {option.label && !isGrid && (
                       <View style={[styles.labelBadge, { backgroundColor: option.label_color || '#C59B63' }]}>
                         <Text style={styles.labelText}>{option.label}</Text>
@@ -211,9 +258,9 @@ const styles = StyleSheet.create({
     gap: 14,
   },
   card: {
-
     borderWidth: 1.5,
-    borderColor: 'rgba(212, 160, 23, 0.2)',
+  borderColor: 'rgba(212, 160, 23, 0.3)',
+
     borderRadius: 16,
     padding: 16,
     position: 'relative',
@@ -232,21 +279,32 @@ const styles = StyleSheet.create({
   },
 premiumGridCard: {
   borderRadius: 24,
-  minHeight: 156,
-  padding: 20,
-  borderWidth: 1.5,
-  borderColor: '#C7A64B',
+  minHeight: 120, // Slightly shorter to avoid "huge" look
+  padding: 16,
+  borderWidth: 1.5, 
+  borderColor: 'rgba(212, 160, 23, 0.2)',
+  backgroundColor: '#FFFDF9', 
   shadowColor: "#000",
-  shadowOffset: { width: 0, height: 8 }, // NOT 2,2 ❌
-  shadowOpacity: 0.15,
-  shadowRadius: 12,
- elevation: 8, // Android
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.1,
+  shadowRadius: 8,
+  elevation: 4,
 },
   selectedCard: {
     borderColor: '#C9A84C',
     borderWidth: 2,
     backgroundColor: '#FFFAF0',
     transform: [{ translateY: -2 }],
+  },
+  premiumSelectedCard: {
+    shadowColor: '#C9A84C',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.8,
+    shadowRadius: 15,
+    elevation: 15,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 3,
+    borderColor: '#D9B44A',
   },
   goldLine: {
     position: 'absolute',
@@ -269,6 +327,13 @@ premiumGridCard: {
   premiumGridContent: {
     justifyContent: 'center',
   },
+  gridFullWidthContent: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    width: '100%',
+  },
   leftPart: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -282,6 +347,13 @@ premiumGridCard: {
   },
   premiumGridLeftPart: {
     gap: 12,
+  },
+  gridFullWidthLeftPart: {
+    flexDirection: 'row',
+    gap: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
   },
   imageContainer: {
     width: 56,
@@ -323,7 +395,7 @@ premiumGridCard: {
   },
   title: {
     fontSize: 18,
-    fontWeight: '700',
+
     color: '#432104',
     fontFamily: 'GelicaBold',
     flex: 1,

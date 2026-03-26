@@ -6,12 +6,14 @@ import { useScreenStore } from './ScreenStore';
 import GenericContainer from '../containers/GenericContainer';
 import PortalContainer from '../containers/PortalContainer';
 import ChoiceStackContainer from '../containers/ChoiceStackContainer'
+import StableScanContainer from '../containers/StableScanContainer';
 
 
 const containerMap: Record<string, React.ComponentType<any>> = {
   portal: PortalContainer,
   generic: GenericContainer,
   choice_stack: ChoiceStackContainer,
+  stable_scan: StableScanContainer,
 };
 
 const ScreenRenderer: React.FC = () => {
@@ -25,7 +27,6 @@ const ScreenRenderer: React.FC = () => {
 
   return (
     <View style={styles.root}>
-      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
       <SafeAreaView style={styles.safeArea}>
         <Container schema={currentScreen} />
       </SafeAreaView>

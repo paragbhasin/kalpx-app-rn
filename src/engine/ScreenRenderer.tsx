@@ -1,0 +1,44 @@
+import React from 'react';
+import { View, StyleSheet, SafeAreaView, StatusBar } from 'react-native';
+import { useScreenStore } from './ScreenStore';
+
+// Import Containers
+import GenericContainer from '../containers/GenericContainer';
+import PortalContainer from '../containers/PortalContainer';
+
+const containerMap: Record<string, React.ComponentType<any>> = {
+  portal: PortalContainer,
+  generic: GenericContainer,
+  // Add other containers as needed
+};
+
+const ScreenRenderer: React.FC = () => {
+  const currentScreen = useScreenStore((state) => state.currentScreen);
+  const currentContainerId = useScreenStore((state) => state.currentContainerId);
+
+  if (!currentScreen) return null;
+
+  // Use specific container or fallback to Generic
+  const Container = containerMap[currentContainerId || 'generic'] || GenericContainer;
+
+  return (
+    <View style={styles.root}>
+      <StatusBar barStyle="light-content" />
+      <SafeAreaView style={styles.safeArea}>
+        <Container schema={currentScreen} />
+      </SafeAreaView>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: '#000',
+  },
+  safeArea: {
+    flex: 1,
+  },
+});
+
+export default ScreenRenderer;

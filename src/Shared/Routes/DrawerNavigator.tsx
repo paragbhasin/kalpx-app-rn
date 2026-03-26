@@ -20,6 +20,7 @@ import Colors from "../../components/Colors";
 import TextComponent from "../../components/TextComponent";
 import { getDailyDharmaTracker } from "../../screens/Home/actions";
 import store, { RootState } from "../../store";
+import { useScreenStore } from "../../engine/ScreenStore";
 import BottomMenu from "./BottomMenu";
 
 const Drawer = createDrawerNavigator();
@@ -208,7 +209,10 @@ const CustomDrawerContent = (props) => {
       style={{ flexDirection: "row", alignItems: "center", padding: 12 }}
       onPress={() => {
 
-        if (item.title === "Profile") {
+        if (item.name === t("drawer.myRoutine")) {
+          useScreenStore.getState().loadScreen('portal', 'portal');
+          props.navigation.navigate("DynamicEngine");
+        } else if (item.title === "Profile") {
           props.navigation.navigate("HomePage", {
             screen: "Profile",
           });

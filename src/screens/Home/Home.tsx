@@ -60,6 +60,7 @@ import {
   getVideos,
   startMantraPractice,
 } from "./actions";
+import { useScreenStore } from "../../engine/ScreenStore";
 import styles from "./homestyles";
 
 const { width } = Dimensions.get("window");
@@ -1117,7 +1118,8 @@ export default function Home() {
           <TouchableOpacity
             style={{ alignItems: "center", marginTop: 8 }}
             onPress={() => {
-              navigation.navigate("DailyPracticeList");
+              useScreenStore.getState().loadScreen("portal", "portal");
+              navigation.navigate("DynamicEngine");
             }}
           >
             <ImageBackground
@@ -1180,7 +1182,8 @@ export default function Home() {
               marginBottom: 20,
             }}
             onPress={() => {
-              navigation.navigate("DailyPracticeList");
+              useScreenStore.getState().loadScreen("portal", "portal");
+              navigation.navigate("DynamicEngine");
             }}
           >
             <TextComponent

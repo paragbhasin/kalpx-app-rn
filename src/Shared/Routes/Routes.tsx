@@ -1,5 +1,6 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
+import ScreenRenderer from "../../engine/ScreenRenderer";
 import ClassBookingScreen from "../../screens/Classes/ClassBookingScreen";
 import ClassesScreen from "../../screens/Classes/classesScreen";
 import ClassPaymentScreen from "../../screens/Classes/ClassPaymentScreen";
@@ -70,6 +71,7 @@ const Routes = ({ initialRouteName = "AppDrawer" }) => {
       <Stack.Screen name="Privacy" component={Privacy} />
       <Stack.Screen name="DailyPracticeList" component={DailyPracticeList} />
       <Stack.Screen name="DailyPracticeSelectList" component={DailyPracticeSelectList} />
+      <Stack.Screen name="DynamicEngine" component={ScreenRenderer} />
     </Stack.Navigator>
   );
 };

@@ -22,7 +22,7 @@ import LearnMore from "../screens/Home/LearnMore";
 import MySadana from "../screens/Home/MySadana";
 import PoojaScreen from "../screens/Home/PoojaScreen";
 import RelatedVideosScreen from "../screens/Home/RelatedVideosScreen";
-import RetreatsScreen from "../screens/Home/RetreatsScreen";
+import RetreatsScreen from "../components/Retreats/RetreatsScreen";
 import SadanaTrackerScreen from "../screens/Home/SadanaTrackerScreen";
 import SubmitMantraScreen from "../screens/Home/SubmitMantraScreen";
 import TravelPlannerScreen from "../screens/Home/TravelPlannerScreen";
@@ -83,7 +83,7 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
       options={{ headerShown: false }}
     />
     <Stack.Screen
-      name="Retreat"
+      name="RetreatsScreen"
       component={RetreatsScreen}
       options={{ headerShown: false }}
     />

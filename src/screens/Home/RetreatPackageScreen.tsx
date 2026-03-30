@@ -305,7 +305,10 @@ const RetreatPackageScreen: React.FC = () => {
                     <Text style={styles.footerLabel}>TOTAL PRICE</Text>
                     <Text style={styles.footerPrice}>₹{packageData.price}</Text>
                 </View>
-                <Pressable style={styles.bookNowButton}>
+                <Pressable
+                    style={styles.bookNowButton}
+                    onPress={() => navigation.navigate('RetreatBooking', { pkg: packageData, retreat })}
+                >
                     <Text style={styles.bookNowText}>Book Now</Text>
                     <FontAwesome name="arrow-right" size={14} color="#fff" />
                 </Pressable>

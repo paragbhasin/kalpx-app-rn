@@ -22,7 +22,13 @@ import LearnMore from "../screens/Home/LearnMore";
 import MySadana from "../screens/Home/MySadana";
 import PoojaScreen from "../screens/Home/PoojaScreen";
 import RelatedVideosScreen from "../screens/Home/RelatedVideosScreen";
-import RetreatsScreen from "../screens/Home/RetreatsScreen";
+import RetreatsScreen from "../components/Retreats/RetreatsScreen";
+import RetreatDetailsScreen from "../screens/Home/RetreatDetailsScreen";
+import RetreatPackageScreen from "../screens/Home/RetreatPackageScreen";
+import RetreatBookingScreen from "../screens/Home/RetreatBookingScreen";
+import RetreatBookingDetailsScreen from "../screens/Home/RetreatBookingDetailsScreen";
+import RetreatPaymentScreen from "../screens/Home/RetreatPaymentScreen";
+import RetreatCancellationScreen from "../screens/Home/RetreatCancellationScreen";
 import SadanaTrackerScreen from "../screens/Home/SadanaTrackerScreen";
 import SubmitMantraScreen from "../screens/Home/SubmitMantraScreen";
 import TravelPlannerScreen from "../screens/Home/TravelPlannerScreen";
@@ -83,8 +89,38 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
       options={{ headerShown: false }}
     />
     <Stack.Screen
-      name="Retreat"
+      name="RetreatsScreen"
       component={RetreatsScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="RetreatDetails"
+      component={RetreatDetailsScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="RetreatPackage"
+      component={RetreatPackageScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="RetreatBooking"
+      component={RetreatBookingScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="RetreatBookingDetails"
+      component={RetreatBookingDetailsScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="RetreatPayment"
+      component={RetreatPaymentScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="RetreatCancellation"
+      component={RetreatCancellationScreen}
       options={{ headerShown: false }}
     />
     <Stack.Screen

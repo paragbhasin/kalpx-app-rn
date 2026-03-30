@@ -16,7 +16,7 @@ import LearnMore from "../../screens/Home/LearnMore";
 import MySadana from "../../screens/Home/MySadana";
 import PoojaScreen from "../../screens/Home/PoojaScreen";
 import RelatedVideosScreen from "../../screens/Home/RelatedVideosScreen";
-import RetreatsScreen from "../../screens/Home/RetreatsScreen";
+import RetreatsScreen from "../../components/Retreats/RetreatsScreen";
 import SadanaTrackerScreen from "../../screens/Home/SadanaTrackerScreen";
 import SubmitMantraScreen from "../../screens/Home/SubmitMantraScreen";
 import TravelPlannerScreen from "../../screens/Home/TravelPlannerScreen";
@@ -48,7 +48,7 @@ const Routes = ({ initialRouteName = "AppDrawer" }) => {
       {/* <Stack.Screen name="Home" component={Home}/> */}
       <Stack.Screen name="Travel" component={TravelPlannerScreen} />
       <Stack.Screen name="Pooja" component={PoojaScreen} />
-      <Stack.Screen name="Retreat" component={RetreatsScreen} />
+      <Stack.Screen name="RetreatsScreen" component={RetreatsScreen} />
       <Stack.Screen name="Language" component={Language} />
       <Stack.Screen name="Explore" component={Explore} />
       <Stack.Screen name="Sankalp" component={Sankalp} />

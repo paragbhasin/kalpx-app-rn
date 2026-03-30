@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   FlatList,
   Image,
@@ -7,39 +7,22 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProducts, fetchStores } from "../../service/haatSlice";
+import { AppDispatch, RootState } from "../../store";
 import ProductCard from "./ProductCard";
 import TrustedStores from "./TrustedStores";
 
 const ProductView = () => {
-  const trustedStores = [
-    {
-      id: 1,
-      name: "Swami Sughandhlay",
-      image:
-        "https://images.unsplash.com/photo-1620619767323-b95a89183081?q=80&w=400&h=300&auto=format&fit=crop",
-      rating: "4.9+",
-      time: "40-50 min",
-      distance: "900m away",
-    },
-    {
-      id: 2,
-      name: "Vedic Vibes",
-      image:
-        "https://images.unsplash.com/photo-1602928321679-560bb453f190?q=80&w=400&h=300&auto=format&fit=crop",
-      rating: "4.7",
-      time: "30-40 min",
-      distance: "1.2km away",
-    },
-    {
-      id: 3,
-      name: "Vedic Vibes",
-      image:
-        "https://images.unsplash.com/photo-1602928321679-560bb453f190?q=80&w=400&h=300&auto=format&fit=crop",
-      rating: "4.7",
-      time: "30-40 min",
-      distance: "1.2km away",
-    },
-  ];
+  const dispatch = useDispatch<AppDispatch>();
+  const products = useSelector((state: RootState) => state.haat.products);
+  const stores = useSelector((state: RootState) => state.haat.stores);
+
+  useEffect(() => {
+    dispatch(fetchProducts({}));
+    dispatch(fetchStores({}));
+  }, []);
+
   const categories = [
     {
       id: "1",
@@ -57,13 +40,13 @@ const ProductView = () => {
       icon: require("../../../assets/image 229.png"),
     },
     {
-      id: "3",
+      id: "4",
       name: "Pooja Kit",
       icon: require("../../../assets/image 230.png"),
     },
   ];
 
-  const renderItem = ({ item }) => {
+  const renderItem = ({ item }: any) => {
     return (
       <View style={styles.card}>
         <Image source={item.icon} style={styles.image} />
@@ -82,23 +65,24 @@ const ProductView = () => {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
       />
-      <TrustedStores stores={trustedStores} />
+      <TrustedStores stores={stores} />
 
       <View style={styles.newArrivalsSection}>
         <View style={styles.headerRow}>
-          <Text style={styles.newArrivalsHeading}>New Arrivals on Kalpx Haat</Text>
+          <Text style={styles.newArrivalsHeading}>
+            New Arrivals on Kalpx Haat
+          </Text>
           <TouchableOpacity>
             <Text style={styles.viewAllText}>View all</Text>
           </TouchableOpacity>
         </View>
 
-        <ProductCard />
-        <ProductCard />
-        <ProductCard />
+        <ProductCard products={products} />
       </View>
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     marginTop: 20,
@@ -151,4 +135,5 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
 });
+
 export default ProductView;

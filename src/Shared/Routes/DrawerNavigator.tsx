@@ -77,7 +77,7 @@ const CustomDrawerContent = (props) => {
   // -----------------------------
   React.useEffect(() => {
     if (isLoggedIn) {
-      dispatch(getDailyDharmaTracker(() => {}));
+      dispatch(getDailyDharmaTracker(() => { }));
     }
   }, [dispatch, isLoggedIn]);
 
@@ -197,6 +197,13 @@ const CustomDrawerContent = (props) => {
       iconType: "vector",
       icon: "people-outline",
       activeIcon: "people",
+    },
+    {
+      id: "5",
+      name: "Retreats",
+      title: "RetreatsScreen",
+      iconType: "image",
+      icon: require("../../../assets/yoga.png"),
     },
     {
       id: "6",

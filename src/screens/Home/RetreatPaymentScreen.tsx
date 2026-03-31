@@ -401,12 +401,12 @@ const styles = StyleSheet.create({
     },
     totalDueLabel: {
         fontSize: 16,
-        fontFamily: 'GelicaBold',
+ 
         color: '#000',
     },
     totalDueValue: {
         fontSize: 18,
-        fontFamily: 'GelicaBold',
+   
         color: '#000',
     },
     paymentForm: {
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
     },
     fieldLabel: {
         fontSize: 12,
-        fontFamily: 'GelicaBold',
+
         color: '#707070',
     },
     inputWrapper: {

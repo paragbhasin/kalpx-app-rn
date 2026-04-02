@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
-import { LinearGradient } from 'expo-linear-gradient';
+import { useScreenStore } from '../engine/ScreenStore';
 
 interface PracticeCardBlockProps {
   block: {
@@ -13,10 +13,13 @@ interface PracticeCardBlockProps {
     meta?: string;
     icon?: string;
     id?: string;
+    detailData?: any;
   };
 }
 
 const PracticeCardBlock: React.FC<PracticeCardBlockProps> = ({ block }) => {
+  const setOverlayData = useScreenStore(state => state.setOverlayData);
+
   return (
     <View style={styles.container}>
       <BlurView intensity={20} tint="light" style={styles.blurBuffer}>
@@ -24,7 +27,10 @@ const PracticeCardBlock: React.FC<PracticeCardBlockProps> = ({ block }) => {
           <View style={styles.headerRow}>
             <Text style={styles.label}>{block.label}</Text>
             {/* The "i" icon mentioned in audio and seen in screenshot */}
-            <TouchableOpacity hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <TouchableOpacity 
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              onPress={() => setOverlayData(block.detailData)}
+            >
               <Ionicons name="information-circle" size={20} color="#D9AD43" />
             </TouchableOpacity>
           </View>
@@ -35,7 +41,7 @@ const PracticeCardBlock: React.FC<PracticeCardBlockProps> = ({ block }) => {
           </Text>
 
           {/* Optional meta info if needed (e.g. 1-2 minutes) */}
-          {block.meta && (
+          {Boolean(block.meta) && (
             <Text style={styles.meta}>{block.meta}</Text>
           )}
         </View>

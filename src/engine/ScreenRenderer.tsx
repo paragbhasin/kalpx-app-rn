@@ -9,6 +9,7 @@ import ChoiceStackContainer from '../containers/ChoiceStackContainer'
 import StableScanContainer from '../containers/StableScanContainer';
 import LockRitualContainer from '../containers/LockRitualContainer';
 import InsightSummaryContainer from '../containers/InsightSummaryContainer';
+import PracticeDetailOverlay from '../components/PracticeDetailOverlay';
 
 const containerMap: Record<string, React.ComponentType<any>> = {
   portal: PortalContainer,
@@ -23,6 +24,7 @@ const containerMap: Record<string, React.ComponentType<any>> = {
 const ScreenRenderer: React.FC = () => {
   const currentScreen = useScreenStore((state) => state.currentScreen);
   const currentContainerId = useScreenStore((state) => state.currentContainerId);
+  const { currentOverlayData, setOverlayData } = useScreenStore();
 
   if (!currentScreen) return null;
 
@@ -37,6 +39,12 @@ const ScreenRenderer: React.FC = () => {
       <Wrapper style={styles.wrapper}>
         <Container schema={currentScreen} />
       </Wrapper>
+      {currentOverlayData && (
+        <PracticeDetailOverlay 
+            data={currentOverlayData} 
+            onClose={() => setOverlayData(null)} 
+        />
+      )}
     </View>
   );
 };

@@ -190,7 +190,8 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
                 label: 'Practice',
                 title: practice.core.title,
                 description: practice.core.summary,
-                meta: practice.ui.card_meta
+                meta: practice.ui.card_meta,
+                detailData: { ...practice.core, type: 'practice' }
             });
         }
         if (sankalp) {
@@ -198,7 +199,8 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
                 type: 'practice_card',
                 label: 'Sankalp',
                 title: sankalp.core.title,
-                description: sankalp.core.line
+                description: sankalp.core.line,
+                detailData: { ...sankalp.core, type: 'sankalp' }
             });
         }
         if (mantra) {
@@ -206,7 +208,8 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
                 type: 'practice_card',
                 label: 'Mantra',
                 title: mantra.core.title,
-                description: mantra.core.line
+                description: mantra.core.line,
+                detailData: { ...mantra.core, type: 'mantra' }
             });
         }
     } else {
@@ -224,7 +227,7 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
             <Text style={styles.headlineStep2}>{currentConfig.headline}</Text>
             <Text style={styles.introSubtextStep2}>{currentConfig.subtext}</Text>
             
-            {(globalAiReasoning || screenState.ai_reasoning) && (
+            {Boolean(globalAiReasoning || screenState.ai_reasoning) && (
                 <Text style={styles.whyPathWhisper}>{globalAiReasoning || screenState.ai_reasoning}</Text>
             )}
 

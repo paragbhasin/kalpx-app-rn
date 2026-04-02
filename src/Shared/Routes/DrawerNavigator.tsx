@@ -211,7 +211,10 @@ const CustomDrawerContent = (props) => {
 
         if (item.name === t("drawer.myRoutine")) {
           useScreenStore.getState().loadScreen('portal', 'portal');
-          props.navigation.navigate("HomePage", { screen: "DynamicEngine" });
+          props.navigation.navigate("HomePage", {
+            screen: "HomePage",
+            params: { screen: "DynamicEngine" },
+          });
         } else if (item.title === "Profile") {
           props.navigation.navigate("HomePage", {
             screen: "Profile",

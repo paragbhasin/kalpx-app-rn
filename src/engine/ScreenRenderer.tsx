@@ -7,6 +7,7 @@ import GenericContainer from '../containers/GenericContainer';
 import PortalContainer from '../containers/PortalContainer';
 import ChoiceStackContainer from '../containers/ChoiceStackContainer'
 import StableScanContainer from '../containers/StableScanContainer';
+import LockRitualContainer from '../containers/LockRitualContainer';
 
 
 const containerMap: Record<string, React.ComponentType<any>> = {
@@ -14,6 +15,8 @@ const containerMap: Record<string, React.ComponentType<any>> = {
   generic: GenericContainer,
   choice_stack: ChoiceStackContainer,
   stable_scan: StableScanContainer,
+  lock_ritual_overlay: LockRitualContainer,
+  lock_ritual: LockRitualContainer,
 };
 
 const ScreenRenderer: React.FC = () => {
@@ -25,11 +28,14 @@ const ScreenRenderer: React.FC = () => {
   // Use specific container or fallback to Generic
   const Container = containerMap[currentContainerId || 'generic'] || GenericContainer;
 
+  // Overlays should cover the entire screen, including Safe Area
+  const Wrapper = currentScreen?.overlay ? View : SafeAreaView;
+
   return (
     <View style={styles.root}>
-      <SafeAreaView style={styles.safeArea}>
+      <Wrapper style={styles.wrapper}>
         <Container schema={currentScreen} />
-      </SafeAreaView>
+      </Wrapper>
     </View>
   );
 };
@@ -39,7 +45,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'transparent',
   },
-  safeArea: {
+  wrapper: {
     flex: 1,
     backgroundColor: 'transparent',
   },

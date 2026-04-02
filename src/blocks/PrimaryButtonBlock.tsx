@@ -79,9 +79,10 @@ const PrimaryButtonBlock: React.FC<PrimaryButtonBlockProps> = ({ block }) => {
     }
   };
 
-  const isGold = block.variant !== 'outline';
+  const variant = block.variant || block.style;
+  const isGold = variant !== 'outline';
 
-  if (block.variant === 'outline') {
+  if (variant === 'outline') {
     return (
       <TouchableOpacity style={styles.outlineButton} onPress={handlePress}>
         <Text style={styles.outlineLabel}>{block.label}</Text>

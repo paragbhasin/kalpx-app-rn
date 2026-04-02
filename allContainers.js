@@ -946,7 +946,7 @@ export const ComposerContainer = {
   },
 };
 
-export const LockRitualContainer = {
+export const LockRitualOverlayContainer = {
   container_id: "lock_ritual_overlay",
 
   states: {
@@ -5302,8 +5302,8 @@ export const ContainerRegistry = {
   portal_splash: PortalSplashContainer,
   choice_stack: ChoiceStackContainer,
   composer: ComposerContainer,
-  lock_ritual_overlay: LockRitualContainer,
-  lock_ritual: LockRitualContainer,
+  lock_ritual_overlay: LockRitualOverlayContainer,
+  lock_ritual: LockRitualOverlayContainer,
   routine_builder: RoutineBuilderContainer,
   routine_locked: RoutineLockedContainer,
   companion_dashboard: CompanionDashboardContainer,

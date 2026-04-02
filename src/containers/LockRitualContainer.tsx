@@ -8,6 +8,7 @@ import Animated, {
   Easing,
   runOnJS
 } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BlockRenderer from '../engine/BlockRenderer';
 import { useScreenStore } from '../engine/ScreenStore';
 import Header from '../components/Header';
@@ -107,53 +108,57 @@ const LockRitualContainer: React.FC<LockRitualContainerProps> = ({ schema }) => 
   const footerBlocks = (schema.blocks || []).filter(b => b.position === 'footer');
   const holdButton = schema.blocks?.find(b => b.type === 'hold_button');
 
+  const insets = useSafeAreaInsets();
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       {/* Ambient Glow */}
       <View style={styles.ambientGlow} />
       
       <Header isTransparent={true} />
 
-      <View style={styles.header}>
-        {headerBlocks.map((block, i) => (
-          <BlockRenderer key={`header-${i}`} block={block} textColor="#FFFFFF" />
-        ))}
-      </View>
+      <View style={styles.contentWrap}>
+        <View style={styles.header}>
+          {headerBlocks.map((block, i) => (
+            <BlockRenderer key={`header-${i}`} block={block} textColor="#FFFFFF" />
+          ))}
+        </View>
 
-      <View style={styles.ritualCenter}>
-        <Animated.View 
-          {...panResponder.panHandlers}
-          style={[
-            styles.holdButtonWrap, 
-            isHolding && styles.isHolding,
-            animatedButtonStyle
-          ]}
-        >
-          {/* Progress Fill */}
-          <Animated.View style={[styles.progressFill, animatedProgressStyle]}>
-            <LinearGradient
-              colors={['#f0c96b', '#d4a017']}
-              style={StyleSheet.absoluteFill}
-            />
+        <View style={styles.ritualCenter}>
+          <Animated.View 
+            {...panResponder.panHandlers}
+            style={[
+              styles.holdButtonWrap, 
+              isHolding && styles.isHolding,
+              animatedButtonStyle
+            ]}
+          >
+            {/* Progress Fill */}
+            <Animated.View style={[styles.progressFill, animatedProgressStyle]}>
+              <LinearGradient
+                colors={['#f0c96b', '#d4a017']}
+                style={StyleSheet.absoluteFill}
+              />
+            </Animated.View>
+
+            <View style={styles.buttonContent}>
+              {!isHolding && <Text style={styles.lockIcon}>🔒</Text>}
+              <Text style={[styles.lockBtn, isHolding && styles.lockBtnHolding]}>
+                {isHolding ? (holdButton?.holding_label || "Committing...") : (holdButton?.label || "Hold to Commit")}
+              </Text>
+            </View>
           </Animated.View>
 
-          <View style={styles.buttonContent}>
-            {!isHolding && <Text style={styles.lockIcon}>🔒</Text>}
-            <Text style={[styles.lockBtn, isHolding && styles.lockBtnHolding]}>
-              {isHolding ? (holdButton?.holding_label || "Committing...") : (holdButton?.label || "Hold to Commit")}
-            </Text>
-          </View>
-        </Animated.View>
+          <Animated.Text style={[styles.hint, { opacity: containerOpacity.value }]}>
+            {schema.hint_text || "Consistency shapes who you become."}
+          </Animated.Text>
+        </View>
 
-        <Animated.Text style={[styles.hint, { opacity: containerOpacity.value }]}>
-          {schema.hint_text || "Consistency shapes who you become."}
-        </Animated.Text>
-      </View>
-
-      <View style={styles.footer}>
-        {footerBlocks.map((block, i) => (
-          <BlockRenderer key={`footer-${i}`} block={block} textColor="rgba(255,255,255,0.6)" />
-        ))}
+        <View style={styles.footer}>
+          {footerBlocks.map((block, i) => (
+            <BlockRenderer key={`footer-${i}`} block={block} textColor="rgba(255,255,255,0.6)" />
+          ))}
+        </View>
       </View>
     </View>
   );
@@ -165,8 +170,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#080a0c',
     width: width,
     height: height,
+  },
+  contentWrap: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingBottom: 80, // Offset for footer
   },
   ambientGlow: {
     position: 'absolute',
@@ -243,6 +252,8 @@ const styles = StyleSheet.create({
   },
   footer: {
     marginTop: 60,
+    width: '100%',
+    alignItems: 'center',
   },
 });
 

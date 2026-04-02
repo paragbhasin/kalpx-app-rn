@@ -10,6 +10,7 @@ import StableScanContainer from '../containers/StableScanContainer';
 import LockRitualContainer from '../containers/LockRitualContainer';
 import InsightSummaryContainer from '../containers/InsightSummaryContainer';
 import PracticeDetailOverlay from '../components/PracticeDetailOverlay';
+import CompanionDashboardContainer from '../containers/CompanionDashboardContainer';
 
 const containerMap: Record<string, React.ComponentType<any>> = {
   portal: PortalContainer,
@@ -19,6 +20,7 @@ const containerMap: Record<string, React.ComponentType<any>> = {
   lock_ritual_overlay: LockRitualContainer,
   lock_ritual: LockRitualContainer,
   insight_summary: InsightSummaryContainer,
+  companion_dashboard: CompanionDashboardContainer,
 };
 
 const ScreenRenderer: React.FC = () => {

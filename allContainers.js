@@ -5158,8 +5158,8 @@ export const InsightSummaryContainer = {
       on_complete: {
         type: "navigate",
         target: {
-          container_id: "lock_ritual_overlay",
-          state_id: "hold_to_lock",
+          container_id: "companion_dashboard",
+          state_id: "day_active",
         },
       },
     },

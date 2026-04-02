@@ -992,7 +992,11 @@ export const LockRitualOverlayContainer = {
             },
           },
           on_complete: {
-            type: "generate_companion",
+            type: "navigate",
+            target: {
+              container_id: "insight_summary",
+              state_id: "path_reveal",
+            },
           },
         },
         {

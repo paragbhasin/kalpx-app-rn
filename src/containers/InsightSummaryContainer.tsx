@@ -5,8 +5,11 @@ import Header from '../components/Header';
 import { LinearGradient } from 'expo-linear-gradient';
 import BlockRenderer from '../engine/BlockRenderer';
 import * as Containers from '../../allContainers';
-
 import { Video, ResizeMode } from 'expo-av';
+
+import { useDispatch, useSelector } from 'react-redux';
+import { generateCompanion } from '../store/mitraSlice';
+import { RootState, AppDispatch } from '../store/index';
 
 const { width, height } = Dimensions.get('window');
 
@@ -15,6 +18,9 @@ interface InsightSummaryContainerProps {
 }
 
 const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schema }) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { companion: companionData, isLoading: isFetching, aiReasoning: globalAiReasoning } = useSelector((state: RootState) => state.mitra);
+
   const screenState = useScreenStore((state) => state.screenData);
   const updateScreenData = useScreenStore((state) => state.updateScreenData);
   const loadScreen = useScreenStore((state) => state.loadScreen);
@@ -32,9 +38,7 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
   const activeFocus = screenState.scan_focus || 'health';
   const subFocus = screenState.prana_baseline_selection || 'burned_out';
 
-  // For now, I'll manually define the local mapping logic as seen in Vue
   const getCategoryData = (focus: string) => {
-      // Matches allContainers.js
       const optionsMap: any = {
           career: {
               title: "Career",
@@ -71,11 +75,39 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
 
   const catData = useMemo(() => getCategoryData(activeFocus), [activeFocus]);
   const subCatData = useMemo(() => getSubCategoryData(activeFocus, subFocus), [activeFocus, subFocus]);
+
+  const fetchCompanionData = () => {
+    const activeMetrics: any = {};
+    const stableScan = (Containers as any).StableScanContainer;
+    const metricsStates = ['baseline_vitals', 'baseline_metrics'];
+    metricsStates.forEach(stateId => {
+        const stateBlocks = stableScan?.states?.[stateId]?.blocks || [];
+        stateBlocks.forEach((b: any) => {
+            if (b.type === 'baseline_slider') {
+                activeMetrics[b.label.toLowerCase()] = screenState[b.label] || 5;
+            }
+        });
+    });
+
+    const payload = {
+      focus: activeFocus,
+      subFocus: subCatData?.label || subFocus,
+      baselineMetrics: activeMetrics,
+      depth: screenState.routine_depth || 'intermediate',
+      dayNumber: 1,
+      locale: 'en',
+      tz: 'Asia/Calcutta'
+    };
+
+    dispatch(generateCompanion(payload));
+  };
+
   const currentConfig = schema.insight_config?.[`step${step}`] || {};
 
   const handleNext = () => {
     if (step === 0) {
       updateScreenData('insight_step', 1);
+      fetchCompanionData();
     } else if (step === 2) {
       const target = schema.on_complete?.target || { container_id: 'companion_dashboard', state_id: 'day_active' };
       loadScreen(target.container_id, target.state_id);
@@ -148,41 +180,78 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
     </View>
   );
 
+  const renderStep2 = () => {
+    const practices: any[] = [];
+    if (companionData?.companion) {
+        const { sankalp, practice, mantra } = companionData.companion;
+        if (practice) {
+            practices.push({
+                type: 'practice_card',
+                label: 'Practice',
+                title: practice.core.title,
+                description: practice.core.summary,
+                meta: practice.ui.card_meta
+            });
+        }
+        if (sankalp) {
+            practices.push({
+                type: 'practice_card',
+                label: 'Sankalp',
+                title: sankalp.core.title,
+                description: sankalp.core.line
+            });
+        }
+        if (mantra) {
+            practices.push({
+                type: 'practice_card',
+                label: 'Mantra',
+                title: mantra.core.title,
+                description: mantra.core.line
+            });
+        }
+    } else {
+        practices.push(...(schema.blocks || []).filter((b: any) => b.type === 'practice_card'));
+    }
 
-  const renderStep2 = () => (
-    <View style={styles.stepContainer}>
-        <View style={styles.step2Header}>
-            <View style={styles.lineSmall} />
-            <Image source={require('../../assets/lotus_icon.png')} style={styles.lotusSmall} />
-            <View style={styles.lineSmall} />
+    return (
+        <View style={styles.stepContainer}>
+            <View style={styles.step2Header}>
+                <View style={styles.lineSmall} />
+                <Image source={require('../../assets/lotus_icon.png')} style={styles.lotusSmall} />
+                <View style={styles.lineSmall} />
+            </View>
+
+            <Text style={styles.headlineStep2}>{currentConfig.headline}</Text>
+            <Text style={styles.introSubtextStep2}>{currentConfig.subtext}</Text>
+            
+            {(globalAiReasoning || screenState.ai_reasoning) && (
+                <Text style={styles.whyPathWhisper}>{globalAiReasoning || screenState.ai_reasoning}</Text>
+            )}
+
+            <View style={styles.cardsStack}>
+                {isFetching && practices.length === 0 ? (
+                    <Text style={styles.loadingText}>Tailoring your path...</Text>
+                ) : (
+                    practices.map((block: any, i: number) => (
+                        <BlockRenderer key={i} block={block} />
+                    ))
+                )}
+            </View>
+
+            <View style={styles.footerArea}>
+                <TouchableOpacity style={styles.primaryActionBtn} onPress={handleNext}>
+                    <LinearGradient
+                        colors={['#db9928', '#dfac3e']}
+                        style={styles.buttonGradientFill}
+                    >
+                        <Text style={styles.buttonText}>{currentConfig.button_label}</Text>
+                    </LinearGradient>
+                </TouchableOpacity>
+                <Text style={styles.footerNoteKalpx}>{currentConfig.footer_note}</Text>
+            </View>
         </View>
-
-        <Text style={styles.headlineStep2}>{currentConfig.headline}</Text>
-        <Text style={styles.introSubtextStep2}>{currentConfig.subtext}</Text>
-        
-        {screenState.ai_reasoning && (
-            <Text style={styles.whyPathWhisper}>{screenState.ai_reasoning}</Text>
-        )}
-
-        <View style={styles.cardsStack}>
-            {(schema.blocks || []).filter((b: any) => b.type === 'practice_card').map((block: any, i: number) => (
-                <BlockRenderer key={i} block={block} />
-            ))}
-        </View>
-
-        <View style={styles.footerArea}>
-            <TouchableOpacity style={styles.primaryActionBtn} onPress={handleNext}>
-                <LinearGradient
-                    colors={['#db9928', '#dfac3e']}
-                    style={styles.buttonGradientFill}
-                >
-                    <Text style={styles.buttonText}>{currentConfig.button_label}</Text>
-                </LinearGradient>
-            </TouchableOpacity>
-            <Text style={styles.footerNoteKalpx}>{currentConfig.footer_note}</Text>
-        </View>
-    </View>
-  );
+    );
+  };
 
   if (step === 1) {
     return (
@@ -194,7 +263,7 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
           shouldPlay
           onPlaybackStatusUpdate={(status: any) => {
             if (status.isLoaded && status.didJustFinish) {
-              updateScreenData('insight_step', 2);
+                updateScreenData('insight_step', 2);
             }
           }}
         />
@@ -400,24 +469,6 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     textAlign: 'center',
   },
-  transitionContainer: {
-    flex: 1,
-    height: height * 0.6,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 30,
-  },
-  largeLotus: {
-    width: 160,
-    height: 160,
-    resizeMode: 'contain',
-  },
-  transitionText: {
-    fontSize: 18,
-    color: '#d9a557',
-    fontFamily: 'GelicaBold',
-    textAlign: 'center',
-  },
   videoContainer: {
     flex: 1,
     height: height,
@@ -477,6 +528,13 @@ const styles = StyleSheet.create({
     width: '100%',
     gap: 12,
     marginTop: 10,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: '#D9A557',
+    fontFamily: 'GelicaBold',
+    textAlign: 'center',
+    paddingVertical: 40,
   },
   footerNoteKalpx: {
     fontSize: 14,

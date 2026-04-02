@@ -5146,8 +5146,8 @@ export const InsightSummaryContainer = {
           // Transition animation — no text needed
         },
         step2: {
-          headline: "The KalpX Way",
-          subtext: "Your personalised 3-practice system.",
+          headline: "Your Personalized Practice is Ready",
+          subtext: "KalpX has curated a 14-day journey to realign your mind, energy, and intention",
           chosen_label: "",
           experience_label: "",
           button_label: "Begin My Practice →",

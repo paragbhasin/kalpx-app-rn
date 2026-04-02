@@ -11,6 +11,7 @@ import LotusLogoBlock from '../blocks/LotusLogoBlock';
 import ChoiceCardBlock from '../blocks/ChoiceCardBlock';
 import BaselineSliderBlock from '../blocks/BaselineSliderBlock';
 import ImageBlock from '../blocks/ImageBlock';
+import PracticeCardBlock from '../blocks/PracticeCardBlock';
 
 const blockMap: Record<string, React.ComponentType<any>> = {
   headline: HeadlineBlock,
@@ -21,6 +22,7 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   choice_grid: ChoiceCardBlock,
   baseline_slider: BaselineSliderBlock,
   image: ImageBlock,
+  practice_card: PracticeCardBlock,
 };
 
 interface BlockRendererProps {

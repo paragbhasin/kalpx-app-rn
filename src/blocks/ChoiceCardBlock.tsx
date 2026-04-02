@@ -140,7 +140,7 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
               isPremiumGrid && isSelected && styles.premiumSelectedCard,
               { 
                 width: isGrid ? 
-                  ((option.fullWidth || (idx === options.length - 1 && options.length % 2 !== 0)) ? '100%' : '48%') 
+                  ((option.fullWidth || (idx === options.length - 1 && options.length % numColumns !== 0)) ? '100%' : `${100 / numColumns - 3}%`) 
                   : '100%', 
                 marginBottom: isGrid ? 12 : 0 
               }

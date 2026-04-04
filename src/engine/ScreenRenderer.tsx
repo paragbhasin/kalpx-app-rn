@@ -11,6 +11,7 @@ import LockRitualContainer from '../containers/LockRitualContainer';
 import InsightSummaryContainer from '../containers/InsightSummaryContainer';
 import PracticeDetailOverlay from '../components/PracticeDetailOverlay';
 import CompanionDashboardContainer from '../containers/CompanionDashboardContainer';
+import PracticeRunnerContainer from '../containers/PracticeRunnerContainer';
 
 const containerMap: Record<string, React.ComponentType<any>> = {
   portal: PortalContainer,
@@ -21,6 +22,8 @@ const containerMap: Record<string, React.ComponentType<any>> = {
   lock_ritual: LockRitualContainer,
   insight_summary: InsightSummaryContainer,
   companion_dashboard: CompanionDashboardContainer,
+  practice_runner: PracticeRunnerContainer,
+  awareness_trigger: PracticeRunnerContainer,
 };
 
 const ScreenRenderer: React.FC = () => {

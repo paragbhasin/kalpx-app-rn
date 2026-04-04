@@ -12,6 +12,8 @@ import ChoiceCardBlock from '../blocks/ChoiceCardBlock';
 import BaselineSliderBlock from '../blocks/BaselineSliderBlock';
 import ImageBlock from '../blocks/ImageBlock';
 import PracticeCardBlock from '../blocks/PracticeCardBlock';
+import SankalpDisplayBlock from '../blocks/SankalpDisplayBlock';
+import BreathAnimationBlock from '../blocks/BreathAnimationBlock';
 
 const blockMap: Record<string, React.ComponentType<any>> = {
   headline: HeadlineBlock,
@@ -23,6 +25,8 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   baseline_slider: BaselineSliderBlock,
   image: ImageBlock,
   practice_card: PracticeCardBlock,
+  sankalp_display: SankalpDisplayBlock,
+  breath_animation: BreathAnimationBlock,
 };
 
 interface BlockRendererProps {

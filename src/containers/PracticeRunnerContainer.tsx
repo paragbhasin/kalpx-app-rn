@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, SafeAreaView } from 'react-native';
 import { useScreenStore } from '../engine/useScreenBridge';
 import BlockRenderer from '../engine/BlockRenderer';
@@ -24,38 +24,33 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
     updateBackground(require('../../assets/companion.png'));
   }, [updateBackground]);
   
-  const renderHeader = () => {
-    const headerBlocks = schema.blocks?.filter(b => b.position === 'header') || [];
-    return (
-      <View style={styles.header}>
-        {headerBlocks.map((block, idx) => (
-          <BlockRenderer key={`header-${idx}`} block={block} />
-        ))}
-      </View>
-    );
-  };
+  const headerBlocks = useMemo(() => schema.blocks?.filter(b => b.position === 'header') || [], [schema.blocks]);
+  const contentBlocks = useMemo(() => schema.blocks?.filter(b => !b.position || b.position === 'content') || [], [schema.blocks]);
+  const footerBlocks = useMemo(() => schema.blocks?.filter(b => b.position === 'footer') || [], [schema.blocks]);
 
-  const renderContent = () => {
-    const contentBlocks = schema.blocks?.filter(b => !b.position || b.position === 'content') || [];
-    return (
-      <View style={styles.content}>
-        {contentBlocks.map((block, idx) => (
-            <BlockRenderer key={`content-${idx}`} block={block} />
-        ))}
-      </View>
-    );
-  };
+  const renderHeader = () => (
+    <View style={styles.header}>
+      {headerBlocks.map((block, idx) => (
+        <BlockRenderer key={block.id || `header-${block.type}-${idx}`} block={block} />
+      ))}
+    </View>
+  );
 
-  const renderFooter = () => {
-    const footerBlocks = schema.blocks?.filter(b => b.position === 'footer') || [];
-    return (
-      <View style={styles.footer}>
-        {footerBlocks.map((block, idx) => (
-          <BlockRenderer key={`footer-${idx}`} block={block} />
-        ))}
-      </View>
-    );
-  };
+  const renderContent = () => (
+    <View style={styles.content}>
+      {contentBlocks.map((block, idx) => (
+        <BlockRenderer key={block.id || `content-${block.type}-${idx}`} block={block} />
+      ))}
+    </View>
+  );
+
+  const renderFooter = () => (
+    <View style={styles.footer}>
+      {footerBlocks.map((block, idx) => (
+        <BlockRenderer key={block.id || `footer-${block.type}-${idx}`} block={block} />
+      ))}
+    </View>
+  );
 
   return (
     <View style={styles.container}>

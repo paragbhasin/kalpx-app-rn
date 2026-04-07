@@ -27,7 +27,7 @@ const AwarenessTriggerContainer: React.FC<AwarenessTriggerContainerProps> = ({ s
   React.useEffect(() => {
     updateBackground(null);
     updateHeaderHidden(false);
-  }, []);
+  }, [updateBackground, updateHeaderHidden]);
 
   if (!schema) return null;
 

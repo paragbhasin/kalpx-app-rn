@@ -40,7 +40,7 @@ const ComposerContainer: React.FC<ComposerContainerProps> = ({ schema }) => {
       showsVerticalScrollIndicator={false}
     >
       {blocks.map((block: any, index: number) => (
-        <BlockRenderer key={`${block.type}-${index}`} block={block} />
+        <BlockRenderer key={block.id || `block-${block.type}-${index}`} block={block} />
       ))}
       <View style={styles.bottomSpacer} />
     </ScrollView>

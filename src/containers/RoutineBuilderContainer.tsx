@@ -39,7 +39,7 @@ const RoutineBuilderContainer: React.FC<RoutineBuilderContainerProps> = ({ schem
       showsVerticalScrollIndicator={false}
     >
       {blocks.map((block: any, index: number) => (
-        <BlockRenderer key={`${block.type}-${index}`} block={block} />
+        <BlockRenderer key={block.id || `block-${block.type}-${index}`} block={block} />
       ))}
       <View style={styles.bottomSpacer} />
     </ScrollView>

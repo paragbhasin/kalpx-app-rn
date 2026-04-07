@@ -36,7 +36,7 @@ const PortalContainer: React.FC<PortalContainerProps> = ({ schema }) => {
       <View style={styles.overlay}>
         <View style={styles.centeredContent}>
           {schema.blocks?.map((block: any, index: number) => (
-            <BlockRenderer key={`${block.type}-${index}`} block={block} textColor="#FFFFFF" />
+            <BlockRenderer key={block.id || `block-${block.type}-${index}`} block={block} textColor="#FFFFFF" />
           ))}
         </View>
       </View>

@@ -55,7 +55,7 @@ const LockRitualContainer: React.FC<LockRitualContainerProps> = ({ schema }) => 
     }, 100);
 
     return () => updateHeaderHidden(false);
-  }, []);
+  }, [updateBackground, updateHeaderHidden]);
 
   const onCommit = () => {
     const holdButton = schema.blocks?.find(b => b.type === 'hold_button');

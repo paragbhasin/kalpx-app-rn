@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
 import { useScreenStore } from '../engine/useScreenBridge';
 import Header from '../components/Header';
@@ -27,12 +27,18 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
   const updateBackground = useScreenStore((state) => state.updateBackground);
   const updateHeaderHidden = useScreenStore((state) => state.updateHeaderHidden);
 
+  const videoRef = useRef<Video>(null);
   const step = screenState.insight_step || 0;
 
   useEffect(() => {
     updateBackground(require('../../assets/beige_bg.png'));
     updateHeaderHidden(true);
-    return () => updateHeaderHidden(false);
+    return () => {
+      updateHeaderHidden(false);
+      if (videoRef.current) {
+        videoRef.current.stopAsync().catch(() => {});
+      }
+    };
   }, []);
 
   const activeFocus = screenState.scan_focus || 'health';
@@ -76,7 +82,9 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
   const catData = useMemo(() => getCategoryData(activeFocus), [activeFocus]);
   const subCatData = useMemo(() => getSubCategoryData(activeFocus, subFocus), [activeFocus, subFocus]);
 
-  const fetchCompanionData = () => {
+  const fetchCompanionData = async () => {
+    if (isFetching) return;
+
     const activeMetrics: any = {};
     const stableScan = getContainerSync('stable_scan');
     const metricsStates = ['baseline_vitals', 'baseline_metrics'];
@@ -99,7 +107,11 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
       tz: 'Asia/Calcutta'
     };
 
-    dispatch(generateCompanion(payload));
+    try {
+      await dispatch(generateCompanion(payload)).unwrap();
+    } catch (err) {
+      console.warn('[InsightSummary] generateCompanion failed:', err);
+    }
   };
 
   const currentConfig = schema.insight_config?.[`step${step}`] || {};
@@ -260,6 +272,7 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
     return (
       <View style={styles.videoContainer}>
         <Video
+          ref={videoRef}
           source={require('../../assets/videos/kalpx_way.mp4')}
           style={styles.fullVideo}
           resizeMode={ResizeMode.COVER}

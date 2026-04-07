@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useScreenStore } from '../engine/useScreenBridge';
 import BlockRenderer from '../engine/BlockRenderer';
-import { CompanionDashboardContainer as DashboardSchema } from '../../allContainers.js';
+import { getContainerSync } from '../engine/screenResolver';
 
 const { width } = Dimensions.get('window');
 
@@ -35,8 +35,9 @@ const CompanionDashboardContainer: React.FC = () => {
     return text.replace(/\{\{(.*?)\}\}/g, (_, key) => templateMap[key.trim()] || "");
   };
 
-  // Get blocks from the schema
-  const stateSchema = DashboardSchema.states.day_active;
+  // Get blocks from the schema (API-first, local fallback)
+  const dashboardContainer = getContainerSync('companion_dashboard');
+  const stateSchema = dashboardContainer?.states?.day_active ?? { blocks: [] };
   const blocks = stateSchema.blocks || [];
 
   const renderProgressCircle = () => (

@@ -37,6 +37,7 @@ import {
   requestPushPermission,
 } from "./src/service/pushNotifications";
 import { registerDeviceToBackend } from "./src/utils/registerDevice";
+import { initScreenResolver } from "./src/engine/screenResolver";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -110,6 +111,11 @@ export default function App() {
     const init = async () => {
       if (!fontsLoaded && !error) return;
       
+      // Preload screen definitions from API (falls back to local)
+      initScreenResolver().catch((err) =>
+        console.warn("Screen resolver init failed (using local fallback):", err)
+      );
+
       // Set route and hide splash immediately to speed up launch
       setInitialRoute("AppDrawer");
       await SplashScreen.hideAsync().catch(() => {});

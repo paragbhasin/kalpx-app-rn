@@ -4,7 +4,7 @@ import { useScreenStore } from '../engine/useScreenBridge';
 import Header from '../components/Header';
 import { LinearGradient } from 'expo-linear-gradient';
 import BlockRenderer from '../engine/BlockRenderer';
-import * as Containers from '../../allContainers';
+import { getContainerSync } from '../engine/screenResolver';
 import { Video, ResizeMode } from 'expo-av';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -67,7 +67,7 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
   };
 
   const getSubCategoryData = (focus: string, selection: string) => {
-      const stableScan = (Containers as any).StableScanContainer;
+      const stableScan = getContainerSync('stable_scan');
       const optionsMap = stableScan?.states?.prana_baseline?.optionsMap || {};
       const list = optionsMap[focus] || [];
       return list.find((o: any) => o.id === selection) || list[0] || {};
@@ -78,7 +78,7 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
 
   const fetchCompanionData = () => {
     const activeMetrics: any = {};
-    const stableScan = (Containers as any).StableScanContainer;
+    const stableScan = getContainerSync('stable_scan');
     const metricsStates = ['baseline_vitals', 'baseline_metrics'];
     metricsStates.forEach(stateId => {
         const stateBlocks = stableScan?.states?.[stateId]?.blocks || [];

@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useDispatch, useSelector } from 'react-redux';
 import { useMemo } from 'react';
 import type { RootState, AppDispatch } from './index';
+import { getScreen } from '../engine/screenResolver';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -74,6 +75,33 @@ export const restoreState = createAsyncThunk(
     } catch (err: any) {
       return rejectWithValue(err?.message ?? 'Failed to restore state');
     }
+  },
+);
+
+/**
+ * Load a screen by containerId + stateId and resolve its schema from the
+ * screen resolver (API first, local allContainers.js fallback).
+ */
+export const loadScreenWithData = createAsyncThunk(
+  'screen/loadScreenWithData',
+  async (
+    { containerId, stateId }: { containerId: string; stateId: string },
+    { dispatch },
+  ) => {
+    // 1. Update navigation state immediately (uses the action creator exported below)
+    dispatch({ type: 'screen/loadScreen', payload: { containerId, stateId } });
+
+    // 2. Resolve the screen schema
+    const screenSchema = await getScreen(containerId, stateId);
+    if (screenSchema) {
+      dispatch({ type: 'screen/setCurrentScreen', payload: screenSchema });
+    } else {
+      console.warn(
+        `[SCREEN_SLICE] No schema found for ${containerId}/${stateId}`,
+      );
+    }
+
+    return screenSchema;
   },
 );
 
@@ -208,6 +236,8 @@ export const useScreenActions = () => {
       setSubmitting: (flag: boolean) =>
         dispatch(screenActions.setSubmitting(flag)),
       resetState: () => dispatch(screenActions.resetState()),
+      loadScreenWithData: (containerId: string, stateId: string) =>
+        dispatch(loadScreenWithData({ containerId, stateId })),
       persistState: () => dispatch(persistState()),
       restoreState: () => dispatch(restoreState()),
     }),

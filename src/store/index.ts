@@ -41,11 +41,13 @@ import { feedReducer } from "../screens/Feed/reducers";
 import { postDetailReducer } from "../screens/PostDetail/reducers";
 import snackBarReducer from "./snackBarSlice";
 import mitraReducer from "./mitraSlice";
+import screenReducer from "./screenSlice";
 
 const appReducer = combineReducers({
   login: loginReducer,
   snackBar: snackBarReducer,
   mitra: mitraReducer,
+  screen: screenReducer,
   classesExploreReducer,
   classesBookingsReducer,
   classesFilterExploreReducer,

@@ -65,10 +65,18 @@ function SnackBarContainer() {
 export default function App() {
   const currentBackground = useScreenStore((state) => state.currentBackground);
   const [fontsLoaded, error] = useFonts({
-    GelicaRegular: require("./assets/fonts/gelica-regular.otf"),
-    GelicaLight: require("./assets/fonts/gelica-light.otf"),
-    GelicaMedium: require("./assets/fonts/gelica-medium.otf"),
-    GelicaBold: require("./assets/fonts/gelica-bold.otf"),
+    // KalpX design language: Cormorant Garamond (serif) + Inter (sans)
+    CormorantGaramond_400Regular: require("@expo-google-fonts/cormorant-garamond/CormorantGaramond_400Regular.ttf"),
+    CormorantGaramond_700Bold: require("@expo-google-fonts/cormorant-garamond/CormorantGaramond_700Bold.ttf"),
+    Inter_400Regular: require("@expo-google-fonts/inter/Inter_400Regular.ttf"),
+    Inter_500Medium: require("@expo-google-fonts/inter/Inter_500Medium.ttf"),
+    Inter_600SemiBold: require("@expo-google-fonts/inter/Inter_600SemiBold.ttf"),
+    Inter_700Bold: require("@expo-google-fonts/inter/Inter_700Bold.ttf"),
+    // Legacy aliases — Gelica mapped to new fonts for backward compatibility
+    GelicaBold: require("@expo-google-fonts/cormorant-garamond/CormorantGaramond_700Bold.ttf"),
+    GelicaRegular: require("@expo-google-fonts/inter/Inter_400Regular.ttf"),
+    GelicaMedium: require("@expo-google-fonts/inter/Inter_500Medium.ttf"),
+    GelicaLight: require("@expo-google-fonts/inter/Inter_400Regular.ttf"),
   });
 
   const [initialRoute, setInitialRoute] = useState(null);

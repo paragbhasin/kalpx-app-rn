@@ -37,20 +37,10 @@ yarn-error.*
 *.tsbuildinfo
 
 ios/
-
-
-# Android build artifacts (keep source, ignore outputs)
-android/
-*.apk
-*.aab
+# android/
 
 app-example
 
 # Google Services files
-# google-services.json
+google-services.json
 GoogleService-Info.plist
-
-# Production credentials
-android/app/production.keystore
-credentials.json
-credentials/

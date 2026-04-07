@@ -18,6 +18,9 @@ import AwarenessTriggerContainer from '../containers/AwarenessTriggerContainer';
 import ComposerContainer from '../containers/ComposerContainer';
 import RoutineBuilderContainer from '../containers/RoutineBuilderContainer';
 import EmbodimentChallengeRunnerContainer from '../containers/EmbodimentChallengeRunnerContainer';
+import InsightsProgressContainer from '../containers/InsightsProgressContainer';
+import PortalSplashContainer from '../containers/PortalSplashContainer';
+import RoutineLockedContainer from '../containers/RoutineLockedContainer';
 
 const containerMap: Record<string, React.ComponentType<any>> = {
   portal: PortalContainer,
@@ -34,6 +37,9 @@ const containerMap: Record<string, React.ComponentType<any>> = {
   routine_builder: RoutineBuilderContainer,
   embodiment_challenge_runner: EmbodimentChallengeRunnerContainer,
   cycle_transitions: CycleTransitionsContainer,
+  insights_progress: InsightsProgressContainer,
+  portal_splash: PortalSplashContainer,
+  routine_locked: RoutineLockedContainer,
 };
 
 const ScreenRenderer: React.FC = () => {

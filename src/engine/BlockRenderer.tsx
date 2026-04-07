@@ -54,6 +54,21 @@ import CycleReflectionResultsBlock from '../blocks/CycleReflectionResultsBlock';
 import MantraSelectionListBlock from '../blocks/MantraSelectionListBlock';
 import TriggerPatternBlock from '../blocks/TriggerPatternBlock';
 
+// Phase 4 blocks (13 niche types)
+import ChallengeTextBlock from '../blocks/ChallengeTextBlock';
+import FormFieldsBlock from '../blocks/FormFieldsBlock';
+import GraphBlock from '../blocks/GraphBlock';
+import GuideBlock from '../blocks/GuideBlock';
+import HoldButtonBlock from '../blocks/HoldButtonBlock';
+import MantraBlock from '../blocks/MantraBlock';
+import PracticeBlock from '../blocks/PracticeBlock';
+import SankalpBlock from '../blocks/SankalpBlock';
+import PressAndHoldBlock from '../blocks/PressAndHoldBlock';
+import PressAndHoldCircularBlock from '../blocks/PressAndHoldCircularBlock';
+import TimelineBlock from '../blocks/TimelineBlock';
+import TrendChartBlock from '../blocks/TrendChartBlock';
+import VoiceRecorderBlock from '../blocks/VoiceRecorderBlock';
+
 const blockMap: Record<string, React.ComponentType<any>> = {
   // Original 11 blocks
   headline: HeadlineBlock,
@@ -104,6 +119,20 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   cycle_reflection_results: CycleReflectionResultsBlock,
   mantra_selection_list: MantraSelectionListBlock,
   trigger_pattern: TriggerPatternBlock,
+  // Phase 4 blocks (13 niche types)
+  challenge_text: ChallengeTextBlock,
+  form_fields: FormFieldsBlock,
+  graph: GraphBlock,
+  guide: GuideBlock,
+  hold_button: HoldButtonBlock,
+  mantra: MantraBlock,
+  practice: PracticeBlock,
+  sankalp: SankalpBlock,
+  press_and_hold: PressAndHoldBlock,
+  press_and_hold_circular: PressAndHoldCircularBlock,
+  timeline: TimelineBlock,
+  trend_chart: TrendChartBlock,
+  voice_recorder: VoiceRecorderBlock,
 };
 
 interface BlockRendererProps {

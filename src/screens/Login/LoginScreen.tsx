@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { AnyAction } from "@reduxjs/toolkit";
 import * as AppleAuthentication from "expo-apple-authentication";
@@ -47,7 +48,7 @@ export default function LoginScreen({ navigation }) {
   useEffect(() => {
     const fetchCredentials = async () => {
       const email = await AsyncStorage.getItem("userEmail");
-      const password = await AsyncStorage.getItem("userPassword");
+      const password = await SecureStore.getItemAsync("userPassword");
       setInitialEmail(email || "");
       setInitialPassword(password || "");
       if (email && password) {
@@ -394,10 +395,10 @@ if (key === "pending_classes_data") {
   });
           if (keepLoggedIn) {
             await AsyncStorage.setItem("userEmail", credentials.email);
-            await AsyncStorage.setItem("userPassword", credentials.password);
+            await SecureStore.setItemAsync("userPassword", credentials.password);
           } else {
             await AsyncStorage.removeItem("userEmail");
-            await AsyncStorage.removeItem("userPassword");
+            await SecureStore.deleteItemAsync("userPassword");
           }
           await AsyncStorage.setItem("showLocationConfirm", "true");
           await resumePendingIfAny();

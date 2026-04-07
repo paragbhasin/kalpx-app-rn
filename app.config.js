@@ -17,7 +17,7 @@ module.exports = {
       bundleIdentifier: "com.kalpx.app",
       usesAppleSignIn: true,
       appleTeamId: "9G5NZ5LBRU",
-      googleServicesFile: "./GoogleService-Info.plist",
+      googleServicesFile: process.env.GOOGLE_SERVICES_PLIST || "./GoogleService-Info.plist",
       buildNumber: "1",
       entitlements: {
         "aps-environment": "production",
@@ -45,7 +45,7 @@ module.exports = {
       },
 
       edgeToEdgeEnabled: true,
-      googleServicesFile: "./google-services.json",
+      googleServicesFile: process.env.GOOGLE_SERVICES_JSON || "./google-services.json",
     },
     web: {
       bundler: "metro",

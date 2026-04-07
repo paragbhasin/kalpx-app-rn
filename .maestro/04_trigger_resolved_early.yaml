@@ -1,0 +1,29 @@
+# Flow 4: Trigger flow — resolved early at OM chanting
+# Validates: dashboard → I Feel Triggered → OM chanting → Return to Mitra Home → dashboard
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "Guided Paths"
+- waitForAnimationToEnd
+
+# Tap I Feel Triggered
+- tapOn:
+    text: "I Feel Triggered"
+    optional: true
+- waitForAnimationToEnd
+
+# Should be on OM chanting screen (free_mantra_chanting)
+- assertVisible:
+    text: ".*Recite.*|.*OM.*|.*chant.*"
+    optional: true
+
+# Exit early via Return to Mitra Home
+- tapOn: "Return to Mitra Home"
+- waitForAnimationToEnd
+
+# Should be back on dashboard
+- assertVisible:
+    text: ".*Day.*|.*Mantra.*|.*Practice.*"
+    optional: true

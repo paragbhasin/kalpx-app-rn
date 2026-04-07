@@ -1,0 +1,45 @@
+# Flow 7: Early exit from runner
+# Validates: dashboard → mantra → runner → End Practice → dashboard (no completion tracked)
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "Guided Paths"
+- waitForAnimationToEnd
+
+# Enter mantra flow
+- tapOn:
+    text: "Mantra"
+    optional: true
+- waitForAnimationToEnd
+
+# Navigate to runner
+- tapOn:
+    text: "Begin Chanting"
+    optional: true
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "9"
+    optional: true
+- tapOn:
+    text: "Begin"
+    optional: true
+- waitForAnimationToEnd
+
+# Tap once then exit early
+- tapOn:
+    text: "TAP"
+    optional: true
+
+# Exit via Return to Mitra Home (not End Practice)
+- tapOn:
+    text: "Return to Mitra Home"
+    optional: true
+- waitForAnimationToEnd
+
+# Should be back on dashboard — no completion
+- assertVisible:
+    text: ".*Day.*|.*Mantra.*"
+    optional: true

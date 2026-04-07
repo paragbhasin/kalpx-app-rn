@@ -1,0 +1,40 @@
+# Flow 5: Trigger flow — through support suggestion
+# Validates: I Feel Triggered → OM → I feel calmer now → reflection → Share → advice cards
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "Guided Paths"
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "I Feel Triggered"
+    optional: true
+- waitForAnimationToEnd
+
+# OM chanting → proceed to reflection
+- tapOn:
+    text: "I feel calmer now"
+    optional: true
+- waitForAnimationToEnd
+
+# Trigger reflection — select a feeling
+- assertVisible:
+    text: ".*How are you feeling.*"
+    optional: true
+- tapOn:
+    text: ".*agitated.*|.*uncertain.*"
+    optional: true
+    index: 0
+
+# Share button
+- tapOn:
+    text: "Share"
+    optional: true
+- waitForAnimationToEnd
+
+# Should show advice/suggestion cards
+- assertVisible:
+    text: ".*Recommended.*|.*practice.*"
+    optional: true

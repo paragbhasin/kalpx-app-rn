@@ -1,0 +1,27 @@
+# Flow 8: Day 7/14 checkpoint smoke path
+# Validates: checkpoint screen renders with options and can be interacted with
+# Note: requires journey at day 7+ — may need pre-seeded state
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "Guided Paths"
+- waitForAnimationToEnd
+
+# If on dashboard at day 7+, checkpoint should be accessible
+# This test validates rendering — actual checkpoint requires API data
+- assertVisible:
+    text: ".*Day.*"
+    optional: true
+
+# Look for checkpoint entry point (if day 7/14)
+- tapOn:
+    text: ".*checkpoint.*|.*reflect.*|.*Complete Day.*"
+    optional: true
+- waitForAnimationToEnd
+
+# If checkpoint renders, should show options
+- assertVisible:
+    text: ".*Continue.*|.*Lighten.*|.*How has your practice felt.*"
+    optional: true

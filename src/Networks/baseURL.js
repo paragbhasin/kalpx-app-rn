@@ -3,9 +3,8 @@
 // const BASE_URL = "https://dev.kalpx.com/api"; // change as needed
 // export default BASE_URL;
 
-// MANUAL SWITCH
-// const ENV = "dev";
-const ENV = "prod";
+// MANUAL SWITCH — set to "dev" during development, "prod" for release builds
+const ENV = "dev";
 
 // API URLs
 const DEV_URL = "https://dev.kalpx.com/api";

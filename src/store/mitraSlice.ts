@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import axios from 'axios';
+import api from '../Networks/axios';
 
 interface MitraState {
   companion: any | null;
@@ -15,12 +15,12 @@ const initialState: MitraState = {
   aiReasoning: null,
 };
 
-// Async thunk for generating companion
+// Async thunk for generating companion — uses centralized API client (not hardcoded URL)
 export const generateCompanion = createAsyncThunk(
   'mitra/generateCompanion',
   async (payload: any, { rejectWithValue }) => {
     try {
-      const response = await axios.post('https://dev.kalpx.com/api/mitra/generate-companion/', payload);
+      const response = await api.post('mitra/generate-companion/', payload);
       return response.data;
     } catch (err: any) {
       return rejectWithValue(err.response?.data || 'Failed to generate companion');

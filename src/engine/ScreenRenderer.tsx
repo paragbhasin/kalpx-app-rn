@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, SafeAreaView, StatusBar } from 'react-native';
 import { useScreenStore } from './useScreenBridge';
+import EngineErrorBoundary from './ErrorBoundary';
 
 // Import Containers
 import GenericContainer from '../containers/GenericContainer';
@@ -13,6 +14,10 @@ import PracticeDetailOverlay from '../components/PracticeDetailOverlay';
 import CompanionDashboardContainer from '../containers/CompanionDashboardContainer';
 import PracticeRunnerContainer from '../containers/PracticeRunnerContainer';
 import CycleTransitionsContainer from '../containers/CycleTransitionsContainer';
+import AwarenessTriggerContainer from '../containers/AwarenessTriggerContainer';
+import ComposerContainer from '../containers/ComposerContainer';
+import RoutineBuilderContainer from '../containers/RoutineBuilderContainer';
+import EmbodimentChallengeRunnerContainer from '../containers/EmbodimentChallengeRunnerContainer';
 
 const containerMap: Record<string, React.ComponentType<any>> = {
   portal: PortalContainer,
@@ -24,7 +29,10 @@ const containerMap: Record<string, React.ComponentType<any>> = {
   insight_summary: InsightSummaryContainer,
   companion_dashboard: CompanionDashboardContainer,
   practice_runner: PracticeRunnerContainer,
-  awareness_trigger: PracticeRunnerContainer,
+  awareness_trigger: AwarenessTriggerContainer,
+  composer: ComposerContainer,
+  routine_builder: RoutineBuilderContainer,
+  embodiment_challenge_runner: EmbodimentChallengeRunnerContainer,
   cycle_transitions: CycleTransitionsContainer,
 };
 
@@ -43,13 +51,15 @@ const ScreenRenderer: React.FC = () => {
 
   return (
     <View style={styles.root}>
+      <EngineErrorBoundary>
       <Wrapper style={styles.wrapper}>
         <Container schema={currentScreen} />
       </Wrapper>
+      </EngineErrorBoundary>
       {currentOverlayData && (
-        <PracticeDetailOverlay 
-            data={currentOverlayData} 
-            onClose={() => setOverlayData(null)} 
+        <PracticeDetailOverlay
+            data={currentOverlayData}
+            onClose={() => setOverlayData(null)}
         />
       )}
     </View>

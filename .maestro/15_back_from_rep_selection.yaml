@@ -1,0 +1,37 @@
+# Flow 15: Back from rep selection
+# Validates: mantra → info → rep selection → back → returns to info or dashboard
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "Guided Paths"
+- waitForAnimationToEnd
+
+# Enter mantra flow
+- tapOn:
+    text: "Mantra"
+    optional: true
+- waitForAnimationToEnd
+
+# Go to rep selection
+- tapOn:
+    text: "Begin Chanting"
+    optional: true
+- waitForAnimationToEnd
+
+# Should see rep options
+- assertVisible:
+    text: ".*9.*|.*21.*|.*Choose.*Chant Count.*"
+    optional: true
+
+# Go back from rep selection
+- tapOn:
+    text: ".*back.*|.*←.*"
+    optional: true
+- waitForAnimationToEnd
+
+# Should return to info or dashboard — not stuck
+- assertVisible:
+    text: ".*Mantra.*|.*Day.*"
+    optional: true

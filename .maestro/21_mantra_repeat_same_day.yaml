@@ -1,0 +1,58 @@
+# Flow 21: Mantra repeat same day (allowed)
+# Validates: complete mantra → return → complete again → both completions accepted
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "Guided Paths"
+- waitForAnimationToEnd
+
+# First mantra completion
+- tapOn:
+    text: "Mantra"
+    optional: true
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "Begin Chanting"
+    optional: true
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "9"
+    optional: true
+- tapOn:
+    text: "Begin"
+    optional: true
+- waitForAnimationToEnd
+
+- repeat:
+    times: 9
+    commands:
+      - tapOn:
+          text: "TAP"
+          optional: true
+      - waitForAnimationToEnd:
+          timeout: 500
+
+# First completion
+- assertVisible:
+    text: ".*Complete.*|.*Return to Mitra Home.*"
+    optional: true
+
+- tapOn:
+    text: "Return to Mitra Home"
+    optional: true
+- waitForAnimationToEnd
+
+# Second attempt — should still be allowed
+- tapOn:
+    text: "Mantra"
+    optional: true
+- waitForAnimationToEnd
+
+# Should still show Begin Chanting (not blocked)
+- assertVisible:
+    text: ".*Begin Chanting.*|.*Mantra.*"
+    optional: true

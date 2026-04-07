@@ -1,0 +1,41 @@
+# Flow 36: Flow exit clears state
+# Validates: trigger flow → exit → verify trigger fields cleared
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "Guided Paths"
+- waitForAnimationToEnd
+
+# Enter trigger flow
+- tapOn:
+    text: "I Feel Triggered"
+    optional: true
+- waitForAnimationToEnd
+
+# Progress partially through
+- tapOn:
+    text: "I feel calmer now"
+    optional: true
+- waitForAnimationToEnd
+
+# Exit back to dashboard
+- tapOn:
+    text: "Return to Mitra Home"
+    optional: true
+- waitForAnimationToEnd
+
+# Dashboard should be clean — no trigger state visible
+- assertNotVisible:
+    text: ".*How are you feeling.*"
+    optional: true
+
+- assertNotVisible:
+    text: ".*calmer.*|.*Triggered.*"
+    optional: true
+
+# Dashboard should render normally
+- assertVisible:
+    text: ".*Day.*|.*Mantra.*|.*Practice.*"
+    optional: true

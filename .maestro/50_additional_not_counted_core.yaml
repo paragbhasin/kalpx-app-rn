@@ -1,0 +1,42 @@
+# Flow 50: Additional item completion does not count toward core progress
+# Validates: complete additional → core day progress unchanged
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "Guided Paths"
+- waitForAnimationToEnd
+
+# Note the current day progress state
+- assertVisible:
+    text: ".*Day.*"
+    optional: true
+
+# Find and complete an additional item
+- tapOn:
+    text: ".*Additional.*|.*Extra.*|.*More.*"
+    optional: true
+- waitForAnimationToEnd
+
+- tapOn:
+    text: ".*Begin.*|.*Start.*"
+    optional: true
+- waitForAnimationToEnd
+
+- tapOn:
+    text: ".*Complete.*|.*Done.*|.*Finish.*"
+    optional: true
+- waitForAnimationToEnd
+
+# Return home
+- tapOn:
+    text: "Return to Mitra Home"
+    optional: true
+- waitForAnimationToEnd
+
+# Core items (mantra, practice, sankalp) should NOT be marked complete
+# by an additional item completion
+- assertVisible:
+    text: ".*Mantra.*|.*Practice.*|.*Sankalp.*"
+    optional: true

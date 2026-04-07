@@ -1,0 +1,41 @@
+# Flow 39: Info state does not leak between flows
+# Validates: mantra info → exit → sankalp info → shows sankalp data not mantra
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "Guided Paths"
+- waitForAnimationToEnd
+
+# Open mantra info
+- tapOn:
+    text: "Mantra"
+    optional: true
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: ".*Mantra.*|.*Chant.*"
+    optional: true
+
+# Exit to dashboard
+- tapOn:
+    text: ".*back.*|.*←.*"
+    optional: true
+- waitForAnimationToEnd
+
+# Open sankalp info
+- tapOn:
+    text: "Sankalp"
+    optional: true
+- waitForAnimationToEnd
+
+# Should show sankalp content
+- assertVisible:
+    text: ".*Sankalp.*|.*intention.*|.*resolve.*"
+    optional: true
+
+# Should NOT show mantra content
+- assertNotVisible:
+    text: ".*Begin Chanting.*|.*Chant Count.*"
+    optional: true

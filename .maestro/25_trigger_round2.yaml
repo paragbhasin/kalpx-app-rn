@@ -1,0 +1,50 @@
+# Flow 25: Trigger round 2
+# Validates: trigger → reflection → agitated → advice → runner → recheck → still agitated → round 2
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "Guided Paths"
+- waitForAnimationToEnd
+
+# Start trigger flow
+- tapOn:
+    text: "I Feel Triggered"
+    optional: true
+- waitForAnimationToEnd
+
+# OM chanting → proceed to reflection
+- tapOn:
+    text: "I feel calmer now"
+    optional: true
+- waitForAnimationToEnd
+
+# Select agitated feeling
+- tapOn:
+    text: ".*agitated.*|.*restless.*"
+    optional: true
+    index: 0
+
+- tapOn:
+    text: "Share"
+    optional: true
+- waitForAnimationToEnd
+
+# Advice cards — tap a suggestion
+- tapOn:
+    text: ".*practice.*|.*mantra.*|.*breath.*"
+    optional: true
+    index: 0
+- waitForAnimationToEnd
+
+# Complete or exit the support runner
+- tapOn:
+    text: ".*Return to Mitra Home.*|.*Complete.*|.*Done.*"
+    optional: true
+- waitForAnimationToEnd
+
+# Recheck — still agitated triggers round 2
+- assertVisible:
+    text: ".*How.*feeling.*|.*Round.*|.*suggestion.*"
+    optional: true

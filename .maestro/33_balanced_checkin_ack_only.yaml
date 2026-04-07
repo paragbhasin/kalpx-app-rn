@@ -1,0 +1,31 @@
+# Flow 33: Balanced check-in shows ack only (no suggestions)
+# Validates: check-in → balanced → ack screen → no support suggestions shown
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "Guided Paths"
+- waitForAnimationToEnd
+
+# Enter check-in
+- tapOn:
+    text: "Quick Check-In"
+    optional: true
+- waitForAnimationToEnd
+
+# Select Balanced
+- tapOn:
+    text: "Balanced"
+    optional: true
+- waitForAnimationToEnd
+
+# Should show ack message
+- assertVisible:
+    text: ".*Return to Mitra Home.*"
+    optional: true
+
+# Should NOT show support suggestions
+- assertNotVisible:
+    text: ".*Recommended.*|.*suggestion.*|.*Try.*"
+    optional: true

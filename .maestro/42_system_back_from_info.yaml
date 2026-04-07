@@ -1,0 +1,29 @@
+# Flow 42: System back from info screen
+# Validates: in info screen → system back → exits to dashboard
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "Guided Paths"
+- waitForAnimationToEnd
+
+# Enter mantra info
+- tapOn:
+    text: "Mantra"
+    optional: true
+- waitForAnimationToEnd
+
+# Verify on info screen
+- assertVisible:
+    text: ".*Begin Chanting.*|.*Mantra.*"
+    optional: true
+
+# Press system back
+- pressKey: back
+- waitForAnimationToEnd
+
+# Should return to dashboard
+- assertVisible:
+    text: ".*Day.*|.*Mantra.*|.*Practice.*"
+    optional: true

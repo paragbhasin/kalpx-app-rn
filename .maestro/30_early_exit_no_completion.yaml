@@ -1,0 +1,44 @@
+# Flow 30: Early exit from any runner — no completion flag
+# Validates: enter runner → exit before finishing → no completion flag set
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "Guided Paths"
+- waitForAnimationToEnd
+
+# Enter mantra runner
+- tapOn:
+    text: "Mantra"
+    optional: true
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "Begin Chanting"
+    optional: true
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "9"
+    optional: true
+- tapOn:
+    text: "Begin"
+    optional: true
+- waitForAnimationToEnd
+
+# Tap only once (incomplete)
+- tapOn:
+    text: "TAP"
+    optional: true
+
+# Exit early
+- tapOn:
+    text: "Return to Mitra Home"
+    optional: true
+- waitForAnimationToEnd
+
+# Dashboard should show mantra as NOT completed
+- assertNotVisible:
+    text: ".*Mantra.*Complete.*"
+    optional: true

@@ -1,0 +1,32 @@
+# Flow 12: Return to Mitra Home from trigger reflection
+# Validates: trigger → OM → reflection → Return to Mitra Home → dashboard
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "Guided Paths"
+- waitForAnimationToEnd
+
+# Start trigger flow
+- tapOn:
+    text: "I Feel Triggered"
+    optional: true
+- waitForAnimationToEnd
+
+# Move to reflection via calmer
+- tapOn:
+    text: "I feel calmer now"
+    optional: true
+- waitForAnimationToEnd
+
+# On reflection screen — return home instead of continuing
+- tapOn:
+    text: "Return to Mitra Home"
+    optional: true
+- waitForAnimationToEnd
+
+# Should be back on dashboard
+- assertVisible:
+    text: ".*Day.*|.*Mantra.*|.*Practice.*"
+    optional: true

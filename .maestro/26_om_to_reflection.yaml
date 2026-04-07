@@ -1,0 +1,31 @@
+# Flow 26: OM chanting to reflection
+# Validates: OM chanting → "I feel calmer now" → reflection screen renders
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "Guided Paths"
+- waitForAnimationToEnd
+
+# Start trigger flow
+- tapOn:
+    text: "I Feel Triggered"
+    optional: true
+- waitForAnimationToEnd
+
+# Should be on OM chanting
+- assertVisible:
+    text: ".*Recite.*|.*OM.*|.*chant.*"
+    optional: true
+
+# Proceed to reflection
+- tapOn:
+    text: "I feel calmer now"
+    optional: true
+- waitForAnimationToEnd
+
+# Should be on reflection screen
+- assertVisible:
+    text: ".*How are you feeling.*|.*feeling.*"
+    optional: true

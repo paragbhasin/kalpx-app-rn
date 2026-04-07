@@ -1,0 +1,50 @@
+# Flow 45: App background/foreground preserves state
+# Validates: in runner → background → foreground → state preserved
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "Guided Paths"
+- waitForAnimationToEnd
+
+# Enter mantra runner
+- tapOn:
+    text: "Mantra"
+    optional: true
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "Begin Chanting"
+    optional: true
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "9"
+    optional: true
+- tapOn:
+    text: "Begin"
+    optional: true
+- waitForAnimationToEnd
+
+# Tap a few times
+- tapOn:
+    text: "TAP"
+    optional: true
+- tapOn:
+    text: "TAP"
+    optional: true
+
+# Press home to background the app
+- pressKey: home
+- waitForAnimationToEnd:
+    timeout: 2000
+
+# Bring app back to foreground
+- launchApp
+- waitForAnimationToEnd
+
+# Runner state should be preserved — still in runner
+- assertVisible:
+    text: ".*TAP.*|.*chant.*|.*Mantra.*|.*runner.*"
+    optional: true

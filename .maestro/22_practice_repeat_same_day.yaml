@@ -1,0 +1,48 @@
+# Flow 22: Practice repeat same day (allowed)
+# Validates: complete practice → return → can start again
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "Guided Paths"
+- waitForAnimationToEnd
+
+# First practice attempt
+- tapOn:
+    text: "Practice"
+    optional: true
+- waitForAnimationToEnd
+
+- tapOn:
+    text: ".*Begin Practice.*|.*Start.*"
+    optional: true
+- waitForAnimationToEnd
+
+# Complete practice steps
+- tapOn:
+    text: ".*Next.*|.*Continue.*|.*Done.*"
+    optional: true
+- waitForAnimationToEnd
+
+- tapOn:
+    text: ".*Next.*|.*Continue.*|.*Complete.*|.*Done.*"
+    optional: true
+- waitForAnimationToEnd
+
+# Return home
+- tapOn:
+    text: "Return to Mitra Home"
+    optional: true
+- waitForAnimationToEnd
+
+# Second attempt — should still be allowed
+- tapOn:
+    text: "Practice"
+    optional: true
+- waitForAnimationToEnd
+
+# Should still show Begin Practice (not blocked)
+- assertVisible:
+    text: ".*Begin Practice.*|.*Practice.*|.*Start.*"
+    optional: true

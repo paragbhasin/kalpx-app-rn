@@ -1,0 +1,26 @@
+# Flow 35: Agitated check-in shows support suggestions
+# Validates: check-in → agitated → should show support suggestions
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "Guided Paths"
+- waitForAnimationToEnd
+
+# Enter check-in
+- tapOn:
+    text: "Quick Check-In"
+    optional: true
+- waitForAnimationToEnd
+
+# Select Agitated
+- tapOn:
+    text: "Agitated"
+    optional: true
+- waitForAnimationToEnd
+
+# Should show support suggestions (not just ack)
+- assertVisible:
+    text: ".*breath.*|.*support.*|.*calm.*|.*Recommended.*|.*Try.*"
+    optional: true

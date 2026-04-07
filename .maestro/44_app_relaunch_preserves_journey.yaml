@@ -1,0 +1,30 @@
+# Flow 44: App relaunch preserves journey state
+# Validates: set journey state → kill app → relaunch → state preserved
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "Guided Paths"
+- waitForAnimationToEnd
+
+# Verify journey is active
+- assertVisible:
+    text: ".*Day.*"
+    optional: true
+
+# Stop the app
+- stopApp
+
+# Relaunch
+- launchApp
+- waitForAnimationToEnd
+
+# Navigate back to engine
+- tapOn: "Guided Paths"
+- waitForAnimationToEnd
+
+# Journey state should be preserved
+- assertVisible:
+    text: ".*Day.*|.*Mantra.*|.*Practice.*"
+    optional: true

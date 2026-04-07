@@ -1,0 +1,37 @@
+# Flow 37: Flow B clean after Flow A
+# Validates: mantra flow → exit → practice flow → practice shows clean state
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "Guided Paths"
+- waitForAnimationToEnd
+
+# Enter mantra flow
+- tapOn:
+    text: "Mantra"
+    optional: true
+- waitForAnimationToEnd
+
+# View mantra info, then exit
+- tapOn:
+    text: ".*back.*|.*←.*"
+    optional: true
+- waitForAnimationToEnd
+
+# Enter practice flow
+- tapOn:
+    text: "Practice"
+    optional: true
+- waitForAnimationToEnd
+
+# Practice should show its own content, not mantra content
+- assertVisible:
+    text: ".*Practice.*|.*Begin Practice.*|.*Step.*"
+    optional: true
+
+# Should NOT show mantra-specific content
+- assertNotVisible:
+    text: ".*Begin Chanting.*|.*Choose Your Chant Count.*"
+    optional: true

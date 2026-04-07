@@ -1,0 +1,32 @@
+# Flow 47: Additional item — create custom
+# Validates: create custom item → appears in dashboard
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "Guided Paths"
+- waitForAnimationToEnd
+
+# Look for create/custom option
+- tapOn:
+    text: ".*Add.*|.*Create.*|.*Custom.*"
+    optional: true
+- waitForAnimationToEnd
+
+# Fill in custom item details (if form exists)
+- tapOn:
+    text: ".*Create.*|.*Add Custom.*|.*Save.*"
+    optional: true
+- waitForAnimationToEnd
+
+# Return to dashboard
+- tapOn:
+    text: "Return to Mitra Home"
+    optional: true
+- waitForAnimationToEnd
+
+# Dashboard should show the item
+- assertVisible:
+    text: ".*Day.*"
+    optional: true

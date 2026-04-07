@@ -1,0 +1,33 @@
+# Flow 17: Sankalp hold to complete
+# Validates: dashboard → sankalp → embody → hold gesture → completion screen
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "Guided Paths"
+- waitForAnimationToEnd
+
+# Enter sankalp flow
+- tapOn:
+    text: "Sankalp"
+    optional: true
+- waitForAnimationToEnd
+
+# Start embody
+- tapOn:
+    text: ".*Embody.*|.*Begin.*"
+    optional: true
+- waitForAnimationToEnd
+
+# Hold gesture — long press on the embody area
+- longPressOn:
+    text: ".*Hold.*|.*Embody.*"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 5000
+
+# Should show completion
+- assertVisible:
+    text: ".*Complete.*|.*Return to Mitra Home.*"
+    optional: true

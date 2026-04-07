@@ -1120,7 +1120,7 @@ export default function Home() {
             style={{ alignItems: "center", marginTop: 8 }}
             onPress={() => {
               store.dispatch(screenActions.loadScreen({containerId: 'portal', stateId: 'portal'}));
-              navigation.navigate("DynamicEngine");
+              navigation.navigate("MitraEngine");
             }}
           >
             <ImageBackground
@@ -1184,7 +1184,7 @@ export default function Home() {
             }}
             onPress={() => {
               store.dispatch(screenActions.loadScreen({containerId: 'portal', stateId: 'portal'}));
-              navigation.navigate("DynamicEngine");
+              navigation.navigate("MitraEngine");
             }}
           >
             <TextComponent

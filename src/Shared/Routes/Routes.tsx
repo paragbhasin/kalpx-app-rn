@@ -77,6 +77,7 @@ const Routes = ({ initialRouteName = "AppDrawer" }) => {
       <Stack.Screen name="Privacy" component={Privacy} />
       <Stack.Screen name="DailyPracticeList" component={DailyPracticeList} />
       <Stack.Screen name="DailyPracticeSelectList" component={DailyPracticeSelectList} />
+      <Stack.Screen name="MitraEngine" component={ScreenRenderer} />
     </Stack.Navigator>
   );
 };

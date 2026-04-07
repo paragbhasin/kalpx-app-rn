@@ -12,6 +12,7 @@ import InsightSummaryContainer from '../containers/InsightSummaryContainer';
 import PracticeDetailOverlay from '../components/PracticeDetailOverlay';
 import CompanionDashboardContainer from '../containers/CompanionDashboardContainer';
 import PracticeRunnerContainer from '../containers/PracticeRunnerContainer';
+import CycleTransitionsContainer from '../containers/CycleTransitionsContainer';
 
 const containerMap: Record<string, React.ComponentType<any>> = {
   portal: PortalContainer,
@@ -24,6 +25,7 @@ const containerMap: Record<string, React.ComponentType<any>> = {
   companion_dashboard: CompanionDashboardContainer,
   practice_runner: PracticeRunnerContainer,
   awareness_trigger: PracticeRunnerContainer,
+  cycle_transitions: CycleTransitionsContainer,
 };
 
 const ScreenRenderer: React.FC = () => {

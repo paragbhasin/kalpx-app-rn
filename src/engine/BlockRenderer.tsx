@@ -32,6 +32,28 @@ import HoldTriggerBlock from '../blocks/HoldTriggerBlock';
 import FooterButtonsBlock from '../blocks/FooterButtonsBlock';
 import AdditionalItemsSectionBlock from '../blocks/AdditionalItemsSectionBlock';
 
+// Phase 3b blocks (20 more)
+import SpacerBlock from '../blocks/SpacerBlock';
+import MicroLabelBlock from '../blocks/MicroLabelBlock';
+import HelperTextBlock from '../blocks/HelperTextBlock';
+import LinkTextBlock from '../blocks/LinkTextBlock';
+import LotusHeaderBlock from '../blocks/LotusHeaderBlock';
+import InsightBoxBlock from '../blocks/InsightBoxBlock';
+import IdentityIndicatorBlock from '../blocks/IdentityIndicatorBlock';
+import IdentityDeltaBlock from '../blocks/IdentityDeltaBlock';
+import SummaryBlock from '../blocks/SummaryBlock';
+import FeedbackRecapBlock from '../blocks/FeedbackRecapBlock';
+import RepCounterFeedbackBlock from '../blocks/RepCounterFeedbackBlock';
+import TextInputBlock from '../blocks/TextInputBlock';
+import OptionPickerBlock from '../blocks/OptionPickerBlock';
+import PauseOrbBlock from '../blocks/PauseOrbBlock';
+import TimerControlsBlock from '../blocks/TimerControlsBlock';
+import ToastMessageBlock from '../blocks/ToastMessageBlock';
+import CycleReflectionBlock from '../blocks/CycleReflectionBlock';
+import CycleReflectionResultsBlock from '../blocks/CycleReflectionResultsBlock';
+import MantraSelectionListBlock from '../blocks/MantraSelectionListBlock';
+import TriggerPatternBlock from '../blocks/TriggerPatternBlock';
+
 const blockMap: Record<string, React.ComponentType<any>> = {
   // Original 11 blocks
   headline: HeadlineBlock,
@@ -45,7 +67,7 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   practice_card: PracticeCardBlock,
   sankalp_display: SankalpDisplayBlock,
   breath_animation: BreathAnimationBlock,
-  // Phase 3 blocks (15 new)
+  // Phase 3a blocks (15)
   rep_counter: RepCounterBlock,
   mantra_display: MantraDisplayBlock,
   timer_display: TimerDisplayBlock,
@@ -54,7 +76,6 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   diamond_divider: DiamondDividerBlock,
   grounding_list: GroundingListBlock,
   textarea: TextareaBlock,
-  ...(CardListBlock && { card_list: CardListBlock }),
   card_list: CardListBlock,
   completion_card: CompletionCardBlock,
   practice_steps: PracticeStepsBlock,
@@ -62,6 +83,27 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   hold_trigger: HoldTriggerBlock,
   footer_buttons: FooterButtonsBlock,
   additional_items_section: AdditionalItemsSectionBlock,
+  // Phase 3b blocks (20)
+  spacer: SpacerBlock,
+  micro_label: MicroLabelBlock,
+  helper_text: HelperTextBlock,
+  link_text: LinkTextBlock,
+  lotus_header: LotusHeaderBlock,
+  insight_box: InsightBoxBlock,
+  identity_indicator: IdentityIndicatorBlock,
+  identity_delta: IdentityDeltaBlock,
+  summary_block: SummaryBlock,
+  feedback_recap: FeedbackRecapBlock,
+  rep_counter_feedback: RepCounterFeedbackBlock,
+  text_input: TextInputBlock,
+  option_picker: OptionPickerBlock,
+  pause_orb: PauseOrbBlock,
+  timer_controls: TimerControlsBlock,
+  toast_message: ToastMessageBlock,
+  cycle_reflection: CycleReflectionBlock,
+  cycle_reflection_results: CycleReflectionResultsBlock,
+  mantra_selection_list: MantraSelectionListBlock,
+  trigger_pattern: TriggerPatternBlock,
 };
 
 interface BlockRendererProps {

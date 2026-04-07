@@ -15,7 +15,7 @@ import {
 } from "../StackNavigator";
 
 const Tab = createBottomTabNavigator();
-import { useScreenStore } from "../../engine/ScreenStore";
+import { useScreenStore } from "../../engine/useScreenBridge";
 
 const BottomMenuContent = () => {
   const { t } = useTranslation();

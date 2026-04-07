@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Text } from 'react-native';
-import { useScreenStore } from '../engine/ScreenStore';
+import { useScreenStore } from '../engine/useScreenBridge';
 import BlockRenderer from '../engine/BlockRenderer';
 import Header from '../components/Header';
 import GlobalScrollLayout from '../components/GlobalScrollLayout';

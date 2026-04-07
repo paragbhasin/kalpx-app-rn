@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, SafeAreaView, StatusBar } from 'react-native';
-import { useScreenStore } from './ScreenStore';
+import { useScreenStore } from './useScreenBridge';
 
 // Import Containers
 import GenericContainer from '../containers/GenericContainer';

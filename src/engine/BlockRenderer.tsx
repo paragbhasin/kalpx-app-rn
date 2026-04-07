@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useScreenStore } from './ScreenStore';
+import { useScreenStore } from './useScreenBridge';
 import { interpolate } from './utils/interpolation';
 
 // Import blocks (to be created)

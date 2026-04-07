@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Dimensions, Text } from 'react-native';
 import BlockRenderer from '../engine/BlockRenderer';
-import { useScreenStore } from '../engine/ScreenStore';
+import { useScreenStore } from '../engine/useScreenBridge';
 import Header from '../components/Header';
 
 const { width, height } = Dimensions.get('window');

@@ -20,7 +20,8 @@ import Colors from "../../components/Colors";
 import TextComponent from "../../components/TextComponent";
 import { getDailyDharmaTracker } from "../../screens/Home/actions";
 import store, { RootState } from "../../store";
-import { useScreenStore } from "../../engine/ScreenStore";
+import { useScreenStore } from "../../engine/useScreenBridge";
+import { screenActions } from "../../store/screenSlice";
 import BottomMenu from "./BottomMenu";
 
 const Drawer = createDrawerNavigator();
@@ -210,7 +211,7 @@ const CustomDrawerContent = (props) => {
       onPress={() => {
 
         if (item.name === t("drawer.myRoutine")) {
-          useScreenStore.getState().loadScreen('portal', 'portal');
+          store.dispatch(screenActions.loadScreen({ containerId: 'portal', stateId: 'portal' }));
           props.navigation.navigate("HomePage", {
             screen: "HomePage",
             params: { screen: "DynamicEngine" },

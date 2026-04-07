@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
-import { useScreenStore } from '../engine/ScreenStore';
+import { useScreenStore } from '../engine/useScreenBridge';
 
 interface PracticeCardBlockProps {
   block: {

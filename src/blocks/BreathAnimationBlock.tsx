@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Animated, Image, Easing } from 'react-native';
-import { useScreenStore } from '../engine/ScreenStore';
+import { useScreenStore } from '../engine/useScreenBridge';
 
 interface BreathAnimationBlockProps {
   block: {
@@ -62,7 +62,8 @@ const BreathAnimationBlock: React.FC<BreathAnimationBlockProps> = ({ block }) =>
 
       // Complete
       if (isMounted) {
-        const currentScreen = useScreenStore.getState().currentScreen;
+        const { screen } = require('../store').store.getState();
+        const currentScreen = screen.currentScreen;
         const onComplete = currentScreen?.on_complete;
         if (onComplete?.target) {
             loadScreen(onComplete.target.container_id, onComplete.target.state_id);

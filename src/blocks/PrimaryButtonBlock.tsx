@@ -10,7 +10,8 @@ import Animated, {
   Easing,
   interpolate as reInterpolate
 } from 'react-native-reanimated';
-import { useScreenStore } from '../engine/ScreenStore';
+import { useScreenStore } from '../engine/useScreenBridge';
+import { executeAction } from '../engine/actionExecutor';
 
 interface PrimaryButtonBlockProps {
   block: {
@@ -26,8 +27,7 @@ interface PrimaryButtonBlockProps {
 }
 
 const PrimaryButtonBlock: React.FC<PrimaryButtonBlockProps> = ({ block }) => {
-  const loadScreen = useScreenStore((state) => state.loadScreen);
-  const screenState = useScreenStore((state) => state.screenData);
+  const { loadScreen, goBack, screenData: screenState, setOverlayData } = useScreenStore();
 
   // Animation values
   const shineProgress = useSharedValue(0);
@@ -62,20 +62,34 @@ const PrimaryButtonBlock: React.FC<PrimaryButtonBlockProps> = ({ block }) => {
     };
   });
 
-  const handlePress = () => {
+  const handlePress = async () => {
     // Basic validation
     if (block.validate) {
       const value = screenState[block.validate];
       if (!value) {
-        // In a real app, we'd trigger a toast here
         console.warn(block.validation_message || 'Please make a selection.');
         return;
       }
     }
 
     const action = block.action;
-    if (action && (action.type === 'navigate' || action.type === 'submit') && action.target) {
-      loadScreen(action.target.container_id, action.target.state_id);
+    if (!action) return;
+
+    // Route ALL actions through the centralized executor
+    try {
+      await executeAction(action, {
+        loadScreen,
+        goBack,
+        setScreenValue: (value: any, key: string) => {
+          // Bridge: update Redux screenData
+          const { screenActions } = require('../store/screenSlice');
+          const { store } = require('../store');
+          store.dispatch(screenActions.setScreenValue({ key, value }));
+        },
+        screenState,
+      });
+    } catch (err) {
+      console.error('[PrimaryButtonBlock] Action failed:', err);
     }
   };
 

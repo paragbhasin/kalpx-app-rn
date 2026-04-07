@@ -10,7 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import BlockRenderer from '../engine/BlockRenderer';
-import { useScreenStore } from '../engine/ScreenStore';
+import { useScreenStore } from '../engine/useScreenBridge';
 import Header from '../components/Header';
 import { LinearGradient } from 'expo-linear-gradient';
 

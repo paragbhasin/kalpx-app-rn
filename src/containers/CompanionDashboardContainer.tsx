@@ -5,7 +5,7 @@ import { RootState } from '../store';
 import Header from '../components/Header';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useScreenStore } from '../engine/ScreenStore';
+import { useScreenStore } from '../engine/useScreenBridge';
 import BlockRenderer from '../engine/BlockRenderer';
 import { CompanionDashboardContainer as DashboardSchema } from '../../allContainers.js';
 

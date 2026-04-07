@@ -15,7 +15,7 @@ import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState, useRef } from "react";
 import { Animated, StyleSheet, View, Image, ImageBackground, StatusBar } from "react-native";
-import { useScreenStore } from "./src/engine/ScreenStore";
+import { useScreenStore } from "./src/engine/useScreenBridge";
 import "react-native-get-random-values";
 import { MenuProvider } from "react-native-popup-menu";
 import { Provider, useDispatch, useSelector } from "react-redux";

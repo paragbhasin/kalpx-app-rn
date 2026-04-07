@@ -46,7 +46,8 @@ import { useScrollContext } from "../../context/ScrollContext";
 import { CATALOGS } from "../../data/mantras";
 import { usePracticeStore } from "../../data/Practice";
 import { BASE_IMAGE_URL } from "../../Networks/baseURL";
-import { RootState } from "../../store";
+import store, { RootState } from "../../store";
+import { screenActions } from "../../store/screenSlice";
 import { saveUserAction } from "../../utils/storage";
 import { classesHomeList } from "../Classes/actions";
 import { fetchFeaturedHomePosts } from "../Feed/actions";
@@ -60,7 +61,7 @@ import {
   getVideos,
   startMantraPractice,
 } from "./actions";
-import { useScreenStore } from "../../engine/ScreenStore";
+import { useScreenStore } from "../../engine/useScreenBridge";
 import styles from "./homestyles";
 
 const { width } = Dimensions.get("window");
@@ -1118,7 +1119,7 @@ export default function Home() {
           <TouchableOpacity
             style={{ alignItems: "center", marginTop: 8 }}
             onPress={() => {
-              useScreenStore.getState().loadScreen("portal", "portal");
+              store.dispatch(screenActions.loadScreen({containerId: 'portal', stateId: 'portal'}));
               navigation.navigate("DynamicEngine");
             }}
           >
@@ -1182,7 +1183,7 @@ export default function Home() {
               marginBottom: 20,
             }}
             onPress={() => {
-              useScreenStore.getState().loadScreen("portal", "portal");
+              store.dispatch(screenActions.loadScreen({containerId: 'portal', stateId: 'portal'}));
               navigation.navigate("DynamicEngine");
             }}
           >

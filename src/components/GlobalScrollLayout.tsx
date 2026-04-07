@@ -2,7 +2,7 @@ import React from 'react';
 import { Animated, StyleSheet, View, ImageBackground } from 'react-native';
 import { useScrollContext } from '../context/ScrollContext';
 import Header from './Header';
-import { useScreenStore } from '../engine/ScreenStore';
+import { useScreenStore } from '../engine/useScreenBridge';
 
 const GlobalScrollLayout = ({ 
     children, 

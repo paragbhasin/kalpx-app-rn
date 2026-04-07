@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions } from 'react-native';
-import { useScreenStore } from '../engine/ScreenStore';
+import { useScreenStore } from '../engine/useScreenBridge';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -72,9 +72,7 @@ const resolveAsset = (path: string | any) => {
 };
 
 const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
-  const loadScreen = useScreenStore((state) => state.loadScreen);
-  const screenState = useScreenStore((state) => state.screenData);
-  const updateScreenData = useScreenStore((state) => state.updateScreenData);
+  const { loadScreen, goBack, screenData: screenState, updateScreenData } = useScreenStore();
   
   const options = useMemo(() => {
     if (block.options) return block.options;
@@ -95,24 +93,30 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
     }
   }, []);
 
-  const handleSelect = (option: Option) => {
+  const handleSelect = async (option: Option) => {
     setSelectedId(option.id);
     updateScreenData(block.id || 'current_choice', option.id);
 
     const isAuto = block.selection_mode === 'auto' || block.selection_mode === 'single_auto_advance';
-    
+
     if (isAuto) {
+      const { executeAction } = require('../engine/actionExecutor');
+      const setScreenValue = (value: any, key: string) => {
+        const { screenActions } = require('../store/screenSlice');
+        const { store } = require('../store');
+        store.dispatch(screenActions.setScreenValue({ key, value }));
+      };
+      const ctx = { loadScreen, goBack, setScreenValue, screenState };
+
       // 1. Check for action on the option itself
       if (option.action) {
-        if (option.action.type === 'navigate' && option.action.target) {
-          loadScreen(option.action.target.container_id, option.action.target.state_id);
-        }
+        await executeAction(option.action, ctx);
         return;
       }
 
       // 2. Handle block level target
       if (block.target) {
-        loadScreen(block.target.container_id, block.target.state_id);
+        await executeAction({ type: 'navigate', target: block.target }, ctx);
       }
     }
   };

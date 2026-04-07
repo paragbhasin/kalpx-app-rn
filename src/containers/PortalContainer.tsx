@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, StyleSheet, Dimensions, ScrollView } from 'react-native';
 import BlockRenderer from '../engine/BlockRenderer';
-import { useScreenStore } from '../engine/ScreenStore';
+import { useScreenStore } from '../engine/useScreenBridge';
 import Header from '../components/Header';
 
 const { width, height } = Dimensions.get('window');

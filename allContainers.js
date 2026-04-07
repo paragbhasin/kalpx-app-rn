@@ -1,8 +1,16 @@
 export const PortalContainer = {
   container_id: "portal",
   states: {
+    splash_portal: {
+      tone: { theme: "gold_dark", mood: "steady" },
+      blocks: [{ type: "lotus_logo" }],
+      actions: { primary: null, secondary: null },
+    },
+
     portal: {
+      tone: { theme: "gold_dark", mood: "steady" },
       blocks: [
+        { type: "lotus_logo" },
         { type: "headline", content: "Your Sanatan Transformation Companion" },
         {
           type: "subtext",
@@ -21,6 +29,14 @@ export const PortalContainer = {
           },
           style: "gold",
         },
+        // {
+        //   type: "subtext",
+        //   content: "Maybe later",
+        //   variant: "link",
+        //   action: { type: "back" },
+        //   position: "footer",
+        //   style: { fontSize: "14px", marginTop: "10px" },
+        // },
       ],
       actions: { primary: "start_cycle", secondary: null },
     },
@@ -49,22 +65,63 @@ export const PortalContainer = {
     post_completion: {
       tone: { theme: "gold_dark", mood: "reflective" },
       blocks: [
-        { type: "headline", content: "Cycle Complete." },
-        { type: "subtext", content: "Integration begins with reflection." },
+        { type: "headline", content: "You do not need to start over." },
+        {
+          type: "subtext",
+          content: "You can evolve from where you are.",
+          variant: "multi_line",
+        },
+        {
+          type: "subtext",
+          content: "{{milestone_insight}}",
+          variant: "multi_line",
+          visibility_condition: "milestone_insight",
+          style: { fontSize: "16px", color: "#bfa58a", marginBottom: "16px" },
+        },
+        {
+          type: "choice_card",
+          id: "evolution_path",
+          selection_mode: "manual",
+          options: [
+            {
+              id: "deepen",
+              title: "Deepen",
+              description: "Strengthen what is already growing.",
+            },
+            {
+              id: "refine",
+              title: "Refine",
+              description: "Adjust the path for where you are now.",
+            },
+            {
+              id: "transcend",
+              title: "Transcend",
+              description: "Move into a new horizon of practice.",
+            },
+            {
+              id: "maintenance",
+              title: "Steady Continuity",
+              description: "Stay in gentle rhythm without added intensity.",
+            },
+            {
+              id: "pause",
+              title: "Pause with Dignity",
+              description: "Rest here. KalpX will be ready when you return.",
+            },
+          ],
+        },
         {
           type: "primary_button",
-          label: "Begin Again →",
+          label: "Continue My Path →",
+          validate: "evolution_path",
           action: {
-            type: "navigate",
-            target: {
-              container_id: "choice_stack",
-              state_id: "mode_toggle",
-            },
+            type: "submit",
+            payload: { type: "checkpoint_submit" },
           },
           style: "gold",
         },
       ],
-      actions: { primary: "restart_cycle", secondary: "view_insights" },
+      actions: { primary: "evolve_cycle", secondary: "pause_cycle" },
     },
 
     re_entry_portal: {
@@ -124,20 +181,21 @@ export const CompanionDashboardContainer = {
 
       dashboard_config: {
         status_messages: {
-          completed: "Day Sealed",
-          start: "Begins Today",
-          milestone: "Milestone Reached",
-          near_end: "Almost There",
-          default: "Continue Journey",
+          completed: "Today's practice is sealed",
+          start: "A new day of sadhana begins",
+          milestone: "Your rhythm is deepening",
+          near_end: "The final days of this cycle — stay steady",
+          default: "Continue your practice",
         },
         day_label: "Day {{day_number}}",
         journey_summary:
-          "Your {{total_days}}-day practice journey starts today — {{days_remaining}} sessions remaining",
+          "Day {{day_number}} of {{total_days}} — same mantra, same practice, same intention. The repetition is the path.",
         seal_button_labels: {
-          ready: "Seal Day & Advance →",
-          not_ready: "Dev: Force Seal Day →",
+          ready: "Complete Day →",
+          not_ready: "Complete your practice first",
         },
-        instruction_text: "Click on any card to start your session.",
+        instruction_text:
+          "Tap any card to begin. Even one practice today deepens your Samskara.",
       },
 
       blocks: [
@@ -169,9 +227,9 @@ export const CompanionDashboardContainer = {
           type: "practice_card",
           id: "practice_chant",
           title: "Mantra",
-          description: "{{mantra_text}}",
+          description: "{{card_mantra_title}}",
           meta: "{{practice_chant_meta}}",
-          thumbnail: "/assets/dash_mantra.png",
+          thumbnail: "/assets/dash_mantra.svg",
           dashboard_variant: true,
           icon: "fas fa-om",
           action_label: "Start →",
@@ -198,7 +256,7 @@ export const CompanionDashboardContainer = {
           id: "practice_embody",
           title: "Sankalp",
           description: "{{sankalp_text}}",
-          thumbnail: "/assets/dash_sankalp.png",
+          thumbnail: "/assets/dash_sankalp.svg",
           dashboard_variant: true,
           icon: "fas fa-fire",
           action_label: "I Embody This →",
@@ -220,14 +278,21 @@ export const CompanionDashboardContainer = {
           title: "Mindful Action",
           description: "{{practice_title}}",
           meta: "{{practice_meta}}",
-          thumbnail: "/assets/dash_action.png",
+          thumbnail: "/assets/dash_action.svg",
           dashboard_variant: true,
           icon: "fas fa-mountain",
-          action_label: "Mark Focus Complete →",
+          action_label: "Begin Practice →",
           allow_repeat: true,
           info_action: {
             type: "view_info",
             payload: { type: "practice" },
+          },
+          action: {
+            type: "navigate",
+            target: {
+              container_id: "practice_runner",
+              state_id: "practice_step_runner",
+            },
           },
         },
         // Bottom Actions
@@ -236,11 +301,7 @@ export const CompanionDashboardContainer = {
           label: "I Feel Triggered",
           style: "gold",
           action: {
-            type: "navigate",
-            target: {
-              container_id: "awareness_trigger",
-              state_id: "breath_reset",
-            },
+            type: "initiate_trigger",
           },
           position: "footer_actions",
           variant: "trigger_entry",
@@ -346,40 +407,29 @@ export const ChoiceStackContainer = {
       blocks: [
         {
           type: "headline",
-          content: "Choose your cycle length.",
+          content: "Your path includes two reflection points",
           position: "header",
         },
         {
           type: "subtext",
-          content: "Short focus or sustained shift.",
+          content:
+            "A 14-day journey with a gentle midpoint reflection on Day 7 and a deeper evolution reflection on Day 14.",
           position: "header",
         },
         {
-          type: "choice_card",
-          selection_mode: "single_auto_advance",
-          options: [
-            {
-              id: "7_day",
-              title: "7-Day Cycle",
-              description: "Focused correction. Rapid reset.",
+          type: "primary_button",
+          label: "Begin My 14-Day Journey →",
+          action: {
+            type: "submit",
+            payload: { type: "cycle_initiation", cycle_length: 14 },
+            target: {
+              container_id: "choice_stack",
+              state_id: "discipline_select",
             },
-            {
-              id: "14_day",
-              title: "14-Day Cycle",
-              description: "Deeper conditioning. Structural shift.",
-            },
-          ],
+          },
+          style: "gold",
         },
       ],
-      on_select: {
-        default: {
-          type: "navigate",
-          target: {
-            container_id: "choice_stack",
-            state_id: "discipline_select",
-          },
-        },
-      },
     },
 
     // 2️⃣ DISCIPLINE SELECT (this replaces scan_focus)
@@ -406,47 +456,81 @@ export const ChoiceStackContainer = {
           type: "choice_card",
           id: "scan_focus",
           selection_mode: "manual",
-          variant: "premium-grid",
+          variant: "premium-grid discipline-grid",
           options: [
             {
-              id: "career",
-              title: "Career",
-              icon: "/assets/career1.png",
-              tags: ["Clarity", "Growth"],
+              id: "career_focus",
+              title: "Career & Focus",
+              icon: "/assets/career1.svg",
+              tags: ["Clarity", "Discipline"],
               description:
-                "Career is not just about jobs or success. In Sanatan terms, it is deeply connected to:",
+                "Career and focus are rooted in Sanatan wisdom through:",
               breakdown: [
                 {
                   term: "Buddhi",
                   definition: "clear intellect",
-                  icon: "/assets/buddhi.png",
+                  icon: "/assets/buddhi.svg",
                 },
                 {
                   term: "Viveka",
                   definition: "right discernment",
-                  icon: "/assets/viveka.png",
+                  icon: "/assets/viveka.svg",
                 },
                 {
                   term: "Tejas",
                   definition: "confidence and radiance",
-                  icon: "/assets/tejas.png",
+                  icon: "/assets/tejas.svg",
                 },
                 {
                   term: "Shakti",
                   definition: "ability to act",
-                  icon: "/assets/shakthi.png",
+                  icon: "/assets/shakthi.svg",
                 },
                 {
-                  term: "Dharma",
-                  definition: "right direction in life",
-                  icon: "/assets/dharma.png",
+                  term: "Ekagrata",
+                  definition: "single-pointed focus",
+                  icon: "/assets/dharma.svg",
                 },
               ],
             },
             {
-              id: "relationship",
-              title: "Relationship",
-              icon: "/assets/relationship.png",
+              id: "health",
+              title: "Health & Wellbeing",
+              icon: "/assets/health.svg",
+              tags: ["Vitality", "Balance"],
+              description: "Health in Sanatan Dharma is tied to:",
+              breakdown: [
+                {
+                  term: "Prana",
+                  definition: "life force",
+                  icon: "/assets/health_1.svg",
+                },
+                {
+                  term: "Ojas",
+                  definition: "deep vitality and reserve",
+                  icon: "/assets/health_2.svg",
+                },
+                {
+                  term: "Tejas",
+                  definition: "metabolic fire and brightness",
+                  icon: "/assets/health_3.svg",
+                },
+                {
+                  term: "Sharira dharma",
+                  definition: "right relationship with the body",
+                  icon: "/assets/health_4.svg",
+                },
+                {
+                  term: "Arogya",
+                  definition: "wholeness and healing",
+                  icon: "/assets/health_5.svg",
+                },
+              ],
+            },
+            {
+              id: "relationships",
+              title: "Relationships",
+              icon: "/assets/relationship.svg",
               tags: ["Connection", "Trust"],
               description:
                 "Relationships in Sanatan Dharma are not only social bonds. They are linked to:",
@@ -454,102 +538,68 @@ export const ChoiceStackContainer = {
                 {
                   term: "Prema",
                   definition: "sacred love",
-                  icon: "/assets/relation_1.png",
+                  icon: "/assets/relation_1.svg",
                 },
                 {
                   term: "Karuna",
                   definition: "compassion",
-                  icon: "/assets/relation_2.png",
+                  icon: "/assets/relation_2.svg",
                 },
                 {
                   term: "Kshama",
                   definition: "forgiveness",
-                  icon: "/assets/relation_3.png",
+                  icon: "/assets/relation_3.svg",
                 },
                 {
                   term: "Hridaya shuddhi",
                   definition: "purification of the heart",
-                  icon: "/assets/relation_4.png",
+                  icon: "/assets/relation_4.svg",
                 },
                 {
                   term: "Sambandha",
                   definition: "right relationship",
-                  icon: "/assets/relation_5.png",
+                  icon: "/assets/relation_5.svg",
                 },
               ],
             },
             {
-              id: "health",
-              title: "Health",
-              icon: "/assets/health.png",
-              tags: ["Balance", "Energy"],
-              description: "Health in Sanatan Dharma is tied to:",
-              breakdown: [
-                {
-                  term: "Prana",
-                  definition: "life force",
-                  icon: "/assets/health_1.png",
-                },
-                {
-                  term: "Ojas",
-                  definition: "deep vitality and reserve",
-                  icon: "/assets/health_2.png",
-                },
-                {
-                  term: "Tejas",
-                  definition: "metabolic fire and brightness",
-                  icon: "/assets/health_3.png",
-                },
-                {
-                  term: "Sharira dharma",
-                  definition: "right relationship with the body",
-                  icon: "/assets/health_4.png",
-                },
-                {
-                  term: "Arogya",
-                  definition: "wholeness and healing",
-                  icon: "/assets/health_5.png",
-                },
-              ],
-            },
-            {
-              id: "wealth",
-              title: "Wealth",
-              icon: "/assets/wealth.png",
-              tags: ["Stability", "Habits"],
+              id: "spiritual_growth",
+              title: "Spiritual Growth",
+              icon: "/assets/spiritual-growth.svg",
+              tags: ["Devotion", "Awareness"],
               description:
-                "Wealth in Sanatan Dharma is not only money. It is connected to:",
+                "Spiritual growth in Sanatan Dharma is the journey toward the Self through:",
               breakdown: [
                 {
-                  term: "Lakshmi",
-                  definition: "auspicious abundance",
-                  icon: "/assets/wealth_1.png",
+                  term: "Bhakti",
+                  definition: "devotion and love",
+                  icon: "/assets/wealth_1.svg",
                 },
                 {
-                  term: "Pushti",
-                  definition: "nourishment",
-                  icon: "/assets/wealth_3.png",
+                  term: "Viveka",
+                  definition: "discernment of real and unreal",
+                  icon: "/assets/viveka.svg",
                 },
                 {
-                  term: "Rakshana",
-                  definition: "preservation",
-                  icon: "/assets/wealth_4.png",
+                  term: "Vairagya",
+                  definition: "detachment from the transient",
+                  icon: "/assets/wealth_2.svg",
                 },
                 {
                   term: "Santosha",
-                  definition: "contentment",
-                  icon: "/assets/wealth_2.png",
+                  definition: "contentment and gratitude",
+                  icon: "/assets/wealth_3.svg",
                 },
                 {
-                  term: "Dharma of resources",
-                  definition:
-                    "right relationship to what one receives and holds",
-                  icon: "/assets/wealth_5.png",
+                  term: "Shraddha",
+                  definition: "faith rooted in experience",
+                  icon: "/assets/wealth_4.svg",
                 },
               ],
             },
           ],
         },
+
         {
           type: "primary_button",
           label: "Let’s Begin →",
@@ -567,8 +617,16 @@ export const ChoiceStackContainer = {
         },
         {
           type: "subtext",
+          content: "Return to start",
+          variant: "link",
+          action: { type: "return_to_start" },
+          position: "footer",
+          style: { fontSize: "14px", marginTop: "4px" },
+        },
+        {
+          type: "subtext",
           content:
-            "Your choice helps KalpX understand where you are today,so the guidance can be truly personal.",
+            "Your choice helps KalpX understand where you are today, so the guidance can be truly personal.",
           variant: "small",
           position: "footer",
         },
@@ -652,7 +710,7 @@ export const ChoiceStackContainer = {
         {
           id: "depth_lotus_top",
           type: "image",
-          url: "/assets/level_lotus.png",
+          url: "/assets/level_lotus.svg",
           style: {
             width: "212px",
             height: "68px",
@@ -688,7 +746,7 @@ export const ChoiceStackContainer = {
               label: "Easy",
               description:
                 "Simple, gentle practices to help you begin. Perfect for easing into your routine.",
-
+              icon: "/assets/beginner.svg",
               label_color: "#A2A751",
             },
             {
@@ -697,7 +755,7 @@ export const ChoiceStackContainer = {
               label: "Balanced",
               description:
                 "A balanced level to build focus and consistency. Ideal when you're ready to go a little deeper.",
-
+              icon: "/assets/intermediate.svg",
               label_color: "#D9A557",
             },
             {
@@ -706,7 +764,7 @@ export const ChoiceStackContainer = {
               label: "Deep",
               description:
                 "More immersive practices for deeper transformation. For when you feel ready to commit more fully.",
-
+              icon: "/assets/advanced.svg",
               label_color: "#C57457",
             },
           ],
@@ -729,7 +787,7 @@ export const ChoiceStackContainer = {
         {
           type: "subtext",
           content:
-            "KalpX will guide you based on your level. You can adjust anytime as you grow",
+            "Depth is about fit, not worth. Choose what matches your life right now.",
           variant: "small_centered",
           position: "footer",
         },
@@ -946,7 +1004,7 @@ export const ComposerContainer = {
   },
 };
 
-export const LockRitualOverlayContainer = {
+export const LockRitualContainer = {
   container_id: "lock_ritual_overlay",
 
   states: {
@@ -967,16 +1025,17 @@ export const LockRitualOverlayContainer = {
       blocks: [
         {
           type: "micro_label",
-          content: "FINALIZE STRUCTURE",
+          content: "COMMIT TO YOUR PATH",
           style: "uppercase_subtle",
         },
         {
           type: "headline",
-          content: "Hold to lock your cycle.",
+          content: "Hold to seal your sadhana.",
         },
         {
           type: "subtext",
-          content: "Commit to this structure for the selected duration.",
+          content:
+            "This is your commitment to yourself — for the next {{total_days}} days.",
         },
         {
           type: "hold_button",
@@ -992,16 +1051,13 @@ export const LockRitualOverlayContainer = {
             },
           },
           on_complete: {
-            type: "navigate",
-            target: {
-              container_id: "insight_summary",
-              state_id: "path_reveal",
-            },
+            type: "generate_companion",
           },
         },
         {
           type: "helper_text",
-          content: "Consistency shapes who you become.",
+          content:
+            "Abhyasa (consistent practice) and Vairagya (letting go) — the two wings of transformation.",
         },
       ],
     },
@@ -1311,7 +1367,7 @@ export const RoutineLockedContainer = {
         {
           type: "subtext",
           variant: "link",
-          content: "Return to Dashboard",
+          content: "Return to Mitra Home",
           action: {
             type: "navigate",
             target: {
@@ -1366,6 +1422,20 @@ export const PracticeRunnerContainer = {
           content:
             "You can always begin with a smaller count and build gradually.",
         },
+        {
+          type: "subtext",
+          variant: "link",
+          content: "Return to Mitra Home",
+          action: {
+            type: "navigate",
+            target: {
+              container_id: "companion_dashboard",
+              state_id: "day_active",
+            },
+          },
+          position: "footer",
+          style: { fontSize: "14px", marginTop: "10px" },
+        },
       ],
     },
     // 0.5️⃣ MANTRA PREPARATION SCREEN
@@ -1379,11 +1449,10 @@ export const PracticeRunnerContainer = {
           "Let your mind settle...",
           "Chant with devotion and awareness...",
           "Offer yourself completely...",
-          "Let this mantra work within you...",
-          "transforming you from within.",
+          "Let this mantra transform you from within.",
         ],
-        audio_src: "/sounds/mantra_relax.mp4",
-        timings: [0, 3, 6, 9, 12, 15, 18],
+        audio_src: "/sounds/Audio_Be_still.mp4",
+        timings: [0, 2, 4, 6, 9, 14],
       },
 
       on_complete: {
@@ -1406,13 +1475,13 @@ export const PracticeRunnerContainer = {
 
       blocks: [
         {
+          type: "rep_counter",
+          total: "{{reps_total}}",
+        },
+        {
           type: "mantra_display",
           text_key: "mantra_text",
           devanagari_key: "mantra_devanagari",
-        },
-        {
-          type: "rep_counter",
-          total: "{{reps_total}}",
         },
         { type: "audio_player" },
       ],
@@ -1456,12 +1525,12 @@ export const PracticeRunnerContainer = {
       feedback_config: {
         slow_threshold: 3.0,
         fast_feedback: {
-          title: "Flow Check",
+          title: "A Gentle Reflection",
           message:
-            "You completed this quite fast. Did you really feel the vibration of every mantra within?",
-          sub: "True power comes from feeling, not just counting. Try to slow down and savor every syllable next time.",
+            "You completed this quite quickly. Did each mantra truly resonate within you?",
+          sub: "True power comes from feeling, not just counting. Next time, let every syllable settle into your being.",
           recommendRepeat: true,
-          retry_cta: "Take a breath. Try one more time, slower.",
+          retry_cta: "Take a breath. Try once more, slowly and mindfully.",
         },
         slow_feedback: {
           title: "Soulful Rhythm",
@@ -1478,7 +1547,7 @@ export const PracticeRunnerContainer = {
         reflection_label: "Session Reflection",
         points: ["Mind cleared", "Stability reinforced", "Inner calm expanded"],
         repeat_label: "Repeat it again",
-        dashboard_label: "Return to Dashboard",
+        dashboard_label: "Return to Mitra Home",
       },
 
       blocks: [
@@ -1515,7 +1584,7 @@ export const PracticeRunnerContainer = {
           type: "subtext",
           variant: "centered",
           content:
-            "<div style='display: flex; flex-direction: column; align-items: flex-start; gap: 16px; width: fit-content; margin: 0 auto; color: #615247; padding-top: 20px;'>\n  <div style='display: flex; align-items: center; gap: 16px;'> <span style=\"font-size: 18px; font-weight: 500; letter-spacing: 0.2px;\">✨ Mind cleared</span></div>\n  <div style='display: flex; align-items: center; gap: 16px;'><span style=\"font-size: 18px; font-weight: 500; letter-spacing: 0.2px;\">✨ Stability reinforced</span></div>\n  <div style='display: flex; align-items: center; gap: 16px;'> <span style=\"font-size: 18px; font-weight: 500; letter-spacing: 0.2px;\">✨ Inner calm expanded</span></div>\n</div>",
+            "<div style='display: flex; flex-direction: column; align-items: flex-start; gap: 16px; width: fit-content; margin: 0 auto; color: #615247; padding-top: 20px;'>\n  <div style='display: flex; align-items: center; gap: 16px;'> <span style=\"font-size: 18px; font-weight: 500; letter-spacing: 0.2px;\">Mind cleared</span></div>\n  <div style='display: flex; align-items: center; gap: 16px;'><span style=\"font-size: 18px; font-weight: 500; letter-spacing: 0.2px;\">Stability reinforced</span></div>\n  <div style='display: flex; align-items: center; gap: 16px;'> <span style=\"font-size: 18px; font-weight: 500; letter-spacing: 0.2px;\">Inner calm expanded</span></div>\n</div>",
         },
         {
           type: "primary_button",
@@ -1532,7 +1601,7 @@ export const PracticeRunnerContainer = {
         },
         {
           type: "primary_button",
-          label: "Return to Dashboard",
+          label: "Return to Mitra Home",
           style: "gold",
           action: {
             type: "submit",
@@ -1649,19 +1718,20 @@ export const PracticeRunnerContainer = {
             },
           },
         },
-        // {
-        //   type: "subtext",
-        //   content: "Try another way",
-        //   variant: "link",
-        //   action: { type: "back" },
-        //   style: {
-        //     fontSize: "16px",
-        //     opacity: "0.5",
-        //     textDecoration: "underline",
-        //     color: "#5C5648",
-        //     marginTop: "20px",
-        //   },
-        // },
+        {
+          type: "subtext",
+          variant: "link",
+          content: "Return to Mitra Home",
+          action: {
+            type: "navigate",
+            target: {
+              container_id: "companion_dashboard",
+              state_id: "day_active",
+            },
+          },
+          position: "footer",
+          style: { fontSize: "14px", marginTop: "10px" },
+        },
       ],
     },
 
@@ -1674,20 +1744,20 @@ export const PracticeRunnerContainer = {
         backgroundImage: "/assets/mantra3.png",
       },
       completion_config: {
-        headline: "Sankalp Finished.",
+        headline: "Your Sankalp is Alive.",
         subtext:
-          "Your Sankalp is done for today. Your focus is anchored within.\nA step closer to your higher self.",
+          "Your sankalp is now alive in you. Carry it gently through your day.\nLet it guide your choices, words, and pauses.",
         points: [
-          { label: "Mind\nCentered", icon: "/assets/sankalp_centered.png" },
-          { label: "Inner\nPeace", icon: "/assets/sankalp_inner_peace.png" },
+          { label: "Mind\nCentered", icon: "/assets/sankalp_centered.svg" },
+          { label: "Inner\nPeace", icon: "/assets/sankalp_inner_peace.svg" },
         ],
         repeat_label: "Repeat it again",
-        dashboard_label: "Return to Dashboard",
+        dashboard_label: "Return to Mitra Home",
       },
       blocks: [
         {
           type: "headline",
-          content: "Sankalp Finished.",
+          content: "Your Sankalp is Alive.",
           style: {
             fontFamily: "'Roboto Serif', serif !important",
             fontSize: "34px",
@@ -1701,7 +1771,7 @@ export const PracticeRunnerContainer = {
         {
           type: "subtext",
           content:
-            "Your Sankalp is done for today. Your focus is anchored within.\nA step closer to your higher self.",
+            "Your sankalp is now alive in you. Carry it gently through your day.\nLet it guide your choices, words, and pauses.",
           style: {
             fontSize: "17px",
             color: "#8C8881",
@@ -1713,9 +1783,18 @@ export const PracticeRunnerContainer = {
             whiteSpace: "pre-line",
           },
         },
+        // How to live this sankalp — PROMINENT after activation
+        {
+          id: "sankalp_how_to_live_block",
+          type: "subtext",
+          content: "",
+          variant: "sankalp_living",
+          label: "How to carry this through your day",
+          position: "content",
+        },
         {
           type: "lotus_logo",
-          style: { height: "240px", marginBottom: "40px" },
+          style: { height: "200px", marginBottom: "24px" },
         },
         {
           type: "primary_button",
@@ -1732,7 +1811,7 @@ export const PracticeRunnerContainer = {
         },
         {
           type: "primary_button",
-          label: "Return to Dashboard",
+          label: "Return to Mitra Home",
           action: {
             type: "submit",
             payload: { practiceId: "practice_embody", completed: true },
@@ -1829,7 +1908,7 @@ export const PracticeRunnerContainer = {
         },
         {
           type: "primary_button",
-          label: "Return to Dashboard",
+          label: "Return to Mitra Home",
           action: {
             type: "submit",
             payload: { practiceId: "practice_act", completed: true },
@@ -1896,7 +1975,7 @@ export const PracticeRunnerContainer = {
         },
         {
           type: "primary_button",
-          label: "Return to Dashboard",
+          label: "Return to Mitra Home",
           action: {
             type: "submit",
             payload: { practiceId: "practice_act", completed: true },
@@ -1919,10 +1998,10 @@ export const PracticeRunnerContainer = {
         subtitle: "The world can wait {{duration}}.",
         orb_label: "Return to the moment",
         selection_title: "How long will you pause?",
-        begin_button: "Begin Practice",
+        begin_button: "Begin",
         selection_hint: "Choose your duration to begin",
-        cancel_button: "Cancel Practice",
-        dashboard_button: "Return to Dashboard",
+        cancel_button: "End Practice",
+        dashboard_button: "Return to Mitra Home",
         default_steps: [
           "Place one hand on the belly",
           "Inhale and let belly rise",
@@ -1990,7 +2069,7 @@ export const PracticeRunnerContainer = {
         {
           type: "subtext",
           variant: "link",
-          content: "Return to Dashboard",
+          content: "Return to Mitra Home",
           action: {
             type: "submit",
             payload: { practiceId: "practice_act", completed: true },
@@ -2021,7 +2100,7 @@ export const PracticeRunnerContainer = {
         {
           type: "subtext",
           variant: "link",
-          content: "Cancel Practice",
+          content: "End Practice",
           action: { type: "back" },
           position: "footer",
           style: { fontSize: "14px", marginTop: "10px" },
@@ -2036,10 +2115,10 @@ export const PracticeRunnerContainer = {
         subtitle: "The world can wait {{duration}}.",
         orb_label: "Return to the moment",
         selection_title: "How long will you pause?",
-        begin_button: "Begin Practice",
+        begin_button: "Begin",
         selection_hint: "Choose your duration to begin",
-        cancel_button: "Cancel Practice",
-        dashboard_button: "Return to Dashboard",
+        cancel_button: "End Practice",
+        dashboard_button: "Return to Mitra Home",
         default_steps: [
           "Place one hand on the belly",
           "Inhale and let belly rise",
@@ -2108,7 +2187,7 @@ export const PracticeRunnerContainer = {
         {
           type: "subtext",
           variant: "link",
-          content: "Return to Dashboard",
+          content: "Return to Mitra Home",
           action: {
             type: "submit",
             payload: { quick_practice_completed: true },
@@ -2124,10 +2203,64 @@ export const PracticeRunnerContainer = {
         {
           type: "subtext",
           variant: "link",
-          content: "Cancel Practice",
+          content: "End Practice",
           action: { type: "back" },
           position: "footer",
           style: { fontSize: "14px", marginTop: "10px" },
+        },
+      ],
+    },
+
+    free_mantra_chanting: {
+      variant: "mantra_runner",
+      tone: {
+        theme: "light_sandal",
+        mood: "steady",
+        backgroundImage: "/assets/mantra3.png",
+      },
+      blocks: [
+        {
+          type: "headline",
+          content: "Recite with focus.",
+          position: "header",
+          style: { fontSize: "16px", letterSpacing: "2px", opacity: "0.6" },
+        },
+        {
+          type: "rep_counter",
+          unlimited: true,
+          total: -1,
+        },
+        {
+          type: "mantra_display",
+          text_key: "trigger_mantra_text",
+          devanagari_key: "trigger_mantra_devanagari",
+        },
+        { type: "audio_player" },
+        {
+          type: "primary_button",
+          label: "I feel calmer now",
+          style: "gold",
+          action: {
+            type: "navigate",
+            target: {
+              container_id: "awareness_trigger",
+              state_id: "trigger_reflection",
+            },
+          },
+          position: "footer_actions",
+        },
+        {
+          type: "subtext",
+          variant: "link",
+          content: "Return to Mitra Home",
+          action: {
+            type: "navigate",
+            target: {
+              container_id: "companion_dashboard",
+              state_id: "day_active",
+            },
+          },
+          position: "footer_actions",
         },
       ],
     },
@@ -2141,12 +2274,12 @@ export const PracticeRunnerContainer = {
 
       blocks: [
         {
-          type: "mantra_display",
-          text_key: "mantra_text",
-        },
-        {
           type: "rep_counter",
           total: 3,
+        },
+        {
+          type: "mantra_display",
+          text_key: "mantra_text",
         },
         { type: "audio_player" },
         {
@@ -2157,7 +2290,7 @@ export const PracticeRunnerContainer = {
             type: "navigate",
             target: {
               container_id: "awareness_trigger",
-              state_id: "sensory_grounding",
+              state_id: "trigger_reflection",
             },
           },
           position: "footer",
@@ -2182,12 +2315,12 @@ export const PracticeRunnerContainer = {
 
       blocks: [
         {
-          type: "mantra_display",
-          text_key: "mantra_text",
-        },
-        {
           type: "rep_counter",
           total: 9,
+        },
+        {
+          type: "mantra_display",
+          text_key: "mantra_text",
         },
         { type: "audio_player" },
       ],
@@ -2215,22 +2348,36 @@ export const PracticeRunnerContainer = {
           position: "header",
         },
         {
+          type: "rep_counter",
+          total: 9,
+        },
+        {
           type: "mantra_display",
           text_key: "trigger_mantra_text",
           devanagari_key: "trigger_mantra_devanagari",
         },
-        {
-          type: "rep_counter",
-          total: 9,
-        },
         { type: "audio_player" },
+        {
+          type: "subtext",
+          variant: "link",
+          content: "I feel better now",
+          position: "footer",
+          action: {
+            type: "submit",
+            payload: { type: "trigger_resolved_after_support" },
+            target: {
+              container_id: "companion_dashboard",
+              state_id: "day_active",
+            },
+          },
+        },
       ],
 
       on_complete: {
         type: "navigate",
         target: {
-          container_id: "companion_dashboard",
-          state_id: "day_active",
+          container_id: "awareness_trigger",
+          state_id: "trigger_recheck",
         },
       },
     },
@@ -2319,7 +2466,7 @@ export const EmbodimentChallengeRunnerContainer = {
         },
         {
           type: "primary_button",
-          label: "Return to Day",
+          label: "Return to Mitra Home",
           action: {
             type: "navigate",
             target: {
@@ -2426,7 +2573,7 @@ export const AwarenessTriggerContainer = {
       blocks: [
         {
           type: "headline",
-          content: "Stay present with this moment",
+          content: "Pause and Breathe",
           position: "header",
           style: {
             fontSize: "28px",
@@ -2513,20 +2660,33 @@ export const AwarenessTriggerContainer = {
           ],
         },
         {
+          type: "primary_button",
+          label: "I feel better now",
+          style: "gold",
+          position: "footer",
+          action: {
+            type: "navigate",
+            target: {
+              container_id: "companion_dashboard",
+              state_id: "day_active",
+            },
+          },
+        },
+        {
           type: "subtext",
           variant: "link",
-          content: "Try another way",
+          content: "Try OM Chanting",
           position: "footer",
           style: {
-            marginTop: "30px",
+            marginTop: "10px",
             textDecoration: "underline",
             opacity: "0.8",
           },
           action: {
             type: "navigate",
             target: {
-              container_id: "awareness_trigger",
-              state_id: "trigger_reflection",
+              container_id: "practice_runner",
+              state_id: "free_mantra_chanting",
             },
           },
         },
@@ -2548,17 +2708,20 @@ export const AwarenessTriggerContainer = {
       blocks: [
         {
           type: "headline",
-          content: "How are you feeling after this?",
+          content: "How are you feeling now?",
           position: "header",
         },
         {
           id: "trigger_feeling_selection",
           type: "chip_list",
           options: [
-            { id: "balanced", label: "Balanced & Calm" },
-            { id: "agitated", label: "Still Triggered" },
-            { id: "uncertain", label: "Not Sure" },
+            { id: "balanced", label: "More settled" },
+            { id: "agitated", label: "Still activated" },
+            { id: "uncertain", label: "Not sure yet" },
           ],
+          on_select: {
+            type: "update_trigger_button",
+          },
         },
         {
           type: "subtext",
@@ -2572,11 +2735,26 @@ export const AwarenessTriggerContainer = {
           position: "content",
         },
         {
+          id: "trigger_share_btn",
           type: "primary_button",
           label: "Share →",
           position: "footer",
+          disabled_condition: "is_trigger_share_disabled",
           action: {
             type: "process_trigger_feedback",
+          },
+        },
+        {
+          type: "subtext",
+          variant: "link",
+          content: "Return to Mitra Home",
+          position: "footer",
+          action: {
+            type: "navigate",
+            target: {
+              container_id: "companion_dashboard",
+              state_id: "day_active",
+            },
           },
         },
       ],
@@ -2615,7 +2793,7 @@ export const AwarenessTriggerContainer = {
         },
         {
           type: "subtext",
-          content: "RECOMMENDED FOR YOUR CURRENT STATE:",
+          content: "Recommended for this moment:",
           variant: "micro_label",
           position: "content",
           style: { color: "#C9A84C", letterSpacing: "3px", fontWeight: "800" },
@@ -2649,7 +2827,7 @@ export const AwarenessTriggerContainer = {
         {
           type: "subtext",
           variant: "link",
-          content: "Return to Dashboard",
+          content: "Return to Mitra Home",
           action: {
             type: "navigate",
             target: {
@@ -2693,7 +2871,7 @@ export const AwarenessTriggerContainer = {
         },
         {
           type: "primary_button",
-          label: "Return to Day",
+          label: "Return to Mitra Home",
           position: "footer",
           action: {
             type: "navigate",
@@ -2748,7 +2926,7 @@ export const AwarenessTriggerContainer = {
         },
         {
           type: "primary_button",
-          label: "Return to Day",
+          label: "Return to Mitra Home",
           action: {
             type: "navigate",
             target: {
@@ -2786,6 +2964,52 @@ export const AwarenessTriggerContainer = {
         {
           type: "subtext",
           content: "Return to your anchor.",
+        },
+      ],
+    },
+
+    trigger_recheck: {
+      tone: { theme: "light_sandal", mood: "reflective" },
+
+      blocks: [
+        {
+          type: "headline",
+          content: "How are you feeling now?",
+          position: "header",
+        },
+        {
+          id: "trigger_recheck_selection",
+          type: "chip_list",
+          options: [
+            { id: "balanced", label: "More settled" },
+            { id: "agitated", label: "Still activated" },
+          ],
+          on_select: {
+            type: "update_recheck_button",
+          },
+        },
+        {
+          id: "trigger_recheck_btn",
+          type: "primary_button",
+          label: "Share →",
+          position: "footer",
+          disabled_condition: "is_recheck_btn_disabled",
+          action: {
+            type: "process_trigger_recheck",
+          },
+        },
+        {
+          type: "subtext",
+          variant: "link",
+          content: "Return to Mitra Home",
+          position: "footer",
+          action: {
+            type: "navigate",
+            target: {
+              container_id: "companion_dashboard",
+              state_id: "day_active",
+            },
+          },
         },
       ],
     },
@@ -2896,16 +3120,60 @@ export const InsightsProgressContainer = {
     },
 
     resume_restart_recalibrate: {
-      tone: { theme: "light_sandal", mood: "neutral" },
+      tone: { theme: "light_sandal", mood: "steady" },
       blocks: [
         {
+          type: "headline",
+          content: "Welcome back.",
+          position: "header",
+        },
+        {
+          type: "subtext",
+          content:
+            "We can begin again from here. There is no catching up — only continuing.",
+          variant: "multi_line",
+          position: "header",
+        },
+        {
           type: "choice_card",
-          selection_mode: "single",
+          id: "return_mode",
+          selection_mode: "manual",
           options: [
-            { id: "resume", title: "Resume" },
-            { id: "restart", title: "Restart" },
-            { id: "recalibrate", title: "Recalibrate" },
+            {
+              id: "resume",
+              title: "Resume Gently",
+              description: "Continue from where your rhythm last held.",
+            },
+            {
+              id: "soften",
+              title: "Soften the Path",
+              description: "Begin again with lighter intensity.",
+            },
+            {
+              id: "reflect",
+              title: "Reflect First",
+              description: "Take a moment to notice what has changed.",
+            },
+            {
+              id: "pause",
+              title: "Pause for Now",
+              description: "Rest here. KalpX will be ready when you are.",
+            },
           ],
+        },
+        {
+          type: "primary_button",
+          label: "Continue →",
+          validate: "return_mode",
+          action: {
+            type: "navigate",
+            target: {
+              container_id: "companion_dashboard",
+              state_id: "day_active",
+            },
+          },
+          style: "gold",
+          position: "footer",
         },
       ],
     },
@@ -2986,8 +3254,8 @@ export const InsightsProgressContainer = {
         {
           type: "practice_card",
           purpose: "Practice",
-          title: "{{practice_title}}",
-          description: "{{practice_guidance}}",
+          title: "{{card_ritual_title}}",
+          description: "{{card_ritual_description}}",
           info_action: {
             type: "view_info",
             payload: { type: "practice", read_only: true },
@@ -2996,8 +3264,8 @@ export const InsightsProgressContainer = {
         {
           type: "practice_card",
           purpose: "Sankalp",
-          title: "",
-          description: "{{sankalp_text}}",
+          title: "{{card_sankalpa_title}}",
+          description: "{{card_sankalpa_description}}",
           info_action: {
             type: "view_info",
             payload: { type: "sankalp", read_only: true },
@@ -3006,8 +3274,8 @@ export const InsightsProgressContainer = {
         {
           type: "practice_card",
           purpose: "Mantra",
-          title: "{{mantra_text}}",
-          description: "{{mantra_devanagari}}",
+          title: "{{card_mantra_title}}",
+          description: "{{card_mantra_description}}",
           info_action: {
             type: "view_info",
             payload: { type: "mantra", read_only: true },
@@ -3178,8 +3446,8 @@ export const CycleTransitionsContainer = {
           id: "card_ritual",
           type: "practice_card",
           purpose: "Practice",
-          title: "{{practice_title}}",
-          description: "{{practice_guidance}}",
+          title: "{{card_ritual_title}}",
+          description: "{{card_ritual_description}}",
           meta: "{{practice_meta}}",
           position: "content",
           info_action: {
@@ -3191,8 +3459,8 @@ export const CycleTransitionsContainer = {
           id: "card_sankalpa",
           type: "practice_card",
           purpose: "Sankalp",
-          title: "",
-          description: "{{sankalp_text}}",
+          title: "{{card_sankalpa_title}}",
+          description: "{{card_sankalpa_description}}",
           position: "content",
           info_action: {
             type: "view_info",
@@ -3203,13 +3471,21 @@ export const CycleTransitionsContainer = {
           id: "card_mantra",
           type: "practice_card",
           purpose: "Mantra",
-          title: "{{mantra_text}}",
+          title: "{{card_mantra_title}}",
           description: "{{mantra_devanagari}}",
           position: "content",
           info_action: {
             type: "view_info",
             payload: { type: "mantra", read_only: true },
           },
+        },
+        {
+          id: "ai_reasoning",
+          type: "subtext",
+          content: "",
+          variant: "reasoning",
+          position: "content",
+          label: "Why this was chosen for you",
         },
         {
           type: "primary_button",
@@ -3333,16 +3609,50 @@ export const CycleTransitionsContainer = {
         },
         {
           type: "subtext",
-          content: "{{info.description}}",
-          variant: "italic_multiline",
-          position: "content",
+          content: "{{info.devanagari}}",
+          variant: "italic",
+          position: "header",
+          style: {
+            fontFamily: "'Noto Sans Devanagari', serif",
+            fontSize: "16px",
+            color: "#615247",
+            textAlign: "center",
+            marginTop: "4px",
+            maxHeight: "80px",
+            overflowY: "auto",
+            lineHeight: "1.5",
+          },
         },
         {
           type: "subtext",
-          content: "{{info.steps_text}}",
-          variant: "italic_multiline",
-          position: "content",
+          content: "{{info.iast}}",
+          variant: "small",
+          position: "header",
+          style: {
+            fontSize: "12px",
+            letterSpacing: "0.08em",
+            textTransform: "uppercase",
+            color: "#615247",
+            opacity: "0.6",
+            textAlign: "center",
+            marginTop: "4px",
+            maxHeight: "60px",
+            overflowY: "auto",
+            lineHeight: "1.5",
+          },
         },
+        // {
+        //   type: "subtext",
+        //   content: "{{info.description}}",
+        //   variant: "italic_multiline",
+        //   position: "content",
+        // },
+        // {
+        //   type: "subtext",
+        //   content: "{{info.steps_text}}",
+        //   variant: "italic_multiline",
+        //   position: "content",
+        // },
         {
           type: "subtext",
           content: "{{info.meta}}",
@@ -3377,9 +3687,9 @@ export const CycleTransitionsContainer = {
           type: "subtext",
           variant: "link",
           content: "{{info_back_label}}",
-          action: { type: "back" },
+          action: { type: "info_back" },
           style: "outline",
-          position: "footer",
+          position: "page_bottom",
         },
         {
           type: "subtext",
@@ -3461,14 +3771,7 @@ export const CycleTransitionsContainer = {
           position: "footer",
           visibility_condition: "show_info_start",
         },
-        {
-          type: "subtext",
-          variant: "link",
-          content: "{{info_back_label}}",
-          action: { type: "back" },
-          style: "outline",
-          position: "footer",
-        },
+
         {
           type: "subtext",
           content: "Chant slowly and let the meaning settle within.",
@@ -3494,6 +3797,14 @@ export const CycleTransitionsContainer = {
           visibility_condition: "info_is_practice",
           style: { color: "#000000", fontStyle: "italic", marginTop: "16px" },
         },
+        {
+          type: "subtext",
+          variant: "link",
+          content: "{{info_back_label}}",
+          action: { type: "info_back" },
+          style: "outline",
+          position: "page_bottom",
+        },
       ],
     },
 
@@ -3508,7 +3819,7 @@ export const CycleTransitionsContainer = {
         },
         {
           type: "subtext",
-          content: "Notice your current energy.",
+          content: "How is your energy right now?",
           position: "header",
         },
         {
@@ -3520,25 +3831,25 @@ export const CycleTransitionsContainer = {
             {
               id: "energized",
               title: "Energized",
-              icon: "/assets/quick_1.png",
+              icon: "/assets/quick_1.svg",
               color: "#EAB308",
             },
             {
               id: "balanced",
               title: "Balanced",
-              icon: "/assets/quick_2.png",
+              icon: "/assets/quick_2.svg",
               color: "#10B981",
             },
             {
               id: "agitated",
               title: "Agitated",
-              icon: "/assets/quick_4.png",
+              icon: "/assets/quick_4.svg",
               color: "#8B5CF6",
             },
             {
               id: "drained",
               title: "Drained",
-              icon: "/assets/quick_3.png",
+              icon: "/assets/quick_3.svg",
               color: "#64748B",
             },
           ],
@@ -3566,15 +3877,89 @@ export const CycleTransitionsContainer = {
           style: "gold",
           position: "footer",
         },
+        {
+          type: "subtext",
+          variant: "link",
+          content: "Return to Mitra Home",
+          position: "footer",
+          action: {
+            type: "navigate",
+            target: {
+              container_id: "companion_dashboard",
+              state_id: "day_active",
+            },
+          },
+        },
       ],
     },
+    // ── Pause and Breathe for agitated/drained check-ins ──
+    checkin_breath_reset: {
+      overlay: true,
+      tone: { theme: "light_sandal", mood: "calming" },
+      blocks: [
+        {
+          type: "headline",
+          content: "Pause and Breathe",
+          position: "header",
+          style: { fontSize: "24px", fontWeight: "300", letterSpacing: "1px" },
+        },
+        {
+          type: "subtext",
+          content: "Let's settle your energy before we continue.",
+          position: "header",
+          style: { opacity: "0.7", fontSize: "14px" },
+        },
+        {
+          type: "rep_counter",
+          unlimited: true,
+          total: -1,
+        },
+        {
+          type: "mantra_display",
+          text_key: "trigger_mantra_text",
+          devanagari_key: "trigger_mantra_devanagari",
+        },
+        { type: "audio_player" },
+        {
+          type: "primary_button",
+          label: "I feel better now",
+          style: "gold",
+          action: {
+            type: "track_event",
+            payload: {
+              eventName: "checkin_ack_only",
+              meta: { resolved_at: "breath_reset" },
+            },
+            target: {
+              container_id: "companion_dashboard",
+              state_id: "day_active",
+            },
+          },
+          position: "footer",
+        },
+        {
+          type: "primary_button",
+          label: "Continue to check-in",
+          style: "outline",
+          action: {
+            type: "navigate",
+            target: {
+              container_id: "cycle_transitions",
+              state_id: "quick_checkin_ack",
+            },
+          },
+          position: "footer",
+        },
+      ],
+    },
+
     quick_checkin_ack: {
       overlay: true,
       tone: { theme: "light_sandal", mood: "steady" },
       blocks: [
         {
           type: "headline",
-          content: "Your current prana has been captured.",
+          content: "We're meeting you where you are.",
           position: "header",
         },
         {
@@ -3594,6 +3979,7 @@ export const CycleTransitionsContainer = {
           type: "subtext",
           content: "Tap a card to begin your recommended practice",
           variant: "italic_multiline",
+          visibility_condition: "prana_ack_suggestions",
         },
         {
           type: "card_list",
@@ -3619,7 +4005,7 @@ export const CycleTransitionsContainer = {
         {
           type: "subtext",
           variant: "link",
-          content: "Return to Dashboard",
+          content: "Return to Mitra Home",
           action: {
             type: "navigate",
             target: {
@@ -3835,7 +4221,7 @@ export const CycleTransitionsContainer = {
       blocks: [
         {
           type: "headline",
-          content: "Refine Your Practice 🧘",
+          content: "Refine Your Practice",
           position: "header",
         },
         {
@@ -3932,7 +4318,7 @@ export const CycleTransitionsContainer = {
         },
         {
           type: "primary_button",
-          label: "✨ Alter My Practices",
+          label: "Alter My Practices",
           subtext: "Keep the same focus, get new practices and mantra",
           style: "gold",
           visibility_condition: "can_alter_practices",
@@ -4022,7 +4408,7 @@ export const CycleTransitionsContainer = {
         { type: "textarea", placeholder: "What did you learn today?" },
         {
           type: "primary_button",
-          label: "Seal Day & Advance →",
+          label: "Complete Day →",
           action: { type: "seal_day" },
           position: "footer",
         },
@@ -4137,7 +4523,7 @@ export const CycleTransitionsContainer = {
             {
               text: "<strong>Your Core:</strong>",
               subtext:
-                "• Mantra: {{mantra_text}}\n• Sankalp: {{sankalp_text}}\n• Anchor: Focused Practice",
+                "• Mantra: {{card_mantra_title}}\n• Sankalp: {{sankalp_text}}\n• Anchor: Focused Practice",
             },
           ],
           footer: "The roots remain. Only depth increases.",
@@ -4446,31 +4832,97 @@ export const CycleTransitionsContainer = {
         },
       ],
     },
-    weekly_checkpoint: {
+    low_burden_day: {
       tone: { theme: "light_sandal", mood: "steady" },
       blocks: [
-        // { type: "checkpoint_logo" },
         {
           type: "headline",
-          content: "{{checkpoint_headline}}",
-          style: { fontSize: "28px", fontWeight: "400", color: "#432104" },
-          visibility_condition: "checkpoint_show_feelings",
+          content: "What is still sincere and possible for today?",
+          position: "header",
         },
         {
           type: "subtext",
-          content: "{{checkpoint_subtext}}",
+          content: "Even one anchor today preserves your rhythm.",
           variant: "multi_line",
-          style: { fontSize: "14px", color: "#432104" },
-          visibility_condition: "checkpoint_show_feelings",
+          position: "header",
         },
+        {
+          type: "choice_card",
+          id: "low_burden_choice",
+          selection_mode: "manual",
+          options: [
+            {
+              id: "vow_carry",
+              title: "Carry the Vow Only",
+              description: "Hold your sankalp through the day.",
+            },
+            {
+              id: "one_mantra",
+              title: "One Mantra Anchor",
+              description: "A short chant to stay connected.",
+            },
+            {
+              id: "one_act",
+              title: "One Gentle Act",
+              description: "A small practice that fits your day.",
+            },
+          ],
+        },
+        {
+          type: "subtext",
+          content: "Sincere beginning matters more than doing it all.",
+          variant: "small_centered",
+          position: "footer",
+        },
+        {
+          type: "primary_button",
+          label: "Continue Gently →",
+          validate: "low_burden_choice",
+          action: {
+            type: "navigate",
+            target: {
+              container_id: "companion_dashboard",
+              state_id: "day_active",
+            },
+          },
+          style: "gold",
+          position: "footer",
+        },
+        {
+          type: "subtext",
+          content: "Return to full path",
+          variant: "link",
+          action: { type: "back" },
+          position: "footer",
+          style: { fontSize: "14px", marginTop: "8px" },
+        },
+      ],
+    },
+
+    weekly_checkpoint: {
+      tone: { theme: "light_sandal", mood: "reflective" },
+      blocks: [
+        // {
+        //   type: "headline",
+        //   content: "What feels different after these days?",
+        //   style: { fontSize: "24px", fontWeight: "400", color: "#432104" },
+        //   position: "header",
+        // },
+        // {
+        //   type: "subtext",
+        //   content: "This is not a test. Just notice what is shifting.",
+        //   variant: "multi_line",
+        //   style: { fontSize: "16px", color: "#615247" },
+        //   position: "header",
+        // },
         {
           type: "cycle_reflection",
           data_key: "checkpoint_metrics",
           description_options: [
-            { id: "slight", label: "A little better", icon: "🙂" },
-            { id: "strong", label: "Much better", icon: "⭐" },
-            { id: "same", label: "About the Same", icon: "🙁" },
-            { id: "worse", label: "A bit heavy", icon: "☁️" },
+            { id: "strong", label: "I feel more steady" },
+            { id: "slight", label: "I feel some shift" },
+            { id: "same", label: "I am still finding my way" },
+            { id: "worse", label: "I still feel heaviness" },
           ],
         },
       ],
@@ -4779,10 +5231,25 @@ export const StableScanContainer = {
       },
 
       dynamicMessages: {
+        // New canonical focus keys
+        career_focus: {
+          headline: "Where do you need the most support right now?",
+          subtext:
+            "Pick the area that feels most relevant to your career and focus today.",
+        },
+        spiritual_growth: {
+          headline: "Where does your spiritual practice feel most stuck?",
+          subtext: "Pick the state that resonates. There is no wrong answer.",
+        },
+        relationships: {
+          headline: "How are your relationships feeling lately?",
+          subtext: "Pick the option that feels true for you.",
+        },
+        // Old keys (backward compat for existing journeys)
         career: {
           headline: "What feels difficult in your career right now?",
           subtext:
-            "You're not alone in feeling this way.Let's understand where you are today.",
+            "You're not alone in feeling this way. Let's understand where you are today.",
         },
         relationship: {
           headline: "How are your relationships feeling lately?",
@@ -4834,10 +5301,10 @@ export const StableScanContainer = {
         },
         {
           type: "primary_button",
-          label: "Set My Practice →",
+          label: "Continue →",
           action: {
             type: "submit",
-
+            payload: { type: "set_baseline" },
             target: {
               container_id: "choice_stack",
               state_id: "depth_selection",
@@ -4859,35 +5326,35 @@ export const StableScanContainer = {
       optionsMap: {
         career: [
           {
-            id: "stagnant",
+            id: "Feeling Stuck",
             label: "Feeling Stuck",
             icon: "fas fa-spinner",
             explanation:
               "<b>Feeling Stuck</b> is <b>Stambha</b>—a freeze in movement where your talents feel jammed.\n\nYou don't need a map; you need a 'hammer.' We use the most aggressive <b>Ganesha</b> and <b>Skanda</b> mantras to shatter inertia and restore the flow of momentum.",
           },
           {
-            id: "undervalued",
+            id: "Not Feeling Valued",
             label: "Not Feeling Valued",
             icon: "fas fa-heart-broken",
             explanation:
               "This wound arises when your <b>inner worth</b> isn't mirrored by your office environment.\n\nWe invoke <b>Lakshmi</b> for dignity and <b>Vishnu</b> for stable identity. You shift from seeking validation to radiating <b>Aishvarya</b>—the sovereignty of a soul that knows its worth.",
           },
           {
-            id: "imposter",
+            id: "Low Confidence",
             label: "Low Confidence",
             icon: "fas fa-user-slash",
             explanation:
               "<b>Low Confidence</b> is a shrinking of your <b>Tejas</b> (radiance).\n\nTo stand your ground in a meeting or negotiation, you need to ignite your <b>inner fire</b> and build a 'Fortress of Fearlessness' using the power of <b>Durga</b> and <b>Hanuman</b>.",
           },
           {
-            id: "directionless",
+            id: "No Direction",
             label: "No Direction",
             icon: "fas fa-signs-post",
             explanation:
               "When you face <b>No Direction</b>, your <b>Buddhi</b> (intellect) is clouded by too many voices.\n\nYou need to cut through the fog to find your true <b>Svadharma</b>.\n\nWe invoke the absolute clarity of the <b>Guru</b> and the solar radiance of <b>Saraswati</b> to awaken your inner compass.",
           },
           {
-            id: "work_overwhelm",
+            id: "Too Much Pressure",
             label: "Too Much Pressure",
             icon: "fas fa-tachometer-alt",
             fullWidth: true,
@@ -4897,32 +5364,71 @@ export const StableScanContainer = {
         ],
         relationship: [
           {
-            id: "heavy_heart",
+            id: "Heart Feels Heavy",
             label: "Heart Feels Heavy",
             icon: "fas fa-heart",
             explanation:
               "When the heart feels heavy, the deeper state is often <b>Shoka</b>—grief, weight, or sorrow held in the emotional body.\n\nThis is not just sadness; it is a heart that needs softening, nourishment, and a return to <b>tenderness</b>. We invoke the mothering presence of <b>Parvati</b> and the steady devotion of <b>Rama</b> to lift the weight.",
           },
           {
-            id: "resentful",
+            id: "Holding Anger",
             label: "Holding Anger",
             icon: "fas fa-fire",
             explanation:
               "<b>Holding Anger</b> is a state of <b>Krodha</b> trapped in the heart. The fire is not moving; it becomes friction and separation.\n\nSanatan Dharma addresses this through cooling, purification, and the transformation of reactive heat into the 'Cool Fire' of <b>wisdom</b> and <b>protection</b>.",
           },
           {
-            id: "lonely",
+            id: "Feeling Lonely",
             label: "Feeling Lonely",
             icon: "fas fa-cloud",
             explanation:
               "<b>Loneliness</b> is <b>Viraha</b>—felt separation.\n\nThis state is healed not just by physical company, but by awakening <b>Divine Nearness</b>. We invoke <b>Krishna</b> as the 'Companion of the Heart' to shift from the pain of absence to the joy of presence.",
           },
           {
-            id: "disconnected",
+            id: "Feeling Distant",
             label: "Feeling Distant",
             icon: "fas fa-link-slash",
             explanation:
               "<b>Feeling Distant</b> reflects a withdrawal and a fading of emotional presence (<b>Bheda</b>).\n\nThis state calls for 'Bridge' mantras that reconnect hearts, restore tenderness, and bring back the sacred remembrance of the <b>'Other.'</b>",
+          },
+          {
+            id: "Emotional Pain",
+            label: "Emotional Pain",
+            icon: "fas fa-tint",
+            fullWidth: true,
+            explanation:
+              "<b>Emotional Pain</b> is <b>Hridaya-Vedana</b>—pain lodged in the heart-field.\n\nIt needs more than just a 'fix'; it needs <b>Mothering</b> and <b>Restoration</b>. We use the most protective <b>Durga</b> mantras and the healing frequency of <b>Shiva</b> to release the pain without hardening the heart.",
+          },
+        ],
+        // Alias: new B.3 key "relationships" maps to same options as "relationship"
+        relationships: [
+          {
+            id: "heavy_heart",
+            label: "Heavy Heart",
+            icon: "fas fa-heart-broken",
+            explanation:
+              "<b>Shoka</b> — weight of grief or sadness. We use heart-opening practices to gently restore lightness.",
+          },
+          {
+            id: "resentful",
+            label: "Holding Anger",
+            icon: "fas fa-fire",
+            explanation:
+              "<b>Krodha</b> — trapped heat in the heart. We use cooling and purification practices to release what is held.",
+          },
+          {
+            id: "lonely",
+            label: "Feeling Lonely",
+            icon: "fas fa-user",
+            explanation:
+              "<b>Viraha</b> — felt separation. We use connection practices to remember that belonging begins within.",
+          },
+          {
+            id: "disconnected",
+            label: "Feeling Distant",
+            icon: "fas fa-unlink",
+            explanation:
+              "<b>Bheda</b> — emotional withdrawal. We use awareness practices to bridge the gap between self and others.",
           },
           {
             id: "grieving",
@@ -4930,7 +5436,7 @@ export const StableScanContainer = {
             icon: "fas fa-tint",
             fullWidth: true,
             explanation:
-              "<b>Emotional Pain</b> is <b>Hridaya-Vedana</b>—pain lodged in the heart-field.\n\nIt needs more than just a 'fix'; it needs <b>Mothering</b> and <b>Restoration</b>. We use the most protective <b>Durga</b> mantras and the healing frequency of <b>Shiva</b> to release the pain without hardening the heart.",
+              "<b>Hridaya-Vedana</b> — deep heart ache. We use protective and compassionate traditions to hold the pain gently.",
           },
         ],
         health: [
@@ -4939,69 +5445,69 @@ export const StableScanContainer = {
             label: "Low Energy",
             icon: "fas fa-battery-quarter",
             explanation:
-              "<b>Low Energy</b> is a state of depleted <b>Prana</b> (life force) and reduced <b>Tejas</b> (metabolic fire).\n\nThe system is not broken—it is dimmed. We invoke the solar power of <b>Surya</b> and the dynamic force of <b>Hanuman</b> to rekindle your inner fire and restore vital movement.",
+              "Depleted <b>Prana</b>. We use solar and activating traditions to restore life force and dynamic vitality.",
           },
           {
             id: "burned_out",
-            label: "Very Tired",
+            label: "Burned Out",
             icon: "fas fa-bed",
             explanation:
-              "Being Very Tired is deeper than low energy; it reflects reduced <b>Ojas</b>—your deep reservoir of vitality.\n\nThis state requires the 'Cooling' energy of the <b>Moon</b> and the 'Restorative' energy of <b>Shiva</b> to replenish your reserves without burning out the system further.",
+              "Reduced <b>Ojas</b> — deep reserves are low. We use restorative and cooling traditions to rebuild from within.",
           },
           {
             id: "physically_tense",
-            label: "Body Tightness",
+            label: "Body Tension",
             icon: "fas fa-compress-arrows-alt",
             explanation:
-              "<b>Body Tightness</b> reflects constricted <b>Prana</b> and stored tension. In Sanatan terms, the flow is blocked.\n\nThis state calls for release, breath (<b>Vayu</b>), and softening. We invoke <b>Shiva</b>, the Lord of Dissolution, to help the body let go of its rigid contractions.",
+              "Constricted <b>Prana</b> — flow is blocked. We use releasing breath and gentle movement to restore ease.",
           },
           {
             id: "sluggish",
-            label: "Slow Feeling",
+            label: "Feeling Sluggish",
             icon: "fas fa-walking",
             explanation:
-              "<b>Slow Feeling</b> is a state of increased <b>Tamas</b>—heaviness, sluggishness, and low activation.\n\nTo restore momentum, we use the 'Igniters'—<b>Surya</b>, <b>Hanuman</b>, and <b>Agni</b> (Fire)—to burn away the fog of lethargy and restore your natural drive.",
+              "Increased <b>Tamas</b> — heaviness dominates. We use awakening practices to restore rhythm and lightness.",
           },
           {
             id: "neglectful",
-            label: "Not Caring for Health",
+            label: "Neglecting Body",
             icon: "fas fa-pills",
             fullWidth: true,
             explanation:
-              "This is a state of <b>disconnection</b>—forgetting that the body is a <b>Sacred Vessel</b>.\n\nIn Sanatan Dharma, healing begins with <b>Reverence</b>. We invoke <b>Dhanvantari</b> and the Divine Mother to restore your sense of worth and the discipline of self-care.",
+              "Disconnection from the sacred vessel. We use body-honoring traditions to rebuild the relationship with your physical self.",
           },
         ],
         wealth: [
           {
-            id: "financial_stress",
+            id: "Feeling Financial Pressure",
             label: "Feeling Financial Pressure",
             icon: "fas fa-money-bill-wave",
             explanation:
               "<b>Financial Pressure</b> is not simply a budgeting problem. It often reflects <b>fear</b>, <b>contraction</b>, and <b>survival strain</b>.\n\nIn Sanatan terms, this state needs protection, stability, and the strength to hold responsibility without collapsing.",
           },
           {
-            id: "scarcity",
+            id: "Fear of Not Having Enough",
             label: "Fear of Not Having Enough",
             icon: "fas fa-hand-holding-usd",
             explanation:
               "<b>Fear of Not Having Enough</b> is a state of <b>scarcity consciousness</b>.\n\nThe deeper wound is a weakened trust in the <b>cosmic flow</b>. This state is addressed by shifting the vibration from 'lack' to 'sufficiency.'",
           },
           {
-            id: "instability",
+            id: "Income Feels Unsteady",
             label: "Income Feels Unsteady",
             icon: "fas fa-chart-line",
             explanation:
               "When <b>income feels unsteady</b>, the issue is often interrupted <b>flow</b>.\n\nIn Sanatan understanding, wealth must not only arrive — it must move with <b>rhythm</b> and supporting order. We address this through <b>Lakshmi</b>, <b>Surya</b>, and <b>Kubera</b>.",
           },
           {
-            id: "debt_worry",
+            id: "Carrying Financial Burden",
             label: "Carrying Financial Burden",
             icon: "fas fa-piggy-bank",
             explanation:
               "<b>Carrying Financial Burden</b> is the state of bearing heavy responsibility for others.\n\nThis requires <b>Shakti</b> to carry and <b>Abhaya</b> to not break. We invoke the strength of <b>Hanuman</b> and <b>Durga</b> to support the bearer.",
           },
           {
-            id: "unfulfilled_wealth",
+            id: "Stable but Not Satisfied",
             label: "Stable but Not Satisfied",
             icon: "fas fa-coins",
             fullWidth: true,
@@ -5009,31 +5515,149 @@ export const StableScanContainer = {
               "This is the state of missing <b>Rasa</b> (sweetness) and <b>Santosha</b> (contentment).\n\nWe use <b>heart-opening energy</b> to turn possession into true fulfillment.",
           },
         ],
+        // ── New merged focus: Career & Focus ──
+        career_focus: [
+          {
+            id: "stagnant",
+            label: "Feeling Stuck",
+            icon: "fas fa-spinner",
+            explanation:
+              "<b>Stambha</b> — frozen momentum. We use sacred sound and intention to dissolve inertia and restore forward movement.",
+          },
+          {
+            id: "work_overwhelm",
+            label: "Overwhelmed",
+            icon: "fas fa-cloud",
+            explanation:
+              "<b>Ati-Bhara</b> — carrying too much. We use cooling practices and grounding breath to restore inner steadiness.",
+          },
+          {
+            id: "imposter",
+            label: "Low Confidence",
+            icon: "fas fa-user-secret",
+            explanation:
+              "Dimmed <b>Tejas</b> — inner radiance has quieted. We use practices that reignite self-trust and courageous action.",
+          },
+          {
+            id: "scattered",
+            label: "Can't Focus",
+            icon: "fas fa-random",
+            explanation:
+              "<b>Vikshipta</b> — the scattered mind. We use clarity practices and focused awareness to train single-pointed attention.",
+          },
+          {
+            id: "financial_stress",
+            label: "Financial Stress",
+            icon: "fas fa-money-bill-wave",
+            fullWidth: true,
+            explanation:
+              "<b>Artha-Chinta</b> — concern for material stability. We use abundance traditions and trust-building practices to restore ease.",
+          },
+        ],
+
+        // ── New merged focus: Spiritual Growth ──
+        spiritual_growth: [
+          {
+            id: "practice_discipline",
+            label: "Unsteady Practice",
+            icon: "fas fa-praying-hands",
+            explanation:
+              "<b>Abhyasa</b> is the foundation. We use daily rhythms and vows to build the steadiness your practice needs.",
+          },
+          {
+            id: "spiritual_dryness",
+            label: "Spiritually Dry",
+            icon: "fas fa-tint-slash",
+            explanation:
+              "Rasa has gone quiet. We use devotional and heart-opening practices to restore the felt sense of the sacred.",
+          },
+          {
+            id: "seeking_surrender",
+            label: "Seeking Surrender",
+            icon: "fas fa-hand-holding-heart",
+            explanation:
+              "<b>Ishvara Pranidhana</b> — the path of offering. We use surrender traditions to deepen trust and release control.",
+          },
+          {
+            id: "ungrateful_pattern",
+            label: "Losing Gratitude",
+            icon: "fas fa-eye-slash",
+            explanation:
+              "<b>Pramada</b> — the blessings have become invisible. We use gratitude rituals and awareness practices to see again.",
+          },
+          {
+            id: "seeking_depth",
+            label: "Seeking Depth",
+            icon: "fas fa-om",
+            fullWidth: true,
+            explanation:
+              "<b>Mumukshutva</b> — the longing for more. We use contemplative and self-inquiry traditions to deepen your connection.",
+          },
+        ],
       },
 
       subCategorySliders: {
-        stagnant: [
-          { label: "Motivation", value: 3 },
-          { label: "New Ideas", value: 3 },
+        // Career & Focus
+        "Feeling Stuck": [
+          { label: "Momentum", value: 3 },
+          { label: "Fresh Ideas", value: 3 },
         ],
-        undervalued: [
-          { label: "Feeling Valued", value: 3 },
-          { label: "Appreciation", value: 4 },
+        stagnant: [
+          { label: "Momentum", value: 3 },
+          { label: "Fresh Ideas", value: 3 },
+        ],
+        Overwhelmed: [
+          { label: "Calm", value: 3 },
+          { label: "Control", value: 3 },
+        ],
+        work_overwhelm: [
+          { label: "Calm", value: 3 },
+          { label: "Control", value: 3 },
+        ],
+        "Low Confidence": [
+          { label: "Self-Belief", value: 2 },
+          { label: "Courage", value: 4 },
         ],
         imposter: [
-          { label: "Confidence", value: 2 },
-          { label: "Self-Belief", value: 4 },
+          { label: "Self-Belief", value: 2 },
+          { label: "Courage", value: 4 },
         ],
-        directionless: [
+        "No Direction": [
           { label: "Clear Goals", value: 3 },
           { label: "Motivation", value: 3 },
         ],
-        work_overwhelm: [
+        "Too Much Pressure": [
           { label: "Free Time", value: 2 },
           { label: "Peace of Mind", value: 3 },
         ],
 
+        "Heart Feels Heavy": [
+          { label: "Lightness", value: 2 },
+          { label: "Forgiveness", value: 3 },
+        ],
+        "Holding Anger": [
+          { label: "Letting Go", value: 3 },
+          { label: "Compassion", value: 2 },
+        ],
+        "Feeling Lonely": [
+          { label: "Connection", value: 3 },
+          { label: "Self-Love", value: 4 },
+        ],
+        "Feeling Distant": [
+          { label: "Self-Connection", value: 3 },
+          { label: "Awareness", value: 3 },
+        ],
+        "Emotional Pain": [
+          { label: "Softness", value: 3 },
+          { label: "Acceptance", value: 4 },
+        ],
+
+        // Relationship ID-based sliders (for new B.3 "relationships" key)
         heavy_heart: [
+          { label: "Lightness", value: 2 },
+          { label: "Forgiveness", value: 3 },
+        ],
+        "Heavy Heart": [
           { label: "Lightness", value: 2 },
           { label: "Forgiveness", value: 3 },
         ],
@@ -5046,54 +5670,136 @@ export const StableScanContainer = {
           { label: "Self-Love", value: 4 },
         ],
         disconnected: [
-          { label: "Self-Connection", value: 3 },
-          { label: "Awareness", value: 3 },
+          { label: "Connection", value: 3 },
+          { label: "Presence", value: 3 },
         ],
         grieving: [
           { label: "Softness", value: 3 },
           { label: "Acceptance", value: 4 },
         ],
 
-        low_vitality: [
+        "Low Energy": [
           { label: "Energy Level", value: 3 },
           { label: "Vitality", value: 2 },
         ],
-        burned_out: [
+        "Very Tired": [
           { label: "Nourishment", value: 2 },
           { label: "Restoration", value: 3 },
         ],
-        physically_tense: [
+        "Body Tightness": [
           { label: "Relaxation", value: 3 },
           { label: "Physical Ease", value: 4 },
         ],
-        sluggish: [
+        "Slow Feeling": [
           { label: "Metabolism", value: 3 },
           { label: "Vigor", value: 2 },
+        ],
+        "Not Caring for Health": [
+          { label: "Body Care", value: 3 },
+          { label: "Self-Care", value: 2 },
+        ],
+
+        // Health ID-based sliders (for updated health optionsMap)
+        low_vitality: [
+          { label: "Energy", value: 3 },
+          { label: "Vitality", value: 2 },
+        ],
+        burned_out: [
+          { label: "Rest", value: 3 },
+          { label: "Recovery", value: 2 },
+        ],
+        physically_tense: [
+          { label: "Relaxation", value: 3 },
+          { label: "Ease", value: 3 },
+        ],
+        sluggish: [
+          { label: "Vigor", value: 3 },
+          { label: "Lightness", value: 3 },
         ],
         neglectful: [
           { label: "Body Care", value: 3 },
           { label: "Self-Care", value: 2 },
         ],
 
-        financial_stress: [
+        "Feeling Financial Pressure": [
           { label: "Peace of Mind", value: 2 },
           { label: "Stability", value: 3 },
         ],
-        scarcity: [
+        "Fear of Not Having Enough": [
           { label: "Abundance", value: 2 },
           { label: "Gratitude", value: 3 },
         ],
-        instability: [
+        "Income Feels Unsteady": [
           { label: "Security", value: 2 },
           { label: "Confidence", value: 3 },
         ],
-        debt_worry: [
+        "Carrying Financial Burden": [
           { label: "Relief", value: 2 },
           { label: "Control", value: 3 },
         ],
-        unfulfilled_wealth: [
+        "Stable but Not Satisfied": [
           { label: "Purpose", value: 2 },
           { label: "Joy", value: 3 },
+        ],
+
+        // New: Career & Focus
+        scattered: [
+          { label: "Clarity", value: 3 },
+          { label: "Focus", value: 3 },
+        ],
+        "Can't Focus": [
+          { label: "Clarity", value: 3 },
+          { label: "Focus", value: 3 },
+        ],
+        financial_stress: [
+          { label: "Stability", value: 3 },
+          { label: "Trust", value: 3 },
+        ],
+        "Financial Stress": [
+          { label: "Stability", value: 3 },
+          { label: "Trust", value: 3 },
+        ],
+
+        // New: Spiritual Growth
+        practice_discipline: [
+          { label: "Consistency", value: 3 },
+          { label: "Devotion", value: 3 },
+        ],
+        "Unsteady Practice": [
+          { label: "Consistency", value: 3 },
+          { label: "Devotion", value: 3 },
+        ],
+        spiritual_dryness: [
+          { label: "Aliveness", value: 3 },
+          { label: "Inspiration", value: 3 },
+        ],
+        "Spiritually Dry": [
+          { label: "Aliveness", value: 3 },
+          { label: "Inspiration", value: 3 },
+        ],
+        seeking_surrender: [
+          { label: "Trust", value: 3 },
+          { label: "Letting Go", value: 3 },
+        ],
+        "Seeking Surrender": [
+          { label: "Trust", value: 3 },
+          { label: "Letting Go", value: 3 },
+        ],
+        ungrateful_pattern: [
+          { label: "Appreciation", value: 3 },
+          { label: "Wonder", value: 3 },
+        ],
+        "Losing Gratitude": [
+          { label: "Appreciation", value: 3 },
+          { label: "Wonder", value: 3 },
+        ],
+        seeking_depth: [
+          { label: "Depth", value: 3 },
+          { label: "Surrender", value: 3 },
+        ],
+        "Seeking Depth": [
+          { label: "Depth", value: 3 },
+          { label: "Surrender", value: 3 },
         ],
       },
     },
@@ -5146,8 +5852,8 @@ export const InsightSummaryContainer = {
           // Transition animation — no text needed
         },
         step2: {
-          headline: "Your Personalized Practice is Ready",
-          subtext: "KalpX has curated a 14-day journey to realign your mind, energy, and intention",
+          headline: "The KalpX Way",
+          subtext: "Your personalised 3-practice system.",
           chosen_label: "",
           experience_label: "",
           button_label: "Begin My Practice →",
@@ -5158,8 +5864,8 @@ export const InsightSummaryContainer = {
       on_complete: {
         type: "navigate",
         target: {
-          container_id: "companion_dashboard",
-          state_id: "day_active",
+          container_id: "lock_ritual_overlay",
+          state_id: "hold_to_lock",
         },
       },
     },
@@ -5250,53 +5956,57 @@ export const MASTER_UI_TEXT = {
   info: {
     start_labels: {
       practice_action: "Begin Practice",
-      practice_offering: "I will do this today",
-      mantra: "Begin Chanting → ",
-      sankalpa: "Start My Sankalp",
-      generic: "Start",
-      done: "Mark it as done",
+      practice_offering: "I embrace this today",
+      mantra: "Begin Chanting →",
+      sankalpa: "I Embody This →",
+      generic: "Begin",
+      done: "Practice Complete",
     },
     back_labels: {
-      dashboard: "Return to Dashboard",
+      dashboard: "Return to Mitra Home",
       generic: "Back",
     },
     help_text: {
-      practice: "Start this whenever you are free. This takes {{duration}}.",
+      practice:
+        "Begin when you feel ready. This takes {{duration}}. There is no rush.",
       offering:
-        "We are noticing every step of yours. Your focus and progress are recorded as you journey.",
+        "Every step you take is noticed and honored. Your focus and dedication are building something real.",
     },
   },
   journey: {
-    alter_practices_headline: "Fresh Practices, Same Path.",
-    path_set_headline: "Your Path is Set.",
-    checkpoint_7_tag: "7-DAY CHECKPOINT",
-    checkpoint_14_tag: "14-DAY COMPLETION",
+    alter_practices_headline: "New Practices, Deepened Path.",
+    path_set_headline: "Your Sadhana is Set.",
+    checkpoint_7_tag: "MIDPOINT REFLECTION",
+    checkpoint_14_tag: "CYCLE REFLECTION",
     low_engagement: {
-      midtext: "Try this instead:",
+      midtext: "A gentler approach:",
       bottomtext:
-        "Remember: Progress, not perfection. Every small step counts.",
-      button: "Let’s Reset →",
+        "The path is patient. Even one mindful breath today is a step forward.",
+      button: "Find My Rhythm →",
     },
   },
   trigger: {
     rhythmic: {
-      headline: "This is a rhythmic process.",
+      headline: "This is the rhythm of growth.",
       subtext1:
-        "Regaining balance is not a one-time event, but a cyclic practice.",
-      subtext2: "We are noticing every step of yours.",
-      subtext3: "Stay with it.",
+        "Regaining balance is not a one-time event — it is a cyclic return to your center.",
+      subtext2: "Every return to awareness strengthens your foundation.",
+      subtext3: "Stay with it. The practice is working beneath the surface.",
     },
     balanced: {
-      headline: "Stay in this center.",
-      subtext1: "You have regained your balance.",
-      subtext2: "Maintain this steady presence as you move through your day.",
-      subtext3: "Your commitment to awareness is your greatest strength.",
+      headline: "Rest in this stillness.",
+      subtext1: "You have found your center again.",
+      subtext2:
+        "Carry this steady presence gently through the rest of your day.",
+      subtext3: "Your awareness is your shield and your strength.",
     },
     uncertain: {
-      headline: "Stay with the witness.",
-      subtext1: "It is natural to feel uncertain.",
-      subtext2: "Observe the changes in your inner state without judgment.",
-      subtext3: "Your center remains steady.",
+      headline: "The witness within you is steady.",
+      subtext1:
+        "It is natural to feel uncertain — the mind moves, but the Sakshi (witness) does not.",
+      subtext2:
+        "Observe your inner state without judgment. Let the feeling pass like a cloud.",
+      subtext3: "Your center has not moved. Only your attention wandered.",
     },
   },
 };
@@ -5306,8 +6016,8 @@ export const ContainerRegistry = {
   portal_splash: PortalSplashContainer,
   choice_stack: ChoiceStackContainer,
   composer: ComposerContainer,
-  lock_ritual_overlay: LockRitualOverlayContainer,
-  lock_ritual: LockRitualOverlayContainer,
+  lock_ritual_overlay: LockRitualContainer,
+  lock_ritual: LockRitualContainer,
   routine_builder: RoutineBuilderContainer,
   routine_locked: RoutineLockedContainer,
   companion_dashboard: CompanionDashboardContainer,

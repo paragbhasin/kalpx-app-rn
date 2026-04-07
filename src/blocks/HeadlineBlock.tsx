@@ -16,13 +16,13 @@ const HeadlineBlock: React.FC<HeadlineBlockProps> = ({ block, textColor }) => {
 
 const styles = StyleSheet.create({
   headline: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: '700',
     color: '#432104',
     marginBottom: 12,
-    fontFamily: 'GelicaBold',
+    fontFamily: 'CormorantGaramond_700Bold',
     textAlign: 'center',
-    lineHeight: 34,
+    lineHeight: 28,
   },
 });
 

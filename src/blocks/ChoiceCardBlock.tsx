@@ -261,9 +261,9 @@ const styles = StyleSheet.create({
   },
   card: {
     borderWidth: 1.5,
-    borderColor: 'rgba(212, 160, 23, 0.2)',
-    borderRadius: 20,
-    padding: 18,
+    borderColor: 'rgba(212, 160, 23, 0.3)',
+    borderRadius: 16,
+    padding: 16,
     backgroundColor: '#FFFDF9', // Explicit background for that premium look
     position: 'relative',
     overflow: 'hidden',
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
   },
   gridCard: {
     padding: 12,
-    minHeight: 160,
+    minHeight: 145,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -284,7 +284,7 @@ premiumGridCard: {
   minHeight: 120,
   padding: 16,
   borderWidth: 1.5, 
-  borderColor: 'rgba(212, 160, 23, 0.2)',
+  borderColor: 'rgba(212, 160, 23, 0.3)',
   backgroundColor: '#FFFDF9', 
   shadowColor: "#000",
   shadowOffset: { width: 0, height: 4 },
@@ -398,7 +398,7 @@ premiumGridCard: {
   title: {
     fontSize: 20,
     color: '#432104',
-    fontFamily: 'GelicaBold',
+    fontFamily: 'CormorantGaramond_700Bold',
     flex: 1,
   },
   premiumTitle: {
@@ -430,7 +430,7 @@ premiumGridCard: {
   tagText: {
     fontSize: 13,
     color: '#616161',
-    fontFamily: 'GelicaRegular',
+    fontFamily: 'Inter_400Regular',
   },
   premiumTagText: {
     fontSize: 14,
@@ -442,7 +442,7 @@ premiumGridCard: {
     color: '#432104',
     opacity: 0.8,
     marginTop: 4,
-    fontFamily: 'GelicaRegular',
+    fontFamily: 'Inter_400Regular',
     lineHeight: 22,
   },
   gridDescription: {

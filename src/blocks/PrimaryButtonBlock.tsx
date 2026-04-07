@@ -114,7 +114,7 @@ const PrimaryButtonBlock: React.FC<PrimaryButtonBlockProps> = ({ block }) => {
           style={styles.borderGradient}
         >
           <LinearGradient
-            colors={['#db9928', '#dfac3e']}
+            colors={['#c49a3c', '#d4a853', '#c49a3c']}
             style={styles.innerButton}
           >
             <View style={styles.contentContainer}>
@@ -142,6 +142,11 @@ const styles = StyleSheet.create({
   pulseContainer: {
     marginVertical: 12,
     alignSelf: 'center',
+    shadowColor: '#C49A3C',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 15,
+    elevation: 8,
   },
   borderGradient: {
     padding: 2, // Border thickness
@@ -163,7 +168,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     textAlign: 'center',
-    fontFamily: 'GelicaBold',
+    fontFamily: 'Inter_600SemiBold',
   },
   subtext: {
     color: 'rgba(255, 255, 255, 0.8)',

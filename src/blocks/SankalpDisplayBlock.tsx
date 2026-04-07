@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sankalpText: {
-    fontFamily: 'GelicaMedium',
+    fontFamily: 'Inter_500Medium',
     fontSize: 20,
     color: '#432104',
     textAlign: 'center',
@@ -44,14 +44,14 @@ const styles = StyleSheet.create({
   },
   quoteMark: {
     fontSize: 48,
-    fontFamily: 'GelicaBold',
+    fontFamily: 'CormorantGaramond_700Bold',
     color: '#D9AD43',
     opacity: 0.3,
     marginBottom: -20,
   },
   quoteMarkRight: {
      fontSize: 48,
-    fontFamily: 'GelicaBold',
+    fontFamily: 'CormorantGaramond_700Bold',
     color: '#D9AD43',
     opacity: 0.3,
     marginTop: -20,

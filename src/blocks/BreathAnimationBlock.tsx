@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   cycleText: {
     fontSize: 16,
     color: '#8c8881',
-    fontFamily: 'GelicaMedium',
+    fontFamily: 'Inter_500Medium',
     marginBottom: 40,
   },
   animationArea: {
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   },
   phaseText: {
     fontSize: 28,
-    fontFamily: 'GelicaBold',
+    fontFamily: 'CormorantGaramond_700Bold',
     color: '#432104',
     marginTop: 40,
     height: 40,

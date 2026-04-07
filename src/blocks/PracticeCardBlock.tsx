@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   blurBuffer: {
-    borderRadius: 24,
+    borderRadius: 12,
     overflow: 'hidden',
     borderWidth: 1.5,
     borderColor: 'rgba(217, 165, 87, 0.4)',
@@ -80,26 +80,26 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 18,
     color: '#8C8881',
-    fontFamily: 'GelicaBold',
+    fontFamily: 'CormorantGaramond_700Bold',
     letterSpacing: 0.5,
   },
   title: {
     fontSize: 20,
     color: '#432104',
-    fontFamily: 'GelicaBold',
+    fontFamily: 'CormorantGaramond_700Bold',
     marginBottom: 6,
   },
   description: {
     fontSize: 16,
     color: '#432104',
-    fontFamily: 'GelicaRegular',
+    fontFamily: 'Inter_400Regular',
     lineHeight: 22,
     opacity: 0.9,
   },
   meta: {
     fontSize: 12,
     color: '#D9AD43',
-    fontFamily: 'GelicaBold',
+    fontFamily: 'CormorantGaramond_700Bold',
     marginTop: 8,
     textTransform: 'uppercase',
   }

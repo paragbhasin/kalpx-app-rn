@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 20,
-    fontFamily: 'GelicaBold',
+    fontFamily: 'CormorantGaramond_700Bold',
     color: '#432104',
     marginBottom: 10,
   },
@@ -146,14 +146,14 @@ const styles = StyleSheet.create({
   limitText: {
     fontSize: 14,
     color: '#8c8881',
-    fontFamily: 'GelicaRegular',
+    fontFamily: 'Inter_400Regular',
     minWidth: 35,
   },
   valueText: {
     textAlign: 'center',
     fontSize: 16,
     color: '#432104',
-    fontFamily: 'GelicaRegular',
+    fontFamily: 'Inter_400Regular',
     marginTop: 4,
   },
 });

@@ -21,11 +21,11 @@ const SubtextBlock: React.FC<SubtextBlockProps> = ({ block, textColor }) => {
 
 const styles = StyleSheet.create({
   subtext: {
-    fontSize: 18,
+    fontSize: 14,
     color: 'rgba(67, 33, 4, 0.8)',
-    lineHeight: 26,
+    lineHeight: 20,
     marginBottom: 20,
-    fontFamily: 'GelicaRegular',
+    fontFamily: 'Inter_400Regular',
     textAlign: 'center',
   },
   small: {

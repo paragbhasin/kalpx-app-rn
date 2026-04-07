@@ -15,26 +15,22 @@ import PracticeCardBlock from '../blocks/PracticeCardBlock';
 import SankalpDisplayBlock from '../blocks/SankalpDisplayBlock';
 import BreathAnimationBlock from '../blocks/BreathAnimationBlock';
 
-// Phase 3 blocks — lazy imports to avoid crash if file doesn't exist yet
-const lazyImport = (path: string) => {
-  try { return require(path).default; } catch { return null; }
-};
-
-const RepCounterBlock = lazyImport('../blocks/RepCounterBlock');
-const MantraDisplayBlock = lazyImport('../blocks/MantraDisplayBlock');
-const TimerDisplayBlock = lazyImport('../blocks/TimerDisplayBlock');
-const AudioPlayerBlock = lazyImport('../blocks/AudioPlayerBlock');
-const ChipListBlock = lazyImport('../blocks/ChipListBlock');
-const DiamondDividerBlock = lazyImport('../blocks/DiamondDividerBlock');
-const GroundingListBlock = lazyImport('../blocks/GroundingListBlock');
-const TextareaBlock = lazyImport('../blocks/TextareaBlock');
-const CardListBlock = lazyImport('../blocks/CardListBlock');
-const CompletionCardBlock = lazyImport('../blocks/CompletionCardBlock');
-const PracticeStepsBlock = lazyImport('../blocks/PracticeStepsBlock');
-const ProgressBarBlock = lazyImport('../blocks/ProgressBarBlock');
-const HoldTriggerBlock = lazyImport('../blocks/HoldTriggerBlock');
-const FooterButtonsBlock = lazyImport('../blocks/FooterButtonsBlock');
-const AdditionalItemsSectionBlock = lazyImport('../blocks/AdditionalItemsSectionBlock');
+// Phase 3 blocks
+import RepCounterBlock from '../blocks/RepCounterBlock';
+import MantraDisplayBlock from '../blocks/MantraDisplayBlock';
+import TimerDisplayBlock from '../blocks/TimerDisplayBlock';
+import AudioPlayerBlock from '../blocks/AudioPlayerBlock';
+import ChipListBlock from '../blocks/ChipListBlock';
+import DiamondDividerBlock from '../blocks/DiamondDividerBlock';
+import GroundingListBlock from '../blocks/GroundingListBlock';
+import TextareaBlock from '../blocks/TextareaBlock';
+import CardListBlock from '../blocks/CardListBlock';
+import CompletionCardBlock from '../blocks/CompletionCardBlock';
+import PracticeStepsBlock from '../blocks/PracticeStepsBlock';
+import ProgressBarBlock from '../blocks/ProgressBarBlock';
+import HoldTriggerBlock from '../blocks/HoldTriggerBlock';
+import FooterButtonsBlock from '../blocks/FooterButtonsBlock';
+import AdditionalItemsSectionBlock from '../blocks/AdditionalItemsSectionBlock';
 
 const blockMap: Record<string, React.ComponentType<any>> = {
   // Original 11 blocks
@@ -50,21 +46,22 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   sankalp_display: SankalpDisplayBlock,
   breath_animation: BreathAnimationBlock,
   // Phase 3 blocks (15 new)
-  ...(RepCounterBlock && { rep_counter: RepCounterBlock }),
-  ...(MantraDisplayBlock && { mantra_display: MantraDisplayBlock }),
-  ...(TimerDisplayBlock && { timer_display: TimerDisplayBlock }),
-  ...(AudioPlayerBlock && { audio_player: AudioPlayerBlock }),
-  ...(ChipListBlock && { chip_list: ChipListBlock }),
-  ...(DiamondDividerBlock && { diamond_divider: DiamondDividerBlock }),
-  ...(GroundingListBlock && { grounding_list: GroundingListBlock }),
-  ...(TextareaBlock && { textarea: TextareaBlock }),
+  rep_counter: RepCounterBlock,
+  mantra_display: MantraDisplayBlock,
+  timer_display: TimerDisplayBlock,
+  audio_player: AudioPlayerBlock,
+  chip_list: ChipListBlock,
+  diamond_divider: DiamondDividerBlock,
+  grounding_list: GroundingListBlock,
+  textarea: TextareaBlock,
   ...(CardListBlock && { card_list: CardListBlock }),
-  ...(CompletionCardBlock && { completion_card: CompletionCardBlock }),
-  ...(PracticeStepsBlock && { practice_steps: PracticeStepsBlock }),
-  ...(ProgressBarBlock && { progress_bar: ProgressBarBlock }),
-  ...(HoldTriggerBlock && { hold_trigger: HoldTriggerBlock }),
-  ...(FooterButtonsBlock && { footer_buttons: FooterButtonsBlock }),
-  ...(AdditionalItemsSectionBlock && { additional_items_section: AdditionalItemsSectionBlock }),
+  card_list: CardListBlock,
+  completion_card: CompletionCardBlock,
+  practice_steps: PracticeStepsBlock,
+  progress_bar: ProgressBarBlock,
+  hold_trigger: HoldTriggerBlock,
+  footer_buttons: FooterButtonsBlock,
+  additional_items_section: AdditionalItemsSectionBlock,
 };
 
 interface BlockRendererProps {

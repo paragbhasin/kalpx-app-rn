@@ -1035,7 +1035,7 @@ export default function Home() {
           />
         </View>
         {/* ── Mitra Journey Hero Section ── */}
-        {isLoggedIn && mitraJourneyId ? (
+        {mitraJourneyId ? (
           <TouchableOpacity
             style={{
               marginHorizontal: 10,
@@ -1063,7 +1063,7 @@ export default function Home() {
               </TextComponent>
             </View>
           </TouchableOpacity>
-        ) : isLoggedIn ? (
+        ) : (
           <TouchableOpacity
             style={{
               marginHorizontal: 10,
@@ -1091,7 +1091,7 @@ export default function Home() {
               </TextComponent>
             </View>
           </TouchableOpacity>
-        ) : null}
+        )}
 
         <View
           style={{

@@ -62,6 +62,7 @@ import {
   startMantraPractice,
 } from "./actions";
 import { useScreenStore } from "../../engine/useScreenBridge";
+import api from "../../Networks/axios";
 import styles from "./homestyles";
 
 const { width } = Dimensions.get("window");
@@ -105,6 +106,7 @@ export default function Home() {
   );
   const isLoggedIn = !!user;
   const { setDailyMantras } = usePracticeStore();
+  const [mitraJourneyId, setMitraJourneyId] = useState<string | null>(null);
   const [apiloading, setApiLoading] = useState(false);
   const [classPage, setClassPage] = useState(1);
   const [homeClasses, setHomeClasses] = useState([]);
@@ -170,6 +172,36 @@ export default function Home() {
       }
       setExpandedItemId(null);
     }, []),
+  );
+
+  // ── Mitra Journey Status Check ──
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!isLoggedIn) {
+        setMitraJourneyId(null);
+        return;
+      }
+      const checkJourney = async () => {
+        try {
+          const res = await api.get("mitra/journey/status/");
+          if (res.data?.hasActiveJourney && res.data?.journeyId) {
+            setMitraJourneyId(res.data.journeyId);
+            // Also restore screen state if available
+            const screenState = store.getState().screen;
+            if (!screenState.screenData?.journey_id) {
+              store.dispatch(screenActions.setScreenValue({ key: 'journey_id', value: res.data.journeyId }));
+              store.dispatch(screenActions.setScreenValue({ key: 'day_number', value: res.data.dayNumber || 1 }));
+              if (res.data.focus) store.dispatch(screenActions.setScreenValue({ key: 'scan_focus', value: res.data.focus }));
+            }
+          } else {
+            setMitraJourneyId(null);
+          }
+        } catch (err) {
+          console.debug("[HOME] journey/status check failed:", err.message);
+        }
+      };
+      checkJourney();
+    }, [isLoggedIn]),
   );
 
   useEffect(() => {
@@ -416,21 +448,12 @@ export default function Home() {
     {
       id: "1",
       name: t("categories.sadana"),
-      // trackerData?.active_practices?.length > 0
-      //   ? t("categories.sadana")
-      //   : t("categories.dharma"),
-      // title: trackerData?.active_practices?.length > 0
-      //   ? "SadanaTrackerScreen"
-      //   : "Dharma",
-      title:
-        trackerData?.active_practices?.length > 0
-          ? "TrackerTabs"
-          : "DailyPracticeLogin",
-      // title: trackerData?.active_practices?.length > 0 ? "DailyPracticeList" : "DailyPracticeList",
+      title: "MitraEngine", // Always route to Mitra engine (journey-aware)
       iconType: "image",
       icon: require("../../../assets/routine.png"),
       event_type: "click_dharma_card",
       component: "Dharma-card",
+      isMitra: true, // Flag for special handling in renderCategory
     },
     {
       id: "2",
@@ -764,6 +787,21 @@ export default function Home() {
             },
           });
 
+          // Mitra Engine — journey-aware routing
+          if (item.isMitra) {
+            const screenState = store.getState().screen;
+            const hasJourney = !!screenState.screenData?.journey_id;
+            if (hasJourney) {
+              // Resume existing journey — load dashboard
+              store.dispatch(screenActions.loadScreen({ containerId: 'companion_dashboard', stateId: 'day_active' }));
+            } else {
+              // New user or no journey — start from portal
+              store.dispatch(screenActions.loadScreen({ containerId: 'portal', stateId: 'portal' }));
+            }
+            navigation.navigate("MitraEngine");
+            return;
+          }
+
           navigation.navigate(item.title);
         } catch (error) {
           console.error("Error fetching UUID:", error);
@@ -996,102 +1034,64 @@ export default function Home() {
             }}
           />
         </View>
-        {isLoggedIn && (
-          <View style={{ alignItems: "center" }}>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.streakScrollContainer}
-            >
-              <Card
-                style={styles.streakItem}
-                onPress={() => navigation.navigate("StreakScreen")}
-              >
-                <View style={{ flexDirection: "row" }}>
-                  <Image
-                    source={require("../../../assets/streak1.png")}
-                    style={styles.streakIcon}
-                  />
-                  <TextComponent type="streakSubText" style={styles.count}>
-                    {streakData?.sankalp ?? 0}
-                  </TextComponent>
-                  <TextComponent type="streakSubText" style={styles.streakText}>
-                    {t("streak.sankalp")}
-                  </TextComponent>
-                </View>
-              </Card>
-              <Card
-                style={styles.streakItem}
-                onPress={() => navigation.navigate("StreakScreen")}
-              >
-                <View style={{ flexDirection: "row" }}>
-                  <Image
-                    source={require("../../../assets/streak2.png")}
-                    style={styles.streakIcon}
-                  />
-                  <TextComponent type="streakSubText" style={styles.count}>
-                    {streakData?.mantra ?? 0}
-                  </TextComponent>
-                  <TextComponent type="streakSubText" style={styles.streakText}>
-                    {t("streak.mantra")}
-                  </TextComponent>
-                </View>
-              </Card>
-              <Card
-                style={styles.streakItem}
-                onPress={() => navigation.navigate("StreakScreen")}
-              >
-                <View style={{ flexDirection: "row" }}>
-                  <Image
-                    source={require("../../../assets/streak3.png")}
-                    style={styles.streakIcon}
-                  />
-                  <TextComponent type="streakSubText" style={styles.count}>
-                    {trackerData?.streak_count ?? 0}
-                  </TextComponent>
-                  <TextComponent type="streakSubText" style={styles.streakText}>
-                    {t("streak.DailyPractice")}
-                  </TextComponent>
-                </View>
-              </Card>
-            </ScrollView>
-          </View>
-        )}
-
-        {/* Today's Practice Cards Section */}
-        <ActivePracticeList
-          todayItems={practiceTodayData?.items || []}
-          onMarkSankalpDone={(sankalp) => {
-            setSelectedSankalpForPopup(sankalp);
-            return DoneSankalpCalled(sankalp);
-          }}
-          onMarkMantraDone={(mantra) => {
-            setSelectedMantraForPopup(mantra);
-            return DoneMantraCalled(mantra);
-          }}
-          onMarkPracticeDone={(practice, type) => {
-            setSelectedPracticeForPopup(practice);
-            const payload = {
-              practice_type: type,
-              item_id: practice.id,
-              tz: locationData?.timezone || "Asia/Kolkata",
-              meta: {
-                ui: "daily_card", // or home specific
-              },
-            };
-            dispatch(
-              completeMantra(payload, (res) => {
-                if (res.success) {
-                  if (!isLoggedIn) {
-                    setShowPracticeComplete(true);
-                  } else {
-                    setShowLoginPracticeComplete(true);
-                  }
-                }
-              }),
-            );
-          }}
-        />
+        {/* ── Mitra Journey Hero Section ── */}
+        {isLoggedIn && mitraJourneyId ? (
+          <TouchableOpacity
+            style={{
+              marginHorizontal: 10,
+              marginTop: 10,
+              padding: 20,
+              backgroundColor: '#FDF8EE',
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: '#EDD9A3',
+            }}
+            onPress={() => {
+              store.dispatch(screenActions.loadScreen({ containerId: 'companion_dashboard', stateId: 'day_active' }));
+              navigation.navigate("MitraEngine");
+            }}
+          >
+            <TextComponent type="headerSubBoldText" style={{ color: '#432104', fontSize: 18 }}>
+              {t("home.resumeJourney") || "Resume Your Journey"}
+            </TextComponent>
+            <TextComponent type="cardSubTitleText" style={{ color: '#5C5648', marginTop: 6, fontSize: 14 }}>
+              {t("home.resumeJourneyDesc") || "Continue where you left off with your daily practice."}
+            </TextComponent>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12, alignSelf: 'flex-end' }}>
+              <TextComponent type="boldText" style={{ color: '#D4A017', fontSize: 14 }}>
+                {t("home.continueBtn") || "Continue →"}
+              </TextComponent>
+            </View>
+          </TouchableOpacity>
+        ) : isLoggedIn ? (
+          <TouchableOpacity
+            style={{
+              marginHorizontal: 10,
+              marginTop: 10,
+              padding: 20,
+              backgroundColor: '#FDF8EE',
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: '#EDD9A3',
+            }}
+            onPress={() => {
+              store.dispatch(screenActions.loadScreen({ containerId: 'portal', stateId: 'portal' }));
+              navigation.navigate("MitraEngine");
+            }}
+          >
+            <TextComponent type="headerSubBoldText" style={{ color: '#432104', fontSize: 18 }}>
+              {t("home.beginMitra") || "Begin with KalpX Mitra"}
+            </TextComponent>
+            <TextComponent type="cardSubTitleText" style={{ color: '#5C5648', marginTop: 6, fontSize: 14 }}>
+              {t("home.beginMitraDesc") || "Your personalized guide for daily spiritual practice."}
+            </TextComponent>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 12, alignSelf: 'flex-end' }}>
+              <TextComponent type="boldText" style={{ color: '#D4A017', fontSize: 14 }}>
+                {t("home.beginBtn") || "Begin Your Journey →"}
+              </TextComponent>
+            </View>
+          </TouchableOpacity>
+        ) : null}
 
         <View
           style={{

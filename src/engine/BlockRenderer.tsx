@@ -146,13 +146,18 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block, textColor }) => {
   if (!block) return null;
 
   // 1. Check Visibility
+  // hide_condition: hide this block when the condition field is truthy
+  if (block.hide_condition) {
+    const hideVal = screenData[block.hide_condition];
+    if (hideVal === true || (hideVal && hideVal !== false)) return null;
+  }
   if (block.visibility_condition) {
     const condition = block.visibility_condition;
     const value = screenData[condition];
-    
-    const isVisible = Array.isArray(value) ? value.length > 0 : 
+
+    const isVisible = Array.isArray(value) ? value.length > 0 :
                      typeof value === 'boolean' ? value : !!value;
-    
+
     if (!isVisible) return null;
   }
 

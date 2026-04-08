@@ -17,7 +17,7 @@ export const CLEANUP_FIELDS: Record<string, string[]> = {
     'info_start_help_text',
     'info_is_locked',
   ],
-  runner: ['runner_active_item', '_last_viewed_item', '_active_support_item', 'reps_done'],
+  runner: ['runner_active_item', '_last_viewed_item', '_active_support_item', '_selected_om_audio', 'reps_done'],
   checkin: [
     'current_prana',
     'current_prana_type',
@@ -39,6 +39,7 @@ export const CLEANUP_FIELDS: Record<string, string[]> = {
     'trigger_advice_subtext_3',
     'show_start_trigger_mantra',
     '_active_support_item',
+    '_trigger_support_completed',
   ],
   checkpoint: [
     'checkpoint_decision',

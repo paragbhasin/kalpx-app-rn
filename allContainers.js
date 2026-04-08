@@ -247,7 +247,7 @@ export const CompanionDashboardContainer = {
             type: "navigate",
             target: {
               container_id: "practice_runner",
-              state_id: "mantra_rep_selection",
+              state_id: "mantra_rep_selection", is_core: true,
             },
           },
         },
@@ -268,7 +268,7 @@ export const CompanionDashboardContainer = {
             type: "navigate",
             target: {
               container_id: "practice_runner",
-              state_id: "sankalp_embody",
+              state_id: "sankalp_embody", is_core: true,
             },
           },
         },
@@ -291,7 +291,7 @@ export const CompanionDashboardContainer = {
             type: "navigate",
             target: {
               container_id: "practice_runner",
-              state_id: "practice_step_runner",
+              state_id: "practice_step_runner", is_core: true,
             },
           },
         },
@@ -1527,10 +1527,10 @@ export const PracticeRunnerContainer = {
         fast_feedback: {
           title: "A Gentle Reflection",
           message:
-            "You completed this quite quickly. Did each mantra truly resonate within you?",
-          sub: "True power comes from feeling, not just counting. Next time, let every syllable settle into your being.",
+            "Did each mantra truly resonate within you?",
+          sub: "True power comes from feeling, not just counting. Let every syllable settle into your being.",
           recommendRepeat: true,
-          retry_cta: "Take a breath. Try once more, slowly and mindfully.",
+          retry_cta: "Take a breath and chant slowly and mindfully.",
         },
         slow_feedback: {
           title: "Soulful Rhythm",
@@ -1594,7 +1594,7 @@ export const PracticeRunnerContainer = {
             type: "navigate",
             target: {
               container_id: "practice_runner",
-              state_id: "mantra_rep_selection",
+              state_id: "mantra_rep_selection", is_core: true,
             },
           },
           position: "footer_actions",
@@ -1639,7 +1639,7 @@ export const PracticeRunnerContainer = {
         instruction:
           "Hold here. Breathe once, and let your sankalp anchor within you.",
         action_hint: "Tap the Circle to Embody",
-        om_audio_src: "/sounds/om.mp3",
+        om_audio_src: "/sounds/Om.mp4",
       },
       blocks: [
         // {
@@ -1804,7 +1804,7 @@ export const PracticeRunnerContainer = {
             type: "navigate",
             target: {
               container_id: "practice_runner",
-              state_id: "sankalp_embody",
+              state_id: "sankalp_embody", is_core: true,
             },
           },
           position: "footer_actions",
@@ -1968,7 +1968,7 @@ export const PracticeRunnerContainer = {
             type: "navigate",
             target: {
               container_id: "practice_runner",
-              state_id: "practice_step_runner",
+              state_id: "practice_step_runner", is_core: true,
             },
           },
           position: "footer_actions",
@@ -2009,8 +2009,7 @@ export const PracticeRunnerContainer = {
           "Repeat slowly",
           "Stay mindful of the rhythm",
         ],
-        beep_audio_src: "/sounds/Censor Beep 1.mp3",
-        om_audio_src: "/sounds/om.mp3",
+        om_audio_src: "/sounds/Om.mp4",
       },
       tone: { theme: "light_sandal", mood: "calming" },
       style: {
@@ -2108,6 +2107,35 @@ export const PracticeRunnerContainer = {
       ],
     },
 
+    // Trigger support practice runner — on_complete goes to trigger_recheck
+    trigger_practice_runner: {
+      variant: "sacred_pause",
+      pause_config: {
+        title: "Take one steadying action.",
+        subtitle:
+          "Move through the steps gently. You do not need to force a shift.",
+        orb_label: "Return to the moment",
+        selection_title: "How long will you pause?",
+        begin_button: "Begin",
+        selection_hint: "Choose your duration to begin",
+        cancel_button: "End Practice",
+        dashboard_button: "Return to Mitra Home",
+        default_steps: [
+          "Place one hand on the belly",
+          "Inhale and let belly rise",
+          "Exhale and let belly soften",
+          "Repeat slowly",
+        ],
+      },
+      tone: { theme: "light_sandal", mood: "calming" },
+      on_complete: {
+        type: "set_state",
+        field: "_trigger_support_completed",
+        value: true,
+      },
+      blocks: [],
+    },
+
     quick_practice_step_runner: {
       variant: "sacred_pause",
       pause_config: {
@@ -2126,8 +2154,7 @@ export const PracticeRunnerContainer = {
           "Repeat slowly",
           "Stay mindful of the rhythm",
         ],
-        beep_audio_src: "/sounds/Censor Beep 1.mp3",
-        om_audio_src: "/sounds/om.mp3",
+        om_audio_src: "/sounds/Om.mp4",
       },
       tone: { theme: "light_sandal", mood: "calming" },
       style: {
@@ -2219,12 +2246,18 @@ export const PracticeRunnerContainer = {
         backgroundImage: "/assets/mantra3.png",
       },
       blocks: [
-        {
-          type: "headline",
-          content: "Recite with focus.",
-          position: "header",
-          style: { fontSize: "16px", letterSpacing: "2px", opacity: "0.6" },
-        },
+        // {
+        //   type: "headline",
+        //   content: "Pause before this grows.",
+        //   position: "header",
+        //   style: { fontSize: "16px", letterSpacing: "2px", opacity: "0.6" },
+        // },
+        // {
+        //   type: "subtext",
+        //   content: "You do not need to solve everything right now. Stay here for a few breaths and let the intensity soften first.",
+        //   position: "header",
+        //   style: { fontSize: "14px", opacity: "0.8", marginTop: "4px" },
+        // },
         {
           type: "rep_counter",
           unlimited: true,
@@ -2241,11 +2274,21 @@ export const PracticeRunnerContainer = {
           label: "I feel calmer now",
           style: "gold",
           action: {
-            type: "navigate",
+            type: "submit",
+            payload: { type: "trigger_resolved_after_reset" },
             target: {
-              container_id: "awareness_trigger",
-              state_id: "trigger_reflection",
+              container_id: "companion_dashboard",
+              state_id: "day_active",
             },
+          },
+          position: "footer_actions",
+        },
+        {
+          type: "primary_button",
+          label: "Try another way",
+          style: "outline",
+          action: {
+            type: "try_another_way",
           },
           position: "footer_actions",
         },
@@ -2254,13 +2297,73 @@ export const PracticeRunnerContainer = {
           variant: "link",
           content: "Return to Mitra Home",
           action: {
-            type: "navigate",
+            type: "submit",
+            payload: { type: "trigger_session_abandoned" },
             target: {
               container_id: "companion_dashboard",
               state_id: "day_active",
             },
           },
           position: "footer_actions",
+        },
+      ],
+    },
+
+    // ── Pause and Breathe for agitated/drained check-ins ──
+    checkin_breath_reset: {
+      variant: "mantra_runner",
+      tone: {
+        theme: "light_sandal",
+        mood: "calming",
+        backgroundImage: "/assets/mantra3.png",
+      },
+      blocks: [
+        {
+          type: "headline",
+          content: "Pause and breathe.",
+          position: "header",
+          style: { fontSize: "16px", letterSpacing: "2px", opacity: "0.6" },
+        },
+        {
+          type: "rep_counter",
+          unlimited: true,
+          total: -1,
+        },
+        {
+          type: "mantra_display",
+          text_key: "checkin_mantra_text",
+          devanagari_key: "checkin_mantra_devanagari",
+        },
+        { type: "audio_player", audio_url: "/sounds/Om.mp4" },
+        {
+          type: "primary_button",
+          label: "I feel calmer now",
+          style: "gold",
+          action: {
+            type: "track_event",
+            payload: {
+              eventName: "checkin_breath_reset_completed",
+              meta: { resolved_at: "breath_reset" },
+            },
+            target: {
+              container_id: "companion_dashboard",
+              state_id: "day_active",
+            },
+          },
+          position: "footer",
+        },
+        {
+          type: "primary_button",
+          label: "Continue to check-in",
+          style: "outline",
+          action: {
+            type: "navigate",
+            target: {
+              container_id: "cycle_transitions",
+              state_id: "quick_checkin_ack",
+            },
+          },
+          position: "footer",
         },
       ],
     },
@@ -2334,6 +2437,56 @@ export const PracticeRunnerContainer = {
       },
     },
 
+    // Check-in support mantra runner — dedicated screen for check-in flow
+    // Separate from post_trigger_mantra to avoid cross-flow contamination (REG-015)
+    checkin_support_mantra: {
+      tone: {
+        theme: "light_sandal",
+        mood: "steady",
+        backgroundImage: "/assets/mantra3.png",
+      },
+      blocks: [
+        {
+          type: "headline",
+          content: "Recite with focus.",
+          position: "header",
+          style: { fontSize: "16px", letterSpacing: "2px", opacity: "0.6" },
+        },
+        {
+          type: "rep_counter",
+          total: 9,
+        },
+        {
+          type: "mantra_display",
+          text_key: "checkin_mantra_text",
+          devanagari_key: "checkin_mantra_devanagari",
+        },
+        { type: "audio_player" },
+        {
+          type: "subtext",
+          variant: "link",
+          content: "Return to Mitra Home",
+          position: "footer",
+          action: {
+            type: "navigate",
+            target: {
+              container_id: "companion_dashboard",
+              state_id: "day_active",
+            },
+          },
+          style: { fontSize: "14px", marginTop: "10px" },
+        },
+      ],
+      on_complete: {
+        type: "navigate",
+        target: {
+          container_id: "companion_dashboard",
+          state_id: "day_active",
+        },
+      },
+    },
+
+    // Trigger support mantra runner — for trigger flow only
     post_trigger_mantra: {
       tone: {
         theme: "light_sandal",
@@ -2344,8 +2497,15 @@ export const PracticeRunnerContainer = {
       blocks: [
         {
           type: "headline",
-          content: "Recite with focus.",
+          content: "Stay with this for a few moments.",
           position: "header",
+        },
+        {
+          type: "subtext",
+          content:
+            "Let the repetition settle the mind before you decide what comes next.",
+          position: "header",
+          style: { fontSize: "14px", opacity: "0.8", marginTop: "4px" },
         },
         {
           type: "rep_counter",
@@ -2358,10 +2518,9 @@ export const PracticeRunnerContainer = {
         },
         { type: "audio_player" },
         {
-          type: "subtext",
-          variant: "link",
-          content: "I feel better now",
-          position: "footer",
+          type: "primary_button",
+          label: "I feel calmer now",
+          style: "gold",
           action: {
             type: "submit",
             payload: { type: "trigger_resolved_after_support" },
@@ -2370,15 +2529,44 @@ export const PracticeRunnerContainer = {
               state_id: "day_active",
             },
           },
+          position: "footer_actions",
+        },
+        {
+          type: "primary_button",
+          label: "Try another way",
+          style: "outline",
+          visibility_condition: "_trigger_support_completed",
+          action: {
+            type: "navigate",
+            target: {
+              container_id: "awareness_trigger",
+              state_id: "trigger_recheck",
+            },
+          },
+          position: "footer_actions",
+        },
+        {
+          type: "subtext",
+          variant: "link",
+          content: "Return to Mitra Home",
+          hide_condition: "_trigger_support_completed",
+          action: {
+            type: "submit",
+            payload: { type: "session_abandoned", source: "support" },
+            target: {
+              container_id: "companion_dashboard",
+              state_id: "day_active",
+            },
+          },
+          position: "footer_actions",
+          style: { fontSize: "14px", marginTop: "10px" },
         },
       ],
 
       on_complete: {
-        type: "navigate",
-        target: {
-          container_id: "awareness_trigger",
-          state_id: "trigger_recheck",
-        },
+        type: "set_state",
+        field: "_trigger_support_completed",
+        value: true,
       },
     },
   },
@@ -2766,15 +2954,22 @@ export const AwarenessTriggerContainer = {
       blocks: [
         {
           type: "headline",
-          content: "{{trigger_advice_headline}}",
+          content: "Take one steadier step.",
           position: "header",
         },
         {
           type: "subtext",
-          content: "{{trigger_advice_subtext_1}}",
+          content:
+            "You do not need to push against the moment. Choose one support that feels most possible right now.",
           position: "header",
-          style: { fontSize: "18px", fontWeight: "500" },
+          style: { fontSize: "14px", opacity: "0.8", marginTop: "4px" },
         },
+        // {
+        //   type: "subtext",
+        //   content: "{{trigger_advice_subtext_1}}",
+        //   position: "header",
+        //   style: { fontSize: "18px", fontWeight: "500" },
+        // },
         {
           type: "diamond_divider",
           position: "content",
@@ -2799,11 +2994,6 @@ export const AwarenessTriggerContainer = {
           style: { color: "#C9A84C", letterSpacing: "3px", fontWeight: "800" },
         },
         {
-          type: "subtext",
-          content: "Tap a card to begin your recommended practice",
-          variant: "italic_multiline",
-        },
-        {
           type: "card_list",
           items_key: "suggested_trigger_mantras",
           position: "content",
@@ -2817,39 +3007,23 @@ export const AwarenessTriggerContainer = {
           style: "gold",
           visibility_condition: "show_start_trigger_mantra",
           action: {
-            type: "navigate",
-            target: {
-              container_id: "practice_runner",
-              state_id: "post_trigger_mantra",
-            },
+            type: "execute_selected_trigger_card",
           },
         },
         {
           type: "subtext",
           variant: "link",
           content: "Return to Mitra Home",
+          position: "footer",
           action: {
-            type: "navigate",
+            type: "submit",
+            payload: { type: "trigger_session_abandoned" },
             target: {
               container_id: "companion_dashboard",
               state_id: "day_active",
             },
           },
-          style: "outline",
         },
-        // {
-        //   type: "primary_button",
-        //   label: "Finish Session",
-        //   position: "footer",
-        //   style: "outline",
-        //   action: {
-        //     type: "navigate",
-        //     target: {
-        //       container_id: "companion_dashboard",
-        //       state_id: "day_active",
-        //     },
-        //   },
-        // },
       ],
     },
 
@@ -2978,6 +3152,12 @@ export const AwarenessTriggerContainer = {
           position: "header",
         },
         {
+          type: "subtext",
+          content: "Notice what has shifted, even slightly.",
+          position: "header",
+          style: { fontSize: "14px", opacity: "0.8", marginTop: "4px" },
+        },
+        {
           id: "trigger_recheck_selection",
           type: "chip_list",
           options: [
@@ -3004,7 +3184,8 @@ export const AwarenessTriggerContainer = {
           content: "Return to Mitra Home",
           position: "footer",
           action: {
-            type: "navigate",
+            type: "submit",
+            payload: { type: "trigger_session_abandoned" },
             target: {
               container_id: "companion_dashboard",
               state_id: "day_active",
@@ -3814,11 +3995,6 @@ export const CycleTransitionsContainer = {
       blocks: [
         {
           type: "headline",
-          content: "Pause for a moment.",
-          position: "header",
-        },
-        {
-          type: "subtext",
           content: "How is your energy right now?",
           position: "header",
         },
@@ -3892,79 +4068,18 @@ export const CycleTransitionsContainer = {
         },
       ],
     },
-    // ── Pause and Breathe for agitated/drained check-ins ──
-    checkin_breath_reset: {
-      overlay: true,
-      tone: { theme: "light_sandal", mood: "calming" },
-      blocks: [
-        {
-          type: "headline",
-          content: "Pause and Breathe",
-          position: "header",
-          style: { fontSize: "24px", fontWeight: "300", letterSpacing: "1px" },
-        },
-        {
-          type: "subtext",
-          content: "Let's settle your energy before we continue.",
-          position: "header",
-          style: { opacity: "0.7", fontSize: "14px" },
-        },
-        {
-          type: "rep_counter",
-          unlimited: true,
-          total: -1,
-        },
-        {
-          type: "mantra_display",
-          text_key: "trigger_mantra_text",
-          devanagari_key: "trigger_mantra_devanagari",
-        },
-        { type: "audio_player" },
-        {
-          type: "primary_button",
-          label: "I feel better now",
-          style: "gold",
-          action: {
-            type: "track_event",
-            payload: {
-              eventName: "checkin_ack_only",
-              meta: { resolved_at: "breath_reset" },
-            },
-            target: {
-              container_id: "companion_dashboard",
-              state_id: "day_active",
-            },
-          },
-          position: "footer",
-        },
-        {
-          type: "primary_button",
-          label: "Continue to check-in",
-          style: "outline",
-          action: {
-            type: "navigate",
-            target: {
-              container_id: "cycle_transitions",
-              state_id: "quick_checkin_ack",
-            },
-          },
-          position: "footer",
-        },
-      ],
-    },
-
     quick_checkin_ack: {
       overlay: true,
       tone: { theme: "light_sandal", mood: "steady" },
       blocks: [
         {
           type: "headline",
-          content: "We're meeting you where you are.",
+          content: "{{checkin_ack_headline}}",
           position: "header",
         },
         {
           type: "subtext",
-          content: "{{prana_ack_insight}}",
+          content: "{{checkin_ack_body}}",
           variant: "italic_multiline",
           position: "content",
         },
@@ -5912,7 +6027,7 @@ export const SadhanaDeepenContainer = {
                 payload: { deepen_type: "add_reps" },
                 target: {
                   container_id: "practice_runner",
-                  state_id: "mantra_rep_selection",
+                  state_id: "mantra_rep_selection", is_core: true,
                 },
               },
             },

@@ -15,6 +15,7 @@
  */
 
 import { Linking } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { cleanupFlowState, GUARDED_ACTIONS } from './cleanupFields';
 import {
   mitraTrackEvent,
@@ -25,6 +26,41 @@ import {
   mitraPathEvolution,
 } from './mitraApi';
 import api from '../Networks/axios';
+
+// ---------------------------------------------------------------------------
+// Audio Rotation
+// ---------------------------------------------------------------------------
+
+const AUDIO_S3_BASE = 'https://kalpx-dev-website.s3.us-east-2.amazonaws.com/audio';
+
+/** OM audio library — add new files here as they're uploaded to S3 */
+const OM_AUDIO_LIBRARY = [
+  `${AUDIO_S3_BASE}/om/Om.mp4`,
+  `${AUDIO_S3_BASE}/om/Om Shanti.mp4`,
+];
+
+/** Calming practice music library — add new files here */
+export const CALM_MUSIC_LIBRARY = [
+  `${AUDIO_S3_BASE}/calm/Audio-calmmusic.mp3`,
+  `${AUDIO_S3_BASE}/calm/Audio1.mpeg`,
+];
+
+/**
+ * Pick the next audio URL from a library using AsyncStorage rotation.
+ */
+async function _rotateAudio(library: string[], storageKey: string): Promise<string> {
+  if (!library || library.length === 0) return '';
+  let lastIdx = -1;
+  try {
+    const stored = await AsyncStorage.getItem(storageKey);
+    lastIdx = stored ? parseInt(stored, 10) : -1;
+  } catch (_) { /* best effort */ }
+  const nextIdx = (lastIdx + 1) % library.length;
+  try {
+    await AsyncStorage.setItem(storageKey, String(nextIdx));
+  } catch (_) { /* best effort */ }
+  return library[nextIdx];
+}
 
 // ---------------------------------------------------------------------------
 // Types
@@ -257,6 +293,16 @@ export async function executeAction(action: Action, context: ActionContext): Pro
     console.log(`[ACTION] Executing: ${type}`, action);
 
     switch (type) {
+      // ================================================================
+      // SET_STATE — simple state setter (used by on_complete to set flags)
+      // ================================================================
+      case 'set_state': {
+        const { field, value } = action as any;
+        if (field) setScreenValue(value, field);
+        _actionInFlight = false;
+        break;
+      }
+
       // ================================================================
       // NAVIGATE — the most common action
       // ================================================================
@@ -559,6 +605,17 @@ export async function executeAction(action: Action, context: ActionContext): Pro
           counts[payload.prana_type] = (counts[payload.prana_type] || 0) + 1;
           setScreenValue(counts, 'prana_checkin_counts');
           setScreenValue((screenState.prana_checkin_total || 0) + 1, 'prana_checkin_total');
+
+          // Select rotated OM audio for check-in breath reset
+          if (payload.prana_type === 'agitated' || payload.prana_type === 'drained') {
+            setScreenValue('OM', 'checkin_mantra_text');
+            setScreenValue('\u0950', 'checkin_mantra_devanagari');
+            const checkinOmAudio = await _rotateAudio(OM_AUDIO_LIBRARY, '_kalpx_om_audio_idx');
+            setScreenValue(checkinOmAudio, '_selected_om_audio');
+            // Clear stale trigger state
+            setScreenValue(null, 'trigger_mantra_text');
+            setScreenValue(null, 'trigger_mantra_devanagari');
+          }
 
           await mitraTrackEvent('checkin_acknowledged', {
             journeyId: screenState.journey_id,
@@ -925,6 +982,10 @@ export async function executeAction(action: Action, context: ActionContext): Pro
         // Scoped OM variables (do NOT overwrite global mantra_text)
         setScreenValue('OM', 'trigger_mantra_text');
         setScreenValue('\u0950', 'trigger_mantra_devanagari'); // ॐ
+
+        // Select rotated OM audio for this session
+        const triggerOmAudio = await _rotateAudio(OM_AUDIO_LIBRARY, '_kalpx_om_audio_idx');
+        setScreenValue(triggerOmAudio, '_selected_om_audio');
 
         // Set recovery target for "Try Another Way"
         setScreenValue(

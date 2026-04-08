@@ -168,9 +168,10 @@ const CustomDrawerContent = (props) => {
     {
       id: "1",
       name: t("drawer.myRoutine"),
-      title: trackerData?.active_practices?.length > 0 ? "TrackerTabs" : "DailyPracticeLogin",
+      title: "MitraEngine", // Always route to Mitra engine
       iconType: "image",
       icon: require("../../../assets/Group.png"),
+      isMitra: true,
     },
     {
       id: "2",

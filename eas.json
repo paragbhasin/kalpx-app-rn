@@ -30,6 +30,14 @@
       "ios": {
         "simulator": true
       }
+    },
+    "development": {
+      "extends": "preview",
+      "developmentClient": true,
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
     }
   },
   "submit": {

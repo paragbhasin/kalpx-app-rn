@@ -12,6 +12,7 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
+  FlatList,
   Image,
   SafeAreaView,
   ScrollView,
@@ -25,7 +26,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
 import store, { RootState } from "../../store";
-import { screenActions } from "../../store/screenSlice";
+import { screenActions, loadScreenWithData } from "../../store/screenSlice";
 import api from "../../Networks/axios";
 import { Fonts } from "../../theme/fonts";
 
@@ -98,11 +99,12 @@ export default function Home() {
     }, [isLoggedIn]),
   );
 
-  const navigateToMitra = (hasJourney: boolean) => {
+  const navigateToMitra = async (hasJourney: boolean) => {
     if (hasJourney) {
-      store.dispatch(screenActions.loadScreen({ containerId: "companion_dashboard", stateId: "day_active" }));
+      await store.dispatch(loadScreenWithData({ containerId: "companion_dashboard", stateId: "day_active" }));
     } else {
-      store.dispatch(screenActions.loadScreen({ containerId: "portal", stateId: "portal" }));
+      // Match web: go directly to discipline_select (skip portal splash)
+      await store.dispatch(loadScreenWithData({ containerId: "choice_stack", stateId: "discipline_select" }));
     }
     navigation.navigate("MitraEngine");
   };
@@ -117,9 +119,41 @@ export default function Home() {
     );
   }
 
+  const categories = [
+    { id: "1", name: "Mitra", icon: "compass-outline" as const, isMitra: true },
+    { id: "2", name: t("categories.explore") || "Videos", icon: "play-circle-outline" as const, screen: "Explore" },
+    { id: "3", name: t("categories.classes") || "Classes", icon: "laptop-outline" as const, screen: "ClassesScreen" },
+    { id: "4", name: t("home.community") || "Community", icon: "people-outline" as const, screen: "CommunityLanding" },
+  ];
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#FAF7F2" translucent={false} />
+
+      {/* ── Top Category Nav ── */}
+      <FlatList
+        data={categories}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.categoryList}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.categoryItem}
+            onPress={() => {
+              if (item.isMitra) {
+                navigateToMitra(!!mitraJourneyId);
+              } else if (item.screen) {
+                navigation.navigate(item.screen);
+              }
+            }}
+          >
+            <Ionicons name={item.icon} size={24} color="#9A7548" />
+            <Text style={styles.categoryText}>{item.name}</Text>
+          </TouchableOpacity>
+        )}
+      />
+
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 
         {/* ── Hero Section ── */}
@@ -219,9 +253,28 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  categoryList: {
+    paddingHorizontal: 12,
+    paddingTop: 16,
+    paddingBottom: 8,
+    gap: 8,
+  },
+  categoryItem: {
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    minWidth: 70,
+  },
+  categoryText: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 11,
+    color: "#432104",
+    marginTop: 4,
+  },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: 12,
     paddingBottom: 40,
   },
 

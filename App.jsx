@@ -63,8 +63,37 @@ function SnackBarContainer() {
   return <SnackBar visible={visible} message={message} />;
 }
 
-export default function App() {
+// Inner component that has access to Redux Provider
+function AppInner({ initialRoute, navigationRef }) {
   const currentBackground = useScreenStore((state) => state.currentBackground);
+  return (
+    <View style={{ flex: 1, backgroundColor: currentBackground ? 'transparent' : '#FFF' }}>
+      <StatusBar
+        barStyle={currentBackground ? "light-content" : "dark-content"}
+        translucent={!!currentBackground}
+        backgroundColor="transparent"
+      />
+      <NavigationContainer ref={navigationRef} theme={TransparentTheme}>
+        {currentBackground ? (
+          <ImageBackground source={currentBackground} style={{ flex: 1 }} resizeMode="cover">
+            <View style={{ flex: 1, backgroundColor: 'transparent' }}>
+              <Routes initialRouteName={initialRoute} />
+              <SnackBarContainer />
+            </View>
+          </ImageBackground>
+        ) : (
+          <View style={{ flex: 1, backgroundColor: '#FFF' }}>
+            <Routes initialRouteName={initialRoute} />
+            <SnackBarContainer />
+          </View>
+        )}
+      </NavigationContainer>
+      <ToastHost />
+    </View>
+  );
+}
+
+export default function App() {
   const [fontsLoaded, error] = useFonts({
     // KalpX design language: Cormorant Garamond (serif) + Inter (sans)
     CormorantGaramond_400Regular: require("@expo-google-fonts/cormorant-garamond/400Regular/CormorantGaramond_400Regular.ttf"),
@@ -137,29 +166,7 @@ export default function App() {
       <Provider store={store}>
         <ToastProvider>
           <CartProvider>
-            <View style={{ flex: 1, backgroundColor: currentBackground ? 'transparent' : '#FFF' }}>
-              <StatusBar 
-                barStyle={currentBackground ? "light-content" : "dark-content"} 
-                translucent={!!currentBackground} 
-                backgroundColor="transparent" 
-              />
-              <NavigationContainer ref={navigationRef} theme={TransparentTheme}>
-                {currentBackground ? (
-                  <ImageBackground source={currentBackground} style={{ flex: 1 }} resizeMode="cover">
-                    <View style={{ flex: 1, backgroundColor: 'transparent' }}>
-                      <Routes initialRouteName={initialRoute} />
-                      <SnackBarContainer />
-                    </View>
-                  </ImageBackground>
-                ) : (
-                  <View style={{ flex: 1, backgroundColor: '#FFF' }}>
-                    <Routes initialRouteName={initialRoute} />
-                    <SnackBarContainer />
-                  </View>
-                )}
-              </NavigationContainer>
-            </View>
-            <ToastHost />
+            <AppInner initialRoute={initialRoute} navigationRef={navigationRef} />
           </CartProvider>
         </ToastProvider>
       </Provider>

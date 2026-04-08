@@ -1,11 +1,13 @@
 import React, { useMemo, useEffect, useRef } from 'react';
-import { View, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
 import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useScreenStore } from '../engine/useScreenBridge';
 import { CALM_MUSIC_LIBRARY } from '../engine/actionExecutor';
+import { executeAction } from '../engine/actionExecutor';
 import BlockRenderer from '../engine/BlockRenderer';
 import Header from '../components/Header';
+import { Fonts } from '../theme/fonts';
 
 interface PracticeRunnerContainerProps {
   schema: {
@@ -17,6 +19,22 @@ interface PracticeRunnerContainerProps {
     };
     variant?: string;
     state_id?: string;
+    on_complete?: any;
+    complete_action?: any;
+    is_trigger?: boolean;
+    headline?: string;
+    subtext?: string;
+    body?: string;
+    pause_config?: any;
+    mantra_text?: string;
+    mantra_hindi_text?: string;
+    mantra_config?: any;
+    completion_config?: any;
+    embody_config?: any;
+    prep_config?: any;
+    feedback_config?: any;
+    audio_url?: string;
+    id?: string;
   };
 }
 
@@ -34,17 +52,66 @@ async function _rotateCalmMusic(): Promise<string> {
 }
 
 const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schema }) => {
-  const loadScreen = useScreenStore(state => state.loadScreen);
+  const { screenData: screenState, loadScreen, goBack, currentScreen, currentStateId } = useScreenStore();
   const updateBackground = useScreenStore(state => state.updateBackground);
-  const screenData = useScreenStore(state => state.screenData);
   const calmSoundRef = useRef<Audio.Sound | null>(null);
 
   useEffect(() => {
     updateBackground(require('../../assets/companion.png'));
   }, [updateBackground]);
 
-  // ── Calming background music for sacred_pause practice runners ──
-  const isSacredPause = schema.variant === 'sacred_pause';
+  // ── Variant Detection ──
+  const currentVariant = schema?.variant || '';
+  const isMantraRunner = currentVariant === 'mantra_runner';
+  const isSacredPause = currentVariant === 'sacred_pause';
+  const isSankalpEmbody = currentVariant === 'sankalp_embody';
+  const isSankalpConfirm = currentVariant === 'sankalp_confirm';
+  const isMantraComplete = currentVariant === 'mantra_complete';
+  const isMantraPrep = currentVariant === 'mantra_prep';
+  const isRepSelection = currentVariant === 'mantra_rep_selection';
+
+  // ── Screen-Aware Detection (prevents cross-flow contamination) ──
+  const stateId = currentStateId || '';
+  const _isTriggerScreen = stateId === 'free_mantra_chanting' || stateId === 'post_trigger_mantra';
+  const _isCheckinSupportScreen = stateId === 'checkin_support_mantra' || stateId === 'checkin_breath_reset';
+
+  const isTriggerSession =
+    schema?.is_trigger ||
+    stateId === 'free_mantra_chanting' ||
+    stateId === 'post_trigger_mantra' ||
+    stateId === 'trigger_practice_runner' ||
+    screenState?.source === 'support' ||
+    screenState?._active_support_item?.source === 'support';
+
+  const isTriggerOmChantScreen =
+    (stateId === 'free_mantra_chanting' || stateId === 'checkin_breath_reset');
+
+  // ── Trigger Support Completion Flag ──
+  const isTriggerSupportCompleted = !!screenState?._trigger_support_completed;
+
+  // ── Mantra Audio URL (screen-aware to prevent cross-flow audio contamination) ──
+  const mantraAudioUrl = useMemo(() => {
+    const state = screenState || {};
+    // OM screens: use rotated OM audio from _selected_om_audio
+    if (stateId === 'free_mantra_chanting' || stateId === 'checkin_breath_reset') {
+      return state._selected_om_audio || '';
+    }
+    // Support mantra runners: use runner_active_item audio or fall back to OM
+    if (_isTriggerScreen || _isCheckinSupportScreen) {
+      return state.runner_active_item?.audio_url || state._selected_om_audio || '';
+    }
+    // Core: runner_active_item first, then master_mantra fallback
+    return state.runner_active_item?.audio_url || state.master_mantra?.audio_url || '';
+  }, [
+    screenState?._selected_om_audio,
+    screenState?.runner_active_item?.audio_url,
+    screenState?.master_mantra?.audio_url,
+    stateId,
+    _isTriggerScreen,
+    _isCheckinSupportScreen,
+  ]);
+
+  // ── Calming background music for sacred_pause ──
   useEffect(() => {
     if (!isSacredPause) return;
     let isMounted = true;
@@ -71,56 +138,161 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
     };
   }, [isSacredPause]);
 
-  // ── Inject _selected_om_audio into audio_player blocks for OM/trigger/checkin screens ──
-  const omAudioUrl = screenData._selected_om_audio || '';
-  const mantraAudioUrl = screenData.runner_active_item?.audio_url || omAudioUrl;
+  // ── Block Filtering by Position ──
+  const { headerBlocks, contentBlocks, footerBlocks, footerActionBlocks } = useMemo(() => {
+    const blocks = schema.blocks || [];
+    return {
+      headerBlocks: blocks.filter((b: any) => b.position === 'header'),
+      contentBlocks: blocks.filter((b: any) => !b.position || b.position === 'content'),
+      footerBlocks: blocks.filter((b: any) => b.position === 'footer'),
+      footerActionBlocks: blocks.filter((b: any) => b.position === 'footer_actions'),
+    };
+  }, [schema.blocks]);
 
-  const headerBlocks = useMemo(() => schema.blocks?.filter(b => b.position === 'header') || [], [schema.blocks]);
-  const contentBlocks = useMemo(() => schema.blocks?.filter(b => !b.position || b.position === 'content') || [], [schema.blocks]);
-  const footerBlocks = useMemo(() => schema.blocks?.filter(b => b.position === 'footer') || [], [schema.blocks]);
-
-  // Inject audio URL into audio_player blocks
+  // ── Audio Injection into audio_player blocks ──
   const injectAudio = (block: any) => {
-    if (block.type === 'audio_player' && !block.audio_url && mantraAudioUrl) {
-      return { ...block, audio_url: mantraAudioUrl };
+    if (block.type === 'audio_player') {
+      // For trigger OM chant screens, hide the audio_player block entirely
+      // (audio is handled by intro/loop refs on web; on RN blocks handle their own audio)
+      if (isTriggerOmChantScreen) {
+        return { ...block, audio_url: mantraAudioUrl || block.audio_url };
+      }
+      // Inject computed audio URL if block doesn't already have one
+      if (!block.audio_url && mantraAudioUrl) {
+        return { ...block, audio_url: mantraAudioUrl };
+      }
+      // If block has audio_url, still prefer computed mantraAudioUrl for consistency
+      if (mantraAudioUrl) {
+        return { ...block, audio_url: mantraAudioUrl };
+      }
     }
     return block;
   };
 
+  // ── For trigger sessions, hide default headline/subtext blocks (container provides its own) ──
+  const processBlock = (block: any) => {
+    let processed = injectAudio(block);
+    if (isTriggerSession && (block.type === 'headline' || (block.type === 'subtext' && !block.action))) {
+      // Hide default headline/subtext on trigger screens — container renders custom ones
+      processed = { ...processed, _hidden: true };
+    }
+    return processed;
+  };
+
+  // ── Trigger Completion Action Handlers ──
+  const handleFeelCalmer = () => {
+    executeAction(
+      {
+        type: 'submit',
+        payload: { type: 'trigger_resolved_after_support' },
+        target: { container_id: 'companion_dashboard', state_id: 'day_active' },
+        currentScreen,
+      },
+      {
+        loadScreen,
+        goBack,
+        setScreenValue: (value: any, key: string) => {
+          const { screenActions } = require('../store/screenSlice');
+          const { store } = require('../store');
+          store.dispatch(screenActions.setScreenValue({ key, value }));
+        },
+        screenState,
+      },
+    );
+  };
+
+  const handleTryAnother = () => {
+    executeAction(
+      {
+        type: 'navigate',
+        target: { container_id: 'awareness_trigger', state_id: 'trigger_recheck' },
+        currentScreen,
+      },
+      {
+        loadScreen,
+        goBack,
+        setScreenValue: (value: any, key: string) => {
+          const { screenActions } = require('../store/screenSlice');
+          const { store } = require('../store');
+          store.dispatch(screenActions.setScreenValue({ key, value }));
+        },
+        screenState,
+      },
+    );
+  };
+
+  // ── Render Helpers ──
+  const renderBlockList = (blocks: any[], keyPrefix: string) => (
+    <>
+      {blocks.map((block: any, idx: number) => {
+        const processed = processBlock(block);
+        if (processed._hidden) return null;
+        return (
+          <BlockRenderer
+            key={block.id || `${keyPrefix}-${block.type}-${idx}`}
+            block={processed}
+          />
+        );
+      })}
+    </>
+  );
+
   const renderHeader = () => (
     <View style={styles.header}>
-      {headerBlocks.map((block, idx) => (
-        <BlockRenderer key={block.id || `header-${block.type}-${idx}`} block={injectAudio(block)} />
-      ))}
+      {renderBlockList(headerBlocks, 'header')}
     </View>
   );
 
   const renderContent = () => (
     <View style={styles.content}>
-      {contentBlocks.map((block, idx) => (
-        <BlockRenderer key={block.id || `content-${block.type}-${idx}`} block={injectAudio(block)} />
-      ))}
+      {renderBlockList(contentBlocks, 'content')}
     </View>
   );
 
   const renderFooter = () => (
     <View style={styles.footer}>
-      {footerBlocks.map((block, idx) => (
-        <BlockRenderer key={block.id || `footer-${block.type}-${idx}`} block={injectAudio(block)} />
-      ))}
+      {renderBlockList(footerBlocks, 'footer')}
     </View>
   );
 
+  const renderFooterActions = () => {
+    // If trigger support is completed, show "I feel calmer now" + "Try another way" buttons
+    if (isTriggerSupportCompleted) {
+      return (
+        <View style={styles.footerActions}>
+          <TouchableOpacity style={styles.calmButton} onPress={handleFeelCalmer} activeOpacity={0.8}>
+            <Text style={styles.calmButtonText}>I feel calmer now</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.tryAnotherButton} onPress={handleTryAnother} activeOpacity={0.8}>
+            <Text style={styles.tryAnotherText}>Try another way</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+
+    // Otherwise render footer_actions blocks normally
+    if (footerActionBlocks.length > 0) {
+      return (
+        <View style={styles.footerActions}>
+          {renderBlockList(footerActionBlocks, 'footer_actions')}
+        </View>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <View style={styles.container}>
-        <Header isTransparent />
-        <SafeAreaView style={styles.safeArea}>
-            <View style={styles.inner}>
-                {renderHeader()}
-                {renderContent()}
-                {renderFooter()}
-            </View>
-        </SafeAreaView>
+      <Header isTransparent />
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.inner}>
+          {renderHeader()}
+          {renderContent()}
+          {renderFooter()}
+          {renderFooterActions()}
+        </View>
+      </SafeAreaView>
     </View>
   );
 };
@@ -158,6 +330,51 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 'auto',
     gap: 20,
+  },
+  footerActions: {
+    width: '100%',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 16,
+    paddingBottom: 8,
+  },
+  // ── Trigger Support Completion Buttons ──
+  calmButton: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: '#C9A84C',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#C9A84C',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  calmButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#FFFFFF',
+    fontFamily: Fonts.sans.semiBold,
+    letterSpacing: 0.5,
+  },
+  tryAnotherButton: {
+    width: '100%',
+    paddingVertical: 12,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: '#C9A84C',
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tryAnotherText: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: '#C9A84C',
+    fontFamily: Fonts.sans.medium,
+    letterSpacing: 0.3,
   },
 });
 

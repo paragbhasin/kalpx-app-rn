@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
+import React, { useMemo, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
 import { useScreenStore } from '../engine/useScreenBridge';
 import Header from '../components/Header';
@@ -6,6 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import BlockRenderer from '../engine/BlockRenderer';
 import { getContainerSync } from '../engine/screenResolver';
 import { Video, ResizeMode } from 'expo-av';
+import { Fonts } from '../theme/fonts';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { generateCompanion } from '../store/mitraSlice';
@@ -41,35 +42,26 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
     };
   }, []);
 
-  const activeFocus = screenState.scan_focus || 'health';
-  const subFocus = screenState.prana_baseline_selection || 'burned_out';
+  const activeFocus = screenState.active_focus || screenState.scan_focus || 'career';
+  const subFocus = screenState.prana_baseline_selection || 'default';
 
   const getCategoryData = (focus: string) => {
-      const optionsMap: any = {
-          career: {
-              title: "Career",
-              description: "Career is not just about jobs or success. In Sanatan terms, it is deeply connected to:",
-              breakdown: [
-                  { term: "Buddhi", definition: "clear intellect", icon: require("../../assets/career1.png") },
-                  { term: "Viveka", definition: "right discernment", icon: require("../../assets/career1.png") },
-                  { term: "Tejas", definition: "confidence and radiance", icon: require("../../assets/career1.png") },
-                  { term: "Shakti", definition: "ability to act", icon: require("../../assets/career1.png") },
-                  { term: "Dharma", definition: "right direction in life", icon: require("../../assets/career1.png") },
-              ]
-          },
-          health: {
-              title: "Health",
-              description: "Health in Sanatan Dharma is tied to:",
-              breakdown: [
-                  { term: "Prana", definition: "life force", icon: require("../../assets/lotus_icon.png") },
-                  { term: "Ojas", definition: "deep vitality and reserve", icon: require("../../assets/lotus_icon.png") },
-                  { term: "Tejas", definition: "metabolic fire and brightness", icon: require("../../assets/lotus_icon.png") },
-                  { term: "Sharira dharma", definition: "right relationship with the body", icon: require("../../assets/lotus_icon.png") },
-                  { term: "Arogya", definition: "wholeness and healing", icon: require("../../assets/lotus_icon.png") },
-              ]
+      // Read from allContainers discipline_select, matching the web version
+      const container = getContainerSync('choice_stack');
+      const disciplineState = container?.states?.discipline_select;
+      if (disciplineState) {
+          const choiceBlock = (disciplineState.blocks || []).find((b: any) => b.type === 'choice_card');
+          if (choiceBlock?.options) {
+              const match = choiceBlock.options.find((o: any) => o.id === focus);
+              if (match) return match;
           }
+      }
+      // Fallback for safety
+      return {
+          title: "Your Path",
+          description: "",
+          breakdown: [],
       };
-      return optionsMap[focus] || optionsMap.health;
   };
 
   const getSubCategoryData = (focus: string, selection: string) => {
@@ -156,7 +148,10 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
               {catData?.breakdown?.map((item: any, idx: number) => (
                 <View key={idx} style={styles.breakdownItem}>
                   <View style={styles.breakdownIconWrap}>
-                    <Image source={item.icon} style={styles.breakdownIcon} />
+                    <Image
+                      source={typeof item.icon === 'number' ? item.icon : require('../../assets/lotus_icon.png')}
+                      style={styles.breakdownIcon}
+                    />
                   </View>
                   <View style={styles.breakdownTextWrap}>
                     <Text style={styles.term}>{item.term}</Text>
@@ -331,13 +326,14 @@ const styles = StyleSheet.create({
   },
   headline: {
     fontSize: 26,
-    fontFamily: 'GelicaBold',
+    fontFamily: Fonts.serif.bold,
     color: '#432104',
     textAlign: 'center',
     marginBottom: 4,
   },
   subtext: {
     fontSize: 14,
+    fontFamily: Fonts.sans.regular,
     color: '#432104',
     textAlign: 'center',
     lineHeight: 20,
@@ -380,7 +376,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontFamily: 'GelicaBold',
+    fontFamily: Fonts.serif.bold,
     color: '#432104',
     marginBottom: 4,
   },
@@ -389,6 +385,7 @@ const styles = StyleSheet.create({
   },
   introP: {
     fontSize: 14,
+    fontFamily: Fonts.sans.regular,
     color: '#432104',
     lineHeight: 22,
     textAlign: 'center',
@@ -420,12 +417,12 @@ const styles = StyleSheet.create({
   },
   term: {
     fontSize: 15,
-    fontFamily: 'GelicaBold',
+    fontFamily: Fonts.sans.bold,
     color: '#432104',
   },
   definition: {
     fontSize: 15,
-    fontFamily: 'GelicaRegular',
+    fontFamily: Fonts.sans.regular,
     color: '#432104',
   },
   experienceCard: {
@@ -439,16 +436,16 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 1,
     color: '#432104',
-    fontFamily: 'GelicaRegular',
+    fontFamily: Fonts.sans.regular,
   },
   subCategoryName: {
     fontSize: 20,
-    fontFamily: 'GelicaBold',
+    fontFamily: Fonts.serif.bold,
     color: '#cc9b2f',
   },
   explanationText: {
     fontSize: 14,
-    fontFamily: 'GelicaRegular',
+    fontFamily: Fonts.sans.regular,
     lineHeight: 22,
     color: '#432104',
   },
@@ -477,10 +474,11 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#FFF',
     fontSize: 17,
-    fontFamily: 'GelicaBold',
+    fontFamily: Fonts.sans.semiBold,
   },
   footerNote: {
     fontSize: 13,
+    fontFamily: Fonts.sans.regular,
     color: '#432104',
     fontStyle: 'italic',
     textAlign: 'center',
@@ -521,12 +519,13 @@ const styles = StyleSheet.create({
   },
   headlineStep2: {
     fontSize: 28,
-    fontFamily: 'GelicaBold',
+    fontFamily: Fonts.serif.bold,
     color: '#432104',
     textAlign: 'center',
   },
   introSubtextStep2: {
     fontSize: 14,
+    fontFamily: Fonts.sans.regular,
     color: '#432104',
     textAlign: 'center',
     marginTop: 4,
@@ -538,7 +537,7 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     marginVertical: 12,
     paddingHorizontal: 8,
-    fontFamily: 'GelicaRegular',
+    fontFamily: Fonts.serif.regular,
   },
   cardsStack: {
     width: '100%',
@@ -548,14 +547,14 @@ const styles = StyleSheet.create({
   loadingText: {
     fontSize: 16,
     color: '#D9A557',
-    fontFamily: 'GelicaBold',
+    fontFamily: Fonts.sans.semiBold,
     textAlign: 'center',
     paddingVertical: 40,
   },
   footerNoteKalpx: {
     fontSize: 14,
     color: '#8c8881',
-    fontFamily: 'GelicaBold',
+    fontFamily: Fonts.sans.medium,
     textAlign: 'center',
   }
 });

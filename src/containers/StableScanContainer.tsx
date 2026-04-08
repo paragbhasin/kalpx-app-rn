@@ -32,7 +32,7 @@ const StableScanContainer: React.FC<StableScanContainerProps> = ({ schema }) => 
 
     if (selectionBlock) {
       // Filter options based on scan_focus
-      const focusRaw = screenState["scan_focus"] || "career"; // default to career
+      const focusRaw = screenState["scan_focus"] || "peacecalm"; // default matches web
       const focus = Array.isArray(focusRaw) ? focusRaw[0] : focusRaw;
 
       if (schema.optionsMap && schema.optionsMap[focus]) {

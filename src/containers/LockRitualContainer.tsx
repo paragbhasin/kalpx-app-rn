@@ -1,18 +1,26 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { View, Text, StyleSheet, Dimensions, PanResponder } from 'react-native';
-import Animated, { 
-  useAnimatedStyle, 
-  useSharedValue, 
-  withTiming, 
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
   withDelay,
   Easing,
-  runOnJS
+  runOnJS,
+  interpolate,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSelector, useDispatch } from 'react-redux';
 import BlockRenderer from '../engine/BlockRenderer';
 import { useScreenStore } from '../engine/useScreenBridge';
+import { executeAction } from '../engine/actionExecutor';
+import { screenActions } from '../store/screenSlice';
 import Header from '../components/Header';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Fonts } from '../theme/fonts';
+import * as Haptics from 'expo-haptics';
+
+import type { RootState, AppDispatch } from '../store';
 
 const { width, height } = Dimensions.get('window');
 
@@ -23,33 +31,68 @@ interface LockRitualContainerProps {
     lock_action?: any;
     hint_text?: string;
     button_label?: string;
+    meta?: {
+      hold_duration_ms?: Record<string, number>;
+      block_background_interaction?: boolean;
+      cancel_on_release?: boolean;
+    };
   };
 }
 
 const LockRitualContainer: React.FC<LockRitualContainerProps> = ({ schema }) => {
-  const loadScreen = useScreenStore((state) => state.loadScreen);
-  const updateBackground = useScreenStore((state) => state.updateBackground);
-  const updateHeaderHidden = useScreenStore((state) => state.updateHeaderHidden);
+  const dispatch = useDispatch<AppDispatch>();
+  const screenState = useSelector((state: RootState) => state.screen);
+  const {
+    loadScreen,
+    goBack,
+    updateBackground,
+    updateHeaderHidden,
+    currentScreen,
+  } = useScreenStore();
 
-  const [isReady, setIsReady] = useState(false);
   const [isHolding, setIsHolding] = useState(false);
-  
+  const [isReady, setIsReady] = useState(false);
+  const [hasFiredMidHaptic, setHasFiredMidHaptic] = useState(false);
+
   const progress = useSharedValue(0);
   const scale = useSharedValue(0.95);
-  const containerOpacity = useSharedValue(0);
-  
+
+  // Staggered entrance animations (matching web CSS keyframes)
+  const headerOpacity = useSharedValue(0);
+  const headerTranslateY = useSharedValue(-20);
+  const buttonOpacity = useSharedValue(0);
+  const buttonScale = useSharedValue(0.95);
+  const hintOpacity = useSharedValue(0);
+  const footerOpacity = useSharedValue(0);
+
+  // Hold duration from schema meta (default ~1.25s matching web: 4% every 50ms = 25 ticks * 50ms)
+  const holdDurationMs = useMemo(() => {
+    if (schema.meta?.hold_duration_ms) {
+      // Use 14_day as default if available, otherwise first value
+      return schema.meta.hold_duration_ms['14_day'] || Object.values(schema.meta.hold_duration_ms)[0] || 1250;
+    }
+    return 1250; // Web default: 25 intervals * 50ms
+  }, [schema.meta]);
+
   useEffect(() => {
-    // Immersion settings
-    updateBackground(null); // Pure black background handled in styles
+    // Immersion settings — dark background, hide header chrome
+    updateBackground(null);
     updateHeaderHidden(true);
-    
-    // Entrance animations
-    containerOpacity.value = withTiming(1, { duration: 800 });
-    scale.value = withDelay(400, withTiming(1, { 
-      duration: 1000, 
-      easing: Easing.bezier(0.22, 0.61, 0.36, 1) 
-    }));
-    
+
+    // Staggered entrance animations matching web CSS:
+    // header: 0.8s ease, delay 0.2s
+    // hold button: 1s cubic-bezier(0.22,0.61,0.36,1), delay 0.4s
+    // hint: 0.8s ease, delay 0.7s
+    // footer: 0.8s ease, delay 0.9s
+    const animEasing = Easing.bezier(0.22, 0.61, 0.36, 1);
+
+    headerOpacity.value = withDelay(200, withTiming(1, { duration: 800 }));
+    headerTranslateY.value = withDelay(200, withTiming(0, { duration: 800 }));
+    buttonOpacity.value = withDelay(400, withTiming(1, { duration: 1000, easing: animEasing }));
+    buttonScale.value = withDelay(400, withTiming(1, { duration: 1000, easing: animEasing }));
+    hintOpacity.value = withDelay(700, withTiming(1, { duration: 800 }));
+    footerOpacity.value = withDelay(900, withTiming(1, { duration: 800 }));
+
     setTimeout(() => {
       setIsReady(true);
     }, 100);
@@ -57,43 +100,102 @@ const LockRitualContainer: React.FC<LockRitualContainerProps> = ({ schema }) => 
     return () => updateHeaderHidden(false);
   }, [updateBackground, updateHeaderHidden]);
 
-  const onCommit = () => {
-    const holdButton = schema.blocks?.find(b => b.type === 'hold_button');
+  // Build the context object for executeAction (matches PracticeRunnerContainer pattern)
+  const buildActionContext = useCallback(() => ({
+    loadScreen,
+    goBack,
+    setScreenValue: (value: any, key: string) => {
+      dispatch(screenActions.setScreenValue({ key, value }));
+    },
+    screenState,
+    startFlowInstance: (flowType: string) =>
+      dispatch(screenActions.startFlowInstance(flowType)),
+    endFlowInstance: () => dispatch(screenActions.endFlowInstance()),
+  }), [loadScreen, goBack, dispatch, screenState]);
+
+  const onCommit = useCallback(() => {
+    // Haptic feedback on completion
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+
+    const holdButton = schema.blocks?.find((b: any) => b.type === 'hold_button');
     const lockAction = schema.lock_action || holdButton?.on_complete;
+
     if (lockAction) {
-      loadScreen(lockAction.target.container_id, lockAction.target.state_id);
+      // Use executeAction to properly handle all action types (especially generate_companion)
+      executeAction(lockAction, buildActionContext());
     }
-  };
+  }, [schema, buildActionContext]);
+
+  // Interval-based progress matching web behavior (4% every 50ms)
+  const holdIntervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+  const progressRef = React.useRef(0);
+
+  const startHold = useCallback(() => {
+    setIsHolding(true);
+    setHasFiredMidHaptic(false);
+    scale.value = withTiming(0.98, { duration: 200 });
+    progressRef.current = 0;
+
+    // Interval approach matching web: increment progress in steps
+    const stepMs = 50;
+    const stepPercent = 100 / (holdDurationMs / stepMs);
+
+    holdIntervalRef.current = setInterval(() => {
+      progressRef.current += stepPercent;
+      progress.value = withTiming(progressRef.current / 100, { duration: stepMs, easing: Easing.linear });
+
+      // Mid-point haptic feedback (schema defines haptic_feedback.mid_point)
+      if (progressRef.current >= 50 && !hasFiredMidHaptic) {
+        setHasFiredMidHaptic(true);
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+      }
+
+      if (progressRef.current >= 100) {
+        progressRef.current = 100;
+        progress.value = withTiming(1, { duration: stepMs, easing: Easing.linear });
+        if (holdIntervalRef.current) {
+          clearInterval(holdIntervalRef.current);
+          holdIntervalRef.current = null;
+        }
+        onCommit();
+      }
+    }, stepMs);
+  }, [holdDurationMs, progress, scale, onCommit, hasFiredMidHaptic]);
+
+  const stopHold = useCallback(() => {
+    setIsHolding(false);
+    scale.value = withTiming(1, { duration: 300 });
+    if (holdIntervalRef.current) {
+      clearInterval(holdIntervalRef.current);
+      holdIntervalRef.current = null;
+    }
+    if (progressRef.current < 100) {
+      progressRef.current = 0;
+      progress.value = withTiming(0, { duration: 200 });
+    }
+  }, [progress, scale]);
+
+  // Cleanup interval on unmount
+  useEffect(() => {
+    return () => {
+      if (holdIntervalRef.current) {
+        clearInterval(holdIntervalRef.current);
+      }
+    };
+  }, []);
 
   const panResponder = useMemo(() => PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onPanResponderGrant: () => {
-      setIsHolding(true);
-      scale.value = withTiming(0.98, { duration: 200 });
-      progress.value = withTiming(1, { 
-        duration: 1500, 
-        easing: Easing.linear 
-      }, (finished) => {
-        if (finished) {
-          runOnJS(onCommit)();
-        }
-      });
+      startHold();
     },
     onPanResponderRelease: () => {
-      setIsHolding(false);
-      scale.value = withTiming(1, { duration: 300 });
-      if (progress.value < 1) {
-        progress.value = withTiming(0, { duration: 200 });
-      }
+      stopHold();
     },
     onPanResponderTerminate: () => {
-      setIsHolding(false);
-      scale.value = withTiming(1, { duration: 300 });
-      if (progress.value < 1) {
-        progress.value = withTiming(0, { duration: 200 });
-      }
-    }
-  }), [schema, progress, scale]);
+      stopHold();
+    },
+  }), [startHold, stopHold]);
 
   const animatedProgressStyle = useAnimatedStyle(() => ({
     height: `${progress.value * 100}%`,
@@ -101,64 +203,100 @@ const LockRitualContainer: React.FC<LockRitualContainerProps> = ({ schema }) => 
 
   const animatedButtonStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
-    opacity: containerOpacity.value,
+    opacity: buttonOpacity.value,
   }));
 
-  const headerBlocks = (schema.blocks || []).filter(b => b.position === 'header');
-  const footerBlocks = (schema.blocks || []).filter(b => b.position === 'footer');
-  const holdButton = schema.blocks?.find(b => b.type === 'hold_button');
+  const animatedHeaderStyle = useAnimatedStyle(() => ({
+    opacity: headerOpacity.value,
+    transform: [{ translateY: headerTranslateY.value }],
+  }));
+
+  const animatedHintStyle = useAnimatedStyle(() => ({
+    opacity: hintOpacity.value,
+  }));
+
+  const animatedFooterStyle = useAnimatedStyle(() => ({
+    opacity: footerOpacity.value,
+  }));
+
+  // Block partitioning (matches web template logic)
+  const headerBlocks = (schema.blocks || []).filter((b: any) => b.position === 'header');
+  const footerBlocks = (schema.blocks || []).filter((b: any) => b.position === 'footer');
+  const contentBlocks = (schema.blocks || []).filter(
+    (b: any) => !b.position || b.position === 'content'
+  );
+  const holdButton = schema.blocks?.find((b: any) => b.type === 'hold_button');
+  const isHoldToLock = schema.id === 'hold_to_lock';
 
   const insets = useSafeAreaInsets();
 
   return (
     <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
-      {/* Ambient Glow */}
+      {/* Ambient glow — matches web radial gradient */}
       <View style={styles.ambientGlow} />
-      
+
       <Header isTransparent={true} />
 
       <View style={styles.contentWrap}>
-        <View style={styles.header}>
-          {headerBlocks.map((block, i) => (
+        {/* Header blocks with staggered entrance */}
+        <Animated.View style={[styles.header, animatedHeaderStyle]}>
+          {headerBlocks.map((block: any, i: number) => (
             <BlockRenderer key={`header-${i}`} block={block} textColor="#FFFFFF" />
           ))}
-        </View>
+        </Animated.View>
 
         <View style={styles.ritualCenter}>
-          <Animated.View 
-            {...panResponder.panHandlers}
-            style={[
-              styles.holdButtonWrap, 
-              isHolding && styles.isHolding,
-              animatedButtonStyle
-            ]}
-          >
-            {/* Progress Fill */}
-            <Animated.View style={[styles.progressFill, animatedProgressStyle]}>
-              <LinearGradient
-                colors={['#f0c96b', '#d4a017']}
-                style={StyleSheet.absoluteFill}
-              />
-            </Animated.View>
+          {isHoldToLock ? (
+            <>
+              {/* Hold-to-commit button */}
+              <Animated.View
+                {...panResponder.panHandlers}
+                style={[
+                  styles.holdButtonWrap,
+                  isHolding && styles.isHolding,
+                  animatedButtonStyle,
+                ]}
+              >
+                {/* Progress fill from bottom */}
+                <Animated.View style={[styles.progressFill, animatedProgressStyle]}>
+                  <LinearGradient
+                    colors={['#f0c96b', '#d4a017']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 0, y: 1 }}
+                    style={StyleSheet.absoluteFill}
+                  />
+                </Animated.View>
 
-            <View style={styles.buttonContent}>
-              {!isHolding && <Text style={styles.lockIcon}>🔒</Text>}
-              <Text style={[styles.lockBtn, isHolding && styles.lockBtnHolding]}>
-                {isHolding ? (holdButton?.holding_label || "Committing...") : (holdButton?.label || "Hold to Commit")}
-              </Text>
+                <View style={styles.buttonContent}>
+                  {!isHolding && <Text style={styles.lockIcon}>🔒</Text>}
+                  <Text style={[styles.lockBtn, isHolding && styles.lockBtnHolding]}>
+                    {isHolding
+                      ? (holdButton?.holding_label || 'Committing...')
+                      : (holdButton?.label || schema.button_label || 'Hold to Commit')}
+                  </Text>
+                </View>
+              </Animated.View>
+
+              <Animated.Text style={[styles.hint, animatedHintStyle]}>
+                {schema.hint_text || 'Consistency shapes who you become.'}
+              </Animated.Text>
+            </>
+          ) : (
+            /* Non-hold_to_lock states: render content blocks generically (matches web v-else) */
+            <View style={styles.blocksContainer}>
+              {contentBlocks.map((block: any, i: number) => (
+                <BlockRenderer key={`content-${i}`} block={block} textColor="#FFFFFF" />
+              ))}
             </View>
-          </Animated.View>
-
-          <Animated.Text style={[styles.hint, { opacity: containerOpacity.value }]}>
-            {schema.hint_text || "Consistency shapes who you become."}
-          </Animated.Text>
+          )}
         </View>
 
-        <View style={styles.footer}>
-          {footerBlocks.map((block, i) => (
+        {/* Footer blocks with staggered entrance */}
+        <Animated.View style={[styles.footer, animatedFooterStyle]}>
+          {footerBlocks.map((block: any, i: number) => (
             <BlockRenderer key={`footer-${i}`} block={block} textColor="rgba(255,255,255,0.6)" />
           ))}
-        </View>
+        </Animated.View>
       </View>
     </View>
   );
@@ -175,7 +313,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingBottom: 80, // Offset for footer
+    paddingBottom: 80,
   },
   ambientGlow: {
     position: 'absolute',
@@ -199,7 +337,7 @@ const styles = StyleSheet.create({
   holdButtonWrap: {
     width: 280,
     height: 72,
-    borderRadius: 36,
+    borderRadius: 40,
     backgroundColor: 'rgba(255, 255, 255, 0.03)',
     borderWidth: 1,
     borderColor: 'rgba(212, 160, 23, 0.3)',
@@ -207,7 +345,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     overflow: 'hidden',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
+    shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.4,
     shadowRadius: 20,
     elevation: 8,
@@ -236,16 +374,16 @@ const styles = StyleSheet.create({
   lockBtn: {
     color: '#FFFFFF',
     fontSize: 18,
-    fontFamily: 'GelicaBold',
+    fontFamily: Fonts.sans.semiBold,
     letterSpacing: 0.5,
   },
   lockBtnHolding: {
-    color: '#080a0c',
+    color: '#1a1d2e',
   },
   hint: {
     color: 'rgba(255, 255, 255, 0.4)',
     fontSize: 14,
-    fontFamily: 'GelicaRegular',
+    fontFamily: Fonts.serif.regular,
     letterSpacing: 0.5,
     textAlign: 'center',
     marginTop: 10,
@@ -254,6 +392,11 @@ const styles = StyleSheet.create({
     marginTop: 60,
     width: '100%',
     alignItems: 'center',
+  },
+  blocksContainer: {
+    gap: 16,
+    alignItems: 'center',
+    width: '100%',
   },
 });
 

@@ -18,7 +18,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
 import Colors from "../../components/Colors";
 import TextComponent from "../../components/TextComponent";
-import { getDailyDharmaTracker } from "../../screens/Home/actions";
+// Old tracker import removed — Mitra engine manages journey state
 import store, { RootState } from "../../store";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import { screenActions } from "../../store/screenSlice";
@@ -61,24 +61,7 @@ const CustomDrawerContent = (props) => {
 
   const user = useSelector((state: RootState) => state.login?.user || state.socialLoginReducer?.user);
   const [isLoggedIn, setIsLoggedIn] = React.useState(!!user);
-  const dailyDharmaTracker = useSelector((state: RootState) => state.dailyDharmaTrackerReducer);
-  const trackerData = dailyDharmaTracker?.data;
-
-  console.log("🪵 Sidebar Debug:", {
-    isLoggedIn,
-    hasTrackerData: !!trackerData,
-    activePractices: trackerData?.active_practices?.length,
-    loading: dailyDharmaTracker?.loading
-  });
-
-  // -----------------------------
-  // ✅ FETCH DAILY DHARMA TRACKER HERE
-  // -----------------------------
-  React.useEffect(() => {
-    if (isLoggedIn) {
-      dispatch(getDailyDharmaTracker(() => { }));
-    }
-  }, [dispatch, isLoggedIn]);
+  // Old tracker API removed — Mitra engine uses journey/status API instead
 
   React.useEffect(() => {
     setIsLoggedIn(!!user);

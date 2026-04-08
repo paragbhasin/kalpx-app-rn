@@ -23,8 +23,20 @@ export function useScreenStore(selector?: (state: any) => any) {
   const screenState = useSelector((state: RootState) => state.screen);
 
   const loadScreen = useCallback(
-    (containerId: string, stateId: string) => {
-      dispatch(screenActions.loadScreen({ containerId, stateId }));
+    (target: string | { container_id?: string; containerId?: string; state_id?: string; stateId?: string }) => {
+      // Support both string and object targets (matches Vue screenStore API)
+      let containerId: string;
+      let stateId: string;
+      if (typeof target === 'string') {
+        containerId = 'generic';
+        stateId = target;
+      } else {
+        containerId = target.container_id || target.containerId || 'generic';
+        stateId = target.state_id || target.stateId || '';
+      }
+      // Use loadScreenWithData to resolve schema (not just set IDs)
+      const { loadScreenWithData } = require('../store/screenSlice');
+      dispatch(loadScreenWithData({ containerId, stateId }));
     },
     [dispatch],
   );

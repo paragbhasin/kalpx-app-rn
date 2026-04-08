@@ -26,7 +26,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
 import store, { RootState } from "../../store";
-import { screenActions, loadScreenWithData } from "../../store/screenSlice";
+import { screenActions } from "../../store/screenSlice";
 import api from "../../Networks/axios";
 import { Fonts } from "../../theme/fonts";
 
@@ -53,6 +53,9 @@ const FEATURE_ITEMS = [
     text: "Daily mantras, sankalps, and guidance.",
   },
 ];
+
+// Legacy export for RelatedVideosScreen compatibility
+export const collapseControl = { avoidCollapse: false };
 
 export default function Home() {
   const navigation: any = useNavigation();
@@ -99,12 +102,12 @@ export default function Home() {
     }, [isLoggedIn]),
   );
 
-  const navigateToMitra = async (hasJourney: boolean) => {
+  const navigateToMitra = (hasJourney: boolean) => {
+    const { loadScreenWithData } = require("../../store/screenSlice");
     if (hasJourney) {
-      await store.dispatch(loadScreenWithData({ containerId: "companion_dashboard", stateId: "day_active" }));
+      store.dispatch(loadScreenWithData({ containerId: "companion_dashboard", stateId: "day_active" }));
     } else {
-      // Match web: go directly to discipline_select (skip portal splash)
-      await store.dispatch(loadScreenWithData({ containerId: "choice_stack", stateId: "discipline_select" }));
+      store.dispatch(loadScreenWithData({ containerId: "choice_stack", stateId: "discipline_select" }));
     }
     navigation.navigate("MitraEngine");
   };

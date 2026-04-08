@@ -5,7 +5,7 @@ appId: com.kalpx.app
 - launchApp
 - waitForAnimationToEnd
 
-- tapOn: "Guided Paths"
+- tapOn: "My Routine"
 - waitForAnimationToEnd
 
 # Verify journey is active
@@ -21,7 +21,7 @@ appId: com.kalpx.app
 - waitForAnimationToEnd
 
 # Navigate back to engine
-- tapOn: "Guided Paths"
+- tapOn: "My Routine"
 - waitForAnimationToEnd
 
 # Journey state should be preserved

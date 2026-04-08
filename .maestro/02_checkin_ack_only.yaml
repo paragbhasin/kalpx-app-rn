@@ -6,7 +6,7 @@ appId: com.kalpx.app
 - waitForAnimationToEnd
 
 # Navigate to engine
-- tapOn: "Guided Paths"
+- tapOn: "My Routine"
 - waitForAnimationToEnd
 
 # Should be on dashboard (if journey exists) or portal

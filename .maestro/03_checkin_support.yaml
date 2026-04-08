@@ -1,16 +1,17 @@
 # Flow 3: Quick check-in — support path (agitated/drained)
-# Validates: dashboard → check-in → select agitated → suggestions → return
+# Validates: dashboard → check-in → select agitated → Proceed → breath reset / suggestions → return
 appId: com.kalpx.app
 ---
 - launchApp
 - waitForAnimationToEnd
 
-- tapOn: "Guided Paths"
+- tapOn: "My Routine"
 - waitForAnimationToEnd
 
 - tapOn:
     text: "Quick Check-In"
     optional: true
+- waitForAnimationToEnd
 
 # Select Agitated
 - tapOn:
@@ -18,7 +19,13 @@ appId: com.kalpx.app
     optional: true
 - waitForAnimationToEnd
 
-# Should show support suggestions or breath reset
+# Tap Proceed (check-in shows Proceed before breath reset for agitated/drained)
+- tapOn:
+    text: "Proceed"
+    optional: true
+- waitForAnimationToEnd
+
+# Should show breath reset screen or support suggestions
 - assertVisible:
-    text: ".*breath.*|.*support.*|.*calm.*"
+    text: ".*breath.*|.*support.*|.*calm.*|.*pause.*|.*OM.*|.*I feel better.*"
     optional: true

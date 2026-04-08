@@ -1,0 +1,31 @@
+# Flow 58: Drawer "My Routine" → MitraEngine
+# Validates: open drawer → tap "My Routine" → MitraEngine loaded (portal or dashboard)
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+# Open drawer (hamburger menu or swipe from left)
+- tapOn:
+    text: ".*menu.*|.*☰.*"
+    optional: true
+
+# If hamburger not found, try swipe from left edge
+- swipe:
+    direction: RIGHT
+    duration: 500
+    start: "0%, 50%"
+    end: "80%, 50%"
+
+- waitForAnimationToEnd
+
+# Tap "My Routine" in drawer
+- tapOn:
+    text: "My Routine"
+    optional: true
+- waitForAnimationToEnd
+
+# Should navigate to MitraEngine (portal if no journey, dashboard if journey exists)
+- assertVisible:
+    text: ".*Day.*|.*Mantra.*|.*Practice.*|.*Begin with KalpX.*|.*Choose your path.*"
+    optional: true

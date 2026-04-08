@@ -5,7 +5,7 @@ appId: com.kalpx.app
 - launchApp
 - waitForAnimationToEnd
 
-- tapOn: "Guided Paths"
+- tapOn: "My Routine"
 - waitForAnimationToEnd
 
 # Note the current day progress state

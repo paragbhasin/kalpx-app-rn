@@ -8,7 +8,7 @@ appId: com.kalpx.app
 - waitForAnimationToEnd
 
 # Navigate to Mitra engine from Home
-- tapOn: "Guided Paths"
+- tapOn: "My Routine"
 - waitForAnimationToEnd
 
 # Portal screen — should show Begin button

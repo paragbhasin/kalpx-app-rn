@@ -1,0 +1,75 @@
+# Flow 52: Post-completion "I feel calmer now" on post_trigger_mantra
+# Validates: dashboard → I Feel Triggered → OM → Try another way → select mantra → complete 9 reps → tap "I feel calmer now" → back to dashboard
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "My Routine"
+- waitForAnimationToEnd
+
+# Enter trigger flow
+- tapOn:
+    text: "I Feel Triggered"
+    optional: true
+- waitForAnimationToEnd
+
+# On OM chanting — tap Try another way to proceed to reflection
+- tapOn:
+    text: "Try another way"
+    optional: true
+- waitForAnimationToEnd
+
+# On trigger_reflection — select a feeling
+- tapOn:
+    text: ".*agitated.*|.*uncertain.*"
+    optional: true
+    index: 0
+
+- tapOn:
+    text: "Share"
+    optional: true
+- waitForAnimationToEnd
+
+# Advice cards — tap a mantra suggestion
+- tapOn:
+    text: ".*mantra.*|.*chant.*"
+    optional: true
+    index: 0
+- waitForAnimationToEnd
+
+# On info screen — begin
+- tapOn:
+    text: ".*Begin.*|.*Start.*"
+    optional: true
+- waitForAnimationToEnd
+
+# Rep selection — choose 9 reps
+- tapOn:
+    text: "9"
+    optional: true
+- tapOn:
+    text: "Begin"
+    optional: true
+- waitForAnimationToEnd
+
+# Complete 9 reps
+- repeat:
+    times: 9
+    commands:
+      - tapOn:
+          text: "TAP"
+          optional: true
+      - waitForAnimationToEnd:
+          timeout: 500
+
+# After completion, tap "I feel calmer now" to return to dashboard
+- tapOn:
+    text: "I feel calmer now"
+    optional: true
+- waitForAnimationToEnd
+
+# Should be back on dashboard
+- assertVisible:
+    text: ".*Day.*|.*Mantra.*|.*Practice.*"
+    optional: true

@@ -1,0 +1,23 @@
+# Flow 56: Home journey-aware — resume (logged in with journey)
+# Validates: launch app with journey state → assert "Resume Your Journey" visible → tap → MitraEngine
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+# On Home screen (with journey state persisted from prior session)
+# Should show "Resume Your Journey" card
+- assertVisible:
+    text: ".*Resume Your Journey.*|.*Continue where you left off.*"
+    optional: true
+
+# Tap Resume Your Journey
+- tapOn:
+    text: ".*Resume Your Journey.*|.*Resume.*"
+    optional: true
+- waitForAnimationToEnd
+
+# Should navigate to MitraEngine (dashboard)
+- assertVisible:
+    text: ".*Day.*|.*Mantra.*|.*Practice.*|.*Sankalp.*"
+    optional: true

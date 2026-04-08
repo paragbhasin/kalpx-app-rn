@@ -6,7 +6,7 @@ appId: com.kalpx.app
 - launchApp
 - waitForAnimationToEnd
 
-- tapOn: "Guided Paths"
+- tapOn: "My Routine"
 - waitForAnimationToEnd
 
 # If on dashboard at day 7+, checkpoint should be accessible

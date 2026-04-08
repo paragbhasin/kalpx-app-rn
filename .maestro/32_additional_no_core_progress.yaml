@@ -5,7 +5,7 @@ appId: com.kalpx.app
 - launchApp
 - waitForAnimationToEnd
 
-- tapOn: "Guided Paths"
+- tapOn: "My Routine"
 - waitForAnimationToEnd
 
 # Look for additional items section on dashboard

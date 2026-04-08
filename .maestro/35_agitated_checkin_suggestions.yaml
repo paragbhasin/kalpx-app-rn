@@ -1,11 +1,11 @@
-# Flow 35: Agitated check-in shows support suggestions
-# Validates: check-in → agitated → should show support suggestions
+# Flow 35: Agitated check-in shows support suggestions / breath reset
+# Validates: check-in → agitated → Proceed → should show breath reset or support suggestions
 appId: com.kalpx.app
 ---
 - launchApp
 - waitForAnimationToEnd
 
-- tapOn: "Guided Paths"
+- tapOn: "My Routine"
 - waitForAnimationToEnd
 
 # Enter check-in
@@ -20,7 +20,13 @@ appId: com.kalpx.app
     optional: true
 - waitForAnimationToEnd
 
-# Should show support suggestions (not just ack)
+# Tap Proceed (if visible — check-in may show Proceed before breath reset)
+- tapOn:
+    text: "Proceed"
+    optional: true
+- waitForAnimationToEnd
+
+# Should show breath reset screen or support suggestions
 - assertVisible:
-    text: ".*breath.*|.*support.*|.*calm.*|.*Recommended.*|.*Try.*"
+    text: ".*breath.*|.*support.*|.*calm.*|.*pause.*|.*OM.*|.*I feel better.*"
     optional: true

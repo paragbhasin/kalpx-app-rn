@@ -5,7 +5,7 @@ appId: com.kalpx.app
 - launchApp
 - waitForAnimationToEnd
 
-- tapOn: "Guided Paths"
+- tapOn: "My Routine"
 - waitForAnimationToEnd
 
 # Trigger flow through to advice
@@ -14,8 +14,9 @@ appId: com.kalpx.app
     optional: true
 - waitForAnimationToEnd
 
+# OM chanting → "Try another way" proceeds to reflection
 - tapOn:
-    text: "I feel calmer now"
+    text: "Try another way"
     optional: true
 - waitForAnimationToEnd
 

@@ -1017,6 +1017,59 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       }
 
       // ================================================================
+      // TRY_ANOTHER_WAY — call API for trigger support suggestions
+      // ================================================================
+      case 'try_another_way': {
+        const feeling = 'uncertain';
+
+        const triggerRes = await mitraTriggerMantras({
+          feeling,
+          focus: screenState.scan_focus || screenState.active_focus || 'peacecalm',
+          subFocus: screenState.prana_baseline_selection || '',
+          depth: screenState.routine_depth || screenState.routine_setup || 'standard',
+          round: screenState.trigger_cycle_count || 1,
+          locale: screenState.locale || 'en',
+          tz: 'Asia/Kolkata',
+        });
+        const suggestions = triggerRes.suggestions || [];
+        const guidance = triggerRes.guidance || {};
+
+        setScreenValue(guidance.headline || 'Take one steadier step.', 'trigger_advice_headline');
+        setScreenValue(guidance.comfort || '', 'trigger_advice_subtext_1');
+        setScreenValue(guidance.insight || '', 'trigger_advice_subtext_2');
+        setScreenValue(guidance.next_step || '', 'trigger_advice_subtext_3');
+
+        // Map suggestions to PracticeCard format
+        const tryAnotherSuggestions = suggestions.map((s: any, idx: number) => {
+          const itemType = s.type || s.core?.type || s.core?.item_type || (s.core?.steps ? 'practice' : 'mantra');
+          const isPractice = itemType === 'practice';
+          return {
+            id: `trigger_suggestion_${idx}`,
+            item_id: s.item_id || s.id,
+            type: 'practice_card',
+            title: s.ui?.card_title || s.core?.title,
+            description: s.ui?.card_subtitle || s.core?.meaning,
+            icon: isPractice ? 'fas fa-leaf' : 'fas fa-om',
+            info_action: {
+              type: 'view_info',
+              payload: {
+                type: itemType,
+                manualData: { ...s.core, wisdom: s.context, source: 'support', is_trigger: true, item_id: s.item_id || s.id, item_type: itemType },
+                is_trigger: true,
+              },
+            },
+          };
+        });
+
+        setScreenValue(tryAnotherSuggestions, 'suggested_trigger_mantras');
+        setScreenValue(null, 'selected_card_id');
+        setScreenValue(false, 'show_start_trigger_mantra');
+
+        loadScreen({ container_id: 'awareness_trigger', state_id: 'trigger_advice_reveal' });
+        break;
+      }
+
+      // ================================================================
       // SEAL_DAY — advance day, track milestone, check for checkpoints
       // ================================================================
       case 'seal_day': {

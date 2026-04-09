@@ -960,9 +960,9 @@ export async function executeAction(action: Action, context: ActionContext): Pro
         // CTA
         if (data.cta) setScreenValue(data.cta, 'contextual_cta');
 
-        // Navigate to reveal screen (unless skipReveal)
+        // Navigate to the post-lock summary reveal (unless skipReveal)
         if (!payload?.skipReveal) {
-          loadScreen({ container_id: 'cycle_transitions', state_id: 'companion_analysis' });
+          loadScreen({ container_id: 'insight_summary', state_id: 'path_reveal' });
         }
         break;
       }
@@ -1331,7 +1331,7 @@ export async function executeAction(action: Action, context: ActionContext): Pro
         setScreenValue(ftcData.pathContext || {}, 'path_context');
         setScreenValue(ftcData.pathMilestone || null, 'path_milestone');
 
-        loadScreen({ container_id: 'cycle_transitions', state_id: 'companion_analysis' });
+        loadScreen({ container_id: 'insight_summary', state_id: 'path_reveal' });
         break;
       }
 

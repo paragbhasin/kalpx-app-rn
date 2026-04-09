@@ -3428,13 +3428,11 @@ export const InsightsProgressContainer = {
           headline: "Your Personalized Practice is Ready",
           subtext:
             "KalpX has curated a 14-day journey to realign your mind, energy, and intention",
-          footer_note: "Explore Sankalp · Mantra · Daily Practice",
+          footer_note: "Begin the KalpX Journey",
           button_label: "Begin the KalpX Journey",
         },
       },
       blocks: [
-        { type: "headline", content: "Insight Summary" },
-        { type: "summary_block", data_key: "insight_data" },
         {
           type: "practice_card",
           purpose: "Practice",
@@ -5958,32 +5956,62 @@ export const InsightSummaryContainer = {
       tone: { theme: "light_sandal", mood: "reflective" },
       insight_config: {
         step0: {
-          headline: "Understanding Your Path",
-          subtext: "Here is why we chose this path for you.",
-          chosen_label: "You chose",
-          experience_label: "YOUR CURRENT EXPERIENCE",
-          button_label: "See Your Path →",
+          headline: "Understanding your path",
+          subtext: "",
+          chosen_label: "You've chosen",
+          experience_label: "WITHIN THIS, YOU'RE EXPERIENCING:",
+          button_label: "Show My Path →",
           footer_note:
-            "This path was built specifically for your current state.",
+            "Understanding is the first step of transformation.",
         },
         step1: {
           // Transition animation — no text needed
         },
         step2: {
-          headline: "The KalpX Way",
-          subtext: "Your personalised 3-practice system.",
-          chosen_label: "",
-          experience_label: "",
-          button_label: "Begin My Practice →",
-          footer_note: "Commit to 14 days. Transformation takes time.",
+          headline: "Your Personalized Practice is Ready",
+          subtext:
+            "KalpX has curated a 14-day journey to realign your mind, energy, and intention",
+          footer_note: "Begin the KalpX Journey",
+          button_label: "Begin the KalpX Journey",
         },
       },
-      blocks: [], // practice_card blocks are injected dynamically by the engine
+      blocks: [
+        {
+          type: "practice_card",
+          purpose: "Practice",
+          title: "{{card_ritual_title}}",
+          description: "{{card_ritual_description}}",
+          info_action: {
+            type: "view_info",
+            payload: { type: "practice", read_only: true },
+          },
+        },
+        {
+          type: "practice_card",
+          purpose: "Sankalp",
+          title: "{{card_sankalpa_title}}",
+          description: "{{card_sankalpa_description}}",
+          info_action: {
+            type: "view_info",
+            payload: { type: "sankalp", read_only: true },
+          },
+        },
+        {
+          type: "practice_card",
+          purpose: "Mantra",
+          title: "{{card_mantra_title}}",
+          description: "{{card_mantra_description}}",
+          info_action: {
+            type: "view_info",
+            payload: { type: "mantra", read_only: true },
+          },
+        },
+      ],
       on_complete: {
         type: "navigate",
         target: {
-          container_id: "lock_ritual_overlay",
-          state_id: "hold_to_lock",
+          container_id: "companion_dashboard",
+          state_id: "day_active",
         },
       },
     },

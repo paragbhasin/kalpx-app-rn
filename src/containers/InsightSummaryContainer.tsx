@@ -3,24 +3,70 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions
 import { useScreenStore } from '../engine/useScreenBridge';
 import Header from '../components/Header';
 import { LinearGradient } from 'expo-linear-gradient';
-import BlockRenderer from '../engine/BlockRenderer';
+import { Ionicons } from '@expo/vector-icons';
+import { executeAction } from '../engine/actionExecutor';
 import { getContainerSync } from '../engine/screenResolver';
 import { Video, ResizeMode } from 'expo-av';
 import { Fonts } from '../theme/fonts';
+import SevenDaysLotus from '../../assets/7days_lotus.svg';
+import { SvgUri } from 'react-native-svg';
 
-import { useDispatch, useSelector } from 'react-redux';
-import { generateCompanion } from '../store/mitraSlice';
-import { RootState, AppDispatch } from '../store/index';
+import { useSelector } from 'react-redux';
+import { RootState } from '../store/index';
 
 const { width, height } = Dimensions.get('window');
+
+const SCHEMA_ASSET_MAP: Record<string, any> = {
+  '/assets/buddhi.svg': require('../../assets/buddhi.svg'),
+  '/assets/viveka.svg': require('../../assets/viveka.svg'),
+  '/assets/tejas.svg': require('../../assets/tejas.svg'),
+  '/assets/shakthi.svg': require('../../assets/shakthi.svg'),
+  '/assets/dharma.svg': require('../../assets/dharma.svg'),
+  '/assets/health_1.svg': require('../../assets/health_1.svg'),
+  '/assets/health_2.svg': require('../../assets/health_2.svg'),
+  '/assets/health_3.svg': require('../../assets/health_3.svg'),
+  '/assets/health_4.svg': require('../../assets/health_4.svg'),
+  '/assets/health_5.svg': require('../../assets/health_5.svg'),
+  '/assets/relation_1.svg': require('../../assets/relation_1.svg'),
+  '/assets/relation_2.svg': require('../../assets/relation_2.svg'),
+  '/assets/relation_3.svg': require('../../assets/relation_3.svg'),
+  '/assets/relation_4.svg': require('../../assets/relation_4.svg'),
+  '/assets/relation_5.svg': require('../../assets/relation_5.svg'),
+  '/assets/wealth_1.svg': require('../../assets/wealth_1.svg'),
+  '/assets/wealth_2.svg': require('../../assets/wealth_2.svg'),
+  '/assets/wealth_3.svg': require('../../assets/wealth_3.svg'),
+  '/assets/wealth_4.svg': require('../../assets/wealth_4.svg'),
+  '/assets/spiritual_growth.png': require('../../assets/spiritual_growth.png'),
+};
+
+const SCHEMA_ICON_FALLBACKS: Record<string, keyof typeof Ionicons.glyphMap> = {
+  '/assets/buddhi.svg': 'bulb-outline',
+  '/assets/viveka.svg': 'eye-outline',
+  '/assets/tejas.svg': 'sunny-outline',
+  '/assets/shakthi.svg': 'flash-outline',
+  '/assets/dharma.svg': 'shield-checkmark-outline',
+  '/assets/health_1.svg': 'fitness-outline',
+  '/assets/health_2.svg': 'body-outline',
+  '/assets/health_3.svg': 'bed-outline',
+  '/assets/health_4.svg': 'nutrition-outline',
+  '/assets/health_5.svg': 'medical-outline',
+  '/assets/relation_1.svg': 'heart-outline',
+  '/assets/relation_2.svg': 'chatbubbles-outline',
+  '/assets/relation_3.svg': 'hand-left-outline',
+  '/assets/relation_4.svg': 'people-outline',
+  '/assets/relation_5.svg': 'home-outline',
+  '/assets/wealth_1.svg': 'sparkles-outline',
+  '/assets/wealth_2.svg': 'leaf-outline',
+  '/assets/wealth_3.svg': 'flower-outline',
+  '/assets/wealth_4.svg': 'compass-outline',
+};
 
 interface InsightSummaryContainerProps {
   schema: any;
 }
 
 const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schema }) => {
-  const dispatch = useDispatch<AppDispatch>();
-  const { companion: companionData, isLoading: isFetching, aiReasoning: globalAiReasoning } = useSelector((state: RootState) => state.mitra);
+  const { isLoading: isFetching, aiReasoning: globalAiReasoning } = useSelector((state: RootState) => state.mitra);
 
   const screenState = useScreenStore((state) => state.screenData);
   const updateScreenData = useScreenStore((state) => state.updateScreenData);
@@ -74,44 +120,76 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
   const catData = useMemo(() => getCategoryData(activeFocus), [activeFocus]);
   const subCatData = useMemo(() => getSubCategoryData(activeFocus, subFocus), [activeFocus, subFocus]);
 
-  const fetchCompanionData = async () => {
-    if (isFetching) return;
+  const currentConfig = schema.insight_config?.[`step${step}`] || {};
 
-    const activeMetrics: any = {};
-    const stableScan = getContainerSync('stable_scan');
-    const metricsStates = ['baseline_vitals', 'baseline_metrics'];
-    metricsStates.forEach(stateId => {
-        const stateBlocks = stableScan?.states?.[stateId]?.blocks || [];
-        stateBlocks.forEach((b: any) => {
-            if (b.type === 'baseline_slider') {
-                activeMetrics[b.label.toLowerCase()] = screenState[b.label] || 5;
-            }
-        });
+  const topDescription = currentConfig.subtext || catData?.description || '';
+  const experienceLabel = currentConfig.experience_label || 'WITHIN THIS, YOU\'RE EXPERIENCING:';
+  const experienceExplanation = (subCatData?.explanation || '').replace(/<b>|<\/b>/g, '');
+
+  const resolveTemplate = (value: any) => {
+    if (typeof value !== 'string') return value;
+    return value.replace(/\{\{([^}]+)\}\}/g, (_, rawKey) => {
+      const key = String(rawKey || '').trim();
+      const resolved = screenState[key];
+      return resolved === undefined || resolved === null ? '' : String(resolved);
     });
+  };
 
-    const payload = {
-      focus: activeFocus,
-      subFocus: subCatData?.label || subFocus,
-      baselineMetrics: activeMetrics,
-      depth: screenState.routine_depth || 'intermediate',
-      dayNumber: 1,
-      locale: 'en',
-      tz: 'Asia/Calcutta'
-    };
-
+  const handleInfoAction = async (action?: any) => {
+    if (!action) return;
     try {
-      await dispatch(generateCompanion(payload)).unwrap();
+      await executeAction(action, {
+        loadScreen,
+        goBack: () => {},
+        setScreenValue: (value: any, key: string) => {
+          updateScreenData(key, value);
+        },
+        screenState: { ...screenState },
+      });
     } catch (err) {
-      console.warn('[InsightSummary] generateCompanion failed:', err);
+      console.error('[InsightSummary] info action failed:', err);
     }
   };
 
-  const currentConfig = schema.insight_config?.[`step${step}`] || {};
+  const renderBreakdownIcon = (icon: any) => {
+    if (typeof icon === 'number') {
+      return <Image source={icon} style={styles.breakdownIcon} />;
+    }
+
+    if (typeof icon === 'string') {
+      const asset = SCHEMA_ASSET_MAP[icon];
+      if (asset) {
+        if (typeof asset === 'number') {
+          return (
+            <SvgUri
+              uri={Image.resolveAssetSource(asset)?.uri ?? null}
+              width="100%"
+              height="100%"
+            />
+          );
+        }
+
+        const AssetComponent = asset;
+        return <AssetComponent width="100%" height="100%" />;
+      }
+
+      const fallbackName = SCHEMA_ICON_FALLBACKS[icon];
+      if (fallbackName) {
+        return <Ionicons name={fallbackName} size={24} color="#d9a557" />;
+      }
+    }
+
+    return (
+      <Image
+        source={require('../../assets/lotus_icon.png')}
+        style={styles.breakdownIcon}
+      />
+    );
+  };
 
   const handleNext = () => {
     if (step === 0) {
       updateScreenData('insight_step', 1);
-      fetchCompanionData();
     } else if (step === 2) {
       const target = schema.on_complete?.target || { container_id: 'companion_dashboard', state_id: 'day_active' };
       loadScreen(target.container_id, target.state_id);
@@ -120,16 +198,18 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
 
   const renderStep0 = () => (
     <View style={styles.stepContainer}>
-      <View style={styles.lotusGlowWrap}>
-          <LinearGradient
-            colors={['rgba(217, 165, 87, 0.3)', 'transparent']}
-            style={styles.glowBg}
-          />
-        <Image source={require('../../assets/lotus_icon.png')} style={styles.lotusHeader} />
-      </View>
-      
+      {typeof SevenDaysLotus === 'number' ? (
+        <SvgUri
+          uri={Image.resolveAssetSource(SevenDaysLotus)?.uri ?? null}
+          width={width - 40}
+          height={86}
+          style={styles.topOrnament}
+        />
+      ) : (
+        <SevenDaysLotus width={width - 40} height={86} style={styles.topOrnament} />
+      )}
+
       <Text style={styles.headline}>{currentConfig.headline}</Text>
-      <Text style={styles.subtext}>{currentConfig.subtext}</Text>
 
       <View style={styles.ornamentalDivider}>
         <View style={styles.ornamentalLine} />
@@ -142,34 +222,40 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
             <Text style={styles.sectionTitle}>
               {currentConfig.chosen_label} <Text style={styles.highlight}>{catData?.title}</Text>.
             </Text>
-            <Text style={styles.introP}>{catData?.description}</Text>
+            {!!topDescription && <Text style={styles.introP}>{topDescription}</Text>}
 
             <View style={styles.breakdownList}>
               {catData?.breakdown?.map((item: any, idx: number) => (
                 <View key={idx} style={styles.breakdownItem}>
                   <View style={styles.breakdownIconWrap}>
-                    <Image
-                      source={typeof item.icon === 'number' ? item.icon : require('../../assets/lotus_icon.png')}
-                      style={styles.breakdownIcon}
-                    />
+                    {renderBreakdownIcon(item.icon)}
                   </View>
                   <View style={styles.breakdownTextWrap}>
-                    <Text style={styles.term}>{item.term}</Text>
-                    <Text style={styles.definition}> - {item.definition}</Text>
+                    <Text style={styles.breakdownCopy}>
+                      <Text style={styles.term}>{item.term}</Text>
+                      <Text style={styles.definition}> - {item.definition}</Text>
+                    </Text>
                   </View>
                 </View>
               ))}
             </View>
+
+            <Image
+              source={require('../../assets/half-mandala-removebg-preview.png')}
+              style={styles.cardGlowMark}
+            />
           </View>
 
           <View style={[styles.glassPathCard, styles.experienceCard]}>
             <View style={styles.experienceHeader}>
-              <Text style={styles.label}>{currentConfig.experience_label}</Text>
+              <Text style={styles.label}>{experienceLabel}</Text>
               <Text style={styles.subCategoryName}>{subCatData?.label}</Text>
             </View>
-            <Text style={styles.explanationText}>
-                {subCatData?.explanation?.replace(/<b>|<\/b>/g, '')}
-            </Text>
+            <Text style={styles.explanationText}>{experienceExplanation}</Text>
+            <Image
+              source={require('../../assets/half-mandala-removebg-preview.png')}
+              style={styles.experienceMandala}
+            />
           </View>
       </View>
 
@@ -188,62 +274,65 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
   );
 
   const renderStep2 = () => {
-    const practices: any[] = [];
-    if (companionData?.companion) {
-        const { sankalp, practice, mantra } = companionData.companion;
-        if (practice) {
-            practices.push({
-                type: 'practice_card',
-                label: 'Practice',
-                title: practice.core.title,
-                description: practice.core.summary,
-                meta: practice.ui.card_meta,
-                detailData: { ...practice.core, type: 'practice' }
-            });
-        }
-        if (sankalp) {
-            practices.push({
-                type: 'practice_card',
-                label: 'Sankalp',
-                title: sankalp.core.title,
-                description: sankalp.core.line,
-                detailData: { ...sankalp.core, type: 'sankalp' }
-            });
-        }
-        if (mantra) {
-            practices.push({
-                type: 'practice_card',
-                label: 'Mantra',
-                title: mantra.core.title,
-                description: mantra.core.line,
-                detailData: { ...mantra.core, type: 'mantra' }
-            });
-        }
-    } else {
-        practices.push(...(schema.blocks || []).filter((b: any) => b.type === 'practice_card'));
-    }
+    const practiceBlocks = (schema.blocks || []).filter((b: any) => b.type === 'practice_card');
+    const summaryText = resolveTemplate(screenState.analysis_insight)
+      || globalAiReasoning
+      || screenState.ai_reasoning
+      || 'This combination was selected to support your current state with practices rooted in Sanatan wisdom.';
+
+    const cards = practiceBlocks
+      .map((block: any) => ({
+        ...block,
+        purpose: resolveTemplate(block.purpose || block.label || ''),
+        title: resolveTemplate(block.title || ''),
+        description: resolveTemplate(block.description || ''),
+      }))
+      .filter((card: any) => card.title || card.description);
 
     return (
         <View style={styles.stepContainer}>
-            <View style={styles.step2Header}>
-                <View style={styles.lineSmall} />
-                <Image source={require('../../assets/lotus_icon.png')} style={styles.lotusSmall} />
-                <View style={styles.lineSmall} />
-            </View>
-
             <Text style={styles.headlineStep2}>{currentConfig.headline}</Text>
             <Text style={styles.introSubtextStep2}>{currentConfig.subtext}</Text>
-            
-            {Boolean(globalAiReasoning || screenState.ai_reasoning) && (
-                <Text style={styles.whyPathWhisper}>{globalAiReasoning || screenState.ai_reasoning}</Text>
-            )}
+
+            <View style={styles.step2Divider}>
+              <View style={styles.step2DividerLine} />
+              <Image source={require('../../assets/lotus_icon.png')} style={styles.step2DividerLotus} />
+              <View style={styles.step2DividerLine} />
+            </View>
+
+            <Text style={styles.step2SummaryText}>{summaryText}</Text>
 
             <View style={styles.cardsStack}>
-                {isFetching && practices.length === 0 ? (
+                {isFetching && cards.length === 0 ? (
                     <Text style={styles.loadingText}>Tailoring your path...</Text>
                 ) : (
-                    practices.map((block: any, i: number) => (
-                        <BlockRenderer key={i} block={block} />
+                    cards.map((card: any, i: number) => (
+                        <View key={i} style={styles.step2Card}>
+                          <Text style={styles.step2CardLabel}>{card.purpose}</Text>
+                          <View style={styles.step2CardTitleRow}>
+                            <Text style={styles.step2CardTitle}>{card.title}</Text>
+                            {!!card.info_action && (
+                              <TouchableOpacity
+                                style={styles.step2InfoButton}
+                                activeOpacity={0.8}
+                                onPress={() => handleInfoAction(card.info_action)}
+                              >
+                                <Ionicons name="information" size={14} color="#ffffff" />
+                              </TouchableOpacity>
+                            )}
+                          </View>
+                          {!!card.description && (
+                            <Text style={styles.step2CardDescription} numberOfLines={3}>
+                              {card.description}
+                            </Text>
+                          )}
+                          {i === cards.length - 1 && (
+                            <Image
+                              source={require('../../assets/half-mandala-removebg-preview.png')}
+                              style={styles.step2CardMandala}
+                            />
+                          )}
+                        </View>
                     ))
                 )}
             </View>
@@ -283,128 +372,114 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
   }
 
   return (
-    <ScrollView style={styles.root} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-      <Header isTransparent />
-      {step === 0 && renderStep0()}
-      {step === 2 && renderStep2()}
-    </ScrollView>
+    <View style={styles.root}>
+      <Image source={require('../../assets/beige_bg.png')} style={StyleSheet.absoluteFill} resizeMode="cover" />
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <Header isTransparent />
+        {step === 0 && renderStep0()}
+        {step === 2 && renderStep2()}
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: '#fffdf9',
   },
   scrollContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingBottom: 60,
   },
   stepContainer: {
     alignItems: 'center',
     width: '100%',
   },
-  lotusGlowWrap: {
-    position: 'relative',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 10,
-    marginTop: 20,
-  },
-  glowBg: {
-    position: 'absolute',
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    opacity: 0.5,
-  },
-  lotusHeader: {
-    height: 80,
-    width: 80,
+  topOrnament: {
+    width: width - 40,
+    height: 86,
     resizeMode: 'contain',
-    zIndex: 1,
+    marginTop: 16,
+    marginBottom: 8,
   },
   headline: {
-    fontSize: 26,
+    fontSize: 28,
     fontFamily: Fonts.serif.bold,
     color: '#432104',
     textAlign: 'center',
-    marginBottom: 4,
-  },
-  subtext: {
-    fontSize: 14,
-    fontFamily: Fonts.sans.regular,
-    color: '#432104',
-    textAlign: 'center',
-    lineHeight: 20,
-    opacity: 0.8,
+    marginBottom: 6,
+    lineHeight: 36,
   },
   ornamentalDivider: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    marginVertical: 15,
-    width: 200,
+    marginTop: 10,
+    marginBottom: 18,
+    width: 180,
   },
   ornamentalLine: {
     flex: 1,
-    height: 2,
-    backgroundColor: 'rgba(217, 165, 87, 0.3)',
+    height: 1,
+    backgroundColor: 'rgba(217, 165, 87, 0.35)',
   },
   ornamentalDiamond: {
-    width: 10,
-    height: 10,
+    width: 14,
+    height: 14,
     backgroundColor: '#d9a557',
     transform: [{ rotate: '45deg' }],
   },
   understandingContent: {
     width: '100%',
     gap: 20,
-    marginTop: 10,
   },
   glassPathCard: {
-    borderRadius: 24,
-    padding: 20,
+    borderRadius: 30,
+    paddingHorizontal: 22,
+    paddingVertical: 28,
     borderWidth: 1.5,
-    borderColor: 'rgba(255, 204, 102, 0.8)',
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    borderColor: '#f3c24f',
+    backgroundColor: 'rgba(255, 255, 255, 0.72)',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
+    shadowOpacity: 0.09,
+    shadowRadius: 18,
     elevation: 5,
+    overflow: 'hidden',
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 19,
     fontFamily: Fonts.serif.bold,
     color: '#432104',
-    marginBottom: 4,
+    textAlign: 'center',
+    marginBottom: 6,
   },
   highlight: {
     color: '#d9a557',
   },
   introP: {
-    fontSize: 14,
-    fontFamily: Fonts.sans.regular,
+    fontSize: 16,
+    fontFamily: Fonts.serif.regular,
     color: '#432104',
-    lineHeight: 22,
+    lineHeight: 24,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: 18,
   },
   breakdownList: {
-    gap: 8,
+    gap: 14,
   },
   breakdownItem: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    paddingVertical: 4,
+    alignItems: 'flex-start',
+    gap: 14,
   },
   breakdownIconWrap: {
-    width: 50,
-    height: 50,
+    width: 42,
+    height: 42,
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 2,
   },
   breakdownIcon: {
     width: '100%',
@@ -413,68 +488,77 @@ const styles = StyleSheet.create({
   },
   breakdownTextWrap: {
     flex: 1,
-    paddingTop: 4,
+    paddingTop: 2,
+  },
+  breakdownCopy: {
+    fontSize: 16,
+    lineHeight: 22,
+    color: '#432104',
+    fontFamily: Fonts.sans.regular,
   },
   term: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: Fonts.sans.bold,
     color: '#432104',
   },
   definition: {
-    fontSize: 15,
+    fontSize: 16,
     fontFamily: Fonts.sans.regular,
     color: '#432104',
   },
   experienceCard: {
-    marginTop: 10,
+    minHeight: 210,
   },
   experienceHeader: {
-    marginBottom: 8,
+    marginBottom: 14,
   },
   label: {
     fontSize: 13,
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 1.6,
     color: '#432104',
-    fontFamily: Fonts.sans.regular,
+    fontFamily: Fonts.serif.regular,
+    marginBottom: 8,
   },
   subCategoryName: {
-    fontSize: 20,
+    fontSize: 22,
     fontFamily: Fonts.serif.bold,
     color: '#cc9b2f',
   },
   explanationText: {
-    fontSize: 14,
-    fontFamily: Fonts.sans.regular,
-    lineHeight: 22,
+    fontSize: 16,
+    fontFamily: Fonts.serif.regular,
+    lineHeight: 24,
     color: '#432104',
+    maxWidth: '88%',
   },
   footerArea: {
-    marginTop: 20,
+    marginTop: 32,
     width: '100%',
     alignItems: 'center',
   },
   primaryActionBtn: {
     width: '100%',
-    height: 56,
-    borderRadius: 28,
+    height: 64,
+    borderRadius: 32,
     overflow: 'hidden',
     shadowColor: '#d9a557',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: 24,
     elevation: 8,
-    marginBottom: 12,
+    marginBottom: 8,
   },
   buttonGradientFill: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 32,
   },
   buttonText: {
     color: '#FFF',
-    fontSize: 17,
-    fontFamily: Fonts.sans.semiBold,
+    fontSize: 18,
+    fontFamily: Fonts.serif.bold,
   },
   footerNote: {
     fontSize: 13,
@@ -482,6 +566,24 @@ const styles = StyleSheet.create({
     color: '#432104',
     fontStyle: 'italic',
     textAlign: 'center',
+  },
+  cardGlowMark: {
+    position: 'absolute',
+    right: -20,
+    bottom: -22,
+    width: 170,
+    height: 170,
+    resizeMode: 'contain',
+    opacity: 0.18,
+  },
+  experienceMandala: {
+    position: 'absolute',
+    right: -18,
+    bottom: -8,
+    width: 150,
+    height: 150,
+    resizeMode: 'contain',
+    opacity: 0.18,
   },
   videoContainer: {
     flex: 1,
@@ -499,50 +601,52 @@ const styles = StyleSheet.create({
     width: width,
     height: height,
   },
-  step2Header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 8,
-    width: '100%',
-  },
-  lineSmall: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#D9A557',
-  },
-  lotusSmall: {
-    width: 40,
-    height: 40,
-    marginHorizontal: 10,
-    resizeMode: 'contain',
-  },
   headlineStep2: {
-    fontSize: 28,
+    fontSize: 32,
     fontFamily: Fonts.serif.bold,
     color: '#432104',
     textAlign: 'center',
+    marginTop: 28,
   },
   introSubtextStep2: {
-    fontSize: 14,
-    fontFamily: Fonts.sans.regular,
+    fontSize: 18,
+    fontFamily: Fonts.serif.regular,
     color: '#432104',
     textAlign: 'center',
-    marginTop: 4,
+    marginTop: 14,
+    lineHeight: 28,
+    paddingHorizontal: 20,
   },
-  whyPathWhisper: {
-    fontSize: 16,
-    color: '#615247',
-    textAlign: 'center',
-    lineHeight: 24,
-    marginVertical: 12,
-    paddingHorizontal: 8,
+  step2Divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    marginTop: 28,
+    marginBottom: 20,
+  },
+  step2DividerLine: {
+    flex: 1,
+    height: 1.5,
+    backgroundColor: 'rgba(217, 165, 87, 0.45)',
+  },
+  step2DividerLotus: {
+    width: 32,
+    height: 32,
+    marginHorizontal: 16,
+    resizeMode: 'contain',
+  },
+  step2SummaryText: {
+    fontSize: 18,
     fontFamily: Fonts.serif.regular,
+    color: '#432104',
+    textAlign: 'center',
+    lineHeight: 28,
+    marginBottom: 32,
+    paddingHorizontal: 18,
   },
   cardsStack: {
     width: '100%',
-    gap: 12,
-    marginTop: 10,
+    gap: 20,
   },
   loadingText: {
     fontSize: 16,
@@ -551,11 +655,71 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: 40,
   },
+  step2Card: {
+    width: '100%',
+    borderRadius: 24,
+    paddingHorizontal: 22,
+    paddingVertical: 24,
+    borderWidth: 2,
+    borderColor: '#E8C587',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    shadowColor: '#d7a64a',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 4,
+    overflow: 'hidden',
+  },
+  step2CardLabel: {
+    fontSize: 15,
+    fontFamily: Fonts.serif.bold,
+    color: '#c4a27a',
+    marginBottom: 10,
+    textTransform: 'capitalize',
+  },
+  step2CardTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  step2CardTitle: {
+    flex: 1,
+    fontSize: 20,
+    lineHeight: 28,
+    fontFamily: Fonts.serif.bold,
+    color: '#432104',
+  },
+  step2InfoButton: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#d9a012',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  step2CardDescription: {
+    fontSize: 16,
+    lineHeight: 26,
+    fontFamily: Fonts.serif.regular,
+    color: '#432104',
+    paddingRight: 12,
+  },
+  step2CardMandala: {
+    position: 'absolute',
+    right: -30,
+    bottom: -30,
+    width: 144,
+    height: 144,
+    resizeMode: 'contain',
+    opacity: 0.1,
+  },
   footerNoteKalpx: {
     fontSize: 14,
     color: '#8c8881',
     fontFamily: Fonts.sans.medium,
     textAlign: 'center',
+    marginTop: 4,
   }
 });
 

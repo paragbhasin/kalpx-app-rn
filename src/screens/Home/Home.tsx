@@ -8,11 +8,12 @@
  *
  * Old Home.tsx saved as Home.old.tsx for reference.
  */
-import React, { useState, useEffect } from "react";
+import { Ionicons } from "@expo/vector-icons";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
-  FlatList,
   Image,
   SafeAreaView,
   ScrollView,
@@ -22,37 +23,37 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
+import { useScreenStore } from "../../engine/useScreenBridge";
+import api from "../../Networks/axios";
 import store, { RootState } from "../../store";
 import { screenActions } from "../../store/screenSlice";
-import api from "../../Networks/axios";
 import { Fonts } from "../../theme/fonts";
 
-// Feature items matching web's MobileHome.vue
 const FEATURE_ITEMS = [
   {
-    icon: "compass-outline" as const,
+    icon: require("../../../assets/guided-growth.png"),
     title: "KalpX Mitra",
     text: "Your daily companion.",
   },
   {
-    icon: "shield-checkmark-outline" as const,
+    icon: require("../../../assets/daily-consistency.png"),
     title: "Support When Triggered",
     text: "Calm guidance in difficult moments.",
   },
   {
-    icon: "pulse-outline" as const,
+    icon: require("../../../assets/self-reflection.png"),
     title: "Quick Check-In",
     text: "Pause and reflect.",
   },
   {
-    icon: "flower-outline" as const,
+    icon: require("../../../assets/sanatan-wisdom.png"),
     title: "Core Practice",
     text: "Daily mantras, sankalps, and guidance.",
   },
 ];
+
+const HOME_BACKGROUND = require("../../../assets/new_bg.png");
 
 // Legacy export for RelatedVideosScreen compatibility
 export const collapseControl = { avoidCollapse: false };
@@ -64,6 +65,13 @@ export default function Home() {
     (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
   );
   const isLoggedIn = !!user;
+
+  const updateBackground = useScreenStore((state) => state.updateBackground);
+
+  useEffect(() => {
+    updateBackground(HOME_BACKGROUND);
+    return () => updateBackground(null);
+  }, [updateBackground]);
 
   const [mitraJourneyId, setMitraJourneyId] = useState<string | null>(null);
   const [journeyFocus, setJourneyFocus] = useState<string>("");
@@ -86,9 +94,25 @@ export default function Home() {
             setJourneyFocus(res.data.focus || "");
             setJourneyDay(res.data.dayNumber || 1);
             // Seed screen state for MitraEngine
-            store.dispatch(screenActions.setScreenValue({ key: "journey_id", value: res.data.journeyId }));
-            store.dispatch(screenActions.setScreenValue({ key: "day_number", value: res.data.dayNumber || 1 }));
-            if (res.data.focus) store.dispatch(screenActions.setScreenValue({ key: "scan_focus", value: res.data.focus }));
+            store.dispatch(
+              screenActions.setScreenValue({
+                key: "journey_id",
+                value: res.data.journeyId,
+              }),
+            );
+            store.dispatch(
+              screenActions.setScreenValue({
+                key: "day_number",
+                value: res.data.dayNumber || 1,
+              }),
+            );
+            if (res.data.focus)
+              store.dispatch(
+                screenActions.setScreenValue({
+                  key: "scan_focus",
+                  value: res.data.focus,
+                }),
+              );
           } else {
             setMitraJourneyId(null);
           }
@@ -105,9 +129,19 @@ export default function Home() {
   const navigateToMitra = (hasJourney: boolean) => {
     const { loadScreenWithData } = require("../../store/screenSlice");
     if (hasJourney) {
-      store.dispatch(loadScreenWithData({ containerId: "companion_dashboard", stateId: "day_active" }));
+      store.dispatch(
+        loadScreenWithData({
+          containerId: "companion_dashboard",
+          stateId: "day_active",
+        }),
+      );
     } else {
-      store.dispatch(loadScreenWithData({ containerId: "choice_stack", stateId: "discipline_select" }));
+      store.dispatch(
+        loadScreenWithData({
+          containerId: "choice_stack",
+          stateId: "discipline_select",
+        }),
+      );
     }
     navigation.navigate("MitraEngine");
   };
@@ -122,18 +156,24 @@ export default function Home() {
     );
   }
 
-  const categories = [
-    { id: "1", name: "Mitra", icon: "compass-outline" as const, isMitra: true },
-    { id: "2", name: t("categories.explore") || "Videos", icon: "play-circle-outline" as const, screen: "Explore" },
-    { id: "3", name: t("categories.classes") || "Classes", icon: "laptop-outline" as const, screen: "ClassesScreen" },
-    { id: "4", name: t("home.community") || "Community", icon: "people-outline" as const, screen: "CommunityLanding" },
-  ];
+  // Temporarily disable the quick-category nav (Mitra / Videos / Classes / Community).
+  // const categories = [
+  //   { id: "1", name: "Mitra", icon: "compass-outline" as const, isMitra: true },
+  //   { id: "2", name: t("categories.explore") || "Videos", icon: "play-circle-outline" as const, screen: "Explore" },
+  //   { id: "3", name: t("categories.classes") || "Classes", icon: "laptop-outline" as const, screen: "ClassesScreen" },
+  //   { id: "4", name: t("home.community") || "Community", icon: "people-outline" as const, screen: "CommunityLanding" },
+  // ];
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FAF7F2" translucent={false} />
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor="#FAF7F2"
+        translucent={false}
+      />
 
       {/* ── Top Category Nav ── */}
+      {/*
       <FlatList
         data={categories}
         horizontal
@@ -156,22 +196,31 @@ export default function Home() {
           </TouchableOpacity>
         )}
       />
+      */}
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* ── Hero Section ── */}
         <View style={styles.heroSection}>
-          <Text style={styles.heroQuote}>"Lift yourself by your own Self."</Text>
+          <Text style={styles.heroQuote}>
+            "Lift yourself by your own Self."
+          </Text>
           <Text style={styles.heroSource}>— Bhagavad Gita 6.5</Text>
           <Text style={styles.heroTitle}>Guided growth for real life</Text>
           <Text style={styles.heroSubtitle}>
-            Helping you navigate life's challenges with clarity, balance, and Sanatan wisdom.
+            Helping you navigate life's challenges with clarity, balance, and
+            Sanatan wisdom.
           </Text>
         </View>
 
         {/* ── Journey CTA ── */}
         {mitraJourneyId ? (
-          <TouchableOpacity style={styles.journeyCard} onPress={() => navigateToMitra(true)}>
+          <TouchableOpacity
+            style={styles.journeyCard}
+            onPress={() => navigateToMitra(true)}
+          >
             <View style={styles.journeyCardInner}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.journeyCardTitle}>
@@ -187,7 +236,10 @@ export default function Home() {
             </View>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity style={styles.ctaButton} onPress={() => navigateToMitra(false)}>
+          <TouchableOpacity
+            style={styles.ctaButton}
+            onPress={() => navigateToMitra(false)}
+          >
             <Text style={styles.ctaText}>Begin with KalpX Mitra →</Text>
           </TouchableOpacity>
         )}
@@ -195,11 +247,15 @@ export default function Home() {
         {/* ── Companion Preview ── */}
         <View style={styles.companionSection}>
           <Text style={styles.companionLabel}>KALPX MITRA</Text>
-          <Text style={styles.companionTitle}>Your guided path begins here</Text>
-          <Text style={styles.companionDesc}>A companion for the life you are actually living.</Text>
+          <Text style={styles.companionTitle}>
+            Your guided path begins here
+          </Text>
+          <Text style={styles.companionDesc}>
+            A companion for the life you are actually living.
+          </Text>
           <TouchableOpacity onPress={() => navigateToMitra(!!mitraJourneyId)}>
             <Image
-              source={require("../../../assets/locus.png")}
+              source={require("../../../assets/home_side(2).png")}
               style={styles.companionImage}
               resizeMode="contain"
             />
@@ -212,9 +268,12 @@ export default function Home() {
           <View style={styles.featureGrid}>
             {FEATURE_ITEMS.map((item, idx) => (
               <View key={idx} style={styles.featureCard}>
-                <View style={styles.featureIconWrap}>
-                  <Ionicons name={item.icon} size={28} color="#D4A017" />
-                </View>
+                <Image
+                  source={item.icon}
+                  style={styles.featureIconImage}
+                  resizeMode="contain"
+                />
+
                 <Text style={styles.featureTitle}>{item.title}</Text>
                 <Text style={styles.featureText}>{item.text}</Text>
               </View>
@@ -240,7 +299,6 @@ export default function Home() {
             <Text style={styles.loginText}>Sign in to save your journey</Text>
           </TouchableOpacity>
         )}
-
       </ScrollView>
     </SafeAreaView>
   );
@@ -249,7 +307,7 @@ export default function Home() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FAF7F2",
+    backgroundColor: "transparent",
   },
   loadingWrap: {
     flex: 1,
@@ -277,7 +335,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 12,
+    paddingTop: 65,
     paddingBottom: 40,
   },
 
@@ -350,19 +408,32 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
 
-  // Begin CTA
+  // Begin CTA — premium gradient-style button look
   ctaButton: {
-    backgroundColor: "#D4A017",
-    borderRadius: 28,
-    paddingVertical: 16,
-    paddingHorizontal: 32,
+    width: "86%",
+    alignSelf: "center",
+    borderRadius: 999,
+    paddingVertical: 14,
+    paddingHorizontal: 28,
     alignItems: "center",
+    justifyContent: "center",
     marginBottom: 24,
-    shadowColor: "#D4A017",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+
+    // Gradient fallback base color
+    backgroundColor: "#8e6f53",
+
+    // Border glow
+    borderWidth: 2,
+    borderColor: "rgba(255, 230, 190, 0.6)",
+
+    // iOS shadow
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.35,
+    shadowRadius: 25,
+
+    // Android shadow
+    elevation: 8,
   },
   ctaText: {
     fontFamily: Fonts.serif.regular,
@@ -375,11 +446,8 @@ const styles = StyleSheet.create({
   companionSection: {
     alignItems: "center",
     marginBottom: 32,
-    paddingVertical: 20,
+    // paddingVertical: 20,
     paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: "#EDD9A3",
-    borderRadius: 12,
   },
   companionLabel: {
     fontFamily: Fonts.sans.semiBold,
@@ -387,6 +455,10 @@ const styles = StyleSheet.create({
     letterSpacing: 3,
     color: "#564B42",
     marginBottom: 6,
+  },
+  featureIconImage: {
+    width: 28,
+    height: 28,
   },
   companionTitle: {
     fontFamily: Fonts.sans.medium,
@@ -418,17 +490,16 @@ const styles = StyleSheet.create({
   },
   featureGrid: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    gap: 12,
+    justifyContent: "center",
+    // alignItems: "flex-start",
+    // gap: 5,
   },
   featureCard: {
-    width: "47%",
-    backgroundColor: "#FFFFFF",
-    borderRadius: 12,
-    padding: 16,
+    width: "27%",
+
+    padding: 5,
     alignItems: "center",
-    shadowColor: "#000",
+
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
@@ -445,14 +516,14 @@ const styles = StyleSheet.create({
   },
   featureTitle: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 15,
+    fontSize: 13,
     color: "#432104",
     textAlign: "center",
     marginBottom: 4,
   },
   featureText: {
     fontFamily: Fonts.sans.regular,
-    fontSize: 12,
+    fontSize: 11,
     color: "#5C5648",
     textAlign: "center",
   },
@@ -465,7 +536,7 @@ const styles = StyleSheet.create({
   philosophyText: {
     fontFamily: Fonts.serif.regular,
     fontSize: 16,
-    color: "#D4A017",
+    color: "#432104",
     textDecorationLine: "underline",
   },
 

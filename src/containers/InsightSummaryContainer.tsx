@@ -1,5 +1,5 @@
 import React, { useMemo, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Pressable, Image, Dimensions } from 'react-native';
 import { useScreenStore } from '../engine/useScreenBridge';
 import Header from '../components/Header';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -73,6 +73,7 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
   const loadScreen = useScreenStore((state) => state.loadScreen);
   const updateBackground = useScreenStore((state) => state.updateBackground);
   const updateHeaderHidden = useScreenStore((state) => state.updateHeaderHidden);
+  const currentStateId = useScreenStore((state) => state.currentStateId);
 
   const videoRef = useRef<Video>(null);
   const step = screenState.insight_step || 0;
@@ -138,7 +139,7 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
   const handleInfoAction = async (action?: any) => {
     if (!action) return;
     try {
-      await executeAction(action, {
+      await executeAction({ ...action, currentScreen: { container_id: 'insight_summary', state_id: currentStateId } }, {
         loadScreen,
         goBack: () => {},
         setScreenValue: (value: any, key: string) => {
@@ -160,17 +161,16 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
       const asset = SCHEMA_ASSET_MAP[icon];
       if (asset) {
         if (typeof asset === 'number') {
-          return (
-            <SvgUri
-              uri={Image.resolveAssetSource(asset)?.uri ?? null}
-              width="100%"
-              height="100%"
-            />
-          );
+          return <Image source={asset} style={styles.breakdownIcon} />;
         }
 
-        const AssetComponent = asset;
-        return <AssetComponent width="100%" height="100%" />;
+        if (typeof asset === 'function' || (typeof asset === 'object' && asset !== null)) {
+          const SVGComp = (asset as any).default || asset;
+          if (typeof SVGComp === 'function' || (typeof SVGComp === 'object' && SVGComp !== null)) {
+            const Component = SVGComp as any;
+            return <Component width="100%" height="100%" />;
+          }
+        }
       }
 
       const fallbackName = SCHEMA_ICON_FALLBACKS[icon];
@@ -192,22 +192,32 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
       updateScreenData('insight_step', 1);
     } else if (step === 2) {
       const target = schema.on_complete?.target || { container_id: 'companion_dashboard', state_id: 'day_active' };
-      loadScreen(target.container_id, target.state_id);
+      loadScreen(target);
     }
   };
 
   const renderStep0 = () => (
     <View style={styles.stepContainer}>
-      {typeof SevenDaysLotus === 'number' ? (
-        <SvgUri
-          uri={Image.resolveAssetSource(SevenDaysLotus)?.uri ?? null}
-          width={width - 40}
-          height={86}
-          style={styles.topOrnament}
-        />
-      ) : (
-        <SevenDaysLotus width={width - 40} height={86} style={styles.topOrnament} />
-      )}
+      {(() => {
+        if (typeof SevenDaysLotus === 'number') {
+          return (
+            <SvgUri
+              uri={Image.resolveAssetSource(SevenDaysLotus)?.uri ?? null}
+              width={width - 40}
+              height={86}
+              style={styles.topOrnament}
+            />
+          );
+        }
+        if (typeof SevenDaysLotus === 'function' || (typeof SevenDaysLotus === 'object' && SevenDaysLotus !== null)) {
+          const SVGComp = (SevenDaysLotus as any).default || SevenDaysLotus;
+          if (typeof SVGComp === 'function' || (typeof SVGComp === 'object' && SVGComp !== null)) {
+            const Component = SVGComp as any;
+            return <Component width={width - 40} height={86} style={styles.topOrnament} />;
+          }
+        }
+        return null;
+      })()}
 
       <Text style={styles.headline}>{currentConfig.headline}</Text>
 
@@ -307,7 +317,12 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
                     <Text style={styles.loadingText}>Tailoring your path...</Text>
                 ) : (
                     cards.map((card: any, i: number) => (
-                        <View key={i} style={styles.step2Card}>
+                        <Pressable
+                          key={i}
+                          style={styles.step2Card}
+                          onPress={() => handleInfoAction(card.info_action)}
+                          disabled={!card.info_action}
+                        >
                           <Text style={styles.step2CardLabel}>{card.purpose}</Text>
                           <View style={styles.step2CardTitleRow}>
                             <Text style={styles.step2CardTitle}>{card.title}</Text>
@@ -332,7 +347,7 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({ schem
                               style={styles.step2CardMandala}
                             />
                           )}
-                        </View>
+                        </Pressable>
                     ))
                 )}
             </View>

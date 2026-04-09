@@ -347,7 +347,7 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
                           ? 32
                           : 24;
                       if (assetSource) {
-                        if (usesImageAsset(iconPath)) {
+                        if (usesImageAsset(iconPath) || typeof assetSource === 'number') {
                           return (
                             <Image
                               source={assetSource}
@@ -356,14 +356,14 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
                             />
                           );
                         }
-                        const resolved = Image.resolveAssetSource(assetSource);
-                        return (
-                          <SvgUri
-                            uri={resolved?.uri ?? null}
-                            width={iconSize}
-                            height={iconSize}
-                          />
-                        );
+                        
+                        if (typeof assetSource === 'function' || (typeof assetSource === 'object' && assetSource !== null)) {
+                          const SVGComp = (assetSource as any).default || assetSource;
+                          if (typeof SVGComp === 'function' || (typeof SVGComp === 'object' && SVGComp !== null)) {
+                            const Component = SVGComp as any;
+                            return <Component width={iconSize} height={iconSize} />;
+                          }
+                        }
                       }
                       const iconName = resolveIconName(iconPath);
                       if (iconName) {

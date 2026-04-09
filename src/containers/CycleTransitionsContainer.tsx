@@ -1,18 +1,3 @@
-/**
- * CycleTransitionsContainer — Renders info screens, checkpoints, and reveal screens.
- * Maps to Vue CycleTransitionsContainer.vue.
- *
- * Two modes:
- *   1. INFO REVEAL MODE (info_reveal / offering_reveal):
- *      Custom detail layout for mantra, sankalp, or practice — shows title,
- *      devanagari, IAST, meaning, collapsible wisdom cards, deity/tradition
- *      metadata, and a Start button rendered via BlockRenderer footer blocks.
- *
- *   2. GENERIC TRANSITION MODE:
- *      Standard block layout for check-in, trigger advice, checkpoints, etc.
- *      Renders header / content / footer / page_bottom blocks.
- */
-
 import React, { useState, useMemo, useCallback } from 'react';
 import {
   View,
@@ -23,10 +8,18 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
+  Image,
+  Dimensions,
 } from 'react-native';
 import BlockRenderer from '../engine/BlockRenderer';
 import { useScreenStore } from '../engine/useScreenBridge';
 import { Fonts } from '../theme/fonts';
+
+// SVGs
+import MantraLotus3d from '../../assets/mantra-lotus-3d.svg';
+import { SvgUri } from 'react-native-svg';
+
+const { width } = Dimensions.get('window');
 
 // Enable LayoutAnimation on Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -44,53 +37,15 @@ interface CycleTransitionsContainerProps {
 type ActivityType = 'mantra' | 'sankalp' | 'practice' | null;
 
 // ---------------------------------------------------------------------------
-// Default fallback data (mirrors Vue version)
-// ---------------------------------------------------------------------------
-
-const defaultMantra = {
-  title: 'Prithvi Gayatri',
-  subtitle:
-    '\u0913\u092E \u092A\u0943\u0925\u094D\u0935\u0940 \u0926\u0947\u0935\u094D\u092F\u0948 \u091A \u0935\u093F\u0926\u094D\u092E\u0939\u0947 \u0938\u0939\u0938\u094D\u0930\u092E\u0942\u0930\u094D\u0924\u094D\u092F\u0948 \u091A \u0927\u0940\u092E\u0939\u093F \u0924\u0928\u094D\u0928\u094B \u0927\u0930\u093E \u092A\u094D\u0930\u091A\u094B\u0926\u092F\u093E\u0924\u094D',
-  english:
-    'Om Prithvi Devyai Cha Vidmahe\nSahasramurtyai Cha Dhimahi\nTanno Dhara Prachodayat',
-  meaning: 'Invokes the \u2018Earth\u2019 element for grounding and physical stability.',
-  essence: 'Invokes the \u2018Earth\u2019 element for grounding and physical stability.',
-  benefits: 'Promotes patience, stability, and deep connection with the nature.',
-};
-
-const defaultSankalp = {
-  how_to_live:
-    'I gently loosen the pace of my day, allowing my inner world to breathe freely again.',
-  essence:
-    'Slowing down reduces rajas and soothes prana. In yogic teachings, a calm heart reflects a calm mind. This sankalp invites rhythm, ease, and emotional softness.',
-  benefits: ['Steadier emotions', 'Lower stress', 'Sense of inner rhythm'],
-};
-
-const defaultPractice = {
-  why_works:
-    'Mindful movement and focused breath transition the nervous system from a state of alertness to one of calm and restoration.',
-};
-
-// ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 
 const hasContent = (val: any): boolean => {
   if (!val) return false;
   if (typeof val === 'string') return val.trim().length > 0;
-  if (Array.isArray(val)) return val.some((item) => hasContent(item));
+  if (Array.isArray(val)) return val.length > 0;
   if (typeof val === 'object') return Object.keys(val).length > 0;
   return true;
-};
-
-const formatShift = (shift: string | undefined): string => {
-  if (!shift) return '';
-  if (!shift.includes('\u2192') && !shift.includes('->')) return shift;
-  const parts = shift.split(/\u2192|->/).map((s) => s.trim());
-  if (parts.length === 2) {
-    return `moving from ${parts[0]} toward ${parts[1]}`;
-  }
-  return shift;
 };
 
 // ---------------------------------------------------------------------------
@@ -119,19 +74,19 @@ const CollapsibleCard: React.FC<CollapsibleCardProps> = ({
     activeOpacity={0.8}
   >
     <View style={styles.cardHeader}>
-      <View style={styles.dividerLeft} />
+      <View style={styles.dividerLine} />
       <View style={styles.headerLabelGroup}>
         <Text style={styles.cardLabel}>{label}</Text>
         <Text style={styles.toggleIcon}>{expanded ? '\u25B2' : '\u25BC'}</Text>
       </View>
-      <View style={styles.dividerRight} />
+      <View style={styles.dividerLine} />
     </View>
     {expanded && <View style={styles.cardContent}>{children}</View>}
   </TouchableOpacity>
 );
 
 // ---------------------------------------------------------------------------
-// Section Header (non-collapsible) — e.g. "How To Live", "What this practice asks of you"
+// Section Header (non-collapsible)
 // ---------------------------------------------------------------------------
 
 interface SectionHeaderProps {
@@ -140,9 +95,9 @@ interface SectionHeaderProps {
 
 const SectionHeader: React.FC<SectionHeaderProps> = ({ label }) => (
   <View style={styles.cardHeader}>
-    <View style={styles.dividerLeft} />
-    <Text style={styles.cardLabel}>{label}</Text>
-    <View style={styles.dividerRight} />
+    <View style={styles.dividerLineThin} />
+    <Text style={styles.cardLabelSmall}>{label}</Text>
+    <View style={styles.dividerLineThin} />
   </View>
 );
 
@@ -151,251 +106,229 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({ label }) => (
 // ---------------------------------------------------------------------------
 
 const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({ schema }) => {
-  const { updateBackground, updateHeaderHidden, screenData, currentStateId } = useScreenStore();
+  const { updateBackground, updateHeaderHidden, screenData, currentStateId, loadScreen } = useScreenStore();
 
   // Expand/collapse state
-  const [isMantraExpanded, setIsMantraExpanded] = useState(false);
   const [meaningExpanded, setMeaningExpanded] = useState(false);
-  const [essenceExpanded, setEssenceExpanded] = useState(false);
   const [benefitsExpanded, setBenefitsExpanded] = useState(false);
+  const [essenceExpanded, setEssenceExpanded] = useState(false);
+  const [mantraExpanded, setMantraExpanded] = useState(false);
 
   React.useEffect(() => {
     updateBackground(null);
     updateHeaderHidden(false);
   }, []);
 
-  // Reset expand state when info title changes
-  const infoTitle = screenData?.info?.title;
-  React.useEffect(() => {
-    setIsMantraExpanded(false);
-    setMeaningExpanded(false);
-    setEssenceExpanded(false);
-    setBenefitsExpanded(false);
-  }, [infoTitle]);
-
-  // ---------------------------------------------------------------------------
-  // Derived state
-  // ---------------------------------------------------------------------------
-
   const info = useMemo(() => screenData?.info || {}, [screenData]);
-
   const stateId = currentStateId || '';
 
   const currentType: ActivityType = useMemo(() => {
-    if (
-      screenData?.info_is_mantra ||
-      screenData?.activity_type === 'mantra' ||
-      info.type === 'mantra'
-    )
-      return 'mantra';
-    if (
-      screenData?.info_is_sankalp ||
-      screenData?.activity_type === 'sankalp' ||
-      info.type === 'sankalp'
-    )
-      return 'sankalp';
-    if (
-      screenData?.info_is_practice ||
-      screenData?.activity_type === 'practice' ||
-      info.type === 'practice'
-    )
-      return 'practice';
+    if (screenData?.info_is_mantra || info.type === 'mantra') return 'mantra';
+    if (screenData?.info_is_sankalp || info.type === 'sankalp') return 'sankalp';
+    if (screenData?.info_is_practice || info.type === 'practice') return 'practice';
     return null;
   }, [screenData, info]);
 
   const isInfoScreen = useMemo(
-    () =>
-      (stateId === 'info_reveal' || stateId === 'offering_reveal') &&
-      currentType !== null,
+    () => (stateId === 'info_reveal' || stateId === 'offering_reveal') && currentType !== null,
     [stateId, currentType],
   );
 
-  // Block buckets
   const blocks = schema?.blocks || [];
-  // DEBUG: log block count and types
-  if (__DEV__) {
-    console.log(`[CycleTransitions] stateId=${stateId} isInfo=${isInfoScreen} blocks=${blocks.length} types=${blocks.map((b:any) => b.type).join(',')}`);
-  }
-  const headerBlocks = useMemo(
-    () => blocks.filter((b: any) => b.position === 'header'),
-    [blocks],
-  );
-  const contentBlocks = useMemo(
-    () => blocks.filter((b: any) => !b.position || b.position === 'content'),
-    [blocks],
-  );
-  const footerBlocks = useMemo(
-    () => blocks.filter((b: any) => b.position === 'footer' || b.position === 'footer_actions'),
-    [blocks],
-  );
-  const pageBottomBlocks = useMemo(
-    () => blocks.filter((b: any) => b.position === 'page_bottom'),
-    [blocks],
-  );
+  const footerBlocks = useMemo(() => blocks.filter((b: any) => b.position === 'footer' || b.position === 'footer_actions'), [blocks]);
 
-  // Mantra / Sanskrit text with fallbacks
-  const mantraText = useMemo(() => {
-    if (info.title) return info.title;
-    return currentType === 'mantra' ? defaultMantra.english : null;
-  }, [info, currentType]);
-
-  const sanskritText = useMemo(() => {
-    if (info.subtitle) return info.subtitle;
-    return currentType === 'mantra' ? defaultMantra.subtitle : null;
-  }, [info, currentType]);
-
-  // Sankalp data with fallbacks
-  const sankalpData = useMemo(
-    () => ({
-      how_to_live: hasContent(info.how_to_live)
-        ? info.how_to_live
-        : defaultSankalp.how_to_live,
-      essence: hasContent(info.essence) ? info.essence : defaultSankalp.essence,
-      benefits: hasContent(info.benefits) ? info.benefits : defaultSankalp.benefits,
-      why_works: hasContent(info.why_works)
-        ? info.why_works
-        : defaultPractice.why_works,
-    }),
-    [info],
-  );
-
-  // Wisdom metadata
-  const hasWisdom = useMemo(
-    () =>
-      !!(info.deityDisplay || info.tradition || info.shift || info.usage || info.grounding),
-    [info],
-  );
-
-  // Tag interpolation (for generic transition mode)
-  const interpolatedTag = useMemo(() => {
-    if (!schema?.tag) return null;
-    return schema.tag.replace(/\{\{(.*?)\}\}/g, (_match: string, p1: string) => {
-      const keys = p1.trim().split('.');
-      let v: any = screenData;
-      for (const k of keys) {
-        v = v?.[k];
-      }
-      return v !== undefined && v !== null ? String(v) : '';
-    });
-  }, [schema?.tag, screenData]);
-
-  // ---------------------------------------------------------------------------
-  // Toggle handlers
-  // ---------------------------------------------------------------------------
-
-  const toggle = useCallback(
-    (setter: React.Dispatch<React.SetStateAction<boolean>>) => () => {
-      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-      setter((prev) => !prev);
-    },
-    [],
-  );
-
-  if (!schema) return null;
-
-  // =========================================================================
-  // INFO REVEAL MODE
-  // =========================================================================
+  const handleBack = () => {
+    const target = screenData.info_back_target;
+    if (target) {
+      loadScreen({
+        container_id: target.container_id || target.id,
+        state_id: target.state_id || target.id,
+      });
+    } else {
+      loadScreen({ container_id: 'companion_dashboard', state_id: 'day_active' });
+    }
+  };
 
   if (isInfoScreen) {
     return (
       <View style={styles.container}>
+        <Image source={require('../../assets/beige_bg.png')} style={StyleSheet.absoluteFill} resizeMode="cover" />
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.infoScrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* ---- Header: Title + Main Text ---- */}
-          <View style={styles.infoHeader}>
-            {/* Type-specific title (mantra / practice) */}
-            {currentType !== 'sankalp' && info.title ? (
-              <Text style={styles.deityTitle}>{info.title}</Text>
-            ) : null}
+          {/* Practice Visual (Lotus) */}
+          <View style={styles.visualContainer}>
+            {typeof MantraLotus3d === 'number' ? (
+              <SvgUri
+                uri={Image.resolveAssetSource(MantraLotus3d)?.uri ?? null}
+                width={180}
+                height={180}
+              />
+            ) : (
+              <MantraLotus3d width={180} height={180} />
+            )}
+            
+            {currentType === 'sankalp' && (
+              <Text style={styles.sankalpMainText}>{info.meaning || info.summary}</Text>
+            )}
 
-            {/* Sanskrit / Devanagari subtitle */}
-            {(sanskritText || info.subtitle) ? (
-              <Text
-                style={[
-                  styles.sanskritText,
-                  currentType !== 'mantra' && styles.serifSubtitle,
-                ]}
-              >
-                {sanskritText || info.subtitle}
-              </Text>
-            ) : null}
-
-            {/* IAST (mantra only) */}
-            {currentType === 'mantra' && info.iast ? (
-              <Text style={styles.englishMantra}>{info.iast}</Text>
-            ) : null}
-
-            {/* English fallback text */}
-            {currentType === 'mantra' &&
-            mantraText &&
-            !info.iast &&
-            mantraText.toLowerCase() !== (info.title || '').toLowerCase() ? (
-              <Text
-                style={styles.englishMantra}
-                numberOfLines={isMantraExpanded ? undefined : 3}
-              >
-                {mantraText}
-              </Text>
-            ) : null}
-          </View>
-
-          {/* ---- Mantra expand toggle ---- */}
-          {currentType === 'mantra' && (
-            <View style={styles.mantraDividerZone}>
-              <TouchableOpacity
-                style={styles.mantraToggleBtn}
-                onPress={toggle(setIsMantraExpanded)}
-                activeOpacity={0.7}
-              >
-                <Text style={styles.mantraToggleText}>
-                  {isMantraExpanded
-                    ? 'Tap to collapse \u2191'
-                    : 'Tap to view full mantra \u2192'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
-
-          {/* ---- How To Live (Sankalp) ---- */}
-          {currentType === 'sankalp' && (
-            <View style={[styles.card, { marginTop: 8 }]}>
-              <SectionHeader label="How To Live" />
-              <View style={{ marginTop: 8 }}>
-                {Array.isArray(sankalpData.how_to_live) ? (
-                  sankalpData.how_to_live.map((item: string, idx: number) => (
-                    <Text key={idx} style={styles.howToLiveText}>
-                      {item}
-                    </Text>
-                  ))
+            {currentType === 'mantra' && (
+              <View style={styles.mantraMainContainer}>
+                <Text style={styles.mantraDevanagariLarge}>{info.subtitle}</Text>
+                <Text style={styles.mantraIAST}>{info.iast || info.title}</Text>
+                
+                {mantraExpanded ? (
+                  <Text style={styles.mantraBrief}>{info.full_mantra || info.meaning}</Text>
                 ) : (
-                  <Text style={styles.howToLiveText}>
-                    &ldquo;{sankalpData.how_to_live}&rdquo;
-                  </Text>
+                  <Text style={styles.mantraBrief}>{info.meaning}</Text>
+                )}
+                
+                {hasContent(info.full_mantra) && (
+                  <TouchableOpacity 
+                    style={styles.viewFullMantraBtn}
+                    onPress={() => setMantraExpanded(!mantraExpanded)}
+                  >
+                    <Text style={styles.viewFullMantraText}>
+                      {mantraExpanded ? 'Hide full mantra' : 'Tap to view full mantra \u2192'}
+                    </Text>
+                  </TouchableOpacity>
                 )}
               </View>
-            </View>
-          )}
+            )}
 
-          {/* ---- Practice Steps ---- */}
-          {currentType === 'practice' && info.steps && info.steps.length > 0 && (
-            <View style={[styles.card, { marginTop: 24 }]}>
-              <SectionHeader label="What this practice asks of you" />
-              <View style={styles.practiceStepsList}>
-                {info.steps.map((step: string, i: number) => (
-                  <View key={i} style={styles.practiceStep}>
-                    <Text style={styles.stepNum}>{i + 1}.</Text>
-                    <Text style={styles.stepText}>{step}</Text>
+            {currentType === 'practice' && (
+              <Text style={styles.deityTitle}>{info.title}</Text>
+            )}
+          </View>
+
+          {/* Main Content Card */}
+          {(currentType === 'practice' || currentType === 'sankalp') && (
+            <View style={styles.mainCard}>
+              {currentType === 'practice' && info.steps && info.steps.length > 0 && (
+                <>
+                  <SectionHeader label="What this practice asks of you" />
+                  <View style={styles.practiceStepsList}>
+                    {info.steps.map((step: string, i: number) => (
+                      <View key={i} style={styles.practiceStep}>
+                        <Text style={styles.stepNum}>{i + 1}.</Text>
+                        <Text style={styles.stepText}>{step}</Text>
+                      </View>
+                    ))}
                   </View>
-                ))}
-              </View>
+                </>
+              )}
+
+              {currentType === 'sankalp' && (
+                <>
+                  <SectionHeader label="How To Live" />
+                  <View style={{ marginTop: 12 }}>
+                    <Text style={styles.howToLiveText}>
+                      {info.how_to_live || "Stay mindful and carry this intention with every breath."}
+                    </Text>
+                  </View>
+                </>
+              )}
             </View>
           )}
 
-          {/* ---- Footer actions (Start button etc.) ---- */}
+          {/* Prompt / Action Text */}
+          <Text style={styles.practicePrompt}>
+            {currentType === 'mantra' 
+              ? "Chant slowly and let the meaning settle within."
+              : currentType === 'sankalp'
+              ? "Carry this intention gently into your thoughts and actions."
+              : "Begin when you feel ready. This takes 2-3 minutes. There is no rush."}
+          </Text>
+
+          {/* Accordion Sections */}
+          <View style={styles.collapsibleSections}>
+            {/* Consolidated Meaning Section for Practices and Mantras */}
+            {currentType !== 'sankalp' && (hasContent(info.meaning) || (currentType === 'mantra' && hasContent(info.summary))) && (
+              <CollapsibleCard
+                label="Meaning"
+                expanded={meaningExpanded}
+                onToggle={() => setMeaningExpanded(!meaningExpanded)}
+              >
+                <Text style={styles.cardText}>
+                  {info.meaning || (currentType === 'mantra' ? info.summary : '')}
+                </Text>
+              </CollapsibleCard>
+            )}
+
+            {currentType === 'sankalp' && (
+              <>
+                <CollapsibleCard
+                  label="Meaning"
+                  expanded={meaningExpanded}
+                  onToggle={() => setMeaningExpanded(!meaningExpanded)}
+                >
+                  <Text style={styles.cardText}>{info.essence || info.summary}</Text>
+                </CollapsibleCard>
+                <CollapsibleCard
+                  label="Benefits"
+                  expanded={benefitsExpanded}
+                  onToggle={() => setBenefitsExpanded(!benefitsExpanded)}
+                >
+                  <Text style={styles.cardText}>Focus and calm are cultivated through this intention.</Text>
+                </CollapsibleCard>
+              </>
+            )}
+
+            {currentType === 'mantra' && (
+              <CollapsibleCard
+                label="Essence"
+                expanded={essenceExpanded}
+                onToggle={() => setEssenceExpanded(!essenceExpanded)}
+              >
+                <Text style={styles.cardText}>
+                  {info.essence || info.insight || "The vibration of this mantra connects you with profound spiritual wisdom."}
+                </Text>
+              </CollapsibleCard>
+            )}
+
+            {currentType === 'practice' && (
+              <>
+                {hasContent(info.benefits) && (
+                  <CollapsibleCard
+                    label="Benefits"
+                    expanded={benefitsExpanded}
+                    onToggle={() => setBenefitsExpanded(!benefitsExpanded)}
+                  >
+                    {Array.isArray(info.benefits) ? (
+                      <View style={styles.benefitList}>
+                        {info.benefits.map((b: string, idx: number) => (
+                          <Text key={idx} style={styles.benefitItem}>
+                            {'\u2022'} {b}
+                          </Text>
+                        ))}
+                      </View>
+                    ) : (
+                      <Text style={styles.cardText}>{info.benefits}</Text>
+                    )}
+                  </CollapsibleCard>
+                )}
+
+                {hasContent(info.essence || info.insight) && (
+                  <CollapsibleCard
+                    label="Why this works"
+                    expanded={essenceExpanded}
+                    onToggle={() => setEssenceExpanded(!essenceExpanded)}
+                  >
+                    <Text style={styles.cardText}>{info.essence || info.insight}</Text>
+                  </CollapsibleCard>
+                )}
+              </>
+            )}
+          </View>
+
+          {/* Deity Metadata (for Mantras) */}
+          {currentType === 'mantra' && info.deity && (
+            <Text style={styles.deityMetadata}>Deity: {info.deity}</Text>
+          )}
+
+          {/* Actions */}
           {footerBlocks.length > 0 && (
             <View style={styles.infoActions}>
               {footerBlocks.map((block: any, i: number) => (
@@ -404,469 +337,273 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({ s
             </View>
           )}
 
-          {/* ---- Collapsible Wisdom Cards ---- */}
-          <View style={styles.collapsibleSections}>
-            {/* Meaning */}
-            {(currentType === 'sankalp' ||
-              info.meaning ||
-              info.essence ||
-              defaultMantra.meaning) && (
-              <CollapsibleCard
-                label="Meaning"
-                expanded={meaningExpanded}
-                onToggle={toggle(setMeaningExpanded)}
-              >
-                <Text style={styles.cardText}>
-                  {currentType === 'sankalp'
-                    ? info.insight
-                    : currentType === 'mantra'
-                      ? info.meaning
-                      : info.description}
-                </Text>
-              </CollapsibleCard>
-            )}
-
-            {/* Essence (mantra only) */}
-            {currentType === 'mantra' &&
-              (info.essence || defaultMantra.essence) && (
-                <CollapsibleCard
-                  label="Essence"
-                  expanded={essenceExpanded}
-                  onToggle={toggle(setEssenceExpanded)}
-                >
-                  <Text style={styles.cardText}>
-                    {info.essence || defaultMantra.essence}
-                  </Text>
-                </CollapsibleCard>
-              )}
-
-            {/* Benefits */}
-            {(currentType === 'sankalp' || hasContent(info.benefits)) && (
-              <CollapsibleCard
-                label={currentType === 'sankalp' ? 'Benefit' : 'Benefits'}
-                expanded={benefitsExpanded}
-                onToggle={toggle(setBenefitsExpanded)}
-              >
-                {currentType === 'sankalp' ? (
-                  Array.isArray(sankalpData.benefits) ? (
-                    <View style={styles.benefitList}>
-                      {sankalpData.benefits.map((b: string, idx: number) => (
-                        <Text key={idx} style={styles.benefitItem}>
-                          {'\u2022'} {b}
-                        </Text>
-                      ))}
-                    </View>
-                  ) : (
-                    <Text style={styles.cardText}>{sankalpData.benefits}</Text>
-                  )
-                ) : Array.isArray(info.benefits) ? (
-                  <View style={styles.benefitList}>
-                    {info.benefits.map((b: string, idx: number) => (
-                      <Text key={idx} style={styles.benefitItem}>
-                        {'\u2022'} {b}
-                      </Text>
-                    ))}
-                  </View>
-                ) : (
-                  <Text style={styles.cardText}>{info.benefits}</Text>
-                )}
-              </CollapsibleCard>
-            )}
-
-            {/* Why this works (practice only) */}
-            {currentType === 'practice' && info.insight && (
-              <CollapsibleCard
-                label="Why this works"
-                expanded={essenceExpanded}
-                onToggle={toggle(setEssenceExpanded)}
-              >
-                <Text style={styles.cardText}>{info.insight}</Text>
-              </CollapsibleCard>
-            )}
-          </View>
-
-          {/* ---- Wisdom metadata ---- */}
-          {hasWisdom && (
-            <View style={styles.wisdomSection}>
-              {info.deityDisplay && (
-                <View style={styles.wisdomLine}>
-                  <Text style={styles.wisdomLabel}>Deity:</Text>
-                  <Text style={styles.wisdomText}>{info.deityDisplay}</Text>
-                </View>
-              )}
-              {info.tradition && (
-                <View style={styles.wisdomLine}>
-                  <Text style={styles.wisdomLabel}>Tradition:</Text>
-                  <Text style={styles.wisdomText}>{info.tradition}</Text>
-                </View>
-              )}
-              {info.shift && (
-                <View style={styles.wisdomLine}>
-                  <Text style={styles.wisdomLabel}>Supports:</Text>
-                  <Text style={styles.wisdomText}>{formatShift(info.shift)}</Text>
-                </View>
-              )}
-              {info.usage && (
-                <View style={styles.wisdomLine}>
-                  <Text style={styles.wisdomText}>{info.usage}</Text>
-                </View>
-              )}
-              {info.grounding && (
-                <View style={styles.wisdomLine}>
-                  <Text style={[styles.wisdomText, styles.wisdomGrounding]}>
-                    {info.grounding}
-                  </Text>
-                </View>
-              )}
-            </View>
-          )}
-
-          {/* ---- Page Bottom (e.g. Return Home link) ---- */}
-          {pageBottomBlocks.length > 0 && (
-            <View style={styles.pageBottom}>
-              {pageBottomBlocks.map((block: any, i: number) => (
-                <BlockRenderer key={`pb-${i}`} block={block} />
-              ))}
-            </View>
-          )}
+          <TouchableOpacity onPress={handleBack} style={styles.backLink}>
+            <Text style={styles.backLinkText}>Back</Text>
+          </TouchableOpacity>
         </ScrollView>
       </View>
     );
   }
 
-  // =========================================================================
-  // GENERIC TRANSITION MODE (check-in, trigger advice, checkpoints)
-  // =========================================================================
-
+  // Generic Transition Mode
   return (
     <View style={styles.container}>
+      <Image source={require('../../assets/beige_bg.png')} style={StyleSheet.absoluteFill} resizeMode="cover" />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Tag */}
-        {(schema.tag || interpolatedTag) ? (
-          <Text style={styles.tag}>{interpolatedTag || schema.tag}</Text>
-        ) : null}
-
-        {/* Header blocks */}
-        {headerBlocks.length > 0 && (
-          <View style={styles.header}>
-            {headerBlocks.map((block: any, i: number) => (
-              <BlockRenderer key={`h-${i}`} block={block} />
-            ))}
-          </View>
-        )}
-
-        {/* Content blocks */}
         <View style={styles.content}>
-          {contentBlocks.map((block: any, i: number) => (
+          {blocks.map((block: any, i: number) => (
             <BlockRenderer key={`c-${i}`} block={block} />
           ))}
         </View>
-
-        {/* Footer action buttons */}
-        {footerBlocks.length > 0 && (
-          <View style={styles.footer}>
-            {footerBlocks.map((block: any, i: number) => (
-              <BlockRenderer key={`f-${i}`} block={block} />
-            ))}
-          </View>
-        )}
-
-        {/* Page bottom blocks */}
-        {pageBottomBlocks.length > 0 && (
-          <View style={styles.pageBottom}>
-            {pageBottomBlocks.map((block: any, i: number) => (
-              <BlockRenderer key={`pb-${i}`} block={block} />
-            ))}
-          </View>
-        )}
       </ScrollView>
     </View>
   );
 };
 
-// ---------------------------------------------------------------------------
-// Styles
-// ---------------------------------------------------------------------------
-
-const GOLD = '#c9a84c';
-const GOLD_BORDER = '#d0902d';
+const GOLD = '#D4A017';
 const BROWN = '#432104';
-const BG = '#fffdf9';
 
 const styles = StyleSheet.create({
-  // ---- Shared layout ----
   container: {
     flex: 1,
-    backgroundColor: BG,
+    backgroundColor: '#fffdf9',
   },
   scroll: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 24,
+    paddingTop: 40,
     paddingBottom: 40,
   },
   infoScrollContent: {
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 48,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 60,
     alignItems: 'center',
   },
-
-  // ---- Generic transition mode ----
-  tag: {
-    fontSize: 10,
-    letterSpacing: 2.5,
-    textAlign: 'center',
-    color: '#bfa58a',
-    marginBottom: 24,
-    fontFamily: Fonts.sans.bold,
-    textTransform: 'uppercase',
-  },
-  header: {
-    marginBottom: 16,
+  visualContainer: {
     alignItems: 'center',
-  },
-  content: {
-    marginBottom: 24,
-  },
-  footer: {
-    marginTop: 16,
-    alignItems: 'center',
-    gap: 12,
-  },
-  pageBottom: {
-    marginTop: 24,
-    alignItems: 'center',
-    paddingBottom: 20,
-  },
-
-  // ---- Info reveal header ----
-  infoHeader: {
-    alignItems: 'center',
-    gap: 8,
-    width: '100%',
-    maxWidth: 500,
+    marginBottom: 20,
   },
   deityTitle: {
-    fontSize: 22,
-    fontFamily: Fonts.serif.regular,
-    fontWeight: '500',
+    fontSize: 26,
+    fontFamily: Fonts.serif.bold,
     color: BROWN,
     textAlign: 'center',
+    marginTop: -10,
   },
-  sanskritText: {
-    fontSize: 18,
-    color: BROWN,
-    textAlign: 'center',
-    lineHeight: 26,
-    // Devanagari font — falls back to system Devanagari on iOS/Android
-    fontFamily: Platform.select({
-      ios: 'Devanagari Sangam MN',
-      android: 'NotoSansDevanagari-Regular',
-      default: undefined,
-    }),
-  },
-  serifSubtitle: {
-    fontFamily: Fonts.serif.regular,
-  },
-  englishMantra: {
-    fontSize: 18,
-    color: BROWN,
-    textAlign: 'center',
-    fontFamily: Fonts.serif.regular,
-    lineHeight: 27,
-    opacity: 0.9,
-  },
-
-  // ---- Mantra toggle ----
-  mantraDividerZone: {
-    alignItems: 'center',
-    marginTop: 8,
-    marginBottom: 16,
-  },
-  mantraToggleBtn: {
-    backgroundColor: 'rgba(255,255,255,0.4)',
-    borderWidth: 1.5,
-    borderColor: GOLD,
-    paddingVertical: 10,
-    paddingHorizontal: 24,
-    borderRadius: 30,
-    ...Platform.select({
-      ios: {
-        shadowColor: GOLD,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.35,
-        shadowRadius: 12,
-      },
-      android: {
-        elevation: 4,
-      },
-    }),
-  },
-  mantraToggleText: {
-    fontSize: 14,
-    color: BROWN,
-    fontFamily: Fonts.serif.regular,
-    textAlign: 'center',
-  },
-
-  // ---- Card (collapsible + static) ----
-  card: {
-    borderWidth: 1,
-    borderColor: GOLD_BORDER,
-    borderRadius: 12,
-    padding: 16,
-    backgroundColor: 'rgba(255,255,255,0.4)',
+  mainCard: {
     width: '100%',
-    maxWidth: 500,
-    marginTop: 12,
-  },
-  cardExpanded: {
-    backgroundColor: 'rgba(255,255,255,0.6)',
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: '#E8C587',
+    padding: 20,
+    marginBottom: 20,
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    width: '100%',
+    justifyContent: 'center',
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#E8C587',
+    opacity: 0.6,
+  },
+  dividerLineThin: {
+    width: 20,
+    height: 1,
+    backgroundColor: '#E8C587',
+    opacity: 0.6,
+  },
+  cardLabel: {
+    fontSize: 18,
+    fontFamily: Fonts.serif.bold,
+    color: BROWN,
+    marginHorizontal: 12,
+  },
+  cardLabelSmall: {
+    fontSize: 18,
+    fontFamily: Fonts.serif.bold,
+    color: BROWN,
+    marginHorizontal: 10,
   },
   headerLabelGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-  },
-  dividerLeft: {
-    flex: 1,
-    height: 1,
-    backgroundColor: GOLD,
-    opacity: 0.6,
-  },
-  dividerRight: {
-    flex: 1,
-    height: 1,
-    backgroundColor: GOLD,
-    opacity: 0.6,
-  },
-  cardLabel: {
-    fontSize: 20,
-    fontWeight: '500',
-    color: BROWN,
-    fontFamily: Fonts.sans.medium,
   },
   toggleIcon: {
     fontSize: 12,
-    color: GOLD_BORDER,
+    color: GOLD,
+    marginLeft: 4,
+  },
+  collapsibleSections: {
+    width: '100%',
+    gap: 12,
+    marginBottom: 30,
+  },
+  card: {
+    width: '100%',
+    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: '#E8C587',
+    padding: 16,
+  },
+  cardExpanded: {
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
   },
   cardContent: {
-    marginTop: 16,
+    marginTop: 12,
   },
   cardText: {
     fontSize: 16,
     lineHeight: 24,
-    color: BROWN,
+    color: '#5a3c21',
     fontFamily: Fonts.serif.regular,
     textAlign: 'center',
   },
-
-  // ---- How to Live (Sankalp) ----
-  howToLiveText: {
-    fontSize: 17,
-    lineHeight: 26,
-    color: BROWN,
-    opacity: 0.85,
-    fontFamily: Fonts.serif.regular,
-    fontStyle: 'italic',
-    textAlign: 'center',
-  },
-
-  // ---- Practice Steps ----
   practiceStepsList: {
-    gap: 12,
     marginTop: 16,
+    gap: 12,
   },
   practiceStep: {
     flexDirection: 'row',
-    gap: 8,
     alignItems: 'flex-start',
   },
   stepNum: {
     fontSize: 18,
-    fontWeight: '600',
+    fontFamily: Fonts.serif.bold,
     color: BROWN,
-    fontFamily: Fonts.sans.semiBold,
-    minWidth: 24,
+    marginRight: 8,
+    width: 24,
   },
   stepText: {
-    fontSize: 18,
-    color: BROWN,
-    fontFamily: Fonts.sans.regular,
-    lineHeight: 25,
     flex: 1,
+    fontSize: 17,
+    lineHeight: 24,
+    color: BROWN,
+    fontFamily: Fonts.serif.regular,
   },
-
-  // ---- Benefits list ----
+  howToLiveText: {
+    fontSize: 18,
+    fontFamily: Fonts.serif.regular,
+    fontStyle: 'italic',
+    color: '#4A4A4A',
+    lineHeight: 28,
+    textAlign: 'center',
+    paddingHorizontal: 10,
+  },
+  sankalpMainText: {
+    fontSize: 24,
+    fontFamily: Fonts.serif.bold,
+    color: '#432104',
+    textAlign: 'center',
+    lineHeight: 34,
+    marginTop: 20,
+    paddingHorizontal: 20,
+  },
+  mantraMainContainer: {
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 20,
+    paddingHorizontal: 20,
+  },
+  mantraDevanagariLarge: {
+    fontSize: 32,
+    fontFamily: Fonts.serif.bold,
+    color: '#432104',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  mantraIAST: {
+    fontSize: 20,
+    fontFamily: Fonts.serif.regular,
+    fontStyle: 'italic',
+    color: '#6B4E31',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  mantraBrief: {
+    fontSize: 16,
+    fontFamily: Fonts.serif.regular,
+    color: '#432104',
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 24,
+  },
+  viewFullMantraBtn: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 30,
+    borderWidth: 1.5,
+    borderColor: '#E8C587',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    shadowColor: '#d7a64a',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  viewFullMantraText: {
+    fontSize: 15,
+    fontFamily: Fonts.serif.bold,
+    color: '#432104',
+  },
+  deityMetadata: {
+    fontSize: 18,
+    fontFamily: Fonts.serif.regular,
+    color: '#432104',
+    textAlign: 'center',
+    marginTop: 24,
+    marginBottom: 10,
+  },
+  practicePrompt: {
+    fontSize: 16,
+    fontFamily: Fonts.serif.regular,
+    fontStyle: 'italic',
+    color: '#432104',
+    textAlign: 'center',
+    marginTop: 30,
+    marginBottom: 20,
+    lineHeight: 24,
+    paddingHorizontal: 30,
+  },
+  infoActions: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
   benefitList: {
-    gap: 8,
+    gap: 4,
   },
   benefitItem: {
     fontSize: 16,
+    lineHeight: 24,
+    color: '#5a3c21',
+    fontFamily: Fonts.serif.regular,
+  },
+  backLink: {
+    marginTop: 10,
+    paddingVertical: 10,
+  },
+  backLinkText: {
+    fontSize: 16,
+    fontFamily: Fonts.serif.regular,
     color: BROWN,
-    fontFamily: Fonts.sans.regular,
-    lineHeight: 22,
+    textDecorationLine: 'underline',
   },
-
-  // ---- Footer actions in info mode ----
-  infoActions: {
-    marginTop: 16,
-    alignItems: 'center',
-    width: '100%',
-    maxWidth: 500,
-    gap: 16,
-  },
-
-  // ---- Collapsible sections wrapper ----
-  collapsibleSections: {
-    width: '100%',
-    maxWidth: 500,
-    gap: 0,
-  },
-
-  // ---- Wisdom metadata ----
-  wisdomSection: {
-    marginTop: 8,
-    paddingBottom: 8,
-    width: '100%',
-    maxWidth: 500,
-    gap: 6,
-  },
-  wisdomLine: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 4,
-    paddingVertical: 2,
-  },
-  wisdomLabel: {
-    fontSize: 14,
-    color: BROWN,
-    fontFamily: Fonts.sans.semiBold,
-    opacity: 0.7,
-  },
-  wisdomText: {
-    fontSize: 14,
-    color: BROWN,
-    fontFamily: Fonts.sans.regular,
-    opacity: 0.7,
-    flex: 1,
-  },
-  wisdomGrounding: {
-    fontStyle: 'italic',
-    opacity: 0.6,
-  },
+  content: {
+    gap: 20,
+  }
 });
 
 export default CycleTransitionsContainer;

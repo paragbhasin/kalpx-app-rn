@@ -32,13 +32,13 @@ const FA_TO_IONICONS: Record<string, string> = {
 };
 
 const PracticeCardBlock: React.FC<PracticeCardBlockProps> = ({ block }) => {
-  const { loadScreen, goBack, screenData: screenState } = useScreenStore();
-
+  const { loadScreen, goBack, screenData: screenState, currentScreen } = useScreenStore();
+  
   const handleCardPress = async () => {
     const action = block.info_action || block.action;
     if (!action) return;
     try {
-      await executeAction(action, {
+      await executeAction({ ...action, currentScreen }, {
         loadScreen,
         goBack,
         setScreenValue: (value: any, key: string) => {

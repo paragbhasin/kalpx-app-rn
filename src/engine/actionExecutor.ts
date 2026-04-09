@@ -172,6 +172,7 @@ interface InfoData {
   is_action: boolean;
   steps: string[];
   summary: string;
+  insight: string;
   deity: string;
   tradition: string;
   duration: string;
@@ -196,6 +197,7 @@ function _generateInfoScreenData(type: string, masterData: Record<string, any>):
     is_action: isAction,
     steps: masterData.steps || [],
     summary: masterData.summary || masterData.description || '',
+    insight: masterData.insight || '',
     deity: masterData.deity || '',
     tradition: masterData.tradition || '',
     duration: masterData.duration || '',
@@ -689,8 +691,15 @@ export async function executeAction(action: Action, context: ActionContext): Pro
         const currentStateId = action.currentScreen?.state_id || action.currentScreen?.id;
         if (currentContainerId === 'companion_dashboard' || currentStateId === 'day_active') {
           setScreenValue({ container_id: 'companion_dashboard', state_id: 'day_active' }, 'info_back_target');
-        } else if (currentStateId === 'companion_analysis' || currentContainerId === 'cycle_transitions') {
-          setScreenValue({ container_id: 'cycle_transitions', state_id: 'companion_analysis' }, 'info_back_target');
+        } else if (
+          currentStateId === 'companion_analysis' ||
+          currentContainerId === 'cycle_transitions' ||
+          currentContainerId === 'insight_summary'
+        ) {
+          setScreenValue(
+            { container_id: currentContainerId, state_id: currentStateId },
+            'info_back_target',
+          );
         } else {
           setScreenValue({ container_id: 'companion_dashboard', state_id: 'day_active' }, 'info_back_target');
         }

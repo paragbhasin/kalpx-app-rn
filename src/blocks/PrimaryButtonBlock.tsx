@@ -63,17 +63,19 @@ const PrimaryButtonBlock: React.FC<PrimaryButtonBlockProps> = ({ block }) => {
   });
 
   const handlePress = async () => {
+    console.log('[PrimaryButtonBlock] PRESSED:', block.label, 'validate:', block.validate, 'value:', block.validate ? screenState[block.validate] : 'none');
     // Basic validation
     if (block.validate) {
       const value = screenState[block.validate];
       if (!value) {
-        console.warn(block.validation_message || 'Please make a selection.');
+        console.warn('[PrimaryButtonBlock] VALIDATION FAILED:', block.validate, '=', value, '| message:', block.validation_message);
         return;
       }
+      console.log('[PrimaryButtonBlock] VALIDATION PASSED:', block.validate, '=', value);
     }
 
     const action = block.action;
-    if (!action) return;
+    if (!action) { console.warn('[PrimaryButtonBlock] NO ACTION'); return; }
 
     // Route ALL actions through the centralized executor
     try {
@@ -105,8 +107,8 @@ const PrimaryButtonBlock: React.FC<PrimaryButtonBlockProps> = ({ block }) => {
   }
 
   return (
-    <Animated.View style={[styles.pulseContainer, animatedContainerStyle]}>
-      <TouchableOpacity activeOpacity={0.9} onPress={handlePress}>
+    <View style={styles.pulseContainer}>
+      <TouchableOpacity activeOpacity={0.85} onPress={handlePress}>
         <LinearGradient
           colors={['#fff8dc', '#f6d365', '#d4af37', '#b8860b', '#fff8dc']}
           start={{ x: 0, y: 0 }}
@@ -121,20 +123,10 @@ const PrimaryButtonBlock: React.FC<PrimaryButtonBlockProps> = ({ block }) => {
               <Text style={styles.label}>{block.label}</Text>
               {block.subtext && <Text style={styles.subtext}>{block.subtext}</Text>}
             </View>
-            
-            {/* Shine Effect */}
-            <Animated.View style={[styles.shine, shineStyle]}>
-              <LinearGradient
-                colors={['transparent', 'rgba(255, 255, 255, 0.4)', 'transparent']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={StyleSheet.absoluteFill}
-              />
-            </Animated.View>
           </LinearGradient>
         </LinearGradient>
       </TouchableOpacity>
-    </Animated.View>
+    </View>
   );
 };
 

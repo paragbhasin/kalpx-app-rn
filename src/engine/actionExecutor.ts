@@ -234,9 +234,14 @@ function _logJourneyAction(action: Action, context: ActionContext): void {
 
   const { screenState, setScreenValue } = context;
   const currentDay = screenState.day_number || 1;
-  const journeyLog = { ...(screenState.journey_log || {}) };
+  const existingLog = screenState.journey_log || {};
   const dayKey = `day_${currentDay}`;
 
+  // Deep copy to avoid mutating frozen Redux state
+  const journeyLog: Record<string, any[]> = {};
+  for (const key of Object.keys(existingLog)) {
+    journeyLog[key] = [...(existingLog[key] || [])];
+  }
   if (!journeyLog[dayKey]) {
     journeyLog[dayKey] = [];
   }

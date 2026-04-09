@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useScreenStore } from './useScreenBridge';
+import { executeAction } from './actionExecutor';
 import { interpolate } from './utils/interpolation';
 import { sanitizeStyle } from './utils/sanitizeStyle';
 
@@ -74,6 +75,7 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   // Original 11 blocks
   headline: HeadlineBlock,
   subtext: SubtextBlock,
+  instruction_text: SubtextBlock,
   primary_button: PrimaryButtonBlock,
   lotus_logo: LotusLogoBlock,
   choice_card: ChoiceCardBlock,
@@ -142,8 +144,8 @@ interface BlockRendererProps {
 }
 
 const BlockRenderer: React.FC<BlockRendererProps> = ({ block, textColor }) => {
-  const screenData = useScreenStore((state) => state.screenData);
-  
+  const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
+
   if (!block) return null;
 
   // 1. Check Visibility
@@ -181,7 +183,55 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block, textColor }) => {
     );
   }
 
-  return <Component block={interpolatedBlock} textColor={textColor} />;
+  const rendered = <Component block={interpolatedBlock} textColor={textColor} />;
+
+  // 4. Wrap in TouchableOpacity if block has an action property.
+  //    This mirrors the web's pattern where ANY block with an `action` is clickable.
+  //    Skip wrapping for blocks that already handle their own actions internally
+  //    (primary_button, choice_card, choice_grid, hold_button, rep_counter, subtext,
+  //    practice_card, hold_trigger, press_and_hold, press_and_hold_circular,
+  //    footer_buttons, chip_list, option_picker, timer_controls, cycle_reflection,
+  //    mantra_selection_list, alignment_selector, form_fields, baseline_slider,
+  //    floating_button).
+  const selfActionBlocks = new Set([
+    'primary_button', 'choice_card', 'choice_grid', 'hold_button',
+    'rep_counter', 'subtext', 'instruction_text', 'practice_card',
+    'hold_trigger', 'press_and_hold', 'press_and_hold_circular',
+    'footer_buttons', 'chip_list', 'option_picker', 'timer_controls',
+    'cycle_reflection', 'mantra_selection_list', 'alignment_selector',
+    'form_fields', 'baseline_slider', 'floating_button', 'link_text',
+    'card_list', 'insight_box',
+  ]);
+
+  if (interpolatedBlock.action && !selfActionBlocks.has(interpolatedBlock.type)) {
+    const handlePress = async () => {
+      try {
+        await executeAction(
+          { ...interpolatedBlock.action, currentScreen },
+          {
+            loadScreen,
+            goBack,
+            setScreenValue: (value: any, key: string) => {
+              const { screenActions } = require('../store/screenSlice');
+              const { store } = require('../store');
+              store.dispatch(screenActions.setScreenValue({ key, value }));
+            },
+            screenState: { ...screenData },
+          },
+        );
+      } catch (err) {
+        console.error('[BlockRenderer] Action execution failed:', err);
+      }
+    };
+
+    return (
+      <TouchableOpacity onPress={handlePress} activeOpacity={0.7}>
+        {rendered}
+      </TouchableOpacity>
+    );
+  }
+
+  return rendered;
 };
 
 const styles = StyleSheet.create({

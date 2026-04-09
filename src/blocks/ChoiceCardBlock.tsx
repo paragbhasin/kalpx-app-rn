@@ -72,7 +72,7 @@ const resolveAsset = (path: string | any) => {
 };
 
 const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
-  const { loadScreen, goBack, screenData: screenState, updateScreenData } = useScreenStore();
+  const { loadScreen, goBack, screenData: screenState, updateScreenData, currentScreen } = useScreenStore();
   
   const options = useMemo(() => {
     if (block.options) return block.options;
@@ -108,13 +108,23 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
       };
       const ctx = { loadScreen, goBack, setScreenValue, screenState: { ...screenState } };
 
-      // 1. Check for action on the option itself
+      // 1. Check for on_select map from current screen schema (dynamic routing)
+      const onSelectMap = currentScreen?.on_select;
+      if (onSelectMap) {
+        const targetAction = onSelectMap[option.id] || onSelectMap['default'];
+        if (targetAction) {
+          await executeAction(targetAction, ctx);
+          return;
+        }
+      }
+
+      // 2. Check for action on the option itself
       if (option.action) {
         await executeAction(option.action, ctx);
         return;
       }
 
-      // 2. Handle block level target
+      // 3. Handle block level target
       if (block.target) {
         await executeAction({ type: 'navigate', target: block.target }, ctx);
       }

@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { SvgUri } from "react-native-svg";
 import { useScreenStore } from "../engine/useScreenBridge";
+import { Fonts } from "../theme/fonts";
 
 const { width } = Dimensions.get("window");
 
@@ -282,6 +283,7 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
             onPress={() => handleSelect(option)}
             style={[
               styles.card,
+              !isGrid && styles.listCard,
               isGrid && styles.gridCard,
               isPremiumGrid && styles.premiumGridCard,
               isDisciplineGrid && styles.disciplineCard,
@@ -519,7 +521,6 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: "rgba(212, 160, 23, 0.3)",
     borderRadius: 16,
-    padding: 16,
     backgroundColor: "#FFFDF9", // Explicit background for that premium look
     position: "relative",
     overflow: "hidden",
@@ -529,16 +530,21 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
+  listCard: {
+    paddingVertical: 14,
+    paddingLeft: 16,
+    paddingRight: 14,
+  },
   gridCard: {
-    padding: 12,
-    minHeight: 145,
+    // padding: 12,
+    // minHeight: 145,
     alignItems: "center",
     justifyContent: "center",
   },
   premiumGridCard: {
     borderRadius: 24,
-    minHeight: 120,
-    padding: 16,
+    // minHeight: 100,
+    // padding: 10,
     borderWidth: 1.5,
     borderColor: "rgba(212, 160, 23, 0.3)",
     backgroundColor: "#FFFDF9",
@@ -555,7 +561,7 @@ const styles = StyleSheet.create({
     transform: [{ translateY: -2 }],
   },
   disciplineCard: {
-    minHeight: 160,
+    // minHeight: 160,
     paddingVertical: 18,
     paddingHorizontal: 16,
     borderRadius: 24,
@@ -685,17 +691,18 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   title: {
-    fontSize: 20,
+    fontSize: 16,
     color: "#432104",
-    fontFamily: "CormorantGaramond_700Bold",
+    fontFamily: Fonts.serif.bold,
     flex: 1,
+    fontWeight: "600",
   },
   premiumTitle: {
-    fontSize: 20,
+    fontSize: 16,
     textAlign: "center",
   },
   disciplineTitle: {
-    fontSize: 19,
+    fontSize: 16,
     lineHeight: 24,
     textAlign: "center",
     flexShrink: 1,

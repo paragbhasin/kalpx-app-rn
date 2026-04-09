@@ -65,7 +65,8 @@ const ScreenRenderer: React.FC = () => {
 
   // Overlays should cover the entire screen, including Safe Area
   const Wrapper = currentScreen?.overlay ? View : SafeAreaView;
-  const showBackButton = !currentScreen?.overlay && history.length > 0;
+  const hideBackOnState = currentScreen?.state_id === 'discipline_select';
+  const showBackButton = !currentScreen?.overlay && history.length > 0 && !hideBackOnState;
 
   const handleBack = () => {
     if (history.length > 0) {

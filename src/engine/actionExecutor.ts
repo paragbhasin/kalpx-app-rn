@@ -26,6 +26,7 @@ import {
   mitraPathEvolution,
 } from './mitraApi';
 import api from '../Networks/axios';
+import { navigate as rootNavigate } from '../Shared/Routes/NavigationService';
 
 // ---------------------------------------------------------------------------
 // Audio Rotation
@@ -1174,9 +1175,16 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // RETURN_TO_START — navigate back to portal / onboarding
       // ================================================================
       case 'return_to_start': {
-        // In RN we don't have Vue Router; fall back to portal screen.
-        // The React Navigation stack handles auth gating at a higher level.
         loadScreen({ container_id: 'portal', state_id: 'portal' });
+        rootNavigate('AppDrawer', {
+          screen: 'HomePage',
+          params: {
+            screen: 'HomePage',
+            params: {
+              screen: 'Home',
+            },
+          },
+        });
         break;
       }
 

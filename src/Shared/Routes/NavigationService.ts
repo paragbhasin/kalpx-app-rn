@@ -1,5 +1,6 @@
-// NavigationService.ts
-import { DrawerActions } from "@react-navigation/native";
+import { createNavigationContainerRef, DrawerActions } from "@react-navigation/native";
+
+export const navigationRef = createNavigationContainerRef<any>();
 
 let drawerRef: any = null;
 
@@ -10,5 +11,11 @@ export const setDrawerRef = (ref: any) => {
 export function openDrawer() {
   if (drawerRef) {
     drawerRef.dispatch(DrawerActions.openDrawer());
+  }
+}
+
+export function navigate(name: string, params?: any) {
+  if (navigationRef.isReady()) {
+    navigationRef.navigate(name as never, params as never);
   }
 }

@@ -1,6 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useMemo } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import BaselineSliderBlock from "../blocks/BaselineSliderBlock";
 import BlockRenderer from "../engine/BlockRenderer";
 import { useScreenStore } from "../engine/useScreenBridge";
@@ -51,9 +57,13 @@ const resolveIconName = (icon?: string) => {
   return icon;
 };
 
-const StableScanContainer: React.FC<StableScanContainerProps> = ({ schema }) => {
+const StableScanContainer: React.FC<StableScanContainerProps> = ({
+  schema,
+}) => {
   const updateBackground = useScreenStore((state) => state.updateBackground);
-  const updateHeaderHidden = useScreenStore((state) => state.updateHeaderHidden);
+  const updateHeaderHidden = useScreenStore(
+    (state) => state.updateHeaderHidden,
+  );
   const screenState = useScreenStore((state) => state.screenData);
   const updateScreenData = useScreenStore((state) => state.updateScreenData);
 
@@ -64,7 +74,10 @@ const StableScanContainer: React.FC<StableScanContainerProps> = ({ schema }) => 
   }, [updateBackground, updateHeaderHidden]);
 
   const selectionBlock = useMemo(
-    () => (schema.blocks || []).find((b: any) => b.id === "prana_baseline_selection"),
+    () =>
+      (schema.blocks || []).find(
+        (b: any) => b.id === "prana_baseline_selection",
+      ),
     [schema.blocks],
   );
   const headerBlocks = useMemo(
@@ -74,7 +87,10 @@ const StableScanContainer: React.FC<StableScanContainerProps> = ({ schema }) => 
   const helperBlock = useMemo(
     () =>
       (schema.blocks || []).find(
-        (b: any) => !b.position && b.type === "subtext" && b.content?.includes("adjust the sliders"),
+        (b: any) =>
+          !b.position &&
+          b.type === "subtext" &&
+          b.content?.includes("adjust the sliders"),
       ),
     [schema.blocks],
   );
@@ -92,7 +108,9 @@ const StableScanContainer: React.FC<StableScanContainerProps> = ({ schema }) => 
     const focusOptions = schema.optionsMap?.[focus] || [];
     return focusOptions.map((opt: any, idx: number) => ({
       ...opt,
-      fullWidth: opt.fullWidth || (idx === focusOptions.length - 1 && focusOptions.length % 2 === 1),
+      fullWidth:
+        opt.fullWidth ||
+        (idx === focusOptions.length - 1 && focusOptions.length % 2 === 1),
     }));
   }, [schema.optionsMap, focus]);
 
@@ -133,16 +151,26 @@ const StableScanContainer: React.FC<StableScanContainerProps> = ({ schema }) => 
   );
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+    >
       <View style={styles.headerSection}>
         {decoratedHeaderBlocks.map((block: any, i: number) => (
-          <BlockRenderer key={`header-${i}`} block={block} textColor="#432104" />
+          <BlockRenderer
+            key={`header-${i}`}
+            block={block}
+            textColor="#432104"
+          />
         ))}
       </View>
 
       <View style={styles.sectionDivider}>
         <View style={styles.line} />
-        <Text style={styles.dividerText}>{selectionBlock?.section_title || "YOUR CURRENT STATE"}</Text>
+        <Text style={styles.dividerText}>
+          {selectionBlock?.section_title || "YOUR CURRENT STATE"}
+        </Text>
         <View style={styles.line} />
       </View>
 
@@ -153,21 +181,33 @@ const StableScanContainer: React.FC<StableScanContainerProps> = ({ schema }) => 
             <TouchableOpacity
               key={option.id}
               activeOpacity={0.85}
-              onPress={() => updateScreenData("prana_baseline_selection", option.id)}
+              onPress={() =>
+                updateScreenData("prana_baseline_selection", option.id)
+              }
               style={[
                 styles.optionCard,
                 option.fullWidth && styles.optionCardFull,
                 isSelected && styles.optionCardSelected,
               ]}
             >
-              <View style={[styles.optionInner, option.fullWidth && styles.optionInnerFull]}>
+              <View
+                style={[
+                  styles.optionInner,
+                  option.fullWidth && styles.optionInnerFull,
+                ]}
+              >
                 <Ionicons
                   name={resolveIconName(option.icon) as any}
                   size={option.fullWidth ? 34 : 38}
                   color="#BF8A4A"
                   style={styles.optionIcon}
                 />
-                <Text style={[styles.optionLabel, option.fullWidth && styles.optionLabelFull]}>
+                <Text
+                  style={[
+                    styles.optionLabel,
+                    option.fullWidth && styles.optionLabelFull,
+                  ]}
+                >
                   {option.label || option.title}
                 </Text>
               </View>
@@ -198,7 +238,11 @@ const StableScanContainer: React.FC<StableScanContainerProps> = ({ schema }) => 
 
       <View style={styles.footerSection}>
         {footerBlocks.map((block: any, i: number) => (
-          <BlockRenderer key={`footer-${i}`} block={block} textColor="#432104" />
+          <BlockRenderer
+            key={`footer-${i}`}
+            block={block}
+            textColor="#432104"
+          />
         ))}
       </View>
     </ScrollView>
@@ -270,8 +314,8 @@ const styles = StyleSheet.create({
   },
   optionCardFull: {
     width: "100%",
-    minHeight: 74,
-    paddingHorizontal: 18,
+    minHeight: 10,
+    paddingHorizontal: 10,
     paddingVertical: 10,
   },
   optionInner: {

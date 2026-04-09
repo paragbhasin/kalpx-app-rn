@@ -247,7 +247,8 @@ export const CompanionDashboardContainer = {
             type: "navigate",
             target: {
               container_id: "practice_runner",
-              state_id: "mantra_rep_selection", is_core: true,
+              state_id: "mantra_rep_selection",
+              is_core: true,
             },
           },
         },
@@ -268,7 +269,8 @@ export const CompanionDashboardContainer = {
             type: "navigate",
             target: {
               container_id: "practice_runner",
-              state_id: "sankalp_embody", is_core: true,
+              state_id: "sankalp_embody",
+              is_core: true,
             },
           },
         },
@@ -291,7 +293,8 @@ export const CompanionDashboardContainer = {
             type: "navigate",
             target: {
               container_id: "practice_runner",
-              state_id: "practice_step_runner", is_core: true,
+              state_id: "practice_step_runner",
+              is_core: true,
             },
           },
         },
@@ -746,7 +749,6 @@ export const ChoiceStackContainer = {
               label: "Easy",
               description:
                 "Simple, gentle practices to help you begin. Perfect for easing into your routine.",
-              icon: "/assets/beginner.svg",
               label_color: "#A2A751",
             },
             {
@@ -755,7 +757,6 @@ export const ChoiceStackContainer = {
               label: "Balanced",
               description:
                 "A balanced level to build focus and consistency. Ideal when you're ready to go a little deeper.",
-              icon: "/assets/intermediate.svg",
               label_color: "#D9A557",
             },
             {
@@ -764,7 +765,6 @@ export const ChoiceStackContainer = {
               label: "Deep",
               description:
                 "More immersive practices for deeper transformation. For when you feel ready to commit more fully.",
-              icon: "/assets/advanced.svg",
               label_color: "#C57457",
             },
           ],
@@ -1055,7 +1055,7 @@ export const LockRitualContainer = {
           },
         },
         {
-          type: "helper_text",
+          type: "subtext",
           content:
             "Abhyasa (consistent practice) and Vairagya (letting go) — the two wings of transformation.",
         },
@@ -1526,8 +1526,7 @@ export const PracticeRunnerContainer = {
         slow_threshold: 3.0,
         fast_feedback: {
           title: "A Gentle Reflection",
-          message:
-            "Did each mantra truly resonate within you?",
+          message: "Did each mantra truly resonate within you?",
           sub: "True power comes from feeling, not just counting. Let every syllable settle into your being.",
           recommendRepeat: true,
           retry_cta: "Take a breath and chant slowly and mindfully.",
@@ -1594,7 +1593,8 @@ export const PracticeRunnerContainer = {
             type: "navigate",
             target: {
               container_id: "practice_runner",
-              state_id: "mantra_rep_selection", is_core: true,
+              state_id: "mantra_rep_selection",
+              is_core: true,
             },
           },
           position: "footer_actions",
@@ -1804,7 +1804,8 @@ export const PracticeRunnerContainer = {
             type: "navigate",
             target: {
               container_id: "practice_runner",
-              state_id: "sankalp_embody", is_core: true,
+              state_id: "sankalp_embody",
+              is_core: true,
             },
           },
           position: "footer_actions",
@@ -1968,7 +1969,8 @@ export const PracticeRunnerContainer = {
             type: "navigate",
             target: {
               container_id: "practice_runner",
-              state_id: "practice_step_runner", is_core: true,
+              state_id: "practice_step_runner",
+              is_core: true,
             },
           },
           position: "footer_actions",
@@ -6027,7 +6029,8 @@ export const SadhanaDeepenContainer = {
                 payload: { deepen_type: "add_reps" },
                 target: {
                   container_id: "practice_runner",
-                  state_id: "mantra_rep_selection", is_core: true,
+                  state_id: "mantra_rep_selection",
+                  is_core: true,
                 },
               },
             },

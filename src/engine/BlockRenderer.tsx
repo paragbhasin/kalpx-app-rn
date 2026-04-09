@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useScreenStore } from './useScreenBridge';
 import { interpolate } from './utils/interpolation';
+import { sanitizeStyle } from './utils/sanitizeStyle';
 
 // Existing blocks
 import HeadlineBlock from '../blocks/HeadlineBlock';
@@ -163,6 +164,11 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block, textColor }) => {
 
   // 2. Interpolate
   const interpolatedBlock = interpolate(block, screenData);
+
+  // 2b. Sanitize block.style — convert web CSS values (e.g. "16px") to RN numbers
+  if (interpolatedBlock.style) {
+    interpolatedBlock.style = sanitizeStyle(interpolatedBlock.style);
+  }
 
   // 3. Render Component
   const Component = blockMap[interpolatedBlock.type];

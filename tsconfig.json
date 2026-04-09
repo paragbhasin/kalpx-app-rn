@@ -4,6 +4,7 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    "**/*.d.ts",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
 , "src/screens/PoojaScreen.jsx", "App.tsx", "src/components/BottomMenu.tsx", "src/components/BottomMenu.tsx", "src/Networks/axios.js", "src/utils/registerDevice.js" ]

@@ -752,7 +752,23 @@ export async function executeAction(action: Action, context: ActionContext): Pro
           setScreenValue(infoData.steps.length === 1, 'show_complete_button');
         } else if (!payload.is_trigger) {
           setScreenValue('', 'info_start_help_text');
-          setScreenValue(is_locked || payload.read_only ? null : payload.start_action, 'info_start_action');
+
+          let defaultStartAction = payload.start_action || null;
+          if (!payload.start_action) {
+            if (infoType === 'mantra') {
+              defaultStartAction = {
+                type: 'navigate',
+                target: { container_id: 'practice_runner', state_id: 'mantra_rep_selection' },
+              };
+            } else if (infoType === 'sankalp' || infoType === 'Sankalpa') {
+              defaultStartAction = {
+                type: 'navigate',
+                target: { container_id: 'practice_runner', state_id: 'sankalp_embody' },
+              };
+            }
+          }
+
+          setScreenValue(is_locked || payload.read_only ? null : defaultStartAction, 'info_start_action');
         }
 
         // Runner context (single source of truth)

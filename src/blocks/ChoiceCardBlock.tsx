@@ -36,11 +36,52 @@ interface ChoiceCardBlockProps {
   };
 }
 
-const assetMap: Record<string, any> = {
-  '/assets/career1.png': require('../../assets/career1.png'),
-  '/assets/relationship.png': require('../../assets/relationship.png'),
-  '/assets/health.png': require('../../assets/health.png'),
-  '/assets/wealth.png': require('../../assets/wealth.png'),
+// SVG paths from allContainers.js → Ionicons mapping (RN can't render SVGs without transformer)
+const SVG_TO_IONICON: Record<string, string> = {
+  // Discipline/Focus categories
+  '/assets/career1.svg': 'briefcase-outline',
+  '/assets/health.svg': 'heart-outline',
+  '/assets/relationship.svg': 'people-outline',
+  '/assets/spiritual-growth.svg': 'leaf-outline',
+  // Quick check-in prana states
+  '/assets/quick_1.svg': 'flash-outline',        // Energized
+  '/assets/quick_2.svg': 'happy-outline',         // Balanced
+  '/assets/quick_3.svg': 'battery-dead-outline',  // Drained
+  '/assets/quick_4.svg': 'thunderstorm-outline',  // Agitated
+  // Depth levels
+  '/assets/beginner.svg': 'sunny-outline',
+  '/assets/intermediate.svg': 'partly-sunny-outline',
+  '/assets/advanced.svg': 'flame-outline',
+  // Sub-focus: Career
+  '/assets/wealth_1.svg': 'trending-up-outline',
+  '/assets/wealth_2.svg': 'briefcase-outline',
+  '/assets/wealth_3.svg': 'bulb-outline',
+  '/assets/wealth_4.svg': 'compass-outline',
+  // Sub-focus: Health
+  '/assets/health_1.svg': 'fitness-outline',
+  '/assets/health_2.svg': 'body-outline',
+  '/assets/health_3.svg': 'bed-outline',
+  '/assets/health_4.svg': 'nutrition-outline',
+  '/assets/health_5.svg': 'medical-outline',
+  // Sub-focus: Relationships
+  '/assets/relation_1.svg': 'heart-outline',
+  '/assets/relation_2.svg': 'chatbubbles-outline',
+  '/assets/relation_3.svg': 'hand-left-outline',
+  '/assets/relation_4.svg': 'people-outline',
+  '/assets/relation_5.svg': 'home-outline',
+  // Dosha/qualities
+  '/assets/buddhi.svg': 'bulb-outline',
+  '/assets/dharma.svg': 'shield-checkmark-outline',
+  '/assets/shakthi.svg': 'flash-outline',
+  '/assets/tejas.svg': 'sunny-outline',
+  '/assets/viveka.svg': 'eye-outline',
+  // Dashboard
+  '/assets/dash_mantra.svg': 'musical-notes-outline',
+  '/assets/dash_sankalp.svg': 'flag-outline',
+  '/assets/dash_action.svg': 'walk-outline',
+  '/assets/level_lotus.svg': 'flower-outline',
+  '/assets/sankalp_centered.svg': 'locate-outline',
+  '/assets/sankalp_inner_peace.svg': 'heart-circle-outline',
 };
 
 const FA_TO_IONICONS: Record<string, string> = {
@@ -66,9 +107,15 @@ const FA_TO_IONICONS: Record<string, string> = {
   'coins': 'cash-outline',
 };
 
-const resolveAsset = (path: string | any) => {
-  if (typeof path !== 'string') return path;
-  return assetMap[path] || { uri: path };
+/** Resolve an icon/image path to either an Ionicons name or null */
+const resolveIconName = (path: string | any): string | null => {
+  if (typeof path !== 'string') return null;
+  // Check SVG mapping first
+  if (SVG_TO_IONICON[path]) return SVG_TO_IONICON[path];
+  // Check FontAwesome mapping
+  const faName = path.replace('fas fa-', '');
+  if (FA_TO_IONICONS[faName]) return FA_TO_IONICONS[faName];
+  return null;
 };
 
 const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
@@ -182,21 +229,22 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
               ]}>
                 {option.image || option.icon ? (
                   <View style={[styles.imageContainer, isPremiumGrid && styles.premiumImageContainer]}>
-                    {option.icon && !option.image && !option.icon.startsWith('/') ? (
-                      <Ionicons 
-                        name={(FA_TO_IONICONS[option.icon.replace('fas fa-', '')] || 'help-circle') as any} 
-                        size={isPremiumGrid ? 32 : 24} 
-                        color="#432104" 
-                      />
-                    ) : (
-                      <Image 
-                        source={
-                          option.image ? resolveAsset(option.image) : resolveAsset(option.icon)
-                        } 
-                        style={[styles.image, isPremiumGrid && styles.premiumImage]} 
-                        resizeMode="contain" 
-                      />
-                    )}
+                    {(() => {
+                      const iconName = resolveIconName(option.icon || option.image);
+                      if (iconName) {
+                        return (
+                          <Ionicons
+                            name={iconName as any}
+                            size={isPremiumGrid ? 32 : 24}
+                            color={isSelected ? '#D4A017' : '#432104'}
+                          />
+                        );
+                      }
+                      // Fallback: generic icon
+                      return (
+                        <Ionicons name="flower-outline" size={isPremiumGrid ? 32 : 24} color="#432104" />
+                      );
+                    })()}
                   </View>
                 ) : null}
                 

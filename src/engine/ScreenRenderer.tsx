@@ -47,6 +47,10 @@ const ScreenRenderer: React.FC = () => {
   const currentContainerId = useScreenStore((state) => state.currentContainerId);
   const { currentOverlayData, setOverlayData } = useScreenStore();
 
+  if (__DEV__) {
+    console.log(`[ScreenRenderer] containerId=${currentContainerId} hasScreen=${!!currentScreen} blocks=${currentScreen?.blocks?.length || 0}`);
+  }
+
   if (!currentScreen) return null;
 
   // Use specific container or fallback to Generic

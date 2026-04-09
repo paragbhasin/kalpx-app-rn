@@ -212,6 +212,10 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({ s
 
   // Block buckets
   const blocks = schema?.blocks || [];
+  // DEBUG: log block count and types
+  if (__DEV__) {
+    console.log(`[CycleTransitions] stateId=${stateId} isInfo=${isInfoScreen} blocks=${blocks.length} types=${blocks.map((b:any) => b.type).join(',')}`);
+  }
   const headerBlocks = useMemo(
     () => blocks.filter((b: any) => b.position === 'header'),
     [blocks],

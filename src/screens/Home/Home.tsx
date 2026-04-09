@@ -67,11 +67,16 @@ export default function Home() {
   const isLoggedIn = !!user;
 
   const updateBackground = useScreenStore((state) => state.updateBackground);
+  const updateHeaderHidden = useScreenStore((state) => state.updateHeaderHidden);
 
   useEffect(() => {
     updateBackground(HOME_BACKGROUND);
-    return () => updateBackground(null);
-  }, [updateBackground]);
+    updateHeaderHidden(false);
+    return () => {
+      updateBackground(null);
+      updateHeaderHidden(false);
+    };
+  }, [updateBackground, updateHeaderHidden]);
 
   const [mitraJourneyId, setMitraJourneyId] = useState<string | null>(null);
   const [journeyFocus, setJourneyFocus] = useState<string>("");
@@ -143,7 +148,7 @@ export default function Home() {
         }),
       );
     }
-    navigation.navigate("MitraEngine");
+    navigation.navigate("DynamicEngine");
   };
 
   if (checkingJourney) {

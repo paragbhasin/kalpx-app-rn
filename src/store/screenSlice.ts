@@ -105,6 +105,27 @@ export const loadScreenWithData = createAsyncThunk(
   },
 );
 
+export const goBackWithData = createAsyncThunk(
+  'screen/goBackWithData',
+  async (_, { getState, dispatch }) => {
+    dispatch({ type: 'screen/goBack' });
+
+    const { screen } = getState() as { screen: ScreenState };
+    const { currentContainerId, currentStateId } = screen;
+    const screenSchema = await getScreen(currentContainerId, currentStateId);
+
+    if (screenSchema) {
+      dispatch({ type: 'screen/setCurrentScreen', payload: screenSchema });
+    } else {
+      console.warn(
+        `[SCREEN_SLICE] No schema found for back target ${currentContainerId}/${currentStateId}`,
+      );
+    }
+
+    return screenSchema;
+  },
+);
+
 // ---------------------------------------------------------------------------
 // Slice
 // ---------------------------------------------------------------------------

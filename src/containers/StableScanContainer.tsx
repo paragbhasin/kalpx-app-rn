@@ -1,108 +1,198 @@
-import React, { useMemo, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Text } from 'react-native';
-import { useScreenStore } from '../engine/useScreenBridge';
-import BlockRenderer from '../engine/BlockRenderer';
-import Header from '../components/Header';
-import GlobalScrollLayout from '../components/GlobalScrollLayout';
+import { Ionicons } from "@expo/vector-icons";
+import React, { useEffect, useMemo } from "react";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import BaselineSliderBlock from "../blocks/BaselineSliderBlock";
+import BlockRenderer from "../engine/BlockRenderer";
+import { useScreenStore } from "../engine/useScreenBridge";
+import { Fonts } from "../theme/fonts";
 
 interface StableScanContainerProps {
   schema: any;
 }
 
+const FA_TO_IONICONS: Record<string, string> = {
+  spinner: "sync",
+  "heart-broken": "heart-dislike-outline",
+  "user-slash": "person-remove",
+  "signs-post": "map",
+  "tachometer-alt": "speedometer",
+  heart: "heart",
+  fire: "flame",
+  cloud: "cloud",
+  "link-slash": "link-outline",
+  tint: "water",
+  "battery-quarter": "battery-dead",
+  bed: "bed",
+  "compress-arrows-alt": "contract",
+  walking: "walk",
+  pills: "medkit",
+  "money-bill-wave": "cash",
+  "hand-holding-usd": "wallet",
+  "chart-line": "trending-up",
+  "piggy-bank": "save",
+  coins: "cash-outline",
+  "user-secret": "person-outline",
+  random: "shuffle-outline",
+  "praying-hands": "hand-left-outline",
+  "tint-slash": "water-outline",
+  "hand-holding-heart": "heart-outline",
+  "eye-slash": "eye-off-outline",
+  om: "sparkles-outline",
+  user: "person-outline",
+  unlink: "unlink-outline",
+};
+
+const resolveIconName = (icon?: string) => {
+  if (!icon) return "ellipse-outline";
+  if (icon.startsWith("fas fa-")) {
+    const faName = icon.replace("fas fa-", "");
+    return FA_TO_IONICONS[faName] || "ellipse-outline";
+  }
+  return icon;
+};
+
 const StableScanContainer: React.FC<StableScanContainerProps> = ({ schema }) => {
   const updateBackground = useScreenStore((state) => state.updateBackground);
   const updateHeaderHidden = useScreenStore((state) => state.updateHeaderHidden);
   const screenState = useScreenStore((state) => state.screenData);
+  const updateScreenData = useScreenStore((state) => state.updateScreenData);
 
   useEffect(() => {
-    // User requested beige_bg only
-    updateBackground(require('../../assets/beige_bg.png'));
-    updateHeaderHidden(true);
+    updateBackground(require("../../assets/beige_bg.png"));
+    updateHeaderHidden(false);
     return () => updateHeaderHidden(false);
   }, [updateBackground, updateHeaderHidden]);
 
-  const dynamicBlocks = useMemo(() => {
-    if (!schema.blocks) return [];
+  const selectionBlock = useMemo(
+    () => (schema.blocks || []).find((b: any) => b.id === "prana_baseline_selection"),
+    [schema.blocks],
+  );
+  const headerBlocks = useMemo(
+    () => (schema.blocks || []).filter((b: any) => b.position === "header"),
+    [schema.blocks],
+  );
+  const helperBlock = useMemo(
+    () =>
+      (schema.blocks || []).find(
+        (b: any) => !b.position && b.type === "subtext" && b.content?.includes("adjust the sliders"),
+      ),
+    [schema.blocks],
+  );
+  const footerBlocks = useMemo(
+    () => (schema.blocks || []).filter((b: any) => b.position === "footer"),
+    [schema.blocks],
+  );
 
-    // Deep clone blocks to avoid side effects
-    let baseBlocks = JSON.parse(JSON.stringify(schema.blocks));
+  const focus = useMemo(() => {
+    const raw = screenState.scan_focus || "default";
+    return Array.isArray(raw) ? raw[0] : raw;
+  }, [screenState.scan_focus]);
 
-    // 1. Handle Selection Logic (Matching Vue implementation)
-    const selectionBlock = baseBlocks.find((b: any) => b.id === "prana_baseline_selection");
+  const options = useMemo(() => {
+    const focusOptions = schema.optionsMap?.[focus] || [];
+    return focusOptions.map((opt: any, idx: number) => ({
+      ...opt,
+      fullWidth: opt.fullWidth || (idx === focusOptions.length - 1 && focusOptions.length % 2 === 1),
+    }));
+  }, [schema.optionsMap, focus]);
 
-    if (selectionBlock) {
-      // Filter options based on scan_focus
-      const focusRaw = screenState["scan_focus"] || "peacecalm"; // default matches web
-      const focus = Array.isArray(focusRaw) ? focusRaw[0] : focusRaw;
+  const selectedId = useMemo(() => {
+    const raw = screenState.prana_baseline_selection;
+    if (raw) return raw;
+    return options[0]?.id || null;
+  }, [screenState.prana_baseline_selection, options]);
 
-      if (schema.optionsMap && schema.optionsMap[focus]) {
-        selectionBlock.options = schema.optionsMap[focus];
-      }
+  useEffect(() => {
+    if (!screenState.prana_baseline_selection && options[0]?.id) {
+      updateScreenData("prana_baseline_selection", options[0].id);
+    }
+  }, [options, screenState.prana_baseline_selection, updateScreenData]);
 
-      // Add dynamic sliders
-      const defaultInternal = selectionBlock.options && selectionBlock.options[0]?.id;
-      const selectedId = screenState["prana_baseline_selection"] || defaultInternal;
+  const sliderDefs = useMemo(() => {
+    if (!selectedId) return [];
+    return schema.subCategorySliders?.[selectedId] || [];
+  }, [schema.subCategorySliders, selectedId]);
 
-      if (schema.subCategorySliders) {
-        const sliders = schema.subCategorySliders[selectedId];
-        if (sliders) {
-          const sliderBlocks = sliders.map((s: any) => ({
-            type: "baseline_slider",
-            label: s.label,
-            value: s.value,
-            id: `slider-${s.label}`
-          }));
-          baseBlocks.push(...sliderBlocks);
+  const messageObj = useMemo(() => {
+    const dynamicMessages = schema.dynamicMessages || {};
+    return dynamicMessages[focus] || dynamicMessages.default || {};
+  }, [schema.dynamicMessages, focus]);
+
+  const decoratedHeaderBlocks = useMemo(
+    () =>
+      headerBlocks.map((block: any) => {
+        if (block.id === "dynamic_prana_text") {
+          return { ...block, content: messageObj.headline || block.content };
         }
-      }
-    }
-
-    // 2. Handle Dynamic Text
-    const textBlock = baseBlocks.find((b: any) => b.id === "dynamic_prana_text");
-    const subtextBlock = baseBlocks.find((b: any) => b.id === "dynamic_prana_subtext");
-
-    if (selectionBlock) {
-      const dynamicMessages = schema.dynamicMessages || {};
-      const focusRaw = screenState["scan_focus"] || "default";
-      const finalFocusStr = Array.isArray(focusRaw) ? focusRaw[0] : focusRaw;
-
-      const messageObj = dynamicMessages[finalFocusStr] || dynamicMessages.default;
-
-      if (messageObj) {
-        if (textBlock) textBlock.content = messageObj.headline || textBlock.content;
-        if (subtextBlock) subtextBlock.content = messageObj.subtext || subtextBlock.content;
-      }
-    }
-
-    return baseBlocks;
-  }, [schema.blocks, schema.optionsMap, schema.subCategorySliders, schema.dynamicMessages, screenState]);
-
-  const headerBlocks = dynamicBlocks.filter((b: any) => b.position === "header");
-  const contentBlocks = dynamicBlocks.filter((b: any) => !b.position || b.position === "content");
-  const footerBlocks = dynamicBlocks.filter((b: any) => b.position === "footer");
+        if (block.id === "dynamic_prana_subtext") {
+          return { ...block, content: messageObj.subtext || block.content };
+        }
+        return block;
+      }),
+    [headerBlocks, messageObj],
+  );
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-      <Header isTransparent={true} />
-      
+    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
       <View style={styles.headerSection}>
-        {headerBlocks.map((block: any, i: number) => (
+        {decoratedHeaderBlocks.map((block: any, i: number) => (
           <BlockRenderer key={`header-${i}`} block={block} textColor="#432104" />
         ))}
       </View>
 
-      <View style={styles.contentSection}>
-        {contentBlocks.map((block: any, i: number) => (
-          <React.Fragment key={block.id || `block-${i}`}>
-            {block.section_title && (
-              <View style={styles.sectionDivider}>
-                <View style={styles.line} />
-                <Text style={styles.dividerText}>{block.section_title}</Text>
-                <View style={styles.line} />
+      <View style={styles.sectionDivider}>
+        <View style={styles.line} />
+        <Text style={styles.dividerText}>{selectionBlock?.section_title || "YOUR CURRENT STATE"}</Text>
+        <View style={styles.line} />
+      </View>
+
+      <View style={styles.cardsWrap}>
+        {options.map((option: any) => {
+          const isSelected = selectedId === option.id;
+          return (
+            <TouchableOpacity
+              key={option.id}
+              activeOpacity={0.85}
+              onPress={() => updateScreenData("prana_baseline_selection", option.id)}
+              style={[
+                styles.optionCard,
+                option.fullWidth && styles.optionCardFull,
+                isSelected && styles.optionCardSelected,
+              ]}
+            >
+              <View style={[styles.optionInner, option.fullWidth && styles.optionInnerFull]}>
+                <Ionicons
+                  name={resolveIconName(option.icon) as any}
+                  size={option.fullWidth ? 34 : 38}
+                  color="#BF8A4A"
+                  style={styles.optionIcon}
+                />
+                <Text style={[styles.optionLabel, option.fullWidth && styles.optionLabelFull]}>
+                  {option.label || option.title}
+                </Text>
               </View>
-            )}
-            <BlockRenderer block={block} textColor="#432104" />
-          </React.Fragment>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      {helperBlock ? (
+        <Text style={styles.helperText}>{helperBlock.content}</Text>
+      ) : null}
+
+      <View style={styles.slidersSection}>
+        {sliderDefs.map((slider: any) => (
+          <BaselineSliderBlock
+            key={`${selectedId}-${slider.label}`}
+            block={{
+              id: `slider-${slider.label}`,
+              label: slider.label,
+              value: screenState[slider.label] ?? slider.value,
+              min: 1,
+              max: 10,
+            }}
+            textColor="#432104"
+          />
         ))}
       </View>
 
@@ -118,44 +208,114 @@ const StableScanContainer: React.FC<StableScanContainerProps> = ({ schema }) => 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
   },
   scrollContent: {
-    paddingBottom: 40,
+    paddingTop: 72,
+    paddingBottom: 120,
+    paddingHorizontal: 18,
   },
   headerSection: {
-    paddingHorizontal: 20,
-    marginTop: 10,
-  },
-  contentSection: {
-    paddingHorizontal: 16,
-    gap: 10,
-  },
-  footerSection: {
-    paddingHorizontal: 20,
-    marginTop: 20,
-    alignItems: 'center',
+    alignItems: "center",
+    marginBottom: 10,
   },
   sectionDivider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 12,
-    marginVertical: 20,
+    marginTop: 8,
+    marginBottom: 18,
   },
   dividerText: {
-    fontFamily: 'GelicaBold',
-    fontSize: 14,
-    textTransform: 'uppercase',
-    letterSpacing: 2,
-    color: '#C9A84C',
-    fontWeight: '600',
+    fontFamily: Fonts.serif.bold,
+    fontSize: 16,
+    letterSpacing: 2.4,
+    color: "#D4A017",
+    textTransform: "uppercase",
   },
   line: {
-    height: 1,
     flex: 1,
-    backgroundColor: '#C9A84C',
-    opacity: 0.3,
+    height: 1,
+    backgroundColor: "rgba(212, 160, 23, 0.22)",
+  },
+  cardsWrap: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  optionCard: {
+    width: "48.2%",
+    minHeight: 120,
+    borderRadius: 22,
+    borderWidth: 1.25,
+    borderColor: "rgba(212, 160, 23, 0.55)",
+    backgroundColor: "rgba(255, 253, 249, 0.96)",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 14,
+    paddingVertical: 14,
+    shadowColor: "#C9A84C",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  optionCardSelected: {
+    borderColor: "#D4A017",
+    shadowOpacity: 0.22,
+    shadowRadius: 12,
+    elevation: 7,
+  },
+  optionCardFull: {
+    width: "100%",
+    minHeight: 74,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+  },
+  optionInner: {
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+  },
+  optionInnerFull: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
+  },
+  optionIcon: {
+    marginBottom: 0,
+  },
+  optionLabel: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 17,
+    lineHeight: 22,
+    color: "#5B4636",
+    textAlign: "center",
+  },
+  optionLabelFull: {
+    textAlign: "center",
+  },
+  helperText: {
+    marginTop: 14,
+    marginBottom: 6,
+    textAlign: "center",
+    color: "#8C8881",
+    fontSize: 15,
+    lineHeight: 22,
+    fontStyle: "italic",
+    fontFamily: Fonts.serif.regular,
+  },
+  slidersSection: {
+    marginTop: 4,
+    gap: 8,
+  },
+  footerSection: {
+    marginTop: 12,
+    alignItems: "center",
   },
 });
 

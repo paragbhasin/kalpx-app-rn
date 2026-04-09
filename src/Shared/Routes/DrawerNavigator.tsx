@@ -196,7 +196,12 @@ const CustomDrawerContent = (props) => {
 
         if (item.name === t("drawer.myRoutine")) {
           store.dispatch(screenActions.loadScreen({ containerId: 'portal', stateId: 'portal' }));
-          props.navigation.navigate("MitraEngine");
+          props.navigation.navigate("HomePage", {
+            screen: "HomePage",
+            params: {
+              screen: "DynamicEngine",
+            },
+          });
         } else if (item.title === "Profile") {
           props.navigation.navigate("HomePage", {
             screen: "Profile",

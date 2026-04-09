@@ -565,7 +565,7 @@ export const ChoiceStackContainer = {
             {
               id: "spiritual_growth",
               title: "Spiritual Growth",
-              icon: "/assets/spiritual-growth.svg",
+              icon: "/assets/spiritual_growth.png",
               tags: ["Devotion", "Awareness"],
               description:
                 "Spiritual growth in Sanatan Dharma is the journey toward the Self through:",

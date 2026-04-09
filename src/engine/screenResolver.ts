@@ -105,26 +105,30 @@ export async function getScreen(
   containerId: string,
   stateId: string,
 ): Promise<ScreenDefinition | null> {
-  // 1. Try API cache
-  if (_apiContainers?.[containerId]?.states?.[stateId]) {
-    const container = _apiContainers[containerId];
-    const state = container.states[stateId];
+  const local = _localLookup[containerId];
+  const api = _apiContainers?.[containerId];
+
+  // Prefer local definitions during app-side iteration; merge API as fallback.
+  if (local?.states?.[stateId]) {
+    const localState = local.states[stateId];
+    const apiState = api?.states?.[stateId] || {};
     return {
       container_id: containerId,
-      container_type: container.container_type,
+      container_type: local.container_type || api?.container_type,
       state_id: stateId,
-      ...state,
+      ...apiState,
+      ...localState,
     };
   }
 
-  // 2. Local fallback
-  const local = _localLookup[containerId];
-  if (local?.states?.[stateId]) {
+  // API fallback
+  if (api?.states?.[stateId]) {
+    const state = api.states[stateId];
     return {
       container_id: containerId,
-      container_type: local.container_type,
+      container_type: api.container_type,
       state_id: stateId,
-      ...local.states[stateId],
+      ...state,
     };
   }
 
@@ -140,26 +144,28 @@ export function getScreenSync(
   containerId: string,
   stateId: string,
 ): ScreenDefinition | null {
-  // 1. API cache (already in memory after init)
-  if (_apiContainers?.[containerId]?.states?.[stateId]) {
-    const container = _apiContainers[containerId];
-    const state = container.states[stateId];
+  const local = _localLookup[containerId];
+  const api = _apiContainers?.[containerId];
+
+  if (local?.states?.[stateId]) {
+    const localState = local.states[stateId];
+    const apiState = api?.states?.[stateId] || {};
     return {
       container_id: containerId,
-      container_type: container.container_type,
+      container_type: local.container_type || api?.container_type,
       state_id: stateId,
-      ...state,
+      ...apiState,
+      ...localState,
     };
   }
 
-  // 2. Local fallback
-  const local = _localLookup[containerId];
-  if (local?.states?.[stateId]) {
+  if (api?.states?.[stateId]) {
+    const state = api.states[stateId];
     return {
       container_id: containerId,
-      container_type: local.container_type,
+      container_type: api.container_type,
       state_id: stateId,
-      ...local.states[stateId],
+      ...state,
     };
   }
 
@@ -174,14 +180,18 @@ export function getScreenSync(
 export async function getContainer(
   containerId: string,
 ): Promise<ContainerDefinition | null> {
-  // 1. API cache
-  if (_apiContainers?.[containerId]) {
-    return _apiContainers[containerId];
-  }
+  const local = _localLookup[containerId];
+  const api = _apiContainers?.[containerId];
 
-  // 2. Local fallback
-  if (_localLookup[containerId]) {
-    return _localLookup[containerId];
+  if (local || api) {
+    return {
+      ...(api || {}),
+      ...(local || {}),
+      states: {
+        ...(api?.states || {}),
+        ...(local?.states || {}),
+      },
+    };
   }
 
   console.warn(`[SCREEN_RESOLVER] Container not found: ${containerId}`);
@@ -194,11 +204,18 @@ export async function getContainer(
 export function getContainerSync(
   containerId: string,
 ): ContainerDefinition | null {
-  if (_apiContainers?.[containerId]) {
-    return _apiContainers[containerId];
-  }
-  if (_localLookup[containerId]) {
-    return _localLookup[containerId];
+  const local = _localLookup[containerId];
+  const api = _apiContainers?.[containerId];
+
+  if (local || api) {
+    return {
+      ...(api || {}),
+      ...(local || {}),
+      states: {
+        ...(api?.states || {}),
+        ...(local?.states || {}),
+      },
+    };
   }
   return null;
 }

@@ -76,7 +76,15 @@ export default function MitraPhilosophy() {
         stateId: "discipline_select",
       }),
     );
-    navigation.navigate("MitraEngine");
+    navigation.navigate("AppDrawer", {
+      screen: "HomePage",
+      params: {
+        screen: "HomePage",
+        params: {
+          screen: "DynamicEngine",
+        },
+      },
+    });
   };
   const updateBackground = useScreenStore((state) => state.updateBackground);
 

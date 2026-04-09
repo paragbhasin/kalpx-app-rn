@@ -3,7 +3,6 @@ import { View, StyleSheet, ScrollView, Dimensions, Text } from 'react-native';
 import BlockRenderer from '../engine/BlockRenderer';
 import { useScreenStore } from '../engine/useScreenBridge';
 import { Fonts } from '../theme/fonts';
-import Header from '../components/Header';
 
 const { width, height } = Dimensions.get('window');
 
@@ -31,7 +30,7 @@ const ChoiceStackContainer: React.FC<ChoiceStackContainerProps> = ({ schema }) =
 
   useEffect(() => {
     updateBackground(require('../../assets/beige_bg.png'));
-    updateHeaderHidden(true);
+    updateHeaderHidden(false);
     return () => updateHeaderHidden(false);
   }, [updateBackground, updateHeaderHidden]);
 
@@ -43,6 +42,7 @@ const ChoiceStackContainer: React.FC<ChoiceStackContainerProps> = ({ schema }) =
     );
 
     const dynamicMessages = schema.dynamicMessages;
+    const disciplineStyle = schema.id === 'discipline_select';
     if (!dynamicMessages) return baseBlocks;
 
     // 1. Get Focus/Category from screen state
@@ -84,18 +84,82 @@ const ChoiceStackContainer: React.FC<ChoiceStackContainerProps> = ({ schema }) =
     return baseBlocks;
   }, [schema.blocks, schema.dynamicMessages, screenData?.scan_focus, screenData?.prana_baseline_selection]);
 
+  const styledBlocks = useMemo(() => {
+    const blocks = dynamicBlocks.map((b: any) => ({ ...b, style: b.style ? { ...b.style } : undefined }));
+
+    if (schema.id !== 'discipline_select') return blocks;
+
+    blocks.forEach((block: any) => {
+      if (block.type === 'headline' && block.position === 'header') {
+        block.style = {
+          ...(block.style || {}),
+          fontSize: 30,
+          lineHeight: 38,
+          fontFamily: Fonts.serif.bold,
+          textAlign: 'center',
+          color: '#432104',
+          maxWidth: 520,
+          marginBottom: 14,
+        };
+      }
+
+      if (block.type === 'subtext' && block.position === 'header') {
+        block.style = {
+          ...(block.style || {}),
+          fontSize: 16,
+          lineHeight: 26,
+          fontFamily: Fonts.serif.regular,
+          textAlign: 'center',
+          color: '#4F331B',
+          maxWidth: 560,
+          marginBottom: 18,
+        };
+      }
+
+      if (block.type === 'primary_button' && block.position === 'footer') {
+        block.style = 'discipline_gold';
+      }
+
+      if (block.type === 'subtext' && block.position === 'footer' && block.content === 'Return to start') {
+        block.style = {
+          ...(block.style || {}),
+          fontSize: 16,
+          marginTop: 0,
+          marginBottom: 6,
+          color: '#5B3920',
+          fontFamily: Fonts.serif.regular,
+        };
+      }
+
+      if (block.type === 'subtext' && block.position === 'footer' && block.content !== 'Return to start') {
+        block.style = {
+          ...(block.style || {}),
+          fontSize: 16,
+          lineHeight: 28,
+          maxWidth: 560,
+          color: '#4F331B',
+          fontFamily: Fonts.serif.regular,
+          textAlign: 'center',
+          marginTop: 2,
+        };
+      }
+    });
+
+    return blocks;
+  }, [dynamicBlocks, schema.id]);
+
   // Filter blocks by position
   const headerBlocks = useMemo(
-    () => dynamicBlocks.filter((b: any) => b.position === 'header'),
-    [dynamicBlocks],
+    () => styledBlocks.filter((b: any) => b.position === 'header'),
+    [styledBlocks],
   );
   const contentBlocks = useMemo(
-    () => dynamicBlocks.filter((b: any) => !b.position || b.position === 'content'),
-    [dynamicBlocks],
+    () => styledBlocks.filter((b: any) => !b.position || b.position === 'content'),
+    [styledBlocks],
   );
   const footerBlocks = useMemo(
-    () => dynamicBlocks.filter((b: any) => b.position === 'footer'),
-    [dynamicBlocks],
+    () => styledBlocks.filter((b: any) => b.position === 'footer'),
+    [styledBlocks],
   );
 
   // Special UI flags
@@ -108,11 +172,10 @@ const ChoiceStackContainer: React.FC<ChoiceStackContainerProps> = ({ schema }) =
       contentContainerStyle={[
         styles.scrollContent,
         isDepthSelection && styles.depthSelectionPadding,
+        isDisciplineSelect && styles.disciplineScrollContent,
       ]}
       showsVerticalScrollIndicator={false}
     >
-      <Header isTransparent={true} />
-
       {/* Header Section */}
       <View style={[styles.header, isDisciplineSelect && styles.disciplineHeader]}>
         {headerBlocks.map((block: any, i: number) => (
@@ -139,8 +202,8 @@ const ChoiceStackContainer: React.FC<ChoiceStackContainerProps> = ({ schema }) =
       </View>
 
       {/* Footer Section */}
-      <View style={styles.footer}>
-        <View style={styles.actions}>
+      <View style={[styles.footer, isDisciplineSelect && styles.disciplineFooter]}>
+        <View style={[styles.actions, isDisciplineSelect && styles.disciplineActions]}>
           {footerBlocks.map((block: any, i: number) => (
             <BlockRenderer key={`footer-${i}`} block={block} textColor="#432104" />
           ))}
@@ -175,7 +238,9 @@ const styles = StyleSheet.create({
     maxWidth: 560,
     alignSelf: 'center',
     width: '100%',
-    marginBottom: 5,
+    marginBottom: 8,
+    paddingHorizontal: 24,
+    paddingTop: 72,
   },
   content: {
     flex: 1,
@@ -183,6 +248,9 @@ const styles = StyleSheet.create({
   },
   disciplineContent: {
     width: '100%',
+    paddingHorizontal: 18,
+    maxWidth: 640,
+    alignSelf: 'center',
   },
   footer: {
     alignItems: 'center',
@@ -194,6 +262,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 15,
+  },
+  disciplineFooter: {
+    width: '100%',
+    paddingHorizontal: 20,
+  },
+  disciplineActions: {
+    maxWidth: 640,
+    paddingBottom: 120,
+  },
+  disciplineScrollContent: {
+    paddingBottom: 140,
   },
   depthDivider: {
     flexDirection: 'row',

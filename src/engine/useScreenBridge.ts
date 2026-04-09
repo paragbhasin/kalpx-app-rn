@@ -42,7 +42,8 @@ export function useScreenStore(selector?: (state: any) => any) {
   );
 
   const goBack = useCallback(() => {
-    dispatch(screenActions.goBack());
+    const { goBackWithData } = require('../store/screenSlice');
+    dispatch(goBackWithData());
   }, [dispatch]);
 
   const setScreenData = useCallback(

@@ -110,17 +110,21 @@ const PrimaryButtonBlock: React.FC<PrimaryButtonBlockProps> = ({ block }) => {
     <View style={styles.pulseContainer}>
       <TouchableOpacity activeOpacity={0.85} onPress={handlePress}>
         <LinearGradient
-          colors={['#fff8dc', '#f6d365', '#d4af37', '#b8860b', '#fff8dc']}
+          colors={variant === 'discipline_gold'
+            ? ['#F6D98D', '#E7B944', '#B8860B']
+            : ['#fff8dc', '#f6d365', '#d4af37', '#b8860b', '#fff8dc']}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
-          style={styles.borderGradient}
+          style={[styles.borderGradient, variant === 'discipline_gold' && styles.disciplineBorderGradient]}
         >
           <LinearGradient
-            colors={['#c49a3c', '#d4a853', '#c49a3c']}
-            style={styles.innerButton}
+            colors={variant === 'discipline_gold'
+              ? ['#EABB47', '#D6A224', '#EABB47']
+              : ['#c49a3c', '#d4a853', '#c49a3c']}
+            style={[styles.innerButton, variant === 'discipline_gold' && styles.disciplineInnerButton]}
           >
             <View style={styles.contentContainer}>
-              <Text style={styles.label}>{block.label}</Text>
+              <Text style={[styles.label, variant === 'discipline_gold' && styles.disciplineLabel]}>{block.label}</Text>
               {block.subtext && <Text style={styles.subtext}>{block.subtext}</Text>}
             </View>
           </LinearGradient>
@@ -144,6 +148,10 @@ const styles = StyleSheet.create({
     padding: 2, // Border thickness
     borderRadius: 50,
   },
+  disciplineBorderGradient: {
+    borderRadius: 42,
+    padding: 3,
+  },
   innerButton: {
     paddingVertical: 14,
     paddingHorizontal: 28,
@@ -151,6 +159,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
+  },
+  disciplineInnerButton: {
+    minWidth: 220,
+    paddingVertical: 18,
+    paddingHorizontal: 42,
+    borderRadius: 38,
+    shadowColor: '#A87514',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.18,
+    shadowRadius: 4,
   },
   contentContainer: {
     alignItems: 'center',
@@ -161,6 +179,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textAlign: 'center',
     fontFamily: 'Inter_600SemiBold',
+  },
+  disciplineLabel: {
+    fontSize: 18,
+    fontFamily: 'CormorantGaramond_700Bold',
+    letterSpacing: 0.2,
   },
   subtext: {
     color: 'rgba(255, 255, 255, 0.8)',

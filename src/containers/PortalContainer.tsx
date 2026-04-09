@@ -43,7 +43,7 @@ const PortalContainer: React.FC<PortalContainerProps> = ({ schema }) => {
   useEffect(() => {
     // gold_dark tone -- dark base with companion background image
     updateBackground(require('../../assets/companion.png'));
-    updateHeaderHidden(true);
+    updateHeaderHidden(false);
 
     // Fade-in + slide-up (mirrors web .portal-content transition)
     Animated.parallel([

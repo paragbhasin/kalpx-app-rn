@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "rnstripe_autolinked_build",
+		"source" : "/Users/nayakpavani/Dev/Kalpx-app/kalpx-app-rn/node_modules/@stripe/stripe-react-native/android/build/generated/source/codegen/jni"
+	}
+}

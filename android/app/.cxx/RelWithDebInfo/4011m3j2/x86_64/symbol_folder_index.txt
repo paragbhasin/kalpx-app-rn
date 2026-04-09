@@ -1,0 +1,1 @@
+/Users/nayakpavani/Dev/Kalpx-app/kalpx-app-rn/android/app/build/intermediates/cxx/RelWithDebInfo/4011m3j2/obj/x86_64

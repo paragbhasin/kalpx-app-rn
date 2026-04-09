@@ -1,0 +1,10 @@
+{
+  "enabled": true,
+  "prefabPath": "/Users/nayakpavani/.gradle/caches/modules-2/files-2.1/com.google.prefab/cli/2.1.0/aa32fec809c44fa531f01dcfb739b5b3304d3050/cli-2.1.0-all.jar",
+  "packages": [
+    "/Users/nayakpavani/.gradle/caches/8.13/transforms/6ca5ddcd0f9a006fd87df8be7756d69c/transformed/react-android-0.79.6-debug/prefab",
+    "/Users/nayakpavani/Dev/Kalpx-app/kalpx-app-rn/node_modules/react-native-reanimated/android/build/intermediates/prefab_package/debug/prefab",
+    "/Users/nayakpavani/.gradle/caches/8.13/transforms/f840b33fbafca90958400a574529aea2/transformed/hermes-android-0.79.6-debug/prefab",
+    "/Users/nayakpavani/.gradle/caches/8.13/transforms/fc48a1eaf3bc2c7d18d587f5247afe86/transformed/fbjni-0.7.0/prefab"
+  ]
+}

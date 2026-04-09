@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "RNEdgeToEdge_autolinked_build",
+		"source" : "/Users/nayakpavani/Dev/Kalpx-app/kalpx-app-rn/node_modules/react-native-edge-to-edge/android/build/generated/source/codegen/jni"
+	}
+}

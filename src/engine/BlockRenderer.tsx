@@ -164,13 +164,11 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block, textColor }) => {
     if (!isVisible) return null;
   }
 
-  // 2. Interpolate
-  const interpolatedBlock = interpolate(block, screenData);
-
-  // 2b. Sanitize block.style — convert web CSS values (e.g. "16px") to RN numbers
-  if (interpolatedBlock.style) {
-    interpolatedBlock.style = sanitizeStyle(interpolatedBlock.style);
-  }
+  // 2. Interpolate and sanitize styles
+  const rawBlock = interpolate(block, screenData);
+  const interpolatedBlock = rawBlock.style
+    ? { ...rawBlock, style: sanitizeStyle(rawBlock.style) }
+    : rawBlock;
 
   // 3. Render Component
   const Component = blockMap[interpolatedBlock.type];

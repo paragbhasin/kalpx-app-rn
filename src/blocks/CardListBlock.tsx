@@ -46,7 +46,7 @@ const CardListBlock: React.FC<CardListBlockProps> = ({ block }) => {
           const { store } = require('../store');
           store.dispatch(screenActions.setScreenValue({ key, value }));
         },
-        screenState,
+        screenState: { ...screenState },
       });
     } catch (err) {
       console.error('[CardListBlock] Action failed:', err);

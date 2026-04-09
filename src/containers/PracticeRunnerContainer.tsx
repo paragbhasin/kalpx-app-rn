@@ -196,7 +196,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
           const { store } = require('../store');
           store.dispatch(screenActions.setScreenValue({ key, value }));
         },
-        screenState,
+        screenState: { ...screenState },
       },
     );
   };
@@ -216,7 +216,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
           const { store } = require('../store');
           store.dispatch(screenActions.setScreenValue({ key, value }));
         },
-        screenState,
+        screenState: { ...screenState },
       },
     );
   };

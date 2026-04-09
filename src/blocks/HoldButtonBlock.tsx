@@ -55,7 +55,7 @@ const HoldButtonBlock: React.FC<HoldButtonBlockProps> = ({ block }) => {
               const { store } = require('../store');
               store.dispatch(screenActions.setScreenValue({ key, value }));
             },
-            screenState,
+            screenState: { ...screenState },
           }).catch((err: any) => console.error('[HoldButtonBlock] Action failed:', err));
         }
       }

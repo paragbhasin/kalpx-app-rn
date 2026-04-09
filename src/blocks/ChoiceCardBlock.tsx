@@ -106,7 +106,7 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
         const { store } = require('../store');
         store.dispatch(screenActions.setScreenValue({ key, value }));
       };
-      const ctx = { loadScreen, goBack, setScreenValue, screenState };
+      const ctx = { loadScreen, goBack, setScreenValue, screenState: { ...screenState } };
 
       // 1. Check for action on the option itself
       if (option.action) {

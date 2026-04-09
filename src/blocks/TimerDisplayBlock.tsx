@@ -84,7 +84,7 @@ const TimerDisplayBlock: React.FC<TimerDisplayBlockProps> = ({ block }) => {
                 const { store } = require('../store');
                 store.dispatch(screenActions.setScreenValue({ key, value }));
               },
-              screenState,
+              screenState: { ...screenState },
             }).catch((err: any) => console.error('[TimerDisplayBlock] Action failed:', err));
           }
           return 0;

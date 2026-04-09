@@ -52,7 +52,7 @@ const PressAndHoldBlock: React.FC<PressAndHoldBlockProps> = ({ block }) => {
               const { store } = require('../store');
               store.dispatch(screenActions.setScreenValue({ key, value }));
             },
-            screenState,
+            screenState: { ...screenState },
           }).catch(console.error);
         }
       }

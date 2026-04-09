@@ -57,7 +57,7 @@ const PressAndHoldCircularBlock: React.FC<PressAndHoldCircularBlockProps> = ({ b
               const { store } = require('../store');
               store.dispatch(screenActions.setScreenValue({ key, value }));
             },
-            screenState,
+            screenState: { ...screenState },
           }).catch(console.error);
         }
       }

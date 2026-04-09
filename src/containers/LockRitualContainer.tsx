@@ -107,7 +107,7 @@ const LockRitualContainer: React.FC<LockRitualContainerProps> = ({ schema }) => 
     setScreenValue: (value: any, key: string) => {
       dispatch(screenActions.setScreenValue({ key, value }));
     },
-    screenState,
+    screenState: { ...screenState },
     startFlowInstance: (flowType: string) =>
       dispatch(screenActions.startFlowInstance(flowType)),
     endFlowInstance: () => dispatch(screenActions.endFlowInstance()),

@@ -26,7 +26,7 @@ const LinkTextBlock: React.FC<LinkTextBlockProps> = ({ block }) => {
           const { store } = require('../store');
           store.dispatch(screenActions.setScreenValue({ key, value }));
         },
-        screenState,
+        screenState: { ...screenState },
       });
     } catch (err) {
       console.error('[LinkTextBlock] Action failed:', err);

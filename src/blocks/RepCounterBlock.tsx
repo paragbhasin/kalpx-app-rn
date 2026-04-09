@@ -62,7 +62,7 @@ const RepCounterBlock: React.FC<RepCounterBlockProps> = ({ block }) => {
                   const { store } = require('../store');
                   store.dispatch(screenActions.setScreenValue({ key, value }));
                 },
-                screenState,
+                screenState: { ...screenState },
               },
             );
           } catch (err) {

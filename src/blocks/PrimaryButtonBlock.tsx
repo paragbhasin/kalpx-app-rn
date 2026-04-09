@@ -86,7 +86,7 @@ const PrimaryButtonBlock: React.FC<PrimaryButtonBlockProps> = ({ block }) => {
           const { store } = require('../store');
           store.dispatch(screenActions.setScreenValue({ key, value }));
         },
-        screenState,
+        screenState: { ...screenState }, // Shallow copy — Redux state is frozen
       });
     } catch (err) {
       console.error('[PrimaryButtonBlock] Action failed:', err);

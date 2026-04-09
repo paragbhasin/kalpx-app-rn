@@ -59,7 +59,7 @@ const ChipListBlock: React.FC<ChipListBlockProps> = ({ block }) => {
             setScreenValue: (value: any, key: string) => {
               store.dispatch(screenActions.setScreenValue({ key, value }));
             },
-            screenState,
+            screenState: { ...screenState },
           },
         );
       } catch (err) {

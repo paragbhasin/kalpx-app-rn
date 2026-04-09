@@ -29,7 +29,7 @@ const TimerControlsBlock: React.FC<TimerControlsBlockProps> = ({ block }) => {
           const { store } = require('../store');
           store.dispatch(screenActions.setScreenValue({ key, value }));
         },
-        screenState,
+        screenState: { ...screenState },
       });
     } catch (err) {
       console.error('[TimerControlsBlock] Action failed:', err);

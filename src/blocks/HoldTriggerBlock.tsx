@@ -72,7 +72,7 @@ const HoldTriggerBlock: React.FC<HoldTriggerBlockProps> = ({ block }) => {
               const { store } = require('../store');
               store.dispatch(screenActions.setScreenValue({ key, value }));
             },
-            screenState,
+            screenState: { ...screenState },
           }).catch((err: any) => console.error('[HoldTriggerBlock] Action failed:', err));
         }
       }

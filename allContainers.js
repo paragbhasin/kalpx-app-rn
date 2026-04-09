@@ -1018,6 +1018,7 @@ export const LockRitualContainer = {
           "7_day": 1800,
           "14_day": 2400,
         },
+        horizontal_padding: 24,
         block_background_interaction: true,
         cancel_on_release: true,
       },

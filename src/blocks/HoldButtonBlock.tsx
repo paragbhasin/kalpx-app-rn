@@ -3,11 +3,11 @@
  * Simpler than HoldTriggerBlock: linear progress bar instead of circular SVG.
  */
 
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, Animated } from 'react-native';
-import { Fonts } from '../theme/fonts';
-import { useScreenStore } from '../engine/useScreenBridge';
-import { executeAction } from '../engine/actionExecutor';
+import React, { useEffect, useRef, useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { executeAction } from "../engine/actionExecutor";
+import { useScreenStore } from "../engine/useScreenBridge";
+import { Fonts } from "../theme/fonts";
 
 interface HoldButtonBlockProps {
   block: {
@@ -20,7 +20,12 @@ interface HoldButtonBlockProps {
 }
 
 const HoldButtonBlock: React.FC<HoldButtonBlockProps> = ({ block }) => {
-  const { screenData: screenState, loadScreen, goBack, currentScreen } = useScreenStore();
+  const {
+    screenData: screenState,
+    loadScreen,
+    goBack,
+    currentScreen,
+  } = useScreenStore();
   const duration = block.hold_duration || 2000;
 
   const [progress, setProgress] = useState(0);
@@ -51,12 +56,14 @@ const HoldButtonBlock: React.FC<HoldButtonBlockProps> = ({ block }) => {
             loadScreen,
             goBack,
             setScreenValue: (value: any, key: string) => {
-              const { screenActions } = require('../store/screenSlice');
-              const { store } = require('../store');
+              const { screenActions } = require("../store/screenSlice");
+              const { store } = require("../store");
               store.dispatch(screenActions.setScreenValue({ key, value }));
             },
             screenState: { ...screenState },
-          }).catch((err: any) => console.error('[HoldButtonBlock] Action failed:', err));
+          }).catch((err: any) =>
+            console.error("[HoldButtonBlock] Action failed:", err),
+          );
         }
       }
     }, 16);
@@ -80,10 +87,10 @@ const HoldButtonBlock: React.FC<HoldButtonBlockProps> = ({ block }) => {
   }, []);
 
   const labelText = isComplete
-    ? 'Confirmed'
+    ? "Confirmed"
     : isHolding
-      ? 'Hold...'
-      : block.label || 'Hold to Confirm';
+      ? "Hold..."
+      : block.label || "Hold to Confirm";
 
   return (
     <View style={[styles.container, block?.style]}>
@@ -95,7 +102,9 @@ const HoldButtonBlock: React.FC<HoldButtonBlockProps> = ({ block }) => {
       >
         {/* Progress fill */}
         <View style={[styles.progressFill, { width: `${progress}%` }]} />
-        <Text style={[styles.label, isComplete && styles.labelComplete]}>{labelText}</Text>
+        <Text style={[styles.label, isComplete && styles.labelComplete]}>
+          {labelText}
+        </Text>
       </View>
     </View>
   );
@@ -103,44 +112,44 @@ const HoldButtonBlock: React.FC<HoldButtonBlockProps> = ({ block }) => {
 
 const styles = StyleSheet.create({
   container: {
-    width: '93%',
-    alignSelf: 'center',
+    width: "93%",
+    alignSelf: "center",
     marginVertical: 12,
   },
   button: {
     height: 52,
     borderRadius: 26,
-    backgroundColor: 'rgba(201, 168, 76, 0.15)',
+    backgroundColor: "rgba(201, 168, 76, 0.15)",
     borderWidth: 1,
-    borderColor: '#C9A84C',
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden',
-    position: 'relative',
+    borderColor: "#C9A84C",
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+    position: "relative",
   },
   buttonComplete: {
-    backgroundColor: 'rgba(201, 168, 76, 0.3)',
-    borderColor: '#C9A84C',
+    backgroundColor: "rgba(201, 168, 76, 0.3)",
+    borderColor: "#C9A84C",
   },
   progressFill: {
-    position: 'absolute',
+    position: "absolute",
     left: 0,
     top: 0,
     bottom: 0,
-    backgroundColor: 'rgba(201, 168, 76, 0.25)',
+    backgroundColor: "rgba(201, 168, 76, 0.25)",
     borderRadius: 26,
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#5c5648',
+    fontWeight: "600",
+    color: "#F3F3F4",
     fontFamily: Fonts.sans.semiBold,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 1,
     zIndex: 1,
   },
   labelComplete: {
-    color: '#432104',
+    color: "#432104",
   },
 });
 

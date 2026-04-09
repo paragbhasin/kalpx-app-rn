@@ -35,6 +35,7 @@ interface LockRitualContainerProps {
       hold_duration_ms?: Record<string, number>;
       block_background_interaction?: boolean;
       cancel_on_release?: boolean;
+      horizontal_padding?: number;
     };
   };
 }
@@ -73,6 +74,8 @@ const LockRitualContainer: React.FC<LockRitualContainerProps> = ({ schema }) => 
     }
     return 1250; // Web default: 25 intervals * 50ms
   }, [schema.meta]);
+
+  const horizontalPadding = schema.meta?.horizontal_padding ?? 24;
 
   useEffect(() => {
     // Immersion settings — dark background, hide header chrome
@@ -237,7 +240,7 @@ const LockRitualContainer: React.FC<LockRitualContainerProps> = ({ schema }) => 
 
       <Header isTransparent={true} />
 
-      <View style={styles.contentWrap}>
+      <View style={[styles.contentWrap, { paddingHorizontal: horizontalPadding }]}>
         {/* Header blocks with staggered entrance */}
         <Animated.View style={[styles.header, animatedHeaderStyle]}>
           {headerBlocks.map((block: any, i: number) => (

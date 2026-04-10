@@ -993,23 +993,12 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
           onToggleMute={toggleTriggerMute}
           footerContent={
             <View style={styles.runnerFooterExtra}>
-              {/* Trigger Buttons */}
-              {isTriggerSession && (
-                <View style={styles.triggerRunnerActions}>
-                  <TouchableOpacity
-                    style={styles.goldActionBtn}
-                    onPress={() => executeAction({ type: "trigger_calmer_now" }, buildActionContext())}
-                  >
-                    <Text style={styles.goldActionBtnText}>I feel calmer now</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.supportOutlineBtn}
-                    onPress={() => executeAction({ type: "trigger_still_feeling" }, buildActionContext())}
-                  >
-                    <Text style={styles.supportOutlineBtnText}>I still feel triggered</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
+              {/* Trigger buttons are rendered via mantraRunnerFooterBlocks
+                  below, driven by the schema in allContainers.js
+                  (free_mantra_chanting / post_trigger_mantra footer_actions).
+                  Previously we rendered them twice — once inline here and
+                  once via BlockRenderer — causing the duplicate button
+                  problem. Web parity: web only has the schema-driven set. */}
 
               {/* Mantra Meaning/Essence Accordions */}
               {isTriggerSession && activeItem?.item_type === "mantra" && (

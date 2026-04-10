@@ -368,10 +368,10 @@ export async function executeAction(action: Action, context: ActionContext): Pro
         // Runner data seeding for practice/quick practice
         if (dest === 'practice_step_runner' || dest === 'quick_practice_step_runner') {
           const lastViewed = screenState._last_viewed_item;
-          if (lastViewed && (dest === 'quick_practice_step_runner' || dest === 'post_trigger_mantra')) {
+          if (lastViewed && ((dest as string) === 'quick_practice_step_runner' || (dest as string) === 'post_trigger_mantra')) {
             const itemId = lastViewed.item_id || lastViewed.id;
             setScreenValue(
-              { itemId, itemType: dest === 'post_trigger_mantra' ? 'mantra' : (lastViewed.item_type || 'practice'), source: 'support' },
+              { itemId, itemType: (dest as string) === 'post_trigger_mantra' ? 'mantra' : (lastViewed.item_type || 'practice'), source: 'support' },
               '_active_support_item',
             );
             setScreenValue(itemId, 'active_session_item_id');
@@ -1197,11 +1197,88 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // TRIGGER_STILL_FEELING — user still feels triggered, escalate
       // ================================================================
       case 'trigger_still_feeling': {
-        const stillStep = screenState['trigger_step'] || 2;
+        const stillStep = screenState['trigger_step'] || 1;
         const stillFeeling = screenState['trigger_feeling'] || 'triggered';
 
-        if (stillStep === 2) {
-          const storedMantra = screenState['_trigger_mantra_data'];
+        console.log(`[TRIGGER] Escalating from Step ${stillStep}. Feeling: ${stillFeeling}`);
+
+        if (stillStep === 1) {
+          // First escalation: Call API and show Practice DIRECTLY
+          const res = await mitraTriggerMantras({
+            feeling: stillFeeling,
+            focus: screenState['scan_focus'] || screenState['active_focus'] || 'peacecalm',
+            subFocus: screenState['prana_baseline_selection'] || '',
+            depth: screenState['routine_depth'] || screenState['routine_setup'] || 'standard',
+            round: 1,
+            locale: screenState['locale'] || 'en',
+            tz: _mitraTz(),
+          });
+
+          const suggestions = res?.suggestions || [];
+          const practiceSuggestion = suggestions.find((s: any) => s.type === 'practice');
+          const mantraSuggestion = suggestions.find((s: any) => s.type === 'mantra');
+
+          // Persist both for the sequence
+          if (practiceSuggestion) {
+            setScreenValue(practiceSuggestion.core, '_trigger_practice_data');
+          }
+          if (mantraSuggestion) {
+            setScreenValue(mantraSuggestion.core, '_trigger_mantra_data');
+          }
+
+          if (practiceSuggestion) {
+            const pCore = practiceSuggestion.core || {};
+            setScreenValue({
+              ...pCore,
+              wisdom: practiceSuggestion.context,
+              source: 'support',
+              is_trigger: true,
+              item_id: pCore.item_id || pCore.id,
+              item_type: 'practice',
+              steps_text: (pCore.steps || []).map((s: string, i: number) => `${i + 1}. ${s}`).join('\n'),
+              benefits_text: (pCore.benefits || []).map((b: string) => `• ${b}`).join('\n'),
+            }, 'runner_active_item');
+
+            setScreenValue(2, 'trigger_step');
+            setScreenValue(_triggerNegativeLabel(stillFeeling, 2), '_trigger_negative_label');
+            loadScreen({ container_id: 'practice_runner', state_id: 'trigger_practice_runner' });
+          } else if (mantraSuggestion) {
+            // Fallback directly to mantra if no practice found
+            const mCore = mantraSuggestion.core || {};
+            setScreenValue(mCore.iast || mCore.title || 'OM', 'trigger_mantra_text');
+            setScreenValue(mCore.devanagari || 'ॐ', 'trigger_mantra_devanagari');
+            setScreenValue(mCore.audio_url || '', '_selected_om_audio');
+            setScreenValue({
+              ...mCore,
+              source: 'support',
+              is_trigger: true,
+              item_type: 'mantra',
+            }, 'runner_active_item');
+
+            setScreenValue(3, 'trigger_step');
+            setScreenValue(_triggerNegativeLabel(stillFeeling, 3), '_trigger_negative_label');
+            loadScreen({ container_id: 'practice_runner', state_id: 'post_trigger_mantra' });
+          } else {
+            loadScreen({ container_id: 'companion_dashboard', state_id: 'day_active' });
+          }
+        } else if (stillStep === 2) {
+          // Second escalation: Show Mantra DIRECTLY (pre-fetched or fetch if missing)
+          let mantraData = screenState['_trigger_mantra_data'];
+
+          if (!mantraData) {
+            const res = await mitraTriggerMantras({
+              feeling: stillFeeling,
+              focus: screenState['scan_focus'] || screenState['active_focus'] || 'peacecalm',
+              round: 2,
+              locale: screenState['locale'] || 'en',
+              tz: _mitraTz(),
+            });
+            const mantraSuggestion = (res?.suggestions || []).find((s: any) => s.type === 'mantra');
+            if (mantraSuggestion) {
+              mantraData = mantraSuggestion.core;
+              setScreenValue(mantraData, '_trigger_mantra_data');
+            }
+          }
 
           mitraTrackEvent('trigger_still_feeling', {
             journeyId: screenState.journey_id,
@@ -1212,20 +1289,22 @@ export async function executeAction(action: Action, context: ActionContext): Pro
           setScreenValue(3, 'trigger_step');
           setScreenValue(_triggerNegativeLabel(stillFeeling, 3), '_trigger_negative_label');
 
-          if (storedMantra) {
-            setScreenValue(storedMantra.iast || storedMantra.title || 'OM', 'trigger_mantra_text');
-            setScreenValue(storedMantra.devanagari || 'ॐ', 'trigger_mantra_devanagari');
-            setScreenValue(storedMantra.audio_url || '', '_selected_om_audio');
+          if (mantraData) {
+            setScreenValue(mantraData.iast || mantraData.title || 'OM', 'trigger_mantra_text');
+            setScreenValue(mantraData.devanagari || 'ॐ', 'trigger_mantra_devanagari');
+            setScreenValue(mantraData.audio_url || '', '_selected_om_audio');
             setScreenValue({
-              ...storedMantra,
+              ...mantraData,
               source: 'support',
               is_trigger: true,
               item_type: 'mantra',
             }, 'runner_active_item');
+            loadScreen({ container_id: 'practice_runner', state_id: 'post_trigger_mantra' });
+          } else {
+            loadScreen({ container_id: 'companion_dashboard', state_id: 'day_active' });
           }
-
-          loadScreen({ container_id: 'practice_runner', state_id: 'post_trigger_mantra' });
         } else {
+          // Final escalation: Return to Dashboard with encouragement
           mitraTrackEvent('trigger_still_feeling_final', {
             journeyId: screenState.journey_id,
             dayNumber: screenState.day_number || 1,

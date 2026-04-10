@@ -13,6 +13,8 @@ import {
   Image,
   ScrollView,
   Easing,
+  LayoutAnimation,
+  UIManager,
 } from "react-native";
 import { Audio } from "expo-av";
 import { useScreenStore } from "../engine/useScreenBridge";
@@ -28,6 +30,48 @@ import SankalpCenteredIcon from "../../assets/sankalp_centered.svg";
 import SankalpInnerPeaceIcon from "../../assets/sankalp_inner_peace.svg";
 
 const { width } = Dimensions.get("window");
+
+// Enable LayoutAnimation on Android
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+// ---------------------------------------------------------------------------
+// Collapsible Card for Runner Footer
+// ---------------------------------------------------------------------------
+
+interface CollapsibleCardProps {
+  label: string;
+  children: React.ReactNode;
+  expanded: boolean;
+  onToggle: () => void;
+}
+
+const CollapsibleCard: React.FC<CollapsibleCardProps> = ({
+  label,
+  children,
+  expanded,
+  onToggle,
+}) => (
+  <TouchableOpacity
+    style={[styles.card, expanded && styles.cardExpanded]}
+    onPress={onToggle}
+    activeOpacity={0.8}
+  >
+    <View style={styles.cardHeader}>
+      <View style={styles.dividerLine} />
+      <View style={styles.headerLabelGroup}>
+        <Text style={styles.cardLabel}>{label}</Text>
+        <Text style={styles.toggleIcon}>{expanded ? "\u25B2" : "\u25BC"}</Text>
+      </View>
+      <View style={styles.dividerLine} />
+    </View>
+    {expanded && <View style={styles.cardContent}>{children}</View>}
+  </TouchableOpacity>
+);
 
 function _omTextForTrack(url: string) {
   if (url.includes("Hari Om")) return { label: "Hari Om", devanagari: "हरि ॐ" };
@@ -371,6 +415,12 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
     if (url.includes("Audio_Be_still.mp4")) {
       return require("../../assets/sounds/Audio_Be_still.mp4");
     }
+    if (url.includes("Hari Om")) {
+      return require("../../assets/sounds/Hari Om -Female.mp4");
+    }
+    if (url.includes("Om Shanti")) {
+      return require("../../assets/sounds/Om Shanti.mp4");
+    }
     if (url.includes("/sounds/Om.mp4")) {
       return require("../../assets/sounds/Om.mp4");
     }
@@ -392,64 +442,89 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
 
   const toggleTriggerMute = async () => {
     const nextMuted = !mediaMuted;
+    console.log("[TRIGGER_AUDIO] Toggling mute to:", nextMuted);
     setMediaMuted(nextMuted);
+
+    const volume = nextMuted ? 0 : 1;
+    
     if (introLoopAudioRef.current) {
+      console.log("[TRIGGER_AUDIO] Updating intro sound volume:", volume);
+      await introLoopAudioRef.current.setVolumeAsync(volume).catch(() => {});
       await introLoopAudioRef.current.setIsMutedAsync(nextMuted).catch(() => {});
     }
     if (mantraLoopAudioRef.current) {
+      console.log("[TRIGGER_AUDIO] Updating mantra sound volume:", volume);
+      await mantraLoopAudioRef.current.setVolumeAsync(volume).catch(() => {});
       await mantraLoopAudioRef.current.setIsMutedAsync(nextMuted).catch(() => {});
     }
   };
 
   useEffect(() => {
+    Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+      playThroughEarpieceAndroid: false,
+    }).catch(e => console.warn("[TRIGGER_AUDIO] Global setAudioModeAsync error:", e));
+  }, []);
+
+  useEffect(() => {
     let isCancelled = false;
 
     const startTriggerAudioSequence = async () => {
+      console.log("[TRIGGER_AUDIO] startTriggerAudioSequence triggered. Mode:", currentStateId);
+      
       if (!isTriggerOmChantScreen) {
+        console.log("[TRIGGER_AUDIO] Not a trigger chanting screen. Stopping.");
         await stopTriggerAudio();
         return;
       }
 
       await stopTriggerAudio();
+      
+      // Delay slightly to ensure component is settled
+      await new Promise(resolve => setTimeout(resolve, 300));
+      if (isCancelled) return;
 
       try {
-        await Audio.setAudioModeAsync({
-          playsInSilentModeIOS: true,
-          staysActiveInBackground: false,
-        });
-
-        const { sound: introSound } = await Audio.Sound.createAsync(
-          require("../../assets/sounds/Audio_Be_still.mp4"),
-          { shouldPlay: false, isLooping: false, isMuted: mediaMuted, volume: 1 },
+        console.log("[TRIGGER_AUDIO] Loading Intro: Audio_Be_still.mp4");
+        const introSource = require("../../assets/sounds/Audio_Be_still.mp4");
+        const { sound: intro } = await Audio.Sound.createAsync(
+          introSource,
+          { shouldPlay: false, isMuted: mediaMuted, volume: 1 }
         );
+        
         if (isCancelled) {
-          await introSound.unloadAsync().catch(() => {});
+          await intro.unloadAsync();
           return;
         }
-        introLoopAudioRef.current = introSound;
+        introLoopAudioRef.current = intro;
 
-        const { sound: mantraSound } = await Audio.Sound.createAsync(
-          resolveAudioSource(mantraAudioUrl),
-          { shouldPlay: false, isLooping: true, isMuted: mediaMuted, volume: 1 },
+        console.log("[TRIGGER_AUDIO] Loading Mantra Source:", mantraAudioUrl);
+        const mantraSource = resolveAudioSource(mantraAudioUrl);
+        const { sound: mantra } = await Audio.Sound.createAsync(
+          mantraSource,
+          { shouldPlay: false, isLooping: true, isMuted: mediaMuted, volume: 1 }
         );
+
         if (isCancelled) {
-          await mantraSound.unloadAsync().catch(() => {});
+          await intro.unloadAsync();
+          await mantra.unloadAsync();
           return;
         }
-        mantraLoopAudioRef.current = mantraSound;
+        mantraLoopAudioRef.current = mantra;
 
-        introSound.setOnPlaybackStatusUpdate((status) => {
-          if (!status.isLoaded) return;
-          if (status.didJustFinish && mantraLoopAudioRef.current) {
-            mantraLoopAudioRef.current.playAsync().catch(() => {});
+        // Transition logic
+        intro.setOnPlaybackStatusUpdate(status => {
+          if (status.isLoaded && status.didJustFinish && !isCancelled) {
+            console.log("[TRIGGER_AUDIO] Intro finished -> Playing Mantra");
+            mantra.playAsync().catch(e => console.error("[TRIGGER_AUDIO] Mantra play failed:", e));
           }
         });
 
-        await introSound.setIsMutedAsync(mediaMuted).catch(() => {});
-        await mantraSound.setIsMutedAsync(mediaMuted).catch(() => {});
-        await introSound.playAsync();
+        console.log("[TRIGGER_AUDIO] Sequence Ready. Playing Intro now.");
+        await intro.playAsync();
       } catch (err) {
-        console.warn("[TRIGGER_AUDIO] Failed to start intro/audio sequence:", err);
+        console.error("[TRIGGER_AUDIO] Sequence Failed:", err);
       }
     };
 
@@ -459,7 +534,8 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
       isCancelled = true;
       stopTriggerAudio().catch(() => {});
     };
-  }, [isTriggerOmChantScreen, mantraAudioUrl, mediaMuted]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isTriggerOmChantScreen, mantraAudioUrl]); // Removed mediaMuted to avoid restart on mute toggle
 
   const mantraCompletionState = useMemo(() => {
     const durationSeconds =
@@ -799,6 +875,9 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
     );
   }
 
+  const [meaningExpanded, setMeaningExpanded] = useState(false);
+  const [essenceExpanded, setEssenceExpanded] = useState(false);
+
   if (isMantraRunner) {
     const target = isUnlimitedRepCounter
       ? -1
@@ -806,6 +885,9 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
         Number(repCounterBlock?.total) ||
         schema.target_count ||
         9;
+    
+    const activeItem = screenState.runner_active_item;
+    
     return (
       <View style={{ flex: 1 }}>
         <MalaMantraCounter
@@ -834,16 +916,64 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
           mediaMuted={mediaMuted}
           onToggleMute={toggleTriggerMute}
           footerContent={
-            mantraRunnerFooterBlocks.length > 0 ? (
-              <>
-                {mantraRunnerFooterBlocks.map((block: any, i: number) => (
-                  <BlockRenderer
-                    key={block.id || `runner-footer-${i}`}
-                    block={block}
-                  />
-                ))}
-              </>
-            ) : null
+            <View style={styles.runnerFooterExtra}>
+              {/* Trigger Buttons */}
+              {isTriggerSession && (
+                <View style={styles.triggerRunnerActions}>
+                  <TouchableOpacity
+                    style={styles.goldActionBtn}
+                    onPress={() => executeAction({ type: "trigger_calmer_now" }, buildActionContext())}
+                  >
+                    <Text style={styles.goldActionBtnText}>I feel calmer now</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.supportOutlineBtn}
+                    onPress={() => executeAction({ type: "trigger_still_feeling" }, buildActionContext())}
+                  >
+                    <Text style={styles.supportOutlineBtnText}>I still feel triggered</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {/* Mantra Meaning/Essence Accordions */}
+              {isTriggerSession && activeItem?.item_type === "mantra" && (
+                <View style={styles.mantraCollapsibleGroup}>
+                  {activeItem.meaning && (
+                    <CollapsibleCard
+                      label="Meaning"
+                      expanded={meaningExpanded}
+                      onToggle={() => {
+                        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                        setMeaningExpanded(!meaningExpanded);
+                      }}
+                    >
+                      <Text style={styles.cardText}>{activeItem.meaning}</Text>
+                    </CollapsibleCard>
+                  )}
+                  {activeItem.essence && (
+                    <CollapsibleCard
+                      label="Essence"
+                      expanded={essenceExpanded}
+                      onToggle={() => {
+                        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                        setEssenceExpanded(!essenceExpanded);
+                      }}
+                    >
+                      <Text style={styles.cardText}>{activeItem.essence}</Text>
+                    </CollapsibleCard>
+                  )}
+                </View>
+              )}
+
+              {/* Existing Footer Blocks */}
+              {mantraRunnerFooterBlocks.length > 0 && (
+                <View style={{ marginTop: 20 }}>
+                  {mantraRunnerFooterBlocks.map((block: any, i: number) => (
+                    <BlockRenderer key={block.id || `runner-footer-${i}`} block={block} />
+                  ))}
+                </View>
+              )}
+            </View>
           }
         />
         {showMicroWin && <MicroCompletion message={microWinMessage} onDismiss={() => setShowMicroWin(false)} />}
@@ -1965,6 +2095,69 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   completionFooter: { width: "100%", padding: 20 },
+  runnerFooterExtra: {
+    width: "100%",
+    alignItems: "center",
+    paddingBottom: 40,
+  },
+  triggerRunnerActions: {
+    width: "100%",
+    gap: 12,
+    marginBottom: 24,
+    paddingHorizontal: 10,
+  },
+  mantraCollapsibleGroup: {
+    width: "100%",
+    gap: 12,
+  },
+  card: {
+    width: "100%",
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: "#E8C587",
+    padding: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+  },
+  cardExpanded: {
+    backgroundColor: "rgba(255, 255, 255, 0.6)",
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    justifyContent: "center",
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#E8C587",
+    opacity: 0.6,
+  },
+  headerLabelGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  cardLabel: {
+    fontSize: 18,
+    fontFamily: Fonts.serif.bold,
+    color: "#432104",
+    marginHorizontal: 12,
+  },
+  toggleIcon: {
+    fontSize: 12,
+    color: "#D4A017",
+    marginLeft: 4,
+  },
+  cardContent: {
+    marginTop: 12,
+  },
+  cardText: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: "#5a3c21",
+    fontFamily: Fonts.serif.regular,
+    textAlign: "center",
+  },
 });
 
 export default PracticeRunnerContainer;

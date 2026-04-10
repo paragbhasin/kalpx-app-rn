@@ -15,6 +15,13 @@ const GlobalScrollLayout = ({
 
     return (
         <View style={styles.container}>
+            {currentBackground && (
+                <ImageBackground
+                    source={currentBackground}
+                    style={StyleSheet.absoluteFill}
+                    resizeMode="cover"
+                />
+            )}
             {!isHeaderHidden && (
                 <Animated.View style={[
                     styles.headerContainer, 

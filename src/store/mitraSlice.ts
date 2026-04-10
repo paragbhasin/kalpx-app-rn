@@ -15,13 +15,22 @@ const initialState: MitraState = {
   aiReasoning: null,
 };
 
-// Async thunk for generating companion — uses centralized API client (not hardcoded URL)
+// Async thunk for generating companion — uses logic from mitraApi and syncs with screen store
 export const generateCompanion = createAsyncThunk(
   'mitra/generateCompanion',
-  async (payload: any, { rejectWithValue }) => {
+  async (payload: any, { dispatch, rejectWithValue }) => {
     try {
-      const response = await api.post('mitra/generate-companion/', payload);
-      return response.data;
+      // 1. Resolve API using localized logic (which handles metrics, tz, locale)
+      const { mitraGenerateCompanion } = require('../engine/mitraApi');
+      const data = await mitraGenerateCompanion(payload);
+
+      if (data) {
+        // 2. Automatically seed the screenData so dashboard renders correctly
+        const { updateScreenData } = require('./screenSlice');
+        dispatch(updateScreenData(data));
+      }
+      
+      return data;
     } catch (err: any) {
       return rejectWithValue(err.response?.data || 'Failed to generate companion');
     }

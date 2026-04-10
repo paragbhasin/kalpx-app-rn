@@ -10,8 +10,7 @@
  */
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -27,8 +26,9 @@ import { useSelector } from "react-redux";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import api from "../../Networks/axios";
 import store, { RootState } from "../../store";
-import { screenActions } from "../../store/screenSlice";
+import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
+import ContinueJourney from "./ContinueJourney";
 
 const FEATURE_ITEMS = [
   {
@@ -53,14 +53,11 @@ const FEATURE_ITEMS = [
   },
 ];
 
-const HOME_BACKGROUND = require("../../../assets/new_bg.png");
-
 // Legacy export for RelatedVideosScreen compatibility
 export const collapseControl = { avoidCollapse: false };
 
 export default function Home() {
   const navigation: any = useNavigation();
-  const { t } = useTranslation();
   const user = useSelector(
     (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
   );
@@ -69,19 +66,55 @@ export default function Home() {
   const updateBackground = useScreenStore((state) => state.updateBackground);
   const updateHeaderHidden = useScreenStore((state) => state.updateHeaderHidden);
 
-  useEffect(() => {
-    updateBackground(HOME_BACKGROUND);
-    updateHeaderHidden(false);
-    return () => {
-      updateBackground(null);
-      updateHeaderHidden(false);
-    };
-  }, [updateBackground, updateHeaderHidden]);
-
   const [mitraJourneyId, setMitraJourneyId] = useState<string | null>(null);
-  const [journeyFocus, setJourneyFocus] = useState<string>("");
   const [journeyDay, setJourneyDay] = useState<number>(1);
   const [checkingJourney, setCheckingJourney] = useState(false);
+
+  const HOME_BACKGROUND = require("../../../assets/new_bg.png");
+  const CONTINUE_BG = require("../../../assets/continue_journey_bg.jpeg");
+
+  useFocusEffect(
+    React.useCallback(() => {
+      updateBackground(mitraJourneyId ? CONTINUE_BG : HOME_BACKGROUND);
+      updateHeaderHidden(false);
+      return () => {
+        updateBackground(null);
+        updateHeaderHidden(false);
+      };
+    }, [updateBackground, updateHeaderHidden, mitraJourneyId, CONTINUE_BG, HOME_BACKGROUND])
+  );
+
+  const seedJourneyStatus = React.useCallback((status: any) => {
+    if (!status) return;
+
+    const screenUpdates: Record<string, any> = {
+      journey_id: status.journeyId ?? null,
+      day_number: status.dayNumber || 1,
+      total_days: status.totalDays || 14,
+      is_experienced: true,
+    };
+
+    const focus = status.focus || status.activeFocus || "";
+    const subFocus = status.subfocus || status.sub_focus || "";
+    const depth = status.depth || "standard";
+
+    if (focus) {
+      screenUpdates.scan_focus = focus;
+      screenUpdates.active_focus = focus;
+      screenUpdates.suggested_focus = focus;
+    }
+
+    if (subFocus) {
+      screenUpdates.prana_baseline_selection = subFocus;
+    }
+
+    if (depth) {
+      screenUpdates.routine_depth = depth;
+      screenUpdates.routine_setup = depth;
+    }
+
+    store.dispatch(screenActions.updateScreenData(screenUpdates));
+  }, []);
 
   // Check journey status on focus (matches web's onMounted behavior)
   useFocusEffect(
@@ -96,28 +129,8 @@ export default function Home() {
           const res = await api.get("mitra/journey/status/");
           if (res.data?.hasActiveJourney && res.data?.journeyId) {
             setMitraJourneyId(res.data.journeyId);
-            setJourneyFocus(res.data.focus || "");
             setJourneyDay(res.data.dayNumber || 1);
-            // Seed screen state for MitraEngine
-            store.dispatch(
-              screenActions.setScreenValue({
-                key: "journey_id",
-                value: res.data.journeyId,
-              }),
-            );
-            store.dispatch(
-              screenActions.setScreenValue({
-                key: "day_number",
-                value: res.data.dayNumber || 1,
-              }),
-            );
-            if (res.data.focus)
-              store.dispatch(
-                screenActions.setScreenValue({
-                  key: "scan_focus",
-                  value: res.data.focus,
-                }),
-              );
+            seedJourneyStatus(res.data);
           } else {
             setMitraJourneyId(null);
           }
@@ -128,18 +141,61 @@ export default function Home() {
         }
       };
       checkJourney();
-    }, [isLoggedIn]),
+    }, [isLoggedIn, seedJourneyStatus]),
   );
 
-  const navigateToMitra = (hasJourney: boolean) => {
-    const { loadScreenWithData } = require("../../store/screenSlice");
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const navigateToMitra = async (hasJourney: boolean) => {
     if (hasJourney) {
-      store.dispatch(
-        loadScreenWithData({
-          containerId: "companion_dashboard",
-          stateId: "day_active",
-        }),
-      );
+      setIsProcessing(true);
+      try {
+        const res = await api.get("mitra/journey/status/");
+        const status = res.data;
+
+        if (status?.hasActiveJourney && status?.journeyId) {
+          seedJourneyStatus(status);
+
+          const { executeAction } = require("../../engine/actionExecutor");
+
+          await executeAction(
+            { type: "generate_companion" },
+            {
+              screenState: store.getState().screen.screenData,
+              loadScreen: (target: any) => {
+                const containerId = target?.container_id || target?.containerId || "generic";
+                const stateId = target?.state_id || target?.stateId || target || "";
+                store.dispatch(loadScreenWithData({ containerId, stateId }));
+              },
+              goBack: () => {
+                const { goBackWithData } = require("../../store/screenSlice");
+                store.dispatch(goBackWithData());
+              },
+              setScreenValue: (value: any, key: string) => {
+                store.dispatch(screenActions.setScreenValue({ key, value }));
+              },
+            },
+          );
+
+          store.dispatch(
+            loadScreenWithData({
+              containerId: "companion_dashboard",
+              stateId: "day_active",
+            }),
+          );
+        } else {
+          store.dispatch(
+            loadScreenWithData({
+              containerId: "choice_stack",
+              stateId: "discipline_select",
+            }),
+          );
+        }
+      } catch (err) {
+        console.debug("[HOME] Navigation pre-check failed:", err);
+      } finally {
+        setIsProcessing(false);
+      }
     } else {
       store.dispatch(
         loadScreenWithData({
@@ -151,7 +207,7 @@ export default function Home() {
     navigation.navigate("DynamicEngine");
   };
 
-  if (checkingJourney) {
+  if (checkingJourney || isProcessing) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingWrap}>
@@ -203,108 +259,94 @@ export default function Home() {
       />
       */}
 
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* ── Hero Section ── */}
-        <View style={styles.heroSection}>
-          <Text style={styles.heroQuote}>
-            "Lift yourself by your own Self."
-          </Text>
-          <Text style={styles.heroSource}>— Bhagavad Gita 6.5</Text>
-          <Text style={styles.heroTitle}>Guided growth for real life</Text>
-          <Text style={styles.heroSubtitle}>
-            Helping you navigate life's challenges with clarity, balance, and
-            Sanatan wisdom.
-          </Text>
-        </View>
+      {mitraJourneyId ? (
+        <ContinueJourney
+          dayNumber={journeyDay}
+          onResume={() => navigateToMitra(true)}
+        />
+      ) : (
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* ── Hero Section ── */}
+          <View style={styles.heroSection}>
+            <Text style={styles.heroQuote}>
+              "Lift yourself by your own Self."
+            </Text>
+            <Text style={styles.heroSource}>— Bhagavad Gita 6.5</Text>
+            <Text style={styles.heroTitle}>Guided growth for real life</Text>
+            <Text style={styles.heroSubtitle}>
+              Helping you navigate life's challenges with clarity, balance, and
+              Sanatan wisdom.
+            </Text>
+          </View>
 
-        {/* ── Journey CTA ── */}
-        {mitraJourneyId ? (
-          <TouchableOpacity
-            style={styles.journeyCard}
-            onPress={() => navigateToMitra(true)}
-          >
-            <View style={styles.journeyCardInner}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.journeyCardTitle}>
-                  {t("home.resumeJourney") || "Resume Your Journey"}
-                </Text>
-                <Text style={styles.journeyCardDesc}>
-                  Day {journeyDay} — Continue where you left off.
-                </Text>
-              </View>
-              <View style={styles.journeyArrow}>
-                <Ionicons name="arrow-forward" size={20} color="#FFF" />
-              </View>
-            </View>
-          </TouchableOpacity>
-        ) : (
+          {/* ── Journey CTA ── */}
           <TouchableOpacity
             style={styles.ctaButton}
             onPress={() => navigateToMitra(false)}
           >
             <Text style={styles.ctaText}>Begin with KalpX Mitra →</Text>
           </TouchableOpacity>
-        )}
 
-        {/* ── Companion Preview ── */}
-        <View style={styles.companionSection}>
-          <Text style={styles.companionLabel}>KALPX MITRA</Text>
-          <Text style={styles.companionTitle}>
-            Your guided path begins here
-          </Text>
-          <Text style={styles.companionDesc}>
-            A companion for the life you are actually living.
-          </Text>
-          <TouchableOpacity onPress={() => navigateToMitra(!!mitraJourneyId)}>
-            <Image
-              source={require("../../../assets/home_side(2).png")}
-              style={styles.companionImage}
-              resizeMode="contain"
-            />
-          </TouchableOpacity>
-        </View>
-
-        {/* ── What Mitra Offers ── */}
-        <View style={styles.featuresSection}>
-          <Text style={styles.sectionTitle}>What Mitra Offers</Text>
-          <View style={styles.featureGrid}>
-            {FEATURE_ITEMS.map((item, idx) => (
-              <View key={idx} style={styles.featureCard}>
-                <Image
-                  source={item.icon}
-                  style={styles.featureIconImage}
-                  resizeMode="contain"
-                />
-
-                <Text style={styles.featureTitle}>{item.title}</Text>
-                <Text style={styles.featureText}>{item.text}</Text>
-              </View>
-            ))}
+          {/* ── Companion Preview ── */}
+          <View style={styles.companionSection}>
+            <Text style={styles.companionLabel}>KALPX MITRA</Text>
+            <Text style={styles.companionTitle}>
+              Your guided path begins here
+            </Text>
+            <Text style={styles.companionDesc}>
+              A companion for the life you are actually living.
+            </Text>
+            <TouchableOpacity onPress={() => navigateToMitra(!!mitraJourneyId)}>
+              <Image
+                source={require("../../../assets/home_side(2).png")}
+                style={styles.companionImage}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
           </View>
-        </View>
 
-        {/* ── How It Works Link ── */}
-        <TouchableOpacity
-          style={styles.philosophyLink}
-          onPress={() => navigation.navigate("MitraPhilosophy")}
-        >
-          <Text style={styles.philosophyText}>How KalpX Mitra Works →</Text>
-        </TouchableOpacity>
+          {/* ── What Mitra Offers ── */}
+          <View style={styles.featuresSection}>
+            <Text style={styles.sectionTitle}>What Mitra Offers</Text>
+            <View style={styles.featureGrid}>
+              {FEATURE_ITEMS.map((item, idx) => (
+                <View key={idx} style={styles.featureCard}>
+                  <Image
+                    source={item.icon}
+                    style={styles.featureIconImage}
+                    resizeMode="contain"
+                  />
 
-        {/* ── Login CTA (logged out only) ── */}
-        {!isLoggedIn && (
+                  <Text style={styles.featureTitle}>{item.title}</Text>
+                  <Text style={styles.featureText}>{item.text}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* ── How It Works Link ── */}
           <TouchableOpacity
-            style={styles.loginCta}
-            onPress={() => navigation.navigate("Login")}
+            style={styles.philosophyLink}
+            onPress={() => navigation.navigate("MitraPhilosophy")}
           >
-            <Ionicons name="person-outline" size={18} color="#D4A017" />
-            <Text style={styles.loginText}>Sign in to save your journey</Text>
+            <Text style={styles.philosophyText}>How KalpX Mitra Works →</Text>
           </TouchableOpacity>
-        )}
-      </ScrollView>
+
+          {/* ── Login CTA (logged out only) ── */}
+          {!isLoggedIn && (
+            <TouchableOpacity
+              style={styles.loginCta}
+              onPress={() => navigation.navigate("Login")}
+            >
+              <Ionicons name="person-outline" size={18} color="#D4A017" />
+              <Text style={styles.loginText}>Sign in to save your journey</Text>
+            </TouchableOpacity>
+          )}
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 }

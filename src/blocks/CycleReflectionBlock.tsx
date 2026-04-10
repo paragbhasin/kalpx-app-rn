@@ -57,7 +57,7 @@ interface Stage {
   MIRROR: 'mirror';
   DECISION: 'decision';
 }
-type StageName = 'intro' | 'mirror' | 'decision';
+type StageName = 'intro' | 'grid' | 'mirror' | 'decision';
 
 interface DecisionAction {
   id: string;
@@ -323,6 +323,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   }, [day]);
 
   // --- Stage navigation ---
+  const goToGrid = () => setStage('grid');
   const goToMirror = () => setStage('mirror');
   const goToDecision = () => setStage('decision');
 
@@ -396,7 +397,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
           <Text style={styles.bottomDescription}>{intro.description}</Text>
 
           <View style={styles.ctaWrap}>
-            <GoldButton label={intro.cta} onPress={goToMirror} />
+            <GoldButton label={intro.cta} onPress={goToGrid} />
           </View>
         </ScrollView>
       </ImageBackground>
@@ -404,7 +405,137 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   }
 
   // -------------------------------------------------------------------------
-  // Stage 2: CONTINUITY MIRROR
+  // Stage 2: JOURNEY GRID — per-day engagement circles (web "journey_progress_screen")
+  // Mirrors kalpx-frontend/src/blocks/CycleReflectionBlock.vue:596-706
+  // -------------------------------------------------------------------------
+  if (stage === 'grid') {
+    const currentDay = screenData.day_number || day;
+    const maxVisible = totalDays;
+    return (
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.gridContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.gridTitle}>Your {maxVisible}-Day Journey</Text>
+        <Text style={styles.gridSubtitle}>Tap a day to see your progress</Text>
+
+        <View style={styles.gridLotusWrap}>
+          {is14 ? (
+            <LotusDay14 width={72} height={72} />
+          ) : (
+            <LotusDay7 width={72} height={72} />
+          )}
+        </View>
+
+        {/* Day circles */}
+        <View style={styles.dayGrid}>
+          {Array.from({ length: maxVisible }).map((_, i) => {
+            const dayNum = i + 1;
+            const isCurrent = dayNum === currentDay;
+            const isEngaged = engagedArr[i] === true;
+            const isFully = fullArr[i] === true;
+            const isLocked = dayNum > currentDay;
+            return (
+              <View
+                key={dayNum}
+                style={[
+                  styles.dayCircle,
+                  isEngaged && styles.dayCircleEngaged,
+                  isFully && styles.dayCircleFull,
+                  isCurrent && styles.dayCircleCurrent,
+                  isLocked && styles.dayCircleLocked,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.dayCircleText,
+                    (isFully || isCurrent) && styles.dayCircleTextBright,
+                  ]}
+                >
+                  {dayNum}
+                </Text>
+              </View>
+            );
+          })}
+        </View>
+
+        {/* Legend */}
+        <View style={styles.gridLegend}>
+          <View style={styles.legendItem}>
+            <View
+              style={[
+                styles.legendDot,
+                { backgroundColor: '#2d7a5f' },
+              ]}
+            />
+            <Text style={styles.legendText}>Fully completed</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View
+              style={[
+                styles.legendDot,
+                { backgroundColor: '#d9a557' },
+              ]}
+            />
+            <Text style={styles.legendText}>Engaged</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View
+              style={[
+                styles.legendDot,
+                {
+                  borderWidth: 1.5,
+                  borderColor: GOLD_DARK,
+                  backgroundColor: 'transparent',
+                },
+              ]}
+            />
+            <Text style={styles.legendText}>Today</Text>
+          </View>
+        </View>
+
+        {/* Progress summary */}
+        <View style={styles.progressSummary}>
+          <Text style={styles.progressLabel}>Overall Progress</Text>
+          <View style={styles.progressBarOuter}>
+            <View
+              style={[
+                styles.progressBarInner,
+                {
+                  width: `${(daysEngaged / totalDays) * 100}%`,
+                },
+              ]}
+            />
+          </View>
+          <Text style={styles.progressCount}>
+            {daysEngaged} of {totalDays} Days
+          </Text>
+        </View>
+
+        <Text style={styles.gridQuote}>
+          {daysEngaged >= totalDays - 1
+            ? 'Keep moving forward.'
+            : daysEngaged > 0
+              ? 'Every return deepens the path.'
+              : 'Your journey begins with a single breath.'}
+        </Text>
+
+        <View style={styles.ctaWrap}>
+          <GoldButton label="Continue" onPress={goToMirror} />
+          <TouchableOpacity
+            style={styles.skipLink}
+            onPress={goToMirror}
+          >
+            <Text style={styles.skipLinkText}>Skip</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Stage 3: CONTINUITY MIRROR
   // -------------------------------------------------------------------------
   if (stage === 'mirror') {
     const tagLabel =
@@ -616,6 +747,154 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     alignItems: 'center',
     backgroundColor: CREAM,
+  },
+  gridContent: {
+    paddingTop: 50,
+    paddingBottom: 60,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    backgroundColor: '#f7efd9',
+  },
+  gridTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 26,
+    color: DARK,
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  gridSubtitle: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 14,
+    color: '#8c7355',
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  gridLotusWrap: {
+    width: 72,
+    height: 72,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    marginBottom: 20,
+  },
+  dayGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 10,
+    maxWidth: 360,
+    marginBottom: 20,
+  },
+  dayCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 1.5,
+    borderColor: 'rgba(201, 168, 76, 0.3)',
+    backgroundColor: 'rgba(253, 251, 247, 0.8)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dayCircleEngaged: {
+    backgroundColor: '#d9a557',
+    borderColor: GOLD_DARK,
+  },
+  dayCircleFull: {
+    backgroundColor: '#2d7a5f',
+    borderColor: '#2d7a5f',
+  },
+  dayCircleCurrent: {
+    borderWidth: 2.5,
+    borderColor: GOLD_DARK,
+    shadowColor: GOLD,
+    shadowOpacity: 0.5,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
+  },
+  dayCircleLocked: {
+    opacity: 0.5,
+  },
+  dayCircleText: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 15,
+    color: DARK,
+  },
+  dayCircleTextBright: {
+    color: '#ffffff',
+  },
+  gridLegend: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 14,
+    marginBottom: 24,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  legendDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  legendText: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 11,
+    color: DARK,
+  },
+  progressSummary: {
+    width: '100%',
+    maxWidth: 320,
+    marginBottom: 14,
+    alignItems: 'center',
+  },
+  progressLabel: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 12,
+    color: '#8c7355',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    marginBottom: 6,
+  },
+  progressBarOuter: {
+    width: '100%',
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(201, 168, 76, 0.2)',
+    overflow: 'hidden',
+    marginBottom: 6,
+  },
+  progressBarInner: {
+    height: '100%',
+    backgroundColor: GOLD,
+    borderRadius: 4,
+  },
+  progressCount: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 13,
+    color: DARK,
+  },
+  gridQuote: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 14,
+    fontStyle: 'italic',
+    color: DARK,
+    opacity: 0.8,
+    textAlign: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 18,
+  },
+  skipLink: {
+    marginTop: 14,
+    paddingVertical: 6,
+  },
+  skipLinkText: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 14,
+    color: '#8c7355',
+    textDecorationLine: 'underline',
   },
   decisionContent: {
     paddingTop: 30,

@@ -268,3 +268,49 @@ export async function mitraPathEvolution(oldFocus: string, newFocus: string): Pr
     return generatePathEvolutionScreen(oldFocus, newFocus);
   }
 }
+
+/** GET mitra/journey/additional/list/ — Fetch user's additional practices. */
+export async function mitraFetchAdditionalItems(): Promise<any> {
+  try {
+    const res = await api.get('mitra/journey/additional/list/', { params: { tz: getTz() } });
+    return res.data;
+  } catch (err: any) {
+    console.error('[MITRA] fetch additional items failed:', err.message);
+    return { items: [], uiHints: {} };
+  }
+}
+
+/** POST mitra/journey/additional/{id}/complete/ — Mark additional practice as complete. */
+export async function mitraCompleteAdditionalItem(itemId: string | number): Promise<any> {
+  try {
+    const res = await api.post(`mitra/journey/additional/${itemId}/complete/`, { tz: getTz() });
+    return res.data;
+  } catch (err: any) {
+    console.error('[MITRA] complete additional item failed:', err.message);
+    throw err;
+  }
+}
+
+/** DELETE mitra/journey/additional/{id}/ — Remove additional practice. */
+export async function mitraRemoveAdditionalItem(itemId: string | number): Promise<any> {
+  try {
+    const res = await api.delete(`mitra/journey/additional/${itemId}/`);
+    return res.data;
+  } catch (err: any) {
+    console.error('[MITRA] remove additional item failed:', err.message);
+    throw err;
+  }
+}
+
+/** GET mitra/library/search/ — Search for practices in the library. */
+export async function mitraLibrarySearch(query: string, itemType?: string): Promise<any> {
+  try {
+    const res = await api.get('mitra/library/search/', {
+      params: { q: query, itemType, limit: 5 },
+    });
+    return res.data;
+  } catch (err: any) {
+    console.error('[MITRA] library search failed:', err.message);
+    return { results: [] };
+  }
+}

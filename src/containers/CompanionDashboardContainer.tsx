@@ -48,7 +48,14 @@ const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 // ---------------------------------------------------------------------------
 
 const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
-  const { screenData, loadScreen, updateScreenData, goBack } = useScreenStore();
+  const {
+    screenData,
+    loadScreen,
+    updateScreenData,
+    goBack,
+    updateBackground,
+    updateHeaderHidden,
+  } = useScreenStore();
 
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
@@ -140,6 +147,13 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
     }
   }, [ss._trigger_resolution_toast]);
 
+  // Apply background (same as ChoiceStackContainer)
+  useEffect(() => {
+    updateBackground(require("../../assets/beige_bg.png"));
+    updateHeaderHidden(false);
+    return () => updateHeaderHidden(false);
+  }, [updateBackground, updateHeaderHidden]);
+
   // -------------------------------------------------------------------------
   // Reset journey handler
   // -------------------------------------------------------------------------
@@ -165,7 +179,8 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
                 { type: "reset_journey" },
                 {
                   screenState: ss,
-                  setScreenValue: (val: any, k: string) => updateScreenData(k, val),
+                  setScreenValue: (val: any, k: string) =>
+                    updateScreenData(k, val),
                   loadScreen,
                   goBack,
                 },
@@ -358,14 +373,6 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
           ))}
         </View>
 
-        {/* Progress Section */}
-        <BlockRenderer
-          block={{
-            type: "progress_section",
-          }}
-        />
-
-        {/* Additional items section */}
         {!!ss.scan_focus && (
           <BlockRenderer
             block={{
@@ -419,6 +426,11 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
         {/* Diamond divider */}
         <Divider />
 
+        <BlockRenderer
+          block={{
+            type: "progress_section",
+          }}
+        />
         {/* Reset section */}
         <View style={styles.resetSection}>
           {!showResetConfirm ? (

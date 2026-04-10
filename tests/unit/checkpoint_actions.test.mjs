@@ -168,11 +168,17 @@ test('CycleReflectionBlock auto-fetches checkpoint data on mount', () => {
   assert.match(cycleReflection, /checkpoint_original_data/);
 });
 
-test('CycleReflectionBlock renders 4 feeling options', () => {
-  assert.match(cycleReflection, /strong.*more steady/);
-  assert.match(cycleReflection, /slight.*some shift/);
-  assert.match(cycleReflection, /same.*finding my way/);
-  assert.match(cycleReflection, /worse.*heaviness/);
+test('CycleReflectionBlock has 3-stage flow (intro / mirror / decision)', () => {
+  // Multi-stage flow mirrors web's showIntro / showJourneyInvite / showJourneyView
+  assert.match(cycleReflection, /stage === 'intro'/);
+  assert.match(cycleReflection, /stage === 'mirror'/);
+  assert.match(cycleReflection, /buildDecisions/);
+});
+
+test('CycleReflectionBlock renders bar chart + strongest area in mirror stage', () => {
+  assert.match(cycleReflection, /EngagementBarChart/);
+  assert.match(cycleReflection, /Strongest area:/);
+  assert.match(cycleReflection, /trendGraph/);
 });
 
 test('CycleReflectionBlock submit dispatches checkpoint_submit action', () => {
@@ -180,14 +186,13 @@ test('CycleReflectionBlock submit dispatches checkpoint_submit action', () => {
   assert.match(cycleReflection, /type: ["']checkpoint_submit["']/);
 });
 
-test('CycleReflectionResultsBlock has decision-tree action buttons', () => {
-  // Day 7 buttons
-  assert.match(cycleResults, /Continue My Path/);
-  assert.match(cycleResults, /Lighten My Path/);
-  // Day 14 buttons
-  assert.match(cycleResults, /Continue Current Path/);
-  assert.match(cycleResults, /Choose New Focus/);
-  assert.match(cycleResults, /Deepen My Practice/);
+test('CycleReflectionBlock decision stage has day 7 + day 14 buttons', () => {
+  // Day 14 decision branches (from buildDecisions)
+  assert.match(cycleReflection, /Continue Same/);
+  assert.match(cycleReflection, /Deepen My Practice/);
+  assert.match(cycleReflection, /Change Focus/);
+  // Day 7 actions
+  assert.match(cycleReflection, /Return to Mitra Home/);
 });
 
 test('CycleReflectionResultsBlock cleans up checkpoint state on exit (Rule 4)', () => {

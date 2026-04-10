@@ -1,17 +1,23 @@
 /**
  * CycleReflectionBlock — Day 7 / Day 14 checkpoint primary block.
  *
- * Visual structure mirrors the web (~/kalpx-frontend/src/blocks/CycleReflectionBlock.vue):
- *   - Background image (7day_screen / 14_day_bg)
- *   - Lotus header
- *   - Cormorant Garamond serif headline + subtitles
- *   - Metrics chip grid
- *   - 4-feeling picker
- *   - Optional reflection textarea
- *   - Gold-gradient pill CTA (matches .share-btn)
+ * Mirrors the web multi-stage flow in
+ * ~/kalpx-frontend/src/blocks/CycleReflectionBlock.vue:
  *
- * Fetches checkpoint data on mount via mitraCheckpoint, submits via the
- * checkpoint_submit action.
+ *   Stage 1: INTRO splash — static day-specific copy + "Reflect" CTA
+ *   Stage 2: CONTINUITY MIRROR — live metrics from API, per-day bar chart,
+ *            strongest-area badge, Mitra message, "Continue" CTA
+ *   Stage 3: DECISION — recommendation-driven buttons:
+ *            day 7: auto-routed (continue / lighten / reset)
+ *            day 14: user chooses Continue Same / Deepen / Change Focus
+ *
+ * All metrics bind to checkpoint_* fields that are populated by
+ * mitraCheckpoint() via the ensure_checkpoint_data action. The block
+ * auto-fetches on mount if the data is missing.
+ *
+ * Reference screenshots: ~/kalpx-frontend/tests/e2e/screenshots/matrix/
+ *   CP7.E.01 (intro), CP7.E.03 (mirror), CP7.E.06 (results-continue)
+ *   CP7.N.03 (lightened), CP14.E.01/03/06 (day 14 variants)
  */
 import { LinearGradient } from 'expo-linear-gradient';
 import React, { useEffect, useState } from 'react';
@@ -21,11 +27,11 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { useScreenStore } from '../engine/useScreenBridge';
+import { cleanupFlowState } from '../engine/cleanupFields';
 import { executeAction } from '../engine/actionExecutor';
 import { mitraCheckpoint } from '../engine/mitraApi';
 import store from '../store';
@@ -36,35 +42,211 @@ import {
 } from '../store/screenSlice';
 import { Fonts } from '../theme/fonts';
 
-interface FeelingOption {
-  id: string;
-  label: string;
-}
-
-interface CycleReflectionBlockProps {
-  block: {
-    data_key?: string;
-    description_options?: FeelingOption[];
-    style?: any;
-  };
-}
-
-const DEFAULT_FEELINGS: FeelingOption[] = [
-  { id: 'strong', label: 'I feel more steady' },
-  { id: 'slight', label: 'I feel some shift' },
-  { id: 'same', label: 'I am still finding my way' },
-  { id: 'worse', label: 'I still feel heaviness' },
-];
-
 import LotusDay7 from '../../assets/7days_lotus.svg';
 import LotusDay14 from '../../assets/14_day_lotus.svg';
 
 const BG_DAY7 = require('../../assets/7day_screen.png');
 const BG_DAY14 = require('../../assets/14_day_bg.jpg');
 
-const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = ({ block }) => {
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+interface Stage {
+  INTRO: 'intro';
+  MIRROR: 'mirror';
+  DECISION: 'decision';
+}
+type StageName = 'intro' | 'mirror' | 'decision';
+
+interface DecisionAction {
+  id: string;
+  label: string;
+  description: string;
+  target: { containerId: string; stateId: string };
+  primary?: boolean;
+}
+
+interface CycleReflectionBlockProps {
+  block?: any;
+}
+
+// ---------------------------------------------------------------------------
+// Copy per day + engagement level (matches web reference)
+// ---------------------------------------------------------------------------
+
+const INTRO_COPY: Record<number, { title: string; subtitle: string; subtitleSmall: string; arcLabel: string; description: string; cta: string }> = {
+  7: {
+    title: 'A Week Into Your Journey',
+    subtitle: 'A week ago, you began this journey with a simple intention.',
+    subtitleSmall:
+      'Through Sankalp \u2022 Mantra \u2022 Practice, you have taken the first step inward.',
+    arcLabel: 'The first steps on your path',
+    description:
+      'Every journey begins quietly. Let\u2019s pause for a moment and see what has begun within you.',
+    cta: 'Reflect on My Journey',
+  },
+  14: {
+    title: 'You\u2019ve completed 14 days',
+    subtitle: 'You stayed with it.',
+    subtitleSmall:
+      'Even on the days it felt quiet or uncertain, you kept returning.',
+    arcLabel: 'Two weeks of returning to yourself',
+    description:
+      'Something within you has begun to shift. It will continue, gently.',
+    cta: 'Reflect on My Journey',
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Decision generator — pure function mapping recommendation to action buttons
+// ---------------------------------------------------------------------------
+
+function buildDecisions(
+  day: number,
+  recAction: string,
+  feeling: string,
+): DecisionAction[] {
+  if (day === 14) {
+    const base: DecisionAction[] = [
+      {
+        id: 'continue_same',
+        label: 'Continue Same',
+        description:
+          'Another cycle on the same path. Consistency becomes resonance.',
+        target: {
+          containerId: 'companion_dashboard',
+          stateId: 'day_active',
+        },
+        primary: recAction === 'continue_same',
+      },
+      {
+        id: 'deepen',
+        label: 'Deepen My Practice',
+        description:
+          'You have the discipline. Let\u2019s add depth to trigger inner transformation.',
+        target: {
+          containerId: 'companion_dashboard',
+          stateId: 'day_active',
+        },
+        primary: recAction === 'deepen',
+      },
+      {
+        id: 'change_focus',
+        label: 'Change Focus',
+        description:
+          'Carry this steadiness to a new area of your life.',
+        target: {
+          containerId: 'choice_stack',
+          stateId: 'discipline_select',
+        },
+        primary: recAction === 'change_focus',
+      },
+    ];
+    return base;
+  }
+
+  // Day 7 is usually a single auto-routed CTA, but render per-action
+  if (recAction === 'lighten') {
+    return [
+      {
+        id: 'lighten',
+        label: 'Return to Mitra Home',
+        description:
+          'Your path has been lightened. One sacred step each day is enough.',
+        target: { containerId: 'companion_dashboard', stateId: 'day_active' },
+        primary: true,
+      },
+      {
+        id: 'reset',
+        label: 'Start Fresh',
+        description:
+          'Begin a new path with a different focus.',
+        target: { containerId: 'choice_stack', stateId: 'discipline_select' },
+      },
+    ];
+  }
+
+  return [
+    {
+      id: 'continue',
+      label: 'Return to Mitra Home',
+      description:
+        'Your path continues. The rhythm is taking hold.',
+      target: { containerId: 'companion_dashboard', stateId: 'day_active' },
+      primary: true,
+    },
+  ];
+}
+
+// ---------------------------------------------------------------------------
+// Sub-components
+// ---------------------------------------------------------------------------
+
+interface BarChartProps {
+  engaged: boolean[];
+  fullyCompleted: boolean[];
+  labels: string[];
+}
+
+const EngagementBarChart: React.FC<BarChartProps> = ({
+  engaged,
+  fullyCompleted,
+  labels,
+}) => {
+  const days = Math.max(engaged.length, labels.length);
+  return (
+    <View style={barStyles.chart}>
+      <View style={barStyles.legend}>
+        <View style={barStyles.legendRow}>
+          <View
+            style={[barStyles.legendSwatch, { backgroundColor: '#2d7a5f' }]}
+          />
+          <Text style={barStyles.legendLabel}>Fully completed</Text>
+        </View>
+        <View style={barStyles.legendRow}>
+          <View
+            style={[barStyles.legendSwatch, { backgroundColor: '#d9a557' }]}
+          />
+          <Text style={barStyles.legendLabel}>Engaged</Text>
+        </View>
+      </View>
+      <View style={barStyles.bars}>
+        {Array.from({ length: days }).map((_, i) => {
+          const isFull = fullyCompleted[i];
+          const isEngaged = engaged[i];
+          const bg = isFull
+            ? '#2d7a5f'
+            : isEngaged
+              ? '#d9a557'
+              : 'rgba(201, 168, 76, 0.15)';
+          const height = isFull ? 54 : isEngaged ? 40 : 10;
+          return (
+            <View key={i} style={barStyles.barCol}>
+              <View
+                style={[barStyles.bar, { height, backgroundColor: bg }]}
+              />
+              <Text style={barStyles.barLabel}>{labels[i] || i + 1}</Text>
+            </View>
+          );
+        })}
+      </View>
+    </View>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
+
+const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   const screenData = useScreenStore((s) => s.screenData);
 
+  const [stage, setStage] = useState<StageName>('intro');
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  // --- State-writer helpers ---
   const writeState = (value: any, key: string) => {
     store.dispatch(screenActions.setScreenValue({ key, value }));
   };
@@ -75,36 +257,30 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = ({ block }) =>
   };
   const back = () => store.dispatch(goBackWithData());
 
-  const [loading, setLoading] = useState(false);
-  const [selectedFeeling, setSelectedFeeling] = useState<string | null>(
-    screenData.checkpoint_feeling || null,
-  );
-  const [reflection, setReflection] = useState<string>(
-    screenData.checkpoint_user_reflection || '',
-  );
-  const [submitting, setSubmitting] = useState(false);
-
-  const feelings = block.description_options || DEFAULT_FEELINGS;
-  const day = screenData.checkpoint_day || screenData.day_number || 7;
+  // --- API-bound values ---
+  const day: number = screenData.checkpoint_day || screenData.day_number || 7;
   const is14 = day === 14;
-  const headline = is14
-    ? 'You\u2019ve completed 14 days'
-    : 'A Week Into Your Journey';
-  const subtitle = is14
-    ? 'Two weeks ago, you stepped onto this path with intention.'
-    : 'A week ago, you began this journey with a simple intention.';
-  const subtitleSmall = is14
-    ? 'Through Sankalp \u2022 Mantra \u2022 Practice, you have cultivated steadiness.'
-    : 'Through Sankalp \u2022 Mantra \u2022 Practice, you have taken the first step inward.';
-  const bottomDescription = is14
-    ? 'Two weeks of returning. Let\u2019s pause and see how this practice has shaped you.'
-    : 'Every journey begins quietly. Let\u2019s pause for a moment and see what has begun within you.';
+  const intro = INTRO_COPY[is14 ? 14 : 7];
 
-  const daysEngaged = screenData.checkpoint_days_engaged || 0;
-  const daysFully = screenData.checkpoint_days_fully_completed || 0;
+  const daysEngaged = screenData.checkpoint_days_engaged ?? 0;
+  const daysFullyCompleted = screenData.checkpoint_days_fully_completed ?? 0;
   const totalDays = screenData.checkpoint_total_days || day;
+  const engagementLevel =
+    screenData.checkpoint_engagement_level || 'near_zero';
   const strongestArea = screenData.strongest_area || '';
+  const recAction = screenData.checkpoint_recommendation || '';
+  const observation = screenData.milestone_reflection || '';
+  const mitraMessage = screenData.checkpoint_subtext || '';
+  const trendGraph: { engaged?: boolean[]; fullyCompleted?: boolean[]; labels?: string[] } =
+    screenData.checkpoint_trend_graph || {};
+  const engagedArr: boolean[] = trendGraph.engaged || [];
+  const fullArr: boolean[] = trendGraph.fullyCompleted || [];
+  const labelsArr: string[] =
+    trendGraph.labels && trendGraph.labels.length
+      ? trendGraph.labels.map((l: string) => l.replace('Day ', ''))
+      : Array.from({ length: totalDays }, (_, i) => String(i + 1));
 
+  // --- Fetch checkpoint data on mount ---
   useEffect(() => {
     if (!screenData.checkpoint_original_data && !loading) {
       setLoading(true);
@@ -146,21 +322,19 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = ({ block }) =>
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [day]);
 
-  const handleFeelingSelect = (id: string) => {
-    setSelectedFeeling(id);
-    writeState(id, 'checkpoint_feeling');
-    writeState(id, 'checkpoint_feeling_simple');
-  };
+  // --- Stage navigation ---
+  const goToMirror = () => setStage('mirror');
+  const goToDecision = () => setStage('decision');
 
-  const handleReflectionChange = (text: string) => {
-    setReflection(text);
-    writeState(text, 'checkpoint_user_reflection');
-  };
-
-  const handleSubmit = async () => {
-    if (!selectedFeeling || submitting) return;
+  const handleDecision = async (action: DecisionAction) => {
+    if (submitting) return;
     setSubmitting(true);
     try {
+      // Persist the decision and fire the checkpoint_submit action
+      writeState(action.id, 'checkpoint_decision');
+      writeState(true, 'checkpoint_completed');
+      writeState(action.id, 'checkpoint_completed_decision');
+
       await executeAction(
         { type: 'checkpoint_submit' },
         {
@@ -170,6 +344,10 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = ({ block }) =>
           goBack: back,
         },
       );
+
+      // Cleanup flow-local state (contract Rule 4)
+      cleanupFlowState('checkpoint', writeState);
+      store.dispatch(loadScreenWithData(action.target));
     } finally {
       setSubmitting(false);
     }
@@ -183,178 +361,291 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = ({ block }) =>
     );
   }
 
-  return (
-    <ImageBackground
-      source={is14 ? BG_DAY14 : BG_DAY7}
-      style={styles.bg}
-      resizeMode="cover"
-    >
-      <View style={styles.bgOverlay} />
+  // -------------------------------------------------------------------------
+  // Stage 1: INTRO
+  // -------------------------------------------------------------------------
+  if (stage === 'intro') {
+    return (
+      <ImageBackground
+        source={is14 ? BG_DAY14 : BG_DAY7}
+        style={styles.bg}
+        resizeMode="cover"
+      >
+        <View style={styles.bgOverlay} />
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.introContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.lotusWrap}>
+            {is14 ? (
+              <LotusDay14 width={140} height={140} />
+            ) : (
+              <LotusDay7 width={140} height={140} />
+            )}
+          </View>
+
+          <Text style={styles.title}>{intro.title}</Text>
+          <Text style={styles.subtitle}>{intro.subtitle}</Text>
+          <Text style={styles.subtitleSmall}>{intro.subtitleSmall}</Text>
+
+          <View style={styles.arcSpacer}>
+            <Text style={styles.arcLabel}>{intro.arcLabel}</Text>
+          </View>
+
+          <Text style={styles.bottomDescription}>{intro.description}</Text>
+
+          <View style={styles.ctaWrap}>
+            <GoldButton label={intro.cta} onPress={goToMirror} />
+          </View>
+        </ScrollView>
+      </ImageBackground>
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Stage 2: CONTINUITY MIRROR
+  // -------------------------------------------------------------------------
+  if (stage === 'mirror') {
+    const tagLabel =
+      is14 ? `DAY ${day} \u2022 EVOLUTION PIVOT` : `DAY ${day} \u2022 CONTINUITY MIRROR`;
+    const mirrorTitle = is14 ? '14-Day Progress Graph' : '7-Day Continuity Mirror';
+    const strongestLabel = strongestArea
+      ? strongestArea.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+      : '';
+    const anchorLine = strongestLabel
+      ? `Your ${strongestLabel.toLowerCase()} practice has been the steadiest anchor this cycle.`
+      : '';
+
+    return (
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={styles.mirrorContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Lotus header */}
-        <View style={styles.lotusWrap}>
-          {is14 ? (
-            <LotusDay14 width={140} height={140} />
-          ) : (
-            <LotusDay7 width={140} height={140} />
-          )}
-        </View>
+        <Text style={styles.tag}>{tagLabel}</Text>
+        <Text style={[styles.title, { marginBottom: 24 }]}>Day {day}</Text>
 
-        {/* Title group */}
-        <Text style={styles.title}>{headline}</Text>
-        <Text style={styles.subtitle}>{subtitle}</Text>
-        <Text style={styles.subtitleSmall}>{subtitleSmall}</Text>
-
-        {/* Decorative arc label */}
-        <View style={styles.arcSpacer}>
-          <Text style={styles.arcLabel}>
-            {is14
-              ? 'Two weeks of returning to yourself'
-              : 'The first steps on your path'}
-          </Text>
-        </View>
-
-        {/* Metrics card */}
-        <View style={styles.metricsCard}>
-          <View style={styles.metricsRow}>
-            <View style={styles.metricChip}>
-              <Text style={styles.metricValue}>
-                {daysEngaged}/{totalDays}
-              </Text>
-              <Text style={styles.metricLabel}>Days engaged</Text>
-            </View>
-            <View style={styles.metricChip}>
-              <Text style={styles.metricValue}>{daysFully}</Text>
-              <Text style={styles.metricLabel}>Fully completed</Text>
-            </View>
-            {strongestArea ? (
-              <View style={styles.metricChip}>
-                <Text style={[styles.metricValue, { fontSize: 14 }]}>
-                  {formatArea(strongestArea)}
-                </Text>
-                <Text style={styles.metricLabel}>Strongest</Text>
-              </View>
-            ) : null}
+        {/* Engagement chips */}
+        <View style={styles.chipRow}>
+          <View style={styles.chip}>
+            <Text style={styles.chipValue}>
+              {daysEngaged}/{totalDays}
+            </Text>
+            <Text style={styles.chipLabel}>Days Engaged</Text>
+          </View>
+          <View style={styles.chip}>
+            <Text style={styles.chipValue}>
+              {daysFullyCompleted}/{totalDays}
+            </Text>
+            <Text style={styles.chipLabel}>Fully Completed</Text>
           </View>
         </View>
 
-        {/* Reflection prompt */}
-        <Text style={styles.question}>How has your practice felt?</Text>
-
-        <View style={styles.feelingList}>
-          {feelings.map((feeling) => {
-            const isSelected = selectedFeeling === feeling.id;
-            return (
-              <TouchableOpacity
-                key={feeling.id}
-                style={[styles.feelingOption, isSelected && styles.feelingSelected]}
-                onPress={() => handleFeelingSelect(feeling.id)}
-                activeOpacity={0.8}
-              >
-                <View style={[styles.radio, isSelected && styles.radioSelected]}>
-                  {isSelected && <View style={styles.radioDot} />}
-                </View>
-                <Text
-                  style={[
-                    styles.feelingLabel,
-                    isSelected && styles.feelingLabelSelected,
-                  ]}
-                >
-                  {feeling.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
+        {/* Bar chart card */}
+        <View style={styles.mirrorCard}>
+          <Text style={styles.mirrorTitle}>{mirrorTitle}</Text>
+          <EngagementBarChart
+            engaged={engagedArr}
+            fullyCompleted={fullArr}
+            labels={labelsArr}
+          />
         </View>
 
-        {/* Optional reflection textarea */}
-        <Text style={styles.reflectionLabel}>
-          IS THERE ANYTHING ELSE YOU WANT TO NOTE?
-        </Text>
-        <TextInput
-          style={styles.textarea}
-          multiline
-          numberOfLines={4}
-          placeholder={'Optional \u2014 a word or sentence\u2026'}
-          placeholderTextColor="rgba(67, 33, 4, 0.4)"
-          value={reflection}
-          onChangeText={handleReflectionChange}
-        />
+        {/* Strongest area badge + anchor line */}
+        {Boolean(strongestLabel) && (
+          <View style={styles.strongestCard}>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>
+                Strongest area: {strongestLabel}
+              </Text>
+            </View>
+            <Text style={styles.anchorLine}>{anchorLine}</Text>
+          </View>
+        )}
 
-        <Text style={styles.bottomDescription}>{bottomDescription}</Text>
+        {/* Mitra message / observation */}
+        {Boolean(mitraMessage || observation) && (
+          <View style={styles.messageCard}>
+            <Text style={styles.messageText}>{mitraMessage || observation}</Text>
+          </View>
+        )}
 
-        {/* CTA — gold gradient pill (matches .share-btn) */}
         <View style={styles.ctaWrap}>
-          <TouchableOpacity
-            style={[
-              styles.shareBtn,
-              (!selectedFeeling || submitting) && styles.shareBtnDisabled,
-            ]}
-            onPress={handleSubmit}
-            disabled={!selectedFeeling || submitting}
-            activeOpacity={0.92}
-          >
-            <LinearGradient
-              colors={['#e8c060', '#d9a557']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
-              style={styles.shareBtnInner}
-            >
-              {submitting ? (
-                <ActivityIndicator color="#ffffff" />
-              ) : (
-                <Text style={styles.shareBtnText}>{'Continue \u2192'}</Text>
-              )}
-            </LinearGradient>
-          </TouchableOpacity>
+          <GoldButton
+            label={is14 ? 'Continue to Choices' : 'Continue'}
+            onPress={goToDecision}
+          />
         </View>
       </ScrollView>
-    </ImageBackground>
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Stage 3: DECISION
+  // -------------------------------------------------------------------------
+  const decisions = buildDecisions(day, recAction, engagementLevel);
+  const decisionTitle =
+    is14 ? 'Choose Your Next Step' : recAction === 'lighten' ? 'Your path has been lightened' : 'Your path continues';
+  const decisionSubtitle = is14
+    ? 'You have walked 14 days with steadiness. You may now choose to continue, deepen, or shift.'
+    : recAction === 'lighten'
+      ? 'One sacred step each day is enough. Sometimes less is the truest form of devotion.'
+      : mitraMessage || 'The rhythm is taking hold. Continue with the same steadiness.';
+
+  return (
+    <ScrollView
+      style={styles.scroll}
+      contentContainerStyle={styles.decisionContent}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={styles.lotusWrap}>
+        {is14 ? (
+          <LotusDay14 width={140} height={140} />
+        ) : (
+          <LotusDay7 width={140} height={140} />
+        )}
+      </View>
+
+      <Text style={styles.tag}>{is14 ? 'DAY 14' : 'DAY 7'}</Text>
+      <Text style={styles.title}>{decisionTitle}</Text>
+      <Text style={styles.decisionSubtitle}>{decisionSubtitle}</Text>
+
+      <View style={styles.decisionList}>
+        {decisions.map((d, idx) => (
+          <View key={d.id} style={{ width: '100%' }}>
+            {idx > 0 && !d.primary && (
+              <Text style={styles.orDivider}>{'\u2014 OR \u2014'}</Text>
+            )}
+            <GoldButton
+              label={d.label}
+              onPress={() => handleDecision(d)}
+              disabled={submitting}
+              variant={d.primary ? 'primary' : 'outline'}
+            />
+            <Text style={styles.decisionDescription}>{d.description}</Text>
+          </View>
+        ))}
+      </View>
+
+      {decisions.length > 1 && (
+        <TouchableOpacity
+          style={styles.backLink}
+          onPress={() => setStage('mirror')}
+        >
+          <Text style={styles.backLinkText}>{'\u2190 Back to Reflection'}</Text>
+        </TouchableOpacity>
+      )}
+    </ScrollView>
   );
 };
 
-function formatArea(area: string): string {
-  if (!area) return '';
-  return area.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+// ---------------------------------------------------------------------------
+// GoldButton sub-component
+// ---------------------------------------------------------------------------
+
+interface GoldButtonProps {
+  label: string;
+  onPress: () => void;
+  disabled?: boolean;
+  variant?: 'primary' | 'outline';
 }
+
+const GoldButton: React.FC<GoldButtonProps> = ({
+  label,
+  onPress,
+  disabled,
+  variant = 'primary',
+}) => {
+  if (variant === 'outline') {
+    return (
+      <TouchableOpacity
+        style={[btn.outlineBtn, disabled && btn.disabled]}
+        onPress={onPress}
+        disabled={disabled}
+        activeOpacity={0.9}
+      >
+        <Text style={btn.outlineText}>{label}</Text>
+      </TouchableOpacity>
+    );
+  }
+  return (
+    <TouchableOpacity
+      style={[btn.primaryBtn, disabled && btn.disabled]}
+      onPress={onPress}
+      disabled={disabled}
+      activeOpacity={0.92}
+    >
+      <LinearGradient
+        colors={['#e8c060', '#d9a557']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={btn.primaryInner}
+      >
+        <Text style={btn.primaryText}>{label}</Text>
+      </LinearGradient>
+    </TouchableOpacity>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// Styles
+// ---------------------------------------------------------------------------
 
 const GOLD = '#d9a557';
 const GOLD_DARK = '#c7a64b';
 const DARK = '#432104';
+const CREAM = '#fffdf8';
 
 const styles = StyleSheet.create({
-  bg: {
-    flex: 1,
-    width: '100%',
-    minHeight: 700,
-  },
+  bg: { flex: 1, width: '100%', minHeight: 700 },
   bgOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(255, 253, 248, 0.75)',
+    backgroundColor: 'rgba(255, 253, 248, 0.72)',
   },
   scroll: { flex: 1 },
-  scrollContent: {
-    paddingTop: 40,
+  introContent: {
+    paddingTop: 50,
     paddingBottom: 80,
     paddingHorizontal: 20,
     alignItems: 'center',
+  },
+  mirrorContent: {
+    paddingTop: 30,
+    paddingBottom: 60,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    backgroundColor: CREAM,
+  },
+  decisionContent: {
+    paddingTop: 30,
+    paddingBottom: 60,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    backgroundColor: CREAM,
   },
   loadingBox: {
     paddingVertical: 100,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: CREAM,
   },
   lotusWrap: {
     width: 140,
     height: 140,
-    marginBottom: 18,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
+    marginBottom: 16,
+  },
+  tag: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 11,
+    color: GOLD_DARK,
+    letterSpacing: 2.5,
+    marginBottom: 8,
+    textTransform: 'uppercase',
+    textAlign: 'center',
   },
   title: {
     fontFamily: Fonts.serif.bold,
@@ -363,7 +654,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 32,
     marginBottom: 10,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
   },
   subtitle: {
     fontFamily: Fonts.serif.regular,
@@ -372,8 +663,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 25,
     marginBottom: 6,
-    opacity: 0.9,
-    paddingHorizontal: 16,
+    opacity: 0.92,
+    paddingHorizontal: 14,
   },
   subtitleSmall: {
     fontFamily: Fonts.serif.regular,
@@ -381,13 +672,13 @@ const styles = StyleSheet.create({
     color: DARK,
     textAlign: 'center',
     lineHeight: 22,
-    opacity: 0.8,
-    paddingHorizontal: 16,
-    marginBottom: 12,
+    opacity: 0.82,
+    paddingHorizontal: 14,
+    marginBottom: 10,
   },
   arcSpacer: {
-    marginTop: 16,
-    marginBottom: 18,
+    marginTop: 22,
+    marginBottom: 22,
     alignItems: 'center',
   },
   arcLabel: {
@@ -398,128 +689,6 @@ const styles = StyleSheet.create({
     opacity: 0.75,
     textAlign: 'center',
   },
-  metricsCard: {
-    width: '100%',
-    maxWidth: 400,
-    backgroundColor: 'rgba(255, 253, 249, 0.92)',
-    borderWidth: 0.5,
-    borderColor: GOLD_DARK,
-    borderRadius: 20,
-    padding: 16,
-    marginVertical: 12,
-  },
-  metricsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 10,
-  },
-  metricChip: {
-    flexGrow: 1,
-    minWidth: '28%',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    backgroundColor: '#f5efe2',
-    borderRadius: 14,
-    gap: 4,
-  },
-  metricValue: {
-    fontFamily: Fonts.serif.bold,
-    fontSize: 18,
-    color: DARK,
-    textAlign: 'center',
-  },
-  metricLabel: {
-    fontFamily: Fonts.sans.semiBold,
-    fontSize: 10,
-    color: '#8c7355',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    textAlign: 'center',
-  },
-  question: {
-    fontFamily: Fonts.serif.bold,
-    fontSize: 18,
-    color: DARK,
-    textAlign: 'center',
-    marginTop: 18,
-    marginBottom: 12,
-  },
-  feelingList: {
-    width: '100%',
-    maxWidth: 400,
-    gap: 10,
-    marginBottom: 18,
-  },
-  feelingOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 14,
-    paddingHorizontal: 18,
-    borderRadius: 20,
-    borderWidth: 0.5,
-    borderColor: GOLD_DARK,
-    backgroundColor: 'rgba(253, 251, 247, 0.88)',
-    gap: 14,
-  },
-  feelingSelected: {
-    borderWidth: 1.5,
-    borderColor: GOLD,
-    backgroundColor: '#faecd5',
-  },
-  radio: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    borderWidth: 1.5,
-    borderColor: GOLD_DARK,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  radioSelected: {
-    borderColor: GOLD,
-  },
-  radioDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: GOLD,
-  },
-  feelingLabel: {
-    fontFamily: Fonts.serif.regular,
-    fontSize: 16,
-    color: DARK,
-    flex: 1,
-  },
-  feelingLabelSelected: {
-    fontFamily: Fonts.serif.bold,
-  },
-  reflectionLabel: {
-    width: '100%',
-    maxWidth: 400,
-    fontFamily: Fonts.sans.semiBold,
-    fontSize: 11,
-    color: '#8c7355',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 8,
-  },
-  textarea: {
-    width: '100%',
-    maxWidth: 400,
-    borderWidth: 0.5,
-    borderColor: GOLD_DARK,
-    borderRadius: 16,
-    padding: 14,
-    minHeight: 84,
-    fontSize: 15,
-    color: DARK,
-    fontFamily: Fonts.serif.regular,
-    backgroundColor: 'rgba(255, 253, 249, 0.85)',
-    textAlignVertical: 'top',
-    marginBottom: 18,
-  },
   bottomDescription: {
     fontFamily: Fonts.serif.regular,
     fontSize: 16,
@@ -527,40 +696,241 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
     paddingHorizontal: 20,
-    marginBottom: 22,
+    marginBottom: 28,
   },
+
+  // Mirror stage
+  chipRow: {
+    flexDirection: 'row',
+    gap: 14,
+    marginBottom: 18,
+  },
+  chip: {
+    borderWidth: 0.5,
+    borderColor: GOLD_DARK,
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    backgroundColor: '#f7efd9',
+    alignItems: 'center',
+    minWidth: 130,
+  },
+  chipValue: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 22,
+    color: DARK,
+  },
+  chipLabel: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 11,
+    color: '#8c7355',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    marginTop: 2,
+  },
+  mirrorCard: {
+    width: '100%',
+    maxWidth: 400,
+    borderWidth: 0.5,
+    borderColor: GOLD_DARK,
+    borderRadius: 20,
+    padding: 18,
+    backgroundColor: '#ffffff',
+    marginBottom: 18,
+  },
+  mirrorTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 16,
+    color: DARK,
+    textAlign: 'center',
+    marginBottom: 14,
+  },
+  strongestCard: {
+    width: '100%',
+    maxWidth: 400,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  badge: {
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+    backgroundColor: '#2d7a5f',
+    marginBottom: 10,
+  },
+  badgeText: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 12,
+    color: '#ffffff',
+    letterSpacing: 0.5,
+  },
+  anchorLine: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 15,
+    color: DARK,
+    textAlign: 'center',
+    paddingHorizontal: 16,
+    opacity: 0.85,
+    lineHeight: 22,
+  },
+  messageCard: {
+    width: '100%',
+    maxWidth: 400,
+    padding: 14,
+    marginBottom: 18,
+  },
+  messageText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 16,
+    color: DARK,
+    textAlign: 'center',
+    opacity: 0.88,
+    lineHeight: 25,
+    fontStyle: 'italic',
+  },
+
+  // Decision stage
+  decisionSubtitle: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 16,
+    color: DARK,
+    textAlign: 'center',
+    lineHeight: 24,
+    opacity: 0.85,
+    paddingHorizontal: 14,
+    marginBottom: 24,
+  },
+  decisionList: {
+    width: '100%',
+    maxWidth: 400,
+    gap: 6,
+  },
+  decisionDescription: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    color: DARK,
+    opacity: 0.7,
+    textAlign: 'center',
+    paddingHorizontal: 14,
+    marginTop: 6,
+    marginBottom: 12,
+  },
+  orDivider: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 13,
+    color: '#bfa58a',
+    letterSpacing: 2,
+    textAlign: 'center',
+    marginVertical: 10,
+  },
+  backLink: {
+    marginTop: 16,
+    paddingVertical: 8,
+  },
+  backLinkText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 15,
+    color: GOLD_DARK,
+    textAlign: 'center',
+  },
+
   ctaWrap: {
     width: '100%',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 10,
   },
-  shareBtn: {
+});
+
+const btn = StyleSheet.create({
+  primaryBtn: {
     width: '100%',
     maxWidth: 320,
     borderRadius: 32,
     overflow: 'hidden',
-    elevation: 6,
+    elevation: 5,
     shadowColor: '#b8860b',
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 6 },
   },
-  shareBtnDisabled: {
-    opacity: 0.45,
-    elevation: 0,
-    shadowOpacity: 0,
-  },
-  shareBtnInner: {
-    height: 64,
+  primaryInner: {
+    height: 60,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 24,
   },
-  shareBtnText: {
+  primaryText: {
     fontFamily: Fonts.sans.semiBold,
-    fontSize: 19,
+    fontSize: 18,
     color: '#ffffff',
     letterSpacing: 0.2,
+  },
+  outlineBtn: {
+    width: '100%',
+    maxWidth: 320,
+    height: 58,
+    borderRadius: 30,
+    borderWidth: 1.5,
+    borderColor: GOLD_DARK,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fdfaf3',
+  },
+  outlineText: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 17,
+    color: DARK,
+  },
+  disabled: {
+    opacity: 0.4,
+  },
+});
+
+const barStyles = StyleSheet.create({
+  chart: {
+    width: '100%',
+  },
+  legend: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 18,
+    marginBottom: 10,
+  },
+  legendRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  legendSwatch: {
+    width: 10,
+    height: 10,
+    borderRadius: 2,
+  },
+  legendLabel: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 11,
+    color: '#6a4d28',
+  },
+  bars: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-around',
+    height: 76,
+    paddingTop: 6,
+  },
+  barCol: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  bar: {
+    width: 14,
+    borderRadius: 4,
+  },
+  barLabel: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 10,
+    color: '#6a4d28',
+    marginTop: 4,
   },
 });
 

@@ -177,6 +177,14 @@ def slugify(label: str) -> str:
     return safe.strip("_")
 
 
+def _wake_device() -> None:
+    """Wake the emulator before capturing (no KEYCODE_MENU — opens dev menu)."""
+    subprocess.run(
+        [ADB, "shell", "input", "keyevent", "KEYCODE_WAKEUP"],
+        capture_output=True,
+    )
+
+
 def capture(label: str, scenario: str = "ad_hoc") -> Path:
     ensure_dir()
     scenario_dir = SCREENSHOT_DIR / slugify(scenario)
@@ -184,6 +192,8 @@ def capture(label: str, scenario: str = "ad_hoc") -> Path:
     ts = dt.datetime.now().strftime("%Y%m%d_%H%M%S")
     fname = f"{slugify(label)}_{ts}.png"
     out_path = scenario_dir / fname
+
+    _wake_device()
 
     proc = subprocess.run(
         [ADB, "exec-out", "screencap", "-p"],

@@ -54,26 +54,30 @@ export const CALM_MUSIC_LIBRARY = [
 ];
 
 /**
- * Pick the next audio URL from a library using AsyncStorage rotation.
+ * Synchronous audio rotation. Returns the next URL immediately so callers
+ * can set screen state BEFORE loadScreen (web parity, actionExecutor.js:3095).
+ * The AsyncStorage write is fire-and-forget and hydrates a module cache on
+ * first load so rotation offsets persist across launches.
  */
-async function _rotateAudio(
-  library: string[],
-  storageKey: string,
-): Promise<string> {
+const _rotationCache: Record<string, number> = {};
+
+(async () => {
+  try {
+    for (const key of ["_kalpx_om_audio_idx", "_kalpx_calm_audio_idx"]) {
+      const stored = await AsyncStorage.getItem(key);
+      if (stored != null) _rotationCache[key] = parseInt(stored, 10);
+    }
+  } catch (_) {
+    /* best effort */
+  }
+})();
+
+function _rotateAudio(library: string[], storageKey: string): string {
   if (!library || library.length === 0) return "";
-  let lastIdx = -1;
-  try {
-    const stored = await AsyncStorage.getItem(storageKey);
-    lastIdx = stored ? parseInt(stored, 10) : -1;
-  } catch (_) {
-    /* best effort */
-  }
+  const lastIdx = _rotationCache[storageKey] ?? -1;
   const nextIdx = (lastIdx + 1) % library.length;
-  try {
-    await AsyncStorage.setItem(storageKey, String(nextIdx));
-  } catch (_) {
-    /* best effort */
-  }
+  _rotationCache[storageKey] = nextIdx;
+  AsyncStorage.setItem(storageKey, String(nextIdx)).catch(() => {});
   return library[nextIdx];
 }
 
@@ -686,8 +690,13 @@ export async function executeAction(
             payload.itemType ||
             (useSupportItem ? activeSupport.itemType : ITEM_TYPE_MAP[itemId]) ||
             "practice";
+          // Source priority: payload.source > activeSupport.source >
+          // runner_active_item.source (for additional items) > "core"
           const source =
-            payload.source || (useSupportItem ? activeSupport.source : "core");
+            payload.source ||
+            (useSupportItem ? activeSupport.source : null) ||
+            screenState.runner_active_item?.source ||
+            "core";
 
           // Resolve authoritative Mitra item ID (priority chain)
           let finalItemId: string;
@@ -794,8 +803,9 @@ export async function executeAction(
           // Call Prana Acknowledge API for all check-in feedback.
           // Pass full context (baselineMetrics + dayNumber) so the backend
           // can personalize suggestions (web parity, actionExecutor.js:2286).
+          // Note: API expects `pranaType` (not `feeling`) per web contract.
           const pranaAckRes = await mitraPranaAcknowledge({
-            feeling: payload.prana_type,
+            pranaType: payload.prana_type,
             focus:
               screenState["scan_focus"] ||
               screenState["active_focus"] ||
@@ -821,7 +831,7 @@ export async function executeAction(
             payload.prana_type === "agitated" ||
             payload.prana_type === "drained"
           ) {
-            const checkinOmAudio = await _rotateAudio(
+            const checkinOmAudio = _rotateAudio(
               OM_AUDIO_LIBRARY,
               "_kalpx_om_audio_idx",
             );
@@ -1401,8 +1411,10 @@ export async function executeAction(
         setScreenValue("triggered", "trigger_feeling");
         setScreenValue(1, "trigger_step");
 
-        // Select rotated OM audio for this session
-        const triggerOmAudio = await _rotateAudio(
+        // Select rotated OM audio for this session (SYNCHRONOUS — web parity).
+        // Must run BEFORE the loadScreen call below so _selected_om_audio is
+        // in state when PracticeRunnerContainer's audio useEffect fires.
+        const triggerOmAudio = _rotateAudio(
           OM_AUDIO_LIBRARY,
           "_kalpx_om_audio_idx",
         );
@@ -1526,6 +1538,18 @@ export async function executeAction(
           "_trigger_negative_label",
         );
 
+        // Track the try-another tap (web parity — actionExecutor.js:3207)
+        mitraTrackEvent("trigger_try_another", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            feeling: tryFeeling,
+            round: tryRound,
+            hasPractice: !!practiceSuggestion,
+            hasMantra: !!mantraSuggestion,
+          },
+        });
+
         if (practiceSuggestion) {
           loadScreen({
             container_id: "practice_runner",
@@ -1602,7 +1626,10 @@ export async function executeAction(
       // TRIGGER_STILL_FEELING — user still feels triggered, escalate
       // ================================================================
       case "trigger_still_feeling": {
-        const stillStep = screenState["trigger_step"] || 1;
+        // Default step 2 matches web actionExecutor.js:3270. initiate_trigger
+        // still sets trigger_step=1 explicitly; this default only kicks in
+        // on state drift (e.g., user navigates back then forward).
+        const stillStep = screenState["trigger_step"] || 2;
         const stillFeeling = screenState["trigger_feeling"] || "triggered";
 
         console.log(
@@ -2588,12 +2615,22 @@ export async function executeAction(
             );
           }
 
-          await mitraTrackEvent("trigger_resolved", {
+          // Distinct event name based on resolution type
+          // (web actionExecutor.js:3367-3376)
+          const ptrRecheckEvent =
+            ptrRound >= 2 && ptrFeeling !== "balanced"
+              ? "trigger_max_support_reached"
+              : "trigger_resolved_after_recheck";
+          await mitraTrackEvent(ptrRecheckEvent, {
             journeyId: screenState.journey_id,
             dayNumber: screenState.day_number || 1,
             meta: { round: ptrRound },
           });
 
+          // Note: web does NOT call _cleanupOnReturnHome here (intentional).
+          // The trigger flow state is cleared on the next engine navigation
+          // via the standard trigger cleanup path. Removing the premature
+          // cleanup avoids losing state before the screen finishes rendering.
           _cleanupOnReturnHome(setScreenValue, screenState, endFlowInstance);
           loadScreen({
             container_id: "companion_dashboard",

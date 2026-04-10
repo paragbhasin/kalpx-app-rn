@@ -266,6 +266,24 @@ export default function Home() {
         const status = res.data;
 
         if (status?.hasActiveJourney && status?.journeyId) {
+          // Reset checkpoint state when entering a new journey so stale
+          // completed flags from a prior session don't skip the checkpoint.
+          const prevJourneyId = store.getState().screen.screenData.journey_id;
+          if (prevJourneyId !== status.journeyId) {
+            store.dispatch(
+              screenActions.setScreenValue({
+                key: "checkpoint_completed",
+                value: false,
+              }),
+            );
+            store.dispatch(
+              screenActions.setScreenValue({
+                key: "checkpoint_original_data",
+                value: null,
+              }),
+            );
+          }
+
           seedJourneyStatus(status);
 
           const { executeAction } = require("../../engine/actionExecutor");
@@ -293,12 +311,12 @@ export default function Home() {
           const dayNumber = status.dayNumber || 1;
           const checkpointCompleted =
             store.getState().screen.screenData.checkpoint_completed;
+          // Both day 7 and day 14 use weekly_checkpoint — the cycle_reflection
+          // block handles both via its internal is14DayCycle check.
+          // (daily_insight_14 is the pre-checkpoint milestone splash and is
+          // reached separately from the milestone view, not auto-routed.)
           const checkpointStateId =
-            dayNumber === 7
-              ? "weekly_checkpoint"
-              : dayNumber === 14
-                ? "daily_insight_14"
-                : null;
+            dayNumber === 7 || dayNumber === 14 ? "weekly_checkpoint" : null;
 
           if (checkpointStateId && !checkpointCompleted) {
             store.dispatch(

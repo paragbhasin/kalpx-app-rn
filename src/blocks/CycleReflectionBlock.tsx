@@ -382,7 +382,7 @@ const styles = StyleSheet.create({
   },
   feelingLabel: {
     fontSize: 15,
-    color: 'rgba(67, 33, 4, 0.8)',
+    color: '#432104',
     fontFamily: Fonts.sans.regular,
     flex: 1,
   },

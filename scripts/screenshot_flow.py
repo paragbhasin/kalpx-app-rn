@@ -42,6 +42,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import html
+import json
 import os
 import shutil
 import subprocess
@@ -194,29 +195,79 @@ def capture(label: str, scenario: str = "ad_hoc") -> Path:
     return out_path
 
 
-def push_test_now(iso_date: str) -> None:
-    """
-    Inject @kalpx_test_now into AsyncStorage. Only works on debuggable builds
-    where `adb run-as com.kalpx.app` is permitted.
-    """
-    sql = (
-        f"INSERT OR REPLACE INTO catalystLocalStorage (key, value) "
-        f"VALUES ('@kalpx_test_now', '\"{iso_date}\"');"
-    )
-    cmd = (
-        f"run-as {APP_PACKAGE} sqlite3 /data/data/{APP_PACKAGE}/databases/RKStorage "
-        f'"{sql}"'
-    )
-    print(f"Pushing X-Test-Now={iso_date} to AsyncStorage…")
+def _exec_sql(sql: str) -> None:
+    """Execute a SQL statement against the app's RKStorage db via adb run-as.
+    Pipes SQL to sqlite3 stdin (avoids adb shell quoting issues)."""
     proc = subprocess.run(
-        [ADB, "shell", cmd], capture_output=True, text=True
+        [ADB, "shell", f"run-as {APP_PACKAGE} sqlite3 databases/RKStorage"],
+        input=sql,
+        capture_output=True,
+        text=True,
     )
     if proc.returncode != 0:
-        print(f"  ⚠ run-as failed: {proc.stderr.strip()}")
-        print("  Try setting it manually via the DevTools screen instead.")
-    else:
-        print("  ✓ pushed. Force-stop + relaunch app to pick it up.")
-        subprocess.run([ADB, "shell", "am", "force-stop", APP_PACKAGE], check=True)
+        raise RuntimeError(f"sqlite3 exec failed: {proc.stderr}")
+
+
+def _async_storage_set(key: str, raw_value: str) -> None:
+    """Set an AsyncStorage key. raw_value should already be JSON-encoded."""
+    # Escape single quotes for SQL literal
+    escaped = raw_value.replace("'", "''")
+    _exec_sql(
+        f"INSERT OR REPLACE INTO catalystLocalStorage (key, value) "
+        f"VALUES ('{key}', '{escaped}');"
+    )
+
+
+def _async_storage_delete(key: str) -> None:
+    _exec_sql(f"DELETE FROM catalystLocalStorage WHERE key = '{key}';")
+
+
+def push_test_now(iso_date: str) -> None:
+    """Inject @kalpx_test_now into AsyncStorage. Force-stop after."""
+    print(f"Pushing X-Test-Now={iso_date} to AsyncStorage…")
+    _async_storage_set("@kalpx_test_now", f'"{iso_date}"')
+    print("  ✓ pushed. Force-stopping app…")
+    subprocess.run([ADB, "shell", "am", "force-stop", APP_PACKAGE], check=True)
+
+
+def inject_jwt(email: str) -> None:
+    """Inject access_token + refresh_token + user_id from tests/api/jwts_full.json.
+
+    AsyncStorage on Android (RKStorage) stores values as raw strings, not JSON.
+    The login flow writes `AsyncStorage.setItem("access_token", token)` which
+    persists the raw string. We must mirror that — no JSON quoting.
+    """
+    full_path = REPO_ROOT / "tests/api/jwts_full.json"
+    if not full_path.exists():
+        sys.exit(
+            f"Missing {full_path}. Run mint_test_jwts.py first to populate refresh tokens."
+        )
+    tokens = json.loads(full_path.read_text())
+    if email not in tokens:
+        sys.exit(f"No tokens for {email}. Available: {list(tokens.keys())}")
+    entry = tokens[email]
+    print(f"Injecting tokens for {email}…")
+    _async_storage_set("access_token", entry["access"])
+    _async_storage_set("refresh_token", entry["refresh"])
+    _async_storage_set("user_id", str(entry["user_id"]))
+    print("  ✓ injected. Force-stopping app + relaunching…")
+    subprocess.run([ADB, "shell", "am", "force-stop", APP_PACKAGE], check=True)
+    deep_link = "exp+kalpx://expo-development-client/?url=http%3A%2F%2F10.0.2.2%3A8081"
+    subprocess.run(
+        [ADB, "shell", "am", "start", "-a", "android.intent.action.VIEW", "-d", deep_link],
+        check=True,
+        capture_output=True,
+    )
+    print("  ✓ app launched")
+
+
+def logout() -> None:
+    """Clear access_token + refresh_token to log out the test user."""
+    print("Logging out (clearing tokens)…")
+    _async_storage_delete("access_token")
+    _async_storage_delete("refresh_token")
+    subprocess.run([ADB, "shell", "am", "force-stop", APP_PACKAGE], check=True)
+    print("  ✓ logged out")
 
 
 def regenerate_gallery() -> None:
@@ -315,6 +366,11 @@ def main() -> None:
     tn = sub.add_parser("set-test-now", help="Push X-Test-Now into AsyncStorage")
     tn.add_argument("iso", help="ISO 8601 datetime, e.g. 2026-05-15T10:00:00Z")
 
+    inj = sub.add_parser("inject-jwt", help="Inject test user JWT into AsyncStorage")
+    inj.add_argument("email", help="Test user email (must exist in tests/api/jwts.json)")
+
+    sub.add_parser("logout", help="Clear access_token from AsyncStorage")
+
     sub.add_parser("scenarios", help="List available scenarios")
 
     args = p.parse_args()
@@ -332,6 +388,12 @@ def main() -> None:
     elif args.cmd == "set-test-now":
         ensure_emulator()
         push_test_now(args.iso)
+    elif args.cmd == "inject-jwt":
+        ensure_emulator()
+        inject_jwt(args.email)
+    elif args.cmd == "logout":
+        ensure_emulator()
+        logout()
     elif args.cmd == "scenarios":
         for name, steps in SCENARIOS.items():
             print(f"  {name}  ({len(steps)} steps)")

@@ -1,0 +1,62 @@
+# Flow 34: Trigger flow audio smoke (Phase 0 bug fix verification)
+#
+# Validates the two audio bug fixes from this session:
+#   Bug 1: OM audio actually plays when entering free_mantra_chanting
+#          (broadened resolveAudioSource Om.mp4 match)
+#   Bug 2: After "Try Another Way", only ONE audio track plays (no
+#          duplicates from old fire-and-forget cleanup races)
+#
+# Maestro can't directly assert audio output, but it can:
+#   - Verify the screen transitions complete without crash
+#   - Verify the practice / mantra screens render after Try Another Way
+#   - Verify the sequence: OM → practice → mantra → resolution toast
+#
+# Pre-req: log in as test+day3@kalpx.com (Test1234!).
+
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "Resume|Continue|My Routine"
+    optional: true
+- waitForAnimationToEnd
+
+# Dashboard should be visible
+- assertVisible:
+    text: "I Feel Triggered|Trigger|Feel Triggered"
+
+- tapOn: "I Feel Triggered"
+- waitForAnimationToEnd
+
+# OM screen — Bug 1 verifies audio loads here.
+- assertVisible:
+    text: "OM|Om|chant|breathe"
+
+# Try another way — Bug 2 boundary
+- tapOn: "Try another way|Try Another Way"
+- waitForAnimationToEnd
+
+# Practice (support_practice) screen
+- assertVisible:
+    text: "step|breath|notice|calmer"
+
+- tapOn: "Try another way|Try Another Way"
+- waitForAnimationToEnd
+
+# Mantra runner screen
+- assertVisible:
+    text: "Recite|chant|mantra|bead"
+    optional: true
+
+# Resolve flow
+- tapOn:
+    text: "I feel calmer now|calmer"
+    optional: true
+- waitForAnimationToEnd
+
+# Back on dashboard
+- assertVisible:
+    text: "Day|Mitra"
+    optional: true

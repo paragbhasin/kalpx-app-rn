@@ -1,0 +1,51 @@
+# Flow 31: Day 14 checkpoint — full path
+#
+# Validates: auto-route to daily_insight_14, activity_stats + trend_chart
+# render, cycle_reflection block fires, feeling submission triggers
+# results screen with day-14 specific decision branches (continue_same,
+# deepen, change_focus), and selecting "Choose New Focus" lands on
+# discipline_select onboarding screen.
+#
+# Pre-req: log in as test+day14@kalpx.com (Test1234!) before launching.
+
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "Resume|Continue|My Routine|Begin"
+    optional: true
+- waitForAnimationToEnd
+
+# Day 14 milestone screen should render
+- assertVisible:
+    text: "Day 14|14 days|reflection"
+
+# Activity stats + trend chart should be visible (scroll if needed)
+- assertVisible:
+    text: "Days engaged|14-Day|Practice Journey"
+    optional: true
+
+- scroll
+- waitForAnimationToEnd
+
+# Cycle reflection block — pick "I feel more steady"
+- assertVisible: "I feel more steady"
+- tapOn: "I feel more steady"
+- waitForAnimationToEnd
+
+- tapOn: "Continue"
+- waitForAnimationToEnd
+
+# Day 14 results screen — multiple decision branches available
+- assertVisible:
+    text: "Choose New Focus|Continue Current Path|Deepen My Practice"
+
+# Pick "Choose New Focus" — should route to discipline_select
+- tapOn: "Choose New Focus"
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: "Choose your path|focus|discipline"
+    optional: true

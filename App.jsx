@@ -66,6 +66,34 @@ function SnackBarContainer() {
 // Inner component that has access to Redux Provider
 function AppInner({ initialRoute, navigationRef }) {
   const currentBackground = useScreenStore((state) => state.currentBackground);
+  const dispatch = useDispatch();
+
+  // Hydrate the login user from AsyncStorage on app boot.
+  // The login flow already persists access_token + refresh_token + user_id to
+  // AsyncStorage, but the Redux state.login.user was being lost on restart.
+  // This restores it so the user stays logged in across app launches.
+  useEffect(() => {
+    let cancelled = false;
+    const hydrate = async () => {
+      try {
+        const [token, userId] = await Promise.all([
+          AsyncStorage.getItem("access_token"),
+          AsyncStorage.getItem("user_id"),
+        ]);
+        if (cancelled || !token) return;
+        // Minimal user shape — full profile can be re-fetched on demand.
+        const user = userId ? { id: Number(userId) } : { id: null };
+        dispatch({ type: "LOGIN_SUCCESS", payload: user });
+      } catch (err) {
+        console.warn("[BOOT] login hydration failed:", err?.message);
+      }
+    };
+    hydrate();
+    return () => {
+      cancelled = true;
+    };
+  }, [dispatch]);
+
   return (
     <View style={{ flex: 1, backgroundColor: currentBackground ? 'transparent' : '#FFF' }}>
       <StatusBar

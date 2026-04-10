@@ -2189,6 +2189,17 @@ export async function executeAction(
           cpData.deepenSuggestion || null,
           "checkpoint_deepen_suggestion",
         );
+
+        // Match web actionExecutor.js:2795 — fire checkpoint_viewed once
+        // when the milestone screen successfully loads its data.
+        mitraTrackEvent("checkpoint_viewed", {
+          journeyId: screenState.journey_id,
+          dayNumber: cpDay,
+          meta: {
+            engagement_level: cpData.engagementLevel || "",
+            day: cpDay,
+          },
+        });
         break;
       }
 
@@ -2248,17 +2259,29 @@ export async function executeAction(
         setScreenValue(true, "checkpoint_completed");
         setScreenValue(csDecision, "checkpoint_completed_decision");
 
+        // Match web actionExecutor.js:2566 payload exactly:
+        // includes reflection_length, drops redundant `day` field.
         mitraTrackEvent("checkpoint_completed", {
           journeyId: screenState.journey_id,
           dayNumber: csDay,
-          meta: { decision: csDecision, day: csDay },
+          meta: {
+            decision: csDecision,
+            reflection_length: (screenState.checkpoint_user_reflection || "").length,
+          },
         });
 
         if (csDay === 14) {
+          // Match web actionExecutor.js:2578 payload — include total_days +
+          // path_cycle_number for analytics parity.
           mitraTrackEvent("cycle_completed", {
             journeyId: screenState.journey_id,
             dayNumber: csDay,
-            meta: { decision: csDecision },
+            meta: {
+              decision: csDecision,
+              total_days: csDay,
+              path_cycle_number:
+                screenState.path_context?.pathCycleNumber || 1,
+            },
           });
         }
 

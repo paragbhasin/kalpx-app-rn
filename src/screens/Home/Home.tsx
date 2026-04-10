@@ -31,7 +31,7 @@ import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
 import ContinueJourney from "./ContinueJourney";
 import WelcomeBack from "./WelcomeBack";
-import { mitraJourneyWelcomeBack } from "../../engine/mitraApi";
+import { mitraJourneyWelcomeBack, mitraTrackEvent } from "../../engine/mitraApi";
 
 const FEATURE_ITEMS = [
   {
@@ -165,6 +165,15 @@ export default function Home() {
 
   const handleWelcomeBackContinue = async () => {
     setIsProcessing(true);
+    mitraTrackEvent("welcome_back_decided", {
+      journeyId: welcomeBackData?.journeyId || null,
+      dayNumber: 0,
+      meta: {
+        decision: "continue",
+        days_past_end: welcomeBackData?.daysPastEnd || 0,
+        focus: welcomeBackData?.focus || "",
+      },
+    });
     try {
       const res = await mitraJourneyWelcomeBack("continue");
       if (res?.status === "ok" && res?.newJourneyId) {
@@ -222,6 +231,15 @@ export default function Home() {
 
   const handleWelcomeBackFresh = async () => {
     setIsProcessing(true);
+    mitraTrackEvent("welcome_back_decided", {
+      journeyId: welcomeBackData?.journeyId || null,
+      dayNumber: 0,
+      meta: {
+        decision: "fresh",
+        days_past_end: welcomeBackData?.daysPastEnd || 0,
+        focus: welcomeBackData?.focus || "",
+      },
+    });
     try {
       await mitraJourneyWelcomeBack("fresh");
     } catch (err) {

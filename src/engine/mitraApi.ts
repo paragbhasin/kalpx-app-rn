@@ -314,3 +314,14 @@ export async function mitraLibrarySearch(query: string, itemType?: string): Prom
     return { results: [] };
   }
 }
+
+/** GET mitra/journey/progress/ — Fetch user's journey progress stats. */
+export async function mitraFetchProgress(): Promise<any> {
+  try {
+    const res = await api.get('mitra/journey/progress/', { params: { tz: getTz() } });
+    return res.data;
+  } catch (err: any) {
+    console.error('[MITRA] fetch progress failed:', err.message);
+    return null;
+  }
+}

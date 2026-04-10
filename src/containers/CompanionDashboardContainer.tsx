@@ -353,8 +353,12 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
           ))}
         </View>
 
-        {/* Diamond divider */}
-        <Divider />
+        {/* Progress Section */}
+        <BlockRenderer
+          block={{
+            type: "progress_section",
+          }}
+        />
 
         {/* Additional items section */}
         {!!ss.scan_focus && (

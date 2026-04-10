@@ -33,6 +33,7 @@ import ProgressBarBlock from '../blocks/ProgressBarBlock';
 import HoldTriggerBlock from '../blocks/HoldTriggerBlock';
 import FooterButtonsBlock from '../blocks/FooterButtonsBlock';
 import AdditionalItemsSectionBlock from '../blocks/AdditionalItemsSectionBlock';
+import ProgressSectionBlock from '../blocks/ProgressSectionBlock';
 
 // Phase 3b blocks (20 more)
 import SpacerBlock from '../blocks/SpacerBlock';
@@ -136,6 +137,7 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   timeline: TimelineBlock,
   trend_chart: TrendChartBlock,
   voice_recorder: VoiceRecorderBlock,
+  progress_section: ProgressSectionBlock,
 };
 
 interface BlockRendererProps {

@@ -48,7 +48,7 @@ const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 // ---------------------------------------------------------------------------
 
 const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
-  const { screenData, loadScreen, updateScreenData } = useScreenStore();
+  const { screenData, loadScreen, updateScreenData, goBack } = useScreenStore();
 
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
@@ -163,7 +163,12 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
               const { executeAction } = require("../engine/actionExecutor");
               await executeAction(
                 { type: "reset_journey" },
-                { screenData: ss, updateScreenData, loadScreen },
+                {
+                  screenState: ss,
+                  setScreenValue: (val: any, k: string) => updateScreenData(k, val),
+                  loadScreen,
+                  goBack,
+                },
               );
             } catch (err) {
               console.error("[RESET] Failed:", err);

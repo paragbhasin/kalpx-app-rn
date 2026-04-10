@@ -134,26 +134,40 @@ const AdditionalItemsSectionBlock: React.FC<Props> = ({ block }) => {
     // Fetch full data for the info screen
     setCompletingId(item.id);
     try {
-      const searchRes = await mitraLibrarySearch(item.itemId || item.title, item.itemType);
-      const fullData =
-        searchRes?.results?.find((r: any) => r.itemId === item.itemId) || searchRes?.results?.[0];
-
-      const manualData = {
-        ...fullData,
+      // 1. Initial manual data from the dashboard item (fallback)
+      const baseManualData = {
+        title: item.title,
         id: item.itemId,
         item_id: item.itemId,
         type: item.itemType,
         item_type: item.itemType,
-        duration: fullData?.duration || item.duration || '',
-        audio_url: fullData?.audio_url || item.audio_url || '',
+        duration: item.duration || '',
+        audio_url: item.audio_url || '',
       };
 
-      const START_ACTIONS = {
+      // 2. Try to fetch high-detail data from library
+      const searchRes = await mitraLibrarySearch(item.itemId || item.title, item.itemType);
+      
+      // Use String() for type-agnostic matching (int vs string IDs)
+      const fullData = searchRes?.results?.find(
+        (r: any) => String(r.itemId) === String(item.itemId)
+      ) || searchRes?.results?.[0];
+
+      const manualData = {
+        ...baseManualData,
+        ...fullData, // Merge library details if found
+      };
+
+      const START_ACTIONS: Record<string, any> = {
         mantra: {
           type: 'navigate',
           target: { container_id: 'practice_runner', state_id: 'mantra_rep_selection' },
         },
         sankalp: {
+          type: 'navigate',
+          target: { container_id: 'practice_runner', state_id: 'sankalp_embody' },
+        },
+        sankalpa: {
           type: 'navigate',
           target: { container_id: 'practice_runner', state_id: 'sankalp_embody' },
         },
@@ -163,20 +177,22 @@ const AdditionalItemsSectionBlock: React.FC<Props> = ({ block }) => {
         },
       };
 
+      const infoType = item.itemType.toLowerCase();
+
       await executeAction(
         {
           type: 'view_info',
           payload: {
-            type: item.itemType,
+            type: infoType,
             manualData,
-            start_action: START_ACTIONS[item.itemType as keyof typeof START_ACTIONS],
+            start_action: START_ACTIONS[infoType],
           },
           currentScreen,
         },
         {
           loadScreen,
           goBack,
-          setScreenValue: updateScreenData,
+          setScreenValue: (val: any, k: string) => updateScreenData(k, val),
           screenState: { ...screenData },
         },
       );
@@ -232,7 +248,7 @@ const AdditionalItemsSectionBlock: React.FC<Props> = ({ block }) => {
                 <TouchableOpacity
                   style={styles.actionBtn}
                   onPress={() =>
-                    item.source === 'additional_library'
+                    item.itemType === 'mantra' || item.itemType === 'sankalp' || item.itemType === 'practice'
                       ? handleLaunchRunner(item)
                       : handleComplete(item)
                   }

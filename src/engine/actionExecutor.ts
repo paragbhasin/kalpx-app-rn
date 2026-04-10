@@ -185,7 +185,9 @@ function _cleanupOnReturnHome(
 // ---------------------------------------------------------------------------
 
 interface InfoData {
+  type: string;
   title: string;
+  subtitle: string;
   meaning: string;
   essence: string;
   benefits: string[];
@@ -196,6 +198,10 @@ interface InfoData {
   deity: string;
   tradition: string;
   duration: string;
+  iast?: string;
+  devanagari?: string;
+  full_mantra?: string;
+  how_to_live?: string[];
 }
 
 /**
@@ -210,7 +216,9 @@ function _generateInfoScreenData(type: string, masterData: Record<string, any>):
     (masterData.steps?.length > 0 || masterData.tags?.includes('action'));
 
   return {
+    type,
     title: masterData.title || masterData.iast || '',
+    subtitle: masterData.subtitle || masterData.devanagari || masterData.hindi || '',
     meaning: masterData.meaning || masterData.line || '',
     essence: masterData.essence || masterData.insight || masterData.summary || '',
     benefits: masterData.benefits || [],
@@ -221,6 +229,10 @@ function _generateInfoScreenData(type: string, masterData: Record<string, any>):
     deity: masterData.deity || '',
     tradition: masterData.tradition || '',
     duration: masterData.duration || '',
+    iast: masterData.iast || '',
+    devanagari: masterData.devanagari || masterData.hindi || '',
+    full_mantra: masterData.full_mantra || masterData.subtitle || masterData.devanagari || '',
+    how_to_live: masterData.how_to_live || masterData.steps || [],
   };
 }
 
@@ -718,7 +730,8 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // ================================================================
       case 'view_info': {
         if (!payload) break;
-        const { type: infoType, manualData, is_locked } = payload;
+        const infoType = (payload.type || '').toLowerCase();
+        const { manualData, is_locked } = payload;
         const masterData = manualData || screenState[`master_${infoType}`];
         if (!masterData) break;
 
@@ -746,10 +759,10 @@ export async function executeAction(action: Action, context: ActionContext): Pro
 
         // Start label
         const startLabelMap: Record<string, string> = {
-          practice: infoData.is_action ? 'Begin Practice' : 'I Will Do This',
-          mantra: 'Begin Chanting',
-          sankalp: 'Embody This',
-          Sankalpa: 'Embody This',
+          practice: infoData.is_action ? 'Practice' : 'I Will Do This',
+          mantra: 'Chant',
+          sankalp: 'Embody',
+          sankalpa: 'Embody',
         };
         setScreenValue(payload.start_label || startLabelMap[infoType] || 'Begin', 'info_start_label');
 
@@ -779,7 +792,7 @@ export async function executeAction(action: Action, context: ActionContext): Pro
         setScreenValue(!!is_locked, 'info_is_locked');
         setScreenValue(!(is_locked || payload.read_only), 'show_info_start');
         setScreenValue(infoType === 'mantra', 'info_is_mantra');
-        setScreenValue(infoType === 'sankalp' || infoType === 'Sankalpa', 'info_is_sankalp');
+        setScreenValue(infoType === 'sankalp' || infoType === 'sankalpa', 'info_is_sankalp');
         setScreenValue(infoType === 'practice', 'info_is_practice');
 
         // Support flow handling
@@ -827,15 +840,21 @@ export async function executeAction(action: Action, context: ActionContext): Pro
 
           let defaultStartAction = payload.start_action || null;
           if (!payload.start_action) {
-            if (infoType === 'mantra') {
+            const typeKey = infoType.toLowerCase();
+            if (typeKey === 'mantra') {
               defaultStartAction = {
                 type: 'navigate',
                 target: { container_id: 'practice_runner', state_id: 'mantra_rep_selection' },
               };
-            } else if (infoType === 'sankalp' || infoType === 'Sankalpa') {
+            } else if (typeKey === 'sankalp' || typeKey === 'sankalpa') {
               defaultStartAction = {
                 type: 'navigate',
                 target: { container_id: 'practice_runner', state_id: 'sankalp_embody' },
+              };
+            } else if (typeKey === 'practice') {
+              defaultStartAction = {
+                type: 'navigate',
+                target: { container_id: 'practice_runner', state_id: 'practice_step_runner' },
               };
             }
           }

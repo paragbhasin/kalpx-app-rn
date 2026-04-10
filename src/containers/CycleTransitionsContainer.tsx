@@ -138,17 +138,28 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
   const stateId = currentStateId || "";
 
   const currentType: ActivityType = useMemo(() => {
-    if (screenData?.info_is_mantra || info.type === "mantra") return "mantra";
-    if (screenData?.info_is_sankalp || info.type === "sankalp")
-      return "sankalp";
-    if (screenData?.info_is_practice || info.type === "practice")
-      return "practice";
+    // 1. Check direct info.type
+    if (info?.type) {
+      const t = info.type.toLowerCase();
+      if (t === "mantra") return "mantra";
+      if (t === "sankalp" || t === "sankalpa") return "sankalp";
+      if (t === "practice") return "practice";
+    }
+
+    // 2. Check screenData flags
+    if (screenData?.info_is_mantra) return "mantra";
+    if (screenData?.info_is_sankalp) return "sankalp";
+    if (screenData?.info_is_practice) return "practice";
+
     return null;
   }, [screenData, info]);
 
   const isInfoScreen = useMemo(
     () =>
-      (stateId === "info_reveal" || stateId === "offering_reveal") &&
+      (stateId === "info_reveal" ||
+        stateId === "offering_reveal" ||
+        stateId === "view_info" ||
+        stateId === "daily_insight") &&
       currentType !== null,
     [stateId, currentType],
   );
@@ -242,31 +253,41 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
 
             {currentType === "mantra" && (
               <View style={styles.mantraMainContainer}>
-                <Text style={styles.mantraDevanagariLarge}>
-                  {info.subtitle}
-                </Text>
-                <Text style={styles.mantraIAST}>{info.iast || info.title}</Text>
-
-                {mantraExpanded ? (
-                  <Text style={styles.mantraBrief}>
-                    {info.full_mantra || info.meaning}
-                  </Text>
-                ) : (
-                  <Text style={styles.mantraBrief}>{info.meaning}</Text>
+                {/* 1. Title (Deity) */}
+                {info.title && (
+                  <Text style={styles.deityTitle}>{info.title}</Text>
                 )}
-
-                {hasContent(info.full_mantra) && (
-                  <TouchableOpacity
-                    style={styles.viewFullMantraBtn}
-                    onPress={() => setMantraExpanded(!mantraExpanded)}
+                {(info.full_mantra || info.subtitle) && (
+                  <Text
+                    style={styles.mantraDevanagariLarge}
+                    numberOfLines={mantraExpanded ? 0 : 2}
+                    ellipsizeMode="tail"
                   >
-                    <Text style={styles.viewFullMantraText}>
-                      {mantraExpanded
-                        ? "Hide full mantra"
-                        : "Tap to view full mantra \u2192"}
-                    </Text>
-                  </TouchableOpacity>
+                    {info.full_mantra || info.subtitle}
+                  </Text>
                 )}
+
+                {/* 2. IAST Section (2 lines limit) */}
+                {info.iast && (
+                  <Text
+                    style={styles.mantraIAST}
+                    numberOfLines={mantraExpanded ? 0 : 2}
+                    ellipsizeMode="tail"
+                  >
+                    {info.iast || info.title}
+                  </Text>
+                )}
+
+                <TouchableOpacity
+                  style={styles.viewFullMantraBtn}
+                  onPress={() => setMantraExpanded(!mantraExpanded)}
+                >
+                  <Text style={styles.viewFullMantraText}>
+                    {mantraExpanded
+                      ? "Hide full mantra"
+                      : "Tap to view full mantra \u2192"}
+                  </Text>
+                </TouchableOpacity>
               </View>
             )}
 
@@ -410,11 +431,6 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
               </>
             )}
           </View>
-
-          {/* Deity Metadata (for Mantras) */}
-          {currentType === "mantra" && info.deity && (
-            <Text style={styles.deityMetadata}>Deity: {info.deity}</Text>
-          )}
 
           {/* Actions */}
 

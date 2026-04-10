@@ -131,6 +131,8 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
   const [showMicroWin, setShowMicroWin] = useState(false);
   const [microWinMessage, setMicroWinMessage] = useState("");
   const [mediaMuted, setMediaMuted] = useState(false);
+  const [meaningExpanded, setMeaningExpanded] = useState(false);
+  const [essenceExpanded, setEssenceExpanded] = useState(false);
   
   // Prep Flow State
   const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
@@ -191,6 +193,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
       currentStateId === "post_trigger_mantra" ||
       currentStateId === "trigger_practice_runner" ||
       screenState.source === "support" ||
+      screenState._last_viewed_item?.source === "support" ||
       screenState._active_support_item?.source === "support"
     );
   }, [schema, currentStateId, screenState]);
@@ -875,9 +878,6 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
     );
   }
 
-  const [meaningExpanded, setMeaningExpanded] = useState(false);
-  const [essenceExpanded, setEssenceExpanded] = useState(false);
-
   if (isMantraRunner) {
     const target = isUnlimitedRepCounter
       ? -1
@@ -1099,15 +1099,16 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
   }
 
   if (isSacredPause) {
-    const steps = (screenState.info?.steps_text || "").split("\n").filter(Boolean);
+    const activeItem = screenState.runner_active_item;
+    const steps = (activeItem?.steps_text || screenState.info?.steps_text || "").split("\n").filter(Boolean);
     const m = Math.floor(timeLeft / 60);
     const s = timeLeft % 60;
 
     return (
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.pauseHeader}>
-          <Text style={styles.pauseTitle}>{schema.pause_config?.title || "Sacred Pause"}</Text>
-          <Text style={styles.pauseSub}>{schema.pause_config?.subtitle || "Take a moment"}</Text>
+          <Text style={styles.pauseTitle}>{activeItem?.title || schema.pause_config?.title || "Sacred Pause"}</Text>
+          <Text style={styles.pauseSub}>{activeItem?.subtitle || schema.pause_config?.subtitle || "Take a moment"}</Text>
         </View>
 
         <View style={styles.instructionsCard}>

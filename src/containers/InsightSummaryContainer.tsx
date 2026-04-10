@@ -756,7 +756,7 @@ const styles = StyleSheet.create({
   step2Card: {
     width: "100%",
     borderRadius: 24,
-    paddingHorizontal: 20,
+    paddingHorizontal: 15,
     paddingVertical: 10,
     borderWidth: 2,
     borderColor: "#E8C587",

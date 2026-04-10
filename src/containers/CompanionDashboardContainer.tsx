@@ -1,18 +1,19 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Image,
   Alert,
-} from 'react-native';
-import Svg, { Circle } from 'react-native-svg';
-import { useScreenStore } from '../engine/useScreenBridge';
-import BlockRenderer from '../engine/BlockRenderer';
-import Header from '../components/Header';
-import { Fonts } from '../theme/fonts';
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Svg, { Circle } from "react-native-svg";
+import MantraLotus3d from "../../assets/mantra-lotus-3d.svg";
+import Header from "../components/Header";
+import BlockRenderer from "../engine/BlockRenderer";
+import { useScreenStore } from "../engine/useScreenBridge";
+import { Fonts } from "../theme/fonts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -37,7 +38,7 @@ interface Props {
 // Constants
 // ---------------------------------------------------------------------------
 
-const RING_SIZE = 200;
+const RING_SIZE = 150;
 const RING_STROKE = 7;
 const RING_RADIUS = 45;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
@@ -47,11 +48,7 @@ const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 // ---------------------------------------------------------------------------
 
 const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
-  const {
-    screenData,
-    loadScreen,
-    updateScreenData,
-  } = useScreenStore();
+  const { screenData, loadScreen, updateScreenData } = useScreenStore();
 
   const [showResetConfirm, setShowResetConfirm] = useState(false);
 
@@ -90,13 +87,13 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
   const dayNumber = Number(ss.day_number) || 1;
   const totalDays = Number(ss.total_days) || 14;
   const daysRemaining = totalDays - dayNumber;
-  const identityLabel = ss.identity_label || '';
+  const identityLabel = ss.identity_label || "";
   const cycleNumber = Number(ss.path_cycle_number) || 1;
   const pathMilestone = ss.path_milestone || null;
-  const streakDisplay = ss.streak_display || '';
+  const streakDisplay = ss.streak_display || "";
   const sankalpHowToLive: string[] = ss.sankalp_how_to_live || [];
   const contextualCta = ss.contextual_cta || null;
-  const pranaInsight = ss.prana_ack_insight || '';
+  const pranaInsight = ss.prana_ack_insight || "";
   const daysSinceLastPractice = Number(ss.days_since_last_practice) || 0;
   const showReturnBanner = daysSinceLastPractice >= 3;
   const journeyId = ss.journey_id || null;
@@ -104,29 +101,30 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
   // Status message from dashboard_config
   const statusMessage = useMemo(() => {
     const messages = schema.dashboard_config?.status_messages || {};
-    if (isDayComplete) return messages.completed || 'Day Completed';
-    if (dayNumber === 1) return messages.start || 'Begins Today';
-    if (dayNumber === 7 && totalDays >= 7) return messages.milestone || 'Milestone Reached';
-    if (dayNumber === totalDays) return messages.near_end || 'Almost There';
-    return messages.default || 'Continue Journey';
+    if (isDayComplete) return messages.completed || "Day Completed";
+    if (dayNumber === 1) return messages.start || "Begins Today";
+    if (dayNumber === 7 && totalDays >= 7)
+      return messages.milestone || "Milestone Reached";
+    if (dayNumber === totalDays) return messages.near_end || "Almost There";
+    return messages.default || "Continue Journey";
   }, [isDayComplete, dayNumber, totalDays, schema.dashboard_config]);
 
   // SVG ring calculations
   const strokeDashoffset = RING_CIRCUMFERENCE - RING_CIRCUMFERENCE * progress;
-  const ringStroke = isDayComplete ? '#10b981' : '#bfa58a';
+  const ringStroke = isDayComplete ? "#10b981" : "#bfa58a";
 
   // Block filtering
   const blocks = schema.blocks || [];
   const practiceBlocks = useMemo(
-    () => blocks.filter((b: any) => b.type === 'practice_card'),
+    () => blocks.filter((b: any) => b.type === "practice_card"),
     [blocks],
   );
   const footerActionBlocks = useMemo(
-    () => blocks.filter((b: any) => b.position === 'footer_actions'),
+    () => blocks.filter((b: any) => b.position === "footer_actions"),
     [blocks],
   );
   const footerBlocks = useMemo(
-    () => blocks.filter((b: any) => b.position === 'footer'),
+    () => blocks.filter((b: any) => b.position === "footer"),
     [blocks],
   );
 
@@ -137,8 +135,8 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
   useEffect(() => {
     const toast = ss._trigger_resolution_toast;
     if (toast?.message) {
-      Alert.alert('', toast.message);
-      updateScreenData('_trigger_resolution_toast', null);
+      Alert.alert("", toast.message);
+      updateScreenData("_trigger_resolution_toast", null);
     }
   }, [ss._trigger_resolution_toast]);
 
@@ -148,23 +146,27 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
 
   const handleReset = () => {
     Alert.alert(
-      'Start Over',
-      'This will end your current journey. Your progress will be remembered, but you\'ll begin a new path from scratch.',
+      "Start Over",
+      "This will end your current journey. Your progress will be remembered, but you'll begin a new path from scratch.",
       [
-        { text: 'Cancel', style: 'cancel', onPress: () => setShowResetConfirm(false) },
         {
-          text: 'Yes, start over',
-          style: 'destructive',
+          text: "Cancel",
+          style: "cancel",
+          onPress: () => setShowResetConfirm(false),
+        },
+        {
+          text: "Yes, start over",
+          style: "destructive",
           onPress: async () => {
             try {
               // The action executor handles the API call + state reset
-              const { executeAction } = require('../engine/actionExecutor');
+              const { executeAction } = require("../engine/actionExecutor");
               await executeAction(
-                { type: 'reset_journey' },
+                { type: "reset_journey" },
                 { screenData: ss, updateScreenData, loadScreen },
               );
             } catch (err) {
-              console.error('[RESET] Failed:', err);
+              console.error("[RESET] Failed:", err);
             }
             setShowResetConfirm(false);
           },
@@ -182,13 +184,11 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
       <View style={styles.root}>
         <Header isTransparent />
         <View style={styles.emptyState}>
-          <Image
-            source={require('../../assets/lotus_icon.png')}
-            style={styles.emptyLotus}
-          />
+          <MantraLotus3d width={120} height={120} />
+
           <Text style={styles.emptyHeadline}>Your practice space is ready</Text>
           <Text style={styles.emptySubtext}>
-            Begin a guided journey rooted in Sanatan wisdom.{'\n'}
+            Begin a guided journey rooted in Sanatan wisdom.{"\n"}
             Choose a focus area that resonates with where you are today.
           </Text>
           <TouchableOpacity
@@ -196,8 +196,8 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
             activeOpacity={0.85}
             onPress={() =>
               loadScreen({
-                container_id: 'choice_stack',
-                state_id: 'discipline_select',
+                container_id: "choice_stack",
+                state_id: "discipline_select",
               })
             }
           >
@@ -224,7 +224,9 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
           <View style={styles.identitySection}>
             <Text style={styles.identityHeadline}>{statusMessage}</Text>
             {!!ss.identity_guidance && (
-              <Text style={styles.identityGuidance}>{ss.identity_guidance}</Text>
+              <Text style={styles.identityGuidance}>
+                {ss.identity_guidance}
+              </Text>
             )}
           </View>
         )}
@@ -288,10 +290,18 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
 
             {/* Lotus at bottom of ring */}
             <View style={styles.lotusWrapper}>
-              <View style={styles.lotusGlow} />
-              <Image
-                source={require('../../assets/lotus_icon.png')}
-                style={styles.lotusImage}
+              <LinearGradient
+                colors={["rgba(212, 160, 23, 0)", "rgba(212, 160, 23, 0.8)"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.lotusLine}
+              />
+              <MantraLotus3d width={100} height={100} />
+              <LinearGradient
+                colors={["rgba(212, 160, 23, 0.8)", "rgba(212, 160, 23, 0)"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.lotusLine}
               />
             </View>
           </View>
@@ -300,7 +310,9 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
         {/* Path milestone — 30+ day practitioners, hidden when return banner visible */}
         {!!pathMilestone?.message && !showReturnBanner && (
           <View style={styles.pathMilestoneSection}>
-            <Text style={styles.pathMilestoneText}>{pathMilestone.message}</Text>
+            <Text style={styles.pathMilestoneText}>
+              {pathMilestone.message}
+            </Text>
           </View>
         )}
 
@@ -322,7 +334,7 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
             <Text style={styles.instructionText}>
               {contextualCta?.label ||
                 schema.dashboard_config?.instruction_text ||
-                'Tap on any card to start your session.'}
+                "Tap on any card to start your session."}
             </Text>
           </View>
         )}
@@ -348,9 +360,9 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
         {!!ss.scan_focus && (
           <BlockRenderer
             block={{
-              type: 'additional_items_section',
-              items_key: 'additional_items',
-              label: 'Additional Practices',
+              type: "additional_items_section",
+              items_key: "additional_items",
+              label: "Additional Practices",
             }}
           />
         )}
@@ -382,7 +394,7 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
         {!isDayComplete && (
           <TouchableOpacity
             style={styles.lowBurdenEntry}
-            onPress={() => loadScreen('low_burden_day')}
+            onPress={() => loadScreen("low_burden_day")}
           >
             <Text style={styles.lowBurdenLink}>What is possible today?</Text>
           </TouchableOpacity>
@@ -415,7 +427,9 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
                   style={styles.resetConfirmBtn}
                   onPress={handleReset}
                 >
-                  <Text style={styles.resetConfirmBtnText}>Yes, start over</Text>
+                  <Text style={styles.resetConfirmBtnText}>
+                    Yes, start over
+                  </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.resetCancelBtn}
@@ -460,7 +474,7 @@ const Divider: React.FC = () => (
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#FAF9F6',
+    // backgroundColor: '#FAF9F6',
   },
   scrollContent: {
     paddingHorizontal: 16,
@@ -470,40 +484,40 @@ const styles = StyleSheet.create({
   // -- Empty state --
   emptyState: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 24,
     paddingVertical: 60,
   },
   emptyLotus: {
     width: 64,
     height: 64,
-    resizeMode: 'contain',
+    resizeMode: "contain",
     marginBottom: 20,
     opacity: 0.8,
   },
   emptyHeadline: {
     fontFamily: Fonts.serif.bold,
     fontSize: 22,
-    color: '#3a3225',
-    textAlign: 'center',
+    color: "#3a3225",
+    textAlign: "center",
     marginBottom: 12,
   },
   emptySubtext: {
     fontFamily: Fonts.serif.regular,
     fontSize: 14,
-    color: '#8b7355',
+    color: "#8b7355",
     lineHeight: 22,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 28,
     maxWidth: 320,
   },
   emptyCta: {
-    backgroundColor: '#c9a84c',
+    backgroundColor: "#c9a84c",
     paddingVertical: 14,
     paddingHorizontal: 32,
     borderRadius: 50,
-    shadowColor: '#c9a84c',
+    shadowColor: "#c9a84c",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 16,
@@ -512,315 +526,328 @@ const styles = StyleSheet.create({
   emptyCtaText: {
     fontFamily: Fonts.serif.bold,
     fontSize: 15,
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     letterSpacing: 0.5,
   },
 
   // -- Identity section --
   identitySection: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingTop: 8,
     paddingHorizontal: 16,
   },
   identityHeadline: {
     fontFamily: Fonts.serif.bold,
     fontSize: 20,
-    color: '#432104',
+    color: "#432104",
   },
   identityGuidance: {
     fontFamily: Fonts.sans.regular,
     fontSize: 14,
-    color: '#615247',
+    color: "#615247",
     marginTop: 2,
   },
 
   // -- Return banner --
   returnBanner: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 12,
     paddingHorizontal: 16,
     marginTop: 8,
     marginBottom: 8,
-    backgroundColor: '#fffdf5',
+    backgroundColor: "#fffdf5",
     borderWidth: 1,
-    borderColor: '#f0e6c8',
+    borderColor: "#f0e6c8",
     borderRadius: 8,
   },
   returnBannerText: {
     fontFamily: Fonts.serif.bold,
     fontSize: 17,
-    color: '#5a4a2a',
+    color: "#5a4a2a",
   },
   returnBannerSub: {
     fontFamily: Fonts.sans.regular,
     fontSize: 13,
-    color: '#8a7a5a',
+    color: "#8a7a5a",
     marginTop: 4,
   },
 
   // -- Progress ring --
   progressSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginVertical: 4,
   },
   progressRingOuter: {
     width: RING_SIZE,
     height: RING_SIZE,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   ringSvg: {
-    position: 'absolute',
+    position: "absolute",
   },
   progressRingInner: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: -20,
   },
   cycleLabel: {
     fontFamily: Fonts.sans.regular,
     fontSize: 11,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 1.5,
-    color: '#8b6914',
+    color: "#8b6914",
     marginBottom: 2,
   },
   dayCount: {
     fontFamily: Fonts.serif.bold,
     fontSize: 22,
-    color: '#432104',
+    color: "#432104",
     lineHeight: 26,
     maxWidth: 140,
-    textAlign: 'center',
+    textAlign: "center",
   },
   lotusWrapper: {
-    position: 'absolute',
-    bottom: 8,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
+    position: "absolute",
+    bottom: -25,
+    left: -40,
+    right: -40,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  lotusLine: {
+    flex: 1,
+    height: 1.5,
+    marginHorizontal: 10,
   },
   lotusGlow: {
-    position: 'absolute',
-    bottom: 0,
+    position: "absolute",
+    bottom: 100,
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: 'rgba(255, 230, 150, 0.25)',
+    backgroundColor: "rgba(255, 230, 150, 0.25)",
   },
   lotusImage: {
     width: 56,
     height: 56,
-    resizeMode: 'contain',
+    resizeMode: "contain",
+  },
+  mantralotusImage: {
+    marginTop: 500,
+    width: 100,
+    height: 100,
   },
 
   // -- Path milestone --
   pathMilestoneSection: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingHorizontal: 16,
     marginBottom: 4,
   },
   pathMilestoneText: {
     fontFamily: Fonts.serif.regular,
     fontSize: 14,
-    color: '#d4a017',
+    color: "#d4a017",
     lineHeight: 21,
-    textAlign: 'center',
+    textAlign: "center",
   },
 
   // -- Reminder / journey summary --
   reminderSection: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 4,
   },
   remainingText: {
     fontFamily: Fonts.serif.regular,
     fontSize: 16,
-    color: '#432104',
-    textAlign: 'center',
+    color: "#432104",
+    textAlign: "center",
   },
 
   // -- Instruction text --
   instructionSection: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 10,
   },
   instructionText: {
     fontFamily: Fonts.sans.regular,
     fontSize: 14,
-    color: '#432104',
+    color: "#432104",
     letterSpacing: 0.5,
-    textAlign: 'center',
+    textAlign: "center",
   },
 
   // -- Prana insight --
   pranaInsightSection: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingHorizontal: 16,
     marginBottom: 12,
   },
   pranaInsightText: {
     fontFamily: Fonts.serif.regular,
     fontSize: 16,
-    color: '#615247',
+    color: "#615247",
     lineHeight: 26,
-    textAlign: 'center',
+    textAlign: "center",
   },
 
   // -- Practice cards list --
   practiceList: {
-    width: '100%',
+    width: "100%",
     gap: 12,
     marginBottom: 10,
   },
 
   // -- Quick actions (footer action buttons) --
   quickActions: {
-    width: '100%',
+    width: "100%",
   },
 
   // -- Sankalp carry-forward --
   carryForwardSection: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 12,
     paddingHorizontal: 20,
     marginHorizontal: 16,
     marginVertical: 8,
-    backgroundColor: 'rgba(212, 160, 23, 0.04)',
+    backgroundColor: "rgba(212, 160, 23, 0.04)",
     borderRadius: 12,
     borderWidth: 0.5,
-    borderColor: 'rgba(191, 165, 138, 0.2)',
+    borderColor: "rgba(191, 165, 138, 0.2)",
   },
   carryForwardLabel: {
     fontFamily: Fonts.sans.bold,
     fontSize: 11,
-    textTransform: 'uppercase',
+    textTransform: "uppercase",
     letterSpacing: 1.5,
-    color: '#bfa58a',
+    color: "#bfa58a",
     marginBottom: 8,
   },
   carryForwardItem: {
     fontFamily: Fonts.sans.regular,
     fontSize: 14,
-    color: '#615247',
+    color: "#615247",
     lineHeight: 20,
     paddingVertical: 4,
-    textAlign: 'center',
+    textAlign: "center",
   },
 
   // -- Vow-carry indicator --
   vowCarryIndicator: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 4,
     paddingHorizontal: 16,
   },
   vowCarryText: {
     fontFamily: Fonts.serif.regular,
     fontSize: 15,
-    color: '#d4a017',
-    textAlign: 'center',
+    color: "#d4a017",
+    textAlign: "center",
   },
 
   // -- Low-burden entry --
   lowBurdenEntry: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 8,
     paddingHorizontal: 16,
   },
   lowBurdenLink: {
     fontFamily: Fonts.sans.regular,
     fontSize: 14,
-    color: '#8c8881',
+    color: "#8c8881",
   },
 
   // -- Diamond divider --
   divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
     marginVertical: 16,
   },
   dividerLineLeft: {
     flex: 1,
     height: 1,
-    backgroundColor: 'rgba(191, 165, 138, 0.3)',
+    backgroundColor: "rgba(191, 165, 138, 0.3)",
   },
   dividerLineRight: {
     flex: 1,
     height: 1,
-    backgroundColor: 'rgba(191, 165, 138, 0.3)',
+    backgroundColor: "rgba(191, 165, 138, 0.3)",
   },
   diamond: {
     width: 6,
     height: 6,
-    backgroundColor: '#bfa58a',
-    transform: [{ rotate: '45deg' }],
+    backgroundColor: "#bfa58a",
+    transform: [{ rotate: "45deg" }],
     marginHorizontal: 8,
   },
 
   // -- Reset section --
   resetSection: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 12,
   },
   resetLink: {
     fontFamily: Fonts.sans.regular,
     fontSize: 13,
-    color: '#bbb',
-    textDecorationLine: 'underline',
+    color: "#bbb",
+    textDecorationLine: "underline",
   },
   resetConfirm: {
     padding: 16,
-    backgroundColor: '#fef9ef',
+    backgroundColor: "#fef9ef",
     borderWidth: 1,
-    borderColor: '#e8d5a8',
+    borderColor: "#e8d5a8",
     borderRadius: 8,
     maxWidth: 320,
-    width: '100%',
+    width: "100%",
   },
   resetConfirmText: {
     fontFamily: Fonts.sans.regular,
     fontSize: 14,
-    color: '#5a4a2a',
+    color: "#5a4a2a",
     lineHeight: 21,
     marginBottom: 12,
-    textAlign: 'center',
+    textAlign: "center",
   },
   resetConfirmActions: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     gap: 8,
   },
   resetConfirmBtn: {
     paddingVertical: 8,
     paddingHorizontal: 16,
-    backgroundColor: '#d4a853',
+    backgroundColor: "#d4a853",
     borderRadius: 6,
   },
   resetConfirmBtnText: {
     fontFamily: Fonts.sans.semiBold,
     fontSize: 14,
-    color: '#FFFFFF',
+    color: "#FFFFFF",
   },
   resetCancelBtn: {
     paddingVertical: 8,
     paddingHorizontal: 16,
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     borderWidth: 1,
-    borderColor: '#d4c8a8',
+    borderColor: "#d4c8a8",
     borderRadius: 6,
   },
   resetCancelBtnText: {
     fontFamily: Fonts.sans.regular,
     fontSize: 14,
-    color: '#8a7a5a',
+    color: "#8a7a5a",
   },
 
   // -- Footer links --
   footerLinkWrap: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingBottom: 16,
   },
 });

@@ -7,6 +7,7 @@ import {
   Dimensions,
   ImageBackground,
   Platform,
+  ScrollView,
 } from "react-native";
 import Animated, {
   useSharedValue,
@@ -16,6 +17,7 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 import { ChevronLeft } from "lucide-react-native";
+import { Volume2, VolumeX } from "lucide-react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 import RudrakshSvg from "../../assets/rudraksh.svg";
 import { Fonts } from "../theme/fonts";
@@ -34,6 +36,10 @@ interface MalaMantraCounterProps {
   triggerHeadline?: string;
   triggerSubtext?: string;
   schema?: any;
+  showMuteToggle?: boolean;
+  mediaMuted?: boolean;
+  onToggleMute?: () => void;
+  footerContent?: React.ReactNode;
   onIncrement: () => void;
   onExit: () => void;
 }
@@ -52,6 +58,10 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
   triggerHeadline,
   triggerSubtext,
   schema,
+  showMuteToggle = false,
+  mediaMuted = false,
+  onToggleMute,
+  footerContent,
   onIncrement,
   onExit,
 }) => {
@@ -143,7 +153,25 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
         <ChevronLeft size={24} color="#8b6914" />
       </TouchableOpacity>
 
-      <View style={styles.contentWrapper}>
+      {showMuteToggle && (
+        <TouchableOpacity
+          style={styles.muteBtn}
+          onPress={onToggleMute}
+          activeOpacity={0.8}
+        >
+          {mediaMuted ? (
+            <VolumeX size={22} color="#b89450" />
+          ) : (
+            <Volume2 size={22} color="#b89450" />
+          )}
+        </TouchableOpacity>
+      )}
+
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.contentWrapper}
+        showsVerticalScrollIndicator={false}
+      >
         {isUnlimited && (
           <View style={styles.triggerHeader}>
             <Text style={styles.triggerHeadline}>
@@ -278,7 +306,9 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
             </View>
           </View>
         )}
-      </View>
+
+        {!!footerContent && <View style={styles.footerActions}>{footerContent}</View>}
+      </ScrollView>
     </ImageBackground>
   );
 };
@@ -288,6 +318,9 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     backgroundColor: "#fff",
+  },
+  scroll: {
+    flex: 1,
   },
   headerOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -310,12 +343,30 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 2,
   },
-  contentWrapper: {
-    flex: 1,
+  muteBtn: {
+    position: "absolute",
+    top: Platform.OS === "ios" ? 50 : 20,
+    right: 20,
+    zIndex: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.5)",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
+    elevation: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  contentWrapper: {
+    flexGrow: 1,
+    alignItems: "center",
+    justifyContent: "flex-start",
     paddingHorizontal: 20,
-    marginTop: 40,
+    paddingTop: 90,
+    paddingBottom: 40,
   },
   triggerHeader: {
     alignItems: "center",
@@ -499,6 +550,13 @@ const styles = StyleSheet.create({
   },
   footerHint: {
     marginTop: 20,
+  },
+  footerActions: {
+    width: "100%",
+    marginTop: 18,
+    alignItems: "center",
+    gap: 14,
+    paddingBottom: 22,
   },
   decorativeDivider: {
     flexDirection: "row",

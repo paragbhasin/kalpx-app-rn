@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import {
+  Animated,
   View,
   Text,
   TouchableOpacity,
@@ -11,6 +12,7 @@ import {
   SafeAreaView,
   Image,
   ScrollView,
+  Easing,
 } from "react-native";
 import { Audio } from "expo-av";
 import { useScreenStore } from "../engine/useScreenBridge";
@@ -21,6 +23,9 @@ import MalaMantraCounter from "../components/MalaMantraCounter";
 import { Fonts } from "../theme/fonts";
 import { RefreshCw, ChevronRight, Check, ChevronLeft } from "lucide-react-native";
 import Slider from "@react-native-community/slider";
+import MantraLotus3d from "../../assets/mantra-lotus-3d.svg";
+import SankalpCenteredIcon from "../../assets/sankalp_centered.svg";
+import SankalpInnerPeaceIcon from "../../assets/sankalp_inner_peace.svg";
 
 const { width } = Dimensions.get("window");
 
@@ -28,6 +33,19 @@ function _omTextForTrack(url: string) {
   if (url.includes("Hari Om")) return { label: "Hari Om", devanagari: "हरि ॐ" };
   if (url.includes("Om Shanti")) return { label: "Om Shanti Shanti Shanti", devanagari: "ॐ शान्तिः शान्तिः शान्तिः" };
   return { label: "OM", devanagari: "ॐ" };
+}
+
+function formatDuration(seconds: number) {
+  const safeSeconds = Math.max(0, Math.round(seconds || 0));
+  if (safeSeconds < 60) {
+    return `${safeSeconds} second${safeSeconds === 1 ? "" : "s"}`;
+  }
+  const mins = Math.floor(safeSeconds / 60);
+  const secs = safeSeconds % 60;
+  if (secs === 0) {
+    return `${mins} minute${mins === 1 ? "" : "s"}`;
+  }
+  return `${mins}m ${secs}s`;
 }
 
 interface PracticeRunnerContainerProps {
@@ -73,6 +91,8 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
   // Prep Flow State
   const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
   const prepAudioRef = useRef<Audio.Sound | null>(null);
+  const introLoopAudioRef = useRef<Audio.Sound | null>(null);
+  const mantraLoopAudioRef = useRef<Audio.Sound | null>(null);
   const prepTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const prepCompletedRef = useRef(false);
 
@@ -87,8 +107,12 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
   // Sankalp Embody State
   const [holdProgress, setHoldProgress] = useState(0);
   const [isHolding, setIsHolding] = useState(false);
+  const [isSankalpActivating, setIsSankalpActivating] = useState(false);
   const holdTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const embodyAudioRef = useRef<Audio.Sound | null>(null);
+  const sankalpOmRef = useRef<Audio.Sound | null>(null);
+  const sankalpSpin = useRef(new Animated.Value(0)).current;
+  const sankalpSpinLoopRef = useRef<Animated.CompositeAnimation | null>(null);
 
   const currentVariant = schema?.variant || currentStateId;
   
@@ -99,7 +123,15 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
   const isRepSelection = currentVariant === "mantra_rep_selection";
   const isMantraPrep = currentVariant === "mantra_prep";
   const isSacredPause = currentVariant === "sacred_pause";
+  const isSupportPractice = currentVariant === "support_practice";
   const isMantraComplete = currentVariant === "mantra_complete";
+  const isTriggerOmChantScreen =
+    currentStateId === "free_mantra_chanting" ||
+    currentStateId === "checkin_breath_reset" ||
+    currentStateId === "post_trigger_mantra";
+  const repCounterBlock = schema.blocks?.find((block: any) => block.type === "rep_counter");
+  const isUnlimitedRepCounter =
+    !!repCounterBlock?.unlimited || Number(repCounterBlock?.total) === -1;
   const selectedRepCount = Number(screenState.reps_total) || 27;
   const buildActionContext = () => ({
     loadScreen,
@@ -236,6 +268,223 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
     }
     return item?.audio_url || screenState.master_mantra?.audio_url || "";
   }, [screenState, currentStateId, _isTriggerScreen, _isCheckinSupportScreen]);
+  const mantraRunnerFooterBlocks = useMemo(
+    () =>
+      (schema.blocks || []).filter(
+        (block: any) =>
+          block.position === "footer" || block.position === "footer_actions",
+      ),
+    [schema.blocks],
+  );
+
+  const runnerHeadline = useMemo(() => {
+    if (currentStateId === "checkin_breath_reset") {
+      return "Pause and breathe.";
+    }
+    if (currentStateId === "checkin_support_mantra") {
+      return "Recite with focus.";
+    }
+    if (isTriggerSession) {
+      if (currentStateId === "free_mantra_chanting") {
+        return "Pause before this grows.";
+      }
+      const isMantraFlow =
+        currentVariant === "mantra_runner" ||
+        currentStateId === "post_trigger_mantra" ||
+        currentStateId === "checkin_support_mantra";
+      return isMantraFlow
+        ? "Stay with this for a few moments."
+        : "Take one steadying action.";
+    }
+    return schema.headline || "";
+  }, [currentStateId, currentVariant, isTriggerSession, schema.headline]);
+
+  const runnerSubtext = useMemo(() => {
+    if (currentStateId === "checkin_breath_reset") {
+      const pranaType = screenState.current_prana_type || "";
+      if (pranaType === "agitated") {
+        return "Your energy may need settling before you move forward.";
+      }
+      if (pranaType === "drained") {
+        return "Your system may need a gentler moment before the next step.";
+      }
+      return "Take a moment here before the next step.";
+    }
+    if (currentStateId === "checkin_support_mantra") {
+      return "Let the repetition bring steadiness and clarity to your journey.";
+    }
+    if (isTriggerSession) {
+      if (currentStateId === "free_mantra_chanting") {
+        return "You do not need to solve everything right now. Stay here for a few breaths and let the intensity soften first.";
+      }
+      const isMantraFlow =
+        currentVariant === "mantra_runner" ||
+        currentStateId === "post_trigger_mantra" ||
+        currentStateId === "checkin_support_mantra";
+      return isMantraFlow
+        ? "Let the repetition settle the mind before you decide what comes next."
+        : "Move through the steps gently. You do not need to force a shift.";
+    }
+    return schema.subtext || schema.body || "";
+  }, [currentStateId, currentVariant, isTriggerSession, screenState.current_prana_type, schema.subtext, schema.body]);
+
+  const activeSankalpText = useMemo(() => {
+    const item = screenState.runner_active_item;
+    if (item?.item_type === "sankalp") {
+      return item.line || item.title || screenState.sankalp_text || "";
+    }
+    return screenState.sankalp_text || "";
+  }, [screenState]);
+
+  const supportPracticeSteps = useMemo(() => {
+    const item = screenState.runner_active_item;
+    if (!item) return [];
+    if (Array.isArray(item.steps)) return item.steps;
+    if (item.steps_text) {
+      return String(item.steps_text)
+        .split("\n")
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .map((s) => s.replace(/^\d+\.\s*/, ""));
+    }
+    return [];
+  }, [screenState.runner_active_item]);
+
+  const supportPracticeBenefits = useMemo(() => {
+    const item = screenState.runner_active_item;
+    if (!item) return [];
+    return Array.isArray(item.benefits) ? item.benefits : [];
+  }, [screenState.runner_active_item]);
+
+  const supportPracticeInsight = useMemo(
+    () => screenState.runner_active_item?.insight || "",
+    [screenState.runner_active_item],
+  );
+
+  const supportPracticeSummary = useMemo(
+    () => screenState.runner_active_item?.summary || "",
+    [screenState.runner_active_item],
+  );
+
+  const resolveAudioSource = (url?: string) => {
+    if (!url) return require("../../assets/sounds/Om.mp4");
+    if (url.includes("Audio_Be_still.mp4")) {
+      return require("../../assets/sounds/Audio_Be_still.mp4");
+    }
+    if (url.includes("/sounds/Om.mp4")) {
+      return require("../../assets/sounds/Om.mp4");
+    }
+    return { uri: url };
+  };
+
+  const stopTriggerAudio = async () => {
+    if (introLoopAudioRef.current) {
+      await introLoopAudioRef.current.stopAsync().catch(() => {});
+      await introLoopAudioRef.current.unloadAsync().catch(() => {});
+      introLoopAudioRef.current = null;
+    }
+    if (mantraLoopAudioRef.current) {
+      await mantraLoopAudioRef.current.stopAsync().catch(() => {});
+      await mantraLoopAudioRef.current.unloadAsync().catch(() => {});
+      mantraLoopAudioRef.current = null;
+    }
+  };
+
+  const toggleTriggerMute = async () => {
+    const nextMuted = !mediaMuted;
+    setMediaMuted(nextMuted);
+    if (introLoopAudioRef.current) {
+      await introLoopAudioRef.current.setIsMutedAsync(nextMuted).catch(() => {});
+    }
+    if (mantraLoopAudioRef.current) {
+      await mantraLoopAudioRef.current.setIsMutedAsync(nextMuted).catch(() => {});
+    }
+  };
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    const startTriggerAudioSequence = async () => {
+      if (!isTriggerOmChantScreen) {
+        await stopTriggerAudio();
+        return;
+      }
+
+      await stopTriggerAudio();
+
+      try {
+        await Audio.setAudioModeAsync({
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: false,
+        });
+
+        const { sound: introSound } = await Audio.Sound.createAsync(
+          require("../../assets/sounds/Audio_Be_still.mp4"),
+          { shouldPlay: false, isLooping: false, isMuted: mediaMuted, volume: 1 },
+        );
+        if (isCancelled) {
+          await introSound.unloadAsync().catch(() => {});
+          return;
+        }
+        introLoopAudioRef.current = introSound;
+
+        const { sound: mantraSound } = await Audio.Sound.createAsync(
+          resolveAudioSource(mantraAudioUrl),
+          { shouldPlay: false, isLooping: true, isMuted: mediaMuted, volume: 1 },
+        );
+        if (isCancelled) {
+          await mantraSound.unloadAsync().catch(() => {});
+          return;
+        }
+        mantraLoopAudioRef.current = mantraSound;
+
+        introSound.setOnPlaybackStatusUpdate((status) => {
+          if (!status.isLoaded) return;
+          if (status.didJustFinish && mantraLoopAudioRef.current) {
+            mantraLoopAudioRef.current.playAsync().catch(() => {});
+          }
+        });
+
+        await introSound.setIsMutedAsync(mediaMuted).catch(() => {});
+        await mantraSound.setIsMutedAsync(mediaMuted).catch(() => {});
+        await introSound.playAsync();
+      } catch (err) {
+        console.warn("[TRIGGER_AUDIO] Failed to start intro/audio sequence:", err);
+      }
+    };
+
+    startTriggerAudioSequence();
+
+    return () => {
+      isCancelled = true;
+      stopTriggerAudio().catch(() => {});
+    };
+  }, [isTriggerOmChantScreen, mantraAudioUrl, mediaMuted]);
+
+  const mantraCompletionState = useMemo(() => {
+    const durationSeconds =
+      Math.round(Number(screenState.chant_duration)) ||
+      Math.round((Date.now() - sessionStartTime) / 1000);
+    const repCount =
+      Number(screenState.mantra_progress_reps) ||
+      Number(screenState.reps_total) ||
+      count ||
+      0;
+    const threshold = Number(schema.feedback_config?.slow_threshold) || 3;
+    const secondsPerRep = repCount > 0 ? durationSeconds / repCount : durationSeconds;
+    const isFastSession = secondsPerRep < threshold;
+    const feedback = isFastSession
+      ? schema.feedback_config?.fast_feedback
+      : schema.feedback_config?.slow_feedback;
+
+    return {
+      durationSeconds,
+      repCount,
+      isFastSession,
+      feedback,
+      durationLabel: formatDuration(durationSeconds),
+    };
+  }, [screenState, sessionStartTime, count, schema.feedback_config]);
 
   // ── Background Handling ──
   useEffect(() => {
@@ -372,7 +621,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
 
   // ── Sankalp Embody Logic ──
   const startEmbody = () => {
-    if (isHolding) return;
+    if (isHolding || isSankalpActivating) return;
     setIsHolding(true);
     let progress = 0;
     holdTimerRef.current = setInterval(() => {
@@ -382,9 +631,77 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
         clearInterval(holdTimerRef.current!);
         setIsHolding(false);
         const action = schema.on_complete || schema.complete_action;
-        if (action) executeAction(action, buildActionContext());
+        if (action) {
+          if (isSankalpEmbody) {
+            runSankalpActivation(action);
+          } else {
+            executeAction(action, buildActionContext());
+          }
+        }
       }
     }, 30);
+  };
+
+  const runSankalpActivation = async (action: any) => {
+    if (isSankalpActivating) return;
+    setIsSankalpActivating(true);
+    setHoldProgress(100);
+
+    const startSmoothSpin = (durationMs: number) => {
+      sankalpSpinLoopRef.current?.stop();
+      sankalpSpin.setValue(0);
+      sankalpSpinLoopRef.current = Animated.loop(
+        Animated.timing(sankalpSpin, {
+          toValue: 1,
+          duration: Math.max(3000, Math.round(durationMs)),
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }),
+      );
+      sankalpSpinLoopRef.current.start();
+    };
+
+    // Start immediately on first activation, then sync to audio duration once loaded.
+    startSmoothSpin(4200);
+
+    try {
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+      });
+
+      if (sankalpOmRef.current) {
+        await sankalpOmRef.current.unloadAsync().catch(() => {});
+        sankalpOmRef.current = null;
+      }
+
+      const { sound } = await Audio.Sound.createAsync(
+        require("../../assets/sounds/om.mp3"),
+        { shouldPlay: false, isLooping: false, volume: 1 },
+      );
+
+      sankalpOmRef.current = sound;
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (!status.isLoaded) return;
+        if (status.durationMillis && status.positionMillis === 0) {
+          startSmoothSpin(status.durationMillis);
+        }
+        if (status.didJustFinish) {
+          sound.setOnPlaybackStatusUpdate(null);
+          sankalpSpinLoopRef.current?.stop();
+          sankalpSpin.setValue(0);
+          executeAction(action, buildActionContext());
+        }
+      });
+      await sound.playAsync();
+    } catch (err) {
+      console.warn("[SANKALP_CONFIRM] OM audio failed:", err);
+      setTimeout(() => {
+        sankalpSpinLoopRef.current?.stop();
+        sankalpSpin.setValue(0);
+        executeAction(action, buildActionContext());
+      }, 4200);
+    }
   };
 
   const returnToDashboard = (completed = true) => {
@@ -397,8 +714,19 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
         payload: { practiceId: schema.id || "practice", completed },
         target: { container_id: "companion_dashboard", state_id: "day_active" }
       }, buildActionContext());
-    }, 2500);
+      }, 2500);
   };
+
+  useEffect(() => {
+    return () => {
+      if (holdTimerRef.current) clearInterval(holdTimerRef.current);
+      sankalpSpinLoopRef.current?.stop();
+      if (sankalpOmRef.current) {
+        sankalpOmRef.current.unloadAsync().catch(() => {});
+        sankalpOmRef.current = null;
+      }
+    };
+  }, []);
 
   // ── Render Components ──
   if (isRepSelection) {
@@ -472,7 +800,12 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
   }
 
   if (isMantraRunner) {
-    const target = Number(screenState.reps_total) || schema.target_count || 9;
+    const target = isUnlimitedRepCounter
+      ? -1
+      : Number(screenState.reps_total) ||
+        Number(repCounterBlock?.total) ||
+        schema.target_count ||
+        9;
     return (
       <View style={{ flex: 1 }}>
         <MalaMantraCounter
@@ -486,15 +819,108 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
             setCount(next);
             if (next >= target) {
               const action = schema.on_complete || schema.complete_action;
-              if (action) setTimeout(() => executeAction(action, buildActionContext()), 1000);
+              if (action) {
+                const durationSeconds = Math.round((Date.now() - sessionStartTime) / 1000);
+                updateScreenData("chant_duration", durationSeconds);
+                updateScreenData("mantra_progress_reps", next);
+                setTimeout(() => executeAction(action, buildActionContext()), 1000);
+              }
             }
           }}
           onExit={handleSessionExit}
-          triggerHeadline={isTriggerSession ? (currentStateId === "free_mantra_chanting" ? "Pause before this grows." : "Stay with this.") : ""}
-          triggerSubtext={isTriggerSession ? (currentStateId === "free_mantra_chanting" ? "Intensity will soften." : "") : ""}
+          triggerHeadline={isTriggerSession ? runnerHeadline : ""}
+          triggerSubtext={isTriggerSession ? runnerSubtext : ""}
+          showMuteToggle={isTriggerOmChantScreen}
+          mediaMuted={mediaMuted}
+          onToggleMute={toggleTriggerMute}
+          footerContent={
+            mantraRunnerFooterBlocks.length > 0 ? (
+              <>
+                {mantraRunnerFooterBlocks.map((block: any, i: number) => (
+                  <BlockRenderer
+                    key={block.id || `runner-footer-${i}`}
+                    block={block}
+                  />
+                ))}
+              </>
+            ) : null
+          }
         />
         {showMicroWin && <MicroCompletion message={microWinMessage} onDismiss={() => setShowMicroWin(false)} />}
       </View>
+    );
+  }
+
+  if (isSupportPractice) {
+    return (
+      <ImageBackground
+        source={require("../../assets/mantra3.png")}
+        style={styles.fullscreenBg}
+        resizeMode="cover"
+      >
+        <ScrollView
+          contentContainerStyle={styles.supportPracticeScroll}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.supportPracticeHeader}>
+            <Text style={styles.supportPracticeTitle}>
+              {screenState.runner_active_item?.title || runnerHeadline}
+            </Text>
+            <Text style={styles.supportPracticeSubtitle}>
+              {runnerSubtext || "Move through this gently. There is no rush."}
+            </Text>
+          </View>
+
+          <View style={styles.instructionsCard}>
+            {supportPracticeSteps.map((step: string, i: number) => (
+              <View key={`${step}-${i}`} style={styles.stepItem}>
+                <Text style={styles.stepNum}>{i + 1}.</Text>
+                <Text style={styles.stepText}>{step}</Text>
+              </View>
+            ))}
+          </View>
+
+          <View style={styles.supportActions}>
+            <TouchableOpacity
+              style={styles.goldActionBtn}
+              onPress={() => executeAction({ type: "trigger_calmer_now" }, buildActionContext())}
+            >
+              <Text style={styles.goldActionBtnText}>I feel calmer now</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.supportOutlineBtn}
+              onPress={() => executeAction({ type: "trigger_still_feeling" }, buildActionContext())}
+            >
+              <Text style={styles.supportOutlineBtnText}>Try another way</Text>
+            </TouchableOpacity>
+          </View>
+
+          {!!supportPracticeSummary && (
+            <View style={styles.supportInfoCard}>
+              <Text style={styles.supportInfoTitle}>Meaning</Text>
+              <Text style={styles.supportInfoText}>{supportPracticeSummary}</Text>
+            </View>
+          )}
+
+          {supportPracticeBenefits.length > 0 && (
+            <View style={styles.supportInfoCard}>
+              <Text style={styles.supportInfoTitle}>Benefits</Text>
+              {supportPracticeBenefits.map((benefit: string, i: number) => (
+                <Text key={`${benefit}-${i}`} style={styles.supportBenefitItem}>
+                  {"\u2022"} {benefit}
+                </Text>
+              ))}
+            </View>
+          )}
+
+          {!!supportPracticeInsight && (
+            <View style={styles.supportInfoCard}>
+              <Text style={styles.supportInfoTitle}>Why this works</Text>
+              <Text style={styles.supportInfoText}>{supportPracticeInsight}</Text>
+            </View>
+          )}
+        </ScrollView>
+      </ImageBackground>
     );
   }
 
@@ -606,7 +1032,16 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
   }
 
   if (isSankalpEmbody) {
-    const text = screenState.runner_active_item?.line || screenState.sankalp_text || "";
+    const text = activeSankalpText;
+    const coinRotateY = sankalpSpin.interpolate({
+      inputRange: [0, 1],
+      outputRange: ["0deg", "360deg"],
+    });
+    const coinScale = sankalpSpin.interpolate({
+      inputRange: [0, 0.2, 0.5, 1],
+      outputRange: [1, 0.96, 1.01, 1],
+    });
+
     return (
       <View style={styles.embodyContainer}>
         <View style={styles.quoteWrap}>
@@ -624,14 +1059,228 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
           onLongPress={startEmbody} 
           delayLongPress={100}
           activeOpacity={0.8}
+          disabled={isSankalpActivating}
         >
-          <Image source={require("../../assets/namaste.png")} style={[styles.embodyImg, isHolding && { transform: [{ rotateY: "180deg" }] }]} />
+          <Animated.View
+            style={{
+              transform: [
+                { perspective: 1000 },
+                { rotateY: coinRotateY },
+                { scale: coinScale },
+              ],
+            }}
+          >
+            <Image
+              source={require("../../assets/namaste.png")}
+              style={[
+                styles.embodyImg,
+                isHolding && !isSankalpActivating && { transform: [{ rotateY: "180deg" }] },
+              ]}
+            />
+          </Animated.View>
         </TouchableOpacity>
+
+        {isSankalpActivating && (
+          <Text style={styles.sankalpActivatingText}>
+            Let the vibration settle within...
+          </Text>
+        )}
         
         <TouchableOpacity style={{ marginTop: 40 }} onPress={() => returnToDashboard(false)}>
           <Text style={styles.returnLink}>Return to Mitra Home</Text>
         </TouchableOpacity>
       </View>
+    );
+  }
+
+  if (isMantraComplete) {
+    const completionConfig = schema.completion_config || {};
+    const feedback = mantraCompletionState.feedback || {};
+    const points = completionConfig.points || [];
+
+    return (
+      <ImageBackground
+        source={require("../../assets/beige_bg.png")}
+        style={styles.fullscreenBg}
+        resizeMode="cover"
+      >
+        <ScrollView
+          contentContainerStyle={styles.mantraCompleteScroll}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.mantraCompleteHeadline}>
+            {completionConfig.headline || "Mantra Completed."}
+          </Text>
+          <Text style={styles.mantraCompleteSubtext}>
+            {completionConfig.subtext ||
+              "A moment of inner calm strengthens your foundation."}
+          </Text>
+
+          <View style={styles.mantraCompleteLotusWrap}>
+            <View style={styles.mantraCompleteLine} />
+            <MantraLotus3d width={110} height={82} />
+            <View style={styles.mantraCompleteLine} />
+          </View>
+
+          <View style={styles.mantraReflectionCard}>
+            <View style={styles.mantraReflectionHeader}>
+              <View style={styles.mantraReflectionHeaderLine} />
+              <Text style={styles.mantraReflectionLabel}>
+                {completionConfig.reflection_label || "Session Reflection"}
+              </Text>
+              <View style={styles.mantraReflectionHeaderLine} />
+            </View>
+
+            <View style={styles.mantraDurationCard}>
+              <Text style={styles.mantraDurationLabel}>Session Duration</Text>
+              <Text style={styles.mantraDurationValue}>
+                {mantraCompletionState.durationLabel}
+              </Text>
+            </View>
+
+            <Text style={styles.mantraFeedbackTitle}>
+              {feedback.title || "A Gentle Reflection"}
+            </Text>
+            <Text style={styles.mantraFeedbackMessage}>
+              {feedback.message || "Did each mantra truly resonate within you?"}
+            </Text>
+            {!!feedback.sub && (
+              <Text style={styles.mantraFeedbackSub}>{feedback.sub}</Text>
+            )}
+
+            {!!feedback.retry_cta && (
+              <View style={styles.mantraRetryCtaBox}>
+                <Text style={styles.mantraRetryCtaText}>{feedback.retry_cta}</Text>
+              </View>
+            )}
+
+            {!mantraCompletionState.isFastSession && points.length > 0 && (
+              <View style={styles.mantraPointsList}>
+                {points.map((point: string, index: number) => (
+                  <View key={`${point}-${index}`} style={styles.mantraPointRow}>
+                    <View style={styles.mantraPointDot} />
+                    <Text style={styles.mantraPointText}>{point}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+
+          {feedback.recommendRepeat && (
+            <View style={styles.recommendedBadge}>
+              <Text style={styles.recommendedBadgeText}>RECOMMENDED</Text>
+            </View>
+          )}
+
+          <TouchableOpacity
+            style={styles.mantraRepeatBtn}
+            onPress={() =>
+              loadScreen({
+                container_id: "practice_runner",
+                state_id: "mantra_rep_selection",
+              })
+            }
+            activeOpacity={0.85}
+          >
+            <Text style={styles.mantraRepeatBtnText}>
+              {completionConfig.repeat_label || "Repeat it again"}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.goldActionBtn}
+            onPress={() => returnToDashboard(true)}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.goldActionBtnText}>
+              {completionConfig.dashboard_label || "Return to Mitra Home"}
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </ImageBackground>
+    );
+  }
+
+  if (isSankalpConfirm) {
+    const completionConfig = schema.completion_config || {};
+    const points = completionConfig.points || [];
+    const pointIconMap: Record<string, any> = {
+      "/assets/sankalp_centered.svg": SankalpCenteredIcon,
+      "/assets/sankalp_inner_peace.svg": SankalpInnerPeaceIcon,
+    };
+
+    return (
+      <ImageBackground
+        source={require("../../assets/beige_bg.png")}
+        style={styles.fullscreenBg}
+        resizeMode="cover"
+      >
+        <ScrollView
+          contentContainerStyle={styles.sankalpConfirmScroll}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.sankalpConfirmHeadline}>
+            {completionConfig.headline || "Your Sankalp is Alive."}
+          </Text>
+
+          <Text style={styles.sankalpConfirmSubtext}>
+            {completionConfig.subtext ||
+              "Your sankalp is now alive in you. Carry it gently through your day.\nLet it guide your choices, words, and pauses."}
+          </Text>
+
+          <View style={styles.sankalpLotusDivider}>
+            <View style={styles.sankalpLotusLine} />
+            <MantraLotus3d width={124} height={88} />
+            <View style={styles.sankalpLotusLine} />
+          </View>
+
+          <View style={styles.sankalpPointsCard}>
+            {points.map((point: any, index: number) => {
+              const IconComponent = pointIconMap[point.icon];
+              return (
+                <React.Fragment key={`${point.label}-${index}`}>
+                  {index > 0 && <View style={styles.sankalpPointsDivider} />}
+                  <View style={styles.sankalpPointCol}>
+                    {IconComponent ? (
+                      <IconComponent width={48} height={48} />
+                    ) : (
+                      <View style={styles.sankalpPointFallbackIcon} />
+                    )}
+                    <Text style={styles.sankalpPointLabel}>
+                      {String(point.label || "").replace(/\n/g, " ")}
+                    </Text>
+                  </View>
+                </React.Fragment>
+              );
+            })}
+          </View>
+
+          <TouchableOpacity
+            style={styles.sankalpRepeatBtn}
+            onPress={() =>
+              loadScreen({
+                container_id: "practice_runner",
+                state_id: "sankalp_embody",
+              })
+            }
+            activeOpacity={0.85}
+          >
+            <Text style={styles.sankalpRepeatBtnText}>
+              {completionConfig.repeat_label || "Repeat it again"}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.sankalpHomeBtn}
+            onPress={() => returnToDashboard(true)}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.sankalpHomeBtnText}>
+              {completionConfig.dashboard_label || "Return to Mitra Home"}
+            </Text>
+          </TouchableOpacity>
+        </ScrollView>
+      </ImageBackground>
     );
   }
 
@@ -812,6 +1461,295 @@ const styles = StyleSheet.create({
     maxWidth: 320,
     marginBottom: 18,
   },
+  mantraCompleteScroll: {
+    paddingHorizontal: 24,
+    paddingTop: 52,
+    paddingBottom: 42,
+    alignItems: "center",
+  },
+  mantraCompleteHeadline: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 28,
+    lineHeight: 36,
+    color: "#432104",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  mantraCompleteSubtext: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 18,
+    lineHeight: 28,
+    color: "#432104",
+    textAlign: "center",
+    maxWidth: 320,
+    marginBottom: 20,
+  },
+  mantraCompleteLotusWrap: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 18,
+  },
+  mantraCompleteLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "rgba(232, 197, 135, 0.7)",
+  },
+  mantraReflectionCard: {
+    width: "100%",
+    borderWidth: 1.5,
+    borderColor: "#E2B24A",
+    borderRadius: 28,
+    backgroundColor: "rgba(255,255,255,0.28)",
+    paddingHorizontal: 18,
+    paddingTop: 22,
+    paddingBottom: 28,
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  mantraReflectionHeader: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 18,
+  },
+  mantraReflectionHeaderLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "rgba(232, 197, 135, 0.55)",
+  },
+  mantraReflectionLabel: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 18,
+    color: "#432104",
+    marginHorizontal: 12,
+  },
+  mantraDurationCard: {
+    width: "100%",
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(232, 197, 135, 0.6)",
+    backgroundColor: "rgba(255,255,255,0.5)",
+    alignItems: "center",
+    paddingVertical: 18,
+    paddingHorizontal: 12,
+    marginBottom: 22,
+  },
+  mantraDurationLabel: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 12,
+    textTransform: "uppercase",
+    letterSpacing: 1.8,
+    color: "#C89C44",
+    marginBottom: 10,
+  },
+  mantraDurationValue: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 28,
+    color: "#432104",
+  },
+  mantraFeedbackTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 20,
+    color: "#C89C44",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  mantraFeedbackMessage: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 18,
+    lineHeight: 28,
+    color: "#432104",
+    textAlign: "center",
+    marginBottom: 14,
+  },
+  mantraFeedbackSub: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 16,
+    lineHeight: 26,
+    color: "#8C8881",
+    textAlign: "center",
+    fontStyle: "italic",
+    marginBottom: 18,
+  },
+  mantraRetryCtaBox: {
+    width: "100%",
+    borderRadius: 22,
+    borderWidth: 1.5,
+    borderStyle: "dashed",
+    borderColor: "#D9A012",
+    backgroundColor: "rgba(255,248,235,0.7)",
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+  },
+  mantraRetryCtaText: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 15,
+    lineHeight: 24,
+    color: "#432104",
+    textAlign: "center",
+  },
+  mantraPointsList: {
+    width: "100%",
+    gap: 10,
+  },
+  mantraPointRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  mantraPointDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: "#D9A012",
+    marginRight: 10,
+  },
+  mantraPointText: {
+    flex: 1,
+    fontFamily: Fonts.sans.medium,
+    fontSize: 16,
+    color: "#615247",
+  },
+  recommendedBadge: {
+    alignSelf: "flex-end",
+    marginRight: 14,
+    marginTop: -12,
+    marginBottom: 8,
+    backgroundColor: "#D6B05B",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+  },
+  recommendedBadgeText: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 12,
+    letterSpacing: 1.4,
+    color: "#FFFFFF",
+  },
+  mantraRepeatBtn: {
+    width: "100%",
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 1.5,
+    borderColor: "#D6A43A",
+    backgroundColor: "rgba(255,255,255,0.35)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 18,
+  },
+  mantraRepeatBtnText: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 18,
+    color: "#432104",
+  },
+  sankalpConfirmScroll: {
+    paddingHorizontal: 22,
+    paddingTop: 44,
+    paddingBottom: 42,
+    alignItems: "center",
+  },
+  sankalpConfirmHeadline: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 34,
+    lineHeight: 50,
+    color: "#432104",
+    textAlign: "center",
+    maxWidth: 320,
+    marginBottom: 18,
+  },
+  sankalpConfirmSubtext: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 18,
+    lineHeight: 40,
+    color: "#615247",
+    textAlign: "center",
+    maxWidth: 330,
+    marginBottom: 18,
+  },
+  sankalpLotusDivider: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 24,
+  },
+  sankalpLotusLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "rgba(232, 197, 135, 0.72)",
+  },
+  sankalpPointsCard: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "stretch",
+    justifyContent: "space-between",
+    borderRadius: 28,
+    borderWidth: 1.5,
+    borderColor: "#D9A012",
+    backgroundColor: "rgba(255,255,255,0.18)",
+    paddingVertical: 24,
+    paddingHorizontal: 20,
+    marginBottom: 18,
+  },
+  sankalpPointCol: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+  },
+  sankalpPointsDivider: {
+    width: 1,
+    marginHorizontal: 8,
+    backgroundColor: "rgba(232, 197, 135, 0.7)",
+  },
+  sankalpPointFallbackIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(217, 160, 18, 0.18)",
+  },
+  sankalpPointLabel: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 17,
+    lineHeight: 24,
+    color: "#432104",
+    textAlign: "center",
+  },
+  sankalpRepeatBtn: {
+    width: "100%",
+    height: 58,
+    borderRadius: 29,
+    borderWidth: 1.5,
+    borderColor: "#D6A43A",
+    backgroundColor: "rgba(255,255,255,0.22)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 18,
+  },
+  sankalpRepeatBtnText: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 19,
+    color: "#432104",
+  },
+  sankalpHomeBtn: {
+    width: "100%",
+    height: 62,
+    borderRadius: 31,
+    backgroundColor: "#E0B13A",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#C8921F",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.22,
+    shadowRadius: 18,
+    elevation: 6,
+  },
+  sankalpHomeBtnText: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 19,
+    color: "#432104",
+  },
   skipBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -933,10 +1871,99 @@ const styles = StyleSheet.create({
   diamond: { width: 6, height: 6, backgroundColor: "#d9a557", transform: [{ rotate: "45deg" }] },
   embodyInstr: { fontSize: 18, color: "#615247", textAlign: "center", marginBottom: 30 },
   holdTarget: { width: 200, height: 200, borderRadius: 100, alignItems: "center", justifyContent: "center" },
+  embodyCoinWrap: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
   embodyImg: { width: 150, height: 150, opacity: 0.8 },
+  sankalpActivatingText: {
+    marginTop: 18,
+    fontFamily: Fonts.serif.regular,
+    fontSize: 18,
+    color: "#615247",
+    textAlign: "center",
+  },
   supportHeader: { width: "100%", alignItems: "center", marginBottom: 24 },
   supportHeadline: { fontFamily: Fonts.serif.bold, fontSize: 28, color: "#432104" },
   supportSub: { fontFamily: Fonts.sans.regular, fontSize: 14, color: "#615247", textAlign: "center" },
+  supportPracticeScroll: {
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    paddingBottom: 48,
+    alignItems: "center",
+  },
+  supportPracticeHeader: {
+    width: "100%",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  supportPracticeTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 28,
+    lineHeight: 36,
+    color: "#432104",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  supportPracticeSubtitle: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 16,
+    lineHeight: 26,
+    color: "#615247",
+    textAlign: "center",
+    maxWidth: 330,
+  },
+  supportActions: {
+    width: "100%",
+    gap: 16,
+    marginTop: 16,
+    marginBottom: 16,
+  },
+  supportOutlineBtn: {
+    width: "100%",
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 1.5,
+    borderColor: "#D6A43A",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.18)",
+  },
+  supportOutlineBtnText: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 18,
+    color: "#432104",
+  },
+  supportInfoCard: {
+    width: "100%",
+    marginTop: 14,
+    borderWidth: 1.5,
+    borderColor: "rgba(196, 164, 92, 0.35)",
+    borderRadius: 20,
+    padding: 18,
+    backgroundColor: "rgba(255,255,255,0.35)",
+  },
+  supportInfoTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 18,
+    color: "#432104",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  supportInfoText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 16,
+    lineHeight: 26,
+    color: "#432104",
+    textAlign: "center",
+  },
+  supportBenefitItem: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 16,
+    lineHeight: 26,
+    color: "#432104",
+    marginBottom: 6,
+  },
   completionFooter: { width: "100%", padding: 20 },
 });
 

@@ -284,7 +284,7 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                 >
                   <Text style={styles.viewFullMantraText}>
                     {mantraExpanded
-                      ? "Hide full mantra"
+                      ? "Tap to collapse "
                       : "Tap to view full mantra \u2192"}
                   </Text>
                 </TouchableOpacity>
@@ -500,7 +500,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif.bold,
     color: BROWN,
     textAlign: "center",
-    marginTop: -10,
+    marginTop: 20,
   },
   mainCard: {
     width: "100%",
@@ -624,11 +624,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
   },
   mantraDevanagariLarge: {
-    fontSize: 32,
+    fontSize: 18,
     fontFamily: Fonts.serif.bold,
     color: "#432104",
     textAlign: "center",
-    marginBottom: 8,
+    // marginBottom: 8,
   },
   mantraIAST: {
     fontSize: 20,
@@ -637,6 +637,7 @@ const styles = StyleSheet.create({
     color: "#432104",
     textAlign: "center",
     marginBottom: 5,
+    marginTop: -24,
   },
   mantraBrief: {
     fontSize: 16,

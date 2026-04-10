@@ -14,26 +14,27 @@
  *   INV-6: Flow instances are started/ended to track active flow lifecycle
  */
 
-import { Linking } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { cleanupFlowState, GUARDED_ACTIONS } from './cleanupFields';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Linking } from "react-native";
+import api from "../Networks/axios";
+import { navigate as rootNavigate } from "../Shared/Routes/NavigationService";
+import { cleanupFlowState, GUARDED_ACTIONS } from "./cleanupFields";
 import {
-  mitraTrackEvent,
-  mitraTrackCompletion,
   mitraGenerateCompanion,
-  mitraTriggerMantras,
   mitraHelpMeChoose,
   mitraPathEvolution,
   mitraPranaAcknowledge,
-} from './mitraApi';
-import api from '../Networks/axios';
-import { navigate as rootNavigate } from '../Shared/Routes/NavigationService';
+  mitraTrackCompletion,
+  mitraTrackEvent,
+  mitraTriggerMantras,
+} from "./mitraApi";
 
 // ---------------------------------------------------------------------------
 // Audio Rotation
 // ---------------------------------------------------------------------------
 
-const AUDIO_S3_BASE = 'https://kalpx-dev-website.s3.us-east-2.amazonaws.com/audio';
+const AUDIO_S3_BASE =
+  "https://kalpx-dev-website.s3.us-east-2.amazonaws.com/audio";
 
 /** OM audio library — add new files here as they're uploaded to S3 */
 const OM_AUDIO_LIBRARY = [
@@ -53,34 +54,49 @@ export const CALM_MUSIC_LIBRARY = [
 /**
  * Pick the next audio URL from a library using AsyncStorage rotation.
  */
-async function _rotateAudio(library: string[], storageKey: string): Promise<string> {
-  if (!library || library.length === 0) return '';
+async function _rotateAudio(
+  library: string[],
+  storageKey: string,
+): Promise<string> {
+  if (!library || library.length === 0) return "";
   let lastIdx = -1;
   try {
     const stored = await AsyncStorage.getItem(storageKey);
     lastIdx = stored ? parseInt(stored, 10) : -1;
-  } catch (_) { /* best effort */ }
+  } catch (_) {
+    /* best effort */
+  }
   const nextIdx = (lastIdx + 1) % library.length;
   try {
     await AsyncStorage.setItem(storageKey, String(nextIdx));
-  } catch (_) { /* best effort */ }
+  } catch (_) {
+    /* best effort */
+  }
   return library[nextIdx];
 }
 
 function _omTextForTrack(url: string) {
   if (url.includes("Hari Om")) return { label: "Hari Om", devanagari: "हरि ॐ" };
-  if (url.includes("Om Shanti")) return { label: "Om Shanti Shanti Shanti", devanagari: "ॐ शान्तिः शान्तिः शान्तिः" };
+  if (url.includes("Om Shanti"))
+    return {
+      label: "Om Shanti Shanti Shanti",
+      devanagari: "ॐ शान्तिः शान्तिः शान्तिः",
+    };
   return { label: "OM", devanagari: "ॐ" };
 }
 
 function _triggerNegativeLabel(feeling: string, step: number): string {
   if (step <= 2) return "Try another way";
-  const labels: Record<string, string> = { triggered: "I still feel triggered", agitated: "I still feel agitated", drained: "I still feel drained" };
+  const labels: Record<string, string> = {
+    triggered: "I still feel triggered",
+    agitated: "I still feel agitated",
+    drained: "I still feel drained",
+  };
   return labels[feeling] || "I still feel unsettled";
 }
 
 function _mitraTz(): string {
-  return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
+  return Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata";
 }
 
 // ---------------------------------------------------------------------------
@@ -127,27 +143,33 @@ let _actionInFlight = false;
 /**
  * Returns true if the given state/container belongs to the prana check-in flow.
  */
-function _isCheckinFlow(currentState: string | undefined, currentContainer: string | undefined): boolean {
+function _isCheckinFlow(
+  currentState: string | undefined,
+  currentContainer: string | undefined,
+): boolean {
   return (
-    currentContainer === 'prana_checkin' ||
-    currentState === 'quick_checkin' ||
-    currentState === 'quick_checkin_ack' ||
-    currentState === 'checkin_breath_reset'
+    currentContainer === "prana_checkin" ||
+    currentState === "quick_checkin" ||
+    currentState === "quick_checkin_ack" ||
+    currentState === "checkin_breath_reset"
   );
 }
 
 /**
  * Returns true if the given state/container belongs to the awareness trigger flow.
  */
-function _isTriggerFlow(currentState: string | undefined, currentContainer: string | undefined): boolean {
+function _isTriggerFlow(
+  currentState: string | undefined,
+  currentContainer: string | undefined,
+): boolean {
   return (
-    currentContainer === 'awareness_trigger' ||
-    currentState === 'trigger_reflection' ||
-    currentState === 'trigger_advice_reveal' ||
-    currentState === 'trigger_recheck' ||
-    currentState === 'post_trigger_mantra' ||
-    currentState === 'free_mantra_chanting' ||
-    currentState === 'post_trigger_reinforcement'
+    currentContainer === "awareness_trigger" ||
+    currentState === "trigger_reflection" ||
+    currentState === "trigger_advice_reveal" ||
+    currentState === "trigger_recheck" ||
+    currentState === "post_trigger_mantra" ||
+    currentState === "free_mantra_chanting" ||
+    currentState === "post_trigger_reinforcement"
   );
 }
 
@@ -168,11 +190,11 @@ function _cleanupOnReturnHome(
   const currentContainer = screenState._currentContainerId;
 
   if (_isCheckinFlow(currentState, currentContainer)) {
-    cleanupFlowState('checkin', setScreenValue);
+    cleanupFlowState("checkin", setScreenValue);
   } else if (_isTriggerFlow(currentState, currentContainer)) {
-    cleanupFlowState('trigger', setScreenValue);
+    cleanupFlowState("trigger", setScreenValue);
   } else {
-    cleanupFlowState('all', setScreenValue);
+    cleanupFlowState("all", setScreenValue);
   }
 
   if (endFlowInstance) {
@@ -208,30 +230,39 @@ interface InfoData {
  * Build a minimal info screen payload from master data.
  * This is a placeholder until dynamicContentEngine is ported to RN.
  */
-function _generateInfoScreenData(type: string, masterData: Record<string, any>): InfoData | null {
+function _generateInfoScreenData(
+  type: string,
+  masterData: Record<string, any>,
+): InfoData | null {
   if (!masterData) return null;
 
   const isAction =
-    type === 'practice' &&
-    (masterData.steps?.length > 0 || masterData.tags?.includes('action'));
+    type === "practice" &&
+    (masterData.steps?.length > 0 || masterData.tags?.includes("action"));
 
   return {
     type,
-    title: masterData.title || masterData.iast || '',
-    subtitle: masterData.subtitle || masterData.devanagari || masterData.hindi || '',
-    meaning: masterData.meaning || masterData.line || '',
-    essence: masterData.essence || masterData.insight || masterData.summary || '',
+    title: masterData.title || masterData.iast || "",
+    subtitle:
+      masterData.subtitle || masterData.devanagari || masterData.hindi || "",
+    meaning: masterData.meaning || masterData.line || "",
+    essence:
+      masterData.essence || masterData.insight || masterData.summary || "",
     benefits: masterData.benefits || [],
     is_action: isAction,
     steps: masterData.steps || [],
-    summary: masterData.summary || masterData.description || '',
-    insight: masterData.insight || '',
-    deity: masterData.deity || '',
-    tradition: masterData.tradition || '',
-    duration: masterData.duration || '',
-    iast: masterData.iast || '',
-    devanagari: masterData.devanagari || masterData.hindi || '',
-    full_mantra: masterData.full_mantra || masterData.subtitle || masterData.devanagari || '',
+    summary: masterData.summary || masterData.description || "",
+    insight: masterData.insight || "",
+    deity: masterData.deity || "",
+    tradition: masterData.tradition || "",
+    duration: masterData.duration || "",
+    iast: masterData.iast || "",
+    devanagari: masterData.devanagari || masterData.hindi || "",
+    full_mantra:
+      masterData.full_mantra ||
+      masterData.subtitle ||
+      masterData.devanagari ||
+      "",
     how_to_live: masterData.how_to_live || masterData.steps || [],
   };
 }
@@ -240,9 +271,11 @@ function _generateInfoScreenData(type: string, masterData: Record<string, any>):
 // Helper: resolve destination string from target
 // ---------------------------------------------------------------------------
 
-function _resolveDest(target: string | ActionTarget | undefined): string | undefined {
+function _resolveDest(
+  target: string | ActionTarget | undefined,
+): string | undefined {
   if (!target) return undefined;
-  return typeof target === 'string' ? target : target.state_id;
+  return typeof target === "string" ? target : target.state_id;
 }
 
 // ---------------------------------------------------------------------------
@@ -250,14 +283,14 @@ function _resolveDest(target: string | ActionTarget | undefined): string | undef
 // ---------------------------------------------------------------------------
 
 const SIGNIFICANT_ACTIONS = new Set([
-  'navigate',
-  'submit',
-  'seal_day',
-  'start_new_journey',
-  'record_pause',
-  'select_trigger_mantra',
-  'view_info',
-  'info_start_click',
+  "navigate",
+  "submit",
+  "seal_day",
+  "start_new_journey",
+  "record_pause",
+  "select_trigger_mantra",
+  "view_info",
+  "info_start_click",
 ]);
 
 /**
@@ -282,12 +315,14 @@ function _logJourneyAction(action: Action, context: ActionContext): void {
   }
 
   let description = type;
-  if (type === 'navigate' && target) {
+  if (type === "navigate" && target) {
     description = `Navigated to ${_resolveDest(target)}`;
-  } else if (type === 'submit' && payload) {
-    if (payload.practiceId) description = `Completed Practice: ${payload.practiceId}`;
-    else if (payload.prana_type) description = `Checked-in Prana: ${payload.prana_type}`;
-  } else if (type === 'view_info' && payload) {
+  } else if (type === "submit" && payload) {
+    if (payload.practiceId)
+      description = `Completed Practice: ${payload.practiceId}`;
+    else if (payload.prana_type)
+      description = `Checked-in Prana: ${payload.prana_type}`;
+  } else if (type === "view_info" && payload) {
     description = `Viewed Info for: ${payload.type}`;
   }
 
@@ -299,7 +334,7 @@ function _logJourneyAction(action: Action, context: ActionContext): void {
     timestamp: new Date().toISOString(),
   });
 
-  setScreenValue(journeyLog, 'journey_log');
+  setScreenValue(journeyLog, "journey_log");
 }
 
 // ---------------------------------------------------------------------------
@@ -312,18 +347,30 @@ function _logJourneyAction(action: Action, context: ActionContext): void {
  * @param action  — The action descriptor (type + target + payload).
  * @param context — Store bindings injected by the caller.
  */
-export async function executeAction(action: Action, context: ActionContext): Promise<void> {
+export async function executeAction(
+  action: Action,
+  context: ActionContext,
+): Promise<void> {
   const { type, target, payload } = action;
-  const { loadScreen, goBack, setScreenValue, screenState, startFlowInstance, endFlowInstance } = context;
+  const {
+    loadScreen,
+    goBack,
+    setScreenValue,
+    screenState,
+    startFlowInstance,
+    endFlowInstance,
+  } = context;
 
   // ── Duplicate-submission guard ──
   if (GUARDED_ACTIONS.has(type) && _actionInFlight) {
-    console.log(`[GUARD] Action "${type}" blocked — previous action still in flight`);
+    console.log(
+      `[GUARD] Action "${type}" blocked — previous action still in flight`,
+    );
     return;
   }
   if (GUARDED_ACTIONS.has(type)) {
     _actionInFlight = true;
-    setScreenValue(true, '_isSubmitting');
+    setScreenValue(true, "_isSubmitting");
   }
 
   try {
@@ -336,7 +383,7 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // ================================================================
       // SET_STATE — simple state setter (used by on_complete to set flags)
       // ================================================================
-      case 'set_state': {
+      case "set_state": {
         const { field, value } = action as any;
         if (field) setScreenValue(value, field);
         _actionInFlight = false;
@@ -346,141 +393,198 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // ================================================================
       // NAVIGATE — the most common action
       // ================================================================
-      case 'navigate': {
+      case "navigate": {
         if (!target) break;
 
         const dest = _resolveDest(target);
         const currentContainer = action.currentScreen?.container_id;
-        const currentState = action.currentScreen?.id || action.currentScreen?.state_id;
+        const currentState =
+          action.currentScreen?.id || action.currentScreen?.state_id;
 
         // INV-6: Start flow instance when entering a runner
         if (startFlowInstance) {
-          if (dest === 'mantra_runner' || dest === 'mantra_prep' || dest === 'mantra_rep_selection') {
+          if (
+            dest === "mantra_runner" ||
+            dest === "mantra_prep" ||
+            dest === "mantra_rep_selection"
+          ) {
             const isSupport =
               screenState._active_support_item ||
-              currentContainer === 'awareness_trigger' ||
-              currentContainer === 'prana_checkin';
-            startFlowInstance(isSupport ? 'additional' : 'core_mantra');
-          } else if (dest === 'sankalp_embody') {
-            startFlowInstance('core_sankalp');
-          } else if (dest === 'practice_step_runner') {
+              currentContainer === "awareness_trigger" ||
+              currentContainer === "prana_checkin";
+            startFlowInstance(isSupport ? "additional" : "core_mantra");
+          } else if (dest === "sankalp_embody") {
+            startFlowInstance("core_sankalp");
+          } else if (dest === "practice_step_runner") {
             const isSupport =
               screenState._active_support_item ||
-              currentContainer === 'awareness_trigger' ||
-              currentContainer === 'prana_checkin';
-            startFlowInstance(isSupport ? 'support' : 'core_practice');
-          } else if (dest === 'quick_practice_step_runner') {
-            startFlowInstance('support');
-          } else if (dest === 'post_trigger_mantra' || dest === 'free_mantra_chanting') {
-            startFlowInstance('trigger');
-          } else if (dest === 'anchor_timer') {
-            startFlowInstance('core_practice');
+              currentContainer === "awareness_trigger" ||
+              currentContainer === "prana_checkin";
+            startFlowInstance(isSupport ? "support" : "core_practice");
+          } else if (dest === "quick_practice_step_runner") {
+            startFlowInstance("support");
+          } else if (
+            dest === "post_trigger_mantra" ||
+            dest === "free_mantra_chanting"
+          ) {
+            startFlowInstance("trigger");
+          } else if (dest === "anchor_timer") {
+            startFlowInstance("core_practice");
           }
         }
 
         // Runner data seeding for practice/quick practice
-        if (dest === 'practice_step_runner' || dest === 'quick_practice_step_runner') {
+        if (
+          dest === "practice_step_runner" ||
+          dest === "quick_practice_step_runner"
+        ) {
           const lastViewed = screenState._last_viewed_item;
-          if (lastViewed && ((dest as string) === 'quick_practice_step_runner' || (dest as string) === 'post_trigger_mantra')) {
+          if (
+            lastViewed &&
+            ((dest as string) === "quick_practice_step_runner" ||
+              (dest as string) === "post_trigger_mantra")
+          ) {
             const itemId = lastViewed.item_id || lastViewed.id;
             setScreenValue(
-              { itemId, itemType: (dest as string) === 'post_trigger_mantra' ? 'mantra' : (lastViewed.item_type || 'practice'), source: 'support' },
-              '_active_support_item',
+              {
+                itemId,
+                itemType:
+                  (dest as string) === "post_trigger_mantra"
+                    ? "mantra"
+                    : lastViewed.item_type || "practice",
+                source: "support",
+              },
+              "_active_support_item",
             );
-            setScreenValue(itemId, 'active_session_item_id');
+            setScreenValue(itemId, "active_session_item_id");
           }
         }
 
         // Mantra support persistence
-        if (dest === 'post_trigger_mantra') {
+        if (dest === "post_trigger_mantra") {
           const lastViewed = screenState._last_viewed_item;
           if (lastViewed) {
             setScreenValue(
-              { itemId: lastViewed.item_id || lastViewed.id, itemType: 'mantra', source: 'support' },
-              '_active_support_item',
+              {
+                itemId: lastViewed.item_id || lastViewed.id,
+                itemType: "mantra",
+                source: "support",
+              },
+              "_active_support_item",
             );
           }
         }
 
         // Track trigger flow milestones
-        if (dest === 'trigger_reflection') {
-          const eventName = currentState === 'breath_reset' ? 'breath_reset_completed' : 'sensory_grounding_completed';
+        if (dest === "trigger_reflection") {
+          const eventName =
+            currentState === "breath_reset"
+              ? "breath_reset_completed"
+              : "sensory_grounding_completed";
           await mitraTrackEvent(eventName, {
             journeyId: screenState.journey_id,
             dayNumber: screenState.day_number || 1,
-            meta: { duration_seconds: currentState === 'breath_reset' ? 45 : 60 },
+            meta: {
+              duration_seconds: currentState === "breath_reset" ? 45 : 60,
+            },
           });
         }
 
         // Automatic completion tracking when navigating from runner to complete screen
-        const destStr = dest || '';
-        const destContainer = typeof target === 'string' ? '' : ((target as ActionTarget).container_id || '');
+        const destStr = dest || "";
+        const destContainer =
+          typeof target === "string"
+            ? ""
+            : (target as ActionTarget).container_id || "";
         const isRunner =
-          currentState?.includes('runner') ||
-          currentState?.includes('post_trigger_mantra') ||
-          currentState?.includes('embody') ||
-          currentState?.includes('selection') ||
-          currentState === 'free_mantra_chanting';
+          currentState?.includes("runner") ||
+          currentState?.includes("post_trigger_mantra") ||
+          currentState?.includes("embody") ||
+          currentState?.includes("selection") ||
+          currentState === "free_mantra_chanting";
         const isCompleteScreen =
-          destStr.includes('complete') ||
-          destStr.includes('confirm') ||
-          destStr.includes('dashboard') ||
-          destContainer.includes('dashboard');
+          destStr.includes("complete") ||
+          destStr.includes("confirm") ||
+          destStr.includes("dashboard") ||
+          destContainer.includes("dashboard");
         const activeSupport = screenState._active_support_item;
 
         if (isRunner && isCompleteScreen) {
           let itemId: string | null = null;
           let itemType: string | null = null;
-          let source = 'core';
+          let source = "core";
 
           if (activeSupport) {
             itemId = activeSupport.itemId;
             itemType = activeSupport.itemType;
-            source = 'support';
+            source = "support";
           } else {
             const isSupportFlow =
-              currentContainer === 'awareness_trigger' ||
-              currentContainer === 'prana_checkin' ||
-              currentState === 'breath_reset' ||
-              currentState === 'sensory_grounding' ||
-              currentState === 'post_trigger_mantra' ||
-              currentState === 'quick_practice_step_runner';
-            source = isSupportFlow ? 'support' : 'core';
+              currentContainer === "awareness_trigger" ||
+              currentContainer === "prana_checkin" ||
+              currentState === "breath_reset" ||
+              currentState === "sensory_grounding" ||
+              currentState === "post_trigger_mantra" ||
+              currentState === "quick_practice_step_runner";
+            source = isSupportFlow ? "support" : "core";
 
-            if (currentState === 'breath_reset') {
-              itemId = 'practice.breath_reset';
-              itemType = 'practice';
-            } else if (currentState === 'sensory_grounding') {
-              itemId = 'practice.sensory_grounding';
-              itemType = 'practice';
-            } else if (currentState === 'quick_practice_step_runner') {
-              itemId = 'practice_anchor';
-              itemType = 'practice';
-              source = 'support';
-            } else if (currentState?.includes('mantra') || currentState === 'post_trigger_mantra') {
-              itemId = screenState.master_mantra?.id || screenState.trigger_mantra_id || 'practice_chant';
-              itemType = 'mantra';
-            } else if (currentState?.includes('sankalp')) {
-              itemId = screenState.master_sankalp?.id || 'practice_embody';
-              itemType = 'sankalp';
-            } else if (currentState?.includes('practice')) {
-              itemId = screenState.master_practice?.id || screenState.selected_practice_id || 'practice_act';
-              itemType = 'practice';
+            if (currentState === "breath_reset") {
+              itemId = "practice.breath_reset";
+              itemType = "practice";
+            } else if (currentState === "sensory_grounding") {
+              itemId = "practice.sensory_grounding";
+              itemType = "practice";
+            } else if (currentState === "quick_practice_step_runner") {
+              itemId = "practice_anchor";
+              itemType = "practice";
+              source = "support";
+            } else if (
+              currentState?.includes("mantra") ||
+              currentState === "post_trigger_mantra"
+            ) {
+              itemId =
+                screenState.master_mantra?.id ||
+                screenState.trigger_mantra_id ||
+                "practice_chant";
+              itemType = "mantra";
+            } else if (currentState?.includes("sankalp")) {
+              itemId = screenState.master_sankalp?.id || "practice_embody";
+              itemType = "sankalp";
+            } else if (currentState?.includes("practice")) {
+              itemId =
+                screenState.master_practice?.id ||
+                screenState.selected_practice_id ||
+                "practice_act";
+              itemType = "practice";
             }
           }
 
           if (itemId && itemType) {
             const meta: Record<string, any> = {};
-            if (source === 'support') {
-              const durRaw = screenState.current_practice_duration || screenState.master_practice?.duration || '2 minutes';
-              meta.duration_seconds = typeof durRaw === 'string' && durRaw.includes('minutes') ? parseInt(durRaw, 10) * 60 : 120;
+            if (source === "support") {
+              const durRaw =
+                screenState.current_practice_duration ||
+                screenState.master_practice?.duration ||
+                "2 minutes";
+              meta.duration_seconds =
+                typeof durRaw === "string" && durRaw.includes("minutes")
+                  ? parseInt(durRaw, 10) * 60
+                  : 120;
             } else {
-              if (itemType === 'mantra') meta.mantra_text = screenState.mantra_text;
-              if (itemType === 'sankalp') meta.sankalp_text = screenState.sankalp_text;
-              if (itemType === 'practice') {
+              if (itemType === "mantra")
+                meta.mantra_text = screenState.mantra_text;
+              if (itemType === "sankalp")
+                meta.sankalp_text = screenState.sankalp_text;
+              if (itemType === "practice") {
                 meta.practice_title = screenState.practice_title;
-                const durRaw = screenState.current_practice_duration || screenState.master_practice?.duration || '2 minutes';
-                meta.duration_seconds = typeof durRaw === 'string' && durRaw.includes('minutes') ? parseInt(durRaw, 10) * 60 : 120;
+                const durRaw =
+                  screenState.current_practice_duration ||
+                  screenState.master_practice?.duration ||
+                  "2 minutes";
+                meta.duration_seconds =
+                  typeof durRaw === "string" && durRaw.includes("minutes")
+                    ? parseInt(durRaw, 10) * 60
+                    : 120;
               }
             }
 
@@ -493,17 +597,17 @@ export async function executeAction(action: Action, context: ActionContext): Pro
               meta,
             });
 
-            setScreenValue(true, '_completion_tracked_this_session');
+            setScreenValue(true, "_completion_tracked_this_session");
             setScreenValue(true, `_tracked_${itemId}`);
 
             if (activeSupport) {
-              setScreenValue(null, '_active_support_item');
+              setScreenValue(null, "_active_support_item");
             }
           }
         }
 
         // INV-1: Clear flow-local state when returning to Mitra Home
-        if (dest === 'day_active') {
+        if (dest === "day_active") {
           _cleanupOnReturnHome(setScreenValue, screenState, endFlowInstance);
         }
 
@@ -514,7 +618,7 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // ================================================================
       // BACK — simple history pop
       // ================================================================
-      case 'back': {
+      case "back": {
         goBack();
         break;
       }
@@ -522,12 +626,12 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // ================================================================
       // INFO_BACK — context-aware back from info_reveal
       // ================================================================
-      case 'info_back': {
+      case "info_back": {
         const backTarget = screenState.info_back_target || {
-          container_id: 'companion_dashboard',
-          state_id: 'day_active',
+          container_id: "companion_dashboard",
+          state_id: "day_active",
         };
-        cleanupFlowState('all', setScreenValue);
+        cleanupFlowState("all", setScreenValue);
         loadScreen(backTarget);
         break;
       }
@@ -535,19 +639,19 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // ================================================================
       // SUBMIT — completion tracking + navigation
       // ================================================================
-      case 'submit': {
+      case "submit": {
         const { itemId } = payload || {}; // note: target is already destructured at top of executeAction
         let finalTarget = target;
 
         // Support flow cleanup: clear scoped trigger mantra on OM / support sessions
         if (
-          payload?.itemId === 'OM' ||
-          payload?.practiceId === 'OM' ||
-          payload?.source === 'support' ||
-          screenState._active_support_item?.source === 'support'
+          payload?.itemId === "OM" ||
+          payload?.practiceId === "OM" ||
+          payload?.source === "support" ||
+          screenState._active_support_item?.source === "support"
         ) {
-          setScreenValue(null, 'trigger_mantra_text');
-          setScreenValue(null, 'trigger_mantra_devanagari');
+          setScreenValue(null, "trigger_mantra_text");
+          setScreenValue(null, "trigger_mantra_devanagari");
         }
 
         if (payload?.practiceId && payload?.completed) {
@@ -562,40 +666,45 @@ export async function executeAction(action: Action, context: ActionContext): Pro
           setScreenValue(true, itemId);
 
           const ITEM_TYPE_MAP: Record<string, string> = {
-            practice_chant: 'mantra',
-            practice_embody: 'sankalp',
-            practice_act: 'practice',
-            practice_anchor: 'practice',
-            OM: 'mantra',
+            practice_chant: "mantra",
+            practice_embody: "sankalp",
+            practice_act: "practice",
+            practice_anchor: "practice",
+            OM: "mantra",
           };
 
           const activeSupport = screenState._active_support_item;
           const useSupportItem =
             activeSupport &&
-            (itemId === 'practice_act' || itemId === 'OM' || itemId === activeSupport.itemId);
+            (itemId === "practice_act" ||
+              itemId === "OM" ||
+              itemId === activeSupport.itemId);
 
           const itemType =
-            payload.itemType || (useSupportItem ? activeSupport.itemType : ITEM_TYPE_MAP[itemId]) || 'practice';
-          const source = payload.source || (useSupportItem ? activeSupport.source : 'core');
+            payload.itemType ||
+            (useSupportItem ? activeSupport.itemType : ITEM_TYPE_MAP[itemId]) ||
+            "practice";
+          const source =
+            payload.source || (useSupportItem ? activeSupport.source : "core");
 
           // Resolve authoritative Mitra item ID (priority chain)
           let finalItemId: string;
           if (useSupportItem) {
             finalItemId = activeSupport.itemId;
-          } else if (itemType === 'mantra') {
+          } else if (itemType === "mantra") {
             finalItemId =
               screenState.cycle_mantra_id ||
               screenState.mantra_id ||
               screenState.master_mantra?.id ||
               screenState.trigger_mantra_id ||
               itemId;
-          } else if (itemType === 'sankalp') {
+          } else if (itemType === "sankalp") {
             finalItemId =
               screenState.cycle_sankalp_id ||
               screenState.sankalp_id ||
               screenState.master_sankalp?.id ||
               itemId;
-          } else if (itemType === 'practice') {
+          } else if (itemType === "practice") {
             finalItemId =
               screenState.cycle_practice_id ||
               screenState.practice_id ||
@@ -608,23 +717,35 @@ export async function executeAction(action: Action, context: ActionContext): Pro
 
           // Build rich meta per v3.5 spec
           const meta: Record<string, any> = { ...(payload.meta || {}) };
-          if (source === 'support') {
+          if (source === "support") {
             meta.duration_seconds = Math.round(
-              screenState.chant_duration || screenState.current_practice_duration || 120,
+              screenState.chant_duration ||
+                screenState.current_practice_duration ||
+                120,
             );
           } else {
-            if (itemType === 'mantra') {
-              meta.rep_count = screenState.reps_total || screenState.mantra_progress_reps || 0;
-              meta.duration_seconds = Math.round(screenState.chant_duration || 0);
-              if (screenState.mantra_text) meta.mantra_text = screenState.mantra_text;
-            } else if (itemType === 'sankalp') {
+            if (itemType === "mantra") {
+              meta.rep_count =
+                screenState.reps_total || screenState.mantra_progress_reps || 0;
               meta.duration_seconds = Math.round(
-                screenState.chant_duration || screenState.current_practice_duration || 60,
+                screenState.chant_duration || 0,
               );
-              if (screenState.sankalp_text) meta.sankalp_text = screenState.sankalp_text;
-            } else if (itemType === 'practice') {
-              meta.duration_seconds = Math.round(screenState.current_practice_duration || 120);
-              if (screenState.practice_title) meta.practice_title = screenState.practice_title;
+              if (screenState.mantra_text)
+                meta.mantra_text = screenState.mantra_text;
+            } else if (itemType === "sankalp") {
+              meta.duration_seconds = Math.round(
+                screenState.chant_duration ||
+                  screenState.current_practice_duration ||
+                  60,
+              );
+              if (screenState.sankalp_text)
+                meta.sankalp_text = screenState.sankalp_text;
+            } else if (itemType === "practice") {
+              meta.duration_seconds = Math.round(
+                screenState.current_practice_duration || 120,
+              );
+              if (screenState.practice_title)
+                meta.practice_title = screenState.practice_title;
             }
           }
 
@@ -638,55 +759,81 @@ export async function executeAction(action: Action, context: ActionContext): Pro
           });
 
           if (useSupportItem) {
-            setScreenValue(null, '_active_support_item');
+            setScreenValue(null, "_active_support_item");
           }
         } else if (payload?.prana_type) {
           // Prana check-in — start checkin flow instance
-          if (startFlowInstance) startFlowInstance('checkin');
+          if (startFlowInstance) startFlowInstance("checkin");
           console.log(`[CHECKIN] Processing prana type: ${payload.prana_type}`);
 
           // Determine navigation target (Override target if agitated/drained)
-          finalTarget = (payload.prana_type === 'agitated' || payload.prana_type === 'drained')
-            ? { container_id: 'practice_runner', state_id: 'checkin_breath_reset' }
-            : (target || { container_id: 'awareness_trigger', state_id: 'quick_checkin_ack' });
+          finalTarget =
+            payload.prana_type === "agitated" ||
+            payload.prana_type === "drained"
+              ? {
+                  container_id: "practice_runner",
+                  state_id: "checkin_breath_reset",
+                }
+              : target || {
+                  container_id: "awareness_trigger",
+                  state_id: "quick_checkin_ack",
+                };
 
           const counts = { ...(screenState.prana_checkin_counts || {}) };
           counts[payload.prana_type] = (counts[payload.prana_type] || 0) + 1;
-          setScreenValue(counts, 'prana_checkin_counts');
-          setScreenValue((screenState.prana_checkin_total || 0) + 1, 'prana_checkin_total');
+          setScreenValue(counts, "prana_checkin_counts");
+          setScreenValue(
+            (screenState.prana_checkin_total || 0) + 1,
+            "prana_checkin_total",
+          );
 
           // Call Prana Acknowledge API for all check-in feedback (as requested)
           const pranaAckRes = await mitraPranaAcknowledge({
             feeling: payload.prana_type,
-            focus: screenState['scan_focus'] || screenState['active_focus'] || 'peacecalm',
-            subFocus: screenState['prana_baseline_selection'] || '',
-            depth: screenState['routine_depth'] || screenState['routine_setup'] || 'standard',
-            round: 2, 
-            locale: screenState['locale'] || 'en',
+            focus:
+              screenState["scan_focus"] ||
+              screenState["active_focus"] ||
+              "peacecalm",
+            subFocus: screenState["prana_baseline_selection"] || "",
+            depth:
+              screenState["routine_depth"] ||
+              screenState["routine_setup"] ||
+              "standard",
+            round: 2,
+            locale: screenState["locale"] || "en",
             tz: _mitraTz(),
           });
           if (pranaAckRes?.insight) {
-            setScreenValue(pranaAckRes.insight, 'prana_ack_insight');
+            setScreenValue(pranaAckRes.insight, "prana_ack_insight");
           }
 
           // Select rotated OM audio for check-in breath reset
-          if (payload.prana_type === 'agitated' || payload.prana_type === 'drained') {
-            const checkinOmAudio = await _rotateAudio(OM_AUDIO_LIBRARY, '_kalpx_om_audio_idx');
-            setScreenValue(checkinOmAudio, '_selected_om_audio');
+          if (
+            payload.prana_type === "agitated" ||
+            payload.prana_type === "drained"
+          ) {
+            const checkinOmAudio = await _rotateAudio(
+              OM_AUDIO_LIBRARY,
+              "_kalpx_om_audio_idx",
+            );
+            setScreenValue(checkinOmAudio, "_selected_om_audio");
             const { label, devanagari } = _omTextForTrack(checkinOmAudio);
-            setScreenValue(label, 'checkin_mantra_text');
-            setScreenValue(devanagari, 'checkin_mantra_devanagari');
+            setScreenValue(label, "checkin_mantra_text");
+            setScreenValue(devanagari, "checkin_mantra_devanagari");
             // Set trigger state for support flow
-            setScreenValue(payload.prana_type, 'trigger_feeling');
-            setScreenValue(1, 'trigger_step');
-            setScreenValue(2, 'trigger_cycle_count');
+            setScreenValue(payload.prana_type, "trigger_feeling");
+            setScreenValue(1, "trigger_step");
+            setScreenValue(2, "trigger_cycle_count");
             // Clear stale trigger state
-            setScreenValue(null, 'trigger_mantra_text');
-            setScreenValue(null, 'trigger_mantra_devanagari');
+            setScreenValue(null, "trigger_mantra_text");
+            setScreenValue(null, "trigger_mantra_devanagari");
           }
 
           // checkin_ack copy per prana type
-          const checkinAckCopy: Record<string, { headline: string; body: string; accent?: string }> = {
+          const checkinAckCopy: Record<
+            string,
+            { headline: string; body: string; accent?: string }
+          > = {
             balanced: {
               headline: "You are exactly where you need to be.",
               body: "There is a quiet steadiness within you.\nStay here. Let it deepen.",
@@ -706,12 +853,13 @@ export async function executeAction(action: Action, context: ActionContext): Pro
               body: "When the body is heavy, the mind can still be clear.\nBe gentle with yourself.",
             },
           };
-          const ackCopy = checkinAckCopy[payload.prana_type] || checkinAckCopy.balanced!;
-          setScreenValue(ackCopy.headline, 'checkin_ack_headline');
-          setScreenValue(ackCopy.body, 'checkin_ack_body');
-          setScreenValue(ackCopy.accent || '', 'checkin_ack_accent');
+          const ackCopy =
+            checkinAckCopy[payload.prana_type] || checkinAckCopy.balanced!;
+          setScreenValue(ackCopy.headline, "checkin_ack_headline");
+          setScreenValue(ackCopy.body, "checkin_ack_body");
+          setScreenValue(ackCopy.accent || "", "checkin_ack_accent");
 
-          await mitraTrackEvent('checkin_acknowledged', {
+          await mitraTrackEvent("checkin_acknowledged", {
             journeyId: screenState.journey_id,
             dayNumber: screenState.day_number || 1,
             meta: { prana_type: payload.prana_type },
@@ -728,9 +876,9 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // ================================================================
       // VIEW_INFO — build info screen data and navigate to info_reveal
       // ================================================================
-      case 'view_info': {
+      case "view_info": {
         if (!payload) break;
-        const infoType = (payload.type || '').toLowerCase();
+        const infoType = (payload.type || "").toLowerCase();
         const { manualData, is_locked } = payload;
         const masterData = manualData || screenState[`master_${infoType}`];
         if (!masterData) break;
@@ -739,10 +887,10 @@ export async function executeAction(action: Action, context: ActionContext): Pro
         if (!infoData) break;
 
         const isSupport =
-          manualData?.source === 'support' ||
+          manualData?.source === "support" ||
           payload.is_trigger ||
-          action.currentScreen?.container_id === 'awareness_trigger' ||
-          action.currentScreen?.container_id === 'prana_checkin';
+          action.currentScreen?.container_id === "awareness_trigger" ||
+          action.currentScreen?.container_id === "prana_checkin";
 
         // Persist raw item data for runner
         setScreenValue(
@@ -750,151 +898,213 @@ export async function executeAction(action: Action, context: ActionContext): Pro
             id: manualData?.id || manualData?.item_id || masterData.id,
             item_id: manualData?.item_id || manualData?.id || masterData.id,
             item_type: manualData?.item_type || infoType,
-            source: manualData?.source || (isSupport ? 'support' : 'core'),
+            source: manualData?.source || (isSupport ? "support" : "core"),
           },
-          '_last_viewed_item',
+          "_last_viewed_item",
         );
 
-        setScreenValue(infoData, 'info');
+        setScreenValue(infoData, "info");
 
         // Start label
         const startLabelMap: Record<string, string> = {
-          practice: infoData.is_action ? 'Practice' : 'I Will Do This',
-          mantra: 'Chant',
-          sankalp: 'Embody',
-          sankalpa: 'Embody',
+          practice: infoData.is_action ? "Practice" : "I Will Do This",
+          mantra: "Chant",
+          sankalp: "Embody",
+          sankalpa: "Embody",
         };
-        setScreenValue(payload.start_label || startLabelMap[infoType] || 'Begin', 'info_start_label');
+        setScreenValue(
+          payload.start_label || startLabelMap[infoType] || "Begin",
+          "info_start_label",
+        );
 
         // Back label
         const currentContainerId = action.currentScreen?.container_id;
         const backLabel =
-          payload.back_label || (currentContainerId === 'companion_dashboard' ? 'Return to Mitra Home' : 'Back');
-        setScreenValue(backLabel, 'info_back_label');
+          payload.back_label ||
+          (currentContainerId === "companion_dashboard"
+            ? "Return to Mitra Home"
+            : "Back");
+        setScreenValue(backLabel, "info_back_label");
 
         // Dynamic back target
-        const currentStateId = action.currentScreen?.state_id || action.currentScreen?.id;
-        if (currentContainerId === 'companion_dashboard' || currentStateId === 'day_active') {
-          setScreenValue({ container_id: 'companion_dashboard', state_id: 'day_active' }, 'info_back_target');
+        const currentStateId =
+          action.currentScreen?.state_id || action.currentScreen?.id;
+        if (
+          currentContainerId === "companion_dashboard" ||
+          currentStateId === "day_active"
+        ) {
+          setScreenValue(
+            { container_id: "companion_dashboard", state_id: "day_active" },
+            "info_back_target",
+          );
         } else if (
-          currentStateId === 'companion_analysis' ||
-          currentContainerId === 'cycle_transitions' ||
-          currentContainerId === 'insight_summary'
+          currentStateId === "companion_analysis" ||
+          currentContainerId === "cycle_transitions" ||
+          currentContainerId === "insight_summary"
         ) {
           setScreenValue(
             { container_id: currentContainerId, state_id: currentStateId },
-            'info_back_target',
+            "info_back_target",
           );
         } else {
-          setScreenValue({ container_id: 'companion_dashboard', state_id: 'day_active' }, 'info_back_target');
+          setScreenValue(
+            { container_id: "companion_dashboard", state_id: "day_active" },
+            "info_back_target",
+          );
         }
 
-        setScreenValue(!!is_locked, 'info_is_locked');
-        setScreenValue(!(is_locked || payload.read_only), 'show_info_start');
-        setScreenValue(infoType === 'mantra', 'info_is_mantra');
-        setScreenValue(infoType === 'sankalp' || infoType === 'sankalpa', 'info_is_sankalp');
-        setScreenValue(infoType === 'practice', 'info_is_practice');
+        setScreenValue(!!is_locked, "info_is_locked");
+        setScreenValue(!(is_locked || payload.read_only), "show_info_start");
+        setScreenValue(infoType === "mantra", "info_is_mantra");
+        setScreenValue(
+          infoType === "sankalp" || infoType === "sankalpa",
+          "info_is_sankalp",
+        );
+        setScreenValue(infoType === "practice", "info_is_practice");
 
         // Support flow handling
         if (isSupport) {
-          const isPractice = (manualData?.item_type || infoType) === 'practice';
-          const stateId = isPractice ? 'quick_practice_step_runner' : 'post_trigger_mantra';
+          const isPractice = (manualData?.item_type || infoType) === "practice";
+          const stateId = isPractice
+            ? "quick_practice_step_runner"
+            : "post_trigger_mantra";
 
           if (!isPractice) {
-            const mText = manualData?.iast || manualData?.title || masterData.iast || masterData.title;
+            const mText =
+              manualData?.iast ||
+              manualData?.title ||
+              masterData.iast ||
+              masterData.title;
             const mDev = manualData?.devanagari || masterData.devanagari;
-            if (mText) setScreenValue(mText, 'trigger_mantra_text');
-            if (mDev) setScreenValue(mDev, 'trigger_mantra_devanagari');
+            if (mText) setScreenValue(mText, "trigger_mantra_text");
+            if (mDev) setScreenValue(mDev, "trigger_mantra_devanagari");
           }
 
           const baseAction = payload.start_action || {
-            type: 'navigate',
-            target: { container_id: 'practice_runner', state_id: stateId },
+            type: "navigate",
+            target: { container_id: "practice_runner", state_id: stateId },
           };
-          setScreenValue(baseAction, 'info_start_action');
-          setScreenValue(masterData, `master_${isPractice ? 'practice' : 'mantra'}`);
-          setScreenValue(true, 'show_info_start');
+          setScreenValue(baseAction, "info_start_action");
+          setScreenValue(
+            masterData,
+            `master_${isPractice ? "practice" : "mantra"}`,
+          );
+          setScreenValue(true, "show_info_start");
         }
 
         // Practice-specific: set step state
-        if (infoType === 'practice') {
+        if (infoType === "practice") {
           if (!payload.is_trigger && !payload.start_action) {
             const defaultStartAction = infoData.is_action
-              ? { type: 'navigate', target: { container_id: 'practice_runner', state_id: 'practice_step_runner' } }
+              ? {
+                  type: "navigate",
+                  target: {
+                    container_id: "practice_runner",
+                    state_id: "practice_step_runner",
+                  },
+                }
               : {
-                  type: 'submit',
-                  payload: { practiceId: 'practice_act', completed: true },
-                  target: { container_id: 'companion_dashboard', state_id: 'day_active' },
+                  type: "submit",
+                  payload: { practiceId: "practice_act", completed: true },
+                  target: {
+                    container_id: "companion_dashboard",
+                    state_id: "day_active",
+                  },
                 };
-            setScreenValue(is_locked || payload.read_only ? null : defaultStartAction, 'info_start_action');
+            setScreenValue(
+              is_locked || payload.read_only ? null : defaultStartAction,
+              "info_start_action",
+            );
           } else if (payload.start_action) {
-            setScreenValue(is_locked || payload.read_only ? null : payload.start_action, 'info_start_action');
+            setScreenValue(
+              is_locked || payload.read_only ? null : payload.start_action,
+              "info_start_action",
+            );
           }
 
-          setScreenValue(0, 'current_practice_step');
-          setScreenValue(infoData.steps.length > 0 ? infoData.steps[0] : '', 'current_step_text');
-          setScreenValue(infoData.steps.length > 1, 'show_next_button');
-          setScreenValue(infoData.steps.length === 1, 'show_complete_button');
+          setScreenValue(0, "current_practice_step");
+          setScreenValue(
+            infoData.steps.length > 0 ? infoData.steps[0] : "",
+            "current_step_text",
+          );
+          setScreenValue(infoData.steps.length > 1, "show_next_button");
+          setScreenValue(infoData.steps.length === 1, "show_complete_button");
         } else if (!payload.is_trigger) {
-          setScreenValue('', 'info_start_help_text');
+          setScreenValue("", "info_start_help_text");
 
           let defaultStartAction = payload.start_action || null;
           if (!payload.start_action) {
             const typeKey = infoType.toLowerCase();
-            if (typeKey === 'mantra') {
+            if (typeKey === "mantra") {
               defaultStartAction = {
-                type: 'navigate',
-                target: { container_id: 'practice_runner', state_id: 'mantra_rep_selection' },
+                type: "navigate",
+                target: {
+                  container_id: "practice_runner",
+                  state_id: "mantra_rep_selection",
+                },
               };
-            } else if (typeKey === 'sankalp' || typeKey === 'sankalpa') {
+            } else if (typeKey === "sankalp" || typeKey === "sankalpa") {
               defaultStartAction = {
-                type: 'navigate',
-                target: { container_id: 'practice_runner', state_id: 'sankalp_embody' },
+                type: "navigate",
+                target: {
+                  container_id: "practice_runner",
+                  state_id: "sankalp_embody",
+                },
               };
-            } else if (typeKey === 'practice') {
+            } else if (typeKey === "practice") {
               defaultStartAction = {
-                type: 'navigate',
-                target: { container_id: 'practice_runner', state_id: 'practice_step_runner' },
+                type: "navigate",
+                target: {
+                  container_id: "practice_runner",
+                  state_id: "practice_step_runner",
+                },
               };
             }
           }
 
-          setScreenValue(is_locked || payload.read_only ? null : defaultStartAction, 'info_start_action');
+          setScreenValue(
+            is_locked || payload.read_only ? null : defaultStartAction,
+            "info_start_action",
+          );
         }
 
         // Runner context (single source of truth)
         const activeItem = manualData || masterData;
         if (activeItem) {
-          const itemSource = manualData ? (isSupport ? 'support' : 'additional') : 'core';
+          const itemSource = manualData
+            ? isSupport
+              ? "support"
+              : "additional"
+            : "core";
           setScreenValue(
             {
               item_type: infoType,
               source: itemSource,
-              item_id: activeItem.item_id || activeItem.id || '',
-              title: activeItem.title || activeItem.iast || '',
-              deity: activeItem.deity || '',
+              item_id: activeItem.item_id || activeItem.id || "",
+              title: activeItem.title || activeItem.iast || "",
+              deity: activeItem.deity || "",
               benefits: activeItem.benefits || [],
-              iast: activeItem.iast || '',
-              devanagari: activeItem.devanagari || '',
-              meaning: activeItem.meaning || '',
-              essence: activeItem.essence || '',
-              audio_url: activeItem.audio_url || '',
-              line: activeItem.line || '',
-              insight: activeItem.insight || '',
+              iast: activeItem.iast || "",
+              devanagari: activeItem.devanagari || "",
+              meaning: activeItem.meaning || "",
+              essence: activeItem.essence || "",
+              audio_url: activeItem.audio_url || "",
+              line: activeItem.line || "",
+              insight: activeItem.insight || "",
               how_to_live: activeItem.how_to_live || [],
-              summary: activeItem.summary || '',
+              summary: activeItem.summary || "",
               steps: activeItem.steps || [],
-              duration: activeItem.duration || '',
-              tradition: activeItem.tradition || '',
+              duration: activeItem.duration || "",
+              tradition: activeItem.tradition || "",
             },
-            'runner_active_item',
+            "runner_active_item",
           );
         }
 
         // Navigate to info reveal
         loadScreen({
-          container_id: 'cycle_transitions',
-          state_id: infoData.is_action ? 'info_reveal' : 'offering_reveal',
+          container_id: "cycle_transitions",
+          state_id: infoData.is_action ? "info_reveal" : "offering_reveal",
         });
         break;
       }
@@ -902,12 +1112,18 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // ================================================================
       // GENERATE_COMPANION — call Mitra API, unpack response into screenState
       // ================================================================
-      case 'generate_companion': {
+      case "generate_companion": {
         const inputData = {
-          focus: screenState.scan_focus || screenState.suggested_focus || 'peacecalm',
+          focus:
+            screenState.scan_focus ||
+            screenState.suggested_focus ||
+            "peacecalm",
           sub_focus: screenState.prana_baseline_selection,
           baseline_metrics: screenState,
-          depth: screenState.routine_depth || screenState.routine_setup || 'standard',
+          depth:
+            screenState.routine_depth ||
+            screenState.routine_setup ||
+            "standard",
           intention: screenState.composer_intent,
           day_number: screenState.day_number || 1,
           re_analysis_friction: screenState.re_analysis_friction,
@@ -915,20 +1131,22 @@ export async function executeAction(action: Action, context: ActionContext): Pro
 
         const data = await mitraGenerateCompanion(inputData);
         if (!data) {
-          console.error('[ENGINE] No companion data received');
-          setScreenValue(false, '_isSubmitting');
+          console.error("[ENGINE] No companion data received");
+          setScreenValue(false, "_isSubmitting");
           return;
         }
 
         // Capture journey status and ID
         const previousJourneyId = screenState.journey_id;
-        if (data.journey?.id) setScreenValue(data.journey.id, 'journey_id');
-        if (data.journey?.dayNumber) setScreenValue(data.journey.dayNumber, 'day_number');
-        if (data.journey?.totalDays) setScreenValue(data.journey.totalDays, 'total_days');
+        if (data.journey?.id) setScreenValue(data.journey.id, "journey_id");
+        if (data.journey?.dayNumber)
+          setScreenValue(data.journey.dayNumber, "day_number");
+        if (data.journey?.totalDays)
+          setScreenValue(data.journey.totalDays, "total_days");
 
         // Track journey_started on new journey
         if (data.journey?.id && data.journey.id !== previousJourneyId) {
-          mitraTrackEvent('journey_started', {
+          mitraTrackEvent("journey_started", {
             journeyId: data.journey.id,
             dayNumber: data.journey.dayNumber || 1,
             meta: {
@@ -941,94 +1159,122 @@ export async function executeAction(action: Action, context: ActionContext): Pro
         }
 
         if (data.journey?.isLightened !== undefined) {
-          setScreenValue(data.journey.isLightened, 'journey_is_lightened');
+          setScreenValue(data.journey.isLightened, "journey_is_lightened");
         }
 
         // Identity and path lifecycle
-        setScreenValue(data.identityLabel || '', 'identity_label');
-        setScreenValue(data.pathContext || {}, 'path_context');
-        setScreenValue(data.pathMilestone || null, 'path_milestone');
+        setScreenValue(data.identityLabel || "", "identity_label");
+        setScreenValue(data.pathContext || {}, "path_context");
+        setScreenValue(data.pathMilestone || null, "path_milestone");
 
         // Cycle item IDs (authoritative)
         if (data.journey?.cycleItems) {
           const ci = data.journey.cycleItems;
-          if (ci.mantraId) setScreenValue(ci.mantraId, 'cycle_mantra_id');
-          if (ci.sankalpId) setScreenValue(ci.sankalpId, 'cycle_sankalp_id');
-          if (ci.practiceId) setScreenValue(ci.practiceId, 'cycle_practice_id');
+          if (ci.mantraId) setScreenValue(ci.mantraId, "cycle_mantra_id");
+          if (ci.sankalpId) setScreenValue(ci.sankalpId, "cycle_sankalp_id");
+          if (ci.practiceId) setScreenValue(ci.practiceId, "cycle_practice_id");
         }
 
         // Extract and reveal companion data
         const companion = data.companion || data;
 
         // Intro and analysis metadata
-        if (data.intro) setScreenValue(data.intro, 'analysis_intro');
-        if (data.metricsSummary) setScreenValue(data.metricsSummary, 'analysis_metrics');
-        if (data.insightText) setScreenValue(data.insightText, 'analysis_insight');
+        if (data.intro) setScreenValue(data.intro, "analysis_intro");
+        if (data.metricsSummary)
+          setScreenValue(data.metricsSummary, "analysis_metrics");
+        if (data.insightText)
+          setScreenValue(data.insightText, "analysis_insight");
 
         // Practice / Ritual
         if (companion.practice || companion.ritual) {
           const p = companion.practice || companion.ritual;
-          setScreenValue(p.ui?.card_title || p.title, 'card_ritual_title');
-          setScreenValue(p.ui?.card_subtitle || p.description || p.core?.summary, 'card_ritual_description');
-          setScreenValue(p.ui?.card_meta || p.meta, 'card_ritual_meta');
-          setScreenValue(p.core?.title || p.title, 'practice_title');
-          setScreenValue(p.ui?.card_meta || p.meta || p.core?.duration, 'practice_meta');
+          setScreenValue(p.ui?.card_title || p.title, "card_ritual_title");
+          setScreenValue(
+            p.ui?.card_subtitle || p.description || p.core?.summary,
+            "card_ritual_description",
+          );
+          setScreenValue(p.ui?.card_meta || p.meta, "card_ritual_meta");
+          setScreenValue(p.core?.title || p.title, "practice_title");
+          setScreenValue(
+            p.ui?.card_meta || p.meta || p.core?.duration,
+            "practice_meta",
+          );
         }
 
         // Sankalpa
         if (companion.sankalp || companion.sankalpa) {
           const s = companion.sankalp || companion.sankalpa;
-          setScreenValue(s.ui?.card_title || s.core?.title || '', 'card_sankalpa_title');
-          setScreenValue(s.ui?.card_subtitle || s.description || s.core?.line, 'card_sankalpa_description');
-          setScreenValue(s.ui?.card_meta || s.meta, 'card_sankalpa_meta');
-          setScreenValue(s.core?.line || s.line, 'sankalp_text');
-          setScreenValue(s.core?.title || s.line, 'sankalp_title');
+          setScreenValue(
+            s.ui?.card_title || s.core?.title || "",
+            "card_sankalpa_title",
+          );
+          setScreenValue(
+            s.ui?.card_subtitle || s.description || s.core?.line,
+            "card_sankalpa_description",
+          );
+          setScreenValue(s.ui?.card_meta || s.meta, "card_sankalpa_meta");
+          setScreenValue(s.core?.line || s.line, "sankalp_text");
+          setScreenValue(s.core?.title || s.line, "sankalp_title");
         }
 
         // Mantra
         if (companion.mantra) {
           const m = companion.mantra;
-          setScreenValue(m.ui?.card_title || m.title, 'card_mantra_title');
-          setScreenValue(m.ui?.card_subtitle || m.description || m.core?.devanagari, 'card_mantra_description');
-          setScreenValue(m.ui?.card_meta || m.meta, 'card_mantra_meta');
-          setScreenValue(m.core?.title || m.line || m.title, 'mantra_text');
-          setScreenValue(m.core?.iast || m.iast, 'mantra_iast');
-          setScreenValue(m.core?.devanagari || m.devanagari || '', 'mantra_devanagari');
-          setScreenValue(m.core?.title || m.title || m.iast, 'mantra_title');
+          setScreenValue(m.ui?.card_title || m.title, "card_mantra_title");
+          setScreenValue(
+            m.ui?.card_subtitle || m.description || m.core?.devanagari,
+            "card_mantra_description",
+          );
+          setScreenValue(m.ui?.card_meta || m.meta, "card_mantra_meta");
+          setScreenValue(m.core?.title || m.line || m.title, "mantra_text");
+          setScreenValue(m.core?.iast || m.iast, "mantra_iast");
+          setScreenValue(
+            m.core?.devanagari || m.devanagari || "",
+            "mantra_devanagari",
+          );
+          setScreenValue(m.core?.title || m.title || m.iast, "mantra_title");
 
-          const resolvedMantraId = m.core?.item_id || m.core?.id || m.item_id || m.id;
-          if (resolvedMantraId) setScreenValue(resolvedMantraId, 'mantra_id');
-          if (m.ui?.deity_display) setScreenValue(m.ui.deity_display, 'mantra_deity_display');
+          const resolvedMantraId =
+            m.core?.item_id || m.core?.id || m.item_id || m.id;
+          if (resolvedMantraId) setScreenValue(resolvedMantraId, "mantra_id");
+          if (m.ui?.deity_display)
+            setScreenValue(m.ui.deity_display, "mantra_deity_display");
         }
 
-        setScreenValue(inputData.day_number, 'day_number');
-        setScreenValue(inputData.focus, 'active_focus');
-        setScreenValue(data.focusName || companion.focus_name, 'focus_name');
-        setScreenValue(27, 'reps_total');
-        setScreenValue(0, 'insight_step');
+        setScreenValue(inputData.day_number, "day_number");
+        setScreenValue(inputData.focus, "active_focus");
+        setScreenValue(data.focusName || companion.focus_name, "focus_name");
+        setScreenValue(27, "reps_total");
+        setScreenValue(0, "insight_step");
 
         // Extract Mitra IDs
-        const getMitraId = (item: any) => item?.core?.item_id || item?.core?.id || item?.item_id || item?.id;
+        const getMitraId = (item: any) =>
+          item?.core?.item_id || item?.core?.id || item?.item_id || item?.id;
 
         if (companion.mantra) {
           const mid = getMitraId(companion.mantra);
-          if (mid) setScreenValue(mid, 'mantra_id');
+          if (mid) setScreenValue(mid, "mantra_id");
         }
         if (companion.sankalp || companion.sankalpa) {
           const sid = getMitraId(companion.sankalp || companion.sankalpa);
-          if (sid) setScreenValue(sid, 'sankalp_id');
+          if (sid) setScreenValue(sid, "sankalp_id");
         }
         if (companion.practice) {
           const pid = getMitraId(companion.practice);
-          if (pid) setScreenValue(pid, 'practice_id');
+          if (pid) setScreenValue(pid, "practice_id");
         }
 
         // Save master data for info screens
         setScreenValue(
           companion.mantra
-            ? { ...companion.mantra.core, id: getMitraId(companion.mantra), wisdom: companion.mantra.context, type: 'mantra' }
+            ? {
+                ...companion.mantra.core,
+                id: getMitraId(companion.mantra),
+                wisdom: companion.mantra.context,
+                type: "mantra",
+              }
             : data.masterData?.selectedMantra,
-          'master_mantra',
+          "master_mantra",
         );
         setScreenValue(
           companion.sankalp || companion.sankalpa
@@ -1036,49 +1282,70 @@ export async function executeAction(action: Action, context: ActionContext): Pro
                 ...(companion.sankalp || companion.sankalpa).core,
                 id: getMitraId(companion.sankalp || companion.sankalpa),
                 wisdom: (companion.sankalp || companion.sankalpa).context,
-                type: 'sankalp',
+                type: "sankalp",
               }
             : data.masterData?.selectedSankalp,
-          'master_sankalp',
+          "master_sankalp",
         );
         setScreenValue(
           companion.practice
-            ? { ...companion.practice.core, id: getMitraId(companion.practice), wisdom: companion.practice.context, type: 'practice' }
+            ? {
+                ...companion.practice.core,
+                id: getMitraId(companion.practice),
+                wisdom: companion.practice.context,
+                type: "practice",
+              }
             : data.masterData?.selectedPractice,
-          'master_practice',
+          "master_practice",
         );
 
         // Sankalp how_to_live
         if (companion.sankalp?.core?.how_to_live) {
-          setScreenValue(companion.sankalp.core.how_to_live, 'sankalp_how_to_live');
+          setScreenValue(
+            companion.sankalp.core.how_to_live,
+            "sankalp_how_to_live",
+          );
         }
         // Practice benefit preview
         if (companion.practice?.ui?.benefit_preview) {
-          setScreenValue(companion.practice.ui.benefit_preview, 'practice_benefit_preview');
+          setScreenValue(
+            companion.practice.ui.benefit_preview,
+            "practice_benefit_preview",
+          );
         }
         // AI reasoning
         if (data.aiReasoning) {
-          setScreenValue(data.aiReasoning, 'ai_reasoning');
+          setScreenValue(data.aiReasoning, "ai_reasoning");
         }
 
         // Dashboard enrichment
         const hub = data.hub || data.dashboard;
         if (hub) {
-          if (hub.shift_message) setScreenValue(hub.shift_message, 'daily_shift_message');
-          if (hub.streak_display) setScreenValue(hub.streak_display, 'streak_display');
-          if (hub.completed_days !== undefined) setScreenValue(hub.completed_days, 'completed_days');
-          if (hub.festival_today) setScreenValue(hub.festival_today, 'festival_today');
+          if (hub.shift_message)
+            setScreenValue(hub.shift_message, "daily_shift_message");
+          if (hub.streak_display)
+            setScreenValue(hub.streak_display, "streak_display");
+          if (hub.completed_days !== undefined)
+            setScreenValue(hub.completed_days, "completed_days");
+          if (hub.festival_today)
+            setScreenValue(hub.festival_today, "festival_today");
           if (hub.days_since_last_practice !== undefined) {
-            setScreenValue(hub.days_since_last_practice, 'days_since_last_practice');
+            setScreenValue(
+              hub.days_since_last_practice,
+              "days_since_last_practice",
+            );
           }
         }
 
         // CTA
-        if (data.cta) setScreenValue(data.cta, 'contextual_cta');
+        if (data.cta) setScreenValue(data.cta, "contextual_cta");
 
         // Navigate to the post-lock summary reveal (unless skipReveal)
         if (!payload?.skipReveal) {
-          loadScreen({ container_id: 'insight_summary', state_id: 'path_reveal' });
+          loadScreen({
+            container_id: "insight_summary",
+            state_id: "path_reveal",
+          });
         }
         break;
       }
@@ -1086,125 +1353,175 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // ================================================================
       // INITIATE_TRIGGER — start OM chanting session (Flow 3, Step 1)
       // ================================================================
-      case 'initiate_trigger': {
+      case "initiate_trigger": {
         // INV-6: Start trigger flow instance
-        if (startFlowInstance) startFlowInstance('trigger');
+        if (startFlowInstance) startFlowInstance("trigger");
 
         // INV-3: Clear prior runner context to prevent contamination
-        setScreenValue(null, 'runner_active_item');
+        setScreenValue(null, "runner_active_item");
 
         // Initialize trigger session
-        setScreenValue(1, 'trigger_cycle_count');
-        setScreenValue('triggered', 'trigger_feeling');
-        setScreenValue(1, 'trigger_step');
+        setScreenValue(1, "trigger_cycle_count");
+        setScreenValue("triggered", "trigger_feeling");
+        setScreenValue(1, "trigger_step");
 
         // Select rotated OM audio for this session
-        const triggerOmAudio = await _rotateAudio(OM_AUDIO_LIBRARY, '_kalpx_om_audio_idx');
-        setScreenValue(triggerOmAudio, '_selected_om_audio');
-        const { label: trigLabel, devanagari: trigDev } = _omTextForTrack(triggerOmAudio);
-        setScreenValue(trigLabel, 'trigger_mantra_text');
-        setScreenValue(trigDev, 'trigger_mantra_devanagari');
+        const triggerOmAudio = await _rotateAudio(
+          OM_AUDIO_LIBRARY,
+          "_kalpx_om_audio_idx",
+        );
+        setScreenValue(triggerOmAudio, "_selected_om_audio");
+        const { label: trigLabel, devanagari: trigDev } =
+          _omTextForTrack(triggerOmAudio);
+        setScreenValue(trigLabel, "trigger_mantra_text");
+        setScreenValue(trigDev, "trigger_mantra_devanagari");
 
         // Fire-and-forget event tracking
-        mitraTrackEvent('trigger_session_started', {
+        mitraTrackEvent("trigger_session_started", {
           journeyId: screenState.journey_id,
           dayNumber: screenState.day_number || 1,
         });
 
         // Set recovery target for "Try Another Way"
         setScreenValue(
-          { container_id: 'awareness_trigger', state_id: 'trigger_reflection' },
-          'free_chant_recovery_target',
+          { container_id: "awareness_trigger", state_id: "trigger_reflection" },
+          "free_chant_recovery_target",
         );
 
         setScreenValue(
-          { itemId: 'OM', itemType: 'mantra', source: 'support' },
-          '_active_support_item',
+          { itemId: "OM", itemType: "mantra", source: "support" },
+          "_active_support_item",
         );
 
         // Reset selection state
-        setScreenValue(null, 'trigger_feeling_selection');
-        setScreenValue('', 'trigger_sentiment_input');
-        setScreenValue(null, 'selected_card_id');
-        setScreenValue(false, 'show_start_trigger_mantra');
+        setScreenValue(null, "trigger_feeling_selection");
+        setScreenValue("", "trigger_sentiment_input");
+        setScreenValue(null, "selected_card_id");
+        setScreenValue(false, "show_start_trigger_mantra");
 
         // Reset trigger button state
-        setScreenValue(true, 'is_trigger_share_disabled');
-        setScreenValue('Share \u2192', 'trigger_share_btn_label');
-        setScreenValue(true, 'is_recheck_btn_disabled');
-        setScreenValue('Share \u2192', 'trigger_recheck_btn_label');
+        setScreenValue(true, "is_trigger_share_disabled");
+        setScreenValue("Share \u2192", "trigger_share_btn_label");
+        setScreenValue(true, "is_recheck_btn_disabled");
+        setScreenValue("Share \u2192", "trigger_recheck_btn_label");
 
-        console.log('[TRIGGER] Initiating OM Chanting session.');
+        console.log("[TRIGGER] Initiating OM Chanting session.");
 
-        loadScreen({ container_id: 'practice_runner', state_id: 'free_mantra_chanting' });
+        loadScreen({
+          container_id: "practice_runner",
+          state_id: "free_mantra_chanting",
+        });
         break;
       }
 
       // ================================================================
       // TRY_ANOTHER_WAY — call API for trigger support suggestions
       // ================================================================
-      case 'try_another_way': {
-        const tryFeeling = screenState['trigger_feeling'] || 'uncertain';
-        const tryRound = screenState['trigger_cycle_count'] || 1;
+      case "try_another_way": {
+        const tryFeeling = screenState["trigger_feeling"] || "uncertain";
+        const tryRound = screenState["trigger_cycle_count"] || 1;
 
         const res = await mitraTriggerMantras({
           feeling: tryFeeling,
-          focus: screenState['scan_focus'] || screenState['active_focus'] || 'peacecalm',
-          subFocus: screenState['prana_baseline_selection'] || '',
-          depth: screenState['routine_depth'] || screenState['routine_setup'] || 'standard',
+          focus:
+            screenState["scan_focus"] ||
+            screenState["active_focus"] ||
+            "peacecalm",
+          subFocus: screenState["prana_baseline_selection"] || "",
+          depth:
+            screenState["routine_depth"] ||
+            screenState["routine_setup"] ||
+            "standard",
           round: tryRound,
-          locale: screenState['locale'] || 'en',
+          locale: screenState["locale"] || "en",
           tz: _mitraTz(),
         });
         const suggestions = res.suggestions || [];
 
         const practiceSuggestion = suggestions.find(
-          (s: any) => s.type === 'practice' || (s.core && s.core.steps),
+          (s: any) => s.type === "practice" || (s.core && s.core.steps),
         );
         const mantraSuggestion = suggestions.find(
-          (s: any) => s.type === 'mantra' || (s.core && !s.core.steps),
+          (s: any) => s.type === "mantra" || (s.core && !s.core.steps),
         );
 
         if (practiceSuggestion) {
-          setScreenValue({
-            ...practiceSuggestion.core,
-            wisdom: practiceSuggestion.context,
-            item_id: practiceSuggestion.item_id || practiceSuggestion.id,
-          }, '_trigger_practice_data');
+          setScreenValue(
+            {
+              ...practiceSuggestion.core,
+              wisdom: practiceSuggestion.context,
+              item_id: practiceSuggestion.item_id || practiceSuggestion.id,
+            },
+            "_trigger_practice_data",
+          );
           const pCore = practiceSuggestion.core || {};
-          setScreenValue({
-            ...pCore,
-            wisdom: practiceSuggestion.context,
-            source: 'support',
-            is_trigger: true,
-            item_id: practiceSuggestion.item_id || practiceSuggestion.id,
-            item_type: 'practice',
-            steps_text: (pCore.steps || []).map((s: string, i: number) => `${i + 1}. ${s}`).join('\n'),
-            benefits_text: (pCore.benefits || []).map((b: string) => `• ${b}`).join('\n'),
-          }, 'runner_active_item');
+          setScreenValue(
+            {
+              ...pCore,
+              wisdom: practiceSuggestion.context,
+              source: "support",
+              is_trigger: true,
+              item_id: practiceSuggestion.item_id || practiceSuggestion.id,
+              item_type: "practice",
+              steps_text: (pCore.steps || [])
+                .map((s: string, i: number) => `${i + 1}. ${s}`)
+                .join("\n"),
+              benefits_text: (pCore.benefits || [])
+                .map((b: string) => `• ${b}`)
+                .join("\n"),
+            },
+            "runner_active_item",
+          );
         }
         if (mantraSuggestion) {
-          setScreenValue({
-            ...mantraSuggestion.core,
-            wisdom: mantraSuggestion.context,
-            item_id: mantraSuggestion.item_id || mantraSuggestion.id,
-          }, '_trigger_mantra_data');
+          setScreenValue(
+            {
+              ...mantraSuggestion.core,
+              wisdom: mantraSuggestion.context,
+              item_id: mantraSuggestion.item_id || mantraSuggestion.id,
+            },
+            "_trigger_mantra_data",
+          );
         }
 
-        setScreenValue(2, 'trigger_step');
-        setScreenValue(_triggerNegativeLabel(tryFeeling, 2), '_trigger_negative_label');
+        setScreenValue(2, "trigger_step");
+        setScreenValue(
+          _triggerNegativeLabel(tryFeeling, 2),
+          "_trigger_negative_label",
+        );
 
         if (practiceSuggestion) {
-          loadScreen({ container_id: 'practice_runner', state_id: 'trigger_practice_runner' });
+          loadScreen({
+            container_id: "practice_runner",
+            state_id: "trigger_practice_runner",
+          });
         } else if (mantraSuggestion) {
-          setScreenValue(3, 'trigger_step');
-          setScreenValue(_triggerNegativeLabel(tryFeeling, 3), '_trigger_negative_label');
-          setScreenValue(mantraSuggestion.core?.iast || mantraSuggestion.core?.title || 'OM', 'trigger_mantra_text');
-          setScreenValue(mantraSuggestion.core?.devanagari || 'ॐ', 'trigger_mantra_devanagari');
-          setScreenValue(mantraSuggestion.core?.audio_url || '', '_selected_om_audio');
-          loadScreen({ container_id: 'practice_runner', state_id: 'post_trigger_mantra' });
+          setScreenValue(3, "trigger_step");
+          setScreenValue(
+            _triggerNegativeLabel(tryFeeling, 3),
+            "_trigger_negative_label",
+          );
+          setScreenValue(
+            mantraSuggestion.core?.iast || mantraSuggestion.core?.title || "OM",
+            "trigger_mantra_text",
+          );
+          setScreenValue(
+            mantraSuggestion.core?.devanagari || "ॐ",
+            "trigger_mantra_devanagari",
+          );
+          setScreenValue(
+            mantraSuggestion.core?.audio_url || "",
+            "_selected_om_audio",
+          );
+          loadScreen({
+            container_id: "practice_runner",
+            state_id: "post_trigger_mantra",
+          });
         } else {
-          loadScreen({ container_id: 'companion_dashboard', state_id: 'day_active' });
+          loadScreen({
+            container_id: "companion_dashboard",
+            state_id: "day_active",
+          });
         }
         break;
       }
@@ -1212,155 +1529,243 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // ================================================================
       // TRIGGER_CALMER_NOW — user feels calmer, resolve trigger flow
       // ================================================================
-      case 'trigger_calmer_now': {
-        const calmerStep = screenState['trigger_step'] || 1;
-        const calmerFeeling = screenState['trigger_feeling'] || 'triggered';
+      case "trigger_calmer_now": {
+        const calmerStep = screenState["trigger_step"] || 1;
+        const calmerFeeling = screenState["trigger_feeling"] || "triggered";
 
-        mitraTrackEvent('trigger_resolved', {
+        mitraTrackEvent("trigger_resolved", {
           journeyId: screenState.journey_id,
           dayNumber: screenState.day_number || 1,
-          meta: { step: calmerStep, feeling: calmerFeeling, resolution: 'calmer_now' },
+          meta: {
+            step: calmerStep,
+            feeling: calmerFeeling,
+            resolution: "calmer_now",
+          },
         });
 
-        setScreenValue({
-          message: 'You returned to your center. Carry this steadiness with you.',
-          type: 'calmer',
-        }, '_trigger_resolution_toast');
+        setScreenValue(
+          {
+            message:
+              "You returned to your center. Carry this steadiness with you.",
+            type: "calmer",
+          },
+          "_trigger_resolution_toast",
+        );
 
-        setScreenValue(null, 'trigger_mantra_text');
-        setScreenValue(null, 'trigger_mantra_devanagari');
+        setScreenValue(null, "trigger_mantra_text");
+        setScreenValue(null, "trigger_mantra_devanagari");
 
-        loadScreen({ container_id: 'companion_dashboard', state_id: 'day_active' });
+        loadScreen({
+          container_id: "companion_dashboard",
+          state_id: "day_active",
+        });
         break;
       }
 
       // ================================================================
       // TRIGGER_STILL_FEELING — user still feels triggered, escalate
       // ================================================================
-      case 'trigger_still_feeling': {
-        const stillStep = screenState['trigger_step'] || 1;
-        const stillFeeling = screenState['trigger_feeling'] || 'triggered';
+      case "trigger_still_feeling": {
+        const stillStep = screenState["trigger_step"] || 1;
+        const stillFeeling = screenState["trigger_feeling"] || "triggered";
 
-        console.log(`[TRIGGER] Escalating from Step ${stillStep}. Feeling: ${stillFeeling}`);
+        console.log(
+          `[TRIGGER] Escalating from Step ${stillStep}. Feeling: ${stillFeeling}`,
+        );
 
         if (stillStep === 1) {
           // First escalation: Call API and show Practice DIRECTLY
           const res = await mitraTriggerMantras({
             feeling: stillFeeling,
-            focus: screenState['scan_focus'] || screenState['active_focus'] || 'peacecalm',
-            subFocus: screenState['prana_baseline_selection'] || '',
-            depth: screenState['routine_depth'] || screenState['routine_setup'] || 'standard',
+            focus:
+              screenState["scan_focus"] ||
+              screenState["active_focus"] ||
+              "peacecalm",
+            subFocus: screenState["prana_baseline_selection"] || "",
+            depth:
+              screenState["routine_depth"] ||
+              screenState["routine_setup"] ||
+              "standard",
             round: 1,
-            locale: screenState['locale'] || 'en',
+            locale: screenState["locale"] || "en",
             tz: _mitraTz(),
           });
 
           const suggestions = res?.suggestions || [];
-          const practiceSuggestion = suggestions.find((s: any) => s.type === 'practice');
-          const mantraSuggestion = suggestions.find((s: any) => s.type === 'mantra');
+          const practiceSuggestion = suggestions.find(
+            (s: any) => s.type === "practice",
+          );
+          const mantraSuggestion = suggestions.find(
+            (s: any) => s.type === "mantra",
+          );
 
           // Persist both for the sequence
           if (practiceSuggestion) {
-            setScreenValue(practiceSuggestion.core, '_trigger_practice_data');
+            setScreenValue(practiceSuggestion.core, "_trigger_practice_data");
           }
           if (mantraSuggestion) {
-            setScreenValue(mantraSuggestion.core, '_trigger_mantra_data');
+            setScreenValue(mantraSuggestion.core, "_trigger_mantra_data");
           }
 
           if (practiceSuggestion) {
             const pCore = practiceSuggestion.core || {};
-            setScreenValue({
-              ...pCore,
-              wisdom: practiceSuggestion.context,
-              source: 'support',
-              is_trigger: true,
-              item_id: pCore.item_id || pCore.id,
-              item_type: 'practice',
-              steps_text: (pCore.steps || []).map((s: string, i: number) => `${i + 1}. ${s}`).join('\n'),
-              benefits_text: (pCore.benefits || []).map((b: string) => `• ${b}`).join('\n'),
-            }, 'runner_active_item');
+            setScreenValue(
+              {
+                ...pCore,
+                wisdom: practiceSuggestion.context,
+                source: "support",
+                is_trigger: true,
+                item_id: pCore.item_id || pCore.id,
+                item_type: "practice",
+                steps_text: (pCore.steps || [])
+                  .map((s: string, i: number) => `${i + 1}. ${s}`)
+                  .join("\n"),
+                benefits_text: (pCore.benefits || [])
+                  .map((b: string) => `• ${b}`)
+                  .join("\n"),
+              },
+              "runner_active_item",
+            );
 
-            setScreenValue(2, 'trigger_step');
-            setScreenValue(_triggerNegativeLabel(stillFeeling, 2), '_trigger_negative_label');
-            loadScreen({ container_id: 'practice_runner', state_id: 'trigger_practice_runner' });
+            setScreenValue(2, "trigger_step");
+            setScreenValue(
+              _triggerNegativeLabel(stillFeeling, 2),
+              "_trigger_negative_label",
+            );
+            loadScreen({
+              container_id: "practice_runner",
+              state_id: "trigger_practice_runner",
+            });
           } else if (mantraSuggestion) {
             // Fallback directly to mantra if no practice found
             const mCore = mantraSuggestion.core || {};
-            setScreenValue(mCore.iast || mCore.title || 'OM', 'trigger_mantra_text');
-            setScreenValue(mCore.devanagari || 'ॐ', 'trigger_mantra_devanagari');
-            setScreenValue(mCore.audio_url || '', '_selected_om_audio');
-            setScreenValue({
-              ...mCore,
-              source: 'support',
-              is_trigger: true,
-              item_type: 'mantra',
-            }, 'runner_active_item');
+            setScreenValue(
+              mCore.iast || mCore.title || "OM",
+              "trigger_mantra_text",
+            );
+            setScreenValue(
+              mCore.devanagari || "ॐ",
+              "trigger_mantra_devanagari",
+            );
+            setScreenValue(mCore.audio_url || "", "_selected_om_audio");
+            setScreenValue(
+              {
+                ...mCore,
+                source: "support",
+                is_trigger: true,
+                item_type: "mantra",
+              },
+              "runner_active_item",
+            );
 
-            setScreenValue(3, 'trigger_step');
-            setScreenValue(_triggerNegativeLabel(stillFeeling, 3), '_trigger_negative_label');
-            loadScreen({ container_id: 'practice_runner', state_id: 'post_trigger_mantra' });
+            setScreenValue(3, "trigger_step");
+            setScreenValue(
+              _triggerNegativeLabel(stillFeeling, 3),
+              "_trigger_negative_label",
+            );
+            loadScreen({
+              container_id: "practice_runner",
+              state_id: "post_trigger_mantra",
+            });
           } else {
-            loadScreen({ container_id: 'companion_dashboard', state_id: 'day_active' });
+            loadScreen({
+              container_id: "companion_dashboard",
+              state_id: "day_active",
+            });
           }
         } else if (stillStep === 2) {
           // Second escalation: Show Mantra DIRECTLY (pre-fetched or fetch if missing)
-          let mantraData = screenState['_trigger_mantra_data'];
+          let mantraData = screenState["_trigger_mantra_data"];
 
           if (!mantraData) {
             const res = await mitraTriggerMantras({
               feeling: stillFeeling,
-              focus: screenState['scan_focus'] || screenState['active_focus'] || 'peacecalm',
+              focus:
+                screenState["scan_focus"] ||
+                screenState["active_focus"] ||
+                "peacecalm",
               round: 2,
-              locale: screenState['locale'] || 'en',
+              locale: screenState["locale"] || "en",
               tz: _mitraTz(),
             });
-            const mantraSuggestion = (res?.suggestions || []).find((s: any) => s.type === 'mantra');
+            const mantraSuggestion = (res?.suggestions || []).find(
+              (s: any) => s.type === "mantra",
+            );
             if (mantraSuggestion) {
               mantraData = mantraSuggestion.core;
-              setScreenValue(mantraData, '_trigger_mantra_data');
+              setScreenValue(mantraData, "_trigger_mantra_data");
             }
           }
 
-          mitraTrackEvent('trigger_still_feeling', {
+          mitraTrackEvent("trigger_still_feeling", {
             journeyId: screenState.journey_id,
             dayNumber: screenState.day_number || 1,
-            meta: { step: 2, feeling: stillFeeling, nextStep: 'mantra' },
+            meta: { step: 2, feeling: stillFeeling, nextStep: "mantra" },
           });
 
-          setScreenValue(3, 'trigger_step');
-          setScreenValue(_triggerNegativeLabel(stillFeeling, 3), '_trigger_negative_label');
+          setScreenValue(3, "trigger_step");
+          setScreenValue(
+            _triggerNegativeLabel(stillFeeling, 3),
+            "_trigger_negative_label",
+          );
 
           if (mantraData) {
-            setScreenValue(mantraData.iast || mantraData.title || 'OM', 'trigger_mantra_text');
-            setScreenValue(mantraData.devanagari || 'ॐ', 'trigger_mantra_devanagari');
-            setScreenValue(mantraData.audio_url || '', '_selected_om_audio');
-            setScreenValue({
-              ...mantraData,
-              source: 'support',
-              is_trigger: true,
-              item_type: 'mantra',
-            }, 'runner_active_item');
-            loadScreen({ container_id: 'practice_runner', state_id: 'post_trigger_mantra' });
+            setScreenValue(
+              mantraData.iast || mantraData.title || "OM",
+              "trigger_mantra_text",
+            );
+            setScreenValue(
+              mantraData.devanagari || "ॐ",
+              "trigger_mantra_devanagari",
+            );
+            setScreenValue(mantraData.audio_url || "", "_selected_om_audio");
+            setScreenValue(
+              {
+                ...mantraData,
+                source: "support",
+                is_trigger: true,
+                item_type: "mantra",
+              },
+              "runner_active_item",
+            );
+            loadScreen({
+              container_id: "practice_runner",
+              state_id: "post_trigger_mantra",
+            });
           } else {
-            loadScreen({ container_id: 'companion_dashboard', state_id: 'day_active' });
+            loadScreen({
+              container_id: "companion_dashboard",
+              state_id: "day_active",
+            });
           }
         } else {
           // Final escalation: Return to Dashboard with encouragement
-          mitraTrackEvent('trigger_still_feeling_final', {
+          mitraTrackEvent("trigger_still_feeling_final", {
             journeyId: screenState.journey_id,
             dayNumber: screenState.day_number || 1,
-            meta: { step: 3, feeling: stillFeeling, resolution: 'encourage_core' },
+            meta: {
+              step: 3,
+              feeling: stillFeeling,
+              resolution: "encourage_core",
+            },
           });
 
-          setScreenValue({
-            message: 'Stay close to your sankalp, mantra, and practice — they are your anchors.',
-            type: 'encourage',
-          }, '_trigger_resolution_toast');
+          setScreenValue(
+            {
+              message:
+                "Stay close to your sankalp, mantra, and practice — they are your anchors.",
+              type: "encourage",
+            },
+            "_trigger_resolution_toast",
+          );
 
-          setScreenValue(null, 'trigger_mantra_text');
-          setScreenValue(null, 'trigger_mantra_devanagari');
+          setScreenValue(null, "trigger_mantra_text");
+          setScreenValue(null, "trigger_mantra_devanagari");
 
-          loadScreen({ container_id: 'companion_dashboard', state_id: 'day_active' });
+          loadScreen({
+            container_id: "companion_dashboard",
+            state_id: "day_active",
+          });
         }
         break;
       }
@@ -1368,7 +1773,7 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // ================================================================
       // SEAL_DAY — advance day, track milestone, check for checkpoints
       // ================================================================
-      case 'seal_day': {
+      case "seal_day": {
         // Release guard early for parallel tracking
         _actionInFlight = false;
 
@@ -1378,7 +1783,7 @@ export async function executeAction(action: Action, context: ActionContext): Pro
           screenState.practice_act,
         ].filter(Boolean).length;
 
-        await mitraTrackEvent('day_sealed', {
+        await mitraTrackEvent("day_sealed", {
           journeyId: screenState.journey_id,
           dayNumber: screenState.day_number || 1,
           meta: {
@@ -1389,33 +1794,44 @@ export async function executeAction(action: Action, context: ActionContext): Pro
 
         const currentDay = screenState.day_number || 1;
         const nextDay = currentDay + 1;
-        setScreenValue(nextDay, 'day_number');
+        setScreenValue(nextDay, "day_number");
 
         // Update cycle history for timeline
         const history = [...(screenState.cycle_history || [])];
         history.push({
           id: `day_${currentDay}`,
-          date: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+          date: new Date().toLocaleDateString(undefined, {
+            month: "short",
+            day: "numeric",
+          }),
           name: `Day ${currentDay}`,
-          status: 'Completed',
-          growth: '+1',
+          status: "Completed",
+          growth: "+1",
         });
-        setScreenValue(history, 'cycle_history');
+        setScreenValue(history, "cycle_history");
 
         // Clear practice completion for new day
-        setScreenValue(false, 'practice_chant');
-        setScreenValue(false, 'practice_embody');
-        setScreenValue(false, 'practice_act');
-        setScreenValue(false, '_completion_tracked_this_session');
-        setScreenValue(0, 'trigger_cycle_count');
+        setScreenValue(false, "practice_chant");
+        setScreenValue(false, "practice_embody");
+        setScreenValue(false, "practice_act");
+        setScreenValue(false, "_completion_tracked_this_session");
+        setScreenValue(0, "trigger_cycle_count");
 
         // Check for checkpoints (Day 7 / Day 14)
         if (currentDay === 6 || currentDay === 14) {
           // Checkpoint will be handled when checkpoint actions are implemented
-          console.log(`[MITRA] Checkpoint Day ${currentDay === 6 ? 7 : 14} — checkpoint handling TBD`);
-          loadScreen({ container_id: 'cycle_transitions', state_id: 'weekly_checkpoint' });
+          console.log(
+            `[MITRA] Checkpoint Day ${currentDay === 6 ? 7 : 14} — checkpoint handling TBD`,
+          );
+          loadScreen({
+            container_id: "cycle_transitions",
+            state_id: "weekly_checkpoint",
+          });
         } else {
-          loadScreen({ container_id: 'companion_dashboard', state_id: 'day_active' });
+          loadScreen({
+            container_id: "companion_dashboard",
+            state_id: "day_active",
+          });
         }
         break;
       }
@@ -1423,12 +1839,16 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // ================================================================
       // INFO_START_CLICK — guarded practice start from info screen
       // ================================================================
-      case 'info_start_click': {
+      case "info_start_click": {
         const info = screenState.info;
 
         // For offerings: first click commits, second click finalizes
-        if (info && !info.is_action && screenState.info_start_label === 'I Will Do This') {
-          setScreenValue('Done', 'info_start_label');
+        if (
+          info &&
+          !info.is_action &&
+          screenState.info_start_label === "I Will Do This"
+        ) {
+          setScreenValue("Done", "info_start_label");
           return;
         }
 
@@ -1443,7 +1863,7 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // ================================================================
       // TRACK_EVENT — fire a Mitra tracking event
       // ================================================================
-      case 'track_event': {
+      case "track_event": {
         if (!payload) break;
         const { eventName, meta } = payload;
         await mitraTrackEvent(eventName, {
@@ -1453,7 +1873,7 @@ export async function executeAction(action: Action, context: ActionContext): Pro
         });
         if (target) {
           const trackDest = _resolveDest(target);
-          if (trackDest === 'day_active') {
+          if (trackDest === "day_active") {
             _cleanupOnReturnHome(setScreenValue, screenState, endFlowInstance);
           }
           loadScreen(target);
@@ -1464,14 +1884,14 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // ================================================================
       // RETURN_TO_START — navigate back to portal / onboarding
       // ================================================================
-      case 'return_to_start': {
-        loadScreen({ container_id: 'portal', state_id: 'portal' });
-        rootNavigate('AppDrawer', {
-          screen: 'HomePage',
+      case "return_to_start": {
+        loadScreen({ container_id: "portal", state_id: "portal" });
+        rootNavigate("AppDrawer", {
+          screen: "HomePage",
           params: {
-            screen: 'HomePage',
+            screen: "HomePage",
             params: {
-              screen: 'Home',
+              screen: "Home",
             },
           },
         });
@@ -1481,17 +1901,20 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // ================================================================
       // CONFIRM_DEEPEN — set 108 reps and show confirmation
       // ================================================================
-      case 'confirm_deepen': {
-        setScreenValue(108, 'reps_total');
-        setScreenValue('108 Reps', 'practice_chant_meta');
-        loadScreen({ container_id: 'cycle_transitions', state_id: 'deepen_confirmation' });
+      case "confirm_deepen": {
+        setScreenValue(108, "reps_total");
+        setScreenValue("108 Reps", "practice_chant_meta");
+        loadScreen({
+          container_id: "cycle_transitions",
+          state_id: "deepen_confirmation",
+        });
         break;
       }
 
       // ================================================================
       // GENERATE_HELP_ME_CHOOSE — AI-guided path selection
       // ================================================================
-      case 'generate_help_me_choose': {
+      case "generate_help_me_choose": {
         const hmcInput = {
           friction: screenState.help_me_choose_1,
           intention: screenState.help_me_choose_2,
@@ -1501,62 +1924,77 @@ export async function executeAction(action: Action, context: ActionContext): Pro
         const hmcData = await mitraHelpMeChoose(hmcInput);
         if (!hmcData) break;
 
-        setScreenValue(hmcData.intro, 'help_me_choose_intro');
-        setScreenValue(hmcData.analysisText, 'help_me_choose_analysis');
-        setScreenValue(hmcData.buttonLabel, 'help_me_choose_button_label');
+        setScreenValue(hmcData.intro, "help_me_choose_intro");
+        setScreenValue(hmcData.analysisText, "help_me_choose_analysis");
+        setScreenValue(hmcData.buttonLabel, "help_me_choose_button_label");
 
         const hmcNextAction = hmcData.isReanalysis
-          ? { type: 'evolve_path', payload: { newFocus: hmcData.suggestedFocus } }
-          : { type: 'fast_track_baseline', payload: { focus: hmcData.suggestedFocus } };
+          ? {
+              type: "evolve_path",
+              payload: { newFocus: hmcData.suggestedFocus },
+            }
+          : {
+              type: "fast_track_baseline",
+              payload: { focus: hmcData.suggestedFocus },
+            };
 
-        setScreenValue(hmcNextAction, 'help_me_choose_button_action');
+        setScreenValue(hmcNextAction, "help_me_choose_button_action");
 
-        loadScreen({ container_id: 'cycle_transitions', state_id: 'help_me_choose_reveal' });
+        loadScreen({
+          container_id: "cycle_transitions",
+          state_id: "help_me_choose_reveal",
+        });
         break;
       }
 
       // ================================================================
       // EVOLVE_PATH — path evolution narrative on focus change
       // ================================================================
-      case 'evolve_path': {
+      case "evolve_path": {
         const epNewFocus = payload?.newFocus;
-        const epOldFocus = screenState.scan_focus || 'peacecalm';
+        const epOldFocus = screenState.scan_focus || "peacecalm";
 
-        const epData = await mitraPathEvolution(epOldFocus, epNewFocus || 'peacecalm');
+        const epData = await mitraPathEvolution(
+          epOldFocus,
+          epNewFocus || "peacecalm",
+        );
 
         if (epData?.evolutionText) {
-          setScreenValue(epData.evolutionText, 'path_evolution_text');
+          setScreenValue(epData.evolutionText, "path_evolution_text");
         }
-        setScreenValue(epNewFocus, 'scan_focus');
-        setScreenValue(epNewFocus, 'suggested_focus');
+        setScreenValue(epNewFocus, "scan_focus");
+        setScreenValue(epNewFocus, "suggested_focus");
 
-        loadScreen({ container_id: 'cycle_transitions', state_id: 'path_evolution_reveal' });
+        loadScreen({
+          container_id: "cycle_transitions",
+          state_id: "path_evolution_reveal",
+        });
         break;
       }
 
       // ================================================================
       // START_NEW_JOURNEY — reset state and begin fresh
       // ================================================================
-      case 'start_new_journey': {
+      case "start_new_journey": {
         // Clear all state for a fresh journey
-        const snjTarget = payload?.target || 'discipline_select';
+        const snjTarget = payload?.target || "discipline_select";
         // Reset key journey fields
-        setScreenValue(null, 'journey_id');
-        setScreenValue(1, 'day_number');
-        setScreenValue({}, 'journey_log');
-        setScreenValue(false, 'practice_chant');
-        setScreenValue(false, 'practice_embody');
-        setScreenValue(false, 'practice_act');
-        setScreenValue(false, '_completion_tracked_this_session');
-        setScreenValue(null, 'scan_focus');
-        setScreenValue(null, 'suggested_focus');
-        setScreenValue(null, 'master_mantra');
-        setScreenValue(null, 'master_sankalp');
-        setScreenValue(null, 'master_practice');
-        setScreenValue(null, 'identity_label');
-        setScreenValue(null, 'path_context');
-        setScreenValue(null, 'path_milestone');
-        cleanupFlowState('all', setScreenValue);
+        setScreenValue(null, "journey_id");
+        setScreenValue(1, "day_number");
+        setScreenValue({}, "journey_log");
+        setScreenValue(false, "practice_chant");
+        setScreenValue(false, "practice_embody");
+        setScreenValue(false, "practice_act");
+        setScreenValue(false, "_completion_tracked_this_session");
+        setScreenValue(null, "scan_focus");
+        setScreenValue(null, "suggested_focus");
+        setScreenValue(null, "master_mantra");
+        setScreenValue(null, "master_sankalp");
+        setScreenValue(null, "master_practice");
+        setScreenValue(null, "identity_label");
+        setScreenValue(null, "path_context");
+        setScreenValue(null, "path_milestone");
+        cleanupFlowState("all", setScreenValue);
         loadScreen(snjTarget);
         break;
       }
@@ -1564,112 +2002,140 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // ================================================================
       // FAST_TRACK_BASELINE — skip to baseline with chosen focus
       // ================================================================
-      case 'fast_track_baseline': {
+      case "fast_track_baseline": {
         const ftbFocus = payload?.focus;
         if (ftbFocus) {
-          setScreenValue(ftbFocus, 'scan_focus');
-          setScreenValue(ftbFocus, 'suggested_focus');
+          setScreenValue(ftbFocus, "scan_focus");
+          setScreenValue(ftbFocus, "suggested_focus");
         }
-        loadScreen({ container_id: 'stable_scan', state_id: 'prana_baseline' });
+        loadScreen({ container_id: "stable_scan", state_id: "prana_baseline" });
         break;
       }
 
       // ================================================================
       // FAST_TRACK_COMPANION — load pre-cached companion data
       // ================================================================
-      case 'fast_track_companion': {
+      case "fast_track_companion": {
         const ftcFocus = payload?.focus;
         const ftcFriction = screenState.help_me_choose_1;
         const ftcIntention = screenState.help_me_choose_2;
 
         const ftcInput = {
           focus: ftcFocus,
-          feelings: [ftcFriction || 'restless'],
-          depth: 'standard',
-          intention: ftcIntention || 'Seek growth and clarity.',
+          feelings: [ftcFriction || "restless"],
+          depth: "standard",
+          intention: ftcIntention || "Seek growth and clarity.",
         };
 
         if (ftcFocus) {
-          setScreenValue(ftcFocus, 'scan_focus');
-          setScreenValue(ftcFocus, 'suggested_focus');
+          setScreenValue(ftcFocus, "scan_focus");
+          setScreenValue(ftcFocus, "suggested_focus");
         }
 
         const ftcData = await mitraGenerateCompanion(ftcInput);
         if (!ftcData) break;
 
-        if (ftcData.intro) setScreenValue(ftcData.intro, 'analysis_intro');
-        if (ftcData.metricsSummary) setScreenValue(ftcData.metricsSummary, 'analysis_metrics');
-        if (ftcData.insightText) setScreenValue(ftcData.insightText, 'analysis_insight');
+        if (ftcData.intro) setScreenValue(ftcData.intro, "analysis_intro");
+        if (ftcData.metricsSummary)
+          setScreenValue(ftcData.metricsSummary, "analysis_metrics");
+        if (ftcData.insightText)
+          setScreenValue(ftcData.insightText, "analysis_insight");
 
         // Extract companion items
         const ftcCompanion = ftcData.companion || ftcData;
 
         if (ftcCompanion.ritual || ftcCompanion.practice) {
           const r = ftcCompanion.ritual || ftcCompanion.practice;
-          setScreenValue(r.title || r.ui?.card_title, 'card_ritual_description');
-          setScreenValue(r.meta || r.ui?.card_meta, 'card_ritual_meta');
+          setScreenValue(
+            r.title || r.ui?.card_title,
+            "card_ritual_description",
+          );
+          setScreenValue(r.meta || r.ui?.card_meta, "card_ritual_meta");
         }
         if (ftcCompanion.sankalpa || ftcCompanion.sankalp) {
           const s = ftcCompanion.sankalpa || ftcCompanion.sankalp;
-          setScreenValue(s.line || s.core?.line || s.ui?.card_subtitle, 'card_sankalpa_description');
+          setScreenValue(
+            s.line || s.core?.line || s.ui?.card_subtitle,
+            "card_sankalpa_description",
+          );
         }
         if (ftcCompanion.mantra) {
-          setScreenValue(ftcCompanion.mantra.line || ftcCompanion.mantra.core?.devanagari || ftcCompanion.mantra.ui?.card_subtitle, 'card_mantra_description');
+          setScreenValue(
+            ftcCompanion.mantra.line ||
+              ftcCompanion.mantra.core?.devanagari ||
+              ftcCompanion.mantra.ui?.card_subtitle,
+            "card_mantra_description",
+          );
         }
 
-        setScreenValue(ftcData.identityLabel || '', 'identity_label');
-        setScreenValue(ftcData.pathContext || {}, 'path_context');
-        setScreenValue(ftcData.pathMilestone || null, 'path_milestone');
+        setScreenValue(ftcData.identityLabel || "", "identity_label");
+        setScreenValue(ftcData.pathContext || {}, "path_context");
+        setScreenValue(ftcData.pathMilestone || null, "path_milestone");
 
-        loadScreen({ container_id: 'insight_summary', state_id: 'path_reveal' });
+        loadScreen({
+          container_id: "insight_summary",
+          state_id: "path_reveal",
+        });
         break;
       }
 
       // ================================================================
       // ALTER_PRACTICES — Day 14 practice alteration
       // ================================================================
-      case 'alter_practices': {
-        const apDirection = payload?.direction || 'alter';
+      case "alter_practices": {
+        const apDirection = payload?.direction || "alter";
         try {
-          const alterRes = await api.post('user-journey/alter-practice/', {
+          const alterRes = await api.post("user-journey/alter-practice/", {
             direction: apDirection,
-            feeling: screenState.checkpoint_feeling || '',
-            newCategory: payload?.newCategory || '',
-            newSubFocus: payload?.newSubFocus || '',
-            newLevel: payload?.newLevel || '',
+            feeling: screenState.checkpoint_feeling || "",
+            newCategory: payload?.newCategory || "",
+            newSubFocus: payload?.newSubFocus || "",
+            newLevel: payload?.newLevel || "",
           });
 
           const alterData = alterRes.data;
-          console.log('[MITRA] alter-practice response:', alterData);
+          console.log("[MITRA] alter-practice response:", alterData);
 
           if (!alterData.allowed) {
-            setScreenValue(alterData.message, 'alter_blocked_message');
-            setScreenValue(alterData.reason, 'alter_blocked_reason');
-            loadScreen({ container_id: 'companion_dashboard', state_id: 'day_active' });
+            setScreenValue(alterData.message, "alter_blocked_message");
+            setScreenValue(alterData.reason, "alter_blocked_reason");
+            loadScreen({
+              container_id: "companion_dashboard",
+              state_id: "day_active",
+            });
             break;
           }
 
           // Allowed — reset for new cycle
-          setScreenValue(true, 'alter_practices_mode');
-          setScreenValue(1, 'day_number');
-          setScreenValue({}, 'journey_log');
-          setScreenValue(false, 'checkpoint_completed');
+          setScreenValue(true, "alter_practices_mode");
+          setScreenValue(1, "day_number");
+          setScreenValue({}, "journey_log");
+          setScreenValue(false, "checkpoint_completed");
 
           if (alterData.journey?.cycleItems) {
-            setScreenValue(alterData.journey.cycleItems.mantraId, 'cycle_mantra_id');
-            setScreenValue(alterData.journey.cycleItems.practiceId, 'cycle_practice_id');
-            setScreenValue(alterData.journey.cycleItems.sankalpId, 'cycle_sankalp_id');
+            setScreenValue(
+              alterData.journey.cycleItems.mantraId,
+              "cycle_mantra_id",
+            );
+            setScreenValue(
+              alterData.journey.cycleItems.practiceId,
+              "cycle_practice_id",
+            );
+            setScreenValue(
+              alterData.journey.cycleItems.sankalpId,
+              "cycle_sankalp_id",
+            );
           }
 
           // Regenerate companion with new locked items
-          await executeAction({ type: 'generate_companion' }, context);
+          await executeAction({ type: "generate_companion" }, context);
         } catch (apErr: any) {
-          console.warn('[MITRA] alter-practice failed:', apErr.message);
+          console.warn("[MITRA] alter-practice failed:", apErr.message);
           // Fallback to local alter
-          setScreenValue(true, 'alter_practices_mode');
-          setScreenValue(1, 'day_number');
-          setScreenValue({}, 'journey_log');
-          await executeAction({ type: 'generate_companion' }, context);
+          setScreenValue(true, "alter_practices_mode");
+          setScreenValue(1, "day_number");
+          setScreenValue({}, "journey_log");
+          await executeAction({ type: "generate_companion" }, context);
         }
         break;
       }
@@ -1677,14 +2143,14 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // ================================================================
       // RECORD_PAUSE — track pause/victory counters
       // ================================================================
-      case 'record_pause': {
+      case "record_pause": {
         const rpSuccess = payload?.success;
         const rpCount = screenState.pause_count || 0;
         const rpVictories = screenState.pause_victories || 0;
 
-        setScreenValue(rpCount + 1, 'pause_count');
+        setScreenValue(rpCount + 1, "pause_count");
         if (rpSuccess) {
-          setScreenValue(rpVictories + 1, 'pause_victories');
+          setScreenValue(rpVictories + 1, "pause_victories");
         }
 
         if (target) loadScreen(target);
@@ -1694,10 +2160,10 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // ================================================================
       // EXTERNAL_LINK — open URL in system browser
       // ================================================================
-      case 'external_link': {
+      case "external_link": {
         if (payload?.url) {
           Linking.openURL(payload.url).catch((err: any) =>
-            console.warn('[ACTION] Failed to open URL:', err.message),
+            console.warn("[ACTION] Failed to open URL:", err.message),
           );
         }
         break;
@@ -1706,16 +2172,16 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // ================================================================
       // NEXT_PRACTICE_STEP — advance step counter in practice runner
       // ================================================================
-      case 'next_practice_step': {
+      case "next_practice_step": {
         const npsSteps = screenState.info?.steps || [];
         const npsCurrentStep = screenState.current_practice_step || 0;
         if (npsCurrentStep < npsSteps.length - 1) {
           const npsNextIdx = npsCurrentStep + 1;
           const npsIsLast = npsNextIdx === npsSteps.length - 1;
-          setScreenValue(npsNextIdx, 'current_practice_step');
-          setScreenValue(npsSteps[npsNextIdx], 'current_step_text');
-          setScreenValue(!npsIsLast, 'show_next_button');
-          setScreenValue(npsIsLast, 'show_complete_button');
+          setScreenValue(npsNextIdx, "current_practice_step");
+          setScreenValue(npsSteps[npsNextIdx], "current_step_text");
+          setScreenValue(!npsIsLast, "show_next_button");
+          setScreenValue(npsIsLast, "show_complete_button");
         }
         break;
       }
@@ -1723,7 +2189,7 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // ================================================================
       // PROCESS_TRIGGER_FEEDBACK — process reflection, get suggestions
       // ================================================================
-      case 'process_trigger_feedback': {
+      case "process_trigger_feedback": {
         const ptfSelection = screenState.trigger_feeling_selection;
         const ptfManual = screenState.trigger_sentiment_input;
         let ptfFeeling = ptfSelection;
@@ -1731,241 +2197,330 @@ export async function executeAction(action: Action, context: ActionContext): Pro
         // Smart sentiment detection for manual typing
         if (!ptfFeeling && ptfManual) {
           const ptfText = ptfManual.toLowerCase();
-          const positiveKeywords = ['good', 'balanced', 'calm', 'better', 'peace', 'fine', 'okay', 'settled', 'stable', 'shanti'];
-          const negativeKeywords = ['bad', 'stressed', 'triggered', 'anxious', 'angry', 'heavy', 'overwhelmed', 'restless', 'upset'];
+          const positiveKeywords = [
+            "good",
+            "balanced",
+            "calm",
+            "better",
+            "peace",
+            "fine",
+            "okay",
+            "settled",
+            "stable",
+            "shanti",
+          ];
+          const negativeKeywords = [
+            "bad",
+            "stressed",
+            "triggered",
+            "anxious",
+            "angry",
+            "heavy",
+            "overwhelmed",
+            "restless",
+            "upset",
+          ];
 
           const hasPositive = positiveKeywords.some((k) => ptfText.includes(k));
           const hasNegative = negativeKeywords.some((k) => ptfText.includes(k));
 
           if (hasPositive && !hasNegative) {
-            ptfFeeling = 'balanced';
+            ptfFeeling = "balanced";
           } else if (hasNegative) {
-            ptfFeeling = 'agitated';
+            ptfFeeling = "agitated";
           } else {
-            ptfFeeling = 'uncertain';
+            ptfFeeling = "uncertain";
           }
         }
 
         // Log trigger reflection submission
-        await mitraTrackEvent('trigger_reflection_submitted', {
+        await mitraTrackEvent("trigger_reflection_submitted", {
           journeyId: screenState.journey_id,
           dayNumber: screenState.day_number || 1,
           meta: { feeling: ptfFeeling, free_text: ptfManual },
         });
 
         // If user feels balanced -> resolve and return home
-        if (ptfFeeling === 'balanced') {
-          await mitraTrackEvent('trigger_resolved_after_reset', {
+        if (ptfFeeling === "balanced") {
+          await mitraTrackEvent("trigger_resolved_after_reset", {
             journeyId: screenState.journey_id,
             dayNumber: screenState.day_number || 1,
           });
 
           // Cleanup support mantra
-          setScreenValue(null, 'trigger_mantra_text');
-          setScreenValue(null, 'trigger_mantra_devanagari');
+          setScreenValue(null, "trigger_mantra_text");
+          setScreenValue(null, "trigger_mantra_devanagari");
 
           _cleanupOnReturnHome(setScreenValue, screenState, endFlowInstance);
-          loadScreen({ container_id: 'companion_dashboard', state_id: 'day_active' });
+          loadScreen({
+            container_id: "companion_dashboard",
+            state_id: "day_active",
+          });
           break;
         }
 
         // Call trigger-mantras API for suggestions
         const ptfRes = await mitraTriggerMantras({
           feeling: ptfFeeling,
-          focus: screenState.scan_focus || screenState.active_focus || 'peacecalm',
-          subFocus: screenState.prana_baseline_selection || '',
-          depth: screenState.routine_depth || screenState.routine_setup || 'standard',
+          focus:
+            screenState.scan_focus || screenState.active_focus || "peacecalm",
+          subFocus: screenState.prana_baseline_selection || "",
+          depth:
+            screenState.routine_depth ||
+            screenState.routine_setup ||
+            "standard",
           round: screenState.trigger_cycle_count || 1,
-          locale: screenState.locale || 'en',
-          tz: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata',
+          locale: screenState.locale || "en",
+          tz:
+            Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
         });
 
         const ptfSuggestions = ptfRes?.suggestions || [];
         const ptfGuidance = ptfRes?.guidance || {};
 
         // Map dynamic guidance
-        setScreenValue(ptfGuidance.headline || 'Let Your Breath Guide You', 'trigger_advice_headline');
-        setScreenValue(ptfGuidance.comfort || 'You are not alone in this.', 'trigger_advice_subtext_1');
-        setScreenValue(ptfGuidance.insight || 'Observe what arises without judgment.', 'trigger_advice_subtext_2');
-        setScreenValue(ptfGuidance.next_step || 'Try one of these practices.', 'trigger_advice_subtext_3');
+        setScreenValue(
+          ptfGuidance.headline || "Let Your Breath Guide You",
+          "trigger_advice_headline",
+        );
+        setScreenValue(
+          ptfGuidance.comfort || "You are not alone in this.",
+          "trigger_advice_subtext_1",
+        );
+        setScreenValue(
+          ptfGuidance.insight || "Observe what arises without judgment.",
+          "trigger_advice_subtext_2",
+        );
+        setScreenValue(
+          ptfGuidance.next_step || "Try one of these practices.",
+          "trigger_advice_subtext_3",
+        );
 
         // Map suggestions to PracticeCard format
         const ptfCards = ptfSuggestions.map((s: any, idx: number) => {
-          const ptfItemType = s.core?.type || s.type || 'mantra';
-          const ptfIsPractice = ptfItemType === 'practice';
+          const ptfItemType = s.core?.type || s.type || "mantra";
+          const ptfIsPractice = ptfItemType === "practice";
 
           return {
             id: `trigger_suggestion_${idx}`,
             item_id: s.item_id || s.id,
-            type: 'practice_card',
+            type: "practice_card",
             title: s.ui?.card_title || s.core?.title,
             description: s.ui?.card_subtitle || s.core?.meaning,
-            icon: ptfIsPractice ? 'leaf' : 'om',
+            icon: ptfIsPractice ? "leaf" : "om",
             info_action: {
-              type: 'view_info',
+              type: "view_info",
               payload: {
                 type: ptfItemType,
                 manualData: {
                   ...s.core,
                   wisdom: s.context,
-                  source: 'support',
+                  source: "support",
                   is_trigger: true,
                   item_id: s.item_id || s.id,
                   item_type: ptfItemType,
                 },
                 is_trigger: true,
                 start_action: ptfIsPractice
-                  ? { type: 'navigate', target: { container_id: 'practice_runner', state_id: 'practice_step_runner' } }
+                  ? {
+                      type: "navigate",
+                      target: {
+                        container_id: "practice_runner",
+                        state_id: "practice_step_runner",
+                      },
+                    }
                   : {
-                      type: 'select_trigger_mantra',
+                      type: "select_trigger_mantra",
                       payload: { mantra: { ...s.core, id: s.item_id || s.id } },
-                      target: { container_id: 'practice_runner', state_id: 'post_trigger_mantra' },
+                      target: {
+                        container_id: "practice_runner",
+                        state_id: "post_trigger_mantra",
+                      },
                     },
               },
             },
           };
         });
 
-        setScreenValue(ptfCards, 'suggested_trigger_mantras');
+        setScreenValue(ptfCards, "suggested_trigger_mantras");
 
         // Reset selection state
-        setScreenValue(null, 'selected_card_id');
-        setScreenValue(false, 'show_start_trigger_mantra');
+        setScreenValue(null, "selected_card_id");
+        setScreenValue(false, "show_start_trigger_mantra");
 
-        loadScreen({ container_id: 'awareness_trigger', state_id: 'trigger_advice_reveal' });
+        loadScreen({
+          container_id: "awareness_trigger",
+          state_id: "trigger_advice_reveal",
+        });
         break;
       }
 
       // ================================================================
       // UPDATE_TRIGGER_BUTTON — enable Share button (always "Share →")
       // ================================================================
-      case 'update_trigger_button': {
-        setScreenValue(false, 'is_trigger_share_disabled');
+      case "update_trigger_button": {
+        setScreenValue(false, "is_trigger_share_disabled");
         // REG-013: Always keep "Share →" — process_trigger_feedback handles balanced → navigate home
-        setScreenValue('Share \u2192', 'trigger_share_btn_label');
+        setScreenValue("Share \u2192", "trigger_share_btn_label");
         break;
       }
 
       // ================================================================
       // UPDATE_RECHECK_BUTTON — enable recheck Share button
       // ================================================================
-      case 'update_recheck_button': {
-        setScreenValue(false, 'is_recheck_btn_disabled');
+      case "update_recheck_button": {
+        setScreenValue(false, "is_recheck_btn_disabled");
         // Always keep "Share →"
-        setScreenValue('Share \u2192', 'trigger_recheck_btn_label');
+        setScreenValue("Share \u2192", "trigger_recheck_btn_label");
         break;
       }
 
       // ================================================================
       // PROCESS_TRIGGER_RECHECK — handle recheck result (round 2 or resolve)
       // ================================================================
-      case 'process_trigger_recheck': {
+      case "process_trigger_recheck": {
         const ptrFeeling = screenState.trigger_recheck_selection;
         const ptrRound = screenState.trigger_cycle_count || 1;
 
         // Log recheck submission
-        await mitraTrackEvent('trigger_recheck_submitted', {
+        await mitraTrackEvent("trigger_recheck_submitted", {
           journeyId: screenState.journey_id,
           dayNumber: screenState.day_number || 1,
           meta: { round: ptrRound, feeling: ptrFeeling },
         });
 
-        if (ptrFeeling === 'balanced' || ptrRound >= 2) {
+        if (ptrFeeling === "balanced" || ptrRound >= 2) {
           // Cleanup support mantra
-          setScreenValue(null, 'trigger_mantra_text');
-          setScreenValue(null, 'trigger_mantra_devanagari');
+          setScreenValue(null, "trigger_mantra_text");
+          setScreenValue(null, "trigger_mantra_devanagari");
 
           // Gentle exit message for max-rounds (not true resolution)
-          if (ptrRound >= 2 && ptrFeeling !== 'balanced') {
+          if (ptrRound >= 2 && ptrFeeling !== "balanced") {
             setScreenValue(
-              'You can return to your dashboard and continue gently from here.',
-              'trigger_exit_message',
+              "You can return to your dashboard and continue gently from here.",
+              "trigger_exit_message",
             );
           }
 
-          await mitraTrackEvent('trigger_resolved', {
+          await mitraTrackEvent("trigger_resolved", {
             journeyId: screenState.journey_id,
             dayNumber: screenState.day_number || 1,
             meta: { round: ptrRound },
           });
 
           _cleanupOnReturnHome(setScreenValue, screenState, endFlowInstance);
-          loadScreen({ container_id: 'companion_dashboard', state_id: 'day_active' });
+          loadScreen({
+            container_id: "companion_dashboard",
+            state_id: "day_active",
+          });
         } else {
           // Round 2 recommendations
           const ptrNextRound = ptrRound + 1;
-          setScreenValue(ptrNextRound, 'trigger_cycle_count');
+          setScreenValue(ptrNextRound, "trigger_cycle_count");
 
           const ptrPrevSupport = screenState._active_support_item || {};
-          const ptrRound1Suggestions = (screenState.suggested_trigger_mantras || [])
+          const ptrRound1Suggestions = (
+            screenState.suggested_trigger_mantras || []
+          )
             .map((s: any) => s.item_id)
             .filter(Boolean);
 
           const ptrRes = await mitraTriggerMantras({
-            feeling: 'agitated',
-            focus: screenState.scan_focus || screenState.active_focus || 'peacecalm',
-            subFocus: screenState.prana_baseline_selection || '',
+            feeling: "agitated",
+            focus:
+              screenState.scan_focus || screenState.active_focus || "peacecalm",
+            subFocus: screenState.prana_baseline_selection || "",
             round: ptrNextRound,
-            previousSuggestionId: ptrPrevSupport.itemId || ptrRound1Suggestions[0] || '',
-            previousSuggestionType: ptrPrevSupport.itemType || 'mantra',
-            previousSuggestionCompleted: !!screenState._completion_tracked_this_session,
+            previousSuggestionId:
+              ptrPrevSupport.itemId || ptrRound1Suggestions[0] || "",
+            previousSuggestionType: ptrPrevSupport.itemType || "mantra",
+            previousSuggestionCompleted:
+              !!screenState._completion_tracked_this_session,
             excludeIds: ptrRound1Suggestions,
             recheckState: ptrFeeling,
-            locale: screenState.locale || 'en',
-            tz: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata',
-            depth: screenState.routine_depth || 'standard',
+            locale: screenState.locale || "en",
+            tz:
+              Intl.DateTimeFormat().resolvedOptions().timeZone ||
+              "Asia/Kolkata",
+            depth: screenState.routine_depth || "standard",
           });
 
           const ptrSuggestions = ptrRes?.suggestions || [];
           const ptrGuidance = ptrRes?.guidance || {};
 
-          setScreenValue(ptrGuidance.headline || 'Round 2: Deeper Focus', 'trigger_advice_headline');
-          setScreenValue(ptrGuidance.comfort || 'Stay steady.', 'trigger_advice_subtext_1');
-          setScreenValue(ptrGuidance.insight || 'Notice your breath.', 'trigger_advice_subtext_2');
-          setScreenValue(ptrGuidance.next_step || 'Continue with focus.', 'trigger_advice_subtext_3');
+          setScreenValue(
+            ptrGuidance.headline || "Round 2: Deeper Focus",
+            "trigger_advice_headline",
+          );
+          setScreenValue(
+            ptrGuidance.comfort || "Stay steady.",
+            "trigger_advice_subtext_1",
+          );
+          setScreenValue(
+            ptrGuidance.insight || "Notice your breath.",
+            "trigger_advice_subtext_2",
+          );
+          setScreenValue(
+            ptrGuidance.next_step || "Continue with focus.",
+            "trigger_advice_subtext_3",
+          );
 
           // Map Round 2 suggestions to cards
           const ptrCards = ptrSuggestions.map((s: any, idx: number) => {
-            const ptrItemType = s.core?.type || s.type || 'mantra';
-            const ptrIsPractice = ptrItemType === 'practice';
+            const ptrItemType = s.core?.type || s.type || "mantra";
+            const ptrIsPractice = ptrItemType === "practice";
 
             return {
               id: `trigger_suggestion_round2_${idx}`,
               item_id: s.item_id || s.id,
-              type: 'practice_card',
+              type: "practice_card",
               title: s.ui?.card_title || s.core?.title,
               description: s.ui?.card_subtitle || s.core?.meaning,
-              icon: ptrIsPractice ? 'leaf' : 'om',
+              icon: ptrIsPractice ? "leaf" : "om",
               info_action: {
-                type: 'view_info',
+                type: "view_info",
                 payload: {
                   type: ptrItemType,
                   manualData: {
                     ...s.core,
                     wisdom: s.context,
-                    source: 'support',
+                    source: "support",
                     is_trigger: true,
                     item_id: s.item_id || s.id,
                     item_type: ptrItemType,
                   },
                   is_trigger: true,
                   start_action: ptrIsPractice
-                    ? { type: 'navigate', target: { container_id: 'practice_runner', state_id: 'practice_step_runner' } }
+                    ? {
+                        type: "navigate",
+                        target: {
+                          container_id: "practice_runner",
+                          state_id: "practice_step_runner",
+                        },
+                      }
                     : {
-                        type: 'select_trigger_mantra',
-                        payload: { mantra: { ...s.core, id: s.item_id || s.id } },
-                        target: { container_id: 'practice_runner', state_id: 'post_trigger_mantra' },
+                        type: "select_trigger_mantra",
+                        payload: {
+                          mantra: { ...s.core, id: s.item_id || s.id },
+                        },
+                        target: {
+                          container_id: "practice_runner",
+                          state_id: "post_trigger_mantra",
+                        },
                       },
                 },
               },
             };
           });
 
-          setScreenValue(ptrCards, 'suggested_trigger_mantras');
-          setScreenValue(null, 'selected_card_id');
-          setScreenValue(false, 'show_start_trigger_mantra');
+          setScreenValue(ptrCards, "suggested_trigger_mantras");
+          setScreenValue(null, "selected_card_id");
+          setScreenValue(false, "show_start_trigger_mantra");
 
-          loadScreen({ container_id: 'awareness_trigger', state_id: 'trigger_advice_reveal' });
+          loadScreen({
+            container_id: "awareness_trigger",
+            state_id: "trigger_advice_reveal",
+          });
         }
         break;
       }
@@ -1973,15 +2528,16 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // ================================================================
       // TRIGGER_MANTRA_SUGGESTIONS — navigate to recovery target or insight
       // ================================================================
-      case 'trigger_mantra_suggestions': {
+      case "trigger_mantra_suggestions": {
         const tmsRecoveryTarget = screenState.free_chant_recovery_target;
         if (tmsRecoveryTarget) {
           loadScreen(tmsRecoveryTarget);
         } else {
           const tmsCurrentDay = screenState.day_number || 1;
           loadScreen({
-            container_id: 'cycle_transitions',
-            state_id: tmsCurrentDay === 14 ? 'daily_insight_14' : 'daily_insight',
+            container_id: "cycle_transitions",
+            state_id:
+              tmsCurrentDay === 14 ? "daily_insight_14" : "daily_insight",
           });
         }
         break;
@@ -1990,20 +2546,23 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // ================================================================
       // SELECT_TRIGGER_MANTRA — select a mantra from suggestions
       // ================================================================
-      case 'select_trigger_mantra': {
+      case "select_trigger_mantra": {
         const stmMantra = payload?.mantra;
         if (!stmMantra) break;
 
-        setScreenValue(stmMantra.id, 'selected_card_id');
-        setScreenValue(stmMantra.iast || stmMantra.title, 'trigger_mantra_text');
-        setScreenValue(stmMantra.devanagari, 'trigger_mantra_devanagari');
-        setScreenValue(true, 'show_start_trigger_mantra');
+        setScreenValue(stmMantra.id, "selected_card_id");
+        setScreenValue(
+          stmMantra.iast || stmMantra.title,
+          "trigger_mantra_text",
+        );
+        setScreenValue(stmMantra.devanagari, "trigger_mantra_devanagari");
+        setScreenValue(true, "show_start_trigger_mantra");
 
         // Update runner_active_item with full mantra data including audio_url
         setScreenValue(
           {
-            item_type: 'mantra',
-            source: 'support',
+            item_type: "mantra",
+            source: "support",
             item_id: stmMantra.item_id || stmMantra.id,
             audio_url: stmMantra.audio_url || null,
             iast: stmMantra.iast || stmMantra.title,
@@ -2011,20 +2570,20 @@ export async function executeAction(action: Action, context: ActionContext): Pro
             meaning: stmMantra.meaning,
             title: stmMantra.title || stmMantra.iast,
           },
-          'runner_active_item',
+          "runner_active_item",
         );
 
         // Log suggestion selection milestone
         const stmEventName =
-          screenState._currentContainerId === 'awareness_trigger'
-            ? 'trigger_suggestion_selected'
-            : 'checkin_suggestion_selected';
+          screenState._currentContainerId === "awareness_trigger"
+            ? "trigger_suggestion_selected"
+            : "checkin_suggestion_selected";
 
         await mitraTrackEvent(stmEventName, {
           journeyId: screenState.journey_id,
           dayNumber: screenState.day_number || 1,
           meta: {
-            item_type: 'mantra',
+            item_type: "mantra",
             item_id: stmMantra.item_id || stmMantra.id,
             round: screenState.trigger_cycle_count || 1,
           },
@@ -2037,9 +2596,14 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // ================================================================
       // TRACK_COMPLETION — fire a Mitra completion event
       // ================================================================
-      case 'track_completion': {
+      case "track_completion": {
         if (!payload) break;
-        const { itemType: tcItemType, itemId: tcItemId, source: tcSource, meta: tcMeta } = payload;
+        const {
+          itemType: tcItemType,
+          itemId: tcItemId,
+          source: tcSource,
+          meta: tcMeta,
+        } = payload;
         await mitraTrackCompletion({
           itemType: tcItemType,
           itemId: tcItemId,
@@ -2058,7 +2622,7 @@ export async function executeAction(action: Action, context: ActionContext): Pro
     // Release duplicate submit guard
     if (GUARDED_ACTIONS.has(type)) {
       _actionInFlight = false;
-      setScreenValue(false, '_isSubmitting');
+      setScreenValue(false, "_isSubmitting");
     }
   }
 }

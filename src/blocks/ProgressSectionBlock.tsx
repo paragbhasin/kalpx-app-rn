@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
   },
   todayItem: {
     flex: 1,
-    padding: 14,
+    padding: 10,
     borderRadius: 15,
     backgroundColor: "rgba(255, 255, 255, 0.7)",
     borderWidth: 1,
@@ -345,7 +345,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(211, 179, 130, 0.9)",
   },
   itemBadge: {
-    alignSelf: "flex-start",
+    alignSelf: "center",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 99,
@@ -362,6 +362,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.regular,
     fontSize: 12,
     color: "#7f7367",
+    textAlign: "center",
   },
   todaySummary: {
     textAlign: "center",

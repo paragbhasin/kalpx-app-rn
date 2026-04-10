@@ -22,6 +22,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { BlurView } from "expo-blur";
 import { useSelector } from "react-redux";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import api from "../../Networks/axios";
@@ -207,15 +208,6 @@ export default function Home() {
     navigation.navigate("DynamicEngine");
   };
 
-  if (checkingJourney || isProcessing) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingWrap}>
-          <ActivityIndicator size="large" color="#D4A017" />
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   // Temporarily disable the quick-category nav (Mitra / Videos / Classes / Community).
   // const categories = [
@@ -232,6 +224,12 @@ export default function Home() {
         backgroundColor="#FAF7F2"
         translucent={false}
       />
+
+      {(checkingJourney || isProcessing) && (
+        <BlurView intensity={30} tint="dark" style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#D4A017" />
+        </BlurView>
+      )}
 
       {/* ── Top Category Nav ── */}
       {/*
@@ -355,6 +353,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "transparent",
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 999,
   },
   loadingWrap: {
     flex: 1,

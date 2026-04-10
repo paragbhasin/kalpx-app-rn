@@ -338,6 +338,24 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                 : "Begin when you feel ready. This takes 2-3 minutes. There is no rush."}
           </Text>
 
+          {/* Actions */}
+          {visibleFooterBlocks.length > 0 && (
+            <View style={styles.infoActions}>
+              {visibleFooterBlocks.map((block: any, i: number) => {
+                const resolvedBlock = { ...block };
+                if (resolvedBlock.type === "primary_button") {
+                  if (currentType === "mantra")
+                    resolvedBlock.label = "Begin Chanting";
+                  else if (currentType === "sankalp")
+                    resolvedBlock.label = "I Embody This";
+                  else if (currentType === "practice")
+                    resolvedBlock.label = "Begin Practice";
+                }
+                return <BlockRenderer key={`f-${i}`} block={resolvedBlock} />;
+              })}
+            </View>
+          )}
+
           {/* Accordion Sections */}
           <View style={styles.collapsibleSections}>
             {/* Consolidated Meaning Section for Practices and Mantras */}
@@ -432,24 +450,6 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
             )}
           </View>
 
-          {/* Actions */}
-
-          {visibleFooterBlocks.length > 0 && (
-            <View style={styles.infoActions}>
-              {visibleFooterBlocks.map((block: any, i: number) => {
-                const resolvedBlock = { ...block };
-                if (resolvedBlock.type === "primary_button") {
-                  if (currentType === "mantra")
-                    resolvedBlock.label = "Begin Chanting";
-                  else if (currentType === "sankalp")
-                    resolvedBlock.label = "I Embody This";
-                  else if (currentType === "practice")
-                    resolvedBlock.label = "Begin Practice";
-                }
-                return <BlockRenderer key={`f-${i}`} block={resolvedBlock} />;
-              })}
-            </View>
-          )}
 
           <TouchableOpacity onPress={handleBack} style={styles.backLink}>
             <Text style={styles.backLinkText}>Back</Text>

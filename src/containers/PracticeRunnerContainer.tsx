@@ -24,6 +24,12 @@ import Slider from "@react-native-community/slider";
 
 const { width } = Dimensions.get("window");
 
+function _omTextForTrack(url: string) {
+  if (url.includes("Hari Om")) return { label: "Hari Om", devanagari: "हरि ॐ" };
+  if (url.includes("Om Shanti")) return { label: "Om Shanti Shanti Shanti", devanagari: "ॐ शान्तिः शान्तिः शान्तिः" };
+  return { label: "OM", devanagari: "ॐ" };
+}
+
 interface PracticeRunnerContainerProps {
   schema: {
     id?: string;
@@ -157,6 +163,9 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
     };
     
     let target = exitTargets[meta.runnerType];
+    if (currentStateId === 'checkin_breath_reset') {
+      target = { container_id: 'companion_dashboard', state_id: 'day_active' };
+    }
     if (isTriggerSession) {
       target = currentStateId === "free_mantra_chanting" 
         ? { container_id: "companion_dashboard", state_id: "day_active" }
@@ -177,21 +186,55 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
   }, [screenState, _isTriggerScreen, _isCheckinSupportScreen]);
 
   const mantraText = useMemo(() => {
-    if (_isTriggerScreen) return screenState.trigger_mantra_text || "";
-    if (_isCheckinSupportScreen) return screenState.checkin_mantra_text || screenState.runner_active_item?.iast || "";
+    if (_isTriggerScreen) {
+      if (screenState.trigger_step >= 3 && screenState.runner_active_item?.iast) {
+        return screenState.runner_active_item.iast;
+      }
+      if (screenState._selected_om_audio) {
+        const r = _omTextForTrack(screenState._selected_om_audio);
+        return r.label;
+      }
+      return screenState.trigger_mantra_text || '';
+    }
+    if (_isCheckinSupportScreen) {
+      if (screenState._selected_om_audio) {
+        const r = _omTextForTrack(screenState._selected_om_audio);
+        return r.label;
+      }
+      return screenState.checkin_mantra_text || screenState.runner_active_item?.iast || '';
+    }
     return screenState.runner_active_item?.iast || screenState.mantra_text || schema.mantra_text || "";
   }, [screenState, _isTriggerScreen, _isCheckinSupportScreen, schema]);
 
   const mantraHindi = useMemo(() => {
-    if (_isTriggerScreen) return screenState.trigger_mantra_devanagari || "ॐ";
-    if (_isCheckinSupportScreen) return screenState.checkin_mantra_devanagari || screenState.runner_active_item?.devanagari || "";
+    if (_isTriggerScreen) {
+      if (screenState.trigger_step >= 3 && screenState.runner_active_item?.devanagari) {
+        return screenState.runner_active_item.devanagari;
+      }
+      if (screenState._selected_om_audio) {
+        const r = _omTextForTrack(screenState._selected_om_audio);
+        return r.devanagari;
+      }
+      return screenState.trigger_mantra_devanagari || 'ॐ';
+    }
+    if (_isCheckinSupportScreen) {
+      if (screenState._selected_om_audio) {
+        const r = _omTextForTrack(screenState._selected_om_audio);
+        return r.devanagari;
+      }
+      return screenState.checkin_mantra_devanagari || screenState.runner_active_item?.devanagari || '';
+    }
     return screenState.runner_active_item?.devanagari || screenState.mantra_devanagari || schema.mantra_hindi_text || "";
   }, [screenState, _isTriggerScreen, _isCheckinSupportScreen, schema]);
 
   const mantraAudioUrl = useMemo(() => {
     if (currentStateId === "free_mantra_chanting" || currentStateId === "checkin_breath_reset") return screenState._selected_om_audio || "";
     if (_isTriggerScreen || _isCheckinSupportScreen) return screenState.runner_active_item?.audio_url || screenState._selected_om_audio || "";
-    return screenState.runner_active_item?.audio_url || screenState.master_mantra?.audio_url || "";
+    const item = screenState.runner_active_item;
+    if (item?.source === 'additional' || item?.source === 'support') {
+      return item?.audio_url || '';
+    }
+    return item?.audio_url || screenState.master_mantra?.audio_url || "";
   }, [screenState, currentStateId, _isTriggerScreen, _isCheckinSupportScreen]);
 
   // ── Background Handling ──

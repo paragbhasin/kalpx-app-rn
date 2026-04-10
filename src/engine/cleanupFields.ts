@@ -25,6 +25,7 @@ export const CLEANUP_FIELDS: Record<string, string[]> = {
     'prana_ack_suggestions',
     'trigger_mantra_text',
     'trigger_mantra_devanagari',
+    'checkin_ack_accent',
   ],
   trigger: [
     'trigger_mantra_text',
@@ -40,6 +41,11 @@ export const CLEANUP_FIELDS: Record<string, string[]> = {
     'show_start_trigger_mantra',
     '_active_support_item',
     '_trigger_support_completed',
+    'trigger_step',
+    '_trigger_practice_data',
+    '_trigger_mantra_data',
+    '_trigger_negative_label',
+    '_trigger_resolution_toast',
   ],
   checkpoint: [
     'checkpoint_decision',

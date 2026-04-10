@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -132,6 +132,15 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
 
   // Has active journey check (same logic as Vue template v-if)
   const hasJourney = !!(ss.scan_focus || ss.mantra_text);
+
+  // Toast for trigger resolution
+  useEffect(() => {
+    const toast = ss._trigger_resolution_toast;
+    if (toast?.message) {
+      Alert.alert('', toast.message);
+      updateScreenData('_trigger_resolution_toast', null);
+    }
+  }, [ss._trigger_resolution_toast]);
 
   // -------------------------------------------------------------------------
   // Reset journey handler

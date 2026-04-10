@@ -38,12 +38,15 @@ const AUDIO_S3_BASE = 'https://kalpx-dev-website.s3.us-east-2.amazonaws.com/audi
 const OM_AUDIO_LIBRARY = [
   `${AUDIO_S3_BASE}/om/Om.mp4`,
   `${AUDIO_S3_BASE}/om/Om Shanti.mp4`,
+  `${AUDIO_S3_BASE}/om/Hari Om -Female.mp4`,
 ];
 
 /** Calming practice music library — add new files here */
 export const CALM_MUSIC_LIBRARY = [
   `${AUDIO_S3_BASE}/calm/Audio-calmmusic.mp3`,
   `${AUDIO_S3_BASE}/calm/Audio1.mpeg`,
+  `${AUDIO_S3_BASE}/calm/Audio9.mpeg`,
+  `${AUDIO_S3_BASE}/calm/Audio6.mpeg`,
 ];
 
 /**
@@ -61,6 +64,22 @@ async function _rotateAudio(library: string[], storageKey: string): Promise<stri
     await AsyncStorage.setItem(storageKey, String(nextIdx));
   } catch (_) { /* best effort */ }
   return library[nextIdx];
+}
+
+function _omTextForTrack(url: string) {
+  if (url.includes("Hari Om")) return { label: "Hari Om", devanagari: "हरि ॐ" };
+  if (url.includes("Om Shanti")) return { label: "Om Shanti Shanti Shanti", devanagari: "ॐ शान्तिः शान्तिः शान्तिः" };
+  return { label: "OM", devanagari: "ॐ" };
+}
+
+function _triggerNegativeLabel(feeling: string, step: number): string {
+  if (step <= 2) return "Try another way";
+  const labels: Record<string, string> = { triggered: "I still feel triggered", agitated: "I still feel agitated", drained: "I still feel drained" };
+  return labels[feeling] || "I still feel unsettled";
+}
+
+function _mitraTz(): string {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
 }
 
 // ---------------------------------------------------------------------------
@@ -616,14 +635,45 @@ export async function executeAction(action: Action, context: ActionContext): Pro
 
           // Select rotated OM audio for check-in breath reset
           if (payload.prana_type === 'agitated' || payload.prana_type === 'drained') {
-            setScreenValue('OM', 'checkin_mantra_text');
-            setScreenValue('\u0950', 'checkin_mantra_devanagari');
             const checkinOmAudio = await _rotateAudio(OM_AUDIO_LIBRARY, '_kalpx_om_audio_idx');
             setScreenValue(checkinOmAudio, '_selected_om_audio');
+            const { label, devanagari } = _omTextForTrack(checkinOmAudio);
+            setScreenValue(label, 'checkin_mantra_text');
+            setScreenValue(devanagari, 'checkin_mantra_devanagari');
+            // Set trigger state for support flow
+            setScreenValue(payload.prana_type, 'trigger_feeling');
+            setScreenValue(1, 'trigger_step');
+            setScreenValue(2, 'trigger_cycle_count');
             // Clear stale trigger state
             setScreenValue(null, 'trigger_mantra_text');
             setScreenValue(null, 'trigger_mantra_devanagari');
           }
+
+          // checkin_ack copy per prana type
+          const checkinAckCopy: Record<string, { headline: string; body: string; accent?: string }> = {
+            balanced: {
+              headline: "You are exactly where you need to be.",
+              body: "There is a quiet steadiness within you.\nStay here. Let it deepen.",
+              accent: "Nothing needs to be changed right now.",
+            },
+            energized: {
+              headline: "Your energy is present and alive.",
+              body: "Move with this energy, not against it.\nLet it carry your intention forward.",
+              accent: "This is a good moment to carry your sankalp forward.",
+            },
+            agitated: {
+              headline: "Pause before this grows.",
+              body: "The intensity you feel is not permanent.\nLet it pass through you.",
+            },
+            drained: {
+              headline: "Rest is not retreat.",
+              body: "When the body is heavy, the mind can still be clear.\nBe gentle with yourself.",
+            },
+          };
+          const ackCopy = checkinAckCopy[payload.prana_type] || checkinAckCopy.balanced!;
+          setScreenValue(ackCopy.headline, 'checkin_ack_headline');
+          setScreenValue(ackCopy.body, 'checkin_ack_body');
+          setScreenValue(ackCopy.accent || '', 'checkin_ack_accent');
 
           await mitraTrackEvent('checkin_acknowledged', {
             journeyId: screenState.journey_id,
@@ -1004,19 +1054,21 @@ export async function executeAction(action: Action, context: ActionContext): Pro
 
         // Initialize trigger session
         setScreenValue(1, 'trigger_cycle_count');
-
-        await mitraTrackEvent('trigger_session_started', {
-          journeyId: screenState.journey_id,
-          dayNumber: screenState.day_number || 1,
-        });
-
-        // Scoped OM variables (do NOT overwrite global mantra_text)
-        setScreenValue('OM', 'trigger_mantra_text');
-        setScreenValue('\u0950', 'trigger_mantra_devanagari'); // ॐ
+        setScreenValue('triggered', 'trigger_feeling');
+        setScreenValue(1, 'trigger_step');
 
         // Select rotated OM audio for this session
         const triggerOmAudio = await _rotateAudio(OM_AUDIO_LIBRARY, '_kalpx_om_audio_idx');
         setScreenValue(triggerOmAudio, '_selected_om_audio');
+        const { label: trigLabel, devanagari: trigDev } = _omTextForTrack(triggerOmAudio);
+        setScreenValue(trigLabel, 'trigger_mantra_text');
+        setScreenValue(trigDev, 'trigger_mantra_devanagari');
+
+        // Fire-and-forget event tracking
+        mitraTrackEvent('trigger_session_started', {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+        });
 
         // Set recovery target for "Try Another Way"
         setScreenValue(
@@ -1051,52 +1103,145 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // TRY_ANOTHER_WAY — call API for trigger support suggestions
       // ================================================================
       case 'try_another_way': {
-        const feeling = 'uncertain';
+        const tryFeeling = screenState['trigger_feeling'] || 'uncertain';
+        const tryRound = screenState['trigger_cycle_count'] || 1;
 
-        const triggerRes = await mitraTriggerMantras({
-          feeling,
-          focus: screenState.scan_focus || screenState.active_focus || 'peacecalm',
-          subFocus: screenState.prana_baseline_selection || '',
-          depth: screenState.routine_depth || screenState.routine_setup || 'standard',
-          round: screenState.trigger_cycle_count || 1,
-          locale: screenState.locale || 'en',
-          tz: 'Asia/Kolkata',
+        const res = await mitraTriggerMantras({
+          feeling: tryFeeling,
+          focus: screenState['scan_focus'] || screenState['active_focus'] || 'peacecalm',
+          subFocus: screenState['prana_baseline_selection'] || '',
+          depth: screenState['routine_depth'] || screenState['routine_setup'] || 'standard',
+          round: tryRound,
+          locale: screenState['locale'] || 'en',
+          tz: _mitraTz(),
         });
-        const suggestions = triggerRes.suggestions || [];
-        const guidance = triggerRes.guidance || {};
+        const suggestions = res.suggestions || [];
 
-        setScreenValue(guidance.headline || 'Take one steadier step.', 'trigger_advice_headline');
-        setScreenValue(guidance.comfort || '', 'trigger_advice_subtext_1');
-        setScreenValue(guidance.insight || '', 'trigger_advice_subtext_2');
-        setScreenValue(guidance.next_step || '', 'trigger_advice_subtext_3');
+        const practiceSuggestion = suggestions.find(
+          (s: any) => s.type === 'practice' || (s.core && s.core.steps),
+        );
+        const mantraSuggestion = suggestions.find(
+          (s: any) => s.type === 'mantra' || (s.core && !s.core.steps),
+        );
 
-        // Map suggestions to PracticeCard format
-        const tryAnotherSuggestions = suggestions.map((s: any, idx: number) => {
-          const itemType = s.type || s.core?.type || s.core?.item_type || (s.core?.steps ? 'practice' : 'mantra');
-          const isPractice = itemType === 'practice';
-          return {
-            id: `trigger_suggestion_${idx}`,
-            item_id: s.item_id || s.id,
-            type: 'practice_card',
-            title: s.ui?.card_title || s.core?.title,
-            description: s.ui?.card_subtitle || s.core?.meaning,
-            icon: isPractice ? 'fas fa-leaf' : 'fas fa-om',
-            info_action: {
-              type: 'view_info',
-              payload: {
-                type: itemType,
-                manualData: { ...s.core, wisdom: s.context, source: 'support', is_trigger: true, item_id: s.item_id || s.id, item_type: itemType },
-                is_trigger: true,
-              },
-            },
-          };
+        if (practiceSuggestion) {
+          setScreenValue({
+            ...practiceSuggestion.core,
+            wisdom: practiceSuggestion.context,
+            item_id: practiceSuggestion.item_id || practiceSuggestion.id,
+          }, '_trigger_practice_data');
+          const pCore = practiceSuggestion.core || {};
+          setScreenValue({
+            ...pCore,
+            wisdom: practiceSuggestion.context,
+            source: 'support',
+            is_trigger: true,
+            item_id: practiceSuggestion.item_id || practiceSuggestion.id,
+            item_type: 'practice',
+            steps_text: (pCore.steps || []).map((s: string, i: number) => `${i + 1}. ${s}`).join('\n'),
+            benefits_text: (pCore.benefits || []).map((b: string) => `• ${b}`).join('\n'),
+          }, 'runner_active_item');
+        }
+        if (mantraSuggestion) {
+          setScreenValue({
+            ...mantraSuggestion.core,
+            wisdom: mantraSuggestion.context,
+            item_id: mantraSuggestion.item_id || mantraSuggestion.id,
+          }, '_trigger_mantra_data');
+        }
+
+        setScreenValue(2, 'trigger_step');
+        setScreenValue(_triggerNegativeLabel(tryFeeling, 2), '_trigger_negative_label');
+
+        if (practiceSuggestion) {
+          loadScreen({ container_id: 'practice_runner', state_id: 'trigger_practice_runner' });
+        } else if (mantraSuggestion) {
+          setScreenValue(3, 'trigger_step');
+          setScreenValue(_triggerNegativeLabel(tryFeeling, 3), '_trigger_negative_label');
+          setScreenValue(mantraSuggestion.core?.iast || mantraSuggestion.core?.title || 'OM', 'trigger_mantra_text');
+          setScreenValue(mantraSuggestion.core?.devanagari || 'ॐ', 'trigger_mantra_devanagari');
+          setScreenValue(mantraSuggestion.core?.audio_url || '', '_selected_om_audio');
+          loadScreen({ container_id: 'practice_runner', state_id: 'post_trigger_mantra' });
+        } else {
+          loadScreen({ container_id: 'companion_dashboard', state_id: 'day_active' });
+        }
+        break;
+      }
+
+      // ================================================================
+      // TRIGGER_CALMER_NOW — user feels calmer, resolve trigger flow
+      // ================================================================
+      case 'trigger_calmer_now': {
+        const calmerStep = screenState['trigger_step'] || 1;
+        const calmerFeeling = screenState['trigger_feeling'] || 'triggered';
+
+        mitraTrackEvent('trigger_resolved', {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { step: calmerStep, feeling: calmerFeeling, resolution: 'calmer_now' },
         });
 
-        setScreenValue(tryAnotherSuggestions, 'suggested_trigger_mantras');
-        setScreenValue(null, 'selected_card_id');
-        setScreenValue(false, 'show_start_trigger_mantra');
+        setScreenValue({
+          message: 'You returned to your center. Carry this steadiness with you.',
+          type: 'calmer',
+        }, '_trigger_resolution_toast');
 
-        loadScreen({ container_id: 'awareness_trigger', state_id: 'trigger_advice_reveal' });
+        setScreenValue(null, 'trigger_mantra_text');
+        setScreenValue(null, 'trigger_mantra_devanagari');
+
+        loadScreen({ container_id: 'companion_dashboard', state_id: 'day_active' });
+        break;
+      }
+
+      // ================================================================
+      // TRIGGER_STILL_FEELING — user still feels triggered, escalate
+      // ================================================================
+      case 'trigger_still_feeling': {
+        const stillStep = screenState['trigger_step'] || 2;
+        const stillFeeling = screenState['trigger_feeling'] || 'triggered';
+
+        if (stillStep === 2) {
+          const storedMantra = screenState['_trigger_mantra_data'];
+
+          mitraTrackEvent('trigger_still_feeling', {
+            journeyId: screenState.journey_id,
+            dayNumber: screenState.day_number || 1,
+            meta: { step: 2, feeling: stillFeeling, nextStep: 'mantra' },
+          });
+
+          setScreenValue(3, 'trigger_step');
+          setScreenValue(_triggerNegativeLabel(stillFeeling, 3), '_trigger_negative_label');
+
+          if (storedMantra) {
+            setScreenValue(storedMantra.iast || storedMantra.title || 'OM', 'trigger_mantra_text');
+            setScreenValue(storedMantra.devanagari || 'ॐ', 'trigger_mantra_devanagari');
+            setScreenValue(storedMantra.audio_url || '', '_selected_om_audio');
+            setScreenValue({
+              ...storedMantra,
+              source: 'support',
+              is_trigger: true,
+              item_type: 'mantra',
+            }, 'runner_active_item');
+          }
+
+          loadScreen({ container_id: 'practice_runner', state_id: 'post_trigger_mantra' });
+        } else {
+          mitraTrackEvent('trigger_still_feeling_final', {
+            journeyId: screenState.journey_id,
+            dayNumber: screenState.day_number || 1,
+            meta: { step: 3, feeling: stillFeeling, resolution: 'encourage_core' },
+          });
+
+          setScreenValue({
+            message: 'Stay close to your sankalp, mantra, and practice — they are your anchors.',
+            type: 'encourage',
+          }, '_trigger_resolution_toast');
+
+          setScreenValue(null, 'trigger_mantra_text');
+          setScreenValue(null, 'trigger_mantra_devanagari');
+
+          loadScreen({ container_id: 'companion_dashboard', state_id: 'day_active' });
+        }
         break;
       }
 

@@ -1085,7 +1085,7 @@ export const RoutineBuilderContainer = {
         {
           type: "option_picker",
           id: "mantra_reps",
-          options: [9, 18, 27, 54],
+          options: [1, 9, 27, 54, 108],
           selection_mode: "single",
         },
         {
@@ -1402,7 +1402,7 @@ export const PracticeRunnerContainer = {
         {
           id: "reps_total",
           type: "option_picker",
-          options: [9, 18, 27, 54, 108],
+          options: [1, 9, 27, 54, 108],
           unit: "Chants",
         },
 
@@ -2112,30 +2112,8 @@ export const PracticeRunnerContainer = {
 
     // Trigger support practice runner — on_complete goes to trigger_recheck
     trigger_practice_runner: {
-      variant: "sacred_pause",
-      pause_config: {
-        title: "Take one steadying action.",
-        subtitle:
-          "Move through the steps gently. You do not need to force a shift.",
-        orb_label: "Return to the moment",
-        selection_title: "How long will you pause?",
-        begin_button: "Begin",
-        selection_hint: "Choose your duration to begin",
-        cancel_button: "End Practice",
-        dashboard_button: "Return to Mitra Home",
-        default_steps: [
-          "Place one hand on the belly",
-          "Inhale and let belly rise",
-          "Exhale and let belly soften",
-          "Repeat slowly",
-        ],
-      },
+      variant: "support_practice",
       tone: { theme: "light_sandal", mood: "calming" },
-      on_complete: {
-        type: "set_state",
-        field: "_trigger_support_completed",
-        value: true,
-      },
       blocks: [],
     },
 
@@ -2342,30 +2320,14 @@ export const PracticeRunnerContainer = {
           type: "primary_button",
           label: "I feel calmer now",
           style: "gold",
-          action: {
-            type: "track_event",
-            payload: {
-              eventName: "checkin_breath_reset_completed",
-              meta: { resolved_at: "breath_reset" },
-            },
-            target: {
-              container_id: "companion_dashboard",
-              state_id: "day_active",
-            },
-          },
+          action: { type: "trigger_calmer_now" },
           position: "footer",
         },
         {
           type: "primary_button",
-          label: "Continue to check-in",
+          label: "Try another way",
           style: "outline",
-          action: {
-            type: "navigate",
-            target: {
-              container_id: "cycle_transitions",
-              state_id: "quick_checkin_ack",
-            },
-          },
+          action: { type: "try_another_way" },
           position: "footer",
         },
       ],
@@ -2491,86 +2453,38 @@ export const PracticeRunnerContainer = {
 
     // Trigger support mantra runner — for trigger flow only
     post_trigger_mantra: {
+      variant: "mantra_runner",
       tone: {
         theme: "light_sandal",
         mood: "steady",
         backgroundImage: "/assets/mantra3.png",
       },
-
       blocks: [
         {
-          type: "headline",
-          content: "Stay with this for a few moments.",
-          position: "header",
-        },
-        {
-          type: "subtext",
-          content:
-            "Let the repetition settle the mind before you decide what comes next.",
-          position: "header",
-          style: { fontSize: "14px", opacity: "0.8", marginTop: "4px" },
-        },
-        {
           type: "rep_counter",
-          total: 9,
+          unlimited: true,
+          total: -1,
         },
         {
           type: "mantra_display",
           text_key: "trigger_mantra_text",
           devanagari_key: "trigger_mantra_devanagari",
         },
-        { type: "audio_player" },
         {
           type: "primary_button",
           label: "I feel calmer now",
           style: "gold",
-          action: {
-            type: "submit",
-            payload: { type: "trigger_resolved_after_support" },
-            target: {
-              container_id: "companion_dashboard",
-              state_id: "day_active",
-            },
-          },
+          action: { type: "trigger_calmer_now" },
           position: "footer_actions",
         },
         {
           type: "primary_button",
-          label: "Try another way",
+          label: "{{_trigger_negative_label}}",
           style: "outline",
-          visibility_condition: "_trigger_support_completed",
-          action: {
-            type: "navigate",
-            target: {
-              container_id: "awareness_trigger",
-              state_id: "trigger_recheck",
-            },
-          },
+          action: { type: "trigger_still_feeling" },
           position: "footer_actions",
-        },
-        {
-          type: "subtext",
-          variant: "link",
-          content: "Return to Mitra Home",
-          hide_condition: "_trigger_support_completed",
-          action: {
-            type: "submit",
-            payload: { type: "session_abandoned", source: "support" },
-            target: {
-              container_id: "companion_dashboard",
-              state_id: "day_active",
-            },
-          },
-          position: "footer_actions",
-          style: { fontSize: "14px", marginTop: "10px" },
         },
       ],
-
-      on_complete: {
-        type: "set_state",
-        field: "_trigger_support_completed",
-        value: true,
-      },
     },
   },
 };
@@ -4072,17 +3986,71 @@ export const CycleTransitionsContainer = {
     quick_checkin_ack: {
       overlay: true,
       tone: { theme: "light_sandal", mood: "steady" },
+      style: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "70vh",
+        padding: "60px 24px 40px",
+        textAlign: "center",
+      },
       blocks: [
+        {
+          type: "image",
+          url: "/assets/mantra-lotus-3d.svg",
+          alt: "lotus",
+          position: "header",
+          style: {
+            width: "120px",
+            maxWidth: "120px",
+            margin: "0 auto 32px",
+            border: "none",
+            boxShadow: "none",
+            borderRadius: "0",
+            overflow: "visible",
+          },
+        },
         {
           type: "headline",
           content: "{{checkin_ack_headline}}",
           position: "header",
+          style: {
+            fontSize: "28px",
+            fontWeight: "400",
+            letterSpacing: "0.3px",
+            lineHeight: "1.3",
+            maxWidth: "320px",
+            margin: "0 auto",
+          },
         },
         {
           type: "subtext",
           content: "{{checkin_ack_body}}",
           variant: "italic_multiline",
           position: "content",
+          style: {
+            maxWidth: "300px",
+            margin: "20px auto 0",
+            lineHeight: "1.8",
+            fontSize: "16px",
+            opacity: "0.8",
+            whiteSpace: "pre-line",
+          },
+        },
+        {
+          type: "subtext",
+          content: "{{checkin_ack_accent}}",
+          position: "content",
+          visibility_condition: "checkin_ack_accent",
+          style: {
+            color: "#D4A01B",
+            fontSize: "15px",
+            fontStyle: "italic",
+            margin: "24px auto 0",
+            maxWidth: "300px",
+            lineHeight: "1.6",
+          },
         },
         {
           type: "subtext",
@@ -4090,6 +4058,7 @@ export const CycleTransitionsContainer = {
           variant: "micro_label",
           position: "content",
           visibility_condition: "prana_ack_suggestions",
+          style: { marginTop: "24px" },
         },
         {
           type: "subtext",
@@ -4106,22 +4075,9 @@ export const CycleTransitionsContainer = {
         },
         {
           type: "primary_button",
-          label: "View Weekly Progress →",
+          label: "Return to your path →",
           style: "gold",
           position: "footer",
-          action: {
-            type: "navigate",
-            target: {
-              container_id: "cycle_transitions",
-              state_id: "{{next_insight_screen}}",
-            },
-          },
-          id: "progress_summary_btn",
-        },
-        {
-          type: "subtext",
-          variant: "link",
-          content: "Return to Mitra Home",
           action: {
             type: "navigate",
             target: {
@@ -4129,7 +4085,6 @@ export const CycleTransitionsContainer = {
               state_id: "day_active",
             },
           },
-          style: "outline",
         },
       ],
     },

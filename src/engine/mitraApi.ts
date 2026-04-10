@@ -337,6 +337,20 @@ export async function mitraJourneyStatus(): Promise<any> {
   }
 }
 
+/** GET mitra/journey/companion/ — Read-only companion data for the current
+ *  active journey. Use this when resuming a known journey instead of
+ *  generate_companion, which would create a new journey and reset day_number.
+ */
+export async function mitraJourneyCompanion(): Promise<any> {
+  try {
+    const res = await api.get('mitra/journey/companion/', { params: { tz: getTz() } });
+    return res.data;
+  } catch (err: any) {
+    console.warn('[MITRA] journey/companion failed:', err.message);
+    return null;
+  }
+}
+
 /** POST mitra/journey/welcome-back/ — Submit welcome-back decision (continue | fresh). */
 export async function mitraJourneyWelcomeBack(decision: 'continue' | 'fresh'): Promise<any> {
   try {

@@ -1,28 +1,32 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useMemo, useState } from "react";
 import {
-  View,
+  Dimensions,
+  Image,
+  LayoutAnimation,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  LayoutAnimation,
-  Platform,
   UIManager,
-  Image,
-  Dimensions,
-} from 'react-native';
-import BlockRenderer from '../engine/BlockRenderer';
-import { useScreenStore } from '../engine/useScreenBridge';
-import { Fonts } from '../theme/fonts';
+  View,
+} from "react-native";
+import BlockRenderer from "../engine/BlockRenderer";
+import { useScreenStore } from "../engine/useScreenBridge";
+import { interpolate } from "../engine/utils/interpolation";
+import { Fonts } from "../theme/fonts";
 
 // SVGs
-import MantraLotus3d from '../../assets/mantra-lotus-3d.svg';
-import { SvgUri } from 'react-native-svg';
+import { SvgUri } from "react-native-svg";
+import MantraLotus3d from "../../assets/mantra-lotus-3d.svg";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 // Enable LayoutAnimation on Android
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
@@ -34,7 +38,7 @@ interface CycleTransitionsContainerProps {
   schema: any;
 }
 
-type ActivityType = 'mantra' | 'sankalp' | 'practice' | null;
+type ActivityType = "mantra" | "sankalp" | "practice" | null;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -42,9 +46,9 @@ type ActivityType = 'mantra' | 'sankalp' | 'practice' | null;
 
 const hasContent = (val: any): boolean => {
   if (!val) return false;
-  if (typeof val === 'string') return val.trim().length > 0;
+  if (typeof val === "string") return val.trim().length > 0;
   if (Array.isArray(val)) return val.length > 0;
-  if (typeof val === 'object') return Object.keys(val).length > 0;
+  if (typeof val === "object") return Object.keys(val).length > 0;
   return true;
 };
 
@@ -77,7 +81,7 @@ const CollapsibleCard: React.FC<CollapsibleCardProps> = ({
       <View style={styles.dividerLine} />
       <View style={styles.headerLabelGroup}>
         <Text style={styles.cardLabel}>{label}</Text>
-        <Text style={styles.toggleIcon}>{expanded ? '\u25B2' : '\u25BC'}</Text>
+        <Text style={styles.toggleIcon}>{expanded ? "\u25B2" : "\u25BC"}</Text>
       </View>
       <View style={styles.dividerLine} />
     </View>
@@ -105,8 +109,16 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({ label }) => (
 // Main Component
 // ---------------------------------------------------------------------------
 
-const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({ schema }) => {
-  const { updateBackground, updateHeaderHidden, screenData, currentStateId, loadScreen } = useScreenStore();
+const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
+  schema,
+}) => {
+  const {
+    updateBackground,
+    updateHeaderHidden,
+    screenData,
+    currentStateId,
+    loadScreen,
+  } = useScreenStore();
 
   // Expand/collapse state
   const [meaningExpanded, setMeaningExpanded] = useState(false);
@@ -115,27 +127,77 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({ s
   const [mantraExpanded, setMantraExpanded] = useState(false);
 
   React.useEffect(() => {
-    updateBackground(null);
+    updateBackground(require("../../assets/beige_bg.png"));
     updateHeaderHidden(false);
-  }, []);
+    return () => {
+      updateBackground(null);
+    };
+  }, [updateBackground, updateHeaderHidden]);
 
   const info = useMemo(() => screenData?.info || {}, [screenData]);
-  const stateId = currentStateId || '';
+  const stateId = currentStateId || "";
 
   const currentType: ActivityType = useMemo(() => {
-    if (screenData?.info_is_mantra || info.type === 'mantra') return 'mantra';
-    if (screenData?.info_is_sankalp || info.type === 'sankalp') return 'sankalp';
-    if (screenData?.info_is_practice || info.type === 'practice') return 'practice';
+    if (screenData?.info_is_mantra || info.type === "mantra") return "mantra";
+    if (screenData?.info_is_sankalp || info.type === "sankalp")
+      return "sankalp";
+    if (screenData?.info_is_practice || info.type === "practice")
+      return "practice";
     return null;
   }, [screenData, info]);
 
   const isInfoScreen = useMemo(
-    () => (stateId === 'info_reveal' || stateId === 'offering_reveal') && currentType !== null,
+    () =>
+      (stateId === "info_reveal" || stateId === "offering_reveal") &&
+      currentType !== null,
     [stateId, currentType],
   );
 
   const blocks = schema?.blocks || [];
-  const footerBlocks = useMemo(() => blocks.filter((b: any) => b.position === 'footer' || b.position === 'footer_actions'), [blocks]);
+  const footerBlocks = useMemo(
+    () =>
+      blocks.filter(
+        (b: any) => b.position === "footer" || b.position === "footer_actions",
+      ),
+    [blocks],
+  );
+  const visibleFooterBlocks = useMemo(
+    () =>
+      footerBlocks.filter((block: any) => {
+        if (block.hide_condition) {
+          const hideVal = screenData?.[block.hide_condition];
+          if (hideVal === true || (hideVal && hideVal !== false)) return false;
+        }
+
+        if (block.visibility_condition) {
+          const value = screenData?.[block.visibility_condition];
+          const isVisible = Array.isArray(value)
+            ? value.length > 0
+            : typeof value === "boolean"
+              ? value
+              : !!value;
+          if (!isVisible) return false;
+        }
+
+        const resolvedBlock = interpolate(block, screenData);
+        const hasRenderableContent =
+          hasContent(resolvedBlock.content) ||
+          hasContent(resolvedBlock.label) ||
+          hasContent(resolvedBlock.subtext) ||
+          !!resolvedBlock.action;
+
+        if (
+          (resolvedBlock.type === "subtext" ||
+            resolvedBlock.type === "primary_button") &&
+          !hasRenderableContent
+        ) {
+          return false;
+        }
+
+        return true;
+      }),
+    [footerBlocks, screenData],
+  );
 
   const handleBack = () => {
     const target = screenData.info_back_target;
@@ -145,14 +207,16 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({ s
         state_id: target.state_id || target.id,
       });
     } else {
-      loadScreen({ container_id: 'companion_dashboard', state_id: 'day_active' });
+      loadScreen({
+        container_id: "companion_dashboard",
+        state_id: "day_active",
+      });
     }
   };
 
   if (isInfoScreen) {
     return (
       <View style={styles.container}>
-        <Image source={require('../../assets/beige_bg.png')} style={StyleSheet.absoluteFill} resizeMode="cover" />
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.infoScrollContent}
@@ -160,7 +224,7 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({ s
         >
           {/* Practice Visual (Lotus) */}
           <View style={styles.visualContainer}>
-            {typeof MantraLotus3d === 'number' ? (
+            {typeof MantraLotus3d === "number" ? (
               <SvgUri
                 uri={Image.resolveAssetSource(MantraLotus3d)?.uri ?? null}
                 width={180}
@@ -169,63 +233,74 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({ s
             ) : (
               <MantraLotus3d width={180} height={180} />
             )}
-            
-            {currentType === 'sankalp' && (
-              <Text style={styles.sankalpMainText}>{info.meaning || info.summary}</Text>
+
+            {currentType === "sankalp" && (
+              <Text style={styles.sankalpMainText}>
+                {info.meaning || info.summary}
+              </Text>
             )}
 
-            {currentType === 'mantra' && (
+            {currentType === "mantra" && (
               <View style={styles.mantraMainContainer}>
-                <Text style={styles.mantraDevanagariLarge}>{info.subtitle}</Text>
+                <Text style={styles.mantraDevanagariLarge}>
+                  {info.subtitle}
+                </Text>
                 <Text style={styles.mantraIAST}>{info.iast || info.title}</Text>
-                
+
                 {mantraExpanded ? (
-                  <Text style={styles.mantraBrief}>{info.full_mantra || info.meaning}</Text>
+                  <Text style={styles.mantraBrief}>
+                    {info.full_mantra || info.meaning}
+                  </Text>
                 ) : (
                   <Text style={styles.mantraBrief}>{info.meaning}</Text>
                 )}
-                
+
                 {hasContent(info.full_mantra) && (
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={styles.viewFullMantraBtn}
                     onPress={() => setMantraExpanded(!mantraExpanded)}
                   >
                     <Text style={styles.viewFullMantraText}>
-                      {mantraExpanded ? 'Hide full mantra' : 'Tap to view full mantra \u2192'}
+                      {mantraExpanded
+                        ? "Hide full mantra"
+                        : "Tap to view full mantra \u2192"}
                     </Text>
                   </TouchableOpacity>
                 )}
               </View>
             )}
 
-            {currentType === 'practice' && (
+            {currentType === "practice" && (
               <Text style={styles.deityTitle}>{info.title}</Text>
             )}
           </View>
 
           {/* Main Content Card */}
-          {(currentType === 'practice' || currentType === 'sankalp') && (
+          {(currentType === "practice" || currentType === "sankalp") && (
             <View style={styles.mainCard}>
-              {currentType === 'practice' && info.steps && info.steps.length > 0 && (
-                <>
-                  <SectionHeader label="What this practice asks of you" />
-                  <View style={styles.practiceStepsList}>
-                    {info.steps.map((step: string, i: number) => (
-                      <View key={i} style={styles.practiceStep}>
-                        <Text style={styles.stepNum}>{i + 1}.</Text>
-                        <Text style={styles.stepText}>{step}</Text>
-                      </View>
-                    ))}
-                  </View>
-                </>
-              )}
+              {currentType === "practice" &&
+                info.steps &&
+                info.steps.length > 0 && (
+                  <>
+                    <SectionHeader label="What this practice asks of you" />
+                    <View style={styles.practiceStepsList}>
+                      {info.steps.map((step: string, i: number) => (
+                        <View key={i} style={styles.practiceStep}>
+                          <Text style={styles.stepNum}>{i + 1}.</Text>
+                          <Text style={styles.stepText}>{step}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  </>
+                )}
 
-              {currentType === 'sankalp' && (
+              {currentType === "sankalp" && (
                 <>
                   <SectionHeader label="How To Live" />
                   <View style={{ marginTop: 12 }}>
                     <Text style={styles.howToLiveText}>
-                      {info.how_to_live || "Stay mindful and carry this intention with every breath."}
+                      {info.how_to_live ||
+                        "Stay mindful and carry this intention with every breath."}
                     </Text>
                   </View>
                 </>
@@ -235,60 +310,71 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({ s
 
           {/* Prompt / Action Text */}
           <Text style={styles.practicePrompt}>
-            {currentType === 'mantra' 
+            {currentType === "mantra"
               ? "Chant slowly and let the meaning settle within."
-              : currentType === 'sankalp'
-              ? "Carry this intention gently into your thoughts and actions."
-              : "Begin when you feel ready. This takes 2-3 minutes. There is no rush."}
+              : currentType === "sankalp"
+                ? "Carry this intention gently into your thoughts and actions."
+                : "Begin when you feel ready. This takes 2-3 minutes. There is no rush."}
           </Text>
 
           {/* Accordion Sections */}
           <View style={styles.collapsibleSections}>
             {/* Consolidated Meaning Section for Practices and Mantras */}
-            {currentType !== 'sankalp' && (hasContent(info.meaning) || (currentType === 'mantra' && hasContent(info.summary))) && (
-              <CollapsibleCard
-                label="Meaning"
-                expanded={meaningExpanded}
-                onToggle={() => setMeaningExpanded(!meaningExpanded)}
-              >
-                <Text style={styles.cardText}>
-                  {info.meaning || (currentType === 'mantra' ? info.summary : '')}
-                </Text>
-              </CollapsibleCard>
-            )}
+            {currentType !== "sankalp" &&
+              ((currentType === "practice" && hasContent(info.summary)) ||
+                (currentType === "mantra" &&
+                  (hasContent(info.meaning) || hasContent(info.summary)))) && (
+                <CollapsibleCard
+                  label="Meaning"
+                  expanded={meaningExpanded}
+                  onToggle={() => setMeaningExpanded(!meaningExpanded)}
+                >
+                  <Text style={styles.cardText}>
+                    {currentType === "practice"
+                      ? info.summary
+                      : info.meaning || info.summary}
+                  </Text>
+                </CollapsibleCard>
+              )}
 
-            {currentType === 'sankalp' && (
+            {currentType === "sankalp" && (
               <>
                 <CollapsibleCard
                   label="Meaning"
                   expanded={meaningExpanded}
                   onToggle={() => setMeaningExpanded(!meaningExpanded)}
                 >
-                  <Text style={styles.cardText}>{info.essence || info.summary}</Text>
+                  <Text style={styles.cardText}>
+                    {info.essence || info.summary}
+                  </Text>
                 </CollapsibleCard>
                 <CollapsibleCard
                   label="Benefits"
                   expanded={benefitsExpanded}
                   onToggle={() => setBenefitsExpanded(!benefitsExpanded)}
                 >
-                  <Text style={styles.cardText}>Focus and calm are cultivated through this intention.</Text>
+                  <Text style={styles.cardText}>
+                    Focus and calm are cultivated through this intention.
+                  </Text>
                 </CollapsibleCard>
               </>
             )}
 
-            {currentType === 'mantra' && (
+            {currentType === "mantra" && (
               <CollapsibleCard
                 label="Essence"
                 expanded={essenceExpanded}
                 onToggle={() => setEssenceExpanded(!essenceExpanded)}
               >
                 <Text style={styles.cardText}>
-                  {info.essence || info.insight || "The vibration of this mantra connects you with profound spiritual wisdom."}
+                  {info.essence ||
+                    info.insight ||
+                    "The vibration of this mantra connects you with profound spiritual wisdom."}
                 </Text>
               </CollapsibleCard>
             )}
 
-            {currentType === 'practice' && (
+            {currentType === "practice" && (
               <>
                 {hasContent(info.benefits) && (
                   <CollapsibleCard
@@ -300,7 +386,7 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({ s
                       <View style={styles.benefitList}>
                         {info.benefits.map((b: string, idx: number) => (
                           <Text key={idx} style={styles.benefitItem}>
-                            {'\u2022'} {b}
+                            {"\u2022"} {b}
                           </Text>
                         ))}
                       </View>
@@ -316,7 +402,9 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({ s
                     expanded={essenceExpanded}
                     onToggle={() => setEssenceExpanded(!essenceExpanded)}
                   >
-                    <Text style={styles.cardText}>{info.essence || info.insight}</Text>
+                    <Text style={styles.cardText}>
+                      {info.essence || info.insight}
+                    </Text>
                   </CollapsibleCard>
                 )}
               </>
@@ -324,14 +412,15 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({ s
           </View>
 
           {/* Deity Metadata (for Mantras) */}
-          {currentType === 'mantra' && info.deity && (
+          {currentType === "mantra" && info.deity && (
             <Text style={styles.deityMetadata}>Deity: {info.deity}</Text>
           )}
 
           {/* Actions */}
-          {footerBlocks.length > 0 && (
+
+          {visibleFooterBlocks.length > 0 && (
             <View style={styles.infoActions}>
-              {footerBlocks.map((block: any, i: number) => (
+              {visibleFooterBlocks.map((block: any, i: number) => (
                 <BlockRenderer key={`f-${i}`} block={block} />
               ))}
             </View>
@@ -348,7 +437,6 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({ s
   // Generic Transition Mode
   return (
     <View style={styles.container}>
-      <Image source={require('../../assets/beige_bg.png')} style={StyleSheet.absoluteFill} resizeMode="cover" />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.scrollContent}
@@ -364,16 +452,17 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({ s
   );
 };
 
-const GOLD = '#D4A017';
-const BROWN = '#432104';
+const GOLD = "#D4A017";
+const BROWN = "#432104";
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fffdf9',
+    backgroundColor: "transparent",
   },
   scroll: {
     flex: 1,
+    backgroundColor: "transparent",
   },
   scrollContent: {
     paddingHorizontal: 20,
@@ -384,44 +473,44 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 60,
-    alignItems: 'center',
+    alignItems: "center",
   },
   visualContainer: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 20,
   },
   deityTitle: {
     fontSize: 26,
     fontFamily: Fonts.serif.bold,
     color: BROWN,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: -10,
   },
   mainCard: {
-    width: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    width: "100%",
+    // backgroundColor: "rgba(255, 255, 255, 0.6)",
     borderRadius: 20,
     borderWidth: 1.5,
-    borderColor: '#E8C587',
+    borderColor: "#E8C587",
     padding: 20,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    justifyContent: "center",
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: '#E8C587',
+    backgroundColor: "#E8C587",
     opacity: 0.6,
   },
   dividerLineThin: {
     width: 20,
     height: 1,
-    backgroundColor: '#E8C587',
+    backgroundColor: "#E8C587",
     opacity: 0.6,
   },
   cardLabel: {
@@ -437,8 +526,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   headerLabelGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   toggleIcon: {
     fontSize: 12,
@@ -446,20 +535,20 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   collapsibleSections: {
-    width: '100%',
+    width: "100%",
     gap: 12,
     marginBottom: 30,
   },
   card: {
-    width: '100%',
-    backgroundColor: 'rgba(255, 255, 255, 0.6)',
+    width: "100%",
+    // backgroundColor: "rgba(255, 255, 255, 0.6)",
     borderRadius: 16,
     borderWidth: 1.5,
-    borderColor: '#E8C587',
+    borderColor: "#E8C587",
     padding: 16,
   },
   cardExpanded: {
-    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    // backgroundColor: "rgba(255, 255, 255, 0.8)",
   },
   cardContent: {
     marginTop: 12,
@@ -467,17 +556,17 @@ const styles = StyleSheet.create({
   cardText: {
     fontSize: 16,
     lineHeight: 24,
-    color: '#5a3c21',
+    color: "#5a3c21",
     fontFamily: Fonts.serif.regular,
-    textAlign: 'center',
+    textAlign: "center",
   },
   practiceStepsList: {
     marginTop: 16,
     gap: 12,
   },
   practiceStep: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
   },
   stepNum: {
     fontSize: 18,
@@ -496,58 +585,59 @@ const styles = StyleSheet.create({
   howToLiveText: {
     fontSize: 18,
     fontFamily: Fonts.serif.regular,
-    fontStyle: 'italic',
-    color: '#4A4A4A',
+    fontStyle: "italic",
+    color: "#4A4A4A",
     lineHeight: 28,
-    textAlign: 'center',
+    textAlign: "center",
     paddingHorizontal: 10,
   },
   sankalpMainText: {
     fontSize: 24,
     fontFamily: Fonts.serif.bold,
-    color: '#432104',
-    textAlign: 'center',
+    color: "#432104",
+    textAlign: "center",
     lineHeight: 34,
-    marginTop: 20,
-    paddingHorizontal: 20,
+    marginTop: -30,
+    paddingHorizontal: 5,
   },
   mantraMainContainer: {
-    width: '100%',
-    alignItems: 'center',
-    marginTop: 20,
-    paddingHorizontal: 20,
+    width: "100%",
+    alignItems: "center",
+    marginTop: -65,
+
+    paddingHorizontal: 5,
   },
   mantraDevanagariLarge: {
     fontSize: 32,
     fontFamily: Fonts.serif.bold,
-    color: '#432104',
-    textAlign: 'center',
+    color: "#432104",
+    textAlign: "center",
     marginBottom: 8,
   },
   mantraIAST: {
     fontSize: 20,
-    fontFamily: Fonts.serif.regular,
-    fontStyle: 'italic',
-    color: '#6B4E31',
-    textAlign: 'center',
-    marginBottom: 16,
+    fontFamily: Fonts.serif.bold,
+    fontStyle: "italic",
+    color: "#432104",
+    textAlign: "center",
+    marginBottom: 5,
   },
   mantraBrief: {
     fontSize: 16,
     fontFamily: Fonts.serif.regular,
-    color: '#432104',
-    textAlign: 'center',
+    color: "#432104",
+    textAlign: "center",
     lineHeight: 24,
-    marginBottom: 24,
+    marginBottom: 10,
   },
   viewFullMantraBtn: {
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 30,
     borderWidth: 1.5,
-    borderColor: '#E8C587',
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
-    shadowColor: '#d7a64a',
+    borderColor: "#E8C587",
+    // backgroundColor: "rgba(255, 255, 255, 0.5)",
+    shadowColor: "#d7a64a",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -556,30 +646,30 @@ const styles = StyleSheet.create({
   viewFullMantraText: {
     fontSize: 15,
     fontFamily: Fonts.serif.bold,
-    color: '#432104',
+    color: "#432104",
   },
   deityMetadata: {
     fontSize: 18,
     fontFamily: Fonts.serif.regular,
-    color: '#432104',
-    textAlign: 'center',
-    marginTop: 24,
+    color: "#432104",
+    textAlign: "center",
+    // marginTop: 24,
     marginBottom: 10,
   },
   practicePrompt: {
     fontSize: 16,
     fontFamily: Fonts.serif.regular,
-    fontStyle: 'italic',
-    color: '#432104',
-    textAlign: 'center',
-    marginTop: 30,
-    marginBottom: 20,
+    fontStyle: "italic",
+    color: "#432104",
+    textAlign: "center",
+    marginTop: 3,
+    marginBottom: 10,
     lineHeight: 24,
     paddingHorizontal: 30,
   },
   infoActions: {
-    width: '100%',
-    alignItems: 'center',
+    width: "100%",
+    alignItems: "center",
     marginBottom: 20,
   },
   benefitList: {
@@ -588,22 +678,22 @@ const styles = StyleSheet.create({
   benefitItem: {
     fontSize: 16,
     lineHeight: 24,
-    color: '#5a3c21',
+    color: "#5a3c21",
     fontFamily: Fonts.serif.regular,
   },
   backLink: {
-    marginTop: 10,
-    paddingVertical: 10,
+    // marginTop: 2,
+    paddingVertical: 1,
   },
   backLinkText: {
     fontSize: 16,
     fontFamily: Fonts.serif.regular,
     color: BROWN,
-    textDecorationLine: 'underline',
+    textDecorationLine: "underline",
   },
   content: {
     gap: 20,
-  }
+  },
 });
 
 export default CycleTransitionsContainer;

@@ -3795,15 +3795,15 @@ export const CycleTransitionsContainer = {
           visibility_condition: "info_is_mantra",
           style: { color: "#000000", fontStyle: "italic", marginTop: "16px" },
         },
-        {
-          type: "subtext",
-          content:
-            "Carry this intention gently into your thoughts and actions.",
-          variant: "small",
-          position: "footer",
-          visibility_condition: "info_is_sankalp",
-          style: { color: "#000000", fontStyle: "italic", marginTop: "16px" },
-        },
+        // {
+        //   type: "subtext",
+        //   content:
+        //     "Carry this intention gently into your thoughts and actions.",
+        //   variant: "small",
+        //   position: "footer",
+        //   visibility_condition: "info_is_sankalp",
+        //   style: { color: "#000000", fontStyle: "italic", marginTop: "16px" },
+        // },
         {
           type: "subtext",
           content: "{{info_start_help_text}}",
@@ -3876,15 +3876,15 @@ export const CycleTransitionsContainer = {
           visibility_condition: "info_is_mantra",
           style: { color: "#000000", marginTop: "16px", fontStyle: "italic" },
         },
-        {
-          type: "subtext",
-          content:
-            "Carry this intention gently into your thoughts and actions.",
-          variant: "small",
-          position: "footer",
-          visibility_condition: "info_is_sankalp",
-          style: { color: "#000000", fontStyle: "italic", marginTop: "16px" },
-        },
+        // {
+        //   type: "subtext",
+        //   content:
+        //     "Carry this intention gently into your thoughts and actions.",
+        //   variant: "small",
+        //   position: "footer",
+        //   visibility_condition: "info_is_sankalp",
+        //   style: { color: "#000000", fontStyle: "italic", marginTop: "16px" },
+        // },
         {
           type: "subtext",
           content: "{{info_start_help_text}}",
@@ -5916,8 +5916,7 @@ export const InsightSummaryContainer = {
           chosen_label: "You've chosen",
           experience_label: "WITHIN THIS, YOU'RE EXPERIENCING:",
           button_label: "Show My Path →",
-          footer_note:
-            "Understanding is the first step of transformation.",
+          footer_note: "Understanding is the first step of transformation.",
         },
         step1: {
           // Transition animation — no text needed

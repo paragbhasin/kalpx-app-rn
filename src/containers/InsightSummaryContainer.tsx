@@ -798,7 +798,7 @@ const styles = StyleSheet.create({
   },
   step2CardDescription: {
     fontSize: 16,
-    lineHeight: 26,
+    // lineHeight: 26,
     fontFamily: Fonts.serif.regular,
     color: "#432104",
     paddingRight: 12,

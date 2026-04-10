@@ -20,25 +20,55 @@ OUT = RN_DIR / "comparison.html"
 # Map web reference → RN persona + stage
 # Each tuple: (section_title, web_filename, rn_persona_dir, rn_stage_name_prefix)
 MAPPING = [
-    # Day 7 Engaged — 4 stages (intro → grid → mirror → decision)
-    ("Day 7 · Engaged · 1. Intro", "CP7.E.01.png", "verify_full_flow", "02_intro_loaded"),
-    ("Day 7 · Engaged · 2. Journey Grid", "CP7.E.02.png", "verify_full_flow", "03_grid_real"),
-    ("Day 7 · Engaged · 3. Continuity Mirror", "CP7.E.03.png", "persona_day7_high", "03_mirror"),
-    ("Day 7 · Engaged · 4. Your path continues", "CP7.E.06.png", "verify_full_flow", "04_mirror_correct"),
-    # Day 7 Medium
-    ("Day 7 · Medium · Mirror", "CP7.L.03.png", "persona_day7_medium", "03_mirror"),
-    # Day 7 Low
-    ("Day 7 · Low · Mirror", "CP7.L.03.png", "persona_day7_low", "03_mirror"),
-    # Day 7 Near-zero → lighten
-    ("Day 7 · Near-zero · Path lightened", "CP7.N.03.png", "persona_day7_nearzero", "04_decision"),
-    # Day 14 variants
-    ("Day 14 · Mastered · Intro", "CP14.E.01.png", "persona_day14_mastered", "02_intro"),
-    ("Day 14 · Mastered · Mirror", "CP14.E.03.png", "persona_day14_mastered", "03_mirror"),
-    ("Day 14 · Mastered · Choose Next Step", "CP14.E.06.png", "persona_day14_mastered", "06_decision_screen"),
-    ("Day 14 · Medium · Mirror", "CP14.L.03.png", "persona_day14_medium", "03_mirror"),
-    ("Day 14 · Low · Mirror", "CP14.L.03.png", "persona_day14_low", "03_mirror"),
-    # Welcome Back
-    ("Welcome Back", "WB.01.png", "persona_welcomeback", "01_home"),
+    # =================================================================
+    # CHECKPOINT — Day 7 / Day 14 / Welcome Back
+    # =================================================================
+    ("CHECKPOINT · Day 7 · Intro", "CP7.E.01.png", "verify_full_flow", "02_intro_loaded"),
+    ("CHECKPOINT · Day 7 · Journey Grid", "CP7.E.02.png", "verify_full_flow", "03_grid_real"),
+    ("CHECKPOINT · Day 7 · Continuity Mirror", "CP7.E.03.png", "persona_day7_high", "03_mirror"),
+    ("CHECKPOINT · Day 7 · Your path continues", "CP7.E.06.png", "verify_full_flow", "04_mirror_correct"),
+    ("CHECKPOINT · Day 7 · Medium · Mirror", "CP7.L.03.png", "persona_day7_medium", "03_mirror"),
+    ("CHECKPOINT · Day 7 · Low · Mirror", "CP7.L.03.png", "persona_day7_low", "03_mirror"),
+    ("CHECKPOINT · Day 7 · Lightened", "CP7.N.03.png", "persona_day7_nearzero", "04_decision"),
+    ("CHECKPOINT · Day 14 · Intro", "CP14.E.01.png", "persona_day14_mastered", "02_intro"),
+    ("CHECKPOINT · Day 14 · Evolution Pivot", "CP14.E.03.png", "persona_day14_mastered", "03_mirror"),
+    ("CHECKPOINT · Day 14 · Choose Next Step", "CP14.E.06.png", "persona_day14_mastered", "06_decision_screen"),
+    ("CHECKPOINT · Day 14 · Medium · Mirror", "CP14.L.03.png", "persona_day14_medium", "03_mirror"),
+    ("CHECKPOINT · Day 14 · Low · Mirror", "CP14.L.03.png", "persona_day14_low", "03_mirror"),
+    ("WELCOME BACK", "WB.01.png", "persona_welcomeback", "01_home"),
+
+    # =================================================================
+    # CORE FLOW — Mantra / Sankalp / Practice
+    # =================================================================
+    ("CORE · Day active dashboard", "RUN.INFO.01.png", "flow_core_mantra", "02_day_active"),
+    ("CORE · Mantra · Info reveal", "RUN.INFO.01.png", "flow_core_mantra", "03_info_reveal_mantra"),
+    ("CORE · Mantra · Rep selection", "RUN.M.01.png", "flow_core_mantra", "04_rep_selection"),
+    ("CORE · Mantra · Prep (Be still)", "RUN.M.02.png", "flow_core_mantra", "05_mantra_prep_or_runner"),
+    ("CORE · Mantra · Runner (bead counter)", "RUN.M.03.png", "flow_core_mantra", "06_mantra_runner"),
+    ("CORE · Sankalp · Info reveal", "RUN.S.01.png", "flow_core_sankalp", "02_info_reveal_sankalp"),
+    ("CORE · Sankalp · Embody", "RUN.S.02.png", "flow_core_sankalp", "03_sankalp_embody"),
+    ("CORE · Practice · Info reveal", "RUN.P.01.png", "flow_core_practice", "02_info_reveal_practice"),
+    ("CORE · Practice · Runner", "RUN.P.02.png", "flow_core_practice", "03_practice_runner"),
+
+    # =================================================================
+    # ADDITIONAL PRACTICE FLOW
+    # =================================================================
+    ("ADDITIONAL · Items section on dashboard", "RUN.A.M.01.png", "flow_additional", "02_additional_section"),
+    ("ADDITIONAL · Library search", "RUN.A.M.02.png", "flow_additional", "03_library_search"),
+
+    # =================================================================
+    # QUICK CHECK-IN FLOW
+    # =================================================================
+    ("CHECK-IN · Prana selection", "RUN.SUP.01.png", "flow_checkin", "02_prana_select"),
+    ("CHECK-IN · Balanced ack", "RUN.SUP.01.png", "flow_checkin", "03_ack_balanced"),
+
+    # =================================================================
+    # I AM TRIGGERED FLOW
+    # =================================================================
+    ("TRIGGER · OM chanting (free_mantra)", "RUN.SP.01.png", "flow_trigger", "02_free_mantra_chanting"),
+    ("TRIGGER · Practice support", "RUN.SP.02.png", "flow_trigger", "03_trigger_practice_runner"),
+    ("TRIGGER · Mantra (post-practice)", "RUN.SUP.P.01.png", "flow_trigger", "04_post_trigger_mantra"),
+    ("TRIGGER · Back to dashboard (resolved)", "RUN.SUP.01.png", "flow_trigger", "05_resolved_dashboard"),
 ]
 
 

@@ -11,8 +11,11 @@ import {
 import Svg, { Circle } from "react-native-svg";
 import MantraLotus3d from "../../assets/mantra-lotus-3d.svg";
 import Header from "../components/Header";
+import { executeAction } from "../engine/actionExecutor";
 import BlockRenderer from "../engine/BlockRenderer";
 import { useScreenStore } from "../engine/useScreenBridge";
+import store from "../store";
+import { screenActions } from "../store/screenSlice";
 import { Fonts } from "../theme/fonts";
 
 // ---------------------------------------------------------------------------
@@ -126,10 +129,8 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
     () => blocks.filter((b: any) => b.type === "practice_card"),
     [blocks],
   );
-  const footerActionBlocks = useMemo(
-    () => blocks.filter((b: any) => b.position === "footer_actions"),
-    [blocks],
-  );
+  // footer_actions blocks (I Feel Triggered, Quick Check-In) are now
+  // rendered directly inline for reliability; see the quickActions JSX.
   const footerBlocks = useMemo(
     () => blocks.filter((b: any) => b.position === "footer"),
     [blocks],
@@ -416,11 +417,66 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
           </TouchableOpacity>
         )}
 
-        {/* Footer action buttons — rendered via BlockRenderer */}
+        {/* ----------------------------------------------------------- */}
+        {/* I Feel Triggered + Quick Check-In                           */}
+        {/* Web parity: kalpx-frontend/src/mock/mock/allContainers.js   */}
+        {/* line 299-336 (day_active footer_actions blocks).            */}
+        {/* Rendered directly here (not via BlockRenderer) so the       */}
+        {/* primary CTAs + their explainer subtexts are always visible  */}
+        {/* regardless of schema load state.                            */}
+        {/* ----------------------------------------------------------- */}
         <View style={styles.quickActions}>
-          {footerActionBlocks.map((block: any, i: number) => (
-            <BlockRenderer key={block.id || `action-${i}`} block={block} />
-          ))}
+          <TouchableOpacity
+            style={styles.triggerBtn}
+            activeOpacity={0.88}
+            onPress={() => {
+              executeAction(
+                { type: "initiate_trigger" },
+                {
+                  loadScreen,
+                  goBack,
+                  setScreenValue: (value: any, key: string) => {
+                    store.dispatch(
+                      screenActions.setScreenValue({ key, value }),
+                    );
+                  },
+                  screenState: store.getState().screen.screenData,
+                },
+              );
+            }}
+          >
+            <LinearGradient
+              colors={["#e8c060", "#d9a557"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={styles.triggerBtnInner}
+            >
+              <Text style={styles.triggerBtnText}>I Feel Triggered</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+          <Text style={styles.quickActionHelp}>
+            Feeling overwhelmed or disturbed? Tap here and KalpX will guide
+            you through a short reset using a mantra, sankalp, or simple
+            practice.
+          </Text>
+
+          <TouchableOpacity
+            style={styles.quickCheckinBtn}
+            activeOpacity={0.88}
+            onPress={() =>
+              loadScreen({
+                container_id: "cycle_transitions",
+                state_id: "quick_checkin",
+              })
+            }
+          >
+            <Text style={styles.quickCheckinBtnText}>Quick Check-In</Text>
+          </TouchableOpacity>
+          <Text style={styles.quickActionHelp}>
+            {
+              "Share how you\u2019re feeling anytime during the day. Each check-in helps KalpX track your progress and guide your journey."
+            }
+          </Text>
         </View>
 
         {/* Diamond divider */}
@@ -725,6 +781,62 @@ const styles = StyleSheet.create({
   // -- Quick actions (footer action buttons) --
   quickActions: {
     width: "100%",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    marginTop: 14,
+    marginBottom: 10,
+  },
+  triggerBtn: {
+    width: "100%",
+    maxWidth: 360,
+    borderRadius: 28,
+    overflow: "hidden",
+    elevation: 5,
+    shadowColor: "#b8860b",
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 6 },
+    marginTop: 4,
+  },
+  triggerBtnInner: {
+    height: 56,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+  },
+  triggerBtnText: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 17,
+    color: "#ffffff",
+    letterSpacing: 0.3,
+  },
+  quickActionHelp: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    lineHeight: 19,
+    color: "#6a4d28",
+    textAlign: "center",
+    paddingHorizontal: 8,
+    marginTop: 10,
+    marginBottom: 16,
+    opacity: 0.78,
+  },
+  quickCheckinBtn: {
+    width: "100%",
+    maxWidth: 360,
+    height: 54,
+    borderRadius: 27,
+    borderWidth: 1.5,
+    borderColor: "#c7a64b",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fdfaf3",
+  },
+  quickCheckinBtnText: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 16,
+    color: "#432104",
+    letterSpacing: 0.3,
   },
 
   // -- Sankalp carry-forward --

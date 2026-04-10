@@ -37,10 +37,18 @@ yarn-error.*
 *.tsbuildinfo
 
 ios/
-# android/
+android/
 
 app-example
 
 # Google Services files
 google-services.json
 GoogleService-Info.plist
+
+# Build artifacts
+build-extract/
+build.ipa
+*.apk
+
+# Screenshot pipeline output
+tests/unit/.compiled/

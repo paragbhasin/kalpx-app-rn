@@ -1,1 +1,0 @@
-/Users/nayakpavani/Dev/Kalpx-app/kalpx-app-rn/android/app/build/intermediates/cxx/Debug/4f3n2td1/obj/arm64-v8a

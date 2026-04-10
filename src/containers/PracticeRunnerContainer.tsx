@@ -127,7 +127,30 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
   } = useScreenStore();
 
   const [count, setCount] = useState(0);
-  const [sessionStartTime] = useState(Date.now());
+  const [sessionStartTime, setSessionStartTime] = useState(Date.now());
+  // Bead count carryover fix: reset the local rep counter (and the Redux
+  // mirror) whenever the active mantra item_id or the screen state id
+  // changes. Without this, the component stays mounted across trigger step
+  // transitions (free_mantra_chanting -> post_trigger_mantra, etc.) and the
+  // count from the previous mantra leaks into the next.
+  const activeItemKey =
+    screenState?.runner_active_item?.item_id ||
+    screenState?.runner_active_item?.id ||
+    screenState?._selected_om_audio ||
+    currentStateId ||
+    "";
+  useEffect(() => {
+    setCount(0);
+    setSessionStartTime(Date.now());
+    // Clear the Redux mirror too so downstream consumers don't see stale values.
+    if (screenState?.mantra_progress_reps) {
+      updateScreenData("mantra_progress_reps", 0);
+    }
+    if (screenState?.reps_done) {
+      updateScreenData("reps_done", 0);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeItemKey, currentStateId]);
   const [showMicroWin, setShowMicroWin] = useState(false);
   const [microWinMessage, setMicroWinMessage] = useState("");
   const [mediaMuted, setMediaMuted] = useState(false);
@@ -186,17 +209,23 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
     screenState: { ...screenState },
   });
 
+  // Strict trigger detection — only rely on authoritative screen state.
+  // Legacy checks on `_active_support_item`, `_last_viewed_item`, and a
+  // top-level `source` field were causing REG-015 style cross-flow
+  // contamination: a stale support item from a prior trigger flow would
+  // make a subsequent CORE mantra screen render the "I feel calmer now"
+  // button. Per STATE_OWNERSHIP_MATRIX.md + INV-12, trigger detection
+  // must be scoped strictly to the current screen id.
   const isTriggerSession = useMemo(() => {
+    const triggerStateIds = new Set([
+      "free_mantra_chanting",
+      "post_trigger_mantra",
+      "trigger_practice_runner",
+    ]);
     return (
-      schema?.is_trigger ||
-      currentStateId === "free_mantra_chanting" ||
-      currentStateId === "post_trigger_mantra" ||
-      currentStateId === "trigger_practice_runner" ||
-      screenState.source === "support" ||
-      screenState._last_viewed_item?.source === "support" ||
-      screenState._active_support_item?.source === "support"
+      schema?.is_trigger === true || triggerStateIds.has(currentStateId || "")
     );
-  }, [schema, currentStateId, screenState]);
+  }, [schema, currentStateId]);
 
   // ── Session Metrics & Exit Logic ──
   const getRunnerType = () => {
@@ -487,11 +516,15 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
       }
 
       await stopTriggerAudio();
-      
+
       // Delay slightly to ensure component is settled
       await new Promise(resolve => setTimeout(resolve, 300));
       if (isCancelled) return;
 
+      // Try to load the intro bell (Audio_Be_still) — but it's optional.
+      // The file is actually an .m4a container with a .mp4 extension, which
+      // occasionally trips expo-asset's downloadAsync pipeline on fresh
+      // launches. If it fails, we skip it and play the mantra directly.
       try {
         console.log("[TRIGGER_AUDIO] Loading Intro: Audio_Be_still.mp4");
         const introSource = require("../../assets/sounds/Audio_Be_still.mp4");
@@ -499,39 +532,78 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
           introSource,
           { shouldPlay: false, isMuted: mediaMuted, volume: 1 }
         );
-        
-        if (isCancelled) {
+        if (!isCancelled) {
+          introLoopAudioRef.current = intro;
+        } else {
           await intro.unloadAsync();
-          return;
         }
-        introLoopAudioRef.current = intro;
+      } catch (introErr) {
+        console.warn("[TRIGGER_AUDIO] Intro load failed — skipping:", (introErr as any)?.message);
+        introLoopAudioRef.current = null;
+      }
 
+      if (isCancelled) return;
+
+      // Load the mantra loop (REQUIRED — this is the primary audio)
+      let mantra: Audio.Sound | null = null;
+      try {
         console.log("[TRIGGER_AUDIO] Loading Mantra Source:", mantraAudioUrl);
         const mantraSource = resolveAudioSource(mantraAudioUrl);
-        const { sound: mantra } = await Audio.Sound.createAsync(
+        const result = await Audio.Sound.createAsync(
           mantraSource,
           { shouldPlay: false, isLooping: true, isMuted: mediaMuted, volume: 1 }
         );
-
-        if (isCancelled) {
-          await intro.unloadAsync();
-          await mantra.unloadAsync();
-          return;
+        mantra = result.sound;
+      } catch (mantraErr) {
+        console.warn("[TRIGGER_AUDIO] Mantra load failed:", (mantraErr as any)?.message);
+        // Fallback: try the local bundled Om.mp4
+        try {
+          const fallbackSource = require("../../assets/sounds/Om.mp4");
+          const result = await Audio.Sound.createAsync(
+            fallbackSource,
+            { shouldPlay: false, isLooping: true, isMuted: mediaMuted, volume: 1 }
+          );
+          mantra = result.sound;
+        } catch (fallbackErr) {
+          console.error("[TRIGGER_AUDIO] Fallback also failed:", (fallbackErr as any)?.message);
+          return; // Give up gracefully — the screen still renders without audio
         }
-        mantraLoopAudioRef.current = mantra;
+      }
 
-        // Transition logic
-        intro.setOnPlaybackStatusUpdate(status => {
-          if (status.isLoaded && status.didJustFinish && !isCancelled) {
-            console.log("[TRIGGER_AUDIO] Intro finished -> Playing Mantra");
-            mantra.playAsync().catch(e => console.error("[TRIGGER_AUDIO] Mantra play failed:", e));
-          }
-        });
+      if (isCancelled || !mantra) {
+        if (mantra) await mantra.unloadAsync().catch(() => {});
+        return;
+      }
+      mantraLoopAudioRef.current = mantra;
 
-        console.log("[TRIGGER_AUDIO] Sequence Ready. Playing Intro now.");
-        await intro.playAsync();
+      const intro = introLoopAudioRef.current;
+      try {
+        if (intro) {
+          // Transition: intro → mantra
+          intro.setOnPlaybackStatusUpdate((status) => {
+            if (
+              status.isLoaded &&
+              status.didJustFinish &&
+              !isCancelled &&
+              mantra
+            ) {
+              console.log("[TRIGGER_AUDIO] Intro finished -> Playing Mantra");
+              mantra
+                .playAsync()
+                .catch((e) =>
+                  console.warn("[TRIGGER_AUDIO] Mantra play failed:", e?.message),
+                );
+            }
+          });
+          console.log("[TRIGGER_AUDIO] Playing intro");
+          await intro.playAsync();
+        } else {
+          // No intro — play mantra directly
+          console.log("[TRIGGER_AUDIO] No intro — playing mantra directly");
+          await mantra.playAsync();
+        }
       } catch (err) {
-        console.error("[TRIGGER_AUDIO] Sequence Failed:", err);
+        console.warn("[TRIGGER_AUDIO] play failed:", (err as any)?.message);
       }
     };
 

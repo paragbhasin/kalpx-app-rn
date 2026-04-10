@@ -205,6 +205,22 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
           return false;
         }
 
+        // Duplicate-prevention: the info_reveal template already renders
+        // the "Chant slowly..." / "Carry this intention..." / practice
+        // start help hint as a dedicated practicePrompt Text below the
+        // lotus. Filter out those subtexts from the footer list so we
+        // don't render them twice.
+        if (resolvedBlock.type === "subtext") {
+          const content = String(resolvedBlock.content || "").toLowerCase();
+          if (
+            content.includes("chant slowly and let the meaning settle") ||
+            content.includes("carry this intention gently") ||
+            content.includes("begin when you feel ready")
+          ) {
+            return false;
+          }
+        }
+
         return true;
       }),
     [footerBlocks, screenData],
@@ -253,41 +269,49 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
 
             {currentType === "mantra" && (
               <View style={styles.mantraMainContainer}>
-                {/* 1. Title (Deity) */}
+                {/* INV-10: render each info field distinctly. No fallbacks
+                    to info.title — if devanagari/iast missing, hide the
+                    section rather than duplicating the title text. */}
                 {info.title && (
                   <Text style={styles.deityTitle}>{info.title}</Text>
                 )}
-                {(info.full_mantra || info.subtitle) && (
+
+                {/* Devanagari (Sanskrit script) — only if present AND
+                    distinct from the title so we don't render it twice. */}
+                {info.devanagari && info.devanagari !== info.title && (
                   <Text
                     style={styles.mantraDevanagariLarge}
-                    numberOfLines={mantraExpanded ? 0 : 2}
+                    numberOfLines={mantraExpanded ? 0 : 3}
                     ellipsizeMode="tail"
                   >
-                    {info.full_mantra || info.subtitle}
+                    {info.devanagari}
                   </Text>
                 )}
 
-                {/* 2. IAST Section (2 lines limit) */}
-                {info.iast && (
+                {/* IAST (Romanized transliteration) — only if present AND
+                    distinct from title. */}
+                {info.iast && info.iast !== info.title && (
                   <Text
                     style={styles.mantraIAST}
-                    numberOfLines={mantraExpanded ? 0 : 2}
+                    numberOfLines={mantraExpanded ? 0 : 3}
                     ellipsizeMode="tail"
                   >
-                    {info.iast || info.title}
+                    {info.iast}
                   </Text>
                 )}
 
-                <TouchableOpacity
-                  style={styles.viewFullMantraBtn}
-                  onPress={() => setMantraExpanded(!mantraExpanded)}
-                >
-                  <Text style={styles.viewFullMantraText}>
-                    {mantraExpanded
-                      ? "Tap to collapse "
-                      : "Tap to view full mantra \u2192"}
-                  </Text>
-                </TouchableOpacity>
+                {(info.devanagari || info.iast) && (
+                  <TouchableOpacity
+                    style={styles.viewFullMantraBtn}
+                    onPress={() => setMantraExpanded(!mantraExpanded)}
+                  >
+                    <Text style={styles.viewFullMantraText}>
+                      {mantraExpanded
+                        ? "Tap to collapse"
+                        : "Tap to view full mantra \u2192"}
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
             )}
 
@@ -628,25 +652,25 @@ const styles = StyleSheet.create({
   mantraMainContainer: {
     width: "100%",
     alignItems: "center",
-    marginTop: -65,
-
-    paddingHorizontal: 5,
+    marginTop: 6,
+    paddingHorizontal: 12,
   },
   mantraDevanagariLarge: {
     fontSize: 18,
     fontFamily: Fonts.serif.bold,
     color: "#432104",
     textAlign: "center",
-    // marginBottom: 8,
+    marginTop: 6,
+    marginBottom: 4,
   },
   mantraIAST: {
-    fontSize: 20,
-    fontFamily: Fonts.serif.bold,
+    fontSize: 16,
+    fontFamily: Fonts.serif.regular,
     fontStyle: "italic",
-    color: "#432104",
+    color: "#6a4d28",
     textAlign: "center",
-    marginBottom: 5,
-    marginTop: -24,
+    marginTop: 2,
+    marginBottom: 10,
   },
   mantraBrief: {
     fontSize: 16,

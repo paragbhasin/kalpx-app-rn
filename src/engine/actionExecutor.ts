@@ -768,7 +768,9 @@ export async function executeAction(
           if (startFlowInstance) startFlowInstance("checkin");
           console.log(`[CHECKIN] Processing prana type: ${payload.prana_type}`);
 
-          // Determine navigation target (Override target if agitated/drained)
+          // Determine navigation target (Override target if agitated/drained).
+          // balanced/energized go to cycle_transitions > quick_checkin_ack
+          // (web parity — actionExecutor.js:2831 uses the same container).
           finalTarget =
             payload.prana_type === "agitated" ||
             payload.prana_type === "drained"
@@ -777,7 +779,7 @@ export async function executeAction(
                   state_id: "checkin_breath_reset",
                 }
               : target || {
-                  container_id: "awareness_trigger",
+                  container_id: "cycle_transitions",
                   state_id: "quick_checkin_ack",
                 };
 
@@ -789,7 +791,9 @@ export async function executeAction(
             "prana_checkin_total",
           );
 
-          // Call Prana Acknowledge API for all check-in feedback (as requested)
+          // Call Prana Acknowledge API for all check-in feedback.
+          // Pass full context (baselineMetrics + dayNumber) so the backend
+          // can personalize suggestions (web parity, actionExecutor.js:2286).
           const pranaAckRes = await mitraPranaAcknowledge({
             feeling: payload.prana_type,
             focus:
@@ -801,6 +805,9 @@ export async function executeAction(
               screenState["routine_depth"] ||
               screenState["routine_setup"] ||
               "standard",
+            baselineMetrics: screenState["baseline_metrics"] || {},
+            dayNumber: screenState["day_number"] || 1,
+            journeyId: screenState["journey_id"] || null,
             round: 2,
             locale: screenState["locale"] || "en",
             tz: _mitraTz(),
@@ -847,12 +854,14 @@ export async function executeAction(
               accent: "This is a good moment to carry your sankalp forward.",
             },
             agitated: {
-              headline: "Pause before this grows.",
-              body: "The intensity you feel is not permanent.\nLet it pass through you.",
+              headline: "A gentler next step may help settle this.",
+              body: "You do not need to push through this state. Choose one small support that helps bring your energy back into steadiness.",
+              accent: "",
             },
             drained: {
-              headline: "Rest is not retreat.",
-              body: "When the body is heavy, the mind can still be clear.\nBe gentle with yourself.",
+              headline: "A nourishing next step may help restore you.",
+              body: "You may not need more effort right now. Choose one small support that helps you return with more softness and steadiness.",
+              accent: "",
             },
           };
           const ackCopy =
@@ -893,6 +902,22 @@ export async function executeAction(
           payload.is_trigger ||
           action.currentScreen?.container_id === "awareness_trigger" ||
           action.currentScreen?.container_id === "prana_checkin";
+
+        // REG-015 / INV-12: core view_info MUST clear stale support context.
+        // Without this, `_active_support_item` (and legacy `source`/
+        // `_last_viewed_item`) from a prior trigger flow leaks into the next
+        // core mantra screen and renders the "I feel calmer now" support
+        // button inside a core runner.
+        if (!isSupport) {
+          setScreenValue(null, "_active_support_item");
+          setScreenValue("", "source");
+          // Also clear trigger flow-local state that should not influence
+          // core screens (STATE_OWNERSHIP_MATRIX.md lines 106-108).
+          setScreenValue(null, "trigger_mantra_text");
+          setScreenValue(null, "trigger_mantra_devanagari");
+          setScreenValue(null, "trigger_step");
+          setScreenValue(null, "trigger_feeling");
+        }
 
         // Persist raw item data for runner
         setScreenValue(

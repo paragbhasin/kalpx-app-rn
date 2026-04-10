@@ -107,6 +107,9 @@ export default function App() {
     GelicaRegular: require("@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf"),
     GelicaMedium: require("@expo-google-fonts/inter/500Medium/Inter_500Medium.ttf"),
     GelicaLight: require("@expo-google-fonts/inter/400Regular/Inter_400Regular.ttf"),
+    // decorative — Cinzel
+    Cinzel_400Regular: require("@expo-google-fonts/cinzel/400Regular/Cinzel_400Regular.ttf"),
+    Cinzel_700Bold: require("@expo-google-fonts/cinzel/700Bold/Cinzel_700Bold.ttf"),
   });
 
   const [initialRoute, setInitialRoute] = useState(null);

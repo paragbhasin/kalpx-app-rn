@@ -1,12 +1,17 @@
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
 import {
+  ImageBackground,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import Mitra1 from "../../../assets/mitra_1.svg";
+import Mitra2 from "../../../assets/mitra_2.svg";
+import Mitra3 from "../../../assets/mitra_3.svg";
 import { Fonts } from "../../theme/fonts";
 
 interface ContinueJourneyProps {
@@ -24,6 +29,11 @@ export default function ContinueJourney({
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
+        <ImageBackground
+          source={require("../../../assets/continue_journey_bg.jpeg")}
+          style={styles.absoluteBg}
+          resizeMode="cover"
+        />
         {/* --- Top Section --- */}
         <View style={styles.topSection}>
           <View style={styles.quoteWrapper}>
@@ -42,50 +52,66 @@ export default function ContinueJourney({
               Rooted guidance.{"\n"}Real transformation.
             </Text>
             <Text style={styles.heroSubtitle}>
-              Your journey into Sanatan wisdom continues. Small steps every day
-              lead to profound inner change.
+              Every day you return, something within you
             </Text>
+            <Text style={styles.heroSubtitle}>strengthens.</Text>
           </View>
 
           <View style={styles.ctaGroup}>
-            <TouchableOpacity
-              style={styles.ctaButton}
-              onPress={onResume}
-              activeOpacity={0.8}
-            >
-              <View style={styles.ctaButtonInner}>
-                <View>
-                  <Text style={styles.ctaButtonText}>Return to Your Practice</Text>
-                  <Text style={styles.ctaButtonStatus}>Day {dayNumber} is waiting</Text>
+            <TouchableOpacity onPress={onResume} activeOpacity={0.85}>
+              <LinearGradient
+                colors={["#E7C355", "#A67C00"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 0, y: 1 }}
+                style={styles.ctaButton}
+              >
+                <View style={styles.ctaButtonInner}>
+                  <Text style={styles.ctaButtonText}>
+                    Return to Your Practice
+                  </Text>
+
+                  <View style={styles.btnIconCircle}>
+                    <Ionicons name="arrow-forward" size={15} color="white" />
+                  </View>
                 </View>
-                <View style={styles.btnIconCircle}>
-                  <Ionicons name="arrow-forward" size={24} color="white" />
-                </View>
-              </View>
+              </LinearGradient>
             </TouchableOpacity>
+          </View>
+          <View style={styles.textCenter}>
+            <Text style={styles.normalText}>
+              Transformation does not come in one moment.
+            </Text>
+            <Text style={styles.italicText}>It comes by returning.</Text>
           </View>
         </View>
 
-        {/* --- Bottom Feature Grid --- */}
         <View style={styles.bottomSection}>
-          <View style={styles.gridCard}>
-            <View style={styles.gridItem}>
-              <MaterialCommunityIcons name="comment-account-outline" size={26} color="#D4A017" />
-              <Text style={styles.gridLabel}>Mitra</Text>
-            </View>
-            
-            <View style={styles.verticalDivider} />
+          <View style={styles.content}>
+            <Text style={styles.heading}>
+              Begin with Mitra. Grow with KalpX.
+            </Text>
 
-            <View style={styles.gridItem}>
-              <MaterialCommunityIcons name="account-group-outline" size={26} color="#D4A017" />
-              <Text style={styles.gridLabel}>Communities</Text>
-            </View>
+            <View style={styles.featuresRow}>
+              {/* Mitra */}
+              <TouchableOpacity style={styles.featureCard} activeOpacity={0.8}>
+                <Mitra3 width={50} height={50} />
+                <Text style={styles.title}>Mitra</Text>
+                <Text style={styles.subtitle}>Your daily companion</Text>
+              </TouchableOpacity>
 
-            <View style={styles.verticalDivider} />
+              {/* Communities */}
+              <TouchableOpacity style={styles.featureCard} activeOpacity={0.8}>
+                <Mitra2 width={50} height={50} />
+                <Text style={styles.title}>Communities</Text>
+                <Text style={styles.subtitle}>Grow with others</Text>
+              </TouchableOpacity>
 
-            <View style={styles.gridItem}>
-              <MaterialCommunityIcons name="book-open-variant" size={26} color="#D4A017" />
-              <Text style={styles.gridLabel}>Classes</Text>
+              {/* Classes */}
+              <TouchableOpacity style={styles.featureCard} activeOpacity={0.8}>
+                <Mitra1 width={50} height={50} />
+                <Text style={styles.title}>Classes</Text>
+                <Text style={styles.subtitle}>Learn with depth</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </View>
@@ -97,6 +123,14 @@ export default function ContinueJourney({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#000",
+  },
+  absoluteBg: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
   scrollContent: {
     flexGrow: 1,
@@ -104,16 +138,16 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   topSection: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 5,
     alignItems: "center",
     marginBottom: 40,
   },
   quoteWrapper: {
     alignItems: "center",
-    marginBottom: 60,
+    // marginBottom: 60,
   },
   quoteText: {
-    fontFamily: Fonts.serif.regular,
+    fontFamily: Fonts.cinzel.bold,
     fontSize: 16,
     lineHeight: 26,
     color: "#E8DCC3",
@@ -125,7 +159,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 12,
+    // marginTop: 12,
     gap: 12,
   },
   line: {
@@ -135,7 +169,7 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
   quoteSource: {
-    fontFamily: Fonts.serif.regular,
+    fontFamily: Fonts.cinzel.bold,
     fontSize: 11,
     color: "#CBBE9A",
     letterSpacing: 1.5,
@@ -145,60 +179,98 @@ const styles = StyleSheet.create({
     marginBottom: 50,
   },
   heroTitle: {
-    fontFamily: Fonts.serif.bold,
-    fontSize: 34,
-    lineHeight: 44,
+    fontFamily: Fonts.cinzel.bold,
+    fontSize: 20,
+    // lineHeight: 44,
     color: "#FFFFFF",
     textAlign: "center",
     marginBottom: 16,
   },
   heroSubtitle: {
-    fontFamily: Fonts.sans.regular,
-    fontSize: 16,
+    fontFamily: Fonts.cinzel.bold,
+    fontSize: 14,
     color: "rgba(255, 255, 255, 0.7)",
     textAlign: "center",
     lineHeight: 24,
-    maxWidth: 320,
+    // maxWidth: 320,
   },
   ctaGroup: {
-    width: "100%",
+    alignItems: "center",
+    marginTop: "auto",
+    paddingBottom: 10,
+    paddingTop: 80,
   },
+
   ctaButton: {
-    backgroundColor: "#C9A84C",
-    padding: 16,
-    borderRadius: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 50,
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.4)",
+
+    shadowColor: "#A67C00",
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.5,
     shadowRadius: 20,
     elevation: 8,
+
+    minWidth: 250,
   },
+
   ctaButtonInner: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-  },
-  ctaButtonText: {
-    fontFamily: Fonts.serif.bold,
-    fontSize: 18,
-    color: "#FFFFFF",
-  },
-  ctaButtonStatus: {
-    fontFamily: Fonts.sans.regular,
-    fontSize: 13,
-    color: "rgba(255, 255, 255, 0.8)",
-    marginTop: 2,
-  },
-  btnIconCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    alignItems: "center",
     justifyContent: "center",
   },
-  bottomSection: {
-    paddingHorizontal: 24,
+
+  ctaButtonText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontFamily: Fonts.sans.bold,
+  },
+
+  btnIconCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 16,
+  },
+
+  textCenter: {
+    alignItems: "center",
+  },
+
+  normalText: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#FFFFFF",
+    opacity: 0.9,
+    textAlign: "center",
+
+    textShadowColor: "rgba(0,0,0,0.25)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+
+  italicText: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 14,
+    lineHeight: 20,
+    fontStyle: "italic",
+    color: "#FFFFFF",
+    opacity: 0.9,
+    textAlign: "center",
+
+    textShadowColor: "rgba(0,0,0,0.25)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   gridCard: {
     flexDirection: "row",
@@ -214,7 +286,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   gridLabel: {
-    fontFamily: Fonts.serif.regular,
+    fontFamily: Fonts.cinzel.bold,
     fontSize: 12,
     color: "#CBBE9A",
     letterSpacing: 0.5,
@@ -223,5 +295,56 @@ const styles = StyleSheet.create({
     width: 1,
     height: "100%",
     backgroundColor: "rgba(255, 255, 255, 0.1)",
+  },
+  bottomSection: {
+    marginTop: 10,
+  },
+
+  content: {
+    alignItems: "center",
+  },
+
+  heading: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 18,
+    color: "#432104",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+
+  featuresRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+
+  featureCard: {
+    flex: 1,
+    alignItems: "center",
+    // paddingVertical: 20,
+    marginHorizontal: 6,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.05)",
+  },
+
+  featureIcon: {
+    width: 48,
+    height: 48,
+    marginBottom: 12,
+  },
+
+  title: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 16,
+    color: "#432104",
+    marginTop: -6,
+  },
+
+  subtitle: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 13,
+    color: "#432104",
+    textAlign: "center",
+    marginTop: 4,
   },
 });

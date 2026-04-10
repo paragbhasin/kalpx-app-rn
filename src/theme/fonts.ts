@@ -22,6 +22,12 @@ export const Fonts = {
     bold: 'Inter_700Bold',
   },
 
+  // Decorative — Cinzel for special headings
+  cinzel: {
+    regular: 'Cinzel_400Regular',
+    bold: 'Cinzel_700Bold',
+  },
+
   // Legacy aliases — use during migration, replace later
   legacy: {
     GelicaBold: 'CormorantGaramond_700Bold',

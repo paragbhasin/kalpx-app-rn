@@ -3342,7 +3342,7 @@ export const InsightsProgressContainer = {
           headline: "Your Personalized Practice is Ready",
           subtext:
             "KalpX has curated a 14-day journey to realign your mind, energy, and intention",
-          footer_note: "Begin the KalpX Journey",
+          footer_note: "Explore Sankalp · Mantra · Daily Practice",
           button_label: "Begin the KalpX Journey",
         },
       },
@@ -5926,7 +5926,7 @@ export const InsightSummaryContainer = {
           headline: "Your Personalized Practice is Ready",
           subtext:
             "KalpX has curated a 14-day journey to realign your mind, energy, and intention",
-          footer_note: "Begin the KalpX Journey",
+          footer_note: "Explore Sankalp · Mantra · Daily Practice",
           button_label: "Begin the KalpX Journey",
         },
       },

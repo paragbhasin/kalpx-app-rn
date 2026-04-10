@@ -20,20 +20,23 @@ OUT = RN_DIR / "comparison.html"
 # Map web reference → RN persona + stage
 # Each tuple: (section_title, web_filename, rn_persona_dir, rn_stage_name_prefix)
 MAPPING = [
-    # Day 7 Engaged
-    ("Day 7 · Engaged · Intro", "CP7.E.01.png", "persona_day7_high", "02_intro"),
-    ("Day 7 · Engaged · Continuity Mirror", "CP7.E.03.png", "persona_day7_high", "03_mirror"),
-    ("Day 7 · Engaged · Your path continues", "CP7.E.06.png", "persona_day7_high", "04_decision"),
+    # Day 7 Engaged — 4 stages (intro → grid → mirror → decision)
+    ("Day 7 · Engaged · 1. Intro", "CP7.E.01.png", "verify_full_flow", "02_intro_loaded"),
+    ("Day 7 · Engaged · 2. Journey Grid", "CP7.E.02.png", "verify_full_flow", "03_grid_real"),
+    ("Day 7 · Engaged · 3. Continuity Mirror", "CP7.E.03.png", "persona_day7_high", "03_mirror"),
+    ("Day 7 · Engaged · 4. Your path continues", "CP7.E.06.png", "verify_full_flow", "04_mirror_correct"),
+    # Day 7 Medium
+    ("Day 7 · Medium · Mirror", "CP7.L.03.png", "persona_day7_medium", "03_mirror"),
     # Day 7 Low
-    ("Day 7 · Low engagement · Mirror", "CP7.L.03.png", "persona_day7_low", "03_mirror"),
-    # Day 7 Near-zero
+    ("Day 7 · Low · Mirror", "CP7.L.03.png", "persona_day7_low", "03_mirror"),
+    # Day 7 Near-zero → lighten
     ("Day 7 · Near-zero · Path lightened", "CP7.N.03.png", "persona_day7_nearzero", "04_decision"),
-    # Day 14 Engaged
-    ("Day 14 · Engaged · Intro", "CP14.E.01.png", "persona_day14_mastered", "02_intro"),
-    ("Day 14 · Engaged · Evolution Pivot", "CP14.E.03.png", "persona_day14_mastered", "03_mirror"),
-    ("Day 14 · Engaged · Choose Next Step", "CP14.E.06.png", "persona_day14_mastered", "06_decision_screen"),
-    # Day 14 Medium
-    ("Day 14 · Medium engagement · Mirror", "CP14.L.03.png", "persona_day14_medium", "03_mirror"),
+    # Day 14 variants
+    ("Day 14 · Mastered · Intro", "CP14.E.01.png", "persona_day14_mastered", "02_intro"),
+    ("Day 14 · Mastered · Mirror", "CP14.E.03.png", "persona_day14_mastered", "03_mirror"),
+    ("Day 14 · Mastered · Choose Next Step", "CP14.E.06.png", "persona_day14_mastered", "06_decision_screen"),
+    ("Day 14 · Medium · Mirror", "CP14.L.03.png", "persona_day14_medium", "03_mirror"),
+    ("Day 14 · Low · Mirror", "CP14.L.03.png", "persona_day14_low", "03_mirror"),
     # Welcome Back
     ("Welcome Back", "WB.01.png", "persona_welcomeback", "01_home"),
 ]

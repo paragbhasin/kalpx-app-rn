@@ -325,3 +325,26 @@ export async function mitraFetchProgress(): Promise<any> {
     return null;
   }
 }
+
+/** GET mitra/journey/status/ — Journey status; may return welcomeBack flag. */
+export async function mitraJourneyStatus(): Promise<any> {
+  try {
+    const res = await api.get('mitra/journey/status/', { params: { tz: getTz() } });
+    return res.data;
+  } catch (err: any) {
+    console.warn('[MITRA] journey/status failed:', err.message);
+    return null;
+  }
+}
+
+/** POST mitra/journey/welcome-back/ — Submit welcome-back decision (continue | fresh). */
+export async function mitraJourneyWelcomeBack(decision: 'continue' | 'fresh'): Promise<any> {
+  try {
+    const res = await api.post('mitra/journey/welcome-back/', { decision, tz: getTz() });
+    console.log(`[MITRA] welcome-back decision "${decision}" submitted`);
+    return res.data;
+  } catch (err: any) {
+    console.error('[MITRA] welcome-back submission failed:', err.message);
+    return null;
+  }
+}

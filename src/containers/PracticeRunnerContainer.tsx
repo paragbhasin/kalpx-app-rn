@@ -424,22 +424,26 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
     if (url.includes("Om Shanti")) {
       return require("../../assets/sounds/Om Shanti.mp4");
     }
-    if (url.includes("/sounds/Om.mp4")) {
+    if (url.includes("Om.mp4")) {
       return require("../../assets/sounds/Om.mp4");
     }
     return { uri: url };
   };
 
+  // Atomic ref-clearing prevents races where an old fire-and-forget cleanup
+  // stops or orphans a newly-created sound from a concurrent effect run.
   const stopTriggerAudio = async () => {
-    if (introLoopAudioRef.current) {
-      await introLoopAudioRef.current.stopAsync().catch(() => {});
-      await introLoopAudioRef.current.unloadAsync().catch(() => {});
-      introLoopAudioRef.current = null;
+    const intro = introLoopAudioRef.current;
+    const mantra = mantraLoopAudioRef.current;
+    introLoopAudioRef.current = null;
+    mantraLoopAudioRef.current = null;
+    if (intro) {
+      await intro.stopAsync().catch(() => {});
+      await intro.unloadAsync().catch(() => {});
     }
-    if (mantraLoopAudioRef.current) {
-      await mantraLoopAudioRef.current.stopAsync().catch(() => {});
-      await mantraLoopAudioRef.current.unloadAsync().catch(() => {});
-      mantraLoopAudioRef.current = null;
+    if (mantra) {
+      await mantra.stopAsync().catch(() => {});
+      await mantra.unloadAsync().catch(() => {});
     }
   };
 

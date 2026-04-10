@@ -71,6 +71,7 @@ import PressAndHoldCircularBlock from '../blocks/PressAndHoldCircularBlock';
 import TimelineBlock from '../blocks/TimelineBlock';
 import TrendChartBlock from '../blocks/TrendChartBlock';
 import VoiceRecorderBlock from '../blocks/VoiceRecorderBlock';
+import ActivityStatsBlock from '../blocks/ActivityStatsBlock';
 
 const blockMap: Record<string, React.ComponentType<any>> = {
   // Original 11 blocks
@@ -138,6 +139,7 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   trend_chart: TrendChartBlock,
   voice_recorder: VoiceRecorderBlock,
   progress_section: ProgressSectionBlock,
+  activity_stats: ActivityStatsBlock,
 };
 
 interface BlockRendererProps {

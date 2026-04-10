@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useScreenStore } from '../engine/useScreenBridge';
 import { Fonts } from '../theme/fonts';
 
 interface TrendChartBlockProps {
@@ -14,31 +15,57 @@ interface TrendChartBlockProps {
     labels?: string[];
     engaged_days?: number;
     total_days?: number;
+    data_key?: string;
     style?: any;
   };
 }
 
 const TrendChartBlock: React.FC<TrendChartBlockProps> = ({ block }) => {
-  const data = block.data || [];
-  const labels = block.labels || [];
+  const screenData = useScreenStore((s) => s.screenData);
+
+  // Prefer data from screenState (checkpoint_trend_graph or block.data_key)
+  const stateGraph =
+    (block.data_key && screenData[block.data_key]) ||
+    screenData.checkpoint_trend_graph ||
+    {};
+  const stateEngaged = stateGraph.engaged || stateGraph.engagedDays || [];
+  const stateLabels =
+    stateGraph.labels ||
+    (stateEngaged.length > 0
+      ? stateEngaged.map((_: any, i: number) => `${i + 1}`)
+      : []);
+
+  const data: number[] =
+    block.data && block.data.length > 0 ? block.data : stateEngaged;
+  const labels: string[] =
+    block.labels && block.labels.length > 0 ? block.labels : stateLabels;
   const maxVal = Math.max(...data, 1);
+
+  const engagedDays =
+    block.engaged_days != null
+      ? block.engaged_days
+      : screenData.checkpoint_days_engaged;
+  const totalDays =
+    block.total_days != null
+      ? block.total_days
+      : screenData.checkpoint_total_days;
 
   return (
     <View style={[styles.container, block?.style]}>
       {Boolean(block.title) && <Text style={styles.title}>{block.title}</Text>}
 
       {/* Summary stats */}
-      {(block.engaged_days != null || block.total_days != null) && (
+      {(engagedDays != null || totalDays != null) && (
         <View style={styles.statsRow}>
-          {block.engaged_days != null && (
+          {engagedDays != null && (
             <View style={styles.stat}>
-              <Text style={styles.statValue}>{block.engaged_days}</Text>
+              <Text style={styles.statValue}>{engagedDays}</Text>
               <Text style={styles.statLabel}>Engaged</Text>
             </View>
           )}
-          {block.total_days != null && (
+          {totalDays != null && (
             <View style={styles.stat}>
-              <Text style={styles.statValue}>{block.total_days}</Text>
+              <Text style={styles.statValue}>{totalDays}</Text>
               <Text style={styles.statLabel}>Total</Text>
             </View>
           )}

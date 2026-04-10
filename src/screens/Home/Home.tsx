@@ -30,6 +30,8 @@ import store, { RootState } from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
 import ContinueJourney from "./ContinueJourney";
+import WelcomeBack from "./WelcomeBack";
+import { mitraJourneyWelcomeBack } from "../../engine/mitraApi";
 
 const FEATURE_ITEMS = [
   {
@@ -70,6 +72,7 @@ export default function Home() {
   const [mitraJourneyId, setMitraJourneyId] = useState<string | null>(null);
   const [journeyDay, setJourneyDay] = useState<number>(1);
   const [checkingJourney, setCheckingJourney] = useState(false);
+  const [welcomeBackData, setWelcomeBackData] = useState<any>(null);
 
   const HOME_BACKGROUND = require("../../../assets/new_bg.png");
   const CONTINUE_BG = require("../../../assets/continue_journey_bg.jpeg");
@@ -128,11 +131,24 @@ export default function Home() {
         setCheckingJourney(true);
         try {
           const res = await api.get("mitra/journey/status/");
-          if (res.data?.hasActiveJourney && res.data?.journeyId) {
-            setMitraJourneyId(res.data.journeyId);
-            setJourneyDay(res.data.dayNumber || 1);
-            seedJourneyStatus(res.data);
+          const data = res.data;
+          if (data?.welcomeBack) {
+            setWelcomeBackData({
+              focus: data.focus || "",
+              subfocus: data.subfocus || data.sub_focus || "",
+              cycleNumber: data.pathCycleNumber || 1,
+              daysPracticed: data.daysPracticed || 0,
+              strongestAnchor: data.strongestAnchor || "",
+              journeyId: data.journeyId || null,
+            });
+            setMitraJourneyId(null);
+          } else if (data?.hasActiveJourney && data?.journeyId) {
+            setWelcomeBackData(null);
+            setMitraJourneyId(data.journeyId);
+            setJourneyDay(data.dayNumber || 1);
+            seedJourneyStatus(data);
           } else {
+            setWelcomeBackData(null);
             setMitraJourneyId(null);
           }
         } catch (err) {
@@ -146,6 +162,83 @@ export default function Home() {
   );
 
   const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleWelcomeBackContinue = async () => {
+    setIsProcessing(true);
+    try {
+      const res = await mitraJourneyWelcomeBack("continue");
+      if (res?.status === "ok" && res?.newJourneyId) {
+        const screenUpdates: Record<string, any> = {
+          journey_id: res.newJourneyId,
+          day_number: 1,
+          is_experienced: true,
+        };
+        if (res.focus) {
+          screenUpdates.scan_focus = res.focus;
+          screenUpdates.active_focus = res.focus;
+        }
+        if (res.subfocus) {
+          screenUpdates.prana_baseline_selection = res.subfocus;
+        }
+        store.dispatch(screenActions.updateScreenData(screenUpdates));
+        setWelcomeBackData(null);
+        setMitraJourneyId(res.newJourneyId);
+        setJourneyDay(1);
+
+        const { executeAction } = require("../../engine/actionExecutor");
+        await executeAction(
+          { type: "generate_companion" },
+          {
+            screenState: store.getState().screen.screenData,
+            loadScreen: (target: any) => {
+              const containerId = target?.container_id || target?.containerId || "generic";
+              const stateId = target?.state_id || target?.stateId || target || "";
+              store.dispatch(loadScreenWithData({ containerId, stateId }));
+            },
+            goBack: () => {
+              const { goBackWithData } = require("../../store/screenSlice");
+              store.dispatch(goBackWithData());
+            },
+            setScreenValue: (value: any, key: string) => {
+              store.dispatch(screenActions.setScreenValue({ key, value }));
+            },
+          },
+        );
+
+        store.dispatch(
+          loadScreenWithData({
+            containerId: "companion_dashboard",
+            stateId: "day_active",
+          }),
+        );
+        navigation.navigate("DynamicEngine");
+      }
+    } catch (err) {
+      console.debug("[HOME] welcome-back continue failed:", err);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleWelcomeBackFresh = async () => {
+    setIsProcessing(true);
+    try {
+      await mitraJourneyWelcomeBack("fresh");
+    } catch (err) {
+      console.debug("[HOME] welcome-back fresh failed:", err);
+    }
+    store.dispatch(screenActions.resetState());
+    setWelcomeBackData(null);
+    setMitraJourneyId(null);
+    store.dispatch(
+      loadScreenWithData({
+        containerId: "choice_stack",
+        stateId: "discipline_select",
+      }),
+    );
+    setIsProcessing(false);
+    navigation.navigate("DynamicEngine");
+  };
 
   const navigateToMitra = async (hasJourney: boolean) => {
     if (hasJourney) {
@@ -178,12 +271,38 @@ export default function Home() {
             },
           );
 
-          store.dispatch(
-            loadScreenWithData({
-              containerId: "companion_dashboard",
-              stateId: "day_active",
-            }),
-          );
+          // Auto-route to checkpoint screens on day 7 / day 14 if not yet completed
+          const dayNumber = status.dayNumber || 1;
+          const checkpointCompleted =
+            store.getState().screen.screenData.checkpoint_completed;
+          const checkpointStateId =
+            dayNumber === 7
+              ? "weekly_checkpoint"
+              : dayNumber === 14
+                ? "daily_insight_14"
+                : null;
+
+          if (checkpointStateId && !checkpointCompleted) {
+            store.dispatch(
+              screenActions.setScreenValue({
+                key: "checkpoint_day",
+                value: dayNumber,
+              }),
+            );
+            store.dispatch(
+              loadScreenWithData({
+                containerId: "cycle_transitions",
+                stateId: checkpointStateId,
+              }),
+            );
+          } else {
+            store.dispatch(
+              loadScreenWithData({
+                containerId: "companion_dashboard",
+                stateId: "day_active",
+              }),
+            );
+          }
         } else {
           store.dispatch(
             loadScreenWithData({
@@ -257,7 +376,17 @@ export default function Home() {
       />
       */}
 
-      {mitraJourneyId ? (
+      {welcomeBackData ? (
+        <WelcomeBack
+          focus={welcomeBackData.focus}
+          subfocus={welcomeBackData.subfocus}
+          cycleNumber={welcomeBackData.cycleNumber}
+          daysPracticed={welcomeBackData.daysPracticed}
+          strongestAnchor={welcomeBackData.strongestAnchor}
+          onContinue={handleWelcomeBackContinue}
+          onFresh={handleWelcomeBackFresh}
+        />
+      ) : mitraJourneyId ? (
         <ContinueJourney
           dayNumber={journeyDay}
           onResume={() => navigateToMitra(true)}

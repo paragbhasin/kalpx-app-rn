@@ -107,6 +107,21 @@ api.interceptors.request.use(
       console.log("🔐 USING GUEST UUID:", guestUUID);
     }
 
+    // ⏰ DEV ONLY: X-Test-Now header for time-travel testing.
+    // Set via the dev tools screen; backend's TestNowMiddleware honors it
+    // when DEBUG=True or TEST_TIME_ENABLED=1.
+    if (__DEV__) {
+      try {
+        const testNow = await AsyncStorage.getItem("@kalpx_test_now");
+        if (testNow) {
+          config.headers["X-Test-Now"] = testNow;
+          console.log("⏰ X-Test-Now:", testNow);
+        }
+      } catch (_) {
+        /* noop */
+      }
+    }
+
     console.log("=====================================");
 
     return config;

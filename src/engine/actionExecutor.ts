@@ -20,10 +20,12 @@ import api from "../Networks/axios";
 import { navigate as rootNavigate } from "../Shared/Routes/NavigationService";
 import { cleanupFlowState, GUARDED_ACTIONS } from "./cleanupFields";
 import {
+  mitraCheckpoint,
   mitraGenerateCompanion,
   mitraHelpMeChoose,
   mitraPathEvolution,
   mitraPranaAcknowledge,
+  mitraSubmitCheckpoint,
   mitraTrackCompletion,
   mitraTrackEvent,
   mitraTriggerMantras,
@@ -1139,7 +1141,14 @@ export async function executeAction(
         // Capture journey status and ID
         const previousJourneyId = screenState.journey_id;
         if (data.journey?.id) setScreenValue(data.journey.id, "journey_id");
-        if (data.journey?.dayNumber)
+
+        // REG-010 / Rule 12 (STATE_OWNERSHIP_MATRIX): Checkpoint context guard.
+        // If a checkpoint is currently in flight (checkpoint_headline set),
+        // do NOT overwrite day_number / identity_label / path_context — those
+        // belong to the checkpoint screen, not the upcoming companion data.
+        const _checkpointActive = !!screenState.checkpoint_headline;
+
+        if (data.journey?.dayNumber && !_checkpointActive)
           setScreenValue(data.journey.dayNumber, "day_number");
         if (data.journey?.totalDays)
           setScreenValue(data.journey.totalDays, "total_days");
@@ -1162,10 +1171,12 @@ export async function executeAction(
           setScreenValue(data.journey.isLightened, "journey_is_lightened");
         }
 
-        // Identity and path lifecycle
-        setScreenValue(data.identityLabel || "", "identity_label");
-        setScreenValue(data.pathContext || {}, "path_context");
-        setScreenValue(data.pathMilestone || null, "path_milestone");
+        // Identity and path lifecycle — guarded by checkpoint context (REG-010)
+        if (!_checkpointActive) {
+          setScreenValue(data.identityLabel || "", "identity_label");
+          setScreenValue(data.pathContext || {}, "path_context");
+          setScreenValue(data.pathMilestone || null, "path_milestone");
+        }
 
         // Cycle item IDs (authoritative)
         if (data.journey?.cycleItems) {
@@ -2137,6 +2148,133 @@ export async function executeAction(
           setScreenValue({}, "journey_log");
           await executeAction({ type: "generate_companion" }, context);
         }
+        break;
+      }
+
+      // ================================================================
+      // ENSURE_CHECKPOINT_DATA — fetch checkpoint data into screen state.
+      // Idempotent: skips fetch if checkpoint_original_data is already populated.
+      // ================================================================
+      case "ensure_checkpoint_data": {
+        const cpDay =
+          payload?.day || screenState.checkpoint_day || screenState.day_number || 7;
+        if (screenState.checkpoint_original_data) {
+          break;
+        }
+        const cpData = await mitraCheckpoint(screenState, cpDay);
+        if (!cpData) break;
+        setScreenValue(cpData.headline, "checkpoint_headline");
+        setScreenValue(cpData.subtext, "checkpoint_subtext");
+        setScreenValue(cpData.question, "checkpoint_question");
+        setScreenValue(cpData.options || [], "checkpoint_options");
+        setScreenValue(cpData.metrics || {}, "checkpoint_metrics");
+        setScreenValue(cpData.originalData || null, "checkpoint_original_data");
+        setScreenValue(cpData.day || cpDay, "checkpoint_day");
+        setScreenValue(cpData.type || "", "checkpoint_type");
+        setScreenValue(cpData.engagementLevel || "", "checkpoint_engagement_level");
+        setScreenValue(cpData.trendGraph || {}, "checkpoint_trend_graph");
+        setScreenValue(cpData.strongestArea || "", "strongest_area");
+        setScreenValue(cpData.observation || "", "milestone_reflection");
+        setScreenValue(cpData.daysEngaged || 0, "checkpoint_days_engaged");
+        setScreenValue(
+          cpData.daysFullyCompleted || 0,
+          "checkpoint_days_fully_completed",
+        );
+        setScreenValue(cpData.totalDays || cpDay, "checkpoint_total_days");
+        setScreenValue(
+          cpData.recommendationAction || "",
+          "checkpoint_recommendation",
+        );
+        setScreenValue(
+          cpData.deepenSuggestion || null,
+          "checkpoint_deepen_suggestion",
+        );
+        break;
+      }
+
+      // ================================================================
+      // CHECKPOINT_SUBMIT — submit Day 7 / Day 14 reflection.
+      // Mirrors web actionExecutor.js:2512-2645.
+      // ================================================================
+      case "checkpoint_submit": {
+        const csDay =
+          screenState.checkpoint_day || screenState.day_number || 7;
+        const csDecision =
+          payload?.decision ||
+          screenState.checkpoint_decision ||
+          screenState.checkpoint_feeling ||
+          screenState.checkpoint_options?.[0]?.id ||
+          "continue";
+
+        const csPayload: any = {
+          decision: csDecision,
+          reflection: screenState.checkpoint_user_reflection || "",
+        };
+
+        if (csDay === 14) {
+          const impliedFeelingMap: Record<string, string> = {
+            continue_same: "steady",
+            deepen: "strong",
+            change_focus: "ready",
+          };
+          csPayload.feeling =
+            screenState.checkpoint_feeling_simple ||
+            screenState.checkpoint_feeling ||
+            impliedFeelingMap[csDecision] ||
+            "steady";
+
+          if (csDecision === "deepen") {
+            const ds = screenState.checkpoint_deepen_suggestion;
+            csPayload.deepenAccepted = true;
+            if (ds?.itemType) csPayload.deepenItemType = ds.itemType;
+            if (ds?.itemId) csPayload.deepenItemId = ds.itemId;
+          }
+        }
+
+        const csRes = await mitraSubmitCheckpoint(csDay, csPayload);
+
+        if (!csRes || csRes.status !== "ok") {
+          console.warn("[CHECKPOINT_SUBMIT] backend returned error:", csRes);
+          // Still mark completed locally so the user isn't stuck
+          setScreenValue(true, "checkpoint_completed");
+          setScreenValue(csDecision, "checkpoint_completed_decision");
+          loadScreen({
+            container_id: "cycle_transitions",
+            state_id: "checkpoint_results",
+          });
+          break;
+        }
+
+        setScreenValue(true, "checkpoint_completed");
+        setScreenValue(csDecision, "checkpoint_completed_decision");
+
+        mitraTrackEvent("checkpoint_completed", {
+          journeyId: screenState.journey_id,
+          dayNumber: csDay,
+          meta: { decision: csDecision, day: csDay },
+        });
+
+        if (csDay === 14) {
+          mitraTrackEvent("cycle_completed", {
+            journeyId: screenState.journey_id,
+            dayNumber: csDay,
+            meta: { decision: csDecision },
+          });
+        }
+
+        // Apply backend-driven side effects: new journey id, day reset, etc.
+        if (csRes.newJourneyId) {
+          setScreenValue(csRes.newJourneyId, "journey_id");
+        }
+        if (csRes.resetDay || csDay === 14) {
+          setScreenValue(1, "day_number");
+        }
+
+        // Navigate to results screen
+        loadScreen({
+          container_id: "cycle_transitions",
+          state_id: "checkpoint_results",
+        });
         break;
       }
 

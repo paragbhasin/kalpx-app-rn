@@ -24,6 +24,7 @@ import {
   mitraTriggerMantras,
   mitraHelpMeChoose,
   mitraPathEvolution,
+  mitraPranaAcknowledge,
 } from './mitraApi';
 import api from '../Networks/axios';
 import { navigate as rootNavigate } from '../Shared/Routes/NavigationService';
@@ -523,6 +524,9 @@ export async function executeAction(action: Action, context: ActionContext): Pro
       // SUBMIT — completion tracking + navigation
       // ================================================================
       case 'submit': {
+        const { itemId } = payload || {}; // note: target is already destructured at top of executeAction
+        let finalTarget = target;
+
         // Support flow cleanup: clear scoped trigger mantra on OM / support sessions
         if (
           payload?.itemId === 'OM' ||
@@ -539,7 +543,7 @@ export async function executeAction(action: Action, context: ActionContext): Pro
 
           // Skip if already tracked on navigation to this screen
           if (screenState._completion_tracked_this_session) {
-            if (target) loadScreen(target);
+            if (finalTarget) loadScreen(finalTarget);
             return;
           }
 
@@ -627,11 +631,31 @@ export async function executeAction(action: Action, context: ActionContext): Pro
         } else if (payload?.prana_type) {
           // Prana check-in — start checkin flow instance
           if (startFlowInstance) startFlowInstance('checkin');
+          console.log(`[CHECKIN] Processing prana type: ${payload.prana_type}`);
 
-          const counts = screenState.prana_checkin_counts || {};
+          // Determine navigation target (Override target if agitated/drained)
+          finalTarget = (payload.prana_type === 'agitated' || payload.prana_type === 'drained')
+            ? { container_id: 'practice_runner', state_id: 'checkin_breath_reset' }
+            : (target || { container_id: 'awareness_trigger', state_id: 'quick_checkin_ack' });
+
+          const counts = { ...(screenState.prana_checkin_counts || {}) };
           counts[payload.prana_type] = (counts[payload.prana_type] || 0) + 1;
           setScreenValue(counts, 'prana_checkin_counts');
           setScreenValue((screenState.prana_checkin_total || 0) + 1, 'prana_checkin_total');
+
+          // Call Prana Acknowledge API for all check-in feedback (as requested)
+          const pranaAckRes = await mitraPranaAcknowledge({
+            feeling: payload.prana_type,
+            focus: screenState['scan_focus'] || screenState['active_focus'] || 'peacecalm',
+            subFocus: screenState['prana_baseline_selection'] || '',
+            depth: screenState['routine_depth'] || screenState['routine_setup'] || 'standard',
+            round: 2, 
+            locale: screenState['locale'] || 'en',
+            tz: _mitraTz(),
+          });
+          if (pranaAckRes?.insight) {
+            setScreenValue(pranaAckRes.insight, 'prana_ack_insight');
+          }
 
           // Select rotated OM audio for check-in breath reset
           if (payload.prana_type === 'agitated' || payload.prana_type === 'drained') {
@@ -680,14 +704,12 @@ export async function executeAction(action: Action, context: ActionContext): Pro
             dayNumber: screenState.day_number || 1,
             meta: { prana_type: payload.prana_type },
           });
-        } else if (payload?.focus) {
-          setScreenValue(payload.focus, 'suggested_focus');
-          setScreenValue(payload.focus, 'scan_focus');
-        } else {
-          console.log(`[SUBMIT] Unhandled payload: ${JSON.stringify(payload || 'no data')}`);
         }
 
-        if (target) loadScreen(target);
+        if (finalTarget) {
+          console.log(`[SUBMIT] Navigating to: ${JSON.stringify(finalTarget)}`);
+          loadScreen(finalTarget);
+        }
         break;
       }
 

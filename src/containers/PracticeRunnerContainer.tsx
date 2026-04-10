@@ -161,13 +161,13 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
   const currentVariant = schema?.variant || currentStateId;
   
   // ── Variant Detection ──
-  const isMantraRunner = currentVariant === "mantra_runner";
+  const isMantraRunner = currentVariant === "mantra_runner" || currentStateId === "checkin_breath_reset";
   const isSankalpEmbody = currentVariant === "sankalp_embody";
   const isSankalpConfirm = currentVariant === "sankalp_confirm";
   const isRepSelection = currentVariant === "mantra_rep_selection";
   const isMantraPrep = currentVariant === "mantra_prep";
   const isSacredPause = currentVariant === "sacred_pause";
-  const isSupportPractice = currentVariant === "support_practice";
+  const isSupportPractice = currentVariant === "support_practice" || currentStateId === "trigger_practice_runner";
   const isMantraComplete = currentVariant === "mantra_complete";
   const isTriggerOmChantScreen =
     currentStateId === "free_mantra_chanting" ||

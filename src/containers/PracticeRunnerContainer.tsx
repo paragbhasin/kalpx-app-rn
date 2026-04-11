@@ -337,32 +337,63 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
   const _isTriggerScreen = currentStateId === "free_mantra_chanting" || currentStateId === "post_trigger_mantra";
   const _isCheckinSupportScreen = currentStateId === "checkin_support_mantra" || currentStateId === "checkin_breath_reset";
 
+  // Web parity (actionExecutor.js yesterday fix 53721c3 "Fixed text/audio
+  // sync: display derives text from _selected_om_audio URL"):
+  // On OM-rotation screens (free_mantra_chanting, post_trigger_mantra,
+  // checkin_breath_reset), derive the displayed mantra text DIRECTLY from
+  // the selected audio URL via _omTextForTrack — never read from stored
+  // trigger_mantra_text / checkin_mantra_text, because those fields can
+  // become stale across rotations and drift from the audio.
+  // Only on step >= 3 (user picked a specific mantra suggestion) do we
+  // read runner_active_item — at that point the rotated OM is no longer
+  // active and the item's title/iast are authoritative.
   const mantraDisplayTitle = useMemo(() => {
-    if (_isTriggerScreen) return screenState.trigger_mantra_text || "OM";
-    if (_isCheckinSupportScreen) return screenState.checkin_mantra_text || screenState.runner_active_item?.title || "";
+    if (_isTriggerScreen) {
+      if (screenState.trigger_step >= 3 && screenState.runner_active_item?.title) {
+        return screenState.runner_active_item.title;
+      }
+      if (screenState._selected_om_audio) {
+        return _omTextForTrack(screenState._selected_om_audio).label;
+      }
+      return screenState.trigger_mantra_text || "OM";
+    }
+    if (_isCheckinSupportScreen) {
+      if (currentStateId === "checkin_support_mantra" && screenState.runner_active_item?.title) {
+        return screenState.runner_active_item.title;
+      }
+      if (screenState._selected_om_audio) {
+        return _omTextForTrack(screenState._selected_om_audio).label;
+      }
+      return screenState.checkin_mantra_text || screenState.runner_active_item?.title || "OM";
+    }
     return screenState.runner_active_item?.title || screenState.mantra_title || "";
-  }, [screenState, _isTriggerScreen, _isCheckinSupportScreen]);
+  }, [screenState, _isTriggerScreen, _isCheckinSupportScreen, currentStateId]);
 
   const mantraText = useMemo(() => {
     if (_isTriggerScreen) {
+      // Trigger step 3 = user picked a specific mantra suggestion, not OM rotation
       if (screenState.trigger_step >= 3 && screenState.runner_active_item?.iast) {
         return screenState.runner_active_item.iast;
       }
       if (screenState._selected_om_audio) {
-        const r = _omTextForTrack(screenState._selected_om_audio);
-        return r.label;
+        return _omTextForTrack(screenState._selected_om_audio).label;
       }
       return screenState.trigger_mantra_text || '';
     }
     if (_isCheckinSupportScreen) {
+      // checkin_support_mantra = user past breath reset onto a specific
+      // mantra — authoritative source is runner_active_item, not OM rotation
+      if (currentStateId === "checkin_support_mantra" && screenState.runner_active_item?.iast) {
+        return screenState.runner_active_item.iast;
+      }
+      // checkin_breath_reset = OM rotation only
       if (screenState._selected_om_audio) {
-        const r = _omTextForTrack(screenState._selected_om_audio);
-        return r.label;
+        return _omTextForTrack(screenState._selected_om_audio).label;
       }
       return screenState.checkin_mantra_text || screenState.runner_active_item?.iast || '';
     }
     return screenState.runner_active_item?.iast || screenState.mantra_text || schema.mantra_text || "";
-  }, [screenState, _isTriggerScreen, _isCheckinSupportScreen, schema]);
+  }, [screenState, _isTriggerScreen, _isCheckinSupportScreen, schema, currentStateId]);
 
   const mantraHindi = useMemo(() => {
     if (_isTriggerScreen) {
@@ -370,20 +401,21 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
         return screenState.runner_active_item.devanagari;
       }
       if (screenState._selected_om_audio) {
-        const r = _omTextForTrack(screenState._selected_om_audio);
-        return r.devanagari;
+        return _omTextForTrack(screenState._selected_om_audio).devanagari;
       }
       return screenState.trigger_mantra_devanagari || 'ॐ';
     }
     if (_isCheckinSupportScreen) {
+      if (currentStateId === "checkin_support_mantra" && screenState.runner_active_item?.devanagari) {
+        return screenState.runner_active_item.devanagari;
+      }
       if (screenState._selected_om_audio) {
-        const r = _omTextForTrack(screenState._selected_om_audio);
-        return r.devanagari;
+        return _omTextForTrack(screenState._selected_om_audio).devanagari;
       }
       return screenState.checkin_mantra_devanagari || screenState.runner_active_item?.devanagari || '';
     }
     return screenState.runner_active_item?.devanagari || screenState.mantra_devanagari || schema.mantra_hindi_text || "";
-  }, [screenState, _isTriggerScreen, _isCheckinSupportScreen, schema]);
+  }, [screenState, _isTriggerScreen, _isCheckinSupportScreen, schema, currentStateId]);
 
   const mantraAudioUrl = useMemo(() => {
     if (currentStateId === "free_mantra_chanting" || currentStateId === "checkin_breath_reset") return screenState._selected_om_audio || "";

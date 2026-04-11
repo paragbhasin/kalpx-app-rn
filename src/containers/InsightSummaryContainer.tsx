@@ -485,7 +485,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 10,
+    // paddingTop: 10,
     paddingBottom: 60,
   },
   stepContainer: {
@@ -703,7 +703,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif.bold,
     color: "#432104",
     textAlign: "center",
-    marginTop: 70,
+    marginTop: 10,
   },
   introSubtextStep2: {
     fontSize: 18,

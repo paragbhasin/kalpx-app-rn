@@ -301,7 +301,10 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                     numberOfLines={mantraExpanded ? 0 : 3}
                     ellipsizeMode="tail"
                     onTextLayout={(e) => {
-                      if (!isMantraTruncatable && e.nativeEvent.lines.length > 3) {
+                      if (
+                        !isMantraTruncatable &&
+                        e.nativeEvent.lines.length > 3
+                      ) {
                         setIsMantraTruncatable(true);
                       }
                     }}
@@ -318,7 +321,10 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                     numberOfLines={mantraExpanded ? 0 : 3}
                     ellipsizeMode="tail"
                     onTextLayout={(e) => {
-                      if (!isMantraTruncatable && e.nativeEvent.lines.length > 3) {
+                      if (
+                        !isMantraTruncatable &&
+                        e.nativeEvent.lines.length > 3
+                      ) {
                         setIsMantraTruncatable(true);
                       }
                     }}
@@ -686,7 +692,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif.bold,
     color: "#432104",
     textAlign: "center",
-    marginTop: 6,
+    marginTop: 15,
     marginBottom: 4,
   },
   mantraIAST: {

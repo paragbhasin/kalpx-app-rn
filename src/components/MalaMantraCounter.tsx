@@ -1,23 +1,22 @@
-import React, { useState, useMemo, useEffect } from "react";
+import { ChevronLeft, Volume2, VolumeX } from "lucide-react-native";
+import React, { useEffect, useMemo, useState } from "react";
 import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
   Dimensions,
   ImageBackground,
   Platform,
   ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import Animated, {
-  useSharedValue,
+  Easing,
   useAnimatedStyle,
+  useSharedValue,
   withRepeat,
   withTiming,
-  Easing,
 } from "react-native-reanimated";
-import { ChevronLeft } from "lucide-react-native";
-import { Volume2, VolumeX } from "lucide-react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 import RudrakshSvg from "../../assets/rudraksh.svg";
 import { Fonts } from "../theme/fonts";
@@ -79,7 +78,7 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
         easing: Easing.linear,
       }),
       -1,
-      false
+      false,
     );
 
     pulseScale.value = withRepeat(
@@ -88,7 +87,7 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
         easing: Easing.inOut(Easing.ease),
       }),
       -1,
-      true
+      true,
     );
   }, []);
 
@@ -147,46 +146,59 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
       style={styles.container}
       resizeMode="cover"
     >
-      <View style={styles.headerOverlay} />
-      
-      <TouchableOpacity style={styles.exitBtn} onPress={onExit} activeOpacity={0.7}>
-        <ChevronLeft size={24} color="#8b6914" />
-      </TouchableOpacity>
-
-      {showMuteToggle && (
-        <TouchableOpacity
-          style={styles.muteBtn}
-          onPress={onToggleMute}
-          activeOpacity={0.8}
-        >
-          {mediaMuted ? (
-            <VolumeX size={22} color="#b89450" />
-          ) : (
-            <Volume2 size={22} color="#b89450" />
-          )}
-        </TouchableOpacity>
-      )}
-
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.contentWrapper}
         showsVerticalScrollIndicator={false}
       >
-        {isUnlimited && (
-          <View style={styles.triggerHeader}>
-            <Text style={styles.triggerHeadline}>
-              {triggerHeadline || "Pause before this grows."}
+        <View style={styles.scrollingHeaderRow}>
+          <TouchableOpacity
+            style={styles.exitBtn}
+            onPress={() => {
+              console.log("[MALA_COUNTER] Exit pressed");
+              onExit();
+            }}
+            activeOpacity={0.7}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <ChevronLeft size={24} color="#8b6914" />
+          </TouchableOpacity>
+
+          <View style={styles.headerTextCenter}>
+            <Text style={styles.headerMantraTitle} numberOfLines={1}>
+              {isUnlimited
+                ? triggerHeadline || "Pause before this grows."
+                : mantraTitle || ""}
             </Text>
+          </View>
+
+          {showMuteToggle ? (
+            <TouchableOpacity
+              style={styles.muteBtn}
+              onPress={() => {
+                console.log("[MALA_COUNTER] Mute toggle pressed");
+                onToggleMute?.();
+              }}
+              activeOpacity={0.8}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              {mediaMuted ? (
+                <VolumeX size={22} color="#b89450" />
+              ) : (
+                <Volume2 size={22} color="#b89450" />
+              )}
+            </TouchableOpacity>
+          ) : (
+            <View style={{ width: 40 }} />
+          )}
+        </View>
+
+        {isUnlimited && !!triggerSubtext && (
+          <View style={styles.triggerSubtextWrap}>
             <Text style={styles.triggerSubtext}>
               {triggerSubtext ||
                 "You do not need to solve everything right now. Stay here for a few breaths and let the intensity soften first."}
             </Text>
-          </View>
-        )}
-
-        {mantraTitle !== "" && !isUnlimited && (
-          <View style={styles.mantraTitleBar}>
-            <Text style={styles.mantraDisplayName}>{mantraTitle}</Text>
           </View>
         )}
 
@@ -224,8 +236,8 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
                     },
                   ]}
                 >
-                  <TouchableOpacity 
-                    onPress={handleTap} 
+                  <TouchableOpacity
+                    onPress={handleTap}
                     disabled={tapped}
                     style={styles.beadInner}
                   >
@@ -238,8 +250,8 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
           </Animated.View>
 
           <Animated.View style={[styles.centerTapTarget, animatedCenterStyle]}>
-            <TouchableOpacity 
-              style={styles.tapTouchable} 
+            <TouchableOpacity
+              style={styles.tapTouchable}
               onPress={handleTap}
               activeOpacity={0.8}
             >
@@ -248,7 +260,13 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
                 <Text style={styles.subTap}>{subTapLabel}</Text>
                 <View style={styles.tapCheck}>
                   <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
-                    <Circle cx="12" cy="12" r="10" stroke="#B89450" strokeWidth="1" />
+                    <Circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="#B89450"
+                      strokeWidth="1"
+                    />
                     <Path
                       d="M8 12L11 15L16 9"
                       stroke="#B89450"
@@ -267,12 +285,15 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
 
         <View style={styles.mantraVerseSection}>
           {mantraText !== "" && (
-            <TouchableOpacity 
-              style={[styles.verseTextGroup, isMantraExpanded && styles.expandedSection]} 
+            <TouchableOpacity
+              style={[
+                styles.verseTextGroup,
+                isMantraExpanded && styles.expandedSection,
+              ]}
               onPress={() => setIsMantraExpanded(!isMantraExpanded)}
               activeOpacity={0.9}
             >
-              <Text 
+              <Text
                 style={styles.verseIast}
                 numberOfLines={isMantraExpanded ? undefined : 2}
               >
@@ -282,12 +303,15 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
           )}
 
           {hindiText !== "" && (
-            <TouchableOpacity 
-              style={[styles.verseTextGroup, isHindiExpanded && styles.expandedSection]} 
+            <TouchableOpacity
+              style={[
+                styles.verseTextGroup,
+                isHindiExpanded && styles.expandedSection,
+              ]}
               onPress={() => setIsHindiExpanded(!isHindiExpanded)}
               activeOpacity={0.9}
             >
-              <Text 
+              <Text
                 style={styles.verseDevanagari}
                 numberOfLines={isHindiExpanded ? undefined : 2}
               >
@@ -307,7 +331,9 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
           </View>
         )}
 
-        {!!footerContent && <View style={styles.footerActions}>{footerContent}</View>}
+        {!!footerContent && (
+          <View style={styles.footerActions}>{footerContent}</View>
+        )}
       </ScrollView>
     </ImageBackground>
   );
@@ -327,10 +353,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.1)",
   },
   exitBtn: {
-    position: "absolute",
-    top: Platform.OS === "ios" ? 50 : 20,
-    left: 20,
-    zIndex: 20,
     backgroundColor: "rgba(255, 255, 255, 0.5)",
     width: 40,
     height: 40,
@@ -342,12 +364,9 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
+    zIndex: 20,
   },
   muteBtn: {
-    position: "absolute",
-    top: Platform.OS === "ios" ? 50 : 20,
-    right: 20,
-    zIndex: 20,
     backgroundColor: "rgba(255, 255, 255, 0.5)",
     width: 40,
     height: 40,
@@ -359,26 +378,41 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
+    zIndex: 20,
   },
   contentWrapper: {
     flexGrow: 1,
     alignItems: "center",
     justifyContent: "flex-start",
     paddingHorizontal: 20,
-    paddingTop: 90,
+    paddingTop: Platform.OS === "ios" ? 10 : 0,
     paddingBottom: 40,
   },
-  triggerHeader: {
+  scrollingHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
-    paddingHorizontal: 10,
-  },
-  triggerHeadline: {
-    fontFamily: Fonts.serif.regular,
-    fontSize: 24,
-    color: "#432104",
-    textAlign: "center",
+    width: "100%",
+    paddingTop: Platform.OS === "ios" ? 10 : 10,
     marginBottom: 8,
+    zIndex: 10,
+    gap: 12,
+  },
+  headerTextCenter: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  headerMantraTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 18,
+    color: "#8b6914",
+    textAlign: "center",
+  },
+  triggerSubtextWrap: {
+    alignItems: "center",
+    // marginBottom: 8,
+    paddingHorizontal: 15,
   },
   triggerSubtext: {
     fontFamily: Fonts.sans.regular,
@@ -386,6 +420,7 @@ const styles = StyleSheet.create({
     color: "#615247",
     textAlign: "center",
     opacity: 0.7,
+    lineHeight: 20,
   },
   mantraTitleBar: {
     paddingVertical: 10,
@@ -397,7 +432,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   counterDisplay: {
-    marginVertical: 10,
+    marginVertical: 0,
   },
   counterRow: {
     flexDirection: "row",
@@ -553,7 +588,7 @@ const styles = StyleSheet.create({
   },
   footerActions: {
     width: "100%",
-    marginTop: 18,
+    marginTop: 5,
     alignItems: "center",
     gap: 14,
     paddingBottom: 22,

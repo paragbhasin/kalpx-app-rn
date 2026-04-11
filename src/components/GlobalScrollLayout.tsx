@@ -1,13 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
-    Animated,
-    ImageBackground,
-    Platform,
-    StatusBar,
-    StyleSheet,
-    TouchableOpacity,
-    View,
+  Animated,
+  ImageBackground,
+  Platform,
+  StatusBar,
+  StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useScrollContext } from "../context/ScrollContext";
 import { useScreenStore } from "../engine/useScreenBridge";
@@ -18,15 +18,28 @@ const HEADER_HEIGHT =
   Platform.OS === "android" ? 45 + (StatusBar.currentHeight || 0) : 45;
 
 const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
-  const { headerY, headerBgOpacity } = useScrollContext();
+  const { headerY, headerBgOpacity, toggleVisibility } = useScrollContext();
   const currentBackground = useScreenStore((state) => state.currentBackground);
   const isHeaderHidden = useScreenStore((state) => state.isHeaderHidden);
 
   // Back button logic — lives here so it rides the headerY animation for free
-  const { history, currentScreen, goBack, loadScreen } = useScreenStore();
-  const hideBackOnState = currentScreen?.state_id === "discipline_select";
+  const { history, currentScreen, currentContainerId, goBack, loadScreen } =
+    useScreenStore();
+
+  const isRootScreen =
+    currentContainerId === "companion_dashboard" ||
+    currentContainerId === "continue_journey" ||
+    currentScreen?.state_id === "discipline_select";
+
   const showBackButton =
-    !currentScreen?.overlay && history.length > 0 && !hideBackOnState;
+    !currentScreen?.overlay && history.length > 0 && !isRootScreen;
+
+  // Reset header visibility when back button is not present (mostly root screens)
+  React.useEffect(() => {
+    if (!showBackButton) {
+      toggleVisibility(true);
+    }
+  }, [showBackButton, toggleVisibility]);
 
   const handleBack = () => {
     if (history.length > 0) {
@@ -39,7 +52,7 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
   // For screens without a background image, always show solid white header
   // For screens with a background, use scroll-driven glass overlay
   const hasBg = !!currentBackground;
-  const backArrowColor = hasBg ? "#FFFFFF" : "#432104";
+  const backArrowColor = hasBg ? "#432104" : "#432104";
 
   return (
     <View style={styles.container}>

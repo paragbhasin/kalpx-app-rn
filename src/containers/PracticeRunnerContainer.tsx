@@ -1,34 +1,39 @@
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import Slider from "@react-native-community/slider";
+import { Audio } from "expo-av";
+import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  RefreshCw,
+} from "lucide-react-native";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Animated,
-  View,
+  Dimensions,
+  Easing,
+  Image,
+  ImageBackground,
+  LayoutAnimation,
+  Platform,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  Pressable,
-  StyleSheet,
-  Dimensions,
-  ImageBackground,
-  Platform,
-  SafeAreaView,
-  Image,
-  ScrollView,
-  Easing,
-  LayoutAnimation,
   UIManager,
+  View,
 } from "react-native";
-import { Audio } from "expo-av";
-import { useScreenStore } from "../engine/useScreenBridge";
-import { executeAction } from "../engine/actionExecutor";
-import { mitraTrackEvent } from "../engine/mitraApi";
-import BlockRenderer from "../engine/BlockRenderer";
-import MicroCompletion from "../components/HabitLoop/MicroCompletion";
-import MalaMantraCounter from "../components/MalaMantraCounter";
-import { Fonts } from "../theme/fonts";
-import { RefreshCw, ChevronRight, Check, ChevronLeft } from "lucide-react-native";
-import Slider from "@react-native-community/slider";
 import MantraLotus3d from "../../assets/mantra-lotus-3d.svg";
 import SankalpCenteredIcon from "../../assets/sankalp_centered.svg";
 import SankalpInnerPeaceIcon from "../../assets/sankalp_inner_peace.svg";
+import MicroCompletion from "../components/HabitLoop/MicroCompletion";
+import MalaMantraCounter from "../components/MalaMantraCounter";
+import { executeAction } from "../engine/actionExecutor";
+import BlockRenderer from "../engine/BlockRenderer";
+import { mitraTrackEvent } from "../engine/mitraApi";
+import { useScreenStore } from "../engine/useScreenBridge";
+import { Fonts } from "../theme/fonts";
 
 const { width } = Dimensions.get("window");
 
@@ -76,7 +81,11 @@ const CollapsibleCard: React.FC<CollapsibleCardProps> = ({
 
 function _omTextForTrack(url: string) {
   if (url.includes("Hari Om")) return { label: "Hari Om", devanagari: "हरि ॐ" };
-  if (url.includes("Om Shanti")) return { label: "Om Shanti Shanti Shanti", devanagari: "ॐ शान्तिः शान्तिः शान्तिः" };
+  if (url.includes("Om Shanti"))
+    return {
+      label: "Om Shanti Shanti Shanti",
+      devanagari: "ॐ शान्तिः शान्तिः शान्तिः",
+    };
   return { label: "OM", devanagari: "ॐ" };
 }
 
@@ -117,7 +126,9 @@ interface PracticeRunnerContainerProps {
   };
 }
 
-const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schema }) => {
+const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
+  schema,
+}) => {
   const {
     screenData: screenState,
     loadScreen,
@@ -206,7 +217,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
   const [mediaMuted, setMediaMuted] = useState(false);
   const [meaningExpanded, setMeaningExpanded] = useState(false);
   const [essenceExpanded, setEssenceExpanded] = useState(false);
-  
+
   // Prep Flow State
   const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
   const prepAudioRef = useRef<Audio.Sound | null>(null);
@@ -234,21 +245,27 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
   const sankalpSpinLoopRef = useRef<Animated.CompositeAnimation | null>(null);
 
   const currentVariant = schema?.variant || currentStateId;
-  
+
   // ── Variant Detection ──
-  const isMantraRunner = currentVariant === "mantra_runner" || currentStateId === "checkin_breath_reset";
+  const isMantraRunner =
+    currentVariant === "mantra_runner" ||
+    currentStateId === "checkin_breath_reset";
   const isSankalpEmbody = currentVariant === "sankalp_embody";
   const isSankalpConfirm = currentVariant === "sankalp_confirm";
   const isRepSelection = currentVariant === "mantra_rep_selection";
   const isMantraPrep = currentVariant === "mantra_prep";
   const isSacredPause = currentVariant === "sacred_pause";
-  const isSupportPractice = currentVariant === "support_practice" || currentStateId === "trigger_practice_runner";
+  const isSupportPractice =
+    currentVariant === "support_practice" ||
+    currentStateId === "trigger_practice_runner";
   const isMantraComplete = currentVariant === "mantra_complete";
   const isTriggerOmChantScreen =
     currentStateId === "free_mantra_chanting" ||
     currentStateId === "checkin_breath_reset" ||
     currentStateId === "post_trigger_mantra";
-  const repCounterBlock = schema.blocks?.find((block: any) => block.type === "rep_counter");
+  const repCounterBlock = schema.blocks?.find(
+    (block: any) => block.type === "rep_counter",
+  );
   const isUnlimitedRepCounter =
     !!repCounterBlock?.unlimited || Number(repCounterBlock?.total) === -1;
   const selectedRepCount = Number(screenState.reps_total) || 27;
@@ -282,7 +299,8 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
     const v = schema?.variant || "";
     if (v.includes("mantra_runner")) return "mantra_runner";
     if (v.includes("mantra_prep")) return "mantra_prep";
-    if (v.includes("sacred_pause") || v.includes("anchor")) return "anchor_timer";
+    if (v.includes("sacred_pause") || v.includes("anchor"))
+      return "anchor_timer";
     if (v.includes("practice_step")) return "practice_step_runner";
     return v;
   };
@@ -290,7 +308,10 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
   const getSessionMeta = () => {
     const activeItem = screenState.runner_active_item || {};
     return {
-      itemType: activeItem.item_type || schema?.variant?.replace("_runner", "") || "unknown",
+      itemType:
+        activeItem.item_type ||
+        schema?.variant?.replace("_runner", "") ||
+        "unknown",
       itemId: activeItem.item_id || screenState.mantra_id || "",
       source: activeItem.source || "core",
       runnerType: getRunnerType(),
@@ -300,42 +321,74 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
   const handleSessionExit = async () => {
     const meta = getSessionMeta();
     const durationSeconds = Math.round((Date.now() - sessionStartTime) / 1000);
-    
+
     // Submit Session Abandoned
-    executeAction({
-      type: "submit",
-      payload: {
-        type: currentStateId === "free_mantra_chanting" ? "trigger_session_abandoned" : "session_abandoned",
-        source: "support",
-        ...meta,
-        repsCompleted: count,
-        durationSeconds,
-      }
-    }, buildActionContext());
+    executeAction(
+      {
+        type: "submit",
+        payload: {
+          type:
+            currentStateId === "free_mantra_chanting"
+              ? "trigger_session_abandoned"
+              : "session_abandoned",
+          source: "support",
+          ...meta,
+          repsCompleted: count,
+          durationSeconds,
+        },
+      },
+      buildActionContext(),
+    );
 
     // Navigate to Target
     const exitTargets: Record<string, any> = {
-      mantra_runner: { container_id: "practice_runner", state_id: "mantra_rep_selection" },
-      mantra_prep: { container_id: "practice_runner", state_id: "mantra_rep_selection" },
-      anchor_timer: { container_id: "practice_runner", state_id: "anchor_duration_picker" },
+      mantra_runner: {
+        container_id: "practice_runner",
+        state_id: "mantra_rep_selection",
+      },
+      mantra_prep: {
+        container_id: "practice_runner",
+        state_id: "mantra_rep_selection",
+      },
+      anchor_timer: {
+        container_id: "practice_runner",
+        state_id: "anchor_duration_picker",
+      },
     };
-    
+
     let target = exitTargets[meta.runnerType];
-    if (currentStateId === 'checkin_breath_reset') {
-      target = { container_id: 'companion_dashboard', state_id: 'day_active' };
+    if (currentStateId === "checkin_breath_reset") {
+      target = { container_id: "companion_dashboard", state_id: "day_active" };
     }
     if (isTriggerSession) {
-      target = currentStateId === "free_mantra_chanting" 
-        ? { container_id: "companion_dashboard", state_id: "day_active" }
-        : { container_id: "awareness_trigger", state_id: "trigger_advice_reveal" };
+      target =
+        currentStateId === "free_mantra_chanting"
+          ? { container_id: "companion_dashboard", state_id: "day_active" }
+          : {
+              container_id: "awareness_trigger",
+              state_id: "trigger_advice_reveal",
+            };
     }
 
-    executeAction({ type: "navigate", target: target || { container_id: "companion_dashboard", state_id: "day_active" } }, buildActionContext());
+    executeAction(
+      {
+        type: "navigate",
+        target: target || {
+          container_id: "companion_dashboard",
+          state_id: "day_active",
+        },
+      },
+      buildActionContext(),
+    );
   };
 
   // ── Screen-Aware Mantra Content ──
-  const _isTriggerScreen = currentStateId === "free_mantra_chanting" || currentStateId === "post_trigger_mantra";
-  const _isCheckinSupportScreen = currentStateId === "checkin_support_mantra" || currentStateId === "checkin_breath_reset";
+  const _isTriggerScreen =
+    currentStateId === "free_mantra_chanting" ||
+    currentStateId === "post_trigger_mantra";
+  const _isCheckinSupportScreen =
+    currentStateId === "checkin_support_mantra" ||
+    currentStateId === "checkin_breath_reset";
 
   // Web parity (actionExecutor.js yesterday fix 53721c3 "Fixed text/audio
   // sync: display derives text from _selected_om_audio URL"):
@@ -349,7 +402,10 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
   // active and the item's title/iast are authoritative.
   const mantraDisplayTitle = useMemo(() => {
     if (_isTriggerScreen) {
-      if (screenState.trigger_step >= 3 && screenState.runner_active_item?.title) {
+      if (
+        screenState.trigger_step >= 3 &&
+        screenState.runner_active_item?.title
+      ) {
         return screenState.runner_active_item.title;
       }
       if (screenState._selected_om_audio) {
@@ -358,71 +414,131 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
       return screenState.trigger_mantra_text || "OM";
     }
     if (_isCheckinSupportScreen) {
-      if (currentStateId === "checkin_support_mantra" && screenState.runner_active_item?.title) {
+      if (
+        currentStateId === "checkin_support_mantra" &&
+        screenState.runner_active_item?.title
+      ) {
         return screenState.runner_active_item.title;
       }
       if (screenState._selected_om_audio) {
         return _omTextForTrack(screenState._selected_om_audio).label;
       }
-      return screenState.checkin_mantra_text || screenState.runner_active_item?.title || "OM";
+      return (
+        screenState.checkin_mantra_text ||
+        screenState.runner_active_item?.title ||
+        "OM"
+      );
     }
-    return screenState.runner_active_item?.title || screenState.mantra_title || "";
+    return (
+      screenState.runner_active_item?.title || screenState.mantra_title || ""
+    );
   }, [screenState, _isTriggerScreen, _isCheckinSupportScreen, currentStateId]);
 
   const mantraText = useMemo(() => {
     if (_isTriggerScreen) {
       // Trigger step 3 = user picked a specific mantra suggestion, not OM rotation
-      if (screenState.trigger_step >= 3 && screenState.runner_active_item?.iast) {
+      if (
+        screenState.trigger_step >= 3 &&
+        screenState.runner_active_item?.iast
+      ) {
         return screenState.runner_active_item.iast;
       }
       if (screenState._selected_om_audio) {
         return _omTextForTrack(screenState._selected_om_audio).label;
       }
-      return screenState.trigger_mantra_text || '';
+      return screenState.trigger_mantra_text || "";
     }
     if (_isCheckinSupportScreen) {
       // checkin_support_mantra = user past breath reset onto a specific
       // mantra — authoritative source is runner_active_item, not OM rotation
-      if (currentStateId === "checkin_support_mantra" && screenState.runner_active_item?.iast) {
+      if (
+        currentStateId === "checkin_support_mantra" &&
+        screenState.runner_active_item?.iast
+      ) {
         return screenState.runner_active_item.iast;
       }
       // checkin_breath_reset = OM rotation only
       if (screenState._selected_om_audio) {
         return _omTextForTrack(screenState._selected_om_audio).label;
       }
-      return screenState.checkin_mantra_text || screenState.runner_active_item?.iast || '';
+      return (
+        screenState.checkin_mantra_text ||
+        screenState.runner_active_item?.iast ||
+        ""
+      );
     }
-    return screenState.runner_active_item?.iast || screenState.mantra_text || schema.mantra_text || "";
-  }, [screenState, _isTriggerScreen, _isCheckinSupportScreen, schema, currentStateId]);
+    return (
+      screenState.runner_active_item?.iast ||
+      screenState.mantra_text ||
+      schema.mantra_text ||
+      ""
+    );
+  }, [
+    screenState,
+    _isTriggerScreen,
+    _isCheckinSupportScreen,
+    schema,
+    currentStateId,
+  ]);
 
   const mantraHindi = useMemo(() => {
     if (_isTriggerScreen) {
-      if (screenState.trigger_step >= 3 && screenState.runner_active_item?.devanagari) {
+      if (
+        screenState.trigger_step >= 3 &&
+        screenState.runner_active_item?.devanagari
+      ) {
         return screenState.runner_active_item.devanagari;
       }
       if (screenState._selected_om_audio) {
         return _omTextForTrack(screenState._selected_om_audio).devanagari;
       }
-      return screenState.trigger_mantra_devanagari || 'ॐ';
+      return screenState.trigger_mantra_devanagari || "ॐ";
     }
     if (_isCheckinSupportScreen) {
-      if (currentStateId === "checkin_support_mantra" && screenState.runner_active_item?.devanagari) {
+      if (
+        currentStateId === "checkin_support_mantra" &&
+        screenState.runner_active_item?.devanagari
+      ) {
         return screenState.runner_active_item.devanagari;
       }
       if (screenState._selected_om_audio) {
         return _omTextForTrack(screenState._selected_om_audio).devanagari;
       }
-      return screenState.checkin_mantra_devanagari || screenState.runner_active_item?.devanagari || '';
+      return (
+        screenState.checkin_mantra_devanagari ||
+        screenState.runner_active_item?.devanagari ||
+        ""
+      );
     }
-    return screenState.runner_active_item?.devanagari || screenState.mantra_devanagari || schema.mantra_hindi_text || "";
-  }, [screenState, _isTriggerScreen, _isCheckinSupportScreen, schema, currentStateId]);
+    return (
+      screenState.runner_active_item?.devanagari ||
+      screenState.mantra_devanagari ||
+      schema.mantra_hindi_text ||
+      ""
+    );
+  }, [
+    screenState,
+    _isTriggerScreen,
+    _isCheckinSupportScreen,
+    schema,
+    currentStateId,
+  ]);
 
   const mantraAudioUrl = useMemo(() => {
-    if (currentStateId === "free_mantra_chanting" || currentStateId === "checkin_breath_reset") return screenState._selected_om_audio || "";
-    if (_isTriggerScreen || _isCheckinSupportScreen) return screenState.runner_active_item?.audio_url || screenState._selected_om_audio || "";
+    if (
+      currentStateId === "free_mantra_chanting" ||
+      currentStateId === "checkin_breath_reset"
+    )
+      return screenState._selected_om_audio || "";
+    if (_isTriggerScreen || _isCheckinSupportScreen)
+      return (
+        screenState.runner_active_item?.audio_url ||
+        screenState._selected_om_audio ||
+        ""
+      );
     const item = screenState.runner_active_item;
-    if (item?.source === 'additional' || item?.source === 'support') {
-      return item?.audio_url || '';
+    if (item?.source === "additional" || item?.source === "support") {
+      return item?.audio_url || "";
     }
     return item?.audio_url || screenState.master_mantra?.audio_url || "";
   }, [screenState, currentStateId, _isTriggerScreen, _isCheckinSupportScreen]);
@@ -484,7 +600,14 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
         : "Move through the steps gently. You do not need to force a shift.";
     }
     return schema.subtext || schema.body || "";
-  }, [currentStateId, currentVariant, isTriggerSession, screenState.current_prana_type, schema.subtext, schema.body]);
+  }, [
+    currentStateId,
+    currentVariant,
+    isTriggerSession,
+    screenState.current_prana_type,
+    schema.subtext,
+    schema.body,
+  ]);
 
   const activeSankalpText = useMemo(() => {
     const item = screenState.runner_active_item;
@@ -558,39 +681,103 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
     }
   };
 
-  const toggleTriggerMute = async () => {
+  const applyMuteState = async (muted: boolean) => {
+    const volume = muted ? 0 : 1;
+    const sounds = [
+      introLoopAudioRef.current,
+      mantraLoopAudioRef.current,
+      prepAudioRef.current,
+      embodyAudioRef.current,
+      sankalpOmRef.current,
+      calmMusicRef.current,
+    ];
+
+    for (const sound of sounds) {
+      if (sound) {
+        try {
+          await sound.setVolumeAsync(volume);
+          await sound.setIsMutedAsync(muted);
+        } catch (err) {
+          // Ignore errors for unloaded sounds
+        }
+      }
+    }
+  };
+
+  const startCalmMusic = async () => {
+    try {
+      if (calmMusicRef.current) {
+        await calmMusicRef.current.unloadAsync().catch(() => {});
+        calmMusicRef.current = null;
+      }
+      const { sound } = await Audio.Sound.createAsync(
+        require("../../assets/sounds/Audio-calmmusic.mp3"),
+        {
+          shouldPlay: true,
+          isLooping: true,
+          isMuted: mediaMuted,
+          volume: mediaMuted ? 0 : 0.6,
+        },
+      );
+      calmMusicRef.current = sound;
+    } catch (err) {
+      console.warn("[CALM_MUSIC] play failed:", err);
+    }
+  };
+
+  const stopCalmMusic = async () => {
+    if (calmMusicRef.current) {
+      const sound = calmMusicRef.current;
+      calmMusicRef.current = null;
+      await sound.stopAsync().catch(() => {});
+      await sound.unloadAsync().catch(() => {});
+    }
+  };
+
+  const toggleTriggerMute = () => {
     const nextMuted = !mediaMuted;
     console.log("[TRIGGER_AUDIO] Toggling mute to:", nextMuted);
     setMediaMuted(nextMuted);
-
-    const volume = nextMuted ? 0 : 1;
-    
-    if (introLoopAudioRef.current) {
-      console.log("[TRIGGER_AUDIO] Updating intro sound volume:", volume);
-      await introLoopAudioRef.current.setVolumeAsync(volume).catch(() => {});
-      await introLoopAudioRef.current.setIsMutedAsync(nextMuted).catch(() => {});
-    }
-    if (mantraLoopAudioRef.current) {
-      console.log("[TRIGGER_AUDIO] Updating mantra sound volume:", volume);
-      await mantraLoopAudioRef.current.setVolumeAsync(volume).catch(() => {});
-      await mantraLoopAudioRef.current.setIsMutedAsync(nextMuted).catch(() => {});
-    }
+    // Explicitly apply to current sounds in addition to the effect
+    applyMuteState(nextMuted);
   };
+
+  // Synchronize audio state whenever mediaMuted changed or sounds are loaded
+  useEffect(() => {
+    applyMuteState(mediaMuted);
+  }, [mediaMuted]);
+
+  // Handle Calm Music for Support Practices
+  useEffect(() => {
+    if (isSupportPractice) {
+      startCalmMusic();
+    } else {
+      stopCalmMusic();
+    }
+    return () => {
+      stopCalmMusic();
+    };
+  }, [isSupportPractice]);
 
   useEffect(() => {
     Audio.setAudioModeAsync({
       playsInSilentModeIOS: true,
       staysActiveInBackground: false,
       playThroughEarpieceAndroid: false,
-    }).catch(e => console.warn("[TRIGGER_AUDIO] Global setAudioModeAsync error:", e));
+    }).catch((e) =>
+      console.warn("[TRIGGER_AUDIO] Global setAudioModeAsync error:", e),
+    );
   }, []);
 
   useEffect(() => {
     let isCancelled = false;
 
     const startTriggerAudioSequence = async () => {
-      console.log("[TRIGGER_AUDIO] startTriggerAudioSequence triggered. Mode:", currentStateId);
-      
+      console.log(
+        "[TRIGGER_AUDIO] startTriggerAudioSequence triggered. Mode:",
+        currentStateId,
+      );
+
       if (!isTriggerOmChantScreen) {
         console.log("[TRIGGER_AUDIO] Not a trigger chanting screen. Stopping.");
         await stopTriggerAudio();
@@ -600,7 +787,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
       await stopTriggerAudio();
 
       // Delay slightly to ensure component is settled
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise((resolve) => setTimeout(resolve, 300));
       if (isCancelled) return;
 
       // Try to load the intro bell (Audio_Be_still) — but it's optional.
@@ -610,17 +797,21 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
       try {
         console.log("[TRIGGER_AUDIO] Loading Intro: Audio_Be_still.mp4");
         const introSource = require("../../assets/sounds/Audio_Be_still.mp4");
-        const { sound: intro } = await Audio.Sound.createAsync(
-          introSource,
-          { shouldPlay: false, isMuted: mediaMuted, volume: 1 }
-        );
+        const { sound: intro } = await Audio.Sound.createAsync(introSource, {
+          shouldPlay: false,
+          isMuted: mediaMuted,
+          volume: mediaMuted ? 0 : 1,
+        });
         if (!isCancelled) {
           introLoopAudioRef.current = intro;
         } else {
           await intro.unloadAsync();
         }
       } catch (introErr) {
-        console.warn("[TRIGGER_AUDIO] Intro load failed — skipping:", (introErr as any)?.message);
+        console.warn(
+          "[TRIGGER_AUDIO] Intro load failed — skipping:",
+          (introErr as any)?.message,
+        );
         introLoopAudioRef.current = null;
       }
 
@@ -631,23 +822,33 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
       try {
         console.log("[TRIGGER_AUDIO] Loading Mantra Source:", mantraAudioUrl);
         const mantraSource = resolveAudioSource(mantraAudioUrl);
-        const result = await Audio.Sound.createAsync(
-          mantraSource,
-          { shouldPlay: false, isLooping: true, isMuted: mediaMuted, volume: 1 }
-        );
+        const result = await Audio.Sound.createAsync(mantraSource, {
+          shouldPlay: false,
+          isLooping: true,
+          isMuted: mediaMuted,
+          volume: mediaMuted ? 0 : 1,
+        });
         mantra = result.sound;
       } catch (mantraErr) {
-        console.warn("[TRIGGER_AUDIO] Mantra load failed:", (mantraErr as any)?.message);
+        console.warn(
+          "[TRIGGER_AUDIO] Mantra load failed:",
+          (mantraErr as any)?.message,
+        );
         // Fallback: try the local bundled Om.mp4
         try {
           const fallbackSource = require("../../assets/sounds/Om.mp4");
-          const result = await Audio.Sound.createAsync(
-            fallbackSource,
-            { shouldPlay: false, isLooping: true, isMuted: mediaMuted, volume: 1 }
-          );
+          const result = await Audio.Sound.createAsync(fallbackSource, {
+            shouldPlay: false,
+            isLooping: true,
+            isMuted: mediaMuted,
+            volume: mediaMuted ? 0 : 1,
+          });
           mantra = result.sound;
         } catch (fallbackErr) {
-          console.error("[TRIGGER_AUDIO] Fallback also failed:", (fallbackErr as any)?.message);
+          console.error(
+            "[TRIGGER_AUDIO] Fallback also failed:",
+            (fallbackErr as any)?.message,
+          );
           return; // Give up gracefully — the screen still renders without audio
         }
       }
@@ -673,7 +874,10 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
               mantra
                 .playAsync()
                 .catch((e) =>
-                  console.warn("[TRIGGER_AUDIO] Mantra play failed:", e?.message),
+                  console.warn(
+                    "[TRIGGER_AUDIO] Mantra play failed:",
+                    e?.message,
+                  ),
                 );
             }
           });
@@ -708,7 +912,8 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
       count ||
       0;
     const threshold = Number(schema.feedback_config?.slow_threshold) || 3;
-    const secondsPerRep = repCount > 0 ? durationSeconds / repCount : durationSeconds;
+    const secondsPerRep =
+      repCount > 0 ? durationSeconds / repCount : durationSeconds;
     const isFastSession = secondsPerRep < threshold;
     const feedback = isFastSession
       ? schema.feedback_config?.fast_feedback
@@ -726,8 +931,10 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
   // ── Background Handling ──
   useEffect(() => {
     let bg = require("../../assets/mantra3.png");
-    if (currentVariant === "mantra_prep") bg = require("../../assets/mantra_relaxing.png");
-    if (currentVariant === "mantra_rep_selection") bg = require("../../assets/beige_bg.png");
+    if (currentVariant === "mantra_prep")
+      bg = require("../../assets/mantra_relaxing.png");
+    if (currentVariant === "mantra_rep_selection")
+      bg = require("../../assets/beige_bg.png");
     // Fallback logic from Vue
     updateBackground(bg);
   }, [currentVariant]);
@@ -762,7 +969,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
 
       const { sound } = await Audio.Sound.createAsync(
         require("../../assets/sounds/Audio_Be_still.mp4"),
-        { shouldPlay: true, isLooping: false, volume: 1 }
+        { shouldPlay: true, isLooping: false, volume: 1 },
       );
 
       sound.setOnPlaybackStatusUpdate((status) => {
@@ -778,7 +985,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
           }
 
           setCurrentSentenceIndex((prev) =>
-            prev === nextSentenceIndex ? prev : nextSentenceIndex
+            prev === nextSentenceIndex ? prev : nextSentenceIndex,
           );
         }
 
@@ -804,7 +1011,8 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
           }
         });
 
-        const flowEnd = timings[sentences.length] ?? timings[timings.length - 1];
+        const flowEnd =
+          timings[sentences.length] ?? timings[timings.length - 1];
         if (typeof flowEnd === "number") {
           const completeTimeoutId = setTimeout(() => {
             if (prepCompletedRef.current) return;
@@ -837,9 +1045,9 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
     setTimeLeft(seconds);
     setInitialSeconds(seconds);
     setIsTimerStarted(true);
-    
+
     pauseTimerRef.current = setInterval(() => {
-      setTimeLeft(prev => {
+      setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(pauseTimerRef.current!);
           const action = schema.on_complete || schema.complete_action;
@@ -942,16 +1150,27 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
   };
 
   const returnToDashboard = (completed = true) => {
-    const messages = ["You showed up today.", "Stillness stays with you.", "Something shifts.", "Body remembers."];
+    const messages = [
+      "You showed up today.",
+      "Stillness stays with you.",
+      "Something shifts.",
+      "Body remembers.",
+    ];
     setMicroWinMessage(messages[Math.floor(Math.random() * messages.length)]);
     setShowMicroWin(true);
     setTimeout(() => {
-      executeAction({
-        type: "submit",
-        payload: { practiceId: schema.id || "practice", completed },
-        target: { container_id: "companion_dashboard", state_id: "day_active" }
-      }, buildActionContext());
-      }, 2500);
+      executeAction(
+        {
+          type: "submit",
+          payload: { practiceId: schema.id || "practice", completed },
+          target: {
+            container_id: "companion_dashboard",
+            state_id: "day_active",
+          },
+        },
+        buildActionContext(),
+      );
+    }, 2500);
   };
 
   useEffect(() => {
@@ -967,23 +1186,47 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
 
   // ── Render Components ──
   if (isRepSelection) {
-    const headlineBlock = schema.blocks?.find((block: any) => block.type === "headline");
-    const subtextBlock = schema.blocks?.find((block: any) => block.type === "subtext" && block.variant !== "link");
-    const repOptions = schema.blocks?.find((block: any) => block.type === "option_picker")?.options || [9, 18, 27, 54, 108];
-    const beginAction = schema.blocks?.find((block: any) => block.id === "begin_mantra_practice")?.action || {
+    const headlineBlock = schema.blocks?.find(
+      (block: any) => block.type === "headline",
+    );
+    const subtextBlock = schema.blocks?.find(
+      (block: any) => block.type === "subtext" && block.variant !== "link",
+    );
+    const repOptions = schema.blocks?.find(
+      (block: any) => block.type === "option_picker",
+    )?.options || [9, 18, 27, 54, 108];
+    const beginAction = schema.blocks?.find(
+      (block: any) => block.id === "begin_mantra_practice",
+    )?.action || {
       type: "navigate",
       target: { container_id: "practice_runner", state_id: "mantra_prep" },
     };
 
     return (
-      <ImageBackground source={require("../../assets/beige_bg.png")} style={styles.fullscreenBg} resizeMode="cover">
-        <ScrollView contentContainerStyle={styles.repSelectionScroll} showsVerticalScrollIndicator={false}>
-          <Text style={styles.repHeadline}>{headlineBlock?.content || "Choose Your Chant Count"}</Text>
-          <Text style={styles.repSubtext}>{subtextBlock?.content || "Set the number of chants for this session."}</Text>
+      <ImageBackground
+        source={require("../../assets/beige_bg.png")}
+        style={styles.fullscreenBg}
+        resizeMode="cover"
+      >
+        <ScrollView
+          contentContainerStyle={styles.repSelectionScroll}
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.repHeadline}>
+            {headlineBlock?.content || "Choose Your Chant Count"}
+          </Text>
+          <Text style={styles.repSubtext}>
+            {subtextBlock?.content ||
+              "Set the number of chants for this session."}
+          </Text>
 
           <View style={styles.repMandalaWrap}>
             <View style={styles.repMandalaOuter}>
-              <Image source={require("../../assets/lotus_glow.png")} style={styles.repMandalaGlow} resizeMode="contain" />
+              <Image
+                source={require("../../assets/lotus_glow.png")}
+                style={styles.repMandalaGlow}
+                resizeMode="contain"
+              />
               <View style={styles.repMandalaInner}>
                 <Text style={styles.repMandalaCount}>{selectedRepCount}</Text>
                 <Text style={styles.repMandalaLabel}>Chants</Text>
@@ -997,7 +1240,10 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
               return (
                 <Pressable
                   key={option}
-                  style={[styles.repOptionPill, selected && styles.repOptionPillSelected]}
+                  style={[
+                    styles.repOptionPill,
+                    selected && styles.repOptionPillSelected,
+                  ]}
                   onPress={() => updateScreenData("reps_total", option)}
                 >
                   {selected && (
@@ -1005,7 +1251,14 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
                       <Check size={12} color="#D9A012" strokeWidth={3} />
                     </View>
                   )}
-                  <Text style={[styles.repOptionText, selected && styles.repOptionTextSelected]}>{option}</Text>
+                  <Text
+                    style={[
+                      styles.repOptionText,
+                      selected && styles.repOptionTextSelected,
+                    ]}
+                  >
+                    {option}
+                  </Text>
                 </Pressable>
               );
             })}
@@ -1026,7 +1279,12 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
           </Text>
 
           <TouchableOpacity
-            onPress={() => loadScreen({ container_id: "companion_dashboard", state_id: "day_active" })}
+            onPress={() =>
+              loadScreen({
+                container_id: "companion_dashboard",
+                state_id: "day_active",
+              })
+            }
             activeOpacity={0.7}
           >
             <Text style={styles.returnLink}>Return to Mitra Home</Text>
@@ -1043,9 +1301,9 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
         Number(repCounterBlock?.total) ||
         schema.target_count ||
         9;
-    
+
     const activeItem = screenState.runner_active_item;
-    
+
     return (
       <View style={{ flex: 1 }}>
         <MalaMantraCounter
@@ -1060,10 +1318,15 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
             if (next >= target) {
               const action = schema.on_complete || schema.complete_action;
               if (action) {
-                const durationSeconds = Math.round((Date.now() - sessionStartTime) / 1000);
+                const durationSeconds = Math.round(
+                  (Date.now() - sessionStartTime) / 1000,
+                );
                 updateScreenData("chant_duration", durationSeconds);
                 updateScreenData("mantra_progress_reps", next);
-                setTimeout(() => executeAction(action, buildActionContext()), 1000);
+                setTimeout(
+                  () => executeAction(action, buildActionContext()),
+                  1000,
+                );
               }
             }
           }}
@@ -1090,7 +1353,9 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
                       label="Meaning"
                       expanded={meaningExpanded}
                       onToggle={() => {
-                        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                        LayoutAnimation.configureNext(
+                          LayoutAnimation.Presets.easeInEaseOut,
+                        );
                         setMeaningExpanded(!meaningExpanded);
                       }}
                     >
@@ -1102,7 +1367,9 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
                       label="Essence"
                       expanded={essenceExpanded}
                       onToggle={() => {
-                        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                        LayoutAnimation.configureNext(
+                          LayoutAnimation.Presets.easeInEaseOut,
+                        );
                         setEssenceExpanded(!essenceExpanded);
                       }}
                     >
@@ -1116,14 +1383,22 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
               {mantraRunnerFooterBlocks.length > 0 && (
                 <View style={{ marginTop: 20 }}>
                   {mantraRunnerFooterBlocks.map((block: any, i: number) => (
-                    <BlockRenderer key={block.id || `runner-footer-${i}`} block={block} />
+                    <BlockRenderer
+                      key={block.id || `runner-footer-${i}`}
+                      block={block}
+                    />
                   ))}
                 </View>
               )}
             </View>
           }
         />
-        {showMicroWin && <MicroCompletion message={microWinMessage} onDismiss={() => setShowMicroWin(false)} />}
+        {showMicroWin && (
+          <MicroCompletion
+            message={microWinMessage}
+            onDismiss={() => setShowMicroWin(false)}
+          />
+        )}
       </View>
     );
   }
@@ -1160,13 +1435,23 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
           <View style={styles.supportActions}>
             <TouchableOpacity
               style={styles.goldActionBtn}
-              onPress={() => executeAction({ type: "trigger_calmer_now" }, buildActionContext())}
+              onPress={() =>
+                executeAction(
+                  { type: "trigger_calmer_now" },
+                  buildActionContext(),
+                )
+              }
             >
               <Text style={styles.goldActionBtnText}>I feel calmer now</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.supportOutlineBtn}
-              onPress={() => executeAction({ type: "trigger_still_feeling" }, buildActionContext())}
+              onPress={() =>
+                executeAction(
+                  { type: "trigger_still_feeling" },
+                  buildActionContext(),
+                )
+              }
             >
               <Text style={styles.supportOutlineBtnText}>Try another way</Text>
             </TouchableOpacity>
@@ -1175,7 +1460,9 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
           {!!supportPracticeSummary && (
             <View style={styles.supportInfoCard}>
               <Text style={styles.supportInfoTitle}>Meaning</Text>
-              <Text style={styles.supportInfoText}>{supportPracticeSummary}</Text>
+              <Text style={styles.supportInfoText}>
+                {supportPracticeSummary}
+              </Text>
             </View>
           )}
 
@@ -1193,7 +1480,9 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
           {!!supportPracticeInsight && (
             <View style={styles.supportInfoCard}>
               <Text style={styles.supportInfoTitle}>Why this works</Text>
-              <Text style={styles.supportInfoText}>{supportPracticeInsight}</Text>
+              <Text style={styles.supportInfoText}>
+                {supportPracticeInsight}
+              </Text>
             </View>
           )}
         </ScrollView>
@@ -1218,26 +1507,43 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
     };
 
     return (
-      <ImageBackground source={require("../../assets/mantra_relaxing.png")} style={styles.fullscreenBg} resizeMode="cover">
+      <ImageBackground
+        source={require("../../assets/mantra_relaxing.png")}
+        style={styles.fullscreenBg}
+        resizeMode="cover"
+      >
         <SafeAreaView style={styles.safeArea}>
           <View style={styles.prepTopBar}>
-            <TouchableOpacity style={styles.prepBackBtn} onPress={handleSessionExit} activeOpacity={0.8}>
+            <TouchableOpacity
+              style={styles.prepBackBtn}
+              onPress={handleSessionExit}
+              activeOpacity={0.8}
+            >
               <ChevronLeft size={22} color="#5C3A12" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.skipBtn} onPress={finishPrep} activeOpacity={0.85}>
+            <TouchableOpacity
+              style={styles.skipBtn}
+              onPress={finishPrep}
+              activeOpacity={0.85}
+            >
               <Text style={styles.skipText}>Skip</Text>
               <ChevronRight size={18} color="#FFF" />
             </TouchableOpacity>
           </View>
 
           <View style={styles.prepContent}>
-            <Text style={styles.prepSentence}>{sentences[currentSentenceIndex]}</Text>
+            <Text style={styles.prepSentence}>
+              {sentences[currentSentenceIndex]}
+            </Text>
           </View>
 
           <View style={styles.prepBottomPanel}>
-            <Text style={styles.prepAudioLabel}>|| Audio Guidance Playing ||</Text>
+            <Text style={styles.prepAudioLabel}>
+              || Audio Guidance Playing ||
+            </Text>
             <Text style={styles.prepHeadphoneText}>
-              {schema.prep_config?.headphone_text || "Use headphone for the best experience"}
+              {schema.prep_config?.headphone_text ||
+                "Use headphone for the best experience"}
             </Text>
           </View>
         </SafeAreaView>
@@ -1247,22 +1553,35 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
 
   if (isSacredPause) {
     const activeItem = screenState.runner_active_item;
-    const steps = (activeItem?.steps_text || screenState.info?.steps_text || "").split("\n").filter(Boolean);
+    const steps = (activeItem?.steps_text || screenState.info?.steps_text || "")
+      .split("\n")
+      .filter(Boolean);
     const m = Math.floor(timeLeft / 60);
     const s = timeLeft % 60;
 
     return (
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.pauseHeader}>
-          <Text style={styles.pauseTitle}>{activeItem?.title || schema.pause_config?.title || "Sacred Pause"}</Text>
-          <Text style={styles.pauseSub}>{activeItem?.subtitle || schema.pause_config?.subtitle || "Take a moment"}</Text>
+          <Text style={styles.pauseTitle}>
+            {activeItem?.title || schema.pause_config?.title || "Sacred Pause"}
+          </Text>
+          <Text style={styles.pauseSub}>
+            {activeItem?.subtitle ||
+              schema.pause_config?.subtitle ||
+              "Take a moment"}
+          </Text>
         </View>
 
         <View style={styles.instructionsCard}>
-          {(steps.length > 0 ? steps : (schema.pause_config?.default_steps || [])).map((step: string, i: number) => (
+          {(steps.length > 0
+            ? steps
+            : schema.pause_config?.default_steps || []
+          ).map((step: string, i: number) => (
             <View key={i} style={styles.stepItem}>
               <Text style={styles.stepNum}>{i + 1}.</Text>
-              <Text style={styles.stepText}>{step.replace(/^\d+\.\s*/, "")}</Text>
+              <Text style={styles.stepText}>
+                {step.replace(/^\d+\.\s*/, "")}
+              </Text>
             </View>
           ))}
         </View>
@@ -1280,25 +1599,36 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
               minimumTrackTintColor="#CA8A04"
               maximumTrackTintColor="#D1D1D1"
             />
-            <TouchableOpacity style={styles.beginBtn} onPress={() => startPauseTimer(selectedDuration * 60)}>
+            <TouchableOpacity
+              style={styles.beginBtn}
+              onPress={() => startPauseTimer(selectedDuration * 60)}
+            >
               <Text style={styles.beginBtnText}>Begin Practice</Text>
             </TouchableOpacity>
           </View>
         ) : (
           <View style={styles.timerOrbArea}>
             <View style={styles.orbInner}>
-              <Text style={styles.timeStr}>{`${m}:${s.toString().padStart(2, "0")}`}</Text>
+              <Text
+                style={styles.timeStr}
+              >{`${m}:${s.toString().padStart(2, "0")}`}</Text>
               <Text style={styles.orbLabel}>REMAINING</Text>
               <TouchableOpacity onPress={resetPauseTimer}>
                 <RefreshCw size={24} color="#615247" />
               </TouchableOpacity>
             </View>
-            <Image source={require("../../assets/mantra-lotus-3d.svg")} style={styles.lotusTimer} />
+            <Image
+              source={require("../../assets/mantra-lotus-3d.svg")}
+              style={styles.lotusTimer}
+            />
           </View>
         )}
 
         <View style={styles.pauseActions}>
-          <TouchableOpacity style={styles.goldActionBtn} onPress={() => goBack()}>
+          <TouchableOpacity
+            style={styles.goldActionBtn}
+            onPress={() => goBack()}
+          >
             <Text style={styles.goldActionBtnText}>Cancel</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => returnToDashboard(false)}>
@@ -1330,11 +1660,14 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
           <View style={styles.diamond} />
           <View style={styles.line} />
         </View>
-        <Text style={styles.embodyInstr}>{schema.embody_config?.instruction || "Hold the icon below to embody."}</Text>
-        
-        <TouchableOpacity 
-          style={styles.holdTarget} 
-          onLongPress={startEmbody} 
+        <Text style={styles.embodyInstr}>
+          {schema.embody_config?.instruction ||
+            "Hold the icon below to embody."}
+        </Text>
+
+        <TouchableOpacity
+          style={styles.holdTarget}
+          onLongPress={startEmbody}
           delayLongPress={100}
           activeOpacity={0.8}
           disabled={isSankalpActivating}
@@ -1352,7 +1685,10 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
               source={require("../../assets/namaste.png")}
               style={[
                 styles.embodyImg,
-                isHolding && !isSankalpActivating && { transform: [{ rotateY: "180deg" }] },
+                isHolding &&
+                  !isSankalpActivating && {
+                    transform: [{ rotateY: "180deg" }],
+                  },
               ]}
             />
           </Animated.View>
@@ -1363,8 +1699,11 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
             Let the vibration settle within...
           </Text>
         )}
-        
-        <TouchableOpacity style={{ marginTop: 40 }} onPress={() => returnToDashboard(false)}>
+
+        <TouchableOpacity
+          style={{ marginTop: 40 }}
+          onPress={() => returnToDashboard(false)}
+        >
           <Text style={styles.returnLink}>Return to Mitra Home</Text>
         </TouchableOpacity>
       </View>
@@ -1428,7 +1767,9 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
 
             {!!feedback.retry_cta && (
               <View style={styles.mantraRetryCtaBox}>
-                <Text style={styles.mantraRetryCtaText}>{feedback.retry_cta}</Text>
+                <Text style={styles.mantraRetryCtaText}>
+                  {feedback.retry_cta}
+                </Text>
               </View>
             )}
 
@@ -1572,15 +1913,22 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
         </View>
       )}
       {schema.blocks?.map((block: any, i: number) => (
-        <BlockRenderer 
-          key={i} 
-          block={block.type === 'audio_player' ? { ...block, audio_url: mantraAudioUrl } : block} 
+        <BlockRenderer
+          key={i}
+          block={
+            block.type === "audio_player"
+              ? { ...block, audio_url: mantraAudioUrl }
+              : block
+          }
         />
       ))}
       {isMantraComplete && (
         <View style={styles.completionFooter}>
-          <TouchableOpacity style={styles.goldActionBtn} onPress={() => returnToDashboard(true)}>
-             <Text style={styles.goldActionBtnText}>Done</Text>
+          <TouchableOpacity
+            style={styles.goldActionBtn}
+            onPress={() => returnToDashboard(true)}
+          >
+            <Text style={styles.goldActionBtnText}>Done</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -2038,7 +2386,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.35)",
   },
-  skipText: { color: "#FFF", fontFamily: Fonts.serif.bold, fontSize: 16, marginRight: 2 },
+  skipText: {
+    color: "#FFF",
+    fontFamily: Fonts.serif.bold,
+    fontSize: 16,
+    marginRight: 2,
+  },
   prepTopBar: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -2099,7 +2452,11 @@ const styles = StyleSheet.create({
   },
   scrollContent: { padding: 24, alignItems: "center" },
   pauseHeader: { alignItems: "center", marginBottom: 30 },
-  pauseTitle: { fontFamily: Fonts.serif.regular, fontSize: 38, color: "#432104" },
+  pauseTitle: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 38,
+    color: "#432104",
+  },
   pauseSub: { fontFamily: Fonts.sans.regular, fontSize: 18, color: "#615247" },
   instructionsCard: {
     width: "100%",
@@ -2107,12 +2464,17 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: "rgba(196,164,92,0.3)",
     borderRadius: 24,
-    backgroundColor: "#FFF",
+    // backgroundColor: "#FFF",
     gap: 12,
   },
   stepItem: { flexDirection: "row", gap: 12 },
   stepNum: { fontFamily: Fonts.sans.bold, color: "#CA8A04" },
-  stepText: { fontFamily: Fonts.sans.regular, fontSize: 16, color: "#615247", flex: 1 },
+  stepText: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 16,
+    color: "#615247",
+    flex: 1,
+  },
   selectionCard: { width: "100%", alignItems: "center", marginTop: 30 },
   currentDurVal: { fontSize: 20, color: "#432104", marginBottom: 10 },
   beginBtn: {
@@ -2125,11 +2487,23 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   beginBtnText: { color: "#FFF", fontSize: 18, fontWeight: "600" },
-  timerOrbArea: { width: 260, height: 260, alignItems: "center", justifyContent: "center", marginTop: 20 },
+  timerOrbArea: {
+    width: 260,
+    height: 260,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 20,
+  },
   orbInner: { alignItems: "center", zIndex: 2 },
   timeStr: { fontSize: 56, color: "#432104" },
   orbLabel: { fontSize: 13, color: "#615247", opacity: 0.6 },
-  lotusTimer: { position: "absolute", bottom: -20, width: 180, height: 100, opacity: 0.3 },
+  lotusTimer: {
+    position: "absolute",
+    bottom: -20,
+    width: 180,
+    height: 100,
+    opacity: 0.3,
+  },
   pauseActions: { width: "100%", marginTop: 40, gap: 16, alignItems: "center" },
   goldActionBtn: {
     width: "100%",
@@ -2140,15 +2514,50 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   goldActionBtnText: { color: "#FFF", fontSize: 18, fontWeight: "600" },
-  returnLink: { color: "#8c8881", fontSize: 14, textDecorationLine: "underline" },
-  embodyContainer: { flex: 1, padding: 20, alignItems: "center", justifyContent: "center" },
+  returnLink: {
+    color: "#8c8881",
+    fontSize: 14,
+    textDecorationLine: "underline",
+  },
+  embodyContainer: {
+    flex: 1,
+    padding: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   quoteWrap: { marginVertical: 20 },
-  sankalpText: { fontFamily: Fonts.serif.bold, fontSize: 28, color: "#432104", textAlign: "center" },
-  divider: { flexDirection: "row", alignItems: "center", gap: 10, marginVertical: 20 },
+  sankalpText: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 28,
+    color: "#432104",
+    textAlign: "center",
+  },
+  divider: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginVertical: 20,
+  },
   line: { flex: 1, height: 1, backgroundColor: "#d9a557", width: 80 },
-  diamond: { width: 6, height: 6, backgroundColor: "#d9a557", transform: [{ rotate: "45deg" }] },
-  embodyInstr: { fontSize: 18, color: "#615247", textAlign: "center", marginBottom: 30 },
-  holdTarget: { width: 200, height: 200, borderRadius: 100, alignItems: "center", justifyContent: "center" },
+  diamond: {
+    width: 6,
+    height: 6,
+    backgroundColor: "#d9a557",
+    transform: [{ rotate: "45deg" }],
+  },
+  embodyInstr: {
+    fontSize: 18,
+    color: "#615247",
+    textAlign: "center",
+    marginBottom: 30,
+  },
+  holdTarget: {
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   embodyCoinWrap: {
     alignItems: "center",
     justifyContent: "center",
@@ -2162,8 +2571,17 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   supportHeader: { width: "100%", alignItems: "center", marginBottom: 24 },
-  supportHeadline: { fontFamily: Fonts.serif.bold, fontSize: 28, color: "#432104" },
-  supportSub: { fontFamily: Fonts.sans.regular, fontSize: 14, color: "#615247", textAlign: "center" },
+  supportHeadline: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 28,
+    color: "#432104",
+  },
+  supportSub: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 14,
+    color: "#615247",
+    textAlign: "center",
+  },
   supportPracticeScroll: {
     paddingHorizontal: 24,
     paddingTop: 32,

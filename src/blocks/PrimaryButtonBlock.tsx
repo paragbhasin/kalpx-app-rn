@@ -246,16 +246,16 @@ const styles = StyleSheet.create({
   outlineButton: {
     borderWidth: 1,
     borderColor: "#C9A84C",
-    borderRadius: 50,
-    paddingVertical: 14,
-    paddingHorizontal: 28,
+    borderRadius: 48,
+    paddingVertical: 10,
+    paddingHorizontal: 26,
     alignItems: "center",
-    marginVertical: 12,
+    marginVertical: 5,
     alignSelf: "center",
   },
   outlineLabel: {
     color: "#C9A84C",
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "600",
   },
 });

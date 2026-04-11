@@ -28,6 +28,7 @@ import MantraLotus3d from "../../assets/mantra-lotus-3d.svg";
 import SankalpCenteredIcon from "../../assets/sankalp_centered.svg";
 import SankalpInnerPeaceIcon from "../../assets/sankalp_inner_peace.svg";
 import AudioPlayerBlock from "../blocks/AudioPlayerBlock";
+import Svg, { Circle } from "react-native-svg";
 import MicroCompletion from "../components/HabitLoop/MicroCompletion";
 import MalaMantraCounter from "../components/MalaMantraCounter";
 import { executeAction } from "../engine/actionExecutor";
@@ -253,6 +254,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
   const inFlightSounds = useRef<Set<Audio.Sound>>(new Set());
 
   const currentVariant = schema?.variant || currentStateId;
+  const activeItem = screenState?.runner_active_item;
 
   // ── Variant Detection ──
   const isMantraRunner =
@@ -267,6 +269,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     currentVariant === "support_practice" ||
     currentStateId === "trigger_practice_runner";
   const isMantraComplete = currentVariant === "mantra_complete";
+  const isPracticeComplete = currentVariant === "practice_complete";
   const isTriggerOmChantScreen =
     currentStateId === "free_mantra_chanting" ||
     currentStateId === "checkin_breath_reset" ||
@@ -331,6 +334,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     const durationSeconds = Math.round((Date.now() - sessionStartTime) / 1000);
 
     // Submit Session Abandoned
+    stopCalmMusic();
     executeAction(
       {
         type: "submit",
@@ -740,7 +744,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
       );
 
       // If we unmounted or changed state while loading, unload immediately
-      if (!isSupportPractice) {
+      if (!isSupportPractice && !isSacredPause) {
         await sound.unloadAsync().catch(() => {});
         return;
       }
@@ -783,11 +787,14 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
       isMantraRunner ||
       isTriggerOmChantScreen;
 
-    if (isSupportPractice && !isMantra) {
-      console.log("[CALM_MUSIC] Practice flow detected. Initializing.");
+    const shouldPlay =
+      (isSupportPractice && !isMantra) || (isSacredPause && isTimerStarted);
+
+    if (shouldPlay) {
+      console.log("[CALM_MUSIC] Play condition met.");
       startCalmMusic();
     } else {
-      console.log("[CALM_MUSIC] Mantra flow or other detected. Stopping.");
+      console.log("[CALM_MUSIC] Stop condition met.");
       stopCalmMusic();
     }
     return () => {
@@ -797,6 +804,8 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     isSupportPractice,
     isMantraRunner,
     isTriggerOmChantScreen,
+    isSacredPause,
+    isTimerStarted,
     currentStateId,
   ]);
 
@@ -1098,6 +1107,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
       setTimeLeft((prev) => {
         if (prev <= 1) {
           clearInterval(pauseTimerRef.current!);
+          setIsTimerStarted(false);
           const action = schema.on_complete || schema.complete_action;
           if (action) executeAction(action, buildActionContext());
           return 0;
@@ -1656,8 +1666,18 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
   }
 
   if (isSacredPause) {
-    const activeItem = screenState.runner_active_item;
-    const steps = (activeItem?.steps_text || screenState.info?.steps_text || "")
+    const stepsFromBlocks = (schema.blocks || [])
+      .filter((b: any) => b.type === "points" || b.type === "text")
+      .map((b: any) => b.content)
+      .join("\n");
+
+    const steps = (
+      activeItem?.steps_text ||
+      screenState.info?.steps_text ||
+      schema.steps_text ||
+      stepsFromBlocks ||
+      ""
+    )
       .split("\n")
       .filter(Boolean);
     const m = Math.floor(timeLeft / 60);
@@ -1698,48 +1718,88 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
 
         {!isTimerStarted ? (
           <View style={styles.selectionCard}>
+            <Text style={styles.pauseTitle}>How long will you pause?</Text>
             <Text style={styles.currentDurVal}>{selectedDuration} min</Text>
-            <Slider
-              style={{ width: "100%", height: 40 }}
-              minimumValue={0.5}
-              maximumValue={5}
-              step={0.5}
-              value={selectedDuration}
-              onValueChange={setSelectedDuration}
-              minimumTrackTintColor="#CA8A04"
-              maximumTrackTintColor="#D1D1D1"
-            />
+
+            <View style={styles.sliderRow}>
+              <Text style={styles.sliderLabel}>0</Text>
+              <Slider
+                style={{ flex: 1, height: 40 }}
+                minimumValue={0.5}
+                maximumValue={5}
+                step={0.5}
+                value={selectedDuration}
+                onValueChange={setSelectedDuration}
+                minimumTrackTintColor="#D6A43A"
+                maximumTrackTintColor="#D1D1D1"
+                thumbTintColor="#D6A43A"
+              />
+              <Text style={styles.sliderLabel}>5 min</Text>
+            </View>
+
             <TouchableOpacity
-              style={styles.beginBtn}
+              style={styles.beginBtnSmall}
               onPress={() => startPauseTimer(selectedDuration * 60)}
             >
-              <Text style={styles.beginBtnText}>Begin Practice</Text>
+              <Text style={styles.beginBtnSmallText}>Begin</Text>
             </TouchableOpacity>
+
+            <Text style={styles.durationHint}>
+              Choose your duration to begin
+            </Text>
           </View>
         ) : (
           <View style={styles.timerOrbArea}>
+            <Svg width={280} height={280} style={styles.timerSvg}>
+              {/* Background Circle */}
+              <Circle
+                cx={140}
+                cy={140}
+                r={130}
+                stroke="rgba(214, 164, 58, 0.15)"
+                strokeWidth={5}
+                fill="transparent"
+              />
+              {/* Progress Arc */}
+              <Circle
+                cx={140}
+                cy={140}
+                r={130}
+                stroke="#D6A43A"
+                strokeWidth={5}
+                fill="transparent"
+                strokeDasharray={816} // 2 * PI * 130
+                strokeDashoffset={816 * (1 - timeLeft / initialSeconds)}
+                strokeLinecap="round"
+                transform="rotate(-90 140 140)"
+              />
+            </Svg>
+
             <View style={styles.orbInner}>
-              <Text
-                style={styles.timeStr}
-              >{`${m}:${s.toString().padStart(2, "0")}`}</Text>
-              <Text style={styles.orbLabel}>REMAINING</Text>
-              <TouchableOpacity onPress={resetPauseTimer}>
-                <RefreshCw size={24} color="#615247" />
+              <Text style={styles.timeStr}>
+                {`${m}:${s.toString().padStart(2, "0")}`}
+              </Text>
+              <Text style={styles.orbLabel}>Return to the moment</Text>
+              <TouchableOpacity
+                onPress={resetPauseTimer}
+                style={{ marginTop: 12 }}
+              >
+                <RefreshCw size={24} color="#615247" opacity={0.6} />
               </TouchableOpacity>
             </View>
-            <Image
-              source={require("../../assets/mantra-lotus-3d.svg")}
-              style={styles.lotusTimer}
-            />
+
+            <View style={styles.lotusOverlay}>
+              <MantraLotus3d width={120} height={90} opacity={0.8} />
+            </View>
           </View>
         )}
 
         <View style={styles.pauseActions}>
           <TouchableOpacity
-            style={styles.goldActionBtn}
+            style={styles.endPracticeBtn}
             onPress={() => goBack()}
           >
-            <Text style={styles.goldActionBtnText}>Cancel</Text>
+            <Text style={styles.endPracticeBtnText}>End Practice</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => returnToDashboard(false)}>
             <Text style={styles.returnLink}>Return to Mitra Home</Text>
@@ -1831,7 +1891,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     );
   }
 
-  if (isMantraComplete) {
+  if (isMantraComplete || isPracticeComplete) {
     const completionConfig = schema.completion_config || {};
     const feedback = mantraCompletionState.feedback || {};
     const points = completionConfig.points || [];
@@ -1847,7 +1907,8 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
           showsVerticalScrollIndicator={false}
         >
           <Text style={styles.mantraCompleteHeadline}>
-            {completionConfig.headline || "Mantra Completed."}
+            {completionConfig.headline ||
+              (isPracticeComplete ? "Practice Completed." : "Mantra Completed.")}
           </Text>
           <Text style={styles.mantraCompleteSubtext}>
             {completionConfig.subtext ||
@@ -1860,51 +1921,58 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
             <View style={styles.mantraCompleteLine} />
           </View>
 
-          <View style={styles.mantraReflectionCard}>
-            <View style={styles.mantraReflectionHeader}>
-              <View style={styles.mantraReflectionHeaderLine} />
-              <Text style={styles.mantraReflectionLabel}>
-                {completionConfig.reflection_label || "Session Reflection"}
-              </Text>
-              <View style={styles.mantraReflectionHeaderLine} />
-            </View>
+          {/* Metric card - only for Mantras or if explicitly configured */}
+          {(isMantraComplete || completionConfig.show_stats) && (
+            <View style={styles.mantraReflectionCard}>
+              <View style={styles.mantraReflectionHeader}>
+                <View style={styles.mantraReflectionHeaderLine} />
+                <Text style={styles.mantraReflectionLabel}>
+                  {completionConfig.reflection_label || "Session Reflection"}
+                </Text>
+                <View style={styles.mantraReflectionHeaderLine} />
+              </View>
 
-            <View style={styles.mantraDurationCard}>
-              <Text style={styles.mantraDurationLabel}>Session Duration</Text>
-              <Text style={styles.mantraDurationValue}>
-                {mantraCompletionState.durationLabel}
-              </Text>
-            </View>
-
-            <Text style={styles.mantraFeedbackTitle}>
-              {feedback.title || "A Gentle Reflection"}
-            </Text>
-            <Text style={styles.mantraFeedbackMessage}>
-              {feedback.message || "Did each mantra truly resonate within you?"}
-            </Text>
-            {!!feedback.sub && (
-              <Text style={styles.mantraFeedbackSub}>{feedback.sub}</Text>
-            )}
-
-            {!!feedback.retry_cta && (
-              <View style={styles.mantraRetryCtaBox}>
-                <Text style={styles.mantraRetryCtaText}>
-                  {feedback.retry_cta}
+              <View style={styles.mantraDurationCard}>
+                <Text style={styles.mantraDurationLabel}>Session Duration</Text>
+                <Text style={styles.mantraDurationValue}>
+                  {mantraCompletionState.durationLabel}
                 </Text>
               </View>
-            )}
 
-            {!mantraCompletionState.isFastSession && points.length > 0 && (
-              <View style={styles.mantraPointsList}>
-                {points.map((point: string, index: number) => (
-                  <View key={`${point}-${index}`} style={styles.mantraPointRow}>
-                    <View style={styles.mantraPointDot} />
-                    <Text style={styles.mantraPointText}>{point}</Text>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
+              <Text style={styles.mantraFeedbackTitle}>
+                {feedback.title || "A Gentle Reflection"}
+              </Text>
+              <Text style={styles.mantraFeedbackMessage}>
+                {feedback.message ||
+                  "Did each mantra truly resonate within you?"}
+              </Text>
+              {!!feedback.sub && (
+                <Text style={styles.mantraFeedbackSub}>{feedback.sub}</Text>
+              )}
+
+              {!!feedback.retry_cta && (
+                <View style={styles.mantraRetryCtaBox}>
+                  <Text style={styles.mantraRetryCtaText}>
+                    {feedback.retry_cta}
+                  </Text>
+                </View>
+              )}
+
+              {!mantraCompletionState.isFastSession && points.length > 0 && (
+                <View style={styles.mantraPointsList}>
+                  {points.map((point: string, index: number) => (
+                    <View
+                      key={`${point}-${index}`}
+                      style={styles.mantraPointRow}
+                    >
+                      <View style={styles.mantraPointDot} />
+                      <Text style={styles.mantraPointText}>{point}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
+            </View>
+          )}
 
           {feedback.recommendRepeat && (
             <View style={styles.recommendedBadge}>
@@ -1914,12 +1982,15 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
 
           <TouchableOpacity
             style={styles.mantraRepeatBtn}
-            onPress={() =>
+            onPress={() => {
+              setIsTimerStarted(false);
               loadScreen({
                 container_id: "practice_runner",
-                state_id: "mantra_rep_selection",
-              })
-            }
+                state_id: isMantraComplete
+                  ? "mantra_rep_selection"
+                  : "sacred_pause",
+              });
+            }}
             activeOpacity={0.85}
           >
             <Text style={styles.mantraRepeatBtnText}>
@@ -1928,11 +1999,11 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.goldActionBtn}
+            style={styles.endPracticeBtn}
             onPress={() => returnToDashboard(true)}
             activeOpacity={0.85}
           >
-            <Text style={styles.goldActionBtnText}>
+            <Text style={styles.endPracticeBtnText}>
               {completionConfig.dashboard_label || "Return to Mitra Home"}
             </Text>
           </TouchableOpacity>
@@ -2604,8 +2675,66 @@ const styles = StyleSheet.create({
     color: "#615247",
     flex: 1,
   },
-  selectionCard: { width: "100%", alignItems: "center", marginTop: 30 },
-  currentDurVal: { fontSize: 20, color: "#432104", marginBottom: 10 },
+  selectionCard: {
+    width: "100%",
+    alignItems: "center",
+    marginTop: 30,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 30,
+    borderWidth: 1.5,
+    borderColor: "rgba(196,164,92,0.2)",
+    paddingVertical: 32,
+    paddingHorizontal: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  currentDurVal: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 24,
+    color: "#432104",
+    marginVertical: 12,
+  },
+  sliderRow: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 24,
+  },
+  sliderLabel: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 16,
+    color: "#615247",
+    width: 40,
+    textAlign: "center",
+  },
+  beginBtnSmall: {
+    width: "100%",
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "#D6A43A",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  beginBtnSmallText: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 18,
+    color: "#432104",
+  },
+  durationHint: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 14,
+    color: "#8c8881",
+    marginTop: 16,
+  },
   beginBtn: {
     width: "100%",
     height: 56,
@@ -2617,15 +2746,38 @@ const styles = StyleSheet.create({
   },
   beginBtnText: { color: "#FFF", fontSize: 18, fontWeight: "600" },
   timerOrbArea: {
-    width: 260,
-    height: 260,
+    width: 280,
+    height: 280,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 20,
+    marginTop: 40,
+    marginBottom: 20,
   },
-  orbInner: { alignItems: "center", zIndex: 2 },
-  timeStr: { fontSize: 56, color: "#432104" },
-  orbLabel: { fontSize: 13, color: "#615247", opacity: 0.6 },
+  timerSvg: {
+    position: "absolute",
+  },
+  orbInner: {
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 2,
+  },
+  timeStr: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 64,
+    color: "#432104",
+    lineHeight: 74,
+  },
+  orbLabel: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 18,
+    color: "#615247",
+    marginTop: 4,
+  },
+  lotusOverlay: {
+    position: "absolute",
+    bottom: -15,
+    zIndex: 3,
+  },
   lotusTimer: {
     position: "absolute",
     bottom: -20,
@@ -2643,6 +2795,24 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   goldActionBtnText: { color: "#FFF", fontSize: 18, fontWeight: "600" },
+  endPracticeBtn: {
+    width: "100%",
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#D6A43A",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  endPracticeBtnText: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 18,
+    color: "#432104",
+  },
   returnLink: {
     color: "#8c8881",
     fontSize: 14,

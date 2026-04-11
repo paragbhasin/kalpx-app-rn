@@ -169,6 +169,7 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
       currentType !== null,
     [stateId, currentType],
   );
+  const isAckScreen = stateId === "quick_checkin_ack";
 
   const blocks = schema?.blocks || [];
   const footerBlocks = useMemo(
@@ -515,6 +516,52 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     );
   }
 
+  if (isAckScreen) {
+    return (
+      <View style={styles.container}>
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.ackScrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.visualContainer}>
+            {typeof MantraLotus3d === "number" ? (
+              <SvgUri
+                uri={Image.resolveAssetSource(MantraLotus3d)?.uri ?? null}
+                width={200}
+                height={200}
+              />
+            ) : (
+              <MantraLotus3d width={200} height={200} />
+            )}
+          </View>
+
+          <View style={styles.ackContent}>
+            <Text style={styles.ackHeadline}>
+              {screenData.checkin_ack_headline}
+            </Text>
+
+            <Text style={styles.ackBody}>{screenData.checkin_ack_body}</Text>
+
+            {screenData.checkin_ack_accent ? (
+              <Text style={styles.ackAccent}>
+                {screenData.checkin_ack_accent}
+              </Text>
+            ) : null}
+          </View>
+
+          {visibleFooterBlocks.length > 0 && (
+            <View style={styles.ackActions}>
+              {visibleFooterBlocks.map((block: any, i: number) => (
+                <BlockRenderer key={`ack-f-${i}`} block={block} />
+              ))}
+            </View>
+          )}
+        </ScrollView>
+      </View>
+    );
+  }
+
   // Generic Transition Mode
   return (
     <View style={styles.container}>
@@ -556,9 +603,17 @@ const styles = StyleSheet.create({
     paddingBottom: 60,
     alignItems: "center",
   },
+  ackScrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 30,
+    // paddingTop: 80,
+    // paddingBottom: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   visualContainer: {
     alignItems: "center",
-    marginBottom: 20,
+    // marginBottom: 20,
   },
   deityTitle: {
     fontSize: 26,
@@ -772,6 +827,40 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif.regular,
     color: BROWN,
     textDecorationLine: "underline",
+  },
+  ackContent: {
+    alignItems: "center",
+    // marginBottom: 40,
+  },
+  ackHeadline: {
+    fontSize: 28,
+    fontFamily: Fonts.serif.bold,
+    color: BROWN,
+    textAlign: "center",
+    lineHeight: 38,
+    marginBottom: 24,
+  },
+  ackBody: {
+    fontSize: 18,
+    lineHeight: 28,
+    color: "#5C5648",
+    fontFamily: Fonts.serif.regular,
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  ackAccent: {
+    fontSize: 17,
+    fontFamily: Fonts.serif.bold,
+    fontStyle: "italic",
+    color: GOLD,
+    textAlign: "center",
+    lineHeight: 26,
+    paddingHorizontal: 10,
+  },
+  ackActions: {
+    width: "100%",
+    alignItems: "center",
+    // marginTop: "auto",
   },
   content: {
     gap: 20,

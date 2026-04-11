@@ -9,7 +9,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { SvgUri } from "react-native-svg";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { Fonts } from "../theme/fonts";
 
@@ -332,6 +331,7 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
                   <View
                     style={[
                       styles.imageContainer,
+                      isGrid && styles.gridImageContainer,
                       isPremiumGrid && styles.premiumImageContainer,
                       isDisciplineGrid && styles.disciplineImageContainer,
                     ]}
@@ -343,11 +343,16 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
                         ? usesImageAsset(iconPath)
                           ? 52
                           : 44
-                        : isPremiumGrid
-                          ? 32
-                          : 24;
+                        : isGrid && !isPremiumGrid
+                          ? 36
+                          : isPremiumGrid
+                            ? 60
+                            : 24;
                       if (assetSource) {
-                        if (usesImageAsset(iconPath) || typeof assetSource === 'number') {
+                        if (
+                          usesImageAsset(iconPath) ||
+                          typeof assetSource === "number"
+                        ) {
                           return (
                             <Image
                               source={assetSource}
@@ -356,12 +361,22 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
                             />
                           );
                         }
-                        
-                        if (typeof assetSource === 'function' || (typeof assetSource === 'object' && assetSource !== null)) {
-                          const SVGComp = (assetSource as any).default || assetSource;
-                          if (typeof SVGComp === 'function' || (typeof SVGComp === 'object' && SVGComp !== null)) {
+
+                        if (
+                          typeof assetSource === "function" ||
+                          (typeof assetSource === "object" &&
+                            assetSource !== null)
+                        ) {
+                          const SVGComp =
+                            (assetSource as any).default || assetSource;
+                          if (
+                            typeof SVGComp === "function" ||
+                            (typeof SVGComp === "object" && SVGComp !== null)
+                          ) {
                             const Component = SVGComp as any;
-                            return <Component width={iconSize} height={iconSize} />;
+                            return (
+                              <Component width={iconSize} height={iconSize} />
+                            );
                           }
                         }
                       }
@@ -403,6 +418,7 @@ const ChoiceCardBlock: React.FC<ChoiceCardBlockProps> = ({ block }) => {
                     <Text
                       style={[
                         styles.title,
+                        isGrid && styles.gridTitle,
                         isPremiumGrid && styles.premiumTitle,
                         isDisciplineGrid && styles.disciplineTitle,
                       ]}
@@ -536,8 +552,9 @@ const styles = StyleSheet.create({
     paddingRight: 14,
   },
   gridCard: {
-    // padding: 12,
-    // minHeight: 145,
+    paddingVertical: 16,
+    paddingHorizontal: 8,
+    minHeight: 100,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -629,7 +646,7 @@ const styles = StyleSheet.create({
   },
   gridLeftPart: {
     flexDirection: "column",
-    gap: 8,
+    gap: 6,
     alignItems: "center",
   },
   premiumGridLeftPart: {
@@ -650,7 +667,12 @@ const styles = StyleSheet.create({
     height: 30,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 16, // Spacing for icons
+    marginRight: 16,
+  },
+  gridImageContainer: {
+    width: 40,
+    height: 40,
+    marginRight: 0,
   },
   premiumImageContainer: {
     width: 64,

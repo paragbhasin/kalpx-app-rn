@@ -16,6 +16,7 @@ import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
 import { Fonts } from "../theme/fonts";
+import KalpxModal from "../components/KalpxModal";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -73,6 +74,8 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
   } = useScreenStore();
 
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showToastModal, setShowToastModal] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
 
   // Alias: screenData in RN Redux = screenState in Vue
   const ss = screenData as Record<string, any>;
@@ -160,10 +163,11 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
   useEffect(() => {
     const toast = ss._trigger_resolution_toast;
     if (toast?.message) {
-      Alert.alert("", toast.message);
+      setToastMsg(toast.message);
+      setShowToastModal(true);
       updateScreenData("_trigger_resolution_toast", null);
     }
-  }, [ss._trigger_resolution_toast]);
+  }, [ss._trigger_resolution_toast, updateScreenData]);
 
   // Apply background (same as ChoiceStackContainer)
   useEffect(() => {
@@ -551,6 +555,12 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
           ))}
         </View>
       </ScrollView>
+
+      <KalpxModal
+        visible={showToastModal}
+        message={toastMsg}
+        onClose={() => setShowToastModal(false)}
+      />
     </View>
   );
 };

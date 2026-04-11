@@ -217,6 +217,9 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
   const [mediaMuted, setMediaMuted] = useState(false);
   const [meaningExpanded, setMeaningExpanded] = useState(false);
   const [essenceExpanded, setEssenceExpanded] = useState(false);
+  const [supportMeaningExpanded, setSupportMeaningExpanded] = useState(false);
+  const [supportBenefitsExpanded, setSupportBenefitsExpanded] = useState(false);
+  const [supportInsightExpanded, setSupportInsightExpanded] = useState(false);
 
   // Prep Flow State
   const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
@@ -1458,32 +1461,47 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
           </View>
 
           {!!supportPracticeSummary && (
-            <View style={styles.supportInfoCard}>
-              <Text style={styles.supportInfoTitle}>Meaning</Text>
+            <CollapsibleCard
+              label="Meaning"
+              expanded={supportMeaningExpanded}
+              onToggle={() =>
+                setSupportMeaningExpanded(!supportMeaningExpanded)
+              }
+            >
               <Text style={styles.supportInfoText}>
                 {supportPracticeSummary}
               </Text>
-            </View>
+            </CollapsibleCard>
           )}
 
           {supportPracticeBenefits.length > 0 && (
-            <View style={styles.supportInfoCard}>
-              <Text style={styles.supportInfoTitle}>Benefits</Text>
+            <CollapsibleCard
+              label="Benefits"
+              expanded={supportBenefitsExpanded}
+              onToggle={() =>
+                setSupportBenefitsExpanded(!supportBenefitsExpanded)
+              }
+            >
               {supportPracticeBenefits.map((benefit: string, i: number) => (
                 <Text key={`${benefit}-${i}`} style={styles.supportBenefitItem}>
                   {"\u2022"} {benefit}
                 </Text>
               ))}
-            </View>
+            </CollapsibleCard>
           )}
 
           {!!supportPracticeInsight && (
-            <View style={styles.supportInfoCard}>
-              <Text style={styles.supportInfoTitle}>Why this works</Text>
+            <CollapsibleCard
+              label="Why this works"
+              expanded={supportInsightExpanded}
+              onToggle={() =>
+                setSupportInsightExpanded(!supportInsightExpanded)
+              }
+            >
               <Text style={styles.supportInfoText}>
                 {supportPracticeInsight}
               </Text>
-            </View>
+            </CollapsibleCard>
           )}
         </ScrollView>
       </ImageBackground>
@@ -2583,7 +2601,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   supportPracticeScroll: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 16,
     paddingTop: 32,
     paddingBottom: 48,
     alignItems: "center",
@@ -2611,7 +2629,7 @@ const styles = StyleSheet.create({
   },
   supportActions: {
     width: "100%",
-    gap: 16,
+    gap: 24,
     marginTop: 16,
     marginBottom: 16,
   },
@@ -2681,8 +2699,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1.5,
     borderColor: "#E8C587",
-    padding: 16,
+    padding: 12,
     backgroundColor: "rgba(255, 255, 255, 0.4)",
+    marginBottom: 12,
   },
   cardExpanded: {
     backgroundColor: "rgba(255, 255, 255, 0.6)",

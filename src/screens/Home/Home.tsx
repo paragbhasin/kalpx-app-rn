@@ -266,8 +266,17 @@ export default function Home() {
     if (hasJourney) {
       setIsProcessing(true);
       try {
+        // Log Bearer Token check for user visibility
+        const AsyncStorage = require("@react-native-async-storage/async-storage").default;
+        const token = await AsyncStorage.getItem("access_token");
+        console.log("=====================================");
+        console.log("🛠️  RESUME JOURNEY DEBUG");
+        console.log("🔑 Checking Bearer Token:", token ? `Exists (${token.slice(0, 15)}...)` : "MISSING");
+
+        console.log("📡 Calling Status API: mitra/journey/status/");
         const res = await api.get("mitra/journey/status/");
         const status = res.data;
+        console.log("📦 Status API Response:", status);
 
         if (status?.hasActiveJourney && status?.journeyId) {
           // Reset checkpoint state when entering a new journey so stale
@@ -290,39 +299,28 @@ export default function Home() {
 
           seedJourneyStatus(status);
 
-          // Fetch read-only companion data for the existing journey.
-          // generate_companion is avoided here because it creates a new
-          // journey on every call and resets day_number. The new
-          // journey/companion endpoint returns the stored cycle_*_meta
-          // without any mutation.
-          const companionData = await mitraJourneyCompanion();
-          if (companionData?.companion) {
-            const c = companionData.companion;
-            const screenUpdates: Record<string, any> = {};
-            if (c.mantra?.core) {
-              screenUpdates.card_mantra_description =
-                c.mantra.core.iast || c.mantra.core.title;
-              screenUpdates.master_mantra = c.mantra.core;
-            }
-            if (c.sankalp?.core) {
-              screenUpdates.card_sankalpa_description =
-                c.sankalp.core.line || c.sankalp.core.title;
-              screenUpdates.master_sankalp = c.sankalp.core;
-            }
-            if (c.practice?.core) {
-              screenUpdates.card_ritual_title = c.practice.core.title;
-              screenUpdates.card_ritual_description =
-                c.practice.core.description || c.practice.core.summary;
-              screenUpdates.master_practice = c.practice.core;
-            }
-            if (companionData.identityLabel) {
-              screenUpdates.identity_label = companionData.identityLabel;
-            }
-            if (companionData.pathContext) {
-              screenUpdates.path_context = companionData.pathContext;
-            }
-            store.dispatch(screenActions.updateScreenData(screenUpdates));
-          }
+          // Fetch companion data. User specifically requested generate-companion.
+          console.log("📡 Calling: generate-companion action (Requested by User)");
+          const { executeAction } = require("../../engine/actionExecutor");
+          await executeAction(
+            { type: "generate_companion" },
+            {
+              screenState: store.getState().screen.screenData,
+              loadScreen: (target: any) => {
+                const containerId = target?.container_id || target?.containerId || "generic";
+                const stateId = target?.state_id || target?.stateId || target || "";
+                store.dispatch(loadScreenWithData({ containerId, stateId }));
+              },
+              goBack: () => {
+                const { goBackWithData } = require("../../store/screenSlice");
+                store.dispatch(goBackWithData());
+              },
+              setScreenValue: (value: any, key: string) => {
+                store.dispatch(screenActions.setScreenValue({ key, value }));
+              },
+            },
+          );
+          console.log("✅ generate-companion complete");
 
           // Auto-route to checkpoint screens on day 7 / day 14 if not yet completed
           const dayNumber = status.dayNumber || 1;

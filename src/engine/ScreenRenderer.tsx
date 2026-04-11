@@ -1,6 +1,5 @@
-import { Ionicons } from "@expo/vector-icons";
 import React from "react";
-import { SafeAreaView, StyleSheet, TouchableOpacity, View } from "react-native";
+import { SafeAreaView, StyleSheet, View } from "react-native";
 import EngineErrorBoundary from "./ErrorBoundary";
 import { useScreenStore } from "./useScreenBridge";
 
@@ -48,8 +47,7 @@ const ScreenRenderer: React.FC = () => {
   const currentContainerId = useScreenStore(
     (state) => state.currentContainerId,
   );
-  const { currentOverlayData, setOverlayData, goBack, history, loadScreen } =
-    useScreenStore();
+  const { currentOverlayData, setOverlayData } = useScreenStore();
 
   if (__DEV__) {
     console.log(
@@ -65,33 +63,15 @@ const ScreenRenderer: React.FC = () => {
 
   // Overlays should cover the entire screen, including Safe Area
   const Wrapper = currentScreen?.overlay ? View : SafeAreaView;
-  const hideBackOnState = currentScreen?.state_id === 'discipline_select';
-  const showBackButton = !currentScreen?.overlay && history.length > 0 && !hideBackOnState;
-
-  const handleBack = () => {
-    if (history.length > 0) {
-      goBack();
-      return;
-    }
-    loadScreen({ container_id: "portal", state_id: "portal" });
-  };
 
   return (
     <View style={styles.root}>
       <EngineErrorBoundary>
         <Wrapper style={styles.wrapper}>
-          {showBackButton && (
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={handleBack}
-              activeOpacity={0.8}
-            >
-              <Ionicons name="arrow-back" size={20} color="#432104" />
-            </TouchableOpacity>
-          )}
           <Container schema={currentScreen} />
         </Wrapper>
       </EngineErrorBoundary>
+
       {currentOverlayData && (
         <PracticeDetailOverlay
           data={currentOverlayData}
@@ -110,17 +90,6 @@ const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
     backgroundColor: "transparent",
-  },
-  backButton: {
-    position: "absolute",
-    top: 50,
-    left: 16,
-    zIndex: 20,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
   },
 });
 

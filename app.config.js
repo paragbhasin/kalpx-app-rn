@@ -52,6 +52,7 @@ module.exports = {
       favicon: "./assets/images/favicon.png",
     },
     plugins: [
+      "./plugins/withAbiSplits",
       "expo-font",
       "@react-native-firebase/app",
       "@react-native-firebase/messaging",

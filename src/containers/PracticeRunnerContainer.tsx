@@ -831,7 +831,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
       }
 
       const { sound } = await Audio.Sound.createAsync(
-        require("../../assets/sounds/om.mp3"),
+        require("../../assets/sounds/sankalp_om.mp3"),
         { shouldPlay: false, isLooping: false, volume: 1 },
       );
 

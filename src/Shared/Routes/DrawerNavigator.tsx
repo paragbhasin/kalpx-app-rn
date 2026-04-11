@@ -11,7 +11,7 @@ import {
   Image,
   Linking,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useDispatch, useSelector } from "react-redux";
@@ -20,7 +20,6 @@ import Colors from "../../components/Colors";
 import TextComponent from "../../components/TextComponent";
 // Old tracker import removed — Mitra engine manages journey state
 import store, { RootState } from "../../store";
-import { useScreenStore } from "../../engine/useScreenBridge";
 import { screenActions } from "../../store/screenSlice";
 import BottomMenu from "./BottomMenu";
 
@@ -29,7 +28,7 @@ const { width } = Dimensions.get("window");
 
 export default function AppDrawerNavigator() {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "transparent" }}>
       <Drawer.Navigator
         id="MainDrawer"
         screenOptions={{
@@ -58,8 +57,9 @@ const CustomDrawerContent = (props) => {
   const { t } = useTranslation();
   const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch();
 
-
-  const user = useSelector((state: RootState) => state.login?.user || state.socialLoginReducer?.user);
+  const user = useSelector(
+    (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
+  );
   const [isLoggedIn, setIsLoggedIn] = React.useState(!!user);
   // Old tracker API removed — Mitra engine uses journey/status API instead
 
@@ -150,8 +150,8 @@ const CustomDrawerContent = (props) => {
   const categories = [
     {
       id: "1",
-      name: t("drawer.myRoutine"),
-      title: "MitraEngine", // Always route to Mitra engine
+      name: "Mitra",
+      title: "GuidedGrowth", // Route to landing page
       iconType: "image",
       icon: require("../../../assets/Group.png"),
       isMitra: true,
@@ -188,14 +188,17 @@ const CustomDrawerContent = (props) => {
     },
   ];
 
-
   const renderCategory = ({ item }) => (
     <TouchableOpacity
       style={{ flexDirection: "row", alignItems: "center", padding: 12 }}
       onPress={() => {
-
         if (item.name === t("drawer.myRoutine")) {
-          store.dispatch(screenActions.loadScreen({ containerId: 'portal', stateId: 'portal' }));
+          store.dispatch(
+            screenActions.loadScreen({
+              containerId: "portal",
+              stateId: "portal",
+            }),
+          );
           props.navigation.navigate("HomePage", {
             screen: "HomePage",
             params: {
@@ -216,7 +219,6 @@ const CustomDrawerContent = (props) => {
         props.navigation.closeDrawer();
       }}
     >
-
       {/* 🔥 Handle VECTOR icon */}
       {item.iconType === "vector" && (
         <Ionicons
@@ -240,7 +242,6 @@ const CustomDrawerContent = (props) => {
       </TextComponent>
     </TouchableOpacity>
   );
-
 
   return (
     <View style={{ flex: 1, paddingHorizontal: 10 }}>
@@ -278,11 +279,17 @@ const CustomDrawerContent = (props) => {
         {isLoggedIn ? (
           // LOGOUT
           <TouchableOpacity
-            style={{ flexDirection: "row", alignItems: "center", paddingVertical: 10, marginBottom: 10 }}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingVertical: 10,
+              marginBottom: 10,
+            }}
             onPress={handleLogout}
           >
             <Ionicons name="log-out-outline" size={22} color="red" />
-            <TextComponent type="headerText"
+            <TextComponent
+              type="headerText"
               allowFontScaling={false}
               style={{ marginLeft: 10, color: "red" }}
             >
@@ -292,11 +299,16 @@ const CustomDrawerContent = (props) => {
         ) : (
           // LOGIN
           <TouchableOpacity
-            style={{ flexDirection: "row", alignItems: "center", paddingVertical: 10 }}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingVertical: 10,
+            }}
             onPress={handleLogin}
           >
             <Ionicons name="log-in-outline" size={22} color="#000" />
-            <TextComponent type="headerText"
+            <TextComponent
+              type="headerText"
               allowFontScaling={false}
               style={{ marginLeft: 10 }}
             >
@@ -315,12 +327,15 @@ const CustomDrawerContent = (props) => {
           paddingVertical: 15,
         }}
       >
-        <View style={{ marginBottom: 20, alignItems: "center", backgroundColor: Colors.Colors.white }}>
+        <View
+          style={{
+            marginBottom: 20,
+            alignItems: "center",
+            backgroundColor: Colors.Colors.white,
+          }}
+        >
           <View style={{ flexDirection: "row", gap: 25, alignItems: "center" }}>
-            <TextComponent
-              type="streakSadanaText"
-              style={{ color: "#000" }}
-            >
+            <TextComponent type="streakSadanaText" style={{ color: "#000" }}>
               {t("drawer.followUs")}
             </TextComponent>
 
@@ -328,7 +343,7 @@ const CustomDrawerContent = (props) => {
             <TouchableOpacity
               onPress={() => {
                 props.navigation.closeDrawer();
-                Linking.openURL("https://www.facebook.com/KalpxOfficial/")
+                Linking.openURL("https://www.facebook.com/KalpxOfficial/");
               }}
             >
               <Ionicons name="logo-facebook" size={34} color="#4267B2" />
@@ -338,14 +353,15 @@ const CustomDrawerContent = (props) => {
             <TouchableOpacity
               onPress={() => {
                 props.navigation.closeDrawer();
-                Linking.openURL("https://www.instagram.com/kalpxofficial")
+                Linking.openURL("https://www.instagram.com/kalpxofficial");
               }}
             >
               <Ionicons name="logo-instagram" size={34} color="#C13584" />
             </TouchableOpacity>
           </View>
         </View>
-        <TextComponent type="streakText"
+        <TextComponent
+          type="streakText"
           allowFontScaling={false}
           style={{ textAlign: "center", color: "#999", fontSize: 12 }}
         >

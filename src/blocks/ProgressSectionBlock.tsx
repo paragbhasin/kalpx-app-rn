@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
   },
   toggleBtn: {
     width: "100%",
-    borderRadius: 24,
+    borderRadius: 10,
     overflow: "hidden",
     borderWidth: 1,
     borderColor: "rgba(214, 176, 109, 0.42)",
@@ -311,9 +311,9 @@ const styles = StyleSheet.create({
     paddingTop: 14,
   },
   mainCard: {
-    padding: 20,
+    padding: 15,
     borderRadius: 15,
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
+    // backgroundColor: "rgba(255, 255, 255, 0.6)",
     borderWidth: 1,
     borderColor: "rgba(218, 183, 122, 0.36)",
     shadowColor: "#7b5c35",

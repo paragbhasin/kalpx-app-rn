@@ -676,7 +676,7 @@ const styles = StyleSheet.create({
   progressSection: {
     alignItems: "center",
     justifyContent: "center",
-    marginVertical: 4,
+    marginVertical: 14,
   },
   progressRingOuter: {
     width: RING_SIZE,

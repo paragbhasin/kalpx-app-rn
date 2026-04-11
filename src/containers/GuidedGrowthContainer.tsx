@@ -100,6 +100,10 @@ export default function GuidedGrowthContainer() {
   // Parity with Vue's onMounted / Home.tsx behavior
   useFocusEffect(
     React.useCallback(() => {
+      // Reset loading gate on every focus — prevents the page flashing
+      // briefly before the journey-status redirect on re-entry.
+      setCheckingJourney(true);
+
       const checkJourney = async () => {
         if (!isLoggedIn) {
           setCheckingJourney(false);

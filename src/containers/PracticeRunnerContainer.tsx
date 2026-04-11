@@ -739,7 +739,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
           shouldPlay: true,
           isLooping: true,
           isMuted: mediaMuted,
-          volume: mediaMuted ? 0 : 0.6,
+          volume: mediaMuted ? 0 : 0.15,
         },
       );
 
@@ -1674,7 +1674,6 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     const steps = (
       activeItem?.steps_text ||
       screenState.info?.steps_text ||
-      schema.steps_text ||
       stepsFromBlocks ||
       ""
     )

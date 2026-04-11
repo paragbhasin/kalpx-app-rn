@@ -30,6 +30,7 @@ interface DashboardSchema {
     seal_button_labels?: Record<string, string>;
     instruction_text?: string;
     journey_summary?: string;
+    day_label?: string;
   };
 }
 

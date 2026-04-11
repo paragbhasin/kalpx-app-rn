@@ -1,0 +1,121 @@
+# Flow: log in as a test persona via the real login UI.
+#
+# Works on release APKs on both Android and iOS — no `adb run-as`, no deep
+# links, no debuggable build needed. This is the Option A alternative to
+# PEND-07 (iOS deep-link code 115) and PEND-12 (Android release-APK JWT
+# injection) from ~/kalpx-app-rn/ISSUES.md.
+#
+# What it does:
+#   1. Clear state + launch fresh (guest)
+#   2. Scroll Home to the "Sign in to save your journey" CTA
+#   3. Tap it → Login screen
+#   4. Fill email + password
+#   5. Tap LOGIN → invisible reCAPTCHA v3 runs → login API call
+#   6. Wait for the "Signing in..." overlay to disappear
+#   7. Dismiss the one-shot location-confirm prompt if it appears
+#   8. Assert we're back on Home WITHOUT the guest sign-in CTA
+#
+# Usage (standalone, default persona test+day3@kalpx.com):
+#   maestro test .maestro/login.yaml
+#
+# Usage (override persona via env):
+#   maestro test -e EMAIL=test+day7_medium@kalpx.com \
+#                -e PASSWORD=Test1234! \
+#                .maestro/login.yaml
+#
+# Usage (as a prerequisite step in a persona walker flow):
+#   # e.g. .maestro/30_day_7_checkpoint_full.yaml
+#   - runFlow:
+#       file: login.yaml
+#       env:
+#         EMAIL: test+day7_medium@kalpx.com
+#         PASSWORD: Test1234!
+#   - waitForAnimationToEnd
+#   # now proceed with the flow's own steps...
+#
+# Notes:
+# - `clearState: true` wipes AsyncStorage and Redux on every run so the login
+#   is deterministic. Use `runFlow` inclusion only at the START of a test.
+# - reCAPTCHA v3 is invisible. It resolves in <2s on a real browser engine;
+#   the 30s extendedWaitUntil below is a generous ceiling, not a target.
+# - Test users must have `soft_verified=True` on dev (SSH fix applied
+#   2026-04-11; Pavani's seed script should preserve this going forward).
+# - Passwords for all test personas are `Test1234!` per seed_test_journey.py.
+
+appId: com.kalpx.app
+env:
+  EMAIL: test+day3@kalpx.com
+  PASSWORD: Test1234!
+---
+- launchApp:
+    clearState: true
+    clearKeychain: true
+- waitForAnimationToEnd
+
+# ── Step 1: reach the Login screen via the Home guest CTA ────────────────
+# The "Sign in to save your journey" button is rendered near the bottom of
+# the Home ScrollView when `!isLoggedIn` (Home.tsx:517-525). It requires a
+# scroll on most devices.
+- scrollUntilVisible:
+    element:
+      text: "Sign in to save your journey"
+    direction: DOWN
+    timeout: 15000
+    speed: 40
+    visibilityPercentage: 80
+
+- tapOn: "Sign in to save your journey"
+- waitForAnimationToEnd
+
+# ── Step 2: confirm we landed on LoginScreen.tsx ─────────────────────────
+# These three strings are stable i18n keys in config/locales/en.json:
+#   login.heading        → "Connect to Your Roots"
+#   login.loginBtn       → "LOGIN"
+- assertVisible: "Connect to Your Roots"
+- assertVisible: "LOGIN"
+
+# ── Step 3: fill credentials ─────────────────────────────────────────────
+# The TextInputs use placeholders ("Username", "Password") from en.json —
+# placeholders surface as the accessible label when the field is empty, so
+# tapOn by text works on both platforms.
+- tapOn:
+    text: "Username"
+- inputText: ${EMAIL}
+- hideKeyboard
+
+- tapOn:
+    text: "Password"
+- inputText: ${PASSWORD}
+- hideKeyboard
+
+# ── Step 4: submit ───────────────────────────────────────────────────────
+# Tapping LOGIN triggers:
+#   1. Formik validation → requestNewToken() on the invisible ReCaptchaRuntime
+#   2. onToken callback → POST /api/users/login/ with email + password + token
+#   3. On 200: AsyncStorage writes + navigation.navigate("AppDrawer")
+# LoadingOverlay shows "Signing in..." for the duration.
+- tapOn: "LOGIN"
+
+# ── Step 5: wait for the overlay to clear ────────────────────────────────
+# If this times out, either reCAPTCHA failed to get a token (network / key
+# rotation) or the backend returned an error (check soft_verified, check
+# credentials, check dev.kalpx.com reachability).
+- extendedWaitUntil:
+    notVisible: "Signing in..."
+    timeout: 30000
+
+# ── Step 6: dismiss the one-shot location-confirm overlay if present ─────
+# LoginScreen.tsx:403 sets showLocationConfirm=true on first successful
+# login. If the prompt renders, dismiss it — exact copy varies, so match
+# any of the common cancel phrasings.
+- tapOn:
+    text: "Not now|Maybe later|Skip|Cancel"
+    optional: true
+
+# ── Step 7: assert login succeeded ───────────────────────────────────────
+# Proof is the absence of the guest CTA — only renders when `!isLoggedIn`
+# (Home.tsx:517). If this still shows, the login failed silently and we
+# bounced back to the guest Home.
+- extendedWaitUntil:
+    notVisible: "Sign in to save your journey"
+    timeout: 10000

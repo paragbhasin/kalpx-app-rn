@@ -429,7 +429,10 @@ const LockRitualContainer: React.FC<LockRitualContainerProps> = ({ schema }) => 
       <SigninPopup
         visible={isSigninVisible}
         onClose={() => setIsSigninVisible(false)}
-        onConfirmCancel={() => {}}
+        onConfirmCancel={() => {
+          setIsSigninVisible(false);
+          goBack();
+        }}
         title="Commit to Your 14-Day Path"
         subTitle="Save Your Progress"
         subText="To lock in these practices and unlock your personalized daily journey, please sign in or create an account."

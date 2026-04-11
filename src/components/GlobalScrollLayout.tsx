@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
   Animated,
+  BackHandler,
   ImageBackground,
   Platform,
   StatusBar,
@@ -70,7 +71,7 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
   // Prevent rapid double-taps from popping the history stack twice.
   const isNavigatingBack = React.useRef(false);
 
-  const handleBack = () => {
+  const handleBack = React.useCallback(() => {
     if (isNavigatingBack.current) return;
     isNavigatingBack.current = true;
     setTimeout(() => { isNavigatingBack.current = false; }, 500);
@@ -88,7 +89,22 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
       return;
     }
     loadScreen({ container_id: "portal", state_id: "portal" });
-  };
+  }, [isInSupportFlow, history.length, goBack, loadScreen]);
+
+  // Android hardware back — delegate to the same handleBack logic so
+  // hardware back honors support-flow jumps, debounce, and root guards.
+  // Returning true tells RN we handled the event (prevents default nav pop).
+  // INV-9: system back must behave identically to header back.
+  React.useEffect(() => {
+    if (Platform.OS !== "android") return;
+    const onBackPress = () => {
+      if (isRootScreen) return false;
+      handleBack();
+      return true;
+    };
+    const sub = BackHandler.addEventListener("hardwareBackPress", onBackPress);
+    return () => sub.remove();
+  }, [handleBack, isRootScreen]);
 
   // For screens without a background image, always show solid white header
   // For screens with a background, use scroll-driven glass overlay

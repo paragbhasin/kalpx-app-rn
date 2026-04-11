@@ -723,6 +723,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
   },
+  gridTitle: {
+    textAlign: "center",
+    flex: 0,
+  },
   disciplineTitle: {
     fontSize: 16,
     lineHeight: 24,

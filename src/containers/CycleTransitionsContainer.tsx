@@ -125,6 +125,10 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
   const [benefitsExpanded, setBenefitsExpanded] = useState(false);
   const [essenceExpanded, setEssenceExpanded] = useState(false);
   const [mantraExpanded, setMantraExpanded] = useState(false);
+  const [isMantraTruncatable, setIsMantraTruncatable] = useState(false);
+
+  const info = useMemo(() => screenData?.info || {}, [screenData]);
+  const stateId = currentStateId || "";
 
   React.useEffect(() => {
     updateBackground(require("../../assets/beige_bg.png"));
@@ -134,8 +138,10 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     };
   }, [updateBackground, updateHeaderHidden]);
 
-  const info = useMemo(() => screenData?.info || {}, [screenData]);
-  const stateId = currentStateId || "";
+  // Reset truncation state when mantra info changes
+  React.useEffect(() => {
+    setIsMantraTruncatable(false);
+  }, [info]);
 
   const currentType: ActivityType = useMemo(() => {
     // 1. Check direct info.type
@@ -270,7 +276,11 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                     the expanded Meaning card below, not in the main header.
                     Fallback chain preserves backward-compat for older
                     payloads that didn't populate subtitle. */}
-                {info.subtitle || info.title || info.iast || info.meaning || info.summary}
+                {info.subtitle ||
+                  info.title ||
+                  info.iast ||
+                  info.meaning ||
+                  info.summary}
               </Text>
             )}
 
@@ -290,6 +300,11 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                     style={styles.mantraDevanagariLarge}
                     numberOfLines={mantraExpanded ? 0 : 3}
                     ellipsizeMode="tail"
+                    onTextLayout={(e) => {
+                      if (!isMantraTruncatable && e.nativeEvent.lines.length > 3) {
+                        setIsMantraTruncatable(true);
+                      }
+                    }}
                   >
                     {info.devanagari}
                   </Text>
@@ -302,12 +317,17 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                     style={styles.mantraIAST}
                     numberOfLines={mantraExpanded ? 0 : 3}
                     ellipsizeMode="tail"
+                    onTextLayout={(e) => {
+                      if (!isMantraTruncatable && e.nativeEvent.lines.length > 3) {
+                        setIsMantraTruncatable(true);
+                      }
+                    }}
                   >
                     {info.iast}
                   </Text>
                 )}
 
-                {(info.devanagari || info.iast) && (
+                {isMantraTruncatable && (
                   <TouchableOpacity
                     style={styles.viewFullMantraBtn}
                     onPress={() => setMantraExpanded(!mantraExpanded)}
@@ -481,7 +501,6 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
             )}
           </View>
 
-
           <TouchableOpacity onPress={handleBack} style={styles.backLink}>
             <Text style={styles.backLinkText}>Back</Text>
           </TouchableOpacity>
@@ -527,7 +546,7 @@ const styles = StyleSheet.create({
   },
   infoScrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 20,
+    // paddingTop: 200,
     paddingBottom: 60,
     alignItems: "center",
   },
@@ -540,7 +559,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif.bold,
     color: BROWN,
     textAlign: "center",
-    marginTop: 20,
+    marginTop: -40,
   },
   mainCard: {
     width: "100%",

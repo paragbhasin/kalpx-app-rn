@@ -878,6 +878,17 @@ export async function executeAction(
             "prana_checkin_total",
           );
 
+          // Web parity (actionExecutor.js:2279-2283): set next_insight_screen
+          // so the {{next_insight_screen}} template in allContainers.js:4122
+          // resolves to daily_insight_14 on Day 14 users. Without this, Day 14
+          // users skip the daily_insight_14 milestone splash entirely and
+          // jump straight to whatever the default target is.
+          const checkinCurrentDay = screenState["day_number"] || 1;
+          setScreenValue(
+            checkinCurrentDay === 14 ? "daily_insight_14" : "daily_insight",
+            "next_insight_screen",
+          );
+
           // Call Prana Acknowledge API for all check-in feedback.
           // Pass full context (baselineMetrics + dayNumber) so the backend
           // can personalize suggestions (web parity, actionExecutor.js:2286).
@@ -1298,7 +1309,15 @@ export async function executeAction(
 
         const data = await mitraGenerateCompanion(inputData);
         if (!data) {
-          console.error("[ENGINE] No companion data received");
+          // Use console.warn, NOT console.error: in dev builds console.error
+          // triggers the RN LogBox red overlay which leaks into screenshot
+          // captures (audit M2 — Day 14 intro screenshot flakiness). The
+          // engine already has a graceful no-op fallback below (the checkpoint
+          // / home orchestrators have their own data seeding paths), so this
+          // is a recoverable warning, not a crash.
+          console.warn(
+            "[ENGINE] generate_companion returned no data — skipping companion seed",
+          );
           setScreenValue(false, "_isSubmitting");
           return;
         }

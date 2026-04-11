@@ -263,7 +263,14 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
 
             {currentType === "sankalp" && (
               <Text style={styles.sankalpMainText}>
-                {info.meaning || info.summary}
+                {/* Web parity: CycleTransitionsContainer.vue:248 renders
+                    `sanskritText || info.subtitle` (= info.subtitle for
+                    sankalp) as the main framing text (e.g., "I step forward
+                    even when..."). info.meaning / info.summary belong in
+                    the expanded Meaning card below, not in the main header.
+                    Fallback chain preserves backward-compat for older
+                    payloads that didn't populate subtitle. */}
+                {info.subtitle || info.title || info.iast || info.meaning || info.summary}
               </Text>
             )}
 

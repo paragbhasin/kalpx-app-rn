@@ -27,13 +27,14 @@ import {
 import MantraLotus3d from "../../assets/mantra-lotus-3d.svg";
 import SankalpCenteredIcon from "../../assets/sankalp_centered.svg";
 import SankalpInnerPeaceIcon from "../../assets/sankalp_inner_peace.svg";
+import AudioPlayerBlock from "../blocks/AudioPlayerBlock";
 import MicroCompletion from "../components/HabitLoop/MicroCompletion";
 import MalaMantraCounter from "../components/MalaMantraCounter";
-import AudioPlayerBlock from "../blocks/AudioPlayerBlock";
 import { executeAction } from "../engine/actionExecutor";
 import BlockRenderer from "../engine/BlockRenderer";
 import { mitraTrackEvent } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
+import { interpolate } from "../engine/utils/interpolation";
 import { Fonts } from "../theme/fonts";
 
 const { width } = Dimensions.get("window");
@@ -792,7 +793,12 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     return () => {
       stopCalmMusic();
     };
-  }, [isSupportPractice, isMantraRunner, isTriggerOmChantScreen, currentStateId]);
+  }, [
+    isSupportPractice,
+    isMantraRunner,
+    isTriggerOmChantScreen,
+    currentStateId,
+  ]);
 
   useEffect(() => {
     Audio.setAudioModeAsync({
@@ -1471,11 +1477,21 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.supportPracticeHeader}>
-            <Text style={styles.supportPracticeTitle}>
-              {screenState.runner_active_item?.title || runnerHeadline}
+            <Text
+              style={[styles.supportPracticeTitle, { textAlign: "center" }]}
+            >
+              {interpolate(
+                screenState.runner_active_item?.title || runnerHeadline,
+                screenState.runner_active_item || screenState.info || {},
+              )}
             </Text>
-            <Text style={styles.supportPracticeSubtitle}>
-              {runnerSubtext || "Move through this gently. There is no rush."}
+            <Text
+              style={[styles.supportPracticeSubtitle, { textAlign: "center" }]}
+            >
+              {interpolate(
+                runnerSubtext || "Move through this gently. There is no rush.",
+                screenState.runner_active_item || screenState.info || {},
+              )}
             </Text>
           </View>
 
@@ -1498,7 +1514,8 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
               <AudioPlayerBlock
                 block={{
                   audio_url: screenState.runner_active_item.audio_url,
-                  label: screenState.runner_active_item.title || "Practice Audio",
+                  label:
+                    screenState.runner_active_item.title || "Practice Audio",
                 }}
               />
             </View>
@@ -1649,13 +1666,19 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     return (
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.pauseHeader}>
-          <Text style={styles.pauseTitle}>
-            {activeItem?.title || schema.pause_config?.title || "Sacred Pause"}
+          <Text style={[styles.pauseTitle, { textAlign: "center" }]}>
+            {interpolate(
+              activeItem?.title || schema.pause_config?.title || "Sacred Pause",
+              activeItem || screenState.info || {},
+            )}
           </Text>
-          <Text style={styles.pauseSub}>
-            {activeItem?.subtitle ||
-              schema.pause_config?.subtitle ||
-              "Take a moment"}
+          <Text style={[styles.pauseSub, { textAlign: "center" }]}>
+            {interpolate(
+              activeItem?.subtitle ||
+                schema.pause_config?.subtitle ||
+                "Take a moment",
+              activeItem || screenState.info || {},
+            )}
           </Text>
         </View>
 
@@ -2558,9 +2581,10 @@ const styles = StyleSheet.create({
   scrollContent: { padding: 24, alignItems: "center" },
   pauseHeader: { alignItems: "center", marginBottom: 30 },
   pauseTitle: {
-    fontFamily: Fonts.serif.regular,
-    fontSize: 38,
+    fontFamily: Fonts.serif.bold,
+    fontSize: 25,
     color: "#432104",
+    marginBottom: 10,
   },
   pauseSub: { fontFamily: Fonts.sans.regular, fontSize: 18, color: "#615247" },
   instructionsCard: {

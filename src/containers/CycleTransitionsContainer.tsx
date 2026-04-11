@@ -11,8 +11,8 @@ import {
   UIManager,
   View,
 } from "react-native";
-import BlockRenderer from "../engine/BlockRenderer";
 import AudioPlayerBlock from "../blocks/AudioPlayerBlock";
+import BlockRenderer from "../engine/BlockRenderer";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { interpolate } from "../engine/utils/interpolation";
 import { Fonts } from "../theme/fonts";
@@ -270,20 +270,34 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
             )}
 
             {currentType === "sankalp" && (
-              <Text style={styles.sankalpMainText}>
-                {/* Web parity: CycleTransitionsContainer.vue:248 renders
-                    `sanskritText || info.subtitle` (= info.subtitle for
-                    sankalp) as the main framing text (e.g., "I step forward
-                    even when..."). info.meaning / info.summary belong in
-                    the expanded Meaning card below, not in the main header.
-                    Fallback chain preserves backward-compat for older
-                    payloads that didn't populate subtitle. */}
-                {info.subtitle ||
-                  info.title ||
+              <View style={styles.mantraMainContainer}>
+                {/* TIT-01: Render Title and Line separately for Sankalp.
+                    Order: Title -> Line -> How To Live (below). */}
+                {info.title && (
+                  <Text style={styles.deityTitle}>{info.title}</Text>
+                )}
+                {(info.line ||
+                  info.subtitle ||
                   info.iast ||
                   info.meaning ||
-                  info.summary}
-              </Text>
+                  info.summary) && (
+                  <Text
+                    style={[
+                      styles.sankalpMainText,
+                      info.title ? { marginTop: 10 } : null,
+                    ]}
+                  >
+                    {interpolate(
+                      info.line ||
+                        info.subtitle ||
+                        info.iast ||
+                        info.meaning ||
+                        info.summary,
+                      { ...screenData, ...info },
+                    )}
+                  </Text>
+                )}
+              </View>
             )}
 
             {currentType === "mantra" && (
@@ -351,7 +365,29 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
             )}
 
             {currentType === "practice" && (
-              <Text style={styles.deityTitle}>{info.title}</Text>
+              <View style={styles.mantraMainContainer}>
+                <Text style={[styles.deityTitle, { textAlign: "center" }]}>
+                  {info.title}
+                </Text>
+                {(info.subtitle || info.line) && (
+                  <Text
+                    style={[
+                      styles.sankalpMainText,
+                      {
+                        fontSize: 18,
+                        fontFamily: Fonts.serif.regular,
+                        marginTop: 8,
+                        textAlign: "center",
+                      },
+                    ]}
+                  >
+                    {interpolate(info.subtitle || info.line, {
+                      ...screenData,
+                      ...info,
+                    })}
+                  </Text>
+                )}
+              </View>
             )}
           </View>
 
@@ -388,15 +424,6 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
             </View>
           )}
 
-          {/* Prompt / Action Text */}
-          <Text style={styles.practicePrompt}>
-            {currentType === "mantra"
-              ? "Chant slowly and let the meaning settle within."
-              : currentType === "sankalp"
-                ? "Carry this intention gently into your thoughts and actions."
-                : "Begin when you feel ready. This takes 2-3 minutes. There is no rush."}
-          </Text>
-
           {/* Actions */}
           {visibleFooterBlocks.length > 0 && (
             <View style={styles.infoActions}>
@@ -415,11 +442,22 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
             </View>
           )}
 
+          {/* Prompt / Action Text - Moved below actions per user feedback */}
+          <Text style={styles.practicePrompt}>
+            {currentType === "mantra"
+              ? "Chant slowly and let the meaning settle within."
+              : currentType === "sankalp"
+                ? "Carry this intention gently into your thoughts and actions."
+                : "Begin when you feel ready. This takes 2-3 minutes. There is no rush."}
+          </Text>
+
           {/* Audio Player if URL exists - only for core journey or additional library mantras (Mala) */}
-          {currentType === "mantra" && 
-           info?.audio_url && 
-           (info.source === "core" || info.source === "additional") ? (
-            <View style={{ width: "100%", marginBottom: 30, paddingHorizontal: 10 }}>
+          {currentType === "mantra" &&
+          info?.audio_url &&
+          (info.source === "core" || info.source === "additional") ? (
+            <View
+              style={{ width: "100%", marginBottom: 30, paddingHorizontal: 10 }}
+            >
               <AudioPlayerBlock
                 block={{
                   audio_url: info.audio_url,
@@ -457,7 +495,7 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                   onToggle={() => setMeaningExpanded(!meaningExpanded)}
                 >
                   <Text style={styles.cardText}>
-                    {info.essence || info.summary}
+                    {info.meaning || info.essence || info.summary}
                   </Text>
                 </CollapsibleCard>
                 <CollapsibleCard
@@ -465,9 +503,23 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                   expanded={benefitsExpanded}
                   onToggle={() => setBenefitsExpanded(!benefitsExpanded)}
                 >
-                  <Text style={styles.cardText}>
-                    Focus and calm are cultivated through this intention.
-                  </Text>
+                  {hasContent(info.benefits) ? (
+                    Array.isArray(info.benefits) ? (
+                      <View style={styles.benefitList}>
+                        {info.benefits.map((b: string, idx: number) => (
+                          <Text key={idx} style={styles.benefitItem}>
+                            {"\u2022"} {b}
+                          </Text>
+                        ))}
+                      </View>
+                    ) : (
+                      <Text style={styles.cardText}>{info.benefits}</Text>
+                    )
+                  ) : (
+                    <Text style={styles.cardText}>
+                      Focus and calm are cultivated through this intention.
+                    </Text>
+                  )}
                 </CollapsibleCard>
               </>
             )}
@@ -645,6 +697,7 @@ const styles = StyleSheet.create({
     borderColor: "#E8C587",
     padding: 20,
     marginBottom: 10,
+    marginTop: 10,
   },
   cardHeader: {
     flexDirection: "row",
@@ -814,7 +867,7 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     color: "#432104",
     textAlign: "center",
-    marginTop: 3,
+    marginTop: -20,
     marginBottom: 10,
     lineHeight: 24,
     paddingHorizontal: 30,

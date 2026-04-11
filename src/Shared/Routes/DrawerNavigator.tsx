@@ -88,10 +88,13 @@ const CustomDrawerContent = (props) => {
       console.log("Google Sign-In Logout Error:", error);
     }
 
-    const parentNav = props.navigation.getParent();
-    parentNav?.reset({
-      index: 0,
-      routes: [{ name: "Login" }],
+    // Close the drawer first, then navigate to Home tab as a logged-out guest.
+    // Previously used parentNav?.reset({ routes: [{ name: "Login" }] }) which
+    // silently failed when parentNav resolved to the wrong navigator — leaving
+    // the user on a blank DynamicEngine screen.
+    props.navigation.closeDrawer();
+    props.navigation.navigate("HomePage", {
+      screen: "Home",
     });
   };
 

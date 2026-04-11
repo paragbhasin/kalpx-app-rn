@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { SafeAreaView, StyleSheet, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import EngineErrorBoundary from "./ErrorBoundary";
 import { useScreenStore } from "./useScreenBridge";
 
@@ -43,11 +44,25 @@ const containerMap: Record<string, React.ComponentType<any>> = {
 };
 
 const ScreenRenderer: React.FC = () => {
+  const navigation = useNavigation<any>();
   const currentScreen = useScreenStore((state) => state.currentScreen);
   const currentContainerId = useScreenStore(
     (state) => state.currentContainerId,
   );
   const { currentOverlayData, setOverlayData } = useScreenStore();
+
+  // Guard: if there is nothing to render (e.g. right after logout / RESET_APP
+  // clears currentScreen), pop back to avoid a permanently blank screen.
+  useEffect(() => {
+    if (!currentScreen) {
+      const timer = setTimeout(() => {
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        }
+      }, 80);
+      return () => clearTimeout(timer);
+    }
+  }, [currentScreen, navigation]);
 
   if (__DEV__) {
     console.log(

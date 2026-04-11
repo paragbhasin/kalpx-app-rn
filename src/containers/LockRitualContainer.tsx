@@ -12,6 +12,8 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSelector, useDispatch } from 'react-redux';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import api from '../Networks/axios';
+import store from '../store';
 import SigninPopup from '../components/SigninPopup';
 import BlockRenderer from '../engine/BlockRenderer';
 import { useScreenStore } from '../engine/useScreenBridge';
@@ -54,37 +56,113 @@ const LockRitualContainer: React.FC<LockRitualContainerProps> = ({ schema }) => 
   } = useScreenStore();
 
   const user = useSelector((state: RootState) => state.login?.user || state.socialLoginReducer?.user);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Derive login state directly from Redux — avoids AsyncStorage race condition
+  // where social login updates the Redux user synchronously but the access_token
+  // may not yet be written to AsyncStorage when the effect fires.
+  const isLoggedIn = !!(user?.id || user?.email || user?.token || user?.profile);
+
   const [isSigninVisible, setIsSigninVisible] = useState(false);
 
-  // Sync login state from store and check local storage for absolute certainty
-  useEffect(() => {
-    const checkLogin = async () => {
-      const token = await AsyncStorage.getItem("access_token");
-      const hasUser = !!(user?.id || user?.email || user?.token || user?.profile);
-      const authenticated = hasUser && !!token;
-      
-      setIsLoggedIn(authenticated);
-      
-      // RED-012: If guest, prompt immediately upon reaching the ritual screen
-      if (!authenticated) {
-        setIsSigninVisible(true);
-      }
-    };
-    checkLogin();
-  }, [user]);
+  // Ref: did we show the SigninPopup to this guest session?
+  const popupShownRef = React.useRef(false);
+  // Ref: have we already fired the post-login flow? (prevents double-fire
+  // if isLoggedIn and isSigninVisible toggle in rapid succession)
+  const postLoginFiredRef = React.useRef(false);
 
-  // Monitor login success to navigate back to induction summary
+  // Show the popup immediately when a guest user arrives
   useEffect(() => {
-    if (isLoggedIn && isSigninVisible) {
-      setIsSigninVisible(false);
-      // RED-012: After login, return to InsightSummary Step 1 as requested
-      loadScreen({
-        container_id: "insight_summary",
-        state_id: "path_reveal"
-      });
+    if (!isLoggedIn) {
+      setIsSigninVisible(true);
+      popupShownRef.current = true;
     }
-  }, [isLoggedIn, isSigninVisible, loadScreen]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally run only on mount
+
+  /**
+   * Post-login flow triggered when the user authenticates via the SigninPopup:
+   *   1. Call Status API  → determine if an active journey exists
+   *   2. Seed focus / day data from the status response
+   *   3. Call generate_companion to populate companion screen state
+   *   4. Route:
+   *      • hasActiveJourney === true  → CompanionDashboard (day_active)
+   *      • hasActiveJourney === false → InsightSummary step 0 (auto-navigated
+   *                                     by generate_companion)
+   */
+  const handlePostLoginFlow = useCallback(async () => {
+    try {
+      // ── 1. Status API ──────────────────────────────────────────────────────
+      const res = await api.get('mitra/journey/status/');
+      const status = res.data;
+      const hasActiveJourney = !!status?.hasActiveJourney;
+
+      // ── 2. Seed status data into Redux screen state ─────────────────────────
+      if (hasActiveJourney) {
+        const updates: Record<string, any> = {
+          journey_id: status.journeyId ?? null,
+          day_number: status.dayNumber || 1,
+          is_experienced: true,
+        };
+        const focus = status.focus || '';
+        const subFocus = status.subfocus || status.sub_focus || '';
+        if (focus) {
+          updates.scan_focus = focus;
+          updates.active_focus = focus;
+          updates.suggested_focus = focus;
+        }
+        if (subFocus) {
+          updates.prana_baseline_selection = subFocus;
+        }
+        Object.entries(updates).forEach(([key, value]) => {
+          dispatch(screenActions.setScreenValue({ key, value }));
+        });
+      }
+
+      // ── 3. Build action context with fresh Redux state after updates ────────
+      const freshState = store.getState().screen.screenData;
+      const actionCtx = {
+        loadScreen,
+        goBack,
+        setScreenValue: (value: any, key: string) => {
+          dispatch(screenActions.setScreenValue({ key, value }));
+        },
+        screenState: freshState,
+        startFlowInstance: (flowType: string) =>
+          dispatch(screenActions.startFlowInstance(flowType)),
+        endFlowInstance: () => dispatch(screenActions.endFlowInstance()),
+      };
+
+      // ── 4. Call generate_companion + route ─────────────────────────────────
+      if (hasActiveJourney) {
+        // skipReveal: true → stops generate_companion from auto-navigating
+        // to insight_summary; we redirect to dashboard ourselves after.
+        await executeAction(
+          { type: 'generate_companion', payload: { skipReveal: true } },
+          actionCtx,
+        );
+        loadScreen({ container_id: 'companion_dashboard', state_id: 'day_active' });
+      } else {
+        // No active journey: generate_companion auto-navigates to
+        // insight_summary / path_reveal (step 0) — no extra loadScreen needed.
+        await executeAction({ type: 'generate_companion' }, actionCtx);
+      }
+    } catch (e) {
+      console.error('[LockRitual] Post-login flow failed:', e);
+      // Fallback: show insight summary at step 0
+      loadScreen({ container_id: 'insight_summary', state_id: 'path_reveal' });
+    }
+  }, [dispatch, loadScreen, goBack]);
+
+  // Trigger the post-login flow as soon as isLoggedIn becomes true,
+  // but only if this component previously showed the popup to a guest.
+  // Using refs means we are not racing against isSigninVisible state.
+  useEffect(() => {
+    if (isLoggedIn && popupShownRef.current && !postLoginFiredRef.current) {
+      postLoginFiredRef.current = true;
+      setIsSigninVisible(false);
+      handlePostLoginFlow();
+    }
+  }, [isLoggedIn, handlePostLoginFlow]);
 
   const [isHolding, setIsHolding] = useState(false);
   const [isReady, setIsReady] = useState(false);

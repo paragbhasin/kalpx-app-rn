@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import BlockRenderer from "../engine/BlockRenderer";
+import AudioPlayerBlock from "../blocks/AudioPlayerBlock";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { interpolate } from "../engine/utils/interpolation";
 import { Fonts } from "../theme/fonts";
@@ -413,6 +414,20 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
               })}
             </View>
           )}
+
+          {/* Audio Player if URL exists - only for core journey or additional library mantras (Mala) */}
+          {currentType === "mantra" && 
+           info?.audio_url && 
+           (info.source === "core" || info.source === "additional") ? (
+            <View style={{ width: "100%", marginBottom: 30, paddingHorizontal: 10 }}>
+              <AudioPlayerBlock
+                block={{
+                  audio_url: info.audio_url,
+                  label: info.title || "Mantra Audio",
+                }}
+              />
+            </View>
+          ) : null}
 
           {/* Accordion Sections */}
           <View style={styles.collapsibleSections}>

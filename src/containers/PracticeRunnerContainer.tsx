@@ -29,6 +29,7 @@ import SankalpCenteredIcon from "../../assets/sankalp_centered.svg";
 import SankalpInnerPeaceIcon from "../../assets/sankalp_inner_peace.svg";
 import MicroCompletion from "../components/HabitLoop/MicroCompletion";
 import MalaMantraCounter from "../components/MalaMantraCounter";
+import AudioPlayerBlock from "../blocks/AudioPlayerBlock";
 import { executeAction } from "../engine/actionExecutor";
 import BlockRenderer from "../engine/BlockRenderer";
 import { mitraTrackEvent } from "../engine/mitraApi";
@@ -1371,6 +1372,20 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
           onToggleMute={toggleTriggerMute}
           footerContent={
             <View style={styles.runnerFooterExtra}>
+              {/* Mantra Audio Player - Only for core journey or library mantras */}
+              {activeItem?.audio_url &&
+              (activeItem.source === "core" ||
+                activeItem.source === "additional") ? (
+                <View style={{ marginBottom: 20 }}>
+                  <AudioPlayerBlock
+                    block={{
+                      audio_url: activeItem.audio_url,
+                      label: activeItem.title || "Mantra Audio",
+                    }}
+                  />
+                </View>
+              ) : null}
+
               {/* Trigger buttons are rendered via mantraRunnerFooterBlocks
                   below, driven by the schema in allContainers.js
                   (free_mantra_chanting / post_trigger_mantra footer_actions).
@@ -1464,6 +1479,22 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
               </View>
             ))}
           </View>
+
+          {/* Practice Audio Player - Only for core journey or library practices */}
+          {screenState.runner_active_item?.audio_url &&
+          (screenState.runner_active_item.source === "core" ||
+            screenState.runner_active_item.source === "additional") ? (
+            <View
+              style={{ paddingHorizontal: 20, width: "100%", marginBottom: 30 }}
+            >
+              <AudioPlayerBlock
+                block={{
+                  audio_url: screenState.runner_active_item.audio_url,
+                  label: screenState.runner_active_item.title || "Practice Audio",
+                }}
+              />
+            </View>
+          ) : null}
 
           <View style={styles.supportActions}>
             <TouchableOpacity

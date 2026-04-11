@@ -229,6 +229,7 @@ interface InfoData {
   iast?: string;
   devanagari?: string;
   full_mantra?: string;
+  audio_url?: string;
   how_to_live?: string[];
 }
 
@@ -269,6 +270,7 @@ function _generateInfoScreenData(
       masterData.subtitle ||
       masterData.devanagari ||
       "",
+    audio_url: masterData.audio_url || "",
     how_to_live: masterData.how_to_live || masterData.steps || [],
   };
 }
@@ -1428,6 +1430,7 @@ export async function executeAction(
             "mantra_devanagari",
           );
           setScreenValue(m.core?.title || m.title || m.iast, "mantra_title");
+          setScreenValue(m.core?.audio_url || m.audio_url || "", "mantra_audio_url");
 
           const resolvedMantraId =
             m.core?.item_id || m.core?.id || m.item_id || m.id;

@@ -1,4 +1,4 @@
-import { ChevronLeft, Volume2, VolumeX } from "lucide-react-native";
+import { ChevronDown, ChevronLeft, ChevronUp, Volume2, VolumeX } from "lucide-react-native";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Dimensions,
@@ -299,6 +299,13 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
               >
                 {mantraText}
               </Text>
+              <View style={styles.expandArrowWrap}>
+                {isMantraExpanded ? (
+                  <ChevronUp size={18} color="#B89450" />
+                ) : (
+                  <ChevronDown size={18} color="#B89450" />
+                )}
+              </View>
             </TouchableOpacity>
           )}
 
@@ -317,6 +324,13 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
               >
                 {hindiText}
               </Text>
+              <View style={styles.expandArrowWrap}>
+                {isHindiExpanded ? (
+                  <ChevronUp size={18} color="#B89450" />
+                ) : (
+                  <ChevronDown size={18} color="#B89450" />
+                )}
+              </View>
             </TouchableOpacity>
           )}
         </View>
@@ -610,6 +624,12 @@ const styles = StyleSheet.create({
     height: 6,
     backgroundColor: "#b89450",
     transform: [{ rotate: "45deg" }],
+  },
+  expandArrowWrap: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 4,
+    opacity: 0.6,
   },
 });
 

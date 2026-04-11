@@ -181,7 +181,6 @@ const StreakScreen = ({ navigation, route }) => {
         dialogTitle: "Share your Kalpx card",
         mimeType: "image/png",
         UTI: "image/png",
-        message,
       });
     } catch (error) {
       console.error("❌ Error sharing:", error);

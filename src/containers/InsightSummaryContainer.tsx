@@ -480,9 +480,9 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
   },
-  // scrollView: {
-  //   backgroundColor: "transparent",
-  // },
+  scrollView: {
+    backgroundColor: "transparent",
+  },
   scrollContent: {
     paddingHorizontal: 20,
     paddingTop: 10,

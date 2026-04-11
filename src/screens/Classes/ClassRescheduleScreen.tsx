@@ -215,7 +215,7 @@ export default function ClassRescheduleScreen({ navigation }) {
                 }}
             >Slot Booking
             </TextComponent>
-            <CalendarUI startDate={new Date().toISOString().split("T")[0]} />
+            <CalendarUI startDate={new Date().toISOString().split("T")[0]} highlightDates={[]} />
             <TextComponent
                 type="boldText"
                 style={{

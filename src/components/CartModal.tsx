@@ -17,7 +17,7 @@ import LoadingButton from "./LoadingButton";
 import TextComponent from "./TextComponent";
 import { useUserLocation } from "./useUserLocation";
 
-export default function CartModal({ onConfirm, onBrowseMore }) {
+export default function CartModal({ onConfirm, onBrowseMore }: { onConfirm: any; onBrowseMore?: any }) {
   const navigation: any = useNavigation();
 
   const {

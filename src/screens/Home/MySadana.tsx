@@ -502,9 +502,6 @@ const selectedLevel = LEVEL_KEYS[activeIndex];
               parallaxScrollingScale: 0.95,
               parallaxScrollingOffset: 70,
             }}
-            panGestureHandlerProps={{
-              activeOffsetX: [-10, 10],
-            }}
             scrollAnimationDuration={800}
             onSnapToItem={(index) => {
               setActiveIndex(index);

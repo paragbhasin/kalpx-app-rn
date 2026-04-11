@@ -603,6 +603,25 @@ export async function executeAction(
               meta,
             });
 
+            // Web parity (actionExecutor.js:1113-1127): when a support item
+            // completes inside a check-in flow, fire checkin_support_completed
+            // so the check-in funnel can distinguish "acknowledged only" from
+            // "acknowledged and did support practice".
+            if (
+              source === "support" &&
+              _isCheckinFlow(currentState, currentContainer)
+            ) {
+              mitraTrackEvent("checkin_support_completed", {
+                journeyId: screenState.journey_id,
+                dayNumber: screenState.day_number || 1,
+                meta: {
+                  prana_type: screenState.current_prana_type,
+                  itemType,
+                  itemId,
+                },
+              });
+            }
+
             setScreenValue(true, "_completion_tracked_this_session");
             setScreenValue(true, `_tracked_${itemId}`);
 
@@ -648,6 +667,65 @@ export async function executeAction(
       case "submit": {
         const { itemId } = payload || {}; // note: target is already destructured at top of executeAction
         let finalTarget = target;
+        const submitCurrentState =
+          action.currentScreen?.id || action.currentScreen?.state_id;
+
+        // Web parity (actionExecutor.js:2674-2707): handle lifecycle
+        // events that submit via payload.type — session_started,
+        // session_abandoned, trigger_session_abandoned,
+        // trigger_resolved_after_support. These are tracked without the
+        // main completion path (no mitraTrackCompletion call).
+        if (payload?.type === "session_started") {
+          mitraTrackEvent("session_started", {
+            journeyId: screenState.journey_id,
+            dayNumber: screenState.day_number || 1,
+            meta: {
+              itemType: payload.itemType,
+              itemId: payload.itemId,
+              source: payload.source,
+              runnerType: payload.runnerType,
+            },
+          });
+          if (target) loadScreen(target);
+          break;
+        }
+        if (payload?.type === "session_abandoned") {
+          mitraTrackEvent("session_abandoned", {
+            journeyId: screenState.journey_id,
+            dayNumber: screenState.day_number || 1,
+            meta: {
+              itemType: payload.itemType,
+              itemId: payload.itemId,
+              source: payload.source,
+              runnerType: payload.runnerType,
+              repsCompleted: payload.repsCompleted || 0,
+              durationSeconds: payload.durationSeconds || 0,
+            },
+          });
+          if (target) loadScreen(target);
+          break;
+        }
+        if (payload?.type === "trigger_session_abandoned") {
+          mitraTrackEvent("trigger_session_abandoned", {
+            journeyId: screenState.journey_id,
+            dayNumber: screenState.day_number || 1,
+            meta: { exitedFrom: submitCurrentState },
+          });
+          _cleanupOnReturnHome(setScreenValue, screenState, endFlowInstance);
+          if (target) loadScreen(target);
+          break;
+        }
+        if (payload?.type === "trigger_resolved_after_support") {
+          mitraTrackEvent("trigger_resolved_after_support", {
+            journeyId: screenState.journey_id,
+            dayNumber: screenState.day_number || 1,
+            meta: { exitedFrom: "post_trigger_mantra" },
+          });
+          setScreenValue(null, "trigger_mantra_text");
+          setScreenValue(null, "trigger_mantra_devanagari");
+          if (target) loadScreen(target);
+          break;
+        }
 
         // Support flow cleanup: clear scoped trigger mantra on OM / support sessions
         if (
@@ -846,6 +924,15 @@ export async function executeAction(
             // Clear stale trigger state
             setScreenValue(null, "trigger_mantra_text");
             setScreenValue(null, "trigger_mantra_devanagari");
+
+            // Web parity (actionExecutor.js:2401-2405): fire check-in breath
+            // reset event immediately when an agitated/drained user enters
+            // the OM breath reset. Fire-and-forget — doesn't block loadScreen.
+            mitraTrackEvent("checkin_breath_reset", {
+              journeyId: screenState.journey_id,
+              dayNumber: screenState.day_number || 1,
+              meta: { prana_type: payload.prana_type },
+            });
           }
 
           // checkin_ack copy per prana type
@@ -880,7 +967,17 @@ export async function executeAction(
           setScreenValue(ackCopy.body, "checkin_ack_body");
           setScreenValue(ackCopy.accent || "", "checkin_ack_accent");
 
-          await mitraTrackEvent("checkin_acknowledged", {
+          // Web parity (actionExecutor.js:2366-2374): differentiate between
+          // ack-only (no support suggestions) and acknowledged (with support)
+          // so funnel analytics can measure how often check-ins route into
+          // support practices vs return-to-rhythm.
+          const hasCheckinSuggestions =
+            Array.isArray(pranaAckRes?.suggestions) &&
+            pranaAckRes.suggestions.length > 0;
+          const checkinEventName = hasCheckinSuggestions
+            ? "checkin_acknowledged"
+            : "checkin_ack_only";
+          await mitraTrackEvent(checkinEventName, {
             journeyId: screenState.journey_id,
             dayNumber: screenState.day_number || 1,
             meta: { prana_type: payload.prana_type },
@@ -1967,6 +2064,17 @@ export async function executeAction(
           dayNumber: screenState.day_number || 1,
           meta,
         });
+        // Web parity: when checkin_breath_reset_completed is tracked,
+        // also fire checkin_resolved_after_breath_reset as a secondary
+        // event so analytics can distinguish the breath_reset completion
+        // from resolution (matches actionExecutor.js:3571-3577).
+        if (eventName === "checkin_breath_reset_completed") {
+          mitraTrackEvent("checkin_resolved_after_breath_reset", {
+            journeyId: screenState.journey_id,
+            dayNumber: screenState.day_number || 1,
+            meta: { prana_type: screenState.current_prana_type },
+          });
+        }
         if (target) {
           const trackDest = _resolveDest(target);
           if (trackDest === "day_active") {

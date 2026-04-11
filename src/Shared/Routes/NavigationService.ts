@@ -16,6 +16,6 @@ export function openDrawer() {
 
 export function navigate(name: string, params?: any) {
   if (navigationRef.isReady()) {
-    navigationRef.navigate(name as never, params as never);
+    (navigationRef.navigate as any)(name, params);
   }
 }

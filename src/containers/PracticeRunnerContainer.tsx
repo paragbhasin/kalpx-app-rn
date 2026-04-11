@@ -19,6 +19,7 @@ import {
 import { Audio } from "expo-av";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { executeAction } from "../engine/actionExecutor";
+import { mitraTrackEvent } from "../engine/mitraApi";
 import BlockRenderer from "../engine/BlockRenderer";
 import MicroCompletion from "../components/HabitLoop/MicroCompletion";
 import MalaMantraCounter from "../components/MalaMantraCounter";
@@ -148,6 +149,55 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({ schem
     }
     if (screenState?.reps_done) {
       updateScreenData("reps_done", 0);
+    }
+
+    // Web parity (PracticeRunnerContainer.vue:1065-1081): fire session_started
+    // analytics event when a runner session begins. Only for actual running
+    // screens (not rep selection, prep, or completion).
+    const sessionRunners = new Set([
+      "mantra_runner",
+      "sankalp_embody",
+      "practice_step_runner",
+      "free_mantra_chanting",
+      "post_trigger_mantra",
+      "trigger_practice_runner",
+      "checkin_breath_reset",
+      "checkin_support_mantra",
+      "anchor_timer",
+      "sacred_pause",
+    ]);
+    if (
+      (currentStateId && sessionRunners.has(currentStateId)) ||
+      (currentVariant && sessionRunners.has(currentVariant))
+    ) {
+      const runnerItem = screenState?.runner_active_item;
+      const sessionItemId =
+        runnerItem?.item_id ||
+        runnerItem?.id ||
+        screenState?.master_mantra?.id ||
+        screenState?.master_practice?.id ||
+        screenState?.master_sankalp?.id ||
+        currentStateId ||
+        "";
+      if (sessionItemId) {
+        const sessionItemType =
+          runnerItem?.item_type ||
+          (currentVariant?.includes("mantra")
+            ? "mantra"
+            : currentVariant?.includes("sankalp")
+              ? "sankalp"
+              : "practice");
+        mitraTrackEvent("session_started", {
+          journeyId: screenState?.journey_id,
+          dayNumber: screenState?.day_number || 1,
+          meta: {
+            itemType: sessionItemType,
+            itemId: sessionItemId,
+            source: runnerItem?.source || "core",
+            runnerType: currentVariant || currentStateId,
+          },
+        });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeItemKey, currentStateId]);

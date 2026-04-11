@@ -930,15 +930,48 @@ export async function executeAction(
         }
 
         // Persist raw item data for runner
+        const resolvedSource =
+          manualData?.source || (isSupport ? "support" : "core");
         setScreenValue(
           {
             id: manualData?.id || manualData?.item_id || masterData.id,
             item_id: manualData?.item_id || manualData?.id || masterData.id,
             item_type: manualData?.item_type || infoType,
-            source: manualData?.source || (isSupport ? "support" : "core"),
+            source: resolvedSource,
           },
           "_last_viewed_item",
         );
+
+        // Additional items (library / custom) must populate runner_active_item
+        // so the runner reads from the correct content source, and the submit
+        // handler attributes engagement to source=additional_* (not "core").
+        // Without this, the 4-tier source resolution in submit falls through
+        // to "core" and additional-flow metrics are lost.
+        // See audit C3 2026-04-10.
+        const isAdditional =
+          resolvedSource === "additional_library" ||
+          resolvedSource === "additional_custom" ||
+          resolvedSource === "additional";
+        if (isAdditional && manualData) {
+          setScreenValue(
+            {
+              ...manualData,
+              id: manualData.id || manualData.item_id || masterData.id,
+              item_id:
+                manualData.item_id || manualData.id || masterData.id,
+              item_type: manualData.item_type || infoType,
+              source: resolvedSource,
+              title: manualData.title || masterData.title || "",
+              iast: manualData.iast || masterData.iast || "",
+              devanagari:
+                manualData.devanagari || masterData.devanagari || "",
+              audio_url:
+                manualData.audio_url || masterData.audio_url || "",
+              steps: manualData.steps || masterData.steps || [],
+            },
+            "runner_active_item",
+          );
+        }
 
         setScreenValue(infoData, "info");
 

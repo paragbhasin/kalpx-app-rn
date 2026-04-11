@@ -122,9 +122,9 @@ function buildDecisions(
       },
       {
         id: 'deepen',
-        label: 'Deepen My Practice',
+        label: 'Deepen',
         description:
-          'You have the discipline. Let\u2019s add depth to trigger inner transformation.',
+          'Add one deeper item while staying on the same path.',
         target: {
           containerId: 'companion_dashboard',
           stateId: 'day_active',
@@ -146,12 +146,13 @@ function buildDecisions(
     return base;
   }
 
-  // Day 7 is usually a single auto-routed CTA, but render per-action
+  // Day 7 options are surfaced from backend via checkpoint_options
+  // (web parity: actionExecutor.js:284-298 Day 7 labelMap).
   if (recAction === 'lighten') {
     return [
       {
         id: 'lighten',
-        label: 'Return to Mitra Home',
+        label: 'Lighten My Path',
         description:
           'Your path has been lightened. One sacred step each day is enough.',
         target: { containerId: 'companion_dashboard', stateId: 'day_active' },
@@ -170,7 +171,7 @@ function buildDecisions(
   return [
     {
       id: 'continue',
-      label: 'Return to Mitra Home',
+      label: 'Continue',
       description:
         'Your path continues. The rhythm is taking hold.',
       target: { containerId: 'companion_dashboard', stateId: 'day_active' },

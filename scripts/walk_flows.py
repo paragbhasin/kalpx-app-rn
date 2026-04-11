@@ -222,6 +222,15 @@ def walk_core_sankalp() -> None:
 
 
 def walk_core_practice() -> None:
+    """Core practice flow: dashboard → Act card → info_reveal → step runner.
+
+    Fixes H2 audit gap: previously captured `02_info_reveal_practice` was
+    actually the dashboard practice selector (wrong screen). The fix is to
+    scroll to the Act/Practice CARD first, tap its body (not an accordion
+    toggle), then tap the "Practice" CTA inside the card to route to the
+    info_reveal state. After info_reveal we tap "Begin Practice" to enter
+    the step_runner (RUN.P.02 equivalent).
+    """
     print("\n=== CORE PRACTICE ===")
     reset_to_dashboard()
 
@@ -230,18 +239,38 @@ def walk_core_practice() -> None:
     wait(5)
     capture("01_day_active", "flow_core_practice")
 
-    # Practice card — "Act" / "Practice" / ritual
-    if not tap_text("Practice"):
-        if not tap_text("Act"):
-            return
-    wait(3)
-    capture("02_info_reveal_practice", "flow_core_practice")
+    # Scroll so the Act card is in view (dashboards are long)
+    scroll_down(400)
+    wait(0.5)
 
-    if not tap_text("Begin Practice"):
-        if not tap_text("I Will"):
+    # Tap the Act card to expand/enter practice info
+    if not tap_text("Act"):
+        if not tap_text("Practice"):
             return
     wait(3)
-    capture("03_practice_runner", "flow_core_practice")
+    capture("02_card_expanded_or_info", "flow_core_practice")
+
+    # From the Act card, tap "Begin Practice" to enter info_reveal state
+    if not tap_text("Begin Practice"):
+        if not tap_text("I Will Do This"):
+            if not tap_text("I Will"):
+                print("   ⚠ Could not find Begin Practice / I Will CTA")
+                return
+    wait(3)
+    capture("03_info_reveal_practice", "flow_core_practice")
+
+    # Now enter the step_runner (RUN.P.02)
+    if not tap_text("Begin Practice"):
+        if not tap_text("Continue"):
+            if not tap_text("Start"):
+                print("   ⚠ Could not enter step runner")
+                return
+    wait(4)
+    capture("04_practice_step_runner", "flow_core_practice")
+
+    # Wait for timer to progress so we capture mid-practice state
+    wait(6)
+    capture("05_practice_mid_timer", "flow_core_practice")
 
 
 def walk_additional() -> None:
@@ -265,6 +294,21 @@ def walk_additional() -> None:
 
 
 def walk_checkin() -> None:
+    """Quick Check-In: dashboard → Quick Check-In btn → prana select → ack path.
+
+    Fixes H1 audit gap: previously only captured day_active. Now walks all
+    4 prana states' ack paths so REG-020 isolation + checkin_mantra_text
+    seeding + pranaType field (not `feeling`) are verifiable:
+
+      balanced   → ack_only (no support)
+      energized  → ack_only
+      agitated   → breath_reset (OM) → support mantra → resolved
+      drained    → breath_reset (OM) → support mantra → resolved
+
+    For this walker run we capture balanced (ack_only fast path) and
+    agitated (full breath_reset + mantra support path) since they cover
+    both ack branches.
+    """
     print("\n=== QUICK CHECK-IN ===")
     reset_to_dashboard()
 
@@ -273,16 +317,62 @@ def walk_checkin() -> None:
     wait(5)
     capture("01_day_active", "flow_checkin")
 
+    # Open Quick Check-In overlay
     if not tap_text("Quick Check"):
         if not tap_text("Check-In"):
+            print("   ⚠ Could not find Quick Check-In button")
             return
     wait(3)
     capture("02_prana_select", "flow_checkin")
 
-    # Try each prana state (for this run just capture balanced)
+    # Path A: balanced → ack only (no support flow)
     if tap_text("balanced"):
         wait(3)
-        capture("03_ack_balanced", "flow_checkin")
+        capture("03a_ack_balanced", "flow_checkin")
+        # Return to dashboard to start Path B
+        if tap_text("Return to"):
+            wait(3)
+        else:
+            reset_to_dashboard()
+
+    # Path B: agitated → breath_reset → support mantra → resolved
+    if not tap_text("Return to Your"):
+        reset_to_dashboard()
+        if not tap_text("Return to Your"):
+            return
+    wait(3)
+    if not tap_text("Quick Check"):
+        if not tap_text("Check-In"):
+            return
+    wait(3)
+    if not tap_text("agitated"):
+        if not tap_text("drained"):
+            print("   ⚠ No agitated/drained chip")
+            return
+    wait(4)
+    capture("03b_breath_reset_om", "flow_checkin")
+
+    # OM breath screen — let a few beads land, then continue to support
+    wait(6)
+    capture("04_breath_reset_mid", "flow_checkin")
+
+    # Tap "I feel better" / "Continue" to move into support mantra
+    if tap_text("feel better"):
+        wait(4)
+    elif tap_text("Continue"):
+        wait(4)
+    else:
+        # Some flows route directly — give it time
+        wait(4)
+    capture("05_support_mantra_or_ack", "flow_checkin")
+
+    # If a support mantra is shown, tap the calmer CTA
+    if tap_text("feel calmer"):
+        wait(3)
+        capture("06_resolved", "flow_checkin")
+    elif tap_text("Return to"):
+        wait(3)
+        capture("06_resolved", "flow_checkin")
 
 
 def walk_trigger() -> None:

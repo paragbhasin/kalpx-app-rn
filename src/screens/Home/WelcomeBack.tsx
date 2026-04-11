@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { Fonts } from "../../theme/fonts";
 
 const FOCUS_LABELS: Record<string, string> = {
@@ -126,8 +127,15 @@ export default function WelcomeBack({
           </Text>
 
           <View style={styles.actions}>
-            <TouchableOpacity style={styles.btnContinue} onPress={onContinue} activeOpacity={0.85}>
-              <Text style={styles.btnContinueText}>Continue with {focusShort}</Text>
+            <TouchableOpacity onPress={onContinue} activeOpacity={0.85}>
+              <LinearGradient
+                colors={["#d4a853", "#c49a3c"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.btnContinue}
+              >
+                <Text style={styles.btnContinueText}>Continue with {focusShort}</Text>
+              </LinearGradient>
             </TouchableOpacity>
             <TouchableOpacity style={styles.btnFresh} onPress={onFresh} activeOpacity={0.85}>
               <Text style={styles.btnFreshText}>Start Fresh</Text>
@@ -216,7 +224,6 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   btnContinue: {
-    backgroundColor: GOLD,
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderRadius: 10,

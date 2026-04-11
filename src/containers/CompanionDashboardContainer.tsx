@@ -10,13 +10,12 @@ import {
 } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import MantraLotus3d from "../../assets/mantra-lotus-3d.svg";
-import Header from "../components/Header";
-import { executeAction } from "../engine/actionExecutor";
-import BlockRenderer from "../engine/BlockRenderer";
-import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
 import { Fonts } from "../theme/fonts";
+import { executeAction } from "../engine/actionExecutor";
+import BlockRenderer from "../engine/BlockRenderer";
+import { useScreenStore } from "../engine/useScreenBridge";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -45,6 +44,19 @@ const RING_SIZE = 150;
 const RING_STROKE = 7;
 const RING_RADIUS = 45;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+const interpolate = (text: string, values: Record<string, any>) => {
+  if (!text) return "";
+  let result = text;
+  Object.keys(values).forEach((key) => {
+    result = result.replace(new RegExp(`{{${key}}}`, "g"), values[key]);
+  });
+  return result;
+};
 
 // ---------------------------------------------------------------------------
 // Component
@@ -110,13 +122,18 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
 
   // Status message from dashboard_config
   const statusMessage = useMemo(() => {
+    const values = { day_number: dayNumber, total_days: totalDays };
     const messages = schema.dashboard_config?.status_messages || {};
-    if (isDayComplete) return messages.completed || "Day Completed";
-    if (dayNumber === 1) return messages.start || "Begins Today";
-    if (dayNumber === 7 && totalDays >= 7)
-      return messages.milestone || "Milestone Reached";
-    if (dayNumber === totalDays) return messages.near_end || "Almost There";
-    return messages.default || "Continue Journey";
+
+    let msg = "";
+    if (isDayComplete) msg = messages.completed || "Day Completed";
+    else if (dayNumber === 1) msg = messages.start || "Begins Today";
+    else if (dayNumber === 7 && totalDays >= 7)
+      msg = messages.milestone || "Milestone Reached";
+    else if (dayNumber === totalDays) msg = messages.near_end || "Almost There";
+    else msg = messages.default || "Continue Journey";
+
+    return interpolate(msg, values);
   }, [isDayComplete, dayNumber, totalDays, schema.dashboard_config]);
 
   // SVG ring calculations
@@ -203,7 +220,6 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
   if (!hasJourney) {
     return (
       <View style={styles.root}>
-        <Header isTransparent />
         <View style={styles.emptyState}>
           <MantraLotus3d width={120} height={120} />
 
@@ -235,7 +251,6 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
 
   return (
     <View style={styles.root}>
-      <Header isTransparent />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -305,7 +320,15 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
                 <Text style={styles.cycleLabel}>Cycle {cycleNumber}</Text>
               )}
               <Text style={styles.dayCount}>
-                {identityLabel || `Day ${dayNumber}`}
+                {identityLabel
+                  ? interpolate(identityLabel, {
+                      day_number: dayNumber,
+                      total_days: totalDays,
+                    })
+                  : interpolate(
+                      schema.dashboard_config?.day_label || "Day {{day_number}}",
+                      { day_number: dayNumber },
+                    )}
               </Text>
             </View>
 
@@ -341,10 +364,13 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
         {daysRemaining > 0 && (
           <View style={styles.reminderSection}>
             <Text style={styles.remainingText}>
-              {schema.dashboard_config?.journey_summary ||
-                `Your ${totalDays}-day practice journey \u2014 ${
-                  streakDisplay || `${daysRemaining} sessions remaining`
-                }`}
+              {interpolate(
+                schema.dashboard_config?.journey_summary ||
+                  `Your ${totalDays}-day practice journey \u2014 ${
+                    streakDisplay || `${daysRemaining} sessions remaining`
+                  }`,
+                { day_number: dayNumber, total_days: totalDays },
+              )}
             </Text>
           </View>
         )}

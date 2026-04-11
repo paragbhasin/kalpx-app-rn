@@ -776,15 +776,23 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
 
   // Handle Calm Music for Support Practices
   useEffect(() => {
-    if (isSupportPractice) {
+    const activeItem = screenState?.runner_active_item;
+    const isMantra =
+      activeItem?.item_type === "mantra" ||
+      isMantraRunner ||
+      isTriggerOmChantScreen;
+
+    if (isSupportPractice && !isMantra) {
+      console.log("[CALM_MUSIC] Practice flow detected. Initializing.");
       startCalmMusic();
     } else {
+      console.log("[CALM_MUSIC] Mantra flow or other detected. Stopping.");
       stopCalmMusic();
     }
     return () => {
       stopCalmMusic();
     };
-  }, [isSupportPractice, currentStateId]);
+  }, [isSupportPractice, isMantraRunner, isTriggerOmChantScreen, currentStateId]);
 
   useEffect(() => {
     Audio.setAudioModeAsync({

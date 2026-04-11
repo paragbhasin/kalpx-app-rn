@@ -247,6 +247,9 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
   const sankalpSpin = useRef(new Animated.Value(0)).current;
   const sankalpSpinLoopRef = useRef<Animated.CompositeAnimation | null>(null);
 
+  // In-flight audio load tracking to prevent echoes during fast transitions
+  const inFlightSounds = useRef<Set<Audio.Sound>>(new Set());
+
   const currentVariant = schema?.variant || currentStateId;
 
   // ── Variant Detection ──
@@ -674,6 +677,11 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     const mantra = mantraLoopAudioRef.current;
     introLoopAudioRef.current = null;
     mantraLoopAudioRef.current = null;
+
+    // Also clear in-flight sounds
+    const currentInFlight = Array.from(inFlightSounds.current);
+    inFlightSounds.current.clear();
+
     if (intro) {
       await intro.stopAsync().catch(() => {});
       await intro.unloadAsync().catch(() => {});
@@ -681,6 +689,12 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     if (mantra) {
       await mantra.stopAsync().catch(() => {});
       await mantra.unloadAsync().catch(() => {});
+    }
+
+    // Unload all in-flight sounds that were orphaned by a quick transition
+    for (const sound of currentInFlight) {
+      await sound.stopAsync().catch(() => {});
+      await sound.unloadAsync().catch(() => {});
     }
   };
 
@@ -722,7 +736,16 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
           volume: mediaMuted ? 0 : 0.6,
         },
       );
+
+      // If we unmounted or changed state while loading, unload immediately
+      if (!isSupportPractice) {
+        await sound.unloadAsync().catch(() => {});
+        return;
+      }
+
+      inFlightSounds.current.add(sound);
       calmMusicRef.current = sound;
+      inFlightSounds.current.delete(sound);
     } catch (err) {
       console.warn("[CALM_MUSIC] play failed:", err);
     }
@@ -760,7 +783,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     return () => {
       stopCalmMusic();
     };
-  }, [isSupportPractice]);
+  }, [isSupportPractice, currentStateId]);
 
   useEffect(() => {
     Audio.setAudioModeAsync({
@@ -805,11 +828,15 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
           isMuted: mediaMuted,
           volume: mediaMuted ? 0 : 1,
         });
-        if (!isCancelled) {
-          introLoopAudioRef.current = intro;
-        } else {
-          await intro.unloadAsync();
+
+        if (isCancelled) {
+          await intro.unloadAsync().catch(() => {});
+          return;
         }
+
+        inFlightSounds.current.add(intro);
+        introLoopAudioRef.current = intro;
+        inFlightSounds.current.delete(intro);
       } catch (introErr) {
         console.warn(
           "[TRIGGER_AUDIO] Intro load failed — skipping:",
@@ -860,7 +887,10 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
         if (mantra) await mantra.unloadAsync().catch(() => {});
         return;
       }
+
+      inFlightSounds.current.add(mantra);
       mantraLoopAudioRef.current = mantra;
+      inFlightSounds.current.delete(mantra);
 
       const intro = introLoopAudioRef.current;
       try {
@@ -1670,8 +1700,12 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
 
     return (
       <View style={styles.embodyContainer}>
-        <View style={styles.quoteWrap}>
+        <View style={styles.quoteContainer}>
+          <Text style={styles.quoteMarkLeft}>“</Text>
+
           <Text style={styles.sankalpText}>{text}</Text>
+
+          <Text style={styles.quoteMarkRight}>”</Text>
         </View>
         <View style={styles.divider}>
           <View style={styles.line} />
@@ -1682,6 +1716,13 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
           {schema.embody_config?.instruction ||
             "Hold the icon below to embody."}
         </Text>
+
+        <View style={styles.sankalpLotusWrapper}>
+          <View style={styles.line} />
+          <MantraLotus3d width={80} height={80} />
+          <View style={styles.line} />
+        </View>
+        <Text style={styles.embodyInstr}>Tap the Circle to Embody</Text>
 
         <TouchableOpacity
           style={styles.holdTarget}
@@ -1955,6 +1996,13 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
 };
 
 const styles = StyleSheet.create({
+  sankalpLotusWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginTop: -40,
+    // marginVertical: 20,
+  },
   fullscreenBg: { flex: 1 },
   safeArea: { flex: 1 },
   repSelectionScroll: {
@@ -2305,7 +2353,7 @@ const styles = StyleSheet.create({
   sankalpConfirmSubtext: {
     fontFamily: Fonts.serif.regular,
     fontSize: 18,
-    lineHeight: 40,
+    lineHeight: 30,
     color: "#615247",
     textAlign: "center",
     maxWidth: 330,
@@ -2542,6 +2590,7 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: "center",
     justifyContent: "center",
+    // marginTop: -30,
   },
   quoteWrap: { marginVertical: 20 },
   sankalpText: {
@@ -2550,13 +2599,37 @@ const styles = StyleSheet.create({
     color: "#432104",
     textAlign: "center",
   },
+
+  quoteContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 30,
+  },
+
+  quoteMarkLeft: {
+    position: "absolute",
+    left: 10,
+    top: -10,
+    fontSize: 40,
+    color: "#C8A96A",
+    fontFamily: Fonts.serif.bold,
+  },
+
+  quoteMarkRight: {
+    position: "absolute",
+    right: 10,
+    bottom: -10,
+    fontSize: 40,
+    color: "#C8A96A",
+    fontFamily: Fonts.serif.bold,
+  },
   divider: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
     marginVertical: 20,
   },
-  line: { flex: 1, height: 1, backgroundColor: "#d9a557", width: 80 },
+  line: { flex: 1, height: 1, backgroundColor: "#d9a557" },
   diamond: {
     width: 6,
     height: 6,
@@ -2580,7 +2653,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  embodyImg: { width: 150, height: 150, opacity: 0.8 },
+  embodyImg: { width: 350, height: 350 },
   sankalpActivatingText: {
     marginTop: 18,
     fontFamily: Fonts.serif.regular,

@@ -91,4 +91,6 @@ export const GUARDED_ACTIONS = new Set([
   'seal_day',
   'submit',
   'info_start_click',
+  'try_another_way',
+  'trigger_still_feeling',
 ]);

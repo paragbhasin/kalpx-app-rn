@@ -22,6 +22,13 @@ import store, { RootState } from "../store";
 import { loadScreenWithData } from "../store/screenSlice";
 import { Fonts } from "../theme/fonts";
 
+// SVGs
+import CheckInIcon from "../../assets/1_min_checkin.svg";
+import SankalpIcon from "../../assets/sankalp.svg";
+import MantraIcon from "../../assets/mantra.svg";
+import WisdomIcon from "../../assets/wisdom.svg";
+import GuidedMobileIcon from "../../assets/guided_mobile.svg";
+
 const { width } = Dimensions.get("window");
 
 const TESTIMONIALS = [
@@ -54,25 +61,25 @@ const FEATURES = [
     id: "checkin",
     title: "Quick Check-In",
     subtitle: "Pause and reflect",
-    icon: require("../../assets/self-reflection.png"),
+    Icon: CheckInIcon,
   },
   {
     id: "practices",
     title: "Additional Practices",
     subtitle: "Go deeper when you need more",
-    icon: require("../../assets/career1.png"), // Fallback to a relevant icon
+    Icon: SankalpIcon,
   },
   {
     id: "core",
     title: "Core Practice",
     subtitle: "Daily mantras, sankalps, and guidance",
-    icon: require("../../assets/sanatan-wisdom.png"),
+    Icon: MantraIcon,
   },
   {
     id: "insight",
     title: "Mitra Insight",
     subtitle: "Thoughtful guidance for your path",
-    icon: require("../../assets/DailyOm.png"), // Fallback to a relevant icon
+    Icon: WisdomIcon,
   },
 ];
 
@@ -204,10 +211,9 @@ export default function GuidedGrowthContainer() {
             </Text>
           </View>
           <View style={styles.mockupContainer}>
-            <Image
-              source={require("../../assets/guided_webmobile.png")} // Using home_side(2) as it's the mobile mockup
-              style={styles.mobileMockup}
-              resizeMode="contain"
+            <GuidedMobileIcon
+              width={160}
+              height={300}
             />
           </View>
         </View>
@@ -247,7 +253,9 @@ export default function GuidedGrowthContainer() {
                 tint="light"
                 style={styles.featureCardSmall}
               >
-                <Image source={feature.icon} style={styles.smallIcon} />
+                {feature.Icon && (
+                  <feature.Icon width={34} height={34} style={styles.smallIcon} />
+                )}
                 <Text style={styles.featureTitleTextSmall}>
                   {feature.title}
                 </Text>

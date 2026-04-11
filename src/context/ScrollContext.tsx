@@ -8,6 +8,7 @@ export const ScrollProvider = ({ children }: any) => {
     const [lastOffset, setLastOffset] = useState(0);
     const [isVisible, setIsVisible] = useState(true);
     const scrollAnim = useRef(new Animated.Value(0)).current; // 0 = visible, 1 = hidden
+    const scrollY = useRef(new Animated.Value(0)).current;   // raw scroll offset
     const isHeaderVisible = useRef(true);
 
     const toggleVisibility = (visible: boolean) => {
@@ -25,6 +26,9 @@ export const ScrollProvider = ({ children }: any) => {
     const handleScroll = (event: any) => {
         const currentOffset = event.nativeEvent.contentOffset.y;
         const direction = currentOffset > lastOffset ? "down" : "up";
+
+        // Track raw scroll position for background opacity
+        scrollY.setValue(currentOffset);
 
         // Show header when at the very top
         if (currentOffset <= 0) {
@@ -46,8 +50,15 @@ export const ScrollProvider = ({ children }: any) => {
         outputRange: [0, -100], // Moves header out of view
     });
 
+    // Opacity: 0 at top (scrollY=0), 1 once user scrolls 20px
+    const headerBgOpacity = scrollY.interpolate({
+        inputRange: [0, 20],
+        outputRange: [0, 1],
+        extrapolate: 'clamp',
+    });
+
     return (
-        <ScrollContext.Provider value={{ handleScroll, headerY, toggleVisibility, isVisible }}>
+        <ScrollContext.Provider value={{ handleScroll, headerY, headerBgOpacity, toggleVisibility, isVisible }}>
             {children}
         </ScrollContext.Provider>
     );

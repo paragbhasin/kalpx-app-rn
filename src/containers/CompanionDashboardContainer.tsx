@@ -10,12 +10,12 @@ import {
 } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import MantraLotus3d from "../../assets/mantra-lotus-3d.svg";
-import store from "../store";
-import { screenActions } from "../store/screenSlice";
-import { Fonts } from "../theme/fonts";
 import { executeAction } from "../engine/actionExecutor";
 import BlockRenderer from "../engine/BlockRenderer";
 import { useScreenStore } from "../engine/useScreenBridge";
+import store from "../store";
+import { screenActions } from "../store/screenSlice";
+import { Fonts } from "../theme/fonts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -326,7 +326,8 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
                       total_days: totalDays,
                     })
                   : interpolate(
-                      schema.dashboard_config?.day_label || "Day {{day_number}}",
+                      schema.dashboard_config?.day_label ||
+                        "Day {{day_number}}",
                       { day_number: dayNumber },
                     )}
               </Text>
@@ -435,12 +436,9 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
 
         {/* Low-burden day entry */}
         {!isDayComplete && (
-          <TouchableOpacity
-            style={styles.lowBurdenEntry}
-            onPress={() => loadScreen("low_burden_day")}
-          >
+          <View style={styles.lowBurdenEntry}>
             <Text style={styles.lowBurdenLink}>What is possible today?</Text>
-          </TouchableOpacity>
+          </View>
         )}
 
         {/* ----------------------------------------------------------- */}
@@ -481,9 +479,8 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
             </LinearGradient>
           </TouchableOpacity>
           <Text style={styles.quickActionHelp}>
-            Feeling overwhelmed or disturbed? Tap here and KalpX will guide
-            you through a short reset using a mantra, sankalp, or simple
-            practice.
+            Feeling overwhelmed or disturbed? Tap here and KalpX will guide you
+            through a short reset using a mantra, sankalp, or simple practice.
           </Text>
 
           <TouchableOpacity
@@ -813,7 +810,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   triggerBtn: {
-    width: "100%",
+    width: "70%",
     maxWidth: 360,
     borderRadius: 28,
     overflow: "hidden",
@@ -825,7 +822,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   triggerBtnInner: {
-    height: 56,
+    height: 40,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 24,
@@ -848,15 +845,15 @@ const styles = StyleSheet.create({
     opacity: 0.78,
   },
   quickCheckinBtn: {
-    width: "100%",
+    width: "70%",
     maxWidth: 360,
-    height: 54,
+    height: 40,
     borderRadius: 27,
     borderWidth: 1.5,
     borderColor: "#c7a64b",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fdfaf3",
+    // backgroundColor: "#fdfaf3",
   },
   quickCheckinBtnText: {
     fontFamily: Fonts.sans.semiBold,

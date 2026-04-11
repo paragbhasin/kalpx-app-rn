@@ -18,7 +18,7 @@ const HEADER_HEIGHT =
   Platform.OS === "android" ? 45 + (StatusBar.currentHeight || 0) : 45;
 
 const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
-  const { headerY } = useScrollContext();
+  const { headerY, headerBgOpacity } = useScrollContext();
   const currentBackground = useScreenStore((state) => state.currentBackground);
   const isHeaderHidden = useScreenStore((state) => state.isHeaderHidden);
 
@@ -36,6 +36,11 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
     loadScreen({ container_id: "portal", state_id: "portal" });
   };
 
+  // For screens without a background image, always show solid white header
+  // For screens with a background, use scroll-driven glass overlay
+  const hasBg = !!currentBackground;
+  const backArrowColor = hasBg ? "#FFFFFF" : "#432104";
+
   return (
     <View style={styles.container}>
       {currentBackground && (
@@ -50,11 +55,23 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
           style={[
             styles.headerContainer,
             { transform: [{ translateY: headerY }] },
-            currentBackground && styles.headerTransparent,
+            // Solid white on plain screens (no background image)
+            !hasBg && styles.headerSolid,
           ]}
         >
-          {/* Back button + Header in one row.
-                        Both live inside the animated block — back arrow slides with the header */}
+          {/* Scroll-driven glass overlay — only visible when user has scrolled */}
+          {hasBg && (
+            <Animated.View
+              style={[
+                StyleSheet.absoluteFill,
+                styles.headerGlassOverlay,
+                { opacity: headerBgOpacity },
+              ]}
+              pointerEvents="none"
+            />
+          )}
+
+          {/* Back button + Header in one row. */}
           <View style={styles.headerRow}>
             {showBackButton ? (
               <TouchableOpacity
@@ -62,11 +79,11 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
                 onPress={handleBack}
                 activeOpacity={0.8}
               >
-                <Ionicons name="arrow-back" size={20} color="#432104" />
+                <Ionicons name="arrow-back" size={20} color={backArrowColor} />
               </TouchableOpacity>
             ) : null}
             <View style={styles.headerFlex}>
-              <Header isTransparent={!!currentBackground} />
+              <Header isTransparent={hasBg} />
             </View>
           </View>
         </Animated.View>
@@ -93,14 +110,18 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 1000,
-    backgroundColor: "#FFF",
     height: HEADER_HEIGHT,
     justifyContent: "center",
   },
-  headerTransparent: {
-    backgroundColor: "rgba(255, 255, 255, 0.15)",
+  // Solid white — used when no background image is present
+  headerSolid: {
+    backgroundColor: "#FFF",
+  },
+  // Glassmorphic overlay — rendered on top of content, driven by scroll opacity
+  headerGlassOverlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.35)",
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "rgba(255, 255, 255, 0.3)",
+    borderBottomColor: "rgba(255, 255, 255, 0.15)",
   },
   // Back arrow + Header logo/dropdown in a single row
   headerRow: {

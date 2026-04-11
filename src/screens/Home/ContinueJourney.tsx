@@ -134,8 +134,8 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingTop: 80,
-    paddingBottom: 40,
+    paddingTop: 15,
+    paddingBottom: 30,
   },
   topSection: {
     paddingHorizontal: 5,
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: "auto",
     paddingBottom: 10,
-    paddingTop: 80,
+    paddingTop: 120,
   },
 
   ctaButton: {

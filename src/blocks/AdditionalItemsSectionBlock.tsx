@@ -244,103 +244,106 @@ const AdditionalItemsSectionBlock: React.FC<Props> = ({ block }) => {
           {block.label || "Additional Practices"}
         </Text>
         <TouchableOpacity onPress={() => setShowLibrary(true)}>
-          <Text style={styles.addBtn}>+ Add from Library</Text>
+          <Text style={styles.addBtn}>+ Add from Library </Text>
         </TouchableOpacity>
       </View>
 
       {/* List */}
-      <View style={styles.list}>
-        {visibleItems.map((item) => (
-          <View
-            key={item.id}
-            style={[styles.card, item.completedToday && styles.cardCompleted]}
-          >
-            <View style={styles.cardInfo}>
-              <View style={styles.badgeRow}>
-                <Text style={styles.typeBadge}>{item.itemType}</Text>
-                {item.completedToday && (
-                  <View style={styles.doneBadge}>
-                    <Text style={styles.doneText}>Done</Text>
-                  </View>
+
+      {visibleItems.length !== 0 && (
+        <View style={styles.list}>
+          {visibleItems.map((item) => (
+            <View
+              key={item.id}
+              style={[styles.card, item.completedToday && styles.cardCompleted]}
+            >
+              <View style={styles.cardInfo}>
+                <View style={styles.badgeRow}>
+                  <Text style={styles.typeBadge}>{item.itemType}</Text>
+                  {item.completedToday && (
+                    <View style={styles.doneBadge}>
+                      <Text style={styles.doneText}>Done</Text>
+                    </View>
+                  )}
+                </View>
+                <Text style={styles.title}>{item.title}</Text>
+                {!!item.subtitle && (
+                  <Text style={styles.subtitle}>{item.subtitle}</Text>
+                )}
+                {!!item.sessionsCount && (
+                  <Text style={styles.sessionsText}>
+                    {item.sessionsCount}{" "}
+                    {item.sessionsCount === 1 ? "session" : "sessions"}
+                  </Text>
                 )}
               </View>
-              <Text style={styles.title}>{item.title}</Text>
-              {!!item.subtitle && (
-                <Text style={styles.subtitle}>{item.subtitle}</Text>
-              )}
-              {!!item.sessionsCount && (
-                <Text style={styles.sessionsText}>
-                  {item.sessionsCount}{" "}
-                  {item.sessionsCount === 1 ? "session" : "sessions"}
-                </Text>
-              )}
-            </View>
 
-            <View style={styles.cardActions}>
-              {!item.completedToday ? (
-                <TouchableOpacity
-                  style={styles.actionBtn}
-                  onPress={() =>
-                    item.itemType === "mantra" ||
-                    item.itemType === "sankalp" ||
-                    item.itemType === "practice"
-                      ? handleLaunchRunner(item)
-                      : handleComplete(item)
-                  }
-                  disabled={!!completingId}
-                >
-                  <LinearGradient
-                    colors={["#c9a84c", "#a8873a"]}
-                    style={styles.actionBtnGradient}
+              <View style={styles.cardActions}>
+                {!item.completedToday ? (
+                  <TouchableOpacity
+                    style={styles.actionBtn}
+                    onPress={() =>
+                      item.itemType === "mantra" ||
+                      item.itemType === "sankalp" ||
+                      item.itemType === "practice"
+                        ? handleLaunchRunner(item)
+                        : handleComplete(item)
+                    }
+                    disabled={!!completingId}
                   >
-                    {completingId === item.id ? (
-                      <ActivityIndicator size="small" color="#fff" />
-                    ) : (
-                      <Text style={styles.actionBtnText}>
-                        {item.itemType === "mantra"
-                          ? "Chant"
-                          : item.itemType === "sankalp"
-                            ? "Embody"
-                            : "Practice"}
-                      </Text>
-                    )}
-                  </LinearGradient>
+                    <LinearGradient
+                      colors={["#c9a84c", "#a8873a"]}
+                      style={styles.actionBtnGradient}
+                    >
+                      {completingId === item.id ? (
+                        <ActivityIndicator size="small" color="#fff" />
+                      ) : (
+                        <Text style={styles.actionBtnText}>
+                          {item.itemType === "mantra"
+                            ? "Chant"
+                            : item.itemType === "sankalp"
+                              ? "Embody"
+                              : "Practice"}
+                        </Text>
+                      )}
+                    </LinearGradient>
+                  </TouchableOpacity>
+                ) : null}
+
+                <TouchableOpacity
+                  style={styles.removeBtn}
+                  onPress={() => handleRemove(item)}
+                  disabled={!!removingId}
+                >
+                  {removingId === item.id ? (
+                    <ActivityIndicator size="small" color="#8c8881" />
+                  ) : (
+                    <Ionicons name="trash-outline" size={18} color="#8c8881" />
+                  )}
                 </TouchableOpacity>
-              ) : null}
-
-              <TouchableOpacity
-                style={styles.removeBtn}
-                onPress={() => handleRemove(item)}
-                disabled={!!removingId}
-              >
-                {removingId === item.id ? (
-                  <ActivityIndicator size="small" color="#8c8881" />
-                ) : (
-                  <Ionicons name="trash-outline" size={18} color="#8c8881" />
-                )}
-              </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        ))}
+          ))}
 
-        {/* Toggle */}
-        {hasMore && (
-          <TouchableOpacity
-            onPress={() => setCollapsed(false)}
-            style={styles.toggleBtn}
-          >
-            <Text style={styles.toggleText}>See all ({items.length})</Text>
-          </TouchableOpacity>
-        )}
-        {!collapsed && items.length > 2 && (
-          <TouchableOpacity
-            onPress={() => setCollapsed(true)}
-            style={styles.toggleBtn}
-          >
-            <Text style={styles.toggleText}>Show less</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+          {/* Toggle */}
+          {hasMore && (
+            <TouchableOpacity
+              onPress={() => setCollapsed(false)}
+              style={styles.toggleBtn}
+            >
+              <Text style={styles.toggleText}>See all ({items.length})</Text>
+            </TouchableOpacity>
+          )}
+          {!collapsed && items.length > 2 && (
+            <TouchableOpacity
+              onPress={() => setCollapsed(true)}
+              style={styles.toggleBtn}
+            >
+              <Text style={styles.toggleText}>Show less</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
 
       <LibrarySearchModal
         isVisible={showLibrary}
@@ -355,8 +358,8 @@ const AdditionalItemsSectionBlock: React.FC<Props> = ({ block }) => {
 const styles = StyleSheet.create({
   container: {
     marginVertical: 18,
-    backgroundColor: "rgba(255, 253, 249, 0.9)",
-    borderRadius: 24,
+    // backgroundColor: "rgba(255, 253, 249, 0.9)",
+    borderRadius: 15,
     borderWidth: 1,
     borderColor: "rgba(192, 145, 61, 0.4)",
     padding: 2,

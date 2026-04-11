@@ -11,6 +11,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSelector, useDispatch } from 'react-redux';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import SigninPopup from '../components/SigninPopup';
 import BlockRenderer from '../engine/BlockRenderer';
 import { useScreenStore } from '../engine/useScreenBridge';
 import { executeAction } from '../engine/actionExecutor';
@@ -50,6 +52,39 @@ const LockRitualContainer: React.FC<LockRitualContainerProps> = ({ schema }) => 
     updateHeaderHidden,
     currentScreen,
   } = useScreenStore();
+
+  const user = useSelector((state: RootState) => state.login?.user || state.socialLoginReducer?.user);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isSigninVisible, setIsSigninVisible] = useState(false);
+
+  // Sync login state from store and check local storage for absolute certainty
+  useEffect(() => {
+    const checkLogin = async () => {
+      const token = await AsyncStorage.getItem("access_token");
+      const hasUser = !!(user?.id || user?.email || user?.token || user?.profile);
+      const authenticated = hasUser && !!token;
+      
+      setIsLoggedIn(authenticated);
+      
+      // RED-012: If guest, prompt immediately upon reaching the ritual screen
+      if (!authenticated) {
+        setIsSigninVisible(true);
+      }
+    };
+    checkLogin();
+  }, [user]);
+
+  // Monitor login success to navigate back to induction summary
+  useEffect(() => {
+    if (isLoggedIn && isSigninVisible) {
+      setIsSigninVisible(false);
+      // RED-012: After login, return to InsightSummary Step 1 as requested
+      loadScreen({
+        container_id: "insight_summary",
+        state_id: "path_reveal"
+      });
+    }
+  }, [isLoggedIn, isSigninVisible, loadScreen]);
 
   const [isHolding, setIsHolding] = useState(false);
   const [isReady, setIsReady] = useState(false);
@@ -116,9 +151,20 @@ const LockRitualContainer: React.FC<LockRitualContainerProps> = ({ schema }) => 
     endFlowInstance: () => dispatch(screenActions.endFlowInstance()),
   }), [loadScreen, goBack, dispatch, screenState]);
 
-  const onCommit = useCallback(() => {
+  const onCommit = useCallback(async () => {
     // Haptic feedback on completion
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+
+    if (!isLoggedIn) {
+      // RED-012: Save induction state to AsyncStorage for recovery after login
+      try {
+        await AsyncStorage.setItem('kalpx_pending_induction', JSON.stringify(screenState.screenData));
+      } catch (e) {
+        console.error("Failed to save pending induction:", e);
+      }
+      setIsSigninVisible(true);
+      return;
+    }
 
     const holdButton = schema.blocks?.find((b: any) => b.type === 'hold_button');
     const lockAction = schema.lock_action || holdButton?.on_complete;
@@ -127,7 +173,7 @@ const LockRitualContainer: React.FC<LockRitualContainerProps> = ({ schema }) => 
       // Use executeAction to properly handle all action types (especially generate_companion)
       executeAction(lockAction, buildActionContext());
     }
-  }, [schema, buildActionContext]);
+  }, [schema, buildActionContext, isLoggedIn, screenState.screenData]);
 
   // Interval-based progress matching web behavior (4% every 50ms)
   const holdIntervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
@@ -301,6 +347,21 @@ const LockRitualContainer: React.FC<LockRitualContainerProps> = ({ schema }) => 
           ))}
         </Animated.View>
       </View>
+
+      <SigninPopup
+        visible={isSigninVisible}
+        onClose={() => setIsSigninVisible(false)}
+        onConfirmCancel={() => {}}
+        title="Commit to Your 14-Day Path"
+        subTitle="Save Your Progress"
+        subText="To lock in these practices and unlock your personalized daily journey, please sign in or create an account."
+        infoTexts={[
+          "Lock in your personalized daily mantras",
+          "Unlock growth tracking and streaks",
+          "Receive daily guidance for your specific path"
+        ]}
+        MantraButtonTitle="Sign In to Commit"
+      />
     </View>
   );
 };

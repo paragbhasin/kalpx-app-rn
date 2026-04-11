@@ -1,8 +1,10 @@
 import React, { useEffect } from "react";
-import { SafeAreaView, StyleSheet, View } from "react-native";
+import { ActivityIndicator, SafeAreaView, StyleSheet, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { useSelector } from "react-redux";
 import EngineErrorBoundary from "./ErrorBoundary";
 import { useScreenStore } from "./useScreenBridge";
+import type { RootState } from "../store";
 
 // Import Containers
 import PracticeDetailOverlay from "../components/PracticeDetailOverlay";
@@ -51,10 +53,19 @@ const ScreenRenderer: React.FC = () => {
   );
   const { currentOverlayData, setOverlayData } = useScreenStore();
 
-  // Guard: if there is nothing to render (e.g. right after logout / RESET_APP
-  // clears currentScreen), pop back to avoid a permanently blank screen.
+  const user = useSelector(
+    (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
+  );
+  const isLoggedIn = !!(user?.id || user?.email || user?.token || user?.profile);
+
+  // Guard: only navigate back when:
+  //   1. currentScreen is null (nothing to render), AND
+  //   2. the user is logged OUT (genuine post-logout/RESET_APP blank).
+  // During normal screen-to-screen transitions currentScreen is briefly null
+  // while the schema is fetching — but the user is still logged in, so we
+  // must NOT call goBack() in that window (it would break forward navigation).
   useEffect(() => {
-    if (!currentScreen) {
+    if (!currentScreen && !isLoggedIn) {
       const timer = setTimeout(() => {
         if (navigation.canGoBack()) {
           navigation.goBack();
@@ -62,7 +73,7 @@ const ScreenRenderer: React.FC = () => {
       }, 80);
       return () => clearTimeout(timer);
     }
-  }, [currentScreen, navigation]);
+  }, [currentScreen, isLoggedIn, navigation]);
 
   if (__DEV__) {
     console.log(
@@ -70,7 +81,20 @@ const ScreenRenderer: React.FC = () => {
     );
   }
 
-  if (!currentScreen) return null;
+  // Show a subtle loading state while the schema resolves (briefly null after
+  // every navigation since loadScreen/goBack now clear currentScreen immediately
+  // to prevent container/schema mismatches). Only logged-in users reach this
+  // path during normal nav; logged-out users are handled by the goBack guard above.
+  if (!currentScreen) {
+    if (isLoggedIn) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="small" color="#b8922a" />
+        </View>
+      );
+    }
+    return null;
+  }
 
   // Use specific container or fallback to Generic
   const Container =
@@ -98,6 +122,12 @@ const ScreenRenderer: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "transparent",
+  },
   root: {
     flex: 1,
     backgroundColor: "transparent",

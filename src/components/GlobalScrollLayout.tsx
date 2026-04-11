@@ -23,8 +23,34 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
   const isHeaderHidden = useScreenStore((state) => state.isHeaderHidden);
 
   // Back button logic — lives here so it rides the headerY animation for free
-  const { history, currentScreen, currentContainerId, goBack, loadScreen } =
-    useScreenStore();
+  const {
+    history,
+    currentScreen,
+    currentContainerId,
+    currentStateId,
+    goBack,
+    loadScreen,
+  } = useScreenStore();
+
+  // ── Support-flow back navigation ─────────────────────────────────────────
+  // The "I Feel Triggered" and "Quick Check-In" flows push many intermediate
+  // steps to the Redux history. Pressing back one-by-one would land on random
+  // flow screens. Instead, detect we're in a support flow and jump directly
+  // to the Companion Dashboard.
+  const SUPPORT_FLOW_CONTAINERS = new Set(['awareness_trigger']);
+  const SUPPORT_FLOW_STATE_IDS = new Set([
+    'free_mantra_chanting',
+    'post_trigger_mantra',
+    'trigger_practice_runner',
+    'trigger_advice_reveal',
+    'trigger_awareness',
+    'checkin_breath_reset',
+    'checkin_support_mantra',
+  ]);
+  const isInSupportFlow =
+    SUPPORT_FLOW_CONTAINERS.has(currentContainerId || '') ||
+    (currentContainerId === 'practice_runner' &&
+      SUPPORT_FLOW_STATE_IDS.has(currentStateId || ''));
 
   const isRootScreen =
     currentContainerId === "companion_dashboard" ||
@@ -41,7 +67,22 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
     }
   }, [showBackButton, toggleVisibility]);
 
+  // Prevent rapid double-taps from popping the history stack twice.
+  const isNavigatingBack = React.useRef(false);
+
   const handleBack = () => {
+    if (isNavigatingBack.current) return;
+    isNavigatingBack.current = true;
+    setTimeout(() => { isNavigatingBack.current = false; }, 500);
+
+    // Support flows (I Feel Triggered / Quick Check-In) accumulate many
+    // intermediate history entries. Jump straight to dashboard instead of
+    // stepping through each flow screen one-by-one.
+    if (isInSupportFlow) {
+      loadScreen({ container_id: 'companion_dashboard', state_id: 'day_active' });
+      return;
+    }
+
     if (history.length > 0) {
       goBack();
       return;

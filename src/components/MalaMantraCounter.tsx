@@ -1,4 +1,9 @@
-import { ChevronDown, ChevronLeft, ChevronUp, Volume2, VolumeX } from "lucide-react-native";
+import {
+  ChevronDown,
+  ChevronUp,
+  Volume2,
+  VolumeX
+} from "lucide-react-native";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Dimensions,
@@ -152,7 +157,7 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.scrollingHeaderRow}>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={styles.exitBtn}
             onPress={() => {
               console.log("[MALA_COUNTER] Exit pressed");
@@ -162,7 +167,7 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
             <ChevronLeft size={24} color="#8b6914" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
 
           <View style={styles.headerTextCenter}>
             <Text style={styles.headerMantraTitle} numberOfLines={1}>

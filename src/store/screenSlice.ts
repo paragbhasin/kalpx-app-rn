@@ -144,6 +144,10 @@ const screenSlice = createSlice({
       }
       state.currentContainerId = containerId;
       state.currentStateId = stateId;
+      // Clear the schema immediately so ScreenRenderer never renders the
+      // previous container's schema inside the new container while the new
+      // schema is being fetched asynchronously.
+      state.currentScreen = null;
     },
 
     goBack(state) {
@@ -152,6 +156,10 @@ const screenSlice = createSlice({
       state.history = state.history.slice(0, -1);
       state.currentContainerId = previous.containerId;
       state.currentStateId = previous.stateId;
+      // Clear schema immediately — prevents ScreenRenderer from briefly
+      // mounting the parent container with the child screen's schema while
+      // the parent schema is being resolved asynchronously.
+      state.currentScreen = null;
     },
 
     setScreenValue(state, action: PayloadAction<{ key: string; value: any }>) {

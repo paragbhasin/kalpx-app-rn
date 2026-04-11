@@ -1,0 +1,52 @@
+# EAS Build ignore — shrinks the project archive uploaded to EAS.
+#
+# EAS rebuilds native code from scratch for every build, so shipping the
+# local android/ and ios/ build outputs is pure waste (3.9GB + 226MB today).
+# Test artifacts (screenshots, walker output, extracted prior builds) also
+# don't belong in a release archive.
+#
+# Without this file the upload was ~523MB. With it it should drop to ~50MB.
+
+# Native build outputs — EAS rebuilds these
+android/
+ios/
+
+# Test artifacts
+screenshots/
+.maestro/screenshots/
+
+# Stale build extracts from prior local runs
+build-extract/
+build.ipa
+*.apk
+*.aab
+
+# Local dev junk
+.expo/
+.expo-shared/
+.metro-cache/
+
+# VSCode / IDE
+.vscode/
+.idea/
+*.xcworkspace/
+*.xcodeproj/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Test caches
+coverage/
+.nyc_output/
+
+# Tmp / logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+/tmp/
+
+# EAS already excludes these automatically, but belt-and-suspenders:
+node_modules/
+.git/

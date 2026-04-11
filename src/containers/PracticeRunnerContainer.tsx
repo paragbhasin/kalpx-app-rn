@@ -1226,11 +1226,11 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
           <View style={styles.repMandalaWrap}>
             <View style={styles.repMandalaOuter}>
               <Image
-                source={require("../../assets/lotus_glow.png")}
+                source={require("../../assets/rep-count.png")}
                 style={styles.repMandalaGlow}
                 resizeMode="contain"
               />
-              <View style={styles.repMandalaInner}>
+              <View style={{ alignItems: "center", justifyContent: "center" }}>
                 <Text style={styles.repMandalaCount}>{selectedRepCount}</Text>
                 <Text style={styles.repMandalaLabel}>Chants</Text>
               </View>
@@ -1979,13 +1979,13 @@ const styles = StyleSheet.create({
     lineHeight: 28,
     color: "#6B4E31",
     textAlign: "center",
-    marginBottom: 28,
+    // marginBottom: 28,
     maxWidth: 320,
   },
   repMandalaWrap: {
     width: "100%",
     alignItems: "center",
-    marginBottom: 26,
+    // marginBottom: 26,
   },
   repMandalaOuter: {
     width: 280,
@@ -2015,11 +2015,11 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   repMandalaCount: {
-    fontFamily: Fonts.serif.bold,
-    fontSize: 52,
+    fontFamily: Fonts.sans.bold,
+    fontSize: 40,
     lineHeight: 58,
     color: "#6B4318",
-    marginBottom: 8,
+    marginBottom: 2,
   },
   repMandalaLabel: {
     fontFamily: Fonts.serif.regular,
@@ -2073,7 +2073,7 @@ const styles = StyleSheet.create({
   },
   repBeginBtn: {
     width: "100%",
-    maxWidth: 310,
+    maxWidth: 270,
     borderRadius: 34,
     backgroundColor: "#E0B13A",
     padding: 4,
@@ -2085,7 +2085,7 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   repBeginBtnInner: {
-    height: 60,
+    height: 30,
     borderRadius: 30,
     backgroundColor: "#E0B13A",
     alignItems: "center",

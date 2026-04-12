@@ -3432,6 +3432,98 @@ export async function executeAction(
         break;
       }
 
+      // ================================================================
+      // CROSS-CUTTING HANDLERS (mitra-v3-cross)
+      // ================================================================
+
+      // mute_entity — companion intelligence: mark an entity (person/topic)
+      // as muted. PATCH /api/mitra/entities/<id>/ with status=muted.
+      case "mute_entity": {
+        try {
+          const entityId = payload?.entity_id || target;
+          if (!entityId) {
+            console.warn("[mute_entity] no entity_id provided");
+            break;
+          }
+          await api.patch(`/api/mitra/entities/${entityId}/`, {
+            status: "muted",
+          });
+          setScreenValue(true, `_entity_muted_${entityId}`);
+        } catch (err) {
+          console.error("[mute_entity] failed:", err);
+        }
+        break;
+      }
+
+      // log_gratitude — generic gratitude-ledger POST. signal_type comes from
+      // payload, allowing multiple call sites (evening reflection, joy moment,
+      // welcome expansion) to share one handler.
+      case "log_gratitude": {
+        try {
+          const body = {
+            signal_type: payload?.signal_type || "gratitude",
+            note: payload?.note || "",
+            context: payload?.context || null,
+            intensity: payload?.intensity ?? null,
+            logged_at: new Date().toISOString(),
+          };
+          await api.post("/api/mitra/gratitude-ledger/", body);
+        } catch (err) {
+          console.error("[log_gratitude] failed:", err);
+        }
+        break;
+      }
+
+      // acknowledge_season — sets season_banner_dismissed_at and (if endpoint
+      // present) PATCHes user-preferences so dismissal persists server-side.
+      case "acknowledge_season": {
+        try {
+          const now = Date.now();
+          setScreenValue(now, "season_banner_dismissed_at");
+          try {
+            await api.patch("/api/mitra/user-preferences/", {
+              season_banner_dismissed_at: new Date(now).toISOString(),
+            });
+          } catch (apiErr: any) {
+            if (apiErr?.response?.status !== 404) {
+              console.warn("[acknowledge_season] PATCH failed:", apiErr?.message);
+            }
+          }
+        } catch (err) {
+          console.error("[acknowledge_season] failed:", err);
+        }
+        break;
+      }
+
+      // start_gentle — generic "start a gentle practice" action for
+      // post-conflict / grief / loneliness rooms. Caller MUST pass
+      // runner_source in payload — never hardcoded here.
+      case "start_gentle": {
+        try {
+          const runnerSource = payload?.runner_source;
+          if (!runnerSource) {
+            console.warn(
+              "[start_gentle] missing required payload.runner_source — aborting",
+            );
+            break;
+          }
+          const practiceId = payload?.practice_id || null;
+          const runnerVariant = payload?.runner_variant || "practice";
+          setScreenValue(runnerSource, "runner_source");
+          setScreenValue(runnerVariant, "runner_variant");
+          if (practiceId) setScreenValue(practiceId, "runner_practice_id");
+
+          // Start flow instance flagged as support (gentle is always support).
+          if (startFlowInstance) startFlowInstance("support");
+
+          const destination = payload?.destination || "practice_step_runner";
+          loadScreen(destination, payload?.destination_state || "active");
+        } catch (err) {
+          console.error("[start_gentle] failed:", err);
+        }
+        break;
+      }
+
       default:
         console.warn(`[ACTION] Unknown action type: ${type}`);
     }

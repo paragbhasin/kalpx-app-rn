@@ -284,6 +284,9 @@ export const CompanionDashboardContainer = {
             type: "view_info",
             payload: { type: "mantra" },
           },
+          // Dashboard tap goes to rep-selection; start_runner fires on the
+          // "Begin Chanting" button inside rep_selection (REG-015 carries
+          // source="core").
           action: {
             type: "navigate",
             target: {
@@ -307,11 +310,15 @@ export const CompanionDashboardContainer = {
             payload: { type: "sankalp" },
           },
           action: {
-            type: "navigate",
-            target: {
-              container_id: "practice_runner",
-              state_id: "sankalp_embody",
-              is_core: true,
+            type: "start_runner",
+            payload: {
+              source: "core",
+              variant: "sankalp",
+              item: {
+                item_type: "sankalp",
+                item_id: "{{companion_sankalp_id}}",
+                title: "{{sankalp_text}}",
+              },
             },
           },
         },
@@ -331,11 +338,15 @@ export const CompanionDashboardContainer = {
             payload: { type: "practice" },
           },
           action: {
-            type: "navigate",
-            target: {
-              container_id: "practice_runner",
-              state_id: "practice_step_runner",
-              is_core: true,
+            type: "start_runner",
+            payload: {
+              source: "core",
+              variant: "practice",
+              item: {
+                item_type: "practice",
+                item_id: "{{companion_practice_id}}",
+                title: "{{practice_title}}",
+              },
             },
           },
         },
@@ -1539,8 +1550,21 @@ export const PracticeRunnerContainer = {
           id: "begin_mantra_practice",
           type: "primary_button",
           label: "Begin Chanting →",
+          // REG-015: core mantra start — source="core" so track_completion
+          // attributes correctly. target_reps comes from the rep picker via
+          // the `reps_total` screenData key the picker writes.
           action: {
-            type: "navigate",
+            type: "start_runner",
+            payload: {
+              source: "core",
+              variant: "mantra",
+              target_reps: "{{reps_total}}",
+              item: {
+                item_type: "mantra",
+                item_id: "{{companion_mantra_id}}",
+                title: "{{mantra_text}}",
+              },
+            },
             target: {
               container_id: "practice_runner",
               state_id: "mantra_prep",
@@ -6310,34 +6334,21 @@ export const MASTER_UI_TEXT = {
   },
 };
 
-<<<<<<< HEAD
 // ─────────────────────────────────────────────────────────────────────────────
-// WEEK 4 — SUPPORT PATH (Mitra v3 Moments 20, 21, 22, 31, 38, 42)
-// Web parity: kalpx-frontend/src/containers/AwarenessTriggerContainer.vue
-// Specs: route_support_trigger.md, route_support_checkin_regulation.md,
-//        overlay_checkin_balanced_ack.md, overlay_voice_note.md,
-//        overlay_voice_consent.md, transient_sound_bridge.md.
-// REG-020: trigger active path has NO recheck (sound_bridge → mantra_runner
-//          via practice_runner → dashboard).
-// REG-015: check-in states touch only checkin_* fields.
+// WEEK 4 — SUPPORT PATH (Moments 20, 21, 22, 31, 38, 42)
 // ─────────────────────────────────────────────────────────────────────────────
 export const SupportTriggerContainer = {
   container_id: "support_trigger",
   states: {
     entry: {
       tone: { theme: "gold_dark", mood: "steady" },
-      blocks: [
-        { type: "trigger_entry", label: "I feel triggered." },
-      ],
+      blocks: [{ type: "trigger_entry", label: "I feel triggered." }],
     },
     sound_bridge: {
       tone: { theme: "deep_focus", mood: "reflective" },
       overlay: true,
       blocks: [{ type: "sound_bridge_transient" }],
     },
-    // Note: mantra_runner_support is hosted under practice_runner container
-    // with runner_source="support_trigger" — not a state here. This prevents
-    // duplicating the runner implementation and preserves week 3 contracts.
   },
 };
 
@@ -6360,32 +6371,10 @@ export const SupportCheckinContainer = {
       tone: { theme: "gold_dark", mood: "celebratory" },
       overlay: true,
       blocks: [{ type: "balanced_ack_overlay" }],
-=======
-// ============================================================================
-// WEEK 7 — Support rooms + Why-This overlays.
-// Spec: route_support_grief.md, route_support_loneliness.md,
-//       overlay_why_this_level_2.md, overlay_why_this_level_3.md.
-// ============================================================================
-
-export const SupportGriefContainer = {
-  container_id: "support_grief",
-  states: {
-    room: {
-      tone: { theme: "warm_cream", mood: "steady" },
-      meta: { variant: "grief_room", reduced_motion_capable: true },
-      // Blocks array is empty — GriefRoomContainer renders its own fixed
-      // chrome (breath guide, presence line, muted CTAs, exit link). The
-      // schema is still required by the engine but carries no block list.
-      blocks: [],
->>>>>>> mitra-v3-week7
     },
   },
 };
 
-<<<<<<< HEAD
-// Overlay container — voice sheets can mount over any parent. Two states:
-// voice_consent (first-use gate) and voice_note (recorder). Accessed only
-// via start_voice_note action; not entered via navigate_to URL.
 export const OverlayContainer = {
   container_id: "overlay",
   states: {
@@ -6398,27 +6387,35 @@ export const OverlayContainer = {
       tone: { theme: "gold_dark", mood: "reflective" },
       overlay: true,
       blocks: [{ type: "voice_note_sheet" }],
-=======
+    },
+  },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WEEK 7 — Support rooms + Why-This overlays
+// ─────────────────────────────────────────────────────────────────────────────
+export const SupportGriefContainer = {
+  container_id: "support_grief",
+  states: {
+    room: {
+      tone: { theme: "warm_cream", mood: "steady" },
+      meta: { variant: "grief_room", reduced_motion_capable: true },
+      blocks: [],
+    },
+  },
+};
+
 export const SupportLonelinessContainer = {
   container_id: "support_loneliness",
   states: {
     room: {
       tone: { theme: "warm_cream", mood: "steady" },
       meta: { variant: "loneliness_room" },
-      // LonelinessRoomContainer renders its own chrome including the
-      // CompanionedChant block. Schema blocks are empty by design.
       blocks: [],
->>>>>>> mitra-v3-week7
     },
   },
 };
 
-<<<<<<< HEAD
-=======
-// Why-This overlays attach to whichever container was current when the
-// overlay opened. We expose them on companion_dashboard as the default host;
-// ScreenRenderer uses GenericContainer fallback when a given container_id
-// lacks that state_id, so they render consistently from any parent.
 export const WhyThisOverlayContainer = {
   container_id: "why_this_overlay",
   states: {
@@ -6437,14 +6434,13 @@ export const WhyThisOverlayContainer = {
   },
 };
 
-// Register why_this_l2 / why_this_l3 states under companion_dashboard too,
-// so open_why_this_l2 can load without changing containerId.
+// Host why-this states under companion_dashboard as well so open_why_this_l2
+// can load without changing containerId.
 CompanionDashboardContainer.states.why_this_l2 =
   WhyThisOverlayContainer.states.why_this_l2;
 CompanionDashboardContainer.states.why_this_l3 =
   WhyThisOverlayContainer.states.why_this_l3;
 
->>>>>>> mitra-v3-week7
 export const ContainerRegistry = {
   portal: PortalContainer,
   portal_splash: PortalSplashContainer,
@@ -6465,7 +6461,6 @@ export const ContainerRegistry = {
   sadhana_deepen: SadhanaDeepenContainer,
   cycle_transitions: CycleTransitionsContainer,
   stable_scan: StableScanContainer,
-<<<<<<< HEAD
   // Week 4 — Support Path
   support_trigger: SupportTriggerContainer,
   support_checkin: SupportCheckinContainer,
@@ -6473,12 +6468,10 @@ export const ContainerRegistry = {
   // Week 5 — Reflection + Checkpoints
   reflection_weekly: null, // filled by post-declaration assignment
   reflection_evening: null,
-=======
   // Week 7 — support rooms + why-this overlay host
   support_grief: SupportGriefContainer,
   support_loneliness: SupportLonelinessContainer,
   why_this_overlay: WhyThisOverlayContainer,
->>>>>>> mitra-v3-week7
   demo_container: {
     container_id: "demo_container",
     states: {

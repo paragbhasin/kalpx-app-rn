@@ -38,6 +38,18 @@ import {
   // Week 5 — Reflection + Checkpoints
   getResilienceNarrative,
   postGratitudeLedger,
+  // Week 6 — Companion Intelligence
+  getPrepContext,
+  getPredictiveAlerts,
+  getRecommendedAdditional,
+  getPostConflictContext,
+  patchEntity,
+  // Week 7 — Why-This + Personas
+  getPrinciple,
+  getPrincipleSource,
+  getGriefContext,
+  getLonelinessContext,
+  getJoySignal,
 } from "./mitraApi";
 
 // Week 1 — friction chip → focus mapping. Web parity: actionExecutor.js FRICTION_MAP.
@@ -3425,13 +3437,13 @@ export async function executeAction(
             });
             setScreenValue(null, "onboarding_draft_state");
             setScreenValue(null, "onboarding_turn");
-            loadScreen("companion_dashboard", "day_active");
+            loadScreen({ container_id: "companion_dashboard", state_id: "day_active" });
             break;
           }
 
           setScreenValue(draft, "onboarding_draft_state");
           setScreenValue(nextTurn, "onboarding_turn");
-          loadScreen("welcome_onboarding", `turn_${nextTurn}`);
+          loadScreen({ container_id: "welcome_onboarding", state_id: `turn_${nextTurn}` });
         } catch (err) {
           console.error("[onboarding_turn_response] failed:", err);
         }
@@ -3854,7 +3866,7 @@ export async function executeAction(
           if (startFlowInstance) startFlowInstance("support");
 
           const destination = payload?.destination || "practice_step_runner";
-          loadScreen(destination, payload?.destination_state || "active");
+          loadScreen({ container_id: destination, state_id: payload?.destination_state || "active" });
         } catch (err) {
           console.error("[start_gentle] failed:", err);
         }
@@ -4265,7 +4277,11 @@ export async function executeAction(
           payload?.signal_id ||
           (screenState.joy_signal && screenState.joy_signal.id) ||
           null;
-        await postGratitudeJoy(text, signalId);
+        await postGratitudeLedger({
+          signal_type: "joy_signal",
+          text,
+          meta: { signal_id: signalId },
+        });
         // Clear the signal so the card collapses and doesn't re-render today.
         setScreenValue(null, "joy_signal");
         mitraTrackEvent("gratitude_joy_submitted", {

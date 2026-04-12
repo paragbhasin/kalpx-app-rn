@@ -237,7 +237,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
   schema,
 }) => {
   // Mitra v3 Week 3 fast path — immersive runners (Moments 17, 18, 19, 32).
-  if (schema?.immersive_v3) {
+  if ((schema as any)?.immersive_v3) {
     return <ImmersiveV3Runner schema={schema} />;
   }
 

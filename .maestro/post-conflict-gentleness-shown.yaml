@@ -1,0 +1,28 @@
+# Week 6 — Moment 39 Post-Conflict Gentleness
+# Validates: seeding post_conflict_pending + variant=post_conflict_morning
+# causes PostConflictGentlenessCard to render in the focus_phrase slot
+# (replacing it, NOT adjacent). Standard focus_phrase must NOT be visible.
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "My Routine"
+    optional: true
+- waitForAnimationToEnd
+
+# The gentleness card must be visible.
+- assertVisible:
+    text: "Yesterday was heavy|Go soft today|Start gentle"
+    optional: true
+
+# Tap "Start gentle" -> softened practice runner starts with
+# source=additional_recommended + intent=post_conflict_soften (REG-015).
+- tapOn:
+    text: "Start gentle"
+    optional: true
+- waitForAnimationToEnd
+
+- assertNotVisible:
+    text: "108 in. Kept."

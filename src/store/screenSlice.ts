@@ -74,6 +74,34 @@ interface ScreenState {
 //   duration.
 // - All runner_* fields are cleared by track_completion and by the
 //   CompletionReturnTransient on unmount (REG-003: cross-flow isolation).
+//
+// Week 6 — Companion Intelligence (Mitra v3 Moments 27, 28, 29, 30, 39)
+// Spec: overlay_prep_coaching.md, embedded_predictive_alert_card.md,
+//       overlay_entity_recognition.md, embedded_recommended_additional_card.md,
+//       embedded_post_conflict_gentleness_card.md
+// All live inside screenData. Populated by fetch_companion_intelligence
+// (parallel fetch of all 5 endpoints) and cleared on dashboard re-load.
+// - prep_context: object | null — Moment 27. From GET /mitra/prep/.
+//   { surface, strategy_line, grounding_action, do_frame, dont_frame,
+//     principle_hint, context_type, gentle_practice?, variant?, duration_min? }
+// - predictive_alert: object | null — Moment 28. From GET /mitra/predictive-alerts/
+//   (first alert with confidence >= 0.6, not dismissed-today, not muted).
+//   { id, entity:{id,display_name,friction_trend}, when_phrase, evidence_line,
+//     suggested_prep_context, confidence, principle_hint? }
+// - entity_recognition_pending: object | null — Moment 29. From
+//   GET /mitra/entities/?status=provisional&ready_to_ask=true.
+//   { id, display_name, mention_count, contexts, first_seen_phrase }
+// - recommended_additional: object | null — Moment 30. From
+//   GET /mitra/recommended-additional/.
+//   { item_type, item_id, title, duration_min, benefit_line, lead_in,
+//     principle_hint?, source: "additional_recommended" }
+// - post_conflict_pending: object | null — Moment 39. From
+//   GET /mitra/post-conflict-context/.
+//   { thread:{id,opened_at,entity?}, yesterday_phrase, softness_line,
+//     gentle_practice:{item_type,item_id,title,duration_min}, principle_hint? }
+// - predictive_alert_dismissed_at: number | null — epoch ms; cools 7d.
+// - recommended_additional_dismissed_at: number | null — cools to end-of-day.
+// - post_conflict_acked: boolean — one-shot ack this morning.
 export type RunnerVariant = 'mantra' | 'sankalp' | 'practice';
 export type RunnerSource =
   | 'core'

@@ -534,3 +534,94 @@ export async function mitraJourneyWelcomeBack(decision: 'continue' | 'fresh'): P
     return null;
   }
 }
+
+
+// ---------------------------------------------------------------------------
+// Week 6 — Companion Intelligence APIs (Moments 27, 28, 29, 30, 39)
+// ---------------------------------------------------------------------------
+
+export async function getPrepContext(params: Record<string, any> = {}): Promise<any> {
+  try {
+    const res = await api.get('mitra/prep/', { params: { ...params, tz: getTz() } });
+    return res.data;
+  } catch (err: any) {
+    // Flag-off → 404 tolerated silently; card hides.
+    if (err?.response?.status !== 404) {
+      console.warn('[MITRA] prep/ failed:', err.message);
+    }
+    return null;
+  }
+}
+
+/** GET mitra/predictive-alerts/ — Moment 28 friction forecasts. */
+export async function getPredictiveAlerts(): Promise<any> {
+  try {
+    const res = await api.get('mitra/predictive-alerts/', { params: { tz: getTz() } });
+    return res.data;
+  } catch (err: any) {
+    if (err?.response?.status !== 404) {
+      console.warn('[MITRA] predictive-alerts/ failed:', err.message);
+    }
+    return null;
+  }
+}
+
+/** GET mitra/recommended-additional/ — Moment 30 post-core recommendation. */
+export async function getRecommendedAdditional(): Promise<any> {
+  try {
+    const res = await api.get('mitra/recommended-additional/', {
+      params: { tz: getTz() },
+    });
+    return res.data;
+  } catch (err: any) {
+    if (err?.response?.status !== 404) {
+      console.warn('[MITRA] recommended-additional/ failed:', err.message);
+    }
+    return null;
+  }
+}
+
+/** GET mitra/post-conflict-context/ — Moment 39 dissonance-thread context. */
+export async function getPostConflictContext(): Promise<any> {
+  try {
+    const res = await api.get('mitra/post-conflict-context/', {
+      params: { tz: getTz() },
+    });
+    return res.data;
+  } catch (err: any) {
+    if (err?.response?.status !== 404) {
+      console.warn('[MITRA] post-conflict-context/ failed:', err.message);
+    }
+    return null;
+  }
+}
+
+/** POST mitra/entities/check-duplicate/ — Moment 29 probe from freeform mention text. */
+export async function postEntitiesCheckDuplicate(text: string): Promise<any> {
+  try {
+    const res = await api.post('mitra/entities/check-duplicate/', { text });
+    return res.data;
+  } catch (err: any) {
+    if (err?.response?.status !== 404) {
+      console.warn('[MITRA] entities/check-duplicate failed:', err.message);
+    }
+    return null;
+  }
+}
+
+/** PATCH mitra/entities/<id>/ — Moment 29 confirm / dismiss / snooze / mute. */
+export async function patchEntity(
+  id: string | number,
+  payload: Record<string, any>,
+): Promise<any> {
+  try {
+    const res = await api.patch(`mitra/entities/${id}/`, payload);
+    return res.data;
+  } catch (err: any) {
+    if (err?.response?.status !== 404) {
+      console.warn(`[MITRA] entities/${id} PATCH failed:`, err.message);
+    }
+    return null;
+  }
+}
+

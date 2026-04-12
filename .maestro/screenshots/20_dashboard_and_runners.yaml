@@ -1,0 +1,67 @@
+# Captures Moments 8-19 + 32 (dashboard + 3 practice runners + completion return).
+# Pre-req: logged-in account with an active journey (post-onboarding).
+# Output: dashboard + per-runner + completion screenshots.
+appId: com.kalpx.app
+---
+- launchApp
+
+# Moment 8-15 — Dashboard day_active (the whole redesigned home)
+- takeScreenshot: 08_dashboard_day_active
+- scroll
+- takeScreenshot: 08b_dashboard_scrolled
+
+# Moment 17 — Mantra runner
+- tapOn:
+    text: "Begin Chanting"
+    optional: true
+- tapOn:
+    text: "Mantra"
+    optional: true
+- takeScreenshot: 17a_mantra_rep_selection
+- tapOn:
+    text: "108"
+    optional: true
+- tapOn:
+    text: "Begin Chanting"
+    optional: true
+- takeScreenshot: 17b_mantra_runner_display
+
+# Tap once to verify ring animation state
+- tapOn:
+    id: "rep_counter"
+    optional: true
+- takeScreenshot: 17c_mantra_runner_after_tap
+
+# Navigate back to dashboard
+- back
+- back
+
+# Moment 18 — Sankalp hold
+- tapOn:
+    text: "I Embody"
+    optional: true
+- takeScreenshot: 18a_sankalp_hold_initial
+- longPressOn:
+    id: "sankalp_hold_ring"
+    duration: 1500
+    optional: true
+- takeScreenshot: 18b_sankalp_hold_mid
+
+# Back to dashboard
+- back
+
+# Moment 19 — Practice timer
+- tapOn:
+    text: "Begin Practice"
+    optional: true
+- takeScreenshot: 19a_practice_timer
+- waitForAnimationToEnd
+- takeScreenshot: 19b_practice_timer_running
+
+# Back to dashboard
+- back
+
+# Moment 32 — Completion Return (captured via runner completion)
+# Note: to capture this cleanly you need to actually finish a runner; this flow
+# only shows runner state. Run `maestro test .maestro/mantra-runner-complete.yaml`
+# then add a `takeScreenshot` before its final assertion to capture 32.

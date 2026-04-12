@@ -1,0 +1,48 @@
+# Captures Moments 1-7 (welcome onboarding conversation thread).
+# Pre-req: app installed fresh or logged out so onboarding is the entry state.
+# Output: screenshots for every turn — copy into Figma as frames.
+appId: com.kalpx.app
+---
+- clearState
+- launchApp
+
+# Moment 1 — Welcome / first beat
+- takeScreenshot: 01_onboarding_turn_1_welcome
+- tapOn:
+    text: "I'm ready"
+    optional: true
+
+# Moment 2 — Friction question
+- takeScreenshot: 02_onboarding_turn_2_friction
+- tapOn:
+    text: "work"
+    index: 0
+    optional: true
+
+# Moment 3 — State reflection
+- takeScreenshot: 03_onboarding_turn_3_state
+- tapOn:
+    text: "steady"
+    index: 0
+    optional: true
+
+# Moment 4 — Voice / text fork
+- takeScreenshot: 04_onboarding_turn_4_fork
+- tapOn:
+    text: "Keep it written"
+    optional: true
+
+# Moment 5 — Guidance mode picker
+- takeScreenshot: 05_onboarding_turn_5_mode
+- tapOn:
+    text: "Hybrid"
+    optional: true
+
+# Moment 6 — First recognition
+- takeScreenshot: 06_onboarding_turn_6_recognition
+- tapOn:
+    text: "Got it"
+    optional: true
+
+# Moment 7 — Path emerges
+- takeScreenshot: 07_onboarding_turn_7_path

@@ -24,20 +24,62 @@ export const PREFERENCES_STORAGE_KEY = 'kalpx:preferences';
 export const PREFERENCES_VERSION = 1;
 
 export type GuidanceMode = 'universal' | 'hybrid' | 'rooted';
+export type RecommendedFrequency = 'off' | 'reduced' | 'normal';
+export type WhyThisLinksMode = 'visible' | 'hidden_30d' | 'hidden_always';
+
+export interface QuietHours {
+  start: string; // "22:00"
+  end: string; // "07:00"
+}
+
+export interface NotificationPrefs {
+  morning_presence: boolean;
+  prep_heads_up: boolean;
+  post_conflict_follow: boolean;
+  evening_reflection: boolean;
+  grief_follow: boolean;
+  festival_ritucharya: boolean;
+  gentle_reengagement: boolean;
+}
 
 export interface PreferencesSlice {
-  notifications_enabled: boolean;
+  // Local-only (OS accessibility)
   reduced_motion: boolean;
+  // Mirrors backend /api/mitra/user-preferences/
   guidance_mode: GuidanceMode;
+  recommended_frequency: RecommendedFrequency;
+  why_this_links: WhyThisLinksMode;
+  retreat_mode: boolean;
+  post_conflict_cards: boolean;
+  season_acknowledged_ritu: string | null;
+  quiet_hours: QuietHours;
+  // Mirrors backend /api/mitra/user-preferences/notifications/
+  notifications: NotificationPrefs;
+  // Legacy carry-overs (screenData dual-write)
   voice_consent_given: boolean;
+  // Client-only
   season_banner_dismissed_at: number | null;
   loaded: boolean;
 }
 
 const initialState: PreferencesSlice = {
-  notifications_enabled: true,
   reduced_motion: false,
   guidance_mode: 'hybrid',
+  recommended_frequency: 'normal',
+  why_this_links: 'visible',
+  retreat_mode: false,
+  post_conflict_cards: true,
+  season_acknowledged_ritu: null,
+  quiet_hours: { start: '22:00', end: '07:00' },
+  notifications: {
+    morning_presence: true,
+    prep_heads_up: true,
+    post_conflict_follow: true,
+    evening_reflection: true,
+    grief_follow: true,
+    festival_ritucharya: true,
+    gentle_reengagement: false,
+  },
   voice_consent_given: false,
   season_banner_dismissed_at: null,
   loaded: false,
@@ -71,6 +113,39 @@ export const updatePreference = createAsyncThunk(
     } catch (err: any) {
       if (err?.response?.status !== 404) {
         return rejectWithValue(err?.message ?? 'update preference failed');
+      }
+    }
+    return { key, value };
+  },
+);
+
+// Notifications sub-resource — /api/mitra/user-preferences/notifications/
+export const fetchNotificationPrefs = createAsyncThunk(
+  'preferences/fetchNotifications',
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await api.get('/api/mitra/user-preferences/notifications/');
+      return res.data as NotificationPrefs;
+    } catch (err: any) {
+      if (err?.response?.status === 404) return null;
+      return rejectWithValue(err?.message ?? 'fetch notifications failed');
+    }
+  },
+);
+
+export const updateNotificationPref = createAsyncThunk(
+  'preferences/updateNotification',
+  async (
+    { key, value }: { key: keyof NotificationPrefs; value: boolean },
+    { rejectWithValue },
+  ) => {
+    try {
+      await api.patch('/api/mitra/user-preferences/notifications/', {
+        [key]: value,
+      });
+    } catch (err: any) {
+      if (err?.response?.status !== 404) {
+        return rejectWithValue(err?.message ?? 'update notification failed');
       }
     }
     return { key, value };
@@ -130,7 +205,16 @@ const preferencesSlice = createSlice({
     builder
       .addCase(fetchPreferences.fulfilled, (state, action) => {
         if (action.payload) {
-          Object.assign(state, action.payload);
+          // Backend returns top-level fields; notifications sub-resource is a
+          // separate endpoint. Keep client-only fields (reduced_motion,
+          // season_banner_dismissed_at) intact across server sync.
+          const { reduced_motion, season_banner_dismissed_at, notifications } =
+            state;
+          Object.assign(state, action.payload, {
+            reduced_motion,
+            season_banner_dismissed_at,
+            notifications,
+          });
         }
         state.loaded = true;
       })
@@ -140,6 +224,15 @@ const preferencesSlice = createSlice({
       .addCase(updatePreference.fulfilled, (state, action) => {
         const { key, value } = action.payload;
         (state as any)[key] = value;
+      })
+      .addCase(fetchNotificationPrefs.fulfilled, (state, action) => {
+        if (action.payload) {
+          state.notifications = { ...state.notifications, ...action.payload };
+        }
+      })
+      .addCase(updateNotificationPref.fulfilled, (state, action) => {
+        const { key, value } = action.payload;
+        state.notifications[key] = value;
       })
       .addCase(restorePreferences.fulfilled, (state, action) => {
         if (!action.payload) {

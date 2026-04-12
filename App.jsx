@@ -29,7 +29,12 @@ import { navigationRef } from "./src/Shared/Routes/NavigationService";
 import Routes from "./src/Shared/Routes/Routes";
 import { store } from "./src/store";
 import { hideSnackBar } from "./src/store/snackBarSlice";
-import { setPreference } from "./src/store/preferencesSlice";
+import {
+  setPreference,
+  restorePreferences,
+  fetchPreferences,
+  fetchNotificationPrefs,
+} from "./src/store/preferencesSlice";
 
 // 📌 Push Notification Service
 import {
@@ -73,18 +78,33 @@ function AppInner({ initialRoute, navigationRef }) {
   // The login flow already persists access_token + refresh_token + user_id to
   // AsyncStorage, but the Redux state.login.user was being lost on restart.
   // This restores it so the user stays logged in across app launches.
+  //
+  // Mitra v3: also bootstraps preferencesSlice — first restores from
+  // AsyncStorage (fast render), then if the user is authed, fetches from
+  // /api/mitra/user-preferences/ and /api/mitra/user-preferences/notifications/
+  // (MITRA_V3_USER_PREFERENCES flag is live on dev). Both fetches are
+  // 404-tolerant and never throw to the UI.
   useEffect(() => {
     let cancelled = false;
     const hydrate = async () => {
       try {
+        // Preferences restore first (no auth required, just AsyncStorage)
+        dispatch(restorePreferences());
+
         const [token, userId] = await Promise.all([
           AsyncStorage.getItem("access_token"),
           AsyncStorage.getItem("user_id"),
         ]);
         if (cancelled || !token) return;
+
         // Minimal user shape — full profile can be re-fetched on demand.
         const user = userId ? { id: Number(userId) } : { id: null };
         dispatch({ type: "LOGIN_SUCCESS", payload: user });
+
+        // Authed: sync preferences from backend (overrides restored values
+        // for server-owned fields; client-only fields are preserved).
+        dispatch(fetchPreferences());
+        dispatch(fetchNotificationPrefs());
       } catch (err) {
         console.warn("[BOOT] login hydration failed:", err?.message);
       }

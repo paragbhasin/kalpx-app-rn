@@ -37,6 +37,37 @@ interface ScreenState {
 // - guidance_mode: 'universal' | 'hybrid' | 'rooted'
 // - companion_mantra_id / companion_sankalp_id / companion_practice_id: set from
 //   generate-companion response between Turn 5 and Turn 6.
+// Week 3 — Practice Runners (Mitra v3 Moments 17, 18, 19, 32)
+// These fields live inside screenData at runtime. Spec:
+// route_practice_mantra_runner.md, route_practice_sankalp_hold.md,
+// route_practice_timer.md, transient_completion_return.md.
+//
+// - runner_variant: 'mantra' | 'sankalp' | 'practice' — selects which runner
+//   block to render inside PracticeRunnerContainer's v3 immersive chrome, and
+//   which message to show in the completion_return transient.
+// - runner_source: 'core' | 'additional_recommended' | 'additional_library' |
+//   'additional_custom' | 'support_trigger' | 'support_checkin' — must be
+//   explicitly set by the entry action (start_runner). Never inferred.
+//   Used by track_completion to log the correct `source` (REG-015 guard).
+// - runner_active_item: { item_type, item_id, title } — the master mantra /
+//   sankalp / practice being run.
+// - runner_start_time: number (ms epoch), set by start_runner.
+// - runner_reps_completed: number — mirror of the MantraRunnerDisplay count.
+// - runner_step_index: number — current step for PracticeTimerBlock.
+// - runner_duration_actual_sec: number — elapsed seconds; used by
+//   track_completion meta.actual_seconds and by SankalpHoldBlock for hold
+//   duration.
+// - All runner_* fields are cleared by track_completion and by the
+//   CompletionReturnTransient on unmount (REG-003: cross-flow isolation).
+export type RunnerVariant = 'mantra' | 'sankalp' | 'practice';
+export type RunnerSource =
+  | 'core'
+  | 'additional_recommended'
+  | 'additional_library'
+  | 'additional_custom'
+  | 'support_trigger'
+  | 'support_checkin';
+
 export type OnboardingDraftState = {
   friction_id?: string;
   friction_freeform?: string;

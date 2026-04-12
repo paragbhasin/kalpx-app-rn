@@ -1464,10 +1464,15 @@ export const PracticeRunnerContainer = {
         },
       },
     },
-    // 1️⃣ MANTRA PRACTICE SCREEN (21)
+    // 1️⃣ MANTRA PRACTICE SCREEN (Mitra v3 Moment 17)
+    // Web parity: route_practice_mantra_runner.md.
+    // Immersive dark chrome (#1a1a1a) + MantraRunnerDisplay block. Completion
+    // dispatches complete_runner which fires track_completion (source from
+    // runner_source) and lands on completion_return transient.
     mantra_runner: {
-      variant: "mantra_runner",
-      tone: { theme: "light_sandal", mood: "immersive" },
+      variant: "mantra_runner_v3",
+      immersive_v3: true,
+      tone: { theme: "gold_dark", mood: "immersive" },
 
       meta: {
         disable_navigation: true,
@@ -1476,29 +1481,12 @@ export const PracticeRunnerContainer = {
 
       blocks: [
         {
-          type: "rep_counter",
+          type: "mantra_runner_display",
           total: "{{reps_total}}",
         },
-        {
-          type: "mantra_display",
-          text_key: "mantra_text",
-          devanagari_key: "mantra_devanagari",
-        },
-        { type: "audio_player" },
       ],
 
-      on_complete: {
-        type: "navigate",
-        target: {
-          container_id: "practice_runner",
-          state_id: "mantra_complete",
-        },
-      },
-      mantra_config: {
-        tap_label: "TAP",
-        sub_tap_label: "HERE",
-        hint_text: "TAP THE BEAD AFTER EACH MANTRA.",
-      },
+      on_complete: { type: "complete_runner" },
     },
 
     // 2️⃣ MANTRA REP COUNTER FEEDBACK (22)
@@ -1617,8 +1605,28 @@ export const PracticeRunnerContainer = {
       ],
     },
 
-    // 4️⃣ SANKALP EMBODIMENT SCREEN (24)
+    // 4️⃣ SANKALP EMBODIMENT SCREEN (Mitra v3 Moment 18)
+    // Web parity: route_practice_sankalp_hold.md.
+    // Immersive dark chrome + SankalpHoldBlock. 3s press-and-hold fires
+    // complete_runner which lands on completion_return transient.
     sankalp_embody: {
+      variant: "sankalp_hold_v3",
+      immersive_v3: true,
+      tone: { theme: "gold_dark", mood: "immersive" },
+
+      blocks: [
+        {
+          type: "sankalp_hold",
+          hold_duration: 3000,
+        },
+      ],
+
+      on_complete: { type: "complete_runner" },
+    },
+
+    // Legacy sankalp_embody preserved under its pre-v3 shape (unused, kept
+    // for non-v3 flows). The current v3 block above takes over rendering.
+    sankalp_embody_legacy: {
       variant: "sankalp_embody",
       tone: { theme: "light_sandal", mood: "reflective" },
       style: {
@@ -1993,8 +2001,52 @@ export const PracticeRunnerContainer = {
       ],
     },
 
-    // 8️⃣ INTERACTIVE PRACTICE STEP RUNNER
+    // 8️⃣ INTERACTIVE PRACTICE STEP RUNNER (Mitra v3 Moment 19)
+    // Web parity: route_practice_timer.md.
+    // Immersive dark chrome + PracticeTimerBlock. Timer expiry fires
+    // complete_runner; "End Practice" link exits without completion.
     practice_step_runner: {
+      variant: "practice_timer_v3",
+      immersive_v3: true,
+      tone: { theme: "gold_dark", mood: "immersive" },
+
+      blocks: [
+        {
+          type: "practice_timer",
+          duration_key: "practice_duration_seconds",
+          steps_key: "practice_steps",
+          end_practice_action: {
+            type: "navigate",
+            target: {
+              container_id: "companion_dashboard",
+              state_id: "day_active",
+            },
+          },
+        },
+      ],
+
+      on_complete: { type: "complete_runner" },
+    },
+
+    // Completion return transient (Mitra v3 Moment 32) — shown after any of
+    // the three v3 runners completes naturally. Reads runner_variant from
+    // screenData to pick the variant message; clears runner_* on unmount
+    // (REG-003). Tone locked to the three canonical completion messages.
+    completion_return: {
+      variant: "completion_return",
+      immersive_v3: true,
+      tone: { theme: "gold_dark", mood: "grounded" },
+      blocks: [
+        {
+          type: "completion_return",
+          variant_key: "runner_variant",
+        },
+      ],
+    },
+
+    // Legacy practice_step_runner (pre-v3 sacred pause) — preserved for
+    // trigger / quick practice variants.
+    practice_step_runner_legacy: {
       variant: "sacred_pause",
       pause_config: {
         title: "Pause",

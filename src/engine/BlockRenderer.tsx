@@ -80,6 +80,12 @@ import GuidanceModePicker from '../blocks/GuidanceModePicker';
 import FirstRecognitionBlock from '../blocks/FirstRecognitionBlock';
 import PathEmergesBlock from '../blocks/PathEmergesBlock';
 
+// Week 3 — Practice Runners + Completion Return (Mitra v3 Moments 17, 18, 19, 32)
+import MantraRunnerDisplay from '../blocks/MantraRunnerDisplay';
+import SankalpHoldBlock from '../blocks/SankalpHoldBlock';
+import PracticeTimerBlock from '../blocks/PracticeTimerBlock';
+import CompletionReturnTransient from '../blocks/CompletionReturnTransient';
+
 const blockMap: Record<string, React.ComponentType<any>> = {
   // Original 11 blocks
   headline: HeadlineBlock,
@@ -153,6 +159,11 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   guidance_mode_picker: GuidanceModePicker,
   first_recognition: FirstRecognitionBlock,
   path_emerges: PathEmergesBlock,
+  // Week 3 — Practice Runners + Completion Return
+  mantra_runner_display: MantraRunnerDisplay,
+  sankalp_hold: SankalpHoldBlock,
+  practice_timer: PracticeTimerBlock,
+  completion_return: CompletionReturnTransient,
 };
 
 interface BlockRendererProps {
@@ -218,6 +229,8 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block, textColor }) => {
     'card_list', 'insight_box',
     // Week 1 onboarding blocks — all dispatch their own on_response actions
     'onboarding_conversation_turn', 'voice_text_fork', 'guidance_mode_picker',
+    // Week 3 runner blocks — all dispatch their own completion actions
+    'mantra_runner_display', 'sankalp_hold', 'practice_timer', 'completion_return',
   ]);
 
   if (interpolatedBlock.action && !selfActionBlocks.has(interpolatedBlock.type)) {

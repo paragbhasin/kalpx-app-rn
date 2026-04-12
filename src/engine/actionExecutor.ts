@@ -3004,23 +3004,189 @@ export async function executeAction(
 
       // ================================================================
       // TRACK_COMPLETION — fire a Mitra completion event
+      //
+      // Week 3 extension (Mitra v3 Moments 17-19): when invoked from a v3
+      // runner, the canonical source / itemType / itemId / duration / variant
+      // are already in screenState. Callers may pass them in payload OR rely
+      // on screenState.runner_* fields. On success, flow-local runner_* state
+      // is cleared (REG-003 cross-flow isolation).
       // ================================================================
       case "track_completion": {
-        if (!payload) break;
-        const {
-          itemType: tcItemType,
-          itemId: tcItemId,
-          source: tcSource,
-          meta: tcMeta,
-        } = payload;
-        await mitraTrackCompletion({
-          itemType: tcItemType,
-          itemId: tcItemId,
-          source: tcSource,
-          journeyId: screenState.journey_id,
-          dayNumber: screenState.day_number || 1,
-          meta: tcMeta,
+        const p = payload || {};
+        const activeItem = screenState.runner_active_item || {};
+        const resolvedItemType =
+          p.itemType || activeItem.item_type || screenState.runner_variant;
+        const resolvedItemId =
+          p.itemId || activeItem.item_id || activeItem.id;
+        const resolvedSource = p.source || screenState.runner_source;
+        const resolvedDuration =
+          p.duration_sec ?? screenState.runner_duration_actual_sec;
+        const resolvedVariant = p.variant || screenState.runner_variant;
+        const resolvedMeta = {
+          ...(p.meta || {}),
+          ...(resolvedDuration != null ? { actual_seconds: resolvedDuration } : {}),
+          ...(resolvedVariant ? { variant: resolvedVariant } : {}),
+          ...(screenState.runner_reps_completed != null
+            ? { reps_completed: screenState.runner_reps_completed }
+            : {}),
+        };
+
+        if (resolvedItemType && resolvedItemId) {
+          await mitraTrackCompletion({
+            itemType: resolvedItemType,
+            itemId: resolvedItemId,
+            source: resolvedSource,
+            journeyId: screenState.journey_id,
+            dayNumber: screenState.day_number || 1,
+            meta: resolvedMeta,
+          });
+        } else {
+          console.warn(
+            "[track_completion] missing itemType or itemId — skipped",
+            { resolvedItemType, resolvedItemId, resolvedSource },
+          );
+        }
+
+        // REG-003: clear runner-local state so it cannot leak into the next
+        // flow (core vs. additional vs. trigger). These fields are owned by
+        // the runner flow and have no meaning outside it.
+        setScreenValue(null, "runner_active_item");
+        setScreenValue(null, "runner_source");
+        setScreenValue(null, "runner_start_time");
+        setScreenValue(null, "runner_variant");
+        setScreenValue(null, "runner_reps_completed");
+        setScreenValue(null, "runner_step_index");
+        setScreenValue(null, "runner_duration_actual_sec");
+        break;
+      }
+
+      // ================================================================
+      // START_RUNNER — initialize runner_* flow-local state from the entry
+      // action, validating that a source is set (REG-015 guard against
+      // cross-flow contamination).
+      //
+      // Called from info reveal / dashboard triad / trigger suggestion with:
+      //   payload: { variant, item: {item_type,item_id,title}, source,
+      //              target_reps?, duration_sec?, steps? }
+      // Navigates to the provided target or inferred runner state.
+      // ================================================================
+      case "start_runner": {
+        const sp = payload || {};
+        if (!sp.source) {
+          console.warn(
+            "[start_runner] missing source — refusing to start to prevent " +
+              "cross-flow contamination (REG-015).",
+          );
+          break;
+        }
+        if (!sp.variant) {
+          console.warn("[start_runner] missing variant");
+          break;
+        }
+        setScreenValue(sp.variant, "runner_variant");
+        setScreenValue(sp.source, "runner_source");
+        setScreenValue(sp.item || null, "runner_active_item");
+        setScreenValue(Date.now(), "runner_start_time");
+        setScreenValue(0, "runner_reps_completed");
+        setScreenValue(0, "runner_step_index");
+        setScreenValue(0, "runner_duration_actual_sec");
+        if (sp.target_reps) setScreenValue(sp.target_reps, "reps_total");
+        if (sp.duration_sec) {
+          setScreenValue(sp.duration_sec, "practice_duration_seconds");
+        }
+        if (sp.steps) setScreenValue(sp.steps, "practice_steps");
+
+        // Nav
+        if (target) {
+          loadScreen(target);
+        } else {
+          const stateMap: Record<string, string> = {
+            mantra: "mantra_runner",
+            sankalp: "sankalp_embody",
+            practice: "practice_step_runner",
+          };
+          const stateId = stateMap[sp.variant];
+          if (stateId) {
+            loadScreen({ container_id: "practice_runner", state_id: stateId });
+          }
+        }
+        break;
+      }
+
+      // ================================================================
+      // COMPLETE_RUNNER — natural completion of a v3 runner (mantra 108th
+      // tap, sankalp 3s hold, practice timer expiry). Fires track_completion
+      // with source derived from runner_source (never inferred), then lands
+      // on the completion_return transient.
+      // ================================================================
+      case "complete_runner": {
+        const activeItem = screenState.runner_active_item || {};
+        const variant = screenState.runner_variant;
+        const source = screenState.runner_source;
+        const durationSec =
+          screenState.runner_duration_actual_sec ??
+          (screenState.runner_start_time
+            ? Math.round((Date.now() - screenState.runner_start_time) / 1000)
+            : 0);
+
+        if (activeItem.item_type && activeItem.item_id && source) {
+          await mitraTrackCompletion({
+            itemType: activeItem.item_type,
+            itemId: activeItem.item_id,
+            source,
+            journeyId: screenState.journey_id,
+            dayNumber: screenState.day_number || 1,
+            meta: {
+              variant,
+              actual_seconds: durationSec,
+              ...(screenState.runner_reps_completed != null
+                ? { reps_completed: screenState.runner_reps_completed }
+                : {}),
+            },
+          });
+        } else {
+          console.warn(
+            "[complete_runner] missing item/source — track_completion skipped",
+            { activeItem, source },
+          );
+        }
+
+        loadScreen({
+          container_id: "practice_runner",
+          state_id: "completion_return",
         });
+        break;
+      }
+
+      // ================================================================
+      // REPEAT_RUNNER — user tapped "Repeat" on completion_return. Resets
+      // reps/step/duration and re-enters the same variant's runner state
+      // with the same item_id/source preserved.
+      // ================================================================
+      case "repeat_runner": {
+        setScreenValue(0, "runner_reps_completed");
+        setScreenValue(0, "runner_step_index");
+        setScreenValue(0, "runner_duration_actual_sec");
+        setScreenValue(Date.now(), "runner_start_time");
+
+        const variant = screenState.runner_variant;
+        const stateMap: Record<string, string> = {
+          mantra: "mantra_runner",
+          sankalp: "sankalp_embody",
+          practice: "practice_step_runner",
+        };
+        const stateId = variant ? stateMap[variant] : undefined;
+        if (stateId) {
+          loadScreen({
+            container_id: "practice_runner",
+            state_id: stateId,
+          });
+        } else {
+          loadScreen({
+            container_id: "companion_dashboard",
+            state_id: "day_active",
+          });
+        }
         break;
       }
 

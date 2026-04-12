@@ -14,7 +14,7 @@ const TransparentTheme = {
 import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState, useRef } from "react";
-import { Animated, StyleSheet, View, Image, ImageBackground, StatusBar } from "react-native";
+import { Animated, StyleSheet, View, Image, ImageBackground, StatusBar, AccessibilityInfo } from "react-native";
 import { useScreenStore } from "./src/engine/useScreenBridge";
 import "react-native-get-random-values";
 import { MenuProvider } from "react-native-popup-menu";
@@ -29,6 +29,7 @@ import { navigationRef } from "./src/Shared/Routes/NavigationService";
 import Routes from "./src/Shared/Routes/Routes";
 import { store } from "./src/store";
 import { hideSnackBar } from "./src/store/snackBarSlice";
+import { setPreference } from "./src/store/preferencesSlice";
 
 // 📌 Push Notification Service
 import {
@@ -166,6 +167,29 @@ export default function App() {
     return () => {
       unsubForeground();
       unsubOpen();
+    };
+  }, []);
+
+  // Reduced-motion accessibility bootstrap — Mitra v3 Week 7.
+  // GriefRoomContainer + CompanionedChant read preferences.reduced_motion to
+  // skip breath pulse / orb scale animations. We read the OS setting once on
+  // mount and subscribe for changes; the preference also persists via
+  // preferencesSlice so user overrides survive relaunch.
+  useEffect(() => {
+    let subscription;
+    AccessibilityInfo.isReduceMotionEnabled()
+      .then((enabled) => {
+        store.dispatch(setPreference({ key: "reduced_motion", value: !!enabled }));
+      })
+      .catch(() => {});
+    subscription = AccessibilityInfo.addEventListener(
+      "reduceMotionChanged",
+      (enabled) => {
+        store.dispatch(setPreference({ key: "reduced_motion", value: !!enabled }));
+      },
+    );
+    return () => {
+      if (subscription?.remove) subscription.remove();
     };
   }, []);
 

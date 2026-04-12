@@ -88,6 +88,12 @@ import CheckInCardCompact from '../blocks/CheckInCardCompact';
 import CycleSignalBar from '../blocks/CycleSignalBar';
 import ClearWindowBanner from '../blocks/ClearWindowBanner';
 
+// Week 3 — Practice Runners + Completion Return (Mitra v3 Moments 17, 18, 19, 32)
+import MantraRunnerDisplay from '../blocks/MantraRunnerDisplay';
+import SankalpHoldBlock from '../blocks/SankalpHoldBlock';
+import PracticeTimerBlock from '../blocks/PracticeTimerBlock';
+import CompletionReturnTransient from '../blocks/CompletionReturnTransient';
+
 const blockMap: Record<string, React.ComponentType<any>> = {
   // Original 11 blocks
   headline: HeadlineBlock,
@@ -168,6 +174,11 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   check_in_card_compact: CheckInCardCompact,
   cycle_signal_bar: CycleSignalBar,
   clear_window_banner: ClearWindowBanner,
+  // Week 3 — Practice Runners + Completion Return
+  mantra_runner_display: MantraRunnerDisplay,
+  sankalp_hold: SankalpHoldBlock,
+  practice_timer: PracticeTimerBlock,
+  completion_return: CompletionReturnTransient,
 };
 
 interface BlockRendererProps {
@@ -236,6 +247,8 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block, textColor }) => {
     // Week 2 dashboard blocks — manage their own taps/dispatch
     'morning_briefing', 'focus_phrase', 'core_items_list',
     'check_in_card_compact', 'cycle_signal_bar', 'clear_window_banner',
+    // Week 3 runner blocks — all dispatch their own completion actions
+    'mantra_runner_display', 'sankalp_hold', 'practice_timer', 'completion_return',
   ]);
 
   if (interpolatedBlock.action && !selfActionBlocks.has(interpolatedBlock.type)) {

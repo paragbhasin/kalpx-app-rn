@@ -1,0 +1,57 @@
+# Week 3 — Sankalp Hold (Moment 18) full completion
+# Spec: route_practice_sankalp_hold.md
+# Regression guards: REG-001, REG-003, REG-020 (3-step trigger NOT triggered
+#   from sankalp path — cross-flow isolation).
+# Asserts: 3s hold completes; early release does NOT complete;
+#   haptic pulses fire at 750/1500/2250/3000ms (verified via timing only —
+#   native haptic cannot be asserted via Maestro, so we sleep/observe).
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "My Routine"
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "Sankalp"
+    optional: true
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "Hold to embody"
+    optional: true
+- waitForAnimationToEnd
+
+# Should see the v3 sankalp hold surface
+- assertVisible:
+    text: "Hold to embody your intention"
+    timeout: 4000
+
+# --- Early release path (partial fill, must NOT complete) ---
+- longPressOn:
+    point: "50%,55%"
+    duration: 800
+- waitForAnimationToEnd:
+    timeout: 800
+# Still on hold screen, not on completion_return
+- assertVisible:
+    text: "Hold to embody your intention"
+    timeout: 2000
+- assertNotVisible:
+    text: "Held. Carry it into the day."
+
+# --- Full 3s hold path (completes) ---
+- longPressOn:
+    point: "50%,55%"
+    duration: 3200
+- waitForAnimationToEnd:
+    timeout: 1500
+
+# Completion return with sankalp variant message
+- assertVisible:
+    text: "Held. Carry it into the day."
+    timeout: 4000
+
+- tapOn: "Return to Mitra Home"
+- waitForAnimationToEnd

@@ -410,6 +410,95 @@ export async function getClearWindow(): Promise<any> {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Week 5 — Reflection + Checkpoints (Mitra v3 Moments 23, 24, 25, 26, 34)
+// Web parity: kalpx-frontend/src/engine/actionExecutor.js track-event +
+//   voice notes + resilience-ledger patterns. Feature flags on the backend
+//   mean resilience-narrative + gratitude-ledger may return 404 until
+//   enabled — callers tolerate null gracefully.
+// ---------------------------------------------------------------------------
+
+/**
+ * GET mitra/resilience-narrative/ — Mitra's one-paragraph narrative for the
+ * embedded Moment 26 card. Returns null on 404 (feature-flag off) or error;
+ * the caller renders a local template fallback.
+ * Spec: embedded_resilience_narrative_card.md §2.
+ */
+export async function getResilienceNarrative(): Promise<any> {
+  try {
+    const res = await api.get('mitra/resilience-narrative/', { params: { tz: getTz() } });
+    return res.data;
+  } catch (err: any) {
+    // 404 is expected when the feature flag is off; log quietly.
+    const status = err?.response?.status;
+    if (status === 404) {
+      console.log('[MITRA] resilience-narrative: feature flag off (404)');
+    } else {
+      console.warn('[MITRA] resilience-narrative failed:', err.message);
+    }
+    return null;
+  }
+}
+
+/**
+ * POST mitra/gratitude-ledger/ — Record a gratitude / what-held / evening
+ * reflection entry. 404-tolerant: returns null without throwing so Mitra's
+ * ack beat still shows on flag-off environments.
+ * signal_type values used in Week 5:
+ *   - "evening_reflection" (Moment 34 submit)
+ *   - "what_held" (Moment 26 "What helped most?")
+ *   - "weekly_held" / "weekly_took" / "weekly_tending" (Moment 23 batch)
+ */
+export async function postGratitudeLedger(entry: {
+  signal_type: string;
+  text?: string;
+  meta?: Record<string, any>;
+}): Promise<any> {
+  try {
+    const res = await api.post('mitra/gratitude-ledger/', {
+      ...entry,
+      tz: getTz(),
+    });
+    return res.data;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (status === 404) {
+      console.log(`[MITRA] gratitude-ledger (${entry.signal_type}): feature flag off (404)`);
+    } else {
+      console.warn(`[MITRA] gratitude-ledger (${entry.signal_type}) failed:`, err.message);
+    }
+    return null;
+  }
+}
+
+/**
+ * GET mitra/journey/weekly-reflection/?cycle_day=7|14 — Fetch the weekly
+ * reflection letter sections for the given cycle day. Reuses existing
+ * journey/status when the dedicated endpoint is not available.
+ * Spec: route_reflection_weekly.md §6.
+ */
+export async function getWeeklyReflectionData(cycleDay?: number): Promise<any> {
+  try {
+    const res = await api.get('mitra/journey/weekly-reflection/', {
+      params: { cycle_day: cycleDay, tz: getTz() },
+    });
+    return res.data;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (status === 404) {
+      // Fallback: try journey/status so the block still has something to render
+      try {
+        const fallback = await api.get('mitra/journey/status/');
+        return fallback?.data || null;
+      } catch {
+        return null;
+      }
+    }
+    console.warn('[MITRA] weekly-reflection failed:', err.message);
+    return null;
+  }
+}
+
 /** POST mitra/journey/welcome-back/ — Submit welcome-back decision (continue | fresh). */
 export async function mitraJourneyWelcomeBack(decision: 'continue' | 'fresh'): Promise<any> {
   try {

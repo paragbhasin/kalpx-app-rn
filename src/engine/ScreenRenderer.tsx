@@ -25,6 +25,9 @@ import RoutineBuilderContainer from "../containers/RoutineBuilderContainer";
 import RoutineLockedContainer from "../containers/RoutineLockedContainer";
 import StableScanContainer from "../containers/StableScanContainer";
 import OnboardingContainer from "../containers/OnboardingContainer";
+// Week 5 — Reflection containers (Moments 23, 34)
+import ReflectionWeeklyContainer from "../containers/ReflectionWeeklyContainer";
+import ReflectionEveningContainer from "../containers/ReflectionEveningContainer";
 
 const containerMap: Record<string, React.ComponentType<any>> = {
   portal: PortalContainer,
@@ -45,6 +48,9 @@ const containerMap: Record<string, React.ComponentType<any>> = {
   portal_splash: PortalSplashContainer,
   routine_locked: RoutineLockedContainer,
   welcome_onboarding: OnboardingContainer,
+  // Week 5
+  reflection_weekly: ReflectionWeeklyContainer,
+  reflection_evening: ReflectionEveningContainer,
 };
 
 const ScreenRenderer: React.FC = () => {

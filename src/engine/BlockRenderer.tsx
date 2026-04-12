@@ -94,6 +94,13 @@ import SankalpHoldBlock from '../blocks/SankalpHoldBlock';
 import PracticeTimerBlock from '../blocks/PracticeTimerBlock';
 import CompletionReturnTransient from '../blocks/CompletionReturnTransient';
 
+// Week 5 — Reflection + Checkpoints (Mitra v3 Moments 23, 24, 25, 26, 34)
+import EveningReflectionBlock from '../blocks/EveningReflectionBlock';
+import WeeklyReflectionBlock from '../blocks/WeeklyReflectionBlock';
+import CheckpointDay7Block from '../blocks/CheckpointDay7Block';
+import CheckpointDay14Block from '../blocks/CheckpointDay14Block';
+import ResilienceNarrativeCard from '../blocks/ResilienceNarrativeCard';
+
 const blockMap: Record<string, React.ComponentType<any>> = {
   // Original 11 blocks
   headline: HeadlineBlock,
@@ -179,6 +186,12 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   sankalp_hold: SankalpHoldBlock,
   practice_timer: PracticeTimerBlock,
   completion_return: CompletionReturnTransient,
+  // Week 5 — Reflection + Checkpoints
+  evening_reflection: EveningReflectionBlock,
+  weekly_reflection: WeeklyReflectionBlock,
+  checkpoint_day_7: CheckpointDay7Block,
+  checkpoint_day_14: CheckpointDay14Block,
+  resilience_narrative_card: ResilienceNarrativeCard,
 };
 
 interface BlockRendererProps {
@@ -249,6 +262,9 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block, textColor }) => {
     'check_in_card_compact', 'cycle_signal_bar', 'clear_window_banner',
     // Week 3 runner blocks — all dispatch their own completion actions
     'mantra_runner_display', 'sankalp_hold', 'practice_timer', 'completion_return',
+    // Week 5 reflection + checkpoint blocks — self-dispatch submit actions
+    'evening_reflection', 'weekly_reflection', 'checkpoint_day_7',
+    'checkpoint_day_14', 'resilience_narrative_card',
   ]);
 
   if (interpolatedBlock.action && !selfActionBlocks.has(interpolatedBlock.type)) {

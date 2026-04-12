@@ -83,6 +83,35 @@ export type RunnerSource =
   | 'support_trigger'
   | 'support_checkin';
 
+// Week 5 — Reflection + Checkpoints (Mitra v3 Moments 23, 24, 25, 26, 34).
+// Spec: route_reflection_evening.md, route_reflection_weekly.md,
+// route_checkpoint_day_7.md, route_checkpoint_day_14.md,
+// embedded_resilience_narrative_card.md. All fields live inside screenData:
+// - evening_reflection_draft: { chip, text } — cleared on submit + unmount
+//   (REG-015).
+// - weekly_reflection_draft: { held, took, tending } — cleared on submit +
+//   unmount (REG-015).
+// - resilience_narrative: null | { headline, carried_summary,
+//   ongoing_thread_ack?, closing_beat } — populated by fetch_resilience_narrative,
+//   stays null if the API 404s (card renders local template fallback).
+// - resilience_narrative_acked: boolean — toggled by ack_resilience_narrative
+//   to collapse the card to its minimal marker.
+// - _evening_reflection_submitted / _weekly_reflection_submitted: internal
+//   transient flags set inside submit_* handlers so the block's unmount
+//   effect doesn't double-clear the draft after a successful submit.
+export type EveningReflectionDraft = { chip: string | null; text: string };
+export type WeeklyReflectionDraft = {
+  held: string;
+  took: string;
+  tending: string;
+};
+export type ResilienceNarrative = {
+  headline?: string;
+  carried_summary?: string;
+  ongoing_thread_ack?: string;
+  closing_beat?: string;
+} | null;
+
 export type OnboardingDraftState = {
   friction_id?: string;
   friction_freeform?: string;

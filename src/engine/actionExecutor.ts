@@ -32,6 +32,9 @@ import {
   postOnboardingTurn,
   patchCompanionState,
   getClearWindow,
+  // Week 5 — Reflection + Checkpoints
+  getResilienceNarrative,
+  postGratitudeLedger,
 } from "./mitraApi";
 
 // Week 1 — friction chip → focus mapping. Web parity: actionExecutor.js FRICTION_MAP.
@@ -3429,6 +3432,158 @@ export async function executeAction(
         } catch (err) {
           console.error("[onboarding_turn_response] failed:", err);
         }
+        break;
+      }
+
+      // ================================================================
+      // Week 5 — Reflection + Checkpoints (Mitra v3 Moments 23, 24, 25, 26, 34)
+      // Web parity: kalpx-frontend/src/engine/actionExecutor.js — gratitude
+      // ledger + track-event patterns. Spec: route_reflection_evening.md,
+      // route_reflection_weekly.md, embedded_resilience_narrative_card.md.
+      //
+      // Preserve contract: checkpoint_submit (case above, ~line 2509) and
+      // seal_day (case above, ~line 2075) are unchanged.
+      // ================================================================
+
+      case "submit_evening_reflection": {
+        // Spec: route_reflection_evening.md §3, §5 (Moment 34).
+        // Web parity: actionExecutor.js track-event "evening_reflection".
+        const p = payload || {};
+        const chip: string = p.chip || "steady";
+        const text: string = (p.text || "").trim();
+
+        // 404-tolerant POST to gratitude-ledger.
+        await postGratitudeLedger({
+          signal_type: "evening_reflection",
+          text,
+          meta: {
+            chip,
+            journey_id: screenState.journey_id,
+            day_number: screenState.day_number || 1,
+          },
+        });
+
+        // Parallel track-event for analytics (web parity).
+        mitraTrackEvent("evening_reflection", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { chip, text_length: text.length },
+        });
+
+        // Mark submitted so the block's unmount effect does not clear the
+        // draft before the ack renders. We still clear the draft immediately
+        // after — REG-015: no leak across flows.
+        setScreenValue(true, "_evening_reflection_submitted");
+        setScreenValue(null, "evening_reflection_draft");
+
+        // Ack beat pauses briefly (block renders ack), then dashboard.
+        setTimeout(() => {
+          loadScreen({
+            container_id: "companion_dashboard",
+            state_id: "day_active",
+          });
+          // Clear the submit marker after nav for a clean next session.
+          setScreenValue(false, "_evening_reflection_submitted");
+        }, 1800);
+        break;
+      }
+
+      case "submit_weekly_reflection": {
+        // Spec: route_reflection_weekly.md §3, §6 (Moment 23).
+        // Batches up to 3 gratitude-ledger POSTs — one per section.
+        const p = payload || {};
+        const sections = p.sections || {};
+        const entries = [
+          { key: "held", signal: "weekly_held" },
+          { key: "took", signal: "weekly_took" },
+          { key: "tending", signal: "weekly_tending" },
+        ];
+
+        await Promise.all(
+          entries
+            .filter((e) => (sections[e.key] || "").trim().length > 0)
+            .map((e) =>
+              postGratitudeLedger({
+                signal_type: e.signal,
+                text: sections[e.key].trim(),
+                meta: {
+                  journey_id: screenState.journey_id,
+                  cycle_day: screenState.cycle_day || screenState.day_number,
+                },
+              }),
+            ),
+        );
+
+        mitraTrackEvent("reflection_letter_completed", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            cycle_day: screenState.cycle_day || screenState.day_number,
+            sections_filled: entries.filter(
+              (e) => (sections[e.key] || "").trim().length > 0,
+            ).length,
+          },
+        });
+
+        setScreenValue(true, "_weekly_reflection_submitted");
+        setScreenValue(null, "weekly_reflection_draft");
+
+        setTimeout(() => {
+          loadScreen({
+            container_id: "companion_dashboard",
+            state_id: "day_active",
+          });
+          setScreenValue(false, "_weekly_reflection_submitted");
+        }, 1800);
+        break;
+      }
+
+      case "fetch_resilience_narrative": {
+        // Spec: embedded_resilience_narrative_card.md §2 (Moment 26).
+        // 404-tolerant: stores null so the card renders its template fallback.
+        try {
+          const data = await getResilienceNarrative();
+          setScreenValue(data || null, "resilience_narrative");
+        } catch (err) {
+          console.warn("[fetch_resilience_narrative] unexpected error", err);
+          setScreenValue(null, "resilience_narrative");
+        }
+        break;
+      }
+
+      case "ack_resilience_narrative": {
+        // Spec: embedded_resilience_narrative_card.md §1 (primary reply
+        // "Thanks for noticing" collapses card to marker).
+        setScreenValue(true, "resilience_narrative_acked");
+        mitraTrackEvent("resilience_narrative_acked", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
+        });
+        break;
+      }
+
+      case "submit_what_helped": {
+        // Spec: embedded_resilience_narrative_card.md §1 "What helped most?"
+        // reply — one-line reflection → gratitude-ledger with
+        // signal_type=what_held.
+        const text: string = ((payload && payload.text) || "").trim();
+        if (!text) break;
+        await postGratitudeLedger({
+          signal_type: "what_held",
+          text,
+          meta: {
+            journey_id: screenState.journey_id,
+            source_surface: "resilience_narrative_card",
+          },
+        });
+        mitraTrackEvent("what_helped_submitted", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { text_length: text.length },
+        });
+        // Mark card acked so it collapses nicely.
+        setScreenValue(true, "resilience_narrative_acked");
         break;
       }
 

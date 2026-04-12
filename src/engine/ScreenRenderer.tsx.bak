@@ -1,0 +1,141 @@
+import React, { useEffect } from "react";
+import { ActivityIndicator, SafeAreaView, StyleSheet, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { useSelector } from "react-redux";
+import EngineErrorBoundary from "./ErrorBoundary";
+import { useScreenStore } from "./useScreenBridge";
+import type { RootState } from "../store";
+
+// Import Containers
+import PracticeDetailOverlay from "../components/PracticeDetailOverlay";
+import AwarenessTriggerContainer from "../containers/AwarenessTriggerContainer";
+import ChoiceStackContainer from "../containers/ChoiceStackContainer";
+import CompanionDashboardContainer from "../containers/CompanionDashboardContainer";
+import ComposerContainer from "../containers/ComposerContainer";
+import CycleTransitionsContainer from "../containers/CycleTransitionsContainer";
+import EmbodimentChallengeRunnerContainer from "../containers/EmbodimentChallengeRunnerContainer";
+import GenericContainer from "../containers/GenericContainer";
+import InsightsProgressContainer from "../containers/InsightsProgressContainer";
+import InsightSummaryContainer from "../containers/InsightSummaryContainer";
+import LockRitualContainer from "../containers/LockRitualContainer";
+import PortalContainer from "../containers/PortalContainer";
+import PortalSplashContainer from "../containers/PortalSplashContainer";
+import PracticeRunnerContainer from "../containers/PracticeRunnerContainer";
+import RoutineBuilderContainer from "../containers/RoutineBuilderContainer";
+import RoutineLockedContainer from "../containers/RoutineLockedContainer";
+import StableScanContainer from "../containers/StableScanContainer";
+
+const containerMap: Record<string, React.ComponentType<any>> = {
+  portal: PortalContainer,
+  generic: GenericContainer,
+  choice_stack: ChoiceStackContainer,
+  stable_scan: StableScanContainer,
+  lock_ritual_overlay: LockRitualContainer,
+  lock_ritual: LockRitualContainer,
+  insight_summary: InsightSummaryContainer,
+  companion_dashboard: CompanionDashboardContainer,
+  practice_runner: PracticeRunnerContainer,
+  awareness_trigger: AwarenessTriggerContainer,
+  composer: ComposerContainer,
+  routine_builder: RoutineBuilderContainer,
+  embodiment_challenge_runner: EmbodimentChallengeRunnerContainer,
+  cycle_transitions: CycleTransitionsContainer,
+  insights_progress: InsightsProgressContainer,
+  portal_splash: PortalSplashContainer,
+  routine_locked: RoutineLockedContainer,
+};
+
+const ScreenRenderer: React.FC = () => {
+  const navigation = useNavigation<any>();
+  const currentScreen = useScreenStore((state) => state.currentScreen);
+  const currentContainerId = useScreenStore(
+    (state) => state.currentContainerId,
+  );
+  const { currentOverlayData, setOverlayData } = useScreenStore();
+
+  const user = useSelector(
+    (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
+  );
+  const isLoggedIn = !!(user?.id || user?.email || user?.token || user?.profile);
+
+  // Guard: only navigate back when:
+  //   1. currentScreen is null (nothing to render), AND
+  //   2. the user is logged OUT (genuine post-logout/RESET_APP blank).
+  // During normal screen-to-screen transitions currentScreen is briefly null
+  // while the schema is fetching — but the user is still logged in, so we
+  // must NOT call goBack() in that window (it would break forward navigation).
+  useEffect(() => {
+    if (!currentScreen && !isLoggedIn) {
+      const timer = setTimeout(() => {
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        }
+      }, 80);
+      return () => clearTimeout(timer);
+    }
+  }, [currentScreen, isLoggedIn, navigation]);
+
+  if (__DEV__) {
+    console.log(
+      `[ScreenRenderer] containerId=${currentContainerId} hasScreen=${!!currentScreen} blocks=${currentScreen?.blocks?.length || 0}`,
+    );
+  }
+
+  // Show a subtle loading state while the schema resolves (briefly null after
+  // every navigation since loadScreen/goBack now clear currentScreen immediately
+  // to prevent container/schema mismatches). Only logged-in users reach this
+  // path during normal nav; logged-out users are handled by the goBack guard above.
+  if (!currentScreen) {
+    if (isLoggedIn) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="small" color="#b8922a" />
+        </View>
+      );
+    }
+    return null;
+  }
+
+  // Use specific container or fallback to Generic
+  const Container =
+    containerMap[currentContainerId || "generic"] || GenericContainer;
+
+  // Overlays should cover the entire screen, including Safe Area
+  const Wrapper = currentScreen?.overlay ? View : SafeAreaView;
+
+  return (
+    <View style={styles.root}>
+      <EngineErrorBoundary>
+        <Wrapper style={styles.wrapper}>
+          <Container schema={currentScreen} />
+        </Wrapper>
+      </EngineErrorBoundary>
+
+      {currentOverlayData && (
+        <PracticeDetailOverlay
+          data={currentOverlayData}
+          onClose={() => setOverlayData(null)}
+        />
+      )}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "transparent",
+  },
+  root: {
+    flex: 1,
+    backgroundColor: "transparent",
+  },
+  wrapper: {
+    flex: 1,
+    backgroundColor: "transparent",
+  },
+});
+
+export default ScreenRenderer;

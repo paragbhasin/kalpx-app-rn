@@ -351,6 +351,178 @@ export async function mitraJourneyCompanion(): Promise<any> {
   }
 }
 
+/**
+ * Week 1 — Welcome Onboarding APIs (Mitra v3 Moments 1-7).
+ * Web counterpart: kalpx-frontend/src/engine/actionExecutor.js — mitra endpoints
+ * Spec: route_welcome_onboarding.md §6
+ */
+
+/** POST mitra/onboarding/turn/ — persist per-turn response (analytics + draft state). */
+export async function postOnboardingTurn(turnNumber: number, payload: any): Promise<any> {
+  try {
+    const res = await api.post('mitra/onboarding/turn/', {
+      turn_number: turnNumber,
+      ...payload,
+      tz: getTz(),
+    });
+    return res.data;
+  } catch (err: any) {
+    console.warn(`[MITRA] onboarding/turn ${turnNumber} failed:`, err.message);
+    return null;
+  }
+}
+
+/** POST mitra/journey/create/ — create a new journey at onboarding completion. */
+export async function postJourneyCreate(payload: any): Promise<any> {
+  try {
+    const res = await api.post('mitra/journey/create/', { ...payload, tz: getTz() });
+    return res.data;
+  } catch (err: any) {
+    console.error('[MITRA] journey/create failed:', err.message);
+    return null;
+  }
+}
+
+/** PATCH mitra/companion-state/ — write guidance_mode and other prefs. */
+export async function patchCompanionState(patch: Record<string, any>): Promise<any> {
+  try {
+    const res = await api.patch('mitra/companion-state/', patch);
+    return res.data;
+  } catch (err: any) {
+    console.warn('[MITRA] companion-state PATCH failed:', err.message);
+    return null;
+  }
+}
+
+/**
+ * Week 2 — Day Active Dashboard API.
+ * GET mitra/clear-window/ — Today's "clear window" payload for Moment 43.
+ * Returns { headline, message, ... } if today is an expansive / clear-window
+ * day, or null otherwise. Web parity: route_dashboard_day_active.md §15.
+ */
+export async function getClearWindow(): Promise<any> {
+  try {
+    const res = await api.get('mitra/clear-window/', { params: { tz: getTz() } });
+    return res.data;
+  } catch (err: any) {
+    console.warn('[MITRA] clear-window failed:', err.message);
+    return null;
+  }
+}
+
+/**
+ * Week 4 — Support Path APIs (Mitra v3 Moments 31, 38 + Phase 1.5 intent).
+ * All feature-flagged on backend; 404-tolerant, never throw to UI.
+ */
+
+export async function postVoiceNote(audioBlob: any, metadata: any): Promise<any> {
+  try {
+    const res = await api.post('mitra/voice/notes/', {
+      source_surface: metadata?.source_surface,
+      duration_ms: metadata?.duration_ms ?? 0,
+      has_audio: !!audioBlob,
+    });
+    return res.data;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (status === 404 || status === 503) {
+      console.warn('[MITRA] voice/notes endpoint unavailable (flag off)');
+      return null;
+    }
+    console.warn('[MITRA] postVoiceNote failed:', err?.message);
+    return null;
+  }
+}
+
+export async function getVoiceNoteInterpretation(id: string): Promise<any> {
+  if (!id) return null;
+  try {
+    const res = await api.get(`mitra/voice/notes/${id}/interpretation/`);
+    return res.data;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (status === 404 || status === 503) return null;
+    console.warn('[MITRA] getVoiceNoteInterpretation failed:', err?.message);
+    return null;
+  }
+}
+
+export async function postInterpretIntent(text: string): Promise<any> {
+  if (!text || !text.trim()) return null;
+  try {
+    const res = await api.post('mitra/interpret-intent/', { text });
+    return res.data;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (status === 404 || status === 503) return null;
+    console.warn('[MITRA] postInterpretIntent failed:', err?.message);
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Week 5 — Reflection + Checkpoints (Mitra v3 Moments 23, 24, 25, 26, 34)
+// All feature-flagged; callers tolerate null gracefully.
+// ---------------------------------------------------------------------------
+
+export async function getResilienceNarrative(): Promise<any> {
+  try {
+    const res = await api.get('mitra/resilience-narrative/', { params: { tz: getTz() } });
+    return res.data;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (status === 404) {
+      console.log('[MITRA] resilience-narrative: feature flag off (404)');
+    } else {
+      console.warn('[MITRA] resilience-narrative failed:', err.message);
+    }
+    return null;
+  }
+}
+
+export async function postGratitudeLedger(entry: {
+  signal_type: string;
+  text?: string;
+  meta?: Record<string, any>;
+}): Promise<any> {
+  try {
+    const res = await api.post('mitra/gratitude-ledger/', {
+      ...entry,
+      tz: getTz(),
+    });
+    return res.data;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (status === 404) {
+      console.log(`[MITRA] gratitude-ledger (${entry.signal_type}): feature flag off (404)`);
+    } else {
+      console.warn(`[MITRA] gratitude-ledger (${entry.signal_type}) failed:`, err.message);
+    }
+    return null;
+  }
+}
+
+export async function getWeeklyReflectionData(cycleDay?: number): Promise<any> {
+  try {
+    const res = await api.get('mitra/journey/weekly-reflection/', {
+      params: { cycle_day: cycleDay, tz: getTz() },
+    });
+    return res.data;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (status === 404) {
+      try {
+        const fallback = await api.get('mitra/journey/status/');
+        return fallback?.data || null;
+      } catch {
+        return null;
+      }
+    }
+    console.warn('[MITRA] weekly-reflection failed:', err.message);
+    return null;
+  }
+}
+
 /** POST mitra/journey/welcome-back/ — Submit welcome-back decision (continue | fresh). */
 export async function mitraJourneyWelcomeBack(decision: 'continue' | 'fresh'): Promise<any> {
   try {
@@ -362,3 +534,155 @@ export async function mitraJourneyWelcomeBack(decision: 'continue' | 'fresh'): P
     return null;
   }
 }
+
+
+// ---------------------------------------------------------------------------
+// Week 6 — Companion Intelligence APIs (Moments 27, 28, 29, 30, 39)
+// ---------------------------------------------------------------------------
+
+export async function getPrepContext(params: Record<string, any> = {}): Promise<any> {
+  try {
+    const res = await api.get('mitra/prep/', { params: { ...params, tz: getTz() } });
+    return res.data;
+  } catch (err: any) {
+    // Flag-off → 404 tolerated silently; card hides.
+    if (err?.response?.status !== 404) {
+      console.warn('[MITRA] prep/ failed:', err.message);
+    }
+    return null;
+  }
+}
+
+/** GET mitra/predictive-alerts/ — Moment 28 friction forecasts. */
+export async function getPredictiveAlerts(): Promise<any> {
+  try {
+    const res = await api.get('mitra/predictive-alerts/', { params: { tz: getTz() } });
+    return res.data;
+  } catch (err: any) {
+    if (err?.response?.status !== 404) {
+      console.warn('[MITRA] predictive-alerts/ failed:', err.message);
+    }
+    return null;
+  }
+}
+
+/** GET mitra/recommended-additional/ — Moment 30 post-core recommendation. */
+export async function getRecommendedAdditional(): Promise<any> {
+  try {
+    const res = await api.get('mitra/recommended-additional/', {
+      params: { tz: getTz() },
+    });
+    return res.data;
+  } catch (err: any) {
+    if (err?.response?.status !== 404) {
+      console.warn('[MITRA] recommended-additional/ failed:', err.message);
+    }
+    return null;
+  }
+}
+
+/** GET mitra/post-conflict-context/ — Moment 39 dissonance-thread context. */
+export async function getPostConflictContext(): Promise<any> {
+  try {
+    const res = await api.get('mitra/post-conflict-context/', {
+      params: { tz: getTz() },
+    });
+    return res.data;
+  } catch (err: any) {
+    if (err?.response?.status !== 404) {
+      console.warn('[MITRA] post-conflict-context/ failed:', err.message);
+    }
+    return null;
+  }
+}
+
+/** POST mitra/entities/check-duplicate/ — Moment 29 probe from freeform mention text. */
+export async function postEntitiesCheckDuplicate(text: string): Promise<any> {
+  try {
+    const res = await api.post('mitra/entities/check-duplicate/', { text });
+    return res.data;
+  } catch (err: any) {
+    if (err?.response?.status !== 404) {
+      console.warn('[MITRA] entities/check-duplicate failed:', err.message);
+    }
+    return null;
+  }
+}
+
+/** PATCH mitra/entities/<id>/ — Moment 29 confirm / dismiss / snooze / mute. */
+export async function patchEntity(
+  id: string | number,
+  payload: Record<string, any>,
+): Promise<any> {
+  try {
+    const res = await api.patch(`mitra/entities/${id}/`, payload);
+    return res.data;
+  } catch (err: any) {
+    if (err?.response?.status !== 404) {
+      console.warn(`[MITRA] entities/${id} PATCH failed:`, err.message);
+    }
+    return null;
+  }
+}
+
+
+// ---------------------------------------------------------------------------
+// Week 7 — Why-This + grief/loneliness/joy APIs (Moments 36, 37, 45, 46, 47)
+// ---------------------------------------------------------------------------
+
+export async function getPrinciple(id: string | number): Promise<any> {
+  if (!id) return null;
+  try {
+    const res = await api.get(`mitra/principles/${id}/`);
+    return res.data || null;
+  } catch (err: any) {
+    console.warn(`[MITRA] principles/${id} failed (tolerated):`, err.message);
+    return null;
+  }
+}
+
+/** GET mitra/principles/{id}/sources/ — Principle source for Why-This L3. */
+export async function getPrincipleSource(id: string | number): Promise<any> {
+  if (!id) return null;
+  try {
+    const res = await api.get(`mitra/principles/${id}/sources/`);
+    return res.data || null;
+  } catch (err: any) {
+    console.warn(`[MITRA] principles/${id}/sources failed (tolerated):`, err.message);
+    return null;
+  }
+}
+
+/** GET mitra/support/grief-context/ — Grief room contextual copy/prompt. */
+export async function getGriefContext(): Promise<any> {
+  try {
+    const res = await api.get('mitra/support/grief-context/');
+    return res.data || null;
+  } catch (err: any) {
+    console.warn('[MITRA] grief-context failed (tolerated):', err.message);
+    return null;
+  }
+}
+
+/** GET mitra/support/loneliness-context/ — Loneliness room context + chant. */
+export async function getLonelinessContext(): Promise<any> {
+  try {
+    const res = await api.get('mitra/support/loneliness-context/');
+    return res.data || null;
+  } catch (err: any) {
+    console.warn('[MITRA] loneliness-context failed (tolerated):', err.message);
+    return null;
+  }
+}
+
+/** GET mitra/joy-signal/ — Today's joy signal (Moment 45). null when no signal. */
+export async function getJoySignal(): Promise<any> {
+  try {
+    const res = await api.get('mitra/joy-signal/');
+    return res.data || null;
+  } catch (err: any) {
+    console.warn('[MITRA] joy-signal failed (tolerated):', err.message);
+    return null;
+  }
+}
+

@@ -1,0 +1,31 @@
+# Week 6 — Companion Intelligence flag-off tolerance
+# Validates: with all 5 endpoints returning 404 (flags off on dev),
+# the dashboard still renders cleanly. All 5 cards hide gracefully —
+# none appear as empty skeletons, none crash the app.
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "My Routine"
+    optional: true
+- waitForAnimationToEnd
+
+# Core triad must still be present.
+- assertVisible:
+    text: "Mantra"
+- assertVisible:
+    text: "Sankalp"
+
+# None of the Week 6 cards should show when their data is null.
+- assertNotVisible:
+    text: "Want to prepare?"
+- assertNotVisible:
+    text: "One small thing"
+- assertNotVisible:
+    text: "Yesterday was heavy"
+- assertNotVisible:
+    text: "Have I got this right?"
+- assertNotVisible:
+    text: "STEADY BEFORE"

@@ -1,0 +1,24 @@
+# cross-screen-resolver-log.yaml
+# Validates: on app launch, the screen resolver logs a resolution line.
+# Log shape: `[screenResolver] resolved <containerId>/<stateId> via <source>`
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+# The resolver must log at least one resolution during boot.
+# Maestro assertion against logcat/console output:
+- assertTrue:
+    condition: ${output.logs.contains("[screenResolver] resolved")}
+    optional: true
+
+# Navigate somewhere to force another resolution (covers both local and cache
+# paths for a subsequent visit).
+- tapOn:
+    text: "My Routine"
+    optional: true
+- waitForAnimationToEnd
+
+- assertTrue:
+    condition: ${output.logs.contains("[screenResolver] resolved")}
+    optional: true

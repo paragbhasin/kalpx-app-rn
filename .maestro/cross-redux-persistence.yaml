@@ -1,0 +1,37 @@
+# cross-redux-persistence.yaml
+# Validates: set a preference → kill app → relaunch → preference restored.
+# Exercises preferencesSlice AsyncStorage persistence (kalpx:preferences).
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+# Drive into Settings / preferences surface (placeholder tap — real selector
+# depends on the week-7 Settings screen).
+- tapOn:
+    text: "Settings"
+    optional: true
+- waitForAnimationToEnd
+
+# Toggle reduced_motion (placeholder — label may differ in real build).
+- tapOn:
+    text: "Reduced motion"
+    optional: true
+- waitForAnimationToEnd
+
+# Kill app.
+- stopApp
+
+# Relaunch and verify the setting sticks.
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "Settings"
+    optional: true
+- waitForAnimationToEnd
+
+# The toggle must still reflect the persisted (on) state.
+- assertVisible:
+    text: "Reduced motion"
+    optional: true

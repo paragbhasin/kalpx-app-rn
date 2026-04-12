@@ -29,7 +29,37 @@ import {
   mitraTrackCompletion,
   mitraTrackEvent,
   mitraTriggerMantras,
+  postOnboardingTurn,
+  patchCompanionState,
+  getClearWindow,
+  postVoiceNote,
+  getVoiceNoteInterpretation,
+  postInterpretIntent,
+  // Week 5 — Reflection + Checkpoints
+  getResilienceNarrative,
+  postGratitudeLedger,
 } from "./mitraApi";
+
+// Week 1 — friction chip → focus mapping. Web parity: actionExecutor.js FRICTION_MAP.
+// Spec: route_welcome_onboarding.md §1 Turn 2-3, §6.
+const FRICTION_TO_FOCUS: Record<string, { focus: string; label: string }> = {
+  work_clarity: { focus: "clarity", label: "work clarity" },
+  relationship: { focus: "connection", label: "relationship attention" },
+  mind_quiet: { focus: "stillness", label: "busy mind" },
+  uncertain: { focus: "grounding", label: "uncertainty" },
+  low_energy: { focus: "vitality", label: "low energy" },
+  searching_identity: { focus: "self_knowledge", label: "self-inquiry" },
+  spiritual: { focus: "devotion", label: "spiritual longing" },
+};
+
+const STATE_LABEL_MAP: Record<string, string> = {
+  activated: "Activated.",
+  drained: "Drained.",
+  foggy: "Foggy.",
+  heavy: "Heavy.",
+  restless: "Restless.",
+  clear_but_full: "Clear but full.",
+};
 
 // ---------------------------------------------------------------------------
 // Audio Rotation
@@ -1538,6 +1568,66 @@ export async function executeAction(
         // CTA
         if (data.cta) setScreenValue(data.cta, "contextual_cta");
 
+        // ----------------------------------------------------------------
+        // Week 2 — Day Active Dashboard enrichment (Moments 8-15, 40, 41, 43).
+        // Spec: route_dashboard_day_active.md §2, §6. Populate briefing,
+        // focus phrase, cycle_day, checkpoint_due, clear_window from the
+        // generate-companion envelope (+ side-call to /clear-window/).
+        // ----------------------------------------------------------------
+        const briefing = data.briefing || data.morningBriefing || null;
+        if (briefing) {
+          setScreenValue(true, "briefing_available");
+          setScreenValue(briefing.audio_url || briefing.audioUrl || "", "briefing_audio_url");
+          setScreenValue(
+            briefing.summary || briefing.opening_line || briefing.script?.slice(0, 140) || "",
+            "briefing_summary",
+          );
+          setScreenValue(briefing.script || briefing.transcript || "", "briefing_transcript");
+          setScreenValue(briefing.voice_preset || "anchor", "briefing_voice_preset");
+        } else {
+          setScreenValue(false, "briefing_available");
+        }
+
+        // Focus phrase — Phase 1.5 expansive phrase; fall back to dayType sub-header.
+        const focusPhrase =
+          data.focus_phrase || data.focusPhrase || data.dayTypeCopy?.subHeader || "";
+        if (focusPhrase) setScreenValue(focusPhrase, "focus_phrase");
+
+        // cycle_day — distinct screenData copy so the signal bar can read it
+        // without stomping on day_number (which checkpoint logic also owns).
+        if (data.journey?.dayNumber) {
+          setScreenValue(data.journey.dayNumber, "cycle_day");
+        }
+
+        // Checkpoint-due enum (for variant selection)
+        const dn = data.journey?.dayNumber;
+        if (dn === 7) setScreenValue("day_7", "checkpoint_due");
+        else if (dn === 14) setScreenValue("day_14", "checkpoint_due");
+        else setScreenValue(null, "checkpoint_due");
+
+        // Dashboard variant resolver — minimal shape; refined by server later.
+        let variant: string = "standard";
+        if (dn === 1) variant = "first_day";
+        if (dn === 7) variant = "checkpoint_pending_day_7";
+        if (dn === 14) variant = "checkpoint_pending_day_14";
+        if (data.postConflict || data.dayType === "post_conflict_morning") {
+          variant = "post_conflict_morning";
+        }
+
+        // Clear-window (Moment 43) — separate endpoint; fire-and-forget.
+        try {
+          const cw = await getClearWindow();
+          if (cw && (cw.headline || cw.message)) {
+            setScreenValue(cw, "clear_window");
+            variant = "clear_window_active";
+          } else {
+            setScreenValue(null, "clear_window");
+          }
+        } catch (_e) {
+          setScreenValue(null, "clear_window");
+        }
+        setScreenValue(variant, "dashboard_variant");
+
         // Navigate to the post-lock summary reveal (unless skipReveal)
         if (!payload?.skipReveal) {
           loadScreen({
@@ -2981,22 +3071,1221 @@ export async function executeAction(
 
       // ================================================================
       // TRACK_COMPLETION — fire a Mitra completion event
+      //
+      // Week 3 extension (Mitra v3 Moments 17-19): when invoked from a v3
+      // runner, the canonical source / itemType / itemId / duration / variant
+      // are already in screenState. Callers may pass them in payload OR rely
+      // on screenState.runner_* fields. On success, flow-local runner_* state
+      // is cleared (REG-003 cross-flow isolation).
       // ================================================================
       case "track_completion": {
-        if (!payload) break;
-        const {
-          itemType: tcItemType,
-          itemId: tcItemId,
-          source: tcSource,
-          meta: tcMeta,
-        } = payload;
-        await mitraTrackCompletion({
-          itemType: tcItemType,
-          itemId: tcItemId,
-          source: tcSource,
+        const p = payload || {};
+        const activeItem = screenState.runner_active_item || {};
+        const resolvedItemType =
+          p.itemType || activeItem.item_type || screenState.runner_variant;
+        const resolvedItemId =
+          p.itemId || activeItem.item_id || activeItem.id;
+        const resolvedSource = p.source || screenState.runner_source;
+        const resolvedDuration =
+          p.duration_sec ?? screenState.runner_duration_actual_sec;
+        const resolvedVariant = p.variant || screenState.runner_variant;
+        const resolvedMeta = {
+          ...(p.meta || {}),
+          ...(resolvedDuration != null ? { actual_seconds: resolvedDuration } : {}),
+          ...(resolvedVariant ? { variant: resolvedVariant } : {}),
+          ...(screenState.runner_reps_completed != null
+            ? { reps_completed: screenState.runner_reps_completed }
+            : {}),
+        };
+
+        if (resolvedItemType && resolvedItemId) {
+          await mitraTrackCompletion({
+            itemType: resolvedItemType,
+            itemId: resolvedItemId,
+            source: resolvedSource,
+            journeyId: screenState.journey_id,
+            dayNumber: screenState.day_number || 1,
+            meta: resolvedMeta,
+          });
+        } else {
+          console.warn(
+            "[track_completion] missing itemType or itemId — skipped",
+            { resolvedItemType, resolvedItemId, resolvedSource },
+          );
+        }
+
+        // REG-003: clear runner-local state so it cannot leak into the next
+        // flow (core vs. additional vs. trigger). These fields are owned by
+        // the runner flow and have no meaning outside it.
+        setScreenValue(null, "runner_active_item");
+        setScreenValue(null, "runner_source");
+        setScreenValue(null, "runner_start_time");
+        setScreenValue(null, "runner_variant");
+        setScreenValue(null, "runner_reps_completed");
+        setScreenValue(null, "runner_step_index");
+        setScreenValue(null, "runner_duration_actual_sec");
+        break;
+      }
+
+      // ================================================================
+      // START_RUNNER — initialize runner_* flow-local state from the entry
+      // action, validating that a source is set (REG-015 guard against
+      // cross-flow contamination).
+      //
+      // Called from info reveal / dashboard triad / trigger suggestion with:
+      //   payload: { variant, item: {item_type,item_id,title}, source,
+      //              target_reps?, duration_sec?, steps? }
+      // Navigates to the provided target or inferred runner state.
+      // ================================================================
+      case "start_runner": {
+        const sp = payload || {};
+        if (!sp.source) {
+          console.warn(
+            "[start_runner] missing source — refusing to start to prevent " +
+              "cross-flow contamination (REG-015).",
+          );
+          break;
+        }
+        if (!sp.variant) {
+          console.warn("[start_runner] missing variant");
+          break;
+        }
+        setScreenValue(sp.variant, "runner_variant");
+        setScreenValue(sp.source, "runner_source");
+        setScreenValue(sp.item || null, "runner_active_item");
+        setScreenValue(Date.now(), "runner_start_time");
+        setScreenValue(0, "runner_reps_completed");
+        setScreenValue(0, "runner_step_index");
+        setScreenValue(0, "runner_duration_actual_sec");
+        if (sp.target_reps) setScreenValue(sp.target_reps, "reps_total");
+        if (sp.duration_sec) {
+          setScreenValue(sp.duration_sec, "practice_duration_seconds");
+        }
+        if (sp.steps) setScreenValue(sp.steps, "practice_steps");
+
+        // Nav
+        if (target) {
+          loadScreen(target);
+        } else {
+          const stateMap: Record<string, string> = {
+            mantra: "mantra_runner",
+            sankalp: "sankalp_embody",
+            practice: "practice_step_runner",
+          };
+          const stateId = stateMap[sp.variant];
+          if (stateId) {
+            loadScreen({ container_id: "practice_runner", state_id: stateId });
+          }
+        }
+        break;
+      }
+
+      // ================================================================
+      // COMPLETE_RUNNER — natural completion of a v3 runner (mantra 108th
+      // tap, sankalp 3s hold, practice timer expiry). Fires track_completion
+      // with source derived from runner_source (never inferred), then lands
+      // on the completion_return transient.
+      // ================================================================
+      case "complete_runner": {
+        const activeItem = screenState.runner_active_item || {};
+        const variant = screenState.runner_variant;
+        const source = screenState.runner_source;
+        const durationSec =
+          screenState.runner_duration_actual_sec ??
+          (screenState.runner_start_time
+            ? Math.round((Date.now() - screenState.runner_start_time) / 1000)
+            : 0);
+
+        if (activeItem.item_type && activeItem.item_id && source) {
+          await mitraTrackCompletion({
+            itemType: activeItem.item_type,
+            itemId: activeItem.item_id,
+            source,
+            journeyId: screenState.journey_id,
+            dayNumber: screenState.day_number || 1,
+            meta: {
+              variant,
+              actual_seconds: durationSec,
+              ...(screenState.runner_reps_completed != null
+                ? { reps_completed: screenState.runner_reps_completed }
+                : {}),
+            },
+          });
+        } else {
+          console.warn(
+            "[complete_runner] missing item/source — track_completion skipped",
+            { activeItem, source },
+          );
+        }
+
+        loadScreen({
+          container_id: "practice_runner",
+          state_id: "completion_return",
+        });
+        break;
+      }
+
+      // ================================================================
+      // ACKNOWLEDGE_CHECK_IN — Week 2 Dashboard inline check-in.
+      // Spec: route_dashboard_day_active.md §1 (CheckInCardCompact), §6.
+      // Web parity: kalpx-frontend/src/mock/mock/allContainers.js cycle_transitions/quick_checkin
+      // REG-015: dashboard check-in must NOT share runner state with core
+      // mantra flow — we only set a dashboard-local dismiss flag and
+      // side-call prana-acknowledge.
+      // ================================================================
+      case "acknowledge_check_in": {
+        const pranaState = (payload && payload.prana_state) || "steady";
+        try {
+          const ack = await mitraPranaAcknowledge({
+            pranaType: pranaState,
+            focus: screenState.scan_focus || screenState.suggested_focus || "peacecalm",
+            locale: "en",
+            journeyId: screenState.journey_id,
+            dayNumber: screenState.day_number || 1,
+          });
+          if (ack?.insight) setScreenValue(ack.insight, "prana_ack_insight");
+        } catch (err) {
+          console.warn("[acknowledge_check_in] prana-acknowledge failed", err);
+        }
+        // Dashboard-local dismiss flag — does NOT touch runner_active_item,
+        // practice_chant, or any core-flow state (REG-015).
+        setScreenValue(true, "check_in_dismissed");
+        mitraTrackEvent("dashboard_check_in_ack", {
           journeyId: screenState.journey_id,
           dayNumber: screenState.day_number || 1,
-          meta: tcMeta,
+          meta: { prana_state: pranaState },
+        });
+        break;
+      }
+
+      // ================================================================
+      // DISMISS_CLEAR_WINDOW — Week 2 Moment 43 banner dismissal.
+      // Spec: route_dashboard_day_active.md §1 variant 43, §7 dismissibility.
+      // Clears only clear_window screenData field; doesn't affect triad.
+      // ================================================================
+      case "dismiss_clear_window": {
+        setScreenValue(null, "clear_window");
+        setScreenValue("standard", "dashboard_variant");
+        mitraTrackEvent("dashboard_clear_window_dismissed", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
+        });
+        break;
+      }
+
+      // ================================================================
+      // REPEAT_RUNNER — Week 3. User tapped "Repeat" on completion_return.
+      // Resets reps/step/duration and re-enters the same variant's runner
+      // state with the same item_id/source preserved.
+      // ================================================================
+      case "repeat_runner": {
+        setScreenValue(0, "runner_reps_completed");
+        setScreenValue(0, "runner_step_index");
+        setScreenValue(0, "runner_duration_actual_sec");
+        setScreenValue(Date.now(), "runner_start_time");
+
+        const variant = screenState.runner_variant;
+        const stateMap: Record<string, string> = {
+          mantra: "mantra_runner",
+          sankalp: "sankalp_embody",
+          practice: "practice_step_runner",
+        };
+        const stateId = variant ? stateMap[variant] : undefined;
+        if (stateId) {
+          loadScreen({
+            container_id: "practice_runner",
+            state_id: stateId,
+          });
+        } else {
+          loadScreen({
+            container_id: "companion_dashboard",
+            state_id: "day_active",
+          });
+        }
+        break;
+      }
+
+      // ================================================================
+      // ONBOARDING_TURN_RESPONSE — Week 1 Welcome Onboarding (Moments 1-7)
+      // Web counterpart: no direct web equivalent (Mitra v3 is RN-first).
+      // Spec: route_welcome_onboarding.md §6.
+      // Branches on current screenData.onboarding_turn (1-7). Validates payload,
+      // calls per-turn API (help-me-choose for free-form friction, PATCH
+      // companion-state + generate-companion at turn 5, track-event at turn 7),
+      // advances screenData.onboarding_turn, and loads next turn state.
+      // ================================================================
+      case "onboarding_turn_response": {
+        const currentTurn = Number(screenState.onboarding_turn || 1);
+        const draft = { ...(screenState.onboarding_draft_state || {}) };
+        const p = payload || {};
+
+        // fire-and-forget analytics
+        postOnboardingTurn(currentTurn, {
+          response_type: p.response_type,
+          chip_id: p.chip_id,
+          freeform_length: (p.freeform_text || "").length,
+        });
+
+        let nextTurn = currentTurn + 1;
+
+        try {
+          if (currentTurn === 1) {
+            if (p.chip_id === "returning") {
+              // Journey status check handled outside — for now advance to Turn 2.
+              draft.returning = true;
+            }
+            if (p.freeform_text) draft.intro_freeform = p.freeform_text;
+          } else if (currentTurn === 2) {
+            if (p.chip_id) {
+              draft.friction_id = p.chip_id;
+              const m = FRICTION_TO_FOCUS[p.chip_id];
+              if (m) draft.suggested_focus = m.focus;
+            } else if (p.freeform_text) {
+              draft.friction_freeform = p.freeform_text;
+              const r = await mitraHelpMeChoose({ freeformInput: p.freeform_text });
+              if (r) {
+                draft.suggested_focus = r.suggestedFocus || r.suggested_focus;
+                draft.friction_analysis = r.analysisText || r.analysis_text;
+              }
+            }
+          } else if (currentTurn === 3) {
+            if (p.chip_id) draft.state_id = p.chip_id;
+            if (p.freeform_text) draft.state_freeform = p.freeform_text;
+            // Stash label for Turn 4 acknowledgment
+            setScreenValue(
+              STATE_LABEL_MAP[p.chip_id] || "I hear you.",
+              "onboarding_state_ack",
+            );
+          } else if (currentTurn === 4) {
+            draft.voice_choice = p.choice;
+            if (p.choice === "voice" && !screenState.voice_consent_given) {
+              // Consent overlay flow — navigate to consent, then consent screen
+              // advances turn back to 5. For Week 1 we mark the gate here.
+              setScreenValue(false, "voice_consent_given");
+            }
+          } else if (currentTurn === 5) {
+            draft.mode = p.guidance_mode;
+            setScreenValue(p.guidance_mode, "guidance_mode");
+
+            await patchCompanionState({
+              preferred_guidance_mode: p.guidance_mode,
+            });
+
+            const companion = await mitraGenerateCompanion({
+              focus: draft.suggested_focus || "clarity",
+              sub_focus: draft.state_id,
+              depth: "standard",
+              baseline_metrics: {},
+              intention: draft.friction_freeform,
+              day_number: 1,
+              guidance_mode: p.guidance_mode,
+            });
+
+            if (companion?.companion) {
+              const c = companion.companion;
+              const fMap = FRICTION_TO_FOCUS[draft.friction_id || ""];
+              setScreenValue(fMap?.label || "what's alive for you", "friction_label");
+              setScreenValue(
+                (STATE_LABEL_MAP[draft.state_id || ""] || "").replace(".", "") ||
+                  "the texture of it",
+                "state_label",
+              );
+              setScreenValue(
+                c.recommended_posture || "protecting your space and doing less, better",
+                "recommended_posture",
+              );
+              setScreenValue(c.mantra?.core?.title || c.mantra?.title || "", "companion_mantra_title");
+              setScreenValue(
+                c.mantra?.ui?.card_subtitle || c.mantra?.one_line || "",
+                "companion_mantra_one_line",
+              );
+              setScreenValue(c.mantra?.core?.id || c.mantra?.id || null, "companion_mantra_id");
+              setScreenValue(c.sankalp?.core?.line || c.sankalp?.line || "", "companion_sankalp_line");
+              setScreenValue(c.sankalp?.one_line || "", "companion_sankalp_one_line");
+              setScreenValue(c.sankalp?.core?.id || c.sankalp?.id || null, "companion_sankalp_id");
+              setScreenValue(c.practice?.core?.title || c.practice?.title || "", "companion_practice_title");
+              setScreenValue(c.practice?.one_line || "", "companion_practice_one_line");
+              setScreenValue(c.practice?.core?.id || c.practice?.id || null, "companion_practice_id");
+            }
+          } else if (currentTurn === 6) {
+            if (p.chip_id === "play_briefing") {
+              draft.briefing_requested = true;
+            }
+          } else if (currentTurn === 7) {
+            // Completion
+            await mitraTrackEvent("onboarding_completed", {
+              meta: {
+                friction: draft.friction_id,
+                state: draft.state_id,
+                mode: draft.mode,
+                free_form_count:
+                  (draft.friction_freeform ? 1 : 0) + (draft.state_freeform ? 1 : 0),
+              },
+            });
+            setScreenValue(null, "onboarding_draft_state");
+            setScreenValue(null, "onboarding_turn");
+            loadScreen("companion_dashboard", "day_active");
+            break;
+          }
+
+          setScreenValue(draft, "onboarding_draft_state");
+          setScreenValue(nextTurn, "onboarding_turn");
+          loadScreen("welcome_onboarding", `turn_${nextTurn}`);
+        } catch (err) {
+          console.error("[onboarding_turn_response] failed:", err);
+        }
+        break;
+      }
+
+      // ================================================================
+      // CROSS-CUTTING HANDLERS (mitra-v3-cross)
+      // ================================================================
+
+      // mute_entity — companion intelligence: mark an entity (person/topic)
+      // as muted. PATCH /api/mitra/entities/<id>/ with status=muted.
+      case "mute_entity": {
+        try {
+          const entityId = payload?.entity_id || target;
+          if (!entityId) {
+            console.warn("[mute_entity] no entity_id provided");
+            break;
+          }
+          await api.patch(`/api/mitra/entities/${entityId}/`, {
+            status: "muted",
+          });
+          setScreenValue(true, `_entity_muted_${entityId}`);
+        } catch (err) {
+          console.error("[mute_entity] failed:", err);
+        }
+        break;
+      }
+
+      // log_gratitude — generic gratitude-ledger POST. signal_type comes from
+      // payload, allowing multiple call sites (evening reflection, joy moment,
+      // welcome expansion) to share one handler.
+      case "log_gratitude": {
+        try {
+          const body = {
+            signal_type: payload?.signal_type || "gratitude",
+            note: payload?.note || "",
+            context: payload?.context || null,
+            intensity: payload?.intensity ?? null,
+            logged_at: new Date().toISOString(),
+          };
+          await api.post("/api/mitra/gratitude-ledger/", body);
+        } catch (err) {
+          console.error("[log_gratitude] failed:", err);
+        }
+        break;
+      }
+
+      // acknowledge_season — sets season_banner_dismissed_at and (if endpoint
+      // present) PATCHes user-preferences so dismissal persists server-side.
+      case "acknowledge_season": {
+        try {
+          const now = Date.now();
+          setScreenValue(now, "season_banner_dismissed_at");
+          try {
+            await api.patch("/api/mitra/user-preferences/", {
+              season_banner_dismissed_at: new Date(now).toISOString(),
+            });
+          } catch (apiErr: any) {
+            if (apiErr?.response?.status !== 404) {
+              console.warn("[acknowledge_season] PATCH failed:", apiErr?.message);
+            }
+          }
+        } catch (err) {
+          console.error("[acknowledge_season] failed:", err);
+        }
+        break;
+      }
+
+      // ================================================================
+      // WEEK 4 — SUPPORT PATH (Mitra v3 Moments 20, 21, 22, 31, 38, 42)
+      // Web parity: AwarenessTriggerContainer.vue + VoiceRecorderBlock.vue
+      // Specs: route_support_trigger.md, route_support_checkin_regulation.md,
+      //        overlay_voice_note.md, overlay_voice_consent.md,
+      //        transient_sound_bridge.md, overlay_checkin_balanced_ack.md.
+      // ================================================================
+
+      // INITIATE_TRIGGER_SUPPORT (Moment 20) — entry from TriggerEntryBlock
+      // REG-002: clear any prior trigger_mantra_text (no contamination)
+      // REG-015: must NOT touch runner_active_item / companion_mantra_id
+      // REG-020: active path is sound_bridge → mantra_runner → dashboard
+      case "initiate_trigger_support": {
+        // REG-002 guard — wipe trigger-owned mantra text so a stale value
+        // from a prior round cannot surface in the new round.
+        setScreenValue(null, "trigger_mantra_text");
+        setScreenValue(null, "trigger_mantra_devanagari");
+
+        // REG-015 multi-round counter
+        const prevRound = Number(screenState.trigger_round || 0);
+        setScreenValue(prevRound + 1, "trigger_round");
+
+        // Seed OM audio for the sound bridge step
+        const omUrl = _rotateAudio(OM_AUDIO_LIBRARY, "_kalpx_om_audio_idx");
+        setScreenValue(omUrl, "om_audio_url");
+        const omText = _omTextForTrack(omUrl);
+        setScreenValue(omText.label, "trigger_mantra_text");
+        setScreenValue(omText.devanagari, "trigger_mantra_devanagari");
+
+        mitraTrackEvent("trigger_session_started", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            source_surface: "dashboard",
+            round: prevRound + 1,
+          },
+        });
+
+        if (context.startFlowInstance) context.startFlowInstance("support_trigger");
+
+        loadScreen({ container_id: "support_trigger", state_id: "sound_bridge" });
+        break;
+      }
+
+      // ADVANCE_SOUND_BRIDGE (Moment 42) — auto or manual advance
+      // Seeds runner_source="support_trigger" then enters mantra runner.
+      // No recheck (REG-020).
+      case "advance_sound_bridge": {
+        const exitType = (payload && payload.exit_type) || "auto";
+        mitraTrackEvent("sound_bridge_exited", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { exit_type: exitType, parent: "trigger" },
+        });
+
+        // Seed runner-local state for the support mantra runner.
+        setScreenValue("mantra", "runner_variant");
+        setScreenValue("support_trigger", "runner_source");
+        setScreenValue(
+          {
+            item_type: "mantra",
+            item_id: screenState.support_mantra_id || "om_support",
+            title: screenState.trigger_mantra_text || "OM",
+          },
+          "runner_active_item",
+        );
+        setScreenValue(Date.now(), "runner_start_time");
+        setScreenValue(0, "runner_reps_completed");
+        setScreenValue(0, "runner_duration_actual_sec");
+
+        loadScreen({
+          container_id: "practice_runner",
+          state_id: "mantra_runner",
+        });
+        break;
+      }
+
+      // ADVANCE_CHECKIN_STEP (Moment 21) — notice → name → settle
+      // REG-015: only touches checkin_* fields.
+      case "advance_checkin_step": {
+        const from = payload?.from || "notice";
+        const value = payload?.value;
+        const draft = { ...(screenState.checkin_draft || {}) };
+        if (from === "notice") draft.noticed = value;
+        else if (from === "name") draft.named = value;
+        setScreenValue(draft, "checkin_draft");
+        const next: Record<string, string> = {
+          notice: "name",
+          name: "settle",
+        };
+        const nextStep = next[from];
+        if (nextStep) {
+          setScreenValue(nextStep, "checkin_step");
+          loadScreen({ container_id: "support_checkin", state_id: nextStep });
+        }
+        break;
+      }
+
+      // SUBMIT_CHECKIN — finalize regulation, show BalancedAckOverlay.
+      case "submit_checkin": {
+        const draft = { ...(screenState.checkin_draft || {}) };
+        if (payload?.final) draft.settled = payload.final;
+        setScreenValue(draft, "checkin_draft");
+
+        mitraTrackEvent("checkin_regulation_completed", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            noticed: draft.noticed,
+            named: draft.named,
+            settled: draft.settled,
+          },
+        });
+
+        // Phase 1.5 — best-effort intent interpretation on freeform settle
+        if (typeof draft.named === "string" && draft.named.length > 2) {
+          postInterpretIntent(draft.named).catch(() => {});
+        }
+
+        setScreenValue("balanced", "checkin_ack_variant");
+        loadScreen({
+          container_id: "support_checkin",
+          state_id: "balanced_ack",
+        });
+        break;
+      }
+
+      // START_VOICE_NOTE — opens VoiceNoteSheet, gates on consent first use.
+      case "start_voice_note": {
+        const sourceSurface = payload?.source_surface || "dashboard";
+        setScreenValue(sourceSurface, "voice_note_source_surface");
+
+        if (
+          screenState.voice_consent_given === null ||
+          screenState.voice_consent_given === undefined
+        ) {
+          loadScreen({ container_id: "overlay", state_id: "voice_consent" });
+        } else if (screenState.voice_consent_given === false) {
+          // User previously declined — re-prompt once per voice trigger
+          loadScreen({ container_id: "overlay", state_id: "voice_consent" });
+        } else {
+          setScreenValue(true, "voice_note_active");
+          loadScreen({ container_id: "overlay", state_id: "voice_note" });
+        }
+        break;
+      }
+
+      // SUBMIT_VOICE_NOTE — POST, stores id, polls interpretation.
+      case "submit_voice_note": {
+        try {
+          const res = await postVoiceNote(payload?.audio || null, {
+            source_surface:
+              payload?.source_surface ||
+              screenState.voice_note_source_surface ||
+              "dashboard",
+            duration_ms: payload?.duration_ms || 0,
+          });
+          if (res && res.id) {
+            setScreenValue(res.id, "voice_note_id");
+            // fire-and-forget poll
+            (async () => {
+              for (let i = 0; i < 5; i++) {
+                await new Promise((r) => setTimeout(r, 1500));
+                const interp = await getVoiceNoteInterpretation(res.id);
+                if (interp) {
+                  setScreenValue(interp, "voice_note_interpretation");
+                  return;
+                }
+              }
+            })();
+          }
+        } catch (err) {
+          console.warn("[submit_voice_note] failed", err);
+        }
+        break;
+      }
+
+      // ================================================================
+      // WEEK 5 — REFLECTION + CHECKPOINTS (Mitra v3 Moments 23, 24, 25, 26, 34)
+      // Web parity: kalpx-frontend/src/engine/actionExecutor.js — gratitude
+      // ledger + track-event patterns. Spec: route_reflection_evening.md,
+      // route_reflection_weekly.md, embedded_resilience_narrative_card.md.
+      //
+      // Preserve contract: checkpoint_submit (case above, ~line 2509) and
+      // seal_day (case above, ~line 2075) are unchanged.
+      // ================================================================
+
+      case "submit_evening_reflection": {
+        const p = payload || {};
+        const chip: string = p.chip || "steady";
+        const text: string = (p.text || "").trim();
+
+        await postGratitudeLedger({
+          signal_type: "evening_reflection",
+          text,
+          meta: {
+            chip,
+            journey_id: screenState.journey_id,
+            day_number: screenState.day_number || 1,
+          },
+        });
+
+        mitraTrackEvent("evening_reflection", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { chip, text_length: text.length },
+        });
+
+        setScreenValue(true, "_evening_reflection_submitted");
+        setScreenValue(null, "evening_reflection_draft");
+
+        setTimeout(() => {
+          loadScreen({
+            container_id: "companion_dashboard",
+            state_id: "day_active",
+          });
+          setScreenValue(false, "_evening_reflection_submitted");
+        }, 1800);
+        break;
+      }
+
+      case "submit_weekly_reflection": {
+        const p = payload || {};
+        const sections = p.sections || {};
+        const entries = [
+          { key: "held", signal: "weekly_held" },
+          { key: "took", signal: "weekly_took" },
+          { key: "tending", signal: "weekly_tending" },
+        ];
+
+        await Promise.all(
+          entries
+            .filter((e) => (sections[e.key] || "").trim().length > 0)
+            .map((e) =>
+              postGratitudeLedger({
+                signal_type: e.signal,
+                text: sections[e.key].trim(),
+                meta: {
+                  journey_id: screenState.journey_id,
+                  cycle_day: screenState.cycle_day || screenState.day_number,
+                },
+              }),
+            ),
+        );
+
+        mitraTrackEvent("reflection_letter_completed", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            cycle_day: screenState.cycle_day || screenState.day_number,
+            sections_filled: entries.filter(
+              (e) => (sections[e.key] || "").trim().length > 0,
+            ).length,
+          },
+        });
+
+        setScreenValue(true, "_weekly_reflection_submitted");
+        setScreenValue(null, "weekly_reflection_draft");
+
+        setTimeout(() => {
+          loadScreen({
+            container_id: "companion_dashboard",
+            state_id: "day_active",
+          });
+          setScreenValue(false, "_weekly_reflection_submitted");
+        }, 1800);
+        break;
+      }
+
+      case "fetch_resilience_narrative": {
+        try {
+          const data = await getResilienceNarrative();
+          setScreenValue(data || null, "resilience_narrative");
+        } catch (err) {
+          console.warn("[fetch_resilience_narrative] unexpected error", err);
+          setScreenValue(null, "resilience_narrative");
+        }
+        break;
+      }
+
+      // ACCEPT_VOICE_CONSENT — sets voice_consent_given=true via PATCH
+      case "accept_voice_consent": {
+        setScreenValue(true, "voice_consent_given");
+        patchCompanionState({ voice_consent_given: true }).catch(() => {});
+        mitraTrackEvent("voice_consent_given", { meta: {} });
+        setScreenValue(true, "voice_note_active");
+        loadScreen({ container_id: "overlay", state_id: "voice_note" });
+        break;
+      }
+
+      // DECLINE_VOICE_CONSENT — sets voice_consent_given=false
+      case "decline_voice_consent": {
+        setScreenValue(false, "voice_consent_given");
+        patchCompanionState({ voice_consent_given: false }).catch(() => {});
+        mitraTrackEvent("voice_consent_declined", { meta: {} });
+        loadScreen({
+          container_id: "companion_dashboard",
+          state_id: "day_active",
+        });
+        break;
+      }
+
+      case "ack_resilience_narrative": {
+        setScreenValue(true, "resilience_narrative_acked");
+        mitraTrackEvent("resilience_narrative_acked", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
+        });
+        break;
+      }
+
+      case "submit_what_helped": {
+        const text: string = ((payload && payload.text) || "").trim();
+        if (!text) break;
+        await postGratitudeLedger({
+          signal_type: "what_held",
+          text,
+          meta: {
+            journey_id: screenState.journey_id,
+            source_surface: "resilience_narrative_card",
+          },
+        });
+        mitraTrackEvent("what_helped_submitted", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { text_length: text.length },
+        });
+        setScreenValue(true, "resilience_narrative_acked");
+        break;
+      }
+
+      // start_gentle — generic "start a gentle practice" action for
+      // post-conflict / grief / loneliness rooms. Caller MUST pass
+      // runner_source in payload — never hardcoded here.
+      case "start_gentle": {
+        try {
+          const runnerSource = payload?.runner_source;
+          if (!runnerSource) {
+            console.warn(
+              "[start_gentle] missing required payload.runner_source — aborting",
+            );
+            break;
+          }
+          const practiceId = payload?.practice_id || null;
+          const runnerVariant = payload?.runner_variant || "practice";
+          setScreenValue(runnerSource, "runner_source");
+          setScreenValue(runnerVariant, "runner_variant");
+          if (practiceId) setScreenValue(practiceId, "runner_practice_id");
+
+          if (startFlowInstance) startFlowInstance("support");
+
+          const destination = payload?.destination || "practice_step_runner";
+          loadScreen(destination, payload?.destination_state || "active");
+        } catch (err) {
+          console.error("[start_gentle] failed:", err);
+        }
+        break;
+      }
+
+      case "fetch_companion_intelligence": {
+        const results = await Promise.allSettled([
+          getPrepContext(payload?.prep_params || {}),
+          getPredictiveAlerts(),
+          getRecommendedAdditional(),
+          getPostConflictContext(),
+        ]);
+        const [prep, alerts, rec, postConflict] = results.map((r) =>
+          r.status === "fulfilled" ? r.value : null,
+        );
+
+        // predictive_alert: pick highest-confidence, not-dismissed-today, not muted.
+        const dismissedAt =
+          screenState.predictive_alert_dismissed_at || 0;
+        const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+        const withinCooldown =
+          dismissedAt && Date.now() - dismissedAt < sevenDaysMs;
+        let topAlert = null;
+        if (alerts && Array.isArray(alerts.alerts)) {
+          topAlert = alerts.alerts
+            .filter((a: any) => (a.confidence ?? 0) >= 0.6)
+            .filter((a: any) => a.entity?.status !== "muted")
+            .sort((a: any, b: any) => (b.confidence || 0) - (a.confidence || 0))[0] || null;
+        }
+        setScreenValue(prep || null, "prep_context");
+        setScreenValue(withinCooldown ? null : topAlert, "predictive_alert");
+        setScreenValue(rec || null, "recommended_additional");
+        setScreenValue(postConflict || null, "post_conflict_pending");
+
+        // Provisional entity: first eligible. (Endpoint returns {entities:[...]})
+        if (alerts === null && rec === null && prep === null && postConflict === null) {
+          // All flags off — nothing to do further.
+        }
+        break;
+      }
+
+      // open_prep_sheet — opens prep_coaching_sheet overlay. If we do not
+      // already have prep_context, fetch it lazily.
+      case "open_prep_sheet": {
+        const existing = screenState.prep_context;
+        if (!existing) {
+          const prep = await getPrepContext({
+            context_type: payload?.context_type,
+          });
+          setScreenValue(prep || null, "prep_context");
+        }
+        loadScreen({
+          container_id: "companion_dashboard",
+          state_id: "prep_coaching_sheet",
+        });
+        break;
+      }
+
+      // ack_prep — Moment 27 "Got it" dismiss.
+      case "ack_prep": {
+        const ctx = screenState.prep_context || {};
+        await mitraTrackEvent("prep_acknowledged", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { context_type: ctx.context_type, surface: ctx.surface },
+        });
+        // REG-003: overlay dismissal clears sheet-local state and does NOT
+        // touch runner_* fields.
+        setScreenValue(null, "prep_context");
+        goBack();
+        break;
+      }
+
+      // dismiss_predictive_alert — Moment 28 "Later" tap. Cools 7d.
+      case "dismiss_predictive_alert": {
+        setScreenValue(null, "predictive_alert");
+        setScreenValue(Date.now(), "predictive_alert_dismissed_at");
+        // Fire-and-forget track-event. No PATCH needed (dismissal is local).
+        mitraTrackEvent("predictive_alert_dismissed", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { id: payload?.id, reason: "not_this_time" },
+        });
+        break;
+      }
+
+      // confirm_entity — Moment 29 "Yes that's them".
+      case "confirm_entity": {
+        const id = payload?.id;
+        if (id) {
+          await patchEntity(id, {
+            status: "confirmed",
+            relation_note: payload?.relation_note,
+          });
+          mitraTrackEvent("entity_confirmed", {
+            journeyId: screenState.journey_id,
+            dayNumber: screenState.day_number || 1,
+            meta: { entity_id: id },
+          });
+        }
+        setScreenValue(null, "entity_recognition_pending");
+        goBack();
+        break;
+      }
+
+      // reject_entity — Moment 29 "Different person" / "Not a person".
+      case "reject_entity": {
+        const id = payload?.id;
+        if (id) {
+          await patchEntity(id, { status: "dismissed" });
+          mitraTrackEvent("entity_dismissed", {
+            journeyId: screenState.journey_id,
+            dayNumber: screenState.day_number || 1,
+            meta: { entity_id: id, reason: payload?.reason },
+          });
+        }
+        setScreenValue(null, "entity_recognition_pending");
+        goBack();
+        break;
+      }
+
+      // ================================================================
+      // start_recommended_additional — Moment 30 "Begin" + Moment 27
+      // "Prepare now" + Moment 39 "Start gentle".
+      //
+      // CRITICAL REG-015: this handler is the single chokepoint for
+      // recommended-additional runner starts. The source is hard-coded
+      // to "additional_recommended" so no caller can accidentally start a
+      // core runner. Any future edit here must preserve this invariant:
+      //
+      //   assert(source === "additional_recommended")
+      //
+      // The start_runner case (see above) in turn stamps runner_source
+      // which track_completion reads without modification — the two
+      // together guarantee no leak to core.
+      // ================================================================
+      case "start_recommended_additional": {
+        const sp = payload || {};
+        // REG-015 assertion — hard-coded source; do NOT accept a payload override.
+        const source = "additional_recommended"; // assert: never "core"
+        const variant = sp.variant || sp.item?.item_type || "practice";
+        const item = sp.item || null;
+        const intent = sp.intent || "recommended";
+
+        // Track acceptance event for analytics.
+        mitraTrackEvent("recommended_additional_accepted", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            item_type: item?.item_type,
+            item_id: item?.item_id,
+            intent,
+            duration_sec: sp.duration_sec,
+          },
+        });
+
+        // Clear the card after accept (it's consumed).
+        if (intent === "recommended") {
+          setScreenValue(null, "recommended_additional");
+        } else if (intent === "prep") {
+          // Prep sheet stays closed after runner starts.
+          setScreenValue(null, "prep_context");
+        } else if (intent === "post_conflict_soften") {
+          setScreenValue(null, "post_conflict_pending");
+        }
+
+        // Delegate to start_runner with the enforced source. This keeps
+        // all runner setup logic in one place (INV-3, INV-6).
+        await executeAction(
+          {
+            type: "start_runner",
+            payload: {
+              variant,
+              item,
+              source,
+              duration_sec: sp.duration_sec,
+              target_reps: sp.target_reps,
+              steps: sp.steps,
+            },
+            currentScreen: action.currentScreen,
+          },
+          context,
+        );
+        break;
+      }
+
+      // dismiss_recommended_additional — Moment 30 "Not now".
+      case "dismiss_recommended_additional": {
+        setScreenValue(null, "recommended_additional");
+        setScreenValue(Date.now(), "recommended_additional_dismissed_at");
+        mitraTrackEvent("recommended_additional_dismissed", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
+        });
+        break;
+      }
+
+      // ack_post_conflict — Moment 39 "I'm okay".
+      case "ack_post_conflict": {
+        const threadId = payload?.thread_id;
+        if (threadId) {
+          try {
+            await api.patch(`mitra/dissonance-threads/${threadId}/`, {
+              status: "acknowledged",
+            });
+          } catch (err: any) {
+            if (err?.response?.status !== 404) {
+              console.warn("[ack_post_conflict] PATCH failed:", err.message);
+            }
+          }
+        }
+        setScreenValue(null, "post_conflict_pending");
+        setScreenValue(true, "post_conflict_acked");
+        mitraTrackEvent("post_conflict_acknowledged", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { thread_id: threadId },
+        });
+        break;
+      }
+
+      // open_post_conflict_voice_note — Moment 39 "Something to say?".
+      case "open_post_conflict_voice_note": {
+        mitraTrackEvent("post_conflict_voice_note_opened", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { thread_id: payload?.thread_id },
+        });
+        // Voice-note overlay is a Phase 3 surface outside Week 6 scope; we
+        // reuse the reflection voice surface if present, else fall back to
+        // reflection_entry.
+        loadScreen({
+          container_id: "reflection_entry",
+          state_id: "voice_note",
+        });
+        break;
+      }
+
+      case "open_why_this_l2": {
+        const principleId = payload?.principle_id;
+        if (!principleId) {
+          console.warn("[open_why_this_l2] missing principle_id");
+          break;
+        }
+        const principle = await getPrinciple(principleId);
+        setScreenValue(principle, "why_this_principle");
+        setScreenValue(null, "why_this_source");
+        loadScreen({
+          container_id: (screenState._overlay_parent_container as string) ||
+            screenState.currentContainerId || "companion_dashboard",
+          state_id: "why_this_l2",
+        } as any);
+        mitraTrackEvent("why_this_l2_opened", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { principle_id: principleId },
+        });
+        break;
+      }
+
+      case "open_why_this_l3": {
+        const principleId =
+          payload?.principle_id ||
+          (screenState.why_this_principle && screenState.why_this_principle.id);
+        if (!principleId) {
+          console.warn("[open_why_this_l3] missing principle_id");
+          break;
+        }
+        const source = await getPrincipleSource(principleId);
+        setScreenValue(source, "why_this_source");
+        loadScreen({
+          container_id: (screenState.currentContainerId as string) || "companion_dashboard",
+          state_id: "why_this_l3",
+        } as any);
+        mitraTrackEvent("why_this_l3_opened", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { principle_id: principleId },
+        });
+        break;
+      }
+
+      // ================================================================
+      // WEEK 7 — Grief room enter/exit.
+      // Spec: route_support_grief.md.
+      // REG-015: clears runner_* so grief never overlaps with a practice
+      // runner. Exit clears only grief_session_* (no runner touches).
+      // ================================================================
+      case "enter_grief_room": {
+        // REG-015: strip runner state so grief doesn't leak into core flow.
+        setScreenValue(null, "runner_variant");
+        setScreenValue(null, "runner_source");
+        setScreenValue(null, "runner_active_item");
+        setScreenValue(0, "runner_reps_completed");
+        setScreenValue(0, "runner_step_index");
+        setScreenValue(0, "runner_duration_actual_sec");
+        setScreenValue(null, "runner_start_time");
+
+        setScreenValue(true, "grief_session_active");
+        setScreenValue(Date.now(), "grief_session_start");
+
+        const ctx = await getGriefContext();
+        if (ctx) setScreenValue(ctx, "grief_context");
+
+        loadScreen({ container_id: "support_grief", state_id: "room" } as any);
+        mitraTrackEvent("grief_room_entered", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
+        });
+        break;
+      }
+
+      case "exit_grief_room": {
+        setScreenValue(false, "grief_session_active");
+        setScreenValue(null, "grief_session_start");
+        setScreenValue(null, "grief_context");
+        mitraTrackEvent("grief_room_exited", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
+        });
+        loadScreen({
+          container_id: "companion_dashboard",
+          state_id: "day_active",
+        } as any);
+        break;
+      }
+
+      // Inner-room muted CTAs: they stay in the room — no navigation.
+      case "grief_stay": {
+        mitraTrackEvent("grief_sit_with_me", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
+        });
+        break;
+      }
+      case "grief_voice_note": {
+        // Week 4 voice consent flow owns the actual recorder. Here we just
+        // mark intent and track; the sheet opens from Week 4 hooks if consent.
+        setScreenValue(true, "grief_voice_note_requested");
+        mitraTrackEvent("grief_voice_note_requested", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
+        });
+        break;
+      }
+
+      // ================================================================
+      // WEEK 7 — Loneliness room enter/exit. Symmetric to grief.
+      // Spec: route_support_loneliness.md.
+      // ================================================================
+      case "enter_loneliness_room": {
+        setScreenValue(null, "runner_variant");
+        setScreenValue(null, "runner_source");
+        setScreenValue(null, "runner_active_item");
+        setScreenValue(0, "runner_reps_completed");
+        setScreenValue(0, "runner_step_index");
+        setScreenValue(0, "runner_duration_actual_sec");
+        setScreenValue(null, "runner_start_time");
+
+        setScreenValue(true, "loneliness_session_active");
+        setScreenValue(Date.now(), "loneliness_session_start");
+
+        const ctx = await getLonelinessContext();
+        if (ctx) setScreenValue(ctx, "loneliness_context");
+
+        loadScreen({
+          container_id: "support_loneliness",
+          state_id: "room",
+        } as any);
+        mitraTrackEvent("loneliness_room_entered", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
+        });
+        break;
+      }
+
+      case "exit_loneliness_room": {
+        setScreenValue(false, "loneliness_session_active");
+        setScreenValue(null, "loneliness_session_start");
+        setScreenValue(null, "loneliness_context");
+        mitraTrackEvent("loneliness_room_exited", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
+        });
+        loadScreen({
+          container_id: "companion_dashboard",
+          state_id: "day_active",
+        } as any);
+        break;
+      }
+
+      // ================================================================
+      // WEEK 7 — Gratitude joy-signal submission.
+      // Spec: embedded_gratitude_joy_card.md.
+      // ================================================================
+      case "submit_gratitude_joy": {
+        const text = (payload?.text || "").trim();
+        if (!text) break;
+        const signalId =
+          payload?.signal_id ||
+          (screenState.joy_signal && screenState.joy_signal.id) ||
+          null;
+        await postGratitudeJoy(text, signalId);
+        // Clear the signal so the card collapses and doesn't re-render today.
+        setScreenValue(null, "joy_signal");
+        mitraTrackEvent("gratitude_joy_submitted", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { length: text.length },
+        });
+        break;
+      }
+
+      // ================================================================
+      // WEEK 7 — Season banner dismiss (7d hide).
+      // Spec: embedded_season_change_banner.md.
+      // ================================================================
+      case "dismiss_season_banner": {
+        setScreenValue(Date.now(), "season_banner_dismissed_at");
+        mitraTrackEvent("season_banner_dismissed", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
         });
         break;
       }

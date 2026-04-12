@@ -1,0 +1,58 @@
+# Week 1 — Welcome Onboarding full-flow E2E.
+# Spec: kalpx-frontend/docs/specs/mitra-v3-experience/screens/route_welcome_onboarding.md §16
+# Regression guard: REG-001, REG-015, REG-016.
+# Runs against EAS development build (com.kalpx.app) — cold-launch into Turn 1.
+
+appId: com.kalpx.app
+tags:
+  - onboarding
+  - week1
+  - v3
+---
+- launchApp:
+    clearState: true
+    clearKeychain: true
+
+# Turn 1 — intro
+- assertVisible: "I'm Mitra"
+- assertVisible: "I'd like that"
+- tapOn: "I'd like that"
+
+# Turn 2 — friction
+- assertVisible: "What's alive for you?"
+- assertVisible: "Work needs more clarity"
+- tapOn: "Work needs more clarity"
+
+# Turn 3 — state texture (reflection should reference work)
+- assertVisible: "texture of it"
+- assertVisible: "Heavy — everything weighs"
+- tapOn: "Heavy — everything weighs"
+
+# Turn 4 — voice/text fork
+- assertVisible: "Heavy"
+- assertVisible: "Speak to me"
+- assertVisible: "Keep it written"
+- tapOn: "Keep it written"
+
+# Turn 5 — guidance mode (default hybrid)
+- assertVisible: "living traditions"
+- assertVisible: "A blend"
+- tapOn: "A blend — modern clarity with spiritual depth"
+
+# Turn 6 — first recognition (audio player visible if has_briefing)
+- assertVisible: "RECOGNITION"
+- assertVisible: "Play my first briefing"
+- assertVisible: "Show me my path first"
+- tapOn: "Show me my path first"
+
+# Turn 7 — path emerges (three cards)
+- assertVisible: "Your mantra"
+- assertVisible: "Your intention"
+- assertVisible: "Your practice"
+- assertVisible: "I'm ready"
+- tapOn: "I'm ready"
+
+# Lands on dashboard with companion set
+- assertVisible:
+    id: "companion_dashboard"
+    optional: true

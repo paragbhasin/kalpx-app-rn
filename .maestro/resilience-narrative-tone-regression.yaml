@@ -1,0 +1,32 @@
+# Mitra v3 Moment 26 — Resilience Narrative tone regression
+# Validates: the rendered resilience narrative contains NO exclamation marks,
+# NO "great" / "amazing" / streak counts, NO emoji. Mitra's tone is strict:
+# celebrates without cheering.
+#
+# Mirrors the tone-lint predicate in ResilienceNarrativeCard.tsx (if the API
+# narrative ever violates these rules, the card substitutes the local
+# fallback).
+# Web parity: embedded_resilience_narrative_card.md §1 "Framing rules".
+
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- assertVisible: "WHAT'S GROWING"
+
+# Forbidden tokens — must not appear anywhere on the card
+- assertNotVisible: "!"
+- assertNotVisible: "Great work"
+- assertNotVisible: "great work"
+- assertNotVisible: "Amazing"
+- assertNotVisible: "amazing"
+- assertNotVisible: "streak"
+- assertNotVisible: "days in a row"
+- assertNotVisible: "You crushed"
+- assertNotVisible: "Keep it up"
+
+# Expected primary/secondary reply chips present (tone is a noticing, not a
+# cheer)
+- assertVisible: "Thanks for noticing"
+- assertVisible: "What helped most?"

@@ -94,6 +94,14 @@ import SankalpHoldBlock from '../blocks/SankalpHoldBlock';
 import PracticeTimerBlock from '../blocks/PracticeTimerBlock';
 import CompletionReturnTransient from '../blocks/CompletionReturnTransient';
 
+// Week 7 — Why-This overlays + Gratitude/Season/Companioned Chant
+// (Mitra v3 Moments 36, 37, 44, 45, 47)
+import WhyThisL2Sheet from '../blocks/WhyThisL2Sheet';
+import WhyThisL3Sheet from '../blocks/WhyThisL3Sheet';
+import GratitudeJoyCard from '../blocks/GratitudeJoyCard';
+import SeasonChangeBanner from '../blocks/SeasonChangeBanner';
+import CompanionedChant from '../blocks/CompanionedChant';
+
 const blockMap: Record<string, React.ComponentType<any>> = {
   // Original 11 blocks
   headline: HeadlineBlock,
@@ -179,6 +187,12 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   sankalp_hold: SankalpHoldBlock,
   practice_timer: PracticeTimerBlock,
   completion_return: CompletionReturnTransient,
+  // Week 7 — Why-This L2/L3 + Gratitude/Season/Companioned Chant
+  why_this_l2: WhyThisL2Sheet,
+  why_this_l3: WhyThisL3Sheet,
+  gratitude_joy_card: GratitudeJoyCard,
+  season_change_banner: SeasonChangeBanner,
+  companioned_chant: CompanionedChant,
 };
 
 interface BlockRendererProps {
@@ -249,6 +263,9 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block, textColor }) => {
     'check_in_card_compact', 'cycle_signal_bar', 'clear_window_banner',
     // Week 3 runner blocks — all dispatch their own completion actions
     'mantra_runner_display', 'sankalp_hold', 'practice_timer', 'completion_return',
+    // Week 7 — all handle their own dispatch / dismiss internally
+    'why_this_l2', 'why_this_l3', 'gratitude_joy_card', 'season_change_banner',
+    'companioned_chant',
   ]);
 
   if (interpolatedBlock.action && !selfActionBlocks.has(interpolatedBlock.type)) {

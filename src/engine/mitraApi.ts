@@ -421,3 +421,84 @@ export async function mitraJourneyWelcomeBack(decision: 'continue' | 'fresh'): P
     return null;
   }
 }
+
+// ---------------------------------------------------------------------------
+// Week 7 — Why-This L2/L3, Grief/Loneliness, Joy signal.
+// All endpoints are 404-tolerant: they return null, never throw.
+// Spec: overlay_why_this_level_2.md, overlay_why_this_level_3.md,
+//       route_support_grief.md, route_support_loneliness.md,
+//       embedded_gratitude_joy_card.md.
+// ---------------------------------------------------------------------------
+
+/** GET mitra/principles/{id}/ — Principle for Why-This L2 (Phase 1.5 core). */
+export async function getPrinciple(id: string | number): Promise<any> {
+  if (!id) return null;
+  try {
+    const res = await api.get(`mitra/principles/${id}/`);
+    return res.data || null;
+  } catch (err: any) {
+    console.warn(`[MITRA] principles/${id} failed (tolerated):`, err.message);
+    return null;
+  }
+}
+
+/** GET mitra/principles/{id}/sources/ — Principle source for Why-This L3. */
+export async function getPrincipleSource(id: string | number): Promise<any> {
+  if (!id) return null;
+  try {
+    const res = await api.get(`mitra/principles/${id}/sources/`);
+    return res.data || null;
+  } catch (err: any) {
+    console.warn(`[MITRA] principles/${id}/sources failed (tolerated):`, err.message);
+    return null;
+  }
+}
+
+/** GET mitra/support/grief-context/ — Grief room contextual copy/prompt. */
+export async function getGriefContext(): Promise<any> {
+  try {
+    const res = await api.get('mitra/support/grief-context/');
+    return res.data || null;
+  } catch (err: any) {
+    console.warn('[MITRA] grief-context failed (tolerated):', err.message);
+    return null;
+  }
+}
+
+/** GET mitra/support/loneliness-context/ — Loneliness room context + chant. */
+export async function getLonelinessContext(): Promise<any> {
+  try {
+    const res = await api.get('mitra/support/loneliness-context/');
+    return res.data || null;
+  } catch (err: any) {
+    console.warn('[MITRA] loneliness-context failed (tolerated):', err.message);
+    return null;
+  }
+}
+
+/** GET mitra/joy-signal/ — Today's joy signal (Moment 45). null when no signal. */
+export async function getJoySignal(): Promise<any> {
+  try {
+    const res = await api.get('mitra/joy-signal/');
+    return res.data || null;
+  } catch (err: any) {
+    console.warn('[MITRA] joy-signal failed (tolerated):', err.message);
+    return null;
+  }
+}
+
+/** POST mitra/gratitude-ledger/ — Submit a joy gratitude entry. */
+export async function postGratitudeJoy(text: string, signalId?: string | null): Promise<any> {
+  try {
+    const res = await api.post('mitra/gratitude-ledger/', {
+      text,
+      signal_type: 'joy_signal',
+      signal_id: signalId || null,
+      tz: getTz(),
+    });
+    return res.data || null;
+  } catch (err: any) {
+    console.warn('[MITRA] gratitude-ledger POST failed (tolerated):', err.message);
+    return null;
+  }
+}

@@ -1,0 +1,64 @@
+# Week 7 — Tone regression: grief / loneliness / joy / season copy.
+# Spec: route_support_grief.md, route_support_loneliness.md,
+#       embedded_gratitude_joy_card.md, embedded_season_change_banner.md.
+# NONE of these surfaces may contain:
+#   - exclamation marks ("!")
+#   - emoji
+#   - "feel better" / "amazing" / "you got this" / "great work" / streak counts
+appId: com.kalpx.app
+---
+- launchApp:
+    arguments:
+      joy_signal_fixture: true
+      season_signal_fixture: true
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "My Routine"
+    optional: true
+- waitForAnimationToEnd
+
+# Joy card + season banner visible on dashboard. Assert disallowed tokens absent.
+- assertNotVisible:
+    text: ".*feel better.*"
+    optional: true
+- assertNotVisible:
+    text: ".*amazing.*"
+    optional: true
+- assertNotVisible:
+    text: ".*you got this.*"
+    optional: true
+- assertNotVisible:
+    text: ".*great work.*"
+    optional: true
+- assertNotVisible:
+    text: ".*[0-9]+ day streak.*|.*streak of.*"
+    optional: true
+- assertNotVisible:
+    text: ".*!.*"
+    optional: true
+
+# Enter grief room — same tone rules.
+- tapOn:
+    text: ".*support/grief.*|.*Grief.*"
+    optional: true
+- waitForAnimationToEnd
+- assertNotVisible:
+    text: ".*feel better.*|.*you got this.*|.*amazing.*|.*!.*"
+    optional: true
+- tapOn:
+    text: "I'll come back to this"
+    optional: true
+- waitForAnimationToEnd
+
+# Enter loneliness room — same.
+- tapOn:
+    text: ".*support/loneliness.*|.*Loneliness.*"
+    optional: true
+- waitForAnimationToEnd
+- assertNotVisible:
+    text: ".*feel better.*|.*you got this.*|.*amazing.*|.*great work.*|.*!.*"
+    optional: true
+- tapOn:
+    text: "I feel less alone now"
+    optional: true

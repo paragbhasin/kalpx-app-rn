@@ -74,6 +74,24 @@ interface ScreenState {
 //   duration.
 // - All runner_* fields are cleared by track_completion and by the
 //   CompletionReturnTransient on unmount (REG-003: cross-flow isolation).
+//
+// Week 7 — Why-This L2/L3, Grief/Loneliness rooms, Joy/Season signals.
+// Spec: overlay_why_this_level_2.md, overlay_why_this_level_3.md,
+//       route_support_grief.md, route_support_loneliness.md,
+//       embedded_gratitude_joy_card.md, embedded_season_change_banner.md.
+// - why_this_principle: { id, name, essence, context } | null — populated by
+//   open_why_this_l2 via getPrinciple(id). Null on 404 (flag-off).
+// - why_this_source: { sanskrit, transliteration, translation, attribution } | null
+//   — populated by open_why_this_l3 via getPrincipleSource(id).
+// - grief_session_active / loneliness_session_active: boolean flags, local to
+//   the route. Cleared by exit_* handlers (REG-015 isolation).
+// - grief_session_start / loneliness_session_start: ms epoch.
+// - joy_signal: { id, mirror, prompt, one_line } | null — populated by
+//   getJoySignal(); if null, GratitudeJoyCard renders nothing.
+// - season_signal: { headline, message, season } | null.
+// - season_banner_dismissed_at: ms epoch; banner hidden for 7d after.
+// - reduced_motion_preference: boolean — read from OS AccessibilityInfo.
+//   When true, GriefRoom & CompanionedChant render static (no transforms).
 export type RunnerVariant = 'mantra' | 'sankalp' | 'practice';
 export type RunnerSource =
   | 'core'
@@ -111,7 +129,20 @@ const initialState: ScreenState = {
   currentBackground: null,
   isHeaderHidden: false,
   history: [],
-  screenData: {},
+  screenData: {
+    // Week 7 defaults. The RN engine reads OS AccessibilityInfo at boot and
+    // patches `reduced_motion_preference`; default false is safe on first paint.
+    why_this_principle: null,
+    why_this_source: null,
+    grief_session_active: false,
+    grief_session_start: null,
+    loneliness_session_active: false,
+    loneliness_session_start: null,
+    joy_signal: null,
+    season_signal: null,
+    season_banner_dismissed_at: null,
+    reduced_motion_preference: false,
+  },
   currentOverlayData: null,
   _flow_instance_id: null,
   _flow_type: null,

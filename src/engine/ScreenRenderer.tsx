@@ -25,6 +25,9 @@ import RoutineBuilderContainer from "../containers/RoutineBuilderContainer";
 import RoutineLockedContainer from "../containers/RoutineLockedContainer";
 import StableScanContainer from "../containers/StableScanContainer";
 import OnboardingContainer from "../containers/OnboardingContainer";
+// Week 7 — Support routes (Moments 46, 47)
+import GriefRoomContainer from "../containers/GriefRoomContainer";
+import LonelinessRoomContainer from "../containers/LonelinessRoomContainer";
 
 const containerMap: Record<string, React.ComponentType<any>> = {
   portal: PortalContainer,
@@ -45,6 +48,9 @@ const containerMap: Record<string, React.ComponentType<any>> = {
   portal_splash: PortalSplashContainer,
   routine_locked: RoutineLockedContainer,
   welcome_onboarding: OnboardingContainer,
+  // Week 7 — Support routes
+  support_grief: GriefRoomContainer,
+  support_loneliness: LonelinessRoomContainer,
 };
 
 const ScreenRenderer: React.FC = () => {

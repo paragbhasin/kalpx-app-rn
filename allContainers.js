@@ -231,6 +231,16 @@ export const CompanionDashboardContainer = {
         { type: "focus_phrase", position: "body" },
         { type: "cycle_signal_bar", position: "body" },
         { type: "clear_window_banner", position: "body" },
+        // Week 7 — conditional embedded slots.
+        // season_change_banner: visible when screenData.season_signal != null
+        //   AND screenData.season_banner_dismissed_at is stale (>7d) or null.
+        // gratitude_joy_card: visible when screenData.joy_signal != null.
+        // Both blocks self-gate by reading screenData; rendering them here
+        // unconditionally is safe — they return null when their signals are
+        // absent (flag-off / 404-tolerant).
+        // Spec: embedded_season_change_banner.md, embedded_gratitude_joy_card.md.
+        { type: "season_change_banner", position: "body", visibility_condition: "season_signal" },
+        { type: "gratitude_joy_card", position: "body", visibility_condition: "joy_signal" },
         { type: "core_items_list", position: "body" },
         { type: "check_in_card_compact", position: "body" },
         // Practice Access Cards
@@ -6214,6 +6224,68 @@ export const MASTER_UI_TEXT = {
   },
 };
 
+// ============================================================================
+// WEEK 7 — Support rooms + Why-This overlays.
+// Spec: route_support_grief.md, route_support_loneliness.md,
+//       overlay_why_this_level_2.md, overlay_why_this_level_3.md.
+// ============================================================================
+
+export const SupportGriefContainer = {
+  container_id: "support_grief",
+  states: {
+    room: {
+      tone: { theme: "warm_cream", mood: "steady" },
+      meta: { variant: "grief_room", reduced_motion_capable: true },
+      // Blocks array is empty — GriefRoomContainer renders its own fixed
+      // chrome (breath guide, presence line, muted CTAs, exit link). The
+      // schema is still required by the engine but carries no block list.
+      blocks: [],
+    },
+  },
+};
+
+export const SupportLonelinessContainer = {
+  container_id: "support_loneliness",
+  states: {
+    room: {
+      tone: { theme: "warm_cream", mood: "steady" },
+      meta: { variant: "loneliness_room" },
+      // LonelinessRoomContainer renders its own chrome including the
+      // CompanionedChant block. Schema blocks are empty by design.
+      blocks: [],
+    },
+  },
+};
+
+// Why-This overlays attach to whichever container was current when the
+// overlay opened. We expose them on companion_dashboard as the default host;
+// ScreenRenderer uses GenericContainer fallback when a given container_id
+// lacks that state_id, so they render consistently from any parent.
+export const WhyThisOverlayContainer = {
+  container_id: "why_this_overlay",
+  states: {
+    why_this_l2: {
+      overlay: true,
+      tone: { theme: "warm_cream", mood: "steady" },
+      meta: { variant: "why_this_l2" },
+      blocks: [{ type: "why_this_l2" }],
+    },
+    why_this_l3: {
+      overlay: true,
+      tone: { theme: "warm_cream", mood: "steady" },
+      meta: { variant: "why_this_l3" },
+      blocks: [{ type: "why_this_l3" }],
+    },
+  },
+};
+
+// Register why_this_l2 / why_this_l3 states under companion_dashboard too,
+// so open_why_this_l2 can load without changing containerId.
+CompanionDashboardContainer.states.why_this_l2 =
+  WhyThisOverlayContainer.states.why_this_l2;
+CompanionDashboardContainer.states.why_this_l3 =
+  WhyThisOverlayContainer.states.why_this_l3;
+
 export const ContainerRegistry = {
   portal: PortalContainer,
   portal_splash: PortalSplashContainer,
@@ -6234,6 +6306,10 @@ export const ContainerRegistry = {
   sadhana_deepen: SadhanaDeepenContainer,
   cycle_transitions: CycleTransitionsContainer,
   stable_scan: StableScanContainer,
+  // Week 7 — support rooms + why-this overlay host
+  support_grief: SupportGriefContainer,
+  support_loneliness: SupportLonelinessContainer,
+  why_this_overlay: WhyThisOverlayContainer,
   demo_container: {
     container_id: "demo_container",
     states: {

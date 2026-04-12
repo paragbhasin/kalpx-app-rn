@@ -28,6 +28,16 @@ export const Fonts = {
     bold: 'Cinzel_700Bold',
   },
 
+  // Devanagari — Sanskrit sources in Why-This L3 (Week 7).
+  // Fallback chain: NotoSansDevanagari → system serif (iOS/Android render Devanagari
+  // glyphs via system fallback when a codepoint is missing). Worst-case is a
+  // platform Devanagari font — never tofu — because RN text rendering uses
+  // platform fallback for unsupported glyphs.
+  devanagari: {
+    regular: 'NotoSansDevanagari_400Regular',
+    bold: 'NotoSansDevanagari_700Bold',
+  },
+
   // Legacy aliases — use during migration, replace later
   legacy: {
     GelicaBold: 'CormorantGaramond_700Bold',

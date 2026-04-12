@@ -222,6 +222,17 @@ export const CompanionDashboardContainer = {
           state: "{{identity_state}}",
           position: "header",
         },
+        // Week 2 — Mitra v3 day_active blocks (Moments 8-15, 40, 41, 43).
+        // Spec: docs/specs/mitra-v3-experience/screens/route_dashboard_day_active.md §10.
+        // These blocks read their data directly from screenData (populated
+        // by generate_companion); the container also renders them inline
+        // to guarantee ordering & presence regardless of schema payload.
+        { type: "morning_briefing", position: "body" },
+        { type: "focus_phrase", position: "body" },
+        { type: "cycle_signal_bar", position: "body" },
+        { type: "clear_window_banner", position: "body" },
+        { type: "core_items_list", position: "body" },
+        { type: "check_in_card_compact", position: "body" },
         // Practice Access Cards
         {
           type: "practice_card",
@@ -352,6 +363,45 @@ export const CompanionDashboardContainer = {
         //   },
         //   position: "footer",
         // },
+      ],
+    },
+
+    // Week 2 — first_day variant (Moment 8 first arrival).
+    // Spec: route_dashboard_day_active.md §1 variant map "first_day".
+    // Minimal: no briefing yet, no cycle signal markers past day 1.
+    first_day: {
+      tone: { theme: "light_sandal", mood: "steady" },
+      meta: { requires_active_cycle: true, variant: "first_day" },
+      dashboard_config: {
+        status_messages: { start: "A new rhythm begins today" },
+        day_label: "Day 1",
+        instruction_text:
+          "Today is day one. Start with whatever calls you — the mantra, the sankalp, the practice.",
+      },
+      blocks: [
+        { type: "focus_phrase", position: "body" },
+        { type: "cycle_signal_bar", position: "body" },
+        { type: "core_items_list", position: "body" },
+      ],
+    },
+
+    // Week 2 — clear_window_active variant (Moment 43).
+    // Spec: route_dashboard_day_active.md §1 variant map "clear_window_expansive".
+    // Banner renders above the triad; check-in suppressed (day feels open).
+    clear_window_active: {
+      tone: { theme: "light_sandal", mood: "celebratory" },
+      meta: { requires_active_cycle: true, variant: "clear_window_active" },
+      dashboard_config: {
+        status_messages: { default: "Today is open" },
+        instruction_text:
+          "You've earned this space. Use it for what matters.",
+      },
+      blocks: [
+        { type: "clear_window_banner", position: "body" },
+        { type: "morning_briefing", position: "body" },
+        { type: "focus_phrase", position: "body" },
+        { type: "cycle_signal_bar", position: "body" },
+        { type: "core_items_list", position: "body" },
       ],
     },
 

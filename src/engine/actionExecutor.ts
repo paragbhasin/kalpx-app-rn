@@ -31,6 +31,7 @@ import {
   mitraTriggerMantras,
   postOnboardingTurn,
   patchCompanionState,
+  getClearWindow,
 } from "./mitraApi";
 
 // Week 1 — friction chip → focus mapping. Web parity: actionExecutor.js FRICTION_MAP.
@@ -1561,6 +1562,66 @@ export async function executeAction(
         // CTA
         if (data.cta) setScreenValue(data.cta, "contextual_cta");
 
+        // ----------------------------------------------------------------
+        // Week 2 — Day Active Dashboard enrichment (Moments 8-15, 40, 41, 43).
+        // Spec: route_dashboard_day_active.md §2, §6. Populate briefing,
+        // focus phrase, cycle_day, checkpoint_due, clear_window from the
+        // generate-companion envelope (+ side-call to /clear-window/).
+        // ----------------------------------------------------------------
+        const briefing = data.briefing || data.morningBriefing || null;
+        if (briefing) {
+          setScreenValue(true, "briefing_available");
+          setScreenValue(briefing.audio_url || briefing.audioUrl || "", "briefing_audio_url");
+          setScreenValue(
+            briefing.summary || briefing.opening_line || briefing.script?.slice(0, 140) || "",
+            "briefing_summary",
+          );
+          setScreenValue(briefing.script || briefing.transcript || "", "briefing_transcript");
+          setScreenValue(briefing.voice_preset || "anchor", "briefing_voice_preset");
+        } else {
+          setScreenValue(false, "briefing_available");
+        }
+
+        // Focus phrase — Phase 1.5 expansive phrase; fall back to dayType sub-header.
+        const focusPhrase =
+          data.focus_phrase || data.focusPhrase || data.dayTypeCopy?.subHeader || "";
+        if (focusPhrase) setScreenValue(focusPhrase, "focus_phrase");
+
+        // cycle_day — distinct screenData copy so the signal bar can read it
+        // without stomping on day_number (which checkpoint logic also owns).
+        if (data.journey?.dayNumber) {
+          setScreenValue(data.journey.dayNumber, "cycle_day");
+        }
+
+        // Checkpoint-due enum (for variant selection)
+        const dn = data.journey?.dayNumber;
+        if (dn === 7) setScreenValue("day_7", "checkpoint_due");
+        else if (dn === 14) setScreenValue("day_14", "checkpoint_due");
+        else setScreenValue(null, "checkpoint_due");
+
+        // Dashboard variant resolver — minimal shape; refined by server later.
+        let variant: string = "standard";
+        if (dn === 1) variant = "first_day";
+        if (dn === 7) variant = "checkpoint_pending_day_7";
+        if (dn === 14) variant = "checkpoint_pending_day_14";
+        if (data.postConflict || data.dayType === "post_conflict_morning") {
+          variant = "post_conflict_morning";
+        }
+
+        // Clear-window (Moment 43) — separate endpoint; fire-and-forget.
+        try {
+          const cw = await getClearWindow();
+          if (cw && (cw.headline || cw.message)) {
+            setScreenValue(cw, "clear_window");
+            variant = "clear_window_active";
+          } else {
+            setScreenValue(null, "clear_window");
+          }
+        } catch (_e) {
+          setScreenValue(null, "clear_window");
+        }
+        setScreenValue(variant, "dashboard_variant");
+
         // Navigate to the post-lock summary reveal (unless skipReveal)
         if (!payload?.skipReveal) {
           loadScreen({
@@ -3020,6 +3081,55 @@ export async function executeAction(
           journeyId: screenState.journey_id,
           dayNumber: screenState.day_number || 1,
           meta: tcMeta,
+        });
+        break;
+      }
+
+      // ================================================================
+      // ACKNOWLEDGE_CHECK_IN — Week 2 Dashboard inline check-in.
+      // Spec: route_dashboard_day_active.md §1 (CheckInCardCompact), §6.
+      // Web parity: kalpx-frontend/src/mock/mock/allContainers.js cycle_transitions/quick_checkin
+      // REG-015: dashboard check-in must NOT share runner state with core
+      // mantra flow — we only set a dashboard-local dismiss flag and
+      // side-call prana-acknowledge.
+      // ================================================================
+      case "acknowledge_check_in": {
+        const pranaState = (payload && payload.prana_state) || "steady";
+        try {
+          const ack = await mitraPranaAcknowledge({
+            pranaType: pranaState,
+            focus: screenState.scan_focus || screenState.suggested_focus || "peacecalm",
+            locale: "en",
+            journeyId: screenState.journey_id,
+            dayNumber: screenState.day_number || 1,
+          });
+          if (ack?.insight) setScreenValue(ack.insight, "prana_ack_insight");
+        } catch (err) {
+          console.warn("[acknowledge_check_in] prana-acknowledge failed", err);
+        }
+        // Dashboard-local dismiss flag — does NOT touch runner_active_item,
+        // practice_chant, or any core-flow state (REG-015).
+        setScreenValue(true, "check_in_dismissed");
+        mitraTrackEvent("dashboard_check_in_ack", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { prana_state: pranaState },
+        });
+        break;
+      }
+
+      // ================================================================
+      // DISMISS_CLEAR_WINDOW — Week 2 Moment 43 banner dismissal.
+      // Spec: route_dashboard_day_active.md §1 variant 43, §7 dismissibility.
+      // Clears only clear_window screenData field; doesn't affect triad.
+      // ================================================================
+      case "dismiss_clear_window": {
+        setScreenValue(null, "clear_window");
+        setScreenValue("standard", "dashboard_variant");
+        mitraTrackEvent("dashboard_clear_window_dismissed", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
         });
         break;
       }

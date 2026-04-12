@@ -24,6 +24,7 @@ import PracticeRunnerContainer from "../containers/PracticeRunnerContainer";
 import RoutineBuilderContainer from "../containers/RoutineBuilderContainer";
 import RoutineLockedContainer from "../containers/RoutineLockedContainer";
 import StableScanContainer from "../containers/StableScanContainer";
+import OnboardingContainer from "../containers/OnboardingContainer";
 
 const containerMap: Record<string, React.ComponentType<any>> = {
   portal: PortalContainer,
@@ -43,6 +44,7 @@ const containerMap: Record<string, React.ComponentType<any>> = {
   insights_progress: InsightsProgressContainer,
   portal_splash: PortalSplashContainer,
   routine_locked: RoutineLockedContainer,
+  welcome_onboarding: OnboardingContainer,
 };
 
 const ScreenRenderer: React.FC = () => {

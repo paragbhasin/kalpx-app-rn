@@ -28,6 +28,26 @@ interface ScreenState {
   _isSubmitting: boolean;
 }
 
+// Week 1 — Welcome Onboarding (Mitra v3 Moments 1-7)
+// These fields live inside screenData at runtime but are documented here for
+// discoverability. Spec: route_welcome_onboarding.md §2, §4.
+// - onboarding_turn: number 1-7, current turn in conversation thread
+// - onboarding_draft_state: accumulated payload (friction, state, freeform, etc.)
+// - voice_consent_given: boolean, gates Turn 4 "Speak to me"
+// - guidance_mode: 'universal' | 'hybrid' | 'rooted'
+// - companion_mantra_id / companion_sankalp_id / companion_practice_id: set from
+//   generate-companion response between Turn 5 and Turn 6.
+export type OnboardingDraftState = {
+  friction_id?: string;
+  friction_freeform?: string;
+  suggested_focus?: string;
+  state_id?: string;
+  state_freeform?: string;
+  mode?: 'universal' | 'hybrid' | 'rooted';
+  voice_choice?: 'voice' | 'text';
+  started_at?: number;
+};
+
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------

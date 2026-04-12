@@ -29,7 +29,30 @@ import {
   mitraTrackCompletion,
   mitraTrackEvent,
   mitraTriggerMantras,
+  postOnboardingTurn,
+  patchCompanionState,
 } from "./mitraApi";
+
+// Week 1 — friction chip → focus mapping. Web parity: actionExecutor.js FRICTION_MAP.
+// Spec: route_welcome_onboarding.md §1 Turn 2-3, §6.
+const FRICTION_TO_FOCUS: Record<string, { focus: string; label: string }> = {
+  work_clarity: { focus: "clarity", label: "work clarity" },
+  relationship: { focus: "connection", label: "relationship attention" },
+  mind_quiet: { focus: "stillness", label: "busy mind" },
+  uncertain: { focus: "grounding", label: "uncertainty" },
+  low_energy: { focus: "vitality", label: "low energy" },
+  searching_identity: { focus: "self_knowledge", label: "self-inquiry" },
+  spiritual: { focus: "devotion", label: "spiritual longing" },
+};
+
+const STATE_LABEL_MAP: Record<string, string> = {
+  activated: "Activated.",
+  drained: "Drained.",
+  foggy: "Foggy.",
+  heavy: "Heavy.",
+  restless: "Restless.",
+  clear_but_full: "Clear but full.",
+};
 
 // ---------------------------------------------------------------------------
 // Audio Rotation
@@ -2998,6 +3021,138 @@ export async function executeAction(
           dayNumber: screenState.day_number || 1,
           meta: tcMeta,
         });
+        break;
+      }
+
+      // ================================================================
+      // ONBOARDING_TURN_RESPONSE — Week 1 Welcome Onboarding (Moments 1-7)
+      // Web counterpart: no direct web equivalent (Mitra v3 is RN-first).
+      // Spec: route_welcome_onboarding.md §6.
+      // Branches on current screenData.onboarding_turn (1-7). Validates payload,
+      // calls per-turn API (help-me-choose for free-form friction, PATCH
+      // companion-state + generate-companion at turn 5, track-event at turn 7),
+      // advances screenData.onboarding_turn, and loads next turn state.
+      // ================================================================
+      case "onboarding_turn_response": {
+        const currentTurn = Number(screenState.onboarding_turn || 1);
+        const draft = { ...(screenState.onboarding_draft_state || {}) };
+        const p = payload || {};
+
+        // fire-and-forget analytics
+        postOnboardingTurn(currentTurn, {
+          response_type: p.response_type,
+          chip_id: p.chip_id,
+          freeform_length: (p.freeform_text || "").length,
+        });
+
+        let nextTurn = currentTurn + 1;
+
+        try {
+          if (currentTurn === 1) {
+            if (p.chip_id === "returning") {
+              // Journey status check handled outside — for now advance to Turn 2.
+              draft.returning = true;
+            }
+            if (p.freeform_text) draft.intro_freeform = p.freeform_text;
+          } else if (currentTurn === 2) {
+            if (p.chip_id) {
+              draft.friction_id = p.chip_id;
+              const m = FRICTION_TO_FOCUS[p.chip_id];
+              if (m) draft.suggested_focus = m.focus;
+            } else if (p.freeform_text) {
+              draft.friction_freeform = p.freeform_text;
+              const r = await mitraHelpMeChoose({ freeformInput: p.freeform_text });
+              if (r) {
+                draft.suggested_focus = r.suggestedFocus || r.suggested_focus;
+                draft.friction_analysis = r.analysisText || r.analysis_text;
+              }
+            }
+          } else if (currentTurn === 3) {
+            if (p.chip_id) draft.state_id = p.chip_id;
+            if (p.freeform_text) draft.state_freeform = p.freeform_text;
+            // Stash label for Turn 4 acknowledgment
+            setScreenValue(
+              STATE_LABEL_MAP[p.chip_id] || "I hear you.",
+              "onboarding_state_ack",
+            );
+          } else if (currentTurn === 4) {
+            draft.voice_choice = p.choice;
+            if (p.choice === "voice" && !screenState.voice_consent_given) {
+              // Consent overlay flow — navigate to consent, then consent screen
+              // advances turn back to 5. For Week 1 we mark the gate here.
+              setScreenValue(false, "voice_consent_given");
+            }
+          } else if (currentTurn === 5) {
+            draft.mode = p.guidance_mode;
+            setScreenValue(p.guidance_mode, "guidance_mode");
+
+            await patchCompanionState({
+              preferred_guidance_mode: p.guidance_mode,
+            });
+
+            const companion = await mitraGenerateCompanion({
+              focus: draft.suggested_focus || "clarity",
+              sub_focus: draft.state_id,
+              depth: "standard",
+              baseline_metrics: {},
+              intention: draft.friction_freeform,
+              day_number: 1,
+              guidance_mode: p.guidance_mode,
+            });
+
+            if (companion?.companion) {
+              const c = companion.companion;
+              const fMap = FRICTION_TO_FOCUS[draft.friction_id || ""];
+              setScreenValue(fMap?.label || "what's alive for you", "friction_label");
+              setScreenValue(
+                (STATE_LABEL_MAP[draft.state_id || ""] || "").replace(".", "") ||
+                  "the texture of it",
+                "state_label",
+              );
+              setScreenValue(
+                c.recommended_posture || "protecting your space and doing less, better",
+                "recommended_posture",
+              );
+              setScreenValue(c.mantra?.core?.title || c.mantra?.title || "", "companion_mantra_title");
+              setScreenValue(
+                c.mantra?.ui?.card_subtitle || c.mantra?.one_line || "",
+                "companion_mantra_one_line",
+              );
+              setScreenValue(c.mantra?.core?.id || c.mantra?.id || null, "companion_mantra_id");
+              setScreenValue(c.sankalp?.core?.line || c.sankalp?.line || "", "companion_sankalp_line");
+              setScreenValue(c.sankalp?.one_line || "", "companion_sankalp_one_line");
+              setScreenValue(c.sankalp?.core?.id || c.sankalp?.id || null, "companion_sankalp_id");
+              setScreenValue(c.practice?.core?.title || c.practice?.title || "", "companion_practice_title");
+              setScreenValue(c.practice?.one_line || "", "companion_practice_one_line");
+              setScreenValue(c.practice?.core?.id || c.practice?.id || null, "companion_practice_id");
+            }
+          } else if (currentTurn === 6) {
+            if (p.chip_id === "play_briefing") {
+              draft.briefing_requested = true;
+            }
+          } else if (currentTurn === 7) {
+            // Completion
+            await mitraTrackEvent("onboarding_completed", {
+              meta: {
+                friction: draft.friction_id,
+                state: draft.state_id,
+                mode: draft.mode,
+                free_form_count:
+                  (draft.friction_freeform ? 1 : 0) + (draft.state_freeform ? 1 : 0),
+              },
+            });
+            setScreenValue(null, "onboarding_draft_state");
+            setScreenValue(null, "onboarding_turn");
+            loadScreen("companion_dashboard", "day_active");
+            break;
+          }
+
+          setScreenValue(draft, "onboarding_draft_state");
+          setScreenValue(nextTurn, "onboarding_turn");
+          loadScreen("welcome_onboarding", `turn_${nextTurn}`);
+        } catch (err) {
+          console.error("[onboarding_turn_response] failed:", err);
+        }
         break;
       }
 

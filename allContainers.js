@@ -6249,3 +6249,177 @@ export const ContainerRegistry = {
     },
   },
 };
+
+// =============================================================================
+// Week 1 — Welcome Onboarding (Mitra v3 Moments 1-7)
+// Web counterpart: kalpx-frontend/src/containers/PortalContainer.vue (replaced
+//   by a 7-turn conversation thread in RN; no direct 1:1 in web).
+// Spec: docs/specs/mitra-v3-experience/screens/route_welcome_onboarding.md §1, §6
+// Regression cases guarded: REG-001 (draft cleanup on completion in
+//   actionExecutor onboarding_turn_response), REG-015 (no auto-advance), REG-016
+//   (turns 4 & 5 have no open_input).
+// =============================================================================
+
+const _onResp = { type: "onboarding_turn_response" };
+
+export const WelcomeOnboardingContainer = {
+  container_id: "welcome_onboarding",
+  container_type: "welcome_onboarding",
+  states: {
+    turn_1: {
+      tone: { theme: "gold_dark", mood: "steady" },
+      blocks: [
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn1",
+          mitra_message: [
+            "I'm Mitra. I'm here to help you live with more clarity, rhythm, and steadiness — in the difficult moments and the beautiful ones.",
+            "I pay attention to timing, inner weather, and the patterns that shape your days.",
+          ],
+          reply_chips: [
+            { id: "ready", label: "I'd like that", style: "primary" },
+            { id: "returning", label: "I'm returning — I've been here before", style: "secondary" },
+          ],
+          open_input: { enabled: true, placeholder: "Or tell me why you're here...", max_length: 400 },
+          voice_available: true,
+          on_response: _onResp,
+        },
+      ],
+    },
+
+    turn_2: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn2",
+          mitra_message:
+            "Before I can help, I want to understand what matters most to you right now. Not a problem to solve — but where your life is asking for more attention. What's alive for you?",
+          reply_chips: [
+            { id: "work_clarity", label: "Work needs more clarity", style: "secondary" },
+            { id: "relationship", label: "A relationship needs attention", style: "secondary" },
+            { id: "mind_quiet", label: "My mind needs quiet", style: "secondary" },
+            { id: "uncertain", label: "I'm navigating something uncertain", style: "secondary" },
+            { id: "low_energy", label: "My energy is low and I want it back", style: "secondary" },
+            { id: "searching_identity", label: "I'm searching for who I really am", style: "secondary" },
+            { id: "spiritual", label: "I want to go deeper spiritually", style: "secondary" },
+          ],
+          open_input: { enabled: true, placeholder: "Or tell me in your own words...", max_length: 400 },
+          voice_available: true,
+          on_response: _onResp,
+        },
+      ],
+    },
+
+    turn_3: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn3",
+          mitra_message:
+            "{{friction_label}}. I understand that one well. How does it feel in you today — not what caused it, just the texture of it right now?",
+          reply_chips: [
+            { id: "activated", label: "Activated — wired, running fast", style: "secondary" },
+            { id: "drained", label: "Drained — empty, nothing left", style: "secondary" },
+            { id: "foggy", label: "Foggy — can't see clearly", style: "secondary" },
+            { id: "heavy", label: "Heavy — everything weighs", style: "secondary" },
+            { id: "restless", label: "Restless — moving but going nowhere", style: "secondary" },
+            { id: "clear_but_full", label: "Actually clear — but there's a lot to hold", style: "secondary" },
+          ],
+          open_input: { enabled: true, placeholder: "Or describe it...", max_length: 400 },
+          voice_available: true,
+          on_response: _onResp,
+        },
+      ],
+    },
+
+    turn_4: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn4",
+          mitra_message:
+            "{{onboarding_state_ack}} I can speak to you, or we can keep things written and quiet. What feels right?",
+          reply_chips: [],
+          open_input: { enabled: false },
+          voice_available: false,
+          on_response: null,
+        },
+        { type: "voice_text_fork", on_response: _onResp },
+      ],
+    },
+
+    turn_5: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn5",
+          mitra_message:
+            "One more thing. I draw from living traditions — Sanatan wisdom about rhythm, awareness, and right action. Some people want that language visible. Some prefer I keep things simple. What feels natural?",
+          reply_chips: [],
+          open_input: { enabled: false },
+          voice_available: false,
+          on_response: null,
+        },
+        { type: "guidance_mode_picker", on_response: _onResp },
+      ],
+    },
+
+    turn_6: {
+      tone: { theme: "gold_dark", mood: "steady" },
+      blocks: [
+        {
+          type: "first_recognition",
+          label: "RECOGNITION",
+          emphasized_line:
+            "Your {{friction_label}} is real — and the {{state_label}} you're in right now is the body's honest response to it.",
+          body_paragraphs: [
+            "Today might not be a day for pushing — it might be a day for {{recommended_posture}}.",
+            "But here's what I also see: you showed up. You're here, paying attention to your inner life. That's not small.",
+            "I built something for you. A practice, an intention, and a morning anchor. Want to hear your first briefing?",
+          ],
+        },
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn6",
+          mitra_message: "",
+          reply_chips: [
+            { id: "play_briefing", label: "Play my first briefing", style: "primary" },
+            { id: "show_path", label: "Show me my path first", style: "secondary" },
+          ],
+          open_input: { enabled: true, placeholder: "Ask me something", max_length: 400 },
+          voice_available: true,
+          on_response: _onResp,
+        },
+      ],
+    },
+
+    turn_7: {
+      tone: { theme: "gold_dark", mood: "steady" },
+      blocks: [
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn7_msg",
+          mitra_message: "This is what I'm holding for you today:",
+          reply_chips: [],
+          open_input: { enabled: false },
+          voice_available: false,
+          on_response: null,
+        },
+        { type: "path_emerges" },
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn7_cta",
+          mitra_message: "",
+          reply_chips: [{ id: "ready", label: "I'm ready", style: "primary" }],
+          open_input: { enabled: true, placeholder: "I have a question", max_length: 400 },
+          voice_available: true,
+          on_response: _onResp,
+        },
+      ],
+    },
+  },
+};

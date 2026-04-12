@@ -351,6 +351,49 @@ export async function mitraJourneyCompanion(): Promise<any> {
   }
 }
 
+/**
+ * Week 1 — Welcome Onboarding APIs (Mitra v3 Moments 1-7).
+ * Web counterpart: kalpx-frontend/src/engine/actionExecutor.js — mitra endpoints
+ * Spec: route_welcome_onboarding.md §6
+ */
+
+/** POST mitra/onboarding/turn/ — persist per-turn response (analytics + draft state). */
+export async function postOnboardingTurn(turnNumber: number, payload: any): Promise<any> {
+  try {
+    const res = await api.post('mitra/onboarding/turn/', {
+      turn_number: turnNumber,
+      ...payload,
+      tz: getTz(),
+    });
+    return res.data;
+  } catch (err: any) {
+    console.warn(`[MITRA] onboarding/turn ${turnNumber} failed:`, err.message);
+    return null;
+  }
+}
+
+/** POST mitra/journey/create/ — create a new journey at onboarding completion. */
+export async function postJourneyCreate(payload: any): Promise<any> {
+  try {
+    const res = await api.post('mitra/journey/create/', { ...payload, tz: getTz() });
+    return res.data;
+  } catch (err: any) {
+    console.error('[MITRA] journey/create failed:', err.message);
+    return null;
+  }
+}
+
+/** PATCH mitra/companion-state/ — write guidance_mode and other prefs. */
+export async function patchCompanionState(patch: Record<string, any>): Promise<any> {
+  try {
+    const res = await api.patch('mitra/companion-state/', patch);
+    return res.data;
+  } catch (err: any) {
+    console.warn('[MITRA] companion-state PATCH failed:', err.message);
+    return null;
+  }
+}
+
 /** POST mitra/journey/welcome-back/ — Submit welcome-back decision (continue | fresh). */
 export async function mitraJourneyWelcomeBack(decision: 'continue' | 'fresh'): Promise<any> {
   try {

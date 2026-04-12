@@ -73,6 +73,13 @@ import TrendChartBlock from '../blocks/TrendChartBlock';
 import VoiceRecorderBlock from '../blocks/VoiceRecorderBlock';
 import ActivityStatsBlock from '../blocks/ActivityStatsBlock';
 
+// Week 1 — Welcome Onboarding blocks (Mitra v3 Moments 1-7)
+import OnboardingConversationTurn from '../blocks/OnboardingConversationTurn';
+import VoiceTextForkBlock from '../blocks/VoiceTextForkBlock';
+import GuidanceModePicker from '../blocks/GuidanceModePicker';
+import FirstRecognitionBlock from '../blocks/FirstRecognitionBlock';
+import PathEmergesBlock from '../blocks/PathEmergesBlock';
+
 const blockMap: Record<string, React.ComponentType<any>> = {
   // Original 11 blocks
   headline: HeadlineBlock,
@@ -140,6 +147,12 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   voice_recorder: VoiceRecorderBlock,
   progress_section: ProgressSectionBlock,
   activity_stats: ActivityStatsBlock,
+  // Week 1 — Welcome Onboarding
+  onboarding_conversation_turn: OnboardingConversationTurn,
+  voice_text_fork: VoiceTextForkBlock,
+  guidance_mode_picker: GuidanceModePicker,
+  first_recognition: FirstRecognitionBlock,
+  path_emerges: PathEmergesBlock,
 };
 
 interface BlockRendererProps {
@@ -203,6 +216,8 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block, textColor }) => {
     'cycle_reflection', 'mantra_selection_list', 'alignment_selector',
     'form_fields', 'baseline_slider', 'floating_button', 'link_text',
     'card_list', 'insight_box',
+    // Week 1 onboarding blocks — all dispatch their own on_response actions
+    'onboarding_conversation_turn', 'voice_text_fork', 'guidance_mode_picker',
   ]);
 
   if (interpolatedBlock.action && !selfActionBlocks.has(interpolatedBlock.type)) {

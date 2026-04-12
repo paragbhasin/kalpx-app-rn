@@ -229,9 +229,18 @@ export const CompanionDashboardContainer = {
         // to guarantee ordering & presence regardless of schema payload.
         { type: "morning_briefing", position: "body" },
         { type: "focus_phrase", position: "body" },
+        // Week 6 — Predictive Alert (Moment 28). Self-hides when
+        // screenData.predictive_alert is null (flag-off / 404 / dismissed).
+        // Spec: embedded_predictive_alert_card.md §7 — slot below
+        // MorningBriefing, above CheckInCard.
+        { type: "predictive_alert_card", position: "body" },
         { type: "cycle_signal_bar", position: "body" },
         { type: "clear_window_banner", position: "body" },
         { type: "core_items_list", position: "body" },
+        // Week 6 — Recommended Additional (Moment 30). Self-hides when
+        // screenData.recommended_additional is null. Below triad, above
+        // check-in per spec §7.
+        { type: "recommended_additional_card", position: "body" },
         { type: "check_in_card_compact", position: "body" },
         // Practice Access Cards
         {
@@ -403,6 +412,55 @@ export const CompanionDashboardContainer = {
         { type: "cycle_signal_bar", position: "body" },
         { type: "core_items_list", position: "body" },
       ],
+    },
+
+    // Week 6 — post_conflict_morning dashboard variant (Moment 39).
+    // Spec: embedded_post_conflict_gentleness_card.md §7.
+    // PostConflictGentlenessCard REPLACES focus_phrase slot on this variant;
+    // standard focus_phrase is NOT rendered adjacent on this morning.
+    post_conflict_morning: {
+      tone: { theme: "light_sandal", mood: "steady" },
+      meta: {
+        requires_active_cycle: true,
+        variant: "post_conflict_morning",
+      },
+      dashboard_config: {
+        status_messages: { default: "Go soft today" },
+        instruction_text:
+          "Yesterday was heavy. Today, just begin.",
+      },
+      blocks: [
+        {
+          type: "micro_label",
+          content: "DAY {{day_number}} OF {{total_days}}",
+          position: "header",
+          variant: "identity_label",
+        },
+        { type: "morning_briefing", position: "body" },
+        // NOTE: focus_phrase intentionally omitted — replaced by the
+        // post_conflict_gentleness_card in this variant.
+        { type: "post_conflict_gentleness_card", position: "body" },
+        { type: "cycle_signal_bar", position: "body" },
+        { type: "core_items_list", position: "body" },
+      ],
+    },
+
+    // Week 6 — Prep Coaching overlay (Moment 27).
+    // Spec: overlay_prep_coaching.md §1, §14A.
+    prep_coaching_sheet: {
+      overlay: true,
+      tone: { theme: "light_sandal", mood: "steady" },
+      meta: { variant: "prep_coaching_sheet" },
+      blocks: [{ type: "prep_coaching_sheet", position: "body" }],
+    },
+
+    // Week 6 — Entity Recognition overlay (Moment 29).
+    // Spec: overlay_entity_recognition.md §1, §14A.
+    entity_recognition_sheet: {
+      overlay: true,
+      tone: { theme: "light_sandal", mood: "steady" },
+      meta: { variant: "entity_recognition_sheet" },
+      blocks: [{ type: "entity_recognition_sheet", position: "body" }],
     },
 
     // 2️⃣ IDENTITY STATE INDICATOR

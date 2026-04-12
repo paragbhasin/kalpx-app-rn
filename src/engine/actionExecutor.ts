@@ -32,6 +32,12 @@ import {
   postOnboardingTurn,
   patchCompanionState,
   getClearWindow,
+  // Week 6 — Companion Intelligence
+  getPrepContext,
+  getPredictiveAlerts,
+  getRecommendedAdditional,
+  getPostConflictContext,
+  patchEntity,
 } from "./mitraApi";
 
 // Week 1 — friction chip → focus mapping. Web parity: actionExecutor.js FRICTION_MAP.
@@ -3429,6 +3435,251 @@ export async function executeAction(
         } catch (err) {
           console.error("[onboarding_turn_response] failed:", err);
         }
+        break;
+      }
+
+      // ================================================================
+      // WEEK 6 — COMPANION INTELLIGENCE (Moments 27, 28, 29, 30, 39)
+      // All endpoints gated by Phase 1.5 / Phase 3 flags; they 404 on dev
+      // until toggled. Every handler below is 404-tolerant (mitraApi helpers
+      // return null) and must leave the dashboard intact on failure.
+      // ================================================================
+
+      // fetch_companion_intelligence — parallel fetch of all 5 endpoints.
+      // Called as dashboard enrichment (e.g. after generate-companion).
+      // Stores results in screenData; cards then render or hide based on
+      // non-null presence. REG-015: none of these fetches touch runner_* state.
+      case "fetch_companion_intelligence": {
+        const results = await Promise.allSettled([
+          getPrepContext(payload?.prep_params || {}),
+          getPredictiveAlerts(),
+          getRecommendedAdditional(),
+          getPostConflictContext(),
+        ]);
+        const [prep, alerts, rec, postConflict] = results.map((r) =>
+          r.status === "fulfilled" ? r.value : null,
+        );
+
+        // predictive_alert: pick highest-confidence, not-dismissed-today, not muted.
+        const dismissedAt =
+          screenState.predictive_alert_dismissed_at || 0;
+        const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+        const withinCooldown =
+          dismissedAt && Date.now() - dismissedAt < sevenDaysMs;
+        let topAlert = null;
+        if (alerts && Array.isArray(alerts.alerts)) {
+          topAlert = alerts.alerts
+            .filter((a: any) => (a.confidence ?? 0) >= 0.6)
+            .filter((a: any) => a.entity?.status !== "muted")
+            .sort((a: any, b: any) => (b.confidence || 0) - (a.confidence || 0))[0] || null;
+        }
+        setScreenValue(prep || null, "prep_context");
+        setScreenValue(withinCooldown ? null : topAlert, "predictive_alert");
+        setScreenValue(rec || null, "recommended_additional");
+        setScreenValue(postConflict || null, "post_conflict_pending");
+
+        // Provisional entity: first eligible. (Endpoint returns {entities:[...]})
+        if (alerts === null && rec === null && prep === null && postConflict === null) {
+          // All flags off — nothing to do further.
+        }
+        break;
+      }
+
+      // open_prep_sheet — opens prep_coaching_sheet overlay. If we do not
+      // already have prep_context, fetch it lazily.
+      case "open_prep_sheet": {
+        const existing = screenState.prep_context;
+        if (!existing) {
+          const prep = await getPrepContext({
+            context_type: payload?.context_type,
+          });
+          setScreenValue(prep || null, "prep_context");
+        }
+        loadScreen({
+          container_id: "companion_dashboard",
+          state_id: "prep_coaching_sheet",
+        });
+        break;
+      }
+
+      // ack_prep — Moment 27 "Got it" dismiss.
+      case "ack_prep": {
+        const ctx = screenState.prep_context || {};
+        await mitraTrackEvent("prep_acknowledged", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { context_type: ctx.context_type, surface: ctx.surface },
+        });
+        // REG-003: overlay dismissal clears sheet-local state and does NOT
+        // touch runner_* fields.
+        setScreenValue(null, "prep_context");
+        goBack();
+        break;
+      }
+
+      // dismiss_predictive_alert — Moment 28 "Later" tap. Cools 7d.
+      case "dismiss_predictive_alert": {
+        setScreenValue(null, "predictive_alert");
+        setScreenValue(Date.now(), "predictive_alert_dismissed_at");
+        // Fire-and-forget track-event. No PATCH needed (dismissal is local).
+        mitraTrackEvent("predictive_alert_dismissed", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { id: payload?.id, reason: "not_this_time" },
+        });
+        break;
+      }
+
+      // confirm_entity — Moment 29 "Yes that's them".
+      case "confirm_entity": {
+        const id = payload?.id;
+        if (id) {
+          await patchEntity(id, {
+            status: "confirmed",
+            relation_note: payload?.relation_note,
+          });
+          mitraTrackEvent("entity_confirmed", {
+            journeyId: screenState.journey_id,
+            dayNumber: screenState.day_number || 1,
+            meta: { entity_id: id },
+          });
+        }
+        setScreenValue(null, "entity_recognition_pending");
+        goBack();
+        break;
+      }
+
+      // reject_entity — Moment 29 "Different person" / "Not a person".
+      case "reject_entity": {
+        const id = payload?.id;
+        if (id) {
+          await patchEntity(id, { status: "dismissed" });
+          mitraTrackEvent("entity_dismissed", {
+            journeyId: screenState.journey_id,
+            dayNumber: screenState.day_number || 1,
+            meta: { entity_id: id, reason: payload?.reason },
+          });
+        }
+        setScreenValue(null, "entity_recognition_pending");
+        goBack();
+        break;
+      }
+
+      // ================================================================
+      // start_recommended_additional — Moment 30 "Begin" + Moment 27
+      // "Prepare now" + Moment 39 "Start gentle".
+      //
+      // CRITICAL REG-015: this handler is the single chokepoint for
+      // recommended-additional runner starts. The source is hard-coded
+      // to "additional_recommended" so no caller can accidentally start a
+      // core runner. Any future edit here must preserve this invariant:
+      //
+      //   assert(source === "additional_recommended")
+      //
+      // The start_runner case (see above) in turn stamps runner_source
+      // which track_completion reads without modification — the two
+      // together guarantee no leak to core.
+      // ================================================================
+      case "start_recommended_additional": {
+        const sp = payload || {};
+        // REG-015 assertion — hard-coded source; do NOT accept a payload override.
+        const source = "additional_recommended"; // assert: never "core"
+        const variant = sp.variant || sp.item?.item_type || "practice";
+        const item = sp.item || null;
+        const intent = sp.intent || "recommended";
+
+        // Track acceptance event for analytics.
+        mitraTrackEvent("recommended_additional_accepted", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            item_type: item?.item_type,
+            item_id: item?.item_id,
+            intent,
+            duration_sec: sp.duration_sec,
+          },
+        });
+
+        // Clear the card after accept (it's consumed).
+        if (intent === "recommended") {
+          setScreenValue(null, "recommended_additional");
+        } else if (intent === "prep") {
+          // Prep sheet stays closed after runner starts.
+          setScreenValue(null, "prep_context");
+        } else if (intent === "post_conflict_soften") {
+          setScreenValue(null, "post_conflict_pending");
+        }
+
+        // Delegate to start_runner with the enforced source. This keeps
+        // all runner setup logic in one place (INV-3, INV-6).
+        await executeAction(
+          {
+            type: "start_runner",
+            payload: {
+              variant,
+              item,
+              source,
+              duration_sec: sp.duration_sec,
+              target_reps: sp.target_reps,
+              steps: sp.steps,
+            },
+            currentScreen: action.currentScreen,
+          },
+          context,
+        );
+        break;
+      }
+
+      // dismiss_recommended_additional — Moment 30 "Not now".
+      case "dismiss_recommended_additional": {
+        setScreenValue(null, "recommended_additional");
+        setScreenValue(Date.now(), "recommended_additional_dismissed_at");
+        mitraTrackEvent("recommended_additional_dismissed", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
+        });
+        break;
+      }
+
+      // ack_post_conflict — Moment 39 "I'm okay".
+      case "ack_post_conflict": {
+        const threadId = payload?.thread_id;
+        if (threadId) {
+          try {
+            await api.patch(`mitra/dissonance-threads/${threadId}/`, {
+              status: "acknowledged",
+            });
+          } catch (err: any) {
+            if (err?.response?.status !== 404) {
+              console.warn("[ack_post_conflict] PATCH failed:", err.message);
+            }
+          }
+        }
+        setScreenValue(null, "post_conflict_pending");
+        setScreenValue(true, "post_conflict_acked");
+        mitraTrackEvent("post_conflict_acknowledged", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { thread_id: threadId },
+        });
+        break;
+      }
+
+      // open_post_conflict_voice_note — Moment 39 "Something to say?".
+      case "open_post_conflict_voice_note": {
+        mitraTrackEvent("post_conflict_voice_note_opened", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { thread_id: payload?.thread_id },
+        });
+        // Voice-note overlay is a Phase 3 surface outside Week 6 scope; we
+        // reuse the reflection voice surface if present, else fall back to
+        // reflection_entry.
+        loadScreen({
+          container_id: "reflection_entry",
+          state_id: "voice_note",
+        });
         break;
       }
 

@@ -94,6 +94,13 @@ import SankalpHoldBlock from '../blocks/SankalpHoldBlock';
 import PracticeTimerBlock from '../blocks/PracticeTimerBlock';
 import CompletionReturnTransient from '../blocks/CompletionReturnTransient';
 
+// Week 6 — Companion Intelligence (Mitra v3 Moments 27, 28, 29, 30, 39)
+import PrepCoachingSheet from '../blocks/PrepCoachingSheet';
+import PredictiveAlertCard from '../blocks/PredictiveAlertCard';
+import EntityRecognitionSheet from '../blocks/EntityRecognitionSheet';
+import RecommendedAdditionalCard from '../blocks/RecommendedAdditionalCard';
+import PostConflictGentlenessCard from '../blocks/PostConflictGentlenessCard';
+
 const blockMap: Record<string, React.ComponentType<any>> = {
   // Original 11 blocks
   headline: HeadlineBlock,
@@ -179,6 +186,12 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   sankalp_hold: SankalpHoldBlock,
   practice_timer: PracticeTimerBlock,
   completion_return: CompletionReturnTransient,
+  // Week 6 — Companion Intelligence
+  prep_coaching_sheet: PrepCoachingSheet,
+  predictive_alert_card: PredictiveAlertCard,
+  entity_recognition_sheet: EntityRecognitionSheet,
+  recommended_additional_card: RecommendedAdditionalCard,
+  post_conflict_gentleness_card: PostConflictGentlenessCard,
 };
 
 interface BlockRendererProps {
@@ -249,6 +262,9 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block, textColor }) => {
     'check_in_card_compact', 'cycle_signal_bar', 'clear_window_banner',
     // Week 3 runner blocks — all dispatch their own completion actions
     'mantra_runner_display', 'sankalp_hold', 'practice_timer', 'completion_return',
+    // Week 6 companion intelligence — all handle their own CTAs / dispatch
+    'prep_coaching_sheet', 'predictive_alert_card', 'entity_recognition_sheet',
+    'recommended_additional_card', 'post_conflict_gentleness_card',
   ]);
 
   if (interpolatedBlock.action && !selfActionBlocks.has(interpolatedBlock.type)) {

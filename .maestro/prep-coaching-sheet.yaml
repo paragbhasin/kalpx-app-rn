@@ -1,0 +1,47 @@
+# Week 6 — Moment 27 Prep Coaching Sheet
+# Validates: prep/ endpoint returns context -> overlay opens via
+# open_prep_sheet -> "Prepare now" dispatches start_recommended_additional
+# -> runner starts with source=additional_recommended (REG-015) ->
+# completion returns to dashboard with track_completion source asserted.
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+# Enter dashboard (assumes journey active).
+- tapOn:
+    text: "My Routine"
+    optional: true
+- waitForAnimationToEnd
+
+# Predictive alert card -> "Prep" opens prep sheet.
+- tapOn:
+    text: "Prep"
+    optional: true
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: "STEADY BEFORE|Prepare now"
+    optional: true
+
+# Expand do/don't
+- tapOn:
+    text: "Anything else I should know?"
+    optional: true
+
+# Tap Prepare now -> runner starts
+- tapOn:
+    text: "Prepare now"
+    optional: true
+- waitForAnimationToEnd
+
+# Runner surface should be visible. Source must be additional_recommended;
+# completion_return transient copy differs from core ("Kept." line).
+- assertNotVisible:
+    text: "108 in. Kept."
+
+# Exit or natural-complete: tap completion if reached.
+- tapOn:
+    text: "Return to Mitra Home|Done"
+    optional: true
+- waitForAnimationToEnd

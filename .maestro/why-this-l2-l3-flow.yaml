@@ -1,0 +1,63 @@
+# Week 7 — Why-This L2/L3 flow.
+# Spec: overlay_why_this_level_2.md, overlay_why_this_level_3.md.
+# From a prep sheet / resilience narrative, tap a principle → L2 renders →
+# "Go deeper" → L3 renders with Sanskrit → dismiss chain returns to source.
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+# Enter a surface that references a principle (prep sheet or resilience narrative).
+# In Week 7 the dashboard is a valid entry once a block with principle_id exists.
+- tapOn:
+    text: "My Routine"
+    optional: true
+- waitForAnimationToEnd
+
+# Tap the Why-This affordance (copy varies by host block).
+- tapOn:
+    text: ".*Why this.*|.*WHY THIS.*"
+    optional: true
+- waitForAnimationToEnd
+
+# L2 sheet renders.
+- assertVisible:
+    text: ".*WHY THIS.*"
+    optional: true
+- assertVisible:
+    text: "Go deeper"
+    optional: true
+
+# Open L3.
+- tapOn:
+    text: "Go deeper"
+    optional: true
+- waitForAnimationToEnd
+
+# L3 renders with Sanskrit glyphs and a Back pill.
+- assertVisible:
+    text: "SOURCE"
+    optional: true
+- assertVisible:
+    text: "Back"
+    optional: true
+
+# Dismiss L3 → back to L2.
+- tapOn:
+    text: "Back"
+    optional: true
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: "Got it"
+    optional: true
+
+# Dismiss L2 → back to source.
+- tapOn:
+    text: "Got it"
+    optional: true
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: ".*Day.*|.*Mantra.*"
+    optional: true

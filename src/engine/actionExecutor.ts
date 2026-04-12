@@ -4095,6 +4095,201 @@ export async function executeAction(
         break;
       }
 
+      case "open_why_this_l2": {
+        const principleId = payload?.principle_id;
+        if (!principleId) {
+          console.warn("[open_why_this_l2] missing principle_id");
+          break;
+        }
+        const principle = await getPrinciple(principleId);
+        setScreenValue(principle, "why_this_principle");
+        setScreenValue(null, "why_this_source");
+        loadScreen({
+          container_id: (screenState._overlay_parent_container as string) ||
+            screenState.currentContainerId || "companion_dashboard",
+          state_id: "why_this_l2",
+        } as any);
+        mitraTrackEvent("why_this_l2_opened", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { principle_id: principleId },
+        });
+        break;
+      }
+
+      case "open_why_this_l3": {
+        const principleId =
+          payload?.principle_id ||
+          (screenState.why_this_principle && screenState.why_this_principle.id);
+        if (!principleId) {
+          console.warn("[open_why_this_l3] missing principle_id");
+          break;
+        }
+        const source = await getPrincipleSource(principleId);
+        setScreenValue(source, "why_this_source");
+        loadScreen({
+          container_id: (screenState.currentContainerId as string) || "companion_dashboard",
+          state_id: "why_this_l3",
+        } as any);
+        mitraTrackEvent("why_this_l3_opened", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { principle_id: principleId },
+        });
+        break;
+      }
+
+      // ================================================================
+      // WEEK 7 — Grief room enter/exit.
+      // Spec: route_support_grief.md.
+      // REG-015: clears runner_* so grief never overlaps with a practice
+      // runner. Exit clears only grief_session_* (no runner touches).
+      // ================================================================
+      case "enter_grief_room": {
+        // REG-015: strip runner state so grief doesn't leak into core flow.
+        setScreenValue(null, "runner_variant");
+        setScreenValue(null, "runner_source");
+        setScreenValue(null, "runner_active_item");
+        setScreenValue(0, "runner_reps_completed");
+        setScreenValue(0, "runner_step_index");
+        setScreenValue(0, "runner_duration_actual_sec");
+        setScreenValue(null, "runner_start_time");
+
+        setScreenValue(true, "grief_session_active");
+        setScreenValue(Date.now(), "grief_session_start");
+
+        const ctx = await getGriefContext();
+        if (ctx) setScreenValue(ctx, "grief_context");
+
+        loadScreen({ container_id: "support_grief", state_id: "room" } as any);
+        mitraTrackEvent("grief_room_entered", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
+        });
+        break;
+      }
+
+      case "exit_grief_room": {
+        setScreenValue(false, "grief_session_active");
+        setScreenValue(null, "grief_session_start");
+        setScreenValue(null, "grief_context");
+        mitraTrackEvent("grief_room_exited", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
+        });
+        loadScreen({
+          container_id: "companion_dashboard",
+          state_id: "day_active",
+        } as any);
+        break;
+      }
+
+      // Inner-room muted CTAs: they stay in the room — no navigation.
+      case "grief_stay": {
+        mitraTrackEvent("grief_sit_with_me", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
+        });
+        break;
+      }
+      case "grief_voice_note": {
+        // Week 4 voice consent flow owns the actual recorder. Here we just
+        // mark intent and track; the sheet opens from Week 4 hooks if consent.
+        setScreenValue(true, "grief_voice_note_requested");
+        mitraTrackEvent("grief_voice_note_requested", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
+        });
+        break;
+      }
+
+      // ================================================================
+      // WEEK 7 — Loneliness room enter/exit. Symmetric to grief.
+      // Spec: route_support_loneliness.md.
+      // ================================================================
+      case "enter_loneliness_room": {
+        setScreenValue(null, "runner_variant");
+        setScreenValue(null, "runner_source");
+        setScreenValue(null, "runner_active_item");
+        setScreenValue(0, "runner_reps_completed");
+        setScreenValue(0, "runner_step_index");
+        setScreenValue(0, "runner_duration_actual_sec");
+        setScreenValue(null, "runner_start_time");
+
+        setScreenValue(true, "loneliness_session_active");
+        setScreenValue(Date.now(), "loneliness_session_start");
+
+        const ctx = await getLonelinessContext();
+        if (ctx) setScreenValue(ctx, "loneliness_context");
+
+        loadScreen({
+          container_id: "support_loneliness",
+          state_id: "room",
+        } as any);
+        mitraTrackEvent("loneliness_room_entered", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
+        });
+        break;
+      }
+
+      case "exit_loneliness_room": {
+        setScreenValue(false, "loneliness_session_active");
+        setScreenValue(null, "loneliness_session_start");
+        setScreenValue(null, "loneliness_context");
+        mitraTrackEvent("loneliness_room_exited", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
+        });
+        loadScreen({
+          container_id: "companion_dashboard",
+          state_id: "day_active",
+        } as any);
+        break;
+      }
+
+      // ================================================================
+      // WEEK 7 — Gratitude joy-signal submission.
+      // Spec: embedded_gratitude_joy_card.md.
+      // ================================================================
+      case "submit_gratitude_joy": {
+        const text = (payload?.text || "").trim();
+        if (!text) break;
+        const signalId =
+          payload?.signal_id ||
+          (screenState.joy_signal && screenState.joy_signal.id) ||
+          null;
+        await postGratitudeJoy(text, signalId);
+        // Clear the signal so the card collapses and doesn't re-render today.
+        setScreenValue(null, "joy_signal");
+        mitraTrackEvent("gratitude_joy_submitted", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { length: text.length },
+        });
+        break;
+      }
+
+      // ================================================================
+      // WEEK 7 — Season banner dismiss (7d hide).
+      // Spec: embedded_season_change_banner.md.
+      // ================================================================
+      case "dismiss_season_banner": {
+        setScreenValue(Date.now(), "season_banner_dismissed_at");
+        mitraTrackEvent("season_banner_dismissed", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
+        });
+        break;
+      }
+
       default:
         console.warn(`[ACTION] Unknown action type: ${type}`);
     }

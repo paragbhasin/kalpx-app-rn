@@ -31,6 +31,9 @@ import SupportCheckinContainer from "../containers/SupportCheckinContainer";
 // Week 5 — Reflection containers (Moments 23, 34)
 import ReflectionWeeklyContainer from "../containers/ReflectionWeeklyContainer";
 import ReflectionEveningContainer from "../containers/ReflectionEveningContainer";
+// Week 7 — Support routes (Moments 46, 47)
+import GriefRoomContainer from "../containers/GriefRoomContainer";
+import LonelinessRoomContainer from "../containers/LonelinessRoomContainer";
 
 const containerMap: Record<string, React.ComponentType<any>> = {
   portal: PortalContainer,
@@ -57,6 +60,9 @@ const containerMap: Record<string, React.ComponentType<any>> = {
   // Week 5
   reflection_weekly: ReflectionWeeklyContainer,
   reflection_evening: ReflectionEveningContainer,
+  // Week 7 — Support routes
+  support_grief: GriefRoomContainer,
+  support_loneliness: LonelinessRoomContainer,
 };
 
 const ScreenRenderer: React.FC = () => {

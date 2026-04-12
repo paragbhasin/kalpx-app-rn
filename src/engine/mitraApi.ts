@@ -625,3 +625,64 @@ export async function patchEntity(
   }
 }
 
+
+// ---------------------------------------------------------------------------
+// Week 7 — Why-This + grief/loneliness/joy APIs (Moments 36, 37, 45, 46, 47)
+// ---------------------------------------------------------------------------
+
+export async function getPrinciple(id: string | number): Promise<any> {
+  if (!id) return null;
+  try {
+    const res = await api.get(`mitra/principles/${id}/`);
+    return res.data || null;
+  } catch (err: any) {
+    console.warn(`[MITRA] principles/${id} failed (tolerated):`, err.message);
+    return null;
+  }
+}
+
+/** GET mitra/principles/{id}/sources/ — Principle source for Why-This L3. */
+export async function getPrincipleSource(id: string | number): Promise<any> {
+  if (!id) return null;
+  try {
+    const res = await api.get(`mitra/principles/${id}/sources/`);
+    return res.data || null;
+  } catch (err: any) {
+    console.warn(`[MITRA] principles/${id}/sources failed (tolerated):`, err.message);
+    return null;
+  }
+}
+
+/** GET mitra/support/grief-context/ — Grief room contextual copy/prompt. */
+export async function getGriefContext(): Promise<any> {
+  try {
+    const res = await api.get('mitra/support/grief-context/');
+    return res.data || null;
+  } catch (err: any) {
+    console.warn('[MITRA] grief-context failed (tolerated):', err.message);
+    return null;
+  }
+}
+
+/** GET mitra/support/loneliness-context/ — Loneliness room context + chant. */
+export async function getLonelinessContext(): Promise<any> {
+  try {
+    const res = await api.get('mitra/support/loneliness-context/');
+    return res.data || null;
+  } catch (err: any) {
+    console.warn('[MITRA] loneliness-context failed (tolerated):', err.message);
+    return null;
+  }
+}
+
+/** GET mitra/joy-signal/ — Today's joy signal (Moment 45). null when no signal. */
+export async function getJoySignal(): Promise<any> {
+  try {
+    const res = await api.get('mitra/joy-signal/');
+    return res.data || null;
+  } catch (err: any) {
+    console.warn('[MITRA] joy-signal failed (tolerated):', err.message);
+    return null;
+  }
+}
+

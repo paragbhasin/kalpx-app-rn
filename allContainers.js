@@ -236,6 +236,16 @@ export const CompanionDashboardContainer = {
         { type: "predictive_alert_card", position: "body" },
         { type: "cycle_signal_bar", position: "body" },
         { type: "clear_window_banner", position: "body" },
+        // Week 7 — conditional embedded slots.
+        // season_change_banner: visible when screenData.season_signal != null
+        //   AND screenData.season_banner_dismissed_at is stale (>7d) or null.
+        // gratitude_joy_card: visible when screenData.joy_signal != null.
+        // Both blocks self-gate by reading screenData; rendering them here
+        // unconditionally is safe — they return null when their signals are
+        // absent (flag-off / 404-tolerant).
+        // Spec: embedded_season_change_banner.md, embedded_gratitude_joy_card.md.
+        { type: "season_change_banner", position: "body", visibility_condition: "season_signal" },
+        { type: "gratitude_joy_card", position: "body", visibility_condition: "joy_signal" },
         { type: "core_items_list", position: "body" },
         // Week 6 — Recommended Additional (Moment 30). Self-hides when
         // screenData.recommended_additional is null. Below triad, above
@@ -6300,6 +6310,7 @@ export const MASTER_UI_TEXT = {
   },
 };
 
+<<<<<<< HEAD
 // ─────────────────────────────────────────────────────────────────────────────
 // WEEK 4 — SUPPORT PATH (Mitra v3 Moments 20, 21, 22, 31, 38, 42)
 // Web parity: kalpx-frontend/src/containers/AwarenessTriggerContainer.vue
@@ -6349,10 +6360,29 @@ export const SupportCheckinContainer = {
       tone: { theme: "gold_dark", mood: "celebratory" },
       overlay: true,
       blocks: [{ type: "balanced_ack_overlay" }],
+=======
+// ============================================================================
+// WEEK 7 — Support rooms + Why-This overlays.
+// Spec: route_support_grief.md, route_support_loneliness.md,
+//       overlay_why_this_level_2.md, overlay_why_this_level_3.md.
+// ============================================================================
+
+export const SupportGriefContainer = {
+  container_id: "support_grief",
+  states: {
+    room: {
+      tone: { theme: "warm_cream", mood: "steady" },
+      meta: { variant: "grief_room", reduced_motion_capable: true },
+      // Blocks array is empty — GriefRoomContainer renders its own fixed
+      // chrome (breath guide, presence line, muted CTAs, exit link). The
+      // schema is still required by the engine but carries no block list.
+      blocks: [],
+>>>>>>> mitra-v3-week7
     },
   },
 };
 
+<<<<<<< HEAD
 // Overlay container — voice sheets can mount over any parent. Two states:
 // voice_consent (first-use gate) and voice_note (recorder). Accessed only
 // via start_voice_note action; not entered via navigate_to URL.
@@ -6368,10 +6398,53 @@ export const OverlayContainer = {
       tone: { theme: "gold_dark", mood: "reflective" },
       overlay: true,
       blocks: [{ type: "voice_note_sheet" }],
+=======
+export const SupportLonelinessContainer = {
+  container_id: "support_loneliness",
+  states: {
+    room: {
+      tone: { theme: "warm_cream", mood: "steady" },
+      meta: { variant: "loneliness_room" },
+      // LonelinessRoomContainer renders its own chrome including the
+      // CompanionedChant block. Schema blocks are empty by design.
+      blocks: [],
+>>>>>>> mitra-v3-week7
     },
   },
 };
 
+<<<<<<< HEAD
+=======
+// Why-This overlays attach to whichever container was current when the
+// overlay opened. We expose them on companion_dashboard as the default host;
+// ScreenRenderer uses GenericContainer fallback when a given container_id
+// lacks that state_id, so they render consistently from any parent.
+export const WhyThisOverlayContainer = {
+  container_id: "why_this_overlay",
+  states: {
+    why_this_l2: {
+      overlay: true,
+      tone: { theme: "warm_cream", mood: "steady" },
+      meta: { variant: "why_this_l2" },
+      blocks: [{ type: "why_this_l2" }],
+    },
+    why_this_l3: {
+      overlay: true,
+      tone: { theme: "warm_cream", mood: "steady" },
+      meta: { variant: "why_this_l3" },
+      blocks: [{ type: "why_this_l3" }],
+    },
+  },
+};
+
+// Register why_this_l2 / why_this_l3 states under companion_dashboard too,
+// so open_why_this_l2 can load without changing containerId.
+CompanionDashboardContainer.states.why_this_l2 =
+  WhyThisOverlayContainer.states.why_this_l2;
+CompanionDashboardContainer.states.why_this_l3 =
+  WhyThisOverlayContainer.states.why_this_l3;
+
+>>>>>>> mitra-v3-week7
 export const ContainerRegistry = {
   portal: PortalContainer,
   portal_splash: PortalSplashContainer,
@@ -6392,6 +6465,7 @@ export const ContainerRegistry = {
   sadhana_deepen: SadhanaDeepenContainer,
   cycle_transitions: CycleTransitionsContainer,
   stable_scan: StableScanContainer,
+<<<<<<< HEAD
   // Week 4 — Support Path
   support_trigger: SupportTriggerContainer,
   support_checkin: SupportCheckinContainer,
@@ -6399,6 +6473,12 @@ export const ContainerRegistry = {
   // Week 5 — Reflection + Checkpoints
   reflection_weekly: null, // filled by post-declaration assignment
   reflection_evening: null,
+=======
+  // Week 7 — support rooms + why-this overlay host
+  support_grief: SupportGriefContainer,
+  support_loneliness: SupportLonelinessContainer,
+  why_this_overlay: WhyThisOverlayContainer,
+>>>>>>> mitra-v3-week7
   demo_container: {
     container_id: "demo_container",
     states: {

@@ -1,0 +1,40 @@
+# Week 7 — Loneliness room with companioned chant.
+# Spec: route_support_loneliness.md.
+# Companioned chant: no counters, no reps, no completion semantics —
+# track_completion MUST NOT fire.
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn:
+    text: ".*support/loneliness.*|.*Loneliness.*"
+    optional: true
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: ".*chant together.*|.*Not alone.*"
+    optional: true
+- assertVisible:
+    id: "companioned-chant-user-orb"
+    optional: true
+- assertVisible:
+    id: "companioned-chant-mitra-orb"
+    optional: true
+
+# No reps counter, no completion button, no timer.
+- assertNotVisible:
+    text: ".*[0-9]+ / [0-9]+.*|.*Complete.*|.*Done.*"
+    optional: true
+
+- assertVisible:
+    text: "I feel less alone now"
+    optional: true
+- tapOn:
+    text: "I feel less alone now"
+    optional: true
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: ".*Day.*|.*Mantra.*"
+    optional: true

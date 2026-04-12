@@ -233,6 +233,17 @@ export const CompanionDashboardContainer = {
         { type: "clear_window_banner", position: "body" },
         { type: "core_items_list", position: "body" },
         { type: "check_in_card_compact", position: "body" },
+        // Week 5 — Moment 26 embedded resilience narrative card.
+        // Spec: embedded_resilience_narrative_card.md. Conditional on
+        // resilience_narrative being present in screenData (populated by
+        // fetch_resilience_narrative action; feature flag on backend).
+        // If the fetch returns null / 404, the card renders its local
+        // template fallback (still shown — never blank).
+        {
+          type: "resilience_narrative_card",
+          position: "body",
+          visibility_condition: "resilience_narrative_slot_enabled",
+        },
         // Practice Access Cards
         {
           type: "practice_card",
@@ -5072,6 +5083,23 @@ export const CycleTransitionsContainer = {
       ],
     },
 
+    // Week 5 — Mitra v3 Moment 24 (Day 7 Checkpoint).
+    // Spec: route_checkpoint_day_7.md. New v3 block variant; legacy
+    // weekly_checkpoint (cycle_reflection block) is preserved below for
+    // back-compat — callers may route to either.
+    day_7: {
+      tone: { theme: "light_sandal", mood: "reflective" },
+      blocks: [{ type: "checkpoint_day_7" }],
+    },
+
+    // Week 5 — Mitra v3 Moment 25 (Day 14 Evolution).
+    // Spec: route_checkpoint_day_14.md. New v3 block variant alongside the
+    // legacy weekly_checkpoint state.
+    day_14: {
+      tone: { theme: "light_sandal", mood: "reflective" },
+      blocks: [{ type: "checkpoint_day_14" }],
+    },
+
     weekly_checkpoint: {
       tone: { theme: "light_sandal", mood: "reflective" },
       blocks: [
@@ -6310,6 +6338,9 @@ export const ContainerRegistry = {
   support_trigger: SupportTriggerContainer,
   support_checkin: SupportCheckinContainer,
   overlay: OverlayContainer,
+  // Week 5 — Reflection + Checkpoints
+  reflection_weekly: null, // filled by post-declaration assignment
+  reflection_evening: null,
   demo_container: {
     container_id: "demo_container",
     states: {
@@ -6601,3 +6632,44 @@ export const WelcomeOnboardingContainer = {
     },
   },
 };
+
+// =============================================================================
+// Week 5 — Reflection + Checkpoints (Mitra v3 Moments 23, 24, 25, 26, 34)
+// Specs:
+//   - route_reflection_weekly.md (Moment 23)
+//   - route_checkpoint_day_7.md (Moment 24, also rendered via cycle_transitions/day_7)
+//   - route_checkpoint_day_14.md (Moment 25, also rendered via cycle_transitions/day_14)
+//   - embedded_resilience_narrative_card.md (Moment 26, embedded in dashboard + weekly)
+//   - route_reflection_evening.md (Moment 34)
+// Web parity: kalpx-frontend/src/containers/CycleTransitionsContainer.vue +
+//   reflection section patterns.
+// Regression guards: REG-015 (draft cleanup on submit/unmount), REG-016 (CTA
+//   in bottom thumb zone — enforced inside the blocks themselves).
+// =============================================================================
+
+export const ReflectionWeeklyContainer = {
+  container_id: "reflection_weekly",
+  container_type: "reflection_weekly",
+  states: {
+    letter: {
+      tone: { theme: "light_sandal", mood: "reflective" },
+      blocks: [{ type: "weekly_reflection" }],
+    },
+  },
+};
+
+export const ReflectionEveningContainer = {
+  container_id: "reflection_evening",
+  container_type: "reflection_evening",
+  states: {
+    reflect: {
+      tone: { theme: "light_sandal", mood: "reflective" },
+      blocks: [{ type: "evening_reflection" }],
+    },
+  },
+};
+
+// Back-fill registry placeholders declared above.
+ContainerRegistry.reflection_weekly = ReflectionWeeklyContainer;
+ContainerRegistry.reflection_evening = ReflectionEveningContainer;
+

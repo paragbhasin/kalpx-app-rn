@@ -35,6 +35,9 @@ import {
   postVoiceNote,
   getVoiceNoteInterpretation,
   postInterpretIntent,
+  // Week 5 — Reflection + Checkpoints
+  getResilienceNarrative,
+  postGratitudeLedger,
 } from "./mitraApi";
 
 // Week 1 — friction chip → focus mapping. Web parity: actionExecutor.js FRICTION_MAP.
@@ -3675,12 +3678,114 @@ export async function executeAction(
         break;
       }
 
+      // ================================================================
+      // WEEK 5 — REFLECTION + CHECKPOINTS (Mitra v3 Moments 23, 24, 25, 26, 34)
+      // Web parity: kalpx-frontend/src/engine/actionExecutor.js — gratitude
+      // ledger + track-event patterns. Spec: route_reflection_evening.md,
+      // route_reflection_weekly.md, embedded_resilience_narrative_card.md.
+      //
+      // Preserve contract: checkpoint_submit (case above, ~line 2509) and
+      // seal_day (case above, ~line 2075) are unchanged.
+      // ================================================================
+
+      case "submit_evening_reflection": {
+        const p = payload || {};
+        const chip: string = p.chip || "steady";
+        const text: string = (p.text || "").trim();
+
+        await postGratitudeLedger({
+          signal_type: "evening_reflection",
+          text,
+          meta: {
+            chip,
+            journey_id: screenState.journey_id,
+            day_number: screenState.day_number || 1,
+          },
+        });
+
+        mitraTrackEvent("evening_reflection", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { chip, text_length: text.length },
+        });
+
+        setScreenValue(true, "_evening_reflection_submitted");
+        setScreenValue(null, "evening_reflection_draft");
+
+        setTimeout(() => {
+          loadScreen({
+            container_id: "companion_dashboard",
+            state_id: "day_active",
+          });
+          setScreenValue(false, "_evening_reflection_submitted");
+        }, 1800);
+        break;
+      }
+
+      case "submit_weekly_reflection": {
+        const p = payload || {};
+        const sections = p.sections || {};
+        const entries = [
+          { key: "held", signal: "weekly_held" },
+          { key: "took", signal: "weekly_took" },
+          { key: "tending", signal: "weekly_tending" },
+        ];
+
+        await Promise.all(
+          entries
+            .filter((e) => (sections[e.key] || "").trim().length > 0)
+            .map((e) =>
+              postGratitudeLedger({
+                signal_type: e.signal,
+                text: sections[e.key].trim(),
+                meta: {
+                  journey_id: screenState.journey_id,
+                  cycle_day: screenState.cycle_day || screenState.day_number,
+                },
+              }),
+            ),
+        );
+
+        mitraTrackEvent("reflection_letter_completed", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            cycle_day: screenState.cycle_day || screenState.day_number,
+            sections_filled: entries.filter(
+              (e) => (sections[e.key] || "").trim().length > 0,
+            ).length,
+          },
+        });
+
+        setScreenValue(true, "_weekly_reflection_submitted");
+        setScreenValue(null, "weekly_reflection_draft");
+
+        setTimeout(() => {
+          loadScreen({
+            container_id: "companion_dashboard",
+            state_id: "day_active",
+          });
+          setScreenValue(false, "_weekly_reflection_submitted");
+        }, 1800);
+        break;
+      }
+
+      case "fetch_resilience_narrative": {
+        try {
+          const data = await getResilienceNarrative();
+          setScreenValue(data || null, "resilience_narrative");
+        } catch (err) {
+          console.warn("[fetch_resilience_narrative] unexpected error", err);
+          setScreenValue(null, "resilience_narrative");
+        }
+        break;
+      }
+
       // ACCEPT_VOICE_CONSENT — sets voice_consent_given=true via PATCH
       case "accept_voice_consent": {
         setScreenValue(true, "voice_consent_given");
         patchCompanionState({ voice_consent_given: true }).catch(() => {});
         mitraTrackEvent("voice_consent_given", { meta: {} });
-        // Return to voice note overlay (primary caller)
         setScreenValue(true, "voice_note_active");
         loadScreen({ container_id: "overlay", state_id: "voice_note" });
         break;
@@ -3691,11 +3796,40 @@ export async function executeAction(
         setScreenValue(false, "voice_consent_given");
         patchCompanionState({ voice_consent_given: false }).catch(() => {});
         mitraTrackEvent("voice_consent_declined", { meta: {} });
-        // Pop back to dashboard
         loadScreen({
           container_id: "companion_dashboard",
           state_id: "day_active",
         });
+        break;
+      }
+
+      case "ack_resilience_narrative": {
+        setScreenValue(true, "resilience_narrative_acked");
+        mitraTrackEvent("resilience_narrative_acked", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
+        });
+        break;
+      }
+
+      case "submit_what_helped": {
+        const text: string = ((payload && payload.text) || "").trim();
+        if (!text) break;
+        await postGratitudeLedger({
+          signal_type: "what_held",
+          text,
+          meta: {
+            journey_id: screenState.journey_id,
+            source_surface: "resilience_narrative_card",
+          },
+        });
+        mitraTrackEvent("what_helped_submitted", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { text_length: text.length },
+        });
+        setScreenValue(true, "resilience_narrative_acked");
         break;
       }
 
@@ -3717,7 +3851,6 @@ export async function executeAction(
           setScreenValue(runnerVariant, "runner_variant");
           if (practiceId) setScreenValue(practiceId, "runner_practice_id");
 
-          // Start flow instance flagged as support (gentle is always support).
           if (startFlowInstance) startFlowInstance("support");
 
           const destination = payload?.destination || "practice_step_runner";

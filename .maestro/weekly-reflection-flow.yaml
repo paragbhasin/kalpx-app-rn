@@ -1,0 +1,43 @@
+# Mitra v3 Moment 23 — Weekly Reflection Letter flow
+# Validates: reflection/weekly renders 3 sections (what held / what took /
+# what wants tending) each with freeform input, submit batches
+# gratitude-ledger POSTs, returns to dashboard.
+#
+# Web parity: route_reflection_weekly.md §3, §6.
+
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- runFlow:
+    when:
+      visible: "A letter from the week|weekly reflection"
+    commands:
+      - tapOn: "weekly reflection"
+
+- assertVisible: "A letter from the week."
+- assertVisible: "WHAT HELD YOU"
+- assertVisible: "WHAT TOOK"
+- assertVisible: "WHAT WANTS TENDING"
+
+- tapOn: "What helped you stay with yourself this week?"
+- inputText: "morning mantra on wednesday"
+- hideKeyboard
+
+- tapOn: "What pulled energy, took time, or stayed heavy?"
+- inputText: "tuesday meeting"
+- hideKeyboard
+
+- tapOn: "What part of you is asking for care next week?"
+- inputText: "sleep before midnight"
+- hideKeyboard
+
+- tapOn: "Hold this with me"
+- waitForAnimationToEnd
+
+- assertVisible: "Held with care."
+
+- extendedWaitUntil:
+    visible: "Day|My Routine|Mitra"
+    timeout: 6000

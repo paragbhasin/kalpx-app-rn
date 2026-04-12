@@ -102,6 +102,13 @@ import BalancedAckOverlay from '../blocks/BalancedAckOverlay';
 import VoiceNoteSheet from '../blocks/VoiceNoteSheet';
 import VoiceConsentSheet from '../blocks/VoiceConsentSheet';
 
+// Week 5 — Reflection + Checkpoints (Mitra v3 Moments 23, 24, 25, 26, 34)
+import EveningReflectionBlock from '../blocks/EveningReflectionBlock';
+import WeeklyReflectionBlock from '../blocks/WeeklyReflectionBlock';
+import CheckpointDay7Block from '../blocks/CheckpointDay7Block';
+import CheckpointDay14Block from '../blocks/CheckpointDay14Block';
+import ResilienceNarrativeCard from '../blocks/ResilienceNarrativeCard';
+
 const blockMap: Record<string, React.ComponentType<any>> = {
   // Original 11 blocks
   headline: HeadlineBlock,
@@ -194,6 +201,12 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   balanced_ack_overlay: BalancedAckOverlay,
   voice_note_sheet: VoiceNoteSheet,
   voice_consent_sheet: VoiceConsentSheet,
+  // Week 5 — Reflection + Checkpoints
+  evening_reflection: EveningReflectionBlock,
+  weekly_reflection: WeeklyReflectionBlock,
+  checkpoint_day_7: CheckpointDay7Block,
+  checkpoint_day_14: CheckpointDay14Block,
+  resilience_narrative_card: ResilienceNarrativeCard,
 };
 
 interface BlockRendererProps {
@@ -267,6 +280,9 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block, textColor }) => {
     // Week 4 support blocks — all self-dispatch their own actions
     'trigger_entry', 'sound_bridge_transient', 'checkin_regulation',
     'balanced_ack_overlay', 'voice_note_sheet', 'voice_consent_sheet',
+    // Week 5 reflection + checkpoint blocks — self-dispatch submit actions
+    'evening_reflection', 'weekly_reflection', 'checkpoint_day_7',
+    'checkpoint_day_14', 'resilience_narrative_card',
   ]);
 
   if (interpolatedBlock.action && !selfActionBlocks.has(interpolatedBlock.type)) {

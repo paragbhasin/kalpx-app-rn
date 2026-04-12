@@ -412,22 +412,11 @@ export async function getClearWindow(): Promise<any> {
 
 /**
  * Week 4 — Support Path APIs (Mitra v3 Moments 31, 38 + Phase 1.5 intent).
- *
- * All of these endpoints are FEATURE-FLAGGED on the backend. On dev the flag
- * defaults OFF, so the endpoints return 404/503. Every function below must
- * tolerate that gracefully and return `null` — never throw to the UI. Web
- * parity: kalpx-frontend voice + consent overlays.
+ * All feature-flagged on backend; 404-tolerant, never throw to UI.
  */
 
-/**
- * POST mitra/voice/notes/ — upload a voice note (multipart when audio is
- * available, JSON-only metadata when not).
- * Spec: overlay_voice_note.md §6.
- */
 export async function postVoiceNote(audioBlob: any, metadata: any): Promise<any> {
   try {
-    // Audio blob capture is not yet wired in the RN sheet; we send metadata
-    // only. When backend wires multipart, swap to FormData here.
     const res = await api.post('mitra/voice/notes/', {
       source_surface: metadata?.source_surface,
       duration_ms: metadata?.duration_ms ?? 0,
@@ -445,11 +434,6 @@ export async function postVoiceNote(audioBlob: any, metadata: any): Promise<any>
   }
 }
 
-/**
- * GET mitra/voice/notes/{id}/interpretation/ — Phase 1.5 Haiku-backed
- * reflection. Returns null when flag off.
- * Spec: overlay_voice_note.md §6 (Phase 1.5 interpretation).
- */
 export async function getVoiceNoteInterpretation(id: string): Promise<any> {
   if (!id) return null;
   try {
@@ -463,11 +447,6 @@ export async function getVoiceNoteInterpretation(id: string): Promise<any> {
   }
 }
 
-/**
- * POST mitra/interpret-intent/ — Phase 1.5 free-form intent router. Used by
- * the voice/text fallback pipeline to route to trigger / check-in / journal.
- * Returns null when flag off.
- */
 export async function postInterpretIntent(text: string): Promise<any> {
   if (!text || !text.trim()) return null;
   try {
@@ -477,6 +456,69 @@ export async function postInterpretIntent(text: string): Promise<any> {
     const status = err?.response?.status;
     if (status === 404 || status === 503) return null;
     console.warn('[MITRA] postInterpretIntent failed:', err?.message);
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Week 5 — Reflection + Checkpoints (Mitra v3 Moments 23, 24, 25, 26, 34)
+// All feature-flagged; callers tolerate null gracefully.
+// ---------------------------------------------------------------------------
+
+export async function getResilienceNarrative(): Promise<any> {
+  try {
+    const res = await api.get('mitra/resilience-narrative/', { params: { tz: getTz() } });
+    return res.data;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (status === 404) {
+      console.log('[MITRA] resilience-narrative: feature flag off (404)');
+    } else {
+      console.warn('[MITRA] resilience-narrative failed:', err.message);
+    }
+    return null;
+  }
+}
+
+export async function postGratitudeLedger(entry: {
+  signal_type: string;
+  text?: string;
+  meta?: Record<string, any>;
+}): Promise<any> {
+  try {
+    const res = await api.post('mitra/gratitude-ledger/', {
+      ...entry,
+      tz: getTz(),
+    });
+    return res.data;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (status === 404) {
+      console.log(`[MITRA] gratitude-ledger (${entry.signal_type}): feature flag off (404)`);
+    } else {
+      console.warn(`[MITRA] gratitude-ledger (${entry.signal_type}) failed:`, err.message);
+    }
+    return null;
+  }
+}
+
+export async function getWeeklyReflectionData(cycleDay?: number): Promise<any> {
+  try {
+    const res = await api.get('mitra/journey/weekly-reflection/', {
+      params: { cycle_day: cycleDay, tz: getTz() },
+    });
+    return res.data;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (status === 404) {
+      try {
+        const fallback = await api.get('mitra/journey/status/');
+        return fallback?.data || null;
+      } catch {
+        return null;
+      }
+    }
+    console.warn('[MITRA] weekly-reflection failed:', err.message);
     return null;
   }
 }

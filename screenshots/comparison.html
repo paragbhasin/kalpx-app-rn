@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>KalpX Web vs RN — Checkpoint Comparison</title>
+<style>
+  body {
+    font-family: -apple-system, 'Helvetica Neue', sans-serif;
+    background: #1a1410;
+    color: #fdfaf3;
+    margin: 0;
+    padding: 32px 24px 64px;
+  }
+  h1 { font-size: 28px; margin: 0 0 8px; color: #e8c060; letter-spacing: 0.3px; }
+  p.subtitle { color: #8c7355; margin: 0 0 32px; font-size: 14px; }
+  section {
+    margin: 48px 0;
+    padding-bottom: 32px;
+    border-bottom: 1px solid rgba(201, 168, 76, 0.15);
+  }
+  h2 {
+    font-size: 20px;
+    color: #e8c060;
+    margin: 0 0 18px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+  }
+  .pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  figure {
+    background: #2a1e14;
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    border-radius: 14px;
+    padding: 12px;
+    margin: 0;
+  }
+  img {
+    width: 100%;
+    border-radius: 8px;
+    display: block;
+  }
+  .label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #8c7355;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .label.web { color: #7fb069; }
+  .label.rn  { color: #d9a557; }
+  .missing {
+    padding: 120px 20px;
+    text-align: center;
+    color: #6a4d28;
+    background: rgba(0,0,0,0.3);
+    border-radius: 8px;
+    font-size: 13px;
+    font-style: italic;
+  }
+  figcaption {
+    font-size: 11px;
+    color: #6a4d28;
+    padding-top: 8px;
+    word-break: break-all;
+  }
+  @media (max-width: 900px) {
+    .pair { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<h1>KalpX Checkpoint — Web Mobile vs RN</h1>
+<p class="subtitle">Left: web (kalpx-frontend Playwright @ 390×844). Right: React Native (Pixel 7 emulator @ 1080×2400). Personas seeded via <code>seed_test_journey --engagement {high|medium|low|near_zero|mastered}</code> with real JourneyActivity rows so checkpoint metrics reflect actual engagement.</p>
+
+<section>
+  <h2>CHECKPOINT · Day 7 · Intro</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/CP7.E.01.png" loading="lazy">
+      <figcaption>CP7.E.01.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="verify_full_flow/02_intro_loaded_20260410_131616.png" loading="lazy">
+      <figcaption>02_intro_loaded_20260410_131616.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>CHECKPOINT · Day 7 · Journey Grid</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/CP7.E.02.png" loading="lazy">
+      <figcaption>CP7.E.02.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="verify_full_flow/03_grid_real_20260410_132815.png" loading="lazy">
+      <figcaption>03_grid_real_20260410_132815.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>CHECKPOINT · Day 7 · Continuity Mirror</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/CP7.E.03.png" loading="lazy">
+      <figcaption>CP7.E.03.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="persona_day7_high/03_mirror_20260410_130149.png" loading="lazy">
+      <figcaption>03_mirror_20260410_130149.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>CHECKPOINT · Day 7 · Your path continues</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/CP7.E.06.png" loading="lazy">
+      <figcaption>CP7.E.06.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="verify_full_flow/04_mirror_correct_20260410_133236.png" loading="lazy">
+      <figcaption>04_mirror_correct_20260410_133236.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>CHECKPOINT · Day 7 · Medium · Mirror</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/CP7.L.03.png" loading="lazy">
+      <figcaption>CP7.L.03.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="persona_day7_medium/03_mirror_20260410_111712.png" loading="lazy">
+      <figcaption>03_mirror_20260410_111712.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>CHECKPOINT · Day 7 · Low · Mirror</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/CP7.L.03.png" loading="lazy">
+      <figcaption>CP7.L.03.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="persona_day7_low/03_mirror_20260410_112208.png" loading="lazy">
+      <figcaption>03_mirror_20260410_112208.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>CHECKPOINT · Day 7 · Lightened</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/CP7.N.03.png" loading="lazy">
+      <figcaption>CP7.N.03.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="persona_day7_nearzero/04_decision_20260410_112446.png" loading="lazy">
+      <figcaption>04_decision_20260410_112446.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>CHECKPOINT · Day 14 · Intro</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/CP14.E.01.png" loading="lazy">
+      <figcaption>CP14.E.01.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="persona_day14_mastered/02_intro_20260410_112557.png" loading="lazy">
+      <figcaption>02_intro_20260410_112557.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>CHECKPOINT · Day 14 · Evolution Pivot</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/CP14.E.03.png" loading="lazy">
+      <figcaption>CP14.E.03.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="persona_day14_mastered/03_mirror_20260410_112616.png" loading="lazy">
+      <figcaption>03_mirror_20260410_112616.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>CHECKPOINT · Day 14 · Choose Next Step</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/CP14.E.06.png" loading="lazy">
+      <figcaption>CP14.E.06.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="persona_day14_mastered/06_decision_screen_20260410_113541.png" loading="lazy">
+      <figcaption>06_decision_screen_20260410_113541.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>CHECKPOINT · Day 14 · Medium · Mirror</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/CP14.L.03.png" loading="lazy">
+      <figcaption>CP14.L.03.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="persona_day14_medium/03_mirror_20260410_114013.png" loading="lazy">
+      <figcaption>03_mirror_20260410_114013.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>CHECKPOINT · Day 14 · Low · Mirror</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/CP14.L.03.png" loading="lazy">
+      <figcaption>CP14.L.03.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="persona_day14_low/03_mirror_20260410_114123.png" loading="lazy">
+      <figcaption>03_mirror_20260410_114123.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>WELCOME BACK</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/WB.01.png" loading="lazy">
+      <figcaption>WB.01.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="persona_welcomeback/01_home_20260410_114328.png" loading="lazy">
+      <figcaption>01_home_20260410_114328.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>CORE · Day active dashboard</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/RUN.INFO.01.png" loading="lazy">
+      <figcaption>RUN.INFO.01.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="flow_core_mantra/02_day_active_20260410_145333.png" loading="lazy">
+      <figcaption>02_day_active_20260410_145333.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>CORE · Mantra · Info reveal</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/RUN.INFO.01.png" loading="lazy">
+      <figcaption>RUN.INFO.01.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="flow_core_mantra/03_info_reveal_mantra_20260410_145403.png" loading="lazy">
+      <figcaption>03_info_reveal_mantra_20260410_145403.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>CORE · Mantra · Rep selection</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/RUN.M.01.png" loading="lazy">
+      <figcaption>RUN.M.01.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="flow_core_mantra/04_rep_selection_20260410_145420.png" loading="lazy">
+      <figcaption>04_rep_selection_20260410_145420.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>CORE · Mantra · Prep (Be still)</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/RUN.M.02.png" loading="lazy">
+      <figcaption>RUN.M.02.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="flow_core_mantra/05_mantra_prep_or_runner_20260410_145506.png" loading="lazy">
+      <figcaption>05_mantra_prep_or_runner_20260410_145506.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>CORE · Mantra · Runner (bead counter)</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/RUN.M.03.png" loading="lazy">
+      <figcaption>RUN.M.03.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="flow_core_mantra/06_mantra_runner_20260410_145512.png" loading="lazy">
+      <figcaption>06_mantra_runner_20260410_145512.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>CORE · Sankalp · Info reveal</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/RUN.S.01.png" loading="lazy">
+      <figcaption>RUN.S.01.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="flow_core_sankalp/02_info_reveal_sankalp_20260410_150003.png" loading="lazy">
+      <figcaption>02_info_reveal_sankalp_20260410_150003.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>CORE · Sankalp · Embody</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/RUN.S.02.png" loading="lazy">
+      <figcaption>RUN.S.02.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="flow_core_sankalp/03_sankalp_embody_20260410_150019.png" loading="lazy">
+      <figcaption>03_sankalp_embody_20260410_150019.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>CORE · Practice · Info reveal</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/RUN.P.01.png" loading="lazy">
+      <figcaption>RUN.P.01.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="flow_core_practice/02_info_reveal_practice_20260410_150122.png" loading="lazy">
+      <figcaption>02_info_reveal_practice_20260410_150122.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>CORE · Practice · Runner</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/RUN.P.02.png" loading="lazy">
+      <figcaption>RUN.P.02.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <div class="missing">RN capture missing</div>
+      <figcaption></figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>ADDITIONAL · Items section on dashboard</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/RUN.A.M.01.png" loading="lazy">
+      <figcaption>RUN.A.M.01.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="flow_additional/02_additional_section_20260410_144009.png" loading="lazy">
+      <figcaption>02_additional_section_20260410_144009.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>ADDITIONAL · Library search</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/RUN.A.M.02.png" loading="lazy">
+      <figcaption>RUN.A.M.02.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <div class="missing">RN capture missing</div>
+      <figcaption></figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>CHECK-IN · Prana selection</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/RUN.SUP.01.png" loading="lazy">
+      <figcaption>RUN.SUP.01.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <div class="missing">RN capture missing</div>
+      <figcaption></figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>CHECK-IN · Balanced ack</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/RUN.SUP.01.png" loading="lazy">
+      <figcaption>RUN.SUP.01.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <div class="missing">RN capture missing</div>
+      <figcaption></figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>TRIGGER · OM chanting (free_mantra)</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/RUN.SP.01.png" loading="lazy">
+      <figcaption>RUN.SP.01.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="flow_trigger/02_free_mantra_chanting_20260410_152528.png" loading="lazy">
+      <figcaption>02_free_mantra_chanting_20260410_152528.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>TRIGGER · Practice support</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/RUN.SP.02.png" loading="lazy">
+      <figcaption>RUN.SP.02.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <div class="missing">RN capture missing</div>
+      <figcaption></figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>TRIGGER · Mantra (post-practice)</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/RUN.SUP.P.01.png" loading="lazy">
+      <figcaption>RUN.SUP.P.01.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <img src="flow_trigger/04_post_trigger_mantra_20260410_153706.png" loading="lazy">
+      <figcaption>04_post_trigger_mantra_20260410_153706.png</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section>
+  <h2>TRIGGER · Back to dashboard (resolved)</h2>
+  <div class="pair">
+    <figure>
+      <div class="label web">WEB MOBILE · 390×844</div>
+      <img src="../../kalpx-frontend/tests/e2e/screenshots/matrix/RUN.SUP.01.png" loading="lazy">
+      <figcaption>RUN.SUP.01.png</figcaption>
+    </figure>
+    <figure>
+      <div class="label rn">RN · emulator 1080×2400</div>
+      <div class="missing">RN capture missing</div>
+      <figcaption></figcaption>
+    </figure>
+  </div>
+</section>
+
+</body>
+</html>

@@ -52,19 +52,67 @@ env:
     clearKeychain: true
 - waitForAnimationToEnd
 
-# ── Step 1: reach the Login screen via the Home guest CTA ────────────────
-# The "Sign in to save your journey" button is rendered near the bottom of
-# the Home ScrollView when `!isLoggedIn` (Home.tsx:517-525). It requires a
-# scroll on most devices.
-- scrollUntilVisible:
-    element:
-      text: "Sign in to save your journey"
-    direction: DOWN
-    timeout: 15000
-    speed: 40
-    visibilityPercentage: 80
+# ── Step 0a: dev-client launcher tap-through ────────────────────────────
+# Debug APKs built with `expo-dev-client` (i.e. `npx expo run:android`)
+# always boot to a "Development servers" picker before loading the real JS
+# bundle. Release APKs (EAS preview/production) skip this entirely, so
+# this step is wrapped in a `when: visible` guard — it runs on debug
+# builds and is a no-op on release.
+- runFlow:
+    when:
+      visible: "Development servers"
+    commands:
+      # Emulator uses http://10.0.2.2:8081, real devices use the Metro host's
+      # LAN IP (e.g., http://192.168.1.x:8081). Regex matches both.
+      - tapOn:
+          text: "http://.*:8081.*"
+      - extendedWaitUntil:
+          notVisible: "Development servers"
+          timeout: 90000
+      - waitForAnimationToEnd
 
-- tapOn: "Sign in to save your journey"
+# ── Step 0b: Expo first-run dev-menu tutorial overlay ───────────────────
+# After the JS bundle loads, expo-dev-client shows a one-time tutorial
+# overlay with a Continue button. clearState:true wipes the "seen" flag
+# so this re-appears on every fresh launch under Maestro. The overlay
+# renders ~500ms to ~2s after the bundle loads, so we do multiple
+# passes with waitForAnimationToEnd between each — covers the race
+# where the tutorial hasn't rendered yet at the time of the check.
+# All passes are guarded by `when: visible` so they're no-ops on
+# release builds (where the tutorial never appears).
+- waitForAnimationToEnd
+- runFlow:
+    when:
+      visible: "Continue"
+    commands:
+      - tapOn: "Continue"
+      - waitForAnimationToEnd
+- waitForAnimationToEnd
+- runFlow:
+    when:
+      visible: "Continue"
+    commands:
+      - tapOn: "Continue"
+      - waitForAnimationToEnd
+- waitForAnimationToEnd
+- runFlow:
+    when:
+      visible: "Continue"
+    commands:
+      - tapOn: "Continue"
+      - waitForAnimationToEnd
+
+# ── Step 1: reach the Login screen via the Menu drawer ──────────────────
+# Tapping "Menu" in the bottom nav opens a right-side drawer
+# (DrawerNavigator.tsx) which contains a "Log In" item when !isLoggedIn
+# (DrawerNavigator.tsx:304-320, calls navigation.navigate("Login")).
+#
+# Using the drawer instead of scrolling to the "Sign in to save your
+# journey" CTA on Home.tsx is more robust — Home.tsx has nested
+# ScrollViews that scrollUntilVisible picks inconsistently between runs.
+- tapOn: "Menu"
+- waitForAnimationToEnd
+- tapOn: "Log In"
 - waitForAnimationToEnd
 
 # ── Step 2: confirm we landed on LoginScreen.tsx ─────────────────────────

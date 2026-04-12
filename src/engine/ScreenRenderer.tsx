@@ -28,6 +28,9 @@ import OnboardingContainer from "../containers/OnboardingContainer";
 // Week 4 — Support Path
 import SupportTriggerContainer from "../containers/SupportTriggerContainer";
 import SupportCheckinContainer from "../containers/SupportCheckinContainer";
+// Week 5 — Reflection containers (Moments 23, 34)
+import ReflectionWeeklyContainer from "../containers/ReflectionWeeklyContainer";
+import ReflectionEveningContainer from "../containers/ReflectionEveningContainer";
 
 const containerMap: Record<string, React.ComponentType<any>> = {
   portal: PortalContainer,
@@ -51,6 +54,9 @@ const containerMap: Record<string, React.ComponentType<any>> = {
   // Week 4 — Support Path
   support_trigger: SupportTriggerContainer,
   support_checkin: SupportCheckinContainer,
+  // Week 5
+  reflection_weekly: ReflectionWeeklyContainer,
+  reflection_evening: ReflectionEveningContainer,
 };
 
 const ScreenRenderer: React.FC = () => {

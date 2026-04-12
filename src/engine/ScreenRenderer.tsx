@@ -25,6 +25,9 @@ import RoutineBuilderContainer from "../containers/RoutineBuilderContainer";
 import RoutineLockedContainer from "../containers/RoutineLockedContainer";
 import StableScanContainer from "../containers/StableScanContainer";
 import OnboardingContainer from "../containers/OnboardingContainer";
+// Week 4 — Support Path
+import SupportTriggerContainer from "../containers/SupportTriggerContainer";
+import SupportCheckinContainer from "../containers/SupportCheckinContainer";
 
 const containerMap: Record<string, React.ComponentType<any>> = {
   portal: PortalContainer,
@@ -45,6 +48,9 @@ const containerMap: Record<string, React.ComponentType<any>> = {
   portal_splash: PortalSplashContainer,
   routine_locked: RoutineLockedContainer,
   welcome_onboarding: OnboardingContainer,
+  // Week 4 — Support Path
+  support_trigger: SupportTriggerContainer,
+  support_checkin: SupportCheckinContainer,
 };
 
 const ScreenRenderer: React.FC = () => {

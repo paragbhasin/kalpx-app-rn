@@ -83,6 +83,26 @@ export type RunnerSource =
   | 'support_trigger'
   | 'support_checkin';
 
+// Week 4 — Support Path (Mitra v3 Moments 20, 21, 22, 31, 38, 42).
+// Specs: route_support_trigger.md, route_support_checkin_regulation.md,
+// overlay_checkin_balanced_ack.md, overlay_voice_note.md, overlay_voice_consent.md,
+// transient_sound_bridge.md. All fields live under screenData:
+//
+// - voice_consent_given: boolean | null  (null = not asked; preserved from Week 1)
+// - voice_note_active: boolean           (Moment 31 sheet currently mounted)
+// - voice_note_id: string | null         (id returned by POST voice/notes/)
+// - voice_note_transcript: string | null (last transcribed text)
+// - voice_note_interpretation: object | null (Haiku/interpretation payload)
+// - voice_note_name_hint_seen: boolean   (Handoff anonymize_text_block hint — show once)
+// - trigger_round: number                (REG-015 multi-round counter; increments per
+//                                         fresh `initiate_trigger_support`)
+// - trigger_mantra_text: string | null   (REG-002 — trigger-owned mantra text,
+//                                         never shared with core mantra screenData)
+// - checkin_step: 'notice' | 'name' | 'settle' | null (Moment 21 state machine)
+// - checkin_draft: { noticed?: string; named?: string; settled?: string }
+// - checkin_ack_variant: 'balanced' | 'energized' | null (Moment 22 overlay)
+export type CheckinStep = 'notice' | 'name' | 'settle';
+
 export type OnboardingDraftState = {
   friction_id?: string;
   friction_freeform?: string;

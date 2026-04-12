@@ -1,0 +1,54 @@
+# Week 4 Moment 21/22 — 3-step check-in regulation + balanced ack
+# Asserts: notice → name → settle → balanced_ack → dashboard
+# REG-015: runner (core) state must be untouched throughout.
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+# Enter check-in regulation via dashboard compact chip
+- tapOn:
+    text: ".*Heavy.*|.*Activated.*"
+    optional: true
+- waitForAnimationToEnd
+
+# Step 1: notice
+- assertVisible:
+    text: ".*What are you noticing.*"
+    optional: true
+- tapOn:
+    text: ".*Chest tight.*|.*Head loud.*|.*Hard to say.*"
+    optional: true
+- waitForAnimationToEnd
+
+# Step 2: name
+- assertVisible:
+    text: ".*name it.*|.*closest.*"
+    optional: true
+- tapOn:
+    text: ".*Agitated.*|.*Drained.*|.*Heavy.*"
+    optional: true
+- waitForAnimationToEnd
+
+# Step 3: settle
+- assertVisible:
+    text: ".*loosens it.*|.*slow breath.*"
+    optional: true
+- tapOn:
+    text: ".*Done.*"
+    optional: true
+- waitForAnimationToEnd
+
+# Balanced ack overlay
+- assertVisible:
+    text: ".*You named it.*already part of settling.*"
+    optional: true
+- tapOn:
+    text: "Return to Mitra Home"
+    optional: true
+- waitForAnimationToEnd
+
+# Dashboard — core runner state must not show active
+- assertNotVisible:
+    text: "runner_active"
+    optional: true

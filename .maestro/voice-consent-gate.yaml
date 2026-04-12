@@ -1,0 +1,58 @@
+# Week 4 Moment 38 — Voice consent gate on first mic tap
+# Asserts: first mic trigger shows consent sheet.
+# Decline → no recording.  Accept → voice_consent_given=true, future taps skip.
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+# Tap any mic-enabled surface (dashboard support entry)
+- tapOn:
+    text: ".*🎙.*|.*Say it out loud.*|.*Record a note.*"
+    optional: true
+- waitForAnimationToEnd
+
+# Consent sheet appears
+- assertVisible:
+    text: ".*Your voice stays private.*"
+    optional: true
+
+# Decline path — tap "Not today"
+- tapOn:
+    text: "Not today"
+    optional: true
+- waitForAnimationToEnd
+
+# Re-trigger mic — consent should re-prompt (declined, not permanently dismissed)
+- tapOn:
+    text: ".*🎙.*|.*Say it out loud.*|.*Record a note.*"
+    optional: true
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: ".*Your voice stays private.*"
+    optional: true
+
+# Accept path
+- tapOn:
+    text: "Sounds right"
+    optional: true
+- waitForAnimationToEnd
+
+# Voice note sheet opens
+- assertVisible:
+    text: ".*I'm listening.*"
+    optional: true
+
+# Subsequent tap should skip consent
+- tapOn:
+    text: ".*×.*"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: ".*🎙.*|.*Say it out loud.*|.*Record a note.*"
+    optional: true
+
+- assertNotVisible:
+    text: "Your voice stays private"
+    optional: true

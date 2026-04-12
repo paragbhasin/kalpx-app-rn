@@ -37,6 +37,21 @@ interface ScreenState {
 // - guidance_mode: 'universal' | 'hybrid' | 'rooted'
 // - companion_mantra_id / companion_sankalp_id / companion_practice_id: set from
 //   generate-companion response between Turn 5 and Turn 6.
+//
+// Week 2 — Day Active Dashboard (Mitra v3 Moments 8-15, 40, 41, 43).
+// Spec: route_dashboard_day_active.md §2. All live inside screenData:
+// - briefing_available: boolean (today's briefing is ready)
+// - briefing_audio_url: string (play url)
+// - briefing_transcript: string (full script, lazy-expanded)
+// - briefing_summary: string (2-line opening)
+// - briefing_voice_preset: 'anchor' | 'guardian' | 'zen' | 'witness'
+// - focus_phrase: string (sub-header italic gold line)
+// - cycle_day: number (1-based, mirrors day_number but cycle-scoped)
+// - clear_window: { headline, message } | null (Moment 43)
+// - checkpoint_due: 'day_7' | 'day_14' | null
+// - check_in_dismissed: boolean (dashboard-local flag, REG-015 isolation)
+// - dashboard_variant: string (first_day | standard | checkpoint_pending_day_7 |
+//   checkpoint_pending_day_14 | clear_window_active | post_conflict_morning)
 export type OnboardingDraftState = {
   friction_id?: string;
   friction_freeform?: string;

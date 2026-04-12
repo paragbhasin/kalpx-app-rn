@@ -394,6 +394,22 @@ export async function patchCompanionState(patch: Record<string, any>): Promise<a
   }
 }
 
+/**
+ * Week 2 — Day Active Dashboard API.
+ * GET mitra/clear-window/ — Today's "clear window" payload for Moment 43.
+ * Returns { headline, message, ... } if today is an expansive / clear-window
+ * day, or null otherwise. Web parity: route_dashboard_day_active.md §15.
+ */
+export async function getClearWindow(): Promise<any> {
+  try {
+    const res = await api.get('mitra/clear-window/', { params: { tz: getTz() } });
+    return res.data;
+  } catch (err: any) {
+    console.warn('[MITRA] clear-window failed:', err.message);
+    return null;
+  }
+}
+
 /** POST mitra/journey/welcome-back/ — Submit welcome-back decision (continue | fresh). */
 export async function mitraJourneyWelcomeBack(decision: 'continue' | 'fresh'): Promise<any> {
   try {

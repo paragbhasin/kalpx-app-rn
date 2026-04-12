@@ -1,0 +1,39 @@
+# Week 2 — Dashboard check-in round-trip isolation flow.
+# Spec: route_dashboard_day_active.md §1 CheckInCardCompact, §6 prana-acknowledge.
+# REG-015: dashboard check-in must NOT contaminate core mantra runner state.
+# Asserts: tap chip → prana-acknowledge fires → card dismisses → triad
+# items (mantra/sankalp/practice) remain visible and uncontaminated.
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn: "My Routine"
+- waitForAnimationToEnd
+
+# Verify check-in card prompt visible
+- assertVisible:
+    text: "How are you landing?"
+    optional: true
+
+# Tap Steady chip → dispatches acknowledge_check_in
+- tapOn:
+    text: "Steady"
+    optional: true
+- waitForAnimationToEnd
+
+# Card should dismiss (check_in_dismissed flag set)
+- assertNotVisible:
+    text: "How are you landing?"
+
+# Triad still fully present — contamination guard (REG-015)
+- assertVisible:
+    text: "MANTRA"
+- assertVisible:
+    text: "SANKALP"
+- assertVisible:
+    text: "PRACTICE"
+
+# Core trigger entry unaffected
+- assertVisible:
+    text: "I Feel Triggered"

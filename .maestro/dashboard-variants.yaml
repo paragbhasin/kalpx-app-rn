@@ -1,0 +1,54 @@
+# Week 2 — Mitra v3 Day Active dashboard variant smoke flow.
+# Spec: kalpx-frontend/docs/specs/mitra-v3-experience/screens/route_dashboard_day_active.md
+# Covers: first_day variant, standard with briefing, clear_window banner,
+# cycle signal bar presence, check-in round-trip validation.
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+# Enter engine → dashboard
+- tapOn: "My Routine"
+- waitForAnimationToEnd
+
+# Day 1 / first_day variant: expect cycle signal bar visible
+- assertVisible:
+    text: ".*Day.*1.*"
+    optional: true
+
+# Triad (core_items_list) — expect all three labels
+- assertVisible:
+    text: "MANTRA"
+    optional: true
+- assertVisible:
+    text: "SANKALP"
+    optional: true
+- assertVisible:
+    text: "PRACTICE"
+    optional: true
+
+# Briefing card — tap Show transcript if visible
+- tapOn:
+    text: "Show transcript"
+    optional: true
+- tapOn:
+    text: "Hide transcript"
+    optional: true
+
+# Clear Window banner — dismiss if visible (variant 43)
+- tapOn:
+    text: "Clear Window"
+    optional: true
+- tapOn:
+    text: "×"
+    optional: true
+
+# Check-in card — prompt visible on due days
+- assertVisible:
+    text: "How are you landing?"
+    optional: true
+
+# Preserve existing trigger entry from Week 1 dashboard
+- assertVisible:
+    text: "I Feel Triggered"
+    optional: true

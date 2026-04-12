@@ -80,6 +80,14 @@ import GuidanceModePicker from '../blocks/GuidanceModePicker';
 import FirstRecognitionBlock from '../blocks/FirstRecognitionBlock';
 import PathEmergesBlock from '../blocks/PathEmergesBlock';
 
+// Week 2 — Day Active Dashboard (Mitra v3 Moments 8-15, 40, 41, 43)
+import MorningBriefingBlock from '../blocks/MorningBriefingBlock';
+import FocusPhraseBlock from '../blocks/FocusPhraseBlock';
+import CoreItemsList from '../blocks/CoreItemsList';
+import CheckInCardCompact from '../blocks/CheckInCardCompact';
+import CycleSignalBar from '../blocks/CycleSignalBar';
+import ClearWindowBanner from '../blocks/ClearWindowBanner';
+
 const blockMap: Record<string, React.ComponentType<any>> = {
   // Original 11 blocks
   headline: HeadlineBlock,
@@ -153,6 +161,13 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   guidance_mode_picker: GuidanceModePicker,
   first_recognition: FirstRecognitionBlock,
   path_emerges: PathEmergesBlock,
+  // Week 2 — Day Active Dashboard
+  morning_briefing: MorningBriefingBlock,
+  focus_phrase: FocusPhraseBlock,
+  core_items_list: CoreItemsList,
+  check_in_card_compact: CheckInCardCompact,
+  cycle_signal_bar: CycleSignalBar,
+  clear_window_banner: ClearWindowBanner,
 };
 
 interface BlockRendererProps {
@@ -218,6 +233,9 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block, textColor }) => {
     'card_list', 'insight_box',
     // Week 1 onboarding blocks — all dispatch their own on_response actions
     'onboarding_conversation_turn', 'voice_text_fork', 'guidance_mode_picker',
+    // Week 2 dashboard blocks — manage their own taps/dispatch
+    'morning_briefing', 'focus_phrase', 'core_items_list',
+    'check_in_card_compact', 'cycle_signal_bar', 'clear_window_banner',
   ]);
 
   if (interpolatedBlock.action && !selfActionBlocks.has(interpolatedBlock.type)) {

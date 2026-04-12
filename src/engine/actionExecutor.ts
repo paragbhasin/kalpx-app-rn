@@ -32,6 +32,9 @@ import {
   postOnboardingTurn,
   patchCompanionState,
   getClearWindow,
+  postVoiceNote,
+  getVoiceNoteInterpretation,
+  postInterpretIntent,
 } from "./mitraApi";
 
 // Week 1 — friction chip → focus mapping. Web parity: actionExecutor.js FRICTION_MAP.
@@ -3492,6 +3495,207 @@ export async function executeAction(
         } catch (err) {
           console.error("[acknowledge_season] failed:", err);
         }
+        break;
+      }
+
+      // ================================================================
+      // WEEK 4 — SUPPORT PATH (Mitra v3 Moments 20, 21, 22, 31, 38, 42)
+      // Web parity: AwarenessTriggerContainer.vue + VoiceRecorderBlock.vue
+      // Specs: route_support_trigger.md, route_support_checkin_regulation.md,
+      //        overlay_voice_note.md, overlay_voice_consent.md,
+      //        transient_sound_bridge.md, overlay_checkin_balanced_ack.md.
+      // ================================================================
+
+      // INITIATE_TRIGGER_SUPPORT (Moment 20) — entry from TriggerEntryBlock
+      // REG-002: clear any prior trigger_mantra_text (no contamination)
+      // REG-015: must NOT touch runner_active_item / companion_mantra_id
+      // REG-020: active path is sound_bridge → mantra_runner → dashboard
+      case "initiate_trigger_support": {
+        // REG-002 guard — wipe trigger-owned mantra text so a stale value
+        // from a prior round cannot surface in the new round.
+        setScreenValue(null, "trigger_mantra_text");
+        setScreenValue(null, "trigger_mantra_devanagari");
+
+        // REG-015 multi-round counter
+        const prevRound = Number(screenState.trigger_round || 0);
+        setScreenValue(prevRound + 1, "trigger_round");
+
+        // Seed OM audio for the sound bridge step
+        const omUrl = _rotateAudio(OM_AUDIO_LIBRARY, "_kalpx_om_audio_idx");
+        setScreenValue(omUrl, "om_audio_url");
+        const omText = _omTextForTrack(omUrl);
+        setScreenValue(omText.label, "trigger_mantra_text");
+        setScreenValue(omText.devanagari, "trigger_mantra_devanagari");
+
+        mitraTrackEvent("trigger_session_started", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            source_surface: "dashboard",
+            round: prevRound + 1,
+          },
+        });
+
+        if (context.startFlowInstance) context.startFlowInstance("support_trigger");
+
+        loadScreen({ container_id: "support_trigger", state_id: "sound_bridge" });
+        break;
+      }
+
+      // ADVANCE_SOUND_BRIDGE (Moment 42) — auto or manual advance
+      // Seeds runner_source="support_trigger" then enters mantra runner.
+      // No recheck (REG-020).
+      case "advance_sound_bridge": {
+        const exitType = (payload && payload.exit_type) || "auto";
+        mitraTrackEvent("sound_bridge_exited", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { exit_type: exitType, parent: "trigger" },
+        });
+
+        // Seed runner-local state for the support mantra runner.
+        setScreenValue("mantra", "runner_variant");
+        setScreenValue("support_trigger", "runner_source");
+        setScreenValue(
+          {
+            item_type: "mantra",
+            item_id: screenState.support_mantra_id || "om_support",
+            title: screenState.trigger_mantra_text || "OM",
+          },
+          "runner_active_item",
+        );
+        setScreenValue(Date.now(), "runner_start_time");
+        setScreenValue(0, "runner_reps_completed");
+        setScreenValue(0, "runner_duration_actual_sec");
+
+        loadScreen({
+          container_id: "practice_runner",
+          state_id: "mantra_runner",
+        });
+        break;
+      }
+
+      // ADVANCE_CHECKIN_STEP (Moment 21) — notice → name → settle
+      // REG-015: only touches checkin_* fields.
+      case "advance_checkin_step": {
+        const from = payload?.from || "notice";
+        const value = payload?.value;
+        const draft = { ...(screenState.checkin_draft || {}) };
+        if (from === "notice") draft.noticed = value;
+        else if (from === "name") draft.named = value;
+        setScreenValue(draft, "checkin_draft");
+        const next: Record<string, string> = {
+          notice: "name",
+          name: "settle",
+        };
+        const nextStep = next[from];
+        if (nextStep) {
+          setScreenValue(nextStep, "checkin_step");
+          loadScreen({ container_id: "support_checkin", state_id: nextStep });
+        }
+        break;
+      }
+
+      // SUBMIT_CHECKIN — finalize regulation, show BalancedAckOverlay.
+      case "submit_checkin": {
+        const draft = { ...(screenState.checkin_draft || {}) };
+        if (payload?.final) draft.settled = payload.final;
+        setScreenValue(draft, "checkin_draft");
+
+        mitraTrackEvent("checkin_regulation_completed", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            noticed: draft.noticed,
+            named: draft.named,
+            settled: draft.settled,
+          },
+        });
+
+        // Phase 1.5 — best-effort intent interpretation on freeform settle
+        if (typeof draft.named === "string" && draft.named.length > 2) {
+          postInterpretIntent(draft.named).catch(() => {});
+        }
+
+        setScreenValue("balanced", "checkin_ack_variant");
+        loadScreen({
+          container_id: "support_checkin",
+          state_id: "balanced_ack",
+        });
+        break;
+      }
+
+      // START_VOICE_NOTE — opens VoiceNoteSheet, gates on consent first use.
+      case "start_voice_note": {
+        const sourceSurface = payload?.source_surface || "dashboard";
+        setScreenValue(sourceSurface, "voice_note_source_surface");
+
+        if (
+          screenState.voice_consent_given === null ||
+          screenState.voice_consent_given === undefined
+        ) {
+          loadScreen({ container_id: "overlay", state_id: "voice_consent" });
+        } else if (screenState.voice_consent_given === false) {
+          // User previously declined — re-prompt once per voice trigger
+          loadScreen({ container_id: "overlay", state_id: "voice_consent" });
+        } else {
+          setScreenValue(true, "voice_note_active");
+          loadScreen({ container_id: "overlay", state_id: "voice_note" });
+        }
+        break;
+      }
+
+      // SUBMIT_VOICE_NOTE — POST, stores id, polls interpretation.
+      case "submit_voice_note": {
+        try {
+          const res = await postVoiceNote(payload?.audio || null, {
+            source_surface:
+              payload?.source_surface ||
+              screenState.voice_note_source_surface ||
+              "dashboard",
+            duration_ms: payload?.duration_ms || 0,
+          });
+          if (res && res.id) {
+            setScreenValue(res.id, "voice_note_id");
+            // fire-and-forget poll
+            (async () => {
+              for (let i = 0; i < 5; i++) {
+                await new Promise((r) => setTimeout(r, 1500));
+                const interp = await getVoiceNoteInterpretation(res.id);
+                if (interp) {
+                  setScreenValue(interp, "voice_note_interpretation");
+                  return;
+                }
+              }
+            })();
+          }
+        } catch (err) {
+          console.warn("[submit_voice_note] failed", err);
+        }
+        break;
+      }
+
+      // ACCEPT_VOICE_CONSENT — sets voice_consent_given=true via PATCH
+      case "accept_voice_consent": {
+        setScreenValue(true, "voice_consent_given");
+        patchCompanionState({ voice_consent_given: true }).catch(() => {});
+        mitraTrackEvent("voice_consent_given", { meta: {} });
+        // Return to voice note overlay (primary caller)
+        setScreenValue(true, "voice_note_active");
+        loadScreen({ container_id: "overlay", state_id: "voice_note" });
+        break;
+      }
+
+      // DECLINE_VOICE_CONSENT — sets voice_consent_given=false
+      case "decline_voice_consent": {
+        setScreenValue(false, "voice_consent_given");
+        patchCompanionState({ voice_consent_given: false }).catch(() => {});
+        mitraTrackEvent("voice_consent_declined", { meta: {} });
+        // Pop back to dashboard
+        loadScreen({
+          container_id: "companion_dashboard",
+          state_id: "day_active",
+        });
         break;
       }
 

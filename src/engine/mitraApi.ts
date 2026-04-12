@@ -410,6 +410,77 @@ export async function getClearWindow(): Promise<any> {
   }
 }
 
+/**
+ * Week 4 — Support Path APIs (Mitra v3 Moments 31, 38 + Phase 1.5 intent).
+ *
+ * All of these endpoints are FEATURE-FLAGGED on the backend. On dev the flag
+ * defaults OFF, so the endpoints return 404/503. Every function below must
+ * tolerate that gracefully and return `null` — never throw to the UI. Web
+ * parity: kalpx-frontend voice + consent overlays.
+ */
+
+/**
+ * POST mitra/voice/notes/ — upload a voice note (multipart when audio is
+ * available, JSON-only metadata when not).
+ * Spec: overlay_voice_note.md §6.
+ */
+export async function postVoiceNote(audioBlob: any, metadata: any): Promise<any> {
+  try {
+    // Audio blob capture is not yet wired in the RN sheet; we send metadata
+    // only. When backend wires multipart, swap to FormData here.
+    const res = await api.post('mitra/voice/notes/', {
+      source_surface: metadata?.source_surface,
+      duration_ms: metadata?.duration_ms ?? 0,
+      has_audio: !!audioBlob,
+    });
+    return res.data;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (status === 404 || status === 503) {
+      console.warn('[MITRA] voice/notes endpoint unavailable (flag off)');
+      return null;
+    }
+    console.warn('[MITRA] postVoiceNote failed:', err?.message);
+    return null;
+  }
+}
+
+/**
+ * GET mitra/voice/notes/{id}/interpretation/ — Phase 1.5 Haiku-backed
+ * reflection. Returns null when flag off.
+ * Spec: overlay_voice_note.md §6 (Phase 1.5 interpretation).
+ */
+export async function getVoiceNoteInterpretation(id: string): Promise<any> {
+  if (!id) return null;
+  try {
+    const res = await api.get(`mitra/voice/notes/${id}/interpretation/`);
+    return res.data;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (status === 404 || status === 503) return null;
+    console.warn('[MITRA] getVoiceNoteInterpretation failed:', err?.message);
+    return null;
+  }
+}
+
+/**
+ * POST mitra/interpret-intent/ — Phase 1.5 free-form intent router. Used by
+ * the voice/text fallback pipeline to route to trigger / check-in / journal.
+ * Returns null when flag off.
+ */
+export async function postInterpretIntent(text: string): Promise<any> {
+  if (!text || !text.trim()) return null;
+  try {
+    const res = await api.post('mitra/interpret-intent/', { text });
+    return res.data;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (status === 404 || status === 503) return null;
+    console.warn('[MITRA] postInterpretIntent failed:', err?.message);
+    return null;
+  }
+}
+
 /** POST mitra/journey/welcome-back/ — Submit welcome-back decision (continue | fresh). */
 export async function mitraJourneyWelcomeBack(decision: 'continue' | 'fresh'): Promise<any> {
   try {

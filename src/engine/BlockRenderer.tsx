@@ -94,6 +94,14 @@ import SankalpHoldBlock from '../blocks/SankalpHoldBlock';
 import PracticeTimerBlock from '../blocks/PracticeTimerBlock';
 import CompletionReturnTransient from '../blocks/CompletionReturnTransient';
 
+// Week 4 — Support Path (Mitra v3 Moments 20, 21, 22, 31, 38, 42)
+import TriggerEntryBlock from '../blocks/TriggerEntryBlock';
+import SoundBridgeTransient from '../blocks/SoundBridgeTransient';
+import CheckInRegulationBlock from '../blocks/CheckInRegulationBlock';
+import BalancedAckOverlay from '../blocks/BalancedAckOverlay';
+import VoiceNoteSheet from '../blocks/VoiceNoteSheet';
+import VoiceConsentSheet from '../blocks/VoiceConsentSheet';
+
 const blockMap: Record<string, React.ComponentType<any>> = {
   // Original 11 blocks
   headline: HeadlineBlock,
@@ -179,6 +187,13 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   sankalp_hold: SankalpHoldBlock,
   practice_timer: PracticeTimerBlock,
   completion_return: CompletionReturnTransient,
+  // Week 4 — Support Path
+  trigger_entry: TriggerEntryBlock,
+  sound_bridge_transient: SoundBridgeTransient,
+  checkin_regulation: CheckInRegulationBlock,
+  balanced_ack_overlay: BalancedAckOverlay,
+  voice_note_sheet: VoiceNoteSheet,
+  voice_consent_sheet: VoiceConsentSheet,
 };
 
 interface BlockRendererProps {
@@ -249,6 +264,9 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block, textColor }) => {
     'check_in_card_compact', 'cycle_signal_bar', 'clear_window_banner',
     // Week 3 runner blocks — all dispatch their own completion actions
     'mantra_runner_display', 'sankalp_hold', 'practice_timer', 'completion_return',
+    // Week 4 support blocks — all self-dispatch their own actions
+    'trigger_entry', 'sound_bridge_transient', 'checkin_regulation',
+    'balanced_ack_overlay', 'voice_note_sheet', 'voice_consent_sheet',
   ]);
 
   if (interpolatedBlock.action && !selfActionBlocks.has(interpolatedBlock.type)) {

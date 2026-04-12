@@ -6214,6 +6214,78 @@ export const MASTER_UI_TEXT = {
   },
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// WEEK 4 — SUPPORT PATH (Mitra v3 Moments 20, 21, 22, 31, 38, 42)
+// Web parity: kalpx-frontend/src/containers/AwarenessTriggerContainer.vue
+// Specs: route_support_trigger.md, route_support_checkin_regulation.md,
+//        overlay_checkin_balanced_ack.md, overlay_voice_note.md,
+//        overlay_voice_consent.md, transient_sound_bridge.md.
+// REG-020: trigger active path has NO recheck (sound_bridge → mantra_runner
+//          via practice_runner → dashboard).
+// REG-015: check-in states touch only checkin_* fields.
+// ─────────────────────────────────────────────────────────────────────────────
+export const SupportTriggerContainer = {
+  container_id: "support_trigger",
+  states: {
+    entry: {
+      tone: { theme: "gold_dark", mood: "steady" },
+      blocks: [
+        { type: "trigger_entry", label: "I feel triggered." },
+      ],
+    },
+    sound_bridge: {
+      tone: { theme: "deep_focus", mood: "reflective" },
+      overlay: true,
+      blocks: [{ type: "sound_bridge_transient" }],
+    },
+    // Note: mantra_runner_support is hosted under practice_runner container
+    // with runner_source="support_trigger" — not a state here. This prevents
+    // duplicating the runner implementation and preserves week 3 contracts.
+  },
+};
+
+export const SupportCheckinContainer = {
+  container_id: "support_checkin",
+  states: {
+    notice: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [{ type: "checkin_regulation" }],
+    },
+    name: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [{ type: "checkin_regulation" }],
+    },
+    settle: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [{ type: "checkin_regulation" }],
+    },
+    balanced_ack: {
+      tone: { theme: "gold_dark", mood: "celebratory" },
+      overlay: true,
+      blocks: [{ type: "balanced_ack_overlay" }],
+    },
+  },
+};
+
+// Overlay container — voice sheets can mount over any parent. Two states:
+// voice_consent (first-use gate) and voice_note (recorder). Accessed only
+// via start_voice_note action; not entered via navigate_to URL.
+export const OverlayContainer = {
+  container_id: "overlay",
+  states: {
+    voice_consent: {
+      tone: { theme: "light_sandal", mood: "steady" },
+      overlay: true,
+      blocks: [{ type: "voice_consent_sheet" }],
+    },
+    voice_note: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      overlay: true,
+      blocks: [{ type: "voice_note_sheet" }],
+    },
+  },
+};
+
 export const ContainerRegistry = {
   portal: PortalContainer,
   portal_splash: PortalSplashContainer,
@@ -6234,6 +6306,10 @@ export const ContainerRegistry = {
   sadhana_deepen: SadhanaDeepenContainer,
   cycle_transitions: CycleTransitionsContainer,
   stable_scan: StableScanContainer,
+  // Week 4 — Support Path
+  support_trigger: SupportTriggerContainer,
+  support_checkin: SupportCheckinContainer,
+  overlay: OverlayContainer,
   demo_container: {
     container_id: "demo_container",
     states: {

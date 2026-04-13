@@ -82,14 +82,14 @@ const styles = StyleSheet.create({
   track: {
     height: 4,
     borderRadius: 2,
-    backgroundColor: "#efe5d6",
+    backgroundColor: "#FFF8EF",
     position: "relative",
     marginBottom: 6,
   },
   fill: {
     height: 4,
     borderRadius: 2,
-    backgroundColor: "#d4a017",
+    backgroundColor: "#c9a84c",
   },
   dot: {
     position: "absolute",
@@ -99,11 +99,11 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     marginLeft: -6,
   },
-  dotActive: { backgroundColor: "#d4a017" },
+  dotActive: { backgroundColor: "#c9a84c" },
   dotPending: {
-    backgroundColor: "#fffdf5",
+    backgroundColor: "#fffdf9",
     borderWidth: 1,
-    borderColor: "#d4c8a8",
+    borderColor: "#eddeb4",
   },
   meta: {
     fontFamily: Fonts.sans.regular,

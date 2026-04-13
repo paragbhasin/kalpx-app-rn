@@ -64,7 +64,7 @@ const CheckInCardCompact: React.FC<{ block?: any }> = () => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#fdf9ee",
+    backgroundColor: "#FFF8EF",
     borderRadius: 12,
     padding: 12,
     marginVertical: 8,
@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
   prompt: {
     fontFamily: Fonts.serif.regular,
     fontSize: 15,
-    color: "#3a2b12",
+    color: "#432104",
     marginBottom: 10,
     textAlign: "center",
   },
@@ -84,8 +84,8 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "#c7a64b",
-    backgroundColor: "#fffdf5",
+    borderColor: "#c9a84c",
+    backgroundColor: "#fffdf9",
   },
   chipText: {
     fontFamily: Fonts.sans.regular,

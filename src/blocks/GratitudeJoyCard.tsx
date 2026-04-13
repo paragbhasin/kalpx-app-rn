@@ -67,7 +67,7 @@ const GratitudeJoyCard: React.FC<{ block?: any }> = () => {
         value={text}
         onChangeText={setText}
         placeholder="A word, a moment, a name"
-        placeholderTextColor="#a89870"
+        placeholderTextColor="#c9a84c"
         style={styles.input}
         multiline
         maxLength={240}
@@ -86,7 +86,7 @@ const GratitudeJoyCard: React.FC<{ block?: any }> = () => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#fbf8ef",
+    backgroundColor: "#FFF8EF",
     borderRadius: 14,
     padding: 16,
     marginVertical: 10,
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   mirror: {
     fontFamily: Fonts.serif.regular,
     fontSize: 17,
-    color: "#3a2a10",
+    color: "#432104",
     lineHeight: 24,
     marginBottom: 8,
   },
@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   input: {
     fontFamily: Fonts.sans.regular,
     fontSize: 14,
-    color: "#2b1d0a",
+    color: "#432104",
     backgroundColor: "#ffffff",
     borderRadius: 10,
     borderWidth: 0.5,
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   btnText: {
     fontFamily: Fonts.sans.semiBold,
     fontSize: 14,
-    color: "#2b1d0a",
+    color: "#432104",
   },
 });
 

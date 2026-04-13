@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif.regular,
     fontSize: 24,
     lineHeight: 32,
-    color: '#f1e7cf',
+    color: '#FFF8EF',
     marginBottom: 14,
   },
   prompt: {

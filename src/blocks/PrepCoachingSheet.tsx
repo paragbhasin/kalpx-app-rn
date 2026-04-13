@@ -136,21 +136,21 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.regular,
     fontSize: 11,
     letterSpacing: 1.4,
-    color: "#b89450",
+    color: "#c9a84c",
     marginBottom: 14,
   },
   strategy: {
     fontFamily: Fonts.serif.regular,
     fontSize: 19,
     lineHeight: 28,
-    color: "#2a1e0b",
+    color: "#432104",
     marginBottom: 12,
   },
   grounding: {
     fontFamily: Fonts.sans.regular,
     fontSize: 15,
     lineHeight: 22,
-    color: "#3a2b12",
+    color: "#432104",
     marginBottom: 14,
   },
   closing: {
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   expandText: {
     fontFamily: Fonts.sans.regular,
     fontSize: 14,
-    color: "#b89450",
+    color: "#c9a84c",
   },
   doDont: {
     borderTopWidth: 1,
@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
   principleHint: {
     fontFamily: Fonts.sans.regular,
     fontSize: 13,
-    color: "#b89450",
+    color: "#c9a84c",
     marginTop: 6,
   },
   footer: { marginTop: 28, gap: 10 },
@@ -191,18 +191,18 @@ const styles = StyleSheet.create({
   primaryPillText: {
     fontFamily: Fonts.sans.bold,
     fontSize: 15,
-    color: "#fffdf5",
+    color: "#fffdf9",
   },
   secondary: { alignItems: "center", paddingVertical: 10 },
   secondaryText: {
     fontFamily: Fonts.sans.regular,
     fontSize: 14,
-    color: "#3a2b12",
+    color: "#432104",
   },
   empty: {
     fontFamily: Fonts.serif.regular,
     fontSize: 15,
-    color: "#3a2b12",
+    color: "#432104",
     textAlign: "center",
     padding: 24,
   },

@@ -98,12 +98,12 @@ const styles = StyleSheet.create({
   },
   cardDefault: { borderColor: GOLD, borderWidth: 1.5 },
   title: { fontFamily: Fonts.serif.bold, fontSize: 17, color: DEEP_BROWN, marginBottom: 6 },
-  desc: { fontFamily: Fonts.sans.regular, fontSize: 14, color: '#6b4a2b', lineHeight: 20 },
+  desc: { fontFamily: Fonts.sans.regular, fontSize: 14, color: '#6b5a45', lineHeight: 20 },
   example: {
     fontFamily: Fonts.serif.regular,
     fontStyle: 'italic',
     fontSize: 13,
-    color: '#8b6a3b',
+    color: '#6b5a45',
     marginTop: 8,
   },
 });

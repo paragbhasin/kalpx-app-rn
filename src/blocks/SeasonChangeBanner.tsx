@@ -67,7 +67,7 @@ const SeasonChangeBanner: React.FC<{ block?: any }> = () => {
 
 const styles = StyleSheet.create({
   banner: {
-    backgroundColor: "#f4ecdc",
+    backgroundColor: "#FFF8EF",
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 14,

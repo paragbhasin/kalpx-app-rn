@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   },
   card: {
     borderLeftWidth: 3,
-    borderLeftColor: '#d4a017',
+    borderLeftColor: '#c9a84c',
     paddingLeft: 14,
     paddingVertical: 10,
     marginBottom: 16,
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     color: '#432104',
   },
   moreCard: {
-    backgroundColor: '#f6ecd4',
+    backgroundColor: '#FFF8EF',
     borderRadius: 10,
     padding: 12,
     marginBottom: 16,
@@ -155,13 +155,13 @@ const styles = StyleSheet.create({
   secondaryText: {
     fontFamily: Fonts.sans.regular,
     fontSize: 14,
-    color: '#6a5a3a',
+    color: '#6b5a45',
   },
   tertiary: { marginTop: 8, padding: 8 },
   tertiaryText: {
     fontFamily: Fonts.sans.regular,
     fontSize: 13,
-    color: '#8c7b5c',
+    color: '#6b5a45',
   },
 });
 

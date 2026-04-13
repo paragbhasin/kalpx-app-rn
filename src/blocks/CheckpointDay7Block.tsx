@@ -194,7 +194,7 @@ const CheckpointDay7Block: React.FC<Props> = () => {
 };
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#fdf9ee" },
+  root: { flex: 1, backgroundColor: "#FFF8EF" },
   scroll: { padding: 24, paddingBottom: 16 },
   topRegion: { flex: 1, padding: 24, justifyContent: "center" },
   bottomRegion: {
@@ -208,19 +208,19 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.medium,
     fontSize: 11,
     letterSpacing: 1.5,
-    color: "#b8922a",
+    color: "#c9a84c",
     marginBottom: 10,
   },
   headline: {
     fontFamily: Fonts.serif.regular,
     fontSize: 28,
-    color: "#3a2b12",
+    color: "#432104",
     marginBottom: 12,
   },
   body: {
     fontFamily: Fonts.serif.regular,
     fontSize: 18,
-    color: "#615247",
+    color: "#6b5a45",
     lineHeight: 26,
   },
   grid: {
@@ -234,22 +234,22 @@ const styles = StyleSheet.create({
     height: 14,
     borderRadius: 7,
     borderWidth: 1,
-    borderColor: "#c7a64b",
+    borderColor: "#c9a84c",
     backgroundColor: "transparent",
   },
-  dotFilled: { backgroundColor: "#d4a017" },
+  dotFilled: { backgroundColor: "#c9a84c" },
   dotPartial: { backgroundColor: "rgba(212,160,23,0.45)" },
   summary: {
     textAlign: "center",
     fontFamily: Fonts.sans.regular,
     fontSize: 13,
-    color: "#615247",
+    color: "#6b5a45",
     marginBottom: 16,
   },
   narrative: {
     fontFamily: Fonts.serif.regular,
     fontSize: 17,
-    color: "#3a2b12",
+    color: "#432104",
     lineHeight: 26,
     marginBottom: 16,
   },
@@ -257,11 +257,11 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.medium,
     fontSize: 11,
     letterSpacing: 1.5,
-    color: "#b8922a",
+    color: "#c9a84c",
     marginBottom: 8,
   },
   growthBox: {
-    backgroundColor: "#fffdf5",
+    backgroundColor: "#fffdf9",
     borderColor: "rgba(199, 166, 75, 0.4)",
     borderWidth: 1,
     borderRadius: 12,
@@ -276,12 +276,12 @@ const styles = StyleSheet.create({
     padding: 12,
     fontFamily: Fonts.sans.regular,
     fontSize: 15,
-    color: "#3a2b12",
-    backgroundColor: "#fffdf5",
+    color: "#432104",
+    backgroundColor: "#fffdf9",
     textAlignVertical: "top",
   },
   cta: {
-    backgroundColor: "#d4a017",
+    backgroundColor: "#c9a84c",
     paddingVertical: 14,
     borderRadius: 28,
     alignItems: "center",
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
   ctaText: {
     fontFamily: Fonts.sans.medium,
     fontSize: 16,
-    color: "#2a1804",
+    color: "#432104",
   },
   secondaryRow: {
     flexDirection: "row",
@@ -300,11 +300,11 @@ const styles = StyleSheet.create({
   secondaryBtn: {
     flex: 1,
     borderWidth: 1,
-    borderColor: "#c7a64b",
+    borderColor: "#c9a84c",
     paddingVertical: 12,
     borderRadius: 26,
     alignItems: "center",
-    backgroundColor: "#fffdf5",
+    backgroundColor: "#fffdf9",
   },
   secondaryText: {
     fontFamily: Fonts.sans.regular,

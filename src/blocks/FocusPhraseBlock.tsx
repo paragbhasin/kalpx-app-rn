@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.regular,
     fontStyle: "italic",
     fontSize: 14,
-    color: "#b89450",
+    color: "#c9a84c",
     textAlign: "center",
   },
 });

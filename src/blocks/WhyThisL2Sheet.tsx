@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   name: {
     fontFamily: Fonts.serif.bold,
     fontSize: 26,
-    color: "#2b1d0a",
+    color: "#432104",
     marginBottom: 10,
     lineHeight: 32,
   },
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   context: {
     fontFamily: Fonts.sans.regular,
     fontSize: 14,
-    color: "#5a4a2a",
+    color: "#6b5a45",
     lineHeight: 21,
   },
   deeper: {
@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
   dismissText: {
     fontFamily: Fonts.sans.medium,
     fontSize: 14,
-    color: "#5a4a2a",
+    color: "#6b5a45",
   },
 });
 

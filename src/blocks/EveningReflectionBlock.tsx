@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
   prompt: {
     fontFamily: Fonts.serif.regular,
     fontSize: 24,
-    color: "#3a2b12",
+    color: "#432104",
     marginBottom: 20,
     textAlign: "center",
   },
@@ -193,16 +193,16 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 22,
     borderWidth: 1,
-    borderColor: "#c7a64b",
-    backgroundColor: "#fffdf5",
+    borderColor: "#c9a84c",
+    backgroundColor: "#fffdf9",
   },
-  chipActive: { backgroundColor: "#d4a017", borderColor: "#a8821a" },
+  chipActive: { backgroundColor: "#c9a84c", borderColor: "#c9a84c" },
   chipText: {
     fontFamily: Fonts.sans.regular,
     fontSize: 14,
     color: "#432104",
   },
-  chipTextActive: { color: "#fffdf5" },
+  chipTextActive: { color: "#fffdf9" },
   input: {
     minHeight: 72,
     borderWidth: 1,
@@ -211,12 +211,12 @@ const styles = StyleSheet.create({
     padding: 12,
     fontFamily: Fonts.sans.regular,
     fontSize: 15,
-    color: "#3a2b12",
-    backgroundColor: "#fffdf5",
+    color: "#432104",
+    backgroundColor: "#fffdf9",
     textAlignVertical: "top",
   },
   cta: {
-    backgroundColor: "#d4a017",
+    backgroundColor: "#c9a84c",
     paddingVertical: 14,
     borderRadius: 28,
     alignItems: "center",
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   ctaText: {
     fontFamily: Fonts.sans.medium,
     fontSize: 16,
-    color: "#2a1804",
+    color: "#432104",
   },
   helper: {
     fontFamily: Fonts.sans.regular,
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
   ackText: {
     fontFamily: Fonts.serif.regular,
     fontSize: 22,
-    color: "#3a2b12",
+    color: "#432104",
     textAlign: "center",
   },
 });

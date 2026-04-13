@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.semiBold,
     fontSize: 11,
     letterSpacing: 2,
-    color: '#8b6a3b',
+    color: '#6b5a45',
     marginBottom: 14,
   },
   emphasized: {

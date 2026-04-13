@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.devanagari.regular,
     fontSize: 22,
     lineHeight: 34,
-    color: "#2b1d0a",
+    color: "#432104",
     marginBottom: 14,
   },
   translit: {
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
   english: {
     fontFamily: Fonts.sans.regular,
     fontSize: 15,
-    color: "#3a2a10",
+    color: "#432104",
     lineHeight: 23,
     marginBottom: 16,
   },
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
   dismissText: {
     fontFamily: Fonts.sans.medium,
     fontSize: 14,
-    color: "#5a4a2a",
+    color: "#6b5a45",
   },
 });
 

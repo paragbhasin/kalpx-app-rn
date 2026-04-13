@@ -115,12 +115,12 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.bold,
     fontSize: 11,
     letterSpacing: 1.4,
-    color: "#b89450",
+    color: "#c9a84c",
   },
   title: {
     fontFamily: Fonts.serif.regular,
     fontSize: 17,
-    color: "#3a2b12",
+    color: "#432104",
     lineHeight: 23,
   },
   why: {
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     height: 14,
     borderRadius: 7,
     borderWidth: 1,
-    borderColor: "#d4c8a8",
+    borderColor: "#eddeb4",
   },
 });
 

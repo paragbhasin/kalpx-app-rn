@@ -57,12 +57,12 @@ const ClearWindowBanner: React.FC<{ block?: any }> = () => {
 
 const styles = StyleSheet.create({
   banner: {
-    backgroundColor: "#fef3d7",
+    backgroundColor: "#FFF7E8",
     borderRadius: 12,
     padding: 14,
     marginVertical: 10,
     borderLeftWidth: 3,
-    borderLeftColor: "#d4a017",
+    borderLeftColor: "#c9a84c",
   },
   row: {
     flexDirection: "row",
@@ -71,12 +71,12 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   chip: {
-    backgroundColor: "#fffdf5",
+    backgroundColor: "#fffdf9",
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderWidth: 0.5,
-    borderColor: "#d4a017",
+    borderColor: "#c9a84c",
   },
   chipText: {
     fontFamily: Fonts.sans.bold,
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
   message: {
     fontFamily: Fonts.sans.regular,
     fontSize: 13,
-    color: "#5a4a2a",
+    color: "#6b5a45",
     lineHeight: 19,
   },
 });

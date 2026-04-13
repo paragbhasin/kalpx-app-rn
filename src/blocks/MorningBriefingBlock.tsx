@@ -65,7 +65,7 @@ const MorningBriefingBlock: React.FC<{ block?: any }> = () => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#fffdf5",
+    backgroundColor: "#fffdf9",
     borderRadius: 14,
     borderLeftWidth: 3,
     borderLeftColor: "#eddeb4",
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif.regular,
     fontSize: 16,
     lineHeight: 24,
-    color: "#3a2b12",
+    color: "#432104",
   },
   link: {
     fontFamily: Fonts.sans.regular,
@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
   transcript: {
     fontFamily: Fonts.sans.regular,
     fontSize: 13,
-    color: "#5a4a2a",
+    color: "#6b5a45",
     marginTop: 8,
     lineHeight: 19,
   },

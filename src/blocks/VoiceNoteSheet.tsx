@@ -241,7 +241,7 @@ const VoiceNoteSheet: React.FC<{ block?: any }> = ({ block }) => {
           <TextInput
             style={styles.textInput}
             placeholder="Type to me..."
-            placeholderTextColor="#8c7b5c"
+            placeholderTextColor="#6b5a45"
             value={textDraft}
             onChangeText={setTextDraft}
             multiline
@@ -291,14 +291,14 @@ const styles = StyleSheet.create({
   listening: {
     fontFamily: Fonts.sans.regular,
     fontSize: 18,
-    color: '#f1e7cf',
+    color: '#FFF8EF',
     marginTop: 24,
     marginBottom: 12,
   },
   nameHint: {
     fontFamily: Fonts.sans.regular,
     fontSize: 12,
-    color: '#9a7a3a',
+    color: '#c9a84c',
     marginBottom: 20,
   },
   recordBtn: {
@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 24,
   },
-  stopIcon: { fontSize: 28, color: '#1a1a1a' },
+  stopIcon: { fontSize: 28, color: '#fffdf9' },
   counter: {
     fontFamily: Fonts.sans.regular,
     fontSize: 20,
@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif.regular,
     fontSize: 17,
     lineHeight: 26,
-    color: '#f1e7cf',
+    color: '#FFF8EF',
   },
   doneBtn: {
     backgroundColor: '#eddeb4',
@@ -377,7 +377,7 @@ const styles = StyleSheet.create({
   doneBtnText: {
     fontFamily: Fonts.sans.semiBold,
     fontSize: 15,
-    color: '#1a1a1a',
+    color: '#fffdf9',
   },
   fallbackLink: { marginTop: 16, padding: 8 },
   fallbackLinkText: {

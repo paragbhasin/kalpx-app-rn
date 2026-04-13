@@ -102,13 +102,13 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.regular,
     fontSize: 11,
     letterSpacing: 1.4,
-    color: "#b89450",
+    color: "#c9a84c",
     marginBottom: 14,
   },
   question: {
     fontFamily: Fonts.serif.regular,
     fontSize: 19,
-    color: "#2a1e0b",
+    color: "#432104",
     marginBottom: 8,
   },
   nameGuess: {
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   context: {
     fontFamily: Fonts.sans.regular,
     fontSize: 14,
-    color: "#3a2b12",
+    color: "#432104",
     lineHeight: 21,
     marginBottom: 24,
   },
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   primaryText: {
     fontFamily: Fonts.sans.bold,
     fontSize: 15,
-    color: "#fffdf5",
+    color: "#fffdf9",
   },
   secondary: {
     paddingVertical: 12,
@@ -146,18 +146,18 @@ const styles = StyleSheet.create({
   secondaryText: {
     fontFamily: Fonts.sans.regular,
     fontSize: 14,
-    color: "#3a2b12",
+    color: "#432104",
   },
   tertiary: { alignItems: "center", paddingVertical: 10 },
   tertiaryText: {
     fontFamily: Fonts.sans.regular,
     fontSize: 13,
-    color: "#6a5a3a",
+    color: "#6b5a45",
   },
   empty: {
     fontFamily: Fonts.serif.regular,
     fontSize: 15,
-    color: "#3a2b12",
+    color: "#432104",
     textAlign: "center",
     padding: 24,
   },

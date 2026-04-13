@@ -94,7 +94,7 @@ const PostConflictGentlenessCard: React.FC<{ block?: any }> = () => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#f6ede0",
+    backgroundColor: "#FFF8EF",
     borderRadius: 12,
     padding: 16,
     marginVertical: 10,
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   lead: {
     fontFamily: Fonts.serif.regular,
     fontSize: 15,
-    color: "#3a2b12",
+    color: "#432104",
     marginBottom: 6,
   },
   soften: {
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     fontSize: 15,
     lineHeight: 22,
-    color: "#5a4a2a",
+    color: "#6b5a45",
     marginBottom: 14,
   },
   row: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   primaryText: {
     fontFamily: Fonts.sans.bold,
     fontSize: 13,
-    color: "#fffdf5",
+    color: "#fffdf9",
   },
   secondary: {
     paddingHorizontal: 14,
@@ -137,13 +137,13 @@ const styles = StyleSheet.create({
   secondaryText: {
     fontFamily: Fonts.sans.regular,
     fontSize: 13,
-    color: "#3a2b12",
+    color: "#432104",
   },
   tertiary: { paddingHorizontal: 8, paddingVertical: 9 },
   tertiaryText: {
     fontFamily: Fonts.sans.regular,
     fontSize: 12,
-    color: "#6a5a3a",
+    color: "#6b5a45",
   },
 });
 

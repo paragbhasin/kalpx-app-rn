@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.semiBold,
     fontSize: 11,
     letterSpacing: 1.8,
-    color: '#8b6a3b',
+    color: '#6b5a45',
     marginBottom: 6,
   },
   title: {
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     color: DEEP_BROWN,
     marginBottom: 6,
   },
-  why: { fontFamily: Fonts.sans.regular, fontSize: 14, color: '#6b4a2b', lineHeight: 20 },
+  why: { fontFamily: Fonts.sans.regular, fontSize: 14, color: '#6b5a45', lineHeight: 20 },
   footer: {
     fontFamily: Fonts.serif.regular,
     fontStyle: 'italic',

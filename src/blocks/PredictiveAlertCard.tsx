@@ -68,7 +68,7 @@ const PredictiveAlertCard: React.FC<{ block?: any }> = () => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#faf5e8",
+    backgroundColor: "#FFF8EF",
     borderRadius: 12,
     padding: 14,
     marginVertical: 10,
@@ -78,13 +78,13 @@ const styles = StyleSheet.create({
   when: {
     fontFamily: Fonts.serif.regular,
     fontSize: 15,
-    color: "#3a2b12",
+    color: "#432104",
     marginBottom: 6,
   },
   evidence: {
     fontFamily: Fonts.sans.regular,
     fontSize: 13,
-    color: "#6a5a3a",
+    color: "#6b5a45",
     lineHeight: 19,
     marginBottom: 10,
   },
@@ -105,13 +105,13 @@ const styles = StyleSheet.create({
   primaryText: {
     fontFamily: Fonts.sans.bold,
     fontSize: 13,
-    color: "#fffdf5",
+    color: "#fffdf9",
   },
   secondary: { paddingHorizontal: 14, paddingVertical: 8 },
   secondaryText: {
     fontFamily: Fonts.sans.regular,
     fontSize: 13,
-    color: "#3a2b12",
+    color: "#432104",
   },
 });
 

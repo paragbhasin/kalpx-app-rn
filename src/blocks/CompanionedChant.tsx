@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
   mantra: {
     fontFamily: Fonts.devanagari.regular,
     fontSize: 24,
-    color: "#2b1d0a",
+    color: "#432104",
     marginBottom: 6,
     textAlign: "center",
   },

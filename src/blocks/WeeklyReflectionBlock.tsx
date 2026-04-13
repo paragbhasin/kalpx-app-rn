@@ -193,14 +193,14 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: Fonts.serif.regular,
     fontSize: 26,
-    color: "#3a2b12",
+    color: "#432104",
     marginBottom: 8,
   },
   opening: {
     fontFamily: Fonts.serif.regular,
     fontStyle: "italic",
     fontSize: 16,
-    color: "#615247",
+    color: "#6b5a45",
     marginBottom: 24,
     lineHeight: 24,
   },
@@ -210,13 +210,13 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.medium,
     fontSize: 11,
     letterSpacing: 1.5,
-    color: "#b8922a",
+    color: "#c9a84c",
     marginBottom: 8,
   },
   sectionPrompt: {
     fontFamily: Fonts.sans.regular,
     fontSize: 15,
-    color: "#3a2b12",
+    color: "#432104",
     marginBottom: 8,
   },
   input: {
@@ -227,8 +227,8 @@ const styles = StyleSheet.create({
     padding: 12,
     fontFamily: Fonts.sans.regular,
     fontSize: 15,
-    color: "#3a2b12",
-    backgroundColor: "#fffdf5",
+    color: "#432104",
+    backgroundColor: "#fffdf9",
     textAlignVertical: "top",
   },
   bottomRegion: {
@@ -237,10 +237,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 28,
     paddingTop: 12,
-    backgroundColor: "#fdf9ee",
+    backgroundColor: "#FFF8EF",
   },
   cta: {
-    backgroundColor: "#d4a017",
+    backgroundColor: "#c9a84c",
     paddingVertical: 14,
     borderRadius: 28,
     alignItems: "center",
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
   ctaText: {
     fontFamily: Fonts.sans.medium,
     fontSize: 16,
-    color: "#2a1804",
+    color: "#432104",
   },
   ackWrap: {
     flex: 1,
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
   ackText: {
     fontFamily: Fonts.serif.regular,
     fontSize: 22,
-    color: "#3a2b12",
+    color: "#432104",
     textAlign: "center",
   },
 });

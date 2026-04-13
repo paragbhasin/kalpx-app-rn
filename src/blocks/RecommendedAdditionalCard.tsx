@@ -83,7 +83,7 @@ const RecommendedAdditionalCard: React.FC<{ block?: any }> = () => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#fdf9ee",
+    backgroundColor: "#FFF8EF",
     borderRadius: 12,
     padding: 14,
     marginVertical: 10,
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif.regular,
     fontSize: 14,
     fontStyle: "italic",
-    color: "#6a5a3a",
+    color: "#6b5a45",
     lineHeight: 20,
     marginBottom: 8,
   },
@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: Fonts.serif.regular,
     fontSize: 17,
-    color: "#2a1e0b",
+    color: "#432104",
   },
   duration: {
     fontFamily: Fonts.sans.regular,
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   benefit: {
     fontFamily: Fonts.sans.regular,
     fontSize: 13,
-    color: "#3a2b12",
+    color: "#432104",
     marginBottom: 12,
   },
   row: { flexDirection: "row", gap: 10, alignItems: "center" },
@@ -130,13 +130,13 @@ const styles = StyleSheet.create({
   primaryText: {
     fontFamily: Fonts.sans.bold,
     fontSize: 13,
-    color: "#fffdf5",
+    color: "#fffdf9",
   },
   secondary: { paddingHorizontal: 12, paddingVertical: 9 },
   secondaryText: {
     fontFamily: Fonts.sans.regular,
     fontSize: 13,
-    color: "#3a2b12",
+    color: "#432104",
   },
 });
 

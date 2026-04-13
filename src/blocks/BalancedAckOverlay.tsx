@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif.regular,
     fontSize: 20,
     lineHeight: 30,
-    color: '#f1e7cf',
+    color: '#FFF8EF',
   },
   pill: {
     backgroundColor: '#eddeb4',
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   pillText: {
     fontFamily: Fonts.sans.semiBold,
     fontSize: 15,
-    color: '#1a1a1a',
+    color: '#fffdf9',
     letterSpacing: 0.3,
   },
 });

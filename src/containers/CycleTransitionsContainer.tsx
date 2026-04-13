@@ -1,3 +1,4 @@
+import { ChevronDown, ChevronUp } from "lucide-react-native";
 import React, { useMemo, useState } from "react";
 import {
   Dimensions,
@@ -11,8 +12,18 @@ import {
   UIManager,
   View,
 } from "react-native";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from "react-native-reanimated";
+import Svg, { Circle, Path } from "react-native-svg";
+import RudrakshSvg from "../../assets/rudraksh.svg";
 import AudioPlayerBlock from "../blocks/AudioPlayerBlock";
 import BlockRenderer from "../engine/BlockRenderer";
+import { executeAction } from "../engine/actionExecutor";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { interpolate } from "../engine/utils/interpolation";
 import { Fonts } from "../theme/fonts";
@@ -52,6 +63,12 @@ const hasContent = (val: any): boolean => {
   if (typeof val === "object") return Object.keys(val).length > 0;
   return true;
 };
+
+// ---------------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------------
+
+const MAX_VISUAL_BEADS = 18;
 
 // ---------------------------------------------------------------------------
 // Collapsible Card sub-component
@@ -107,6 +124,70 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({ label }) => (
 );
 
 // ---------------------------------------------------------------------------
+// Mantra Text Card sub-component
+// ---------------------------------------------------------------------------
+
+interface MantraTextCardProps {
+  text: string;
+  isDevanagari?: boolean;
+  expanded: boolean;
+  onToggle: () => void;
+}
+
+const MantraTextCard: React.FC<MantraTextCardProps> = ({
+  text,
+  isDevanagari,
+  expanded,
+  onToggle,
+}) => {
+  const [showToggle, setShowToggle] = React.useState(false);
+
+  return (
+    <TouchableOpacity
+      style={[styles.card, expanded && styles.cardExpanded, { padding: 12 }]}
+      onPress={() => {
+        if (showToggle) {
+          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+          onToggle();
+        }
+      }}
+      activeOpacity={0.8}
+    >
+      <View style={styles.textCardHeader}>
+        <Text
+          style={[
+            styles.textCardHeaderContent,
+            isDevanagari && {
+              fontSize: 20,
+              fontFamily: "NotoSansDevanagari_500Medium",
+            },
+          ]}
+          numberOfLines={expanded ? undefined : 2}
+          onTextLayout={(e) => {
+            const lines = e.nativeEvent.lines.length;
+            if (lines > 2) {
+              setShowToggle(true);
+            }
+          }}
+        >
+          {text}
+        </Text>
+      </View>
+
+      {showToggle && (
+        <View style={styles.toggleIcon}>
+          {expanded ? (
+            <ChevronUp size={18} color="#B89450" />
+          ) : (
+            <ChevronDown size={18} color="#B89450" />
+          )}
+        </View>
+      )}
+    </TouchableOpacity>
+  );
+};
+
+// ---------------------------------------------------------------------------
 // Main Component
 // ---------------------------------------------------------------------------
 
@@ -119,17 +200,146 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     screenData,
     currentStateId,
     loadScreen,
+    updateScreenData,
+    goBack,
   } = useScreenStore();
 
   // Expand/collapse state
   const [meaningExpanded, setMeaningExpanded] = useState(false);
   const [benefitsExpanded, setBenefitsExpanded] = useState(false);
   const [essenceExpanded, setEssenceExpanded] = useState(false);
-  const [mantraExpanded, setMantraExpanded] = useState(false);
+  const [iastExpanded, setIastExpanded] = useState(false);
+  const [devanagariExpanded, setDevanagariExpanded] = useState(false);
   const [isMantraTruncatable, setIsMantraTruncatable] = useState(false);
+
+  // Mantra Practice State
+  const [chantCount, setChantCount] = useState(0);
+  const [selectedTarget, setSelectedTarget] = useState(
+    Number(screenData.reps_total) || 27,
+  );
+  const [sessionStartTime, setSessionStartTime] = useState(Date.now());
+
+  // Reanimated values for Mala
+  const rotation = useSharedValue(0);
+  const pulseScale = useSharedValue(1);
 
   const info = useMemo(() => screenData?.info || {}, [screenData]);
   const stateId = currentStateId || "";
+
+  const currentType: ActivityType = useMemo(() => {
+    // 1. Check direct info.type
+    if (info?.type) {
+      const t = info.type.toLowerCase();
+      if (t === "mantra") return "mantra";
+      if (t === "sankalp" || t === "sankalpa") return "sankalp";
+      if (t === "practice") return "practice";
+    }
+
+    // 2. Check screenData flags
+    if (
+      screenData?.info_is_mantra ||
+      screenData?.runner_active_item?.type === "mantra"
+    )
+      return "mantra";
+    if (screenData?.info_is_sankalp) return "sankalp";
+    if (screenData?.info_is_practice) return "practice";
+
+    return null;
+  }, [screenData, info]);
+
+  React.useEffect(() => {
+    rotation.value = withRepeat(
+      withTiming(360, {
+        duration: 40000,
+        easing: Easing.linear,
+      }),
+      -1,
+      false,
+    );
+
+    pulseScale.value = withRepeat(
+      withTiming(1.05, {
+        duration: 1500,
+        easing: Easing.inOut(Easing.ease),
+      }),
+      -1,
+      true,
+    );
+  }, [rotation, pulseScale]);
+
+  const animatedRingStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotation.value}deg` }],
+  }));
+
+  const animatedCenterStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: pulseScale.value }],
+  }));
+
+  const visualBeadsCount = Math.min(selectedTarget, MAX_VISUAL_BEADS);
+
+  const beads = useMemo(() => {
+    const arr = [];
+    const count = visualBeadsCount;
+    const radius = 90;
+    for (let i = 0; i < count; i++) {
+      const angle = (i / count) * 2 * Math.PI - Math.PI / 2;
+      arr.push({
+        x: Math.cos(angle) * (radius + 10),
+        y: Math.sin(angle) * (radius + 10),
+        index: i,
+      });
+    }
+    return arr;
+  }, [visualBeadsCount]);
+
+  const isBeadTapped = (index: number) => {
+    if (selectedTarget > MAX_VISUAL_BEADS) {
+      const progressInCycle = chantCount % visualBeadsCount;
+      return index < progressInCycle;
+    }
+    return index < chantCount;
+  };
+
+  const isBeadActive = (index: number) => {
+    if (selectedTarget > MAX_VISUAL_BEADS) {
+      return index === chantCount % visualBeadsCount;
+    }
+    return index === chantCount;
+  };
+
+  const handleIncrement = () => {
+    const nextCount = chantCount + 1;
+    setChantCount(nextCount);
+
+    if (nextCount >= selectedTarget) {
+      // Handle completion
+      const completeAction = screenData.info_start_action || {
+        type: "navigate",
+        target: {
+          container_id: "practice_runner",
+          state_id: "mantra_complete",
+        },
+      };
+
+      const durationSeconds = Math.round(
+        (Date.now() - sessionStartTime) / 1000,
+      );
+
+      // Track engagement properly
+      updateScreenData("chant_duration", durationSeconds);
+      updateScreenData("mantra_progress_reps", nextCount);
+      updateScreenData("reps_done", nextCount);
+
+      setTimeout(() => {
+        executeAction(completeAction, {
+          loadScreen,
+          goBack,
+          setScreenValue: (val: any, k: string) => updateScreenData(k, val),
+          screenState: { ...screenData },
+        });
+      }, 800);
+    }
+  };
 
   React.useEffect(() => {
     updateBackground(require("../../assets/beige_bg.png"));
@@ -143,23 +353,6 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
   React.useEffect(() => {
     setIsMantraTruncatable(false);
   }, [info]);
-
-  const currentType: ActivityType = useMemo(() => {
-    // 1. Check direct info.type
-    if (info?.type) {
-      const t = info.type.toLowerCase();
-      if (t === "mantra") return "mantra";
-      if (t === "sankalp" || t === "sankalpa") return "sankalp";
-      if (t === "practice") return "practice";
-    }
-
-    // 2. Check screenData flags
-    if (screenData?.info_is_mantra) return "mantra";
-    if (screenData?.info_is_sankalp) return "sankalp";
-    if (screenData?.info_is_practice) return "practice";
-
-    return null;
-  }, [screenData, info]);
 
   const isInfoScreen = useMemo(
     () =>
@@ -248,7 +441,6 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
       });
     }
   };
-
   if (isInfoScreen) {
     return (
       <View style={styles.container}>
@@ -257,141 +449,274 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
           contentContainerStyle={styles.infoScrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* Practice Visual (Lotus) */}
-          <View style={styles.visualContainer}>
-            {typeof MantraLotus3d === "number" ? (
-              <SvgUri
-                uri={Image.resolveAssetSource(MantraLotus3d)?.uri ?? null}
-                width={180}
-                height={180}
-              />
-            ) : (
-              <MantraLotus3d width={180} height={180} />
-            )}
-
-            {currentType === "sankalp" && (
-              <View style={styles.mantraMainContainer}>
-                {/* TIT-01: Render Title and Line separately for Sankalp.
-                    Order: Title -> Line -> How To Live (below). */}
-                {info.title && (
-                  <Text style={styles.deityTitle}>{info.title}</Text>
+          {/* Package for Mantra combined flow */}
+          {currentType === "mantra" && (
+            <View style={styles.combinedMantraFlow}>
+              {/* Top Mantra Cards */}
+              <View style={styles.topCardsRow}>
+                {info.iast && (
+                  <MantraTextCard
+                    text={info.iast}
+                    expanded={iastExpanded}
+                    onToggle={() => setIastExpanded(!iastExpanded)}
+                  />
                 )}
-                {(info.line ||
-                  info.subtitle ||
-                  info.iast ||
-                  info.meaning ||
-                  info.summary) && (
-                  <Text
-                    style={[
-                      styles.sankalpMainText,
-                      info.title ? { marginTop: 10 } : null,
-                    ]}
-                  >
-                    {interpolate(
-                      info.line ||
-                        info.subtitle ||
-                        info.iast ||
-                        info.meaning ||
-                        info.summary,
-                      { ...screenData, ...info },
-                    )}
-                  </Text>
+                <View style={{ height: 5 }} />
+                {info.devanagari && (
+                  <MantraTextCard
+                    text={info.devanagari}
+                    isDevanagari
+                    expanded={devanagariExpanded}
+                    onToggle={() => setDevanagariExpanded(!devanagariExpanded)}
+                  />
                 )}
               </View>
-            )}
 
-            {currentType === "mantra" && (
-              <View style={styles.mantraMainContainer}>
-                {/* INV-10: render each info field distinctly. No fallbacks
-                    to info.title — if devanagari/iast missing, hide the
-                    section rather than duplicating the title text. */}
-                {info.title && (
-                  <Text style={styles.deityTitle}>{info.title}</Text>
-                )}
+              {/* Progress Count */}
+              <View style={styles.progressCounter}>
+                <Text style={styles.currentCountText}>{chantCount}</Text>
+                <Text style={styles.totalCountText}> / {selectedTarget}</Text>
+              </View>
 
-                {/* Devanagari (Sanskrit script) — only if present AND
-                    distinct from the title so we don't render it twice. */}
-                {info.devanagari && info.devanagari !== info.title && (
-                  <Text
-                    style={styles.mantraDevanagariLarge}
-                    numberOfLines={mantraExpanded ? 0 : 3}
-                    ellipsizeMode="tail"
-                    onTextLayout={(e) => {
-                      if (
-                        !isMantraTruncatable &&
-                        e.nativeEvent.lines.length > 3
-                      ) {
-                        setIsMantraTruncatable(true);
-                      }
-                    }}
-                  >
-                    {info.devanagari}
-                  </Text>
-                )}
+              {/* Mala beads interaction area */}
+              <View style={styles.interactionArea}>
+                {/* Glow Background Layer */}
+                <View style={styles.glowOuter}>
+                  <View style={styles.glowMiddle}>
+                    <View style={styles.glowInner} />
+                  </View>
+                </View>
 
-                {/* IAST (Romanized transliteration) — only if present AND
-                    distinct from title. */}
-                {info.iast && info.iast !== info.title && (
-                  <Text
-                    style={styles.mantraIAST}
-                    numberOfLines={mantraExpanded ? 0 : 3}
-                    ellipsizeMode="tail"
-                    onTextLayout={(e) => {
-                      if (
-                        !isMantraTruncatable &&
-                        e.nativeEvent.lines.length > 3
-                      ) {
-                        setIsMantraTruncatable(true);
-                      }
-                    }}
-                  >
-                    {info.iast}
-                  </Text>
-                )}
+                <Animated.View style={[styles.beadsRing, animatedRingStyle]}>
+                  <View style={styles.ringCircle} />
 
-                {isMantraTruncatable && (
+                  {beads.map((bead) => {
+                    const tapped = isBeadTapped(bead.index);
+                    const active = isBeadActive(bead.index);
+                    return (
+                      <View
+                        key={bead.index}
+                        style={[
+                          styles.beadWrapper,
+                          {
+                            transform: [
+                              { translateX: bead.x },
+                              { translateY: bead.y },
+                              { scale: tapped ? 0.6 : 1 },
+                            ],
+                            opacity: tapped ? 0.2 : 1,
+                          },
+                        ]}
+                      >
+                        <TouchableOpacity
+                          onPress={handleIncrement}
+                          disabled={tapped}
+                          style={styles.beadInner}
+                          activeOpacity={1}
+                        >
+                          <RudrakshSvg width={30} height={30} />
+                          {active && <View style={styles.beadPointer} />}
+                        </TouchableOpacity>
+                      </View>
+                    );
+                  })}
+                </Animated.View>
+
+                <Animated.View
+                  style={[styles.centerTapTarget, animatedCenterStyle]}
+                >
                   <TouchableOpacity
-                    style={styles.viewFullMantraBtn}
-                    onPress={() => setMantraExpanded(!mantraExpanded)}
+                    style={styles.tapTouchable}
+                    onPress={handleIncrement}
+                    activeOpacity={0.8}
                   >
-                    <Text style={styles.viewFullMantraText}>
-                      {mantraExpanded
-                        ? "Tap to collapse"
-                        : "Tap to view full mantra \u2192"}
-                    </Text>
+                    <View style={styles.tapContent}>
+                      <Text style={styles.tapText}>TAP</Text>
+                      <Text style={styles.subTap}>HERE</Text>
+                      <View style={styles.tapCheck}>
+                        <Svg
+                          width={24}
+                          height={24}
+                          viewBox="0 0 24 24"
+                          fill="none"
+                        >
+                          <Circle
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="#B89450"
+                            strokeWidth="1"
+                          />
+                          <Path
+                            d="M8 12L11 15L16 9"
+                            stroke="#B89450"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </Svg>
+                      </View>
+                    </View>
                   </TouchableOpacity>
-                )}
+                </Animated.View>
               </View>
-            )}
+              <Text style={styles.combinedHelpText}>
+                Choose your chant count and tap the bead after each mantra.
+              </Text>
+              {/* Rep Selection Pills */}
+              <View style={styles.repPillsContainer}>
+                {[1, 9, 27, 54, 108].map((option) => {
+                  const isSelected = option === selectedTarget;
+                  return (
+                    <TouchableOpacity
+                      key={option}
+                      style={[
+                        styles.repPill,
+                        isSelected && styles.repPillSelected,
+                      ]}
+                      onPress={() => {
+                        setSelectedTarget(option);
+                        setChantCount(0); // Reset count when target changes
+                      }}
+                    >
+                      <Text
+                        style={[
+                          styles.repPillText,
+                          isSelected && styles.repPillTextSelected,
+                        ]}
+                      >
+                        {option} {isSelected && " \u2713"}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
 
-            {currentType === "practice" && (
-              <View style={styles.mantraMainContainer}>
-                <Text style={[styles.deityTitle, { textAlign: "center" }]}>
-                  {info.title}
-                </Text>
-                {(info.subtitle || info.line) && (
-                  <Text
-                    style={[
-                      styles.sankalpMainText,
-                      {
-                        fontSize: 18,
-                        fontFamily: Fonts.serif.regular,
-                        marginTop: 8,
-                        textAlign: "center",
-                      },
-                    ]}
+              {/* Audio Player if URL exists */}
+              {info?.audio_url &&
+              (info.source === "core" || info.source === "additional") ? (
+                <View
+                  style={{
+                    width: "100%",
+                    marginBottom: 30,
+                    paddingHorizontal: 10,
+                  }}
+                >
+                  <AudioPlayerBlock
+                    block={{
+                      audio_url: info.audio_url,
+                      label: info.title || "Mantra Audio",
+                    }}
+                  />
+                </View>
+              ) : null}
+
+              {/* Consolidated Meaning/Essence Section */}
+              <View style={styles.collapsibleSectionsCombined}>
+                {hasContent(info.meaning) || hasContent(info.summary) ? (
+                  <CollapsibleCard
+                    label="Meaning"
+                    expanded={meaningExpanded}
+                    onToggle={() => setMeaningExpanded(!meaningExpanded)}
                   >
-                    {interpolate(info.subtitle || info.line, {
-                      ...screenData,
-                      ...info,
-                    })}
-                  </Text>
-                )}
-              </View>
-            )}
-          </View>
+                    <Text style={styles.cardText}>
+                      {info.meaning || info.summary}
+                    </Text>
+                  </CollapsibleCard>
+                ) : null}
 
-          {/* Main Content Card */}
+                <View style={{ height: 12 }} />
+
+                {hasContent(info.essence) || hasContent(info.insight) ? (
+                  <CollapsibleCard
+                    label="Essence"
+                    expanded={essenceExpanded}
+                    onToggle={() => setEssenceExpanded(!essenceExpanded)}
+                  >
+                    <Text style={styles.cardText}>{info.essence}</Text>
+                  </CollapsibleCard>
+                ) : null}
+              </View>
+
+              <TouchableOpacity onPress={handleBack} style={styles.backLink}>
+                <Text style={styles.backLinkText}>Back</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
+          {/* Legacy Practice Visual (Lotus) - only for Sankalp and Practice */}
+          {currentType !== "mantra" && (
+            <View style={styles.visualContainer}>
+              {typeof MantraLotus3d === "number" ? (
+                <SvgUri
+                  uri={Image.resolveAssetSource(MantraLotus3d)?.uri ?? null}
+                  width={180}
+                  height={180}
+                />
+              ) : (
+                <MantraLotus3d width={180} height={180} />
+              )}
+
+              {currentType === "sankalp" && (
+                <View style={styles.mantraMainContainer}>
+                  {/* TIT-01: Render Title and Line separately for Sankalp.
+                    Order: Title -> Line -> How To Live (below). */}
+                  {info.title && (
+                    <Text style={styles.deityTitle}>{info.title}</Text>
+                  )}
+                  {(info.line ||
+                    info.subtitle ||
+                    info.iast ||
+                    info.meaning ||
+                    info.summary) && (
+                    <Text
+                      style={[
+                        styles.sankalpMainText,
+                        info.title ? { marginTop: 10 } : null,
+                      ]}
+                    >
+                      {interpolate(
+                        info.line ||
+                          info.subtitle ||
+                          info.iast ||
+                          info.meaning ||
+                          info.summary,
+                        { ...screenData, ...info },
+                      )}
+                    </Text>
+                  )}
+                </View>
+              )}
+
+              {currentType === "practice" && (
+                <View style={styles.mantraMainContainer}>
+                  <Text style={[styles.deityTitle, { textAlign: "center" }]}>
+                    {info.title}
+                  </Text>
+                  {(info.subtitle || info.line) && (
+                    <Text
+                      style={[
+                        styles.sankalpMainText,
+                        {
+                          fontSize: 18,
+                          fontFamily: Fonts.serif.regular,
+                          marginTop: 8,
+                          textAlign: "center",
+                        },
+                      ]}
+                    >
+                      {interpolate(info.subtitle || info.line, {
+                        ...screenData,
+                        ...info,
+                      })}
+                    </Text>
+                  )}
+                </View>
+              )}
+            </View>
+          )}
+
+          {/* Main Content Card - only for Sankalp and Practice */}
           {(currentType === "practice" || currentType === "sankalp") && (
             <View style={styles.mainCard}>
               {currentType === "practice" &&
@@ -424,8 +749,8 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
             </View>
           )}
 
-          {/* Actions */}
-          {visibleFooterBlocks.length > 0 && (
+          {/* Actions - only for Sankalp and Practice */}
+          {visibleFooterBlocks.length > 0 && currentType !== "mantra" && (
             <View style={styles.infoActions}>
               {visibleFooterBlocks.map((block: any, i: number) => {
                 const resolvedBlock = { ...block };
@@ -442,142 +767,117 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
             </View>
           )}
 
-          {/* Prompt / Action Text - Moved below actions per user feedback */}
-          <Text style={styles.practicePrompt}>
-            {currentType === "mantra"
-              ? "Chant slowly and let the meaning settle within."
-              : currentType === "sankalp"
+          {/* Prompt / Action Text - Moved below actions per user feedback - only for Sankalp and Practice */}
+          {currentType !== "mantra" && (
+            <Text style={styles.practicePrompt}>
+              {currentType === "sankalp"
                 ? "Carry this intention gently into your thoughts and actions."
                 : "Begin when you feel ready. This takes 2-3 minutes. There is no rush."}
-          </Text>
+            </Text>
+          )}
 
-          {/* Audio Player if URL exists - only for core journey or additional library mantras (Mala) */}
-          {currentType === "mantra" &&
-          info?.audio_url &&
-          (info.source === "core" || info.source === "additional") ? (
-            <View
-              style={{ width: "100%", marginBottom: 30, paddingHorizontal: 10 }}
-            >
-              <AudioPlayerBlock
-                block={{
-                  audio_url: info.audio_url,
-                  label: info.title || "Mantra Audio",
-                }}
-              />
-            </View>
-          ) : null}
-
-          {/* Accordion Sections */}
-          <View style={styles.collapsibleSections}>
-            {/* Consolidated Meaning Section for Practices and Mantras */}
-            {currentType !== "sankalp" &&
-              ((currentType === "practice" && hasContent(info.summary)) ||
-                (currentType === "mantra" &&
-                  (hasContent(info.meaning) || hasContent(info.summary)))) && (
-                <CollapsibleCard
-                  label="Meaning"
-                  expanded={meaningExpanded}
-                  onToggle={() => setMeaningExpanded(!meaningExpanded)}
-                >
-                  <Text style={styles.cardText}>
-                    {currentType === "practice"
-                      ? info.summary
-                      : info.meaning || info.summary}
-                  </Text>
-                </CollapsibleCard>
-              )}
-
-            {currentType === "sankalp" && (
-              <>
-                <CollapsibleCard
-                  label="Meaning"
-                  expanded={meaningExpanded}
-                  onToggle={() => setMeaningExpanded(!meaningExpanded)}
-                >
-                  <Text style={styles.cardText}>
-                    {info.meaning || info.essence || info.summary}
-                  </Text>
-                </CollapsibleCard>
-                <CollapsibleCard
-                  label="Benefits"
-                  expanded={benefitsExpanded}
-                  onToggle={() => setBenefitsExpanded(!benefitsExpanded)}
-                >
-                  {hasContent(info.benefits) ? (
-                    Array.isArray(info.benefits) ? (
-                      <View style={styles.benefitList}>
-                        {info.benefits.map((b: string, idx: number) => (
-                          <Text key={idx} style={styles.benefitItem}>
-                            {"\u2022"} {b}
-                          </Text>
-                        ))}
-                      </View>
-                    ) : (
-                      <Text style={styles.cardText}>{info.benefits}</Text>
-                    )
-                  ) : (
+          {/* Accordion Sections - only for Sankalp and Practice */}
+          {currentType !== "mantra" && (
+            <View style={styles.collapsibleSections}>
+              {/* Consolidated Meaning Section for Practices and Mantras */}
+              {currentType !== "sankalp" &&
+                ((currentType === "practice" && hasContent(info.summary)) ||
+                  (currentType === "mantra" &&
+                    (hasContent(info.meaning) ||
+                      hasContent(info.summary)))) && (
+                  <CollapsibleCard
+                    label="Meaning"
+                    expanded={meaningExpanded}
+                    onToggle={() => setMeaningExpanded(!meaningExpanded)}
+                  >
                     <Text style={styles.cardText}>
-                      Focus and calm are cultivated through this intention.
+                      {currentType === "practice"
+                        ? info.summary
+                        : info.meaning || info.summary}
                     </Text>
-                  )}
-                </CollapsibleCard>
-              </>
-            )}
+                  </CollapsibleCard>
+                )}
 
-            {currentType === "mantra" && (
-              <CollapsibleCard
-                label="Essence"
-                expanded={essenceExpanded}
-                onToggle={() => setEssenceExpanded(!essenceExpanded)}
-              >
-                <Text style={styles.cardText}>
-                  {info.essence ||
-                    info.insight ||
-                    "The vibration of this mantra connects you with profound spiritual wisdom."}
-                </Text>
-              </CollapsibleCard>
-            )}
-
-            {currentType === "practice" && (
-              <>
-                {hasContent(info.benefits) && (
+              {currentType === "sankalp" && (
+                <>
+                  <CollapsibleCard
+                    label="Meaning"
+                    expanded={meaningExpanded}
+                    onToggle={() => setMeaningExpanded(!meaningExpanded)}
+                  >
+                    <Text style={styles.cardText}>
+                      {info.meaning || info.essence || info.summary}
+                    </Text>
+                  </CollapsibleCard>
                   <CollapsibleCard
                     label="Benefits"
                     expanded={benefitsExpanded}
                     onToggle={() => setBenefitsExpanded(!benefitsExpanded)}
                   >
-                    {Array.isArray(info.benefits) ? (
-                      <View style={styles.benefitList}>
-                        {info.benefits.map((b: string, idx: number) => (
-                          <Text key={idx} style={styles.benefitItem}>
-                            {"\u2022"} {b}
-                          </Text>
-                        ))}
-                      </View>
+                    {hasContent(info.benefits) ? (
+                      Array.isArray(info.benefits) ? (
+                        <View style={styles.benefitList}>
+                          {info.benefits.map((b: string, idx: number) => (
+                            <Text key={idx} style={styles.benefitItem}>
+                              {"\u2022"} {b}
+                            </Text>
+                          ))}
+                        </View>
+                      ) : (
+                        <Text style={styles.cardText}>{info.benefits}</Text>
+                      )
                     ) : (
-                      <Text style={styles.cardText}>{info.benefits}</Text>
+                      <Text style={styles.cardText}>
+                        Focus and calm are cultivated through this intention.
+                      </Text>
                     )}
                   </CollapsibleCard>
-                )}
+                </>
+              )}
 
-                {hasContent(info.essence || info.insight) && (
-                  <CollapsibleCard
-                    label="Why this works"
-                    expanded={essenceExpanded}
-                    onToggle={() => setEssenceExpanded(!essenceExpanded)}
-                  >
-                    <Text style={styles.cardText}>
-                      {info.essence || info.insight}
-                    </Text>
-                  </CollapsibleCard>
-                )}
-              </>
-            )}
-          </View>
+              {currentType === "practice" && (
+                <>
+                  {hasContent(info.benefits) && (
+                    <CollapsibleCard
+                      label="Benefits"
+                      expanded={benefitsExpanded}
+                      onToggle={() => setBenefitsExpanded(!benefitsExpanded)}
+                    >
+                      {Array.isArray(info.benefits) ? (
+                        <View style={styles.benefitList}>
+                          {info.benefits.map((b: string, idx: number) => (
+                            <Text key={idx} style={styles.benefitItem}>
+                              {"\u2022"} {b}
+                            </Text>
+                          ))}
+                        </View>
+                      ) : (
+                        <Text style={styles.cardText}>{info.benefits}</Text>
+                      )}
+                    </CollapsibleCard>
+                  )}
 
-          <TouchableOpacity onPress={handleBack} style={styles.backLink}>
-            <Text style={styles.backLinkText}>Back</Text>
-          </TouchableOpacity>
+                  {hasContent(info.essence || info.insight) && (
+                    <CollapsibleCard
+                      label="Why this works"
+                      expanded={essenceExpanded}
+                      onToggle={() => setEssenceExpanded(!essenceExpanded)}
+                    >
+                      <Text style={styles.cardText}>
+                        {info.essence || info.insight}
+                      </Text>
+                    </CollapsibleCard>
+                  )}
+                </>
+              )}
+            </View>
+          )}
+
+          {currentType !== "mantra" && (
+            <TouchableOpacity onPress={handleBack} style={styles.backLink}>
+              <Text style={styles.backLinkText}>Back</Text>
+            </TouchableOpacity>
+          )}
         </ScrollView>
       </View>
     );
@@ -736,7 +1036,11 @@ const styles = StyleSheet.create({
   toggleIcon: {
     fontSize: 12,
     color: GOLD,
-    marginLeft: 4,
+    display: "flex",
+    alignItems: "center",
+    alignSelf: "center",
+
+    // marginLeft: 4,
   },
   collapsibleSections: {
     width: "100%",
@@ -745,11 +1049,12 @@ const styles = StyleSheet.create({
   },
   card: {
     width: "100%",
-    // backgroundColor: "rgba(255, 255, 255, 0.6)",
+
+    backgroundColor: "rgba(255, 255, 255, 0.3)",
     borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: "#E8C587",
-    padding: 16,
+    borderWidth: 1,
+    borderColor: "rgba(184, 148, 80, 0.1)",
+    padding: 10,
   },
   cardExpanded: {
     // backgroundColor: "rgba(255, 255, 255, 0.8)",
@@ -932,6 +1237,214 @@ const styles = StyleSheet.create({
   },
   content: {
     gap: 20,
+  },
+  combinedMantraFlow: {
+    width: "100%",
+    alignItems: "center",
+    paddingTop: 40,
+  },
+  topCardsRow: {
+    width: "100%",
+    marginBottom: 24,
+    marginTop: 0,
+    gap: 2,
+  },
+  textCardHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  textCardHeaderContent: {
+    flex: 1,
+    fontSize: 17,
+    fontFamily: Fonts.serif.medium,
+    color: BROWN,
+    lineHeight: 24,
+    textAlign: "center",
+  },
+  combinedHelpText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 18,
+    color: "#5a4a2a",
+    textAlign: "center",
+    paddingHorizontal: 20,
+    marginBottom: 10,
+    lineHeight: 26,
+    opacity: 0.8,
+  },
+  progressCounter: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    // marginBottom: 0,
+    marginTop: -40,
+  },
+  currentCountText: {
+    fontSize: 64,
+    fontFamily: Fonts.serif.regular,
+    color: "#b89450",
+  },
+  totalCountText: {
+    fontSize: 32,
+    fontFamily: Fonts.serif.regular,
+    color: "#d1c1a1",
+  },
+  interactionArea: {
+    width: 260,
+    height: 260,
+    alignItems: "center",
+    justifyContent: "center",
+    marginVertical: 10,
+  },
+  glowOuter: {
+    position: "absolute",
+    width: 250,
+    height: 250,
+    borderRadius: 125,
+    // backgroundColor: "rgba(232, 197, 135, 0.15)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  glowMiddle: {
+    width: 210,
+    height: 210,
+    borderRadius: 105,
+    shadowColor: "#E8C587",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 20,
+    elevation: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  glowInner: {
+    width: 170,
+    height: 170,
+    borderRadius: 85,
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    shadowColor: "#E8C587",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  beadsRing: {
+    width: "100%",
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  ringCircle: {
+    position: "absolute",
+    width: 180,
+    height: 180,
+    // borderRadius: 100,
+    // borderWidth: 1.5,
+    // borderColor: "rgba(184, 148, 80, 0.2)",
+  },
+  beadWrapper: {
+    position: "absolute",
+    width: 30,
+    height: 30,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  beadInner: {
+    width: "100%",
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  beadPointer: {
+    position: "absolute",
+    top: -2,
+    width: 6,
+    height: 6,
+    backgroundColor: "#b89450",
+    borderRadius: 3,
+  },
+  centerTapTarget: {
+    position: "absolute",
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: "#fffdf9",
+    borderWidth: 1,
+    borderColor: "#e8c587",
+    elevation: 4,
+    shadowColor: "#b89450",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+  },
+  tapTouchable: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tapContent: {
+    alignItems: "center",
+  },
+  tapText: {
+    fontSize: 20,
+    letterSpacing: 4,
+    fontFamily: Fonts.sans.bold,
+    color: "#b89450",
+  },
+  subTap: {
+    fontSize: 10,
+    letterSpacing: 1,
+    color: "#8a7a5a",
+    fontFamily: Fonts.sans.medium,
+    marginTop: 2,
+  },
+  tapCheck: {
+    marginTop: 5,
+  },
+  repPillsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: 10,
+    marginTop: 20,
+    paddingHorizontal: 5,
+    marginBottom: 25,
+  },
+  repPill: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#e8c587",
+    backgroundColor: "transparent",
+  },
+  repPillSelected: {
+    backgroundColor: "#b89450",
+    borderColor: "#b89450",
+  },
+  repPillText: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 14,
+    color: "#8a7a5a",
+  },
+  repPillTextSelected: {
+    color: "#fff",
+  },
+  repPillsLabel: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 12,
+    color: "#8a7a5a",
+    marginTop: 8,
+    marginBottom: 30,
+  },
+  collapsibleSectionsCombined: {
+    width: "100%",
+    paddingHorizontal: 0,
+    marginBottom: 40,
+  },
+  cardTextLarge: {
+    fontSize: 18,
+    lineHeight: 28,
   },
 });
 

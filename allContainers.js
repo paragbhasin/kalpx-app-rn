@@ -235,7 +235,7 @@ export const CompanionDashboardContainer = {
         // MorningBriefing, above CheckInCard.
         { type: "predictive_alert_card", position: "body" },
         { type: "cycle_signal_bar", position: "body" },
-        { type: "clear_window_banner", position: "body" },
+        // clear_window_banner removed 2026-04-13 (Moment 43 dropped, backend B4)
         // Week 7 — conditional embedded slots.
         // season_change_banner: visible when screenData.season_signal != null
         //   AND screenData.season_banner_dismissed_at is stale (>7d) or null.
@@ -426,25 +426,8 @@ export const CompanionDashboardContainer = {
       ],
     },
 
-    // Week 2 — clear_window_active variant (Moment 43).
-    // Spec: route_dashboard_day_active.md §1 variant map "clear_window_expansive".
-    // Banner renders above the triad; check-in suppressed (day feels open).
-    clear_window_active: {
-      tone: { theme: "light_sandal", mood: "celebratory" },
-      meta: { requires_active_cycle: true, variant: "clear_window_active" },
-      dashboard_config: {
-        status_messages: { default: "Today is open" },
-        instruction_text:
-          "You've earned this space. Use it for what matters.",
-      },
-      blocks: [
-        { type: "clear_window_banner", position: "body" },
-        { type: "morning_briefing", position: "body" },
-        { type: "focus_phrase", position: "body" },
-        { type: "cycle_signal_bar", position: "body" },
-        { type: "core_items_list", position: "body" },
-      ],
-    },
+    // clear_window_active variant removed 2026-04-13 (Moment 43 dropped per
+    // backend B4). Slot kept commented for revisit if post-soak data warrants.
 
     // Week 6 — post_conflict_morning dashboard variant (Moment 39).
     // Spec: embedded_post_conflict_gentleness_card.md §7.

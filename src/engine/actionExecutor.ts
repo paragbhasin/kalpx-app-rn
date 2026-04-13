@@ -30,7 +30,6 @@ import {
   mitraTrackEvent,
   mitraTriggerMantras,
   patchCompanionState,
-  getClearWindow,
   postVoiceNote,
   getVoiceNoteInterpretation,
   postInterpretIntent,
@@ -57,6 +56,9 @@ import {
   getDeepenPreview,
   dismissPredictiveAlert,
   mutePredictiveAlertEntity,
+  // 2026-04-13 backend B2/B3 wiring
+  getPanchangToday,
+  patchDissonanceThread,
 } from "./mitraApi";
 
 // Audit fix F6 (2026-04-13) — dispatch fetchCompanionState via Redux store
@@ -1645,18 +1647,9 @@ export async function executeAction(
           variant = "post_conflict_morning";
         }
 
-        // Clear-window (Moment 43) — separate endpoint; fire-and-forget.
-        try {
-          const cw = await getClearWindow();
-          if (cw && (cw.headline || cw.message)) {
-            setScreenValue(cw, "clear_window");
-            variant = "clear_window_active";
-          } else {
-            setScreenValue(null, "clear_window");
-          }
-        } catch (_e) {
-          setScreenValue(null, "clear_window");
-        }
+        // Clear-window (Moment 43) was dropped per backend B4 decision
+        // (2026-04-13 audit). Slot reserved if revisited post-soak.
+        setScreenValue(null, "clear_window");
         setScreenValue(variant, "dashboard_variant");
 
         // Navigate to the post-lock summary reveal (unless skipReveal)
@@ -3290,18 +3283,10 @@ export async function executeAction(
       }
 
       // ================================================================
-      // DISMISS_CLEAR_WINDOW — Week 2 Moment 43 banner dismissal.
-      // Spec: route_dashboard_day_active.md §1 variant 43, §7 dismissibility.
-      // Clears only clear_window screenData field; doesn't affect triad.
-      // ================================================================
+      // DISMISS_CLEAR_WINDOW removed (B4 dropped 2026-04-13). Handler
+      // retained as no-op for any cached schema referencing it.
       case "dismiss_clear_window": {
         setScreenValue(null, "clear_window");
-        setScreenValue("standard", "dashboard_variant");
-        mitraTrackEvent("dashboard_clear_window_dismissed", {
-          journeyId: screenState.journey_id,
-          dayNumber: screenState.day_number || 1,
-          meta: {},
-        });
         break;
       }
 
@@ -3970,10 +3955,10 @@ export async function executeAction(
           mitraFetchAdditionalItems(),
           getJoySignal(),
           getGriefContext(),
+          getPanchangToday(),
         ]);
-        const [briefing, _cs, resilienceLedger, additional, joy] = results.map(
-          (r) => (r.status === "fulfilled" ? r.value : null),
-        );
+        const [briefing, _cs, resilienceLedger, additional, joy, _grief, panchang] =
+          results.map((r) => (r.status === "fulfilled" ? r.value : null));
 
         if (briefing) {
           setScreenValue(true, "briefing_available");
@@ -3989,6 +3974,9 @@ export async function executeAction(
         if (resilienceLedger) setScreenValue(resilienceLedger, "resilience_ledger");
         if (additional?.items) setScreenValue(additional.items, "additional_items");
         if (joy) setScreenValue(joy, "joy_signal");
+        // Backend B2 — only show season banner when ritu changed today
+        if (panchang?.ritu_changed_today) setScreenValue(panchang, "season_signal");
+        else setScreenValue(null, "season_signal");
 
         break;
       }
@@ -4186,19 +4174,13 @@ export async function executeAction(
         break;
       }
 
-      // ack_post_conflict — Moment 39 "I'm okay".
+      // ack_post_conflict — Moment 39 "I'm okay". Backend B3 (2026-04-13)
+      // ships PATCH /api/mitra/dissonance-threads/<id>/ accepting status:
+      // acknowledged | resolved | stale | softened.
       case "ack_post_conflict": {
         const threadId = payload?.thread_id;
         if (threadId) {
-          try {
-            await api.patch(`mitra/dissonance-threads/${threadId}/`, {
-              status: "acknowledged",
-            });
-          } catch (err: any) {
-            if (err?.response?.status !== 404) {
-              console.warn("[ack_post_conflict] PATCH failed:", err.message);
-            }
-          }
+          await patchDissonanceThread(threadId, { status: "acknowledged" });
         }
         setScreenValue(null, "post_conflict_pending");
         setScreenValue(true, "post_conflict_acked");

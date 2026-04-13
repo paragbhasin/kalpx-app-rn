@@ -499,21 +499,10 @@ export async function patchCompanionState(patch: Record<string, any>): Promise<a
   }
 }
 
-/**
- * Week 2 — Day Active Dashboard API.
- * GET mitra/clear-window/ — Today's "clear window" payload for Moment 43.
- * Returns { headline, message, ... } if today is an expansive / clear-window
- * day, or null otherwise. Web parity: route_dashboard_day_active.md §15.
- */
-export async function getClearWindow(): Promise<any> {
-  try {
-    const res = await api.get('mitra/clear-window/', { params: { tz: getTz() } });
-    return res.data;
-  } catch (err: any) {
-    console.warn('[MITRA] clear-window failed:', err.message);
-    return null;
-  }
-}
+// 2026-04-13 audit: getClearWindow removed (B4 backend decision = drop).
+// Moment 43 ClearWindowBanner is dropped from current ship; if post-soak data
+// shows demand, backend will revisit. ClearWindowBanner block + dashboard
+// slot also removed in same change.
 
 /**
  * Week 4 — Support Path APIs (Mitra v3 Moments 31, 38 + Phase 1.5 intent).
@@ -806,7 +795,10 @@ export async function postEntitiesCheckDuplicate(text: string): Promise<any> {
   }
 }
 
-/** PATCH mitra/entities/<id>/ — Moment 29 confirm / dismiss / snooze / mute. */
+/** PATCH mitra/entities/<id>/ — Moment 29 confirm / dismiss / snooze / mute.
+ *  Backend B5 shipped 2026-04-13: generic PATCH with {status, snooze_until}.
+ *  status: 'confirmed' | 'dismissed' | 'snoozed' | 'muted'
+ */
 export async function patchEntity(
   id: string | number,
   payload: Record<string, any>,
@@ -818,6 +810,44 @@ export async function patchEntity(
     if (err?.response?.status !== 404) {
       console.warn(`[MITRA] entities/${id} PATCH failed:`, err.message);
     }
+    return null;
+  }
+}
+
+/** PATCH mitra/dissonance-threads/<id>/ — Moment 39 post-conflict ack.
+ *  Backend B3 shipped 2026-04-13. Body: { status: 'acknowledged' | 'resolved'
+ *  | 'stale' | 'softened' }. Sets timestamps server-side.
+ */
+export async function patchDissonanceThread(
+  id: string | number,
+  payload: { status: 'acknowledged' | 'resolved' | 'stale' | 'softened' },
+): Promise<any> {
+  try {
+    const res = await api.patch(`mitra/dissonance-threads/${id}/`, payload);
+    return res.data;
+  } catch (err: any) {
+    if (err?.response?.status !== 404) {
+      console.warn(`[MITRA] dissonance-threads/${id} PATCH failed:`, err.message);
+    }
+    return null;
+  }
+}
+
+/** GET mitra/panchang/today/ — Moment 44 season change banner data source.
+ *  Backend B2 shipped 2026-04-13. Returns { date, ritu, ritu_english,
+ *  ritu_changed_today, tithi, festival, moon_phase, sunrise, sunset } or null.
+ *  Optional ?date= override for testing.
+ */
+export async function getPanchangToday(date?: string): Promise<any> {
+  try {
+    const res = await api.get('mitra/panchang/today/', {
+      params: date ? { date, tz: getTz() } : { tz: getTz() },
+    });
+    return res.data;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (status === 404 || status === 502 || !status) return null;
+    console.warn('[MITRA] panchang/today failed:', err.message);
     return null;
   }
 }

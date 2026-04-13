@@ -12,9 +12,8 @@
  *     may return 404 when flag off — tolerated, shows fallback ack).
  *  4. Text fallback if mic unavailable.
  *
- * Handoff note: backend `anonymize_text_block` does not yet strip first-names.
- * On first use in a session, show "Mitra keeps names private" hint to soften
- * this until the backend fix lands (flag: voice_note_name_hint_seen).
+ * 2026-04-13: backend B6 PII fix shipped (commit 766be7d2). The first-name
+ * stripping soft hint is no longer needed; rendering removed below.
  *
  * Tone: minimal. "I'm listening." then fade. No exclamations. 404/null
  * tolerant — endpoint may be behind a disabled feature flag on dev.
@@ -58,9 +57,7 @@ const VoiceNoteSheet: React.FC<{ block?: any }> = ({ block }) => {
   const [seconds, setSeconds] = useState(0);
   const [textDraft, setTextDraft] = useState('');
   const [reflection, setReflection] = useState<string | null>(null);
-  const [showNameHint, setShowNameHint] = useState<boolean>(
-    !screenData.voice_note_name_hint_seen,
-  );
+  // showNameHint removed 2026-04-13 (backend B6 PII fix shipped).
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const setValue = (key: string, v: any) =>
@@ -84,10 +81,6 @@ const VoiceNoteSheet: React.FC<{ block?: any }> = ({ block }) => {
         return s + 1;
       });
     }, 1000);
-    if (showNameHint) {
-      setValue('voice_note_name_hint_seen', true);
-      setShowNameHint(false);
-    }
   };
 
   const stopAndSubmit = async () => {
@@ -164,9 +157,7 @@ const VoiceNoteSheet: React.FC<{ block?: any }> = ({ block }) => {
 
       <Text style={styles.listening}>I&apos;m listening.</Text>
 
-      {showNameHint && (
-        <Text style={styles.nameHint}>Mitra keeps names private.</Text>
-      )}
+      {/* Name-hint banner removed 2026-04-13 (backend B6 PII fix shipped) */}
 
       {phase === 'idle' && (
         <>

@@ -22,7 +22,7 @@ import KalpxModal from "../components/KalpxModal";
 import MorningBriefingBlock from "../blocks/MorningBriefingBlock";
 import FocusPhraseBlock from "../blocks/FocusPhraseBlock";
 import CycleSignalBar from "../blocks/CycleSignalBar";
-import ClearWindowBanner from "../blocks/ClearWindowBanner";
+// ClearWindowBanner removed 2026-04-13 (Moment 43 dropped per backend B4)
 import CoreItemsList from "../blocks/CoreItemsList";
 import CheckInCardCompact from "../blocks/CheckInCardCompact";
 
@@ -314,7 +314,6 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
         <MorningBriefingBlock />
         <FocusPhraseBlock block={{}} />
         <CycleSignalBar />
-        <ClearWindowBanner />
 
         {/* Return banner — absent 3+ days */}
         {showReturnBanner && (

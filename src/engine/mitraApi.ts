@@ -480,35 +480,13 @@ export async function mitraJourneyCompanion(): Promise<any> {
 
 /**
  * Week 1 — Welcome Onboarding APIs (Mitra v3 Moments 1-7).
- * Web counterpart: kalpx-frontend/src/engine/actionExecutor.js — mitra endpoints
  * Spec: route_welcome_onboarding.md §6
+ *
+ * NOTE 2026-04-13 audit cleanup (F8): postOnboardingTurn and postJourneyCreate
+ * were removed — backend has neither endpoint. Per-turn analytics is via
+ * track-event (already wrapped). Journey creation happens server-side as a
+ * side effect of generate-companion at Turn 5 with day_number: 1.
  */
-
-/** POST mitra/onboarding/turn/ — persist per-turn response (analytics + draft state). */
-export async function postOnboardingTurn(turnNumber: number, payload: any): Promise<any> {
-  try {
-    const res = await api.post('mitra/onboarding/turn/', {
-      turn_number: turnNumber,
-      ...payload,
-      tz: getTz(),
-    });
-    return res.data;
-  } catch (err: any) {
-    console.warn(`[MITRA] onboarding/turn ${turnNumber} failed:`, err.message);
-    return null;
-  }
-}
-
-/** POST mitra/journey/create/ — create a new journey at onboarding completion. */
-export async function postJourneyCreate(payload: any): Promise<any> {
-  try {
-    const res = await api.post('mitra/journey/create/', { ...payload, tz: getTz() });
-    return res.data;
-  } catch (err: any) {
-    console.error('[MITRA] journey/create failed:', err.message);
-    return null;
-  }
-}
 
 /** PATCH mitra/companion-state/ — write guidance_mode and other prefs. */
 export async function patchCompanionState(patch: Record<string, any>): Promise<any> {
@@ -692,16 +670,95 @@ export async function getPrepContext(params: Record<string, any> = {}): Promise<
   }
 }
 
-/** GET mitra/predictive-alerts/ — Moment 28 friction forecasts. */
+/** GET mitra/predictive/alerts/ — Moment 28 friction forecasts.
+ *  Audit fix F5 (2026-04-13): URL was 'predictive-alerts' (hyphen), but
+ *  backend exposes 'predictive/alerts' (slash). Fixed.
+ */
 export async function getPredictiveAlerts(): Promise<any> {
   try {
-    const res = await api.get('mitra/predictive-alerts/', { params: { tz: getTz() } });
+    const res = await api.get('mitra/predictive/alerts/', { params: { tz: getTz() } });
     return res.data;
   } catch (err: any) {
-    // 404 (flag off) + 502 (backend down): hide card quietly. No fake alerts.
     if (err?.response?.status && err?.response?.status !== 404 && err?.response?.status !== 502) {
-      console.warn('[MITRA] predictive-alerts/ failed:', err.message);
+      console.warn('[MITRA] predictive/alerts failed:', err.message);
     }
+    return null;
+  }
+}
+
+/** POST mitra/predictive/alerts/<id>/dismiss/ — Moment 28 user-dismiss action. */
+export async function dismissPredictiveAlert(alertId: string | number): Promise<any> {
+  try {
+    const res = await api.post(`mitra/predictive/alerts/${alertId}/dismiss/`);
+    return res.data;
+  } catch (err: any) {
+    console.warn(`[MITRA] predictive/alerts/${alertId}/dismiss failed:`, err.message);
+    return null;
+  }
+}
+
+/** POST mitra/predictive/alerts/<id>/mute-entity/ — mute the entity behind an alert. */
+export async function mutePredictiveAlertEntity(alertId: string | number): Promise<any> {
+  try {
+    const res = await api.post(`mitra/predictive/alerts/${alertId}/mute-entity/`);
+    return res.data;
+  } catch (err: any) {
+    console.warn(`[MITRA] predictive/alerts/${alertId}/mute-entity failed:`, err.message);
+    return null;
+  }
+}
+
+/** GET mitra/briefing/today/ — Moment 8/Dashboard morning briefing.
+ *  Audit fix F2 (2026-04-13): added wrapper. Backend has it; spec dashboard §6
+ *  step 4 declares it as a separate endpoint (not bundled in generate-companion).
+ *  Returns: { audio_url, script, voice_preset, duration_ms } or null when no
+ *  briefing today / flag off / 502.
+ */
+export async function getBriefingToday(): Promise<any> {
+  try {
+    const res = await api.get('mitra/briefing/today/', { params: { tz: getTz() } });
+    return res.data;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (status === 404 || status === 502 || !status) {
+      // Briefing card hides gracefully when no briefing for today.
+      return null;
+    }
+    console.warn('[MITRA] briefing/today failed:', err.message);
+    return null;
+  }
+}
+
+/** GET mitra/resilience-ledger/?limit=N — Moment 23/26 dashboard data source.
+ *  Audit fix F3 (2026-04-13): distinct from getResilienceNarrative (which is the
+ *  LLM-generated paragraph). Ledger is the raw entity-linked resilience data.
+ *  Spec dashboard §6 step 7 + route_reflection_weekly entity highlights.
+ */
+export async function getResilienceLedger(params: { limit?: number; entity_id?: string | number } = {}): Promise<any> {
+  try {
+    const res = await api.get('mitra/resilience-ledger/', {
+      params: { ...params, tz: getTz() },
+    });
+    return res.data;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (status === 404 || status === 502 || !status) return null;
+    console.warn('[MITRA] resilience-ledger failed:', err.message);
+    return null;
+  }
+}
+
+/** GET mitra/journey/deepen-preview/ — Moment 25 Day-14 deepen path preview.
+ *  Audit fix F9 (2026-04-13): wrapper added; CheckpointDay14Block can fetch.
+ */
+export async function getDeepenPreview(): Promise<any> {
+  try {
+    const res = await api.get('mitra/journey/deepen-preview/', { params: { tz: getTz() } });
+    return res.data;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (status === 404 || status === 502 || !status) return null;
+    console.warn('[MITRA] journey/deepen-preview failed:', err.message);
     return null;
   }
 }

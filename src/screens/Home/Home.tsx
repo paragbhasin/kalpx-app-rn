@@ -25,6 +25,7 @@ import {
 } from "react-native";
 import { useSelector } from "react-redux";
 import {
+  mitraJourneyCompanion,
   mitraJourneyWelcomeBack,
   mitraTrackEvent,
 } from "../../engine/mitraApi";
@@ -326,32 +327,78 @@ export default function Home() {
 
           seedJourneyStatus(status);
 
-          // Fetch companion data. User specifically requested generate-companion.
-          console.log(
-            "📡 Calling: generate-companion action (Requested by User)",
-          );
-          const { executeAction } = require("../../engine/actionExecutor");
-          await executeAction(
-            { type: "generate_companion" },
-            {
-              screenState: store.getState().screen.screenData,
-              loadScreen: (target: any) => {
-                const containerId =
-                  target?.container_id || target?.containerId || "generic";
-                const stateId =
-                  target?.state_id || target?.stateId || target || "";
-                store.dispatch(loadScreenWithData({ containerId, stateId }));
+          // Audit fix F4 (2026-04-13) — resume uses journey/companion (read-only)
+          // instead of generate-companion (which can create a fresh journey).
+          // Spec: route_dashboard_day_active.md §6 step 2 (resume branch).
+          console.log("📡 Calling: mitra/journey/companion/ (resume)");
+          try {
+            const companion = await mitraJourneyCompanion();
+            if (companion) {
+              const c = companion.companion || companion;
+              if (c?.mantra) {
+                store.dispatch(
+                  screenActions.setScreenValue({
+                    key: "companion_mantra_title",
+                    value: c.mantra?.core?.title || c.mantra?.title || "",
+                  }),
+                );
+                store.dispatch(
+                  screenActions.setScreenValue({
+                    key: "mantra_text",
+                    value: c.mantra?.core?.title || c.mantra?.title || "",
+                  }),
+                );
+              }
+              if (c?.sankalp) {
+                const line = c.sankalp?.core?.line || c.sankalp?.line || "";
+                store.dispatch(
+                  screenActions.setScreenValue({
+                    key: "companion_sankalp_line",
+                    value: line,
+                  }),
+                );
+                store.dispatch(
+                  screenActions.setScreenValue({ key: "sankalp_text", value: line }),
+                );
+              }
+              if (c?.practice) {
+                const title = c.practice?.core?.title || c.practice?.title || "";
+                store.dispatch(
+                  screenActions.setScreenValue({
+                    key: "companion_practice_title",
+                    value: title,
+                  }),
+                );
+                store.dispatch(
+                  screenActions.setScreenValue({ key: "practice_title", value: title }),
+                );
+              }
+            }
+          } catch (err: any) {
+            console.warn("[HOME] journey/companion failed, falling back to generate-companion:", err?.message);
+            const { executeAction } = require("../../engine/actionExecutor");
+            await executeAction(
+              { type: "generate_companion" },
+              {
+                screenState: store.getState().screen.screenData,
+                loadScreen: (target: any) => {
+                  const containerId =
+                    target?.container_id || target?.containerId || "generic";
+                  const stateId =
+                    target?.state_id || target?.stateId || target || "";
+                  store.dispatch(loadScreenWithData({ containerId, stateId }));
+                },
+                goBack: () => {
+                  const { goBackWithData } = require("../../store/screenSlice");
+                  store.dispatch(goBackWithData());
+                },
+                setScreenValue: (value: any, key: string) => {
+                  store.dispatch(screenActions.setScreenValue({ key, value }));
+                },
               },
-              goBack: () => {
-                const { goBackWithData } = require("../../store/screenSlice");
-                store.dispatch(goBackWithData());
-              },
-              setScreenValue: (value: any, key: string) => {
-                store.dispatch(screenActions.setScreenValue({ key, value }));
-              },
-            },
-          );
-          console.log("✅ generate-companion complete");
+            );
+          }
+          console.log("✅ resume companion data loaded");
 
           // Auto-route to checkpoint screens on day 7 / day 14 if not yet completed
           const dayNumber = status.dayNumber || 1;

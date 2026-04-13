@@ -29,7 +29,6 @@ import {
   mitraTrackCompletion,
   mitraTrackEvent,
   mitraTriggerMantras,
-  postOnboardingTurn,
   patchCompanionState,
   getClearWindow,
   postVoiceNote,
@@ -50,7 +49,27 @@ import {
   getGriefContext,
   getLonelinessContext,
   getJoySignal,
+  // Audit fix F1/F2/F3/F9 (2026-04-13) — wrappers for dashboard_load orchestration
+  getBriefingToday,
+  getResilienceLedger,
+  mitraFetchAdditionalItems,
+  mitraJourneyCompanion,
+  getDeepenPreview,
+  dismissPredictiveAlert,
+  mutePredictiveAlertEntity,
 } from "./mitraApi";
+
+// Audit fix F6 (2026-04-13) — dispatch fetchCompanionState via Redux store
+// without creating a hard import dep on the slice file at module top.
+async function dispatchFetchCompanionState(): Promise<any> {
+  try {
+    const { store } = require("../store");
+    const { fetchCompanionState } = require("../store/companionStateSlice");
+    return await store.dispatch(fetchCompanionState()).unwrap();
+  } catch (err) {
+    return null;
+  }
+}
 
 // Week 1 — friction chip → focus mapping. Web parity: actionExecutor.js FRICTION_MAP.
 // Spec: route_welcome_onboarding.md §1 Turn 2-3, §6.
@@ -3332,11 +3351,17 @@ export async function executeAction(
         const draft = { ...(screenState.onboarding_draft_state || {}) };
         const p = payload || {};
 
-        // fire-and-forget analytics
-        postOnboardingTurn(currentTurn, {
-          response_type: p.response_type,
-          chip_id: p.chip_id,
-          freeform_length: (p.freeform_text || "").length,
+        // Per-turn analytics — uses generic track-event since backend has no
+        // dedicated onboarding/turn endpoint (audit F8, 2026-04-13).
+        mitraTrackEvent("onboarding_turn_response", {
+          journeyId: screenState.journey_id || null,
+          dayNumber: 0,
+          meta: {
+            turn: currentTurn,
+            response_type: p.response_type,
+            chip_id: p.chip_id,
+            freeform_length: (p.freeform_text || "").length,
+          },
         });
 
         let nextTurn = currentTurn + 1;
@@ -3465,6 +3490,24 @@ export async function executeAction(
                   (draft.friction_freeform ? 1 : 0) + (draft.state_freeform ? 1 : 0),
               },
             });
+
+            // Audit fix F6 (2026-04-13) — Spec route_welcome_onboarding §5
+            // requires 4 companion-state writes at Turn 7.
+            // preferred_guidance_mode is already PATCH'd at Turn 5; here we
+            // add the remaining 3: last_reported_mood, last_seen_at,
+            // active_dissonance.
+            await patchCompanionState({
+              last_reported_mood: draft.state_id || null,
+              last_seen_at: new Date().toISOString(),
+              active_dissonance: draft.friction_id
+                ? {
+                    source: draft.friction_id,
+                    opened_at: new Date().toISOString(),
+                    summary: draft.friction_freeform || null,
+                  }
+                : null,
+            });
+
             setScreenValue(null, "onboarding_draft_state");
             setScreenValue(null, "onboarding_turn");
             loadScreen({ container_id: "companion_dashboard", state_id: "day_active" });
@@ -3900,6 +3943,53 @@ export async function executeAction(
         } catch (err) {
           console.error("[start_gentle] failed:", err);
         }
+        break;
+      }
+
+      // ================================================================
+      // DASHBOARD_LOAD — Audit fix F1 (2026-04-13).
+      // Spec route_dashboard_day_active.md §6 declares 8 parallel API calls
+      // on dashboard entry. Previously only generate-companion + clear-window
+      // ran. This action orchestrates the full set per the contract.
+      // Dispatch from: CompanionDashboardContainer.tsx mount + on focus
+      // (with 30s debounce). Failure of any one fetch hides only its card.
+      // ================================================================
+      case "dashboard_load": {
+        // Delegate to fetch_companion_intelligence first for prep/alerts/rec/
+        // post-conflict (kept separate so it can also be triggered standalone).
+        await executeAction(
+          { type: "fetch_companion_intelligence", payload: payload || {} },
+          context,
+        );
+
+        // Then the rest of the spec-declared parallel calls.
+        const results = await Promise.allSettled([
+          getBriefingToday(),
+          dispatchFetchCompanionState(),
+          getResilienceLedger({ limit: 3 }),
+          mitraFetchAdditionalItems(),
+          getJoySignal(),
+          getGriefContext(),
+        ]);
+        const [briefing, _cs, resilienceLedger, additional, joy] = results.map(
+          (r) => (r.status === "fulfilled" ? r.value : null),
+        );
+
+        if (briefing) {
+          setScreenValue(true, "briefing_available");
+          setScreenValue(briefing.audio_url || null, "briefing_audio_url");
+          setScreenValue(briefing.script || briefing.transcript || null, "briefing_transcript");
+          setScreenValue(briefing.script || briefing.summary || null, "briefing_summary");
+          setScreenValue(briefing.voice_preset || null, "briefing_voice_preset");
+          setScreenValue(briefing.duration_ms || null, "briefing_duration_ms");
+        } else {
+          setScreenValue(false, "briefing_available");
+        }
+
+        if (resilienceLedger) setScreenValue(resilienceLedger, "resilience_ledger");
+        if (additional?.items) setScreenValue(additional.items, "additional_items");
+        if (joy) setScreenValue(joy, "joy_signal");
+
         break;
       }
 

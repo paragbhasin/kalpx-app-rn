@@ -35,6 +35,11 @@ import {
   fetchPreferences,
   fetchNotificationPrefs,
 } from "./src/store/preferencesSlice";
+// Audit fix F6 (2026-04-13): companion-state boot
+import {
+  restoreCompanionState,
+  fetchCompanionState,
+} from "./src/store/companionStateSlice";
 
 // 📌 Push Notification Service
 import {
@@ -105,6 +110,12 @@ function AppInner({ initialRoute, navigationRef }) {
         // for server-owned fields; client-only fields are preserved).
         dispatch(fetchPreferences());
         dispatch(fetchNotificationPrefs());
+
+        // Audit fix F6 (2026-04-13): companion-state hydration.
+        // restore from AsyncStorage first (fast render), then fetch from
+        // backend to sync. Both 404-tolerant via the slice.
+        dispatch(restoreCompanionState());
+        dispatch(fetchCompanionState());
       } catch (err) {
         console.warn("[BOOT] login hydration failed:", err?.message);
       }

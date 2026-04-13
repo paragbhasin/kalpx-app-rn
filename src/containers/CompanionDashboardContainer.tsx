@@ -185,6 +185,31 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
     return () => updateHeaderHidden(false);
   }, [updateBackground, updateHeaderHidden]);
 
+  // Audit fix F1 (2026-04-13) — Spec route_dashboard_day_active.md §6 declares
+  // 8 parallel calls on dashboard entry. Dispatch dashboard_load on mount;
+  // debounce subsequent re-mounts so we don't refetch on every focus.
+  const lastDashboardLoadRef = React.useRef<number>(0);
+  useEffect(() => {
+    const now = Date.now();
+    if (now - lastDashboardLoadRef.current < 30000) return; // 30s debounce
+    lastDashboardLoadRef.current = now;
+    executeAction(
+      { type: "dashboard_load" },
+      {
+        screenState: ss,
+        loadScreen: () => {},
+        goBack: () => {},
+        setScreenValue: (value: any, key: string) =>
+          updateScreenData(key, value),
+        startFlowInstance: () => {},
+        endFlowInstance: () => {},
+      },
+    ).catch((err: any) => {
+      console.warn("[Dashboard] dashboard_load failed:", err?.message);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // -------------------------------------------------------------------------
   // Reset journey handler
   // -------------------------------------------------------------------------

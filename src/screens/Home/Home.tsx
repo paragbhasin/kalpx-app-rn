@@ -10,7 +10,7 @@
  */
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -77,6 +77,8 @@ export default function Home() {
   const [journeyDay, setJourneyDay] = useState<number>(1);
   const [checkingJourney, setCheckingJourney] = useState(false);
   const [welcomeBackData, setWelcomeBackData] = useState<any>(null);
+  // Mitra v3 — guard auto-route so we don't re-navigate on every Home focus.
+  const v3AutoRoutedRef = useRef(false);
 
   const HOME_BACKGROUND = require("../../../assets/new_bg.png");
   const CONTINUE_BG = require("../../../assets/continue_journey_bg.jpeg");
@@ -151,9 +153,21 @@ export default function Home() {
             setMitraJourneyId(data.journeyId);
             setJourneyDay(data.dayNumber || 1);
             seedJourneyStatus(data);
+            // Mitra v3 auto-route: authed user with active journey skips
+            // legacy Home splash and goes straight to the companion experience.
+            if (!v3AutoRoutedRef.current) {
+              v3AutoRoutedRef.current = true;
+              navigateToMitra(true);
+            }
           } else {
             setWelcomeBackData(null);
             setMitraJourneyId(null);
+            // Mitra v3 auto-route: authed user without a journey lands in
+            // welcome_onboarding Turn 1 instead of the legacy splash.
+            if (!v3AutoRoutedRef.current) {
+              v3AutoRoutedRef.current = true;
+              navigateToMitra(false);
+            }
           }
         } catch (err) {
           console.debug("[HOME] journey/status failed:", (err as any).message);
@@ -355,10 +369,28 @@ export default function Home() {
             );
           }
         } else {
+          // Mitra v3: no active journey → launch welcome_onboarding conversation
+          // (Moments 1–7). Replaces the legacy choice_stack/discipline_select
+          // portal. Seeds onboarding_turn=1 + empty draft state so the first
+          // turn renders correctly.
+          // LEGACY (commented out — kept for rollback reference):
+          // store.dispatch(loadScreenWithData({
+          //   containerId: "choice_stack",
+          //   stateId: "discipline_select",
+          // }));
+          store.dispatch(
+            screenActions.setScreenValue({ key: "onboarding_turn", value: 1 }),
+          );
+          store.dispatch(
+            screenActions.setScreenValue({
+              key: "onboarding_draft_state",
+              value: { started_at: Date.now() },
+            }),
+          );
           store.dispatch(
             loadScreenWithData({
-              containerId: "choice_stack",
-              stateId: "discipline_select",
+              containerId: "welcome_onboarding",
+              stateId: "turn_1",
             }),
           );
         }
@@ -368,10 +400,25 @@ export default function Home() {
         setIsProcessing(false);
       }
     } else {
+      // Mitra v3: unauthed or no-journey path → welcome_onboarding turn_1.
+      // LEGACY (commented out):
+      // store.dispatch(loadScreenWithData({
+      //   containerId: "choice_stack",
+      //   stateId: "discipline_select",
+      // }));
+      store.dispatch(
+        screenActions.setScreenValue({ key: "onboarding_turn", value: 1 }),
+      );
+      store.dispatch(
+        screenActions.setScreenValue({
+          key: "onboarding_draft_state",
+          value: { started_at: Date.now() },
+        }),
+      );
       store.dispatch(
         loadScreenWithData({
-          containerId: "choice_stack",
-          stateId: "discipline_select",
+          containerId: "welcome_onboarding",
+          stateId: "turn_1",
         }),
       );
     }

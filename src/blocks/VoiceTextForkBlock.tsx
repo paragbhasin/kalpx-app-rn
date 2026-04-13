@@ -19,7 +19,9 @@ import { useScreenStore } from '../engine/useScreenBridge';
 import { executeAction } from '../engine/actionExecutor';
 import { interpolate } from '../engine/utils/interpolation';
 
-const GOLD = '#eddeb4';
+const GOLD_BORDER = '#eddeb4';
+const AMBER_CTA = '#c89a47';
+const DEEP_BROWN = '#432104';
 
 interface Props {
   block: {
@@ -84,17 +86,17 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     marginBottom: 12,
     borderWidth: 1.5,
-    borderColor: GOLD,
+    borderColor: GOLD_BORDER,
   },
-  optionSpeak: { backgroundColor: 'rgba(237,222,180,0.08)' },
-  optionWritten: { backgroundColor: 'transparent' },
+  optionSpeak: { backgroundColor: '#FFF7E8' },
+  optionWritten: { backgroundColor: '#FFFDF9' },
   icon: {
-    color: GOLD,
+    color: AMBER_CTA,
     fontSize: 22,
     marginRight: 12,
     fontFamily: Fonts.sans.regular,
   },
-  label: { color: GOLD, fontSize: 17, fontFamily: Fonts.sans.medium },
+  label: { color: DEEP_BROWN, fontSize: 17, fontFamily: Fonts.sans.medium },
 });
 
 export default VoiceTextForkBlock;

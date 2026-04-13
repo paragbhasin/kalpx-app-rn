@@ -50,7 +50,7 @@ const SupportTriggerContainer: React.FC<Props> = ({ schema }) => {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFF8EF',
   },
   darkBg: {
     backgroundColor: '#0a0a0a',

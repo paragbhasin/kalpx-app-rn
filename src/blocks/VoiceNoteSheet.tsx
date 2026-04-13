@@ -264,7 +264,7 @@ const VoiceNoteSheet: React.FC<{ block?: any }> = ({ block }) => {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFF8EF',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingTop: 16,
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  closeText: { fontSize: 24, color: '#eddeb4' },
+  closeText: { fontSize: 24, color: '#432104' },
   listening: {
     fontFamily: Fonts.sans.regular,
     fontSize: 18,
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
   counter: {
     fontFamily: Fonts.sans.regular,
     fontSize: 20,
-    color: '#eddeb4',
+    color: '#432104',
     marginTop: 16,
   },
   waveform: {
@@ -394,7 +394,7 @@ const styles = StyleSheet.create({
     padding: 14,
     marginTop: 24,
     marginBottom: 16,
-    color: '#eddeb4',
+    color: '#432104',
     fontFamily: Fonts.sans.regular,
     fontSize: 14,
     textAlignVertical: 'top',

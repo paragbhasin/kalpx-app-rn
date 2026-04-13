@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: Fonts.sans.regular,
     fontSize: 15,
-    color: '#eddeb4',
+    color: '#432104',
     letterSpacing: 0.4,
   },
 });

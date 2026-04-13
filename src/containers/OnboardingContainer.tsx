@@ -54,7 +54,10 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
 };
 
 const styles = StyleSheet.create({
-  scroll: { flex: 1, backgroundColor: '#1a1a1a' },
+  // Match legacy KalpX warm parchment aesthetic (Home.tsx / MitraPhilosophy).
+  // Cream background, not dark immersive — onboarding is welcoming, not
+  // practice-mode.
+  scroll: { flex: 1, backgroundColor: '#FFF8EF' },
   content: { padding: 24, paddingTop: 48 },
 });
 

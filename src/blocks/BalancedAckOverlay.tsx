@@ -90,7 +90,7 @@ const BalancedAckOverlay: React.FC<{ block?: any }> = () => {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFF8EF',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,

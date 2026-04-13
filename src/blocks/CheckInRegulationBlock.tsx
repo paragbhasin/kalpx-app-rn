@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     padding: 28,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#FFF8EF',
     justifyContent: 'center',
   },
   title: {
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   chipText: {
     fontFamily: Fonts.sans.regular,
     fontSize: 14,
-    color: '#eddeb4',
+    color: '#432104',
   },
   micBtn: {
     flexDirection: 'row',
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     paddingVertical: 8,
   },
-  micIcon: { fontSize: 18, color: '#eddeb4', marginRight: 8 },
+  micIcon: { fontSize: 18, color: '#432104', marginRight: 8 },
   micLabel: {
     fontFamily: Fonts.sans.regular,
     fontSize: 13,

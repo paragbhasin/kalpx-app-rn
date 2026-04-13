@@ -38,9 +38,13 @@ interface Props {
   };
 }
 
-const GOLD = '#eddeb4';
-const DEEP_BROWN = '#432104';
-const CREAM = '#fffdf9';
+// Tokens mirror legacy KalpX palette — see Home.tsx hero CTA + cards.
+const GOLD_BORDER = '#eddeb4';        // subtle gold border / card accent
+const AMBER_CTA = '#c89a47';          // primary CTA fill (matches "Begin Chanting")
+const DEEP_BROWN = '#432104';         // primary text
+const WARM_SUBTEXT = '#6b5a45';       // secondary text
+const CREAM = '#fffdf9';              // card surface
+const CHIP_BG = '#FFF7E8';            // secondary chip fill
 
 const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
@@ -122,7 +126,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
             <TextInput
               style={styles.input}
               placeholder={block.open_input.placeholder || 'Tell me more...'}
-              placeholderTextColor="rgba(237,222,180,0.5)"
+              placeholderTextColor="rgba(67, 33, 4, 0.4)"
               value={text}
               onChangeText={setText}
               maxLength={block.open_input.max_length || 400}
@@ -154,15 +158,15 @@ const styles = StyleSheet.create({
   wrap: { marginVertical: 12 },
   mitraMsgCard: {
     borderLeftWidth: 3,
-    borderLeftColor: GOLD,
+    borderLeftColor: GOLD_BORDER,
     paddingLeft: 16,
     paddingVertical: 8,
     marginBottom: 24,
   },
   mitraMsg: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 22,
-    lineHeight: 32,
+    fontSize: 20,
+    lineHeight: 28,
     color: DEEP_BROWN,
   },
   chip: {
@@ -174,23 +178,26 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     borderWidth: 1,
   },
-  chipPrimary: { backgroundColor: GOLD, borderColor: GOLD },
-  chipSecondary: { backgroundColor: 'transparent', borderColor: GOLD },
-  chipLabel: { fontFamily: Fonts.sans.medium, fontSize: 15, color: GOLD, textAlign: 'center' },
-  chipLabelPrimary: { color: '#1a1a1a' },
+  chipPrimary: { backgroundColor: AMBER_CTA, borderColor: AMBER_CTA },
+  chipSecondary: { backgroundColor: CHIP_BG, borderColor: GOLD_BORDER },
+  chipLabel: { fontFamily: Fonts.sans.medium, fontSize: 15, color: DEEP_BROWN, textAlign: 'center' },
+  chipLabelPrimary: { color: '#ffffff' },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(237,222,180,0.2)',
-    paddingTop: 12,
+    backgroundColor: CREAM,
+    borderWidth: 1,
+    borderColor: GOLD_BORDER,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
     marginTop: 16,
   },
   input: {
     flex: 1,
     minHeight: 44,
     maxHeight: 100,
-    color: GOLD,
+    color: DEEP_BROWN,
     fontFamily: Fonts.sans.regular,
     fontSize: 15,
   },
@@ -201,7 +208,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginLeft: 8,
   },
-  micIcon: { color: GOLD, fontSize: 20 },
+  micIcon: { color: AMBER_CTA, fontSize: 20 },
 });
 
 export default OnboardingConversationTurn;

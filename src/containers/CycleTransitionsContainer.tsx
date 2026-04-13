@@ -1,3 +1,4 @@
+import { Audio } from "expo-av";
 import { ChevronDown, ChevronUp } from "lucide-react-native";
 import React, { useMemo, useRef, useState } from "react";
 import {
@@ -5,6 +6,8 @@ import {
   Image,
   LayoutAnimation,
   Platform,
+  Animated as RNAnimated,
+  Easing as RNEasing,
   ScrollView,
   StyleSheet,
   Text,
@@ -28,9 +31,10 @@ import { useScreenStore } from "../engine/useScreenBridge";
 import { interpolate } from "../engine/utils/interpolation";
 import { Fonts } from "../theme/fonts";
 
-// SVGs
+// SVGs / Assets
 import { SvgUri } from "react-native-svg";
 import MantraLotus3d from "../../assets/mantra-lotus-3d.svg";
+const NamasteIcon = require("../../assets/namaste.png");
 
 const { width } = Dimensions.get("window");
 
@@ -74,6 +78,14 @@ const MAX_VISUAL_BEADS = 18;
 // Collapsible Card sub-component
 // ---------------------------------------------------------------------------
 
+const SectionHeader: React.FC<{ label: string }> = ({ label }) => (
+  <View style={styles.sectionHeader}>
+    <View style={styles.dividerLine} />
+    <Text style={styles.sectionLabel}>{label}</Text>
+    <View style={styles.dividerLine} />
+  </View>
+);
+
 interface CollapsibleCardProps {
   label: string;
   children: React.ReactNode;
@@ -105,22 +117,6 @@ const CollapsibleCard: React.FC<CollapsibleCardProps> = ({
     </View>
     {expanded && <View style={styles.cardContent}>{children}</View>}
   </TouchableOpacity>
-);
-
-// ---------------------------------------------------------------------------
-// Section Header (non-collapsible)
-// ---------------------------------------------------------------------------
-
-interface SectionHeaderProps {
-  label: string;
-}
-
-const SectionHeader: React.FC<SectionHeaderProps> = ({ label }) => (
-  <View style={styles.cardHeader}>
-    <View style={styles.dividerLineThin} />
-    <Text style={styles.cardLabelSmall}>{label}</Text>
-    <View style={styles.dividerLineThin} />
-  </View>
 );
 
 // ---------------------------------------------------------------------------
@@ -219,6 +215,111 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
   );
   const [sessionStartTime, setSessionStartTime] = useState(Date.now());
 
+  // Sankalp Embodiment State
+  const [isSankalpActivating, setIsSankalpActivating] = useState(false);
+
+  const sankalpOmRef = useRef<Audio.Sound | null>(null);
+  const sankalpSpin = useRef(new RNAnimated.Value(0)).current;
+  const sankalpSpinLoopRef = useRef<RNAnimated.CompositeAnimation | null>(null);
+
+  const isCompletingRef = useRef(false);
+
+  const runSankalpActivation = async () => {
+    if (isSankalpActivating) return;
+    setIsSankalpActivating(true);
+
+    const startSmoothSpin = (durationMs: number) => {
+      sankalpSpinLoopRef.current?.stop();
+      sankalpSpin.setValue(0);
+      sankalpSpinLoopRef.current = RNAnimated.loop(
+        RNAnimated.timing(sankalpSpin, {
+          toValue: 1,
+          duration: Math.max(3000, Math.round(durationMs)),
+          easing: RNEasing.linear,
+          useNativeDriver: true,
+        }),
+      );
+      sankalpSpinLoopRef.current.start();
+    };
+
+    // Start immediately, sync to audio once loaded
+    startSmoothSpin(4200);
+
+    try {
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+      });
+
+      if (sankalpOmRef.current) {
+        await sankalpOmRef.current.unloadAsync().catch(() => {});
+        sankalpOmRef.current = null;
+      }
+
+      const { sound } = await Audio.Sound.createAsync(
+        require("../../assets/sounds/sankalp_om.mp3"),
+        { shouldPlay: false, isLooping: false, volume: 1 },
+      );
+
+      sankalpOmRef.current = sound;
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (!status.isLoaded) return;
+        if (status.durationMillis && status.positionMillis === 0) {
+          startSmoothSpin(status.durationMillis);
+        }
+        if (status.didJustFinish) {
+          sound.setOnPlaybackStatusUpdate(null);
+          sankalpSpinLoopRef.current?.stop();
+          sankalpSpin.setValue(0);
+          setIsSankalpActivating(false);
+
+          // Complete the runner
+          triggerCompletion();
+        }
+      });
+      await sound.playAsync();
+    } catch (err) {
+      console.warn("[SANKALP_ACTIVATE] OM audio failed:", err);
+      setTimeout(() => {
+        sankalpSpinLoopRef.current?.stop();
+        sankalpSpin.setValue(0);
+        setIsSankalpActivating(false);
+        triggerCompletion();
+      }, 4200);
+    }
+  };
+
+  const triggerCompletion = () => {
+    if (isCompletingRef.current) return;
+    isCompletingRef.current = true;
+
+    const durationSeconds = Math.round((Date.now() - sessionStartTime) / 1000);
+
+    // Update session stats
+    updateScreenData(
+      "runner_reps_completed",
+      currentType === "mantra" ? chantCount : 1,
+    );
+    updateScreenData("runner_duration_actual_sec", durationSeconds);
+    updateScreenData("reps_done", currentType === "mantra" ? chantCount : 1);
+    updateScreenData("chant_duration", durationSeconds);
+
+    const completeAction = {
+      type: "complete_runner",
+      target: {
+        container_id: "practice_runner",
+        state_id: "completion_return",
+      },
+    };
+
+    executeAction(completeAction, {
+      loadScreen,
+      goBack,
+      setScreenValue: (val: any, k: string) => updateScreenData(k, val),
+      screenState: { ...screenData },
+    });
+  };
+
   // Reanimated values for Mala
   const rotation = useSharedValue(0);
   const pulseScale = useSharedValue(1);
@@ -307,8 +408,6 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     return index === chantCount;
   };
 
-  const isCompletingRef = useRef(false);
-
   const handleIncrement = () => {
     if (chantCount >= selectedTarget || isCompletingRef.current) return;
 
@@ -373,6 +472,17 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
   React.useEffect(() => {
     setIsMantraTruncatable(false);
   }, [info]);
+
+  React.useEffect(() => {
+    return () => {
+      sankalpSpinLoopRef.current?.stop();
+      sankalpSpin.setValue(0);
+      if (sankalpOmRef.current) {
+        sankalpOmRef.current.unloadAsync().catch(() => {});
+        sankalpOmRef.current = null;
+      }
+    };
+  }, [sankalpSpin]);
 
   const isInfoScreen = useMemo(
     () =>
@@ -664,8 +774,130 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
             </View>
           )}
 
-          {/* Legacy Practice Visual (Lotus) - only for Sankalp and Practice */}
-          {currentType !== "mantra" && (
+          {/* Sankalp Integrated Flow */}
+          {currentType === "sankalp" && (
+            <View style={styles.combinedSankalpFlow}>
+              <View style={styles.mantraInfoCard}>
+                <Text style={styles.deityTitle}>
+                  {info.title || "Intention"}
+                </Text>
+                <Text style={styles.sankalpMainTextInline}>
+                  {interpolate(
+                    info.line ||
+                      info.subtitle ||
+                      info.iast ||
+                      info.meaning ||
+                      info.summary,
+                    { ...screenData, ...info },
+                  )}
+                </Text>
+              </View>
+
+              <View style={[styles.mainCard, { marginTop: -30 }]}>
+                <SectionHeader label="How To Live" />
+                <View style={{ marginTop: 12 }}>
+                  {Array.isArray(info.how_to_live) ? (
+                    <View style={styles.howToLiveList}>
+                      {info.how_to_live.map((line: string, index: number) => (
+                        <Text
+                          key={`${line}-${index}`}
+                          style={styles.howToLiveText}
+                        >
+                          {line}
+                        </Text>
+                      ))}
+                    </View>
+                  ) : (
+                    <Text style={styles.howToLiveText}>
+                      {info.how_to_live ||
+                        "Stay mindful and carry this intention with every breath."}
+                    </Text>
+                  )}
+                </View>
+              </View>
+
+              <View style={styles.embodySection}>
+                <Text style={styles.embodyInstr}>
+                  {isSankalpActivating
+                    ? "Let the vibration settle within..."
+                    : "Tap to embody your intention"}
+                </Text>
+
+                <TouchableOpacity
+                  activeOpacity={0.9}
+                  onPress={runSankalpActivation}
+                  disabled={isSankalpActivating}
+                  style={styles.holdTarget}
+                >
+                  <RNAnimated.View
+                    style={{
+                      transform: [
+                        { perspective: 1000 },
+                        {
+                          rotateY: sankalpSpin.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: ["0deg", "360deg"],
+                          }),
+                        },
+                        {
+                          scaleX: sankalpSpin.interpolate({
+                            inputRange: [0, 0.25, 0.5, 0.75, 1],
+                            outputRange: [1, 0.18, 1, 0.18, 1],
+                          }),
+                        },
+                      ],
+                    }}
+                  >
+                    <Image source={NamasteIcon} style={styles.embodyImg} />
+                  </RNAnimated.View>
+                </TouchableOpacity>
+
+                {/* 
+                <TouchableOpacity
+                  onPress={handleBack}
+                  style={{ marginTop: 24 }}
+                >
+                  <Text style={styles.returnLink}>Return to Mitra Home</Text>
+                </TouchableOpacity> */}
+              </View>
+
+              {/* Collapsible Sections for Sankalp */}
+              <View
+                style={[styles.collapsibleSectionsCombined, { marginTop: -70 }]}
+              >
+                {hasContent(info.meaning) || hasContent(info.summary) ? (
+                  <CollapsibleCard
+                    label="Meaning"
+                    expanded={meaningExpanded}
+                    onToggle={() => setMeaningExpanded(!meaningExpanded)}
+                  >
+                    <Text style={styles.cardText}>{info.insight}</Text>
+                  </CollapsibleCard>
+                ) : null}
+                <View style={{ height: 12 }} />
+                <CollapsibleCard
+                  label="Benefits"
+                  expanded={benefitsExpanded}
+                  onToggle={() => setBenefitsExpanded(!benefitsExpanded)}
+                >
+                  {Array.isArray(info.benefits) ? (
+                    <View style={styles.benefitList}>
+                      {info.benefits.map((b: string, idx: number) => (
+                        <Text key={idx} style={styles.benefitItem}>
+                          {"\u2022"} {b}
+                        </Text>
+                      ))}
+                    </View>
+                  ) : (
+                    <Text style={styles.cardText}>{info.benefits}</Text>
+                  )}
+                </CollapsibleCard>
+              </View>
+            </View>
+          )}
+
+          {/* Practice Flow (Legacy for non-sankalp/non-mantra) */}
+          {currentType === "practice" && (
             <View style={styles.visualContainer}>
               {typeof MantraLotus3d === "number" ? (
                 <SvgUri
@@ -676,72 +908,27 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
               ) : (
                 <MantraLotus3d width={180} height={180} />
               )}
-
-              {currentType === "sankalp" && (
-                <View style={styles.mantraMainContainer}>
-                  {/* TIT-01: Render Title and Line separately for Sankalp.
-                    Order: Title -> Line -> How To Live (below). */}
-                  {info.title && (
-                    <Text style={styles.deityTitle}>{info.title}</Text>
-                  )}
-                  {(info.line ||
-                    info.subtitle ||
-                    info.iast ||
-                    info.meaning ||
-                    info.summary) && (
-                    <Text
-                      style={[
-                        styles.sankalpMainText,
-                        info.title ? { marginTop: 10 } : null,
-                      ]}
-                    >
-                      {interpolate(
-                        info.line ||
-                          info.subtitle ||
-                          info.iast ||
-                          info.meaning ||
-                          info.summary,
-                        { ...screenData, ...info },
-                      )}
-                    </Text>
-                  )}
-                </View>
-              )}
-
-              {currentType === "practice" && (
-                <View style={styles.mantraMainContainer}>
-                  <Text style={[styles.deityTitle, { textAlign: "center" }]}>
-                    {info.title}
+              <View style={styles.mantraMainContainer}>
+                <Text style={[styles.deityTitle, { textAlign: "center" }]}>
+                  {info.title}
+                </Text>
+                {(info.subtitle || info.line) && (
+                  <Text
+                    style={[
+                      styles.sankalpMainText,
+                      { fontSize: 18, marginTop: 8, textAlign: "center" },
+                    ]}
+                  >
+                    {interpolate(info.subtitle || info.line, {
+                      ...screenData,
+                      ...info,
+                    })}
                   </Text>
-                  {(info.subtitle || info.line) && (
-                    <Text
-                      style={[
-                        styles.sankalpMainText,
-                        {
-                          fontSize: 18,
-                          fontFamily: Fonts.serif.regular,
-                          marginTop: 8,
-                          textAlign: "center",
-                        },
-                      ]}
-                    >
-                      {interpolate(info.subtitle || info.line, {
-                        ...screenData,
-                        ...info,
-                      })}
-                    </Text>
-                  )}
-                </View>
-              )}
-            </View>
-          )}
+                )}
+              </View>
 
-          {/* Main Content Card - only for Sankalp and Practice */}
-          {(currentType === "practice" || currentType === "sankalp") && (
-            <View style={styles.mainCard}>
-              {currentType === "practice" &&
-                info.steps &&
-                info.steps.length > 0 && (
+              <View style={styles.mainCard}>
+                {info.steps && info.steps.length > 0 && (
                   <>
                     <SectionHeader label="What this practice asks of you" />
                     <View style={styles.practiceStepsList}>
@@ -755,109 +942,11 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                   </>
                 )}
 
-              {currentType === "sankalp" && (
-                <>
-                  <SectionHeader label="How To Live" />
-                  <View style={{ marginTop: 12 }}>
-                    <Text style={styles.howToLiveText}>
-                      {info.how_to_live ||
-                        "Stay mindful and carry this intention with every breath."}
-                    </Text>
-                  </View>
-                </>
-              )}
-            </View>
-          )}
-
-          {/* Actions - only for Sankalp and Practice */}
-          {visibleFooterBlocks.length > 0 && currentType !== "mantra" && (
-            <View style={styles.infoActions}>
-              {visibleFooterBlocks.map((block: any, i: number) => {
-                const resolvedBlock = { ...block };
-                if (resolvedBlock.type === "primary_button") {
-                  if (currentType === "mantra")
-                    resolvedBlock.label = "Begin Chanting";
-                  else if (currentType === "sankalp")
-                    resolvedBlock.label = "I Embody This";
-                  else if (currentType === "practice")
-                    resolvedBlock.label = "Begin Practice";
-                }
-                return <BlockRenderer key={`f-${i}`} block={resolvedBlock} />;
-              })}
-            </View>
-          )}
-
-          {/* Prompt / Action Text - Moved below actions per user feedback - only for Sankalp and Practice */}
-          {currentType !== "mantra" && (
-            <Text style={styles.practicePrompt}>
-              {currentType === "sankalp"
-                ? "Carry this intention gently into your thoughts and actions."
-                : "Begin when you feel ready. This takes 2-3 minutes. There is no rush."}
-            </Text>
-          )}
-
-          {/* Accordion Sections - only for Sankalp and Practice */}
-          {currentType !== "mantra" && (
-            <View style={styles.collapsibleSections}>
-              {/* Consolidated Meaning Section for Practices and Mantras */}
-              {currentType !== "sankalp" &&
-                ((currentType === "practice" && hasContent(info.summary)) ||
-                  (currentType === "mantra" &&
-                    (hasContent(info.meaning) ||
-                      hasContent(info.summary)))) && (
-                  <CollapsibleCard
-                    label="Meaning"
-                    expanded={meaningExpanded}
-                    onToggle={() => setMeaningExpanded(!meaningExpanded)}
-                  >
-                    <Text style={styles.cardText}>
-                      {currentType === "practice"
-                        ? info.summary
-                        : info.meaning || info.summary}
-                    </Text>
-                  </CollapsibleCard>
-                )}
-
-              {currentType === "sankalp" && (
-                <>
-                  <CollapsibleCard
-                    label="Meaning"
-                    expanded={meaningExpanded}
-                    onToggle={() => setMeaningExpanded(!meaningExpanded)}
-                  >
-                    <Text style={styles.cardText}>
-                      {info.meaning || info.essence || info.summary}
-                    </Text>
-                  </CollapsibleCard>
-                  <CollapsibleCard
-                    label="Benefits"
-                    expanded={benefitsExpanded}
-                    onToggle={() => setBenefitsExpanded(!benefitsExpanded)}
-                  >
-                    {hasContent(info.benefits) ? (
-                      Array.isArray(info.benefits) ? (
-                        <View style={styles.benefitList}>
-                          {info.benefits.map((b: string, idx: number) => (
-                            <Text key={idx} style={styles.benefitItem}>
-                              {"\u2022"} {b}
-                            </Text>
-                          ))}
-                        </View>
-                      ) : (
-                        <Text style={styles.cardText}>{info.benefits}</Text>
-                      )
-                    ) : (
-                      <Text style={styles.cardText}>
-                        Focus and calm are cultivated through this intention.
-                      </Text>
+                {hasContent(info.benefits) && (
+                  <>
+                    {info.steps && info.steps.length > 0 && (
+                      <View style={{ height: 18 }} />
                     )}
-                  </CollapsibleCard>
-                </>
-              )}
-
-              {currentType === "practice" && (
-                <>
-                  {hasContent(info.benefits) && (
                     <CollapsibleCard
                       label="Benefits"
                       expanded={benefitsExpanded}
@@ -875,9 +964,14 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                         <Text style={styles.cardText}>{info.benefits}</Text>
                       )}
                     </CollapsibleCard>
-                  )}
+                  </>
+                )}
 
-                  {hasContent(info.essence || info.insight) && (
+                {hasContent(info.essence || info.insight) && (
+                  <>
+                    {(hasContent(info.steps) || hasContent(info.benefits)) && (
+                      <View style={{ height: 18 }} />
+                    )}
                     <CollapsibleCard
                       label="Why this works"
                       expanded={essenceExpanded}
@@ -887,8 +981,16 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                         {info.essence || info.insight}
                       </Text>
                     </CollapsibleCard>
-                  )}
-                </>
+                  </>
+                )}
+              </View>
+
+              {visibleFooterBlocks.length > 0 && (
+                <View style={styles.infoActions}>
+                  {visibleFooterBlocks.map((block: any, i: number) => (
+                    <BlockRenderer key={`f-${i}`} block={block} />
+                  ))}
+                </View>
               )}
             </View>
           )}
@@ -1071,10 +1173,10 @@ const styles = StyleSheet.create({
     width: "100%",
 
     backgroundColor: "rgba(255, 255, 255, 0.3)",
-    borderRadius: 16,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: "rgba(184, 148, 80, 0.1)",
-    padding: 10,
+    padding: 15,
   },
   cardExpanded: {
     // backgroundColor: "rgba(255, 255, 255, 0.8)",
@@ -1119,6 +1221,10 @@ const styles = StyleSheet.create({
     lineHeight: 28,
     textAlign: "center",
     paddingHorizontal: 10,
+  },
+  howToLiveList: {
+    alignItems: "center",
+    gap: 4,
   },
   sankalpMainText: {
     fontSize: 24,
@@ -1462,9 +1568,91 @@ const styles = StyleSheet.create({
     paddingHorizontal: 0,
     marginBottom: 40,
   },
-  cardTextLarge: {
-    fontSize: 18,
-    lineHeight: 28,
+  combinedSankalpFlow: {
+    width: "100%",
+    alignItems: "center",
+    paddingTop: 50,
+  },
+  mantraInfoCard: {
+    width: "100%",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  sankalpMainTextInline: {
+    fontSize: 16,
+    fontFamily: Fonts.serif.regular,
+    color: "#432104",
+    textAlign: "center",
+    lineHeight: 38,
+    // marginTop: 10,
+    // paddingHorizontal: 12,
+  },
+  embodySection: {
+    width: "100%",
+    alignItems: "center",
+    marginTop: 10,
+    marginBottom: 40,
+  },
+  embodyInstr: {
+    fontSize: 16,
+    fontFamily: Fonts.serif.regular,
+    color: "#8a7a5a",
+    marginBottom: 24,
+    fontStyle: "italic",
+  },
+  holdTarget: {
+    width: 220,
+    height: 220,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  namasteContainer: {
+    width: 180,
+    height: 180,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  progressSvg: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+  },
+  embodyImg: {
+    marginTop: -40,
+    width: 250,
+    height: 250,
+    resizeMode: "contain",
+  },
+  sankalpActivatingText: {
+    fontSize: 17,
+    fontFamily: Fonts.serif.bold,
+    fontStyle: "italic",
+    color: "#B89450",
+    marginTop: -20,
+    textAlign: "center",
+    marginBottom: 30,
+  },
+  returnLink: {
+    fontSize: 15,
+    fontFamily: Fonts.serif.regular,
+    color: "#8a7a5a",
+    textDecorationLine: "underline",
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    gap: 12,
+  },
+  sectionLabel: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 14,
+    color: "#B89450",
+    textTransform: "uppercase",
+    letterSpacing: 1.5,
   },
 });
 

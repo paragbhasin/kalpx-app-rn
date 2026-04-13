@@ -1,28 +1,20 @@
 /**
- * CompletionReturnTransient — Week 3 Moment 32 completion return overlay.
+ * CompletionReturnTransient — Week 3 Moment 32 completion return screen.
+ * REDESIGNED: Premium Light Theme with Glowing Lotus.
  *
- * Web parity: src/containers/PracticeRunnerContainer.vue completion variants
- * (mantra_complete / sankalp_confirm / practice_complete). Spec:
- * transient_completion_return.md.
- *
- * Fades in over the dim runner background. Gold checkmark SVG stroke-draw
- * (800ms ease-out). Variant-specific Mitra message in Cormorant. Optional
- * "How did that feel?" input (120 char cap, mic button). Two CTAs: gold pill
- * "Return to Mitra Home" + text link "Repeat". 10s idle auto-return timer
- * that pauses if the user begins typing.
- *
- * On unmount (the very last step before nav home), clears the runner-local
- * flow fields: runner_active_item, runner_source, runner_start_time,
- * runner_variant (REG-003 cross-flow state leak guard).
- *
- * Tone constraint: ONLY the 3 specified messages. No exclamations, no "Great
- * job!", no streaks, no confetti.
+ * Fades in over the beige background. Gold checkmark SVG stroke-draw (800ms).
+ * Variant-specific Mitra message in Cormorant/Serif dark brown.
+ * "How did that feel?" input (120 char cap).
+ * Large glowing lotus at bottom center.
+ * manual redirection only (Return to Dashboard / Repeat).
  */
 
 import * as Haptics from "expo-haptics";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
+  Dimensions,
+  ImageBackground,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -32,12 +24,11 @@ import {
   View,
 } from "react-native";
 import Svg, { Path } from "react-native-svg";
+import MantraLotus3d from "../../assets/mantra-lotus-3d.svg";
 import { executeAction } from "../engine/actionExecutor";
 import { mitraTrackEvent } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { Fonts } from "../theme/fonts";
-
-const AUTO_RETURN_MS = 10_000;
 
 const VARIANT_MESSAGES: Record<string, string> = {
   mantra: "108 in. Kept.",
@@ -57,7 +48,7 @@ interface CompletionReturnTransientProps {
 const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
   block,
 }) => {
-  const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
+  const { screenData, loadScreen, goBack, currentScreen, updateBackground, updateHeaderHidden } = useScreenStore();
 
   const resolvedVariant: "mantra" | "sankalp" | "practice" =
     (block.variant as any) ||
@@ -69,12 +60,10 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
     VARIANT_MESSAGES[resolvedVariant] || VARIANT_MESSAGES.practice;
 
   const [inputText, setInputText] = useState("");
-  const [autoReturnPaused, setAutoReturnPaused] = useState(false);
 
-  const bgFade = useRef(new Animated.Value(0)).current;
+  const contentFade = useRef(new Animated.Value(0)).current;
   const checkProgress = useRef(new Animated.Value(0)).current;
   const messageOpacity = useRef(new Animated.Value(0)).current;
-  const autoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const unmountedRef = useRef(false);
 
   const setScreenValue = (key: string, value: any) => {
@@ -84,15 +73,17 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
   };
 
   const clearRunnerState = () => {
-    // REG-003: flow-local cleanup on every exit path
     setScreenValue("runner_active_item", null);
     setScreenValue("runner_source", null);
     setScreenValue("runner_start_time", null);
     setScreenValue("runner_variant", null);
   };
 
-  // Fire completion_return_shown telemetry (spec §13)
   useEffect(() => {
+    // Apply global background from header to footer via bridge
+    updateBackground(require("../../assets/beige_bg.png"));
+    updateHeaderHidden(false);
+
     mitraTrackEvent("completion_return_shown", {
       meta: {
         item_type: resolvedVariant,
@@ -105,12 +96,13 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     }
 
-    // Sequence: background fade 500ms -> check draw 800ms -> message fade 600ms
-    Animated.timing(bgFade, {
+    // Sequence: content fade -> check draw -> message fade
+    Animated.timing(contentFade, {
       toValue: 1,
-      duration: 500,
+      duration: 600,
       useNativeDriver: true,
     }).start();
+    
     Animated.timing(checkProgress, {
       toValue: 1,
       duration: 800,
@@ -118,38 +110,18 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
     }).start(() => {
       Animated.timing(messageOpacity, {
         toValue: 1,
-        duration: 600,
+        duration: 800,
         useNativeDriver: true,
       }).start();
     });
 
     return () => {
       unmountedRef.current = true;
-      if (autoTimerRef.current) clearTimeout(autoTimerRef.current);
       clearRunnerState();
     };
   }, []);
 
-  // Auto-return timer
-  // useEffect(() => {
-  //   if (autoReturnPaused) {
-  //     if (autoTimerRef.current) clearTimeout(autoTimerRef.current);
-  //     return;
-  //   }
-  //   autoTimerRef.current = setTimeout(() => {
-  //     if (unmountedRef.current) return;
-  //     mitraTrackEvent('completion_return_auto_returned', {
-  //       meta: { item_type: resolvedVariant },
-  //     }).catch(() => {});
-  //     handleReturnHome(false);
-  //   }, AUTO_RETURN_MS);
-  //   return () => {
-  //     if (autoTimerRef.current) clearTimeout(autoTimerRef.current);
-  //   };
-  // }, [autoReturnPaused]);
-
   const handleReturnHome = (manual: boolean) => {
-    if (autoTimerRef.current) clearTimeout(autoTimerRef.current);
     if (manual) {
       mitraTrackEvent("completion_return_manually_returned", {
         meta: { item_type: resolvedVariant },
@@ -171,7 +143,6 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
   };
 
   const handleRepeat = () => {
-    if (autoTimerRef.current) clearTimeout(autoTimerRef.current);
     mitraTrackEvent("completion_return_repeated", {
       meta: {
         item_type: resolvedVariant,
@@ -195,10 +166,9 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
         text: inputText.trim().slice(0, 120),
       },
     }).catch(() => {});
-    setTimeout(() => handleReturnHome(true), 1500);
+    handleReturnHome(true);
   };
 
-  // Check SVG path — simple elegant check
   const checkPathLength = 48;
   const checkDashOffset = checkProgress.interpolate({
     inputRange: [0, 1],
@@ -210,16 +180,14 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.overlay}
     >
-      <Animated.View style={[styles.bg, { opacity: bgFade }]} />
-
-      <View style={styles.content}>
+      <Animated.View style={[styles.content, { opacity: contentFade }]}>
         <View style={styles.checkWrap}>
           <Svg width={48} height={48} viewBox="0 0 48 48">
             <AnimatedPath
               d="M10 24 L20 34 L38 14"
               fill="none"
-              stroke="#eddeb4"
-              strokeWidth={2}
+              stroke="#A68246"
+              strokeWidth={2.5}
               strokeLinecap="round"
               strokeLinejoin="round"
               strokeDasharray={`${checkPathLength}`}
@@ -228,7 +196,9 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
           </Svg>
         </View>
 
-        <Animated.View style={{ opacity: messageOpacity, width: "100%" }}>
+        <Animated.View
+          style={{ opacity: messageOpacity, width: "100%", alignItems: "center" }}
+        >
           <View style={styles.messageCard}>
             <Text style={styles.messageText}>{message}</Text>
           </View>
@@ -237,48 +207,46 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
             <TextInput
               style={styles.input}
               placeholder="How did that feel?"
-              placeholderTextColor="#8c7b5c"
+              placeholderTextColor="#A6824699"
               value={inputText}
-              onChangeText={(t) => {
-                setInputText(t.slice(0, 120));
-                if (!autoReturnPaused) setAutoReturnPaused(true);
-              }}
+              onChangeText={(t) => setInputText(t.slice(0, 120))}
               onSubmitEditing={handleSubmitInput}
               maxLength={120}
               returnKeyType="send"
-              accessibilityLabel="Post-completion reflection input"
             />
             <TouchableOpacity
               style={styles.micBtn}
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              accessibilityRole="button"
-              accessibilityLabel="Voice note"
-              onPress={() => setAutoReturnPaused(true)}
+              activeOpacity={0.7}
             >
               <Text style={styles.micIcon}>🎙</Text>
             </TouchableOpacity>
           </View>
         </Animated.View>
-      </View>
+      </Animated.View>
 
-      <View style={styles.footer}>
-        <TouchableOpacity
-          style={styles.primaryCta}
-          onPress={() => handleReturnHome(true)}
-          accessibilityRole="button"
-          accessibilityLabel="Return to Mitra Home"
-        >
-          <Text style={styles.primaryCtaText}>Return to Mitra Home</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.secondaryCta}
-          onPress={handleRepeat}
-          hitSlop={{ top: 10, bottom: 10, left: 32, right: 32 }}
-          accessibilityRole="button"
-          accessibilityLabel="Repeat practice"
-        >
-          <Text style={styles.secondaryCtaText}>Repeat</Text>
-        </TouchableOpacity>
+      <View style={styles.bottomSection}>
+        <View style={styles.lotusWrap}>
+          <MantraLotus3d width={180} height={140} opacity={0.65} />
+        </View>
+
+        <View style={styles.footer}>
+          <TouchableOpacity
+            style={styles.primaryCta}
+            onPress={() => handleReturnHome(true)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.primaryCtaText}>Return to Mitra Home</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.secondaryCta}
+            onPress={handleRepeat}
+            activeOpacity={0.6}
+          >
+            <Text style={styles.secondaryCtaText}>Repeat</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </KeyboardAvoidingView>
   );
@@ -290,51 +258,49 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingTop: 72,
-    paddingBottom: 40,
-    paddingHorizontal: 24,
-  },
-  bg: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "#1a1a1a",
+    paddingTop: 100,
+    paddingBottom: 48,
+    paddingHorizontal: 32,
   },
   content: {
     alignItems: "center",
     width: "100%",
-    marginTop: 24,
   },
   checkWrap: {
-    width: 48,
-    height: 48,
+    width: 64,
+    height: 64,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 36,
+    marginBottom: 48,
   },
   messageCard: {
-    borderLeftWidth: 3,
-    borderLeftColor: "#eddeb4",
-    paddingLeft: 16,
-    paddingVertical: 12,
-    marginBottom: 32,
+    borderLeftWidth: 2,
+    borderLeftColor: "#DAC28E",
+    paddingLeft: 20,
+    paddingVertical: 4,
+    marginBottom: 40,
+    width: '100%',
+    alignSelf: 'flex-start',
   },
   messageText: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 22,
-    lineHeight: 32,
-    color: "#f1e7cf",
+    fontSize: 26,
+    lineHeight: 38,
+    color: "#5C3A12",
   },
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
-    borderBottomColor: "rgba(237,222,180,0.2)",
+    borderBottomColor: "#DAC28E66",
     borderBottomWidth: 1,
-    paddingVertical: 8,
+    paddingVertical: 12,
+    width: "100%",
   },
   input: {
     flex: 1,
-    fontFamily: Fonts.sans.regular,
-    fontSize: 14,
-    color: "#eddeb4",
+    fontFamily: Fonts.serif.regular,
+    fontSize: 16,
+    color: "#5C3A12",
     paddingVertical: 4,
   },
   micBtn: {
@@ -344,38 +310,54 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   micIcon: {
-    fontSize: 18,
-    color: "#eddeb4",
+    fontSize: 20,
+    color: "#5C3A12",
+  },
+  bottomSection: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  lotusWrap: {
+    marginBottom: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   footer: {
     width: "100%",
     alignItems: "center",
-    gap: 12,
+    gap: 16,
   },
   primaryCta: {
-    backgroundColor: "#eddeb4",
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    borderRadius: 999,
-    minWidth: 260,
-    minHeight: 48,
+    backgroundColor: "#F2E8CF",
+    paddingVertical: 16,
+    paddingHorizontal: 40,
+    borderRadius: 32,
+    width: "100%",
+    maxWidth: 280,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#DAC28E",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
   },
   primaryCtaText: {
-    fontFamily: Fonts.sans.semiBold,
-    fontSize: 15,
-    color: "#1a1a1a",
-    letterSpacing: 0.3,
+    fontFamily: Fonts.serif.bold,
+    fontSize: 16,
+    color: "#5C3A12",
+    letterSpacing: 0.2,
   },
   secondaryCta: {
     paddingVertical: 10,
   },
   secondaryCtaText: {
-    fontFamily: Fonts.sans.regular,
-    fontSize: 14,
-    color: "#bfa58a",
-    letterSpacing: 0.4,
+    fontFamily: Fonts.serif.regular,
+    fontSize: 15,
+    color: "#8C6A3D",
+    letterSpacing: 0.5,
   },
 });
 

@@ -179,7 +179,7 @@ const ImmersiveV3Runner: React.FC<{ schema: any }> = ({ schema }) => {
   };
 
   return (
-    <View style={v3Styles.root}>
+    <View style={[v3Styles.root, isCompletion && { backgroundColor: "transparent" }]}>
       {!isCompletion && (
         <TouchableOpacity
           onPress={handleBack}
@@ -193,7 +193,7 @@ const ImmersiveV3Runner: React.FC<{ schema: any }> = ({ schema }) => {
         </TouchableOpacity>
       )}
 
-      <View style={v3Styles.body}>
+      <View style={[v3Styles.body, isCompletion && { paddingHorizontal: 0, paddingTop: 0, paddingBottom: 0 }]}>
         {schema.blocks?.map((block: any, i: number) => (
           <BlockRenderer key={i} block={block} />
         ))}

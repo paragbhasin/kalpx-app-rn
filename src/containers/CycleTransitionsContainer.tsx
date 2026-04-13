@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronUp } from "lucide-react-native";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -307,41 +307,47 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     return index === chantCount;
   };
 
+  const isCompletingRef = useRef(false);
+
   const handleIncrement = () => {
-    const nextCount = chantCount + 1;
-    setChantCount(nextCount);
+    if (chantCount >= selectedTarget || isCompletingRef.current) return;
 
-    if (nextCount >= selectedTarget) {
-      // Handle completion
-      const durationSeconds = Math.round(
-        (Date.now() - sessionStartTime) / 1000,
-      );
+    setChantCount((prev) => {
+      const nextCount = prev + 1;
 
-      // 1. Update engagement fields for completion tracking
-      updateScreenData("runner_reps_completed", nextCount);
-      updateScreenData("runner_duration_actual_sec", durationSeconds);
-      updateScreenData("reps_done", nextCount);
-      updateScreenData("chant_duration", durationSeconds);
+      if (nextCount >= selectedTarget && !isCompletingRef.current) {
+        isCompletingRef.current = true;
+        // Handle completion
+        const durationSeconds = Math.round(
+          (Date.now() - sessionStartTime) / 1000,
+        );
 
-      // 2. Use the standard complete_runner action
-      // This will trigger mitraTrackCompletion and land on completion_return
-      const completeAction = {
-        type: "complete_runner",
-        target: {
-          container_id: "practice_runner",
-          state_id: "completion_return",
-        },
-      };
+        // 1. Update engagement fields for completion tracking
+        updateScreenData("runner_reps_completed", nextCount);
+        updateScreenData("runner_duration_actual_sec", durationSeconds);
+        updateScreenData("reps_done", nextCount);
+        updateScreenData("chant_duration", durationSeconds);
 
-      setTimeout(() => {
-        executeAction(completeAction, {
-          loadScreen,
-          goBack,
-          setScreenValue: (val: any, k: string) => updateScreenData(k, val),
-          screenState: { ...screenData },
-        });
-      }, 800);
-    }
+        // 2. Use the standard complete_runner action
+        const completeAction = {
+          type: "complete_runner",
+          target: {
+            container_id: "practice_runner",
+            state_id: "completion_return",
+          },
+        };
+
+        setTimeout(() => {
+          executeAction(completeAction, {
+            loadScreen,
+            goBack,
+            setScreenValue: (val: any, k: string) => updateScreenData(k, val),
+            screenState: { ...screenData },
+          });
+        }, 800);
+      }
+      return nextCount;
+    });
   };
 
   React.useEffect(() => {
@@ -1272,7 +1278,7 @@ const styles = StyleSheet.create({
   textCardHeaderContent: {
     flex: 1,
     fontSize: 17,
-    fontFamily: Fonts.serif.medium,
+    fontFamily: Fonts.serif.bold,
     color: BROWN,
     lineHeight: 24,
     textAlign: "center",

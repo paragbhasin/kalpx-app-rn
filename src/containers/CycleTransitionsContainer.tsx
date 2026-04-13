@@ -1,6 +1,14 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Slider from "@react-native-community/slider";
 import { Audio } from "expo-av";
-import { ChevronDown, ChevronUp } from "lucide-react-native";
-import React, { useMemo, useState } from "react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Minus,
+  Plus,
+  RefreshCw,
+} from "lucide-react-native";
+import React, { useMemo, useRef, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -73,6 +81,34 @@ const hasContent = (val: any): boolean => {
 // ---------------------------------------------------------------------------
 
 const MAX_VISUAL_BEADS = 18;
+const CALM_MUSIC_INDEX_KEY = "_kalpx_calm_music_idx";
+const CALM_MUSIC_TRACKS = [
+  require("../../assets/sounds/Audio-calmmusic.mp3"),
+  require("../../assets/sounds/Audio1.mpeg"),
+  require("../../assets/sounds/Audio9.mpeg"),
+  require("../../assets/sounds/Audio6.mpeg"),
+];
+
+function formatTimer(seconds: number): string {
+  const safe = Math.max(0, Math.floor(seconds));
+  const mins = Math.floor(safe / 60);
+  const secs = safe % 60;
+  return `${mins}:${String(secs).padStart(2, "0")}`;
+}
+
+async function getNextCalmTrack() {
+  let lastIdx = -1;
+  try {
+    const stored = await AsyncStorage.getItem(CALM_MUSIC_INDEX_KEY);
+    lastIdx = parseInt(stored || "-1", 10);
+  } catch (_) {}
+  const nextIdx =
+    ((Number.isFinite(lastIdx) ? lastIdx : -1) + 1) % CALM_MUSIC_TRACKS.length;
+  try {
+    await AsyncStorage.setItem(CALM_MUSIC_INDEX_KEY, String(nextIdx));
+  } catch (_) {}
+  return CALM_MUSIC_TRACKS[nextIdx];
+}
 
 // ---------------------------------------------------------------------------
 // Collapsible Card sub-component
@@ -217,12 +253,21 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
 
   // Sankalp Embodiment State
   const [isSankalpActivating, setIsSankalpActivating] = useState(false);
+  const [selectedPracticeMinutes, setSelectedPracticeMinutes] = useState(3);
+  const [practiceTimeLeft, setPracticeTimeLeft] = useState(180);
+  const [practiceInitialSeconds, setPracticeInitialSeconds] = useState(180);
+  const [isPracticeTimerRunning, setIsPracticeTimerRunning] = useState(false);
 
   const sankalpOmRef = useRef<Audio.Sound | null>(null);
+  const calmMusicRef = useRef<Audio.Sound | null>(null);
   const sankalpSpin = useRef(new RNAnimated.Value(0)).current;
   const sankalpSpinLoopRef = useRef<RNAnimated.CompositeAnimation | null>(null);
+  const practiceTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const isCompletingRef = useRef(false);
+
+  const clampPracticeMinutes = (value: number) =>
+    Math.max(1, Math.min(10, Math.round(value)));
 
   const runSankalpActivation = async () => {
     if (isSankalpActivating) return;
@@ -318,6 +363,104 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
       setScreenValue: (val: any, k: string) => updateScreenData(k, val),
       screenState: { ...screenData },
     });
+  };
+
+  const stopCalmMusic = async () => {
+    if (calmMusicRef.current) {
+      const sound = calmMusicRef.current;
+      calmMusicRef.current = null;
+      await sound.stopAsync().catch(() => {});
+      await sound.unloadAsync().catch(() => {});
+    }
+  };
+
+  const startCalmMusic = async () => {
+    try {
+      await stopCalmMusic();
+      const trackSource = await getNextCalmTrack();
+      const { sound } = await Audio.Sound.createAsync(trackSource, {
+        shouldPlay: false,
+        isLooping: true,
+        volume: 0.15,
+      });
+      await sound.playAsync();
+      calmMusicRef.current = sound;
+    } catch (err) {
+      console.warn("[PRACTICE_TIMER] calm music failed, falling back:", err);
+      try {
+        const { sound } = await Audio.Sound.createAsync(
+          require("../../assets/sounds/Audio-calmmusic.mp3"),
+          {
+            shouldPlay: false,
+            isLooping: true,
+            volume: 0.15,
+          },
+        );
+        await sound.playAsync();
+        calmMusicRef.current = sound;
+      } catch (fallbackErr) {
+        console.warn(
+          "[PRACTICE_TIMER] calm music fallback failed:",
+          fallbackErr,
+        );
+      }
+    }
+  };
+
+  const stopPracticeTimer = async () => {
+    if (practiceTimerRef.current) {
+      clearInterval(practiceTimerRef.current);
+      practiceTimerRef.current = null;
+    }
+    setIsPracticeTimerRunning(false);
+    await stopCalmMusic();
+  };
+
+  const startPracticeTimer = async () => {
+    if (isPracticeTimerRunning) return;
+
+    const totalSeconds = Math.max(60, Math.round(selectedPracticeMinutes * 60));
+    setPracticeInitialSeconds(totalSeconds);
+    setPracticeTimeLeft(totalSeconds);
+    setSessionStartTime(Date.now());
+    setIsPracticeTimerRunning(true);
+
+    await Audio.setAudioModeAsync({
+      playsInSilentModeIOS: true,
+      staysActiveInBackground: false,
+      playThroughEarpieceAndroid: false,
+    }).catch(() => {});
+    await startCalmMusic();
+
+    practiceTimerRef.current = setInterval(() => {
+      setPracticeTimeLeft((prev) => {
+        if (prev <= 1) {
+          if (practiceTimerRef.current) {
+            clearInterval(practiceTimerRef.current);
+            practiceTimerRef.current = null;
+          }
+          setIsPracticeTimerRunning(false);
+          stopCalmMusic().catch(() => {});
+          triggerCompletion();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  const resetPracticeTimer = async () => {
+    await stopPracticeTimer();
+    const totalSeconds = Math.max(60, Math.round(selectedPracticeMinutes * 60));
+    setPracticeInitialSeconds(totalSeconds);
+    setPracticeTimeLeft(totalSeconds);
+  };
+
+  const updatePracticeMinutes = (value: number) => {
+    const mins = clampPracticeMinutes(value);
+    setSelectedPracticeMinutes(mins);
+    setPracticeTimeLeft(mins * 60);
+    setPracticeInitialSeconds(mins * 60);
   };
 
   // Reanimated values for Mala
@@ -445,6 +588,25 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
   React.useEffect(() => {
     updateBackground(require("../../assets/beige_bg.png"));
     updateHeaderHidden(false);
+
+    // Initialize runner fields for merged info flows so complete_runner can
+    // attribute completions correctly even when we stay inside this container.
+    if (!screenData?.runner_source) {
+      updateScreenData(
+        "runner_source",
+        screenData?.runner_active_item?.source || "core",
+      );
+    }
+    if (!screenData?.runner_variant) {
+      if (currentType === "mantra") {
+        updateScreenData("runner_variant", "mantra");
+      } else if (currentType === "sankalp") {
+        updateScreenData("runner_variant", "sankalp");
+      } else if (currentType === "practice") {
+        updateScreenData("runner_variant", "practice");
+      }
+    }
+
     return () => {
       updateBackground(null);
     };
@@ -457,6 +619,11 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
 
   React.useEffect(() => {
     return () => {
+      if (practiceTimerRef.current) {
+        clearInterval(practiceTimerRef.current);
+        practiceTimerRef.current = null;
+      }
+      stopCalmMusic().catch(() => {});
       sankalpSpinLoopRef.current?.stop();
       sankalpSpin.setValue(0);
       if (sankalpOmRef.current) {
@@ -465,6 +632,39 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
       }
     };
   }, [sankalpSpin]);
+
+  React.useEffect(() => {
+    const seconds = Number(screenData.practice_duration_seconds);
+    if (seconds > 0) {
+      const mins = Math.max(1, Math.round(seconds / 60));
+      setSelectedPracticeMinutes(mins);
+      setPracticeTimeLeft(seconds);
+      setPracticeInitialSeconds(seconds);
+      return;
+    }
+
+    const rawDuration =
+      info.duration_min ??
+      info.duration ??
+      screenData.runner_active_item?.duration_min ??
+      screenData.runner_active_item?.duration;
+    let mins = 3;
+
+    if (typeof rawDuration === "number" && rawDuration > 0) {
+      mins = Math.max(1, Math.round(rawDuration));
+    } else if (typeof rawDuration === "string") {
+      const matched = rawDuration.match(/(\d+(?:\.\d+)?)/);
+      if (matched) mins = Math.max(1, Math.round(Number(matched[1])));
+    }
+
+    setSelectedPracticeMinutes(mins);
+    setPracticeTimeLeft(mins * 60);
+    setPracticeInitialSeconds(mins * 60);
+  }, [
+    info,
+    screenData.practice_duration_seconds,
+    screenData.runner_active_item,
+  ]);
 
   const isInfoScreen = useMemo(
     () =>
@@ -881,15 +1081,16 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
           {/* Practice Flow (Legacy for non-sankalp/non-mantra) */}
           {currentType === "practice" && (
             <View style={styles.visualContainer}>
-              {typeof MantraLotus3d === "number" ? (
+              {/* {typeof MantraLotus3d === "number" ? (
                 <SvgUri
                   uri={Image.resolveAssetSource(MantraLotus3d)?.uri ?? null}
                   width={180}
                   height={180}
                 />
               ) : (
-                <MantraLotus3d width={180} height={180} />
-              )}
+                <MantraLotus3d width={180} height={180} /> */}
+              {/* )
+              } */}
               <View style={styles.mantraMainContainer}>
                 <Text style={[styles.deityTitle, { textAlign: "center" }]}>
                   {info.title}
@@ -923,63 +1124,220 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                     </View>
                   </>
                 )}
-
-                {hasContent(info.benefits) && (
+              </View>
+              <View
+                style={[
+                  styles.practiceTimerCard,
+                  info.steps && info.steps.length > 0 && { marginTop: 24 },
+                ]}
+              >
+                {!isPracticeTimerRunning ? (
                   <>
-                    {info.steps && info.steps.length > 0 && (
-                      <View style={{ height: 18 }} />
-                    )}
-                    <CollapsibleCard
-                      label="Benefits"
-                      expanded={benefitsExpanded}
-                      onToggle={() => setBenefitsExpanded(!benefitsExpanded)}
-                    >
-                      {Array.isArray(info.benefits) ? (
-                        <View style={styles.benefitList}>
-                          {info.benefits.map((b: string, idx: number) => (
-                            <Text key={idx} style={styles.benefitItem}>
-                              {"\u2022"} {b}
-                            </Text>
-                          ))}
-                        </View>
-                      ) : (
-                        <Text style={styles.cardText}>{info.benefits}</Text>
-                      )}
-                    </CollapsibleCard>
-                  </>
-                )}
-
-                {hasContent(info.essence || info.insight) && (
-                  <>
-                    {(hasContent(info.steps) || hasContent(info.benefits)) && (
-                      <View style={{ height: 18 }} />
-                    )}
-                    <CollapsibleCard
-                      label="Why this works"
-                      expanded={essenceExpanded}
-                      onToggle={() => setEssenceExpanded(!essenceExpanded)}
-                    >
-                      <Text style={styles.cardText}>
-                        {info.essence || info.insight}
+                    <Text style={styles.practiceTimerHeading}>
+                      How long will you pause?
+                    </Text>
+                    <Text style={styles.practiceTimerValue}>
+                      {selectedPracticeMinutes} min
+                    </Text>
+                    <View style={styles.practiceSliderRow}>
+                      <TouchableOpacity
+                        style={styles.practiceAdjustButton}
+                        onPress={() =>
+                          updatePracticeMinutes(selectedPracticeMinutes - 1)
+                        }
+                        activeOpacity={0.8}
+                      >
+                        <Minus size={18} color="#8A5A12" />
+                      </TouchableOpacity>
+                      <View style={styles.practiceSliderWrap}>
+                        <Slider
+                          style={styles.practiceSlider}
+                          minimumValue={1}
+                          maximumValue={10}
+                          step={1}
+                          value={selectedPracticeMinutes}
+                          onValueChange={updatePracticeMinutes}
+                          minimumTrackTintColor="#D4A017"
+                          maximumTrackTintColor="#E8D8B5"
+                          thumbTintColor="#D4A017"
+                        />
+                      </View>
+                      <TouchableOpacity
+                        style={styles.practiceAdjustButton}
+                        onPress={() =>
+                          updatePracticeMinutes(selectedPracticeMinutes + 1)
+                        }
+                        activeOpacity={0.8}
+                      >
+                        <Plus size={18} color="#8A5A12" />
+                      </TouchableOpacity>
+                    </View>
+                    <View style={styles.practiceTimerScale}>
+                      <Text style={styles.practiceTimerScaleLabel}>1 min</Text>
+                      <Text style={styles.practiceTimerScaleHint}>
+                        Drag to adjust
                       </Text>
-                    </CollapsibleCard>
+                      <Text style={styles.practiceTimerScaleLabel}>10 min</Text>
+                    </View>
+                    <TouchableOpacity
+                      style={styles.practicePrimaryButton}
+                      onPress={startPracticeTimer}
+                      activeOpacity={0.85}
+                    >
+                      <Text style={styles.practicePrimaryButtonText}>
+                        Begin
+                      </Text>
+                    </TouchableOpacity>
+                  </>
+                ) : (
+                  <>
+                    <View style={styles.practiceTimerVisual}>
+                      <Svg width={260} height={260} viewBox="0 0 260 260">
+                        <Circle
+                          cx="130"
+                          cy="130"
+                          r="108"
+                          stroke="rgba(212,160,23,0.2)"
+                          strokeWidth="12"
+                          fill="none"
+                        />
+                        <Circle
+                          cx="130"
+                          cy="130"
+                          r="108"
+                          stroke="#D4A017"
+                          strokeWidth="12"
+                          fill="none"
+                          strokeDasharray={`${2 * Math.PI * 108}`}
+                          strokeDashoffset={
+                            2 *
+                            Math.PI *
+                            108 *
+                            (1 - practiceTimeLeft / practiceInitialSeconds)
+                          }
+                          strokeLinecap="round"
+                          transform="rotate(-90 130 130)"
+                        />
+                      </Svg>
+                      <View style={styles.practiceTimerCenter}>
+                        <Text style={styles.practiceTimerClock}>
+                          {formatTimer(practiceTimeLeft)}
+                        </Text>
+                        <Text style={styles.practiceTimerSubtext}>
+                          Return to the moment
+                        </Text>
+                        <TouchableOpacity
+                          style={styles.practiceResetIconButton}
+                          onPress={() => resetPracticeTimer().catch(() => {})}
+                          activeOpacity={0.75}
+                        >
+                          <RefreshCw size={18} color="#8A7A5A" />
+                        </TouchableOpacity>
+                        {typeof MantraLotus3d === "number" ? (
+                          <SvgUri
+                            uri={
+                              Image.resolveAssetSource(MantraLotus3d)?.uri ??
+                              null
+                            }
+                            width={110}
+                            height={80}
+                          />
+                        ) : (
+                          <MantraLotus3d width={110} height={80} />
+                        )}
+                      </View>
+                    </View>
+                    <TouchableOpacity
+                      style={styles.practicePrimaryButton}
+                      onPress={() => {
+                        stopPracticeTimer().catch(() => {});
+                        handleBack();
+                      }}
+                      activeOpacity={0.85}
+                    >
+                      <Text style={styles.practicePrimaryButtonText}>
+                        End Practice
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.practiceResetButton}
+                      onPress={() => resetPracticeTimer().catch(() => {})}
+                      activeOpacity={0.75}
+                    >
+                      {/* <Text style={styles.practiceResetButtonText}>
+                          Reset Timer
+                        </Text> */}
+                    </TouchableOpacity>
                   </>
                 )}
               </View>
-
-              {visibleFooterBlocks.length > 0 && (
-                <View style={styles.infoActions}>
-                  {visibleFooterBlocks.map((block: any, i: number) => (
-                    <BlockRenderer key={`f-${i}`} block={block} />
-                  ))}
-                </View>
+              {hasContent(info.summary) && (
+                <>
+                  {hasContent(info.summary) && <View style={{ height: 18 }} />}
+                  <CollapsibleCard
+                    label="Meaning"
+                    expanded={meaningExpanded}
+                    onToggle={() => setMeaningExpanded(!meaningExpanded)}
+                  >
+                    <Text style={styles.cardText}>{info.summary}</Text>
+                  </CollapsibleCard>
+                </>
               )}
+
+              {hasContent(info.benefits) && (
+                <>
+                  {info.steps && info.steps.length > 0 && (
+                    <View style={{ height: 18 }} />
+                  )}
+                  <CollapsibleCard
+                    label="Benefits"
+                    expanded={benefitsExpanded}
+                    onToggle={() => setBenefitsExpanded(!benefitsExpanded)}
+                  >
+                    {Array.isArray(info.benefits) ? (
+                      <View style={styles.benefitList}>
+                        {info.benefits.map((b: string, idx: number) => (
+                          <Text key={idx} style={styles.benefitItem}>
+                            {"\u2022"} {b}
+                          </Text>
+                        ))}
+                      </View>
+                    ) : (
+                      <Text style={styles.cardText}>{info.benefits}</Text>
+                    )}
+                  </CollapsibleCard>
+                </>
+              )}
+
+              {hasContent(info.essence || info.insight) && (
+                <>
+                  {(hasContent(info.steps) || hasContent(info.benefits)) && (
+                    <View style={{ height: 18 }} />
+                  )}
+                  <CollapsibleCard
+                    label="Why this works"
+                    expanded={essenceExpanded}
+                    onToggle={() => setEssenceExpanded(!essenceExpanded)}
+                  >
+                    <Text style={styles.cardText}>
+                      {info.essence || info.insight}
+                    </Text>
+                  </CollapsibleCard>
+                </>
+              )}
+
+              <TouchableOpacity
+                onPress={handleBack}
+                style={[styles.backLink, { marginTop: 20 }]}
+              >
+                <Text style={styles.backLinkText}>Return to Mitra Home</Text>
+              </TouchableOpacity>
             </View>
           )}
 
-          {currentType !== "mantra" && (
+          {currentType !== "mantra" && currentType !== "practice" && (
             <TouchableOpacity onPress={handleBack} style={styles.backLink}>
-              <Text style={styles.backLinkText}>Back</Text>
+              <Text style={styles.backLinkText}>Return to Mitra Home</Text>
             </TouchableOpacity>
           )}
         </ScrollView>
@@ -1085,6 +1443,7 @@ const styles = StyleSheet.create({
   visualContainer: {
     alignItems: "center",
     // marginBottom: 20,
+    marginTop: 50,
   },
   deityTitle: {
     fontSize: 26,
@@ -1176,6 +1535,136 @@ const styles = StyleSheet.create({
   practiceStepsList: {
     marginTop: 16,
     gap: 12,
+  },
+  practiceTimerCard: {
+    width: "100%",
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(212,160,23,0.25)",
+    paddingVertical: 22,
+    paddingHorizontal: 40,
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.35)",
+  },
+  practiceTimerHeading: {
+    fontSize: 20,
+    lineHeight: 30,
+    color: BROWN,
+    fontFamily: Fonts.serif.bold,
+    textAlign: "center",
+  },
+  practiceTimerValue: {
+    fontSize: 18,
+    color: BROWN,
+    fontFamily: Fonts.sans.semiBold,
+    marginTop: 18,
+    marginBottom: 12,
+  },
+  practiceSliderWrap: {
+    flex: 1,
+    paddingHorizontal: 6,
+    marginTop: 4,
+  },
+  practiceSlider: {
+    width: "100%",
+    height: 40,
+  },
+  practiceSliderRow: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  practiceAdjustButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: "rgba(212,160,23,0.35)",
+    backgroundColor: "rgba(255,255,255,0.7)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  practiceTimerScale: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 2,
+    marginBottom: 20,
+  },
+  practiceTimerScaleLabel: {
+    fontSize: 13,
+    color: "#6a4d28",
+    fontFamily: Fonts.sans.medium,
+  },
+  practiceTimerScaleHint: {
+    fontSize: 12,
+    color: "#8A7A5A",
+    fontFamily: Fonts.sans.regular,
+  },
+  practicePrimaryButton: {
+    width: "100%",
+    minHeight: 58,
+    borderRadius: 30,
+    backgroundColor: "#E8B63A",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    shadowColor: "#d7a64a",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
+    elevation: 3,
+  },
+  practicePrimaryButtonText: {
+    fontSize: 18,
+    color: "#432104",
+    fontFamily: Fonts.serif.bold,
+  },
+  practiceResetButton: {
+    marginTop: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+  },
+  practiceResetButtonText: {
+    fontSize: 15,
+    color: "#7B6A55",
+    fontFamily: Fonts.sans.medium,
+    textDecorationLine: "underline",
+  },
+  practiceTimerVisual: {
+    width: 260,
+    height: 260,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 18,
+  },
+  practiceTimerCenter: {
+    position: "absolute",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  practiceTimerClock: {
+    fontSize: 54,
+    lineHeight: 60,
+    color: BROWN,
+    fontFamily: Fonts.serif.bold,
+  },
+  practiceTimerSubtext: {
+    fontSize: 14,
+    color: "#7B6A55",
+    fontFamily: Fonts.sans.regular,
+    marginTop: 6,
+    marginBottom: 10,
+  },
+  practiceResetIconButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 6,
   },
   practiceStep: {
     flexDirection: "row",

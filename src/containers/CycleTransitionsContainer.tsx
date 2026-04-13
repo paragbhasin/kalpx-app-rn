@@ -313,22 +313,25 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
 
     if (nextCount >= selectedTarget) {
       // Handle completion
-      const completeAction = screenData.info_start_action || {
-        type: "navigate",
-        target: {
-          container_id: "practice_runner",
-          state_id: "mantra_complete",
-        },
-      };
-
       const durationSeconds = Math.round(
         (Date.now() - sessionStartTime) / 1000,
       );
 
-      // Track engagement properly
-      updateScreenData("chant_duration", durationSeconds);
-      updateScreenData("mantra_progress_reps", nextCount);
+      // 1. Update engagement fields for completion tracking
+      updateScreenData("runner_reps_completed", nextCount);
+      updateScreenData("runner_duration_actual_sec", durationSeconds);
       updateScreenData("reps_done", nextCount);
+      updateScreenData("chant_duration", durationSeconds);
+
+      // 2. Use the standard complete_runner action
+      // This will trigger mitraTrackCompletion and land on completion_return
+      const completeAction = {
+        type: "complete_runner",
+        target: {
+          container_id: "practice_runner",
+          state_id: "completion_return",
+        },
+      };
 
       setTimeout(() => {
         executeAction(completeAction, {
@@ -344,10 +347,21 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
   React.useEffect(() => {
     updateBackground(require("../../assets/beige_bg.png"));
     updateHeaderHidden(false);
+
+    // Initialize runner fields for completion tracking if in Mantra flow
+    if (currentType === "mantra") {
+      if (!screenData?._runner_variant) {
+        updateScreenData("runner_variant", "mantra_runner");
+      }
+      if (!screenData?._runner_source) {
+        updateScreenData("runner_source", "core");
+      }
+    }
+
     return () => {
       updateBackground(null);
     };
-  }, [updateBackground, updateHeaderHidden]);
+  }, [updateBackground, updateHeaderHidden, currentType, screenData]);
 
   // Reset truncation state when mantra info changes
   React.useEffect(() => {

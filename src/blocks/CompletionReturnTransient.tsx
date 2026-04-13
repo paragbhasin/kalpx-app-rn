@@ -19,53 +19,56 @@
  * job!", no streaks, no confetti.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import * as Haptics from "expo-haptics";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
   Animated,
-  TextInput,
-  Platform,
   KeyboardAvoidingView,
-} from 'react-native';
-import Svg, { Path } from 'react-native-svg';
-import * as Haptics from 'expo-haptics';
-import { Fonts } from '../theme/fonts';
-import { useScreenStore } from '../engine/useScreenBridge';
-import { executeAction } from '../engine/actionExecutor';
-import { mitraTrackEvent } from '../engine/mitraApi';
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import Svg, { Path } from "react-native-svg";
+import { executeAction } from "../engine/actionExecutor";
+import { mitraTrackEvent } from "../engine/mitraApi";
+import { useScreenStore } from "../engine/useScreenBridge";
+import { Fonts } from "../theme/fonts";
 
 const AUTO_RETURN_MS = 10_000;
 
 const VARIANT_MESSAGES: Record<string, string> = {
-  mantra: '108 in. Kept.',
-  sankalp: 'Held. Carry it into the day.',
-  practice: 'Done. Notice what stayed.',
+  mantra: "108 in. Kept.",
+  sankalp: "Held. Carry it into the day.",
+  practice: "Done. Notice what stayed.",
 };
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
 interface CompletionReturnTransientProps {
   block: {
-    variant?: 'mantra' | 'sankalp' | 'practice';
+    variant?: "mantra" | "sankalp" | "practice";
     variant_key?: string;
   };
 }
 
-const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({ block }) => {
+const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
+  block,
+}) => {
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
 
-  const resolvedVariant: 'mantra' | 'sankalp' | 'practice' =
+  const resolvedVariant: "mantra" | "sankalp" | "practice" =
     (block.variant as any) ||
-    (screenData[block.variant_key || 'runner_variant'] as any) ||
+    (screenData[block.variant_key || "runner_variant"] as any) ||
     (screenData.runner_variant as any) ||
-    'practice';
+    "practice";
 
-  const message = VARIANT_MESSAGES[resolvedVariant] || VARIANT_MESSAGES.practice;
+  const message =
+    VARIANT_MESSAGES[resolvedVariant] || VARIANT_MESSAGES.practice;
 
-  const [inputText, setInputText] = useState('');
+  const [inputText, setInputText] = useState("");
   const [autoReturnPaused, setAutoReturnPaused] = useState(false);
 
   const bgFade = useRef(new Animated.Value(0)).current;
@@ -75,22 +78,22 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({ b
   const unmountedRef = useRef(false);
 
   const setScreenValue = (key: string, value: any) => {
-    const { screenActions } = require('../store/screenSlice');
-    const { store } = require('../store');
+    const { screenActions } = require("../store/screenSlice");
+    const { store } = require("../store");
     store.dispatch(screenActions.setScreenValue({ key, value }));
   };
 
   const clearRunnerState = () => {
     // REG-003: flow-local cleanup on every exit path
-    setScreenValue('runner_active_item', null);
-    setScreenValue('runner_source', null);
-    setScreenValue('runner_start_time', null);
-    setScreenValue('runner_variant', null);
+    setScreenValue("runner_active_item", null);
+    setScreenValue("runner_source", null);
+    setScreenValue("runner_start_time", null);
+    setScreenValue("runner_variant", null);
   };
 
   // Fire completion_return_shown telemetry (spec §13)
   useEffect(() => {
-    mitraTrackEvent('completion_return_shown', {
+    mitraTrackEvent("completion_return_shown", {
       meta: {
         item_type: resolvedVariant,
         item_id: screenData.runner_active_item?.item_id,
@@ -98,17 +101,25 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({ b
       },
     }).catch(() => {});
 
-    if (Platform.OS !== 'web') {
+    if (Platform.OS !== "web") {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     }
 
     // Sequence: background fade 500ms -> check draw 800ms -> message fade 600ms
-    Animated.timing(bgFade, { toValue: 1, duration: 500, useNativeDriver: true }).start();
+    Animated.timing(bgFade, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
     Animated.timing(checkProgress, {
-      toValue: 1, duration: 800, useNativeDriver: false,
+      toValue: 1,
+      duration: 800,
+      useNativeDriver: false,
     }).start(() => {
       Animated.timing(messageOpacity, {
-        toValue: 1, duration: 600, useNativeDriver: true,
+        toValue: 1,
+        duration: 600,
+        useNativeDriver: true,
       }).start();
     });
 
@@ -120,33 +131,33 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({ b
   }, []);
 
   // Auto-return timer
-  useEffect(() => {
-    if (autoReturnPaused) {
-      if (autoTimerRef.current) clearTimeout(autoTimerRef.current);
-      return;
-    }
-    autoTimerRef.current = setTimeout(() => {
-      if (unmountedRef.current) return;
-      mitraTrackEvent('completion_return_auto_returned', {
-        meta: { item_type: resolvedVariant },
-      }).catch(() => {});
-      handleReturnHome(false);
-    }, AUTO_RETURN_MS);
-    return () => {
-      if (autoTimerRef.current) clearTimeout(autoTimerRef.current);
-    };
-  }, [autoReturnPaused]);
+  // useEffect(() => {
+  //   if (autoReturnPaused) {
+  //     if (autoTimerRef.current) clearTimeout(autoTimerRef.current);
+  //     return;
+  //   }
+  //   autoTimerRef.current = setTimeout(() => {
+  //     if (unmountedRef.current) return;
+  //     mitraTrackEvent('completion_return_auto_returned', {
+  //       meta: { item_type: resolvedVariant },
+  //     }).catch(() => {});
+  //     handleReturnHome(false);
+  //   }, AUTO_RETURN_MS);
+  //   return () => {
+  //     if (autoTimerRef.current) clearTimeout(autoTimerRef.current);
+  //   };
+  // }, [autoReturnPaused]);
 
   const handleReturnHome = (manual: boolean) => {
     if (autoTimerRef.current) clearTimeout(autoTimerRef.current);
     if (manual) {
-      mitraTrackEvent('completion_return_manually_returned', {
+      mitraTrackEvent("completion_return_manually_returned", {
         meta: { item_type: resolvedVariant },
       }).catch(() => {});
     }
     const action = {
-      type: 'navigate',
-      target: { container_id: 'companion_dashboard', state_id: 'day_active' },
+      type: "navigate",
+      target: { container_id: "companion_dashboard", state_id: "day_active" },
     };
     executeAction(
       { ...action, currentScreen },
@@ -161,26 +172,23 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({ b
 
   const handleRepeat = () => {
     if (autoTimerRef.current) clearTimeout(autoTimerRef.current);
-    mitraTrackEvent('completion_return_repeated', {
+    mitraTrackEvent("completion_return_repeated", {
       meta: {
         item_type: resolvedVariant,
         item_id: screenData.runner_active_item?.item_id,
       },
     }).catch(() => {});
-    executeAction(
-      { type: 'repeat_runner', currentScreen } as any,
-      {
-        loadScreen,
-        goBack,
-        setScreenValue: (value: any, key: string) => setScreenValue(key, value),
-        screenState: { ...screenData },
-      },
-    ).catch(() => {});
+    executeAction({ type: "repeat_runner", currentScreen } as any, {
+      loadScreen,
+      goBack,
+      setScreenValue: (value: any, key: string) => setScreenValue(key, value),
+      screenState: { ...screenData },
+    }).catch(() => {});
   };
 
   const handleSubmitInput = () => {
     if (!inputText.trim()) return;
-    mitraTrackEvent('post_completion_reflection', {
+    mitraTrackEvent("post_completion_reflection", {
       meta: {
         item_type: resolvedVariant,
         item_id: screenData.runner_active_item?.item_id,
@@ -199,7 +207,7 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({ b
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.overlay}
     >
       <Animated.View style={[styles.bg, { opacity: bgFade }]} />
@@ -220,7 +228,7 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({ b
           </Svg>
         </View>
 
-        <Animated.View style={{ opacity: messageOpacity, width: '100%' }}>
+        <Animated.View style={{ opacity: messageOpacity, width: "100%" }}>
           <View style={styles.messageCard}>
             <Text style={styles.messageText}>{message}</Text>
           </View>
@@ -279,32 +287,32 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({ b
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingTop: 72,
     paddingBottom: 40,
     paddingHorizontal: 24,
   },
   bg: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: "#1a1a1a",
   },
   content: {
-    alignItems: 'center',
-    width: '100%',
+    alignItems: "center",
+    width: "100%",
     marginTop: 24,
   },
   checkWrap: {
     width: 48,
     height: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 36,
   },
   messageCard: {
     borderLeftWidth: 3,
-    borderLeftColor: '#eddeb4',
+    borderLeftColor: "#eddeb4",
     paddingLeft: 16,
     paddingVertical: 12,
     marginBottom: 32,
@@ -313,12 +321,12 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif.regular,
     fontSize: 22,
     lineHeight: 32,
-    color: '#f1e7cf',
+    color: "#f1e7cf",
   },
   inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderBottomColor: 'rgba(237,222,180,0.2)',
+    flexDirection: "row",
+    alignItems: "center",
+    borderBottomColor: "rgba(237,222,180,0.2)",
     borderBottomWidth: 1,
     paddingVertical: 8,
   },
@@ -326,38 +334,38 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: Fonts.sans.regular,
     fontSize: 14,
-    color: '#eddeb4',
+    color: "#eddeb4",
     paddingVertical: 4,
   },
   micBtn: {
     width: 32,
     height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   micIcon: {
     fontSize: 18,
-    color: '#eddeb4',
+    color: "#eddeb4",
   },
   footer: {
-    width: '100%',
-    alignItems: 'center',
+    width: "100%",
+    alignItems: "center",
     gap: 12,
   },
   primaryCta: {
-    backgroundColor: '#eddeb4',
+    backgroundColor: "#eddeb4",
     paddingVertical: 14,
     paddingHorizontal: 32,
     borderRadius: 999,
     minWidth: 260,
     minHeight: 48,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   primaryCtaText: {
     fontFamily: Fonts.sans.semiBold,
     fontSize: 15,
-    color: '#1a1a1a',
+    color: "#1a1a1a",
     letterSpacing: 0.3,
   },
   secondaryCta: {
@@ -366,7 +374,7 @@ const styles = StyleSheet.create({
   secondaryCtaText: {
     fontFamily: Fonts.sans.regular,
     fontSize: 14,
-    color: '#bfa58a',
+    color: "#bfa58a",
     letterSpacing: 0.4,
   },
 });

@@ -431,11 +431,11 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
 
         {/* Practice cards — legacy block-driven cards (kept for schema
             parity with other flows / variant overrides) */}
-        <View style={styles.practiceList}>
+        {/* <View style={styles.practiceList}>
           {practiceBlocks.map((block: any, i: number) => (
             <BlockRenderer key={block.id || `practice-${i}`} block={block} />
           ))}
-        </View>
+        </View> */}
 
         {!!ss.scan_focus && (
           <BlockRenderer

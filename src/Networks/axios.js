@@ -12,6 +12,40 @@ const api = axios.create({
   },
 });
 
+/** ✅ Format data for logs (truncates large blobs, detects HTML) */
+const formatLogData = (data) => {
+  if (!data) return "null";
+
+  // 1. Detect HTML (often a 404/500 fallback from the server)
+  if (
+    typeof data === "string" &&
+    (data.includes("<!doctype html>") || data.includes("<html"))
+  ) {
+    const title = data.match(/<title>(.*?)<\/title>/)?.[1] || "Unknown Title";
+    return `📄 [HTML Response] Title: "${title}" (${data.length} chars). Preview: ${data.trim().substring(0, 150)}...`;
+  }
+
+  // 2. Handle Objects (JSON)
+  if (typeof data === "object") {
+    try {
+      const json = JSON.stringify(data);
+      if (json.length > 2000) {
+        return `${json.substring(0, 2000)}... [TRUNCATED, Total: ${json.length} chars]`;
+      }
+      return json;
+    } catch (e) {
+      return "[Circular or Complex Object]";
+    }
+  }
+
+  // 3. Handle Strings
+  if (typeof data === "string" && data.length > 2000) {
+    return `${data.substring(0, 2000)}... [TRUNCATED, Total: ${data.length} chars]`;
+  }
+
+  return String(data);
+};
+
 /** ✅ Ensure guest UUID exists (with fallback if crypto fails) */
 const getGuestUUID = async () => {
   try {
@@ -90,11 +124,13 @@ api.interceptors.request.use(
     const token = await AsyncStorage.getItem("access_token");
     const guestUUID = await AsyncStorage.getItem("guestUUID");
 
-    console.log("=====================================");
     console.log("📡 API REQUEST");
     console.log("➡️ URL:", `${config.baseURL}${config.url}`);
     console.log("📝 METHOD:", config.method?.toUpperCase());
-    console.log("📦 PAYLOAD:", config.data ?? "NO BODY");
+    console.log(
+      "📦 PAYLOAD:",
+      config.data ? JSON.stringify(config.data) : "null",
+    );
 
     // 🔐 FIX: Send ONLY one header type
     if (token) {
@@ -122,8 +158,6 @@ api.interceptors.request.use(
       }
     }
 
-    console.log("=====================================");
-
     return config;
   },
   (error) => Promise.reject(error),
@@ -133,8 +167,20 @@ api.interceptors.request.use(
  *  Response interceptor — token refresh on 401
  *  ------------------------------------------------- */
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log("✅ API RESPONSE");
+    console.log(
+      "➡️ URL:",
+      `${response.config.baseURL}${response.config.url}`,
+    );
+    console.log("📦 DATA:", formatLogData(response.data));
+    return response;
+  },
   async (error) => {
+    console.log("❌ API RESPONSE ERROR");
+    console.log("➡️ URL:", `${error.config?.baseURL}${error.config?.url}`);
+    console.log("📦 ERROR:", formatLogData(error.response?.data || error.message));
+
     const originalRequest = error.config;
     const status = error.response?.status;
 

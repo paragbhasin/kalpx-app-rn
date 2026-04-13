@@ -3394,32 +3394,62 @@ export async function executeAction(
               guidance_mode: p.guidance_mode,
             });
 
-            if (companion?.companion) {
-              const c = companion.companion;
-              const fMap = FRICTION_TO_FOCUS[draft.friction_id || ""];
-              setScreenValue(fMap?.label || "what's alive for you", "friction_label");
-              setScreenValue(
-                (STATE_LABEL_MAP[draft.state_id || ""] || "").replace(".", "") ||
-                  "the texture of it",
-                "state_label",
-              );
-              setScreenValue(
-                c.recommended_posture || "protecting your space and doing less, better",
-                "recommended_posture",
-              );
-              setScreenValue(c.mantra?.core?.title || c.mantra?.title || "", "companion_mantra_title");
-              setScreenValue(
-                c.mantra?.ui?.card_subtitle || c.mantra?.one_line || "",
-                "companion_mantra_one_line",
-              );
-              setScreenValue(c.mantra?.core?.id || c.mantra?.id || null, "companion_mantra_id");
-              setScreenValue(c.sankalp?.core?.line || c.sankalp?.line || "", "companion_sankalp_line");
-              setScreenValue(c.sankalp?.one_line || "", "companion_sankalp_one_line");
-              setScreenValue(c.sankalp?.core?.id || c.sankalp?.id || null, "companion_sankalp_id");
-              setScreenValue(c.practice?.core?.title || c.practice?.title || "", "companion_practice_title");
-              setScreenValue(c.practice?.one_line || "", "companion_practice_one_line");
-              setScreenValue(c.practice?.core?.id || c.practice?.id || null, "companion_practice_id");
-            }
+            // Always populate shared labels (friction_label, state_label,
+            // recommended_posture) even when generate-companion fails so
+            // Turns 6/7 render something meaningful.
+            const fMap = FRICTION_TO_FOCUS[draft.friction_id || ""];
+            setScreenValue(fMap?.label || "what's alive for you", "friction_label");
+            setScreenValue(
+              (STATE_LABEL_MAP[draft.state_id || ""] || "").replace(".", "") ||
+                "the texture of it",
+              "state_label",
+            );
+
+            const c = companion?.companion || {};
+            setScreenValue(
+              c.recommended_posture || "protecting your space and doing less, better",
+              "recommended_posture",
+            );
+
+            // Week 1 onboarding fallback defaults for Turn 7 triad — so the
+            // screen never shows "—" when generate-companion is flag-off or
+            // returns an unexpected shape on dev. Real values land when the
+            // backend endpoint ships + returns the expected envelope.
+            const mantraTitle =
+              c.mantra?.core?.title || c.mantra?.title || "Om Namah Shivaya";
+            const mantraWhy =
+              c.mantra?.ui?.card_subtitle ||
+              c.mantra?.one_line ||
+              "A soft reminder of what you're steadying into";
+            const sankalpLine =
+              c.sankalp?.core?.line ||
+              c.sankalp?.line ||
+              "I protect what matters and let the rest pass.";
+            const sankalpWhy =
+              c.sankalp?.one_line ||
+              "One line to carry you through the small decisions today";
+            const practiceTitle =
+              c.practice?.core?.title ||
+              c.practice?.title ||
+              "Nine slow breaths, eyes soft";
+            const practiceWhy =
+              c.practice?.one_line ||
+              "A practice to settle the body before the day opens";
+
+            setScreenValue(mantraTitle, "companion_mantra_title");
+            setScreenValue(mantraTitle, "mantra_text");
+            setScreenValue(mantraWhy, "companion_mantra_one_line");
+            setScreenValue(c.mantra?.core?.id || c.mantra?.id || null, "companion_mantra_id");
+
+            setScreenValue(sankalpLine, "companion_sankalp_line");
+            setScreenValue(sankalpLine, "sankalp_text");
+            setScreenValue(sankalpWhy, "companion_sankalp_one_line");
+            setScreenValue(c.sankalp?.core?.id || c.sankalp?.id || null, "companion_sankalp_id");
+
+            setScreenValue(practiceTitle, "companion_practice_title");
+            setScreenValue(practiceTitle, "practice_title");
+            setScreenValue(practiceWhy, "companion_practice_one_line");
+            setScreenValue(c.practice?.core?.id || c.practice?.id || null, "companion_practice_id");
           } else if (currentTurn === 6) {
             if (p.chip_id === "play_briefing") {
               draft.briefing_requested = true;

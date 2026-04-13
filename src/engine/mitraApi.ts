@@ -10,17 +10,136 @@
 import api from '../Networks/axios';
 
 // ---------------------------------------------------------------------------
-// Stub fallbacks — will be replaced with full dynamicContentEngine port
+// Offline fallbacks — used when backend is unreachable (dev 502, airplane
+// mode, flag-off). Minimal stub data so screens never render "—" / blanks.
+// Full dynamicContentEngine port (Vue parity) is a future task; these are
+// the smallest-possible shapes that satisfy the readers across the 30 blocks.
 // ---------------------------------------------------------------------------
 
-function generateCompanionResponse(_input: any): any { return null; }
-function generateHelpMeChooseResponse(_input: any): any { return null; }
-function generatePranaAcknowledgement(_pranaType: string, _focus: string, _locale: string): any { return null; }
-function generateTriggerMantraSuggestions(_feeling: string, _locale: string): any { return null; }
-function generateCheckpointData(_screenState: any): any { return null; }
-function generateResetPlan(_obstacle: string): any { return null; }
-function generateInfoScreenData(_type: string, _data: any): any { return null; }
-function generatePathEvolutionScreen(_oldFocus: string, _newFocus: string): any { return null; }
+function generateCompanionResponse(input: any): any {
+  const focus = input?.focus || 'clarity';
+  return {
+    companion: {
+      recommended_posture: 'protecting your space and doing less, better',
+      mantra: {
+        core: {
+          id: 'fallback_mantra',
+          title: 'Om Namah Shivaya',
+          devanagari: 'ॐ नमः शिवाय',
+          audio_url: null,
+        },
+        one_line: 'A soft reminder of what you are steadying into',
+        ui: { card_subtitle: 'A soft reminder of what you are steadying into' },
+      },
+      sankalp: {
+        core: {
+          id: 'fallback_sankalp',
+          line: 'I protect what matters and let the rest pass.',
+        },
+        one_line: 'One line to carry through the small decisions today',
+      },
+      practice: {
+        core: {
+          id: 'fallback_practice',
+          title: 'Nine slow breaths, eyes soft',
+          duration_min: 6,
+        },
+        one_line: 'A practice to settle the body before the day opens',
+      },
+      focus,
+      day_number: input?.day_number || 1,
+    },
+    briefing: null,
+    continuity: null,
+    _offline_fallback: true,
+  };
+}
+
+function generateHelpMeChooseResponse(input: any): any {
+  const text = (input?.text || '').toLowerCase();
+  // Simple keyword → focus mapping (mirrors web fallback pattern)
+  const focus = /work|career|deadline/.test(text) ? 'clarity'
+    : /relation|partner|family|sarah|mother|father/.test(text) ? 'connection'
+    : /anger|stress|upset|tight|tense/.test(text) ? 'regulation'
+    : /quiet|rest|sleep|tired/.test(text) ? 'stillness'
+    : 'grounding';
+  return { focus, sub_focus: null, label: focus, _offline_fallback: true };
+}
+
+function generatePranaAcknowledgement(pranaType: string, _focus: string, _locale: string): any {
+  const insights: Record<string, string> = {
+    steady: 'Steady is enough. Stay here.',
+    heavy: "It's heavy. That's honest. Be kind with yourself today.",
+    activated: 'Something is rising. Notice it. Let it settle before you act.',
+  };
+  return {
+    insight: insights[pranaType] || 'I heard you.',
+    _offline_fallback: true,
+  };
+}
+
+function generateTriggerMantraSuggestions(_feeling: string, _locale: string): any {
+  return {
+    mantras: [
+      { id: 'trig_om', title: 'Om', devanagari: 'ॐ', one_line: 'The simplest sound. Start here.' },
+      { id: 'trig_so_hum', title: 'So Hum', devanagari: 'सो हम्', one_line: 'I am that. With the breath.' },
+    ],
+    _offline_fallback: true,
+  };
+}
+
+function generateCheckpointData(screenState: any): any {
+  const day = screenState?.day_number || 7;
+  return {
+    day_number: day,
+    headline: day >= 14 ? 'Two weeks. Something settled.' : "You've been at this a week.",
+    summary: 'The practice is the practice. Keep going if it is serving; shift if it is not.',
+    options: [
+      { id: 'continue_same', label: 'Continue the same path' },
+      { id: 'deepen', label: 'Deepen this path' },
+      { id: 'change_focus', label: 'Shift to a new focus' },
+    ],
+    _offline_fallback: true,
+  };
+}
+
+function generateResetPlan(_obstacle: string): any {
+  return {
+    plan: {
+      headline: 'Start small.',
+      steps: ['One slow breath.', 'One honest sentence.', 'One clean action.'],
+    },
+    _offline_fallback: true,
+  };
+}
+
+function generateInfoScreenData(type: string, _data: any): any {
+  const defaults: Record<string, any> = {
+    mantra: {
+      title: 'Om Namah Shivaya',
+      devanagari: 'ॐ नमः शिवाय',
+      meaning: 'A turning toward the steady self.',
+      instruction: 'Chant slowly. Let the meaning settle within.',
+    },
+    sankalp: {
+      line: 'I protect what matters and let the rest pass.',
+      instruction: 'Hold the intention in the body, not just the mind.',
+    },
+    practice: {
+      title: 'Nine slow breaths, eyes soft',
+      instruction: 'Sit comfortably. Breathe in for four, out for six. Nine rounds.',
+    },
+  };
+  return { ...(defaults[type] || {}), _offline_fallback: true };
+}
+
+function generatePathEvolutionScreen(oldFocus: string, newFocus: string): any {
+  return {
+    headline: `Shifting from ${oldFocus} to ${newFocus}.`,
+    subtext: 'The path moves when you move. Trust the turn.',
+    _offline_fallback: true,
+  };
+}
 
 const SUB_FOCUS_METRICS: Record<string, string[]> = {};
 
@@ -332,8 +451,16 @@ export async function mitraJourneyStatus(): Promise<any> {
     const res = await api.get('mitra/journey/status/', { params: { tz: getTz() } });
     return res.data;
   } catch (err: any) {
-    console.warn('[MITRA] journey/status failed:', err.message);
-    return null;
+    console.warn('[MITRA] journey/status failed — offline fallback (no journey):', err.message);
+    // Offline fallback — treat as "no active journey" so Home.tsx auto-routes
+    // into welcome_onboarding instead of getting stuck on the legacy splash.
+    return {
+      hasActiveJourney: false,
+      journeyId: null,
+      welcomeBack: false,
+      dayNumber: 0,
+      _offline_fallback: true,
+    };
   }
 }
 
@@ -545,10 +672,22 @@ export async function getPrepContext(params: Record<string, any> = {}): Promise<
     const res = await api.get('mitra/prep/', { params: { ...params, tz: getTz() } });
     return res.data;
   } catch (err: any) {
-    // Flag-off → 404 tolerated silently; card hides.
-    if (err?.response?.status !== 404) {
-      console.warn('[MITRA] prep/ failed:', err.message);
+    const status = err?.response?.status;
+    if (status === 404 || status === 502 || !status) {
+      // Flag-off (404) or backend unreachable (502/timeout) → offline fallback
+      // so the sheet renders sample coaching content instead of a blank state.
+      return {
+        surface: 'Steady before',
+        strategy_line: 'Lower your voice slightly. Let them finish before you respond.',
+        grounding_action: 'One slow breath before you enter the room.',
+        do_frame: 'Speak from steadiness. Keep to one clean point.',
+        dont_frame: "Don't enter already arguing in your head.",
+        principle_hint: null,
+        context_type: params?.context_type || 'work_conversation',
+        _offline_fallback: true,
+      };
     }
+    console.warn('[MITRA] prep/ failed:', err.message);
     return null;
   }
 }
@@ -559,7 +698,8 @@ export async function getPredictiveAlerts(): Promise<any> {
     const res = await api.get('mitra/predictive-alerts/', { params: { tz: getTz() } });
     return res.data;
   } catch (err: any) {
-    if (err?.response?.status !== 404) {
+    // 404 (flag off) + 502 (backend down): hide card quietly. No fake alerts.
+    if (err?.response?.status && err?.response?.status !== 404 && err?.response?.status !== 502) {
       console.warn('[MITRA] predictive-alerts/ failed:', err.message);
     }
     return null;
@@ -574,7 +714,7 @@ export async function getRecommendedAdditional(): Promise<any> {
     });
     return res.data;
   } catch (err: any) {
-    if (err?.response?.status !== 404) {
+    if (err?.response?.status && err?.response?.status !== 404 && err?.response?.status !== 502) {
       console.warn('[MITRA] recommended-additional/ failed:', err.message);
     }
     return null;
@@ -589,7 +729,7 @@ export async function getPostConflictContext(): Promise<any> {
     });
     return res.data;
   } catch (err: any) {
-    if (err?.response?.status !== 404) {
+    if (err?.response?.status && err?.response?.status !== 404 && err?.response?.status !== 502) {
       console.warn('[MITRA] post-conflict-context/ failed:', err.message);
     }
     return null;
@@ -659,8 +799,13 @@ export async function getGriefContext(): Promise<any> {
     const res = await api.get('mitra/support/grief-context/');
     return res.data || null;
   } catch (err: any) {
-    console.warn('[MITRA] grief-context failed (tolerated):', err.message);
-    return null;
+    console.warn('[MITRA] grief-context failed (fallback applied):', err.message);
+    return {
+      opening_line: "I'm here. No rush.",
+      presence_hint: 'No timer. No goal. Just a space to sit.',
+      principle_hint: null,
+      _offline_fallback: true,
+    };
   }
 }
 
@@ -670,8 +815,12 @@ export async function getLonelinessContext(): Promise<any> {
     const res = await api.get('mitra/support/loneliness-context/');
     return res.data || null;
   } catch (err: any) {
-    console.warn('[MITRA] loneliness-context failed (tolerated):', err.message);
-    return null;
+    console.warn('[MITRA] loneliness-context failed (fallback applied):', err.message);
+    return {
+      opening_line: "Let's chant together for a minute. Not alone.",
+      chant: { id: 'fallback_chant', reps: 11, title: 'So Hum', devanagari: 'सो हम्' },
+      _offline_fallback: true,
+    };
   }
 }
 

@@ -30,6 +30,7 @@ import {
   mitraTrackEvent,
   mitraTriggerMantras,
   patchCompanionState,
+  getClearWindow,
   postVoiceNote,
   getVoiceNoteInterpretation,
   postInterpretIntent,
@@ -3956,9 +3957,18 @@ export async function executeAction(
           getJoySignal(),
           getGriefContext(),
           getPanchangToday(),
+          getClearWindow(),
         ]);
-        const [briefing, _cs, resilienceLedger, additional, joy, _grief, panchang] =
-          results.map((r) => (r.status === "fulfilled" ? r.value : null));
+        const [
+          briefing,
+          _cs,
+          resilienceLedger,
+          additional,
+          joy,
+          _grief,
+          panchang,
+          clearWindow,
+        ] = results.map((r) => (r.status === "fulfilled" ? r.value : null));
 
         if (briefing) {
           setScreenValue(true, "briefing_available");
@@ -3977,6 +3987,16 @@ export async function executeAction(
         // Backend B2 — only show season banner when ritu changed today
         if (panchang?.ritu_changed_today) setScreenValue(panchang, "season_signal");
         else setScreenValue(null, "season_signal");
+
+        // Backend B4-v2 (2026-04-13) — clear_window payload only non-null when
+        // all 5 gates pass server-side. Also drives clear_window_active
+        // dashboard variant so the banner renders in the hero slot.
+        if (clearWindow) {
+          setScreenValue(clearWindow, "clear_window");
+          setScreenValue("clear_window_active", "dashboard_variant");
+        } else {
+          setScreenValue(null, "clear_window");
+        }
 
         break;
       }

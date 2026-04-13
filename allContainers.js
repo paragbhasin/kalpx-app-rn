@@ -235,7 +235,7 @@ export const CompanionDashboardContainer = {
         // MorningBriefing, above CheckInCard.
         { type: "predictive_alert_card", position: "body" },
         { type: "cycle_signal_bar", position: "body" },
-        // clear_window_banner removed 2026-04-13 (Moment 43 dropped, backend B4)
+        { type: "clear_window_banner", position: "body" },  // re-added 2026-04-13 (backend B4-v2 shipped)
         // Week 7 — conditional embedded slots.
         // season_change_banner: visible when screenData.season_signal != null
         //   AND screenData.season_banner_dismissed_at is stale (>7d) or null.
@@ -426,8 +426,27 @@ export const CompanionDashboardContainer = {
       ],
     },
 
-    // clear_window_active variant removed 2026-04-13 (Moment 43 dropped per
-    // backend B4). Slot kept commented for revisit if post-soak data warrants.
+    // Week 2 — clear_window_active variant (Moment 43).
+    // Re-added 2026-04-13 after backend B4-v2 shipped with 5-gate signal-
+    // based detection. Banner renders above the triad; dashboard_load sets
+    // dashboard_variant="clear_window_active" when clear_window payload is
+    // non-null (i.e., all 5 server-side gates passed).
+    clear_window_active: {
+      tone: { theme: "light_sandal", mood: "celebratory" },
+      meta: { requires_active_cycle: true, variant: "clear_window_active" },
+      dashboard_config: {
+        status_messages: { default: "Today is open" },
+        instruction_text:
+          "You've earned this space. Use it for what matters.",
+      },
+      blocks: [
+        { type: "clear_window_banner", position: "body" },
+        { type: "morning_briefing", position: "body" },
+        { type: "focus_phrase", position: "body" },
+        { type: "cycle_signal_bar", position: "body" },
+        { type: "core_items_list", position: "body" },
+      ],
+    },
 
     // Week 6 — post_conflict_morning dashboard variant (Moment 39).
     // Spec: embedded_post_conflict_gentleness_card.md §7.

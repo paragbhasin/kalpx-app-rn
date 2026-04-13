@@ -86,7 +86,7 @@ import FocusPhraseBlock from '../blocks/FocusPhraseBlock';
 import CoreItemsList from '../blocks/CoreItemsList';
 import CheckInCardCompact from '../blocks/CheckInCardCompact';
 import CycleSignalBar from '../blocks/CycleSignalBar';
-// ClearWindowBanner removed 2026-04-13 (Moment 43 dropped per backend B4)
+import ClearWindowBanner from '../blocks/ClearWindowBanner';  // re-added 2026-04-13 (backend B4-v2 shipped)
 
 // Week 3 — Practice Runners + Completion Return (Mitra v3 Moments 17, 18, 19, 32)
 import MantraRunnerDisplay from '../blocks/MantraRunnerDisplay';
@@ -203,6 +203,7 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   core_items_list: CoreItemsList,
   check_in_card_compact: CheckInCardCompact,
   cycle_signal_bar: CycleSignalBar,
+  clear_window_banner: ClearWindowBanner,
   // Week 3 — Practice Runners + Completion Return
   mantra_runner_display: MantraRunnerDisplay,
   sankalp_hold: SankalpHoldBlock,
@@ -300,7 +301,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block, textColor }) => {
     'onboarding_conversation_turn', 'voice_text_fork', 'guidance_mode_picker',
     // Week 2 dashboard blocks — manage their own taps/dispatch
     'morning_briefing', 'focus_phrase', 'core_items_list',
-    'check_in_card_compact', 'cycle_signal_bar',
+    'check_in_card_compact', 'cycle_signal_bar', 'clear_window_banner',
     // Week 3 runner blocks — all dispatch their own completion actions
     'mantra_runner_display', 'sankalp_hold', 'practice_timer', 'completion_return',
     // Week 4 support blocks — all self-dispatch their own actions

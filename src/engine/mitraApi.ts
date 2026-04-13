@@ -499,10 +499,31 @@ export async function patchCompanionState(patch: Record<string, any>): Promise<a
   }
 }
 
-// 2026-04-13 audit: getClearWindow removed (B4 backend decision = drop).
-// Moment 43 ClearWindowBanner is dropped from current ship; if post-soak data
-// shows demand, backend will revisit. ClearWindowBanner block + dashboard
-// slot also removed in same change.
+/**
+ * GET mitra/clear-window/ — Moment 43 Clear Window banner data source.
+ * Backend B4-v2 shipped 2026-04-13 (commits cfef7cbb + 4fff840f). 5-gate
+ * signal-based detection (volatility, upcoming alerts, fresh dissonance,
+ * active hours, 7-day cooldown); never synthesizes.
+ *
+ * Flag MITRA_V3_CLEAR_WINDOW default OFF → 404 (card hides).
+ * Response when active:
+ *   { active: true, headline, message, until_time, window_minutes,
+ *     confidence, signals_used }
+ * Response when gated: { active: false } or 404.
+ */
+export async function getClearWindow(): Promise<any> {
+  try {
+    const res = await api.get('mitra/clear-window/', { params: { tz: getTz() } });
+    // Normalize: treat {active:false} same as null so frontend can just null-check.
+    if (res.data && res.data.active === false) return null;
+    return res.data;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (status === 404 || status === 502 || !status) return null;
+    console.warn('[MITRA] clear-window failed:', err.message);
+    return null;
+  }
+}
 
 /**
  * Week 4 — Support Path APIs (Mitra v3 Moments 31, 38 + Phase 1.5 intent).

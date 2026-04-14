@@ -54,7 +54,6 @@ import {
   getResilienceLedger,
   mitraFetchAdditionalItems,
   mitraJourneyCompanion,
-  getDeepenPreview,
   dismissPredictiveAlert,
   mutePredictiveAlertEntity,
   // 2026-04-13 backend B2/B3 wiring
@@ -3437,21 +3436,19 @@ export async function executeAction(
               c.mantra?.core?.title || c.mantra?.title || "Om Namah Shivaya";
             const mantraWhy =
               c.mantra?.ui?.card_subtitle ||
-              c.mantra?.one_line ||
               "A soft reminder of what you're steadying into";
             const sankalpLine =
+              c.sankalp?.core?.title ||
               c.sankalp?.core?.line ||
-              c.sankalp?.line ||
               "I protect what matters and let the rest pass.";
             const sankalpWhy =
-              c.sankalp?.one_line ||
+              c.sankalp?.ui?.card_subtitle ||
               "One line to carry you through the small decisions today";
             const practiceTitle =
               c.practice?.core?.title ||
-              c.practice?.title ||
               "Nine slow breaths, eyes soft";
             const practiceWhy =
-              c.practice?.one_line ||
+              c.practice?.ui?.card_subtitle ||
               "A practice to settle the body before the day opens";
 
             setScreenValue(mantraTitle, "companion_mantra_title");

@@ -18,7 +18,10 @@ import { useScreenStore } from "../engine/useScreenBridge";
 
 const WhyThisL3Sheet: React.FC<{ block?: any }> = () => {
   const { screenData, goBack } = useScreenStore();
-  const src = (screenData as any).why_this_source;
+  const raw = (screenData as any).why_this_source;
+  // Backend GET /mitra/principles/{id}/sources/ returns { principle_id, sources: [...] }.
+  // Unwrap to the first source so the template below reads a single citation.
+  const src = raw?.sources?.[0] || raw;
 
   if (!src) {
     return (
@@ -43,26 +46,30 @@ const WhyThisL3Sheet: React.FC<{ block?: any }> = () => {
       <Text style={styles.label}>SOURCE</Text>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
-        {src.sanskrit ? (
+        {src.verse_devanagari || src.sanskrit ? (
           <Text
             style={styles.sanskrit}
             accessibilityLabel="Sanskrit source"
             testID="why-this-l3-sanskrit"
           >
-            {src.sanskrit}
+            {src.verse_devanagari || src.sanskrit}
           </Text>
         ) : null}
 
-        {src.transliteration ? (
-          <Text style={styles.translit}>{src.transliteration}</Text>
+        {src.verse_iast || src.transliteration ? (
+          <Text style={styles.translit}>{src.verse_iast || src.transliteration}</Text>
         ) : null}
 
-        {src.translation || src.english ? (
-          <Text style={styles.english}>{src.translation || src.english}</Text>
+        {src.verse_english || src.translation || src.english ? (
+          <Text style={styles.english}>{src.verse_english || src.translation || src.english}</Text>
         ) : null}
 
-        {src.attribution || src.source ? (
-          <Text style={styles.attribution}>— {src.attribution || src.source}</Text>
+        {src.citation || src.attribution || src.source ? (
+          <Text style={styles.attribution}>— {src.citation || src.attribution || src.source}</Text>
+        ) : null}
+
+        {src.commentary ? (
+          <Text style={styles.english}>{src.commentary}</Text>
         ) : null}
       </ScrollView>
 

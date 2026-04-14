@@ -758,21 +758,6 @@ export async function getResilienceLedger(params: { limit?: number; entity_id?: 
   }
 }
 
-/** GET mitra/journey/deepen-preview/ — Moment 25 Day-14 deepen path preview.
- *  Audit fix F9 (2026-04-13): wrapper added; CheckpointDay14Block can fetch.
- */
-export async function getDeepenPreview(): Promise<any> {
-  try {
-    const res = await api.get('mitra/journey/deepen-preview/', { params: { tz: getTz() } });
-    return res.data;
-  } catch (err: any) {
-    const status = err?.response?.status;
-    if (status === 404 || status === 502 || !status) return null;
-    console.warn('[MITRA] journey/deepen-preview failed:', err.message);
-    return null;
-  }
-}
-
 /** GET mitra/recommended-additional/ — Moment 30 post-core recommendation. */
 export async function getRecommendedAdditional(): Promise<any> {
   try {
@@ -804,9 +789,14 @@ export async function getPostConflictContext(): Promise<any> {
 }
 
 /** POST mitra/entities/check-duplicate/ — Moment 29 probe from freeform mention text. */
-export async function postEntitiesCheckDuplicate(text: string): Promise<any> {
+export async function postEntitiesCheckDuplicate(
+  entity_context: string,
+  entity_type?: string,
+): Promise<any> {
   try {
-    const res = await api.post('mitra/entities/check-duplicate/', { text });
+    const payload: Record<string, any> = { entity_context };
+    if (entity_type) payload.entity_type = entity_type;
+    const res = await api.post('mitra/entities/check-duplicate/', payload);
     return res.data;
   } catch (err: any) {
     if (err?.response?.status !== 404) {

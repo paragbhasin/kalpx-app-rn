@@ -57,13 +57,23 @@ const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
     <View style={styles.sheet}>
       <View style={styles.handle} />
       <Text style={styles.label}>WHY THIS</Text>
-      <Text style={styles.name}>{p.name || p.title}</Text>
-      {p.essence ? <Text style={styles.essence}>{p.essence}</Text> : null}
-      {p.context ? (
-        <ScrollView style={styles.contextWrap}>
-          <Text style={styles.context}>{p.context}</Text>
-        </ScrollView>
-      ) : null}
+      <Text style={styles.name}>{p.principle_name || p.short_label || p.name || p.title}</Text>
+      {(() => {
+        const essence = p.core_teaching || p.plain_english || p.essence;
+        return essence ? <Text style={styles.essence}>{essence}</Text> : null;
+      })()}
+      {(() => {
+        const body =
+          p.universal_explanation ||
+          p.rooted_explanation ||
+          p.why_this?.level2 ||
+          p.context;
+        return body ? (
+          <ScrollView style={styles.contextWrap}>
+            <Text style={styles.context}>{body}</Text>
+          </ScrollView>
+        ) : null;
+      })()}
 
       <TouchableOpacity
         style={styles.deeper}

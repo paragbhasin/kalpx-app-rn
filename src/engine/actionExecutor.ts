@@ -54,6 +54,7 @@ import {
   getResilienceLedger,
   mitraFetchAdditionalItems,
   mitraJourneyCompanion,
+  mitraJourneyStatus,
   dismissPredictiveAlert,
   mutePredictiveAlertEntity,
   // 2026-04-13 backend B2/B3 wiring
@@ -2558,6 +2559,11 @@ export async function executeAction(
           reflection: screenState.checkpoint_user_reflection || "",
         };
 
+        // G21 — always include feeling when the block captured one (Day 7 + Day 14).
+        const csFeelingTop =
+          screenState.checkpoint_feeling_simple || screenState.checkpoint_feeling;
+        if (csFeelingTop) csPayload.feeling = csFeelingTop;
+
         if (csDay === 14) {
           const impliedFeelingMap: Record<string, string> = {
             continue_same: "steady",
@@ -3361,8 +3367,21 @@ export async function executeAction(
         try {
           if (currentTurn === 1) {
             if (p.chip_id === "returning") {
-              // Journey status check handled outside — for now advance to Turn 2.
               draft.returning = true;
+              // G1: probe journey/status — if user has an active journey, skip
+              // onboarding entirely and land on the companion dashboard.
+              try {
+                const status = await mitraJourneyStatus();
+                if (status?.hasActiveJourney) {
+                  loadScreen({
+                    container_id: "companion_dashboard",
+                    state_id: "day_active",
+                  } as any);
+                  return;
+                }
+              } catch (e) {
+                // Network error — fall through to Turn 2 (onboarding continues).
+              }
             }
             if (p.freeform_text) draft.intro_freeform = p.freeform_text;
           } else if (currentTurn === 2) {

@@ -538,10 +538,9 @@ export async function getClearWindow(): Promise<any> {
  * metadata-only (matches prior behavior for text fallback or endpoints still
  * behind a flag that only accept metadata).
  *
- * G16 — `source_surface="evening_reflection"` is mapped to the backend-
- * accepted enum `journal_capture` to satisfy the current choices set
- * (trigger_venting / journal_capture / weekly_reflection). Remove the map
- * when the backend enum is extended.
+ * G16 — backend VoiceNote.source_surface now accepts evening_reflection +
+ * post_conflict_voice_note natively (migration 0102). No remap needed; the
+ * value passes through unchanged.
  */
 export async function postVoiceNote(
   audioUri: string | null,
@@ -551,13 +550,7 @@ export async function postVoiceNote(
     mime_type?: string;
   },
 ): Promise<any> {
-  const sourceSurfaceMap: Record<string, string> = {
-    evening_reflection: 'journal_capture',
-  };
-  const source_surface =
-    sourceSurfaceMap[metadata?.source_surface || ''] ||
-    metadata?.source_surface ||
-    'journal_capture';
+  const source_surface = metadata?.source_surface || 'journal_capture';
   const duration_ms = metadata?.duration_ms ?? 0;
 
   try {

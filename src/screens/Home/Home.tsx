@@ -15,6 +15,7 @@ import React, { useRef, useState } from "react";
 
 import {
   ActivityIndicator,
+  Image,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -333,10 +334,15 @@ export default function Home() {
           // where CoreItemsList read empty card_mantra_title / master_mantra
           // on resume and dashboard triad showed placeholders + view_info
           // couldn't open info reveal.
-          console.log("📡 Calling: generate_companion via journey/companion (resume)");
+          console.log(
+            "📡 Calling: generate_companion via journey/companion (resume)",
+          );
           const { executeAction } = require("../../engine/actionExecutor");
           await executeAction(
-            { type: "generate_companion", payload: { use_journey_companion: true } },
+            {
+              type: "generate_companion",
+              payload: { use_journey_companion: true },
+            },
             {
               screenState: store.getState().screen.screenData,
               loadScreen: (target: any) => {
@@ -550,7 +556,8 @@ export default function Home() {
               <Text style={styles.loginText}>Sign in to save your journey</Text>
             </TouchableOpacity>
           )} */}
-          <View style={{ height: 220 }} />
+          <Image source={require("../../../assets/new_home_lotus.png")} />
+          {/* <View style={{ height: 220 }} /> */}
           <TouchableOpacity
             onPress={() => navigateToMitra(false)}
             activeOpacity={0.85}

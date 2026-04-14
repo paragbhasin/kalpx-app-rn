@@ -49,6 +49,9 @@ import {
 } from "./src/service/pushNotifications";
 import { registerDeviceToBackend } from "./src/utils/registerDevice";
 import { initScreenResolver } from "./src/engine/screenResolver";
+// DEV-only: kalpx://mitra/<container>/<state> deep-link handler for
+// validation screenshots. No-op in release builds (gated by __DEV__).
+import { initDeepLinkHandler } from "./src/navigation/deepLinkHandler";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -233,6 +236,9 @@ export default function App() {
       initScreenResolver().catch((err) =>
         console.warn("Screen resolver init failed (using local fallback):", err)
       );
+
+      // DEV-only deep-link handler — no-op in release builds.
+      initDeepLinkHandler().catch(() => {});
 
       // Set route and hide splash immediately to speed up launch
       setInitialRoute("AppDrawer");

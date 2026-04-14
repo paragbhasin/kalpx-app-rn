@@ -12,10 +12,11 @@
  *   "Not a person"     → dismiss + PATCH status=dismissed
  */
 
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
   ScrollView,
@@ -50,11 +51,31 @@ const EntityRecognitionSheet: React.FC<{ block?: any }> = () => {
       screenState: store.getState().screen.screenData,
     });
 
-  const onConfirm = () =>
+  const [confirmed, setConfirmed] = useState(false);
+  const [relationNote, setRelationNote] = useState("");
+
+  const onConfirm = () => {
     dispatch({
       type: "confirm_entity",
       payload: { id: pending.id, name: pending.display_name },
     });
+    // G25 — after confirmation, reveal the relation-note input in-sheet so the
+    // user can add a short descriptor (persisted via PATCH entities/<id>/).
+    setConfirmed(true);
+  };
+
+  const onSaveRelationNote = () => {
+    const note = relationNote.trim().slice(0, 80);
+    if (!note) {
+      goBack();
+      return;
+    }
+    dispatch({
+      type: "patch_entity_relation_note",
+      payload: { id: pending.id, relation_note: note },
+    });
+    goBack();
+  };
 
   const onDifferent = () =>
     dispatch({
@@ -80,17 +101,41 @@ const EntityRecognitionSheet: React.FC<{ block?: any }> = () => {
       </Text>
 
       {/* REG-016: CTAs in bottom 30% */}
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.primary} onPress={onConfirm}>
-          <Text style={styles.primaryText}>Yes that&apos;s them</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.secondary} onPress={onDifferent}>
-          <Text style={styles.secondaryText}>Different person</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tertiary} onPress={onNotPerson}>
-          <Text style={styles.tertiaryText}>Not a person</Text>
-        </TouchableOpacity>
-      </View>
+      {confirmed ? (
+        <View style={styles.footer}>
+          <Text style={styles.microLabel}>ADD A NOTE (OPTIONAL)</Text>
+          <Text style={styles.relationHint}>
+            A short descriptor so I remember. e.g. &quot;sister&quot;, &quot;manager&quot;, &quot;partner&quot;.
+          </Text>
+          <TextInput
+            value={relationNote}
+            onChangeText={setRelationNote}
+            placeholder="Short descriptor"
+            placeholderTextColor="#c9a84c"
+            style={styles.relationInput}
+            maxLength={80}
+            returnKeyType="done"
+            onSubmitEditing={onSaveRelationNote}
+          />
+          <TouchableOpacity style={styles.primary} onPress={onSaveRelationNote}>
+            <Text style={styles.primaryText}>
+              {relationNote.trim() ? "Save" : "Skip"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View style={styles.footer}>
+          <TouchableOpacity style={styles.primary} onPress={onConfirm}>
+            <Text style={styles.primaryText}>Yes that&apos;s them</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.secondary} onPress={onDifferent}>
+            <Text style={styles.secondaryText}>Different person</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.tertiary} onPress={onNotPerson}>
+            <Text style={styles.tertiaryText}>Not a person</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </ScrollView>
   );
 };
@@ -153,6 +198,25 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.regular,
     fontSize: 13,
     color: "#6b5a45",
+  },
+  relationHint: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    color: "#6b5a45",
+    marginBottom: 10,
+    lineHeight: 19,
+  },
+  relationInput: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 15,
+    color: "#432104",
+    backgroundColor: "#ffffff",
+    borderRadius: 10,
+    borderWidth: 0.5,
+    borderColor: "#d9cfb8",
+    padding: 12,
+    marginBottom: 12,
+    minHeight: 44,
   },
   empty: {
     fontFamily: Fonts.serif.regular,

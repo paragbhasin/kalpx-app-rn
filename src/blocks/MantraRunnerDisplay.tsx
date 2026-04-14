@@ -48,13 +48,25 @@ const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 const MantraRunnerDisplay: React.FC<MantraRunnerDisplayProps> = ({ block }) => {
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
 
-  // Target reps — allow 1, 9, 27, 54, 108. Default 108 per spec.
+  // Target reps — allow 1, 9, 27, 54, 108. Caller must supply one of block.total
+  // or screenData.reps_total (G13 — no silent 108 default masking a missing hint).
   const parsedTotal = typeof block.total === 'string'
     ? parseInt(block.total, 10)
     : block.total;
-  const total = (parsedTotal && !isNaN(parsedTotal) && parsedTotal > 0)
-    ? parsedTotal
-    : (Number(screenData.reps_total) || 108);
+  const screenReps = Number(screenData.reps_total);
+  const resolvedTotal =
+    (parsedTotal && !isNaN(parsedTotal) && parsedTotal > 0)
+      ? parsedTotal
+      : (screenReps && !isNaN(screenReps) && screenReps > 0)
+        ? screenReps
+        : null;
+  if (resolvedTotal === null && __DEV__) {
+    console.warn(
+      '[MantraRunnerDisplay] missing target_reps — caller must supply block.total ' +
+      'or screenData.reps_total. Falling back to 108.',
+    );
+  }
+  const total = resolvedTotal ?? 108;
 
   const [count, setCount] = useState<number>(0);
   const completedRef = useRef(false);

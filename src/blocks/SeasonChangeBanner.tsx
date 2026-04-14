@@ -9,7 +9,7 @@
  *   - Dismiss action: `dismiss_season_banner` sets season_banner_dismissed_at.
  */
 
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Fonts } from "../theme/fonts";
 import { executeAction } from "../engine/actionExecutor";
@@ -33,10 +33,15 @@ const SeasonChangeBanner: React.FC<{ block?: any }> = () => {
     return null;
   }
 
+  const [expanded, setExpanded] = useState(false);
+
   const headline =
     signal.headline || "The season is shifting.";
   const message =
     signal.message || "Slower mornings land well now.";
+  const detail = signal.detail || signal.long_text || signal.body;
+
+  const onToggle = () => setExpanded((v) => !v);
 
   const onDismiss = () => {
     executeAction(
@@ -52,16 +57,38 @@ const SeasonChangeBanner: React.FC<{ block?: any }> = () => {
   };
 
   return (
-    <TouchableOpacity
-      style={styles.banner}
-      onPress={onDismiss}
-      activeOpacity={0.8}
-      accessibilityLabel="Season banner, tap to dismiss"
-      testID="season-change-banner"
-    >
-      <Text style={styles.headline}>{headline}</Text>
-      <Text style={styles.message}>{message}</Text>
-    </TouchableOpacity>
+    <View style={styles.banner} testID="season-change-banner">
+      <TouchableOpacity
+        onPress={detail ? onToggle : onDismiss}
+        activeOpacity={0.8}
+        accessibilityLabel={
+          detail
+            ? expanded
+              ? "Season banner, tap to collapse"
+              : "Season banner, tap to expand"
+            : "Season banner, tap to dismiss"
+        }
+        hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+      >
+        <Text style={styles.headline}>{headline}</Text>
+        <Text style={styles.message}>{message}</Text>
+      </TouchableOpacity>
+
+      {expanded && detail ? (
+        <View style={styles.detailWrap} testID="season-change-banner-detail">
+          <Text style={styles.detailText}>{detail}</Text>
+          <TouchableOpacity
+            onPress={onDismiss}
+            style={styles.dismiss}
+            accessibilityLabel="Dismiss season banner"
+            testID="season-change-banner-dismiss"
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Text style={styles.dismissText}>Got it</Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
+    </View>
   );
 };
 
@@ -85,6 +112,29 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#6a5830",
     lineHeight: 17,
+  },
+  detailWrap: {
+    marginTop: 10,
+    paddingTop: 10,
+    borderTopWidth: 0.5,
+    borderTopColor: "#d9cfb8",
+  },
+  detailText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 13,
+    color: "#4a3a20",
+    lineHeight: 20,
+    marginBottom: 10,
+  },
+  dismiss: {
+    alignSelf: "flex-end",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  dismissText: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 12,
+    color: "#8b7a55",
   },
 });
 

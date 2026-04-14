@@ -3200,6 +3200,20 @@ export async function executeAction(
         }
         if (sp.steps) setScreenValue(sp.steps, "practice_steps");
 
+        // G12 — fire session_started analytics on runner entry so the backend
+        // sees the intent even if the user abandons before complete_runner.
+        mitraTrackEvent("session_started", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            variant: sp.variant,
+            source: sp.source,
+            item_id: sp.item?.item_id || null,
+            target_reps: sp.target_reps || null,
+            duration_sec: sp.duration_sec || null,
+          },
+        });
+
         // Nav
         if (target) {
           loadScreen(target);
@@ -4106,6 +4120,10 @@ export async function executeAction(
       }
 
       // confirm_entity — Moment 29 "Yes that's them".
+      // G25: keep the sheet open after confirm so the user can enter a
+      // relation_note; the follow-up patch_entity_relation_note closes the
+      // sheet. Callers that don't show the note input can pass
+      // payload.close_sheet=true to restore legacy behavior.
       case "confirm_entity": {
         const id = payload?.id;
         if (id) {
@@ -4119,8 +4137,27 @@ export async function executeAction(
             meta: { entity_id: id },
           });
         }
+        if (payload?.close_sheet) {
+          setScreenValue(null, "entity_recognition_pending");
+          goBack();
+        }
+        break;
+      }
+
+      // patch_entity_relation_note — Moment 29 follow-up after confirm_entity
+      // to persist the user's short descriptor (G25).
+      case "patch_entity_relation_note": {
+        const id = payload?.id;
+        const note = (payload?.relation_note || "").toString().trim().slice(0, 80);
+        if (id && note) {
+          await patchEntity(id, { relation_note: note });
+          mitraTrackEvent("entity_relation_note_saved", {
+            journeyId: screenState.journey_id,
+            dayNumber: screenState.day_number || 1,
+            meta: { entity_id: id, length: note.length },
+          });
+        }
         setScreenValue(null, "entity_recognition_pending");
-        goBack();
         break;
       }
 

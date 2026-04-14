@@ -4395,6 +4395,48 @@ export async function executeAction(
         break;
       }
 
+      // Inner-room muted CTAs for loneliness (parallel to grief_stay/voice_note).
+      // Spec: route_support_loneliness.md §5. Minimal stubs — reflection-entry
+      // for Name it, an in-room presence marker for Reach out, and a simple
+      // walk-timer marker for Walk outside. Stay in the room, never navigate.
+      case "loneliness_name_it": {
+        setScreenValue(true, "loneliness_name_it_requested");
+        mitraTrackEvent("loneliness_name_it", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
+        });
+        // Reuses the reflection voice surface for a brief capture — backend
+        // has no dedicated journal-capture endpoint yet (Phase 1.5 work).
+        loadScreen({
+          container_id: "reflection_entry",
+          state_id: "voice_note",
+        } as any);
+        break;
+      }
+      case "loneliness_reach_out": {
+        setScreenValue(true, "loneliness_reach_out_open");
+        mitraTrackEvent("loneliness_reach_out", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
+        });
+        // TODO: wire to active-entities list when backend endpoint lands.
+        // For now the flag drives an in-container prompt (see container).
+        break;
+      }
+      case "loneliness_walk_outside": {
+        const duration = payload?.duration_min || 5;
+        setScreenValue(duration, "loneliness_walk_duration_min");
+        setScreenValue(Date.now(), "loneliness_walk_started_at");
+        mitraTrackEvent("loneliness_walk_outside", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { duration_min: duration },
+        });
+        break;
+      }
+
       case "exit_loneliness_room": {
         setScreenValue(false, "loneliness_session_active");
         setScreenValue(null, "loneliness_session_start");

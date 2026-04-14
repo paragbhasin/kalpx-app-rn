@@ -94,24 +94,57 @@ const GriefRoomContainer: React.FC<Props> = () => {
       </View>
 
       <Text style={styles.presence}>
-        {ctx.presence_line || "I'm here. No rush."}
+        {ctx.presence_line || ctx.opening_line || "I'm here. No rush."}
       </Text>
 
       <Text style={styles.body}>
         {ctx.message ||
+          ctx.second_beat_line ||
           "You don't have to name it. You don't have to move through it. I'll sit with you for as long as you need."}
       </Text>
 
       <View style={styles.ctas}>
         <TouchableOpacity
           style={styles.ctaMuted}
-          onPress={() => dispatch("grief_stay")}
+          onPress={() =>
+            dispatch("grief_stay", {
+              slow_breath: ctx.slow_breath,
+              duration_min: ctx.slow_breath?.duration_min,
+              pattern: ctx.slow_breath?.pattern,
+            })
+          }
           accessibilityLabel="Sit with me"
           testID="grief-sit-cta"
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Text style={styles.ctaMutedText}>Sit with me</Text>
         </TouchableOpacity>
+
+        {ctx.grief_mantra?.id ? (
+          <TouchableOpacity
+            style={styles.ctaMuted}
+            onPress={() =>
+              dispatch("start_gentle", {
+                variant: "mantra",
+                item: {
+                  item_type: "mantra",
+                  item_id: ctx.grief_mantra.id,
+                  title: ctx.grief_mantra.title,
+                  runner_route: ctx.grief_mantra.runner_route,
+                },
+                intent: "grief_mantra",
+                duration_sec: (ctx.grief_mantra.duration_min || 5) * 60,
+              })
+            }
+            accessibilityLabel="A mantra to hold"
+            testID="grief-mantra-cta"
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Text style={styles.ctaMutedText}>
+              {ctx.grief_mantra.title ? `A mantra — ${ctx.grief_mantra.title}` : "A mantra"}
+            </Text>
+          </TouchableOpacity>
+        ) : null}
 
         <TouchableOpacity
           style={styles.ctaMuted}
@@ -123,6 +156,12 @@ const GriefRoomContainer: React.FC<Props> = () => {
           <Text style={styles.ctaMutedText}>Voice note</Text>
         </TouchableOpacity>
       </View>
+
+      {ctx.principle_hint?.name ? (
+        <Text style={styles.hint} testID="grief-principle-hint">
+          {ctx.principle_hint.name}
+        </Text>
+      ) : null}
 
       <TouchableOpacity
         style={styles.exit}
@@ -202,6 +241,16 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.medium,
     fontSize: 14,
     color: "#4a3a20",
+  },
+  hint: {
+    fontFamily: Fonts.serif.regular,
+    fontStyle: "italic",
+    fontSize: 13,
+    color: "#8b7a55",
+    textAlign: "center",
+    marginTop: -16,
+    marginBottom: 20,
+    maxWidth: 280,
   },
   exit: {
     marginTop: 8,

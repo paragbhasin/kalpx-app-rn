@@ -3830,42 +3830,48 @@ export async function executeAction(
         break;
       }
 
+      // G20 — weekly reflection response submit. Spec §6 API contracts:
+      // POST /api/mitra/track-event/ with reflection_user_response (text/voice)
+      // or reflection_acknowledged (quick "That lands" tap). Letter itself
+      // lives in screenData.weekly_reflection_letter, not in a user-authored
+      // draft — the old 3-section form was wrong against spec + backend.
       case "submit_weekly_reflection": {
         const p = payload || {};
-        const sections = p.sections || {};
-        const entries = [
-          { key: "held", signal: "weekly_held" },
-          { key: "took", signal: "weekly_took" },
-          { key: "tending", signal: "weekly_tending" },
-        ];
+        const cycleDay =
+          p.cycle_day || screenState.cycle_day || screenState.day_number;
+        const text = (p.text || "").trim();
+        const isAck = !!p.ack_only || !text;
 
-        await Promise.all(
-          entries
-            .filter((e) => (sections[e.key] || "").trim().length > 0)
-            .map((e) =>
-              postGratitudeLedger({
-                signal_type: e.signal,
-                text: sections[e.key].trim(),
-                meta: {
-                  journey_id: screenState.journey_id,
-                  cycle_day: screenState.cycle_day || screenState.day_number,
-                },
-              }),
-            ),
-        );
+        if (isAck) {
+          mitraTrackEvent("reflection_acknowledged", {
+            journeyId: screenState.journey_id,
+            dayNumber: screenState.day_number || 1,
+            meta: { cycle_day: cycleDay },
+          });
+        } else {
+          mitraTrackEvent("reflection_user_response", {
+            journeyId: screenState.journey_id,
+            dayNumber: screenState.day_number || 1,
+            meta: {
+              cycle_day: cycleDay,
+              text,
+              response_type: p.response_type || "text",
+            },
+          });
+        }
 
         mitraTrackEvent("reflection_letter_completed", {
           journeyId: screenState.journey_id,
           dayNumber: screenState.day_number || 1,
           meta: {
-            cycle_day: screenState.cycle_day || screenState.day_number,
-            sections_filled: entries.filter(
-              (e) => (sections[e.key] || "").trim().length > 0,
-            ).length,
+            cycle_day: cycleDay,
+            user_responded: !isAck,
+            response_type: isAck ? "none" : p.response_type || "text",
           },
         });
 
         setScreenValue(true, "_weekly_reflection_submitted");
+        // Legacy draft key — clear if anything set it from older builds.
         setScreenValue(null, "weekly_reflection_draft");
 
         setTimeout(() => {

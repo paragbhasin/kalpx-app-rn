@@ -235,7 +235,7 @@ export const CompanionDashboardContainer = {
         // MorningBriefing, above CheckInCard.
         { type: "predictive_alert_card", position: "body" },
         { type: "cycle_signal_bar", position: "body" },
-        { type: "clear_window_banner", position: "body" },  // re-added 2026-04-13 (backend B4-v2 shipped)
+        { type: "clear_window_banner", position: "body" }, // re-added 2026-04-13 (backend B4-v2 shipped)
         // Week 7 — conditional embedded slots.
         // season_change_banner: visible when screenData.season_signal != null
         //   AND screenData.season_banner_dismissed_at is stale (>7d) or null.
@@ -244,8 +244,16 @@ export const CompanionDashboardContainer = {
         // unconditionally is safe — they return null when their signals are
         // absent (flag-off / 404-tolerant).
         // Spec: embedded_season_change_banner.md, embedded_gratitude_joy_card.md.
-        { type: "season_change_banner", position: "body", visibility_condition: "season_signal" },
-        { type: "gratitude_joy_card", position: "body", visibility_condition: "joy_signal" },
+        {
+          type: "season_change_banner",
+          position: "body",
+          visibility_condition: "season_signal",
+        },
+        {
+          type: "gratitude_joy_card",
+          position: "body",
+          visibility_condition: "joy_signal",
+        },
         { type: "core_items_list", position: "body" },
         // Week 6 — Recommended Additional (Moment 30). Self-hides when
         // screenData.recommended_additional is null. Below triad, above
@@ -436,8 +444,7 @@ export const CompanionDashboardContainer = {
       meta: { requires_active_cycle: true, variant: "clear_window_active" },
       dashboard_config: {
         status_messages: { default: "Today is open" },
-        instruction_text:
-          "You've earned this space. Use it for what matters.",
+        instruction_text: "You've earned this space. Use it for what matters.",
       },
       blocks: [
         { type: "clear_window_banner", position: "body" },
@@ -460,8 +467,7 @@ export const CompanionDashboardContainer = {
       },
       dashboard_config: {
         status_messages: { default: "Go soft today" },
-        instruction_text:
-          "Yesterday was heavy. Today, just begin.",
+        instruction_text: "Yesterday was heavy. Today, just begin.",
       },
       blocks: [
         {
@@ -6611,18 +6617,42 @@ export const WelcomeOnboardingContainer = {
     turn_1: {
       tone: { theme: "gold_dark", mood: "steady" },
       blocks: [
+        // {
+        //   type: "image",
+        //   url: "/assets/mitra.png",
+        //   alt: "lotus",
+        // },
+        {
+          type: "headline",
+          content: "I'm Mitra.\nI'm here with you.",
+          style: { fontSize: "32px", lineHeight: 40, marginTop: -45 },
+        },
         {
           type: "onboarding_conversation_turn",
           id: "turn1",
           mitra_message: [
-            "I'm Mitra. I'm here to help you live with more clarity, rhythm, and steadiness — in the difficult moments and the beautiful ones.",
-            "I pay attention to timing, inner weather, and the patterns that shape your days.",
+            "Some days feel clear.",
+            "Some feel heavy.",
+            "And some… you just don’t have the words.",
+            "Whatever this moment holds -you don’t have to figure it out alone.",
           ],
+          image: {
+            url: "/assets/new_home_lotus.png",
+            alt: "lotus",
+          },
           reply_chips: [
-            { id: "ready", label: "I'd like that", style: "primary" },
-            { id: "returning", label: "I'm returning — I've been here before", style: "secondary" },
+            { id: "ready", label: "Yes, let’s begin →", style: "primary" },
+            // {
+            //   id: "returning",
+            //   label: "I’m returning",
+            //   style: "secondary",
+            // },
           ],
-          open_input: { enabled: true, placeholder: "Or tell me why you're here...", max_length: 400 },
+          open_input: {
+            enabled: true,
+            placeholder: "Or tell me why you're here...",
+            max_length: 400,
+          },
           voice_available: true,
           on_response: _onResp,
         },
@@ -6638,15 +6668,47 @@ export const WelcomeOnboardingContainer = {
           mitra_message:
             "Before I can help, I want to understand what matters most to you right now. Not a problem to solve — but where your life is asking for more attention. What's alive for you?",
           reply_chips: [
-            { id: "work_clarity", label: "Work needs more clarity", style: "secondary" },
-            { id: "relationship", label: "A relationship needs attention", style: "secondary" },
-            { id: "mind_quiet", label: "My mind needs quiet", style: "secondary" },
-            { id: "uncertain", label: "I'm navigating something uncertain", style: "secondary" },
-            { id: "low_energy", label: "My energy is low and I want it back", style: "secondary" },
-            { id: "searching_identity", label: "I'm searching for who I really am", style: "secondary" },
-            { id: "spiritual", label: "I want to go deeper spiritually", style: "secondary" },
+            {
+              id: "work_clarity",
+              label: "Work needs more clarity",
+              style: "secondary",
+            },
+            {
+              id: "relationship",
+              label: "A relationship needs attention",
+              style: "secondary",
+            },
+            {
+              id: "mind_quiet",
+              label: "My mind needs quiet",
+              style: "secondary",
+            },
+            {
+              id: "uncertain",
+              label: "I'm navigating something uncertain",
+              style: "secondary",
+            },
+            {
+              id: "low_energy",
+              label: "My energy is low and I want it back",
+              style: "secondary",
+            },
+            {
+              id: "searching_identity",
+              label: "I'm searching for who I really am",
+              style: "secondary",
+            },
+            {
+              id: "spiritual",
+              label: "I want to go deeper spiritually",
+              style: "secondary",
+            },
           ],
-          open_input: { enabled: true, placeholder: "Or tell me in your own words...", max_length: 400 },
+          open_input: {
+            enabled: true,
+            placeholder: "Or tell me in your own words...",
+            max_length: 400,
+          },
           voice_available: true,
           on_response: _onResp,
         },
@@ -6662,14 +6724,42 @@ export const WelcomeOnboardingContainer = {
           mitra_message:
             "{{friction_label}}. I understand that one well. How does it feel in you today — not what caused it, just the texture of it right now?",
           reply_chips: [
-            { id: "activated", label: "Activated — wired, running fast", style: "secondary" },
-            { id: "drained", label: "Drained — empty, nothing left", style: "secondary" },
-            { id: "foggy", label: "Foggy — can't see clearly", style: "secondary" },
-            { id: "heavy", label: "Heavy — everything weighs", style: "secondary" },
-            { id: "restless", label: "Restless — moving but going nowhere", style: "secondary" },
-            { id: "clear_but_full", label: "Actually clear — but there's a lot to hold", style: "secondary" },
+            {
+              id: "activated",
+              label: "Activated — wired, running fast",
+              style: "secondary",
+            },
+            {
+              id: "drained",
+              label: "Drained — empty, nothing left",
+              style: "secondary",
+            },
+            {
+              id: "foggy",
+              label: "Foggy — can't see clearly",
+              style: "secondary",
+            },
+            {
+              id: "heavy",
+              label: "Heavy — everything weighs",
+              style: "secondary",
+            },
+            {
+              id: "restless",
+              label: "Restless — moving but going nowhere",
+              style: "secondary",
+            },
+            {
+              id: "clear_but_full",
+              label: "Actually clear — but there's a lot to hold",
+              style: "secondary",
+            },
           ],
-          open_input: { enabled: true, placeholder: "Or describe it...", max_length: 400 },
+          open_input: {
+            enabled: true,
+            placeholder: "Or describe it...",
+            max_length: 400,
+          },
           voice_available: true,
           on_response: _onResp,
         },
@@ -6729,10 +6819,22 @@ export const WelcomeOnboardingContainer = {
           id: "turn6",
           mitra_message: "",
           reply_chips: [
-            { id: "play_briefing", label: "Play my first briefing", style: "primary" },
-            { id: "show_path", label: "Show me my path first", style: "secondary" },
+            {
+              id: "play_briefing",
+              label: "Play my first briefing",
+              style: "primary",
+            },
+            {
+              id: "show_path",
+              label: "Show me my path first",
+              style: "secondary",
+            },
           ],
-          open_input: { enabled: true, placeholder: "Ask me something", max_length: 400 },
+          open_input: {
+            enabled: true,
+            placeholder: "Ask me something",
+            max_length: 400,
+          },
           voice_available: true,
           on_response: _onResp,
         },
@@ -6757,7 +6859,11 @@ export const WelcomeOnboardingContainer = {
           id: "turn7_cta",
           mitra_message: "",
           reply_chips: [{ id: "ready", label: "I'm ready", style: "primary" }],
-          open_input: { enabled: true, placeholder: "I have a question", max_length: 400 },
+          open_input: {
+            enabled: true,
+            placeholder: "I have a question",
+            max_length: 400,
+          },
           voice_available: true,
           on_response: _onResp,
         },
@@ -6805,4 +6911,3 @@ export const ReflectionEveningContainer = {
 // Back-fill registry placeholders declared above.
 ContainerRegistry.reflection_weekly = ReflectionWeeklyContainer;
 ContainerRegistry.reflection_evening = ReflectionEveningContainer;
-

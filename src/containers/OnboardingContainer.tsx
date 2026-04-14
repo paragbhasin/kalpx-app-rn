@@ -14,22 +14,34 @@
  * via screenSlice persistState/restoreState).
  */
 
-import React, { useEffect } from 'react';
-import { ScrollView, StyleSheet, View, BackHandler } from 'react-native';
-import BlockRenderer from '../engine/BlockRenderer';
-import { useScreenStore } from '../engine/useScreenBridge';
+import React, { useEffect } from "react";
+import { BackHandler, ScrollView, StyleSheet, View } from "react-native";
+import BlockRenderer from "../engine/BlockRenderer";
+import { useScreenStore } from "../engine/useScreenBridge";
 
 interface Props {
   schema: { blocks: any[]; tone?: any; state_id?: string };
 }
 
 const OnboardingContainer: React.FC<Props> = ({ schema }) => {
-  const { screenData } = useScreenStore();
+  const updateBackground = useScreenStore(
+    (state: any) => state.updateBackground,
+  );
+  const updateHeaderHidden = useScreenStore(
+    (state: any) => state.updateHeaderHidden,
+  );
+  const screenData = useScreenStore((state: any) => state.screenData);
   const turn = Number(screenData.onboarding_turn || 1);
+
+  useEffect(() => {
+    updateBackground(require("../../assets/new_home.png"));
+    updateHeaderHidden(false);
+    return () => updateHeaderHidden(false);
+  }, [updateBackground, updateHeaderHidden]);
 
   // Disable Android back on Turn 1 (INV-equivalent: onboarding root cannot go back).
   useEffect(() => {
-    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
       if (turn === 1) return true; // consume — abandonment confirm handled elsewhere
       return false;
     });
@@ -37,6 +49,24 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
   }, [turn]);
 
   const blocks = schema?.blocks || [];
+  const headlineBlock = blocks.find((block: any) => block.type === "headline");
+  const conversationBlock = blocks.find(
+    (block: any) => block.type === "onboarding_conversation_turn",
+  );
+
+  const renderTurnOne = () => {
+    if (!conversationBlock) return null;
+
+    return (
+      <BlockRenderer
+        block={{
+          ...conversationBlock,
+          headline: headlineBlock?.content,
+          turnOneHero: true,
+        }}
+      />
+    );
+  };
 
   return (
     <ScrollView
@@ -45,9 +75,11 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
-      {blocks.map((b: any, i: number) => (
-        <BlockRenderer key={b.id || `${b.type}-${i}`} block={b} />
-      ))}
+      {turn === 1
+        ? renderTurnOne()
+        : blocks.map((b: any, i: number) => (
+            <BlockRenderer key={b.id || `${b.type}-${i}`} block={b} />
+          ))}
       <View style={{ height: 100 }} />
     </ScrollView>
   );
@@ -57,8 +89,8 @@ const styles = StyleSheet.create({
   // Match legacy KalpX warm parchment aesthetic (Home.tsx / MitraPhilosophy).
   // Cream background, not dark immersive — onboarding is welcoming, not
   // practice-mode.
-  scroll: { flex: 1, backgroundColor: '#FFF8EF' },
-  content: { padding: 24, paddingTop: 48 },
+  scroll: { flex: 1 },
+  content: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 32 },
 });
 
 export default OnboardingContainer;

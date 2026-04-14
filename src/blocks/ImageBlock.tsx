@@ -17,9 +17,16 @@ const ImageBlock: React.FC<ImageBlockProps> = ({ block }) => {
   // Resolve asset
   let source;
   if (block.url.startsWith('/assets/')) {
-    // Basic mapping for known assets
-    if (block.url.includes('lotus_glow')) source = require('../../assets/lotus_glow.png');
-    else if (block.url.includes('level_lotus')) source = require('../../assets/lotus_glow.png'); // Default to glow
+    const assetPath = block.url.replace('/assets/', '');
+    if (assetPath === 'lotus_glow.png' || assetPath === 'lotus_glow') source = require('../../assets/lotus_glow.png');
+    else if (assetPath === 'lotus.png' || assetPath === 'lotus') source = require('../../assets/lotus.png');
+    else if (assetPath === 'mitra.png' || assetPath === 'mitra') source = require('../../assets/mitra.png');
+    else if (assetPath === 'mitra_lotus.png') source = require('../../assets/mitra_lotus.png');
+    else if (assetPath === 'KalpXlogo.png') source = require('../../assets/KalpXlogo.png');
+    else if (assetPath === 'logo.png') source = require('../../assets/logo.png');
+    else if (assetPath === 'dash_mantra.png') source = require('../../assets/dash_mantra.png');
+    else if (assetPath === 'dash_sankalp.png') source = require('../../assets/dash_sankalp.png');
+    else if (assetPath === 'dash_action.png') source = require('../../assets/dash_action.png');
     else source = { uri: block.url };
   } else {
     source = { uri: block.url };

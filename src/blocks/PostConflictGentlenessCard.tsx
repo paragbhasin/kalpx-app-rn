@@ -77,6 +77,11 @@ const PostConflictGentlenessCard: React.FC<{ block?: any }> = () => {
         {ctx.softness_line ||
           "You don't need to fix anything today. Just start gentle. I'm with you."}
       </Text>
+      {ctx.principle_hint?.name || typeof ctx.principle_hint === "string" ? (
+        <Text style={styles.hint}>
+          {ctx.principle_hint?.name || ctx.principle_hint}
+        </Text>
+      ) : null}
       <View style={styles.row}>
         <TouchableOpacity style={styles.primary} onPress={onGentle}>
           <Text style={styles.primaryText}>Start gentle</Text>
@@ -113,6 +118,12 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
     color: "#6b5a45",
+    marginBottom: 10,
+  },
+  hint: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 12,
+    color: "#8b7a55",
     marginBottom: 14,
   },
   row: { flexDirection: "row", flexWrap: "wrap", gap: 8 },

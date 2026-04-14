@@ -4467,6 +4467,7 @@ export async function executeAction(
         await postGratitudeLedger({
           signal_type: "joy_signal",
           text,
+          entered_via: payload?.entered_via || "text",
           meta: { signal_id: signalId },
         });
         // Clear the signal so the card collapses and doesn't re-render today.

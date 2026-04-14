@@ -28,7 +28,7 @@
 import { Linking } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { store } from "../store";
-import { screenActions } from "../store/screenSlice";
+import { screenActions, loadScreenWithData } from "../store/screenSlice";
 
 let _registered = false;
 let _subscription: { remove: () => void } | null = null;
@@ -80,11 +80,12 @@ function _handle(url: string | null | undefined) {
         store.dispatch(screenActions.updateScreenData(data));
       }
     }
+    // loadScreenWithData is the ASYNC thunk that actually resolves the
+    // screen schema + mounts the container. Dispatching the plain
+    // screenActions.loadScreen only flags _loading=true and never
+    // resolves, leaving the UI on a spinner.
     store.dispatch(
-      screenActions.loadScreen({
-        containerId: container,
-        stateId: state,
-      }),
+      loadScreenWithData({ containerId: container, stateId: state }) as any,
     );
     if (__DEV__) {
       console.log(`[deepLinkHandler] → ${container}/${state}`);

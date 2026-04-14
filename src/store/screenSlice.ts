@@ -135,11 +135,18 @@ export type ResilienceNarrative = {
 export type OnboardingDraftState = {
   friction_id?: string;
   friction_freeform?: string;
+  // v3: scan_focus is the canonical intent axis from Turn 2. suggested_focus
+  // retained as legacy mirror for pre-v3 readers.
+  scan_focus?: string;
   suggested_focus?: string;
+  friction_analysis?: string;
   state_id?: string;
   state_freeform?: string;
   mode?: 'universal' | 'hybrid' | 'rooted';
   voice_choice?: 'voice' | 'text';
+  intro_freeform?: string;
+  returning?: boolean;
+  briefing_requested?: boolean;
   started_at?: number;
 };
 

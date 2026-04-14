@@ -177,22 +177,35 @@ function extractBaselineMetrics(
 // API Functions
 // ---------------------------------------------------------------------------
 
-/** POST mitra/generate-companion/ — Generate personalized companion (daily practice plan). */
+/**
+ * POST mitra/generate-companion/ — Generate personalized companion (v3).
+ *
+ * v3 (2026-04-13): `scan_focus` is the canonical intent field. Callers
+ * should populate it from FRICTION_TO_SCAN_FOCUS. Legacy `focus` is still
+ * sent (aliased server-side via LEGACY_FOCUS_TO_SCAN_FOCUS) so pre-v3
+ * backend builds keep functioning, but new integrations target scan_focus.
+ *
+ * `freeform_text` is optional Turn-2/Turn-3 open input; the backend passes
+ * it to the persona_bucket_detector for additive life-stage signal.
+ */
 export async function mitraGenerateCompanion(inputData: any): Promise<any> {
   try {
     const baselineMetrics = extractBaselineMetrics(
       inputData.sub_focus,
       inputData.baseline_metrics || {},
     );
-    const res = await api.post('mitra/generate-companion/', {
-      focus: inputData.focus,
+    const body: Record<string, any> = {
       subFocus: inputData.sub_focus,
       baselineMetrics,
       depth: inputData.depth,
       locale: 'en',
       tz: getTz(),
-    });
-    console.log('[MITRA] API response received', res.data?._backend);
+    };
+    if (inputData.scan_focus) body.scan_focus = inputData.scan_focus;
+    if (inputData.focus) body.focus = inputData.focus;
+    if (inputData.freeform_text) body.freeform_text = inputData.freeform_text;
+    const res = await api.post('mitra/generate-companion/', body);
+    console.log('[MITRA] API response received', res.data?._backend, 'mapping:', res.data?._mapping);
     return res.data;
   } catch (err: any) {
     console.warn('[MITRA] API failed, falling back to local engine:', err.message);

@@ -74,17 +74,36 @@ async function dispatchFetchCompanionState(): Promise<any> {
   }
 }
 
-// Week 1 — friction chip → focus mapping. Web parity: actionExecutor.js FRICTION_MAP.
-// Spec: route_welcome_onboarding.md §1 Turn 2-3, §6.
-const FRICTION_TO_FOCUS: Record<string, { focus: string; label: string }> = {
-  work_clarity: { focus: "clarity", label: "work clarity" },
-  relationship: { focus: "connection", label: "relationship attention" },
-  mind_quiet: { focus: "stillness", label: "busy mind" },
-  uncertain: { focus: "grounding", label: "uncertainty" },
-  low_energy: { focus: "vitality", label: "low energy" },
-  searching_identity: { focus: "self_knowledge", label: "self-inquiry" },
-  spiritual: { focus: "devotion", label: "spiritual longing" },
+// v3 (2026-04-13) — friction chip → scan_focus mapping.
+//
+// Spec:
+//   kalpx-frontend/docs/specs/mitra-v3-experience/05-MOMENT-API-MAP.md §A
+//   kalpx-frontend/docs/specs/mitra-v3-experience/screens/route_welcome_onboarding.md
+//
+// The 7 Turn-2 friction chips map to the 7 canonical `scan_focus` keys.
+// Generate-companion body uses the `scan_focus` field (not legacy `focus`).
+// Backend aliases legacy `focus` → `scan_focus` via LEGACY_FOCUS_TO_SCAN_FOCUS,
+// but new v3 callers should send scan_focus directly.
+const FRICTION_TO_SCAN_FOCUS: Record<string, { scan_focus: string; label: string }> = {
+  work_clarity:        { scan_focus: "workstress",      label: "work clarity" },
+  relationship:        { scan_focus: "relationships",   label: "relationship attention" },
+  mind_quiet:          { scan_focus: "mentalclarity",   label: "busy mind" },
+  uncertain:           { scan_focus: "fearuncertainty", label: "uncertainty" },
+  low_energy:          { scan_focus: "lowenergy",       label: "low energy" },
+  searching_identity:  { scan_focus: "identity",        label: "self-inquiry" },
+  spiritual:           { scan_focus: "spiritualgrowth", label: "spiritual longing" },
 };
+
+// Legacy alias retained so code paths that still reference FRICTION_TO_FOCUS
+// (if any slipped through the rename) keep compiling. New code MUST use
+// FRICTION_TO_SCAN_FOCUS.
+const FRICTION_TO_FOCUS: Record<string, { focus: string; label: string }> =
+  Object.fromEntries(
+    Object.entries(FRICTION_TO_SCAN_FOCUS).map(([k, v]) => [
+      k,
+      { focus: v.scan_focus, label: v.label },
+    ]),
+  );
 
 const STATE_LABEL_MAP: Record<string, string> = {
   activated: "Activated.",
@@ -3403,14 +3422,28 @@ export async function executeAction(
           } else if (currentTurn === 2) {
             if (p.chip_id) {
               draft.friction_id = p.chip_id;
-              const m = FRICTION_TO_FOCUS[p.chip_id];
-              if (m) draft.suggested_focus = m.focus;
+              // v3: friction chip → canonical scan_focus. Back-compat: also
+              // set legacy `suggested_focus` for any caller still reading it.
+              const m = FRICTION_TO_SCAN_FOCUS[p.chip_id];
+              if (m) {
+                draft.scan_focus = m.scan_focus;
+                draft.suggested_focus = m.scan_focus;
+              }
             } else if (p.freeform_text) {
               draft.friction_freeform = p.freeform_text;
               const r = await mitraHelpMeChoose({ freeformInput: p.freeform_text });
               if (r) {
-                draft.suggested_focus = r.suggestedFocus || r.suggested_focus;
-                draft.friction_analysis = r.analysisText || r.analysis_text;
+                // v3 response has _mapping.scan_focus; fall back to legacy keys.
+                draft.scan_focus =
+                  (r as any)?._mapping?.scan_focus ||
+                  r.suggestedFocus ||
+                  r.suggested_focus ||
+                  draft.scan_focus;
+                draft.suggested_focus = draft.scan_focus;
+                draft.friction_analysis =
+                  (r as any)?.analysis_summary ||
+                  r.analysisText ||
+                  r.analysis_text;
               }
             }
           } else if (currentTurn === 3) {
@@ -3437,13 +3470,18 @@ export async function executeAction(
             });
 
             const companion = await mitraGenerateCompanion({
-              focus: draft.suggested_focus || "clarity",
+              // v3: send scan_focus as the canonical field. Legacy `focus`
+              // mirror kept only to satisfy any v2 back-compat path on
+              // older backend builds.
+              scan_focus: draft.scan_focus || draft.suggested_focus || "unclassified",
+              focus: draft.scan_focus || draft.suggested_focus,
               sub_focus: draft.state_id,
               depth: "standard",
               baseline_metrics: {},
               intention: draft.friction_freeform,
               day_number: 1,
               guidance_mode: p.guidance_mode,
+              freeform_text: draft.state_freeform || draft.friction_freeform,
             });
 
             // Always populate shared labels (friction_label, state_label,

@@ -3126,12 +3126,14 @@ export async function executeAction(
         const resolvedDuration =
           p.duration_sec ?? screenState.runner_duration_actual_sec;
         const resolvedVariant = p.variant || screenState.runner_variant;
+        // G11 — backend (mitra_views.py L5868) expects meta.duration_seconds
+        // and meta.rep_count, not actual_seconds / reps_completed.
         const resolvedMeta = {
           ...(p.meta || {}),
-          ...(resolvedDuration != null ? { actual_seconds: resolvedDuration } : {}),
+          ...(resolvedDuration != null ? { duration_seconds: resolvedDuration } : {}),
           ...(resolvedVariant ? { variant: resolvedVariant } : {}),
           ...(screenState.runner_reps_completed != null
-            ? { reps_completed: screenState.runner_reps_completed }
+            ? { rep_count: screenState.runner_reps_completed }
             : {}),
         };
 
@@ -3256,9 +3258,9 @@ export async function executeAction(
             dayNumber: screenState.day_number || 1,
             meta: {
               variant,
-              actual_seconds: durationSec,
+              duration_seconds: durationSec,
               ...(screenState.runner_reps_completed != null
-                ? { reps_completed: screenState.runner_reps_completed }
+                ? { rep_count: screenState.runner_reps_completed }
                 : {}),
             },
           });

@@ -22,12 +22,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Audio } from 'expo-av';
 import { Fonts } from '../theme/fonts';
 import { useScreenStore } from '../engine/useScreenBridge';
 import { executeAction } from '../engine/actionExecutor';
@@ -57,8 +59,8 @@ const VoiceNoteSheet: React.FC<{ block?: any }> = ({ block }) => {
   const [seconds, setSeconds] = useState(0);
   const [textDraft, setTextDraft] = useState('');
   const [reflection, setReflection] = useState<string | null>(null);
-  // showNameHint removed 2026-04-13 (backend B6 PII fix shipped).
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const recordingRef = useRef<Audio.Recording | null>(null);
 
   const setValue = (key: string, v: any) =>
     store.dispatch(screenActions.setScreenValue({ key, value: v }));
@@ -66,33 +68,74 @@ const VoiceNoteSheet: React.FC<{ block?: any }> = ({ block }) => {
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      // Best-effort cleanup of any orphaned recorder.
+      const rec = recordingRef.current;
+      if (rec) {
+        rec.stopAndUnloadAsync().catch(() => {});
+        recordingRef.current = null;
+      }
     };
   }, []);
 
-  const startRecording = () => {
-    setPhase('recording');
-    setSeconds(0);
-    timerRef.current = setInterval(() => {
-      setSeconds((s) => {
-        if (s + 1 >= MAX_DURATION_SEC) {
-          stopAndSubmit();
-          return MAX_DURATION_SEC;
-        }
-        return s + 1;
+  const startRecording = async () => {
+    // Expo AV multipart capture — G15 / Phase 6.
+    try {
+      const perm = await Audio.requestPermissionsAsync();
+      if (!perm.granted) {
+        // Mic denied — fall back to text input silently.
+        setPhase('text_fallback');
+        return;
+      }
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
       });
-    }, 1000);
+      const rec = new Audio.Recording();
+      await rec.prepareToRecordAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY,
+      );
+      await rec.startAsync();
+      recordingRef.current = rec;
+      setPhase('recording');
+      setSeconds(0);
+      timerRef.current = setInterval(() => {
+        setSeconds((s) => {
+          if (s + 1 >= MAX_DURATION_SEC) {
+            stopAndSubmit();
+            return MAX_DURATION_SEC;
+          }
+          return s + 1;
+        });
+      }, 1000);
+    } catch (err) {
+      console.warn('[VoiceNoteSheet] recording prepare failed', err);
+      setPhase('text_fallback');
+    }
   };
 
   const stopAndSubmit = async () => {
     if (timerRef.current) clearInterval(timerRef.current);
     setPhase('uploading');
-    // NOTE: Expo AV / react-native-audio-recorder is not wired in this
-    // sheet. The submit call sends metadata only; audio blob capture is a
-    // follow-up item. 404-tolerant: endpoint may be flagged off on dev.
+    let audioUri: string | null = null;
+    let mime = Platform.OS === 'ios' ? 'audio/m4a' : 'audio/m4a';
     try {
-      const res = await postVoiceNote(null, {
+      const rec = recordingRef.current;
+      if (rec) {
+        await rec.stopAndUnloadAsync();
+        audioUri = rec.getURI();
+        // Reset audio mode so other surfaces can play sound in silent mode.
+        Audio.setAudioModeAsync({ allowsRecordingIOS: false }).catch(() => {});
+        recordingRef.current = null;
+      }
+    } catch (err) {
+      console.warn('[VoiceNoteSheet] stopAndUnload failed', err);
+    }
+
+    try {
+      const res = await postVoiceNote(audioUri, {
         source_surface: sourceSurface,
         duration_ms: seconds * 1000,
+        mime_type: mime,
       });
       if (!res || !res.id) {
         // Flag off or upload failed — fall back to gentle ack.

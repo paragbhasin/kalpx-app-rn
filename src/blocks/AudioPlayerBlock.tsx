@@ -62,6 +62,33 @@ function formatTime(seconds: number): string {
   return `${mins}:${secs.toString().padStart(2, "0")}`;
 }
 
+// G14 — Local OM fallback registry. When the S3 URL fails to load (offline,
+// bucket error, CloudFront hiccup), the player swaps to the bundled asset
+// whose basename matches the URL's last path segment. Matching is file-name-
+// based so rotation adding new tracks only requires dropping a matching
+// bundled asset at the same name (or leaving the fallback list as-is).
+const LOCAL_AUDIO_FALLBACKS: Record<string, number> = {
+  "Om.mp4": require("../../assets/sounds/Om.mp4"),
+  "Om Shanti.mp4": require("../../assets/sounds/Om Shanti.mp4"),
+  "Hari Om -Female.mp4": require("../../assets/sounds/Hari Om -Female.mp4"),
+  "Audio-calmmusic.mp3": require("../../assets/sounds/Audio-calmmusic.mp3"),
+  "Audio1.mpeg": require("../../assets/sounds/Audio1.mpeg"),
+  "Audio6.mpeg": require("../../assets/sounds/Audio6.mpeg"),
+  "Audio9.mpeg": require("../../assets/sounds/Audio9.mpeg"),
+  "sankalp_om.mp3": require("../../assets/sounds/sankalp_om.mp3"),
+};
+
+function _localFallbackFor(url: string): number | null {
+  if (!url) return null;
+  try {
+    const decoded = decodeURIComponent(url.split("?")[0]);
+    const name = decoded.split("/").pop() || "";
+    return LOCAL_AUDIO_FALLBACKS[name] ?? null;
+  } catch {
+    return null;
+  }
+}
+
 const AudioPlayerBlock: React.FC<AudioPlayerBlockProps> = ({ block }) => {
   const audioUrl = block.audio_url || "";
   const soundRef = useRef<Audio.Sound | null>(null);
@@ -83,17 +110,38 @@ const AudioPlayerBlock: React.FC<AudioPlayerBlockProps> = ({ block }) => {
           staysActiveInBackground: false,
         });
 
-        const { sound } = await Audio.Sound.createAsync(
-          { uri: audioUrl },
-          { shouldPlay: false, isLooping: true },
-          (status) => {
-            if (!isMounted || !status.isLoaded) return;
-            setCurrentTime(status.positionMillis / 1000);
-            if (status.durationMillis) {
-              setDuration(status.durationMillis / 1000);
-            }
-          },
-        );
+        const onStatus = (status: any) => {
+          if (!isMounted || !status?.isLoaded) return;
+          setCurrentTime(status.positionMillis / 1000);
+          if (status.durationMillis) setDuration(status.durationMillis / 1000);
+        };
+
+        let sound: Audio.Sound | null = null;
+        try {
+          const created = await Audio.Sound.createAsync(
+            { uri: audioUrl },
+            { shouldPlay: false, isLooping: true },
+            onStatus,
+          );
+          sound = created.sound;
+        } catch (remoteErr) {
+          // G14 — S3 load failed; try bundled local fallback by filename.
+          const fallback = _localFallbackFor(audioUrl);
+          if (fallback != null) {
+            console.warn(
+              "[AudioPlayerBlock] remote load failed — using local fallback:",
+              audioUrl,
+            );
+            const created = await Audio.Sound.createAsync(
+              fallback,
+              { shouldPlay: false, isLooping: true },
+              onStatus,
+            );
+            sound = created.sound;
+          } else {
+            throw remoteErr;
+          }
+        }
         soundRef.current = sound;
 
         // Auto-play after 2 seconds

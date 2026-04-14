@@ -1,19 +1,19 @@
 /**
  * VoiceConsentSheet — Week 4 Moment 38 first-time voice consent overlay.
  *
- * Web parity: kalpx-frontend/src/components/VoiceConsentOverlay.vue (first-use
- * voice consent gate). Spec: overlay_voice_consent.md §1, §6 (API contract).
+ * Spec: overlay_voice_consent.md §1, §2, §3. Binary choice — two chips only:
+ *   - "I'm ready"       → accept_voice_consent  (voice_consent_given = true)
+ *   - "Keep using text" → decline_voice_consent (voice_consent_given = false)
  *
- * Three reply chips:
- *   - "Sounds right"  → accept_voice_consent  (voice_consent_given = true)
- *   - "Tell me more"  → expands a second copy panel (does not grant yet)
- *   - "Not today"     → decline_voice_consent (voice_consent_given = false)
+ * The prior third chip ("Tell me more") contradicted spec §3
+ * (`Tap-chip response options: 2 (accept / decline)`) — removed. The
+ * transcription-clarity body copy is always visible (no reveal pattern).
  *
  * Only shown when screenData.voice_consent_given is null or undefined.
  * PATCHes companion-state on accept. 404/null tolerant for endpoint.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Fonts } from '../theme/fonts';
 import { useScreenStore } from '../engine/useScreenBridge';
@@ -23,7 +23,6 @@ import { screenActions } from '../store/screenSlice';
 
 const VoiceConsentSheet: React.FC<{ block?: any }> = () => {
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
-  const [expanded, setExpanded] = useState(false);
 
   const dispatch = (actionType: string) => {
     executeAction(
@@ -45,43 +44,27 @@ const VoiceConsentSheet: React.FC<{ block?: any }> = () => {
 
       <View style={styles.card}>
         <Text style={styles.body}>
-          Mitra can listen. Recordings are processed, then deleted within 24h.
-          You can stop any time.
+          I transcribe what you say to text, then the audio is discarded within
+          24 hours. The text lives in your journal only. I never share voice data.
         </Text>
       </View>
-
-      {expanded && (
-        <View style={styles.moreCard}>
-          <Text style={styles.moreText}>
-            Audio is transcribed to text. Only the text is kept — in your
-            journal. Mitra never shares voice data.
-          </Text>
-        </View>
-      )}
 
       <TouchableOpacity
         style={styles.primary}
         onPress={() => dispatch('accept_voice_consent')}
         accessibilityRole="button"
-        accessibilityLabel="Accept voice consent"
+        accessibilityLabel="I'm ready"
       >
-        <Text style={styles.primaryText}>Sounds right</Text>
+        <Text style={styles.primaryText}>I&apos;m ready</Text>
       </TouchableOpacity>
-
-      {!expanded && (
-        <TouchableOpacity
-          style={styles.secondary}
-          onPress={() => setExpanded(true)}
-        >
-          <Text style={styles.secondaryText}>Tell me more</Text>
-        </TouchableOpacity>
-      )}
 
       <TouchableOpacity
         style={styles.tertiary}
         onPress={() => dispatch('decline_voice_consent')}
+        accessibilityRole="button"
+        accessibilityLabel="Keep using text"
       >
-        <Text style={styles.tertiaryText}>Not today</Text>
+        <Text style={styles.tertiaryText}>Keep using text</Text>
       </TouchableOpacity>
     </View>
   );
@@ -125,18 +108,6 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     color: '#432104',
   },
-  moreCard: {
-    backgroundColor: '#FFF8EF',
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 16,
-  },
-  moreText: {
-    fontFamily: Fonts.sans.regular,
-    fontSize: 13,
-    lineHeight: 20,
-    color: '#432104',
-  },
   primary: {
     backgroundColor: '#eddeb4',
     paddingVertical: 14,
@@ -151,13 +122,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#432104',
   },
-  secondary: { marginTop: 14, padding: 8 },
-  secondaryText: {
-    fontFamily: Fonts.sans.regular,
-    fontSize: 14,
-    color: '#6b5a45',
-  },
-  tertiary: { marginTop: 8, padding: 8 },
+  tertiary: { marginTop: 12, padding: 10 },
   tertiaryText: {
     fontFamily: Fonts.sans.regular,
     fontSize: 13,

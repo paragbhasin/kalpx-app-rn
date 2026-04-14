@@ -530,12 +530,60 @@ export async function getClearWindow(): Promise<any> {
  * All feature-flagged on backend; 404-tolerant, never throw to UI.
  */
 
-export async function postVoiceNote(audioBlob: any, metadata: any): Promise<any> {
+/**
+ * POST mitra/voice/notes/ — multipart upload for Moment 31 voice capture.
+ *
+ * G15 — Phase 6. If a recorded audio URI is passed, the request is sent as
+ * multipart/form-data with the audio file; otherwise falls back to JSON
+ * metadata-only (matches prior behavior for text fallback or endpoints still
+ * behind a flag that only accept metadata).
+ *
+ * G16 — `source_surface="evening_reflection"` is mapped to the backend-
+ * accepted enum `journal_capture` to satisfy the current choices set
+ * (trigger_venting / journal_capture / weekly_reflection). Remove the map
+ * when the backend enum is extended.
+ */
+export async function postVoiceNote(
+  audioUri: string | null,
+  metadata: {
+    source_surface?: string;
+    duration_ms?: number;
+    mime_type?: string;
+  },
+): Promise<any> {
+  const sourceSurfaceMap: Record<string, string> = {
+    evening_reflection: 'journal_capture',
+  };
+  const source_surface =
+    sourceSurfaceMap[metadata?.source_surface || ''] ||
+    metadata?.source_surface ||
+    'journal_capture';
+  const duration_ms = metadata?.duration_ms ?? 0;
+
   try {
+    if (audioUri) {
+      const form = new FormData();
+      // RN FormData file form — backend uses request.FILES['audio'].
+      const mime = metadata?.mime_type || 'audio/m4a';
+      // Derive a reasonable filename from mime.
+      const ext = mime.includes('mpeg') ? 'mp3' : mime.includes('wav') ? 'wav' : 'm4a';
+      // @ts-ignore — RN FormData file tuple shape not in DOM types.
+      form.append('audio', {
+        uri: audioUri,
+        name: `voice_note.${ext}`,
+        type: mime,
+      });
+      form.append('source_surface', source_surface);
+      form.append('duration_ms', String(duration_ms));
+      const res = await api.post('mitra/voice/notes/', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return res.data;
+    }
     const res = await api.post('mitra/voice/notes/', {
-      source_surface: metadata?.source_surface,
-      duration_ms: metadata?.duration_ms ?? 0,
-      has_audio: !!audioBlob,
+      source_surface,
+      duration_ms,
+      has_audio: false,
     });
     return res.data;
   } catch (err: any) {

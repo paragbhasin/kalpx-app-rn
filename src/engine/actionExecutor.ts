@@ -1373,7 +1373,14 @@ export async function executeAction(
           re_analysis_friction: screenState.re_analysis_friction,
         };
 
-        const data = await mitraGenerateCompanion(inputData);
+        // 2026-04-13 fix: resume flow sets payload.use_journey_companion=true
+        // so we call the read-only /journey/companion endpoint instead of
+        // /generate-companion (which can create a fresh journey). The full
+        // population logic below is shared — both response shapes provide
+        // the same companion envelope per backend contract.
+        const data = payload?.use_journey_companion
+          ? await mitraJourneyCompanion()
+          : await mitraGenerateCompanion(inputData);
         if (!data) {
           // Use console.warn, NOT console.error: in dev builds console.error
           // triggers the RN LogBox red overlay which leaks into screenshot

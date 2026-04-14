@@ -81,10 +81,7 @@ export default function Home() {
   // Mitra v3 — guard auto-route so we don't re-navigate on every Home focus.
   const v3AutoRoutedRef = useRef(false);
 
-  // TODO(pavani): check in assets/new_home.png; fallback to home.jpg so the
-  // bundler succeeds on fresh clones (asset was referenced in commit ea9994d
-  // but never added to the repo).
-  const HOME_BACKGROUND = require("../../../assets/home.jpg");
+  const HOME_BACKGROUND = require("../../../assets/new_home.png");
   const CONTINUE_BG = require("../../../assets/continue_journey_bg.jpeg");
 
   useFocusEffect(

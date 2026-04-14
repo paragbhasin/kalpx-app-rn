@@ -12,6 +12,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useRef, useState } from "react";
+import useBootstrapAuth from "../../hooks/useBootstrapAuth";
 
 import {
   ActivityIndicator,
@@ -68,6 +69,10 @@ export default function Home() {
     (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
   );
   const isLoggedIn = !!user;
+
+  // Resume session from AsyncStorage on cold-start if valid tokens exist.
+  // Fires once; no-op when already logged in. See hooks/useBootstrapAuth.ts.
+  useBootstrapAuth();
 
   const updateBackground = useScreenStore((state) => state.updateBackground);
   const updateHeaderHidden = useScreenStore(

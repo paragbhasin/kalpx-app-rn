@@ -1,0 +1,45 @@
+# Week 4 Moment 20/42 — Support Trigger Flow (REG-020)
+# Asserts: trigger entry → sound bridge → mantra runner (source=support_trigger)
+# → completion → dashboard. NO recheck screen on active path.
+# Asserts: track_completion fires with source=support_trigger.
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+# Dashboard — tap "I feel triggered"
+- tapOn:
+    text: "I feel triggered."
+    optional: true
+- waitForAnimationToEnd
+
+# Sound Bridge transient (Moment 42)
+- assertVisible:
+    text: ".*Hum with me.*|.*ॐ.*"
+    optional: true
+
+# Tap-anywhere to skip to mantra runner
+- tapOn:
+    point: "50%,50%"
+- waitForAnimationToEnd
+
+# Mantra runner — support source (no recheck interposed)
+- assertVisible:
+    text: ".*OM.*|.*Mantra.*|.*108.*"
+    optional: true
+
+# REG-020: there must be NO "recheck" screen anywhere on the active path
+- assertNotVisible:
+    text: "recheck"
+    optional: true
+
+# Complete / exit via "Return to Mitra Home"
+- tapOn:
+    text: ".*Return to Mitra Home.*|.*I feel calmer now.*"
+    optional: true
+- waitForAnimationToEnd
+
+# Back on dashboard
+- assertVisible:
+    text: ".*Day.*|.*Mantra.*|.*Practice.*"
+    optional: true

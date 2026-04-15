@@ -1,16 +1,3 @@
-<<<<<<< HEAD
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ScrollView,
-} from "react-native";
-import Ionicons from "react-native-vector-icons/Ionicons";
-import { useNavigation } from "@react-navigation/native";
-import { useTranslation } from "react-i18next";
-=======
 import { useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -24,7 +11,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
 
 export default function Language() {
   const navigation = useNavigation();
@@ -50,21 +36,14 @@ export default function Language() {
   }, [i18n.language]);
 
   return (
-<<<<<<< HEAD
-=======
        <SafeAreaView style={{ flex: 1}}>
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
     <ScrollView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="#000" />
         </TouchableOpacity>
-<<<<<<< HEAD
-        <Text style={styles.headerText}>Language</Text>
-=======
         <Text  allowFontScaling={false} style={styles.headerText}>Language</Text>
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
         <View style={{ width: 24 }} />
       </View>
 
@@ -76,11 +55,7 @@ export default function Language() {
             style={styles.menuItem}
             onPress={() => changeLanguage(lang.code)}
           >
-<<<<<<< HEAD
-            <Text style={styles.menuText}>{lang.label}</Text>
-=======
             <Text  allowFontScaling={false} style={styles.menuText}>{lang.label}</Text>
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
             {selectedLang === lang.code ? (
               <Ionicons name="radio-button-on" size={20} color="#007bff" />
             ) : (
@@ -90,10 +65,7 @@ export default function Language() {
         ))}
       </View>
     </ScrollView>
-<<<<<<< HEAD
-=======
     </SafeAreaView>
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
   );
 }
 
@@ -112,11 +84,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: "GelicaMedium",
     color: "#000",
-<<<<<<< HEAD
-    lineHeight: 20,
-=======
     // lineHeight: 20,
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
   },
   menu: {
     marginTop: 10,
@@ -129,19 +97,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderBottomWidth: 0.5,
     borderBottomColor: "#ddd",
-<<<<<<< HEAD
-=======
     backgroundColor:"red"
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
   },
   menuText: {
     fontSize: 16,
     fontFamily: "GelicaRegular",
     color: "#333",
-<<<<<<< HEAD
-    lineHeight: 20,
-=======
     // lineHeight: 20,
->>>>>>> 32d65a58210371a3fcd7c935e9b9120fc9eeaf08
   },
 });

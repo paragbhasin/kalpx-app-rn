@@ -70,10 +70,25 @@ export default function MitraPhilosophy() {
   const navigation: any = useNavigation();
 
   const handleBeginJourney = () => {
+    // Mitra v3: "Begin Journey" enters welcome_onboarding Turn 1 conversation.
+    // LEGACY (commented out):
+    // store.dispatch(screenActions.loadScreen({
+    //   containerId: "choice_stack",
+    //   stateId: "discipline_select",
+    // }));
+    store.dispatch(
+      screenActions.setScreenValue({ key: "onboarding_turn", value: 1 }),
+    );
+    store.dispatch(
+      screenActions.setScreenValue({
+        key: "onboarding_draft_state",
+        value: { started_at: Date.now() },
+      }),
+    );
     store.dispatch(
       screenActions.loadScreen({
-        containerId: "choice_stack",
-        stateId: "discipline_select",
+        containerId: "welcome_onboarding",
+        stateId: "turn_1",
       }),
     );
     navigation.navigate("AppDrawer", {

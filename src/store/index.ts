@@ -42,12 +42,18 @@ import { postDetailReducer } from "../screens/PostDetail/reducers";
 import snackBarReducer from "./snackBarSlice";
 import mitraReducer from "./mitraSlice";
 import screenReducer from "./screenSlice";
+import companionStateReducer from "./companionStateSlice";
+import preferencesReducer from "./preferencesSlice";
+import notificationsReducer2 from "./notificationsSlice";
 
 const appReducer = combineReducers({
   login: loginReducer,
   snackBar: snackBarReducer,
   mitra: mitraReducer,
   screen: screenReducer,
+  companionState: companionStateReducer,
+  preferences: preferencesReducer,
+  notifications: notificationsReducer2,
   classesExploreReducer,
   classesBookingsReducer,
   classesFilterExploreReducer,
@@ -98,5 +104,30 @@ export const store = configureStore({
 });
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Cross-cutting persistence wiring (companionState + preferences).
+// Persist on every change (cheap — slices are small). Use persist thunks so
+// versioning/serialization live in the slice.
+// ─────────────────────────────────────────────────────────────────────────────
+import {
+  persistCompanionState,
+} from "./companionStateSlice";
+import { persistPreferences } from "./preferencesSlice";
+
+let _lastCompanionState: any = null;
+let _lastPreferences: any = null;
+store.subscribe(() => {
+  const s: any = store.getState();
+  if (s.companionState !== _lastCompanionState) {
+    _lastCompanionState = s.companionState;
+    // fire-and-forget
+    (store.dispatch as any)(persistCompanionState());
+  }
+  if (s.preferences !== _lastPreferences) {
+    _lastPreferences = s.preferences;
+    (store.dispatch as any)(persistPreferences());
+  }
+});
 
 export default store;

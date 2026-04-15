@@ -17,6 +17,14 @@ import store from "../store";
 import { screenActions } from "../store/screenSlice";
 import { Fonts } from "../theme/fonts";
 import KalpxModal from "../components/KalpxModal";
+// Week 2 — Day Active dashboard sections (Mitra v3 Moments 8-15, 40, 41, 43).
+// Spec: kalpx-frontend/docs/specs/mitra-v3-experience/screens/route_dashboard_day_active.md §10
+import MorningBriefingBlock from "../blocks/MorningBriefingBlock";
+import FocusPhraseBlock from "../blocks/FocusPhraseBlock";
+import CycleSignalBar from "../blocks/CycleSignalBar";
+import ClearWindowBanner from "../blocks/ClearWindowBanner";  // re-added 2026-04-13 (backend B4-v2 shipped)
+import CoreItemsList from "../blocks/CoreItemsList";
+import CheckInCardCompact from "../blocks/CheckInCardCompact";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -177,6 +185,31 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
     return () => updateHeaderHidden(false);
   }, [updateBackground, updateHeaderHidden]);
 
+  // Audit fix F1 (2026-04-13) — Spec route_dashboard_day_active.md §6 declares
+  // 8 parallel calls on dashboard entry. Dispatch dashboard_load on mount;
+  // debounce subsequent re-mounts so we don't refetch on every focus.
+  const lastDashboardLoadRef = React.useRef<number>(0);
+  useEffect(() => {
+    const now = Date.now();
+    if (now - lastDashboardLoadRef.current < 30000) return; // 30s debounce
+    lastDashboardLoadRef.current = now;
+    executeAction(
+      { type: "dashboard_load" },
+      {
+        screenState: ss,
+        loadScreen: () => {},
+        goBack: () => {},
+        setScreenValue: (value: any, key: string) =>
+          updateScreenData(key, value),
+        startFlowInstance: () => {},
+        endFlowInstance: () => {},
+      },
+    ).catch((err: any) => {
+      console.warn("[Dashboard] dashboard_load failed:", err?.message);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // -------------------------------------------------------------------------
   // Reset journey handler
   // -------------------------------------------------------------------------
@@ -260,7 +293,7 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Identity section */}
+        {/* Identity section (header: day number + status) */}
         {!!statusMessage && (
           <View style={styles.identitySection}>
             <Text style={styles.identityHeadline}>{statusMessage}</Text>
@@ -271,6 +304,17 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
             )}
           </View>
         )}
+
+        {/* ------------------------------------------------------------ */}
+        {/* Week 2 — Day Active dashboard sections (Moments 8-15, 40,   */}
+        {/* 41, 43). Spec §10 ordering: briefing → focus phrase →       */}
+        {/* cycle signal → clear window → triad → check-in.             */}
+        {/* Web parity: allContainers.js companion_dashboard.day_active */}
+        {/* ------------------------------------------------------------ */}
+        <MorningBriefingBlock />
+        <FocusPhraseBlock block={{}} />
+        <CycleSignalBar />
+        <ClearWindowBanner />
 
         {/* Return banner — absent 3+ days */}
         {showReturnBanner && (
@@ -399,12 +443,24 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
           </View>
         )}
 
-        {/* Practice cards — rendered via BlockRenderer */}
-        <View style={styles.practiceList}>
+        {/* ------------------------------------------------------------ */}
+        {/* Core triad — CoreItemsList wraps mantra/sankalp/practice.   */}
+        {/* Preserves legacy practice_card blocks underneath for any    */}
+        {/* schema that still drives cards via BlockRenderer.           */}
+        {/* Web parity: allContainers.js day_active lines 226-300.      */}
+        {/* ------------------------------------------------------------ */}
+        <CoreItemsList />
+
+        {/* Dashboard check-in (REG-015: dashboard-local dismiss flag). */}
+        <CheckInCardCompact />
+
+        {/* Practice cards — legacy block-driven cards (kept for schema
+            parity with other flows / variant overrides) */}
+        {/* <View style={styles.practiceList}>
           {practiceBlocks.map((block: any, i: number) => (
             <BlockRenderer key={block.id || `practice-${i}`} block={block} />
           ))}
-        </View>
+        </View> */}
 
         {!!ss.scan_focus && (
           <BlockRenderer

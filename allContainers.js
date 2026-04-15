@@ -222,6 +222,55 @@ export const CompanionDashboardContainer = {
           state: "{{identity_state}}",
           position: "header",
         },
+        // Week 2 — Mitra v3 day_active blocks (Moments 8-15, 40, 41, 43).
+        // Spec: docs/specs/mitra-v3-experience/screens/route_dashboard_day_active.md §10.
+        // These blocks read their data directly from screenData (populated
+        // by generate_companion); the container also renders them inline
+        // to guarantee ordering & presence regardless of schema payload.
+        { type: "morning_briefing", position: "body" },
+        { type: "focus_phrase", position: "body" },
+        // Week 6 — Predictive Alert (Moment 28). Self-hides when
+        // screenData.predictive_alert is null (flag-off / 404 / dismissed).
+        // Spec: embedded_predictive_alert_card.md §7 — slot below
+        // MorningBriefing, above CheckInCard.
+        { type: "predictive_alert_card", position: "body" },
+        { type: "cycle_signal_bar", position: "body" },
+        { type: "clear_window_banner", position: "body" }, // re-added 2026-04-13 (backend B4-v2 shipped)
+        // Week 7 — conditional embedded slots.
+        // season_change_banner: visible when screenData.season_signal != null
+        //   AND screenData.season_banner_dismissed_at is stale (>7d) or null.
+        // gratitude_joy_card: visible when screenData.joy_signal != null.
+        // Both blocks self-gate by reading screenData; rendering them here
+        // unconditionally is safe — they return null when their signals are
+        // absent (flag-off / 404-tolerant).
+        // Spec: embedded_season_change_banner.md, embedded_gratitude_joy_card.md.
+        {
+          type: "season_change_banner",
+          position: "body",
+          visibility_condition: "season_signal",
+        },
+        {
+          type: "gratitude_joy_card",
+          position: "body",
+          visibility_condition: "joy_signal",
+        },
+        { type: "core_items_list", position: "body" },
+        // Week 6 — Recommended Additional (Moment 30). Self-hides when
+        // screenData.recommended_additional is null. Below triad, above
+        // check-in per spec §7.
+        { type: "recommended_additional_card", position: "body" },
+        { type: "check_in_card_compact", position: "body" },
+        // Week 5 — Moment 26 embedded resilience narrative card.
+        // Spec: embedded_resilience_narrative_card.md. Conditional on
+        // resilience_narrative being present in screenData (populated by
+        // fetch_resilience_narrative action; feature flag on backend).
+        // If the fetch returns null / 404, the card renders its local
+        // template fallback (still shown — never blank).
+        {
+          type: "resilience_narrative_card",
+          position: "body",
+          visibility_condition: "resilience_narrative_slot_enabled",
+        },
         // Practice Access Cards
         {
           type: "practice_card",
@@ -243,6 +292,9 @@ export const CompanionDashboardContainer = {
             type: "view_info",
             payload: { type: "mantra" },
           },
+          // Dashboard tap goes to rep-selection; start_runner fires on the
+          // "Begin Chanting" button inside rep_selection (REG-015 carries
+          // source="core").
           action: {
             type: "navigate",
             target: {
@@ -266,11 +318,15 @@ export const CompanionDashboardContainer = {
             payload: { type: "sankalp" },
           },
           action: {
-            type: "navigate",
-            target: {
-              container_id: "practice_runner",
-              state_id: "sankalp_embody",
-              is_core: true,
+            type: "start_runner",
+            payload: {
+              source: "core",
+              variant: "sankalp",
+              item: {
+                item_type: "sankalp",
+                item_id: "{{companion_sankalp_id}}",
+                title: "{{sankalp_text}}",
+              },
             },
           },
         },
@@ -290,11 +346,15 @@ export const CompanionDashboardContainer = {
             payload: { type: "practice" },
           },
           action: {
-            type: "navigate",
-            target: {
-              container_id: "practice_runner",
-              state_id: "practice_step_runner",
-              is_core: true,
+            type: "start_runner",
+            payload: {
+              source: "core",
+              variant: "practice",
+              item: {
+                item_type: "practice",
+                item_id: "{{companion_practice_id}}",
+                title: "{{practice_title}}",
+              },
             },
           },
         },
@@ -353,6 +413,94 @@ export const CompanionDashboardContainer = {
         //   position: "footer",
         // },
       ],
+    },
+
+    // Week 2 — first_day variant (Moment 8 first arrival).
+    // Spec: route_dashboard_day_active.md §1 variant map "first_day".
+    // Minimal: no briefing yet, no cycle signal markers past day 1.
+    first_day: {
+      tone: { theme: "light_sandal", mood: "steady" },
+      meta: { requires_active_cycle: true, variant: "first_day" },
+      dashboard_config: {
+        status_messages: { start: "A new rhythm begins today" },
+        day_label: "Day 1",
+        instruction_text:
+          "Today is day one. Start with whatever calls you — the mantra, the sankalp, the practice.",
+      },
+      blocks: [
+        { type: "focus_phrase", position: "body" },
+        { type: "cycle_signal_bar", position: "body" },
+        { type: "core_items_list", position: "body" },
+      ],
+    },
+
+    // Week 2 — clear_window_active variant (Moment 43).
+    // Re-added 2026-04-13 after backend B4-v2 shipped with 5-gate signal-
+    // based detection. Banner renders above the triad; dashboard_load sets
+    // dashboard_variant="clear_window_active" when clear_window payload is
+    // non-null (i.e., all 5 server-side gates passed).
+    clear_window_active: {
+      tone: { theme: "light_sandal", mood: "celebratory" },
+      meta: { requires_active_cycle: true, variant: "clear_window_active" },
+      dashboard_config: {
+        status_messages: { default: "Today is open" },
+        instruction_text: "You've earned this space. Use it for what matters.",
+      },
+      blocks: [
+        { type: "clear_window_banner", position: "body" },
+        { type: "morning_briefing", position: "body" },
+        { type: "focus_phrase", position: "body" },
+        { type: "cycle_signal_bar", position: "body" },
+        { type: "core_items_list", position: "body" },
+      ],
+    },
+
+    // Week 6 — post_conflict_morning dashboard variant (Moment 39).
+    // Spec: embedded_post_conflict_gentleness_card.md §7.
+    // PostConflictGentlenessCard REPLACES focus_phrase slot on this variant;
+    // standard focus_phrase is NOT rendered adjacent on this morning.
+    post_conflict_morning: {
+      tone: { theme: "light_sandal", mood: "steady" },
+      meta: {
+        requires_active_cycle: true,
+        variant: "post_conflict_morning",
+      },
+      dashboard_config: {
+        status_messages: { default: "Go soft today" },
+        instruction_text: "Yesterday was heavy. Today, just begin.",
+      },
+      blocks: [
+        {
+          type: "micro_label",
+          content: "DAY {{day_number}} OF {{total_days}}",
+          position: "header",
+          variant: "identity_label",
+        },
+        { type: "morning_briefing", position: "body" },
+        // NOTE: focus_phrase intentionally omitted — replaced by the
+        // post_conflict_gentleness_card in this variant.
+        { type: "post_conflict_gentleness_card", position: "body" },
+        { type: "cycle_signal_bar", position: "body" },
+        { type: "core_items_list", position: "body" },
+      ],
+    },
+
+    // Week 6 — Prep Coaching overlay (Moment 27).
+    // Spec: overlay_prep_coaching.md §1, §14A.
+    prep_coaching_sheet: {
+      overlay: true,
+      tone: { theme: "light_sandal", mood: "steady" },
+      meta: { variant: "prep_coaching_sheet" },
+      blocks: [{ type: "prep_coaching_sheet", position: "body" }],
+    },
+
+    // Week 6 — Entity Recognition overlay (Moment 29).
+    // Spec: overlay_entity_recognition.md §1, §14A.
+    entity_recognition_sheet: {
+      overlay: true,
+      tone: { theme: "light_sandal", mood: "steady" },
+      meta: { variant: "entity_recognition_sheet" },
+      blocks: [{ type: "entity_recognition_sheet", position: "body" }],
     },
 
     // 2️⃣ IDENTITY STATE INDICATOR
@@ -1410,8 +1558,21 @@ export const PracticeRunnerContainer = {
           id: "begin_mantra_practice",
           type: "primary_button",
           label: "Begin Chanting →",
+          // REG-015: core mantra start — source="core" so track_completion
+          // attributes correctly. target_reps comes from the rep picker via
+          // the `reps_total` screenData key the picker writes.
           action: {
-            type: "navigate",
+            type: "start_runner",
+            payload: {
+              source: "core",
+              variant: "mantra",
+              target_reps: "{{reps_total}}",
+              item: {
+                item_type: "mantra",
+                item_id: "{{companion_mantra_id}}",
+                title: "{{mantra_text}}",
+              },
+            },
             target: {
               container_id: "practice_runner",
               state_id: "mantra_prep",
@@ -1464,10 +1625,15 @@ export const PracticeRunnerContainer = {
         },
       },
     },
-    // 1️⃣ MANTRA PRACTICE SCREEN (21)
+    // 1️⃣ MANTRA PRACTICE SCREEN (Mitra v3 Moment 17)
+    // Web parity: route_practice_mantra_runner.md.
+    // Immersive dark chrome (#1a1a1a) + MantraRunnerDisplay block. Completion
+    // dispatches complete_runner which fires track_completion (source from
+    // runner_source) and lands on completion_return transient.
     mantra_runner: {
-      variant: "mantra_runner",
-      tone: { theme: "light_sandal", mood: "immersive" },
+      variant: "mantra_runner_v3",
+      immersive_v3: true,
+      tone: { theme: "gold_dark", mood: "immersive" },
 
       meta: {
         disable_navigation: true,
@@ -1476,29 +1642,12 @@ export const PracticeRunnerContainer = {
 
       blocks: [
         {
-          type: "rep_counter",
+          type: "mantra_runner_display",
           total: "{{reps_total}}",
         },
-        {
-          type: "mantra_display",
-          text_key: "mantra_text",
-          devanagari_key: "mantra_devanagari",
-        },
-        { type: "audio_player" },
       ],
 
-      on_complete: {
-        type: "navigate",
-        target: {
-          container_id: "practice_runner",
-          state_id: "mantra_complete",
-        },
-      },
-      mantra_config: {
-        tap_label: "TAP",
-        sub_tap_label: "HERE",
-        hint_text: "TAP THE BEAD AFTER EACH MANTRA.",
-      },
+      on_complete: { type: "complete_runner" },
     },
 
     // 2️⃣ MANTRA REP COUNTER FEEDBACK (22)
@@ -1617,8 +1766,28 @@ export const PracticeRunnerContainer = {
       ],
     },
 
-    // 4️⃣ SANKALP EMBODIMENT SCREEN (24)
+    // 4️⃣ SANKALP EMBODIMENT SCREEN (Mitra v3 Moment 18)
+    // Web parity: route_practice_sankalp_hold.md.
+    // Immersive dark chrome + SankalpHoldBlock. 3s press-and-hold fires
+    // complete_runner which lands on completion_return transient.
     sankalp_embody: {
+      variant: "sankalp_hold_v3",
+      immersive_v3: true,
+      tone: { theme: "gold_dark", mood: "immersive" },
+
+      blocks: [
+        {
+          type: "sankalp_hold",
+          hold_duration: 3000,
+        },
+      ],
+
+      on_complete: { type: "complete_runner" },
+    },
+
+    // Legacy sankalp_embody preserved under its pre-v3 shape (unused, kept
+    // for non-v3 flows). The current v3 block above takes over rendering.
+    sankalp_embody_legacy: {
       variant: "sankalp_embody",
       tone: { theme: "light_sandal", mood: "reflective" },
       style: {
@@ -1993,8 +2162,52 @@ export const PracticeRunnerContainer = {
       ],
     },
 
-    // 8️⃣ INTERACTIVE PRACTICE STEP RUNNER
+    // 8️⃣ INTERACTIVE PRACTICE STEP RUNNER (Mitra v3 Moment 19)
+    // Web parity: route_practice_timer.md.
+    // Immersive dark chrome + PracticeTimerBlock. Timer expiry fires
+    // complete_runner; "End Practice" link exits without completion.
     practice_step_runner: {
+      variant: "practice_timer_v3",
+      immersive_v3: true,
+      tone: { theme: "gold_dark", mood: "immersive" },
+
+      blocks: [
+        {
+          type: "practice_timer",
+          duration_key: "practice_duration_seconds",
+          steps_key: "practice_steps",
+          end_practice_action: {
+            type: "navigate",
+            target: {
+              container_id: "companion_dashboard",
+              state_id: "day_active",
+            },
+          },
+        },
+      ],
+
+      on_complete: { type: "complete_runner" },
+    },
+
+    // Completion return transient (Mitra v3 Moment 32) — shown after any of
+    // the three v3 runners completes naturally. Reads runner_variant from
+    // screenData to pick the variant message; clears runner_* on unmount
+    // (REG-003). Tone locked to the three canonical completion messages.
+    completion_return: {
+      variant: "completion_return",
+      immersive_v3: true,
+      tone: { theme: "gold_dark", mood: "grounded" },
+      blocks: [
+        {
+          type: "completion_return",
+          variant_key: "runner_variant",
+        },
+      ],
+    },
+
+    // Legacy practice_step_runner (pre-v3 sacred pause) — preserved for
+    // trigger / quick practice variants.
+    practice_step_runner_legacy: {
       variant: "sacred_pause",
       pause_config: {
         title: "Pause",
@@ -4970,6 +5183,23 @@ export const CycleTransitionsContainer = {
       ],
     },
 
+    // Week 5 — Mitra v3 Moment 24 (Day 7 Checkpoint).
+    // Spec: route_checkpoint_day_7.md. New v3 block variant; legacy
+    // weekly_checkpoint (cycle_reflection block) is preserved below for
+    // back-compat — callers may route to either.
+    day_7: {
+      tone: { theme: "light_sandal", mood: "reflective" },
+      blocks: [{ type: "checkpoint_day_7" }],
+    },
+
+    // Week 5 — Mitra v3 Moment 25 (Day 14 Evolution).
+    // Spec: route_checkpoint_day_14.md. New v3 block variant alongside the
+    // legacy weekly_checkpoint state.
+    day_14: {
+      tone: { theme: "light_sandal", mood: "reflective" },
+      blocks: [{ type: "checkpoint_day_14" }],
+    },
+
     weekly_checkpoint: {
       tone: { theme: "light_sandal", mood: "reflective" },
       blocks: [
@@ -6112,6 +6342,113 @@ export const MASTER_UI_TEXT = {
   },
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// WEEK 4 — SUPPORT PATH (Moments 20, 21, 22, 31, 38, 42)
+// ─────────────────────────────────────────────────────────────────────────────
+export const SupportTriggerContainer = {
+  container_id: "support_trigger",
+  states: {
+    entry: {
+      tone: { theme: "gold_dark", mood: "steady" },
+      blocks: [{ type: "trigger_entry", label: "I feel triggered." }],
+    },
+    sound_bridge: {
+      tone: { theme: "deep_focus", mood: "reflective" },
+      overlay: true,
+      blocks: [{ type: "sound_bridge_transient" }],
+    },
+  },
+};
+
+export const SupportCheckinContainer = {
+  container_id: "support_checkin",
+  states: {
+    notice: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [{ type: "checkin_regulation" }],
+    },
+    name: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [{ type: "checkin_regulation" }],
+    },
+    settle: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [{ type: "checkin_regulation" }],
+    },
+    balanced_ack: {
+      tone: { theme: "gold_dark", mood: "celebratory" },
+      overlay: true,
+      blocks: [{ type: "balanced_ack_overlay" }],
+    },
+  },
+};
+
+export const OverlayContainer = {
+  container_id: "overlay",
+  states: {
+    voice_consent: {
+      tone: { theme: "light_sandal", mood: "steady" },
+      overlay: true,
+      blocks: [{ type: "voice_consent_sheet" }],
+    },
+    voice_note: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      overlay: true,
+      blocks: [{ type: "voice_note_sheet" }],
+    },
+  },
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// WEEK 7 — Support rooms + Why-This overlays
+// ─────────────────────────────────────────────────────────────────────────────
+export const SupportGriefContainer = {
+  container_id: "support_grief",
+  states: {
+    room: {
+      tone: { theme: "warm_cream", mood: "steady" },
+      meta: { variant: "grief_room", reduced_motion_capable: true },
+      blocks: [],
+    },
+  },
+};
+
+export const SupportLonelinessContainer = {
+  container_id: "support_loneliness",
+  states: {
+    room: {
+      tone: { theme: "warm_cream", mood: "steady" },
+      meta: { variant: "loneliness_room" },
+      blocks: [],
+    },
+  },
+};
+
+export const WhyThisOverlayContainer = {
+  container_id: "why_this_overlay",
+  states: {
+    why_this_l2: {
+      overlay: true,
+      tone: { theme: "warm_cream", mood: "steady" },
+      meta: { variant: "why_this_l2" },
+      blocks: [{ type: "why_this_l2" }],
+    },
+    why_this_l3: {
+      overlay: true,
+      tone: { theme: "warm_cream", mood: "steady" },
+      meta: { variant: "why_this_l3" },
+      blocks: [{ type: "why_this_l3" }],
+    },
+  },
+};
+
+// Host why-this states under companion_dashboard as well so open_why_this_l2
+// can load without changing containerId.
+CompanionDashboardContainer.states.why_this_l2 =
+  WhyThisOverlayContainer.states.why_this_l2;
+CompanionDashboardContainer.states.why_this_l3 =
+  WhyThisOverlayContainer.states.why_this_l3;
+
 export const ContainerRegistry = {
   portal: PortalContainer,
   portal_splash: PortalSplashContainer,
@@ -6132,6 +6469,17 @@ export const ContainerRegistry = {
   sadhana_deepen: SadhanaDeepenContainer,
   cycle_transitions: CycleTransitionsContainer,
   stable_scan: StableScanContainer,
+  // Week 4 — Support Path
+  support_trigger: SupportTriggerContainer,
+  support_checkin: SupportCheckinContainer,
+  overlay: OverlayContainer,
+  // Week 5 — Reflection + Checkpoints
+  reflection_weekly: null, // filled by post-declaration assignment
+  reflection_evening: null,
+  // Week 7 — support rooms + why-this overlay host
+  support_grief: SupportGriefContainer,
+  support_loneliness: SupportLonelinessContainer,
+  why_this_overlay: WhyThisOverlayContainer,
   demo_container: {
     container_id: "demo_container",
     states: {
@@ -6249,3 +6597,336 @@ export const ContainerRegistry = {
     },
   },
 };
+
+// =============================================================================
+// Week 1 — Welcome Onboarding (Mitra v3 Moments 1-7)
+// Web counterpart: kalpx-frontend/src/containers/PortalContainer.vue (replaced
+//   by a 7-turn conversation thread in RN; no direct 1:1 in web).
+// Spec: docs/specs/mitra-v3-experience/screens/route_welcome_onboarding.md §1, §6
+// Regression cases guarded: REG-001 (draft cleanup on completion in
+//   actionExecutor onboarding_turn_response), REG-015 (no auto-advance), REG-016
+//   (turns 4 & 5 have no open_input).
+// =============================================================================
+
+const _onResp = { type: "onboarding_turn_response" };
+
+export const WelcomeOnboardingContainer = {
+  container_id: "welcome_onboarding",
+  container_type: "welcome_onboarding",
+  states: {
+    turn_1: {
+      tone: { theme: "gold_dark", mood: "steady" },
+      blocks: [
+        // {
+        //   type: "image",
+        //   url: "/assets/mitra.png",
+        //   alt: "lotus",
+        // },
+        {
+          type: "headline",
+          content: "I'm Mitra.\nI'm here with you.",
+          style: { fontSize: "32px", lineHeight: 40, marginTop: -45 },
+        },
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn1",
+          mitra_message: [
+            "Some days feel clear.",
+            "Some feel heavy.",
+            "And some… you just don’t have the words.",
+            "Whatever this moment holds -you don’t have to figure it out alone.",
+          ],
+          image: {
+            url: "/assets/new_home_lotus.png",
+            alt: "lotus",
+          },
+          reply_chips: [
+            { id: "ready", label: "Yes, let’s begin →", style: "primary" },
+            // {
+            //   id: "returning",
+            //   label: "I’m returning",
+            //   style: "secondary",
+            // },
+          ],
+          open_input: {
+            enabled: true,
+            placeholder: "Or tell me why you're here...",
+            max_length: 400,
+          },
+          voice_available: true,
+          on_response: _onResp,
+        },
+      ],
+    },
+
+    turn_2: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [
+        {
+          type: "headline",
+          content: "Where would you like support right now?",
+          style: { fontSize: "32px", lineHeight: 40, marginTop: -10 },
+        },
+        {
+          type: "subtext",
+          content: "Choose what feels closest. We can take it from there.",
+          variant: "multi_line",
+        },
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn2",
+          mitra_message: "",
+          reply_chips: [
+            {
+              id: "work_clarity",
+              label: "Work feels unclear",
+              style: "secondary",
+            },
+            {
+              id: "relationship",
+              label: "A relationship needs care",
+              style: "secondary",
+            },
+            {
+              id: "mind_quiet",
+              label: "My mind needs quiet",
+              style: "secondary",
+            },
+            {
+              id: "uncertain",
+              label: "I'm moving through uncertainty",
+              style: "secondary",
+            },
+            {
+              id: "low_energy",
+              label: "My energy feels low",
+              style: "secondary",
+            },
+            {
+              id: "searching_identity",
+              label: "I'm trying to understand myself",
+              style: "secondary",
+            },
+            {
+              id: "spiritual",
+              label: "I want to grow spiritually",
+              style: "secondary",
+            },
+          ],
+          open_input: {
+            enabled: true,
+            placeholder: "Or tell me in your own words...",
+            max_length: 400,
+          },
+          voice_available: true,
+          on_response: _onResp,
+        },
+      ],
+    },
+
+    turn_3: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn3",
+          mitra_message:
+            "{{friction_label}}. I understand that one well. How does it feel in you today — not what caused it, just the texture of it right now?",
+          reply_chips: [
+            {
+              id: "activated",
+              label: "Activated — wired, running fast",
+              style: "secondary",
+            },
+            {
+              id: "drained",
+              label: "Drained — empty, nothing left",
+              style: "secondary",
+            },
+            {
+              id: "foggy",
+              label: "Foggy — can't see clearly",
+              style: "secondary",
+            },
+            {
+              id: "heavy",
+              label: "Heavy — everything weighs",
+              style: "secondary",
+            },
+            {
+              id: "restless",
+              label: "Restless — moving but going nowhere",
+              style: "secondary",
+            },
+            {
+              id: "clear_but_full",
+              label: "Actually clear — but there's a lot to hold",
+              style: "secondary",
+            },
+          ],
+          open_input: {
+            enabled: true,
+            placeholder: "Or describe it...",
+            max_length: 400,
+          },
+          voice_available: true,
+          on_response: _onResp,
+        },
+      ],
+    },
+
+    turn_4: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn4",
+          mitra_message:
+            "{{onboarding_state_ack}} I can speak to you, or we can keep things written and quiet. What feels right?",
+          reply_chips: [],
+          open_input: { enabled: false },
+          voice_available: false,
+          on_response: null,
+        },
+        { type: "voice_text_fork", on_response: _onResp },
+      ],
+    },
+
+    turn_5: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [
+        {
+          type: "headline",
+          content: "How would you like this guidance to sound?",
+          style: { fontSize: "32px", lineHeight: 40, marginTop: -10 },
+        },
+        {
+          type: "subtext",
+          content:
+            "Some people prefer simple, modern language. Some like a blend. Some want the deeper roots visible.",
+          variant: "multi_line",
+        },
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn5",
+          mitra_message: "",
+          reply_chips: [],
+          open_input: { enabled: false },
+          voice_available: false,
+          on_response: null,
+        },
+        { type: "guidance_mode_picker", on_response: _onResp },
+      ],
+    },
+
+    turn_6: {
+      tone: { theme: "gold_dark", mood: "steady" },
+      blocks: [
+        {
+          type: "first_recognition",
+          label: "RECOGNITION",
+          emphasized_line:
+            "Your {{friction_label}} is real — and the {{state_label}} you're in right now is the body's honest response to it.",
+          body_paragraphs: [
+            "Today might not be a day for pushing — it might be a day for {{recommended_posture}}.",
+            "But here's what I also see: you showed up. You're here, paying attention to your inner life. That's not small.",
+            "I built something for you. A practice, an intention, and a morning anchor. Want to hear your first briefing?",
+          ],
+        },
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn6",
+          mitra_message: "",
+          reply_chips: [
+            {
+              id: "play_briefing",
+              label: "Play my first briefing",
+              style: "primary",
+            },
+            {
+              id: "show_path",
+              label: "Show me my path first",
+              style: "secondary",
+            },
+          ],
+          open_input: {
+            enabled: true,
+            placeholder: "Ask me something",
+            max_length: 400,
+          },
+          voice_available: true,
+          on_response: _onResp,
+        },
+      ],
+    },
+
+    turn_7: {
+      tone: { theme: "gold_dark", mood: "steady" },
+      blocks: [
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn7_msg",
+          mitra_message: "This is what I'm holding for you today:",
+          reply_chips: [],
+          open_input: { enabled: false },
+          voice_available: false,
+          on_response: null,
+        },
+        { type: "path_emerges" },
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn7_cta",
+          mitra_message: "",
+          reply_chips: [{ id: "ready", label: "I'm ready", style: "primary" }],
+          open_input: {
+            enabled: true,
+            placeholder: "I have a question",
+            max_length: 400,
+          },
+          voice_available: true,
+          on_response: _onResp,
+        },
+      ],
+    },
+  },
+};
+
+// =============================================================================
+// Week 5 — Reflection + Checkpoints (Mitra v3 Moments 23, 24, 25, 26, 34)
+// Specs:
+//   - route_reflection_weekly.md (Moment 23)
+//   - route_checkpoint_day_7.md (Moment 24, also rendered via cycle_transitions/day_7)
+//   - route_checkpoint_day_14.md (Moment 25, also rendered via cycle_transitions/day_14)
+//   - embedded_resilience_narrative_card.md (Moment 26, embedded in dashboard + weekly)
+//   - route_reflection_evening.md (Moment 34)
+// Web parity: kalpx-frontend/src/containers/CycleTransitionsContainer.vue +
+//   reflection section patterns.
+// Regression guards: REG-015 (draft cleanup on submit/unmount), REG-016 (CTA
+//   in bottom thumb zone — enforced inside the blocks themselves).
+// =============================================================================
+
+export const ReflectionWeeklyContainer = {
+  container_id: "reflection_weekly",
+  container_type: "reflection_weekly",
+  states: {
+    letter: {
+      tone: { theme: "light_sandal", mood: "reflective" },
+      blocks: [{ type: "weekly_reflection" }],
+    },
+  },
+};
+
+export const ReflectionEveningContainer = {
+  container_id: "reflection_evening",
+  container_type: "reflection_evening",
+  states: {
+    reflect: {
+      tone: { theme: "light_sandal", mood: "reflective" },
+      blocks: [{ type: "evening_reflection" }],
+    },
+  },
+};
+
+// Back-fill registry placeholders declared above.
+ContainerRegistry.reflection_weekly = ReflectionWeeklyContainer;
+ContainerRegistry.reflection_evening = ReflectionEveningContainer;

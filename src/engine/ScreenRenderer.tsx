@@ -24,6 +24,16 @@ import PracticeRunnerContainer from "../containers/PracticeRunnerContainer";
 import RoutineBuilderContainer from "../containers/RoutineBuilderContainer";
 import RoutineLockedContainer from "../containers/RoutineLockedContainer";
 import StableScanContainer from "../containers/StableScanContainer";
+import OnboardingContainer from "../containers/OnboardingContainer";
+// Week 4 — Support Path
+import SupportTriggerContainer from "../containers/SupportTriggerContainer";
+import SupportCheckinContainer from "../containers/SupportCheckinContainer";
+// Week 5 — Reflection containers (Moments 23, 34)
+import ReflectionWeeklyContainer from "../containers/ReflectionWeeklyContainer";
+import ReflectionEveningContainer from "../containers/ReflectionEveningContainer";
+// Week 7 — Support routes (Moments 46, 47)
+import GriefRoomContainer from "../containers/GriefRoomContainer";
+import LonelinessRoomContainer from "../containers/LonelinessRoomContainer";
 
 const containerMap: Record<string, React.ComponentType<any>> = {
   portal: PortalContainer,
@@ -43,6 +53,16 @@ const containerMap: Record<string, React.ComponentType<any>> = {
   insights_progress: InsightsProgressContainer,
   portal_splash: PortalSplashContainer,
   routine_locked: RoutineLockedContainer,
+  welcome_onboarding: OnboardingContainer,
+  // Week 4 — Support Path
+  support_trigger: SupportTriggerContainer,
+  support_checkin: SupportCheckinContainer,
+  // Week 5
+  reflection_weekly: ReflectionWeeklyContainer,
+  reflection_evening: ReflectionEveningContainer,
+  // Week 7 — Support routes
+  support_grief: GriefRoomContainer,
+  support_loneliness: LonelinessRoomContainer,
 };
 
 const ScreenRenderer: React.FC = () => {

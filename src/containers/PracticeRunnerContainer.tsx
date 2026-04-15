@@ -129,9 +129,118 @@ interface PracticeRunnerContainerProps {
   };
 }
 
+// ---------------------------------------------------------------------------
+// Week 3 — Mitra v3 Immersive Runner Chrome (Moments 17, 18, 19, 32)
+// ---------------------------------------------------------------------------
+// When a screen schema carries `immersive_v3: true`, render the immersive
+// dark chrome (#1a1a1a background, subtle gold back arrow top-left, pause
+// orb bottom-right) and delegate to the new v3 blocks
+// (mantra_runner_display, sankalp_hold, practice_timer, completion_return).
+//
+// The legacy PracticeRunnerContainer body below (3000+ lines of pre-v3
+// sacred_pause / trigger / sankalp_embody_legacy rendering) is untouched.
+// Week 3's new variants (mantra_runner_v3 / sankalp_hold_v3 /
+// practice_timer_v3 / completion_return) route through this shim instead.
+//
+// Spec refs:
+//   - route_practice_mantra_runner.md §1, §14A
+//   - route_practice_sankalp_hold.md §1, §14A
+//   - route_practice_timer.md §1, §9, §14A
+//   - transient_completion_return.md §1, §9, §14A
+// Regression guards in scope here:
+//   - REG-001: completion_return "Return Home" is a navigate (never back-pop)
+//   - REG-003: back from completion_return clears runner_* via the block's
+//     unmount hook
+//   - REG-016: ≥44x44 touch targets for back arrow
+const ImmersiveV3Runner: React.FC<{ schema: any }> = ({ schema }) => {
+  const { loadScreen, goBack, screenData, currentScreen } = useScreenStore();
+  const isCompletion = schema.variant === "completion_return";
+
+  const handleBack = () => {
+    // For completion_return, back == Return Home (practice already tracked).
+    // For runners, back == early abandon (exit to dashboard; block's own
+    // cleanup on unmount handles state clear).
+    executeAction(
+      {
+        type: "navigate",
+        target: { container_id: "companion_dashboard", state_id: "day_active" },
+      } as any,
+      {
+        loadScreen,
+        goBack,
+        setScreenValue: (value: any, key: string) => {
+          const { screenActions } = require("../store/screenSlice");
+          const { store } = require("../store");
+          store.dispatch(screenActions.setScreenValue({ key, value }));
+        },
+        screenState: { ...screenData },
+      },
+    ).catch(() => {});
+  };
+
+  return (
+    <View style={[v3Styles.root, isCompletion && { backgroundColor: "transparent" }]}>
+      {!isCompletion && (
+        <TouchableOpacity
+          onPress={handleBack}
+          style={v3Styles.backBtn}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+          accessibilityRole="button"
+          accessibilityLabel="Exit practice"
+          testID="v3-back"
+        >
+          <Text style={v3Styles.backArrow}>{"\u2190"}</Text>
+        </TouchableOpacity>
+      )}
+
+      <View style={[v3Styles.body, isCompletion && { paddingHorizontal: 0, paddingTop: 0, paddingBottom: 0 }]}>
+        {schema.blocks?.map((block: any, i: number) => (
+          <BlockRenderer key={i} block={block} />
+        ))}
+      </View>
+    </View>
+  );
+};
+
+const v3Styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: "#1a1a1a",
+    width: "100%",
+    minHeight: "100%",
+  },
+  backBtn: {
+    position: "absolute",
+    top: 52,
+    left: 16,
+    width: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+  },
+  backArrow: {
+    fontSize: 22,
+    color: "#9a7a3a",
+  },
+  body: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 16,
+    paddingTop: 80,
+    paddingBottom: 48,
+  },
+});
+
 const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
   schema,
 }) => {
+  // Mitra v3 Week 3 fast path — immersive runners (Moments 17, 18, 19, 32).
+  if ((schema as any)?.immersive_v3) {
+    return <ImmersiveV3Runner schema={schema} />;
+  }
+
   const {
     screenData: screenState,
     loadScreen,

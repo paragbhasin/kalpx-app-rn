@@ -1,0 +1,41 @@
+# Week 4 Moment 31 — Voice note text fallback when mic unavailable/declined
+# Asserts: tap "Type instead" → text input renders → submit succeeds offline
+# (endpoint may be flagged OFF, should still ack gracefully).
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+# Accept consent once so mic gate is out of the way
+- tapOn:
+    text: ".*🎙.*|.*Say it out loud.*|.*Record a note.*"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "Sounds right"
+    optional: true
+- waitForAnimationToEnd
+
+# Voice note sheet — use text fallback
+- assertVisible:
+    text: ".*I'm listening.*"
+    optional: true
+- tapOn:
+    text: "Type instead"
+    optional: true
+- waitForAnimationToEnd
+
+- inputText: "Today felt heavy but I stayed with it."
+- tapOn:
+    text: "Send"
+    optional: true
+- waitForAnimationToEnd
+
+# Fallback reflection ack (endpoint 404 is tolerated — generic ack appears)
+- assertVisible:
+    text: ".*I'll hold it.*|.*heard you.*"
+    optional: true
+
+- tapOn:
+    text: "Thank you"
+    optional: true

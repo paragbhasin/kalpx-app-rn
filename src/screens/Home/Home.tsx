@@ -8,9 +8,11 @@
  *
  * Old Home.tsx saved as Home.old.tsx for reference.
  */
-import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import React, { useState } from "react";
+import { BlurView } from "expo-blur";
+import { LinearGradient } from "expo-linear-gradient";
+import React, { useRef, useState } from "react";
+
 import {
   ActivityIndicator,
   Image,
@@ -22,8 +24,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { BlurView } from "expo-blur";
 import { useSelector } from "react-redux";
+import {
+  mitraJourneyWelcomeBack,
+  mitraTrackEvent,
+} from "../../engine/mitraApi";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import api from "../../Networks/axios";
 import store, { RootState } from "../../store";
@@ -31,11 +36,6 @@ import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
 import ContinueJourney from "./ContinueJourney";
 import WelcomeBack from "./WelcomeBack";
-import {
-  mitraJourneyCompanion,
-  mitraJourneyWelcomeBack,
-  mitraTrackEvent,
-} from "../../engine/mitraApi";
 
 const FEATURE_ITEMS = [
   {
@@ -71,14 +71,18 @@ export default function Home() {
   const isLoggedIn = !!user;
 
   const updateBackground = useScreenStore((state) => state.updateBackground);
-  const updateHeaderHidden = useScreenStore((state) => state.updateHeaderHidden);
+  const updateHeaderHidden = useScreenStore(
+    (state) => state.updateHeaderHidden,
+  );
 
   const [mitraJourneyId, setMitraJourneyId] = useState<string | null>(null);
   const [journeyDay, setJourneyDay] = useState<number>(1);
   const [checkingJourney, setCheckingJourney] = useState(false);
   const [welcomeBackData, setWelcomeBackData] = useState<any>(null);
+  // Mitra v3 — guard auto-route so we don't re-navigate on every Home focus.
+  const v3AutoRoutedRef = useRef(false);
 
-  const HOME_BACKGROUND = require("../../../assets/new_bg.png");
+  const HOME_BACKGROUND = require("../../../assets/new_home.png");
   const CONTINUE_BG = require("../../../assets/continue_journey_bg.jpeg");
 
   useFocusEffect(
@@ -89,7 +93,13 @@ export default function Home() {
         updateBackground(null);
         updateHeaderHidden(false);
       };
-    }, [updateBackground, updateHeaderHidden, mitraJourneyId, CONTINUE_BG, HOME_BACKGROUND])
+    }, [
+      updateBackground,
+      updateHeaderHidden,
+      mitraJourneyId,
+      CONTINUE_BG,
+      HOME_BACKGROUND,
+    ]),
   );
 
   const seedJourneyStatus = React.useCallback((status: any) => {
@@ -151,9 +161,21 @@ export default function Home() {
             setMitraJourneyId(data.journeyId);
             setJourneyDay(data.dayNumber || 1);
             seedJourneyStatus(data);
+            // Mitra v3 auto-route: authed user with active journey skips
+            // legacy Home splash and goes straight to the companion experience.
+            if (!v3AutoRoutedRef.current) {
+              v3AutoRoutedRef.current = true;
+              navigateToMitra(true);
+            }
           } else {
             setWelcomeBackData(null);
             setMitraJourneyId(null);
+            // Mitra v3 auto-route: authed user without a journey lands in
+            // welcome_onboarding Turn 1 instead of the legacy splash.
+            if (!v3AutoRoutedRef.current) {
+              v3AutoRoutedRef.current = true;
+              navigateToMitra(false);
+            }
           }
         } catch (err) {
           console.debug("[HOME] journey/status failed:", (err as any).message);
@@ -204,8 +226,10 @@ export default function Home() {
           {
             screenState: store.getState().screen.screenData,
             loadScreen: (target: any) => {
-              const containerId = target?.container_id || target?.containerId || "generic";
-              const stateId = target?.state_id || target?.stateId || target || "";
+              const containerId =
+                target?.container_id || target?.containerId || "generic";
+              const stateId =
+                target?.state_id || target?.stateId || target || "";
               store.dispatch(loadScreenWithData({ containerId, stateId }));
             },
             goBack: () => {
@@ -267,11 +291,15 @@ export default function Home() {
       setIsProcessing(true);
       try {
         // Log Bearer Token check for user visibility
-        const AsyncStorage = require("@react-native-async-storage/async-storage").default;
+        const AsyncStorage =
+          require("@react-native-async-storage/async-storage").default;
         const token = await AsyncStorage.getItem("access_token");
         console.log("=====================================");
         console.log("🛠️  RESUME JOURNEY DEBUG");
-        console.log("🔑 Checking Bearer Token:", token ? `Exists (${token.slice(0, 15)}...)` : "MISSING");
+        console.log(
+          "🔑 Checking Bearer Token:",
+          token ? `Exists (${token.slice(0, 15)}...)` : "MISSING",
+        );
 
         console.log("📡 Calling Status API: mitra/journey/status/");
         const res = await api.get("mitra/journey/status/");
@@ -299,16 +327,29 @@ export default function Home() {
 
           seedJourneyStatus(status);
 
-          // Fetch companion data. User specifically requested generate-companion.
-          console.log("📡 Calling: generate-companion action (Requested by User)");
+          // Audit fix F4 (2026-04-13, revised) — resume dispatches the same
+          // generate_companion action handler with use_journey_companion=true,
+          // which swaps the API call to read-only /journey/companion/ but
+          // reuses the full (~50-field) population logic. Fixes regression
+          // where CoreItemsList read empty card_mantra_title / master_mantra
+          // on resume and dashboard triad showed placeholders + view_info
+          // couldn't open info reveal.
+          console.log(
+            "📡 Calling: generate_companion via journey/companion (resume)",
+          );
           const { executeAction } = require("../../engine/actionExecutor");
           await executeAction(
-            { type: "generate_companion" },
+            {
+              type: "generate_companion",
+              payload: { use_journey_companion: true },
+            },
             {
               screenState: store.getState().screen.screenData,
               loadScreen: (target: any) => {
-                const containerId = target?.container_id || target?.containerId || "generic";
-                const stateId = target?.state_id || target?.stateId || target || "";
+                const containerId =
+                  target?.container_id || target?.containerId || "generic";
+                const stateId =
+                  target?.state_id || target?.stateId || target || "";
                 store.dispatch(loadScreenWithData({ containerId, stateId }));
               },
               goBack: () => {
@@ -320,7 +361,7 @@ export default function Home() {
               },
             },
           );
-          console.log("✅ generate-companion complete");
+          console.log("✅ resume companion data loaded");
 
           // Auto-route to checkpoint screens on day 7 / day 14 if not yet completed
           const dayNumber = status.dayNumber || 1;
@@ -355,10 +396,28 @@ export default function Home() {
             );
           }
         } else {
+          // Mitra v3: no active journey → launch welcome_onboarding conversation
+          // (Moments 1–7). Replaces the legacy choice_stack/discipline_select
+          // portal. Seeds onboarding_turn=1 + empty draft state so the first
+          // turn renders correctly.
+          // LEGACY (commented out — kept for rollback reference):
+          // store.dispatch(loadScreenWithData({
+          //   containerId: "choice_stack",
+          //   stateId: "discipline_select",
+          // }));
+          store.dispatch(
+            screenActions.setScreenValue({ key: "onboarding_turn", value: 1 }),
+          );
+          store.dispatch(
+            screenActions.setScreenValue({
+              key: "onboarding_draft_state",
+              value: { started_at: Date.now() },
+            }),
+          );
           store.dispatch(
             loadScreenWithData({
-              containerId: "choice_stack",
-              stateId: "discipline_select",
+              containerId: "welcome_onboarding",
+              stateId: "turn_1",
             }),
           );
         }
@@ -368,16 +427,30 @@ export default function Home() {
         setIsProcessing(false);
       }
     } else {
+      // Mitra v3: unauthed or no-journey path → welcome_onboarding turn_1.
+      // LEGACY (commented out):
+      // store.dispatch(loadScreenWithData({
+      //   containerId: "choice_stack",
+      //   stateId: "discipline_select",
+      // }));
+      store.dispatch(
+        screenActions.setScreenValue({ key: "onboarding_turn", value: 1 }),
+      );
+      store.dispatch(
+        screenActions.setScreenValue({
+          key: "onboarding_draft_state",
+          value: { started_at: Date.now() },
+        }),
+      );
       store.dispatch(
         loadScreenWithData({
-          containerId: "choice_stack",
-          stateId: "discipline_select",
+          containerId: "welcome_onboarding",
+          stateId: "turn_1",
         }),
       );
     }
     navigation.navigate("DynamicEngine");
   };
-
 
   // Temporarily disable the quick-category nav (Mitra / Videos / Classes / Community).
   // const categories = [
@@ -450,71 +523,31 @@ export default function Home() {
           {/* ── Hero Section ── */}
           <View style={styles.heroSection}>
             <Text style={styles.heroQuote}>
-              "Lift yourself by your own Self."
+              "In this path, no effort is ever lost."
             </Text>
             <Text style={styles.heroSource}>— Bhagavad Gita 6.5</Text>
-            <Text style={styles.heroTitle}>Guided growth for real life</Text>
-            <Text style={styles.heroSubtitle}>
-              Helping you navigate life's challenges with clarity, balance, and
-              Sanatan wisdom.
+            <Text style={[styles.heroTitle, { marginTop: 20 }]}>
+              KalpX Mitra
             </Text>
+            <Text style={styles.heroSubtitle}>A daily companion for life</Text>
           </View>
 
           {/* ── Journey CTA ── */}
-          <TouchableOpacity
-            style={styles.ctaButton}
-            onPress={() => navigateToMitra(false)}
-          >
-            <Text style={styles.ctaText}>Begin with KalpX Mitra →</Text>
-          </TouchableOpacity>
 
           {/* ── Companion Preview ── */}
           <View style={styles.companionSection}>
-            <Text style={styles.companionLabel}>KALPX MITRA</Text>
-            <Text style={styles.companionTitle}>
-              Your guided path begins here
+            <Text style={[styles.companionTitle, { marginTop: 20 }]}>
+              Your daily companion for life
             </Text>
             <Text style={styles.companionDesc}>
-              A companion for the life you are actually living.
+              Grounded in timeless Sanatan wisdom.
             </Text>
-            <TouchableOpacity onPress={() => navigateToMitra(!!mitraJourneyId)}>
-              <Image
-                source={require("../../../assets/home_side(2).png")}
-                style={styles.companionImage}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
+            <Text style={styles.companionDesc}>
+              A calmer, clearer way to navigate life - one day at a time.
+            </Text>
           </View>
 
-          {/* ── What Mitra Offers ── */}
-          <View style={styles.featuresSection}>
-            <Text style={styles.sectionTitle}>What Mitra Offers</Text>
-            <View style={styles.featureGrid}>
-              {FEATURE_ITEMS.map((item, idx) => (
-                <View key={idx} style={styles.featureCard}>
-                  <Image
-                    source={item.icon}
-                    style={styles.featureIconImage}
-                    resizeMode="contain"
-                  />
-
-                  <Text style={styles.featureTitle}>{item.title}</Text>
-                  <Text style={styles.featureText}>{item.text}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-
-          {/* ── How It Works Link ── */}
-          <TouchableOpacity
-            style={styles.philosophyLink}
-            onPress={() => navigation.navigate("MitraPhilosophy")}
-          >
-            <Text style={styles.philosophyText}>How KalpX Mitra Works →</Text>
-          </TouchableOpacity>
-
-          {/* ── Login CTA (logged out only) ── */}
-          {!isLoggedIn && (
+          {/* {!isLoggedIn && (
             <TouchableOpacity
               style={styles.loginCta}
               onPress={() => navigation.navigate("Login")}
@@ -522,7 +555,23 @@ export default function Home() {
               <Ionicons name="person-outline" size={18} color="#D4A017" />
               <Text style={styles.loginText}>Sign in to save your journey</Text>
             </TouchableOpacity>
-          )}
+          )} */}
+          <Image source={require("../../../assets/new_home_lotus.png")} />
+          {/* <View style={{ height: 220 }} /> */}
+          <TouchableOpacity
+            onPress={() => navigateToMitra(false)}
+            activeOpacity={0.85}
+            style={{ borderRadius: 28 }}
+          >
+            <LinearGradient
+              colors={["#E5D4CA", "#F5EDEA"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.ctaButton}
+            >
+              <Text style={styles.ctaText}>Begin your journey →</Text>
+            </LinearGradient>
+          </TouchableOpacity>
         </ScrollView>
       )}
     </SafeAreaView>
@@ -533,6 +582,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "transparent",
+    marginTop: -40,
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -639,38 +689,28 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginLeft: 12,
   },
-
-  // Begin CTA — premium gradient-style button look
   ctaButton: {
-    width: "86%",
-    alignSelf: "center",
-    borderRadius: 999,
     paddingVertical: 14,
-    paddingHorizontal: 28,
+    borderRadius: 30,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 24,
 
-    // Gradient fallback base color
-    backgroundColor: "#8e6f53",
+    borderWidth: 1.5,
+    borderColor: "#E8D7B5",
 
-    // Border glow
-    borderWidth: 2,
-    borderColor: "rgba(255, 230, 190, 0.6)",
-
-    // iOS shadow
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.35,
-    shadowRadius: 25,
-
-    // Android shadow
-    elevation: 8,
+    shadowColor: "#BFA27A",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    width: "60%",
+    elevation: 6,
+    alignSelf: "center",
   },
+
   ctaText: {
-    fontFamily: Fonts.serif.regular,
-    fontSize: 18,
-    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#5C4432", // deep gold-brown
     letterSpacing: 0.5,
   },
 
@@ -703,6 +743,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#5C5648",
     marginBottom: 16,
+    textAlign: "center",
   },
   companionImage: {
     width: 280,

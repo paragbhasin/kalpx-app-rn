@@ -1,0 +1,40 @@
+# Mitra v3 Moment 25 — Day 14 Evolution Checkpoint flow
+# Validates: on day 14, cycle_transitions/day_14 renders CheckpointDay14Block
+# with intro → body (14-day grid + optional seal ritual entry + reflection +
+# 3 evolution decisions). Tapping "Continue the same path" reuses
+# checkpoint_submit (decision=continue_same, day=14) — backend contract
+# unchanged. Seal-day entry preserved via existing seal_day pattern.
+#
+# Web parity: route_checkpoint_day_14.md + actionExecutor.ts case
+#   "checkpoint_submit" (csDay === 14 branch).
+# Pre-req: seed journey to day 14.
+
+appId: com.kalpx.app
+---
+- launchApp
+- waitForAnimationToEnd
+
+- tapOn:
+    text: "Resume|Continue|My Routine|Begin"
+    optional: true
+- waitForAnimationToEnd
+
+- assertVisible: "DAY 14"
+- assertVisible:
+    text: "Two weeks|Something settled"
+- tapOn: "Show me"
+- waitForAnimationToEnd
+
+- assertVisible: "SEAL THIS CYCLE"
+
+- tapOn:
+    text: "What deserves to be remembered"
+    optional: true
+- inputText: "two weeks, i kept coming back"
+- hideKeyboard
+
+- tapOn: "Continue the same path"
+- waitForAnimationToEnd
+
+- assertVisible:
+    text: "Day|Mitra|Routine"

@@ -52,3 +52,14 @@ build.ipa
 
 # Screenshot pipeline output
 tests/unit/.compiled/
+
+# Mitra v3 screenshot runner outputs
+screenshots/mitra-v3/
+*.png
+!screenshots/comparison.html
+!screenshots/flow_*/
+!screenshots/persona_*/
+!screenshots/verify_*/
+!screenshots/day_*/
+!screenshots/welcome_back/
+

@@ -14,7 +14,7 @@ const TransparentTheme = {
 import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState, useRef } from "react";
-import { Animated, StyleSheet, View, Image, ImageBackground, StatusBar } from "react-native";
+import { Animated, StyleSheet, View, Image, ImageBackground, StatusBar, AccessibilityInfo } from "react-native";
 import { useScreenStore } from "./src/engine/useScreenBridge";
 import "react-native-get-random-values";
 import { MenuProvider } from "react-native-popup-menu";
@@ -29,6 +29,17 @@ import { navigationRef } from "./src/Shared/Routes/NavigationService";
 import Routes from "./src/Shared/Routes/Routes";
 import { store } from "./src/store";
 import { hideSnackBar } from "./src/store/snackBarSlice";
+import {
+  setPreference,
+  restorePreferences,
+  fetchPreferences,
+  fetchNotificationPrefs,
+} from "./src/store/preferencesSlice";
+// Audit fix F6 (2026-04-13): companion-state boot
+import {
+  restoreCompanionState,
+  fetchCompanionState,
+} from "./src/store/companionStateSlice";
 
 // 📌 Push Notification Service
 import {
@@ -72,18 +83,39 @@ function AppInner({ initialRoute, navigationRef }) {
   // The login flow already persists access_token + refresh_token + user_id to
   // AsyncStorage, but the Redux state.login.user was being lost on restart.
   // This restores it so the user stays logged in across app launches.
+  //
+  // Mitra v3: also bootstraps preferencesSlice — first restores from
+  // AsyncStorage (fast render), then if the user is authed, fetches from
+  // /api/mitra/user-preferences/ and /api/mitra/user-preferences/notifications/
+  // (MITRA_V3_USER_PREFERENCES flag is live on dev). Both fetches are
+  // 404-tolerant and never throw to the UI.
   useEffect(() => {
     let cancelled = false;
     const hydrate = async () => {
       try {
+        // Preferences restore first (no auth required, just AsyncStorage)
+        dispatch(restorePreferences());
+
         const [token, userId] = await Promise.all([
           AsyncStorage.getItem("access_token"),
           AsyncStorage.getItem("user_id"),
         ]);
         if (cancelled || !token) return;
+
         // Minimal user shape — full profile can be re-fetched on demand.
         const user = userId ? { id: Number(userId) } : { id: null };
         dispatch({ type: "LOGIN_SUCCESS", payload: user });
+
+        // Authed: sync preferences from backend (overrides restored values
+        // for server-owned fields; client-only fields are preserved).
+        dispatch(fetchPreferences());
+        dispatch(fetchNotificationPrefs());
+
+        // Audit fix F6 (2026-04-13): companion-state hydration.
+        // restore from AsyncStorage first (fast render), then fetch from
+        // backend to sync. Both 404-tolerant via the slice.
+        dispatch(restoreCompanionState());
+        dispatch(fetchCompanionState());
       } catch (err) {
         console.warn("[BOOT] login hydration failed:", err?.message);
       }
@@ -138,6 +170,9 @@ export default function App() {
     // decorative — Cinzel
     Cinzel_400Regular: require("@expo-google-fonts/cinzel/400Regular/Cinzel_400Regular.ttf"),
     Cinzel_700Bold: require("@expo-google-fonts/cinzel/700Bold/Cinzel_700Bold.ttf"),
+    // Week 7 — Devanagari for Why-This L3 Sanskrit sources
+    NotoSansDevanagari_400Regular: require("@expo-google-fonts/noto-sans-devanagari/400Regular/NotoSansDevanagari_400Regular.ttf"),
+    NotoSansDevanagari_700Bold: require("@expo-google-fonts/noto-sans-devanagari/700Bold/NotoSansDevanagari_700Bold.ttf"),
   });
 
   const [initialRoute, setInitialRoute] = useState(null);
@@ -163,6 +198,29 @@ export default function App() {
     return () => {
       unsubForeground();
       unsubOpen();
+    };
+  }, []);
+
+  // Reduced-motion accessibility bootstrap — Mitra v3 Week 7.
+  // GriefRoomContainer + CompanionedChant read preferences.reduced_motion to
+  // skip breath pulse / orb scale animations. We read the OS setting once on
+  // mount and subscribe for changes; the preference also persists via
+  // preferencesSlice so user overrides survive relaunch.
+  useEffect(() => {
+    let subscription;
+    AccessibilityInfo.isReduceMotionEnabled()
+      .then((enabled) => {
+        store.dispatch(setPreference({ key: "reduced_motion", value: !!enabled }));
+      })
+      .catch(() => {});
+    subscription = AccessibilityInfo.addEventListener(
+      "reduceMotionChanged",
+      (enabled) => {
+        store.dispatch(setPreference({ key: "reduced_motion", value: !!enabled }));
+      },
+    );
+    return () => {
+      if (subscription?.remove) subscription.remove();
     };
   }, []);
 

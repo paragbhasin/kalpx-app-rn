@@ -23,6 +23,7 @@ import {
   mitraCheckpoint,
   mitraGenerateCompanion,
   mitraHelpMeChoose,
+  mitraOnboardingRecognition,
   mitraPathEvolution,
   mitraPranaAcknowledge,
   mitraSubmitCheckpoint,
@@ -3340,86 +3341,190 @@ export async function executeAction(
       // advances screenData.onboarding_turn, and loads next turn state.
       // ================================================================
       case "onboarding_turn_response": {
-        const currentTurn = Number(screenState.onboarding_turn || 1);
+        // Sadhana Yatra 4-stage flow (2026-04-14). State-id driven rather than
+        // numeric-turn driven — path-aware branching requires named states.
+        const currentStateId: string =
+          screenState._currentStateId ||
+          (screenState.onboarding_turn
+            ? `turn_${screenState.onboarding_turn}`
+            : "turn_1");
         const draft = { ...(screenState.onboarding_draft_state || {}) };
         const p = payload || {};
 
-        // Per-turn analytics — uses generic track-event since backend has no
-        // dedicated onboarding/turn endpoint (audit F8, 2026-04-13).
+        // Kosha / klesha maps per spec mitra_architecture_sadhana_yatra.md
+        const KOSHA_MAP: Record<string, string> = {
+          body: "annamaya",
+          breath: "pranamaya",
+          mind: "manomaya",
+          intellect: "vijnanamaya",
+          deep: "anandamaya",
+        };
+        const KLESHA_MAP: Record<string, string> = {
+          fear: "abhinivesha",
+          wanting: "raga",
+          resistance: "dvesha",
+          identity: "asmita",
+          confusion: "avidya",
+          not_sure: "avidya",
+        };
+
         mitraTrackEvent("onboarding_turn_response", {
           journeyId: screenState.journey_id || null,
           dayNumber: 0,
           meta: {
-            turn: currentTurn,
+            turn: currentStateId,
             response_type: p.response_type,
             chip_id: p.chip_id,
             freeform_length: (p.freeform_text || "").length,
           },
         });
 
-        let nextTurn = currentTurn + 1;
+        let nextStateId = "";
 
         try {
-          if (currentTurn === 1) {
+          if (currentStateId === "turn_1") {
             if (p.chip_id === "returning") {
-              // Journey status check handled outside — for now advance to Turn 2.
               draft.returning = true;
+              // Returning users skip to dashboard via journey-status flow
+              // (handled outside this case); for now just advance to Stage 0.
             }
             if (p.freeform_text) draft.intro_freeform = p.freeform_text;
-          } else if (currentTurn === 2) {
+            nextStateId = "turn_2";
+          } else if (currentStateId === "turn_2") {
+            // Stage 0 — path pick
+            if (p.chip_id === "support") {
+              draft.path = "support";
+              nextStateId = "turn_3_support";
+            } else if (p.chip_id === "growth") {
+              draft.path = "growth";
+              nextStateId = "turn_3_growth";
+            } else {
+              // No freeform on Stage 0 per spec; default to support on missing
+              draft.path = "support";
+              nextStateId = "turn_3_support";
+            }
+          } else if (currentStateId === "turn_3_support") {
             if (p.chip_id) {
-              draft.friction_id = p.chip_id;
-              const m = FRICTION_TO_FOCUS[p.chip_id];
-              if (m) draft.suggested_focus = m.focus;
-            } else if (p.freeform_text) {
-              draft.friction_freeform = p.freeform_text;
-              const r = await mitraHelpMeChoose({ freeformInput: p.freeform_text });
-              if (r) {
-                draft.suggested_focus = r.suggestedFocus || r.suggested_focus;
-                draft.friction_analysis = r.analysisText || r.analysis_text;
-              }
+              draft.primary_kosha = KOSHA_MAP[p.chip_id] || p.chip_id;
+              draft.kosha_chip_id = p.chip_id;
             }
-          } else if (currentTurn === 3) {
-            if (p.chip_id) draft.state_id = p.chip_id;
-            if (p.freeform_text) draft.state_freeform = p.freeform_text;
-            // Stash label for Turn 4 acknowledgment
-            setScreenValue(
-              STATE_LABEL_MAP[p.chip_id] || "I hear you.",
-              "onboarding_state_ack",
-            );
-          } else if (currentTurn === 4) {
-            draft.voice_choice = p.choice;
-            if (p.choice === "voice" && !screenState.voice_consent_given) {
-              // Consent overlay flow — navigate to consent, then consent screen
-              // advances turn back to 5. For Week 1 we mark the gate here.
-              setScreenValue(false, "voice_consent_given");
+            if (p.freeform_text) {
+              draft.kosha_freeform = p.freeform_text;
+              draft.freeforms = {
+                ...(draft.freeforms || {}),
+                stage1_support: p.freeform_text,
+              };
             }
-          } else if (currentTurn === 5) {
+            nextStateId = "turn_4_support";
+          } else if (currentStateId === "turn_3_growth") {
+            if (p.chip_id) draft.aliveness_state = p.chip_id;
+            if (p.freeform_text) {
+              draft.aliveness_freeform = p.freeform_text;
+              draft.freeforms = {
+                ...(draft.freeforms || {}),
+                stage1_growth: p.freeform_text,
+              };
+            }
+            nextStateId = "turn_4_growth";
+          } else if (currentStateId === "turn_4_support") {
+            if (p.chip_id) draft.primary_vritti = p.chip_id;
+            if (p.freeform_text) {
+              draft.vritti_freeform = p.freeform_text;
+              draft.freeforms = {
+                ...(draft.freeforms || {}),
+                stage2_support: p.freeform_text,
+              };
+            }
+            nextStateId = "turn_5_support";
+          } else if (currentStateId === "turn_4_growth") {
+            if (p.chip_id) draft.aspiration = p.chip_id;
+            if (p.freeform_text) {
+              draft.aspiration_freeform = p.freeform_text;
+              draft.freeforms = {
+                ...(draft.freeforms || {}),
+                stage2_growth: p.freeform_text,
+              };
+            }
+            nextStateId = "turn_5_growth";
+          } else if (currentStateId === "turn_5_support") {
+            if (p.chip_id) {
+              draft.primary_klesha = KLESHA_MAP[p.chip_id] || "avidya";
+              draft.klesha_chip_id = p.chip_id;
+            }
+            if (p.freeform_text) {
+              draft.klesha_freeform = p.freeform_text;
+              draft.freeforms = {
+                ...(draft.freeforms || {}),
+                stage3_support: p.freeform_text,
+              };
+            }
+            nextStateId = "turn_6";
+          } else if (currentStateId === "turn_5_growth") {
+            if (p.chip_id) draft.preferred_modality = p.chip_id;
+            if (p.freeform_text) {
+              draft.modality_freeform = p.freeform_text;
+              draft.freeforms = {
+                ...(draft.freeforms || {}),
+                stage3_growth: p.freeform_text,
+              };
+            }
+            nextStateId = "turn_6";
+          } else if (currentStateId === "turn_6") {
+            // Mode picker — same signal shape as legacy (p.guidance_mode)
             draft.mode = p.guidance_mode;
+            draft.guidance_mode = p.guidance_mode;
             setScreenValue(p.guidance_mode, "guidance_mode");
 
             await patchCompanionState({
               preferred_guidance_mode: p.guidance_mode,
             });
 
+            // Fetch recognition line (backend-gated; falls back to JS template)
+            const rec = await mitraOnboardingRecognition({
+              path: (draft.path || "support") as "support" | "growth",
+              primary_kosha: draft.primary_kosha,
+              primary_vritti: draft.primary_vritti,
+              primary_klesha: draft.primary_klesha,
+              aliveness_state: draft.aliveness_state,
+              aspiration: draft.aspiration,
+              preferred_modality: draft.preferred_modality,
+              guidance_mode: p.guidance_mode || "hybrid",
+              freeforms: draft.freeforms || {},
+            });
+            draft.recognition_line = rec.recognition_line;
+            draft.recognition_resolution = rec.resolution;
+            setScreenValue(rec.recognition_line, "recognition_line");
+
+            // Generate the triad for Turn 8 — preserve legacy generateCompanion
+            // invocation so triad cards render with real data.
             const companion = await mitraGenerateCompanion({
-              focus: draft.suggested_focus || "clarity",
-              sub_focus: draft.state_id,
+              focus: draft.primary_kosha || draft.aspiration || "clarity",
+              sub_focus:
+                draft.primary_vritti || draft.preferred_modality || null,
               depth: "standard",
               baseline_metrics: {},
-              intention: draft.friction_freeform,
+              intention: draft.recognition_line,
               day_number: 1,
               guidance_mode: p.guidance_mode,
+              // Pass full Sadhana Yatra signals so backend can enrich if ready
+              path: draft.path,
+              primary_kosha: draft.primary_kosha,
+              primary_vritti: draft.primary_vritti,
+              primary_klesha: draft.primary_klesha,
+              aliveness_state: draft.aliveness_state,
+              aspiration: draft.aspiration,
+              preferred_modality: draft.preferred_modality,
             });
+            nextStateId = "turn_7";
 
-            // Always populate shared labels (friction_label, state_label,
-            // recommended_posture) even when generate-companion fails so
-            // Turns 6/7 render something meaningful.
-            const fMap = FRICTION_TO_FOCUS[draft.friction_id || ""];
-            setScreenValue(fMap?.label || "what's alive for you", "friction_label");
+            // Shared labels for recognition/triad templating. Sadhana Yatra
+            // replaces friction/state with kosha/vritti/klesha|aliveness.
             setScreenValue(
-              (STATE_LABEL_MAP[draft.state_id || ""] || "").replace(".", "") ||
-                "the texture of it",
+              draft.kosha_chip_id || draft.aliveness_state || "what's alive for you",
+              "friction_label",
+            );
+            setScreenValue(
+              draft.primary_vritti || draft.aspiration || "the texture of it",
               "state_label",
             );
 
@@ -3468,35 +3573,36 @@ export async function executeAction(
             setScreenValue(practiceTitle, "practice_title");
             setScreenValue(practiceWhy, "companion_practice_one_line");
             setScreenValue(c.practice?.core?.id || c.practice?.id || null, "companion_practice_id");
-          } else if (currentTurn === 6) {
-            if (p.chip_id === "play_briefing") {
-              draft.briefing_requested = true;
-            }
-          } else if (currentTurn === 7) {
-            // Completion
+          } else if (currentStateId === "turn_7") {
+            // User tapped "Hear my first guidance" or "Show me my path first"
+            if (p.chip_id === "play_briefing") draft.briefing_requested = true;
+            if (p.freeform_text) draft.turn7_freeform = p.freeform_text;
+            nextStateId = "turn_8";
+          } else if (currentStateId === "turn_8") {
+            // Completion — triad accepted
             await mitraTrackEvent("onboarding_completed", {
               meta: {
-                friction: draft.friction_id,
-                state: draft.state_id,
+                path: draft.path,
+                primary_kosha: draft.primary_kosha,
+                primary_vritti: draft.primary_vritti,
+                primary_klesha: draft.primary_klesha,
+                aliveness_state: draft.aliveness_state,
+                aspiration: draft.aspiration,
+                preferred_modality: draft.preferred_modality,
                 mode: draft.mode,
-                free_form_count:
-                  (draft.friction_freeform ? 1 : 0) + (draft.state_freeform ? 1 : 0),
+                free_form_count: Object.keys(draft.freeforms || {}).length,
               },
             });
 
-            // Audit fix F6 (2026-04-13) — Spec route_welcome_onboarding §5
-            // requires 4 companion-state writes at Turn 7.
-            // preferred_guidance_mode is already PATCH'd at Turn 5; here we
-            // add the remaining 3: last_reported_mood, last_seen_at,
-            // active_dissonance.
             await patchCompanionState({
-              last_reported_mood: draft.state_id || null,
+              last_reported_mood:
+                draft.primary_kosha || draft.aliveness_state || null,
               last_seen_at: new Date().toISOString(),
-              active_dissonance: draft.friction_id
+              active_dissonance: draft.primary_klesha
                 ? {
-                    source: draft.friction_id,
+                    source: draft.primary_klesha,
                     opened_at: new Date().toISOString(),
-                    summary: draft.friction_freeform || null,
+                    summary: draft.klesha_freeform || null,
                   }
                 : null,
             });
@@ -3507,9 +3613,17 @@ export async function executeAction(
             break;
           }
 
+          if (!nextStateId) {
+            console.warn(
+              "[onboarding_turn_response] no next state for",
+              currentStateId,
+            );
+            break;
+          }
+
           setScreenValue(draft, "onboarding_draft_state");
-          setScreenValue(nextTurn, "onboarding_turn");
-          loadScreen({ container_id: "welcome_onboarding", state_id: `turn_${nextTurn}` });
+          setScreenValue(nextStateId, "onboarding_turn");
+          loadScreen({ container_id: "welcome_onboarding", state_id: nextStateId });
         } catch (err) {
           console.error("[onboarding_turn_response] failed:", err);
         }

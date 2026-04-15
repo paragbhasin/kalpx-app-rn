@@ -277,6 +277,93 @@ export async function mitraTrackCompletion(inputData: any): Promise<any> {
 }
 
 /** POST mitra/help-me-choose/ — AI-powered path/focus guidance. */
+/**
+ * POST /api/mitra/onboarding/recognition/ — Sadhana Yatra Stage 5.
+ * Composes the "recognition line" from the user's 4-stage onboarding signals.
+ *
+ * Gated by `MITRA_V3_RECOGNITION_BACKEND=1` (runtime env). When disabled OR the
+ * backend returns non-2xx, falls back to a simple JS-composed template so the
+ * UI always has a non-empty recognition_line to render.
+ */
+export interface MitraRecognitionPayload {
+  path: "support" | "growth";
+  primary_kosha?: string;
+  primary_vritti?: string;
+  primary_klesha?: string;
+  aliveness_state?: string;
+  aspiration?: string;
+  preferred_modality?: string;
+  guidance_mode: "universal" | "hybrid" | "rooted";
+  freeforms?: Record<string, string>;
+}
+
+export interface MitraRecognitionResponse {
+  recognition_line: string;
+  resolution: any;
+}
+
+function composeRecognitionFallback(
+  p: MitraRecognitionPayload,
+): MitraRecognitionResponse {
+  if (p.path === "support") {
+    const koshaPhrase: Record<string, string> = {
+      annamaya: "your body is holding something tight",
+      pranamaya: "your breath has gone uneven",
+      manomaya: "your mind is not settling",
+      vijnanamaya: "your clarity is clouded",
+      anandamaya: "something deep inside feels heavy",
+    };
+    const k = koshaPhrase[p.primary_kosha || ""] || "something in you needs care";
+    return {
+      recognition_line: `I hear you — ${k}. Let's begin gently.`,
+      resolution: { source: "fallback", path: "support" },
+    };
+  }
+  const aspirationPhrase: Record<string, string> = {
+    clarity: "clarity",
+    peace: "peace",
+    strength: "strength",
+    devotion: "devotion",
+    purpose: "purpose",
+    steadiness: "steadiness",
+  };
+  const a = aspirationPhrase[p.aspiration || ""] || "growth";
+  return {
+    recognition_line: `Beautiful — you're here for ${a}. Let's honour that.`,
+    resolution: { source: "fallback", path: "growth" },
+  };
+}
+
+export async function mitraOnboardingRecognition(
+  payload: MitraRecognitionPayload,
+): Promise<MitraRecognitionResponse> {
+  // Env flag — RN exposes process.env at build time via Expo.
+  const flagOn =
+    (process.env.MITRA_V3_RECOGNITION_BACKEND ||
+      process.env.EXPO_PUBLIC_MITRA_V3_RECOGNITION_BACKEND ||
+      "0") === "1";
+  if (!flagOn) {
+    return composeRecognitionFallback(payload);
+  }
+  try {
+    const res = await api.post("mitra/onboarding/recognition/", payload);
+    const data = res.data || {};
+    if (!data.recognition_line) {
+      return composeRecognitionFallback(payload);
+    }
+    return {
+      recognition_line: data.recognition_line,
+      resolution: data.resolution || null,
+    };
+  } catch (err: any) {
+    console.warn(
+      "[MITRA] onboarding/recognition failed, using fallback:",
+      err?.message,
+    );
+    return composeRecognitionFallback(payload);
+  }
+}
+
 export async function mitraHelpMeChoose(inputData: any): Promise<any> {
   try {
     const res = await api.post("mitra/help-me-choose/", inputData);

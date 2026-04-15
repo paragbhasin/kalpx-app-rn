@@ -4303,10 +4303,10 @@ export async function executeAction(
         if (ctx) setScreenValue(ctx, "grief_context");
 
         loadScreen({ container_id: "support_grief", state_id: "room" } as any);
-        mitraTrackEvent("grief_room_entered", {
+        mitraTrackEvent("grief_session_opened", {
           journeyId: screenState.journey_id,
           dayNumber: screenState.day_number || 1,
-          meta: {},
+          meta: { parent_source: payload?.source },
         });
         break;
       }
@@ -4315,15 +4315,39 @@ export async function executeAction(
         setScreenValue(false, "grief_session_active");
         setScreenValue(null, "grief_session_start");
         setScreenValue(null, "grief_context");
-        mitraTrackEvent("grief_room_exited", {
+        mitraTrackEvent("grief_session_ended", {
           journeyId: screenState.journey_id,
           dayNumber: screenState.day_number || 1,
-          meta: {},
+          meta: { 
+            duration_sec: (Date.now() - (screenState.grief_session_start || 0)) / 1000,
+            actions_used: payload?.actions_used || []
+          },
         });
         loadScreen({
           container_id: "companion_dashboard",
           state_id: "day_active",
         } as any);
+        break;
+      }
+
+      case "grief_voice_note_submitted": {
+        mitraTrackEvent("grief_voice_note_submitted", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { 
+            duration_sec: payload?.duration_sec,
+            length_chars: payload?.length_chars 
+          },
+        });
+        break;
+      }
+
+      case "grief_session_abandoned": {
+        mitraTrackEvent("grief_session_abandoned", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { duration_sec: payload?.duration_sec },
+        });
         break;
       }
 
@@ -4383,15 +4407,54 @@ export async function executeAction(
         setScreenValue(false, "loneliness_session_active");
         setScreenValue(null, "loneliness_session_start");
         setScreenValue(null, "loneliness_context");
-        mitraTrackEvent("loneliness_room_exited", {
+        mitraTrackEvent("loneliness_session_ended", {
           journeyId: screenState.journey_id,
           dayNumber: screenState.day_number || 1,
-          meta: {},
+          meta: { duration_sec: (Date.now() - (screenState.loneliness_session_start || 0)) / 1000 },
         });
         loadScreen({
           container_id: "companion_dashboard",
           state_id: "day_active",
         } as any);
+        break;
+      }
+
+      case "loneliness_named": {
+        mitraTrackEvent("loneliness_named", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            body_location: payload?.text,
+            length_chars: (payload?.text || "").length,
+          },
+        });
+        break;
+      }
+
+      case "loneliness_person_named": {
+        mitraTrackEvent("loneliness_person_named", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {}, // spec specifies no contact content transmitted
+        });
+        break;
+      }
+
+      case "loneliness_walk_started": {
+        mitraTrackEvent("loneliness_walk_started", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { duration_min: payload?.duration_min },
+        });
+        break;
+      }
+
+      case "loneliness_stay": {
+        mitraTrackEvent("loneliness_stay", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {},
+        });
         break;
       }
 

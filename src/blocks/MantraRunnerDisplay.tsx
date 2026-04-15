@@ -149,6 +149,11 @@ const MantraRunnerDisplay: React.FC<MantraRunnerDisplayProps> = ({ block }) => {
       </Animated.View>
       <Text style={styles.ofLine}>{`of ${total}`}</Text>
 
+      <View style={styles.mantraInfo}>
+        <Text style={styles.devanagari}>{screenData.runner_active_item?.devanagari}</Text>
+        <Text style={styles.iast}>{screenData.runner_active_item?.title || screenData.runner_active_item?.iast}</Text>
+      </View>
+
       {audioUrl ? (
         <View style={styles.hiddenAudio} pointerEvents="none">
           <AudioPlayerBlock block={{ audio_url: audioUrl, autoplay: true, loop: true } as any} />
@@ -196,6 +201,29 @@ const styles = StyleSheet.create({
     width: 0,
     height: 0,
     opacity: 0,
+  },
+  mantraInfo: {
+    position: 'absolute',
+    top: 120,
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 32,
+  },
+  devanagari: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 28,
+    color: '#eddeb4',
+    marginBottom: 8,
+    textAlign: 'center',
+    opacity: 0.9,
+  },
+  iast: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 14,
+    color: '#bfa58a',
+    letterSpacing: 1.2,
+    textAlign: 'center',
+    textTransform: 'uppercase',
   },
 });
 

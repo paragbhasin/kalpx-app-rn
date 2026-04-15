@@ -376,6 +376,24 @@ export const CompanionDashboardContainer = {
           variant: "small",
           position: "footer_actions",
         },
+        {
+          type: "primary_button",
+          label: "I Need Support (Grief)",
+          style: "outline",
+          action: {
+            type: "enter_grief_room",
+          },
+          position: "footer_actions",
+        },
+        {
+          type: "primary_button",
+          label: "I Feel Lonely",
+          style: "outline",
+          action: {
+            type: "enter_loneliness_room",
+          },
+          position: "footer_actions",
+        },
 
         {
           type: "primary_button",
@@ -538,6 +556,20 @@ export const CompanionDashboardContainer = {
           type: "toast_message",
           content: "{{adaptation_message}}",
         },
+      ],
+    },
+  },
+};
+
+export const CompanionDashboardV3Container = {
+  container_id: "companion_dashboard_v3",
+
+  states: {
+    day_active: {
+      tone: { theme: "light_sandal", mood: "steady" },
+      meta: { requires_active_cycle: true, reactive_updates: true },
+      blocks: [
+        { type: "new_dashboard_body" },
       ],
     },
   },
@@ -6408,7 +6440,7 @@ export const SupportGriefContainer = {
     room: {
       tone: { theme: "warm_cream", mood: "steady" },
       meta: { variant: "grief_room", reduced_motion_capable: true },
-      blocks: [],
+      blocks: [{ type: "grief_room_body" }],
     },
   },
 };
@@ -6419,7 +6451,7 @@ export const SupportLonelinessContainer = {
     room: {
       tone: { theme: "warm_cream", mood: "steady" },
       meta: { variant: "loneliness_room" },
-      blocks: [],
+      blocks: [{ type: "loneliness_room_body" }],
     },
   },
 };

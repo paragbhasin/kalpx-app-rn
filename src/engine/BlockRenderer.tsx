@@ -124,6 +124,16 @@ import GratitudeJoyCard from '../blocks/GratitudeJoyCard';
 import SeasonChangeBanner from '../blocks/SeasonChangeBanner';
 import CompanionedChant from '../blocks/CompanionedChant';
 
+// Week 8 — New Dashboard v3 (Mitra v3 Moment 19)
+// A parallel dashboard variant that assembles all Tier-2 embeds.
+// Feature-flagged: renders when screen loads via companion_dashboard_v3.
+import NewDashboardContainer from '../extensions/moments/new_dashboard';
+
+// Tier 1 — Support: Grief Room
+import GriefRoomContainer from '../extensions/moments/grief_room';
+// Tier 1 — Support: Loneliness Room
+import LonelinessRoomContainer from '../extensions/moments/loneliness_room';
+
 const blockMap: Record<string, React.ComponentType<any>> = {
   // Original 11 blocks
   headline: HeadlineBlock,
@@ -234,6 +244,11 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   gratitude_joy_card: GratitudeJoyCard,
   season_change_banner: SeasonChangeBanner,
   companioned_chant: CompanionedChant,
+  // Week 8 — New Dashboard v3
+  new_dashboard_body: NewDashboardContainer,
+  // Tier 1 — Support rooms
+  grief_room_body: GriefRoomContainer,
+  loneliness_room_body: LonelinessRoomContainer,
 };
 
 interface BlockRendererProps {

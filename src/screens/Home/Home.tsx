@@ -244,7 +244,9 @@ export default function Home() {
 
         store.dispatch(
           loadScreenWithData({
-            containerId: "companion_dashboard",
+            containerId: process.env.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
+              ? "companion_dashboard_v3"
+              : "companion_dashboard",
             stateId: "day_active",
           }),
         );
@@ -390,7 +392,9 @@ export default function Home() {
           } else {
             store.dispatch(
               loadScreenWithData({
-                containerId: "companion_dashboard",
+                containerId: process.env.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
+                  ? "companion_dashboard_v3"
+                  : "companion_dashboard",
                 stateId: "day_active",
               }),
             );

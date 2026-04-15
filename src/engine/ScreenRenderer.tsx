@@ -32,8 +32,8 @@ import SupportCheckinContainer from "../containers/SupportCheckinContainer";
 import ReflectionWeeklyContainer from "../containers/ReflectionWeeklyContainer";
 import ReflectionEveningContainer from "../containers/ReflectionEveningContainer";
 // Week 7 — Support routes (Moments 46, 47)
-import GriefRoomContainer from "../containers/GriefRoomContainer";
-import LonelinessRoomContainer from "../containers/LonelinessRoomContainer";
+import GriefRoomContainer from "../extensions/moments/grief_room";
+import LonelinessRoomContainer from "../extensions/moments/loneliness_room";
 
 const containerMap: Record<string, React.ComponentType<any>> = {
   portal: PortalContainer,

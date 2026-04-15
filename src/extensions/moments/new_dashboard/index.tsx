@@ -18,6 +18,10 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { Fonts } from "../../../theme/fonts";
+import { executeAction } from "../../../engine/actionExecutor";
+import { useScreenStore } from "../../../engine/useScreenBridge";
+import store from "../../../store";
+import { screenActions } from "../../../store/screenSlice";
 
 import PersonalGreetingCard from "../personal_greeting_card";
 import PathMilestoneBanner from "../path_milestone_banner";
@@ -88,8 +92,23 @@ const NewDashboardContainer: React.FC<Props> = ({ block, screenData, onAction })
     ? sd.why_this_l1_items
     : [];
 
+  const { loadScreen, goBack } = useScreenStore();
+
   const handlePress = (actionId: string, payload?: any) => {
-    if (onAction) onAction(actionId, payload);
+    if (onAction) {
+      onAction(actionId, payload);
+    } else {
+      executeAction(
+        { type: actionId, payload },
+        {
+          loadScreen,
+          goBack,
+          setScreenValue: (value: any, key: string) =>
+            store.dispatch(screenActions.setScreenValue({ key, value })),
+          screenState: { ...sd },
+        }
+      ).catch(() => {});
+    }
   };
 
   return (
@@ -176,6 +195,36 @@ const NewDashboardContainer: React.FC<Props> = ({ block, screenData, onAction })
             style={styles.primaryBtn}
           >
             <Text style={styles.primaryBtnText}>I Feel Triggered</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={() => handlePress("enter_grief_room")}
+          style={{ marginTop: 10 }}
+        >
+          <LinearGradient
+            colors={["#E5D4CA", "#F5EDEA"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.primaryBtn}
+          >
+            <Text style={styles.primaryBtnText}>I Need Support (Grief)</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={() => handlePress("enter_loneliness_room")}
+          style={{ marginTop: 10 }}
+        >
+          <LinearGradient
+            colors={["#E5D4CA", "#F5EDEA"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.primaryBtn}
+          >
+            <Text style={styles.primaryBtnText}>I Feel Lonely</Text>
           </LinearGradient>
         </TouchableOpacity>
 

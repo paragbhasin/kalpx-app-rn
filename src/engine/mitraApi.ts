@@ -7,7 +7,7 @@
  * via interceptors, so no manual auth headers are needed.
  */
 
-import api from '../Networks/axios';
+import api from "../Networks/axios";
 
 // ---------------------------------------------------------------------------
 // Offline fallbacks — used when backend is unreachable (dev 502, airplane
@@ -17,34 +17,34 @@ import api from '../Networks/axios';
 // ---------------------------------------------------------------------------
 
 function generateCompanionResponse(input: any): any {
-  const focus = input?.focus || 'clarity';
+  const focus = input?.focus || "clarity";
   return {
     companion: {
-      recommended_posture: 'protecting your space and doing less, better',
+      recommended_posture: "protecting your space and doing less, better",
       mantra: {
         core: {
-          id: 'fallback_mantra',
-          title: 'Om Namah Shivaya',
-          devanagari: 'ॐ नमः शिवाय',
+          id: "fallback_mantra",
+          title: "Om Namah Shivaya",
+          devanagari: "ॐ नमः शिवाय",
           audio_url: null,
         },
-        one_line: 'A soft reminder of what you are steadying into',
-        ui: { card_subtitle: 'A soft reminder of what you are steadying into' },
+        one_line: "A soft reminder of what you are steadying into",
+        ui: { card_subtitle: "A soft reminder of what you are steadying into" },
       },
       sankalp: {
         core: {
-          id: 'fallback_sankalp',
-          line: 'I protect what matters and let the rest pass.',
+          id: "fallback_sankalp",
+          line: "I protect what matters and let the rest pass.",
         },
-        one_line: 'One line to carry through the small decisions today',
+        one_line: "One line to carry through the small decisions today",
       },
       practice: {
         core: {
-          id: 'fallback_practice',
-          title: 'Nine slow breaths, eyes soft',
+          id: "fallback_practice",
+          title: "Nine slow breaths, eyes soft",
           duration_min: 6,
         },
-        one_line: 'A practice to settle the body before the day opens',
+        one_line: "A practice to settle the body before the day opens",
       },
       focus,
       day_number: input?.day_number || 1,
@@ -56,33 +56,54 @@ function generateCompanionResponse(input: any): any {
 }
 
 function generateHelpMeChooseResponse(input: any): any {
-  const text = (input?.text || '').toLowerCase();
+  const text = (input?.text || "").toLowerCase();
   // Simple keyword → focus mapping (mirrors web fallback pattern)
-  const focus = /work|career|deadline/.test(text) ? 'clarity'
-    : /relation|partner|family|sarah|mother|father/.test(text) ? 'connection'
-    : /anger|stress|upset|tight|tense/.test(text) ? 'regulation'
-    : /quiet|rest|sleep|tired/.test(text) ? 'stillness'
-    : 'grounding';
+  const focus = /work|career|deadline/.test(text)
+    ? "clarity"
+    : /relation|partner|family|sarah|mother|father/.test(text)
+      ? "connection"
+      : /anger|stress|upset|tight|tense/.test(text)
+        ? "regulation"
+        : /quiet|rest|sleep|tired/.test(text)
+          ? "stillness"
+          : "grounding";
   return { focus, sub_focus: null, label: focus, _offline_fallback: true };
 }
 
-function generatePranaAcknowledgement(pranaType: string, _focus: string, _locale: string): any {
+function generatePranaAcknowledgement(
+  pranaType: string,
+  _focus: string,
+  _locale: string,
+): any {
   const insights: Record<string, string> = {
-    steady: 'Steady is enough. Stay here.',
+    steady: "Steady is enough. Stay here.",
     heavy: "It's heavy. That's honest. Be kind with yourself today.",
-    activated: 'Something is rising. Notice it. Let it settle before you act.',
+    activated: "Something is rising. Notice it. Let it settle before you act.",
   };
   return {
-    insight: insights[pranaType] || 'I heard you.',
+    insight: insights[pranaType] || "I heard you.",
     _offline_fallback: true,
   };
 }
 
-function generateTriggerMantraSuggestions(_feeling: string, _locale: string): any {
+function generateTriggerMantraSuggestions(
+  _feeling: string,
+  _locale: string,
+): any {
   return {
     mantras: [
-      { id: 'trig_om', title: 'Om', devanagari: 'ॐ', one_line: 'The simplest sound. Start here.' },
-      { id: 'trig_so_hum', title: 'So Hum', devanagari: 'सो हम्', one_line: 'I am that. With the breath.' },
+      {
+        id: "trig_om",
+        title: "Om",
+        devanagari: "ॐ",
+        one_line: "The simplest sound. Start here.",
+      },
+      {
+        id: "trig_so_hum",
+        title: "So Hum",
+        devanagari: "सो हम्",
+        one_line: "I am that. With the breath.",
+      },
     ],
     _offline_fallback: true,
   };
@@ -92,12 +113,16 @@ function generateCheckpointData(screenState: any): any {
   const day = screenState?.day_number || 7;
   return {
     day_number: day,
-    headline: day >= 14 ? 'Two weeks. Something settled.' : "You've been at this a week.",
-    summary: 'The practice is the practice. Keep going if it is serving; shift if it is not.',
+    headline:
+      day >= 14
+        ? "Two weeks. Something settled."
+        : "You've been at this a week.",
+    summary:
+      "The practice is the practice. Keep going if it is serving; shift if it is not.",
     options: [
-      { id: 'continue_same', label: 'Continue the same path' },
-      { id: 'deepen', label: 'Deepen this path' },
-      { id: 'change_focus', label: 'Shift to a new focus' },
+      { id: "continue_same", label: "Continue the same path" },
+      { id: "deepen", label: "Deepen this path" },
+      { id: "change_focus", label: "Shift to a new focus" },
     ],
     _offline_fallback: true,
   };
@@ -106,8 +131,8 @@ function generateCheckpointData(screenState: any): any {
 function generateResetPlan(_obstacle: string): any {
   return {
     plan: {
-      headline: 'Start small.',
-      steps: ['One slow breath.', 'One honest sentence.', 'One clean action.'],
+      headline: "Start small.",
+      steps: ["One slow breath.", "One honest sentence.", "One clean action."],
     },
     _offline_fallback: true,
   };
@@ -116,18 +141,19 @@ function generateResetPlan(_obstacle: string): any {
 function generateInfoScreenData(type: string, _data: any): any {
   const defaults: Record<string, any> = {
     mantra: {
-      title: 'Om Namah Shivaya',
-      devanagari: 'ॐ नमः शिवाय',
-      meaning: 'A turning toward the steady self.',
-      instruction: 'Chant slowly. Let the meaning settle within.',
+      title: "Om Namah Shivaya",
+      devanagari: "ॐ नमः शिवाय",
+      meaning: "A turning toward the steady self.",
+      instruction: "Chant slowly. Let the meaning settle within.",
     },
     sankalp: {
-      line: 'I protect what matters and let the rest pass.',
-      instruction: 'Hold the intention in the body, not just the mind.',
+      line: "I protect what matters and let the rest pass.",
+      instruction: "Hold the intention in the body, not just the mind.",
     },
     practice: {
-      title: 'Nine slow breaths, eyes soft',
-      instruction: 'Sit comfortably. Breathe in for four, out for six. Nine rounds.',
+      title: "Nine slow breaths, eyes soft",
+      instruction:
+        "Sit comfortably. Breathe in for four, out for six. Nine rounds.",
     },
   };
   return { ...(defaults[type] || {}), _offline_fallback: true };
@@ -136,7 +162,7 @@ function generateInfoScreenData(type: string, _data: any): any {
 function generatePathEvolutionScreen(oldFocus: string, newFocus: string): any {
   return {
     headline: `Shifting from ${oldFocus} to ${newFocus}.`,
-    subtext: 'The path moves when you move. Trust the turn.',
+    subtext: "The path moves when you move. Trust the turn.",
     _offline_fallback: true,
   };
 }
@@ -148,7 +174,7 @@ const SUB_FOCUS_METRICS: Record<string, string[]> = {};
 // ---------------------------------------------------------------------------
 
 function getTz(): string {
-  return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
+  return Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata";
 }
 
 function extractBaselineMetrics(
@@ -184,32 +210,42 @@ export async function mitraGenerateCompanion(inputData: any): Promise<any> {
       inputData.sub_focus,
       inputData.baseline_metrics || {},
     );
-    const res = await api.post('mitra/generate-companion/', {
+    const res = await api.post("mitra/generate-companion/", {
       focus: inputData.focus,
       subFocus: inputData.sub_focus,
       baselineMetrics,
       depth: inputData.depth,
-      locale: 'en',
+      locale: "en",
       tz: getTz(),
     });
-    console.log('[MITRA] API response received', res.data?._backend);
+    console.log("[MITRA] API response received", res.data?._backend);
     return res.data;
   } catch (err: any) {
-    console.warn('[MITRA] API failed, falling back to local engine:', err.message);
+    console.warn(
+      "[MITRA] API failed, falling back to local engine:",
+      err.message,
+    );
     const fallback = generateCompanionResponse(inputData);
     if (fallback) return fallback;
-    console.error('[MITRA] Local fallback also returned null');
+    console.error("[MITRA] Local fallback also returned null");
     return null;
   }
 }
 
 /** POST mitra/track-event/ — Track a journey event or milestone. */
-export async function mitraTrackEvent(eventName: string, inputData: any): Promise<any> {
+export async function mitraTrackEvent(
+  eventName: string,
+  inputData: any,
+): Promise<any> {
   try {
     const { journeyId, dayNumber, meta } = inputData;
-    const res = await api.post('mitra/track-event/', {
-      eventName, journeyId, dayNumber,
-      locale: 'en', tz: getTz(), meta: meta || {},
+    const res = await api.post("mitra/track-event/", {
+      eventName,
+      journeyId,
+      dayNumber,
+      locale: "en",
+      tz: getTz(),
+      meta: meta || {},
     });
     console.log(`[MITRA] track-event "${eventName}" logged`);
     return res.data;
@@ -223,14 +259,19 @@ export async function mitraTrackEvent(eventName: string, inputData: any): Promis
 export async function mitraTrackCompletion(inputData: any): Promise<any> {
   try {
     const { itemType, itemId, source, journeyId, dayNumber, meta } = inputData;
-    const res = await api.post('mitra/track-completion/', {
-      itemType, itemId, source, journeyId, dayNumber,
-      tz: getTz(), meta: meta || {},
+    const res = await api.post("mitra/track-completion/", {
+      itemType,
+      itemId,
+      source,
+      journeyId,
+      dayNumber,
+      tz: getTz(),
+      meta: meta || {},
     });
-    console.log('[MITRA] track-completion API response received', res.data);
+    console.log("[MITRA] track-completion API response received", res.data);
     return res.data;
   } catch (err: any) {
-    console.warn('[MITRA] track-completion API failed:', err.message);
+    console.warn("[MITRA] track-completion API failed:", err.message);
     return null;
   }
 }
@@ -238,10 +279,10 @@ export async function mitraTrackCompletion(inputData: any): Promise<any> {
 /** POST mitra/help-me-choose/ — AI-powered path/focus guidance. */
 export async function mitraHelpMeChoose(inputData: any): Promise<any> {
   try {
-    const res = await api.post('mitra/help-me-choose/', inputData);
+    const res = await api.post("mitra/help-me-choose/", inputData);
     return res.data;
   } catch (err: any) {
-    console.warn('[MITRA] help-me-choose failed, falling back:', err.message);
+    console.warn("[MITRA] help-me-choose failed, falling back:", err.message);
     return generateHelpMeChooseResponse(inputData);
   }
 }
@@ -249,29 +290,41 @@ export async function mitraHelpMeChoose(inputData: any): Promise<any> {
 /** POST mitra/prana-acknowledge/ — Prana check-in acknowledgement. */
 export async function mitraPranaAcknowledge(inputData: any): Promise<any> {
   try {
-    const res = await api.post('mitra/prana-acknowledge/', inputData);
+    const res = await api.post("mitra/prana-acknowledge/", inputData);
     return res.data;
   } catch (err: any) {
-    console.warn('[MITRA] prana-acknowledge failed, falling back:', err.message);
-    return generatePranaAcknowledgement(inputData.pranaType, inputData.focus, inputData.locale || 'en');
+    console.warn(
+      "[MITRA] prana-acknowledge failed, falling back:",
+      err.message,
+    );
+    return generatePranaAcknowledgement(
+      inputData.pranaType,
+      inputData.focus,
+      inputData.locale || "en",
+    );
   }
 }
 
 /** POST mitra/trigger-mantras/ — Trigger mantra suggestions. */
 export async function mitraTriggerMantras(inputData: any): Promise<any> {
   try {
-    const res = await api.post('mitra/trigger-mantras/', inputData);
+    const res = await api.post("mitra/trigger-mantras/", inputData);
     return res.data;
   } catch (err: any) {
-    console.warn('[MITRA] trigger-mantras failed, falling back:', err.message);
-    return generateTriggerMantraSuggestions(inputData.feeling, inputData.locale || 'en');
+    console.warn("[MITRA] trigger-mantras failed, falling back:", err.message);
+    return generateTriggerMantraSuggestions(
+      inputData.feeling,
+      inputData.locale || "en",
+    );
   }
 }
 
 /** GET mitra/journey/checkpoint/{day}/ — Fetch checkpoint data. */
 export async function mitraGetCheckpoint(day: number): Promise<any> {
   try {
-    const res = await api.get(`mitra/journey/checkpoint/${day}/`, { params: { tz: getTz() } });
+    const res = await api.get(`mitra/journey/checkpoint/${day}/`, {
+      params: { tz: getTz() },
+    });
     console.log(`[MITRA] checkpoint/${day} data fetched`);
     return res.data;
   } catch (err: any) {
@@ -281,9 +334,15 @@ export async function mitraGetCheckpoint(day: number): Promise<any> {
 }
 
 /** POST mitra/journey/checkpoint/{day}/submit/ — Submit checkpoint decision. */
-export async function mitraSubmitCheckpoint(day: number, payload: any): Promise<any> {
+export async function mitraSubmitCheckpoint(
+  day: number,
+  payload: any,
+): Promise<any> {
   try {
-    const res = await api.post(`mitra/journey/checkpoint/${day}/submit/`, { ...payload, tz: getTz() });
+    const res = await api.post(`mitra/journey/checkpoint/${day}/submit/`, {
+      ...payload,
+      tz: getTz(),
+    });
     console.log(`[MITRA] checkpoint/${day} submission complete`);
     return res.data;
   } catch (err: any) {
@@ -293,7 +352,10 @@ export async function mitraSubmitCheckpoint(day: number, payload: any): Promise<
 }
 
 /** Orchestrate checkpoint fetch + normalize into screen-ready shape. */
-export async function mitraCheckpoint(screenState: any, targetDay: number | null = null): Promise<any> {
+export async function mitraCheckpoint(
+  screenState: any,
+  targetDay: number | null = null,
+): Promise<any> {
   const day = targetDay || screenState.day_number || 7;
   console.log(`[MITRA] Requesting checkpoint data for Day ${day}`);
   const data = await mitraGetCheckpoint(day);
@@ -301,50 +363,60 @@ export async function mitraCheckpoint(screenState: any, targetDay: number | null
   if (data) {
     const options: any[] = [];
     const rec = data.recommendation;
-    const engagementLevel = data.engagement?.engagementLevel || '';
+    const engagementLevel = data.engagement?.engagementLevel || "";
 
     if (day === 7) {
-      if (rec?.action === 'lighten') {
-        options.push({ id: 'lighten', label: 'Lighten My Path' });
+      if (rec?.action === "lighten") {
+        options.push({ id: "lighten", label: "Lighten My Path" });
         (rec?.alternatives || []).forEach((alt: string) => {
-          if (alt !== 'reset') return;
+          if (alt !== "reset") return;
           if (!options.find((o: any) => o.id === alt)) {
-            options.push({ id: alt, label: 'Start Fresh' });
+            options.push({ id: alt, label: "Start Fresh" });
           }
         });
       } else {
-        options.push({ id: 'continue', label: 'Continue' });
+        options.push({ id: "continue", label: "Continue" });
       }
     } else if (day === 14) {
-      options.push({ id: 'continue_same', label: 'Continue Same Path' });
+      options.push({ id: "continue_same", label: "Continue Same Path" });
       if (rec?.deepenSuggestion) {
-        options.push({ id: 'deepen', label: `Deepen: ${rec.deepenSuggestion.title}`, description: rec.deepenSuggestion.reason });
+        options.push({
+          id: "deepen",
+          label: `Deepen: ${rec.deepenSuggestion.title}`,
+          description: rec.deepenSuggestion.reason,
+        });
       }
-      options.push({ id: 'change_focus', label: 'Change My Focus' });
+      options.push({ id: "change_focus", label: "Change My Focus" });
     }
 
     const engagement = data.engagement || {};
     return {
       headline: data.identityLabel || `Day ${day}`,
-      subtext: rec?.mitraMessage || data.pathMilestone?.message || '',
-      question: data.reflectionPrompt || 'How has your practice felt?',
+      subtext: rec?.mitraMessage || data.pathMilestone?.message || "",
+      question: data.reflectionPrompt || "How has your practice felt?",
       options,
       metrics: data.baseline?.baselineMetrics || {},
-      show_feelings: engagementLevel !== 'near_zero',
+      show_feelings: engagementLevel !== "near_zero",
       originalData: data,
       day,
-      type: data.checkpoint?.type || '',
+      type: data.checkpoint?.type || "",
       engagementLevel,
-      supportStability: engagement.supportStability || '',
+      supportStability: engagement.supportStability || "",
       trendGraph: data.trendGraph || { engaged: [], fullyCompleted: [] },
-      strongestArea: data.patternNotice?.strongestArea || data.cycleReflection?.strongestType || '',
-      observation: data.patternNotice?.observation || data.cycleReflection?.mitraReflection || '',
-      recommendationAction: rec?.action || '',
+      strongestArea:
+        data.patternNotice?.strongestArea ||
+        data.cycleReflection?.strongestType ||
+        "",
+      observation:
+        data.patternNotice?.observation ||
+        data.cycleReflection?.mitraReflection ||
+        "",
+      recommendationAction: rec?.action || "",
       deepenSuggestion: rec?.deepenSuggestion || null,
       refinementSignal: data.refinementSignal || null,
       pathDurationDays: data.pathContext?.pathDurationDays || 0,
-      pathMilestoneMessage: data.pathMilestone?.message || '',
-      growthArea: data.cycleReflection?.growthArea || '',
+      pathMilestoneMessage: data.pathMilestone?.message || "",
+      growthArea: data.cycleReflection?.growthArea || "",
       consistencyScore: data.cycleReflection?.consistencyScore || 0,
       daysEngaged: engagement.daysEngaged || 0,
       daysFullyCompleted: engagement.daysFullyCompleted || 0,
@@ -358,10 +430,10 @@ export async function mitraCheckpoint(screenState: any, targetDay: number | null
 /** POST mitra/reset-plan/ — Low-engagement recovery guide. */
 export async function mitraResetPlan(obstacle: string): Promise<any> {
   try {
-    const res = await api.post('mitra/reset-plan/', { obstacle });
+    const res = await api.post("mitra/reset-plan/", { obstacle });
     return res.data;
   } catch (err: any) {
-    console.warn('[MITRA] reset-plan failed, falling back:', err.message);
+    console.warn("[MITRA] reset-plan failed, falling back:", err.message);
     return generateResetPlan(obstacle);
   }
 }
@@ -369,21 +441,24 @@ export async function mitraResetPlan(obstacle: string): Promise<any> {
 /** POST mitra/info-screen/ — Info screen content for items. */
 export async function mitraInfoScreen(type: string, data: any): Promise<any> {
   try {
-    const res = await api.post('mitra/info-screen/', { type, data });
+    const res = await api.post("mitra/info-screen/", { type, data });
     return res.data;
   } catch (err: any) {
-    console.warn('[MITRA] info-screen failed, falling back:', err.message);
+    console.warn("[MITRA] info-screen failed, falling back:", err.message);
     return generateInfoScreenData(type, data);
   }
 }
 
 /** POST mitra/path-evolution/ — Path evolution narrative on focus change. */
-export async function mitraPathEvolution(oldFocus: string, newFocus: string): Promise<any> {
+export async function mitraPathEvolution(
+  oldFocus: string,
+  newFocus: string,
+): Promise<any> {
   try {
-    const res = await api.post('mitra/path-evolution/', { oldFocus, newFocus });
+    const res = await api.post("mitra/path-evolution/", { oldFocus, newFocus });
     return res.data;
   } catch (err: any) {
-    console.warn('[MITRA] path-evolution failed, falling back:', err.message);
+    console.warn("[MITRA] path-evolution failed, falling back:", err.message);
     return generatePathEvolutionScreen(oldFocus, newFocus);
   }
 }
@@ -391,45 +466,56 @@ export async function mitraPathEvolution(oldFocus: string, newFocus: string): Pr
 /** GET mitra/journey/additional/list/ — Fetch user's additional practices. */
 export async function mitraFetchAdditionalItems(): Promise<any> {
   try {
-    const res = await api.get('mitra/journey/additional/list/', { params: { tz: getTz() } });
+    const res = await api.get("mitra/journey/additional/list/", {
+      params: { tz: getTz() },
+    });
     return res.data;
   } catch (err: any) {
-    console.error('[MITRA] fetch additional items failed:', err.message);
+    console.error("[MITRA] fetch additional items failed:", err.message);
     return { items: [], uiHints: {} };
   }
 }
 
 /** POST mitra/journey/additional/{id}/complete/ — Mark additional practice as complete. */
-export async function mitraCompleteAdditionalItem(itemId: string | number): Promise<any> {
+export async function mitraCompleteAdditionalItem(
+  itemId: string | number,
+): Promise<any> {
   try {
-    const res = await api.post(`mitra/journey/additional/${itemId}/complete/`, { tz: getTz() });
+    const res = await api.post(`mitra/journey/additional/${itemId}/complete/`, {
+      tz: getTz(),
+    });
     return res.data;
   } catch (err: any) {
-    console.error('[MITRA] complete additional item failed:', err.message);
+    console.error("[MITRA] complete additional item failed:", err.message);
     throw err;
   }
 }
 
 /** DELETE mitra/journey/additional/{id}/ — Remove additional practice. */
-export async function mitraRemoveAdditionalItem(itemId: string | number): Promise<any> {
+export async function mitraRemoveAdditionalItem(
+  itemId: string | number,
+): Promise<any> {
   try {
     const res = await api.delete(`mitra/journey/additional/${itemId}/`);
     return res.data;
   } catch (err: any) {
-    console.error('[MITRA] remove additional item failed:', err.message);
+    console.error("[MITRA] remove additional item failed:", err.message);
     throw err;
   }
 }
 
 /** GET mitra/library/search/ — Search for practices in the library. */
-export async function mitraLibrarySearch(query: string, itemType?: string): Promise<any> {
+export async function mitraLibrarySearch(
+  query: string,
+  itemType?: string,
+): Promise<any> {
   try {
-    const res = await api.get('mitra/library/search/', {
+    const res = await api.get("mitra/library/search/", {
       params: { q: query, itemType, limit: 5 },
     });
     return res.data;
   } catch (err: any) {
-    console.error('[MITRA] library search failed:', err.message);
+    console.error("[MITRA] library search failed:", err.message);
     return { results: [] };
   }
 }
@@ -437,10 +523,12 @@ export async function mitraLibrarySearch(query: string, itemType?: string): Prom
 /** GET mitra/journey/progress/ — Fetch user's journey progress stats. */
 export async function mitraFetchProgress(): Promise<any> {
   try {
-    const res = await api.get('mitra/journey/progress/', { params: { tz: getTz() } });
+    const res = await api.get("mitra/journey/progress/", {
+      params: { tz: getTz() },
+    });
     return res.data;
   } catch (err: any) {
-    console.error('[MITRA] fetch progress failed:', err.message);
+    console.error("[MITRA] fetch progress failed:", err.message);
     return null;
   }
 }
@@ -448,10 +536,15 @@ export async function mitraFetchProgress(): Promise<any> {
 /** GET mitra/journey/status/ — Journey status; may return welcomeBack flag. */
 export async function mitraJourneyStatus(): Promise<any> {
   try {
-    const res = await api.get('mitra/journey/status/', { params: { tz: getTz() } });
+    const res = await api.get("mitra/journey/status/", {
+      params: { tz: getTz() },
+    });
     return res.data;
   } catch (err: any) {
-    console.warn('[MITRA] journey/status failed — offline fallback (no journey):', err.message);
+    console.warn(
+      "[MITRA] journey/status failed — offline fallback (no journey):",
+      err.message,
+    );
     // Offline fallback — treat as "no active journey" so Home.tsx auto-routes
     // into welcome_onboarding instead of getting stuck on the legacy splash.
     return {
@@ -470,10 +563,12 @@ export async function mitraJourneyStatus(): Promise<any> {
  */
 export async function mitraJourneyCompanion(): Promise<any> {
   try {
-    const res = await api.get('mitra/journey/companion/', { params: { tz: getTz() } });
+    const res = await api.get("mitra/journey/companion/", {
+      params: { tz: getTz() },
+    });
     return res.data;
   } catch (err: any) {
-    console.warn('[MITRA] journey/companion failed:', err.message);
+    console.warn("[MITRA] journey/companion failed:", err.message);
     return null;
   }
 }
@@ -489,12 +584,14 @@ export async function mitraJourneyCompanion(): Promise<any> {
  */
 
 /** PATCH mitra/companion-state/ — write guidance_mode and other prefs. */
-export async function patchCompanionState(patch: Record<string, any>): Promise<any> {
+export async function patchCompanionState(
+  patch: Record<string, any>,
+): Promise<any> {
   try {
-    const res = await api.patch('mitra/companion-state/', patch);
+    const res = await api.patch("mitra/companion-state/", patch);
     return res.data;
   } catch (err: any) {
-    console.warn('[MITRA] companion-state PATCH failed:', err.message);
+    console.warn("[MITRA] companion-state PATCH failed:", err.message);
     return null;
   }
 }
@@ -513,14 +610,16 @@ export async function patchCompanionState(patch: Record<string, any>): Promise<a
  */
 export async function getClearWindow(): Promise<any> {
   try {
-    const res = await api.get('mitra/clear-window/', { params: { tz: getTz() } });
+    const res = await api.get("mitra/clear-window/", {
+      params: { tz: getTz() },
+    });
     // Normalize: treat {active:false} same as null so frontend can just null-check.
     if (res.data && res.data.active === false) return null;
     return res.data;
   } catch (err: any) {
     const status = err?.response?.status;
     if (status === 404 || status === 502 || !status) return null;
-    console.warn('[MITRA] clear-window failed:', err.message);
+    console.warn("[MITRA] clear-window failed:", err.message);
     return null;
   }
 }
@@ -530,9 +629,12 @@ export async function getClearWindow(): Promise<any> {
  * All feature-flagged on backend; 404-tolerant, never throw to UI.
  */
 
-export async function postVoiceNote(audioBlob: any, metadata: any): Promise<any> {
+export async function postVoiceNote(
+  audioBlob: any,
+  metadata: any,
+): Promise<any> {
   try {
-    const res = await api.post('mitra/voice/notes/', {
+    const res = await api.post("mitra/voice/notes/", {
       source_surface: metadata?.source_surface,
       duration_ms: metadata?.duration_ms ?? 0,
       has_audio: !!audioBlob,
@@ -541,10 +643,10 @@ export async function postVoiceNote(audioBlob: any, metadata: any): Promise<any>
   } catch (err: any) {
     const status = err?.response?.status;
     if (status === 404 || status === 503) {
-      console.warn('[MITRA] voice/notes endpoint unavailable (flag off)');
+      console.warn("[MITRA] voice/notes endpoint unavailable (flag off)");
       return null;
     }
-    console.warn('[MITRA] postVoiceNote failed:', err?.message);
+    console.warn("[MITRA] postVoiceNote failed:", err?.message);
     return null;
   }
 }
@@ -557,7 +659,7 @@ export async function getVoiceNoteInterpretation(id: string): Promise<any> {
   } catch (err: any) {
     const status = err?.response?.status;
     if (status === 404 || status === 503) return null;
-    console.warn('[MITRA] getVoiceNoteInterpretation failed:', err?.message);
+    console.warn("[MITRA] getVoiceNoteInterpretation failed:", err?.message);
     return null;
   }
 }
@@ -565,12 +667,12 @@ export async function getVoiceNoteInterpretation(id: string): Promise<any> {
 export async function postInterpretIntent(text: string): Promise<any> {
   if (!text || !text.trim()) return null;
   try {
-    const res = await api.post('mitra/interpret-intent/', { text });
+    const res = await api.post("mitra/interpret-intent/", { text });
     return res.data;
   } catch (err: any) {
     const status = err?.response?.status;
     if (status === 404 || status === 503) return null;
-    console.warn('[MITRA] postInterpretIntent failed:', err?.message);
+    console.warn("[MITRA] postInterpretIntent failed:", err?.message);
     return null;
   }
 }
@@ -582,14 +684,16 @@ export async function postInterpretIntent(text: string): Promise<any> {
 
 export async function getResilienceNarrative(): Promise<any> {
   try {
-    const res = await api.get('mitra/resilience-narrative/', { params: { tz: getTz() } });
+    const res = await api.get("mitra/resilience-narrative/", {
+      params: { tz: getTz() },
+    });
     return res.data;
   } catch (err: any) {
     const status = err?.response?.status;
     if (status === 404) {
-      console.log('[MITRA] resilience-narrative: feature flag off (404)');
+      console.log("[MITRA] resilience-narrative: feature flag off (404)");
     } else {
-      console.warn('[MITRA] resilience-narrative failed:', err.message);
+      console.warn("[MITRA] resilience-narrative failed:", err.message);
     }
     return null;
   }
@@ -601,7 +705,7 @@ export async function postGratitudeLedger(entry: {
   meta?: Record<string, any>;
 }): Promise<any> {
   try {
-    const res = await api.post('mitra/gratitude-ledger/', {
+    const res = await api.post("mitra/gratitude-ledger/", {
       ...entry,
       tz: getTz(),
     });
@@ -609,9 +713,14 @@ export async function postGratitudeLedger(entry: {
   } catch (err: any) {
     const status = err?.response?.status;
     if (status === 404) {
-      console.log(`[MITRA] gratitude-ledger (${entry.signal_type}): feature flag off (404)`);
+      console.log(
+        `[MITRA] gratitude-ledger (${entry.signal_type}): feature flag off (404)`,
+      );
     } else {
-      console.warn(`[MITRA] gratitude-ledger (${entry.signal_type}) failed:`, err.message);
+      console.warn(
+        `[MITRA] gratitude-ledger (${entry.signal_type}) failed:`,
+        err.message,
+      );
     }
     return null;
   }
@@ -619,7 +728,7 @@ export async function postGratitudeLedger(entry: {
 
 export async function getWeeklyReflectionData(cycleDay?: number): Promise<any> {
   try {
-    const res = await api.get('mitra/journey/weekly-reflection/', {
+    const res = await api.get("mitra/journey/weekly-reflection/", {
       params: { cycle_day: cycleDay, tz: getTz() },
     });
     return res.data;
@@ -627,37 +736,45 @@ export async function getWeeklyReflectionData(cycleDay?: number): Promise<any> {
     const status = err?.response?.status;
     if (status === 404) {
       try {
-        const fallback = await api.get('mitra/journey/status/');
+        const fallback = await api.get("mitra/journey/status/");
         return fallback?.data || null;
       } catch {
         return null;
       }
     }
-    console.warn('[MITRA] weekly-reflection failed:', err.message);
+    console.warn("[MITRA] weekly-reflection failed:", err.message);
     return null;
   }
 }
 
 /** POST mitra/journey/welcome-back/ — Submit welcome-back decision (continue | fresh). */
-export async function mitraJourneyWelcomeBack(decision: 'continue' | 'fresh'): Promise<any> {
+export async function mitraJourneyWelcomeBack(
+  decision: "continue" | "fresh",
+): Promise<any> {
   try {
-    const res = await api.post('mitra/journey/welcome-back/', { decision, tz: getTz() });
+    const res = await api.post("mitra/journey/welcome-back/", {
+      decision,
+      tz: getTz(),
+    });
     console.log(`[MITRA] welcome-back decision "${decision}" submitted`);
     return res.data;
   } catch (err: any) {
-    console.error('[MITRA] welcome-back submission failed:', err.message);
+    console.error("[MITRA] welcome-back submission failed:", err.message);
     return null;
   }
 }
-
 
 // ---------------------------------------------------------------------------
 // Week 6 — Companion Intelligence APIs (Moments 27, 28, 29, 30, 39)
 // ---------------------------------------------------------------------------
 
-export async function getPrepContext(params: Record<string, any> = {}): Promise<any> {
+export async function getPrepContext(
+  params: Record<string, any> = {},
+): Promise<any> {
   try {
-    const res = await api.get('mitra/prep/', { params: { ...params, tz: getTz() } });
+    const res = await api.get("mitra/prep/", {
+      params: { ...params, tz: getTz() },
+    });
     return res.data;
   } catch (err: any) {
     const status = err?.response?.status;
@@ -665,17 +782,18 @@ export async function getPrepContext(params: Record<string, any> = {}): Promise<
       // Flag-off (404) or backend unreachable (502/timeout) → offline fallback
       // so the sheet renders sample coaching content instead of a blank state.
       return {
-        surface: 'Steady before',
-        strategy_line: 'Lower your voice slightly. Let them finish before you respond.',
-        grounding_action: 'One slow breath before you enter the room.',
-        do_frame: 'Speak from steadiness. Keep to one clean point.',
+        surface: "Steady before",
+        strategy_line:
+          "Lower your voice slightly. Let them finish before you respond.",
+        grounding_action: "One slow breath before you enter the room.",
+        do_frame: "Speak from steadiness. Keep to one clean point.",
         dont_frame: "Don't enter already arguing in your head.",
         principle_hint: null,
-        context_type: params?.context_type || 'work_conversation',
+        context_type: params?.context_type || "work_conversation",
         _offline_fallback: true,
       };
     }
-    console.warn('[MITRA] prep/ failed:', err.message);
+    console.warn("[MITRA] prep/ failed:", err.message);
     return null;
   }
 }
@@ -686,34 +804,52 @@ export async function getPrepContext(params: Record<string, any> = {}): Promise<
  */
 export async function getPredictiveAlerts(): Promise<any> {
   try {
-    const res = await api.get('mitra/predictive/alerts/', { params: { tz: getTz() } });
+    const res = await api.get("mitra/predictive/alerts/", {
+      params: { tz: getTz() },
+    });
     return res.data;
   } catch (err: any) {
-    if (err?.response?.status && err?.response?.status !== 404 && err?.response?.status !== 502) {
-      console.warn('[MITRA] predictive/alerts failed:', err.message);
+    if (
+      err?.response?.status &&
+      err?.response?.status !== 404 &&
+      err?.response?.status !== 502
+    ) {
+      console.warn("[MITRA] predictive/alerts failed:", err.message);
     }
     return null;
   }
 }
 
 /** POST mitra/predictive/alerts/<id>/dismiss/ — Moment 28 user-dismiss action. */
-export async function dismissPredictiveAlert(alertId: string | number): Promise<any> {
+export async function dismissPredictiveAlert(
+  alertId: string | number,
+): Promise<any> {
   try {
     const res = await api.post(`mitra/predictive/alerts/${alertId}/dismiss/`);
     return res.data;
   } catch (err: any) {
-    console.warn(`[MITRA] predictive/alerts/${alertId}/dismiss failed:`, err.message);
+    console.warn(
+      `[MITRA] predictive/alerts/${alertId}/dismiss failed:`,
+      err.message,
+    );
     return null;
   }
 }
 
 /** POST mitra/predictive/alerts/<id>/mute-entity/ — mute the entity behind an alert. */
-export async function mutePredictiveAlertEntity(alertId: string | number): Promise<any> {
+export async function mutePredictiveAlertEntity(
+  alertId: string | number,
+): Promise<any> {
   try {
-    const res = await api.post(`mitra/predictive/alerts/${alertId}/mute-entity/`);
+    const res = await api.post(
+      `mitra/predictive/alerts/${alertId}/mute-entity/`,
+    );
     return res.data;
   } catch (err: any) {
-    console.warn(`[MITRA] predictive/alerts/${alertId}/mute-entity failed:`, err.message);
+    console.warn(
+      `[MITRA] predictive/alerts/${alertId}/mute-entity failed:`,
+      err.message,
+    );
     return null;
   }
 }
@@ -726,7 +862,9 @@ export async function mutePredictiveAlertEntity(alertId: string | number): Promi
  */
 export async function getBriefingToday(): Promise<any> {
   try {
-    const res = await api.get('mitra/briefing/today/', { params: { tz: getTz() } });
+    const res = await api.get("mitra/briefing/today/", {
+      params: { tz: getTz() },
+    });
     return res.data;
   } catch (err: any) {
     const status = err?.response?.status;
@@ -734,7 +872,7 @@ export async function getBriefingToday(): Promise<any> {
       // Briefing card hides gracefully when no briefing for today.
       return null;
     }
-    console.warn('[MITRA] briefing/today failed:', err.message);
+    console.warn("[MITRA] briefing/today failed:", err.message);
     return null;
   }
 }
@@ -744,16 +882,18 @@ export async function getBriefingToday(): Promise<any> {
  *  LLM-generated paragraph). Ledger is the raw entity-linked resilience data.
  *  Spec dashboard §6 step 7 + route_reflection_weekly entity highlights.
  */
-export async function getResilienceLedger(params: { limit?: number; entity_id?: string | number } = {}): Promise<any> {
+export async function getResilienceLedger(
+  params: { limit?: number; entity_id?: string | number } = {},
+): Promise<any> {
   try {
-    const res = await api.get('mitra/resilience-ledger/', {
+    const res = await api.get("mitra/resilience-ledger/", {
       params: { ...params, tz: getTz() },
     });
     return res.data;
   } catch (err: any) {
     const status = err?.response?.status;
     if (status === 404 || status === 502 || !status) return null;
-    console.warn('[MITRA] resilience-ledger failed:', err.message);
+    console.warn("[MITRA] resilience-ledger failed:", err.message);
     return null;
   }
 }
@@ -763,12 +903,14 @@ export async function getResilienceLedger(params: { limit?: number; entity_id?: 
  */
 export async function getDeepenPreview(): Promise<any> {
   try {
-    const res = await api.get('mitra/journey/deepen-preview/', { params: { tz: getTz() } });
+    const res = await api.get("mitra/journey/deepen-preview/", {
+      params: { tz: getTz() },
+    });
     return res.data;
   } catch (err: any) {
     const status = err?.response?.status;
     if (status === 404 || status === 502 || !status) return null;
-    console.warn('[MITRA] journey/deepen-preview failed:', err.message);
+    console.warn("[MITRA] journey/deepen-preview failed:", err.message);
     return null;
   }
 }
@@ -776,13 +918,17 @@ export async function getDeepenPreview(): Promise<any> {
 /** GET mitra/recommended-additional/ — Moment 30 post-core recommendation. */
 export async function getRecommendedAdditional(): Promise<any> {
   try {
-    const res = await api.get('mitra/recommended-additional/', {
+    const res = await api.get("mitra/recommended-additional/", {
       params: { tz: getTz() },
     });
     return res.data;
   } catch (err: any) {
-    if (err?.response?.status && err?.response?.status !== 404 && err?.response?.status !== 502) {
-      console.warn('[MITRA] recommended-additional/ failed:', err.message);
+    if (
+      err?.response?.status &&
+      err?.response?.status !== 404 &&
+      err?.response?.status !== 502
+    ) {
+      console.warn("[MITRA] recommended-additional/ failed:", err.message);
     }
     return null;
   }
@@ -791,13 +937,17 @@ export async function getRecommendedAdditional(): Promise<any> {
 /** GET mitra/post-conflict-context/ — Moment 39 dissonance-thread context. */
 export async function getPostConflictContext(): Promise<any> {
   try {
-    const res = await api.get('mitra/post-conflict-context/', {
+    const res = await api.get("mitra/post-conflict-context/", {
       params: { tz: getTz() },
     });
     return res.data;
   } catch (err: any) {
-    if (err?.response?.status && err?.response?.status !== 404 && err?.response?.status !== 502) {
-      console.warn('[MITRA] post-conflict-context/ failed:', err.message);
+    if (
+      err?.response?.status &&
+      err?.response?.status !== 404 &&
+      err?.response?.status !== 502
+    ) {
+      console.warn("[MITRA] post-conflict-context/ failed:", err.message);
     }
     return null;
   }
@@ -806,11 +956,11 @@ export async function getPostConflictContext(): Promise<any> {
 /** POST mitra/entities/check-duplicate/ — Moment 29 probe from freeform mention text. */
 export async function postEntitiesCheckDuplicate(text: string): Promise<any> {
   try {
-    const res = await api.post('mitra/entities/check-duplicate/', { text });
+    const res = await api.post("mitra/entities/check-duplicate/", { text });
     return res.data;
   } catch (err: any) {
     if (err?.response?.status !== 404) {
-      console.warn('[MITRA] entities/check-duplicate failed:', err.message);
+      console.warn("[MITRA] entities/check-duplicate failed:", err.message);
     }
     return null;
   }
@@ -841,14 +991,17 @@ export async function patchEntity(
  */
 export async function patchDissonanceThread(
   id: string | number,
-  payload: { status: 'acknowledged' | 'resolved' | 'stale' | 'softened' },
+  payload: { status: "acknowledged" | "resolved" | "stale" | "softened" },
 ): Promise<any> {
   try {
     const res = await api.patch(`mitra/dissonance-threads/${id}/`, payload);
     return res.data;
   } catch (err: any) {
     if (err?.response?.status !== 404) {
-      console.warn(`[MITRA] dissonance-threads/${id} PATCH failed:`, err.message);
+      console.warn(
+        `[MITRA] dissonance-threads/${id} PATCH failed:`,
+        err.message,
+      );
     }
     return null;
   }
@@ -861,18 +1014,17 @@ export async function patchDissonanceThread(
  */
 export async function getPanchangToday(date?: string): Promise<any> {
   try {
-    const res = await api.get('mitra/panchang/today/', {
+    const res = await api.get("mitra/panchang/today/", {
       params: date ? { date, tz: getTz() } : { tz: getTz() },
     });
     return res.data;
   } catch (err: any) {
     const status = err?.response?.status;
     if (status === 404 || status === 502 || !status) return null;
-    console.warn('[MITRA] panchang/today failed:', err.message);
+    console.warn("[MITRA] panchang/today failed:", err.message);
     return null;
   }
 }
-
 
 // ---------------------------------------------------------------------------
 // Week 7 — Why-This + grief/loneliness/joy APIs (Moments 36, 37, 45, 46, 47)
@@ -896,7 +1048,10 @@ export async function getPrincipleSource(id: string | number): Promise<any> {
     const res = await api.get(`mitra/principles/${id}/sources/`);
     return res.data || null;
   } catch (err: any) {
-    console.warn(`[MITRA] principles/${id}/sources failed (tolerated):`, err.message);
+    console.warn(
+      `[MITRA] principles/${id}/sources failed (tolerated):`,
+      err.message,
+    );
     return null;
   }
 }
@@ -904,14 +1059,25 @@ export async function getPrincipleSource(id: string | number): Promise<any> {
 /** GET mitra/support/grief-context/ — Grief room contextual copy/prompt. */
 export async function getGriefContext(): Promise<any> {
   try {
-    const res = await api.get('mitra/support/grief-context/');
+    const res = await api.get("mitra/support/grief-context/");
     return res.data || null;
   } catch (err: any) {
-    console.warn('[MITRA] grief-context failed (fallback applied):', err.message);
+    console.warn(
+      "[MITRA] grief-context failed (fallback applied):",
+      err.message,
+    );
     return {
-      opening_line: "I'm here. No rush.",
-      presence_hint: 'No timer. No goal. Just a space to sit.',
+      opening_line: "You don't have to say anything yet. I'm here. We can sit.",
+      second_beat_line:
+        "Would a slow breath help right now? Or would you rather just stay quiet together?",
       principle_hint: null,
+      grief_mantra: {
+        id: "fallback_grief_mantra",
+        title: "Om",
+        devanagari: "ॐ",
+        duration_min: 7,
+      },
+      slow_breath: { duration_min: 1, pattern: "4-7-8" },
       _offline_fallback: true,
     };
   }
@@ -920,13 +1086,30 @@ export async function getGriefContext(): Promise<any> {
 /** GET mitra/support/loneliness-context/ — Loneliness room context + chant. */
 export async function getLonelinessContext(): Promise<any> {
   try {
-    const res = await api.get('mitra/support/loneliness-context/');
+    const res = await api.get("mitra/support/loneliness-context/");
     return res.data || null;
   } catch (err: any) {
-    console.warn('[MITRA] loneliness-context failed (fallback applied):', err.message);
+    console.warn(
+      "[MITRA] loneliness-context failed (fallback applied):",
+      err.message,
+    );
     return {
-      opening_line: "Let's chant together for a minute. Not alone.",
-      chant: { id: 'fallback_chant', reps: 11, title: 'So Hum', devanagari: 'सो हम्' },
+      opening_line: "Loneliness is heavy. I'm here with you.",
+      second_beat_line: "Not to fix it — just to share the minute.",
+      bhakti_mantra: {
+        id: "fallback_bhakti",
+        title: "So Hum",
+        devanagari: "सो हम्",
+        duration_min: 6,
+      },
+      companioned_chant: {
+        id: "fallback_chant",
+        reps: 11,
+        title: "Om",
+        devanagari: "ॐ",
+      },
+      walk_duration_min: 10,
+      principle_hint: null,
       _offline_fallback: true,
     };
   }
@@ -935,11 +1118,10 @@ export async function getLonelinessContext(): Promise<any> {
 /** GET mitra/joy-signal/ — Today's joy signal (Moment 45). null when no signal. */
 export async function getJoySignal(): Promise<any> {
   try {
-    const res = await api.get('mitra/joy-signal/');
+    const res = await api.get("mitra/joy-signal/");
     return res.data || null;
   } catch (err: any) {
-    console.warn('[MITRA] joy-signal failed (tolerated):', err.message);
+    console.warn("[MITRA] joy-signal failed (tolerated):", err.message);
     return null;
   }
 }
-

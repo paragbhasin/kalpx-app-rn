@@ -60,6 +60,15 @@ NOT code changes — these are JSON content packs applied through the backend.
 - `cycle_reflection_refresh`
 - `checkpoint_results_refresh`
 
+### Tier 4 — v3 Dashboard shell (ship as ONE PR with Tier 2)
+
+A new dashboard variant (`companion_dashboard_v3`) that assembles all Tier-2 embeds in the right slots, plus a new personal greeting card that lives at its top. Ships side-by-side with the Apr-11 dashboard, gated by a feature flag — **zero regression risk**.
+
+Because `new_dashboard` composes every Tier-2 embed, wire Tier 2 FIRST (so each embed renders correctly in isolation), then ship Tier 2 + Tier 4 together as one cohesive "v3 dashboard" PR.
+
+- `personal_greeting_card` (~15 min) — top-slot greeting with contextual CTAs. Also usable on unauthed Home or as a standalone `home_hub/main` container.
+- `new_dashboard` (~25 min) — assembles greeting + all Tier-2 embeds into `companion_dashboard_v3/day_active`. See its README for the exact 3-step wire-up and the flag toggle in `Home.tsx`.
+
 ## Rules
 
 1. ONE moment per branch, ONE moment per commit.

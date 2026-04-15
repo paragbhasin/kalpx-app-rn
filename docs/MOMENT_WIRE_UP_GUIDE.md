@@ -2,7 +2,7 @@
 
 ## Sadhana Yatra framework — read this first (2026-04-14)
 
-Every moment in Mitra now lives inside the **Sadhana Yatra** spine. This is the unifying model that tells us WHEN a moment surfaces, WHY, and HOW it relates to every other moment. Spec: `~/.claude/projects/-Users-paragbhasin/memory/mitra_architecture_sadhana_yatra.md`.
+Every moment in Mitra now lives inside the **Sadhana Yatra** spine. This is the unifying model that tells us WHEN a moment surfaces, WHY, and HOW it relates to every other moment. (The full framework doc is in Parag's local memory — ask him for the architecture summary if you need more context than the sections below provide.)
 
 ### The 4-stage diagnostic
 Every user enters via a 4-stage conversation (onboarding today, daily check-in later):
@@ -155,6 +155,13 @@ Key files:
 This engine is "append-only" for wiring. You are ADDING lines, never removing. If you ever find yourself reaching to delete or refactor an existing line in one of the 3 engine files, stop and ask. The moment you remove a line, you are outside the safe path.
 
 ---
+
+## Scaffold 22 — voice_on_every_screen (floating mic affordance)
+
+- **What:** A floating mic button designed to sit adjacent to any input area. Per the Sadhana Yatra spec, the mic should be present on every conversational turn so the user can reply by voice at any time.
+- **Status:** scaffold-only, NOT wired. Do not wire until voice-consent flow + recording pipeline are signed off.
+- **Folder:** `src/extensions/moments/voice_on_every_screen/`
+- **Spec:** no canonical spec yet — treat as vision-driven.
 
 ## Scaffold 21 — completion_return (added after the main 20)
 

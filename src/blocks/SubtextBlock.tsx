@@ -45,15 +45,26 @@ const SubtextBlock: React.FC<SubtextBlockProps> = ({ block, textColor }) => {
     block.style,
   ];
 
+  // Sanitize: strip raw HTML tags that leak through from server-side templates
+  // when an interpolated slot is empty (e.g. "<strong>{{prana_checkin_total}}</strong>"
+  // renders literally as "<strong></strong>" when the count binding is absent).
+  // TODO(backend): allContainers.js progress_summary subtext should bind
+  // prana_checkin_total via schema, not inline HTML template string.
+  const sanitize = (v: any) => {
+    if (typeof v !== 'string') return v;
+    return v.replace(/<[^>]+>/g, '');
+  };
+  const rendered = sanitize(block.content);
+
   if (block.action) {
     return (
       <TouchableOpacity onPress={handlePress} activeOpacity={0.7}>
-        <Text style={textStyle}>{block.content}</Text>
+        <Text style={textStyle}>{rendered}</Text>
       </TouchableOpacity>
     );
   }
 
-  return <Text style={textStyle}>{block.content}</Text>;
+  return <Text style={textStyle}>{rendered}</Text>;
 };
 
 const styles = StyleSheet.create({

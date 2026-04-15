@@ -55,8 +55,31 @@ const CoreItemsList: React.FC<{ block?: any }> = () => {
   ];
 
   const handleTap = (type: string) => {
+    // If master_* was seeded by generate_companion, view_info reads it via
+    // the masterData fallback in actionExecutor. If not (deep-link landing,
+    // post-logout re-auth, or v3 state machines that skip the legacy
+    // companion fetch), synthesize manualData from the card_* fields already
+    // visible on the dashboard so the tap never silently no-ops.
+    const masterKey = `master_${type}` as const;
+    const master = ss[masterKey];
+    const fallbackTitle =
+      ss[`card_${type === "sankalp" ? "sankalpa" : type === "practice" ? "ritual" : "mantra"}_title`] ||
+      ss[`${type}_text`] ||
+      ss[`${type}_title`] ||
+      "";
+    const manualData = master || {
+      id: ss[`${type}_id`] || `card_${type}`,
+      item_id: ss[`${type}_id`] || `card_${type}`,
+      item_type: type,
+      title: fallbackTitle,
+      iast: ss[`${type}_iast`] || "",
+      devanagari: ss[`${type}_devanagari`] || "",
+      audio_url: ss[`${type}_audio_url`] || "",
+      source: "core",
+      type,
+    };
     executeAction(
-      { type: "view_info", payload: { type } },
+      { type: "view_info", payload: { type, manualData } },
       {
         loadScreen,
         goBack,

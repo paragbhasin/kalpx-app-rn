@@ -425,13 +425,32 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
           </View>
         )}
 
-        {/* Instruction text — shown when day is not complete */}
+        {/* Instruction text — shown when day is not complete.
+            Day-awareness gate: the first_day variant's instruction_text
+            ("Today is day one. Start with whatever calls you...") is only
+            correct for day 1. If dayNumber > 1 (e.g. backend auto-routed
+            someone to first_day schema on day 7 due to re-entry), fall back
+            to the generic instruction instead of printing a day-1 line on
+            day 7. */}
         {!isDayComplete && (
           <View style={styles.instructionSection}>
             <Text style={styles.instructionText}>
-              {contextualCta?.label ||
-                schema.dashboard_config?.instruction_text ||
-                "Tap on any card to start your session."}
+              {(() => {
+                const fromCta = contextualCta?.label;
+                const fromSchema = schema.dashboard_config?.instruction_text;
+                const generic = "Tap on any card to start your session.";
+                const variant = schema.meta?.variant || "";
+                const schemaMentionsDayOne =
+                  typeof fromSchema === "string" &&
+                  /\bday one\b/i.test(fromSchema);
+                if (variant === "first_day" && dayNumber > 1) {
+                  return fromCta || generic;
+                }
+                if (schemaMentionsDayOne && dayNumber !== 1) {
+                  return fromCta || generic;
+                }
+                return fromCta || fromSchema || generic;
+              })()}
             </Text>
           </View>
         )}

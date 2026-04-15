@@ -30,17 +30,57 @@ const FirstRecognitionBlock: React.FC<Props> = ({ block }) => {
   const { screenData } = useScreenStore();
   const paras = block.body_paragraphs || [];
 
+  // Defensive fallback: if generate-companion upstream didn't populate the
+  // turn_6 template vars (friction_label / state_label / recommended_posture /
+  // primary_feeling / active_life_situation), inject graceful alternates so
+  // the sentence never renders with empty slots producing malformed prose.
+  const dataWithFallbacks = {
+    friction_label: "what's alive for you",
+    state_label: 'moment',
+    recommended_posture: 'gentle steadiness — doing less, better',
+    primary_feeling: "what's alive for you",
+    active_life_situation: 'this moment',
+    feeling: "what's alive for you",
+    situation: 'this moment',
+    ...(screenData || {}),
+  };
+  // Also overlay any explicitly-empty values so an empty string still yields
+  // the fallback (screenData spread would keep "" and interpolation would
+  // render the empty string).
+  for (const k of [
+    'friction_label',
+    'state_label',
+    'recommended_posture',
+    'primary_feeling',
+    'active_life_situation',
+    'feeling',
+    'situation',
+  ]) {
+    const v = (dataWithFallbacks as any)[k];
+    if (v === '' || v === null || v === undefined) {
+      (dataWithFallbacks as any)[k] = {
+        friction_label: "what's alive for you",
+        state_label: 'moment',
+        recommended_posture: 'gentle steadiness — doing less, better',
+        primary_feeling: "what's alive for you",
+        active_life_situation: 'this moment',
+        feeling: "what's alive for you",
+        situation: 'this moment',
+      }[k];
+    }
+  }
+
   return (
     <View style={styles.card}>
       {block.label && <Text style={styles.label}>{block.label}</Text>}
       {block.emphasized_line && (
         <Text style={styles.emphasized}>
-          {interpolate(block.emphasized_line, screenData)}
+          {interpolate(block.emphasized_line, dataWithFallbacks)}
         </Text>
       )}
       {paras.map((p, i) => (
         <Text key={i} style={styles.body}>
-          {interpolate(p, screenData)}
+          {interpolate(p, dataWithFallbacks)}
         </Text>
       ))}
     </View>

@@ -24,14 +24,31 @@ const ActivityStatsBlock: React.FC<ActivityStatsBlockProps> = ({ block }) => {
   const screenData = useScreenStore((s) => s.screenData);
 
   const dataKey = block.data_key || 'milestone_activity_stats';
-  const data = screenData[dataKey] || {};
+  // Backend binding may surface activity counters under several keys depending
+  // on the flow path (milestone_activity_stats, engagement_counts, progress.counters,
+  // checkpoint_metrics). Merge across the common shapes so day7/day14 daily_insight
+  // never renders a grid of zeroes when the source values exist under a
+  // sibling key.
+  const primary = (screenData as any)[dataKey] || {};
+  const engagement = (screenData as any).engagement_counts || {};
+  const counters = (screenData as any).progress?.counters || {};
+  const checkpointMetrics = (screenData as any).checkpoint_metrics || {};
+  const data: any = { ...checkpointMetrics, ...counters, ...engagement, ...primary };
+
+  const firstNumber = (...candidates: any[]) => {
+    for (const c of candidates) {
+      if (typeof c === 'number' && !isNaN(c)) return c;
+      if (typeof c === 'string' && c !== '' && !isNaN(Number(c))) return Number(c);
+    }
+    return 0;
+  };
 
   const stats: StatItem[] = [
-    { label: 'Check-ins', value: data.checkin || data.checkins || 0, icon: '\u{1F9D8}' },
-    { label: 'Triggers', value: data.trigger || data.triggers || 0, icon: '\u{1F4A8}' },
-    { label: 'Mantras', value: data.mantra || data.mantras || 0, icon: '\u{1F4FF}' },
-    { label: 'Sankalps', value: data.sankalp || data.sankalps || 0, icon: '\u{1FAB7}' },
-    { label: 'Practices', value: data.practice || data.practices || data.core || 0, icon: '\u{1F31F}' },
+    { label: 'Check-ins', value: firstNumber(data.checkin, data.checkins, data.checkin_count, data.total_checkins), icon: '\u{1F9D8}' },
+    { label: 'Triggers', value: firstNumber(data.trigger, data.triggers, data.trigger_count, data.total_triggers), icon: '\u{1F4A8}' },
+    { label: 'Mantras', value: firstNumber(data.mantra, data.mantras, data.mantra_count, data.total_mantras), icon: '\u{1F4FF}' },
+    { label: 'Sankalps', value: firstNumber(data.sankalp, data.sankalps, data.sankalp_count, data.total_sankalps), icon: '\u{1FAB7}' },
+    { label: 'Practices', value: firstNumber(data.practice, data.practices, data.core, data.practice_count, data.total_practices), icon: '\u{1F31F}' },
   ];
 
   return (

@@ -1,11 +1,14 @@
 # Moment: Grief Room
 
+## ⚠️ Canonical spec status
+Spec partially defined in `overlay_support_grief_room.md` (stub). Confirm copy with product before wiring. Fallback copy in `index.tsx` is a best-guess from the Mitra vision memos.
+
 ## What this is
 The Grief Room is a soft, dim-lit space Mitra opens when the user signals loss, heavy grief, or bereavement. Nothing rushes them — the room just sits with them. It offers a single grounding phrase, an ambient sound option, and two calm exits (stay longer / return to day).
 
 ## Where the design + exact copy comes from
 Open this spec file — source of truth for every word and layout:
-`/Users/paragbhasin/kalpx-frontend/docs/specs/mitra-v3-experience/screens/route_support_grief.md`
+`/Users/paragbhasin/kalpx-frontend/docs/specs/mitra-v3-experience/screens/overlay_support_grief_room.md`
 
 If this scaffold renders differently from the spec, edit the scaffold, not the spec.
 
@@ -76,7 +79,7 @@ Bypasses the real user flow. Good only for confirming the screen renders at all.
 xcrun simctl openurl booted kalpx://mitra/support_grief/room
 ```
 
-Expected: "I'm here. No rush." style phrase + two soft buttons (stay / return).
+Expected: "Sit with me for a moment." style phrase + soft buttons (stay / return).
 
 ### Option B — Real user flow (the test that matters)
 A user never types a URL. Test the tap path from cold launch:

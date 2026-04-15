@@ -1,5 +1,8 @@
 # Moment: Personal Greeting Card
 
+## ⚠️ Canonical spec status
+No canonical spec exists. Copy is a best guess from Mitra vision principles. Product confirmation required before shipping.
+
 ## What this is
 A personalized top-of-screen greeting card that addresses the user by name (when available), surfaces a contextual message based on `greeting_context`, and offers 3–4 gentle next-step CTAs (Start today / Review / Reflect / Ask Mitra). It is meant to be the first warm voice the user hears when they land on a home-like surface.
 
@@ -27,11 +30,11 @@ This file is isolated. Nothing in the app currently imports it. You connect it v
 
 | Field | Type | Purpose |
 |---|---|---|
-| `screenData.user.first_name` (or `screenData.first_name`) | string | Used in "Hi, ${firstName}." — falls back to "Hi there." |
+| `screenData.user.first_name` (or `screenData.first_name`) | string | Used in "Hi, ${firstName}." — if absent, greeting line is hidden and only the contextual message renders. |
 | `screenData.greeting_context` | `"morning" \| "evening" \| "low_engagement" \| "milestone"` | Picks the contextual line-2 message. Anything else → generic fallback. |
 | `screenData.greeting_ctas` | `{id, label}[]` (optional) | Overrides the default 4 CTAs. |
 
-Backend may not yet emit `greeting_context` — the fallback message ("A calmer, clearer way — one day at a time.") will render. That is acceptable for MVP.
+Backend may not yet emit `greeting_context` — the fallback message ("Still here. That is the practice.") will render. That is acceptable for MVP.
 
 ---
 
@@ -100,7 +103,7 @@ Add an `open_home_hub` action in `src/engine/actionExecutor.ts` if you need a ta
 ```bash
 xcrun simctl openurl booted kalpx://mitra/home_hub/main
 ```
-Expected: Greeting card with "Hi there." (or the logged-in user's first name), contextual line, four gradient CTA pills.
+Expected: Greeting card with "Hi, {first_name}." (or just contextual line if no name), contextual message, four gradient CTA pills.
 
 ### Option B — Real user flow
 1. Cold launch the app.
@@ -119,7 +122,7 @@ Real navigation for each CTA is left to Pavani when she wires — the scaffold i
 | Blank where greeting should be | Path C: container/block not registered |
 | "Unknown block type" error | Path C: BlockRenderer import/case missing |
 | CTA taps do nothing | Expected — wire `onCtaPress` to your navigation logic |
-| Name shows "Hi there." when user is logged in | Backend not populating `screenData.user.first_name` |
+| Greeting line hidden when user is logged in | Backend not populating `screenData.user.first_name` |
 
 ---
 

@@ -31,8 +31,8 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
   const fade2 = useRef(new Animated.Value(0)).current;
 
   const ctx = (screenData as any).loneliness_context || {
-    opening_line: "Loneliness is heavy. I'm here with you.",
-    second_beat_line: "Not to fix it — just to share the minute.",
+    opening_line: "Loneliness is heavy. Let's chant one together.",
+    second_beat_line: "Nothing more is needed. Just this minute.",
   };
 
   useEffect(() => {

@@ -1,11 +1,14 @@
 # Moment: Loneliness Room
 
+## ⚠️ Canonical spec status
+Spec partially defined in `overlay_support_loneliness_room.md` (stub). Confirm copy with product before wiring. Fallback copy in `index.tsx` is a best-guess from Mitra vision memos.
+
 ## What this is
 The Loneliness Room is opened when a user expresses loneliness or a feeling of not being seen. It is gentle and company-like — never clinical. One phrase, one breathing/ambient cue, two kind exits.
 
 ## Where the design + exact copy comes from
 Open this spec file — source of truth for every word and layout:
-`/Users/paragbhasin/kalpx-frontend/docs/specs/mitra-v3-experience/screens/route_support_loneliness.md`
+`/Users/paragbhasin/kalpx-frontend/docs/specs/mitra-v3-experience/screens/overlay_support_loneliness_room.md`
 
 If this scaffold renders differently from the spec, edit the scaffold, not the spec.
 

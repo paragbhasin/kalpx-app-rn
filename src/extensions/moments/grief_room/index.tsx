@@ -32,7 +32,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
   const dotScale = useRef(new Animated.Value(1)).current;
 
   const ctx = (screenData as any).grief_context || {
-    opening_line: "You don't have to say anything yet. I'm here. We can sit.",
+    opening_line: "You don't have to say anything yet. Sit with me for a moment.",
     second_beat_line: "Would a slow breath help right now? Or would you rather just stay quiet together?",
   };
 

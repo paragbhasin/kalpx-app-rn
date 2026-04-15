@@ -21,10 +21,10 @@ type Props = {
 };
 
 const CONTEXTUAL_MESSAGES: Record<string, string> = {
-  morning: "Let's begin today gently.",
-  evening: "Reflecting on today's rhythm.",
-  low_engagement: "Even one small step counts.",
-  milestone: "You've stayed with this. That matters.",
+  morning: "One quiet start is enough for today.",
+  evening: "The day is softening. Pause here.",
+  low_engagement: "Small return. That is sadhana.",
+  milestone: "A week's steadiness is not small.",
 };
 
 const DEFAULT_CTAS: Cta[] = [
@@ -45,22 +45,21 @@ const PersonalGreetingCard: React.FC<Props> = ({
   const greetingContext: string = sd?.greeting_context || "";
   const contextualMessage =
     CONTEXTUAL_MESSAGES[greetingContext] ||
-    "A calmer, clearer way — one day at a time.";
+    "Still here. That is the practice.";
   const ctas: Cta[] =
     Array.isArray(sd?.greeting_ctas) && sd.greeting_ctas.length
       ? sd.greeting_ctas
       : DEFAULT_CTAS;
 
-  const greetingLine = firstName ? `Hi, ${firstName}.` : "Hi there.";
+  const greetingLine = firstName ? `Hi, ${firstName}.` : "";
 
   return (
     <View
       style={styles.card}
       accessibilityLabel="personal_greeting_card"
     >
-      <Text style={styles.greeting}>{greetingLine}</Text>
+      {greetingLine ? <Text style={styles.greeting}>{greetingLine}</Text> : null}
       <Text style={styles.contextual}>{contextualMessage}</Text>
-      <Text style={styles.prompt}>How can I help you today?</Text>
 
       <ScrollView
         horizontal

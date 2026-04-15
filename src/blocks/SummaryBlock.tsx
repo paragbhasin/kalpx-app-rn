@@ -18,12 +18,20 @@ const SummaryBlock: React.FC<SummaryBlockProps> = ({ block }) => {
 
       {block.items && block.items.length > 0 ? (
         <View style={styles.list}>
-          {block.items.map((item, index) => (
-            <View key={index} style={styles.bulletRow}>
-              <Text style={styles.bullet}>{'\u2022'}</Text>
-              <Text style={styles.itemText}>{item}</Text>
-            </View>
-          ))}
+          {(block.items as any[]).map((item, index) => {
+            const text =
+              typeof item === 'string'
+                ? item
+                : (item && typeof item === 'object'
+                    ? ((item as any).title || (item as any).text || (item as any).label || (item as any).instruction || '')
+                    : '');
+            return (
+              <View key={index} style={styles.bulletRow}>
+                <Text style={styles.bullet}>{'\u2022'}</Text>
+                <Text style={styles.itemText}>{text}</Text>
+              </View>
+            );
+          })}
         </View>
       ) : block.content ? (
         <Text style={styles.content}>{block.content}</Text>

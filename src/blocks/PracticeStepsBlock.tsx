@@ -14,21 +14,28 @@ interface PracticeStepsBlockProps {
 const PracticeStepsBlock: React.FC<PracticeStepsBlockProps> = ({ block }) => {
   const { screenData: screenState } = useScreenStore();
 
-  const steps: string[] =
+  const rawSteps: any[] =
     block.steps ||
-    (block.steps_key ? (screenState[block.steps_key] as string[]) : null) ||
+    (block.steps_key ? (screenState[block.steps_key] as any[]) : null) ||
     [];
 
-  if (steps.length === 0) return null;
+  if (rawSteps.length === 0) return null;
+
+  const asText = (s: any): string =>
+    typeof s === 'string'
+      ? s
+      : (s && typeof s === 'object'
+          ? (s.title || s.instruction || s.text || s.label || '')
+          : '');
 
   return (
     <View style={[styles.container, block?.style]}>
-      {steps.map((step, index) => (
+      {rawSteps.map((step, index) => (
         <View key={index} style={styles.stepRow}>
           <View style={styles.numberCircle}>
             <Text style={styles.numberText}>{index + 1}</Text>
           </View>
-          <Text style={styles.stepText}>{step}</Text>
+          <Text style={styles.stepText}>{asText(step)}</Text>
         </View>
       ))}
     </View>

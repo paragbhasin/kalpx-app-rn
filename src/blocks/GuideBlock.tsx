@@ -16,8 +16,15 @@ interface GuideBlockProps {
   textColor?: string;
 }
 
+const asText = (s: any): string =>
+  typeof s === 'string'
+    ? s
+    : (s && typeof s === 'object'
+        ? (s.title || s.instruction || s.text || s.label || '')
+        : '');
+
 const GuideBlock: React.FC<GuideBlockProps> = ({ block, textColor }) => {
-  const steps = block.steps || [];
+  const steps: any[] = (block.steps as any[]) || [];
   if (steps.length === 0) return null;
 
   return (
@@ -34,7 +41,7 @@ const GuideBlock: React.FC<GuideBlockProps> = ({ block, textColor }) => {
             </View>
             {index < steps.length - 1 && <View style={styles.connector} />}
           </View>
-          <Text style={[styles.stepText, textColor ? { color: textColor } : null]}>{step}</Text>
+          <Text style={[styles.stepText, textColor ? { color: textColor } : null]}>{asText(step)}</Text>
         </View>
       ))}
     </View>

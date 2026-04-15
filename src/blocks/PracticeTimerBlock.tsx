@@ -170,7 +170,13 @@ const PracticeTimerBlock: React.FC<PracticeTimerBlockProps> = ({ block }) => {
 
   const glowOpacity = glowAnim.interpolate({ inputRange: [0, 1], outputRange: [0.2, 0.6] });
 
-  const stepText = steps.length ? steps[stepIndex] : '';
+  const rawStep = steps.length ? steps[stepIndex] : '';
+  const stepText =
+    typeof rawStep === 'string'
+      ? rawStep
+      : (rawStep && typeof rawStep === 'object'
+          ? (rawStep.title || rawStep.instruction || rawStep.text || '')
+          : '');
   const practiceTitle =
     screenData.companion_practice_title ||
     screenData.practice_title ||

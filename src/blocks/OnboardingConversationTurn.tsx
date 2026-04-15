@@ -34,6 +34,7 @@ interface Props {
   block: {
     id?: string;
     headline?: string;
+    subtext?: string;
     turnOneHero?: boolean;
     mitra_message?: string | string[];
     image?: {
@@ -115,9 +116,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
     ? block.mitra_message
     : [block.mitra_message || ""];
   const inlineImageSource = resolveBlockImage(block.image?.url);
-  const headlineLines = (block.headline || "I'm Mitra.\nI'm here with you.")
-    .split("\n")
-    .filter(Boolean);
+  const headlineLines = (block.headline || "").split("\n").filter(Boolean);
   const featureMessages = messages.slice(0, 3);
   const closingMessage = messages[3] || "";
 
@@ -366,37 +365,71 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
 
   return (
     <View style={styles.wrap}>
-      {messages.some((m) => m && String(m).trim().length > 0) && (
-        <Animated.View style={[styles.mitraMsgCard, { opacity: fadeAnim }]}>
-          {messages.map((para, i) =>
-            para && String(para).trim().length > 0 ? (
-              <Text
-                key={i}
-                style={[styles.mitraMsg, i > 0 && { marginTop: 12 }]}
-              >
-                {interpolate(para, screenData)}
-              </Text>
-            ) : null,
-          )}
-        </Animated.View>
-      )}
+      <View style={styles.fullCard}>
+        {block.headline && (
+          <>
+            <Text style={styles.unifiedHeadline}>
+              {headlineLines.join("\n")}
+            </Text>
 
-      <Animated.View style={{ opacity: replyAnim }}>
-        {isIntroTurn && inlineImageSource && (
-          <View style={styles.inlineImageWrap}>
-            <Image
-              source={inlineImageSource}
-              style={[styles.inlineImage, block.image?.style]}
-              resizeMode="contain"
-              accessibilityLabel={block.image?.alt || "decorative image"}
-            />
-          </View>
+            <View style={styles.turnOneHeadlineDivider}>
+              <View style={styles.turnOneDividerLine} />
+              <Ionicons name="diamond" size={10} color="#c7a258" />
+              <View style={styles.turnOneDividerLine} />
+            </View>
+
+            {block.subtext && (
+              <Text style={styles.unifiedSubtext}>
+                {interpolate(block.subtext, screenData)}
+              </Text>
+            )}
+          </>
         )}
 
-        {(block.reply_chips || []).map((chip) => {
-          const isReturning = chip.label.toLowerCase().includes("returning");
+        {messages.some((m) => m && String(m).trim().length > 0) && (
+          <Animated.View style={[styles.mitraMsgCard, { opacity: fadeAnim }]}>
+            {messages.map((para, i) =>
+              para && String(para).trim().length > 0 ? (
+                <Text
+                  key={i}
+                  style={[styles.mitraMsg, i > 0 && { marginTop: 12 }]}
+                >
+                  {interpolate(para, screenData)}
+                </Text>
+              ) : null,
+            )}
+          </Animated.View>
+        )}
 
-          if (isReturning) {
+        <Animated.View style={{ opacity: replyAnim }}>
+          {isIntroTurn && inlineImageSource && (
+            <View style={styles.inlineImageWrap}>
+              <Image
+                source={inlineImageSource}
+                style={[styles.inlineImage, block.image?.style]}
+                resizeMode="contain"
+                accessibilityLabel={block.image?.alt || "decorative image"}
+              />
+            </View>
+          )}
+
+          {(block.reply_chips || []).map((chip) => {
+            const isReturning = chip.label.toLowerCase().includes("returning");
+
+            if (isReturning) {
+              return (
+                <TouchableOpacity
+                  key={chip.id}
+                  activeOpacity={0.75}
+                  onPress={() =>
+                    fire({ chip_id: chip.id, response_type: "chip" })
+                  }
+                >
+                  <Text style={styles.linkText}>{chip.label}</Text>
+                </TouchableOpacity>
+              );
+            }
+
             return (
               <TouchableOpacity
                 key={chip.id}
@@ -405,58 +438,48 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                   fire({ chip_id: chip.id, response_type: "chip" })
                 }
               >
-                <Text style={styles.linkText}>{chip.label}</Text>
-              </TouchableOpacity>
-            );
-          }
-
-          return (
-            <TouchableOpacity
-              key={chip.id}
-              activeOpacity={0.75}
-              onPress={() => fire({ chip_id: chip.id, response_type: "chip" })}
-            >
-              {isIntroTurn && chip.style !== "primary" ? (
-                <LinearGradient
-                  colors={["#E5D4CA", "#F5EDEA"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={[styles.heroChip, styles.heroChipSecondary]}
-                >
-                  <Text style={styles.heroChipLabel}>{chip.label}</Text>
-                </LinearGradient>
-              ) : (
-                <View
-                  style={[
-                    isIntroTurn ? styles.heroChip : styles.chip,
-                    chip.style === "primary"
-                      ? isIntroTurn
-                        ? styles.heroChipPrimary
-                        : styles.chipPrimary
-                      : isIntroTurn
-                        ? styles.heroChipSecondary
-                        : styles.chipSecondary,
-                  ]}
-                >
-                  <Text
+                {isIntroTurn && chip.style !== "primary" ? (
+                  <LinearGradient
+                    colors={["#E5D4CA", "#F5EDEA"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 0 }}
+                    style={[styles.heroChip, styles.heroChipSecondary]}
+                  >
+                    <Text style={styles.heroChipLabel}>{chip.label}</Text>
+                  </LinearGradient>
+                ) : (
+                  <View
                     style={[
-                      isIntroTurn ? styles.heroChipLabel : styles.chipLabel,
-                      chip.style === "primary" &&
-                        (isIntroTurn
-                          ? styles.heroChipLabelPrimary
-                          : styles.chipLabelPrimary),
+                      isIntroTurn ? styles.heroChip : styles.chip,
+                      chip.style === "primary"
+                        ? isIntroTurn
+                          ? styles.heroChipPrimary
+                          : styles.chipPrimary
+                        : isIntroTurn
+                          ? styles.heroChipSecondary
+                          : styles.chipSecondary,
                     ]}
                   >
-                    {chip.label}
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          );
-        })}
+                    <Text
+                      style={[
+                        isIntroTurn ? styles.heroChipLabel : styles.chipLabel,
+                        chip.style === "primary" &&
+                          (isIntroTurn
+                            ? styles.heroChipLabelPrimary
+                            : styles.chipLabelPrimary),
+                      ]}
+                    >
+                      {chip.label}
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+            );
+          })}
 
-        {block.open_input?.enabled && renderStyledInput(false)}
-      </Animated.View>
+          {block.open_input?.enabled && renderStyledInput(false)}
+        </Animated.View>
+      </View>
     </View>
   );
 };
@@ -480,6 +503,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.18,
     shadowRadius: 22,
     elevation: 4,
+  },
+  unifiedSubtext: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 15,
+    lineHeight: 22,
+    color: "#6b5a45",
+    textAlign: "center",
+    marginBottom: 16,
   },
   turnOneGlyphWrap: {
     alignItems: "center",
@@ -813,6 +844,28 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   micIcon: { color: AMBER_CTA, fontSize: 20 },
+  fullCard: {
+    borderRadius: 24,
+    padding: 20,
+    backgroundColor: "#fffaf3",
+    borderWidth: 1,
+    borderColor: "#e6c88f",
+    shadowColor: "#c89a47",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 4,
+    marginTop: -15,
+  },
+
+  unifiedHeadline: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 24,
+    lineHeight: 34,
+    color: "#3f2810",
+    textAlign: "center",
+    marginBottom: 10,
+  },
 });
 
 export default OnboardingConversationTurn;

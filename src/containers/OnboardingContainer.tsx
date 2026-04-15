@@ -53,24 +53,17 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
   }, [turn]);
 
   const blocks = schema?.blocks || [];
-  const headlineBlock = blocks.find((block: any) => block.type === "headline");
-  const conversationBlock = blocks.find(
-    (block: any) => block.type === "onboarding_conversation_turn",
-  );
+  const headlineBlock = blocks.find((b: any) => b.type === "headline");
+  const subtextBlock = blocks.find((b: any) => b.type === "subtext");
 
-  const renderTurnOne = () => {
-    if (!conversationBlock) return null;
-
-    return (
-      <BlockRenderer
-        block={{
-          ...conversationBlock,
-          headline: headlineBlock?.content,
-          turnOneHero: true,
-        }}
-      />
-    );
-  };
+  const enrichedBlocks = blocks
+    .filter((b: any) => b.type === "onboarding_conversation_turn")
+    .map((b: any) => ({
+      ...b,
+      headline: headlineBlock?.content,
+      subtext: subtextBlock?.content,
+      turnOneHero: turn === 1,
+    }));
 
   return (
     <ScrollView
@@ -79,11 +72,9 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
       showsVerticalScrollIndicator={false}
       keyboardShouldPersistTaps="handled"
     >
-      {turn === 1
-        ? renderTurnOne()
-        : blocks.map((b: any, i: number) => (
-            <BlockRenderer key={b.id || `${b.type}-${i}`} block={b} />
-          ))}
+      {enrichedBlocks.map((b: any, i: number) => (
+        <BlockRenderer key={b.id || `conv-${i}`} block={b} />
+      ))}
       <View style={{ height: 100 }} />
     </ScrollView>
   );

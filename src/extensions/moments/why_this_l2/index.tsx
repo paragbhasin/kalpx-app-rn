@@ -1,5 +1,5 @@
 // Tier 1 — overlay: WhyThisL2Overlay
-// Spec: kalpx-frontend/docs/specs/mitra-v3-experience/screens/why_this_l2.md
+// Spec: kalpx-frontend/docs/specs/mitra-v3-experience/screens/overlay_why_this_level_2.md
 // ISOLATED SCAFFOLD — not registered. See ./README.md for wire-up.
 
 import React from "react";
@@ -8,14 +8,16 @@ import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from "react-na
 type Props = {
   onCta1?: () => void;
   onCta2?: () => void;
+  screenData?: any;
 };
 
-const WhyThisL2Overlay: React.FC<Props> = ({ onCta1, onCta2 }) => {
+const WhyThisL2Overlay: React.FC<Props> = ({ onCta1, onCta2, screenData }) => {
+  const teaching = screenData?.why_this_principle?.core_teaching || "";
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.container} accessibilityLabel="why_this_l2">
         <Text style={styles.headline}>Why this</Text>
-                <Text style={styles.subline}>Deeper teaching line goes here.</Text>
+        {teaching ? <Text style={styles.subline}>{teaching}</Text> : null}
         <View style={styles.ctaCol}>
           <TouchableOpacity style={styles.cta} onPress={onCta1}>
             <Text style={styles.ctaText}>Go deeper</Text>

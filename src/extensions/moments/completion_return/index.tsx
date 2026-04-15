@@ -24,6 +24,7 @@ import {
   View,
 } from "react-native";
 import Svg, { Path } from "react-native-svg";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import MantraLotus3d from "./assets/mantra-lotus-3d.svg";
 import { executeAction } from "../../../engine/actionExecutor";
 import { mitraTrackEvent } from "../../../engine/mitraApi";
@@ -219,7 +220,7 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
               hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               activeOpacity={0.7}
             >
-              <Text style={styles.micIcon}>🎙</Text>
+              <Ionicons name="mic-outline" size={22} color="#6d5a3a" />
             </TouchableOpacity>
           </View>
         </Animated.View>

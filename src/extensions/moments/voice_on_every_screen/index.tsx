@@ -12,7 +12,8 @@
  */
 
 import React from "react";
-import { Pressable, StyleSheet, View, Text } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
 type Props = {
   onPress?: () => void;
@@ -39,7 +40,7 @@ export default function VoiceOnEveryScreen({
           pressed && styles.fabPressed,
         ]}
       >
-        <Text style={styles.icon}>🎙</Text>
+        <Ionicons name="mic-outline" size={24} color="#1a1a1a" />
       </Pressable>
     </View>
   );
@@ -67,5 +68,4 @@ const styles = StyleSheet.create({
   },
   fabPressed: { opacity: 0.75 },
   fabDisabled: { opacity: 0.4 },
-  icon: { fontSize: 22, color: "#1a1a1a" },
 });

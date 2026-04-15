@@ -12,16 +12,18 @@
  *   - "Keep it written" fires action with choice=text.
  */
 
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Fonts } from '../theme/fonts';
-import { useScreenStore } from '../engine/useScreenBridge';
-import { executeAction } from '../engine/actionExecutor';
-import { interpolate } from '../engine/utils/interpolation';
+import { LinearGradient } from "expo-linear-gradient";
+import React from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { executeAction } from "../engine/actionExecutor";
+import { useScreenStore } from "../engine/useScreenBridge";
+import { interpolate } from "../engine/utils/interpolation";
 
-const GOLD_BORDER = '#eddeb4';
-const AMBER_CTA = '#c89a47';
-const DEEP_BROWN = '#432104';
+import { Fonts } from "../theme/fonts";
+
+const GOLD_BORDER = "#eddeb4";
+const AMBER_CTA = "#c89a47";
+const DEEP_BROWN = "#432104";
 
 interface Props {
   block: {
@@ -33,7 +35,7 @@ interface Props {
 const VoiceTextForkBlock: React.FC<Props> = ({ block }) => {
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
 
-  const fire = async (choice: 'voice' | 'text') => {
+  const fire = async (choice: "voice" | "text") => {
     if (!block.on_response) return;
     const base = interpolate(block.on_response, screenData);
     await executeAction(
@@ -42,8 +44,8 @@ const VoiceTextForkBlock: React.FC<Props> = ({ block }) => {
         loadScreen,
         goBack,
         setScreenValue: (value: any, key: string) => {
-          const { screenActions } = require('../store/screenSlice');
-          const { store } = require('../store');
+          const { screenActions } = require("../store/screenSlice");
+          const { store } = require("../store");
           store.dispatch(screenActions.setScreenValue({ key, value }));
         },
         screenState: { ...screenData },
@@ -55,16 +57,22 @@ const VoiceTextForkBlock: React.FC<Props> = ({ block }) => {
     <View style={styles.wrap}>
       <TouchableOpacity
         style={[styles.option, styles.optionSpeak]}
-        onPress={() => fire('voice')}
+        onPress={() => fire("voice")}
         activeOpacity={0.8}
       >
-        <Text style={styles.icon}>≈</Text>
-        <Text style={styles.label}>Speak to me</Text>
+        <LinearGradient
+          colors={["#C08B31", "#D3A44D", "#B57C26"]}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={[styles.turnOneButton, styles.turnOnePrimaryButton]}
+        >
+          <Text style={styles.turnOnePrimaryButtonText}>Speak with me</Text>
+        </LinearGradient>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={[styles.option, styles.optionWritten]}
-        onPress={() => fire('text')}
+        onPress={() => fire("text")}
         activeOpacity={0.8}
       >
         <Text style={styles.icon}>✎</Text>
@@ -77,19 +85,59 @@ const VoiceTextForkBlock: React.FC<Props> = ({ block }) => {
 const styles = StyleSheet.create({
   wrap: { marginVertical: 12 },
   option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 64,
-    borderRadius: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    marginBottom: 12,
-    borderWidth: 1.5,
-    borderColor: GOLD_BORDER,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  optionSpeak: { backgroundColor: '#FFF7E8' },
-  optionWritten: { backgroundColor: '#FFFDF9' },
+  turnOnePrimaryButton: {
+    justifyContent: "center",
+  },
+  turnOnePrimaryButtonText: {
+    fontFamily: Fonts.sans.bold,
+    fontSize: 17,
+    color: "#fff9ec",
+    alignSelf: "center",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  turnOneButton: {
+    width: "100%",
+    minHeight: 45,
+    borderRadius: 31,
+    marginBottom: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    paddingHorizontal: 24,
+    shadowColor: "#d2b176",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.22,
+    shadowRadius: 18,
+    elevation: 4,
+  },
+  optionWritten: {
+    backgroundColor: "#fdf8f2",
+
+    borderRadius: 30,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+
+    borderWidth: 1,
+    borderColor: "#e6c88f",
+
+    // OUTER SHADOW (depth)
+    shadowColor: "#c89a47",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 10,
+    elevation: 4,
+
+    // alignment
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   icon: {
     color: AMBER_CTA,
     fontSize: 22,

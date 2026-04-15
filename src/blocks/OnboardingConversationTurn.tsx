@@ -733,8 +733,8 @@ const styles = StyleSheet.create({
     color: "#6f5730",
   },
   mitraMsgCard: {
-    borderLeftWidth: 3,
-    borderLeftColor: GOLD_BORDER,
+    // borderLeftWidth: 3,
+    // borderLeftColor: GOLD_BORDER,
     paddingLeft: 16,
     paddingVertical: 8,
     marginBottom: 24,

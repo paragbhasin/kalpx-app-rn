@@ -12,10 +12,18 @@
  * State machine: screenData.onboarding_turn (1-7) — advanced by onboarding_turn_response
  * action handler in actionExecutor. On mount, hydrates from screenData (AsyncStorage-backed
  * via screenSlice persistState/restoreState).
+ *
+ * Block rendering strategy:
+ *   - All blocks from schema are passed through to BlockRenderer.
+ *   - headline + subtext blocks are injected into onboarding_conversation_turn blocks
+ *     for layout (so the turn card owns its own header), then filtered from the top-level
+ *     render list to avoid double-rendering.
+ *   - All other block types (voice_text_fork, guidance_mode_picker, first_recognition,
+ *     path_emerges) are passed through as-is so BlockRenderer can handle them.
  */
 
 import React, { useEffect } from "react";
-import { BackHandler, ScrollView, StyleSheet, View } from "react-native";
+import { BackHandler, ScrollView, StyleSheet } from "react-native";
 import BlockRenderer from "../engine/BlockRenderer";
 import { useScreenStore } from "../engine/useScreenBridge";
 
@@ -41,7 +49,7 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
     updateBackground(updatedBackground);
     updateHeaderHidden(false);
     return () => updateHeaderHidden(false);
-  }, [updateBackground, updateHeaderHidden]);
+  }, [updateBackground, updateHeaderHidden, turn]);
 
   // Disable Android back on Turn 1 (INV-equivalent: onboarding root cannot go back).
   useEffect(() => {
@@ -53,17 +61,26 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
   }, [turn]);
 
   const blocks = schema?.blocks || [];
+
+  // Find headline/subtext to inject into conversation turn blocks for layout.
   const headlineBlock = blocks.find((b: any) => b.type === "headline");
   const subtextBlock = blocks.find((b: any) => b.type === "subtext");
 
   const enrichedBlocks = blocks
-    .filter((b: any) => b.type === "onboarding_conversation_turn")
-    .map((b: any) => ({
-      ...b,
-      headline: headlineBlock?.content,
-      subtext: subtextBlock?.content,
-      turnOneHero: turn === 1,
-    }));
+    // Inject headline/subtext into conversation turn blocks; pass all others through as-is.
+    .map((b: any) => {
+      if (b.type === "onboarding_conversation_turn") {
+        return {
+          ...b,
+          headline: headlineBlock?.content,
+          subtext: subtextBlock?.content,
+          turnOneHero: turn === 1,
+        };
+      }
+      return b;
+    })
+    // Remove standalone headline/subtext — they're now owned by the turn card.
+    .filter((b: any) => b.type !== "headline" && b.type !== "subtext");
 
   return (
     <ScrollView
@@ -75,15 +92,13 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
       {enrichedBlocks.map((b: any, i: number) => (
         <BlockRenderer key={b.id || `conv-${i}`} block={b} />
       ))}
-      <View style={{ height: 100 }} />
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   // Match legacy KalpX warm parchment aesthetic (Home.tsx / MitraPhilosophy).
-  // Cream background, not dark immersive — onboarding is welcoming, not
-  // practice-mode.
+  // Cream background, not dark immersive — onboarding is welcoming, not practice-mode.
   scroll: { flex: 1 },
   content: { paddingHorizontal: 20, paddingTop: 24, paddingBottom: 32 },
 });

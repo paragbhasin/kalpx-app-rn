@@ -6735,12 +6735,12 @@ export const WelcomeOnboardingContainer = {
           reply_chips: [
             {
               id: "activated",
-              label: "Activated — wired, running fast",
+              label: "Racing — mind moving too fast",
               style: "secondary",
             },
             {
               id: "drained",
-              label: "Drained — empty, nothing left",
+              label: "Drained — low energy, nothing left",
               style: "secondary",
             },
             {
@@ -6779,10 +6779,19 @@ export const WelcomeOnboardingContainer = {
       tone: { theme: "gold_dark", mood: "reflective" },
       blocks: [
         {
+          type: "headline",
+          content: "How would you like me to be with you?",
+          style: { fontSize: "32px", lineHeight: 40, marginTop: -10 },
+        },
+        {
+          type: "subtext",
+          content: "I can speak with you, or keep things quiet and written.",
+          variant: "multi_line",
+        },
+        {
           type: "onboarding_conversation_turn",
           id: "turn4",
-          mitra_message:
-            "{{onboarding_state_ack}} I can speak to you, or we can keep things written and quiet. What feels right?",
+          mitra_message: "",
           reply_chips: [],
           open_input: { enabled: false },
           voice_available: false,
@@ -6827,10 +6836,17 @@ export const WelcomeOnboardingContainer = {
           label: "RECOGNITION",
           emphasized_line:
             "Your {{friction_label}} is real — and the {{state_label}} you're in right now is the body's honest response to it.",
+          // body_paragraphs: [
+          //   "Today might not be a day for pushing — it might be a day for {{recommended_posture}}.",
+          //   "But here's what I also see: you showed up. You're here, paying attention to your inner life. That's not small.",
+          //   "I built something for you. A practice, an intention, and a morning anchor. Want to hear your first briefing?",
+          // ],
           body_paragraphs: [
-            "Today might not be a day for pushing — it might be a day for {{recommended_posture}}.",
-            "But here's what I also see: you showed up. You're here, paying attention to your inner life. That's not small.",
-            "I built something for you. A practice, an intention, and a morning anchor. Want to hear your first briefing?",
+            "And this matters too — ",
+            "you showed up. You’re here.",
+            "We can take this one step at a time.",
+            "I’ll guide you with a practice, an intention",
+            "and a way to begin your day.",
           ],
         },
         {
@@ -6840,12 +6856,12 @@ export const WelcomeOnboardingContainer = {
           reply_chips: [
             {
               id: "play_briefing",
-              label: "Play my first briefing",
+              label: "Hear my first guidance",
               style: "primary",
             },
             {
               id: "show_path",
-              label: "Show me my path first",
+              label: "Show me the path first",
               style: "secondary",
             },
           ],

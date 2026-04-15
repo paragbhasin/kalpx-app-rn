@@ -15,12 +15,20 @@ The actual copy you will apply lives in this folder:
 
 There is no RN wiring here — no `allContainers.js` edit, no BlockRenderer change, no action. The scaffold ships a `contentpack.json` that you copy into the backend content template.
 
-## How to apply
+## How to ship this content pack
 
-1. Open `contentpack.json` in this folder.
-2. Copy the fields into the backend Checkpoint template (kalpx repo, content YAML).
-3. Run backend content-ingest.
-4. Verify on dev that checkpoint screens show the new copy.
+### Option A — via backend YAML (preferred)
+1. Copy the key/value pairs from `contentpack.json` into `kalpx/core/data_seed/mitra_v3/checkpoint_results_copy.yaml` (create if it doesn't exist).
+2. Run the content ingest: `docker exec kalpx-dev-web python manage.py ingest_mitra_v3_content --file=checkpoint_results_copy.yaml`
+3. Restart Django: `docker compose -f docker-compose.dev.yml -p kalpxdev restart kalpx-dev-web`
+4. Test: fire `kalpx://mitra/checkpoint/day_7` (or day_14) — new copy renders.
+
+### Option B — via FE fallback (fastest)
+1. Copy the key/value pairs into `src/engine/allContainers.js` under the checkpoint state(s).
+2. Rebuild RN bundle.
+3. Test in sim.
+
+Time estimate: ~30-60 min.
 
 Expected: Checkpoint result screen shows new copy.
 

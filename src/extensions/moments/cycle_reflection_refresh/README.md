@@ -15,12 +15,20 @@ The actual copy you will apply lives in this folder:
 
 There is no RN wiring here — no `allContainers.js` edit, no BlockRenderer change, no action. The scaffold ships a `contentpack.json` that you copy into the backend content template.
 
-## How to apply
+## How to ship this content pack
 
-1. Open `contentpack.json` in this folder.
-2. Copy the fields into the backend CycleReflection template (see kalpx repo, content YAML).
-3. Run the backend content-ingest command per ~/.claude user-memory rules.
-4. Verify on dev that cycle reflection screen now shows the new copy.
+### Option A — via backend YAML (preferred)
+1. Copy the key/value pairs from `contentpack.json` into `kalpx/core/data_seed/mitra_v3/cycle_reflection_copy.yaml` (create if it doesn't exist).
+2. Run the content ingest: `docker exec kalpx-dev-web python manage.py ingest_mitra_v3_content --file=cycle_reflection_copy.yaml`
+3. Restart Django: `docker compose -f docker-compose.dev.yml -p kalpxdev restart kalpx-dev-web`
+4. Test: fire `kalpx://mitra/cycle_transitions/cycle_reflection` in sim — new copy should render.
+
+### Option B — via FE fallback (fastest)
+1. Copy the key/value pairs into `src/engine/allContainers.js` under the `cycle_reflection` state.
+2. Rebuild RN bundle.
+3. Test in sim.
+
+Time estimate: ~30-60 min (honest revision; Option A requires a short deploy).
 
 Expected: Cycle reflection screen shows new copy lines.
 

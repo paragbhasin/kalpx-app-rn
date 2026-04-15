@@ -112,3 +112,15 @@ Key files:
 ## One more thing
 
 This engine is "append-only" for wiring. You are ADDING lines, never removing. If you ever find yourself reaching to delete or refactor an existing line in one of the 3 engine files, stop and ask. The moment you remove a line, you are outside the safe path.
+
+---
+
+## Scaffold 21 — completion_return (added after the main 20)
+
+- **What:** the "108 in. Kept." / "Held. Carry it into the day." / "Done. Notice what stayed." acknowledgment screen that appears right after a core practice completes. Pavani's Apr 13 redesign (premium light theme, glowing lotus at bottom, no auto-return timer).
+- **Why separate:** it was extracted from Pavani's commits `b71bca9` + `dc0ce82` which could not be cherry-picked onto Apr 11 base because they modify a file that Week 3 introduced (and Week 3 is excluded from this branch).
+- **Depends on:** Week 3 runner state machine fields (`runner_variant`, `runner_active_item`, `runner_source`, `runner_start_time`). Apr 11 runners may not set these — verify or stub before wiring.
+- **Folder:** `src/extensions/moments/completion_return/` (includes `index.tsx` + `assets/mantra-lotus-3d.svg` 423KB)
+- **Estimated wire time:** 15-25 min (longer than other Tier 1 scaffolds because you may need to also seed runner_variant in the active runner if not already set)
+- **Spec:** `kalpx-frontend/docs/specs/mitra-v3-experience/screens/transient_completion_return.md`
+- **Feature flag:** `MITRA_V3_COMPLETION_RETURN`

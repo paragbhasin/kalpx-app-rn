@@ -172,50 +172,76 @@ const MantraTextCard: React.FC<MantraTextCardProps> = ({
   expanded,
   onToggle,
 }) => {
-  const [showToggle, setShowToggle] = React.useState(false);
+  const [isTruncated, setIsTruncated] = React.useState(false);
+
+  const baseTextStyle: any[] = [
+    styles.textCardHeaderContent,
+    isDevanagari && {
+      fontSize: 20,
+      fontFamily: "NotoSansDevanagari_500Medium",
+    },
+  ];
 
   return (
-    <TouchableOpacity
-      style={[styles.card, expanded && styles.cardExpanded, { padding: 12 }]}
-      onPress={() => {
-        if (showToggle) {
-          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-          onToggle();
-        }
-      }}
-      activeOpacity={0.8}
-    >
-      <View style={styles.textCardHeader}>
-        <Text
-          style={[
-            styles.textCardHeaderContent,
-            isDevanagari && {
-              fontSize: 20,
-              fontFamily: "NotoSansDevanagari_500Medium",
-            },
-          ]}
-          numberOfLines={expanded ? undefined : 2}
-          onTextLayout={(e) => {
-            const lines = e.nativeEvent.lines.length;
-            if (lines > 2) {
-              setShowToggle(true);
-            }
-          }}
-        >
-          {text}
-        </Text>
-      </View>
+    <View style={styles.card}>
+      {/* Hidden measurement text for precise truncation detection */}
+      <Text
+        style={[
+          ...baseTextStyle,
+          { position: "absolute", opacity: 0, zIndex: -1 },
+        ]}
+        onTextLayout={(e) => {
+          if (e.nativeEvent.lines.length > 2) {
+            setIsTruncated(true);
+          }
+        }}
+        aria-hidden
+      >
+        {text}
+      </Text>
 
-      {showToggle && (
-        <View style={styles.toggleIcon}>
+      {/* Visible Content */}
+      {!expanded ? (
+        <View style={{ padding: 12, paddingBottom: isTruncated ? 0 : 12 }}>
+          <Text style={baseTextStyle} numberOfLines={2}>
+            {text}
+          </Text>
+        </View>
+      ) : (
+        <ScrollView
+          style={{ maxHeight: 180 }}
+          showsVerticalScrollIndicator
+          nestedScrollEnabled
+          contentContainerStyle={{ padding: 12, paddingBottom: 0 }}
+        >
+          <Text style={baseTextStyle}>{text}</Text>
+        </ScrollView>
+      )}
+
+      {/* Toggle Arrow */}
+      {isTruncated && (
+        <TouchableOpacity
+          onPress={() => {
+            LayoutAnimation.configureNext(
+              LayoutAnimation.Presets.easeInEaseOut,
+            );
+            onToggle();
+          }}
+          style={{
+            alignItems: "center",
+            paddingVertical: 8,
+            width: "100%",
+          }}
+          activeOpacity={0.7}
+        >
           {expanded ? (
             <ChevronUp size={18} color="#B89450" />
           ) : (
             <ChevronDown size={18} color="#B89450" />
           )}
-        </View>
+        </TouchableOpacity>
       )}
-    </TouchableOpacity>
+    </View>
   );
 };
 
@@ -524,12 +550,12 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
   const beads = useMemo(() => {
     const arr = [];
     const count = visualBeadsCount;
-    const radius = 90;
+    const radius = 72; // Reduced from 90 to make mala smaller
     for (let i = 0; i < count; i++) {
       const angle = (i / count) * 2 * Math.PI - Math.PI / 2;
       arr.push({
-        x: Math.cos(angle) * (radius + 10),
-        y: Math.sin(angle) * (radius + 10),
+        x: Math.cos(angle) * (radius + 8),
+        y: Math.sin(angle) * (radius + 8),
         index: i,
       });
     }
@@ -772,24 +798,9 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
           {currentType === "mantra" && (
             <View style={styles.combinedMantraFlow}>
               {/* Top Mantra Cards */}
-              <View style={styles.topCardsRow}>
-                {info.iast && (
-                  <MantraTextCard
-                    text={info.iast}
-                    expanded={iastExpanded}
-                    onToggle={() => setIastExpanded(!iastExpanded)}
-                  />
-                )}
-                <View style={{ height: 5 }} />
-                {info.devanagari && (
-                  <MantraTextCard
-                    text={info.devanagari}
-                    isDevanagari
-                    expanded={devanagariExpanded}
-                    onToggle={() => setDevanagariExpanded(!devanagariExpanded)}
-                  />
-                )}
-              </View>
+              <Text style={[styles.mantraTitle, { marginBottom: 12 }]}>
+                {info.title}
+              </Text>
 
               {/* Progress Count */}
               <View style={styles.progressCounter}>
@@ -879,9 +890,27 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                   </TouchableOpacity>
                 </Animated.View>
               </View>
-              <Text style={styles.combinedHelpText}>
+              <View style={styles.topCardsRow}>
+                {info.iast && (
+                  <MantraTextCard
+                    text={info.iast}
+                    expanded={iastExpanded}
+                    onToggle={() => setIastExpanded(!iastExpanded)}
+                  />
+                )}
+                <View style={{ height: 5 }} />
+                {info.devanagari && (
+                  <MantraTextCard
+                    text={info.devanagari}
+                    isDevanagari
+                    expanded={devanagariExpanded}
+                    onToggle={() => setDevanagariExpanded(!devanagariExpanded)}
+                  />
+                )}
+              </View>
+              {/* <Text style={styles.combinedHelpText}>
                 Choose your chant count and tap the bead after each mantra.
-              </Text>
+              </Text> */}
               {/* Rep Selection Pills */}
               <View style={styles.repPillsContainer}>
                 {[1, 9, 27, 54, 108].map((option) => {
@@ -1459,6 +1488,13 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: -40,
   },
+  mantraTitle: {
+    fontSize: 23,
+    fontFamily: Fonts.serif.bold,
+    color: BROWN,
+    textAlign: "center",
+    marginTop: -20,
+  },
   mainCard: {
     width: "100%",
     // backgroundColor: "rgba(255, 255, 255, 0.6)",
@@ -1860,11 +1896,10 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   textCardHeaderContent: {
-    flex: 1,
     fontSize: 17,
     fontFamily: Fonts.serif.bold,
     color: BROWN,
-    lineHeight: 24,
+    // lineHeight: 24,
     textAlign: "center",
   },
   combinedHelpText: {
@@ -1881,7 +1916,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "baseline",
     // marginBottom: 0,
-    marginTop: -40,
+    marginTop: -20,
   },
   currentCountText: {
     fontSize: 64,
@@ -1894,43 +1929,42 @@ const styles = StyleSheet.create({
     color: "#d1c1a1",
   },
   interactionArea: {
-    width: 260,
-    height: 260,
+    width: 220,
+    height: 220,
     alignItems: "center",
     justifyContent: "center",
     marginVertical: 10,
   },
   glowOuter: {
     position: "absolute",
-    width: 250,
-    height: 250,
-    borderRadius: 125,
-    // backgroundColor: "rgba(232, 197, 135, 0.15)",
+    width: 210,
+    height: 210,
+    borderRadius: 105,
     alignItems: "center",
     justifyContent: "center",
   },
   glowMiddle: {
-    width: 210,
-    height: 210,
-    borderRadius: 105,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
     shadowColor: "#E8C587",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,
     shadowRadius: 20,
-    elevation: 10,
+    elevation: 8,
     alignItems: "center",
     justifyContent: "center",
   },
   glowInner: {
-    width: 170,
-    height: 170,
-    borderRadius: 85,
+    width: 140,
+    height: 140,
+    borderRadius: 70,
     backgroundColor: "rgba(255, 255, 255, 0.8)",
     shadowColor: "#E8C587",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.8,
     shadowRadius: 20,
-    elevation: 10,
+    elevation: 8,
   },
   beadsRing: {
     width: "100%",
@@ -1940,11 +1974,8 @@ const styles = StyleSheet.create({
   },
   ringCircle: {
     position: "absolute",
-    width: 180,
-    height: 180,
-    // borderRadius: 100,
-    // borderWidth: 1.5,
-    // borderColor: "rgba(184, 148, 80, 0.2)",
+    width: 144,
+    height: 144,
   },
   beadWrapper: {
     position: "absolute",
@@ -1969,9 +2000,9 @@ const styles = StyleSheet.create({
   },
   centerTapTarget: {
     position: "absolute",
-    width: 120,
-    height: 120,
-    borderRadius: 60,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     backgroundColor: "#fffdf9",
     borderWidth: 1,
     borderColor: "#e8c587",
@@ -2102,6 +2133,11 @@ const styles = StyleSheet.create({
     width: 250,
     height: 250,
     resizeMode: "contain",
+  },
+  cardToggleContainer: {
+    width: "100%",
+    alignItems: "center",
+    paddingVertical: 4,
   },
   sankalpActivatingText: {
     fontSize: 17,

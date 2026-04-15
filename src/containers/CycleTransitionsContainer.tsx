@@ -1855,7 +1855,7 @@ const styles = StyleSheet.create({
   textCardHeaderContent: {
     flex: 1,
     fontSize: 17,
-    fontFamily: Fonts.serif.medium,
+    fontFamily: Fonts.serif.bold,
     color: BROWN,
     lineHeight: 24,
     textAlign: "center",

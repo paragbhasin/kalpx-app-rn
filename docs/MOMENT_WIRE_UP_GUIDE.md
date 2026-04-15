@@ -1,5 +1,46 @@
 # Adding Mitra v3 Moments — Guide for Pavani
 
+## Sadhana Yatra framework — read this first (2026-04-14)
+
+Every moment in Mitra now lives inside the **Sadhana Yatra** spine. This is the unifying model that tells us WHEN a moment surfaces, WHY, and HOW it relates to every other moment. Spec: `~/.claude/projects/-Users-paragbhasin/memory/mitra_architecture_sadhana_yatra.md`.
+
+### The 4-stage diagnostic
+Every user enters via a 4-stage conversation (onboarding today, daily check-in later):
+- **Stage 0 — Path pick:** support (need help) vs growth (feel okay, want to grow)
+- **Stage 1 — Where / What:** kosha (support) OR aliveness (growth)
+- **Stage 2 — Movement:** vritti (support) OR aspiration (growth)
+- **Stage 3 — Root / Fit:** klesha (support) OR preferred modality (growth)
+
+These four signals plus `guidance_mode` compose a **recognition line** and select the user's **triad** (mantra / sankalp / practice).
+
+### Two temporal layers
+1. **Life phase** — stable over a 14-day cycle. Drives the triad.
+2. **Daily state** — volatile, per session. Drives which moment surfaces today.
+
+### What this means for wiring a moment
+Before you add any new moment, answer:
+1. Which **path** does it serve — support, growth, or both?
+2. Which **framework cell** does it live in? (e.g. "support + anandamaya + asmita" = grief room)
+3. Is it driven by **life phase** or **daily state**?
+4. Does it depend on any diagnostic signal from onboarding (`primary_kosha`, `primary_vritti`, `primary_klesha`, `aliveness_state`, `aspiration`, `preferred_modality`)?
+
+If you cannot name the cell, surface the question to Parag before building. A moment without a cell will drift.
+
+### Onboarding shape (as of 2026-04-14)
+`welcome_onboarding` container, 8 states:
+- `turn_1` — greet
+- `turn_2` — Stage 0 (path)
+- `turn_3_support` | `turn_3_growth` — Stage 1
+- `turn_4_support` | `turn_4_growth` — Stage 2
+- `turn_5_support` | `turn_5_growth` — Stage 3
+- `turn_6` — guidance mode picker
+- `turn_7` — recognition (backend-composed, JS fallback via `MITRA_V3_RECOGNITION_BACKEND=0`)
+- `turn_8` — triad reveal
+
+Routing lives in `src/engine/actionExecutor.ts` → `onboarding_turn_response`. Chip-id → signal mapping is inline in that case. Chip labels are LOCKED per spec — do not paraphrase.
+
+---
+
 ## What is a "moment"?
 
 Mitra's experience is made of ~47 named moments — specific emotional surfaces the user sees at specific points in their day and journey. Each moment is ONE container x ONE state (e.g. `support_grief` x `room` = the Grief Room).

@@ -34,7 +34,11 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
   const turn = Number(screenData.onboarding_turn || 1);
 
   useEffect(() => {
-    updateBackground(require("../../assets/new_home.png"));
+    const updatedBackground =
+      turn === 1
+        ? require("../../assets/new_home.png")
+        : require("../../assets/beige_bg.png");
+    updateBackground(updatedBackground);
     updateHeaderHidden(false);
     return () => updateHeaderHidden(false);
   }, [updateBackground, updateHeaderHidden]);

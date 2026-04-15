@@ -6663,19 +6663,28 @@ export const WelcomeOnboardingContainer = {
       tone: { theme: "gold_dark", mood: "reflective" },
       blocks: [
         {
+          type: "headline",
+          content: "Where would you like support right now?",
+          style: { fontSize: "32px", lineHeight: 40, marginTop: -10 },
+        },
+        {
+          type: "subtext",
+          content: "Choose what feels closest. We can take it from there.",
+          variant: "multi_line",
+        },
+        {
           type: "onboarding_conversation_turn",
           id: "turn2",
-          mitra_message:
-            "Before I can help, I want to understand what matters most to you right now. Not a problem to solve — but where your life is asking for more attention. What's alive for you?",
+          mitra_message: "",
           reply_chips: [
             {
               id: "work_clarity",
-              label: "Work needs more clarity",
+              label: "Work feels unclear",
               style: "secondary",
             },
             {
               id: "relationship",
-              label: "A relationship needs attention",
+              label: "A relationship needs care",
               style: "secondary",
             },
             {
@@ -6685,22 +6694,22 @@ export const WelcomeOnboardingContainer = {
             },
             {
               id: "uncertain",
-              label: "I'm navigating something uncertain",
+              label: "I'm moving through uncertainty",
               style: "secondary",
             },
             {
               id: "low_energy",
-              label: "My energy is low and I want it back",
+              label: "My energy feels low",
               style: "secondary",
             },
             {
               id: "searching_identity",
-              label: "I'm searching for who I really am",
+              label: "I'm trying to understand myself",
               style: "secondary",
             },
             {
               id: "spiritual",
-              label: "I want to go deeper spiritually",
+              label: "I want to grow spiritually",
               style: "secondary",
             },
           ],
@@ -6787,10 +6796,20 @@ export const WelcomeOnboardingContainer = {
       tone: { theme: "gold_dark", mood: "reflective" },
       blocks: [
         {
+          type: "headline",
+          content: "How would you like this guidance to sound?",
+          style: { fontSize: "32px", lineHeight: 40, marginTop: -10 },
+        },
+        {
+          type: "subtext",
+          content:
+            "Some people prefer simple, modern language. Some like a blend. Some want the deeper roots visible.",
+          variant: "multi_line",
+        },
+        {
           type: "onboarding_conversation_turn",
           id: "turn5",
-          mitra_message:
-            "One more thing. I draw from living traditions — Sanatan wisdom about rhythm, awareness, and right action. Some people want that language visible. Some prefer I keep things simple. What feels natural?",
+          mitra_message: "",
           reply_chips: [],
           open_input: { enabled: false },
           voice_available: false,

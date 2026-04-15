@@ -57,12 +57,12 @@ interface Props {
 }
 
 // Tokens mirror legacy KalpX palette — see Home.tsx hero CTA + cards.
-const GOLD_BORDER = "#eddeb4"; // subtle gold border / card accent
+const GOLD_BORDER = "#9f9f9f"; // subtle gold border / card accent
 const AMBER_CTA = "#c89a47"; // primary CTA fill (matches "Begin Chanting")
 const DEEP_BROWN = "#432104"; // primary text
 const WARM_SUBTEXT = "#6b5a45"; // secondary text
-const CREAM = "#fffdf9"; // card surface
-const CHIP_BG = "#FFF7E8"; // secondary chip fill
+const CREAM = "#FEFDF9A1"; // card surface
+const CHIP_BG = "#FBF5F5"; // secondary chip fill
 
 const resolveBlockImage = (url?: string) => {
   if (!url) return null;
@@ -729,10 +729,20 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 24,
     marginBottom: 10,
-    borderWidth: 1,
+    borderWidth: 0.3,
   },
   chipPrimary: { backgroundColor: AMBER_CTA, borderColor: AMBER_CTA },
-  chipSecondary: { backgroundColor: CHIP_BG, borderColor: GOLD_BORDER },
+  chipSecondary: {
+    backgroundColor: CHIP_BG,
+    borderColor: GOLD_BORDER,
+
+    elevation: 6,
+
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
   chipLabel: {
     fontFamily: Fonts.sans.medium,
     fontSize: 15,

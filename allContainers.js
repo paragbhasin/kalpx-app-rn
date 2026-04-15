@@ -6642,6 +6642,20 @@ export const ContainerRegistry = {
 
 const _onResp = { type: "onboarding_turn_response" };
 
+// Sadhana Yatra 4-stage schema (2026-04-14). Path-aware branching map:
+//   turn_1            → turn_2
+//   turn_2 (path)     → turn_3_support     if path: "support"
+//   turn_2 (path)     → turn_3_growth      if path: "growth"
+//   turn_3_support    → turn_4_support     (stashes primary_kosha)
+//   turn_3_growth     → turn_4_growth      (stashes aliveness_state)
+//   turn_4_support    → turn_5_support     (stashes primary_vritti)
+//   turn_4_growth     → turn_5_growth      (stashes aspiration)
+//   turn_5_support    → turn_6             (stashes primary_klesha)
+//   turn_5_growth     → turn_6             (stashes preferred_modality)
+//   turn_6 (mode)     → turn_7             (calls /onboarding/recognition/)
+//   turn_7            → turn_8             (triad reveal)
+//   turn_8            → companion_dashboard/day_active
+// Chip text is LOCKED per spec mitra_architecture_sadhana_yatra.md — do not paraphrase.
 export const WelcomeOnboardingContainer = {
   container_id: "welcome_onboarding",
   container_type: "welcome_onboarding",
@@ -6649,11 +6663,6 @@ export const WelcomeOnboardingContainer = {
     turn_1: {
       tone: { theme: "gold_dark", mood: "steady" },
       blocks: [
-        // {
-        //   type: "image",
-        //   url: "/assets/mitra.png",
-        //   alt: "lotus",
-        // },
         {
           type: "headline",
           content: "I'm Mitra.\nI'm here with you.",
@@ -6663,22 +6672,17 @@ export const WelcomeOnboardingContainer = {
           type: "onboarding_conversation_turn",
           id: "turn1",
           mitra_message: [
-            "Some days feel clear.",
-            "Some feel heavy.",
-            "And some… you just don’t have the words.",
-            "Whatever this moment holds -you don’t have to figure it out alone.",
+            "Hi. I am Mitra.",
+            "I am here to help you feel more calm, steady, and clear — on hard days and good days.",
+            "I notice small things, like your mood and the shape of your day.",
           ],
           image: {
             url: "/assets/new_home_lotus.png",
             alt: "lotus",
           },
           reply_chips: [
-            { id: "ready", label: "Yes, let’s begin →", style: "primary" },
-            // {
-            //   id: "returning",
-            //   label: "I’m returning",
-            //   style: "secondary",
-            // },
+            { id: "continue", label: "I'd like that", style: "primary" },
+            { id: "returning", label: "I've used this before", style: "secondary" },
           ],
           open_input: {
             enabled: true,
@@ -6691,7 +6695,337 @@ export const WelcomeOnboardingContainer = {
       ],
     },
 
+    // Stage 0 — path selection (support vs growth)
     turn_2: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [
+        {
+          type: "headline",
+          content: "What brings you here right now?",
+          style: { fontSize: "32px", lineHeight: 40, marginTop: -10 },
+        },
+        {
+          type: "subtext",
+          content: "Pick whichever feels true.",
+          variant: "multi_line",
+        },
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn2",
+          mitra_message: "",
+          reply_chips: [
+            { id: "support", label: "I need support right now", style: "secondary" },
+            { id: "growth", label: "I feel okay and want to grow", style: "secondary" },
+          ],
+          open_input: { enabled: false },
+          voice_available: true,
+          on_response: _onResp,
+        },
+      ],
+    },
+
+    // Stage 1 Support — kosha (where it lands)
+    turn_3_support: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [
+        {
+          type: "headline",
+          content: "What feels strongest right now?",
+          style: { fontSize: "32px", lineHeight: 40, marginTop: -10 },
+        },
+        { type: "subtext", content: "Pick where you feel it most.", variant: "multi_line" },
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn3_support",
+          mitra_message: "",
+          reply_chips: [
+            { id: "body", label: "My body feels tight", style: "secondary" },
+            { id: "breath", label: "My breathing feels off", style: "secondary" },
+            { id: "mind", label: "My mind won't settle", style: "secondary" },
+            { id: "intellect", label: "I don't know what to do", style: "secondary" },
+            { id: "deep", label: "Something feels heavy inside", style: "secondary" },
+          ],
+          open_input: {
+            enabled: true,
+            placeholder: "Or say it in your words",
+            max_length: 400,
+          },
+          voice_available: true,
+          on_response: _onResp,
+        },
+      ],
+    },
+
+    // Stage 1 Growth — aliveness (what's present)
+    turn_3_growth: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [
+        {
+          type: "headline",
+          content: "What feels present right now?",
+          style: { fontSize: "32px", lineHeight: 40, marginTop: -10 },
+        },
+        { type: "subtext", content: "Pick whichever fits today.", variant: "multi_line" },
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn3_growth",
+          mitra_message: "",
+          reply_chips: [
+            { id: "steady", label: "I feel steady", style: "secondary" },
+            { id: "thankful", label: "I feel thankful", style: "secondary" },
+            { id: "changing", label: "Something is changing", style: "secondary" },
+            { id: "better_today", label: "I feel better today", style: "secondary" },
+            { id: "want_grow", label: "I want to grow", style: "secondary" },
+            { id: "more_meaning", label: "I want more meaning", style: "secondary" },
+          ],
+          open_input: {
+            enabled: true,
+            placeholder: "Or say it in your words",
+            max_length: 400,
+          },
+          voice_available: true,
+          on_response: _onResp,
+        },
+      ],
+    },
+
+    // Stage 2 Support — vritti (what the mind is doing)
+    turn_4_support: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [
+        {
+          type: "headline",
+          content: "What is your mind doing?",
+          style: { fontSize: "32px", lineHeight: 40, marginTop: -10 },
+        },
+        { type: "subtext", content: "This helps me see the movement.", variant: "multi_line" },
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn4_support",
+          mitra_message: "",
+          reply_chips: [
+            { id: "replay", label: "It keeps replaying", style: "secondary" },
+            { id: "worry", label: "It keeps worrying ahead", style: "secondary" },
+            { id: "compare", label: "It keeps comparing", style: "secondary" },
+            { id: "argue", label: "It keeps arguing inside", style: "secondary" },
+            { id: "blank", label: "It goes blank", style: "secondary" },
+            { id: "hold", label: "It keeps holding on", style: "secondary" },
+            { id: "push_away", label: "It keeps pushing away", style: "secondary" },
+          ],
+          open_input: {
+            enabled: true,
+            placeholder: "Or say it in your words",
+            max_length: 400,
+          },
+          voice_available: true,
+          on_response: _onResp,
+        },
+      ],
+    },
+
+    // Stage 2 Growth — aspiration
+    turn_4_growth: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [
+        {
+          type: "headline",
+          content: "What do you want more of right now?",
+          style: { fontSize: "32px", lineHeight: 40, marginTop: -10 },
+        },
+        { type: "subtext", content: "The one that pulls you most.", variant: "multi_line" },
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn4_growth",
+          mitra_message: "",
+          reply_chips: [
+            { id: "clarity", label: "More clarity", style: "secondary" },
+            { id: "peace", label: "More peace", style: "secondary" },
+            { id: "strength", label: "More strength", style: "secondary" },
+            { id: "devotion", label: "More devotion", style: "secondary" },
+            { id: "purpose", label: "More purpose", style: "secondary" },
+            { id: "steadiness", label: "More steadiness", style: "secondary" },
+          ],
+          open_input: {
+            enabled: true,
+            placeholder: "Or say it in your words",
+            max_length: 400,
+          },
+          voice_available: true,
+          on_response: _onResp,
+        },
+      ],
+    },
+
+    // Stage 3 Support — klesha (what's underneath)
+    turn_5_support: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [
+        {
+          type: "headline",
+          content: "What feels underneath it most?",
+          style: { fontSize: "32px", lineHeight: 40, marginTop: -10 },
+        },
+        {
+          type: "subtext",
+          content: "Pick what feels truest, even if small.",
+          variant: "multi_line",
+        },
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn5_support",
+          mitra_message: "",
+          reply_chips: [
+            { id: "fear", label: "Fear", style: "secondary" },
+            { id: "wanting", label: "Holding on too tightly", style: "secondary" },
+            { id: "resistance", label: "Not wanting this at all", style: "secondary" },
+            { id: "identity", label: "Feeling hurt", style: "secondary" },
+            { id: "confusion", label: "Confusion", style: "secondary" },
+            { id: "not_sure", label: "I'm not sure", style: "secondary" },
+          ],
+          open_input: {
+            enabled: true,
+            placeholder: "Or say it in your words",
+            max_length: 400,
+          },
+          voice_available: true,
+          on_response: _onResp,
+        },
+      ],
+    },
+
+    // Stage 3 Growth — preferred modality
+    turn_5_growth: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [
+        {
+          type: "headline",
+          content: "What would help most today?",
+          style: { fontSize: "32px", lineHeight: 40, marginTop: -10 },
+        },
+        {
+          type: "subtext",
+          content: "Pick whichever feels right.",
+          variant: "multi_line",
+        },
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn5_growth",
+          mitra_message: "",
+          reply_chips: [
+            { id: "quiet", label: "Something quiet", style: "secondary" },
+            { id: "practical", label: "Something practical", style: "secondary" },
+            { id: "uplifting", label: "Something uplifting", style: "secondary" },
+            { id: "devotional", label: "Something devotional", style: "secondary" },
+            { id: "grounding", label: "Something grounding", style: "secondary" },
+            { id: "think_through", label: "Something to think through", style: "secondary" },
+          ],
+          open_input: {
+            enabled: true,
+            placeholder: "Or say it in your words",
+            max_length: 400,
+          },
+          voice_available: true,
+          on_response: _onResp,
+        },
+      ],
+    },
+
+    // Stage 4 — mode picker (universal / hybrid / rooted)
+    turn_6: {
+      tone: { theme: "gold_dark", mood: "reflective" },
+      blocks: [
+        {
+          type: "headline",
+          content: "How would you like this guidance to sound?",
+          style: { fontSize: "32px", lineHeight: 40, marginTop: -10 },
+        },
+        {
+          type: "subtext",
+          content:
+            "Some people prefer simple, modern language. Some like a blend. Some want the deeper roots visible.",
+          variant: "multi_line",
+        },
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn6",
+          mitra_message: "",
+          reply_chips: [],
+          open_input: { enabled: false },
+          voice_available: false,
+          on_response: null,
+        },
+        { type: "guidance_mode_picker", on_response: _onResp },
+      ],
+    },
+
+    // Stage 5 — recognition (backend-composed line)
+    turn_7: {
+      tone: { theme: "gold_dark", mood: "steady" },
+      blocks: [
+        {
+          type: "first_recognition",
+          label: "RECOGNITION",
+          emphasized_line: "{{recognition_line}}",
+          body_paragraphs: [
+            "And this matters too — ",
+            "you showed up. You're here.",
+            "We can take this one step at a time.",
+            "I'll guide you with a practice, an intention",
+            "and a way to begin your day.",
+          ],
+        },
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn7",
+          mitra_message: "",
+          reply_chips: [
+            { id: "play_briefing", label: "Hear my first guidance", style: "primary" },
+            { id: "show_path", label: "Show me my path first", style: "secondary" },
+          ],
+          open_input: {
+            enabled: true,
+            placeholder: "Ask me something",
+            max_length: 400,
+          },
+          voice_available: true,
+          on_response: _onResp,
+        },
+      ],
+    },
+
+    // Stage 6 — triad reveal (life-phase commitment)
+    turn_8: {
+      tone: { theme: "gold_dark", mood: "steady" },
+      blocks: [
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn8_msg",
+          mitra_message: "This is what I'm holding for you today:",
+          reply_chips: [],
+          open_input: { enabled: false },
+          voice_available: false,
+          on_response: null,
+        },
+        { type: "path_emerges" },
+        {
+          type: "onboarding_conversation_turn",
+          id: "turn8_cta",
+          mitra_message: "",
+          reply_chips: [{ id: "ready", label: "I'm ready", style: "primary" }],
+          open_input: {
+            enabled: true,
+            placeholder: "I have a question",
+            max_length: 400,
+          },
+          voice_available: true,
+          on_response: _onResp,
+        },
+      ],
+    },
+
+    // --- legacy states (superseded 2026-04-14; kept temporarily for any stale
+    //     navigation). Safe to delete after 1 release cycle. ---
+    turn_2_legacy: {
       tone: { theme: "gold_dark", mood: "reflective" },
       blocks: [
         {
@@ -6860,82 +7194,6 @@ export const WelcomeOnboardingContainer = {
       ],
     },
 
-    turn_6: {
-      tone: { theme: "gold_dark", mood: "steady" },
-      blocks: [
-        {
-          type: "first_recognition",
-          label: "RECOGNITION",
-          emphasized_line:
-            "Your {{friction_label}} is real — and the {{state_label}} you're in right now is the body's honest response to it.",
-          // body_paragraphs: [
-          //   "Today might not be a day for pushing — it might be a day for {{recommended_posture}}.",
-          //   "But here's what I also see: you showed up. You're here, paying attention to your inner life. That's not small.",
-          //   "I built something for you. A practice, an intention, and a morning anchor. Want to hear your first briefing?",
-          // ],
-          body_paragraphs: [
-            "And this matters too — ",
-            "you showed up. You’re here.",
-            "We can take this one step at a time.",
-            "I’ll guide you with a practice, an intention",
-            "and a way to begin your day.",
-          ],
-        },
-        {
-          type: "onboarding_conversation_turn",
-          id: "turn6",
-          mitra_message: "",
-          reply_chips: [
-            {
-              id: "play_briefing",
-              label: "Hear my first guidance",
-              style: "primary",
-            },
-            {
-              id: "show_path",
-              label: "Show me the path first",
-              style: "secondary",
-            },
-          ],
-          open_input: {
-            enabled: true,
-            placeholder: "Ask me something",
-            max_length: 400,
-          },
-          voice_available: true,
-          on_response: _onResp,
-        },
-      ],
-    },
-
-    turn_7: {
-      tone: { theme: "gold_dark", mood: "steady" },
-      blocks: [
-        {
-          type: "onboarding_conversation_turn",
-          id: "turn7_msg",
-          mitra_message: "This is what I'm holding for you today:",
-          reply_chips: [],
-          open_input: { enabled: false },
-          voice_available: false,
-          on_response: null,
-        },
-        { type: "path_emerges" },
-        {
-          type: "onboarding_conversation_turn",
-          id: "turn7_cta",
-          mitra_message: "",
-          reply_chips: [{ id: "ready", label: "I'm ready", style: "primary" }],
-          open_input: {
-            enabled: true,
-            placeholder: "I have a question",
-            max_length: 400,
-          },
-          voice_available: true,
-          on_response: _onResp,
-        },
-      ],
-    },
   },
 };
 

@@ -8,9 +8,11 @@
  *
  * Old Home.tsx saved as Home.old.tsx for reference.
  */
+import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
+
 import React, { useRef, useState } from "react";
 
 import {
@@ -244,9 +246,10 @@ export default function Home() {
 
         store.dispatch(
           loadScreenWithData({
-            containerId: process.env.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
-              ? "companion_dashboard_v3"
-              : "companion_dashboard",
+            containerId:
+              process.env.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
+                ? "companion_dashboard_v3"
+                : "companion_dashboard",
             stateId: "day_active",
           }),
         );
@@ -392,9 +395,10 @@ export default function Home() {
           } else {
             store.dispatch(
               loadScreenWithData({
-                containerId: process.env.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
-                  ? "companion_dashboard_v3"
-                  : "companion_dashboard",
+                containerId:
+                  process.env.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
+                    ? "companion_dashboard_v3"
+                    : "companion_dashboard",
                 stateId: "day_active",
               }),
             );
@@ -530,19 +534,23 @@ export default function Home() {
               "In this path, no effort is ever lost."
             </Text>
             <Text style={styles.heroSource}>— Bhagavad Gita 6.5</Text>
+            <View style={styles.turnOneHeadlineDivider}>
+              <View style={styles.turnOneDividerLine} />
+              <Ionicons name="diamond" size={10} color="#c7a258" />
+              <View style={styles.turnOneDividerLine} />
+            </View>
             <Text style={[styles.heroTitle, { marginTop: 20 }]}>
               KalpX Mitra
             </Text>
-            <Text style={styles.heroSubtitle}>A daily companion for life</Text>
+            <Text style={[styles.companionTitle, { marginTop: 5 }]}>
+              Your daily companion for life
+            </Text>
           </View>
 
           {/* ── Journey CTA ── */}
 
           {/* ── Companion Preview ── */}
           <View style={styles.companionSection}>
-            <Text style={[styles.companionTitle, { marginTop: 20 }]}>
-              Your daily companion for life
-            </Text>
             <Text style={styles.companionDesc}>
               Grounded in timeless Sanatan wisdom.
             </Text>
@@ -634,19 +642,19 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif.regular,
     fontSize: 18,
     fontStyle: "italic",
-    color: "#5C5648",
+    color: "#50453D",
     textAlign: "center",
   },
   heroSource: {
     fontFamily: Fonts.serif.regular,
     fontSize: 14,
-    color: "#8A7D6B",
+    color: "#432104",
     textAlign: "center",
     marginTop: 4,
     marginBottom: 16,
   },
   heroTitle: {
-    fontFamily: Fonts.serif.regular,
+    fontFamily: Fonts.serif.bold,
     fontSize: 28,
     color: "#432104",
     textAlign: "center",
@@ -723,7 +731,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 32,
     // paddingVertical: 20,
-    paddingHorizontal: 16,
+    // paddingHorizontal: 16,
+    marginTop: -15,
   },
   companionLabel: {
     fontFamily: Fonts.sans.semiBold,
@@ -738,13 +747,13 @@ const styles = StyleSheet.create({
   },
   companionTitle: {
     fontFamily: Fonts.sans.medium,
-    fontSize: 16,
+    fontSize: 18,
     color: "#432104",
     marginBottom: 4,
   },
   companionDesc: {
     fontFamily: Fonts.sans.regular,
-    fontSize: 13,
+    fontSize: 16,
     color: "#5C5648",
     marginBottom: 16,
     textAlign: "center",
@@ -804,7 +813,19 @@ const styles = StyleSheet.create({
     color: "#5C5648",
     textAlign: "center",
   },
-
+  turnOneHeadlineDivider: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    marginTop: 12,
+    marginBottom: 20,
+  },
+  turnOneDividerLine: {
+    width: 44,
+    height: 1,
+    backgroundColor: "rgba(199, 162, 88, 0.6)",
+  },
   // Philosophy link
   philosophyLink: {
     alignItems: "center",

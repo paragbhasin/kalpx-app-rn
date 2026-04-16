@@ -1,9 +1,12 @@
 // Tier 1 — overlay: WhyThisL2Overlay
+// Phase F — registry-backed via M36_why_this_l2 ContentPack.
 // Spec: kalpx-frontend/docs/specs/mitra-v3-experience/screens/overlay_why_this_level_2.md
-// ISOLATED SCAFFOLD — not registered. See ./README.md for wire-up.
 
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from "react-native";
+
+import { useContentSlots, readMomentSlot } from "../../../hooks/useContentSlots";
+import { useScreenStore } from "../../../engine/useScreenBridge";
 
 type Props = {
   onCta1?: () => void;
@@ -11,19 +14,46 @@ type Props = {
   screenData?: any;
 };
 
-const WhyThisL2Overlay: React.FC<Props> = ({ onCta1, onCta2, screenData }) => {
-  const teaching = screenData?.why_this_principle?.core_teaching || "";
+const WhyThisL2Overlay: React.FC<Props> = ({ onCta1, onCta2, screenData: propScreenData }) => {
+  const { screenData: storeScreenData } = useScreenStore();
+  const ss = (propScreenData || storeScreenData || {}) as Record<string, any>;
+
+  useContentSlots({
+    momentId: "M36_why_this_l2",
+    screenDataKey: "why_this_l2",
+    buildCtx: (s) => ({
+      path: s.journey_path === "growth" ? "growth" : "support",
+      guidance_mode: s.guidance_mode || "hybrid",
+      locale: s.locale || "en",
+      user_attention_state: "focused_receiving",
+      emotional_weight: "light",
+      cycle_day: Number(s.day_number) || 0,
+      entered_via: "triad_card_why_this_l1_tap",
+      stage_signals: {},
+      today_layer: {},
+      life_layer: {
+        cycle_id: s.journey_id || s.cycle_id || "",
+        life_kosha: s.life_kosha || s.scan_focus || "",
+        scan_focus: s.scan_focus || "",
+      },
+    }),
+  });
+  const slot = (name: string) => readMomentSlot(ss, "why_this_l2", name);
+
+  // Backend-provided teaching overrides registry body if present.
+  const teaching = ss?.why_this_principle?.core_teaching || slot("body");
+
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.container} accessibilityLabel="why_this_l2">
-        <Text style={styles.headline}>Why this</Text>
+        <Text style={styles.headline}>{slot("headline")}</Text>
         {teaching ? <Text style={styles.subline}>{teaching}</Text> : null}
         <View style={styles.ctaCol}>
           <TouchableOpacity style={styles.cta} onPress={onCta1}>
-            <Text style={styles.ctaText}>Go deeper</Text>
+            <Text style={styles.ctaText}>{slot("go_deeper_cta")}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.cta} onPress={onCta2}>
-            <Text style={styles.ctaText}>Got it</Text>
+            <Text style={styles.ctaText}>{slot("close_cta")}</Text>
           </TouchableOpacity>
         </View>
       </View>

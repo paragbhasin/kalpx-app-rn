@@ -77,10 +77,10 @@ const GriefRoomContainer: React.FC<Props> = () => {
       ]),
     ).start();
 
-    // Stage 2: Reveal options after 30s (or on user tap)
+    // Stage 2: Reveal options after 2s (or on user tap)
     const timer = setTimeout(() => {
       revealOptions();
-    }, 30000);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, []);

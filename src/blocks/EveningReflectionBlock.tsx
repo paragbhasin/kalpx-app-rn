@@ -1,21 +1,35 @@
 /**
- * EveningReflectionBlock — Mitra v3 Moment 34 (end-of-day reflection).
+ * EveningReflectionBlock — Mitra v3 Moment 35 (end-of-day reflection).
  *
- * Spec: /Users/paragbhasin/kalpx-frontend/docs/specs/mitra-v3-experience/screens/route_reflection_evening.md
- * Web parity: kalpx-frontend/src/engine/actionExecutor.js (track_event "evening_reflection" pattern)
- *   and kalpx-frontend/src/mock/mock/allContainers.js cycle_transitions/daily_reflection:3700+.
+ * Phase C pilot migration — content sovereignty compliant.
+ *   Before: every user-facing string hard-coded in this file.
+ *   After: all user-facing strings read from screenData slots resolved
+ *          by kalpx/core/content backend (moment_id=M35_evening_reflection).
  *
- * Shape: Mitra's brief prompt "How did today land?" + 3 chips
- * (steady / mixed / hard) + optional one-line freeform + optional mic. On
- * submit dispatches `submit_evening_reflection` which posts to gratitude-ledger
- * (tolerant of 404), then shows an ack beat and navigates back to dashboard.
+ * Slot keys (null-safe "" fallback; no English in this file):
+ *   evening_reflection.prompt
+ *   evening_reflection.chip_steady_label / chip_mixed_label / chip_hard_label
+ *   evening_reflection.placeholder
+ *   evening_reflection.cta_label
+ *   evening_reflection.helper
+ *   evening_reflection.ack_text
+ *
+ * If slots are empty strings (backend resolver unreachable or ctx invalid)
+ * the render appears short but never crashes. Missing content surfaces via
+ * MitraDecisionLog / fallback_rate dashboards, not through a hidden TSX
+ * fallback — that was the whole point of the sovereignty gate.
+ *
+ * Spec refs:
+ *   kalpx-app-rn/docs/CONTENT_CONTRACT_V1.md        (slot shape)
+ *   kalpx-app-rn/docs/ORCHESTRATION_CONTRACT_V1.md  (null-safe contract)
+ *   kalpx-app-rn/docs/PRESENTATION_CONTEXT_WALKTHROUGHS.md §6 (M35 pctx)
  *
  * REG-015: the draft state (evening_reflection_draft) is local to this block
  * and is cleared on submit + on unmount.
  * REG-016: the submit CTA sits inside the bottom 30% thumb-zone wrapper.
  *
- * Tone lint (strict): no exclamations, no "amazing/great/awesome", no streak
- * counts, no comparisons. Mitra acknowledges — she does not cheer.
+ * Chip IDs remain stable: steady / mixed / hard — these are analytics keys,
+ * NOT display labels. Display labels come from slots and may rotate.
  */
 
 import React, { useEffect, useState } from "react";
@@ -34,13 +48,24 @@ import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
 
-const CHIPS = [
-  { id: "steady", label: "Steady" },
-  { id: "mixed", label: "Mixed" },
-  { id: "hard", label: "Hard" },
-];
+// Chip IDs are stable (analytics keys). Display labels come from the
+// M35_evening_reflection ContentPack via screenData slots.
+const CHIP_IDS = ["steady", "mixed", "hard"] as const;
 
 const MAX_CHARS = 240;
+
+/**
+ * Read a slot from screenData with null-safe "" default. No English
+ * fallback — if the slot is empty the UI shows nothing, exposing the
+ * missing content via telemetry rather than hiding it.
+ */
+const readSlot = (ss: Record<string, any>, key: string): string => {
+  const moment = ss.evening_reflection;
+  if (moment && typeof moment === "object" && typeof moment[key] === "string") {
+    return moment[key];
+  }
+  return "";
+};
 
 interface Props {
   block?: any;
@@ -100,12 +125,21 @@ const EveningReflectionBlock: React.FC<Props> = () => {
     );
   };
 
+  const prompt = readSlot(ss, "prompt");
+  const placeholder = readSlot(ss, "placeholder");
+  const ctaLabel = readSlot(ss, "cta_label");
+  const helper = readSlot(ss, "helper");
+  const ackText = readSlot(ss, "ack_text");
+  const chipLabels: Record<string, string> = {
+    steady: readSlot(ss, "chip_steady_label"),
+    mixed: readSlot(ss, "chip_mixed_label"),
+    hard: readSlot(ss, "chip_hard_label"),
+  };
+
   if (submitted) {
     return (
       <View style={styles.ackWrap}>
-        <Text style={styles.ackText}>
-          Thank you for showing up. Rest well.
-        </Text>
+        <Text style={styles.ackText}>{ackText}</Text>
       </View>
     );
   }
@@ -116,22 +150,23 @@ const EveningReflectionBlock: React.FC<Props> = () => {
       style={styles.root}
     >
       <View style={styles.topRegion}>
-        <Text style={styles.prompt}>How did today land?</Text>
+        <Text style={styles.prompt}>{prompt}</Text>
 
         <View style={styles.chipRow}>
-          {CHIPS.map((c) => {
-            const active = chip === c.id;
+          {CHIP_IDS.map((id) => {
+            const active = chip === id;
+            const label = chipLabels[id];
             return (
               <TouchableOpacity
-                key={c.id}
-                onPress={() => setChip(c.id)}
+                key={id}
+                onPress={() => setChip(id)}
                 style={[styles.chip, active && styles.chipActive]}
                 activeOpacity={0.85}
                 accessibilityRole="button"
                 accessibilityState={{ selected: active }}
               >
                 <Text style={[styles.chipText, active && styles.chipTextActive]}>
-                  {c.label}
+                  {label}
                 </Text>
               </TouchableOpacity>
             );
@@ -141,7 +176,7 @@ const EveningReflectionBlock: React.FC<Props> = () => {
         <TextInput
           value={text}
           onChangeText={(v) => setText(v.slice(0, MAX_CHARS))}
-          placeholder="One line, if anything wants naming."
+          placeholder={placeholder}
           placeholderTextColor="rgba(88, 58, 24, 0.45)"
           style={styles.input}
           multiline
@@ -157,11 +192,11 @@ const EveningReflectionBlock: React.FC<Props> = () => {
           style={[styles.cta, !chip && styles.ctaDisabled]}
           activeOpacity={0.85}
           accessibilityRole="button"
-          accessibilityLabel="Set down the day"
+          accessibilityLabel={ctaLabel}
         >
-          <Text style={styles.ctaText}>Set it down</Text>
+          <Text style={styles.ctaText}>{ctaLabel}</Text>
         </TouchableOpacity>
-        <Text style={styles.helper}>Mitra will carry it into tomorrow.</Text>
+        <Text style={styles.helper}>{helper}</Text>
       </View>
     </KeyboardAvoidingView>
   );

@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Image,
@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { VoiceModal } from "../components/VoiceTextInput";
 import { executeAction } from "../engine/actionExecutor";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { interpolate } from "../engine/utils/interpolation";
@@ -35,6 +36,7 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const replyAnim = useRef(new Animated.Value(0)).current;
+  const [voiceModalVisible, setVoiceModalVisible] = useState(false);
 
   const updateBackground = useScreenStore(
     (state: any) => state.updateBackground,
@@ -158,10 +160,18 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
 
       <TouchableOpacity
         style={styles.floatingMic}
-        onPress={() => fire({ response_type: "voice_requested" })}
+        onPress={() => setVoiceModalVisible(true)}
       >
         <Ionicons name="mic" size={32} color="#432104" />
       </TouchableOpacity>
+
+      <VoiceModal
+        visible={voiceModalVisible}
+        onClose={() => setVoiceModalVisible(false)}
+        onSend={() => {
+          fire({ response_type: "voice_requested" });
+        }}
+      />
     </View>
   );
 };

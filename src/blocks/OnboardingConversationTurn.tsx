@@ -29,6 +29,7 @@ import { executeAction } from "../engine/actionExecutor";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { interpolate } from "../engine/utils/interpolation";
 import { Fonts } from "../theme/fonts";
+import { VoiceTextInput } from "../components/VoiceTextInput";
 
 interface Props {
   block: {
@@ -160,50 +161,21 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
         </View>
       )}
 
-      <View
-        style={[
-          styles.turnOneInputShell,
-          !showHeroMeta && styles.sharedInputShell,
-        ]}
-      >
-        <Ionicons
-          name="create-outline"
-          size={22}
-          color="#5e4721"
-          style={styles.turnOneInputLeadIcon}
-        />
-        <TextInput
-          style={[styles.turnOneInput, !showHeroMeta && styles.sharedInput]}
-          placeholder={
-            showHeroMeta
-              ? "Write or speak what's on your mind..."
-              : "Type Or say it in your words..."
+      <VoiceTextInput
+        voiceAvailable={block.voice_available}
+        placeholder={
+          showHeroMeta
+            ? "Write or speak what's on your mind..."
+            : "Type Or say it in your words..."
+        }
+        onSend={(val, type) => {
+          if (type === "text") {
+            fire({ freeform_text: val, response_type: "text" });
+          } else {
+            fire({ response_type: "voice_requested" });
           }
-          placeholderTextColor="rgba(67, 33, 4, 0.45)"
-          value={text}
-          onChangeText={setText}
-          maxLength={block.open_input?.max_length || 400}
-          multiline
-          onSubmitEditing={() => {
-            if (text.trim().length > 0) {
-              fire({
-                freeform_text: text.trim(),
-                response_type: "text",
-              });
-              setText("");
-            }
-          }}
-          returnKeyType="send"
-        />
-        {block.voice_available && (
-          <TouchableOpacity
-            style={styles.turnOneMicButton}
-            onPress={() => fire({ response_type: "voice_requested" })}
-          >
-            <Ionicons name="mic-outline" size={24} color="#b9892f" />
-          </TouchableOpacity>
-        )}
-      </View>
+        }}
+      />
 
       {showHeroMeta && (
         <>

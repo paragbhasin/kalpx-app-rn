@@ -1,8 +1,11 @@
+import { Audio } from "expo-av";
 import { LinearGradient } from "expo-linear-gradient";
+import { Volume2, VolumeX } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Easing,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -37,13 +40,15 @@ const GriefRoomContainer: React.FC<Props> = () => {
     updateHeaderHidden(false);
     return () => updateHeaderHidden(false);
   }, [updateBackground, updateHeaderHidden]);
-  const [step, setStep] = useState<"opening" | "options" | "input" | "breath">(
-    "opening",
-  );
+  const [step, setStep] = useState<
+    "opening" | "options" | "input" | "breath" | "stay"
+  >("opening");
   const [breathText, setBreathText] = useState("Inhale");
   const [timerSeconds, setTimerSeconds] = useState(540); // 9 minutes
   const [inputValue, setInputValue] = useState("");
   const [actionsUsed, setActionsUsed] = useState<string[]>([]);
+  const [isMuted, setIsMuted] = useState(false);
+  const soundRef = useRef<Audio.Sound | null>(null);
 
   const fade1 = useRef(new Animated.Value(0)).current;
   const fade2 = useRef(new Animated.Value(0)).current;
@@ -110,6 +115,43 @@ const GriefRoomContainer: React.FC<Props> = () => {
       clearInterval(timerInterval);
     };
   }, [step]);
+
+  // Audio for "Just Sit"
+  useEffect(() => {
+    if (step === "stay") {
+      const playSound = async () => {
+        try {
+          const { sound } = await Audio.Sound.createAsync(
+            require("../../../../assets/sounds/Om.mp4"),
+            { isLooping: true, shouldPlay: true, isMuted: isMuted },
+          );
+          soundRef.current = sound;
+        } catch (err) {
+          console.warn("[GriefRoom] Failed to load Om audio:", err);
+        }
+      };
+      playSound();
+    } else {
+      if (soundRef.current) {
+        soundRef.current.stopAsync();
+        soundRef.current.unloadAsync();
+        soundRef.current = null;
+      }
+    }
+
+    return () => {
+      if (soundRef.current) {
+        soundRef.current.stopAsync();
+        soundRef.current.unloadAsync();
+      }
+    };
+  }, [step]);
+
+  useEffect(() => {
+    if (soundRef.current) {
+      soundRef.current.setIsMutedAsync(isMuted);
+    }
+  }, [isMuted]);
 
   const revealOptions = () => {
     if (step === "options" || step === "input") return;
@@ -181,10 +223,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
         <Text style={styles.pillText}>A mantra for holding this</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.pill}
-        onPress={() => dispatch("grief_stay")}
-      >
+      <TouchableOpacity style={styles.pill} onPress={() => setStep("stay")}>
         <Text style={styles.pillText}>Just sit</Text>
       </TouchableOpacity>
 
@@ -207,7 +246,9 @@ const GriefRoomContainer: React.FC<Props> = () => {
     return (
       <View style={styles.breathContainer}>
         <Text style={styles.mudraLabel}>
-          {ctx.slow_breath?.title || ctx.slow_breath?.label || "Guided Breathing"}
+          {ctx.slow_breath?.title ||
+            ctx.slow_breath?.label ||
+            "Guided Breathing"}
         </Text>
 
         <View style={styles.orbOuter}>
@@ -247,6 +288,47 @@ const GriefRoomContainer: React.FC<Props> = () => {
       </View>
     );
   };
+
+  const renderStay = () => (
+    <View style={styles.stayContainer}>
+      <View style={styles.stayTopRow}>
+        <TouchableOpacity
+          style={styles.floatingMuteBtn}
+          onPress={() => setIsMuted(!isMuted)}
+        >
+          {isMuted ? (
+            <VolumeX size={24} color="#564B42" />
+          ) : (
+            <Volume2 size={24} color="#564B42" />
+          )}
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.stayContent}>
+        <Image
+          source={require("../../../../assets/DailyOm.png")}
+          style={styles.stayOmIcon}
+          resizeMode="contain"
+        />
+
+        <Text style={styles.stayQuote}>
+          Come, let's sit together in this quiet.{"\n"}
+          There's nothing for you to do.{"\n"}
+          You're exactly where you need to be{"\n"}
+          right now.
+        </Text>
+      </View>
+
+      <View style={styles.stayFooter}>
+        <TouchableOpacity
+          style={styles.stayBackBtn}
+          onPress={() => setStep("options")}
+        >
+          <Text style={styles.stayBackText}>I'll go now</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 
   const renderInput = () => (
     <KeyboardAvoidingView
@@ -295,6 +377,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
         {step === "options" && renderOptions()}
         {step === "input" && renderInput()}
         {step === "breath" && renderBreath()}
+        {step === "stay" && renderStay()}
       </ScrollView>
     </TouchableOpacity>
   );
@@ -406,6 +489,72 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#8a7d6b",
     textDecorationLine: "underline",
+  },
+  // Stay Interaction Styles
+  stayContainer: {
+    flex: 1,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingTop: 20,
+    paddingBottom: 60,
+  },
+  stayTopRow: {
+    width: "100%",
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    justifyContent: "flex-start",
+  },
+  floatingMuteBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  stayContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 10,
+  },
+  stayOmIcon: {
+    width: 80,
+    height: 80,
+    marginBottom: 60,
+    opacity: 0.8,
+    tintColor: "#BF8A4A",
+  },
+  stayQuote: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 22,
+    color: "#564B42",
+    textAlign: "center",
+    lineHeight: 36,
+  },
+  stayFooter: {
+    alignItems: "center",
+    width: "100%",
+  },
+  stayFooterText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 18,
+    color: "#432104",
+    opacity: 0.7,
+    marginBottom: 40,
+  },
+  stayBackBtn: {
+    paddingVertical: 10,
+  },
+  stayBackText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 16,
+    color: "#432104",
+    textDecorationLine: "underline",
+    marginTop: 20,
   },
   secondBeat: {
     fontFamily: Fonts.serif.regular,

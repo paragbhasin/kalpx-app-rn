@@ -4498,6 +4498,41 @@ export async function executeAction(
         break;
       }
 
+      // T3A-3 — Crisis safety surface.
+      // User taps 'I'm not safe right now' on dashboard (or elsewhere).
+      // Call /api/mitra/crisis/ with trigger=button_tap — always returns
+      // a full crisis payload. Seed it into Redux so CrisisRoomContainer
+      // can render. If network fails, the container has a local
+      // fallback (sovereignty rule explicitly waived for this surface).
+      case "open_crisis": {
+        const { mitraCrisis } = require("./mitraApi");
+        let crisisPayload = null;
+        try {
+          crisisPayload = await mitraCrisis({
+            trigger: "button_tap",
+            source_surface: payload?.source || "dashboard",
+          });
+        } catch (_err) {
+          // Swallow — CrisisRoomContainer has its own local fallback.
+          crisisPayload = null;
+        }
+        setScreenValue(crisisPayload, "crisis_payload");
+        loadScreen({
+          container_id: "crisis_room",
+          state_id: "grounding",
+        } as any);
+        mitraTrackEvent("crisis_surface_opened", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            parent_source: payload?.source || "dashboard",
+            is_crisis: crisisPayload?.is_crisis ?? null,
+            tier: crisisPayload?.tier ?? null,
+          },
+        });
+        break;
+      }
+
       // WEEK 7 — Grief room enter/exit.
       // Spec: route_support_grief.md.
       // REG-015: clears runner_* so grief never overlaps with a practice

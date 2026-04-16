@@ -242,6 +242,25 @@ const NewDashboardContainer: React.FC<Props> = ({ block, screenData, onAction })
             <Text style={styles.primaryBtnText}>Quick Check-In</Text>
           </LinearGradient>
         </TouchableOpacity>
+
+        {/*
+          T3A-3 FE — Safety surface entry.
+          Quiet placement (secondary button style, not hero), but
+          always visible at the bottom of the dashboard. Tapping
+          opens the crisis_room via /api/mitra/crisis/ with
+          trigger=button_tap (always returns a full safety payload).
+        */}
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={() => handlePress("open_crisis")}
+          style={styles.safetyBtn}
+          accessibilityRole="button"
+          accessibilityLabel="I'm not safe right now. Open crisis support."
+        >
+          <Text style={styles.safetyBtnText}>
+            I'm not safe right now
+          </Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -399,6 +418,25 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.semiBold,
     fontSize: 15,
     color: "#432104",
+    letterSpacing: 0.3,
+  },
+  // T3A-3 safety surface — quiet, always visible, not alarming.
+  // Intentionally less prominent than primary CTAs (no gradient,
+  // muted text) but legible and tappable.
+  safetyBtn: {
+    marginTop: 20,
+    paddingVertical: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: "#D4C5B2",
+    backgroundColor: "transparent",
+  },
+  safetyBtnText: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 13,
+    color: "#6B5948",
     letterSpacing: 0.3,
   },
 });

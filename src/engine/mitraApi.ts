@@ -801,6 +801,53 @@ export async function getVoiceNoteInterpretation(id: string): Promise<any> {
   }
 }
 
+/** POST mitra/crisis/ — Phase T3A-3 safety surface.
+ *
+ * Safety-critical: not gated, always on. Server returns a full crisis
+ * payload (opening_line + grounding_breath + reach_out + hotlines)
+ * regardless of classifier result — even when the classifier says
+ * not-crisis, the payload is usable as de-escalation content.
+ *
+ * Response shape:
+ *   {
+ *     is_crisis: boolean,
+ *     tier: "acute_crisis" | "acute_distress" | "user_requested" | "none",
+ *     severity: number,                     // 0..1
+ *     opening_line: string,
+ *     grounding_anchor: string,
+ *     grounding_breath: { title, duration_min, pattern, runner_route },
+ *     reach_out: string[],                  // action lines
+ *     hotlines: {region, name, number, hours}[],
+ *     signals: string[],                    // matched keyword phrases
+ *     next_step: { label, target }          // FE deeplink hint
+ *   }
+ *
+ * Null only on outright network failure — in that case the FE must
+ * still surface a local emergency reminder ('call 112 / 911').
+ */
+export async function mitraCrisis(input: {
+  trigger?: "button_tap" | "text_input" | "voice_interpretation";
+  text?: string;
+  source_surface?: string;
+} = {}): Promise<any | null> {
+  try {
+    const res = await api.post("mitra/crisis/", {
+      trigger: input.trigger || "button_tap",
+      text: input.text || "",
+      source_surface: input.source_surface || "dashboard",
+    });
+    return res.data;
+  } catch (err: any) {
+    if (__DEV__) {
+      console.warn(
+        "[MITRA] crisis endpoint unreachable — local fallback:",
+        err?.message,
+      );
+    }
+    return null;
+  }
+}
+
 export async function postInterpretIntent(text: string): Promise<any> {
   if (!text || !text.trim()) return null;
   try {

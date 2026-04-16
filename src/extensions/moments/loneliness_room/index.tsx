@@ -132,12 +132,11 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
         onPress={() =>
           dispatch(
             "start_runner",
-            { container_id: "practice_runner", state_id: "mantra_runner" },
+            { container_id: "practice_runner", state_id: "free_mantra_chanting" },
             {
               source: "support_loneliness",
               variant: "mantra",
               target_reps: 11,
-              item: ctx.companioned_chant,
             },
           )
         }

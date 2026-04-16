@@ -23,6 +23,7 @@ import {
 } from 'react-native';
 import { useScreenStore } from '../engine/useScreenBridge';
 import { cleanupFlowState } from '../engine/cleanupFields';
+import { useContentSlots, readMomentSlot } from '../hooks/useContentSlots';
 import store from '../store';
 import { loadScreenWithData, screenActions } from '../store/screenSlice';
 import { Fonts } from '../theme/fonts';
@@ -41,6 +42,13 @@ interface CycleReflectionResultsBlockProps {
   block?: { style?: any };
 }
 
+// NOTE: feeling-conditional TITLES + PARAGRAPHS are a known Phase E
+// multi-variant migration target. Today M_cycle_reflection_results
+// ships with ONE approved variant keyed on no signal. Until the
+// registry grows per-feeling variants (applies_when:
+// {checkpoint_feeling: "strong"} etc.), the 4-way dict below is the
+// authoritative source for per-feeling title + paragraph. Action
+// labels + descriptions + divider text migrate fully.
 const FEELING_TITLES: Record<string, string> = {
   strong: 'Your steadiness shows.',
   slight: 'A shift is taking root.',
@@ -67,10 +75,54 @@ const FEELING_PARAGRAPHS: Record<string, string[]> = {
   ],
 };
 
+// Stable analytics ids (not content labels).
+type ActionId = 'change_focus' | 'deepen' | 'restart' | 'refine';
+
+const ACTION_LABEL_SLOT: Record<ActionId, string> = {
+  change_focus: 'action_new_focus_label',
+  deepen: 'action_deepen_label',
+  restart: 'action_restart_label',
+  refine: 'action_continue_label',
+};
+const ACTION_DESC_SLOT: Record<ActionId, string> = {
+  change_focus: 'action_new_focus_desc',
+  deepen: 'action_deepen_desc',
+  restart: 'action_restart_desc',
+  refine: 'action_continue_desc',
+};
+
 const CycleReflectionResultsBlock: React.FC<CycleReflectionResultsBlockProps> = ({
   block,
 }) => {
   const screenData = useScreenStore((s) => s.screenData);
+  const ss = screenData as Record<string, any>;
+
+  // Phase D — M_cycle_reflection_results registry-backed action CTAs.
+  // Feeling-conditional title/paragraphs grandfathered (see note above).
+  useContentSlots({
+    momentId: "M_cycle_reflection_results",
+    screenDataKey: "cycle_reflection_results",
+    buildCtx: (s) => ({
+      path: s.journey_path === "growth" ? "growth" : "support",
+      guidance_mode: s.guidance_mode || "hybrid",
+      locale: s.locale || "en",
+      user_attention_state: "reflective_exposed",
+      emotional_weight: "heavy",
+      cycle_day: Number(s.checkpoint_day) || Number(s.day_number) || 14,
+      entered_via: s._entered_via || "day_14_submit",
+      stage_signals: {},
+      today_layer: {},
+      life_layer: {
+        cycle_id: s.journey_id || s.cycle_id || "",
+        life_kosha: s.life_kosha || s.scan_focus || "",
+        scan_focus: s.scan_focus || "",
+        life_klesha: s.life_klesha || null,
+        life_vritti: s.life_vritti || null,
+        life_goal: s.life_goal || null,
+      },
+    }),
+  });
+  const slot = (name: string) => readMomentSlot(ss, "cycle_reflection_results", name);
 
   const day = screenData.checkpoint_day || 7;
   const is14 = day === 14;
@@ -85,54 +137,33 @@ const CycleReflectionResultsBlock: React.FC<CycleReflectionResultsBlockProps> = 
   const actions: ResultAction[] = [];
   const isStrong = feeling === 'strong';
 
-  if (isStrong) {
+  // Action set is driven by the decision tree; labels/descriptions
+  // come from registry slots (ACTION_LABEL_SLOT / ACTION_DESC_SLOT).
+  // Fallback to empty string per the null-safe contract — no TSX
+  // English fallback.
+  const pushAction = (id: ActionId, targetContainer: string, targetState: string, altLabelSlot?: string, altDescSlot?: string) => {
     actions.push({
-      id: 'change_focus',
-      label: 'Choose New Focus',
-      description:
-        'You\u2019ve found your rhythm. Carry this success to a new area of your life.',
-      target: { container_id: 'choice_stack', state_id: 'discipline_select' },
+      id,
+      label: slot(altLabelSlot || ACTION_LABEL_SLOT[id]),
+      description: slot(altDescSlot || ACTION_DESC_SLOT[id]),
+      target: { container_id: targetContainer, state_id: targetState },
     });
+  };
+
+  if (isStrong) {
+    pushAction('change_focus', 'choice_stack', 'discipline_select');
     if (daysEngaged >= totalDays) {
-      actions.push({
-        id: 'deepen',
-        label: 'Deepen My Practice',
-        description:
-          'You have the discipline \u2014 now let\u2019s add depth to trigger inner transformation.',
-        target: { container_id: 'companion_dashboard', state_id: 'day_active' },
-      });
+      pushAction('deepen', 'companion_dashboard', 'day_active');
     }
   } else if (daysEngaged < 5) {
-    actions.push({
-      id: 'restart',
-      label: 'Restart Current Cycle',
-      description:
-        'Consistency is the base of transformation. Let\u2019s rebuild your rhythm.',
-      target: { container_id: 'companion_dashboard', state_id: 'day_active' },
-    });
+    pushAction('restart', 'companion_dashboard', 'day_active');
   } else if (daysEngaged >= totalDays && !isStrong) {
-    actions.push({
-      id: 'deepen',
-      label: 'Deepen My Practice',
-      description:
-        'You have the discipline \u2014 now let\u2019s add depth to the practice.',
-      target: { container_id: 'companion_dashboard', state_id: 'day_active' },
-    });
+    pushAction('deepen', 'companion_dashboard', 'day_active');
   } else {
-    actions.push({
-      id: 'refine',
-      label: 'Continue Current Path',
-      description:
-        'Strengthen your current habit and move forward with more consistency.',
-      target: { container_id: 'companion_dashboard', state_id: 'day_active' },
-    });
-    actions.push({
-      id: 'change_focus',
-      label: 'Alter My Practices',
-      description:
-        'Adjust your level to find a rhythm that feels more natural for you.',
-      target: { container_id: 'choice_stack', state_id: 'discipline_select' },
-    });
+    pushAction('refine', 'companion_dashboard', 'day_active');
+    // "Alter My Practices" uses the alter_ slot set (label differs from
+    // the generic change_focus labeling above).
+    pushAction('change_focus', 'choice_stack', 'discipline_select', 'action_alter_label', 'action_alter_desc');
   }
 
   const title = FEELING_TITLES[feeling] || FEELING_TITLES.same;
@@ -197,7 +228,7 @@ const CycleReflectionResultsBlock: React.FC<CycleReflectionResultsBlockProps> = 
         <View style={styles.ctaArea}>
           {actions.map((action, idx) => (
             <View key={action.id} style={{ width: '100%' }}>
-              {idx > 0 && <Text style={styles.orDivider}>{'\u2014 OR \u2014'}</Text>}
+              {idx > 0 && <Text style={styles.orDivider}>{slot("action_divider")}</Text>}
               <TouchableOpacity
                 style={styles.ctaButton}
                 onPress={() => handleAction(action)}

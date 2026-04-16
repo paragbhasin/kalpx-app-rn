@@ -28,6 +28,7 @@ import {
 } from "react-native";
 import { Fonts } from "../theme/fonts";
 import { executeAction } from "../engine/actionExecutor";
+import { useContentSlots, readMomentSlot } from "../hooks/useContentSlots";
 import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
@@ -41,6 +42,32 @@ interface Props {
 const CheckpointDay14Block: React.FC<Props> = () => {
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
   const ss = screenData as Record<string, any>;
+
+  // Phase D — M25 registry-backed slots; null-safe on failure.
+  useContentSlots({
+    momentId: "M25_checkpoint_day_14",
+    screenDataKey: "checkpoint_day_14",
+    buildCtx: (s) => ({
+      path: s.journey_path === "growth" ? "growth" : "support",
+      guidance_mode: s.guidance_mode || "hybrid",
+      locale: s.locale || "en",
+      user_attention_state: "reflective_exposed",
+      emotional_weight: "heavy",
+      cycle_day: Number(s.day_number) || 14,
+      entered_via: s._entered_via || "dashboard_day_14_auto_navigation",
+      stage_signals: {},
+      today_layer: {},
+      life_layer: {
+        cycle_id: s.journey_id || s.cycle_id || "",
+        life_kosha: s.life_kosha || s.scan_focus || "",
+        scan_focus: s.scan_focus || "",
+        life_klesha: s.life_klesha || null,
+        life_vritti: s.life_vritti || null,
+        life_goal: s.life_goal || null,
+      },
+    }),
+  });
+  const slot = (name: string) => readMomentSlot(ss, "checkpoint_day_14", name);
 
   const [step, setStep] = useState<"intro" | "body">("intro");
   const [reflection, setReflection] = useState<string>(
@@ -104,9 +131,9 @@ const CheckpointDay14Block: React.FC<Props> = () => {
     return (
       <View style={styles.root}>
         <View style={styles.topRegion}>
-          <Text style={styles.eyebrow}>DAY 14</Text>
-          <Text style={styles.headline}>Two weeks. Something settled.</Text>
-          <Text style={styles.body}>Can I show you what has changed?</Text>
+          <Text style={styles.eyebrow}>{slot("eyebrow")}</Text>
+          <Text style={styles.headline}>{slot("intro_headline")}</Text>
+          <Text style={styles.body}>{slot("intro_body")}</Text>
         </View>
         <View style={styles.bottomRegion}>
           <TouchableOpacity
@@ -114,7 +141,7 @@ const CheckpointDay14Block: React.FC<Props> = () => {
             style={styles.cta}
             activeOpacity={0.85}
           >
-            <Text style={styles.ctaText}>Show me</Text>
+            <Text style={styles.ctaText}>{slot("intro_cta_label")}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -127,7 +154,7 @@ const CheckpointDay14Block: React.FC<Props> = () => {
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.eyebrow}>DAY 14</Text>
+        <Text style={styles.eyebrow}>{slot("eyebrow")}</Text>
 
         <View style={styles.gridWrap}>
           {Array.from({ length: 2 }).map((_, row) => (
@@ -156,30 +183,28 @@ const CheckpointDay14Block: React.FC<Props> = () => {
 
         {growth ? (
           <View style={styles.growthBox}>
-            <Text style={styles.microLabel}>WHAT HAS GROWN</Text>
+            <Text style={styles.microLabel}>{slot("summary_label")}</Text>
             <Text style={styles.narrative}>{growth}</Text>
           </View>
         ) : null}
 
-        <Text style={styles.microLabel}>SEAL THIS CYCLE</Text>
-        <Text style={styles.helper}>
-          Optional: one line to mark what you want to remember from these two weeks.
-        </Text>
+        <Text style={styles.microLabel}>{slot("seal_cycle_label")}</Text>
+        <Text style={styles.helper}>{slot("seal_cycle_helper")}</Text>
         <TextInput
           value={sealRitual}
           onChangeText={(v) => setSealRitual(v.slice(0, 300))}
-          placeholder="What deserves to be remembered?"
+          placeholder={slot("seal_input_placeholder")}
           placeholderTextColor="rgba(88, 58, 24, 0.4)"
           multiline
           style={styles.input}
           maxLength={300}
         />
 
-        <Text style={[styles.microLabel, { marginTop: 20 }]}>WHAT TO CARRY</Text>
+        <Text style={[styles.microLabel, { marginTop: 20 }]}>{slot("carry_label")}</Text>
         <TextInput
           value={reflection}
           onChangeText={(v) => setReflection(v.slice(0, 1500))}
-          placeholder="Is there anything you want Mitra to remember about this cycle?"
+          placeholder={slot("carry_input_placeholder")}
           placeholderTextColor="rgba(88, 58, 24, 0.4)"
           multiline
           style={styles.input}
@@ -194,7 +219,7 @@ const CheckpointDay14Block: React.FC<Props> = () => {
           style={styles.cta}
           activeOpacity={0.85}
         >
-          <Text style={styles.ctaText}>Continue the same path</Text>
+          <Text style={styles.ctaText}>{slot("continue_path_cta")}</Text>
         </TouchableOpacity>
         <View style={styles.secondaryRow}>
           <TouchableOpacity
@@ -202,14 +227,14 @@ const CheckpointDay14Block: React.FC<Props> = () => {
             style={styles.secondaryBtn}
             activeOpacity={0.85}
           >
-            <Text style={styles.secondaryText}>Deepen my practice</Text>
+            <Text style={styles.secondaryText}>{slot("deepen_practice_cta")}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => submitDecision("change_focus")}
             style={styles.secondaryBtn}
             activeOpacity={0.85}
           >
-            <Text style={styles.secondaryText}>Change my focus</Text>
+            <Text style={styles.secondaryText}>{slot("change_focus_cta")}</Text>
           </TouchableOpacity>
         </View>
       </View>

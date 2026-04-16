@@ -621,6 +621,56 @@ export async function mitraFetchProgress(): Promise<any> {
 }
 
 /** GET mitra/journey/status/ — Journey status; may return welcomeBack flag. */
+/** POST mitra/moment/next/ — Phase T2b decide_moment router.
+ *
+ * Shadow call on app-open (and future: push_tap / flow_end / idle_return).
+ * Server gate: MITRA_V3_MOMENT_ROUTER_ENABLED — returns 404 when off so FE
+ * transparently falls back to legacy routing.
+ *
+ * Response shape is stable across 404/500/offline via catch — the caller
+ * always gets an object with moment_id + reentry_target; null means
+ * "router unavailable, keep legacy routing."
+ *
+ * ``triggers`` and ``session_hints`` are optional. Caller fills in what the
+ * FE knows (grief/loneliness/crisis taps, decline counts, embed candidates).
+ */
+export async function mitraMomentNext(input: {
+  trigger_event?: "app_open" | "push_tap" | "flow_end" | "idle_return";
+  triggers?: {
+    grief?: boolean;
+    loneliness?: boolean;
+    crisis?: boolean;
+    refocus_tap?: boolean;
+    predictive_alert?: boolean;
+  };
+  session_hints?: {
+    decline_count_this_session?: number;
+    predictive_tier?: number;
+    predictive_severity?: number;
+    embed_candidates?: string[];
+  };
+} = {}): Promise<any | null> {
+  try {
+    const res = await api.post("mitra/moment/next/", {
+      trigger_event: input.trigger_event || "app_open",
+      triggers: input.triggers || {},
+      session_hints: input.session_hints || {},
+    });
+    return res.data;
+  } catch (err: any) {
+    // 404 (flag off) / 401 / network error — caller falls back to legacy.
+    // Low-volume WARN so we can see rollout progress in dev logs without
+    // crying wolf on every unauthenticated screen.
+    if (__DEV__) {
+      console.log(
+        "[MOMENT_ROUTER] unavailable — falling back to legacy routing:",
+        err?.response?.status || err?.message,
+      );
+    }
+    return null;
+  }
+}
+
 export async function mitraJourneyStatus(): Promise<any> {
   try {
     const res = await api.get("mitra/journey/status/", {

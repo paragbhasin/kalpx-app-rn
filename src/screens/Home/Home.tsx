@@ -329,6 +329,29 @@ export default function Home() {
 
           seedJourneyStatus(status);
 
+          // Phase T2b — shadow call to the decide_moment router. We log
+          // the decision for telemetry validation but do NOT override
+          // legacy routing yet. A follow-up PR will flip to active
+          // routing once shadow-mode decisions are validated against
+          // the legacy Home.tsx:368+ auto-route logic below.
+          try {
+            const { mitraMomentNext } = require("../../engine/mitraApi");
+            const decision = await mitraMomentNext({
+              trigger_event: "app_open",
+            });
+            if (decision && __DEV__) {
+              console.log(
+                "[MOMENT_ROUTER] shadow decision:",
+                decision.moment_id,
+                "tier=" + decision.tier,
+                "reentry=" + (decision.reentry_target ?? "none"),
+                "considered=" + JSON.stringify(decision.considered || []),
+              );
+            }
+          } catch (_err) {
+            // swallow — router is shadow mode only, never blocks resume
+          }
+
           // Audit fix F4 (2026-04-13, revised) — resume dispatches the same
           // generate_companion action handler with use_journey_companion=true,
           // which swaps the API call to read-only /journey/companion/ but

@@ -1193,62 +1193,40 @@ export async function getPrincipleSource(id: string | number): Promise<any> {
   }
 }
 
-/** GET mitra/support/grief-context/ — Grief room contextual copy/prompt. */
+/** GET mitra/support/grief-context/ — Grief room contextual copy/prompt.
+ *
+ * T3B-2 (Day-14 audit follow-up): returns null on failure instead of
+ * TSX English fallback copy. Sovereignty-compliant per the rule
+ * documented at mitraResolveMoment: blank UI > hidden hardcoded
+ * content. The M46 spine moment handles null by falling back to its
+ * approved universal × en variant via the BE orchestrator.
+ */
 export async function getGriefContext(): Promise<any> {
   try {
     const res = await api.get("mitra/support/grief-context/");
     return res.data || null;
   } catch (err: any) {
-    console.warn(
-      "[MITRA] grief-context failed (fallback applied):",
-      err.message,
-    );
-    return {
-      opening_line: "You don't have to say anything yet. I'm here. We can sit.",
-      second_beat_line:
-        "Would a slow breath help right now? Or would you rather just stay quiet together?",
-      principle_hint: null,
-      grief_mantra: {
-        id: "fallback_grief_mantra",
-        title: "Om",
-        devanagari: "ॐ",
-        duration_min: 7,
-      },
-      slow_breath: { duration_min: 1, pattern: "4-7-8" },
-      _offline_fallback: true,
-    };
+    if (__DEV__) {
+      console.warn("[MITRA] grief-context unavailable:", err.message);
+    }
+    return null;
   }
 }
 
-/** GET mitra/support/loneliness-context/ — Loneliness room context + chant. */
+/** GET mitra/support/loneliness-context/ — Loneliness room context + chant.
+ *
+ * T3B-2: null on failure (see getGriefContext docstring). M47 spine
+ * variant is the authoritative fallback path.
+ */
 export async function getLonelinessContext(): Promise<any> {
   try {
     const res = await api.get("mitra/support/loneliness-context/");
     return res.data || null;
   } catch (err: any) {
-    console.warn(
-      "[MITRA] loneliness-context failed (fallback applied):",
-      err.message,
-    );
-    return {
-      opening_line: "Loneliness is heavy. I'm here with you.",
-      second_beat_line: "Not to fix it — just to share the minute.",
-      bhakti_mantra: {
-        id: "fallback_bhakti",
-        title: "So Hum",
-        devanagari: "सो हम्",
-        duration_min: 6,
-      },
-      companioned_chant: {
-        id: "fallback_chant",
-        reps: 11,
-        title: "Om",
-        devanagari: "ॐ",
-      },
-      walk_duration_min: 10,
-      principle_hint: null,
-      _offline_fallback: true,
-    };
+    if (__DEV__) {
+      console.warn("[MITRA] loneliness-context unavailable:", err.message);
+    }
+    return null;
   }
 }
 

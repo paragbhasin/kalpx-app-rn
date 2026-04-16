@@ -4457,6 +4457,47 @@ export async function executeAction(
       }
 
       // ================================================================
+      // T3B-4 — open_trigger + open_check_in handlers.
+      // Spec: SUPPORT_ADVICE_AUDIT.md gap 8. new_dashboard dispatched
+      // these actions but they were undefined in actionExecutor —
+      // runtime error on tap. Implementations route to the existing
+      // support containers (SupportTriggerContainer + SupportCheckinContainer).
+      // ================================================================
+      case "open_trigger": {
+        // Fresh entry — reset the trigger round + any lingering feeling
+        // so the user doesn't resume in a stale state.
+        setScreenValue(1, "trigger_round");
+        setScreenValue(null, "trigger_previous_suggestion_id");
+        setScreenValue(null, "trigger_previous_suggestion_type");
+        setScreenValue("", "trigger_feeling");
+        loadScreen({
+          container_id: "support_trigger",
+          state_id: "feeling_select",
+        } as any);
+        mitraTrackEvent("trigger_flow_opened", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { parent_source: payload?.source || "dashboard" },
+        });
+        break;
+      }
+
+      case "open_check_in": {
+        // Reset the 3-step state machine (notice → name → settle).
+        setScreenValue("notice", "checkin_step");
+        setScreenValue(null, "checkin_draft");
+        loadScreen({
+          container_id: "support_checkin",
+          state_id: "notice",
+        } as any);
+        mitraTrackEvent("checkin_flow_opened", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { parent_source: payload?.source || "dashboard" },
+        });
+        break;
+      }
+
       // WEEK 7 — Grief room enter/exit.
       // Spec: route_support_grief.md.
       // REG-015: clears runner_* so grief never overlaps with a practice

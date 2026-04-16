@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
+  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -36,7 +37,10 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
     updateHeaderHidden(false);
     return () => updateHeaderHidden(false);
   }, [updateBackground, updateHeaderHidden]);
-  const [step, setStep] = useState<"opening" | "options" | "input">("opening");
+  const [step, setStep] = useState<"opening" | "options" | "input" | "walk">(
+    "opening",
+  );
+  const [timerSeconds, setTimerSeconds] = useState(600); // 10 minutes
   const [inputType, setInputType] = useState<"naming" | "person">("naming");
   const [inputValue, setInputValue] = useState("");
 
@@ -48,6 +52,15 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
     second_beat_line: "Nothing more is needed. Just this minute.",
   };
 
+  const revealOptions = () => {
+    setStep("options");
+    Animated.timing(fade2, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+  };
+
   useEffect(() => {
     // Stage 1: Opening line
     Animated.timing(fade1, {
@@ -55,17 +68,25 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
       duration: 1000,
       useNativeDriver: true,
     }).start(() => {
-      // Stage 2: Second beat after 2 seconds
-      setTimeout(() => {
-        setStep("options");
-        Animated.timing(fade2, {
-          toValue: 1,
-          duration: 1000,
-          useNativeDriver: true,
-        }).start();
+      const timer = setTimeout(() => {
+        revealOptions();
       }, 2000);
+      return () => clearTimeout(timer);
     });
-  }, [fade1, fade2]);
+  }, [fade1]);
+
+  // Timer orchestration for Walk
+  useEffect(() => {
+    if (step !== "walk") return;
+
+    setTimerSeconds(600); // RE-APPLYING: Reset to 10 mins on entry
+
+    const timerInterval = setInterval(() => {
+      setTimerSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(timerInterval);
+  }, [step]);
 
   const dispatch = (
     actionType: string,
@@ -132,7 +153,10 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
         onPress={() =>
           dispatch(
             "start_runner",
-            { container_id: "practice_runner", state_id: "free_mantra_chanting" },
+            {
+              container_id: "practice_runner",
+              state_id: "free_mantra_chanting",
+            },
             {
               source: "support_loneliness",
               variant: "mantra",
@@ -154,17 +178,8 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
         <Text style={styles.pillText}>Reach out to one person</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.pill}
-        onPress={() =>
-          dispatch("loneliness_walk_started", null, {
-            duration_min: ctx.walk_duration_min || 10,
-          })
-        }
-      >
-        <Text style={styles.pillText}>
-          Walk outside for {ctx.walk_duration_min || 10} minutes
-        </Text>
+      <TouchableOpacity style={styles.pill} onPress={() => setStep("walk")}>
+        <Text style={styles.pillText}>Walk outside for 10 minutes</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -207,16 +222,61 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
     </KeyboardAvoidingView>
   );
 
+  const renderWalk = () => {
+    const minutes = Math.floor(timerSeconds / 60);
+    const seconds = timerSeconds % 60;
+    const timeStr = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+
+    return (
+      <View style={styles.walkContainer}>
+        <View style={styles.walkHeader}>
+          <TouchableOpacity
+            style={styles.endReturnBtn}
+            onPress={() => setStep("options")}
+          >
+            <Text style={styles.endReturnText}>End & Return</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.walkContent}>
+          <Text style={styles.walkQuote}>
+            Step outside into the fresh air.{"\n"}
+            Walk for 10 minutes, no need to rush.{"\n"}
+            Take any path that feels right,{"\n"}
+            and let your body move naturally.
+          </Text>
+          <Text style={[styles.secondQuote, { marginTop: 40, opacity: 0.8 }]}>
+            I'll be here, holding this quiet space for you.
+          </Text>
+        </View>
+
+        <View style={styles.walkBottomBar}>
+          <View style={styles.walkIconBox}>
+            <Image
+              source={require("../../../../assets/walk.png")}
+              style={{ width: 24, height: 24 }}
+            />
+          </View>
+          <Text style={styles.walkActionLabel}>Time to walk</Text>
+          <Text style={styles.walkTimerText}>{timeStr}</Text>
+        </View>
+      </View>
+    );
+  };
+
   return (
     <View style={styles.root}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Animated.View style={{ opacity: fade1, marginBottom: 40 }}>
-          <Text style={styles.openingLine}>{ctx.opening_line}</Text>
-          <Text style={styles.secondBeat}>{ctx.second_beat_line}</Text>
-        </Animated.View>
+        {step !== "walk" && (
+          <Animated.View style={{ opacity: fade1, marginBottom: 40 }}>
+            <Text style={styles.openingLine}>{ctx.opening_line}</Text>
+            <Text style={styles.secondBeat}>{ctx.second_beat_line}</Text>
+          </Animated.View>
+        )}
 
         {step === "options" && renderOptions()}
         {step === "input" && renderInput()}
+        {step === "walk" && renderWalk()}
       </ScrollView>
     </View>
   );
@@ -252,7 +312,6 @@ const styles = StyleSheet.create({
     color: "#946A47",
     textAlign: "center",
     marginBottom: 12,
-    // marginTop: 20,
   },
   optionsStack: {
     width: "100%",
@@ -276,11 +335,112 @@ const styles = StyleSheet.create({
   },
   pillText: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 17,
+    fontSize: 18,
     color: "#432104",
   },
+  // Walk Interaction Styles
+  walkContainer: {
+    flex: 1,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 10,
+    // paddingBottom: 40,
+  },
+  walkHeader: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 10,
+  },
+  walkBackCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  endReturnBtn: {
+    backgroundColor: "#FBF5F5",
+    borderColor: "#c89a47",
+    borderWidth: 1,
+    elevation: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 24,
+    justifyContent: "center",
+    alignItems: "center",
+
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    position: "absolute",
+    right: 20,
+  },
+  endReturnText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 16,
+    color: "#6B4F31",
+  },
+  walkContent: {
+    flex: 1, // 🔥 MUST — takes full screen height
+    justifyContent: "center", // vertical center
+    alignItems: "center", // horizontal center
+    marginTop: 100,
+  },
+  walkQuote: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 22,
+    color: "#432104",
+    textAlign: "center",
+    lineHeight: 36,
+  },
+  secondQuote: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 18,
+    color: "#432104",
+    textAlign: "center",
+    lineHeight: 36,
+  },
+  walkBottomBar: {
+    backgroundColor: "#FBF5F5",
+    borderColor: "#c89a47",
+    borderWidth: 1,
+    elevation: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 12,
+    borderRadius: 24,
+    justifyContent: "center",
+    marginTop: 100,
+
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    width: "90%",
+    // height: 30,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  walkIconBox: {
+    marginRight: 15,
+  },
+  walkActionLabel: {
+    flex: 1,
+    fontFamily: Fonts.serif.regular,
+    fontSize: 18,
+    color: "#564B42",
+  },
+  walkTimerText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 20,
+    color: "#564B42",
+    letterSpacing: 1,
+  },
   exitBtn: {
-    // marginTop: 32,
     alignItems: "center",
     paddingVertical: 12,
   },

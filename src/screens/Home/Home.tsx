@@ -399,13 +399,51 @@ export default function Home() {
           const checkpointStateId =
             dayNumber === 7 || dayNumber === 14 ? "weekly_checkpoint" : null;
 
-          if (checkpointStateId && !checkpointCompleted) {
+          // P1-6 — AsyncStorage checkpoint guard (Day-14 audit).
+          // The BE's journey_status now returns checkpointPending=true +
+          // reentryTarget="day14_boundary" when an unresolved day14
+          // boundary exists. We persist a local flag so a mid-flow crash
+          // or cleared Redux state doesn't drop the user back to the
+          // dashboard. The flag is cleared on successful submit in
+          // actionExecutor.ts (checkpoint_submit case).
+          const day14Pending =
+            dayNumber === 14 &&
+            (status.checkpointPending === true ||
+              status.reentryTarget === "day14_boundary");
+          if (day14Pending) {
+            try {
+              await AsyncStorage.setItem(
+                "kalpx_day14_pending",
+                JSON.stringify({
+                  journey_id: status.journeyId,
+                  day: dayNumber,
+                  at: Date.now(),
+                }),
+              );
+            } catch (_err) {
+              // non-fatal — resume still works via Redux + BE signal
+            }
+          }
+
+          if (checkpointStateId && (!checkpointCompleted || day14Pending)) {
             store.dispatch(
               screenActions.setScreenValue({
                 key: "checkpoint_day",
                 value: dayNumber,
               }),
             );
+            // P1-6 — force `checkpoint_completed=false` when the BE
+            // reports the boundary is still pending. Prevents stale
+            // Redux state (from a prior session) from skipping the
+            // reentry flow.
+            if (day14Pending) {
+              store.dispatch(
+                screenActions.setScreenValue({
+                  key: "checkpoint_completed",
+                  value: false,
+                }),
+              );
+            }
             store.dispatch(
               loadScreenWithData({
                 containerId: "cycle_transitions",

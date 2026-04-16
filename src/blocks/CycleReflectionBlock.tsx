@@ -1,6 +1,21 @@
 /**
  * CycleReflectionBlock — Day 7 / Day 14 checkpoint primary block.
  *
+ * @deprecated P1-8 (Day-14 audit 2026-04-16). Kept as schema-fallback only.
+ *
+ * The MODERN block for Day 14 is CheckpointDay14Block.tsx, which is
+ * content-sovereign via useContentSlots/mitraResolveMoment (M25 moment).
+ * Production routing uses that block by default; this file survives only
+ * as a fallback if a schema explicitly references ``cycle_reflection``.
+ *
+ * SOVEREIGNTY VIOLATION: the string table below (INTRO_COPY, decision
+ * labels at lines 113–145) is hardcoded in TSX and bypasses the content
+ * spine. Do NOT use this block for new moments. Day-7 checkpoint usage
+ * should migrate to the M24 spine variant next; once done, this file can
+ * be removed entirely.
+ *
+ * --- Historical notes ---
+ *
  * Mirrors the web multi-stage flow in
  * ~/kalpx-frontend/src/blocks/CycleReflectionBlock.vue:
  *

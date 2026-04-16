@@ -2555,6 +2555,16 @@ export async function executeAction(
           screenState.checkpoint_options?.[0]?.id ||
           "continue";
 
+        // P1-7 — capture pre-submit triad IDs for post-submit validation.
+        // continue_same / deepen MUST preserve item identity per the
+        // Day-14 contract; if BE silently regenerates, we want a
+        // warning in dev logs (not user-facing failure).
+        const preSubmitTriadIds = {
+          mantra:   screenState?.cycle_mantra_id || screenState?.companion?.mantra?.core?.id,
+          sankalp:  screenState?.cycle_sankalp_id || screenState?.companion?.sankalp?.core?.id,
+          practice: screenState?.cycle_practice_id || screenState?.companion?.practice?.core?.id,
+        };
+
         const csPayload: any = {
           decision: csDecision,
           reflection: screenState.checkpoint_user_reflection || "",
@@ -2629,6 +2639,58 @@ export async function executeAction(
         }
         if (csRes.resetDay || csDay === 14) {
           setScreenValue(1, "day_number");
+        }
+
+        // P1-6 — clear the AsyncStorage day14 pending flag on success.
+        // Any future mid-flow crash before navigation completes won't
+        // re-surface this now-resolved checkpoint.
+        if (csDay === 14) {
+          try {
+            const AsyncStorage =
+              require("@react-native-async-storage/async-storage").default;
+            await AsyncStorage.removeItem("kalpx_day14_pending");
+          } catch (_err) {
+            // non-fatal
+          }
+        }
+
+        // P1-7 — triad-identity validation for continue_same / deepen.
+        // Dev-only log; warns if BE silently regenerated an item ID.
+        // continue_same and deepen MUST keep the same mantra/sankalp/
+        // practice IDs; change_focus is expected to change them.
+        if (
+          csDay === 14 &&
+          (csDecision === "continue_same" || csDecision === "deepen") &&
+          __DEV__
+        ) {
+          try {
+            const { mitraJourneyCompanion } = require("./mitraApi");
+            const companion = await mitraJourneyCompanion();
+            const post = {
+              mantra:   companion?.companion?.mantra?.core?.id,
+              sankalp:  companion?.companion?.sankalp?.core?.id,
+              practice: companion?.companion?.practice?.core?.id,
+            };
+            const drifted: string[] = [];
+            for (const k of ["mantra", "sankalp", "practice"] as const) {
+              if (preSubmitTriadIds[k] && post[k] &&
+                  preSubmitTriadIds[k] !== post[k]) {
+                drifted.push(
+                  `${k}: ${preSubmitTriadIds[k]} → ${post[k]}`,
+                );
+              }
+            }
+            if (drifted.length > 0) {
+              console.warn(
+                "[CHECKPOINT_SUBMIT] triad-identity drift on " +
+                  csDecision +
+                  " — IDs changed silently:",
+                drifted,
+              );
+            }
+          } catch (_err) {
+            // non-fatal — validation failure doesn't block navigation
+          }
         }
 
         // Navigate to results screen

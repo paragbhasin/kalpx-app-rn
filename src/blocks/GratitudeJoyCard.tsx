@@ -21,24 +21,48 @@ import {
 } from "react-native";
 import { Fonts } from "../theme/fonts";
 import { executeAction } from "../engine/actionExecutor";
+import { useContentSlots, readMomentSlot } from "../hooks/useContentSlots";
 import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
 
 const GratitudeJoyCard: React.FC<{ block?: any }> = () => {
   const { screenData, loadScreen, goBack } = useScreenStore();
-  const signal = (screenData as any).joy_signal;
+  const ss = screenData as Record<string, any>;
+
+  useContentSlots({
+    momentId: "M44_gratitude_joy_card",
+    screenDataKey: "gratitude_joy_card",
+    buildCtx: (s) => ({
+      path: s.journey_path === "growth" ? "growth" : "support",
+      guidance_mode: s.guidance_mode || "hybrid",
+      locale: s.locale || "en",
+      user_attention_state: "scanning",
+      emotional_weight: "light",
+      cycle_day: Number(s.day_number) || 0,
+      entered_via: "dashboard_embed",
+      stage_signals: {},
+      today_layer: {},
+      life_layer: {
+        cycle_id: s.journey_id || s.cycle_id || "",
+        life_kosha: s.life_kosha || s.scan_focus || "",
+        scan_focus: s.scan_focus || "",
+      },
+    }),
+  });
+  const slot = (name: string) => readMomentSlot(ss, "gratitude_joy_card", name);
+
+  const signal = ss.joy_signal;
   const [text, setText] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
   if (!signal || typeof signal !== "object") return null;
   if (submitted) return null;
 
-  const mirror =
-    signal.mirror ||
-    signal.one_line ||
-    "Something good landed today.";
-  const prompt = signal.prompt || "Name it with me";
+  // Backend signal payload can override mirror/prompt; otherwise use
+  // the sovereign default (empty string if slot not yet resolved).
+  const mirror = signal.mirror || signal.one_line || "";
+  const prompt = signal.prompt || "";
 
   const onSubmit = async () => {
     if (!text.trim()) return;
@@ -60,13 +84,13 @@ const GratitudeJoyCard: React.FC<{ block?: any }> = () => {
 
   return (
     <View style={styles.card} testID="gratitude-joy-card">
-      <Text style={styles.label}>NOTICED</Text>
+      <Text style={styles.label}>{slot("card_label")}</Text>
       <Text style={styles.mirror}>{mirror}</Text>
       <Text style={styles.prompt}>{prompt}</Text>
       <TextInput
         value={text}
         onChangeText={setText}
-        placeholder="A word, a moment, a name"
+        placeholder={slot("joy_input_placeholder")}
         placeholderTextColor="#c9a84c"
         style={styles.input}
         multiline
@@ -78,7 +102,7 @@ const GratitudeJoyCard: React.FC<{ block?: any }> = () => {
         style={[styles.btn, !text.trim() && styles.btnDisabled]}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
-        <Text style={styles.btnText}>Hold this</Text>
+        <Text style={styles.btnText}>{slot("joy_cta")}</Text>
       </TouchableOpacity>
     </View>
   );

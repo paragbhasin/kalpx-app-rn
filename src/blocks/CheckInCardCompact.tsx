@@ -15,19 +15,40 @@ import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Fonts } from "../theme/fonts";
 import { executeAction } from "../engine/actionExecutor";
+import { useContentSlots, readMomentSlot } from "../hooks/useContentSlots";
 import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
 
-const CHIPS = [
-  { id: "steady", label: "Steady" },
-  { id: "heavy", label: "Heavy" },
-  { id: "activated", label: "Activated" },
-];
+// Stable chip ids (analytics keys); labels now slot-resolved.
+const CHIP_IDS = ["steady", "heavy", "activated"] as const;
 
 const CheckInCardCompact: React.FC<{ block?: any }> = () => {
   const { screenData, loadScreen, goBack } = useScreenStore();
   const ss = screenData as Record<string, any>;
+
+  useContentSlots({
+    momentId: "M_checkin_compact",
+    screenDataKey: "checkin_compact",
+    buildCtx: (s) => ({
+      path: s.journey_path === "growth" ? "growth" : "support",
+      guidance_mode: s.guidance_mode || "hybrid",
+      locale: s.locale || "en",
+      user_attention_state: "scanning",
+      emotional_weight: "light",
+      cycle_day: Number(s.day_number) || 0,
+      entered_via: "dashboard_embed",
+      stage_signals: {},
+      today_layer: {},
+      life_layer: {
+        cycle_id: s.journey_id || s.cycle_id || "",
+        life_kosha: s.life_kosha || s.scan_focus || "",
+        scan_focus: s.scan_focus || "",
+      },
+    }),
+  });
+  const slot = (name: string) => readMomentSlot(ss, "checkin_compact", name);
+
   if (ss.check_in_dismissed) return null;
 
   const onChip = (id: string) => {
@@ -45,16 +66,16 @@ const CheckInCardCompact: React.FC<{ block?: any }> = () => {
 
   return (
     <View style={styles.card}>
-      <Text style={styles.prompt}>How are you landing?</Text>
+      <Text style={styles.prompt}>{slot("prompt")}</Text>
       <View style={styles.row}>
-        {CHIPS.map((c) => (
+        {CHIP_IDS.map((id) => (
           <TouchableOpacity
-            key={c.id}
+            key={id}
             style={styles.chip}
             activeOpacity={0.8}
-            onPress={() => onChip(c.id)}
+            onPress={() => onChip(id)}
           >
-            <Text style={styles.chipText}>{c.label}</Text>
+            <Text style={styles.chipText}>{slot(`chip_${id}`)}</Text>
           </TouchableOpacity>
         ))}
       </View>

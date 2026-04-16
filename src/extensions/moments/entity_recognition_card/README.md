@@ -3,6 +3,17 @@
 ## What this is
 When Mitra recognises a named person/entity from recent user input (e.g. 'my mother', 'Ravi'), it surfaces this card to acknowledge the recurring presence in the user's life. Note: the spec file labels this as an overlay, but this scaffold is built as a dashboard embed — confirm with design before wiring.
 
+## Backend fields this moment needs
+
+Reads from:
+- `EntityMention` rows where `confirmed=true`, `muted=false`, `count >= 3`
+
+Backend content source:
+- yaml: `core/data_seed/mitra_v3/entity_recognition_templates.yaml` (if present) OR fallback templates in `allContainers.js` state schema
+- API: `/api/mitra/entities/confirmed/`
+
+NOTE: yaml not confirmed present in this backend release. Verify before wiring.
+
 ## Where the design + exact copy comes from
 Open this spec file — source of truth for every word and layout:
 `/Users/paragbhasin/kalpx-frontend/docs/specs/mitra-v3-experience/screens/overlay_entity_recognition.md`

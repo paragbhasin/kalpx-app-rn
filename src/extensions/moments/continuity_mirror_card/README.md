@@ -3,6 +3,16 @@
 ## What this is
 A card on the dashboard that mirrors yesterday back to the user (what they did, how it landed), making today feel continuous rather than isolated.
 
+## Backend fields this moment needs
+
+Reads from:
+- `JourneyContext.prior_cycle_id` (when present, card shows)
+- `prior_cycle.life_kosha`, `prior_cycle.life_klesha`, `prior_cycle.vritti_ratio`
+
+Backend content source:
+- yaml: `core/data_seed/mitra_v3/continuity_templates.yaml`
+- Data from prior `JourneyContext` rows
+
 ## Where the design + exact copy comes from
 WARNING: No dedicated spec file — see §1 of route_dashboard_day_active.md.
 

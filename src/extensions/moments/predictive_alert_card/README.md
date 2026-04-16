@@ -3,6 +3,14 @@
 ## What this is
 A card shown sparingly when Mitra predicts a rough stretch (e.g. anniversary, low-energy pattern). Calm, not alarming — offers a pre-emptive practice.
 
+## Backend fields this moment needs
+
+Reads from:
+- `CompanionState.dissonance_pattern` (backend-detected via self-learning S1)
+
+Backend content source:
+- yaml: `core/data_seed/mitra_v3/predictive_alert_templates.yaml`
+
 ## Where the design + exact copy comes from
 Open this spec file — source of truth for every word and layout:
 `/Users/paragbhasin/kalpx-frontend/docs/specs/mitra-v3-experience/screens/embedded_predictive_alert_card.md`

@@ -17,6 +17,17 @@ Three messages (the ONLY allowed copy per design rule — no "Great job!", no st
 User then sees: `How did that feel?` input (optional) + `Return to Mitra Home` / `Repeat`.
 There is no 10-second auto-return timer — user taps when ready.
 
+## Backend fields this moment needs
+
+Reads from:
+- `runner.variant` (`mantra | sankalp | practice`) from Redux
+- `runner.reps_completed` or `runner.duration`
+- `JourneyContext.guidance_mode`
+
+Backend content source:
+- yaml: `core/data_seed/mitra_v3/moments_support_copy.yaml` section `completion_return` (added in v1.2.0)
+- Returned by `/api/mitra/submit-engagement/` response
+
 ## Where the design + copy comes from
 
 - The three messages and tone rule: `kalpx-frontend/docs/specs/mitra-v3-experience/screens/transient_completion_return.md`

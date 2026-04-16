@@ -3,6 +3,15 @@
 ## What this is
 A card that acknowledges seasonal / ritu change (monsoon, spring, winter) and suggests a small adjustment aligned with Ayurvedic/Dinacharya guidance.
 
+## Backend fields this moment needs
+
+Reads from:
+- `Panchang.current_ritu` + `current_festival` (if any)
+
+Backend content source:
+- yaml: `core/data_seed/mitra_v3/festival_templates.yaml` + `core/data_seed/mitra_v3/seasonal_templates.yaml`
+- API: `/api/mitra/panchang/today/?lat=<>&lng=<>`
+
 ## Where the design + exact copy comes from
 Open this spec file — source of truth for every word and layout:
 `/Users/paragbhasin/kalpx-frontend/docs/specs/mitra-v3-experience/screens/embedded_season_change_banner.md`

@@ -11,6 +11,18 @@ Possible use-cases:
 - Top banner of the unauthed Apr-11 Home screen.
 - Standalone `home_hub/main` container.
 
+## Backend fields this moment needs
+
+Reads from:
+- `User.first_name`
+- `CompanionState.greeting_context` — one of `morning | evening | low_engagement | milestone`
+
+Writes to: —
+
+Backend content source:
+- Not yet defined server-side (see the ⚠️ spec-status note above)
+- Fallback: the static `CONTEXTUAL_MESSAGES` table inside `index.tsx`
+
 ## Where the design + exact copy comes from
 ⚠️ **No canonical spec file exists yet.** The layout + copy in this scaffold is a best-guess translation of these memos:
 

@@ -41,6 +41,159 @@ Routing lives in `src/engine/actionExecutor.ts` → `onboarding_turn_response`. 
 
 ---
 
+## API calls per onboarding turn
+
+The onboarding flow has 8 turns. Only 2 turns make backend calls — everything else is client-side chip filtering from the CSV-bundled tree.
+
+| Turn | What user sees | Backend call | Response | Stored in Redux draft |
+|---|---|---|---|---|
+| 1 | Mitra intro + returning/new | — | — | `is_returning` |
+| 2 | Stage 0 path pick | — | — | `path` |
+| 3 | Stage 1 chips (5 support / 6 growth) | — | — | `stage1_choice` |
+| 4 | Stage 2 chips (25 support / 30 growth) | — | — | `stage2_choice` |
+| 5 | Stage 3 chips (5 support / 6 growth) | — | — | `stage3_choice` |
+| 6 | Mode picker (universal/hybrid/rooted) | — | — | `guidance_mode` |
+| **7** | Recognition line | **POST `/api/mitra/onboarding/complete/`** with all 4 stage choices + mode + freeforms | `inference` + `recognition.line` + `bridges` + `stage_subtexts` + `triad_labels` + `dashboard_chrome` + `journey` + `triad: {triad_pending: true}` | `recognition_line`, `inference_snapshot`, `journey_id` |
+| **8** | Triad reveal | **POST `/api/mitra/journey/start/`** with inference-derived signals | `mantra` + `sankalp` + `practice` + `focus_name` + `recommended_posture` + `sankalp_prefix_line` | `master_mantra`, `master_sankalp`, `master_practice` |
+
+**2 backend calls during onboarding.** All chip filtering happens client-side against the CSV tree bundled in `allContainers.js`.
+
+### Example payload — Turn 7 call
+
+```
+POST /api/mitra/onboarding/complete/
+Headers: Content-Type: application/json, X-Guest-UUID: <uuid> (if guest)
+Body: {
+  "stage0_choice": "support",           // or "I need support right now"
+  "stage1_choice": "mind",              // or full label "My mind won't settle"
+  "stage2_choice": "replay",            // or full label "It keeps replaying"
+  "stage3_choice": "grounding",
+  "guidance_mode": "hybrid",
+  "freeforms": {
+    "stage1": null,
+    "stage2": "I keep thinking about tomorrow's meeting",
+    "stage3": null
+  }
+}
+```
+
+Backend accepts BOTH chip_id values and full-label strings. Translator is in `onboarding_inference.py`.
+
+### FE handshake at Turn 6 → Turn 7
+
+```js
+// after mode pick at Turn 6
+const resp = await mitraOnboardingComplete({
+  stage0_choice, stage1_choice, stage2_choice, stage3_choice,
+  guidance_mode, freeforms
+});
+
+// store in Redux for Turn 7/8 render
+setScreenValue(resp.inference, "sadhana_yatra_inference");
+setScreenValue(resp.recognition.line, "recognition_line");
+setScreenValue(resp.recognition.body, "recognition_body");
+setScreenValue(resp.recognition.cta, "recognition_cta_labels");
+setScreenValue(resp.bridges, "onboarding_bridges");
+setScreenValue(resp.stage_subtexts, "onboarding_subtexts");
+setScreenValue(resp.triad_labels, "triad_labels");
+setScreenValue(resp.dashboard_chrome, "dashboard_chrome");
+setScreenValue(resp.journey, "journey_context");
+
+// Render Turn 7
+loadScreen({ container: "welcome_onboarding", state: "turn_7" });
+
+// In parallel, fetch triad for Turn 8
+const triad = await mitraJourneyStart({
+  path: resp.inference.lane,
+  primary_kosha: resp.inference.primary_kosha,
+  primary_vritti: resp.inference.primary_vritti,
+  primary_klesha: resp.inference.primary_klesha,
+  life_context: resp.inference.life_context,
+  support_style: resp.inference.support_style,
+  intervention_bias: resp.inference.intervention_bias,
+  aspiration: resp.inference.aspiration,
+  preferred_modality: resp.inference.preferred_modality,
+  guidance_mode
+});
+
+setScreenValue(triad.mantra, "master_mantra");
+setScreenValue(triad.sankalp, "master_sankalp");
+setScreenValue(triad.practice, "master_practice");
+// triad.labels + triad.sankalp_prefix_line already in onboarding/complete response
+```
+
+## v1.2.0 `/onboarding/complete/` response shape (locked)
+
+Every field below is ALWAYS present in the response — never omitted. Explicit `null` used for empty — FE never needs to check existence.
+
+```json
+{
+  "inference": {
+    "lane": "support | growth",
+    "life_context": "work_career | health | relationship_home | money_responsibility | inner_state | work_career_thriving | home_thriving | inner_clarity | inner_steadiness | gratitude | transition_growth | null",
+    "primary_kosha": "annamaya | pranamaya | manomaya | vijnanamaya | anandamaya | null",
+    "secondary_kosha": "same | null",
+    "primary_vritti": "replaying | worrying_ahead | ... | null",
+    "primary_klesha": "avidya | asmita | raga | dvesha | abhinivesha | null",
+    "vritti_candidates": ["..."],
+    "klesha_candidates": ["..."],
+    "support_style": "practical | calming | grounding | devotional | clarifying | quiet | uplifting | reflective",
+    "intervention_bias": ["..."],
+    "confidence": "float [0..1]",
+    "why_this_internal": { "stage0_choice": "...", "stage1_choice": "...", "stage2_choice": "...", "stage3_choice": "...", "inferred_from": "..." },
+    "mapping_version": "1.2.0"
+  },
+  "recognition": {
+    "line": "str (composed 3-sentence recognition)",
+    "body": "str (secondary paragraph — mode-adapted)",
+    "cta": {
+      "primary": "str (label — lane x mode adapted)",
+      "secondary": "str (label — lane x mode adapted)"
+    },
+    "freeform_ack": "str | null (prepended to line if freeform was provided)",
+    "mode_used": "universal | hybrid | rooted",
+    "slots_used": { "...": "..." },
+    "mapping_version": "1.2.0"
+  },
+  "bridges": {
+    "post_stage0": "str (e.g. Okay. Let me help you locate where it's landing.)",
+    "triad_opener": "str (e.g. Here is what I'm holding for you today.)"
+  },
+  "stage_subtexts": {
+    "stage1": "str",
+    "stage2": "str",
+    "stage3": "str"
+  },
+  "triad_labels": {
+    "mantra": "str",
+    "sankalp": "str",
+    "practice": "str"
+  },
+  "dashboard_chrome": {
+    "heading": "str (day-aware)",
+    "context_subheading": "str (life-context aware)"
+  },
+  "journey": {
+    "journey_id": "str | null",
+    "cycle_day": "int",
+    "cycle_id": "str | null"
+  },
+  "triad": {
+    "triad_pending": "bool",
+    "reason": "call_journey_start_next | unauthenticated_or_no_journey | null",
+    "mantra": "object | null",
+    "sankalp": "object | null",
+    "practice": "object | null",
+    "sankalp_prefix_line": "str",
+    "labels": { "...": "..." }
+  }
+}
+```
+
+FE rule of thumb: **read every field directly — no existence checks needed.**
+
+---
+
 ## What is a "moment"?
 
 Mitra's experience is made of ~47 named moments — specific emotional surfaces the user sees at specific points in their day and journey. Each moment is ONE container x ONE state (e.g. `support_grief` x `room` = the Grief Room).

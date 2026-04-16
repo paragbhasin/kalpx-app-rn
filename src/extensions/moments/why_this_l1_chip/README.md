@@ -3,6 +3,15 @@
 ## What this is
 NOTE: this is NOT a full block — it is a tiny inline chip that attaches to existing triad cards (mantra/sankalp/practice) on the dashboard. It shows a 1-line reason directly, and opens L2 on tap. Wiring is slightly different: the chip is used inside the triad card renderer, not added as a standalone block.
 
+## Backend fields this moment needs
+
+Reads from:
+- `JourneyContext.primary_klesha` + `primary_kosha`
+
+Backend content source:
+- yaml: `core/data_seed/mitra_v3/diagnostic_copy.yaml` — shortest `level_1` variant (`why_this_level1` per principle)
+- FE pulls it from the companion response under `mantra.ui.why_this_l1`
+
 ## Where the design + exact copy comes from
 WARNING: No dedicated spec file — see §1 of route_dashboard_day_active.md (Why-This L1 is described alongside the triad cards).
 

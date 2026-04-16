@@ -6,6 +6,20 @@ Spec partially defined in `overlay_support_loneliness_room.md` (stub). Confirm c
 ## What this is
 The Loneliness Room is opened when a user expresses loneliness or a feeling of not being seen. It is gentle and company-like — never clinical. One phrase, one breathing/ambient cue, two kind exits.
 
+## Backend fields this moment needs
+
+Reads from:
+- `JourneyContext.primary_kosha` (`anandamaya`) + `JourneyContext.life_context` (`relationship_home` strengthens offer)
+- `JourneyContext.guidance_mode`
+
+Writes to:
+- Trigger log
+
+Backend content source:
+- yaml: `core/data_seed/mitra_v3/moments_support_copy.yaml` section `loneliness_room`
+
+See [MOMENT_WIRE_UP_GUIDE.md — API per turn + v1.2.0 response shape](../../../../docs/MOMENT_WIRE_UP_GUIDE.md#api-calls-per-onboarding-turn).
+
 ## Where the design + exact copy comes from
 Open this spec file — source of truth for every word and layout:
 `/Users/paragbhasin/kalpx-frontend/docs/specs/mitra-v3-experience/screens/overlay_support_loneliness_room.md`

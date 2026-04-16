@@ -3,6 +3,19 @@
 ## What this is
 When a user taps the small 'Why this?' chip on a dashboard card (mantra / sankalp / practice), Mitra reveals a Level-2 explanation: 1-2 lines of reasoning in plain human language, with a 'Go deeper' link to Level 3.
 
+## Backend fields this moment needs
+
+Reads from:
+- `JourneyContext.primary_klesha` + `JourneyContext.primary_kosha` — selects `diagnostic_copy` key
+- `JourneyContext.guidance_mode`
+
+Writes to:
+- Why-this open event log
+
+Backend content source:
+- yaml: `core/data_seed/mitra_v3/diagnostic_copy.yaml` (klesha x kosha x mode matrix)
+- API: `/api/mitra/principle/<id>/detail/?level=2` OR `/api/mitra/diagnostic/<klesha>/<kosha>/`
+
 ## Where the design + exact copy comes from
 Open this spec file — source of truth for every word and layout:
 `/Users/paragbhasin/kalpx-frontend/docs/specs/mitra-v3-experience/screens/overlay_why_this_level_2.md`

@@ -3,6 +3,15 @@
 ## What this is
 A gentle banner that appears on specific days of the cycle (day 7, day 14, or cycle complete) acknowledging progress — never triumphant, just noting the turn.
 
+## Backend fields this moment needs
+
+Reads from:
+- `JourneyContext.cycle_day` (7 or 14 triggers milestone)
+- `JourneyContext.vritti_ratio` (backend-computed)
+
+Backend content source:
+- v1.2.0 `dashboard_chrome.heading` keys for day_7 / day_14 (composed server-side; yaml section `dashboard_headings`)
+
 ## Where the design + exact copy comes from
 WARNING: No dedicated spec file — see §1 of route_dashboard_day_active.md.
 

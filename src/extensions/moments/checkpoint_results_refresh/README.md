@@ -3,6 +3,14 @@
 ## What this is
 This is NOT a code change — it is a content pack. The scaffold contains a `contentpack.json` with refreshed copy for the day-7 / day-14 checkpoint results screens. Apply via backend template, no RN wiring.
 
+## Backend fields this moment needs
+
+Reads from:
+- Backend-returned `checkpoint_results_copy` for the day 7 / day 14 checkpoint
+
+Backend content source:
+- yaml stub: `core/data_seed/mitra_v3/checkpoint_results_copy.yaml` (TO BE CREATED — not yet present on `mitra-v3-sadhana-yatra`)
+
 ## Where the design + exact copy comes from
 WARNING: No dedicated spec file — see route_checkpoint_day_7.md / route_checkpoint_day_14.md.
 

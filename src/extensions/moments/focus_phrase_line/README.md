@@ -3,6 +3,16 @@
 ## What this is
 A single line of anchor text shown on the dashboard — Mitra's suggested focus for today. Short, poetic, non-prescriptive.
 
+## Backend fields this moment needs
+
+Reads from:
+- `CompanionState.focus_phrase` (returned by `/journey/companion/`)
+- OR `JourneyContext.life_context` + `dashboard_chrome.context_subheading` (from v1.2.0 onboarding/complete)
+
+Backend content source:
+- v1.2.0 `dashboard_chrome.context_subheading`
+- OR `core/data_seed/mitra_v3/morning_briefing_templates.yaml`
+
 ## Where the design + exact copy comes from
 WARNING: No dedicated spec file — see §1 of route_dashboard_day_active.md.
 

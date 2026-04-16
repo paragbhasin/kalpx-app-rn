@@ -3,6 +3,16 @@
 ## What this is
 A small chip at the top of the dashboard that shows the user what kind of day Mitra thinks this is (e.g. 'Morning', 'Low energy', 'Evening'). Sets the emotional tone for the rest of the surface.
 
+## Backend fields this moment needs
+
+Reads from:
+- `CompanionState.day_type` — one of `morning | evening | low_energy | clear_window | friction_day | recovery_phase`
+- `JourneyContext.guidance_mode`
+
+Backend content source:
+- yaml: `core/data_seed/mitra_v3/day_type_copy.yaml` (6 day-types x headers/subheaders x tone)
+- Surfaced inside `/api/mitra/journey/companion/` response under `companion.day_type`
+
 ## Where the design + exact copy comes from
 WARNING: No dedicated spec file — see §1 of route_dashboard_day_active.md in the web spec repo. The chip text + design is documented there alongside the dashboard layout.
 

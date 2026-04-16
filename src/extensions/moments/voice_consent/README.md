@@ -3,6 +3,20 @@
 ## What this is
 The very first time a user taps any microphone icon, Mitra interrupts with a consent overlay explaining what is recorded, where it is stored, and how to opt out. Tapping 'Continue' remembers the consent and opens the recorder; 'Not now' returns to the previous screen.
 
+## Backend fields this moment needs
+
+Reads from:
+- `User.voice_consent_given` (boolean)
+- `JourneyContext.guidance_mode`
+
+Writes to:
+- `User.voice_consent_given = true` on accept
+- Analytics event
+
+Backend content source:
+- yaml: `core/data_seed/mitra_v3/voice_note_consent_copy.yaml`
+- API: `PUT /api/user/voice-consent/`
+
 ## Where the design + exact copy comes from
 Open this spec file — source of truth for every word and layout:
 `/Users/paragbhasin/kalpx-frontend/docs/specs/mitra-v3-experience/screens/overlay_voice_consent.md`

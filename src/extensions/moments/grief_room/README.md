@@ -6,6 +6,22 @@ Spec partially defined in `overlay_support_grief_room.md` (stub). Confirm copy w
 ## What this is
 The Grief Room is a soft, dim-lit space Mitra opens when the user signals loss, heavy grief, or bereavement. Nothing rushes them — the room just sits with them. It offers a single grounding phrase, an ambient sound option, and two calm exits (stay longer / return to day).
 
+## Backend fields this moment needs
+
+Reads from:
+- `JourneyContext.primary_kosha` — determines intensity (`anandamaya` triggers grief path)
+- `JourneyContext.primary_klesha` — `asmita` or `abhinivesha` strengthens offer
+- `JourneyContext.guidance_mode` — determines copy mode
+
+Writes to:
+- Trigger log (`reason: grief_room_entered`, `source: {automatic|user_requested}`)
+
+Backend content source:
+- yaml: `core/data_seed/mitra_v3/moments_support_copy.yaml` section `grief_room`
+- Planned API: `/api/mitra/moments/grief_room/copy?mode=<mode>`
+
+See [MOMENT_WIRE_UP_GUIDE.md — API per turn + v1.2.0 response shape](../../../../docs/MOMENT_WIRE_UP_GUIDE.md#api-calls-per-onboarding-turn) for the full field map.
+
 ## Where the design + exact copy comes from
 Open this spec file — source of truth for every word and layout:
 `/Users/paragbhasin/kalpx-frontend/docs/specs/mitra-v3-experience/screens/overlay_support_grief_room.md`

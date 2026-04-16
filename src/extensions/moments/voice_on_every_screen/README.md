@@ -5,6 +5,18 @@ A floating mic button that rides on every conversational surface so the user can
 
 Per Sadhana Yatra spec (`mitra_architecture_sadhana_yatra.md` §Voice affordance): voice is first-class, not a feature of a single screen.
 
+## Backend fields this moment needs
+
+Reads from:
+- `User.voice_consent_given` (gates mic visibility)
+- `JourneyContext.guidance_mode` (adjusts hint text)
+
+Writes to:
+- Voice recording upload via `POST /api/mitra/voice/upload/` (multipart)
+
+Backend content source:
+- yaml: `core/data_seed/mitra_v3/voice_note_consent_copy.yaml` for the consent overlay
+
 ## Where the design lives
 No dedicated spec doc yet. Placement reference: kalpx-frontend `ChatComposer.vue` — mic sits bottom-right, 16px inset, above the bottom tab bar.
 

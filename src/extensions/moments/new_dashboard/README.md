@@ -13,6 +13,18 @@ A NEW dashboard variant that assembles all Tier-2 embed moments in the right slo
 - `ContinuityMirrorCard`
 - Two primary CTAs (I Feel Triggered / Quick Check-In) that mirror the existing Apr-11 `companion_dashboard/day_active` buttons
 
+## Backend fields this moment needs
+
+Reads from (composes many signals):
+- All `CompanionState.*` fields
+- All `JourneyContext.*` fields
+- `dashboard_chrome.heading` + `dashboard_chrome.context_subheading` (v1.2.0)
+- `triad_labels` (v1.2.0)
+
+Backend content source:
+- Composed via `/api/mitra/journey/companion/` response
+- v1.2.0 `/api/mitra/onboarding/complete/` carries seeds (see [MOMENT_WIRE_UP_GUIDE.md](../../../../docs/MOMENT_WIRE_UP_GUIDE.md#v120-onboardingcomplete-response-shape-locked))
+
 ## Why it's separate (not a replacement)
 This ships as a NEW container `companion_dashboard_v3`. The existing Apr-11 `companion_dashboard` stays untouched. A feature flag decides which a given user sees — **zero regression risk**.
 

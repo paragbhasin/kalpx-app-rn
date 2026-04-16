@@ -3,6 +3,19 @@
 ## What this is
 Level 3 is the full explanation: source tradition, principle reference, and how it ties to the user's current journey state. Opens from the 'Go deeper' link on L2.
 
+## Backend fields this moment needs
+
+Reads from:
+- Same as L2 (klesha + kosha + guidance_mode)
+- Plus principle source citations
+
+Writes to:
+- Why-this deep-dive event log
+
+Backend content source:
+- `PrincipleSource` rows ingested from `core/data_seed/mitra_v3/principles_*.yaml`
+- API: `/api/mitra/principle/<id>/detail/?level=3`
+
 ## Where the design + exact copy comes from
 Open this spec file — source of truth for every word and layout:
 `/Users/paragbhasin/kalpx-frontend/docs/specs/mitra-v3-experience/screens/overlay_why_this_level_3.md`

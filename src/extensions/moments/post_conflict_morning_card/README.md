@@ -3,6 +3,16 @@
 ## What this is
 The morning after a user logged a conflict/rupture, Mitra opens with a softer card: no goals, just a question of how they slept and an offer to sit.
 
+## Backend fields this moment needs
+
+Reads from:
+- Prior day's `ReflectionEntry.weight == "heavy"`
+- `JourneyContext.guidance_mode`
+
+Backend content source:
+- yaml: `core/data_seed/mitra_v3/notification_templates.yaml` entry `post_conflict_follow`
+- v1.2.0 `stage_subtext` / `dashboard_headings` provide alt copy when needed
+
 ## Where the design + exact copy comes from
 Open this spec file — source of truth for every word and layout:
 `/Users/paragbhasin/kalpx-frontend/docs/specs/mitra-v3-experience/screens/embedded_post_conflict_gentleness_card.md`

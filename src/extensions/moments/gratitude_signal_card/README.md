@@ -3,6 +3,15 @@
 ## What this is
 A card that appears when the user's recent input reflects gratitude or joy — Mitra celebrates it rather than just tracking it. Part of the 'celebrate life, not just solve problems' rule.
 
+## Backend fields this moment needs
+
+Reads from:
+- `CompanionState.joy_signal_type` — one of `self_declared | festival | steady_streak | joy_note | cycle_complete`
+- `JourneyContext.guidance_mode`
+
+Backend content source:
+- yaml: `core/data_seed/mitra_v3/joy_signal_templates.yaml` (5 signals)
+
 ## Where the design + exact copy comes from
 Open this spec file — source of truth for every word and layout:
 `/Users/paragbhasin/kalpx-frontend/docs/specs/mitra-v3-experience/screens/embedded_gratitude_joy_card.md`

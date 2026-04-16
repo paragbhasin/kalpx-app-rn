@@ -3,6 +3,18 @@
 ## What this is
 A brief ambient sound transition (~8-12s) Mitra plays after a user names a trigger feeling and before the regulation runner begins. It is a psychological bridge — a pause that tells the nervous system 'we are moving'.
 
+## Backend fields this moment needs
+
+Reads from:
+- `JourneyContext.primary_vritti` (`racing`/`replaying` lengthens hum duration)
+- `JourneyContext.guidance_mode`
+
+Writes to:
+- Session event (`sound_bridge_started` / `sound_bridge_completed`)
+
+Backend content source:
+- Audio URL from the `mantra` object returned by `/api/mitra/journey/start/` (OM variants)
+
 ## Where the design + exact copy comes from
 Open this spec file — source of truth for every word and layout:
 `/Users/paragbhasin/kalpx-frontend/docs/specs/mitra-v3-experience/screens/transient_sound_bridge.md`

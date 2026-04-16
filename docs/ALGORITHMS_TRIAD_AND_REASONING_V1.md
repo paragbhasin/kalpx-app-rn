@@ -1,9 +1,91 @@
 # Mitra v3 — Algorithm specs for Triad generation + Central reasoning
 
-**Status:** REVIEW DRAFT (2026-04-14).
-**Purpose:** lock the two most load-bearing unimplemented algorithms
-before writing code. After founder sign-off, these become
-implementation tickets.
+**Status:** LOCKED (2026-04-14). Founder sign-off received with
+specific tunable values + path_intent addition. This doc is now the
+implementation spec for Phases T1 + T2.
+**Previous state:** REVIEW DRAFT — superseded by the locked values
+below. Open questions in Part 3 are resolved in Part 0 "Locked
+decisions."
+
+---
+
+## Part 0 — Locked decisions
+
+### Triad weights (final)
+| Signal | Weight | Notes |
+|---|---|---|
+| primary_kosha match | **4** | Kosha is the most load-bearing signal — raised from 3 to 4 to prevent additive bias matches from overpowering it |
+| secondary_kosha match | 1 | Token acknowledgement |
+| top_klesha match | 2 | Direct state signal |
+| top_vritti match | 2 | Direct state signal |
+| intervention_bias per match | +1 | Each merged-bias match adds additively |
+| path_intent match | **+2** | NEW — see §0.2. Only if catalog item has explicit `path_intent_tags` |
+| mode exact-fit | +1 | Rewards items authored `[mode]` exactly |
+| duration_bias (practice only) | +1 | Direction match per `style_to_duration` |
+
+### Low-confidence threshold: `0.4`
+
+Below → `HARDCODED_FALLBACK` triad served, telemetry flagged
+`fallback_reason="low_confidence"`.
+
+### Tiebreak: `item_id` alphabetical (deterministic)
+
+Freshness rotation deferred until telemetry is trusted.
+
+### Lighten / deepen: ITEM IDENTITY PRESERVED
+
+Both adjust reps / duration / burden only. Item swap is **only**
+through reset / change-focus. Deepen additionally preserves
+`path_intent` — deepen never mutates `restore` into `clarify`.
+
+### Decision ladder (decide_moment) — final tweaks
+- **Tier 3 long absence is tiered:**
+  - 72h ≤ t < 168h → soft return (dashboard + `M_adaptation_toast` embed)
+  - t ≥ 168h → strong (`M_identity_state_view`)
+- **Tier 5 embeds capped at TOP 3**
+- **Embed ordering:** priority first (as listed in §2), freshness second
+- **Grief room re-entry:** fresh entry line again (not mid-options)
+- **Trigger vs evening:** unresolved trigger wins
+- **Path + joy + post-conflict:** post-conflict wins; joy demoted to
+  embed or next session
+
+### §0.2 — path_intent / movement_goal (new internal layer)
+
+The triad selector does not optimize directly for `ananda`. It
+optimizes for **the next honest movement**. `path_intent` is the
+internal bridge between onboarding signals and catalog scoring.
+
+```
+path_intent: Literal[
+    "settle",    # overload/volatility → ground down
+    "clarify",   # confusion/vikalpa → illuminate next step
+    "restore",   # depletion/tamas → gentle replenishment
+    "hold",      # grief/loss → stay present with what is
+    "soften",    # tension/dvesha → loosen resistance
+    "deepen",    # steadiness present → deepen existing pattern
+    "abide",     # devotion/bhakti → rest in presence
+    "return",    # comparison/asmita → come back to self
+    "steady",    # default / orientation-seeking
+]
+```
+
+**Contract:**
+- Derived AFTER signal assembly (between Step 3 and Step 4 of the
+  triad algorithm)
+- Persisted in `TriadReadonlyView.path_intent` (added)
+- Scored as +2 when catalog items carry `path_intent_tags`
+- Runs as a **coherence check** after initial top-of-score picks —
+  if mantra/sankalp/practice together contradict path_intent (e.g.,
+  `path_intent=restore` but mantra is aggressively energizing),
+  re-pick the offending item from the next-best within its type and
+  log `coherence_adjustment_used=True`
+- `deepen` decisions preserve `path_intent` — day-14 "deepen" spawns
+  a next cycle with the same `path_intent` and same items, deeper reps
+
+---
+
+**Status:** LOCKED (2026-04-14).
+**Purpose:** implementation spec for Phases T1 + T2.
 
 ---
 

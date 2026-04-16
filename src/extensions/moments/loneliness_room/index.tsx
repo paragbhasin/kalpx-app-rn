@@ -8,12 +8,13 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { executeAction } from "../../../engine/actionExecutor";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 import store from "../../../store";
 import { screenActions } from "../../../store/screenSlice";
+
 import { Fonts } from "../../../theme/fonts";
 
 interface Props {
@@ -22,6 +23,19 @@ interface Props {
 
 const LonelinessRoomContainer: React.FC<Props> = () => {
   const { screenData, loadScreen, goBack } = useScreenStore();
+  const updateBackground = useScreenStore(
+    (state: any) => state.updateBackground,
+  );
+  const updateHeaderHidden = useScreenStore(
+    (state: any) => state.updateHeaderHidden,
+  );
+  useEffect(() => {
+    const updatedBackground = require("../../../../assets/beige_bg.png");
+
+    updateBackground(updatedBackground);
+    updateHeaderHidden(false);
+    return () => updateHeaderHidden(false);
+  }, [updateBackground, updateHeaderHidden]);
   const [step, setStep] = useState<"opening" | "options" | "input">("opening");
   const [inputType, setInputType] = useState<"naming" | "person">("naming");
   const [inputValue, setInputValue] = useState("");
@@ -212,65 +226,69 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: "#fffdf9", // Spec: warm cream
   },
   scrollContent: {
     paddingHorizontal: 28,
-    paddingTop: 80,
+    paddingTop: 15,
     paddingBottom: 60,
   },
   openingLine: {
-    fontFamily: Fonts.serif.regular,
+    fontFamily: Fonts.sans.medium,
     fontSize: 24,
-    color: "#2b1d0a",
+    color: "#432104",
     textAlign: "center",
     marginBottom: 20,
     lineHeight: 32,
   },
   secondBeat: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 24,
-    color: "#2b1d0a",
+    fontSize: 20,
+    color: "#564B42",
     textAlign: "center",
-    lineHeight: 32,
+    lineHeight: 28,
   },
   offerText: {
     fontFamily: Fonts.sans.regular,
     fontSize: 15,
-    color: "#8a7d6b",
+    color: "#946A47",
     textAlign: "center",
-    marginBottom: 32,
-    marginTop: 20,
+    marginBottom: 12,
+    // marginTop: 20,
   },
   optionsStack: {
     width: "100%",
     gap: 12,
   },
   pill: {
+    backgroundColor: "#FBF5F5",
+    borderColor: "#c89a47",
     borderWidth: 1,
-    borderColor: "#EDE1D3",
-    borderRadius: 28,
-    paddingVertical: 14,
+    elevation: 6,
     paddingHorizontal: 20,
-    alignItems: "center",
+    paddingVertical: 12,
+    borderRadius: 24,
     justifyContent: "center",
-    minHeight: 44,
-    backgroundColor: "#FFFDF7",
+    alignItems: "center",
+
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   pillText: {
-    fontFamily: Fonts.sans.medium,
-    fontSize: 15,
+    fontFamily: Fonts.serif.regular,
+    fontSize: 17,
     color: "#432104",
   },
   exitBtn: {
-    marginTop: 32,
+    // marginTop: 32,
     alignItems: "center",
     paddingVertical: 12,
   },
   exitText: {
-    fontFamily: Fonts.sans.regular,
-    fontSize: 14,
-    color: "#8a7d6b",
+    fontFamily: Fonts.serif.bold,
+    fontSize: 18,
+    color: "#432104",
     textDecorationLine: "underline",
   },
   inputWrap: {

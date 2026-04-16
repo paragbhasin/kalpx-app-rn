@@ -49,6 +49,7 @@ import {
 } from "./src/service/pushNotifications";
 import { registerDeviceToBackend } from "./src/utils/registerDevice";
 import { initScreenResolver } from "./src/engine/screenResolver";
+import { attachDeepLinkListeners } from "./src/utils/deeplink";
 
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
@@ -199,6 +200,14 @@ export default function App() {
       unsubForeground();
       unsubOpen();
     };
+  }, []);
+
+  // Deep-link handler — Phase C pilot infrastructure (dev-only gate).
+  // Enables `xcrun simctl openurl booted "kalpx://mitra/<container>/<state>"`
+  // for sim validation + future notification-nav. See src/utils/deeplink.ts.
+  useEffect(() => {
+    const detach = attachDeepLinkListeners();
+    return () => detach();
   }, []);
 
   // Reduced-motion accessibility bootstrap — Mitra v3 Week 7.

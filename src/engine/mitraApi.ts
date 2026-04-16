@@ -364,6 +364,71 @@ export async function mitraOnboardingRecognition(
   }
 }
 
+/** GET /api/mitra/onboarding/chips/ — Fetch dynamic stage chips. */
+export async function mitraFetchOnboardingChips(params: {
+  stage: number;
+  lane: string;
+  guidance_mode: string;
+  stage1_choice?: string;
+  stage2_choice?: string;
+}): Promise<any> {
+  try {
+    console.log("[MITRA] Fetch Chips Payload:", params);
+    const res = await api.get("mitra/onboarding/chips/", { params });
+    console.log("[MITRA] Fetch Chips Response:", res.data);
+    return res.data;
+  } catch (err: any) {
+    console.error("[MITRA] fetch onboarding chips failed:", err.message);
+    return null;
+  }
+}
+
+/** POST /api/mitra/onboarding/complete/ — Finish onboarding and get recognition. */
+export async function mitraCompleteOnboarding(payload: {
+  stage0_choice: string;
+  stage1_choice: string;
+  stage2_choice: string;
+  stage3_choice: string;
+  guidance_mode: string;
+  freeforms: Record<string, string | null>;
+}): Promise<any> {
+  try {
+    console.log("[MITRA] Complete Onboarding Payload:", payload);
+    const res = await api.post("mitra/onboarding/complete/", payload);
+    console.log("[MITRA] Complete Onboarding Response:", res.data);
+    return res.data;
+  } catch (err: any) {
+    console.error("[MITRA] complete onboarding failed:", err.message);
+    return null;
+  }
+}
+
+/** POST /api/mitra/journey/start/ — Formally start the journey and get the triad. */
+export async function mitraStartJourney(payload: {
+  path: string;
+  primary_kosha?: string;
+  primary_vritti?: string;
+  primary_klesha?: string;
+  life_context?: string;
+  support_style?: string;
+  intervention_bias?: string[];
+  aspiration?: string | null;
+  preferred_modality?: string | null;
+  guidance_mode: string;
+  intention?: string | null;
+  day_number: number;
+}): Promise<any> {
+  try {
+    console.log("[MITRA] Start Journey Payload:", payload);
+    const res = await api.post("mitra/journey/start/", payload);
+    console.log("[MITRA] Start Journey Response:", res.data);
+    return res.data;
+  } catch (err: any) {
+    console.error("[MITRA] journey start failed:", err.message);
+    return null;
+  }
+}
+
 export async function mitraHelpMeChoose(inputData: any): Promise<any> {
   try {
     const res = await api.post("mitra/help-me-choose/", inputData);

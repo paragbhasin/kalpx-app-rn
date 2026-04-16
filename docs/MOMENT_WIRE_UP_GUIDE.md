@@ -5,7 +5,9 @@
 Every moment in Mitra now lives inside the **Sadhana Yatra** spine. This is the unifying model that tells us WHEN a moment surfaces, WHY, and HOW it relates to every other moment. (The full framework doc is in Parag's local memory — ask him for the architecture summary if you need more context than the sections below provide.)
 
 ### The 4-stage diagnostic
+
 Every user enters via a 4-stage conversation (onboarding today, daily check-in later):
+
 - **Stage 0 — Path pick:** support (need help) vs growth (feel okay, want to grow)
 - **Stage 1 — Where / What:** kosha (support) OR aliveness (growth)
 - **Stage 2 — Movement:** vritti (support) OR aspiration (growth)
@@ -14,11 +16,14 @@ Every user enters via a 4-stage conversation (onboarding today, daily check-in l
 These four signals plus `guidance_mode` compose a **recognition line** and select the user's **triad** (mantra / sankalp / practice).
 
 ### Two temporal layers
+
 1. **Life phase** — stable over a 14-day cycle. Drives the triad.
 2. **Daily state** — volatile, per session. Drives which moment surfaces today.
 
 ### What this means for wiring a moment
+
 Before you add any new moment, answer:
+
 1. Which **path** does it serve — support, growth, or both?
 2. Which **framework cell** does it live in? (e.g. "support + anandamaya + asmita" = grief room)
 3. Is it driven by **life phase** or **daily state**?
@@ -27,7 +32,9 @@ Before you add any new moment, answer:
 If you cannot name the cell, surface the question to Parag before building. A moment without a cell will drift.
 
 ### Onboarding shape (as of 2026-04-14)
+
 `welcome_onboarding` container, 8 states:
+
 - `turn_1` — greet
 - `turn_2` — Stage 0 (path)
 - `turn_3_support` | `turn_3_growth` — Stage 1
@@ -45,28 +52,28 @@ Routing lives in `src/engine/actionExecutor.ts` → `onboarding_turn_response`. 
 
 The onboarding flow has 8 turns. Turns 3/4/5/7/8 make backend calls (Option C — per-turn chip delivery). Turns 3/4/5 fetch chips + dynamic heading + sub_prompt from the backend; Turn 7 composes recognition; Turn 8 fetches the triad.
 
-| Turn | What user sees | Backend call | Response | Stored in Redux draft |
-|---|---|---|---|---|
-| 1 | Mitra intro + returning/new | — | — | `is_returning` |
-| 2 | Stage 0 path pick | — | — | `path` |
-| **3** | Stage 1 chips | **GET `/api/mitra/onboarding/chips/?stage=1&lane=<path>&guidance_mode=<mode>`** | 5 or 6 chips + heading + sub_prompt | `stage1_choice` |
-| **4** | Stage 2 chips | **GET `/api/mitra/onboarding/chips/?stage=2&lane=<path>&stage1_choice=<...>&guidance_mode=<mode>`** | 5–6 filtered chips + dynamic heading + sub_prompt | `stage2_choice` |
-| **5** | Stage 3 chips | **GET `/api/mitra/onboarding/chips/?stage=3&lane=<path>&stage1_choice=<...>&stage2_choice=<...>&guidance_mode=<mode>`** | 5–6 style chips + dynamic heading + sub_prompt | `stage3_choice` |
-| 6 | Mode picker (universal/hybrid/rooted) | — | — | `guidance_mode` |
-| **7** | Recognition line | **POST `/api/mitra/onboarding/complete/`** with all 4 stage choices + mode + freeforms | `inference` + `recognition.line` + `bridges` + `stage_subtexts` + `triad_labels` + `dashboard_chrome` + `journey` + `triad: {triad_pending: true}` | `recognition_line`, `inference_snapshot`, `journey_id` |
-| **8** | Triad reveal | **POST `/api/mitra/journey/start/`** with inference-derived signals | `mantra` + `sankalp` + `practice` + `focus_name` + `recommended_posture` + `sankalp_prefix_line` | `master_mantra`, `master_sankalp`, `master_practice` |
+| Turn  | What user sees                        | Backend call                                                                                                            | Response                                                                                                                                           | Stored in Redux draft                                  |
+| ----- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
+| 1     | Mitra intro + returning/new           | —                                                                                                                       | —                                                                                                                                                  | `is_returning`                                         |
+| 2     | Stage 0 path pick                     | —                                                                                                                       | —                                                                                                                                                  | `path`                                                 |
+| **3** | Stage 1 chips                         | **GET `/api/mitra/onboarding/chips/?stage=1&lane=<path>&guidance_mode=<mode>`**                                         | 5 or 6 chips + heading + sub_prompt                                                                                                                | `stage1_choice`                                        |
+| **4** | Stage 2 chips                         | **GET `/api/mitra/onboarding/chips/?stage=2&lane=<path>&stage1_choice=<...>&guidance_mode=<mode>`**                     | 5–6 filtered chips + dynamic heading + sub_prompt                                                                                                  | `stage2_choice`                                        |
+| **5** | Stage 3 chips                         | **GET `/api/mitra/onboarding/chips/?stage=3&lane=<path>&stage1_choice=<...>&stage2_choice=<...>&guidance_mode=<mode>`** | 5–6 style chips + dynamic heading + sub_prompt                                                                                                     | `stage3_choice`                                        |
+| 6     | Mode picker (universal/hybrid/rooted) | —                                                                                                                       | —                                                                                                                                                  | `guidance_mode`                                        |
+| **7** | Recognition line                      | **POST `/api/mitra/onboarding/complete/`** with all 4 stage choices + mode + freeforms                                  | `inference` + `recognition.line` + `bridges` + `stage_subtexts` + `triad_labels` + `dashboard_chrome` + `journey` + `triad: {triad_pending: true}` | `recognition_line`, `inference_snapshot`, `journey_id` |
+| **8** | Triad reveal                          | **POST `/api/mitra/journey/start/`** with inference-derived signals                                                     | `mantra` + `sankalp` + `practice` + `focus_name` + `recommended_posture` + `sankalp_prefix_line`                                                   | `master_mantra`, `master_sankalp`, `master_practice`   |
 
 **5 backend calls during onboarding** (stages 1/2/3 chip delivery + complete + journey/start). Backend is the single source of chip truth; `allContainers.js` CSV tree is a now-unused fallback (FE will consume the new endpoint on its own rollout schedule).
 
 ### `GET /api/mitra/onboarding/chips/` — query-param spec
 
-| Param | Required | Values |
-|---|---|---|
-| `stage` | yes | `1` \| `2` \| `3` |
-| `lane` | yes | `support` \| `growth` |
-| `stage1_choice` | if stage ≥ 2 | chip_id or full label (e.g. `work_career` or `Work feels heavy`) |
-| `stage2_choice` | if stage == 3 | chip_id or full label |
-| `guidance_mode` | optional | `universal` \| `hybrid` (default) \| `rooted` |
+| Param           | Required      | Values                                                           |
+| --------------- | ------------- | ---------------------------------------------------------------- |
+| `stage`         | yes           | `1` \| `2` \| `3`                                                |
+| `lane`          | yes           | `support` \| `growth`                                            |
+| `stage1_choice` | if stage ≥ 2  | chip_id or full label (e.g. `work_career` or `Work feels heavy`) |
+| `stage2_choice` | if stage == 3 | chip_id or full label                                            |
+| `guidance_mode` | optional      | `universal` \| `hybrid` (default) \| `rooted`                    |
 
 Response shape:
 
@@ -80,7 +87,10 @@ Response shape:
     { "id": "work_feels_hard", "label": "Work feels hard", "sort_order": 1 },
     { "id": "i_feel_stuck", "label": "I feel stuck", "sort_order": 2 }
   ],
-  "open_input": { "placeholder": "Or say it in your words", "max_length": 180 },
+  "open_input": {
+    "placeholder": "Type Or say it in your words",
+    "max_length": 180
+  },
   "mapping_version": "1.2.0"
 }
 ```
@@ -113,8 +123,12 @@ Backend accepts BOTH chip_id values and full-label strings. Translator is in `on
 ```js
 // after mode pick at Turn 6
 const resp = await mitraOnboardingComplete({
-  stage0_choice, stage1_choice, stage2_choice, stage3_choice,
-  guidance_mode, freeforms
+  stage0_choice,
+  stage1_choice,
+  stage2_choice,
+  stage3_choice,
+  guidance_mode,
+  freeforms,
 });
 
 // store in Redux for Turn 7/8 render
@@ -142,7 +156,7 @@ const triad = await mitraJourneyStart({
   intervention_bias: resp.inference.intervention_bias,
   aspiration: resp.inference.aspiration,
   preferred_modality: resp.inference.preferred_modality,
-  guidance_mode
+  guidance_mode,
 });
 
 setScreenValue(triad.mantra, "master_mantra");
@@ -169,7 +183,13 @@ Every field below is ALWAYS present in the response — never omitted. Explicit 
     "support_style": "practical | calming | grounding | devotional | clarifying | quiet | uplifting | reflective",
     "intervention_bias": ["..."],
     "confidence": "float [0..1]",
-    "why_this_internal": { "stage0_choice": "...", "stage1_choice": "...", "stage2_choice": "...", "stage3_choice": "...", "inferred_from": "..." },
+    "why_this_internal": {
+      "stage0_choice": "...",
+      "stage1_choice": "...",
+      "stage2_choice": "...",
+      "stage3_choice": "...",
+      "inferred_from": "..."
+    },
     "mapping_version": "1.2.0"
   },
   "recognition": {

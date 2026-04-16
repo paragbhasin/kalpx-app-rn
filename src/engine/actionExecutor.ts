@@ -21,11 +21,14 @@ import { navigate as rootNavigate } from "../Shared/Routes/NavigationService";
 import { cleanupFlowState, GUARDED_ACTIONS } from "./cleanupFields";
 import {
   mitraCheckpoint,
+  mitraCompleteOnboarding,
+  mitraFetchOnboardingChips,
   mitraGenerateCompanion,
   mitraHelpMeChoose,
   mitraOnboardingRecognition,
   mitraPathEvolution,
   mitraPranaAcknowledge,
+  mitraStartJourney,
   mitraSubmitCheckpoint,
   mitraTrackCompletion,
   mitraTrackEvent,
@@ -3343,13 +3346,13 @@ export async function executeAction(
       case "onboarding_turn_response": {
         // Sadhana Yatra 4-stage flow (2026-04-14). State-id driven rather than
         // numeric-turn driven — path-aware branching requires named states.
-        const currentStateId: string =
-          screenState._currentStateId ||
-          (screenState.onboarding_turn
-            ? `turn_${screenState.onboarding_turn}`
-            : "turn_1");
+        const currentStateId = 
+          action.currentScreen?.stateId || 
+          (typeof screenState.onboarding_turn === "string" 
+            ? screenState.onboarding_turn 
+            : `turn_${screenState.onboarding_turn || 1}`);
         const draft = { ...(screenState.onboarding_draft_state || {}) };
-        const p = payload || {};
+        const p = action.payload || {};
 
         // Kosha / klesha maps per spec mitra_architecture_sadhana_yatra.md
         const KOSHA_MAP: Record<string, string> = {
@@ -3368,16 +3371,14 @@ export async function executeAction(
           not_sure: "avidya",
         };
 
+        // Tracking (non-blocking)
         mitraTrackEvent("onboarding_turn_response", {
-          journeyId: screenState.journey_id || null,
-          dayNumber: 0,
           meta: {
             turn: currentStateId,
-            response_type: p.response_type,
             chip_id: p.chip_id,
             freeform_length: (p.freeform_text || "").length,
           },
-        });
+        }).catch(() => {});
 
         let nextStateId = "";
 
@@ -3385,214 +3386,155 @@ export async function executeAction(
           if (currentStateId === "turn_1") {
             if (p.chip_id === "returning") {
               draft.returning = true;
-              // Returning users skip to dashboard via journey-status flow
-              // (handled outside this case); for now just advance to Stage 0.
             }
             if (p.freeform_text) draft.intro_freeform = p.freeform_text;
             nextStateId = "turn_2";
           } else if (currentStateId === "turn_2") {
             // Stage 0 — path pick
-            if (p.chip_id === "support") {
-              draft.path = "support";
-              nextStateId = "turn_3_support";
-            } else if (p.chip_id === "growth") {
-              draft.path = "growth";
-              nextStateId = "turn_3_growth";
-            } else {
-              // No freeform on Stage 0 per spec; default to support on missing
-              draft.path = "support";
-              nextStateId = "turn_3_support";
-            }
-          } else if (currentStateId === "turn_3_support") {
-            if (p.chip_id) {
-              draft.primary_kosha = KOSHA_MAP[p.chip_id] || p.chip_id;
-              draft.kosha_chip_id = p.chip_id;
-            }
+            const path = p.chip_id === "growth" ? "growth" : "support";
+            draft.path = path;
+            draft.stage0_choice = path;
+            nextStateId = path === "growth" ? "turn_3_growth" : "turn_3_support";
+
+            // Fetch Stage 1 chips
+            const stage1 = await mitraFetchOnboardingChips({
+              stage: 1,
+              lane: path,
+              guidance_mode: "hybrid",
+            });
+            if (stage1) setScreenValue(stage1, "stage1_data");
+          } else if (
+            currentStateId === "turn_3_support" ||
+            currentStateId === "turn_3_growth"
+          ) {
+            // Stage 1 chip pick
+            draft.stage1_choice = p.chip_id || "selected_via_text";
+            nextStateId = draft.path === "growth" ? "turn_4_growth" : "turn_4_support";
             if (p.freeform_text) {
-              draft.kosha_freeform = p.freeform_text;
-              draft.freeforms = {
-                ...(draft.freeforms || {}),
-                stage1_support: p.freeform_text,
-              };
+              draft.freeforms = { ...(draft.freeforms || {}), stage1: p.freeform_text };
             }
-            nextStateId = "turn_4_support";
-          } else if (currentStateId === "turn_3_growth") {
-            if (p.chip_id) draft.aliveness_state = p.chip_id;
+
+            // Fetch Stage 2 chips
+            const stage2 = await mitraFetchOnboardingChips({
+              stage: 2,
+              lane: draft.path,
+              guidance_mode: "hybrid",
+              stage1_choice: draft.stage1_choice,
+            });
+            if (stage2) setScreenValue(stage2, "stage2_data");
+          } else if (
+            currentStateId === "turn_4_support" ||
+            currentStateId === "turn_4_growth"
+          ) {
+            // Stage 2 chip pick
+            draft.stage2_choice = p.chip_id || "selected_via_text";
+            nextStateId = draft.path === "growth" ? "turn_5_growth" : "turn_5_support";
             if (p.freeform_text) {
-              draft.aliveness_freeform = p.freeform_text;
-              draft.freeforms = {
-                ...(draft.freeforms || {}),
-                stage1_growth: p.freeform_text,
-              };
+              draft.freeforms = { ...(draft.freeforms || {}), stage2: p.freeform_text };
             }
-            nextStateId = "turn_4_growth";
-          } else if (currentStateId === "turn_4_support") {
-            if (p.chip_id) draft.primary_vritti = p.chip_id;
+
+            // Fetch Stage 3 chips (Help styles)
+            const stage3 = await mitraFetchOnboardingChips({
+              stage: 3,
+              lane: draft.path,
+              guidance_mode: "hybrid",
+              stage1_choice: draft.stage1_choice,
+              stage2_choice: draft.stage2_choice,
+            });
+            if (stage3) setScreenValue(stage3, "stage3_data");
+          } else if (
+            currentStateId === "turn_5_support" ||
+            currentStateId === "turn_5_growth"
+          ) {
+            // Stage 3 chip pick
+            draft.stage3_choice = p.chip_id || "selected_via_text";
             if (p.freeform_text) {
-              draft.vritti_freeform = p.freeform_text;
-              draft.freeforms = {
-                ...(draft.freeforms || {}),
-                stage2_support: p.freeform_text,
-              };
-            }
-            nextStateId = "turn_5_support";
-          } else if (currentStateId === "turn_4_growth") {
-            if (p.chip_id) draft.aspiration = p.chip_id;
-            if (p.freeform_text) {
-              draft.aspiration_freeform = p.freeform_text;
-              draft.freeforms = {
-                ...(draft.freeforms || {}),
-                stage2_growth: p.freeform_text,
-              };
-            }
-            nextStateId = "turn_5_growth";
-          } else if (currentStateId === "turn_5_support") {
-            if (p.chip_id) {
-              draft.primary_klesha = KLESHA_MAP[p.chip_id] || "avidya";
-              draft.klesha_chip_id = p.chip_id;
-            }
-            if (p.freeform_text) {
-              draft.klesha_freeform = p.freeform_text;
-              draft.freeforms = {
-                ...(draft.freeforms || {}),
-                stage3_support: p.freeform_text,
-              };
-            }
-            nextStateId = "turn_6";
-          } else if (currentStateId === "turn_5_growth") {
-            if (p.chip_id) draft.preferred_modality = p.chip_id;
-            if (p.freeform_text) {
-              draft.modality_freeform = p.freeform_text;
-              draft.freeforms = {
-                ...(draft.freeforms || {}),
-                stage3_growth: p.freeform_text,
-              };
+              draft.freeforms = { ...(draft.freeforms || {}), stage3: p.freeform_text };
             }
             nextStateId = "turn_6";
           } else if (currentStateId === "turn_6") {
-            // Mode picker — same signal shape as legacy (p.guidance_mode)
-            draft.mode = p.guidance_mode;
-            draft.guidance_mode = p.guidance_mode;
-            setScreenValue(p.guidance_mode, "guidance_mode");
-
-            await patchCompanionState({
-              preferred_guidance_mode: p.guidance_mode,
-            });
-
-            // Fetch recognition line (backend-gated; falls back to JS template)
-            const rec = await mitraOnboardingRecognition({
-              path: (draft.path || "support") as "support" | "growth",
-              primary_kosha: draft.primary_kosha,
-              primary_vritti: draft.primary_vritti,
-              primary_klesha: draft.primary_klesha,
-              aliveness_state: draft.aliveness_state,
-              aspiration: draft.aspiration,
-              preferred_modality: draft.preferred_modality,
-              guidance_mode: p.guidance_mode || "hybrid",
-              freeforms: draft.freeforms || {},
-            });
-            draft.recognition_line = rec.recognition_line;
-            draft.recognition_resolution = rec.resolution;
-            setScreenValue(rec.recognition_line, "recognition_line");
-
-            // Generate the triad for Turn 8 — preserve legacy generateCompanion
-            // invocation so triad cards render with real data.
-            const companion = await mitraGenerateCompanion({
-              focus: draft.primary_kosha || draft.aspiration || "clarity",
-              sub_focus:
-                draft.primary_vritti || draft.preferred_modality || null,
-              depth: "standard",
-              baseline_metrics: {},
-              intention: draft.recognition_line,
-              day_number: 1,
-              guidance_mode: p.guidance_mode,
-              // Pass full Sadhana Yatra signals so backend can enrich if ready
-              path: draft.path,
-              primary_kosha: draft.primary_kosha,
-              primary_vritti: draft.primary_vritti,
-              primary_klesha: draft.primary_klesha,
-              aliveness_state: draft.aliveness_state,
-              aspiration: draft.aspiration,
-              preferred_modality: draft.preferred_modality,
-            });
+            // Mode picker
+            const mode = p.guidance_mode || p.chip_id || "hybrid";
+            draft.guidance_mode = mode;
             nextStateId = "turn_7";
 
-            // Shared labels for recognition/triad templating. Sadhana Yatra
-            // replaces friction/state with kosha/vritti/klesha|aliveness.
-            setScreenValue(
-              draft.kosha_chip_id || draft.aliveness_state || "what's alive for you",
-              "friction_label",
-            );
-            setScreenValue(
-              draft.primary_vritti || draft.aspiration || "the texture of it",
-              "state_label",
-            );
+            // Call POST onboarding/complete/
+            const complete = await mitraCompleteOnboarding({
+              stage0_choice: draft.stage0_choice || draft.path || "support",
+              stage1_choice: draft.stage1_choice,
+              stage2_choice: draft.stage2_choice,
+              stage3_choice: draft.stage3_choice,
+              guidance_mode: mode,
+              freeforms: {
+                stage1: draft.freeforms?.stage1 || null,
+                stage2: draft.freeforms?.stage2 || null,
+                stage3: draft.freeforms?.stage3 || null,
+              },
+            });
 
-            const c = companion?.companion || {};
-            setScreenValue(
-              c.recommended_posture || "protecting your space and doing less, better",
-              "recommended_posture",
-            );
+            if (complete) {
+              draft.recognition_line = complete.recognition?.line;
+              setScreenValue(complete.recognition?.line, "recognition_line");
+              setScreenValue(complete, "onboarding_complete_data");
+              // Use labels for triad templating
+              setScreenValue(complete.triad_labels?.sankalp || "SANKALP", "sankalp_label");
+              setScreenValue(complete.triad_labels?.mantra || "MANTRA", "mantra_label");
+              setScreenValue(complete.triad_labels?.practice || "PRACTICE", "practice_label");
+              setScreenValue(complete.sankalp_prefix_line, "sankalp_prefix");
+              
+              // Store inference fields for triad call
+              draft.inference = complete.inference;
+            }
 
-            // Week 1 onboarding fallback defaults for Turn 7 triad — so the
-            // screen never shows "—" when generate-companion is flag-off or
-            // returns an unexpected shape on dev. Real values land when the
-            // backend endpoint ships + returns the expected envelope.
-            const mantraTitle =
-              c.mantra?.core?.title || c.mantra?.title || "Om Namah Shivaya";
-            const mantraWhy =
-              c.mantra?.ui?.card_subtitle ||
-              c.mantra?.one_line ||
-              "A soft reminder of what you're steadying into";
-            const sankalpLine =
-              c.sankalp?.core?.line ||
-              c.sankalp?.line ||
-              "I protect what matters and let the rest pass.";
-            const sankalpWhy =
-              c.sankalp?.one_line ||
-              "One line to carry you through the small decisions today";
-            const practiceTitle =
-              c.practice?.core?.title ||
-              c.practice?.title ||
-              "Nine slow breaths, eyes soft";
-            const practiceWhy =
-              c.practice?.one_line ||
-              "A practice to settle the body before the day opens";
-
-            setScreenValue(mantraTitle, "companion_mantra_title");
-            setScreenValue(mantraTitle, "mantra_text");
-            setScreenValue(mantraWhy, "companion_mantra_one_line");
-            setScreenValue(c.mantra?.core?.id || c.mantra?.id || null, "companion_mantra_id");
-
-            setScreenValue(sankalpLine, "companion_sankalp_line");
-            setScreenValue(sankalpLine, "sankalp_text");
-            setScreenValue(sankalpWhy, "companion_sankalp_one_line");
-            setScreenValue(c.sankalp?.core?.id || c.sankalp?.id || null, "companion_sankalp_id");
-
-            setScreenValue(practiceTitle, "companion_practice_title");
-            setScreenValue(practiceTitle, "practice_title");
-            setScreenValue(practiceWhy, "companion_practice_one_line");
-            setScreenValue(c.practice?.core?.id || c.practice?.id || null, "companion_practice_id");
+            nextStateId = "turn_7";
           } else if (currentStateId === "turn_7") {
-            // User tapped "Hear my first guidance" or "Show me my path first"
-            if (p.chip_id === "play_briefing") draft.briefing_requested = true;
-            if (p.freeform_text) draft.turn7_freeform = p.freeform_text;
+            // User advances to triad reveal
+            const inf = draft.inference || {};
+            nextStateId = "turn_8";
+
+            const start = await mitraStartJourney({
+              path: inf.lane || draft.path || "support",
+              primary_kosha: inf.primary_kosha,
+              primary_vritti: inf.primary_vritti,
+              primary_klesha: inf.primary_klesha,
+              life_context: inf.life_context,
+              support_style: inf.support_style,
+              intervention_bias: inf.intervention_bias,
+              aspiration: draft.aspiration || null,
+              preferred_modality: draft.preferred_modality || null,
+              guidance_mode: draft.guidance_mode || "hybrid",
+              day_number: 1,
+            });
+
+            if (start && start.companion) {
+              const c = start.companion;
+              setScreenValue(c.focus_name, "focus_name");
+              setScreenValue(c.recommended_posture, "recommended_posture");
+              
+              // Mantra
+              setScreenValue(c.mantra?.core?.title, "mantra_text");
+              setScreenValue(c.mantra?.ui?.card_subtitle, "mantra_one_line");
+              setScreenValue(c.mantra?.core?.id, "companion_mantra_id");
+              
+              // Sankalp
+              setScreenValue(c.sankalp?.core?.line, "sankalp_text");
+              setScreenValue(c.sankalp?.ui?.card_title, "companion_sankalp_line");
+              setScreenValue(c.sankalp?.core?.id, "companion_sankalp_id");
+              
+              // Practice
+              setScreenValue(c.practice?.core?.title, "practice_title");
+              setScreenValue(c.practice?.ui?.card_subtitle, "companion_practice_one_line");
+              setScreenValue(c.practice?.core?.id, "companion_practice_id");
+              
+              setScreenValue(start, "onboarding_triad_data");
+            }
+
             nextStateId = "turn_8";
           } else if (currentStateId === "turn_8") {
             // Completion — triad accepted
-            await mitraTrackEvent("onboarding_completed", {
-              meta: {
-                path: draft.path,
-                primary_kosha: draft.primary_kosha,
-                primary_vritti: draft.primary_vritti,
-                primary_klesha: draft.primary_klesha,
-                aliveness_state: draft.aliveness_state,
-                aspiration: draft.aspiration,
-                preferred_modality: draft.preferred_modality,
-                mode: draft.mode,
-                free_form_count: Object.keys(draft.freeforms || {}).length,
-              },
-            });
+            mitraTrackEvent("onboarding_completed", {
+              meta: { path: draft.path, mode: draft.guidance_mode },
+            }).catch(() => {});
 
             await patchCompanionState({
               last_reported_mood:

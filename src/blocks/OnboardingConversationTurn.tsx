@@ -177,7 +177,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
           placeholder={
             showHeroMeta
               ? "Write or speak what's on your mind..."
-              : block.open_input?.placeholder || "Tell me more..."
+              : "Type Or say it in your words..."
           }
           placeholderTextColor="rgba(67, 33, 4, 0.45)"
           value={text}

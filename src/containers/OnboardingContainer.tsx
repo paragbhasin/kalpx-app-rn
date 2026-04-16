@@ -70,10 +70,26 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
     // Inject headline/subtext into conversation turn blocks; pass all others through as-is.
     .map((b: any) => {
       if (b.type === "onboarding_conversation_turn") {
+        const turnId = b.id || "";
+        // Support dynamic stage data injection from screenData
+        let dynamicData = null;
+        if (turnId === "turn3_support" || turnId === "turn3_growth") {
+          dynamicData = screenData.stage1_data;
+        } else if (turnId === "turn4_support" || turnId === "turn4_growth") {
+          dynamicData = screenData.stage2_data;
+        } else if (turnId === "turn5_support" || turnId === "turn5_growth") {
+          dynamicData = screenData.stage3_data;
+        }
+
         return {
           ...b,
-          headline: headlineBlock?.content,
-          subtext: subtextBlock?.content,
+          mitra_message: dynamicData ? null : b.mitra_message,
+          reply_chips: dynamicData?.chips || b.reply_chips,
+          subtext: dynamicData?.sub_prompt || subtextBlock?.content || b.subtext,
+          headline: dynamicData?.mitra_message || headlineBlock?.content || b.headline,
+          open_input: dynamicData?.open_input 
+            ? { ...b.open_input, ...dynamicData.open_input, enabled: true } 
+            : b.open_input,
           turnOneHero: turn === 1,
         };
       }

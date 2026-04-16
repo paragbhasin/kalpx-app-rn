@@ -6761,7 +6761,7 @@ export const WelcomeOnboardingContainer = {
           ],
           open_input: {
             enabled: true,
-            placeholder: "Or say it in your words",
+            placeholder: "Type Or say it in your words",
             max_length: 400,
           },
           voice_available: true,
@@ -6810,7 +6810,7 @@ export const WelcomeOnboardingContainer = {
           ],
           open_input: {
             enabled: true,
-            placeholder: "Or say it in your words",
+            placeholder: "Type Or say it in your words",
             max_length: 400,
           },
           voice_available: true,
@@ -6860,7 +6860,7 @@ export const WelcomeOnboardingContainer = {
           ],
           open_input: {
             enabled: true,
-            placeholder: "Or say it in your words",
+            placeholder: "Type Or say it in your words",
             max_length: 400,
           },
           voice_available: true,
@@ -6897,7 +6897,7 @@ export const WelcomeOnboardingContainer = {
           ],
           open_input: {
             enabled: true,
-            placeholder: "Or say it in your words",
+            placeholder: "Type Or say it in your words",
             max_length: 400,
           },
           voice_available: true,
@@ -6942,7 +6942,7 @@ export const WelcomeOnboardingContainer = {
           ],
           open_input: {
             enabled: true,
-            placeholder: "Or say it in your words",
+            placeholder: "Type Or say it in your words",
             max_length: 400,
           },
           voice_available: true,
@@ -6999,7 +6999,7 @@ export const WelcomeOnboardingContainer = {
           ],
           open_input: {
             enabled: true,
-            placeholder: "Or say it in your words",
+            placeholder: "Type Or say it in your words",
             max_length: 400,
           },
           voice_available: true,

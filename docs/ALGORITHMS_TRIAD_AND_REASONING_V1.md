@@ -49,6 +49,39 @@ through reset / change-focus. Deepen additionally preserves
 - **Path + joy + post-conflict:** post-conflict wins; joy demoted to
   embed or next session
 
+### §0.1 — Content refinement during implementation (authorized)
+
+If existing content (library item tags, moment variants, tone tags,
+diagnostic copy) needs refinement to properly support triad
+generation, `path_intent`, central reasoning, or real FE placement,
+**drafting + auditing agents may refine it during implementation.**
+The system must not force legacy content to remain unchanged if it
+materially weakens the new logic.
+
+Authorization scope:
+- Add / tune tags on library items (kosha, klesha, vritti,
+  intervention, path_intent, tone, mode_fit, locale_fit).
+- Refine moment ContentPack variants when a clearer tone emerges.
+- Adjust copy when the new reasoning layer surfaces a signal the
+  old text was written blind to.
+
+Refinement process:
+1. **Drafter agent** produces the refinement PR-style with diff +
+   rationale.
+2. **Auditor agent** verifies the refinement against Content
+   Guidelines §0–§12 (tone rules, banned words, char caps,
+   no-grief-bypass, no-celebration-at-heavy, etc.).
+3. **CI validators** must pass: `quality_validator`,
+   `coverage_validator`, `chip_id_stability`,
+   `content_sovereignty_check`, `fallback_exhaustion_test`,
+   `triad_authority_check`.
+4. Variant status stays `draft` until founder reviews and promotes
+   to `approved`. No agent alone promotes per Content Contract §3.
+
+This carve-out keeps content honest as the logic strengthens. No
+forcing old text through a new brain; also no agent-authored
+content served to users without founder sign-off.
+
 ### §0.2 — path_intent / movement_goal (new internal layer)
 
 The triad selector does not optimize directly for `ananda`. It

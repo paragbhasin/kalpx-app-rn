@@ -25,6 +25,7 @@ import {
 } from 'react-native';
 import { Fonts } from '../theme/fonts';
 import { executeAction } from '../engine/actionExecutor';
+import { useContentSlots, readMomentSlot } from '../hooks/useContentSlots';
 import { useScreenStore } from '../engine/useScreenBridge';
 import store from '../store';
 import { screenActions } from '../store/screenSlice';
@@ -33,8 +34,31 @@ const OM_CYCLE_MS = 12_000;
 
 const SoundBridgeTransient: React.FC<{ block?: any }> = () => {
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
+  const ss = screenData as Record<string, any>;
   const pulse = useRef(new Animated.Value(0)).current;
   const advancedRef = useRef(false);
+
+  useContentSlots({
+    momentId: 'M42_sound_bridge',
+    screenDataKey: 'sound_bridge',
+    buildCtx: (s) => ({
+      path: s.journey_path === 'growth' ? 'growth' : 'support',
+      guidance_mode: s.guidance_mode || 'hybrid',
+      locale: s.locale || 'en',
+      user_attention_state: 'scanning',
+      emotional_weight: 'light',
+      cycle_day: Number(s.day_number) || 0,
+      entered_via: 'trigger_flow',
+      stage_signals: {},
+      today_layer: {},
+      life_layer: {
+        cycle_id: s.journey_id || s.cycle_id || '',
+        life_kosha: s.life_kosha || s.scan_focus || '',
+        scan_focus: s.scan_focus || '',
+      },
+    }),
+  });
+  const slot = (name: string) => readMomentSlot(ss, 'sound_bridge', name);
 
   useEffect(() => {
     Animated.loop(
@@ -92,8 +116,8 @@ const SoundBridgeTransient: React.FC<{ block?: any }> = () => {
           />
           <Text style={styles.omChar}>ॐ</Text>
         </View>
-        <Text style={styles.hint}>Hum with me</Text>
-        <Text style={styles.continueHint}>Continue</Text>
+        <Text style={styles.hint}>{slot('hum_hint')}</Text>
+        <Text style={styles.continueHint}>{slot('continue_hint')}</Text>
       </View>
     </TouchableWithoutFeedback>
   );

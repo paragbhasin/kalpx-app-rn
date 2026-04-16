@@ -27,9 +27,13 @@ import Svg, { Path } from "react-native-svg";
 import MantraLotus3d from "../../assets/mantra-lotus-3d.svg";
 import { executeAction } from "../engine/actionExecutor";
 import { mitraTrackEvent } from "../engine/mitraApi";
+import { useContentSlots, readMomentSlot } from "../hooks/useContentSlots";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { Fonts } from "../theme/fonts";
 
+// Variant-specific completion messages are a known Phase E multi-variant
+// migration target (applies_when: {runner_variant: "mantra"} etc.).
+// Until then, these 3 short completion blessings grandfather in TSX.
 const VARIANT_MESSAGES: Record<string, string> = {
   mantra: "108 in. Kept.",
   sankalp: "Held. Carry it into the day.",
@@ -49,6 +53,29 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
   block,
 }) => {
   const { screenData, loadScreen, goBack, currentScreen, updateBackground, updateHeaderHidden } = useScreenStore();
+  const ss = screenData as Record<string, any>;
+
+  useContentSlots({
+    momentId: 'M_completion_return',
+    screenDataKey: 'completion_return',
+    buildCtx: (s) => ({
+      path: s.journey_path === 'growth' ? 'growth' : 'support',
+      guidance_mode: s.guidance_mode || 'hybrid',
+      locale: s.locale || 'en',
+      user_attention_state: 'winding_down',
+      emotional_weight: 'light',
+      cycle_day: Number(s.day_number) || 0,
+      entered_via: `${s.runner_variant || 'practice'}_complete`,
+      stage_signals: {},
+      today_layer: {},
+      life_layer: {
+        cycle_id: s.journey_id || s.cycle_id || '',
+        life_kosha: s.life_kosha || s.scan_focus || '',
+        scan_focus: s.scan_focus || '',
+      },
+    }),
+  });
+  const slot = (name: string) => readMomentSlot(ss, 'completion_return', name);
 
   const resolvedVariant: "mantra" | "sankalp" | "practice" =
     (block.variant as any) ||
@@ -206,7 +233,7 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
           <View style={styles.inputRow}>
             <TextInput
               style={styles.input}
-              placeholder="How did that feel?"
+              placeholder={slot('reflection_prompt')}
               placeholderTextColor="#A6824699"
               value={inputText}
               onChangeText={(t) => setInputText(t.slice(0, 120))}
@@ -236,7 +263,7 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
             onPress={() => handleReturnHome(true)}
             activeOpacity={0.8}
           >
-            <Text style={styles.primaryCtaText}>Return to Mitra Home</Text>
+            <Text style={styles.primaryCtaText}>{slot('return_home_cta')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -244,7 +271,7 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
             onPress={handleRepeat}
             activeOpacity={0.6}
           >
-            <Text style={styles.secondaryCtaText}>Repeat</Text>
+            <Text style={styles.secondaryCtaText}>{slot('repeat_cta')}</Text>
           </TouchableOpacity>
         </View>
       </View>

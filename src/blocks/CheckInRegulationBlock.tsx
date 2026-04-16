@@ -23,51 +23,51 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Fonts } from '../theme/fonts';
 import { executeAction } from '../engine/actionExecutor';
+import { useContentSlots, readMomentSlot } from '../hooks/useContentSlots';
 import { useScreenStore } from '../engine/useScreenBridge';
 import store from '../store';
 import { screenActions } from '../store/screenSlice';
 
 type Step = 'notice' | 'name' | 'settle';
 
-const STEP_CONTENT: Record<
-  Step,
-  { title: string; prompt: string; chips: { id: string; label: string }[] }
-> = {
-  notice: {
-    title: "Let's not try to figure anything out right now.",
-    prompt: 'What are you noticing in the body?',
-    chips: [
-      { id: 'chest', label: 'Chest tight' },
-      { id: 'head', label: 'Head loud' },
-      { id: 'stomach', label: 'Stomach knotted' },
-      { id: 'unsure', label: 'Hard to say' },
-    ],
-  },
-  name: {
-    title: "You don't need to explain it. Just name it.",
-    prompt: 'What word comes closest?',
-    chips: [
-      { id: 'agitated', label: 'Agitated' },
-      { id: 'drained', label: 'Drained' },
-      { id: 'scared', label: 'Scared' },
-      { id: 'heavy', label: 'Heavy' },
-    ],
-  },
-  settle: {
-    title: 'Naming it loosens it a little.',
-    prompt: 'Stay for one slow breath with it.',
-    chips: [
-      { id: 'done', label: 'Done' },
-      { id: 'another', label: 'Another breath' },
-    ],
-  },
+// Stable chip ids per step (analytics keys). Labels + titles + prompts
+// come from the M20_checkin_regulation ContentPack.
+const STEP_CHIPS: Record<Step, readonly string[]> = {
+  notice: ['chest', 'head', 'stomach', 'unsure'] as const,
+  name: ['agitated', 'drained', 'scared', 'heavy'] as const,
+  settle: ['done', 'another'] as const,
 };
 
 const CheckInRegulationBlock: React.FC<{ block?: any }> = () => {
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
-  const step: Step =
-    (screenData.checkin_step as Step) || 'notice';
-  const content = STEP_CONTENT[step];
+  const ss = screenData as Record<string, any>;
+
+  useContentSlots({
+    momentId: 'M20_checkin_regulation',
+    screenDataKey: 'checkin_regulation',
+    buildCtx: (s) => ({
+      path: s.journey_path === 'growth' ? 'growth' : 'support',
+      guidance_mode: s.guidance_mode || 'hybrid',
+      locale: s.locale || 'en',
+      user_attention_state: 'scanning',
+      emotional_weight: 'moderate',
+      cycle_day: Number(s.day_number) || 0,
+      entered_via: 'dashboard_card',
+      stage_signals: {},
+      today_layer: {},
+      life_layer: {
+        cycle_id: s.journey_id || s.cycle_id || '',
+        life_kosha: s.life_kosha || s.scan_focus || '',
+        scan_focus: s.scan_focus || '',
+      },
+    }),
+  });
+  const slot = (name: string) => readMomentSlot(ss, 'checkin_regulation', name);
+
+  const step: Step = (ss.checkin_step as Step) || 'notice';
+  const title = slot(`${step}_title`);
+  const prompt = slot(`${step}_prompt`);
+  const chipIds = STEP_CHIPS[step];
 
   const dispatch = (actionType: string, payload: any) => {
     executeAction(
@@ -96,19 +96,19 @@ const CheckInRegulationBlock: React.FC<{ block?: any }> = () => {
 
   return (
     <View style={styles.root}>
-      <Text style={styles.title}>{content.title}</Text>
-      <Text style={styles.prompt}>{content.prompt}</Text>
+      <Text style={styles.title}>{title}</Text>
+      <Text style={styles.prompt}>{prompt}</Text>
 
       <View style={styles.chips}>
-        {content.chips.map((c) => (
+        {chipIds.map((id) => (
           <TouchableOpacity
-            key={c.id}
+            key={id}
             style={styles.chip}
             activeOpacity={0.75}
-            onPress={() => onChip(c.id)}
+            onPress={() => onChip(id)}
             accessibilityRole="button"
           >
-            <Text style={styles.chipText}>{c.label}</Text>
+            <Text style={styles.chipText}>{slot(`${step}_${id}_chip`)}</Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -117,10 +117,10 @@ const CheckInRegulationBlock: React.FC<{ block?: any }> = () => {
         style={styles.micBtn}
         onPress={onVoice}
         accessibilityRole="button"
-        accessibilityLabel="Voice note"
+        accessibilityLabel={slot('voice_mic_label')}
       >
         <Text style={styles.micIcon}>🎙</Text>
-        <Text style={styles.micLabel}>Say it out loud</Text>
+        <Text style={styles.micLabel}>{slot('voice_mic_label')}</Text>
       </TouchableOpacity>
     </View>
   );

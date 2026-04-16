@@ -3382,7 +3382,11 @@ export async function executeAction(
         let nextStateId = "";
 
         try {
-          if (currentStateId === "turn_1") {
+          if (currentStateId === "turn_0") {
+            if (p.chip_id === "support") draft.path = "support";
+            if (p.chip_id === "growth") draft.path = "growth";
+            nextStateId = "turn_1";
+          } else if (currentStateId === "turn_1") {
             if (p.chip_id === "returning") {
               draft.returning = true;
               // Returning users skip to dashboard via journey-status flow

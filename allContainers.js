@@ -6660,6 +6660,32 @@ export const WelcomeOnboardingContainer = {
   container_id: "welcome_onboarding",
   container_type: "welcome_onboarding",
   states: {
+    turn_0: {
+      tone: { theme: "gold_dark", mood: "steady" },
+      blocks: [
+        {
+          type: "onboarding_intro_hero",
+          headline: "Do you need support in some area of life right now?",
+          subtext: "Or are you feeling balanced and ready to grow?",
+          reply_chips: [
+            {
+              id: "support",
+              label: "I need support in an area of life",
+              style: "secondary",
+            },
+            {
+              id: "growth",
+              label: "I feel balanced and want to grow",
+              style: "secondary",
+            },
+          ],
+          on_response: {
+            type: "onboarding_turn_response",
+            payload: {},
+          },
+        },
+      ],
+    },
     turn_1: {
       tone: { theme: "gold_dark", mood: "steady" },
       blocks: [

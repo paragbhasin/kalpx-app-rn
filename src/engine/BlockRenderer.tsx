@@ -79,6 +79,7 @@ import VoiceTextForkBlock from '../blocks/VoiceTextForkBlock';
 import GuidanceModePicker from '../blocks/GuidanceModePicker';
 import FirstRecognitionBlock from '../blocks/FirstRecognitionBlock';
 import PathEmergesBlock from '../blocks/PathEmergesBlock';
+import OnboardingIntroHero from '../blocks/OnboardingIntroHero';
 
 // Week 2 — Day Active Dashboard (Mitra v3 Moments 8-15, 40, 41, 43)
 import MorningBriefingBlock from '../blocks/MorningBriefingBlock';
@@ -207,6 +208,7 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   guidance_mode_picker: GuidanceModePicker,
   first_recognition: FirstRecognitionBlock,
   path_emerges: PathEmergesBlock,
+  onboarding_intro_hero: OnboardingIntroHero,
   // Week 2 — Day Active Dashboard
   morning_briefing: MorningBriefingBlock,
   focus_phrase: FocusPhraseBlock,

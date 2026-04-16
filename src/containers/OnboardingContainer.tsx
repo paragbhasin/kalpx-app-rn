@@ -42,19 +42,19 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
   const turn = Number(screenData.onboarding_turn || 1);
 
   useEffect(() => {
-    const updatedBackground =
-      turn === 1
-        ? require("../../assets/new_home.png")
-        : require("../../assets/beige_bg.png");
+    const isIntro = turn === 0 || turn === 1;
+    const updatedBackground = isIntro
+      ? require("../../assets/new_home.png")
+      : require("../../assets/beige_bg.png");
     updateBackground(updatedBackground);
     updateHeaderHidden(false);
     return () => updateHeaderHidden(false);
   }, [updateBackground, updateHeaderHidden, turn]);
 
-  // Disable Android back on Turn 1 (INV-equivalent: onboarding root cannot go back).
+  // Disable Android back on Turn 0/1 (INV-equivalent: onboarding root cannot go back).
   useEffect(() => {
     const sub = BackHandler.addEventListener("hardwareBackPress", () => {
-      if (turn === 1) return true; // consume — abandonment confirm handled elsewhere
+      if (turn === 0 || turn === 1) return true; // consume — abandonment confirm handled elsewhere
       return false;
     });
     return () => sub.remove();

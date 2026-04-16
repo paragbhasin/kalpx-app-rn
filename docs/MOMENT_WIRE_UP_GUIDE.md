@@ -43,20 +43,49 @@ Routing lives in `src/engine/actionExecutor.ts` → `onboarding_turn_response`. 
 
 ## API calls per onboarding turn
 
-The onboarding flow has 8 turns. Only 2 turns make backend calls — everything else is client-side chip filtering from the CSV-bundled tree.
+The onboarding flow has 8 turns. Turns 3/4/5/7/8 make backend calls (Option C — per-turn chip delivery). Turns 3/4/5 fetch chips + dynamic heading + sub_prompt from the backend; Turn 7 composes recognition; Turn 8 fetches the triad.
 
 | Turn | What user sees | Backend call | Response | Stored in Redux draft |
 |---|---|---|---|---|
 | 1 | Mitra intro + returning/new | — | — | `is_returning` |
 | 2 | Stage 0 path pick | — | — | `path` |
-| 3 | Stage 1 chips (5 support / 6 growth) | — | — | `stage1_choice` |
-| 4 | Stage 2 chips (25 support / 30 growth) | — | — | `stage2_choice` |
-| 5 | Stage 3 chips (5 support / 6 growth) | — | — | `stage3_choice` |
+| **3** | Stage 1 chips | **GET `/api/mitra/onboarding/chips/?stage=1&lane=<path>&guidance_mode=<mode>`** | 5 or 6 chips + heading + sub_prompt | `stage1_choice` |
+| **4** | Stage 2 chips | **GET `/api/mitra/onboarding/chips/?stage=2&lane=<path>&stage1_choice=<...>&guidance_mode=<mode>`** | 5–6 filtered chips + dynamic heading + sub_prompt | `stage2_choice` |
+| **5** | Stage 3 chips | **GET `/api/mitra/onboarding/chips/?stage=3&lane=<path>&stage1_choice=<...>&stage2_choice=<...>&guidance_mode=<mode>`** | 5–6 style chips + dynamic heading + sub_prompt | `stage3_choice` |
 | 6 | Mode picker (universal/hybrid/rooted) | — | — | `guidance_mode` |
 | **7** | Recognition line | **POST `/api/mitra/onboarding/complete/`** with all 4 stage choices + mode + freeforms | `inference` + `recognition.line` + `bridges` + `stage_subtexts` + `triad_labels` + `dashboard_chrome` + `journey` + `triad: {triad_pending: true}` | `recognition_line`, `inference_snapshot`, `journey_id` |
 | **8** | Triad reveal | **POST `/api/mitra/journey/start/`** with inference-derived signals | `mantra` + `sankalp` + `practice` + `focus_name` + `recommended_posture` + `sankalp_prefix_line` | `master_mantra`, `master_sankalp`, `master_practice` |
 
-**2 backend calls during onboarding.** All chip filtering happens client-side against the CSV tree bundled in `allContainers.js`.
+**5 backend calls during onboarding** (stages 1/2/3 chip delivery + complete + journey/start). Backend is the single source of chip truth; `allContainers.js` CSV tree is a now-unused fallback (FE will consume the new endpoint on its own rollout schedule).
+
+### `GET /api/mitra/onboarding/chips/` — query-param spec
+
+| Param | Required | Values |
+|---|---|---|
+| `stage` | yes | `1` \| `2` \| `3` |
+| `lane` | yes | `support` \| `growth` |
+| `stage1_choice` | if stage ≥ 2 | chip_id or full label (e.g. `work_career` or `Work feels heavy`) |
+| `stage2_choice` | if stage == 3 | chip_id or full label |
+| `guidance_mode` | optional | `universal` \| `hybrid` (default) \| `rooted` |
+
+Response shape:
+
+```json
+{
+  "stage": 2,
+  "lane": "support",
+  "mitra_message": "About work — what feels hardest right now?",
+  "sub_prompt": "Name the vṛtti — the mental movement — that is loudest.",
+  "chips": [
+    { "id": "work_feels_hard", "label": "Work feels hard", "sort_order": 1 },
+    { "id": "i_feel_stuck", "label": "I feel stuck", "sort_order": 2 }
+  ],
+  "open_input": { "placeholder": "Or say it in your words", "max_length": 180 },
+  "mapping_version": "1.2.0"
+}
+```
+
+All fields always present — never omit keys. Backend accepts BOTH chip_id values and full-label strings in `stage1_choice` / `stage2_choice`.
 
 ### Example payload — Turn 7 call
 

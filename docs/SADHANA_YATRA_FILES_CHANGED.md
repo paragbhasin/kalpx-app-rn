@@ -18,9 +18,9 @@ Verified line counts via `wc -l` against actual files on 2026-04-14. Bold counts
 
 ### Modified files
 - `core/reasoning/diagnostics.py` — added `compose_support_recognition_csv`, `compose_growth_recognition_csv`, helpers
-- `core/content_loader.py` — added `get_onboarding_slots`
-- `core/mitra_views.py` — added `onboarding_complete` view, v1.2.0 response shape
-- `core/urls.py` — added `/api/mitra/onboarding/complete/` route
+- `core/content_loader.py` — added `get_onboarding_slots`; added `get_stage_flow_chips` CSV-backed loader with module-level cache (`_STAGE_FLOW_CACHE`) + `_slugify_label` helper
+- `core/mitra_views.py` — added `onboarding_complete` view, v1.2.0 response shape; added `onboarding_chips` per-turn chip endpoint (Turns 3/4/5) + `_resolve_stage_heading` / `_resolve_stage_subtext` helpers
+- `core/urls.py` — added `/api/mitra/onboarding/complete/` and `/api/mitra/onboarding/chips/` routes
 - `core/serializers.py` — added 7 new fields on `JourneyStartSerializer`
 - `core/journey_views.py` — sadhana-yatra signal folding
 - `core/models.py` — `JourneyContext` sadhana-yatra fields + `MitraDecisionLog`

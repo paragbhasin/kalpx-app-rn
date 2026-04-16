@@ -209,13 +209,12 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderRadius: 24,
     borderWidth: 0.3,
-
     elevation: 6,
-
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
+    width: "100%",
   },
   premiumChipLabel: {
     fontFamily: Fonts.sans.regular,

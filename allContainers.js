@@ -568,9 +568,7 @@ export const CompanionDashboardV3Container = {
     day_active: {
       tone: { theme: "light_sandal", mood: "steady" },
       meta: { requires_active_cycle: true, reactive_updates: true },
-      blocks: [
-        { type: "new_dashboard_body" },
-      ],
+      blocks: [{ type: "new_dashboard_body" }],
     },
   },
 };
@@ -6660,32 +6658,6 @@ export const WelcomeOnboardingContainer = {
   container_id: "welcome_onboarding",
   container_type: "welcome_onboarding",
   states: {
-    turn_0: {
-      tone: { theme: "gold_dark", mood: "steady" },
-      blocks: [
-        {
-          type: "onboarding_intro_hero",
-          headline: "Do you need support in some area of life right now?",
-          subtext: "Or are you feeling balanced and ready to grow?",
-          reply_chips: [
-            {
-              id: "support",
-              label: "I need support in an area of life",
-              style: "secondary",
-            },
-            {
-              id: "growth",
-              label: "I feel balanced and want to grow",
-              style: "secondary",
-            },
-          ],
-          on_response: {
-            type: "onboarding_turn_response",
-            payload: {},
-          },
-        },
-      ],
-    },
     turn_1: {
       tone: { theme: "gold_dark", mood: "steady" },
       blocks: [
@@ -6708,7 +6680,11 @@ export const WelcomeOnboardingContainer = {
           },
           reply_chips: [
             { id: "continue", label: "I'd like that", style: "primary" },
-            { id: "returning", label: "I've used this before", style: "secondary" },
+            {
+              id: "returning",
+              label: "I've used this before",
+              style: "secondary",
+            },
           ],
           open_input: {
             enabled: true,
@@ -6726,25 +6702,21 @@ export const WelcomeOnboardingContainer = {
       tone: { theme: "gold_dark", mood: "reflective" },
       blocks: [
         {
-          type: "headline",
-          content: "What brings you here right now?",
-          style: { fontSize: "32px", lineHeight: 40, marginTop: -10 },
-        },
-        {
-          type: "subtext",
-          content: "Pick whichever feels true.",
-          variant: "multi_line",
-        },
-        {
-          type: "onboarding_conversation_turn",
-          id: "turn2",
-          mitra_message: "",
+          type: "onboarding_intro_hero",
+          headline: "Do you need support in some area of life right now?",
+          subtext: "Or are you feeling balanced and ready to grow?",
           reply_chips: [
-            { id: "support", label: "I need support right now", style: "secondary" },
-            { id: "growth", label: "I feel okay and want to grow", style: "secondary" },
+            {
+              id: "support",
+              label: "I need help with something in life right now",
+              style: "secondary",
+            },
+            {
+              id: "growth",
+              label: "I feel balanced and want to grow",
+              style: "secondary",
+            },
           ],
-          open_input: { enabled: false },
-          voice_available: true,
           on_response: _onResp,
         },
       ],
@@ -6759,17 +6731,33 @@ export const WelcomeOnboardingContainer = {
           content: "What feels strongest right now?",
           style: { fontSize: "32px", lineHeight: 40, marginTop: -10 },
         },
-        { type: "subtext", content: "Pick where you feel it most.", variant: "multi_line" },
+        {
+          type: "subtext",
+          content: "Pick where you feel it most.",
+          variant: "multi_line",
+        },
         {
           type: "onboarding_conversation_turn",
           id: "turn3_support",
           mitra_message: "",
           reply_chips: [
             { id: "body", label: "My body feels tight", style: "secondary" },
-            { id: "breath", label: "My breathing feels off", style: "secondary" },
+            {
+              id: "breath",
+              label: "My breathing feels off",
+              style: "secondary",
+            },
             { id: "mind", label: "My mind won't settle", style: "secondary" },
-            { id: "intellect", label: "I don't know what to do", style: "secondary" },
-            { id: "deep", label: "Something feels heavy inside", style: "secondary" },
+            {
+              id: "intellect",
+              label: "I don't know what to do",
+              style: "secondary",
+            },
+            {
+              id: "deep",
+              label: "Something feels heavy inside",
+              style: "secondary",
+            },
           ],
           open_input: {
             enabled: true,
@@ -6791,7 +6779,11 @@ export const WelcomeOnboardingContainer = {
           content: "What feels present right now?",
           style: { fontSize: "32px", lineHeight: 40, marginTop: -10 },
         },
-        { type: "subtext", content: "Pick whichever fits today.", variant: "multi_line" },
+        {
+          type: "subtext",
+          content: "Pick whichever fits today.",
+          variant: "multi_line",
+        },
         {
           type: "onboarding_conversation_turn",
           id: "turn3_growth",
@@ -6799,10 +6791,22 @@ export const WelcomeOnboardingContainer = {
           reply_chips: [
             { id: "steady", label: "I feel steady", style: "secondary" },
             { id: "thankful", label: "I feel thankful", style: "secondary" },
-            { id: "changing", label: "Something is changing", style: "secondary" },
-            { id: "better_today", label: "I feel better today", style: "secondary" },
+            {
+              id: "changing",
+              label: "Something is changing",
+              style: "secondary",
+            },
+            {
+              id: "better_today",
+              label: "I feel better today",
+              style: "secondary",
+            },
             { id: "want_grow", label: "I want to grow", style: "secondary" },
-            { id: "more_meaning", label: "I want more meaning", style: "secondary" },
+            {
+              id: "more_meaning",
+              label: "I want more meaning",
+              style: "secondary",
+            },
           ],
           open_input: {
             enabled: true,
@@ -6824,19 +6828,35 @@ export const WelcomeOnboardingContainer = {
           content: "What is your mind doing?",
           style: { fontSize: "32px", lineHeight: 40, marginTop: -10 },
         },
-        { type: "subtext", content: "This helps me see the movement.", variant: "multi_line" },
+        {
+          type: "subtext",
+          content: "This helps me see the movement.",
+          variant: "multi_line",
+        },
         {
           type: "onboarding_conversation_turn",
           id: "turn4_support",
           mitra_message: "",
           reply_chips: [
             { id: "replay", label: "It keeps replaying", style: "secondary" },
-            { id: "worry", label: "It keeps worrying ahead", style: "secondary" },
+            {
+              id: "worry",
+              label: "It keeps worrying ahead",
+              style: "secondary",
+            },
             { id: "compare", label: "It keeps comparing", style: "secondary" },
-            { id: "argue", label: "It keeps arguing inside", style: "secondary" },
+            {
+              id: "argue",
+              label: "It keeps arguing inside",
+              style: "secondary",
+            },
             { id: "blank", label: "It goes blank", style: "secondary" },
             { id: "hold", label: "It keeps holding on", style: "secondary" },
-            { id: "push_away", label: "It keeps pushing away", style: "secondary" },
+            {
+              id: "push_away",
+              label: "It keeps pushing away",
+              style: "secondary",
+            },
           ],
           open_input: {
             enabled: true,
@@ -6858,7 +6878,11 @@ export const WelcomeOnboardingContainer = {
           content: "What do you want more of right now?",
           style: { fontSize: "32px", lineHeight: 40, marginTop: -10 },
         },
-        { type: "subtext", content: "The one that pulls you most.", variant: "multi_line" },
+        {
+          type: "subtext",
+          content: "The one that pulls you most.",
+          variant: "multi_line",
+        },
         {
           type: "onboarding_conversation_turn",
           id: "turn4_growth",
@@ -6902,8 +6926,16 @@ export const WelcomeOnboardingContainer = {
           mitra_message: "",
           reply_chips: [
             { id: "fear", label: "Fear", style: "secondary" },
-            { id: "wanting", label: "Holding on too tightly", style: "secondary" },
-            { id: "resistance", label: "Not wanting this at all", style: "secondary" },
+            {
+              id: "wanting",
+              label: "Holding on too tightly",
+              style: "secondary",
+            },
+            {
+              id: "resistance",
+              label: "Not wanting this at all",
+              style: "secondary",
+            },
             { id: "identity", label: "Feeling hurt", style: "secondary" },
             { id: "confusion", label: "Confusion", style: "secondary" },
             { id: "not_sure", label: "I'm not sure", style: "secondary" },
@@ -6939,11 +6971,31 @@ export const WelcomeOnboardingContainer = {
           mitra_message: "",
           reply_chips: [
             { id: "quiet", label: "Something quiet", style: "secondary" },
-            { id: "practical", label: "Something practical", style: "secondary" },
-            { id: "uplifting", label: "Something uplifting", style: "secondary" },
-            { id: "devotional", label: "Something devotional", style: "secondary" },
-            { id: "grounding", label: "Something grounding", style: "secondary" },
-            { id: "think_through", label: "Something to think through", style: "secondary" },
+            {
+              id: "practical",
+              label: "Something practical",
+              style: "secondary",
+            },
+            {
+              id: "uplifting",
+              label: "Something uplifting",
+              style: "secondary",
+            },
+            {
+              id: "devotional",
+              label: "Something devotional",
+              style: "secondary",
+            },
+            {
+              id: "grounding",
+              label: "Something grounding",
+              style: "secondary",
+            },
+            {
+              id: "think_through",
+              label: "Something to think through",
+              style: "secondary",
+            },
           ],
           open_input: {
             enabled: true,
@@ -7005,8 +7057,16 @@ export const WelcomeOnboardingContainer = {
           id: "turn7",
           mitra_message: "",
           reply_chips: [
-            { id: "play_briefing", label: "Hear my first guidance", style: "primary" },
-            { id: "show_path", label: "Show me my path first", style: "secondary" },
+            {
+              id: "play_briefing",
+              label: "Hear my first guidance",
+              style: "primary",
+            },
+            {
+              id: "show_path",
+              label: "Show me my path first",
+              style: "secondary",
+            },
           ],
           open_input: {
             enabled: true,
@@ -7219,7 +7279,6 @@ export const WelcomeOnboardingContainer = {
         { type: "guidance_mode_picker", on_response: _onResp },
       ],
     },
-
   },
 };
 

@@ -414,7 +414,7 @@ export default function Home() {
           //   stateId: "discipline_select",
           // }));
           store.dispatch(
-            screenActions.setScreenValue({ key: "onboarding_turn", value: 0 }),
+            screenActions.setScreenValue({ key: "onboarding_turn", value: 2 }),
           );
           store.dispatch(
             screenActions.setScreenValue({
@@ -425,7 +425,7 @@ export default function Home() {
           store.dispatch(
             loadScreenWithData({
               containerId: "welcome_onboarding",
-              stateId: "turn_0",
+              stateId: "turn_2",
             }),
           );
         }
@@ -442,7 +442,7 @@ export default function Home() {
       //   stateId: "discipline_select",
       // }));
       store.dispatch(
-        screenActions.setScreenValue({ key: "onboarding_turn", value: 0 }),
+        screenActions.setScreenValue({ key: "onboarding_turn", value: 2 }),
       );
       store.dispatch(
         screenActions.setScreenValue({
@@ -453,7 +453,7 @@ export default function Home() {
       store.dispatch(
         loadScreenWithData({
           containerId: "welcome_onboarding",
-          stateId: "turn_0",
+          stateId: "turn_2",
         }),
       );
     }

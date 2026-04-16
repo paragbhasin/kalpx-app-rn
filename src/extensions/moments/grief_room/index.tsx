@@ -1,3 +1,4 @@
+import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -36,7 +37,11 @@ const GriefRoomContainer: React.FC<Props> = () => {
     updateHeaderHidden(false);
     return () => updateHeaderHidden(false);
   }, [updateBackground, updateHeaderHidden]);
-  const [step, setStep] = useState<"opening" | "options" | "input">("opening");
+  const [step, setStep] = useState<"opening" | "options" | "input" | "breath">(
+    "opening",
+  );
+  const [breathText, setBreathText] = useState("Inhale");
+  const [timerSeconds, setTimerSeconds] = useState(540); // 9 minutes
   const [inputValue, setInputValue] = useState("");
   const [actionsUsed, setActionsUsed] = useState<string[]>([]);
 
@@ -59,31 +64,52 @@ const GriefRoomContainer: React.FC<Props> = () => {
       useNativeDriver: true,
     }).start();
 
-    // Subtle breathing dot animation
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(dotScale, {
-          toValue: 1.3,
-          duration: 3000,
-          easing: Easing.inOut(Easing.sin),
-          useNativeDriver: true,
-        }),
+    // Stage 2: Reveal options after 2s (or on user tap)
+    const timer = setTimeout(() => {
+      revealOptions();
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Breathing orchestration
+  useEffect(() => {
+    if (step !== "breath") return;
+
+    let timerInterval: any;
+
+    // Timer countdown
+    timerInterval = setInterval(() => {
+      setTimerSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
+    const runBreathCycle = () => {
+      setBreathText("Inhale");
+      Animated.timing(dotScale, {
+        toValue: 2.2,
+        duration: 4000,
+        easing: Easing.inOut(Easing.sin),
+        useNativeDriver: true,
+      }).start(() => {
+        setBreathText("Exhale");
         Animated.timing(dotScale, {
           toValue: 1,
           duration: 4000,
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
-        }),
-      ]),
-    ).start();
+        }).start(() => {
+          // Check if we are still in breath mode before looping
+          runBreathCycle();
+        });
+      });
+    };
 
-    // Stage 2: Reveal options after 2s (or on user tap)
-    const timer = setTimeout(() => {
-      revealOptions();
-    }, 1000);
+    runBreathCycle();
 
-    return () => clearTimeout(timer);
-  }, []);
+    return () => {
+      clearInterval(timerInterval);
+    };
+  }, [step]);
 
   const revealOptions = () => {
     if (step === "options" || step === "input") return;
@@ -129,24 +155,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
     <Animated.View style={[styles.optionsStack, { opacity: fade2 }]}>
       <Text style={styles.secondBeat}>{ctx.second_beat_line}</Text>
 
-      <TouchableOpacity
-        style={styles.pill}
-        onPress={() =>
-          dispatch(
-            "start_runner",
-            {
-              container_id: "practice_runner",
-              state_id: "practice_step_runner",
-            },
-            {
-              source: "support_grief",
-              variant: "practice_timer",
-              duration_sec: (ctx.slow_breath?.duration_min || 9) * 60,
-              item: ctx.slow_breath,
-            },
-          )
-        }
-      >
+      <TouchableOpacity style={styles.pill} onPress={() => setStep("breath")}>
         <Text style={styles.pillText}>Breathe slow with me</Text>
       </TouchableOpacity>
 
@@ -189,6 +198,55 @@ const GriefRoomContainer: React.FC<Props> = () => {
       </TouchableOpacity>
     </Animated.View>
   );
+
+  const renderBreath = () => {
+    const minutes = Math.floor(timerSeconds / 60);
+    const seconds = timerSeconds % 60;
+    const timeStr = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+
+    return (
+      <View style={styles.breathContainer}>
+        <Text style={styles.mudraLabel}>
+          {ctx.slow_breath?.title || ctx.slow_breath?.label || "Guided Breathing"}
+        </Text>
+
+        <View style={styles.orbOuter}>
+          <Animated.View
+            style={[styles.orbWrapper, { transform: [{ scale: dotScale }] }]}
+          >
+            <LinearGradient
+              colors={["rgba(255, 255, 255, 0.45)", "rgba(235, 215, 190, 0.2)"]}
+              style={styles.orbGradient}
+            >
+              <Text style={styles.breathActionText}>{breathText}</Text>
+            </LinearGradient>
+          </Animated.View>
+          {/* Subtle water-drop highlight */}
+          <View style={styles.orbHighlight} />
+        </View>
+
+        <Text style={styles.timerText}>{timeStr}</Text>
+
+        <TouchableOpacity
+          style={styles.endPracticeBtn}
+          onPress={() => setStep("options")}
+        >
+          <Text style={styles.endPracticeText}>
+            I want to end this practice
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.exitBtn}
+          onPress={() =>
+            dispatch("exit_grief_room", null, { actions_used: actionsUsed })
+          }
+        >
+          <Text style={styles.exitText}>I'll go now</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   const renderInput = () => (
     <KeyboardAvoidingView
@@ -236,6 +294,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
 
         {step === "options" && renderOptions()}
         {step === "input" && renderInput()}
+        {step === "breath" && renderBreath()}
       </ScrollView>
     </TouchableOpacity>
   );
@@ -265,6 +324,88 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: "#D4A017",
     opacity: 0.6,
+  },
+  // Breath Interaction Styles
+  breathContainer: {
+    width: "100%",
+    alignItems: "center",
+    paddingTop: 10,
+  },
+  breathHeader: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    marginBottom: 60,
+  },
+  backArrow: {
+    fontSize: 28,
+    color: "#c89a47",
+    fontFamily: Fonts.serif.regular,
+  },
+  mudraLabel: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 24,
+    color: "#432104",
+    marginBottom: 60,
+    textAlign: "center",
+  },
+  orbOuter: {
+    width: 220,
+    height: 220,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 60,
+  },
+  orbWrapper: {
+    width: 140,
+    height: 140,
+    borderRadius: 110,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(191, 138, 74, 0.25)",
+    elevation: 4,
+    shadowColor: "#BF8A4A",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+  },
+  orbGradient: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 253, 249, 0.2)",
+  },
+  orbHighlight: {
+    position: "absolute",
+    top: "15%",
+    left: "25%",
+    width: 40,
+    height: 20,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.35)",
+    transform: [{ rotate: "-15deg" }],
+    pointerEvents: "none",
+  },
+  breathActionText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 22,
+    color: "#564B42",
+  },
+  timerText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 28,
+    color: "#432104",
+    letterSpacing: 2,
+    marginBottom: 100,
+  },
+  endPracticeBtn: {
+    paddingVertical: 12,
+  },
+  endPracticeText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 16,
+    color: "#8a7d6b",
+    textDecorationLine: "underline",
   },
   secondBeat: {
     fontFamily: Fonts.serif.regular,

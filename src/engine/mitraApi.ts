@@ -1212,3 +1212,81 @@ export async function getJoySignal(): Promise<any> {
     return null;
   }
 }
+
+/**
+ * Mitra v3 content resolver — Phase C pilot client (M35 evening_reflection).
+ *
+ * Spec: kalpx-app-rn/docs/ORCHESTRATION_CONTRACT_V1.md §1
+ * Endpoint: POST /api/mitra/content/moments/<moment_id>/resolve/
+ *   (gated behind MITRA_V3_CONTENT_RESOLVE_ENABLED on the backend — 404
+ *   when disabled; caller treats 404 identically to a network failure)
+ *
+ * Sovereignty-compliant failure mode:
+ *   - On 404 / 5xx / network error: returns null.
+ *   - The caller MUST NOT fall back to TSX-embedded English strings.
+ *     Blank UI is preferred over hidden content. Missing content
+ *     surfaces via the backend MitraDecisionLog dashboards.
+ */
+export interface MomentContextShape {
+  path: "support" | "growth" | "both";
+  guidance_mode: "universal" | "hybrid" | "rooted";
+  locale: string;
+  user_attention_state: string;
+  emotional_weight: "light" | "moderate" | "heavy" | "maximum";
+  cycle_day: number;
+  entered_via: string;
+  stage_signals?: Record<string, string>;
+  today_layer?: Record<string, string>;
+  life_layer: {
+    cycle_id: string;
+    life_kosha: string;
+    scan_focus: string;
+    life_klesha?: string | null;
+    life_vritti?: string | null;
+    life_goal?: string | null;
+  };
+}
+
+export interface MomentPayloadShape {
+  moment_id: string;
+  slots: Record<string, string>;
+  meta: {
+    variant_id: string;
+    mode_served: string;
+    locale_served: string;
+    fallback_used: boolean;
+    fallback_reason: string | null;
+    audit_id: string;
+    resolved_in_ms: number;
+  };
+  presentation_hints: Record<string, any> | null;
+}
+
+export async function mitraResolveMoment(
+  momentId: string,
+  ctx: MomentContextShape,
+  requestId?: string,
+): Promise<MomentPayloadShape | null> {
+  try {
+    const headers: Record<string, string> = {};
+    if (requestId) headers["X-Request-ID"] = requestId;
+    const res = await api.post(
+      `mitra/content/moments/${momentId}/resolve/`,
+      ctx,
+      { headers },
+    );
+    const data = res.data || null;
+    if (!data || typeof data !== "object" || !data.slots) return null;
+    return data as MomentPayloadShape;
+  } catch (err: any) {
+    // Sovereignty contract: never fall back to English. Return null and
+    // let the caller render empty slots ("") so missing content is
+    // visible in QA + telemetry.
+    console.warn(
+      "[MITRA] content.resolve failed (tolerated, blank-on-missing):",
+      momentId,
+      err?.message,
+    );
+    return null;
+  }
+}

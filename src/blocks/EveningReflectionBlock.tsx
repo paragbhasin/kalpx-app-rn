@@ -32,7 +32,7 @@
  * NOT display labels. Display labels come from slots and may rotate.
  */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -44,6 +44,7 @@ import {
 } from "react-native";
 import { Fonts } from "../theme/fonts";
 import { executeAction } from "../engine/actionExecutor";
+import { mitraResolveMoment } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
@@ -79,6 +80,69 @@ const EveningReflectionBlock: React.FC<Props> = () => {
   const [chip, setChip] = useState<string | null>(draft.chip || null);
   const [text, setText] = useState<string>(draft.text || "");
   const [submitted, setSubmitted] = useState(false);
+  const resolveFiredRef = useRef(false);
+
+  // Phase C pilot — resolve M35 content slots on mount.
+  // PresentationContext declared fields (user_attention_state,
+  // emotional_weight, reading_posture) are FIXED for this surface per
+  // CONTENT_CONTRACT_V1 §1b. Variable signals come from screenData.
+  // On failure: slots stay empty "", UI renders blank — by design.
+  useEffect(() => {
+    if (resolveFiredRef.current) return;
+    if (ss.evening_reflection && typeof ss.evening_reflection === "object") {
+      // Already populated (e.g. server-side injection or prior mount).
+      resolveFiredRef.current = true;
+      return;
+    }
+    resolveFiredRef.current = true;
+    const cycleId =
+      typeof ss.journey_id === "string" && ss.journey_id
+        ? ss.journey_id
+        : typeof ss.cycle_id === "string" && ss.cycle_id
+          ? ss.cycle_id
+          : "";
+    const ctx = {
+      path: (ss.journey_path === "growth" ? "growth" : "support") as
+        | "support"
+        | "growth",
+      guidance_mode: (ss.guidance_mode || "hybrid") as
+        | "universal"
+        | "hybrid"
+        | "rooted",
+      locale: (ss.locale || "en") as string,
+      user_attention_state: "winding_down",
+      emotional_weight: "moderate" as const,
+      cycle_day: Number(ss.day_number) || 0,
+      entered_via:
+        typeof ss._entered_via === "string" && ss._entered_via
+          ? ss._entered_via
+          : "dashboard_card",
+      stage_signals: {},
+      today_layer: {},
+      life_layer: {
+        cycle_id: cycleId,
+        life_kosha: (ss.life_kosha || ss.scan_focus || "") as string,
+        scan_focus: (ss.scan_focus || "") as string,
+        life_klesha: ss.life_klesha || null,
+        life_vritti: ss.life_vritti || null,
+        life_goal: ss.life_goal || null,
+      },
+    };
+    let cancelled = false;
+    (async () => {
+      const payload = await mitraResolveMoment("M35_evening_reflection", ctx);
+      if (cancelled || !payload) return;
+      store.dispatch(
+        screenActions.setScreenValue({
+          key: "evening_reflection",
+          value: payload.slots,
+        }),
+      );
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Persist to draft (kept local — cleared on exit/submit by actionExecutor)
   useEffect(() => {

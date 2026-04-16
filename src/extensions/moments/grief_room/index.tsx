@@ -2,20 +2,20 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Easing,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ScrollView,
-  TextInput,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { Fonts } from "../../../theme/fonts";
 import { executeAction } from "../../../engine/actionExecutor";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 import store from "../../../store";
 import { screenActions } from "../../../store/screenSlice";
+import { Fonts } from "../../../theme/fonts";
 
 interface Props {
   block?: any;
@@ -23,17 +23,32 @@ interface Props {
 
 const GriefRoomContainer: React.FC<Props> = () => {
   const { screenData, loadScreen, goBack } = useScreenStore();
+  const updateBackground = useScreenStore(
+    (state: any) => state.updateBackground,
+  );
+  const updateHeaderHidden = useScreenStore(
+    (state: any) => state.updateHeaderHidden,
+  );
+  useEffect(() => {
+    const updatedBackground = require("../../../../assets/beige_bg.png");
+
+    updateBackground(updatedBackground);
+    updateHeaderHidden(false);
+    return () => updateHeaderHidden(false);
+  }, [updateBackground, updateHeaderHidden]);
   const [step, setStep] = useState<"opening" | "options" | "input">("opening");
   const [inputValue, setInputValue] = useState("");
   const [actionsUsed, setActionsUsed] = useState<string[]>([]);
-  
+
   const fade1 = useRef(new Animated.Value(0)).current;
   const fade2 = useRef(new Animated.Value(0)).current;
   const dotScale = useRef(new Animated.Value(1)).current;
 
   const ctx = (screenData as any).grief_context || {
-    opening_line: "You don't have to say anything yet. Sit with me for a moment.",
-    second_beat_line: "Would a slow breath help right now? Or would you rather just stay quiet together?",
+    opening_line:
+      "You don't have to say anything yet. Sit with me for a moment.",
+    second_beat_line:
+      "Would a slow breath help right now? Or would you rather just stay quiet together?",
   };
 
   useEffect(() => {
@@ -59,7 +74,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
 
     // Stage 2: Reveal options after 30s (or on user tap)
@@ -80,9 +95,13 @@ const GriefRoomContainer: React.FC<Props> = () => {
     }).start();
   };
 
-  const dispatch = (actionType: string, actionTarget?: any, actionPayload?: any) => {
+  const dispatch = (
+    actionType: string,
+    actionTarget?: any,
+    actionPayload?: any,
+  ) => {
     if (actionType !== "exit_grief_room") {
-      setActionsUsed(prev => [...new Set([...prev, actionType])]);
+      setActionsUsed((prev) => [...new Set([...prev, actionType])]);
     }
     executeAction(
       { type: actionType, target: actionTarget, payload: actionPayload },
@@ -97,10 +116,10 @@ const GriefRoomContainer: React.FC<Props> = () => {
   };
 
   const handleInputSubmit = () => {
-    dispatch("grief_voice_note_submitted", { 
-      text: inputValue, 
+    dispatch("grief_voice_note_submitted", {
+      text: inputValue,
       length_chars: inputValue.length,
-      duration_sec: 0 // Local text fallback for now
+      duration_sec: 0, // Local text fallback for now
     });
     setInputValue("");
     setStep("options");
@@ -109,35 +128,46 @@ const GriefRoomContainer: React.FC<Props> = () => {
   const renderOptions = () => (
     <Animated.View style={[styles.optionsStack, { opacity: fade2 }]}>
       <Text style={styles.secondBeat}>{ctx.second_beat_line}</Text>
-      
+
       <TouchableOpacity
         style={styles.pill}
-        onPress={() => dispatch("start_runner", 
-          { container_id: "practice_runner", state_id: "practice_step_runner" },
-          { 
-            source: "support_grief", 
-            variant: "practice_timer", 
-            duration_sec: (ctx.slow_breath?.duration_min || 9) * 60,
-            item: ctx.slow_breath 
-          }
-        )}
+        onPress={() =>
+          dispatch(
+            "start_runner",
+            {
+              container_id: "practice_runner",
+              state_id: "practice_step_runner",
+            },
+            {
+              source: "support_grief",
+              variant: "practice_timer",
+              duration_sec: (ctx.slow_breath?.duration_min || 9) * 60,
+              item: ctx.slow_breath,
+            },
+          )
+        }
       >
         <Text style={styles.pillText}>Breathe slow with me</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.pill}
-        onPress={() => setStep("input")}
-      >
+      <TouchableOpacity style={styles.pill} onPress={() => setStep("input")}>
         <Text style={styles.pillText}>I want to speak</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.pill}
-        onPress={() => dispatch("start_runner", 
-          { container_id: "cycle_transitions", state_id: "view_info" },
-          { source: "support_grief", variant: "mantra", target_reps: 27, item: ctx.grief_mantra }
-        )}
+        onPress={() =>
+          dispatch(
+            "start_runner",
+            { container_id: "cycle_transitions", state_id: "view_info" },
+            {
+              source: "support_grief",
+              variant: "mantra",
+              target_reps: 27,
+              item: ctx.grief_mantra,
+            },
+          )
+        }
       >
         <Text style={styles.pillText}>A mantra for holding this</Text>
       </TouchableOpacity>
@@ -148,10 +178,12 @@ const GriefRoomContainer: React.FC<Props> = () => {
       >
         <Text style={styles.pillText}>Just sit</Text>
       </TouchableOpacity>
-      
+
       <TouchableOpacity
         style={styles.exitBtn}
-        onPress={() => dispatch("exit_grief_room", null, { actions_used: actionsUsed })}
+        onPress={() =>
+          dispatch("exit_grief_room", null, { actions_used: actionsUsed })
+        }
       >
         <Text style={styles.exitText}>I'll go now</Text>
       </TouchableOpacity>
@@ -186,18 +218,18 @@ const GriefRoomContainer: React.FC<Props> = () => {
   );
 
   return (
-    <TouchableOpacity 
-      activeOpacity={1} 
-      style={styles.root} 
+    <TouchableOpacity
+      activeOpacity={1}
+      style={styles.root}
       onPress={revealOptions}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Animated.View style={{ opacity: fade1, alignItems: "center" }}>
           <Text style={styles.openingLine}>{ctx.opening_line}</Text>
-          
+
           {step === "opening" && (
-            <Animated.View 
-              style={[styles.dot, { transform: [{ scale: dotScale }] }]} 
+            <Animated.View
+              style={[styles.dot, { transform: [{ scale: dotScale }] }]}
             />
           )}
         </Animated.View>
@@ -212,21 +244,20 @@ const GriefRoomContainer: React.FC<Props> = () => {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: "#F4EAD4", // Spec: deep cream, dim ambient
   },
   scrollContent: {
     paddingHorizontal: 28,
-    paddingTop: 100,
+    paddingTop: 20,
     paddingBottom: 60,
     alignItems: "center",
   },
   openingLine: {
-    fontFamily: Fonts.serif.regular,
+    fontFamily: Fonts.sans.medium,
     fontSize: 24,
-    color: "#2b1d0a",
+    color: "#432104",
     textAlign: "center",
-    lineHeight: 34,
-    marginBottom: 60,
+    marginBottom: 20,
+    lineHeight: 32,
   },
   dot: {
     width: 8,
@@ -236,42 +267,48 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   secondBeat: {
-    fontFamily: Fonts.sans.regular,
-    fontSize: 16,
-    color: "#8a7d6b",
+    fontFamily: Fonts.serif.regular,
+    fontSize: 20,
+    color: "#564B42",
     textAlign: "center",
-    lineHeight: 24,
-    marginBottom: 36,
+    lineHeight: 28,
+    marginBottom: 20,
   },
   optionsStack: {
     width: "100%",
     gap: 12,
+    marginTop: 10,
   },
   pill: {
+    backgroundColor: "#FBF5F5",
+    borderColor: "#c89a47",
     borderWidth: 1,
-    borderColor: "rgba(43, 29, 10, 0.15)",
-    borderRadius: 28,
-    paddingVertical: 14,
+    elevation: 6,
     paddingHorizontal: 20,
-    alignItems: "center",
+    paddingVertical: 12,
+    borderRadius: 24,
     justifyContent: "center",
-    minHeight: 44,
-    backgroundColor: "transparent",
+    alignItems: "center",
+
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   pillText: {
-    fontFamily: Fonts.sans.medium,
-    fontSize: 15,
-    color: "#2b1d0a",
+    fontFamily: Fonts.serif.regular,
+    fontSize: 17,
+    color: "#432104",
   },
   exitBtn: {
-    marginTop: 40,
+    // marginTop: 40,
     alignItems: "center",
     paddingVertical: 12,
   },
   exitText: {
-    fontFamily: Fonts.sans.regular,
-    fontSize: 14,
-    color: "#8a7d6b",
+    fontFamily: Fonts.serif.bold,
+    fontSize: 18,
+    color: "#432104",
     textDecorationLine: "underline",
   },
   inputWrap: {

@@ -35,6 +35,7 @@ import {
   postVoiceNote,
   getVoiceNoteInterpretation,
 } from '../engine/mitraApi';
+import { useContentSlots, readMomentSlot } from '../hooks/useContentSlots';
 import store from '../store';
 import { screenActions } from '../store/screenSlice';
 
@@ -51,14 +52,37 @@ type Phase =
 
 const VoiceNoteSheet: React.FC<{ block?: any }> = ({ block }) => {
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
+  const ss = screenData as Record<string, any>;
   const sourceSurface =
-    (block && block.source_surface) || screenData.voice_note_source_surface || 'dashboard';
+    (block && block.source_surface) || ss.voice_note_source_surface || 'dashboard';
   const [phase, setPhase] = useState<Phase>('idle');
   const [seconds, setSeconds] = useState(0);
   const [textDraft, setTextDraft] = useState('');
   const [reflection, setReflection] = useState<string | null>(null);
   // showNameHint removed 2026-04-13 (backend B6 PII fix shipped).
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useContentSlots({
+    momentId: 'M31_voice_note_sheet',
+    screenDataKey: 'voice_note_sheet',
+    buildCtx: (s) => ({
+      path: s.journey_path === 'growth' ? 'growth' : 'support',
+      guidance_mode: s.guidance_mode || 'hybrid',
+      locale: s.locale || 'en',
+      user_attention_state: 'focused_receiving',
+      emotional_weight: 'moderate',
+      cycle_day: Number(s.day_number) || 0,
+      entered_via: 'mic_tap',
+      stage_signals: {},
+      today_layer: {},
+      life_layer: {
+        cycle_id: s.journey_id || s.cycle_id || '',
+        life_kosha: s.life_kosha || s.scan_focus || '',
+        scan_focus: s.scan_focus || '',
+      },
+    }),
+  });
+  const slot = (name: string) => readMomentSlot(ss, 'voice_note_sheet', name);
 
   const setValue = (key: string, v: any) =>
     store.dispatch(screenActions.setScreenValue({ key, value: v }));
@@ -95,8 +119,8 @@ const VoiceNoteSheet: React.FC<{ block?: any }> = ({ block }) => {
         duration_ms: seconds * 1000,
       });
       if (!res || !res.id) {
-        // Flag off or upload failed — fall back to gentle ack.
-        setReflection("I heard you. I'll hold it.");
+        // Flag off or upload failed — fall back to gentle ack from slots.
+        setReflection(slot('fallback_ack'));
         setPhase('done');
         return;
       }
@@ -111,14 +135,14 @@ const VoiceNoteSheet: React.FC<{ block?: any }> = ({ block }) => {
       }
       if (interp) {
         setValue('voice_note_interpretation', interp);
-        setReflection(interp.reflection || "I heard you. I'll hold it.");
+        setReflection(interp.reflection || slot('fallback_ack'));
       } else {
-        setReflection("I heard you. I'll hold it.");
+        setReflection(slot('fallback_ack'));
       }
       setPhase('done');
     } catch (err) {
       console.warn('[VoiceNoteSheet] submit failed', err);
-      setReflection("I heard you. I'll hold it.");
+      setReflection(slot('fallback_ack'));
       setPhase('done');
     }
   };
@@ -127,7 +151,7 @@ const VoiceNoteSheet: React.FC<{ block?: any }> = ({ block }) => {
     if (!textDraft.trim()) return;
     setPhase('uploading');
     setValue('voice_note_transcript', textDraft.trim());
-    setReflection("I heard you. I'll hold it.");
+    setReflection(slot('fallback_ack'));
     setPhase('done');
   };
 
@@ -155,7 +179,7 @@ const VoiceNoteSheet: React.FC<{ block?: any }> = ({ block }) => {
         <Text style={styles.closeText}>×</Text>
       </TouchableOpacity>
 
-      <Text style={styles.listening}>I&apos;m listening.</Text>
+      <Text style={styles.listening}>{slot('listening_prompt')}</Text>
 
       {/* Name-hint banner removed 2026-04-13 (backend B6 PII fix shipped) */}
 
@@ -172,7 +196,7 @@ const VoiceNoteSheet: React.FC<{ block?: any }> = ({ block }) => {
             onPress={() => setPhase('text_fallback')}
             style={styles.fallbackLink}
           >
-            <Text style={styles.fallbackLinkText}>Type instead</Text>
+            <Text style={styles.fallbackLinkText}>{slot('type_instead_link')}</Text>
           </TouchableOpacity>
         </>
       )}
@@ -210,8 +234,8 @@ const VoiceNoteSheet: React.FC<{ block?: any }> = ({ block }) => {
           <ActivityIndicator size="small" color="#eddeb4" />
           <Text style={styles.processingText}>
             {phase === 'uploading'
-              ? 'Saving what you shared.'
-              : 'Sitting with it.'}
+              ? slot('saving_status')
+              : slot('interpreting_status')}
           </Text>
         </View>
       )}
@@ -222,7 +246,7 @@ const VoiceNoteSheet: React.FC<{ block?: any }> = ({ block }) => {
             <Text style={styles.reflectText}>{reflection}</Text>
           </View>
           <TouchableOpacity style={styles.doneBtn} onPress={dismiss}>
-            <Text style={styles.doneBtnText}>Thank you</Text>
+            <Text style={styles.doneBtnText}>{slot('thank_you_cta')}</Text>
           </TouchableOpacity>
         </>
       )}
@@ -231,7 +255,7 @@ const VoiceNoteSheet: React.FC<{ block?: any }> = ({ block }) => {
         <>
           <TextInput
             style={styles.textInput}
-            placeholder="Type to me..."
+            placeholder={slot('type_placeholder')}
             placeholderTextColor="#6b5a45"
             value={textDraft}
             onChangeText={setTextDraft}
@@ -244,7 +268,7 @@ const VoiceNoteSheet: React.FC<{ block?: any }> = ({ block }) => {
             onPress={submitText}
             disabled={!textDraft.trim()}
           >
-            <Text style={styles.doneBtnText}>Send</Text>
+            <Text style={styles.doneBtnText}>{slot('send_cta')}</Text>
           </TouchableOpacity>
         </>
       )}

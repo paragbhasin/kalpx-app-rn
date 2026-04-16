@@ -72,6 +72,8 @@ interface WelcomeBackProps {
   cycleNumber?: number;
   daysPracticed?: number;
   strongestAnchor?: string;
+  /** T4B: per-intent welcome-back opener from backend (overrides generic copy). */
+  welcomeBackLine?: string;
   onContinue: () => void;
   onFresh: () => void;
 }
@@ -85,6 +87,7 @@ export default function WelcomeBack({
   cycleNumber = 1,
   daysPracticed = 0,
   strongestAnchor = "",
+  welcomeBackLine,
   onContinue,
   onFresh,
 }: WelcomeBackProps) {
@@ -105,8 +108,12 @@ export default function WelcomeBack({
           <Text style={styles.title}>Welcome back</Text>
 
           <Text style={styles.message}>
-            You were walking the path of <Text style={styles.strong}>{focusLabel}</Text>
-            {subfocusLabel ? ` — ${subfocusLabel}` : ""}.
+            {welcomeBackLine || (
+              <>
+                You were walking the path of <Text style={styles.strong}>{focusLabel}</Text>
+                {subfocusLabel ? ` — ${subfocusLabel}` : ""}.
+              </>
+            )}
           </Text>
 
           {daysPracticed > 0 && (

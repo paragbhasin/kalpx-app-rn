@@ -329,6 +329,9 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
             data.deepenSuggestion || null,
             'checkpoint_deepen_suggestion',
           );
+          if (data.framing) {
+            writeState(data.framing, 'checkpoint_framing');
+          }
         })
         .catch((err: any) => {
           console.warn('[CYCLE_REFLECTION] fetch failed:', err?.message);
@@ -410,7 +413,9 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
             <Text style={styles.arcLabel}>{intro.arcLabel}</Text>
           </View>
 
-          <Text style={styles.bottomDescription}>{intro.description}</Text>
+          <Text style={styles.bottomDescription}>
+            {(typeof screenData.checkpoint_framing === 'string' && screenData.checkpoint_framing) || intro.description}
+          </Text>
 
           <View style={styles.ctaWrap}>
             <GoldButton label={intro.cta} onPress={goToGrid} />

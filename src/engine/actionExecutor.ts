@@ -2527,6 +2527,9 @@ export async function executeAction(
           cpData.deepenSuggestion || null,
           "checkpoint_deepen_suggestion",
         );
+        if (cpData.framing) {
+          setScreenValue(cpData.framing, "checkpoint_framing");
+        }
 
         // Match web actionExecutor.js:2795 — fire checkpoint_viewed once
         // when the milestone screen successfully loads its data.

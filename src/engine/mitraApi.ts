@@ -508,6 +508,7 @@ export async function mitraCheckpoint(
       daysEngaged: engagement.daysEngaged || 0,
       daysFullyCompleted: engagement.daysFullyCompleted || 0,
       totalDays: engagement.totalDays || day,
+      framing: data.framing || "",
     };
   }
 

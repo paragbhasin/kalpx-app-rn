@@ -154,6 +154,7 @@ export default function Home() {
               daysPracticed: data.daysPracticed || 0,
               strongestAnchor: data.strongestAnchor || "",
               journeyId: data.journeyId || null,
+              welcomeBackLine: data.welcomeBackLine || "",
             });
             setMitraJourneyId(null);
           } else if (data?.hasActiveJourney && data?.journeyId) {
@@ -572,6 +573,7 @@ export default function Home() {
           cycleNumber={welcomeBackData.cycleNumber}
           daysPracticed={welcomeBackData.daysPracticed}
           strongestAnchor={welcomeBackData.strongestAnchor}
+          welcomeBackLine={welcomeBackData.welcomeBackLine}
           onContinue={handleWelcomeBackContinue}
           onFresh={handleWelcomeBackFresh}
         />

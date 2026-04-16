@@ -135,7 +135,12 @@ const CheckpointDay7Block: React.FC<Props> = () => {
   // hasn't resolved yet. Missing content visible, not hidden.
   const eyebrow = readSlot(ss, "eyebrow");
   const introHeadline = readSlot(ss, "intro_headline");
-  const introBody = readSlot(ss, "intro_body");
+  const introBodySlot = readSlot(ss, "intro_body");
+  // T4B: per-intent framing from checkpoint GET overrides spine intro_body.
+  const introBody: string =
+    (typeof ss.checkpoint_framing === "string" && ss.checkpoint_framing)
+      ? ss.checkpoint_framing
+      : introBodySlot;
   const introCtaLabel = readSlot(ss, "intro_cta_label");
   const bodyNarrativeAuthored = readSlot(ss, "body_narrative");
   const whatGrewLabel = readSlot(ss, "what_grew_label");

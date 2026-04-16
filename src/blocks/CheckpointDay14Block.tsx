@@ -133,7 +133,9 @@ const CheckpointDay14Block: React.FC<Props> = () => {
         <View style={styles.topRegion}>
           <Text style={styles.eyebrow}>{slot("eyebrow")}</Text>
           <Text style={styles.headline}>{slot("intro_headline")}</Text>
-          <Text style={styles.body}>{slot("intro_body")}</Text>
+          <Text style={styles.body}>
+            {(typeof ss.checkpoint_framing === "string" && ss.checkpoint_framing) || slot("intro_body")}
+          </Text>
         </View>
         <View style={styles.bottomRegion}>
           <TouchableOpacity

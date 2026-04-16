@@ -1,21 +1,20 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
-  Easing,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ScrollView,
-  TextInput,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from "react-native";
-import { Fonts } from "../../../theme/fonts";
 import { executeAction } from "../../../engine/actionExecutor";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 import store from "../../../store";
 import { screenActions } from "../../../store/screenSlice";
+import { Fonts } from "../../../theme/fonts";
 
 interface Props {
   block?: any;
@@ -26,7 +25,7 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
   const [step, setStep] = useState<"opening" | "options" | "input">("opening");
   const [inputType, setInputType] = useState<"naming" | "person">("naming");
   const [inputValue, setInputValue] = useState("");
-  
+
   const fade1 = useRef(new Animated.Value(0)).current;
   const fade2 = useRef(new Animated.Value(0)).current;
 
@@ -54,7 +53,11 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
     });
   }, [fade1, fade2]);
 
-  const dispatch = (actionType: string, actionTarget?: any, actionPayload?: any) =>
+  const dispatch = (
+    actionType: string,
+    actionTarget?: any,
+    actionPayload?: any,
+  ) =>
     executeAction(
       { type: actionType, target: actionTarget, payload: actionPayload },
       {
@@ -78,8 +81,10 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
 
   const renderOptions = () => (
     <Animated.View style={[styles.optionsStack, { opacity: fade2 }]}>
-      <Text style={styles.offerText}>A few things I can offer, if any land:</Text>
-      
+      <Text style={styles.offerText}>
+        A few things I can offer, if any land:
+      </Text>
+
       <TouchableOpacity
         style={styles.pill}
         onPress={() => {
@@ -92,20 +97,36 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
 
       <TouchableOpacity
         style={styles.pill}
-        onPress={() => dispatch("start_runner", 
-          { container_id: "practice_runner", state_id: "mantra_runner" },
-          { source: "support_loneliness", variant: "mantra", target_reps: 27, item: ctx.bhakti_mantra }
-        )}
+        onPress={() =>
+          dispatch(
+            "start_runner",
+            { container_id: "cycle_transitions", state_id: "view_info" },
+            {
+              source: "support_loneliness",
+              variant: "mantra",
+              target_reps: 27,
+              item: ctx.bhakti_mantra,
+            },
+          )
+        }
       >
         <Text style={styles.pillText}>Bhakti mantra</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.pill}
-        onPress={() => dispatch("start_runner", 
-          { container_id: "practice_runner", state_id: "mantra_runner" },
-          { source: "support_loneliness", variant: "mantra", target_reps: 11, item: ctx.companioned_chant }
-        )}
+        onPress={() =>
+          dispatch(
+            "start_runner",
+            { container_id: "practice_runner", state_id: "mantra_runner" },
+            {
+              source: "support_loneliness",
+              variant: "mantra",
+              target_reps: 11,
+              item: ctx.companioned_chant,
+            },
+          )
+        }
       >
         <Text style={styles.pillText}>A short chant together</Text>
       </TouchableOpacity>
@@ -122,11 +143,17 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
 
       <TouchableOpacity
         style={styles.pill}
-        onPress={() => dispatch("loneliness_walk_started", null, { duration_min: ctx.walk_duration_min || 10 })}
+        onPress={() =>
+          dispatch("loneliness_walk_started", null, {
+            duration_min: ctx.walk_duration_min || 10,
+          })
+        }
       >
-        <Text style={styles.pillText}>Walk outside for {ctx.walk_duration_min || 10} minutes</Text>
+        <Text style={styles.pillText}>
+          Walk outside for {ctx.walk_duration_min || 10} minutes
+        </Text>
       </TouchableOpacity>
-      
+
       <TouchableOpacity
         style={styles.exitBtn}
         onPress={() => dispatch("exit_loneliness_room")}
@@ -142,7 +169,9 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
       style={styles.inputWrap}
     >
       <Text style={styles.openingLine}>
-        {inputType === "naming" ? "Where does it sit in the body?" : "Who comes to mind?"}
+        {inputType === "naming"
+          ? "Where does it sit in the body?"
+          : "Who comes to mind?"}
       </Text>
       <TextInput
         autoFocus

@@ -493,26 +493,40 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
   const rotation = useSharedValue(0);
   const pulseScale = useSharedValue(1);
 
-  const info = useMemo(() => screenData?.info || {}, [screenData]);
+  const info = useMemo(
+    () => screenData?.info || screenData?.runner_active_item || {},
+    [screenData],
+  );
   const stateId = currentStateId || "";
 
   const currentType: ActivityType = useMemo(() => {
-    // 1. Check direct info.type
-    if (info?.type) {
-      const t = info.type.toLowerCase();
-      if (t === "mantra") return "mantra";
-      if (t === "sankalp" || t === "sankalpa") return "sankalp";
-      if (t === "practice") return "practice";
-    }
+    const rawType = (info?.type || info?.item_type || "").toLowerCase();
+    
+    // 1. Check direct info type
+    if (rawType === "mantra") return "mantra";
+    if (rawType === "sankalp" || rawType === "sankalpa") return "sankalp";
+    if (rawType === "practice") return "practice";
 
-    // 2. Check screenData flags
+    // 2. Check screenData flags & variants
     if (
       screenData?.info_is_mantra ||
-      screenData?.runner_active_item?.type === "mantra"
+      screenData?.runner_variant === "mantra" ||
+      screenData?.runner_active_item?.type === "mantra" ||
+      screenData?.runner_active_item?.item_type === "mantra"
     )
       return "mantra";
-    if (screenData?.info_is_sankalp) return "sankalp";
-    if (screenData?.info_is_practice) return "practice";
+    if (
+      screenData?.info_is_sankalp || 
+      screenData?.runner_variant === "sankalp" ||
+      screenData?.runner_active_item?.type === "sankalp" ||
+      screenData?.runner_active_item?.item_type === "sankalp"
+    ) return "sankalp";
+    if (
+      screenData?.info_is_practice ||
+      screenData?.runner_variant === "practice" ||
+      screenData?.runner_active_item?.type === "practice" ||
+      screenData?.runner_active_item?.item_type === "practice"
+    ) return "practice";
 
     return null;
   }, [screenData, info]);

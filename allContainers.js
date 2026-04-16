@@ -3639,6 +3639,12 @@ export const CycleTransitionsContainer = {
   container_id: "cycle_transitions",
 
   states: {
+    // 0️⃣ VIEW INFO (MALA INTERACTION)
+    view_info: {
+      tone: { theme: "light_sandal", mood: "steady" },
+      blocks: [], // Handled by CycleTransitionsContainer's custom mantra UI
+    },
+
     // Legacy Deepen flow states removed. Refined versions are located under 'deepen_sadhana' and 'rep_extension_setup'.
 
     // 3️⃣ EXTENSION ACTIVATION

@@ -135,7 +135,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
       <TouchableOpacity
         style={styles.pill}
         onPress={() => dispatch("start_runner", 
-          { container_id: "practice_runner", state_id: "mantra_runner" },
+          { container_id: "cycle_transitions", state_id: "view_info" },
           { source: "support_grief", variant: "mantra", target_reps: 27, item: ctx.grief_mantra }
         )}
       >

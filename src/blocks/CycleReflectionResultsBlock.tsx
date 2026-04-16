@@ -42,38 +42,12 @@ interface CycleReflectionResultsBlockProps {
   block?: { style?: any };
 }
 
-// NOTE: feeling-conditional TITLES + PARAGRAPHS are a known Phase E
-// multi-variant migration target. Today M_cycle_reflection_results
-// ships with ONE approved variant keyed on no signal. Until the
-// registry grows per-feeling variants (applies_when:
-// {checkpoint_feeling: "strong"} etc.), the 4-way dict below is the
-// authoritative source for per-feeling title + paragraph. Action
-// labels + descriptions + divider text migrate fully.
-const FEELING_TITLES: Record<string, string> = {
-  strong: 'Your steadiness shows.',
-  slight: 'A shift is taking root.',
-  same: 'You are still finding your way.',
-  worse: 'Let\u2019s make this lighter.',
-};
-
-const FEELING_PARAGRAPHS: Record<string, string[]> = {
-  strong: [
-    'You are finding real steadiness in your practice.',
-    'That kind of inner balance is rare. Let\u2019s honor it by either deepening this path or carrying the same calm to a new focus area of your life.',
-  ],
-  slight: [
-    'Even a small shift matters.',
-    'Continue this path so the change can root itself. The next cycle will deepen what has already begun.',
-  ],
-  same: [
-    'Finding your way takes time.',
-    'Stay with the rhythm \u2014 the next cycle will meet you exactly where you are. Nothing here is wasted.',
-  ],
-  worse: [
-    'Heaviness is not failure. It is information.',
-    'Let\u2019s lighten the path so it can hold you better. Smaller steps create steadier ground.',
-  ],
-};
+// Phase E — feeling-conditional TITLES + PARAGRAPHS now come from the
+// content registry via applies_when.checkpoint_feeling. The 4-way TSX
+// dict that previously held them is removed. stage_signals.checkpoint_
+// feeling passes through buildCtx → orchestrator picks the keyed
+// variant (strong / slight / same / worse) and serves result_title +
+// paragraph_1 + paragraph_2. Default variant covers unknown feelings.
 
 // Stable analytics ids (not content labels).
 type ActionId = 'change_focus' | 'deepen' | 'restart' | 'refine';
@@ -97,8 +71,18 @@ const CycleReflectionResultsBlock: React.FC<CycleReflectionResultsBlockProps> = 
   const screenData = useScreenStore((s) => s.screenData);
   const ss = screenData as Record<string, any>;
 
-  // Phase D — M_cycle_reflection_results registry-backed action CTAs.
-  // Feeling-conditional title/paragraphs grandfathered (see note above).
+  // Phase E — M_cycle_reflection_results is multi-variant, keyed on
+  // stage_signals.checkpoint_feeling. The orchestrator's specificity
+  // sort prefers a feeling-specific variant over the default.
+  const feeling: string =
+    (screenData.checkpoint_feeling as any) ||
+    (screenData.checkpoint_completed_decision as any) ||
+    'same';
+  const day = screenData.checkpoint_day || 7;
+  const is14 = day === 14;
+  const daysEngaged = screenData.checkpoint_days_engaged || 0;
+  const totalDays = screenData.checkpoint_total_days || day;
+
   useContentSlots({
     momentId: "M_cycle_reflection_results",
     screenDataKey: "cycle_reflection_results",
@@ -110,7 +94,8 @@ const CycleReflectionResultsBlock: React.FC<CycleReflectionResultsBlockProps> = 
       emotional_weight: "heavy",
       cycle_day: Number(s.checkpoint_day) || Number(s.day_number) || 14,
       entered_via: s._entered_via || "day_14_submit",
-      stage_signals: {},
+      // Pass feeling into stage_signals so the variant router can key on it.
+      stage_signals: { checkpoint_feeling: feeling },
       today_layer: {},
       life_layer: {
         cycle_id: s.journey_id || s.cycle_id || "",
@@ -123,15 +108,6 @@ const CycleReflectionResultsBlock: React.FC<CycleReflectionResultsBlockProps> = 
     }),
   });
   const slot = (name: string) => readMomentSlot(ss, "cycle_reflection_results", name);
-
-  const day = screenData.checkpoint_day || 7;
-  const is14 = day === 14;
-  const feeling: keyof typeof FEELING_TITLES =
-    (screenData.checkpoint_feeling as any) ||
-    (screenData.checkpoint_completed_decision as any) ||
-    'same';
-  const daysEngaged = screenData.checkpoint_days_engaged || 0;
-  const totalDays = screenData.checkpoint_total_days || day;
 
   // Decision tree mirrors web finalActions (L30-110)
   const actions: ResultAction[] = [];
@@ -166,8 +142,9 @@ const CycleReflectionResultsBlock: React.FC<CycleReflectionResultsBlockProps> = 
     pushAction('change_focus', 'choice_stack', 'discipline_select', 'action_alter_label', 'action_alter_desc');
   }
 
-  const title = FEELING_TITLES[feeling] || FEELING_TITLES.same;
-  const paragraphs = FEELING_PARAGRAPHS[feeling] || FEELING_PARAGRAPHS.same;
+  // Feeling-keyed copy now served from registry via slot().
+  const title = slot("result_title");
+  const paragraphs = [slot("paragraph_1"), slot("paragraph_2")].filter(Boolean);
 
   const handleAction = (action: ResultAction) => {
     store.dispatch(

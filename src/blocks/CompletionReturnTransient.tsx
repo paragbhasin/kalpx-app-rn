@@ -31,14 +31,10 @@ import { useContentSlots, readMomentSlot } from "../hooks/useContentSlots";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { Fonts } from "../theme/fonts";
 
-// Variant-specific completion messages are a known Phase E multi-variant
-// migration target (applies_when: {runner_variant: "mantra"} etc.).
-// Until then, these 3 short completion blessings grandfather in TSX.
-const VARIANT_MESSAGES: Record<string, string> = {
-  mantra: "108 in. Kept.",
-  sankalp: "Held. Carry it into the day.",
-  practice: "Done. Notice what stayed.",
-};
+// Phase E — variant-specific completion messages now served from the
+// M_completion_return registry pack, keyed on
+// stage_signals.runner_variant (mantra / sankalp / practice). The
+// 3-way TSX dict is removed; fully registry-driven.
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
@@ -55,6 +51,12 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
   const { screenData, loadScreen, goBack, currentScreen, updateBackground, updateHeaderHidden } = useScreenStore();
   const ss = screenData as Record<string, any>;
 
+  const resolvedVariant: "mantra" | "sankalp" | "practice" =
+    (block.variant as any) ||
+    (screenData[block.variant_key || "runner_variant"] as any) ||
+    (screenData.runner_variant as any) ||
+    "practice";
+
   useContentSlots({
     momentId: 'M_completion_return',
     screenDataKey: 'completion_return',
@@ -65,8 +67,10 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
       user_attention_state: 'winding_down',
       emotional_weight: 'light',
       cycle_day: Number(s.day_number) || 0,
-      entered_via: `${s.runner_variant || 'practice'}_complete`,
-      stage_signals: {},
+      entered_via: `${resolvedVariant}_complete`,
+      // Pass runner_variant through stage_signals so the registry
+      // serves the matching keyed variant (mantra/sankalp/practice).
+      stage_signals: { runner_variant: resolvedVariant },
       today_layer: {},
       life_layer: {
         cycle_id: s.journey_id || s.cycle_id || '',
@@ -77,14 +81,8 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
   });
   const slot = (name: string) => readMomentSlot(ss, 'completion_return', name);
 
-  const resolvedVariant: "mantra" | "sankalp" | "practice" =
-    (block.variant as any) ||
-    (screenData[block.variant_key || "runner_variant"] as any) ||
-    (screenData.runner_variant as any) ||
-    "practice";
-
-  const message =
-    VARIANT_MESSAGES[resolvedVariant] || VARIANT_MESSAGES.practice;
+  // Message comes from the registry's runner_variant-keyed slot.
+  const message = slot('message');
 
   const [inputText, setInputText] = useState("");
 

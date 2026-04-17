@@ -242,7 +242,6 @@ export const VoiceTextInput: React.FC<VoiceTextInputProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [contentHeight, setContentHeight] = useState(0);
-  const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
   const shouldExpandForContent = (
@@ -280,10 +279,21 @@ export const VoiceTextInput: React.FC<VoiceTextInputProps> = ({
           style={[styles.inputShell, isExpanded && styles.expandedShell]}
           onPress={() => inputRef.current?.focus()}
         >
+          {!text && (
+            <View style={styles.placeholderContainer}>
+              <Text
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={styles.placeholderText}
+              >
+                {placeholder}
+              </Text>
+            </View>
+          )}
           <TextInput
             ref={inputRef}
             style={[styles.input, isExpanded && styles.expandedInput]}
-            placeholder={placeholder}
+            placeholder="" // Handled by overlay above
             placeholderTextColor="rgba(67, 33, 4, 0.45)"
             value={text}
             onChangeText={setText}
@@ -292,10 +302,6 @@ export const VoiceTextInput: React.FC<VoiceTextInputProps> = ({
             onContentSizeChange={(event) =>
               setContentHeight(event.nativeEvent.contentSize.height)
             }
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => {
-              setIsFocused(false);
-            }}
             onSubmitEditing={handleSend}
             blurOnSubmit={false}
           />
@@ -341,14 +347,12 @@ const styles = StyleSheet.create({
   },
   inputShell: {
     flex: 1,
-    flexDirection: "row",
-    alignItems: "flex-end", // Fixed: Mic stays at bottom-right
+    paddingRight: 45, // Leave room for absolute mic
     backgroundColor: "rgba(255, 252, 246, 0.98)",
     borderRadius: 30,
     borderWidth: 1,
     borderColor: "rgba(222, 206, 176, 0.95)",
-    paddingHorizontal: 16,
-    paddingBottom: 10,
+    paddingLeft: 16,
     minHeight: 52,
     marginRight: 10,
     shadowColor: "#d9bf8f",
@@ -356,6 +360,20 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.14,
     shadowRadius: 20,
     elevation: 3,
+    position: "relative",
+  },
+  placeholderContainer: {
+    position: "absolute",
+    left: 17,
+    right: 50,
+    top: 0,
+    bottom: 0,
+    justifyContent: "center",
+  },
+  placeholderText: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    color: "rgba(67, 33, 4, 0.45)",
   },
   expandedShell: {
     borderRadius: 20,
@@ -365,22 +383,22 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.regular,
     fontSize: 13,
     color: "#432104",
-    paddingVertical: 10,
-    paddingHorizontal: 0,
-    textAlignVertical: "bottom",
+    paddingVertical: 12,
+    textAlignVertical: "top",
   },
   expandedInput: {
     minHeight: 80,
-    textAlignVertical: "top",
   },
   micButton: {
+    position: "absolute",
+    right: 12,
+    bottom: 10, // Fixed at bottom-right
     width: 32,
     height: 32,
     borderRadius: 16,
     backgroundColor: "rgba(200, 154, 71, 0.1)",
     alignItems: "center",
     justifyContent: "center",
-    marginLeft: 8,
   },
   outerSendButton: {
     width: 52,

@@ -1,4 +1,3 @@
-import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -8,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { VoiceModal } from "../components/VoiceTextInput";
+import { VoiceTextInput } from "../components/VoiceTextInput";
 import { executeAction } from "../engine/actionExecutor";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { interpolate } from "../engine/utils/interpolation";
@@ -158,20 +157,19 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
         />
       </View>
 
-      <TouchableOpacity
-        style={styles.floatingMic}
-        onPress={() => setVoiceModalVisible(true)}
-      >
-        <Ionicons name="mic" size={32} color="#432104" />
-      </TouchableOpacity>
-
-      <VoiceModal
-        visible={voiceModalVisible}
-        onClose={() => setVoiceModalVisible(false)}
-        onSend={() => {
-          fire({ response_type: "voice_requested" });
-        }}
-      />
+      <View style={styles.fixedInputArea}>
+        <VoiceTextInput
+          voiceAvailable={true}
+          placeholder="How can I help you?"
+          onSend={(val, type) => {
+            if (type === "text") {
+              fire({ freeform_text: val, response_type: "text" });
+            } else {
+              fire({ response_type: "voice_requested" });
+            }
+          }}
+        />
+      </View>
     </View>
   );
 };
@@ -251,22 +249,13 @@ const styles = StyleSheet.create({
     width: 340,
     height: 340,
   },
-  floatingMic: {
+  fixedInputArea: {
     position: "absolute",
-    bottom: -40,
-    // top: -10,
-    right: -10,
-    width: 40,
-    height: 40,
-    borderRadius: 32,
-    backgroundColor: "#FBF5F5",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 8,
+    padding: 5,
+    bottom: -60,
+    left: 0,
+    right: 0,
+    // backgroundColor: "#fef8f5",
   },
 });
 

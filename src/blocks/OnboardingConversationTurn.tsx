@@ -166,22 +166,23 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
           <View style={styles.turnOneInputLine} />
         </View>
       )}
-
-      <VoiceTextInput
-        voiceAvailable={block.voice_available}
-        placeholder={
-          showHeroMeta
-            ? "Type Or say it in your words..."
-            : "Type Or say it in your words..."
-        }
-        onSend={(val, type) => {
-          if (type === "text") {
-            fire({ freeform_text: val, response_type: "text" });
-          } else {
-            fire({ response_type: "voice_requested" });
+      <View style={{ marginTop: 10 }}>
+        <VoiceTextInput
+          voiceAvailable={block.voice_available}
+          placeholder={
+            showHeroMeta
+              ? "Type Or say it in your words..."
+              : "Type Or say it in your words..."
           }
-        }}
-      />
+          onSend={(val, type) => {
+            if (type === "text") {
+              fire({ freeform_text: val, response_type: "text" });
+            } else {
+              fire({ response_type: "voice_requested" });
+            }
+          }}
+        />
+      </View>
 
       {showHeroMeta && (
         <>

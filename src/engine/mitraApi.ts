@@ -732,7 +732,8 @@ export async function mitraFetchAdditionalItems(): Promise<any> {
     });
     return res.data;
   } catch (err: any) {
-    console.error("[MITRA] fetch additional items failed:", err.message);
+    // Non-fatal — block renders empty state / hides itself via uiHints.
+    console.warn("[MITRA] fetch additional items failed:", err.message);
     return { items: [], uiHints: {} };
   }
 }

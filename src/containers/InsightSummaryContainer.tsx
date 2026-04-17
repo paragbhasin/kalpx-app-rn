@@ -144,7 +144,9 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({
           });
         }
       } catch (e) {
-        console.error("[InsightSummary] Journey check failed:", e);
+        // Advisory — if this fails we stay on Step 0 induction. User
+        // can navigate manually if they already have an active journey.
+        console.warn("[InsightSummary] Journey check failed:", e);
       }
     };
 

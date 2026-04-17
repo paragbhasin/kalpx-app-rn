@@ -4,9 +4,16 @@ import axios from "axios";
 import { v4 as uuidv4 } from "uuid"; // ✅ safe, since App.js polyfills crypto
 import BASE_URL from "./baseURL";
 
+// Global axios timeout. Dev backend (CloudFront + cold celery workers
+// + per-user Mitra resolve) can take >10s on first hit, which produced
+// frequent "timeout of 10000ms exceeded" console errors on screens
+// that fire multiple GETs on mount (e.g. /journey/additional/list/,
+// /journey/status/). 30s is long enough to absorb cold starts without
+// leaving the user staring at a frozen UI; individual long-running
+// calls still have their own per-call override if needed.
 const api = axios.create({
   baseURL: BASE_URL,
-  timeout: 10000,
+  timeout: 30000,
   headers: {
     "Content-Type": "application/json",
   },

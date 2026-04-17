@@ -506,7 +506,14 @@ if (key === "pending_classes_data") {
                 validationSchema={LoginSchema}
                 onSubmit={(values) => {
                   formikValuesRef.current = values;
-                  recaptchaRef.current?.requestNewToken();
+                  // Dev bypass: skip ReCaptcha widget and pass dummy token.
+                  // The backend has RECAPTCHA_SKIP_ON_DEV=1 which accepts
+                  // any token value. Production builds use the real widget.
+                  if (__DEV__) {
+                    handleRecaptchaToken("dev-bypass-token");
+                  } else {
+                    recaptchaRef.current?.requestNewToken();
+                  }
                 }}
               >
                 {({

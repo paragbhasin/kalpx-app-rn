@@ -10,25 +10,23 @@
  */
 
 import * as Haptics from "expo-haptics";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   Animated,
-  Dimensions,
-  ImageBackground,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import Svg, { Path } from "react-native-svg";
 import MantraLotus3d from "../../assets/mantra-lotus-3d.svg";
+import { VoiceTextInput } from "../components/VoiceTextInput";
 import { executeAction } from "../engine/actionExecutor";
 import { mitraTrackEvent } from "../engine/mitraApi";
-import { useContentSlots, readMomentSlot } from "../hooks/useContentSlots";
 import { useScreenStore } from "../engine/useScreenBridge";
+import { readMomentSlot, useContentSlots } from "../hooks/useContentSlots";
 import { Fonts } from "../theme/fonts";
 
 // Phase E — variant-specific completion messages now served from the
@@ -48,7 +46,14 @@ interface CompletionReturnTransientProps {
 const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
   block,
 }) => {
-  const { screenData, loadScreen, goBack, currentScreen, updateBackground, updateHeaderHidden } = useScreenStore();
+  const {
+    screenData,
+    loadScreen,
+    goBack,
+    currentScreen,
+    updateBackground,
+    updateHeaderHidden,
+  } = useScreenStore();
   const ss = screenData as Record<string, any>;
 
   const resolvedVariant: "mantra" | "sankalp" | "practice" =
@@ -58,14 +63,14 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
     "practice";
 
   useContentSlots({
-    momentId: 'M_completion_return',
-    screenDataKey: 'completion_return',
+    momentId: "M_completion_return",
+    screenDataKey: "completion_return",
     buildCtx: (s) => ({
-      path: s.journey_path === 'growth' ? 'growth' : 'support',
-      guidance_mode: s.guidance_mode || 'hybrid',
-      locale: s.locale || 'en',
-      user_attention_state: 'winding_down',
-      emotional_weight: 'light',
+      path: s.journey_path === "growth" ? "growth" : "support",
+      guidance_mode: s.guidance_mode || "hybrid",
+      locale: s.locale || "en",
+      user_attention_state: "winding_down",
+      emotional_weight: "light",
       cycle_day: Number(s.day_number) || 0,
       entered_via: `${resolvedVariant}_complete`,
       // Pass runner_variant through stage_signals so the registry
@@ -73,23 +78,20 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
       stage_signals: { runner_variant: resolvedVariant },
       today_layer: {},
       life_layer: {
-        cycle_id: s.journey_id || s.cycle_id || '',
-        life_kosha: s.life_kosha || s.scan_focus || '',
-        scan_focus: s.scan_focus || '',
+        cycle_id: s.journey_id || s.cycle_id || "",
+        life_kosha: s.life_kosha || s.scan_focus || "",
+        scan_focus: s.scan_focus || "",
       },
     }),
   });
-  const slot = (name: string) => readMomentSlot(ss, 'completion_return', name);
+  const slot = (name: string) => readMomentSlot(ss, "completion_return", name);
 
   // Message comes from the registry's runner_variant-keyed slot.
-  const message = slot('message');
-
-  const [inputText, setInputText] = useState("");
+  const message = slot("message");
 
   const contentFade = useRef(new Animated.Value(0)).current;
   const checkProgress = useRef(new Animated.Value(0)).current;
   const messageOpacity = useRef(new Animated.Value(0)).current;
-  const unmountedRef = useRef(false);
 
   const setScreenValue = (key: string, value: any) => {
     const { screenActions } = require("../store/screenSlice");
@@ -127,7 +129,7 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
       duration: 600,
       useNativeDriver: true,
     }).start();
-    
+
     Animated.timing(checkProgress, {
       toValue: 1,
       duration: 800,
@@ -141,7 +143,6 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
     });
 
     return () => {
-      unmountedRef.current = true;
       clearRunnerState();
     };
   }, []);
@@ -182,13 +183,17 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
     }).catch(() => {});
   };
 
-  const handleSubmitInput = () => {
-    if (!inputText.trim()) return;
+  const handleSubmitReflection = (
+    reflectionText: string,
+    responseType: "text" | "voice",
+  ) => {
+    if (!reflectionText.trim()) return;
     mitraTrackEvent("post_completion_reflection", {
       meta: {
         item_type: resolvedVariant,
         item_id: screenData.runner_active_item?.item_id,
-        text: inputText.trim().slice(0, 120),
+        text: reflectionText.trim().slice(0, 120),
+        response_type: responseType,
       },
     }).catch(() => {});
     handleReturnHome(true);
@@ -222,30 +227,21 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
         </View>
 
         <Animated.View
-          style={{ opacity: messageOpacity, width: "100%", alignItems: "center" }}
+          style={{
+            opacity: messageOpacity,
+            width: "100%",
+            alignItems: "center",
+          }}
         >
           <View style={styles.messageCard}>
             <Text style={styles.messageText}>{message}</Text>
           </View>
 
-          <View style={styles.inputRow}>
-            <TextInput
-              style={styles.input}
-              placeholder={slot('reflection_prompt')}
-              placeholderTextColor="#A6824699"
-              value={inputText}
-              onChangeText={(t) => setInputText(t.slice(0, 120))}
-              onSubmitEditing={handleSubmitInput}
-              maxLength={120}
-              returnKeyType="send"
+          <View style={styles.voiceInputWrap}>
+            <VoiceTextInput
+              placeholder={slot("reflection_prompt") || "How did that feel?"}
+              onSend={(text, type) => handleSubmitReflection(text, type)}
             />
-            <TouchableOpacity
-              style={styles.micBtn}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.micIcon}>🎙</Text>
-            </TouchableOpacity>
           </View>
         </Animated.View>
       </Animated.View>
@@ -261,7 +257,7 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
             onPress={() => handleReturnHome(true)}
             activeOpacity={0.8}
           >
-            <Text style={styles.primaryCtaText}>{slot('return_home_cta')}</Text>
+            <Text style={styles.primaryCtaText}>{slot("return_home_cta")}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -269,7 +265,7 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
             onPress={handleRepeat}
             activeOpacity={0.6}
           >
-            <Text style={styles.secondaryCtaText}>{slot('repeat_cta')}</Text>
+            <Text style={styles.secondaryCtaText}>{slot("repeat_cta")}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -279,13 +275,13 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
 
 const styles = StyleSheet.create({
   overlay: {
-    flex: 1,
+    // flex: 1,
     width: "100%",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingTop: 100,
-    paddingBottom: 48,
-    paddingHorizontal: 32,
+    // paddingTop: 80,
+    // paddingBottom: 48,
+    paddingHorizontal: 20,
   },
   content: {
     alignItems: "center",
@@ -304,8 +300,8 @@ const styles = StyleSheet.create({
     paddingLeft: 20,
     paddingVertical: 4,
     marginBottom: 40,
-    width: '100%',
-    alignSelf: 'flex-start',
+    width: "100%",
+    alignSelf: "flex-start",
   },
   messageText: {
     fontFamily: Fonts.serif.regular,
@@ -313,47 +309,28 @@ const styles = StyleSheet.create({
     lineHeight: 38,
     color: "#5C3A12",
   },
-  inputRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderBottomColor: "#DAC28E66",
-    borderBottomWidth: 1,
-    paddingVertical: 12,
+  voiceInputWrap: {
     width: "100%",
-  },
-  input: {
-    flex: 1,
-    fontFamily: Fonts.serif.regular,
-    fontSize: 16,
-    color: "#5C3A12",
-    paddingVertical: 4,
-  },
-  micBtn: {
-    width: 32,
-    height: 32,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  micIcon: {
-    fontSize: 20,
-    color: "#5C3A12",
+    // marginBottom: 8,
+    // paddingHorizontal: -100,
   },
   bottomSection: {
-    width: '100%',
-    alignItems: 'center',
+    width: "100%",
+    alignItems: "center",
   },
   lotusWrap: {
-    marginBottom: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    // marginBottom: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: -20,
   },
   footer: {
     width: "100%",
     alignItems: "center",
-    gap: 16,
+    // gap: 16,
   },
   primaryCta: {
-    backgroundColor: "#F2E8CF",
+    backgroundColor: "#FBF5F5",
     paddingVertical: 16,
     paddingHorizontal: 40,
     borderRadius: 32,
@@ -361,18 +338,18 @@ const styles = StyleSheet.create({
     maxWidth: 280,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "#DAC28E",
+    borderWidth: 0.3,
+    borderColor: "#9f9f9f",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 6,
   },
   primaryCtaText: {
-    fontFamily: Fonts.serif.bold,
+    fontFamily: Fonts.sans.regular,
     fontSize: 16,
-    color: "#5C3A12",
+    color: "#432104",
     letterSpacing: 0.2,
   },
   secondaryCta: {
@@ -380,9 +357,11 @@ const styles = StyleSheet.create({
   },
   secondaryCtaText: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 15,
-    color: "#8C6A3D",
+    fontSize: 18,
+    color: "#432104",
     letterSpacing: 0.5,
+    marginTop: 10,
+    textDecorationLine: "underline",
   },
 });
 

@@ -311,6 +311,7 @@ export default function Home() {
               inference_state: stashedInference,
               guidance_mode: stashedMode,
               locale: "en",
+              tz: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
             });
             if (v3Result) {
               const t = v3Result.triad || {};

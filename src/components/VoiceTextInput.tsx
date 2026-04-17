@@ -33,7 +33,7 @@ export const VoiceModal: React.FC<VoiceModalProps> = ({
   >("idle");
   const [timer, setTimer] = useState(0);
 
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {

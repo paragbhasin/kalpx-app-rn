@@ -116,6 +116,9 @@ const styles = StyleSheet.create({
     shadowRadius: 18,
     elevation: 4,
   },
+  optionSpeak: {
+    marginBottom: 8,
+  },
   optionWritten: {
     backgroundColor: "#fdf8f2",
 

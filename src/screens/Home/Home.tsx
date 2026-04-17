@@ -311,7 +311,7 @@ export default function Home() {
               inference_state: stashedInference,
               guidance_mode: stashedMode,
               locale: "en",
-              tz: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
+              tz: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
             });
             if (v3Result) {
               const t = v3Result.triad || {};

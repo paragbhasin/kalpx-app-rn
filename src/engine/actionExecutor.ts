@@ -3617,7 +3617,7 @@ export async function executeAction(
               },
               guidance_mode: draft.guidance_mode || "hybrid",
               locale: "en",
-              tz: Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC",
+              tz: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
               stage0_choice: draft.stage0_choice || draft.path,
               stage1_choice: draft.stage1_choice,
               stage2_choice: draft.stage2_choice,

@@ -21,15 +21,16 @@ import {
   Image,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+import { VoiceTextInput } from "../components/VoiceTextInput";
+import { useSelector } from "react-redux";
 import { executeAction } from "../engine/actionExecutor";
 import { useScreenStore } from "../engine/useScreenBridge";
+import { RootState } from "../store";
 import { interpolate } from "../engine/utils/interpolation";
 import { Fonts } from "../theme/fonts";
-import { VoiceTextInput } from "../components/VoiceTextInput";
 
 interface Props {
   block: {
@@ -92,6 +93,11 @@ const turnOneMessageIcons: (keyof typeof Ionicons.glyphMap)[] = [
 
 const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
+  const user = useSelector(
+    (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
+  );
+  const isLoggedIn = !!user;
+
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const replyAnim = useRef(new Animated.Value(0)).current;
   const [text, setText] = useState("");
@@ -305,15 +311,13 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
             );
           })}
 
-          {block.open_input?.enabled && renderStyledInput(true)}
-
           {(() => {
             const returningChip = (block.reply_chips || []).find((c) =>
               c.label.toLowerCase().includes("returning"),
             );
             if (!returningChip && !isIntroTurn) return null;
+            if (isLoggedIn) return null; // Hide returning button if already logged in
 
-            // Fallback for Turn 1 to ensure it ALWAYS shows as requested
             const finalId = returningChip?.id || "returning";
             const finalLabel = returningChip?.label || "I'm returning";
 
@@ -324,12 +328,20 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                 onPress={() =>
                   fire({ chip_id: finalId, response_type: "chip" })
                 }
-                style={{ paddingBottom: 40 }} // Extra padding to clear tab bar
+                style={{ paddingBottom: 10 }}
               >
-                <Text style={styles.linkText}>{finalLabel}</Text>
+                <View
+                  style={[styles.turnOneButton, styles.turnOneSecondaryButton]}
+                >
+                  <Text style={styles.turnOneSecondaryButtonText}>
+                    {finalLabel}
+                  </Text>
+                </View>
               </TouchableOpacity>
             );
           })()}
+
+          {block.open_input?.enabled && renderStyledInput(true)}
         </Animated.View>
       </View>
     );
@@ -389,6 +401,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
             const isReturning = chip.label.toLowerCase().includes("returning");
 
             if (isReturning) {
+              if (isLoggedIn) return null; // Hide returning button if already logged in
               return (
                 <TouchableOpacity
                   key={chip.id}
@@ -397,7 +410,9 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                     fire({ chip_id: chip.id, response_type: "chip" })
                   }
                 >
-                  <Text style={styles.linkText}>{chip.label}</Text>
+                  <View style={[styles.chip, styles.chipSecondary]}>
+                    <Text style={styles.chipLabel}>{chip.label}</Text>
+                  </View>
                 </TouchableOpacity>
               );
             }
@@ -599,7 +614,6 @@ const styles = StyleSheet.create({
   turnOneSecondaryButton: {
     borderWidth: 1.5,
     borderColor: "#cfaa62",
-    backgroundColor: "rgba(255, 251, 243, 0.96)",
   },
   turnOneSecondaryButtonText: {
     fontFamily: Fonts.sans.bold,
@@ -738,6 +752,7 @@ const styles = StyleSheet.create({
   chipSecondary: {
     backgroundColor: CHIP_BG,
     borderColor: GOLD_BORDER,
+    borderWidth: 0.3,
 
     elevation: 6,
 

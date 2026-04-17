@@ -188,8 +188,8 @@ export const CompanionDashboardContainer = {
           default: "Continue your practice",
         },
         day_label: "Day {{day_number}}",
-        journey_summary:
-          "Day {{day_number}} of {{total_days}} — same mantra, same practice, same intention. The repetition is the path.",
+        // journey_summary:
+        //   "Day {{day_number}} of {{total_days}} — same mantra, same practice, same intention. The repetition is the path.",
         seal_button_labels: {
           ready: "Complete Day →",
           not_ready: "Complete your practice first",
@@ -6685,10 +6685,10 @@ export const WelcomeOnboardingContainer = {
             alt: "lotus",
           },
           reply_chips: [
-            { id: "continue", label: "I'd like that", style: "primary" },
+            { id: "continue", label: "Yes,let's begin", style: "primary" },
             {
               id: "returning",
-              label: "I've used this before",
+              label: "I'm returning",
               style: "secondary",
             },
           ],
@@ -7094,7 +7094,9 @@ export const WelcomeOnboardingContainer = {
           type: "onboarding_conversation_turn",
           id: "turn8_cta",
           mitra_message: "",
-          reply_chips: [{ id: "ready", label: "Begin my journey", style: "primary" }],
+          reply_chips: [
+            { id: "ready", label: "Begin my journey", style: "primary" },
+          ],
           open_input: { enabled: false },
           voice_available: false,
           on_response: _onResp,

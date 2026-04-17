@@ -568,9 +568,9 @@ export default function Home() {
             }
           }
 
-          // No stash — fresh start. Launch onboarding from turn_2.
+          // No stash — fresh start. Launch onboarding from turn_1.
           store.dispatch(
-            screenActions.setScreenValue({ key: "onboarding_turn", value: 2 }),
+            screenActions.setScreenValue({ key: "onboarding_turn", value: 1 }),
           );
           store.dispatch(
             screenActions.setScreenValue({
@@ -581,7 +581,7 @@ export default function Home() {
           store.dispatch(
             loadScreenWithData({
               containerId: "welcome_onboarding",
-              stateId: "turn_2",
+              stateId: "turn_1",
             }),
           );
         }
@@ -598,7 +598,7 @@ export default function Home() {
       //   stateId: "discipline_select",
       // }));
       store.dispatch(
-        screenActions.setScreenValue({ key: "onboarding_turn", value: 2 }),
+        screenActions.setScreenValue({ key: "onboarding_turn", value: 1 }),
       );
       store.dispatch(
         screenActions.setScreenValue({
@@ -609,7 +609,7 @@ export default function Home() {
       store.dispatch(
         loadScreenWithData({
           containerId: "welcome_onboarding",
-          stateId: "turn_2",
+          stateId: "turn_1",
         }),
       );
     }

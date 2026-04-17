@@ -231,7 +231,7 @@ interface VoiceTextInputProps {
 }
 
 export const VoiceTextInput: React.FC<VoiceTextInputProps> = ({
-  placeholder = "Type or say it in your words...",
+  placeholder = "How can I help you?",
   initialValue = "",
   onSend,
   voiceAvailable = true,
@@ -250,40 +250,38 @@ export const VoiceTextInput: React.FC<VoiceTextInputProps> = ({
 
   return (
     <View style={styles.container}>
-      <View style={[styles.inputShell, isExpanded && styles.expandedShell]}>
+      <View style={styles.inputWrapper}>
+        <View style={[styles.inputShell, isExpanded && styles.expandedShell]}>
+          <TextInput
+            style={[styles.input, isExpanded && styles.expandedInput]}
+            placeholder={placeholder}
+            placeholderTextColor="rgba(67, 33, 4, 0.45)"
+            value={text}
+            onChangeText={setText}
+            multiline={isExpanded}
+            onFocus={() => setIsExpanded(true)}
+            onBlur={() => !text.trim() && setIsExpanded(false)}
+            onSubmitEditing={handleSend}
+            blurOnSubmit={false}
+          />
+
+          {voiceAvailable && (
+            <TouchableOpacity
+              style={styles.micButton}
+              onPress={() => setModalVisible(true)}
+            >
+              <Ionicons name="mic" size={22} color="#b9892f" />
+            </TouchableOpacity>
+          )}
+        </View>
+
         <TouchableOpacity
-          style={styles.leadIcon}
-          onPress={() => setIsExpanded(!isExpanded)}
+          style={[styles.outerSendButton, !text.trim() && { opacity: 0.5 }]}
+          onPress={handleSend}
+          disabled={!text.trim()}
         >
-          <Ionicons name="create-outline" size={22} color="#5e4721" />
+          <Ionicons name="send" size={20} color="#6b4d28" />
         </TouchableOpacity>
-
-        <TextInput
-          style={[styles.input, isExpanded && styles.expandedInput]}
-          placeholder={placeholder}
-          placeholderTextColor="rgba(67, 33, 4, 0.45)"
-          value={text}
-          onChangeText={setText}
-          multiline={isExpanded}
-          onFocus={() => setIsExpanded(true)}
-          onSubmitEditing={handleSend}
-          blurOnSubmit={false}
-        />
-
-        {voiceAvailable && !isExpanded && (
-          <TouchableOpacity
-            style={styles.micButton}
-            onPress={() => setModalVisible(true)}
-          >
-            <Ionicons name="mic-outline" size={24} color="#b9892f" />
-          </TouchableOpacity>
-        )}
-
-        {isExpanded && text.length > 0 && (
-          <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-            <Ionicons name="send" size={20} color="#c89a47" />
-          </TouchableOpacity>
-        )}
       </View>
 
       <VoiceModal
@@ -298,42 +296,70 @@ export const VoiceTextInput: React.FC<VoiceTextInputProps> = ({
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    marginVertical: 10,
+    paddingHorizontal: 16,
+    paddingBottom: 20,
   },
-  inputShell: {
+  inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.7)",
-    borderRadius: 16,
+    justifyContent: "space-between",
+  },
+  inputShell: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 252, 246, 0.98)",
+    borderRadius: 30,
     borderWidth: 1,
-    borderColor: "#e8e0d5",
-    paddingHorizontal: 12,
-    minHeight: 56,
+    borderColor: "rgba(222, 206, 176, 0.95)",
+    paddingHorizontal: 16,
+    minHeight: 52,
+    marginRight: 10,
+    shadowColor: "#d9bf8f",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.14,
+    shadowRadius: 20,
+    elevation: 3,
   },
   expandedShell: {
     alignItems: "flex-end",
-    paddingVertical: 12,
-  },
-  leadIcon: {
-    marginRight: 8,
-    paddingBottom: 2,
+    paddingVertical: 10,
+    borderRadius: 20,
   },
   input: {
     flex: 1,
-    fontFamily: Fonts.serif.regular,
-    fontSize: 16,
+    fontFamily: Fonts.sans.regular,
+    fontSize: 15,
     color: "#432104",
     paddingVertical: 8,
   },
   expandedInput: {
-    minHeight: 120,
+    minHeight: 80,
     textAlignVertical: "top",
   },
   micButton: {
-    padding: 8,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(200, 154, 71, 0.1)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 8,
   },
-  sendButton: {
-    padding: 8,
+  outerSendButton: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: "rgba(255, 252, 246, 0.98)",
+    borderWidth: 1,
+    borderColor: "rgba(222, 206, 176, 0.95)",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#d9bf8f",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.14,
+    shadowRadius: 20,
+    elevation: 3,
   },
   modalOverlay: {
     flex: 1,

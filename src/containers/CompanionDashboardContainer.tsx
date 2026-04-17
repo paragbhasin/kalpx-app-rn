@@ -10,21 +10,20 @@ import {
 } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import MantraLotus3d from "../../assets/mantra-lotus-3d.svg";
+import KalpxModal from "../components/KalpxModal";
 import { executeAction } from "../engine/actionExecutor";
 import BlockRenderer from "../engine/BlockRenderer";
 import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
 import { Fonts } from "../theme/fonts";
-import KalpxModal from "../components/KalpxModal";
 // Week 2 — Day Active dashboard sections (Mitra v3 Moments 8-15, 40, 41, 43).
 // Spec: kalpx-frontend/docs/specs/mitra-v3-experience/screens/route_dashboard_day_active.md §10
-import MorningBriefingBlock from "../blocks/MorningBriefingBlock";
-import FocusPhraseBlock from "../blocks/FocusPhraseBlock";
-import CycleSignalBar from "../blocks/CycleSignalBar";
-import ClearWindowBanner from "../blocks/ClearWindowBanner";  // re-added 2026-04-13 (backend B4-v2 shipped)
-import CoreItemsList from "../blocks/CoreItemsList";
 import CheckInCardCompact from "../blocks/CheckInCardCompact";
+import ClearWindowBanner from "../blocks/ClearWindowBanner"; // re-added 2026-04-13 (backend B4-v2 shipped)
+import CoreItemsList from "../blocks/CoreItemsList";
+import FocusPhraseBlock from "../blocks/FocusPhraseBlock";
+import { VoiceTextInput } from "../components/VoiceTextInput";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -311,9 +310,9 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
         {/* cycle signal → clear window → triad → check-in.             */}
         {/* Web parity: allContainers.js companion_dashboard.day_active */}
         {/* ------------------------------------------------------------ */}
-        <MorningBriefingBlock />
+        {/* <MorningBriefingBlock /> */}
         <FocusPhraseBlock block={{}} />
-        <CycleSignalBar />
+        {/* <CycleSignalBar /> */}
         <ClearWindowBanner />
 
         {/* Return banner — absent 3+ days */}
@@ -613,6 +612,23 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
         </View>
       </ScrollView>
 
+      {/* FIXED CONVERSATIONAL INPUT AREA */}
+      <View style={styles.fixedInputArea}>
+        <VoiceTextInput
+          onSend={(text, type) => {
+            console.log(`[Dashboard] Sending ${type}:`, text);
+            // Future integration with conversational query engine
+            executeAction(
+              {
+                type: "dashboard_query",
+                payload: { text, response_type: type },
+              },
+              { screenState: ss },
+            );
+          }}
+        />
+      </View>
+
       <KalpxModal
         visible={showToastModal}
         message={toastMsg}
@@ -645,7 +661,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingBottom: 50,
+    paddingBottom: 120,
   },
 
   // -- Empty state --
@@ -743,7 +759,7 @@ const styles = StyleSheet.create({
   progressSection: {
     alignItems: "center",
     justifyContent: "center",
-    marginVertical: 14,
+    marginVertical: 6,
   },
   progressRingOuter: {
     width: RING_SIZE,
@@ -838,6 +854,7 @@ const styles = StyleSheet.create({
   instructionSection: {
     alignItems: "center",
     marginBottom: 10,
+    marginTop: 5,
   },
   instructionText: {
     fontFamily: Fonts.sans.regular,
@@ -1072,6 +1089,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingBottom: 16,
+  },
+  fixedInputArea: {
+    position: "absolute",
+    padding: 5,
+    bottom: -20,
+    left: 0,
+    right: 0,
+    backgroundColor: "#fef8f5",
   },
 });
 

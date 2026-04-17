@@ -3469,6 +3469,8 @@ export async function executeAction(
           if (currentStateId === "turn_1") {
             if (p.chip_id === "returning") {
               draft.returning = true;
+              rootNavigate("Login");
+              return; // Do not proceed to turn_2
             }
             if (p.freeform_text) draft.intro_freeform = p.freeform_text;
             nextStateId = "turn_2";
@@ -4831,6 +4833,11 @@ export async function executeAction(
           dayNumber: screenState.day_number || 1,
           meta: {},
         });
+        break;
+      }
+
+      case "dashboard_query": {
+        console.log("[ActionExecutor] dashboard_query captured:", payload);
         break;
       }
 

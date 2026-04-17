@@ -12,11 +12,11 @@
 
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Fonts } from "../theme/fonts";
 import { executeAction } from "../engine/actionExecutor";
 import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
+import { Fonts } from "../theme/fonts";
 
 interface CoreItem {
   type: "mantra" | "sankalp" | "practice";
@@ -78,11 +78,11 @@ const CoreItemsList: React.FC<{ block?: any }> = () => {
         >
           <View style={styles.headerRow}>
             <Text style={styles.label}>{it.label}</Text>
-            {it.done ? (
+            {/* {it.done ? (
               <Text style={styles.check}>✓</Text>
             ) : (
               <View style={styles.circle} />
-            )}
+            )} */}
           </View>
           <Text style={styles.title} numberOfLines={2}>
             {it.title}

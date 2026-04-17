@@ -1153,6 +1153,16 @@ export async function executeAction(
 
         setScreenValue(infoData, "info");
 
+        // Seed mantra_audio_url for the runner. masterData comes from
+        // screenState.master_mantra which was populated by the companion
+        // response (core.audio_url from MasterMantra DB lookup).
+        if (infoType === "mantra") {
+          const infoAudioUrl = masterData.audio_url || masterData.core?.audio_url || "";
+          if (infoAudioUrl) {
+            setScreenValue(infoAudioUrl, "mantra_audio_url");
+          }
+        }
+
         // Start label
         const startLabelMap: Record<string, string> = {
           practice: infoData.is_action ? "Practice" : "I Will Do This",
@@ -3258,6 +3268,14 @@ export async function executeAction(
         setScreenValue(0, "runner_reps_completed");
         setScreenValue(0, "runner_step_index");
         setScreenValue(0, "runner_duration_actual_sec");
+        // Seed audio_url for MantraRunnerDisplay — it reads from
+        // screenData.mantra_audio_url, not runner_active_item.
+        if (sp.variant === "mantra" && sp.item) {
+          const itemAudio = sp.item.audio_url || sp.item.core?.audio_url || "";
+          if (itemAudio) {
+            setScreenValue(itemAudio, "mantra_audio_url");
+          }
+        }
         if (sp.target_reps) setScreenValue(sp.target_reps, "reps_total");
         if (sp.duration_sec) {
           setScreenValue(sp.duration_sec, "practice_duration_seconds");

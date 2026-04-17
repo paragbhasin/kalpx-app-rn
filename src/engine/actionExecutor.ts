@@ -3647,7 +3647,12 @@ export async function executeAction(
 
             nextStateId = "turn_8";
           } else if (currentStateId === "turn_8") {
-            // Completion — triad accepted
+            // Completion — "Begin my journey" tapped. Before navigating
+            // to the dashboard, call generate_companion (via journey/
+            // companion/) to seed ALL enrichment data (how_to_live,
+            // recommended_posture, focus_name, one_line, reasoning, etc.)
+            // so the dashboard renders fully — not just the triad stubs
+            // from the v3 response.
             mitraTrackEvent("onboarding_completed", {
               meta: { path: draft.path, mode: draft.guidance_mode },
             }).catch(() => {});
@@ -3664,6 +3669,29 @@ export async function executeAction(
                   }
                 : null,
             });
+
+            // Seed full companion enrichment from the journey companion
+            // endpoint. This populates how_to_live, recommended_posture,
+            // focus_name, one_line, reasoning, shift messages, etc.
+            try {
+              const _store = require("../store").default;
+              const _screenActions = require("../store/screenSlice").screenActions;
+              await executeAction(
+                {
+                  type: "generate_companion",
+                  payload: { use_journey_companion: true },
+                },
+                {
+                  screenState: _store.getState().screen.screenData,
+                  loadScreen: () => {},
+                  goBack: () => {},
+                  setScreenValue: (value: any, key: string) =>
+                    _store.dispatch(_screenActions.setScreenValue({ key, value })),
+                },
+              );
+            } catch (_err) {
+              if (__DEV__) console.warn("[ONBOARDING] companion enrichment failed:", _err);
+            }
 
             setScreenValue(null, "onboarding_draft_state");
             setScreenValue(null, "onboarding_turn");

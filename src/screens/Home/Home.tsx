@@ -9,11 +9,13 @@
  * Old Home.tsx saved as Home.old.tsx for reference.
  */
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
+
 import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import {
   ActivityIndicator,
@@ -26,11 +28,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   mitraJourneyWelcomeBack,
   mitraTrackEvent,
 } from "../../engine/mitraApi";
+import { fetchProfileDetails } from "../Profile/actions";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import api from "../../Networks/axios";
 import store, { RootState } from "../../store";
@@ -67,10 +70,15 @@ export const collapseControl = { avoidCollapse: false };
 
 export default function Home() {
   const navigation: any = useNavigation();
+  const dispatch = useDispatch();
   const user = useSelector(
     (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
   );
   const isLoggedIn = !!user;
+  const profileNameFromRedux = useSelector(
+    (state: RootState) =>
+      state.profileDetailsReducer?.data?.profile?.profile_name,
+  );
 
   const updateBackground = useScreenStore((state) => state.updateBackground);
   const updateHeaderHidden = useScreenStore(
@@ -83,9 +91,18 @@ export default function Home() {
   const [welcomeBackData, setWelcomeBackData] = useState<any>(null);
   // Mitra v3 — guard auto-route so we don't re-navigate on every Home focus.
   const v3AutoRoutedRef = useRef(false);
+  const [profileNameFromStorage, setProfileNameFromStorage] = useState<
+    string | null
+  >(null);
+
+  useEffect(() => {
+    AsyncStorage.getItem("profile_name").then((name) => {
+      if (name) setProfileNameFromStorage(name);
+    });
+  }, []);
 
   const HOME_BACKGROUND = require("../../../assets/new_home.png");
-  const CONTINUE_BG = require("../../../assets/continue_journey_bg.jpeg");
+  const CONTINUE_BG = require("../../../assets/beige_bg.png");
 
   useFocusEffect(
     React.useCallback(() => {
@@ -164,12 +181,11 @@ export default function Home() {
             setMitraJourneyId(data.journeyId);
             setJourneyDay(data.dayNumber || 1);
             seedJourneyStatus(data);
-            // Mitra v3 auto-route: authed user with active journey skips
-            // legacy Home splash and goes straight to the companion experience.
-            if (!v3AutoRoutedRef.current) {
-              v3AutoRoutedRef.current = true;
-              navigateToMitra(true);
-            }
+            // Mitra v3 auto-route: disabled to allow landing on the redesigned ContinueJourney decision screen.
+            // if (!v3AutoRoutedRef.current) {
+            //   v3AutoRoutedRef.current = true;
+            //   navigateToMitra(true);
+            // }
           } else {
             setWelcomeBackData(null);
             setMitraJourneyId(null);
@@ -186,8 +202,11 @@ export default function Home() {
           setCheckingJourney(false);
         }
       };
+      if (isLoggedIn) {
+        dispatch(fetchProfileDetails(() => {}));
+      }
       checkJourney();
-    }, [isLoggedIn, seedJourneyStatus]),
+    }, [isLoggedIn, navigation, dispatch]),
   );
 
   const [isProcessing, setIsProcessing] = useState(false);
@@ -292,47 +311,136 @@ export default function Home() {
     navigation.navigate("DynamicEngine");
   };
 
-  const navigateToMitra = async (hasJourney: boolean) => {
+  const navigateToMitra = async (
+    hasJourney: boolean,
+    initialTarget?: { containerId: string; stateId: string },
+  ) => {
     if (hasJourney) {
       setIsProcessing(true);
       try {
+        // ... (rest of the logic remains same, just using initialTarget at the end)
         // Post-auth v3 triad generation: if the user completed onboarding
         // as a guest and stashed inference_state (triad_pending was true),
         // call /journey/start-v3/ now that they're authenticated.
         // Post-auth triad generation: if guest completed onboarding and
         // stashed inference_state, generate triad now and route to turn_8
         // (triad reveal + "Begin my journey" CTA).
-        const stashedInference = store.getState().screen.screenData.stashed_inference_state;
+        const stashedInference =
+          store.getState().screen.screenData.stashed_inference_state;
         if (stashedInference && isLoggedIn) {
           try {
             const { mitraStartJourney } = require("../../engine/mitraApi");
-            const stashedMode = store.getState().screen.screenData.stashed_guidance_mode || "hybrid";
+            const stashedMode =
+              store.getState().screen.screenData.stashed_guidance_mode ||
+              "hybrid";
             const v3Result = await mitraStartJourney({
               inference_state: stashedInference,
               guidance_mode: stashedMode,
               locale: "en",
-              tz: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
+              tz:
+                Intl.DateTimeFormat().resolvedOptions().timeZone ||
+                "Asia/Kolkata",
             });
             if (v3Result) {
               const t = v3Result.triad || {};
-              store.dispatch(screenActions.setScreenValue({ key: "mantra_text", value: t.mantra?.title }));
-              store.dispatch(screenActions.setScreenValue({ key: "companion_mantra_title", value: t.mantra?.title }));
-              store.dispatch(screenActions.setScreenValue({ key: "companion_mantra_id", value: t.mantra?.item_id }));
-              store.dispatch(screenActions.setScreenValue({ key: "sankalp_text", value: t.sankalp?.title }));
-              store.dispatch(screenActions.setScreenValue({ key: "companion_sankalp_line", value: t.sankalp?.title }));
-              store.dispatch(screenActions.setScreenValue({ key: "companion_sankalp_id", value: t.sankalp?.item_id }));
-              store.dispatch(screenActions.setScreenValue({ key: "practice_title", value: t.practice?.title }));
-              store.dispatch(screenActions.setScreenValue({ key: "companion_practice_title", value: t.practice?.title }));
-              store.dispatch(screenActions.setScreenValue({ key: "companion_practice_id", value: t.practice?.item_id }));
-              store.dispatch(screenActions.setScreenValue({ key: "path_intent", value: v3Result.path_intent }));
-              store.dispatch(screenActions.setScreenValue({ key: "scan_focus", value: v3Result.scan_focus }));
-              store.dispatch(screenActions.setScreenValue({ key: "journey_id", value: v3Result.journey_id }));
+              store.dispatch(
+                screenActions.setScreenValue({
+                  key: "mantra_text",
+                  value: t.mantra?.title,
+                }),
+              );
+              store.dispatch(
+                screenActions.setScreenValue({
+                  key: "companion_mantra_title",
+                  value: t.mantra?.title,
+                }),
+              );
+              store.dispatch(
+                screenActions.setScreenValue({
+                  key: "companion_mantra_id",
+                  value: t.mantra?.item_id,
+                }),
+              );
+              store.dispatch(
+                screenActions.setScreenValue({
+                  key: "sankalp_text",
+                  value: t.sankalp?.title,
+                }),
+              );
+              store.dispatch(
+                screenActions.setScreenValue({
+                  key: "companion_sankalp_line",
+                  value: t.sankalp?.title,
+                }),
+              );
+              store.dispatch(
+                screenActions.setScreenValue({
+                  key: "companion_sankalp_id",
+                  value: t.sankalp?.item_id,
+                }),
+              );
+              store.dispatch(
+                screenActions.setScreenValue({
+                  key: "practice_title",
+                  value: t.practice?.title,
+                }),
+              );
+              store.dispatch(
+                screenActions.setScreenValue({
+                  key: "companion_practice_title",
+                  value: t.practice?.title,
+                }),
+              );
+              store.dispatch(
+                screenActions.setScreenValue({
+                  key: "companion_practice_id",
+                  value: t.practice?.item_id,
+                }),
+              );
+              store.dispatch(
+                screenActions.setScreenValue({
+                  key: "path_intent",
+                  value: v3Result.path_intent,
+                }),
+              );
+              store.dispatch(
+                screenActions.setScreenValue({
+                  key: "scan_focus",
+                  value: v3Result.scan_focus,
+                }),
+              );
+              store.dispatch(
+                screenActions.setScreenValue({
+                  key: "journey_id",
+                  value: v3Result.journey_id,
+                }),
+              );
               // Clear stashed state
-              store.dispatch(screenActions.setScreenValue({ key: "stashed_inference_state", value: null }));
-              store.dispatch(screenActions.setScreenValue({ key: "stashed_guidance_mode", value: null }));
-              store.dispatch(screenActions.setScreenValue({ key: "onboarding_turn", value: "turn_8" }));
+              store.dispatch(
+                screenActions.setScreenValue({
+                  key: "stashed_inference_state",
+                  value: null,
+                }),
+              );
+              store.dispatch(
+                screenActions.setScreenValue({
+                  key: "stashed_guidance_mode",
+                  value: null,
+                }),
+              );
+              store.dispatch(
+                screenActions.setScreenValue({
+                  key: "onboarding_turn",
+                  value: "turn_8",
+                }),
+              );
 
-              if (__DEV__) console.log("[HOME] Post-auth triad generated:", v3Result.path_intent, "→ routing to turn_8");
+              if (__DEV__)
+                console.log(
+                  "[HOME] Post-auth triad generated:",
+                  v3Result.path_intent,
+                  "→ routing to turn_8",
+                );
 
               // Route to turn_8 (triad reveal + "Begin my journey")
               // instead of the normal dashboard resume flow.
@@ -347,7 +455,8 @@ export default function Home() {
               return; // skip the normal resume flow below
             }
           } catch (_err) {
-            if (__DEV__) console.warn("[HOME] Post-auth v3 triad call failed:", _err);
+            if (__DEV__)
+              console.warn("[HOME] Post-auth v3 triad call failed:", _err);
           }
         }
 
@@ -484,7 +593,12 @@ export default function Home() {
             }
           }
 
-          if (checkpointStateId && (!checkpointCompleted || day14Pending)) {
+          if (initialTarget) {
+            store.dispatch(loadScreenWithData(initialTarget));
+          } else if (
+            checkpointStateId &&
+            (!checkpointCompleted || day14Pending)
+          ) {
             store.dispatch(
               screenActions.setScreenValue({
                 key: "checkpoint_day",
@@ -525,11 +639,14 @@ export default function Home() {
           // the user just logged in after completing onboarding as a guest.
           // Generate the triad and go to turn_8 (triad reveal + "Begin my
           // journey") instead of restarting onboarding at turn_1.
-          const stashedInf = store.getState().screen.screenData.stashed_inference_state;
+          const stashedInf =
+            store.getState().screen.screenData.stashed_inference_state;
           if (stashedInf && isLoggedIn) {
             try {
               const { mitraStartJourney } = require("../../engine/mitraApi");
-              const stashedMode = store.getState().screen.screenData.stashed_guidance_mode || "hybrid";
+              const stashedMode =
+                store.getState().screen.screenData.stashed_guidance_mode ||
+                "hybrid";
               const v3Result = await mitraStartJourney({
                 inference_state: stashedInf,
                 guidance_mode: stashedMode,
@@ -537,22 +654,102 @@ export default function Home() {
               });
               if (v3Result) {
                 const t = v3Result.triad || {};
-                store.dispatch(screenActions.setScreenValue({ key: "mantra_text", value: t.mantra?.title }));
-                store.dispatch(screenActions.setScreenValue({ key: "companion_mantra_title", value: t.mantra?.title }));
-                store.dispatch(screenActions.setScreenValue({ key: "companion_mantra_id", value: t.mantra?.item_id }));
-                store.dispatch(screenActions.setScreenValue({ key: "sankalp_text", value: t.sankalp?.title }));
-                store.dispatch(screenActions.setScreenValue({ key: "companion_sankalp_line", value: t.sankalp?.title }));
-                store.dispatch(screenActions.setScreenValue({ key: "companion_sankalp_id", value: t.sankalp?.item_id }));
-                store.dispatch(screenActions.setScreenValue({ key: "practice_title", value: t.practice?.title }));
-                store.dispatch(screenActions.setScreenValue({ key: "companion_practice_title", value: t.practice?.title }));
-                store.dispatch(screenActions.setScreenValue({ key: "companion_practice_id", value: t.practice?.item_id }));
-                store.dispatch(screenActions.setScreenValue({ key: "path_intent", value: v3Result.path_intent }));
-                store.dispatch(screenActions.setScreenValue({ key: "scan_focus", value: v3Result.scan_focus }));
-                store.dispatch(screenActions.setScreenValue({ key: "journey_id", value: v3Result.journey_id }));
-                store.dispatch(screenActions.setScreenValue({ key: "stashed_inference_state", value: null }));
-                store.dispatch(screenActions.setScreenValue({ key: "stashed_guidance_mode", value: null }));
-                store.dispatch(screenActions.setScreenValue({ key: "onboarding_turn", value: "turn_8" }));
-                if (__DEV__) console.log("[HOME] Post-auth triad generated:", v3Result.path_intent, "→ turn_8");
+                store.dispatch(
+                  screenActions.setScreenValue({
+                    key: "mantra_text",
+                    value: t.mantra?.title,
+                  }),
+                );
+                store.dispatch(
+                  screenActions.setScreenValue({
+                    key: "companion_mantra_title",
+                    value: t.mantra?.title,
+                  }),
+                );
+                store.dispatch(
+                  screenActions.setScreenValue({
+                    key: "companion_mantra_id",
+                    value: t.mantra?.item_id,
+                  }),
+                );
+                store.dispatch(
+                  screenActions.setScreenValue({
+                    key: "sankalp_text",
+                    value: t.sankalp?.title,
+                  }),
+                );
+                store.dispatch(
+                  screenActions.setScreenValue({
+                    key: "companion_sankalp_line",
+                    value: t.sankalp?.title,
+                  }),
+                );
+                store.dispatch(
+                  screenActions.setScreenValue({
+                    key: "companion_sankalp_id",
+                    value: t.sankalp?.item_id,
+                  }),
+                );
+                store.dispatch(
+                  screenActions.setScreenValue({
+                    key: "practice_title",
+                    value: t.practice?.title,
+                  }),
+                );
+                store.dispatch(
+                  screenActions.setScreenValue({
+                    key: "companion_practice_title",
+                    value: t.practice?.title,
+                  }),
+                );
+                store.dispatch(
+                  screenActions.setScreenValue({
+                    key: "companion_practice_id",
+                    value: t.practice?.item_id,
+                  }),
+                );
+                store.dispatch(
+                  screenActions.setScreenValue({
+                    key: "path_intent",
+                    value: v3Result.path_intent,
+                  }),
+                );
+                store.dispatch(
+                  screenActions.setScreenValue({
+                    key: "scan_focus",
+                    value: v3Result.scan_focus,
+                  }),
+                );
+                store.dispatch(
+                  screenActions.setScreenValue({
+                    key: "journey_id",
+                    value: v3Result.journey_id,
+                  }),
+                );
+                store.dispatch(
+                  screenActions.setScreenValue({
+                    key: "stashed_inference_state",
+                    value: null,
+                  }),
+                );
+                store.dispatch(
+                  screenActions.setScreenValue({
+                    key: "stashed_guidance_mode",
+                    value: null,
+                  }),
+                );
+                store.dispatch(
+                  screenActions.setScreenValue({
+                    key: "onboarding_turn",
+                    value: "turn_8",
+                  }),
+                );
+                if (__DEV__)
+                  console.log(
+                    "[HOME] Post-auth triad generated:",
+                    v3Result.path_intent,
+                    "→ turn_8",
+                  );
                 store.dispatch(
                   loadScreenWithData({
                     containerId: "welcome_onboarding",
@@ -677,8 +874,29 @@ export default function Home() {
         />
       ) : mitraJourneyId ? (
         <ContinueJourney
+          userName={
+            profileNameFromRedux ||
+            profileNameFromStorage ||
+            user?.name ||
+            user?.firstName ||
+            user?.email?.split("@")[0] ||
+            "User"
+          }
           dayNumber={journeyDay}
           onResume={() => navigateToMitra(true)}
+          onSupport={() =>
+            navigateToMitra(true, {
+              containerId: "companion_dashboard",
+              stateId: "day_active",
+            })
+          }
+          onCheckIn={() =>
+            navigateToMitra(true, {
+              containerId: "cycle_transitions",
+              stateId: "quick_checkin",
+            })
+          }
+          onTalk={() => navigateToMitra(true)}
         />
       ) : (
         <ScrollView

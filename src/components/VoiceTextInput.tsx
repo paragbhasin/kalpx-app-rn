@@ -242,6 +242,7 @@ export const VoiceTextInput: React.FC<VoiceTextInputProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [contentHeight, setContentHeight] = useState(0);
+  const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
   const shouldExpandForContent = (
@@ -251,7 +252,8 @@ export const VoiceTextInput: React.FC<VoiceTextInputProps> = ({
     if (!currentText.trim()) return false;
 
     return (
-      currentText.includes("\n") || currentContentHeight > EXPANDED_HEIGHT_THRESHOLD
+      currentText.includes("\n") ||
+      currentContentHeight > EXPANDED_HEIGHT_THRESHOLD
     );
   };
 
@@ -290,7 +292,10 @@ export const VoiceTextInput: React.FC<VoiceTextInputProps> = ({
             onContentSizeChange={(event) =>
               setContentHeight(event.nativeEvent.contentSize.height)
             }
-            onBlur={() => setIsExpanded(shouldExpandForContent(text, contentHeight))}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => {
+              setIsFocused(false);
+            }}
             onSubmitEditing={handleSend}
             blurOnSubmit={false}
           />
@@ -326,7 +331,7 @@ export const VoiceTextInput: React.FC<VoiceTextInputProps> = ({
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    paddingHorizontal: 16,
+    // paddingHorizontal: 16,
     paddingBottom: 20,
   },
   inputWrapper: {
@@ -337,12 +342,13 @@ const styles = StyleSheet.create({
   inputShell: {
     flex: 1,
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-end", // Fixed: Mic stays at bottom-right
     backgroundColor: "rgba(255, 252, 246, 0.98)",
     borderRadius: 30,
     borderWidth: 1,
     borderColor: "rgba(222, 206, 176, 0.95)",
     paddingHorizontal: 16,
+    paddingBottom: 10,
     minHeight: 52,
     marginRight: 10,
     shadowColor: "#d9bf8f",
@@ -352,17 +358,16 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   expandedShell: {
-    alignItems: "flex-end",
-    paddingVertical: 10,
     borderRadius: 20,
   },
   input: {
     flex: 1,
     fontFamily: Fonts.sans.regular,
-    fontSize: 15,
+    fontSize: 13,
     color: "#432104",
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 0,
+    textAlignVertical: "bottom",
   },
   expandedInput: {
     minHeight: 80,

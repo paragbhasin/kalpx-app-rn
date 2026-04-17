@@ -24,12 +24,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { VoiceTextInput } from "../components/VoiceTextInput";
 import { useSelector } from "react-redux";
+import { VoiceTextInput } from "../components/VoiceTextInput";
 import { executeAction } from "../engine/actionExecutor";
 import { useScreenStore } from "../engine/useScreenBridge";
-import { RootState } from "../store";
 import { interpolate } from "../engine/utils/interpolation";
+import { RootState } from "../store";
 import { Fonts } from "../theme/fonts";
 
 interface Props {
@@ -171,7 +171,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
         voiceAvailable={block.voice_available}
         placeholder={
           showHeroMeta
-            ? "Write or speak what's on your mind..."
+            ? "Type Or say it in your words..."
             : "Type Or say it in your words..."
         }
         onSend={(val, type) => {

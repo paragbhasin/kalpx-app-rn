@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../../Networks/axios";
 
 // 🔹 Action Types
@@ -87,6 +88,9 @@ export const fetchProfileDetails = (callback) => async (dispatch) => {
     const payload = response?.data?.data || response?.data || {};
     console.log("Profile Details Payload:", payload);
     dispatch(profileDetailsSuccess(payload));
+    if (payload?.profile?.profile_name) {
+      AsyncStorage.setItem("profile_name", payload.profile.profile_name);
+    }
     callback?.({ success: true, data: payload });
   } catch (error) {
     const errorMsg =
@@ -102,10 +106,9 @@ export const updateProfile = (profileData, callback) => async (dispatch) => {
     const response = await updateProfileApi(profileData);
     const payload = response?.data?.data || response?.data || {};
     dispatch(updateProfileSuccess(payload));
-
-    // Refresh details automatically after update
-    // dispatch(fetchProfileDetails());
-
+    if (profileData.profile_name) {
+      AsyncStorage.setItem("profile_name", profileData.profile_name);
+    }
     callback?.({ success: true, data: payload });
   } catch (error) {
     const errorMsg =

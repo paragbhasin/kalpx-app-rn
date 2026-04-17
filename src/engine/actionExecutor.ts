@@ -467,6 +467,54 @@ export async function executeAction(
       }
 
       // ================================================================
+      // HOME SURFACE ACTIONS (JOURNEY_HOME_CONTRACT_V1 §10 action enum)
+      // These fire from chips/CTAs on the /journey/home/ response.
+      // ================================================================
+      case "continue_practice": {
+        // "Start today's practice" / "See today's path" — go to dashboard.
+        loadScreen({
+          container_id:
+            (process as any).env?.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
+              ? "companion_dashboard_v3"
+              : "companion_dashboard",
+          state_id: "day_active",
+        });
+        _actionInFlight = false;
+        break;
+      }
+      case "start_checkin": {
+        // "Start with a check-in" / "A quiet check-in" — pranaType selector.
+        loadScreen({
+          container_id: "cycle_transitions",
+          state_id: "quick_checkin",
+        });
+        _actionInFlight = false;
+        break;
+      }
+      case "start_support": {
+        // "I need some support today" — re-dispatch to the trigger flow
+        // (OM / "I'm here" regulation space — same entry as the dashboard
+        // "I Feel Triggered" button per contract).
+        _actionInFlight = false;
+        await executeAction({ type: "initiate_trigger" } as any, action);
+        break;
+      }
+      case "open_mitra_chat": {
+        // "Talk with Mitra" / "I'd like to talk with Mitra" — no dedicated
+        // chat sheet yet; dashboard carries the voice/text input row.
+        // Tier 2 follow-up: build a dedicated Mitra chat surface.
+        loadScreen({
+          container_id:
+            (process as any).env?.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
+              ? "companion_dashboard_v3"
+              : "companion_dashboard",
+          state_id: "day_active",
+        });
+        _actionInFlight = false;
+        break;
+      }
+
+      // ================================================================
       // NAVIGATE — the most common action
       // ================================================================
       case "navigate": {

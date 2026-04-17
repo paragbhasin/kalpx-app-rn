@@ -155,7 +155,19 @@ export default function ContinueJourney({
       return _homeCache.response;
     }
     setLoading(true);
-    const res = (await mitraJourneyHome({})) as HomeResponse | null;
+    // Device timezone — per Contract §13, FE SHOULD include tz when it
+    // has one from the device. Without this the backend uses
+    // UserProfile.timezone (default Asia/Kolkata), which makes every
+    // overseas user look like a late-night user to the decision router.
+    let deviceTz: string | undefined;
+    try {
+      deviceTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    } catch {
+      deviceTz = undefined;
+    }
+    const res = (await mitraJourneyHome({
+      tz: deviceTz,
+    })) as HomeResponse | null;
     if (res) {
       _homeCache = { response: res, ts: Date.now() };
       setHome(res);

@@ -173,74 +173,49 @@ const MantraTextCard: React.FC<MantraTextCardProps> = ({
   onToggle,
 }) => {
   const [isTruncated, setIsTruncated] = React.useState(false);
-
   const baseTextStyle: any[] = [
-    styles.textCardHeaderContent,
-    isDevanagari && {
-      fontSize: 20,
-      fontFamily: "NotoSansDevanagari_500Medium",
-    },
+    isDevanagari ? styles.verseDevanagari : styles.verseIast,
   ];
 
   return (
-    <View style={styles.card}>
-      {/* Hidden measurement text for precise truncation detection */}
+    <View
+      style={[
+        styles.verseTextGroup,
+        !isTruncated && styles.verseTextGroupNoArrow,
+        expanded && styles.expandedSection,
+      ]}
+    >
       <Text
-        style={[
-          ...baseTextStyle,
-          { position: "absolute", opacity: 0, zIndex: -1 },
-        ]}
+        style={[baseTextStyle, styles.verseMeasureText]}
         onTextLayout={(e) => {
-          if (e.nativeEvent.lines.length > 2) {
-            setIsTruncated(true);
-          }
+          setIsTruncated(e.nativeEvent.lines.length > 2);
         }}
-        aria-hidden
       >
         {text}
       </Text>
 
-      {/* Visible Content */}
-      {!expanded ? (
-        <View style={{ padding: 12, paddingBottom: isTruncated ? 0 : 12 }}>
-          <Text style={baseTextStyle} numberOfLines={2}>
-            {text}
-          </Text>
-        </View>
-      ) : (
-        <ScrollView
-          style={{ maxHeight: 180 }}
-          showsVerticalScrollIndicator
-          nestedScrollEnabled
-          contentContainerStyle={{ padding: 12, paddingBottom: 0 }}
-        >
-          <Text style={baseTextStyle}>{text}</Text>
-        </ScrollView>
-      )}
-
-      {/* Toggle Arrow */}
-      {isTruncated && (
-        <TouchableOpacity
-          onPress={() => {
-            LayoutAnimation.configureNext(
-              LayoutAnimation.Presets.easeInEaseOut,
-            );
-            onToggle();
-          }}
-          style={{
-            alignItems: "center",
-            paddingVertical: 8,
-            width: "100%",
-          }}
-          activeOpacity={0.7}
-        >
-          {expanded ? (
-            <ChevronUp size={18} color="#B89450" />
-          ) : (
-            <ChevronDown size={18} color="#B89450" />
-          )}
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity
+        onPress={() => {
+          if (!isTruncated) return;
+          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+          onToggle();
+        }}
+        activeOpacity={isTruncated ? 0.9 : 1}
+        disabled={!isTruncated}
+      >
+        <Text style={baseTextStyle} numberOfLines={expanded ? undefined : 2}>
+          {text}
+        </Text>
+        {isTruncated && (
+          <View style={styles.expandArrowWrap}>
+            {expanded ? (
+              <ChevronUp size={18} color="#B89450" />
+            ) : (
+              <ChevronDown size={18} color="#B89450" />
+            )}
+          </View>
+        )}
+      </TouchableOpacity>
     </View>
   );
 };
@@ -268,7 +243,6 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
   const [essenceExpanded, setEssenceExpanded] = useState(false);
   const [iastExpanded, setIastExpanded] = useState(false);
   const [devanagariExpanded, setDevanagariExpanded] = useState(false);
-  const [isMantraTruncatable, setIsMantraTruncatable] = useState(false);
 
   // Mantra Practice State
   const [chantCount, setChantCount] = useState(0);
@@ -501,7 +475,7 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
 
   const currentType: ActivityType = useMemo(() => {
     const rawType = (info?.type || info?.item_type || "").toLowerCase();
-    
+
     // 1. Check direct info type
     if (rawType === "mantra") return "mantra";
     if (rawType === "sankalp" || rawType === "sankalpa") return "sankalp";
@@ -516,17 +490,19 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     )
       return "mantra";
     if (
-      screenData?.info_is_sankalp || 
+      screenData?.info_is_sankalp ||
       screenData?.runner_variant === "sankalp" ||
       screenData?.runner_active_item?.type === "sankalp" ||
       screenData?.runner_active_item?.item_type === "sankalp"
-    ) return "sankalp";
+    )
+      return "sankalp";
     if (
       screenData?.info_is_practice ||
       screenData?.runner_variant === "practice" ||
       screenData?.runner_active_item?.type === "practice" ||
       screenData?.runner_active_item?.item_type === "practice"
-    ) return "practice";
+    )
+      return "practice";
 
     return null;
   }, [screenData, info]);
@@ -658,11 +634,6 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
       updateBackground(null);
     };
   }, [updateBackground, updateHeaderHidden, currentType, screenData]);
-
-  // Reset truncation state when mantra info changes
-  React.useEffect(() => {
-    setIsMantraTruncatable(false);
-  }, [info]);
 
   React.useEffect(() => {
     return () => {
@@ -912,7 +883,6 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                     onToggle={() => setIastExpanded(!iastExpanded)}
                   />
                 )}
-                <View style={{ height: 5 }} />
                 {info.devanagari && (
                   <MantraTextCard
                     text={info.devanagari}
@@ -1576,6 +1546,48 @@ const styles = StyleSheet.create({
     borderColor: "rgba(184, 148, 80, 0.1)",
     padding: 15,
   },
+  verseTextGroup: {
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(184, 148, 80, 0.1)",
+    padding: 5,
+  },
+  verseTextGroupNoArrow: {
+    padding: 15,
+  },
+  verseMeasureText: {
+    position: "absolute",
+    opacity: 0,
+    zIndex: -1,
+    left: 5,
+    right: 5,
+  },
+  expandedSection: {
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+  },
+  verseIast: {
+    fontSize: 13,
+    letterSpacing: 1,
+    textTransform: "uppercase",
+    color: "#615247",
+    fontFamily: Fonts.sans.regular,
+    textAlign: "center",
+    lineHeight: 18,
+  },
+  verseDevanagari: {
+    fontFamily: "NotoSansDevanagari_500Medium",
+    fontSize: 15,
+    // lineHeight: 26,
+    color: "#615247",
+    textAlign: "center",
+  },
+  expandArrowWrap: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 4,
+    opacity: 0.6,
+  },
   cardExpanded: {
     // backgroundColor: "rgba(255, 255, 255, 0.8)",
   },
@@ -1899,22 +1911,9 @@ const styles = StyleSheet.create({
   },
   topCardsRow: {
     width: "100%",
-    marginBottom: 24,
-    marginTop: 0,
-    gap: 2,
-  },
-  textCardHeader: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    width: "100%",
-  },
-  textCardHeaderContent: {
-    fontSize: 17,
-    fontFamily: Fonts.serif.bold,
-    color: BROWN,
-    // lineHeight: 24,
-    textAlign: "center",
+    marginTop: 20,
+    marginBottom: 0,
+    gap: 12,
   },
   combinedHelpText: {
     fontFamily: Fonts.serif.regular,

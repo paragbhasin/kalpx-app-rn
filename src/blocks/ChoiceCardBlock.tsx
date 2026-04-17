@@ -552,8 +552,8 @@ const styles = StyleSheet.create({
     paddingRight: 14,
   },
   gridCard: {
-    paddingVertical: 16,
-    paddingHorizontal: 8,
+    paddingVertical: 10,
+    // paddingHorizontal: 8,
     minHeight: 100,
     alignItems: "center",
     justifyContent: "center",
@@ -591,6 +591,20 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 6,
   },
+  quickCheckinCard: {
+    // minHeight: 178,
+    // paddingVertical: 18,
+    // paddingHorizontal: 12,
+    borderRadius: 28,
+    borderWidth: 2,
+    borderColor: "rgba(229, 196, 127, 0.72)",
+    backgroundColor: "rgba(255, 252, 247, 0.97)",
+    shadowColor: "#B78A2E",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 5,
+  },
   premiumSelectedCard: {
     shadowColor: "#C9A84C",
     shadowOffset: { width: 0, height: 4 },
@@ -606,6 +620,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     transform: [{ translateY: -1 }],
     shadowOpacity: 0.22,
+  },
+  quickCheckinSelectedCard: {
+    borderColor: "#D6A82F",
+    backgroundColor: "#FFFFFF",
+    shadowOpacity: 0.2,
+    transform: [{ translateY: -1 }],
   },
   goldLine: {
     position: "absolute",
@@ -632,6 +652,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  quickCheckinGridContent: {
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+  },
   gridFullWidthContent: {
     flexDirection: "row",
     justifyContent: "center",
@@ -650,10 +675,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   premiumGridLeftPart: {
-    gap: 12,
+    // gap: 12,
   },
   disciplineGridLeftPart: {
     gap: 10,
+  },
+  quickCheckinLeftPart: {
+    gap: 18,
+    alignItems: "center",
+    justifyContent: "center",
   },
   gridFullWidthLeftPart: {
     flexDirection: "row",
@@ -684,6 +714,12 @@ const styles = StyleSheet.create({
     marginRight: 0,
     marginBottom: 2,
   },
+  quickCheckinImageContainer: {
+    width: 64,
+    height: 64,
+    marginRight: 0,
+    marginBottom: 0,
+  },
   image: {
     width: "100%",
     height: "100%",
@@ -695,13 +731,19 @@ const styles = StyleSheet.create({
   details: {
     flex: 1,
     justifyContent: "center",
+    alignItems: "center",
   },
   premiumDetails: {
     alignItems: "center",
   },
+  quickCheckinDetails: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+  },
   titleRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
     width: "100%",
     marginBottom: 4,
@@ -712,12 +754,17 @@ const styles = StyleSheet.create({
   premiumTitleRow: {
     marginBottom: 2,
   },
+  quickCheckinTitleRow: {
+    justifyContent: "center",
+    marginBottom: 0,
+  },
   title: {
     fontSize: 16,
     color: "#432104",
     fontFamily: Fonts.serif.bold,
     flex: 1,
     fontWeight: "600",
+    textAlign: "center",
   },
   premiumTitle: {
     fontSize: 16,
@@ -725,13 +772,21 @@ const styles = StyleSheet.create({
   },
   gridTitle: {
     textAlign: "center",
-    flex: 0,
   },
   disciplineTitle: {
     fontSize: 16,
     lineHeight: 24,
     textAlign: "center",
     flexShrink: 1,
+  },
+  quickCheckinTitle: {
+    fontSize: 17,
+    // lineHeight: 24,
+    color: "#432104",
+    textAlign: "center",
+    flex: 0,
+    alignSelf: "center",
+    alignItems: "center",
   },
   labelBadge: {
     paddingHorizontal: 10,

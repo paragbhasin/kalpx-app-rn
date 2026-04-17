@@ -520,15 +520,54 @@ export default function Home() {
             );
           }
         } else {
-          // Mitra v3: no active journey → launch welcome_onboarding conversation
-          // (Moments 1–7). Replaces the legacy choice_stack/discipline_select
-          // portal. Seeds onboarding_turn=1 + empty draft state so the first
-          // turn renders correctly.
-          // LEGACY (commented out — kept for rollback reference):
-          // store.dispatch(loadScreenWithData({
-          //   containerId: "choice_stack",
-          //   stateId: "discipline_select",
-          // }));
+          // Check for stashed inference from guest onboarding. If present,
+          // the user just logged in after completing onboarding as a guest.
+          // Generate the triad and go to turn_8 (triad reveal + "Begin my
+          // journey") instead of restarting onboarding at turn_1.
+          const stashedInf = store.getState().screen.screenData.stashed_inference_state;
+          if (stashedInf && isLoggedIn) {
+            try {
+              const { mitraStartJourney } = require("../../engine/mitraApi");
+              const stashedMode = store.getState().screen.screenData.stashed_guidance_mode || "hybrid";
+              const v3Result = await mitraStartJourney({
+                inference_state: stashedInf,
+                guidance_mode: stashedMode,
+                locale: "en",
+              });
+              if (v3Result) {
+                const t = v3Result.triad || {};
+                store.dispatch(screenActions.setScreenValue({ key: "mantra_text", value: t.mantra?.title }));
+                store.dispatch(screenActions.setScreenValue({ key: "companion_mantra_title", value: t.mantra?.title }));
+                store.dispatch(screenActions.setScreenValue({ key: "companion_mantra_id", value: t.mantra?.item_id }));
+                store.dispatch(screenActions.setScreenValue({ key: "sankalp_text", value: t.sankalp?.title }));
+                store.dispatch(screenActions.setScreenValue({ key: "companion_sankalp_line", value: t.sankalp?.title }));
+                store.dispatch(screenActions.setScreenValue({ key: "companion_sankalp_id", value: t.sankalp?.item_id }));
+                store.dispatch(screenActions.setScreenValue({ key: "practice_title", value: t.practice?.title }));
+                store.dispatch(screenActions.setScreenValue({ key: "companion_practice_title", value: t.practice?.title }));
+                store.dispatch(screenActions.setScreenValue({ key: "companion_practice_id", value: t.practice?.item_id }));
+                store.dispatch(screenActions.setScreenValue({ key: "path_intent", value: v3Result.path_intent }));
+                store.dispatch(screenActions.setScreenValue({ key: "scan_focus", value: v3Result.scan_focus }));
+                store.dispatch(screenActions.setScreenValue({ key: "journey_id", value: v3Result.journey_id }));
+                store.dispatch(screenActions.setScreenValue({ key: "stashed_inference_state", value: null }));
+                store.dispatch(screenActions.setScreenValue({ key: "stashed_guidance_mode", value: null }));
+                store.dispatch(screenActions.setScreenValue({ key: "onboarding_turn", value: "turn_8" }));
+                if (__DEV__) console.log("[HOME] Post-auth triad generated:", v3Result.path_intent, "→ turn_8");
+                store.dispatch(
+                  loadScreenWithData({
+                    containerId: "welcome_onboarding",
+                    stateId: "turn_8",
+                  }),
+                );
+                setIsProcessing(false);
+                navigation.navigate("DynamicEngine");
+                return;
+              }
+            } catch (_err) {
+              if (__DEV__) console.warn("[HOME] Post-auth triad failed:", _err);
+            }
+          }
+
+          // No stash — fresh start. Launch onboarding from turn_2.
           store.dispatch(
             screenActions.setScreenValue({ key: "onboarding_turn", value: 2 }),
           );

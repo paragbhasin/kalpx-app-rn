@@ -4529,6 +4529,47 @@ export async function executeAction(
       // a full crisis payload. Seed it into Redux so CrisisRoomContainer
       // can render. If network fails, the container has a local
       // fallback (sovereignty rule explicitly waived for this surface).
+
+      // "I want to start over" — abandon current journey, restart from
+      // stage 1 (growth/support lane selection).
+      case "reset_journey": {
+        try {
+          const { mitraResetJourney } = require("./mitraApi");
+          const res = await mitraResetJourney();
+          if (__DEV__) console.log("[RESET] Journey reset:", res?.status);
+
+          const clearKeys = [
+            "journey_id", "day_number", "total_days", "mantra_text",
+            "sankalp_text", "practice_title", "companion_mantra_id",
+            "companion_sankalp_id", "companion_practice_id",
+            "companion_mantra_title", "companion_sankalp_line",
+            "companion_practice_title", "path_intent", "scan_focus",
+            "cycle_id", "onboarding_draft_state", "onboarding_turn",
+            "practice_chant", "practice_embody", "practice_act",
+            "sankalp_how_to_live", "master_mantra", "master_sankalp",
+            "master_practice", "stashed_inference_state",
+            "stashed_guidance_mode", "checkpoint_completed",
+          ];
+          for (const key of clearKeys) {
+            setScreenValue(null, key);
+          }
+
+          mitraTrackEvent("journey_reset", {
+            meta: { source: "dashboard_start_over" },
+          }).catch(() => {});
+
+          setScreenValue(2, "onboarding_turn");
+          setScreenValue({ started_at: Date.now() }, "onboarding_draft_state");
+          loadScreen({
+            container_id: "welcome_onboarding",
+            state_id: "turn_2",
+          } as any);
+        } catch (err) {
+          if (__DEV__) console.error("[RESET] Failed:", err);
+        }
+        break;
+      }
+
       case "open_crisis": {
         const { mitraCrisis } = require("./mitraApi");
         let crisisPayload = null;

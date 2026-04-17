@@ -764,10 +764,28 @@ export async function mitraFetchProgress(): Promise<any> {
   try {
     const res = await api.get("mitra/journey/progress/", {
       params: { tz: getTz() },
+      timeout: 15000, // CloudFront can be slow on first hit
     });
     return res.data;
   } catch (err: any) {
-    console.error("[MITRA] fetch progress failed:", err.message);
+    if (__DEV__) console.warn("[MITRA] fetch progress failed:", err.message);
+    return null;
+  }
+}
+
+/** POST mitra/journey/reset/ — Abandon current journey, start fresh.
+ * Called by "I want to start over" on the dashboard. */
+export async function mitraResetJourney(): Promise<any> {
+  try {
+    // Use the welcome-back endpoint with decision="fresh" to cleanly
+    // close the current journey and signal a fresh start.
+    const res = await api.post("mitra/journey/welcome-back/", {
+      decision: "fresh",
+      tz: getTz(),
+    });
+    return res.data;
+  } catch (err: any) {
+    if (__DEV__) console.warn("[MITRA] reset journey failed:", err.message);
     return null;
   }
 }

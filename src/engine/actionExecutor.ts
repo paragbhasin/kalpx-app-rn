@@ -3560,6 +3560,12 @@ export async function executeAction(
             if (complete) {
               draft.recognition_line = complete.recognition?.line;
               setScreenValue(complete.recognition?.line, "recognition_line");
+              // Recognition body — lane × mode closing paragraph (2026-04-17
+              // Option B). Moved from FE hardcoded block to backend spine.
+              setScreenValue(
+                complete.recognition?.body_lines || [],
+                "recognition_body_lines",
+              );
               setScreenValue(complete, "onboarding_complete_data");
               // Use labels for triad templating
               setScreenValue(complete.triad_labels?.sankalp || "SANKALP", "sankalp_label");

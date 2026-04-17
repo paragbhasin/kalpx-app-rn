@@ -7049,16 +7049,13 @@ export const WelcomeOnboardingContainer = {
       tone: { theme: "gold_dark", mood: "steady" },
       blocks: [
         {
+          // body_paragraphs intentionally omitted — FirstRecognitionBlock
+          // now reads screenData.recognition_body_lines (backend-delivered,
+          // lane × mode per onboarding_complete). 2026-04-17 Option B
+          // (sovereignty: no hardcoded user-facing strings in schema).
           type: "first_recognition",
           label: "RECOGNITION",
           emphasized_line: "{{recognition_line}}",
-          body_paragraphs: [
-            "And this matters too — ",
-            "you showed up. You're here.",
-            "We can take this one step at a time.",
-            "I'll guide you with a practice, an intention",
-            "and a way to begin your day.",
-          ],
         },
         {
           type: "onboarding_conversation_turn",

@@ -28,7 +28,15 @@ interface Props {
 
 const FirstRecognitionBlock: React.FC<Props> = ({ block }) => {
   const { screenData } = useScreenStore();
-  const paras = block.body_paragraphs || [];
+  // Prefer backend-delivered lines (sovereignty: no user-facing strings in TSX).
+  // 2026-04-17 Option B: recognition closing paragraph now lives on the spine
+  // per-lane × mode. Falls back to schema-provided body_paragraphs only if
+  // backend returned empty (which itself falls back to a safety line in
+  // resolve_recognition_body). Finally, renders empty if neither is present.
+  const backendLines: string[] = Array.isArray((screenData as any)?.recognition_body_lines)
+    ? ((screenData as any).recognition_body_lines as string[])
+    : [];
+  const paras = backendLines.length > 0 ? backendLines : (block.body_paragraphs || []);
 
   return (
     <View style={styles.card}>

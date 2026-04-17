@@ -37,9 +37,11 @@ import {
   View,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useDispatch } from "react-redux";
 import { executeAction } from "../../engine/actionExecutor";
 import { mitraJourneyHome } from "../../engine/mitraApi";
 import { useScreenStore } from "../../engine/useScreenBridge";
+import { screenActions, loadScreenWithData, goBackWithData } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -128,19 +130,41 @@ export default function ContinueJourney({
   userName = "friend",
 }: ContinueJourneyProps) {
   const screenBridge = useScreenStore();
+  const dispatch = useDispatch();
   const [home, setHome] = useState<HomeResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const routedRef = useRef(false);
 
+  // ActionContext matches the signature expected by actionExecutor:
+  //   loadScreen(target), goBack(), setScreenValue(value, key) — note
+  //   the reversed arg order — and screenState as the current snapshot.
+  // useScreenStore does not expose setScreenValue directly (only
+  // updateScreenData with reversed args), so we build it here via
+  // dispatch(screenActions.setScreenValue({key, value})) to match the
+  // canonical Home.tsx pattern.
   const buildActionContext = useCallback(() => {
     return {
       screenState: screenBridge.screenData || {},
-      setScreenValue: screenBridge.setScreenValue,
-      loadScreen: screenBridge.loadScreen,
-      goBack: screenBridge.goBack,
+      setScreenValue: (value: any, key: string) => {
+        dispatch(screenActions.setScreenValue({ key, value }));
+      },
+      loadScreen: (target: any) => {
+        const containerId =
+          typeof target === "string"
+            ? "generic"
+            : target?.container_id || target?.containerId || "generic";
+        const stateId =
+          typeof target === "string"
+            ? target
+            : target?.state_id || target?.stateId || "";
+        dispatch(loadScreenWithData({ containerId, stateId }) as any);
+      },
+      goBack: () => {
+        dispatch(goBackWithData() as any);
+      },
       currentScreen: screenBridge.currentScreen,
     };
-  }, [screenBridge]);
+  }, [screenBridge.screenData, screenBridge.currentScreen, dispatch]);
 
   const fetchHome = useCallback(async (forceRefresh: boolean = false) => {
     const ttlMs = (_homeCache?.response?.meta?.cache_ttl_sec || 0) * 1000;

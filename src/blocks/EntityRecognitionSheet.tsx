@@ -22,20 +22,44 @@ import {
 } from "react-native";
 import { Fonts } from "../theme/fonts";
 import { executeAction } from "../engine/actionExecutor";
+import { useContentSlots, readMomentSlot } from "../hooks/useContentSlots";
 import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
 
 const EntityRecognitionSheet: React.FC<{ block?: any }> = () => {
   const { screenData, loadScreen, goBack } = useScreenStore();
-  const pending = (screenData as any).entity_recognition_pending;
+  const ss = screenData as Record<string, any>;
+  const pending = ss.entity_recognition_pending;
+
+  useContentSlots({
+    momentId: "M29_entity_recognition_sheet",
+    screenDataKey: "entity_recognition_sheet",
+    buildCtx: (s) => ({
+      path: s.journey_path === "growth" ? "growth" : "support",
+      guidance_mode: s.guidance_mode || "hybrid",
+      locale: s.locale || "en",
+      user_attention_state: "scanning",
+      emotional_weight: "light",
+      cycle_day: Number(s.day_number) || 0,
+      entered_via: "dashboard_entity_card_tap",
+      stage_signals: {},
+      today_layer: {},
+      life_layer: {
+        cycle_id: s.journey_id || s.cycle_id || "",
+        life_kosha: s.life_kosha || s.scan_focus || "",
+        scan_focus: s.scan_focus || "",
+      },
+    }),
+  });
+  const slot = (name: string) => readMomentSlot(ss, "entity_recognition_sheet", name);
 
   if (!pending) {
     return (
       <View style={styles.sheet}>
-        <Text style={styles.empty}>No pending recognitions.</Text>
+        <Text style={styles.empty}>{slot("empty_state")}</Text>
         <TouchableOpacity style={styles.primary} onPress={() => goBack()}>
-          <Text style={styles.primaryText}>Close</Text>
+          <Text style={styles.primaryText}>{slot("empty_close_cta")}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -68,27 +92,28 @@ const EntityRecognitionSheet: React.FC<{ block?: any }> = () => {
       payload: { id: pending.id, reason: "not_a_person" },
     });
 
+  // recognition_context slot holds the verbatim "I've heard this..."
+  // line per the registry; dynamic mention_count/phrase are part of
+  // the user's data and kept out of the authored slot. If/when the
+  // backend accepts these as applies_when signals, the variant can
+  // vary; baseline covers the common case.
   return (
     <ScrollView style={styles.scroll} contentContainerStyle={styles.sheet}>
-      <Text style={styles.microLabel}>QUICK CHECK</Text>
-      <Text style={styles.question}>Have I got this right?</Text>
+      <Text style={styles.microLabel}>{slot("quick_check_label")}</Text>
+      <Text style={styles.question}>{slot("recognition_question")}</Text>
       <Text style={styles.nameGuess}>{pending.display_name}</Text>
-      <Text style={styles.context}>
-        I&apos;ve heard this {pending.mention_count || "a few"} time
-        {pending.mention_count === 1 ? "" : "s"}{" "}
-        {pending.first_seen_phrase || "lately"}. Is that who you mean?
-      </Text>
+      <Text style={styles.context}>{slot("recognition_context")}</Text>
 
       {/* REG-016: CTAs in bottom 30% */}
       <View style={styles.footer}>
         <TouchableOpacity style={styles.primary} onPress={onConfirm}>
-          <Text style={styles.primaryText}>Yes that&apos;s them</Text>
+          <Text style={styles.primaryText}>{slot("confirm_entity_cta")}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.secondary} onPress={onDifferent}>
-          <Text style={styles.secondaryText}>Different person</Text>
+          <Text style={styles.secondaryText}>{slot("different_person_cta")}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tertiary} onPress={onNotPerson}>
-          <Text style={styles.tertiaryText}>Not a person</Text>
+          <Text style={styles.tertiaryText}>{slot("not_person_cta")}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

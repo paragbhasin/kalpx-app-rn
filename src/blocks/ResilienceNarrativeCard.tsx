@@ -29,16 +29,10 @@ import {
 } from "react-native";
 import { Fonts } from "../theme/fonts";
 import { executeAction } from "../engine/actionExecutor";
+import { useContentSlots, readMomentSlot } from "../hooks/useContentSlots";
 import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
-
-const FALLBACK = {
-  headline: "This week you showed up.",
-  carried_summary:
-    "Some of it was hard. Some of it held. Both are true, and both are yours to keep.",
-  closing_beat: "That's the practice. I'm keeping track so you don't have to.",
-};
 
 // Tone-lint predicate. Returns true if the narrative passes; false if we should
 // substitute the local fallback. Mirrors the backend tone-lint contract.
@@ -75,6 +69,35 @@ const ResilienceNarrativeCard: React.FC<Props> = ({ block }) => {
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
   const ss = screenData as Record<string, any>;
   const embedded = block?.embedded === true;
+
+  // Phase D — M26 resilience_narrative_card registry-backed slots.
+  useContentSlots({
+    momentId: "M26_resilience_narrative_card",
+    screenDataKey: "resilience_narrative_card",
+    buildCtx: (s) => ({
+      path: s.journey_path === "growth" ? "growth" : "support",
+      guidance_mode: s.guidance_mode || "hybrid",
+      locale: s.locale || "en",
+      user_attention_state: "reflective_exposed",
+      emotional_weight: "light",
+      cycle_day: Number(s.day_number) || 0,
+      entered_via: embedded ? "weekly_reflection_embed" : "dashboard_embed",
+      stage_signals: {},
+      today_layer: {},
+      life_layer: {
+        cycle_id: s.journey_id || s.cycle_id || "",
+        life_kosha: s.life_kosha || s.scan_focus || "",
+        scan_focus: s.scan_focus || "",
+      },
+    }),
+  });
+  const slot = (name: string) => readMomentSlot(ss, "resilience_narrative_card", name);
+
+  const FALLBACK = {
+    headline: slot("fallback_headline"),
+    carried_summary: slot("fallback_summary"),
+    closing_beat: slot("fallback_closing"),
+  };
 
   const narrative = ss.resilience_narrative;
   const acked = ss.resilience_narrative_acked === true;
@@ -124,7 +147,7 @@ const ResilienceNarrativeCard: React.FC<Props> = ({ block }) => {
     // Once acknowledged on the dashboard, collapse to a minimal marker.
     return (
       <View style={styles.marker}>
-        <Text style={styles.markerText}>Held.</Text>
+        <Text style={styles.markerText}>{slot("marker_text")}</Text>
       </View>
     );
   }
@@ -163,7 +186,7 @@ const ResilienceNarrativeCard: React.FC<Props> = ({ block }) => {
 
   return (
     <View style={[styles.card, embedded && styles.cardEmbedded]}>
-      <Text style={styles.label}>WHAT'S GROWING</Text>
+      <Text style={styles.label}>{slot("growing_label")}</Text>
       {"headline" in resolved && (resolved as any).headline ? (
         <Text style={styles.headline}>{(resolved as any).headline}</Text>
       ) : null}
@@ -188,18 +211,18 @@ const ResilienceNarrativeCard: React.FC<Props> = ({ block }) => {
             style={styles.primaryChip}
             activeOpacity={0.85}
           >
-            <Text style={styles.primaryChipText}>Thanks for noticing</Text>
+            <Text style={styles.primaryChipText}>{slot("thanks_noticing_chip")}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setHelpedOpen((v) => !v)}
             style={styles.secondaryChip}
             activeOpacity={0.85}
           >
-            <Text style={styles.secondaryChipText}>What helped most?</Text>
+            <Text style={styles.secondaryChipText}>{slot("what_helped_most_chip")}</Text>
           </TouchableOpacity>
         </View>
       ) : (
-        <Text style={styles.helperAck}>Held. I'll remember.</Text>
+        <Text style={styles.helperAck}>{slot("helped_ack_message")}</Text>
       )}
 
       {helpedOpen && !helpedSubmitted ? (
@@ -207,7 +230,7 @@ const ResilienceNarrativeCard: React.FC<Props> = ({ block }) => {
           <TextInput
             value={helpedText}
             onChangeText={(v) => setHelpedText(v.slice(0, 240))}
-            placeholder="One thing that helped…"
+            placeholder={slot("helped_input_placeholder")}
             placeholderTextColor="rgba(88, 58, 24, 0.4)"
             style={styles.helpedInput}
             maxLength={240}
@@ -222,7 +245,7 @@ const ResilienceNarrativeCard: React.FC<Props> = ({ block }) => {
             ]}
             activeOpacity={0.85}
           >
-            <Text style={styles.helpedSubmitText}>Hold it</Text>
+            <Text style={styles.helpedSubmitText}>{slot("hold_it_cta")}</Text>
           </TouchableOpacity>
         </View>
       ) : null}

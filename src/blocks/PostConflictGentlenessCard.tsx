@@ -19,13 +19,38 @@ import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Fonts } from "../theme/fonts";
 import { executeAction } from "../engine/actionExecutor";
+import { useContentSlots, readMomentSlot } from "../hooks/useContentSlots";
 import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
 
 const PostConflictGentlenessCard: React.FC<{ block?: any }> = () => {
   const { screenData, loadScreen, goBack } = useScreenStore();
-  const ctx = (screenData as any).post_conflict_pending;
+  const ss = screenData as Record<string, any>;
+  const ctx = ss.post_conflict_pending;
+
+  // Phase D — M39 registry-backed slots (fires once regardless of render).
+  useContentSlots({
+    momentId: "M39_post_conflict_morning",
+    screenDataKey: "post_conflict_morning",
+    buildCtx: (s) => ({
+      path: s.journey_path === "growth" ? "growth" : "support",
+      guidance_mode: s.guidance_mode || "hybrid",
+      locale: s.locale || "en",
+      user_attention_state: "reflective_exposed",
+      emotional_weight: "moderate",
+      cycle_day: Number(s.day_number) || 0,
+      entered_via: "dashboard_embed",
+      stage_signals: {},
+      today_layer: {},
+      life_layer: {
+        cycle_id: s.journey_id || s.cycle_id || "",
+        life_kosha: s.life_kosha || s.scan_focus || "",
+        scan_focus: s.scan_focus || "",
+      },
+    }),
+  });
+  const slot = (name: string) => readMomentSlot(ss, "post_conflict_morning", name);
 
   if (!ctx) return null;
 
@@ -68,24 +93,25 @@ const PostConflictGentlenessCard: React.FC<{ block?: any }> = () => {
       payload: { thread_id: ctx.thread?.id },
     });
 
-  const yesterday = ctx.yesterday_phrase || "Yesterday was heavy";
+  // Backend-provided yesterday_phrase is user-specific data; kept as a
+  // screenData read since it's state-dependent, not content.
+  const yesterday = ctx.yesterday_phrase || "";
 
   return (
     <View style={styles.card}>
-      <Text style={styles.lead}>{yesterday}.</Text>
+      {yesterday ? <Text style={styles.lead}>{yesterday}.</Text> : null}
       <Text style={styles.soften}>
-        {ctx.softness_line ||
-          "You don't need to fix anything today. Just start gentle. I'm with you."}
+        {ctx.softness_line || slot("post_conflict_softness")}
       </Text>
       <View style={styles.row}>
         <TouchableOpacity style={styles.primary} onPress={onGentle}>
-          <Text style={styles.primaryText}>Start gentle</Text>
+          <Text style={styles.primaryText}>{slot("start_gentle_cta")}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.secondary} onPress={onVoice}>
-          <Text style={styles.secondaryText}>Something to say?</Text>
+          <Text style={styles.secondaryText}>{slot("something_to_say_cta")}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tertiary} onPress={onOkay}>
-          <Text style={styles.tertiaryText}>I&apos;m okay</Text>
+          <Text style={styles.tertiaryText}>{slot("im_okay_cta")}</Text>
         </TouchableOpacity>
       </View>
     </View>

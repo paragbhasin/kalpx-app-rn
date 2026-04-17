@@ -1,3 +1,36 @@
+/**
+ * LonelinessRoomContainer — Mitra v3 Moment M47 (support room, Tier 1 batch).
+ *
+ * HYBRID MERGE: content sovereignty shell (ours) + Pavani's walk timer feature.
+ *
+ * First batch-expansion migration after the Phase C pilot trio. Structural
+ * mirror of M46 grief_room migration; same sovereignty + null-safe rules.
+ *
+ * Pavani integrations:
+ *   - Inline walk timer with countdown (reads walk_duration_min from slot)
+ *   - Walk UI with end-and-return, walk icon, timer bar
+ *   - Background image via useScreenStore.updateBackground
+ *
+ * Slot keys (null-safe "" fallback, no TSX English):
+ *   loneliness_room.opening_line / second_beat_line / offer_intro_text
+ *   loneliness_room.pill_name_label / pill_bhakti_label / pill_chant_label
+ *   loneliness_room.pill_reach_out_label / pill_walk_label / pill_exit_label
+ *   loneliness_room.input_naming_prompt / input_person_prompt
+ *   loneliness_room.input_placeholder / input_submit_label / input_cancel_label
+ *   loneliness_room.walk_quote / walk_holding_line / walk_action_label
+ *   loneliness_room.walk_end_return_label
+ *
+ * PresentationContext highlights:
+ *   user_attention_state=grieving_shut_down (60-char cap, same as M46)
+ *   emotional_weight=heavy (weight_guard filters celebration + cheer)
+ *   silence_tolerance_sec=2 (component auto-reveals options after 2s,
+ *     vs M46's 30s — loneliness invites connection faster)
+ *
+ * Spec refs:
+ *   kalpx-app-rn/docs/CONTENT_CONTRACT_V1.md
+ *   kalpx-app-rn/docs/ORCHESTRATION_CONTRACT_V1.md
+ */
+
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -12,11 +45,19 @@ import {
   View,
 } from "react-native";
 import { executeAction } from "../../../engine/actionExecutor";
+import { mitraResolveMoment } from "../../../engine/mitraApi";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 import store from "../../../store";
 import { screenActions } from "../../../store/screenSlice";
-
 import { Fonts } from "../../../theme/fonts";
+
+const readSlot = (ss: Record<string, any>, key: string): string => {
+  const moment = ss.loneliness_room;
+  if (moment && typeof moment === "object" && typeof moment[key] === "string") {
+    return moment[key];
+  }
+  return "";
+};
 
 interface Props {
   block?: any;
@@ -30,27 +71,111 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
   const updateHeaderHidden = useScreenStore(
     (state: any) => state.updateHeaderHidden,
   );
-  useEffect(() => {
-    const updatedBackground = require("../../../../assets/beige_bg.png");
+  const ss = screenData as Record<string, any>;
 
-    updateBackground(updatedBackground);
-    updateHeaderHidden(false);
-    return () => updateHeaderHidden(false);
-  }, [updateBackground, updateHeaderHidden]);
   const [step, setStep] = useState<"opening" | "options" | "input" | "walk">(
     "opening",
   );
-  const [timerSeconds, setTimerSeconds] = useState(600); // 10 minutes
+  const [timerSeconds, setTimerSeconds] = useState(600); // default 10 min
   const [inputType, setInputType] = useState<"naming" | "person">("naming");
   const [inputValue, setInputValue] = useState("");
 
   const fade1 = useRef(new Animated.Value(0)).current;
   const fade2 = useRef(new Animated.Value(0)).current;
+  const resolveFiredRef = useRef(false);
 
-  const ctx = (screenData as any).loneliness_context || {
-    opening_line: "Loneliness is heavy. Let's chant one together.",
-    second_beat_line: "Nothing more is needed. Just this minute.",
-  };
+  // --- Pavani: background image setup ---
+  useEffect(() => {
+    const updatedBackground = require("../../../../assets/beige_bg.png");
+    updateBackground(updatedBackground);
+    updateHeaderHidden(false);
+    return () => updateHeaderHidden(false);
+  }, [updateBackground, updateHeaderHidden]);
+
+  // --- Ours: Phase C Tier 1 — resolve loneliness_room slots on mount ---
+  useEffect(() => {
+    if (resolveFiredRef.current) return;
+    if (ss.loneliness_room && typeof ss.loneliness_room === "object") {
+      resolveFiredRef.current = true;
+      return;
+    }
+    resolveFiredRef.current = true;
+    const cycleId =
+      typeof ss.journey_id === "string" && ss.journey_id
+        ? ss.journey_id
+        : typeof ss.cycle_id === "string" && ss.cycle_id
+          ? ss.cycle_id
+          : "";
+    const resolveCtx = {
+      path: "support" as const,
+      guidance_mode: (ss.guidance_mode || "hybrid") as
+        | "universal"
+        | "hybrid"
+        | "rooted",
+      locale: (ss.locale || "en") as string,
+      user_attention_state: "grieving_shut_down",
+      emotional_weight: "heavy" as const,
+      cycle_day: Number(ss.day_number) || 0,
+      entered_via:
+        typeof ss._entered_via === "string" && ss._entered_via
+          ? ss._entered_via
+          : "check_in_anandamaya_klesha_asmita_isolation",
+      stage_signals: {},
+      today_layer: {
+        today_kosha: ss.today_kosha || "anandamaya",
+        today_klesha: ss.today_klesha || "asmita",
+      },
+      life_layer: {
+        cycle_id: cycleId,
+        life_kosha: (ss.life_kosha || ss.scan_focus || "") as string,
+        scan_focus: (ss.scan_focus || "") as string,
+        life_klesha: ss.life_klesha || null,
+        life_vritti: ss.life_vritti || null,
+        life_goal: ss.life_goal || null,
+      },
+    };
+    let cancelled = false;
+    (async () => {
+      const payload = await mitraResolveMoment(
+        "M47_loneliness_room",
+        resolveCtx,
+      );
+      if (cancelled || !payload) return;
+      store.dispatch(
+        screenActions.setScreenValue({
+          key: "loneliness_room",
+          value: payload.slots,
+        }),
+      );
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Data handles (practice pointers, not user-facing copy).
+  const bhaktiMantra = (ss as any).bhakti_mantra;
+  const companionedChant = (ss as any).companioned_chant;
+
+  // Slot reads — backend-authored, null-safe.
+  const openingLine = readSlot(ss, "opening_line");
+  const secondBeatLine = readSlot(ss, "second_beat_line");
+  const offerIntroText = readSlot(ss, "offer_intro_text");
+  const pillNameLabel = readSlot(ss, "pill_name_label");
+  const pillBhaktiLabel = readSlot(ss, "pill_bhakti_label");
+  const pillChantLabel = readSlot(ss, "pill_chant_label");
+  const pillReachOutLabel = readSlot(ss, "pill_reach_out_label");
+  const pillWalkLabel = readSlot(ss, "pill_walk_label");
+  const pillExitLabel = readSlot(ss, "pill_exit_label");
+  const inputNamingPrompt = readSlot(ss, "input_naming_prompt");
+  const inputPersonPrompt = readSlot(ss, "input_person_prompt");
+  const inputPlaceholder = readSlot(ss, "input_placeholder");
+  const inputSubmitLabel = readSlot(ss, "input_submit_label");
+  const inputCancelLabel = readSlot(ss, "input_cancel_label");
+  const walkQuote = readSlot(ss, "walk_quote");
+  const walkHoldingLine = readSlot(ss, "walk_holding_line");
+  const walkActionLabel = readSlot(ss, "walk_action_label");
+  const walkEndReturnLabel = readSlot(ss, "walk_end_return_label");
 
   const revealOptions = () => {
     setStep("options");
@@ -75,11 +200,13 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
     });
   }, [fade1]);
 
-  // Timer orchestration for Walk
+  // --- Pavani: Timer orchestration for Walk ---
   useEffect(() => {
     if (step !== "walk") return;
 
-    setTimerSeconds(600); // RE-APPLYING: Reset to 10 mins on entry
+    // Read walk duration from slot-resolved data (default 10 min)
+    const walkDurationMin = Number((ss as any).walk_duration_min) || 10;
+    setTimerSeconds(walkDurationMin * 60);
 
     const timerInterval = setInterval(() => {
       setTimerSeconds((prev) => (prev > 0 ? prev - 1 : 0));
@@ -116,9 +243,7 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
 
   const renderOptions = () => (
     <Animated.View style={[styles.optionsStack, { opacity: fade2 }]}>
-      <Text style={styles.offerText}>
-        A few things I can offer, if any land:
-      </Text>
+      <Text style={styles.offerText}>{offerIntroText}</Text>
 
       <TouchableOpacity
         style={styles.pill}
@@ -127,7 +252,7 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
           setStep("input");
         }}
       >
-        <Text style={styles.pillText}>Name it with me</Text>
+        <Text style={styles.pillText}>{pillNameLabel}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -135,17 +260,17 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
         onPress={() =>
           dispatch(
             "start_runner",
-            { container_id: "cycle_transitions", state_id: "view_info" },
+            { container_id: "practice_runner", state_id: "mantra_runner" },
             {
               source: "support_loneliness",
               variant: "mantra",
               target_reps: 27,
-              item: ctx.bhakti_mantra,
+              item: bhaktiMantra,
             },
           )
         }
       >
-        <Text style={styles.pillText}>Bhakti mantra</Text>
+        <Text style={styles.pillText}>{pillBhaktiLabel}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -153,19 +278,17 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
         onPress={() =>
           dispatch(
             "start_runner",
-            {
-              container_id: "practice_runner",
-              state_id: "free_mantra_chanting",
-            },
+            { container_id: "practice_runner", state_id: "mantra_runner" },
             {
               source: "support_loneliness",
               variant: "mantra",
               target_reps: 11,
+              item: companionedChant,
             },
           )
         }
       >
-        <Text style={styles.pillText}>A short chant together</Text>
+        <Text style={styles.pillText}>{pillChantLabel}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -175,18 +298,21 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
           setStep("input");
         }}
       >
-        <Text style={styles.pillText}>Reach out to one person</Text>
+        <Text style={styles.pillText}>{pillReachOutLabel}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.pill} onPress={() => setStep("walk")}>
-        <Text style={styles.pillText}>Walk outside for 10 minutes</Text>
+      <TouchableOpacity
+        style={styles.pill}
+        onPress={() => setStep("walk")}
+      >
+        <Text style={styles.pillText}>{pillWalkLabel}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.exitBtn}
         onPress={() => dispatch("exit_loneliness_room")}
       >
-        <Text style={styles.exitText}>I'll go now</Text>
+        <Text style={styles.exitText}>{pillExitLabel}</Text>
       </TouchableOpacity>
     </Animated.View>
   );
@@ -197,14 +323,12 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
       style={styles.inputWrap}
     >
       <Text style={styles.openingLine}>
-        {inputType === "naming"
-          ? "Where does it sit in the body?"
-          : "Who comes to mind?"}
+        {inputType === "naming" ? inputNamingPrompt : inputPersonPrompt}
       </Text>
       <TextInput
         autoFocus
         style={styles.input}
-        placeholder="Type here..."
+        placeholder={inputPlaceholder}
         placeholderTextColor="#8a7d6b"
         value={inputValue}
         onChangeText={setInputValue}
@@ -213,15 +337,16 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
       />
       <View style={styles.inputActions}>
         <TouchableOpacity style={styles.pill} onPress={handleInputSubmit}>
-          <Text style={styles.pillText}>Submit</Text>
+          <Text style={styles.pillText}>{inputSubmitLabel}</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setStep("options")}>
-          <Text style={styles.cancelText}>Cancel</Text>
+          <Text style={styles.cancelText}>{inputCancelLabel}</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
   );
 
+  // --- Pavani: Walk screen with timer ---
   const renderWalk = () => {
     const minutes = Math.floor(timerSeconds / 60);
     const seconds = timerSeconds % 60;
@@ -234,30 +359,22 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
             style={styles.endReturnBtn}
             onPress={() => setStep("options")}
           >
-            <Text style={styles.endReturnText}>End & Return</Text>
+            <Text style={styles.endReturnText}>{walkEndReturnLabel}</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.walkContent}>
-          <Text style={styles.walkQuote}>
-            Step outside into the fresh air.{"\n"}
-            Walk for 10 minutes, no need to rush.{"\n"}
-            Take any path that feels right,{"\n"}
-            and let your body move naturally.
-          </Text>
+          <Text style={styles.walkQuote}>{walkQuote}</Text>
           <Text style={[styles.secondQuote, { marginTop: 40, opacity: 0.8 }]}>
-            I'll be here, holding this quiet space for you.
+            {walkHoldingLine}
           </Text>
         </View>
 
         <View style={styles.walkBottomBar}>
           <View style={styles.walkIconBox}>
-            <Image
-              source={require("../../../../assets/walk.png")}
-              style={{ width: 24, height: 24 }}
-            />
+            <Text style={{ fontSize: 24 }}>{"\u{1F6B6}"}</Text>
           </View>
-          <Text style={styles.walkActionLabel}>Time to walk</Text>
+          <Text style={styles.walkActionLabel}>{walkActionLabel}</Text>
           <Text style={styles.walkTimerText}>{timeStr}</Text>
         </View>
       </View>
@@ -269,8 +386,8 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {step !== "walk" && (
           <Animated.View style={{ opacity: fade1, marginBottom: 40 }}>
-            <Text style={styles.openingLine}>{ctx.opening_line}</Text>
-            <Text style={styles.secondBeat}>{ctx.second_beat_line}</Text>
+            <Text style={styles.openingLine}>{openingLine}</Text>
+            <Text style={styles.secondBeat}>{secondBeatLine}</Text>
           </Animated.View>
         )}
 
@@ -327,7 +444,6 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     justifyContent: "center",
     alignItems: "center",
-
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
@@ -338,14 +454,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#432104",
   },
-  // Walk Interaction Styles
+  // --- Walk Interaction Styles (Pavani) ---
   walkContainer: {
     flex: 1,
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
     paddingTop: 10,
-    // paddingBottom: 40,
   },
   walkHeader: {
     width: "100%",
@@ -353,14 +468,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 10,
-  },
-  walkBackCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "rgba(255, 255, 255, 0.4)",
-    justifyContent: "center",
-    alignItems: "center",
   },
   endReturnBtn: {
     backgroundColor: "#FBF5F5",
@@ -372,7 +479,6 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     justifyContent: "center",
     alignItems: "center",
-
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
@@ -386,9 +492,9 @@ const styles = StyleSheet.create({
     color: "#6B4F31",
   },
   walkContent: {
-    flex: 1, // 🔥 MUST — takes full screen height
-    justifyContent: "center", // vertical center
-    alignItems: "center", // horizontal center
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 100,
   },
   walkQuote: {
@@ -415,13 +521,11 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     justifyContent: "center",
     marginTop: 100,
-
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
     width: "90%",
-    // height: 30,
     flexDirection: "row",
     alignItems: "center",
   },
@@ -440,6 +544,7 @@ const styles = StyleSheet.create({
     color: "#564B42",
     letterSpacing: 1,
   },
+  // --- Shared styles ---
   exitBtn: {
     alignItems: "center",
     paddingVertical: 12,

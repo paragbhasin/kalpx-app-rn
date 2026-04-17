@@ -16,6 +16,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Fonts } from '../theme/fonts';
+import { useContentSlots, readMomentSlot } from '../hooks/useContentSlots';
 import { useScreenStore } from '../engine/useScreenBridge';
 import { executeAction } from '../engine/actionExecutor';
 import store from '../store';
@@ -23,7 +24,30 @@ import { screenActions } from '../store/screenSlice';
 
 const VoiceConsentSheet: React.FC<{ block?: any }> = () => {
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
+  const ss = screenData as Record<string, any>;
   const [expanded, setExpanded] = useState(false);
+
+  useContentSlots({
+    momentId: 'M38_voice_consent_sheet',
+    screenDataKey: 'voice_consent_sheet',
+    buildCtx: (s) => ({
+      path: s.journey_path === 'growth' ? 'growth' : 'support',
+      guidance_mode: s.guidance_mode || 'hybrid',
+      locale: s.locale || 'en',
+      user_attention_state: 'reflective_exposed',
+      emotional_weight: 'moderate',
+      cycle_day: Number(s.day_number) || 0,
+      entered_via: 'first_voice_tap',
+      stage_signals: {},
+      today_layer: {},
+      life_layer: {
+        cycle_id: s.journey_id || s.cycle_id || '',
+        life_kosha: s.life_kosha || s.scan_focus || '',
+        scan_focus: s.scan_focus || '',
+      },
+    }),
+  });
+  const slot = (name: string) => readMomentSlot(ss, 'voice_consent_sheet', name);
 
   const dispatch = (actionType: string) => {
     executeAction(
@@ -41,21 +65,15 @@ const VoiceConsentSheet: React.FC<{ block?: any }> = () => {
   return (
     <View style={styles.root}>
       <View style={styles.handle} />
-      <Text style={styles.headline}>Your voice stays private.</Text>
+      <Text style={styles.headline}>{slot('voice_privacy_headline')}</Text>
 
       <View style={styles.card}>
-        <Text style={styles.body}>
-          Mitra can listen. Recordings are processed, then deleted within 24h.
-          You can stop any time.
-        </Text>
+        <Text style={styles.body}>{slot('voice_consent_body')}</Text>
       </View>
 
       {expanded && (
         <View style={styles.moreCard}>
-          <Text style={styles.moreText}>
-            Audio is transcribed to text. Only the text is kept — in your
-            journal. Mitra never shares voice data.
-          </Text>
+          <Text style={styles.moreText}>{slot('consent_more_detail')}</Text>
         </View>
       )}
 
@@ -63,9 +81,9 @@ const VoiceConsentSheet: React.FC<{ block?: any }> = () => {
         style={styles.primary}
         onPress={() => dispatch('accept_voice_consent')}
         accessibilityRole="button"
-        accessibilityLabel="Accept voice consent"
+        accessibilityLabel={slot('sounds_right_cta')}
       >
-        <Text style={styles.primaryText}>Sounds right</Text>
+        <Text style={styles.primaryText}>{slot('sounds_right_cta')}</Text>
       </TouchableOpacity>
 
       {!expanded && (
@@ -73,7 +91,7 @@ const VoiceConsentSheet: React.FC<{ block?: any }> = () => {
           style={styles.secondary}
           onPress={() => setExpanded(true)}
         >
-          <Text style={styles.secondaryText}>Tell me more</Text>
+          <Text style={styles.secondaryText}>{slot('tell_me_more_cta')}</Text>
         </TouchableOpacity>
       )}
 
@@ -81,7 +99,7 @@ const VoiceConsentSheet: React.FC<{ block?: any }> = () => {
         style={styles.tertiary}
         onPress={() => dispatch('decline_voice_consent')}
       >
-        <Text style={styles.tertiaryText}>Not today</Text>
+        <Text style={styles.tertiaryText}>{slot('not_today_cta')}</Text>
       </TouchableOpacity>
     </View>
   );

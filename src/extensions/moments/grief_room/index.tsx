@@ -1,3 +1,41 @@
+/**
+ * GriefRoomContainer — Mitra v3 Moment M46 (support room, high-stakes).
+ *
+ * HYBRID MERGE: content sovereignty shell (ours) + Pavani's audio/walk/animation features.
+ *
+ * Phase C pilot migration — content sovereignty compliant.
+ *   All user-facing strings read from screenData.grief_room.* slots resolved
+ *   by kalpx/core/content backend (moment_id=M46_grief_room).
+ *   NO English fallback in TSX. Missing content surfaces via MitraDecisionLog.
+ *
+ * Pavani integrations:
+ *   - Audio.Sound playback for "Just sit" mode (Om loop, slot-resolved URL)
+ *   - Volume2/VolumeX mute toggle (lucide-react-native)
+ *   - LinearGradient breathing orb
+ *   - Background image via useScreenStore.updateBackground
+ *   - In-component breath timer + "stay" ambient screen
+ *
+ * Slot keys (null-safe "" fallback):
+ *   grief_room.opening_line / second_beat_line
+ *   grief_room.pill_breathe_label / pill_speak_label / pill_mantra_label
+ *   grief_room.pill_stay_label / pill_exit_label
+ *   grief_room.input_prompt / input_placeholder
+ *   grief_room.input_submit_label / input_cancel_label
+ *   grief_room.breath_title / breath_end_label
+ *   grief_room.stay_quote
+ *
+ * Authoring constraints honored by the backing ContentPack:
+ *   - user_attention_state=grieving_shut_down -> 60-char body cap
+ *   - emotional_weight=maximum -> weight_guard filters celebration/cheer
+ *   - silence_tolerance_sec=30 -> component auto-reveals options after 30s;
+ *     copy MUST NOT pressure a tap. Honoring this is the whole moment.
+ *
+ * Spec refs:
+ *   kalpx-app-rn/docs/PRESENTATION_CONTEXT_WALKTHROUGHS.md section 5 (M46)
+ *   kalpx-app-rn/docs/CONTENT_CONTRACT_V1.md
+ *   kalpx-app-rn/docs/ORCHESTRATION_CONTRACT_V1.md
+ */
+
 import { Audio } from "expo-av";
 import { LinearGradient } from "expo-linear-gradient";
 import { Volume2, VolumeX } from "lucide-react-native";
@@ -16,10 +54,23 @@ import {
   View,
 } from "react-native";
 import { executeAction } from "../../../engine/actionExecutor";
+import { mitraResolveMoment } from "../../../engine/mitraApi";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 import store from "../../../store";
 import { screenActions } from "../../../store/screenSlice";
 import { Fonts } from "../../../theme/fonts";
+
+/**
+ * Read a slot from screenData.grief_room with null-safe "" fallback.
+ * No English fallback — blank UI exposes missing content via telemetry.
+ */
+const readSlot = (ss: Record<string, any>, key: string): string => {
+  const moment = ss.grief_room;
+  if (moment && typeof moment === "object" && typeof moment[key] === "string") {
+    return moment[key];
+  }
+  return "";
+};
 
 interface Props {
   block?: any;
@@ -33,18 +84,13 @@ const GriefRoomContainer: React.FC<Props> = () => {
   const updateHeaderHidden = useScreenStore(
     (state: any) => state.updateHeaderHidden,
   );
-  useEffect(() => {
-    const updatedBackground = require("../../../../assets/beige_bg.png");
+  const ss = screenData as Record<string, any>;
 
-    updateBackground(updatedBackground);
-    updateHeaderHidden(false);
-    return () => updateHeaderHidden(false);
-  }, [updateBackground, updateHeaderHidden]);
   const [step, setStep] = useState<
     "opening" | "options" | "input" | "breath" | "stay"
   >("opening");
   const [breathText, setBreathText] = useState("Inhale");
-  const [timerSeconds, setTimerSeconds] = useState(540); // 9 minutes
+  const [timerSeconds, setTimerSeconds] = useState(540); // 9 minutes default
   const [inputValue, setInputValue] = useState("");
   const [actionsUsed, setActionsUsed] = useState<string[]>([]);
   const [isMuted, setIsMuted] = useState(false);
@@ -53,14 +99,76 @@ const GriefRoomContainer: React.FC<Props> = () => {
   const fade1 = useRef(new Animated.Value(0)).current;
   const fade2 = useRef(new Animated.Value(0)).current;
   const dotScale = useRef(new Animated.Value(1)).current;
+  const resolveFiredRef = useRef(false);
 
-  const ctx = (screenData as any).grief_context || {
-    opening_line:
-      "You don't have to say anything yet. Sit with me for a moment.",
-    second_beat_line:
-      "Would a slow breath help right now? Or would you rather just stay quiet together?",
-  };
+  // --- Pavani: background image setup ---
+  useEffect(() => {
+    const updatedBackground = require("../../../../assets/beige_bg.png");
+    updateBackground(updatedBackground);
+    updateHeaderHidden(false);
+    return () => updateHeaderHidden(false);
+  }, [updateBackground, updateHeaderHidden]);
 
+  // --- Ours: Phase C M46 pilot — resolve grief_room content slots on mount ---
+  useEffect(() => {
+    if (resolveFiredRef.current) return;
+    if (ss.grief_room && typeof ss.grief_room === "object") {
+      resolveFiredRef.current = true;
+      return;
+    }
+    resolveFiredRef.current = true;
+    const cycleId =
+      typeof ss.journey_id === "string" && ss.journey_id
+        ? ss.journey_id
+        : typeof ss.cycle_id === "string" && ss.cycle_id
+          ? ss.cycle_id
+          : "";
+    const resolveCtx = {
+      path: "support" as const,
+      guidance_mode: (ss.guidance_mode || "hybrid") as
+        | "universal"
+        | "hybrid"
+        | "rooted",
+      locale: (ss.locale || "en") as string,
+      user_attention_state: "grieving_shut_down",
+      emotional_weight: "maximum" as const,
+      cycle_day: Number(ss.day_number) || 0,
+      entered_via:
+        typeof ss._entered_via === "string" && ss._entered_via
+          ? ss._entered_via
+          : "check_in_anandamaya_klesha_asmita",
+      stage_signals: {},
+      today_layer: {
+        today_kosha: ss.today_kosha || "anandamaya",
+        today_klesha: ss.today_klesha || "asmita",
+      },
+      life_layer: {
+        cycle_id: cycleId,
+        life_kosha: (ss.life_kosha || ss.scan_focus || "") as string,
+        scan_focus: (ss.scan_focus || "") as string,
+        life_klesha: ss.life_klesha || null,
+        life_vritti: ss.life_vritti || null,
+        life_goal: ss.life_goal || null,
+      },
+    };
+    let cancelled = false;
+    (async () => {
+      const payload = await mitraResolveMoment("M46_grief_room", resolveCtx);
+      if (cancelled || !payload) return;
+      store.dispatch(
+        screenActions.setScreenValue({
+          key: "grief_room",
+          value: payload.slots,
+        }),
+      );
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // PresentationContext silence_tolerance_sec=30 — component honors this
+  // by auto-revealing options after 30s. Copy MUST NOT pressure a tap.
   useEffect(() => {
     // Stage 1: Opening line
     Animated.timing(fade1, {
@@ -69,22 +177,41 @@ const GriefRoomContainer: React.FC<Props> = () => {
       useNativeDriver: true,
     }).start();
 
-    // Stage 2: Reveal options after 2s (or on user tap)
+    // Subtle breathing dot animation (opening step only)
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(dotScale, {
+          toValue: 1.3,
+          duration: 3000,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+        Animated.timing(dotScale, {
+          toValue: 1,
+          duration: 4000,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }),
+      ]),
+    ).start();
+
+    // Stage 2: Reveal options after 30s (or on user tap)
     const timer = setTimeout(() => {
       revealOptions();
-    }, 2000);
+    }, 30000);
 
     return () => clearTimeout(timer);
   }, []);
 
-  // Breathing orchestration
+  // --- Pavani: Breathing orchestration ---
   useEffect(() => {
     if (step !== "breath") return;
 
-    let timerInterval: any;
+    // Read breath duration from slot-resolved data (default 9 min)
+    const durationSec = ((ss as any).slow_breath?.duration_min || 9) * 60;
+    setTimerSeconds(durationSec);
 
-    // Timer countdown
-    timerInterval = setInterval(() => {
+    const timerInterval = setInterval(() => {
       setTimerSeconds((prev) => (prev > 0 ? prev - 1 : 0));
     }, 1000);
 
@@ -103,7 +230,6 @@ const GriefRoomContainer: React.FC<Props> = () => {
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }).start(() => {
-          // Check if we are still in breath mode before looping
           runBreathCycle();
         });
       });
@@ -116,18 +242,24 @@ const GriefRoomContainer: React.FC<Props> = () => {
     };
   }, [step]);
 
-  // Audio for "Just Sit"
+  // --- Pavani: Audio for "Just Sit" ---
   useEffect(() => {
     if (step === "stay") {
       const playSound = async () => {
         try {
-          const { sound } = await Audio.Sound.createAsync(
-            require("../../../../assets/sounds/Om.mp4"),
-            { isLooping: true, shouldPlay: true, isMuted: isMuted },
-          );
+          // Prefer slot-resolved audio URL; fall back to local Om asset
+          const audioSource =
+            (ss as any).grief_mantra?.audio_url
+              ? { uri: (ss as any).grief_mantra.audio_url }
+              : require("../../../../assets/sounds/Om.mp4");
+          const { sound } = await Audio.Sound.createAsync(audioSource, {
+            isLooping: true,
+            shouldPlay: true,
+            isMuted: isMuted,
+          });
           soundRef.current = sound;
         } catch (err) {
-          console.warn("[GriefRoom] Failed to load Om audio:", err);
+          console.warn("[GriefRoom] Failed to load audio:", err);
         }
       };
       playSound();
@@ -147,6 +279,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
     };
   }, [step]);
 
+  // --- Pavani: Mute toggle ---
   useEffect(() => {
     if (soundRef.current) {
       soundRef.current.setIsMutedAsync(isMuted);
@@ -193,16 +326,43 @@ const GriefRoomContainer: React.FC<Props> = () => {
     setStep("options");
   };
 
+  // Slot reads. Backend-authored; no TSX English fallback (see section 0 of
+  // CONTENT_CONTRACT_V1 — missing content stays visibly missing).
+  const openingLine = readSlot(ss, "opening_line");
+  const secondBeatLine = readSlot(ss, "second_beat_line");
+  const pillBreatheLabel = readSlot(ss, "pill_breathe_label");
+  const pillSpeakLabel = readSlot(ss, "pill_speak_label");
+  const pillMantraLabel = readSlot(ss, "pill_mantra_label");
+  const pillStayLabel = readSlot(ss, "pill_stay_label");
+  const pillExitLabel = readSlot(ss, "pill_exit_label");
+  const inputPrompt = readSlot(ss, "input_prompt");
+  const inputPlaceholder = readSlot(ss, "input_placeholder");
+  const inputSubmitLabel = readSlot(ss, "input_submit_label");
+  const inputCancelLabel = readSlot(ss, "input_cancel_label");
+  const breathTitle = readSlot(ss, "breath_title");
+  const breathEndLabel = readSlot(ss, "breath_end_label");
+  const stayQuote = readSlot(ss, "stay_quote");
+
+  // Practice pointers (data handles, not user-facing copy).
+  const slowBreath = (ss as any).slow_breath;
+  const griefMantra = (ss as any).grief_mantra;
+
   const renderOptions = () => (
     <Animated.View style={[styles.optionsStack, { opacity: fade2 }]}>
-      <Text style={styles.secondBeat}>{ctx.second_beat_line}</Text>
+      <Text style={styles.secondBeat}>{secondBeatLine}</Text>
 
-      <TouchableOpacity style={styles.pill} onPress={() => setStep("breath")}>
-        <Text style={styles.pillText}>Breathe slow with me</Text>
+      <TouchableOpacity
+        style={styles.pill}
+        onPress={() => setStep("breath")}
+      >
+        <Text style={styles.pillText}>{pillBreatheLabel}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.pill} onPress={() => setStep("input")}>
-        <Text style={styles.pillText}>I want to speak</Text>
+      <TouchableOpacity
+        style={styles.pill}
+        onPress={() => setStep("input")}
+      >
+        <Text style={styles.pillText}>{pillSpeakLabel}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -210,21 +370,24 @@ const GriefRoomContainer: React.FC<Props> = () => {
         onPress={() =>
           dispatch(
             "start_runner",
-            { container_id: "cycle_transitions", state_id: "view_info" },
+            { container_id: "practice_runner", state_id: "mantra_runner" },
             {
               source: "support_grief",
               variant: "mantra",
               target_reps: 27,
-              item: ctx.grief_mantra,
+              item: griefMantra,
             },
           )
         }
       >
-        <Text style={styles.pillText}>A mantra for holding this</Text>
+        <Text style={styles.pillText}>{pillMantraLabel}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.pill} onPress={() => setStep("stay")}>
-        <Text style={styles.pillText}>Just sit</Text>
+      <TouchableOpacity
+        style={styles.pill}
+        onPress={() => setStep("stay")}
+      >
+        <Text style={styles.pillText}>{pillStayLabel}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -233,11 +396,12 @@ const GriefRoomContainer: React.FC<Props> = () => {
           dispatch("exit_grief_room", null, { actions_used: actionsUsed })
         }
       >
-        <Text style={styles.exitText}>I'll go now</Text>
+        <Text style={styles.exitText}>{pillExitLabel}</Text>
       </TouchableOpacity>
     </Animated.View>
   );
 
+  // --- Pavani: Breath screen with LinearGradient orb ---
   const renderBreath = () => {
     const minutes = Math.floor(timerSeconds / 60);
     const seconds = timerSeconds % 60;
@@ -245,24 +409,22 @@ const GriefRoomContainer: React.FC<Props> = () => {
 
     return (
       <View style={styles.breathContainer}>
-        <Text style={styles.mudraLabel}>
-          {ctx.slow_breath?.title ||
-            ctx.slow_breath?.label ||
-            "Guided Breathing"}
-        </Text>
+        <Text style={styles.mudraLabel}>{breathTitle}</Text>
 
         <View style={styles.orbOuter}>
           <Animated.View
             style={[styles.orbWrapper, { transform: [{ scale: dotScale }] }]}
           >
             <LinearGradient
-              colors={["rgba(255, 255, 255, 0.45)", "rgba(235, 215, 190, 0.2)"]}
+              colors={[
+                "rgba(255, 255, 255, 0.45)",
+                "rgba(235, 215, 190, 0.2)",
+              ]}
               style={styles.orbGradient}
             >
               <Text style={styles.breathActionText}>{breathText}</Text>
             </LinearGradient>
           </Animated.View>
-          {/* Subtle water-drop highlight */}
           <View style={styles.orbHighlight} />
         </View>
 
@@ -272,9 +434,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
           style={styles.endPracticeBtn}
           onPress={() => setStep("options")}
         >
-          <Text style={styles.endPracticeText}>
-            I want to end this practice
-          </Text>
+          <Text style={styles.endPracticeText}>{breathEndLabel}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -283,12 +443,13 @@ const GriefRoomContainer: React.FC<Props> = () => {
             dispatch("exit_grief_room", null, { actions_used: actionsUsed })
           }
         >
-          <Text style={styles.exitText}>I'll go now</Text>
+          <Text style={styles.exitText}>{pillExitLabel}</Text>
         </TouchableOpacity>
       </View>
     );
   };
 
+  // --- Pavani: "Just sit" ambient screen with audio + mute ---
   const renderStay = () => (
     <View style={styles.stayContainer}>
       <View style={styles.stayTopRow}>
@@ -311,12 +472,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
           resizeMode="contain"
         />
 
-        <Text style={styles.stayQuote}>
-          Come, let's sit together in this quiet.{"\n"}
-          There's nothing for you to do.{"\n"}
-          You're exactly where you need to be{"\n"}
-          right now.
-        </Text>
+        <Text style={styles.stayQuote}>{stayQuote}</Text>
       </View>
 
       <View style={styles.stayFooter}>
@@ -324,7 +480,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
           style={styles.stayBackBtn}
           onPress={() => setStep("options")}
         >
-          <Text style={styles.stayBackText}>I'll go now</Text>
+          <Text style={styles.stayBackText}>{pillExitLabel}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -335,11 +491,11 @@ const GriefRoomContainer: React.FC<Props> = () => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.inputWrap}
     >
-      <Text style={styles.inputPrompt}>Say whatever needs saying</Text>
+      <Text style={styles.inputPrompt}>{inputPrompt}</Text>
       <TextInput
         autoFocus
         style={styles.input}
-        placeholder="Share your thoughts..."
+        placeholder={inputPlaceholder}
         placeholderTextColor="#8a7d6b"
         value={inputValue}
         onChangeText={setInputValue}
@@ -348,10 +504,10 @@ const GriefRoomContainer: React.FC<Props> = () => {
       />
       <View style={styles.inputActions}>
         <TouchableOpacity style={styles.pill} onPress={handleInputSubmit}>
-          <Text style={styles.pillText}>Submit</Text>
+          <Text style={styles.pillText}>{inputSubmitLabel}</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setStep("options")}>
-          <Text style={styles.cancelText}>Cancel</Text>
+          <Text style={styles.cancelText}>{inputCancelLabel}</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>
@@ -365,7 +521,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Animated.View style={{ opacity: fade1, alignItems: "center" }}>
-          <Text style={styles.openingLine}>{ctx.opening_line}</Text>
+          <Text style={styles.openingLine}>{openingLine}</Text>
 
           {step === "opening" && (
             <Animated.View
@@ -408,22 +564,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#D4A017",
     opacity: 0.6,
   },
-  // Breath Interaction Styles
+  // --- Breath Interaction Styles (Pavani) ---
   breathContainer: {
     width: "100%",
     alignItems: "center",
     paddingTop: 10,
-  },
-  breathHeader: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    marginBottom: 60,
-  },
-  backArrow: {
-    fontSize: 28,
-    color: "#c89a47",
-    fontFamily: Fonts.serif.regular,
   },
   mudraLabel: {
     fontFamily: Fonts.serif.regular,
@@ -490,7 +635,7 @@ const styles = StyleSheet.create({
     color: "#8a7d6b",
     textDecorationLine: "underline",
   },
-  // Stay Interaction Styles
+  // --- Stay Interaction Styles (Pavani) ---
   stayContainer: {
     flex: 1,
     width: "100%",
@@ -539,13 +684,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     width: "100%",
   },
-  stayFooterText: {
-    fontFamily: Fonts.serif.regular,
-    fontSize: 18,
-    color: "#432104",
-    opacity: 0.7,
-    marginBottom: 40,
-  },
   stayBackBtn: {
     paddingVertical: 10,
   },
@@ -556,13 +694,14 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
     marginTop: 20,
   },
+  // --- Shared styles ---
   secondBeat: {
-    fontFamily: Fonts.serif.regular,
-    fontSize: 20,
-    color: "#564B42",
+    fontFamily: Fonts.sans.regular,
+    fontSize: 16,
+    color: "#8a7d6b",
     textAlign: "center",
-    lineHeight: 28,
-    marginBottom: 20,
+    lineHeight: 24,
+    marginBottom: 36,
   },
   optionsStack: {
     width: "100%",
@@ -579,7 +718,6 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     justifyContent: "center",
     alignItems: "center",
-
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.2,
@@ -591,7 +729,6 @@ const styles = StyleSheet.create({
     color: "#432104",
   },
   exitBtn: {
-    // marginTop: 40,
     alignItems: "center",
     paddingVertical: 12,
   },

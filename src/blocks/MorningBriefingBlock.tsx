@@ -19,12 +19,35 @@ import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import AudioPlayerBlock from "./AudioPlayerBlock";
 import { Fonts } from "../theme/fonts";
+import { useContentSlots, readMomentSlot } from "../hooks/useContentSlots";
 import { useScreenStore } from "../engine/useScreenBridge";
 
 const MorningBriefingBlock: React.FC<{ block?: any }> = () => {
   const { screenData } = useScreenStore();
   const ss = screenData as Record<string, any>;
   const [expanded, setExpanded] = useState(false);
+
+  useContentSlots({
+    momentId: "M_morning_briefing",
+    screenDataKey: "morning_briefing",
+    buildCtx: (s) => ({
+      path: s.journey_path === "growth" ? "growth" : "support",
+      guidance_mode: s.guidance_mode || "hybrid",
+      locale: s.locale || "en",
+      user_attention_state: "scanning",
+      emotional_weight: "light",
+      cycle_day: Number(s.day_number) || 0,
+      entered_via: "dashboard_embed",
+      stage_signals: {},
+      today_layer: {},
+      life_layer: {
+        cycle_id: s.journey_id || s.cycle_id || "",
+        life_kosha: s.life_kosha || s.scan_focus || "",
+        scan_focus: s.scan_focus || "",
+      },
+    }),
+  });
+  const slot = (name: string) => readMomentSlot(ss, "morning_briefing", name);
 
   const available = !!ss.briefing_available;
   const audioUrl = ss.briefing_audio_url || "";
@@ -45,7 +68,7 @@ const MorningBriefingBlock: React.FC<{ block?: any }> = () => {
           {!!transcript && (
             <TouchableOpacity onPress={() => setExpanded((v) => !v)}>
               <Text style={styles.link}>
-                {expanded ? "Hide transcript" : "Show transcript"}
+                {expanded ? slot("transcript_hide_label") : slot("transcript_show_label")}
               </Text>
             </TouchableOpacity>
           )}

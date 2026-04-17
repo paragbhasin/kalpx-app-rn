@@ -27,22 +27,46 @@ import {
 } from "react-native";
 import { Fonts } from "../theme/fonts";
 import { executeAction } from "../engine/actionExecutor";
+import { useContentSlots, readMomentSlot } from "../hooks/useContentSlots";
 import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
 
 const PrepCoachingSheet: React.FC<{ block?: any }> = () => {
   const { screenData, loadScreen, goBack } = useScreenStore();
-  const ctx = (screenData as any).prep_context;
+  const ss = screenData as Record<string, any>;
+  const ctx = ss.prep_context;
   const [expanded, setExpanded] = useState(false);
 
+  useContentSlots({
+    momentId: "M27_prep_coaching_sheet",
+    screenDataKey: "prep_coaching_sheet",
+    buildCtx: (s) => ({
+      path: s.journey_path === "growth" ? "growth" : "support",
+      guidance_mode: s.guidance_mode || "hybrid",
+      locale: s.locale || "en",
+      user_attention_state: "reflective_exposed",
+      emotional_weight: "moderate",
+      cycle_day: Number(s.day_number) || 0,
+      entered_via: "upcoming_event_signal",
+      stage_signals: {},
+      today_layer: {},
+      life_layer: {
+        cycle_id: s.journey_id || s.cycle_id || "",
+        life_kosha: s.life_kosha || s.scan_focus || "",
+        scan_focus: s.scan_focus || "",
+      },
+    }),
+  });
+  const slot = (name: string) => readMomentSlot(ss, "prep_coaching_sheet", name);
+
   if (!ctx) {
-    // No data — render graceful empty state so the overlay does not crash.
+    // No data — render graceful empty state from slots.
     return (
       <View style={styles.sheet}>
-        <Text style={styles.empty}>No prep guidance available right now.</Text>
+        <Text style={styles.empty}>{slot("empty_state")}</Text>
         <TouchableOpacity style={styles.primaryPill} onPress={() => goBack()}>
-          <Text style={styles.primaryPillText}>Close</Text>
+          <Text style={styles.primaryPillText}>{slot("empty_close")}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -89,14 +113,14 @@ const PrepCoachingSheet: React.FC<{ block?: any }> = () => {
       {ctx.grounding_action ? (
         <Text style={styles.grounding}>{ctx.grounding_action}</Text>
       ) : null}
-      <Text style={styles.closing}>I&apos;ll be here after.</Text>
+      <Text style={styles.closing}>{slot("closing_affirmation")}</Text>
 
       <TouchableOpacity
         onPress={() => setExpanded((v) => !v)}
         style={styles.expandRow}
       >
         <Text style={styles.expandText}>
-          {expanded ? "Hide details" : "Anything else I should know?"}
+          {expanded ? slot("expand_toggle_open") : slot("expand_toggle_closed")}
         </Text>
       </TouchableOpacity>
 
@@ -119,10 +143,10 @@ const PrepCoachingSheet: React.FC<{ block?: any }> = () => {
       {/* REG-016: CTAs in bottom 30% of sheet. */}
       <View style={styles.footer}>
         <TouchableOpacity style={styles.primaryPill} onPress={onPrepareNow}>
-          <Text style={styles.primaryPillText}>Prepare now</Text>
+          <Text style={styles.primaryPillText}>{slot("prepare_now_cta")}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.secondary} onPress={onGotIt}>
-          <Text style={styles.secondaryText}>Got it</Text>
+          <Text style={styles.secondaryText}>{slot("got_it_cta")}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

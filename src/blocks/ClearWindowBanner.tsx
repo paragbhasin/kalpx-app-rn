@@ -13,6 +13,7 @@ import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Fonts } from "../theme/fonts";
 import { executeAction } from "../engine/actionExecutor";
+import { useContentSlots, readMomentSlot } from "../hooks/useContentSlots";
 import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
@@ -20,11 +21,37 @@ import { screenActions } from "../store/screenSlice";
 const ClearWindowBanner: React.FC<{ block?: any }> = () => {
   const { screenData, loadScreen, goBack } = useScreenStore();
   const ss = screenData as Record<string, any>;
+
+  // Phase D — M43 registry-backed slots (hook fires; if banner hidden,
+  // fetched slots are harmless).
+  useContentSlots({
+    momentId: "M43_clear_window_banner",
+    screenDataKey: "clear_window_banner",
+    buildCtx: (s) => ({
+      path: s.journey_path === "growth" ? "growth" : "support",
+      guidance_mode: s.guidance_mode || "hybrid",
+      locale: s.locale || "en",
+      user_attention_state: "scanning",
+      emotional_weight: "light",
+      cycle_day: Number(s.day_number) || 0,
+      entered_via: "dashboard_embed",
+      stage_signals: {},
+      today_layer: {},
+      life_layer: {
+        cycle_id: s.journey_id || s.cycle_id || "",
+        life_kosha: s.life_kosha || s.scan_focus || "",
+        scan_focus: s.scan_focus || "",
+      },
+    }),
+  });
+  const slot = (name: string) => readMomentSlot(ss, "clear_window_banner", name);
+
   const cw = ss.clear_window;
   if (!cw || typeof cw !== "object") return null;
 
-  const headline = cw.headline || "Today is open";
-  const message = cw.message || "You've earned this space. Use it for what matters.";
+  // Backend clear_window API can override the defaults for today.
+  const headline = cw.headline || slot("default_headline");
+  const message = cw.message || slot("default_message");
 
   const onDismiss = () => {
     executeAction(
@@ -43,7 +70,7 @@ const ClearWindowBanner: React.FC<{ block?: any }> = () => {
     <View style={styles.banner}>
       <View style={styles.row}>
         <View style={styles.chip}>
-          <Text style={styles.chipText}>Clear Window</Text>
+          <Text style={styles.chipText}>{slot("banner_chip")}</Text>
         </View>
         <TouchableOpacity onPress={onDismiss} hitSlop={8}>
           <Text style={styles.dismiss}>×</Text>

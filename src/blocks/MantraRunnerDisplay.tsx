@@ -28,6 +28,7 @@ import { View, Text, StyleSheet, Pressable, Animated, Platform } from 'react-nat
 import Svg, { Circle } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { Fonts } from '../theme/fonts';
+import { useContentSlots, readMomentSlot } from '../hooks/useContentSlots';
 import { useScreenStore } from '../engine/useScreenBridge';
 import { executeAction } from '../engine/actionExecutor';
 import AudioPlayerBlock from './AudioPlayerBlock';
@@ -47,6 +48,29 @@ const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
 const MantraRunnerDisplay: React.FC<MantraRunnerDisplayProps> = ({ block }) => {
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
+  const ss = screenData as Record<string, any>;
+
+  useContentSlots({
+    momentId: 'M17_mantra_runner',
+    screenDataKey: 'mantra_runner',
+    buildCtx: (s) => ({
+      path: s.journey_path === 'growth' ? 'growth' : 'support',
+      guidance_mode: s.guidance_mode || 'hybrid',
+      locale: s.locale || 'en',
+      user_attention_state: 'meditative_single_pointed',
+      emotional_weight: 'moderate',
+      cycle_day: Number(s.day_number) || 0,
+      entered_via: 'dashboard_practice_card',
+      stage_signals: {},
+      today_layer: {},
+      life_layer: {
+        cycle_id: s.journey_id || s.cycle_id || '',
+        life_kosha: s.life_kosha || s.scan_focus || '',
+        scan_focus: s.scan_focus || '',
+      },
+    }),
+  });
+  const slot = (name: string) => readMomentSlot(ss, 'mantra_runner', name);
 
   // Target reps — allow 1, 9, 27, 54, 108. Default 108 per spec.
   const parsedTotal = typeof block.total === 'string'
@@ -147,7 +171,7 @@ const MantraRunnerDisplay: React.FC<MantraRunnerDisplayProps> = ({ block }) => {
           <Text style={styles.countText}>{count}</Text>
         </View>
       </Animated.View>
-      <Text style={styles.ofLine}>{`of ${total}`}</Text>
+      <Text style={styles.ofLine}>{`${slot('of_separator') || 'of'} ${total}`}</Text>
 
       <View style={styles.mantraInfo}>
         <Text style={styles.devanagari}>{screenData.runner_active_item?.devanagari}</Text>

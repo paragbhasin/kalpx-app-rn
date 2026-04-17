@@ -573,6 +573,7 @@ export async function mitraCheckpoint(
       daysEngaged: engagement.daysEngaged || 0,
       daysFullyCompleted: engagement.daysFullyCompleted || 0,
       totalDays: engagement.totalDays || day,
+      framing: data.framing || "",
     };
   }
 
@@ -686,6 +687,56 @@ export async function mitraFetchProgress(): Promise<any> {
 }
 
 /** GET mitra/journey/status/ — Journey status; may return welcomeBack flag. */
+/** POST mitra/moment/next/ — Phase T2b decide_moment router.
+ *
+ * Shadow call on app-open (and future: push_tap / flow_end / idle_return).
+ * Server gate: MITRA_V3_MOMENT_ROUTER_ENABLED — returns 404 when off so FE
+ * transparently falls back to legacy routing.
+ *
+ * Response shape is stable across 404/500/offline via catch — the caller
+ * always gets an object with moment_id + reentry_target; null means
+ * "router unavailable, keep legacy routing."
+ *
+ * ``triggers`` and ``session_hints`` are optional. Caller fills in what the
+ * FE knows (grief/loneliness/crisis taps, decline counts, embed candidates).
+ */
+export async function mitraMomentNext(input: {
+  trigger_event?: "app_open" | "push_tap" | "flow_end" | "idle_return";
+  triggers?: {
+    grief?: boolean;
+    loneliness?: boolean;
+    crisis?: boolean;
+    refocus_tap?: boolean;
+    predictive_alert?: boolean;
+  };
+  session_hints?: {
+    decline_count_this_session?: number;
+    predictive_tier?: number;
+    predictive_severity?: number;
+    embed_candidates?: string[];
+  };
+} = {}): Promise<any | null> {
+  try {
+    const res = await api.post("mitra/moment/next/", {
+      trigger_event: input.trigger_event || "app_open",
+      triggers: input.triggers || {},
+      session_hints: input.session_hints || {},
+    });
+    return res.data;
+  } catch (err: any) {
+    // 404 (flag off) / 401 / network error — caller falls back to legacy.
+    // Low-volume WARN so we can see rollout progress in dev logs without
+    // crying wolf on every unauthenticated screen.
+    if (__DEV__) {
+      console.log(
+        "[MOMENT_ROUTER] unavailable — falling back to legacy routing:",
+        err?.response?.status || err?.message,
+      );
+    }
+    return null;
+  }
+}
+
 export async function mitraJourneyStatus(): Promise<any> {
   try {
     const res = await api.get("mitra/journey/status/", {
@@ -812,6 +863,53 @@ export async function getVoiceNoteInterpretation(id: string): Promise<any> {
     const status = err?.response?.status;
     if (status === 404 || status === 503) return null;
     console.warn("[MITRA] getVoiceNoteInterpretation failed:", err?.message);
+    return null;
+  }
+}
+
+/** POST mitra/crisis/ — Phase T3A-3 safety surface.
+ *
+ * Safety-critical: not gated, always on. Server returns a full crisis
+ * payload (opening_line + grounding_breath + reach_out + hotlines)
+ * regardless of classifier result — even when the classifier says
+ * not-crisis, the payload is usable as de-escalation content.
+ *
+ * Response shape:
+ *   {
+ *     is_crisis: boolean,
+ *     tier: "acute_crisis" | "acute_distress" | "user_requested" | "none",
+ *     severity: number,                     // 0..1
+ *     opening_line: string,
+ *     grounding_anchor: string,
+ *     grounding_breath: { title, duration_min, pattern, runner_route },
+ *     reach_out: string[],                  // action lines
+ *     hotlines: {region, name, number, hours}[],
+ *     signals: string[],                    // matched keyword phrases
+ *     next_step: { label, target }          // FE deeplink hint
+ *   }
+ *
+ * Null only on outright network failure — in that case the FE must
+ * still surface a local emergency reminder ('call 112 / 911').
+ */
+export async function mitraCrisis(input: {
+  trigger?: "button_tap" | "text_input" | "voice_interpretation";
+  text?: string;
+  source_surface?: string;
+} = {}): Promise<any | null> {
+  try {
+    const res = await api.post("mitra/crisis/", {
+      trigger: input.trigger || "button_tap",
+      text: input.text || "",
+      source_surface: input.source_surface || "dashboard",
+    });
+    return res.data;
+  } catch (err: any) {
+    if (__DEV__) {
+      console.warn(
+        "[MITRA] crisis endpoint unreachable — local fallback:",
+        err?.message,
+      );
+    }
     return null;
   }
 }
@@ -1208,62 +1306,40 @@ export async function getPrincipleSource(id: string | number): Promise<any> {
   }
 }
 
-/** GET mitra/support/grief-context/ — Grief room contextual copy/prompt. */
+/** GET mitra/support/grief-context/ — Grief room contextual copy/prompt.
+ *
+ * T3B-2 (Day-14 audit follow-up): returns null on failure instead of
+ * TSX English fallback copy. Sovereignty-compliant per the rule
+ * documented at mitraResolveMoment: blank UI > hidden hardcoded
+ * content. The M46 spine moment handles null by falling back to its
+ * approved universal × en variant via the BE orchestrator.
+ */
 export async function getGriefContext(): Promise<any> {
   try {
     const res = await api.get("mitra/support/grief-context/");
     return res.data || null;
   } catch (err: any) {
-    console.warn(
-      "[MITRA] grief-context failed (fallback applied):",
-      err.message,
-    );
-    return {
-      opening_line: "You don't have to say anything yet. I'm here. We can sit.",
-      second_beat_line:
-        "Would a slow breath help right now? Or would you rather just stay quiet together?",
-      principle_hint: null,
-      grief_mantra: {
-        id: "fallback_grief_mantra",
-        title: "Om",
-        devanagari: "ॐ",
-        duration_min: 7,
-      },
-      slow_breath: { duration_min: 1, pattern: "4-7-8" },
-      _offline_fallback: true,
-    };
+    if (__DEV__) {
+      console.warn("[MITRA] grief-context unavailable:", err.message);
+    }
+    return null;
   }
 }
 
-/** GET mitra/support/loneliness-context/ — Loneliness room context + chant. */
+/** GET mitra/support/loneliness-context/ — Loneliness room context + chant.
+ *
+ * T3B-2: null on failure (see getGriefContext docstring). M47 spine
+ * variant is the authoritative fallback path.
+ */
 export async function getLonelinessContext(): Promise<any> {
   try {
     const res = await api.get("mitra/support/loneliness-context/");
     return res.data || null;
   } catch (err: any) {
-    console.warn(
-      "[MITRA] loneliness-context failed (fallback applied):",
-      err.message,
-    );
-    return {
-      opening_line: "Loneliness is heavy. I'm here with you.",
-      second_beat_line: "Not to fix it — just to share the minute.",
-      bhakti_mantra: {
-        id: "fallback_bhakti",
-        title: "So Hum",
-        devanagari: "सो हम्",
-        duration_min: 6,
-      },
-      companioned_chant: {
-        id: "fallback_chant",
-        reps: 11,
-        title: "Om",
-        devanagari: "ॐ",
-      },
-      walk_duration_min: 10,
-      principle_hint: null,
-      _offline_fallback: true,
-    };
+    if (__DEV__) {
+      console.warn("[MITRA] loneliness-context unavailable:", err.message);
+    }
+    return null;
   }
 }
 
@@ -1274,6 +1350,84 @@ export async function getJoySignal(): Promise<any> {
     return res.data || null;
   } catch (err: any) {
     console.warn("[MITRA] joy-signal failed (tolerated):", err.message);
+    return null;
+  }
+}
+
+/**
+ * Mitra v3 content resolver — Phase C pilot client (M35 evening_reflection).
+ *
+ * Spec: kalpx-app-rn/docs/ORCHESTRATION_CONTRACT_V1.md §1
+ * Endpoint: POST /api/mitra/content/moments/<moment_id>/resolve/
+ *   (gated behind MITRA_V3_CONTENT_RESOLVE_ENABLED on the backend — 404
+ *   when disabled; caller treats 404 identically to a network failure)
+ *
+ * Sovereignty-compliant failure mode:
+ *   - On 404 / 5xx / network error: returns null.
+ *   - The caller MUST NOT fall back to TSX-embedded English strings.
+ *     Blank UI is preferred over hidden content. Missing content
+ *     surfaces via the backend MitraDecisionLog dashboards.
+ */
+export interface MomentContextShape {
+  path: "support" | "growth" | "both";
+  guidance_mode: "universal" | "hybrid" | "rooted";
+  locale: string;
+  user_attention_state: string;
+  emotional_weight: "light" | "moderate" | "heavy" | "maximum";
+  cycle_day: number;
+  entered_via: string;
+  stage_signals?: Record<string, string>;
+  today_layer?: Record<string, string>;
+  life_layer: {
+    cycle_id: string;
+    life_kosha: string;
+    scan_focus: string;
+    life_klesha?: string | null;
+    life_vritti?: string | null;
+    life_goal?: string | null;
+  };
+}
+
+export interface MomentPayloadShape {
+  moment_id: string;
+  slots: Record<string, string>;
+  meta: {
+    variant_id: string;
+    mode_served: string;
+    locale_served: string;
+    fallback_used: boolean;
+    fallback_reason: string | null;
+    audit_id: string;
+    resolved_in_ms: number;
+  };
+  presentation_hints: Record<string, any> | null;
+}
+
+export async function mitraResolveMoment(
+  momentId: string,
+  ctx: MomentContextShape,
+  requestId?: string,
+): Promise<MomentPayloadShape | null> {
+  try {
+    const headers: Record<string, string> = {};
+    if (requestId) headers["X-Request-ID"] = requestId;
+    const res = await api.post(
+      `mitra/content/moments/${momentId}/resolve/`,
+      ctx,
+      { headers },
+    );
+    const data = res.data || null;
+    if (!data || typeof data !== "object" || !data.slots) return null;
+    return data as MomentPayloadShape;
+  } catch (err: any) {
+    // Sovereignty contract: never fall back to English. Return null and
+    // let the caller render empty slots ("") so missing content is
+    // visible in QA + telemetry.
+    console.warn(
+      "[MITRA] content.resolve failed (tolerated, blank-on-missing):",
+      momentId,
+      err?.message,
+    );
     return null;
   }
 }

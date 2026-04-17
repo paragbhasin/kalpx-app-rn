@@ -33,28 +33,15 @@ import {
 } from "react-native";
 import { Fonts } from "../theme/fonts";
 import { executeAction } from "../engine/actionExecutor";
+import { useContentSlots, readMomentSlot } from "../hooks/useContentSlots";
 import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
 import ResilienceNarrativeCard from "./ResilienceNarrativeCard";
 
-const SECTIONS: { key: "held" | "took" | "tending"; label: string; prompt: string }[] = [
-  {
-    key: "held",
-    label: "WHAT HELD YOU",
-    prompt: "What helped you stay with yourself this week?",
-  },
-  {
-    key: "took",
-    label: "WHAT TOOK",
-    prompt: "What pulled energy, took time, or stayed heavy?",
-  },
-  {
-    key: "tending",
-    label: "WHAT WANTS TENDING",
-    prompt: "What part of you is asking for care next week?",
-  },
-];
+// Section keys are stable analytics ids. Labels + prompts come from
+// the M23_weekly_reflection ContentPack at runtime.
+const SECTION_KEYS = ["held", "took", "tending"] as const;
 
 const MAX_SECTION = 600;
 
@@ -65,6 +52,32 @@ interface Props {
 const WeeklyReflectionBlock: React.FC<Props> = () => {
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
   const ss = screenData as Record<string, any>;
+
+  // Phase D — M23 registry-backed slots.
+  useContentSlots({
+    momentId: "M23_weekly_reflection",
+    screenDataKey: "weekly_reflection",
+    buildCtx: (s) => ({
+      path: s.journey_path === "growth" ? "growth" : "support",
+      guidance_mode: s.guidance_mode || "hybrid",
+      locale: s.locale || "en",
+      user_attention_state: "reflective_exposed",
+      emotional_weight: "moderate",
+      cycle_day: Number(s.day_number) || 0,
+      entered_via: s._entered_via || "dashboard_card",
+      stage_signals: {},
+      today_layer: {},
+      life_layer: {
+        cycle_id: s.journey_id || s.cycle_id || "",
+        life_kosha: s.life_kosha || s.scan_focus || "",
+        scan_focus: s.scan_focus || "",
+        life_klesha: s.life_klesha || null,
+        life_vritti: s.life_vritti || null,
+        life_goal: s.life_goal || null,
+      },
+    }),
+  });
+  const slot = (name: string) => readMomentSlot(ss, "weekly_reflection", name);
 
   const draft = ss.weekly_reflection_draft || {};
   const [values, setValues] = useState<Record<string, string>>({
@@ -121,7 +134,7 @@ const WeeklyReflectionBlock: React.FC<Props> = () => {
   if (submitted) {
     return (
       <View style={styles.ackWrap}>
-        <Text style={styles.ackText}>Held with care.</Text>
+        <Text style={styles.ackText}>{slot("ack_text")}</Text>
       </View>
     );
   }
@@ -137,10 +150,8 @@ const WeeklyReflectionBlock: React.FC<Props> = () => {
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.title}>A letter from the week.</Text>
-        <Text style={styles.opening}>
-          Let us sit with it together. Nothing to perform — just what is true.
-        </Text>
+        <Text style={styles.title}>{slot("title")}</Text>
+        <Text style={styles.opening}>{slot("opening")}</Text>
 
         {hasNarrative && (
           <View style={styles.narrativeWrap}>
@@ -148,21 +159,21 @@ const WeeklyReflectionBlock: React.FC<Props> = () => {
           </View>
         )}
 
-        {SECTIONS.map((s) => (
-          <View key={s.key} style={styles.sectionBlock}>
-            <Text style={styles.microLabel}>{s.label}</Text>
-            <Text style={styles.sectionPrompt}>{s.prompt}</Text>
+        {SECTION_KEYS.map((key) => (
+          <View key={key} style={styles.sectionBlock}>
+            <Text style={styles.microLabel}>{slot(`section_${key}_label`)}</Text>
+            <Text style={styles.sectionPrompt}>{slot(`section_${key}_prompt`)}</Text>
             <TextInput
-              value={values[s.key]}
+              value={values[key]}
               onChangeText={(v) =>
                 setValues((prev) => ({
                   ...prev,
-                  [s.key]: v.slice(0, MAX_SECTION),
+                  [key]: v.slice(0, MAX_SECTION),
                 }))
               }
               multiline
               maxLength={MAX_SECTION}
-              placeholder="Whatever comes..."
+              placeholder={slot("input_placeholder")}
               placeholderTextColor="rgba(88, 58, 24, 0.4)"
               style={styles.input}
             />
@@ -180,7 +191,7 @@ const WeeklyReflectionBlock: React.FC<Props> = () => {
           style={[styles.cta, !anyContent && styles.ctaDisabled]}
           activeOpacity={0.85}
         >
-          <Text style={styles.ctaText}>Hold this with me</Text>
+          <Text style={styles.ctaText}>{slot("cta_label")}</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

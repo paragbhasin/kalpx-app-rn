@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Fonts } from '../theme/fonts';
+import { useContentSlots, readMomentSlot } from '../hooks/useContentSlots';
+import { useScreenStore } from '../engine/useScreenBridge';
 
 interface IdentityDeltaBlockProps {
   block: {
@@ -11,19 +13,44 @@ interface IdentityDeltaBlockProps {
 }
 
 const IdentityDeltaBlock: React.FC<IdentityDeltaBlockProps> = ({ block }) => {
+  const { screenData } = useScreenStore();
+  const ss = screenData as Record<string, any>;
+
+  useContentSlots({
+    momentId: 'M_identity_delta',
+    screenDataKey: 'identity_delta',
+    buildCtx: (s) => ({
+      path: s.journey_path === 'growth' ? 'growth' : 'support',
+      guidance_mode: s.guidance_mode || 'hybrid',
+      locale: s.locale || 'en',
+      user_attention_state: 'reflective_exposed',
+      emotional_weight: 'light',
+      cycle_day: Number(s.day_number) || 0,
+      entered_via: 'dashboard_embed',
+      stage_signals: {},
+      today_layer: {},
+      life_layer: {
+        cycle_id: s.journey_id || s.cycle_id || '',
+        life_kosha: s.life_kosha || s.scan_focus || '',
+        scan_focus: s.scan_focus || '',
+      },
+    }),
+  });
+  const slot = (name: string) => readMomentSlot(ss, 'identity_delta', name);
+
   return (
     <View style={[styles.container, block?.style]}>
       <View style={styles.identityRow}>
         <View style={styles.identityBox}>
-          <Text style={styles.label}>Before</Text>
-          <Text style={styles.oldIdentity}>{block.old_identity || 'Seeker'}</Text>
+          <Text style={styles.label}>{slot('label_before')}</Text>
+          <Text style={styles.oldIdentity}>{block.old_identity || ''}</Text>
         </View>
 
         <Text style={styles.arrow}>{'\u2192'}</Text>
 
         <View style={styles.identityBox}>
-          <Text style={styles.label}>Now</Text>
-          <Text style={styles.newIdentity}>{block.new_identity || 'Builder'}</Text>
+          <Text style={styles.label}>{slot('label_now')}</Text>
+          <Text style={styles.newIdentity}>{block.new_identity || ''}</Text>
         </View>
       </View>
     </View>

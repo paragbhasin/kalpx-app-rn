@@ -25,6 +25,7 @@ import { View, Text, StyleSheet, Animated, Platform, Pressable } from 'react-nat
 import Svg, { Circle, Defs, LinearGradient, Stop } from 'react-native-svg';
 import * as Haptics from 'expo-haptics';
 import { Fonts } from '../theme/fonts';
+import { useContentSlots, readMomentSlot } from '../hooks/useContentSlots';
 import { useScreenStore } from '../engine/useScreenBridge';
 import { executeAction } from '../engine/actionExecutor';
 
@@ -44,7 +45,30 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 const SankalpHoldBlock: React.FC<SankalpHoldBlockProps> = ({ block }) => {
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
+  const ss = screenData as Record<string, any>;
   const duration = block.hold_duration ?? 3000;
+
+  useContentSlots({
+    momentId: 'M18_sankalp_embody',
+    screenDataKey: 'sankalp_embody',
+    buildCtx: (s) => ({
+      path: s.journey_path === 'growth' ? 'growth' : 'support',
+      guidance_mode: s.guidance_mode || 'hybrid',
+      locale: s.locale || 'en',
+      user_attention_state: 'focused_receiving',
+      emotional_weight: 'moderate',
+      cycle_day: Number(s.day_number) || 0,
+      entered_via: 'dashboard_practice_card',
+      stage_signals: {},
+      today_layer: {},
+      life_layer: {
+        cycle_id: s.journey_id || s.cycle_id || '',
+        life_kosha: s.life_kosha || s.scan_focus || '',
+        scan_focus: s.scan_focus || '',
+      },
+    }),
+  });
+  const slot = (name: string) => readMomentSlot(ss, 'sankalp_embody', name);
 
   const [progress, setProgress] = useState(0);
   const [phase, setPhase] = useState<'idle' | 'holding' | 'held'>('idle');
@@ -227,13 +251,13 @@ const SankalpHoldBlock: React.FC<SankalpHoldBlockProps> = ({ block }) => {
 
       <View style={styles.instructionSlot}>
         <Animated.Text style={[styles.instruction, { opacity: instructionOpacity }]}>
-          Hold to embody your intention
+          {slot('hold_prompt')}
         </Animated.Text>
         <Animated.Text style={[styles.instruction, styles.absolute, { opacity: steadyOpacity }]}>
-          Steady…
+          {slot('steady_label')}
         </Animated.Text>
         <Animated.Text style={[styles.heldText, styles.absolute, { opacity: heldOpacity }]}>
-          Held.
+          {slot('held_label')}
         </Animated.Text>
       </View>
     </View>

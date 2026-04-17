@@ -2530,6 +2530,9 @@ export async function executeAction(
           cpData.deepenSuggestion || null,
           "checkpoint_deepen_suggestion",
         );
+        if (cpData.framing) {
+          setScreenValue(cpData.framing, "checkpoint_framing");
+        }
 
         // Match web actionExecutor.js:2795 — fire checkpoint_viewed once
         // when the milestone screen successfully loads its data.
@@ -2557,6 +2560,16 @@ export async function executeAction(
           screenState.checkpoint_feeling ||
           screenState.checkpoint_options?.[0]?.id ||
           "continue";
+
+        // P1-7 — capture pre-submit triad IDs for post-submit validation.
+        // continue_same / deepen MUST preserve item identity per the
+        // Day-14 contract; if BE silently regenerates, we want a
+        // warning in dev logs (not user-facing failure).
+        const preSubmitTriadIds = {
+          mantra:   screenState?.cycle_mantra_id || screenState?.companion?.mantra?.core?.id,
+          sankalp:  screenState?.cycle_sankalp_id || screenState?.companion?.sankalp?.core?.id,
+          practice: screenState?.cycle_practice_id || screenState?.companion?.practice?.core?.id,
+        };
 
         const csPayload: any = {
           decision: csDecision,
@@ -2632,6 +2645,58 @@ export async function executeAction(
         }
         if (csRes.resetDay || csDay === 14) {
           setScreenValue(1, "day_number");
+        }
+
+        // P1-6 — clear the AsyncStorage day14 pending flag on success.
+        // Any future mid-flow crash before navigation completes won't
+        // re-surface this now-resolved checkpoint.
+        if (csDay === 14) {
+          try {
+            const AsyncStorage =
+              require("@react-native-async-storage/async-storage").default;
+            await AsyncStorage.removeItem("kalpx_day14_pending");
+          } catch (_err) {
+            // non-fatal
+          }
+        }
+
+        // P1-7 — triad-identity validation for continue_same / deepen.
+        // Dev-only log; warns if BE silently regenerated an item ID.
+        // continue_same and deepen MUST keep the same mantra/sankalp/
+        // practice IDs; change_focus is expected to change them.
+        if (
+          csDay === 14 &&
+          (csDecision === "continue_same" || csDecision === "deepen") &&
+          __DEV__
+        ) {
+          try {
+            const { mitraJourneyCompanion } = require("./mitraApi");
+            const companion = await mitraJourneyCompanion();
+            const post = {
+              mantra:   companion?.companion?.mantra?.core?.id,
+              sankalp:  companion?.companion?.sankalp?.core?.id,
+              practice: companion?.companion?.practice?.core?.id,
+            };
+            const drifted: string[] = [];
+            for (const k of ["mantra", "sankalp", "practice"] as const) {
+              if (preSubmitTriadIds[k] && post[k] &&
+                  preSubmitTriadIds[k] !== post[k]) {
+                drifted.push(
+                  `${k}: ${preSubmitTriadIds[k]} → ${post[k]}`,
+                );
+              }
+            }
+            if (drifted.length > 0) {
+              console.warn(
+                "[CHECKPOINT_SUBMIT] triad-identity drift on " +
+                  csDecision +
+                  " — IDs changed silently:",
+                drifted,
+              );
+            }
+          } catch (_err) {
+            // non-fatal — validation failure doesn't block navigation
+          }
         }
 
         // Navigate to results screen
@@ -4337,6 +4402,82 @@ export async function executeAction(
       }
 
       // ================================================================
+      // T3B-4 — open_trigger + open_check_in handlers.
+      // Spec: SUPPORT_ADVICE_AUDIT.md gap 8. new_dashboard dispatched
+      // these actions but they were undefined in actionExecutor —
+      // runtime error on tap. Implementations route to the existing
+      // support containers (SupportTriggerContainer + SupportCheckinContainer).
+      // ================================================================
+      case "open_trigger": {
+        // Fresh entry — reset the trigger round + any lingering feeling
+        // so the user doesn't resume in a stale state.
+        setScreenValue(1, "trigger_round");
+        setScreenValue(null, "trigger_previous_suggestion_id");
+        setScreenValue(null, "trigger_previous_suggestion_type");
+        setScreenValue("", "trigger_feeling");
+        loadScreen({
+          container_id: "support_trigger",
+          state_id: "feeling_select",
+        } as any);
+        mitraTrackEvent("trigger_flow_opened", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { parent_source: payload?.source || "dashboard" },
+        });
+        break;
+      }
+
+      case "open_check_in": {
+        // Reset the 3-step state machine (notice → name → settle).
+        setScreenValue("notice", "checkin_step");
+        setScreenValue(null, "checkin_draft");
+        loadScreen({
+          container_id: "support_checkin",
+          state_id: "notice",
+        } as any);
+        mitraTrackEvent("checkin_flow_opened", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { parent_source: payload?.source || "dashboard" },
+        });
+        break;
+      }
+
+      // T3A-3 — Crisis safety surface.
+      // User taps 'I'm not safe right now' on dashboard (or elsewhere).
+      // Call /api/mitra/crisis/ with trigger=button_tap — always returns
+      // a full crisis payload. Seed it into Redux so CrisisRoomContainer
+      // can render. If network fails, the container has a local
+      // fallback (sovereignty rule explicitly waived for this surface).
+      case "open_crisis": {
+        const { mitraCrisis } = require("./mitraApi");
+        let crisisPayload = null;
+        try {
+          crisisPayload = await mitraCrisis({
+            trigger: "button_tap",
+            source_surface: payload?.source || "dashboard",
+          });
+        } catch (_err) {
+          // Swallow — CrisisRoomContainer has its own local fallback.
+          crisisPayload = null;
+        }
+        setScreenValue(crisisPayload, "crisis_payload");
+        loadScreen({
+          container_id: "crisis_room",
+          state_id: "grounding",
+        } as any);
+        mitraTrackEvent("crisis_surface_opened", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            parent_source: payload?.source || "dashboard",
+            is_crisis: crisisPayload?.is_crisis ?? null,
+            tier: crisisPayload?.tier ?? null,
+          },
+        });
+        break;
+      }
+
       // WEEK 7 — Grief room enter/exit.
       // Spec: route_support_grief.md.
       // REG-015: clears runner_* so grief never overlaps with a practice

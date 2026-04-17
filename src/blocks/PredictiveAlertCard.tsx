@@ -14,13 +14,39 @@ import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Fonts } from "../theme/fonts";
 import { executeAction } from "../engine/actionExecutor";
+import { useContentSlots, readMomentSlot } from "../hooks/useContentSlots";
 import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
 
 const PredictiveAlertCard: React.FC<{ block?: any }> = () => {
   const { screenData, loadScreen, goBack } = useScreenStore();
-  const alert = (screenData as any).predictive_alert;
+  const ss = screenData as Record<string, any>;
+  const alert = ss.predictive_alert;
+
+  // Phase D — M28 registry-backed slots. Hook always fires; if card
+  // doesn't render (confidence gate), slot fetches are harmless.
+  useContentSlots({
+    momentId: "M28_predictive_alert_card",
+    screenDataKey: "predictive_alert_card",
+    buildCtx: (s) => ({
+      path: s.journey_path === "growth" ? "growth" : "support",
+      guidance_mode: s.guidance_mode || "hybrid",
+      locale: s.locale || "en",
+      user_attention_state: "scanning",
+      emotional_weight: "moderate",
+      cycle_day: Number(s.day_number) || 0,
+      entered_via: "dashboard_embed",
+      stage_signals: {},
+      today_layer: {},
+      life_layer: {
+        cycle_id: s.journey_id || s.cycle_id || "",
+        life_kosha: s.life_kosha || s.scan_focus || "",
+        scan_focus: s.scan_focus || "",
+      },
+    }),
+  });
+  const slot = (name: string) => readMomentSlot(ss, "predictive_alert_card", name);
 
   // Confidence gate per spec §7: only render if confidence ≥ 0.6.
   if (!alert || (alert.confidence != null && alert.confidence < 0.6)) {
@@ -53,13 +79,13 @@ const PredictiveAlertCard: React.FC<{ block?: any }> = () => {
       {alert.evidence_line ? (
         <Text style={styles.evidence}>{alert.evidence_line}</Text>
       ) : null}
-      <Text style={styles.voice}>Want to prepare?</Text>
+      <Text style={styles.voice}>{slot("prep_question")}</Text>
       <View style={styles.row}>
         <TouchableOpacity style={styles.primary} onPress={onPrep}>
-          <Text style={styles.primaryText}>Prep</Text>
+          <Text style={styles.primaryText}>{slot("prep_cta")}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.secondary} onPress={onLater}>
-          <Text style={styles.secondaryText}>Later</Text>
+          <Text style={styles.secondaryText}>{slot("later_cta")}</Text>
         </TouchableOpacity>
       </View>
     </View>

@@ -34,6 +34,8 @@ import ReflectionEveningContainer from "../containers/ReflectionEveningContainer
 // Week 7 — Support routes (Moments 46, 47)
 import GriefRoomContainer from "../extensions/moments/grief_room";
 import LonelinessRoomContainer from "../extensions/moments/loneliness_room";
+// T3A-3 — Crisis safety surface
+import CrisisRoomContainer from "../containers/CrisisRoomContainer";
 
 const containerMap: Record<string, React.ComponentType<any>> = {
   portal: PortalContainer,
@@ -63,6 +65,8 @@ const containerMap: Record<string, React.ComponentType<any>> = {
   // Week 7 — Support routes
   support_grief: GriefRoomContainer,
   support_loneliness: LonelinessRoomContainer,
+  // T3A-3 — Crisis safety surface
+  crisis_room: CrisisRoomContainer,
 };
 
 const ScreenRenderer: React.FC = () => {

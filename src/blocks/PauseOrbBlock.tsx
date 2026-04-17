@@ -19,6 +19,7 @@ import { Fonts } from '../theme/fonts';
 import { useScreenStore } from '../engine/useScreenBridge';
 import { executeAction } from '../engine/actionExecutor';
 import { sanitizeStyle } from '../engine/utils/sanitizeStyle';
+import { useContentSlots, readMomentSlot } from '../hooks/useContentSlots';
 
 /** Convert Indic script digits to ASCII digits */
 function toEnglishDigits(str: string): string {
@@ -52,9 +53,32 @@ interface PauseOrbBlockProps {
 
 const PauseOrbBlock: React.FC<PauseOrbBlockProps> = ({ block }) => {
   const { screenData: screenState, loadScreen, goBack, currentScreen } = useScreenStore();
+  const ss = screenState as Record<string, any>;
+
+  useContentSlots({
+    momentId: 'M_pause_orb',
+    screenDataKey: 'pause_orb',
+    buildCtx: (s) => ({
+      path: s.journey_path === 'growth' ? 'growth' : 'support',
+      guidance_mode: s.guidance_mode || 'hybrid',
+      locale: s.locale || 'en',
+      user_attention_state: 'focused_receiving',
+      emotional_weight: 'light',
+      cycle_day: Number(s.day_number) || 0,
+      entered_via: 'pause_tap_in_runner',
+      stage_signals: {},
+      today_layer: {},
+      life_layer: {
+        cycle_id: s.journey_id || s.cycle_id || '',
+        life_kosha: s.life_kosha || s.scan_focus || '',
+        scan_focus: s.scan_focus || '',
+      },
+    }),
+  });
+  const slot = (name: string) => readMomentSlot(ss, 'pause_orb', name);
 
   // Duration string from screen state (e.g. "1 Minute", "1-3 Minutes", "10-30 Seconds")
-  const rawDuration = (screenState as any).info?.duration || '1 Minute';
+  const rawDuration = ss.info?.duration || '1 Minute';
   const normalizedDuration = toEnglishDigits(rawDuration);
 
   const isSeconds = useMemo(() => {
@@ -230,12 +254,12 @@ const PauseOrbBlock: React.FC<PauseOrbBlockProps> = ({ block }) => {
           /* Timer display */
           <View style={styles.timerContent}>
             <Text style={[styles.timeMain, { color: '#615247' }]}>{displayTime}</Text>
-            <Text style={styles.returnLabel}>Return to this.</Text>
+            <Text style={styles.returnLabel}>{slot('timer_label')}</Text>
           </View>
         ) : (
           /* Duration selection */
           <View style={styles.selectionContent}>
-            <Text style={styles.selectionLabel}>How long will you pause?</Text>
+            <Text style={styles.selectionLabel}>{slot('duration_prompt')}</Text>
             <View style={styles.durationOptions}>
               {options?.map((opt) => (
                 <TouchableOpacity

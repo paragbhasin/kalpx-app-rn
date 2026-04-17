@@ -472,6 +472,9 @@ export async function executeAction(
       // ================================================================
       case "continue_practice": {
         // "Start today's practice" / "See today's path" — go to dashboard.
+        // Also push the React Navigation route to DynamicEngine so the
+        // loaded engine screen actually renders (loadScreen alone only
+        // updates redux; the user must also switch out of Home.tsx).
         loadScreen({
           container_id:
             (process as any).env?.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
@@ -479,6 +482,7 @@ export async function executeAction(
               : "companion_dashboard",
           state_id: "day_active",
         });
+        rootNavigate("DynamicEngine");
         _actionInFlight = false;
         break;
       }
@@ -488,6 +492,7 @@ export async function executeAction(
           container_id: "cycle_transitions",
           state_id: "quick_checkin",
         });
+        rootNavigate("DynamicEngine");
         _actionInFlight = false;
         break;
       }
@@ -497,6 +502,7 @@ export async function executeAction(
         // "I Feel Triggered" button per contract).
         _actionInFlight = false;
         await executeAction({ type: "initiate_trigger" } as any, action);
+        rootNavigate("DynamicEngine");
         break;
       }
       case "open_mitra_chat": {
@@ -510,6 +516,7 @@ export async function executeAction(
               : "companion_dashboard",
           state_id: "day_active",
         });
+        rootNavigate("DynamicEngine");
         _actionInFlight = false;
         break;
       }

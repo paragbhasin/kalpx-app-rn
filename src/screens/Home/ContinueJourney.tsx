@@ -203,8 +203,22 @@ export default function ContinueJourney({
 
   const handleAction = useCallback(
     async (action: ActionSpec | undefined) => {
-      if (!action) return;
-      await executeAction(action as any, buildActionContext() as any);
+      console.log("[ContinueJourney] chip tapped, action:", JSON.stringify(action));
+      if (!action) {
+        console.warn("[ContinueJourney] no action — aborting");
+        return;
+      }
+      try {
+        const ctx = buildActionContext();
+        console.log(
+          "[ContinueJourney] dispatching executeAction, ctx keys:",
+          Object.keys(ctx || {}),
+        );
+        await executeAction(action as any, ctx as any);
+        console.log("[ContinueJourney] executeAction returned cleanly for type:", action.type);
+      } catch (err: any) {
+        console.error("[ContinueJourney] executeAction threw:", err?.message, err);
+      }
     },
     [buildActionContext],
   );

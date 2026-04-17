@@ -474,20 +474,23 @@ export async function executeAction(
       // generate_companion happens on ContinueJourney mount — not on
       // chip tap — so these handlers stay fast and synchronous.
       case "continue_practice": {
-        // "Start today's practice" / "See today's path" — go to dashboard.
-        loadScreen({
+        console.log("[actionExecutor] continue_practice: entering");
+        const target = {
           container_id:
             (process as any).env?.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
               ? "companion_dashboard_v3"
               : "companion_dashboard",
           state_id: "day_active",
-        });
+        };
+        console.log("[actionExecutor] continue_practice: loadScreen ->", target, "typeof loadScreen:", typeof loadScreen);
+        loadScreen(target);
+        console.log("[actionExecutor] continue_practice: rootNavigate DynamicEngine");
         rootNavigate("DynamicEngine");
         _actionInFlight = false;
         break;
       }
       case "start_checkin": {
-        // "Start with a check-in" / "A quiet check-in" — pranaType selector.
+        console.log("[actionExecutor] start_checkin: entering");
         loadScreen({
           container_id: "cycle_transitions",
           state_id: "quick_checkin",
@@ -497,6 +500,7 @@ export async function executeAction(
         break;
       }
       case "start_support": {
+        console.log("[actionExecutor] start_support: entering");
         // "I need some support today" — same entry as dashboard
         // "I Feel Triggered" button. Previously we re-dispatched
         // initiate_trigger via a nested executeAction call, but that

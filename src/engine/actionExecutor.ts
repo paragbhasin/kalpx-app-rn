@@ -475,6 +475,14 @@ export async function executeAction(
         // Also push the React Navigation route to DynamicEngine so the
         // loaded engine screen actually renders (loadScreen alone only
         // updates redux; the user must also switch out of Home.tsx).
+        //
+        // First dispatch generate_companion to populate the triad into
+        // screenState (mantra_text, sankalp_text, practice_title, etc.)
+        // Without this the dashboard renders fallback schema placeholders
+        // ("Today's anchor" / "Today's vow" / "Today's practice")
+        // instead of the user's real triad.
+        _actionInFlight = false;
+        await executeAction({ type: "generate_companion" } as any, action);
         loadScreen({
           container_id:
             (process as any).env?.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
@@ -483,7 +491,6 @@ export async function executeAction(
           state_id: "day_active",
         });
         rootNavigate("DynamicEngine");
-        _actionInFlight = false;
         break;
       }
       case "start_checkin": {
@@ -508,7 +515,9 @@ export async function executeAction(
       case "open_mitra_chat": {
         // "Talk with Mitra" / "I'd like to talk with Mitra" — no dedicated
         // chat sheet yet; dashboard carries the voice/text input row.
-        // Tier 2 follow-up: build a dedicated Mitra chat surface.
+        // Same triad-hydration prerequisite as continue_practice.
+        _actionInFlight = false;
+        await executeAction({ type: "generate_companion" } as any, action);
         loadScreen({
           container_id:
             (process as any).env?.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
@@ -517,7 +526,6 @@ export async function executeAction(
           state_id: "day_active",
         });
         rootNavigate("DynamicEngine");
-        _actionInFlight = false;
         break;
       }
 

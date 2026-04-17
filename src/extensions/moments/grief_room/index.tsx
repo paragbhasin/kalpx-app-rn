@@ -1,54 +1,64 @@
 /**
  * GriefRoomContainer — Mitra v3 Moment M46 (support room, high-stakes).
  *
+ * HYBRID MERGE: content sovereignty shell (ours) + Pavani's audio/walk/animation features.
+ *
  * Phase C pilot migration — content sovereignty compliant.
- *   Before: ctx fallback (l.34-37) + 5 pill labels + input prompts all
- *           hard-coded English. TSX held the grief-room voice, which
- *           made variant rotation and locale support impossible.
- *   After: all user-facing strings read from screenData.grief_room.*
- *          slots resolved by kalpx/core/content backend
- *          (moment_id=M46_grief_room). NO English fallback in TSX.
- *          Missing content surfaces via MitraDecisionLog, not hidden.
+ *   All user-facing strings read from screenData.grief_room.* slots resolved
+ *   by kalpx/core/content backend (moment_id=M46_grief_room).
+ *   NO English fallback in TSX. Missing content surfaces via MitraDecisionLog.
+ *
+ * Pavani integrations:
+ *   - Audio.Sound playback for "Just sit" mode (Om loop, slot-resolved URL)
+ *   - Volume2/VolumeX mute toggle (lucide-react-native)
+ *   - LinearGradient breathing orb
+ *   - Background image via useScreenStore.updateBackground
+ *   - In-component breath timer + "stay" ambient screen
  *
  * Slot keys (null-safe "" fallback):
- *   grief_room.opening_line
- *   grief_room.second_beat_line
+ *   grief_room.opening_line / second_beat_line
  *   grief_room.pill_breathe_label / pill_speak_label / pill_mantra_label
  *   grief_room.pill_stay_label / pill_exit_label
  *   grief_room.input_prompt / input_placeholder
  *   grief_room.input_submit_label / input_cancel_label
+ *   grief_room.breath_title / breath_end_label
+ *   grief_room.stay_quote
  *
  * Authoring constraints honored by the backing ContentPack:
- *   - user_attention_state=grieving_shut_down → 60-char body cap
- *   - emotional_weight=maximum → weight_guard filters celebration/cheer
- *   - silence_tolerance_sec=30 → component auto-reveals options after 30s;
+ *   - user_attention_state=grieving_shut_down -> 60-char body cap
+ *   - emotional_weight=maximum -> weight_guard filters celebration/cheer
+ *   - silence_tolerance_sec=30 -> component auto-reveals options after 30s;
  *     copy MUST NOT pressure a tap. Honoring this is the whole moment.
  *
  * Spec refs:
- *   kalpx-app-rn/docs/PRESENTATION_CONTEXT_WALKTHROUGHS.md §5 (M46)
+ *   kalpx-app-rn/docs/PRESENTATION_CONTEXT_WALKTHROUGHS.md section 5 (M46)
  *   kalpx-app-rn/docs/CONTENT_CONTRACT_V1.md
  *   kalpx-app-rn/docs/ORCHESTRATION_CONTRACT_V1.md
  */
 
+import { Audio } from "expo-av";
+import { LinearGradient } from "expo-linear-gradient";
+import { Volume2, VolumeX } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Easing,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ScrollView,
-  TextInput,
+  Image,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { Fonts } from "../../../theme/fonts";
 import { executeAction } from "../../../engine/actionExecutor";
 import { mitraResolveMoment } from "../../../engine/mitraApi";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 import store from "../../../store";
 import { screenActions } from "../../../store/screenSlice";
+import { Fonts } from "../../../theme/fonts";
 
 /**
  * Read a slot from screenData.grief_room with null-safe "" fallback.
@@ -68,25 +78,41 @@ interface Props {
 
 const GriefRoomContainer: React.FC<Props> = () => {
   const { screenData, loadScreen, goBack } = useScreenStore();
+  const updateBackground = useScreenStore(
+    (state: any) => state.updateBackground,
+  );
+  const updateHeaderHidden = useScreenStore(
+    (state: any) => state.updateHeaderHidden,
+  );
   const ss = screenData as Record<string, any>;
-  const [step, setStep] = useState<"opening" | "options" | "input">("opening");
+
+  const [step, setStep] = useState<
+    "opening" | "options" | "input" | "breath" | "stay"
+  >("opening");
+  const [breathText, setBreathText] = useState("Inhale");
+  const [timerSeconds, setTimerSeconds] = useState(540); // 9 minutes default
   const [inputValue, setInputValue] = useState("");
   const [actionsUsed, setActionsUsed] = useState<string[]>([]);
+  const [isMuted, setIsMuted] = useState(false);
+  const soundRef = useRef<Audio.Sound | null>(null);
 
   const fade1 = useRef(new Animated.Value(0)).current;
   const fade2 = useRef(new Animated.Value(0)).current;
   const dotScale = useRef(new Animated.Value(1)).current;
   const resolveFiredRef = useRef(false);
 
-  // Phase C M46 pilot — resolve grief_room content slots on mount.
-  // PresentationContext declared fields are FIXED for this surface:
-  //   user_attention_state=grieving_shut_down (load-bearing; wrong tone harms)
-  //   emotional_weight=maximum (weight_guard filters celebration/cheer)
-  // Variable signals (path, guidance_mode, locale) come from screenData.
+  // --- Pavani: background image setup ---
+  useEffect(() => {
+    const updatedBackground = require("../../../../assets/beige_bg.png");
+    updateBackground(updatedBackground);
+    updateHeaderHidden(false);
+    return () => updateHeaderHidden(false);
+  }, [updateBackground, updateHeaderHidden]);
+
+  // --- Ours: Phase C M46 pilot — resolve grief_room content slots on mount ---
   useEffect(() => {
     if (resolveFiredRef.current) return;
     if (ss.grief_room && typeof ss.grief_room === "object") {
-      // Already populated (prior mount or server-side seed).
       resolveFiredRef.current = true;
       return;
     }
@@ -151,7 +177,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
       useNativeDriver: true,
     }).start();
 
-    // Subtle breathing dot animation
+    // Subtle breathing dot animation (opening step only)
     Animated.loop(
       Animated.sequence([
         Animated.timing(dotScale, {
@@ -166,7 +192,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
           easing: Easing.inOut(Easing.sin),
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
 
     // Stage 2: Reveal options after 30s (or on user tap)
@@ -176,6 +202,89 @@ const GriefRoomContainer: React.FC<Props> = () => {
 
     return () => clearTimeout(timer);
   }, []);
+
+  // --- Pavani: Breathing orchestration ---
+  useEffect(() => {
+    if (step !== "breath") return;
+
+    // Read breath duration from slot-resolved data (default 9 min)
+    const durationSec = ((ss as any).slow_breath?.duration_min || 9) * 60;
+    setTimerSeconds(durationSec);
+
+    const timerInterval = setInterval(() => {
+      setTimerSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
+    const runBreathCycle = () => {
+      setBreathText("Inhale");
+      Animated.timing(dotScale, {
+        toValue: 2.2,
+        duration: 4000,
+        easing: Easing.inOut(Easing.sin),
+        useNativeDriver: true,
+      }).start(() => {
+        setBreathText("Exhale");
+        Animated.timing(dotScale, {
+          toValue: 1,
+          duration: 4000,
+          easing: Easing.inOut(Easing.sin),
+          useNativeDriver: true,
+        }).start(() => {
+          runBreathCycle();
+        });
+      });
+    };
+
+    runBreathCycle();
+
+    return () => {
+      clearInterval(timerInterval);
+    };
+  }, [step]);
+
+  // --- Pavani: Audio for "Just Sit" ---
+  useEffect(() => {
+    if (step === "stay") {
+      const playSound = async () => {
+        try {
+          // Prefer slot-resolved audio URL; fall back to local Om asset
+          const audioSource =
+            (ss as any).grief_mantra?.audio_url
+              ? { uri: (ss as any).grief_mantra.audio_url }
+              : require("../../../../assets/sounds/Om.mp4");
+          const { sound } = await Audio.Sound.createAsync(audioSource, {
+            isLooping: true,
+            shouldPlay: true,
+            isMuted: isMuted,
+          });
+          soundRef.current = sound;
+        } catch (err) {
+          console.warn("[GriefRoom] Failed to load audio:", err);
+        }
+      };
+      playSound();
+    } else {
+      if (soundRef.current) {
+        soundRef.current.stopAsync();
+        soundRef.current.unloadAsync();
+        soundRef.current = null;
+      }
+    }
+
+    return () => {
+      if (soundRef.current) {
+        soundRef.current.stopAsync();
+        soundRef.current.unloadAsync();
+      }
+    };
+  }, [step]);
+
+  // --- Pavani: Mute toggle ---
+  useEffect(() => {
+    if (soundRef.current) {
+      soundRef.current.setIsMutedAsync(isMuted);
+    }
+  }, [isMuted]);
 
   const revealOptions = () => {
     if (step === "options" || step === "input") return;
@@ -187,9 +296,13 @@ const GriefRoomContainer: React.FC<Props> = () => {
     }).start();
   };
 
-  const dispatch = (actionType: string, actionTarget?: any, actionPayload?: any) => {
+  const dispatch = (
+    actionType: string,
+    actionTarget?: any,
+    actionPayload?: any,
+  ) => {
     if (actionType !== "exit_grief_room") {
-      setActionsUsed(prev => [...new Set([...prev, actionType])]);
+      setActionsUsed((prev) => [...new Set([...prev, actionType])]);
     }
     executeAction(
       { type: actionType, target: actionTarget, payload: actionPayload },
@@ -204,16 +317,16 @@ const GriefRoomContainer: React.FC<Props> = () => {
   };
 
   const handleInputSubmit = () => {
-    dispatch("grief_voice_note_submitted", { 
-      text: inputValue, 
+    dispatch("grief_voice_note_submitted", {
+      text: inputValue,
       length_chars: inputValue.length,
-      duration_sec: 0 // Local text fallback for now
+      duration_sec: 0, // Local text fallback for now
     });
     setInputValue("");
     setStep("options");
   };
 
-  // Slot reads. Backend-authored; no TSX English fallback (see §0 of
+  // Slot reads. Backend-authored; no TSX English fallback (see section 0 of
   // CONTENT_CONTRACT_V1 — missing content stays visibly missing).
   const openingLine = readSlot(ss, "opening_line");
   const secondBeatLine = readSlot(ss, "second_beat_line");
@@ -226,11 +339,11 @@ const GriefRoomContainer: React.FC<Props> = () => {
   const inputPlaceholder = readSlot(ss, "input_placeholder");
   const inputSubmitLabel = readSlot(ss, "input_submit_label");
   const inputCancelLabel = readSlot(ss, "input_cancel_label");
+  const breathTitle = readSlot(ss, "breath_title");
+  const breathEndLabel = readSlot(ss, "breath_end_label");
+  const stayQuote = readSlot(ss, "stay_quote");
 
-  // `slow_breath` / `grief_mantra` are not content slots — they are
-  // practice pointers the backend ships separately (duration, mantra id).
-  // Read from screenData without TSX-embedded English for ANY user-facing
-  // string; these are data handles, not copy.
+  // Practice pointers (data handles, not user-facing copy).
   const slowBreath = (ss as any).slow_breath;
   const griefMantra = (ss as any).grief_mantra;
 
@@ -240,15 +353,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
 
       <TouchableOpacity
         style={styles.pill}
-        onPress={() => dispatch("start_runner",
-          { container_id: "practice_runner", state_id: "practice_step_runner" },
-          {
-            source: "support_grief",
-            variant: "practice_timer",
-            duration_sec: (slowBreath?.duration_min || 9) * 60,
-            item: slowBreath,
-          }
-        )}
+        onPress={() => setStep("breath")}
       >
         <Text style={styles.pillText}>{pillBreatheLabel}</Text>
       </TouchableOpacity>
@@ -262,28 +367,123 @@ const GriefRoomContainer: React.FC<Props> = () => {
 
       <TouchableOpacity
         style={styles.pill}
-        onPress={() => dispatch("start_runner",
-          { container_id: "practice_runner", state_id: "mantra_runner" },
-          { source: "support_grief", variant: "mantra", target_reps: 27, item: griefMantra }
-        )}
+        onPress={() =>
+          dispatch(
+            "start_runner",
+            { container_id: "practice_runner", state_id: "mantra_runner" },
+            {
+              source: "support_grief",
+              variant: "mantra",
+              target_reps: 27,
+              item: griefMantra,
+            },
+          )
+        }
       >
         <Text style={styles.pillText}>{pillMantraLabel}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.pill}
-        onPress={() => dispatch("grief_stay")}
+        onPress={() => setStep("stay")}
       >
         <Text style={styles.pillText}>{pillStayLabel}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.exitBtn}
-        onPress={() => dispatch("exit_grief_room", null, { actions_used: actionsUsed })}
+        onPress={() =>
+          dispatch("exit_grief_room", null, { actions_used: actionsUsed })
+        }
       >
         <Text style={styles.exitText}>{pillExitLabel}</Text>
       </TouchableOpacity>
     </Animated.View>
+  );
+
+  // --- Pavani: Breath screen with LinearGradient orb ---
+  const renderBreath = () => {
+    const minutes = Math.floor(timerSeconds / 60);
+    const seconds = timerSeconds % 60;
+    const timeStr = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+
+    return (
+      <View style={styles.breathContainer}>
+        <Text style={styles.mudraLabel}>{breathTitle}</Text>
+
+        <View style={styles.orbOuter}>
+          <Animated.View
+            style={[styles.orbWrapper, { transform: [{ scale: dotScale }] }]}
+          >
+            <LinearGradient
+              colors={[
+                "rgba(255, 255, 255, 0.45)",
+                "rgba(235, 215, 190, 0.2)",
+              ]}
+              style={styles.orbGradient}
+            >
+              <Text style={styles.breathActionText}>{breathText}</Text>
+            </LinearGradient>
+          </Animated.View>
+          <View style={styles.orbHighlight} />
+        </View>
+
+        <Text style={styles.timerText}>{timeStr}</Text>
+
+        <TouchableOpacity
+          style={styles.endPracticeBtn}
+          onPress={() => setStep("options")}
+        >
+          <Text style={styles.endPracticeText}>{breathEndLabel}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.exitBtn}
+          onPress={() =>
+            dispatch("exit_grief_room", null, { actions_used: actionsUsed })
+          }
+        >
+          <Text style={styles.exitText}>{pillExitLabel}</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  // --- Pavani: "Just sit" ambient screen with audio + mute ---
+  const renderStay = () => (
+    <View style={styles.stayContainer}>
+      <View style={styles.stayTopRow}>
+        <TouchableOpacity
+          style={styles.floatingMuteBtn}
+          onPress={() => setIsMuted(!isMuted)}
+        >
+          {isMuted ? (
+            <VolumeX size={24} color="#564B42" />
+          ) : (
+            <Volume2 size={24} color="#564B42" />
+          )}
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.stayContent}>
+        <Image
+          source={require("../../../../assets/DailyOm.png")}
+          style={styles.stayOmIcon}
+          resizeMode="contain"
+        />
+
+        <Text style={styles.stayQuote}>{stayQuote}</Text>
+      </View>
+
+      <View style={styles.stayFooter}>
+        <TouchableOpacity
+          style={styles.stayBackBtn}
+          onPress={() => setStep("options")}
+        >
+          <Text style={styles.stayBackText}>{pillExitLabel}</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 
   const renderInput = () => (
@@ -332,6 +532,8 @@ const GriefRoomContainer: React.FC<Props> = () => {
 
         {step === "options" && renderOptions()}
         {step === "input" && renderInput()}
+        {step === "breath" && renderBreath()}
+        {step === "stay" && renderStay()}
       </ScrollView>
     </TouchableOpacity>
   );
@@ -340,21 +542,20 @@ const GriefRoomContainer: React.FC<Props> = () => {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: "#F4EAD4", // Spec: deep cream, dim ambient
   },
   scrollContent: {
     paddingHorizontal: 28,
-    paddingTop: 100,
+    paddingTop: 20,
     paddingBottom: 60,
     alignItems: "center",
   },
   openingLine: {
-    fontFamily: Fonts.serif.regular,
+    fontFamily: Fonts.sans.medium,
     fontSize: 24,
-    color: "#2b1d0a",
+    color: "#432104",
     textAlign: "center",
-    lineHeight: 34,
-    marginBottom: 60,
+    marginBottom: 20,
+    lineHeight: 32,
   },
   dot: {
     width: 8,
@@ -363,6 +564,137 @@ const styles = StyleSheet.create({
     backgroundColor: "#D4A017",
     opacity: 0.6,
   },
+  // --- Breath Interaction Styles (Pavani) ---
+  breathContainer: {
+    width: "100%",
+    alignItems: "center",
+    paddingTop: 10,
+  },
+  mudraLabel: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 24,
+    color: "#432104",
+    marginBottom: 60,
+    textAlign: "center",
+  },
+  orbOuter: {
+    width: 220,
+    height: 220,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 60,
+  },
+  orbWrapper: {
+    width: 140,
+    height: 140,
+    borderRadius: 110,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(191, 138, 74, 0.25)",
+    elevation: 4,
+    shadowColor: "#BF8A4A",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+  },
+  orbGradient: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 253, 249, 0.2)",
+  },
+  orbHighlight: {
+    position: "absolute",
+    top: "15%",
+    left: "25%",
+    width: 40,
+    height: 20,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.35)",
+    transform: [{ rotate: "-15deg" }],
+    pointerEvents: "none",
+  },
+  breathActionText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 22,
+    color: "#564B42",
+  },
+  timerText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 28,
+    color: "#432104",
+    letterSpacing: 2,
+    marginBottom: 100,
+  },
+  endPracticeBtn: {
+    paddingVertical: 12,
+  },
+  endPracticeText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 16,
+    color: "#8a7d6b",
+    textDecorationLine: "underline",
+  },
+  // --- Stay Interaction Styles (Pavani) ---
+  stayContainer: {
+    flex: 1,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingTop: 20,
+    paddingBottom: 60,
+  },
+  stayTopRow: {
+    width: "100%",
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    justifyContent: "flex-start",
+  },
+  floatingMuteBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  stayContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 10,
+  },
+  stayOmIcon: {
+    width: 80,
+    height: 80,
+    marginBottom: 60,
+    opacity: 0.8,
+    tintColor: "#BF8A4A",
+  },
+  stayQuote: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 22,
+    color: "#564B42",
+    textAlign: "center",
+    lineHeight: 36,
+  },
+  stayFooter: {
+    alignItems: "center",
+    width: "100%",
+  },
+  stayBackBtn: {
+    paddingVertical: 10,
+  },
+  stayBackText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 16,
+    color: "#432104",
+    textDecorationLine: "underline",
+    marginTop: 20,
+  },
+  // --- Shared styles ---
   secondBeat: {
     fontFamily: Fonts.sans.regular,
     fontSize: 16,
@@ -374,32 +706,36 @@ const styles = StyleSheet.create({
   optionsStack: {
     width: "100%",
     gap: 12,
+    marginTop: 10,
   },
   pill: {
+    backgroundColor: "#FBF5F5",
+    borderColor: "#c89a47",
     borderWidth: 1,
-    borderColor: "rgba(43, 29, 10, 0.15)",
-    borderRadius: 28,
-    paddingVertical: 14,
+    elevation: 6,
     paddingHorizontal: 20,
-    alignItems: "center",
+    paddingVertical: 12,
+    borderRadius: 24,
     justifyContent: "center",
-    minHeight: 44,
-    backgroundColor: "transparent",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   pillText: {
-    fontFamily: Fonts.sans.medium,
-    fontSize: 15,
-    color: "#2b1d0a",
+    fontFamily: Fonts.serif.regular,
+    fontSize: 17,
+    color: "#432104",
   },
   exitBtn: {
-    marginTop: 40,
     alignItems: "center",
     paddingVertical: 12,
   },
   exitText: {
-    fontFamily: Fonts.sans.regular,
-    fontSize: 14,
-    color: "#8a7d6b",
+    fontFamily: Fonts.serif.bold,
+    fontSize: 18,
+    color: "#432104",
     textDecorationLine: "underline",
   },
   inputWrap: {

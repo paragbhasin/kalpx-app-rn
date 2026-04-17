@@ -1,8 +1,15 @@
 /**
  * LonelinessRoomContainer — Mitra v3 Moment M47 (support room, Tier 1 batch).
  *
+ * HYBRID MERGE: content sovereignty shell (ours) + Pavani's walk timer feature.
+ *
  * First batch-expansion migration after the Phase C pilot trio. Structural
  * mirror of M46 grief_room migration; same sovereignty + null-safe rules.
+ *
+ * Pavani integrations:
+ *   - Inline walk timer with countdown (reads walk_duration_min from slot)
+ *   - Walk UI with end-and-return, walk icon, timer bar
+ *   - Background image via useScreenStore.updateBackground
  *
  * Slot keys (null-safe "" fallback, no TSX English):
  *   loneliness_room.opening_line / second_beat_line / offer_intro_text
@@ -10,6 +17,8 @@
  *   loneliness_room.pill_reach_out_label / pill_walk_label / pill_exit_label
  *   loneliness_room.input_naming_prompt / input_person_prompt
  *   loneliness_room.input_placeholder / input_submit_label / input_cancel_label
+ *   loneliness_room.walk_quote / walk_holding_line / walk_action_label
+ *   loneliness_room.walk_end_return_label
  *
  * PresentationContext highlights:
  *   user_attention_state=grieving_shut_down (60-char cap, same as M46)
@@ -25,22 +34,22 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
-  Easing,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ScrollView,
-  TextInput,
+  Image,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { Fonts } from "../../../theme/fonts";
 import { executeAction } from "../../../engine/actionExecutor";
 import { mitraResolveMoment } from "../../../engine/mitraApi";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 import store from "../../../store";
 import { screenActions } from "../../../store/screenSlice";
+import { Fonts } from "../../../theme/fonts";
 
 const readSlot = (ss: Record<string, any>, key: string): string => {
   const moment = ss.loneliness_room;
@@ -56,8 +65,18 @@ interface Props {
 
 const LonelinessRoomContainer: React.FC<Props> = () => {
   const { screenData, loadScreen, goBack } = useScreenStore();
+  const updateBackground = useScreenStore(
+    (state: any) => state.updateBackground,
+  );
+  const updateHeaderHidden = useScreenStore(
+    (state: any) => state.updateHeaderHidden,
+  );
   const ss = screenData as Record<string, any>;
-  const [step, setStep] = useState<"opening" | "options" | "input">("opening");
+
+  const [step, setStep] = useState<"opening" | "options" | "input" | "walk">(
+    "opening",
+  );
+  const [timerSeconds, setTimerSeconds] = useState(600); // default 10 min
   const [inputType, setInputType] = useState<"naming" | "person">("naming");
   const [inputValue, setInputValue] = useState("");
 
@@ -65,7 +84,15 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
   const fade2 = useRef(new Animated.Value(0)).current;
   const resolveFiredRef = useRef(false);
 
-  // Phase C Tier 1 — resolve loneliness_room slots on mount.
+  // --- Pavani: background image setup ---
+  useEffect(() => {
+    const updatedBackground = require("../../../../assets/beige_bg.png");
+    updateBackground(updatedBackground);
+    updateHeaderHidden(false);
+    return () => updateHeaderHidden(false);
+  }, [updateBackground, updateHeaderHidden]);
+
+  // --- Ours: Phase C Tier 1 — resolve loneliness_room slots on mount ---
   useEffect(() => {
     if (resolveFiredRef.current) return;
     if (ss.loneliness_room && typeof ss.loneliness_room === "object") {
@@ -109,7 +136,10 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
     };
     let cancelled = false;
     (async () => {
-      const payload = await mitraResolveMoment("M47_loneliness_room", resolveCtx);
+      const payload = await mitraResolveMoment(
+        "M47_loneliness_room",
+        resolveCtx,
+      );
       if (cancelled || !payload) return;
       store.dispatch(
         screenActions.setScreenValue({
@@ -123,8 +153,7 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
     };
   }, []);
 
-  // `bhakti_mantra`, `companioned_chant`, `walk_duration_min` are data
-  // handles (practice pointers), not user-facing copy.
+  // Data handles (practice pointers, not user-facing copy).
   const bhaktiMantra = (ss as any).bhakti_mantra;
   const companionedChant = (ss as any).companioned_chant;
 
@@ -143,6 +172,19 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
   const inputPlaceholder = readSlot(ss, "input_placeholder");
   const inputSubmitLabel = readSlot(ss, "input_submit_label");
   const inputCancelLabel = readSlot(ss, "input_cancel_label");
+  const walkQuote = readSlot(ss, "walk_quote");
+  const walkHoldingLine = readSlot(ss, "walk_holding_line");
+  const walkActionLabel = readSlot(ss, "walk_action_label");
+  const walkEndReturnLabel = readSlot(ss, "walk_end_return_label");
+
+  const revealOptions = () => {
+    setStep("options");
+    Animated.timing(fade2, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+  };
 
   useEffect(() => {
     // Stage 1: Opening line
@@ -151,19 +193,33 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
       duration: 1000,
       useNativeDriver: true,
     }).start(() => {
-      // Stage 2: Second beat after 2 seconds
-      setTimeout(() => {
-        setStep("options");
-        Animated.timing(fade2, {
-          toValue: 1,
-          duration: 1000,
-          useNativeDriver: true,
-        }).start();
+      const timer = setTimeout(() => {
+        revealOptions();
       }, 2000);
+      return () => clearTimeout(timer);
     });
-  }, [fade1, fade2]);
+  }, [fade1]);
 
-  const dispatch = (actionType: string, actionTarget?: any, actionPayload?: any) =>
+  // --- Pavani: Timer orchestration for Walk ---
+  useEffect(() => {
+    if (step !== "walk") return;
+
+    // Read walk duration from slot-resolved data (default 10 min)
+    const walkDurationMin = Number((ss as any).walk_duration_min) || 10;
+    setTimerSeconds(walkDurationMin * 60);
+
+    const timerInterval = setInterval(() => {
+      setTimerSeconds((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(timerInterval);
+  }, [step]);
+
+  const dispatch = (
+    actionType: string,
+    actionTarget?: any,
+    actionPayload?: any,
+  ) =>
     executeAction(
       { type: actionType, target: actionTarget, payload: actionPayload },
       {
@@ -201,20 +257,36 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
 
       <TouchableOpacity
         style={styles.pill}
-        onPress={() => dispatch("start_runner",
-          { container_id: "practice_runner", state_id: "mantra_runner" },
-          { source: "support_loneliness", variant: "mantra", target_reps: 27, item: bhaktiMantra }
-        )}
+        onPress={() =>
+          dispatch(
+            "start_runner",
+            { container_id: "practice_runner", state_id: "mantra_runner" },
+            {
+              source: "support_loneliness",
+              variant: "mantra",
+              target_reps: 27,
+              item: bhaktiMantra,
+            },
+          )
+        }
       >
         <Text style={styles.pillText}>{pillBhaktiLabel}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.pill}
-        onPress={() => dispatch("start_runner",
-          { container_id: "practice_runner", state_id: "mantra_runner" },
-          { source: "support_loneliness", variant: "mantra", target_reps: 11, item: companionedChant }
-        )}
+        onPress={() =>
+          dispatch(
+            "start_runner",
+            { container_id: "practice_runner", state_id: "mantra_runner" },
+            {
+              source: "support_loneliness",
+              variant: "mantra",
+              target_reps: 11,
+              item: companionedChant,
+            },
+          )
+        }
       >
         <Text style={styles.pillText}>{pillChantLabel}</Text>
       </TouchableOpacity>
@@ -231,7 +303,7 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
 
       <TouchableOpacity
         style={styles.pill}
-        onPress={() => dispatch("loneliness_walk_started", null, { duration_min: (ss as any).walk_duration_min || 10 })}
+        onPress={() => setStep("walk")}
       >
         <Text style={styles.pillText}>{pillWalkLabel}</Text>
       </TouchableOpacity>
@@ -274,16 +346,54 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
     </KeyboardAvoidingView>
   );
 
+  // --- Pavani: Walk screen with timer ---
+  const renderWalk = () => {
+    const minutes = Math.floor(timerSeconds / 60);
+    const seconds = timerSeconds % 60;
+    const timeStr = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+
+    return (
+      <View style={styles.walkContainer}>
+        <View style={styles.walkHeader}>
+          <TouchableOpacity
+            style={styles.endReturnBtn}
+            onPress={() => setStep("options")}
+          >
+            <Text style={styles.endReturnText}>{walkEndReturnLabel}</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.walkContent}>
+          <Text style={styles.walkQuote}>{walkQuote}</Text>
+          <Text style={[styles.secondQuote, { marginTop: 40, opacity: 0.8 }]}>
+            {walkHoldingLine}
+          </Text>
+        </View>
+
+        <View style={styles.walkBottomBar}>
+          <View style={styles.walkIconBox}>
+            <Text style={{ fontSize: 24 }}>{"\u{1F6B6}"}</Text>
+          </View>
+          <Text style={styles.walkActionLabel}>{walkActionLabel}</Text>
+          <Text style={styles.walkTimerText}>{timeStr}</Text>
+        </View>
+      </View>
+    );
+  };
+
   return (
     <View style={styles.root}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Animated.View style={{ opacity: fade1, marginBottom: 40 }}>
-          <Text style={styles.openingLine}>{openingLine}</Text>
-          <Text style={styles.secondBeat}>{secondBeatLine}</Text>
-        </Animated.View>
+        {step !== "walk" && (
+          <Animated.View style={{ opacity: fade1, marginBottom: 40 }}>
+            <Text style={styles.openingLine}>{openingLine}</Text>
+            <Text style={styles.secondBeat}>{secondBeatLine}</Text>
+          </Animated.View>
+        )}
 
         {step === "options" && renderOptions()}
         {step === "input" && renderInput()}
+        {step === "walk" && renderWalk()}
       </ScrollView>
     </View>
   );
@@ -292,65 +402,157 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: "#fffdf9", // Spec: warm cream
   },
   scrollContent: {
     paddingHorizontal: 28,
-    paddingTop: 80,
+    paddingTop: 20,
     paddingBottom: 60,
   },
   openingLine: {
-    fontFamily: Fonts.serif.regular,
+    fontFamily: Fonts.sans.medium,
     fontSize: 24,
-    color: "#2b1d0a",
+    color: "#432104",
     textAlign: "center",
     marginBottom: 20,
     lineHeight: 32,
   },
   secondBeat: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 24,
-    color: "#2b1d0a",
+    fontSize: 20,
+    color: "#564B42",
     textAlign: "center",
-    lineHeight: 32,
+    lineHeight: 28,
   },
   offerText: {
     fontFamily: Fonts.sans.regular,
     fontSize: 15,
-    color: "#8a7d6b",
+    color: "#946A47",
     textAlign: "center",
-    marginBottom: 32,
-    marginTop: 20,
+    marginBottom: 12,
   },
   optionsStack: {
     width: "100%",
     gap: 12,
   },
   pill: {
+    backgroundColor: "#FBF5F5",
+    borderColor: "#c89a47",
     borderWidth: 1,
-    borderColor: "#EDE1D3",
-    borderRadius: 28,
-    paddingVertical: 14,
+    elevation: 6,
     paddingHorizontal: 20,
-    alignItems: "center",
+    paddingVertical: 12,
+    borderRadius: 24,
     justifyContent: "center",
-    minHeight: 44,
-    backgroundColor: "#FFFDF7",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   pillText: {
-    fontFamily: Fonts.sans.medium,
-    fontSize: 15,
+    fontFamily: Fonts.serif.regular,
+    fontSize: 18,
     color: "#432104",
   },
+  // --- Walk Interaction Styles (Pavani) ---
+  walkContainer: {
+    flex: 1,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingTop: 10,
+  },
+  walkHeader: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 10,
+  },
+  endReturnBtn: {
+    backgroundColor: "#FBF5F5",
+    borderColor: "#c89a47",
+    borderWidth: 1,
+    elevation: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 24,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    position: "absolute",
+    right: 20,
+  },
+  endReturnText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 16,
+    color: "#6B4F31",
+  },
+  walkContent: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 100,
+  },
+  walkQuote: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 22,
+    color: "#432104",
+    textAlign: "center",
+    lineHeight: 36,
+  },
+  secondQuote: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 18,
+    color: "#432104",
+    textAlign: "center",
+    lineHeight: 36,
+  },
+  walkBottomBar: {
+    backgroundColor: "#FBF5F5",
+    borderColor: "#c89a47",
+    borderWidth: 1,
+    elevation: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 12,
+    borderRadius: 24,
+    justifyContent: "center",
+    marginTop: 100,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    width: "90%",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  walkIconBox: {
+    marginRight: 15,
+  },
+  walkActionLabel: {
+    flex: 1,
+    fontFamily: Fonts.serif.regular,
+    fontSize: 18,
+    color: "#564B42",
+  },
+  walkTimerText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 20,
+    color: "#564B42",
+    letterSpacing: 1,
+  },
+  // --- Shared styles ---
   exitBtn: {
-    marginTop: 32,
     alignItems: "center",
     paddingVertical: 12,
   },
   exitText: {
-    fontFamily: Fonts.sans.regular,
-    fontSize: 14,
-    color: "#8a7d6b",
+    fontFamily: Fonts.serif.bold,
+    fontSize: 18,
+    color: "#432104",
     textDecorationLine: "underline",
   },
   inputWrap: {

@@ -352,7 +352,17 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
 
   if (block.isTurn7) {
     const rec = block.recognition || {};
-    const paras = rec.body_paragraphs || [];
+    // 2026-04-17 Option B — prefer backend-delivered lines from the spine.
+    // screenData.recognition_body_lines is populated by actionExecutor when
+    // /onboarding/complete/ returns. Falls back to schema body_paragraphs
+    // only when backend returns empty (which itself has a safety fallback).
+    const backendLines: string[] = Array.isArray(
+      (screenData as any)?.recognition_body_lines,
+    )
+      ? ((screenData as any).recognition_body_lines as string[])
+      : [];
+    const paras: string[] =
+      backendLines.length > 0 ? backendLines : rec.body_paragraphs || [];
 
     return (
       <View style={styles.wrap}>

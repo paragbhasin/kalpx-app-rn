@@ -87,7 +87,33 @@ const StreakPill: React.FC<{ count?: number }> = ({ count }) => {
 const NewDashboardContainer: React.FC<Props> = ({ block, screenData, onAction }) => {
   const sd = screenData ?? block?.screenData ?? {};
 
-  const coreItems = sd.core_items ?? sd.triad_items ?? [];
+  // core_items may be pre-built by the backend, OR we build from
+  // individual screenData keys seeded by generate_companion / v3 triad.
+  const coreItems = sd.core_items ?? sd.triad_items ?? (() => {
+    const items: any[] = [];
+    const mt = sd.card_mantra_title || sd.mantra_text || sd.companion_mantra_title;
+    if (mt) items.push({
+      id: sd.companion_mantra_id || "mantra",
+      label: "MANTRA",
+      title: mt,
+      why: sd.card_mantra_description || sd.companion_mantra_one_line || "",
+    });
+    const st = sd.card_sankalpa_title || sd.sankalp_text || sd.companion_sankalp_line;
+    if (st) items.push({
+      id: sd.companion_sankalp_id || "sankalp",
+      label: "SANKALP",
+      title: st,
+      why: sd.card_sankalpa_description || sd.companion_sankalp_one_line || "",
+    });
+    const pt = sd.card_ritual_title || sd.practice_title || sd.companion_practice_title;
+    if (pt) items.push({
+      id: sd.companion_practice_id || "practice",
+      label: "PRACTICE",
+      title: pt,
+      why: sd.card_ritual_description || sd.companion_practice_one_line || "",
+    });
+    return items;
+  })();
   const whyL1Items: any[] = Array.isArray(sd.why_this_l1_items)
     ? sd.why_this_l1_items
     : [];

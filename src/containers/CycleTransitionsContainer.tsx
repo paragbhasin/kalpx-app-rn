@@ -33,6 +33,7 @@ import Animated, {
 import Svg, { Circle, Path } from "react-native-svg";
 import RudrakshSvg from "../../assets/rudraksh.svg";
 import AudioPlayerBlock from "../blocks/AudioPlayerBlock";
+import { VoiceTextInput } from "../components/VoiceTextInput";
 import BlockRenderer from "../engine/BlockRenderer";
 import { executeAction } from "../engine/actionExecutor";
 import { useScreenStore } from "../engine/useScreenBridge";
@@ -694,6 +695,8 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     [stateId, currentType],
   );
   const isAckScreen = stateId === "quick_checkin_ack";
+  const showVoiceInput =
+    stateId === "quick_checkin" || stateId === "quick_checkin_ack";
 
   const blocks = schema?.blocks || [];
   const footerBlocks = useMemo(
@@ -1370,7 +1373,10 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
       <View style={styles.container}>
         <ScrollView
           style={styles.scroll}
-          contentContainerStyle={styles.ackScrollContent}
+          contentContainerStyle={[
+            styles.ackScrollContent,
+            showVoiceInput && styles.scrollContentWithVoiceInput,
+          ]}
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.visualContainer}>
@@ -1407,6 +1413,22 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
             </View>
           )}
         </ScrollView>
+
+        {showVoiceInput && (
+          <View style={styles.fixedInputArea}>
+            <VoiceTextInput
+              onSend={(text, type) => {
+                executeAction(
+                  {
+                    type: "dashboard_query",
+                    payload: { text, response_type: type },
+                  },
+                  { screenState: screenData },
+                );
+              }}
+            />
+          </View>
+        )}
       </View>
     );
   }
@@ -1416,7 +1438,10 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     <View style={styles.container}>
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          showVoiceInput && styles.scrollContentWithVoiceInput,
+        ]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.content}>
@@ -1425,6 +1450,22 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
           ))}
         </View>
       </ScrollView>
+
+      {showVoiceInput && (
+        <View style={styles.fixedInputArea}>
+          <VoiceTextInput
+            onSend={(text, type) => {
+              executeAction(
+                {
+                  type: "dashboard_query",
+                  payload: { text, response_type: type },
+                },
+                { screenState: screenData },
+              );
+            }}
+          />
+        </View>
+      )}
     </View>
   );
 };
@@ -1459,6 +1500,9 @@ const styles = StyleSheet.create({
     // paddingBottom: 40,
     alignItems: "center",
     justifyContent: "center",
+  },
+  scrollContentWithVoiceInput: {
+    paddingBottom: 140,
   },
   visualContainer: {
     alignItems: "center",
@@ -1900,6 +1944,14 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     // marginTop: "auto",
+  },
+  fixedInputArea: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: -20,
+    padding: 5,
+    backgroundColor: "#fef8f5",
   },
   content: {
     gap: 20,

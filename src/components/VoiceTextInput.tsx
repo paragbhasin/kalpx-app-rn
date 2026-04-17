@@ -6,6 +6,7 @@ import {
   Dimensions,
   ImageBackground,
   Modal,
+  Pressable,
   StyleSheet,
   Text,
   TextInput,
@@ -15,6 +16,7 @@ import {
 import { Fonts } from "../theme/fonts";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
+const EXPANDED_HEIGHT_THRESHOLD = 42;
 
 // REUSABLE VOICE MODAL COMPONENT
 export interface VoiceModalProps {
@@ -239,6 +241,27 @@ export const VoiceTextInput: React.FC<VoiceTextInputProps> = ({
   const [text, setText] = useState(initialValue);
   const [isExpanded, setIsExpanded] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [contentHeight, setContentHeight] = useState(0);
+  const inputRef = useRef<TextInput>(null);
+
+  const shouldExpandForContent = (
+    currentText: string,
+    currentContentHeight: number,
+  ) => {
+    if (!currentText.trim()) return false;
+
+    return (
+      currentText.includes("\n") || currentContentHeight > EXPANDED_HEIGHT_THRESHOLD
+    );
+  };
+
+  useEffect(() => {
+    const resizeTimer = setTimeout(() => {
+      setIsExpanded(shouldExpandForContent(text, contentHeight));
+    }, 180);
+
+    return () => clearTimeout(resizeTimer);
+  }, [contentHeight, text]);
 
   const handleSend = () => {
     if (text.trim()) {
@@ -251,16 +274,23 @@ export const VoiceTextInput: React.FC<VoiceTextInputProps> = ({
   return (
     <View style={styles.container}>
       <View style={styles.inputWrapper}>
-        <View style={[styles.inputShell, isExpanded && styles.expandedShell]}>
+        <Pressable
+          style={[styles.inputShell, isExpanded && styles.expandedShell]}
+          onPress={() => inputRef.current?.focus()}
+        >
           <TextInput
+            ref={inputRef}
             style={[styles.input, isExpanded && styles.expandedInput]}
             placeholder={placeholder}
             placeholderTextColor="rgba(67, 33, 4, 0.45)"
             value={text}
             onChangeText={setText}
-            multiline={isExpanded}
-            onFocus={() => setIsExpanded(true)}
-            onBlur={() => !text.trim() && setIsExpanded(false)}
+            multiline
+            scrollEnabled={false}
+            onContentSizeChange={(event) =>
+              setContentHeight(event.nativeEvent.contentSize.height)
+            }
+            onBlur={() => setIsExpanded(shouldExpandForContent(text, contentHeight))}
             onSubmitEditing={handleSend}
             blurOnSubmit={false}
           />
@@ -273,7 +303,7 @@ export const VoiceTextInput: React.FC<VoiceTextInputProps> = ({
               <Ionicons name="mic" size={22} color="#b9892f" />
             </TouchableOpacity>
           )}
-        </View>
+        </Pressable>
 
         <TouchableOpacity
           style={[styles.outerSendButton, !text.trim() && { opacity: 0.5 }]}
@@ -332,6 +362,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "#432104",
     paddingVertical: 8,
+    paddingHorizontal: 0,
   },
   expandedInput: {
     minHeight: 80,

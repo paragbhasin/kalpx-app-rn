@@ -177,9 +177,21 @@ export default function ContinueJourney({
   }, []);
 
   // Fetch on mount.
+  // Pre-hydrate the triad (generate_companion) in parallel with /journey/home/
+  // so that when the user taps "Continue today's practice" or any dashboard-
+  // bound chip, the triad data (mantra_text, sankalp_text, practice_title)
+  // is already in screenState. Keeps chip taps synchronous + responsive.
   useEffect(() => {
     (async () => {
-      const res = await fetchHome();
+      const [res] = await Promise.all([
+        fetchHome(),
+        executeAction(
+          { type: "generate_companion" } as any,
+          buildActionContext() as any,
+        ).catch((err) => {
+          console.debug("[ContinueJourney] generate_companion prehydrate failed:", err?.message);
+        }),
+      ]);
       if (!res) return;
       // route_to_moment → navigate immediately, do not render home.
       if (res.response_type === "route_to_moment" && res.action && !routedRef.current) {

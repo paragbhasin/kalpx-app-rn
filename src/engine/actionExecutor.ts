@@ -470,19 +470,11 @@ export async function executeAction(
       // HOME SURFACE ACTIONS (JOURNEY_HOME_CONTRACT_V1 §10 action enum)
       // These fire from chips/CTAs on the /journey/home/ response.
       // ================================================================
+      // Navigation-only handlers. By contract, triad hydration via
+      // generate_companion happens on ContinueJourney mount — not on
+      // chip tap — so these handlers stay fast and synchronous.
       case "continue_practice": {
         // "Start today's practice" / "See today's path" — go to dashboard.
-        // Also push the React Navigation route to DynamicEngine so the
-        // loaded engine screen actually renders (loadScreen alone only
-        // updates redux; the user must also switch out of Home.tsx).
-        //
-        // First dispatch generate_companion to populate the triad into
-        // screenState (mantra_text, sankalp_text, practice_title, etc.)
-        // Without this the dashboard renders fallback schema placeholders
-        // ("Today's anchor" / "Today's vow" / "Today's practice")
-        // instead of the user's real triad.
-        _actionInFlight = false;
-        await executeAction({ type: "generate_companion" } as any, action);
         loadScreen({
           container_id:
             (process as any).env?.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
@@ -491,6 +483,7 @@ export async function executeAction(
           state_id: "day_active",
         });
         rootNavigate("DynamicEngine");
+        _actionInFlight = false;
         break;
       }
       case "start_checkin": {
@@ -504,20 +497,43 @@ export async function executeAction(
         break;
       }
       case "start_support": {
-        // "I need some support today" — re-dispatch to the trigger flow
-        // (OM / "I'm here" regulation space — same entry as the dashboard
-        // "I Feel Triggered" button per contract).
-        _actionInFlight = false;
-        await executeAction({ type: "initiate_trigger" } as any, action);
+        // "I need some support today" — same entry as dashboard
+        // "I Feel Triggered" button. Previously we re-dispatched
+        // initiate_trigger via a nested executeAction call, but that
+        // passed the wrong second argument (`action` instead of
+        // `context`) — the nested call saw an undefined loadScreen and
+        // silently no-op'd. Fix: inline the minimum trigger-session
+        // setup here + navigate to the OM chanting screen. Matches what
+        // initiate_trigger does at actionExecutor.ts:~1690.
+        if (startFlowInstance) startFlowInstance("trigger");
+        setScreenValue(null, "runner_active_item");
+        setScreenValue(1, "trigger_cycle_count");
+        setScreenValue("triggered", "trigger_feeling");
+        setScreenValue(1, "trigger_step");
+        const triggerOmAudio = _rotateAudio(
+          OM_AUDIO_LIBRARY,
+          "_kalpx_om_audio_idx",
+        );
+        setScreenValue(triggerOmAudio, "_selected_om_audio");
+        const { label: trigLabel, devanagari: trigDev } =
+          _omTextForTrack(triggerOmAudio);
+        setScreenValue(trigLabel, "trigger_mantra_text");
+        setScreenValue(trigDev, "trigger_mantra_devanagari");
+        mitraTrackEvent("trigger_session_started", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+        });
+        loadScreen({
+          container_id: "practice_runner",
+          state_id: "free_mantra_chanting",
+        });
         rootNavigate("DynamicEngine");
+        _actionInFlight = false;
         break;
       }
       case "open_mitra_chat": {
         // "Talk with Mitra" / "I'd like to talk with Mitra" — no dedicated
         // chat sheet yet; dashboard carries the voice/text input row.
-        // Same triad-hydration prerequisite as continue_practice.
-        _actionInFlight = false;
-        await executeAction({ type: "generate_companion" } as any, action);
         loadScreen({
           container_id:
             (process as any).env?.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
@@ -526,6 +542,7 @@ export async function executeAction(
           state_id: "day_active",
         });
         rootNavigate("DynamicEngine");
+        _actionInFlight = false;
         break;
       }
 

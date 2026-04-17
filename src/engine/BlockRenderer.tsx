@@ -52,7 +52,9 @@ import OptionPickerBlock from '../blocks/OptionPickerBlock';
 import PauseOrbBlock from '../blocks/PauseOrbBlock';
 import TimerControlsBlock from '../blocks/TimerControlsBlock';
 import ToastMessageBlock from '../blocks/ToastMessageBlock';
-import CycleReflectionBlock from '../blocks/CycleReflectionBlock';
+// CycleReflectionBlock DELETED (T4D cleanup — @deprecated legacy block).
+// Redirect to modern CheckpointDay7Block for any residual schema reference.
+// The modern block is content-sovereign; the legacy one had TSX-hardcoded copy.
 import CycleReflectionResultsBlock from '../blocks/CycleReflectionResultsBlock';
 import MantraSelectionListBlock from '../blocks/MantraSelectionListBlock';
 import TriggerPatternBlock from '../blocks/TriggerPatternBlock';
@@ -181,7 +183,7 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   pause_orb: PauseOrbBlock,
   timer_controls: TimerControlsBlock,
   toast_message: ToastMessageBlock,
-  cycle_reflection: CycleReflectionBlock,
+  cycle_reflection: CheckpointDay7Block, // legacy alias → modern block
   cycle_reflection_results: CycleReflectionResultsBlock,
   mantra_selection_list: MantraSelectionListBlock,
   trigger_pattern: TriggerPatternBlock,

@@ -299,6 +299,9 @@ export default function Home() {
         // Post-auth v3 triad generation: if the user completed onboarding
         // as a guest and stashed inference_state (triad_pending was true),
         // call /journey/start-v3/ now that they're authenticated.
+        // Post-auth triad generation: if guest completed onboarding and
+        // stashed inference_state, generate triad now and route to turn_8
+        // (triad reveal + "Begin my journey" CTA).
         const stashedInference = store.getState().screen.screenData.stashed_inference_state;
         if (stashedInference && isLoggedIn) {
           try {
@@ -312,17 +315,35 @@ export default function Home() {
             if (v3Result) {
               const t = v3Result.triad || {};
               store.dispatch(screenActions.setScreenValue({ key: "mantra_text", value: t.mantra?.title }));
+              store.dispatch(screenActions.setScreenValue({ key: "companion_mantra_title", value: t.mantra?.title }));
               store.dispatch(screenActions.setScreenValue({ key: "companion_mantra_id", value: t.mantra?.item_id }));
               store.dispatch(screenActions.setScreenValue({ key: "sankalp_text", value: t.sankalp?.title }));
+              store.dispatch(screenActions.setScreenValue({ key: "companion_sankalp_line", value: t.sankalp?.title }));
               store.dispatch(screenActions.setScreenValue({ key: "companion_sankalp_id", value: t.sankalp?.item_id }));
               store.dispatch(screenActions.setScreenValue({ key: "practice_title", value: t.practice?.title }));
+              store.dispatch(screenActions.setScreenValue({ key: "companion_practice_title", value: t.practice?.title }));
               store.dispatch(screenActions.setScreenValue({ key: "companion_practice_id", value: t.practice?.item_id }));
               store.dispatch(screenActions.setScreenValue({ key: "path_intent", value: v3Result.path_intent }));
               store.dispatch(screenActions.setScreenValue({ key: "scan_focus", value: v3Result.scan_focus }));
+              store.dispatch(screenActions.setScreenValue({ key: "journey_id", value: v3Result.journey_id }));
               // Clear stashed state
               store.dispatch(screenActions.setScreenValue({ key: "stashed_inference_state", value: null }));
               store.dispatch(screenActions.setScreenValue({ key: "stashed_guidance_mode", value: null }));
-              if (__DEV__) console.log("[HOME] Post-auth v3 triad generated:", v3Result.path_intent);
+              store.dispatch(screenActions.setScreenValue({ key: "onboarding_turn", value: "turn_8" }));
+
+              if (__DEV__) console.log("[HOME] Post-auth triad generated:", v3Result.path_intent, "→ routing to turn_8");
+
+              // Route to turn_8 (triad reveal + "Begin my journey")
+              // instead of the normal dashboard resume flow.
+              setIsProcessing(false);
+              store.dispatch(
+                loadScreenWithData({
+                  containerId: "welcome_onboarding",
+                  stateId: "turn_8",
+                }),
+              );
+              navigation.navigate("DynamicEngine");
+              return; // skip the normal resume flow below
             }
           } catch (_err) {
             if (__DEV__) console.warn("[HOME] Post-auth v3 triad call failed:", _err);

@@ -3553,11 +3553,54 @@ export async function executeAction(
 
             nextStateId = "turn_7";
           } else if (currentStateId === "turn_7") {
-            // User advances to triad reveal. Call v3 journey start with
-            // inference_state from /onboarding/complete/ (stashed at turn_6).
+            // "Show me my path" tapped. Flow:
+            //   1. Check if authenticated
+            //   2. If guest → navigate to Login, stash inference for post-auth
+            //   3. If authed → call /journey/start-v3/ → seed triad → turn_8
             const inf = draft.inference || {};
-            nextStateId = "turn_8";
 
+            // Check auth state
+            const _store = require("../store").default;
+            const authState = _store.getState().login || _store.getState().socialLoginReducer || {};
+            const isAuthed = !!(authState.user?.id || authState.user?.email || authState.user?.token);
+
+            if (!isAuthed) {
+              // Guest — stash inference + onboarding state, redirect to Login.
+              // After login, Home.tsx post-auth hook:
+              //   1. Calls /journey/start-v3/ with stashed inference
+              //   2. Seeds triad into screenData
+              //   3. Navigates to welcome_onboarding/turn_8 (triad reveal)
+              setScreenValue(inf, "stashed_inference_state");
+              setScreenValue(draft.guidance_mode || "hybrid", "stashed_guidance_mode");
+              setScreenValue(draft, "onboarding_draft_state");
+              setScreenValue("turn_7_awaiting_auth", "onboarding_turn");
+
+              // Navigate to Login via the root stack navigator.
+              // The actionExecutor doesn't have direct nav access, but
+              // the loadScreen function's container_id is checked by
+              // ScreenRenderer → if not in containerMap, we need a
+              // different approach. Use the navigation service.
+              try {
+                const { CommonActions } = require("@react-navigation/native");
+                const { navigationRef } = require("../Shared/Routes/NavigationService");
+                if (navigationRef?.isReady()) {
+                  (navigationRef.navigate as any)("Login");
+                } else {
+                  // Fallback: use the global navigation from store
+                  // The RN app's StackNavigator has "Login" as a screen.
+                  // Force a re-render of Home which will detect isLoggedIn=false
+                  // and show the login prompt.
+                  if (__DEV__) console.log("[ONBOARDING] No nav ref — user must tap Login from menu");
+                }
+              } catch (_navErr) {
+                if (__DEV__) console.warn("[ONBOARDING] Login redirect failed:", _navErr);
+              }
+              // Don't advance to turn_8 yet — wait for auth
+              break;
+            }
+
+            // Authenticated — generate triad via v3
+            nextStateId = "turn_8";
             const start = await mitraStartJourney({
               inference_state: {
                 lane: inf.lane || draft.path || "support",
@@ -3581,46 +3624,25 @@ export async function executeAction(
             });
 
             if (start) {
-              // v3 response shape: { triad: { mantra, sankalp, practice },
-              //   scan_focus, path_intent, ... }
               const t = start.triad || {};
-
-              // Mantra
               setScreenValue(t.mantra?.title, "mantra_text");
               setScreenValue(t.mantra?.title, "companion_mantra_title");
               setScreenValue(t.mantra?.item_id, "companion_mantra_id");
-
-              // Sankalp
               setScreenValue(t.sankalp?.title, "sankalp_text");
               setScreenValue(t.sankalp?.title, "companion_sankalp_line");
               setScreenValue(t.sankalp?.item_id, "companion_sankalp_id");
-
-              // Practice
               setScreenValue(t.practice?.title, "practice_title");
               setScreenValue(t.practice?.title, "companion_practice_title");
               setScreenValue(t.practice?.item_id, "companion_practice_id");
-
-              // v3 metadata
               setScreenValue(start.scan_focus, "focus_name");
               setScreenValue(start.scan_focus, "scan_focus");
               setScreenValue(start.path_intent, "path_intent");
               setScreenValue(start.movement_goal_label, "movement_goal_label");
-              setScreenValue(start.journey_context_id, "journey_context_id");
               setScreenValue(start.cycle_id, "cycle_id");
               setScreenValue(start, "onboarding_triad_data");
-
-              // Seed journey_id — v3 now returns the actual Journey row ID
               if (start.journey_id) {
                 setScreenValue(start.journey_id, "journey_id");
               }
-            } else {
-              // v3 returned null — user is guest or flag is off.
-              // Stash inference for post-auth retry.
-              setScreenValue(inf, "stashed_inference_state");
-              setScreenValue(draft.guidance_mode, "stashed_guidance_mode");
-              console.log(
-                "[ONBOARDING] v3 triad unavailable — inference stashed for post-auth",
-              );
             }
 
             nextStateId = "turn_8";

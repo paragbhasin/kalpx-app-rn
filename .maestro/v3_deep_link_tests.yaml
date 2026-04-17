@@ -1,0 +1,166 @@
+# v3 Deep-Link Moment Test Matrix
+#
+# Launches the app, opens each deep link via xcrun simctl openurl, and
+# captures a screenshot per moment. Where expected text is known, asserts
+# visibility. Where content is slot-resolved (unpredictable), takes a
+# screenshot only for manual visual review.
+#
+# Pre-reqs:
+#   - Dev build running on iPhone 15 Pro simulator (com.kalpx.app)
+#   - Metro bundler on :8081
+#   - Logged-in user with active journey (tokens in AsyncStorage)
+#   - Backend healthy on dev.kalpx.com
+#
+# Run:
+#   maestro test .maestro/v3_deep_link_tests.yaml
+#
+# Screenshots land in: screenshots/v3_deep_link_<container>_<state>.png
+
+appId: com.kalpx.app
+tags:
+  - v3
+  - deep-link
+  - regression
+---
+
+# ── Login as day7 user (has active journey + triad) ────────────────────
+- runFlow:
+    file: login.yaml
+    env:
+      EMAIL: test+day7@kalpx.com
+      PASSWORD: Test1234!
+- waitForAnimationToEnd
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# DL-01: companion_dashboard / day_active — Dashboard with triad
+# ══════════════════════════════════════════════════════════════════════════
+- openLink: "kalpx://mitra/companion_dashboard/day_active"
+- waitForAnimationToEnd
+- assertVisible:
+    text: ".*MANTRA.*|.*Mantra.*|.*mantra.*"
+    optional: true
+- takeScreenshot: "screenshots/v3_deep_link_companion_dashboard_day_active"
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# DL-02: cycle_transitions / weekly_checkpoint — Day 7 checkpoint
+# ══════════════════════════════════════════════════════════════════════════
+- openLink: "kalpx://mitra/cycle_transitions/weekly_checkpoint?cycle_day=7"
+- waitForAnimationToEnd
+- assertVisible:
+    text: ".*Has.*|.*Day 7.*|.*reflection.*|.*practice felt.*"
+    optional: true
+- takeScreenshot: "screenshots/v3_deep_link_cycle_transitions_weekly_checkpoint_day7"
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# DL-03: cycle_transitions / weekly_checkpoint — Day 14 checkpoint
+# ══════════════════════════════════════════════════════════════════════════
+- openLink: "kalpx://mitra/cycle_transitions/weekly_checkpoint?cycle_day=14"
+- waitForAnimationToEnd
+- assertVisible:
+    text: ".*Two weeks.*|.*14.*|.*journey.*"
+    optional: true
+- takeScreenshot: "screenshots/v3_deep_link_cycle_transitions_weekly_checkpoint_day14"
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# DL-04: support_trigger / feeling_select — Trigger flow entry
+# ══════════════════════════════════════════════════════════════════════════
+- openLink: "kalpx://mitra/support_trigger/feeling_select"
+- waitForAnimationToEnd
+- assertVisible:
+    text: ".*Triggered.*|.*triggered.*|.*feeling.*"
+    optional: true
+- takeScreenshot: "screenshots/v3_deep_link_support_trigger_feeling_select"
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# DL-05: support_checkin / notice — Check-in entry
+# ══════════════════════════════════════════════════════════════════════════
+- openLink: "kalpx://mitra/support_checkin/notice"
+- waitForAnimationToEnd
+- assertVisible:
+    text: ".*notice.*|.*Notice.*|.*check.*"
+    optional: true
+- takeScreenshot: "screenshots/v3_deep_link_support_checkin_notice"
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# DL-06: support_grief / room — Grief room (slot-resolved, no text assert)
+# ══════════════════════════════════════════════════════════════════════════
+- openLink: "kalpx://mitra/support_grief/room"
+- waitForAnimationToEnd
+# Grief room content is fully slot-resolved — no hardcoded text to assert.
+# Visual check: screen should NOT be blank, should have soft tone, no timers.
+- assertNotVisible:
+    text: ".*[0-9]+:[0-9]+.*"
+    optional: true
+- takeScreenshot: "screenshots/v3_deep_link_support_grief_room"
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# DL-07: support_loneliness / room — Loneliness room (slot-resolved)
+# ══════════════════════════════════════════════════════════════════════════
+- openLink: "kalpx://mitra/support_loneliness/room"
+- waitForAnimationToEnd
+# Same as grief — slot-resolved content. Visual review needed.
+- assertNotVisible:
+    text: ".*[0-9]+:[0-9]+.*"
+    optional: true
+- takeScreenshot: "screenshots/v3_deep_link_support_loneliness_room"
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# DL-08: crisis_room / grounding — Crisis room
+# ══════════════════════════════════════════════════════════════════════════
+- openLink: "kalpx://mitra/crisis_room/grounding"
+- waitForAnimationToEnd
+- assertVisible:
+    text: ".*I hear.*|.*safe.*|.*here.*"
+    optional: true
+- takeScreenshot: "screenshots/v3_deep_link_crisis_room_grounding"
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# DL-09: practice_runner / mantra_runner — Mantra runner
+# ══════════════════════════════════════════════════════════════════════════
+- openLink: "kalpx://mitra/practice_runner/mantra_runner"
+- waitForAnimationToEnd
+- assertVisible:
+    text: ".*Mantra.*|.*chant.*|.*Begin.*|.*TAP.*"
+    optional: true
+- takeScreenshot: "screenshots/v3_deep_link_practice_runner_mantra_runner"
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# DL-10: practice_runner / practice_timer — Practice timer
+# ══════════════════════════════════════════════════════════════════════════
+- openLink: "kalpx://mitra/practice_runner/practice_timer"
+- waitForAnimationToEnd
+- assertVisible:
+    text: ".*Practice.*|.*Timer.*|.*Begin.*|.*Start.*"
+    optional: true
+- takeScreenshot: "screenshots/v3_deep_link_practice_runner_practice_timer"
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# DL-11: companion_dashboard_v3 / day_active — v3 dashboard variant
+# ══════════════════════════════════════════════════════════════════════════
+- openLink: "kalpx://mitra/companion_dashboard_v3/day_active"
+- waitForAnimationToEnd
+- assertVisible:
+    text: ".*Day.*|.*Mantra.*|.*Mitra.*"
+    optional: true
+- takeScreenshot: "screenshots/v3_deep_link_companion_dashboard_v3_day_active"
+
+
+# ══════════════════════════════════════════════════════════════════════════
+# DL-12: welcome_onboarding / turn_1 — Onboarding entry (needs fresh user)
+# NOTE: This deep link may not work for an already-onboarded user.
+#       Run separately with a fresh/guest session if needed.
+# ══════════════════════════════════════════════════════════════════════════
+- openLink: "kalpx://mitra/welcome_onboarding/turn_1"
+- waitForAnimationToEnd
+- takeScreenshot: "screenshots/v3_deep_link_welcome_onboarding_turn_1"

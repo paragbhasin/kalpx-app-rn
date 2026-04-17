@@ -3609,9 +3609,9 @@ export async function executeAction(
               setScreenValue(start.cycle_id, "cycle_id");
               setScreenValue(start, "onboarding_triad_data");
 
-              // Seed journey_id if present
-              if (start.journey_context_id) {
-                setScreenValue(start.journey_context_id, "journey_id");
+              // Seed journey_id — v3 now returns the actual Journey row ID
+              if (start.journey_id) {
+                setScreenValue(start.journey_id, "journey_id");
               }
             } else {
               // v3 returned null — user is guest or flag is off.

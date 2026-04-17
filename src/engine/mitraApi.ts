@@ -488,6 +488,7 @@ export async function mitraStartJourney(payload: {
   inference_state: Record<string, any>;
   guidance_mode: string;
   locale?: string;
+  tz?: string;
   cycle_id?: string;
   stage0_choice?: string;
   stage1_choice?: string;

@@ -873,6 +873,10 @@ export default function Home() {
           onFresh={handleWelcomeBackFresh}
         />
       ) : mitraJourneyId ? (
+        // ContinueJourney v2 — backend-driven via GET /journey/home/.
+        // All chip copy + navigation comes from the backend response;
+        // the parent only provides userName for {userName} interpolation.
+        // See JOURNEY_HOME_CONTRACT_V1.md.
         <ContinueJourney
           userName={
             profileNameFromRedux ||
@@ -880,23 +884,8 @@ export default function Home() {
             user?.name ||
             user?.firstName ||
             user?.email?.split("@")[0] ||
-            "User"
+            "friend"
           }
-          dayNumber={journeyDay}
-          onResume={() => navigateToMitra(true)}
-          onSupport={() =>
-            navigateToMitra(true, {
-              containerId: "companion_dashboard",
-              stateId: "day_active",
-            })
-          }
-          onCheckIn={() =>
-            navigateToMitra(true, {
-              containerId: "cycle_transitions",
-              stateId: "quick_checkin",
-            })
-          }
-          onTalk={() => navigateToMitra(true)}
         />
       ) : (
         <ScrollView

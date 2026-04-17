@@ -451,6 +451,28 @@ export async function mitraFetchOnboardingChips(params: {
   }
 }
 
+/** GET /api/mitra/journey/home/ — Contextual home surface.
+ *
+ * Per JOURNEY_HOME_CONTRACT_V1. Returns one of three response types:
+ *   - render_home:      layout (momentum/choice/minimal_care) + chips + copy
+ *   - route_to_moment:  blocking override (crisis/checkpoint/grief/loneliness)
+ *   - fallback:         last-resort neutral 2-chip minimal_care shell
+ * FE dispatches on response_type BEFORE touching anything else.
+ */
+export async function mitraJourneyHome(params: {
+  tz?: string;
+  locale?: string;
+  guidance_mode?: string;
+} = {}): Promise<any | null> {
+  try {
+    const res = await api.get("mitra/journey/home/", { params });
+    return res.data;
+  } catch (err: any) {
+    console.warn("[MITRA] journey/home failed:", err?.message);
+    return null;
+  }
+}
+
 /** POST /api/mitra/onboarding/complete/ — Finish onboarding and get recognition. */
 export async function mitraCompleteOnboarding(payload: {
   stage0_choice: string;

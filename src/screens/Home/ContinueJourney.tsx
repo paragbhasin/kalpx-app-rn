@@ -1,6 +1,32 @@
+/**
+ * ContinueJourney — contextual home surface for authed users with an
+ * active journey. v2 (2026-04-17) — backend-driven per
+ * kalpx/docs/mitra-v3/JOURNEY_HOME_CONTRACT_V1.md.
+ *
+ * Data source: GET /api/mitra/journey/home/
+ * Response dispatching per contract §5:
+ *   - response_type === "render_home"      → render headline + body +
+ *                                             optional h2 + optional gold
+ *                                             primary_cta + chips + optional
+ *                                             footer_link. Layout = one of
+ *                                             momentum | choice | minimal_care.
+ *   - response_type === "route_to_moment"  → executeAction(response.action)
+ *                                             immediately; do not render a
+ *                                             home card.
+ *   - response_type === "fallback"         → render the minimal 2-chip shell.
+ *
+ * Sovereignty: no hardcoded user-facing strings except a loading indicator.
+ * Actions: only the contract-locked action.type enum; dispatched through the
+ * existing executeAction pipeline.
+ *
+ * Cache: lightweight local TTL check. Full Redux-backed cache with
+ * completion-event invalidation (Invariant #10) tracked as a follow-up.
+ */
+
 import { Ionicons } from "@expo/vector-icons";
-import React from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Dimensions,
   Image,
   SafeAreaView,
@@ -10,125 +36,273 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { executeAction } from "../../engine/actionExecutor";
+import { mitraJourneyHome } from "../../engine/mitraApi";
+import { useScreenStore } from "../../engine/useScreenBridge";
 import { Fonts } from "../../theme/fonts";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-interface ContinueJourneyProps {
-  userName?: string;
-  dayNumber: number;
-  onResume: () => void;
-  onCheckIn?: () => void;
-  onSupport?: () => void;
-  onTalk?: () => void;
+// ── Types mirror the JSON returned by /journey/home/ ─────────────────
+interface ActionSpec {
+  type:
+    | "navigate"
+    | "load_screen"
+    | "open_mitra_chat"
+    | "start_checkin"
+    | "start_support"
+    | "continue_practice"
+    | "view_last_path"
+    | "noop";
+  target?: { container_id?: string; state_id?: string } | string;
 }
 
+interface ChipSpec {
+  id: string;
+  label: string;
+  icon: string | null;
+  action: ActionSpec;
+}
+
+interface FooterLink {
+  label: string;
+  action: ActionSpec;
+}
+
+interface HomeResponse {
+  response_type: "render_home" | "route_to_moment" | "fallback";
+  moment_id?: string | null;
+  layout?: "momentum" | "choice" | "minimal_care";
+  layout_reason?: string;
+  priority_source?: string;
+  headline?: string;
+  body_lines?: string[];
+  h2_prompt?: string | null;
+  primary_cta?: ChipSpec | null;
+  chips?: ChipSpec[];
+  footer_link?: FooterLink | null;
+  embeds?: any[];
+  context?: any;
+  action?: ActionSpec;
+  target?: { container_id: string; state_id: string };
+  presentation?: "replace" | "push" | "modal";
+  reason?: string;
+  meta: {
+    fallback_used?: boolean;
+    cache_ttl_sec?: number;
+    refetch_triggers?: string[];
+  };
+}
+
+interface ContinueJourneyProps {
+  userName?: string;
+}
+
+// Icon-name → Ionicon glyph.
+function ioniconFor(name: string | null | undefined): React.ReactNode {
+  if (!name) {
+    return <View style={styles.iconPlaceholder} />;
+  }
+  const glyphMap: Record<string, any> = {
+    chat: "chatbubble-outline",
+    heart: "heart-outline",
+    hands_heart: "heart-outline",
+    diamond: "diamond-outline",
+  };
+  const glyph = glyphMap[name] || "ellipse-outline";
+  return (
+    <Ionicons
+      name={glyph}
+      size={24}
+      color="#432104"
+      style={styles.btnIcon}
+    />
+  );
+}
+
+// Lightweight in-module cache. Not Redux-backed yet — sufficient for v1.
+let _homeCache: { response: HomeResponse; ts: number } | null = null;
+
 export default function ContinueJourney({
-  userName = "User",
-  dayNumber,
-  onResume,
-  onCheckIn,
-  onSupport,
-  onTalk,
+  userName = "friend",
 }: ContinueJourneyProps) {
+  const screenBridge = useScreenStore();
+  const [home, setHome] = useState<HomeResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const routedRef = useRef(false);
+
+  const buildActionContext = useCallback(() => {
+    return {
+      screenState: screenBridge.screenData || {},
+      setScreenValue: screenBridge.setScreenValue,
+      loadScreen: screenBridge.loadScreen,
+      goBack: screenBridge.goBack,
+      currentScreen: screenBridge.currentScreen,
+    };
+  }, [screenBridge]);
+
+  const fetchHome = useCallback(async (forceRefresh: boolean = false) => {
+    const ttlMs = (_homeCache?.response?.meta?.cache_ttl_sec || 0) * 1000;
+    if (
+      !forceRefresh &&
+      _homeCache &&
+      ttlMs > 0 &&
+      Date.now() - _homeCache.ts < ttlMs
+    ) {
+      setHome(_homeCache.response);
+      setLoading(false);
+      return _homeCache.response;
+    }
+    setLoading(true);
+    const res = (await mitraJourneyHome({})) as HomeResponse | null;
+    if (res) {
+      _homeCache = { response: res, ts: Date.now() };
+      setHome(res);
+    }
+    setLoading(false);
+    return res;
+  }, []);
+
+  // Fetch on mount.
+  useEffect(() => {
+    (async () => {
+      const res = await fetchHome();
+      if (!res) return;
+      // route_to_moment → navigate immediately, do not render home.
+      if (res.response_type === "route_to_moment" && res.action && !routedRef.current) {
+        routedRef.current = true;
+        await executeAction(res.action as any, buildActionContext() as any);
+      }
+    })();
+  }, [fetchHome, buildActionContext]);
+
+  const handleAction = useCallback(
+    async (action: ActionSpec | undefined) => {
+      if (!action) return;
+      await executeAction(action as any, buildActionContext() as any);
+    },
+    [buildActionContext],
+  );
+
+  // ── Loading state ────────────────────────────────────────────────
+  if (loading || !home) {
+    return (
+      <SafeAreaView style={{ flex: 1 }}>
+        <View style={styles.loadingWrap}>
+          <ActivityIndicator size="small" color="#432104" />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // route_to_moment returns nothing visual (navigation fires in effect).
+  if (home.response_type === "route_to_moment") {
+    return null;
+  }
+
+  // ── render_home / fallback ─────────────────────────────────────
+  const headline = (home.headline || "").replace("{userName}", userName || "friend");
+  const bodyLines = home.body_lines || [];
+  const layout = home.layout || "minimal_care";
+  const chips = home.chips || [];
+  const primaryCta = home.primary_cta || null;
+  const h2 = home.h2_prompt || null;
+  const footer = home.footer_link || null;
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* --- Header Section --- */}
+        {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.welcomeText}>Welcome back, {userName}.</Text>
-          <Text style={styles.subtext}>
-            Last time felt a little heavier, and you came in for support.
-            {"\n"}
-            {"\n"}
-            We can begin there again, or take today one gentle step at a time.
-          </Text>
+          {!!headline && <Text style={styles.welcomeText}>{headline}</Text>}
+          {bodyLines.map((line, i) => (
+            <Text key={i} style={styles.subtext}>
+              {line}
+            </Text>
+          ))}
         </View>
 
-        {/* --- Divider --- */}
+        {/* Divider */}
         <View style={styles.dividerContainer}>
           <View style={styles.dividerLine} />
           <Ionicons name="diamond-outline" size={10} color="#DAC28E" />
           <View style={styles.dividerLine} />
         </View>
 
-        {/* --- Prompt --- */}
-        <Text style={styles.promptText}>What feels right for you today?</Text>
+        {/* H2 prompt (choice + momentum, not minimal_care) */}
+        {!!h2 && <Text style={styles.promptText}>{h2}</Text>}
 
-        {/* --- Actions --- */}
-        <View style={styles.actionGroup}>
+        {/* Gold primary CTA (momentum only; contract Invariant #2) */}
+        {primaryCta && layout === "momentum" && (
           <TouchableOpacity
-            style={styles.actionButton}
-            onPress={onSupport}
-            activeOpacity={0.7}
+            activeOpacity={0.85}
+            onPress={() => handleAction(primaryCta.action)}
+            style={styles.primaryCtaWrap}
           >
-            <View style={styles.btnContent}>
-              <Ionicons
-                name="heart-outline"
-                size={24}
-                color="#432104"
-                style={styles.btnIcon}
-              />
-              <Text style={styles.btnText}>I need some support today</Text>
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={onCheckIn}
-            activeOpacity={0.7}
-          >
-            <View style={styles.btnContent}>
-              <Ionicons
-                name="chatbubble-outline"
-                size={24}
-                color="#432104"
-                style={styles.btnIcon}
-              />
-              <Text style={styles.btnText}>Let me start with a check-in</Text>
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={onTalk}
-            activeOpacity={0.7}
-          >
-            <View style={styles.btnContent}>
-              <Ionicons
-                name="heart-outline"
-                size={24}
-                color="#432104"
-                style={styles.btnIcon}
-              />
-              <Text style={styles.btnText}>I'd like to talk with Mitra</Text>
-            </View>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionButton}
-            onPress={onResume}
-            activeOpacity={0.7}
-          >
-            <View
-              style={[styles.btnContent, { justifyContent: "space-between" }]}
+            <LinearGradient
+              colors={["#C08B31", "#D3A44D", "#B57C26"]}
+              start={{ x: 0, y: 0.5 }}
+              end={{ x: 1, y: 0.5 }}
+              style={styles.primaryCtaGradient}
             >
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <View style={styles.iconPlaceholder} />
-                <Text style={styles.btnText}>
-                  I'm ready for today's practice
-                </Text>
-              </View>
-              <Ionicons name="arrow-forward" size={24} color="#432104" />
-            </View>
+              <Text style={styles.primaryCtaLabel}>{primaryCta.label}</Text>
+              <Ionicons name="arrow-forward" size={22} color="#FFF8E7" />
+            </LinearGradient>
           </TouchableOpacity>
+        )}
+
+        {/* Chips (always present; contract Invariant #3) */}
+        <View style={styles.actionGroup}>
+          {chips.map((chip, idx) => {
+            const isLastWithArrow =
+              chip.action?.type === "continue_practice" && !primaryCta;
+            return (
+              <TouchableOpacity
+                key={chip.id || `chip_${idx}`}
+                style={styles.actionButton}
+                activeOpacity={0.7}
+                onPress={() => handleAction(chip.action)}
+              >
+                <View
+                  style={[
+                    styles.btnContent,
+                    isLastWithArrow && { justifyContent: "space-between" },
+                  ]}
+                >
+                  <View style={styles.btnContentInner}>
+                    {ioniconFor(chip.icon)}
+                    <Text style={styles.btnText}>{chip.label}</Text>
+                  </View>
+                  {isLastWithArrow && (
+                    <Ionicons
+                      name="arrow-forward"
+                      size={22}
+                      color="#432104"
+                    />
+                  )}
+                </View>
+              </TouchableOpacity>
+            );
+          })}
         </View>
+
+        {/* Footer link (momentum only when present) */}
+        {footer && layout === "momentum" && (
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => handleAction(footer.action)}
+            style={styles.footerLinkWrap}
+          >
+            <Text style={styles.footerLinkText}>{footer.label}  →</Text>
+          </TouchableOpacity>
+        )}
       </ScrollView>
 
-      {/* --- Lotus Illustration --- */}
+      {/* Lotus illustration */}
       <View style={styles.lotusContainer} pointerEvents="none">
         <Image
           source={require("../../../assets/new_home_lotus.png")}
@@ -147,8 +321,13 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 24,
     paddingTop: 60,
-    paddingBottom: 220, // Space for lotus
+    paddingBottom: 220,
     alignItems: "center",
+  },
+  loadingWrap: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
   header: {
     alignItems: "center",
@@ -168,6 +347,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 28,
     maxWidth: 320,
+    marginBottom: 6,
   },
   dividerContainer: {
     flexDirection: "row",
@@ -189,13 +369,30 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 15,
   },
+  primaryCtaWrap: {
+    width: "100%",
+    marginBottom: 12,
+  },
+  primaryCtaGradient: {
+    height: 60,
+    borderRadius: 30,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+    gap: 8,
+  },
+  primaryCtaLabel: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 18,
+    color: "#FFF8E7",
+  },
   actionGroup: {
     width: "100%",
     gap: 12,
   },
   actionButton: {
     width: "100%",
-    // height: 60,
     padding: 10,
     borderRadius: 30,
     borderWidth: 1,
@@ -205,6 +402,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   btnContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  btnContentInner: {
     flexDirection: "row",
     alignItems: "center",
   },
@@ -219,6 +420,15 @@ const styles = StyleSheet.create({
   iconPlaceholder: {
     width: 24,
     marginRight: 12,
+  },
+  footerLinkWrap: {
+    marginTop: 16,
+    alignItems: "center",
+  },
+  footerLinkText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 16,
+    color: "#6b5a45",
   },
   lotusContainer: {
     position: "absolute",

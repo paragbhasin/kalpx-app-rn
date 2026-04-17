@@ -511,7 +511,7 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
         {/* ----------------------------------------------------------- */}
         <View style={styles.quickActions}>
           <TouchableOpacity
-            style={styles.triggerBtn}
+            style={styles.quickCheckinBtn}
             activeOpacity={0.88}
             onPress={() => {
               executeAction(
@@ -529,14 +529,7 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
               );
             }}
           >
-            <LinearGradient
-              colors={["#e8c060", "#d9a557"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 0, y: 1 }}
-              style={styles.triggerBtnInner}
-            >
-              <Text style={styles.triggerBtnText}>I Feel Triggered</Text>
-            </LinearGradient>
+            <Text style={styles.quickCheckinBtnText}>I Feel Triggered</Text>=
           </TouchableOpacity>
           <Text style={styles.quickActionHelp}>
             Feeling overwhelmed or disturbed? Tap here and KalpX will guide you
@@ -544,7 +537,10 @@ const CompanionDashboardContainer: React.FC<Props> = ({ schema }) => {
           </Text>
 
           <TouchableOpacity
-            style={styles.quickCheckinBtn}
+            style={[
+              styles.quickCheckinBtn,
+              { borderColor: "#c9a84c", borderWidth: 1 },
+            ]}
             activeOpacity={0.88}
             onPress={() =>
               loadScreen({
@@ -933,11 +929,17 @@ const styles = StyleSheet.create({
     maxWidth: 360,
     height: 40,
     borderRadius: 27,
-    borderWidth: 1.5,
-    borderColor: "#c7a64b",
     alignItems: "center",
     justifyContent: "center",
-    // backgroundColor: "#fdfaf3",
+    backgroundColor: "#FBF5F5",
+    borderColor: "#9f9f9f",
+    borderWidth: 0.3,
+
+    elevation: 6,
+
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
   },
   quickCheckinBtnText: {
     fontFamily: Fonts.sans.semiBold,

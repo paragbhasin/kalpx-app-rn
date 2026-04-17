@@ -4221,6 +4221,8 @@ export const CycleTransitionsContainer = {
           type: "subtext",
           variant: "link",
           content: "Return to Mitra Home",
+          style: { marginBottom: "-40px" },
+
           position: "footer",
           action: {
             type: "navigate",

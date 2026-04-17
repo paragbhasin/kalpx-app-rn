@@ -1,4 +1,3 @@
-import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import {
@@ -11,6 +10,7 @@ import {
 } from "react-native-reanimated";
 import { executeAction } from "../engine/actionExecutor";
 import { useScreenStore } from "../engine/useScreenBridge";
+import { Fonts } from "../theme/fonts";
 
 interface PrimaryButtonBlockProps {
   block: {
@@ -134,46 +134,13 @@ const PrimaryButtonBlock: React.FC<PrimaryButtonBlockProps> = ({ block }) => {
 
   return (
     <View style={styles.pulseContainer}>
-      <TouchableOpacity activeOpacity={0.85} onPress={handlePress}>
-        <LinearGradient
-          colors={
-            variant === "discipline_gold"
-              ? ["#F6D98D", "#E7B944", "#B8860B"]
-              : ["#fff8dc", "#f6d365", "#d4af37", "#b8860b", "#fff8dc"]
-          }
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[
-            styles.borderGradient,
-            variant === "discipline_gold" && styles.disciplineBorderGradient,
-          ]}
-        >
-          <LinearGradient
-            colors={
-              variant === "discipline_gold"
-                ? ["#EABB47", "#D6A224", "#EABB47"]
-                : ["#c49a3c", "#d4a853", "#c49a3c"]
-            }
-            style={[
-              styles.innerButton,
-              variant === "discipline_gold" && styles.disciplineInnerButton,
-            ]}
-          >
-            <View style={styles.contentContainer}>
-              <Text
-                style={[
-                  styles.label,
-                  variant === "discipline_gold" && styles.disciplineLabel,
-                ]}
-              >
-                {block.label}
-              </Text>
-              {block.subtext && (
-                <Text style={styles.subtext}>{block.subtext}</Text>
-              )}
-            </View>
-          </LinearGradient>
-        </LinearGradient>
+      <TouchableOpacity
+        activeOpacity={0.85}
+        onPress={handlePress}
+        style={styles.chipSecondary}
+      >
+        <Text style={styles.chipLabel}>{block.label}</Text>
+        {block.subtext && <Text style={styles.subtext}>{block.subtext}</Text>}
       </TouchableOpacity>
     </View>
   );
@@ -214,6 +181,26 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     shadowOpacity: 0.18,
     shadowRadius: 4,
+  },
+  chipSecondary: {
+    backgroundColor: "#FBF5F5",
+    borderColor: "#9f9f9f",
+    borderWidth: 0.6,
+    padding: 10,
+    borderRadius: 24,
+    elevation: 6,
+    paddingHorizontal: 35,
+
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  chipLabel: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 15,
+    color: "#432104",
+    textAlign: "center",
   },
   contentContainer: {
     alignItems: "center",

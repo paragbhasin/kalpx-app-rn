@@ -24,11 +24,11 @@ import {
   UIManager,
   View,
 } from "react-native";
+import Svg, { Circle } from "react-native-svg";
 import MantraLotus3d from "../../assets/mantra-lotus-3d.svg";
 import SankalpCenteredIcon from "../../assets/sankalp_centered.svg";
 import SankalpInnerPeaceIcon from "../../assets/sankalp_inner_peace.svg";
 import AudioPlayerBlock from "../blocks/AudioPlayerBlock";
-import Svg, { Circle } from "react-native-svg";
 import MicroCompletion from "../components/HabitLoop/MicroCompletion";
 import MalaMantraCounter from "../components/MalaMantraCounter";
 import { executeAction } from "../engine/actionExecutor";
@@ -179,7 +179,12 @@ const ImmersiveV3Runner: React.FC<{ schema: any }> = ({ schema }) => {
   };
 
   return (
-    <View style={[v3Styles.root, isCompletion && { backgroundColor: "transparent" }]}>
+    <View
+      style={[
+        v3Styles.root,
+        isCompletion && { backgroundColor: "transparent" },
+      ]}
+    >
       {!isCompletion && (
         <TouchableOpacity
           onPress={handleBack}
@@ -193,7 +198,16 @@ const ImmersiveV3Runner: React.FC<{ schema: any }> = ({ schema }) => {
         </TouchableOpacity>
       )}
 
-      <View style={[v3Styles.body, isCompletion && { paddingHorizontal: 0, paddingTop: 0, paddingBottom: 0 }]}>
+      <View
+        style={[
+          v3Styles.body,
+          isCompletion && {
+            paddingHorizontal: 0,
+            paddingTop: 0,
+            paddingBottom: 0,
+          },
+        ]}
+      >
         {schema.blocks?.map((block: any, i: number) => (
           <BlockRenderer key={i} block={block} />
         ))}
@@ -2016,7 +2030,9 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
         >
           <Text style={styles.mantraCompleteHeadline}>
             {completionConfig.headline ||
-              (isPracticeComplete ? "Practice Completed." : "Mantra Completed.")}
+              (isPracticeComplete
+                ? "Practice Completed."
+                : "Mantra Completed.")}
           </Text>
           <Text style={styles.mantraCompleteSubtext}>
             {completionConfig.subtext ||
@@ -2895,14 +2911,25 @@ const styles = StyleSheet.create({
   },
   pauseActions: { width: "100%", marginTop: 40, gap: 16, alignItems: "center" },
   goldActionBtn: {
-    width: "100%",
-    height: 56,
+    // height: 56,
     borderRadius: 28,
-    backgroundColor: "#CA8A04",
+    borderColor: "#9f9f9f",
+    backgroundColor: "#FBF5F5",
     alignItems: "center",
     justifyContent: "center",
+    alignSelf: "center",
+    padding: 10,
+    width: "70%",
+    borderWidth: 0.3,
+
+    elevation: 6,
+
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
-  goldActionBtnText: { color: "#FFF", fontSize: 18, fontWeight: "600" },
+  goldActionBtnText: { color: "#432104", fontSize: 18, fontWeight: "400" },
   endPracticeBtn: {
     width: "100%",
     height: 60,
@@ -3048,11 +3075,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   supportOutlineBtn: {
-    width: "100%",
-    height: 56,
+    width: "70%",
+    padding: 10,
+    // height: 56,
     borderRadius: 28,
-    borderWidth: 1.5,
-    borderColor: "#D6A43A",
+    alignSelf: "center",
+    borderWidth: 0.6,
+    borderColor: "#9f9f9f",
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "rgba(255,255,255,0.18)",

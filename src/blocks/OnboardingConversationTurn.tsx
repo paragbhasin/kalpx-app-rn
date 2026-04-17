@@ -56,6 +56,8 @@ interface Props {
     };
     voice_available?: boolean;
     on_response?: any; // base action object; { chip_id } or { freeform_text } merged into payload
+    recognition?: any;
+    isTurn7?: boolean;
   };
 }
 
@@ -344,6 +346,67 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
 
           {block.open_input?.enabled && renderStyledInput(true)}
         </Animated.View>
+      </View>
+    );
+  }
+
+  if (block.isTurn7) {
+    const rec = block.recognition || {};
+    const paras = rec.body_paragraphs || [];
+
+    return (
+      <View style={styles.wrap}>
+        <View style={styles.recognitionCard}>
+          <Text style={styles.recognitionLabel}>
+            {rec.label || "RECOGNITION"}
+          </Text>
+
+          <View style={styles.turnOneHeadlineDivider}>
+            <View style={styles.turnOneDividerLine} />
+            <Ionicons name="diamond" size={10} color="#c7a258" />
+            <View style={styles.turnOneDividerLine} />
+          </View>
+
+          <Text style={styles.recognitionEmphasized}>
+            {interpolate(rec.emphasized_line, screenData)}
+          </Text>
+
+          <View style={styles.recognitionBodyList}>
+            {paras.map((p: string, i: number) => (
+              <Text key={i} style={styles.recognitionBodyText}>
+                {interpolate(p, screenData)}
+              </Text>
+            ))}
+          </View>
+
+          <Animated.View
+            style={[
+              styles.turnOneResponseWrap,
+              { opacity: replyAnim, marginTop: 20 },
+            ]}
+          >
+            {(block.reply_chips || []).map((chip) => (
+              <TouchableOpacity
+                key={chip.id}
+                activeOpacity={0.85}
+                onPress={() =>
+                  fire({ chip_id: chip.id, response_type: "chip" })
+                }
+              >
+                <LinearGradient
+                  colors={["#C08B31", "#D3A44D", "#B57C26"]}
+                  start={{ x: 0, y: 0.5 }}
+                  end={{ x: 1, y: 0.5 }}
+                  style={[styles.turnOneButton, styles.turnOnePrimaryButton]}
+                >
+                  <Text style={styles.turnOnePrimaryButtonText}>
+                    {chip.label}
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            ))}
+          </Animated.View>
+        </View>
       </View>
     );
   }
@@ -853,6 +916,49 @@ const styles = StyleSheet.create({
     color: "#3f2810",
     textAlign: "center",
     marginBottom: 10,
+  },
+  recognitionCard: {
+    borderRadius: 25,
+    backgroundColor: "rgba(255, 252, 246, 0.96)",
+    borderWidth: 1,
+    borderColor: "rgba(226, 208, 174, 0.9)",
+    paddingHorizontal: 20,
+    paddingTop: 30,
+    paddingBottom: 24,
+    shadowColor: "#d9bf8f",
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.18,
+    shadowRadius: 22,
+    elevation: 4,
+    alignItems: "center",
+  },
+  recognitionLabel: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 12,
+    letterSpacing: 2.5,
+    color: "#6b5a45",
+    textTransform: "uppercase",
+  },
+  recognitionEmphasized: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 20,
+    lineHeight: 30,
+    color: "#3f2810",
+    textAlign: "center",
+    marginBottom: 20,
+    marginTop: 10,
+  },
+  recognitionBodyList: {
+    width: "100%",
+    gap: 8,
+  },
+  recognitionBodyText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 18,
+    lineHeight: 20,
+    color: "#432104",
+    textAlign: "center",
+    opacity: 0.85,
   },
 });
 

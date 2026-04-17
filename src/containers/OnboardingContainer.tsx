@@ -62,9 +62,10 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
 
   const blocks = schema?.blocks || [];
 
-  // Find headline/subtext to inject into conversation turn blocks for layout.
+  // Find headline/subtext/recognition to inject into conversation turn blocks for layout.
   const headlineBlock = blocks.find((b: any) => b.type === "headline");
   const subtextBlock = blocks.find((b: any) => b.type === "subtext");
+  const recognitionBlock = blocks.find((b: any) => b.type === "first_recognition");
 
   const enrichedBlocks = blocks
     // Inject headline/subtext into conversation turn blocks; pass all others through as-is.
@@ -87,16 +88,18 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
           reply_chips: dynamicData?.chips || b.reply_chips,
           subtext: dynamicData?.sub_prompt || subtextBlock?.content || b.subtext,
           headline: dynamicData?.mitra_message || headlineBlock?.content || b.headline,
+          recognition: recognitionBlock,
           open_input: dynamicData?.open_input 
             ? { ...b.open_input, ...dynamicData.open_input, enabled: true } 
             : b.open_input,
           turnOneHero: turn === 1,
+          isTurn7: turn === 7 || turnId === "turn7",
         };
       }
       return b;
     })
-    // Remove standalone headline/subtext — they're now owned by the turn card.
-    .filter((b: any) => b.type !== "headline" && b.type !== "subtext");
+    // Remove standalone headline/subtext/recognition — they're now owned by the turn card.
+    .filter((b: any) => b.type !== "headline" && b.type !== "subtext" && b.type !== "first_recognition");
 
   return (
     <ScrollView

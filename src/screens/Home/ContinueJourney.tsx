@@ -200,29 +200,38 @@ export default function ContinueJourney({
     return res;
   }, []);
 
-  // Fetch on mount.
-  // Pre-hydrate the triad (generate_companion) in parallel with /journey/home/
-  // so that when the user taps "Continue today's practice" or any dashboard-
-  // bound chip, the triad data (mantra_text, sankalp_text, practice_title)
-  // is already in screenState. Keeps chip taps synchronous + responsive.
+  // Mount effect: fetch /journey/home/ first, then stagger
+  // generate_companion prehydration by 1.5s so it doesn't compete with
+  // the home fetch / any downstream route_to_moment nav for network +
+  // redux churn. Previously both fired in parallel on mount which
+  // caused cascading container mounts + 10s axios timeouts under slow
+  // dev network.
   useEffect(() => {
+    let cancelled = false;
+    let prehydrateTimer: ReturnType<typeof setTimeout> | null = null;
     (async () => {
-      const [res] = await Promise.all([
-        fetchHome(),
+      const res = await fetchHome();
+      if (cancelled || !res) return;
+      if (res.response_type === "route_to_moment" && res.action && !routedRef.current) {
+        routedRef.current = true;
+        await executeAction(res.action as any, buildActionContext() as any);
+        return; // routing away — don't prehydrate
+      }
+      // Only prehydrate if we're actually rendering home (chips will be tapped).
+      prehydrateTimer = setTimeout(() => {
+        if (cancelled) return;
         executeAction(
           { type: "generate_companion" } as any,
           buildActionContext() as any,
         ).catch((err) => {
           console.debug("[ContinueJourney] generate_companion prehydrate failed:", err?.message);
-        }),
-      ]);
-      if (!res) return;
-      // route_to_moment → navigate immediately, do not render home.
-      if (res.response_type === "route_to_moment" && res.action && !routedRef.current) {
-        routedRef.current = true;
-        await executeAction(res.action as any, buildActionContext() as any);
-      }
+        });
+      }, 1500);
     })();
+    return () => {
+      cancelled = true;
+      if (prehydrateTimer) clearTimeout(prehydrateTimer);
+    };
   }, [fetchHome, buildActionContext]);
 
   const handleAction = useCallback(

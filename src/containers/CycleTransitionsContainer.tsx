@@ -998,7 +998,7 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                 </Text>
               </View>
 
-              <View style={[styles.mainCard, { marginTop: -30 }]}>
+              <View style={[styles.mainCard]}>
                 <SectionHeader label="How To Live" />
                 <View style={{ marginTop: 12 }}>
                   {Array.isArray(info.how_to_live) ? (
@@ -1266,7 +1266,11 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                             height={80}
                           />
                         ) : (
-                          <MantraLotus3d width={110} height={80} />
+                          <MantraLotus3d
+                            width={110}
+                            height={80}
+                            style={{ marginBottom: -60 }}
+                          />
                         )}
                       </View>
                     </View>
@@ -1718,17 +1722,19 @@ const styles = StyleSheet.create({
   },
   practicePrimaryButton: {
     width: "100%",
-    minHeight: 58,
+    borderColor: "#9f9f9f",
     borderRadius: 30,
-    backgroundColor: "#E8B63A",
+    borderWidth: 0.5,
+    backgroundColor: "#FBF5F5",
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 20,
-    shadowColor: "#d7a64a",
+    padding: 10,
+    paddingHorizontal: 40,
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.2,
     shadowRadius: 10,
-    elevation: 3,
+    elevation: 6,
   },
   practicePrimaryButtonText: {
     fontSize: 18,
@@ -2159,7 +2165,7 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif.regular,
     color: "#432104",
     textAlign: "center",
-    lineHeight: 38,
+    // lineHeight: 38,
     // marginTop: 10,
     // paddingHorizontal: 12,
   },

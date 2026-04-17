@@ -3412,7 +3412,7 @@ export async function executeAction(
         // Sadhana Yatra 4-stage flow (2026-04-14). State-id driven rather than
         // numeric-turn driven — path-aware branching requires named states.
         const currentStateId = 
-          action.currentScreen?.stateId || 
+          action.currentScreen?.state_id ||
           (typeof screenState.onboarding_turn === "string" 
             ? screenState.onboarding_turn 
             : `turn_${screenState.onboarding_turn || 1}`);
@@ -3553,45 +3553,74 @@ export async function executeAction(
 
             nextStateId = "turn_7";
           } else if (currentStateId === "turn_7") {
-            // User advances to triad reveal
+            // User advances to triad reveal. Call v3 journey start with
+            // inference_state from /onboarding/complete/ (stashed at turn_6).
             const inf = draft.inference || {};
             nextStateId = "turn_8";
 
             const start = await mitraStartJourney({
-              path: inf.lane || draft.path || "support",
-              primary_kosha: inf.primary_kosha,
-              primary_vritti: inf.primary_vritti,
-              primary_klesha: inf.primary_klesha,
-              life_context: inf.life_context,
-              support_style: inf.support_style,
-              intervention_bias: inf.intervention_bias,
-              aspiration: draft.aspiration || null,
-              preferred_modality: draft.preferred_modality || null,
+              inference_state: {
+                lane: inf.lane || draft.path || "support",
+                primary_kosha: inf.primary_kosha,
+                secondary_kosha: inf.secondary_kosha,
+                top_klesha: inf.primary_klesha,
+                top_vritti: inf.primary_vritti,
+                vritti_candidates: inf.vritti_candidates || [],
+                klesha_candidates: inf.klesha_candidates || [],
+                life_context: inf.life_context,
+                support_style: inf.support_style,
+                intervention_bias: inf.intervention_bias || [],
+                confidence: inf.confidence || 0.0,
+              },
               guidance_mode: draft.guidance_mode || "hybrid",
-              day_number: 1,
+              locale: "en",
+              stage0_choice: draft.stage0_choice || draft.path,
+              stage1_choice: draft.stage1_choice,
+              stage2_choice: draft.stage2_choice,
+              stage3_choice: draft.stage3_choice,
             });
 
-            if (start && start.companion) {
-              const c = start.companion;
-              setScreenValue(c.focus_name, "focus_name");
-              setScreenValue(c.recommended_posture, "recommended_posture");
-              
+            if (start) {
+              // v3 response shape: { triad: { mantra, sankalp, practice },
+              //   scan_focus, path_intent, ... }
+              const t = start.triad || {};
+
               // Mantra
-              setScreenValue(c.mantra?.core?.title, "mantra_text");
-              setScreenValue(c.mantra?.ui?.card_subtitle, "mantra_one_line");
-              setScreenValue(c.mantra?.core?.id, "companion_mantra_id");
-              
+              setScreenValue(t.mantra?.title, "mantra_text");
+              setScreenValue(t.mantra?.title, "companion_mantra_title");
+              setScreenValue(t.mantra?.item_id, "companion_mantra_id");
+
               // Sankalp
-              setScreenValue(c.sankalp?.core?.line, "sankalp_text");
-              setScreenValue(c.sankalp?.ui?.card_title, "companion_sankalp_line");
-              setScreenValue(c.sankalp?.core?.id, "companion_sankalp_id");
-              
+              setScreenValue(t.sankalp?.title, "sankalp_text");
+              setScreenValue(t.sankalp?.title, "companion_sankalp_line");
+              setScreenValue(t.sankalp?.item_id, "companion_sankalp_id");
+
               // Practice
-              setScreenValue(c.practice?.core?.title, "practice_title");
-              setScreenValue(c.practice?.ui?.card_subtitle, "companion_practice_one_line");
-              setScreenValue(c.practice?.core?.id, "companion_practice_id");
-              
+              setScreenValue(t.practice?.title, "practice_title");
+              setScreenValue(t.practice?.title, "companion_practice_title");
+              setScreenValue(t.practice?.item_id, "companion_practice_id");
+
+              // v3 metadata
+              setScreenValue(start.scan_focus, "focus_name");
+              setScreenValue(start.scan_focus, "scan_focus");
+              setScreenValue(start.path_intent, "path_intent");
+              setScreenValue(start.movement_goal_label, "movement_goal_label");
+              setScreenValue(start.journey_context_id, "journey_context_id");
+              setScreenValue(start.cycle_id, "cycle_id");
               setScreenValue(start, "onboarding_triad_data");
+
+              // Seed journey_id if present
+              if (start.journey_context_id) {
+                setScreenValue(start.journey_context_id, "journey_id");
+              }
+            } else {
+              // v3 returned null — user is guest or flag is off.
+              // Stash inference for post-auth retry.
+              setScreenValue(inf, "stashed_inference_state");
+              setScreenValue(draft.guidance_mode, "stashed_guidance_mode");
+              console.log(
+                "[ONBOARDING] v3 triad unavailable — inference stashed for post-auth",
+              );
             }
 
             nextStateId = "turn_8";

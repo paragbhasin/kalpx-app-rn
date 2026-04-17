@@ -296,6 +296,39 @@ export default function Home() {
     if (hasJourney) {
       setIsProcessing(true);
       try {
+        // Post-auth v3 triad generation: if the user completed onboarding
+        // as a guest and stashed inference_state (triad_pending was true),
+        // call /journey/start-v3/ now that they're authenticated.
+        const stashedInference = store.getState().screen.screenData.stashed_inference_state;
+        if (stashedInference && isLoggedIn) {
+          try {
+            const { mitraStartJourney } = require("../../engine/mitraApi");
+            const stashedMode = store.getState().screen.screenData.stashed_guidance_mode || "hybrid";
+            const v3Result = await mitraStartJourney({
+              inference_state: stashedInference,
+              guidance_mode: stashedMode,
+              locale: "en",
+            });
+            if (v3Result) {
+              const t = v3Result.triad || {};
+              store.dispatch(screenActions.setScreenValue({ key: "mantra_text", value: t.mantra?.title }));
+              store.dispatch(screenActions.setScreenValue({ key: "companion_mantra_id", value: t.mantra?.item_id }));
+              store.dispatch(screenActions.setScreenValue({ key: "sankalp_text", value: t.sankalp?.title }));
+              store.dispatch(screenActions.setScreenValue({ key: "companion_sankalp_id", value: t.sankalp?.item_id }));
+              store.dispatch(screenActions.setScreenValue({ key: "practice_title", value: t.practice?.title }));
+              store.dispatch(screenActions.setScreenValue({ key: "companion_practice_id", value: t.practice?.item_id }));
+              store.dispatch(screenActions.setScreenValue({ key: "path_intent", value: v3Result.path_intent }));
+              store.dispatch(screenActions.setScreenValue({ key: "scan_focus", value: v3Result.scan_focus }));
+              // Clear stashed state
+              store.dispatch(screenActions.setScreenValue({ key: "stashed_inference_state", value: null }));
+              store.dispatch(screenActions.setScreenValue({ key: "stashed_guidance_mode", value: null }));
+              if (__DEV__) console.log("[HOME] Post-auth v3 triad generated:", v3Result.path_intent);
+            }
+          } catch (_err) {
+            if (__DEV__) console.warn("[HOME] Post-auth v3 triad call failed:", _err);
+          }
+        }
+
         // Log Bearer Token check for user visibility
         const AsyncStorage =
           require("@react-native-async-storage/async-storage").default;

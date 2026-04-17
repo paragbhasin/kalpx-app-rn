@@ -334,6 +334,74 @@ function composeRecognitionFallback(
   };
 }
 
+/** POST mitra/onboarding/complete/ — unified one-shot onboarding endpoint.
+ *
+ * Takes all 4-stage choices + guidance_mode and returns:
+ *   inference (internal state), recognition (composed line), triad
+ *   (mantra/sankalp/practice — or triad_pending:true for guests),
+ *   journey metadata, dashboard_chrome, bridges, stage_subtexts.
+ *
+ * This is the canonical Call 4 in the v3 onboarding flow. Replaces
+ * the deprecated separate /recognition/ + /generate-companion/ calls.
+ */
+export async function mitraOnboardingComplete(payload: {
+  stage0_choice: string;
+  stage1_choice: string;
+  stage2_choice: string;
+  stage3_choice: string;
+  guidance_mode: string;
+  freeforms?: Record<string, string | null>;
+}): Promise<any> {
+  try {
+    const res = await api.post("mitra/onboarding/complete/", payload);
+    return res.data;
+  } catch (err: any) {
+    console.warn("[MITRA] onboarding/complete failed:", err?.message);
+    return null;
+  }
+}
+
+
+/** POST mitra/journey/start-v3/ — v3 triad generation (authenticated only).
+ *
+ * Takes the inference_state from /onboarding/complete/ and generates the
+ * triad with path_intent derivation, coherence checking, deny-list
+ * enforcement, and rupture detection. This is the ONLY triad generation
+ * endpoint — legacy /user-journey/start/ is deprecated.
+ *
+ * Returns null on auth failure (401) or flag-off (404). Caller must
+ * handle: if null, stash inference_state and retry after auth.
+ */
+export async function mitraJourneyStartV3(payload: {
+  inference_state: Record<string, any>;
+  guidance_mode: string;
+  locale?: string;
+  cycle_id?: string;
+  stage0_choice?: string;
+  stage1_choice?: string;
+  stage2_choice?: string;
+  stage3_choice?: string;
+}): Promise<any | null> {
+  try {
+    const res = await api.post("mitra/journey/start-v3/", payload);
+    return res.data;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    if (status === 401 || status === 404) {
+      if (__DEV__) {
+        console.log(
+          "[MITRA] journey/start-v3/ unavailable:",
+          status === 401 ? "not authenticated" : "flag off",
+        );
+      }
+      return null;
+    }
+    console.warn("[MITRA] journey/start-v3/ failed:", err?.message);
+    return null;
+  }
+}
+
+
 export async function mitraOnboardingRecognition(
   payload: MitraRecognitionPayload,
 ): Promise<MitraRecognitionResponse> {
@@ -403,28 +471,45 @@ export async function mitraCompleteOnboarding(payload: {
   }
 }
 
-/** POST /api/mitra/journey/start/ — Formally start the journey and get the triad. */
+/** POST /api/mitra/journey/start-v3/ — v3 triad generation (authenticated).
+ *
+ * This is the ONLY triad generation endpoint. Legacy /journey/start/ is
+ * deprecated. Requires authentication — returns null for guests (call
+ * after auth with stashed inference_state from /onboarding/complete/).
+ *
+ * v3 response shape:
+ *   { triad: { mantra, sankalp, practice },
+ *     scan_focus, path_intent, movement_goal_label, rupture_inferred,
+ *     confidence, hard_fallback, downgrade_applied,
+ *     coherence_adjustment_used, fallback_reason,
+ *     mode_served, locale_served, cycle_id, journey_context_id }
+ */
 export async function mitraStartJourney(payload: {
-  path: string;
-  primary_kosha?: string;
-  primary_vritti?: string;
-  primary_klesha?: string;
-  life_context?: string;
-  support_style?: string;
-  intervention_bias?: string[];
-  aspiration?: string | null;
-  preferred_modality?: string | null;
+  inference_state: Record<string, any>;
   guidance_mode: string;
-  intention?: string | null;
-  day_number: number;
+  locale?: string;
+  cycle_id?: string;
+  stage0_choice?: string;
+  stage1_choice?: string;
+  stage2_choice?: string;
+  stage3_choice?: string;
 }): Promise<any> {
   try {
-    console.log("[MITRA] Start Journey Payload:", payload);
-    const res = await api.post("mitra/journey/start/", payload);
-    console.log("[MITRA] Start Journey Response:", res.data);
+    console.log("[MITRA] Start Journey v3 Payload:", payload);
+    const res = await api.post("mitra/journey/start-v3/", payload);
+    console.log("[MITRA] Start Journey v3 Response:", res.data);
     return res.data;
   } catch (err: any) {
-    console.error("[MITRA] journey start failed:", err.message);
+    const status = err?.response?.status;
+    if (status === 401) {
+      console.log("[MITRA] journey/start-v3/ requires auth — stash inference for post-auth call");
+      return null;
+    }
+    if (status === 404) {
+      console.log("[MITRA] journey/start-v3/ flag off on server");
+      return null;
+    }
+    console.error("[MITRA] journey start v3 failed:", err.message);
     return null;
   }
 }

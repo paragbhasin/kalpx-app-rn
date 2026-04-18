@@ -34,6 +34,9 @@ import ReflectionEveningContainer from "../containers/ReflectionEveningContainer
 // Week 7 — Support routes (Moments 46, 47)
 import GriefRoomContainer from "../extensions/moments/grief_room";
 import LonelinessRoomContainer from "../extensions/moments/loneliness_room";
+// Track 1 — first-class Joy + Growth support rooms (Moments 48, 49).
+import JoyRoomContainer from "../extensions/moments/joy_room";
+import GrowthRoomContainer from "../extensions/moments/growth_room";
 // T3A-3 — Crisis safety surface
 import CrisisRoomContainer from "../containers/CrisisRoomContainer";
 // Phase 3 — Mitra v3 new dashboard shell (11 required components).
@@ -80,6 +83,9 @@ const containerMap: Record<string, React.ComponentType<any>> = {
   // Week 7 — Support routes
   support_grief: GriefRoomContainer,
   support_loneliness: LonelinessRoomContainer,
+  // Track 1 — first-class Joy + Growth support rooms
+  support_joy: JoyRoomContainer,
+  support_growth: GrowthRoomContainer,
   // T3A-3 — Crisis safety surface
   crisis_room: CrisisRoomContainer,
   // Phase 3 — Mitra v3 new dashboard. Active only when Home.tsx routes

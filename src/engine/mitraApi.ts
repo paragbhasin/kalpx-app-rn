@@ -1555,3 +1555,191 @@ export async function mitraResolveMoment(
     return null;
   }
 }
+
+// ---------------------------------------------------------------------------
+// mitraPickWisdom — Track 0.5 Wisdom Orchestration selector client.
+//
+// Contract: kalpx-app-rn/docs/WISDOM_ORCHESTRATION_CONTRACT_V1.md §5
+// Impl spec: kalpx-app-rn/docs/WISDOM_SELECTOR_IMPLEMENTATION_SPEC_V1.md §4
+//
+// Endpoint: POST /api/mitra/wisdom/pick/
+//
+// Null-safe invariants (match backend selector.py contract):
+//   - Never rejects. Always resolves with a WisdomSelectionOutput.
+//   - On backend error, timeout, env-flag-off, or non-200 response:
+//     returns { ok: false, selected_text: "", fallback_reason: "<cause>" }
+//     so the caller falls through to the ContentPack authored fallback.
+//   - NEVER emits canned English from the FE. Blank is preferred; copy is
+//     always authored in ContentPacks.
+//
+// Timeout: hard cap at 1500ms (Stream 1 integration budget). Enforced via
+// AbortController — we do NOT rely solely on the shared 30s axios timeout.
+// ---------------------------------------------------------------------------
+
+export type WisdomInteractionType =
+  | "first_read_opening"
+  | "second_beat"
+  | "quiet_ack"
+  | "visible_reply"
+  | "completion_anchor";
+
+export type WisdomGuidanceMode = "universal" | "hybrid" | "rooted";
+
+export type WisdomReadinessLevel = "L0" | "L1" | "L2" | "L3" | "L4";
+
+export interface WisdomSelectionInput {
+  // Required — see contract §4.1
+  interaction_type: WisdomInteractionType;
+  context: string; // surface id: joy_room | grief_room | growth_room | completion_core | completion_support | ...
+  state_family: string; // grief | loneliness | joy | growth | core | ...
+  guidance_mode: WisdomGuidanceMode;
+  locale: string; // en | hi | ...
+
+  // Optional
+  path_intent?: string | null;
+  user_context?: Record<string, any>;
+  memory?: {
+    recent_asset_ids?: string[];
+    session_traditions?: string[];
+    session_id?: string;
+    thread_id?: string;
+  };
+  preferences?: Record<string, any>;
+
+  // Extension (declared in V1, populated post-cutover)
+  user_readiness_level?: WisdomReadinessLevel;
+  thread_id?: string;
+}
+
+export interface WisdomDecisionTraceSubset {
+  audit_id?: string;
+  input_hash?: string;
+  final_winner_asset_id?: string;
+  final_winner_tier?: string;
+  final_winner_family?: string;
+  tiebreak_reason?: string;
+  relaxation_steps_applied?: string[];
+  truncation_layer_used?: string;
+  rendered_char_count?: number;
+  fallback_used?: boolean;
+  fallback_reason?: string | null;
+  latency_ms?: number;
+  principle_version_id_served?: number;
+}
+
+export interface WisdomSelectionOutput {
+  ok: boolean;
+  selected_text: string;
+  asset_kind?: "principle" | "snippet" | "none";
+  asset_id?: string;
+  source_tier?: "tier_1" | "tier_2" | "application" | "snippet" | "none" | string;
+  source_family?: string;
+  char_count?: number;
+  wrapper_required?: boolean;
+  wrapper_suggestion?: string | null;
+  drill_down_id?: string | null;
+  drill_down_available?: boolean;
+  principle_version_id?: number;
+  trace?: WisdomDecisionTraceSubset | null;
+  // FE-only diagnostic — set when selector was skipped locally.
+  fallback_reason?: string | null;
+}
+
+/**
+ * POST /api/mitra/wisdom/pick/ — Track 0.5 Wisdom Orchestration selector.
+ *
+ * Null-safe: always resolves (never rejects). On backend error, timeout, or
+ * env-flag-off, returns { ok: false, selected_text: "", fallback_reason }.
+ * Caller inspects `output.ok` and falls through to its ContentPack slot on
+ * false. Never renders `fallback_reason` as user-facing copy.
+ */
+export async function mitraPickWisdom(
+  input: WisdomSelectionInput,
+  timeoutMs: number = 1500,
+): Promise<WisdomSelectionOutput> {
+  const controller =
+    typeof AbortController !== "undefined" ? new AbortController() : null;
+  const timer = controller
+    ? setTimeout(() => {
+        try {
+          controller.abort();
+        } catch {
+          // no-op
+        }
+      }, Math.max(0, timeoutMs))
+    : null;
+
+  try {
+    const res = await api.post("mitra/wisdom/pick/", input, {
+      // Also set axios-level timeout as a belt-and-suspenders — if the
+      // AbortController path is unavailable for some reason, the per-request
+      // timeout still caps the wait.
+      timeout: Math.max(0, timeoutMs),
+      signal: controller ? (controller.signal as any) : undefined,
+    });
+    const data = res?.data;
+    if (!data || typeof data !== "object") {
+      return {
+        ok: false,
+        selected_text: "",
+        fallback_reason: "empty_response",
+      };
+    }
+    // Pass through the backend shape verbatim; tolerate missing optional
+    // fields so future additions (e.g., channel_coverage) don't break
+    // existing callers.
+    const out: WisdomSelectionOutput = {
+      ok: Boolean(data.ok),
+      selected_text:
+        typeof data.selected_text === "string" ? data.selected_text : "",
+      asset_kind: data.asset_kind,
+      asset_id: data.asset_id,
+      source_tier: data.source_tier,
+      source_family: data.source_family,
+      char_count:
+        typeof data.char_count === "number"
+          ? data.char_count
+          : typeof data.selected_text === "string"
+            ? data.selected_text.length
+            : 0,
+      wrapper_required: Boolean(data.wrapper_required),
+      wrapper_suggestion: data.wrapper_suggestion ?? null,
+      drill_down_id: data.drill_down_id ?? null,
+      drill_down_available: Boolean(data.drill_down_available),
+      principle_version_id:
+        typeof data.principle_version_id === "number"
+          ? data.principle_version_id
+          : 0,
+      trace: data.trace ?? null,
+      fallback_reason: data.ok
+        ? null
+        : (data.trace && data.trace.fallback_reason) || "selector_not_ok",
+    };
+    return out;
+  } catch (err: any) {
+    const aborted =
+      err?.name === "CanceledError" ||
+      err?.name === "AbortError" ||
+      err?.code === "ERR_CANCELED" ||
+      err?.code === "ECONNABORTED";
+    const reason = aborted
+      ? "selector_timeout"
+      : err?.response?.status === 404
+        ? "selector_not_deployed"
+        : err?.response
+          ? `selector_http_${err.response.status}`
+          : "selector_network_error";
+    console.warn(
+      "[MITRA] wisdom.pick failed (tolerated, ContentPack fallback):",
+      reason,
+      err?.message,
+    );
+    return {
+      ok: false,
+      selected_text: "",
+      fallback_reason: reason,
+    };
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}

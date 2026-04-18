@@ -6462,6 +6462,29 @@ export const SupportLonelinessContainer = {
   },
 };
 
+// Track 1 — first-class Joy + Growth support rooms.
+export const SupportJoyContainer = {
+  container_id: "support_joy",
+  states: {
+    room: {
+      tone: { theme: "warm_cream", mood: "open_steady" },
+      meta: { variant: "joy_room" },
+      blocks: [{ type: "joy_room_body" }],
+    },
+  },
+};
+
+export const SupportGrowthContainer = {
+  container_id: "support_growth",
+  states: {
+    room: {
+      tone: { theme: "warm_cream", mood: "reflective_open" },
+      meta: { variant: "growth_room" },
+      blocks: [{ type: "growth_room_body" }],
+    },
+  },
+};
+
 export const WhyThisOverlayContainer = {
   container_id: "why_this_overlay",
   states: {
@@ -6517,6 +6540,9 @@ export const ContainerRegistry = {
   // Week 7 — support rooms + why-this overlay host
   support_grief: SupportGriefContainer,
   support_loneliness: SupportLonelinessContainer,
+  // Track 1 — Joy + Growth first-class support rooms
+  support_joy: SupportJoyContainer,
+  support_growth: SupportGrowthContainer,
   why_this_overlay: WhyThisOverlayContainer,
   demo_container: {
     container_id: "demo_container",

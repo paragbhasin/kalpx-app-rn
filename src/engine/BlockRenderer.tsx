@@ -136,6 +136,9 @@ import NewDashboardContainer from '../extensions/moments/new_dashboard';
 import GriefRoomContainer from '../extensions/moments/grief_room';
 // Tier 1 — Support: Loneliness Room
 import LonelinessRoomContainer from '../extensions/moments/loneliness_room';
+// Track 1 — Joy Room (M48) + Growth Room (M49)
+import JoyRoomContainer from '../extensions/moments/joy_room';
+import GrowthRoomContainer from '../extensions/moments/growth_room';
 
 const blockMap: Record<string, React.ComponentType<any>> = {
   // Original 11 blocks
@@ -253,6 +256,8 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   // Tier 1 — Support rooms
   grief_room_body: GriefRoomContainer,
   loneliness_room_body: LonelinessRoomContainer,
+  joy_room_body: JoyRoomContainer,
+  growth_room_body: GrowthRoomContainer,
 };
 
 interface BlockRendererProps {

@@ -4919,6 +4919,101 @@ export async function executeAction(
         break;
       }
 
+      // ================================================================
+      // TRACK 1 — Joy room enter/exit. Symmetric to grief/loneliness.
+      // Moment M48. Mirrors flow contract; emotional behavior differs
+      // (lighter timing, no weight_guard max cap).
+      // ================================================================
+      case "enter_joy_room": {
+        setScreenValue(null, "runner_variant");
+        setScreenValue(null, "runner_source");
+        setScreenValue(null, "runner_active_item");
+        setScreenValue(0, "runner_reps_completed");
+        setScreenValue(0, "runner_step_index");
+        setScreenValue(0, "runner_duration_actual_sec");
+        setScreenValue(null, "runner_start_time");
+
+        setScreenValue(true, "joy_session_active");
+        setScreenValue(Date.now(), "joy_session_start");
+
+        loadScreen({
+          container_id: "support_joy",
+          state_id: "room",
+        } as any);
+        mitraTrackEvent("joy_room_entered", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { parent_source: payload?.source },
+        });
+        break;
+      }
+
+      case "exit_joy_room": {
+        setScreenValue(false, "joy_session_active");
+        setScreenValue(null, "joy_session_start");
+        mitraTrackEvent("joy_session_ended", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            duration_sec: (Date.now() - (screenState.joy_session_start || 0)) / 1000,
+            actions_used: payload?.actions_used || [],
+          },
+        });
+        loadScreen({
+          container_id: "companion_dashboard",
+          state_id: "day_active",
+        } as any);
+        break;
+      }
+
+      // ================================================================
+      // TRACK 1 — Growth room enter/exit. Symmetric to grief/loneliness.
+      // Moment M49 + M49_inquiry_seeds. Seeded-inquiry sub-flow lives
+      // inside growth_room/index.tsx as internal state (not a separate
+      // container).
+      // ================================================================
+      case "enter_growth_room": {
+        setScreenValue(null, "runner_variant");
+        setScreenValue(null, "runner_source");
+        setScreenValue(null, "runner_active_item");
+        setScreenValue(0, "runner_reps_completed");
+        setScreenValue(0, "runner_step_index");
+        setScreenValue(0, "runner_duration_actual_sec");
+        setScreenValue(null, "runner_start_time");
+
+        setScreenValue(true, "growth_session_active");
+        setScreenValue(Date.now(), "growth_session_start");
+
+        loadScreen({
+          container_id: "support_growth",
+          state_id: "room",
+        } as any);
+        mitraTrackEvent("growth_room_entered", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { parent_source: payload?.source },
+        });
+        break;
+      }
+
+      case "exit_growth_room": {
+        setScreenValue(false, "growth_session_active");
+        setScreenValue(null, "growth_session_start");
+        mitraTrackEvent("growth_session_ended", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            duration_sec: (Date.now() - (screenState.growth_session_start || 0)) / 1000,
+            actions_used: payload?.actions_used || [],
+          },
+        });
+        loadScreen({
+          container_id: "companion_dashboard",
+          state_id: "day_active",
+        } as any);
+        break;
+      }
+
       // Generic return-to-source: reads runner_source (stamped by
       // start_runner from a support room) and navigates back to that
       // container so mantra completion loops back to the room, not
@@ -4935,6 +5030,9 @@ export async function executeAction(
             container_id: "support_loneliness",
             state_id: "room",
           },
+          // Track 1 — Joy + Growth first-class support rooms.
+          support_joy: { container_id: "support_joy", state_id: "room" },
+          support_growth: { container_id: "support_growth", state_id: "room" },
         };
         const target = map[source as string];
         // Clear runner state BEFORE nav so the room remounts clean.

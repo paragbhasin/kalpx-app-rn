@@ -56,6 +56,13 @@ import QuickSupportBlock from "../blocks/dashboard/QuickSupportBlock";
 import DayTypeChip from "../extensions/moments/day_type_chip";
 import FocusPhraseLine from "../extensions/moments/focus_phrase_line";
 
+// ── Conditional intelligence cards (Phase 5 — show when signal exists) ───
+import PredictiveAlertCard from "../extensions/moments/predictive_alert_card";
+import ClearWindowBanner from "../blocks/ClearWindowBanner";
+import PostConflictMorningCard from "../extensions/moments/post_conflict_morning_card";
+import GratitudeSignalCard from "../extensions/moments/gratitude_signal_card";
+import SeasonSignalCard from "../extensions/moments/season_signal_card";
+
 // ── Voice input ─────────────────────────────────────────────────────────
 import { VoiceTextInput } from "../components/VoiceTextInput";
 
@@ -68,76 +75,13 @@ type Props = {
   schema?: Schema;
 };
 
-// ── Header ──────────────────────────────────────────────────────────────
-const DashboardHeader: React.FC<{ screenData: Record<string, any> }> = ({
-  screenData,
-}) => {
-  const brandLabel: string = screenData.brand_label ?? "KalpX";
-  const langLabel: string = screenData.language_label ?? "";
-  return (
-    <View style={styles.header}>
-      <View style={styles.headerLeft}>
-        <View style={styles.logoDot}>
-          <Ionicons name="flower-outline" size={16} color={Colors.goldBright} />
-        </View>
-        <Text style={styles.brand}>{brandLabel}</Text>
-      </View>
-      <View style={styles.headerRight}>
-        {!!langLabel && (
-          <TouchableOpacity style={styles.langPill} activeOpacity={0.75}>
-            <Ionicons
-              name="globe-outline"
-              size={13}
-              color={Colors.brownMuted}
-            />
-            <Text style={styles.langText}>{langLabel}</Text>
-          </TouchableOpacity>
-        )}
-        <TouchableOpacity
-          style={styles.bellBtn}
-          activeOpacity={0.75}
-          accessibilityLabel="notifications"
-        >
-          <Ionicons
-            name="notifications-outline"
-            size={18}
-            color={Colors.brownDeep}
-          />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-};
-
-// ── SafetyQuietLink ─────────────────────────────────────────────────────
-const SafetyQuietLink: React.FC<{ screenData: Record<string, any> }> = ({
-  screenData,
-}) => {
-  const label: string = screenData.safety_quiet_label ?? "";
-  const { loadScreen, goBack } = useScreenStore();
-  if (!label) return null;
-  return (
-    <TouchableOpacity
-      style={styles.safetyBtn}
-      activeOpacity={0.85}
-      accessibilityRole="button"
-      onPress={() =>
-        executeAction(
-          { type: "open_crisis" },
-          {
-            loadScreen,
-            goBack,
-            setScreenValue: (value: any, key: string) =>
-              store.dispatch(screenActions.setScreenValue({ key, value })),
-            screenState: store.getState().screen.screenData,
-          },
-        ).catch(() => {})
-      }
-    >
-      <Text style={styles.safetyText}>{label}</Text>
-    </TouchableOpacity>
-  );
-};
+// DashboardHeader + SafetyQuietLink removed 2026-04-18:
+//   - App shell already renders KalpX brand + English dropdown at top;
+//     a second in-container header row was redundant.
+//   - Bell moved into GreetingCard (top-right corner) for a tighter
+//     visual hierarchy.
+//   - "I'm not safe right now" quiet link pulled from the dashboard
+//     per founder call. Crisis surface still reachable via other paths.
 
 // ── Main container ─────────────────────────────────────────────────────
 const NewDashboardContainer: React.FC<Props> = () => {
@@ -236,6 +180,21 @@ const NewDashboardContainer: React.FC<Props> = () => {
     ).catch(() => {});
   };
 
+  // Bell tap — routes to the Notifications tab (handled at bottom-nav
+  // level already; here we just toast-style pass-through via navigate).
+  const handleBellPress = () => {
+    executeAction(
+      { type: "navigate", target: { container_id: "notifications", state_id: "default" } },
+      {
+        loadScreen,
+        goBack,
+        setScreenValue: (value: any, key: string) =>
+          store.dispatch(screenActions.setScreenValue({ key, value })),
+        screenState: store.getState().screen.screenData,
+      },
+    ).catch(() => {});
+  };
+
   return (
     <View style={styles.root}>
       <ScrollView
@@ -243,13 +202,10 @@ const NewDashboardContainer: React.FC<Props> = () => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* 1. Header */}
-        <DashboardHeader screenData={sd} />
+        {/* 1. Greeting card with bell in top-right corner */}
+        <GreetingCard screenData={sd} onBellPress={handleBellPress} />
 
-        {/* 2. Greeting card */}
-        <GreetingCard screenData={sd} />
-
-        {/* 3. Chip row — DayType + Path */}
+        {/* 2. Chip row — DayType + Path */}
         <View style={styles.chipRow}>
           <View style={styles.chipWrap}>
             <DayTypeChip screenData={sd} />
@@ -259,30 +215,34 @@ const NewDashboardContainer: React.FC<Props> = () => {
           </View>
         </View>
 
-        {/* 4. Focus phrase line */}
+        {/* 3. Focus phrase line */}
         <FocusPhraseLine screenData={sd} />
 
-        {/* 5. Triad + why_this_l1 strip */}
+        {/* 4. Triad + why_this_l1 strip */}
         <TriadCardsRow />
         <WhyThisL1Strip screenData={sd} />
 
-        {/* 6. Cycle progress (collapsible, default closed) */}
+        {/* 5. Cycle progress (collapsible, default closed) */}
         <CycleProgressBlock screenData={sd} />
 
-        {/* 7. Sankalp carry (conditional on practice_embody) */}
+        {/* 6. Sankalp carry (conditional on practice_embody) */}
         <SankalpCarryBlock screenData={sd} />
 
-        {/* 8. Insights slot — reserved for Phase 4 conditional cards. */}
-        <View style={styles.insightsSlot} />
+        {/* 7. Intelligence cards — each self-hides when its backend
+             signal is missing (sovereignty respected at the block).
+             Display priority: banners first (PostConflict / ClearWindow),
+             then cards (Predictive / Gratitude / Season). */}
+        {!!sd.post_conflict && <PostConflictMorningCard screenData={sd} />}
+        {!!sd.clear_window_active && <ClearWindowBanner />}
+        {!!sd.predictive_alert && <PredictiveAlertCard screenData={sd} />}
+        {!!sd.gratitude_card && <GratitudeSignalCard screenData={sd} />}
+        {!!sd.season_card && <SeasonSignalCard screenData={sd} />}
 
-        {/* 9. Quick support block (+ More support sheet) */}
+        {/* 8. Quick support block (+ More support sheet) */}
         <QuickSupportBlock screenData={sd} />
-
-        {/* 10. Safety quiet link */}
-        <SafetyQuietLink screenData={sd} />
       </ScrollView>
 
-      {/* 11. Floating voice input bar */}
+      {/* 9. Floating voice input bar */}
       <View style={styles.voiceBar}>
         <VoiceTextInput
           placeholder={sd.voice_placeholder ?? ""}

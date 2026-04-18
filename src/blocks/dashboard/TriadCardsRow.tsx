@@ -33,9 +33,10 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useSelector } from "react-redux";
 import { executeAction } from "../../engine/actionExecutor";
 import { useScreenStore } from "../../engine/useScreenBridge";
-import store from "../../store";
+import store, { RootState } from "../../store";
 import { screenActions } from "../../store/screenSlice";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
@@ -55,6 +56,22 @@ interface TriadCard {
 const TriadCardsRow: React.FC = () => {
   const { screenData, loadScreen, goBack } = useScreenStore();
   const sd = (screenData ?? {}) as Record<string, any>;
+
+  // Subscribe to the completion flags directly via Redux selectors.
+  // Without this the card doesn't always re-render when the runner
+  // completes (useScreenStore returns an object snapshot that the
+  // component was memoizing). Reading these booleans through
+  // useSelector guarantees the ✓ indicator flips the instant the
+  // runner dispatches setScreenValue on practice_chant/embody/act.
+  const practiceChant = useSelector(
+    (state: RootState) => !!(state as any).screen?.screenData?.practice_chant,
+  );
+  const practiceEmbody = useSelector(
+    (state: RootState) => !!(state as any).screen?.screenData?.practice_embody,
+  );
+  const practiceAct = useSelector(
+    (state: RootState) => !!(state as any).screen?.screenData?.practice_act,
+  );
 
   // Cross-session ✓ hydration — reads completed_today[] and flips flags.
   useEffect(() => {
@@ -95,7 +112,7 @@ const TriadCardsRow: React.FC = () => {
       labelFallback: "MANTRA",
       title: sd.card_mantra_title ?? "",
       sub: sd.card_mantra_description ?? "",
-      done: !!sd.practice_chant,
+      done: practiceChant,
       iconName: "musical-notes-outline",
     },
     {
@@ -104,7 +121,7 @@ const TriadCardsRow: React.FC = () => {
       labelFallback: "SANKALP",
       title: sd.card_sankalpa_title ?? "",
       sub: sd.card_sankalpa_description ?? "",
-      done: !!sd.practice_embody,
+      done: practiceEmbody,
       iconName: "leaf-outline",
     },
     {
@@ -113,7 +130,7 @@ const TriadCardsRow: React.FC = () => {
       labelFallback: "PRACTICE",
       title: sd.card_ritual_title ?? "",
       sub: sd.card_ritual_description ?? "",
-      done: !!sd.practice_act,
+      done: practiceAct,
       iconName: "flower-outline",
     },
   ];

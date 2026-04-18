@@ -129,14 +129,14 @@ const DailyRhythmStrip: React.FC<Props> = ({ screenData }) => {
   );
 };
 
-const DOT_SIZE = 14;
+const DOT_SIZE = 11;
 
 const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",
-    flexWrap: "wrap",
-    gap: 6,
+    justifyContent: "space-between",
+    flexWrap: "nowrap",
     paddingVertical: 8,
   },
   dot: {
@@ -144,19 +144,18 @@ const styles = StyleSheet.create({
     height: DOT_SIZE,
     borderRadius: DOT_SIZE / 2,
     borderWidth: 1,
-    marginRight: 4,
     alignItems: "center",
     justifyContent: "center",
   },
   dotCheckpoint: {
-    width: DOT_SIZE + 8,
-    height: DOT_SIZE + 8,
-    borderRadius: (DOT_SIZE + 8) / 2,
+    width: DOT_SIZE + 6,
+    height: DOT_SIZE + 6,
+    borderRadius: (DOT_SIZE + 6) / 2,
     borderWidth: 1.5,
   },
   dotNum: {
     fontFamily: Fonts.sans.medium,
-    fontSize: 9,
+    fontSize: 8,
     color: Colors.brownDeep,
   },
 });

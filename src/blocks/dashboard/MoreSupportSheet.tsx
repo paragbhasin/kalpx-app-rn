@@ -37,7 +37,7 @@ type Props = {
 };
 
 type Row = {
-  key: "grief" | "loneliness" | "crisis";
+  key: "grief" | "loneliness";
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
   target: { container_id: string; state_id: string };
@@ -56,24 +56,24 @@ const MoreSupportSheet: React.FC<Props> = ({
 
   const { loadScreen } = useScreenStore();
 
+  // Container keys match ScreenRenderer.tsx registration:
+  //   support_grief → GriefRoomContainer
+  //   support_loneliness → LonelinessRoomContainer
+  //   crisis_room → CrisisRoomContainer
+  // "I'm not safe right now" crisis row REMOVED 2026-04-18 per founder
+  // call (keeping the room but pulling the quiet link from the sheet).
   const rows: Row[] = [
     {
       key: "grief",
       label: labels.grief_label || "Grief Room",
       icon: "water-outline",
-      target: { container_id: "support_rooms", state_id: "grief_room" },
+      target: { container_id: "support_grief", state_id: "grief_room" },
     },
     {
       key: "loneliness",
       label: labels.loneliness_label || "Loneliness Room",
       icon: "people-outline",
-      target: { container_id: "support_rooms", state_id: "loneliness_room" },
-    },
-    {
-      key: "crisis",
-      label: labels.crisis_label || "I'm not safe right now",
-      icon: "shield-outline",
-      target: { container_id: "crisis_room", state_id: "crisis_entry" },
+      target: { container_id: "support_loneliness", state_id: "loneliness_room" },
     },
   ];
 

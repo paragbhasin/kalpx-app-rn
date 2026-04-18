@@ -3,28 +3,18 @@
 > Living list. Add items as they surface, remove when shipped. Reviewed at the
 > top of every new session.
 >
-> Last updated: **2026-04-18** (end of Phase 5).
+> Last updated: **2026-04-18** (end of Phase 5, post-audio-fix).
 
-## 🔴 P0 — bug open from this session
+## ✅ Resolved this session
 
-### 1. Core mantra auto-play not firing
-**What:** Added `useEffect` in `src/containers/PracticeRunnerContainer.tsx` (after the `isTriggerOmChantScreen` block at line ~1083) that's supposed to auto-load + loop the core mantra audio when `isMantraRunner && !isTriggerOmChantScreen && mantraAudioUrl`. User confirmed audio not playing on the runner screen after commit `5967942`.
+### Core mantra auto-play — FIXED at `7f5b7ec`
+The bug lived in two places, not one:
+1. Real render path for the mala counter is `cycle_transitions/offering_reveal` (inline in `CycleTransitionsContainer.tsx:806+`) — NOT `practice_runner/mantra_runner` as originally assumed. The earlier `PracticeRunnerContainer` useEffect never mounted for this flow.
+2. `AudioPlayerBlock` on the info-screen render (container line 937) was over-gated on `info.source === "core" || "additional"` — `view_info` doesn't reliably set a source tag, so the player was hidden even with a valid `audio_url`.
+3. Gate loosened (3-way fallback: `info.audio_url` → `screenData.mantra_audio_url` → `master_mantra.audio_url`) → player visible.
+4. Double-playback (2-3 concurrent loops) caused by `AudioPlayerBlock`'s unmount cleanup firing `unloadAsync()` without awaiting → fixed at `6edfd97` by serializing stop+unload before creating the next sound.
 
-**State:** Diagnostic logs pushed at `be1f160` — gate conditions are logged on every effect run:
-```
-[CORE_MANTRA_AUDIO] effect check — isMantraRunner: X isTriggerOm: Y mantraAudioUrl: Z currentVariant: V currentStateId: S
-```
-
-**Next session:**
-1. Reload sim with current code
-2. Navigate MANTRA triad card → info → Begin Chanting → mantra_runner
-3. Capture the log line
-4. One of three gate conditions will be false → that's the actual bug:
-   - `isMantraRunner=false` → the runner screen variant doesn't match "mantra_runner" (schema config issue)
-   - `isTriggerOm=true` → something routed core-triad-tap into the trigger flow
-   - `mantraAudioUrl=""` → neither `runner_active_item.audio_url` nor `master_mantra.audio_url` populated (view_info chain break)
-
-**DB side confirmed healthy:** `mantra.peace_calm.om_namah_shivaya` has a valid audio_url pointing at `mantra.health_panchakshara.mp4` (Panchakshara = Om Namah Shivaya = 5-syllable mantra; file is correct).
+Diagnostic logs removed at `7f5b7ec`.
 
 ---
 

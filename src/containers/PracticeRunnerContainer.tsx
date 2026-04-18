@@ -1082,6 +1082,44 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isTriggerOmChantScreen, mantraAudioUrl]); // Removed mediaMuted to avoid restart on mute toggle
 
+  // Core mantra runner — auto-load + loop the core mantra audio on mount.
+  // Restores the legacy "Begin Chanting → audio auto-plays" behavior for
+  // the mantra_runner state (distinct from the trigger OM flow, which has
+  // its own startTriggerAudioSequence above). Gated on !trigger so the
+  // two effects never fire together for the same mantra ref.
+  useEffect(() => {
+    if (!isMantraRunner || isTriggerOmChantScreen || !mantraAudioUrl) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        await stopTriggerAudio();
+        if (cancelled) return;
+        const source = resolveAudioSource(mantraAudioUrl);
+        const { sound } = await Audio.Sound.createAsync(source, {
+          shouldPlay: true,
+          isLooping: true,
+          isMuted: mediaMuted,
+          volume: mediaMuted ? 0 : 1,
+        });
+        if (cancelled) {
+          await sound.unloadAsync().catch(() => {});
+          return;
+        }
+        mantraLoopAudioRef.current = sound;
+      } catch (err) {
+        console.warn(
+          "[CORE_MANTRA_AUDIO] auto-play failed:",
+          (err as any)?.message,
+        );
+      }
+    })();
+    return () => {
+      cancelled = true;
+      stopTriggerAudio().catch(() => {});
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMantraRunner, isTriggerOmChantScreen, mantraAudioUrl]);
+
   const mantraCompletionState = useMemo(() => {
     const durationSeconds =
       Math.round(Number(screenState.chant_duration)) ||

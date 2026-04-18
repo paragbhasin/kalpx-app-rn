@@ -17,6 +17,50 @@
  *     deprecated in favor of this.
  */
 
+// Legacy palette — preserved for ~10 pre-Phase-3 consumers that do
+// `import colors from "../theme/colors"` (default import). When
+// src/theme/colors.jsx and src/theme/colors.ts both exist, Metro
+// resolves the .ts file first — which previously had no default
+// export, causing `colors.card` to read as undefined at module load
+// and crashing the app on boot. The legacy `colors` object below is
+// the full contents of the retired colors.jsx, restored here as the
+// default export. Both `import { Colors }` (new) and
+// `import colors` (legacy) now work from the same file.
+const legacyColors = {
+  pageBg: "#fff",
+  bg: "#FFF8EF",
+  card: "#F7E8D6",
+  border: "#FAD38C",
+  text: "#2D1F14",
+  subtext: "#6B5B4A",
+  primary: "#9C6B3D",
+  primaryDark: "#7E5330",
+  accent: "#E6B05B",
+  chipBg: "#FFF7E8",
+  chipBorder: "#F3D6A6",
+  success: "#2E7D32",
+  labelfontsize: "font-size: 16px, font-weight: 600, color: #333;",
+  title: {
+    fontFamily: "GelicaBold",
+    fontSize: 24,
+    color: "#000",
+  },
+  subtitle: {
+    fontFamily: "GelicaMedium",
+    fontSize: 18,
+  },
+  body: {
+    fontFamily: "GelicaRegular",
+    fontSize: 16,
+  },
+  light: {
+    fontFamily: "GelicaLight",
+    fontSize: 14,
+  },
+};
+
+export default legacyColors;
+
 export const Colors = {
   // Primary gold accents
   gold: "#C9A84C",

@@ -6,7 +6,8 @@
     "production": {
       "environment": "production",
       "env": {
-        "EXPO_UPDATES_DISABLED": "1"
+        "EXPO_UPDATES_DISABLED": "1",
+        "EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD": "0"
       },
       "android": {
         "buildType": "app-bundle"

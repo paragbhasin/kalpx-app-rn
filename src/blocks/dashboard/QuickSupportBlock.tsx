@@ -40,9 +40,12 @@ type Props = {
 const QuickSupportBlock: React.FC<Props> = ({ screenData }) => {
   const sd = screenData ?? {};
   const labels = (sd.quick_support_labels ?? {}) as Record<string, string>;
-  const triggeredLabel: string = labels.triggered_label ?? "";
-  const checkinLabel: string = labels.checkin_label ?? "";
-  const moreLabel: string = labels.more_label ?? "";
+  // Always-visible core block — support must always be reachable. CTAs
+  // are factual UI labels (not emotional prose), so structural English
+  // fallbacks are acceptable per the sovereignty contract.
+  const triggeredLabel: string = labels.triggered_label || "I Feel Triggered";
+  const checkinLabel: string = labels.checkin_label || "Quick Check-in";
+  const moreLabel: string = labels.more_label || "More support";
 
   const [sheetVisible, setSheetVisible] = useState(false);
   const { loadScreen, goBack } = useScreenStore();
@@ -60,57 +63,48 @@ const QuickSupportBlock: React.FC<Props> = ({ screenData }) => {
     ).catch(() => {});
   };
 
-  // If backend has not seeded ANY labels, render nothing (no English fallback).
-  if (!triggeredLabel && !checkinLabel && !moreLabel) return null;
-
   return (
     <View style={styles.wrap} accessibilityLabel="quick_support_block">
-      {!!triggeredLabel && (
-        <TouchableOpacity
-          style={styles.primary}
-          activeOpacity={0.88}
-          onPress={() => dispatchAction("initiate_trigger")}
-        >
-          <Ionicons
-            name="alert-circle-outline"
-            size={16}
-            color={Colors.brownDeep}
-            style={styles.primaryIcon}
-          />
-          <Text style={styles.primaryText}>{triggeredLabel}</Text>
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity
+        style={styles.primary}
+        activeOpacity={0.88}
+        onPress={() => dispatchAction("initiate_trigger")}
+      >
+        <Ionicons
+          name="alert-circle-outline"
+          size={16}
+          color={Colors.brownDeep}
+          style={styles.primaryIcon}
+        />
+        <Text style={styles.primaryText}>{triggeredLabel}</Text>
+      </TouchableOpacity>
 
-      {!!checkinLabel && (
-        <TouchableOpacity
-          style={[styles.primary, styles.primaryBordered]}
-          activeOpacity={0.88}
-          onPress={() => dispatchAction("open_check_in")}
-        >
-          <Ionicons
-            name="checkmark-circle-outline"
-            size={16}
-            color={Colors.brownDeep}
-            style={styles.primaryIcon}
-          />
-          <Text style={styles.primaryText}>{checkinLabel}</Text>
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity
+        style={[styles.primary, styles.primaryBordered]}
+        activeOpacity={0.88}
+        onPress={() => dispatchAction("open_check_in")}
+      >
+        <Ionicons
+          name="checkmark-circle-outline"
+          size={16}
+          color={Colors.brownDeep}
+          style={styles.primaryIcon}
+        />
+        <Text style={styles.primaryText}>{checkinLabel}</Text>
+      </TouchableOpacity>
 
-      {!!moreLabel && (
-        <TouchableOpacity
-          style={styles.more}
-          activeOpacity={0.7}
-          onPress={() => setSheetVisible(true)}
-        >
-          <Text style={styles.moreText}>{moreLabel}</Text>
-          <Ionicons
-            name="chevron-forward"
-            size={14}
-            color={Colors.brownMuted}
-          />
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity
+        style={styles.more}
+        activeOpacity={0.7}
+        onPress={() => setSheetVisible(true)}
+      >
+        <Text style={styles.moreText}>{moreLabel}</Text>
+        <Ionicons
+          name="chevron-forward"
+          size={14}
+          color={Colors.brownMuted}
+        />
+      </TouchableOpacity>
 
       <MoreSupportSheet
         visible={sheetVisible}

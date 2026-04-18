@@ -15,10 +15,12 @@ const FocusPhraseLine: React.FC<Props> = ({ block, screenData }) => {
     block?.value ??
     screenData?.focus_phrase ??
     null;
-  if (!value) return null;
+  // Always-visible. Structural fallback keeps the italic gold line
+  // present even before backend authors today's phrase.
+  const display = value ? String(value) : "One gentle step is enough.";
   return (
     <View style={styles.pill} accessibilityLabel="focus_phrase_line">
-      <Text style={styles.text}>{String(value)}</Text>
+      <Text style={styles.text}>{display}</Text>
     </View>
   );
 };

@@ -11,14 +11,17 @@ type Props = {
 };
 
 const DayTypeChip: React.FC<Props> = ({ block, screenData }) => {
-  const value =
+  const raw =
     block?.value ??
     screenData?.day_type ??
+    screenData?.dayType ??
     null;
-  if (!value) return null;
+  // Always-visible block — fall back to "Today" so the chip row
+  // anchors the dashboard even before backend classification arrives.
+  const label = raw ? String(raw).replace(/_/g, " ") : "Today";
   return (
     <View style={styles.pill} accessibilityLabel="day_type_chip">
-      <Text style={styles.text}>{String(value)}</Text>
+      <Text style={styles.text}>{label}</Text>
     </View>
   );
 };

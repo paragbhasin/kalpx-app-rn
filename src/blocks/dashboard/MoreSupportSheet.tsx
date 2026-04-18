@@ -50,26 +50,28 @@ const MoreSupportSheet: React.FC<Props> = ({
 }) => {
   const sd = screenData ?? {};
   const labels = (sd.support_rooms_labels ?? {}) as Record<string, string>;
-  const headerLabel: string = labels.header_label ?? "";
+  // Always-populated structural labels — these are functional deep-link
+  // labels, not emotional prose.
+  const headerLabel: string = labels.header_label || "I'm here if you need more.";
 
   const { loadScreen } = useScreenStore();
 
   const rows: Row[] = [
     {
       key: "grief",
-      label: labels.grief_label ?? "",
+      label: labels.grief_label || "Grief Room",
       icon: "water-outline",
       target: { container_id: "support_rooms", state_id: "grief_room" },
     },
     {
       key: "loneliness",
-      label: labels.loneliness_label ?? "",
+      label: labels.loneliness_label || "Loneliness Room",
       icon: "people-outline",
       target: { container_id: "support_rooms", state_id: "loneliness_room" },
     },
     {
       key: "crisis",
-      label: labels.crisis_label ?? "",
+      label: labels.crisis_label || "I'm not safe right now",
       icon: "shield-outline",
       target: { container_id: "crisis_room", state_id: "crisis_entry" },
     },

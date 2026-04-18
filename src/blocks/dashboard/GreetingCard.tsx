@@ -3,14 +3,16 @@
  *
  * Spec: docs/NEW_DASHBOARD_V1_SPEC.md §2 #1
  *
- * Sovereignty: all user-facing strings come from screenData
- * (greeting_context, user_name, greeting_tone). NO English fallbacks.
- * When the slot is absent the card renders nothing.
+ * Always-visible core block (per founder dashboard contract): the
+ * greeting card is part of the stable dashboard skeleton and must
+ * render every time. Emotional copy (greeting_context, tone) comes
+ * from backend ContentPacks; when a slot is empty we fall back to a
+ * neutral structural greeting rather than hiding the card, so the
+ * dashboard keeps its visual presence even on cold hydration.
  *
  * Visual: gold left-border card on cream background; serif headline
  * with subtitle; right-side Om mandala placeholder uses the existing
- * mantra-lotus-3d SVG (visually doubles as an Om mandala until a
- * dedicated asset ships).
+ * mantra-lotus-3d SVG.
  */
 
 import React from "react";
@@ -29,15 +31,18 @@ const GreetingCard: React.FC<Props> = ({ screenData }) => {
   const userName: string = sd.user_name ?? "";
   const tone: string = sd.greeting_tone ?? "";
 
-  // Sovereignty rule: if backend has not seeded a greeting, render nothing.
-  if (!context && !userName && !tone) return null;
+  // Always-visible block. When backend copy is missing, fall back to
+  // a neutral structural greeting using the user name so the card
+  // still anchors the dashboard top.
+  const displayName = userName || "friend";
+  const displayContext = context || "You're here. Begin wherever feels right.";
 
   return (
     <View style={styles.card} accessibilityLabel="greeting_card">
       <View style={styles.leftAccent} />
       <View style={styles.body}>
-        {!!userName && <Text style={styles.name}>{userName}</Text>}
-        {!!context && <Text style={styles.context}>{context}</Text>}
+        <Text style={styles.name}>Welcome, {displayName}.</Text>
+        <Text style={styles.context}>{displayContext}</Text>
         {!!tone && <Text style={styles.tone}>{tone}</Text>}
       </View>
       <View style={styles.mandalaWrap} accessibilityElementsHidden>

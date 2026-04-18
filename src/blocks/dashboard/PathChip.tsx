@@ -39,9 +39,15 @@ const iconForPath = (path: JourneyPath): keyof typeof Ionicons.glyphMap => {
 const PathChip: React.FC<Props> = ({ screenData }) => {
   const sd = screenData ?? {};
   const path: JourneyPath | null = sd.journey_path ?? null;
-  const label: string = sd.journey_path_label ?? (path ? String(path) : "");
-
-  if (!path && !label) return null;
+  // Always-visible block. When backend hasn't supplied a label yet,
+  // use a neutral structural default ("Your Path") so the chip row
+  // is stable. Specific copy swaps in once the journey classifies.
+  const label: string =
+    sd.journey_path_label ||
+    (path === "support" ? "Support Path" :
+     path === "growth" ? "Growth Path" :
+     path === "return" ? "Re-entry" :
+     "Your Path");
 
   return (
     <View style={styles.pill} accessibilityLabel="path_chip">

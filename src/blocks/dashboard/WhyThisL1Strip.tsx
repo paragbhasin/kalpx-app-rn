@@ -36,12 +36,26 @@ type Props = {
 
 const WhyThisL1Strip: React.FC<Props> = ({ screenData, onItemPress }) => {
   const sd = screenData ?? {};
-  const raw = sd.why_this_l1_items;
-  const items: WhyThisL1Item[] = Array.isArray(raw)
-    ? raw.filter(
+  const rawArr = sd.why_this_l1_items;
+  let items: WhyThisL1Item[] = Array.isArray(rawArr)
+    ? rawArr.filter(
         (w: any) => w && typeof w.label === "string" && w.label.length > 0,
       )
     : [];
+  // Fallback: derive from generate_companion's why_this.level1 object shape
+  // (per-item one-liners keyed by item_type). Keeps the strip populated
+  // without requiring every backend endpoint to re-shape its response.
+  if (items.length === 0) {
+    const lvl1 = (sd.why_this && sd.why_this.level1) || null;
+    if (lvl1 && typeof lvl1 === "object") {
+      for (const type of ["mantra", "sankalp", "practice"] as const) {
+        const label = lvl1[type];
+        if (typeof label === "string" && label.length > 0) {
+          items.push({ id: type, label });
+        }
+      }
+    }
+  }
   if (items.length === 0) return null;
 
   return (

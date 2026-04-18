@@ -55,13 +55,13 @@ type Props = {
 
 const CycleProgressBlock: React.FC<Props> = ({ screenData }) => {
   const sd = screenData ?? {};
-  const metrics = sd.cycle_metrics ?? null;
+  const metrics = sd.cycle_metrics ?? {};
 
   // Hooks must be called unconditionally.
   const [expanded, setExpanded] = useState(false);
 
-  if (!metrics) return null;
-
+  // Always-visible block. Falls back to day_number / total_days when
+  // cycle_metrics hasn't loaded yet; numeric metrics default to 0.
   const daysEngaged: number =
     typeof metrics.days_engaged === "number" ? metrics.days_engaged : 0;
   const daysComplete: number =
@@ -73,7 +73,10 @@ const CycleProgressBlock: React.FC<Props> = ({ screenData }) => {
       ? metrics.trigger_sessions
       : 0;
 
-  const summaryLabel: string = metrics.summary_label ?? "";
+  const fallbackDay = Number(sd.day_number) || Number(sd.cycle_day) || 1;
+  const fallbackTotal = Number(sd.total_days) || 14;
+  const summaryLabel: string =
+    metrics.summary_label || `Day ${fallbackDay} of ${fallbackTotal}`;
 
   const toggle = () => {
     LayoutAnimation.configureNext(
@@ -90,9 +93,7 @@ const CycleProgressBlock: React.FC<Props> = ({ screenData }) => {
         style={styles.header}
       >
         <View style={{ flex: 1 }}>
-          {!!summaryLabel && (
-            <Text style={styles.summary}>{summaryLabel}</Text>
-          )}
+          <Text style={styles.summary}>{summaryLabel}</Text>
         </View>
         <Ionicons
           name={expanded ? "chevron-up" : "chevron-down"}
@@ -106,22 +107,20 @@ const CycleProgressBlock: React.FC<Props> = ({ screenData }) => {
           <View style={styles.metricsRow}>
             <Metric
               value={daysEngaged}
-              label={metrics.days_engaged_label ?? ""}
+              label={metrics.days_engaged_label || "Days engaged"}
             />
             <Metric
               value={daysComplete}
-              label={metrics.days_complete_label ?? ""}
+              label={metrics.days_complete_label || "Fully completed"}
             />
             <Metric
               value={triggerSessions}
-              label={metrics.trigger_sessions_label ?? ""}
+              label={metrics.trigger_sessions_label || "Trigger sessions"}
             />
           </View>
-          {!!metrics.rhythm_header_label && (
-            <Text style={styles.rhythmHeader}>
-              {metrics.rhythm_header_label}
-            </Text>
-          )}
+          <Text style={styles.rhythmHeader}>
+            {metrics.rhythm_header_label || "Daily rhythm"}
+          </Text>
           <DailyRhythmStrip screenData={sd} />
         </View>
       )}

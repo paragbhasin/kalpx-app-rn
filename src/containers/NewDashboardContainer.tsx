@@ -201,6 +201,11 @@ const NewDashboardContainer: React.FC<Props> = () => {
           "focusName",
           "pathMilestone",
           "continuity",
+          "why_this",
+          "why_this_l1_items",
+          "sankalp_how_to_live",
+          "focus_phrase",
+          "day_type",
         ];
         for (const k of keys) {
           const v = (res as any)[k];

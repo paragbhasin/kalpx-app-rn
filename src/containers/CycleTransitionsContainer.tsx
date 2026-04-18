@@ -934,24 +934,45 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                 })}
               </View>
 
-              {/* Audio Player if URL exists */}
-              {info?.audio_url &&
-              (info.source === "core" || info.source === "additional") ? (
-                <View
-                  style={{
-                    width: "100%",
-                    marginBottom: 30,
-                    paddingHorizontal: 10,
-                  }}
-                >
-                  <AudioPlayerBlock
-                    block={{
-                      audio_url: info.audio_url,
-                      label: info.title || "Mantra Audio",
+              {/* Audio Player — show whenever an audio URL is present
+                  regardless of source. Earlier gate required source ∈
+                  {"core","additional"} but view_info doesn't always set
+                  a source tag (e.g. when masterData path runs without
+                  the manualData branch). Falling back to master_mantra
+                  URL keeps the player visible on the core mantra
+                  runner even if runner_active_item.audio_url is empty. */}
+              {(() => {
+                const audioUrl =
+                  info?.audio_url ||
+                  screenData?.mantra_audio_url ||
+                  screenData?.master_mantra?.audio_url ||
+                  "";
+                console.log(
+                  "[CORE_MANTRA_AUDIO] cycle_transitions gate —",
+                  "audioUrl:", audioUrl,
+                  "info.audio_url:", info?.audio_url,
+                  "info.source:", info?.source,
+                  "info.item_type:", info?.item_type,
+                  "master_mantra.audio_url:", screenData?.master_mantra?.audio_url,
+                );
+                if (!audioUrl) return null;
+                return (
+                  <View
+                    style={{
+                      width: "100%",
+                      marginBottom: 30,
+                      paddingHorizontal: 10,
                     }}
-                  />
-                </View>
-              ) : null}
+                  >
+                    <AudioPlayerBlock
+                      block={{
+                        audio_url: audioUrl,
+                        label: info?.title || "Mantra Audio",
+                      }}
+                    />
+                  </View>
+                );
+              })()}
 
               {/* Consolidated Meaning/Essence Section */}
               <View style={styles.collapsibleSectionsCombined}>

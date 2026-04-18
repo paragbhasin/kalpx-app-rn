@@ -179,12 +179,8 @@ const MantraRunnerDisplay: React.FC<MantraRunnerDisplayProps> = ({ block }) => {
       </View>
 
       {audioUrl ? (
-        // 2026-04-18 — unhid the player so the user gets the
-        // legacy mantra-runner controls back (play/pause + mute +
-        // progress slider). AudioPlayerBlock auto-plays after 2s on
-        // its own, so external auto-load is not needed.
-        <View style={styles.audioPlayerWrap}>
-          <AudioPlayerBlock block={{ audio_url: audioUrl } as any} />
+        <View style={styles.hiddenAudio} pointerEvents="none">
+          <AudioPlayerBlock block={{ audio_url: audioUrl, autoplay: true, loop: true } as any} />
         </View>
       ) : null}
     </Pressable>
@@ -224,12 +220,11 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
     marginTop: 28,
   },
-  audioPlayerWrap: {
+  hiddenAudio: {
     position: 'absolute',
-    bottom: 24,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 24,
+    width: 0,
+    height: 0,
+    opacity: 0,
   },
   mantraInfo: {
     position: 'absolute',

@@ -65,6 +65,8 @@ import ClearWindowBanner from "../blocks/ClearWindowBanner";
 import PostConflictMorningCard from "../extensions/moments/post_conflict_morning_card";
 import GratitudeSignalCard from "../extensions/moments/gratitude_signal_card";
 import SeasonSignalCard from "../extensions/moments/season_signal_card";
+import ResilienceNarrativeCard from "../blocks/dashboard/insights/ResilienceNarrativeCard";
+import EntityRecognitionCard from "../blocks/dashboard/insights/EntityRecognitionCard";
 
 // ── Voice input ─────────────────────────────────────────────────────────
 import { VoiceTextInput } from "../components/VoiceTextInput";
@@ -224,14 +226,56 @@ const NewDashboardContainer: React.FC<Props> = () => {
         <SankalpCarryBlock screenData={sd} />
 
         {/* 7. Intelligence cards — each self-hides when its backend
-             signal is missing (sovereignty respected at the block).
-             Display priority: banners first (PostConflict / ClearWindow),
-             then cards (Predictive / Gratitude / Season). */}
-        {!!sd.post_conflict && <PostConflictMorningCard screenData={sd} />}
-        {!!sd.clear_window_active && <ClearWindowBanner />}
-        {!!sd.predictive_alert && <PredictiveAlertCard screenData={sd} />}
-        {!!sd.gratitude_card && <GratitudeSignalCard screenData={sd} />}
-        {!!sd.season_card && <SeasonSignalCard screenData={sd} />}
+             signal is missing. Founder priority ranking (2026-04-18):
+               1. checkpoint / re-entry / critical banner
+               2. resilience narrative (M26)
+               3. predictive alert (M28)
+               4. entity recognition (M29)
+               5. gratitude / joy (M44)
+               6. season signal (M45)
+               7. recommended additional (M30 — not yet shipped)
+             Dashboard rendering rule: max 1 banner + max 2 insight
+             cards above fold. We render banners unconditionally (they
+             self-hide on no signal) and cap the stacked insight cards
+             at 2 via renderInsightCards() below. */}
+        {(() => {
+          // Banners (max 1 — PostConflict wins if both signal).
+          const banner = sd.post_conflict ? (
+            <PostConflictMorningCard screenData={sd} />
+          ) : sd.clear_window_active ? (
+            <ClearWindowBanner />
+          ) : null;
+
+          // Insight cards in priority order (max 2 shown).
+          const candidates: React.ReactNode[] = [];
+          if (sd.resilience_narrative) {
+            candidates.push(
+              <ResilienceNarrativeCard key="rn" screenData={sd} />,
+            );
+          }
+          if (sd.predictive_alert) {
+            candidates.push(<PredictiveAlertCard key="pa" screenData={sd} />);
+          }
+          if (sd.entity_card) {
+            candidates.push(
+              <EntityRecognitionCard key="er" screenData={sd} />,
+            );
+          }
+          if (sd.gratitude_card) {
+            candidates.push(<GratitudeSignalCard key="gj" screenData={sd} />);
+          }
+          if (sd.season_card) {
+            candidates.push(<SeasonSignalCard key="ss" screenData={sd} />);
+          }
+          const insights = candidates.slice(0, 2);
+
+          return (
+            <>
+              {banner}
+              {insights}
+            </>
+          );
+        })()}
 
         {/* 8. Quick support block (+ More support sheet) */}
         <QuickSupportBlock screenData={sd} />

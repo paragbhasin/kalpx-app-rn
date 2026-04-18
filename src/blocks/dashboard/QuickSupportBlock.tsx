@@ -5,9 +5,14 @@
  * Spec: docs/NEW_DASHBOARD_V1_SPEC.md §2 #10.
  *
  * Primary actions:
- *   - `initiate_trigger` — (legacy alias: `open_trigger`)
- *   - `open_check_in`    — (legacy alias: `start_checkin`)
- * Both are handled in src/engine/actionExecutor.ts (T3B-4).
+ *   - `initiate_trigger` — opens trigger-reset flow (mantra / reset suggest).
+ *   - `start_checkin`    — opens the single-screen dashboard quick check-in
+ *                          at `cycle_transitions/quick_checkin` (matches the
+ *                          legacy CompanionDashboardContainer flow).
+ *                          Do NOT dispatch `open_check_in` here —
+ *                          that routes to the separate 3-step support
+ *                          check-in (notice → name → settle) which is a
+ *                          different surface.
  *
  * Labels come from screenData.quick_support_labels:
  *   { triggered_label, checkin_label, more_label }
@@ -82,7 +87,7 @@ const QuickSupportBlock: React.FC<Props> = ({ screenData }) => {
       <TouchableOpacity
         style={[styles.primary, styles.primaryBordered]}
         activeOpacity={0.88}
-        onPress={() => dispatchAction("open_check_in")}
+        onPress={() => dispatchAction("start_checkin")}
       >
         <Ionicons
           name="checkmark-circle-outline"

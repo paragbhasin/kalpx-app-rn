@@ -176,16 +176,36 @@ const NewDashboardContainer: React.FC<Props> = () => {
       );
     });
 
-    // 2) /journey/companion/ → populate cycle_metrics on screenData.
+    // 2) /journey/companion/ → populate cycle_metrics + new dashboard
+    //    screenData slots (greeting_context, journey_path, support labels,
+    //    etc.) that each block reads and self-hides on when missing.
     (async () => {
       try {
         const res = await mitraJourneyCompanion();
-        if (res && typeof res === "object") {
-          if (res.cycle_metrics) {
-            updateScreenData("cycle_metrics", res.cycle_metrics);
-          }
-          if (Array.isArray(res.completed_today)) {
-            updateScreenData("completed_today", res.completed_today);
+        if (!res || typeof res !== "object") return;
+        const keys = [
+          "cycle_metrics",
+          "completed_today",
+          "greeting_context",
+          "user_name",
+          "journey_path",
+          "journey_path_label",
+          "quick_support_labels",
+          "support_rooms_labels",
+          "brand_label",
+          "language_label",
+          "safety_quiet_label",
+          "voice_placeholder",
+          "dayType",
+          "dayTypeCopy",
+          "focusName",
+          "pathMilestone",
+          "continuity",
+        ];
+        for (const k of keys) {
+          const v = (res as any)[k];
+          if (v !== undefined && v !== null) {
+            updateScreenData(k, v);
           }
         }
       } catch (err: any) {

@@ -75,8 +75,24 @@ const AudioPlayerBlock: React.FC<AudioPlayerBlockProps> = ({ block }) => {
     if (!audioUrl) return;
 
     let isMounted = true;
+    // Capture the previous sound ref (if any) and stop+unload it
+    // BEFORE loading the new one. Without this, a rapid remount
+    // (React StrictMode / parent re-render before unload completes)
+    // leaves the previous Audio.Sound still looping while the new
+    // one also plays — user hears 2-3 simultaneous loops.
+    const priorSound = soundRef.current;
+    soundRef.current = null;
 
     const loadAudio = async () => {
+      if (priorSound) {
+        try {
+          await priorSound.stopAsync();
+        } catch {}
+        try {
+          await priorSound.unloadAsync();
+        } catch {}
+      }
+      if (!isMounted) return;
       try {
         await Audio.setAudioModeAsync({
           playsInSilentModeIOS: true,
@@ -94,11 +110,15 @@ const AudioPlayerBlock: React.FC<AudioPlayerBlockProps> = ({ block }) => {
             }
           },
         );
+        if (!isMounted) {
+          await sound.unloadAsync().catch(() => {});
+          return;
+        }
         soundRef.current = sound;
 
         // Auto-play after 2 seconds
         setTimeout(async () => {
-          if (isMounted && soundRef.current) {
+          if (isMounted && soundRef.current === sound) {
             await soundRef.current.playAsync();
             setIsPlaying(true);
           }
@@ -112,9 +132,17 @@ const AudioPlayerBlock: React.FC<AudioPlayerBlockProps> = ({ block }) => {
 
     return () => {
       isMounted = false;
-      if (soundRef.current) {
-        soundRef.current.unloadAsync();
-        soundRef.current = null;
+      const current = soundRef.current;
+      soundRef.current = null;
+      if (current) {
+        (async () => {
+          try {
+            await current.stopAsync();
+          } catch {}
+          try {
+            await current.unloadAsync();
+          } catch {}
+        })();
       }
     };
   }, [audioUrl]);

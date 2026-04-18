@@ -64,6 +64,8 @@ import {
   // 2026-04-13 backend B2/B3 wiring
   getPanchangToday,
   patchDissonanceThread,
+  // 2026-04-18 M12 long-absence unification (Phase 2)
+  mitraJourneyWelcomeBack,
 } from "./mitraApi";
 
 // Audit fix F6 (2026-04-13) — dispatch fetchCompanionState via Redux store
@@ -544,6 +546,76 @@ export async function executeAction(
               ? "companion_dashboard_v3"
               : "companion_dashboard",
           state_id: "day_active",
+        });
+        rootNavigate("DynamicEngine");
+        _actionInFlight = false;
+        break;
+      }
+
+      // ================================================================
+      // M12 LONG-ABSENCE (WelcomeBack unification, 2026-04-18)
+      // Fires from the 30+-day M12 variant chips. Backend endpoint
+      // /mitra/journey/welcome-back/ handles the DB transition:
+      //  - "continue" → closes old journey (status=completed),
+      //                 creates new with path_cycle_number += 1 +
+      //                 previous_journey lineage + reused triad
+      //  - "fresh"    → closes old journey (status=completed, NOT
+      //                 abandoned — lineage preserved per Option A);
+      //                 user proceeds to onboarding turn_1; when
+      //                 onboarding creates the new Journey, it sets
+      //                 previous_journey=<old> automatically.
+      // Legacy WelcomeBack.tsx + custom telemetry event superseded.
+      // ================================================================
+      case "welcome_back_continue": {
+        console.log("[actionExecutor] welcome_back_continue: entering");
+        try {
+          const res = await mitraJourneyWelcomeBack("continue");
+          if (res && res.status === "ok" && res.newJourneyId) {
+            // Seed triad + focus into screenData so dashboard mount
+            // doesn't need a second round-trip.
+            setScreenValue(res.newJourneyId, "journey_id");
+            if (res.focus) setScreenValue(res.focus, "active_focus");
+            if (res.subfocus) setScreenValue(res.subfocus, "prana_baseline_selection");
+          }
+        } catch (err: any) {
+          console.warn("[actionExecutor] welcome_back_continue failed:", err?.message);
+        }
+        loadScreen({
+          container_id:
+            (process as any).env?.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
+              ? "companion_dashboard_v3"
+              : "companion_dashboard",
+          state_id: "day_active",
+        });
+        rootNavigate("DynamicEngine");
+        _actionInFlight = false;
+        break;
+      }
+      case "welcome_back_fresh": {
+        console.log("[actionExecutor] welcome_back_fresh: entering");
+        try {
+          await mitraJourneyWelcomeBack("fresh");
+        } catch (err: any) {
+          console.warn("[actionExecutor] welcome_back_fresh failed:", err?.message);
+        }
+        // Scoped reset — clear journey-scoped redux keys only, NOT full
+        // resetState (which would wipe profile/guidance prefs etc.).
+        // Lineage is preserved server-side; user's earlier cycles stay
+        // linked via previous_journey when onboarding creates the new row.
+        setScreenValue(null, "journey_id");
+        setScreenValue(null, "active_focus");
+        setScreenValue(null, "prana_baseline_selection");
+        setScreenValue(null, "scan_focus");
+        setScreenValue(null, "insight_step");
+        setScreenValue(null, "mantra_text");
+        setScreenValue(null, "sankalp_text");
+        setScreenValue(null, "practice_title");
+        setScreenValue(false, "practice_chant");
+        setScreenValue(false, "practice_embody");
+        setScreenValue(false, "practice_act");
+        loadScreen({
+          container_id: "welcome_onboarding",
+          state_id: "turn_1",
         });
         rootNavigate("DynamicEngine");
         _actionInFlight = false;

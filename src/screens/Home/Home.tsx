@@ -29,10 +29,6 @@ import {
   View,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  mitraJourneyWelcomeBack,
-  mitraTrackEvent,
-} from "../../engine/mitraApi";
 import { fetchProfileDetails } from "../Profile/actions";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import api from "../../Networks/axios";
@@ -40,7 +36,10 @@ import store, { RootState } from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
 import ContinueJourney from "./ContinueJourney";
-import WelcomeBack from "./WelcomeBack";
+// Legacy WelcomeBack screen removed 2026-04-18 — all returning users
+// (3d+, including 30+d) now flow through ContinueJourney →
+// GET /api/mitra/journey/home/ which resolves to M12 (short-gap or
+// long-absence variant). See M12_LONG_ABSENCE_DRAFT.md.
 
 const FEATURE_ITEMS = [
   {
@@ -88,7 +87,6 @@ export default function Home() {
   const [mitraJourneyId, setMitraJourneyId] = useState<string | null>(null);
   const [journeyDay, setJourneyDay] = useState<number>(1);
   const [checkingJourney, setCheckingJourney] = useState(false);
-  const [welcomeBackData, setWelcomeBackData] = useState<any>(null);
   // Mitra v3 — guard auto-route so we don't re-navigate on every Home focus.
   const v3AutoRoutedRef = useRef(false);
   const [profileNameFromStorage, setProfileNameFromStorage] = useState<
@@ -165,32 +163,21 @@ export default function Home() {
         try {
           const res = await api.get("mitra/journey/status/");
           const data = res.data;
-          if (data?.welcomeBack) {
-            setWelcomeBackData({
-              focus: data.focus || "",
-              subfocus: data.subfocus || data.sub_focus || "",
-              cycleNumber: data.pathCycleNumber || 1,
-              daysPracticed: data.daysPracticed || 0,
-              strongestAnchor: data.strongestAnchor || "",
-              journeyId: data.journeyId || null,
-              welcomeBackLine: data.welcomeBackLine || "",
-            });
-            setMitraJourneyId(null);
-          } else if (data?.hasActiveJourney && data?.journeyId) {
-            setWelcomeBackData(null);
+          // Unified returning-user flow (2026-04-18). Any user with an
+          // existing journey row — active, expired (welcomeBack), or
+          // completed recently — routes to ContinueJourney, which
+          // fetches /api/mitra/journey/home/ and lets the backend
+          // resolve the right M12 variant (short-gap vs long-absence
+          // vs momentum). Legacy 30+d WelcomeBack path deleted.
+          if (data?.journeyId) {
             setMitraJourneyId(data.journeyId);
             setJourneyDay(data.dayNumber || 1);
-            seedJourneyStatus(data);
-            // Mitra v3 auto-route: disabled to allow landing on the redesigned ContinueJourney decision screen.
-            // if (!v3AutoRoutedRef.current) {
-            //   v3AutoRoutedRef.current = true;
-            //   navigateToMitra(true);
-            // }
+            if (data?.hasActiveJourney) {
+              seedJourneyStatus(data);
+            }
           } else {
-            setWelcomeBackData(null);
             setMitraJourneyId(null);
-            // Mitra v3 auto-route: authed user without a journey lands in
-            // welcome_onboarding Turn 1 instead of the legacy splash.
+            // Authed user with no journey → welcome_onboarding turn_1.
             if (!v3AutoRoutedRef.current) {
               v3AutoRoutedRef.current = true;
               navigateToMitra(false);
@@ -211,105 +198,11 @@ export default function Home() {
 
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const handleWelcomeBackContinue = async () => {
-    setIsProcessing(true);
-    mitraTrackEvent("welcome_back_decided", {
-      journeyId: welcomeBackData?.journeyId || null,
-      dayNumber: 0,
-      meta: {
-        decision: "continue",
-        days_past_end: welcomeBackData?.daysPastEnd || 0,
-        focus: welcomeBackData?.focus || "",
-      },
-    });
-    try {
-      const res = await mitraJourneyWelcomeBack("continue");
-      if (res?.status === "ok" && res?.newJourneyId) {
-        const screenUpdates: Record<string, any> = {
-          journey_id: res.newJourneyId,
-          day_number: 1,
-          is_experienced: true,
-        };
-        if (res.focus) {
-          screenUpdates.scan_focus = res.focus;
-          screenUpdates.active_focus = res.focus;
-        }
-        if (res.subfocus) {
-          screenUpdates.prana_baseline_selection = res.subfocus;
-        }
-        store.dispatch(screenActions.updateScreenData(screenUpdates));
-        setWelcomeBackData(null);
-        setMitraJourneyId(res.newJourneyId);
-        setJourneyDay(1);
-
-        const { executeAction } = require("../../engine/actionExecutor");
-        await executeAction(
-          { type: "generate_companion" },
-          {
-            screenState: store.getState().screen.screenData,
-            loadScreen: (target: any) => {
-              const containerId =
-                target?.container_id || target?.containerId || "generic";
-              const stateId =
-                target?.state_id || target?.stateId || target || "";
-              store.dispatch(loadScreenWithData({ containerId, stateId }));
-            },
-            goBack: () => {
-              const { goBackWithData } = require("../../store/screenSlice");
-              store.dispatch(goBackWithData());
-            },
-            setScreenValue: (value: any, key: string) => {
-              store.dispatch(screenActions.setScreenValue({ key, value }));
-            },
-          },
-        );
-
-        store.dispatch(
-          loadScreenWithData({
-            containerId:
-              process.env.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
-                ? "companion_dashboard_v3"
-                : "companion_dashboard",
-            stateId: "day_active",
-          }),
-        );
-        navigation.navigate("DynamicEngine");
-      }
-    } catch (err) {
-      console.debug("[HOME] welcome-back continue failed:", err);
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const handleWelcomeBackFresh = async () => {
-    setIsProcessing(true);
-    mitraTrackEvent("welcome_back_decided", {
-      journeyId: welcomeBackData?.journeyId || null,
-      dayNumber: 0,
-      meta: {
-        decision: "fresh",
-        days_past_end: welcomeBackData?.daysPastEnd || 0,
-        focus: welcomeBackData?.focus || "",
-      },
-    });
-    try {
-      await mitraJourneyWelcomeBack("fresh");
-    } catch (err) {
-      console.debug("[HOME] welcome-back fresh failed:", err);
-    }
-    store.dispatch(screenActions.resetState());
-    setWelcomeBackData(null);
-    setMitraJourneyId(null);
-    store.dispatch(
-      loadScreenWithData({
-        containerId: "choice_stack",
-        stateId: "discipline_select",
-      }),
-    );
-    setIsProcessing(false);
-    navigation.navigate("DynamicEngine");
-  };
+  // Legacy handleWelcomeBackContinue + handleWelcomeBackFresh removed
+  // 2026-04-18. Both decisions now flow through the two action handlers
+  // in actionExecutor.ts (`welcome_back_continue` / `welcome_back_fresh`)
+  // fired from M12 long-absence chips via the /journey/home/ response.
+  // Lineage is preserved server-side on either decision (Option A).
 
   const navigateToMitra = async (
     hasJourney: boolean,
@@ -861,22 +754,13 @@ export default function Home() {
       />
       */}
 
-      {welcomeBackData ? (
-        <WelcomeBack
-          focus={welcomeBackData.focus}
-          subfocus={welcomeBackData.subfocus}
-          cycleNumber={welcomeBackData.cycleNumber}
-          daysPracticed={welcomeBackData.daysPracticed}
-          strongestAnchor={welcomeBackData.strongestAnchor}
-          welcomeBackLine={welcomeBackData.welcomeBackLine}
-          onContinue={handleWelcomeBackContinue}
-          onFresh={handleWelcomeBackFresh}
-        />
-      ) : mitraJourneyId ? (
+      {mitraJourneyId ? (
         // ContinueJourney v2 — backend-driven via GET /journey/home/.
-        // All chip copy + navigation comes from the backend response;
-        // the parent only provides userName for {userName} interpolation.
-        // See JOURNEY_HOME_CONTRACT_V1.md.
+        // All chip copy + navigation (including 30+d welcome-back)
+        // comes from the backend response; the parent only provides
+        // userName for {userName} interpolation. Legacy WelcomeBack
+        // screen deleted 2026-04-18. See JOURNEY_HOME_CONTRACT_V1.md
+        // + M12_LONG_ABSENCE_DRAFT.md.
         <ContinueJourney
           userName={
             profileNameFromRedux ||

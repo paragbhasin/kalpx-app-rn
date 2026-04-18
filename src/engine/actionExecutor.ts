@@ -4919,6 +4919,41 @@ export async function executeAction(
         break;
       }
 
+      // Generic return-to-source: reads runner_source (stamped by
+      // start_runner from a support room) and navigates back to that
+      // container so mantra completion loops back to the room, not
+      // dashboard. Used by the source-aware M_completion_return variants
+      // (return_action slot). Falls back to dashboard if source unknown.
+      case "return_to_source": {
+        const source = screenState.runner_source;
+        const map: Record<
+          string,
+          { container_id: string; state_id: string }
+        > = {
+          support_grief: { container_id: "support_grief", state_id: "room" },
+          support_loneliness: {
+            container_id: "support_loneliness",
+            state_id: "room",
+          },
+        };
+        const target = map[source as string];
+        // Clear runner state BEFORE nav so the room remounts clean.
+        setScreenValue(null, "runner_variant");
+        setScreenValue(null, "runner_source");
+        setScreenValue(null, "runner_active_item");
+        setScreenValue(null, "runner_start_time");
+        setScreenValue(0, "runner_reps_completed");
+        if (target) {
+          loadScreen(target as any);
+        } else {
+          loadScreen({
+            container_id: "companion_dashboard",
+            state_id: "day_active",
+          } as any);
+        }
+        break;
+      }
+
       case "loneliness_named": {
         mitraTrackEvent("loneliness_named", {
           journeyId: screenState.journey_id,

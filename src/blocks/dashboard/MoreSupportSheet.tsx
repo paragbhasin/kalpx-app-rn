@@ -1,19 +1,24 @@
 /**
  * MoreSupportSheet — bottom sheet opened from QuickSupportBlock with
- * Grief / Lonely / Crisis shortcuts.
+ * Grief / Lonely shortcuts.
  *
  * Spec: docs/NEW_DASHBOARD_V1_SPEC.md §2 #10 + §7 acceptance checklist.
  *
- * Routing (via useScreenStore().loadScreen):
- *   Grief   → { container_id: "support_rooms", state_id: "grief_room" }
- *             (container id mapped to "support_grief" in ScreenRenderer)
- *   Lonely  → { container_id: "support_rooms", state_id: "loneliness_room" }
- *             (container id mapped to "support_loneliness" in ScreenRenderer)
- *   Crisis  → { container_id: "crisis_room", state_id: "crisis_entry" }
+ * Routing (via executeAction — canonical pattern):
+ *   Grief   → dispatch `enter_grief_room`    → support_grief / room
+ *   Lonely  → dispatch `enter_loneliness_room` → support_loneliness / room
+ *
+ * The handlers in actionExecutor.ts own the full transition: they clear
+ * runner_* state, stamp session_* timestamps, fetch context, and call
+ * loadScreen with the correct {container_id, state_id: "room"} shape that
+ * allContainers.js actually registers. Previously this sheet called
+ * loadScreen directly with state_id "grief_room" / "loneliness_room" —
+ * which returned no schema (see SCREEN_SLICE "No schema found" warning)
+ * and rendered as an empty Screen.
  *
  * Sovereignty: labels come from screenData.support_rooms_labels
- * (grief_label, loneliness_label, crisis_label, header_label). If labels
- * are missing, the row is hidden rather than showing an English fallback.
+ * (grief_label, loneliness_label, header_label). If labels are missing
+ * the row is hidden rather than showing an English fallback.
  */
 
 import React from "react";
@@ -26,7 +31,10 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { executeAction } from "../../engine/actionExecutor";
 import { useScreenStore } from "../../engine/useScreenBridge";
+import store from "../../store";
+import { screenActions } from "../../store/screenSlice";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 
@@ -40,7 +48,7 @@ type Row = {
   key: "grief" | "loneliness";
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
-  target: { container_id: string; state_id: string };
+  actionType: "enter_grief_room" | "enter_loneliness_room";
 };
 
 const MoreSupportSheet: React.FC<Props> = ({
@@ -54,34 +62,39 @@ const MoreSupportSheet: React.FC<Props> = ({
   // labels, not emotional prose.
   const headerLabel: string = labels.header_label || "I'm here if you need more.";
 
-  const { loadScreen } = useScreenStore();
+  const { loadScreen, goBack } = useScreenStore();
 
-  // Container keys match ScreenRenderer.tsx registration:
-  //   support_grief → GriefRoomContainer
-  //   support_loneliness → LonelinessRoomContainer
-  //   crisis_room → CrisisRoomContainer
-  // "I'm not safe right now" crisis row REMOVED 2026-04-18 per founder
-  // call (keeping the room but pulling the quiet link from the sheet).
   const rows: Row[] = [
     {
       key: "grief",
       label: labels.grief_label || "Grief Room",
       icon: "water-outline",
-      target: { container_id: "support_grief", state_id: "grief_room" },
+      actionType: "enter_grief_room",
     },
     {
       key: "loneliness",
       label: labels.loneliness_label || "Loneliness Room",
       icon: "people-outline",
-      target: { container_id: "support_loneliness", state_id: "loneliness_room" },
+      actionType: "enter_loneliness_room",
     },
   ];
 
-  const go = (target: { container_id: string; state_id: string }) => {
+  const go = (actionType: Row["actionType"]) => {
     onClose();
     // Defer slightly so the modal dismiss animation doesn't swallow
     // the navigation (matches the pattern used by VoiceConsentSheet).
-    setTimeout(() => loadScreen(target), 120);
+    setTimeout(() => {
+      executeAction(
+        { type: actionType, payload: { source: "more_support_sheet" } },
+        {
+          loadScreen,
+          goBack,
+          setScreenValue: (value: any, key: string) =>
+            store.dispatch(screenActions.setScreenValue({ key, value })),
+          screenState: store.getState().screen.screenData,
+        },
+      ).catch(() => {});
+    }, 120);
   };
 
   return (
@@ -101,7 +114,7 @@ const MoreSupportSheet: React.FC<Props> = ({
                 key={row.key}
                 style={styles.row}
                 activeOpacity={0.85}
-                onPress={() => go(row.target)}
+                onPress={() => go(row.actionType)}
               >
                 <View style={styles.iconWrap}>
                   <Ionicons name={row.icon} size={18} color={Colors.gold} />

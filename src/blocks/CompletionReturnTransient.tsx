@@ -73,9 +73,14 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
       emotional_weight: "light",
       cycle_day: Number(s.day_number) || 0,
       entered_via: `${resolvedVariant}_complete`,
-      // Pass runner_variant through stage_signals so the registry
-      // serves the matching keyed variant (mantra/sankalp/practice).
-      stage_signals: { runner_variant: resolvedVariant },
+      // Pass runner_variant AND runner_source through stage_signals so the
+      // registry can pick between the keyed runner-variant variants (core
+      // flow) and the higher-specificity source-aware variants (support
+      // rooms — "Back to your seat" + return_to_source action).
+      stage_signals: {
+        runner_variant: resolvedVariant,
+        runner_source: s.runner_source || "",
+      },
       today_layer: {},
       life_layer: {
         cycle_id: s.journey_id || s.cycle_id || "",
@@ -150,15 +155,25 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
   const handleReturnHome = (manual: boolean) => {
     if (manual) {
       mitraTrackEvent("completion_return_manually_returned", {
-        meta: { item_type: resolvedVariant },
+        meta: { item_type: resolvedVariant, source: screenData.runner_source },
       }).catch(() => {});
     }
-    const action = {
-      type: "navigate",
-      target: { container_id: "companion_dashboard", state_id: "day_active" },
-    };
+    // If the resolved variant provides a return_action (support-room
+    // variants set "return_to_source"), dispatch it so completion loops
+    // back to the originating grief/loneliness room. Otherwise fall back
+    // to the default dashboard navigation.
+    const returnAction = slot("return_action");
+    const action = returnAction
+      ? { type: returnAction }
+      : {
+          type: "navigate",
+          target: {
+            container_id: "companion_dashboard",
+            state_id: "day_active",
+          },
+        };
     executeAction(
-      { ...action, currentScreen },
+      { ...action, currentScreen } as any,
       {
         loadScreen,
         goBack,

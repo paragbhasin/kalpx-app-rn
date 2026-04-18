@@ -45,7 +45,10 @@ import {
   View,
 } from "react-native";
 import { executeAction } from "../../../engine/actionExecutor";
-import { mitraResolveMoment } from "../../../engine/mitraApi";
+import {
+  mitraLibrarySearch,
+  mitraResolveMoment,
+} from "../../../engine/mitraApi";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 import store from "../../../store";
 import { screenActions } from "../../../store/screenSlice";
@@ -154,12 +157,14 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
   }, []);
 
   // Data handles (practice pointers, not user-facing copy).
-  const bhaktiMantra = (ss as any).bhakti_mantra;
-  const companionedChant = (ss as any).companioned_chant;
+  // bhakti_mantra / companioned_chant are now hydrated on-demand by
+  // routeSupportMantra (via library_search) rather than consumed as
+  // pre-populated screenData objects — backend only returns item_ids.
 
   // Slot reads — backend-authored, null-safe.
   const openingLine = readSlot(ss, "opening_line");
   const secondBeatLine = readSlot(ss, "second_beat_line");
+  const readyHintLabel = readSlot(ss, "ready_hint");
   const offerIntroText = readSlot(ss, "offer_intro_text");
   const pillNameLabel = readSlot(ss, "pill_name_label");
   const pillBhaktiLabel = readSlot(ss, "pill_bhakti_label");
@@ -241,6 +246,60 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
     setStep("options");
   };
 
+  // Hydrate a support mantra from the library and route through the same
+  // runner chain as the core dashboard mantra (cycle_transitions/offering_reveal).
+  // start_runner stamps runner_source="support_loneliness" which M_completion_return
+  // keys on for the "Back to your seat" variant.
+  const routeSupportMantra = async (
+    itemIdSlot: "bhakti_mantra_item_id" | "companioned_chant_item_id",
+    targetReps: number,
+  ) => {
+    const itemId = readSlot(ss, itemIdSlot);
+    if (!itemId) {
+      console.warn(
+        `[loneliness_room] ${itemIdSlot} missing from slots`,
+      );
+      return;
+    }
+    try {
+      const resp = await mitraLibrarySearch(itemId, "mantra");
+      const mantra = (resp?.results || []).find(
+        (r: any) => r?.item_id === itemId,
+      );
+      if (!mantra) {
+        console.warn(
+          "[loneliness_room] mantra not found in library:",
+          itemId,
+        );
+        return;
+      }
+      store.dispatch(
+        screenActions.setScreenValue({ key: "master_mantra", value: mantra }),
+      );
+      store.dispatch(
+        screenActions.setScreenValue({
+          key: "info",
+          value: { ...mantra, audio_url: mantra.audio_url },
+        }),
+      );
+      dispatch(
+        "start_runner",
+        { container_id: "cycle_transitions", state_id: "offering_reveal" },
+        {
+          source: "support_loneliness",
+          variant: "mantra",
+          target_reps: targetReps,
+          item: { ...mantra, core: mantra },
+        },
+      );
+    } catch (err) {
+      console.warn("[loneliness_room] mantra tap failed:", err);
+    }
+  };
+
+  const handleBhaktiTap = () => routeSupportMantra("bhakti_mantra_item_id", 27);
+  const handleChantTap = () => routeSupportMantra("companioned_chant_item_id", 11);
+
   const renderOptions = () => (
     <Animated.View style={[styles.optionsStack, { opacity: fade2 }]}>
       <Text style={styles.offerText}>{offerIntroText}</Text>
@@ -255,39 +314,11 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
         <Text style={styles.pillText}>{pillNameLabel}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.pill}
-        onPress={() =>
-          dispatch(
-            "start_runner",
-            { container_id: "practice_runner", state_id: "mantra_runner" },
-            {
-              source: "support_loneliness",
-              variant: "mantra",
-              target_reps: 27,
-              item: bhaktiMantra,
-            },
-          )
-        }
-      >
+      <TouchableOpacity style={styles.pill} onPress={handleBhaktiTap}>
         <Text style={styles.pillText}>{pillBhaktiLabel}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.pill}
-        onPress={() =>
-          dispatch(
-            "start_runner",
-            { container_id: "practice_runner", state_id: "mantra_runner" },
-            {
-              source: "support_loneliness",
-              variant: "mantra",
-              target_reps: 11,
-              item: companionedChant,
-            },
-          )
-        }
-      >
+      <TouchableOpacity style={styles.pill} onPress={handleChantTap}>
         <Text style={styles.pillText}>{pillChantLabel}</Text>
       </TouchableOpacity>
 
@@ -383,11 +414,28 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
 
   return (
     <View style={styles.root}>
+      {/* Always-visible back affordance. Walk screen hides it (owns its
+          own top-right end-return). Uses the same exit copy the room
+          already has (pill_exit_label). */}
+      {step !== "walk" && !!pillExitLabel && (
+        <View style={styles.topBackWrap} pointerEvents="box-none">
+          <TouchableOpacity
+            style={styles.topBackBtn}
+            activeOpacity={0.7}
+            onPress={() => dispatch("exit_loneliness_room")}
+          >
+            <Text style={styles.topBackText}>{pillExitLabel}</Text>
+          </TouchableOpacity>
+        </View>
+      )}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {step !== "walk" && (
           <Animated.View style={{ opacity: fade1, marginBottom: 40 }}>
             <Text style={styles.openingLine}>{openingLine}</Text>
             <Text style={styles.secondBeat}>{secondBeatLine}</Text>
+            {step === "opening" && !!readyHintLabel && (
+              <Text style={styles.readyHint}>{readyHintLabel}</Text>
+            )}
           </Animated.View>
         )}
 
@@ -422,6 +470,31 @@ const styles = StyleSheet.create({
     color: "#564B42",
     textAlign: "center",
     lineHeight: 28,
+  },
+  readyHint: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 12,
+    color: "#8a7d6b",
+    textAlign: "center",
+    marginTop: 18,
+    letterSpacing: 0.3,
+    opacity: 0.75,
+  },
+  topBackWrap: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    zIndex: 10,
+  },
+  topBackBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  topBackText: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    color: "#8a7d6b",
+    letterSpacing: 0.3,
   },
   offerText: {
     fontFamily: Fonts.sans.regular,

@@ -54,7 +54,7 @@ import {
   View,
 } from "react-native";
 import { executeAction } from "../../../engine/actionExecutor";
-import { mitraResolveMoment } from "../../../engine/mitraApi";
+import { mitraLibrarySearch, mitraResolveMoment } from "../../../engine/mitraApi";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 import store from "../../../store";
 import { screenActions } from "../../../store/screenSlice";
@@ -326,10 +326,58 @@ const GriefRoomContainer: React.FC<Props> = () => {
     setStep("options");
   };
 
+  // Hydrate the grief mantra from the library and route through the SAME
+  // runner chain as the core dashboard mantra (cycle_transitions/offering_reveal).
+  // Uses start_runner so runner_source="support_grief" is stamped — that's
+  // what the source-aware M_completion_return variant keys on to show
+  // "Back to your seat" + return_to_source on completion.
+  const handleMantraTap = async () => {
+    const itemId = readSlot(ss, "grief_mantra_item_id");
+    if (!itemId) {
+      console.warn("[grief_room] grief_mantra_item_id missing from slots");
+      return;
+    }
+    try {
+      const resp = await mitraLibrarySearch(itemId, "mantra");
+      const mantra = (resp?.results || []).find(
+        (r: any) => r?.item_id === itemId,
+      );
+      if (!mantra) {
+        console.warn("[grief_room] mantra not found in library:", itemId);
+        return;
+      }
+      // Pre-seed display fields that CycleTransitionsContainer's
+      // offering_reveal path reads (master_mantra / info). start_runner
+      // below handles mantra_audio_url + runner_source + runner_active_item.
+      store.dispatch(
+        screenActions.setScreenValue({ key: "master_mantra", value: mantra }),
+      );
+      store.dispatch(
+        screenActions.setScreenValue({
+          key: "info",
+          value: { ...mantra, audio_url: mantra.audio_url },
+        }),
+      );
+      dispatch(
+        "start_runner",
+        { container_id: "cycle_transitions", state_id: "offering_reveal" },
+        {
+          source: "support_grief",
+          variant: "mantra",
+          target_reps: 27,
+          item: { ...mantra, core: mantra },
+        },
+      );
+    } catch (err) {
+      console.warn("[grief_room] mantra tap failed:", err);
+    }
+  };
+
   // Slot reads. Backend-authored; no TSX English fallback (see section 0 of
   // CONTENT_CONTRACT_V1 — missing content stays visibly missing).
   const openingLine = readSlot(ss, "opening_line");
   const secondBeatLine = readSlot(ss, "second_beat_line");
+  const readyHintLabel = readSlot(ss, "ready_hint");
   const pillBreatheLabel = readSlot(ss, "pill_breathe_label");
   const pillSpeakLabel = readSlot(ss, "pill_speak_label");
   const pillMantraLabel = readSlot(ss, "pill_mantra_label");
@@ -344,8 +392,11 @@ const GriefRoomContainer: React.FC<Props> = () => {
   const stayQuote = readSlot(ss, "stay_quote");
 
   // Practice pointers (data handles, not user-facing copy).
+  // Note: grief_mantra is now hydrated on-demand by handleMantraTap (via
+  // library_search) rather than consumed as a pre-populated screenData
+  // object — prior pattern never worked because backend returns only the
+  // item_id string, not a full mantra object.
   const slowBreath = (ss as any).slow_breath;
-  const griefMantra = (ss as any).grief_mantra;
 
   const renderOptions = () => (
     <Animated.View style={[styles.optionsStack, { opacity: fade2 }]}>
@@ -365,21 +416,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
         <Text style={styles.pillText}>{pillSpeakLabel}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.pill}
-        onPress={() =>
-          dispatch(
-            "start_runner",
-            { container_id: "practice_runner", state_id: "mantra_runner" },
-            {
-              source: "support_grief",
-              variant: "mantra",
-              target_reps: 27,
-              item: griefMantra,
-            },
-          )
-        }
-      >
+      <TouchableOpacity style={styles.pill} onPress={handleMantraTap}>
         <Text style={styles.pillText}>{pillMantraLabel}</Text>
       </TouchableOpacity>
 
@@ -519,14 +556,37 @@ const GriefRoomContainer: React.FC<Props> = () => {
       style={styles.root}
       onPress={revealOptions}
     >
+      {/* Always-visible back affordance. Pre-options-reveal there's no
+          "I'll go now" pill yet — without this the user is stuck waiting
+          30s or tapping to reveal just to find the exit. Uses the
+          same exit copy the room already has (pill_exit_label). */}
+      {step !== "stay" && step !== "breath" && !!pillExitLabel && (
+        <View style={styles.topBackWrap} pointerEvents="box-none">
+          <TouchableOpacity
+            style={styles.topBackBtn}
+            activeOpacity={0.7}
+            onPress={(e) => {
+              e.stopPropagation();
+              dispatch("exit_grief_room", null, { actions_used: actionsUsed });
+            }}
+          >
+            <Text style={styles.topBackText}>{pillExitLabel}</Text>
+          </TouchableOpacity>
+        </View>
+      )}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Animated.View style={{ opacity: fade1, alignItems: "center" }}>
           <Text style={styles.openingLine}>{openingLine}</Text>
 
           {step === "opening" && (
-            <Animated.View
-              style={[styles.dot, { transform: [{ scale: dotScale }] }]}
-            />
+            <>
+              <Animated.View
+                style={[styles.dot, { transform: [{ scale: dotScale }] }]}
+              />
+              {!!readyHintLabel && (
+                <Text style={styles.readyHint}>{readyHintLabel}</Text>
+              )}
+            </>
           )}
         </Animated.View>
 
@@ -563,6 +623,31 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: "#D4A017",
     opacity: 0.6,
+  },
+  readyHint: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 12,
+    color: "#8a7d6b",
+    textAlign: "center",
+    marginTop: 18,
+    letterSpacing: 0.3,
+    opacity: 0.75,
+  },
+  topBackWrap: {
+    position: "absolute",
+    top: 10,
+    left: 10,
+    zIndex: 10,
+  },
+  topBackBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  topBackText: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    color: "#8a7d6b",
+    letterSpacing: 0.3,
   },
   // --- Breath Interaction Styles (Pavani) ---
   breathContainer: {

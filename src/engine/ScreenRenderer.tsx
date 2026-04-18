@@ -36,6 +36,12 @@ import GriefRoomContainer from "../extensions/moments/grief_room";
 import LonelinessRoomContainer from "../extensions/moments/loneliness_room";
 // T3A-3 — Crisis safety surface
 import CrisisRoomContainer from "../containers/CrisisRoomContainer";
+// Phase 3 — Mitra v3 new dashboard shell (11 required components).
+// Registered under `companion_dashboard_v3` so Home.tsx can route to it
+// when the flag flips. Gated behind EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD=1;
+// the Home.tsx flag check is already in place (Home.tsx:270). Phase 5
+// flips the flag in the release channel — no code swap required here.
+import NewDashboardContainer from "../containers/NewDashboardContainer";
 
 const containerMap: Record<string, React.ComponentType<any>> = {
   portal: PortalContainer,
@@ -67,6 +73,10 @@ const containerMap: Record<string, React.ComponentType<any>> = {
   support_loneliness: LonelinessRoomContainer,
   // T3A-3 — Crisis safety surface
   crisis_room: CrisisRoomContainer,
+  // Phase 3 — Mitra v3 new dashboard. Active only when Home.tsx routes
+  // here (EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD=1). Coexists with
+  // companion_dashboard until Phase 5 cutover.
+  companion_dashboard_v3: NewDashboardContainer,
 };
 
 const ScreenRenderer: React.FC = () => {

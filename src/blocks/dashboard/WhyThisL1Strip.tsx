@@ -12,16 +12,16 @@
  * with a non-empty `label`. No hardcoded strings.
  */
 
-import React from "react";
+import React, { useState } from "react";
 import {
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
 } from "react-native";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
+import WhyThisSheet from "./WhyThisSheet";
 
 export interface WhyThisL1Item {
   id?: string;
@@ -56,30 +56,56 @@ const WhyThisL1Strip: React.FC<Props> = ({ screenData, onItemPress }) => {
       }
     }
   }
+
+  // Sheet state for the L2 / L3 drill-down. Tapping a chip opens the
+  // sheet; sheet internally resolves M36 then M37 when "Go deeper" is
+  // tapped. Sovereignty-compliant — empty body if resolvers fail.
+  const [sheet, setSheet] = useState<{
+    visible: boolean;
+    item: WhyThisL1Item | null;
+  }>({ visible: false, item: null });
+
   if (items.length === 0) return null;
 
+  const handleTap = (it: WhyThisL1Item) => {
+    if (onItemPress) {
+      onItemPress(it);
+      return;
+    }
+    setSheet({ visible: true, item: it });
+  };
+
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.row}
-      accessibilityLabel="why_this_l1_strip"
-    >
-      {items.map((it, i) => {
-        const key = it.id ?? `why-${i}`;
-        const Chip = onItemPress ? TouchableOpacity : View;
-        return (
-          <Chip
-            key={key}
-            style={styles.chip}
-            activeOpacity={0.85}
-            onPress={onItemPress ? () => onItemPress(it) : undefined}
-          >
-            <Text style={styles.chipText}>{it.label}</Text>
-          </Chip>
-        );
-      })}
-    </ScrollView>
+    <>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.row}
+        accessibilityLabel="why_this_l1_strip"
+      >
+        {items.map((it, i) => {
+          const key = it.id ?? `why-${i}`;
+          return (
+            <TouchableOpacity
+              key={key}
+              style={styles.chip}
+              activeOpacity={0.85}
+              onPress={() => handleTap(it)}
+            >
+              <Text style={styles.chipText}>{it.label}</Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+
+      <WhyThisSheet
+        visible={sheet.visible}
+        onClose={() => setSheet({ visible: false, item: null })}
+        triggerLabel={sheet.item?.label ?? ""}
+        itemType={sheet.item?.id ?? "practice"}
+        screenData={sd}
+      />
+    </>
   );
 };
 

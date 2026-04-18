@@ -26,7 +26,8 @@
  * EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD=1 flag (see Home.tsx:270).
  */
 
-import React, { useEffect, useRef } from "react";
+import React, { useCallback } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   ScrollView,
   StyleSheet,
@@ -91,83 +92,90 @@ const NewDashboardContainer: React.FC<Props> = () => {
     useScreenStore();
   const sd = (screenData ?? {}) as Record<string, any>;
 
-  // Fire-once guard for generate_companion + /journey/companion fetch.
-  const hydratedRef = useRef(false);
-
-  useEffect(() => {
-    if (hydratedRef.current) return;
-    hydratedRef.current = true;
-
-    // 1) generate_companion → hydrate triad.
-    //
-    // skipReveal=true is load-bearing: by default the generate_companion
-    // action handler auto-navigates to insight_summary/path_reveal at
-    // the end of its chain (actionExecutor.ts:1834). That was designed
-    // for the post-lock onboarding flow, but we're using it here purely
-    // to hydrate screenData. Without skipReveal the user would see:
-    //   new dashboard → "Understanding your path" bounce → dashboard
-    executeAction(
-      { type: "generate_companion", payload: { skipReveal: true } },
-      {
-        loadScreen,
-        goBack,
-        setScreenValue: (value: any, key: string) =>
-          store.dispatch(screenActions.setScreenValue({ key, value })),
-        screenState: store.getState().screen.screenData,
-      },
-    ).catch((err: any) => {
-      console.warn(
-        "[NewDashboard] generate_companion failed:",
-        err?.message,
-      );
-    });
-
-    // 2) /journey/companion/ → populate cycle_metrics + new dashboard
-    //    screenData slots (greeting_context, journey_path, support labels,
-    //    etc.) that each block reads and self-hides on when missing.
-    (async () => {
-      try {
-        const res = await mitraJourneyCompanion();
-        if (!res || typeof res !== "object") return;
-        const keys = [
-          "cycle_metrics",
-          "completed_today",
-          "greeting_context",
-          "user_name",
-          "journey_path",
-          "journey_path_label",
-          "quick_support_labels",
-          "support_rooms_labels",
-          "brand_label",
-          "language_label",
-          "safety_quiet_label",
-          "voice_placeholder",
-          "dayType",
-          "dayTypeCopy",
-          "focusName",
-          "pathMilestone",
-          "continuity",
-          "why_this",
-          "why_this_l1_items",
-          "sankalp_how_to_live",
-          "focus_phrase",
-          "day_type",
-        ];
-        for (const k of keys) {
-          const v = (res as any)[k];
-          if (v !== undefined && v !== null) {
-            updateScreenData(k, v);
-          }
-        }
-      } catch (err: any) {
+  // Re-fetch on every focus (not just first mount). Returning from the
+  // runner should refresh the triad ✓ + cycle_metrics from the DB,
+  // which is the authoritative source of "is this item done today".
+  // Redux flags (practice_chant/embody/act) are only the session cache.
+  useFocusEffect(
+    useCallback(() => {
+      // 1) generate_companion with use_journey_companion=true →
+      //    action handler calls /journey/companion/ (read-only), not
+      //    /generate-companion/ (which can create journeys as a side
+      //    effect). Populates card_mantra_title, card_sankalpa_title,
+      //    card_ritual_title + descriptions + per-item wisdom via the
+      //    same 50-line setScreenValue cascade that the legacy path
+      //    used — we just feed it the read-only payload.
+      //
+      //    skipReveal=true prevents the action from auto-navigating to
+      //    insight_summary/path_reveal at the end of its chain
+      //    (actionExecutor.ts:1834).
+      executeAction(
+        {
+          type: "generate_companion",
+          payload: { skipReveal: true, use_journey_companion: true },
+        },
+        {
+          loadScreen,
+          goBack,
+          setScreenValue: (value: any, key: string) =>
+            store.dispatch(screenActions.setScreenValue({ key, value })),
+          screenState: store.getState().screen.screenData,
+        },
+      ).catch((err: any) => {
         console.warn(
-          "[NewDashboard] journey/companion fetch failed:",
+          "[NewDashboard] journey/companion hydrate failed:",
           err?.message,
         );
-      }
-    })();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+      });
+
+      // 2) /journey/companion/ → populate cycle_metrics + new dashboard
+      //    screenData slots (greeting_context, journey_path, support
+      //    labels, etc.) that each block reads and self-hides on when
+      //    missing.
+      (async () => {
+        try {
+          const res = await mitraJourneyCompanion();
+          if (!res || typeof res !== "object") return;
+          const keys = [
+            "cycle_metrics",
+            "completed_today",
+            "greeting_context",
+            "user_name",
+            "journey_path",
+            "journey_path_label",
+            "quick_support_labels",
+            "support_rooms_labels",
+            "brand_label",
+            "language_label",
+            "safety_quiet_label",
+            "voice_placeholder",
+            "dayType",
+            "dayTypeCopy",
+            "focusName",
+            "pathMilestone",
+            "continuity",
+            "why_this",
+            "why_this_l1_items",
+            "sankalp_how_to_live",
+            "focus_phrase",
+            "day_type",
+          ];
+          for (const k of keys) {
+            const v = (res as any)[k];
+            if (v !== undefined && v !== null) {
+              updateScreenData(k, v);
+            }
+          }
+        } catch (err: any) {
+          console.warn(
+            "[NewDashboard] journey/companion fetch failed:",
+            err?.message,
+          );
+        }
+      })();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []),
+  );
 
   const handleVoiceSend = (text: string, type: "text" | "voice") => {
     executeAction(
@@ -192,18 +200,20 @@ const NewDashboardContainer: React.FC<Props> = () => {
         {/* 1. Greeting card */}
         <GreetingCard screenData={sd} />
 
-        {/* 2. Chip row — Path only (DayTypeChip removed per founder call;
-             day characterization leaking into multiple surfaces was noisy). */}
-        <View style={styles.chipRow}>
-          <View style={styles.chipWrap}>
+        {/* 2. Focus phrase + Path on one row (user request — save vertical
+             space; PathChip carries "Support Path" label, focus phrase
+             carries today's one-liner). DayTypeChip removed per prior
+             founder call. */}
+        <View style={styles.phraseRow}>
+          <View style={styles.phraseWrap}>
+            <FocusPhraseLine screenData={sd} />
+          </View>
+          <View style={styles.phraseRightWrap}>
             <PathChip screenData={sd} />
           </View>
         </View>
 
-        {/* 3. Focus phrase line */}
-        <FocusPhraseLine screenData={sd} />
-
-        {/* 4. Triad + why_this_l1 strip */}
+        {/* 3. Triad + why_this_l1 strip */}
         <TriadCardsRow />
         <WhyThisL1Strip screenData={sd} />
 
@@ -314,51 +324,37 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 
-  // Chip row
-  chipRow: {
+  // Focus phrase + Path chip — single row to save vertical space
+  // (user feedback 2026-04-18).
+  phraseRow: {
     flexDirection: "row",
     alignItems: "center",
-    flexWrap: "wrap",
+    justifyContent: "space-between",
     gap: 8,
     marginVertical: 6,
   },
-  chipWrap: {
-    marginRight: 8,
+  phraseWrap: {
+    flex: 1,
+    flexShrink: 1,
+  },
+  phraseRightWrap: {
+    marginLeft: 8,
   },
 
-  // Insights slot placeholder (empty in Phase 3)
-  insightsSlot: {
-    // no rendered children until Phase 4 conditional cards land
-  },
-
-  // Safety quiet link
-  safetyBtn: {
-    marginTop: 18,
-    paddingVertical: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: Colors.ringTan,
-    backgroundColor: "transparent",
-  },
-  safetyText: {
-    fontFamily: Fonts.sans.medium,
-    fontSize: 13,
-    color: Colors.textSoft,
-    letterSpacing: 0.3,
-  },
-
-  // Voice bar
+  // Voice bar — positioned just above the bottom tab nav (~52px) with
+  // a small breathing gap. Was previously pinned to bottom: 0 which
+  // overlapped the tabs.
   voiceBar: {
     position: "absolute",
     left: 0,
     right: 0,
-    bottom: 0,
+    bottom: 56, // sits above the bottom-nav tab bar height
     paddingHorizontal: 12,
-    paddingBottom: 18,
-    paddingTop: 10,
+    paddingTop: 8,
+    paddingBottom: 4,
     backgroundColor: Colors.parchment,
+    borderTopWidth: 1,
+    borderTopColor: Colors.borderCream,
   },
 });
 

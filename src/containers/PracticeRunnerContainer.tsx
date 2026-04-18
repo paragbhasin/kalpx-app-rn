@@ -1088,10 +1088,21 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
   // its own startTriggerAudioSequence above). Gated on !trigger so the
   // two effects never fire together for the same mantra ref.
   useEffect(() => {
-    if (!isMantraRunner || isTriggerOmChantScreen || !mantraAudioUrl) return;
+    console.log(
+      "[CORE_MANTRA_AUDIO] effect check — isMantraRunner:", isMantraRunner,
+      "isTriggerOm:", isTriggerOmChantScreen,
+      "mantraAudioUrl:", mantraAudioUrl,
+      "currentVariant:", currentVariant,
+      "currentStateId:", currentStateId,
+    );
+    if (!isMantraRunner || isTriggerOmChantScreen || !mantraAudioUrl) {
+      console.log("[CORE_MANTRA_AUDIO] effect skipped (gate false)");
+      return;
+    }
     let cancelled = false;
     (async () => {
       try {
+        console.log("[CORE_MANTRA_AUDIO] loading:", mantraAudioUrl);
         await stopTriggerAudio();
         if (cancelled) return;
         const source = resolveAudioSource(mantraAudioUrl);
@@ -1106,6 +1117,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
           return;
         }
         mantraLoopAudioRef.current = sound;
+        console.log("[CORE_MANTRA_AUDIO] playing");
       } catch (err) {
         console.warn(
           "[CORE_MANTRA_AUDIO] auto-play failed:",

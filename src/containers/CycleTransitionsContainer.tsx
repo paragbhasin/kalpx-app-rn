@@ -261,6 +261,12 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
 
   const sankalpOmRef = useRef<Audio.Sound | null>(null);
   const calmMusicRef = useRef<Audio.Sound | null>(null);
+  // Core mantra loop — plays on offering_reveal when currentType is
+  // "mantra" and a mantra audio_url is available. Legacy flow had a
+  // "Begin Chanting" button on the info screen that auto-played; the
+  // redesign embeds the counter on this info screen so audio must
+  // auto-play on mount.
+  const mantraLoopAudioRef = useRef<Audio.Sound | null>(null);
   const sankalpSpin = useRef(new RNAnimated.Value(0)).current;
   const sankalpSpinLoopRef = useRef<RNAnimated.CompositeAnimation | null>(null);
   const practiceTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -694,6 +700,74 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
       currentType !== null,
     [stateId, currentType],
   );
+
+  // Auto-play core mantra audio on offering_reveal / info_reveal when
+  // the item_type is "mantra". Mirrors the legacy "Begin Chanting →
+  // audio starts" behavior. Audio URL comes from runner_active_item
+  // (set by view_info handler) or falls back to master_mantra.
+  //
+  // Gate: info screen visible AND mantra type AND we have a URL.
+  const coreMantraAudioUrl = useMemo(() => {
+    if (currentType !== "mantra") return "";
+    const ria = screenData?.runner_active_item;
+    if (ria?.audio_url) return ria.audio_url;
+    return screenData?.master_mantra?.audio_url || "";
+  }, [currentType, screenData?.runner_active_item, screenData?.master_mantra]);
+
+  React.useEffect(() => {
+    console.log(
+      "[CORE_MANTRA_AUDIO] CycleTransitions gate —",
+      "isInfoScreen:", isInfoScreen,
+      "currentType:", currentType,
+      "audioUrl:", coreMantraAudioUrl,
+      "stateId:", stateId,
+    );
+    if (!isInfoScreen || currentType !== "mantra" || !coreMantraAudioUrl) {
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        // Stop any prior instance before reloading (e.g., on mantra change)
+        if (mantraLoopAudioRef.current) {
+          await mantraLoopAudioRef.current.stopAsync().catch(() => {});
+          await mantraLoopAudioRef.current.unloadAsync().catch(() => {});
+          mantraLoopAudioRef.current = null;
+        }
+        await Audio.setAudioModeAsync({
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: false,
+        }).catch(() => {});
+        if (cancelled) return;
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: coreMantraAudioUrl },
+          { shouldPlay: true, isLooping: true, volume: 1 },
+        );
+        if (cancelled) {
+          await sound.unloadAsync().catch(() => {});
+          return;
+        }
+        mantraLoopAudioRef.current = sound;
+        console.log("[CORE_MANTRA_AUDIO] CycleTransitions playing");
+      } catch (err) {
+        console.warn(
+          "[CORE_MANTRA_AUDIO] CycleTransitions load failed:",
+          (err as any)?.message,
+        );
+      }
+    })();
+    return () => {
+      cancelled = true;
+      if (mantraLoopAudioRef.current) {
+        const snd = mantraLoopAudioRef.current;
+        mantraLoopAudioRef.current = null;
+        snd.stopAsync().catch(() => {});
+        snd.unloadAsync().catch(() => {});
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isInfoScreen, currentType, coreMantraAudioUrl]);
+
   const isAckScreen = stateId === "quick_checkin_ack";
   const showVoiceInput =
     stateId === "quick_checkin" || stateId === "quick_checkin_ack";

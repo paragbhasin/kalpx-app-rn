@@ -220,8 +220,14 @@ export default function ContinueJourney({
       // Only prehydrate if we're actually rendering home (chips will be tapped).
       prehydrateTimer = setTimeout(() => {
         if (cancelled) return;
+        // skipReveal=true: the generate_companion handler otherwise
+        // auto-navigates to insight_summary/path_reveal at the end of
+        // its chain (actionExecutor.ts:1834). That's fine for the
+        // original onboarding lock flow but breaks home-surface
+        // prehydration — the user would bounce from home to the
+        // "Understanding your path" screen for no reason.
         executeAction(
-          { type: "generate_companion" } as any,
+          { type: "generate_companion", payload: { skipReveal: true } } as any,
           buildActionContext() as any,
         ).catch((err) => {
           console.debug("[ContinueJourney] generate_companion prehydrate failed:", err?.message);

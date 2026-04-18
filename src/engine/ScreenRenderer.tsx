@@ -51,7 +51,16 @@ const containerMap: Record<string, React.ComponentType<any>> = {
   lock_ritual_overlay: LockRitualContainer,
   lock_ritual: LockRitualContainer,
   insight_summary: InsightSummaryContainer,
-  companion_dashboard: CompanionDashboardContainer,
+  // When EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD=1, every `companion_dashboard`
+  // route — including hardcoded redirects from InsightSummaryContainer,
+  // LockRitualContainer, PracticeRunnerContainer, etc. (40+ callsites) —
+  // resolves to the new dashboard shell. Flag=0 keeps the legacy
+  // CompanionDashboardContainer. This is the cleanest single-flip for
+  // Phase 5 without touching every hardcoded nav call.
+  companion_dashboard:
+    process.env.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
+      ? NewDashboardContainer
+      : CompanionDashboardContainer,
   practice_runner: PracticeRunnerContainer,
   awareness_trigger: AwarenessTriggerContainer,
   composer: ComposerContainer,

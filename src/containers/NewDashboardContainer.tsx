@@ -153,8 +153,15 @@ const NewDashboardContainer: React.FC<Props> = () => {
     hydratedRef.current = true;
 
     // 1) generate_companion → hydrate triad.
+    //
+    // skipReveal=true is load-bearing: by default the generate_companion
+    // action handler auto-navigates to insight_summary/path_reveal at
+    // the end of its chain (actionExecutor.ts:1834). That was designed
+    // for the post-lock onboarding flow, but we're using it here purely
+    // to hydrate screenData. Without skipReveal the user would see:
+    //   new dashboard → "Understanding your path" bounce → dashboard
     executeAction(
-      { type: "generate_companion" },
+      { type: "generate_companion", payload: { skipReveal: true } },
       {
         loadScreen,
         goBack,

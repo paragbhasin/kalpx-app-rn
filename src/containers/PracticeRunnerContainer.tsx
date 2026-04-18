@@ -1087,50 +1087,12 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
   // the mantra_runner state (distinct from the trigger OM flow, which has
   // its own startTriggerAudioSequence above). Gated on !trigger so the
   // two effects never fire together for the same mantra ref.
-  useEffect(() => {
-    console.log(
-      "[CORE_MANTRA_AUDIO] effect check — isMantraRunner:", isMantraRunner,
-      "isTriggerOm:", isTriggerOmChantScreen,
-      "mantraAudioUrl:", mantraAudioUrl,
-      "currentVariant:", currentVariant,
-      "currentStateId:", currentStateId,
-    );
-    if (!isMantraRunner || isTriggerOmChantScreen || !mantraAudioUrl) {
-      console.log("[CORE_MANTRA_AUDIO] effect skipped (gate false)");
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      try {
-        console.log("[CORE_MANTRA_AUDIO] loading:", mantraAudioUrl);
-        await stopTriggerAudio();
-        if (cancelled) return;
-        const source = resolveAudioSource(mantraAudioUrl);
-        const { sound } = await Audio.Sound.createAsync(source, {
-          shouldPlay: true,
-          isLooping: true,
-          isMuted: mediaMuted,
-          volume: mediaMuted ? 0 : 1,
-        });
-        if (cancelled) {
-          await sound.unloadAsync().catch(() => {});
-          return;
-        }
-        mantraLoopAudioRef.current = sound;
-        console.log("[CORE_MANTRA_AUDIO] playing");
-      } catch (err) {
-        console.warn(
-          "[CORE_MANTRA_AUDIO] auto-play failed:",
-          (err as any)?.message,
-        );
-      }
-    })();
-    return () => {
-      cancelled = true;
-      stopTriggerAudio().catch(() => {});
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMantraRunner, isTriggerOmChantScreen, mantraAudioUrl]);
+  // Core mantra runner audio — the AudioPlayerBlock inside the info-
+  // screen render of CycleTransitionsContainer (cycle_transitions/
+  // offering_reveal) handles auto-play + controls for this flow.
+  // If PracticeRunnerContainer is ever the primary runner surface
+  // again (legacy Begin Chanting path), uncomment + restore the
+  // useEffect removed here on 2026-04-18.
 
   const mantraCompletionState = useMemo(() => {
     const durationSeconds =

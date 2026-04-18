@@ -947,14 +947,6 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                   screenData?.mantra_audio_url ||
                   screenData?.master_mantra?.audio_url ||
                   "";
-                console.log(
-                  "[CORE_MANTRA_AUDIO] cycle_transitions gate —",
-                  "audioUrl:", audioUrl,
-                  "info.audio_url:", info?.audio_url,
-                  "info.source:", info?.source,
-                  "info.item_type:", info?.item_type,
-                  "master_mantra.audio_url:", screenData?.master_mantra?.audio_url,
-                );
                 if (!audioUrl) return null;
                 return (
                   <View

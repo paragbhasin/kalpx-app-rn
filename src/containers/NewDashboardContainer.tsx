@@ -385,17 +385,19 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
 
-  // Voice bar — positioned just above the bottom tab nav (~52px) with
-  // a small breathing gap. Was previously pinned to bottom: 0 which
-  // overlapped the tabs.
+  // Voice bar — the NewDashboardContainer is rendered INSIDE the tab
+  // navigator, so this container's bottom edge already sits just above
+  // the tab bar. Pinning to bottom: 0 places the input bar directly
+  // above the footer with no overlap. A hairline top border separates
+  // it visually from the scrolling content above.
   voiceBar: {
     position: "absolute",
     left: 0,
     right: 0,
-    bottom: 56, // sits above the bottom-nav tab bar height
+    bottom: 0,
     paddingHorizontal: 12,
     paddingTop: 8,
-    paddingBottom: 4,
+    paddingBottom: 8,
     backgroundColor: Colors.parchment,
     borderTopWidth: 1,
     borderTopColor: Colors.borderCream,

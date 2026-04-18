@@ -704,27 +704,11 @@ export async function mitraCheckpoint(
   return generateCheckpointData(screenState);
 }
 
-/** POST mitra/reset-plan/ — Low-engagement recovery guide. */
-export async function mitraResetPlan(obstacle: string): Promise<any> {
-  try {
-    const res = await api.post("mitra/reset-plan/", { obstacle });
-    return res.data;
-  } catch (err: any) {
-    console.warn("[MITRA] reset-plan failed, falling back:", err.message);
-    return generateResetPlan(obstacle);
-  }
-}
-
-/** POST mitra/info-screen/ — Info screen content for items. */
-export async function mitraInfoScreen(type: string, data: any): Promise<any> {
-  try {
-    const res = await api.post("mitra/info-screen/", { type, data });
-    return res.data;
-  } catch (err: any) {
-    console.warn("[MITRA] info-screen failed, falling back:", err.message);
-    return generateInfoScreenData(type, data);
-  }
-}
+// mitraResetPlan + mitraInfoScreen removed 2026-04-18 — audited as
+// zero-call-site dead wrappers. Local fallback generators
+// (generateResetPlan / generateInfoScreenData) kept if any future
+// consumer wants to reconstruct them. If neither is used a quarter
+// from now, delete those too.
 
 /** POST mitra/path-evolution/ — Path evolution narrative on focus change. */
 export async function mitraPathEvolution(
@@ -1126,15 +1110,12 @@ export async function getWeeklyReflectionData(cycleDay?: number): Promise<any> {
     });
     return res.data;
   } catch (err: any) {
-    const status = err?.response?.status;
-    if (status === 404) {
-      try {
-        const fallback = await api.get("mitra/journey/status/");
-        return fallback?.data || null;
-      } catch {
-        return null;
-      }
-    }
+    // Audited 2026-04-18: the 404 path previously fell back to
+    // /mitra/journey/status/ which returns a journey-status shape
+    // (hasActiveJourney, journeyId) — NOT a weekly-reflection shape.
+    // Callers reading .letter / .framing would see undefined and the
+    // fallback accomplished nothing except adding a second round-trip.
+    // Removed. 404 now returns null cleanly; callers already handle it.
     console.warn("[MITRA] weekly-reflection failed:", err.message);
     return null;
   }

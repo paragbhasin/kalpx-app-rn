@@ -93,6 +93,12 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
 
   // Message comes from the registry's runner_variant-keyed slot.
   const message = slot("message");
+  // Track 1 — optional wisdom anchor line (third beat). Authored in the
+  // M_completion_return ContentPack on source-aware variants. Empty when
+  // the resolved variant doesn't include it; in that case the third beat
+  // is not rendered and the completion shows the existing 2-beat shape.
+  const wisdomAnchorLine = slot("wisdom_anchor_line");
+  const wisdomAnchorPrincipleId = slot("wisdom_anchor_principle_id");
 
   const contentFade = useRef(new Animated.Value(0)).current;
   const checkProgress = useRef(new Animated.Value(0)).current;
@@ -252,6 +258,49 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
             <Text style={styles.messageText}>{message}</Text>
           </View>
 
+          {/* Track 1 — wisdom anchor (third beat). Renders only when the
+              resolved ContentPack variant authored a wisdom_anchor_line.
+              "Read more →" surfaces existing WhyThisSheet L2 seeded with
+              the backing principle_id when present. */}
+          {!!wisdomAnchorLine && (
+            <View style={styles.wisdomAnchorCard}>
+              <View style={styles.wisdomDivider} />
+              <Text style={styles.wisdomAnchorText}>{wisdomAnchorLine}</Text>
+              {!!wisdomAnchorPrincipleId && (
+                <TouchableOpacity
+                  style={styles.readMoreBtn}
+                  activeOpacity={0.7}
+                  onPress={() => {
+                    const { screenActions } = require("../store/screenSlice");
+                    const { store } = require("../store");
+                    // Seed principle id + open WhyThisSheet L2
+                    store.dispatch(
+                      screenActions.setScreenValue({
+                        key: "why_this_principle_id",
+                        value: wisdomAnchorPrincipleId,
+                      }),
+                    );
+                    executeAction(
+                      {
+                        type: "open_why_this_l2",
+                        payload: { principle_id: wisdomAnchorPrincipleId },
+                      } as any,
+                      {
+                        loadScreen,
+                        goBack,
+                        setScreenValue: (value: any, key: string) =>
+                          setScreenValue(key, value),
+                        screenState: { ...screenData },
+                      },
+                    ).catch(() => {});
+                  }}
+                >
+                  <Text style={styles.readMoreText}>Read more →</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+
           <View style={styles.voiceInputWrap}>
             <VoiceTextInput
               placeholder={slot("reflection_prompt") || "How did that feel?"}
@@ -328,6 +377,36 @@ const styles = StyleSheet.create({
     width: "100%",
     // marginBottom: 8,
     // paddingHorizontal: -100,
+  },
+  // Track 1 — third-beat wisdom anchor block (below message, above input).
+  wisdomAnchorCard: {
+    width: "100%",
+    marginBottom: 20,
+    paddingLeft: 20,
+    alignItems: "flex-start",
+  },
+  wisdomDivider: {
+    width: 40,
+    height: 1,
+    backgroundColor: "#DAC28E",
+    marginBottom: 12,
+  },
+  wisdomAnchorText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 17,
+    lineHeight: 24,
+    color: "#5C3A12",
+    fontStyle: "italic",
+    marginBottom: 8,
+  },
+  readMoreBtn: {
+    paddingVertical: 4,
+  },
+  readMoreText: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 13,
+    color: "#946A47",
+    letterSpacing: 0.3,
   },
   bottomSection: {
     width: "100%",

@@ -53,7 +53,9 @@ import SankalpCarryBlock from "../blocks/dashboard/SankalpCarryBlock";
 import QuickSupportBlock from "../blocks/dashboard/QuickSupportBlock";
 
 // ── Registered moment blocks (Phase 3 re-uses existing scaffolds) ─────────
-import DayTypeChip from "../extensions/moments/day_type_chip";
+// DayTypeChip removed 2026-04-18 per founder call — kept scaffold in
+// src/extensions/moments/day_type_chip/ for future re-mount if day-
+// characterization surface returns.
 import FocusPhraseLine from "../extensions/moments/focus_phrase_line";
 
 // ── Conditional intelligence cards (Phase 5 — show when signal exists) ───
@@ -180,21 +182,6 @@ const NewDashboardContainer: React.FC<Props> = () => {
     ).catch(() => {});
   };
 
-  // Bell tap — routes to the Notifications tab (handled at bottom-nav
-  // level already; here we just toast-style pass-through via navigate).
-  const handleBellPress = () => {
-    executeAction(
-      { type: "navigate", target: { container_id: "notifications", state_id: "default" } },
-      {
-        loadScreen,
-        goBack,
-        setScreenValue: (value: any, key: string) =>
-          store.dispatch(screenActions.setScreenValue({ key, value })),
-        screenState: store.getState().screen.screenData,
-      },
-    ).catch(() => {});
-  };
-
   return (
     <View style={styles.root}>
       <ScrollView
@@ -202,14 +189,12 @@ const NewDashboardContainer: React.FC<Props> = () => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* 1. Greeting card with bell in top-right corner */}
-        <GreetingCard screenData={sd} onBellPress={handleBellPress} />
+        {/* 1. Greeting card */}
+        <GreetingCard screenData={sd} />
 
-        {/* 2. Chip row — DayType + Path */}
+        {/* 2. Chip row — Path only (DayTypeChip removed per founder call;
+             day characterization leaking into multiple surfaces was noisy). */}
         <View style={styles.chipRow}>
-          <View style={styles.chipWrap}>
-            <DayTypeChip screenData={sd} />
-          </View>
           <View style={styles.chipWrap}>
             <PathChip screenData={sd} />
           </View>

@@ -16,27 +16,27 @@
  */
 
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { StyleSheet, Text, View } from "react-native";
 import MantraLotus3d from "../../../assets/mantra-lotus-3d.svg";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 
 type Props = {
   screenData?: Record<string, any>;
-  onBellPress?: () => void;
 };
 
-const GreetingCard: React.FC<Props> = ({ screenData, onBellPress }) => {
+const GreetingCard: React.FC<Props> = ({ screenData }) => {
   const sd = screenData ?? {};
   const context: string = sd.greeting_context ?? "";
   const userName: string = sd.user_name ?? "";
   const tone: string = sd.greeting_tone ?? "";
-  const hasUnread: boolean = !!sd.notifications_unread;
 
   // Always-visible block. When backend copy is missing, fall back to
   // a neutral structural greeting using the user name so the card
   // still anchors the dashboard top.
+  //
+  // Notifications bell removed 2026-04-18 — the bottom-nav tab already
+  // carries it; duplicating in-card was redundant.
   const displayName = userName || "friend";
   const displayContext = context || "You're here. Begin wherever feels right.";
 
@@ -48,23 +48,8 @@ const GreetingCard: React.FC<Props> = ({ screenData, onBellPress }) => {
         <Text style={styles.context}>{displayContext}</Text>
         {!!tone && <Text style={styles.tone}>{tone}</Text>}
       </View>
-      <View style={styles.rightCol}>
-        <TouchableOpacity
-          style={styles.bellBtn}
-          activeOpacity={0.7}
-          onPress={onBellPress}
-          accessibilityLabel="notifications"
-        >
-          <Ionicons
-            name="notifications-outline"
-            size={18}
-            color={Colors.brownDeep}
-          />
-          {hasUnread && <View style={styles.bellDot} />}
-        </TouchableOpacity>
-        <View style={styles.mandalaWrap} accessibilityElementsHidden>
-          <MantraLotus3d width={48} height={48} />
-        </View>
+      <View style={styles.mandalaWrap} accessibilityElementsHidden>
+        <MantraLotus3d width={56} height={56} />
       </View>
     </View>
   );
@@ -113,35 +98,12 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     marginTop: 4,
   },
-  rightCol: {
-    alignItems: "center",
-    marginLeft: 10,
-  },
-  bellBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: Colors.borderCream,
-    backgroundColor: Colors.creamWarm,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 6,
-  },
-  bellDot: {
-    position: "absolute",
-    top: 6,
-    right: 6,
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: Colors.goldBright,
-  },
   mandalaWrap: {
-    width: 48,
-    height: 48,
+    width: 56,
+    height: 56,
     alignItems: "center",
     justifyContent: "center",
+    marginLeft: 10,
   },
 });
 

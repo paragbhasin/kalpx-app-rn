@@ -18,6 +18,11 @@ import api from "../Networks/axios";
 
 function generateCompanionResponse(input: any): any {
   const focus = input?.focus || "clarity";
+  // Offline fallback triad shape. Every item supplies ui.card_title +
+  // ui.card_subtitle explicitly so TriadCardsRow renders all three
+  // cards even when backend is unreachable (no title → card gets
+  // filtered out by `c.title || c.sub`; previously PRACTICE card
+  // silently disappeared on offline).
   return {
     companion: {
       recommended_posture: "protecting your space and doing less, better",
@@ -29,7 +34,10 @@ function generateCompanionResponse(input: any): any {
           audio_url: null,
         },
         one_line: "A soft reminder of what you are steadying into",
-        ui: { card_subtitle: "A soft reminder of what you are steadying into" },
+        ui: {
+          card_title: "Om Namah Shivaya",
+          card_subtitle: "ॐ नमः शिवाय",
+        },
       },
       sankalp: {
         core: {
@@ -37,6 +45,10 @@ function generateCompanionResponse(input: any): any {
           line: "I protect what matters and let the rest pass.",
         },
         one_line: "One line to carry through the small decisions today",
+        ui: {
+          card_title: "I protect what matters and let the rest pass.",
+          card_subtitle: "One line to carry today.",
+        },
       },
       practice: {
         core: {
@@ -45,6 +57,10 @@ function generateCompanionResponse(input: any): any {
           duration_min: 6,
         },
         one_line: "A practice to settle the body before the day opens",
+        ui: {
+          card_title: "Nine slow breaths, eyes soft",
+          card_subtitle: "A practice to settle the body.",
+        },
       },
       focus,
       day_number: input?.day_number || 1,

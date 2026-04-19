@@ -26,7 +26,7 @@
 | Impacted tickets | MDR-S1-15 (classification) — not a legacy candidate; classified `live`. No Sprint 3 deletion. |
 | Revised disposition | `live`. Keep. Not in any cleanup queue. |
 
-### C-3 — Scaffold-delete queue is **14**, not 7 (consolidation override)
+### C-3 — Scaffold-delete queue is **14**, not 7 (CP-1 APPROVED)
 
 | Field | Value |
 |---|---|
@@ -34,8 +34,8 @@
 | S1-15 Agent 1 draft claim | Added `personal_greeting_card`, `path_milestone_banner`, `continuity_mirror_card`, `day_type_chip` as "Tier B — blocked by new_dashboard parent removal." Total: 7 scaffolds. |
 | Consolidation panel correction | Both prior claims are undercounts. Grep of `src/extensions/moments/` vs production imports reveals **14 genuinely orphaned scaffolds** (zero cross-folder importers, only README self-references): `checkpoint_results_refresh`, `completion_return`, `continuity_mirror_card`, `cycle_reflection_refresh`, `day_type_chip`, `entity_recognition_card`, `path_milestone_banner`, `personal_greeting_card`, `sound_bridge`, `voice_consent`, `voice_on_every_screen`, `why_this_l1_chip`, `why_this_l2`, `why_this_l3`. Additionally, the claimed cross-dependency — that `personal_greeting_card`, `path_milestone_banner`, `continuity_mirror_card`, `day_type_chip` are imported ONLY by `new_dashboard/index.tsx` — is **also wrong**. All 14 have zero cross-folder importers; none block on `new_dashboard` removal. |
 | Evidence | Grep output: every orphan's only non-Markdown reference is its own `README.md`. For `completion_return` the project's `docs/TELEMETRY_CALLSITES_CURRENT_FLOW.csv:11-14` explicitly labels it "Dead code — BlockRenderer registers `src/blocks/CompletionReturnTransient.tsx`, not this file." Same pattern for `why_this_l2` (live = `src/blocks/WhyThisL2Sheet.tsx`), `entity_recognition_card` (live = `src/blocks/dashboard/insights/EntityRecognitionCard.tsx`), `personal_greeting_card` (live greeting is inside `NewDashboardContainer`'s embedded `GreetingCard`), and the rest. |
-| Impacted tickets | **MDR-S3-10 delete queue must expand from 7 → 14 scaffolds.** No ordering constraint between MDR-S3-10 and MDR-S3-11 (they can run in parallel). Original "blocked by #2 removal" claim is **revoked** — `NewDashboardContainer.tsx` (the live container) does not import any of the 14. The isolated-scaffold `new_dashboard/index.tsx` imports 5 sibling scaffolds (`personal_greeting_card`, `path_milestone_banner`, `continuity_mirror_card`, `day_type_chip`, and some LIVE ones like `focus_phrase_line`) — but the LIVE block is served through `BlockRenderer.tsx:133` registration, NOT via the orphan scaffold's imports. |
-| Revised disposition | Single-stage deletion: **delete all 14 in one Sprint 3 PR**. No tier cascade needed. |
+| Impacted tickets | **MDR-S3-10 delete queue APPROVED for all 14 scaffolds at CP-1 (2026-04-18).** No ordering constraint between MDR-S3-10 and MDR-S3-11 (they can run in parallel). Original "blocked by #2 removal" claim is **revoked** — `NewDashboardContainer.tsx` (the live container) does not import any of the 14. The isolated-scaffold `new_dashboard/index.tsx` imports 5 sibling scaffolds (`personal_greeting_card`, `path_milestone_banner`, `continuity_mirror_card`, `day_type_chip`, and some LIVE ones like `focus_phrase_line`) — but the LIVE block is served through `BlockRenderer.tsx:133` registration, NOT via the orphan scaffold's imports. |
+| Revised disposition | Single-stage deletion: **delete all 14 in one Sprint 3 PR**. No tier cascade needed. **Includes `day_type_chip` and `voice_on_every_screen` per CP-1 default-delete disposition** (standing baseline Rule 5 tightening applied; git history preserves both if unexpected re-mount need surfaces). |
 
 ### C-4 — `/api/mitra/onboarding/recognition/` is flag-gated with local fallback
 

@@ -27,15 +27,17 @@
 
 ## Post-CP-1 sequencing — REVISED per 2026-04-18 mid-CP-1 constraint
 
-**Scope:** dev + staging only this sprint. No prod activity.
+**Scope:** dev only this sprint (topology: no separate staging env in this repo — dev IS the team's staging equivalent per `docker-compose.yml` + memory confirmation). No prod activity.
 
-1. **Phase 1** — Ops handoff (G1 work) on **staging only**. Artifact: `docs/OPS_HANDOFF_G1_CONTENT_RESOLVE_FLAG.md` (revised to drop prod steps).
-2. **Phase 2** — Preview build via `eas build --profile preview` **targeting staging backend** (not prod).
-3. **Phase 3** — S1-13 Silk Integrity first live execution against preview build on staging. Iterate until 11/11 green.
-4. **Phase 4** — S1-16 human smoke walk-through on the now-clean preview build on staging (end-of-sprint validation).
+1. **Phase 1** — Ops handoff (G1 work). ✅ **Already satisfied on dev** (MITRA_V3_CONTENT_RESOLVE_ENABLED=1 set, 7-moment probe PASS 7/7). No separate staging env exists to verify.
+2. **Phase 2** — Preview build via `eas build --profile preview` **targeting dev backend**. Requires EAS credentials + explicit founder "go" before invoking (cost + distribution visibility).
+3. **Phase 3** — S1-13 Silk Integrity first live execution against preview build. Iterate until 11/11 green. Patch placeholder Maestro IDs as real IDs surface.
+4. **Phase 4** — S1-16 human smoke walk-through on preview build (end-of-sprint validation).
 5. **Phase 5** — **PARKED.** S1-17 production flag flip does NOT happen this sprint. Reopens only on explicit founder instruction; will carry its own future ticket + gates.
 
-Sprint 1 closes when Phase 4 is green on staging. Production rollout is a separate future engagement.
+Sprint 1 closes when Phase 4 is green on dev. Production rollout is a separate future engagement.
+
+**Topology note:** If the team stands up a separate staging env in the future, Phase 1 reopens for that env and Phase 2/3/4 iterate against it before prod reopen. For this sprint, dev carries the full validation weight.
 
 ## What CP-1 did NOT decide (deliberately deferred)
 

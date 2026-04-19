@@ -148,6 +148,41 @@ Still open per `mitra_session_2026_04_17.md`:
 
 ---
 
+## 🔵 Post-cutover (Track 0.5 live on dev 2026-04-18 evening)
+
+### 14. Joy/Growth Maestro smoke flows not authored yet
+**What:** Track 1 Joy/Growth rooms are live (M48/M49 + dashboard chips) but `.maestro/` has automated flows only for grief (`grief-room-enter-exit.yaml`, `grief-room-reduced-motion.yaml`) and loneliness (`loneliness-room-companioned-chant.yaml`). No Joy chip tap / Growth chip tap / Joy Room walk-sit / Growth Room 5-inquiry / return_to_source flows exist.
+
+**Impact:** Every Joy/Growth smoke pass is human-manual on a device. No regression CI for these flows.
+
+**Next:** author 4-6 Maestro flows — joy-chip-tap, joy-room-sit-flow, growth-chip-tap, growth-room-inquiry-decision, return-to-source-from-support-runner. Each ~20-40 min to author against a running dev client.
+
+### 15. EAS OTA update channel not configured
+**What:** `eas.json` has no `updates` block; `EXPO_UPDATES_DISABLED=1` in production profile. No OTA push path exists — every merge to `main` requires team members to pull + restart Metro to pick up changes.
+
+**Impact:** Track 1 dashboard changes landed in `main` but won't reach team devices automatically. Friction for any JS-only iteration. Every Pass Back / Pass D/E/F would have been OTA-worthy but couldn't be pushed.
+
+**Next:** configure `expo-updates` runtime version + `eas update` channels (e.g. `dev-preview` for internal builds). Decide whether OTA stays opt-in (only dev/preview) or whether production gets it too. Founder call.
+
+### 16. Track 0.5 flag cutover to staging/prod
+**What:** `MITRA_V3_WISDOM_SELECTOR_ENABLED=1` live on **dev only** (EC2 `.env.dev`). Staging + prod still have it OFF.
+
+**Next:** monitor dev for 1–2 weeks (winner quality, fallback rate, grief/loneliness tone safety, MitraDecisionLog trace volume). If clean, promote to staging. Watchlist: `ok=false`/`fallback_reason` rate >5%, any tradition_naming leak into grief, any celebration-register line on weight=maximum surfaces, dashboard visible_reply fatigue (we only have 6 rows).
+
+### 17. Batch 3 support-completion drafts parked
+**What:** 9 tone-reviewed draft lines for `completion_support`, `completion_support_grief`, `completion_support_loneliness` surfaces. Committed at `kalpx/core/data_seed/wisdom/parked/batch3_support_completion_drafts_2026_04_18.md`.
+
+**Why parked, not shipped:** wiring those surfaces to the selector would extend `COMPLETION_FAMILY_LAW` with `support_*` runner_variants — re-opens the Track 1 "Invariant #8 stays absolute, no resolver exemption" lock. Support completions today are served via `M_completion_return.yaml` ContentPack (9 founder-approved source-aware variants, live).
+
+**Possible future use:** ContentPack rotation-depth pass if telemetry shows `M_completion_return` variants feel stale. Not selector work. Must pass a fresh Agent 5 integrity review before any use.
+
+### 18. Staging re-probe before promoting flag
+**What:** The 12 canonical (surface × interaction × mode) probes were exercised on dev DB in-process and via live HTTP. Staging DB has not been probed. Before any staging cutover, re-run the 12 probes against staging.
+
+**Next:** run `/api/mitra/wisdom/pick/` probe matrix on staging after the staging DB pulls Passes D/E/F migrations. Confirm 12/12 resolve, fallback rate = 0%.
+
+---
+
 ## Reference (files touched this session)
 
 - Memory: `~/.claude/projects/-Users-paragbhasin/memory/mitra_session_2026_04_18_phase_5.md`

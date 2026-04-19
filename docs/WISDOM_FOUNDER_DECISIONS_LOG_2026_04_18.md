@@ -258,3 +258,49 @@ With Packet 1 + 2 + 3 + 4 + Q5-Q10 locked and applied to Pass C CSV:
 - **Reachability: all Track 1 cells ≥3**
 
 **Engineering Day 1 (migrations 0111-0117) is CLEARED TO START.** No remaining founder-blocking items before cutover.
+
+---
+
+## Session-close block — Track 0.5 content gap-fill + cutover (2026-04-18 evening)
+
+After the initial Packet 1–4 locks, a 4-batch targeted content gap-fill program ran to close the thin-pool gaps that made every staging probe fall through. Three passes shipped; one batch was intentionally skipped.
+
+### Pass D (migration 0113) — Batch 1: foundation fill
+20 selector-ready assets covering 3-mode opening_line for joy/grief/loneliness rooms, visible_reply for growth/dashboard, and 6 completion_anchor rows aligned to the locked family law. Plus a selector refactor:
+- `_STATE_FAMILY_ALIAS` rewritten so every aliased tag exists in live library vocab (prior aliases pointed at phantom tags).
+- `_SURFACE_ALIAS = {"dashboard_input": ["dashboard"]}` added to bridge caller surface enum → library context_fit_tags; `_surface_matches()` helper wired through `_filter_context_fit`, `_specificity_score`, and all 4 `_relax()` call sites.
+- 23 `source_family` diacritic variants canonicalized (`bhagavad gītā → gita`, `yoga sūtras → yoga_sutras`, etc.) — unlocks ~15 latent Invariant #8 candidates with zero authoring.
+
+Founder decisions baked in:
+- **A5 grief hybrid opener** → `source_family=app_authored` (downgraded from bhakti; grief stays witness-first; no tradition_specificity extension into grief).
+- **A7 loneliness hybrid opener** → **bhakti → loneliness bridge APPROVED** (sat-sanga companionship register). New axis: the Q5 lock ("bhakti bridge → joy too") now extends to loneliness. Does NOT extend to grief.
+
+### Pass E (migration 0114) — Batch 2: quiet_ack + second_beat fill
+15 assets: 4 joy second_beat (2 universal / 1 hybrid / 1 rooted) + 4 grief quiet_ack + 4 loneliness quiet_ack + 3 joy quiet_ack. All quiet_ack drafts tagged with `interaction_role_tags=[typed_ack]` per selector alias. All universal, app_authored (grief/loneliness/generic tone safety).
+
+Founder decisions: **A4 joy rooted second_beat approved** — reuses the exact santosha wrapper copy from Pass D ("santosha: contentment that does not depend on what happens next."). B2 grief ack rewritten to "Heard. Sat with, not fixed." (tightened companion-as-person drift). D2 joy ack rewritten to "Noted. Stays as it is." (removed performance drift).
+
+### Batch 3 — SKIPPED as selector batch
+Support completion surfaces (`completion_support`, `completion_support_grief`, `completion_support_loneliness`) are declared in `SURFACE_INTERACTION_POLICY` but **already served via `M_completion_return.yaml` ContentPack slots** (9 founder-approved source-aware variants live today). Wiring them to the selector would require extending `COMPLETION_FAMILY_LAW` with `support_*` runner_variants, which **re-opens the Invariant #8 "stays absolute, no resolver exemption" lock** made in Track 1 review.
+
+**Decision: Option B — skip.** The 9 tone-reviewed draft lines Agent 3 produced were parked at `kalpx/core/data_seed/wisdom/parked/batch3_support_completion_drafts_2026_04_18.md` for optional future ContentPack rotation/deepening. Not selector work.
+
+### Pass F (migration 0115) — Batch 4: growth + dashboard deepening
+8 assets: 5 growth visible_reply (2 universal, 2 hybrid, 1 rooted sankalpa) + 3 dashboard visible_reply. Growth rooted cell (previously zero rows) now filled with the sankalpa wrapper.
+
+Founder decisions:
+- **A5 rooted sankalpa visible_reply APPROVED** — uses Packet 3's locked gloss verbatim: "sankalpa: an intention held steadily enough to shape practice." Applied cosmetic edit "the → an" for exact wrapper/surface parity.
+- **Sanskrit metadata TIGHT policy** — locked-10 wrappers (`nishkāma karma, vairāgya, santosha, sat-sanga, karuna, phala, swadharma, abhyāsa, viveka, sankalpa`) + canonical tradition family names only in internal strings. `jnana, sakshi, vichara/vicara, dhyana, tapas, seva` are forbidden even in internal titles / core_teaching / asset_id. Enforcement precedent: A3 renamed from `growth_room_reply_jnana_seeing_through_hybrid_001` to `growth_room_reply_seeing_through_hybrid_001`, title + core_teaching stripped of `jnana`.
+
+### Post-content cutover
+- Track 1 FE merged `pavani → main` (RN tip `eb61ec2`).
+- Backend flag flipped on dev EC2: `MITRA_V3_WISDOM_SELECTOR_ENABLED=1` in `.env.dev`; web + celery recreated.
+- Live `/api/mitra/wisdom/pick/` probe returns `ok=true` with Pass D asset as winner. Full DecisionTrace returned.
+- Library state: 420 → 463 rows, 349 → 392 selector_eligible.
+
+### What this unlocks / what still waits
+- Selector now serves real wisdom across all 12 canonical (surface × interaction × mode) cells on dev.
+- Staging/prod flag cutover: next founder decision whenever ready.
+- Joy/Growth Maestro automated smoke flows: not authored yet (only grief/loneliness have them). Device smoke for Joy/Growth is human-manual until those flows are added.
+- Parked Batch 3 drafts: available for future ContentPack rotation-depth pass; must pass fresh integrity review before use.
+

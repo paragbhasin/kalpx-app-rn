@@ -9,10 +9,10 @@ testIDs.
 
 | # | Slug | File | Status | Notes |
 |---|---|---|---|---|
-| 01 | onboarding_start | `01_onboarding_start.yaml` | needs_selector_patch | Guest enter + pattern-scan only; no testIDs on onboarding CTA (P5) |
-| 02 | recognition | `02_recognition.yaml` | needs_selector_patch | Turn-N chips + recognition line need testIDs (P5) |
-| 03 | triad_reveal | `03_triad_reveal.yaml` | needs_selector_patch | Triad cards need testIDs (P5 — onboarding reveal surface) |
-| 04 | first_dashboard | `04_first_dashboard.yaml` | needs_selector_patch | Chains from flow 03; inherits selector gaps (P5) |
+| 01 | onboarding_start | `01_onboarding_start.yaml` | ready | 2026-04-19 §A.3 testIDs land + runtime-verified on sim 221EDFB1: `onboarding_begin_journey_cta` + `onboarding_turn_1_root` + `onboarding_turn_1_chip_continue` + `onboarding_im_returning` all live. `onboarding_yes_lets_begin` dormant (backend ships chip label "Continue"). |
+| 02 | recognition | `02_recognition.yaml` | ready | 2026-04-19 §A.3 testIDs land; uses `onboarding_turn_\d+_chip_.*` repeat-walk pattern + `onboarding_recognition_root` + `onboarding_recognition_continue` terminal assert. Live end-to-end verification pending. |
+| 03 | triad_reveal | `03_triad_reveal.yaml` | ready | 2026-04-19 §A.3 testIDs land; `onboarding_triad_reveal_root` + `onboarding_triad_begin_journey` terminal assert. Live end-to-end verification pending. |
+| 04 | first_dashboard | `04_first_dashboard.yaml` | ready | Chains from flow 03 via `onboarding_triad_begin_journey`; asserts dashboard render + v3 greeting tail. Live end-to-end verification pending. |
 | 05 | dashboard_load | `05_dashboard_load.yaml` | ready | Smoke persona live on dev; text anchors stable |
 | 06 | triad_visibility | `06_triad_visibility.yaml` | ready | Phase 3: `core_item_<kind>` testIDs expected on CoreItemsList |
 | 07 | quick_checkin_balanced | `07_quick_checkin_balanced.yaml` | ready | Phase 3: `checkin_state_<state>` testIDs expected |
@@ -43,8 +43,8 @@ testIDs.
 
 ## Summary counts
 
-- `ready`: 27 (flows 05–31 except onboarding entry group 01–04)
-- `needs_selector_patch`: 4 (flows 01, 02, 03, 04 — onboarding surfaces, P5)
+- `ready`: 31 (all flows, post §A.3 onboarding testID land 2026-04-19)
+- `needs_selector_patch`: 0
 - `blocked_by_data`: 0 (canonical persona seed cleared all)
 - `blocked_by_app_bug`: 0 (Phase 2 cleared all)
 

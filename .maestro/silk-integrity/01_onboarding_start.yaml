@@ -1,16 +1,60 @@
 # Silk Integrity Flow 01 — Onboarding Start
-# Group A. Persona: guest. Selector risk: YES (onboarding CTA + chips).
+# Group A. Persona: guest.
+#
+# v3 Flow Contract §A.3 / §D (2026-04-19):
+#   Welcome splash primary CTA has stable testID `onboarding_begin_journey_cta`.
+#   Turn 1 root has testID `onboarding_turn_1_root`; Turn 1 primary chip has
+#   testID `onboarding_yes_lets_begin`.
+#
+# Asserts:
+#   - Welcome splash CTA renders with stable testID
+#   - After tapping the splash + Turn 1 fresh-begin chip, a turn root
+#     surface mounts (generic `onboarding_turn_<n>_root` pattern)
+#   - No translation-missing / no deny-list leakage
 appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
-- runFlow: common/guest_enter.yaml
-# Turn 1 — Recognition onboarding prompt should be visible
-# SELECTOR_PATCH_NEEDED: onboarding prompt has no testID; relying on pattern length.
+- openLink: "com.kalpx.app://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081"
+- tapOn:
+    text: "Open"
+    optional: true
+- extendedWaitUntil:
+    visible: "Continue"
+    timeout: 5000
+    optional: true
+- tapOn:
+    text: "Continue"
+    optional: true
+# Dismiss any Dev Menu overlay that may intercept the splash tap
+- tapOn:
+    point: "75%, 34%"
+    optional: true
 - extendedWaitUntil:
     visible:
-      text: ".{20,}"
-    timeout: 10000
+      id: "onboarding_begin_journey_cta"
+    timeout: 180000
+- tapOn:
+    id: "onboarding_begin_journey_cta"
+# Turn 1 primary chip. Runtime-verified 2026-04-19: backend ships the
+# chip label as "Continue" (not "Yes, let's begin"), so the semantic
+# `onboarding_yes_lets_begin` testID stays dormant; the turn-scoped
+# `onboarding_turn_1_chip_continue` is the live path. Flow uses the
+# turn-scoped ID; semantic ID kept as optional fallback if backend
+# content ever flips back.
+- extendedWaitUntil:
+    visible:
+      id: "onboarding_turn_1_root"
+    timeout: 20000
+- tapOn:
+    id: "onboarding_turn_1_chip_continue"
+- waitForAnimationToEnd:
+    timeout: 8000
+# Land on the next onboarding turn root (turn index emitted by block).
+- extendedWaitUntil:
+    visible:
+      id: "onboarding_turn_\\d+_root"
+    timeout: 15000
 - assertNotVisible: "(translation missing)"
 - takeScreenshot: silk_01_onboarding_start
 - runFlow: common/assert_no_english_fallback.yaml

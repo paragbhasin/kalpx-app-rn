@@ -1,27 +1,40 @@
 # Silk Integrity Flow 02 — Onboarding Recognition (Turn 7)
-# Group A. Walks Turns 1-6 then asserts Turn 7 recognition line.
-# Persona: guest. Selector risk: YES.
+# Group A. Walks turns past Turn 1 then asserts the recognition surface
+# (§D turn 7 per v3 Flow Contract 2026-04-19).
+# Persona: guest.
+#
+# Strategy: Flow 01 landed us on an onboarding turn root. Repeatedly tap
+# the first visible chip under the active turn root until the
+# `onboarding_recognition_root` surface mounts. This is robust to the
+# exact turn count (the contract says turns 1-6 then recognition).
 appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
-- runFlow: common/guest_enter.yaml
-# Walk Turns 1-6 tapping first available chip each turn
+- runFlow: 01_onboarding_start.yaml
+# Walk forward until recognition root mounts. Each iteration taps the
+# first chip with testID matching `onboarding_turn_<n>_chip_*` and waits
+# for the next animation. The `onFailure: continue` pattern tolerates
+# the last loop where the recognition root has already mounted.
 - repeat:
-    times: 6
+    times: 8
     commands:
-      - tapOn:
-          index: 0
-          # SELECTOR_PATCH_NEEDED: chip has no testID; first-tappable traits fallback.
-          optional: true
-      - waitForAnimationToEnd
-# Turn 7 — recognition beat
+      - runFlow:
+          when:
+            notVisible:
+              id: "onboarding_recognition_root"
+          commands:
+            - tapOn:
+                id: "onboarding_turn_\\d+_chip_.*"
+                optional: true
+            - waitForAnimationToEnd:
+                timeout: 4000
 - extendedWaitUntil:
     visible:
-      text: ".{20,}"
-    timeout: 10000
-- assertNotVisible:
-    text: "I'm returning"
+      id: "onboarding_recognition_root"
+    timeout: 12000
+- assertVisible:
+    id: "onboarding_recognition_continue"
 - assertNotVisible: "(translation missing)"
 - takeScreenshot: silk_02_recognition_turn7
 - runFlow: common/assert_no_english_fallback.yaml

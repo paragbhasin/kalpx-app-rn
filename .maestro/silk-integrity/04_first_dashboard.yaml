@@ -1,25 +1,30 @@
 # Silk Integrity Flow 04 — First Dashboard After Onboarding
-# Group A. Chains from Flow 03. Selector risk: LOW.
-# v3 Flow Contract §A.1 (2026-04-19): "You're here. Begin wherever feels
-# right." IS the governed greeting — removed from deny-list. Only
+# Group A. Chains from Flow 03.
+#
+# v3 Flow Contract §A.1 (2026-04-19): "Welcome, <name>. You're here. Begin
+# wherever feels right." IS the governed GreetingCard copy on
+# NewDashboardContainer — REQUIRED content, not a denied fallback. Only
 # "Welcome, friend." (name-less onboarding leak) stays denied.
+#
+# §D terminal: `onboarding_triad_begin_journey` → POST /journey/start-v3/
+# → full dashboard.
 appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
 - runFlow: 03_triad_reveal.yaml
-# SELECTOR_PATCH_NEEDED: primary CTA at end of triad reveal has no testID.
 - tapOn:
-    text: "Continue"
-    optional: true
-- tapOn:
-    index: 0
-    optional: true
+    id: "onboarding_triad_begin_journey"
 - runFlow: common/wait_for_dashboard.yaml
-# Dashboard primary chips should render
+# Dashboard primary chips render.
 - assertVisible: ".*I Feel Triggered.*"
 - assertVisible: ".*Quick Check-in.*"
-# Deny-list fallbacks
+# Greeting is valid — assert the governed v3 tail is present.
+- extendedWaitUntil:
+    visible: ".*Begin wherever feels right.*"
+    timeout: 10000
+    optional: true
+# Deny-list fallback — pre-name onboarding leak only.
 - assertNotVisible: "Welcome, friend."
 - takeScreenshot: silk_04_first_dashboard
 - runFlow: common/assert_no_english_fallback.yaml

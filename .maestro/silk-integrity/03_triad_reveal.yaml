@@ -1,28 +1,25 @@
 # Silk Integrity Flow 03 — Triad Reveal (Turn 8)
-# Group A. Chains from Flow 02 (recognition → CTA → Turn 8).
-# Selector risk: YES — triad cards need testIDs.
-# Deny: "Today's anchor"/"Today's vow"/"Today's practice".
+# Group A. Chains from Flow 02 (recognition → triad reveal surface).
+# v3 Flow Contract §D (2026-04-19): `onboarding_recognition_continue`
+# advances to `onboarding_triad_reveal_root`.
+#
+# Deny: "Today's anchor" / "Today's vow" / "Today's practice" (§A sovereignty).
 appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
 - runFlow: 02_recognition.yaml
-# Advance from recognition → triad reveal
-# SELECTOR_PATCH_NEEDED: recognition primary CTA has no testID.
 - tapOn:
-    text: "Continue"
-    optional: true
-- tapOn:
-    index: 0
-    optional: true
+    id: "onboarding_recognition_continue"
 - waitForAnimationToEnd:
     timeout: 10000
-# Triad cards — assert 3 distinct items render (via pattern-scan)
 - extendedWaitUntil:
     visible:
-      text: ".{10,}"
-    timeout: 10000
-# Deny-list sovereignty fallbacks
+      id: "onboarding_triad_reveal_root"
+    timeout: 15000
+- assertVisible:
+    id: "onboarding_triad_begin_journey"
+# Sovereignty deny — legacy triad copy must not leak onto reveal surface.
 - assertNotVisible: "Today's anchor"
 - assertNotVisible: "Today's vow"
 - assertNotVisible: "Today's practice"

@@ -1,0 +1,29 @@
+# Silk Integrity Flow 10 — Grief Room (M46)
+# Group C. Persona: smoke+triad. Selector risk: MEDIUM.
+# Deny: "Grief Room" body, "I'm here if you need more.".
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow: common/login_as_smoke_persona.yaml
+- runFlow: common/wait_for_dashboard.yaml
+# Open MoreSupportSheet
+- tapOn:
+    text: "More support"
+- waitForAnimationToEnd
+# Grief row inside the sheet
+# SELECTOR_PATCH_NEEDED: grief row in MoreSupportSheet needs testID="more_support_grief_row".
+- tapOn:
+    text: "(grief|loss|heavy|mourning)"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 8000
+# Grief room opening line — pattern check; body must not be "Grief Room"
+- extendedWaitUntil:
+    visible:
+      pattern: ".{15,}"
+    timeout: 10000
+- assertNotVisible: "Grief Room"
+- assertNotVisible: "I'm here if you need more."
+- takeScreenshot: silk_10_grief_room
+- runFlow: common/assert_no_english_fallback.yaml

@@ -1,0 +1,10 @@
+{
+  "flow": "04_grief_room",
+  "status": "PASS",
+  "passed": true,
+  "duration_s": 11.3,
+  "started_at": "2026-04-18T19:01:20+00:00",
+  "finished_at": "2026-04-18T19:01:31+00:00",
+  "captured_strings": [],
+  "flaky": false
+}

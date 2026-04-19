@@ -1,0 +1,34 @@
+# Silk Integrity Flow 28 — Continuity card (welcome-back / long-absence)
+# Flow group: F (Dashboard parity surfaces)
+# 7-layer coverage:
+#   L1 M12 long-absence + continuity mirror ContentPacks | L2 resolver picks variant by absence length
+#   L3 /journey/home/ returns continuity slot | L4 FE mounts ContinuityMirrorCard
+#   L5 continuity line renders | L6 no greeting fallback
+#   L7 MitraDecisionLog row |
+# Persona: persona_welcomeback (SEED REQUIRED — see PERSONAS.md)
+#   — journey > 7d since last activity so continuity fires
+# Deny-list tier: greeting fallbacks
+# Known selector risk: MEDIUM — ContinuityMirrorCard in src/extensions/moments/continuity_mirror_card
+env:
+  PERSONA_EMAIL: "persona_welcomeback@kalpx.com"
+  PERSONA_PASSWORD: "persona-welcomeback-dev-only"
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: common/login_as_persona.yaml
+    env:
+      PERSONA_EMAIL: ${PERSONA_EMAIL}
+      PERSONA_PASSWORD: ${PERSONA_PASSWORD}
+- runFlow: common/wait_for_dashboard.yaml
+# Continuity card should render above the triad
+# SELECTOR_PATCH_NEEDED: ContinuityMirrorCard needs testID="continuity_mirror_card".
+- extendedWaitUntil:
+    visible:
+      pattern: ".{15,}"
+    timeout: 10000
+- assertNotVisible: "Welcome, friend."
+- assertNotVisible: "You're here. Begin wherever feels right."
+- takeScreenshot: silk_28_continuity
+- runFlow: common/assert_no_english_fallback.yaml

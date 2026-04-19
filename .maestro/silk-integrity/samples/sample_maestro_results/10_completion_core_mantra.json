@@ -1,0 +1,14 @@
+{
+  "flow": "10_completion_core_mantra",
+  "status": "FAIL",
+  "passed": false,
+  "duration_s": 9.4,
+  "started_at": "2026-04-18T19:03:25+00:00",
+  "finished_at": "2026-04-18T19:03:34+00:00",
+  "failure": {
+    "assertion": "assertNotVisible text=How did that feel?",
+    "message": "Forbidden deny-list string observed: 'How did that feel?'"
+  },
+  "captured_strings": ["How did that feel?"],
+  "flaky": false
+}

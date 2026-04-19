@@ -1,0 +1,30 @@
+# Silk Integrity Flow 29 — Path Milestone banner
+# Flow group: F (Dashboard parity surfaces)
+# 7-layer coverage:
+#   L1 path_milestone_banner ContentPack | L2 resolver picks milestone variant
+#   L3 /journey/home/ returns milestone slot | L4 FE mounts PathMilestoneBanner
+#   L5 banner renders | L6 no fallback
+#   L7 MitraDecisionLog row |
+# Persona: persona_day7 (triggers the 7-day milestone banner)
+# Deny-list tier: generic + translation-missing
+# Known selector risk: MEDIUM — PathMilestoneBanner in src/extensions/moments/path_milestone_banner
+env:
+  PERSONA_EMAIL: "persona_day7@kalpx.com"
+  PERSONA_PASSWORD: "persona-day7-dev-only"
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: common/login_as_persona.yaml
+    env:
+      PERSONA_EMAIL: ${PERSONA_EMAIL}
+      PERSONA_PASSWORD: ${PERSONA_PASSWORD}
+- runFlow: common/wait_for_dashboard.yaml
+# SELECTOR_PATCH_NEEDED: PathMilestoneBanner needs testID="path_milestone_banner".
+- extendedWaitUntil:
+    visible:
+      pattern: ".{10,}"
+    timeout: 10000
+- takeScreenshot: silk_29_path_milestone
+- runFlow: common/assert_no_english_fallback.yaml

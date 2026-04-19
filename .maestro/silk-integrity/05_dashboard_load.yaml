@@ -1,0 +1,20 @@
+# Silk Integrity Flow 05 — Dashboard Load (returning user)
+# Group B. Persona: smoke+triad (day 3/14, journey 3637).
+# Selector risk: LOW. Deny: greeting fallbacks, translation-missing.
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow: common/login_as_smoke_persona.yaml
+# Dashboard headline + supporting render block
+- extendedWaitUntil:
+    visible:
+      pattern: ".{10,}"
+    timeout: 12000
+- assertVisible: "I Feel Triggered"
+- assertVisible: "Quick Check-in"
+# Deny-list
+- assertNotVisible: "Welcome, friend."
+- assertNotVisible: "You're here. Begin wherever feels right."
+- takeScreenshot: silk_05_dashboard_load
+- runFlow: common/assert_no_english_fallback.yaml

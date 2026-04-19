@@ -1,0 +1,16 @@
+# Silk Integrity Flow 01 — Onboarding Start
+# Group A. Persona: guest. Selector risk: YES (onboarding CTA + chips).
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow: common/guest_enter.yaml
+# Turn 1 — Recognition onboarding prompt should be visible
+# SELECTOR_PATCH_NEEDED: onboarding prompt has no testID; relying on pattern length.
+- extendedWaitUntil:
+    visible:
+      pattern: ".{20,}"
+    timeout: 10000
+- assertNotVisible: "(translation missing)"
+- takeScreenshot: silk_01_onboarding_start
+- runFlow: common/assert_no_english_fallback.yaml

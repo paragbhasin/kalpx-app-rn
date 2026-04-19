@@ -1,0 +1,12 @@
+# common/launch_dev_client.yaml
+# Cold-launch the dev-client scheme (ensures Metro + dev build path).
+# Use at flow top when the regression target is Metro-wiring itself
+# (e.g. flow 06_triad_visibility).
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: false
+    arguments:
+      expo.dev: true
+- waitForAnimationToEnd:
+    timeout: 10000

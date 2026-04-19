@@ -1,0 +1,27 @@
+# Silk Integrity Flow 15 — Day 14 Checkpoint (M25)
+# Group D. Persona: persona_day14 (SEED REQUIRED).
+# Deny: pre-S1-10 "Fourteen days.", "sealed. Something has settled.".
+# Selector risk: MEDIUM (pattern "N of 14" works).
+env:
+  PERSONA_EMAIL: "persona_day14@kalpx.com"
+  PERSONA_PASSWORD: "persona-day14-dev-only"
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: common/login_as_persona.yaml
+    env:
+      PERSONA_EMAIL: ${PERSONA_EMAIL}
+      PERSONA_PASSWORD: ${PERSONA_PASSWORD}
+- runFlow: common/wait_for_dashboard.yaml
+# Day 14 narrative should render with interpolated count "N of 14"
+- extendedWaitUntil:
+    visible:
+      pattern: "\\d+ of 14"
+    timeout: 12000
+# Hard deny — pre-S1-10 hardcoded templates
+- assertNotVisible: "Fourteen days. Two weeks of showing up."
+- assertNotVisible: "sealed. Something has settled."
+- takeScreenshot: silk_15_day14
+- runFlow: common/assert_no_english_fallback.yaml

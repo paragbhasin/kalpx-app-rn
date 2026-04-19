@@ -1,0 +1,37 @@
+# Silk Integrity Flow 21 — Completion Return (joy × mantra)
+# Flow group: E (Completion flows)
+# Persona: smoke+triad@kalpx.com
+# Completion family: support_joy + mantra source (bhakti_maitri bridge)
+# Deny-list tier: MDR-S1-12 + translation-missing
+# Known selector risk: MEDIUM
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow: common/login_as_smoke_persona.yaml
+- runFlow: common/wait_for_dashboard.yaml
+- extendedWaitUntil:
+    visible: "I'm in a good place"
+    timeout: 10000
+- tapOn: "I'm in a good place"
+- waitForAnimationToEnd:
+    timeout: 8000
+# SELECTOR_PATCH_NEEDED: joy walk/mantra option testID="joy_walk_option" etc.
+- tapOn:
+    text: "(chant|mantra|bhakti|gratitude)"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "(Start|Begin|Play)"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "(Done|Complete|I'm done)"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      pattern: ".{10,}"
+    timeout: 10000
+- assertNotVisible: "How did that feel?"
+- takeScreenshot: silk_21_completion_joy_mantra
+- runFlow: common/assert_no_english_fallback.yaml

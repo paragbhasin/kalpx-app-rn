@@ -1,0 +1,25 @@
+# Silk Integrity Flow 31 — Entity Recognition Card (M29)
+# Flow group: F (Dashboard parity surfaces)
+# 7-layer coverage:
+#   L1 M29 entity_card ContentPack | L2 resolver picks entity variant
+#   L3 /journey/home/ returns entity_card slot | L4 FE mounts EntityRecognitionCard
+#   L5 entity card renders | L6 no fallback
+#   L7 MitraDecisionLog row |
+# Persona: smoke+triad@kalpx.com
+# Deny-list tier: generic
+# Known selector risk: MEDIUM — EntityRecognitionCard in src/extensions/moments/entity_recognition_card
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow: common/login_as_smoke_persona.yaml
+- runFlow: common/wait_for_dashboard.yaml
+- scroll
+# SELECTOR_PATCH_NEEDED: entity card needs testID="entity_recognition_card".
+- extendedWaitUntil:
+    visible:
+      pattern: ".{10,}"
+    timeout: 10000
+    optional: true
+- takeScreenshot: silk_31_entity_card
+- runFlow: common/assert_no_english_fallback.yaml

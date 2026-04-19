@@ -1,0 +1,25 @@
+# Silk Integrity Flow 13 — Growth Room (M49, Track 1)
+# Group C. Persona: smoke+triad (growth_label + M49_inquiry_seeds seeded).
+# Selector risk: LOW for chip, HIGH for inquiry categories.
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow: common/login_as_smoke_persona.yaml
+- runFlow: common/wait_for_dashboard.yaml
+# Growth chip — Track 1 founder-locked label: "I want to go deeper"
+- extendedWaitUntil:
+    visible: "I want to go deeper"
+    timeout: 10000
+- tapOn: "I want to go deeper"
+- waitForAnimationToEnd:
+    timeout: 8000
+- extendedWaitUntil:
+    visible:
+      pattern: ".{10,}"
+    timeout: 10000
+# Inquiry category seeds should be present (at least one tappable chip)
+# SELECTOR_PATCH_NEEDED: inquiry category chips need testID="inquiry_category_<cat>".
+- assertNotVisible: "(opening missing)"
+- takeScreenshot: silk_13_growth_room
+- runFlow: common/assert_no_english_fallback.yaml

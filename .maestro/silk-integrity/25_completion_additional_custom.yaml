@@ -1,0 +1,41 @@
+# Silk Integrity Flow 25 — Completion Return (additional × custom)
+# Flow group: E (Completion flows)
+# Persona: persona_additional_custom (SEED REQUIRED — see PERSONAS.md)
+# Deny-list tier: MDR-S1-12 + runner fallbacks
+# Known selector risk: HIGH
+env:
+  PERSONA_EMAIL: "persona_additional_custom@kalpx.com"
+  PERSONA_PASSWORD: "persona-addcustom-dev-only"
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: common/login_as_persona.yaml
+    env:
+      PERSONA_EMAIL: ${PERSONA_EMAIL}
+      PERSONA_PASSWORD: ${PERSONA_PASSWORD}
+- runFlow: common/wait_for_dashboard.yaml
+# SELECTOR_PATCH_NEEDED: additional entry + custom filter testID needed.
+- tapOn:
+    text: "(Additional|More|Custom)"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    index: 0
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "(Start|Begin|Play)"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "(Done|Complete|I'm done)"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      pattern: ".{10,}"
+    timeout: 10000
+- assertNotVisible: "How did that feel?"
+- takeScreenshot: silk_25_completion_additional_custom
+- runFlow: common/assert_no_english_fallback.yaml

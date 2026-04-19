@@ -1,0 +1,10 @@
+{
+  "flow": "11_completion_support_matrix",
+  "status": "PASS",
+  "passed": true,
+  "duration_s": 18.7,
+  "started_at": "2026-04-18T19:03:45+00:00",
+  "finished_at": "2026-04-18T19:04:04+00:00",
+  "captured_strings": [],
+  "flaky": false
+}

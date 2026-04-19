@@ -1,0 +1,26 @@
+# Silk Integrity Flow 14 — Day 7 Checkpoint (M24)
+# Group D. Persona: persona_day7 (SEED REQUIRED).
+# Deny: "Seven days.", "One week of showing up.". Selector risk: HIGH.
+env:
+  PERSONA_EMAIL: "persona_day7@kalpx.com"
+  PERSONA_PASSWORD: "persona-day7-dev-only"
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: common/login_as_persona.yaml
+    env:
+      PERSONA_EMAIL: ${PERSONA_EMAIL}
+      PERSONA_PASSWORD: ${PERSONA_PASSWORD}
+- runFlow: common/wait_for_dashboard.yaml
+# Day 7 checkpoint surfaces as a card on dashboard or modal
+# SELECTOR_PATCH_NEEDED: day7 narrative + decision CTAs need testIDs.
+- extendedWaitUntil:
+    visible:
+      pattern: ".{20,}"
+    timeout: 12000
+- assertNotVisible: "Seven days."
+- assertNotVisible: "One week of showing up."
+- takeScreenshot: silk_14_day7
+- runFlow: common/assert_no_english_fallback.yaml

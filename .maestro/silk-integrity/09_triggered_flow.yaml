@@ -1,0 +1,18 @@
+# Silk Integrity Flow 09 — Triggered flow (I Feel Triggered → reset)
+# Group B. Persona: smoke+triad. Selector risk: LOW ("I Feel Triggered" stable).
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow: common/login_as_smoke_persona.yaml
+- runFlow: common/wait_for_dashboard.yaml
+- tapOn: "I Feel Triggered"
+- waitForAnimationToEnd:
+    timeout: 10000
+# Trigger-reset screen should render prompt copy
+- extendedWaitUntil:
+    visible:
+      pattern: ".{15,}"
+    timeout: 10000
+- takeScreenshot: silk_09_triggered_flow
+- runFlow: common/assert_no_english_fallback.yaml

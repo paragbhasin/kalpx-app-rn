@@ -1,0 +1,112 @@
+{
+  "generated_at": "2026-04-18T19:00:00+00:00",
+  "base_url": "https://dev.kalpx.dev",
+  "personas": {
+    "test_day3": {
+      "email": "test+day3@kalpx.dev",
+      "has_locked_triad": true,
+      "missing_master_rows": ["mantra", "sankalp", "practice"],
+      "empty_card_titles": [],
+      "notes": "locked triad but WisdomAsset Master rows absent (2026-04-18)"
+    },
+    "smoke_triad": {
+      "email": "smoke+triad@kalpx.dev",
+      "has_locked_triad": true,
+      "missing_master_rows": [],
+      "empty_card_titles": [],
+      "notes": "ok"
+    },
+    "test_day7": {
+      "email": "test+day7@kalpx.dev",
+      "has_locked_triad": true,
+      "missing_master_rows": [],
+      "empty_card_titles": [],
+      "notes": "ok"
+    },
+    "test_day14": {
+      "email": "test+day14@kalpx.dev",
+      "has_locked_triad": true,
+      "missing_master_rows": [],
+      "empty_card_titles": [],
+      "notes": "ok"
+    },
+    "test_welcomeback": {
+      "email": "test+welcomeback@kalpx.dev",
+      "has_locked_triad": false,
+      "missing_master_rows": [],
+      "empty_card_titles": [],
+      "notes": "ok"
+    },
+    "smoke_joy": {
+      "email": "smoke+joy@kalpx.dev",
+      "has_locked_triad": false,
+      "missing_master_rows": [],
+      "empty_card_titles": [],
+      "notes": "ok"
+    },
+    "smoke_growth": {
+      "email": "smoke+growth@kalpx.dev",
+      "has_locked_triad": false,
+      "missing_master_rows": [],
+      "empty_card_titles": [],
+      "notes": "ok"
+    }
+  },
+  "flows": {
+    "triad_reveal": {
+      "persona": "test_day3",
+      "has_locked_triad": true,
+      "missing_master_rows": ["mantra", "sankalp", "practice"],
+      "empty_card_titles": []
+    },
+    "home_contextual": {
+      "persona": "test_welcomeback",
+      "has_locked_triad": false,
+      "missing_master_rows": [],
+      "empty_card_titles": []
+    },
+    "day7_checkpoint": {
+      "persona": "test_day7",
+      "has_locked_triad": true,
+      "missing_master_rows": [],
+      "empty_card_titles": []
+    },
+    "day14_checkpoint": {
+      "persona": "test_day14",
+      "has_locked_triad": true,
+      "missing_master_rows": [],
+      "empty_card_titles": []
+    },
+    "joy_room": {
+      "persona": "smoke_joy",
+      "has_locked_triad": false,
+      "missing_master_rows": [],
+      "empty_card_titles": []
+    },
+    "growth_room": {
+      "persona": "smoke_growth",
+      "has_locked_triad": false,
+      "missing_master_rows": [],
+      "empty_card_titles": []
+    },
+    "completion_core_mantra": {
+      "persona": "smoke_triad",
+      "has_locked_triad": true,
+      "missing_master_rows": [],
+      "empty_card_titles": []
+    }
+  },
+  "telemetry": {
+    "recognition": {"expected": true, "observed": true, "moment_id": "M07_turn7_recognition"},
+    "triad_reveal": {"expected": true, "observed": false, "moment_id": "M08_triad_reveal"},
+    "home_contextual": {"expected": true, "observed": true, "moment_id": "M08_dashboard_day_active"},
+    "grief_room": {"expected": true, "observed": true, "moment_id": "M46_grief_room"},
+    "loneliness_room": {"expected": true, "observed": true, "moment_id": "M47_loneliness_room"},
+    "joy_room": {"expected": true, "observed": true, "moment_id": "M48_joy_room"},
+    "growth_room": {"expected": true, "observed": true, "moment_id": "M49_growth_room"},
+    "day7_checkpoint": {"expected": true, "observed": true, "moment_id": "M24_checkpoint_day_7"},
+    "day14_checkpoint": {"expected": true, "observed": true, "moment_id": "M25_checkpoint_day_14"},
+    "completion_core_mantra": {"expected": true, "observed": true, "moment_id": "M_completion_return_core_mantra"},
+    "completion_support_matrix": {"expected": true, "observed": true, "moment_id": "M_completion_return"}
+  }
+}

@@ -1,0 +1,27 @@
+# Silk Integrity Flow 02 — Onboarding Recognition (Turn 7)
+# Group A. Walks Turns 1-6 then asserts Turn 7 recognition line.
+# Persona: guest. Selector risk: YES.
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow: common/guest_enter.yaml
+# Walk Turns 1-6 tapping first available chip each turn
+- repeat:
+    times: 6
+    commands:
+      - tapOn:
+          index: 0
+          # SELECTOR_PATCH_NEEDED: chip has no testID; first-tappable traits fallback.
+          optional: true
+      - waitForAnimationToEnd
+# Turn 7 — recognition beat
+- extendedWaitUntil:
+    visible:
+      pattern: ".{20,}"
+    timeout: 10000
+- assertNotVisible:
+    text: "I'm returning"
+- assertNotVisible: "(translation missing)"
+- takeScreenshot: silk_02_recognition_turn7
+- runFlow: common/assert_no_english_fallback.yaml

@@ -1,0 +1,23 @@
+# common/login_as_persona.yaml
+# Parameterized login. Consumers pass PERSONA_EMAIL + PERSONA_PASSWORD.
+# Lands the user on the authed dashboard (QuickSupportBlock visible).
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+# Email entry
+# SELECTOR_PATCH_NEEDED: login screen does not expose testID on email input;
+# relying on text placeholder — patch LoginScreen to add testID="login_email_input".
+- tapOn:
+    text: "Email"
+    optional: true
+- inputText: ${PERSONA_EMAIL}
+- tapOn:
+    text: "Password"
+    optional: true
+- inputText: ${PERSONA_PASSWORD}
+- tapOn:
+    text: "Sign In"
+- waitForAnimationToEnd:
+    timeout: 10000
+- runFlow: wait_for_dashboard.yaml

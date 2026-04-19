@@ -1,0 +1,15 @@
+# common/wait_for_dashboard.yaml
+# Waits until dashboard is render-ready.
+# Readiness signal = QuickSupportBlock mounted (accessibilityLabel="quick_support_block")
+# OR the "I Feel Triggered" primary chip visible.
+appId: com.kalpx.mitra
+---
+- extendedWaitUntil:
+    visible:
+      text: "I Feel Triggered"
+    timeout: 15000
+    optional: true
+- extendedWaitUntil:
+    visible: "Quick Check-in"
+    timeout: 5000
+    optional: true

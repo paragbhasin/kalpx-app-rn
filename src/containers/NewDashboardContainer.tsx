@@ -52,6 +52,7 @@ import WhyThisL1Strip from "../blocks/dashboard/WhyThisL1Strip";
 import CycleProgressBlock from "../blocks/dashboard/CycleProgressBlock";
 import SankalpCarryBlock from "../blocks/dashboard/SankalpCarryBlock";
 import QuickSupportBlock from "../blocks/dashboard/QuickSupportBlock";
+import AdditionalItemsSectionBlock from "../blocks/AdditionalItemsSectionBlock";
 
 // ── Registered moment blocks (Phase 3 re-uses existing scaffolds) ─────────
 // DayTypeChip removed 2026-04-18 per founder call — kept scaffold in
@@ -281,6 +282,14 @@ const NewDashboardContainer: React.FC<Props> = () => {
 
         {/* 8. Quick support block (+ More support sheet) */}
         <QuickSupportBlock screenData={sd} />
+
+        {/* 9. Additional items — PARITY RESTORATION (2026-04-18).
+             Legacy CompanionDashboardContainer rendered AdditionalItemsSectionBlock;
+             the new dashboard dropped it pending M30 ContentPack (not yet shipped).
+             Metro smoke surfaced the gap as a real parity regression; we restore
+             the block now (it self-hides when the backend hasn't seeded items)
+             while M30 authoring continues. See docs/ADDITIONAL_ITEMS_DISPOSITION.md. */}
+        <AdditionalItemsSectionBlock screenData={sd} />
       </ScrollView>
 
       {/* 9. Floating voice input bar */}

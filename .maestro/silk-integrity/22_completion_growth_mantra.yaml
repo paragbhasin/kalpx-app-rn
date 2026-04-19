@@ -1,0 +1,42 @@
+# Silk Integrity Flow 22 — Completion Return (growth × mantra)
+# Flow group: E (Completion flows)
+# Persona: smoke+triad@kalpx.com
+# Completion family: support_growth + mantra source
+# Deny-list tier: MDR-S1-12 + translation-missing
+# Known selector risk: MEDIUM
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow: common/login_as_smoke_persona.yaml
+- runFlow: common/wait_for_dashboard.yaml
+- extendedWaitUntil:
+    visible: "I want to go deeper"
+    timeout: 10000
+- tapOn: "I want to go deeper"
+- waitForAnimationToEnd:
+    timeout: 8000
+# Pick an inquiry category, then drill into a mantra offering
+# SELECTOR_PATCH_NEEDED: inquiry category testIDs needed.
+- tapOn:
+    text: "(decision|relationship|stuck|practice)"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "(chant|mantra|inquiry)"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "(Start|Begin|Play)"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "(Done|Complete|I'm done)"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      pattern: ".{10,}"
+    timeout: 10000
+- assertNotVisible: "How did that feel?"
+- takeScreenshot: silk_22_completion_growth_mantra
+- runFlow: common/assert_no_english_fallback.yaml

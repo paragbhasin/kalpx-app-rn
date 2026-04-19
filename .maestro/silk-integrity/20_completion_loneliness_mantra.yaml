@@ -1,0 +1,39 @@
+# Silk Integrity Flow 20 — Completion Return (loneliness × mantra)
+# Flow group: E (Completion flows)
+# Persona: smoke+triad@kalpx.com
+# Completion family: support_loneliness + mantra source
+# Deny-list tier: loneliness + MDR-S1-12
+# Known selector risk: MEDIUM
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow: common/login_as_smoke_persona.yaml
+- runFlow: common/wait_for_dashboard.yaml
+- tapOn:
+    text: "More support"
+- waitForAnimationToEnd
+# SELECTOR_PATCH_NEEDED: loneliness row testID.
+- tapOn:
+    text: "(lonely|loneliness|alone|isolation)"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 8000
+- tapOn:
+    text: "(chant|mantra|soham|companioned)"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "(Start|Begin|Play)"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "(Done|Complete|I'm done)"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      pattern: ".{10,}"
+    timeout: 10000
+- assertNotVisible: "How did that feel?"
+- takeScreenshot: silk_20_completion_loneliness_mantra
+- runFlow: common/assert_no_english_fallback.yaml

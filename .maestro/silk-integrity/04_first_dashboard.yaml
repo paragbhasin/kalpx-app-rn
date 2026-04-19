@@ -1,0 +1,24 @@
+# Silk Integrity Flow 04 — First Dashboard After Onboarding
+# Group A. Chains from Flow 03. Selector risk: LOW.
+# Deny: "Welcome, friend.", "You're here. Begin wherever feels right.".
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow: 03_triad_reveal.yaml
+# SELECTOR_PATCH_NEEDED: primary CTA at end of triad reveal has no testID.
+- tapOn:
+    text: "Continue"
+    optional: true
+- tapOn:
+    index: 0
+    optional: true
+- runFlow: common/wait_for_dashboard.yaml
+# Dashboard primary chips should render
+- assertVisible: "I Feel Triggered"
+- assertVisible: "Quick Check-in"
+# Deny-list fallbacks
+- assertNotVisible: "Welcome, friend."
+- assertNotVisible: "You're here. Begin wherever feels right."
+- takeScreenshot: silk_04_first_dashboard
+- runFlow: common/assert_no_english_fallback.yaml

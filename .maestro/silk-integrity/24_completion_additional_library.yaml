@@ -1,0 +1,43 @@
+# Silk Integrity Flow 24 — Completion Return (additional × library)
+# Flow group: E (Completion flows)
+# 7-layer coverage: additional_library completion variant (MDR-S1-08)
+# Persona: persona_additional_library (SEED REQUIRED — see PERSONAS.md)
+# Deny-list tier: MDR-S1-12 + runner fallbacks
+# Known selector risk: HIGH — additional-items entry surface is parked dashboard work
+env:
+  PERSONA_EMAIL: "persona_additional_library@kalpx.com"
+  PERSONA_PASSWORD: "persona-addlib-dev-only"
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow:
+    file: common/login_as_persona.yaml
+    env:
+      PERSONA_EMAIL: ${PERSONA_EMAIL}
+      PERSONA_PASSWORD: ${PERSONA_PASSWORD}
+- runFlow: common/wait_for_dashboard.yaml
+# Navigate to additional items surface
+# SELECTOR_PATCH_NEEDED: additional items entry testID needed (dashboard parity gap).
+- tapOn:
+    text: "(Additional|More|Library)"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    index: 0
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "(Start|Begin|Play)"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "(Done|Complete|I'm done)"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      pattern: ".{10,}"
+    timeout: 10000
+- assertNotVisible: "How did that feel?"
+- takeScreenshot: silk_24_completion_additional_library
+- runFlow: common/assert_no_english_fallback.yaml

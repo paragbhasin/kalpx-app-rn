@@ -1,0 +1,34 @@
+# Silk Integrity Flow 18 — Completion Return (core × practice)
+# Flow group: E (Completion flows)
+# Persona: smoke+triad@kalpx.com (triad practice.mindful_55_walking locked)
+# Completion family: core_practice → ayurveda/dinacharya wisdom anchor
+# Deny-list tier: MDR-S1-12 + runner fallbacks
+# Known selector risk: MEDIUM
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow: common/login_as_smoke_persona.yaml
+- runFlow: common/wait_for_dashboard.yaml
+# SELECTOR_PATCH_NEEDED: triad practice card needs testID="core_item_practice".
+- tapOn:
+    text: "(Practice|walking|Walk|Mindful)"
+- waitForAnimationToEnd:
+    timeout: 8000
+# SELECTOR_PATCH_NEEDED: practice runner Start + Done need testIDs.
+- tapOn:
+    text: "(Start|Begin|Play)"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "(Done|Complete|I'm done)"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 10000
+- extendedWaitUntil:
+    visible:
+      pattern: ".{10,}"
+    timeout: 10000
+- assertNotVisible: "How did that feel?"
+- takeScreenshot: silk_18_completion_core_practice
+- runFlow: common/assert_no_english_fallback.yaml

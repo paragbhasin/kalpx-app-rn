@@ -1,0 +1,26 @@
+# Silk Integrity Flow 11 — Loneliness Room (M47)
+# Group C. Persona: smoke+triad. Selector risk: MEDIUM.
+# Deny: "Loneliness Room" body, "I'm here if you need more.".
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow: common/login_as_smoke_persona.yaml
+- runFlow: common/wait_for_dashboard.yaml
+- tapOn:
+    text: "More support"
+- waitForAnimationToEnd
+# SELECTOR_PATCH_NEEDED: loneliness row in MoreSupportSheet needs testID="more_support_loneliness_row".
+- tapOn:
+    text: "(lonely|loneliness|alone|isolation)"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 8000
+- extendedWaitUntil:
+    visible:
+      pattern: ".{15,}"
+    timeout: 10000
+- assertNotVisible: "Loneliness Room"
+- assertNotVisible: "I'm here if you need more."
+- takeScreenshot: silk_11_loneliness_room
+- runFlow: common/assert_no_english_fallback.yaml

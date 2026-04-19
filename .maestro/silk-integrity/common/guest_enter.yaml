@@ -1,0 +1,17 @@
+# common/guest_enter.yaml
+# Cold-open path onto onboarding-eligible state.
+# Clears auth + journey, then launches onboarding chip flow.
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- waitForAnimationToEnd:
+    timeout: 8000
+# SELECTOR_PATCH_NEEDED: onboarding entry CTA has no testID — using text.
+- tapOn:
+    text: "Begin"
+    optional: true
+- tapOn:
+    text: "Get Started"
+    optional: true
+- waitForAnimationToEnd

@@ -1,0 +1,25 @@
+# Silk Integrity Flow 12 — Joy Room (M48, Track 1)
+# Group C. Persona: smoke+triad (joy_label must be BE-seeded).
+# Selector risk: LOW. Deny: "(opening missing)".
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow: common/login_as_smoke_persona.yaml
+- runFlow: common/wait_for_dashboard.yaml
+# Joy chip — sovereignty-strict, only present when backend seeded. Confirmed live
+# via the Track 1 chip label ("I'm in a good place" per founder decision 2026-04-18).
+- extendedWaitUntil:
+    visible: "I'm in a good place"
+    timeout: 10000
+- tapOn: "I'm in a good place"
+- waitForAnimationToEnd:
+    timeout: 8000
+# Joy Room opens — assert opening_line renders
+- extendedWaitUntil:
+    visible:
+      pattern: ".{10,}"
+    timeout: 10000
+- assertNotVisible: "(opening missing)"
+- takeScreenshot: silk_12_joy_room
+- runFlow: common/assert_no_english_fallback.yaml

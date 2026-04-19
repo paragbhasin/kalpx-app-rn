@@ -1,0 +1,35 @@
+# Silk Integrity Flow 06 — Triad Visibility (METRO BUG REGRESSION GUARD)
+# Group B. Asserts all 3 smoke-persona triad items mount on dashboard:
+# mantra.soham / sankalp.permission_to_rest / practice.mindful_55_walking.
+# Selector risk: YES — triad cards pattern-scan only until testIDs land.
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow: common/login_as_smoke_persona.yaml
+- runFlow: common/wait_for_dashboard.yaml
+# Expect triad items to be visible on the dashboard. Use authored item labels
+# for the seeded triad persona (soham / permission_to_rest / mindful_55_walking)
+# OR the resolved core-items eyebrow when present.
+# SELECTOR_PATCH_NEEDED: triad cards need testID="core_item_mantra"/"core_item_sankalp"/"core_item_practice".
+- extendedWaitUntil:
+    visible:
+      pattern: "(Mantra|Soham|So Ham|Soʼham|ॐ)"
+    timeout: 15000
+- extendedWaitUntil:
+    visible:
+      pattern: "(Sankalp|permission to rest|Permission)"
+    timeout: 10000
+- extendedWaitUntil:
+    visible:
+      pattern: "(Practice|walking|Walk)"
+    timeout: 10000
+# Sovereignty deny — pre-S3-04 placeholders
+- assertNotVisible: "Today's anchor"
+- assertNotVisible: "Today's vow"
+- assertNotVisible: "Today's practice"
+- assertNotVisible: "Anchor when the mind gets loud."
+- assertNotVisible: "Today's quiet promise."
+- assertNotVisible: "A small act of steadiness."
+- takeScreenshot: silk_06_triad_visibility
+- runFlow: common/assert_no_english_fallback.yaml

@@ -1,0 +1,10 @@
+{
+  "flow": "08_day7_checkpoint",
+  "status": "PASS",
+  "passed": true,
+  "duration_s": 10.1,
+  "started_at": "2026-04-18T19:02:45+00:00",
+  "finished_at": "2026-04-18T19:02:55+00:00",
+  "captured_strings": [],
+  "flaky": false
+}

@@ -1,0 +1,10 @@
+{
+  "flow": "07_growth_room",
+  "status": "PASS",
+  "passed": true,
+  "duration_s": 15.0,
+  "started_at": "2026-04-18T19:02:20+00:00",
+  "finished_at": "2026-04-18T19:02:35+00:00",
+  "captured_strings": [],
+  "flaky": false
+}

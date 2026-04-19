@@ -1,0 +1,24 @@
+# Silk Integrity Flow 07 — Quick Check-in (balanced)
+# Group B. Persona: smoke+triad. Selector risk: MEDIUM.
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow: common/login_as_smoke_persona.yaml
+- runFlow: common/wait_for_dashboard.yaml
+- tapOn: "Quick Check-in"
+- waitForAnimationToEnd:
+    timeout: 8000
+# Select balanced/steady/good state
+# SELECTOR_PATCH_NEEDED: checkin state chips need testID="checkin_state_balanced" etc.
+- tapOn:
+    text: "(Balanced|Steady|Good|Calm|I'm okay)"
+    optional: true
+- waitForAnimationToEnd
+# Balanced ack surface — pattern check (no explicit deep prompts)
+- extendedWaitUntil:
+    visible:
+      pattern: ".{15,}"
+    timeout: 8000
+- takeScreenshot: silk_07_checkin_balanced
+- runFlow: common/assert_no_english_fallback.yaml

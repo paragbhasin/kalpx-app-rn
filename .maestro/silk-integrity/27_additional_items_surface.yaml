@@ -1,0 +1,27 @@
+# Silk Integrity Flow 27 — Additional Items Surface
+# Flow group: F (Dashboard parity surfaces)
+# 7-layer coverage:
+#   L1 additional items ContentPacks | L2 resolver picks additional list
+#   L3 /journey/home/ returns additional_items array | L4 FE renders AdditionalItems section
+#   L5 additional items visible | L6 no core-items fallback
+#   L7 MitraDecisionLog row |
+# Persona: smoke+triad@kalpx.com
+# Deny-list tier: core-items fallback (prevents leak to additional surface)
+# Known selector risk: HIGH — additional items section may not be live on dashboard yet
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow: common/login_as_smoke_persona.yaml
+- runFlow: common/wait_for_dashboard.yaml
+# Scroll dashboard to expose Additional Items section
+- scroll
+- scroll
+# SELECTOR_PATCH_NEEDED: AdditionalItems header + list need testID.
+- extendedWaitUntil:
+    visible:
+      pattern: "(Additional|More offerings|Library)"
+    timeout: 8000
+    optional: true
+- takeScreenshot: silk_27_additional_items_surface
+- runFlow: common/assert_no_english_fallback.yaml

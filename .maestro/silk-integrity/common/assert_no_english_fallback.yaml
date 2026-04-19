@@ -1,0 +1,35 @@
+# common/assert_no_english_fallback.yaml
+# Enforces FALLBACK_DENY_LIST.txt at the end of every flow.
+# Any deny-listed string rendered on the current screen fails the flow.
+appId: com.kalpx.mitra
+---
+# MDR-S1-10 CheckpointDay14
+- assertNotVisible: "Fourteen days. Two weeks of showing up."
+- assertNotVisible: "sealed. Something has settled."
+# MDR-S1-12 CompletionReturnTransient
+- assertNotVisible: "How did that feel?"
+# MDR-S1-11 MoreSupportSheet
+- assertNotVisible: "I'm here if you need more."
+# MDR-S3-04 CoreItemsList
+- assertNotVisible: "Today's anchor"
+- assertNotVisible: "Today's vow"
+- assertNotVisible: "Today's practice"
+- assertNotVisible: "Anchor when the mind gets loud."
+- assertNotVisible: "Today's quiet promise."
+- assertNotVisible: "A small act of steadiness."
+# MDR-S3-05 PracticeRunnerContainer
+- assertNotVisible: "Your Sankalp is Alive."
+- assertNotVisible: "Your sankalp is now alive in you"
+- assertNotVisible: "Session Reflection"
+- assertNotVisible: "Repeat it again"
+- assertNotVisible: "Return to Mitra Home"
+- assertNotVisible: "Mantra Audio"
+# MDR-S3-07 GreetingCard
+- assertNotVisible: "Welcome, friend."
+- assertNotVisible: "You're here. Begin wherever feels right."
+# Generic dashboard eyebrows
+- assertNotVisible: "NOTICING"
+- assertNotVisible: "MITRA NOTICED"
+# Generic translation-missing markers
+- assertNotVisible: "(translation missing)"
+- assertNotVisible: "(opening missing)"

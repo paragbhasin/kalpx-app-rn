@@ -1,0 +1,14 @@
+{
+  "flow": "02_triad_reveal",
+  "status": "FAIL",
+  "passed": false,
+  "duration_s": 22.1,
+  "started_at": "2026-04-18T19:00:30+00:00",
+  "finished_at": "2026-04-18T19:00:52+00:00",
+  "failure": {
+    "assertion": "assertVisible id=triad_card_mantra_title",
+    "message": "Element with id=triad_card_mantra_title had empty text"
+  },
+  "captured_strings": [],
+  "flaky": false
+}

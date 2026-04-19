@@ -1,0 +1,37 @@
+# Silk Integrity Flow 23 — Completion Return (growth × practice)
+# Group E. INVARIANT #8 (ABSOLUTE): anchor MUST be
+# "The rhythm clarifies what urgency cannot." (dinacharya_rhythm_clarifies).
+# Persona: smoke+triad. Selector risk: MEDIUM.
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow: common/login_as_smoke_persona.yaml
+- runFlow: common/wait_for_dashboard.yaml
+- extendedWaitUntil:
+    visible: "I want to go deeper"
+    timeout: 10000
+- tapOn: "I want to go deeper"
+- waitForAnimationToEnd:
+    timeout: 8000
+# SELECTOR_PATCH_NEEDED: growth practice option testID.
+- tapOn:
+    text: "(practice|ritual|walking|rhythm|dinacharya)"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "(Start|Begin|Play)"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "(Done|Complete|I'm done)"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      pattern: ".{10,}"
+    timeout: 10000
+# INVARIANT #8 — exact string that MUST be rendered
+- assertVisible: "The rhythm clarifies what urgency cannot."
+- assertNotVisible: "How did that feel?"
+- takeScreenshot: silk_23_completion_growth_practice
+- runFlow: common/assert_no_english_fallback.yaml

@@ -1,0 +1,26 @@
+# Silk Integrity Flow 30 — Resilience Narrative surface (M26)
+# Flow group: F (Dashboard parity surfaces)
+# 7-layer coverage:
+#   L1 M26_resilience_narrative ContentPack | L2 resolver picks narrative variant
+#   L3 /journey/home/ returns resilience_narrative slot | L4 FE renders narrative card
+#   L5 narrative visible | L6 no fallback tone regression
+#   L7 MitraDecisionLog row |
+# Persona: smoke+triad@kalpx.com
+# Deny-list tier: generic + resilience narrative fallback
+# Known selector risk: HIGH — card testID unknown
+appId: com.kalpx.mitra
+---
+- launchApp:
+    clearState: true
+- runFlow: common/login_as_smoke_persona.yaml
+- runFlow: common/wait_for_dashboard.yaml
+# Scroll to reveal resilience narrative card (may be below fold)
+- scroll
+# SELECTOR_PATCH_NEEDED: resilience narrative card needs testID="resilience_narrative_card".
+- extendedWaitUntil:
+    visible:
+      pattern: ".{15,}"
+    timeout: 10000
+    optional: true
+- takeScreenshot: silk_30_resilience_narrative
+- runFlow: common/assert_no_english_fallback.yaml

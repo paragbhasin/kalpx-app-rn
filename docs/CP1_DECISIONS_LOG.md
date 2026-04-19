@@ -8,30 +8,34 @@
 
 | Gate | Disposition | Guardrail |
 |---|---|---|
-| **G1 — Prod env flag + flip sequencing** | **Ops adds flag now, verify staging/prod resolve, then flip.** | **No production flag flip until ops explicitly confirms `MITRA_V3_CONTENT_RESOLVE_ENABLED=1` on staging AND prod.** Staging and prod must each pass the 7-moment resolve probe matrix (see `S1_07_CONTENT_RESOLVE_GATE_REPORT.md`). |
+| **G1 — Env flag verification** (**REVISED 2026-04-18 mid-CP-1**) | **No prod now.** Verify `MITRA_V3_CONTENT_RESOLVE_ENABLED=1` on **dev + staging only.** Prod `.env` untouched. No production flag flip. Sprint 1 continues on dev/staging only. | **Hard constraint: no production env changes, no production flag flip, no production smoke path this sprint.** Prod rollout is PARKED and reopens only by explicit founder instruction. Staging must pass the 7-moment resolve probe matrix before Phase 2 preview build. |
 | **G2 — 14-scaffold delete queue** | **Approve 14.** | Sprint 3 ships single delete PR. Deletion includes `day_type_chip` + `voice_on_every_screen` (per standing defaults-if-silent tightening). Git history preserves. |
 | **G3 — `/moment/next/` shadow router** | **Defer to CP-5.** | Shadow mode continues through Sprint 4. Phase T2b exit-criteria memo required for CP-5 activation-vs-delete decision. |
 | **G4 — Legacy dashboard removal** | **Evidence-gate (not calendar).** | **Remove only after the first fully-green post-flip week, with rollback confidence established, and zero unresolved dashboard parity regressions.** `2026-07-31` is a planning placeholder, NOT the trigger. |
 | **G5 — Silk skeleton quality** | **Acknowledged as regression floor only.** | Skeletons are baseline. First live-run against preview build is expected to reveal Maestro-ID patches. Do not describe as "CI-ready" or "comprehensive." |
 | **G6 — CP-3 bridge removal** | **Approve.** | At CP-3 (end of Sprint 3, ~2026-05-30): `postConflict` camelCase + `why_this.level1.*` nested shapes removed from `journey_envelope.py`. Register row updates at CP-3 bundle. |
 
-## Immediate consequences
+## Immediate consequences (post-revision)
 
-- **S1-17 production flag flip remains BLOCKED** until G1 guardrail is verified green (staging + prod both PASS the resolve probe matrix).
+- **S1-17 production flag flip is PARKED for this sprint.** No eas.json production edit, no App Store ship. Reopens only on founder instruction.
+- **Sprint 1 closes on dev/staging** once: staging G1 verified + preview build green + Silk live-run green + staging smoke walk-through clean.
+- **Prod rollout path becomes a separate future ticket** (not scoped into Sprint 1 or 2). It carries its own gating: prod env flag work + prod smoke matrix + prod rollback drill.
 - Sprint 3 planning (MDR-S3-10 delete queue) can now expand to 14 scaffolds without further founder review.
 - Sprint 4 planning stays clean (no shadow-router activation work scheduled there).
 - Sprint 5 bundle (CP-5) must include: `/moment/next/` activate-vs-delete + Phase T2b exit-criteria memo.
 - CompanionDashboardContainer carries a standing evidence-gate — do not remove until the 3 conditions are met, regardless of date.
 
-## Post-CP-1 sequencing (locked this checkpoint)
+## Post-CP-1 sequencing — REVISED per 2026-04-18 mid-CP-1 constraint
 
-1. **Phase 1** — Ops handoff (G1 work). Artifact: `docs/OPS_HANDOFF_G1_CONTENT_RESOLVE_FLAG.md`.
-2. **Phase 2** — Preview build via `eas build --profile preview` targeting prod backend.
-3. **Phase 3** — S1-13 Silk Integrity first live execution against preview build. Iterate until 11/11 green.
-4. **Phase 4** — S1-16 human smoke walk-through on the now-clean preview build (end-of-sprint validation, not early CP-1 prerequisite).
-5. **Phase 5** — S1-17 production flag flip; Sprint 1 closes.
+**Scope:** dev + staging only this sprint. No prod activity.
 
-Human smoke walk-through does not gate CP-1 itself — it gates S1-17 at the end of the sprint.
+1. **Phase 1** — Ops handoff (G1 work) on **staging only**. Artifact: `docs/OPS_HANDOFF_G1_CONTENT_RESOLVE_FLAG.md` (revised to drop prod steps).
+2. **Phase 2** — Preview build via `eas build --profile preview` **targeting staging backend** (not prod).
+3. **Phase 3** — S1-13 Silk Integrity first live execution against preview build on staging. Iterate until 11/11 green.
+4. **Phase 4** — S1-16 human smoke walk-through on the now-clean preview build on staging (end-of-sprint validation).
+5. **Phase 5** — **PARKED.** S1-17 production flag flip does NOT happen this sprint. Reopens only on explicit founder instruction; will carry its own future ticket + gates.
+
+Sprint 1 closes when Phase 4 is green on staging. Production rollout is a separate future engagement.
 
 ## What CP-1 did NOT decide (deliberately deferred)
 

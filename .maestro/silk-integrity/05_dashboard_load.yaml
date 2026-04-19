@@ -1,19 +1,32 @@
-# Silk Integrity Flow 05 — Dashboard Load (returning user)
-# Group B. Persona: smoke+triad (day 3/14, journey 3637).
-# Selector risk: LOW. Deny: greeting fallbacks, translation-missing.
-appId: com.kalpx.mitra
+# Silk Integrity Flow 05 — Dashboard Load (returning user, mid-journey)
+# Group B. Persona: smoke+triad (day 3/14, journey 3645).
+# State: Day 1+2 complete, Day 3 in progress, practice NOT yet done today.
+#
+# V3 behavior (JOURNEY_HOME_CONTRACT_V1): Home.tsx calls /journey/home/,
+# receives `render_home` with layout="momentum" (M10_practice_incomplete),
+# renders momentum surface: headline + body lines + h2 CTA + 3 chips.
+# This flow does NOT land on NewDashboardContainer's full surface — user
+# must tap "Continue today's practice" to open the runner + complete the
+# practice, which moves them into post-practice state. A separate flow
+# (not 05) asserts the post-practice full dashboard.
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
 - runFlow: common/login_as_smoke_persona.yaml
-# Dashboard headline + supporting render block
 - extendedWaitUntil:
-    visible:
-      pattern: ".{10,}"
-    timeout: 12000
-- assertVisible: "I Feel Triggered"
-- assertVisible: "Quick Check-in"
-# Deny-list
+    visible: ".*Welcome back.*"
+    timeout: 20000
+# Momentum layout — headline + body lines + h2 prompt + chips.
+- assertVisible: ".*Welcome back.*"
+- assertVisible: ".*Your practice is still here.*"
+- assertVisible: ".*One small step is enough.*"
+- assertVisible: "Start with your core practice"
+- assertVisible: ".*Continue today's practice.*"
+- assertVisible: ".*Start with a check-in.*"
+- assertVisible: ".*Talk with Mitra.*"
+- assertVisible: ".*I need some support.*"
+# Deny-list: legacy onboarding greetings must never render on a returning user.
 - assertNotVisible: "Welcome, friend."
 - assertNotVisible: "You're here. Begin wherever feels right."
 - takeScreenshot: silk_05_dashboard_load

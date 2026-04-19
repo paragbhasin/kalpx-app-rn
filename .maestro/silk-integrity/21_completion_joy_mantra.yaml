@@ -4,7 +4,7 @@
 # Completion family: support_joy + mantra source (bhakti_maitri bridge)
 # Phase 3 selector-patch: joy_walk_option + completion_* testIDs expected.
 # Deny-list tier: MDR-S1-12 + translation-missing
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
@@ -48,7 +48,7 @@ appId: com.kalpx.mitra
     optional: true
 - extendedWaitUntil:
     visible:
-      pattern: ".{10,}"
+      text: ".{10,}"
     timeout: 10000
 - assertNotVisible: "How did that feel?"
 - takeScreenshot: silk_21_completion_joy_mantra

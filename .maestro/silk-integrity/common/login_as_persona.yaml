@@ -1,23 +1,32 @@
 # common/login_as_persona.yaml
 # Parameterized login. Consumers pass PERSONA_EMAIL + PERSONA_PASSWORD.
 # Lands the user on the authed dashboard (QuickSupportBlock visible).
-appId: com.kalpx.mitra
+#
+# Login UI notes:
+#   - Username field placeholder = "Username" (accepts email format)
+#   - Password field placeholder = "Password"
+#   - Primary CTA text = "LOGIN" (i18n key login.loginBtn)
+#   - Tapping a field focuses it + opens keyboard; tapping next field
+#     dismisses prior keyboard automatically — we rely on this instead of
+#     `hideKeyboard` since the app uses custom input wrappers that don't
+#     expose the standard dismiss action.
+# SELECTOR_PATCH_NEEDED: add testID="login_{username,password,submit}" to
+# src/screens/Login/LoginScreen.tsx.
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
-# Email entry
-# SELECTOR_PATCH_NEEDED: login screen does not expose testID on email input;
-# relying on text placeholder — patch LoginScreen to add testID="login_email_input".
-- tapOn:
-    text: "Email"
-    optional: true
+- runFlow: connect_dev_client.yaml
+- tapOn: "Username"
 - inputText: ${PERSONA_EMAIL}
-- tapOn:
-    text: "Password"
-    optional: true
+- tapOn: "Password"
 - inputText: ${PERSONA_PASSWORD}
-- tapOn:
-    text: "Sign In"
+# Dismiss keyboard by tapping the "KalpX" header (non-input area) so LOGIN
+# becomes tappable — iOS keyboard otherwise covers the LOGIN button.
+# `hideKeyboard` fails here because the app wraps inputs in a custom
+# component that doesn't expose the standard dismiss action.
+- tapOn: "KalpX"
+- tapOn: "LOGIN"
 - waitForAnimationToEnd:
-    timeout: 10000
+    timeout: 15000
 - runFlow: wait_for_dashboard.yaml

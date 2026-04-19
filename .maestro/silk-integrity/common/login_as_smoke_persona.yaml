@@ -2,7 +2,7 @@
 # Logs in as the canonical smoke persona seeded on dev.
 # Journey 3/14. Triad: soham / permission_to_rest / mindful_55_walking.
 # Canonical dev-only password (see PERSONAS.md). Never use outside dev.
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - runFlow:
     file: login_as_persona.yaml

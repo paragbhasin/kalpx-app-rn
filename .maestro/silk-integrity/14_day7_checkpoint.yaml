@@ -5,7 +5,7 @@
 env:
   PERSONA_EMAIL: "persona_day7@kalpx.com"
   PERSONA_PASSWORD: "smoke-dev-only-do-not-use-in-prod"
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
@@ -28,7 +28,7 @@ appId: com.kalpx.mitra
     optional: true
 - extendedWaitUntil:
     visible:
-      pattern: ".{20,}"
+      text: ".{20,}"
     timeout: 12000
 - assertNotVisible: "Seven days."
 - assertNotVisible: "One week of showing up."

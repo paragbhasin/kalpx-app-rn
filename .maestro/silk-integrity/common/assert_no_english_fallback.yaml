@@ -1,7 +1,7 @@
 # common/assert_no_english_fallback.yaml
 # Enforces FALLBACK_DENY_LIST.txt at the end of every flow.
 # Any deny-listed string rendered on the current screen fails the flow.
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 # MDR-S1-10 CheckpointDay14
 - assertNotVisible: "Fourteen days. Two weeks of showing up."

@@ -3,7 +3,7 @@
 # mantra.soham / sankalp.permission_to_rest / practice.mindful_55_walking.
 # Phase 3 selector-patch: canonical triad card testIDs land concurrently
 # (Agent X adds `core_item_<kind>` to CoreItemsList children).
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
@@ -26,17 +26,17 @@ appId: com.kalpx.mitra
 # Soft label checks for belt-and-braces (pattern only, non-failing).
 - extendedWaitUntil:
     visible:
-      pattern: "(Mantra|Soham|So Ham|Soʼham|ॐ)"
+      text: "(Mantra|Soham|So Ham|Soʼham|ॐ)"
     timeout: 8000
     optional: true
 - extendedWaitUntil:
     visible:
-      pattern: "(Sankalp|permission to rest|Permission)"
+      text: "(Sankalp|permission to rest|Permission)"
     timeout: 5000
     optional: true
 - extendedWaitUntil:
     visible:
-      pattern: "(Practice|walking|Walk)"
+      text: "(Practice|walking|Walk)"
     timeout: 5000
     optional: true
 # Sovereignty deny — pre-S3-04 placeholders

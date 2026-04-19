@@ -71,3 +71,9 @@ screenshots/career_persona_*/
 .maestro/career_persona_screenshot_matrix*.yaml
 .maestro/day7/
 
+
+# Maestro test run artifacts (screenshots, junit xml)
+.maestro/silk-integrity/.results/
+bridge_*.png
+silk_*.png
+

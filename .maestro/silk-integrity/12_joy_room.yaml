@@ -1,7 +1,7 @@
 # Silk Integrity Flow 12 — Joy Room (M48, Track 1)
 # Group C. Persona: smoke+triad (joy_label must be BE-seeded).
 # Phase 3 selector-patch: joy_room_opening_line testID now expected.
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
@@ -23,7 +23,7 @@ appId: com.kalpx.mitra
     optional: true
 - extendedWaitUntil:
     visible:
-      pattern: ".{10,}"
+      text: ".{10,}"
     timeout: 10000
 - assertNotVisible: "(opening missing)"
 - takeScreenshot: silk_12_joy_room

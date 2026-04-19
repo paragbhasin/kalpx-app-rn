@@ -2,7 +2,7 @@
 # Group C. Persona: smoke+triad (growth_label + M49_inquiry_seeds seeded).
 # Phase 3 selector-patch: growth_room_opening_line + inquiry_category_*
 # testIDs now expected.
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
@@ -22,7 +22,7 @@ appId: com.kalpx.mitra
     optional: true
 - extendedWaitUntil:
     visible:
-      pattern: ".{10,}"
+      text: ".{10,}"
     timeout: 10000
 # Inquiry category chips expose testID="inquiry_category_<decision|relationship|stuck|practice|other>"
 - extendedWaitUntil:

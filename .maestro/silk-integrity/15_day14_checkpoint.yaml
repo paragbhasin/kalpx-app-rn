@@ -5,7 +5,7 @@
 env:
   PERSONA_EMAIL: "persona_day14@kalpx.com"
   PERSONA_PASSWORD: "smoke-dev-only-do-not-use-in-prod"
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
@@ -28,7 +28,7 @@ appId: com.kalpx.mitra
 # Day 14 narrative should render with interpolated count "N of 14"
 - extendedWaitUntil:
     visible:
-      pattern: "\\d+ of 14"
+      text: "\\d+ of 14"
     timeout: 12000
 # Hard deny — pre-S1-10 hardcoded templates
 - assertNotVisible: "Fourteen days. Two weeks of showing up."

@@ -4,7 +4,7 @@
 # Completion family: support_growth + mantra source
 # Phase 3 selector-patch: inquiry_category_* + completion_* testIDs expected.
 # Deny-list tier: MDR-S1-12 + translation-missing
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
@@ -56,7 +56,7 @@ appId: com.kalpx.mitra
     optional: true
 - extendedWaitUntil:
     visible:
-      pattern: ".{10,}"
+      text: ".{10,}"
     timeout: 10000
 - assertNotVisible: "How did that feel?"
 - takeScreenshot: silk_22_completion_growth_mantra

@@ -3,7 +3,7 @@
 # "The rhythm clarifies what urgency cannot." (dinacharya_rhythm_clarifies).
 # Persona: smoke+triad. Phase 3 selector-patch: inquiry_*_practice_option +
 # completion_* testIDs expected.
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
@@ -42,7 +42,7 @@ appId: com.kalpx.mitra
     optional: true
 - extendedWaitUntil:
     visible:
-      pattern: ".{10,}"
+      text: ".{10,}"
     timeout: 10000
 # INVARIANT #8 — exact string that MUST be rendered
 - assertVisible: "The rhythm clarifies what urgency cannot."

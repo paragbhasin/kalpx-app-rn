@@ -2,7 +2,7 @@
 # Cold-launch the dev-client scheme (ensures Metro + dev build path).
 # Use at flow top when the regression target is Metro-wiring itself
 # (e.g. flow 06_triad_visibility).
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: false

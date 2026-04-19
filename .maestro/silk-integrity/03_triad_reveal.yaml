@@ -2,7 +2,7 @@
 # Group A. Chains from Flow 02 (recognition → CTA → Turn 8).
 # Selector risk: YES — triad cards need testIDs.
 # Deny: "Today's anchor"/"Today's vow"/"Today's practice".
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
@@ -20,7 +20,7 @@ appId: com.kalpx.mitra
 # Triad cards — assert 3 distinct items render (via pattern-scan)
 - extendedWaitUntil:
     visible:
-      pattern: ".{10,}"
+      text: ".{10,}"
     timeout: 10000
 # Deny-list sovereignty fallbacks
 - assertNotVisible: "Today's anchor"

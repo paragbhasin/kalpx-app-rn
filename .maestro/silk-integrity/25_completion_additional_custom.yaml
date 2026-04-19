@@ -6,7 +6,7 @@
 env:
   PERSONA_EMAIL: "persona_additional_custom@kalpx.com"
   PERSONA_PASSWORD: "smoke-dev-only-do-not-use-in-prod"
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
@@ -48,7 +48,7 @@ appId: com.kalpx.mitra
     optional: true
 - extendedWaitUntil:
     visible:
-      pattern: ".{10,}"
+      text: ".{10,}"
     timeout: 10000
 - assertNotVisible: "How did that feel?"
 - takeScreenshot: silk_25_completion_additional_custom

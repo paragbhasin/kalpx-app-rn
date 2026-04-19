@@ -8,7 +8,7 @@
 # Persona: smoke+triad@kalpx.com (also any additional-seeded persona).
 # Phase 3 selector-patch: additional_items_surface testID now expected
 # (Agent X adds to AdditionalItemsSectionBlock).
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
@@ -24,7 +24,7 @@ appId: com.kalpx.mitra
 # Soft label check (non-failing) as a belt-and-braces assertion.
 - extendedWaitUntil:
     visible:
-      pattern: "(Additional|More offerings|Library)"
+      text: "(Additional|More offerings|Library)"
     timeout: 5000
     optional: true
 - takeScreenshot: silk_27_additional_items_surface

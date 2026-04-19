@@ -1,7 +1,7 @@
 # Silk Integrity Flow 02 — Onboarding Recognition (Turn 7)
 # Group A. Walks Turns 1-6 then asserts Turn 7 recognition line.
 # Persona: guest. Selector risk: YES.
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
@@ -18,7 +18,7 @@ appId: com.kalpx.mitra
 # Turn 7 — recognition beat
 - extendedWaitUntil:
     visible:
-      pattern: ".{20,}"
+      text: ".{20,}"
     timeout: 10000
 - assertNotVisible:
     text: "I'm returning"

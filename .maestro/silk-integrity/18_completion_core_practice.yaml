@@ -5,7 +5,7 @@
 # Phase 3 selector-patch: core_item_practice + practice_runner_start/complete +
 # completion_* testIDs now expected.
 # Deny-list tier: MDR-S1-12 + runner fallbacks
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
@@ -42,7 +42,7 @@ appId: com.kalpx.mitra
     optional: true
 - extendedWaitUntil:
     visible:
-      pattern: ".{10,}"
+      text: ".{10,}"
     timeout: 10000
 - assertNotVisible: "How did that feel?"
 - takeScreenshot: silk_18_completion_core_practice

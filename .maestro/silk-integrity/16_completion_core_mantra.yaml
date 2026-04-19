@@ -3,7 +3,7 @@
 # Phase 3 selector-patch: core_item_mantra + mantra_runner_start/complete +
 # completion_* testIDs now expected.
 # Deny: MDR-S1-12 "How did that feel?".
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
@@ -43,7 +43,7 @@ appId: com.kalpx.mitra
     optional: true
 - extendedWaitUntil:
     visible:
-      pattern: ".{10,}"
+      text: ".{10,}"
     timeout: 10000
 - assertNotVisible: "How did that feel?"
 - takeScreenshot: silk_16_completion_core_mantra

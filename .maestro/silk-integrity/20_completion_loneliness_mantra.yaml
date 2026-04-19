@@ -4,7 +4,7 @@
 # Completion family: support_loneliness + mantra source
 # Phase 3 selector-patch: loneliness_mantra_option + completion_* testIDs expected.
 # Deny-list tier: loneliness + MDR-S1-12
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
@@ -53,7 +53,7 @@ appId: com.kalpx.mitra
     optional: true
 - extendedWaitUntil:
     visible:
-      pattern: ".{10,}"
+      text: ".{10,}"
     timeout: 10000
 - assertNotVisible: "How did that feel?"
 - takeScreenshot: silk_20_completion_loneliness_mantra

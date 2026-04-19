@@ -8,7 +8,7 @@
 # Persona: smoke+triad@kalpx.com
 # Phase 3 selector-patch: resilience_narrative_card testID now expected.
 # Deny-list tier: generic + resilience narrative fallback
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
@@ -21,7 +21,7 @@ appId: com.kalpx.mitra
     timeout: 10000
 - extendedWaitUntil:
     visible:
-      pattern: ".{15,}"
+      text: ".{15,}"
     timeout: 10000
     optional: true
 - takeScreenshot: silk_30_resilience_narrative

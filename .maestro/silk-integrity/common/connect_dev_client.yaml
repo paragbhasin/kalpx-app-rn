@@ -1,0 +1,45 @@
+# common/connect_dev_client.yaml
+# Post-clearState bridge from Expo dev-client launcher to the Login screen.
+#
+# Gotchas learned the hard way:
+#   - On cold clearState relaunch, dev-client pops its Dev Menu sheet over
+#     the Welcome screen. Dismiss by tapping the X close button at ~75%, 34%.
+#   - Maestro text matchers are full-string regex matches, NOT substrings.
+#     "Begin your journey" does NOT match "Begin your journey →" — use the
+#     exact string (with arrow) or a .* wildcard.
+appId: com.kalpx.app
+---
+- openLink: "com.kalpx.app://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081"
+- tapOn:
+    text: "Open"
+    optional: true
+- extendedWaitUntil:
+    visible: "Continue"
+    timeout: 5000
+    optional: true
+- tapOn:
+    text: "Continue"
+    optional: true
+# Wait for Dev Menu (indicates bundle loaded) OR Welcome (if no menu popped).
+- extendedWaitUntil:
+    visible: ".*Begin your journey.*"
+    timeout: 180000
+    optional: true
+# Dev Menu modal may still be covering welcome — dismiss via X button.
+- tapOn:
+    point: "75%, 34%"
+    optional: true
+- takeScreenshot: bridge_01_welcome
+- extendedWaitUntil:
+    visible: ".*Begin your journey.*"
+    timeout: 60000
+- tapOn: "Begin your journey →"
+- extendedWaitUntil:
+    visible: "I'm returning"
+    timeout: 20000
+- takeScreenshot: bridge_02_intro
+- tapOn: "I'm returning"
+- extendedWaitUntil:
+    visible: "LOGIN"
+    timeout: 20000
+- takeScreenshot: bridge_03_login

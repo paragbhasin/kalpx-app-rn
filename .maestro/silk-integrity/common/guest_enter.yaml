@@ -1,7 +1,7 @@
 # common/guest_enter.yaml
 # Cold-open path onto onboarding-eligible state.
 # Clears auth + journey, then launches onboarding chip flow.
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true

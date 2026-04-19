@@ -11,7 +11,7 @@
 env:
   PERSONA_EMAIL: "persona_day7@kalpx.com"
   PERSONA_PASSWORD: "smoke-dev-only-do-not-use-in-prod"
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
@@ -27,7 +27,7 @@ appId: com.kalpx.mitra
     timeout: 10000
 - extendedWaitUntil:
     visible:
-      pattern: ".{10,}"
+      text: ".{10,}"
     timeout: 10000
 - takeScreenshot: silk_29_path_milestone
 - runFlow: common/assert_no_english_fallback.yaml

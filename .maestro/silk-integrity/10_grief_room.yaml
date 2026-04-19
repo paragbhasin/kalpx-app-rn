@@ -2,7 +2,7 @@
 # Group C. Persona: smoke+triad. Phase 3 selector-patch: more_support row
 # + room opening_line now expose testIDs.
 # Deny: "Grief Room" body, "I'm here if you need more.".
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
@@ -28,7 +28,7 @@ appId: com.kalpx.mitra
     optional: true
 - extendedWaitUntil:
     visible:
-      pattern: ".{15,}"
+      text: ".{15,}"
     timeout: 10000
 - assertNotVisible: "Grief Room"
 - assertNotVisible: "I'm here if you need more."

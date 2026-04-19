@@ -11,7 +11,7 @@
 env:
   PERSONA_EMAIL: "persona_welcomeback@kalpx.com"
   PERSONA_PASSWORD: "smoke-dev-only-do-not-use-in-prod"
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
@@ -27,7 +27,7 @@ appId: com.kalpx.mitra
     timeout: 10000
 - extendedWaitUntil:
     visible:
-      pattern: ".{15,}"
+      text: ".{15,}"
     timeout: 10000
 - assertNotVisible: "Welcome, friend."
 - assertNotVisible: "You're here. Begin wherever feels right."

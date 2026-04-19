@@ -2,7 +2,7 @@
 # Waits until dashboard is render-ready.
 # Readiness signal = QuickSupportBlock mounted (accessibilityLabel="quick_support_block")
 # OR the "I Feel Triggered" primary chip visible.
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - extendedWaitUntil:
     visible:

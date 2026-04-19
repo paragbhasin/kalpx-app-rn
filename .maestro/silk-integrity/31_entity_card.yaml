@@ -8,7 +8,7 @@
 # Persona: smoke+triad@kalpx.com
 # Phase 3 selector-patch: entity_recognition_card testID now expected.
 # Deny-list tier: generic
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
@@ -21,7 +21,7 @@ appId: com.kalpx.mitra
     timeout: 10000
 - extendedWaitUntil:
     visible:
-      pattern: ".{10,}"
+      text: ".{10,}"
     timeout: 10000
     optional: true
 - takeScreenshot: silk_31_entity_card

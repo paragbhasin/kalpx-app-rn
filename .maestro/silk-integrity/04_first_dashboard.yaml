@@ -1,7 +1,7 @@
 # Silk Integrity Flow 04 — First Dashboard After Onboarding
 # Group A. Chains from Flow 03. Selector risk: LOW.
 # Deny: "Welcome, friend.", "You're here. Begin wherever feels right.".
-appId: com.kalpx.mitra
+appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true

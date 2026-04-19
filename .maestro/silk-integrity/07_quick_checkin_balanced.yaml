@@ -8,6 +8,9 @@ appId: com.kalpx.app
     clearState: false
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
+# Returning user may land on the momentum ContinueJourney surface
+# (§E.1). Advance past it to expose the QuickSupportBlock testIDs.
+- runFlow: common/enter_core_view.yaml
 - tapOn:
     id: "quick_support_checkin"
 - waitForAnimationToEnd:

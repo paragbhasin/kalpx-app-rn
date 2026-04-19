@@ -8,11 +8,17 @@ appId: com.kalpx.app
     clearState: false
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
-# Growth chip — Track 1 founder-locked label: ".*I want to go deeper.*"
+# Advance past momentum ContinueJourney (§E.1) to full dashboard.
+- runFlow: common/enter_core_view.yaml
+# Growth chip — Track 1 founder-locked. Runtime 2026-04-19: chip's
+# display label doesn't round-trip via accessibilityText; stable key
+# is the v3 §G testID.
 - extendedWaitUntil:
-    visible: ".*I want to go deeper.*"
+    visible:
+      id: "quick_support_growth_chip"
     timeout: 10000
-- tapOn: ".*I want to go deeper.*"
+- tapOn:
+    id: "quick_support_growth_chip"
 - waitForAnimationToEnd:
     timeout: 8000
 - extendedWaitUntil:

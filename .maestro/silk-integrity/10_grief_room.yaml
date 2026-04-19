@@ -8,6 +8,8 @@ appId: com.kalpx.app
     clearState: false
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
+# Advance past momentum ContinueJourney (§E.1) to full dashboard.
+- runFlow: common/enter_core_view.yaml
 # Open MoreSupportSheet
 - tapOn:
     text: ".*More support.*"

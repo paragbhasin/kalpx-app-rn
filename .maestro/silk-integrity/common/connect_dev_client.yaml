@@ -29,6 +29,15 @@ appId: com.kalpx.app
 - tapOn:
     text: "Open"
     optional: true
+# First-launch iOS system permission dialog (post-clearState reinstall
+# often triggers notifications permission). Dismiss whichever branch
+# the sim shows.
+- tapOn:
+    text: "Allow"
+    optional: true
+- tapOn:
+    text: "Don.t Allow"
+    optional: true
 # Dismiss first-run tutorial if it appears before the Dev Menu proper.
 - extendedWaitUntil:
     visible: "Continue"
@@ -50,9 +59,12 @@ appId: com.kalpx.app
 - tapOn:
     point: "75%, 34%"
     optional: true
-# Bundle may still be loading under the menu. Now wait for Welcome.
+# Bundle may still be loading under the menu. Now wait for Welcome —
+# keyed on stable testID (splash CTA has no text label on iOS; label
+# is rendered via LinearGradient child).
 - extendedWaitUntil:
-    visible: ".*Begin your journey.*"
+    visible:
+      id: "onboarding_begin_journey_cta"
     timeout: 180000
 # If Dev Menu re-appears (race: menu pops AFTER bundle-loads event),
 # tap X once more defensively.
@@ -62,11 +74,16 @@ appId: com.kalpx.app
 - tapOn:
     point: "75%, 34%"
     optional: true
-- tapOn: ".*Begin your journey.*"
+- tapOn:
+    id: "onboarding_begin_journey_cta"
+# Turn 1 (conversation_turn): tap the "I'm returning" secondary link
+# to route to Login. Stable testID landed §A.3 / Wave 1.
 - extendedWaitUntil:
-    visible: "I'm returning"
+    visible:
+      id: "onboarding_im_returning"
     timeout: 20000
-- tapOn: "I'm returning"
+- tapOn:
+    id: "onboarding_im_returning"
 - extendedWaitUntil:
     visible: "LOGIN"
     timeout: 20000

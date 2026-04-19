@@ -1,6 +1,7 @@
 # Silk Integrity Flow 13 — Growth Room (M49, Track 1)
 # Group C. Persona: smoke+triad (growth_label + M49_inquiry_seeds seeded).
-# Selector risk: LOW for chip, HIGH for inquiry categories.
+# Phase 3 selector-patch: growth_room_opening_line + inquiry_category_*
+# testIDs now expected.
 appId: com.kalpx.mitra
 ---
 - launchApp:
@@ -16,10 +17,24 @@ appId: com.kalpx.mitra
     timeout: 8000
 - extendedWaitUntil:
     visible:
+      id: "growth_room_opening_line"
+    timeout: 10000
+    optional: true
+- extendedWaitUntil:
+    visible:
       pattern: ".{10,}"
     timeout: 10000
-# Inquiry category seeds should be present (at least one tappable chip)
-# SELECTOR_PATCH_NEEDED: inquiry category chips need testID="inquiry_category_<cat>".
+# Inquiry category chips expose testID="inquiry_category_<decision|relationship|stuck|practice|other>"
+- extendedWaitUntil:
+    visible:
+      id: "inquiry_category_decision"
+    timeout: 5000
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "inquiry_seat_prompt"
+    timeout: 5000
+    optional: true
 - assertNotVisible: "(opening missing)"
 - takeScreenshot: silk_13_growth_room
 - runFlow: common/assert_no_english_fallback.yaml

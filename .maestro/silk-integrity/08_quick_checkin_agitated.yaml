@@ -1,21 +1,30 @@
 # Silk Integrity Flow 08 — Quick Check-in (agitated → suggestions)
-# Group B. Persona: smoke+triad. Selector risk: MEDIUM.
+# Group B. Persona: smoke+triad. Phase 3 selector-patch: checkin state
+# chips now expose testID="checkin_state_<state>" (Agent X adds to
+# QuickCheckinBlock).
 appId: com.kalpx.mitra
 ---
 - launchApp:
     clearState: true
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
-- tapOn: "Quick Check-in"
+- tapOn:
+    id: "quick_support_checkin"
 - waitForAnimationToEnd:
     timeout: 8000
-# Select agitated/overwhelmed/tense state
-# SELECTOR_PATCH_NEEDED: checkin state chips need testID="checkin_state_agitated" etc.
+- tapOn:
+    id: "checkin_state_agitated"
+    optional: true
 - tapOn:
     text: "(Agitated|Overwhelmed|Tense|Anxious|Scattered)"
     optional: true
 - waitForAnimationToEnd
-# Suggestions surface — should display at least one support option
+# Suggestions surface — at least one suggestion row with testID.
+- extendedWaitUntil:
+    visible:
+      id: "checkin_suggestion_0"
+    timeout: 10000
+    optional: true
 - extendedWaitUntil:
     visible:
       pattern: ".{15,}"

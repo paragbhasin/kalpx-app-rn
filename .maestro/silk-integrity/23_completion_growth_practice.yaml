@@ -1,7 +1,8 @@
 # Silk Integrity Flow 23 — Completion Return (growth × practice)
 # Group E. INVARIANT #8 (ABSOLUTE): anchor MUST be
 # "The rhythm clarifies what urgency cannot." (dinacharya_rhythm_clarifies).
-# Persona: smoke+triad. Selector risk: MEDIUM.
+# Persona: smoke+triad. Phase 3 selector-patch: inquiry_*_practice_option +
+# completion_* testIDs expected.
 appId: com.kalpx.mitra
 ---
 - launchApp:
@@ -14,17 +15,30 @@ appId: com.kalpx.mitra
 - tapOn: "I want to go deeper"
 - waitForAnimationToEnd:
     timeout: 8000
-# SELECTOR_PATCH_NEEDED: growth practice option testID.
+- tapOn:
+    id: "inquiry_practice_practice_option"
+    optional: true
 - tapOn:
     text: "(practice|ritual|walking|rhythm|dinacharya)"
     optional: true
 - waitForAnimationToEnd
 - tapOn:
+    id: "practice_runner_start"
+    optional: true
+- tapOn:
     text: "(Start|Begin|Play)"
     optional: true
 - waitForAnimationToEnd
 - tapOn:
+    id: "practice_runner_complete"
+    optional: true
+- tapOn:
     text: "(Done|Complete|I'm done)"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "completion_wisdom_anchor_line"
+    timeout: 10000
     optional: true
 - extendedWaitUntil:
     visible:

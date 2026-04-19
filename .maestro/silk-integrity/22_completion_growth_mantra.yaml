@@ -2,8 +2,8 @@
 # Flow group: E (Completion flows)
 # Persona: smoke+triad@kalpx.com
 # Completion family: support_growth + mantra source
+# Phase 3 selector-patch: inquiry_category_* + completion_* testIDs expected.
 # Deny-list tier: MDR-S1-12 + translation-missing
-# Known selector risk: MEDIUM
 appId: com.kalpx.mitra
 ---
 - launchApp:
@@ -16,22 +16,43 @@ appId: com.kalpx.mitra
 - tapOn: "I want to go deeper"
 - waitForAnimationToEnd:
     timeout: 8000
-# Pick an inquiry category, then drill into a mantra offering
-# SELECTOR_PATCH_NEEDED: inquiry category testIDs needed.
+# Pick an inquiry category, then drill into a mantra offering.
+- tapOn:
+    id: "inquiry_category_decision"
+    optional: true
 - tapOn:
     text: "(decision|relationship|stuck|practice)"
     optional: true
 - waitForAnimationToEnd
 - tapOn:
+    id: "inquiry_decision_mantra_option"
+    optional: true
+- tapOn:
     text: "(chant|mantra|inquiry)"
     optional: true
 - waitForAnimationToEnd
+- tapOn:
+    id: "mantra_runner_start"
+    optional: true
 - tapOn:
     text: "(Start|Begin|Play)"
     optional: true
 - waitForAnimationToEnd
 - tapOn:
+    id: "mantra_runner_complete"
+    optional: true
+- tapOn:
     text: "(Done|Complete|I'm done)"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "completion_message"
+    timeout: 10000
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "completion_wisdom_anchor_line"
+    timeout: 10000
     optional: true
 - extendedWaitUntil:
     visible:

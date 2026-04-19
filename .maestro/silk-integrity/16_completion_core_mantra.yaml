@@ -1,6 +1,8 @@
 # Silk Integrity Flow 16 — Completion Return (core × mantra)
 # Group E. Persona: smoke+triad. Family: core_mantra → gita anchor.
-# Selector risk: MEDIUM. Deny: MDR-S1-12 "How did that feel?".
+# Phase 3 selector-patch: core_item_mantra + mantra_runner_start/complete +
+# completion_* testIDs now expected.
+# Deny: MDR-S1-12 "How did that feel?".
 appId: com.kalpx.mitra
 ---
 - launchApp:
@@ -8,23 +10,37 @@ appId: com.kalpx.mitra
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
 # Tap the mantra triad card to open mantra runner
-# SELECTOR_PATCH_NEEDED: triad card needs testID="core_item_mantra".
 - tapOn:
-    text: "(Mantra|Soham|So Ham|ॐ)"
+    id: "core_item_mantra"
 - waitForAnimationToEnd:
     timeout: 8000
-# Start + complete the runner
-# SELECTOR_PATCH_NEEDED: runner Start + Done controls need testID="mantra_runner_start"/"mantra_runner_complete".
+# Start + complete the runner (testIDs with soft label fallback)
+- tapOn:
+    id: "mantra_runner_start"
+    optional: true
 - tapOn:
     text: "(Start|Begin|Play)"
     optional: true
 - waitForAnimationToEnd
 - tapOn:
+    id: "mantra_runner_complete"
+    optional: true
+- tapOn:
     text: "(Done|Complete|I'm done)"
     optional: true
 - waitForAnimationToEnd:
     timeout: 10000
-# CompletionReturnTransient — core_mantra anchor (gita)
+# CompletionReturnTransient — core_mantra anchor (gita).
+- extendedWaitUntil:
+    visible:
+      id: "completion_message"
+    timeout: 10000
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "completion_wisdom_anchor_line"
+    timeout: 10000
+    optional: true
 - extendedWaitUntil:
     visible:
       pattern: ".{10,}"

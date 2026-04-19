@@ -5,13 +5,12 @@
 #   L3 /journey/home/ returns continuity slot | L4 FE mounts ContinuityMirrorCard
 #   L5 continuity line renders | L6 no greeting fallback
 #   L7 MitraDecisionLog row |
-# Persona: persona_welcomeback (SEED REQUIRED — see PERSONAS.md)
-#   — journey > 7d since last activity so continuity fires
+# Persona: persona_welcomeback (canonical seeded persona; 35d past end_date_local).
+# Phase 3 selector-patch: continuity_mirror_card testID now expected.
 # Deny-list tier: greeting fallbacks
-# Known selector risk: MEDIUM — ContinuityMirrorCard in src/extensions/moments/continuity_mirror_card
 env:
   PERSONA_EMAIL: "persona_welcomeback@kalpx.com"
-  PERSONA_PASSWORD: "persona-welcomeback-dev-only"
+  PERSONA_PASSWORD: "smoke-dev-only-do-not-use-in-prod"
 appId: com.kalpx.mitra
 ---
 - launchApp:
@@ -22,8 +21,10 @@ appId: com.kalpx.mitra
       PERSONA_EMAIL: ${PERSONA_EMAIL}
       PERSONA_PASSWORD: ${PERSONA_PASSWORD}
 - runFlow: common/wait_for_dashboard.yaml
-# Continuity card should render above the triad
-# SELECTOR_PATCH_NEEDED: ContinuityMirrorCard needs testID="continuity_mirror_card".
+- extendedWaitUntil:
+    visible:
+      id: "continuity_mirror_card"
+    timeout: 10000
 - extendedWaitUntil:
     visible:
       pattern: ".{15,}"

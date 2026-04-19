@@ -1,23 +1,24 @@
 # Silk Integrity Flow 17 — Completion Return (core × sankalp)
 # Flow group: E (Completion flows)
-# 7-layer coverage — see flow 16 template.
 # Persona: smoke+triad@kalpx.com (triad sankalp.permission_to_rest locked)
 # Completion family: core_sankalp → yoga_sutras wisdom anchor
+# Phase 3 selector-patch: core_item_sankalp + sankalp_hold + completion_*
+# testIDs now expected.
 # Deny-list tier: MDR-S1-12
-# Known selector risk: MEDIUM
 appId: com.kalpx.mitra
 ---
 - launchApp:
     clearState: true
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
-# SELECTOR_PATCH_NEEDED: triad sankalp card needs testID="core_item_sankalp".
 - tapOn:
-    text: "(Sankalp|permission to rest|Permission)"
+    id: "core_item_sankalpa"
 - waitForAnimationToEnd:
     timeout: 8000
-# SankalpHoldBlock — hold to complete
-# SELECTOR_PATCH_NEEDED: sankalp hold button needs testID="sankalp_hold".
+# SankalpHoldBlock — hold to complete.
+- longPressOn:
+    id: "sankalp_hold"
+    optional: true
 - longPressOn:
     text: "(Hold|Press|Begin)"
     optional: true
@@ -25,6 +26,16 @@ appId: com.kalpx.mitra
     timeout: 10000
 - tapOn:
     text: "(Done|Complete|I'm done)"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "completion_message"
+    timeout: 10000
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "completion_wisdom_anchor_line"
+    timeout: 10000
     optional: true
 - extendedWaitUntil:
     visible:

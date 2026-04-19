@@ -6,17 +6,19 @@
 #   L5 narrative visible | L6 no fallback tone regression
 #   L7 MitraDecisionLog row |
 # Persona: smoke+triad@kalpx.com
+# Phase 3 selector-patch: resilience_narrative_card testID now expected.
 # Deny-list tier: generic + resilience narrative fallback
-# Known selector risk: HIGH — card testID unknown
 appId: com.kalpx.mitra
 ---
 - launchApp:
     clearState: true
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
-# Scroll to reveal resilience narrative card (may be below fold)
 - scroll
-# SELECTOR_PATCH_NEEDED: resilience narrative card needs testID="resilience_narrative_card".
+- extendedWaitUntil:
+    visible:
+      id: "resilience_narrative_card"
+    timeout: 10000
 - extendedWaitUntil:
     visible:
       pattern: ".{15,}"

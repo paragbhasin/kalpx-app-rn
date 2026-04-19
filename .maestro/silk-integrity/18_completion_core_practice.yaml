@@ -2,29 +2,44 @@
 # Flow group: E (Completion flows)
 # Persona: smoke+triad@kalpx.com (triad practice.mindful_55_walking locked)
 # Completion family: core_practice → ayurveda/dinacharya wisdom anchor
+# Phase 3 selector-patch: core_item_practice + practice_runner_start/complete +
+# completion_* testIDs now expected.
 # Deny-list tier: MDR-S1-12 + runner fallbacks
-# Known selector risk: MEDIUM
 appId: com.kalpx.mitra
 ---
 - launchApp:
     clearState: true
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
-# SELECTOR_PATCH_NEEDED: triad practice card needs testID="core_item_practice".
 - tapOn:
-    text: "(Practice|walking|Walk|Mindful)"
+    id: "core_item_ritual"
 - waitForAnimationToEnd:
     timeout: 8000
-# SELECTOR_PATCH_NEEDED: practice runner Start + Done need testIDs.
+- tapOn:
+    id: "practice_runner_start"
+    optional: true
 - tapOn:
     text: "(Start|Begin|Play)"
     optional: true
 - waitForAnimationToEnd
 - tapOn:
+    id: "practice_runner_complete"
+    optional: true
+- tapOn:
     text: "(Done|Complete|I'm done)"
     optional: true
 - waitForAnimationToEnd:
     timeout: 10000
+- extendedWaitUntil:
+    visible:
+      id: "completion_message"
+    timeout: 10000
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "completion_wisdom_anchor_line"
+    timeout: 10000
+    optional: true
 - extendedWaitUntil:
     visible:
       pattern: ".{10,}"

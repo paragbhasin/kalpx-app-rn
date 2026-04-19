@@ -2,8 +2,8 @@
 # Flow group: E (Completion flows)
 # Persona: smoke+triad@kalpx.com
 # Completion family: support_loneliness + mantra source
+# Phase 3 selector-patch: loneliness_mantra_option + completion_* testIDs expected.
 # Deny-list tier: loneliness + MDR-S1-12
-# Known selector risk: MEDIUM
 appId: com.kalpx.mitra
 ---
 - launchApp:
@@ -13,22 +13,43 @@ appId: com.kalpx.mitra
 - tapOn:
     text: "More support"
 - waitForAnimationToEnd
-# SELECTOR_PATCH_NEEDED: loneliness row testID.
+- tapOn:
+    id: "more_support_loneliness_row"
+    optional: true
 - tapOn:
     text: "(lonely|loneliness|alone|isolation)"
     optional: true
 - waitForAnimationToEnd:
     timeout: 8000
 - tapOn:
+    id: "loneliness_mantra_option"
+    optional: true
+- tapOn:
     text: "(chant|mantra|soham|companioned)"
     optional: true
 - waitForAnimationToEnd
+- tapOn:
+    id: "mantra_runner_start"
+    optional: true
 - tapOn:
     text: "(Start|Begin|Play)"
     optional: true
 - waitForAnimationToEnd
 - tapOn:
+    id: "mantra_runner_complete"
+    optional: true
+- tapOn:
     text: "(Done|Complete|I'm done)"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "completion_message"
+    timeout: 10000
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "completion_wisdom_anchor_line"
+    timeout: 10000
     optional: true
 - extendedWaitUntil:
     visible:

@@ -1,29 +1,44 @@
 # Silk Integrity Flow 06 — Triad Visibility (METRO BUG REGRESSION GUARD)
 # Group B. Asserts all 3 smoke-persona triad items mount on dashboard:
 # mantra.soham / sankalp.permission_to_rest / practice.mindful_55_walking.
-# Selector risk: YES — triad cards pattern-scan only until testIDs land.
+# Phase 3 selector-patch: canonical triad card testIDs land concurrently
+# (Agent X adds `core_item_<kind>` to CoreItemsList children).
 appId: com.kalpx.mitra
 ---
 - launchApp:
     clearState: true
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
-# Expect triad items to be visible on the dashboard. Use authored item labels
-# for the seeded triad persona (soham / permission_to_rest / mindful_55_walking)
-# OR the resolved core-items eyebrow when present.
-# SELECTOR_PATCH_NEEDED: triad cards need testID="core_item_mantra"/"core_item_sankalp"/"core_item_practice".
+# Expect triad items to be visible on the dashboard — strong testID assertions
+# first, with a label pattern fallback while Phase 3 rollout completes.
 - extendedWaitUntil:
     visible:
-      pattern: "(Mantra|Soham|So Ham|Soʼham|ॐ)"
+      id: "core_item_mantra"
     timeout: 15000
 - extendedWaitUntil:
     visible:
-      pattern: "(Sankalp|permission to rest|Permission)"
+      id: "core_item_sankalpa"
     timeout: 10000
 - extendedWaitUntil:
     visible:
-      pattern: "(Practice|walking|Walk)"
+      id: "core_item_ritual"
     timeout: 10000
+# Soft label checks for belt-and-braces (pattern only, non-failing).
+- extendedWaitUntil:
+    visible:
+      pattern: "(Mantra|Soham|So Ham|Soʼham|ॐ)"
+    timeout: 8000
+    optional: true
+- extendedWaitUntil:
+    visible:
+      pattern: "(Sankalp|permission to rest|Permission)"
+    timeout: 5000
+    optional: true
+- extendedWaitUntil:
+    visible:
+      pattern: "(Practice|walking|Walk)"
+    timeout: 5000
+    optional: true
 # Sovereignty deny — pre-S3-04 placeholders
 - assertNotVisible: "Today's anchor"
 - assertNotVisible: "Today's vow"

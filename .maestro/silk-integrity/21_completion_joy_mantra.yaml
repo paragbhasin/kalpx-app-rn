@@ -2,8 +2,8 @@
 # Flow group: E (Completion flows)
 # Persona: smoke+triad@kalpx.com
 # Completion family: support_joy + mantra source (bhakti_maitri bridge)
+# Phase 3 selector-patch: joy_walk_option + completion_* testIDs expected.
 # Deny-list tier: MDR-S1-12 + translation-missing
-# Known selector risk: MEDIUM
 appId: com.kalpx.mitra
 ---
 - launchApp:
@@ -16,17 +16,35 @@ appId: com.kalpx.mitra
 - tapOn: "I'm in a good place"
 - waitForAnimationToEnd:
     timeout: 8000
-# SELECTOR_PATCH_NEEDED: joy walk/mantra option testID="joy_walk_option" etc.
+- tapOn:
+    id: "joy_walk_option"
+    optional: true
 - tapOn:
     text: "(chant|mantra|bhakti|gratitude)"
     optional: true
 - waitForAnimationToEnd
 - tapOn:
+    id: "mantra_runner_start"
+    optional: true
+- tapOn:
     text: "(Start|Begin|Play)"
     optional: true
 - waitForAnimationToEnd
 - tapOn:
+    id: "mantra_runner_complete"
+    optional: true
+- tapOn:
     text: "(Done|Complete|I'm done)"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "completion_message"
+    timeout: 10000
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "completion_wisdom_anchor_line"
+    timeout: 10000
     optional: true
 - extendedWaitUntil:
     visible:

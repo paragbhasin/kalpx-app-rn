@@ -5,12 +5,12 @@
 #   L3 /journey/home/ returns milestone slot | L4 FE mounts PathMilestoneBanner
 #   L5 banner renders | L6 no fallback
 #   L7 MitraDecisionLog row |
-# Persona: persona_day7 (triggers the 7-day milestone banner)
+# Persona: persona_day7 (triggers the 7-day milestone banner).
+# Phase 3 selector-patch: path_milestone_banner testID now expected.
 # Deny-list tier: generic + translation-missing
-# Known selector risk: MEDIUM — PathMilestoneBanner in src/extensions/moments/path_milestone_banner
 env:
   PERSONA_EMAIL: "persona_day7@kalpx.com"
-  PERSONA_PASSWORD: "persona-day7-dev-only"
+  PERSONA_PASSWORD: "smoke-dev-only-do-not-use-in-prod"
 appId: com.kalpx.mitra
 ---
 - launchApp:
@@ -21,7 +21,10 @@ appId: com.kalpx.mitra
       PERSONA_EMAIL: ${PERSONA_EMAIL}
       PERSONA_PASSWORD: ${PERSONA_PASSWORD}
 - runFlow: common/wait_for_dashboard.yaml
-# SELECTOR_PATCH_NEEDED: PathMilestoneBanner needs testID="path_milestone_banner".
+- extendedWaitUntil:
+    visible:
+      id: "path_milestone_banner"
+    timeout: 10000
 - extendedWaitUntil:
     visible:
       pattern: ".{10,}"

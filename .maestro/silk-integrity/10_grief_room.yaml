@@ -1,5 +1,6 @@
 # Silk Integrity Flow 10 — Grief Room (M46)
-# Group C. Persona: smoke+triad. Selector risk: MEDIUM.
+# Group C. Persona: smoke+triad. Phase 3 selector-patch: more_support row
+# + room opening_line now expose testIDs.
 # Deny: "Grief Room" body, "I'm here if you need more.".
 appId: com.kalpx.mitra
 ---
@@ -11,14 +12,20 @@ appId: com.kalpx.mitra
 - tapOn:
     text: "More support"
 - waitForAnimationToEnd
-# Grief row inside the sheet
-# SELECTOR_PATCH_NEEDED: grief row in MoreSupportSheet needs testID="more_support_grief_row".
+- tapOn:
+    id: "more_support_grief_row"
+    optional: true
 - tapOn:
     text: "(grief|loss|heavy|mourning)"
     optional: true
 - waitForAnimationToEnd:
     timeout: 8000
-# Grief room opening line — pattern check; body must not be "Grief Room"
+# Grief room opening line — testID-first, pattern fallback.
+- extendedWaitUntil:
+    visible:
+      id: "grief_room_opening_line"
+    timeout: 10000
+    optional: true
 - extendedWaitUntil:
     visible:
       pattern: ".{15,}"

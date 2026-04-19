@@ -1,10 +1,9 @@
 # Silk Integrity Flow 19 — Completion Return (grief × mantra)
 # Flow group: E (Completion flows)
-# 7-layer coverage — support_grief + mantra source variant
 # Persona: smoke+triad@kalpx.com
 # Completion family: support_grief → source-aware wisdom anchor
+# Phase 3 selector-patch: grief_mantra_option + completion_* testIDs expected.
 # Deny-list tier: grief + MDR-S1-12
-# Known selector risk: MEDIUM
 appId: com.kalpx.mitra
 ---
 - launchApp:
@@ -14,23 +13,44 @@ appId: com.kalpx.mitra
 - tapOn:
     text: "More support"
 - waitForAnimationToEnd
-# SELECTOR_PATCH_NEEDED: grief row testID.
+- tapOn:
+    id: "more_support_grief_row"
+    optional: true
 - tapOn:
     text: "(grief|loss|heavy|mourning)"
     optional: true
 - waitForAnimationToEnd:
     timeout: 8000
-# Enter a mantra suggestion inside grief room
+# Enter a mantra suggestion inside grief room.
+- tapOn:
+    id: "grief_mantra_option"
+    optional: true
 - tapOn:
     text: "(chant|mantra|soham|companioned)"
     optional: true
 - waitForAnimationToEnd
 - tapOn:
+    id: "mantra_runner_start"
+    optional: true
+- tapOn:
     text: "(Start|Begin|Play)"
     optional: true
 - waitForAnimationToEnd
 - tapOn:
+    id: "mantra_runner_complete"
+    optional: true
+- tapOn:
     text: "(Done|Complete|I'm done)"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "completion_message"
+    timeout: 10000
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "completion_wisdom_anchor_line"
+    timeout: 10000
     optional: true
 - extendedWaitUntil:
     visible:

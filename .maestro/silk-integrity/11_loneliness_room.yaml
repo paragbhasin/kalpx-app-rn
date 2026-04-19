@@ -1,5 +1,6 @@
 # Silk Integrity Flow 11 — Loneliness Room (M47)
-# Group C. Persona: smoke+triad. Selector risk: MEDIUM.
+# Group C. Persona: smoke+triad. Phase 3 selector-patch: more_support row
+# + room opening_line now expose testIDs.
 # Deny: "Loneliness Room" body, "I'm here if you need more.".
 appId: com.kalpx.mitra
 ---
@@ -10,12 +11,19 @@ appId: com.kalpx.mitra
 - tapOn:
     text: "More support"
 - waitForAnimationToEnd
-# SELECTOR_PATCH_NEEDED: loneliness row in MoreSupportSheet needs testID="more_support_loneliness_row".
+- tapOn:
+    id: "more_support_loneliness_row"
+    optional: true
 - tapOn:
     text: "(lonely|loneliness|alone|isolation)"
     optional: true
 - waitForAnimationToEnd:
     timeout: 8000
+- extendedWaitUntil:
+    visible:
+      id: "loneliness_room_opening_line"
+    timeout: 10000
+    optional: true
 - extendedWaitUntil:
     visible:
       pattern: ".{15,}"

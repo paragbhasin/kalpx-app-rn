@@ -6,7 +6,9 @@ appId: com.kalpx.mitra
     clearState: true
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
-- tapOn: "I Feel Triggered"
+# Phase 3: QuickSupportBlock exposes testID="quick_support_triggered".
+- tapOn:
+    id: "quick_support_triggered"
 - waitForAnimationToEnd:
     timeout: 10000
 # Trigger-reset screen should render prompt copy

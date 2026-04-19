@@ -1,11 +1,11 @@
 # Silk Integrity Flow 26 — Completion Return (additional × recommended)
 # Flow group: E (Completion flows)
-# Persona: persona_additional_recommended (SEED REQUIRED — see PERSONAS.md)
+# Persona: persona_additional_recommended (canonical seeded persona).
+# Phase 3 selector-patch: additional_items_* + completion_* testIDs expected.
 # Deny-list tier: MDR-S1-12 + runner fallbacks
-# Known selector risk: HIGH
 env:
   PERSONA_EMAIL: "persona_additional_recommended@kalpx.com"
-  PERSONA_PASSWORD: "persona-addrec-dev-only"
+  PERSONA_PASSWORD: "smoke-dev-only-do-not-use-in-prod"
 appId: com.kalpx.mitra
 ---
 - launchApp:
@@ -16,13 +16,17 @@ appId: com.kalpx.mitra
       PERSONA_EMAIL: ${PERSONA_EMAIL}
       PERSONA_PASSWORD: ${PERSONA_PASSWORD}
 - runFlow: common/wait_for_dashboard.yaml
-# SELECTOR_PATCH_NEEDED: recommended chip testID needed.
+- scroll
+- extendedWaitUntil:
+    visible:
+      id: "additional_items_surface"
+    timeout: 8000
+    optional: true
+- tapOn:
+    id: "additional_item_0"
+    optional: true
 - tapOn:
     text: "(Recommended|Suggested|Additional)"
-    optional: true
-- waitForAnimationToEnd
-- tapOn:
-    index: 0
     optional: true
 - waitForAnimationToEnd
 - tapOn:
@@ -31,6 +35,16 @@ appId: com.kalpx.mitra
 - waitForAnimationToEnd
 - tapOn:
     text: "(Done|Complete|I'm done)"
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "completion_message"
+    timeout: 10000
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: "completion_wisdom_anchor_line"
+    timeout: 10000
     optional: true
 - extendedWaitUntil:
     visible:

@@ -63,3 +63,11 @@ screenshots/mitra-v3/
 !screenshots/day_*/
 !screenshots/welcome_back/
 
+# MDR-S1 hygiene (2026-04-18) — local auditing artifacts that must not
+# ship in the repo. If a committed copy exists it should be removed via
+# `git rm -r --cached <path>` before these entries take effect.
+screenshots/career_deeplink_*/
+screenshots/career_persona_*/
+.maestro/career_persona_screenshot_matrix*.yaml
+.maestro/day7/
+

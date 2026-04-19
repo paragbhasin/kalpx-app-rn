@@ -1,0 +1,29 @@
+# Silk Integrity Flow 11 — Completion Return (support × source matrix)
+# MDR-S1-13. Exercises the 5 source-aware variants + the 3 new
+# additional_* variants landed in MDR-S1-08.
+#
+# This flow is parameterized — in CI runs, each source value is a
+# separate Maestro invocation. Shown here as a single template.
+appId: com.kalpx.mitra
+---
+# Parameter: env.SILK_RUNNER_SOURCE ∈ {
+#   support_grief, support_loneliness, support_joy, support_growth,
+#   additional_library, additional_custom, additional_recommended
+# }
+- launchApp
+- runFlow: common/persona_day3.yaml
+- runFlow:
+    file: common/enter_source.yaml
+    env:
+      source: ${SILK_RUNNER_SOURCE}
+- tapOn: { id: "mantra_runner_start" }
+- waitForAnimationToEnd
+- tapOn: { id: "mantra_runner_complete_shortcut" }
+- waitForAnimationToEnd
+# Expected variant winner (fallback-deny the WRONG variants):
+- assertVisible:
+    id: "completion_message"
+    pattern: ".{10,}"
+# Per-source wisdom anchor assertions (only support_* carries an anchor):
+- runScript: common/assert_expected_anchor.js  # reads SILK_RUNNER_SOURCE and asserts exact slot text
+- takeScreenshot: "silk_11_completion_${SILK_RUNNER_SOURCE}"

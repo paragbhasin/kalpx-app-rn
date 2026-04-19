@@ -1,0 +1,18 @@
+# Silk Integrity Flow 03 — ContinueJourney / journey_home
+# MDR-S1-13. Verifies /journey/home/ response_type + render_home shape.
+appId: com.kalpx.mitra
+---
+- launchApp
+- runFlow: common/persona_day3.yaml
+- assertVisible: { id: "continue_journey_card" }
+# home.response_type = render_home
+- assertVisible:
+    pattern: ".{20,}"
+    id: "home_headline"
+- assertVisible:
+    pattern: ".{20,}"
+    id: "home_body_lines"
+# No fallback English
+- assertNotVisible: "Welcome, friend."
+- assertNotVisible: "You're here. Begin wherever feels right."
+- takeScreenshot: silk_03_home_contextual

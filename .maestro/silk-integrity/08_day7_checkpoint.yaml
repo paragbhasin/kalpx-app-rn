@@ -1,0 +1,17 @@
+# Silk Integrity Flow 08 — Day 7 Checkpoint (M24)
+# MDR-S1-13. M24 is the Phase C second pilot — full sovereignty.
+appId: com.kalpx.mitra
+---
+- launchApp
+- runFlow: common/persona_day7.yaml
+- assertVisible: { id: "checkpoint_day_7_narrative" }
+- assertVisible: { id: "checkpoint_day_7_eyebrow" }
+- assertVisible: { id: "checkpoint_day_7_headline" }
+# Sovereignty: no hardcoded English templates
+- assertNotVisible: "Seven days."
+- assertNotVisible: "One week of showing up."
+- takeScreenshot: silk_08_day7
+# Decision CTAs
+- assertVisible: { id: "checkpoint_cta_continue_same" }
+- assertVisible: { id: "checkpoint_cta_deepen" }
+- assertVisible: { id: "checkpoint_cta_change_focus" }

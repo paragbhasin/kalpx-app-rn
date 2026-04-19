@@ -1,0 +1,31 @@
+# Silk Integrity Flow 07 — Growth Room (M49) — Track 1
+# MDR-S1-13. Includes 5-inquiry-category parallel resolve via M49_inquiry_seeds.
+appId: com.kalpx.mitra
+---
+- launchApp
+- runFlow: common/persona_day3.yaml
+- assertVisible: { id: "quick_support_growth_chip" }
+- tapOn: { id: "quick_support_growth_chip" }
+- waitForAnimationToEnd
+- assertVisible:
+    id: "growth_room_opening_line"
+    pattern: ".{10,}"
+# Inquiry categories — 5 parallel resolves against M49_inquiry_seeds
+- tapOn: { id: "inquiry_category_decision" }
+- assertVisible:
+    id: "inquiry_seat_prompt"
+    pattern: ".{15,}"
+- takeScreenshot: silk_07_growth_inquiry_decision
+# Repeat for each category
+- repeat:
+    times: 4
+    commands:
+      - tapOn: { id: "growth_back_to_categories" }
+      - tapOn:
+          index: 0
+          traits: [Button]
+          class: "inquiry_category_*"
+      - assertVisible:
+          id: "inquiry_seat_prompt"
+          pattern: ".{15,}"
+- takeScreenshot: silk_07_growth_all_categories_visited

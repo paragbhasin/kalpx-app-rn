@@ -1,0 +1,19 @@
+# Silk Integrity Flow 09 — Day 14 Checkpoint (M25)
+# MDR-S1-13 + post-S1-10 (narrative + summary templates spine-backed).
+appId: com.kalpx.mitra
+---
+- launchApp
+- runFlow: common/persona_day14.yaml
+# Narrative now reads from spine (M25.narrative_template interpolated).
+- assertVisible: { id: "checkpoint_day_14_narrative" }
+- assertVisible: { id: "checkpoint_day_14_summary" }
+# Hard deny-list: the prior hardcoded template must NOT appear.
+- assertNotVisible: "Fourteen days. Two weeks of showing up."
+- assertNotVisible: "sealed. Something has settled."
+# New template must produce visible text with interpolated counts.
+- assertVisible:
+    pattern: "\\d+ of 14"
+- takeScreenshot: silk_09_day14
+- assertVisible: { id: "checkpoint_cta_continue_same" }
+- assertVisible: { id: "checkpoint_cta_deepen" }
+- assertVisible: { id: "checkpoint_cta_change_focus" }

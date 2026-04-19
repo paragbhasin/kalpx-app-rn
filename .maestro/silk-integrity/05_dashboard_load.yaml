@@ -36,6 +36,5 @@ appId: com.kalpx.app
 # Deny-list: legacy onboarding greetings must never render on a
 # returning user.
 - assertNotVisible: "Welcome, friend."
-- assertNotVisible: "You're here. Begin wherever feels right."
 - takeScreenshot: silk_05_dashboard_load
 - runFlow: common/assert_no_english_fallback.yaml

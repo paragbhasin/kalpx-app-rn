@@ -25,8 +25,12 @@ appId: com.kalpx.app
 - assertNotVisible: "Return to Mitra Home"
 - assertNotVisible: "Mantra Audio"
 # MDR-S3-07 GreetingCard
+# v3 Flow Contract §A.1 (2026-04-19): "Welcome, <name>. You're here. Begin
+# wherever feels right." is the governed GreetingCard copy on
+# NewDashboardContainer. Removed from deny-list. Only the pre-name
+# "Welcome, friend." variant stays denied — it's the legacy onboarding
+# greeting that must not leak onto a returning-user dashboard.
 - assertNotVisible: "Welcome, friend."
-- assertNotVisible: "You're here. Begin wherever feels right."
 # Generic dashboard eyebrows
 - assertNotVisible: "NOTICING"
 - assertNotVisible: "MITRA NOTICED"

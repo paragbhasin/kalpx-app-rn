@@ -1,6 +1,8 @@
 # Silk Integrity Flow 04 — First Dashboard After Onboarding
 # Group A. Chains from Flow 03. Selector risk: LOW.
-# Deny: "Welcome, friend.", "You're here. Begin wherever feels right.".
+# v3 Flow Contract §A.1 (2026-04-19): "You're here. Begin wherever feels
+# right." IS the governed greeting — removed from deny-list. Only
+# "Welcome, friend." (name-less onboarding leak) stays denied.
 appId: com.kalpx.app
 ---
 - launchApp:
@@ -19,6 +21,5 @@ appId: com.kalpx.app
 - assertVisible: ".*Quick Check-in.*"
 # Deny-list fallbacks
 - assertNotVisible: "Welcome, friend."
-- assertNotVisible: "You're here. Begin wherever feels right."
 - takeScreenshot: silk_04_first_dashboard
 - runFlow: common/assert_no_english_fallback.yaml

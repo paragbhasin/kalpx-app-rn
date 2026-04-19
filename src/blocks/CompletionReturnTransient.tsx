@@ -164,13 +164,25 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
         meta: { item_type: resolvedVariant, source: screenData.runner_source },
       }).catch(() => {});
     }
-    // If the resolved variant provides a return_action (support-room
-    // variants set "return_to_source"), dispatch it so completion loops
-    // back to the originating grief/loneliness room. Otherwise fall back
-    // to the default dashboard navigation.
+    // v3 Flow Contract §A.8: support runner completion returns to source room.
+    // Backend MAY seed `return_action: "return_to_source"` explicitly; if not,
+    // and runner_source is a known support source, we default to return_to_source
+    // so completion consistently loops back to grief/loneliness/joy/growth rooms.
+    // Core / additional / trigger sources fall through to dashboard (§A.9, §A.10).
     const returnAction = slot("return_action");
-    const action = returnAction
-      ? { type: returnAction }
+    const SUPPORT_SOURCES = new Set([
+      "support_grief",
+      "support_loneliness",
+      "support_joy",
+      "support_growth",
+    ]);
+    const isSupportSource = SUPPORT_SOURCES.has(
+      String(screenData.runner_source || ""),
+    );
+    const resolvedReturnAction =
+      returnAction || (isSupportSource ? "return_to_source" : null);
+    const action = resolvedReturnAction
+      ? { type: resolvedReturnAction }
       : {
           type: "navigate",
           target: {

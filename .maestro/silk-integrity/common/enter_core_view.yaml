@@ -1,0 +1,21 @@
+# common/enter_core_view.yaml
+# Advances smoke+triad-style personas from the momentum dashboard (M10
+# practice-incomplete layout) to the full core view where the triad
+# cards (MANTRA / SANKALP / PRACTICE) render with their
+# `core_item_*` testIDs. Momentum shows "Continue today's practice";
+# the full view follows the tap and exposes the triad row.
+#
+# Safe to call after login_as_smoke_persona. No-op if the triad cards
+# are already visible (flow still passes through if persona lands
+# directly on the full surface).
+appId: com.kalpx.app
+---
+- runFlow:
+    when:
+      visible: ".*Continue today's practice.*"
+    commands:
+      - tapOn: ".*Continue today's practice.*"
+      - extendedWaitUntil:
+          visible:
+            id: "core_item_mantra"
+          timeout: 10000

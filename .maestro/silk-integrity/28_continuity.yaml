@@ -30,6 +30,5 @@ appId: com.kalpx.app
       text: ".{15,}"
     timeout: 10000
 - assertNotVisible: "Welcome, friend."
-- assertNotVisible: "You're here. Begin wherever feels right."
 - takeScreenshot: silk_28_continuity
 - runFlow: common/assert_no_english_fallback.yaml

@@ -128,10 +128,23 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
         meta: { item_type: resolvedVariant },
       }).catch(() => {});
     }
-    const action = {
-      type: "navigate",
-      target: { container_id: "companion_dashboard", state_id: "day_active" },
-    };
+    // v3 Flow Contract §A.8: support runner completion returns to source room.
+    // Core / additional / trigger sources fall through to dashboard (§A.9, §A.10).
+    const SUPPORT_SOURCES = new Set([
+      "support_grief",
+      "support_loneliness",
+      "support_joy",
+      "support_growth",
+    ]);
+    const isSupportSource = SUPPORT_SOURCES.has(
+      String(screenData.runner_source || ""),
+    );
+    const action = isSupportSource
+      ? { type: "return_to_source" }
+      : {
+          type: "navigate",
+          target: { container_id: "companion_dashboard", state_id: "day_active" },
+        };
     executeAction(
       { ...action, currentScreen },
       {

@@ -34,8 +34,10 @@ Mantra Audio
 Intention
 
 # ---- MDR-S3-07 (GreetingCard) ----
+# v3 Flow Contract §A.1 (2026-04-19): "You're here. Begin wherever feels
+# right." is the governed GreetingCard copy — NOT a fallback. Removed
+# from deny-list. "Welcome, friend." stays denied (legacy onboarding leak).
 Welcome, friend.
-You're here. Begin wherever feels right.
 
 # ---- MDR-S3-06 (JoyRoom) ----
 # Only the pill label fallback — NOT the opening strings (which are

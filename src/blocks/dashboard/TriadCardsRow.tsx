@@ -135,7 +135,38 @@ const TriadCardsRow: React.FC = () => {
     },
   ];
 
-  const handleTap = (type: CardType) => {
+  // v3 Flow Contract §B: primary card tap dispatches start_runner directly.
+  // The prior `view_info` intermediate surface has been moved to the secondary
+  // info icon (ℹ︎). Runner source is always "core" for triad cards.
+  const handleCardTap = (type: CardType) => {
+    const masterKey =
+      type === "sankalp"
+        ? "master_sankalp"
+        : type === "practice"
+          ? "master_practice"
+          : "master_mantra";
+    const masterItem = (sd as any)[masterKey] || null;
+    executeAction(
+      {
+        type: "start_runner",
+        payload: {
+          source: "core",
+          variant: type,
+          item: masterItem,
+        },
+      },
+      {
+        loadScreen,
+        goBack,
+        setScreenValue: (value: any, key: string) =>
+          store.dispatch(screenActions.setScreenValue({ key, value })),
+        screenState: store.getState().screen.screenData,
+      },
+    ).catch(() => {});
+  };
+
+  // Secondary affordance: info icon opens the metadata surface.
+  const handleInfoTap = (type: CardType) => {
     executeAction(
       { type: "view_info", payload: { type } },
       {
@@ -156,16 +187,38 @@ const TriadCardsRow: React.FC = () => {
     <View style={styles.row} accessibilityLabel="triad_cards_row">
       {rendered.map((it) => {
         const label: string = (sd[it.labelKey] as string) || it.labelFallback;
+        const testID =
+          it.type === "sankalp"
+            ? "core_item_sankalpa"
+            : it.type === "practice"
+              ? "core_item_ritual"
+              : "core_item_mantra";
         return (
           <TouchableOpacity
             key={it.type}
             style={styles.card}
             activeOpacity={0.85}
-            onPress={() => handleTap(it.type)}
+            onPress={() => handleCardTap(it.type)}
+            testID={testID}
+            accessibilityLabel={testID}
           >
             <View style={styles.iconWrap}>
               <Ionicons name={it.iconName} size={18} color={Colors.gold} />
             </View>
+            <TouchableOpacity
+              style={styles.infoBtn}
+              hitSlop={{ top: 6, right: 6, bottom: 6, left: 6 }}
+              activeOpacity={0.6}
+              onPress={() => handleInfoTap(it.type)}
+              testID={`${testID}_info`}
+              accessibilityLabel={`${testID}_info`}
+            >
+              <Ionicons
+                name="information-circle-outline"
+                size={16}
+                color={Colors.brownMuted}
+              />
+            </TouchableOpacity>
             <Text style={styles.label}>{String(label).toUpperCase()}</Text>
             {!!it.title && (
               <Text style={styles.title} numberOfLines={2}>
@@ -218,6 +271,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
+  },
+  infoBtn: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    width: 24,
+    height: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    opacity: 0.7,
   },
   label: {
     fontFamily: Fonts.sans.medium,

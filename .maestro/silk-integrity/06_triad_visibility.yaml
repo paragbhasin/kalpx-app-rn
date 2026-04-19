@@ -9,6 +9,7 @@ appId: com.kalpx.app
     clearState: false
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
+- runFlow: common/enter_core_view.yaml
 # Expect triad items to be visible on the dashboard — strong testID assertions
 # first, with a label pattern fallback while Phase 3 rollout completes.
 - extendedWaitUntil:

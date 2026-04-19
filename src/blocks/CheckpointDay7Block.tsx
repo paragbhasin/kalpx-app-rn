@@ -191,9 +191,15 @@ const CheckpointDay7Block: React.FC<Props> = () => {
     return (
       <View style={styles.root}>
         <View style={styles.topRegion}>
-          <Text style={styles.eyebrow}>{eyebrow}</Text>
-          <Text style={styles.headline}>{introHeadline}</Text>
-          <Text style={styles.body}>{introBody}</Text>
+          <Text style={styles.eyebrow} testID="checkpoint_day_7_eyebrow">
+            {eyebrow}
+          </Text>
+          <Text style={styles.headline} testID="checkpoint_day_7_headline">
+            {introHeadline}
+          </Text>
+          <Text style={styles.body} testID="checkpoint_day_7_narrative">
+            {introBody}
+          </Text>
         </View>
         <View style={styles.bottomRegion}>
           <TouchableOpacity
@@ -264,6 +270,7 @@ const CheckpointDay7Block: React.FC<Props> = () => {
           onPress={() => dispatchDecision("continue")}
           style={styles.cta}
           activeOpacity={0.85}
+          testID="checkpoint_day_7_cta_continue"
         >
           <Text style={styles.ctaText}>{ctaContinueLabel}</Text>
         </TouchableOpacity>
@@ -272,6 +279,7 @@ const CheckpointDay7Block: React.FC<Props> = () => {
             onPress={() => dispatchDecision("lighten")}
             style={styles.secondaryBtn}
             activeOpacity={0.85}
+            testID="checkpoint_day_7_cta_lighten"
           >
             <Text style={styles.secondaryText}>{ctaLightenLabel}</Text>
           </TouchableOpacity>
@@ -279,6 +287,7 @@ const CheckpointDay7Block: React.FC<Props> = () => {
             onPress={() => dispatchDecision("start_fresh")}
             style={styles.secondaryBtn}
             activeOpacity={0.85}
+            testID="checkpoint_day_7_cta_start_fresh"
           >
             <Text style={styles.secondaryText}>{ctaStartFreshLabel}</Text>
           </TouchableOpacity>

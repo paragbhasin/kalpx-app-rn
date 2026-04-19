@@ -16,7 +16,11 @@ const ContinuityMirrorCard: React.FC<Props> = ({ block, screenData }) => {
   const title = payload.title ?? payload.headline ?? "";
   const body = payload.body ?? payload.message ?? "";
   return (
-    <View style={styles.card} accessibilityLabel="continuity_mirror_card">
+    <View
+      style={styles.card}
+      accessibilityLabel="continuity_mirror_card"
+      testID="continuity_mirror_card"
+    >
       {!!title && <Text style={styles.title}>{title}</Text>}
       {!!body && <Text style={styles.body}>{body}</Text>}
     </View>

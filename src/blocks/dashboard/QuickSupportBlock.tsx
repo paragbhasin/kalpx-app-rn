@@ -82,6 +82,7 @@ const QuickSupportBlock: React.FC<Props> = ({ screenData }) => {
         style={styles.primary}
         activeOpacity={0.88}
         onPress={() => dispatchAction("initiate_trigger")}
+        testID="quick_support_triggered"
       >
         <Ionicons
           name="alert-circle-outline"
@@ -96,6 +97,7 @@ const QuickSupportBlock: React.FC<Props> = ({ screenData }) => {
         style={[styles.primary, styles.primaryBordered]}
         activeOpacity={0.88}
         onPress={() => dispatchAction("start_checkin")}
+        testID="quick_support_checkin"
       >
         <Ionicons
           name="checkmark-circle-outline"
@@ -113,6 +115,7 @@ const QuickSupportBlock: React.FC<Props> = ({ screenData }) => {
           activeOpacity={0.88}
           onPress={() => dispatchAction("enter_joy_room")}
           accessibilityLabel="joy_room_chip"
+          testID="quick_support_joy_chip"
         >
           <Ionicons
             name="sunny-outline"
@@ -131,6 +134,7 @@ const QuickSupportBlock: React.FC<Props> = ({ screenData }) => {
           activeOpacity={0.88}
           onPress={() => dispatchAction("enter_growth_room")}
           accessibilityLabel="growth_room_chip"
+          testID="quick_support_growth_chip"
         >
           <Ionicons
             name="leaf-outline"
@@ -146,6 +150,7 @@ const QuickSupportBlock: React.FC<Props> = ({ screenData }) => {
         style={styles.more}
         activeOpacity={0.7}
         onPress={() => setSheetVisible(true)}
+        testID="quick_support_more_label"
       >
         <Text style={styles.moreText}>{moreLabel}</Text>
         <Ionicons

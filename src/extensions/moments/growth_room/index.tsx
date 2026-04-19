@@ -619,7 +619,12 @@ const GrowthRoomContainer: React.FC<Props> = () => {
         {(step === "opening" || step === "options") && (
           <Animated.View style={{ opacity: fade1, marginBottom: 40 }}>
             {!!openingLine && (
-              <Text style={styles.openingLine}>{openingLine}</Text>
+              <Text
+                style={styles.openingLine}
+                testID="growth_room_opening_line"
+              >
+                {openingLine}
+              </Text>
             )}
             {!!secondBeatLine && (
               <Text style={styles.secondBeat}>{secondBeatLine}</Text>

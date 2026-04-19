@@ -43,12 +43,26 @@ const ResilienceNarrativeCard: React.FC<Props> = ({ screenData }) => {
         ? Colors.ringTan
         : Colors.gold;
 
+  // Sovereignty Rule 3 — eyebrow is backend-seeded; hide when absent rather
+  // than leaking hardcoded "NOTICING". BE field: payload.eyebrow_label
+  // (or legacy payload.eyebrow). FE-first fix; slot populates when BE ships.
+  const eyebrowLabel: string =
+    typeof payload.eyebrow_label === "string"
+      ? payload.eyebrow_label
+      : typeof payload.eyebrow === "string"
+        ? payload.eyebrow
+        : "";
+
   return (
-    <View style={styles.card} accessibilityLabel="resilience_narrative_card">
+    <View
+      style={styles.card}
+      accessibilityLabel="resilience_narrative_card"
+      testID="resilience_narrative_card"
+    >
       <View style={styles.headerRow}>
         <View style={styles.eyebrowWrap}>
           <View style={[styles.strengthDot, { backgroundColor: strengthDot }]} />
-          <Text style={styles.eyebrow}>NOTICING</Text>
+          {!!eyebrowLabel && <Text style={styles.eyebrow}>{eyebrowLabel}</Text>}
         </View>
         <Ionicons
           name="leaf-outline"

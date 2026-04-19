@@ -30,18 +30,18 @@
 | 24 | completion_additional_library | `24_completion_additional_library.yaml` | blocked_by_data | persona_additional_library SEED REQUIRED |
 | 25 | completion_additional_custom | `25_completion_additional_custom.yaml` | blocked_by_data | persona_additional_custom SEED REQUIRED |
 | 26 | completion_additional_recommended | `26_completion_additional_recommended.yaml` | blocked_by_data | persona_additional_recommended SEED REQUIRED |
-| 27 | additional_items_surface | `27_additional_items_surface.yaml` | blocked_by_app_bug | Additional items section not yet live on new dashboard (P1 parked) |
-| 28 | continuity | `28_continuity.yaml` | blocked_by_data | persona_welcomeback SEED REQUIRED; also ContinuityMirrorCard may not be wired |
-| 29 | path_milestone | `29_path_milestone.yaml` | blocked_by_data | persona_day7 SEED REQUIRED |
-| 30 | resilience_narrative | `30_resilience_narrative.yaml` | blocked_by_app_bug | Resilience narrative card surface location unverified |
-| 31 | entity_card | `31_entity_card.yaml` | needs_selector_patch | EntityRecognitionCard testID needed |
+| 27 | additional_items_surface | `27_additional_items_surface.yaml` | needs_selector_patch | AdditionalItemsSectionBlock landed in NewDashboardContainer; `testID="additional_items_surface"` added Phase 2 |
+| 28 | continuity | `28_continuity.yaml` | blocked_by_data | persona_welcomeback SEED REQUIRED; `testID="continuity_mirror_card"` added Phase 2 |
+| 29 | path_milestone | `29_path_milestone.yaml` | blocked_by_data | persona_day7 SEED REQUIRED; `testID="path_milestone_banner"` added Phase 2 |
+| 30 | resilience_narrative | `30_resilience_narrative.yaml` | needs_selector_patch | `testID="resilience_narrative_card"` added Phase 2; sovereignty leak "NOTICING" removed (lifted to eyebrow_label slot) |
+| 31 | entity_card | `31_entity_card.yaml` | needs_selector_patch | `testID="entity_recognition_card"` added Phase 2; sovereignty leak "MITRA NOTICED" removed (lifted to eyebrow_label slot) |
 
 ## Summary counts
 
 - `ready`: 3 (flows 05, 09, 12)
-- `needs_selector_patch`: 20
+- `needs_selector_patch`: 22 (flows 27 + 30 flipped from blocked_by_app_bug after Phase 2 testID land)
 - `blocked_by_data`: 6 (flows 14, 15, 24, 25, 26, 28, 29 — persona seeds)
-- `blocked_by_app_bug`: 2 (flows 27, 30 — surface wiring)
+- `blocked_by_app_bug`: 0 (Phase 2 cleared both)
 
 ## Unblocking order
 

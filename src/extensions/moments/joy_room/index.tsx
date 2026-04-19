@@ -423,7 +423,12 @@ const JoyRoomContainer: React.FC<Props> = () => {
         {step !== "walk" && step !== "sit" && (
           <Animated.View style={{ opacity: fade1, marginBottom: 40 }}>
             {!!openingLine && (
-              <Text style={styles.openingLine}>{openingLine}</Text>
+              <Text
+                style={styles.openingLine}
+                testID="joy_room_opening_line"
+              >
+                {openingLine}
+              </Text>
             )}
             {!!secondBeatLine && (
               <Text style={styles.secondBeat}>{secondBeatLine}</Text>

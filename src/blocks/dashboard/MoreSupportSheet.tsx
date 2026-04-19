@@ -130,6 +130,11 @@ const MoreSupportSheet: React.FC<Props> = ({
                 style={styles.row}
                 activeOpacity={0.85}
                 onPress={() => go(row.actionType)}
+                testID={
+                  row.key === "grief"
+                    ? "more_support_grief_row"
+                    : "more_support_loneliness_row"
+                }
               >
                 <View style={styles.iconWrap}>
                   <Ionicons name={row.icon} size={18} color={Colors.gold} />

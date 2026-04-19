@@ -431,7 +431,12 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {step !== "walk" && (
           <Animated.View style={{ opacity: fade1, marginBottom: 40 }}>
-            <Text style={styles.openingLine}>{openingLine}</Text>
+            <Text
+              style={styles.openingLine}
+              testID="loneliness_room_opening_line"
+            >
+              {openingLine}
+            </Text>
             <Text style={styles.secondBeat}>{secondBeatLine}</Text>
             {step === "opening" && !!readyHintLabel && (
               <Text style={styles.readyHint}>{readyHintLabel}</Text>

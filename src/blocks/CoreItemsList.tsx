@@ -75,6 +75,13 @@ const CoreItemsList: React.FC<{ block?: any }> = () => {
           style={styles.card}
           activeOpacity={0.85}
           onPress={() => handleTap(it.type)}
+          testID={
+            it.type === "sankalp"
+              ? "core_item_sankalpa"
+              : it.type === "practice"
+                ? "core_item_ritual"
+                : "core_item_mantra"
+          }
         >
           <View style={styles.headerRow}>
             <Text style={styles.label}>{it.label}</Text>

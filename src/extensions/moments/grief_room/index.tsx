@@ -576,7 +576,9 @@ const GriefRoomContainer: React.FC<Props> = () => {
       )}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Animated.View style={{ opacity: fade1, alignItems: "center" }}>
-          <Text style={styles.openingLine}>{openingLine}</Text>
+          <Text style={styles.openingLine} testID="grief_room_opening_line">
+            {openingLine}
+          </Text>
 
           {step === "opening" && (
             <>

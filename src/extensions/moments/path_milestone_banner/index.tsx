@@ -16,7 +16,11 @@ const PathMilestoneBanner: React.FC<Props> = ({ block, screenData }) => {
   const title = payload.title ?? payload.headline ?? "";
   const body = payload.body ?? payload.message ?? "";
   return (
-    <View style={styles.card} accessibilityLabel="path_milestone_banner">
+    <View
+      style={styles.card}
+      accessibilityLabel="path_milestone_banner"
+      testID="path_milestone_banner"
+    >
       {!!title && <Text style={styles.title}>{title}</Text>}
       {!!body && <Text style={styles.body}>{body}</Text>}
     </View>

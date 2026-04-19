@@ -255,7 +255,9 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
           }}
         >
           <View style={styles.messageCard}>
-            <Text style={styles.messageText}>{message}</Text>
+            <Text style={styles.messageText} testID="completion_message">
+              {message}
+            </Text>
           </View>
 
           {/* Track 1 — wisdom anchor (third beat). Renders only when the
@@ -265,11 +267,17 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
           {!!wisdomAnchorLine && (
             <View style={styles.wisdomAnchorCard}>
               <View style={styles.wisdomDivider} />
-              <Text style={styles.wisdomAnchorText}>{wisdomAnchorLine}</Text>
+              <Text
+                style={styles.wisdomAnchorText}
+                testID="completion_wisdom_anchor_line"
+              >
+                {wisdomAnchorLine}
+              </Text>
               {!!wisdomAnchorPrincipleId && (
                 <TouchableOpacity
                   style={styles.readMoreBtn}
                   activeOpacity={0.7}
+                  testID="completion_read_more"
                   onPress={() => {
                     const { screenActions } = require("../store/screenSlice");
                     const { store } = require("../store");
@@ -301,7 +309,10 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
             </View>
           )}
 
-          <View style={styles.voiceInputWrap}>
+          <View
+            style={styles.voiceInputWrap}
+            testID="completion_reflection_placeholder"
+          >
             {/* MDR-S1-12 — sovereignty-strict. Placeholder reads from slot
                  only; dead English fallback dropped. Empty slot → blank
                  placeholder (acceptable — input remains functional; missing

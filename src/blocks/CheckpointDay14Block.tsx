@@ -140,9 +140,13 @@ const CheckpointDay14Block: React.FC<Props> = () => {
     return (
       <View style={styles.root}>
         <View style={styles.topRegion}>
-          <Text style={styles.eyebrow}>{slot("eyebrow")}</Text>
-          <Text style={styles.headline}>{slot("intro_headline")}</Text>
-          <Text style={styles.body}>
+          <Text style={styles.eyebrow} testID="checkpoint_day_14_eyebrow">
+            {slot("eyebrow")}
+          </Text>
+          <Text style={styles.headline} testID="checkpoint_day_14_headline">
+            {slot("intro_headline")}
+          </Text>
+          <Text style={styles.body} testID="checkpoint_day_14_narrative">
             {(typeof ss.checkpoint_framing === "string" && ss.checkpoint_framing) || slot("intro_body")}
           </Text>
         </View>
@@ -193,7 +197,9 @@ const CheckpointDay14Block: React.FC<Props> = () => {
           })}
         </Text>
 
-        <Text style={styles.narrative}>{narrative}</Text>
+        <Text style={styles.narrative} testID="checkpoint_day_14_summary">
+          {narrative}
+        </Text>
 
         {growth ? (
           <View style={styles.growthBox}>
@@ -232,6 +238,7 @@ const CheckpointDay14Block: React.FC<Props> = () => {
           onPress={() => submitDecision("continue_same")}
           style={styles.cta}
           activeOpacity={0.85}
+          testID="checkpoint_cta_continue_same"
         >
           <Text style={styles.ctaText}>{slot("continue_path_cta")}</Text>
         </TouchableOpacity>
@@ -240,6 +247,7 @@ const CheckpointDay14Block: React.FC<Props> = () => {
             onPress={() => submitDecision("deepen")}
             style={styles.secondaryBtn}
             activeOpacity={0.85}
+            testID="checkpoint_cta_deepen"
           >
             <Text style={styles.secondaryText}>{slot("deepen_practice_cta")}</Text>
           </TouchableOpacity>
@@ -247,6 +255,7 @@ const CheckpointDay14Block: React.FC<Props> = () => {
             onPress={() => submitDecision("change_focus")}
             style={styles.secondaryBtn}
             activeOpacity={0.85}
+            testID="checkpoint_cta_change_focus"
           >
             <Text style={styles.secondaryText}>{slot("change_focus_cta")}</Text>
           </TouchableOpacity>

@@ -237,7 +237,7 @@ const AdditionalItemsSectionBlock: React.FC<Props> = ({ block }) => {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="additional_items_surface">
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.label}>

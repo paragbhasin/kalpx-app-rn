@@ -42,10 +42,24 @@ const EntityRecognitionCard: React.FC<Props> = ({ screenData }) => {
   // High-confidence guard — avoid "creepy" surface when evidence weak.
   if (!summary || confidence < CONFIDENCE_THRESHOLD) return null;
 
+  // Sovereignty Rule 3 — eyebrow backend-seeded; hide when absent rather
+  // than leaking hardcoded "MITRA NOTICED". BE field: payload.eyebrow_label
+  // (or legacy payload.eyebrow). FE-first fix; slot populates when BE ships.
+  const eyebrowLabel: string =
+    typeof payload.eyebrow_label === "string"
+      ? payload.eyebrow_label
+      : typeof payload.eyebrow === "string"
+        ? payload.eyebrow
+        : "";
+
   return (
-    <View style={styles.card} accessibilityLabel="entity_recognition_card">
+    <View
+      style={styles.card}
+      accessibilityLabel="entity_recognition_card"
+      testID="entity_recognition_card"
+    >
       <View style={styles.headerRow}>
-        <Text style={styles.eyebrow}>MITRA NOTICED</Text>
+        {!!eyebrowLabel && <Text style={styles.eyebrow}>{eyebrowLabel}</Text>}
         <Ionicons
           name="person-circle-outline"
           size={15}

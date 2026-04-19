@@ -11,13 +11,14 @@ type Props = {
 };
 
 const FocusPhraseLine: React.FC<Props> = ({ block, screenData }) => {
-  const value =
-    block?.value ??
-    screenData?.focus_phrase ??
-    null;
-  // Always-visible. Structural fallback keeps the italic gold line
-  // present even before backend authors today's phrase.
-  const display = value ? String(value) : "One gentle step is enough.";
+  // MDR-S1-04 — sovereignty-strict. BE emits `focus_phrase` at top level
+  // (via journey_envelope.merge_enrichment_into_response). Hide block
+  // cleanly when BE has not seeded a value rather than leaking hardcoded
+  // English. Per standing baseline Rule 3 (sovereignty) + Rule 6 (unread
+  // field closure): the pill is a "render only if present" surface.
+  const value = block?.value ?? screenData?.focus_phrase ?? null;
+  const display = typeof value === "string" ? value : "";
+  if (!display) return null;
   return (
     <View style={styles.pill} accessibilityLabel="focus_phrase_line">
       <Text style={styles.text}>{display}</Text>

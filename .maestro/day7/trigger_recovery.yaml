@@ -1,0 +1,83 @@
+# trigger_recovery_flow — day7 uses the trigger composer, gets advice,
+# completes a support practice, lands back at dashboard CLEAN.
+appId: com.kalpx.app
+---
+- launchApp:
+    clearState: false
+- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 6000
+- extendedWaitUntil:
+    visible: "Day 7 of 14"
+    timeout: 25000
+- takeScreenshot: "screenshots/day7_maestro/trigger_recovery/01_dashboard"
+
+# Open composer/trigger entry
+- tapOn:
+    text: ".*How are you.*|.*Share.*|.*check.*in.*|.*Trigger.*|.*\\+.*"
+    index: 0
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: "screenshots/day7_maestro/trigger_recovery/02_composer"
+
+# Pick "drained"
+- tapOn:
+    text: ".*[Dd]rained.*"
+- extendedWaitUntil:
+    visible: ".*drained.*|.*Drained.*|.*continue.*|.*Next.*"
+    timeout: 15000
+
+- tapOn:
+    text: ".*Next.*|.*Continue.*|.*Share.*|.*Submit.*"
+    optional: true
+- extendedWaitUntil:
+    visible: ".*here.*|.*try.*|.*suggest.*|.*practice.*|.*mantra.*"
+    timeout: 20000
+- takeScreenshot: "screenshots/day7_maestro/trigger_recovery/03_advice_reveal"
+
+# Tap first advice card
+- tapOn:
+    id: ".*advice.*|.*card.*"
+    index: 0
+    optional: true
+- tapOn:
+    text: ".*Begin.*|.*Start.*|.*Try.*"
+    optional: true
+    index: 0
+- waitForAnimationToEnd
+- takeScreenshot: "screenshots/day7_maestro/trigger_recovery/04_sound_bridge_or_runner"
+
+- extendedWaitUntil:
+    visible: ".*Begin.*|.*Practice.*|.*TAP.*|.*breath.*"
+    timeout: 20000
+
+# Complete the support runner
+- tapOn:
+    text: ".*Begin.*|.*Start.*"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: "screenshots/day7_maestro/trigger_recovery/05_support_runner"
+
+- tapOn:
+    text: ".*Complete.*|.*Done.*|.*Finish.*"
+    optional: true
+
+# The support-flow terminal CTA
+- extendedWaitUntil:
+    visible: "I feel calmer now"
+    timeout: 20000
+- takeScreenshot: "screenshots/day7_maestro/trigger_recovery/06_calmer_cta"
+
+- tapOn:
+    text: "I feel calmer now"
+- extendedWaitUntil:
+    visible: "Day 7 of 14"
+    timeout: 20000
+- takeScreenshot: "screenshots/day7_maestro/trigger_recovery/07_dashboard_clean"
+
+# Assert no trigger artifacts remain visible
+- assertVisible: "Day 7 of 14"
+- assertNotVisible: "I feel calmer now"
+- assertNotVisible: ".*[Dd]rained.*"
+
+- stopApp

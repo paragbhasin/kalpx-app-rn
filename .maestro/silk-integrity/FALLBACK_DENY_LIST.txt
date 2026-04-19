@@ -1,0 +1,47 @@
+# Silk Integrity — fallback deny-list
+# Strings that MUST NOT render in any Mitra surface post-Sprint 1.
+# Each entry removed only if the source fallback is both proven live AND
+# promoted to the Sovereignty Exception Registry (MDR-S3-08).
+# Format: one string per line; leading # is a comment.
+
+# ---- MDR-S1-10 (CheckpointDay14Block) ----
+Fourteen days. Two weeks of showing up.
+sealed. Something has settled.
+
+# ---- MDR-S1-12 (CompletionReturnTransient) ----
+How did that feel?
+
+# ---- MDR-S1-11 (MoreSupportSheet) ----
+I'm here if you need more.
+Grief Room
+Loneliness Room
+
+# ---- MDR-S3-04 (CoreItemsList — legacy dashboard) ----
+Today's anchor
+Today's vow
+Today's practice
+Anchor when the mind gets loud.
+Today's quiet promise.
+A small act of steadiness.
+
+# ---- MDR-S3-05 (PracticeRunnerContainer) ----
+Your Sankalp is Alive.
+Your sankalp is now alive in you
+Session Reflection
+Repeat it again
+Return to Mitra Home
+Mantra Audio
+Intention
+
+# ---- MDR-S3-07 (GreetingCard) ----
+Welcome, friend.
+You're here. Begin wherever feels right.
+
+# ---- MDR-S3-06 (JoyRoom) ----
+# Only the pill label fallback — NOT the opening strings (which are
+# ContentPack-owned already).
+# Captured as-is; if the Hi test proves room-opening leak, add those lines.
+
+# ---- General dashboard eyebrows ----
+NOTICING
+MITRA NOTICED

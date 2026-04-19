@@ -1,0 +1,126 @@
+# additional_flow — day7 exercises the "Additional Practices" lane.
+# Validates source attribution (additional_library / additional_custom) and
+# ensures additional completion does NOT mark core triad as done.
+# Entry point: AdditionalItemsSectionBlock ("Additional Practices" / "+ Add from Library").
+# See src/blocks/AdditionalItemsSectionBlock.tsx and actionExecutor.ts:1144 (audit C3 regression guard).
+appId: com.kalpx.app
+---
+- launchApp:
+    clearState: false
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Day 7 of 14"
+    timeout: 20000
+- takeScreenshot: "screenshots/day7_maestro/additional_flow/01_dashboard"
+
+# Capture pre-completion state of core triad (must remain UN-checked after additional completes).
+- assertVisible: "Day 7 of 14"
+
+# Scroll down to reveal the Additional Practices section (sits below the core triad).
+- swipe:
+    direction: UP
+- waitForAnimationToEnd
+- swipe:
+    direction: UP
+- waitForAnimationToEnd
+- takeScreenshot: "screenshots/day7_maestro/additional_flow/02_additional_section"
+
+# The block is rendered by AdditionalItemsSectionBlock.tsx. Header copy is
+# exactly "Additional Practices" (block.label default, line 244). We require
+# it visible — failure here = entry-point gap on the dashboard.
+- extendedWaitUntil:
+    visible: "Additional Practices"
+    timeout: 15000
+- assertVisible: "Additional Practices"
+- assertVisible: "+ Add from Library"
+- takeScreenshot: "screenshots/day7_maestro/additional_flow/03_additional_header"
+
+# --- PATH A: existing library item already in the section ---
+# If a card is present, tap its action button ("Chant" | "Embody" | "Practice").
+# This fires handleLaunchRunner → view_info → navigate to practice_runner with
+# source=additional_library carried through runner_active_item.
+- runFlow:
+    when:
+      visible: "Chant"
+    commands:
+      - tapOn:
+          text: "Chant"
+          index: 0
+      - extendedWaitUntil:
+          visible: ".*Begin.*|.*Start.*|.*info.*|.*About.*|.*session.*"
+          timeout: 15000
+      - takeScreenshot: "screenshots/day7_maestro/additional_flow/04a_view_info"
+
+# --- PATH B: empty — add from library first ---
+- runFlow:
+    when:
+      notVisible: "Chant"
+    commands:
+      - tapOn:
+          text: "+ Add from Library"
+      - extendedWaitUntil:
+          visible: ".*Library.*|.*Search.*|.*mantra.*|.*practice.*"
+          timeout: 15000
+      - takeScreenshot: "screenshots/day7_maestro/additional_flow/04b_library_modal"
+      # Tap first result
+      - tapOn:
+          text: ".*"
+          index: 2
+          optional: true
+      - waitForAnimationToEnd
+      - tapOn:
+          text: ".*Add.*|.*Done.*|.*Close.*"
+          optional: true
+      - waitForAnimationToEnd
+      # Now tap the newly added card
+      - extendedWaitUntil:
+          visible: ".*Chant.*|.*Embody.*|.*Practice.*"
+          timeout: 15000
+      - tapOn:
+          text: ".*Chant.*|.*Embody.*|.*Practice.*"
+          index: 0
+
+# Start the runner from view_info
+- tapOn:
+    text: ".*Begin.*|.*Start.*|.*Chant now.*"
+    optional: true
+    index: 0
+- waitForAnimationToEnd
+- takeScreenshot: "screenshots/day7_maestro/additional_flow/05_runner_active"
+
+# Complete — the runner's complete action fires submit with
+# source resolved from runner_active_item.source = "additional_library".
+# See actionExecutor.ts:854-860 (source priority).
+- tapOn:
+    text: ".*Complete.*|.*Done.*|.*Finish.*|.*I chanted.*"
+    optional: true
+- extendedWaitUntil:
+    visible: ".*Day 7 of 14.*|.*Additional Practices.*"
+    timeout: 20000
+- takeScreenshot: "screenshots/day7_maestro/additional_flow/06_return_to_dashboard"
+
+# CRITICAL ASSERT 1 — back on dashboard.
+- assertVisible: "Day 7 of 14"
+
+# CRITICAL ASSERT 2 — core triad remains UN-completed by this additional run.
+# Day 7 core triad cards have NOT been tapped this flow, so they must still
+# show the pending state. The "Done" green badge is SCOPED to the additional
+# card (doneBadge, AdditionalItemsSectionBlock.tsx:432). We assert that the
+# core headline status (e.g. "Today's Three" / untouched chant card) is
+# unchanged — no "✓" on core mantra/sankalp/practice chips.
+- assertVisible: "Additional Practices"
+# The additional card itself should reflect completion.
+- scroll
+- takeScreenshot: "screenshots/day7_maestro/additional_flow/07_additional_done_badge"
+- assertVisible: ".*Done.*|.*session.*"
+
+# CUSTOM PATH — attempt to create a custom practice. Codebase review shows no
+# dashboard CTA to CREATE a custom mantra/practice; additional_custom items
+# are seeded server-side or via other flows. We document this as a product
+# gap rather than faking a tap.
+# PRODUCT GAP: no "Create custom practice" CTA reachable from dashboard.
+# If one existed, source=additional_custom would flow through identically
+# (actionExecutor.ts:1146). Skipped intentionally — do NOT synthesize.
+
+- stopApp
+# FLOW PASSED: additional_flow

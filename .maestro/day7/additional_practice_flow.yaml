@@ -1,0 +1,82 @@
+# additional_practice_flow — day7 additional library exercised with a PRACTICE item.
+# Pick Anulom Vilom (different from day7 core Prithvi Mudra).
+appId: com.kalpx.app
+---
+- launchApp:
+    clearState: false
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Day 7 of 14"
+    timeout: 20000
+- takeScreenshot: "screenshots/day7_maestro/additional_practice/01_dashboard_pre"
+
+- tapOn:
+    text: "My Routine"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: ".*Add.*|.*Browse.*|.*Library.*|.*More Practices.*|.*\\+.*"
+    index: 0
+- extendedWaitUntil:
+    visible: ".*Search.*|.*library.*|.*Library.*"
+    timeout: 15000
+- takeScreenshot: "screenshots/day7_maestro/additional_practice/02_library_modal"
+
+- tapOn:
+    id: "library-search-input"
+    optional: true
+- tapOn:
+    text: ".*Search.*"
+    optional: true
+- inputText: "Anulom"
+- hideKeyboard
+- extendedWaitUntil:
+    visible: ".*Anulom.*|.*Vilom.*|.*breath.*|.*Pranayama.*"
+    timeout: 15000
+- takeScreenshot: "screenshots/day7_maestro/additional_practice/03_search_results"
+
+- assertNotVisible: "Prithvi Mudra"
+- tapOn:
+    text: ".*Anulom.*Vilom.*|.*Anulom.*|.*Vilom.*"
+    index: 0
+- waitForAnimationToEnd
+- takeScreenshot: "screenshots/day7_maestro/additional_practice/04_info_screen"
+
+- tapOn:
+    text: ".*Begin.*|.*Start.*"
+    index: 0
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Step|Next|Begin|Anulom|Inhale|Exhale"
+    timeout: 15000
+- takeScreenshot: "screenshots/day7_maestro/additional_practice/05_runner"
+
+# Surface-correctness: practice step runner, not mantra counter or sankalp embody
+- assertNotVisible: "108"
+- assertNotVisible: "mantra-bead-tap"
+- assertNotVisible: "I feel calmer now"
+
+- repeat:
+    times: 8
+    commands:
+      - runFlow:
+          when:
+            visible: "Next"
+          commands:
+            - tapOn: "Next"
+            - waitForAnimationToEnd:
+                timeout: 2000
+
+- tapOn:
+    text: ".*Complete.*|.*Return to Mitra.*|.*Done.*|.*Finish.*"
+    optional: true
+- extendedWaitUntil:
+    visible: "Day 7 of 14"
+    timeout: 20000
+- takeScreenshot: "screenshots/day7_maestro/additional_practice/06_dashboard_post"
+
+- assertVisible: "Day 7 of 14"
+# Core practice (Prithvi Mudra) row must still be the core row; additional did not replace it
+- assertVisible:
+    text: ".*Prithvi.*|.*Practice.*"
+- stopApp

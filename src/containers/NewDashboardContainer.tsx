@@ -240,7 +240,9 @@ const NewDashboardContainer: React.FC<Props> = () => {
              at 2 via renderInsightCards() below. */}
         {(() => {
           // Banners (max 1 — PostConflict wins if both signal).
-          const banner = sd.post_conflict ? (
+          // MDR-S1-02: sd.post_conflict is the canonical read; fall back to
+          // sd.postConflict during the dual-emit burn-in (removed after CP-3).
+          const banner = (sd.post_conflict || sd.postConflict) ? (
             <PostConflictMorningCard screenData={sd} />
           ) : sd.clear_window_active ? (
             <ClearWindowBanner />

@@ -58,26 +58,36 @@ const MoreSupportSheet: React.FC<Props> = ({
 }) => {
   const sd = screenData ?? {};
   const labels = (sd.support_rooms_labels ?? {}) as Record<string, string>;
-  // Always-populated structural labels — these are functional deep-link
-  // labels, not emotional prose.
-  const headerLabel: string = labels.header_label || "I'm here if you need more.";
+  // MDR-S1-11: sovereignty-strict. Labels are governed by the backend
+  // envelope (`journey_envelope._build_new_dashboard_slots`). If a label is
+  // missing, the row hides rather than falling back to English — matches
+  // the standing Sovereignty rule (rule 3 in the delivery-restoration
+  // baseline) and the sheet's long-standing docstring contract.
+  const headerLabel: string = labels.header_label ?? "";
 
   const { loadScreen, goBack } = useScreenStore();
 
   const rows: Row[] = [
-    {
-      key: "grief",
-      label: labels.grief_label || "Grief Room",
-      icon: "water-outline",
-      actionType: "enter_grief_room",
-    },
-    {
-      key: "loneliness",
-      label: labels.loneliness_label || "Loneliness Room",
-      icon: "people-outline",
-      actionType: "enter_loneliness_room",
-    },
+    ...(labels.grief_label
+      ? [{
+          key: "grief" as const,
+          label: labels.grief_label,
+          icon: "water-outline" as const,
+          actionType: "enter_grief_room" as const,
+        }]
+      : []),
+    ...(labels.loneliness_label
+      ? [{
+          key: "loneliness" as const,
+          label: labels.loneliness_label,
+          icon: "people-outline" as const,
+          actionType: "enter_loneliness_room" as const,
+        }]
+      : []),
   ];
+
+  // If header and all rows are empty, hide the sheet entirely — nothing to say.
+  const hasContent = !!headerLabel || rows.length > 0;
 
   const go = (actionType: Row["actionType"]) => {
     onClose();
@@ -96,6 +106,11 @@ const MoreSupportSheet: React.FC<Props> = ({
       ).catch(() => {});
     }, 120);
   };
+
+  // MDR-S1-11: if the envelope has seeded nothing, do not render — avoid
+  // an empty modal chrome with no content. Sovereignty-strict: no English
+  // default survives this surface.
+  if (!hasContent) return null;
 
   return (
     <Modal

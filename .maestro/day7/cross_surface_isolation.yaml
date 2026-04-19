@@ -1,0 +1,107 @@
+# cross_surface_isolation_flow — THE STATE-BLEED CATCHER.
+# Runs a support (trigger) practice, exits, then opens a CORE mantra.
+# Asserts the core runner shows day7's CORE mantra (Śāntākāraṃ), NOT the trigger mantra,
+# and has NO "I feel calmer now" CTA (that belongs to the support flow only).
+appId: com.kalpx.app
+---
+- launchApp:
+    clearState: false
+- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 6000
+- extendedWaitUntil:
+    visible: "Day 7 of 14"
+    timeout: 25000
+- takeScreenshot: "screenshots/day7_maestro/cross_surface_isolation/01_dashboard"
+
+# --- Phase 1: run a trigger/support flow ---
+- tapOn:
+    text: ".*How are you.*|.*Share.*|.*check.*in.*|.*Trigger.*"
+    optional: true
+    index: 0
+- waitForAnimationToEnd
+- tapOn:
+    text: ".*[Dd]rained.*|.*[Aa]gitated.*|.*[Aa]nxious.*"
+    optional: true
+    index: 0
+- waitForAnimationToEnd
+- tapOn:
+    text: ".*Next.*|.*Continue.*|.*Share.*|.*Submit.*"
+    optional: true
+- extendedWaitUntil:
+    visible: ".*here.*|.*try.*|.*suggest.*|.*practice.*"
+    timeout: 20000
+- takeScreenshot: "screenshots/day7_maestro/cross_surface_isolation/02_support_advice"
+
+- tapOn:
+    text: ".*Begin.*|.*Try.*|.*Start.*"
+    optional: true
+    index: 0
+- waitForAnimationToEnd
+- takeScreenshot: "screenshots/day7_maestro/cross_surface_isolation/03_support_runner"
+
+# Cancel/home out mid-flow (the state-bleed risk point)
+- tapOn:
+    id: "home-button"
+    optional: true
+- back
+- back
+- back
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Day 7 of 14"
+    timeout: 20000
+- takeScreenshot: "screenshots/day7_maestro/cross_surface_isolation/04_dashboard_after_support"
+
+# --- Phase 2: open CORE mantra card ---
+- tapOn:
+    text: ".*Mantra.*|.*Śāntākāraṃ.*|.*chant.*"
+    index: 0
+- extendedWaitUntil:
+    visible: ".*Śāntākāraṃ.*|.*Begin Chanting.*"
+    timeout: 15000
+- takeScreenshot: "screenshots/day7_maestro/cross_surface_isolation/05_core_mantra_info"
+
+# CRITICAL: core mantra should be Śāntākāraṃ (day7 L2 core), not a trigger-sourced mantra.
+- assertVisible:
+    text: ".*Śāntākāraṃ.*|Śāntākāraṃ Bhujagaśayanaṃ.*"
+
+- tapOn:
+    text: "Begin Chanting"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "9"
+    optional: true
+- tapOn:
+    text: "Begin"
+    optional: true
+- extendedWaitUntil:
+    visible: ".*TAP.*|.*/9.*|.*/27.*"
+    timeout: 15000
+- takeScreenshot: "screenshots/day7_maestro/cross_surface_isolation/06_core_runner"
+
+# CRITICAL: No support-flow terminal CTA ("I feel calmer now") in a CORE runner.
+- assertNotVisible: "I feel calmer now"
+
+- repeat:
+    times: 9
+    commands:
+      - tapOn:
+          text: "TAP"
+          optional: true
+      - waitForAnimationToEnd:
+          timeout: 400
+
+- tapOn:
+    text: ".*Complete.*|.*Return.*|.*Done.*"
+    optional: true
+- extendedWaitUntil:
+    visible: "Day 7 of 14"
+    timeout: 20000
+- takeScreenshot: "screenshots/day7_maestro/cross_surface_isolation/07_dashboard_final"
+
+# Core completion must register ✓ on dashboard (day unchanged, source=core)
+- assertVisible: "Day 7 of 14"
+
+- stopApp

@@ -1,0 +1,40 @@
+appId: com.kalpx.app
+name: evening_reflection_flow
+---
+- killApp: com.kalpx.app
+- launchApp:
+    appId: com.kalpx.app
+    clearState: false
+- extendedWaitUntil:
+    visible: "Today"
+    timeout: 20000
+- takeScreenshot: ~/kalpx-app-rn/screenshots/day7_maestro/evening_reflection/01_dashboard
+# Entry: bell icon or "evening check-in" entry
+- runFlow:
+    when:
+      visible: "evening check-in"
+    commands:
+      - tapOn: "evening check-in"
+- runFlow:
+    when:
+      notVisible: "What did you learn"
+    commands:
+      - tapOn:
+          id: "bell-icon"
+- extendedWaitUntil:
+    visible: "What did you learn|reflect|Reflection|evening"
+    timeout: 15000
+- takeScreenshot: ~/kalpx-app-rn/screenshots/day7_maestro/evening_reflection/02_reflection_turn
+- assertVisible: "What did you learn|reflect"
+- tapOn:
+    id: "reflection-input"
+- inputText: "I learned that rest and presence are a practice, not a reward."
+- takeScreenshot: ~/kalpx-app-rn/screenshots/day7_maestro/evening_reflection/03_text_entered
+- tapOn:
+    text: "Complete Day"
+- extendedWaitUntil:
+    visible: "Day 7 complete|sealed|Kept"
+    timeout: 20000
+- takeScreenshot: ~/kalpx-app-rn/screenshots/day7_maestro/evening_reflection/04_sealed
+- assertVisible: "Day 7 complete|sealed|Kept"
+- stopApp

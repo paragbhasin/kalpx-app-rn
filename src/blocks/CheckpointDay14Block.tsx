@@ -28,7 +28,7 @@ import {
 } from "react-native";
 import { Fonts } from "../theme/fonts";
 import { executeAction } from "../engine/actionExecutor";
-import { useContentSlots, readMomentSlot } from "../hooks/useContentSlots";
+import { useContentSlots, readMomentSlot, interpolate } from "../hooks/useContentSlots";
 import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
@@ -82,9 +82,18 @@ const CheckpointDay14Block: React.FC<Props> = () => {
 
   const completedCount = statuses.filter((s) => s === "completed").length;
 
+  // MDR-S1-10 — spine-backed narrative. Priority chain:
+  //   1. ss.journey_narrative — server-seeded per-cycle override (unchanged)
+  //   2. slot("narrative_template") interpolated with {completed_count}/{total_days}
+  //   3. empty string — sovereignty Rule 3 (no English fallback; empty renders
+  //      as zero-height Text rather than leaking hardcoded copy)
+  const narrativeTpl = slot("narrative_template");
   const narrative: string =
     ss.journey_narrative ||
-    `Fourteen days. Two weeks of showing up. ${completedCount} of ${DOTS} sealed. Something has settled.`;
+    interpolate(narrativeTpl, {
+      completed_count: completedCount,
+      total_days: DOTS,
+    });
 
   const growth: string | null = ss.what_grew_section || null;
 
@@ -178,7 +187,10 @@ const CheckpointDay14Block: React.FC<Props> = () => {
         </View>
 
         <Text style={styles.summary}>
-          {completedCount} of {DOTS} days.
+          {interpolate(slot("summary_line_template"), {
+            completed_count: completedCount,
+            total_days: DOTS,
+          })}
         </Text>
 
         <Text style={styles.narrative}>{narrative}</Text>

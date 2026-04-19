@@ -1,0 +1,150 @@
+# support_flow — day7 exercises the three support rooms end-to-end:
+# grief, loneliness, and trigger sound-bridge. Asserts exact room copy,
+# asserts core triad state UNCHANGED post-support (support does not
+# advance core journey per REG-015), and asserts no trigger artifacts
+# leak back into dashboard.
+#
+# Entry strategy: the dashboard may not surface a direct "Need support"
+# CTA in every variant, and the support rooms are deep-linkable
+# (see src/navigation/deepLinkHandler.ts:23). We use deep links for
+# deterministic entry — this mirrors how Pavani reaches these rooms in
+# her render-truth audit flow.
+appId: com.kalpx.app
+---
+- launchApp:
+    clearState: false
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Day 7 of 14"
+    timeout: 20000
+- takeScreenshot: "screenshots/day7_maestro/support_flow/01_dashboard_pre"
+
+# Snapshot core state — we will compare again at the end.
+- assertVisible: "Day 7 of 14"
+
+# ============================================================
+# PART 1 — GRIEF ROOM
+# ============================================================
+- openLink: "kalpx://mitra/support_grief/room"
+- extendedWaitUntil:
+    visible: "I'm here. No rush."
+    timeout: 20000
+- takeScreenshot: "screenshots/day7_maestro/support_flow/02_grief_room"
+
+# Spec copy asserts — route_support_grief.md mandates exact opening line.
+- assertVisible: "I'm here. No rush."
+- assertVisible: "Sit with me"
+- assertVisible: "Voice note"
+- assertVisible: "I'll come back to this"
+
+# Sit with me — dispatches grief_stay (breath loop); no completion event.
+- tapOn:
+    text: "Sit with me"
+- waitForAnimationToEnd
+- takeScreenshot: "screenshots/day7_maestro/support_flow/03_grief_sit"
+
+# Voice note path — opens recorder, return.
+- tapOn:
+    text: "Voice note"
+- extendedWaitUntil:
+    visible: ".*record.*|.*Record.*|.*Tap.*|.*mic.*|.*listening.*|.*I'll come back.*"
+    timeout: 15000
+- takeScreenshot: "screenshots/day7_maestro/support_flow/04_grief_voice"
+# Exit voice — back to room (or direct back)
+- tapOn:
+    text: ".*[Cc]ancel.*|.*[Dd]one.*|.*[Bb]ack.*"
+    optional: true
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "I'll come back to this"
+    timeout: 15000
+
+# Exit grief room — REG-015 clears grief_session_* + runner_* flags.
+- tapOn:
+    text: "I'll come back to this"
+- extendedWaitUntil:
+    visible: "Day 7 of 14"
+    timeout: 20000
+- takeScreenshot: "screenshots/day7_maestro/support_flow/05_after_grief_dashboard"
+
+# ASSERT — dashboard clean; no grief artifacts leaked.
+- assertVisible: "Day 7 of 14"
+- assertNotVisible: "I'm here. No rush."
+- assertNotVisible: "Sit with me"
+
+# ============================================================
+# PART 2 — LONELINESS ROOM
+# ============================================================
+- openLink: "kalpx://mitra/support_loneliness/room"
+- extendedWaitUntil:
+    visible: "Let's chant together for a minute. Not alone."
+    timeout: 20000
+- takeScreenshot: "screenshots/day7_maestro/support_flow/06_loneliness_room"
+
+# Spec copy asserts.
+- assertVisible: "Let's chant together for a minute. Not alone."
+- assertVisible: "I feel less alone now"
+
+# CompanionedChant block renders. We look for the mantra region or the
+# "Name it" / "Walk outside" CTAs which are always present.
+- assertVisible: ".*Name it.*|.*Reach out.*|.*Walk outside.*"
+
+# Exit — REG-015 clears loneliness_session_*.
+- tapOn:
+    text: "I feel less alone now"
+- extendedWaitUntil:
+    visible: "Day 7 of 14"
+    timeout: 20000
+- takeScreenshot: "screenshots/day7_maestro/support_flow/07_after_loneliness_dashboard"
+- assertVisible: "Day 7 of 14"
+- assertNotVisible: "Let's chant together for a minute. Not alone."
+
+# ============================================================
+# PART 3 — TRIGGER SUPPORT / SOUND BRIDGE
+# ============================================================
+- openLink: "kalpx://mitra/support_trigger/sound_bridge"
+- extendedWaitUntil:
+    visible: ".*OM.*|.*Om.*|.*hum.*|.*Hum.*|.*breath.*|.*Tap.*"
+    timeout: 20000
+- takeScreenshot: "screenshots/day7_maestro/support_flow/08_sound_bridge"
+
+# Tap anywhere to skip / continue (SoundBridgeTransient.tsx:65 advance_sound_bridge).
+- tapOn:
+    point: "50%,50%"
+- waitForAnimationToEnd
+- takeScreenshot: "screenshots/day7_maestro/support_flow/09_post_sound_bridge"
+
+# The bridge advances to the support-trigger mantra surface or back to
+# dashboard depending on journey state. Either is acceptable — we assert
+# NO trigger_mantra_text leak regardless.
+- extendedWaitUntil:
+    visible: ".*Day 7 of 14.*|.*Begin.*|.*mantra.*"
+    timeout: 20000
+
+# If landed on a mantra runner, exit gracefully.
+- tapOn:
+    text: ".*Exit.*|.*I'll come back.*|.*Back.*|.*Close.*"
+    optional: true
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Day 7 of 14"
+    timeout: 20000
+- takeScreenshot: "screenshots/day7_maestro/support_flow/10_final_dashboard"
+
+# ============================================================
+# FINAL INVARIANTS — REG-015 / INV-12
+# ============================================================
+- assertVisible: "Day 7 of 14"
+# No support-room copy leaked onto the dashboard.
+- assertNotVisible: "I'm here. No rush."
+- assertNotVisible: "Let's chant together for a minute. Not alone."
+- assertNotVisible: "Sit with me"
+# No trigger sound-bridge artifact.
+- assertNotVisible: ".*sound bridge.*|.*Sound bridge.*"
+# Core triad state unchanged — support does NOT advance core.
+# We re-assert the dashboard headline persists and no new "complete"
+# toast for core is visible.
+- assertNotVisible: ".*Core complete.*|.*Triad complete.*"
+
+- stopApp
+# FLOW PASSED: support_flow

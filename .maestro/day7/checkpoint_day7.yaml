@@ -1,0 +1,53 @@
+# checkpoint_day7_flow — cold-launch should auto-route day7 to the checkpoint.
+# If it doesn't, that's a Home.tsx routing bug — do NOT work around.
+appId: com.kalpx.app
+---
+- launchApp:
+    clearState: false
+- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 6000
+- extendedWaitUntil:
+    visible: "A Week Into Your Journey"
+    timeout: 30000
+- takeScreenshot: "screenshots/day7_maestro/checkpoint_day7/01_checkpoint_entry"
+
+- assertVisible: "A Week Into Your Journey"
+- assertVisible: "Reflect on My Journey"
+
+- tapOn: "Reflect on My Journey"
+- extendedWaitUntil:
+    visible: ".*reflect.*|.*journey.*|.*week.*|.*share.*"
+    timeout: 15000
+- takeScreenshot: "screenshots/day7_maestro/checkpoint_day7/02_reflection_prompt"
+
+# Enter reflection text
+- tapOn:
+    id: "reflection-input"
+    optional: true
+- tapOn:
+    text: ".*reflect.*|.*share.*|.*tell.*"
+    optional: true
+    index: 0
+- inputText: "This week I have felt more grounded and the mantra has become steadier."
+- hideKeyboard
+- takeScreenshot: "screenshots/day7_maestro/checkpoint_day7/03_reflection_typed"
+
+- tapOn:
+    text: ".*Submit.*|.*Share.*|.*Continue.*|.*Next.*"
+- extendedWaitUntil:
+    visible: ".*Deepen.*|.*Extension.*|.*Begin Day 1.*|.*Continue.*|.*result.*"
+    timeout: 25000
+- takeScreenshot: "screenshots/day7_maestro/checkpoint_day7/04_results_or_confirmation"
+
+- tapOn:
+    text: ".*Begin Day 1.*|.*Extension.*|.*Deepen.*|.*Continue.*"
+    index: 0
+- extendedWaitUntil:
+    visible: "Day 1 of"
+    timeout: 25000
+- takeScreenshot: "screenshots/day7_maestro/checkpoint_day7/05_new_cycle_day1"
+
+- assertVisible: "Day 1 of"
+
+- stopApp

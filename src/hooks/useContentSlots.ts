@@ -123,3 +123,37 @@ export function readMomentSlot(
   }
   return "";
 }
+
+/**
+ * Bounded template interpolation for ContentPack slot values.
+ *
+ * MDR-S1-10. Replaces `{token}` occurrences in a slot template with
+ * provided variable values. Intentionally simple and bounded:
+ *
+ *  - Empty template → returns "" (sovereignty Rule 3: no English fallback
+ *    allowed; the caller's upstream override already decides whether to
+ *    short-circuit to a server-seeded string).
+ *  - Missing variable → substitutes "" (blank) — NEVER leaks the raw
+ *    `{token}` to the UI. This is a regression guard: a template authored
+ *    with a typo (e.g. `{completed_count}` vs `{completedCount}`) renders
+ *    as a quiet empty instead of a visible token, so QA/telemetry catch
+ *    the authoring drift without user-facing breakage.
+ *  - Variable value is always coerced via String(). Callers must not pass
+ *    values that could be abused for code injection — templates are
+ *    ContentPack-governed plaintext, not executable.
+ *  - Returns early if template has no tokens (zero substitution cost).
+ *
+ * This helper does NOT read slots or resolve moments; it operates on a
+ * pre-read string. Slot governance (sovereignty, variant selection, CI
+ * fallback-deny-list) is unaffected — this is purely a formatting layer.
+ */
+export function interpolate(
+  template: string,
+  vars: Record<string, string | number>,
+): string {
+  if (!template) return "";
+  return template.replace(/\{(\w+)\}/g, (_match, key) => {
+    const raw = vars[key];
+    return raw === undefined || raw === null ? "" : String(raw);
+  });
+}

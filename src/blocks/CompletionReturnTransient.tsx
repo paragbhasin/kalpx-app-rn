@@ -295,15 +295,19 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
                     ).catch(() => {});
                   }}
                 >
-                  <Text style={styles.readMoreText}>Read more →</Text>
+                  <Text style={styles.readMoreText}>{slot("read_more_label")}</Text>
                 </TouchableOpacity>
               )}
             </View>
           )}
 
           <View style={styles.voiceInputWrap}>
+            {/* MDR-S1-12 — sovereignty-strict. Placeholder reads from slot
+                 only; dead English fallback dropped. Empty slot → blank
+                 placeholder (acceptable — input remains functional; missing
+                 content visible in QA + telemetry). */}
             <VoiceTextInput
-              placeholder={slot("reflection_prompt") || "How did that feel?"}
+              placeholder={slot("reflection_prompt")}
               onSend={(text, type) => handleSubmitReflection(text, type)}
             />
           </View>

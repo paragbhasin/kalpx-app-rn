@@ -1,0 +1,103 @@
+# support_mantra_flow — trigger/support lane recommends a MANTRA as recovery.
+# Runner must mount with source=support_trigger (or support_*), item_type=mantra.
+# Terminal CTA: "I feel calmer now" (support signature). On return: core ✓ unchanged,
+# trigger artifacts cleared (no "drained" chip, no support CTA visible).
+#
+# Note: support lane routing may pick mantra/sankalp/practice dynamically based on
+# backend recommendation. If the lane returns a non-mantra type here, we log the
+# actual routing and flag as product gap in results — we do NOT fake it.
+appId: com.kalpx.app
+---
+- launchApp:
+    clearState: false
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible: "Day 7 of 14"
+    timeout: 20000
+- takeScreenshot: "screenshots/day7_maestro/support_mantra/01_dashboard"
+
+# Enter support/trigger lane. Try "I feel triggered" first (direct mantra bridge),
+# fall back to composer path.
+- tapOn:
+    text: "I feel triggered."
+    optional: true
+- runFlow:
+    when:
+      notVisible: ".*OM.*|.*ॐ.*|.*Hum.*|.*TAP.*"
+    commands:
+      - tapOn:
+          text: ".*How are you.*|.*Share.*|.*check.*in.*|.*Trigger.*"
+          optional: true
+          index: 0
+      - waitForAnimationToEnd
+      - tapOn:
+          text: ".*[Dd]rained.*|.*[Aa]gitated.*|.*[Aa]nxious.*|.*overwhelm.*"
+          optional: true
+          index: 0
+      - tapOn:
+          text: ".*Next.*|.*Continue.*|.*Share.*|.*Submit.*"
+          optional: true
+- waitForAnimationToEnd
+- takeScreenshot: "screenshots/day7_maestro/support_mantra/02_lane_entry"
+
+# Sound bridge / advice / mantra entry
+- extendedWaitUntil:
+    visible: ".*Hum.*|.*ॐ.*|.*OM.*|.*TAP.*|.*Mantra.*|.*practice.*|.*try.*"
+    timeout: 20000
+- takeScreenshot: "screenshots/day7_maestro/support_mantra/03_advice_or_bridge"
+
+# If advice cards: pick the mantra-looking one. If direct bridge: tap anywhere to skip.
+- tapOn:
+    text: ".*Mantra.*|.*chant.*|.*OM.*|.*ॐ.*"
+    optional: true
+    index: 0
+- tapOn:
+    point: "50%,50%"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: ".*Begin.*|.*Start.*|.*Try.*"
+    optional: true
+    index: 0
+- extendedWaitUntil:
+    visible: ".*TAP.*|.*/9.*|.*/27.*|.*/108.*|.*bead.*"
+    timeout: 20000
+- takeScreenshot: "screenshots/day7_maestro/support_mantra/04_runner"
+
+# Surface-correctness: mantra counter rendered
+- assertVisible:
+    text: ".*TAP.*|.*/9.*|.*/27.*|.*/108.*"
+
+# Complete the mantra runner
+- repeat:
+    times: 9
+    commands:
+      - tapOn:
+          text: "TAP"
+          optional: true
+      - waitForAnimationToEnd:
+          timeout: 400
+
+- tapOn:
+    text: ".*Complete.*|.*Done.*|.*Finish.*"
+    optional: true
+- extendedWaitUntil:
+    visible: "I feel calmer now"
+    timeout: 20000
+- takeScreenshot: "screenshots/day7_maestro/support_mantra/05_calmer_cta"
+
+# Support terminal CTA present — confirms source=support_*
+- assertVisible: "I feel calmer now"
+
+- tapOn:
+    text: "I feel calmer now"
+- extendedWaitUntil:
+    visible: "Day 7 of 14"
+    timeout: 20000
+- takeScreenshot: "screenshots/day7_maestro/support_mantra/06_dashboard_clean"
+
+# State-bleed checks on return
+- assertVisible: "Day 7 of 14"
+- assertNotVisible: "I feel calmer now"
+- assertNotVisible: ".*[Dd]rained.*"
+- stopApp

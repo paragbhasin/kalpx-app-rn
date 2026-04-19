@@ -1,0 +1,47 @@
+appId: com.kalpx.app
+name: deep_mantra_flow
+---
+- killApp: com.kalpx.app
+- launchApp:
+    appId: com.kalpx.app
+    clearState: false
+- extendedWaitUntil:
+    visible: "Mitra"
+    timeout: 20000
+- takeScreenshot: ~/kalpx-app-rn/screenshots/day7_maestro/deep_mantra/01_home
+# Navigate to dashboard if not already
+- runFlow:
+    when:
+      visible: "Today"
+    commands:
+      - takeScreenshot: ~/kalpx-app-rn/screenshots/day7_maestro/deep_mantra/02_dashboard
+# Tap mantra card
+- tapOn:
+    text: "Śāntākāraṃ"
+- extendedWaitUntil:
+    visible: "108"
+    timeout: 15000
+- takeScreenshot: ~/kalpx-app-rn/screenshots/day7_maestro/deep_mantra/03_runner_entry
+- assertVisible: "108"
+# Tap bead 27 times (mantra runner default rep count per day7 triad)
+- repeat:
+    times: 27
+    commands:
+      - tapOn:
+          id: "mantra-bead-tap"
+      - waitForAnimationToEnd:
+          timeout: 1500
+- takeScreenshot: ~/kalpx-app-rn/screenshots/day7_maestro/deep_mantra/04_after_27_reps
+- extendedWaitUntil:
+    visible: "Kept"
+    timeout: 15000
+- assertVisible: "Kept"
+- takeScreenshot: ~/kalpx-app-rn/screenshots/day7_maestro/deep_mantra/05_completion
+- tapOn:
+    text: "Return to Mitra"
+- extendedWaitUntil:
+    visible: "Today"
+    timeout: 15000
+- takeScreenshot: ~/kalpx-app-rn/screenshots/day7_maestro/deep_mantra/06_dashboard_return
+- assertVisible: ".*✓.*|.*Kept.*|.*Complete.*"
+- stopApp

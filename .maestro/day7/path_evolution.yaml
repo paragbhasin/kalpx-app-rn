@@ -1,0 +1,42 @@
+# path_evolution_flow — cycle_complete_overview → deepen_confirmation → new cycle.
+# NOTE: ideally uses day14. Day7 harness can't advance state; we run against day7 user
+# and expect either (a) cycle_complete surface if checkpoint already submitted,
+# or (b) the flow fails at the first assertVisible — which is a valid honest result.
+appId: com.kalpx.app
+---
+- launchApp:
+    clearState: false
+- waitForAnimationToEnd
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: "screenshots/day7_maestro/path_evolution/01_launch"
+
+- extendedWaitUntil:
+    visible: ".*cycle.*complete.*|.*Cycle Complete.*|.*Deepen This Focus.*|.*Week Into.*|.*Day.*of.*"
+    timeout: 25000
+- takeScreenshot: "screenshots/day7_maestro/path_evolution/02_entry_state"
+
+# Try to reach cycle_complete_overview. On day7 this may require finishing
+# the checkpoint first; we attempt, and honestly record whatever we hit.
+- tapOn:
+    text: ".*Deepen This Focus.*"
+    optional: true
+- waitForAnimationToEnd
+- takeScreenshot: "screenshots/day7_maestro/path_evolution/03_deepen_tapped"
+
+- extendedWaitUntil:
+    visible: ".*Deepen.*|.*confirm.*|.*new cycle.*|.*same.*focus.*"
+    timeout: 15000
+- takeScreenshot: "screenshots/day7_maestro/path_evolution/04_deepen_confirmation"
+
+- tapOn:
+    text: ".*Confirm.*|.*Yes.*|.*Submit.*|.*Begin.*"
+    optional: true
+- extendedWaitUntil:
+    visible: "Day 1 of"
+    timeout: 25000
+- takeScreenshot: "screenshots/day7_maestro/path_evolution/05_new_cycle"
+
+- assertVisible: "Day 1 of"
+
+- stopApp

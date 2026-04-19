@@ -93,9 +93,23 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
   };
 
   const headlineLines = (block.headline || "").split("\n").filter(Boolean);
+  // `screenData.onboarding_turn` is a state-id string (e.g. "turn_2",
+  // "turn_3_support") after the first turn response; extract digits.
+  const rawTurn = screenData.onboarding_turn;
+  const turn =
+    typeof rawTurn === "number"
+      ? rawTurn
+      : typeof rawTurn === "string"
+        ? Number((rawTurn.match(/\d+/) || ["2"])[0])
+        : 2;
+  const rootTestID = `onboarding_turn_${turn}_root`;
 
   return (
-    <View style={styles.container}>
+    <View
+      style={styles.container}
+      testID={rootTestID}
+      accessibilityLabel={rootTestID}
+    >
       <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
         <Text style={styles.headline}>{headlineLines.join("\n")}</Text>
 
@@ -110,6 +124,7 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
             const isReturning = chip.label.toLowerCase().includes("returning");
             if (isReturning) return null;
 
+            const chipTestID = `onboarding_turn_${turn}_chip_${chip.id}`;
             return (
               <TouchableOpacity
                 key={chip.id}
@@ -118,6 +133,8 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
                   fire({ chip_id: chip.id, response_type: "chip" })
                 }
                 style={styles.chipButton}
+                testID={chipTestID}
+                accessibilityLabel={chipTestID}
               >
                 <View style={styles.premiumChip}>
                   <Text style={styles.premiumChipLabel}>{chip.label}</Text>
@@ -140,6 +157,8 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
                   fire({ chip_id: returningChip.id, response_type: "chip" })
                 }
                 style={styles.returningButton}
+                testID="onboarding_im_returning"
+                accessibilityLabel="onboarding_im_returning"
               >
                 <Text style={styles.linkText}>{returningChip.label}</Text>
               </TouchableOpacity>

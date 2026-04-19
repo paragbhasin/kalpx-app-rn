@@ -103,7 +103,16 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const replyAnim = useRef(new Animated.Value(0)).current;
   const [text, setText] = useState("");
-  const turn = Number(screenData.onboarding_turn || 1);
+  // `screenData.onboarding_turn` is a state-id string (e.g. "turn_2",
+  // "turn_3_support") after the first turn response; extract digits so
+  // testIDs like `onboarding_turn_<n>_root` get a real number, not NaN.
+  const _rawTurn = screenData.onboarding_turn;
+  const turn =
+    typeof _rawTurn === "number"
+      ? _rawTurn
+      : typeof _rawTurn === "string"
+        ? Number((_rawTurn.match(/\d+/) || ["1"])[0])
+        : 1;
   const isIntroTurn = turn === 1;
 
   useEffect(() => {

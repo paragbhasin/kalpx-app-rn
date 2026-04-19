@@ -68,20 +68,33 @@ const GuidanceModePicker: React.FC<Props> = ({ block }) => {
     );
   };
 
+  const rawTurn = screenData.onboarding_turn;
+  const turn =
+    typeof rawTurn === "number"
+      ? rawTurn
+      : typeof rawTurn === "string"
+        ? Number((rawTurn.match(/\d+/) || ["6"])[0])
+        : 6;
+
   return (
     <View style={styles.wrap}>
-      {MODES.map((m) => (
-        <TouchableOpacity
-          key={m.id}
-          style={[styles.card, m.default && styles.cardDefault]}
-          onPress={() => fire(m.id)}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.title}>{m.title}</Text>
-          <Text style={styles.desc}>{m.desc}</Text>
-          <Text style={styles.example}>{m.example}</Text>
-        </TouchableOpacity>
-      ))}
+      {MODES.map((m) => {
+        const cardTestID = `onboarding_turn_${turn}_chip_${m.id}`;
+        return (
+          <TouchableOpacity
+            key={m.id}
+            style={[styles.card, m.default && styles.cardDefault]}
+            onPress={() => fire(m.id)}
+            activeOpacity={0.85}
+            testID={cardTestID}
+            accessibilityLabel={cardTestID}
+          >
+            <Text style={styles.title}>{m.title}</Text>
+            <Text style={styles.desc}>{m.desc}</Text>
+            <Text style={styles.example}>{m.example}</Text>
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
 };

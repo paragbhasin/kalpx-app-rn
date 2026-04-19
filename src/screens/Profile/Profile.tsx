@@ -137,6 +137,8 @@ const Profile = () => {
               onPress={() =>
                 item.action ? item.action() : navigation.navigate(item.route)
               }
+              testID={`profile_menu_${item.key}`}
+              accessibilityLabel={`profile_menu_${item.key}`}
             >
               <View style={styles.menuLeft}>
                 <Ionicons name={item.icon} size={20} color="#a67c52" />

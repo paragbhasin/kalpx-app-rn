@@ -1,32 +1,14 @@
 # common/login_as_persona.yaml
 # Parameterized login. Consumers pass PERSONA_EMAIL + PERSONA_PASSWORD.
-# Lands the user on the authed dashboard (QuickSupportBlock visible).
 #
-# Login UI notes:
-#   - Username field placeholder = "Username" (accepts email format)
-#   - Password field placeholder = "Password"
-#   - Primary CTA text = "LOGIN" (i18n key login.loginBtn)
-#   - Tapping a field focuses it + opens keyboard; tapping next field
-#     dismisses prior keyboard automatically — we rely on this instead of
-#     `hideKeyboard` since the app uses custom input wrappers that don't
-#     expose the standard dismiss action.
-# SELECTOR_PATCH_NEEDED: add testID="login_{username,password,submit}" to
-# src/screens/Login/LoginScreen.tsx.
+# Delegates to fast_login_as_persona.yaml which uses `clearState:
+# false` + Profile/Logout navigation to skip the ~90s bundle reload.
+# First flow of a cold batch should call `common/warmup.yaml` before
+# these runs.
 appId: com.kalpx.app
 ---
-- launchApp:
-    clearState: true
-- runFlow: connect_dev_client.yaml
-- tapOn: "Username"
-- inputText: ${PERSONA_EMAIL}
-- tapOn: "Password"
-- inputText: ${PERSONA_PASSWORD}
-# Dismiss keyboard by tapping the "KalpX" header (non-input area) so LOGIN
-# becomes tappable — iOS keyboard otherwise covers the LOGIN button.
-# `hideKeyboard` fails here because the app wraps inputs in a custom
-# component that doesn't expose the standard dismiss action.
-- tapOn: "KalpX"
-- tapOn: "LOGIN"
-- waitForAnimationToEnd:
-    timeout: 15000
-- runFlow: wait_for_dashboard.yaml
+- runFlow:
+    file: fast_login_as_persona.yaml
+    env:
+      PERSONA_EMAIL: ${PERSONA_EMAIL}
+      PERSONA_PASSWORD: ${PERSONA_PASSWORD}

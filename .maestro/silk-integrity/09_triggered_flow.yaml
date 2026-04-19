@@ -3,7 +3,7 @@
 appId: com.kalpx.app
 ---
 - launchApp:
-    clearState: true
+    clearState: false
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
 # Phase 3: QuickSupportBlock exposes testID="quick_support_triggered".

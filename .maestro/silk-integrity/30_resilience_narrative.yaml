@@ -11,7 +11,7 @@
 appId: com.kalpx.app
 ---
 - launchApp:
-    clearState: true
+    clearState: false
 # M26 resilience narrative is typically day-14+ territory — use persona
 # with Day-14 state for best surface-match probability. Kept as a soft
 # check (optional) since surface conditions aren't 100% deterministic

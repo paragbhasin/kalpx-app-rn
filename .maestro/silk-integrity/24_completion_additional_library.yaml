@@ -9,7 +9,7 @@ env:
 appId: com.kalpx.app
 ---
 - launchApp:
-    clearState: true
+    clearState: false
 - runFlow:
     file: common/login_as_persona.yaml
     env:

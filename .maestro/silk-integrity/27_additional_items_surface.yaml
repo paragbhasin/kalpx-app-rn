@@ -11,7 +11,7 @@
 appId: com.kalpx.app
 ---
 - launchApp:
-    clearState: true
+    clearState: false
 # persona_additional_library@kalpx.com has pre-seeded additional items
 # (smoke+triad does not; would hard-fail at the additional_items_surface
 # testID wait).

@@ -1,0 +1,56 @@
+# common/ensure_login_screen.yaml
+# State-aware navigation to the Login screen WITHOUT clearing app state.
+# Skips the expensive ~90s bundle reload that `clearState: true` forces.
+#
+# Every step is optional — the flow no-ops if we're already on Login.
+# The final extendedWaitUntil on "LOGIN" is the contract.
+#
+# Handles starting states:
+#   A. Already on Login screen — every tap no-ops; final wait fires instantly
+#   B. On Dashboard / any authed screen — Home tab → Profile tab → Logout
+#   C. On Welcome / Mitra intro — tap "Begin your journey" → "I'm returning"
+#   D. On a sub-screen / overlay — back out via Home tab first
+appId: com.kalpx.app
+---
+# Reset navigation to the root by tapping Home tab (escapes any sub-
+# screen / overlay).
+- tapOn:
+    text: ".*Home, tab, 1 of 4.*"
+    optional: true
+# Go to Profile tab via its full accessibility label.
+- tapOn:
+    text: ".*Profile, tab, 3 of 4.*"
+    optional: true
+# testID is the stable selector here — rendered menu text has Ionicons
+# prefix + chevron-forward suffix ("\ueccf Login \ueb3c") that breaks
+# full-string text matchers. testID was added to Profile.tsx this turn.
+- tapOn:
+    id: "profile_menu_logout"
+    optional: true
+# LogoutPopup — confirm.
+- tapOn:
+    text: "Yes"
+    optional: true
+- tapOn:
+    text: "Confirm"
+    optional: true
+- tapOn:
+    text: "OK"
+    optional: true
+# Already-guest state: Profile renders a "Login" menu item instead of
+# "Logout". testID keeps us from accidentally tapping "Login With
+# Google" on a LoginScreen that may already be showing.
+- tapOn:
+    id: "profile_menu_login"
+    optional: true
+# Case C: Welcome / Mitra intro route.
+- tapOn:
+    text: ".*Begin your journey.*"
+    optional: true
+- tapOn:
+    text: "I'm returning"
+    optional: true
+# Contract assertion.
+- extendedWaitUntil:
+    visible: "LOGIN"
+    timeout: 20000

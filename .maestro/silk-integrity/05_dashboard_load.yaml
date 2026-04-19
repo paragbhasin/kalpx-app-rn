@@ -14,7 +14,7 @@
 appId: com.kalpx.app
 ---
 - launchApp:
-    clearState: true
+    clearState: false
 - runFlow: common/login_as_smoke_persona.yaml
 # Cross-layout signal: "Welcome back, <name>." headline is always on
 # the top of /journey/home/ render surface for returning users.

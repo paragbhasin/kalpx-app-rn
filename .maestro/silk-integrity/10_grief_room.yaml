@@ -5,7 +5,7 @@
 appId: com.kalpx.app
 ---
 - launchApp:
-    clearState: true
+    clearState: false
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
 # Open MoreSupportSheet

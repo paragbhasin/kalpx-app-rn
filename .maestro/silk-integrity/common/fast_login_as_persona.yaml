@@ -1,0 +1,33 @@
+# common/fast_login_as_persona.yaml
+# Fast alternative to `login_as_persona.yaml` — skips the ~90s cold bundle
+# reload by NOT clearing app state. Use this in flows that run in a batch
+# where a prior flow has already warmed the bundle + reached a known app
+# state.
+#
+# Contract:
+#   - App must already be running + connected to Metro (use
+#     `login_as_persona.yaml` for the first flow in a batch to cold-start,
+#     or call `warmup.yaml` once before the batch).
+#   - Consumer must pass PERSONA_EMAIL + PERSONA_PASSWORD env vars.
+#
+# Speedup: ~60–90s per flow (skips dev-client launcher + Dev Menu
+# dismiss + Welcome/Intro bridge when the app is already on an
+# authed/guest screen that we can navigate from).
+appId: com.kalpx.app
+---
+- launchApp:
+    clearState: false
+# Navigate to Login from wherever we are (Dashboard → logout; Welcome
+# → I'm returning; already-on-Login → no-op).
+- runFlow: ensure_login_screen.yaml
+# Login — placeholder-based selectors + KalpX-header tap to dismiss
+# keyboard so LOGIN button is tappable.
+- tapOn: "Username"
+- inputText: ${PERSONA_EMAIL}
+- tapOn: "Password"
+- inputText: ${PERSONA_PASSWORD}
+- tapOn: "KalpX"
+- tapOn: "LOGIN"
+- waitForAnimationToEnd:
+    timeout: 15000
+- runFlow: wait_for_dashboard.yaml

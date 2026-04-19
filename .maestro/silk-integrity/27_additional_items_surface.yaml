@@ -12,7 +12,14 @@ appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
-- runFlow: common/login_as_smoke_persona.yaml
+# persona_additional_library@kalpx.com has pre-seeded additional items
+# (smoke+triad does not; would hard-fail at the additional_items_surface
+# testID wait).
+- runFlow:
+    file: common/login_as_persona.yaml
+    env:
+      PERSONA_EMAIL: "persona_additional_library@kalpx.com"
+      PERSONA_PASSWORD: "smoke-dev-only-do-not-use-in-prod"
 - runFlow: common/wait_for_dashboard.yaml
 # Scroll dashboard to expose Additional Items section.
 - scroll

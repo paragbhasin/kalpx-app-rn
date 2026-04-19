@@ -11,9 +11,9 @@ appId: com.kalpx.app
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
 - extendedWaitUntil:
-    visible: "I'm in a good place"
+    visible: ".*I'm in a good place.*"
     timeout: 10000
-- tapOn: "I'm in a good place"
+- tapOn: ".*I'm in a good place.*"
 - waitForAnimationToEnd:
     timeout: 8000
 - tapOn:

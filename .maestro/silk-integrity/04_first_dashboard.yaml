@@ -15,8 +15,8 @@ appId: com.kalpx.app
     optional: true
 - runFlow: common/wait_for_dashboard.yaml
 # Dashboard primary chips should render
-- assertVisible: "I Feel Triggered"
-- assertVisible: "Quick Check-in"
+- assertVisible: ".*I Feel Triggered.*"
+- assertVisible: ".*Quick Check-in.*"
 # Deny-list fallbacks
 - assertNotVisible: "Welcome, friend."
 - assertNotVisible: "You're here. Begin wherever feels right."

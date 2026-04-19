@@ -1,5 +1,5 @@
 # Silk Integrity Flow 09 — Triggered flow (I Feel Triggered → reset)
-# Group B. Persona: smoke+triad. Selector risk: LOW ("I Feel Triggered" stable).
+# Group B. Persona: smoke+triad. Selector risk: LOW (".*I Feel Triggered.*" stable).
 appId: com.kalpx.app
 ---
 - launchApp:

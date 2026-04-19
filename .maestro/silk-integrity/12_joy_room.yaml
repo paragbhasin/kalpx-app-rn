@@ -8,11 +8,11 @@ appId: com.kalpx.app
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
 # Joy chip — sovereignty-strict, only present when backend seeded. Confirmed live
-# via the Track 1 chip label ("I'm in a good place" per founder decision 2026-04-18).
+# via the Track 1 chip label (".*I'm in a good place.*" per founder decision 2026-04-18).
 - extendedWaitUntil:
-    visible: "I'm in a good place"
+    visible: ".*I'm in a good place.*"
     timeout: 10000
-- tapOn: "I'm in a good place"
+- tapOn: ".*I'm in a good place.*"
 - waitForAnimationToEnd:
     timeout: 8000
 # Joy Room opens — testID-first assertion, pattern fallback.

@@ -1,17 +1,39 @@
 # common/guest_enter.yaml
-# Cold-open path onto onboarding-eligible state.
-# Clears auth + journey, then launches onboarding chip flow.
+# Cold-open path onto the first onboarding conversation turn (fresh user
+# branch — NOT the "I'm returning" branch used by login flows).
+#
+# Full sequence:
+#   1. Clear state + relaunch
+#   2. Dev-client deep-link to Metro (bypass launcher)
+#   3. Dismiss Dev Menu overlay (X button at 75%, 34% of the sheet)
+#   4. Welcome screen → tap "Begin your journey →"
+#   5. Mitra intro conversation → tap fresh-begin chip ("Yes,let's begin")
+#   6. Land on Turn 1 (Stage 0 recognition prompt)
 appId: com.kalpx.app
 ---
 - launchApp:
     clearState: true
+- openLink: "com.kalpx.app://expo-development-client/?url=http%3A%2F%2Flocalhost%3A8081"
+- tapOn:
+    text: "Open"
+    optional: true
+- extendedWaitUntil:
+    visible: "Continue"
+    timeout: 5000
+    optional: true
+- tapOn:
+    text: "Continue"
+    optional: true
+- extendedWaitUntil:
+    visible: ".*Begin your journey.*"
+    timeout: 180000
+- tapOn:
+    point: "75%, 34%"
+    optional: true
+- tapOn: ".*Begin your journey.*"
+- extendedWaitUntil:
+    visible: ".*Yes.*let.*begin.*"
+    timeout: 20000
+- tapOn: ".*Yes.*let.*begin.*"
 - waitForAnimationToEnd:
     timeout: 8000
-# SELECTOR_PATCH_NEEDED: onboarding entry CTA has no testID — using text.
-- tapOn:
-    text: "Begin"
-    optional: true
-- tapOn:
-    text: "Get Started"
-    optional: true
-- waitForAnimationToEnd

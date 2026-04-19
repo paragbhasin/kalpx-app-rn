@@ -9,7 +9,7 @@ appId: com.kalpx.app
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
 - tapOn:
-    text: "More support"
+    text: ".*More support.*"
 - waitForAnimationToEnd
 - tapOn:
     id: "more_support_loneliness_row"

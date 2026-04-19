@@ -8,11 +8,11 @@ appId: com.kalpx.app
     clearState: true
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
-# Growth chip — Track 1 founder-locked label: "I want to go deeper"
+# Growth chip — Track 1 founder-locked label: ".*I want to go deeper.*"
 - extendedWaitUntil:
-    visible: "I want to go deeper"
+    visible: ".*I want to go deeper.*"
     timeout: 10000
-- tapOn: "I want to go deeper"
+- tapOn: ".*I want to go deeper.*"
 - waitForAnimationToEnd:
     timeout: 8000
 - extendedWaitUntil:

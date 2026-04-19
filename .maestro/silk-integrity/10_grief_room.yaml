@@ -10,7 +10,7 @@ appId: com.kalpx.app
 - runFlow: common/wait_for_dashboard.yaml
 # Open MoreSupportSheet
 - tapOn:
-    text: "More support"
+    text: ".*More support.*"
 - waitForAnimationToEnd
 - tapOn:
     id: "more_support_grief_row"

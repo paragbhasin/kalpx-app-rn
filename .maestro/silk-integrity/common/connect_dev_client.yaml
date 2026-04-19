@@ -4,15 +4,20 @@
 # Speed note: Previously waited up to 180s on "Begin your journey" THEN
 # dismissed Dev Menu — wasted ~90s of the bundle-load window. Now we
 # race: as soon as the Dev Menu header ("Runtime version") shows, tap
-# the X close button (75%, 34%). "Runtime version" text appears the
-# moment the dev-client connects — typically 3-5s after openLink —
-# long before the Welcome screen finishes rendering underneath.
+# the X close button. "Runtime version" text appears the moment the
+# dev-client connects — typically 3-5s after openLink — long before the
+# Welcome screen finishes rendering underneath.
+#
+# Coord note (Wave 2 2026-04-19): prior 75%,34% was a silent no-op on
+# iPhone 15 Pro (393x852). Live inspection placed the X at approx
+# (369, 368) = 94%, 43%. Primary tap is 94%,43%; 75%,34% kept as
+# optional defensive fallback in case the sheet layout drifts.
 #
 # Flow:
 #   1. openLink deep-link to Metro
 #   2. Dismiss iOS scheme confirmation (if present)
 #   3. Wait for Dev Menu signal ("Runtime version") — fast
-#   4. Tap the X close button at 75%, 34% of the sheet
+#   4. Tap X close button (94%, 43%), fallback (75%, 34%)
 #   5. Dismiss dev-menu first-run tutorial ("Continue") if present
 #   6. Wait for Welcome screen text
 #   7. Welcome → "Begin your journey →"
@@ -40,6 +45,9 @@ appId: com.kalpx.app
     optional: true
 # Dismiss by tapping the X close button in the sheet header.
 - tapOn:
+    point: "94%, 43%"
+    optional: true
+- tapOn:
     point: "75%, 34%"
     optional: true
 # Bundle may still be loading under the menu. Now wait for Welcome.
@@ -48,6 +56,9 @@ appId: com.kalpx.app
     timeout: 180000
 # If Dev Menu re-appears (race: menu pops AFTER bundle-loads event),
 # tap X once more defensively.
+- tapOn:
+    point: "94%, 43%"
+    optional: true
 - tapOn:
     point: "75%, 34%"
     optional: true

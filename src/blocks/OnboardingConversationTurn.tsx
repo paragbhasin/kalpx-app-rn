@@ -210,7 +210,11 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
 
   if (block.turnOneHero && isIntroTurn) {
     return (
-      <View style={styles.turnOneWrap}>
+      <View
+        style={styles.turnOneWrap}
+        testID={`onboarding_turn_${turn}_root`}
+        accessibilityLabel={`onboarding_turn_${turn}_root`}
+      >
         <View style={styles.turnOneCard}>
           <Text style={styles.turnOneHeadline}>{headlineLines.join("\n")}</Text>
 
@@ -273,6 +277,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
             const isReturning = chip.label.toLowerCase().includes("returning");
             if (isReturning) return null; // Rendered at the bottom instead
 
+            const chipTestID = `onboarding_turn_${turn}_chip_${chip.id}`;
             return (
               <TouchableOpacity
                 key={chip.id}
@@ -280,6 +285,8 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                 onPress={() =>
                   fire({ chip_id: chip.id, response_type: "chip" })
                 }
+                testID={chipTestID}
+                accessibilityLabel={chipTestID}
               >
                 {chip.style === "primary" ? (
                   <LinearGradient
@@ -332,6 +339,8 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                   fire({ chip_id: finalId, response_type: "chip" })
                 }
                 style={{ paddingBottom: 10 }}
+                testID="onboarding_im_returning"
+                accessibilityLabel="onboarding_im_returning"
               >
                 <View
                   style={[styles.turnOneButton, styles.turnOneSecondaryButton]}
@@ -365,7 +374,11 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
       backendLines.length > 0 ? backendLines : rec.body_paragraphs || [];
 
     return (
-      <View style={styles.wrap}>
+      <View
+        style={styles.wrap}
+        testID="onboarding_recognition_root"
+        accessibilityLabel="onboarding_recognition_root"
+      >
         <View style={styles.recognitionCard}>
           <Text style={styles.recognitionLabel}>
             {rec.label || "RECOGNITION"}
@@ -395,34 +408,55 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
               { opacity: replyAnim, marginTop: 20 },
             ]}
           >
-            {(block.reply_chips || []).map((chip) => (
-              <TouchableOpacity
-                key={chip.id}
-                activeOpacity={0.85}
-                onPress={() =>
-                  fire({ chip_id: chip.id, response_type: "chip" })
-                }
-              >
-                <LinearGradient
-                  colors={["#C08B31", "#D3A44D", "#B57C26"]}
-                  start={{ x: 0, y: 0.5 }}
-                  end={{ x: 1, y: 0.5 }}
-                  style={[styles.turnOneButton, styles.turnOnePrimaryButton]}
+            {(block.reply_chips || []).map((chip) => {
+              // Turn 7 is the recognition beat — primary continue CTA carries
+              // the stable `onboarding_recognition_continue` testID in
+              // addition to the generic turn-scoped one.
+              const recognitionCta =
+                turn === 7 ? "onboarding_recognition_continue" : null;
+              const chipTestID = `onboarding_turn_${turn}_chip_${chip.id}`;
+              return (
+                <TouchableOpacity
+                  key={chip.id}
+                  activeOpacity={0.85}
+                  onPress={() =>
+                    fire({ chip_id: chip.id, response_type: "chip" })
+                  }
+                  testID={recognitionCta || chipTestID}
+                  accessibilityLabel={recognitionCta || chipTestID}
                 >
-                  <Text style={styles.turnOnePrimaryButtonText}>
-                    {chip.label}
-                  </Text>
-                </LinearGradient>
-              </TouchableOpacity>
-            ))}
+                  <LinearGradient
+                    colors={["#C08B31", "#D3A44D", "#B57C26"]}
+                    start={{ x: 0, y: 0.5 }}
+                    end={{ x: 1, y: 0.5 }}
+                    style={[styles.turnOneButton, styles.turnOnePrimaryButton]}
+                  >
+                    <Text style={styles.turnOnePrimaryButtonText}>
+                      {chip.label}
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              );
+            })}
           </Animated.View>
         </View>
       </View>
     );
   }
 
+  // Triad-reveal turn (turn 8 in current flows) carries an additional
+  // stable testID so Maestro can assert the reveal surface independently
+  // of the generic turn-N root.
+  const isTriadRevealTurn = turn === 8;
+  const rootTestID = isTriadRevealTurn
+    ? "onboarding_triad_reveal_root"
+    : `onboarding_turn_${turn}_root`;
   return (
-    <View style={styles.wrap}>
+    <View
+      style={styles.wrap}
+      testID={rootTestID}
+      accessibilityLabel={rootTestID}
+    >
       <View style={styles.fullCard}>
         {block.headline && (
           <>
@@ -483,6 +517,8 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                   onPress={() =>
                     fire({ chip_id: chip.id, response_type: "chip" })
                   }
+                  testID="onboarding_im_returning"
+                  accessibilityLabel="onboarding_im_returning"
                 >
                   <View style={[styles.chip, styles.chipSecondary]}>
                     <Text style={styles.chipLabel}>{chip.label}</Text>
@@ -491,6 +527,23 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
               );
             }
 
+            // Turn 1 "Yes, let's begin" primary chip also carries a stable
+            // semantic testID in addition to the turn-scoped one.
+            const isYesLetsBegin =
+              chip.style === "primary" &&
+              /yes.*(let|begin)/i.test(chip.label);
+            // Turn 8 triad-reveal "Begin my journey" primary chip is the
+            // onboarding terminator — stable semantic testID.
+            const isBeginMyJourney =
+              chip.style === "primary" &&
+              /begin.*(my|your).*(journey)/i.test(chip.label);
+            const stableTestID = isYesLetsBegin
+              ? "onboarding_yes_lets_begin"
+              : isBeginMyJourney
+                ? "onboarding_triad_begin_journey"
+                : null;
+            const chipTestID = `onboarding_turn_${turn}_chip_${chip.id}`;
+
             return (
               <TouchableOpacity
                 key={chip.id}
@@ -498,6 +551,8 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                 onPress={() =>
                   fire({ chip_id: chip.id, response_type: "chip" })
                 }
+                testID={stableTestID || chipTestID}
+                accessibilityLabel={stableTestID || chipTestID}
               >
                 {isIntroTurn && chip.style !== "primary" ? (
                   <LinearGradient

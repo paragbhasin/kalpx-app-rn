@@ -822,6 +822,8 @@ export default function Home() {
             onPress={() => navigateToMitra(false)}
             activeOpacity={0.85}
             style={{ borderRadius: 28 }}
+            testID="onboarding_begin_journey_cta"
+            accessibilityLabel="onboarding_begin_journey_cta"
           >
             <LinearGradient
               colors={["#E5D4CA", "#F5EDEA"]}

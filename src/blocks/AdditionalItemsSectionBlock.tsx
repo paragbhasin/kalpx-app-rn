@@ -48,14 +48,16 @@ interface UIHints {
 }
 
 interface Props {
-  block: {
+  block?: {
     items_key?: string;
     label?: string;
     style?: any;
   };
+  screenData?: any;
 }
 
 const AdditionalItemsSectionBlock: React.FC<Props> = ({ block }) => {
+  const blockSafe = block ?? {};
   const { screenData, updateScreenData, loadScreen, currentScreen, goBack } =
     useScreenStore();
 
@@ -241,7 +243,7 @@ const AdditionalItemsSectionBlock: React.FC<Props> = ({ block }) => {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.label}>
-          {block.label || "Additional Practices"}
+          {blockSafe.label || "Additional Practices"}
         </Text>
         <TouchableOpacity onPress={() => setShowLibrary(true)}>
           <Text style={styles.addBtn}>+ Add from Library </Text>

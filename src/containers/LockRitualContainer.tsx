@@ -18,6 +18,7 @@ import SigninPopup from '../components/SigninPopup';
 import BlockRenderer from '../engine/BlockRenderer';
 import { useScreenStore } from '../engine/useScreenBridge';
 import { executeAction } from '../engine/actionExecutor';
+import { mitraJourneyCompanion } from '../engine/mitraApi';
 import { screenActions } from '../store/screenSlice';
 import Header from '../components/Header';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -80,78 +81,63 @@ const LockRitualContainer: React.FC<LockRitualContainerProps> = ({ schema }) => 
   }, []); // intentionally run only on mount
 
   /**
-   * Post-login flow triggered when the user authenticates via the SigninPopup:
-   *   1. Call Status API  → determine if an active journey exists
-   *   2. Seed focus / day data from the status response
-   *   3. Call generate_companion to populate companion screen state
-   *   4. Route:
-   *      • hasActiveJourney === true  → CompanionDashboard (day_active)
-   *      • hasActiveJourney === false → InsightSummary step 0 (auto-navigated
-   *                                     by generate_companion)
+   * Post-login flow triggered when the user authenticates via the SigninPopup.
+   *
+   * 2026-04-19: legacy generate_companion side-effect journey creation is
+   * retired. This now:
+   *   1. Call Status API → determine if an active journey exists
+   *   2. If yes → seed status data, hydrate via v3 journey/companion/ (read),
+   *      route to CompanionDashboard day_active
+   *   3. If no → route to onboarding; journey creation runs through
+   *      POST /journey/start-v3/ (mitraStartJourney) at onboarding turn_7
    */
   const handlePostLoginFlow = useCallback(async () => {
     try {
-      // ── 1. Status API ──────────────────────────────────────────────────────
       const res = await api.get('mitra/journey/status/');
       const status = res.data;
       const hasActiveJourney = !!status?.hasActiveJourney;
 
-      // ── 2. Seed status data into Redux screen state ─────────────────────────
-      if (hasActiveJourney) {
-        const updates: Record<string, any> = {
-          journey_id: status.journeyId ?? null,
-          day_number: status.dayNumber || 1,
-          is_experienced: true,
-        };
-        const focus = status.focus || '';
-        const subFocus = status.subfocus || status.sub_focus || '';
-        if (focus) {
-          updates.scan_focus = focus;
-          updates.active_focus = focus;
-          updates.suggested_focus = focus;
-        }
-        if (subFocus) {
-          updates.prana_baseline_selection = subFocus;
-        }
-        Object.entries(updates).forEach(([key, value]) => {
-          dispatch(screenActions.setScreenValue({ key, value }));
-        });
+      if (!hasActiveJourney) {
+        // No journey yet → kick user into onboarding. Turn-7 of that flow
+        // calls journey/start-v3/ which creates the Journey + locks triad.
+        loadScreen({ container_id: 'welcome_onboarding', state_id: 'turn_1' });
+        return;
       }
 
-      // ── 3. Build action context with fresh Redux state after updates ────────
-      const freshState = store.getState().screen.screenData;
-      const actionCtx = {
-        loadScreen,
-        goBack,
-        setScreenValue: (value: any, key: string) => {
-          dispatch(screenActions.setScreenValue({ key, value }));
-        },
-        screenState: freshState,
-        startFlowInstance: (flowType: string) =>
-          dispatch(screenActions.startFlowInstance(flowType)),
-        endFlowInstance: () => dispatch(screenActions.endFlowInstance()),
+      // Seed status data into Redux screen state.
+      const updates: Record<string, any> = {
+        journey_id: status.journeyId ?? null,
+        day_number: status.dayNumber || 1,
+        is_experienced: true,
       };
-
-      // ── 4. Call generate_companion + route ─────────────────────────────────
-      if (hasActiveJourney) {
-        // skipReveal: true → stops generate_companion from auto-navigating
-        // to insight_summary; we redirect to dashboard ourselves after.
-        await executeAction(
-          { type: 'generate_companion', payload: { skipReveal: true } },
-          actionCtx,
-        );
-        loadScreen({ container_id: 'companion_dashboard', state_id: 'day_active' });
-      } else {
-        // No active journey: generate_companion auto-navigates to
-        // insight_summary / path_reveal (step 0) — no extra loadScreen needed.
-        await executeAction({ type: 'generate_companion' }, actionCtx);
+      const focus = status.focus || '';
+      const subFocus = status.subfocus || status.sub_focus || '';
+      if (focus) {
+        updates.scan_focus = focus;
+        updates.active_focus = focus;
+        updates.suggested_focus = focus;
       }
+      if (subFocus) {
+        updates.prana_baseline_selection = subFocus;
+      }
+      Object.entries(updates).forEach(([key, value]) => {
+        dispatch(screenActions.setScreenValue({ key, value }));
+      });
+
+      // Hydrate dashboard from v3 journey/companion/ (read-only). The
+      // dashboard containers also refetch on mount so this is redundant
+      // but harmless — it smooths the first render.
+      try {
+        await mitraJourneyCompanion();
+      } catch (_err) {
+        // Non-fatal — dashboard will refetch on mount.
+      }
+      loadScreen({ container_id: 'companion_dashboard', state_id: 'day_active' });
     } catch (e) {
       console.error('[LockRitual] Post-login flow failed:', e);
-      // Fallback: show insight summary at step 0
-      loadScreen({ container_id: 'insight_summary', state_id: 'path_reveal' });
+      loadScreen({ container_id: 'welcome_onboarding', state_id: 'turn_1' });
     }
-  }, [dispatch, loadScreen, goBack]);
+  }, [dispatch, loadScreen]);
 
   // Trigger the post-login flow as soon as isLoggedIn becomes true,
   // but only if this component previously showed the popup to a guest.
@@ -248,7 +234,9 @@ const LockRitualContainer: React.FC<LockRitualContainerProps> = ({ schema }) => 
     const lockAction = schema.lock_action || holdButton?.on_complete;
 
     if (lockAction) {
-      // Use executeAction to properly handle all action types (especially generate_companion)
+      // Dispatch schema-declared lock_action through the action pipeline.
+      // (Post 2026-04-19 refactor, generate_companion maps to v3
+      // journey/companion/ read — journey creation is at onboarding turn_7.)
       executeAction(lockAction, buildActionContext());
     }
   }, [schema, buildActionContext, isLoggedIn, screenState.screenData]);

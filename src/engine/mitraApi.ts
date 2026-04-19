@@ -16,61 +16,6 @@ import api from "../Networks/axios";
 // the smallest-possible shapes that satisfy the readers across the 30 blocks.
 // ---------------------------------------------------------------------------
 
-function generateCompanionResponse(input: any): any {
-  const focus = input?.focus || "clarity";
-  // Offline fallback triad shape. Every item supplies ui.card_title +
-  // ui.card_subtitle explicitly so TriadCardsRow renders all three
-  // cards even when backend is unreachable (no title → card gets
-  // filtered out by `c.title || c.sub`; previously PRACTICE card
-  // silently disappeared on offline).
-  return {
-    companion: {
-      recommended_posture: "protecting your space and doing less, better",
-      mantra: {
-        core: {
-          id: "fallback_mantra",
-          title: "Om Namah Shivaya",
-          devanagari: "ॐ नमः शिवाय",
-          audio_url: null,
-        },
-        one_line: "A soft reminder of what you are steadying into",
-        ui: {
-          card_title: "Om Namah Shivaya",
-          card_subtitle: "ॐ नमः शिवाय",
-        },
-      },
-      sankalp: {
-        core: {
-          id: "fallback_sankalp",
-          line: "I protect what matters and let the rest pass.",
-        },
-        one_line: "One line to carry through the small decisions today",
-        ui: {
-          card_title: "I protect what matters and let the rest pass.",
-          card_subtitle: "One line to carry today.",
-        },
-      },
-      practice: {
-        core: {
-          id: "fallback_practice",
-          title: "Nine slow breaths, eyes soft",
-          duration_min: 6,
-        },
-        one_line: "A practice to settle the body before the day opens",
-        ui: {
-          card_title: "Nine slow breaths, eyes soft",
-          card_subtitle: "A practice to settle the body.",
-        },
-      },
-      focus,
-      day_number: input?.day_number || 1,
-    },
-    briefing: null,
-    continuity: null,
-    _offline_fallback: true,
-  };
-}
-
 function generateHelpMeChooseResponse(input: any): any {
   const text = (input?.text || "").toLowerCase();
   // Simple keyword → focus mapping (mirrors web fallback pattern)
@@ -183,8 +128,6 @@ function generatePathEvolutionScreen(oldFocus: string, newFocus: string): any {
   };
 }
 
-const SUB_FOCUS_METRICS: Record<string, string[]> = {};
-
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -193,60 +136,9 @@ function getTz(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata";
 }
 
-function extractBaselineMetrics(
-  subFocus: string | undefined,
-  screenState: Record<string, any>,
-): Record<string, any> {
-  const metrics: Record<string, any> = {};
-  if (subFocus && SUB_FOCUS_METRICS[subFocus]) {
-    SUB_FOCUS_METRICS[subFocus].forEach((m) => {
-      let val = screenState[m];
-      if (val === undefined || val === null) {
-        const matchingKey = Object.keys(screenState).find(
-          (k) => k.toLowerCase() === m.toLowerCase(),
-        );
-        if (matchingKey) val = screenState[matchingKey];
-      }
-      if (val !== undefined && val !== null) {
-        metrics[m.toLowerCase()] = val;
-      }
-    });
-  }
-  return metrics;
-}
-
 // ---------------------------------------------------------------------------
 // API Functions
 // ---------------------------------------------------------------------------
-
-/** POST mitra/generate-companion/ — Generate personalized companion (daily practice plan). */
-export async function mitraGenerateCompanion(inputData: any): Promise<any> {
-  try {
-    const baselineMetrics = extractBaselineMetrics(
-      inputData.sub_focus,
-      inputData.baseline_metrics || {},
-    );
-    const res = await api.post("mitra/generate-companion/", {
-      focus: inputData.focus,
-      subFocus: inputData.sub_focus,
-      baselineMetrics,
-      depth: inputData.depth,
-      locale: "en",
-      tz: getTz(),
-    });
-    console.log("[MITRA] API response received", res.data?._backend);
-    return res.data;
-  } catch (err: any) {
-    console.warn(
-      "[MITRA] API failed, falling back to local engine:",
-      err.message,
-    );
-    const fallback = generateCompanionResponse(inputData);
-    if (fallback) return fallback;
-    console.error("[MITRA] Local fallback also returned null");
-    return null;
-  }
-}
 
 /** POST mitra/track-event/ — Track a journey event or milestone. */
 export async function mitraTrackEvent(
@@ -373,46 +265,6 @@ export async function mitraOnboardingComplete(payload: {
     return res.data;
   } catch (err: any) {
     console.warn("[MITRA] onboarding/complete failed:", err?.message);
-    return null;
-  }
-}
-
-
-/** POST mitra/journey/start-v3/ — v3 triad generation (authenticated only).
- *
- * Takes the inference_state from /onboarding/complete/ and generates the
- * triad with path_intent derivation, coherence checking, deny-list
- * enforcement, and rupture detection. This is the ONLY triad generation
- * endpoint — legacy /user-journey/start/ is deprecated.
- *
- * Returns null on auth failure (401) or flag-off (404). Caller must
- * handle: if null, stash inference_state and retry after auth.
- */
-export async function mitraJourneyStartV3(payload: {
-  inference_state: Record<string, any>;
-  guidance_mode: string;
-  locale?: string;
-  cycle_id?: string;
-  stage0_choice?: string;
-  stage1_choice?: string;
-  stage2_choice?: string;
-  stage3_choice?: string;
-}): Promise<any | null> {
-  try {
-    const res = await api.post("mitra/journey/start-v3/", payload);
-    return res.data;
-  } catch (err: any) {
-    const status = err?.response?.status;
-    if (status === 401 || status === 404) {
-      if (__DEV__) {
-        console.log(
-          "[MITRA] journey/start-v3/ unavailable:",
-          status === 401 ? "not authenticated" : "flag off",
-        );
-      }
-      return null;
-    }
-    console.warn("[MITRA] journey/start-v3/ failed:", err?.message);
     return null;
   }
 }
@@ -796,6 +648,34 @@ export async function mitraFetchProgress(): Promise<any> {
   }
 }
 
+/** POST mitra/journey/alter/ — v3 alter/deepen/change.
+ *
+ * Day-7 compassionate adjust + Day-14 full choice (deepen | alter | change).
+ * Replaces legacy POST /api/user-journey/alter-practice/.
+ * Backend delegates to the existing decision matrix so gating (tapas /
+ * compassionate_reset / mid_cycle_adjust / continue) is identical.
+ *
+ * Response (success): { allowed, reason?, message, direction?, journey?, stats }
+ * Response (blocked): { allowed: false, reason, message, stats }
+ */
+export async function mitraAlterPractice(payload: {
+  direction?: "alter" | "deepen" | "change";
+  feeling?: string;
+  reason?: string;
+  journeyId?: number | string;
+  newCategory?: string;
+  newSubFocus?: string;
+  newLevel?: string;
+}): Promise<any | null> {
+  try {
+    const res = await api.post("mitra/journey/alter/", payload);
+    return res.data;
+  } catch (err: any) {
+    console.warn("[MITRA] journey/alter failed:", err?.message);
+    return null;
+  }
+}
+
 /** POST mitra/journey/reset/ — Abandon current journey, start fresh.
  * Called by "I want to start over" on the dashboard. */
 export async function mitraResetJourney(): Promise<any> {
@@ -1079,6 +959,10 @@ export async function getResilienceNarrative(): Promise<any> {
 export async function postGratitudeLedger(entry: {
   signal_type: string;
   text?: string;
+  note?: string;
+  context?: any;
+  intensity?: number | null;
+  logged_at?: string;
   meta?: Record<string, any>;
 }): Promise<any> {
   try {
@@ -1335,6 +1219,63 @@ export async function postEntitiesCheckDuplicate(text: string): Promise<any> {
   } catch (err: any) {
     if (err?.response?.status !== 404) {
       console.warn("[MITRA] entities/check-duplicate failed:", err.message);
+    }
+    return null;
+  }
+}
+
+/** GET mitra/user-preferences/ — load companion-wide prefs.
+ *  404-tolerant so old dev backends stay functional. */
+export async function getUserPreferences(): Promise<any | null> {
+  try {
+    const res = await api.get("mitra/user-preferences/");
+    return res.data;
+  } catch (err: any) {
+    if (err?.response?.status === 404) return null;
+    console.warn("[MITRA] user-preferences GET failed:", err?.message);
+    return null;
+  }
+}
+
+/** PATCH mitra/user-preferences/ — persist companion-wide prefs (season
+ *  banner dismissal, guidance preferences, etc.). Swallows 404 quietly so
+ *  old dev backends stay functional. */
+export async function patchUserPreferences(
+  patch: Record<string, any>,
+): Promise<any | null> {
+  try {
+    const res = await api.patch("mitra/user-preferences/", patch);
+    return res.data;
+  } catch (err: any) {
+    if (err?.response?.status !== 404) {
+      console.warn("[MITRA] user-preferences PATCH failed:", err?.message);
+    }
+    return null;
+  }
+}
+
+/** GET mitra/user-preferences/notifications/ — notification toggles. */
+export async function getNotificationPreferences(): Promise<any | null> {
+  try {
+    const res = await api.get("mitra/user-preferences/notifications/");
+    return res.data;
+  } catch (err: any) {
+    if (err?.response?.status === 404) return null;
+    console.warn("[MITRA] notification-prefs GET failed:", err?.message);
+    return null;
+  }
+}
+
+/** PATCH mitra/user-preferences/notifications/ — update a notification toggle. */
+export async function patchNotificationPreferences(
+  patch: Record<string, any>,
+): Promise<any | null> {
+  try {
+    const res = await api.patch("mitra/user-preferences/notifications/", patch);
+    return res.data;
+  } catch (err: any) {
+    if (err?.response?.status !== 404) {
+      console.warn("[MITRA] notification-prefs PATCH failed:", err?.message);
     }
     return null;
   }

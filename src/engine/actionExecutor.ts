@@ -20,10 +20,10 @@ import api from "../Networks/axios";
 import { navigate as rootNavigate } from "../Shared/Routes/NavigationService";
 import { cleanupFlowState, GUARDED_ACTIONS } from "./cleanupFields";
 import {
+  mitraAlterPractice,
   mitraCheckpoint,
   mitraCompleteOnboarding,
   mitraFetchOnboardingChips,
-  mitraGenerateCompanion,
   mitraHelpMeChoose,
   mitraOnboardingRecognition,
   mitraPathEvolution,
@@ -34,6 +34,7 @@ import {
   mitraTrackEvent,
   mitraTriggerMantras,
   patchCompanionState,
+  patchUserPreferences,
   getClearWindow,
   postVoiceNote,
   getVoiceNoteInterpretation,
@@ -1527,39 +1528,31 @@ export async function executeAction(
       // GENERATE_COMPANION — call Mitra API, unpack response into screenState
       // ================================================================
       case "generate_companion": {
+        // 2026-04-19: legacy /generate-companion/ side-effect journey
+        // creation is retired on FE. This action now ALWAYS calls the
+        // v3 read-only /journey/companion/ endpoint. Journey creation
+        // runs through POST /journey/start-v3/ (mitraStartJourney) at
+        // onboarding turn_7. If no active journey exists, this returns
+        // null — callers are responsible for routing to onboarding.
+        // Kept the action name for caller compatibility; consider
+        // renaming to `fetch_companion` in a follow-up.
         const inputData = {
           focus:
             screenState.scan_focus ||
             screenState.suggested_focus ||
             "peacecalm",
           sub_focus: screenState.prana_baseline_selection,
-          baseline_metrics: screenState,
           depth:
             screenState.routine_depth ||
             screenState.routine_setup ||
             "standard",
-          intention: screenState.composer_intent,
           day_number: screenState.day_number || 1,
-          re_analysis_friction: screenState.re_analysis_friction,
         };
 
-        // 2026-04-13 fix: resume flow sets payload.use_journey_companion=true
-        // so we call the read-only /journey/companion endpoint instead of
-        // /generate-companion (which can create a fresh journey). The full
-        // population logic below is shared — both response shapes provide
-        // the same companion envelope per backend contract.
-        const data = payload?.use_journey_companion
-          ? await mitraJourneyCompanion()
-          : await mitraGenerateCompanion(inputData);
+        const data = await mitraJourneyCompanion();
         if (!data) {
-          // Use console.warn, NOT console.error: in dev builds console.error
-          // triggers the RN LogBox red overlay which leaks into screenshot
-          // captures (audit M2 — Day 14 intro screenshot flakiness). The
-          // engine already has a graceful no-op fallback below (the checkpoint
-          // / home orchestrators have their own data seeding paths), so this
-          // is a recoverable warning, not a crash.
           console.warn(
-            "[ENGINE] generate_companion returned no data — skipping companion seed",
+            "[ENGINE] journey/companion returned no data — skipping companion seed",
           );
           setScreenValue(false, "_isSubmitting");
           return;
@@ -2531,26 +2524,19 @@ export async function executeAction(
       }
 
       // ================================================================
-      // FAST_TRACK_COMPANION — load pre-cached companion data
+      // FAST_TRACK_COMPANION — load companion data for a pre-existing journey
+      // (2026-04-19: now reads via v3 journey/companion/; journey must
+      // already exist — creation runs through journey/start-v3at turn_7)
       // ================================================================
       case "fast_track_companion": {
         const ftcFocus = payload?.focus;
-        const ftcFriction = screenState.help_me_choose_1;
-        const ftcIntention = screenState.help_me_choose_2;
-
-        const ftcInput = {
-          focus: ftcFocus,
-          feelings: [ftcFriction || "restless"],
-          depth: "standard",
-          intention: ftcIntention || "Seek growth and clarity.",
-        };
 
         if (ftcFocus) {
           setScreenValue(ftcFocus, "scan_focus");
           setScreenValue(ftcFocus, "suggested_focus");
         }
 
-        const ftcData = await mitraGenerateCompanion(ftcInput);
+        const ftcData = await mitraJourneyCompanion();
         if (!ftcData) break;
 
         if (ftcData.intro) setScreenValue(ftcData.intro, "analysis_intro");
@@ -2603,7 +2589,7 @@ export async function executeAction(
       case "alter_practices": {
         const apDirection = payload?.direction || "alter";
         try {
-          const alterRes = await api.post("user-journey/alter-practice/", {
+          const alterData = await mitraAlterPractice({
             direction: apDirection,
             feeling: screenState.checkpoint_feeling || "",
             newCategory: payload?.newCategory || "",
@@ -2611,8 +2597,10 @@ export async function executeAction(
             newLevel: payload?.newLevel || "",
           });
 
-          const alterData = alterRes.data;
-          console.log("[MITRA] alter-practice response:", alterData);
+          if (!alterData) {
+            console.warn("[MITRA] alter-practice returned no data — skipping");
+            break;
+          }
 
           if (!alterData.allowed) {
             setScreenValue(alterData.message, "alter_blocked_message");
@@ -3906,18 +3894,14 @@ export async function executeAction(
       // mute_entity — companion intelligence: mark an entity (person/topic)
       // as muted. PATCH /api/mitra/entities/<id>/ with status=muted.
       case "mute_entity": {
-        try {
-          const entityId = payload?.entity_id || target;
-          if (!entityId) {
-            console.warn("[mute_entity] no entity_id provided");
-            break;
-          }
-          await api.patch(`/api/mitra/entities/${entityId}/`, {
-            status: "muted",
-          });
+        const entityId = payload?.entity_id || target;
+        if (!entityId) {
+          console.warn("[mute_entity] no entity_id provided");
+          break;
+        }
+        const muted = await patchEntity(entityId, { status: "muted" });
+        if (muted !== null) {
           setScreenValue(true, `_entity_muted_${entityId}`);
-        } catch (err) {
-          console.error("[mute_entity] failed:", err);
         }
         break;
       }
@@ -3926,39 +3910,24 @@ export async function executeAction(
       // payload, allowing multiple call sites (evening reflection, joy moment,
       // welcome expansion) to share one handler.
       case "log_gratitude": {
-        try {
-          const body = {
-            signal_type: payload?.signal_type || "gratitude",
-            note: payload?.note || "",
-            context: payload?.context || null,
-            intensity: payload?.intensity ?? null,
-            logged_at: new Date().toISOString(),
-          };
-          await api.post("/api/mitra/gratitude-ledger/", body);
-        } catch (err) {
-          console.error("[log_gratitude] failed:", err);
-        }
+        await postGratitudeLedger({
+          signal_type: payload?.signal_type || "gratitude",
+          note: payload?.note || "",
+          context: payload?.context || null,
+          intensity: payload?.intensity ?? null,
+          logged_at: new Date().toISOString(),
+        });
         break;
       }
 
       // acknowledge_season — sets season_banner_dismissed_at and (if endpoint
       // present) PATCHes user-preferences so dismissal persists server-side.
       case "acknowledge_season": {
-        try {
-          const now = Date.now();
-          setScreenValue(now, "season_banner_dismissed_at");
-          try {
-            await api.patch("/api/mitra/user-preferences/", {
-              season_banner_dismissed_at: new Date(now).toISOString(),
-            });
-          } catch (apiErr: any) {
-            if (apiErr?.response?.status !== 404) {
-              console.warn("[acknowledge_season] PATCH failed:", apiErr?.message);
-            }
-          }
-        } catch (err) {
-          console.error("[acknowledge_season] failed:", err);
-        }
+        const now = Date.now();
+        setScreenValue(now, "season_banner_dismissed_at");
+        await patchUserPreferences({
+          season_banner_dismissed_at: new Date(now).toISOString(),
+        });
         break;
       }
 

@@ -18,7 +18,12 @@ import {
   PayloadAction,
 } from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import api from '../Networks/axios';
+import {
+  getUserPreferences,
+  patchUserPreferences,
+  getNotificationPreferences,
+  patchNotificationPreferences,
+} from '../engine/mitraApi';
 
 export const PREFERENCES_STORAGE_KEY = 'kalpx:preferences';
 export const PREFERENCES_VERSION = 1;
@@ -89,65 +94,42 @@ const initialState: PreferencesSlice = {
 // Thunks
 // ---------------------------------------------------------------------------
 
+// 2026-04-19: routed through src/engine/mitraApi.ts wrappers for
+// consistency + 404 tolerance. Fixes a latent axios path bug: previous
+// code used "/api/mitra/user-preferences/" which axios-joined to the
+// baseURL "https://dev.kalpx.com/api" produced "/api/api/mitra/..."
+// double-prefixed. Wrappers use "mitra/user-preferences/" (relative).
 export const fetchPreferences = createAsyncThunk(
   'preferences/fetch',
-  async (_, { rejectWithValue }) => {
-    try {
-      const res = await api.get('/api/mitra/user-preferences/');
-      return res.data;
-    } catch (err: any) {
-      if (err?.response?.status === 404) return null;
-      return rejectWithValue(err?.message ?? 'fetch preferences failed');
-    }
-  },
+  async () => getUserPreferences(),
 );
 
 export const updatePreference = createAsyncThunk(
   'preferences/update',
-  async (
-    { key, value }: { key: keyof PreferencesSlice; value: any },
-    { rejectWithValue },
-  ) => {
-    try {
-      await api.patch('/api/mitra/user-preferences/', { [key]: value });
-    } catch (err: any) {
-      if (err?.response?.status !== 404) {
-        return rejectWithValue(err?.message ?? 'update preference failed');
-      }
-    }
+  async ({ key, value }: { key: keyof PreferencesSlice; value: any }) => {
+    await patchUserPreferences({ [key]: value });
     return { key, value };
   },
 );
 
-// Notifications sub-resource — /api/mitra/user-preferences/notifications/
 export const fetchNotificationPrefs = createAsyncThunk(
   'preferences/fetchNotifications',
-  async (_, { rejectWithValue }) => {
-    try {
-      const res = await api.get('/api/mitra/user-preferences/notifications/');
-      return res.data as NotificationPrefs;
-    } catch (err: any) {
-      if (err?.response?.status === 404) return null;
-      return rejectWithValue(err?.message ?? 'fetch notifications failed');
-    }
+  async () => {
+    const data = await getNotificationPreferences();
+    return (data as NotificationPrefs | null) ?? null;
   },
 );
 
 export const updateNotificationPref = createAsyncThunk(
   'preferences/updateNotification',
-  async (
-    { key, value }: { key: keyof NotificationPrefs; value: boolean },
-    { rejectWithValue },
-  ) => {
-    try {
-      await api.patch('/api/mitra/user-preferences/notifications/', {
-        [key]: value,
-      });
-    } catch (err: any) {
-      if (err?.response?.status !== 404) {
-        return rejectWithValue(err?.message ?? 'update notification failed');
-      }
-    }
+  async ({
+    key,
+    value,
+  }: {
+    key: keyof NotificationPrefs;
+    value: boolean;
+  }) => {
+    await patchNotificationPreferences({ [key]: value });
     return { key, value };
   },
 );

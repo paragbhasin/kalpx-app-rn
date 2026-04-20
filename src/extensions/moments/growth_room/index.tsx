@@ -269,7 +269,7 @@ const GrowthRoomContainer: React.FC<Props> = () => {
     }).start(() => {
       const timer = setTimeout(() => {
         revealOptions();
-      }, 10000);
+      }, 2000);
       return () => clearTimeout(timer);
     });
   }, [fade1]);

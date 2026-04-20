@@ -60,6 +60,7 @@ import { executeAction } from "../../../engine/actionExecutor";
 import {
   mitraLibrarySearch,
   mitraResolveMoment,
+  mitraTrackEvent,
 } from "../../../engine/mitraApi";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 import store from "../../../store";
@@ -149,11 +150,22 @@ const GrowthRoomContainer: React.FC<Props> = () => {
   // Resolve M49_growth_room slots on mount
   useEffect(() => {
     if (resolveFiredRef.current) return;
+    resolveFiredRef.current = true;
+
+    // Telemetry — Step 4a: Room entered
+    const parentSource =
+      typeof ss._entered_via === "string" && ss._entered_via
+        ? ss._entered_via
+        : "dashboard";
+    mitraTrackEvent("growth_room_entered", {
+      journeyId: ss.journey_id,
+      dayNumber: ss.day_number || 1,
+      meta: { parent_source: parentSource },
+    });
+
     if (ss.growth_room && typeof ss.growth_room === "object") {
-      resolveFiredRef.current = true;
       return;
     }
-    resolveFiredRef.current = true;
     const cycleId =
       typeof ss.journey_id === "string" && ss.journey_id
         ? ss.journey_id
@@ -170,10 +182,7 @@ const GrowthRoomContainer: React.FC<Props> = () => {
       user_attention_state: "reflective_open",
       emotional_weight: "moderate" as const,
       cycle_day: Number(ss.day_number) || 0,
-      entered_via:
-        typeof ss._entered_via === "string" && ss._entered_via
-          ? ss._entered_via
-          : "check_in_vijnanamaya_question_forming",
+      entered_via: parentSource,
       stage_signals: {},
       today_layer: {
         today_kosha: ss.today_kosha || "vijnanamaya",
@@ -529,11 +538,7 @@ const GrowthRoomContainer: React.FC<Props> = () => {
       "suggested_practice_label",
     );
     const journalCta = readSeedSlot(ss, selectedCategory, "journal_cta");
-    const carryCta = readSeedSlot(
-      ss,
-      selectedCategory,
-      "carry_forward_cta",
-    );
+    const carryCta = readSeedSlot(ss, selectedCategory, "carry_forward_cta");
     return (
       <View style={styles.inquirySeatWrap}>
         {!!principleAnchor && (
@@ -628,7 +633,7 @@ const GrowthRoomContainer: React.FC<Props> = () => {
               })
             }
           >
-            <Text style={styles.topBackText}>{pillExitLabel}</Text>
+            {/* <Text style={styles.topBackText}>{pillExitLabel}</Text> */}
           </TouchableOpacity>
         </View>
       )}

@@ -481,7 +481,12 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
   const stateId = currentStateId || "";
 
   const currentType: ActivityType = useMemo(() => {
-    const rawType = (info?.type || info?.item_type || "").toLowerCase();
+    const rawType = (
+      info?.type ||
+      info?.item_type ||
+      info?.itemType ||
+      ""
+    ).toLowerCase();
 
     // 1. Check direct info type
     if (rawType === "mantra") return "mantra";
@@ -493,21 +498,24 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
       screenData?.info_is_mantra ||
       screenData?.runner_variant === "mantra" ||
       screenData?.runner_active_item?.type === "mantra" ||
-      screenData?.runner_active_item?.item_type === "mantra"
+      screenData?.runner_active_item?.item_type === "mantra" ||
+      screenData?.runner_active_item?.itemType === "mantra"
     )
       return "mantra";
     if (
       screenData?.info_is_sankalp ||
       screenData?.runner_variant === "sankalp" ||
       screenData?.runner_active_item?.type === "sankalp" ||
-      screenData?.runner_active_item?.item_type === "sankalp"
+      screenData?.runner_active_item?.item_type === "sankalp" ||
+      screenData?.runner_active_item?.itemType === "sankalp"
     )
       return "sankalp";
     if (
       screenData?.info_is_practice ||
       screenData?.runner_variant === "practice" ||
       screenData?.runner_active_item?.type === "practice" ||
-      screenData?.runner_active_item?.item_type === "practice"
+      screenData?.runner_active_item?.item_type === "practice" ||
+      screenData?.runner_active_item?.itemType === "practice"
     )
       return "practice";
 

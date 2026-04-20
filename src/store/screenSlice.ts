@@ -61,8 +61,10 @@ interface ScreenState {
 //   block to render inside PracticeRunnerContainer's v3 immersive chrome, and
 //   which message to show in the completion_return transient.
 // - runner_source: 'core' | 'additional_recommended' | 'additional_library' |
-//   'additional_custom' | 'support_trigger' | 'support_checkin' — must be
-//   explicitly set by the entry action (start_runner). Never inferred.
+//   'additional_custom' | 'support_trigger' | 'support_checkin' |
+//   'support_grief' | 'support_loneliness' | 'support_joy' |
+//   'support_growth' — must be explicitly set by the entry action
+//   (start_runner). Never inferred.
 //   Used by track_completion to log the correct `source` (REG-015 guard).
 // - runner_active_item: { item_type, item_id, title } — the master mantra /
 //   sankalp / practice being run.
@@ -109,7 +111,11 @@ export type RunnerSource =
   | 'additional_library'
   | 'additional_custom'
   | 'support_trigger'
-  | 'support_checkin';
+  | 'support_checkin'
+  | 'support_grief'
+  | 'support_loneliness'
+  | 'support_joy'
+  | 'support_growth';
 
 // Week 4 — Support Path (Mitra v3 Moments 20, 21, 22, 31, 38, 42).
 // voice_consent_given, voice_note_*, trigger_round, trigger_mantra_text,

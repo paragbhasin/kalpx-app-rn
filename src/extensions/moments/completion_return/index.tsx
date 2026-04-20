@@ -88,7 +88,9 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
     mitraTrackEvent("completion_return_shown", {
       meta: {
         item_type: resolvedVariant,
-        item_id: screenData.runner_active_item?.item_id,
+        item_id:
+          screenData.runner_active_item?.item_id ||
+          screenData.runner_active_item?.itemId,
         source: screenData.runner_source,
       },
     }).catch(() => {});
@@ -160,7 +162,9 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
     mitraTrackEvent("completion_return_repeated", {
       meta: {
         item_type: resolvedVariant,
-        item_id: screenData.runner_active_item?.item_id,
+        item_id:
+          screenData.runner_active_item?.item_id ||
+          screenData.runner_active_item?.itemId,
       },
     }).catch(() => {});
     executeAction({ type: "repeat_runner", currentScreen } as any, {
@@ -176,7 +180,9 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
     mitraTrackEvent("post_completion_reflection", {
       meta: {
         item_type: resolvedVariant,
-        item_id: screenData.runner_active_item?.item_id,
+        item_id:
+          screenData.runner_active_item?.item_id ||
+          screenData.runner_active_item?.itemId,
         text: inputText.trim().slice(0, 120),
       },
     }).catch(() => {});

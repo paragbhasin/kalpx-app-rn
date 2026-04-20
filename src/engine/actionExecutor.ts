@@ -176,6 +176,21 @@ function _mitraTz(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata";
 }
 
+function _normalizeRunnerItem(item: any): any {
+  if (!item || typeof item !== "object") return item;
+  const itemType = item.item_type || item.itemType || item.type || null;
+  const itemId = item.item_id || item.itemId || item.id || null;
+  const normalized: any = {
+    ...item,
+    ...(itemType ? { item_type: itemType, itemType, type: itemType } : {}),
+    ...(itemId ? { item_id: itemId, itemId, id: itemId } : {}),
+  };
+  if (item.core && typeof item.core === "object") {
+    normalized.core = _normalizeRunnerItem(item.core);
+  }
+  return normalized;
+}
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -3335,11 +3350,21 @@ export async function executeAction(
       // ================================================================
       case "track_completion": {
         const p = payload || {};
-        const activeItem = screenState.runner_active_item || {};
+        const activeItem = _normalizeRunnerItem(
+          screenState.runner_active_item || {},
+        );
         const resolvedItemType =
-          p.itemType || activeItem.item_type || screenState.runner_variant;
+          p.itemType ||
+          p.item_type ||
+          activeItem.item_type ||
+          activeItem.itemType ||
+          screenState.runner_variant;
         const resolvedItemId =
-          p.itemId || activeItem.item_id || activeItem.id;
+          p.itemId ||
+          p.item_id ||
+          activeItem.item_id ||
+          activeItem.itemId ||
+          activeItem.id;
         const resolvedSource = p.source || screenState.runner_source;
         const resolvedDuration =
           p.duration_sec ?? screenState.runner_duration_actual_sec;
@@ -3405,9 +3430,11 @@ export async function executeAction(
           console.warn("[start_runner] missing variant");
           break;
         }
+        const normalizedItem = _normalizeRunnerItem(sp.item || null);
+
         setScreenValue(sp.variant, "runner_variant");
         setScreenValue(sp.source, "runner_source");
-        setScreenValue(sp.item || null, "runner_active_item");
+        setScreenValue(normalizedItem, "runner_active_item");
         setScreenValue(Date.now(), "runner_start_time");
         setScreenValue(0, "runner_reps_completed");
         setScreenValue(0, "runner_step_index");
@@ -3419,13 +3446,14 @@ export async function executeAction(
         // tapped mantra triad card), the stale item renders instead of the
         // current runner's item. Always overwrite `info` with the current
         // item so the rich surface aligns with the active runner.
-        if (sp.item) {
-          setScreenValue(sp.item, "info");
+        if (normalizedItem) {
+          setScreenValue(normalizedItem, "info");
         }
         // Seed audio_url for MantraRunnerDisplay — it reads from
         // screenData.mantra_audio_url, not runner_active_item.
-        if (sp.variant === "mantra" && sp.item) {
-          const itemAudio = sp.item.audio_url || sp.item.core?.audio_url || "";
+        if (sp.variant === "mantra" && normalizedItem) {
+          const itemAudio =
+            normalizedItem.audio_url || normalizedItem.core?.audio_url || "";
           if (itemAudio) {
             setScreenValue(itemAudio, "mantra_audio_url");
           }
@@ -3469,7 +3497,9 @@ export async function executeAction(
       // on the completion_return transient.
       // ================================================================
       case "complete_runner": {
-        const activeItem = screenState.runner_active_item || {};
+        const activeItem = _normalizeRunnerItem(
+          screenState.runner_active_item || {},
+        );
         const variant = screenState.runner_variant;
         const source = screenState.runner_source;
         const durationSec =
@@ -3478,10 +3508,14 @@ export async function executeAction(
             ? Math.round((Date.now() - screenState.runner_start_time) / 1000)
             : 0);
 
-        if (activeItem.item_type && activeItem.item_id && source) {
+        if (
+          (activeItem.item_type || activeItem.itemType) &&
+          (activeItem.item_id || activeItem.itemId) &&
+          source
+        ) {
           await mitraTrackCompletion({
-            itemType: activeItem.item_type,
-            itemId: activeItem.item_id,
+            itemType: activeItem.item_type || activeItem.itemType,
+            itemId: activeItem.item_id || activeItem.itemId,
             source,
             journeyId: screenState.journey_id,
             dayNumber: screenState.day_number || 1,
@@ -4791,11 +4825,6 @@ export async function executeAction(
         if (ctx) setScreenValue(ctx, "grief_context");
 
         loadScreen({ container_id: "support_grief", state_id: "room" } as any);
-        mitraTrackEvent("grief_session_opened", {
-          journeyId: screenState.journey_id,
-          dayNumber: screenState.day_number || 1,
-          meta: { parent_source: payload?.source },
-        });
         break;
       }
 
@@ -4883,11 +4912,6 @@ export async function executeAction(
           container_id: "support_loneliness",
           state_id: "room",
         } as any);
-        mitraTrackEvent("loneliness_room_entered", {
-          journeyId: screenState.journey_id,
-          dayNumber: screenState.day_number || 1,
-          meta: {},
-        });
         break;
       }
 
@@ -4928,11 +4952,6 @@ export async function executeAction(
           container_id: "support_joy",
           state_id: "room",
         } as any);
-        mitraTrackEvent("joy_room_entered", {
-          journeyId: screenState.journey_id,
-          dayNumber: screenState.day_number || 1,
-          meta: { parent_source: payload?.source },
-        });
         break;
       }
 
@@ -4987,6 +5006,52 @@ export async function executeAction(
         break;
       }
 
+      case "joy_named": {
+        mitraTrackEvent("joy_named", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            text: payload?.text || "",
+            length_chars: payload?.length_chars ?? (payload?.text || "").length,
+          },
+        });
+        break;
+      }
+
+      case "joy_offering_noted": {
+        mitraTrackEvent("joy_offering_noted", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            label: payload?.label || "",
+          },
+        });
+        break;
+      }
+
+      case "joy_walk_started": {
+        mitraTrackEvent("joy_walk_started", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            duration_min: payload?.duration_min ?? null,
+            label: payload?.label || "",
+          },
+        });
+        break;
+      }
+
+      case "joy_sit_started": {
+        mitraTrackEvent("joy_sit_started", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            label: payload?.label || "",
+          },
+        });
+        break;
+      }
+
       // ================================================================
       // TRACK 1 — Growth room enter/exit. Symmetric to grief/loneliness.
       // Moment M49 + M49_inquiry_seeds. Seeded-inquiry sub-flow lives
@@ -5009,11 +5074,6 @@ export async function executeAction(
           container_id: "support_growth",
           state_id: "room",
         } as any);
-        mitraTrackEvent("growth_room_entered", {
-          journeyId: screenState.journey_id,
-          dayNumber: screenState.day_number || 1,
-          meta: { parent_source: payload?.source },
-        });
         break;
       }
 

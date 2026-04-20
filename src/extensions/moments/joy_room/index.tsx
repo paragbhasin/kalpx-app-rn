@@ -48,6 +48,7 @@ import { executeAction } from "../../../engine/actionExecutor";
 import {
   mitraLibrarySearch,
   mitraResolveMoment,
+  mitraTrackEvent,
 } from "../../../engine/mitraApi";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 import store from "../../../store";
@@ -102,11 +103,22 @@ const JoyRoomContainer: React.FC<Props> = () => {
   // Resolve M48_joy_room slots on mount
   useEffect(() => {
     if (resolveFiredRef.current) return;
+    resolveFiredRef.current = true;
+
+    // Telemetry — Step 4a: Room entered
+    const parentSource =
+      typeof ss._entered_via === "string" && ss._entered_via
+        ? ss._entered_via
+        : "dashboard";
+    mitraTrackEvent("joy_room_entered", {
+      journeyId: ss.journey_id,
+      dayNumber: ss.day_number || 1,
+      meta: { parent_source: parentSource },
+    });
+
     if (ss.joy_room && typeof ss.joy_room === "object") {
-      resolveFiredRef.current = true;
       return;
     }
-    resolveFiredRef.current = true;
     const cycleId =
       typeof ss.journey_id === "string" && ss.journey_id
         ? ss.journey_id
@@ -123,10 +135,7 @@ const JoyRoomContainer: React.FC<Props> = () => {
       user_attention_state: "open_steady",
       emotional_weight: "light" as const,
       cycle_day: Number(ss.day_number) || 0,
-      entered_via:
-        typeof ss._entered_via === "string" && ss._entered_via
-          ? ss._entered_via
-          : "check_in_anandamaya_joy_expansion",
+      entered_via: parentSource,
       stage_signals: {},
       today_layer: {
         today_kosha: ss.today_kosha || "anandamaya",
@@ -206,6 +215,7 @@ const JoyRoomContainer: React.FC<Props> = () => {
   const inputPlaceholder = readSlot(ss, "input_placeholder");
   const inputSubmitLabel = readSlot(ss, "input_submit_label");
   const inputCancelLabel = readSlot(ss, "input_cancel_label");
+  const walkDurationMin = Number(readSlot(ss, "walk_duration_min")) || 10;
 
   const revealOptions = () => {
     setStep("options");
@@ -306,10 +316,7 @@ const JoyRoomContainer: React.FC<Props> = () => {
       )}
 
       {!!pillNameLabel && (
-        <TouchableOpacity
-          style={styles.pill}
-          onPress={() => setStep("input")}
-        >
+        <TouchableOpacity style={styles.pill} onPress={() => setStep("input")}>
           <Text style={styles.pillText}>{pillNameLabel}</Text>
         </TouchableOpacity>
       )}
@@ -318,7 +325,7 @@ const JoyRoomContainer: React.FC<Props> = () => {
         <TouchableOpacity
           style={styles.pill}
           onPress={() => {
-            dispatch("joy_offering_noted");
+            dispatch("joy_offering_noted", null, { label: pillOfferLabel });
             setStep("options");
           }}
         >
@@ -327,13 +334,28 @@ const JoyRoomContainer: React.FC<Props> = () => {
       )}
 
       {!!pillWalkLabel && (
-        <TouchableOpacity style={styles.pill} onPress={() => setStep("walk")}>
+        <TouchableOpacity
+          style={styles.pill}
+          onPress={() => {
+            dispatch("joy_walk_started", null, {
+              label: pillWalkLabel,
+              duration_min: walkDurationMin,
+            });
+            setStep("walk");
+          }}
+        >
           <Text style={styles.pillText}>{pillWalkLabel}</Text>
         </TouchableOpacity>
       )}
 
       {!!pillSitLabel && (
-        <TouchableOpacity style={styles.pill} onPress={() => setStep("sit")}>
+        <TouchableOpacity
+          style={styles.pill}
+          onPress={() => {
+            dispatch("joy_sit_started", null, { label: pillSitLabel });
+            setStep("sit");
+          }}
+        >
           <Text style={styles.pillText}>{pillSitLabel}</Text>
         </TouchableOpacity>
       )}
@@ -441,7 +463,7 @@ const JoyRoomContainer: React.FC<Props> = () => {
               dispatch("exit_joy_room", null, { actions_used: actionsUsed })
             }
           >
-            <Text style={styles.topBackText}>{pillCarryLabel}</Text>
+            {/* <Text style={styles.topBackText}>{pillCarryLabel}</Text> */}
           </TouchableOpacity>
         </View>
       )}
@@ -449,10 +471,7 @@ const JoyRoomContainer: React.FC<Props> = () => {
         {step !== "walk" && step !== "sit" && (
           <Animated.View style={{ opacity: fade1, marginBottom: 40 }}>
             {!!openingLine && (
-              <Text
-                style={styles.openingLine}
-                testID="joy_room_opening_line"
-              >
+              <Text style={styles.openingLine} testID="joy_room_opening_line">
                 {openingLine}
               </Text>
             )}

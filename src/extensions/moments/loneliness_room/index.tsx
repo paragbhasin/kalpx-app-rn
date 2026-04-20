@@ -48,6 +48,7 @@ import { executeAction } from "../../../engine/actionExecutor";
 import {
   mitraLibrarySearch,
   mitraResolveMoment,
+  mitraTrackEvent,
 } from "../../../engine/mitraApi";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 import store from "../../../store";
@@ -98,11 +99,22 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
   // --- Ours: Phase C Tier 1 — resolve loneliness_room slots on mount ---
   useEffect(() => {
     if (resolveFiredRef.current) return;
+    resolveFiredRef.current = true;
+
+    // Telemetry — Step 4a: Room entered
+    const parentSource =
+      typeof ss._entered_via === "string" && ss._entered_via
+        ? ss._entered_via
+        : "dashboard";
+    mitraTrackEvent("loneliness_session_opened", {
+      journeyId: ss.journey_id,
+      dayNumber: ss.day_number || 1,
+      meta: { parent_source: parentSource },
+    });
+
     if (ss.loneliness_room && typeof ss.loneliness_room === "object") {
-      resolveFiredRef.current = true;
       return;
     }
-    resolveFiredRef.current = true;
     const cycleId =
       typeof ss.journey_id === "string" && ss.journey_id
         ? ss.journey_id
@@ -119,10 +131,7 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
       user_attention_state: "grieving_shut_down",
       emotional_weight: "heavy" as const,
       cycle_day: Number(ss.day_number) || 0,
-      entered_via:
-        typeof ss._entered_via === "string" && ss._entered_via
-          ? ss._entered_via
-          : "check_in_anandamaya_klesha_asmita_isolation",
+      entered_via: parentSource,
       stage_signals: {},
       today_layer: {
         today_kosha: ss.today_kosha || "anandamaya",

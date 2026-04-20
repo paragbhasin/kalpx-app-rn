@@ -215,3 +215,19 @@ Applies on every Phase 4 smoke pass until H-3 ships.
 | 29 path_milestone | 🟡 FE already live, validation blocked | **persona / harness owner + BE threshold owner** | Either (a) create/use `persona_day30+` so BE `_build_path_milestone` emits a non-null value, OR (b) confirm-and-document whether the 30-day threshold in `core/tests/test_journey_envelope.py:228` is product intent |
 
 **Classification doc correction (same commit):** `continuity_mirror_card` + `path_milestone_banner` reclassified from DELETE-CANDIDATE to KEEP. 14-scaffold delete queue reduced to 12 pending Batch M-B fresh re-audit.
+
+## Batch M-D (2026-04-19) — M-8 Batch C readiness audit
+
+Audit-only (CLI execution deferred to clean operator session per same harness constraint as flows 15/19/20). Readiness + owner per remaining flow:
+
+| Flow | Readiness | Gap owner | Next action |
+|---|---|---|---|
+| 23 growth_practice | 🟡 NEEDS CONTENT | BE/content (founder copy) | Author `M_completion_return` practice variant `wisdom_anchor_line` = "The rhythm clarifies what urgency cannot." |
+| 24 additional_library | 🟡 NEEDS CONTENT | BE/content | Author / verify `M_completion_return` `additional_library` variant message. Visual-only default acceptable per M-6 spec. |
+| 25 additional_custom | 🔴 NEEDS FE + BE | FE routing + BE event map | FE: route custom items through completion_return transient (AdditionalItemsSectionBlock:140 short-circuit). Requires UX decision. |
+| 26 additional_recommended | 🔴 NEEDS SCHEMA | BE schema owner | JourneyAdditionalItem.source lacks `additional_recommended` choice. Schema migration needed (product direction). Partial fix landed: BE event_name_map entry (commit `85a45a73`). |
+| 27 additional_items_surface | 🟢 LIKELY GREEN | BE persona | Verify `persona_additional_library@kalpx.com` seed actually materializes JourneyAdditionalItem rows in DB. |
+| 30 resilience_narrative | 🟡 NEEDS BE PERSONA | BE seed author | Seed ResilienceSnapshot rows with valid trend/confidence for `persona_day14` in `seed_canonical_persona_set.py`. Eligibility gate currently prevents render. |
+| 31 entity_card | 🟡 NEEDS BE PERSONA | BE seed author | Seed EntityMention rows (≥3 mentions, ≥2 contexts in last 14 days) for `smoke+triad`. Card self-hides until threshold met. |
+
+**Bottom line:** 0 flows have FE render bugs. All gaps are BE content authoring or persona seeding. Sprint 2 stream for persona-seed expansion + founder copy authoring is the right home for these.

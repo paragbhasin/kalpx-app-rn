@@ -34,7 +34,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
-  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -61,6 +60,22 @@ const readSlot = (ss: Record<string, any>, key: string): string => {
     return moment[key];
   }
   return "";
+};
+
+const WALK_FALLBACKS = {
+  walk_quote:
+    "Step outside into the fresh air.\n\nWalk for 10 minutes, no need to rush.\n\nTake any path that feels right, and let your body move naturally.",
+  walk_holding_line: "I’ll be here, holding this quiet space for you.",
+  walk_action_label: "Time to walk",
+  walk_end_return_label: "End walk and return",
+} as const;
+
+const readWalkSlot = (
+  ss: Record<string, any>,
+  key: keyof typeof WALK_FALLBACKS,
+): string => {
+  const value = readSlot(ss, key);
+  return value || WALK_FALLBACKS[key];
 };
 
 interface Props {
@@ -192,10 +207,10 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
   const inputPlaceholder = readSlot(ss, "input_placeholder");
   const inputSubmitLabel = readSlot(ss, "input_submit_label");
   const inputCancelLabel = readSlot(ss, "input_cancel_label");
-  const walkQuote = readSlot(ss, "walk_quote");
-  const walkHoldingLine = readSlot(ss, "walk_holding_line");
-  const walkActionLabel = readSlot(ss, "walk_action_label");
-  const walkEndReturnLabel = readSlot(ss, "walk_end_return_label");
+  const walkQuote = readWalkSlot(ss, "walk_quote");
+  const walkHoldingLine = readWalkSlot(ss, "walk_holding_line");
+  const walkActionLabel = readWalkSlot(ss, "walk_action_label");
+  const walkEndReturnLabel = readWalkSlot(ss, "walk_end_return_label");
 
   const revealOptions = () => {
     setStep("options");
@@ -271,9 +286,7 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
   ) => {
     const itemId = readSlot(ss, itemIdSlot);
     if (!itemId) {
-      console.warn(
-        `[loneliness_room] ${itemIdSlot} missing from slots`,
-      );
+      console.warn(`[loneliness_room] ${itemIdSlot} missing from slots`);
       return;
     }
     try {
@@ -282,10 +295,7 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
         (r: any) => (r?.itemId ?? r?.item_id) === itemId,
       );
       if (!mantra) {
-        console.warn(
-          "[loneliness_room] mantra not found in library:",
-          itemId,
-        );
+        console.warn("[loneliness_room] mantra not found in library:", itemId);
         return;
       }
       store.dispatch(
@@ -313,7 +323,8 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
   };
 
   const handleBhaktiTap = () => routeSupportMantra("bhakti_mantra_item_id", 27);
-  const handleChantTap = () => routeSupportMantra("companioned_chant_item_id", 11);
+  const handleChantTap = () =>
+    routeSupportMantra("companioned_chant_item_id", 11);
 
   const renderOptions = () => (
     <Animated.View style={[styles.optionsStack, { opacity: fade2 }]}>
@@ -361,10 +372,7 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
         <Text style={styles.pillText}>{pillReachOutLabel}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.pill}
-        onPress={() => setStep("walk")}
-      >
+      <TouchableOpacity style={styles.pill} onPress={() => setStep("walk")}>
         <Text style={styles.pillText}>{pillWalkLabel}</Text>
       </TouchableOpacity>
 
@@ -453,7 +461,7 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
             activeOpacity={0.7}
             onPress={() => dispatch("exit_loneliness_room")}
           >
-            <Text style={styles.topBackText}>{pillExitLabel}</Text>
+            {/* <Text style={styles.topBackText}>{pillExitLabel}</Text> */}
           </TouchableOpacity>
         </View>
       )}

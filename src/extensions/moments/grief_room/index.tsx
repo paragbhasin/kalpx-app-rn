@@ -260,10 +260,9 @@ const GriefRoomContainer: React.FC<Props> = () => {
       const playSound = async () => {
         try {
           // Prefer slot-resolved audio URL; fall back to local Om asset
-          const audioSource =
-            (ss as any).grief_mantra?.audio_url
-              ? { uri: (ss as any).grief_mantra.audio_url }
-              : require("../../../../assets/sounds/Om.mp4");
+          const audioSource = (ss as any).grief_mantra?.audio_url
+            ? { uri: (ss as any).grief_mantra.audio_url }
+            : require("../../../../assets/sounds/Om.mp4");
           const { sound } = await Audio.Sound.createAsync(audioSource, {
             isLooping: true,
             shouldPlay: true,
@@ -419,17 +418,11 @@ const GriefRoomContainer: React.FC<Props> = () => {
     <Animated.View style={[styles.optionsStack, { opacity: fade2 }]}>
       <Text style={styles.secondBeat}>{secondBeatLine}</Text>
 
-      <TouchableOpacity
-        style={styles.pill}
-        onPress={() => setStep("breath")}
-      >
+      <TouchableOpacity style={styles.pill} onPress={() => setStep("breath")}>
         <Text style={styles.pillText}>{pillBreatheLabel}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.pill}
-        onPress={() => setStep("input")}
-      >
+      <TouchableOpacity style={styles.pill} onPress={() => setStep("input")}>
         <Text style={styles.pillText}>{pillSpeakLabel}</Text>
       </TouchableOpacity>
 
@@ -444,10 +437,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
         </TouchableOpacity>
       )}
 
-      <TouchableOpacity
-        style={styles.pill}
-        onPress={() => setStep("stay")}
-      >
+      <TouchableOpacity style={styles.pill} onPress={() => setStep("stay")}>
         <Text style={styles.pillText}>{pillStayLabel}</Text>
       </TouchableOpacity>
 
@@ -477,10 +467,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
             style={[styles.orbWrapper, { transform: [{ scale: dotScale }] }]}
           >
             <LinearGradient
-              colors={[
-                "rgba(255, 255, 255, 0.45)",
-                "rgba(235, 215, 190, 0.2)",
-              ]}
+              colors={["rgba(255, 255, 255, 0.45)", "rgba(235, 215, 190, 0.2)"]}
               style={styles.orbGradient}
             >
               <Text style={styles.breathActionText}>{breathText}</Text>
@@ -533,7 +520,12 @@ const GriefRoomContainer: React.FC<Props> = () => {
           resizeMode="contain"
         />
 
-        <Text style={styles.stayQuote}>{stayQuote}</Text>
+        <Text style={styles.stayQuote}>
+          {stayQuote ||
+            `Come, let’s sit together in this quiet.
+There’s nothing for you to do.
+You’re exactly where you need to be right now.`}
+        </Text>
       </View>
 
       <View style={styles.stayFooter}>
@@ -594,7 +586,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
               dispatch("exit_grief_room", null, { actions_used: actionsUsed });
             }}
           >
-            <Text style={styles.topBackText}>{pillExitLabel}</Text>
+            {/* <Text style={styles.topBackText}>{pillExitLabel}</Text> */}
           </TouchableOpacity>
         </View>
       )}

@@ -14,9 +14,14 @@ interface SankalpDisplayBlockProps {
 const SankalpDisplayBlock: React.FC<SankalpDisplayBlockProps> = ({ block }) => {
   const { companion: companionData } = useSelector((state: RootState) => state.mitra);
   
-  // Resolve sankalp text from companion data
-  const sankalpText = companionData?.companion?.sankalp?.core?.line || "Let me be present with what is.";
-  
+  // SOV-4 (2026-04-20): sovereignty-strict. Prior English fallback
+  // ("Let me be present with what is.") retired. Sankalp text reads
+  // directly from companion.sankalp.core.line. When BE ships empty,
+  // block self-hides rather than showing a hardcoded line.
+  const sankalpText = companionData?.companion?.sankalp?.core?.line || "";
+
+  if (!sankalpText) return null;
+
   return (
     <View style={styles.container}>
       <Text style={styles.quoteMark}>“</Text>

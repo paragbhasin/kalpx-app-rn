@@ -47,9 +47,11 @@ All other hardcoded fallbacks must be retired to ContentPack slots or enforced a
 
 ## Resolution tracking
 
-- **Batch M-C M-5 (2026-04-19):** Audit produced this registry. Individual fixes deferred to Sprint 2/3 (estimated 8-12 story points to close all P1/P2 items).
-- **Sprint 2 priority:** close all P1 items before broader Sprint 2 scope begins.
-- **Sprint 3 priority:** close P2 + retire P3 tech debt.
+- **Batch M-C M-5 (2026-04-19):** Audit produced this registry. Individual fixes deferred to Sprint 2/3.
+- **Round 3 (2026-04-20):** P1-1, P1-2, P1-3 CLOSED. FE commit `a44b2c0`, BE commit `da35746b` (greeting_context → ContentPack slot). Live-verified on dev (greeting returns `"Still here. That is the practice."` from M_new_dashboard_greeting.contextual_fallback, not the prior Python hardcode).
+- **Round 4 (2026-04-20):** P2-5, P2-6, P2-1, P2-3 CLOSED. FE commit TBD. SankalpDisplayBlock self-hides on empty; SeasonChangeBanner self-hides; HoldButtonBlock idle label blank on missing; OptionPickerBlock placeholder + modal title both blank on missing.
+- **Remaining P2 items deferred to Sprint 3:** P2-2 TextInputBlock `"Type here..."` + P2-4 TextareaBlock `"Write your intention..."` (placeholder-only, lowest visibility).
+- **P3 items** (AdditionalItemsSectionBlock `"Additional Practices"` + RepCounterBlock functional labels) remain as tech-debt, deferred.
 
 ## Sovereignty reviewer rule
 

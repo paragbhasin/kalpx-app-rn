@@ -36,9 +36,14 @@ const OptionPickerBlock: React.FC<OptionPickerBlockProps> = ({ block }) => {
     <View style={[styles.container, block?.style]}>
       {Boolean(block.label) && <Text style={styles.label}>{block.label}</Text>}
 
+      {/* SOV-7 (2026-04-20): sovereignty-strict. Retired "Select an
+          option..." + "Choose" English fallbacks. Placeholder reads
+          from block.placeholder; modal title reads block.label. Both
+          render blank when backend/block config does not ship them —
+          no English default. */}
       <TouchableOpacity style={styles.selector} onPress={() => setVisible(true)} activeOpacity={0.7}>
         <Text style={[styles.selectorText, !selectedOption && styles.placeholder]}>
-          {selectedOption?.label || block.placeholder || 'Select an option...'}
+          {selectedOption?.label || block.placeholder || ''}
         </Text>
         <Text style={styles.arrow}>{'\u25BE'}</Text>
       </TouchableOpacity>
@@ -46,7 +51,7 @@ const OptionPickerBlock: React.FC<OptionPickerBlockProps> = ({ block }) => {
       <Modal visible={visible} transparent animationType="fade" onRequestClose={() => setVisible(false)}>
         <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={() => setVisible(false)}>
           <View style={styles.modal}>
-            <Text style={styles.modalTitle}>{block.label || 'Choose'}</Text>
+            {!!block.label && <Text style={styles.modalTitle}>{block.label}</Text>}
             <FlatList
               data={block.options}
               keyExtractor={(item) => item.id}

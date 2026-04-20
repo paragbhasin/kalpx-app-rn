@@ -86,11 +86,15 @@ const HoldButtonBlock: React.FC<HoldButtonBlockProps> = ({ block }) => {
     };
   }, []);
 
+  // SOV-6 (2026-04-20): sovereignty-strict. Retire Python-hardcoded
+  // "Hold to Confirm" fallback. Idle label reads directly from
+  // block.label; missing = blank. Transitional isComplete / isHolding
+  // labels retained as structural UI states (factual, not emotional).
   const labelText = isComplete
     ? "Confirmed"
     : isHolding
       ? "Hold..."
-      : block.label || "Hold to Confirm";
+      : block.label || "";
 
   return (
     <View style={[styles.container, block?.style]}>

@@ -294,6 +294,73 @@ Canonical smoke persona (unless noted): `smoke+triad@kalpx.com` / `smoke-dev-onl
 
 ---
 
+## 4b. What each pill/button DOES (room-by-room)
+
+Each room has a mix of **runner pills** (dispatch `start_runner` → canonical rich runner → track-completion) and **in-room pills** (`setStep(...)` — stay in the room, no backend). Exit always dispatches `exit_{room}_room` → dashboard. Runner completion returns to the **source room** (not dashboard) for `support_{room}` / `joy_room` / `growth_room` sources.
+
+### Joy Room
+
+| Copy | testID | Behavior on press |
+|---|---|---|
+| "Chant for this fullness" | `joy_chant_option` | start_runner mantra, source=support_joy, target_reps=27 → offering_reveal |
+| "Name what's steady" | — | setStep("input") — in-room textarea; submit dispatches `joy_naming_saved` |
+| "Offer it into your day" | — | dispatch("joy_offering_noted") — silent nod, stays in options |
+| "A quiet 10-minute walk" | — | setStep("walk") — in-room walk timer |
+| "Sit in it a while" | — | setStep("sit") — in-room quiet sit |
+| "Carry it forward" | — | dispatch("carry_joy_forward") → dashboard later shows `joy_carry_chip` |
+| "I'll go now" | — | dispatch("exit_joy_room") → back to dashboard with actions_used counter |
+
+### Grief Room
+
+| Copy | testID | Behavior on press |
+|---|---|---|
+| Breath pill | — | setStep("breath") — in-room guided breath |
+| Input (what's underneath) | — | setStep("input") — textarea; submit dispatches `grief_naming_saved` |
+| Mantra pill | `grief_mantra_option` | start_runner mantra, source=support_grief |
+| Stay pill | — | setStep("stay") — quiet accompany with mute toggle |
+| Exit pill | — | dispatch("exit_grief_room") → dashboard |
+
+Grief has 30s silence-tolerance auto-reveal (options appear after silence).
+
+### Loneliness Room
+
+| Copy | testID | Behavior on press |
+|---|---|---|
+| Bhakti pill | `loneliness_bhakti_option` | start_runner mantra, source=support_loneliness |
+| Chant pill | `loneliness_chant_option` | start_runner mantra, source=support_loneliness |
+| Input pill | — | setStep("input") — naming textarea |
+| Walk pill | — | setStep("walk") — in-room walk |
+| Exit pill | — | dispatch("exit_loneliness_room") → dashboard |
+
+### Growth Room ("deep")
+
+Two-layer menu: pick a category pill first, then runner/sub-pills.
+
+| Layer 1 | On press |
+|---|---|
+| Inquiry | `handleInquiryPillTap` → setStep("category") → shows `inquiry_category_decision` / `meaning` / `boundary` sub-pills |
+| Teaching | `handleTeachingTap` → in-room teaching display |
+| Mantra (`growth_mantra_option` testID) | start_runner mantra, source=support_growth |
+| Practice (`growth_practice_option` testID) | start_runner practice, source=support_growth |
+| Journal | setStep("journal") — in-room journaling |
+| Exit | dispatch("exit_growth_room") → dashboard |
+
+### Common invariants (all rooms)
+
+- **Pill renders only if its backend label slot is non-empty** (sovereignty-strict; missing slot = hidden pill).
+- **setStep(X) pills stay in the room** — no backend call, no runner.
+- **start_runner pills** go through `mitraLibrarySearch` → `CycleTransitionsContainer / offering_reveal`.
+- **Runner completion (source-aware return):** for `support_*` / `joy_room` / `growth_room` sources, Return lands on the **source room**. For `source==="core"`, Return lands on dashboard.
+- **Exit pill** always dispatches `exit_{room}_room` and logs `actions_used` telemetry.
+
+### Red flags during manual testing
+
+- Pill tap does nothing → mitraLibrarySearch returned empty OR item_id missing in envelope.
+- Pill tap lands on blank info screen → Case-A BE content gap for that item_id.
+- Runner completion lands on dashboard instead of source room → return-to-source logic broken for that source.
+- Visible English pill copy but the slot is empty → sovereignty violation (hardcoded fallback shipping).
+- `joy_carry_chip` missing after tapping Carry It Forward → `carry_joy_forward` handler regression.
+
 ## 5. Known MANUAL EXCEPTIONS (do NOT mark these flows GREEN without a clean Maestro CLI session)
 
 These flows are product-complete but CLI e2e verification owed. Sprint 1 close condition (a) is NOT satisfied until each flows green via `maestro test` in a clean session (no MCP daemon attached):

@@ -25,6 +25,16 @@ type Props = {
   screenData?: Record<string, any>;
 };
 
+const isSameCalendarDay = (a: number, b: number) => {
+  const da = new Date(a);
+  const db = new Date(b);
+  return (
+    da.getFullYear() === db.getFullYear() &&
+    da.getMonth() === db.getMonth() &&
+    da.getDate() === db.getDate()
+  );
+};
+
 const GreetingCard: React.FC<Props> = ({ screenData }) => {
   const sd = screenData ?? {};
   const context: string = sd.greeting_context ?? "";
@@ -40,17 +50,41 @@ const GreetingCard: React.FC<Props> = ({ screenData }) => {
   const displayName = userName || "friend";
   const displayContext = context || "You're here. Begin wherever feels right.";
 
+  // Joy Carry same-day chip (founder adjustment #3, 2026-04-19 — Option A
+  // frontend-first). Stamped by `carry_joy_forward` action when the user
+  // taps the Carry pill inside the Joy room. Chip hides automatically
+  // when captured_at is not today (calendar-day boundary). Label
+  // preserves the sovereign pill label the user actually tapped.
+  const joyCarry = sd.joy_carry;
+  const carryIsToday =
+    joyCarry &&
+    typeof joyCarry.captured_at === "number" &&
+    isSameCalendarDay(joyCarry.captured_at, Date.now());
+  const carryLabel: string =
+    typeof joyCarry?.label === "string" && joyCarry.label
+      ? joyCarry.label
+      : "";
+
   return (
-    <View style={styles.card} accessibilityLabel="greeting_card">
-      <View style={styles.leftAccent} />
-      <View style={styles.body}>
-        <Text style={styles.name}>Welcome, {displayName}.</Text>
-        <Text style={styles.context}>{displayContext}</Text>
-        {!!tone && <Text style={styles.tone}>{tone}</Text>}
+    <View>
+      <View style={styles.card} accessibilityLabel="greeting_card">
+        <View style={styles.leftAccent} />
+        <View style={styles.body}>
+          <Text style={styles.name}>Welcome, {displayName}.</Text>
+          <Text style={styles.context}>{displayContext}</Text>
+          {!!tone && <Text style={styles.tone}>{tone}</Text>}
+        </View>
+        <View style={styles.mandalaWrap} accessibilityElementsHidden>
+          <MantraLotus3d width={56} height={56} />
+        </View>
       </View>
-      <View style={styles.mandalaWrap} accessibilityElementsHidden>
-        <MantraLotus3d width={56} height={56} />
-      </View>
+      {carryIsToday && (
+        <View style={styles.carryChip} accessibilityLabel="joy_carry_chip">
+          <Text style={styles.carryChipText} numberOfLines={1}>
+            {carryLabel ? `${carryLabel} — held today` : "Joy carried forward"}
+          </Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -104,6 +138,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginLeft: 10,
+  },
+  carryChip: {
+    alignSelf: "flex-start",
+    marginTop: -4,
+    marginBottom: 6,
+    marginLeft: 18,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.goldHairline,
+    backgroundColor: Colors.creamWarm,
+  },
+  carryChipText: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 11,
+    color: Colors.brownDeep,
+    letterSpacing: 0.2,
   },
 });
 

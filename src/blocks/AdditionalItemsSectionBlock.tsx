@@ -173,33 +173,43 @@ const AdditionalItemsSectionBlock: React.FC<Props> = ({ block }) => {
         ...fullData, // Merge library details if found
       };
 
+      // Canonical rich runner routing (LOCKED 2026-04-19): additional-item
+      // "Start" now dispatches start_runner with source="additional_library"
+      // (or whatever item.source is). start_runner's default stateMap lands
+      // on cycle_transitions/offering_reveal — the single rich runner
+      // surface. Replaces prior navigate-to-practice_runner/* legacy path.
+      const runnerSource = item.source || "additional_library";
       const START_ACTIONS: Record<string, any> = {
         mantra: {
-          type: "navigate",
-          target: {
-            container_id: "practice_runner",
-            state_id: "mantra_rep_selection",
+          type: "start_runner",
+          payload: {
+            source: runnerSource,
+            variant: "mantra",
+            item: manualData,
           },
         },
         sankalp: {
-          type: "navigate",
-          target: {
-            container_id: "practice_runner",
-            state_id: "sankalp_embody",
+          type: "start_runner",
+          payload: {
+            source: runnerSource,
+            variant: "sankalp",
+            item: manualData,
           },
         },
         sankalpa: {
-          type: "navigate",
-          target: {
-            container_id: "practice_runner",
-            state_id: "sankalp_embody",
+          type: "start_runner",
+          payload: {
+            source: runnerSource,
+            variant: "sankalp",
+            item: manualData,
           },
         },
         practice: {
-          type: "navigate",
-          target: {
-            container_id: "practice_runner",
-            state_id: "practice_step_runner",
+          type: "start_runner",
+          payload: {
+            source: runnerSource,
+            variant: "practice",
+            item: manualData,
           },
         },
       };

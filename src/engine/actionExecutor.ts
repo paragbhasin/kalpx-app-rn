@@ -3412,6 +3412,16 @@ export async function executeAction(
         setScreenValue(0, "runner_reps_completed");
         setScreenValue(0, "runner_step_index");
         setScreenValue(0, "runner_duration_actual_sec");
+        // Canonical rich runner routing (LOCKED 2026-04-19): the rich
+        // surface (`cycle_transitions/offering_reveal`) reads `info` with
+        // `runner_active_item` as fallback. If `screenData.info` is stale
+        // from a prior view_info (e.g. user opened sankalp info icon, then
+        // tapped mantra triad card), the stale item renders instead of the
+        // current runner's item. Always overwrite `info` with the current
+        // item so the rich surface aligns with the active runner.
+        if (sp.item) {
+          setScreenValue(sp.item, "info");
+        }
         // Seed audio_url for MantraRunnerDisplay — it reads from
         // screenData.mantra_audio_url, not runner_active_item.
         if (sp.variant === "mantra" && sp.item) {
@@ -3427,18 +3437,27 @@ export async function executeAction(
         if (sp.steps) setScreenValue(sp.steps, "practice_steps");
 
         // Nav
+        //
+        // Canonical rich runner routing (LOCKED 2026-04-19): when no
+        // explicit target is passed (core triad primary tap, default path),
+        // all variants route to `cycle_transitions/offering_reveal` — the
+        // single rich runner surface already used by support paths
+        // (grief / loneliness / joy / growth mantra taps). This collapses
+        // the prior split where core landed on the thin
+        // `practice_runner/{mantra_runner|sankalp_embody|practice_step_runner}`
+        // surfaces with bare count/animation-only UI. Thin surfaces are
+        // parked as legacy/unreachable — safe to delete in a future PR.
         if (target) {
           loadScreen(target);
-        } else {
-          const stateMap: Record<string, string> = {
-            mantra: "mantra_runner",
-            sankalp: "sankalp_embody",
-            practice: "practice_step_runner",
-          };
-          const stateId = stateMap[sp.variant];
-          if (stateId) {
-            loadScreen({ container_id: "practice_runner", state_id: stateId });
-          }
+        } else if (
+          sp.variant === "mantra" ||
+          sp.variant === "sankalp" ||
+          sp.variant === "practice"
+        ) {
+          loadScreen({
+            container_id: "cycle_transitions",
+            state_id: "offering_reveal",
+          });
         }
         break;
       }
@@ -3540,17 +3559,17 @@ export async function executeAction(
         setScreenValue(0, "runner_duration_actual_sec");
         setScreenValue(Date.now(), "runner_start_time");
 
+        // Canonical rich runner routing (LOCKED 2026-04-19) — repeat
+        // lands on the same surface as first-run start_runner.
         const variant = screenState.runner_variant;
-        const stateMap: Record<string, string> = {
-          mantra: "mantra_runner",
-          sankalp: "sankalp_embody",
-          practice: "practice_step_runner",
-        };
-        const stateId = variant ? stateMap[variant] : undefined;
-        if (stateId) {
+        if (
+          variant === "mantra" ||
+          variant === "sankalp" ||
+          variant === "practice"
+        ) {
           loadScreen({
-            container_id: "practice_runner",
-            state_id: stateId,
+            container_id: "cycle_transitions",
+            state_id: "offering_reveal",
           });
         } else {
           loadScreen({
@@ -4932,6 +4951,39 @@ export async function executeAction(
           container_id: "companion_dashboard",
           state_id: "day_active",
         } as any);
+        break;
+      }
+
+      // ================================================================
+      // CARRY_JOY_FORWARD — Joy room §C.3 INLINE_STEP semantics.
+      //
+      // Founder decision 2026-04-19 (Option A, frontend-first): the
+      // "Carry it forward" pill must honor its label. Previously it
+      // dispatched exit_joy_room — label/action mismatch. Now it stamps
+      // a session-scoped `joy_carry` trace that the dashboard renders as
+      // a same-day chip under the greeting, then returns to the room
+      // options (per INLINE_STEP contract). Exit is a separate pill.
+      //
+      // Backend persistence is deferred (see Locked Adjustments memory).
+      // Chip lives in Redux — visible for the current session and same
+      // calendar day. Cross-session persistence can be added later via
+      // JournalEvent when backend ships the endpoint.
+      // ================================================================
+      case "carry_joy_forward": {
+        const now = Date.now();
+        const label = payload?.label || "";
+        setScreenValue(
+          {
+            captured_at: now,
+            label,
+          },
+          "joy_carry",
+        );
+        mitraTrackEvent("joy_carried_forward", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { label, captured_at: now },
+        });
         break;
       }
 

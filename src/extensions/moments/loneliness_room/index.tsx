@@ -172,6 +172,12 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
   const pillReachOutLabel = readSlot(ss, "pill_reach_out_label");
   const pillWalkLabel = readSlot(ss, "pill_walk_label");
   const pillExitLabel = readSlot(ss, "pill_exit_label");
+  // Null-asset render guards (founder adjustment #4, 2026-04-19): hide
+  // runner-launching pills if their item_id slot is missing. Prevents
+  // the silent no-op tap where handler warns to console but user sees
+  // nothing. Same "hide, don't render no-op" rule as Why-This Go deeper.
+  const bhaktiMantraItemId = readSlot(ss, "bhakti_mantra_item_id");
+  const companionedChantItemId = readSlot(ss, "companioned_chant_item_id");
   const inputNamingPrompt = readSlot(ss, "input_naming_prompt");
   const inputPersonPrompt = readSlot(ss, "input_person_prompt");
   const inputPlaceholder = readSlot(ss, "input_placeholder");
@@ -314,13 +320,27 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
         <Text style={styles.pillText}>{pillNameLabel}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.pill} onPress={handleBhaktiTap}>
-        <Text style={styles.pillText}>{pillBhaktiLabel}</Text>
-      </TouchableOpacity>
+      {!!pillBhaktiLabel && !!bhaktiMantraItemId && (
+        <TouchableOpacity
+          style={styles.pill}
+          onPress={handleBhaktiTap}
+          testID="loneliness_bhakti_option"
+          accessibilityLabel="loneliness_bhakti_option"
+        >
+          <Text style={styles.pillText}>{pillBhaktiLabel}</Text>
+        </TouchableOpacity>
+      )}
 
-      <TouchableOpacity style={styles.pill} onPress={handleChantTap}>
-        <Text style={styles.pillText}>{pillChantLabel}</Text>
-      </TouchableOpacity>
+      {!!pillChantLabel && !!companionedChantItemId && (
+        <TouchableOpacity
+          style={styles.pill}
+          onPress={handleChantTap}
+          testID="loneliness_chant_option"
+          accessibilityLabel="loneliness_chant_option"
+        >
+          <Text style={styles.pillText}>{pillChantLabel}</Text>
+        </TouchableOpacity>
+      )}
 
       <TouchableOpacity
         style={styles.pill}

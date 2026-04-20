@@ -1,0 +1,22 @@
+# common/scroll_to_quick_support.yaml
+#
+# Wave 3 (2026-04-19): on the full dashboard, QuickSupportBlock chips
+# (quick_support_joy_chip, quick_support_growth_chip, quick_support_more_label)
+# render BELOW the initial scroll viewport on most device sizes. Maestro's
+# tap_on auto-scroll is unreliable when combined with dev-mode LogBox
+# overlays or FB CAPI error toasts.
+#
+# This helper explicitly scrolls the dashboard until the joy chip
+# testID is visible, then leaves the viewport positioned so all
+# QuickSupportBlock chips (joy/growth/more) are in frame for subsequent
+# taps. Idempotent — no-op if already visible.
+#
+# Usage: runFlow after wait_for_dashboard + enter_core_view.
+appId: com.kalpx.app
+---
+- scrollUntilVisible:
+    element:
+      id: "quick_support_joy_chip"
+    direction: DOWN
+    timeout: 8000
+    speed: 40

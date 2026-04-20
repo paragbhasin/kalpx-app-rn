@@ -10,32 +10,27 @@ appId: com.kalpx.app
     clearState: false
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
+- runFlow: common/enter_core_view.yaml
+- runFlow: common/scroll_to_quick_support.yaml
+# Wave 3 (2026-04-19): testID-first entry chain
+- tapOn:
+    id: "quick_support_joy_chip"
 - extendedWaitUntil:
-    visible: ".*I'm in a good place.*"
+    visible:
+      id: "joy_room_opening_line"
     timeout: 10000
-- tapOn: ".*I'm in a good place.*"
+# Joy options reveal on 2s timeout; wait it out.
 - waitForAnimationToEnd:
-    timeout: 8000
+    timeout: 5000
 - tapOn:
-    id: "joy_walk_option"
-    optional: true
+    id: "joy_chant_option"
+- waitForAnimationToEnd:
+    timeout: 6000
+# Wave 3 (2026-04-19) PROVISIONAL — canonical rich runner hook
 - tapOn:
-    text: "(chant|mantra|bhakti|gratitude)"
-    optional: true
-- waitForAnimationToEnd
-- tapOn:
-    id: "mantra_runner_start"
-    optional: true
-- tapOn:
-    text: "(Start|Begin|Play)"
-    optional: true
-- waitForAnimationToEnd
-- tapOn:
-    id: "mantra_runner_complete"
-    optional: true
-- tapOn:
-    text: "(Done|Complete|I'm done)"
-    optional: true
+    id: "test_runner_force_complete"
+- waitForAnimationToEnd:
+    timeout: 10000
 - extendedWaitUntil:
     visible:
       id: "completion_message"

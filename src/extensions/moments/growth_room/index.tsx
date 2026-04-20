@@ -281,6 +281,10 @@ const GrowthRoomContainer: React.FC<Props> = () => {
   const inputSubmitLabel = readSlot(ss, "input_submit_label");
   const inputCancelLabel = readSlot(ss, "input_cancel_label");
   const seededPrincipleId = readSlot(ss, "seeded_principle_id");
+  // Null-asset render guards (founder adjustment #4, 2026-04-19): hide
+  // runner-launching pills if their item_id slot is missing.
+  const growthMantraItemId = readSlot(ss, "growth_mantra_item_id");
+  const growthPracticeItemId = readSlot(ss, "growth_practice_item_id");
 
   const revealOptions = () => {
     if (step === "opening") {
@@ -392,9 +396,12 @@ const GrowthRoomContainer: React.FC<Props> = () => {
         console.warn("[growth_room] practice not found:", itemId);
         return;
       }
+      // Canonical rich runner routing (LOCKED 2026-04-19): support
+      // practice lands on offering_reveal to match growth mantra + all
+      // other support runner paths. No parallel thin practice surface.
       dispatch(
         "start_runner",
-        { container_id: "practice_runner", state_id: "practice_step_runner" },
+        { container_id: "cycle_transitions", state_id: "offering_reveal" },
         {
           source: "support_growth",
           variant: "practice",
@@ -434,14 +441,24 @@ const GrowthRoomContainer: React.FC<Props> = () => {
         </TouchableOpacity>
       )}
 
-      {!!pillMantraLabel && (
-        <TouchableOpacity style={styles.pill} onPress={handleMantraTap}>
+      {!!pillMantraLabel && !!growthMantraItemId && (
+        <TouchableOpacity
+          style={styles.pill}
+          onPress={handleMantraTap}
+          testID="growth_mantra_option"
+          accessibilityLabel="growth_mantra_option"
+        >
           <Text style={styles.pillText}>{pillMantraLabel}</Text>
         </TouchableOpacity>
       )}
 
-      {!!pillPracticeLabel && (
-        <TouchableOpacity style={styles.pill} onPress={handlePracticeTap}>
+      {!!pillPracticeLabel && !!growthPracticeItemId && (
+        <TouchableOpacity
+          style={styles.pill}
+          onPress={handlePracticeTap}
+          testID="growth_practice_option"
+          accessibilityLabel="growth_practice_option"
+        >
           <Text style={styles.pillText}>{pillPracticeLabel}</Text>
         </TouchableOpacity>
       )}

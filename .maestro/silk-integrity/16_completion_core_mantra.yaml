@@ -9,25 +9,20 @@ appId: com.kalpx.app
     clearState: false
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
+# Advance past momentum ContinueJourney to full dashboard (smoke+triad day N).
+- runFlow: common/enter_core_view.yaml
 # Tap the mantra triad card to open mantra runner
 - tapOn:
     id: "core_item_mantra"
 - waitForAnimationToEnd:
     timeout: 8000
-# Start + complete the runner (testIDs with soft label fallback)
+# Wave 3 (2026-04-19) PROVISIONAL: core mantra lands on canonical rich
+# runner (cycle_transitions/offering_reveal). No mantra_runner_start/
+# _complete testIDs exist on this surface — tap the __DEV__-gated
+# test_runner_force_complete hook to fire the REAL complete_runner
+# action per variant. YAML will be finalized after Batch B proof.
 - tapOn:
-    id: "mantra_runner_start"
-    optional: true
-- tapOn:
-    text: "(Start|Begin|Play)"
-    optional: true
-- waitForAnimationToEnd
-- tapOn:
-    id: "mantra_runner_complete"
-    optional: true
-- tapOn:
-    text: "(Done|Complete|I'm done)"
-    optional: true
+    id: "test_runner_force_complete"
 - waitForAnimationToEnd:
     timeout: 10000
 # CompletionReturnTransient — core_mantra anchor (gita).

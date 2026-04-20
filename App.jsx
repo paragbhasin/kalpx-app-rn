@@ -14,7 +14,19 @@ const TransparentTheme = {
 import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState, useRef } from "react";
-import { Animated, StyleSheet, View, Image, ImageBackground, StatusBar, AccessibilityInfo } from "react-native";
+import { Animated, LogBox, StyleSheet, View, Image, ImageBackground, StatusBar, AccessibilityInfo } from "react-native";
+
+// Silence benign dev-only noise that triggers LogBox overlay and blocks
+// Maestro automation. FB CAPI "Param event must be one of ..." error
+// fires on every login in dev (Simulator doesn't meet Meta's allowed
+// event enum); harmless in prod where the event is gated.
+// 2026-04-19 Wave 3 — Maestro unblock.
+if (__DEV__) {
+  LogBox.ignoreLogs([
+    /FB CAPI Error/i,
+    /Param event must be one of/i,
+  ]);
+}
 import { useScreenStore } from "./src/engine/useScreenBridge";
 import "react-native-get-random-values";
 import { MenuProvider } from "react-native-popup-menu";

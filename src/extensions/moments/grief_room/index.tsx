@@ -383,6 +383,11 @@ const GriefRoomContainer: React.FC<Props> = () => {
   const pillMantraLabel = readSlot(ss, "pill_mantra_label");
   const pillStayLabel = readSlot(ss, "pill_stay_label");
   const pillExitLabel = readSlot(ss, "pill_exit_label");
+  // Null-asset render guard (founder adjustment #4, 2026-04-19): hide the
+  // mantra pill if grief_mantra_item_id is missing. Prevents silent no-op
+  // tap. Also fixes prior sovereignty violation where unconditional render
+  // exposed empty label-less pills when backend hadn't seeded slots.
+  const griefMantraItemId = readSlot(ss, "grief_mantra_item_id");
   const inputPrompt = readSlot(ss, "input_prompt");
   const inputPlaceholder = readSlot(ss, "input_placeholder");
   const inputSubmitLabel = readSlot(ss, "input_submit_label");
@@ -416,9 +421,16 @@ const GriefRoomContainer: React.FC<Props> = () => {
         <Text style={styles.pillText}>{pillSpeakLabel}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.pill} onPress={handleMantraTap}>
-        <Text style={styles.pillText}>{pillMantraLabel}</Text>
-      </TouchableOpacity>
+      {!!pillMantraLabel && !!griefMantraItemId && (
+        <TouchableOpacity
+          style={styles.pill}
+          onPress={handleMantraTap}
+          testID="grief_mantra_option"
+          accessibilityLabel="grief_mantra_option"
+        >
+          <Text style={styles.pillText}>{pillMantraLabel}</Text>
+        </TouchableOpacity>
+      )}
 
       <TouchableOpacity
         style={styles.pill}

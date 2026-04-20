@@ -18,9 +18,12 @@ import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
 
+const VALID_INFO_TYPES = ["mantra", "sankalp", "practice"] as const;
+
 const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
   const { screenData, loadScreen, goBack } = useScreenStore();
-  const p = (screenData as any).why_this_principle;
+  const sd = screenData as any;
+  const p = sd.why_this_principle;
 
   // Flag-off / 404 tolerance — render a minimal placeholder and a Got it exit.
   if (!p) {
@@ -40,9 +43,24 @@ const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
     );
   }
 
-  const goDeeper = () => {
+  // Founder adjustment #1 (2026-04-19): "Go deeper" is only visible when
+  // a linked item type + data is resolvable. Principles today ship without
+  // item bindings, so this gate almost always hides the CTA — which is
+  // the correct behavior ("sheet = interpretation, info screen =
+  // understanding"). If a future principle authors a linked_item_type +
+  // linked_item_id pair, the CTA re-surfaces automatically and routes to
+  // view_info instead of the retired open_why_this_l3 drill-down.
+  const linkedType: string = typeof p.linked_item_type === "string"
+    ? p.linked_item_type
+    : "";
+  const canGoDeeper =
+    (VALID_INFO_TYPES as readonly string[]).includes(linkedType) &&
+    !!sd[`master_${linkedType}`];
+
+  const handleGoDeeper = () => {
+    goBack();
     executeAction(
-      { type: "open_why_this_l3", payload: { principle_id: p.id } },
+      { type: "view_info", payload: { type: linkedType } },
       {
         loadScreen,
         goBack,
@@ -65,13 +83,17 @@ const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
         </ScrollView>
       ) : null}
 
-      <TouchableOpacity
-        style={styles.deeper}
-        onPress={goDeeper}
-        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-      >
-        <Text style={styles.deeperText}>Go deeper</Text>
-      </TouchableOpacity>
+      {canGoDeeper && (
+        <TouchableOpacity
+          style={styles.deeper}
+          onPress={handleGoDeeper}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          testID="why_this_l2_go_deeper"
+          accessibilityLabel="why_this_l2_go_deeper"
+        >
+          <Text style={styles.deeperText}>Go deeper</Text>
+        </TouchableOpacity>
+      )}
 
       <TouchableOpacity
         style={styles.dismissPill}

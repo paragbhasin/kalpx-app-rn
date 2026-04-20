@@ -32,7 +32,7 @@ land tracks these and their corresponding FE components:
 - Flow 13 — `inquiry_category_<decision|relationship|stuck|practice|other>` + `inquiry_seat_prompt` (growth_room)
 - Flow 14 — `checkpoint_day_7_narrative` / `..._headline` / `..._eyebrow` / `checkpoint_cta_*` (CheckpointDay7Block)
 - Flow 15 — `checkpoint_day_14_narrative` / `..._summary` / `checkpoint_cta_*` (CheckpointDay14Block)
-- Flows 16–23 — `mantra_runner_start` / `mantra_runner_complete` / `sankalp_hold` / `practice_runner_start` / `practice_runner_complete` (runners)
+- Flows 16–23 — `mantra_runner_start` / `mantra_runner_complete` / `sankalp_hold` / `practice_runner_start` / `practice_runner_complete` (runners) — **SUPERSEDED 2026-04-19 by canonical rich runner routing.** These testIDs lived on the parked `MantraRunnerDisplay` dark-chrome component. Core triad + support runner paths now land on `cycle_transitions/offering_reveal` (CycleTransitionsContainer rich surface). Replacement selector: `test_runner_force_complete` — a dev-only invisible pressable (1×1, `__DEV__`-gated) that triggers the REAL `complete_runner` dispatch per variant (same action the natural 108-tap / 3s-hold / timer-expiry paths use; backend tracking fires; `completion_return` renders; source-room routing resolves identically). Production builds strip the affordance entirely. Maestro flows 16 + 19–22 can swap the legacy `_start`/`_complete` optional taps for a single `tapOn: id: "test_runner_force_complete"`.
 - Flows 16–26 — `completion_message` / `completion_wisdom_anchor_line` / `completion_read_more` / `completion_reflection_placeholder` (CompletionReturnTransient)
 - Flows 19–20 — `<room>_mantra_option` support-room runner entry
 - Flows 22–23 — `inquiry_<cat>_<kind>_option` offering selectors

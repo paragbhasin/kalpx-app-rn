@@ -241,7 +241,13 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
   // Expand/collapse state
   const [meaningExpanded, setMeaningExpanded] = useState(false);
   const [benefitsExpanded, setBenefitsExpanded] = useState(false);
-  const [essenceExpanded, setEssenceExpanded] = useState(false);
+  // Runner beautification (PR5, 2026-04-19): Essence opens expanded on
+  // first render so the info/runner surface feels authored rather than
+  // cold. Applies to all three variants — on mantra, Essence is the
+  // anchoring interpretation (info.essence); on sankalp, it's info.insight
+  // (relabeled from Meaning in PR4); on practice, info.insight. User can
+  // still collapse manually — no runtime data dependency on initial state.
+  const [essenceExpanded, setEssenceExpanded] = useState(true);
   const [iastExpanded, setIastExpanded] = useState(false);
   const [devanagariExpanded, setDevanagariExpanded] = useState(false);
 
@@ -781,9 +787,75 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
       });
     }
   };
+  // Dev-only test hook (LOCKED 2026-04-19): Maestro flows 16/19–22 tap
+  // `test_runner_force_complete` to trigger the REAL completion path for
+  // the current runner variant — same `complete_runner` dispatch the
+  // natural 108-tap / 3s-hold / timer-expiry paths use. Not a mock; the
+  // backend tracking fires, completion_return renders, source-room
+  // routing resolves identically. Guarded on `__DEV__` so production
+  // builds strip the affordance entirely. 1×1 invisible pressable
+  // positioned off-touchable-flow; real users never see or hit it.
+  const handleTestForceComplete = () => {
+    if (isCompletingRef.current) return;
+    isCompletingRef.current = true;
+
+    const durationSeconds = Math.round(
+      (Date.now() - (sessionStartTime || Date.now())) / 1000,
+    );
+
+    if (currentType === "mantra") {
+      setChantCount(selectedTarget);
+      updateScreenData("runner_reps_completed", selectedTarget);
+      updateScreenData("reps_done", selectedTarget);
+    } else if (currentType === "practice") {
+      stopPracticeTimer().catch(() => {});
+      updateScreenData("runner_reps_completed", 1);
+    } else if (currentType === "sankalp") {
+      updateScreenData("runner_reps_completed", 1);
+    }
+    updateScreenData("runner_duration_actual_sec", durationSeconds);
+    updateScreenData("chant_duration", durationSeconds);
+
+    executeAction(
+      {
+        type: "complete_runner",
+        target: {
+          container_id: "practice_runner",
+          state_id: "completion_return",
+        },
+      },
+      {
+        loadScreen,
+        goBack,
+        setScreenValue: (val: any, k: string) => updateScreenData(k, val),
+        screenState: { ...screenData },
+      },
+    );
+  };
+
   if (isInfoScreen) {
     return (
       <View style={styles.container}>
+        {__DEV__ && (
+          <TouchableOpacity
+            testID="test_runner_force_complete"
+            accessibilityLabel="test_runner_force_complete"
+            accessible={true}
+            accessibilityRole="button"
+            onPress={handleTestForceComplete}
+            style={{
+              position: "absolute",
+              top: 60,
+              right: 4,
+              width: 24,
+              height: 24,
+              opacity: 0.01,
+              zIndex: 9999,
+            }}
+          >
+            <View style={{ width: 24, height: 24 }} />
+          </TouchableOpacity>
+        )}
         <ScrollView
           style={styles.scroll}
           contentContainerStyle={styles.infoScrollContent}
@@ -796,6 +868,19 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
               <Text style={[styles.mantraTitle, { marginBottom: 12 }]}>
                 {info.title}
               </Text>
+
+              {/* Tradition eyebrow (founder adjustment #2, 2026-04-19):
+                  render when deity OR source is present. Combine with an
+                  en-dash when both are present. Single-value renders the
+                  lone field. Keeps elegant + data-truthful — no padded
+                  wording when only one side is seeded. */}
+              {(!!info.deity || !!info.source) && (
+                <Text style={styles.mantraTraditionLine}>
+                  {info.deity && info.source
+                    ? `${info.deity} \u2014 ${info.source}`
+                    : info.deity || info.source}
+                </Text>
+              )}
 
               {/* Progress Count */}
               <View style={styles.progressCounter}>
@@ -1018,28 +1103,37 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                 </Text>
               </View>
 
-              <View style={[styles.mainCard]}>
-                <SectionHeader label="How To Live" />
-                <View style={{ marginTop: 12 }}>
-                  {Array.isArray(info.how_to_live) ? (
-                    <View style={styles.howToLiveList}>
-                      {info.how_to_live.map((line: string, index: number) => (
-                        <Text
-                          key={`${line}-${index}`}
-                          style={styles.howToLiveText}
-                        >
-                          {line}
-                        </Text>
-                      ))}
-                    </View>
-                  ) : (
-                    <Text style={styles.howToLiveText}>
-                      {info.how_to_live ||
-                        "Stay mindful and carry this intention with every breath."}
-                    </Text>
-                  )}
+              {/* How To Live — stays visible as a MAIN section (founder
+                  adjustment #2, 2026-04-19; not a collapsible). Gated on
+                  content presence — English fallback removed per
+                  sovereignty law. 46% of sankalps have no how_to_live
+                  today; those render without this card rather than fake
+                  wisdom. */}
+              {hasContent(info.how_to_live) && (
+                <View style={[styles.mainCard]}>
+                  <SectionHeader label="How To Live" />
+                  <View style={{ marginTop: 12 }}>
+                    {Array.isArray(info.how_to_live) ? (
+                      <View style={styles.howToLiveList}>
+                        {info.how_to_live.map(
+                          (line: string, index: number) => (
+                            <Text
+                              key={`${line}-${index}`}
+                              style={styles.howToLiveText}
+                            >
+                              {line}
+                            </Text>
+                          ),
+                        )}
+                      </View>
+                    ) : (
+                      <Text style={styles.howToLiveText}>
+                        {info.how_to_live}
+                      </Text>
+                    )}
+                  </View>
                 </View>
-              </View>
+              )}
 
               <View style={styles.embodySection}>
                 <Text style={styles.embodyInstr}>
@@ -1086,37 +1180,48 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                 </TouchableOpacity> */}
               </View>
 
-              {/* Collapsible Sections for Sankalp */}
+              {/* Collapsible Sections for Sankalp.
+                  - "Essence" (relabeled from "Meaning" per founder plan,
+                    2026-04-19): MasterSankalp has no `meaning` column;
+                    body reads info.insight (100% populated). Label now
+                    matches the field it renders.
+                  - "Benefits" gated on hasContent — 46% of sankalps ship
+                    with empty benefits; those render nothing rather than
+                    an empty collapsible. */}
               <View
                 style={[styles.collapsibleSectionsCombined, { marginTop: -70 }]}
               >
-                {hasContent(info.meaning) || hasContent(info.summary) ? (
+                {hasContent(info.insight) && (
                   <CollapsibleCard
-                    label="Meaning"
-                    expanded={meaningExpanded}
-                    onToggle={() => setMeaningExpanded(!meaningExpanded)}
+                    label="Essence"
+                    expanded={essenceExpanded}
+                    onToggle={() => setEssenceExpanded(!essenceExpanded)}
                   >
                     <Text style={styles.cardText}>{info.insight}</Text>
                   </CollapsibleCard>
-                ) : null}
-                <View style={{ height: 12 }} />
-                <CollapsibleCard
-                  label="Benefits"
-                  expanded={benefitsExpanded}
-                  onToggle={() => setBenefitsExpanded(!benefitsExpanded)}
-                >
-                  {Array.isArray(info.benefits) ? (
-                    <View style={styles.benefitList}>
-                      {info.benefits.map((b: string, idx: number) => (
-                        <Text key={idx} style={styles.benefitItem}>
-                          {"\u2022"} {b}
-                        </Text>
-                      ))}
-                    </View>
-                  ) : (
-                    <Text style={styles.cardText}>{info.benefits}</Text>
-                  )}
-                </CollapsibleCard>
+                )}
+                {hasContent(info.insight) && hasContent(info.benefits) && (
+                  <View style={{ height: 12 }} />
+                )}
+                {hasContent(info.benefits) && (
+                  <CollapsibleCard
+                    label="Benefits"
+                    expanded={benefitsExpanded}
+                    onToggle={() => setBenefitsExpanded(!benefitsExpanded)}
+                  >
+                    {Array.isArray(info.benefits) ? (
+                      <View style={styles.benefitList}>
+                        {info.benefits.map((b: string, idx: number) => (
+                          <Text key={idx} style={styles.benefitItem}>
+                            {"\u2022"} {b}
+                          </Text>
+                        ))}
+                      </View>
+                    ) : (
+                      <Text style={styles.cardText}>{info.benefits}</Text>
+                    )}
+                  </CollapsibleCard>
+                )}
               </View>
             </View>
           )}
@@ -1138,17 +1243,29 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                 <Text style={[styles.deityTitle, { textAlign: "center" }]}>
                   {info.title}
                 </Text>
-                {(info.subtitle || info.line) && (
+                {/* Subtitle — MasterPractice ships `summary` on 99.7% of
+                    items; legacy subtitle/line fields are effectively
+                    dead. Prefer summary; fall through to legacy fields
+                    for defensive compatibility. (PR4 tightening, 2026-04-19) */}
+                {(info.summary || info.subtitle || info.line) && (
                   <Text
                     style={[
                       styles.sankalpMainText,
                       { fontSize: 18, marginTop: 8, textAlign: "center" },
                     ]}
                   >
-                    {interpolate(info.subtitle || info.line, {
+                    {interpolate(info.summary || info.subtitle || info.line, {
                       ...screenData,
                       ...info,
                     })}
+                  </Text>
+                )}
+                {/* Duration eyebrow (PR4 tightening, 2026-04-19): rendered
+                    when MasterPractice.duration is seeded (~42%). Kept
+                    elegant — no tradition/deity (too sparse at 10%/4%). */}
+                {!!info.duration && (
+                  <Text style={styles.practiceDurationLine}>
+                    {info.duration}
                   </Text>
                 )}
               </View>
@@ -1318,19 +1435,8 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                   </>
                 )}
               </View>
-              {hasContent(info.summary) && (
-                <>
-                  {hasContent(info.summary) && <View style={{ height: 18 }} />}
-                  <CollapsibleCard
-                    label="Meaning"
-                    expanded={meaningExpanded}
-                    onToggle={() => setMeaningExpanded(!meaningExpanded)}
-                  >
-                    <Text style={styles.cardText}>{info.summary}</Text>
-                  </CollapsibleCard>
-                </>
-              )}
-
+              {/* Benefits collapsible — gated on hasContent (48% of
+                  practices populated). */}
               {hasContent(info.benefits) && (
                 <>
                   {info.steps && info.steps.length > 0 && (
@@ -1356,13 +1462,18 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                 </>
               )}
 
+              {/* Essence (relabeled from "Why this works" per PR4, 2026-
+                  04-19 — unifies labeling with mantra + sankalp). Body
+                  reads info.insight (99.95% populated on MasterPractice);
+                  essence fallback preserved for defensive compat even
+                  though the field doesn't exist on the practice model. */}
               {hasContent(info.essence || info.insight) && (
                 <>
                   {(hasContent(info.steps) || hasContent(info.benefits)) && (
                     <View style={{ height: 18 }} />
                   )}
                   <CollapsibleCard
-                    label="Why this works"
+                    label="Essence"
                     expanded={essenceExpanded}
                     onToggle={() => setEssenceExpanded(!essenceExpanded)}
                   >
@@ -1546,6 +1657,28 @@ const styles = StyleSheet.create({
     color: BROWN,
     textAlign: "center",
     marginTop: -20,
+  },
+  // Mantra tradition eyebrow (deity/source) — small gold caps line below
+  // the title. PR4 (2026-04-19).
+  mantraTraditionLine: {
+    fontSize: 11,
+    letterSpacing: 1.3,
+    fontFamily: Fonts.sans.medium,
+    color: "#B89450",
+    textAlign: "center",
+    textTransform: "uppercase",
+    marginBottom: 8,
+    marginTop: -6,
+  },
+  // Practice duration eyebrow — small gold caps line below the practice
+  // subtitle (info.duration). PR4 (2026-04-19).
+  practiceDurationLine: {
+    fontSize: 11,
+    letterSpacing: 1.3,
+    fontFamily: Fonts.sans.medium,
+    color: "#B89450",
+    textAlign: "center",
+    marginTop: 10,
   },
   mainCard: {
     width: "100%",

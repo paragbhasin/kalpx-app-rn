@@ -193,6 +193,15 @@ const JoyRoomContainer: React.FC<Props> = () => {
   const pillNameLabel = readSlot(ss, "pill_name_label");
   const pillSitLabel = readSlot(ss, "pill_sit_label");
   const pillCarryLabel = readSlot(ss, "pill_carry_label");
+  // Joy Carry truth (founder adjustment #3, 2026-04-19): Carry is now
+  // INLINE_STEP per §C.3 (stamps joy_carry + dashboard chip). Exit is a
+  // separate NAV_EXIT pill. Backend is expected to author pill_exit_label
+  // alongside pill_carry_label; until it does, the top-back affordance
+  // (which currently uses pillCarryLabel) still provides an exit path.
+  const pillExitLabel = readSlot(ss, "pill_exit_label");
+  // Null-asset render guard (founder adjustment #4, 2026-04-19): hide the
+  // chant pill if joy_mantra_item_id is missing. Prevents silent no-op tap.
+  const joyMantraItemId = readSlot(ss, "joy_mantra_item_id");
   const inputNamingPrompt = readSlot(ss, "input_naming_prompt");
   const inputPlaceholder = readSlot(ss, "input_placeholder");
   const inputSubmitLabel = readSlot(ss, "input_submit_label");
@@ -285,8 +294,13 @@ const JoyRoomContainer: React.FC<Props> = () => {
         <Text style={styles.offerText}>{offerIntroText}</Text>
       )}
 
-      {!!pillChantLabel && (
-        <TouchableOpacity style={styles.pill} onPress={handleMantraTap}>
+      {!!pillChantLabel && !!joyMantraItemId && (
+        <TouchableOpacity
+          style={styles.pill}
+          onPress={handleMantraTap}
+          testID="joy_chant_option"
+          accessibilityLabel="joy_chant_option"
+        >
           <Text style={styles.pillText}>{pillChantLabel}</Text>
         </TouchableOpacity>
       )}
@@ -326,12 +340,24 @@ const JoyRoomContainer: React.FC<Props> = () => {
 
       {!!pillCarryLabel && (
         <TouchableOpacity
+          style={styles.pill}
+          onPress={() => {
+            dispatch("carry_joy_forward", null, { label: pillCarryLabel });
+            setStep("options");
+          }}
+        >
+          <Text style={styles.pillText}>{pillCarryLabel}</Text>
+        </TouchableOpacity>
+      )}
+
+      {!!pillExitLabel && (
+        <TouchableOpacity
           style={styles.exitBtn}
           onPress={() =>
             dispatch("exit_joy_room", null, { actions_used: actionsUsed })
           }
         >
-          <Text style={styles.exitText}>{pillCarryLabel}</Text>
+          <Text style={styles.exitText}>{pillExitLabel}</Text>
         </TouchableOpacity>
       )}
     </Animated.View>

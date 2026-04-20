@@ -1,13 +1,18 @@
 /**
- * WhyThisSheet — bottom sheet that reveals the L2 / L3 "why this"
- * explanation for a single triad item.
+ * WhyThisSheet — bottom sheet that reveals the L2 "why this" interpretation
+ * for a single triad item.
  *
  * Flow:
  *   1. User taps a chip on WhyThisL1Strip → opens this sheet
  *   2. Sheet resolves M36_why_this_l2 on mount and shows the L2 body
- *   3. "Go deeper" CTA resolves M37_why_this_l3 and swaps body to L3
- *      (L3 is where explicit source naming lives — Gita / Yoga Sutras /
- *      Sankhya etc. per SOURCE_VISIBILITY_POLICY_V1 §2)
+ *   3. "Go deeper" CTA closes the sheet and dispatches `view_info` for
+ *      the linked item type — user lands on the real info screen (the
+ *      canonical understanding surface, not an in-sheet body swap).
+ *
+ * Contract (locked 2026-04-19): sheet = interpretation, info screen =
+ * understanding. The sheet is a doorway, not a mini-content-system.
+ * "Go deeper" is HIDDEN ENTIRELY when there is no resolvable linked
+ * item in screenData — no no-op CTAs (founder adjustment #1).
  *
  * Sovereignty: NO English fallbacks for the body. If the resolver
  * returns null the sheet shows the chip's label as a minimal title and
@@ -31,6 +36,10 @@ import {
   type MomentContextShape,
   type MomentPayloadShape,
 } from "../../engine/mitraApi";
+import { executeAction } from "../../engine/actionExecutor";
+import { useScreenStore } from "../../engine/useScreenBridge";
+import store from "../../store";
+import { screenActions } from "../../store/screenSlice";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 
@@ -46,7 +55,8 @@ type Props = {
 };
 
 const L2_MOMENT_ID = "M36_why_this_l2";
-const L3_MOMENT_ID = "M37_why_this_l3";
+
+const VALID_INFO_TYPES = ["mantra", "sankalp", "practice"] as const;
 
 const buildCtx = (
   sd: Record<string, any>,
@@ -82,8 +92,6 @@ const buildCtx = (
 
 const pickBody = (payload: MomentPayloadShape | null): string => {
   if (!payload || !payload.slots) return "";
-  // Both L2 + L3 use a handful of conventional slot names; pick the
-  // first non-empty one so we work with either M36 or M37 shape.
   const keys = [
     "body",
     "body_line",
@@ -91,7 +99,6 @@ const pickBody = (payload: MomentPayloadShape | null): string => {
     "explanation",
     "deeper_explanation",
     "l2_body",
-    "l3_body",
   ];
   for (const k of keys) {
     const v = payload.slots[k];
@@ -112,15 +119,6 @@ const pickCta = (
   return typeof k === "string" && k.trim() ? k : fallback;
 };
 
-const pickSource = (payload: MomentPayloadShape | null): string => {
-  if (!payload || !payload.slots) return "";
-  const s =
-    payload.slots.source_line ||
-    payload.slots.tradition_line ||
-    payload.slots.lineage_line;
-  return typeof s === "string" ? s : "";
-};
-
 const WhyThisSheet: React.FC<Props> = ({
   visible,
   onClose,
@@ -129,18 +127,15 @@ const WhyThisSheet: React.FC<Props> = ({
   screenData,
 }) => {
   const sd = screenData ?? {};
-  const [depth, setDepth] = useState<"l2" | "l3">("l2");
+  const { loadScreen, goBack } = useScreenStore();
   const [l2, setL2] = useState<MomentPayloadShape | null>(null);
-  const [l3, setL3] = useState<MomentPayloadShape | null>(null);
   const [loading, setLoading] = useState(false);
 
   // Reset state every time the sheet opens so the previous chip's
   // content doesn't flash through.
   useEffect(() => {
     if (!visible) return;
-    setDepth("l2");
     setL2(null);
-    setL3(null);
     setLoading(true);
     const ctx = buildCtx(sd, itemType);
     mitraResolveMoment(L2_MOMENT_ID, ctx)
@@ -149,23 +144,35 @@ const WhyThisSheet: React.FC<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, itemType]);
 
-  const showL3 = async () => {
-    if (l3) {
-      setDepth("l3");
-      return;
-    }
-    setLoading(true);
-    const ctx = buildCtx(sd, itemType);
-    const p = await mitraResolveMoment(L3_MOMENT_ID, ctx);
-    setL3(p);
-    setDepth("l3");
-    setLoading(false);
-  };
-
-  const body = depth === "l2" ? pickBody(l2) : pickBody(l3);
-  const sourceLine = depth === "l3" ? pickSource(l3) : "";
+  const body = pickBody(l2);
   const goDeeperLabel = pickCta(l2, "Go deeper");
-  const showGoDeeper = depth === "l2" && !loading;
+
+  // Guard (founder adjustment #1, 2026-04-19): the Go-deeper CTA is only
+  // visible when a linked item type + data is actually resolvable. No
+  // no-op CTAs. view_info reads master_<type> from screenState when
+  // manualData is absent, so this guard mirrors that resolution.
+  const canGoDeeper =
+    !loading &&
+    (VALID_INFO_TYPES as readonly string[]).includes(itemType) &&
+    !!sd[`master_${itemType}`];
+
+  const handleGoDeeper = () => {
+    const type = itemType;
+    onClose();
+    executeAction(
+      {
+        type: "view_info",
+        payload: { type },
+      },
+      {
+        loadScreen,
+        goBack,
+        setScreenValue: (value: any, key: string) =>
+          store.dispatch(screenActions.setScreenValue({ key, value })),
+        screenState: store.getState().screen.screenData,
+      },
+    );
+  };
 
   return (
     <Modal
@@ -201,17 +208,17 @@ const WhyThisSheet: React.FC<Props> = ({
               contentContainerStyle={styles.bodyContent}
             >
               {!!body && <Text style={styles.body}>{body}</Text>}
-              {!!sourceLine && (
-                <Text style={styles.source}>{sourceLine}</Text>
-              )}
             </ScrollView>
           )}
 
-          {showGoDeeper && (
+          {canGoDeeper && (
             <TouchableOpacity
               style={styles.goDeeperBtn}
               activeOpacity={0.85}
-              onPress={showL3}
+              onPress={handleGoDeeper}
+              testID="why_this_go_deeper"
+              accessibilityLabel="why_this_go_deeper"
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
               <Text style={styles.goDeeperText}>{goDeeperLabel}</Text>
               <Ionicons
@@ -286,14 +293,6 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 22,
     color: Colors.textSoft,
-  },
-  source: {
-    fontFamily: Fonts.sans.regular,
-    fontStyle: "italic",
-    fontSize: 12,
-    color: Colors.brownMuted,
-    marginTop: 14,
-    lineHeight: 18,
   },
   goDeeperBtn: {
     flexDirection: "row",

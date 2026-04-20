@@ -11,22 +11,16 @@ appId: com.kalpx.app
     clearState: false
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
+- runFlow: common/enter_core_view.yaml
 - tapOn:
     id: "core_item_sankalpa"
 - waitForAnimationToEnd:
     timeout: 8000
-# SankalpHoldBlock — hold to complete.
-- longPressOn:
-    id: "sankalp_hold"
-    optional: true
-- longPressOn:
-    text: "(Hold|Press|Begin)"
-    optional: true
+# Wave 3 (2026-04-19) PROVISIONAL — canonical rich runner hook
+- tapOn:
+    id: "test_runner_force_complete"
 - waitForAnimationToEnd:
     timeout: 10000
-- tapOn:
-    text: "(Done|Complete|I'm done)"
-    optional: true
 - extendedWaitUntil:
     visible:
       id: "completion_message"

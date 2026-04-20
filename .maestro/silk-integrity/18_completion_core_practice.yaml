@@ -11,23 +11,14 @@ appId: com.kalpx.app
     clearState: false
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
+- runFlow: common/enter_core_view.yaml
 - tapOn:
     id: "core_item_ritual"
 - waitForAnimationToEnd:
     timeout: 8000
+# Wave 3 (2026-04-19) PROVISIONAL — canonical rich runner hook
 - tapOn:
-    id: "practice_runner_start"
-    optional: true
-- tapOn:
-    text: "(Start|Begin|Play)"
-    optional: true
-- waitForAnimationToEnd
-- tapOn:
-    id: "practice_runner_complete"
-    optional: true
-- tapOn:
-    text: "(Done|Complete|I'm done)"
-    optional: true
+    id: "test_runner_force_complete"
 - waitForAnimationToEnd:
     timeout: 10000
 - extendedWaitUntil:

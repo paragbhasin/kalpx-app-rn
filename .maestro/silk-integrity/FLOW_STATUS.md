@@ -48,6 +48,71 @@ testIDs.
 - `blocked_by_data`: 0 (canonical persona seed cleared all)
 - `blocked_by_app_bug`: 0 (Phase 2 cleared all)
 
+## 2026-04-19 Wave 3 — Canonical rich runner routing + Batch A live-green
+
+**Runtime state (sim 221EDFB1, Metro 8081, dev backend):**
+
+- **Batch A (flows 06–13) — LIVE GREEN on unified rich runner surface.**
+  All 8 flows passed against `cycle_transitions/offering_reveal` canonical
+  path (post PR1–PR6 wave). 116 Maestro commands total, 0 failures.
+  Batch A scope = room ENTRY assertions only; does not exercise support
+  runner-launching pills or completion paths.
+- **Canary validation (core triad × 3 + joy_carry_chip) — LIVE GREEN.**
+  Rich surface renders for mantra, sankalp, practice primary taps. Joy
+  Carry pill → `carry_joy_forward` → dashboard `joy_carry_chip` verified
+  end-to-end. PR5 sankalp Essence state-binding regression fixed
+  same-day (2-token swap).
+
+## 2026-04-19 Wave 3 — Batch B blocker (single)
+
+Flows 16 / 19 / 20 / 21 / 22 / (optionally 23) depend on
+`mantra_runner_start` + `mantra_runner_complete` testIDs to automate
+the 108-tap / 3s-hold / timer-expiry completions. Those testIDs lived
+on the parked `MantraRunnerDisplay` component. **Resolution landed
+2026-04-19:** `test_runner_force_complete` — dev-only (`__DEV__`-gated),
+invisible (1×1 opacity 0), real-completion-path hook added to
+`CycleTransitionsContainer.tsx` inside the `isInfoScreen` branch.
+Tapping it fires the same `complete_runner` action the natural
+completion paths use — no fake UI state, no mocked tracking.
+
+**Required YAML patch pattern** (provisional — to be finalized only
+after Batch B proves the surface):
+
+```yaml
+# Replace the legacy optional taps:
+# - tapOn: { id: "mantra_runner_start", optional: true }
+# - tapOn: { text: "(Start|Begin|Play)", optional: true }
+# - waitForAnimationToEnd
+# - tapOn: { id: "mantra_runner_complete", optional: true }
+# - tapOn: { text: "(Done|Complete|I'm done)", optional: true }
+
+# With a single deterministic tap on the dev affordance:
+- tapOn:
+    id: "test_runner_force_complete"
+- waitForAnimationToEnd:
+    timeout: 10000
+```
+
+Then preserve existing `completion_message` / `completion_wisdom_anchor_line`
+/ `completion_read_more` / `completion_reflection_placeholder` extendedWaitUntil
+assertions. Add a post-completion assertion for `return_to_source` landing
+(flows 19–22 should verify they re-enter `support_<room>/room`, not the
+dashboard — per v3 Flow Contract §A.8).
+
+## Final YAML rewrites — DEFERRED
+
+Per 2026-04-19 founder direction, final Maestro YAML rewrites remain
+deferred until:
+
+1. `test_runner_force_complete` hook lands (✅ 2026-04-19)
+2. Batch B runs green against the hook (pending)
+3. Support completion → source room routing is proven live (pending,
+   part of Batch B runtime)
+
+Once all three are green, YAMLs for flows 16 + 19–23 finalize against
+the verified testID set. Until then, docs reflect the INTENT; YAML
+patches are provisional.
+
 ## Runtime coverage (layers 5 + 7)
 
 Status `ready` means the flow is fully authored and selector-resolved on

@@ -31,6 +31,8 @@
  *   kalpx/core/data_seed/mitra_v3/moments/M48_joy_room.yaml
  */
 
+import { Audio } from "expo-av";
+import { Volume2, VolumeX } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -67,6 +69,21 @@ const readSlot = (ss: Record<string, any>, key: string): string => {
   return "";
 };
 
+const JOY_WALK_FALLBACKS = {
+  walk_quote:
+    "Step outside into the fresh air.\n\nWalk for 10 minutes, no need to rush.\n\nTake any path that feels right, and let your body move naturally.",
+  walk_holding_line: "I’ll be here, holding this quiet space for you.",
+  walk_action_label: "Time to walk",
+  walk_end_return_label: "End & Return",
+} as const;
+
+const readWalkSlot = (
+  ss: Record<string, any>,
+  key: keyof typeof JOY_WALK_FALLBACKS,
+): string => {
+  return readSlot(ss, key) || JOY_WALK_FALLBACKS[key];
+};
+
 interface Props {
   block?: any;
 }
@@ -87,6 +104,8 @@ const JoyRoomContainer: React.FC<Props> = () => {
   const [timerSeconds, setTimerSeconds] = useState(600);
   const [inputValue, setInputValue] = useState("");
   const [actionsUsed, setActionsUsed] = useState<string[]>([]);
+  const [isMuted, setIsMuted] = useState(false);
+  const soundRef = useRef<Audio.Sound | null>(null);
 
   const fade1 = useRef(new Animated.Value(0)).current;
   const fade2 = useRef(new Animated.Value(0)).current;
@@ -191,6 +210,49 @@ const JoyRoomContainer: React.FC<Props> = () => {
     return () => clearInterval(timerInterval);
   }, [step]);
 
+  useEffect(() => {
+    if (step !== "sit") {
+      if (soundRef.current) {
+        soundRef.current.stopAsync();
+        soundRef.current.unloadAsync();
+        soundRef.current = null;
+      }
+      return;
+    }
+
+    const playSound = async () => {
+      try {
+        const audioSource = readSlot(ss, "joy_sit_audio_url")
+          ? { uri: readSlot(ss, "joy_sit_audio_url") }
+          : require("../../../../assets/sounds/Om.mp4");
+        const { sound } = await Audio.Sound.createAsync(audioSource, {
+          isLooping: true,
+          shouldPlay: true,
+          isMuted,
+        });
+        soundRef.current = sound;
+      } catch (err) {
+        console.warn("[joy_room] failed to load sit audio:", err);
+      }
+    };
+
+    playSound();
+
+    return () => {
+      if (soundRef.current) {
+        soundRef.current.stopAsync();
+        soundRef.current.unloadAsync();
+        soundRef.current = null;
+      }
+    };
+  }, [step]);
+
+  useEffect(() => {
+    if (soundRef.current) {
+      soundRef.current.setIsMutedAsync(isMuted);
+    }
+  }, [isMuted]);
+
   // Slot reads
   const openingLine = readSlot(ss, "opening_line");
   const secondBeatLine = readSlot(ss, "second_beat_line");
@@ -216,6 +278,15 @@ const JoyRoomContainer: React.FC<Props> = () => {
   const inputSubmitLabel = readSlot(ss, "input_submit_label");
   const inputCancelLabel = readSlot(ss, "input_cancel_label");
   const walkDurationMin = Number(readSlot(ss, "walk_duration_min")) || 10;
+  const walkQuote = readWalkSlot(ss, "walk_quote");
+  const walkHoldingLine = readWalkSlot(ss, "walk_holding_line");
+  const walkActionLabel = readWalkSlot(ss, "walk_action_label");
+  const walkEndReturnLabel = readWalkSlot(ss, "walk_end_return_label");
+  const sitQuote =
+    readSlot(ss, "sit_quote") ||
+    `Come, let’s sit together in this quiet.
+There’s nothing for you to do.
+You’re exactly where you need to be right now.`;
 
   const revealOptions = () => {
     setStep("options");
@@ -424,30 +495,64 @@ const JoyRoomContainer: React.FC<Props> = () => {
     const timeStr = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
     return (
       <View style={styles.walkContainer}>
-        <Text style={styles.walkTimerText}>{timeStr}</Text>
-        <TouchableOpacity
-          style={styles.exitBtn}
-          onPress={() => setStep("options")}
-        >
-          <Text style={styles.exitText}>{pillCarryLabel || "Done"}</Text>
-        </TouchableOpacity>
+        <View style={styles.walkHeader}>
+          <TouchableOpacity
+            style={styles.endReturnBtn}
+            onPress={() => setStep("options")}
+          >
+            <Text style={styles.endReturnText}>{walkEndReturnLabel}</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.walkContent}>
+          <Text style={styles.walkQuote}>{walkQuote}</Text>
+          <Text style={styles.walkHoldingLine}>{walkHoldingLine}</Text>
+        </View>
+
+        <View style={styles.walkBottomBar}>
+          <View style={styles.walkIconBox}>
+            <Text style={styles.walkEmoji}>{"\u{1F6B6}"}</Text>
+          </View>
+          <Text style={styles.walkActionLabel}>{walkActionLabel}</Text>
+          <Text style={styles.walkTimerText}>{timeStr}</Text>
+        </View>
       </View>
     );
   };
 
   const renderSit = () => (
     <View style={styles.sitContainer}>
-      <Image
-        source={require("../../../../assets/DailyOm.png")}
-        style={styles.stayOmIcon}
-        resizeMode="contain"
-      />
-      <TouchableOpacity
-        style={styles.exitBtn}
-        onPress={() => setStep("options")}
-      >
-        <Text style={styles.exitText}>{pillCarryLabel || "Done"}</Text>
-      </TouchableOpacity>
+      <View style={styles.stayTopRow}>
+        <TouchableOpacity
+          style={styles.floatingMuteBtn}
+          onPress={() => setIsMuted(!isMuted)}
+        >
+          {isMuted ? (
+            <VolumeX size={24} color="#564B42" />
+          ) : (
+            <Volume2 size={24} color="#564B42" />
+          )}
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.stayContent}>
+        <Image
+          source={require("../../../../assets/DailyOm.png")}
+          style={styles.stayOmIcon}
+          resizeMode="contain"
+        />
+
+        <Text style={styles.stayQuote}>{sitQuote}</Text>
+      </View>
+
+      <View style={styles.stayFooter}>
+        <TouchableOpacity
+          style={styles.stayBackBtn}
+          onPress={() => setStep("options")}
+        >
+          <Text style={styles.stayBackText}>{pillExitLabel || "Back"}</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
@@ -610,24 +715,142 @@ const styles = StyleSheet.create({
     color: "#8a7d6b",
   },
   walkContainer: {
+    flex: 1,
+    width: "100%",
+    justifyContent: "space-between",
+    paddingTop: 20,
+    paddingBottom: 60,
+  },
+  walkHeader: {
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    paddingHorizontal: 8,
+  },
+  endReturnBtn: {
+    paddingHorizontal: 22,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: "#c9a35f",
+    borderRadius: 24,
+    backgroundColor: "rgba(255,255,255,0.45)",
+  },
+  endReturnText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 16,
+    color: "#564B42",
+  },
+  walkContent: {
     alignItems: "center",
-    paddingVertical: 40,
-    gap: 24,
+    justifyContent: "center",
+    paddingHorizontal: 10,
+    gap: 28,
+    marginTop: 40,
+    marginBottom: 40,
+  },
+  walkQuote: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 22,
+    lineHeight: 44,
+    color: "#432104",
+    textAlign: "center",
+  },
+  walkHoldingLine: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 18,
+    lineHeight: 34,
+    color: "#564B42",
+    textAlign: "center",
+    opacity: 0.88,
+  },
+  walkBottomBar: {
+    width: "100%",
+    minHeight: 62,
+    borderWidth: 1,
+    borderColor: "#c9a35f",
+    borderRadius: 32,
+    backgroundColor: "rgba(255,255,255,0.45)",
+    paddingHorizontal: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 12,
+  },
+  walkIconBox: {
+    width: 34,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  walkEmoji: {
+    fontSize: 24,
+  },
+  walkActionLabel: {
+    flex: 1,
+    fontFamily: Fonts.serif.regular,
+    fontSize: 18,
+    color: "#564B42",
   },
   walkTimerText: {
-    fontFamily: Fonts.sans.medium,
-    fontSize: 48,
+    fontFamily: Fonts.serif.regular,
+    fontSize: 18,
     color: "#432104",
   },
   sitContainer: {
+    flex: 1,
+    width: "100%",
     alignItems: "center",
-    paddingVertical: 40,
-    gap: 24,
+    justifyContent: "space-between",
+    paddingTop: 20,
+    paddingBottom: 60,
+  },
+  stayTopRow: {
+    width: "100%",
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    justifyContent: "flex-start",
+  },
+  floatingMuteBtn: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(191, 138, 74, 0.35)",
+  },
+  stayContent: {
+    alignItems: "center",
+    justifyContent: "center",
+    flex: 1,
+    paddingHorizontal: 16,
   },
   stayOmIcon: {
     width: 120,
     height: 120,
     opacity: 0.8,
+  },
+  stayQuote: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 22,
+    lineHeight: 42,
+    color: "#432104",
+    textAlign: "center",
+    marginTop: 28,
+  },
+  stayFooter: {
+    width: "100%",
+    alignItems: "center",
+  },
+  stayBackBtn: {
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+  },
+  stayBackText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 16,
+    color: "#564B42",
+    textDecorationLine: "underline",
   },
 });
 

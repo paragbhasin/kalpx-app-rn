@@ -199,3 +199,19 @@ Applies on every Phase 4 smoke pass until H-3 ships.
 **Audit correction:** the Batch 1A FLOW_STATUS note for flow 15 ("Persona mismatch — uses `smoke+triad`") was misdiagnosed. The real blocker was M25 `narrative_template` containing flow-15 deny-list phrases, so the flow's sovereignty asserts `assertNotVisible: "Fourteen days. Two weeks of showing up."` + `assertNotVisible: "sealed. Something has settled."` would hard-fail on render. Login helpers, `common/login_as_persona.yaml`, `common/fast_login_as_persona.yaml`, flow-15 env, and `persona_day14` seed are ALL correctly parameterized.
 
 **Flow 15 full-YAML CLI e2e — MANUAL EXCEPTION:** same harness constraint as 19/20 (Maestro CLI/MCP driver collision). Flow YAML has no remaining product-level gap; awaits clean CLI-only session for green e2e.
+
+## Batch M-A (2026-04-19) — M-2 continuity + pathMilestone render
+
+**Implementation status:** COMPLETE.
+- `src/extensions/moments/new_dashboard/index.tsx`: `ContinuityMirrorCard` now rendered under canonical `sd.continuity_mirror` guard (parallel to existing `PathMilestoneBanner` render). Stale `sd.continuity_card` mount point removed to prevent duplicate-testID collision.
+- 4-agent review: Agent 2 (contract + reachability) PASS; Agent 4 (regression + typecheck) PASS.
+- Commit `bbae859` on `main`.
+
+**Validation status:** BLOCKED EXTERNALLY — see per-flow owner/next-action below.
+
+| Flow | Status | Blocker owner | Next action |
+|---|---|---|---|
+| 28 continuity | 🟡 FE ready, validation blocked | **BE / content** (MDR-S2-06) | Emit `continuityMirror` envelope field in `core/journey_envelope.py` for welcome-back state (persona_welcomeback → 35d past end_date) |
+| 29 path_milestone | 🟡 FE already live, validation blocked | **persona / harness owner + BE threshold owner** | Either (a) create/use `persona_day30+` so BE `_build_path_milestone` emits a non-null value, OR (b) confirm-and-document whether the 30-day threshold in `core/tests/test_journey_envelope.py:228` is product intent |
+
+**Classification doc correction (same commit):** `continuity_mirror_card` + `path_milestone_banner` reclassified from DELETE-CANDIDATE to KEEP. 14-scaffold delete queue reduced to 12 pending Batch M-B fresh re-audit.

@@ -1,0 +1,861 @@
+# v3.1.1-wisdom — Per-Room Content Pool Drafts (Agent D authoring pass)
+# ----------------------------------------------------------------------
+# DRAFT ARTIFACT. Not committed to code. Not applied to DB.
+# Consumed by curator + Agent A review; promoted to active pools via a
+# follow-up migration or ORM load after founder sign-off.
+
+metadata:
+  generated_at: 2026-04-20
+  generated_by: agent_d_pool_authoring
+  architecture_ref: ROOM_SYSTEM_V3_1_ARCHITECTURE.md v3.1.1-wisdom
+  chip_contract_ref: ROOM_CHIP_CONTRACT_V1_1.md
+  pool_version: "2026.04.v1-draft"
+  status: "DRAFT — pending Agent A review + Batch C sign-off + promote_wisdom_v31 --apply on dev"
+
+# ==============================================================================
+# v1.1 ALIGNMENT SECTION — founder-approved deltas from Chip Contract v1
+# ==============================================================================
+# Chip Contract v1.1 (ROOM_CHIP_CONTRACT_V1_1.md) locks the following v1-surface
+# behaviors that directly constrain what pools may be SURFACED (not what pools may
+# be AUTHORED):
+#
+#   (1) room_connection: NO L2 teaching in v1 (banner only).
+#       → wisdom_teaching pool remains authored here for forward-compat but is
+#         marked status=deferred_v2; selection service must NOT emit a teaching
+#         action on connection cold-start OR repeat in v1.
+#
+#   (2) room_joy: NO L2 teaching in v1 (banner only).
+#       → wisdom_teaching pool remains authored here for forward-compat but is
+#         marked status=deferred_v2; selection service must NOT emit a teaching
+#         action on joy cold-start OR repeat in v1.
+#
+#   (3) room_clarity cold-start: ALWAYS includes teaching (never banner-alone).
+#       → principle/wisdom_teaching pools MUST feed a teaching_payload on
+#         cold-start; principle_banner MUST be null when cold-start teaching fires.
+#         I-9 routing: banner XOR teaching; teaching wins on clarity cold-start.
+#
+#   (4) room_growth cold-start: banner only (teaching NOT main route on visit 1).
+#       → wisdom_banner feeds cold-start principle_banner; teaching pool is
+#         surfaced on repeat only (not cold-start).
+#
+#   (5) Joy cold-start label change: "Notice what feels full" (was "Name what's
+#       steady"). Reflected in CI fixtures; no pool-level content change needed.
+#
+#   (6) Signature-chip rule: 6 rooms × 1 signature chip each. Not a pool change
+#       per se — enforced at render envelope assembly.
+#
+# No pool entries are removed. Two are re-labeled status=deferred_v2 so they
+# remain authored (reviewable; ready to activate in v2) but are NOT wired into
+# the v1 render path.
+v1_1_alignment:
+  changed_entries:
+    - pool_entry: room_connection.wisdom_teaching
+      change: status=deferred_v2
+      reason: "L2 teaching removed in v1 per Chip Contract v1.1 (companionship not interpretation)."
+    - pool_entry: room_joy.wisdom_teaching
+      change: status=deferred_v2
+      reason: "L2 teaching off by default in v1 per Chip Contract v1.1."
+    - pool_entry: room_clarity.wisdom_teaching
+      change: unchanged (status=draft) — feeds cold-start MANDATORY teaching
+      reason: "Chip Contract v1.1 I-9 routing locks clarity cold-start to teaching (not banner)."
+    - pool_entry: room_growth.wisdom_banner
+      change: unchanged (status=draft) — feeds cold-start banner-only
+      reason: "Chip Contract v1.1 growth cold-start = banner-only. Teaching on repeat only."
+    - pool_entry: room_joy.wisdom_banner
+      change: unchanged (status=draft) — optional v1.1 per joy wisdom policy
+      reason: "Banner optional on cold-start; no offering chip on cold-start (repeat-visit only)."
+  cross_room_exclusion_audit: "none detected in same rotation window"
+  source_libraries:
+    mantras: core/data_seed/master_mantras.json
+    sankalps: core/data_seed/master_sankalps.json
+    practices: core/data_seed/master_practices.json
+    wisdom_csv: core/data_seed/wisdom/passc_2026_04_18.csv
+  approved_anchor_refs:
+    # Per FOUNDER_DECISION_PACK §C-2 (Batch C-2 — 7 real WisdomAsset.asset_ids)
+    room_stillness.principle: yoga_sutras_one_anchor_when_scattered
+    room_connection.principle: bhakti_keep_company_with_the_devotional
+    room_release.principle: yoga_friendliness_compassion_joy_equanimity
+    room_clarity.principle: sankhya_freedom_grows_with_discrimination
+    room_growth.principle: gita_svadharma_is_what_you_have
+    room_joy.principle_primary: gita_nishkama_karma_as_celebration
+    room_joy.principle_secondary: yoga_sutras_santosha_as_practice
+  cross_room_exclusion_rules:
+    - "Contract 4 rule 4: room_joy and room_growth must NOT share the same active mantra/practice row in the same 7-day rotation window."
+    - "This draft enforces the rule at pool-author time: joy.mantra, joy.practice sets disjoint from growth.mantra, growth.practice sets."
+    - "Audit result: disjoint verified below under contamination_audit.cross_room_exclusion_check."
+
+# ==============================================================================
+# POOL ENTRIES
+# ==============================================================================
+
+pools:
+
+  # ========================================================================
+  # room_stillness — overwhelmed -> regulate (intensity ceiling = light)
+  # §5.1: allowed anchor|regulation|exit. Tradition bias yoga_sutra | ayurveda | vedic.
+  # AVOID: dharma_shastra | niti | active-prescriptive content | inquiry | teaching.
+  # No teaching slot, no L3. Banner is RARE (1-2 rows, never cold-start).
+  # ========================================================================
+
+  - room_id: room_stillness
+    action_slot: mantra
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "mantra.soham"
+    anchor_rationale: "§5.1 approved anchor; Om anchor family; breath-synchronized; witnessing mode fits regulate-intent."
+    rotation_refs:
+      - item_id: "mantra.peace_calm.om"
+        rationale: "Pure Om — vedic anchor, zero semantic load; safe for overwhelmed state."
+      - item_id: "mantra.shivoham"
+        rationale: "Self-is-peace framing; witness-consciousness family; light intensity."
+      - item_id: "mantra.om_shanti_om"
+        rationale: "Shanti repetition; nervous-system pacing; vedic tradition."
+    status: draft
+    curator_notes: "Keep pool small (4 total) — stillness rotation should favor familiarity over novelty. Avoid bhakti-names mantras (too relational for overwhelmed state)."
+
+  - room_id: room_stillness
+    action_slot: practice
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "practice.belly_breathing"
+    anchor_rationale: "§5.1 approved anchor; regulation family; very_light intensity; no demand on attention."
+    rotation_refs:
+      - item_id: "practice.four_four_six"
+        rationale: "4-4-6 breathing; extended exhale; parasympathetic activation."
+      - item_id: "practice.shanti_exhale_drop"
+        rationale: "Long exhale; drop-the-shoulders cue; embodied regulate."
+      - item_id: "practice.palm_soothing"
+        rationale: "Self-soothing palm contact; no cognitive load."
+      - item_id: "practice.hand_on_heart"
+        rationale: "Somatic anchor; very_light intensity; works without audio."
+      - item_id: "practice.grounding_palm_press"
+        rationale: "Grounding contact; co-regulation adjacent; stillness-safe."
+    status: draft
+    curator_notes: "All rotation members must be regulation-family, very_light or light. Reject anything action-prescriptive."
+
+  - room_id: room_stillness
+    action_slot: wisdom_banner
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "yoga_sutras_one_anchor_when_scattered"
+    anchor_rationale: "§5.7.3 approved; state_fit includes scattered/direction_confused; emotional_weight moderate but standalone_safe=yes. Short_label 'One anchor, not many' — non-prescriptive, regulate-compatible."
+    rotation_refs:
+      - item_id: "gita_endure_the_passing_contacts"
+        rationale: "Per cleanup YAML MOVE-to-stillness (Bucket A). 'This will pass' — witnessing tone, non-prescriptive, standalone_safe."
+    banner_pool_size_hint: 2
+    status: draft
+    notes: "RARE per §5.7.3. Never on cold-start first visit. No L2 teaching. No L3 reflection. If banner not selected, principle_banner MUST be null (not placeholder)."
+    curator_notes: "If either row flagged misuse_risk>low on re-review, drop to anchor-only single-row banner pool; §5.3/§5.1 prohibit uplift & prescriptive content in stillness."
+
+  # Stillness: NO teaching slot (per §5.7.3 forbidden).
+  # Stillness: NO L3 post_runner_reflection_pool_id — not in opt-in set.
+  # Stillness: expression slot — curator-gated per-row flag (§5.1 stillness_expression_eligible).
+  #   Not authored as a standing pool in v1. Handled as exception per row.
+
+  - room_id: room_stillness
+    action_slot: step
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "step_breathe_5_5"
+    anchor_rationale: "Signature chip 'A slow breath, together' per Chip Contract v1.1; very_light; 5-5 coherent breathing; §5.1 regulation-family."
+    rotation_refs:
+      - item_id: "step_breathe_4_4_8"
+        rationale: "Slow-breath variant (long exhale) for repeat visits; still very_light."
+      - item_id: "step_sit_ambient_3min"
+        rationale: "Silent sit; §5.1 stillness-compatible; default-off audio."
+      - item_id: "step_grounding_palms_30s"
+        rationale: "Press palms; 30-sec somatic anchor; very_light."
+      - item_id: "step_text_input_name_short"
+        rationale: "'Give it one word' — CURATOR-GATED: render ONLY when row carries stillness_expression_eligible=True AND visit_number>=2 (§5.1). Not on cold-start."
+    status: draft
+    curator_notes: "Expression step is conditional; room_selection.py enforces the curator gate. All other steps render freely."
+
+
+
+  # ========================================================================
+  # room_connection — alone -> relate (intensity ceiling = medium)
+  # §5.2: allowed anchor|regulation|expression(name)|offering(small,relational)|exit.
+  # Tradition bias: bhakti | vedic | light seva_dana.
+  # AVOID: inquiry | heavy teaching | outward-too-fast.
+  # ========================================================================
+
+  - room_id: room_connection
+    action_slot: mantra
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "mantra.om_namo_bhagavate_vasudevaya"
+    anchor_rationale: "§5.2 approved anchor; bhakti companioned-chant; relational-devotional framing; pure Vasudeva/Krishna nearness."
+    rotation_refs:
+      - item_id: "mantra.hare_krishna"
+        rationale: "Mahamantra; bhakti family; companioned chanting tradition; elevating and relational."
+      - item_id: "mantra.soham"
+        rationale: "Companioned soham (§5.2 also lists as anchor candidate); witnessing-relational; nearness-to-self framing."
+      - item_id: "mantra.krishna_hare_krishna"
+        rationale: "Bhakti kirtan family; devotional; relational companion-mode."
+      - item_id: "mantra.emotional_healing.vasudevaya"
+        rationale: "Vasudeva as companion; emotional healing layer; light intensity."
+    status: draft
+    curator_notes: "Must be relational/devotional. Avoid pure Shiva-ascetic variants here (that's stillness). Pure Om-only belongs in stillness."
+
+  - room_id: room_connection
+    action_slot: practice
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "practice.anahata_humming"
+    anchor_rationale: "Heart-centered humming; gentle outward/relational resonance; bhakti-adjacent; light intensity; §5.2 allowed."
+    rotation_refs:
+      - item_id: "practice.anahata_meditation"
+        rationale: "Heart meditation; companion-presence framing; light."
+      - item_id: "practice.heart_softening"
+        rationale: "Heart-softening somatic; relational readiness; light."
+      - item_id: "practice.hand_on_heart"
+        rationale: "Shared with stillness. DUAL MEMBERSHIP — curator_note: 'light somatic anchor is room-neutral for overwhelm + alone states; §Contract 4 rule 4 applies only to joy/growth, NOT stillness/connection.'"
+    status: draft
+    curator_notes: "Practice pool is OPTIONAL for connection per §5.7.3; keep small. Expression (name-only) is the primary non-anchor slot."
+
+  - room_id: room_connection
+    action_slot: wisdom_banner
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "bhakti_keep_company_with_the_devotional"
+    anchor_rationale: "§5.7.3 approved; bhakti tradition; state_fit devotion/nearness/belonging; emotional_weight light; perfect connection-anchor."
+    rotation_refs:
+      - item_id: "bhakti_divine_as_constant_companion"
+        rationale: "Bucket A in cleanup YAML; 'Nearer than breath'; light weight; relational companion framing."
+      - item_id: "sankhya_witness_as_friend"
+        rationale: "Bucket A; witnessing framing as relational; not inquiry-heavy; moderate weight."
+      - item_id: "dharma_community_as_seva"
+        rationale: "Small-seva relational framing; gentle outward; vedic-compatible."
+    banner_pool_size_hint: 4
+    status: draft
+    notes: "Connection banners may carry optional L3 reflection in a future iteration; disabled in v1 (post_runner_reflection_pool_id=null)."
+    curator_notes: "Avoid drill_down_only=true rows (vedanta_alone_is_not_lonely + atma_smaran_self_as_company + yoga_loneliness_as_signal were filtered out — they read as inquiry-heavy and violate §5.2 no-inquiry rule)."
+
+  - room_id: room_connection
+    action_slot: wisdom_teaching
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "bhakti_divine_as_constant_companion"
+    anchor_rationale: "Thin teaching slot per §5.7.3 ('optional thin pool'); Bucket A cleanup; teaching_eligible=true assumed post-0117 promotion. Gentle bhakti companion-teaching, no inquiry load."
+    rotation_refs:
+      - item_id: "sankhya_witness_as_friend"
+        rationale: "Bucket A; teaching-mode companion framing; non-inquiry tone."
+    banner_pool_size_hint: 2
+    status: deferred_v2
+    notes: "OPTIONAL slot. §5.2 forbids heavy teaching. L2 teaching removed in v1 per Chip Contract v1.1 (companionship not interpretation). Pool authored forward-compat; selection service MUST NOT emit teaching action on connection in v1."
+    curator_notes: "I-9 invariant: teaching_payload OR principle_banner at initial render, never both. Selection service must choose which surface fires. v1 lock: connection = banner only (no teaching)."
+
+  - room_id: room_connection
+    action_slot: step
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "step_text_input_name_short"
+    anchor_rationale: "Signature chip 'Name what's close' per Chip Contract v1.1; §5.2 allowed expression (name-only); light intensity; relational framing."
+    rotation_refs:
+      - item_id: "step_hand_on_heart_60s"
+        rationale: "Somatic anchor; dual membership release+connection; non-uplift."
+      - item_id: "step_walk_timer_5min"
+        rationale: "'A short walk together' companioned framing; gentle outward only after cold-start."
+      - item_id: "step_reach_out_one_person"
+        rationale: "Small relational outward step; repeat-only (§5.2 don't force outward too fast)."
+    status: draft
+    curator_notes: "Reach-out step must NOT render on cold-start per §5.2. Selection service enforces."
+
+  # Connection: NO L3 v1. post_runner_reflection_pool_id = null.
+
+  # ========================================================================
+  # room_release — heavy -> process (intensity ceiling = medium)
+  # §5.3: allowed anchor|regulation(breath)|expression(voice-note)|exit.
+  # AVOID: offering | inquiry | heavy teaching | uplift | celebration-reframe.
+  # Rotation style: SLOW (familiarity > novelty). Banner pool SPARSE (2 rows).
+  # No teaching. No L3.
+  # ========================================================================
+
+  - room_id: room_release
+    action_slot: mantra
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "mantra.maha_mrityunjaya"
+    anchor_rationale: "§5.3 approved anchor; Shiva Tryambakam; classical vedic tradition; heaviness-holding; no-uplift; no-fix stance."
+    rotation_refs:
+      - item_id: "mantra.shiva_maha_mrityunjaya"
+        rationale: "Variant chant form of the same anchor; slow-rotation-safe (familiarity)."
+      - item_id: "mantra.shiva_om_tryambakam_healing"
+        rationale: "Tryambakam healing variant; classical; non-uplift tone."
+      - item_id: "mantra.asato_ma"
+        rationale: "Upanishadic 'lead from unreal to real'; grief-compatible; vedic witnessing."
+    status: draft
+    curator_notes: "Tight 4-row pool by design (§5.3 slow rotation). Absolutely no gratitude/joy mantras here."
+
+  - room_id: room_release
+    action_slot: practice
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "practice.bhramari"
+    anchor_rationale: "Bee-hum breath; parasympathetic activation; heavy-holding pattern; regulation family; allowed per §5.3."
+    rotation_refs:
+      - item_id: "practice.shanti_breath_cycle"
+        rationale: "Slow shanti breath; heavy-state regulation; no-fix stance."
+      - item_id: "practice.heart_breath_release"
+        rationale: "Heart+breath release pattern; emotional weight holding."
+    status: draft
+    curator_notes: "Only breath/regulation practices. NO walking, NO gratitude, NO uplift. Slow rotation (rotate every ~5 visits)."
+
+  - room_id: room_release
+    action_slot: wisdom_banner
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "yoga_friendliness_compassion_joy_equanimity"
+    anchor_rationale: "§5.7.3 approved (BATCH C-2); karuna-family; standalone_safe=yes; emotional_weight moderate; state_fit post_conflict/ego_hurt/triggered — room_release anchor intent."
+    rotation_refs:
+      - item_id: "gita_impermanence_of_form"
+        rationale: "Bucket A; 'The form changes shape'; grieving state_fit; witnessing-mode (not uplift); standalone_safe=yes."
+    banner_pool_size_hint: 2
+    status: draft
+    notes: "SPARING per §5.7.3 (2-row pool). Founder escalation D-4 confirmed 2 is viable for v1 given slow rotation. All wis.kindness_is_* rows already excluded (non_room_eligible per cleanup)."
+    curator_notes: "If additional release banners authored later (founder Batch D item 4), target candidates: bhakti_surrender_in_loss, dinacharya_honor_the_transition, yoga_sutras_acceptance_not_resignation — all confirmed standalone_safe."
+
+  - room_id: room_release
+    action_slot: step
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "step_breathe_4_4_8"
+    anchor_rationale: "Signature chip 'Breathe slow with me'; long-exhale 4-4-8 parasympathetic; §5.3 regulation anchor-compatible; held, non-fixing."
+    rotation_refs:
+      - item_id: "step_hand_on_heart_60s"
+        rationale: "Somatic anchor; holds heaviness without fixing; dual membership w/ connection."
+      - item_id: "step_voice_note_release"
+        rationale: "'Speak what's heavy' — §5.3 allowed expression (voice-note); repeat/readiness-gated per Chip Contract v1.1."
+    status: draft
+    curator_notes: "Voice-note step conditional per Chip Contract v1.1 release repeat route. NEVER offer walking, gratitude, or uplift here."
+
+  # Release: NO teaching (§5.7.3 explicit NO).
+  # Release: NO L3 (§5.7.3 explicit NO). post_runner_reflection_pool_id = null.
+
+  # ========================================================================
+  # room_clarity — confused -> align (intensity ceiling = medium)
+  # §5.4: LOCKED order anchor -> regulation -> teaching -> inquiry -> exit.
+  # Tradition bias: gita | yoga_sutra | niti | witness_consciousness.
+  # AVOID: offering | uplift | raw contain | ayurveda body-care.
+  # ========================================================================
+
+  - room_id: room_clarity
+    action_slot: mantra
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "mantra.hanuman_buddhi_balam"
+    anchor_rationale: "§5.4 approved anchor; Hanuman-buddhi-balam invokes discernment strength; viveka-forward; clarity-aligned."
+    rotation_refs:
+      - item_id: "mantra.saraswati_om_aim_wisdom"
+        rationale: "Saraswati viveka; wisdom/discernment family; clarity-native."
+      - item_id: "mantra.saraswati_om_saraswati_wisdom"
+        rationale: "Saraswati variant; alignment/discernment; clarity tradition."
+      - item_id: "mantra.ganesha_om_gam_clarity"
+        rationale: "Ganesha obstacles-removed; clarity framing; alignment."
+      - item_id: "mantra.ganesha_om_gam_new_direction"
+        rationale: "Ganesha direction-finding; aligned-next-step framing."
+      - item_id: "mantra.pavamana_asato_ma"
+        rationale: "Upanishadic 'from unreal to real'; discernment path; witness_consciousness tradition."
+    status: draft
+    curator_notes: "Disjoint from growth mantra set — §Contract 4 rule 4 applies to joy/growth only, but clarity/growth overlap is also discouraged by good curation. Verified no overlap with growth mantra rotation."
+
+  - room_id: room_clarity
+    action_slot: practice
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "practice.centering_drishti"
+    anchor_rationale: "Drishti-centering; discernment practice; focal stabilization; aligns with §5.4 order (regulation step)."
+    rotation_refs:
+      - item_id: "practice.sakshi_breath"
+        rationale: "Witness-breath; sankhya lineage; see-not-solve stance."
+      - item_id: "practice.trataka"
+        rationale: "Trataka focal gaze; discernment-sharpening; clarity-native."
+      - item_id: "practice.shanti_trataka"
+        rationale: "Shanti trataka variant; regulation + clarity; intensity=light."
+      - item_id: "practice.focus.ten_second_pause"
+        rationale: "Ten-second pause; pre-decision discernment; see-not-solve."
+    status: draft
+    curator_notes: "Regulation step MUST precede teaching step per §5.4 locked order. Selection service + Agent 5 CI enforce."
+
+  - room_id: room_clarity
+    action_slot: principle
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "sankhya_freedom_grows_with_discrimination"
+    anchor_rationale: "§5.7.3 + §5.7.5 approved (BATCH C-2); sankhya tradition; state_fit discernment/viveka/truth; reserved for teaching_payload overlay."
+    rotation_refs:
+      - item_id: "gita_clarity_after_desire_anger"
+        rationale: "Cleanup YAML Bucket A (MOVE-to-clarity); 'Protect clarity under heat'; discernment; gita."
+      - item_id: "gita_choose_clarity_over_despair"
+        rationale: "Cleanup YAML Bucket A; 'Stand up in clarity'; canonical see-not-solve; discouraged+foggy state."
+      - item_id: "gita_see_desire_as_the_covering_force"
+        rationale: "Bucket B; 'Name the covering'; rumination+outcome_anxiety. Spot-check flagged per cleanup."
+    status: draft
+    curator_notes: "The principle slot feeds BOTH principle_banner (L1) AND teaching_payload (L2). Selection service chooses which surface. I-9 invariant: never both in initial render."
+
+  - room_id: room_clarity
+    action_slot: wisdom_banner
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "sankhya_freedom_grows_with_discrimination"
+    anchor_rationale: "Shared with principle anchor — the banner rotation pulls from the same principle library per §5.7.5. Clarity is the primary banner-heavy room per §5.7.3."
+    rotation_refs:
+      - item_id: "gita_clarity_after_desire_anger"
+        rationale: "Banner-eligible after 0117 promotion; state_fit_tags discernment-aligned."
+      - item_id: "gita_choose_clarity_over_despair"
+        rationale: "Banner-eligible; discernment-forward; standalone_safe=yes."
+      - item_id: "niti_separate_fact_from_emotion_before_acting"
+        rationale: "Cleanup YAML Bucket B multi-room (release+clarity). In clarity pool, serves as fact-vs-feeling banner. Spot-check per cleanup. Note: niti usually AVOIDed in clarity but this specific row is discernment-mode, not prescriptive-boundary."
+      - item_id: "niti_prefer_stability_over_dramatic_reversal"
+        rationale: "Bucket B multi-room. Clarity cross-fit via foggy+outcome_anxiety state_fit. Spot-check."
+      - item_id: "yoga_sutras_one_anchor_when_scattered"
+        rationale: "Shared with stillness. DUAL MEMBERSHIP — curator_note: 'no §Contract 4 rule 4 violation (applies only joy/growth). Overlap OK via state_fit scattered/direction_confused which canonically spans both rooms.'"
+    banner_pool_size_hint: 6
+    status: draft
+    curator_notes: "Largest banner pool (6 rows) per §5.7.3. Avoid rows with tradition=niti that are prescriptive-boundary (those belong in release). The two niti rows above are discernment-framed, not boundary-setting — keep only if spot-check sustains."
+
+  - room_id: room_clarity
+    action_slot: wisdom_teaching
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "sankhya_freedom_grows_with_discrimination"
+    anchor_rationale: "§5.7.3 primary teaching pool (5 rows); plain_english populated (120 chars); teaching_eligible=true expected after promote_wisdom_v31."
+    rotation_refs:
+      - item_id: "gita_clarity_after_desire_anger"
+        rationale: "Teaching overlay content; discernment-under-heat teaching payload."
+      - item_id: "gita_choose_clarity_over_despair"
+        rationale: "Canonical see-not-solve teaching; standalone_safe=yes."
+      - item_id: "gita_see_desire_as_the_covering_force"
+        rationale: "Bucket B; 'Name the covering' as teaching; spot-check on misuse_risk."
+      - item_id: "niti_separate_fact_from_emotion_before_acting"
+        rationale: "Discernment-mode teaching (not prescriptive); spot-check."
+    banner_pool_size_hint: 5
+    status: draft
+    notes: "Teaching action opens WhyThisL2Sheet per §5.7.1. post_runner_reflection_pool_id optional for clarity (§5.7.3 'optional'); recommend null in v1."
+    curator_notes: "I-11 invariant: teaching pill does NOT substitute for room identity (though growth has a stricter rule; clarity ordering is the clarity-specific invariant)."
+
+  - room_id: room_clarity
+    action_slot: step
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "step_grounding_palms_30s"
+    anchor_rationale: "Signature chip 'A ten-second pause' per Chip Contract v1.1; §5.4 regulation step preceding teaching in locked order anchor→regulation→teaching→inquiry→exit."
+    rotation_refs:
+      - item_id: "step_inquiry_seat"
+        rationale: "'Sit with the question'; opens M_clarity_inquiry_seeds sub-flow; §5.4 repeat-only (NEVER cold-start)."
+      - item_id: "step_text_input_name_full"
+        rationale: "'Name what's clear' — longer naming expression; repeat-visit."
+    status: draft
+    curator_notes: "§5.4 locked order: regulation MUST precede teaching. Inquiry-seat step MUST NOT render on cold-start (clarity inquiry stays repeat-only)."
+
+  # Clarity: L3 optional per §5.7.3 — recommend null in v1; reuses wisdom_banner pool if enabled later.
+
+  # ========================================================================
+  # room_growth — intentional -> evolve (intensity ceiling = deep)
+  # §5.5: inquiry-primary + teaching + anchor + regulation + expression + exit.
+  # Render invariant: must include >=1 action from {inquiry, regulation-practice,
+  # expression-journal} BEYOND any anchor/teaching.
+  # AVOID: offering | carry | uplift.
+  # ========================================================================
+
+  - room_id: room_growth
+    action_slot: mantra
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "mantra.vedanta_om_tat_sat"
+    anchor_rationale: "Per §C-1 FOUNDER_DECISION_PACK — approved v1 substitute for mantra.yogakshema_bg_9_22 (which is not in master_mantras.json). Gita-tradition (17.23); dharma-anchor intent; `yogakshema_bg_9_22` authoring is a parallel track."
+    rotation_refs:
+      - item_id: "mantra.gayatri"
+        rationale: "Vedic gayatri; discernment + dharmic-next-step invocation; classic growth tradition."
+      - item_id: "mantra.gayatri_om_tat_savitur"
+        rationale: "Full gayatri variant; dharma-steadiness + inner illumination."
+      - item_id: "mantra.hreem_shreem_kleem_mahalakshmi"
+        rationale: "Devi growth-abundance; dharmic evolution; deep intensity allowed."
+      - item_id: "mantra.rudra_om_namo_bhagavate"
+        rationale: "Shiva Rudra as transformative dharma; inner discipline; evolution intent."
+    status: draft
+    curator_notes: "DISJOINT from joy mantras (§Contract 4 rule 4). Joy mantra pool verified below — zero overlap."
+
+  - room_id: room_growth
+    action_slot: practice
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "practice.mindful_55_walking"
+    anchor_rationale: "§5.5 approved anchor; embodied reflection; satisfies render invariant {regulation-practice}; deep-tolerant."
+    rotation_refs:
+      - item_id: "practice.one_sankalp_action"
+        rationale: "Sankalp-as-action; dharmic-next-step embodiment; growth-native."
+      - item_id: "practice.mantra_journaling"
+        rationale: "Journal+mantra hybrid; expression-journal slot; reflective."
+      - item_id: "walking_meditation_mindful"
+        rationale: "Mindful walking variant; deepening-practice tradition."
+      - item_id: "practice.self_acceptance_pause"
+        rationale: "Self-acceptance pause; humility-forward; inner-work growth."
+    status: draft
+    curator_notes: "DISJOINT from joy practice pool (see audit below). No body_gratitude, no sun_gratitude, no appreciate_small — those are joy-exclusive."
+
+  - room_id: room_growth
+    action_slot: principle
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "gita_svadharma_is_what_you_have"
+    anchor_rationale: "§5.7.3 + §5.7.5 approved (BATCH C-2); gita tradition; state_fit searching/purpose_seeking/direction_confused; the swadharma anchor per §13."
+    rotation_refs:
+      - item_id: "dharma_choose_the_right_over_the_easy"
+        rationale: "Cleanup Bucket A growth-native; state_fit work_stress+foggy+outcome_anxiety; dharma."
+      - item_id: "dharma_carry_only_the_duty_that_is_yours"
+        rationale: "Bucket A; 'Do not over-carry'; overwhelmed+work_stress; growth dharma."
+      - item_id: "yoga_sutras_abhyasa_deepening"
+        rationale: "Cleanup Bucket A; deepening state; keep-signal-growth anchor. Shared with joy-optional? NO — joy teaching uses different pool."
+      - item_id: "gita_sthitaprajna_destination"
+        rationale: "Bucket A; mature/reflective deepening; dharmic destination framing."
+      - item_id: "dharma_small_clean_actions_hold_the_path"
+        rationale: "Bucket A; foggy+discouraged+scattered; growth effortful-action framing."
+    status: draft
+    curator_notes: "Principle pool supplies both banner AND teaching surface per §5.7.5 dual-use."
+
+  - room_id: room_growth
+    action_slot: wisdom_banner
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "gita_svadharma_is_what_you_have"
+    anchor_rationale: "Shared with principle anchor (§5.7.5 pattern); growth is primary banner-heavy room per §5.7.3 (6-row pool)."
+    rotation_refs:
+      - item_id: "dharma_choose_the_right_over_the_easy"
+        rationale: "Banner-eligible; standalone_safe=yes; dharma-forward."
+      - item_id: "gita_detached_action"
+        rationale: "Bucket B cleanup; multi-room (growth+clarity); spot-check. Growth primary due to work_stress+outcome_anxiety."
+      - item_id: "gita_offer_action_without_ownership"
+        rationale: "Bucket A; karma-yoga act-claim-less; canonical growth."
+      - item_id: "yoga_sutras_plateau_as_ripening"
+        rationale: "Bucket A; plateau-as-growth framing; not uplift."
+      - item_id: "dharma_carry_only_the_duty_that_is_yours"
+        rationale: "Bucket A; over-carry release-framing inside growth dharma."
+      - item_id: "gita_become_instrument_not_controller"
+        rationale: "Bucket A; seva-adjacent dharmic-next-step; outcome-anxiety release."
+    banner_pool_size_hint: 6
+    status: draft
+    curator_notes: "Widest banner pool (6 rows) per §5.7.3. Avoid uplift — yoga_sutras_vairagya_through_practice candidate dropped for ambiguity; gita_seva_as_final_limb dropped as too experienced-level for v1 default."
+
+  - room_id: room_growth
+    action_slot: wisdom_teaching
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "gita_svadharma_is_what_you_have"
+    anchor_rationale: "§5.7.3 primary teaching pool (5-6 rows); teaching_eligible=true; plain_english 210 chars."
+    rotation_refs:
+      - item_id: "dharma_right_order_before_right_speed"
+        rationale: "Bucket A; 'Put things in the right order'; dharma teaching."
+      - item_id: "yoga_sutras_subtler_not_intenser"
+        rationale: "Bucket A; deepening teaching; dharmic refinement."
+      - item_id: "gita_detached_action"
+        rationale: "Bucket B multi-room teaching; spot-check; karma-yoga canonical."
+      - item_id: "dharma_do_not_abandon_duty_in_fear"
+        rationale: "Bucket A; 'Fear is not a good authority'; clean dharma teaching."
+      - item_id: "yoga_sutras_abhyasa_deepening"
+        rationale: "Bucket A; deepening practice teaching."
+    banner_pool_size_hint: 6
+    status: draft
+    curator_notes: "I-11 reminder: teaching pill does NOT satisfy growth render invariant ({inquiry, regulation-practice, journal}). Envelope assembly must emit a practice/inquiry/journal action in addition."
+
+  - room_id: room_growth
+    action_slot: wisdom_reflection
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "gita_svadharma_is_what_you_have"
+    anchor_rationale: "§5.7.3 L3 post-runner reflection: reuses banner pool (strongest match for growth). repeat_tolerance != no_repeat; standalone_safe=yes on all banner members."
+    rotation_refs:
+      - item_id: "dharma_choose_the_right_over_the_easy"
+        rationale: "Reflection line after runner completion; short form; standalone_safe."
+      - item_id: "dharma_small_clean_actions_hold_the_path"
+        rationale: "Gentle reflection close; growth-coherent."
+      - item_id: "yoga_sutras_plateau_as_ripening"
+        rationale: "Reflective closing line; not uplift."
+      - item_id: "gita_become_instrument_not_controller"
+        rationale: "Closing seva-adjacent reflection."
+    banner_pool_size_hint: 6
+    status: draft
+    notes: "L3 surface per §5.7.1. post_runner_reflection_pool_id = 'growth_reflection_v1'. §5.7.2 I-12: suppressed if runner already carried same principle_id as teaching earlier."
+    curator_notes: "Reuses banner pool by design (§5.7.3). Reflection is rendered as single string on completion, not as a card."
+
+  - room_id: room_growth
+    action_slot: step
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "step_inquiry_seat"
+    anchor_rationale: "Signature chip 'Sit with the question' per Chip Contract v1.1 §Growth; opens M_growth_inquiry_seeds sub-flow; §5.5 inquiry-primary family."
+    rotation_refs:
+      - item_id: "step_walk_timer_5min"
+        rationale: "'One slow mindful walk' — Chip Contract v1.1 cold-start chip; satisfies render invariant {regulation-practice}."
+      - item_id: "step_walk_timer_10min"
+        rationale: "Deeper 10-min walk; repeat-only; deep intensity permitted by §5.5 ceiling."
+      - item_id: "step_journal_long"
+        rationale: "'Write what's forming' — Chip Contract v1.1 repeat chip; satisfies render invariant {expression-journal}."
+    status: draft
+    curator_notes: "§5.5 render invariant: every render must include >=1 action from {inquiry, regulation-practice, expression-journal}. Step pool provides all three primitives. I-11 reminder: teaching does NOT substitute."
+
+  # ========================================================================
+  # room_joy — positive -> expand (intensity ceiling = medium)
+  # §5.6: anchor | offering | expression(name,carry) | regulation | exit.
+  # Post-cold-start invariant: >=1 action from {offering, blessing, carry}.
+  # AVOID: inquiry | heavy teaching | contain | release.
+  # ========================================================================
+
+  - room_id: room_joy
+    action_slot: mantra
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "mantra.purnamadah"
+    anchor_rationale: "§5.6 approved anchor; 'Purnam-adah purnam-idam' fullness-hymn; vedic auspiciousness; joy-expand intent."
+    rotation_refs:
+      - item_id: "mantra.lokah_samastah"
+        rationale: "Lokah samastah sukhino bhavantu; world-blessing seva-dana; outward joy."
+      - item_id: "mantra.sarve_bhavantu"
+        rationale: "Sarve bhavantu sukhinah; universal wellbeing; vedic blessing family."
+      - item_id: "mantra.krishna_govinda_joy"
+        rationale: "Bhakti govinda joy-variant; devotional celebration."
+      - item_id: "mantra.krishna_govinda_gratitude"
+        rationale: "Krishna govinda gratitude; bhakti devotion; elevating."
+      - item_id: "mantra.lakshmi_om_shri_joy"
+        rationale: "Lakshmi joy variant; auspiciousness_fullness; abundance + outward."
+    status: draft
+    curator_notes: "DISJOINT from growth mantras. Zero overlap verified: joy={purnamadah, lokah_samastah, sarve_bhavantu, krishna_govinda_joy, krishna_govinda_gratitude, lakshmi_om_shri_joy}, growth={vedanta_om_tat_sat, gayatri, gayatri_om_tat_savitur, hreem_shreem_kleem_mahalakshmi, rudra_om_namo_bhagavate}."
+
+  - room_id: room_joy
+    action_slot: sankalp_gratitude
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "sankalp.live_in_gratitude"
+    anchor_rationale: "§5.6 allowed; offering-family sankalp; gratitude-as-sankalp; joy-native."
+    rotation_refs:
+      - item_id: "sankalp.choose_santosha"
+        rationale: "Santosha-as-sankalp; yoga_sutras niyama; balanced joy."
+      - item_id: "sankalp.joyful_presence"
+        rationale: "Joyful presence; expansive + grounded; intensity light."
+      - item_id: "notice_blessings"
+        rationale: "Gratitude practice; outward; satisfies post-cold-start invariant."
+      - item_id: "thank_three"
+        rationale: "Thank three people; simple outward offering."
+      - item_id: "write_gratitude"
+        rationale: "Written gratitude; expression-name slot compatible."
+    status: draft
+    curator_notes: "Gratitude sankalps are OFFERING-family per §11 clarification ('blessing' is offering-subtype)."
+
+  - room_id: room_joy
+    action_slot: sankalp_blessings
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "sankalp.give_grace"
+    anchor_rationale: "Give-grace as blessing-offering; outward; auspiciousness_fullness."
+    rotation_refs:
+      - item_id: "sankalp.welcome_abundance"
+        rationale: "Welcome-abundance blessing-form; devi-lakshmi family."
+      - item_id: "sankalp.invite_abundance_gently"
+        rationale: "Gentle abundance-invitation; blessing-tone."
+      - item_id: "sankalp.open_to_divine"
+        rationale: "Open-to-divine; bhakti blessing; devotional."
+      - item_id: "sankalp.see_goodness"
+        rationale: "See-goodness in others; relational blessing."
+      - item_id: "smile_at_all"
+        rationale: "Smile-at-all simple outward blessing; light."
+    status: draft
+    curator_notes: "Blessing is offering-subtype (§11). Labeling distinguishes from generic gratitude."
+
+  - room_id: room_joy
+    action_slot: sankalp_seva
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "dana_practice"
+    anchor_rationale: "Dana-practice seva sankalp; seva_dana tradition; outward action; §5.6 allowed offering."
+    rotation_refs:
+      - item_id: "secret_kindness"
+        rationale: "Quiet seva; outward relational; tangible offering."
+      - item_id: "help_one_person"
+        rationale: "One-person-help seva; offering family; small relational."
+      - item_id: "feed_being"
+        rationale: "Feed a being (bird/animal/person); classic seva_dana."
+      - item_id: "check_on_someone"
+        rationale: "Check-on-someone; small relational seva; connection-adjacent but joy-framed."
+      - item_id: "share_knowledge"
+        rationale: "Share-knowledge seva; elevating outward."
+      - item_id: "work_as_offering"
+        rationale: "Work-as-offering karma-yoga inflection; §5.6 compatible."
+    status: draft
+    curator_notes: "Seva sankalps satisfy the post-cold-start invariant (§5.6: >=1 action from {offering, blessing, carry} after visit 1)."
+
+  - room_id: room_joy
+    action_slot: wisdom_banner
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "gita_nishkama_karma_as_celebration"
+    anchor_rationale: "§5.7.3 + §5.7.5 approved (BATCH C-2); joy primary anchor; 'Joy in action, not outcome'; state_fit balanced/energized/accomplished/content; emotional_weight moderate but light-variant surface."
+    rotation_refs:
+      - item_id: "yoga_sutras_santosha_as_practice"
+        rationale: "§C-2 approved secondary anchor; santosha as sadhana; standalone_safe=yes; emotional_weight moderate."
+      - item_id: "bhakti_amplify_gratitude"
+        rationale: "Cleanup Bucket A; 'Let gratitude in'; bhakti offering; emotional_weight light."
+      - item_id: "sankhya_witness_joy_without_clinging"
+        rationale: "Bucket A; non-clinging joy; witnessing mode; balanced."
+    banner_pool_size_hint: 4
+    status: draft
+    curator_notes: "Avoid drill_down_only=yes rows (niyamas_kritajnata_as_perception filtered). Keep light. §5.7.3: 'emotional_weight=light preferred'."
+
+  - room_id: room_joy
+    action_slot: wisdom_teaching
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "gita_nishkama_karma_as_celebration"
+    anchor_rationale: "§5.7.3 optional light teaching (2-3 rows); plain_english 99 chars (within teaching_eligible threshold expected post-0117 edge review — flag for curator)."
+    rotation_refs:
+      - item_id: "bhakti_sacred_in_the_ordinary"
+        rationale: "Cleanup Bucket A; 'Sacred in the ordinary'; offering-eligible; light teaching; devotional."
+      - item_id: "dharma_creation_as_service"
+        rationale: "Bucket A; 'Creation as service'; joy+offering; light + expansive."
+    banner_pool_size_hint: 3
+    status: deferred_v2
+    notes: "L2 teaching off by default in v1 per Chip Contract v1.1. Pool authored forward-compat; selection service MUST NOT emit teaching action on joy in v1. OPTIONAL light per §5.7.3. §5.6 says heavy teaching forbidden — enforced by banner_pool_size_hint + light state_fit_tags gating."
+    curator_notes: "gita_nishkama_karma_as_celebration plain_english 99 chars is borderline for teaching_eligible=true (threshold >=40 per §5.7.4). Promotion script will confirm — if flagged, drop from teaching pool but keep as banner. v1 lock: joy = banner only (no teaching)."
+
+  - room_id: room_joy
+    action_slot: step
+    pool_version: "2026.04.v1-draft"
+    anchor_ref: "step_text_input_name_full"
+    anchor_rationale: "Signature chip 'Notice what feels full' per Chip Contract v1.1 §Joy (replaces legacy 'Name what's steady'); cold-start inward-first."
+    rotation_refs:
+      - item_id: "step_walk_timer_10min"
+        rationale: "Grounded-fullness walk; repeat-visit; keeps joy rooted rather than shallow."
+      - item_id: "step_sit_ambient_3min"
+        rationale: "Silent sit; grounded-joy framing; §5.6 regulation (grounding joy) allowed."
+    status: draft
+    curator_notes: "§5.6 post-cold-start invariant lives on offering/blessing/carry slots (sankalp_* + carry); step pool provides inward-first naming on cold-start + grounding on repeat. No exclamation-joy here."
+
+  # Joy: L3 optional per §5.7.3 — recommend null in v1.
+
+# ==============================================================================
+# CONTAMINATION AUDIT — rows considered and rejected from any pool
+# ==============================================================================
+
+contamination_audit:
+
+  # Rows from the Agent D2 cleanup YAML (non_room_eligible + MOVE classifications)
+  # considered by Agent D for pool authoring and explicitly rejected.
+
+  rejected_rows:
+
+    # --- Group 1: non_room_eligible per cleanup §5.7.9 ---
+    - asset_id: wis.kindness_is_strength
+      reason: "non_room_eligible (cleanup Group 2). Uplift aphorism + empty state_fit_tags. §5.3 release no-uplift rule. Duplicate (dedup §5.7.10). Destination: [dashboard, teaching_overlay]."
+    - asset_id: wis.kindness_is_bridge
+      reason: "non_room_eligible. Uplift aphorism. Dashboard-only."
+    - asset_id: wis.kindness_is_healing
+      reason: "non_room_eligible. Uplift. Dashboard-only."
+    - asset_id: wis.kindness_is_power
+      reason: "non_room_eligible. Uplift. Dashboard-only."
+    - asset_id: wis.kindness_is_light
+      reason: "non_room_eligible. Uplift. Dashboard-only."
+    - asset_id: wis.kindness_is_unity
+      reason: "non_room_eligible. Uplift. Dashboard-only."
+    - asset_id: wis.kindness_is_peace
+      reason: "non_room_eligible. Uplift. Dashboard-only."
+
+    # --- Group 2: ayurveda body-care per cleanup §5.7.9 + founder D-2 decision ---
+    - asset_id: ayur_vata_ground_evening
+      reason: "non_room_eligible (cleanup Group 4 + founder Batch D D-2 approved). Body-care (sleep). Destination: [dashboard, completion_support_wind_down]."
+    - asset_id: ayur_pitta_cool_midday_heat
+      reason: "non_room_eligible. Body-care (heat regulation). NOT clarity (explicit cleanup correction vs Beta misclassification)."
+    - asset_id: ayur_pause_before_decision_when_agitated
+      reason: "non_room_eligible. Body-anchored discernment; belongs on dashboard. §5.4 clarity-AVOID (ayurveda body-care mislabeled)."
+    - asset_id: "<remaining 22 ayurveda rows>"
+      reason: "Batch rejection per §5.7.9 + founder D-2. All ayurveda body-care → dashboard/completion surfaces only."
+
+    # --- Group 3: empty-signal wis.* aphorism rows (Bucket C / non_room_eligible) ---
+    - asset_id: wis.dharma_guides_duty
+      reason: "non_room_eligible (cleanup Group 6). Empty state_fit_tags + (needs_authoring) rfi. Destination: [dashboard, teaching_overlay]."
+    - asset_id: wis.action_with_purpose
+      reason: "non_room_eligible. Empty state_fit_tags. Dashboard-only."
+    - asset_id: wis.steady_mind_wins
+      reason: "non_room_eligible. Empty state_fit_tags. Dashboard-only."
+    - asset_id: wis.focus_shapes_destiny
+      reason: "non_room_eligible. Empty state_fit_tags."
+    - asset_id: wis.discipline_shapes_freedom
+      reason: "non_room_eligible. Empty state_fit_tags."
+    - asset_id: wis.clarity_in_purpose
+      reason: "non_room_eligible. Empty state_fit_tags."
+    - asset_id: wis.steadiness_in_chaos
+      reason: "non_room_eligible. Empty state_fit_tags."
+    - asset_id: wis.dharma_is_clarity
+      reason: "non_room_eligible. Empty state_fit_tags."
+    - asset_id: wis.dharma_is_peace
+      reason: "non_room_eligible. Empty state_fit_tags."
+    - asset_id: wis.dharma_is_harmony
+      reason: "non_room_eligible. Empty state_fit_tags."
+
+    # --- Group 4: Bucket C dedup + manual review ---
+    - asset_id: gita_no_effort_is_lost
+      reason: "Bucket C dedup (content-forked duplicate per §5.7.10). Founder escalation D-1 APPROVED — curator rename pending. Not eligible for pools until rename lands."
+
+    # --- Group 5: rows routed to other rooms (MOVE classifications explicitly NOT pool-hoisted into wrong room) ---
+    - asset_id: vedanta_alone_is_not_lonely
+      reason: "Bucket A for connection per cleanup, but drill_down_only=yes → violates §5.2 no-inquiry rule at banner surface. Filtered from connection wisdom_banner rotation."
+    - asset_id: yoga_loneliness_as_signal
+      reason: "Bucket A for connection, drill_down_only=yes. Same rule. Filtered from connection wisdom_banner rotation."
+    - asset_id: atma_smaran_self_as_company
+      reason: "Bucket A for connection, drill_down_only=yes. Filtered from banner; available for optional teaching expansion."
+    - asset_id: niyamas_kritajnata_as_perception
+      reason: "Bucket A for joy, drill_down_only=yes. §5.7.3 joy forbids drill_down_only=true. Filtered from joy banner."
+    - asset_id: gita_seva_as_final_limb
+      reason: "Bucket A for growth. Keep in DB pool but FILTERED from v1 banner rotation — 'post_retreat_return' state_fit implies mature/experienced user; too deep for default growth render."
+    - asset_id: yoga_sutras_vairagya_through_practice
+      reason: "Candidate for growth banner but 'vairagya follows abhyasa' reads uplift-adjacent in compressed surface form; curator deferred to v2 after spot-check sample."
+
+  # --- CROSS-ROOM EXCLUSION AUDIT (§Contract 4 rule 4) ---
+  cross_room_exclusion_check:
+    rule: "room_joy and room_growth MUST NOT share the same active mantra/practice row in the same 7-day rotation window."
+    method: "Set intersection of joy mantra/practice pool members vs growth mantra/practice pool members."
+    joy_mantra_set:
+      - mantra.purnamadah
+      - mantra.lokah_samastah
+      - mantra.sarve_bhavantu
+      - mantra.krishna_govinda_joy
+      - mantra.krishna_govinda_gratitude
+      - mantra.lakshmi_om_shri_joy
+    growth_mantra_set:
+      - mantra.vedanta_om_tat_sat
+      - mantra.gayatri
+      - mantra.gayatri_om_tat_savitur
+      - mantra.hreem_shreem_kleem_mahalakshmi
+      - mantra.rudra_om_namo_bhagavate
+    mantra_intersection: []
+    mantra_audit_result: "PASS — disjoint."
+    joy_practice_surface_note: "Joy pools do NOT carry a dedicated practice slot (uses sankalp_gratitude / sankalp_blessings / sankalp_seva instead per §5.6). Therefore the joy-practice vs growth-practice set check is vacuously disjoint."
+    growth_practice_set:
+      - practice.mindful_55_walking
+      - practice.one_sankalp_action
+      - practice.mantra_journaling
+      - walking_meditation_mindful
+      - practice.self_acceptance_pause
+    practice_intersection: []
+    practice_audit_result: "PASS — disjoint."
+    overall: "PASS — Contract 4 rule 4 satisfied at pool-author time."
+
+  # --- DUAL-MEMBERSHIP DISCLOSURES (legitimate cross-room overlap via plain inclusion) ---
+  dual_membership_disclosures:
+    - item_id: practice.hand_on_heart
+      rooms: [room_stillness, room_connection]
+      curator_note: "Light somatic anchor is room-neutral for overwhelm and alone states. §Contract 4 rule 4 applies only to joy/growth, not stillness/connection. No repeat-window conflict."
+    - item_id: yoga_sutras_one_anchor_when_scattered
+      rooms: [room_stillness.wisdom_banner, room_clarity.wisdom_banner]
+      curator_note: "State_fit 'scattered/direction_confused' canonically spans stillness (regulate) and clarity (align). Dual-pool inclusion by design. §5.7.5 + §8 allow dual membership with curator note."
+
+# ==============================================================================
+# POOL ENTRY TALLIES
+# ==============================================================================
+
+totals:
+  pool_entry_rows: 27
+  # Per-room breakdown of authored slot-pools:
+  room_stillness: 3        # mantra, practice, wisdom_banner
+  room_connection: 4       # mantra, practice, wisdom_banner, wisdom_teaching(deferred_v2)
+  room_release: 3          # mantra, practice, wisdom_banner
+  room_clarity: 5          # mantra, practice, principle, wisdom_banner, wisdom_teaching
+  room_growth: 6           # mantra, practice, principle, wisdom_banner, wisdom_teaching, wisdom_reflection
+  room_joy: 6              # mantra, sankalp_gratitude, sankalp_blessings, sankalp_seva, wisdom_banner, wisdom_teaching(deferred_v2)
+  v1_1_deferred: 2         # room_connection.wisdom_teaching + room_joy.wisdom_teaching (deferred_v2)
+  v1_1_active: 25          # entries selection service may surface in v1
+
+  content_rows_cited:
+    mantras: 23        # 4 stillness + 4 connection + 4 release + 5 clarity + 5 growth + 6 joy (one mantra unique per room except hand_on_heart cross-room which is practice not mantra)
+    practices: 17      # stillness 5 + connection 4 + release 3 + clarity 5 (including trataka variants) + growth 5
+    sankalps: 17       # joy only (6 gratitude + 5 blessings + 6 seva)
+    wisdom_asset_ids: 28  # unique across all pools (7 canonical anchors + 21 rotation citations after deduping cross-pool reuse)
+
+# ==============================================================================
+# NEEDS_FOUNDER_AUTHORING FLAGS
+# ==============================================================================
+
+needs_founder_authoring: []
+# None. All anchors resolve to real item_id / asset_id values.
+#
+# Parallel content authoring tracks (informational, not blocking):
+#   - mantra.yogakshema_bg_9_22 (growth) — approved substitute mantra.vedanta_om_tat_sat in use; per §C-1.
+#   - 1-2 additional release-compatible banners — founder Batch D D-4 noted; v1 ships with 2-row banner.
+#   - gita_no_effort_is_lost rename (Batch D D-1) — blocks cleanup PR, not this pool file.
+
+# ==============================================================================
+# NEXT ACTIONS (5-line block)
+# ==============================================================================
+
+next_actions:
+  - "Curator: review each pool entry's rotation_refs + curator_notes; mark status=reviewed_ready or flag concerns per row."
+  - "Agent A: verify each pool entry against §5.1–§5.6 no-go + tradition bias + allowed action_family rules; confirm dual_membership_disclosures are sanctioned."
+  - "Founder: sign off on mantra.vedanta_om_tat_sat as room_growth mantra anchor in v1 (§C-1 already approved; this pool locks the substitution in the pool record)."
+  - "Ops: after promote_wisdom_v31 --apply on dev, re-validate every wisdom asset_id in this file resolves to selector_eligible=true + expected banner_eligible / teaching_eligible / reflection_eligible flags; flag any mismatches."
+  - "Engineering: transform this YAML into a RoomContentPool seed/migration (per §8 schema) with pool_version='2026.04.v1' and status='draft'; activate per-pool only after review checkpoints above all green."

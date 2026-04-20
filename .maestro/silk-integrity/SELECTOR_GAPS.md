@@ -51,3 +51,18 @@ land tracks these and their corresponding FE components:
 2. **common login_as_persona.yaml:** add `login_email_input` +
    `login_password_input` to eliminate text-placeholder reliance for
    every persona-based flow.
+
+## 2026-04-19 Wave 3 close addendum
+
+### Superseded (done)
+- `mantra_runner_start` / `mantra_runner_complete` / `sankalp_hold` / `practice_runner_start` / `practice_runner_complete` legacy testIDs — no longer queried. Flows 16/17/18 now use `test_runner_force_complete` (dev-only, __DEV__-gated) on the canonical rich runner surface.
+
+### Landed (room-internal pills)
+- `grief_mantra_option`, `loneliness_bhakti_option`, `loneliness_chant_option`, `joy_chant_option`, `growth_mantra_option`, `growth_practice_option` — added PR2, accessibility-label override removed in Cases A+B pass. All queryable via resource-id (verified in DOM inspect 2026-04-19).
+
+### Known iOS accessibility quirks (flow-harness notes)
+- **MoreSupportSheet modal**: `Modal` + `Pressable` + children on iOS flattens the accessibility tree into a single parent container. `more_support_grief_row` + `more_support_loneliness_row` testIDs are present in code + accessibilityText concatenation but NOT queryable as discrete resource-id nodes. Blocks flows 19 + 20 until FE refactor (H-3 in Post-Wave-3 Roadmap).
+- **Room-pill TouchableOpacity**: previously had the same `accessibilityLabel={testId}` pattern which flattened activation — removed in Wave 3 close. Now testIDs + child authored text work cleanly for Maestro.
+
+### Remaining onboarding gaps (unchanged from prior)
+See top of file for Flow 01–04 + `common/login_as_persona` gaps.

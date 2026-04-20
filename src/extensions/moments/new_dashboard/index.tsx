@@ -167,6 +167,15 @@ const NewDashboardContainer: React.FC<Props> = ({ block, screenData, onAction })
         </View>
       ) : null}
 
+      {/* 3b. Continuity mirror card — renders after long absence.
+          M-2 (2026-04-19): previously imported but never rendered.
+          Guarded by sd.continuity_mirror so it stays invisible when
+          BE envelope doesn't ship the field (current prod state
+          until MDR-S2-06 BE continuity wire-up lands). */}
+      {sd.continuity_mirror ? (
+        <ContinuityMirrorCard screenData={sd} />
+      ) : null}
+
       {/* 4. Chip row: dayType + streak */}
       {sd.day_type || sd.streak_count ? (
         <View style={styles.chipRow}>
@@ -205,8 +214,12 @@ const NewDashboardContainer: React.FC<Props> = ({ block, screenData, onAction })
       {sd.season_card ? <SeasonSignalCard screenData={sd} /> : null}
       {sd.post_conflict ? <PostConflictMorningCard screenData={sd} /> : null}
 
-      {/* 9. Continuity mirror */}
-      {sd.continuity_card ? <ContinuityMirrorCard screenData={sd} /> : null}
+      {/* 9. Continuity mirror — moved to section 3b (line ~175) under
+          the canonical `sd.continuity_mirror` key per the v3 envelope
+          contract. The previous `sd.continuity_card` mount point is a
+          stale README Step-1 idiom; keeping it would risk a duplicate
+          testID collision once BE wires the field. Removed by M-2
+          (2026-04-19). */}
 
       {/* 10. Support CTAs — mirror existing Apr-11 primary_buttons */}
       <View style={styles.ctaBlock}>

@@ -19,12 +19,18 @@
  * Sovereignty: labels come from screenData.support_rooms_labels
  * (grief_label, loneliness_label, header_label). If labels are missing
  * the row is hidden rather than showing an English fallback.
+ *
+ * Accessibility contract (MDR-S1-15 / Batch 1B H-3): scrim and sheet
+ * containers are `accessible=false` / `importantForAccessibility=no`;
+ * the scrim tap-target is a sibling TouchableOpacity (not a parent
+ * Pressable) so row testIDs are not flattened on iOS. Rows are the
+ * single accessible leaves, each with `accessibilityRole=button` and
+ * an authored `accessibilityLabel=row.label`.
  */
 
 import React from "react";
 import {
   Modal,
-  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -112,17 +118,46 @@ const MoreSupportSheet: React.FC<Props> = ({
   // default survives this surface.
   if (!hasContent) return null;
 
+  // MDR-S1-15 / H-3: iOS accessibility hardening.
+  // Prior impl nested Pressable(scrim) → Pressable(sheet) → TouchableOpacity(row).
+  // On iOS, the outer Pressable with onPress claims the accessibility element,
+  // flattening descendants — row testIDs became unreachable via Maestro and
+  // ambiguous for screen readers. Fix: make scrim and sheet non-accessible
+  // containers, use a sibling absolute TouchableOpacity for scrim-tap-to-close,
+  // and keep rows as the single accessible leaves with authored labels.
   return (
     <Modal
       visible={visible}
       animationType="slide"
       transparent
+      presentationStyle="overFullScreen"
       onRequestClose={onClose}
     >
-      <Pressable style={styles.scrim} onPress={onClose}>
-        <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()}>
+      <View
+        style={styles.scrim}
+        accessible={false}
+        importantForAccessibility="no"
+      >
+        <TouchableOpacity
+          style={StyleSheet.absoluteFill}
+          activeOpacity={1}
+          onPress={onClose}
+          accessible={false}
+          importantForAccessibility="no-hide-descendants"
+          testID="more_support_scrim"
+        />
+        <View
+          style={styles.sheet}
+          accessible={false}
+          importantForAccessibility="no"
+          testID="more_support_sheet"
+        >
           <View style={styles.handle} />
-          {!!headerLabel && <Text style={styles.header}>{headerLabel}</Text>}
+          {!!headerLabel && (
+            <Text style={styles.header} testID="more_support_header">
+              {headerLabel}
+            </Text>
+          )}
           {rows.map((row) => {
             const testId =
               row.key === "grief"
@@ -137,11 +172,22 @@ const MoreSupportSheet: React.FC<Props> = ({
                 testID={testId}
                 accessible={true}
                 accessibilityRole="button"
+                accessibilityLabel={row.label}
               >
-                <View style={styles.iconWrap}>
+                <View
+                  style={styles.iconWrap}
+                  accessible={false}
+                  importantForAccessibility="no"
+                >
                   <Ionicons name={row.icon} size={18} color={Colors.gold} />
                 </View>
-                <Text style={styles.rowLabel}>{row.label}</Text>
+                <Text
+                  style={styles.rowLabel}
+                  accessible={false}
+                  importantForAccessibility="no"
+                >
+                  {row.label}
+                </Text>
                 <Ionicons
                   name="chevron-forward"
                   size={16}
@@ -150,8 +196,8 @@ const MoreSupportSheet: React.FC<Props> = ({
               </TouchableOpacity>
             ) : null;
           })}
-        </Pressable>
-      </Pressable>
+        </View>
+      </View>
     </Modal>
   );
 };

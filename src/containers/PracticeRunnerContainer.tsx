@@ -372,6 +372,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
   const sankalpOmRef = useRef<Audio.Sound | null>(null);
   const sankalpSpin = useRef(new Animated.Value(0)).current;
   const sankalpSpinLoopRef = useRef<Animated.CompositeAnimation | null>(null);
+  const triggerAudioRunIdRef = useRef(0);
 
   // In-flight audio load tracking to prevent echoes during fast transitions
   const inFlightSounds = useRef<Set<Audio.Sound>>(new Set());
@@ -944,6 +945,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
 
   useEffect(() => {
     let isCancelled = false;
+    const runId = ++triggerAudioRunIdRef.current;
 
     const startTriggerAudioSequence = async () => {
       console.log(
@@ -961,7 +963,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
 
       // Delay slightly to ensure component is settled
       await new Promise((resolve) => setTimeout(resolve, 300));
-      if (isCancelled) return;
+      if (isCancelled || triggerAudioRunIdRef.current !== runId) return;
 
       // Try to load the intro bell (Audio_Be_still) — but it's optional.
       // The file is actually an .m4a container with a .mp4 extension, which
@@ -976,7 +978,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
           volume: mediaMuted ? 0 : 1,
         });
 
-        if (isCancelled) {
+        if (isCancelled || triggerAudioRunIdRef.current !== runId) {
           await intro.unloadAsync().catch(() => {});
           return;
         }
@@ -992,7 +994,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
         introLoopAudioRef.current = null;
       }
 
-      if (isCancelled) return;
+      if (isCancelled || triggerAudioRunIdRef.current !== runId) return;
 
       // Load the mantra loop (REQUIRED — this is the primary audio)
       let mantra: Audio.Sound | null = null;
@@ -1030,7 +1032,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
         }
       }
 
-      if (isCancelled || !mantra) {
+      if (isCancelled || triggerAudioRunIdRef.current !== runId || !mantra) {
         if (mantra) await mantra.unloadAsync().catch(() => {});
         return;
       }
@@ -1048,6 +1050,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
               status.isLoaded &&
               status.didJustFinish &&
               !isCancelled &&
+              triggerAudioRunIdRef.current === runId &&
               mantra
             ) {
               console.log("[TRIGGER_AUDIO] Intro finished -> Playing Mantra");
@@ -1066,7 +1069,9 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
         } else {
           // No intro — play mantra directly
           console.log("[TRIGGER_AUDIO] No intro — playing mantra directly");
-          await mantra.playAsync();
+          if (!isCancelled && triggerAudioRunIdRef.current === runId) {
+            await mantra.playAsync();
+          }
         }
       } catch (err) {
         console.warn("[TRIGGER_AUDIO] play failed:", (err as any)?.message);
@@ -1077,6 +1082,9 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
 
     return () => {
       isCancelled = true;
+      if (triggerAudioRunIdRef.current === runId) {
+        triggerAudioRunIdRef.current += 1;
+      }
       stopTriggerAudio().catch(() => {});
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

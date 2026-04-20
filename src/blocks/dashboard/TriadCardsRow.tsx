@@ -225,7 +225,7 @@ const TriadCardsRow: React.FC = () => {
                 {it.sub}
               </Text>
             )}
-            {/* <View style={styles.bottomRow}>
+            <View style={styles.bottomRow}>
               {it.done ? (
                 <View style={styles.doneDot}>
                   <Ionicons name="checkmark" size={12} color={Colors.cream} />
@@ -233,7 +233,7 @@ const TriadCardsRow: React.FC = () => {
               ) : (
                 <View style={styles.openDot} />
               )}
-            </View> */}
+            </View>
           </TouchableOpacity>
         );
       })}

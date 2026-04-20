@@ -26,33 +26,26 @@
  * EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD=1 flag (see Home.tsx:270).
  */
 
-import React, { useCallback } from "react";
 import { useFocusEffect } from "@react-navigation/native";
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import React, { useCallback, useEffect } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { executeAction } from "../engine/actionExecutor";
-import { useScreenStore } from "../engine/useScreenBridge";
 import { mitraJourneyCompanion } from "../engine/mitraApi";
+import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
 import { Colors } from "../theme/colors";
 import { Fonts } from "../theme/fonts";
 
 // ── Dashboard blocks (Phase 3) ────────────────────────────────────────────
+import AdditionalItemsSectionBlock from "../blocks/AdditionalItemsSectionBlock";
+import CycleProgressBlock from "../blocks/dashboard/CycleProgressBlock";
 import GreetingCard from "../blocks/dashboard/GreetingCard";
 import PathChip from "../blocks/dashboard/PathChip";
+import QuickSupportBlock from "../blocks/dashboard/QuickSupportBlock";
+import SankalpCarryBlock from "../blocks/dashboard/SankalpCarryBlock";
 import TriadCardsRow from "../blocks/dashboard/TriadCardsRow";
 import WhyThisL1Strip from "../blocks/dashboard/WhyThisL1Strip";
-import CycleProgressBlock from "../blocks/dashboard/CycleProgressBlock";
-import SankalpCarryBlock from "../blocks/dashboard/SankalpCarryBlock";
-import QuickSupportBlock from "../blocks/dashboard/QuickSupportBlock";
-import AdditionalItemsSectionBlock from "../blocks/AdditionalItemsSectionBlock";
 
 // ── Registered moment blocks (Phase 3 re-uses existing scaffolds) ─────────
 // DayTypeChip removed 2026-04-18 per founder call — kept scaffold in
@@ -61,13 +54,13 @@ import AdditionalItemsSectionBlock from "../blocks/AdditionalItemsSectionBlock";
 import FocusPhraseLine from "../extensions/moments/focus_phrase_line";
 
 // ── Conditional intelligence cards (Phase 5 — show when signal exists) ───
-import PredictiveAlertCard from "../extensions/moments/predictive_alert_card";
 import ClearWindowBanner from "../blocks/ClearWindowBanner";
-import PostConflictMorningCard from "../extensions/moments/post_conflict_morning_card";
-import GratitudeSignalCard from "../extensions/moments/gratitude_signal_card";
-import SeasonSignalCard from "../extensions/moments/season_signal_card";
-import ResilienceNarrativeCard from "../blocks/dashboard/insights/ResilienceNarrativeCard";
 import EntityRecognitionCard from "../blocks/dashboard/insights/EntityRecognitionCard";
+import ResilienceNarrativeCard from "../blocks/dashboard/insights/ResilienceNarrativeCard";
+import GratitudeSignalCard from "../extensions/moments/gratitude_signal_card";
+import PostConflictMorningCard from "../extensions/moments/post_conflict_morning_card";
+import PredictiveAlertCard from "../extensions/moments/predictive_alert_card";
+import SeasonSignalCard from "../extensions/moments/season_signal_card";
 
 // ── Voice input ─────────────────────────────────────────────────────────
 import { VoiceTextInput } from "../components/VoiceTextInput";
@@ -91,9 +84,21 @@ type Props = {
 
 // ── Main container ─────────────────────────────────────────────────────
 const NewDashboardContainer: React.FC<Props> = () => {
-  const { screenData, loadScreen, goBack, updateScreenData } =
-    useScreenStore();
+  const {
+    screenData,
+    loadScreen,
+    goBack,
+    updateScreenData,
+    updateBackground,
+    updateHeaderHidden,
+  } = useScreenStore();
   const sd = (screenData ?? {}) as Record<string, any>;
+
+  useEffect(() => {
+    updateBackground(require("../../assets/beige_bg.png"));
+    updateHeaderHidden(false);
+    return () => updateHeaderHidden(false);
+  }, [updateBackground, updateHeaderHidden]);
 
   // Re-fetch on every focus (not just first mount). Returning from the
   // runner should refresh the triad ✓ + cycle_metrics from the DB,
@@ -243,11 +248,12 @@ const NewDashboardContainer: React.FC<Props> = () => {
           // Banners (max 1 — PostConflict wins if both signal).
           // MDR-S1-02: sd.post_conflict is the canonical read; fall back to
           // sd.postConflict during the dual-emit burn-in (removed after CP-3).
-          const banner = (sd.post_conflict || sd.postConflict) ? (
-            <PostConflictMorningCard screenData={sd} />
-          ) : sd.clear_window_active ? (
-            <ClearWindowBanner />
-          ) : null;
+          const banner =
+            sd.post_conflict || sd.postConflict ? (
+              <PostConflictMorningCard screenData={sd} />
+            ) : sd.clear_window_active ? (
+              <ClearWindowBanner />
+            ) : null;
 
           // Insight cards in priority order (max 2 shown).
           const candidates: React.ReactNode[] = [];
@@ -260,9 +266,7 @@ const NewDashboardContainer: React.FC<Props> = () => {
             candidates.push(<PredictiveAlertCard key="pa" screenData={sd} />);
           }
           if (sd.entity_card) {
-            candidates.push(
-              <EntityRecognitionCard key="er" screenData={sd} />,
-            );
+            candidates.push(<EntityRecognitionCard key="er" screenData={sd} />);
           }
           if (sd.gratitude_card) {
             candidates.push(<GratitudeSignalCard key="gj" screenData={sd} />);
@@ -306,11 +310,11 @@ const NewDashboardContainer: React.FC<Props> = () => {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: Colors.parchment,
+    // backgroundColor: Colors.parchment,
   },
   scroll: {
     flex: 1,
-    backgroundColor: Colors.parchment,
+    // backgroundColor: Colors.parchment,
   },
   scrollContent: {
     paddingHorizontal: 18,
@@ -405,7 +409,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
-    bottom: 0,
+    bottom: -25,
     paddingHorizontal: 12,
     paddingTop: 8,
     paddingBottom: 8,

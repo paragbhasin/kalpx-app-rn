@@ -25,14 +25,9 @@
  * the legacy CoreItemsList. Starting the runner is a separate CTA.
  */
 
-import React, { useEffect } from "react";
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import React, { useEffect } from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSelector } from "react-redux";
 import { executeAction } from "../../engine/actionExecutor";
 import { useScreenStore } from "../../engine/useScreenBridge";
@@ -230,7 +225,7 @@ const TriadCardsRow: React.FC = () => {
                 {it.sub}
               </Text>
             )}
-            <View style={styles.bottomRow}>
+            {/* <View style={styles.bottomRow}>
               {it.done ? (
                 <View style={styles.doneDot}>
                   <Ionicons name="checkmark" size={12} color={Colors.cream} />
@@ -238,7 +233,7 @@ const TriadCardsRow: React.FC = () => {
               ) : (
                 <View style={styles.openDot} />
               )}
-            </View>
+            </View> */}
           </TouchableOpacity>
         );
       })}

@@ -57,7 +57,11 @@ const QuickSupportBlock: React.FC<Props> = ({ screenData }) => {
   // Track 1 — sovereignty-strict. No TSX English fallback. Chip renders only
   // when backend seeds the label (otherwise chip is invisible, no broken UI).
   const joyLabel: string = labels.joy_label || "";
-  const growthLabel: string = labels.growth_label || "";
+  const rawGrowthLabel: string = labels.growth_label || "";
+  const growthLabel: string =
+    rawGrowthLabel === "I want to go deeper"
+      ? "I want to grow"
+      : rawGrowthLabel;
   const moreLabel: string = labels.more_label || "More support";
 
   const [sheetVisible, setSheetVisible] = useState(false);

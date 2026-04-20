@@ -290,6 +290,7 @@ const GrowthRoomContainer: React.FC<Props> = () => {
   const inputSubmitLabel = readSlot(ss, "input_submit_label");
   const inputCancelLabel = readSlot(ss, "input_cancel_label");
   const seededPrincipleId = readSlot(ss, "seeded_principle_id");
+  const inquiryCategoriesPrompt = inputInquiryPrompt || pillInquiryLabel;
   // Null-asset render guards (founder adjustment #4, 2026-04-19): hide
   // runner-launching pills if their item_id slot is missing.
   const growthMantraItemId = readSlot(ss, "growth_mantra_item_id");
@@ -496,6 +497,9 @@ const GrowthRoomContainer: React.FC<Props> = () => {
 
   const renderInquiryCategories = () => (
     <View style={styles.categoriesStack}>
+      {!!inquiryCategoriesPrompt && (
+        <Text style={styles.categoriesPrompt}>{inquiryCategoriesPrompt}</Text>
+      )}
       {INQUIRY_CATEGORIES.map((cat) => {
         const label = readSeedSlot(ss, cat, "category_label");
         if (!label) return null;
@@ -714,6 +718,16 @@ const styles = StyleSheet.create({
   },
   optionsStack: { width: "100%", gap: 12 },
   categoriesStack: { width: "100%", gap: 12 },
+  categoriesPrompt: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 22,
+    color: "#432104",
+    textAlign: "center",
+    lineHeight: 30,
+    marginTop: 56,
+    marginBottom: 18,
+    paddingHorizontal: 8,
+  },
   pill: {
     backgroundColor: "#FBF5F5",
     borderColor: "#c89a47",

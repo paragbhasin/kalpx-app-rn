@@ -61,9 +61,7 @@ const GreetingCard: React.FC<Props> = ({ screenData }) => {
     typeof joyCarry.captured_at === "number" &&
     isSameCalendarDay(joyCarry.captured_at, Date.now());
   const carryLabel: string =
-    typeof joyCarry?.label === "string" && joyCarry.label
-      ? joyCarry.label
-      : "";
+    typeof joyCarry?.label === "string" && joyCarry.label ? joyCarry.label : "";
 
   return (
     <View>
@@ -143,7 +141,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     marginTop: -4,
     marginBottom: 6,
-    marginLeft: 18,
+    // marginLeft: 18,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,

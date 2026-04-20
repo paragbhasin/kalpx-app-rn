@@ -2,7 +2,9 @@
 
 **Purpose:** authoritative navigation map for the 4 support / inquiry rooms (grief, loneliness, joy, growth) and a concrete manual-test checklist the operator can run against sim 221EDFB1-254E-4694-9B58-8BABEF2EBADD or a real device.
 
-**Scope:** post-Phase-3 close (2026-04-19). Covers H-3 (MoreSupportSheet a11y), H-5 (Day-14 sovereignty), M-2 (continuity render), M-3 (Joy/Growth ContentPack labels), and the triad-completion local-flag sync bug fix (`720206e`).
+**Scope:** post-Phase-3 close (2026-04-19). Covers H-3 (MoreSupportSheet a11y), H-5 (Day-14 sovereignty), M-2 (continuity render), M-3 (Joy/Growth ContentPack labels), the triad-completion local-flag sync bug fix (`720206e`), **and the track-completion source-validation fix (`6a171ea3`) — BE now accepts `support_{grief,loneliness,joy,growth}` sources so every room completion actually persists to the DB (pre-fix: all 4 room completions silently 400'd and no `JourneyActivity` was created).**
+
+**Cross-reference:** real request/response wire captures for the full 4-step room API flow are in `docs/ROOM_API_FULL_FLOW_V1.md`.
 
 ---
 
@@ -49,7 +51,18 @@ CycleTransitionsContainer (canonical rich runner)
   ↓ on complete → dispatches complete_runner
   ↓
 actionExecutor complete_runner handler (src/engine/actionExecutor.ts:3471)
-  ├ POST /api/mitra/track-completion/ (BE persists JourneyActivity)
+  ├ POST /api/mitra/track-completion/
+  │   Payload: {itemType, itemId, source, journeyId, dayNumber, tz, meta}
+  │   Response (post-fix 6a171ea3):
+  │     200 {status:"ok", itemType, itemId, source, tracked:true, ...}
+  │     → JourneyActivity row created with event_name:
+  │        • source=core             → event_name=core_{type}_completed
+  │        • source=support_grief    → event_name=support_grief_{type}_completed
+  │        • source=support_joy      → event_name=support_joy_{type}_completed
+  │        • source=support_loneliness → support_loneliness_{type}_completed
+  │        • source=support_growth   → event_name=support_growth_{type}_completed
+  │   Pre-fix behavior (HISTORICAL, do not expect): 400 {"error":"Invalid source"}
+  │     → FE silently swallowed via try/catch → no DB row, no analytics event
   ├ setScreenValue(true, practice_chant|embody|act|deepen)  ← Fix 720206e
   │   (only when source==="core"; support/additional sources don't flip triad)
   └ loadScreen({container_id: "practice_runner", state_id: "completion_return"})
@@ -66,30 +79,28 @@ CompletionReturnTransient
 
 ## 3. Room-specific pills + runner sources
 
+**Important correction (2026-04-19):** The FE actually dispatches `source="support_{room}"` for all 4 rooms (NOT `joy_room` / `growth_room` as originally documented). This was a known mismatch vs. BE validator which expected bare `"support"` — fixed in commit `6a171ea3` (BE now accepts all 4 `support_*` variants). Distinct `event_name` values are generated per room for analytics segmentation.
+
 ### Grief room (`src/extensions/moments/grief_room/index.tsx`)
-- `grief_mantra_option` → mantra runner (source: `support_grief`)
-- `grief_chant_option` → chant runner
-- `grief_sitting_option` → practice runner
+- `grief_mantra_option` → mantra runner → `start_runner` with `source: "support_grief"` → completion persists as `event_name: "support_grief_mantra_completed"`
 - Opening testID: `grief_room_opening_line`
 - Room-internal testIDs verified reachable post-Batch-1A Case B (camelCase fix).
 
 ### Loneliness room (`src/extensions/moments/loneliness_room/index.tsx`)
-- `loneliness_bhakti_option` → mantra runner (source: `support_loneliness`)
-- `loneliness_chant_option` → mantra runner
-- `loneliness_walk_option` → practice runner
+- `loneliness_bhakti_option` → mantra runner → `source: "support_loneliness"` → `event_name: "support_loneliness_mantra_completed"`
+- `loneliness_chant_option` → mantra runner → same source
 - Opening testID: `loneliness_room_opening_line`
 
 ### Joy room (`src/extensions/moments/joy_room/index.tsx`)
-- `joy_mantra_option` → mantra runner (source: `joy_room`)
-- `joy_chant_option` → chant runner
-- `joy_walk_option` → practice runner (10-min walk)
-- `joy_carry_option` → dispatches `carry_joy_forward` → adds `joy_carry_chip` to dashboard
+- `joy_chant_option` → mantra runner → `source: "support_joy"` → `event_name: "support_joy_mantra_completed"`
+- In-room `pill_walk_label` → 10-min walk (no runner, stays in room)
+- In-room `pill_carry_label` → dispatches `carry_joy_forward` → adds `joy_carry_chip` to dashboard
 - Opening testID: `joy_room_opening_line`
 
 ### Growth room / "deep" (`src/extensions/moments/growth_room/index.tsx`)
-- `growth_mantra_option` → mantra runner (source: `growth_room`)
-- `growth_practice_option` → practice runner
-- `inquiry_category_{decision|meaning|boundary}` → category-specific pills
+- `growth_mantra_option` → mantra runner → `source: "support_growth"` → `event_name: "support_growth_mantra_completed"`
+- `growth_practice_option` → practice runner → `source: "support_growth"` → `event_name: "support_growth_practice_completed"`
+- `inquiry_category_{decision|meaning|boundary}` → category-specific pills (leads to layer-2 runner options)
 - Opening testID: `growth_room_opening_line`
 
 ---
@@ -130,9 +141,9 @@ Canonical smoke persona (unless noted): `smoke+triad@kalpx.com` / `smoke-dev-onl
 
 ---
 
-### T-2 — Grief room e2e (H-3 a11y verification)
+### T-2 — Grief room e2e (H-3 a11y + source-validation verification)
 
-**Why:** H-3 refactored MoreSupportSheet to fix iOS Modal accessibility flatten. Previously the grief/loneliness rows were unreachable by Maestro / screen readers.
+**Why:** H-3 refactored MoreSupportSheet to fix iOS Modal accessibility flatten (previously grief/loneliness rows were unreachable). Source-validation fix `6a171ea3` means grief completions now actually persist to BE — before they silently 400'd.
 
 **Steps:**
 1. Dashboard visible.
@@ -277,6 +288,46 @@ Canonical smoke persona (unless noted): `smoke+triad@kalpx.com` / `smoke-dev-onl
 
 ---
 
+### T-10b — Room-completion DB persistence (post source-validation fix)
+
+**Why:** verifies the 6a171ea3 fix is live end-to-end — every room completion now creates a `JourneyActivity` row on BE with a source-distinct `event_name`.
+
+**Prereq:** complete one mantra in each of the 4 rooms (T-2, T-3, T-4, T-5 in any order).
+
+**Verify via dev DB (operator with SSH access):**
+
+```
+ssh -i ~/KalpXKeyPairName.pem ubuntu@18.223.217.113
+cd /opt/kalpx-dev/app/KalpX
+docker compose -f docker-compose.dev.yml -p kalpxdev exec -T web python manage.py shell -c "
+from core.models import JourneyActivity
+qs = JourneyActivity.objects.filter(source__startswith='support_').order_by('-performed_at')[:10]
+for a in qs:
+    print(a.performed_at.isoformat(), a.source, a.activity_type, a.event_name, 'journey=', a.journey_id)
+"
+```
+
+**EXPECTED rows** (one per completion, most-recent first):
+
+```
+<ts> support_grief      mantra support_grief_mantra_completed      journey=<id>
+<ts> support_loneliness mantra support_loneliness_mantra_completed journey=<id>
+<ts> support_joy        mantra support_joy_mantra_completed        journey=<id>
+<ts> support_growth     mantra support_growth_mantra_completed     journey=<id>
+```
+
+**Verify via API probe (alternative — no SSH needed):**
+
+```
+# After each room completion, POST the same payload manually and confirm HTTP 200:
+curl -X POST https://dev.kalpx.com/api/mitra/track-completion/ \
+  -H "Authorization: Bearer $TOK" -H "Content-Type: application/json" \
+  -d '{"itemType":"mantra","itemId":"mantra.peace_calm.om_namah_shivaya","source":"support_grief","journeyId":null,"dayNumber":3,"tz":"Asia/Kolkata","meta":{}}'
+# Expect: {"status":"ok","tracked":true, ...} HTTP 200
+```
+
+**Fail signal:** fewer than 4 rows, or any row with `event_name="mantra_completed"` (generic fallback = fix regressed). If any of the 4 sources returns HTTP 400 "Invalid source", the fix is not deployed.
+
 ### T-10 — Dashboard sanity + no-regression on adjacent flows
 
 **Steps:**
@@ -296,13 +347,15 @@ Canonical smoke persona (unless noted): `smoke+triad@kalpx.com` / `smoke-dev-onl
 
 ## 4b. What each pill/button DOES (room-by-room)
 
-Each room has a mix of **runner pills** (dispatch `start_runner` → canonical rich runner → track-completion) and **in-room pills** (`setStep(...)` — stay in the room, no backend). Exit always dispatches `exit_{room}_room` → dashboard. Runner completion returns to the **source room** (not dashboard) for `support_{room}` / `joy_room` / `growth_room` sources.
+Each room has a mix of **runner pills** (dispatch `start_runner` → canonical rich runner → track-completion) and **in-room pills** (`setStep(...)` — stay in the room, no backend). Exit always dispatches `exit_{room}_room` → dashboard. Runner completion returns to the **source room** (not dashboard) for all 4 support sources: `support_grief`, `support_loneliness`, `support_joy`, `support_growth`.
+
+Post 6a171ea3 (2026-04-19): all 4 sources are now BE-accepted and persist `JourneyActivity` rows with distinct `event_name` values.
 
 ### Joy Room
 
 | Copy | testID | Behavior on press |
 |---|---|---|
-| "Chant for this fullness" | `joy_chant_option` | start_runner mantra, source=support_joy, target_reps=27 → offering_reveal |
+| "Chant for this fullness" | `joy_chant_option` | start_runner mantra, source=support_joy, target_reps=27 → offering_reveal → complete_runner → POST track-completion `{source:"support_joy"}` → 200 `tracked:true`, event_name=`support_joy_mantra_completed` |
 | "Name what's steady" | — | setStep("input") — in-room textarea; submit dispatches `joy_naming_saved` |
 | "Offer it into your day" | — | dispatch("joy_offering_noted") — silent nod, stays in options |
 | "A quiet 10-minute walk" | — | setStep("walk") — in-room walk timer |
@@ -316,7 +369,7 @@ Each room has a mix of **runner pills** (dispatch `start_runner` → canonical r
 |---|---|---|
 | Breath pill | — | setStep("breath") — in-room guided breath |
 | Input (what's underneath) | — | setStep("input") — textarea; submit dispatches `grief_naming_saved` |
-| Mantra pill | `grief_mantra_option` | start_runner mantra, source=support_grief |
+| Mantra pill | `grief_mantra_option` | start_runner mantra, source=support_grief → track-completion 200 event_name=`support_grief_mantra_completed` |
 | Stay pill | — | setStep("stay") — quiet accompany with mute toggle |
 | Exit pill | — | dispatch("exit_grief_room") → dashboard |
 
@@ -326,8 +379,8 @@ Grief has 30s silence-tolerance auto-reveal (options appear after silence).
 
 | Copy | testID | Behavior on press |
 |---|---|---|
-| Bhakti pill | `loneliness_bhakti_option` | start_runner mantra, source=support_loneliness |
-| Chant pill | `loneliness_chant_option` | start_runner mantra, source=support_loneliness |
+| Bhakti pill | `loneliness_bhakti_option` | start_runner mantra, source=support_loneliness → track-completion 200 event_name=`support_loneliness_mantra_completed` |
+| Chant pill | `loneliness_chant_option` | start_runner mantra, source=support_loneliness → same event_name |
 | Input pill | — | setStep("input") — naming textarea |
 | Walk pill | — | setStep("walk") — in-room walk |
 | Exit pill | — | dispatch("exit_loneliness_room") → dashboard |
@@ -340,8 +393,8 @@ Two-layer menu: pick a category pill first, then runner/sub-pills.
 |---|---|
 | Inquiry | `handleInquiryPillTap` → setStep("category") → shows `inquiry_category_decision` / `meaning` / `boundary` sub-pills |
 | Teaching | `handleTeachingTap` → in-room teaching display |
-| Mantra (`growth_mantra_option` testID) | start_runner mantra, source=support_growth |
-| Practice (`growth_practice_option` testID) | start_runner practice, source=support_growth |
+| Mantra (`growth_mantra_option` testID) | start_runner mantra, source=support_growth → track-completion 200 event_name=`support_growth_mantra_completed` |
+| Practice (`growth_practice_option` testID) | start_runner practice, source=support_growth → track-completion 200 event_name=`support_growth_practice_completed` |
 | Journal | setStep("journal") — in-room journaling |
 | Exit | dispatch("exit_growth_room") → dashboard |
 
@@ -350,8 +403,9 @@ Two-layer menu: pick a category pill first, then runner/sub-pills.
 - **Pill renders only if its backend label slot is non-empty** (sovereignty-strict; missing slot = hidden pill).
 - **setStep(X) pills stay in the room** — no backend call, no runner.
 - **start_runner pills** go through `mitraLibrarySearch` → `CycleTransitionsContainer / offering_reveal`.
-- **Runner completion (source-aware return):** for `support_*` / `joy_room` / `growth_room` sources, Return lands on the **source room**. For `source==="core"`, Return lands on dashboard.
-- **Exit pill** always dispatches `exit_{room}_room` and logs `actions_used` telemetry.
+- **Runner completion (source-aware return):** for all 4 `support_*` sources (grief / loneliness / joy / growth), Return lands on the **source room**. For `source==="core"`, Return lands on dashboard.
+- **Runner completion always POSTs to `/api/mitra/track-completion/`** with the source-distinct payload. Post-fix `6a171ea3`, BE responds 200 `tracked:true` and creates a `JourneyActivity` row with a source-distinct `event_name`. Pre-fix all 4 rooms silently 400'd (see doc change log).
+- **Exit pill** always dispatches `exit_{room}_room` and logs `actions_used` telemetry via `/api/mitra/track-event/`.
 
 ### Red flags during manual testing
 
@@ -360,6 +414,8 @@ Two-layer menu: pick a category pill first, then runner/sub-pills.
 - Runner completion lands on dashboard instead of source room → return-to-source logic broken for that source.
 - Visible English pill copy but the slot is empty → sovereignty violation (hardcoded fallback shipping).
 - `joy_carry_chip` missing after tapping Carry It Forward → `carry_joy_forward` handler regression.
+- Metro logs show `track-completion API failed: Request failed with status code 400` after any support-room completion → 6a171ea3 not deployed to the BE this client is hitting; re-run `docker compose down/up` on EC2 or confirm the client is pointing at dev.
+- DB query (T-10b) returns rows with generic `event_name="mantra_completed"` instead of `support_{room}_mantra_completed` → event_name_map regressed (likely a merge conflict dropped the 4 support_* entries).
 
 ## 5. Known MANUAL EXCEPTIONS (do NOT mark these flows GREEN without a clean Maestro CLI session)
 

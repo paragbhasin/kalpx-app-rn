@@ -3493,6 +3493,32 @@ export async function executeAction(
                 : {}),
             },
           });
+
+          // Local engagement flag update — dashboard ring depends on
+          // practice_chant / practice_embody / practice_act (+ practice_deepen
+          // when a 4th deepen item is chosen). BE persists the JourneyActivity
+          // but does not return engagement state, and /journey/home/ is not
+          // re-fetched on dashboard return, so the flags must flip locally.
+          // Scoped to source === "core" so support/additional completions do
+          // not falsely flip the core triad progress.
+          if (source === "core") {
+            const isDeepenCompletion =
+              !!screenState.cycle_deepen_item_id &&
+              activeItem.item_id === screenState.cycle_deepen_item_id;
+            if (isDeepenCompletion) {
+              setScreenValue(true, "practice_deepen");
+            } else {
+              const flagKey =
+                activeItem.item_type === "mantra"
+                  ? "practice_chant"
+                  : activeItem.item_type === "sankalp"
+                  ? "practice_embody"
+                  : activeItem.item_type === "practice"
+                  ? "practice_act"
+                  : null;
+              if (flagKey) setScreenValue(true, flagKey);
+            }
+          }
         } else {
           console.warn(
             "[complete_runner] missing item/source — track_completion skipped",

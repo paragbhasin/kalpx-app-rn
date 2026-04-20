@@ -104,23 +104,20 @@ const CycleProgressBlock: React.FC<Props> = ({ screenData }) => {
 
       {expanded && (
         <View style={styles.body}>
+          {/* SOV-3 (2026-04-20): sovereignty-strict. Prior English fallbacks
+              ("Days engaged" / "Fully completed" / "Trigger sessions" /
+              "Daily rhythm") retired. Labels now read directly from
+              cycle_metrics payload. Missing label = empty Metric label
+              (value still shown); missing rhythm_header_label = no heading
+              rendered above the rhythm strip. */}
           <View style={styles.metricsRow}>
-            <Metric
-              value={daysEngaged}
-              label={metrics.days_engaged_label || "Days engaged"}
-            />
-            <Metric
-              value={daysComplete}
-              label={metrics.days_complete_label || "Fully completed"}
-            />
-            <Metric
-              value={triggerSessions}
-              label={metrics.trigger_sessions_label || "Trigger sessions"}
-            />
+            <Metric value={daysEngaged} label={metrics.days_engaged_label || ""} />
+            <Metric value={daysComplete} label={metrics.days_complete_label || ""} />
+            <Metric value={triggerSessions} label={metrics.trigger_sessions_label || ""} />
           </View>
-          <Text style={styles.rhythmHeader}>
-            {metrics.rhythm_header_label || "Daily rhythm"}
-          </Text>
+          {!!metrics.rhythm_header_label && (
+            <Text style={styles.rhythmHeader}>{metrics.rhythm_header_label}</Text>
+          )}
           <DailyRhythmStrip screenData={sd} />
         </View>
       )}

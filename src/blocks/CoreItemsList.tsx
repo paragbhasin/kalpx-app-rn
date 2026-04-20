@@ -30,26 +30,33 @@ const CoreItemsList: React.FC<{ block?: any }> = () => {
   const { screenData, loadScreen, goBack } = useScreenStore();
   const ss = screenData as Record<string, any>;
 
+  // SOV-2 (2026-04-20): sovereignty-strict. Prior Python fallbacks
+  // ("Today's anchor" / "Anchor when the mind gets loud." / etc.) retired.
+  // Titles read from backend companion `card_<type>_title` or the
+  // per-item content fields (mantra_text / sankalp_text / practice_title).
+  // Whys read from `card_<type>_description`. Missing = blank — card
+  // surface still anchors via the eyebrow label ("MANTRA" / "SANKALP" /
+  // "PRACTICE"), which is factual structural chrome.
   const items: CoreItem[] = [
     {
       type: "mantra",
       label: "MANTRA",
-      title: ss.card_mantra_title || ss.mantra_text || "Today's anchor",
-      why: ss.card_mantra_description || "Anchor when the mind gets loud.",
+      title: ss.card_mantra_title || ss.mantra_text || "",
+      why: ss.card_mantra_description || "",
       done: !!ss.practice_chant,
     },
     {
       type: "sankalp",
       label: "SANKALP",
-      title: ss.card_sankalpa_title || ss.sankalp_text || "Today's vow",
-      why: ss.card_sankalpa_description || "Today's quiet promise.",
+      title: ss.card_sankalpa_title || ss.sankalp_text || "",
+      why: ss.card_sankalpa_description || "",
       done: !!ss.practice_embody,
     },
     {
       type: "practice",
       label: "PRACTICE",
-      title: ss.card_ritual_title || ss.practice_title || "Today's practice",
-      why: ss.card_ritual_description || "A small act of steadiness.",
+      title: ss.card_ritual_title || ss.practice_title || "",
+      why: ss.card_ritual_description || "",
       done: !!ss.practice_act,
     },
   ];

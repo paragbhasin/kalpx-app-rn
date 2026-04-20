@@ -16,7 +16,6 @@
  */
 
 import React from "react";
-// @ts-expect-error — package installed once Jest + RTL are wired in Phase 5.
 import { render } from "@testing-library/react-native";
 
 import RoomRenderer from "../RoomRenderer";

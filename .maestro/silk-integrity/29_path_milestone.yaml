@@ -9,7 +9,11 @@
 # Phase 3 selector-patch: path_milestone_banner testID now expected.
 # Deny-list tier: generic + translation-missing
 env:
-  PERSONA_EMAIL: "persona_day7@kalpx.com"
+  # BE-4 (2026-04-19): switched from persona_day7 to persona_day30 so the BE
+  # _build_path_milestone returns non-null (emits only when pathDurationDays
+  # >= 30 — see core/tests/test_journey_envelope.py:228). persona_day7 was a
+  # misconfiguration — day=7 gives pathDurationDays=7, below threshold.
+  PERSONA_EMAIL: "persona_day30@kalpx.com"
   PERSONA_PASSWORD: "smoke-dev-only-do-not-use-in-prod"
 appId: com.kalpx.app
 ---

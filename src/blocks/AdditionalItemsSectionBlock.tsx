@@ -137,17 +137,22 @@ const AdditionalItemsSectionBlock: React.FC<Props> = ({ block }) => {
   };
 
   const handleLaunchRunner = async (item: AdditionalItem) => {
-    if (item.source === "additional_custom") {
-      handleComplete(item);
-      return;
-    }
-
-    // Fetch full data for the info screen
+    // Flow 25 (2026-04-20): custom items now route through the same
+    // cycle_transitions/offering_reveal → complete_runner → completion_return
+    // path as library/recommended, per founder approval. Previously we
+    // short-circuited to mitraCompleteAdditionalItem and skipped the
+    // completion transient — user-authored items had no "proper return".
+    // For custom items we skip the library search step (no master row)
+    // and use the user-authored title/subtitle directly; the runner's
+    // essence/audio/devanagari blocks self-hide when empty per sovereignty.
     setCompletingId(item.id);
     try {
+      const isCustom = item.source === "additional_custom";
+
       // 1. Initial manual data from the dashboard item (fallback)
       const baseManualData = {
         title: item.title,
+        subtitle: item.subtitle || "",
         id: item.itemId,
         item_id: item.itemId,
         type: item.itemType,
@@ -156,22 +161,30 @@ const AdditionalItemsSectionBlock: React.FC<Props> = ({ block }) => {
         audio_url: item.audio_url || "",
       };
 
-      // 2. Try to fetch high-detail data from library
-      const searchRes = await mitraLibrarySearch(
-        item.itemId || item.title,
-        item.itemType,
-      );
+      let manualData: Record<string, any>;
+      if (isCustom) {
+        // Custom items have no master row — rich runner renders with only
+        // the user-authored fields. Skip library search; go straight to
+        // the runner dispatch.
+        manualData = baseManualData;
+      } else {
+        // 2. Try to fetch high-detail data from library (library/recommended).
+        const searchRes = await mitraLibrarySearch(
+          item.itemId || item.title,
+          item.itemType,
+        );
 
-      // Use String() for type-agnostic matching (int vs string IDs)
-      const fullData =
-        searchRes?.results?.find(
-          (r: any) => String(r.itemId) === String(item.itemId),
-        ) || searchRes?.results?.[0];
+        // Use String() for type-agnostic matching (int vs string IDs)
+        const fullData =
+          searchRes?.results?.find(
+            (r: any) => String(r.itemId) === String(item.itemId),
+          ) || searchRes?.results?.[0];
 
-      const manualData = {
-        ...baseManualData,
-        ...fullData, // Merge library details if found
-      };
+        manualData = {
+          ...baseManualData,
+          ...fullData, // Merge library details if found
+        };
+      }
 
       // Canonical rich runner routing (LOCKED 2026-04-19): additional-item
       // "Start" now dispatches start_runner with source="additional_library"

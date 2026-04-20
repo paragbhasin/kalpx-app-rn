@@ -51,3 +51,13 @@ These remain queued against their designated checkpoints. No scope creep into CP
 ## Process note
 
 Single Level-A gate left in Sprint 1: S1-17 flag flip itself, now sequenced behind Phase 1–4. Every other ticket operated under agent review + defaults-if-silent. No additional founder intervention expected between now and end-of-Sprint-1 unless Phase 1–4 surfaces a real ambiguity.
+
+## Batch 1A pending disposition (2026-04-19)
+
+**Scope:** post-Wave-3 close. Batch 1A landed H-1 (durable commit + deploy + runtime truth), H-2 (chip stability 3/3 + flow 21 e2e green, flow 22 intermittent), H-4 (8-artifact docs sweep).
+
+**Pending decision — H-3 MoreSupportSheet iOS Modal accessibility refactor:**
+- **Option A (authorize H-3 now):** FE refactor replaces `Modal` with absolute `View` overlay OR adds `accessibilityViewIsModal={true}`. Unblocks Silk flows 19 + 20. Sprint 1 closes via condition (a) — all remaining flows green.
+- **Option B (defer H-3):** Flows 19/20 classified as manual-validation exceptions in FLOW_STATUS.md. Sprint 1 closes via condition (b) — manual exception protocol covers grief + loneliness completion paths on Phase 4 smoke with recorded evidence. H-3 carries forward to Sprint 2/3.
+
+Recommendation in `Batch_1A_Status_Report.md` drives the call; not yet reviewed.

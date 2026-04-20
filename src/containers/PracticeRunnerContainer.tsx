@@ -247,6 +247,13 @@ const v3Styles = StyleSheet.create({
   },
 });
 
+/**
+ * @deprecated 2026-04-20 — Canonical rich runner is
+ * `cycle_transitions/offering_reveal`. State id `practice_runner/practice_step_runner`
+ * was decommissioned post-Wave-3. Stage-1 deprecation adds runtime warn +
+ * `legacy_runner_rendered` telemetry. DO NOT EXTEND. Coordinated delete
+ * in Sprint 3. See `docs/LEGACY_COMPONENT_CLASSIFICATION_V1.md`.
+ */
 const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
   schema,
 }) => {
@@ -263,6 +270,28 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     updateScreenData,
     updateBackground,
   } = useScreenStore();
+
+  // DEPRECATED (2026-04-20). Stage-1 telemetry — any mount (non-immersive_v3
+  // branch) indicates a dispatch to legacy state id. Canonical runner is
+  // cycle_transitions/offering_reveal.
+  useEffect(() => {
+    if (__DEV__) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        "[DEPRECATED] PracticeRunnerContainer rendered (legacy branch) — canonical runner is cycle_transitions/offering_reveal. Trace the caller.",
+      );
+    }
+    const ss = screenState as Record<string, any>;
+    mitraTrackEvent("legacy_runner_rendered", {
+      journeyId: ss.journey_id,
+      dayNumber: ss.day_number || 1,
+      meta: {
+        component: "PracticeRunnerContainer",
+        state_id: "practice_runner/practice_step_runner",
+        source: ss.runner_source,
+      },
+    }).catch(() => {});
+  }, []);
 
   const [count, setCount] = useState(0);
   const [sessionStartTime, setSessionStartTime] = useState(Date.now());

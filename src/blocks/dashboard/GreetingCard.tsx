@@ -41,14 +41,17 @@ const GreetingCard: React.FC<Props> = ({ screenData }) => {
   const userName: string = sd.user_name ?? "";
   const tone: string = sd.greeting_tone ?? "";
 
-  // Always-visible block. When backend copy is missing, fall back to
-  // a neutral structural greeting using the user name so the card
-  // still anchors the dashboard top.
+  // SOV-1 (2026-04-20): sovereignty-strict. `displayContext` reads
+  // directly from BE-sourced `greeting_context` (now wired to
+  // M_new_dashboard_greeting.contextual_fallback ContentPack slot via
+  // journey_envelope._get_slot_from_contentpack). If BE ships empty,
+  // the context line self-hides below rather than falling back to an
+  // English string. `displayName` retains the structural "friend"
+  // fallback since a name is required for the greeting to grammar.
   //
-  // Notifications bell removed 2026-04-18 — the bottom-nav tab already
-  // carries it; duplicating in-card was redundant.
+  // Notifications bell removed 2026-04-18 — bottom-nav tab carries it.
   const displayName = userName || "friend";
-  const displayContext = context || "You're here. Begin wherever feels right.";
+  const displayContext = context;
 
   // Joy Carry same-day chip (founder adjustment #3, 2026-04-19 — Option A
   // frontend-first). Stamped by `carry_joy_forward` action when the user
@@ -69,7 +72,7 @@ const GreetingCard: React.FC<Props> = ({ screenData }) => {
         <View style={styles.leftAccent} />
         <View style={styles.body}>
           <Text style={styles.name}>Welcome, {displayName}.</Text>
-          <Text style={styles.context}>{displayContext}</Text>
+          {!!displayContext && <Text style={styles.context}>{displayContext}</Text>}
           {!!tone && <Text style={styles.tone}>{tone}</Text>}
         </View>
         <View style={styles.mandalaWrap} accessibilityElementsHidden>

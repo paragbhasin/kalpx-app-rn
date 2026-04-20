@@ -33,10 +33,13 @@ const SeasonChangeBanner: React.FC<{ block?: any }> = () => {
     return null;
   }
 
-  const headline =
-    signal.headline || "The season is shifting.";
-  const message =
-    signal.message || "Slower mornings land well now.";
+  // SOV-5 (2026-04-20): sovereignty-strict. Prior English fallbacks
+  // ("The season is shifting." / "Slower mornings land well now.")
+  // retired. Banner reads directly from signal payload; if neither
+  // headline nor message is present the banner self-hides below.
+  const headline = signal.headline || "";
+  const message = signal.message || "";
+  if (!headline && !message) return null;
 
   const onDismiss = () => {
     executeAction(

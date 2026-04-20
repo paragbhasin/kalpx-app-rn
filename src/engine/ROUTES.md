@@ -78,3 +78,21 @@
 3. Wire the handler in `actionExecutor.ts` if it's a new action type.
 4. Register in `ScreenRenderer.tsx` if it's a new `container_id`.
 5. For post-CP-1 dashboard tickets: specify which container (legacy vs new) the feature targets.
+
+## Wave 3 addendum (2026-04-19) — Canonical rich runner routing
+
+**Primary change:** all `start_runner` dispatches — regardless of source (core / support_grief / support_loneliness / support_joy / support_growth / additional_library / additional_custom / additional_recommended) — route to `cycle_transitions/offering_reveal` as the single canonical rich runner surface.
+
+### Deprecated paths (parked as legacy/unreachable)
+
+| Legacy target | Status |
+|---|---|
+| `practice_runner/mantra_runner` (MantraRunnerDisplay dark-chrome) | Parked — no live dispatcher after 2026-04-19 |
+| `practice_runner/sankalp_embody` (EmbodimentChallengeRunnerContainer) | Parked — no live dispatcher |
+| `practice_runner/practice_step_runner` (legacy PracticeRunnerContainer) | Parked — no live dispatcher |
+
+These state ids + their backing components are candidates for the Sprint 3 delete queue (MDR-S3-10). Any flow that lands on them post-PR1.5 is a regression.
+
+### Test affordance
+
+`test_runner_force_complete` — `__DEV__`-gated TouchableOpacity in `CycleTransitionsContainer.tsx` `isInfoScreen` branch. testID queryable, dispatches real `complete_runner` for all 3 variants. Production strips.

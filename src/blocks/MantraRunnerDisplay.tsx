@@ -1,4 +1,14 @@
 /**
+ * @deprecated 2026-04-20 — Canonical rich runner is
+ * `cycle_transitions/offering_reveal` via `CycleTransitionsContainer`.
+ * All dispatch paths to `practice_runner/mantra_runner` (state id that
+ * mounts this component) were decommissioned post-Wave-3. This component
+ * is parked for coordinated-delete in Sprint 3; Stage 1 deprecation
+ * (2026-04-20) adds a runtime warn + `legacy_runner_rendered` telemetry
+ * event so any residual dispatcher surfaces in logs before the Stage-4
+ * cleanup PR. DO NOT EXTEND. See
+ * `docs/LEGACY_COMPONENT_CLASSIFICATION_V1.md` + `mitra_parked_items_2026_04_19.md`.
+ *
  * MantraRunnerDisplay — Week 3 Moment 17 immersive mantra runner (bead counter).
  *
  * Web parity: src/blocks/RepCounter.vue + src/containers/PracticeRunnerContainer.vue
@@ -31,6 +41,7 @@ import { Fonts } from '../theme/fonts';
 import { useContentSlots, readMomentSlot } from '../hooks/useContentSlots';
 import { useScreenStore } from '../engine/useScreenBridge';
 import { executeAction } from '../engine/actionExecutor';
+import { mitraTrackEvent } from '../engine/mitraApi';
 import AudioPlayerBlock from './AudioPlayerBlock';
 
 interface MantraRunnerDisplayProps {
@@ -49,6 +60,27 @@ const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 const MantraRunnerDisplay: React.FC<MantraRunnerDisplayProps> = ({ block }) => {
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
   const ss = screenData as Record<string, any>;
+
+  // DEPRECATED (2026-04-20). Stage-1 deprecation telemetry — fires on every
+  // mount so any leaked dispatcher surfaces in logs. Canonical runner is
+  // `cycle_transitions/offering_reveal`. Remove with Stage-4 cleanup PR.
+  useEffect(() => {
+    if (__DEV__) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        "[DEPRECATED] MantraRunnerDisplay rendered — canonical runner is cycle_transitions/offering_reveal. Trace the caller.",
+      );
+    }
+    mitraTrackEvent("legacy_runner_rendered", {
+      journeyId: ss.journey_id,
+      dayNumber: ss.day_number || 1,
+      meta: {
+        component: "MantraRunnerDisplay",
+        state_id: "practice_runner/mantra_runner",
+        source: ss.runner_source,
+      },
+    }).catch(() => {});
+  }, []);
 
   useContentSlots({
     momentId: 'M17_mantra_runner',

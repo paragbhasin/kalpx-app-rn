@@ -21,11 +21,18 @@ appId: com.kalpx.app
     timeout: 1500
 - tapOn:
     id: "quick_support_more_label"
-# iOS Modal flattens Pressable testIDs; tap by authored label text.
+# Batch 1B H-3 (2026-04-19): MoreSupportSheet refactored so row testIDs
+# are reachable on iOS (no more Pressable-flatten). Tap by testID.
+# Sheet uses slide animation — waitForAnimationToEnd before assertion
+# so the mount completes before Maestro queries the hierarchy.
+- waitForAnimationToEnd:
+    timeout: 3000
 - extendedWaitUntil:
-    visible: ".*Company for loneliness.*"
-    timeout: 6000
-- tapOn: ".*Company for loneliness.*"
+    visible:
+      id: "more_support_loneliness_row"
+    timeout: 10000
+- tapOn:
+    id: "more_support_loneliness_row"
 - extendedWaitUntil:
     visible:
       id: "loneliness_room_opening_line"

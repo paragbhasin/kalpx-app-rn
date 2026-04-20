@@ -1,4 +1,10 @@
 /**
+ * @deprecated 2026-04-20 — Canonical rich runner is
+ * `cycle_transitions/offering_reveal`. State id `practice_runner/sankalp_embody`
+ * (which mounts this container) was decommissioned post-Wave-3. Stage-1
+ * deprecation adds runtime warn + `legacy_runner_rendered` telemetry.
+ * DO NOT EXTEND. Coordinated delete in Sprint 3.
+ *
  * EmbodimentChallengeRunnerContainer — Runner for embodiment challenge flows.
  *
  * States handled (from allContainers.js):
@@ -22,6 +28,7 @@ import {
 } from 'react-native';
 import BlockRenderer from '../engine/BlockRenderer';
 import { executeAction } from '../engine/actionExecutor';
+import { mitraTrackEvent } from '../engine/mitraApi';
 import { useScreenStore } from '../engine/useScreenBridge';
 import { Fonts } from '../theme/fonts';
 
@@ -93,6 +100,28 @@ const EmbodimentChallengeRunnerContainer: React.FC<EmbodimentChallengeRunnerCont
 
   // Track last on_select value we acted on to avoid re-firing
   const lastOnSelectRef = useRef<string | null>(null);
+
+  // DEPRECATED (2026-04-20). Stage-1 telemetry — any mount indicates a
+  // leaked dispatcher to practice_runner/sankalp_embody. Canonical runner
+  // is cycle_transitions/offering_reveal.
+  useEffect(() => {
+    if (__DEV__) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        "[DEPRECATED] EmbodimentChallengeRunnerContainer rendered — canonical runner is cycle_transitions/offering_reveal. Trace the caller.",
+      );
+    }
+    const ss = screenData as Record<string, any>;
+    mitraTrackEvent("legacy_runner_rendered", {
+      journeyId: ss.journey_id,
+      dayNumber: ss.day_number || 1,
+      meta: {
+        component: "EmbodimentChallengeRunnerContainer",
+        state_id: "practice_runner/sankalp_embody",
+        source: ss.runner_source,
+      },
+    }).catch(() => {});
+  }, []);
 
   // Configure background and header on mount
   useEffect(() => {

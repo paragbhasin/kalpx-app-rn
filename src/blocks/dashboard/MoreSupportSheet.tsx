@@ -123,18 +123,20 @@ const MoreSupportSheet: React.FC<Props> = ({
         <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()}>
           <View style={styles.handle} />
           {!!headerLabel && <Text style={styles.header}>{headerLabel}</Text>}
-          {rows.map((row) =>
-            row.label ? (
+          {rows.map((row) => {
+            const testId =
+              row.key === "grief"
+                ? "more_support_grief_row"
+                : "more_support_loneliness_row";
+            return row.label ? (
               <TouchableOpacity
                 key={row.key}
                 style={styles.row}
                 activeOpacity={0.85}
                 onPress={() => go(row.actionType)}
-                testID={
-                  row.key === "grief"
-                    ? "more_support_grief_row"
-                    : "more_support_loneliness_row"
-                }
+                testID={testId}
+                accessible={true}
+                accessibilityRole="button"
               >
                 <View style={styles.iconWrap}>
                   <Ionicons name={row.icon} size={18} color={Colors.gold} />
@@ -146,8 +148,8 @@ const MoreSupportSheet: React.FC<Props> = ({
                   color={Colors.brownMuted}
                 />
               </TouchableOpacity>
-            ) : null,
-          )}
+            ) : null;
+          })}
         </Pressable>
       </Pressable>
     </Modal>

@@ -349,7 +349,7 @@ const GrowthRoomContainer: React.FC<Props> = () => {
     try {
       const resp = await mitraLibrarySearch(itemId, "mantra");
       const mantra = (resp?.results || []).find(
-        (r: any) => r?.item_id === itemId,
+        (r: any) => (r?.itemId ?? r?.item_id) === itemId,
       );
       if (!mantra) {
         console.warn("[growth_room] mantra not found:", itemId);
@@ -390,7 +390,7 @@ const GrowthRoomContainer: React.FC<Props> = () => {
     try {
       const resp = await mitraLibrarySearch(itemId, "practice");
       const practice = (resp?.results || []).find(
-        (r: any) => r?.item_id === itemId,
+        (r: any) => (r?.itemId ?? r?.item_id) === itemId,
       );
       if (!practice) {
         console.warn("[growth_room] practice not found:", itemId);
@@ -446,7 +446,7 @@ const GrowthRoomContainer: React.FC<Props> = () => {
           style={styles.pill}
           onPress={handleMantraTap}
           testID="growth_mantra_option"
-          accessibilityLabel="growth_mantra_option"
+          accessible={true}
         >
           <Text style={styles.pillText}>{pillMantraLabel}</Text>
         </TouchableOpacity>
@@ -457,7 +457,7 @@ const GrowthRoomContainer: React.FC<Props> = () => {
           style={styles.pill}
           onPress={handlePracticeTap}
           testID="growth_practice_option"
-          accessibilityLabel="growth_practice_option"
+          accessible={true}
         >
           <Text style={styles.pillText}>{pillPracticeLabel}</Text>
         </TouchableOpacity>

@@ -340,7 +340,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
     try {
       const resp = await mitraLibrarySearch(itemId, "mantra");
       const mantra = (resp?.results || []).find(
-        (r: any) => r?.item_id === itemId,
+        (r: any) => (r?.itemId ?? r?.item_id) === itemId,
       );
       if (!mantra) {
         console.warn("[grief_room] mantra not found in library:", itemId);
@@ -426,7 +426,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
           style={styles.pill}
           onPress={handleMantraTap}
           testID="grief_mantra_option"
-          accessibilityLabel="grief_mantra_option"
+          accessible={true}
         >
           <Text style={styles.pillText}>{pillMantraLabel}</Text>
         </TouchableOpacity>

@@ -270,7 +270,7 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
     try {
       const resp = await mitraLibrarySearch(itemId, "mantra");
       const mantra = (resp?.results || []).find(
-        (r: any) => r?.item_id === itemId,
+        (r: any) => (r?.itemId ?? r?.item_id) === itemId,
       );
       if (!mantra) {
         console.warn(
@@ -325,7 +325,7 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
           style={styles.pill}
           onPress={handleBhaktiTap}
           testID="loneliness_bhakti_option"
-          accessibilityLabel="loneliness_bhakti_option"
+          accessible={true}
         >
           <Text style={styles.pillText}>{pillBhaktiLabel}</Text>
         </TouchableOpacity>
@@ -336,7 +336,7 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
           style={styles.pill}
           onPress={handleChantTap}
           testID="loneliness_chant_option"
-          accessibilityLabel="loneliness_chant_option"
+          accessible={true}
         >
           <Text style={styles.pillText}>{pillChantLabel}</Text>
         </TouchableOpacity>

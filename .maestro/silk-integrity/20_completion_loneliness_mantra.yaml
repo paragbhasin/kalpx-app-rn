@@ -11,13 +11,21 @@ appId: com.kalpx.app
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
 - runFlow: common/enter_core_view.yaml
-# Wave 3 (2026-04-19): testID-first entry chain
+# Wave 3 (2026-04-19): harness timing fix
+- scrollUntilVisible:
+    element:
+      id: "quick_support_more_label"
+    direction: DOWN
+    timeout: 8000
+- waitForAnimationToEnd:
+    timeout: 1500
 - tapOn:
     id: "quick_support_more_label"
-- waitForAnimationToEnd:
-    timeout: 4000
-- tapOn:
-    id: "more_support_loneliness_row"
+# iOS Modal flattens Pressable testIDs; tap by authored label text.
+- extendedWaitUntil:
+    visible: ".*Company for loneliness.*"
+    timeout: 6000
+- tapOn: ".*Company for loneliness.*"
 - extendedWaitUntil:
     visible:
       id: "loneliness_room_opening_line"
@@ -27,10 +35,16 @@ appId: com.kalpx.app
     optional: true
 - waitForAnimationToEnd:
     timeout: 4000
+- extendedWaitUntil:
+    visible:
+      id: "loneliness_bhakti_option"
+    timeout: 4000
 - tapOn:
     id: "loneliness_bhakti_option"
-- waitForAnimationToEnd:
-    timeout: 6000
+- extendedWaitUntil:
+    visible:
+      id: "test_runner_force_complete"
+    timeout: 8000
 # Wave 3 (2026-04-19) PROVISIONAL — canonical rich runner hook
 - tapOn:
     id: "test_runner_force_complete"

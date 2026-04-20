@@ -258,7 +258,7 @@ const JoyRoomContainer: React.FC<Props> = () => {
     try {
       const resp = await mitraLibrarySearch(itemId, "mantra");
       const mantra = (resp?.results || []).find(
-        (r: any) => r?.item_id === itemId,
+        (r: any) => (r?.itemId ?? r?.item_id) === itemId,
       );
       if (!mantra) {
         console.warn("[joy_room] mantra not found in library:", itemId);
@@ -299,7 +299,7 @@ const JoyRoomContainer: React.FC<Props> = () => {
           style={styles.pill}
           onPress={handleMantraTap}
           testID="joy_chant_option"
-          accessibilityLabel="joy_chant_option"
+          accessible={true}
         >
           <Text style={styles.pillText}>{pillChantLabel}</Text>
         </TouchableOpacity>

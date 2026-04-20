@@ -11,22 +11,34 @@ appId: com.kalpx.app
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
 - runFlow: common/enter_core_view.yaml
-- runFlow: common/scroll_to_quick_support.yaml
-# Wave 3 (2026-04-19): testID-first entry chain. Bypasses inquiry
-# sub-flow — mantra pill is a sibling option on growth_room options.
+# Wave 3 (2026-04-19): harness timing fix — inline scroll. Bypasses
+# inquiry sub-flow — mantra pill is a sibling option on growth_room.
+- scrollUntilVisible:
+    element:
+      id: "quick_support_growth_chip"
+    direction: DOWN
+    timeout: 8000
+- waitForAnimationToEnd:
+    timeout: 1500
 - tapOn:
     id: "quick_support_growth_chip"
 - extendedWaitUntil:
     visible:
       id: "growth_room_opening_line"
     timeout: 10000
-# Growth uses 10s silence tolerance; wait it out.
+# Growth uses 10s silence tolerance; wait options to auto-reveal.
 - waitForAnimationToEnd:
     timeout: 12000
+- extendedWaitUntil:
+    visible:
+      id: "growth_mantra_option"
+    timeout: 4000
 - tapOn:
     id: "growth_mantra_option"
-- waitForAnimationToEnd:
-    timeout: 6000
+- extendedWaitUntil:
+    visible:
+      id: "test_runner_force_complete"
+    timeout: 8000
 # Wave 3 (2026-04-19) PROVISIONAL — canonical rich runner hook
 - tapOn:
     id: "test_runner_force_complete"

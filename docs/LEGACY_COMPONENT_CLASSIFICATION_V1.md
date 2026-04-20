@@ -60,6 +60,36 @@ Pre-delete audit under M-1/M-2 surfaced two scaffolds that are NOT safe to delet
 
 Effective delete-queue size reduces 14 → 12. Re-verify the remaining 12 items with a fresh cross-folder importer grep before M-1 execution (Batch M-B).
 
+## Batch M-B — M-1 fresh re-audit + partial execution (2026-04-19)
+
+Fresh cross-folder importer grep over the remaining 12 items surfaced additional items that were WRONGLY tagged DELETE-CANDIDATE by the prior audit. Final disposition:
+
+**DELETED (6 verified-safe scaffolds; zero importers):**
+- `src/extensions/moments/checkpoint_results_refresh/` — deleted (README + contentpack.json only, never wired).
+- `src/extensions/moments/cycle_reflection_refresh/` — deleted (README + contentpack.json only, never wired).
+- `src/extensions/moments/voice_consent/` — deleted (scaffold; live VoiceConsentSheet lives at `src/blocks/VoiceConsentSheet.tsx`).
+- `src/extensions/moments/voice_on_every_screen/` — deleted (scaffold; never integrated).
+- `src/extensions/moments/completion_return/` — deleted (scaffold; live CompletionReturnTransient at `src/blocks/CompletionReturnTransient.tsx` and block-map entry `completion_return` in BlockRenderer.tsx:228 both preserved).
+- `src/extensions/moments/sound_bridge/` — deleted (scaffold; live SoundBridgeTransient at `src/blocks/SoundBridgeTransient.tsx` and block-map entry `sound_bridge_transient` in BlockRenderer.tsx:231 both preserved).
+
+Typecheck after deletion: 7 pre-existing errors repo-wide (unrelated); zero new errors from deletions.
+
+**RECLASSIFIED KEEP (actively used, Agent-1 audit wrong):**
+| Component | Prior | Corrected | Evidence |
+|---|---|---|---|
+| `src/extensions/moments/day_type_chip/` | DELETE-CANDIDATE | **KEEP** | Imported + rendered by `src/extensions/moments/new_dashboard/index.tsx:28,183`. |
+| `src/extensions/moments/personal_greeting_card/` | DELETE-CANDIDATE | **KEEP** | Imported + rendered by `src/extensions/moments/new_dashboard/index.tsx:26,150`. Greeting logic that was referenced as "inlined in NewDashboardContainer" is for the containers/ version; the extensions/moments/new_dashboard uses this scaffold. |
+| `src/extensions/moments/entity_recognition_card/` | DELETE-CANDIDATE | **KEEP** | Imported + rendered by `src/extensions/moments/new_dashboard/index.tsx:32,212` under `sd.entity_card` guard. Flow 31 depends on `entity_recognition_card` testID. A separate canonical version lives at `src/blocks/dashboard/insights/EntityRecognitionCard.tsx`; both are live for different containers. |
+
+**DEFERRED (3 registered components, dispatch audit required):**
+- `src/blocks/MantraRunnerDisplay.tsx` — registered at BlockRenderer.tsx:225 as `mantra_runner_display`. Parked per Wave 3 routing, but registry entry + import must be removed together with the file to avoid TS breakage. Coordinated delete across BlockRenderer + file.
+- `src/containers/EmbodimentChallengeRunnerContainer.tsx` — registered at ScreenRenderer.tsx:16. Same coordination requirement.
+- `src/containers/PracticeRunnerContainer.tsx` — registered at ScreenRenderer.tsx:23. Same coordination requirement.
+
+Deferral rationale: each of these 3 requires a multi-file coordinated delete (file + registry entry + any stateMap reference in `allContainers.js` + possible test updates). Tracked for a dedicated Sprint 3 pass. Do NOT bundle with simple scaffold deletes.
+
+**Queue closure:** 14 original → 2 reclassified in Batch M-A + 3 reclassified + 6 deleted + 3 deferred = full disposition. M-1 Batch M-B partial execution complete; 3 items queued for Sprint 3 coordinated delete.
+
 ## Known BE gaps surfaced by M-2 (deferred)
 
 - `continuity_mirror` envelope field NOT populated by BE. `ContinuityMirrorCard` will stay invisible until MDR-S2-06 BE continuity wire-up lands. FE render block is now ready to receive it.

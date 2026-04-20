@@ -77,6 +77,13 @@ const hasContent = (val: any): boolean => {
   return true;
 };
 
+const normalizeComparableText = (val: any): string => {
+  return String(val || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+};
+
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
@@ -478,6 +485,21 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     () => screenData?.info || screenData?.runner_active_item || {},
     [screenData],
   );
+  const sankalpBodyText = useMemo(
+    () =>
+      interpolate(
+        info.line || info.subtitle || info.iast || info.meaning || info.summary,
+        { ...screenData, ...info },
+      ),
+    [info, screenData],
+  );
+  const shouldShowSankalpBody = useMemo(() => {
+    if (!hasContent(sankalpBodyText)) return false;
+    return (
+      normalizeComparableText(sankalpBodyText) !==
+      normalizeComparableText(info.title || "Intention")
+    );
+  }, [sankalpBodyText, info.title]);
   const stateId = currentStateId || "";
 
   const currentType: ActivityType = useMemo(() => {
@@ -1099,16 +1121,11 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                 <Text style={styles.deityTitle}>
                   {info.title || "Intention"}
                 </Text>
-                <Text style={styles.sankalpMainTextInline}>
-                  {interpolate(
-                    info.line ||
-                      info.subtitle ||
-                      info.iast ||
-                      info.meaning ||
-                      info.summary,
-                    { ...screenData, ...info },
-                  )}
-                </Text>
+                {shouldShowSankalpBody && (
+                  <Text style={styles.sankalpMainTextInline}>
+                    {sankalpBodyText}
+                  </Text>
+                )}
               </View>
 
               {/* How To Live — stays visible as a MAIN section (founder
@@ -1123,16 +1140,14 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                   <View style={{ marginTop: 12 }}>
                     {Array.isArray(info.how_to_live) ? (
                       <View style={styles.howToLiveList}>
-                        {info.how_to_live.map(
-                          (line: string, index: number) => (
-                            <Text
-                              key={`${line}-${index}`}
-                              style={styles.howToLiveText}
-                            >
-                              {line}
-                            </Text>
-                          ),
-                        )}
+                        {info.how_to_live.map((line: string, index: number) => (
+                          <Text
+                            key={`${line}-${index}`}
+                            style={styles.howToLiveText}
+                          >
+                            {line}
+                          </Text>
+                        ))}
                       </View>
                     ) : (
                       <Text style={styles.howToLiveText}>
@@ -1979,10 +1994,10 @@ const styles = StyleSheet.create({
   },
   sankalpMainText: {
     fontSize: 24,
-    fontFamily: Fonts.serif.bold,
+    fontFamily: Fonts.serif.regular,
     color: "#432104",
     textAlign: "center",
-    lineHeight: 34,
+    // lineHeight: 34,
     marginTop: -30,
     paddingHorizontal: 5,
   },

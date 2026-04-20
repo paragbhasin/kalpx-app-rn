@@ -1,4 +1,16 @@
 /**
+ * @deprecated v3.1.1-wisdom (2026-04-20) — superseded by
+ *   `src/blocks/room/RoomEntrySheet.tsx`.
+ *
+ * Replacement contract: ROOM_SYSTEM_V3_1_ARCHITECTURE.md §14.3 —
+ * RoomEntrySheet lists all 6 canonical rooms (grief + loneliness become
+ * `room_release` and `room_connection` rows). Prefer that sheet anywhere
+ * QuickSupportBlock's "More ways to be supported →" footer opens.
+ *
+ * This file is RETAINED, NOT DELETED — legacy support_* room flows still
+ * reference its dispatch shape during the Phase 6 dev-bridge window (per
+ * architecture phase plan). Removal happens after per-room flip audit.
+ *
  * MoreSupportSheet — bottom sheet opened from QuickSupportBlock with
  * Grief / Lonely shortcuts.
  *

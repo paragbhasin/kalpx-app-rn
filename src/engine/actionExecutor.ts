@@ -15,7 +15,7 @@
  */
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Linking } from "react-native";
+import { Alert, Linking } from "react-native";
 import api from "../Networks/axios";
 import { navigate as rootNavigate } from "../Shared/Routes/NavigationService";
 import { cleanupFlowState, GUARDED_ACTIONS } from "./cleanupFields";
@@ -4825,6 +4825,94 @@ export async function executeAction(
             is_crisis: crisisPayload?.is_crisis ?? null,
             tier: crisisPayload?.tier ?? null,
           },
+        });
+        break;
+      }
+
+      // ================================================================
+      // v3.1.1-wisdom §14 — canonical room entry dispatch.
+      //
+      // Spec: docs/ROOM_SYSTEM_V3_1_ARCHITECTURE.md §14.1 / §14.3.
+      //
+      // Dispatched by the §14.1 "I'm in a good place" primary chip and
+      // by every RoomEntrySheet row (§14.3). Payload shape:
+      //   { room_id: RoomId, source?: string }
+      //
+      // Routing policy (Phase 5 — flag OFF default):
+      //   - EXPO_PUBLIC_MITRA_V3_ROOMS === "1" → route to the v3.1
+      //     RoomRenderer surface ({container_id:"room", state_id:"render",
+      //     meta:{room_id}}). NOT wired into allContainers yet; that
+      //     mounting lands in Phase 6 per-room flips.
+      //   - Flag OFF → map canonical room_id onto the legacy support_*
+      //     container when one exists (room_release→support_grief,
+      //     room_connection→support_loneliness, room_joy→support_joy,
+      //     room_growth→support_growth). Rooms without a legacy
+      //     container (room_stillness, room_clarity) show a "Coming
+      //     soon" toast until Phase 6.
+      //
+      // This handler intentionally does NOT clear runner_* state: each
+      // downstream legacy enter_* case already handles that, and the
+      // flag-ON RoomRenderer path owns its own state via envelope.
+      // ================================================================
+      case "enter_room": {
+        const roomId: string = payload?.room_id || "";
+        const source: string = payload?.source || "quick_support_block";
+        if (!roomId) {
+          console.warn("[actionExecutor] enter_room: missing room_id");
+          break;
+        }
+
+        mitraTrackEvent("room_entry_dispatched", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { room_id: roomId, source },
+        });
+
+        const flagOn = process.env.EXPO_PUBLIC_MITRA_V3_ROOMS === "1";
+        if (flagOn) {
+          // Phase 6 target surface. allContainers wiring lands with the
+          // per-room flip; until then this is a forward-compatible stub.
+          loadScreen({
+            container_id: "room",
+            state_id: "render",
+            meta: { room_id: roomId },
+          } as any);
+          break;
+        }
+
+        // Flag OFF — legacy dev-bridge mapping. Reuse the existing
+        // support_* enter_* handlers so session state, context fetches,
+        // and telemetry continue to match the legacy flow contract.
+        const legacyActionMap: Record<string, string> = {
+          room_joy: "enter_joy_room",
+          room_growth: "enter_growth_room",
+          room_release: "enter_grief_room",
+          room_connection: "enter_loneliness_room",
+        };
+        const legacyAction = legacyActionMap[roomId];
+        if (legacyAction) {
+          await executeAction(
+            { type: legacyAction, payload: { source } },
+            context,
+          );
+          break;
+        }
+
+        // room_stillness + room_clarity have no legacy container.
+        // Surface a Coming-Soon acknowledgement until Phase 6 ships
+        // the RoomRenderer flip for these rooms.
+        try {
+          Alert.alert(
+            "Coming soon",
+            "This room is on the way. Your path is held.",
+          );
+        } catch {
+          // Alert can fail in test harness; swallow.
+        }
+        mitraTrackEvent("room_entry_coming_soon", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { room_id: roomId, source },
         });
         break;
       }

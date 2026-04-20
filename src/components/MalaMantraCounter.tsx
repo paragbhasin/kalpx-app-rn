@@ -1,9 +1,4 @@
-import {
-  ChevronDown,
-  ChevronUp,
-  Volume2,
-  VolumeX
-} from "lucide-react-native";
+import { ChevronDown, ChevronUp, Volume2, VolumeX } from "lucide-react-native";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Dimensions,
@@ -112,7 +107,7 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
   const beads = useMemo(() => {
     const arr = [];
     const count = visualBeadsCount;
-    const radius = 100;
+    const radius = 86;
     for (let i = 0; i < count; i++) {
       const angle = (i / count) * 2 * Math.PI - Math.PI / 2;
       arr.push({
@@ -246,7 +241,7 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
                     disabled={tapped}
                     style={styles.beadInner}
                   >
-                    <RudrakshSvg width={36} height={36} />
+                    <RudrakshSvg width={32} height={32} />
                     {active && <View style={styles.beadPointer} />}
                   </TouchableOpacity>
                 </View>
@@ -427,6 +422,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#8b6914",
     textAlign: "center",
+    marginLeft: 30,
   },
   triggerSubtextWrap: {
     alignItems: "center",
@@ -474,8 +470,8 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif.regular,
   },
   interactionArea: {
-    width: 300,
-    height: 300,
+    width: 264,
+    height: 264,
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
@@ -488,9 +484,9 @@ const styles = StyleSheet.create({
   },
   ringCircle: {
     position: "absolute",
-    width: 200,
-    height: 200,
-    borderRadius: 100,
+    width: 172,
+    height: 172,
+    borderRadius: 86,
     borderWidth: 2,
     borderColor: "rgba(255, 200, 100, 0.4)",
     shadowColor: "#FFB432",
@@ -500,8 +496,8 @@ const styles = StyleSheet.create({
   },
   beadWrapper: {
     position: "absolute",
-    width: 50,
-    height: 50,
+    width: 44,
+    height: 44,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -525,9 +521,9 @@ const styles = StyleSheet.create({
   },
   centerTapTarget: {
     position: "absolute",
-    width: 130,
-    height: 130,
-    borderRadius: 65,
+    width: 118,
+    height: 118,
+    borderRadius: 59,
     backgroundColor: "#fff",
     borderWidth: 1.5,
     borderColor: "#e3b54c",
@@ -547,7 +543,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   tapText: {
-    fontSize: 22,
+    fontSize: 20,
     letterSpacing: 4,
     fontFamily: Fonts.sans.medium,
     color: "#b89450",

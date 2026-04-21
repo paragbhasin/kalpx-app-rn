@@ -1,23 +1,25 @@
 /**
  * ContinueJourney — contextual home surface for authed users.
- * v3 (2026-04-21) — backend-driven per v3 Journey Contract.
  *
- * Data source: GET /api/mitra/v3/journey/entry-view/
- * The entry-view envelope carries a `target.view_key` + `target.payload`:
- *   - target.view_key === "daily_view"            → route to new-dashboard,
- *                                                     hydrate screenData from inline payload
- *   - target.view_key === "day_7_view"            → route to checkpoint-day-7, inline payload
- *   - target.view_key === "day_14_view"           → route to checkpoint-day-14, inline payload
- *   - target.view_key === "crisis_view"           → route to crisis surface
- *   - target.view_key === "onboarding_start"      → route to onboarding turn 1
- *   - target.view_key === "welcome_back_surface"  → render the chip home with
- *                                                   reentry-decision chips (continue | fresh)
+ * Two modes selected by `hasActiveJourney` prop:
  *
- * ETag discipline: client stores last-seen etag; subsequent focus passes
- * If-None-Match; on 304 we keep the previously-rendered view.
+ *   hasActiveJourney = true  → GET /api/mitra/journey/home/
+ *     Dispatches on response_type per JOURNEY_HOME_CONTRACT_V1:
+ *       render_home      → momentum / choice / minimal_care layouts
+ *       route_to_moment  → executeAction immediately
+ *       fallback         → minimal 2-chip shell
+ *
+ *   hasActiveJourney = false → GET /api/mitra/v3/journey/entry-view/
+ *     target.view_key === "welcome_back_surface" → reentry chip home
+ *     Any other view_key (daily_view / day_7 / day_14 / crisis /
+ *     onboarding_start) → route away inline.
+ *
+ * ETag discipline (returning path only): module-level _entryViewEtag;
+ * cleared on stale fresh mount.
  */
 
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -33,13 +35,17 @@ import {
 } from "react-native";
 import uuidv4 from "react-native-uuid";
 import { useDispatch } from "react-redux";
+import { executeAction } from "../../engine/actionExecutor";
 import {
   mitraJourneyEntryView,
+  mitraJourneyHome,
   mitraJourneyReentryDecision,
   V3EntryViewEnvelope,
 } from "../../engine/mitraApi";
+import { useScreenStore } from "../../engine/useScreenBridge";
 import { ingestDailyView } from "../../engine/v3Ingest";
 import {
+  goBackWithData,
   loadScreenWithData,
   screenActions,
 } from "../../store/screenSlice";
@@ -47,19 +53,65 @@ import { Fonts } from "../../theme/fonts";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-// Local render shape — derived from v3 entry-view envelope. Intentionally
-// small: we either route (target != welcome_back_surface) or render a
-// minimal chip home for reentry.
+// ── Types: journey/home/ response ────────────────────────────────────
+interface ActionSpec {
+  type:
+    | "navigate"
+    | "load_screen"
+    | "open_mitra_chat"
+    | "start_checkin"
+    | "start_support"
+    | "continue_practice"
+    | "view_last_path"
+    | "noop";
+  target?: { container_id?: string; state_id?: string } | string;
+}
+
+interface ChipSpec {
+  id: string;
+  label: string;
+  icon: string | null;
+  action: ActionSpec;
+}
+
+interface FooterLink {
+  label: string;
+  action: ActionSpec;
+}
+
+interface HomeResponse {
+  response_type: "render_home" | "route_to_moment" | "fallback";
+  moment_id?: string | null;
+  layout?: "momentum" | "choice" | "minimal_care";
+  headline?: string;
+  body_lines?: string[];
+  h2_prompt?: string | null;
+  primary_cta?: ChipSpec | null;
+  chips?: ChipSpec[];
+  footer_link?: FooterLink | null;
+  action?: ActionSpec;
+  target?: { container_id: string; state_id: string };
+  meta: {
+    fallback_used?: boolean;
+    cache_ttl_sec?: number;
+  };
+}
+
+// ── Types: entry-view / welcome_back_surface ─────────────────────────
 type ChipKey = "reentry_continue" | "reentry_fresh";
 interface ReentryHome {
   headline: string;
   body_lines: string[];
+  welcome_back_line?: string;
+  focus_short?: string;
+  cycle_count?: number;
   chips: { id: ChipKey; label: string }[];
   user_name: string;
 }
 
 interface ContinueJourneyProps {
   userName?: string;
+  hasActiveJourney?: boolean;
 }
 
 // Icon-name → Ionicon glyph.
@@ -79,39 +131,91 @@ function ioniconFor(name: string | null | undefined): React.ReactNode {
   );
 }
 
-// Module-level ETag cache for entry-view. Cleared only on explicit
-// refresh or unmount; matches the room-system ETag pattern.
+// Lightweight in-module TTL cache for active-user journey/home/.
+let _homeCache: { response: HomeResponse; ts: number } | null = null;
+
+// Module-level ETag for entry-view (returning-user path).
 let _entryViewEtag: string | null = null;
 
 export default function ContinueJourney({
   userName = "friend",
+  hasActiveJourney = false,
 }: ContinueJourneyProps) {
+  const screenBridge = useScreenStore();
   const dispatch = useDispatch();
+  const navigation = useNavigation<any>();
+
+  // Active-user path state.
+  const [home, setHome] = useState<HomeResponse | null>(null);
+  // Returning-user path state.
   const [reentry, setReentry] = useState<ReentryHome | null>(null);
+  // Shared.
   const [loading, setLoading] = useState(true);
   const [submittingReentry, setSubmittingReentry] = useState(false);
   const routedRef = useRef(false);
 
-  // ActionContext matches the signature expected by actionExecutor:
-  //   loadScreen(target), goBack(), setScreenValue(value, key) — note
-  //   the reversed arg order — and screenState as the current snapshot.
-  // useScreenStore does not expose setScreenValue directly (only
-  // updateScreenData with reversed args), so we build it here via
-  // dispatch(screenActions.setScreenValue({key, value})) to match the
-  // canonical Home.tsx pattern.
-  const navigation = useNavigation<any>();
+  // ── Active-user path: buildActionContext ─────────────────────────
+  const buildActionContext = useCallback(() => {
+    return {
+      screenState: screenBridge.screenData || {},
+      setScreenValue: (value: any, key: string) => {
+        dispatch(screenActions.setScreenValue({ key, value }));
+      },
+      loadScreen: (target: any) => {
+        const containerId =
+          typeof target === "string"
+            ? "generic"
+            : target?.container_id || target?.containerId || "generic";
+        const stateId =
+          typeof target === "string"
+            ? target
+            : target?.state_id || target?.stateId || "";
+        dispatch(loadScreenWithData({ containerId, stateId }) as any);
+        navigation.navigate("DynamicEngine");
+      },
+      goBack: () => {
+        dispatch(goBackWithData() as any);
+      },
+      currentScreen: screenBridge.currentScreen,
+    };
+  }, [screenBridge.screenData, screenBridge.currentScreen, dispatch, navigation]);
 
-  // routeToView — given a v3 entry-view envelope, either hydrate
-  // screenData from the inline target.payload and navigate, or set
-  // local reentry state for in-place chip render. No legacy
-  // generate_companion prehydration.
+  // ── Active-user path: fetchHome ──────────────────────────────────
+  const fetchHome = useCallback(async (forceRefresh = false) => {
+    const ttlMs = (_homeCache?.response?.meta?.cache_ttl_sec || 0) * 1000;
+    if (
+      !forceRefresh &&
+      _homeCache &&
+      ttlMs > 0 &&
+      Date.now() - _homeCache.ts < ttlMs
+    ) {
+      setHome(_homeCache.response);
+      setLoading(false);
+      return _homeCache.response;
+    }
+    setLoading(true);
+    let deviceTz: string | undefined;
+    try {
+      deviceTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    } catch {
+      deviceTz = undefined;
+    }
+    const res = (await mitraJourneyHome({ tz: deviceTz })) as HomeResponse | null;
+    if (res) {
+      _homeCache = { response: res, ts: Date.now() };
+      setHome(res);
+    }
+    setLoading(false);
+    return res;
+  }, []);
+
+  // ── Returning-user path: routeToView ─────────────────────────────
   const routeToView = useCallback(
     (env: V3EntryViewEnvelope): ReentryHome | null => {
       const target = env.target;
       const viewKey = target?.view_key;
       const payload = target?.payload ?? {};
 
-      // Inline-hydrate screenData for container targets.
       const writeAll = (flat: Record<string, any>) => {
         for (const [k, v] of Object.entries(flat)) {
           if (v !== undefined) {
@@ -121,7 +225,6 @@ export default function ContinueJourney({
       };
 
       if (viewKey === "daily_view") {
-        // Inline payload IS the daily-view envelope body.
         writeAll(ingestDailyView(payload as any));
         routedRef.current = true;
         dispatch(
@@ -162,10 +265,7 @@ export default function ContinueJourney({
       if (viewKey === "crisis_view") {
         routedRef.current = true;
         dispatch(
-          loadScreenWithData({
-            containerId: "safety",
-            stateId: "crisis",
-          }) as any,
+          loadScreenWithData({ containerId: "safety", stateId: "crisis" }) as any,
         );
         navigation.navigate("DynamicEngine");
         return null;
@@ -196,6 +296,9 @@ export default function ContinueJourney({
       return {
         headline: cont.headline || "Welcome back.",
         body_lines: cont.body ? [cont.body] : [],
+        welcome_back_line: cont.welcome_back_line || "",
+        focus_short: cont.focus_short || "",
+        cycle_count: cont.cycle_count ?? undefined,
         chips,
         user_name: greet.user_name || userName || "friend",
       };
@@ -210,10 +313,6 @@ export default function ContinueJourney({
       if (result.etag) _entryViewEtag = result.etag;
 
       if (result.notModified || !result.envelope) {
-        // 304 — keep whatever we rendered last. If nothing was ever
-        // rendered (e.g. fresh mount but with a stale module-level ETag),
-        // we must clear the ETag and refetch to avoid a permanent blank
-        // hang. This ensures a fresh mount always gets data.
         if (!reentry && !routedRef.current) {
           _entryViewEtag = null;
           return fetchEntryView();
@@ -225,27 +324,60 @@ export default function ContinueJourney({
       if (next) setReentry(next);
       setLoading(false);
     } catch (err: any) {
-      console.warn("[ContinueJourney] v3 entry-view fetch failed:", err?.message);
+      console.warn("[ContinueJourney] entry-view fetch failed:", err?.message);
       setLoading(false);
     }
   }, [routeToView]);
 
-  // Mount effect: single entry-view fetch. v3 inlines all target
-  // payloads so there is no separate prehydration call.
+  // ── Mount effect ─────────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false;
+    let prehydrateTimer: ReturnType<typeof setTimeout> | null = null;
+
     if (routedRef.current) return;
-    (async () => {
-      if (cancelled) return;
-      await fetchEntryView();
-    })();
+
+    if (hasActiveJourney) {
+      // Active-user path: journey/home/ with optional generate_companion prehydration.
+      (async () => {
+        const res = await fetchHome();
+        if (cancelled || !res || routedRef.current) return;
+
+        if (res.response_type === "route_to_moment" && res.action) {
+          routedRef.current = true;
+          await executeAction(res.action as any, buildActionContext() as any);
+          return;
+        }
+        prehydrateTimer = setTimeout(() => {
+          if (cancelled || routedRef.current) return;
+          executeAction(
+            {
+              type: "generate_companion",
+              payload: { skipReveal: true, use_journey_companion: true },
+            } as any,
+            buildActionContext() as any,
+          ).catch((err) => {
+            console.debug(
+              "[ContinueJourney] generate_companion prehydrate failed:",
+              err?.message,
+            );
+          });
+        }, 1500);
+      })();
+    } else {
+      // Returning-user path: entry-view.
+      (async () => {
+        if (cancelled) return;
+        await fetchEntryView();
+      })();
+    }
+
     return () => {
       cancelled = true;
+      if (prehydrateTimer) clearTimeout(prehydrateTimer);
     };
-  }, [fetchEntryView]);
+  }, [hasActiveJourney, fetchHome, fetchEntryView, buildActionContext]);
 
-  // Reentry chip submit — owns its own POST (Step 7: replaces legacy
-  // welcome_back_continue / welcome_back_fresh executor cases).
+  // ── Reentry chip submit (returning-user path only) ───────────────
   const handleReentryChip = useCallback(
     async (chipId: ChipKey) => {
       if (submittingReentry) return;
@@ -278,19 +410,10 @@ export default function ContinueJourney({
           );
           navigation.navigate("DynamicEngine");
         } else if (nv.view_key === "onboarding_start") {
-          // Clear journey-scoped screenData before onboarding.
           const clearKeys = [
-            "journey_id",
-            "day_number",
-            "total_days",
-            "path_cycle_number",
-            "cycle_metrics",
-            "continuity",
-            "today",
-            "arc_state",
-            "insights",
-            "identity",
-            "greeting",
+            "journey_id", "day_number", "total_days", "path_cycle_number",
+            "cycle_metrics", "continuity", "today", "arc_state", "insights",
+            "identity", "greeting",
           ];
           for (const k of clearKeys) {
             dispatch(screenActions.setScreenValue({ key: k, value: null }));
@@ -310,10 +433,7 @@ export default function ContinueJourney({
           );
         }
       } catch (err: any) {
-        console.warn(
-          "[ContinueJourney] reentry-decision threw:",
-          err?.message,
-        );
+        console.warn("[ContinueJourney] reentry-decision threw:", err?.message);
       } finally {
         setSubmittingReentry(false);
       }
@@ -322,7 +442,7 @@ export default function ContinueJourney({
   );
 
   // ── Loading state ────────────────────────────────────────────────
-  if (loading || !reentry) {
+  if (loading || (hasActiveJourney ? !home : !reentry)) {
     return (
       <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.loadingWrap}>
@@ -332,13 +452,126 @@ export default function ContinueJourney({
     );
   }
 
-  // ── Reentry chip render ─────────────────────────────────────
-  const headline = (reentry.headline || "").replace(
+  // ── Active-user render (journey/home/) ───────────────────────────
+  if (hasActiveJourney && home) {
+    if (home.response_type === "route_to_moment") {
+      return null;
+    }
+
+    const headline = (home.headline || "").replace("{userName}", userName || "friend");
+    const bodyLines = home.body_lines || [];
+    const layout = home.layout || "minimal_care";
+    const chips = home.chips || [];
+    const primaryCta = home.primary_cta || null;
+    const h2 = home.h2_prompt || null;
+    const footer = home.footer_link || null;
+
+    const handleAction = async (action: ActionSpec | undefined) => {
+      if (!action) return;
+      try {
+        await executeAction(action as any, buildActionContext() as any);
+      } catch (err: any) {
+        console.warn("[ContinueJourney] executeAction threw:", err?.message);
+      }
+    };
+
+    return (
+      <SafeAreaView style={{ flex: 1 }}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.header}>
+            {!!headline && <Text style={styles.welcomeText}>{headline}</Text>}
+            {bodyLines.map((line, i) => (
+              <Text key={i} style={styles.subtext}>{line}</Text>
+            ))}
+          </View>
+
+          <View style={styles.dividerContainer}>
+            <View style={styles.dividerLine} />
+            <Ionicons name="diamond-outline" size={10} color="#DAC28E" />
+            <View style={styles.dividerLine} />
+          </View>
+
+          {!!h2 && <Text style={styles.promptText}>{h2}</Text>}
+
+          {primaryCta && (
+            <TouchableOpacity
+              style={styles.primaryCtaWrap}
+              activeOpacity={0.85}
+              onPress={() => handleAction(primaryCta.action)}
+            >
+              <LinearGradient
+                colors={["#C08B31", "#D3A44D", "#B57C26"]}
+                start={{ x: 0, y: 0.5 }}
+                end={{ x: 1, y: 0.5 }}
+                style={styles.primaryCtaGradient}
+              >
+                <Text style={styles.primaryCtaLabel}>{primaryCta.label}</Text>
+                <Ionicons name="arrow-forward" size={22} color="#FFF8E7" />
+              </LinearGradient>
+            </TouchableOpacity>
+          )}
+
+          <View style={styles.actionGroup}>
+            {chips.map((chip, idx) => {
+              const isLastWithArrow =
+                chip.action?.type === "continue_practice" && !primaryCta;
+              return (
+                <TouchableOpacity
+                  key={chip.id || `chip_${idx}`}
+                  style={styles.actionButton}
+                  activeOpacity={0.7}
+                  onPress={() => handleAction(chip.action)}
+                >
+                  <View
+                    style={[
+                      styles.btnContent,
+                      isLastWithArrow && { justifyContent: "space-between" },
+                    ]}
+                  >
+                    <View style={styles.btnContentInner}>
+                      {ioniconFor(chip.icon)}
+                      <Text style={styles.btnText}>{chip.label}</Text>
+                    </View>
+                    {isLastWithArrow && (
+                      <Ionicons name="arrow-forward" size={22} color="#432104" />
+                    )}
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          {footer && layout === "momentum" && (
+            <TouchableOpacity
+              activeOpacity={0.7}
+              onPress={() => handleAction(footer.action)}
+              style={styles.footerLinkWrap}
+            >
+              <Text style={styles.footerLinkText}>{footer.label} →</Text>
+            </TouchableOpacity>
+          )}
+        </ScrollView>
+
+        <View style={styles.lotusContainer} pointerEvents="none">
+          <Image
+            source={require("../../../assets/new_home_lotus.png")}
+            style={styles.lotusImage}
+            resizeMode="contain"
+          />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // ── Returning-user render (entry-view welcome_back_surface) ──────
+  const rEntry = reentry!;
+  const headline = (rEntry.headline || "").replace(
     "{userName}",
-    reentry.user_name || userName || "friend",
+    rEntry.user_name || userName || "friend",
   );
-  const bodyLines = reentry.body_lines;
-  const chips = reentry.chips;
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -346,26 +579,24 @@ export default function ContinueJourney({
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
         <View style={styles.header}>
           {!!headline && <Text style={styles.welcomeText}>{headline}</Text>}
-          {bodyLines.map((line, i) => (
-            <Text key={i} style={styles.subtext}>
-              {line}
-            </Text>
+          {!!rEntry.welcome_back_line && (
+            <Text style={styles.earnedLine}>{rEntry.welcome_back_line}</Text>
+          )}
+          {rEntry.body_lines.map((line, i) => (
+            <Text key={i} style={styles.subtext}>{line}</Text>
           ))}
         </View>
 
-        {/* Divider */}
         <View style={styles.dividerContainer}>
           <View style={styles.dividerLine} />
           <Ionicons name="diamond-outline" size={10} color="#DAC28E" />
           <View style={styles.dividerLine} />
         </View>
 
-        {/* Reentry chips (continue | fresh) */}
         <View style={styles.actionGroup}>
-          {chips.map((chip, idx) => (
+          {rEntry.chips.map((chip, idx) => (
             <TouchableOpacity
               key={chip.id || `chip_${idx}`}
               style={[
@@ -387,7 +618,6 @@ export default function ContinueJourney({
         </View>
       </ScrollView>
 
-      {/* Lotus illustration */}
       <View style={styles.lotusContainer} pointerEvents="none">
         <Image
           source={require("../../../assets/new_home_lotus.png")}
@@ -434,6 +664,15 @@ const styles = StyleSheet.create({
     maxWidth: 320,
     marginBottom: 6,
   },
+  earnedLine: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 16,
+    color: "#9b7a4a",
+    textAlign: "center",
+    lineHeight: 24,
+    maxWidth: 300,
+    marginBottom: 12,
+  },
   dividerContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -459,13 +698,11 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   primaryCtaGradient: {
-    // height: 60,
     borderRadius: 30,
     padding: 10,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    // paddingHorizontal: 24,
     width: "80%",
     alignSelf: "center",
     gap: 8,

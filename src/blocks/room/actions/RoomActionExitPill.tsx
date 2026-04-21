@@ -55,11 +55,22 @@ const RoomActionExitPill: React.FC<Props> = ({ action, envelope }) => {
 };
 
 const styles = StyleSheet.create({
+  // Approach: hairline-bordered pill that matches step/runner pill geometry
+  // (paddingHorizontal 16, borderRadius 24) for spatial consistency, but uses
+  // a quieter border (#E8E8E8 vs #D8D8D8) + muted label color so "exit" reads
+  // as a calm stepping-out affordance rather than a primary chip. Padding
+  // vertical raised 12 → 14 and minHeight 44 added to meet iOS HIG 44pt tap
+  // target (prev 12pad + 15pt text ≈ 39pt).
   pill: {
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingHorizontal: 16,
     borderRadius: 24,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "#E8E8E8",
     marginVertical: 4,
+    minHeight: 44,
+    alignItems: "center",
+    justifyContent: "center",
   },
   label: {
     fontSize: 15,

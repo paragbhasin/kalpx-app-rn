@@ -332,11 +332,6 @@ export interface PrincipleBanner {
 // Top-level envelope (§7.1)
 // ───────────────────────────────────────────────────────────────────────────
 
-export interface RoomIdentity {
-  purpose_line: string;
-  stance_tag: string;
-}
-
 export interface RoomProvenance {
   pool_id: string;
   pool_version: string;
@@ -355,7 +350,6 @@ export interface RoomFallbacks {
 export interface RoomRenderV1 {
   schema_version: "room.render.v1";
   room_id: RoomId;
-  room_identity: RoomIdentity;
 
   opening_line: string;
   second_beat_line: string | null;

@@ -44,10 +44,6 @@ function buildExitOnlyFallback(roomId: RoomId): RoomRenderV1 {
   return {
     schema_version: "room.render.v1",
     room_id: roomId,
-    room_identity: {
-      purpose_line: "",
-      stance_tag: "steady",
-    },
     opening_line: "",
     second_beat_line: null,
     ready_hint: "",

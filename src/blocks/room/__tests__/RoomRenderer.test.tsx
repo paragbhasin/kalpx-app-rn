@@ -88,7 +88,6 @@ function fixtureEnvelope(): RoomRenderV1 {
   return {
     schema_version: "room.render.v1",
     room_id: "room_joy",
-    room_identity: { purpose_line: "Honor fullness.", stance_tag: "expand" },
     opening_line: "You arrive bright.",
     second_beat_line: "Breathe the fullness in.",
     ready_hint: "Tap when you're ready",

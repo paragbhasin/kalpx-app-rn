@@ -61,8 +61,6 @@ import ResilienceNarrativeCard from "../blocks/dashboard/insights/ResilienceNarr
 import ContinuityMirrorCard from "../extensions/moments/continuity_mirror_card";
 import PathMilestoneBanner from "../extensions/moments/path_milestone_banner";
 
-// ── Voice input ─────────────────────────────────────────────────────────
-import { VoiceTextInput } from "../components/VoiceTextInput";
 
 type Schema = {
   blocks?: any[];
@@ -141,18 +139,6 @@ const NewDashboardContainer: React.FC<Props> = () => {
     }, []),
   );
 
-  const handleVoiceSend = (text: string, type: "text" | "voice") => {
-    executeAction(
-      { type: "voice_input_send", payload: { text, input_type: type } },
-      {
-        loadScreen,
-        goBack,
-        setScreenValue: (value: any, key: string) =>
-          store.dispatch(screenActions.setScreenValue({ key, value })),
-        screenState: store.getState().screen.screenData,
-      },
-    ).catch(() => {});
-  };
 
   return (
     <View style={styles.root}>
@@ -253,13 +239,6 @@ const NewDashboardContainer: React.FC<Props> = () => {
         <AdditionalItemsSectionBlock screenData={sd} />
       </ScrollView>
 
-      {/* 9. Floating voice input bar */}
-      <View style={styles.voiceBar}>
-        <VoiceTextInput
-          placeholder={sd.greeting?.voice_placeholder ?? sd.voice_placeholder ?? ""}
-          onSend={handleVoiceSend}
-        />
-      </View>
     </View>
   );
 };
@@ -276,8 +255,7 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 18,
     paddingTop: 10,
-    // Leave room for the floating voice bar so content isn't hidden.
-    paddingBottom: 120,
+    paddingBottom: 32,
   },
 
   // Header

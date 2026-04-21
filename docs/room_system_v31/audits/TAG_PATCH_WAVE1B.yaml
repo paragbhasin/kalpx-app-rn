@@ -1,0 +1,2206 @@
+---
+# =============================================================================
+# TAG PATCH — WAVE 1B
+# =============================================================================
+# Governance-field completion sweep for the 82 new Tier-1 principle rows
+# authored in Wave 2 (Agents F + G). These rows populate room_fit /
+# life_context_bias / surface_eligibility / emotional_function_tag /
+# action_family / pool_role / intensity / standalone_safe_flag /
+# repeat_tolerance_level / misuse_risk — which are all empty on the source
+# YAMLs. Source files are NOT modified; this patch is the only authorized
+# bridge from comment-header grouping to Rule 5 / room_selection runtime.
+#
+# Every row in this patch is scoped by the source YAML's comment-header
+# (room × life_context) and the tradition routing locked in
+# ROOM_TRADITION_ASSIGNMENT_V2. No new doctrine is introduced here.
+# =============================================================================
+agent: Agent 1 (Wave 1b governance-field completion)
+generated_at: 2026-04-21
+doctrine_ref:
+  - docs/room_system_v31/ROOM_SYSTEM_STRATEGY_V1.md (§1 §5 §5.7.5 §8)
+  - docs/room_system_v31/WAVE1_SYNTHESIS.md (§2 §3 §6 §7)
+  - docs/room_system_v31/audits/ROOM_TRADITION_ASSIGNMENT_V2.md
+  - docs/room_system_v31/audits/ROOM_CLASS_DOMINANCE_V2.md
+  - docs/room_system_v31/audits/CONTENT_CLASS_AUDIT_V2.md (§A.3 empty-field baseline)
+  - docs/room_system_v31/audits/TAG_PATCH_WAVE1.yaml (schema + conventions extended here)
+source_files_tagged:
+  - kalpx/core/data_seed/mitra_v3/principles_niti_wave2.yaml (50 rows)
+  - kalpx/core/data_seed/mitra_v3/principles_sankhya_wave2.yaml (32 rows)
+pool_version: "2026.04.v1-wave1b"
+curator_gate: true
+locale: en-only
+
+scope: >
+  Row-level governance tags for Wave 2 authoring output. Populates the 11
+  v3.1 governance fields per row (tradition_family, tradition, room_fit,
+  life_context_bias, surface_eligibility, pool_role, emotional_function_tag,
+  intensity, action_family, standalone_safe_flag, repeat_tolerance_level,
+  misuse_risk, exclude_from_contexts). CURATOR_GATE stays true on every row.
+  Rows with non-trivial judgment calls carry one-line uncertainty entries.
+
+counts:
+  group_A_niti_clarity_work_career: 12
+  group_B_niti_clarity_money_security: 12
+  group_C_niti_clarity_daily_life: 10
+  group_D_niti_clarity_relationships: 6
+  group_E_niti_growth_work_career: 5
+  group_F_niti_growth_money_security: 3
+  group_G_niti_clarity_work_applied: 2
+  subtotal_niti: 50
+  group_H_sankhya_clarity_self: 7
+  group_I_sankhya_clarity_relationships: 5
+  group_J_sankhya_clarity_work_career: 5
+  group_K_sankhya_clarity_health_energy: 3
+  group_L_sankhya_clarity_money_security: 3
+  group_M_sankhya_clarity_purpose_direction: 3
+  group_N_sankhya_clarity_daily_life: 3
+  group_O_sankhya_stillness_self: 2
+  group_P_sankhya_growth_self: 1
+  subtotal_sankhya: 32
+  total_wave1b_rows: 82
+
+# -----------------------------------------------------------------------------
+# Doctrine cheat sheet applied in this patch
+# -----------------------------------------------------------------------------
+# Canonical life_context set (STRATEGY_V1 §1 §8, lowercase snake_case):
+#   work_career, relationships, self, health_energy, money_security,
+#   purpose_direction, daily_life
+# → "self" is canonical (NOT "self_devotion"). Sankhya file's comment-header
+#   "× self" is verified literal. See uncertainty section below for one flag.
+#
+# Clarity (native home for both Niti and Sankhya) allows all 7 contexts.
+# Growth (secondary for Niti work/money; secondary for Sankhya svadhyaya-self)
+#   allows all 7 contexts.
+# Stillness is principle-EXCLUDED per DOMINANCE_V2 + SYNTHESIS §2.1 — sankhya
+#   × self rows here are flagged as doctrinal tension (see group O).
+#
+# Defaults applied per row CLASS/ROOM without further judgment:
+#   CLARITY + principle   → surface_eligibility=[wisdom_teaching, wisdom_reflection]
+#                           emotional_function_tag=discriminate
+#                           action_family=discernment
+#                           intensity=medium
+#                           repeat_tolerance_level=high
+#                           standalone_safe_flag=true (unless contraindication)
+#   GROWTH + principle    → surface_eligibility=[wisdom_reflection]
+#                           emotional_function_tag=hold
+#                           action_family=cultivation
+#                           intensity=medium
+#                           repeat_tolerance_level=high
+#                           standalone_safe_flag=true (unless contraindication)
+#   STILLNESS + principle → surface_eligibility=[wisdom_banner]
+#                           emotional_function_tag=witness
+#                           action_family=witness
+#                           intensity=light
+#                           repeat_tolerance_level=high
+#                           standalone_safe_flag=true (unless contraindication)
+#                           (stillness-principle routing carries §2.1 tension flag)
+#
+# pool_role defaults to 'rotation' for all Tier-1 principles. Curator may
+# elevate individual rows to 'anchor' later (non-destructive).
+# exclude_from_contexts defaults to [] unless the row's register would conflict
+# with a room-allowed context (rare at principle tier).
+# misuse_risk copies the source row's contraindications[0].note verbatim when
+# present, else null.
+# =============================================================================
+
+rows:
+
+  # ==========================================================================
+  # GROUP A — Niti × Clarity × Work_career (12 rows)
+  # Source: principles_niti_wave2.yaml lines 32-1086.
+  # Register: pragmatic discernment in professional decision-making.
+  # Primary clarity-native per ROOM_TRADITION_V2 §Clarity (Niti dominant).
+  # ==========================================================================
+
+  - row_id: niti_separate_report_from_interpretation
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 36
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [work_career]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this as a cover to ignore a clear pattern of harmful intent that has already repeated."
+      exclude_from_contexts: []
+    justification: Vidura-Nīti śabda vs abhiprāya discernment — clarity × work_career native.
+    uncertainty: []
+
+  - row_id: niti_counsel_versus_flattery
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 122
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [work_career, relationships]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to elevate every contrarian as wise; hita-vāda is tested by consequence, not by harshness."
+      exclude_from_contexts: []
+    justification: Hita-vāda vs priya-vāda discernment — work counsel scenarios; dual-context note flagged.
+    uncertainty: []
+
+  - row_id: niti_timing_of_the_action
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 209
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [work_career]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use timing-language to indefinitely postpone a move whose window is in fact open now."
+      exclude_from_contexts: []
+    justification: Kāla-yoga timing doctrine — clarity × work_career native.
+    uncertainty: []
+
+  - row_id: niti_reputation_over_gain
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 296
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [work_career]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not hide behind reputation-language to avoid every hard decision where short-term cost is genuinely necessary."
+      exclude_from_contexts: []
+    justification: Yaśas-over-artha discernment — Cāṇakya-Nīti work register.
+    uncertainty: []
+
+  - row_id: niti_speak_or_stay_silent
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 385
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [work_career, relationships]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use silence-discipline to avoid speaking up when clear dissent or protection is required."
+      exclude_from_contexts: []
+    justification: Mauna-vs-vacana discernment — applies across work and relationships per source tone_modes.
+    uncertainty: []
+
+  - row_id: niti_coalition_without_losing_the_principle
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 472
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [work_career]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use 'principle' as cover for stubbornness where the alliance actually asks for a genuine trade of preference on a non-core issue."
+      exclude_from_contexts: []
+    justification: Sandhi-vigraha balance with dharma-lakṣmaṇa — work alliance register.
+    uncertainty: []
+
+  - row_id: niti_short_gain_vs_long_credibility
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 559
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [work_career, money_security]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to refuse a legitimate short-term win that carries no credibility cost at all."
+      exclude_from_contexts: []
+    justification: Short-vs-long arc discernment — straddles work and money domains.
+    uncertainty: []
+
+  - row_id: niti_rising_by_help_does_not_reduce_you
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 647
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [work_career, self]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to accept help that comes with unstated strings that will in fact cost your autonomy later."
+      exclude_from_contexts: []
+    justification: Ahaṃkāra-under-help discernment; bridges work promotion scenarios and self-worth.
+    uncertainty: []
+
+  - row_id: niti_two_masters_problem
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 734
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [work_career]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to refuse integrative work across functions where the integration itself is the legitimate job."
+      exclude_from_contexts: []
+    justification: Divided-loyalty discernment — work-specific.
+    uncertainty: []
+
+  - row_id: niti_do_not_announce_the_plan_before_it_holds
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 821
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [work_career]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use plan-secrecy to bypass legitimate stakeholder consultation that the plan in fact requires to succeed."
+      exclude_from_contexts: []
+    justification: Mantra-gupti (plan-discretion) — work execution register.
+    uncertainty: []
+
+  - row_id: niti_know_your_position_before_your_move
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 909
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [work_career]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this audit as a stalling device that never concludes and never releases action."
+      exclude_from_contexts: []
+    justification: Sthāna-bala self-audit before move — work decision register.
+    uncertainty: []
+
+  - row_id: niti_protect_the_channel_of_information
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 999
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [work_career]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use open-channel language to invite every rumour; discernment of signal from noise remains required."
+      exclude_from_contexts: []
+    justification: Cāra-mantra — information-channel integrity in organizations.
+    uncertainty: []
+
+  # ==========================================================================
+  # GROUP B — Niti × Clarity × Money_security (12 rows)
+  # Source: principles_niti_wave2.yaml lines 1087-2150.
+  # Register: prudent material discernment (Cāṇakya-artha-śāstra).
+  # Clarity × money_security is thin pre-W1 — this group is the primary fill.
+  # ==========================================================================
+
+  - row_id: niti_wealth_that_eats_you
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 1091
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [money_security]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to justify neglect of legitimate financial management that the situation actually requires."
+      exclude_from_contexts: []
+    justification: Artha-that-consumes — clarity × money_security native.
+    uncertainty: []
+
+  - row_id: niti_generosity_as_root_of_abundance
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 1180
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [money_security]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to justify giving that is in fact beyond your means or that evades needed saving for dependents."
+      exclude_from_contexts: []
+    justification: Dāna-as-root-of-lakṣmī — money_security discernment.
+    uncertainty: []
+
+  - row_id: niti_investment_over_speculation
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 1268
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [money_security]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to refuse all legitimate risk; investment itself contains proportionate, repeatable risk."
+      exclude_from_contexts: []
+    justification: Sthira-artha vs dyūta-like speculation — money discernment.
+    uncertainty: []
+
+  - row_id: niti_stability_vs_greed
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 1356
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [money_security]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to freeze all ambition; the principle is about not trading stability, not about refusing growth that does not touch stability."
+      exclude_from_contexts: []
+    justification: Lobha vs sthairya — money discernment.
+    uncertainty: []
+
+  - row_id: niti_prudent_planning_over_dramatic_reversal
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 1444
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [money_security]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this against a real emergency that does require immediate and substantial adjustment."
+      exclude_from_contexts: []
+    justification: Prudence-over-upheaval — money_security register (mirrors pre-W1 niti_prefer_stability_over_dramatic_reversal).
+    uncertainty: []
+
+  - row_id: niti_aparigraha_meets_prudence
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 1532
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti, yamas]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [money_security]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use aparigraha-language to avoid a legitimate financial conversation with dependents that is in fact overdue."
+      exclude_from_contexts: []
+    justification: Aparigraha × artha-śāstra hybrid; dual tradition tag preserves lineage.
+    uncertainty:
+      - "Curator: confirm dual-tag (niti + yamas) acceptable vs niti-primary only."
+
+  - row_id: niti_lending_is_a_test_of_friendship
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 1620
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [money_security, relationships]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to refuse every legitimate small loan between trusted friends where the relationship is in fact strong."
+      exclude_from_contexts: []
+    justification: Ṛṇa-mitratā — money + relationships straddle per tone_modes.
+    uncertainty: []
+
+  - row_id: niti_the_cost_of_shortcuts
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 1709
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [money_security, work_career]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to refuse every efficient path; the principle targets unearned shortcuts, not competent efficiency."
+      exclude_from_contexts: []
+    justification: Adharmic-shortcut discernment — money + work cross-context.
+    uncertainty: []
+
+  - row_id: niti_separate_fear_from_caution
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 1797
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [money_security]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to dismiss fear as always irrational; sometimes fear carries real signal that caution then needs to translate."
+      exclude_from_contexts: []
+    justification: Bhaya vs apramāda discernment in money decisions.
+    uncertainty: []
+
+  - row_id: niti_income_before_the_lifestyle
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 1886
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [money_security]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this against legitimate short-term deficit-spending during a clear investment phase (education, medical, one-time setup)."
+      exclude_from_contexts: []
+    justification: Āya-vyaya-samatā foundational discernment — money_security anchor-candidate.
+    uncertainty: []
+
+  - row_id: niti_protect_the_emergency_reserve
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 1974
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [money_security]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to refuse all access to reserves in a genuine emergency; the point is the rule, not the lock."
+      exclude_from_contexts: []
+    justification: Āpad-dhana-rakṣā — money_security safety buffer discernment.
+    uncertainty: []
+
+  - row_id: niti_do_not_sign_in_agitation
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 2061
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [money_security]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to indefinitely avoid a time-bounded legitimate commitment that must be closed; the rule is about state, not about indefinite delay."
+      exclude_from_contexts: []
+    justification: Agitated-state-as-non-committal-window — money_security discipline.
+    uncertainty: []
+
+  # ==========================================================================
+  # GROUP C — Niti × Clarity × Daily_life (10 rows)
+  # Source: principles_niti_wave2.yaml lines 2151-3035.
+  # Register: daily-rhythm discernment (dinacharya-like but Niti-framed).
+  # ==========================================================================
+
+  - row_id: niti_rhythm_before_decision
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 2155
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti, dinacharya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [daily_life]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to defer a genuinely time-critical decision where the window will close in hours."
+      exclude_from_contexts: []
+    justification: Pre-decision rhythm — dinacharya × niti hybrid register.
+    uncertainty: []
+
+  - row_id: niti_small_clean_actions_compound
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 2244
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [daily_life]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to avoid the large decision whose window is in fact open now and requires a step change."
+      exclude_from_contexts: []
+    justification: Kṣudra-kriyā compound doctrine — daily discernment.
+    uncertainty: []
+
+  - row_id: niti_reputation_slow_built_quickly_lost
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 2333
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [daily_life, work_career]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to become so avoidance-driven that no action is ever taken for fear of a single-night cost."
+      exclude_from_contexts: []
+    justification: Asymmetric-reputation-cost doctrine — daily × work discernment.
+    uncertainty: []
+
+  - row_id: niti_small_virtue_daily
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 2421
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [daily_life]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this against the genuine occasional moment that does require a large dramatic stand."
+      exclude_from_contexts: []
+    justification: Daily-virtue cultivation reading — daily_life register.
+    uncertainty: []
+
+  - row_id: niti_protection_of_attention
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 2509
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [daily_life]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to close necessary channels of attention to family, dependents, or genuine emergency."
+      exclude_from_contexts: []
+    justification: Manas-saṁyama — attention-as-resource daily discernment.
+    uncertainty: []
+
+  - row_id: niti_company_shapes_mind
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 2597
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [daily_life, relationships]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to isolate from all challenging company; growth sometimes requires uncomfortable company, and the rule is about sustained absorption, not single exposure."
+      exclude_from_contexts: []
+    justification: Saṅga-prabhāva — daily × relational discernment.
+    uncertainty: []
+
+  - row_id: niti_food_and_sleep_as_decisions
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 2684
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti, dinacharya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [daily_life, health_energy]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to rigidify food-sleep rules in life seasons (infant, illness) where flexibility is required."
+      exclude_from_contexts: []
+    justification: Āhāra-nidrā-as-choice — dinacharya × niti hybrid.
+    uncertainty: []
+
+  - row_id: niti_weekly_self_audit
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 2773
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [daily_life]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not let the audit become a rumination session; structured review is not the same as re-litigation."
+      exclude_from_contexts: []
+    justification: Weekly svādhyāya-lite — daily discernment rhythm.
+    uncertainty: []
+
+  - row_id: niti_hold_the_ordinary_when_storm_is_outside
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 2860
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [daily_life]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to perform normalcy when a genuine emergency actually requires interruption of rhythm."
+      exclude_from_contexts: []
+    justification: Rhythm-as-anchor-in-turbulence — daily discernment.
+    uncertainty: []
+
+  - row_id: niti_finish_one_thing_each_day
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 2949
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [daily_life]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to force premature closure on something that genuinely needs more time to mature."
+      exclude_from_contexts: []
+    justification: Daily-completion discipline — daily_life register.
+    uncertainty: []
+
+  # ==========================================================================
+  # GROUP D — Niti × Clarity × Relationships (6 rows)
+  # Source: principles_niti_wave2.yaml lines 3036-3568.
+  # Register: relational discernment (satya, maryādā, boundaries).
+  # ==========================================================================
+
+  - row_id: niti_truthfulness_with_discretion
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 3040
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti, yamas]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [relationships]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to withhold information that the relationship or role actually obligates disclosure of."
+      exclude_from_contexts: []
+    justification: Satya × priya-hita discernment — relationships register; dual-tag niti + yamas.
+    uncertainty:
+      - "Curator: confirm dual-tag (niti + yamas) acceptable vs niti-primary only."
+
+  - row_id: niti_when_silence_protects_the_other
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 3130
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [relationships]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to conceal information whose disclosure is required for safety, law, or legitimate accountability."
+      exclude_from_contexts: []
+    justification: Mauna-as-ahiṃsā in relational register.
+    uncertainty: []
+
+  - row_id: niti_read_character_slowly
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 3218
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [relationships]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to refuse all early trust; some relationships require provisional trust to begin at all."
+      exclude_from_contexts: []
+    justification: Character-over-time reading — relationships discernment.
+    uncertainty: []
+
+  - row_id: niti_boundaries_as_respect
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 3304
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [relationships]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use boundary-language to withdraw from a relationship that actually requires increased engagement."
+      exclude_from_contexts: []
+    justification: Maryādā-as-respect — relationships register.
+    uncertainty: []
+
+  - row_id: niti_withholding_what_is_not_theirs
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 3392
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [relationships]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to refuse ordinary courtesy and compassion, which are not the same as extended access."
+      exclude_from_contexts: []
+    justification: Adhikāra-bound information discernment — relationships register.
+    uncertainty: []
+
+  - row_id: niti_keep_one_elder_counsel
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 3481
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [relationships, self]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to outsource agency to the elder; the counsel is weighed, not obeyed."
+      exclude_from_contexts: []
+    justification: Guru-mantri counsel — relationships × self discernment.
+    uncertainty: []
+
+  # ==========================================================================
+  # GROUP E — Niti × Growth × Work_career (5 rows)
+  # Source: principles_niti_wave2.yaml lines 3569-4017.
+  # Register: cultivation (abhyāsa on craft / leadership / dharmic means).
+  # Secondary home per ROOM_TRADITION_V2 §Growth light-support Niti (work).
+  # ==========================================================================
+
+  - row_id: niti_craft_outlives_the_role
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 3573
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti, dharma]
+      room_fit: [growth]
+      surface_eligibility: [wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: hold
+      action_family: cultivation
+      intensity: medium
+      life_context_bias: [work_career]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to neglect role-specific responsibilities in the name of pure craft-investment; both are required."
+      exclude_from_contexts: []
+    justification: Śilpa-over-pada — growth × work cultivation register.
+    uncertainty: []
+
+  - row_id: niti_clean_means_as_discipline
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 3662
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti, dharma]
+      room_fit: [growth]
+      surface_eligibility: [wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: hold
+      action_family: cultivation
+      intensity: medium
+      life_context_bias: [work_career]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to refuse every difficult trade-off; cleanness of means is not the same as cleanness of comfort."
+      exclude_from_contexts: []
+    justification: Śuddha-upāya discipline — growth × work cultivation.
+    uncertainty: []
+
+  - row_id: niti_leadership_that_serves
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 3750
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti, dharma]
+      room_fit: [growth]
+      surface_eligibility: [wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: hold
+      action_family: cultivation
+      intensity: medium
+      life_context_bias: [work_career, purpose_direction]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to deny the leader any legitimate reward or rest; the principle is against inversion, not against fair recompense."
+      exclude_from_contexts: []
+    justification: Rājadharma-as-sevā — growth × work cultivation bleed to purpose.
+    uncertainty: []
+
+  - row_id: niti_develop_your_successor
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 3838
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [growth]
+      surface_eligibility: [wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: hold
+      action_family: cultivation
+      intensity: medium
+      life_context_bias: [work_career]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to prematurely prepare a successor where the ecosystem has not yet legitimated the succession."
+      exclude_from_contexts: []
+    justification: Parampara-transfer cultivation — growth × work.
+    uncertainty: []
+
+  - row_id: niti_learn_from_the_counterpart
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 3927
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [growth]
+      surface_eligibility: [wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: hold
+      action_family: cultivation
+      intensity: medium
+      life_context_bias: [work_career]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to internalise hostile framing that is actually manipulation; the principle is about learning from pressure, not absorbing distortion."
+      exclude_from_contexts: []
+    justification: Adversary-as-teacher discipline — growth × work cultivation.
+    uncertainty: []
+
+  # ==========================================================================
+  # GROUP F — Niti × Growth × Money_security (3 rows)
+  # Source: principles_niti_wave2.yaml lines 4018-4291.
+  # Register: cultivation (dharmic wealth-use, voluntary austerity).
+  # ==========================================================================
+
+  - row_id: niti_wealth_used_rightly
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 4022
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti, dharma]
+      room_fit: [growth]
+      surface_eligibility: [wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: hold
+      action_family: cultivation
+      intensity: medium
+      life_context_bias: [money_security]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to avoid legitimate accumulation needed for clear future obligations."
+      exclude_from_contexts: []
+    justification: Dharma-artha-sambandha — growth × money cultivation.
+    uncertainty: []
+
+  - row_id: niti_austerity_as_freedom
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 4111
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti, yamas]
+      room_fit: [growth]
+      surface_eligibility: [wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: hold
+      action_family: cultivation
+      intensity: medium
+      life_context_bias: [money_security, self]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to impose austerity on dependents who have not chosen it; voluntary austerity is a personal practice, not a household mandate."
+      exclude_from_contexts: []
+    justification: Tapas-aparigraha-as-freedom — growth × money cultivation; dual-tag to yamas.
+    uncertainty:
+      - "Curator: confirm dual-tag (niti + yamas) acceptable vs niti-primary only."
+
+  - row_id: niti_do_not_mistake_money_for_security
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 4201
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [growth]
+      surface_eligibility: [wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: hold
+      action_family: cultivation
+      intensity: medium
+      life_context_bias: [money_security, self]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to dismiss legitimate money-strain that does in fact need an income-side intervention."
+      exclude_from_contexts: []
+    justification: Artha ≠ kṣema — growth × money cultivation.
+    uncertainty: []
+
+  # ==========================================================================
+  # GROUP G — Niti × Clarity × Work (applied specific-case) (2 rows)
+  # Source: principles_niti_wave2.yaml lines 4292-4472.
+  # Register: specific-case work-discernment (Tier-2 applied).
+  # ==========================================================================
+
+  - row_id: niti_the_promoter_who_overclaims
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 4296
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [work_career, money_security]
+      standalone_safe_flag: true
+      repeat_tolerance_level: medium
+      misuse_risk: "Do not use this to dismiss enthusiastic but honest professionals whose claims are aspirational but accountable."
+      exclude_from_contexts: []
+    justification: Tier-2 applied case — overclaim-reading; clarity × work primary, money secondary.
+    uncertainty: []
+
+  - row_id: niti_do_not_negotiate_from_exhaustion
+    class: principle
+    source_file: principles_niti_wave2.yaml
+    source_line: 4386
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: niti }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: niti
+      tradition: [niti]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [work_career, health_energy]
+      standalone_safe_flag: true
+      repeat_tolerance_level: medium
+      misuse_risk: "Do not use this to indefinitely postpone a negotiation whose window will close; the rule is about state, not about delay."
+      exclude_from_contexts: []
+    justification: Tier-2 applied case — state-gate on negotiation; clarity × work primary, health secondary per state-tag register.
+    uncertainty: []
+
+  # ==========================================================================
+  # GROUP H — Sankhya × Clarity × Self (7 rows)
+  # Source: principles_sankhya_wave2.yaml lines 35-613.
+  # Register: viveka-khyāti applied to self-perception; sākṣī-bhāva.
+  # Clarity × self is native home per ROOM_TRADITION_V2 §Clarity (Sankhya dominant).
+  # ==========================================================================
+
+  - row_id: sankhya_the_thought_is_not_the_thinker
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 41
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [self]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to dismiss thoughts that contain genuine practical information."
+      exclude_from_contexts: []
+    justification: Sāṁkhya-kārikā 3/19 buddhi-vṛtti vs puruṣa — clarity × self native.
+    uncertainty: []
+
+  - row_id: sankhya_emotion_is_a_guna_weather_not_a_self
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 123
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [self]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use guṇa-language to dismiss or suppress feelings that need acknowledgment."
+      exclude_from_contexts: []
+    justification: Guṇa-as-weather reading — clarity × self viveka.
+    uncertainty: []
+
+  - row_id: sankhya_the_body_is_the_oldest_mistaken_identity
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 205
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [self, health_energy]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to bypass real somatic care or medical need."
+      exclude_from_contexts: []
+    justification: Deha-ātma-bhrānti viveka — clarity × self; health_energy secondary.
+    uncertainty: []
+
+  - row_id: sankhya_the_story_about_me_is_also_prakriti
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 286
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [self]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to evade responsibility for patterns the narrative accurately identifies."
+      exclude_from_contexts: []
+    justification: Narrative-as-prakṛti viveka — clarity × self.
+    uncertainty: []
+
+  - row_id: sankhya_the_inner_instrument_has_three_functions
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 368
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [self]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not turn this framework into rigid self-diagnosis that delays action."
+      exclude_from_contexts: []
+    justification: Antaḥkaraṇa (manas/buddhi/ahaṃkāra) tri-function — clarity × self framework.
+    uncertainty: []
+
+  - row_id: sankhya_the_seer_is_never_stained_by_the_seen
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 451
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [self]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to claim invulnerability or dismiss real wounds that need tending."
+      exclude_from_contexts: []
+    justification: Puruṣa-kaivalya viveka — anchor-candidate for clarity × self.
+    uncertainty: []
+
+  - row_id: sankhya_memory_of_self_is_a_buddhi_impression
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 532
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [self]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to dismiss useful lessons that memory legitimately offers."
+      exclude_from_contexts: []
+    justification: Saṁskāra-memory-as-prakṛti viveka — clarity × self.
+    uncertainty: []
+
+  # ==========================================================================
+  # GROUP I — Sankhya × Clarity × Relationships (5 rows)
+  # Source: principles_sankhya_wave2.yaml lines 614-1031.
+  # Register: puruṣa/prakṛti in relational dynamics; guṇa-reading of others.
+  # ==========================================================================
+
+  - row_id: sankhya_their_reaction_is_guna_movement_in_them
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 620
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [relationships]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to dismiss accurate feedback or evade your own contribution to the dynamic."
+      exclude_from_contexts: []
+    justification: Other-guṇa-reading — clarity × relationships viveka.
+    uncertainty: []
+
+  - row_id: sankhya_the_role_is_not_the_person
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 702
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [relationships]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to excuse role-failures that require real accountability."
+      exclude_from_contexts: []
+    justification: Pada vs puruṣa distinction — relationships viveka.
+    uncertainty: []
+
+  - row_id: sankhya_their_ahamkara_is_not_your_problem_to_hold
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 784
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [relationships]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this as license for cruelty; truthful response still needs to be humane."
+      exclude_from_contexts: []
+    justification: Other-ahaṃkāra non-hold — relationships viveka.
+    uncertainty: []
+
+  - row_id: sankhya_love_is_not_fusion
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 867
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [relationships]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use distinctness-language to build walls against genuine intimacy."
+      exclude_from_contexts: []
+    justification: Puruṣa-plurality in intimacy — relationships viveka.
+    uncertainty: []
+
+  - row_id: sankhya_read_their_guna_before_reading_their_message
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 949
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [relationships]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use guṇa-reading to dismiss content that is accurate even when delivered imperfectly."
+      exclude_from_contexts: []
+    justification: Guṇa-before-śabda relational viveka.
+    uncertainty: []
+
+  # ==========================================================================
+  # GROUP J — Sankhya × Clarity × Work_career (5 rows)
+  # Source: principles_sankhya_wave2.yaml lines 1032-1447.
+  # Register: guṇa-aware action; craft vs identity-claim.
+  # ==========================================================================
+
+  - row_id: sankhya_work_identity_is_an_ahamkara_claim
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 1037
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [work_career]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to disengage from work that deserves full presence."
+      exclude_from_contexts: []
+    justification: Ahaṃkāra-on-role viveka — clarity × work_career.
+    uncertainty: []
+
+  - row_id: sankhya_tamasic_workday_needs_smaller_inputs
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 1119
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [work_career, health_energy]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to avoid work that is actually workable with slight effort."
+      exclude_from_contexts: []
+    justification: Tamas-state-aware action — work + health bridge.
+    uncertainty: []
+
+  - row_id: sankhya_craft_is_prakriti_outcome_is_prakriti
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 1201
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [work_career]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to evade responsibility for choices that were clearly yours."
+      exclude_from_contexts: []
+    justification: Prakṛti-of-craft-and-outcome viveka — work_career.
+    uncertainty: []
+
+  - row_id: sankhya_performance_anxiety_is_ahamkara_predicting_itself
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 1284
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [work_career, self]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to skip legitimate preparation that would actually reduce risk."
+      exclude_from_contexts: []
+    justification: Performance-anxiety-as-ahaṃkāra viveka — work × self.
+    uncertainty: []
+
+  - row_id: sankhya_ambition_is_rajasic_motion_not_direction
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 1366
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [work_career, purpose_direction]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to suppress healthy ambition when direction is already clear."
+      exclude_from_contexts: []
+    justification: Rajas-motion vs direction viveka — work + purpose.
+    uncertainty: []
+
+  # ==========================================================================
+  # GROUP K — Sankhya × Clarity × Health_energy (3 rows)
+  # Source: principles_sankhya_wave2.yaml lines 1448-1700.
+  # Register: body-as-prakṛti; guṇa-imbalance.
+  # ==========================================================================
+
+  - row_id: sankhya_fatigue_is_prakriti_information
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 1454
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [health_energy]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to ignore fatigue that indicates real medical concern."
+      exclude_from_contexts: []
+    justification: Fatigue-as-prakṛti-signal viveka — clarity × health.
+    uncertainty: []
+
+  - row_id: sankhya_the_body_has_its_own_guna_cycle
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 1536
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [health_energy, daily_life]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use cyclical-language to dismiss patterns that actually require intervention."
+      exclude_from_contexts: []
+    justification: Body-guṇa-cycle viveka — health + daily rhythm.
+    uncertainty: []
+
+  - row_id: sankhya_pain_is_a_sensation_in_the_field
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 1618
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [health_energy]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use witness-language to dismiss pain that requires medical attention."
+      exclude_from_contexts: []
+    justification: Pain-as-kṣetra-event viveka — clarity × health.
+    uncertainty: []
+
+  # ==========================================================================
+  # GROUP L — Sankhya × Clarity × Money_security (3 rows)
+  # Source: principles_sankhya_wave2.yaml lines 1701-1953.
+  # Register: possessions as prakṛti; material flux as guṇa-motion.
+  # ==========================================================================
+
+  - row_id: sankhya_possession_is_association_not_self
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 1707
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [money_security]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to dismiss legitimate material needs or responsible planning."
+      exclude_from_contexts: []
+    justification: Possession-as-saṁyoga viveka — clarity × money.
+    uncertainty: []
+
+  - row_id: sankhya_financial_anxiety_is_future_ahamkara
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 1789
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [money_security, self]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to avoid realistic planning that would address actual financial risk."
+      exclude_from_contexts: []
+    justification: Future-ahaṃkāra anxiety viveka — money + self.
+    uncertainty: []
+
+  - row_id: sankhya_security_is_a_guna_reading_not_a_number
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 1871
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [money_security]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use guṇa-reading to dismiss felt insecurity that accurately tracks real risk."
+      exclude_from_contexts: []
+    justification: Guṇa-reading-of-security viveka — clarity × money.
+    uncertainty: []
+
+  # ==========================================================================
+  # GROUP M — Sankhya × Clarity × Purpose_direction (3 rows)
+  # Source: principles_sankhya_wave2.yaml lines 1954-2207.
+  # Register: svadharma-calling vs ahaṃkāra-goal; guṇa-path alignment.
+  # ==========================================================================
+
+  - row_id: sankhya_calling_and_claim_are_different_movements
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 1960
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [purpose_direction]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not over-scrutinize every impulse into paralysis; viveka is a brief test, not an endless inquiry."
+      exclude_from_contexts: []
+    justification: Calling-vs-claim viveka — clarity × purpose_direction.
+    uncertainty: []
+
+  - row_id: sankhya_path_alignment_follows_the_dominant_guna
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 2044
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [purpose_direction]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use guṇa-alignment to justify avoiding paths that would actually stretch you in healthy ways."
+      exclude_from_contexts: []
+    justification: Guṇa-path-alignment viveka — clarity × purpose_direction.
+    uncertainty: []
+
+  - row_id: sankhya_purpose_is_not_the_self_it_serves
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 2126
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [purpose_direction, self]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to disengage from purpose that deserves full commitment."
+      exclude_from_contexts: []
+    justification: Purpose ≠ puruṣa viveka — purpose × self.
+    uncertainty: []
+
+  # ==========================================================================
+  # GROUP N — Sankhya × Clarity × Daily_life (3 rows)
+  # Source: principles_sankhya_wave2.yaml lines 2208-2458.
+  # Register: witness-in-the-mundane; seer behind habits.
+  # ==========================================================================
+
+  - row_id: sankhya_the_witness_is_present_in_small_tasks_too
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 2213
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [daily_life]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not force constant meta-awareness into tasks that need uninterrupted practical attention."
+      exclude_from_contexts: []
+    justification: Sākṣin-in-mundane viveka — clarity × daily_life.
+    uncertainty: []
+
+  - row_id: sankhya_habit_is_prakriti_running_its_program
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 2295
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [daily_life]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use this to disrupt healthy habits that are working well; viveka is interruption-capable, not interruption-required."
+      exclude_from_contexts: []
+    justification: Habit-as-prakṛti-program viveka — clarity × daily_life.
+    uncertainty: []
+
+  - row_id: sankhya_the_ordinary_field_is_a_tattva_laboratory
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 2377
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [daily_life]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not turn every small moment into forced analysis; viveka is a stance, not a constant commentary."
+      exclude_from_contexts: []
+    justification: Ordinary-field-as-tattva-lab viveka — clarity × daily_life.
+    uncertainty: []
+
+  # ==========================================================================
+  # GROUP O — Sankhya × Stillness × Self (2 rows)
+  # Source: principles_sankhya_wave2.yaml lines 2459-2627.
+  # Register: pure sākṣī-bhāva; kaivalya-direction.
+  #
+  # ⚠ DOCTRINAL TENSION (curator gate mandatory on both rows):
+  #   - ROOM_TRADITION_ASSIGNMENT_V2 §Stillness lists Sankhya in "Avoid / exclude"
+  #     (stillness native is Yoga-Sūtras + Vedanta-witness; Sankhya is explicitly
+  #     excluded from stillness tradition set).
+  #   - WAVE1_SYNTHESIS §2.1 classifies stillness as principle-class EXCLUDED
+  #     ("wisdom_banner only"; sankalp & principle excluded by room doctrine).
+  #   - Agent G header (lines 5-7) anticipated "stillness × self as sākṣī-bhāva
+  #     secondary" on the register-alignment argument (pure witness, no
+  #     cognitive content).
+  #   Resolution options (founder call required):
+  #     (a) Route these 2 rows to stillness AS WISDOM_BANNER only (change
+  #         surface_eligibility from principle_* to wisdom_banner; class-role
+  #         stays principle but runtime exposure is banner-only).
+  #     (b) Re-route to clarity × self (sākṣin-register still fits clarity native).
+  #     (c) Reject for stillness, park as clarity × self (fall-back).
+  #   This patch proposes option (a) — retains authored register + respects
+  #   §2.1 class-exclusion by capping surface to wisdom_banner. Flagged.
+  # ==========================================================================
+
+  - row_id: sankhya_rest_in_the_non_participating_witness
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 2464
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya, vedanta_witness]
+      room_fit: [stillness]
+      surface_eligibility: [wisdom_banner]
+      pool_role: rare
+      emotional_function_tag: witness
+      action_family: witness
+      intensity: light
+      life_context_bias: []
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not use witness-rest to avoid the body's need for actual sleep or medical rest."
+      exclude_from_contexts: []
+    justification: >
+      Non-participating-sākṣin — register aligns with stillness Vedanta-witness
+      light-support but source tradition (sankhya) is in §Stillness avoid-set.
+      Banner-only capping respects §2.1 class exclusion. Founder call.
+    uncertainty:
+      - "Doctrine: does sākṣī-bhāva register override sankhya tradition-exclusion in §Stillness? Or should row re-route to clarity × self?"
+      - "Stillness has no life_context per §1 §2.1 — life_context_bias set to [] accordingly. Confirm."
+
+  - row_id: sankhya_kaivalya_is_the_direction_of_stillness
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 2546
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya]
+      room_fit: [stillness]
+      surface_eligibility: [wisdom_banner]
+      pool_role: rare
+      emotional_function_tag: witness
+      action_family: witness
+      intensity: light
+      life_context_bias: []
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not turn this principle into spiritual grandiosity; kaivalya-direction is a pointer, not a claim."
+      exclude_from_contexts: []
+    justification: >
+      Kaivalya-as-direction — same §Stillness tension as sibling row. Banner-only.
+    uncertainty:
+      - "Doctrine: same as sibling — tradition-exclusion override test for §Stillness."
+      - "Alternative: re-route to clarity × self as puruṣa-isolation viveka?"
+
+  # ==========================================================================
+  # GROUP P — Sankhya × Growth × Self (1 row)
+  # Source: principles_sankhya_wave2.yaml lines 2628-2714.
+  # Register: svādhyāya as guṇa-observation (light-support per §Growth).
+  # ==========================================================================
+
+  - row_id: sankhya_svadhyaya_is_guna_observation_over_time
+    class: principle
+    source_file: principles_sankhya_wave2.yaml
+    source_line: 2633
+    current_state: { has_room_fit: false, has_life_context_bias: false, existing_tradition: sankhya }
+    CURATOR_GATE: true
+    proposed_tags:
+      tradition_family: sankhya
+      tradition: [sankhya, niyamas]
+      room_fit: [growth]
+      surface_eligibility: [wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: hold
+      action_family: cultivation
+      intensity: medium
+      life_context_bias: [self]
+      standalone_safe_flag: true
+      repeat_tolerance_level: high
+      misuse_risk: "Do not turn guṇa-tracking into another self-surveillance loop; the observation is light, not forensic."
+      exclude_from_contexts: []
+    justification: >
+      Svādhyāya × guṇa-observation — aligns §Growth light-support (svādhyāya);
+      dual tag sankhya + niyamas preserves both lineages.
+    uncertainty:
+      - "Curator: confirm dual-tag (sankhya + niyamas) acceptable; svādhyāya is niyama-5 so linkage is real."
+
+# =============================================================================
+# DOCTRINAL AMBIGUITIES REQUIRING FOUNDER CALL
+# =============================================================================
+doctrinal_flags:
+
+  - id: DF-1_self_vs_self_devotion_canonical
+    severity: low
+    status: resolved-in-patch
+    description: >
+      Session-handoff 2026-04-20 referenced "self_devotion" as a potential
+      context label. STRATEGY_V1 §1 + §8 canonically use "self" (lowercase
+      snake_case, no suffix). The Sankhya wave2 file comment-headers use
+      "self" literally (lines 36, 39, 2461, 2630). ROOM_TRADITION_V2 and
+      ROOM_POOL_PLAN_V2 also use "self" consistently. TAG_PATCH_WAVE1 uses
+      "self" in life_context_bias arrays (e.g. gita_choose_clarity_over_despair).
+      PATCH DECISION: this artifact uses "self" uniformly per canonical.
+      If founder retains "self_devotion" for a specific semantic (e.g.
+      atma-bhakti register distinct from generic self-inquiry), a separate
+      label migration is required — none of the 82 rows here have that
+      register (sankhya is anti-bhakti by doctrine).
+
+  - id: DF-2_sankhya_stillness_doctrinal_tension
+    severity: medium
+    status: needs-founder-call
+    rows_affected: [sankhya_rest_in_the_non_participating_witness, sankhya_kaivalya_is_the_direction_of_stillness]
+    description: >
+      ROOM_TRADITION_V2 §Stillness explicitly excludes Sankhya (Avoid/exclude
+      list). WAVE1_SYNTHESIS §2.1 classifies principle-class as doctrinally
+      excluded from stillness. Agent G's authoring premise (header lines 5-7)
+      was that sākṣī-bhāva register supersedes tradition-exclusion.
+      THIS PATCH conservatively routes both rows to stillness with
+      surface_eligibility=[wisdom_banner] + pool_role=rare, respecting §2.1
+      class-exclusion by capping exposure to banner only. Alternative routes:
+      (b) clarity × self; (c) reject for stillness entirely. Curator/founder
+      to pick (a)/(b)/(c) before pool_version=2026.04.v1-wave1b applies.
+
+  - id: DF-3_dual_tradition_tags
+    severity: low
+    status: proposed-in-patch
+    rows_affected:
+      - niti_aparigraha_meets_prudence (niti + yamas)
+      - niti_truthfulness_with_discretion (niti + yamas)
+      - niti_craft_outlives_the_role (niti + dharma)
+      - niti_clean_means_as_discipline (niti + dharma)
+      - niti_leadership_that_serves (niti + dharma)
+      - niti_wealth_used_rightly (niti + dharma)
+      - niti_austerity_as_freedom (niti + yamas)
+      - niti_rhythm_before_decision (niti + dinacharya)
+      - niti_food_and_sleep_as_decisions (niti + dinacharya)
+      - sankhya_svadhyaya_is_guna_observation_over_time (sankhya + niyamas)
+    description: >
+      10 rows span two tradition lineages per their authored source text
+      (e.g. aparigraha is both a yama AND an artha-śāstra topic; svādhyāya
+      is both niyama-5 AND a sankhya-aligned guṇa-observation move).
+      Convention applied: tradition_family remains the PRIMARY (niti or
+      sankhya as authored), tradition[] lists both. This preserves lineage
+      integrity without forcing a single-family-tag. Curator may request
+      primary-only if it simplifies pool filtering.
+
+  - id: DF-4_repeat_tolerance_level_lowered_on_tier2
+    severity: very_low
+    status: proposed-in-patch
+    rows_affected:
+      - niti_the_promoter_who_overclaims (tier 2)
+      - niti_do_not_negotiate_from_exhaustion (tier 2)
+    description: >
+      Brief specifies "repeat_tolerance_level = high for Tier-1". Two rows
+      in Group G are Tier-2 applied specific-cases — lowered to 'medium'
+      because applied-case content gets stale faster than foundational
+      discernment principles. No other Tier-2 rows exist in this patch set.
+
+# =============================================================================
+# APPLICATION NOTES
+# =============================================================================
+application_notes:
+  - "Apply this patch BEFORE migrations 0132-0135 ingest the 82 rows to DB."
+  - "Patch is curator-gated (curator_gate=true on every row) — no auto-merge."
+  - "Source YAML files MUST NOT be modified by this patch; tag fields are materialized in a DB migration that reads both the YAML + this patch."
+  - "Sankhya-stillness rows (group O) block on DF-2 founder call."
+  - "Stillness × self rows currently have life_context_bias=[] per §1 §2.1 stillness-has-no-life_context rule. Do not auto-populate self here."
+  - "Defense-in-depth: runtime room_selection.py should assert that any row entering a room pool has non-empty surface_eligibility AND non-empty room_fit. See ROOM_GOVERNANCE_FIELD_GAP_REPORT.md §D."

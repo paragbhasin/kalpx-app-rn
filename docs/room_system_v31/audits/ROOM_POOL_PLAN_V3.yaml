@@ -1,0 +1,1142 @@
+# ROOM_POOL_PLAN_V3.yaml
+#
+# Agent 2 — Wave 1 execution-ready consolidation.
+# Builds on ROOM_POOL_PLAN_V2.yaml; adds: current_state (live today),
+# wave_1b_projected (post-governance-tagging of 82 new principle rows),
+# action_list (ordered concrete operations), tradition_distribution in
+# final state, life_context_coverage in final state, doctrinal_checks
+# with pass/fail, and deferred_items.
+#
+# Status: FOUNDER-REVIEW-PENDING
+# Source doctrine:
+#   - docs/room_system_v31/ROOM_SYSTEM_STRATEGY_V1.md  §1 §5 §5.7.5 §8
+#   - docs/room_system_v31/audits/ROOM_TRADITION_ASSIGNMENT_V2.md
+#   - docs/room_system_v31/audits/ROOM_CLASS_DOMINANCE_V2.md
+#   - docs/room_system_v31/audits/SURFACE_ISOLATION_AUDIT_V2.md  §C
+#   - docs/room_system_v31/audits/OVERRIDE_LEDGER_V2.yaml  (empty; 2-sig policy)
+# Implementing migrations (all DRAFTS in /Users/paragbhasin/kalpx/core/migrations/):
+#   - 0132_add_growth_sankalp_slot.py
+#   - 0133_decontaminate_cross_room_rows.py
+#   - 0134_expand_clarity_principle_pool.py
+#   - 0135_seed_dark_tradition_principles.py
+#
+# Conventions for this V3 artifact:
+#   wave_1_projected      = after 0132-0135 apply
+#   wave_1b_projected     = after 0132-0135 + TAG_PATCH_WAVE1B governance
+#                           fields land on Agent F/G's 82 new principle rows.
+#                           Pool refs unchanged from W1; only row-level tags
+#                           (room_fit, life_context_bias, surface_eligibility,
+#                           pool_role, emotional_function_tag, intensity,
+#                           action_family, standalone_safe_flag,
+#                           repeat_tolerance_level) are populated. Rule 5 can
+#                           then discriminate properly.
+#   action_list[].op =
+#     add_rotation_row | remove_rotation_row | add_anchor | replace_row |
+#     add_slot          | tag_row               | assert_doctrine
+#   Each row in action_list carries: op, scope {room_id, action_slot}, ref,
+#   from_migration, reason.
+# =====================================================================
+
+pool_version_current: "2026.04.v1"      # 0120 seed
+pool_version_wave_1:  "2026.04.v2"      # 0132-0135 bump (additive)
+pool_version_wave_1b: "2026.04.v2"      # tag-patch doesn't bump; row-level only
+
+# =====================================================================
+# TOP-LEVEL VERIFICATION SECTION — called out explicitly per task brief
+# =====================================================================
+verification:
+  growth_sankalp_slot:
+    requirement: "9 rows populated (anchor + 8 rotation) from master_sankalps.json"
+    anchor: sankalp.honor_my_skill
+    rotation:
+      - sankalp.walk_dharma_path
+      - sankalp.move_with_dhriti
+      - sankalp.value_small_steps
+      - sankalp.take_one_brave_step
+      - sankalp.remain_open_to_learning
+      - sankalp.effort_over_outcome
+      - sankalp.seek_clarity_not_rush
+      - sankalp.live_from_purpose
+    total_rows: 9
+    source_file: core/data_seed/master_sankalps.json
+    source_verified: true              # grep confirmed all 9 ids exist in master_sankalps.json (90 locale entries total = 9 rows × 10 locales)
+    migration: 0132_add_growth_sankalp_slot.py
+    founder_call_resolved: PARTIAL
+    founder_question_outstanding: >
+      POOL_GAP_REPORT_V2 §E risk-register flagged "Agent D's Group 1 sankalp
+      list was not provided — Agent E substituted 9 native sankalps." V3 has
+      NOT independently confirmed that the 9 chosen rows match Agent D's
+      original Group 1 intent. TAG_PATCH_WAVE1 Group 1 is 26 sankalps wide;
+      founder must cross-check 0132's subset of 9 against that broader set
+      before migration apply. See deferred_items §G-1.
+
+  clarity_principle_expansion:
+    requirement: "5 → ~64 rows; BG ≤ 25%"
+    pre_wave_1_total: 5               # anchor + 4 rotation
+    wave_1_total: 64                  # 5 + 49 via 0134 + 10 via 0135 = computed below
+    counting:
+      existing_rotation: 4
+      existing_anchor: 1
+      added_0134_niti_promoted: 1
+      added_0134_sankhya: 14
+      added_0134_yoga_sutras: 18
+      added_0134_niti_orphans: 10
+      added_0134_bg: 4
+      added_0134_dharma: 3
+      added_0135_yamas: 4             # satya_clean + satya_with_timing + ahimsa_toward_others + asteya_not_stealing_credit
+      added_0135_ayurveda: 3
+      added_0135_dinacharya: 5
+      sum: 64
+    bg_count_final: 7                  # 3 existing (clarity_after_desire_anger, choose_clarity_over_despair, see_desire_as_covering_force) + 4 via 0134 (detached_action, offer_action_without_ownership, return_the_wandering_mind, unhook_from_liking_disliking)
+    bg_pct_final: 10.9                 # 7/64
+    bg_cap_doctrine: 25.0
+    bg_cap_pass: true                  # 10.9% ≤ 25%
+    enforcement: "RuntimeError assertion in both 0134 (lines 194-215) and 0135 (lines 258-276). Runtime selector does NOT assert — flagged as Wave 1b carryover."
+
+  yamas_rooms_touched_ge_3:
+    requirement: "Yamas/Niyamas touches ≥3 rooms post-apply"
+    rooms_touched:
+      - growth           # 18 rows (primary substrate via 0135)
+      - clarity          # 4 rows (satya_clean_truth + satya_with_timing + ahimsa_toward_others + asteya_not_stealing_credit via 0135)
+      - release          # 2 rows (aparigraha_release_the_extra + aparigraha_in_identity via 0135)
+    count: 3
+    pass: true
+    doctrine_ref: "ROOM_TRADITION_ASSIGNMENT_V2 §Growth (primary), §Release (aparigraha × money_security), §Clarity (satya/ahimsa × relationships; asteya × work_career)"
+
+  ayurveda_rooms_touched_ge_3:
+    requirement: "Ayurveda touches ≥3 rooms post-apply"
+    rooms_touched:
+      - release          # 5 (cool/pause/warmth/soften/abhyanga via 0135)
+      - growth           # 4 (rhythm_over_intensity/stability_through_repetition/regular_sleep_wake_rhythm/small_daily_care via 0135)
+      - clarity          # 3 (sleep_before_wisdom/sense_restraint_when_overloaded/regular_meals_reduce_reactivity via 0135)
+      - stillness        # 1 (ayur_vata_ground_evening via 0135 — light body-regulation)
+      - connection       # 1 (ayur_eat_before_hard_conversation via 0135 — health_energy light)
+    count: 5
+    pass: true
+    note: "Joy intentionally excluded — joy-register mismatch (rasa-register body-vitality authoring target for Wave 2)."
+
+  dinacharya_rooms_touched_ge_3:
+    requirement: "Dinacharya touches ≥3 rooms post-apply"
+    rooms_touched:
+      - growth           # 10 rows (full daily-life substrate via 0135)
+      - clarity          # 5 rows (same_anchor_daily/pre_meeting/post_trigger_cooldown/sunday_reset/one_noon_pause via 0135)
+      - connection       # 2 rows (pre_meeting_arrive_before_you_speak/sunday_reset_restore_the_weekly_rhythm via 0135)
+    count: 3
+    pass: true
+
+  connection_decontamination:
+    requirement: "mantra.soham + practice.hand_on_heart removed from connection; kept in stillness"
+    actions:
+      - remove: mantra.soham
+        from: "room_connection/mantra rotation"
+        keep_at: "room_stillness/mantra (ANCHOR — unchanged)"
+        migration: 0133
+        doctrine_ref: "SURFACE_ISOLATION_AUDIT_V2 §C cross-room critical"
+      - remove: practice.hand_on_heart
+        from: "room_connection/practice rotation"
+        keep_at: "room_stillness/practice (rotation — unchanged)"
+        migration: 0133
+        doctrine_ref: "SURFACE_ISOLATION_AUDIT_V2 §C cross-room medium"
+    pass: true
+
+  stillness_no_principle_no_sankalp:
+    requirement: "Stillness pool has no principle, no sankalp (pre-cognitive posture protection)"
+    principle_rows: 0
+    sankalp_rows: 0
+    pass: true
+    doctrine_ref: "ROOM_CLASS_DOMINANCE_V2 §Stillness; ROOM_TRADITION_ASSIGNMENT_V2 §Stillness"
+
+  stillness_banner_additions_scope:
+    requirement: "Stillness banner Wave 1 additions = vāta-body-regulation + Vedanta-witness only (NO Shaiva)"
+    additions_via_0135:
+      - ayur_vata_ground_evening      # Ayurveda vāta-grounding light body-regulation
+      - yoga_rest_in_the_seer         # Vedanta-witness / sākṣī-bhāva register
+    shaiva_additions: 0
+    pass: true
+    doctrine_ref: "ROOM_TRADITION_ASSIGNMENT_V2 §Stillness 'Avoid/exclude: Tantric-Shaiva'"
+
+  joy_no_principle_no_practice:
+    requirement: "Joy pool has no principle slot and no practice slot (protect against principle/practice creep)"
+    principle_rows: 0
+    practice_rows: 0
+    pass: true
+    doctrine_ref: "ROOM_CLASS_DOMINANCE_V2 §Joy 'Primary: Sankalp; Avoid: Principle, Practice'; ROOM_TRADITION_ASSIGNMENT_V2 §Joy 'BG as dominant NEAR-EXCLUDED; principle desiccates'"
+
+# =====================================================================
+# ROOM: STILLNESS
+# =====================================================================
+room_stillness:
+  life_contexts: []                 # pre-cognitive — no life_context
+  current_state:
+    total_rows_pooled: 11
+    classes: { mantra: 4, practice: 6, sankalp: 0, principle: 0, wisdom: 2 }
+    notes: "practice.hand_on_heart cross-contaminated into connection; otherwise clean"
+  wave_1_projected:
+    total_rows_pooled: 10
+    classes: { mantra: 4, practice: 5, sankalp: 0, principle: 0, wisdom: 4 }
+    pool_version: "2026.04.v2"
+  wave_1b_projected:
+    same_as_wave_1: true
+    reason: "Stillness has no new principle rows (dark-tradition banner additions are ayur_vata_ground_evening + yoga_rest_in_the_seer — existing authored rows; no Agent F/G authoring lands here)."
+  action_list:
+    # NOTE: The "-1" practice count vs current_state reflects that
+    # SURFACE_ISOLATION_AUDIT_V2 §A counted hand_on_heart as a stillness
+    # rotation entry; 0133 does NOT remove it from stillness (home room),
+    # but reconciles it with the corrected stillness pool count in v2.
+    - op: add_rotation_row
+      scope: { room_id: room_stillness, action_slot: wisdom_banner }
+      ref: ayur_vata_ground_evening
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "Light Ayurveda vāta-body-regulation (stillness body-settling register). Doctrinal floor §Ayurveda stillness 1-2."
+    - op: add_rotation_row
+      scope: { room_id: room_stillness, action_slot: wisdom_banner }
+      ref: yoga_rest_in_the_seer
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "Vedanta-witness (sākṣī-bhāva) — native stillness register per ROOM_TRADITION_ASSIGNMENT_V2 §Stillness."
+    - op: assert_doctrine
+      scope: { room_id: room_stillness }
+      check: "no principle or sankalp rows anywhere in pool"
+      result: PASS
+  tradition_distribution_wave_1b:
+    yoga_sutras: 2                 # yoga_sutras_one_anchor_when_scattered + yoga_rest_in_the_seer
+    gita: 1                        # gita_endure_the_passing_contacts (banner, light per §Stillness)
+    ayurveda: 1                    # ayur_vata_ground_evening
+    vedanta_sakshin: 1             # yoga_rest_in_the_seer (dual-tagged YS + Vedanta)
+    shaiva: 1                      # mantra.shivoham (rotation)  — FLAG for founder-review §G-3
+    bhakti: 0
+    sankhya: 0
+    niti: 0
+    yamas: 0
+    dinacharya: 0
+    dominant_check: "Yoga-Sūtras / Vedanta-witness aligned per §Stillness dominant; BG at 1 banner (sparse ch 6.10-15) OK; Shaiva shivoham flagged as founder-review."
+  life_context_coverage: { none: all_10_rows }
+  doctrinal_checks:
+    - { id: stillness_no_principle,            pass: true, note: "0 principle rows" }
+    - { id: stillness_no_sankalp,              pass: true, note: "0 sankalp rows" }
+    - { id: stillness_banner_additions_scope,  pass: true, note: "Wave 1 added only Ayur vāta + Vedanta-witness; no Shaiva additions" }
+    - { id: stillness_banner_count,            pass: true, note: "4 banner rows (doctrinal sparse per ROOM_CLASS_DOMINANCE §Stillness)" }
+    - { id: stillness_shaiva_existing,         pass: AMBIGUOUS, note: "mantra.shivoham is pre-existing 0120 rotation — NOT a W1 addition; ROOM_TRADITION_V2 §Stillness 'Avoid/exclude: Tantric-Shaiva' could argue for removal. Flag §G-3 founder_call_needed." }
+  deferred_items:
+    - wave: 2
+      item: "Vedanta-sākṣin banner breadth (+2-3 rows)"
+      reason: "POOL_GAP_REPORT §C.1 + WAVE1_SYNTHESIS §2.1 — banner rotation currently 4 rows; 6 rows would harden rotation. Requires authoring (dark-orphan territory)."
+    - wave: 1b
+      item: "Resolve mantra.shivoham status in stillness rotation"
+      reason: "ROOM_TRADITION_ASSIGNMENT_V2 §Stillness excludes Tantric-Shaiva but this pre-existing 0120 seed is Shaiva-bija. ROOM_CLASS_DOMINANCE_V2 §Stillness advises: 'swap mantra.shivoham rotation for Vedanta-witness equivalent if available'. Founder call §G-3."
+
+# =====================================================================
+# ROOM: CONNECTION
+# =====================================================================
+room_connection:
+  life_contexts: [relationships, self, daily_life, purpose_direction, health_energy]
+  excluded_contexts: [work_career, money_security]
+  current_state:
+    total_rows_pooled: 12
+    classes: { mantra: 5, practice: 4, sankalp: 0, principle: 0, wisdom: 4 }
+    notes: "Includes cross-contaminated mantra.soham + practice.hand_on_heart"
+  wave_1_projected:
+    total_rows_pooled: 17
+    classes: { mantra: 4, practice: 3, sankalp: 0, principle: 0, wisdom: 10 }
+    pool_version: "2026.04.v2"
+  wave_1b_projected:
+    same_as_wave_1: true
+    reason: "No Agent F/G principle rows target connection; banner additions are existing authored bhakti/dinacharya/ayurveda rows."
+  action_list:
+    - op: remove_rotation_row
+      scope: { room_id: room_connection, action_slot: mantra }
+      ref: mantra.soham
+      from_migration: 0133_decontaminate_cross_room_rows
+      reason: "Decontamination: soham is stillness ANCHOR (home); connection is mantra-primary in bhakti-register (Vasudeva/Krishna). SURFACE_ISOLATION_AUDIT_V2 §C critical."
+    - op: remove_rotation_row
+      scope: { room_id: room_connection, action_slot: practice }
+      ref: practice.hand_on_heart
+      from_migration: 0133_decontaminate_cross_room_rows
+      reason: "Decontamination: home room is stillness; connection practice pool is anahata-family. SURFACE_ISOLATION_AUDIT_V2 §C medium."
+    # Bhakti banner additions (6 via 0135 → total bhakti 7, meets 6-8 doctrinal floor):
+    - op: add_rotation_row
+      scope: { room_id: room_connection, action_slot: wisdom_banner }
+      ref: bhakti_remember_the_beloved_in_the_middle_of_life
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "Nārada-register bhakti banner per ROOM_TRADITION_V2 §Connection dominant."
+    - op: add_rotation_row
+      scope: { room_id: room_connection, action_slot: wisdom_banner }
+      ref: bhakti_offer_the_moment_not_only_the_ritual
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "Bhāgavata-rasa offering register. NOTE: also added to joy banner (§G-4 joint-use governance)."
+    - op: add_rotation_row
+      scope: { room_id: room_connection, action_slot: wisdom_banner }
+      ref: bhakti_love_softens_the_hard_inner_grip
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "Bhakti warmth register — connection native per §Connection."
+    - op: add_rotation_row
+      scope: { room_id: room_connection, action_slot: wisdom_banner }
+      ref: bhakti_gratitude_keeps_the_heart_open
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "Bhakti rotation breadth. NOTE: also in joy banner (§G-4)."
+    - op: add_rotation_row
+      scope: { room_id: room_connection, action_slot: wisdom_banner }
+      ref: bhakti_humility_makes_room_for_grace
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "Bhakti rotation breadth — relational-heart register."
+    - op: add_rotation_row
+      scope: { room_id: room_connection, action_slot: wisdom_banner }
+      ref: bhakti_the_name_can_be_home
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "Nāma-smaraṇa register — connection mantra-led primary reinforcement."
+    - op: add_rotation_row
+      scope: { room_id: room_connection, action_slot: wisdom_banner }
+      ref: dina_pre_meeting_arrive_before_you_speak
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "Dinacharya devotional-daily (daily_life context). NOTE: also in clarity principle (§G-5)."
+    - op: add_rotation_row
+      scope: { room_id: room_connection, action_slot: wisdom_banner }
+      ref: dina_sunday_reset_restore_the_weekly_rhythm
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "Dinacharya daily_life. NOTE: also in clarity principle (§G-5)."
+    - op: add_rotation_row
+      scope: { room_id: room_connection, action_slot: wisdom_banner }
+      ref: ayur_eat_before_hard_conversation
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "Ayurveda × health_energy light support — meets §Connection doctrinal floor 1-2."
+    - op: assert_doctrine
+      scope: { room_id: room_connection, action_slot: wisdom_banner }
+      check: "bhakti_count >= 6"
+      result: PASS                    # 7 bhakti rows
+    - op: assert_doctrine
+      scope: { room_id: room_connection, action_slot: wisdom_banner }
+      check: "bhakti_count <= 8"
+      result: PASS                    # 7 bhakti rows ≤ 8 upper band
+  tradition_distribution_wave_1b:
+    bhakti: 7                        # 2 existing + 6 added − 1 (bhakti_divine_as_constant_companion was existing; keep_company_with_the_devotional was existing; net 7) — plus 1 existing bhakti mantra not counted
+    dinacharya: 2
+    ayurveda: 1
+    sankhya: 1                       # sankhya_witness_as_friend (existing light support)
+    dharma: 1                        # dharma_community_as_seva (existing light support)
+    shaiva: 0
+    niti: 0
+    gita: 0
+    dominant_check: "Bhakti primary tradition — doctrine §Connection satisfied. Light support Dinacharya + Ayurveda as doctrinal allowed."
+  life_context_coverage_wave_1b:
+    relationships: 5                 # 2 mantra + 2 practice + 2 banner (bhakti_love/bhakti_humility)
+    self: 5                          # 2 mantra + 3 practice + bhakti banners
+    daily_life: 3                    # 1 mantra + 1 practice + 2 banner (dina × 2)
+    purpose_direction: 1             # 1 mantra; practice=0; banner bhakti_the_name_can_be_home partial (THIN — WAVE2)
+    health_energy: 2                 # 1 mantra + 1 practice + 1 banner (ayur_eat_before)
+  doctrinal_checks:
+    - { id: connection_no_principle_slot,  pass: true, note: "0 principle rows" }
+    - { id: connection_no_sankalp_slot,    pass: true, note: "0 sankalp rows" }
+    - { id: connection_bhakti_banner_6_8,  pass: true, note: "7 bhakti rows; within 6-8 floor/ceiling" }
+    - { id: connection_soham_removed,      pass: true, note: "Confirmed removed via 0133" }
+    - { id: connection_hand_on_heart_removed, pass: true, note: "Confirmed removed via 0133" }
+    - { id: connection_excluded_contexts,  pass: true, note: "No work_career or money_security rows in any class" }
+  deferred_items:
+    - wave: 2
+      item: "Bhakti connection rotation breadth (+5-10 Nārada/Bhāgavata rows)"
+      reason: "WAVE1_SYNTHESIS §1.3 + POOL_GAP_REPORT §C.1 — 7-row floor meets minimum; 3-month repeat-tolerance needs 12+ for rotation discipline."
+    - wave: 2
+      item: "Dhanvantari / body-bhakti × health_energy (+3-4 rows)"
+      reason: "POOL_GAP_REPORT §A.2 — health_energy practice=1, banner=2 [THIN]. Requires authoring (Dhanvantari-register body-bhakti not present in current corpus)."
+    - wave: 2
+      item: "Guru-bhakti × purpose_direction (+4-6 practice rows)"
+      reason: "POOL_GAP_REPORT §A.2 — purpose_direction practice=0. Requires authoring."
+    - wave: "v1.1"
+      item: "wisdom_teaching for connection"
+      reason: "Doctrine-gated per migration 0129_park_wisdom_teaching_connection_joy.py — unlock requires founder doctrinal decision not in Wave 1 scope."
+
+# =====================================================================
+# ROOM: RELEASE
+# =====================================================================
+room_release:
+  life_contexts: [work_career, relationships, self, health_energy, money_security, daily_life]
+  excluded_contexts: [purpose_direction]
+  current_state:
+    total_rows_pooled: 8
+    classes: { mantra: 4, practice: 3, sankalp: 0, principle: 0, wisdom: 2 }
+  wave_1_projected:
+    total_rows_pooled: 18
+    classes: { mantra: 4, practice: 3, sankalp: 0, principle: 0, wisdom: 11 }
+    pool_version: "2026.04.v2"
+  wave_1b_projected:
+    same_as_wave_1: true
+    reason: "No Agent F/G principle rows target release. Banner additions are existing authored rows."
+  action_list:
+    - op: add_rotation_row
+      scope: { room_id: room_release, action_slot: wisdom_banner }
+      ref: gita_stable_in_sorrow_and_pleasure
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "BG 2.14-family endure-like-seasons — SPARSE BANNER ONLY per §Release doctrine."
+    - op: add_rotation_row
+      scope: { room_id: room_release, action_slot: wisdom_banner }
+      ref: ayur_cool_after_conflict
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "Ayurveda pitta-pacifying × health_energy release register."
+    - op: add_rotation_row
+      scope: { room_id: room_release, action_slot: wisdom_banner }
+      ref: ayur_pause_before_decision_when_agitated
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "Ayurveda vāta-pacifying — release × health."
+    - op: add_rotation_row
+      scope: { room_id: room_release, action_slot: wisdom_banner }
+      ref: ayur_warmth_for_fear_and_shakiness
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "Ayurveda vāta-pacifying grief register — §Release dominant light-support Ayurveda."
+    - op: add_rotation_row
+      scope: { room_id: room_release, action_slot: wisdom_banner }
+      ref: ayur_soften_before_sleep_after_stress
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "Ayurveda somatic release — release × health."
+    - op: add_rotation_row
+      scope: { room_id: room_release, action_slot: wisdom_banner }
+      ref: ayur_abhyanga_for_overwhelm
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "Ayurveda abhyanga (self-massage) somatic release — §Release dominant Ayurveda substrate."
+    - op: add_rotation_row
+      scope: { room_id: room_release, action_slot: wisdom_banner }
+      ref: yamas_aparigraha_release_the_extra
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "Yamas aparigraha × money_security — §Release light-support doctrinal floor 2."
+    - op: add_rotation_row
+      scope: { room_id: room_release, action_slot: wisdom_banner }
+      ref: yamas_aparigraha_in_identity
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "Yamas aparigraha identity-release — §Release × money_security."
+    - op: add_rotation_row
+      scope: { room_id: room_release, action_slot: wisdom_banner }
+      ref: sankhya_witness_before_interpretation
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "Vedanta-witness light-support per §Release. NOTE: also in clarity principle pool — dual-room, different surface (clarity=principle=L1/L2/L3 viveka; release=banner=witness-to-contraction). §G-6."
+    - op: assert_doctrine
+      scope: { room_id: room_release }
+      check: "no principle slot populated (banner-only use)"
+      result: PASS
+    - op: assert_doctrine
+      scope: { room_id: room_release }
+      check: "no sankalp slot (release pre-sankalpic)"
+      result: PASS
+  tradition_distribution_wave_1b:
+    shaiva: 4                        # maha_mrityunjaya anchor + shiva_maha_mrityunjaya + shiva_om_tryambakam_healing + asato_ma (mantras)
+    ayurveda: 5                      # cool/pause/warmth/soften/abhyanga (all banners)
+    yamas: 2                         # aparigraha × 2 banners
+    yoga_sutras: 1                   # friendliness_compassion_joy_equanimity (existing banner)
+    gita: 2                          # impermanence_of_form + stable_in_sorrow_and_pleasure (both banners, sparse-by-design)
+    vedanta_sakshin: 1               # sankhya_witness_before_interpretation (banner)
+    bhakti: 0                        # doctrinally excluded (grief-bypass risk)
+    niti: 0                          # doctrinally excluded
+    dinacharya: 0                    # doctrinally excluded (wrong register for catharsis)
+    dominant_check: "Shaiva mantra primary + Ayurveda somatic primary — §Release dominant axis satisfied. BG at 2 banner rows (sparse-only). No bhakti/niti/sankhya/dinacharya principle-level content — doctrinal exclusion held."
+  life_context_coverage_wave_1b:
+    self: 7                          # 2 mantra + 3 practice + 2 banner (yoga_friendliness + sankhya_witness)
+    relationships: 5                 # 1 mantra + 2 practice + 2 banner
+    health_energy: 9                 # 1 mantra + 3 practice + 5 banner (all Ayurveda)
+    daily_life: 3                    # 0 mantra + 1 practice + 2 banner (gita × 2)
+    money_security: 2                # 0 mantra + 0 practice + 2 banner (aparigraha × 2)
+    work_career: 1                   # 0 mantra + 0 practice + 1 banner  [THIN — deferred to doctrinal call]
+  doctrinal_checks:
+    - { id: release_no_principle_slot,        pass: true }
+    - { id: release_no_sankalp_slot,          pass: true }
+    - { id: release_bhakti_excluded,          pass: true }
+    - { id: release_niti_excluded,            pass: true }
+    - { id: release_purpose_direction_excluded, pass: true }
+    - { id: release_bg_sparse_banner_only,    pass: true, note: "2 BG rows total, both in banner; no BG in principle/teaching" }
+    - { id: release_ayurveda_health_floor,    pass: true, note: "5 Ayurveda × health (doctrinal 5-6 band hit)" }
+    - { id: release_yamas_money_security_floor, pass: true, note: "2 aparigraha rows (doctrinal ~2)" }
+  deferred_items:
+    - wave: 2
+      item: "BG 2.14-family release banner breadth (+3-5 rows)"
+      reason: "WAVE1_SYNTHESIS §1.6 + POOL_GAP_REPORT §C.1 — 2 BG rows sparse-by-design but thin for rotation; authoring needed in Ch 2.11-30 death/grief-endurance verses."
+    - wave: 3
+      item: "Release × work_career (all classes)"
+      reason: "POOL_GAP_REPORT §A.3 — 0 rows across mantra/practice. Doctrinal call needed FIRST: does work-grief (layoff, project collapse) route through release or clarity? Flag §G-2 founder_call_needed."
+    - wave: 2
+      item: "Ayurveda vāta/pitta practice rotation (+3-5 rows)"
+      reason: "ROOM_CLASS_DOMINANCE §Release 'Add Ayurveda vāta/pitta-pacifying practice rotation — currently missing. Authoring needed.' Practice class stays at 3 rows post-W1."
+    - wave: 2
+      item: "Shaiva × money_security aparigraha mantra (+2-3 rows)"
+      reason: "POOL_PLAN_V2 §Release deferred. Release × money_security currently served ONLY via principle banner (yamas aparigraha); mantra=0, practice=0."
+
+# =====================================================================
+# ROOM: CLARITY
+# =====================================================================
+room_clarity:
+  life_contexts: [work_career, relationships, purpose_direction, money_security, self, daily_life, health_energy]
+  excluded_contexts: []
+  current_state:
+    total_rows_pooled: 26
+    classes: { mantra: 6, practice: 5, sankalp: 0, principle: 5, wisdom_banner: 6, wisdom_teaching: 5 }
+  wave_1_projected:
+    total_rows_pooled: 98
+    classes: { mantra: 6, practice: 5, sankalp: 0, principle: 64, wisdom_banner: 7, wisdom_teaching: 7 }
+    pool_version: "2026.04.v2"
+    notes: "Dual-use §5.7.5 — principle rows surface in banner + teaching within clarity; not double-counted."
+  wave_1b_projected:
+    total_rows_pooled: 98            # unchanged row refs; only tags populated on existing rows AND on 82 Agent F/G authored principles
+    classes_unchanged: true
+    note: >
+      Agent F delivered 50 Niti rows (principles_niti_wave2.yaml); Agent G
+      delivered 32 Sankhya rows (principles_sankhya_wave2.yaml). Both files
+      are authored but uncommitted and do NOT yet have v3.1 governance
+      fields (room_fit, life_context_bias, etc.). TAG_PATCH_WAVE1B is a
+      curator sweep to populate these fields from existing comment-header
+      groupings (no regeneration). Ingestion of the 82 rows to DB is a
+      separate follow-up from Wave 1b.
+    wave_1b_operations_count: 82     # all tag_row ops
+  action_list:
+    # Decontamination:
+    - op: remove_rotation_row
+      scope: { room_id: room_clarity, action_slot: wisdom_banner }
+      ref: yoga_sutras_one_anchor_when_scattered
+      from_migration: 0133_decontaminate_cross_room_rows
+      reason: "Stillness is home room (ANCHOR). Clarity replaces with yoga_use_one_truthful_anchor via 0134. SURFACE_ISOLATION_AUDIT_V2 §C critical."
+    # Principle pool additions (49 via 0134):
+    - op: add_rotation_row
+      scope: { room_id: room_clarity, action_slot: principle }
+      ref: niti_prefer_stability_over_dramatic_reversal
+      from_migration: 0134_expand_clarity_principle_pool
+      reason: "Niti-discernment — promoted from banner rotation to principle (dominant-class per §Clarity)."
+    # Sankhya viveka corpus (14):
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: sankhya_seer_is_not_the_seen, from_migration: 0134_expand_clarity_principle_pool, reason: "Sankhya viveka — §Clarity dominant." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: sankhya_misidentification_creates_bondage, from_migration: 0134_expand_clarity_principle_pool, reason: "Sankhya viveka — §Clarity dominant." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: sankhya_discern_the_changing_from_the_constant, from_migration: 0134_expand_clarity_principle_pool, reason: "Sankhya viveka — §Clarity dominant." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: sankhya_the_gunas_are_moving, from_migration: 0134_expand_clarity_principle_pool, reason: "Sankhya guna-analysis — §Clarity dominant." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: sankhya_rajas_needs_direction_not_more_fuel, from_migration: 0134_expand_clarity_principle_pool, reason: "Sankhya guna-analysis." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: sankhya_tamas_needs_lift_not_self_contempt, from_migration: 0134_expand_clarity_principle_pool, reason: "Sankhya guna-analysis." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: sankhya_sattva_needs_protection, from_migration: 0134_expand_clarity_principle_pool, reason: "Sankhya guna-analysis." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: sankhya_buddhi_should_lead_not_reactivity, from_migration: 0134_expand_clarity_principle_pool, reason: "Sankhya buddhi-teaching." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: sankhya_ahamkara_makes_it_personal_too_fast, from_migration: 0134_expand_clarity_principle_pool, reason: "Sankhya ahamkara-teaching." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: sankhya_manas_collects_too_much_noise, from_migration: 0134_expand_clarity_principle_pool, reason: "Sankhya manas-teaching." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: sankhya_prakriti_is_doing_the_moving, from_migration: 0134_expand_clarity_principle_pool, reason: "Sankhya prakriti-teaching." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: sankhya_witness_before_interpretation, from_migration: 0134_expand_clarity_principle_pool, reason: "Sankhya witness — dual-room with release banner (different surface; §G-6)." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: sankhya_return_to_the_witnessing_center, from_migration: 0134_expand_clarity_principle_pool, reason: "Sankhya viveka." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: sankhya_do_not_confuse_clarity_with_coldness, from_migration: 0134_expand_clarity_principle_pool, reason: "Sankhya viveka — tempering teaching." }
+    # YS kleśa-analysis + citta-vritti (18):
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: yoga_name_the_vritti, from_migration: 0134_expand_clarity_principle_pool, reason: "YS citta-vritti — §Clarity dominant. Also in wisdom_teaching." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: yoga_kleshas_distort_seeing, from_migration: 0134_expand_clarity_principle_pool, reason: "YS kleśa-analysis — §Clarity dominant. Also in wisdom_teaching." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: yoga_avidya_is_the_root_confusion, from_migration: 0134_expand_clarity_principle_pool, reason: "YS kleśa-analysis." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: yoga_asmita_tightens_identity, from_migration: 0134_expand_clarity_principle_pool, reason: "YS kleśa-analysis." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: yoga_lower_the_obstacles_by_naming_them, from_migration: 0134_expand_clarity_principle_pool, reason: "YS kleśa-analysis." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: yoga_opposite_thought_when_harmful_patterns_rise, from_migration: 0134_expand_clarity_principle_pool, reason: "YS pratipaksa-bhavana." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: yoga_abhyasa_steady_return, from_migration: 0134_expand_clarity_principle_pool, reason: "YS abhyasa — dual-room with growth principle (different primary class home; §G-7)." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: yoga_vairagya_release_the_grip, from_migration: 0134_expand_clarity_principle_pool, reason: "YS vairagya." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: yoga_one_pointedness_gathers_the_mind, from_migration: 0134_expand_clarity_principle_pool, reason: "YS ekagrata." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: yoga_steady_the_breath_to_steady_the_mind, from_migration: 0134_expand_clarity_principle_pool, reason: "YS pranayama-clarity." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: yoga_clear_perception_needs_inner_quiet, from_migration: 0134_expand_clarity_principle_pool, reason: "YS samyama-light." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: yoga_shorten_the_distance_between_noticing_and_return, from_migration: 0134_expand_clarity_principle_pool, reason: "YS samyama-light." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: yoga_turn_inward_when_the_senses_are_scattering, from_migration: 0134_expand_clarity_principle_pool, reason: "YS pratyahara." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: yoga_hold_attention_gently_on_one_place, from_migration: 0134_expand_clarity_principle_pool, reason: "YS dharana." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: yoga_let_attention_flow_without_breaking, from_migration: 0134_expand_clarity_principle_pool, reason: "YS dhyana." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: yoga_object_and_observer_can_temporarily_stop_fighting, from_migration: 0134_expand_clarity_principle_pool, reason: "YS samadhi-light." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: yoga_use_one_truthful_anchor, from_migration: 0134_expand_clarity_principle_pool, reason: "YS-1.32 equivalent — replaces decontaminated yoga_sutras_one_anchor_when_scattered." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: yoga_befriend_the_calm_breath_pause, from_migration: 0134_expand_clarity_principle_pool, reason: "YS pranayama-light." }
+    # Niti orphan pooling (10):
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: niti_soften_when_the_bond_can_hold, from_migration: 0134_expand_clarity_principle_pool, reason: "Niti × relationships — §Clarity dominant Niti + §Relationships context." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: niti_firm_boundary_when_delay_worsens_harm, from_migration: 0134_expand_clarity_principle_pool, reason: "Niti × relationships." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: niti_disengage_when_the_field_is_not_teachable, from_migration: 0134_expand_clarity_principle_pool, reason: "Niti pragmatic discernment." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: niti_protect_peace_over_winning, from_migration: 0134_expand_clarity_principle_pool, reason: "Niti × relationships." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: niti_speak_truth_with_timing, from_migration: 0134_expand_clarity_principle_pool, reason: "Niti satya-timing." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: niti_read_pattern_not_promise, from_migration: 0134_expand_clarity_principle_pool, reason: "Niti discernment — §Clarity." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: niti_choose_the_smallest_effective_move, from_migration: 0134_expand_clarity_principle_pool, reason: "Niti practical-action × work_career." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: niti_look_for_the_hidden_cost, from_migration: 0134_expand_clarity_principle_pool, reason: "Niti × money_security." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: niti_do_not_advise_the_unwilling_mid_fury, from_migration: 0134_expand_clarity_principle_pool, reason: "Niti × relationships." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: niti_preserve_relationship_without_surrendering_truth, from_migration: 0134_expand_clarity_principle_pool, reason: "Niti × relationships." }
+    # BG karma-yoga tight set (4; total BG 7 ≤ 25%):
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: gita_detached_action, from_migration: 0134_expand_clarity_principle_pool, reason: "BG 2.47 karma-yoga — §Clarity light-support BG verse set." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: gita_offer_action_without_ownership, from_migration: 0134_expand_clarity_principle_pool, reason: "BG karma-yoga." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: gita_return_the_wandering_mind, from_migration: 0134_expand_clarity_principle_pool, reason: "BG 6.26 mind-return." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: gita_unhook_from_liking_disliking, from_migration: 0134_expand_clarity_principle_pool, reason: "BG raga-dvesa." }
+    # Dharma dual-tagged (3):
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: dharma_right_order_before_right_speed, from_migration: 0134_expand_clarity_principle_pool, reason: "Dharma dual-tag — §Clarity light-support." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: dharma_clarity_before_loyalty_to_group_pressure, from_migration: 0134_expand_clarity_principle_pool, reason: "Dharma × relationships — §Clarity." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: dharma_when_in_doubt_return_to_non_harmful_duty, from_migration: 0134_expand_clarity_principle_pool, reason: "Dharma × purpose_direction." }
+    # Yamas × relationships + work_career (4 via 0135):
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: yamas_satya_clean_truth, from_migration: 0135_seed_dark_tradition_principles, reason: "Yamas satya × relationships — §Clarity light-support doctrinal 3." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: yamas_satya_with_timing, from_migration: 0135_seed_dark_tradition_principles, reason: "Yamas satya × relationships." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: yamas_ahimsa_toward_others, from_migration: 0135_seed_dark_tradition_principles, reason: "Yamas ahimsa × relationships." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: yamas_asteya_not_stealing_credit, from_migration: 0135_seed_dark_tradition_principles, reason: "Yamas asteya × work_career — §Clarity." }
+    # Ayurveda × health (3 via 0135):
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: ayur_sleep_before_wisdom, from_migration: 0135_seed_dark_tradition_principles, reason: "Ayurveda × health — §Clarity light-support." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: ayur_sense_restraint_when_overloaded, from_migration: 0135_seed_dark_tradition_principles, reason: "Ayurveda × health." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: ayur_regular_meals_reduce_reactivity, from_migration: 0135_seed_dark_tradition_principles, reason: "Ayurveda × health." }
+    # Dinacharya × daily_life (5 via 0135):
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: dina_pre_meeting_arrive_before_you_speak, from_migration: 0135_seed_dark_tradition_principles, reason: "Dinacharya × daily_life. NOTE: also in connection banner (§G-5)." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: dina_post_trigger_cooldown_before_reentry, from_migration: 0135_seed_dark_tradition_principles, reason: "Dinacharya × daily_life." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: dina_sunday_reset_restore_the_weekly_rhythm, from_migration: 0135_seed_dark_tradition_principles, reason: "Dinacharya × daily_life. NOTE: also in connection banner (§G-5)." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: dina_same_anchor_daily, from_migration: 0135_seed_dark_tradition_principles, reason: "Dinacharya × daily_life." }
+    - { op: add_rotation_row, scope: { room_id: room_clarity, action_slot: principle }, ref: dina_one_noon_pause_prevents_the_day_from_fragmenting, from_migration: 0135_seed_dark_tradition_principles, reason: "Dinacharya × daily_life." }
+    # Banner replacement:
+    - op: add_rotation_row
+      scope: { room_id: room_clarity, action_slot: wisdom_banner }
+      ref: yoga_use_one_truthful_anchor
+      from_migration: 0134_expand_clarity_principle_pool
+      reason: "Replaces decontaminated yoga_sutras_one_anchor_when_scattered (YS-1.32 equivalent)."
+    # Teaching additions:
+    - op: add_rotation_row
+      scope: { room_id: room_clarity, action_slot: wisdom_teaching }
+      ref: yoga_kleshas_distort_seeing
+      from_migration: 0134_expand_clarity_principle_pool
+      reason: "Teaching-light dual-use with principle pool (§5.7.5)."
+    - op: add_rotation_row
+      scope: { room_id: room_clarity, action_slot: wisdom_teaching }
+      ref: yoga_name_the_vritti
+      from_migration: 0134_expand_clarity_principle_pool
+      reason: "Teaching-light dual-use with principle pool."
+    # Wave 1b governance tag ops (82 ops; grouped summary):
+    - op: tag_row_batch
+      scope: { source: "principles_niti_wave2.yaml (Agent F)" }
+      row_count: 50
+      from_migration: "TAG_PATCH_WAVE1B.yaml (to be authored)"
+      fields_populated:
+        - room_fit
+        - life_context_bias
+        - surface_eligibility
+        - pool_role
+        - emotional_function_tag
+        - intensity
+        - action_family
+        - standalone_safe_flag
+        - repeat_tolerance_level
+        - exclude_from_contexts
+      reason: "WAVE1_SYNTHESIS §6.1 — Agent F rows have empty governance fields; Rule 5 cannot discriminate until tagged."
+    - op: tag_row_batch
+      scope: { source: "principles_sankhya_wave2.yaml (Agent G)" }
+      row_count: 32
+      from_migration: "TAG_PATCH_WAVE1B.yaml (to be authored)"
+      fields_populated:
+        - room_fit
+        - life_context_bias
+        - surface_eligibility
+        - pool_role
+        - emotional_function_tag
+        - intensity
+        - action_family
+        - standalone_safe_flag
+        - repeat_tolerance_level
+        - exclude_from_contexts
+      reason: "WAVE1_SYNTHESIS §6.2 — Agent G rows have empty governance fields."
+    # Final assertions:
+    - op: assert_doctrine
+      scope: { room_id: room_clarity, action_slot: principle }
+      check: "bg_pct <= 25%"
+      result: PASS
+      value: "7/64 = 10.9%"
+      enforcement_site: "migration 0134 lines 194-215 + 0135 lines 258-276"
+    - op: assert_doctrine
+      scope: { room_id: room_clarity }
+      check: "no sankalp slot (Gita 2.63 resolve-before-clarity trap)"
+      result: PASS
+  tradition_distribution_wave_1b:
+    sankhya: 15                      # anchor + 14 rotation via 0134 (23%)
+    yoga_sutras: 18                  # via 0134 (28%)
+    niti: 11                         # 1 promoted + 10 orphan via 0134 (17%)
+    gita: 7                          # 3 existing + 4 via 0134 (10.9% — cap satisfied)
+    dharma: 3                        # via 0134 (5%)
+    yamas: 4                         # via 0135 (6%)
+    ayurveda: 3                      # via 0135 (5%)
+    dinacharya: 5                    # via 0135 (8%)
+    total_principle_pool: 64
+    dominant_check: "Sankhya (23%) + YS (28%) + Niti (17%) = 68% analytical-discernment dominant per §Clarity. BG held to 10.9% secondary. Bhakti 0 — exclusion held. Tantric-Shaiva 0 — exclusion held."
+  life_context_coverage_wave_1b_principle:
+    work_career: 14
+    purpose_direction: 12
+    relationships: 10
+    daily_life: 10
+    self: 10
+    health_energy: 6
+    money_security: 2                # [THIN — wave 3 authoring target]
+  doctrinal_checks:
+    - { id: clarity_bg_cap_25_pct,           pass: true, note: "7/64 = 10.9%" }
+    - { id: clarity_dominant_analytical,     pass: true, note: "Sankhya+YS+Niti = 68%" }
+    - { id: clarity_no_sankalp_slot,         pass: true, note: "0 sankalp rows (Gita 2.63 trap doctrine)" }
+    - { id: clarity_bhakti_excluded,         pass: true, note: "0 bhakti principle rows" }
+    - { id: clarity_shaiva_excluded,         pass: true, note: "0 Shaiva/Tantric principle rows" }
+    - { id: clarity_yamas_relationships_floor, pass: true, note: "3 relationships rows (satya_clean + satya_with_timing + ahimsa_toward_others)" }
+    - { id: clarity_ayurveda_health_floor,   pass: true, note: "3 health rows (doctrinal band 2-3)" }
+    - { id: clarity_dinacharya_daily_life_floor, pass: true, note: "5 daily_life rows (doctrinal band 4-5)" }
+    - { id: clarity_wave1b_row_tagging,      pass: PENDING, note: "82 new Agent F/G rows require tag-patch before Rule 5 can discriminate" }
+  deferred_items:
+    - wave: 1b
+      item: "TAG_PATCH_WAVE1B.yaml — 82-row governance field population"
+      reason: "WAVE1_SYNTHESIS §6.3 + §7 carryover #1 — Agent F/G rows are authored but fields empty."
+    - wave: 1b
+      item: "Runtime BG cap guard in core/rooms/room_selection.py"
+      reason: "WAVE1_SYNTHESIS §5 — cap enforced only at migration time; future non-migration pool changes could bypass."
+    - wave: 2
+      item: "Clarity × money_security mantra/practice (+2-3 each)"
+      reason: "POOL_GAP_REPORT §A.4 — 0 mantra / 0 practice for money_security context. Authoring needed."
+    - wave: 2
+      item: "Clarity × health_energy mantra/practice (+2-3 each)"
+      reason: "POOL_GAP_REPORT §A.4 — 0 mantra / 0 practice for health_energy context."
+    - wave: 2
+      item: "Clarity × purpose_direction Niti breadth (+4-6)"
+      reason: "POOL_GAP_REPORT §A.4 + WAVE1_SYNTHESIS §6.1 — Agent F's 50 rows do not cover purpose_direction directly."
+    - wave: 1b
+      item: "Populate mantra/practice life_context_bias + room_fit on 554 master rows"
+      reason: "SURFACE_ISOLATION_V2 field-governance gap — bias tagging required for Rule 5 per-context discrimination."
+
+# =====================================================================
+# ROOM: GROWTH
+# =====================================================================
+room_growth:
+  life_contexts: [work_career, relationships, purpose_direction, money_security, self, daily_life, health_energy]
+  excluded_contexts: []
+  current_state:
+    total_rows_pooled: 26
+    classes: { mantra: 5, practice: 5, sankalp: 0, principle: 6, wisdom: 10 }
+    notes: "Sankalp slot MISSING — highest-leverage gap per ROOM_CLASS_DOMINANCE §Growth."
+  wave_1_projected:
+    total_rows_pooled: 92
+    classes: { mantra: 5, practice: 5, sankalp: 9, principle: 56, wisdom_banner: 11, wisdom_teaching: 7, wisdom_reflection: 5 }
+    pool_version: "2026.04.v2"
+  wave_1b_projected:
+    same_as_wave_1: true
+    reason: "No Agent F/G rows target growth as primary (Agent F has 8 growth-tagged rows; Agent G has 1 growth × self row — these land in Wave 1b tag-patch but do not change pool refs since growth principle pool refs are all seeded via 0135)."
+  action_list:
+    # Structural: add sankalp slot (9 rows):
+    - op: add_slot
+      scope: { room_id: room_growth, action_slot: sankalp }
+      ref: "new pool row (action_slot=sankalp); flat anchor+rotation shape"
+      from_migration: 0132_add_growth_sankalp_slot
+      reason: "ROOM_CLASS_DOMINANCE §Growth 'Sankalp slot missing — highest-leverage gap'. Flat, not subslots (joy pattern is gratitude/blessings/seva offering-register; growth is cultivation-resolve register)."
+    - op: add_anchor
+      scope: { room_id: room_growth, action_slot: sankalp }
+      ref: sankalp.honor_my_skill
+      from_migration: 0132_add_growth_sankalp_slot
+      reason: "Svadharma-carry voice; definitional growth-room anchor per §Growth."
+    - op: add_rotation_row
+      scope: { room_id: room_growth, action_slot: sankalp }
+      ref: sankalp.walk_dharma_path
+      from_migration: 0132_add_growth_sankalp_slot
+      reason: "Purpose_direction sankalp. Cultivation-resolve register."
+    - op: add_rotation_row
+      scope: { room_id: room_growth, action_slot: sankalp }
+      ref: sankalp.move_with_dhriti
+      from_migration: 0132_add_growth_sankalp_slot
+      reason: "Daily_life fortitude. Cultivation-resolve register."
+    - op: add_rotation_row
+      scope: { room_id: room_growth, action_slot: sankalp }
+      ref: sankalp.value_small_steps
+      from_migration: 0132_add_growth_sankalp_slot
+      reason: "Daily_life abhyasa. Cultivation-resolve register."
+    - op: add_rotation_row
+      scope: { room_id: room_growth, action_slot: sankalp }
+      ref: sankalp.take_one_brave_step
+      from_migration: 0132_add_growth_sankalp_slot
+      reason: "Purpose_direction courage-abhyasa."
+    - op: add_rotation_row
+      scope: { room_id: room_growth, action_slot: sankalp }
+      ref: sankalp.remain_open_to_learning
+      from_migration: 0132_add_growth_sankalp_slot
+      reason: "Self-svadhyaya register."
+    - op: add_rotation_row
+      scope: { room_id: room_growth, action_slot: sankalp }
+      ref: sankalp.effort_over_outcome
+      from_migration: 0132_add_growth_sankalp_slot
+      reason: "Work_career karma-yoga register (BG 2.47 inflection)."
+    - op: add_rotation_row
+      scope: { room_id: room_growth, action_slot: sankalp }
+      ref: sankalp.seek_clarity_not_rush
+      from_migration: 0132_add_growth_sankalp_slot
+      reason: "Self-reflective viveka-adjacent; growth-tempo teaching."
+    - op: add_rotation_row
+      scope: { room_id: room_growth, action_slot: sankalp }
+      ref: sankalp.live_from_purpose
+      from_migration: 0132_add_growth_sankalp_slot
+      reason: "Purpose_direction svadharma-live."
+    # Principle additions (51 via 0135 — full list retained in migration; 6 sub-groups):
+    # Yamas/Niyamas primary (18):
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: yamas_ahimsa_toward_self, from_migration: 0135_seed_dark_tradition_principles, reason: "Yamas ahimsa self — §Growth primary substrate." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: yamas_satya_clean_truth, from_migration: 0135_seed_dark_tradition_principles, reason: "Yamas satya — §Growth primary substrate. NOTE: also in clarity principle (§G-7, different context biasing)." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: yamas_asteya_not_taking_what_is_not_given, from_migration: 0135_seed_dark_tradition_principles, reason: "Yamas asteya — §Growth." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: yamas_brahmacharya_guard_the_vital_force, from_migration: 0135_seed_dark_tradition_principles, reason: "Yamas brahmacharya — §Growth." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: yamas_brahmacharya_in_speech_and_attention, from_migration: 0135_seed_dark_tradition_principles, reason: "Yamas brahmacharya-speech." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: yamas_tapas_warmth_not_punishment, from_migration: 0135_seed_dark_tradition_principles, reason: "Niyamas tapas — also in growth banner (dual-use §5.7.5)." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: yamas_svadhyaya_study_the_pattern, from_migration: 0135_seed_dark_tradition_principles, reason: "Niyamas svadhyaya." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: yamas_ishvara_pranidhana_release_final_control, from_migration: 0135_seed_dark_tradition_principles, reason: "Niyamas ishvara-pranidhana." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: niyamas_shaucha_clear_the_field, from_migration: 0135_seed_dark_tradition_principles, reason: "Niyamas shaucha." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: niyamas_shaucha_reduce_inner_toxicity, from_migration: 0135_seed_dark_tradition_principles, reason: "Niyamas shaucha-inner." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: niyamas_santosha_rest_in_enough, from_migration: 0135_seed_dark_tradition_principles, reason: "Niyamas santosha — also in growth banner (dual-use)." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: niyamas_santosha_without_stagnation, from_migration: 0135_seed_dark_tradition_principles, reason: "Niyamas santosha-tempered." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: niyamas_tapas_warm_discipline, from_migration: 0135_seed_dark_tradition_principles, reason: "Niyamas tapas." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: niyamas_tapas_keep_the_vow_small_and_true, from_migration: 0135_seed_dark_tradition_principles, reason: "Niyamas tapas-vow." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: niyamas_svadhyaya_read_the_pattern, from_migration: 0135_seed_dark_tradition_principles, reason: "Niyamas svadhyaya." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: niyamas_svadhyaya_name_the_story_you_keep_telling, from_migration: 0135_seed_dark_tradition_principles, reason: "Niyamas svadhyaya-narrative." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: niyamas_return_after_break_without_shame, from_migration: 0135_seed_dark_tradition_principles, reason: "Niyamas abhyasa-return." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: niyamas_order_the_day_around_the_sacred, from_migration: 0135_seed_dark_tradition_principles, reason: "Niyamas daily-sacred rhythm." }
+    # BG growth-native (8; no cap in growth):
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: gita_act_from_what_is_yours_to_do, from_migration: 0135_seed_dark_tradition_principles, reason: "BG 3.35 svadharma — §Growth PRIMARY tradition (no cap in growth)." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: gita_lift_by_abhyasa_and_detachment, from_migration: 0135_seed_dark_tradition_principles, reason: "BG 6.35 abhyasa + vairagya. Also in wisdom_teaching." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: gita_no_effort_is_lost, from_migration: 0135_seed_dark_tradition_principles, reason: "BG 2.40 — also in growth banner (dual-use §5.7.5)." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: gita_be_your_own_lamp_of_effort, from_migration: 0135_seed_dark_tradition_principles, reason: "BG self-effort." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: gita_walk_from_faith_not_only_mood, from_migration: 0135_seed_dark_tradition_principles, reason: "BG shraddha-walk." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: gita_steady_in_success_failure, from_migration: 0135_seed_dark_tradition_principles, reason: "BG samatvam." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: gita_qualities_of_the_steady_heart, from_migration: 0135_seed_dark_tradition_principles, reason: "BG sthitaprajna." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: gita_right_measure_in_living, from_migration: 0135_seed_dark_tradition_principles, reason: "BG 6.16-17 yuktāhāra." }
+    # Dharma Tier-2 (5):
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: dharma_alignment_brings_inner_strength, from_migration: 0135_seed_dark_tradition_principles, reason: "Dharma Tier-2 — §Growth dominant substrate." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: dharma_do_not_trade_integrity_for_short_term_relief, from_migration: 0135_seed_dark_tradition_principles, reason: "Dharma Tier-2." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: dharma_the_next_clean_step_is_already_the_path, from_migration: 0135_seed_dark_tradition_principles, reason: "Dharma Tier-2." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: dharma_do_the_needed_thing_before_the_impressive_thing, from_migration: 0135_seed_dark_tradition_principles, reason: "Dharma Tier-2." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: dharma_keep_commitments_visible, from_migration: 0135_seed_dark_tradition_principles, reason: "Dharma Tier-2." }
+    # YS abhyasa/tapas (6):
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: yoga_abhyasa_steady_return, from_migration: 0135_seed_dark_tradition_principles, reason: "YS abhyasa — dual-room with clarity principle; §G-7 documented as intentional." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: yoga_samadhi_grows_from_refinement_not_force, from_migration: 0135_seed_dark_tradition_principles, reason: "YS samadhi-gradient." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: yoga_repeated_settling_changes_the_field, from_migration: 0135_seed_dark_tradition_principles, reason: "YS abhyasa-change." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: yoga_steadiness_is_built_in_the_middle_not_the_edge, from_migration: 0135_seed_dark_tradition_principles, reason: "YS steadiness." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: yoga_devotion_can_also_steady_the_mind, from_migration: 0135_seed_dark_tradition_principles, reason: "YS ishvara-pranidhana." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: yoga_the_subtlest_obstacle_is_impatience, from_migration: 0135_seed_dark_tradition_principles, reason: "YS antaraya." }
+    # Dinacharya substrate (10):
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: dina_wake_before_rush, from_migration: 0135_seed_dark_tradition_principles, reason: "Dinacharya daily-rhythm — §Growth daily_life primary." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: dina_first_light_no_phone, from_migration: 0135_seed_dark_tradition_principles, reason: "Dinacharya morning-sacred." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: dina_warm_water_on_waking, from_migration: 0135_seed_dark_tradition_principles, reason: "Dinacharya body-reset." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: dina_clear_the_body_early, from_migration: 0135_seed_dark_tradition_principles, reason: "Dinacharya elimination." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: dina_move_before_sitting_long, from_migration: 0135_seed_dark_tradition_principles, reason: "Dinacharya activity." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: dina_same_time_meals, from_migration: 0135_seed_dark_tradition_principles, reason: "Dinacharya regularity." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: dina_midday_main_effort, from_migration: 0135_seed_dark_tradition_principles, reason: "Dinacharya noon-effort." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: dina_evening_lighten_tasks, from_migration: 0135_seed_dark_tradition_principles, reason: "Dinacharya evening-lighten." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: dina_pre_sleep_same_sequence, from_migration: 0135_seed_dark_tradition_principles, reason: "Dinacharya sleep-sequence." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: dina_after_work_reset, from_migration: 0135_seed_dark_tradition_principles, reason: "Dinacharya transition." }
+    # Ayurveda × health (4):
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: ayur_rhythm_over_intensity, from_migration: 0135_seed_dark_tradition_principles, reason: "Ayurveda × health — §Growth dominant health_energy." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: ayur_stability_through_repetition, from_migration: 0135_seed_dark_tradition_principles, reason: "Ayurveda × health." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: ayur_regular_sleep_wake_rhythm, from_migration: 0135_seed_dark_tradition_principles, reason: "Ayurveda × health." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: principle }, ref: ayur_small_daily_care_prevents_spikes, from_migration: 0135_seed_dark_tradition_principles, reason: "Ayurveda × health." }
+    # Banner additions (4 via 0135):
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: wisdom_banner }, ref: yamas_tapas_warmth_not_punishment, from_migration: 0135_seed_dark_tradition_principles, reason: "Banner dual-use with principle (§5.7.5)." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: wisdom_banner }, ref: niyamas_santosha_rest_in_enough, from_migration: 0135_seed_dark_tradition_principles, reason: "Banner dual-use with principle." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: wisdom_banner }, ref: dina_match_routine_to_life_stage_not_ideal_image, from_migration: 0135_seed_dark_tradition_principles, reason: "Banner Dinacharya life-stage." }
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: wisdom_banner }, ref: gita_no_effort_is_lost, from_migration: 0135_seed_dark_tradition_principles, reason: "Banner BG-encouragement — dual-use with principle." }
+    # Teaching (1 via 0135):
+    - { op: add_rotation_row, scope: { room_id: room_growth, action_slot: wisdom_teaching }, ref: gita_lift_by_abhyasa_and_detachment, from_migration: 0135_seed_dark_tradition_principles, reason: "Teaching dual-use with principle." }
+    # Final assertions:
+    - op: assert_doctrine
+      scope: { room_id: room_growth, action_slot: sankalp }
+      check: "sankalp slot exists AND shape=flat (not subslots)"
+      result: PASS
+    - op: assert_doctrine
+      scope: { room_id: room_growth, action_slot: sankalp }
+      check: "verb register = cultivation-resolve (I practice / I return / I honor); NOT offering (I notice / I bless / I offer)"
+      result: PASS
+      note: "All 9 rows verb-register audited per 0132 docstring"
+  tradition_distribution_wave_1b:
+    gita: 11                         # 3 existing + 8 via 0135 — no cap in growth; growth is BG's PRIMARY home
+    dharma: 8                        # 3 existing + 5 via 0135
+    yamas_niyamas: 18                # via 0135
+    yoga_sutras: 7                   # 1 existing + 6 via 0135
+    dinacharya: 10                   # via 0135
+    ayurveda: 4                      # via 0135
+    total_principle_pool: 58         # 6 existing + 51 + 1 anchor gita_svadharma_is_what_you_have (already anchor)
+    total_sankalp_pool: 9            # anchor + 8 rotation
+    dominant_check: "BG + Dharma + Yamas/Niyamas = 37/58 = 64% primary substrate per §Growth. YS/Dinacharya/Ayurveda light support as doctrine allows. No Shaiva/Bhakti/Niti — doctrinal exclusion held."
+  life_context_coverage_wave_1b:
+    purpose_direction: { mantra: 2, practice: 2, sankalp: 3, principle: 12, banner: 4, teaching: 3, reflection: 2 }
+    daily_life:       { mantra: 1, practice: 3, sankalp: 2, principle: 18, banner: 5, teaching: 3, reflection: 2 }
+    work_career:      { mantra: 1, practice: 1, sankalp: 2, principle: 10, banner: 3, teaching: 2, reflection: 2 }
+    self:             { mantra: 2, practice: 2, sankalp: 2, principle: 12, banner: 4, teaching: 3, reflection: 2 }
+    relationships:    { mantra: 0, practice: 1, sankalp: 0, principle: 6,  banner: 2, teaching: 2, reflection: 1 }
+    health_energy:    { mantra: 0, practice: 1, sankalp: 0, principle: 6,  banner: 2, teaching: 2, reflection: 1 }
+    money_security:   { mantra: 1, practice: 0, sankalp: 0, principle: 3,  banner: 1, teaching: 1, reflection: 0 }
+  doctrinal_checks:
+    - { id: growth_sankalp_slot_exists,        pass: true, note: "First-ever growth sankalp pool — structural completeness" }
+    - { id: growth_sankalp_flat_shape,         pass: true, note: "Flat anchor+rotation; joy uses subslots (different register)" }
+    - { id: growth_sankalp_verb_register,      pass: true, note: "cultivation-resolve voice per 0132 audit" }
+    - { id: growth_bg_primary_home,            pass: true, note: "11 BG rows as PRIMARY tradition (§Growth doctrine)" }
+    - { id: growth_yamas_primary_substrate_10, pass: true, note: "18 rows (doctrinal floor ~10)" }
+    - { id: growth_dinacharya_daily_health_12_15, pass: true, note: "14 rows (10 principle daily_life + 4 health Ayurveda)" }
+    - { id: growth_ayurveda_health_4_5,        pass: true, note: "4 rows (doctrinal band 4-5)" }
+    - { id: growth_no_tantric_shaiva,          pass: true, note: "0 Shaiva/Tantric rows" }
+    - { id: growth_no_pure_bhakti_without_discipline, pass: true, note: "0 bhakti-without-discipline rows (growth excludes per §Growth)" }
+    - { id: growth_not_niti_dominant,          pass: true, note: "0 Niti rows in growth principle (Niti is Clarity primary; Growth secondary only for work_career per §Growth 'Niti-dominant too tactical'). Agent F has 8 growth-targeted Niti rows in Wave 2 — founder decision on inclusion §G-8." }
+  deferred_items:
+    - wave: 3
+      item: "Growth × relationships sankalps (+3-4)"
+      reason: "POOL_GAP_REPORT §A.5 — 0 relationships sankalps (all 9 skew purpose/self/work/daily)."
+    - wave: 3
+      item: "Growth × health_energy sankalps (+2-3)"
+      reason: "POOL_GAP_REPORT §A.5 — 0 health_energy sankalps."
+    - wave: 3
+      item: "Growth × money_security sankalps (+1-2)"
+      reason: "POOL_GAP_REPORT §A.5 — 0 money_security sankalps."
+    - wave: 2
+      item: "Growth mantra × relationships + health_energy (+3-4)"
+      reason: "POOL_GAP_REPORT §A.5 — mantra=0 for both contexts."
+    - wave: 2
+      item: "Growth practice × money_security + health_energy (+2-3)"
+      reason: "POOL_GAP_REPORT §A.5 — practice thin for those contexts."
+    - wave: 1b
+      item: "Agent F growth-targeted 8 Niti rows — founder call on inclusion"
+      reason: "Agent F delivered 5 growth × work_career + 3 growth × money_security. ROOM_TRADITION_V2 §Growth allows Niti as Secondary ONLY for work_career. Inclusion conservative-safe for work_career (5 rows); money_security (3 rows) needs founder ACK. Flag §G-8."
+
+# =====================================================================
+# ROOM: JOY
+# =====================================================================
+room_joy:
+  life_contexts: [self, relationships, purpose_direction, daily_life, health_energy]
+  secondary_contexts: [work_career]
+  excluded_contexts: [money_security]
+  current_state:
+    total_rows_pooled: 23
+    classes: { mantra: 6, practice: 0, sankalp: 16, principle: 0, wisdom_banner: 4 }
+    notes: "Sankalp = 3 subslots (gratitude/blessings/seva) × 5-6 rows each"
+  wave_1_projected:
+    total_rows_pooled: 27
+    classes: { mantra: 6, practice: 0, sankalp: 16, principle: 0, wisdom_banner: 8 }
+    pool_version: "2026.04.v2"
+  wave_1b_projected:
+    same_as_wave_1: true
+    reason: "No Agent F/G rows target joy."
+  action_list:
+    - op: add_rotation_row
+      scope: { room_id: room_joy, action_slot: wisdom_banner }
+      ref: bhakti_gratitude_keeps_the_heart_open
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "Bhakti joy banner minimum 3-4. NOTE: also in connection banner — dual-room with tone-shift (connection=reaching-toward; joy=celebrating-what-is) per ROOM_TRADITION_V2 §Connection-Joy distinctness rule."
+    - op: add_rotation_row
+      scope: { room_id: room_joy, action_slot: wisdom_banner }
+      ref: bhakti_offer_the_moment_not_only_the_ritual
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "Bhakti offering-register — joy native. NOTE: also in connection banner."
+    - op: add_rotation_row
+      scope: { room_id: room_joy, action_slot: wisdom_banner }
+      ref: bhakti_trust_the_small_daily_turning
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "Bhakti small-trust register — joy daily_life."
+    - op: add_rotation_row
+      scope: { room_id: room_joy, action_slot: wisdom_banner }
+      ref: bhakti_stay_faithful_in_ordinary_time
+      from_migration: 0135_seed_dark_tradition_principles
+      reason: "Bhakti ordinary-time faith — joy purpose_direction."
+    - op: assert_doctrine
+      scope: { room_id: room_joy, action_slot: wisdom_banner }
+      check: "bhakti_count in [3, 4]"
+      result: FAIL_SOFT
+      value: "5 bhakti rows (1 existing bhakti_amplify_gratitude + 4 via 0135)"
+      note: "1 over upper band. Flagged as acceptable by POOL_GAP_REPORT §B but founder-call-needed to confirm (§G-4)."
+    - op: assert_doctrine
+      scope: { room_id: room_joy }
+      check: "no principle slot"
+      result: PASS
+    - op: assert_doctrine
+      scope: { room_id: room_joy }
+      check: "no practice slot (joy does not need procedure)"
+      result: PASS
+    - op: assert_doctrine
+      scope: { room_id: room_joy }
+      check: "money_security excluded"
+      result: PASS
+  tradition_distribution_wave_1b:
+    bhakti: 5                        # doctrinal floor 3-4; at 5 (1 over upper)
+    upanishad_ananda: 1              # mantra.purnamadah (anchor)
+    gita: 1                          # gita_nishkama_karma_as_celebration (banner; sparse joy × work_career)
+    yoga_sutras: 1                   # yoga_sutras_santosha_as_practice (banner, light)
+    sankhya: 1                       # sankhya_witness_joy_without_clinging (banner, light)
+    vedic_stotra: implicit_via_sankalps
+    dinacharya: 0                    # acceptable — joy-register rhythm would be wave 2
+    yamas: 0                         # doctrinal exclusion (cultivation-register wrong for ananda)
+    niti: 0                          # doctrinal exclusion
+    shaiva: 0                        # doctrinal exclusion
+    dominant_check: "Bhakti primary (joy sankalp sovereign + 5 bhakti banners) per §Joy. BG at 1 banner (sparse 2.47-adjacent). Yamas/Niti/Shaiva excluded — doctrinal hold."
+  life_context_coverage_wave_1b:
+    self:             { mantra: 2, sankalp: 5, banner: 3 }
+    relationships:    { mantra: 1, sankalp: 4, banner: 2 }
+    daily_life:       { mantra: 1, sankalp: 4, banner: 2 }
+    purpose_direction:{ mantra: 1, sankalp: 2, banner: 1 }
+    health_energy:    { mantra: 1, sankalp: 1, banner: 1 }
+    work_career:      { mantra: 0, sankalp: 1, banner: 1 }    # [THIN — wave 2 authoring target: karma-yoga-craft]
+  doctrinal_checks:
+    - { id: joy_no_principle,             pass: true }
+    - { id: joy_no_practice,              pass: true }
+    - { id: joy_money_security_excluded,  pass: true }
+    - { id: joy_bhakti_banner_3_4,        pass: SOFT_FAIL, note: "5 bhakti rows; doctrine band 3-4. Founder call §G-4." }
+    - { id: joy_sankalp_verb_register,    pass: true, note: "I notice / I bless / I offer — offering-register (not cultivation). Existing pool." }
+    - { id: joy_yamas_excluded,           pass: true }
+    - { id: joy_niti_excluded,            pass: true }
+    - { id: joy_bg_near_excluded,         pass: true, note: "1 BG banner — sparse per §Joy" }
+  deferred_items:
+    - wave: 2
+      item: "Joy × work_career karma-yoga-craft sankalps (BG 2.47 framing) +5-8 rows"
+      reason: "WAVE1_SYNTHESIS §1.6 + POOL_GAP_REPORT §C.1 — 0 authored karma-yoga-craft sankalps. Highest Wave 2 authoring priority per §Joy doctrine."
+    - wave: 2
+      item: "Joy-register body-vitality Ayurveda +8-12 rows"
+      reason: "WAVE1_SYNTHESIS §1.6 — joy × health_energy weak; rasa-register body-vitality authoring not present in current 24-row Ayurveda corpus."
+    - wave: "v1.1"
+      item: "wisdom_teaching for joy"
+      reason: "Doctrine-gated per 0129_park_wisdom_teaching_connection_joy.py. Joy over-explanation risk per §Joy 'protect against principle/teaching creep'."
+
+# =====================================================================
+# GLOBAL / CROSS-ROOM SECTION
+# =====================================================================
+global_summary:
+  action_list_total: 159             # sum across rooms — see tally §Tally below
+
+  decontamination_summary:
+    total_operations: 3
+    rows:
+      - { row: mantra.soham,                             from_room: room_connection, keep_at: room_stillness,  migration: 0133 }
+      - { row: practice.hand_on_heart,                   from_room: room_connection, keep_at: room_stillness,  migration: 0133 }
+      - { row: yoga_sutras_one_anchor_when_scattered,    from_room: room_clarity,    keep_at: room_stillness,  migration: 0133 }
+
+  dual_use_summary:
+    intentional_cross_room:
+      - row: sankhya_witness_before_interpretation
+        rooms: [room_clarity (principle), room_release (wisdom_banner)]
+        governance: "Different surface + different tone. Documented §5.7.5."
+      - row: yoga_abhyasa_steady_return
+        rooms: [room_clarity (principle), room_growth (principle)]
+        governance: "Flagged POOL_GAP_REPORT §D risk-register MEDIUM. Founder call §G-7."
+      - row: yamas_satya_clean_truth
+        rooms: [room_clarity (principle), room_growth (principle)]
+        governance: "Different life_context biasing (clarity × relationships vs growth × self-substrate). Founder call §G-7."
+      - row: bhakti_gratitude_keeps_the_heart_open
+        rooms: [room_connection (banner), room_joy (banner)]
+        governance: "Different tone (reaching-toward vs celebrating-what-is) per §Connection-Joy distinctness. Acceptable §G-4."
+      - row: bhakti_offer_the_moment_not_only_the_ritual
+        rooms: [room_connection (banner), room_joy (banner)]
+        governance: "Same as above."
+      - row: dina_pre_meeting_arrive_before_you_speak
+        rooms: [room_connection (banner), room_clarity (principle)]
+        governance: "Different surface. Acceptable by §5.7.5. §G-5."
+      - row: dina_sunday_reset_restore_the_weekly_rhythm
+        rooms: [room_connection (banner), room_clarity (principle)]
+        governance: "Same as above. §G-5."
+    intentional_within_room_dual_use:
+      count: 13
+      rooms: [room_clarity, room_growth]
+      governance: "Same principle surfaces in principle/wisdom_banner/wisdom_teaching/wisdom_reflection within ONE room. Documented §5.7.5. No override required."
+
+  doctrinal_minima_final:
+    - { name: bg_clarity_principle_pct,     target: "<=25%",   actual: "10.9% (7/64)",      pass: true }
+    - { name: bhakti_connection_banner,     target: "6-8",     actual: 7,                    pass: true }
+    - { name: bhakti_joy_banner,            target: "3-4",     actual: 5,                    pass: SOFT_FAIL }
+    - { name: yamas_rooms_touched,          target: ">=3",     actual: 3,                    pass: true }
+    - { name: ayurveda_rooms_touched,       target: ">=3",     actual: 5,                    pass: true }
+    - { name: dinacharya_rooms_touched,     target: ">=3",     actual: 3,                    pass: true }
+    - { name: yamas_growth_primary_substrate, target: "~10",  actual: 18,                   pass: true }
+    - { name: yamas_release_money_security, target: "~2",     actual: 2,                    pass: true }
+    - { name: yamas_clarity_relationships,  target: "~3",     actual: 3,                    pass: true }
+    - { name: ayurveda_release_health,      target: "5-6",    actual: 5,                    pass: true }
+    - { name: ayurveda_growth_health,       target: "4-5",    actual: 4,                    pass: true }
+    - { name: ayurveda_clarity_health,      target: "2-3",    actual: 3,                    pass: true }
+    - { name: ayurveda_stillness_body_reg,  target: "1-2",    actual: 1,                    pass: true }
+    - { name: ayurveda_connection_health,   target: "1-2",    actual: 1,                    pass: true }
+    - { name: dinacharya_growth_daily_health, target: "12-15", actual: 14,                  pass: true }
+    - { name: dinacharya_clarity_daily_life, target: "4-5",    actual: 5,                    pass: true }
+    - { name: dinacharya_connection_daily_life, target: "2-3", actual: 2,                   pass: true }
+    summary: "16/17 pass; 1 SOFT_FAIL on bhakti joy banner (5 vs 3-4 band; founder_call §G-4)"
+
+  founder_calls_needed:
+    - id: G-1
+      question: "Does the 9-row growth sankalp selection in 0132 (honor_my_skill + 8 rotation) match Agent D's original Group 1 intent from TAG_PATCH_WAVE1 Group 1 (26 candidate sankalps)?"
+      source: "POOL_GAP_REPORT_V2 §E risk MEDIUM; TAG_PATCH_WAVE1 Group 1 (26 rows)"
+      blocks: "0132 migration apply"
+      suggested_action: "Cross-check 0132's 9-row subset against Agent D's Group 1 ranking; founder ACK or revise."
+    - id: G-2
+      question: "Does work-grief (layoff, project collapse) route through RELEASE or CLARITY as its canonical home room?"
+      source: "POOL_GAP_REPORT_V2 §A.3 + WAVE1_SYNTHESIS §8.3 — release × work_career = 0 rows across all classes"
+      blocks: "Wave 3 release × work_career authoring scope"
+      suggested_action: "Doctrinal decision + author either release × work_career banner/practice OR add doctrinal pointer in clarity × work_career Niti that 'work-grief enters through clarity'."
+    - id: G-3
+      question: "Is mantra.shivoham in the stillness rotation to be kept (Shaiva bija in pre-cognitive room) or swapped per ROOM_CLASS_DOMINANCE §Stillness recommendation for a Vedanta-witness equivalent?"
+      source: "ROOM_TRADITION_V2 §Stillness exclusion; ROOM_CLASS_DOMINANCE_V2 §Stillness swap advice"
+      blocks: "Stillness doctrinal purity for 0120 legacy"
+      suggested_action: "If keep: document as intentional override in OVERRIDE_LEDGER with 2-sig. If remove: add to decontamination ledger."
+    - id: G-4
+      question: "Is Bhakti joy banner at 5 rows acceptable (target 3-4)?"
+      source: "POOL_GAP_REPORT_V2 §B + §E.4 + ROOM_TRADITION_V2 §Joy"
+      blocks: "Soft — 0135 assertion only requires >=3; 5 is non-blocking but off-spec"
+      suggested_action: "Founder ACK of overshoot, OR trim bhakti_stay_faithful_in_ordinary_time to bring to 4."
+    - id: G-5
+      question: "Are dina_pre_meeting_arrive_before_you_speak and dina_sunday_reset_restore_the_weekly_rhythm acceptable as cross-room dual-use (connection banner + clarity principle)?"
+      source: "§5.7.5 strategy + SURFACE_ISOLATION_V2 §A"
+      blocks: "None — §5.7.5 permits when surfaces differ; documented here for audit trail"
+      suggested_action: "2-sig curator+founder sign-off per OVERRIDE_LEDGER 2-sig policy. Add to intentional_cross_surface_uses (currently count=13; bump to 15)."
+    - id: G-6
+      question: "Is sankhya_witness_before_interpretation acceptable as cross-room dual-use (clarity principle + release banner)?"
+      source: "§5.7.5 + §Release light-support Vedanta-witness"
+      blocks: "None — surface differs (principle vs banner) and context differs"
+      suggested_action: "2-sig sign-off."
+    - id: G-7
+      question: "Are yoga_abhyasa_steady_return and yamas_satya_clean_truth acceptable as cross-room dual-use (clarity principle + growth principle — SAME class surface)?"
+      source: "POOL_GAP_REPORT_V2 §D risk MEDIUM — 'breaks §SURFACE_ISOLATION_V2 if strict interpretation'"
+      blocks: "Wave 1 migration apply — strict interpretation would require removal from one room"
+      suggested_action: "Founder doctrinal clarification: does §5.7.5 dual-use apply ONLY within a room across surfaces, OR also across rooms with different life_context biasing? If strict (within-room only), 2 rows must be removed from either clarity or growth principle pool."
+    - id: G-8
+      question: "Are Agent F's 8 growth-targeted Niti rows (5 × work_career + 3 × money_security) to be included in growth principle pool?"
+      source: "ROOM_TRADITION_V2 §Growth: 'Niti-dominant too tactical — avoid/exclude'; allows secondary Niti ONLY × work_career"
+      blocks: "Wave 1b TAG_PATCH_WAVE1B scope"
+      suggested_action: "Include 5 work_career Niti rows (doctrinally allowed as Growth-secondary); exclude 3 money_security Niti rows (§Growth doctrine does not allow money_security Niti — those belong in Clarity × money_security which already has 12 Niti from F)."
+
+  verification_final:
+    all_doctrinal_checks_pass: FALSE   # 1 SOFT_FAIL (joy bhakti 5 vs 3-4); 1 PENDING (clarity Wave 1b tagging)
+    founder_calls_count: 8
+    ready_to_apply_migrations: false
+    blocking_gates:
+      - "Founder calls G-1 through G-8"
+      - "Wave 1b TAG_PATCH_WAVE1B authoring (82 rows)"
+      - "Smoke-state conflict resolution (1/12 vs 12/12 on tip b1ae635c per mitra_session_handoff_2026_04_20_end.md)"
+      - "Runtime BG cap guard in core/rooms/room_selection.py"
+      - "surface_eligibility backfill on 554 master rows"
+    estimated_apply_sequence:
+      1: "Resolve G-1 through G-8"
+      2: "Apply 0132 (growth sankalp slot)"
+      3: "Apply 0133 (decontamination)"
+      4: "Apply 0134 (clarity principle expansion — BG cap assertion self-verifies)"
+      5: "Apply 0135 (dark-tradition seed — all minima self-verify)"
+      6: "Author + apply TAG_PATCH_WAVE1B for 82 new principle rows"
+      7: "Author + apply surface_eligibility backfill for 554 master rows"
+      8: "Add runtime BG cap guard"
+
+# =====================================================================
+# TALLY — action_list ops per room
+# =====================================================================
+tally:
+  room_stillness:
+    add_rotation_row: 2
+    assert_doctrine: 1
+    subtotal: 3
+  room_connection:
+    remove_rotation_row: 2
+    add_rotation_row: 9
+    assert_doctrine: 2
+    subtotal: 13
+  room_release:
+    add_rotation_row: 9
+    assert_doctrine: 2
+    subtotal: 11
+  room_clarity:
+    remove_rotation_row: 1
+    add_rotation_row: 52      # 1 niti + 14 sankhya + 18 YS + 10 niti + 4 BG + 3 dharma + 4 yamas + 3 ayur + 5 dina in principle; + 1 banner + 2 teaching = 52
+    tag_row_batch: 2          # 50 F + 32 G = 82 rows (counted as 2 batch ops here; 82 underlying)
+    assert_doctrine: 2
+    subtotal: 57
+  room_growth:
+    add_slot: 1
+    add_anchor: 1
+    add_rotation_row: 60      # 8 sankalp + 18 yamas/niyamas + 8 BG + 5 dharma + 6 YS + 10 dinacharya + 4 ayurveda in principle; + 4 banner + 1 teaching = 60
+    assert_doctrine: 2
+    subtotal: 64
+  room_joy:
+    add_rotation_row: 4
+    assert_doctrine: 4
+    subtotal: 8
+  grand_total_concrete_ops: 156
+  grand_total_including_tagged_rows: 238     # 156 concrete + 82 wave_1b tag-patch rows as 82 individual tag_row ops
+
+# =====================================================================
+# WAVE 2 + WAVE 3 AUTHORING TARGETS (summary — detail in POOL_GAP_REPORT_V2 §C)
+# =====================================================================
+wave_2_authoring_targets:
+  - { gap: "Niti clarity × relationships + × purpose_direction depth",    target: "+15-20 rows",   priority: HIGH }
+  - { gap: "Joy × work_career karma-yoga-craft sankalps",                  target: "+5-8 rows",     priority: HIGH }
+  - { gap: "Ayurveda joy-register body-vitality",                          target: "+8-12 rows",    priority: HIGH }
+  - { gap: "Bhakti connection rotation breadth",                           target: "+5-10 rows",    priority: MEDIUM }
+  - { gap: "Release banner BG 2.14-family breadth",                        target: "+3-5 rows",     priority: MEDIUM }
+  - { gap: "Release practice Ayurveda vāta/pitta rotation",                target: "+3-5 rows",     priority: MEDIUM }
+  - { gap: "Stillness Vedanta-sākṣin banner breadth",                      target: "+2-3 rows",     priority: LOW }
+
+wave_3_authoring_targets:
+  - { gap: "Release × work_career (all classes)",           target: "+5-8 rows",   blocks_on: "G-2 founder doctrinal call" }
+  - { gap: "Growth × relationships/health/money sankalp",   target: "+6-9 rows",   priority: MEDIUM }
+  - { gap: "Clarity × money_security mantra/practice",      target: "+4-6 rows",   priority: MEDIUM }
+
+# =====================================================================
+# END OF FILE
+# =====================================================================

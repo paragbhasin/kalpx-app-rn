@@ -9,7 +9,9 @@
  *   - step_text_input_*    → Multiline text-input (1000 char cap)
  *   - step_journal_*       → Multiline text-input (1000 char cap)
  *   - step_grounding_*     → 5-4-3-2-1 sequential prompts
- *   - unknown              → caller-side Alert fallback (we render nothing)
+ *   - step_voice_note_*    → Voice-note MVP (stub recorder, elapsed counter)
+ *   - step_reach_out_*     → Reach-out prompt (contact hint + message + copy)
+ *   - unknown              → defensive inline fallback panel
  *
  * On Done, the caller's `onDone(extra)` callback fires with any collected
  * payload bits (text, grounding[]) so the pill can merge them into the
@@ -20,6 +22,7 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
+  Clipboard,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -40,11 +43,23 @@ export type StepModalKind =
   | "timer_heart"
   | "text_input"
   | "grounding"
+  | "voice_note"
+  | "reach_out"
   | "unknown";
 
 export interface StepModalResult {
   text?: string;
   grounding?: string[];
+  // Voice-note extras — §Phase 6 carry-equivalent. `stub:true` until the
+  // recorder is wired; duration_sec is the elapsed counter value.
+  source?: "voice_note" | "reach_out";
+  duration_sec?: number;
+  stub?: boolean;
+  // Reach-out extras — user-authored contact hint + message; copied flag
+  // tells the BE whether the user tapped the clipboard affordance.
+  contact_hint?: string;
+  message?: string;
+  copied?: boolean;
 }
 
 interface Props {
@@ -65,6 +80,8 @@ export function classifyStep(templateId?: string | null): StepModalKind {
   if (templateId.startsWith("step_text_input_")) return "text_input";
   if (templateId.startsWith("step_journal_")) return "text_input";
   if (templateId.startsWith("step_grounding_")) return "grounding";
+  if (templateId.startsWith("step_voice_note")) return "voice_note";
+  if (templateId.startsWith("step_reach_out")) return "reach_out";
   return "unknown";
 }
 
@@ -138,6 +155,14 @@ const StepModal: React.FC<Props> = ({
 
           {kind === "grounding" ? (
             <GroundingBody onDone={onDone} />
+          ) : null}
+
+          {kind === "voice_note" ? (
+            <VoiceNoteBody stepPayload={stepPayload} onDone={onDone} />
+          ) : null}
+
+          {kind === "reach_out" ? (
+            <ReachOutBody stepPayload={stepPayload} onDone={onDone} />
           ) : null}
 
           {kind === "unknown" ? (
@@ -366,6 +391,269 @@ const GroundingBody: React.FC<{ onDone: (extra: StepModalResult) => void }> = ({
   );
 };
 
+// ─── Voice-note body (Phase 6 release-room carry-equivalent) ────────────
+//
+// MVP stub: the UI walks through idle → recording → stopped states with an
+// elapsed-seconds counter, but does NOT capture audio. expo-av is present
+// in package.json (~15.1.7) and iOS has NSMicrophoneUsageDescription, but
+// Android RECORD_AUDIO is not yet declared in app.config.js and there is
+// no BE upload pipeline for audio. Per Phase 6 spec we ship the UI with
+// `stub: true` so QA can verify the flow; wiring the real recorder is a
+// follow-up when both platforms have permissions + BE endpoint ready.
+//
+// todo: expo-av recorder wiring — Audio.Recording.createAsync() on start,
+// stopAndUnloadAsync() on stop, then POST the URI to the BE once the
+// upload endpoint exists; flip `stub: false` at that point.
+
+interface VoiceNoteBodyProps {
+  stepPayload: StepPayload | null | undefined;
+  onDone: (extra: StepModalResult) => void;
+}
+
+type VoiceNotePhase = "idle" | "recording" | "stopped";
+
+const VoiceNoteBody: React.FC<VoiceNoteBodyProps> = ({
+  stepPayload,
+  onDone,
+}) => {
+  const prompt =
+    (stepPayload?.prompt && String(stepPayload.prompt)) ||
+    "Leave a voice note — what are you releasing?";
+
+  const [phase, setPhase] = useState<VoiceNotePhase>("idle");
+  const [elapsed, setElapsed] = useState<number>(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (phase !== "recording") return;
+    intervalRef.current = setInterval(() => {
+      setElapsed((e) => e + 1);
+    }, 1000);
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [phase]);
+
+  const mm = Math.floor(elapsed / 60);
+  const ss = elapsed % 60;
+  const timeLabel = `${mm.toString().padStart(2, "0")}:${ss
+    .toString()
+    .padStart(2, "0")}`;
+
+  const handleRecord = () => {
+    setElapsed(0);
+    setPhase("recording");
+  };
+  const handleStop = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    setPhase("stopped");
+  };
+  const handleDone = () => {
+    onDone({
+      source: "voice_note",
+      duration_sec: elapsed,
+      stub: true,
+    });
+  };
+
+  const doneEnabled = phase === "stopped" && elapsed > 0;
+
+  return (
+    <View style={styles.timerRoot}>
+      <Text style={styles.timerCue} testID="step_modal_voice_note_prompt">
+        {prompt}
+      </Text>
+
+      <Text style={styles.timerDigits} testID="step_modal_voice_note_elapsed">
+        {timeLabel}
+      </Text>
+
+      {phase === "recording" ? (
+        <Text style={styles.voiceNoteStatus}>Recording…</Text>
+      ) : phase === "stopped" ? (
+        <Text style={styles.voiceNoteStatus}>
+          Recorded {timeLabel} — tap Done to save
+        </Text>
+      ) : (
+        <Text style={styles.voiceNoteStatus}>Tap the circle to begin</Text>
+      )}
+
+      <TouchableOpacity
+        style={[
+          styles.voiceRecordButton,
+          phase === "recording" ? styles.voiceRecordButtonActive : null,
+          phase === "stopped" ? styles.voiceRecordButtonDone : null,
+        ]}
+        onPress={phase === "recording" ? handleStop : handleRecord}
+        disabled={phase === "stopped"}
+        testID={
+          phase === "recording"
+            ? "step_modal_voice_note_stop"
+            : "step_modal_voice_note_record"
+        }
+        accessibilityRole="button"
+        accessibilityLabel={
+          phase === "recording" ? "Stop recording" : "Start recording"
+        }
+      >
+        <View
+          style={
+            phase === "recording"
+              ? styles.voiceRecordInnerSquare
+              : styles.voiceRecordInnerCircle
+          }
+        />
+      </TouchableOpacity>
+
+      <View style={styles.timerControls}>
+        <TouchableOpacity
+          style={[
+            styles.ctrlBtn,
+            styles.ctrlDone,
+            !doneEnabled ? styles.ctrlDisabled : null,
+          ]}
+          disabled={!doneEnabled}
+          onPress={handleDone}
+          testID="step_modal_voice_note_done"
+        >
+          <Text
+            style={[
+              styles.ctrlBtnLabel,
+              doneEnabled ? styles.ctrlDoneLabel : null,
+            ]}
+          >
+            Done
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
+
+// ─── Reach-out body (Phase 6 connection-room carry) ─────────────────────
+//
+// User composes a short message for someone who matters. "Copy and close"
+// writes the message body to the system clipboard (react-native Clipboard;
+// deprecated but still bundled — no new deps per scope). "Done without
+// copying" fires the dispatch with copied:false. No SMS/email integration —
+// the user pastes into their own messaging app.
+
+interface ReachOutBodyProps {
+  stepPayload: StepPayload | null | undefined;
+  onDone: (extra: StepModalResult) => void;
+}
+
+const MAX_CONTACT = 40;
+const MAX_REACH_OUT = 280;
+
+const ReachOutBody: React.FC<ReachOutBodyProps> = ({
+  stepPayload,
+  onDone,
+}) => {
+  const prompt =
+    (stepPayload?.prompt && String(stepPayload.prompt)) ||
+    "Reach out — a short message to someone who matters.";
+
+  const [contact, setContact] = useState<string>("");
+  const [message, setMessage] = useState<string>("");
+
+  const trimmedMessage = message.trim();
+  const trimmedContact = contact.trim();
+  const enabled = trimmedMessage.length >= 1;
+
+  const dispatch = (copied: boolean) => {
+    if (!enabled) return;
+    onDone({
+      source: "reach_out",
+      contact_hint: trimmedContact,
+      message: trimmedMessage,
+      copied,
+    });
+  };
+
+  const handleCopyAndClose = () => {
+    if (!enabled) return;
+    try {
+      Clipboard.setString(trimmedMessage);
+      dispatch(true);
+    } catch (err) {
+      if (__DEV__) {
+        console.warn(
+          "[StepModal/reach_out] Clipboard.setString failed; dispatching copied:false",
+          err,
+        );
+      }
+      dispatch(false);
+    }
+  };
+
+  const handleDoneWithoutCopy = () => {
+    dispatch(false);
+  };
+
+  return (
+    <ScrollView style={styles.textRoot} keyboardShouldPersistTaps="handled">
+      <Text style={styles.textPrompt}>{prompt}</Text>
+
+      <TextInput
+        value={contact}
+        onChangeText={(v) => setContact(v.slice(0, MAX_CONTACT))}
+        style={styles.reachOutContactInput}
+        placeholder="Who — e.g. my mom (optional)"
+        placeholderTextColor="#B0B0B5"
+        testID="step_modal_reach_out_contact"
+        maxLength={MAX_CONTACT}
+      />
+
+      <TextInput
+        value={message}
+        onChangeText={(v) => setMessage(v.slice(0, MAX_REACH_OUT))}
+        multiline
+        textAlignVertical="top"
+        style={styles.textInput}
+        placeholder="Your message…"
+        placeholderTextColor="#B0B0B5"
+        testID="step_modal_reach_out_message"
+        maxLength={MAX_REACH_OUT}
+      />
+      <Text style={styles.textCounter}>
+        {message.length} / {MAX_REACH_OUT}
+      </Text>
+
+      <View style={styles.reachOutActions}>
+        <TouchableOpacity
+          style={[
+            styles.ctrlBtn,
+            styles.ctrlDone,
+            !enabled ? styles.ctrlDisabled : null,
+          ]}
+          disabled={!enabled}
+          onPress={handleCopyAndClose}
+          testID="step_modal_reach_out_copy_done"
+        >
+          <Text
+            style={[
+              styles.ctrlBtnLabel,
+              enabled ? styles.ctrlDoneLabel : null,
+            ]}
+          >
+            Copy and close
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.ctrlBtn, !enabled ? styles.ctrlDisabled : null]}
+          disabled={!enabled}
+          onPress={handleDoneWithoutCopy}
+          testID="step_modal_reach_out_done"
+        >
+          <Text style={styles.ctrlBtnLabel}>Done without copying</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
+};
+
 // ─── Unknown-template body (defensive fallback) ──────────────────────────
 
 const UnknownBody: React.FC<{ onDone: (extra: StepModalResult) => void }> = ({
@@ -505,6 +793,57 @@ const styles = StyleSheet.create({
   },
   ctrlDisabled: {
     opacity: 0.35,
+  },
+
+  // Voice note
+  voiceNoteStatus: {
+    fontSize: 13,
+    color: "#6E6E73",
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  voiceRecordButton: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    backgroundColor: "#E53935",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 32,
+  },
+  voiceRecordButtonActive: {
+    backgroundColor: "#B71C1C",
+  },
+  voiceRecordButtonDone: {
+    backgroundColor: "#BDBDBD",
+  },
+  voiceRecordInnerCircle: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#FFFFFF",
+  },
+  voiceRecordInnerSquare: {
+    width: 28,
+    height: 28,
+    borderRadius: 4,
+    backgroundColor: "#FFFFFF",
+  },
+
+  // Reach out
+  reachOutContactInput: {
+    borderWidth: 1,
+    borderColor: "#D8D8D8",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 15,
+    color: "#1C1C1E",
+    marginBottom: 12,
+  },
+  reachOutActions: {
+    gap: 10,
+    marginBottom: 24,
   },
 });
 

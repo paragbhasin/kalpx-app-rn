@@ -4868,15 +4868,31 @@ export async function executeAction(
           meta: { room_id: roomId, source },
         });
 
-        // Phase 5 Stage 2 — global + per-room flag gate. When BOTH are on
-        // we route to the canonical RoomContainer (which fetches the
-        // RoomRenderV1 envelope from /api/mitra/rooms/{id}/render/). When
-        // either is off we fall through to the legacy dev-bridge map below.
+        // Defensive audio kill — global static expo-av audio mode reset
+        // in case a prior runner / room session left audio playing
+        // without unloading. Quiet-by-default on every room entry; the
+        // user can re-enable per the §6 Opening Experience policy.
+        try {
+          const { Audio } = require("expo-av");
+          await Audio.setIsEnabledAsync(false);
+          await Audio.setIsEnabledAsync(true);
+        } catch {
+          // expo-av not loaded or platform doesn't support — noop.
+        }
+
+        // Phase 5 Stage 2 (revised) — single global flag gate. When ON,
+        // ALL six rooms route to the canonical RoomContainer (which fetches
+        // the RoomRenderV1 envelope from /api/mitra/rooms/{id}/render/).
+        // The BE has its own per-room flag (MITRA_ROOM_<ID>) and returns
+        // 404 if a specific room is disabled — RoomContainer handles that
+        // gracefully with the synthesized exit-only fallback.
+        //
+        // Per-room env var checks at FE-build-time were removed — they
+        // required setting all 6 EXPO_PUBLIC_MITRA_ROOM_* flags, which is
+        // operationally fragile (each Expo build bakes env at bundle
+        // time). Single global flag is the cleaner gate.
         const globalFlagOn = process.env.EXPO_PUBLIC_MITRA_V3_ROOMS === "1";
-        const perRoomKey = `EXPO_PUBLIC_MITRA_${roomId.toUpperCase()}`;
-        const perRoomFlagOn =
-          (process.env as any)[perRoomKey] === "1";
-        if (globalFlagOn && perRoomFlagOn) {
+        if (globalFlagOn) {
           // Stamp room_id into screenData BEFORE navigation so the
           // RoomContainer (which reads screenData.room_id on mount) has
           // the identifier available for its /render/ fetch.

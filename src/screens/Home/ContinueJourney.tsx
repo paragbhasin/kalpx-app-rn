@@ -24,6 +24,8 @@
  */
 
 import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useNavigation } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -36,12 +38,15 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { useDispatch } from "react-redux";
 import { executeAction } from "../../engine/actionExecutor";
 import { mitraJourneyHome } from "../../engine/mitraApi";
 import { useScreenStore } from "../../engine/useScreenBridge";
-import { screenActions, loadScreenWithData, goBackWithData } from "../../store/screenSlice";
+import {
+  goBackWithData,
+  loadScreenWithData,
+  screenActions,
+} from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -114,12 +119,7 @@ function ioniconFor(name: string | null | undefined): React.ReactNode {
   };
   const glyph = glyphMap[name] || "ellipse-outline";
   return (
-    <Ionicons
-      name={glyph}
-      size={24}
-      color="#432104"
-      style={styles.btnIcon}
-    />
+    <Ionicons name={glyph} size={24} color="#432104" style={styles.btnIcon} />
   );
 }
 
@@ -142,6 +142,8 @@ export default function ContinueJourney({
   // updateScreenData with reversed args), so we build it here via
   // dispatch(screenActions.setScreenValue({key, value})) to match the
   // canonical Home.tsx pattern.
+  const navigation = useNavigation<any>();
+
   const buildActionContext = useCallback(() => {
     return {
       screenState: screenBridge.screenData || {},
@@ -158,13 +160,19 @@ export default function ContinueJourney({
             ? target
             : target?.state_id || target?.stateId || "";
         dispatch(loadScreenWithData({ containerId, stateId }) as any);
+        navigation.navigate("DynamicEngine");
       },
       goBack: () => {
         dispatch(goBackWithData() as any);
       },
       currentScreen: screenBridge.currentScreen,
     };
-  }, [screenBridge.screenData, screenBridge.currentScreen, dispatch]);
+  }, [
+    screenBridge.screenData,
+    screenBridge.currentScreen,
+    dispatch,
+    navigation,
+  ]);
 
   const fetchHome = useCallback(async (forceRefresh: boolean = false) => {
     const ttlMs = (_homeCache?.response?.meta?.cache_ttl_sec || 0) * 1000;
@@ -209,24 +217,21 @@ export default function ContinueJourney({
   useEffect(() => {
     let cancelled = false;
     let prehydrateTimer: ReturnType<typeof setTimeout> | null = null;
+
+    if (routedRef.current) return;
+
     (async () => {
       const res = await fetchHome();
-      if (cancelled || !res) return;
-      if (res.response_type === "route_to_moment" && res.action && !routedRef.current) {
+      if (cancelled || !res || routedRef.current) return;
+
+      if (res.response_type === "route_to_moment" && res.action) {
         routedRef.current = true;
         await executeAction(res.action as any, buildActionContext() as any);
         return; // routing away — don't prehydrate
       }
       // Only prehydrate if we're actually rendering home (chips will be tapped).
       prehydrateTimer = setTimeout(() => {
-        if (cancelled) return;
-        // skipReveal=true prevents the insight_summary/path_reveal nav
-        // at the end of the generate_companion chain (1834).
-        // use_journey_companion=true routes the internal fetch to the
-        // read-only /journey/companion/ endpoint instead of
-        // /generate-companion/ (which can create journeys as a side
-        // effect AND 500s with "Backend contract failure" when the
-        // locked triad on the journey row is incomplete).
+        if (cancelled || routedRef.current) return;
         executeAction(
           {
             type: "generate_companion",
@@ -234,10 +239,14 @@ export default function ContinueJourney({
           } as any,
           buildActionContext() as any,
         ).catch((err) => {
-          console.debug("[ContinueJourney] generate_companion prehydrate failed:", err?.message);
+          console.debug(
+            "[ContinueJourney] generate_companion prehydrate failed:",
+            err?.message,
+          );
         });
       }, 1500);
     })();
+
     return () => {
       cancelled = true;
       if (prehydrateTimer) clearTimeout(prehydrateTimer);
@@ -246,7 +255,10 @@ export default function ContinueJourney({
 
   const handleAction = useCallback(
     async (action: ActionSpec | undefined) => {
-      console.log("[ContinueJourney] chip tapped, action:", JSON.stringify(action));
+      console.log(
+        "[ContinueJourney] chip tapped, action:",
+        JSON.stringify(action),
+      );
       if (!action) {
         console.warn("[ContinueJourney] no action — aborting");
         return;
@@ -258,9 +270,16 @@ export default function ContinueJourney({
           Object.keys(ctx || {}),
         );
         await executeAction(action as any, ctx as any);
-        console.log("[ContinueJourney] executeAction returned cleanly for type:", action.type);
+        console.log(
+          "[ContinueJourney] executeAction returned cleanly for type:",
+          action.type,
+        );
       } catch (err: any) {
-        console.error("[ContinueJourney] executeAction threw:", err?.message, err);
+        console.error(
+          "[ContinueJourney] executeAction threw:",
+          err?.message,
+          err,
+        );
       }
     },
     [buildActionContext],
@@ -283,7 +302,10 @@ export default function ContinueJourney({
   }
 
   // ── render_home / fallback ─────────────────────────────────────
-  const headline = (home.headline || "").replace("{userName}", userName || "friend");
+  const headline = (home.headline || "").replace(
+    "{userName}",
+    userName || "friend",
+  );
   const bodyLines = home.body_lines || [];
   const layout = home.layout || "minimal_care";
   const chips = home.chips || [];
@@ -359,11 +381,7 @@ export default function ContinueJourney({
                     <Text style={styles.btnText}>{chip.label}</Text>
                   </View>
                   {isLastWithArrow && (
-                    <Ionicons
-                      name="arrow-forward"
-                      size={22}
-                      color="#432104"
-                    />
+                    <Ionicons name="arrow-forward" size={22} color="#432104" />
                   )}
                 </View>
               </TouchableOpacity>
@@ -378,7 +396,7 @@ export default function ContinueJourney({
             onPress={() => handleAction(footer.action)}
             style={styles.footerLinkWrap}
           >
-            <Text style={styles.footerLinkText}>{footer.label}  →</Text>
+            <Text style={styles.footerLinkText}>{footer.label} →</Text>
           </TouchableOpacity>
         )}
       </ScrollView>
@@ -455,12 +473,15 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   primaryCtaGradient: {
-    height: 60,
+    // height: 60,
     borderRadius: 30,
+    padding: 10,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 24,
+    // paddingHorizontal: 24,
+    width: "80%",
+    alignSelf: "center",
     gap: 8,
   },
   primaryCtaLabel: {

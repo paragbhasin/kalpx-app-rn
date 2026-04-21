@@ -208,7 +208,8 @@ export default function Home() {
     hasJourney: boolean,
     initialTarget?: { containerId: string; stateId: string },
   ) => {
-    if (hasJourney) {
+    const stashedInference = store.getState().screen.screenData.stashed_inference_state;
+    if (hasJourney || stashedInference) {
       setIsProcessing(true);
       try {
         // ... (rest of the logic remains same, just using initialTarget at the end)

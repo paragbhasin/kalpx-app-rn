@@ -39,7 +39,13 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
     (state: any) => state.updateHeaderHidden,
   );
   const screenData = useScreenStore((state: any) => state.screenData);
-  const turn = Number(screenData.onboarding_turn || 1);
+  const _rawTurn = screenData.onboarding_turn;
+  const turn =
+    typeof _rawTurn === "number"
+      ? _rawTurn
+      : typeof _rawTurn === "string"
+        ? Number((_rawTurn.match(/\d+/) || ["1"])[0])
+        : 1;
 
   useEffect(() => {
     const isIntro = turn === 1 || turn === 2;

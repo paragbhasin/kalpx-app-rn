@@ -5225,7 +5225,7 @@ export const CycleTransitionsContainer = {
     // Spec: route_checkpoint_day_7.md. New v3 block variant; legacy
     // weekly_checkpoint (cycle_reflection block) is preserved below for
     // back-compat — callers may route to either.
-    day_7: {
+    checkpoint_day_7: {
       tone: { theme: "light_sandal", mood: "reflective" },
       blocks: [{ type: "checkpoint_day_7" }],
     },
@@ -5233,7 +5233,7 @@ export const CycleTransitionsContainer = {
     // Week 5 — Mitra v3 Moment 25 (Day 14 Evolution).
     // Spec: route_checkpoint_day_14.md. New v3 block variant alongside the
     // legacy weekly_checkpoint state.
-    day_14: {
+    checkpoint_day_14: {
       tone: { theme: "light_sandal", mood: "reflective" },
       blocks: [{ type: "checkpoint_day_14" }],
     },

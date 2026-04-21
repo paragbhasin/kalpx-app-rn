@@ -24,19 +24,19 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
-  ScrollView,
 } from "react-native";
-import { Fonts } from "../theme/fonts";
 import { executeAction } from "../engine/actionExecutor";
 import { mitraResolveMoment } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
+import { Fonts } from "../theme/fonts";
 
 type Step = "intro" | "body";
 
@@ -110,7 +110,10 @@ const CheckpointDay7Block: React.FC<Props> = () => {
     };
     let cancelled = false;
     (async () => {
-      const payload = await mitraResolveMoment("M24_checkpoint_day_7", resolveCtx);
+      const payload = await mitraResolveMoment(
+        "M24_checkpoint_day_7",
+        resolveCtx,
+      );
       if (cancelled || !payload) return;
       store.dispatch(
         screenActions.setScreenValue({
@@ -138,7 +141,7 @@ const CheckpointDay7Block: React.FC<Props> = () => {
   const introBodySlot = readSlot(ss, "intro_body");
   // T4B: per-intent framing from checkpoint GET overrides spine intro_body.
   const introBody: string =
-    (typeof ss.checkpoint_framing === "string" && ss.checkpoint_framing)
+    typeof ss.checkpoint_framing === "string" && ss.checkpoint_framing
       ? ss.checkpoint_framing
       : introBodySlot;
   const introCtaLabel = readSlot(ss, "intro_cta_label");
@@ -159,7 +162,9 @@ const CheckpointDay7Block: React.FC<Props> = () => {
 
   const growth: string | null = ss.what_grew_section || null;
 
-  const dispatchDecision = async (decision: "continue" | "lighten" | "start_fresh") => {
+  const dispatchDecision = async (
+    decision: "continue" | "lighten" | "start_fresh",
+  ) => {
     // Persist reflection so checkpoint_submit reads it identically to web.
     store.dispatch(
       screenActions.setScreenValue({
@@ -260,7 +265,9 @@ const CheckpointDay7Block: React.FC<Props> = () => {
           maxLength={1000}
         />
 
-        <Text style={[styles.microLabel, { marginTop: 20 }]}>{nextWeekLabel}</Text>
+        <Text style={[styles.microLabel, { marginTop: 20 }]}>
+          {nextWeekLabel}
+        </Text>
         <Text style={styles.narrative}>{nextWeekProse}</Text>
       </ScrollView>
 
@@ -298,7 +305,7 @@ const CheckpointDay7Block: React.FC<Props> = () => {
 };
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#FFF8EF" },
+  root: { flex: 1 },
   scroll: { padding: 24, paddingBottom: 16 },
   topRegion: { flex: 1, padding: 24, justifyContent: "center" },
   bottomRegion: {
@@ -385,10 +392,19 @@ const styles = StyleSheet.create({
     textAlignVertical: "top",
   },
   cta: {
-    backgroundColor: "#c9a84c",
-    paddingVertical: 14,
+    backgroundColor: "#FBF5F5",
+    borderColor: "#9f9f9f",
+    borderWidth: 1,
+    paddingVertical: 10,
     borderRadius: 28,
     alignItems: "center",
+
+    elevation: 6,
+
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   ctaText: {
     fontFamily: Fonts.sans.medium,

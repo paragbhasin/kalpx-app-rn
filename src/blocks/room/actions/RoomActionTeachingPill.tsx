@@ -1,9 +1,12 @@
 /**
- * RoomActionTeachingPill — stub for action_type=teaching.
+ * RoomActionTeachingPill — opens WhyThisL2Sheet overlay from the
+ * `teaching_payload` authored by the BE.
  *
- * Opens the WhyThisL2Sheet overlay (reuses existing FE component per §5.7.6).
- * SCAFFOLDING ONLY: stub does not wire into the overlay yet — real wiring
- * lands in Phase 5 alongside BE teaching_payload hydration.
+ * Stage 2 wiring (2026-04-20): tap stamps teaching_payload into screenData
+ * under `why_this_principle` (the key WhyThisL2Sheet reads from), then
+ * dispatches `open_why_this_l2`. The open_why_this_l2 handler
+ * (actionExecutor.ts:4670+) will overwrite with a fresh BE fetch when
+ * principle_id is provided; we pass principle_id so that path runs too.
  *
  * Gated at RoomRenderer via EXPO_PUBLIC_MITRA_V3_ROOMS.
  */
@@ -11,22 +14,64 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
 
-import type { ActionEnvelope } from "../types";
+import { executeAction } from "../../../engine/actionExecutor";
+import { useScreenStore } from "../../../engine/useScreenBridge";
+import type { ActionEnvelope, RoomRenderV1 } from "../types";
+import { buildActionCtx } from "./actionContextHelper";
 
 interface Props {
   action: ActionEnvelope;
   index: number;
+  envelope?: RoomRenderV1;
 }
 
 const RoomActionTeachingPill: React.FC<Props> = ({ action }) => {
+  const { loadScreen, goBack } = useScreenStore();
+
+  const onPress = () => {
+    const tp = action.teaching_payload;
+    if (!tp) {
+      console.warn(
+        "[RoomActionTeachingPill] missing teaching_payload",
+        action.action_id,
+      );
+      return;
+    }
+    const ctx = buildActionCtx({ loadScreen, goBack });
+    // WhyThisL2Sheet reads screenData.why_this_principle. Stamp the BE
+    // payload first so the overlay has content to render immediately —
+    // the open_why_this_l2 handler then overwrites with the authoritative
+    // fetch via principle_id.
+    ctx.setScreenValue(
+      {
+        id: tp.principle_id,
+        name: tp.principle_name,
+        principle_name: tp.principle_name,
+        body: tp.body,
+        sources: tp.sources,
+      },
+      "why_this_principle",
+    );
+    executeAction(
+      {
+        type: "open_why_this_l2",
+        payload: { principle_id: tp.principle_id },
+      } as any,
+      ctx,
+    ).catch((err) => {
+      if (__DEV__) {
+        console.warn("[RoomActionTeachingPill] dispatch failed:", err);
+      }
+    });
+  };
+
   return (
     <TouchableOpacity
       testID={action.testID}
       accessibilityRole="button"
       accessibilityLabel={action.label}
       style={styles.pill}
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      onPress={() => {}}
+      onPress={onPress}
     >
       <Text style={styles.label}>{action.label}</Text>
     </TouchableOpacity>

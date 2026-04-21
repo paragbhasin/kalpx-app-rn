@@ -43,7 +43,7 @@ const RoomActionList: React.FC<Props> = ({ envelope, reduceMotion }) => {
         void _staggerDelay;
         return (
           <View key={action.action_id} style={styles.row}>
-            {renderActionComponent(action, index)}
+            {renderActionComponent(action, index, envelope)}
           </View>
         );
       })}
@@ -51,22 +51,38 @@ const RoomActionList: React.FC<Props> = ({ envelope, reduceMotion }) => {
   );
 };
 
-function renderActionComponent(action: ActionEnvelope, index: number) {
+function renderActionComponent(
+  action: ActionEnvelope,
+  index: number,
+  envelope: RoomRenderV1,
+) {
   switch (action.action_type) {
     case "runner_mantra":
     case "runner_sankalp":
     case "runner_practice":
-      return <RoomActionRunnerPill action={action} index={index} />;
+      return (
+        <RoomActionRunnerPill action={action} index={index} envelope={envelope} />
+      );
     case "teaching":
-      return <RoomActionTeachingPill action={action} index={index} />;
+      return (
+        <RoomActionTeachingPill action={action} index={index} envelope={envelope} />
+      );
     case "inquiry":
-      return <RoomActionInquiryPill action={action} index={index} />;
+      return (
+        <RoomActionInquiryPill action={action} index={index} envelope={envelope} />
+      );
     case "in_room_step":
-      return <RoomActionStepPill action={action} index={index} />;
+      return (
+        <RoomActionStepPill action={action} index={index} envelope={envelope} />
+      );
     case "carry":
-      return <RoomActionCarryPill action={action} index={index} />;
+      return (
+        <RoomActionCarryPill action={action} index={index} envelope={envelope} />
+      );
     case "exit":
-      return <RoomActionExitPill action={action} index={index} />;
+      return (
+        <RoomActionExitPill action={action} index={index} envelope={envelope} />
+      );
     default:
       // Unknown action_type — self-hide per sovereignty fallback (§I-6).
       return null;

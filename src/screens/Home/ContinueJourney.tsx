@@ -270,6 +270,22 @@ export default function ContinueJourney({
         navigation.navigate("DynamicEngine");
         return null;
       }
+      if (viewKey === "grief_room") {
+        routedRef.current = true;
+        dispatch(
+          loadScreenWithData({ containerId: "companion_dashboard", stateId: "grief_room" }) as any,
+        );
+        navigation.navigate("DynamicEngine");
+        return null;
+      }
+      if (viewKey === "loneliness_room") {
+        routedRef.current = true;
+        dispatch(
+          loadScreenWithData({ containerId: "companion_dashboard", stateId: "loneliness_room" }) as any,
+        );
+        navigation.navigate("DynamicEngine");
+        return null;
+      }
       if (viewKey === "onboarding_start") {
         routedRef.current = true;
         dispatch(

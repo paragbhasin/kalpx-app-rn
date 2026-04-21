@@ -1037,7 +1037,9 @@ export interface V3EntryViewEnvelope extends V3Envelope {
       | "day_14_view"
       | "welcome_back_surface"
       | "onboarding_start"
-      | "crisis_view";
+      | "crisis_view"
+      | "grief_room"
+      | "loneliness_room";
     payload: Record<string, any>;
   };
 }
@@ -1127,12 +1129,14 @@ export interface V3GetResult<E extends V3Envelope> {
 async function v3Get<E extends V3Envelope>(
   url: string,
   etagIn: string | null = null,
+  params?: Record<string, string>,
 ): Promise<V3GetResult<E>> {
   const headers: Record<string, string> = {};
   if (etagIn) headers["If-None-Match"] = etagIn;
   try {
     const res = await api.get(url, {
       headers,
+      params,
       validateStatus: (s: number) => (s >= 200 && s < 300) || s === 304,
     });
     const etag =
@@ -1156,8 +1160,30 @@ async function v3Get<E extends V3Envelope>(
 
 export function mitraJourneyEntryView(
   etag: string | null = null,
+  signals?: { crisis?: boolean; grief?: boolean; loneliness?: boolean },
 ): Promise<V3GetResult<V3EntryViewEnvelope>> {
-  return v3Get<V3EntryViewEnvelope>("mitra/v3/journey/entry-view/", etag);
+  const params: Record<string, string> = {};
+  if (signals?.crisis) params.crisis = "1";
+  if (signals?.grief) params.grief = "1";
+  if (signals?.loneliness) params.loneliness = "1";
+  return v3Get<V3EntryViewEnvelope>("mitra/v3/journey/entry-view/", etag, Object.keys(params).length ? params : undefined);
+}
+
+export async function mitraJourneyHome(params: {
+  tz?: string;
+  locale?: string;
+  guidance_mode?: string;
+  crisis?: string;
+  grief?: string;
+  loneliness?: string;
+} = {}): Promise<any | null> {
+  try {
+    const res = await api.get("mitra/journey/home/", { params });
+    return res.data;
+  } catch (err: any) {
+    console.warn("[MITRA] journey/home failed:", err?.message);
+    return null;
+  }
 }
 
 export function mitraJourneyDailyView(

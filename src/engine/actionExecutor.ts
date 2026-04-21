@@ -4868,14 +4868,22 @@ export async function executeAction(
           meta: { room_id: roomId, source },
         });
 
-        const flagOn = process.env.EXPO_PUBLIC_MITRA_V3_ROOMS === "1";
-        if (flagOn) {
-          // Phase 6 target surface. allContainers wiring lands with the
-          // per-room flip; until then this is a forward-compatible stub.
+        // Phase 5 Stage 2 — global + per-room flag gate. When BOTH are on
+        // we route to the canonical RoomContainer (which fetches the
+        // RoomRenderV1 envelope from /api/mitra/rooms/{id}/render/). When
+        // either is off we fall through to the legacy dev-bridge map below.
+        const globalFlagOn = process.env.EXPO_PUBLIC_MITRA_V3_ROOMS === "1";
+        const perRoomKey = `EXPO_PUBLIC_MITRA_${roomId.toUpperCase()}`;
+        const perRoomFlagOn =
+          (process.env as any)[perRoomKey] === "1";
+        if (globalFlagOn && perRoomFlagOn) {
+          // Stamp room_id into screenData BEFORE navigation so the
+          // RoomContainer (which reads screenData.room_id on mount) has
+          // the identifier available for its /render/ fetch.
+          setScreenValue(roomId, "room_id");
           loadScreen({
             container_id: "room",
             state_id: "render",
-            meta: { room_id: roomId },
           } as any);
           break;
         }
@@ -4913,6 +4921,116 @@ export async function executeAction(
           journeyId: screenState.journey_id,
           dayNumber: screenState.day_number || 1,
           meta: { room_id: roomId, source },
+        });
+        break;
+      }
+
+      // ================================================================
+      // ROOM_EXIT — Phase 5 Stage 2 canonical room exit dispatcher.
+      // Called by RoomActionExitPill on tap. Always navigates back to
+      // the v3 dashboard, fires telemetry, and clears room_id from
+      // screenData so a subsequent enter_room can re-stamp cleanly.
+      // ================================================================
+      case "room_exit": {
+        const roomId = payload?.room_id || screenState.room_id || null;
+        mitraTrackEvent("room_exit_dispatched", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            room_id: roomId,
+            source: "room_renderer",
+          },
+        });
+        // Clear room-scoped screenData so stale state doesn't bleed into
+        // a subsequent room entry.
+        setScreenValue(null, "room_id");
+        // Route to the v3 dashboard when the new-dashboard flag is on,
+        // otherwise legacy. Mirrors continue_practice handler at line
+        // ~494 of this file.
+        const dashboardContainer =
+          process.env.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
+            ? "companion_dashboard_v3"
+            : "companion_dashboard";
+        loadScreen({
+          container_id: dashboardContainer,
+          state_id: "day_active",
+        } as any);
+        break;
+      }
+
+      // ================================================================
+      // ROOM_STEP_COMPLETED — Stage 2 v1 telemetry-only handler for
+      // in_room_step taps. Writes telemetry so BE can observe step
+      // completion; when step_payload.persistence.writes_event is
+      // non-null, also fires a sacred-trace event name so the resilience
+      // ledger / JourneyActivity pipeline can pick it up.
+      //
+      // Phase 6 replaces the Alert-stub pill UX with real inline panels;
+      // the telemetry contract here stays stable.
+      // ================================================================
+      case "room_step_completed": {
+        const roomId = payload?.room_id || screenState.room_id || null;
+        const templateId = payload?.template_id || null;
+        const writesEvent = payload?.writes_event || null;
+        mitraTrackEvent("room_step_completed", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            room_id: roomId,
+            template_id: templateId,
+            action_id: payload?.action_id || null,
+            analytics_key: payload?.analytics_key || null,
+          },
+        });
+        if (writesEvent) {
+          mitraTrackEvent(writesEvent, {
+            journeyId: screenState.journey_id,
+            dayNumber: screenState.day_number || 1,
+            meta: {
+              room_id: roomId,
+              template_id: templateId,
+              source: "room_step",
+            },
+          });
+        }
+        break;
+      }
+
+      // ================================================================
+      // ROOM_INQUIRY_OPENED — Stage 2 v1 telemetry-only handler for the
+      // inquiry pill. Phase 6 replaces the Alert-stub with a real
+      // category picker + routing into suggested_practice_template_id.
+      // ================================================================
+      case "room_inquiry_opened": {
+        mitraTrackEvent("room_inquiry_opened", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            room_id: payload?.room_id || screenState.room_id || null,
+            action_id: payload?.action_id || null,
+            analytics_key: payload?.analytics_key || null,
+            category_count: payload?.category_count ?? 0,
+          },
+        });
+        break;
+      }
+
+      // ================================================================
+      // ROOM_CARRY_CAPTURED — Stage 2 v1 handler for carry pills. The
+      // pill writes the Redux session trace inline (matches existing
+      // carry_joy_forward pattern); this case fires telemetry only.
+      // Phase 4 extends with a BE sacred-write endpoint.
+      // ================================================================
+      case "room_carry_captured": {
+        mitraTrackEvent("room_carry_captured", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            room_id: payload?.room_id || screenState.room_id || null,
+            writes_event: payload?.writes_event || null,
+            label: payload?.label || "",
+            analytics_key: payload?.analytics_key || null,
+          },
         });
         break;
       }

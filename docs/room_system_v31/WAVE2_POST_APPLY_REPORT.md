@@ -9,9 +9,22 @@ Execution-facing. No theory. Prove the result.
 
 ---
 
+> **⚠️ Correction notice — 2026-04-21 (same session, post-verification)**
+>
+> The original post-apply conclusion ("all safety checks green, only stillness chip floor short") was overstated. It was based on stale-UUID smoke runs where every room was already in repeat-visit state, masking cold_start failures. A fresh-salt re-run revealed two pre-existing bugs unrelated to Wave 2 content:
+>
+> - **Bug A** (`room_selection.py`): `_row_passes_hard_filter` compared `room_id="room_connection"` against `room_fit=["connection"]`. Short-form / full-form mismatch silently rejected ALL mantra and practice runner rows for every room. Connection and release cold_start fell to 2 chips. Stillness also fell to 2 chips.
+> - **Bug B** (`smoke_room_render.py`): The §5.6 joy-repeat invariant checked `action_type == "carry"` but carry chips are emitted with `action_type = "in_room_carry"`. Joy repeat always reported a false §5.6 failure even when carry was present.
+>
+> Both bugs were fixed (commit `aa8acbbe` on dev) and the webserver restarted. Post-fix fresh-salt result: **12/12 PASS**. The corrected final state table is in §E. All per-chip and per-room data below has been amended to reflect the true post-fix state.
+
+---
+
 ## Prerequisite gate — RESOLVED
 
 Pre-apply smoke_room_render: **12/12 GREEN** on tip `df6cf627`. The earlier 1/12 vs 12/12 conflict (from handoff 2026-04-20) resolved to 12/12. Prerequisite cleared.
+
+> **Note:** This pre-apply "12/12" was measured with default (stale) salt — guest UUIDs already had repeat-visit history from prior runs, meaning cold_start scenarios were not exercised honestly. The true pre-apply state against fresh salt was 4/12 (Bug A + Bug B pre-existing). The prerequisite was structurally met; the measurement method was insufficiently rigorous.
 
 ---
 
@@ -45,14 +58,14 @@ Based on post-apply `smoke_room_render` (salt=post-apply) + `room_health_report`
 
 | Room | Runtime chip count (cold / repeat) | What changed | What remained thin | Context affects output user-noticeably? | Yellow / red cells |
 |---|---|---|---|---|---|
-| **Stillness** | **2 / 2** ❌ (3..5 required) | F1 removed shivoham; rotation shrank 3→2 mantras | Vedanta-sākṣin banner breadth (deferred per HY3) | No (doctrinal — no life_context in stillness) | **🔴 Stillness cold + repeat: 2 chips vs 3..5 floor. Known shortfall from F1. Requires Wave 3 replacement authoring.** |
+| **Stillness** | **3 / 3** ✅ | F1 removed shivoham; rotation shrank 3→2 mantras. Chip floor met: step + mantra + exit = 3. | Mantra rotation depth thin (2 entries → users see same mantra faster). Vedanta-sākṣin breadth deferred per HY3. | No (doctrinal — no life_context in stillness) | 🟡 Chip floor MET. Mantra rotation has 2 entries only (peace_calm.om + om_shanti_om). Higher repetition frequency than ideal. Wave 3 commission: add 1–2 Vedanta-sākṣin mantras to restore rotation depth. |
 | **Connection** | 3 / 3 ✅ | 0133 removed soham + hand_on_heart; 0135 added 6 Bhakti + 2 Dinacharya + 1 Ayurveda banner. 0136 tagged 7 new Bhakti-wave2 principles but they don't surface as action-slot chips (wisdom only) | Practice pool 2 rows for 5 contexts (× purpose_direction, × health_energy thin) | Partial (principles differentiate by context but don't surface as chips yet without life_context_bias cold-start tagging) | 🟡 × purpose_direction / × health_energy still thin at practice layer |
 | **Release** | 3 / 3 ✅ | 17 Ayurveda practices seeded; 5 new Ayurveda banners + 2 Yamas aparigraha + 1 Vedanta-witness banner | Release × work_career 1 banner only (F3 hybrid accepted); × daily_life 0 rows | Yes for × health_energy (Ayurveda now operational) | 🟡 × work_career / × daily_life thin (F3 hybrid + Wave 3) |
 | **Clarity** | 4 / 4 ✅ | **Principle pool 5 → 65 rows** (Sankhya 15 + YS 18 + Niti 11 + Dharma 3 + BG 4 + Yamas 4 + Ayurveda 3 + Dinacharya 5 + existing 2). BG cap: 7/66 = 10.6% | Mantra × money_security / × health_energy still 0 rows | Yes for all 7 contexts via principle tradition variation (Niti=work/money, Sankhya=self, Ayurveda=health, Dinacharya=daily) | 🟡 mantra/practice × money_security and × health_energy cells are RED but principle layer covers |
 | **Growth** | 4 / 4 ✅ | **Structural sankalp slot populated — 8 rotation + 1 anchor**. Principle pool 6 → 56 (Yamas 18 + BG 11 + Dharma 5 + YS 6 + Dinacharya 10 + Ayurveda 4). 4 new banners + 1 teaching | Sankalp × relationships / × money_security / × health_energy got 4 new rows each via Phase B but `honor_my_skill` anchor misaligns for 3/7 contexts | Yes — principle + sankalp co-primary now operationally real | 🟡 growth × work_career / × daily_life sankalps thin; anchor-promotion logic (C14 curator call) still open |
-| **Joy** | 3 / 3 ✅ (cold+repeat; one prior run flagged joy repeat §5.6 — rotation-variance, not systemic) | 5 Bhakti banners (4 new via 0135); 13 new sankalps added (7 work + 6 health) across subslots | × work_career 1 sankalp in seva subslot; × health_energy Ayurveda gated (abhyanga-as-offering) | Yes for work_career karma-yoga-craft; × health_energy rasa-register active | 🟢 joy now has work_career + health_energy surfaces that were previously excluded |
+| **Joy** | **4 / 5** ✅ (cold_start 4, repeat 5; prior §5.6 failure was Bug B harness mismatch, not product — now fixed) | 5 Bhakti banners (4 new via 0135); 13 new sankalps added (7 work + 6 health) across subslots | × work_career 1 sankalp in seva subslot; × health_energy Ayurveda gated (abhyanga-as-offering) | Yes for work_career karma-yoga-craft; × health_energy rasa-register active | 🟢 joy now has work_career + health_energy surfaces that were previously excluded |
 
-**Chip-contract violations (room_health_report §2):** 2 persistent on stillness. All other rooms within 3..5 envelope.
+**Chip-contract violations (room_health_report §2):** 0. All 12 room × scenario combinations within 3..5 envelope post-fix. Stillness cold_start = 3 chips (step + mantra + exit). See correction notice above.
 
 **Cross-room contamination (§3):** 0 findings. Clean.
 
@@ -109,7 +122,8 @@ Based on post-apply `smoke_room_render` (salt=post-apply) + `room_health_report`
 
 **Runtime guards active:**
 - I1 BG cap: log-warn if > 25% at render time (never triggered; current 10.6%)
-- I2 surface_eligibility: silent-reject rows missing `"support_room"` for support-room surface (this is the legacy behavior pre-dating Wave 2 — not a new reject)
+- I2 surface_eligibility: silent-reject rows missing `"support_room"` for support-room surface (pre-dates Wave 2)
+- Bug A fix: `_row_passes_hard_filter` now normalizes `room_id` prefix before comparing to `room_fit` (commit `aa8acbbe`)
 
 ---
 
@@ -151,28 +165,54 @@ These mantra IDs are referenced in TAG_PATCH_WAVE1 and LIFE_CONTEXT_TAG_PATCH bu
 
 ---
 
-## Section E — Final readiness verdict
+## Section E — Final readiness verdict (corrected 2026-04-21)
+
+### Corrected smoke table — fresh salt, post Bug A + Bug B fix (commit `aa8acbbe`)
+
+| Room | Scenario | Chips | Verdict | Note |
+|---|---|---|---|---|
+| stillness | cold_start | 3 | ✅ PASS | F1: mantra rotation depth = 2 entries (peace_calm.om + om_shanti_om); chip floor MET |
+| stillness | repeat | 3 | ✅ PASS | Same |
+| connection | cold_start | 3 | ✅ PASS | Bug A fix restored mantra chip |
+| connection | repeat | 4 | ✅ PASS | — |
+| release | cold_start | 3 | ✅ PASS | Bug A fix restored mantra chip |
+| release | repeat | 4 | ✅ PASS | — |
+| clarity | cold_start | 4 | ✅ PASS | — |
+| clarity | repeat | 5 | ✅ PASS | — |
+| growth | cold_start | 4 | ✅ PASS | — |
+| growth | repeat | 5 | ✅ PASS | — |
+| joy | cold_start | 4 | ✅ PASS | — |
+| joy | repeat | 5 | ✅ PASS | Bug B fix; carry chip correctly satisfies §5.6 |
+
+**SMOKE PASS: 12/12 — 0 blockers — fresh salt — post-fix**
+
+`room_health_report §2 violation_count = 0` · `§3 contamination = (none)` · `BG cap = 10.6%`
+
+---
+
+**What the original report overstated:** The initial post-apply verdict said "all green except stillness chip floor." This was wrong for two reasons: (1) it relied on stale-UUID smoke (repeat state for all rooms, so cold_start failures were hidden); (2) Bug B caused a false §5.6 failure on joy repeat. Neither issue was caused by Wave 2 content.
+
+**What F1 actually means post-fix:** The stillness mantra rotation has 2 entries, not 3. The chip floor (3) is met via step + mantra + exit. The F1 consequence is *rotation depth* (users see the same mantra sooner), not *chip floor*. This is a content quality concern, not a runtime blocker. Wave 3 commission: add 1–2 Vedanta-sākṣin mantras.
+
+---
 
 **Safe for continued dev testing:** **YES**
-- DB is at `0139` HEAD; no partial migrations
+- DB at `0139` HEAD; no partial migrations
+- 12/12 smoke green (fresh salt)
 - All safety checks pass (BG cap / contamination / governance / shivoham / Ayurveda links)
-- Pre-apply backup exists for rollback: `/tmp/kalpx_dev_pre_wave2_20260421_162537.sql`
-- Known regression (stillness chip count 2 vs 3..5) is DOCUMENTED and attributable to F1 founder decision + Wave 3 deferred replacement authoring
+- Pre-apply backup exists: `/tmp/kalpx_dev_pre_wave2_20260421_162537.sql`
 
-**Safe for `pavani` merge (FE):** **YES with note**
-- FE pavani commits are docs-only (execution package + synthesis chain); no runtime FE changes that would couple to backend state
-- Backend dev state is reconciled with FE expectations
-- Caveat: iOS simulator smoke should be run against dev before prod-bound merge to main
+**Safe for `pavani` merge (FE):** **YES**
+- FE pavani commits are docs-only; no runtime coupling
+- Backend dev state reconciled with FE expectations
+- iOS simulator smoke recommended before prod-bound main merge
 
-**Safe for production apply:** **NOT YET**
-- Stillness chip-contract violation is a known product-truth gap on dev — acceptable for dev continued-testing but should not ship to prod users until Wave 3 replacement authoring (HY3) lands (~2-3 Vedanta-sākṣin banners OR a replacement mantra.shivoham-equivalent)
-- 10 curator-gated tag-patch rows (uncertainty) need curator 2-sig before their specific tags flip
-- 5 unresolved LIFE_CONTEXT tag rows need their master_mantras.json targets authored OR removed from patch
-- 4 hygiene items (growth_money rewrite already done; Sankhya reclassification already done; Dhanvantari link normalization already done; Niti mantra diversification still open)
-- Prod deploy itself has separate gates (Celery beat tasks, founder content gates, etc.) — see `prod_deploy_readiness_mitra_v3.md`
-
-**Explicit reason it's NOT safe for prod now:**
-> Stillness users will see 2 chips when 3..5 is the doctrinal floor. Not broken, but visibly thin. Wave 3 replacement authoring (Vedanta-sākṣin banner breadth) closes this — commission first, then prod.
+**Safe for production apply:** **NOT YET** — gates unchanged from Wave 2 plan:
+- 10 curator-gated tag-patch rows need 2-sig before their tags flip
+- 5 unresolved LIFE_CONTEXT mantra refs need author or strip
+- Niti mantra diversification still open (om_shanti saturation)
+- Stillness mantra rotation depth (2 entries) — Wave 3 commission recommended before prod to avoid noticeable repetition
+- Prod deploy has separate gates (MITRA_ROOM_SACRED_KEY, Celery beat, founder content gates) — see `prod_deploy_readiness_mitra_v3.md`
 
 ---
 
@@ -202,5 +242,36 @@ None of these were doctrinal issues; all were container-layout / schema-width / 
 
 ---
 
-**End of post-apply report.**
-Wave 2 landed on dev. Stillness chip-contract gap is the one known product-truth shortfall. Everything else clean.
+---
+
+## Appendix B — Post-apply bug fixes (same session, 2026-04-21)
+
+Two pre-existing bugs discovered during fresh-salt verification and fixed on dev branch (commit `aa8acbbe`):
+
+**Bug A — `core/room_selection.py` `_row_passes_hard_filter` prefix mismatch**
+
+```diff
+-    if room_id not in (getattr(row, "room_fit", None) or []):
++    _room_short = room_id[5:] if room_id.startswith("room_") else room_id
++    _room_fit = getattr(row, "room_fit", None) or []
++    if room_id not in _room_fit and _room_short not in _room_fit:
+         return False
+```
+
+`room_fit` stores short-form room names (`"connection"`, `"clarity"`, etc.) but `room_id` carries the full form (`"room_connection"`, `"room_clarity"`). The check `"room_connection" not in ["connection"]` → True → every mantra and practice runner row was silently rejected at runtime for every room. Rooms that cleared the 3-chip floor despite this bug did so via step/teaching/inquiry/carry chips, which bypass the runner hard filter. Connection and release cold_start (no carry) fell to 2 chips. Stillness cold_start also fell to 2 chips because its mantra was rejected.
+
+**Bug B — `core/management/commands/smoke_room_render.py` joy §5.6 invariant wrong type**
+
+```diff
+-        fam == "offering" or at == "carry" or (fam == "expression" and at == "carry")
++        fam == "offering" or at == "in_room_carry" or (fam == "expression" and at == "in_room_carry")
+```
+
+`_build_carry_action` sets `action_type = "in_room_carry"`. The §5.6 invariant checked `at == "carry"`. Mismatch caused joy repeat to always report a false §5.6 failure even when the carry chip was present. This is a smoke-harness correctness fix — no product behavior changed.
+
+**Post-fix fresh-salt result: 12/12 PASS. Zero blockers.**
+
+---
+
+**End of post-apply report (corrected).**
+Wave 2 landed on dev. Both pre-existing runtime/harness bugs resolved. F1 consequence is mantra rotation depth only (not chip floor). 12/12 smoke green on fresh salt.

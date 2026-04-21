@@ -98,12 +98,12 @@ export function ingestDailyView(env: V3DailyViewEnvelope | null): V3FlatIngest {
     focus_phrase: today.focus_phrase ?? "",
 
     // card_* fallbacks for TriadCardsRow
-    card_mantra_title: mantra.title || _humanizeId(mantra.item_id) || "",
-    card_mantra_description: mantra.subtitle ?? "",
-    card_sankalpa_title: sankalp.title || _humanizeId(sankalp.item_id) || "",
-    card_sankalpa_description: sankalp.subtitle ?? "",
-    card_ritual_title: practice.title || _humanizeId(practice.item_id) || "",
-    card_ritual_description: practice.subtitle ?? "",
+    card_mantra_title: mantra?.title || _humanizeId(mantra?.item_id) || "",
+    card_mantra_description: mantra?.subtitle ?? "",
+    card_sankalpa_title: sankalp?.title || _humanizeId(sankalp?.item_id) || "",
+    card_sankalpa_description: sankalp?.subtitle ?? "",
+    card_ritual_title: practice?.title || _humanizeId(practice?.item_id) || "",
+    card_ritual_description: practice?.subtitle ?? "",
 
     // envelope status (kept permanently — even post-bridge)
     v3_status: env.status,
@@ -172,18 +172,43 @@ export function ingestDay14View(env: V3Day14ViewEnvelope | null): V3FlatIngest {
     path_cycle_number: id.path_cycle_number ?? 1,
     journey_id: id.journey_id ?? null,
     checkpoint_day_14: {
-      mitra_reflection: reflection.mitra_reflection ?? "",
-      reflection_prompt: reflection.reflection_prompt ?? "",
-      strongest_type: reflection.strongest_type ?? "",
-      growth_area: reflection.growth_area ?? "",
-      completion_rates: reflection.completion_rates ?? {},
+      eyebrow: env.insights?.resilience_narrative?.summary_line || "Two Weeks",
+      intro_headline: "Fourteen Days.",
+      intro_body:
+        reflection.mitra_reflection ||
+        "You've reached a significant milestone in your journey.",
+      intro_cta_label: "Begin Reflection",
+      narrative_template:
+        reflection.mitra_reflection || "You've fully held {completed_count} of {total_days} days.",
+      summary_line_template: "{completed_count} of {total_days} days.",
+      summary_label: "WHAT GREW",
+      seal_cycle_label: "SEAL THIS CYCLE",
+      seal_cycle_helper: "What do you carry forward from these fourteen days?",
+      seal_input_placeholder: "Type your observation here...",
+      carry_label: "CARRY FORWARD",
+      carry_input_placeholder: "How will you continue?",
+      continue_path_cta: "Continue Same Path",
+      deepen_practice_cta: "Deepen Practice",
+      change_focus_cta: "Change Focus",
+      ...env.m25_narrative, // merge any BE-resolved slots
     },
-    day14_classification: arc.classification ?? null,
-    what_grew_section: arc.what_grew ?? null,
-    refinement_signal: arc.refinement_signal ?? null,
-    completion_ceremony: ceremony,
-    m25_narrative: env.m25_narrative ?? {},
+    journey_day_statuses: Array(14)
+      .fill("completed")
+      .map((s, i) => (i < (ceremony.completed_days ?? 13) ? "completed" : "pending")),
+    checkpoint_framing: reflection.reflection_prompt ?? "",
+    journey_narrative: reflection.mitra_reflection ?? "",
+    what_grew_section: String(env.insights?.resilience_narrative?.summary_line ?? ""),
     day_14_decisions_available: actions.decisions_available ?? [],
+    m25_narrative: {
+      eyebrow: "Cycle Complete",
+      intro_headline: "You've arrived.",
+      narrative_template:
+        reflection.mitra_reflection ||
+        "Fourteen days of dedicated practice. You've held your path through {completed_count} days.",
+      summary_line_template: "{completed_count} of {total_days} days completed.",
+      ...env.m25_narrative,
+    },
+    completion_ceremony: ceremony,
     v3_status: env.status,
   };
 }

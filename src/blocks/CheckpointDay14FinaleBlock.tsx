@@ -58,11 +58,13 @@ const CheckpointDay14FinaleBlock: React.FC<Props> = () => {
     );
   };
 
+  /*
   useEffect(() => {
     const t = setTimeout(goToDashboard, AUTO_ADVANCE_MS);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  */
 
   return (
     <View style={styles.root} testID="checkpoint_day_14_finale">

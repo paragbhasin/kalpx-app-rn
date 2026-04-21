@@ -19,24 +19,24 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
-  ScrollView,
 } from "react-native";
 import uuidv4 from "react-native-uuid";
-import { Fonts } from "../theme/fonts";
 import {
   mitraJourneyDay14Decision,
   mitraJourneyDay14View,
 } from "../engine/mitraApi";
-import { interpolate, readMomentSlot } from "../hooks/useContentSlots";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { ingestDailyView, ingestDay14View } from "../engine/v3Ingest";
+import { interpolate, readMomentSlot } from "../hooks/useContentSlots";
 import store from "../store";
 import { loadScreenWithData, screenActions } from "../store/screenSlice";
+import { Fonts } from "../theme/fonts";
 
 const DOTS = 14;
 
@@ -67,7 +67,10 @@ const CheckpointDay14Block: React.FC<Props> = () => {
       // Merge M25 narrative slots under checkpoint_day_14 so the
       // existing slot() render continues to work.
       const m25 = result.envelope.m25_narrative || {};
-      const merged = { ...flat, checkpoint_day_14: { ...flat.checkpoint_day_14, ...m25 } };
+      const merged = {
+        ...flat,
+        checkpoint_day_14: { ...flat.checkpoint_day_14, ...m25 },
+      };
       for (const [k, v] of Object.entries(merged)) {
         if (v !== undefined) {
           store.dispatch(screenActions.setScreenValue({ key: k, value: v }));
@@ -149,7 +152,9 @@ const CheckpointDay14Block: React.FC<Props> = () => {
       }
       const nv = env.next_view ?? { view_key: "", payload: {} };
       if (nv.view_key === "daily_view") {
-        for (const [k, v] of Object.entries(ingestDailyView(nv.payload as any))) {
+        for (const [k, v] of Object.entries(
+          ingestDailyView(nv.payload as any),
+        )) {
           if (v !== undefined) {
             store.dispatch(screenActions.setScreenValue({ key: k, value: v }));
           }
@@ -191,7 +196,9 @@ const CheckpointDay14Block: React.FC<Props> = () => {
             {slot("intro_headline")}
           </Text>
           <Text style={styles.body} testID="checkpoint_day_14_narrative">
-            {(typeof ss.checkpoint_framing === "string" && ss.checkpoint_framing) || slot("intro_body")}
+            {(typeof ss.checkpoint_framing === "string" &&
+              ss.checkpoint_framing) ||
+              slot("intro_body")}
           </Text>
         </View>
         <View style={styles.bottomRegion}>
@@ -218,18 +225,16 @@ const CheckpointDay14Block: React.FC<Props> = () => {
         <View style={styles.gridWrap}>
           {Array.from({ length: 2 }).map((_, row) => (
             <View style={styles.gridRow} key={row}>
-              {statuses
-                .slice(row * 7, row * 7 + 7)
-                .map((s, i) => (
-                  <View
-                    key={`${row}-${i}`}
-                    style={[
-                      styles.dot,
-                      s === "completed" && styles.dotFilled,
-                      s === "partial" && styles.dotPartial,
-                    ]}
-                  />
-                ))}
+              {statuses.slice(row * 7, row * 7 + 7).map((s, i) => (
+                <View
+                  key={`${row}-${i}`}
+                  style={[
+                    styles.dot,
+                    s === "completed" && styles.dotFilled,
+                    s === "partial" && styles.dotPartial,
+                  ]}
+                />
+              ))}
             </View>
           ))}
         </View>
@@ -241,77 +246,95 @@ const CheckpointDay14Block: React.FC<Props> = () => {
           })}
         </Text>
 
-        <Text style={styles.narrative} testID="checkpoint_day_14_summary">
-          {narrative}
-        </Text>
+        {narrative ? (
+          <Text style={styles.narrative} testID="checkpoint_day_14_summary">
+            {narrative}
+          </Text>
+        ) : null}
 
         {growth ? (
           <View style={styles.growthBox}>
-            <Text style={styles.microLabel}>{slot("summary_label")}</Text>
+            <Text style={styles.microLabel}>
+              {slot("summary_label") || "WHAT GREW"}
+            </Text>
             <Text style={styles.narrative}>{growth}</Text>
           </View>
         ) : null}
 
-        <Text style={styles.microLabel}>{slot("seal_cycle_label")}</Text>
-        <Text style={styles.helper}>{slot("seal_cycle_helper")}</Text>
-        <TextInput
-          value={sealRitual}
-          onChangeText={(v) => setSealRitual(v.slice(0, 300))}
-          placeholder={slot("seal_input_placeholder")}
-          placeholderTextColor="rgba(88, 58, 24, 0.4)"
-          multiline
-          style={styles.input}
-          maxLength={300}
-        />
-
-        <Text style={[styles.microLabel, { marginTop: 20 }]}>{slot("carry_label")}</Text>
-        <TextInput
-          value={reflection}
-          onChangeText={(v) => setReflection(v.slice(0, 1500))}
-          placeholder={slot("carry_input_placeholder")}
-          placeholderTextColor="rgba(88, 58, 24, 0.4)"
-          multiline
-          style={styles.input}
-          maxLength={1500}
-        />
-      </ScrollView>
-
-      {/* REG-016: three evolution options in bottom zone */}
-      <View style={styles.bottomRegion}>
-        <TouchableOpacity
-          onPress={() => submitDecision("continue_same")}
-          style={styles.cta}
-          activeOpacity={0.85}
-          testID="checkpoint_cta_continue_same"
-        >
-          <Text style={styles.ctaText}>{slot("continue_path_cta")}</Text>
-        </TouchableOpacity>
-        <View style={styles.secondaryRow}>
-          <TouchableOpacity
-            onPress={() => submitDecision("deepen")}
-            style={styles.secondaryBtn}
-            activeOpacity={0.85}
-            testID="checkpoint_cta_deepen"
-          >
-            <Text style={styles.secondaryText}>{slot("deepen_practice_cta")}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => submitDecision("change_focus")}
-            style={styles.secondaryBtn}
-            activeOpacity={0.85}
-            testID="checkpoint_cta_change_focus"
-          >
-            <Text style={styles.secondaryText}>{slot("change_focus_cta")}</Text>
-          </TouchableOpacity>
+        <View style={{ marginBottom: 16 }}>
+          <Text style={styles.microLabel}>
+            {slot("seal_cycle_label") || "SEAL THIS CYCLE"}
+          </Text>
+          <Text style={styles.helper}>{slot("seal_cycle_helper")}</Text>
+          <TextInput
+            value={sealRitual}
+            onChangeText={(v) => setSealRitual(v.slice(0, 300))}
+            placeholder={slot("seal_input_placeholder")}
+            placeholderTextColor="rgba(88, 58, 24, 0.4)"
+            multiline
+            style={styles.input}
+            maxLength={300}
+          />
         </View>
-      </View>
+
+        <View style={{ marginBottom: 16 }}>
+          <Text style={[styles.microLabel, { marginTop: 8 }]}>
+            {slot("carry_label") || "CARRY FORWARD"}
+          </Text>
+          <TextInput
+            value={reflection}
+            onChangeText={(v) => setReflection(v.slice(0, 1500))}
+            placeholder={slot("carry_input_placeholder")}
+            placeholderTextColor="rgba(88, 58, 24, 0.4)"
+            multiline
+            style={styles.input}
+            maxLength={1500}
+          />
+        </View>
+
+        {/* REG-016: move buttons inside scroll for unified flow */}
+        <View style={styles.contentFooter}>
+          <TouchableOpacity
+            onPress={() => submitDecision("continue_same")}
+            style={styles.cta}
+            activeOpacity={0.85}
+            testID="checkpoint_cta_continue_same"
+          >
+            <Text style={styles.ctaText}>
+              {slot("continue_path_cta") || "Continue"}
+            </Text>
+          </TouchableOpacity>
+          <View style={styles.secondaryRow}>
+            <TouchableOpacity
+              onPress={() => submitDecision("deepen")}
+              style={styles.secondaryBtn}
+              activeOpacity={0.85}
+              testID="checkpoint_cta_deepen"
+            >
+              <Text style={styles.secondaryText}>
+                {slot("deepen_practice_cta") || "Deepen"}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => submitDecision("change_focus")}
+              style={styles.secondaryBtn}
+              activeOpacity={0.85}
+              testID="checkpoint_cta_change_focus"
+            >
+              <Text style={styles.secondaryText}>
+                {slot("change_focus_cta") || "Change"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#FFF8EF" },
-  scroll: { padding: 24, paddingBottom: 16 },
+  root: { flex: 1 },
+  scroll: { paddingBottom: 16 },
   topRegion: { flex: 1, padding: 24, justifyContent: "center" },
   bottomRegion: {
     minHeight: "30%",
@@ -320,24 +343,31 @@ const styles = StyleSheet.create({
     paddingBottom: 28,
     paddingTop: 12,
   },
+  contentFooter: {
+    marginTop: 40,
+    paddingBottom: 40,
+  },
   eyebrow: {
     fontFamily: Fonts.sans.medium,
-    fontSize: 11,
+    fontSize: 13,
     letterSpacing: 1.5,
     color: "#c9a84c",
     marginBottom: 10,
+    textAlign: "center",
   },
   headline: {
     fontFamily: Fonts.serif.regular,
     fontSize: 28,
     color: "#432104",
     marginBottom: 12,
+    textAlign: "center",
   },
   body: {
     fontFamily: Fonts.serif.regular,
     fontSize: 18,
     color: "#6b5a45",
     lineHeight: 26,
+    textAlign: "center",
   },
   gridWrap: { alignItems: "center", marginVertical: 14, gap: 10 },
   gridRow: { flexDirection: "row", gap: 10 },
@@ -364,6 +394,7 @@ const styles = StyleSheet.create({
     color: "#432104",
     lineHeight: 26,
     marginBottom: 16,
+    textAlign: "center",
   },
   microLabel: {
     fontFamily: Fonts.sans.medium,
@@ -371,12 +402,14 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
     color: "#c9a84c",
     marginBottom: 8,
+    textAlign: "center",
   },
   helper: {
     fontFamily: Fonts.sans.regular,
     fontSize: 13,
     color: "#6b5a45",
     marginBottom: 8,
+    textAlign: "center",
   },
   growthBox: {
     backgroundColor: "#fffdf9",
@@ -399,10 +432,19 @@ const styles = StyleSheet.create({
     textAlignVertical: "top",
   },
   cta: {
-    backgroundColor: "#c9a84c",
-    paddingVertical: 14,
+    backgroundColor: "#FBF5F5",
+    borderColor: "#9f9f9f",
+    borderWidth: 1,
+    paddingVertical: 10,
     borderRadius: 28,
     alignItems: "center",
+
+    elevation: 6,
+
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   ctaText: {
     fontFamily: Fonts.sans.medium,

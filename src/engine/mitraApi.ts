@@ -327,15 +327,6 @@ export async function mitraFetchOnboardingChips(params: {
 // mitraJourney{Reentry,Day7,Day14}Decision).
 // ─────────────────────────────────────────────────────────────────────
 
-  try {
-    const res = await api.get("mitra/journey/home/", { params });
-    return res.data;
-  } catch (err: any) {
-    console.warn("[MITRA] journey/home failed:", err?.message);
-    return null;
-  }
-}
-
 /** POST /api/mitra/onboarding/complete/ — Finish onboarding and get recognition. */
 export async function mitraCompleteOnboarding(payload: {
   stage0_choice: string;

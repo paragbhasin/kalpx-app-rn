@@ -23,6 +23,26 @@ export type RoomId =
   | "room_growth"
   | "room_joy";
 
+/**
+ * 2-step UX life-context slugs (founder-locked 2026-04-20).
+ * Picked by `LifeContextPickerSheet` and passed as `?life_context=<slug>`
+ * on the /render/ fetch. `self` renders as "Myself" in the picker UI.
+ */
+export type LifeContext =
+  | "work_career"
+  | "relationships"
+  | "self"
+  | "health_energy"
+  | "money_security"
+  | "purpose_direction"
+  | "daily_life";
+
+/**
+ * Room visit state (B1 provenance addition). BE may omit; FE treats as
+ * optional.
+ */
+export type VisitState = "cold_start" | "repeat" | "seasoned";
+
 export type ActionType =
   | "runner_mantra"
   | "runner_sankalp"
@@ -368,6 +388,15 @@ export interface RoomRenderV1 {
 
   provenance: RoomProvenance;
   fallbacks: RoomFallbacks;
+
+  // ─────────────────────────────────────────────────────────────────────
+  // 2-step UX additions (founder-locked 2026-04-20). BE stamps these on
+  // /render/ responses when the FE passes `?life_context=<slug>`.
+  // Visit-state is provenance-only on the BE side; FE treats both fields
+  // as informational and tolerates their absence.
+  // ─────────────────────────────────────────────────────────────────────
+  life_context?: LifeContext | null;
+  visit_state?: VisitState | null;
 }
 
 // ───────────────────────────────────────────────────────────────────────────

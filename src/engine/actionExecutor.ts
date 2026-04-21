@@ -4895,11 +4895,22 @@ export async function executeAction(
         if (globalFlagOn) {
           // Stamp room_id into screenData BEFORE navigation so the
           // RoomContainer (which reads screenData.room_id on mount) has
-          // the identifier available for its /render/ fetch.
+          // the identifier available.
+          //
+          // 2-step UX (founder-locked 2026-04-20): route to the
+          // `context_picker` state first. The user picks a life_context
+          // (or skips), and LifeContextPickerSheet then advances to
+          // `render` with `life_context` / `context_skipped` stamped in
+          // screenData. RoomContainer reads life_context when building
+          // the /render/ URL.
           setScreenValue(roomId, "room_id");
+          // Clear any stale life_context from a prior room visit — the
+          // picker is the sole source of truth for this field.
+          setScreenValue(null, "life_context");
+          setScreenValue(false, "context_skipped");
           loadScreen({
             container_id: "room",
-            state_id: "render",
+            state_id: "context_picker",
           } as any);
           break;
         }
@@ -4971,6 +4982,42 @@ export async function executeAction(
           container_id: dashboardContainer,
           state_id: "day_active",
         } as any);
+        break;
+      }
+
+      // ================================================================
+      // ROOM_TELEMETRY — 2-step UX picker telemetry (founder-locked
+      // 2026-04-20). Dispatched by LifeContextPickerSheet on option tap
+      // (`context_picked`) and on skip (`context_skipped`).
+      //
+      // Endpoint: POST /api/mitra/rooms/telemetry/ (owned by agent B3).
+      // Safe-to-dispatch even if the endpoint isn't live yet — 404 /
+      // network errors are swallowed with a __DEV__ warn. Non-critical
+      // telemetry; never blocks the picker → render transition.
+      //
+      // Payload shape (caller-supplied):
+      //   { event_type: "context_picked" | "context_skipped",
+      //     room_id: RoomId,
+      //     life_context?: LifeContext }
+      // ================================================================
+      case "room_telemetry": {
+        const body = {
+          event_type: payload?.event_type || null,
+          room_id: payload?.room_id || screenState.room_id || null,
+          life_context: payload?.life_context ?? null,
+          ts: Date.now(),
+        };
+        try {
+          await api.post("mitra/rooms/telemetry/", body);
+        } catch (err: any) {
+          if (__DEV__) {
+            console.warn(
+              "[actionExecutor] room_telemetry post failed (non-critical):",
+              err?.response?.status || err?.message,
+            );
+          }
+          // Swallow — telemetry is best-effort.
+        }
         break;
       }
 
@@ -5383,6 +5430,11 @@ export async function executeAction(
       // (return_action slot). Falls back to dashboard if source unknown.
       case "return_to_source": {
         const source = screenState.runner_source;
+        // A0 finding 2026-04-20: BE stamps `runner_source: "support_room"`
+        // on every canonical v3.1 room runner. Map it back to the `room`
+        // container + `render` state so completion loops the user into
+        // the room they came from. The RoomContainer reads screenData.room_id
+        // (stamped by RoomActionRunnerPill.tsx on runner start).
         const map: Record<
           string,
           { container_id: string; state_id: string }
@@ -5395,6 +5447,10 @@ export async function executeAction(
           // Track 1 — Joy + Growth first-class support rooms.
           support_joy: { container_id: "support_joy", state_id: "room" },
           support_growth: { container_id: "support_growth", state_id: "room" },
+          // Canonical v3.1 rooms — single canonical source string for all
+          // six rooms. room_id is read from screenState at nav time (see
+          // below).
+          support_room: { container_id: "room", state_id: "render" },
         };
         const target = map[source as string];
         // Clear runner state BEFORE nav so the room remounts clean.
@@ -5404,7 +5460,23 @@ export async function executeAction(
         setScreenValue(null, "runner_start_time");
         setScreenValue(0, "runner_reps_completed");
         if (target) {
-          loadScreen(target as any);
+          // For canonical v3.1 rooms we need a room_id in screenData to
+          // drive the /render/ fetch. If missing (unexpected — pill
+          // stamps it on start), fall back to dashboard rather than
+          // strand the user in an exit-only fallback.
+          if (source === "support_room" && !screenState.room_id) {
+            if (__DEV__) {
+              console.warn(
+                "[actionExecutor] return_to_source: support_room with no room_id — falling back to dashboard",
+              );
+            }
+            loadScreen({
+              container_id: "companion_dashboard",
+              state_id: "day_active",
+            } as any);
+          } else {
+            loadScreen(target as any);
+          }
         } else {
           loadScreen({
             container_id: "companion_dashboard",

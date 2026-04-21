@@ -175,6 +175,11 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
       "support_loneliness",
       "support_joy",
       "support_growth",
+      // Canonical v3.1 rooms — BE stamps `runner_source: "support_room"` on
+      // every runner whose pill was dispatched from a canonical Room (A0
+      // finding 2026-04-20). Without this, completion falls through to
+      // dashboard instead of looping back into the room.
+      "support_room",
     ]);
     const isSupportSource = SUPPORT_SOURCES.has(
       String(screenData.runner_source || ""),

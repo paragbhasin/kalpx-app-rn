@@ -6490,9 +6490,18 @@ export const SupportGrowthContainer = {
 // container fetches the RoomRenderV1 envelope from
 // GET /api/mitra/rooms/{room_id}/render/ and mounts RoomRenderer directly.
 // `room_id` is read from screenData (stamped by enter_room handler).
+//
+// `context_picker` state (2026-04-20) — 2-step UX interstitial mounted
+// between the RoomEntrySheet tap and the /render/ fetch. RoomContainer
+// branches on currentStateId and mounts LifeContextPickerSheet.
 export const RoomRenderContainer = {
   container_id: "room",
   states: {
+    context_picker: {
+      tone: { theme: "warm_cream", mood: "inviting" },
+      meta: { variant: "life_context_picker" },
+      blocks: [],
+    },
     render: {
       tone: { theme: "warm_cream", mood: "steady" },
       meta: { variant: "room_render_v1" },

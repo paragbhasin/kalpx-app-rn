@@ -1,9 +1,12 @@
 /**
  * RoomContainer — Phase 5 Stage 2 entry surface for v3.1 canonical rooms.
  *
- * Reads `room_id` from Redux screenData (stamped by the enter_room handler in
- * actionExecutor.ts), then fetches the RoomRenderV1 envelope from
- * GET /api/mitra/rooms/{room_id}/render/ and mounts <RoomRenderer />.
+ * Two states (2026-04-20 2-step UX update):
+ *   - `context_picker` — mounts <LifeContextPickerSheet />. User picks a
+ *     life_context slug (or skips), then advances to `render`.
+ *   - `render` — reads `room_id` + optional `life_context` from screenData,
+ *     fetches GET /api/mitra/rooms/{room_id}/render/?life_context=<slug>
+ *     and mounts <RoomRenderer />.
  *
  * Identity-XOR is handled at the axios interceptor layer
  * (src/Networks/axios.js) — JWT for authed users, X-Guest-UUID header for
@@ -23,11 +26,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import api from "../Networks/axios";
+import LifeContextPickerSheet, {
+  type LifeContext,
+} from "../blocks/room/LifeContextPickerSheet";
 import RoomRenderer from "../blocks/room/RoomRenderer";
 import type {
   RoomId,
   RoomRenderV1,
 } from "../blocks/room/types";
+import { executeAction } from "../engine/actionExecutor";
 import { mitraTrackEvent } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
 
@@ -116,6 +123,8 @@ function buildExitOnlyFallback(roomId: RoomId): RoomRenderV1 {
     fallbacks: {
       hide_if_empty: ["second_beat_line", "principle_banner", "dashboard_chip_label"],
     },
+    life_context: null,
+    visit_state: null,
   };
 }
 
@@ -123,8 +132,107 @@ const RoomContainer: React.FC<Props> = () => {
   const screenData = useScreenStore(
     (s: any) => s.screen?.screenData ?? s.screenData ?? {},
   );
-  const roomId: RoomId | undefined = (screenData as any)?.room_id;
+  const currentStateId = useScreenStore(
+    (s: any) => s.screen?.currentStateId ?? s.currentStateId ?? "render",
+  );
+  const loadScreen = useScreenStore((s: any) => s.loadScreen);
+  const goBack = useScreenStore((s: any) => s.goBack);
 
+  const roomId: RoomId | undefined = (screenData as any)?.room_id;
+  const lifeContext: LifeContext | null =
+    ((screenData as any)?.life_context as LifeContext | null) || null;
+
+  // ── Context picker branch ──────────────────────────────────────────
+  if (currentStateId === "context_picker") {
+    const setScreenValue = (value: any, key: string) => {
+      const { screenActions } = require("../store/screenSlice");
+      const { store } = require("../store");
+      store.dispatch(screenActions.setScreenValue({ key, value }));
+    };
+
+    const navToRender = () => {
+      loadScreen({ container_id: "room", state_id: "render" } as any);
+    };
+
+    const navToDashboard = () => {
+      // Clear room_id so re-entering is clean.
+      setScreenValue(null, "room_id");
+      setScreenValue(null, "life_context");
+      setScreenValue(false, "context_skipped");
+      const dashboardContainer =
+        process.env.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
+          ? "companion_dashboard_v3"
+          : "companion_dashboard";
+      loadScreen({
+        container_id: dashboardContainer,
+        state_id: "day_active",
+      } as any);
+    };
+
+    const dispatchTelemetry = (
+      event_type: "context_picked" | "context_skipped",
+      life_context: LifeContext | null,
+    ) => {
+      executeAction(
+        {
+          type: "room_telemetry",
+          payload: {
+            event_type,
+            room_id: roomId,
+            life_context,
+          },
+        } as any,
+        {
+          loadScreen,
+          goBack,
+          setScreenValue,
+          screenState: { ...(screenData as any) },
+        } as any,
+      ).catch(() => {
+        // Non-critical — telemetry failures swallowed in handler.
+      });
+    };
+
+    return (
+      <LifeContextPickerSheet
+        visible={true}
+        onPick={(slug) => {
+          setScreenValue(slug, "life_context");
+          setScreenValue(false, "context_skipped");
+          dispatchTelemetry("context_picked", slug);
+          navToRender();
+        }}
+        onSkip={() => {
+          setScreenValue(null, "life_context");
+          setScreenValue(true, "context_skipped");
+          dispatchTelemetry("context_skipped", null);
+          navToRender();
+        }}
+        onBack={() => {
+          navToDashboard();
+        }}
+      />
+    );
+  }
+
+  // ── Render branch ──────────────────────────────────────────────────
+  return (
+    <RoomRenderBranch
+      roomId={roomId}
+      lifeContext={lifeContext}
+    />
+  );
+};
+
+interface RenderBranchProps {
+  roomId: RoomId | undefined;
+  lifeContext: LifeContext | null;
+}
+
+const RoomRenderBranch: React.FC<RenderBranchProps> = ({
+  roomId,
+  lifeContext,
+}) => {
   const [envelope, setEnvelope] = useState<RoomRenderV1 | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const fetchedRef = useRef<string | null>(null);
@@ -136,15 +244,23 @@ const RoomContainer: React.FC<Props> = () => {
       setLoading(false);
       return;
     }
-    // Guard against double-fetch on re-renders for the same room.
-    if (fetchedRef.current === roomId) return;
-    fetchedRef.current = roomId;
+    // Fetch key includes life_context so switching context re-fetches.
+    const fetchKey = `${roomId}::${lifeContext || ""}`;
+    if (fetchedRef.current === fetchKey) return;
+    fetchedRef.current = fetchKey;
 
     let active = true;
     setLoading(true);
     (async () => {
       try {
-        const res = await api.get(`mitra/rooms/${roomId}/render/`);
+        // Append life_context as a query param when present; omit when
+        // the user skipped (null). BE is expected to default gracefully.
+        const url = lifeContext
+          ? `mitra/rooms/${roomId}/render/?life_context=${encodeURIComponent(
+              lifeContext,
+            )}`
+          : `mitra/rooms/${roomId}/render/`;
+        const res = await api.get(url);
         if (!active) return;
         const data = res?.data;
         if (!data || typeof data !== "object" || !Array.isArray(data.actions)) {
@@ -164,6 +280,7 @@ const RoomContainer: React.FC<Props> = () => {
           dayNumber: null,
           meta: {
             room_id: roomId,
+            life_context: lifeContext,
             status: err?.response?.status ?? null,
             reason: err?.message || "unknown",
           },
@@ -177,7 +294,7 @@ const RoomContainer: React.FC<Props> = () => {
     return () => {
       active = false;
     };
-  }, [roomId]);
+  }, [roomId, lifeContext]);
 
   if (loading || !envelope) {
     return (

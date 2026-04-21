@@ -21,7 +21,6 @@ import { navigate as rootNavigate } from "../Shared/Routes/NavigationService";
 import { cleanupFlowState, GUARDED_ACTIONS } from "./cleanupFields";
 import {
   mitraAlterPractice,
-  mitraCheckpoint,
   mitraCompleteOnboarding,
   mitraFetchOnboardingChips,
   mitraHelpMeChoose,
@@ -29,7 +28,6 @@ import {
   mitraPathEvolution,
   mitraPranaAcknowledge,
   mitraStartJourney,
-  mitraSubmitCheckpoint,
   mitraTrackCompletion,
   mitraTrackEvent,
   mitraTriggerMantras,
@@ -58,7 +56,6 @@ import {
   getBriefingToday,
   getResilienceLedger,
   mitraFetchAdditionalItems,
-  mitraJourneyCompanion,
   getDeepenPreview,
   dismissPredictiveAlert,
   mutePredictiveAlertEntity,
@@ -66,7 +63,6 @@ import {
   getPanchangToday,
   patchDissonanceThread,
   // 2026-04-18 M12 long-absence unification (Phase 2)
-  mitraJourneyWelcomeBack,
 } from "./mitraApi";
 
 // Audit fix F6 (2026-04-13) — dispatch fetchCompanionState via Redux store
@@ -582,61 +578,9 @@ export async function executeAction(
       //                 previous_journey=<old> automatically.
       // Legacy WelcomeBack.tsx + custom telemetry event superseded.
       // ================================================================
-      case "welcome_back_continue": {
-        console.log("[actionExecutor] welcome_back_continue: entering");
-        try {
-          const res = await mitraJourneyWelcomeBack("continue");
-          if (res && res.status === "ok" && res.newJourneyId) {
-            // Seed triad + focus into screenData so dashboard mount
-            // doesn't need a second round-trip.
-            setScreenValue(res.newJourneyId, "journey_id");
-            if (res.focus) setScreenValue(res.focus, "active_focus");
-            if (res.subfocus) setScreenValue(res.subfocus, "prana_baseline_selection");
-          }
-        } catch (err: any) {
-          console.warn("[actionExecutor] welcome_back_continue failed:", err?.message);
-        }
-        loadScreen({
-          container_id:
-            (process as any).env?.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
-              ? "companion_dashboard_v3"
-              : "companion_dashboard",
-          state_id: "day_active",
-        });
-        rootNavigate("DynamicEngine");
-        _actionInFlight = false;
-        break;
-      }
-      case "welcome_back_fresh": {
-        console.log("[actionExecutor] welcome_back_fresh: entering");
-        try {
-          await mitraJourneyWelcomeBack("fresh");
-        } catch (err: any) {
-          console.warn("[actionExecutor] welcome_back_fresh failed:", err?.message);
-        }
-        // Scoped reset — clear journey-scoped redux keys only, NOT full
-        // resetState (which would wipe profile/guidance prefs etc.).
-        // Lineage is preserved server-side; user's earlier cycles stay
-        // linked via previous_journey when onboarding creates the new row.
-        setScreenValue(null, "journey_id");
-        setScreenValue(null, "active_focus");
-        setScreenValue(null, "prana_baseline_selection");
-        setScreenValue(null, "scan_focus");
-        setScreenValue(null, "insight_step");
-        setScreenValue(null, "mantra_text");
-        setScreenValue(null, "sankalp_text");
-        setScreenValue(null, "practice_title");
-        setScreenValue(false, "practice_chant");
-        setScreenValue(false, "practice_embody");
-        setScreenValue(false, "practice_act");
-        loadScreen({
-          container_id: "welcome_onboarding",
-          state_id: "turn_1",
-        });
-        rootNavigate("DynamicEngine");
-        _actionInFlight = false;
-        break;
-      }
+      // welcome_back_continue / welcome_back_fresh cases retired per v3
+      // journey migration (journey-v3-fe Step 7). Reentry is now owned
+      // by ContinueJourney.tsx via mitraJourneyReentryDecision POST.
 
       // ================================================================
       // NAVIGATE — the most common action
@@ -1542,310 +1486,12 @@ export async function executeAction(
       // ================================================================
       // GENERATE_COMPANION — call Mitra API, unpack response into screenState
       // ================================================================
-      case "generate_companion": {
-        // 2026-04-19: legacy /generate-companion/ side-effect journey
-        // creation is retired on FE. This action now ALWAYS calls the
-        // v3 read-only /journey/companion/ endpoint. Journey creation
-        // runs through POST /journey/start-v3/ (mitraStartJourney) at
-        // onboarding turn_7. If no active journey exists, this returns
-        // null — callers are responsible for routing to onboarding.
-        // Kept the action name for caller compatibility; consider
-        // renaming to `fetch_companion` in a follow-up.
-        const inputData = {
-          focus:
-            screenState.scan_focus ||
-            screenState.suggested_focus ||
-            "peacecalm",
-          sub_focus: screenState.prana_baseline_selection,
-          depth:
-            screenState.routine_depth ||
-            screenState.routine_setup ||
-            "standard",
-          day_number: screenState.day_number || 1,
-        };
-
-        const data = await mitraJourneyCompanion();
-        if (!data) {
-          console.warn(
-            "[ENGINE] journey/companion returned no data — skipping companion seed",
-          );
-          setScreenValue(false, "_isSubmitting");
-          return;
-        }
-
-        // Capture journey status and ID
-        const previousJourneyId = screenState.journey_id;
-        if (data.journey?.id) setScreenValue(data.journey.id, "journey_id");
-
-        // REG-010 / Rule 12 (STATE_OWNERSHIP_MATRIX): Checkpoint context guard.
-        // If a checkpoint is currently in flight (checkpoint_headline set),
-        // do NOT overwrite day_number / identity_label / path_context — those
-        // belong to the checkpoint screen, not the upcoming companion data.
-        const _checkpointActive = !!screenState.checkpoint_headline;
-
-        if (data.journey?.dayNumber && !_checkpointActive)
-          setScreenValue(data.journey.dayNumber, "day_number");
-        if (data.journey?.totalDays)
-          setScreenValue(data.journey.totalDays, "total_days");
-
-        // Track journey_started on new journey
-        if (data.journey?.id && data.journey.id !== previousJourneyId) {
-          mitraTrackEvent("journey_started", {
-            journeyId: data.journey.id,
-            dayNumber: data.journey.dayNumber || 1,
-            meta: {
-              focus: inputData.focus,
-              subFocus: inputData.sub_focus,
-              depth: inputData.depth,
-              totalDays: data.journey.totalDays,
-            },
-          });
-        }
-
-        if (data.journey?.isLightened !== undefined) {
-          setScreenValue(data.journey.isLightened, "journey_is_lightened");
-        }
-
-        // Identity and path lifecycle — guarded by checkpoint context (REG-010)
-        if (!_checkpointActive) {
-          setScreenValue(data.identityLabel || "", "identity_label");
-          setScreenValue(data.pathContext || {}, "path_context");
-          setScreenValue(data.pathMilestone || null, "path_milestone");
-        }
-
-        // Cycle item IDs (authoritative)
-        if (data.journey?.cycleItems) {
-          const ci = data.journey.cycleItems;
-          if (ci.mantraId) setScreenValue(ci.mantraId, "cycle_mantra_id");
-          if (ci.sankalpId) setScreenValue(ci.sankalpId, "cycle_sankalp_id");
-          if (ci.practiceId) setScreenValue(ci.practiceId, "cycle_practice_id");
-        }
-
-        // Extract and reveal companion data
-        const companion = data.companion || data;
-
-        // Intro and analysis metadata
-        if (data.intro) setScreenValue(data.intro, "analysis_intro");
-        if (data.metricsSummary)
-          setScreenValue(data.metricsSummary, "analysis_metrics");
-        if (data.insightText)
-          setScreenValue(data.insightText, "analysis_insight");
-
-        // Practice / Ritual
-        if (companion.practice || companion.ritual) {
-          const p = companion.practice || companion.ritual;
-          setScreenValue(p.ui?.card_title || p.title, "card_ritual_title");
-          setScreenValue(
-            p.ui?.card_subtitle || p.description || p.core?.summary,
-            "card_ritual_description",
-          );
-          setScreenValue(p.ui?.card_meta || p.meta, "card_ritual_meta");
-          setScreenValue(p.core?.title || p.title, "practice_title");
-          setScreenValue(
-            p.ui?.card_meta || p.meta || p.core?.duration,
-            "practice_meta",
-          );
-        }
-
-        // Sankalpa
-        if (companion.sankalp || companion.sankalpa) {
-          const s = companion.sankalp || companion.sankalpa;
-          setScreenValue(
-            s.ui?.card_title || s.core?.title || "",
-            "card_sankalpa_title",
-          );
-          setScreenValue(
-            s.ui?.card_subtitle || s.description || s.core?.line,
-            "card_sankalpa_description",
-          );
-          setScreenValue(s.ui?.card_meta || s.meta, "card_sankalpa_meta");
-          setScreenValue(s.core?.line || s.line, "sankalp_text");
-          setScreenValue(s.core?.title || s.line, "sankalp_title");
-        }
-
-        // Mantra
-        if (companion.mantra) {
-          const m = companion.mantra;
-          setScreenValue(m.ui?.card_title || m.title, "card_mantra_title");
-          setScreenValue(
-            m.ui?.card_subtitle || m.description || m.core?.devanagari,
-            "card_mantra_description",
-          );
-          setScreenValue(m.ui?.card_meta || m.meta, "card_mantra_meta");
-          setScreenValue(m.core?.title || m.line || m.title, "mantra_text");
-          setScreenValue(m.core?.iast || m.iast, "mantra_iast");
-          setScreenValue(
-            m.core?.devanagari || m.devanagari || "",
-            "mantra_devanagari",
-          );
-          setScreenValue(m.core?.title || m.title || m.iast, "mantra_title");
-          setScreenValue(m.core?.audio_url || m.audio_url || "", "mantra_audio_url");
-
-          const resolvedMantraId =
-            m.core?.item_id || m.core?.id || m.item_id || m.id;
-          if (resolvedMantraId) setScreenValue(resolvedMantraId, "mantra_id");
-          if (m.ui?.deity_display)
-            setScreenValue(m.ui.deity_display, "mantra_deity_display");
-        }
-
-        setScreenValue(inputData.day_number, "day_number");
-        setScreenValue(inputData.focus, "active_focus");
-        setScreenValue(data.focusName || companion.focus_name, "focus_name");
-        setScreenValue(27, "reps_total");
-        setScreenValue(0, "insight_step");
-
-        // Extract Mitra IDs
-        const getMitraId = (item: any) =>
-          item?.core?.item_id || item?.core?.id || item?.item_id || item?.id;
-
-        if (companion.mantra) {
-          const mid = getMitraId(companion.mantra);
-          if (mid) setScreenValue(mid, "mantra_id");
-        }
-        if (companion.sankalp || companion.sankalpa) {
-          const sid = getMitraId(companion.sankalp || companion.sankalpa);
-          if (sid) setScreenValue(sid, "sankalp_id");
-        }
-        if (companion.practice) {
-          const pid = getMitraId(companion.practice);
-          if (pid) setScreenValue(pid, "practice_id");
-        }
-
-        // Save master data for info screens
-        setScreenValue(
-          companion.mantra
-            ? {
-                ...companion.mantra.core,
-                id: getMitraId(companion.mantra),
-                wisdom: companion.mantra.context,
-                type: "mantra",
-              }
-            : data.masterData?.selectedMantra,
-          "master_mantra",
-        );
-        setScreenValue(
-          companion.sankalp || companion.sankalpa
-            ? {
-                ...(companion.sankalp || companion.sankalpa).core,
-                id: getMitraId(companion.sankalp || companion.sankalpa),
-                wisdom: (companion.sankalp || companion.sankalpa).context,
-                type: "sankalp",
-              }
-            : data.masterData?.selectedSankalp,
-          "master_sankalp",
-        );
-        setScreenValue(
-          companion.practice
-            ? {
-                ...companion.practice.core,
-                id: getMitraId(companion.practice),
-                wisdom: companion.practice.context,
-                type: "practice",
-              }
-            : data.masterData?.selectedPractice,
-          "master_practice",
-        );
-
-        // Sankalp how_to_live
-        if (companion.sankalp?.core?.how_to_live) {
-          setScreenValue(
-            companion.sankalp.core.how_to_live,
-            "sankalp_how_to_live",
-          );
-        }
-        // Practice benefit preview
-        if (companion.practice?.ui?.benefit_preview) {
-          setScreenValue(
-            companion.practice.ui.benefit_preview,
-            "practice_benefit_preview",
-          );
-        }
-        // AI reasoning
-        if (data.aiReasoning) {
-          setScreenValue(data.aiReasoning, "ai_reasoning");
-        }
-
-        // Dashboard enrichment
-        const hub = data.hub || data.dashboard;
-        if (hub) {
-          if (hub.shift_message)
-            setScreenValue(hub.shift_message, "daily_shift_message");
-          if (hub.streak_display)
-            setScreenValue(hub.streak_display, "streak_display");
-          if (hub.completed_days !== undefined)
-            setScreenValue(hub.completed_days, "completed_days");
-          if (hub.festival_today)
-            setScreenValue(hub.festival_today, "festival_today");
-          if (hub.days_since_last_practice !== undefined) {
-            setScreenValue(
-              hub.days_since_last_practice,
-              "days_since_last_practice",
-            );
-          }
-        }
-
-        // CTA
-        if (data.cta) setScreenValue(data.cta, "contextual_cta");
-
-        // ----------------------------------------------------------------
-        // Week 2 — Day Active Dashboard enrichment (Moments 8-15, 40, 41, 43).
-        // Spec: route_dashboard_day_active.md §2, §6. Populate briefing,
-        // focus phrase, cycle_day, checkpoint_due, clear_window from the
-        // generate-companion envelope (+ side-call to /clear-window/).
-        // ----------------------------------------------------------------
-        const briefing = data.briefing || data.morningBriefing || null;
-        if (briefing) {
-          setScreenValue(true, "briefing_available");
-          setScreenValue(briefing.audio_url || briefing.audioUrl || "", "briefing_audio_url");
-          setScreenValue(
-            briefing.summary || briefing.opening_line || briefing.script?.slice(0, 140) || "",
-            "briefing_summary",
-          );
-          setScreenValue(briefing.script || briefing.transcript || "", "briefing_transcript");
-          setScreenValue(briefing.voice_preset || "anchor", "briefing_voice_preset");
-        } else {
-          setScreenValue(false, "briefing_available");
-        }
-
-        // Focus phrase — Phase 1.5 expansive phrase; fall back to dayType sub-header.
-        const focusPhrase =
-          data.focus_phrase || data.focusPhrase || data.dayTypeCopy?.subHeader || "";
-        if (focusPhrase) setScreenValue(focusPhrase, "focus_phrase");
-
-        // cycle_day — distinct screenData copy so the signal bar can read it
-        // without stomping on day_number (which checkpoint logic also owns).
-        if (data.journey?.dayNumber) {
-          setScreenValue(data.journey.dayNumber, "cycle_day");
-        }
-
-        // Checkpoint-due enum (for variant selection)
-        const dn = data.journey?.dayNumber;
-        if (dn === 7) setScreenValue("day_7", "checkpoint_due");
-        else if (dn === 14) setScreenValue("day_14", "checkpoint_due");
-        else setScreenValue(null, "checkpoint_due");
-
-        // Dashboard variant resolver — minimal shape; refined by server later.
-        let variant: string = "standard";
-        if (dn === 1) variant = "first_day";
-        if (dn === 7) variant = "checkpoint_pending_day_7";
-        if (dn === 14) variant = "checkpoint_pending_day_14";
-        // post_conflict_morning variant retired per v3 journey migration
-        // (PostConflictMorningCard deleted).
-
-        // Clear-window (Moment 43) was dropped per backend B4 decision
-        // (2026-04-13 audit). Slot reserved if revisited post-soak.
-        setScreenValue(null, "clear_window");
-        setScreenValue(variant, "dashboard_variant");
-
-        // Navigate to the post-lock summary reveal (unless skipReveal)
-        if (!payload?.skipReveal) {
-          loadScreen({
-            container_id: "insight_summary",
-            state_id: "path_reveal",
-          });
-        }
-        break;
-      }
+      // generate_companion case retired per v3 journey migration
+      // (journey-v3-fe Step 8). Callers now fetch v3 daily-view
+      // envelope directly via mitraJourneyDailyView + ingestDailyView.
+      // The dashboard container itself hydrates on focus; other
+      // historical prehydrate call sites (Home resume, alter-practices,
+      // onboarding complete) have been inlined to v3 direct fetch.
 
       // ================================================================
       // INITIATE_TRIGGER — start OM chanting session (Flow 3, Step 1)
@@ -2550,7 +2196,11 @@ export async function executeAction(
           setScreenValue(ftcFocus, "suggested_focus");
         }
 
-        const ftcData = await mitraJourneyCompanion();
+        // fast_track_companion was backed by legacy /journey/companion/.
+        // Orphaned after v3 journey migration (journey-v3-fe Step 8):
+        // no remaining callers; v3 daily-view shape is incompatible
+        // with the fields below. Case retained as a no-op for safety.
+        const ftcData: any = null;
         if (!ftcData) break;
 
         if (ftcData.intro) setScreenValue(ftcData.intro, "analysis_intro");
@@ -2647,233 +2297,38 @@ export async function executeAction(
             );
           }
 
-          // Regenerate companion with new locked items
-          await executeAction({ type: "generate_companion" }, context);
+          // v3 journey: hydrate from daily-view after alter-practices.
+          try {
+            const { mitraJourneyDailyView } = require("./mitraApi");
+            const { ingestDailyView } = require("./v3Ingest");
+            const result = await mitraJourneyDailyView(null);
+            if (result?.envelope) {
+              for (const [k, v] of Object.entries(
+                ingestDailyView(result.envelope),
+              )) {
+                if (v !== undefined) setScreenValue(v, k);
+              }
+            }
+          } catch (_err: any) {
+            // non-fatal
+          }
         } catch (apErr: any) {
           console.warn("[MITRA] alter-practice failed:", apErr.message);
           // Fallback to local alter
           setScreenValue(true, "alter_practices_mode");
           setScreenValue(1, "day_number");
           setScreenValue({}, "journey_log");
-          await executeAction({ type: "generate_companion" }, context);
         }
         break;
       }
 
-      // ================================================================
-      // ENSURE_CHECKPOINT_DATA — fetch checkpoint data into screen state.
-      // Idempotent: skips fetch if checkpoint_original_data is already populated.
-      // ================================================================
-      case "ensure_checkpoint_data": {
-        const cpDay =
-          payload?.day || screenState.checkpoint_day || screenState.day_number || 7;
-        if (screenState.checkpoint_original_data) {
-          break;
-        }
-        const cpData = await mitraCheckpoint(screenState, cpDay);
-        if (!cpData) break;
-        setScreenValue(cpData.headline, "checkpoint_headline");
-        setScreenValue(cpData.subtext, "checkpoint_subtext");
-        setScreenValue(cpData.question, "checkpoint_question");
-        setScreenValue(cpData.options || [], "checkpoint_options");
-        setScreenValue(cpData.metrics || {}, "checkpoint_metrics");
-        setScreenValue(cpData.originalData || null, "checkpoint_original_data");
-        setScreenValue(cpData.day || cpDay, "checkpoint_day");
-        setScreenValue(cpData.type || "", "checkpoint_type");
-        setScreenValue(cpData.engagementLevel || "", "checkpoint_engagement_level");
-        setScreenValue(cpData.trendGraph || {}, "checkpoint_trend_graph");
-        setScreenValue(cpData.strongestArea || "", "strongest_area");
-        setScreenValue(cpData.observation || "", "milestone_reflection");
-        setScreenValue(cpData.daysEngaged || 0, "checkpoint_days_engaged");
-        setScreenValue(
-          cpData.daysFullyCompleted || 0,
-          "checkpoint_days_fully_completed",
-        );
-        setScreenValue(cpData.totalDays || cpDay, "checkpoint_total_days");
-        setScreenValue(
-          cpData.recommendationAction || "",
-          "checkpoint_recommendation",
-        );
-        setScreenValue(
-          cpData.deepenSuggestion || null,
-          "checkpoint_deepen_suggestion",
-        );
-        if (cpData.framing) {
-          setScreenValue(cpData.framing, "checkpoint_framing");
-        }
-
-        // Match web actionExecutor.js:2795 — fire checkpoint_viewed once
-        // when the milestone screen successfully loads its data.
-        mitraTrackEvent("checkpoint_viewed", {
-          journeyId: screenState.journey_id,
-          dayNumber: cpDay,
-          meta: {
-            engagement_level: cpData.engagementLevel || "",
-            day: cpDay,
-          },
-        });
-        break;
-      }
-
-      // ================================================================
-      // CHECKPOINT_SUBMIT — submit Day 7 / Day 14 reflection.
-      // Mirrors web actionExecutor.js:2512-2645.
-      // ================================================================
-      case "checkpoint_submit": {
-        const csDay =
-          screenState.checkpoint_day || screenState.day_number || 7;
-        const csDecision =
-          payload?.decision ||
-          screenState.checkpoint_decision ||
-          screenState.checkpoint_feeling ||
-          screenState.checkpoint_options?.[0]?.id ||
-          "continue";
-
-        // P1-7 — capture pre-submit triad IDs for post-submit validation.
-        // continue_same / deepen MUST preserve item identity per the
-        // Day-14 contract; if BE silently regenerates, we want a
-        // warning in dev logs (not user-facing failure).
-        const preSubmitTriadIds = {
-          mantra:   screenState?.cycle_mantra_id || screenState?.companion?.mantra?.core?.id,
-          sankalp:  screenState?.cycle_sankalp_id || screenState?.companion?.sankalp?.core?.id,
-          practice: screenState?.cycle_practice_id || screenState?.companion?.practice?.core?.id,
-        };
-
-        const csPayload: any = {
-          decision: csDecision,
-          reflection: screenState.checkpoint_user_reflection || "",
-        };
-
-        if (csDay === 14) {
-          const impliedFeelingMap: Record<string, string> = {
-            continue_same: "steady",
-            deepen: "strong",
-            change_focus: "ready",
-          };
-          csPayload.feeling =
-            screenState.checkpoint_feeling_simple ||
-            screenState.checkpoint_feeling ||
-            impliedFeelingMap[csDecision] ||
-            "steady";
-
-          if (csDecision === "deepen") {
-            const ds = screenState.checkpoint_deepen_suggestion;
-            csPayload.deepenAccepted = true;
-            if (ds?.itemType) csPayload.deepenItemType = ds.itemType;
-            if (ds?.itemId) csPayload.deepenItemId = ds.itemId;
-          }
-        }
-
-        const csRes = await mitraSubmitCheckpoint(csDay, csPayload);
-
-        if (!csRes || csRes.status !== "ok") {
-          console.warn("[CHECKPOINT_SUBMIT] backend returned error:", csRes);
-          // Still mark completed locally so the user isn't stuck
-          setScreenValue(true, "checkpoint_completed");
-          setScreenValue(csDecision, "checkpoint_completed_decision");
-          loadScreen({
-            container_id: "cycle_transitions",
-            state_id: "checkpoint_results",
-          });
-          break;
-        }
-
-        setScreenValue(true, "checkpoint_completed");
-        setScreenValue(csDecision, "checkpoint_completed_decision");
-
-        // Match web actionExecutor.js:2566 payload exactly:
-        // includes reflection_length, drops redundant `day` field.
-        mitraTrackEvent("checkpoint_completed", {
-          journeyId: screenState.journey_id,
-          dayNumber: csDay,
-          meta: {
-            decision: csDecision,
-            reflection_length: (screenState.checkpoint_user_reflection || "").length,
-          },
-        });
-
-        if (csDay === 14) {
-          // Match web actionExecutor.js:2578 payload — include total_days +
-          // path_cycle_number for analytics parity.
-          mitraTrackEvent("cycle_completed", {
-            journeyId: screenState.journey_id,
-            dayNumber: csDay,
-            meta: {
-              decision: csDecision,
-              total_days: csDay,
-              path_cycle_number:
-                screenState.path_context?.pathCycleNumber || 1,
-            },
-          });
-        }
-
-        // Apply backend-driven side effects: new journey id, day reset, etc.
-        if (csRes.newJourneyId) {
-          setScreenValue(csRes.newJourneyId, "journey_id");
-        }
-        if (csRes.resetDay || csDay === 14) {
-          setScreenValue(1, "day_number");
-        }
-
-        // P1-6 — clear the AsyncStorage day14 pending flag on success.
-        // Any future mid-flow crash before navigation completes won't
-        // re-surface this now-resolved checkpoint.
-        if (csDay === 14) {
-          try {
-            const AsyncStorage =
-              require("@react-native-async-storage/async-storage").default;
-            await AsyncStorage.removeItem("kalpx_day14_pending");
-          } catch (_err) {
-            // non-fatal
-          }
-        }
-
-        // P1-7 — triad-identity validation for continue_same / deepen.
-        // Dev-only log; warns if BE silently regenerated an item ID.
-        // continue_same and deepen MUST keep the same mantra/sankalp/
-        // practice IDs; change_focus is expected to change them.
-        if (
-          csDay === 14 &&
-          (csDecision === "continue_same" || csDecision === "deepen") &&
-          __DEV__
-        ) {
-          try {
-            const { mitraJourneyCompanion } = require("./mitraApi");
-            const companion = await mitraJourneyCompanion();
-            const post = {
-              mantra:   companion?.companion?.mantra?.core?.id,
-              sankalp:  companion?.companion?.sankalp?.core?.id,
-              practice: companion?.companion?.practice?.core?.id,
-            };
-            const drifted: string[] = [];
-            for (const k of ["mantra", "sankalp", "practice"] as const) {
-              if (preSubmitTriadIds[k] && post[k] &&
-                  preSubmitTriadIds[k] !== post[k]) {
-                drifted.push(
-                  `${k}: ${preSubmitTriadIds[k]} → ${post[k]}`,
-                );
-              }
-            }
-            if (drifted.length > 0) {
-              console.warn(
-                "[CHECKPOINT_SUBMIT] triad-identity drift on " +
-                  csDecision +
-                  " — IDs changed silently:",
-                drifted,
-              );
-            }
-          } catch (_err) {
-            // non-fatal — validation failure doesn't block navigation
-          }
-        }
-
-        // Navigate to results screen
-        loadScreen({
-          container_id: "cycle_transitions",
-          state_id: "checkpoint_results",
-        });
-        break;
-      }
+      // ensure_checkpoint_data + checkpoint_submit cases retired per
+      // v3 journey migration (journey-v3-fe Step 6). Checkpoint data
+      // is now fetched directly by CheckpointDay7Block /
+      // CheckpointDay14Block via mitraJourneyDay7View /
+      // mitraJourneyDay14View (ETag-aware). Submissions owned by the
+      // blocks via mitraJourneyDay7Decision / mitraJourneyDay14Decision
+      // POSTs with next_view.payload hydrated inline.
 
       // ================================================================
       // RECORD_PAUSE — track pause/victory counters
@@ -3919,27 +3374,28 @@ export async function executeAction(
                 : null,
             });
 
-            // Seed full companion enrichment from the journey companion
-            // endpoint. This populates how_to_live, recommended_posture,
-            // focus_name, one_line, reasoning, shift messages, etc.
+            // v3 journey: hydrate from daily-view after onboarding
+            // completion so dashboard renders triad + continuity +
+            // insights on first navigation (no mount-time blank state).
             try {
               const _store = require("../store").default;
               const _screenActions = require("../store/screenSlice").screenActions;
-              await executeAction(
-                {
-                  type: "generate_companion",
-                  payload: { use_journey_companion: true },
-                },
-                {
-                  screenState: _store.getState().screen.screenData,
-                  loadScreen: () => {},
-                  goBack: () => {},
-                  setScreenValue: (value: any, key: string) =>
-                    _store.dispatch(_screenActions.setScreenValue({ key, value })),
-                },
-              );
+              const { mitraJourneyDailyView } = require("./mitraApi");
+              const { ingestDailyView } = require("./v3Ingest");
+              const result = await mitraJourneyDailyView(null);
+              if (result?.envelope) {
+                for (const [k, v] of Object.entries(
+                  ingestDailyView(result.envelope),
+                )) {
+                  if (v !== undefined) {
+                    _store.dispatch(
+                      _screenActions.setScreenValue({ key: k, value: v }),
+                    );
+                  }
+                }
+              }
             } catch (_err) {
-              if (__DEV__) console.warn("[ONBOARDING] companion enrichment failed:", _err);
+              if (__DEV__) console.warn("[ONBOARDING] v3 daily-view hydrate failed:", _err);
             }
 
             setScreenValue(null, "onboarding_draft_state");

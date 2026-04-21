@@ -5238,6 +5238,14 @@ export const CycleTransitionsContainer = {
       blocks: [{ type: "checkpoint_day_14" }],
     },
 
+    // v3 journey: arc_complete transient moment rendered after POST
+    // /api/mitra/v3/journey/day-14-decision/ returns daily_view.
+    // Auto-advances to cycle-2 dashboard after ~6s dwell.
+    day_14_finale: {
+      tone: { theme: "light_sandal", mood: "reflective" },
+      blocks: [{ type: "checkpoint_day_14_finale" }],
+    },
+
     weekly_checkpoint: {
       tone: { theme: "light_sandal", mood: "reflective" },
       blocks: [

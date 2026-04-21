@@ -10,7 +10,6 @@ import type { RootState } from "../store";
 import PracticeDetailOverlay from "../components/PracticeDetailOverlay";
 import AwarenessTriggerContainer from "../containers/AwarenessTriggerContainer";
 import ChoiceStackContainer from "../containers/ChoiceStackContainer";
-import CompanionDashboardContainer from "../containers/CompanionDashboardContainer";
 import ComposerContainer from "../containers/ComposerContainer";
 import CycleTransitionsContainer from "../containers/CycleTransitionsContainer";
 import EmbodimentChallengeRunnerContainer from "../containers/EmbodimentChallengeRunnerContainer";
@@ -57,16 +56,10 @@ const containerMap: Record<string, React.ComponentType<any>> = {
   lock_ritual_overlay: LockRitualContainer,
   lock_ritual: LockRitualContainer,
   insight_summary: InsightSummaryContainer,
-  // When EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD=1, every `companion_dashboard`
-  // route — including hardcoded redirects from InsightSummaryContainer,
-  // LockRitualContainer, PracticeRunnerContainer, etc. (40+ callsites) —
-  // resolves to the new dashboard shell. Flag=0 keeps the legacy
-  // CompanionDashboardContainer. This is the cleanest single-flip for
-  // Phase 5 without touching every hardcoded nav call.
-  companion_dashboard:
-    process.env.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
-      ? NewDashboardContainer
-      : CompanionDashboardContainer,
+  // Legacy `companion_dashboard` route now resolves to the v3
+  // NewDashboardContainer unconditionally. The legacy
+  // CompanionDashboardContainer was deleted in journey-v3-fe Step 5.
+  companion_dashboard: NewDashboardContainer,
   practice_runner: PracticeRunnerContainer,
   awareness_trigger: AwarenessTriggerContainer,
   composer: ComposerContainer,

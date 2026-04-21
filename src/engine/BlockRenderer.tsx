@@ -110,6 +110,7 @@ import EveningReflectionBlock from '../blocks/EveningReflectionBlock';
 import WeeklyReflectionBlock from '../blocks/WeeklyReflectionBlock';
 import CheckpointDay7Block from '../blocks/CheckpointDay7Block';
 import CheckpointDay14Block from '../blocks/CheckpointDay14Block';
+import CheckpointDay14FinaleBlock from '../blocks/CheckpointDay14FinaleBlock';
 import ResilienceNarrativeCard from '../blocks/ResilienceNarrativeCard';
 
 // Week 6 — Companion Intelligence (Mitra v3 Moments 27, 28, 29, 30, 39)
@@ -237,6 +238,7 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   weekly_reflection: WeeklyReflectionBlock,
   checkpoint_day_7: CheckpointDay7Block,
   checkpoint_day_14: CheckpointDay14Block,
+  checkpoint_day_14_finale: CheckpointDay14FinaleBlock,
   resilience_narrative_card: ResilienceNarrativeCard,
   // Week 6 — Companion Intelligence
   prep_coaching_sheet: PrepCoachingSheet,
@@ -331,7 +333,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block, textColor }) => {
     'balanced_ack_overlay', 'voice_note_sheet', 'voice_consent_sheet',
     // Week 5 reflection + checkpoint blocks — self-dispatch submit actions
     'evening_reflection', 'weekly_reflection', 'checkpoint_day_7',
-    'checkpoint_day_14', 'resilience_narrative_card',
+    'checkpoint_day_14', 'checkpoint_day_14_finale', 'resilience_narrative_card',
     // Week 6 companion intelligence — all handle their own CTAs / dispatch
     'prep_coaching_sheet', 'entity_recognition_sheet',
     'recommended_additional_card', 'post_conflict_gentleness_card',

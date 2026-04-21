@@ -414,40 +414,27 @@ export default function Home() {
             // swallow — router is shadow mode only, never blocks resume
           }
 
-          // Audit fix F4 (2026-04-13, revised) — resume dispatches the same
-          // generate_companion action handler with use_journey_companion=true,
-          // which swaps the API call to read-only /journey/companion/ but
-          // reuses the full (~50-field) population logic. Fixes regression
-          // where CoreItemsList read empty card_mantra_title / master_mantra
-          // on resume and dashboard triad showed placeholders + view_info
-          // couldn't open info reveal.
+          // v3 journey: post-resume hydrate from daily-view envelope.
+          // Replaces the legacy generate_companion action dispatch.
           console.log(
-            "📡 Calling: generate_companion via journey/companion (resume)",
+            "📡 Calling: v3/journey/daily-view (resume hydrate)",
           );
-          const { executeAction } = require("../../engine/actionExecutor");
-          await executeAction(
-            {
-              type: "generate_companion",
-              payload: { use_journey_companion: true },
-            },
-            {
-              screenState: store.getState().screen.screenData,
-              loadScreen: (target: any) => {
-                const containerId =
-                  target?.container_id || target?.containerId || "generic";
-                const stateId =
-                  target?.state_id || target?.stateId || target || "";
-                store.dispatch(loadScreenWithData({ containerId, stateId }));
-              },
-              goBack: () => {
-                const { goBackWithData } = require("../../store/screenSlice");
-                store.dispatch(goBackWithData());
-              },
-              setScreenValue: (value: any, key: string) => {
-                store.dispatch(screenActions.setScreenValue({ key, value }));
-              },
-            },
-          );
+          try {
+            const { mitraJourneyDailyView } = require("../../engine/mitraApi");
+            const { ingestDailyView } = require("../../engine/v3Ingest");
+            const result = await mitraJourneyDailyView(null);
+            if (result?.envelope) {
+              for (const [k, v] of Object.entries(
+                ingestDailyView(result.envelope),
+              )) {
+                if (v !== undefined) {
+                  store.dispatch(screenActions.setScreenValue({ key: k, value: v }));
+                }
+              }
+            }
+          } catch (_err: any) {
+            console.warn("[Home] v3 daily-view resume hydrate failed:", _err?.message);
+          }
           console.log("✅ resume companion data loaded");
 
           // Auto-route to checkpoint screens on day 7 / day 14 if not yet completed

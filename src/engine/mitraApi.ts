@@ -319,19 +319,14 @@ export async function mitraFetchOnboardingChips(params: {
   }
 }
 
-/** GET /api/mitra/journey/home/ — Contextual home surface.
- *
- * Per JOURNEY_HOME_CONTRACT_V1. Returns one of three response types:
- *   - render_home:      layout (momentum/choice/minimal_care) + chips + copy
- *   - route_to_moment:  blocking override (crisis/checkpoint/grief/loneliness)
- *   - fallback:         last-resort neutral 2-chip minimal_care shell
- * FE dispatches on response_type BEFORE touching anything else.
- */
-export async function mitraJourneyHome(params: {
-  tz?: string;
-  locale?: string;
-  guidance_mode?: string;
-} = {}): Promise<any | null> {
+
+// ─── legacy journey wrappers retired (journey-v3-fe Step 11) ─────────
+// Deleted: mitraJourneyHome, mitraGetCheckpoint, mitraSubmitCheckpoint,
+// mitraCheckpoint, mitraJourneyCompanion, mitraJourneyWelcomeBack.
+// All callers migrated to v3 (mitraJourney{Entry,Daily,Day7,Day14}View +
+// mitraJourney{Reentry,Day7,Day14}Decision).
+// ─────────────────────────────────────────────────────────────────────
+
   try {
     const res = await api.get("mitra/journey/home/", { params });
     return res.data;
@@ -447,114 +442,8 @@ export async function mitraTriggerMantras(inputData: any): Promise<any> {
   }
 }
 
-/** GET mitra/journey/checkpoint/{day}/ — Fetch checkpoint data. */
-export async function mitraGetCheckpoint(day: number): Promise<any> {
-  try {
-    const res = await api.get(`mitra/journey/checkpoint/${day}/`, {
-      params: { tz: getTz() },
-    });
-    console.log(`[MITRA] checkpoint/${day} data fetched`);
-    return res.data;
-  } catch (err: any) {
-    console.error(`[MITRA] checkpoint/${day} fetch failed:`, err.message);
-    return null;
-  }
-}
 
-/** POST mitra/journey/checkpoint/{day}/submit/ — Submit checkpoint decision. */
-export async function mitraSubmitCheckpoint(
-  day: number,
-  payload: any,
-): Promise<any> {
-  try {
-    const res = await api.post(`mitra/journey/checkpoint/${day}/submit/`, {
-      ...payload,
-      tz: getTz(),
-    });
-    console.log(`[MITRA] checkpoint/${day} submission complete`);
-    return res.data;
-  } catch (err: any) {
-    console.error(`[MITRA] checkpoint/${day} submission failed:`, err.message);
-    return null;
-  }
-}
 
-/** Orchestrate checkpoint fetch + normalize into screen-ready shape. */
-export async function mitraCheckpoint(
-  screenState: any,
-  targetDay: number | null = null,
-): Promise<any> {
-  const day = targetDay || screenState.day_number || 7;
-  console.log(`[MITRA] Requesting checkpoint data for Day ${day}`);
-  const data = await mitraGetCheckpoint(day);
-
-  if (data) {
-    const options: any[] = [];
-    const rec = data.recommendation;
-    const engagementLevel = data.engagement?.engagementLevel || "";
-
-    if (day === 7) {
-      if (rec?.action === "lighten") {
-        options.push({ id: "lighten", label: "Lighten My Path" });
-        (rec?.alternatives || []).forEach((alt: string) => {
-          if (alt !== "reset") return;
-          if (!options.find((o: any) => o.id === alt)) {
-            options.push({ id: alt, label: "Start Fresh" });
-          }
-        });
-      } else {
-        options.push({ id: "continue", label: "Continue" });
-      }
-    } else if (day === 14) {
-      options.push({ id: "continue_same", label: "Continue Same Path" });
-      if (rec?.deepenSuggestion) {
-        options.push({
-          id: "deepen",
-          label: `Deepen: ${rec.deepenSuggestion.title}`,
-          description: rec.deepenSuggestion.reason,
-        });
-      }
-      options.push({ id: "change_focus", label: "Change My Focus" });
-    }
-
-    const engagement = data.engagement || {};
-    return {
-      headline: data.identityLabel || `Day ${day}`,
-      subtext: rec?.mitraMessage || data.pathMilestone?.message || "",
-      question: data.reflectionPrompt || "How has your practice felt?",
-      options,
-      metrics: data.baseline?.baselineMetrics || {},
-      show_feelings: engagementLevel !== "near_zero",
-      originalData: data,
-      day,
-      type: data.checkpoint?.type || "",
-      engagementLevel,
-      supportStability: engagement.supportStability || "",
-      trendGraph: data.trendGraph || { engaged: [], fullyCompleted: [] },
-      strongestArea:
-        data.patternNotice?.strongestArea ||
-        data.cycleReflection?.strongestType ||
-        "",
-      observation:
-        data.patternNotice?.observation ||
-        data.cycleReflection?.mitraReflection ||
-        "",
-      recommendationAction: rec?.action || "",
-      deepenSuggestion: rec?.deepenSuggestion || null,
-      refinementSignal: data.refinementSignal || null,
-      pathDurationDays: data.pathContext?.pathDurationDays || 0,
-      pathMilestoneMessage: data.pathMilestone?.message || "",
-      growthArea: data.cycleReflection?.growthArea || "",
-      consistencyScore: data.cycleReflection?.consistencyScore || 0,
-      daysEngaged: engagement.daysEngaged || 0,
-      daysFullyCompleted: engagement.daysFullyCompleted || 0,
-      totalDays: engagement.totalDays || day,
-      framing: data.framing || "",
-    };
-  }
-
-  return generateCheckpointData(screenState);
-}
 
 // mitraResetPlan + mitraInfoScreen removed 2026-04-18 — audited as
 // zero-call-site dead wrappers. Local fallback generators
@@ -767,21 +656,6 @@ export async function mitraJourneyStatus(): Promise<any> {
   }
 }
 
-/** GET mitra/journey/companion/ — Read-only companion data for the current
- *  active journey. Use this when resuming a known journey instead of
- *  generate_companion, which would create a new journey and reset day_number.
- */
-export async function mitraJourneyCompanion(): Promise<any> {
-  try {
-    const res = await api.get("mitra/journey/companion/", {
-      params: { tz: getTz() },
-    });
-    return res.data;
-  } catch (err: any) {
-    console.warn("[MITRA] journey/companion failed:", err.message);
-    return null;
-  }
-}
 
 /**
  * Week 1 — Welcome Onboarding APIs (Mitra v3 Moments 1-7).
@@ -1005,22 +879,6 @@ export async function getWeeklyReflectionData(cycleDay?: number): Promise<any> {
   }
 }
 
-/** POST mitra/journey/welcome-back/ — Submit welcome-back decision (continue | fresh). */
-export async function mitraJourneyWelcomeBack(
-  decision: "continue" | "fresh",
-): Promise<any> {
-  try {
-    const res = await api.post("mitra/journey/welcome-back/", {
-      decision,
-      tz: getTz(),
-    });
-    console.log(`[MITRA] welcome-back decision "${decision}" submitted`);
-    return res.data;
-  } catch (err: any) {
-    console.error("[MITRA] welcome-back submission failed:", err.message);
-    return null;
-  }
-}
 
 // ===========================================================================
 // Mitra v3 Journey Views — CONTRACT v3.0.0

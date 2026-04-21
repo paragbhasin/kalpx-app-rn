@@ -47,78 +47,49 @@ export function ingestDailyView(env: V3DailyViewEnvelope | null): V3FlatIngest {
   const brief = today.morning_briefing || ({} as any);
 
   return {
-    // identity
+    // ── v3 namespaced blocks (preferred — migrated blocks read these) ──
+    identity: id,
+    greeting: greet,
+    arc_state: arc,
+    continuity: cont,
+    today: today,
+    insights: insights,
+
+    // ── residual legacy flat keys ────────────────────────────────────
+    // Post-Step-9 audit: most blocks now read sd.{identity|greeting|
+    // arc_state|continuity|today|insights}.* directly. The flat keys
+    // below remain because they're consumed by legacy readers outside
+    // the v3 journey migration scope OR serve as double-fallbacks.
+    //
+    // Eligible for removal when every consumer has migrated:
+    //   journey_id / day_number / total_days — read by many non-dashboard
+    //   screens (CheckpointDay7/14 reflection, telemetry). Keep until
+    //   those screens all migrate.
+    //   checkpoint_due / arc_complete — read by cycle_transitions routing
+    //   helpers in actionExecutor. Could migrate to sd.arc_state.*.
+    //   additional_items — consumed by AdditionalItemsSectionBlock; Step-X
+    //   follow-up.
+    //   briefing_* — morning briefing block path not migrated in this wave.
+
     journey_id: id.journey_id ?? null,
     day_number: id.day_number ?? 0,
     total_days: id.total_days ?? 0,
     path_cycle_number: id.path_cycle_number ?? 1,
-
-    // greeting
-    greeting_context: greet.supporting_line ?? "",
-    user_name: greet.user_name ?? "",
-    voice_placeholder: greet.voice_placeholder ?? "",
-
-    // arc_state
     checkpoint_due: arc.checkpoint_due ?? null,
     arc_complete: !!arc.arc_complete,
-    journey_path: arc.journey_path ?? "",
-    journey_path_label: arc.journey_path_label ?? "",
-
-    // continuity — expose the full block AND the legacy-shaped
-    // continuity_mirror consumed by the existing ContinuityMirrorCard
-    // until that component is migrated (Step 3).
-    continuity: cont,
-    continuity_mirror:
-      cont.tier && cont.tier !== "none"
-        ? {
-            title: cont.headline ?? "",
-            body: cont.body ?? "",
-            headline: cont.headline ?? "",
-            message: cont.body ?? "",
-            days_since_last_session: cont.gap_days ?? 0,
-            earned_context: cont.earned_context ?? {},
-          }
-        : null,
-    why_this: cont.why_this ?? null,
-    why_this_l1_items: cont.why_this_l1_items ?? [],
-
-    // today — triad flattened into per-slot scalar keys used by blocks
-    card_mantra_title: mantra?.title ?? "",
-    card_mantra_subtitle: mantra?.subtitle ?? "",
-    card_mantra_item_id: mantra?.item_id ?? "",
-    card_sankalpa_title: sankalp?.title ?? "",
-    card_sankalpa_subtitle: sankalp?.subtitle ?? "",
-    card_sankalpa_item_id: sankalp?.item_id ?? "",
-    card_ritual_title: practice?.title ?? "",
-    card_ritual_subtitle: practice?.subtitle ?? "",
-    card_ritual_item_id: practice?.item_id ?? "",
-    sankalp_how_to_live: sankalp?.how_to_live ?? "",
-
-    // today — other
     additional_items: today.additional_items ?? [],
-    focus_phrase: today.focus_phrase ?? "",
-    quick_support_labels: today.quick_support_labels ?? {},
-    cycle_metrics: today.cycle_metrics ?? null,
     completed_today: {
       mantra: !!mantra?.completed_today,
       sankalp: !!sankalp?.completed_today,
       practice: !!practice?.completed_today,
     },
-
-    // morning briefing
     briefing_available: brief.audio_status === "ready",
     briefing_audio_url: brief.audio_url ?? null,
     briefing_summary: brief.summary ?? "",
     briefing_id: brief.briefing_id ?? "",
     briefing_audio_status: brief.audio_status ?? "generating",
 
-    // insights
-    resilience_narrative: insights.resilience_narrative ?? null,
-    path_milestone: insights.path_milestone ?? null,
-    entity_card: insights.entity_card ?? null,
-    refinement_signal: insights.refinement_signal ?? null,
-
-    // envelope status (surfaced so dashboard can show degraded state)
+    // envelope status (kept permanently — even post-bridge)
     v3_status: env.status,
     v3_fallback_reason: env.fallback_reason,
   };

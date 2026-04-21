@@ -11,10 +11,15 @@ type Props = {
 };
 
 const ContinuityMirrorCard: React.FC<Props> = ({ block, screenData }) => {
-  const payload = block?.payload ?? screenData?.continuity_mirror ?? null;
-  if (!payload) return null;
-  const title = payload.title ?? payload.headline ?? "";
-  const body = payload.body ?? payload.message ?? "";
+  // v3 journey: continuity is a tier-aware block. Render when tier !== "none".
+  const cont = screenData?.continuity;
+  const blockPayload = block?.payload;
+  const tierActive = cont?.tier && cont.tier !== "none";
+  if (!blockPayload && !tierActive) return null;
+  const title =
+    blockPayload?.title ?? blockPayload?.headline ?? cont?.headline ?? "";
+  const body = blockPayload?.body ?? blockPayload?.message ?? cont?.body ?? "";
+  if (!title && !body) return null;
   return (
     <View
       style={styles.card}

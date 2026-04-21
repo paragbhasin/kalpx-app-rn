@@ -25,11 +25,20 @@ const SankalpCarryBlock: React.FC<Props> = ({ screenData }) => {
   const sd = screenData ?? {};
   if (!sd.practice_embody) return null;
 
-  const items: string[] = Array.isArray(sd.sankalp_how_to_live)
-    ? sd.sankalp_how_to_live.filter(
-        (x: any) => typeof x === "string" && x.trim().length > 0,
-      )
-    : [];
+  // v3 journey: read from today.triad[slot=sankalp].how_to_live (singleton
+  // string). Legacy flat sankalp_how_to_live was a list; v3 is scalar.
+  const triad = Array.isArray(sd.today?.triad) ? sd.today.triad : [];
+  const sankalpRow = triad.find((t: any) => t?.slot === "sankalp");
+  let items: string[] = [];
+  if (sankalpRow?.how_to_live && typeof sankalpRow.how_to_live === "string") {
+    items = [sankalpRow.how_to_live];
+  } else if (Array.isArray(sd.sankalp_how_to_live)) {
+    items = sd.sankalp_how_to_live.filter(
+      (x: any) => typeof x === "string" && x.trim().length > 0,
+    );
+  } else if (typeof sd.sankalp_how_to_live === "string" && sd.sankalp_how_to_live) {
+    items = [sd.sankalp_how_to_live];
+  }
   if (items.length === 0) return null;
 
   const header: string = sd.sankalp_how_to_live_label ?? "";

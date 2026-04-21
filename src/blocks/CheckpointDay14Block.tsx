@@ -17,7 +17,7 @@
  * REG-016: all three primary evolution options live in the bottom 30% zone.
  */
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -26,12 +26,17 @@ import {
   View,
   ScrollView,
 } from "react-native";
+import uuidv4 from "react-native-uuid";
 import { Fonts } from "../theme/fonts";
-import { executeAction } from "../engine/actionExecutor";
-import { useContentSlots, readMomentSlot, interpolate } from "../hooks/useContentSlots";
+import {
+  mitraJourneyDay14Decision,
+  mitraJourneyDay14View,
+} from "../engine/mitraApi";
+import { interpolate, readMomentSlot } from "../hooks/useContentSlots";
 import { useScreenStore } from "../engine/useScreenBridge";
+import { ingestDailyView, ingestDay14View } from "../engine/v3Ingest";
 import store from "../store";
-import { screenActions } from "../store/screenSlice";
+import { loadScreenWithData, screenActions } from "../store/screenSlice";
 
 const DOTS = 14;
 
@@ -40,33 +45,39 @@ interface Props {
 }
 
 const CheckpointDay14Block: React.FC<Props> = () => {
-  const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
+  const { screenData } = useScreenStore();
   const ss = screenData as Record<string, any>;
 
-  // Phase D — M25 registry-backed slots; null-safe on failure.
-  useContentSlots({
-    momentId: "M25_checkpoint_day_14",
-    screenDataKey: "checkpoint_day_14",
-    buildCtx: (s) => ({
-      path: s.journey_path === "growth" ? "growth" : "support",
-      guidance_mode: s.guidance_mode || "hybrid",
-      locale: s.locale || "en",
-      user_attention_state: "reflective_exposed",
-      emotional_weight: "heavy",
-      cycle_day: Number(s.day_number) || 14,
-      entered_via: s._entered_via || "dashboard_day_14_auto_navigation",
-      stage_signals: {},
-      today_layer: {},
-      life_layer: {
-        cycle_id: s.journey_id || s.cycle_id || "",
-        life_kosha: s.life_kosha || s.scan_focus || "",
-        scan_focus: s.scan_focus || "",
-        life_klesha: s.life_klesha || null,
-        life_vritti: s.life_vritti || null,
-        life_goal: s.life_goal || null,
-      },
-    }),
-  });
+  // v3 journey: fetch day-14-view. M25 narrative resolved inline on BE —
+  // no separate content-pack resolve required. Stores slots into
+  // screenData.checkpoint_day_14 (same slot-key shape) so the existing
+  // readMomentSlot/interpolate render path below is preserved.
+  const fetchedRef = useRef(false);
+  const etagRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
+    let cancelled = false;
+    (async () => {
+      const result = await mitraJourneyDay14View(etagRef.current);
+      if (cancelled) return;
+      if (result.etag) etagRef.current = result.etag;
+      if (result.notModified || !result.envelope) return;
+      const flat = ingestDay14View(result.envelope);
+      // Merge M25 narrative slots under checkpoint_day_14 so the
+      // existing slot() render continues to work.
+      const m25 = result.envelope.m25_narrative || {};
+      const merged = { ...flat, checkpoint_day_14: { ...flat.checkpoint_day_14, ...m25 } };
+      for (const [k, v] of Object.entries(merged)) {
+        if (v !== undefined) {
+          store.dispatch(screenActions.setScreenValue({ key: k, value: v }));
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const slot = (name: string) => readMomentSlot(ss, "checkpoint_day_14", name);
 
   const [step, setStep] = useState<"intro" | "body">("intro");
@@ -120,20 +131,53 @@ const CheckpointDay14Block: React.FC<Props> = () => {
       );
     }
 
-    await executeAction(
-      {
-        type: "checkpoint_submit",
-        payload: { decision },
-        currentScreen,
-      },
-      {
-        loadScreen,
-        goBack,
-        setScreenValue: (value: any, key: string) =>
-          store.dispatch(screenActions.setScreenValue({ key, value })),
-        screenState: store.getState().screen.screenData,
-      },
-    );
+    const idempotencyKey = String(uuidv4.v4());
+    try {
+      const env = await mitraJourneyDay14Decision(
+        {
+          decision,
+          reflection,
+          deepenItemType: ss.deepen_item_type || "",
+          deepenItemId: ss.deepen_item_id || "",
+          deepenAccepted: !!ss.deepen_accepted,
+        },
+        idempotencyKey,
+      );
+      if (!env) {
+        console.warn("[CheckpointDay14Block] decision network error");
+        return;
+      }
+      const nv = env.next_view ?? { view_key: "", payload: {} };
+      if (nv.view_key === "daily_view") {
+        for (const [k, v] of Object.entries(ingestDailyView(nv.payload as any))) {
+          if (v !== undefined) {
+            store.dispatch(screenActions.setScreenValue({ key: k, value: v }));
+          }
+        }
+        // Route to day-14 finale moment first (arc_complete transient),
+        // FE then auto-transitions into cycle-2 dashboard.
+        store.dispatch(
+          loadScreenWithData({
+            containerId: "cycle_transitions",
+            stateId: "day_14_finale",
+          }) as any,
+        );
+      } else if (nv.view_key === "onboarding_start") {
+        store.dispatch(
+          loadScreenWithData({
+            containerId: "welcome_onboarding",
+            stateId: "turn_1",
+          }) as any,
+        );
+      } else {
+        console.warn(
+          "[CheckpointDay14Block] unexpected next_view.view_key",
+          nv.view_key,
+        );
+      }
+    } catch (err: any) {
+      console.warn("[CheckpointDay14Block] decision threw:", err?.message);
+    }
   };
 
   if (step === "intro") {

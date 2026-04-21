@@ -28,7 +28,8 @@ type Props = {
 
 const ResilienceNarrativeCard: React.FC<Props> = ({ screenData }) => {
   const sd = screenData ?? {};
-  const payload = sd.resilience_narrative ?? null;
+  // v3 journey: insights.resilience_narrative (namespaced). Fallback flat.
+  const payload = sd.insights?.resilience_narrative ?? sd.resilience_narrative ?? null;
   if (!payload || typeof payload !== "object") return null;
 
   const summary: string =

@@ -11,7 +11,12 @@ type Props = {
 };
 
 const PathMilestoneBanner: React.FC<Props> = ({ block, screenData }) => {
-  const payload = block?.payload ?? screenData?.path_milestone ?? null;
+  // v3 journey: insights.path_milestone (namespaced). Fallback flat.
+  const payload =
+    block?.payload ??
+    screenData?.insights?.path_milestone ??
+    screenData?.path_milestone ??
+    null;
   if (!payload) return null;
   const title = payload.title ?? payload.headline ?? "";
   const body = payload.body ?? payload.message ?? "";

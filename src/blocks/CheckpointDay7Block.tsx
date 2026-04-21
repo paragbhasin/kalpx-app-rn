@@ -31,11 +31,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { executeAction } from "../engine/actionExecutor";
-import { mitraResolveMoment } from "../engine/mitraApi";
+import uuidv4 from "react-native-uuid";
+import { mitraJourneyDay7Decision, mitraJourneyDay7View } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
+import { ingestDailyView, ingestDay7View } from "../engine/v3Ingest";
 import store from "../store";
-import { screenActions } from "../store/screenSlice";
+import { loadScreenWithData, screenActions } from "../store/screenSlice";
 import { Fonts } from "../theme/fonts";
 
 type Step = "intro" | "body";
@@ -59,68 +60,34 @@ interface Props {
 }
 
 const CheckpointDay7Block: React.FC<Props> = () => {
-  const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
+  const { screenData } = useScreenStore();
   const ss = screenData as Record<string, any>;
   const [step, setStep] = useState<Step>("intro");
   const [reflection, setReflection] = useState<string>(
     ss.checkpoint_user_reflection || "",
   );
-  const resolveFiredRef = useRef(false);
+  const [submitting, setSubmitting] = useState(false);
+  const fetchedRef = useRef(false);
+  const etagRef = useRef<string | null>(null);
 
-  // Phase C M24 pilot — resolve compound intro→body slots on mount.
+  // v3 journey: fetch day-7-view which carries all slot copy + framing
+  // + journey_narrative inline. Replaces the legacy M24 mitraResolveMoment
+  // compound-moment resolve.
   useEffect(() => {
-    if (resolveFiredRef.current) return;
-    if (ss.checkpoint_day_7 && typeof ss.checkpoint_day_7 === "object") {
-      resolveFiredRef.current = true;
-      return;
-    }
-    resolveFiredRef.current = true;
-    const cycleId =
-      typeof ss.journey_id === "string" && ss.journey_id
-        ? ss.journey_id
-        : typeof ss.cycle_id === "string" && ss.cycle_id
-          ? ss.cycle_id
-          : "";
-    const resolveCtx = {
-      path: (ss.journey_path === "growth" ? "growth" : "support") as
-        | "support"
-        | "growth",
-      guidance_mode: (ss.guidance_mode || "hybrid") as
-        | "universal"
-        | "hybrid"
-        | "rooted",
-      locale: (ss.locale || "en") as string,
-      user_attention_state: "reflective_exposed",
-      emotional_weight: "heavy" as const,
-      cycle_day: Number(ss.day_number) || 7,
-      entered_via:
-        typeof ss._entered_via === "string" && ss._entered_via
-          ? ss._entered_via
-          : "dashboard_day_7_auto_navigation",
-      stage_signals: {},
-      today_layer: {},
-      life_layer: {
-        cycle_id: cycleId,
-        life_kosha: (ss.life_kosha || ss.scan_focus || "") as string,
-        scan_focus: (ss.scan_focus || "") as string,
-        life_klesha: ss.life_klesha || null,
-        life_vritti: ss.life_vritti || null,
-        life_goal: ss.life_goal || null,
-      },
-    };
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
     let cancelled = false;
     (async () => {
-      const payload = await mitraResolveMoment(
-        "M24_checkpoint_day_7",
-        resolveCtx,
-      );
-      if (cancelled || !payload) return;
-      store.dispatch(
-        screenActions.setScreenValue({
-          key: "checkpoint_day_7",
-          value: payload.slots,
-        }),
-      );
+      const result = await mitraJourneyDay7View(etagRef.current);
+      if (cancelled) return;
+      if (result.etag) etagRef.current = result.etag;
+      if (result.notModified || !result.envelope) return;
+      const flat = ingestDay7View(result.envelope);
+      for (const [k, v] of Object.entries(flat)) {
+        if (v !== undefined) {
+          store.dispatch(screenActions.setScreenValue({ key: k, value: v }));
+        }
+      }
     })();
     return () => {
       cancelled = true;
@@ -165,31 +132,53 @@ const CheckpointDay7Block: React.FC<Props> = () => {
   const dispatchDecision = async (
     decision: "continue" | "lighten" | "start_fresh",
   ) => {
-    // Persist reflection so checkpoint_submit reads it identically to web.
-    store.dispatch(
-      screenActions.setScreenValue({
-        key: "checkpoint_user_reflection",
-        value: reflection,
-      }),
-    );
-    store.dispatch(
-      screenActions.setScreenValue({ key: "checkpoint_day", value: 7 }),
-    );
-
-    await executeAction(
-      {
-        type: "checkpoint_submit",
-        payload: { decision },
-        currentScreen,
-      },
-      {
-        loadScreen,
-        goBack,
-        setScreenValue: (value: any, key: string) =>
-          store.dispatch(screenActions.setScreenValue({ key, value })),
-        screenState: store.getState().screen.screenData,
-      },
-    );
+    if (submitting) return;
+    setSubmitting(true);
+    // v3 decision names: legacy "start_fresh" → v3 "reset".
+    const v3Decision: "continue" | "lighten" | "reset" =
+      decision === "start_fresh" ? "reset" : decision;
+    const idempotencyKey = String(uuidv4.v4());
+    try {
+      const env = await mitraJourneyDay7Decision(
+        { decision: v3Decision, reflection },
+        idempotencyKey,
+      );
+      if (!env) {
+        console.warn("[CheckpointDay7Block] decision network error");
+        setSubmitting(false);
+        return;
+      }
+      const nv = env.next_view ?? { view_key: "", payload: {} };
+      if (nv.view_key === "daily_view") {
+        for (const [k, v] of Object.entries(ingestDailyView(nv.payload as any))) {
+          if (v !== undefined) {
+            store.dispatch(screenActions.setScreenValue({ key: k, value: v }));
+          }
+        }
+        store.dispatch(
+          loadScreenWithData({
+            containerId: "companion_dashboard",
+            stateId: "day_active",
+          }) as any,
+        );
+      } else if (nv.view_key === "onboarding_start") {
+        store.dispatch(
+          loadScreenWithData({
+            containerId: "welcome_onboarding",
+            stateId: "turn_1",
+          }) as any,
+        );
+      } else {
+        console.warn(
+          "[CheckpointDay7Block] unexpected next_view.view_key",
+          nv.view_key,
+        );
+      }
+    } catch (err: any) {
+      console.warn("[CheckpointDay7Block] decision threw:", err?.message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (step === "intro") {

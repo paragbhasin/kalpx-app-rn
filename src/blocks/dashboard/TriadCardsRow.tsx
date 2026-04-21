@@ -100,13 +100,22 @@ const TriadCardsRow: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sd.completed_today]);
 
+  // v3 journey: today.triad is a slot-keyed array. Legacy flat
+  // card_*_title / card_*_description keys retained as fallback.
+  const triadArr = Array.isArray(sd.today?.triad) ? sd.today.triad : [];
+  const triadBySlot = (slot: string) =>
+    triadArr.find((t: any) => t?.slot === slot) ?? {};
+  const tMantra = triadBySlot("mantra");
+  const tSankalp = triadBySlot("sankalp");
+  const tPractice = triadBySlot("practice");
+
   const cards: TriadCard[] = [
     {
       type: "mantra",
       labelKey: "card_mantra_label",
       labelFallback: "MANTRA",
-      title: sd.card_mantra_title ?? "",
-      sub: sd.card_mantra_description ?? "",
+      title: tMantra.title || sd.card_mantra_title || "",
+      sub: tMantra.subtitle || sd.card_mantra_description || "",
       done: practiceChant,
       iconName: "musical-notes-outline",
     },
@@ -114,8 +123,8 @@ const TriadCardsRow: React.FC = () => {
       type: "sankalp",
       labelKey: "card_sankalpa_label",
       labelFallback: "SANKALP",
-      title: sd.card_sankalpa_title ?? "",
-      sub: sd.card_sankalpa_description ?? "",
+      title: tSankalp.title || sd.card_sankalpa_title || "",
+      sub: tSankalp.subtitle || sd.card_sankalpa_description || "",
       done: practiceEmbody,
       iconName: "leaf-outline",
     },
@@ -123,8 +132,8 @@ const TriadCardsRow: React.FC = () => {
       type: "practice",
       labelKey: "card_ritual_label",
       labelFallback: "PRACTICE",
-      title: sd.card_ritual_title ?? "",
-      sub: sd.card_ritual_description ?? "",
+      title: tPractice.title || sd.card_ritual_title || "",
+      sub: tPractice.subtitle || sd.card_ritual_description || "",
       done: practiceAct,
       iconName: "flower-outline",
     },

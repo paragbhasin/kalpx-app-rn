@@ -206,7 +206,9 @@ const NewDashboardContainer: React.FC<Props> = () => {
           // populated continuity.* and insights.path_milestone coherently).
           // ClearWindowBanner remains as the generic banner.
           // Retired: PostConflictMorningCard (v3 journey migration).
-          const banner = sd.continuity_mirror ? (
+          const contTierActive =
+            sd.continuity?.tier && sd.continuity.tier !== "none";
+          const banner = contTierActive ? (
             <ContinuityMirrorCard screenData={sd} />
           ) : sd.clear_window_active ? (
             <ClearWindowBanner />
@@ -215,17 +217,18 @@ const NewDashboardContainer: React.FC<Props> = () => {
           // Insight cards in priority order (max 2 shown).
           // Retired: PredictiveAlertCard, GratitudeSignalCard, SeasonSignalCard.
           const candidates: React.ReactNode[] = [];
-          if (sd.path_milestone) {
+          const ins = sd.insights ?? {};
+          if (ins.path_milestone ?? sd.path_milestone) {
             candidates.push(
               <PathMilestoneBanner key="pm" screenData={sd} />,
             );
           }
-          if (sd.resilience_narrative) {
+          if (ins.resilience_narrative ?? sd.resilience_narrative) {
             candidates.push(
               <ResilienceNarrativeCard key="rn" screenData={sd} />,
             );
           }
-          if (sd.entity_card) {
+          if (ins.entity_card ?? sd.entity_card) {
             candidates.push(<EntityRecognitionCard key="er" screenData={sd} />);
           }
           const insights = candidates.slice(0, 2);
@@ -253,7 +256,7 @@ const NewDashboardContainer: React.FC<Props> = () => {
       {/* 9. Floating voice input bar */}
       <View style={styles.voiceBar}>
         <VoiceTextInput
-          placeholder={sd.voice_placeholder ?? ""}
+          placeholder={sd.greeting?.voice_placeholder ?? sd.voice_placeholder ?? ""}
           onSend={handleVoiceSend}
         />
       </View>

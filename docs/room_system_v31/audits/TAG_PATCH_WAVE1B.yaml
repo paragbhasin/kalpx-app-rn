@@ -2027,14 +2027,11 @@ rows:
   #   - Agent G header (lines 5-7) anticipated "stillness × self as sākṣī-bhāva
   #     secondary" on the register-alignment argument (pure witness, no
   #     cognitive content).
-  #   Resolution options (founder call required):
-  #     (a) Route these 2 rows to stillness AS WISDOM_BANNER only (change
-  #         surface_eligibility from principle_* to wisdom_banner; class-role
-  #         stays principle but runtime exposure is banner-only).
-  #     (b) Re-route to clarity × self (sākṣin-register still fits clarity native).
-  #     (c) Reject for stillness, park as clarity × self (fall-back).
-  #   This patch proposes option (a) — retains authored register + respects
-  #   §2.1 class-exclusion by capping surface to wisdom_banner. Flagged.
+  #   RESOLVED 2026-04-21 per founder lock D2: Option (b) applied — both rows
+  #   reclassified to clarity × self (Sankhya native home; sākṣin-register
+  #   routed via viveka not via stillness rest). Inline governance updated in
+  #   source YAML (principles_sankhya_wave2.yaml lines 2464 and 2546) AND in
+  #   this patch (below). Uncertainty blocks cleared.
   # ==========================================================================
 
   - row_id: sankhya_rest_in_the_non_participating_witness
@@ -2045,25 +2042,24 @@ rows:
     CURATOR_GATE: true
     proposed_tags:
       tradition_family: sankhya
-      tradition: [sankhya, vedanta_witness]
-      room_fit: [stillness]
-      surface_eligibility: [wisdom_banner]
-      pool_role: rare
-      emotional_function_tag: witness
-      action_family: witness
-      intensity: light
-      life_context_bias: []
+      tradition: [sankhya]
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [self]
       standalone_safe_flag: true
       repeat_tolerance_level: high
       misuse_risk: "Do not use witness-rest to avoid the body's need for actual sleep or medical rest."
       exclude_from_contexts: []
     justification: >
-      Non-participating-sākṣin — register aligns with stillness Vedanta-witness
-      light-support but source tradition (sankhya) is in §Stillness avoid-set.
-      Banner-only capping respects §2.1 class exclusion. Founder call.
-    uncertainty:
-      - "Doctrine: does sākṣī-bhāva register override sankhya tradition-exclusion in §Stillness? Or should row re-route to clarity × self?"
-      - "Stillness has no life_context per §1 §2.1 — life_context_bias set to [] accordingly. Confirm."
+      Reclassified to clarity × self per founder lock D2 (2026-04-21). Sankhya
+      is native to clarity (§Clarity primary tradition); §Stillness avoid-list
+      explicitly excludes sankhya. Sākṣin register routes via viveka in
+      clarity, not via rest in stillness.
+    uncertainty: []
 
   - row_id: sankhya_kaivalya_is_the_direction_of_stillness
     class: principle
@@ -2074,22 +2070,22 @@ rows:
     proposed_tags:
       tradition_family: sankhya
       tradition: [sankhya]
-      room_fit: [stillness]
-      surface_eligibility: [wisdom_banner]
-      pool_role: rare
-      emotional_function_tag: witness
-      action_family: witness
-      intensity: light
-      life_context_bias: []
+      room_fit: [clarity]
+      surface_eligibility: [wisdom_teaching, wisdom_reflection]
+      pool_role: rotation
+      emotional_function_tag: discriminate
+      action_family: discernment
+      intensity: medium
+      life_context_bias: [self]
       standalone_safe_flag: true
       repeat_tolerance_level: high
       misuse_risk: "Do not turn this principle into spiritual grandiosity; kaivalya-direction is a pointer, not a claim."
       exclude_from_contexts: []
     justification: >
-      Kaivalya-as-direction — same §Stillness tension as sibling row. Banner-only.
-    uncertainty:
-      - "Doctrine: same as sibling — tradition-exclusion override test for §Stillness."
-      - "Alternative: re-route to clarity × self as puruṣa-isolation viveka?"
+      Reclassified to clarity × self per founder lock D2 (2026-04-21). Same
+      rationale as sibling row — kaivalya-direction is puruṣa-isolation viveka,
+      a clarity move not a stillness move.
+    uncertainty: []
 
   # ==========================================================================
   # GROUP P — Sankhya × Growth × Self (1 row)

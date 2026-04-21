@@ -1829,9 +1829,8 @@ export async function executeAction(
         if (dn === 1) variant = "first_day";
         if (dn === 7) variant = "checkpoint_pending_day_7";
         if (dn === 14) variant = "checkpoint_pending_day_14";
-        if (data.postConflict || data.dayType === "post_conflict_morning") {
-          variant = "post_conflict_morning";
-        }
+        // post_conflict_morning variant retired per v3 journey migration
+        // (PostConflictMorningCard deleted).
 
         // Clear-window (Moment 43) was dropped per backend B4 decision
         // (2026-04-13 audit). Slot reserved if revisited post-soak.
@@ -4450,21 +4449,8 @@ export async function executeAction(
           r.status === "fulfilled" ? r.value : null,
         );
 
-        // predictive_alert: pick highest-confidence, not-dismissed-today, not muted.
-        const dismissedAt =
-          screenState.predictive_alert_dismissed_at || 0;
-        const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
-        const withinCooldown =
-          dismissedAt && Date.now() - dismissedAt < sevenDaysMs;
-        let topAlert = null;
-        if (alerts && Array.isArray(alerts.alerts)) {
-          topAlert = alerts.alerts
-            .filter((a: any) => (a.confidence ?? 0) >= 0.6)
-            .filter((a: any) => a.entity?.status !== "muted")
-            .sort((a: any, b: any) => (b.confidence || 0) - (a.confidence || 0))[0] || null;
-        }
+        // predictive_alert retired per v3 journey migration (PredictiveAlertCard deleted).
         setScreenValue(prep || null, "prep_context");
-        setScreenValue(withinCooldown ? null : topAlert, "predictive_alert");
         setScreenValue(rec || null, "recommended_additional");
         setScreenValue(postConflict || null, "post_conflict_pending");
 
@@ -4507,18 +4493,8 @@ export async function executeAction(
         break;
       }
 
-      // dismiss_predictive_alert — Moment 28 "Later" tap. Cools 7d.
-      case "dismiss_predictive_alert": {
-        setScreenValue(null, "predictive_alert");
-        setScreenValue(Date.now(), "predictive_alert_dismissed_at");
-        // Fire-and-forget track-event. No PATCH needed (dismissal is local).
-        mitraTrackEvent("predictive_alert_dismissed", {
-          journeyId: screenState.journey_id,
-          dayNumber: screenState.day_number || 1,
-          meta: { id: payload?.id, reason: "not_this_time" },
-        });
-        break;
-      }
+      // dismiss_predictive_alert case retired per v3 journey migration
+      // (PredictiveAlertCard deleted).
 
       // confirm_entity — Moment 29 "Yes that's them".
       case "confirm_entity": {

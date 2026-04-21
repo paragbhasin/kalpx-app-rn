@@ -30,7 +30,8 @@ import { useFocusEffect } from "@react-navigation/native";
 import React, { useCallback, useEffect } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { executeAction } from "../engine/actionExecutor";
-import { mitraJourneyCompanion } from "../engine/mitraApi";
+import { mitraJourneyDailyView } from "../engine/mitraApi";
+import { ingestDailyView } from "../engine/v3Ingest";
 import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
@@ -57,10 +58,8 @@ import FocusPhraseLine from "../extensions/moments/focus_phrase_line";
 import ClearWindowBanner from "../blocks/ClearWindowBanner";
 import EntityRecognitionCard from "../blocks/dashboard/insights/EntityRecognitionCard";
 import ResilienceNarrativeCard from "../blocks/dashboard/insights/ResilienceNarrativeCard";
-import GratitudeSignalCard from "../extensions/moments/gratitude_signal_card";
-import PostConflictMorningCard from "../extensions/moments/post_conflict_morning_card";
-import PredictiveAlertCard from "../extensions/moments/predictive_alert_card";
-import SeasonSignalCard from "../extensions/moments/season_signal_card";
+import ContinuityMirrorCard from "../extensions/moments/continuity_mirror_card";
+import PathMilestoneBanner from "../extensions/moments/path_milestone_banner";
 
 // ── Voice input ─────────────────────────────────────────────────────────
 import { VoiceTextInput } from "../components/VoiceTextInput";
@@ -88,7 +87,6 @@ const NewDashboardContainer: React.FC<Props> = () => {
     screenData,
     loadScreen,
     goBack,
-    updateScreenData,
     updateBackground,
     updateHeaderHidden,
   } = useScreenStore();
@@ -104,79 +102,37 @@ const NewDashboardContainer: React.FC<Props> = () => {
   // runner should refresh the triad ✓ + cycle_metrics from the DB,
   // which is the authoritative source of "is this item done today".
   // Redux flags (practice_chant/embody/act) are only the session cache.
+  // v3 journey daily-view fetch — ETag-aware single-call hydrate.
+  // Replaces the legacy double-fetch (generate_companion +
+  // mitraJourneyCompanion) that ran on every focus event.
+  //
+  // Flow:
+  //   1. Call mitraJourneyDailyView(lastEtag) → 200 + envelope OR 304
+  //   2. On 200: ingestDailyView(env) → flat screenData keys (bridge
+  //      until block-level namespace migration lands in Step 3)
+  //   3. On 304: keep existing screenData; no-op
+  //
+  // v3Ingest.ts is a temporary adapter; individual blocks migrate to
+  // direct namespaced reads (data.identity.day_number etc.) per the
+  // journey-v3-fe migration plan. This hydrate call itself stays put.
+  const dailyViewEtagRef = React.useRef<string | null>(null);
+
   useFocusEffect(
     useCallback(() => {
-      // 1) generate_companion with use_journey_companion=true →
-      //    action handler calls /journey/companion/ (read-only), not
-      //    /generate-companion/ (which can create journeys as a side
-      //    effect). Populates card_mantra_title, card_sankalpa_title,
-      //    card_ritual_title + descriptions + per-item wisdom via the
-      //    same 50-line setScreenValue cascade that the legacy path
-      //    used — we just feed it the read-only payload.
-      //
-      //    skipReveal=true prevents the action from auto-navigating to
-      //    insight_summary/path_reveal at the end of its chain
-      //    (actionExecutor.ts:1834).
-      executeAction(
-        {
-          type: "generate_companion",
-          payload: { skipReveal: true, use_journey_companion: true },
-        },
-        {
-          loadScreen,
-          goBack,
-          setScreenValue: (value: any, key: string) =>
-            store.dispatch(screenActions.setScreenValue({ key, value })),
-          screenState: store.getState().screen.screenData,
-        },
-      ).catch((err: any) => {
-        console.warn(
-          "[NewDashboard] journey/companion hydrate failed:",
-          err?.message,
-        );
-      });
-
-      // 2) /journey/companion/ → populate cycle_metrics + new dashboard
-      //    screenData slots (greeting_context, journey_path, support
-      //    labels, etc.) that each block reads and self-hides on when
-      //    missing.
       (async () => {
         try {
-          const res = await mitraJourneyCompanion();
-          if (!res || typeof res !== "object") return;
-          const keys = [
-            "cycle_metrics",
-            "completed_today",
-            "greeting_context",
-            "user_name",
-            "journey_path",
-            "journey_path_label",
-            "quick_support_labels",
-            "support_rooms_labels",
-            "brand_label",
-            "language_label",
-            "safety_quiet_label",
-            "voice_placeholder",
-            "dayType",
-            "dayTypeCopy",
-            "focusName",
-            "pathMilestone",
-            "continuity",
-            "why_this",
-            "why_this_l1_items",
-            "sankalp_how_to_live",
-            "focus_phrase",
-            "day_type",
-          ];
-          for (const k of keys) {
-            const v = (res as any)[k];
-            if (v !== undefined && v !== null) {
-              updateScreenData(k, v);
+          const result = await mitraJourneyDailyView(dailyViewEtagRef.current);
+          if (result.etag) dailyViewEtagRef.current = result.etag;
+          if (result.notModified || !result.envelope) return;
+          const flat = ingestDailyView(result.envelope);
+          for (const [k, v] of Object.entries(flat)) {
+            if (v !== undefined) {
+              store.dispatch(screenActions.setScreenValue({ key: k, value: v }));
             }
           }
         } catch (err: any) {
           console.warn(
-            "[NewDashboard] journey/companion fetch failed:",
+            "[NewDashboard] v3 daily-view hydrate failed:",
             err?.message,
           );
         }
@@ -245,34 +201,32 @@ const NewDashboardContainer: React.FC<Props> = () => {
              self-hide on no signal) and cap the stacked insight cards
              at 2 via renderInsightCards() below. */}
         {(() => {
-          // Banners (max 1 — PostConflict wins if both signal).
-          // MDR-S1-02: sd.post_conflict is the canonical read; fall back to
-          // sd.postConflict during the dual-emit burn-in (removed after CP-3).
-          const banner =
-            sd.post_conflict || sd.postConflict ? (
-              <PostConflictMorningCard screenData={sd} />
-            ) : sd.clear_window_active ? (
-              <ClearWindowBanner />
-            ) : null;
+          // v3 journey: ContinuityMirrorCard + PathMilestoneBanner finally
+          // mounted (scaffolds existed but were orphaned until v3 envelope
+          // populated continuity.* and insights.path_milestone coherently).
+          // ClearWindowBanner remains as the generic banner.
+          // Retired: PostConflictMorningCard (v3 journey migration).
+          const banner = sd.continuity_mirror ? (
+            <ContinuityMirrorCard screenData={sd} />
+          ) : sd.clear_window_active ? (
+            <ClearWindowBanner />
+          ) : null;
 
           // Insight cards in priority order (max 2 shown).
+          // Retired: PredictiveAlertCard, GratitudeSignalCard, SeasonSignalCard.
           const candidates: React.ReactNode[] = [];
+          if (sd.path_milestone) {
+            candidates.push(
+              <PathMilestoneBanner key="pm" screenData={sd} />,
+            );
+          }
           if (sd.resilience_narrative) {
             candidates.push(
               <ResilienceNarrativeCard key="rn" screenData={sd} />,
             );
           }
-          if (sd.predictive_alert) {
-            candidates.push(<PredictiveAlertCard key="pa" screenData={sd} />);
-          }
           if (sd.entity_card) {
             candidates.push(<EntityRecognitionCard key="er" screenData={sd} />);
-          }
-          if (sd.gratitude_card) {
-            candidates.push(<GratitudeSignalCard key="gj" screenData={sd} />);
-          }
-          if (sd.season_card) {
-            candidates.push(<SeasonSignalCard key="ss" screenData={sd} />);
           }
           const insights = candidates.slice(0, 2);
 

@@ -1082,6 +1082,8 @@ export interface V3Greeting {
   headline: string;
   supporting_line: string;
   user_name: string;
+  /** Mic input placeholder copy; FE VoiceTextInput self-hides on empty. */
+  voice_placeholder: string;
 }
 
 export interface V3ArcState {

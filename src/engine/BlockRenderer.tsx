@@ -114,7 +114,6 @@ import ResilienceNarrativeCard from '../blocks/ResilienceNarrativeCard';
 
 // Week 6 — Companion Intelligence (Mitra v3 Moments 27, 28, 29, 30, 39)
 import PrepCoachingSheet from '../blocks/PrepCoachingSheet';
-import PredictiveAlertCard from '../blocks/PredictiveAlertCard';
 import EntityRecognitionSheet from '../blocks/EntityRecognitionSheet';
 import RecommendedAdditionalCard from '../blocks/RecommendedAdditionalCard';
 import PostConflictGentlenessCard from '../blocks/PostConflictGentlenessCard';
@@ -241,7 +240,6 @@ const blockMap: Record<string, React.ComponentType<any>> = {
   resilience_narrative_card: ResilienceNarrativeCard,
   // Week 6 — Companion Intelligence
   prep_coaching_sheet: PrepCoachingSheet,
-  predictive_alert_card: PredictiveAlertCard,
   entity_recognition_sheet: EntityRecognitionSheet,
   recommended_additional_card: RecommendedAdditionalCard,
   post_conflict_gentleness_card: PostConflictGentlenessCard,
@@ -335,7 +333,7 @@ const BlockRenderer: React.FC<BlockRendererProps> = ({ block, textColor }) => {
     'evening_reflection', 'weekly_reflection', 'checkpoint_day_7',
     'checkpoint_day_14', 'resilience_narrative_card',
     // Week 6 companion intelligence — all handle their own CTAs / dispatch
-    'prep_coaching_sheet', 'predictive_alert_card', 'entity_recognition_sheet',
+    'prep_coaching_sheet', 'entity_recognition_sheet',
     'recommended_additional_card', 'post_conflict_gentleness_card',
     // Week 7 — all handle their own dispatch / dismiss internally
     'why_this_l2', 'why_this_l3', 'gratitude_joy_card', 'season_change_banner',

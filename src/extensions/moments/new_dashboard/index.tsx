@@ -28,11 +28,7 @@ import PathMilestoneBanner from "../path_milestone_banner";
 import DayTypeChip from "../day_type_chip";
 import FocusPhraseLine from "../focus_phrase_line";
 import WhyThisL1Chip from "../why_this_l1_chip";
-import PredictiveAlertCard from "../predictive_alert_card";
 import EntityRecognitionCard from "../entity_recognition_card";
-import GratitudeSignalCard from "../gratitude_signal_card";
-import SeasonSignalCard from "../season_signal_card";
-import PostConflictMorningCard from "../post_conflict_morning_card";
 import ContinuityMirrorCard from "../continuity_mirror_card";
 
 type Props = {
@@ -207,12 +203,10 @@ const NewDashboardContainer: React.FC<Props> = ({ block, screenData, onAction })
         </ScrollView>
       ) : null}
 
-      {/* 8. Conditional embeds */}
-      {sd.predictive_alert ? <PredictiveAlertCard screenData={sd} /> : null}
+      {/* 8. Conditional embeds. Retired v3 journey migration:
+           PredictiveAlertCard, GratitudeSignalCard, SeasonSignalCard,
+           PostConflictMorningCard. */}
       {sd.entity_card ? <EntityRecognitionCard screenData={sd} /> : null}
-      {sd.gratitude_card ? <GratitudeSignalCard screenData={sd} /> : null}
-      {sd.season_card ? <SeasonSignalCard screenData={sd} /> : null}
-      {sd.post_conflict ? <PostConflictMorningCard screenData={sd} /> : null}
 
       {/* 9. Continuity mirror — moved to section 3b (line ~175) under
           the canonical `sd.continuity_mirror` key per the v3 envelope

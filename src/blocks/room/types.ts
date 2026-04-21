@@ -166,6 +166,12 @@ export interface InquiryCategory {
   prompt: string;
   practice_label: string;
   principle_id: string;
+
+  // Phase 6 optional additions — founder spec fields. `reflective_prompt`
+  // supersedes `prompt` when present; `suggested_practice_template_id`
+  // lets the inquiry detail launch a step directly (InquiryModal Phase 6).
+  reflective_prompt?: string | null;
+  suggested_practice_template_id?: string | null;
 }
 
 export interface InquiryPayload {
@@ -183,6 +189,13 @@ export interface StepPayload {
   template_id: StepTemplateId | string;
   step_config: Record<string, unknown>;
   input_slots: string[];
+
+  // Phase 6 optional additions — surfaced by StepModal. When BE starts
+  // emitting these they populate the modal; otherwise sensible defaults
+  // per template category apply (60s timer, generic placeholders).
+  duration_sec?: number | null;
+  cue_text?: string | null;
+  prompt?: string | null;
 }
 
 export interface CarryPayload {

@@ -5,19 +5,18 @@
  * step_sit_ambient_*, step_grounding_*, step_hand_on_heart_*,
  * step_text_input_*, step_journal_*, step_voice_note_*, step_reach_out_*.
  *
- * Stage 2 v1 (2026-04-20): acceptable shortcut per Agent C review — tap
- * shows an Alert stub with the step label + "Done" that dispatches a
- * `room_step_completed` action for telemetry. The actionExecutor already
- * writes a sacred-trace event when step_payload.persistence.writes_event
- * is non-null.
+ * Phase 6 (2026-04-20): tapping the pill opens `<StepModal />` with an
+ * inline UI per template_id family (timer, text-input, grounding). When
+ * the user taps Done the modal closes and we dispatch
+ * `room_step_completed` with any collected payload bits (text, grounding).
  *
- * v1 stub: the real inline panel (timer, text input, voice note) lands in
- * Phase 6. This stub proves the chip dispatches meaningfully + returns to
- * the room. testID is preserved per BE emission.
- * TODO(Phase 6): replace Alert with inline modal per template_id.
+ * Defensive fallback: if `step_payload` is missing or the template_id is
+ * unknown, the modal still opens with a generic "Done" button (classifyStep
+ * → "unknown"). In test-harness contexts where Modal can't mount, we
+ * fall through to the v1 Alert stub so telemetry still fires.
  */
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Alert,
   StyleSheet,
@@ -29,6 +28,7 @@ import { executeAction } from "../../../engine/actionExecutor";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 import type { ActionEnvelope, RoomRenderV1 } from "../types";
 import { buildActionCtx } from "./actionContextHelper";
+import StepModal, { type StepModalResult } from "./StepModal";
 
 interface Props {
   action: ActionEnvelope;
@@ -38,58 +38,82 @@ interface Props {
 
 const RoomActionStepPill: React.FC<Props> = ({ action, envelope }) => {
   const { loadScreen, goBack } = useScreenStore();
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+
+  const templateId = action.step_payload?.template_id ?? "unknown";
+
+  const dispatchCompletion = (extra: StepModalResult) => {
+    const ctx = buildActionCtx({ loadScreen, goBack });
+    executeAction(
+      {
+        type: "room_step_completed",
+        payload: {
+          room_id: envelope?.room_id ?? null,
+          template_id: templateId,
+          action_id: action.action_id,
+          analytics_key: action.analytics_key,
+          writes_event: action.persistence?.writes_event ?? null,
+          ...(extra.text ? { text: extra.text } : {}),
+          ...(extra.grounding ? { grounding: extra.grounding } : {}),
+        },
+      } as any,
+      ctx,
+    ).catch((err) => {
+      if (__DEV__) console.warn("[RoomActionStepPill] dispatch failed:", err);
+    });
+  };
 
   const onPress = () => {
-    const templateId = action.step_payload?.template_id ?? "unknown";
-    const ctx = buildActionCtx({ loadScreen, goBack });
-
-    const dispatchCompletion = () => {
-      executeAction(
-        {
-          type: "room_step_completed",
-          payload: {
-            room_id: envelope?.room_id ?? null,
-            template_id: templateId,
-            action_id: action.action_id,
-            analytics_key: action.analytics_key,
-            writes_event: action.persistence?.writes_event ?? null,
-          },
-        } as any,
-        ctx,
-      ).catch((err) => {
-        if (__DEV__) console.warn("[RoomActionStepPill] dispatch failed:", err);
-      });
-    };
-
-    // v1 stub — proves the chip dispatches and returns to the room.
-    // TODO(Phase 6): replace with inline modal panel per step template.
+    // Primary path — open the inline Phase 6 modal.
     try {
-      Alert.alert(
-        action.label || "Step",
-        "This step will open an inline panel in Phase 6.",
-        [
-          { text: "Cancel", style: "cancel" },
-          { text: "Done", onPress: dispatchCompletion },
-        ],
-        { cancelable: true },
-      );
+      setModalVisible(true);
     } catch {
-      // Alert may fail in test harness — still dispatch completion so
-      // telemetry fires deterministically.
-      dispatchCompletion();
+      // Modal open failed (test harness). Fall back to Alert stub so
+      // telemetry still fires deterministically.
+      try {
+        Alert.alert(
+          action.label || "Step",
+          "This step will open an inline panel.",
+          [
+            { text: "Cancel", style: "cancel" },
+            { text: "Done", onPress: () => dispatchCompletion({}) },
+          ],
+          { cancelable: true },
+        );
+      } catch {
+        dispatchCompletion({});
+      }
     }
   };
 
+  const handleDone = (extra: StepModalResult) => {
+    setModalVisible(false);
+    dispatchCompletion(extra);
+  };
+
+  const handleCancel = () => {
+    setModalVisible(false);
+  };
+
   return (
-    <TouchableOpacity
-      testID={action.testID}
-      accessibilityRole="button"
-      accessibilityLabel={action.label}
-      style={styles.pill}
-      onPress={onPress}
-    >
-      <Text style={styles.label}>{action.label}</Text>
-    </TouchableOpacity>
+    <>
+      <TouchableOpacity
+        testID={action.testID}
+        accessibilityRole="button"
+        accessibilityLabel={action.label}
+        style={styles.pill}
+        onPress={onPress}
+      >
+        <Text style={styles.label}>{action.label}</Text>
+      </TouchableOpacity>
+      <StepModal
+        visible={modalVisible}
+        stepPayload={action.step_payload}
+        label={action.label || "Step"}
+        onCancel={handleCancel}
+        onDone={handleDone}
+      />
+    </>
   );
 };
 

@@ -5,11 +5,14 @@
  * connection_named, connection_reach_out, growth_journal, stillness_named,
  * clarity_journal.
  *
- * Stage 2 wiring (2026-04-20): mirrors the existing carry_joy_forward
- * pattern in actionExecutor.ts — stamps a session-scoped trace in Redux
- * (visible for the current session + same calendar day) and fires
- * telemetry. BE sacred-write endpoint is Phase 4 work; this falls back to
- * Redux-only + telemetry until then.
+ * Phase 6 (2026-04-20): dual-write to the Phase 4 BE sacred endpoint
+ *   POST /api/mitra/rooms/{room_id}/sacred/
+ * and the existing Redux session-trace (the dashboard chip reads it for
+ * today's carry preview). The Redux write remains the durability guarantee
+ * when BE is unreachable — on network/4xx/5xx failure we fall through to
+ * Redux-only and log a __DEV__ warning. The room_carry_captured telemetry
+ * event now carries `sacred_write_ok: boolean` so Phase 7 can measure
+ * delivery rate from the FE perspective.
  *
  * The tap returns the user to the room per INLINE_STEP contract — no nav.
  */
@@ -17,6 +20,7 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
 
+import api from "../../../Networks/axios";
 import { executeAction } from "../../../engine/actionExecutor";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 import type { ActionEnvelope, RoomRenderV1 } from "../types";
@@ -31,23 +35,55 @@ interface Props {
 const RoomActionCarryPill: React.FC<Props> = ({ action, envelope }) => {
   const { loadScreen, goBack } = useScreenStore();
 
-  const onPress = () => {
+  const onPress = async () => {
     const ctx = buildActionCtx({ loadScreen, goBack });
     const writesEvent =
       action.carry_payload?.writes_event ??
       action.persistence?.writes_event ??
       "joy_carry";
+    const roomId = envelope?.room_id ?? null;
+    const capturedAt = Date.now();
 
-    // Redux-only session trace — mirrors carry_joy_forward pattern.
-    // TODO(Phase 4): POST sacred-write endpoint once BE ships.
+    // Phase 4 BE sacred-write. Dual-write pattern: attempt POST first,
+    // then always write the Redux session-trace regardless of outcome so
+    // the dashboard carry-chip has a same-session preview.
+    let sacredWriteOk = false;
+    if (roomId) {
+      try {
+        const res = await api.post(`mitra/rooms/${roomId}/sacred/`, {
+          writes_event: writesEvent,
+          label: action.label,
+          action_id: action.action_id,
+          analytics_key: action.analytics_key,
+          captured_at: capturedAt,
+        });
+        const status = res?.status ?? 0;
+        sacredWriteOk = status >= 200 && status < 300;
+      } catch (err: any) {
+        sacredWriteOk = false;
+        if (__DEV__) {
+          console.warn(
+            "[RoomActionCarryPill] sacred POST failed; falling back to Redux-only",
+            err?.response?.status || err?.message,
+          );
+        }
+      }
+    } else if (__DEV__) {
+      console.warn(
+        "[RoomActionCarryPill] missing room_id on envelope; skipping BE POST",
+      );
+    }
+
+    // Session-scoped Redux trace — mirrors carry_joy_forward pattern.
+    // Bucketed by event_type so the dashboard carry-chip reads it by key.
     ctx.setScreenValue(
       {
-        captured_at: Date.now(),
+        captured_at: capturedAt,
         label: action.label,
-        room_id: envelope?.room_id ?? null,
+        room_id: roomId,
         writes_event: writesEvent,
+        sacred_write_ok: sacredWriteOk,
       },
-      // Bucket by event_type so the dashboard carry-chip can read it by key.
       writesEvent,
     );
 
@@ -55,10 +91,11 @@ const RoomActionCarryPill: React.FC<Props> = ({ action, envelope }) => {
       {
         type: "room_carry_captured",
         payload: {
-          room_id: envelope?.room_id ?? null,
+          room_id: roomId,
           writes_event: writesEvent,
           label: action.label,
           analytics_key: action.analytics_key,
+          sacred_write_ok: sacredWriteOk,
         },
       } as any,
       ctx,

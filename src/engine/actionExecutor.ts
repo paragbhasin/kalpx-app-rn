@@ -5032,6 +5032,33 @@ export async function executeAction(
       }
 
       // ================================================================
+      // ROOM_INQUIRY_CATEGORY_SELECTED — Phase 6 telemetry stub. Fires
+      // when the user taps a category row inside InquiryModal. Real
+      // persistence (per-category aggregate counters) lands in a later
+      // phase; for now we log + emit a tracking event so the funnel
+      // from open → category-tap → practice/journal is observable.
+      // ================================================================
+      case "room_inquiry_category_selected": {
+        if (__DEV__) {
+          console.log("[actionExecutor] room_inquiry_category_selected", {
+            room_id: payload?.room_id || screenState.room_id || null,
+            category_id: payload?.category_id || null,
+          });
+        }
+        mitraTrackEvent("room_inquiry_category_selected", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            room_id: payload?.room_id || screenState.room_id || null,
+            category_id: payload?.category_id || null,
+            action_id: payload?.action_id || null,
+            analytics_key: payload?.analytics_key || null,
+          },
+        });
+        break;
+      }
+
+      // ================================================================
       // ROOM_CARRY_CAPTURED — Stage 2 v1 handler for carry pills. The
       // pill writes the Redux session trace inline (matches existing
       // carry_joy_forward pattern); this case fires telemetry only.
@@ -5046,6 +5073,12 @@ export async function executeAction(
             writes_event: payload?.writes_event || null,
             label: payload?.label || "",
             analytics_key: payload?.analytics_key || null,
+            // Phase 6 addition — Phase 4 sacred-write outcome so Phase 7
+            // can measure delivery rate from the client perspective.
+            sacred_write_ok:
+              typeof payload?.sacred_write_ok === "boolean"
+                ? payload.sacred_write_ok
+                : null,
           },
         });
         break;

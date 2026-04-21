@@ -27,6 +27,7 @@
  * numeric value — we never invent English copy.
  */
 
+import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
   LayoutAnimation,
@@ -37,7 +38,6 @@ import {
   UIManager,
   View,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import DailyRhythmStrip from "./DailyRhythmStrip";
@@ -69,9 +69,7 @@ const CycleProgressBlock: React.FC<Props> = ({ screenData }) => {
       ? metrics.days_fully_completed
       : 0;
   const triggerSessions: number =
-    typeof metrics.trigger_sessions === "number"
-      ? metrics.trigger_sessions
-      : 0;
+    typeof metrics.trigger_sessions === "number" ? metrics.trigger_sessions : 0;
 
   const fallbackDay = Number(sd.day_number) || Number(sd.cycle_day) || 1;
   const fallbackTotal = Number(sd.total_days) || 14;
@@ -111,12 +109,23 @@ const CycleProgressBlock: React.FC<Props> = ({ screenData }) => {
               (value still shown); missing rhythm_header_label = no heading
               rendered above the rhythm strip. */}
           <View style={styles.metricsRow}>
-            <Metric value={daysEngaged} label={metrics.days_engaged_label || ""} />
-            <Metric value={daysComplete} label={metrics.days_complete_label || ""} />
-            <Metric value={triggerSessions} label={metrics.trigger_sessions_label || ""} />
+            <Metric
+              value={daysEngaged}
+              label={metrics.days_engaged_label || "Days engaged"}
+            />
+            <Metric
+              value={daysComplete}
+              label={metrics.days_complete_label || "Fully completed"}
+            />
+            <Metric
+              value={triggerSessions}
+              label={metrics.trigger_sessions_label || "Trigger sessions"}
+            />
           </View>
           {!!metrics.rhythm_header_label && (
-            <Text style={styles.rhythmHeader}>{metrics.rhythm_header_label}</Text>
+            <Text style={styles.rhythmHeader}>
+              {metrics.rhythm_header_label}
+            </Text>
           )}
           <DailyRhythmStrip screenData={sd} />
         </View>

@@ -32,7 +32,10 @@ import {
   View,
 } from "react-native";
 import uuidv4 from "react-native-uuid";
-import { mitraJourneyDay7Decision, mitraJourneyDay7View } from "../engine/mitraApi";
+import {
+  mitraJourneyDay7Decision,
+  mitraJourneyDay7View,
+} from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { ingestDailyView, ingestDay7View } from "../engine/v3Ingest";
 import store from "../store";
@@ -150,7 +153,9 @@ const CheckpointDay7Block: React.FC<Props> = () => {
       }
       const nv = env.next_view ?? { view_key: "", payload: {} };
       if (nv.view_key === "daily_view") {
-        for (const [k, v] of Object.entries(ingestDailyView(nv.payload as any))) {
+        for (const [k, v] of Object.entries(
+          ingestDailyView(nv.payload as any),
+        )) {
           if (v !== undefined) {
             store.dispatch(screenActions.setScreenValue({ key: k, value: v }));
           }
@@ -183,7 +188,7 @@ const CheckpointDay7Block: React.FC<Props> = () => {
 
   if (step === "intro") {
     return (
-      <View style={styles.root}>
+      <View>
         <View style={styles.topRegion}>
           <Text style={styles.eyebrow} testID="checkpoint_day_7_eyebrow">
             {eyebrow}
@@ -210,92 +215,105 @@ const CheckpointDay7Block: React.FC<Props> = () => {
 
   return (
     <View style={styles.root}>
-      <ScrollView
-        contentContainerStyle={styles.scroll}
-        keyboardShouldPersistTaps="handled"
-      >
-        <Text style={styles.eyebrow}>{eyebrow}</Text>
+      <ScrollView keyboardShouldPersistTaps="handled">
+        {eyebrow ? <Text style={styles.eyebrow}>{eyebrow}</Text> : null}
 
         {/* Journey grid */}
-        <View style={styles.grid}>
-          {statuses.slice(0, DOTS).map((s, i) => (
-            <View
-              key={i}
-              style={[
-                styles.dot,
-                s === "completed" && styles.dotFilled,
-                s === "partial" && styles.dotPartial,
-              ]}
-            />
-          ))}
-        </View>
+        {statuses.length > 0 && (
+          <>
+            <View style={styles.grid}>
+              {statuses.slice(0, DOTS).map((s, i) => (
+                <View
+                  key={i}
+                  style={[
+                    styles.dot,
+                    s === "completed" && styles.dotFilled,
+                    s === "partial" && styles.dotPartial,
+                  ]}
+                />
+              ))}
+            </View>
 
-        <Text style={styles.summary}>
-          {completedCount} of {DOTS} days.
-        </Text>
+            <Text style={styles.summary}>
+              {completedCount} of {DOTS} days.
+            </Text>
+          </>
+        )}
 
-        <Text style={styles.narrative}>{narrative}</Text>
+        {narrative ? <Text style={styles.narrative}>{narrative}</Text> : null}
 
         {growth ? (
           <View style={styles.growthBox}>
-            <Text style={styles.microLabel}>{whatGrewLabel}</Text>
+            {whatGrewLabel ? (
+              <Text style={styles.microLabel}>{whatGrewLabel}</Text>
+            ) : null}
             <Text style={styles.narrative}>{growth}</Text>
           </View>
         ) : null}
 
-        <Text style={styles.microLabel}>{whatToCarryLabel}</Text>
-        <TextInput
-          value={reflection}
-          onChangeText={(v) => setReflection(v.slice(0, 1000))}
-          placeholder={inputPlaceholder}
-          placeholderTextColor="rgba(88, 58, 24, 0.4)"
-          multiline
-          style={styles.input}
-          maxLength={1000}
-        />
+        {whatToCarryLabel || inputPlaceholder ? (
+          <View style={{ marginBottom: 16 }}>
+            {whatToCarryLabel ? (
+              <Text style={styles.microLabel}>{whatToCarryLabel}</Text>
+            ) : null}
+            <TextInput
+              value={reflection}
+              onChangeText={(v) => setReflection(v.slice(0, 1000))}
+              placeholder={inputPlaceholder}
+              placeholderTextColor="rgba(88, 58, 24, 0.4)"
+              multiline
+              style={styles.input}
+              maxLength={1000}
+            />
+          </View>
+        ) : null}
 
-        <Text style={[styles.microLabel, { marginTop: 20 }]}>
-          {nextWeekLabel}
-        </Text>
-        <Text style={styles.narrative}>{nextWeekProse}</Text>
-      </ScrollView>
+        {nextWeekProse ? (
+          <View style={{ marginTop: 20 }}>
+            {nextWeekLabel ? (
+              <Text style={styles.microLabel}>{nextWeekLabel}</Text>
+            ) : null}
+            <Text style={styles.narrative}>{nextWeekProse}</Text>
+          </View>
+        ) : null}
 
-      {/* REG-016: all three decisions in bottom region, primary largest */}
-      <View style={styles.bottomRegion}>
-        <TouchableOpacity
-          onPress={() => dispatchDecision("continue")}
-          style={styles.cta}
-          activeOpacity={0.85}
-          testID="checkpoint_day_7_cta_continue"
-        >
-          <Text style={styles.ctaText}>{ctaContinueLabel}</Text>
-        </TouchableOpacity>
-        <View style={styles.secondaryRow}>
+        {/* REG-016: all three decisions at the end of the scroll */}
+        <View style={styles.contentFooter}>
           <TouchableOpacity
-            onPress={() => dispatchDecision("lighten")}
-            style={styles.secondaryBtn}
+            onPress={() => dispatchDecision("continue")}
+            style={styles.cta}
             activeOpacity={0.85}
-            testID="checkpoint_day_7_cta_lighten"
+            testID="checkpoint_day_7_cta_continue"
           >
-            <Text style={styles.secondaryText}>{ctaLightenLabel}</Text>
+            <Text style={styles.ctaText}>{ctaContinueLabel}</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => dispatchDecision("start_fresh")}
-            style={styles.secondaryBtn}
-            activeOpacity={0.85}
-            testID="checkpoint_day_7_cta_start_fresh"
-          >
-            <Text style={styles.secondaryText}>{ctaStartFreshLabel}</Text>
-          </TouchableOpacity>
+          <View style={styles.secondaryRow}>
+            <TouchableOpacity
+              onPress={() => dispatchDecision("lighten")}
+              style={styles.secondaryBtn}
+              activeOpacity={0.85}
+              testID="checkpoint_day_7_cta_lighten"
+            >
+              <Text style={styles.secondaryText}>{ctaLightenLabel}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => dispatchDecision("start_fresh")}
+              style={styles.secondaryBtn}
+              activeOpacity={0.85}
+              testID="checkpoint_day_7_cta_start_fresh"
+            >
+              <Text style={styles.secondaryText}>{ctaStartFreshLabel}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      </ScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   root: { flex: 1 },
-  scroll: { padding: 24, paddingBottom: 16 },
+  scroll: { padding: 24 },
   topRegion: { flex: 1, padding: 24, justifyContent: "center" },
   bottomRegion: {
     minHeight: "30%",
@@ -304,12 +322,17 @@ const styles = StyleSheet.create({
     paddingBottom: 28,
     paddingTop: 12,
   },
+  contentFooter: {
+    marginTop: 80,
+    // paddingBottom: 40,
+  },
   eyebrow: {
     fontFamily: Fonts.sans.medium,
-    fontSize: 11,
+    fontSize: 13,
     letterSpacing: 1.5,
     color: "#c9a84c",
     marginBottom: 10,
+    alignSelf: "center",
   },
   headline: {
     fontFamily: Fonts.serif.regular,
@@ -417,7 +440,7 @@ const styles = StyleSheet.create({
   },
   secondaryText: {
     fontFamily: Fonts.sans.regular,
-    fontSize: 14,
+    fontSize: 12,
     color: "#432104",
   },
 });

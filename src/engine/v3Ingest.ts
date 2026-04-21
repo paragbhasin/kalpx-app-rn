@@ -89,6 +89,22 @@ export function ingestDailyView(env: V3DailyViewEnvelope | null): V3FlatIngest {
     briefing_id: brief.briefing_id ?? "",
     briefing_audio_status: brief.audio_status ?? "generating",
 
+    // ── Legacy Root Keys (Step 2 bridge) ──
+    user_name: greet.user_name ?? null,
+    greeting_headline: greet.headline ?? "",
+    greeting_context: greet.supporting_line ?? "",
+    voice_placeholder: greet.voice_placeholder ?? "",
+    journey_path_label: arc.journey_path_label ?? "",
+    focus_phrase: today.focus_phrase ?? "",
+
+    // card_* fallbacks for TriadCardsRow
+    card_mantra_title: mantra.title || _humanizeId(mantra.item_id) || "",
+    card_mantra_description: mantra.subtitle ?? "",
+    card_sankalpa_title: sankalp.title || _humanizeId(sankalp.item_id) || "",
+    card_sankalpa_description: sankalp.subtitle ?? "",
+    card_ritual_title: practice.title || _humanizeId(practice.item_id) || "",
+    card_ritual_description: practice.subtitle ?? "",
+
     // envelope status (kept permanently — even post-bridge)
     v3_status: env.status,
     v3_fallback_reason: env.fallback_reason,
@@ -108,21 +124,35 @@ export function ingestDay7View(env: V3Day7ViewEnvelope | null): V3FlatIngest {
     path_cycle_number: id.path_cycle_number ?? 1,
     journey_id: id.journey_id ?? null,
     checkpoint_day_7: {
-      headline: refl.headline ?? "",
-      body: refl.body ?? "",
+      headline: refl.headline || refl.engagement_trajectory || "",
+      intro_headline: refl.headline || refl.engagement_trajectory || "Deep Breaths.",
+      body: refl.body || refl.journey_narrative || "",
+      intro_body: refl.body || refl.framing || "",
       framing: refl.framing ?? "",
       journey_narrative: refl.journey_narrative ?? "",
+      body_narrative: refl.journey_narrative || refl.engagement_trajectory || "",
+      eyebrow: refl.engagement_trajectory || "Checkpoint",
+      intro_cta_label: "Continue",
+      what_grew_label: "WHAT GREW",
+      what_to_carry_label: "WHAT TO CARRY",
+      input_placeholder: "Type your reflection here...",
+      next_week_label: "NEXT WEEK",
+      cta_continue_label: (actions.decisions_available || []).includes("continue")
+        ? "Continue My Path"
+        : "",
+      cta_lighten_label: (actions.decisions_available || []).includes("lighten")
+        ? "Lighten"
+        : "",
+      cta_start_fresh_label: (actions.decisions_available || []).includes("reset")
+        ? "Choose New Focus"
+        : "",
     },
-    journey_day_statuses: (refl.trend_graph?.fully_completed || []).map(
-      (v: number, i: number) => ({
-        day_number: i + 1,
-        status: v ? "complete" : "pending",
-      }),
+    journey_day_statuses: (refl.trend_graph?.fully_completed || []).map((v: number) =>
+      v ? "completed" : "pending",
     ),
-    day_7_decisions_available: actions.decisions_available ?? [],
     checkpoint_framing: refl.framing ?? "",
     journey_narrative: refl.journey_narrative ?? "",
-    what_grew_section: null,
+    what_grew_section: env.insights?.resilience_narrative?.summary_line ?? null,
     v3_status: env.status,
   };
 }
@@ -156,4 +186,13 @@ export function ingestDay14View(env: V3Day14ViewEnvelope | null): V3FlatIngest {
     day_14_decisions_available: actions.decisions_available ?? [],
     v3_status: env.status,
   };
+}
+
+function _humanizeId(id: string | null | undefined): string {
+  if (!id) return "";
+  const parts = id.split(".");
+  const term = parts[parts.length - 1];
+  return term
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }

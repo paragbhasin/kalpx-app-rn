@@ -437,6 +437,15 @@ export default function Home() {
           }
           console.log("✅ resume companion data loaded");
 
+          // v3 journey: skip manual auto-routing. We let ContinueJourney
+          // handle the entry-view decision (Wait-Back vs. Dashboard vs.
+          // Checkpoint) to ensure the target screen is hydrated with its
+          // correct v3 envelope data.
+          if (process.env.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1") {
+            console.log("[Home] v3 detected: delegating entry route to ContinueJourney");
+            return;
+          }
+
           // Auto-route to checkpoint screens on day 7 / day 14 if not yet completed
           const dayNumber = status.dayNumber || 1;
           const checkpointCompleted =
@@ -446,7 +455,11 @@ export default function Home() {
           // (daily_insight_14 is the pre-checkpoint milestone splash and is
           // reached separately from the milestone view, not auto-routed.)
           const checkpointStateId =
-            dayNumber === 7 || dayNumber === 14 ? "weekly_checkpoint" : null;
+            dayNumber === 7
+              ? "checkpoint_day_7"
+              : dayNumber === 14
+                ? "checkpoint_day_14"
+                : null;
 
           // P1-6 — AsyncStorage checkpoint guard (Day-14 audit).
           // The BE's journey_status now returns checkpointPending=true +

@@ -134,6 +134,8 @@ export default function ContinueJourney({
         return null;
       }
       if (viewKey === "day_7_view") {
+        const { ingestDay7View } = require("../../engine/v3Ingest");
+        writeAll(ingestDay7View(payload as any));
         routedRef.current = true;
         dispatch(
           loadScreenWithData({
@@ -145,6 +147,8 @@ export default function ContinueJourney({
         return null;
       }
       if (viewKey === "day_14_view") {
+        const { ingestDay14View } = require("../../engine/v3Ingest");
+        writeAll(ingestDay14View(payload as any));
         routedRef.current = true;
         dispatch(
           loadScreenWithData({
@@ -204,9 +208,16 @@ export default function ContinueJourney({
     try {
       const result = await mitraJourneyEntryView(_entryViewEtag);
       if (result.etag) _entryViewEtag = result.etag;
+
       if (result.notModified || !result.envelope) {
-        // 304 — keep whatever we rendered last. If nothing, fall out
-        // and let the ActivityIndicator keep showing (rare in practice).
+        // 304 — keep whatever we rendered last. If nothing was ever
+        // rendered (e.g. fresh mount but with a stale module-level ETag),
+        // we must clear the ETag and refetch to avoid a permanent blank
+        // hang. This ensures a fresh mount always gets data.
+        if (!reentry && !routedRef.current) {
+          _entryViewEtag = null;
+          return fetchEntryView();
+        }
         setLoading(false);
         return;
       }

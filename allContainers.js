@@ -6485,6 +6485,22 @@ export const SupportGrowthContainer = {
   },
 };
 
+// Phase 5 Stage 2 — canonical v3.1 room container. Mounted by
+// RoomContainer (src/containers/RoomContainer.tsx). No block list — the
+// container fetches the RoomRenderV1 envelope from
+// GET /api/mitra/rooms/{room_id}/render/ and mounts RoomRenderer directly.
+// `room_id` is read from screenData (stamped by enter_room handler).
+export const RoomRenderContainer = {
+  container_id: "room",
+  states: {
+    render: {
+      tone: { theme: "warm_cream", mood: "steady" },
+      meta: { variant: "room_render_v1" },
+      blocks: [],
+    },
+  },
+};
+
 export const WhyThisOverlayContainer = {
   container_id: "why_this_overlay",
   states: {
@@ -6544,6 +6560,8 @@ export const ContainerRegistry = {
   support_joy: SupportJoyContainer,
   support_growth: SupportGrowthContainer,
   why_this_overlay: WhyThisOverlayContainer,
+  // Phase 5 Stage 2 — canonical v3.1 room render surface.
+  room: RoomRenderContainer,
   demo_container: {
     container_id: "demo_container",
     states: {

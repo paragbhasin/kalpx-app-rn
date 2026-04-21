@@ -30,7 +30,7 @@ export type ActionType =
   | "teaching"
   | "inquiry"
   | "in_room_step"
-  | "carry"
+  | "in_room_carry"
   | "exit";
 
 export type ActionFamily =

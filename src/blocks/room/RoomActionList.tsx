@@ -75,7 +75,7 @@ function renderActionComponent(
       return (
         <RoomActionStepPill action={action} index={index} envelope={envelope} />
       );
-    case "carry":
+    case "in_room_carry":
       return (
         <RoomActionCarryPill action={action} index={index} envelope={envelope} />
       );

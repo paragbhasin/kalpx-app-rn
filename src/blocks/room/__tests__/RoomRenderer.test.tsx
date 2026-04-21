@@ -72,7 +72,7 @@ function fixtureEnvelope(): RoomRenderV1 {
     }),
     makeAction({
       action_id: "a1",
-      action_type: "carry",
+      action_type: "in_room_carry",
       action_family: "offering",
       testID: "room_joy_carry_1",
       carry_payload: { writes_event: "joy_carry", persists: true },

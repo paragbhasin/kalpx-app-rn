@@ -1022,6 +1022,381 @@ export async function mitraJourneyWelcomeBack(
   }
 }
 
+// ===========================================================================
+// Mitra v3 Journey Views — CONTRACT v3.0.0
+// ---------------------------------------------------------------------------
+// Endpoints under /api/mitra/v3/journey/. Gated server-side by
+// MITRA_V3_JOURNEY_VIEWS (defaults ON in DEBUG, OFF otherwise).
+//
+// GETs:
+//   entry-view, daily-view, day-7-view, day-14-view
+//   — ETag-aware: caller passes last-known ETag as `etag` arg; 304
+//     response returns `{envelope:null, etag, notModified:true}` so
+//     caller can keep rendering its cached payload.
+//
+// POSTs:
+//   reentry-decision, day-7-decision, day-14-decision
+//   — Idempotency-Key required. Duplicate requests within 24h return
+//     cached response verbatim. 400 responses carry a structured
+//     fallback envelope and are surfaced to the caller (not swallowed
+//     as network errors).
+//
+// Envelope frame (all endpoints):
+//   { envelope_version: "3.0.0",
+//     status: "ok" | "degraded" | "fallback",
+//     fallback_reason: string | null,
+//     view: string,
+//     ...body,
+//     provenance: { contract, generated_at, cache_ttl_sec } }
+//
+// Legacy wrappers above (mitraJourneyHome, mitraJourneyCompanion,
+// mitraGetCheckpoint, mitraSubmitCheckpoint, mitraJourneyWelcomeBack,
+// mitraCheckpoint) are SCHEDULED FOR DELETION at migration Step 11.
+// Do NOT add new callers.
+// ===========================================================================
+
+export type V3Status = "ok" | "degraded" | "fallback";
+
+export interface V3Provenance {
+  contract: string;
+  generated_at: string;
+  cache_ttl_sec: number;
+}
+
+export interface V3Envelope {
+  envelope_version: string;
+  status: V3Status;
+  fallback_reason: string | null;
+  view: string;
+  provenance: V3Provenance;
+}
+
+export interface V3Identity {
+  journey_id: number | null;
+  day_number: number;
+  total_days: number;
+  path_cycle_number: number;
+}
+
+export interface V3Greeting {
+  headline: string;
+  supporting_line: string;
+  user_name: string;
+}
+
+export interface V3ArcState {
+  phase: string;
+  checkpoint_due: "day_7" | "day_14" | null;
+  arc_complete: boolean;
+  /** "support" | "growth" | "" — derived from journey.category bucket */
+  journey_path: string;
+  /** Display label for PathChip; e.g. "Support Path" */
+  journey_path_label: string;
+}
+
+export interface V3WhyThis {
+  level1: string;
+  level2: string;
+  level3: string;
+}
+
+export interface V3Continuity {
+  tier: "none" | "short" | "medium" | "long" | "very_long";
+  gap_days: number;
+  headline: string;
+  body: string;
+  earned_context: Record<string, any>;
+  fresh_restart_suggested: boolean;
+  /** Null when sankalp has no linked principle; FE self-hides WhyThis surfaces on null. */
+  why_this: V3WhyThis | null;
+  why_this_l1_items: { id: string; label: string }[];
+}
+
+export interface V3TriadItem {
+  slot: "mantra" | "sankalp" | "practice";
+  item_id: string;
+  title: string;
+  subtitle: string;
+  completed_today: boolean;
+  /** Sankalp row only; absent/"" on mantra+practice rows. */
+  how_to_live?: string;
+}
+
+export interface V3MorningBriefing {
+  audio_status: "generating" | "ready" | "failed";
+  audio_url: string | null;
+  summary: string;
+  briefing_id: string;
+}
+
+export interface V3QuickSupportLabels {
+  triggered_label: string;
+  checkin_label: string;
+  joy_label: string;
+  growth_label: string;
+  more_label: string;
+}
+
+export interface V3CycleMetrics {
+  days_engaged: number;
+  days_fully_completed: number;
+  trigger_sessions: number;
+  daily_rhythm: { day: number; state: "done" | "missed" | "pending" }[];
+  summary_label: string;
+  days_engaged_label: string;
+  days_complete_label: string;
+  trigger_sessions_label: string;
+  rhythm_header_label: string;
+}
+
+export interface V3Today {
+  triad: V3TriadItem[];
+  additional_items: any[];
+  morning_briefing: V3MorningBriefing;
+  /** Path focus phrase; "" when no authored source available. */
+  focus_phrase: string;
+  quick_support_labels: V3QuickSupportLabels;
+  /** Null on no active journey; FE CycleProgressBlock self-hides. */
+  cycle_metrics: V3CycleMetrics | null;
+}
+
+export interface V3Insights {
+  resilience_narrative: any | null;
+  path_milestone: any | null;
+  entity_card: any | null;
+  refinement_signal: any | null;
+}
+
+export interface V3EntryViewEnvelope extends V3Envelope {
+  view: "entry_view";
+  greeting: V3Greeting;
+  journey_state: {
+    has_active_journey: boolean;
+    day_number: number;
+    total_days: number;
+    path_cycle_number: number;
+    checkpoint_due: "day_7" | "day_14" | null;
+    arc_complete: boolean;
+  };
+  continuity: V3Continuity;
+  target: {
+    view_key:
+      | "daily_view"
+      | "day_7_view"
+      | "day_14_view"
+      | "welcome_back_surface"
+      | "onboarding_start"
+      | "crisis_view";
+    payload: Record<string, any>;
+  };
+}
+
+export interface V3DailyViewEnvelope extends V3Envelope {
+  view: "daily_view";
+  identity: V3Identity;
+  greeting: V3Greeting;
+  arc_state: V3ArcState;
+  continuity: V3Continuity;
+  today: V3Today;
+  insights: V3Insights;
+}
+
+export interface V3Day7ViewEnvelope extends V3Envelope {
+  view: "day_7_view";
+  surface_type: "day_7_reflection";
+  identity: V3Identity;
+  reflection: {
+    headline: string;
+    body: string;
+    engagement_trajectory: string;
+    trend_graph: {
+      labels: string[];
+      engaged: number[];
+      fully_completed: number[];
+    };
+    /** Per-path-intent checkpoint framing (checkpoint_framings.yaml); "" on miss. */
+    framing: string;
+    /** Synthesized 1-line recap based on trend_graph counts; always non-empty on success. */
+    journey_narrative: string;
+  };
+  insights: V3Insights;
+  continuity: V3Continuity | null;
+  actions: { primary: string; decisions_available: string[] };
+}
+
+export interface V3Day14ViewEnvelope extends V3Envelope {
+  view: "day_14_view";
+  surface_type: "day_14_completion";
+  identity: V3Identity;
+  cycle_reflection: {
+    mitra_reflection: string;
+    reflection_prompt: string;
+    strongest_type: string;
+    growth_area: string;
+    completion_rates: Record<string, number>;
+  };
+  day14_arc: {
+    classification: { label: string; completion_rate: number } | null;
+    what_grew: { days_completed: number; days_total: number } | null;
+    refinement_signal: any | null;
+  };
+  completion_ceremony: {
+    completed_days: number;
+    total_days: number;
+    strongest_practice: string;
+    growth_highlight: string;
+    sovereignty_line: string;
+  };
+  m25_narrative: Record<string, any>;
+  insights: V3Insights;
+  actions: { primary: string; decisions_available: string[] };
+}
+
+export interface V3DecisionEnvelope extends V3Envelope {
+  decision_applied: string | null;
+  next_view: {
+    view_key: string;
+    payload: Record<string, any>;
+  };
+  prior_journey_id?: number;
+  new_journey_id?: number;
+  path_cycle_number?: number;
+  journey_id?: number;
+}
+
+export interface V3GetResult<E extends V3Envelope> {
+  /** Parsed envelope when a fresh 200 was returned; `null` on 304 or error. */
+  envelope: E | null;
+  /** ETag value to keep for the next request. `null` on error. */
+  etag: string | null;
+  /** True if server returned 304 (client should keep its cached envelope). */
+  notModified: boolean;
+}
+
+async function v3Get<E extends V3Envelope>(
+  url: string,
+  etagIn: string | null = null,
+): Promise<V3GetResult<E>> {
+  const headers: Record<string, string> = {};
+  if (etagIn) headers["If-None-Match"] = etagIn;
+  try {
+    const res = await api.get(url, {
+      headers,
+      validateStatus: (s: number) => (s >= 200 && s < 300) || s === 304,
+    });
+    const etag =
+      (res.headers?.etag as string) ||
+      (res.headers?.ETag as string) ||
+      etagIn ||
+      null;
+    if (res.status === 304) {
+      return { envelope: null, etag, notModified: true };
+    }
+    return { envelope: res.data as E, etag, notModified: false };
+  } catch (err: any) {
+    const status = err?.response?.status;
+    console.warn(
+      `[MITRA v3] GET ${url} failed (${status || "network"})`,
+      err?.message,
+    );
+    return { envelope: null, etag: null, notModified: false };
+  }
+}
+
+export function mitraJourneyEntryView(
+  etag: string | null = null,
+): Promise<V3GetResult<V3EntryViewEnvelope>> {
+  return v3Get<V3EntryViewEnvelope>("mitra/v3/journey/entry-view/", etag);
+}
+
+export function mitraJourneyDailyView(
+  etag: string | null = null,
+): Promise<V3GetResult<V3DailyViewEnvelope>> {
+  return v3Get<V3DailyViewEnvelope>("mitra/v3/journey/daily-view/", etag);
+}
+
+export function mitraJourneyDay7View(
+  etag: string | null = null,
+): Promise<V3GetResult<V3Day7ViewEnvelope>> {
+  return v3Get<V3Day7ViewEnvelope>("mitra/v3/journey/day-7-view/", etag);
+}
+
+export function mitraJourneyDay14View(
+  etag: string | null = null,
+): Promise<V3GetResult<V3Day14ViewEnvelope>> {
+  return v3Get<V3Day14ViewEnvelope>("mitra/v3/journey/day-14-view/", etag);
+}
+
+async function v3DecisionPost(
+  url: string,
+  body: Record<string, any>,
+  idempotencyKey: string,
+): Promise<V3DecisionEnvelope | null> {
+  try {
+    const res = await api.post(url, body, {
+      headers: { "Idempotency-Key": idempotencyKey },
+      validateStatus: (s: number) => (s >= 200 && s < 300) || s === 400,
+    });
+    return res.data as V3DecisionEnvelope;
+  } catch (err: any) {
+    const status = err?.response?.status;
+    // v3 POSTs are designed to never 500 — a network/unexpected error
+    // should be surfaced as null so callers can render a retry CTA.
+    if (err?.response?.data) {
+      return err.response.data as V3DecisionEnvelope;
+    }
+    console.warn(
+      `[MITRA v3] POST ${url} failed (${status || "network"})`,
+      err?.message,
+    );
+    return null;
+  }
+}
+
+export function mitraJourneyReentryDecision(
+  decision: "continue" | "fresh",
+  idempotencyKey: string,
+): Promise<V3DecisionEnvelope | null> {
+  return v3DecisionPost(
+    "mitra/v3/journey/reentry-decision/",
+    { decision, tz: getTz() },
+    idempotencyKey,
+  );
+}
+
+export function mitraJourneyDay7Decision(
+  payload: {
+    decision: "continue" | "lighten" | "reset";
+    reflection?: string;
+    feeling?: string;
+  },
+  idempotencyKey: string,
+): Promise<V3DecisionEnvelope | null> {
+  return v3DecisionPost(
+    "mitra/v3/journey/day-7-decision/",
+    { ...payload, tz: getTz() },
+    idempotencyKey,
+  );
+}
+
+export function mitraJourneyDay14Decision(
+  payload: {
+    decision: "continue_same" | "deepen" | "change_focus";
+    reflection?: string;
+    feeling?: string;
+    deepenItemType?: string;
+    deepenItemId?: string;
+    deepenAccepted?: boolean;
+  },
+  idempotencyKey: string,
+): Promise<V3DecisionEnvelope | null> {
+  return v3DecisionPost(
+    "mitra/v3/journey/day-14-decision/",
+    { ...payload, tz: getTz() },
+    idempotencyKey,
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Week 6 — Companion Intelligence APIs (Moments 27, 28, 29, 30, 39)
 // ---------------------------------------------------------------------------

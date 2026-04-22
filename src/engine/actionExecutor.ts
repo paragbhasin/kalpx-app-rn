@@ -3301,7 +3301,6 @@ export async function executeAction(
             }
 
             // Authenticated — generate triad via v3
-            nextStateId = "turn_8";
             const start = await mitraStartJourney({
               inference_state: {
                 lane: inf.lane || draft.path || "support",
@@ -3326,6 +3325,7 @@ export async function executeAction(
             });
 
             if (start) {
+              setScreenValue(false, "v3_start_failed");
               const t = start.triad || {};
               setScreenValue(t.mantra?.title, "mantra_text");
               setScreenValue(t.mantra?.title, "companion_mantra_title");
@@ -3345,9 +3345,12 @@ export async function executeAction(
               if (start.journey_id) {
                 setScreenValue(start.journey_id, "journey_id");
               }
+              nextStateId = "turn_8";
+            } else {
+              setScreenValue(true, "v3_start_failed");
+              nextStateId = "turn_7";
+              if (__DEV__) console.warn("[ONBOARDING] start-v3 returned null — staying on turn_7 for retry");
             }
-
-            nextStateId = "turn_8";
           } else if (currentStateId === "turn_8") {
             // Completion — "Begin my journey" tapped. Before navigating
             // to the dashboard, call generate_companion (via journey/
@@ -4326,21 +4329,21 @@ export async function executeAction(
           // Stamp room_id into screenData BEFORE navigation so the
           // RoomContainer (which reads screenData.room_id on mount) has
           // the identifier available.
-          //
-          // 2-step UX (founder-locked 2026-04-20): route to the
-          // `context_picker` state first. The user picks a life_context
-          // (or skips), and LifeContextPickerSheet then advances to
-          // `render` with `life_context` / `context_skipped` stamped in
-          // screenData. RoomContainer reads life_context when building
-          // the /render/ URL.
           setScreenValue(roomId, "room_id");
           // Clear any stale life_context from a prior room visit — the
           // picker is the sole source of truth for this field.
           setScreenValue(null, "life_context");
           setScreenValue(false, "context_skipped");
+
+          // Picker gating (founder-locked 2026-04-21): only show the
+          // context_picker for rooms where life-context is proven responsive.
+          // All other rooms skip directly to render — they are either
+          // universal by design (stillness, joy) or not yet proven
+          // (connection, release).
+          const PICKER_ROOMS = new Set(["room_clarity", "room_growth"]);
           loadScreen({
             container_id: "room",
-            state_id: "context_picker",
+            state_id: PICKER_ROOMS.has(roomId) ? "context_picker" : "render",
           } as any);
           break;
         }

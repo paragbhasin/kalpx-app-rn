@@ -55,7 +55,7 @@ type Props = {
 
 const CycleProgressBlock: React.FC<Props> = ({ screenData }) => {
   const sd = screenData ?? {};
-  const metrics = sd.cycle_metrics ?? {};
+  const metrics = sd.today?.cycle_metrics ?? sd.cycle_metrics ?? {};
 
   // Hooks must be called unconditionally.
   const [expanded, setExpanded] = useState(false);

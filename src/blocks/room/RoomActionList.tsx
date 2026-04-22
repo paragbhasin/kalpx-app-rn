@@ -1,10 +1,6 @@
 /**
  * RoomActionList — iterates `envelope.actions[]` and delegates to sub-components
- * by `action_type`. Honors reveal stagger per `pacing_ms.pills_reveal_stagger`.
- *
- * Stub behavior: reveal delay is computed but no animation driver is wired
- * yet (scaffolding). When flag flips, RoomRenderer mounts this only under
- * EXPO_PUBLIC_MITRA_V3_ROOMS === "1".
+ * by `action_type`. Renders immediately — no stagger, no animation.
  *
  * Invariant I-1 (§4): exit is always present. This component does not
  * enforce I-1 — that's Agent 5 CI's job. If malformed envelope arrives
@@ -26,27 +22,18 @@ import {
 
 interface Props {
   envelope: RoomRenderV1;
-  reduceMotion: boolean;
 }
 
-const RoomActionList: React.FC<Props> = ({ envelope, reduceMotion }) => {
-  const { actions, opening_experience } = envelope;
-  const stagger = opening_experience.pacing_ms.pills_reveal_stagger;
+const RoomActionList: React.FC<Props> = ({ envelope }) => {
+  const { actions } = envelope;
 
   return (
     <View style={styles.list} testID="room_action_list">
-      {actions.map((action, index) => {
-        // staggerDelay reserved for future animation driver.
-        // When reduceMotion=true, stagger collapses to 0 and we rely on
-        // opacity-only fades per §6 accessibility invariants.
-        const _staggerDelay = reduceMotion ? 0 : index * stagger;
-        void _staggerDelay;
-        return (
-          <View key={action.action_id} style={styles.row}>
-            {renderActionComponent(action, index, envelope)}
-          </View>
-        );
-      })}
+      {actions.map((action, index) => (
+        <View key={action.action_id} style={styles.row}>
+          {renderActionComponent(action, index, envelope)}
+        </View>
+      ))}
     </View>
   );
 };

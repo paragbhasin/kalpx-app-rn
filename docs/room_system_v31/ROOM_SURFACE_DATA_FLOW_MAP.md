@@ -31,7 +31,7 @@ DB Model (WisdomPrinciple / MasterMantra / MasterCarry / StepTemplate)
 | RN ingest | `RoomContainer` passes full `RoomRenderV1` to `RoomRenderer` |
 | UI component | `RoomOpeningExperience` — renders `envelope.opening_line` as primary text |
 | Tap handler | None — ambient text |
-| User sees | Room entry phrase. Fades in per `pacing_ms.opening_line_in`. |
+| User sees | Room entry phrase. Renders immediately on mount. |
 | Honest to ship | Yes |
 
 ---
@@ -198,4 +198,4 @@ DB Model (WisdomPrinciple / MasterMantra / MasterCarry / StepTemplate)
 | `principle_name` returns slug not display name | Banner + teaching pill sheet header (pre-fetch) | Low — overwrites after fetch |
 | `RoomProvenance` TS type missing 4 fields | Type completeness only, non-breaking | Low |
 | `VisualAnchorKind` enum stale | Type completeness only | Low |
-| Opening animation not wired (stagger is computed, no driver) | All rooms — transitions are instant not staggered | Medium (Phase 6) |
+| `principle_name` slug vs. display name in sheet header (pre-fetch) | Banner + teaching pill | Low — overwrites after fetch |

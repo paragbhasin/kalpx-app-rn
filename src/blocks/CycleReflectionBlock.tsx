@@ -1,13 +1,13 @@
 import { BlurView } from "expo-blur";
 import React, { useEffect, useMemo, useState } from "react";
 import {
+  ActivityIndicator,
   Dimensions,
   Image,
   Modal,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -27,7 +27,6 @@ import { Fonts } from "../theme/fonts";
 
 // Assets (imported as components via react-native-svg-transformer)
 import Day14Lotus from "../../assets/14_day_lotus.svg";
-import LotusImg from "../../assets/7days_lotus.svg";
 
 // Raster assets
 const Day14Bg = require("../../assets/14_day_bg.jpg");
@@ -55,13 +54,21 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   const ss = screenData as Record<string, any>;
 
   const is14DayCycle = useMemo(() => {
+    const day = Number(ss.day_number || ss.checkpoint_day || 0);
     return (
-      ss.day_number === 14 ||
-      ss.checkpoint_day === 14 ||
+      day === 14 ||
+      day === 1 ||
       ss.checkpoint_tag === "14-DAY COMPLETION" ||
-      ss.checkpoint_tag === "CYCLE REFLECTION"
+      ss.checkpoint_tag === "CYCLE REFLECTION" ||
+      // ingestDay14View sets checkpoint_day_14 (object) but not checkpoint_tag
+      !!ss.checkpoint_day_14
     );
-  }, [ss.day_number, ss.checkpoint_day, ss.checkpoint_tag]);
+  }, [
+    ss.day_number,
+    ss.checkpoint_day,
+    ss.checkpoint_tag,
+    ss.checkpoint_day_14,
+  ]);
 
   const is7DayCycle = useMemo(() => {
     return (
@@ -69,11 +76,14 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
       ss.checkpoint_tag === "7-DAY COMPLETION" ||
       ss.checkpoint_tag === "MIDWAY REFLECTION" ||
       ss.checkpoint_tag === "MIDPOINT REFLECTION" ||
-      (ss.checkpoint_day === 7 && !is14DayCycle)
+      (ss.checkpoint_day === 7 && !is14DayCycle) ||
+      // ingestDay7View sets checkpoint_day_7 (object) but NOT checkpoint_tag / checkpoint_day
+      // This is the primary detection path for API-driven 7-day cycles
+      (!is14DayCycle && !!ss.checkpoint_day_7)
     );
-  }, [ss.checkpoint_tag, ss.checkpoint_day, is14DayCycle]);
+  }, [ss.checkpoint_tag, ss.checkpoint_day, ss.checkpoint_day_7, is14DayCycle]);
 
-  const [showIntro, setShowIntro] = useState(false);
+  const [showIntro, setShowIntro] = useState(true);
   const [showJourneyInvite, setShowJourneyInvite] = useState(false);
   const [showJourneyView, setShowJourneyView] = useState(false);
   const [introShown, setIntroShown] = useState(false);
@@ -81,13 +91,26 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   const updateHeaderHidden = useScreenStore(
     (state) => state.updateHeaderHidden,
   );
+
+  // Compute background directly from raw day number so it is set correctly
+  // on the FIRST render — before is7DayCycle/is14DayCycle memos have a chance
+  // to trigger a re-render. checkpoint_day is written to the store BEFORE
+  // navigation so it is always available at mount time.
   const screenBackground = useMemo(() => {
+    const rawDay = Number(ss.checkpoint_day || ss.day_number || 0);
     if (showIntro || showJourneyInvite) {
-      if (is14DayCycle) return Day14Bg;
-      if (is7DayCycle) return Day7Bg;
+      if (rawDay === 14 || is14DayCycle) return Day14Bg;
+      if (rawDay === 7 || is7DayCycle) return Day7Bg;
     }
     return BeigeBg;
-  }, [showIntro, showJourneyInvite, is14DayCycle, is7DayCycle]);
+  }, [
+    showIntro,
+    showJourneyInvite,
+    ss.checkpoint_day,
+    ss.day_number,
+    is14DayCycle,
+    is7DayCycle,
+  ]);
 
   useEffect(() => {
     updateBackground(screenBackground);
@@ -125,14 +148,17 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
 
   // v3 data sync: fetch milestone data if missing when on Day 7/14
   useEffect(() => {
-    const day = ss.day_number || ss.checkpoint_day;
-    if ((day === 7 || day === 14) && !ss.checkpoint_headline) {
+    const day = Number(ss.day_number || ss.checkpoint_day || 0);
+    if ((day === 7 || day === 14 || day === 1) && !ss.checkpoint_headline) {
       (async () => {
         const fetcher =
-          day === 14 ? mitraJourneyDay14View : mitraJourneyDay7View;
+          day === 14 || day === 1
+            ? mitraJourneyDay14View
+            : mitraJourneyDay7View;
         const result = await fetcher();
         if (result.envelope) {
-          const ingester = day === 14 ? ingestDay14View : ingestDay7View;
+          const ingester =
+            day === 14 || day === 1 ? ingestDay14View : ingestDay7View;
           const flat = ingester(result.envelope as any);
           for (const [k, v] of Object.entries(flat)) {
             if (v !== undefined) {
@@ -848,74 +874,9 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   }
 
   return (
-    <ScrollView
-      style={styles.reflectionRoot}
-      contentContainerStyle={styles.reflectionContent}
-    >
-      <View style={styles.lotusHeaderCard}>
-        <LotusImg width={100} height={100} />
-      </View>
-      <View style={styles.reflectionCard}>
-        <Text style={styles.cardTitle}>
-          {ss.checkpoint_headline || "Evolution Pivot"}
-        </Text>
-        <TextInput
-          style={styles.textArea}
-          multiline
-          value={ss.checkpoint_user_reflection || ""}
-          onChangeText={(v) =>
-            store.dispatch(
-              screenActions.setScreenValue({
-                key: "checkpoint_user_reflection",
-                value: v,
-              }),
-            )
-          }
-          placeholder="Reflection..."
-          placeholderTextColor="#8c7355"
-        />
-        <View style={styles.metricsGrid}>
-          {checkpointMetrics.map((m) => (
-            <View key={m.label} style={styles.metricChip}>
-              <Text style={styles.metricLabel}>{m.label}</Text>
-              <Text style={styles.metricValue}>{m.value}</Text>
-            </View>
-          ))}
-        </View>
-        <View style={styles.decisionList}>
-          {is14DayCycle ? (
-            <>
-              <DecisionBtn
-                label="Continue Same"
-                id="continue_same"
-                onPress={handleDecision}
-              />
-              {ss.checkpoint_deepen_suggestion && (
-                <DecisionBtn
-                  label="Deepen"
-                  id="deepen"
-                  onPress={handleDecision}
-                  isPrimary
-                />
-              )}
-              <DecisionBtn
-                label="Change Focus"
-                id="change_focus"
-                onPress={handleDecision}
-                isSecondary
-              />
-            </>
-          ) : (
-            <DecisionBtn
-              label="Continue"
-              id="continue"
-              onPress={handleDecision}
-              isPrimary
-            />
-          )}
-        </View>
-      </View>
-    </ScrollView>
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <ActivityIndicator size="large" color="#D9A557" />
+    </View>
   );
 };
 

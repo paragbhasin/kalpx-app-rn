@@ -514,10 +514,13 @@ export default function Home() {
                 }),
               );
             }
+            // Route to thin checkpoint_reflection container — renders
+            // CycleReflectionBlock directly without any container
+            // background override (was: cycle_transitions/checkpoint_day_7).
             store.dispatch(
               loadScreenWithData({
-                containerId: "cycle_transitions",
-                stateId: checkpointStateId,
+                containerId: "checkpoint_reflection",
+                stateId: dayNumber === 14 ? "day_14" : "day_7",
               }),
             );
           } else {

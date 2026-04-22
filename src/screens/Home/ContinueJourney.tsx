@@ -239,11 +239,13 @@ export default function ContinueJourney({
       if (viewKey === "day_7_view") {
         const { ingestDay7View } = require("../../engine/v3Ingest");
         writeAll(ingestDay7View(payload as any));
+        // Also write checkpoint_day so CycleReflectionBlock can detect the cycle
+        dispatch(screenActions.setScreenValue({ key: "checkpoint_day", value: 7 }));
         routedRef.current = true;
         dispatch(
           loadScreenWithData({
-            containerId: "cycle_transitions",
-            stateId: "checkpoint_day_7",
+            containerId: "checkpoint_reflection",
+            stateId: "day_7",
           }) as any,
         );
         navigation.navigate("DynamicEngine");
@@ -252,11 +254,13 @@ export default function ContinueJourney({
       if (viewKey === "day_14_view") {
         const { ingestDay14View } = require("../../engine/v3Ingest");
         writeAll(ingestDay14View(payload as any));
+        // Also write checkpoint_day so CycleReflectionBlock can detect the cycle
+        dispatch(screenActions.setScreenValue({ key: "checkpoint_day", value: 14 }));
         routedRef.current = true;
         dispatch(
           loadScreenWithData({
-            containerId: "cycle_transitions",
-            stateId: "checkpoint_day_14",
+            containerId: "checkpoint_reflection",
+            stateId: "day_14",
           }) as any,
         );
         navigation.navigate("DynamicEngine");

@@ -38,6 +38,9 @@ import JoyRoomContainer from "../extensions/moments/joy_room";
 import GrowthRoomContainer from "../extensions/moments/growth_room";
 // T3A-3 — Crisis safety surface
 import CrisisRoomContainer from "../containers/CrisisRoomContainer";
+// Checkpoint reflection — thin container that renders CycleReflectionBlock directly.
+// Avoids CycleTransitionsContainer background interference.
+import CheckpointReflectionContainer from "../containers/CheckpointReflectionContainer";
 // Phase 5 Stage 2 — Canonical v3.1 room renderer (flag-gated at RoomRenderer).
 // Fetches GET /api/mitra/rooms/{room_id}/render/ and mounts <RoomRenderer />.
 import RoomContainer from "../containers/RoomContainer";
@@ -84,6 +87,8 @@ const containerMap: Record<string, React.ComponentType<any>> = {
   support_growth: GrowthRoomContainer,
   // T3A-3 — Crisis safety surface
   crisis_room: CrisisRoomContainer,
+  // Day 7 / Day 14 checkpoint — renders CycleReflectionBlock directly.
+  checkpoint_reflection: CheckpointReflectionContainer,
   // Phase 3 — Mitra v3 new dashboard. Active only when Home.tsx routes
   // here (EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD=1). Coexists with
   // companion_dashboard until Phase 5 cutover.

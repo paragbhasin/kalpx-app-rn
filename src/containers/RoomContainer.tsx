@@ -29,6 +29,7 @@ import api from "../Networks/axios";
 import LifeContextPickerSheet, {
   type LifeContext,
 } from "../blocks/room/LifeContextPickerSheet";
+import WhyThisL2Sheet from "../blocks/WhyThisL2Sheet";
 import RoomRenderer from "../blocks/room/RoomRenderer";
 import type {
   RoomId,
@@ -119,6 +120,10 @@ function buildExitOnlyFallback(roomId: RoomId): RoomRenderV1 {
       selection_service_version: "fe-fallback",
       render_id: `fallback_${Date.now()}`,
       active_rotation_window_days: 0,
+      visit_number: 0,
+      render_phase: "fallback",
+      life_context_applied: false,
+      life_context_skipped: false,
     },
     fallbacks: {
       hide_if_empty: ["second_beat_line", "principle_banner", "dashboard_chip_label"],
@@ -143,6 +148,13 @@ const RoomContainer: React.FC<Props> = () => {
     ((screenData as any)?.life_context as LifeContext | null) || null;
   const allowedContexts: LifeContext[] | null =
     ((screenData as any)?.life_context_allowed as LifeContext[] | null) || null;
+
+  // ── Wisdom overlay branch ──────────────────────────────────────────
+  // open_why_this_l2 routes to room/why_this_l2 when currentContainerId is
+  // "room". goBack() from WhyThisL2Sheet returns to room/render.
+  if (currentStateId === "why_this_l2") {
+    return <WhyThisL2Sheet />;
+  }
 
   // ── Context picker branch ──────────────────────────────────────────
   if (currentStateId === "context_picker") {

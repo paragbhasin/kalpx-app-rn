@@ -6502,6 +6502,11 @@ export const SupportGrowthContainer = {
 // `context_picker` state (2026-04-20) — 2-step UX interstitial mounted
 // between the RoomEntrySheet tap and the /render/ fetch. RoomContainer
 // branches on currentStateId and mounts LifeContextPickerSheet.
+//
+// `why_this_l2` state — wisdom overlay hosted directly within the room
+// container so open_why_this_l2 can resolve without navigating to
+// companion_dashboard. RoomContainer branches on currentStateId and mounts
+// WhyThisL2Sheet. goBack() returns to room/render naturally.
 export const RoomRenderContainer = {
   container_id: "room",
   states: {
@@ -6517,6 +6522,10 @@ export const RoomRenderContainer = {
     },
   },
 };
+
+// Host why-this states under room so open_why_this_l2 can resolve without
+// navigating to companion_dashboard. Assigned after WhyThisOverlayContainer
+// is defined below.
 
 export const WhyThisOverlayContainer = {
   container_id: "why_this_overlay",
@@ -6536,11 +6545,19 @@ export const WhyThisOverlayContainer = {
   },
 };
 
-// Host why-this states under companion_dashboard as well so open_why_this_l2
-// can load without changing containerId.
+// Host why-this states under companion_dashboard so open_why_this_l2
+// can load without changing containerId when on the dashboard.
 CompanionDashboardContainer.states.why_this_l2 =
   WhyThisOverlayContainer.states.why_this_l2;
 CompanionDashboardContainer.states.why_this_l3 =
+  WhyThisOverlayContainer.states.why_this_l3;
+
+// Host why-this states under room so wisdom taps from within a room resolve
+// to room/why_this_l2 — RoomContainer branches on currentStateId and mounts
+// WhyThisL2Sheet directly. goBack() returns to room/render.
+RoomRenderContainer.states.why_this_l2 =
+  WhyThisOverlayContainer.states.why_this_l2;
+RoomRenderContainer.states.why_this_l3 =
   WhyThisOverlayContainer.states.why_this_l3;
 
 export const ContainerRegistry = {

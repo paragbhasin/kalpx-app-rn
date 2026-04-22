@@ -125,6 +125,10 @@ function fixtureEnvelope(): RoomRenderV1 {
       selection_service_version: "1.0.0",
       render_id: "uuid-x",
       active_rotation_window_days: 7,
+      visit_number: 1,
+      render_phase: "standard",
+      life_context_applied: false,
+      life_context_skipped: false,
     },
     fallbacks: {
       hide_if_empty: ["second_beat_line", "principle_banner"],

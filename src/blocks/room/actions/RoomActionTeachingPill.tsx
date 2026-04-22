@@ -48,6 +48,9 @@ const RoomActionTeachingPill: React.FC<Props> = ({ action }) => {
         name: tp.principle_name,
         principle_name: tp.principle_name,
         body: tp.body,
+        // WhyThisL2Sheet renders p.essence — map body here so the teaching
+        // text is visible even when WisdomPrinciple has no row for this asset.
+        essence: tp.body,
         sources: tp.sources,
       },
       "why_this_principle",

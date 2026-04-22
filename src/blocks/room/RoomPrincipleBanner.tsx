@@ -39,6 +39,10 @@ const RoomPrincipleBanner: React.FC<Props> = ({ banner }) => {
         name: banner.principle_name,
         principle_name: banner.principle_name,
         body: banner.wisdom_anchor_line,
+        // WhyThisL2Sheet renders p.essence — use wisdom_anchor_line as the
+        // immediate placeholder so the sheet shows text while the handler
+        // fetches the full principle body via principle_id.
+        essence: banner.wisdom_anchor_line,
         sources: [],
       },
       "why_this_principle",

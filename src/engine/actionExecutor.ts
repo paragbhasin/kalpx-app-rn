@@ -4103,7 +4103,13 @@ export async function executeAction(
           break;
         }
         const principle = await getPrinciple(principleId);
-        setScreenValue(principle, "why_this_principle");
+        // Only overwrite why_this_principle if the fetch succeeded.
+        // The caller (RoomActionTeachingPill, RoomPrincipleBanner) stamps a
+        // placeholder from the action payload before dispatching — preserve it
+        // when WisdomPrinciple has no row for this asset_id.
+        if (principle !== null) {
+          setScreenValue(principle, "why_this_principle");
+        }
         setScreenValue(null, "why_this_source");
         loadScreen({
           container_id: (screenState._overlay_parent_container as string) ||

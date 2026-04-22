@@ -305,9 +305,12 @@ export default function ContinueJourney({
         "continue",
         "fresh",
       ]) as string[];
+      const decisionLabels: Record<string, string> =
+        (payload as any).decision_labels ?? {};
       const chips: ReentryHome["chips"] = decisions.map((d) => ({
         id: (d === "fresh" ? "reentry_fresh" : "reentry_continue") as ChipKey,
-        label: d === "fresh" ? "Begin fresh" : "Continue",
+        label:
+          decisionLabels[d] ?? (d === "fresh" ? "Begin fresh" : "Continue"),
       }));
       return {
         headline: cont.headline || "Welcome back.",

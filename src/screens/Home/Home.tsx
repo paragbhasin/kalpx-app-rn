@@ -85,6 +85,7 @@ export default function Home() {
   );
 
   const [mitraJourneyId, setMitraJourneyId] = useState<string | null>(null);
+  const [hasActiveJourney, setHasActiveJourney] = useState(false);
   const [journeyDay, setJourneyDay] = useState<number>(1);
   const [checkingJourney, setCheckingJourney] = useState(false);
   // Mitra v3 — guard auto-route so we don't re-navigate on every Home focus.
@@ -171,12 +172,14 @@ export default function Home() {
           // vs momentum). Legacy 30+d WelcomeBack path deleted.
           if (data?.journeyId) {
             setMitraJourneyId(data.journeyId);
+            setHasActiveJourney(!!data.hasActiveJourney);
             setJourneyDay(data.dayNumber || 1);
             if (data?.hasActiveJourney) {
               seedJourneyStatus(data);
             }
           } else {
             setMitraJourneyId(null);
+            setHasActiveJourney(false);
             // Authed user with no journey → welcome_onboarding turn_1.
             if (!v3AutoRoutedRef.current) {
               v3AutoRoutedRef.current = true;
@@ -763,6 +766,7 @@ export default function Home() {
         // screen deleted 2026-04-18. See JOURNEY_HOME_CONTRACT_V1.md
         // + M12_LONG_ABSENCE_DRAFT.md.
         <ContinueJourney
+          hasActiveJourney={hasActiveJourney}
           userName={
             profileNameFromRedux ||
             profileNameFromStorage ||

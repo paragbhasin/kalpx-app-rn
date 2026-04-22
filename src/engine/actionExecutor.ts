@@ -2960,14 +2960,13 @@ export async function executeAction(
             ? Math.round((Date.now() - screenState.runner_start_time) / 1000)
             : 0);
 
-        if (
-          (activeItem.item_type || activeItem.itemType) &&
-          (activeItem.item_id || activeItem.itemId) &&
-          source
-        ) {
+        const resolvedItemType = activeItem.item_type || activeItem.itemType;
+        const resolvedItemId = activeItem.item_id || activeItem.itemId;
+        if (resolvedItemType && source) {
+          // BE call — item_id may be empty for some mantras; BE accepts it.
           await mitraTrackCompletion({
-            itemType: activeItem.item_type || activeItem.itemType,
-            itemId: activeItem.item_id || activeItem.itemId,
+            itemType: resolvedItemType,
+            itemId: resolvedItemId || "",
             source,
             journeyId: screenState.journey_id,
             dayNumber: screenState.day_number || 1,
@@ -2980,26 +2979,23 @@ export async function executeAction(
             },
           });
 
-          // Local engagement flag update — dashboard ring depends on
-          // practice_chant / practice_embody / practice_act (+ practice_deepen
-          // when a 4th deepen item is chosen). BE persists the JourneyActivity
-          // but does not return engagement state, and /journey/home/ is not
-          // re-fetched on dashboard return, so the flags must flip locally.
-          // Scoped to source === "core" so support/additional completions do
-          // not falsely flip the core triad progress.
+          // Local engagement flag — always flip regardless of item_id so the
+          // ✓ indicator shows on all 3 triad cards after completion.
+          // NewDashboardContainer re-fetches daily-view on focus and confirms
+          // via completed_today[], but the local flag gives immediate feedback.
           if (source === "core") {
             const isDeepenCompletion =
               !!screenState.cycle_deepen_item_id &&
-              activeItem.item_id === screenState.cycle_deepen_item_id;
+              resolvedItemId === screenState.cycle_deepen_item_id;
             if (isDeepenCompletion) {
               setScreenValue(true, "practice_deepen");
             } else {
               const flagKey =
-                activeItem.item_type === "mantra"
+                resolvedItemType === "mantra"
                   ? "practice_chant"
-                  : activeItem.item_type === "sankalp"
+                  : resolvedItemType === "sankalp"
                   ? "practice_embody"
-                  : activeItem.item_type === "practice"
+                  : resolvedItemType === "practice"
                   ? "practice_act"
                   : null;
               if (flagKey) setScreenValue(true, flagKey);

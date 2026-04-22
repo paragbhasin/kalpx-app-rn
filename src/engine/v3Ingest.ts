@@ -78,11 +78,19 @@ export function ingestDailyView(env: V3DailyViewEnvelope | null): V3FlatIngest {
     checkpoint_due: arc.checkpoint_due ?? null,
     arc_complete: !!arc.arc_complete,
     additional_items: today.additional_items ?? [],
-    completed_today: {
-      mantra: !!mantra?.completed_today,
-      sankalp: !!sankalp?.completed_today,
-      practice: !!practice?.completed_today,
-    },
+    completed_today: [
+      ...(mantra?.completed_today ? ["mantra"] : []),
+      ...(sankalp?.completed_today ? ["sankalp"] : []),
+      ...(practice?.completed_today ? ["practice"] : []),
+    ],
+    why_this_l1_items: cont.why_this_l1_items ?? [],
+    why_this: cont.why_this ?? null,
+    journey_path: arc.journey_path ?? "",
+    sankalp_how_to_live: Array.isArray(sankalp?.how_to_live)
+      ? sankalp.how_to_live
+      : sankalp?.how_to_live
+        ? [sankalp.how_to_live]
+        : [],
     briefing_available: brief.audio_status === "ready",
     briefing_audio_url: brief.audio_url ?? null,
     briefing_summary: brief.summary ?? "",
@@ -104,6 +112,41 @@ export function ingestDailyView(env: V3DailyViewEnvelope | null): V3FlatIngest {
     card_sankalpa_description: sankalp?.subtitle ?? "",
     card_ritual_title: practice?.title || _humanizeId(practice?.item_id) || "",
     card_ritual_description: practice?.subtitle ?? "",
+
+    // master_* flat objects — runner reads these from screenData for rich
+    // content (audio, devanagari, meaning, steps, etc.)
+    master_mantra: mantra
+      ? {
+          ...mantra,
+          id: mantra.item_id,
+          item_id: mantra.item_id,
+          item_type: "mantra",
+          type: "mantra",
+          wisdom: (mantra as any).meaning || (mantra as any).essence || "",
+        }
+      : null,
+    master_sankalp: sankalp
+      ? {
+          ...sankalp,
+          id: sankalp.item_id,
+          item_id: sankalp.item_id,
+          item_type: "sankalp",
+          type: "sankalp",
+        }
+      : null,
+    master_practice: practice
+      ? {
+          ...practice,
+          id: practice.item_id,
+          item_id: practice.item_id,
+          item_type: "practice",
+          type: "practice",
+        }
+      : null,
+
+    // guidance_mode — read by PostConflictGentlenessCard + any resolver
+    // that sends mode to content endpoints. Emitted by BE in daily_view body.
+    guidance_mode: (env as any).guidance_mode ?? null,
 
     // envelope status (kept permanently — even post-bridge)
     v3_status: env.status,

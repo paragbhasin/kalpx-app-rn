@@ -22,6 +22,7 @@
  * REG-016: decision CTAs live in the bottom 30% thumb zone (unchanged).
  */
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ScrollView,
@@ -72,6 +73,8 @@ const CheckpointDay7Block: React.FC<Props> = () => {
   const [submitting, setSubmitting] = useState(false);
   const fetchedRef = useRef(false);
   const etagRef = useRef<string | null>(null);
+  const persistKeyRef = useRef<string | null>(null);
+  const hasRestoredRef = useRef(false);
 
   // v3 journey: fetch day-7-view which carries all slot copy + framing
   // + journey_narrative inline. Replaces the legacy M24 mitraResolveMoment
@@ -96,6 +99,33 @@ const CheckpointDay7Block: React.FC<Props> = () => {
       cancelled = true;
     };
   }, []);
+
+  // Restore persisted step + reflection on mount (survives app close).
+  useEffect(() => {
+    const journeyId = (store.getState() as any).screen?.screenData?.journey_id || "default";
+    const key = `checkpoint_7_${journeyId}`;
+    persistKeyRef.current = key;
+    AsyncStorage.getItem(key).then((raw) => {
+      hasRestoredRef.current = true;
+      if (!raw) return;
+      try {
+        const saved = JSON.parse(raw);
+        if (saved.step === "body") setStep("body");
+        if (typeof saved.reflection === "string") setReflection(saved.reflection);
+      } catch {
+        // ignore corrupt entry
+      }
+    });
+  }, []);
+
+  // Persist step + reflection whenever they change — but only after restore completes
+  // to avoid overwriting saved draft on mount before the async getItem fires.
+  useEffect(() => {
+    if (!hasRestoredRef.current) return;
+    const key = persistKeyRef.current;
+    if (!key) return;
+    AsyncStorage.setItem(key, JSON.stringify({ step, reflection })).catch(() => {});
+  }, [step, reflection]);
 
   const statuses: string[] =
     Array.isArray(ss.journey_day_statuses) && ss.journey_day_statuses.length

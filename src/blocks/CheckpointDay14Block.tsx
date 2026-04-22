@@ -17,6 +17,7 @@
  * REG-016: all three primary evolution options live in the bottom 30% zone.
  */
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ScrollView,
@@ -88,6 +89,35 @@ const CheckpointDay14Block: React.FC<Props> = () => {
     ss.checkpoint_user_reflection || "",
   );
   const [sealRitual, setSealRitual] = useState<string>("");
+  const persistKeyRef = useRef<string | null>(null);
+  const hasRestoredRef = useRef(false);
+
+  // Restore persisted step + reflection + sealRitual on mount.
+  useEffect(() => {
+    const journeyId = (store.getState() as any).screen?.screenData?.journey_id || "default";
+    const key = `checkpoint_14_${journeyId}`;
+    persistKeyRef.current = key;
+    AsyncStorage.getItem(key).then((raw) => {
+      hasRestoredRef.current = true;
+      if (!raw) return;
+      try {
+        const saved = JSON.parse(raw);
+        if (saved.step === "body") setStep("body");
+        if (typeof saved.reflection === "string") setReflection(saved.reflection);
+        if (typeof saved.sealRitual === "string") setSealRitual(saved.sealRitual);
+      } catch {
+        // ignore corrupt entry
+      }
+    });
+  }, []);
+
+  // Persist on change — only after restore completes to avoid overwriting saved draft on mount.
+  useEffect(() => {
+    if (!hasRestoredRef.current) return;
+    const key = persistKeyRef.current;
+    if (!key) return;
+    AsyncStorage.setItem(key, JSON.stringify({ step, reflection, sealRitual })).catch(() => {});
+  }, [step, reflection, sealRitual]);
 
   const statuses: string[] =
     Array.isArray(ss.journey_day_statuses) && ss.journey_day_statuses.length

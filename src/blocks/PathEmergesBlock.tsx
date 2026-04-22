@@ -13,7 +13,6 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Fonts } from '../theme/fonts';
 import { useScreenStore } from '../engine/useScreenBridge';
-import { interpolate } from '../engine/utils/interpolation';
 
 const GOLD = '#eddeb4';
 const DEEP_BROWN = '#432104';
@@ -51,6 +50,13 @@ const PathEmergesBlock: React.FC<Props> = () => {
 
   return (
     <View style={styles.wrap}>
+      {!!screenData.v3_start_failed && (
+        <View style={styles.errorBanner}>
+          <Text style={styles.errorText}>
+            Something went wrong. Please try again.
+          </Text>
+        </View>
+      )}
       {ITEMS.map((it) => {
         const title =
           it.kind === 'sankalp'
@@ -105,6 +111,20 @@ const styles = StyleSheet.create({
     marginTop: 8,
     lineHeight: 22,
     textAlign: 'center',
+  },
+  errorBanner: {
+    backgroundColor: '#fff3cd',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: '#e6a817',
+  },
+  errorText: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 14,
+    color: '#7a5c00',
+    lineHeight: 20,
   },
 });
 

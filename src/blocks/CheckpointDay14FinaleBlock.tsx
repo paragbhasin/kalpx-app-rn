@@ -24,8 +24,6 @@ interface Props {
   block?: any;
 }
 
-const AUTO_ADVANCE_MS = 6000;
-
 const CheckpointDay14FinaleBlock: React.FC<Props> = () => {
   const { screenData } = useScreenStore();
   const ss = (screenData ?? {}) as Record<string, any>;

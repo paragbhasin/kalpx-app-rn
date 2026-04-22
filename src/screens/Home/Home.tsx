@@ -171,6 +171,13 @@ export default function Home() {
           // resolve the right M12 variant (short-gap vs long-absence
           // vs momentum). Legacy 30+d WelcomeBack path deleted.
           if (data?.journeyId) {
+            // Reentry case: user has a journey row but it is not active
+            // (e.g. expired, completed, or long absence).
+            if (!data.hasActiveJourney && !v3AutoRoutedRef.current) {
+              v3AutoRoutedRef.current = true;
+              navigation.navigate("GuidedGrowth");
+              return;
+            }
             setMitraJourneyId(data.journeyId);
             setHasActiveJourney(!!data.hasActiveJourney);
             setJourneyDay(data.dayNumber || 1);

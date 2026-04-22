@@ -613,7 +613,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   }
 
   // --- Consolidated Reflection View (Matches Images) ---
-  if (!showJourneyInvite && !showIntro && (is7DayCycle || is14DayCycle)) {
+  if (!showJourneyInvite && !showIntro && !showDecisions && (is7DayCycle || is14DayCycle)) {
     return (
       <ScrollView showsVerticalScrollIndicator={false} style={{ padding: 10 }}>
         {is7DayCycle && (
@@ -954,11 +954,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
             </Text>
           </View>
           <View style={styles.weeksWrapper}>
-            <Image
-              source={require("../../assets/14day_screen_lotus.png")}
-              style={styles.lotus}
-              resizeMode="contain"
-            />
+            <Day14Lotus style={styles.lotus} />
             <View style={styles.weeksContainer}>
               {[1, 2].map(
                 (w) =>

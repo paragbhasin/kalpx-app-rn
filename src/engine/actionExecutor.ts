@@ -77,6 +77,15 @@ async function dispatchFetchCompanionState(): Promise<any> {
   }
 }
 
+// Notify ProgressSectionBlock to re-fetch after a core triad item completes.
+function dispatchCoreCompletion(): void {
+  try {
+    const { store } = require("../store");
+    const { recordCoreCompletion } = require("../store/mitraSlice");
+    store.dispatch(recordCoreCompletion());
+  } catch (_) {}
+}
+
 // Week 1 — friction chip → focus mapping. Web parity: actionExecutor.js FRICTION_MAP.
 // Spec: route_welcome_onboarding.md §1 Turn 2-3, §6.
 const FRICTION_TO_FOCUS: Record<string, { focus: string; label: string }> = {
@@ -788,6 +797,7 @@ export async function executeAction(
               dayNumber: screenState.day_number || 1,
               meta,
             });
+            if (source === "core") dispatchCoreCompletion();
 
             // Web parity (actionExecutor.js:1113-1127): when a support item
             // completes inside a check-in flow, fire checkin_support_completed
@@ -1032,6 +1042,7 @@ export async function executeAction(
             dayNumber: screenState.day_number || 1,
             meta,
           });
+          if (source === "core") dispatchCoreCompletion();
 
           if (useSupportItem) {
             setScreenValue(null, "_active_support_item");
@@ -2839,6 +2850,7 @@ export async function executeAction(
             dayNumber: screenState.day_number || 1,
             meta: resolvedMeta,
           });
+          if (resolvedSource === "core") dispatchCoreCompletion();
         } else {
           console.warn(
             "[track_completion] missing itemType or itemId — skipped",
@@ -2978,6 +2990,7 @@ export async function executeAction(
                 : {}),
             },
           });
+          if (source === "core") dispatchCoreCompletion();
 
           // Local engagement flag — always flip regardless of item_id so the
           // ✓ indicator shows on all 3 triad cards after completion.

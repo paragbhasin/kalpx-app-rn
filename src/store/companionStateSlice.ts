@@ -48,7 +48,7 @@ export const fetchCompanionState = createAsyncThunk(
   'companionState/fetch',
   async (_, { rejectWithValue }) => {
     try {
-      const res = await api.get('/api/mitra/companion-state/');
+      const res = await api.get('mitra/companion-state/');
       return res.data;
     } catch (err: any) {
       // 404-tolerant: endpoint may not exist yet

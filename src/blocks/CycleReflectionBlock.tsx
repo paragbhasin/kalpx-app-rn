@@ -824,8 +824,10 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
     const ceremony14 = ss.completion_ceremony || {};
     const fullCompleted = ceremony14.completed_days ?? completedDays;
 
-    // Determine which decisions to show based on completion + decision_layout
+    // Determine which decisions to show based on completion + decision_layout.
+    // Deepen is only offered when BE has a valid distinct suggestion; null = no valid item exists.
     const showDeepen =
+      !!deepenSuggestion &&
       (ss.day_14_decisions_available || []).includes("deepen") &&
       (decisionLayout === "deepen_first" || decisionLayout === "continue_first");
     const showRestart = decisionLayout === "restart_rhythm";
@@ -865,8 +867,27 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
           </View>
         )}
 
-        {/* Carry forward reflection input */}
+        {/* Seal This Cycle input */}
         <Text style={[styles.microLabel, { marginBottom: 8 }]}>
+          {d14.seal_cycle_label || "SEAL THIS CYCLE"}
+        </Text>
+        <View style={styles.inputWrap}>
+          <TextInput
+            style={styles.inputField}
+            value={sealRitualText}
+            onChangeText={setSealRitualText}
+            placeholder={d14.seal_input_placeholder || "What deserves to be remembered?"}
+            placeholderTextColor="#b8a898"
+            multiline
+            numberOfLines={3}
+            maxLength={300}
+            textAlignVertical="top"
+            testID="checkpoint_day_14_seal_input"
+          />
+        </View>
+
+        {/* Carry forward reflection input */}
+        <Text style={[styles.microLabel, { marginBottom: 8, marginTop: 16 }]}>
           {d14.carry_label || "CARRY FORWARD"}
         </Text>
         <View style={styles.inputWrap}>

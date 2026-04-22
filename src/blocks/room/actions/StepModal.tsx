@@ -204,8 +204,19 @@ const TimerBody: React.FC<TimerBodyProps> = ({
   const totalSec = useMemo(() => {
     const raw = stepPayload?.duration_sec;
     if (typeof raw === "number" && raw > 0 && raw <= 60 * 60) return raw;
+    // BE sends duration inside step_config (cycles × per-cycle seconds)
+    // rather than as a top-level duration_sec field. Compute when present.
+    const sc = stepPayload?.step_config;
+    if (sc) {
+      const cycles = typeof sc.cycles === "number" ? sc.cycles : 0;
+      const inhale = typeof sc.inhale === "number" ? sc.inhale : 0;
+      const exhale = typeof sc.exhale === "number" ? sc.exhale : 0;
+      const hold = typeof sc.hold === "number" ? sc.hold : 0;
+      const computed = cycles * (inhale + exhale + hold);
+      if (computed > 0 && computed <= 3600) return computed;
+    }
     return defaultTimerSeconds(kind);
-  }, [stepPayload?.duration_sec, kind]);
+  }, [stepPayload?.duration_sec, stepPayload?.step_config, kind]);
 
   const cueText =
     (stepPayload?.cue_text && String(stepPayload.cue_text)) ||
@@ -282,6 +293,13 @@ const TimerBody: React.FC<TimerBodyProps> = ({
 
 // ─── Text-input body ─────────────────────────────────────────────────────
 
+// Resolves the prompt_slot key that BE sends in step_config to authored
+// prompt text. BE sends the slot name; FE owns the resolved copy.
+const PROMPT_SLOT_TEXT: Record<string, string> = {
+  name_short_prompt: "What's closest to you right now?",
+  name_full_prompt: "What feels most full or alive right now?",
+};
+
 interface TextInputBodyProps {
   stepPayload: StepPayload | null | undefined;
   onDone: (extra: StepModalResult) => void;
@@ -292,8 +310,10 @@ const TextInputBody: React.FC<TextInputBodyProps> = ({
   onDone,
 }) => {
   const [text, setText] = useState<string>("");
+  const promptSlot = stepPayload?.step_config?.prompt_slot;
   const placeholder =
     (stepPayload?.prompt && String(stepPayload.prompt)) ||
+    (typeof promptSlot === "string" && PROMPT_SLOT_TEXT[promptSlot]) ||
     "Take a moment and write what comes.";
 
   const trimmed = text.trim();

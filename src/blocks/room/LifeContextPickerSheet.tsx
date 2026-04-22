@@ -61,6 +61,12 @@ export interface LifeContextPickerSheetProps {
    * dashboard (no mid-flow orphan). Caller owns the navigation.
    */
   onBack: () => void;
+  /**
+   * When provided, restricts the rendered list to only these slugs
+   * (preserving the canonical order from LIFE_CONTEXT_OPTIONS).
+   * When omitted, all options are shown.
+   */
+  allowedContexts?: LifeContext[];
 }
 
 const LifeContextPickerSheet: React.FC<LifeContextPickerSheetProps> = ({
@@ -68,7 +74,11 @@ const LifeContextPickerSheet: React.FC<LifeContextPickerSheetProps> = ({
   onPick,
   onSkip,
   onBack,
+  allowedContexts,
 }) => {
+  const options = allowedContexts
+    ? LIFE_CONTEXT_OPTIONS.filter((o) => allowedContexts.includes(o.slug))
+    : LIFE_CONTEXT_OPTIONS;
   // Android hardware back → dashboard via onBack.
   useEffect(() => {
     if (!visible || Platform.OS !== "android") return;
@@ -104,7 +114,7 @@ const LifeContextPickerSheet: React.FC<LifeContextPickerSheetProps> = ({
           </Text>
 
           <View style={styles.optionsBlock}>
-            {LIFE_CONTEXT_OPTIONS.map((opt) => (
+            {options.map((opt) => (
               <TouchableOpacity
                 key={opt.slug}
                 style={styles.row}

@@ -4331,15 +4331,56 @@ export async function executeAction(
           setScreenValue(null, "life_context");
           setScreenValue(false, "context_skipped");
 
-          // Picker gating (founder-locked 2026-04-21): only show the
-          // context_picker for rooms where life-context is proven responsive.
-          // All other rooms skip directly to render — they are either
-          // universal by design (stillness, joy) or not yet proven
-          // (connection, release).
-          const PICKER_ROOMS = new Set(["room_clarity", "room_growth"]);
+          // Per-room picker contract (live pool– and API-verified 2026-04-21).
+          // Each context list is derived from RoomContentPool rotation_refs
+          // that have matching life_context_bias AND produce visibly different
+          // API output (principle_banner or teaching chip changes on selection).
+          //
+          // room_clarity — all 7 incl. self: principle pool (33 self-refs),
+          //   wisdom_teaching pool (5 self-refs) — live-verified different items
+          //   returned for self vs work_career.
+          // room_growth  — all 7 incl. self: principle pool (29 self-refs),
+          //   wisdom_banner pool (4 self-refs) — different principle per context.
+          // room_connection — EXCLUDED: all 15 wisdom_banner items have
+          //   banner_eligible=False; principle_banner is null for every context;
+          //   API returns identical 4 actions regardless of context selection.
+          //   Adding it would be a dishonest picker — no visible differentiation.
+          // room_release — 5 contexts: wisdom_banner pool (10 biased items) incl.
+          //   self (7 refs). work_career live-verified → ayur_pause_before_decision.
+          //   No purpose_direction/daily_life bias in pool.
+          // room_joy, room_stillness — universal by design, no picker.
+          const ROOM_PICKER_CONFIG: Record<string, string[]> = {
+            room_clarity: [
+              "work_career",
+              "relationships",
+              "self",
+              "health_energy",
+              "money_security",
+              "purpose_direction",
+              "daily_life",
+            ],
+            room_growth: [
+              "work_career",
+              "relationships",
+              "self",
+              "health_energy",
+              "money_security",
+              "purpose_direction",
+              "daily_life",
+            ],
+            room_release: [
+              "work_career",
+              "relationships",
+              "self",
+              "health_energy",
+              "money_security",
+            ],
+          };
+          const allowedContexts = ROOM_PICKER_CONFIG[roomId] ?? null;
+          setScreenValue(allowedContexts, "life_context_allowed");
           loadScreen({
             container_id: "room",
-            state_id: PICKER_ROOMS.has(roomId) ? "context_picker" : "render",
+            state_id: allowedContexts ? "context_picker" : "render",
           } as any);
           break;
         }

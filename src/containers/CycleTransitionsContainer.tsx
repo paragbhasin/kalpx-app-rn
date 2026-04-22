@@ -44,6 +44,9 @@ import { Fonts } from "../theme/fonts";
 import { SvgUri } from "react-native-svg";
 import MantraLotus3d from "../../assets/mantra-lotus-3d.svg";
 const NamasteIcon = require("../../assets/namaste.png");
+const BeigeBg = require("../../assets/beige_bg.png");
+const Day7Bg = require("../../assets/7day_screen.png");
+const Day14Bg = require("../../assets/14_day_bg.jpg");
 
 const { width } = Dimensions.get("window");
 
@@ -244,6 +247,12 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     updateScreenData,
     goBack,
   } = useScreenStore();
+
+  const containerBackground = useMemo(() => {
+    if (currentStateId === "checkpoint_day_14") return Day14Bg;
+    if (currentStateId === "checkpoint_day_7") return Day7Bg;
+    return BeigeBg;
+  }, [currentStateId]);
 
   // Expand/collapse state
   const [meaningExpanded, setMeaningExpanded] = useState(false);
@@ -646,7 +655,7 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
   };
 
   React.useEffect(() => {
-    updateBackground(require("../../assets/beige_bg.png"));
+    updateBackground(containerBackground);
     updateHeaderHidden(false);
 
     // Initialize runner fields for merged info flows so complete_runner can
@@ -670,7 +679,7 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     return () => {
       updateBackground(null);
     };
-  }, [updateBackground, updateHeaderHidden, currentType, screenData]);
+  }, [updateBackground, updateHeaderHidden, currentType, containerBackground]);
 
   React.useEffect(() => {
     return () => {

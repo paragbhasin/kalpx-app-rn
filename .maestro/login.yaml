@@ -106,30 +106,27 @@ env:
 - assertVisible: "Connect to Your Roots"
 
 # ── Step 5: fill credentials ─────────────────────────────────────────────
-# Formik can retain state if the Login screen was not freshly unmounted.
-# To clear reliably:
-#   1. Tap label/placeholder to focus the field (cursor at start)
-#   2. Tap far-right of field (85%) to move cursor past any existing text
-#   3. eraseText: 50 deletes leftward from cursor (clears the field)
-#   4. inputText types into the now-empty field
+# testID="login_email_input" / "login_password_input" added to LoginScreen.tsx.
+# eraseText: 100 defensive-clears any stale content (no-op on a fresh empty field).
+# Works reliably when Login screen is freshly mounted (normal case via drawer).
 - tapOn:
-    text: "Username"
-- tapOn:
-    point: "85%, 43%"
-- eraseText: 50
+    id: "login_email_input"
+- eraseText: 100
 - inputText: ${EMAIL}
 
 - tapOn:
-    text: "Password"
-- tapOn:
-    point: "85%, 51%"
-- eraseText: 50
+    id: "login_password_input"
+- eraseText: 100
 - inputText: ${PASSWORD}
 
-# ── Step 6: submit ───────────────────────────────────────────────────────
-# Exact regex avoids fuzzy match hitting "Login With Google".
-# In __DEV__, handleRecaptchaToken("dev-bypass-token") fires immediately —
-# no Google dialog, no reCAPTCHA network call.
+# ── Step 6: dismiss keyboard then submit ─────────────────────────────────
+# MUST dismiss keyboard before tapping LOGIN. With the keyboard open, the
+# y-key sits at ~(215,591) which overlaps the LOGIN button's scrolled position,
+# causing Maestro to accidentally press "y" before tapping LOGIN.
+# Tapping the top logo area (50%,10%) is always safe and dismisses the keyboard.
+- tapOn:
+    point: "50%, 10%"
+- waitForAnimationToEnd
 - tapOn:
     text: "^LOGIN$"
 

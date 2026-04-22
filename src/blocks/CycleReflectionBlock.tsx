@@ -15,6 +15,7 @@ import {
 import Svg, { Circle, Path } from "react-native-svg";
 import uuidv4 from "react-native-uuid";
 import {
+  mitraFetchProgress,
   mitraJourneyDay14Decision,
   mitraJourneyDay14View,
   mitraJourneyDay7Decision,
@@ -244,34 +245,52 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   const [carryReflection, setCarryReflection] = useState("");
   // Day 7 reflection text (BUG-4)
   const [day7ReflectionText, setDay7ReflectionText] = useState("");
+  const [progressData, setProgressData] = useState<any>(null);
+
+  useEffect(() => {
+    if (!showJourneyView) return;
+    mitraFetchProgress()
+      .then((res) => { if (res) setProgressData(res); })
+      .catch(() => {});
+  }, [showJourneyView]);
 
   const milestoneDayCount = is14DayCycle ? 14 : 7;
 
   const journeyData = useMemo(() => {
     const log = ss.journey_log || {};
     const currentDay = ss.day_number || 1;
-    const dayKey = `day_${selectedDay}`;
-    const dayLogs = log[dayKey] || [];
+    const beTrend = progressData?.weeklyTrend as Array<any> | undefined;
 
     let checkinCount = 0,
       triggerCount = 0,
       mantraCount = 0,
       sankalpCount = 0,
       coreCount = 0;
-    dayLogs.forEach((entry: any) => {
-      const desc = entry.description || "";
-      const pId = entry.payload?.practiceId || "";
-      if (desc.includes("Checked-in Prana")) checkinCount++;
-      if (
-        desc.includes("awareness_trigger") ||
-        desc.includes("breath_reset") ||
-        entry.action === "record_pause"
-      )
-        triggerCount++;
-      if (pId === "practice_chant") mantraCount++;
-      else if (pId === "practice_embody") sankalpCount++;
-      else if (entry.action === "submit" && pId) coreCount++;
-    });
+    if (beTrend && beTrend[selectedDay - 1]) {
+      const t = beTrend[selectedDay - 1];
+      mantraCount = t.mantraSessions || 0;
+      sankalpCount = t.sankalpEmbodied ? 1 : 0;
+      coreCount = t.practiceSessions || 0;
+      checkinCount = t.checkins || 0;
+      triggerCount = t.triggers || 0;
+    } else {
+      const dayKey = `day_${selectedDay}`;
+      const dayLogs = log[dayKey] || [];
+      dayLogs.forEach((entry: any) => {
+        const desc = entry.description || "";
+        const pId = entry.payload?.practiceId || "";
+        if (desc.includes("Checked-in Prana")) checkinCount++;
+        if (
+          desc.includes("awareness_trigger") ||
+          desc.includes("breath_reset") ||
+          entry.action === "record_pause"
+        )
+          triggerCount++;
+        if (pId === "practice_chant") mantraCount++;
+        else if (pId === "practice_embody") sankalpCount++;
+        else if (entry.action === "submit" && pId) coreCount++;
+      });
+    }
 
     const metrics_src = ss.checkpoint_metrics || {};
     const metricLabels = Object.keys(metrics_src)
@@ -315,26 +334,31 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
       coreCount: 0,
     };
     for (let d = 1; d <= milestoneDayCount; d++) {
-      const dl = log[`day_${d}`] || [];
-      let dc = 0,
-        dt = 0,
-        dm = 0,
-        ds = 0,
-        dcore = 0;
-      dl.forEach((e: any) => {
-        const desc = e.description || "",
-          pId = e.payload?.practiceId || "";
-        if (desc.includes("Checked-in Prana")) dc++;
-        if (
-          desc.includes("awareness_trigger") ||
-          desc.includes("breath_reset") ||
-          e.action === "record_pause"
-        )
-          dt++;
-        if (pId === "practice_chant") dm++;
-        else if (pId === "practice_embody") ds++;
-        else if (e.action === "submit" && pId) dcore++;
-      });
+      let dc = 0, dt = 0, dm = 0, ds = 0, dcore = 0;
+      if (beTrend && beTrend[d - 1]) {
+        const t = beTrend[d - 1];
+        dm = t.mantraSessions || 0;
+        ds = t.sankalpEmbodied ? 1 : 0;
+        dcore = t.practiceSessions || 0;
+        dc = t.checkins || 0;
+        dt = t.triggers || 0;
+      } else {
+        const dl = log[`day_${d}`] || [];
+        dl.forEach((e: any) => {
+          const desc = e.description || "",
+            pId = e.payload?.practiceId || "";
+          if (desc.includes("Checked-in Prana")) dc++;
+          if (
+            desc.includes("awareness_trigger") ||
+            desc.includes("breath_reset") ||
+            e.action === "record_pause"
+          )
+            dt++;
+          if (pId === "practice_chant") dm++;
+          else if (pId === "practice_embody") ds++;
+          else if (e.action === "submit" && pId) dcore++;
+        });
+      }
       weeklyStats.push({ day: d, total: dc + dt + dm + ds + dcore });
       weeklyTotals.checkinCount += dc;
       weeklyTotals.triggerCount += dt;
@@ -368,6 +392,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
     ss.checkpoint_metrics,
     selectedDay,
     milestoneDayCount,
+    progressData,
   ]);
 
   const checkpointMetrics = useMemo(() => {
@@ -1071,63 +1096,64 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
           <View style={styles.weeksWrapper}>
             <Day14Lotus style={styles.lotus} />
             <View style={styles.weeksContainer}>
-              {[1, 2].map(
-                (w) =>
-                  (w === 1 || milestoneDayCount === 14) && (
-                    <BlurView
-                      key={w}
-                      intensity={60}
-                      tint="light"
-                      style={styles.weekCard}
-                    >
-                      <Text style={styles.weekLabel}>Week {w}</Text>
-                      <View style={styles.daysGrid}>
-                        {[1, 2, 3, 4, 5, 6, 7].map((d) => {
-                          const dayNum = (w - 1) * 7 + d;
-                          const isLocked = dayNum > journeyData.maxUnlockedDay;
-                          const isToday = dayNum === ss.day_number;
-                          return (
-                            <TouchableOpacity
-                              key={d}
-                              style={[
-                                styles.dayItem,
-                                isToday && styles.dayToday,
-                              ]}
-                              onPress={() => {
-                                if (!isLocked) {
-                                  setSelectedDay(dayNum);
-                                  setShowJourneyView(true);
-                                }
-                              }}
-                            >
-                              {/* <View style={styles.statusMarker}>
-                                {isDayEngaged(dayNum) && (
-                                  <Text style={{ fontSize: 10 }}>✅</Text>
-                                )}
-                                {isToday && (
-                                  <Text style={styles.todayTag}>Today</Text>
-                                )}
-                              </View> */}
-                              <View
+              {(() => {
+                const dailyRhythm: Array<{ day: number; state: string }> =
+                  ss.today?.cycle_metrics?.daily_rhythm || [];
+                return [1, 2].map(
+                  (w) =>
+                    (w === 1 || milestoneDayCount === 14) && (
+                      <BlurView
+                        key={w}
+                        intensity={60}
+                        tint="light"
+                        style={styles.weekCard}
+                      >
+                        <Text style={styles.weekLabel}>Week {w}</Text>
+                        <View style={styles.daysGrid}>
+                          {[1, 2, 3, 4, 5, 6, 7].map((d) => {
+                            const dayNum = (w - 1) * 7 + d;
+                            const isLocked = dayNum > journeyData.maxUnlockedDay;
+                            const isToday = dayNum === ss.day_number;
+                            const dayState = !isLocked
+                              ? dailyRhythm.find((r) => r.day === dayNum)?.state
+                              : undefined;
+                            return (
+                              <TouchableOpacity
+                                key={d}
                                 style={[
-                                  styles.dayCircle,
-                                  isLocked && styles.dayCircleLocked,
+                                  styles.dayItem,
+                                  isToday && styles.dayToday,
                                 ]}
+                                onPress={() => {
+                                  if (!isLocked) {
+                                    setSelectedDay(dayNum);
+                                    setShowJourneyView(true);
+                                  }
+                                }}
                               >
-                                {!isLocked ? (
-                                  <Text style={styles.dayNum}>{dayNum}</Text>
-                                ) : (
-                                  <Text style={{ fontSize: 10 }}>🔒</Text>
-                                )}
-                              </View>
-                              <Text style={styles.dayText}>Day {dayNum}</Text>
-                            </TouchableOpacity>
-                          );
-                        })}
-                      </View>
-                    </BlurView>
-                  ),
-              )}
+                                <View
+                                  style={[
+                                    styles.dayCircle,
+                                    isLocked && styles.dayCircleLocked,
+                                    dayState === "done" && styles.dayCircleDone,
+                                    dayState === "missed" && styles.dayCircleMissed,
+                                  ]}
+                                >
+                                  {!isLocked ? (
+                                    <Text style={styles.dayNum}>{dayNum}</Text>
+                                  ) : (
+                                    <Text style={{ fontSize: 10 }}>🔒</Text>
+                                  )}
+                                </View>
+                                <Text style={styles.dayText}>Day {dayNum}</Text>
+                              </TouchableOpacity>
+                            );
+                          })}
+                        </View>
+                      </BlurView>
+                    ),
+                );
+              })()}
             </View>
           </View>
           <TouchableOpacity style={styles.skipBtn} onPress={onSkipJourney}>
@@ -1490,6 +1516,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   dayCircleLocked: { backgroundColor: "#f0f0f0", borderColor: "#ccc" },
+  dayCircleDone: { backgroundColor: "#e8f4e8", borderColor: "#2d7a5f", borderWidth: 2 },
+  dayCircleMissed: { backgroundColor: "#f5f5f5", borderColor: "#c9b19a" },
   dayNum: { fontFamily: Fonts.sans.bold, fontSize: 14, color: "#432104" },
   dayText: {
     fontFamily: Fonts.sans.regular,

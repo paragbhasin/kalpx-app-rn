@@ -4397,12 +4397,12 @@ export async function executeAction(
           };
           const allowedContexts = ROOM_PICKER_CONFIG[roomId] ?? null;
           setScreenValue(allowedContexts, "life_context_allowed");
-          // Clear _overlay_parent_container so open_why_this_l2 falls back to
-          // currentContainerId ("room") and routes to room/why_this_l2.
-          // RoomContainer handles that state directly with WhyThisL2Sheet.
-          // Stale values from a prior dashboard session would otherwise route
-          // the sheet to companion_dashboard, rendering the full dashboard UI.
-          setScreenValue(null, "_overlay_parent_container");
+          // Stamp "room" explicitly so open_why_this_l2 routes to room/why_this_l2.
+          // The handler reads _overlay_parent_container from screenData (not the
+          // screen store's currentContainerId field), so the value must be set —
+          // null falls through to the hardcoded "companion_dashboard" default and
+          // renders the full dashboard UI instead of the sheet within the room.
+          setScreenValue("room", "_overlay_parent_container");
           loadScreen({
             container_id: "room",
             state_id: allowedContexts ? "context_picker" : "render",

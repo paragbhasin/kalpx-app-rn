@@ -358,6 +358,10 @@ export interface RoomProvenance {
   selection_service_version: string;
   render_id: string;
   active_rotation_window_days: number;
+  visit_number: number;
+  render_phase: string;
+  life_context_applied: boolean;
+  life_context_skipped: boolean;
 }
 
 export interface RoomFallbacks {

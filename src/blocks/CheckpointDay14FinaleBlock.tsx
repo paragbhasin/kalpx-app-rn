@@ -133,7 +133,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   sovereignty: {
-    fontFamily: Fonts.serif.italic,
+    fontFamily: Fonts.serif.regular,
+    fontStyle: "italic",
     fontSize: 14,
     lineHeight: 20,
     color: "#9c7c3e",

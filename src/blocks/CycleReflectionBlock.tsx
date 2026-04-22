@@ -8,6 +8,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -235,6 +236,11 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   const [activeTab, setActiveTab] = useState<"day" | "weekly">("day");
   const [selectedDay, setSelectedDay] = useState(1);
   const [showDayPicker, setShowDayPicker] = useState(false);
+  // Screen 4 for Day 14: classification verdict + decision choices
+  const [showDecisions, setShowDecisions] = useState(false);
+  const [sealRitualText, setSealRitualText] = useState("");
+  const [deepenConfirmed, setDeepenConfirmed] = useState(false);
+  const [carryReflection, setCarryReflection] = useState("");
 
   const milestoneDayCount = is14DayCycle ? 14 : 7;
 
@@ -433,6 +439,56 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
     }
   };
 
+  const handleDecision14 = async (
+    decision: string,
+    carry: string,
+    deepenAccepted?: boolean,
+  ) => {
+    const feelingMap: Record<string, string> = {
+      continue_same: "steady",
+      deepen: "strong",
+      change_focus: "ready",
+    };
+    store.dispatch(
+      screenActions.setScreenValue({ key: "checkpoint_decision", value: decision }),
+    );
+    store.dispatch(
+      screenActions.setScreenValue({ key: "checkpoint_feeling", value: decision }),
+    );
+    store.dispatch(
+      screenActions.setScreenValue({
+        key: "checkpoint_feeling_simple",
+        value: feelingMap[decision] || "steady",
+      }),
+    );
+
+    const body: any = {
+      decision,
+      reflection: carry || ss.checkpoint_user_reflection || "",
+      sealRitual: sealRitualText,
+    };
+    if (deepenAccepted && deepenSuggestion) {
+      body.deepenAccepted = true;
+      body.deepenItemType = deepenSuggestion.item_type || "";
+      body.deepenItemId = deepenSuggestion.item_id || "";
+    }
+
+    try {
+      await mitraJourneyDay14Decision(body as any, String(uuidv4.v4()));
+      store.dispatch(
+        screenActions.setScreenValue({ key: "checkpoint_completed", value: true }),
+      );
+      store.dispatch(
+        loadScreenWithData({
+          containerId: "cycle_transitions",
+          stateId: "checkpoint_results",
+        }) as any,
+      );
+    } catch (err: any) {
+      console.warn(`[CycleReflectionBlock] day14 submit failed:`, err.message);
+    }
+  };
+
   const onReflectJourney = () => {
     setShowIntro(false);
     setShowJourneyInvite(true);
@@ -449,77 +505,62 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
     );
   };
 
+  const trendGraph = useMemo(() => {
+    const tg = ss.checkpoint_trend_graph || {};
+    return {
+      engaged: (tg.engaged || []) as number[],
+      fully_completed: (tg.fully_completed || []) as number[],
+      labels: (tg.labels || []) as string[],
+    };
+  }, [ss.checkpoint_trend_graph]);
+
+  const engagedTotal = useMemo(
+    () => trendGraph.engaged.reduce((acc: number, v: number) => acc + v, 0),
+    [trendGraph.engaged],
+  );
+  const completedTotal = useMemo(
+    () => trendGraph.fully_completed.reduce((acc: number, v: number) => acc + v, 0),
+    [trendGraph.fully_completed],
+  );
+
   const isDayEngaged = (dayNum: number) => {
-    if (is7DayCycle) {
-      return [true, true, true, false, true, true, true][dayNum - 1];
+    if (trendGraph.engaged.length > 0) {
+      return !!trendGraph.engaged[dayNum - 1];
     }
-    if (is14DayCycle) {
-      // 14-day hardcoded mockup data
-      return [
-        true,
-        false,
-        true,
-        true,
-        false,
-        true,
-        true,
-        true,
-        false,
-        true,
-        true,
-        false,
-        true,
-        true,
-      ][dayNum - 1];
-    }
-    const engaged = (ss.checkpoint_trend_graph || {}).engaged || [];
-    return (
-      !!engaged[dayNum - 1] || journeyData.weeklyStats[dayNum - 1]?.total > 0
-    );
+    return journeyData.weeklyStats[dayNum - 1]?.total > 0;
   };
 
   const isDayCompleted = (dayNum: number) => {
-    if (is7DayCycle) {
-      return [true, true, false, false, true, true, false][dayNum - 1];
-    }
-    if (is14DayCycle) {
-      return [
-        true,
-        false,
-        false,
-        true,
-        false,
-        false,
-        true,
-        true,
-        false,
-        false,
-        true,
-        false,
-        false,
-        true,
-      ][dayNum - 1];
+    if (trendGraph.fully_completed.length > 0) {
+      return !!trendGraph.fully_completed[dayNum - 1];
     }
     return false;
   };
 
+  const d7 = (ss.checkpoint_day_7 || {}) as Record<string, any>;
+  const d14 = (ss.checkpoint_day_14 || {}) as Record<string, any>;
+  const decisionsAvailable: string[] = ss.day_7_decisions_available || ["continue"];
+  const strongestType: string = ss.checkpoint_strongest_type || "";
+  const mitraReflection: string = ss.checkpoint_mitra_reflection || "";
+  const decisionFraming: string = ss.checkpoint_decision_framing || "";
+  const classifHeadline: string = ss.checkpoint_classification_headline || "";
+  const classifBody: string = ss.checkpoint_classification_body || "";
+  const deepenSuggestion: Record<string, any> | null = ss.checkpoint_deepen_suggestion || null;
+  const decisionLayout: string = ss.checkpoint_decision_layout || "continue_first";
+
   if (showIntro && is7DayCycle) {
+    const introHeadline = d7.intro_headline || "A Week Into Your Journey";
+    const ctaLabel = d7.intro_cta_label || "Reflect on My Journey";
     return (
       <View style={styles.introContainer}>
         <View style={styles.introOverlay}>
           <View style={{ marginTop: 30, alignSelf: "center" }}>
-            <Text style={styles.introTitleSpecial}>
-              A Week Into Your Journey
-            </Text>
+            <Text style={styles.introTitleSpecial}>{introHeadline}</Text>
             <Text style={styles.introSubtitle}>
-              A week ago, you began this journey with a simple intention.
+              {d7.body || "A week ago, you began this journey with a simple intention."}
             </Text>
             <Text style={styles.intro7daytitle}>
-              Through Sankalp • Mantra • Practice, you have taken the first step
-              inward.
-            </Text>
-            <Text style={styles.sevendayContent}>
-              The first steps on your path
+              {d7.framing || "Through Sankalp • Mantra • Practice, you have taken the first step inward."}
             </Text>
           </View>
           <View style={styles.bottomGroup}>
@@ -527,7 +568,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
               style={styles.primaryBtn}
               onPress={onReflectJourney}
             >
-              <Text style={styles.primaryBtnText}>Reflect on My Journey</Text>
+              <Text style={styles.primaryBtnText}>{ctaLabel}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -536,35 +577,34 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   }
 
   if (showIntro && is14DayCycle) {
+    const intro14Headline = day14Intro.title || d14.intro_headline || "You've completed 14 days";
+    const intro14Body1 = day14Intro.bodyLine1 || d14.intro_body || "You stayed with it.";
+    const intro14Body2 = day14Intro.bodyLine2 || "Even on the days it felt quiet or uncertain.";
+    const intro14Closing = day14Intro.closing || "Something within you has begun to shift — and it will continue, gently.";
+    const intro14Cta = day14Intro.ctaLabel || d14.intro_cta_label || "Reflect on My Journey";
     return (
       <View style={styles.introContainer}>
         <View style={styles.introOverlay14Day}>
           <View style={styles.introTopCluster}>
-            <Text style={styles.overlayTitleDark}>
-              You've completed 14 days
-            </Text>
+            <Text style={styles.overlayTitleDark}>{intro14Headline}</Text>
             <Day14Lotus width={600} />
           </View>
           <View style={styles.day14Body}>
-            <Text style={styles.day14BodyText}>
-              You stayed with it. Even on the days it felt quiet or uncertain.
-            </Text>
+            <Text style={styles.day14BodyText}>{intro14Body1}</Text>
+            <Text style={styles.day14BodyText}>{intro14Body2}</Text>
             <View style={styles.day14DividerRow}>
               <View style={styles.day14DividerLine} />
               <Text style={styles.day14DividerDiamond}>◆</Text>
               <View style={styles.day14DividerLine} />
             </View>
-            <Text style={styles.day14BodyText}>
-              Something within you has begun to shift — and it will continue,
-              gently.
-            </Text>
+            <Text style={styles.day14BodyText}>{intro14Closing}</Text>
           </View>
           <View style={styles.day14ButtonWrap}>
             <TouchableOpacity
               style={styles.primaryBtn}
               onPress={onReflectJourney}
             >
-              <Text style={styles.primaryBtnText}>Reflect on My Journey</Text>
+              <Text style={styles.primaryBtnText}>{intro14Cta}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -604,11 +644,11 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
           <View style={styles.statsRow}>
             <View style={styles.statBox}>
               <Text style={styles.statLabel}>Days Engaged</Text>
-              <Text style={styles.statValue}>6 / 7</Text>
+              <Text style={styles.statValue}>{engagedTotal} / {milestoneDayCount}</Text>
             </View>
             <View style={styles.statBox}>
               <Text style={styles.statLabel}>Fully Completed</Text>
-              <Text style={styles.statValue}>4 / 7</Text>
+              <Text style={styles.statValue}>{completedTotal} / {milestoneDayCount}</Text>
             </View>
           </View>
         )}
@@ -711,36 +751,192 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
             <Text style={styles.mitraBadgeText}>MITRA REFLECTION</Text>
           </View>
           <View style={styles.mitraContent}>
-            {is7DayCycle && (
+            {!!strongestType && (
               <View style={[styles.pill, { backgroundColor: "#eaf4e9" }]}>
                 <Text style={[styles.pillText, { color: "#2D7A5F" }]}>
-                  Strongest area: mantra
+                  Strongest area: {strongestType}
                 </Text>
               </View>
             )}
-            <Text style={styles.mitraText}>
-              {is14DayCycle
-                ? "Your mantra practice was the one you returned to most."
-                : "Your mantra practice has been the steadiest anchor this cycle."}
-            </Text>
+            {!!mitraReflection && (
+              <Text style={styles.mitraText}>{mitraReflection}</Text>
+            )}
           </View>
         </View>
 
-        {is7DayCycle && (
-          <Text style={styles.footerSummaryText}>
-            You have walked 7 days of this path. The rhythm is taking hold.
-            Continue with the same steadiness.
-          </Text>
+        {is7DayCycle && !!decisionFraming && (
+          <Text style={styles.footerSummaryText}>{decisionFraming}</Text>
         )}
 
-        <TouchableOpacity
-          style={styles.goldActionBtn}
-          onPress={() => handleDecision(is14DayCycle ? "deepen" : "continue")}
-        >
-          <Text style={styles.goldActionBtnText}>
-            {is14DayCycle ? "Continue to Choices →" : "Continue →"}
-          </Text>
-        </TouchableOpacity>
+        {/* Day 7 — decision buttons inline, driven by BE decisions_available */}
+        {is7DayCycle && (
+          <View style={{ marginTop: 16, gap: 10 }}>
+            <TouchableOpacity
+              style={styles.primaryBtn}
+              onPress={() => handleDecision("continue")}
+            >
+              <Text style={styles.primaryBtnText}>
+                {d7.cta_continue_label || "Continue My Path"}
+              </Text>
+            </TouchableOpacity>
+            {decisionsAvailable.includes("lighten") && (
+              <TouchableOpacity
+                style={[styles.primaryBtn, { backgroundColor: "#c8a97a" }]}
+                onPress={() => handleDecision("lighten")}
+              >
+                <Text style={styles.primaryBtnText}>
+                  {d7.cta_lighten_label || "Lighten"}
+                </Text>
+              </TouchableOpacity>
+            )}
+            {decisionsAvailable.includes("reset") && (
+              <TouchableOpacity
+                style={styles.skipBtn}
+                onPress={() => handleDecision("reset")}
+              >
+                <Text style={styles.skipBtnText}>
+                  {d7.cta_start_fresh_label || "Start Fresh"}
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        )}
+
+        {/* Day 14 — navigate to classification + decision screen (Screen 4) */}
+        {is14DayCycle && (
+          <TouchableOpacity
+            style={styles.goldActionBtn}
+            onPress={() => setShowDecisions(true)}
+          >
+            <Text style={styles.goldActionBtnText}>
+              {d14.graph_cta || "Continue to Choices →"}
+            </Text>
+          </TouchableOpacity>
+        )}
+      </ScrollView>
+    );
+  }
+
+  // --- Screen 4 (Day 14 only): Classification verdict + Decision buttons ---
+  if (showDecisions && is14DayCycle) {
+    const completedDays = completedTotal;
+    const totalDays14 = milestoneDayCount;
+    const ceremony14 = ss.completion_ceremony || {};
+    const fullCompleted = ceremony14.completed_days ?? completedDays;
+
+    // Determine which decisions to show based on completion + decision_layout
+    const showDeepen =
+      (ss.day_14_decisions_available || []).includes("deepen") &&
+      (decisionLayout === "deepen_first" || decisionLayout === "continue_first");
+    const showRestart = decisionLayout === "restart_rhythm";
+    const deepenFirst = decisionLayout === "deepen_first";
+
+    return (
+      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20, paddingBottom: 60 }}>
+        {/* Classification verdict card */}
+        {!!classifHeadline && (
+          <View style={styles.classificationCard}>
+            <Text style={styles.classificationHeadline}>{classifHeadline}</Text>
+            <View style={styles.day14DividerRow}>
+              <View style={styles.day14DividerLine} />
+              <Text style={styles.day14DividerDiamond}>◆</Text>
+              <View style={styles.day14DividerLine} />
+            </View>
+            {!!classifBody && (
+              <Text style={styles.classificationBody}>{classifBody}</Text>
+            )}
+          </View>
+        )}
+
+        {/* Deepen preview card — shown if suggestion is available and user hasn't confirmed yet */}
+        {showDeepen && deepenSuggestion && !deepenConfirmed && (
+          <View style={styles.deepenPreviewCard}>
+            <View style={[styles.pill, { backgroundColor: "#ede4f7", alignSelf: "flex-start" }]}>
+              <Text style={[styles.pillText, { color: "#9067C6" }]}>
+                {deepenSuggestion.item_type || "practice"}
+              </Text>
+            </View>
+            {!!deepenSuggestion.title && (
+              <Text style={styles.deepenTitle}>{deepenSuggestion.title}</Text>
+            )}
+            {!!deepenSuggestion.preview && (
+              <Text style={styles.deepenPreview}>{deepenSuggestion.preview}</Text>
+            )}
+          </View>
+        )}
+
+        {/* Carry forward reflection input */}
+        <Text style={[styles.microLabel, { marginBottom: 8 }]}>
+          {d14.carry_label || "CARRY FORWARD"}
+        </Text>
+        <View style={styles.inputWrap}>
+          <TextInput
+            style={styles.inputField}
+            value={carryReflection}
+            onChangeText={setCarryReflection}
+            placeholder={d14.carry_input_placeholder || "How will you continue?"}
+            placeholderTextColor="#b8a898"
+            multiline
+            numberOfLines={4}
+            textAlignVertical="top"
+          />
+        </View>
+
+        {/* Decision buttons */}
+        <View style={{ gap: 12, marginTop: 20 }}>
+          {showRestart && (
+            <TouchableOpacity
+              style={styles.primaryBtn}
+              onPress={() => handleDecision14("continue_same", carryReflection)}
+            >
+              <Text style={styles.primaryBtnText}>
+                {d14.restart_cta || "Start a New 14-Day Rhythm"}
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {!showRestart && deepenFirst && showDeepen && (
+            <TouchableOpacity
+              style={styles.primaryBtn}
+              onPress={() => handleDecision14("deepen", carryReflection, true)}
+            >
+              <Text style={styles.primaryBtnText}>
+                {d14.deepen_practice_cta || "Deepen Practice"}
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {!showRestart && (
+            <TouchableOpacity
+              style={[styles.primaryBtn, deepenFirst && { backgroundColor: "#c8a97a" }]}
+              onPress={() => handleDecision14("continue_same", carryReflection)}
+            >
+              <Text style={styles.primaryBtnText}>
+                {d14.continue_path_cta || "Continue Same Path"}
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {!showRestart && !deepenFirst && showDeepen && (
+            <TouchableOpacity
+              style={[styles.primaryBtn, { backgroundColor: "#c8a97a" }]}
+              onPress={() => handleDecision14("deepen", carryReflection, true)}
+            >
+              <Text style={styles.primaryBtnText}>
+                {d14.deepen_practice_cta || "Deepen Practice"}
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          <TouchableOpacity
+            style={styles.skipBtn}
+            onPress={() => handleDecision14("change_focus", carryReflection)}
+          >
+            <Text style={styles.skipBtnText}>
+              {d14.change_focus_cta || "Change Focus"}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     );
   }
@@ -1495,8 +1691,9 @@ const styles = StyleSheet.create({
   },
   pillText: { fontFamily: Fonts.sans.bold, fontSize: 12 },
   mitraText: {
-    fontFamily: Fonts.serif.italic,
+    fontFamily: Fonts.serif.regular,
     fontSize: 15,
+    fontStyle: "italic",
     color: "#432104",
     lineHeight: 22,
   },
@@ -1522,6 +1719,66 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.bold,
     fontSize: 16,
     color: "#fff",
+  },
+  // Screen 4 — classification + decision
+  classificationCard: {
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "rgba(217, 165, 87, 0.3)",
+  },
+  classificationHeadline: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 22,
+    color: "#432104",
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  classificationBody: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 16,
+    lineHeight: 26,
+    color: "#5e4533",
+    textAlign: "center",
+  },
+  deepenPreviewCard: {
+    backgroundColor: "#f5f0fa",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "rgba(144, 103, 198, 0.3)",
+  },
+  deepenTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 17,
+    color: "#432104",
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  deepenPreview: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 14,
+    color: "#6b4c35",
+    lineHeight: 22,
+  },
+  inputWrap: {
+    backgroundColor: "#fafaf8",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(217, 165, 87, 0.4)",
+    padding: 12,
+    minHeight: 100,
+    marginBottom: 20,
+  },
+  inputField: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 15,
+    color: "#432104",
+    lineHeight: 24,
+    minHeight: 80,
   },
   // Comparison Rows
   comparisonArea: { gap: 20, marginTop: 15 },

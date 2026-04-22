@@ -159,40 +159,54 @@ export function ingestDay7View(env: V3Day7ViewEnvelope | null): V3FlatIngest {
   if (!env) return {};
   const id = env.identity || ({} as any);
   const refl = env.reflection || ({} as any);
+  const cyc = (env as any).cycle_reflection || ({} as any);
   const actions = env.actions || ({} as any);
+  const tg = refl.trend_graph || ({} as any);
 
   return {
     day_number: id.day_number ?? 0,
     total_days: id.total_days ?? 0,
     path_cycle_number: id.path_cycle_number ?? 1,
     journey_id: id.journey_id ?? null,
+    // Cycle state — BE decides eligibility; RN controls visual weight only
+    checkpoint_day7_state: cyc.day7_state || "steady",
+    checkpoint_engagement_level: cyc.engagement_level || "engaged",
+    checkpoint_intervention_eligible: cyc.intervention_eligible ?? false,
+    checkpoint_strongest_type: cyc.strongest_type || "",
+    checkpoint_mitra_reflection: cyc.mitra_reflection || "",
+    checkpoint_completion_rates: cyc.completion_rates || {},
+    checkpoint_decision_framing: refl.decision_framing || "",
+    // Per-day engagement data for the bar chart / day dots
+    checkpoint_trend_graph: {
+      labels: tg.labels || [],
+      engaged: tg.engaged || [],
+      fully_completed: tg.fully_completed || [],
+    },
     checkpoint_day_7: {
       headline: refl.headline || refl.engagement_trajectory || "",
-      intro_headline: refl.headline || refl.engagement_trajectory || "Deep Breaths.",
+      intro_headline: refl.headline || refl.engagement_trajectory || "",
       body: refl.body || refl.journey_narrative || "",
       intro_body: refl.body || refl.framing || "",
       framing: refl.framing ?? "",
       journey_narrative: refl.journey_narrative ?? "",
       body_narrative: refl.journey_narrative || refl.engagement_trajectory || "",
       eyebrow: refl.engagement_trajectory || "Checkpoint",
+      surface_label: refl.surface_label || "CONTINUITY MIRROR",
       intro_cta_label: "Continue",
       what_grew_label: "WHAT GREW",
       what_to_carry_label: "WHAT TO CARRY",
       input_placeholder: "Type your reflection here...",
       next_week_label: "NEXT WEEK",
-      cta_continue_label: (actions.decisions_available || []).includes("continue")
-        ? "Continue My Path"
-        : "",
-      cta_lighten_label: (actions.decisions_available || []).includes("lighten")
-        ? "Lighten"
-        : "",
-      cta_start_fresh_label: (actions.decisions_available || []).includes("reset")
-        ? "Choose New Focus"
-        : "",
+      cta_continue_label: refl.cta_continue || "Continue My Path",
+      cta_lighten_label: refl.cta_lighten || "Lighten",
+      cta_start_fresh_label: refl.cta_reset || "Start Fresh",
     },
-    journey_day_statuses: (refl.trend_graph?.fully_completed || []).map((v: number) =>
+    journey_day_statuses: (tg.fully_completed || []).map((v: number) =>
       v ? "completed" : "pending",
     ),
+    // actions carries BE-computed decisions_available + primary_decision
+    day_7_decisions_available: actions.decisions_available ?? ["continue"],
+    day_7_primary_decision: actions.primary_decision ?? "continue",
     checkpoint_framing: refl.framing ?? "",
     journey_narrative: refl.journey_narrative ?? "",
     what_grew_section: env.insights?.resilience_narrative?.summary_line ?? null,
@@ -200,7 +214,7 @@ export function ingestDay7View(env: V3Day7ViewEnvelope | null): V3FlatIngest {
   };
 }
 
-/** Maps day-14-view envelope → flat keys used by CheckpointDay14Block. */
+/** Maps day-14-view envelope → flat keys used by CycleReflectionBlock. */
 export function ingestDay14View(env: V3Day14ViewEnvelope | null): V3FlatIngest {
   if (!env) return {};
   const id = env.identity || ({} as any);
@@ -208,43 +222,76 @@ export function ingestDay14View(env: V3Day14ViewEnvelope | null): V3FlatIngest {
   const arc = env.day14_arc || ({} as any);
   const ceremony = env.completion_ceremony || ({} as any);
   const actions = env.actions || ({} as any);
+  const tg = (env as any).trend_graph || ({} as any);
+  const ds = (env as any).deepen_suggestion || null;
+  const dc = (env as any).decision_copy || ({} as any);
+  const classif = arc.classification || ({} as any);
 
   return {
     day_number: id.day_number ?? 14,
     total_days: id.total_days ?? 14,
     path_cycle_number: id.path_cycle_number ?? 1,
     journey_id: id.journey_id ?? null,
+    // Per-day engagement data for bar chart and day picker dots
+    checkpoint_trend_graph: {
+      labels: tg.labels || [],
+      engaged: tg.engaged || [],
+      fully_completed: tg.fully_completed || [],
+    },
+    // Cycle reflection — strongest area, growth, mitra narrative
+    checkpoint_strongest_type: reflection.strongest_type || "",
+    checkpoint_mitra_reflection: reflection.mitra_reflection || "",
+    checkpoint_completion_rates: reflection.completion_rates || {},
+    // Classification verdict — headline + body from M25, pre-resolved by BE
+    checkpoint_classification_label: classif.label || "",
+    checkpoint_classification_headline: classif.headline || "",
+    checkpoint_classification_body: classif.body || "",
+    checkpoint_primary_recommendation: arc.primary_recommendation || "continue_same",
+    checkpoint_decision_layout: arc.decision_layout || "continue_first",
+    // Deepen suggestion — BE recommends what to deepen
+    checkpoint_deepen_suggestion: ds,
+    // Decision CTA labels + layout framing
+    checkpoint_decision_copy: dc,
     checkpoint_day_14: {
-      eyebrow: env.insights?.resilience_narrative?.summary_line || "Two Weeks",
-      intro_headline: "Fourteen Days.",
-      intro_body:
-        reflection.mitra_reflection ||
-        "You've reached a significant milestone in your journey.",
-      intro_cta_label: "Begin Reflection",
+      eyebrow: env.insights?.resilience_narrative?.summary_line || "DAY 14",
+      intro_headline: (env.m25_narrative as any)?.intro_headline || "Two weeks. Something settled.",
+      intro_body: (env.m25_narrative as any)?.intro_body || "Can I show you what has changed?",
+      intro_cta_label: (env.m25_narrative as any)?.intro_cta_label || "Reflect on My Journey",
+      surface_label: (env.m25_narrative as any)?.surface_label || "EVOLUTION PIVOT",
+      day_picker_title: (env.m25_narrative as any)?.day_picker_title || "Your 14-Day Journey",
+      day_picker_subtitle: (env.m25_narrative as any)?.day_picker_subtitle || "Tap a day to see your progress",
+      day_picker_progress_tagline: (env.m25_narrative as any)?.day_picker_progress_tagline || "Every return deepens the path.",
+      graph_cta: (env.m25_narrative as any)?.graph_cta || "Continue to Choices",
+      narrative_strongest: reflection.mitra_reflection || "",
       narrative_template:
-        reflection.mitra_reflection || "You've fully held {completed_count} of {total_days} days.",
-      summary_line_template: "{completed_count} of {total_days} days.",
+        (env.m25_narrative as any)?.narrative_template ||
+        "You've fully held {completed_count} of {total_days} days.",
+      summary_line_template:
+        (env.m25_narrative as any)?.summary_line_template || "{completed_count} of {total_days} days held.",
       summary_label: "WHAT GREW",
-      seal_cycle_label: "SEAL THIS CYCLE",
-      seal_cycle_helper: "What do you carry forward from these fourteen days?",
-      seal_input_placeholder: "Type your observation here...",
-      carry_label: "CARRY FORWARD",
-      carry_input_placeholder: "How will you continue?",
-      continue_path_cta: "Continue Same Path",
-      deepen_practice_cta: "Deepen Practice",
-      change_focus_cta: "Change Focus",
-      ...env.m25_narrative, // merge any BE-resolved slots
+      seal_cycle_label: (env.m25_narrative as any)?.seal_cycle_label || "SEAL THIS CYCLE",
+      seal_cycle_helper: (env.m25_narrative as any)?.seal_cycle_helper || "",
+      seal_input_placeholder: (env.m25_narrative as any)?.seal_input_placeholder || "What deserves to be remembered?",
+      carry_label: (env.m25_narrative as any)?.carry_label || "CARRY FORWARD",
+      carry_input_placeholder: (env.m25_narrative as any)?.carry_input_placeholder || "",
+      continue_path_cta: dc.continue_same_cta || (env.m25_narrative as any)?.continue_path_cta || "Continue Same Path",
+      deepen_practice_cta: dc.deepen_cta || (env.m25_narrative as any)?.deepen_practice_cta || "Deepen Practice",
+      change_focus_cta: dc.change_focus_cta || (env.m25_narrative as any)?.change_focus_cta || "Change Focus",
+      restart_cta: dc.restart_cta || "Start a New 14-Day Rhythm",
+      ceremony_continue_headline: (env.m25_narrative as any)?.ceremony_continue_headline || "A new cycle begins.",
+      ceremony_deepen_headline: (env.m25_narrative as any)?.ceremony_deepen_headline || "A deeper commitment begins.",
+      ceremony_change_focus_headline: (env.m25_narrative as any)?.ceremony_change_focus_headline || "Your cycle is complete.",
     },
     journey_day_statuses: Array(14)
       .fill("completed")
-      .map((s, i) => (i < (ceremony.completed_days ?? 13) ? "completed" : "pending")),
+      .map((_s, i) => (i < (ceremony.completed_days ?? 13) ? "completed" : "pending")),
     checkpoint_framing: reflection.reflection_prompt ?? "",
     journey_narrative: reflection.mitra_reflection ?? "",
     what_grew_section: String(env.insights?.resilience_narrative?.summary_line ?? ""),
     day_14_decisions_available: actions.decisions_available ?? [],
     m25_narrative: {
       eyebrow: "Cycle Complete",
-      intro_headline: "You've arrived.",
+      intro_headline: (env.m25_narrative as any)?.intro_headline || "You've arrived.",
       narrative_template:
         reflection.mitra_reflection ||
         "Fourteen days of dedicated practice. You've held your path through {completed_count} days.",

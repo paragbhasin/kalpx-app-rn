@@ -99,6 +99,12 @@ interface HomeResponse {
 
 // ── Types: entry-view / welcome_back_surface ─────────────────────────
 type ChipKey = "reentry_continue" | "reentry_fresh";
+interface EarnedContext {
+  days_practiced?: number;
+  strongest_anchor?: string;
+  focus?: string;
+  path_cycle_number?: number;
+}
 interface ReentryHome {
   headline: string;
   body_lines: string[];
@@ -107,6 +113,12 @@ interface ReentryHome {
   cycle_count?: number;
   chips: { id: ChipKey; label: string }[];
   user_name: string;
+  // tier-aware additions
+  tier?: "short" | "medium" | "long" | "very_long";
+  earned_context?: EarnedContext;
+  fresh_restart_suggested?: boolean;
+  fresh_reason_label?: string;
+  primary_recommendation?: "continue" | "fresh";
 }
 
 interface ContinueJourneyProps {
@@ -324,6 +336,11 @@ export default function ContinueJourney({
         cycle_count: cont.cycle_count ?? undefined,
         chips,
         user_name: greet.user_name || userName || "friend",
+        tier: (cont.tier as ReentryHome["tier"]) || "short",
+        earned_context: cont.earned_context ?? undefined,
+        fresh_restart_suggested: cont.fresh_restart_suggested ?? false,
+        fresh_reason_label: cont.fresh_reason_label || "",
+        primary_recommendation: (cont.primary_recommendation as "continue" | "fresh") || "continue",
       };
     },
     [dispatch, navigation, userName],
@@ -591,11 +608,126 @@ export default function ContinueJourney({
 
   // ── Returning-user render (entry-view welcome_back_surface) ──────
   const rEntry = reentry!;
-  const headline = (rEntry.headline || "").replace(
-    "{userName}",
-    rEntry.user_name || userName || "friend",
-  );
+  const displayName = rEntry.user_name || userName || "friend";
+  const headline = (rEntry.headline || "").replace("{userName}", displayName);
+  const isDeepTier =
+    rEntry.tier === "medium" || rEntry.tier === "long" || rEntry.tier === "very_long";
 
+  // For medium/long/very_long: show dedicated emotional card with earned context.
+  // For short (3-7 day gap): keep inline chip layout.
+  if (isDeepTier) {
+    // BE controls button order via primary_recommendation.
+    const freshFirst = rEntry.fresh_restart_suggested || rEntry.primary_recommendation === "fresh";
+    const continueChip = rEntry.chips.find((c) => c.id === "reentry_continue");
+    const freshChip = rEntry.chips.find((c) => c.id === "reentry_fresh");
+    const primaryChip = freshFirst ? freshChip : continueChip;
+    const secondaryChip = freshFirst ? continueChip : freshChip;
+    const ec = rEntry.earned_context;
+
+    return (
+      <SafeAreaView style={{ flex: 1 }}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Headline + body */}
+          <View style={styles.header}>
+            {!!headline && <Text style={styles.welcomeText}>{headline}</Text>}
+            {rEntry.body_lines.map((line, i) => (
+              <Text key={i} style={styles.subtext}>{line}</Text>
+            ))}
+          </View>
+
+          {/* Welcome back context line */}
+          {!!rEntry.welcome_back_line && (
+            <Text style={styles.welcomeBackLine}>{rEntry.welcome_back_line}</Text>
+          )}
+
+          <View style={styles.dividerContainer}>
+            <View style={styles.dividerLine} />
+            <Ionicons name="diamond-outline" size={10} color="#DAC28E" />
+            <View style={styles.dividerLine} />
+          </View>
+
+          {/* Earned context card */}
+          {!!ec && (
+            <View style={styles.earnedContextCard}>
+              {typeof ec.days_practiced === "number" && (
+                <View style={styles.earnedRow}>
+                  <Text style={styles.earnedKey}>Days practiced</Text>
+                  <Text style={styles.earnedVal}>{ec.days_practiced}</Text>
+                </View>
+              )}
+              {typeof rEntry.cycle_count === "number" && rEntry.cycle_count > 0 && (
+                <View style={styles.earnedRow}>
+                  <Text style={styles.earnedKey}>Full cycles</Text>
+                  <Text style={styles.earnedVal}>{rEntry.cycle_count}</Text>
+                </View>
+              )}
+              {!!ec.strongest_anchor && (
+                <View style={styles.earnedRow}>
+                  <Text style={styles.earnedKey}>Strongest anchor</Text>
+                  <Text style={styles.earnedVal}>{ec.strongest_anchor}</Text>
+                </View>
+              )}
+            </View>
+          )}
+
+          {/* very_long tier: fresh reason nudge */}
+          {!!rEntry.fresh_reason_label && (
+            <Text style={styles.freshReasonLabel}>{rEntry.fresh_reason_label}</Text>
+          )}
+
+          {/* Decision buttons */}
+          <View style={[styles.actionGroup, { marginTop: 24 }]}>
+            {primaryChip && (
+              <TouchableOpacity
+                testID={primaryChip.id}
+                style={[styles.actionButton, submittingReentry && { opacity: 0.5 }]}
+                activeOpacity={0.7}
+                disabled={submittingReentry}
+                onPress={() => handleReentryChip(primaryChip.id)}
+              >
+                <LinearGradient
+                  colors={["#C08B31", "#D3A44D", "#B57C26"]}
+                  start={{ x: 0, y: 0.5 }}
+                  end={{ x: 1, y: 0.5 }}
+                  style={styles.primaryCtaGradient}
+                >
+                  <Text style={styles.primaryCtaLabel}>{primaryChip.label}</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            )}
+            {secondaryChip && (
+              <TouchableOpacity
+                testID={secondaryChip.id}
+                style={[styles.actionButton, submittingReentry && { opacity: 0.5 }]}
+                activeOpacity={0.7}
+                disabled={submittingReentry}
+                onPress={() => handleReentryChip(secondaryChip.id)}
+              >
+                <View style={styles.btnContent}>
+                  <View style={styles.btnContentInner}>
+                    <Text style={styles.btnText}>{secondaryChip.label}</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            )}
+          </View>
+        </ScrollView>
+
+        <View style={styles.lotusContainer} pointerEvents="none">
+          <Image
+            source={require("../../../assets/new_home_lotus.png")}
+            style={styles.lotusImage}
+            resizeMode="contain"
+          />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // ── Short-tier (3-7 day gap): inline chip layout ─────────────────
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ScrollView
@@ -622,6 +754,7 @@ export default function ContinueJourney({
           {rEntry.chips.map((chip, idx) => (
             <TouchableOpacity
               key={chip.id || `chip_${idx}`}
+              testID={chip.id}
               style={[
                 styles.actionButton,
                 submittingReentry && { opacity: 0.5 },
@@ -695,6 +828,55 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     maxWidth: 300,
     marginBottom: 12,
+  },
+  welcomeBackLine: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 17,
+    color: "#7a5c35",
+    textAlign: "center",
+    lineHeight: 26,
+    maxWidth: 320,
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  earnedContextCard: {
+    width: "100%",
+    backgroundColor: "rgba(255, 252, 246, 0.85)",
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(217, 194, 142, 0.4)",
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    marginBottom: 8,
+    gap: 10,
+  },
+  earnedRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  earnedKey: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 13,
+    color: "#8c7355",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  earnedVal: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 16,
+    color: "#432104",
+  },
+  freshReasonLabel: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 15,
+    color: "#9b7a4a",
+    textAlign: "center",
+    lineHeight: 24,
+    maxWidth: 300,
+    marginTop: 8,
+    marginBottom: 4,
+    fontStyle: "italic",
   },
   dividerContainer: {
     flexDirection: "row",

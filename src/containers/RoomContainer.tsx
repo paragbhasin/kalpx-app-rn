@@ -141,6 +141,8 @@ const RoomContainer: React.FC<Props> = () => {
   const roomId: RoomId | undefined = (screenData as any)?.room_id;
   const lifeContext: LifeContext | null =
     ((screenData as any)?.life_context as LifeContext | null) || null;
+  const allowedContexts: LifeContext[] | null =
+    ((screenData as any)?.life_context_allowed as LifeContext[] | null) || null;
 
   // ── Context picker branch ──────────────────────────────────────────
   if (currentStateId === "context_picker") {
@@ -196,6 +198,7 @@ const RoomContainer: React.FC<Props> = () => {
     return (
       <LifeContextPickerSheet
         visible={true}
+        allowedContexts={allowedContexts ?? undefined}
         onPick={(slug) => {
           setScreenValue(slug, "life_context");
           setScreenValue(false, "context_skipped");

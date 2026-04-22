@@ -1601,7 +1601,10 @@ export async function getPrinciple(id: string | number): Promise<any> {
   if (!id) return null;
   try {
     const res = await api.get(`mitra/principles/${id}/`);
-    return res.data || null;
+    const data = res.data;
+    // Reject HTML responses (nginx catch-all on 404) — treat as not found.
+    if (!data || typeof data !== "object") return null;
+    return data;
   } catch (err: any) {
     console.warn(`[MITRA] principles/${id} failed (tolerated):`, err.message);
     return null;

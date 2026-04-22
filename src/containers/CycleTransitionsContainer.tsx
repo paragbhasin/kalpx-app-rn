@@ -33,6 +33,7 @@ import Animated, {
 import Svg, { Circle, Path } from "react-native-svg";
 import RudrakshSvg from "../../assets/rudraksh.svg";
 import AudioPlayerBlock from "../blocks/AudioPlayerBlock";
+import CycleReflectionBlock from "../blocks/CycleReflectionBlock";
 import { VoiceTextInput } from "../components/VoiceTextInput";
 import BlockRenderer from "../engine/BlockRenderer";
 import { executeAction } from "../engine/actionExecutor";
@@ -646,7 +647,13 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
   };
 
   React.useEffect(() => {
-    updateBackground(require("../../assets/beige_bg.png"));
+    const isCheckpointReflectionState =
+      stateId === "checkpoint_day_7" || stateId === "checkpoint_day_14";
+
+    // Let CycleReflectionBlock own the checkpoint backgrounds (Day-7/Day-14).
+    if (!isCheckpointReflectionState) {
+      updateBackground(require("../../assets/beige_bg.png"));
+    }
     updateHeaderHidden(false);
 
     // Initialize runner fields for merged info flows so complete_runner can
@@ -670,7 +677,7 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     return () => {
       updateBackground(null);
     };
-  }, [updateBackground, updateHeaderHidden, currentType, screenData]);
+  }, [updateBackground, updateHeaderHidden, currentType, screenData, stateId]);
 
   React.useEffect(() => {
     return () => {
@@ -740,6 +747,16 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
   const isAckScreen = stateId === "quick_checkin_ack";
   const showVoiceInput =
     stateId === "quick_checkin" || stateId === "quick_checkin_ack";
+  const isCheckpointReflectionState =
+    stateId === "checkpoint_day_7" || stateId === "checkpoint_day_14";
+
+  if (isCheckpointReflectionState) {
+    return (
+      <View style={styles.container}>
+        <CycleReflectionBlock />
+      </View>
+    );
+  }
 
   const blocks = schema?.blocks || [];
   const footerBlocks = useMemo(

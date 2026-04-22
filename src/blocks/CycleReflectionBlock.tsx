@@ -1,5 +1,5 @@
 import { BlurView } from "expo-blur";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -50,11 +50,21 @@ const METRIC_ALLOWLIST: Record<string, string> = {
 };
 
 const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
-  const { screenData } = useScreenStore();
+  const { screenData, currentStateId } = useScreenStore();
   const ss = screenData as Record<string, any>;
+  const checkpointDayNum = Number(ss.checkpoint_day || 0);
+  const dayNumberNum = Number(ss.day_number || 0);
+  const routeCycleDay = useMemo(() => {
+    if (currentStateId === "checkpoint_day_7") return 7;
+    if (currentStateId === "checkpoint_day_14") return 14;
+    return 0;
+  }, [currentStateId]);
+  const resolvedCycleDay = Number(
+    dayNumberNum || checkpointDayNum || routeCycleDay || 0,
+  );
 
   const is14DayCycle = useMemo(() => {
-    const day = Number(ss.day_number || ss.checkpoint_day || 0);
+    const day = resolvedCycleDay;
     return (
       day === 14 ||
       day === 1 ||
@@ -63,12 +73,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
       // ingestDay14View sets checkpoint_day_14 (object) but not checkpoint_tag
       !!ss.checkpoint_day_14
     );
-  }, [
-    ss.day_number,
-    ss.checkpoint_day,
-    ss.checkpoint_tag,
-    ss.checkpoint_day_14,
-  ]);
+  }, [resolvedCycleDay, ss.checkpoint_tag, ss.checkpoint_day_14]);
 
   const is7DayCycle = useMemo(() => {
     return (
@@ -76,17 +81,19 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
       ss.checkpoint_tag === "7-DAY COMPLETION" ||
       ss.checkpoint_tag === "MIDWAY REFLECTION" ||
       ss.checkpoint_tag === "MIDPOINT REFLECTION" ||
-      (ss.checkpoint_day === 7 && !is14DayCycle) ||
+      (resolvedCycleDay === 7 && !is14DayCycle) ||
       // ingestDay7View sets checkpoint_day_7 (object) but NOT checkpoint_tag / checkpoint_day
       // This is the primary detection path for API-driven 7-day cycles
       (!is14DayCycle && !!ss.checkpoint_day_7)
     );
-  }, [ss.checkpoint_tag, ss.checkpoint_day, ss.checkpoint_day_7, is14DayCycle]);
+  }, [resolvedCycleDay, ss.checkpoint_tag, ss.checkpoint_day_7, is14DayCycle]);
 
   const [showIntro, setShowIntro] = useState(true);
   const [showJourneyInvite, setShowJourneyInvite] = useState(false);
   const [showJourneyView, setShowJourneyView] = useState(false);
   const [introShown, setIntroShown] = useState(false);
+  const checkpointViewFetchInFlight = useRef(false);
+  const checkpointViewFetchedKey = useRef<string | null>(null);
   const updateBackground = useScreenStore((state) => state.updateBackground);
   const updateHeaderHidden = useScreenStore(
     (state) => state.updateHeaderHidden,
@@ -97,8 +104,11 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   // to trigger a re-render. checkpoint_day is written to the store BEFORE
   // navigation so it is always available at mount time.
   const screenBackground = useMemo(() => {
-    const rawDay = Number(ss.checkpoint_day || ss.day_number || 0);
-    if (showIntro || showJourneyInvite) {
+    const rawDay = resolvedCycleDay;
+    if (showJourneyInvite) {
+      return Day14Bg;
+    }
+    if (showIntro) {
       if (rawDay === 14 || is14DayCycle) return Day14Bg;
       if (rawDay === 7 || is7DayCycle) return Day7Bg;
     }
@@ -106,8 +116,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   }, [
     showIntro,
     showJourneyInvite,
-    ss.checkpoint_day,
-    ss.day_number,
+    resolvedCycleDay,
     is14DayCycle,
     is7DayCycle,
   ]);
@@ -148,17 +157,40 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
 
   // v3 data sync: fetch milestone data if missing when on Day 7/14
   useEffect(() => {
-    const day = Number(ss.day_number || ss.checkpoint_day || 0);
-    if ((day === 7 || day === 14 || day === 1) && !ss.checkpoint_headline) {
-      (async () => {
-        const fetcher =
-          day === 14 || day === 1
-            ? mitraJourneyDay14View
-            : mitraJourneyDay7View;
+    const day = resolvedCycleDay;
+    if (day !== 7 && day !== 14 && day !== 1) return;
+
+    const isDay14Fetch = day === 14 || day === 1;
+    const hasHydratedPayload = isDay14Fetch
+      ? !!ss.checkpoint_day_14
+      : !!ss.checkpoint_day_7;
+    const fetchKey = `${currentStateId || "checkpoint"}:${isDay14Fetch ? 14 : 7}:${ss.journey_id || ""}`;
+
+    // Do not refetch if:
+    // 1) payload is already present,
+    // 2) same checkpoint fetch already completed in this mount,
+    // 3) request is currently in flight.
+    if (
+      hasHydratedPayload ||
+      checkpointViewFetchedKey.current === fetchKey ||
+      checkpointViewFetchInFlight.current
+    ) {
+      return;
+    }
+
+    checkpointViewFetchInFlight.current = true;
+    let isCancelled = false;
+
+    (async () => {
+      try {
+        const fetcher = isDay14Fetch
+          ? mitraJourneyDay14View
+          : mitraJourneyDay7View;
         const result = await fetcher();
+        if (isCancelled) return;
+
         if (result.envelope) {
-          const ingester =
-            day === 14 || day === 1 ? ingestDay14View : ingestDay7View;
+          const ingester = isDay14Fetch ? ingestDay14View : ingestDay7View;
           const flat = ingester(result.envelope as any);
           for (const [k, v] of Object.entries(flat)) {
             if (v !== undefined) {
@@ -168,13 +200,28 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
             }
           }
         }
-      })();
-    }
-  }, [ss.day_number, ss.checkpoint_day, ss.checkpoint_headline]);
+        checkpointViewFetchedKey.current = fetchKey;
+      } finally {
+        checkpointViewFetchInFlight.current = false;
+      }
+    })();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [
+    currentStateId,
+    resolvedCycleDay,
+    ss.checkpoint_day_14,
+    ss.checkpoint_day_7,
+    ss.journey_id,
+  ]);
 
   useEffect(() => {
-    if ((is7DayCycle || is14DayCycle) && !introShown) {
+    if (!introShown && (is7DayCycle || is14DayCycle)) {
+      // Both Day-7 and Day-14 start at intro, then proceed to journey invite.
       setShowIntro(true);
+      setShowJourneyInvite(false);
       setIntroShown(true);
       store.dispatch(
         screenActions.setScreenValue({
@@ -351,7 +398,9 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
       }),
     );
 
-    const day = ss.checkpoint_day || milestoneDayCount;
+    const day = Number(
+      ss.checkpoint_day || resolvedCycleDay || milestoneDayCount,
+    );
     const body = {
       decision: decision as any,
       reflection: ss.checkpoint_user_reflection || "",
@@ -458,12 +507,19 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
     return (
       <View style={styles.introContainer}>
         <View style={styles.introOverlay}>
-          <View style={styles.visualHeader7Day}>
+          <View style={{ marginTop: 30, alignSelf: "center" }}>
             <Text style={styles.introTitleSpecial}>
               A Week Into Your Journey
             </Text>
             <Text style={styles.introSubtitle}>
               A week ago, you began this journey with a simple intention.
+            </Text>
+            <Text style={styles.intro7daytitle}>
+              Through Sankalp • Mantra • Practice, you have taken the first step
+              inward.
+            </Text>
+            <Text style={styles.sevendayContent}>
+              The first steps on your path
             </Text>
           </View>
           <View style={styles.bottomGroup}>
@@ -519,7 +575,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   // --- Consolidated Reflection View (Matches Images) ---
   if (!showJourneyInvite && !showIntro && (is7DayCycle || is14DayCycle)) {
     return (
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} style={{ padding: 10 }}>
         {is7DayCycle && (
           <View style={styles.mirrorHeader}>
             <Text style={styles.microLabel}>DAY 7 • MIDPOINT</Text>
@@ -697,7 +753,9 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
             <Text style={styles.journeyTitle}>
               Your {milestoneDayCount}-Day Journey
             </Text>
-            14day_screen_lotus
+            <Text style={[styles.sevendayContent, { marginBottom: 60 }]}>
+              Tap a day to see your progress
+            </Text>
           </View>
           <View style={styles.weeksWrapper}>
             <Image
@@ -955,14 +1013,27 @@ const styles = StyleSheet.create({
   visualHeader7Day: { marginTop: 100 },
   introTitleSpecial: {
     fontFamily: Fonts.serif.bold,
-    fontSize: 32,
-    color: "#fff",
-    marginBottom: 20,
+    fontSize: 28,
+    color: "#4a2f1a",
+    alignSelf: "center",
+    // marginBottom: 20,
   },
   introSubtitle: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 18,
-    color: "#fff",
+    fontSize: 16,
+    color: "#5e4533",
+    alignSelf: "center",
+    textAlign: "center",
+    paddingHorizontal: 10,
+  },
+  intro7daytitle: {
+    fontFamily: Fonts.serif.regular,
+    paddingHorizontal: 10,
+    marginTop: 10,
+    fontSize: 15,
+    color: "#5e4533",
+    alignSelf: "center",
+    textAlign: "center",
   },
   overlayTitleDark: {
     position: "absolute",
@@ -1038,7 +1109,21 @@ const styles = StyleSheet.create({
     fontSize: 24,
     color: "#432104",
   },
-  weeksContainer: { gap: 20 },
+  sevendayContent: {
+    position: "absolute",
+
+    top: "170%",
+
+    fontFamily: Fonts.serif.bold,
+
+    fontSize: 16,
+
+    color: "#3f2918",
+
+    textAlign: "center",
+    alignSelf: "center",
+  },
+  weeksContainer: { gap: 20, padding: 10 },
   weekCard: {
     marginBottom: 20,
     padding: 16,
@@ -1064,21 +1149,17 @@ const styles = StyleSheet.create({
   },
   weeksWrapper: {
     position: "relative",
-    // marginTop: 40,
+    marginTop: 40,
   },
 
   lotus: {
     position: "absolute",
-    top: -20,
+    top: -30,
     alignSelf: "center",
     width: 120,
     height: 60,
-    zIndex: 10,
   },
 
-  weeksContainer: {
-    marginTop: 20,
-  },
   weekLabel: {
     fontFamily: Fonts.sans.bold,
     fontSize: 16,

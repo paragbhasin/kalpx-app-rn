@@ -50,7 +50,7 @@ const CheckpointDay14FinaleBlock: React.FC<Props> = () => {
   const goToDashboard = () => {
     store.dispatch(
       loadScreenWithData({
-        containerId: "companion_dashboard",
+        containerId: "companion_dashboard_v3",
         stateId: "day_active",
       }) as any,
     );

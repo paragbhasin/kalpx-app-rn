@@ -1,0 +1,42 @@
+appId: com.kalpx.app
+---
+# Case 1: WB → Continue
+# Persona: test+welcomeback@kalpx.com (gap=7d, careerprosperity)
+# Expected: Home shows ContinueJourney WB chips, tap Continue → dashboard day_active
+- runFlow:
+    file: login.yaml
+    env:
+      EMAIL: test+welcomeback@kalpx.com
+      PASSWORD: Test1234!
+- waitForAnimationToEnd
+
+# Entry surface: must be WB chip home (ContinueJourney hasActiveJourney=false)
+# NOT the legacy GuidedGrowth "Welcome back. Your path is waiting." surface
+- takeScreenshot: audit_case1_01_after_login_wb
+
+# WB headline from continuity.headline
+- assertVisible:
+    text: "Welcome back|welcome back"
+- takeScreenshot: audit_case1_02_wb_surface
+
+# Continue chip must be visible (NOT "Continue with" - that was GuidedGrowth)
+- assertVisible:
+    text: "Continue"
+- assertVisible:
+    text: "Begin fresh|fresh"
+- takeScreenshot: audit_case1_03_chips_visible
+
+# Tap Continue chip
+- tapOn:
+    text: "Continue"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      text: "Day|My Routine|Mitra"
+    timeout: 20000
+- takeScreenshot: audit_case1_04_after_continue_final_destination
+
+# Final destination: companion_dashboard_v3/day_active
+# Triad should be visible
+- assertVisible:
+    text: "Day|My Routine|Mitra"

@@ -282,6 +282,8 @@ const CustomDrawerContent = (props) => {
         {isLoggedIn ? (
           // LOGOUT
           <TouchableOpacity
+            testID="drawer_logout_btn"
+            accessibilityLabel="drawer_logout_btn"
             style={{
               flexDirection: "row",
               alignItems: "center",
@@ -302,6 +304,8 @@ const CustomDrawerContent = (props) => {
         ) : (
           // LOGIN
           <TouchableOpacity
+            testID="drawer_login_btn"
+            accessibilityLabel="drawer_login_btn"
             style={{
               flexDirection: "row",
               alignItems: "center",

@@ -21,7 +21,7 @@ import {
   mitraJourneyDay7View,
 } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
-import { ingestDay14View, ingestDay7View } from "../engine/v3Ingest";
+import { ingestDailyView, ingestDay14View, ingestDay7View } from "../engine/v3Ingest";
 import store from "../store";
 import { loadScreenWithData, screenActions } from "../store/screenSlice";
 import { Fonts } from "../theme/fonts";
@@ -68,7 +68,6 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
     const day = resolvedCycleDay;
     return (
       day === 14 ||
-      day === 1 ||
       ss.checkpoint_tag === "14-DAY COMPLETION" ||
       ss.checkpoint_tag === "CYCLE REFLECTION" ||
       // ingestDay14View sets checkpoint_day_14 (object) but not checkpoint_tag
@@ -159,9 +158,9 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   // v3 data sync: fetch milestone data if missing when on Day 7/14
   useEffect(() => {
     const day = resolvedCycleDay;
-    if (day !== 7 && day !== 14 && day !== 1) return;
+    if (day !== 7 && day !== 14) return;
 
-    const isDay14Fetch = day === 14 || day === 1;
+    const isDay14Fetch = day === 14;
     const hasHydratedPayload = isDay14Fetch
       ? !!ss.checkpoint_day_14
       : !!ss.checkpoint_day_7;
@@ -238,9 +237,13 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   const [showDayPicker, setShowDayPicker] = useState(false);
   // Screen 4 for Day 14: classification verdict + decision choices
   const [showDecisions, setShowDecisions] = useState(false);
+  // Screen 5 for Day 14: completion ceremony before routing to cycle 2
+  const [showFinale, setShowFinale] = useState(false);
   const [sealRitualText, setSealRitualText] = useState("");
   const [deepenConfirmed, setDeepenConfirmed] = useState(false);
   const [carryReflection, setCarryReflection] = useState("");
+  // Day 7 reflection text (BUG-4)
+  const [day7ReflectionText, setDay7ReflectionText] = useState("");
 
   const milestoneDayCount = is14DayCycle ? 14 : 7;
 
@@ -404,38 +407,37 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
       }),
     );
 
-    const day = Number(
-      ss.checkpoint_day || resolvedCycleDay || milestoneDayCount,
-    );
     const body = {
       decision: decision as any,
-      reflection: ss.checkpoint_user_reflection || "",
+      reflection: day7ReflectionText || ss.checkpoint_user_reflection || "",
     };
 
     try {
-      const fetcher =
-        day === 14 ? mitraJourneyDay14Decision : mitraJourneyDay7Decision;
-      const env = await fetcher(body as any, String(uuidv4.v4()));
-      if (env) {
-        const nv = env.next_view || { view_key: "", payload: {} };
-        if (nv.view_key === "checkpoint_results" || nv.payload) {
-          // results logic...
+      const env = await mitraJourneyDay7Decision(body as any, String(uuidv4.v4()));
+      store.dispatch(
+        screenActions.setScreenValue({ key: "checkpoint_completed", value: true }),
+      );
+      const nv = env?.next_view ?? { view_key: "", payload: {} };
+      if (nv.view_key === "onboarding_start") {
+        for (const k of ["journey_id", "day_number", "total_days", "arc_state", "continuity"]) {
+          store.dispatch(screenActions.setScreenValue({ key: k, value: null }));
         }
+        store.dispatch(
+          loadScreenWithData({ containerId: "welcome_onboarding", stateId: "turn_1" }) as any,
+        );
+      } else {
+        if (nv.payload && Object.keys(nv.payload).length > 0) {
+          const flat = ingestDailyView(nv.payload as any);
+          for (const [k, v] of Object.entries(flat)) {
+            if (v !== undefined) store.dispatch(screenActions.setScreenValue({ key: k, value: v }));
+          }
+        }
+        store.dispatch(
+          loadScreenWithData({ containerId: "companion_dashboard_v3", stateId: "day_active" }) as any,
+        );
       }
-      store.dispatch(
-        screenActions.setScreenValue({
-          key: "checkpoint_completed",
-          value: true,
-        }),
-      );
-      store.dispatch(
-        loadScreenWithData({
-          containerId: "cycle_transitions",
-          stateId: "checkpoint_results",
-        }) as any,
-      );
     } catch (err: any) {
-      console.warn(`[CycleReflectionBlock] submit failed:`, err.message);
+      console.warn(`[CycleReflectionBlock] day7 submit failed:`, err.message);
     }
   };
 
@@ -474,16 +476,25 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
     }
 
     try {
-      await mitraJourneyDay14Decision(body as any, String(uuidv4.v4()));
+      const env = await mitraJourneyDay14Decision(body as any, String(uuidv4.v4()));
       store.dispatch(
         screenActions.setScreenValue({ key: "checkpoint_completed", value: true }),
       );
-      store.dispatch(
-        loadScreenWithData({
-          containerId: "cycle_transitions",
-          stateId: "checkpoint_results",
-        }) as any,
-      );
+      const nv = env?.next_view ?? { view_key: "", payload: {} };
+      if (decision === "change_focus" || nv.view_key === "onboarding_start") {
+        for (const k of ["journey_id", "day_number", "total_days", "arc_state", "continuity"]) {
+          store.dispatch(screenActions.setScreenValue({ key: k, value: null }));
+        }
+        store.dispatch(
+          loadScreenWithData({ containerId: "welcome_onboarding", stateId: "turn_1" }) as any,
+        );
+      } else {
+        // continue_same or deepen: stash new cycle payload, show finale ceremony
+        if (nv.payload && Object.keys(nv.payload).length > 0) {
+          store.dispatch(screenActions.setScreenValue({ key: "_pending_daily_view", value: nv.payload }));
+        }
+        setShowFinale(true);
+      }
     } catch (err: any) {
       console.warn(`[CycleReflectionBlock] day14 submit failed:`, err.message);
     }
@@ -768,6 +779,29 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
           <Text style={styles.footerSummaryText}>{decisionFraming}</Text>
         )}
 
+        {/* Day 7 — reflection input (BUG-4) */}
+        {is7DayCycle && (
+          <View style={{ marginTop: 16 }}>
+            <Text style={[styles.microLabel, { marginBottom: 8 }]}>
+              {d7.reflection_prompt_label || "WHAT DO YOU CARRY FORWARD?"}
+            </Text>
+            <View style={styles.inputWrap}>
+              <TextInput
+                style={styles.inputField}
+                value={day7ReflectionText}
+                onChangeText={setDay7ReflectionText}
+                placeholder={d7.reflection_placeholder || "What from this week feels worth continuing?"}
+                placeholderTextColor="#b8a898"
+                multiline
+                numberOfLines={3}
+                maxLength={1000}
+                textAlignVertical="top"
+                testID="checkpoint_day_7_reflection_input"
+              />
+            </View>
+          </View>
+        )}
+
         {/* Day 7 — decision buttons inline, driven by BE decisions_available */}
         {is7DayCycle && (
           <View style={{ marginTop: 16, gap: 10 }}>
@@ -959,6 +993,66 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
+    );
+  }
+
+  // --- Day 14 Finale (BUG-5) ---
+  // Shown after continue_same / deepen decision, before routing to cycle 2.
+  if (showFinale && is14DayCycle) {
+    const ceremony = ss.completion_ceremony || {};
+    const m25 = ss.m25_narrative || {};
+    const finaleHeadline = m25.intro_headline || ceremony.sovereignty_line || "A new cycle begins.";
+    const finaleNarrative =
+      typeof m25.narrative_template === "string" && m25.narrative_template
+        ? m25.narrative_template
+            .replace("{completed_count}", String(ceremony.completed_days ?? ""))
+            .replace("{total_days}", String(ceremony.total_days ?? 14))
+        : "";
+    const finaleSovereignty = ceremony.sovereignty_line || "";
+    const handleFinaleContinue = () => {
+      const pendingPayload = ss._pending_daily_view;
+      if (pendingPayload && Object.keys(pendingPayload).length > 0) {
+        const flat = ingestDailyView(pendingPayload as any);
+        for (const [k, v] of Object.entries(flat)) {
+          if (v !== undefined) store.dispatch(screenActions.setScreenValue({ key: k, value: v }));
+        }
+      }
+      store.dispatch(screenActions.setScreenValue({ key: "_pending_daily_view", value: null }));
+      store.dispatch(
+        loadScreenWithData({ containerId: "companion_dashboard_v3", stateId: "day_active" }) as any,
+      );
+    };
+    return (
+      <View style={styles.introContainer} testID="checkpoint_day_14_finale">
+        <View style={styles.introOverlay14Day}>
+          <View style={styles.introTopCluster}>
+            <Text style={styles.overlayTitleDark}>{finaleHeadline}</Text>
+            <Day14Lotus width={600} />
+          </View>
+          <View style={styles.day14Body}>
+            {!!finaleNarrative && (
+              <Text style={styles.day14BodyText}>{finaleNarrative}</Text>
+            )}
+            {!!finaleSovereignty && (
+              <>
+                <View style={styles.day14DividerRow}>
+                  <View style={styles.day14DividerLine} />
+                  <Text style={styles.day14DividerDiamond}>◆</Text>
+                  <View style={styles.day14DividerLine} />
+                </View>
+                <Text style={[styles.day14BodyText, { fontStyle: "italic" }]}>{finaleSovereignty}</Text>
+              </>
+            )}
+          </View>
+          <View style={styles.day14ButtonWrap}>
+            <TouchableOpacity style={styles.primaryBtn} onPress={handleFinaleContinue}>
+              <Text style={styles.primaryBtnText}>
+                {d14.begin_cycle_cta || "Begin Cycle 2"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
     );
   }
 

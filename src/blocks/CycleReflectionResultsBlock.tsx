@@ -156,9 +156,12 @@ const CycleReflectionResultsBlock: React.FC<
 
   // Feeling-keyed copy now served from registry via slot().
   const title = slot("result_title");
-  const paragraphs = [slot("paragraph_1"), slot("paragraph_2")].filter(Boolean);
+  const paragraphs = [
+    slot("paragraph_1") || "Even a small shift matters.",
+    slot("paragraph_2") || "Continue this path so the change can root itself.",
+  ];
 
-  const handleAction = (action: ResultAction) => {
+  const onContinueSame = () => {
     store.dispatch(
       screenActions.setScreenValue({
         key: "checkpoint_completed",
@@ -171,28 +174,43 @@ const CycleReflectionResultsBlock: React.FC<
     cleanupFlowState("checkpoint", writeState);
     store.dispatch(
       loadScreenWithData({
-        containerId: action.target.container_id,
-        stateId: action.target.state_id,
+        containerId: "companion_dashboard_v3",
+        stateId: "day_active",
+      }) as any,
+    );
+  };
+
+  const onChangeFocus = () => {
+    store.dispatch(
+      screenActions.setScreenValue({
+        key: "checkpoint_completed",
+        value: true,
       }),
+    );
+    const writeState = (value: any, key: string) => {
+      store.dispatch(screenActions.setScreenValue({ key, value }));
+    };
+    cleanupFlowState("checkpoint", writeState);
+    // Explicitly set turn 2 for the onboarding container
+    store.dispatch(
+      screenActions.setScreenValue({
+        key: "onboarding_turn",
+        value: "turn_2",
+      }),
+    );
+    store.dispatch(
+      loadScreenWithData({
+        containerId: "welcome_onboarding",
+        stateId: "turn_2",
+      }) as any,
     );
   };
 
   return (
-    <ScrollView
-      style={styles.scroll}
-      contentContainerStyle={styles.scrollContent}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* Big lotus header */}
-      <View style={styles.lotusHeader}>
-        {is14 ? (
-          <LotusDay14 width={170} height={170} />
-        ) : (
-          <LotusDay7 width={170} height={170} />
-        )}
-      </View>
-
-      <Text style={styles.resultTitle}>{title}</Text>
+    <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false}>
+      <Text style={styles.resultTitle}>
+        {title || "A shift is taking root"}
+      </Text>
 
       {/* Smaller decorative lotus */}
       <View style={styles.lotusCardWrap}>
@@ -218,28 +236,31 @@ const CycleReflectionResultsBlock: React.FC<
 
         {/* Action buttons */}
         <View style={styles.ctaArea}>
-          {actions.map((action, idx) => (
-            <View key={action.id} style={{ width: "100%" }}>
-              {idx > 0 && (
-                <Text style={styles.orDivider}>{slot("action_divider")}</Text>
-              )}
-              <TouchableOpacity
-                style={styles.ctaButton}
-                onPress={() => handleAction(action)}
-                activeOpacity={0.92}
-              >
-                <Text style={styles.ctaText}>Continue Same</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.secondaryctaButton, { marginTop: 12 }]}
-                onPress={() => handleAction(action)}
-                activeOpacity={0.92}
-              >
-                <Text style={styles.ctaText}>Change Focus</Text>
-              </TouchableOpacity>
-              <Text style={styles.optionDescription}>{action.description}</Text>
-            </View>
-          ))}
+          <TouchableOpacity
+            style={styles.ctaButton}
+            onPress={onContinueSame}
+            activeOpacity={0.92}
+          >
+            <Text style={styles.ctaText}>Continue Same</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.optionDescription}>
+            Consistency is the base of transformation. Root your rhythm.
+          </Text>
+
+          <View style={{ height: 20 }} />
+
+          <TouchableOpacity
+            style={styles.secondaryctaButton}
+            onPress={onChangeFocus}
+            activeOpacity={0.92}
+          >
+            <Text style={styles.ctaText}>Change Focus</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.optionDescription}>
+            Shift your intention and start fresh with a new focus.
+          </Text>
         </View>
       </View>
     </ScrollView>
@@ -283,6 +304,7 @@ const styles = StyleSheet.create({
     width: "70%",
     alignItems: "center",
     marginBottom: -35,
+    alignSelf: "center",
   },
   contentCard: {
     width: "100%",

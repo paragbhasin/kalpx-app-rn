@@ -186,14 +186,7 @@ mantras:
     rationale: Same family; relational-loss secondary biasing.
     CURATOR_GATE: true
 
-  - row_id: mantra.shiva_om_tryambakam_healing
-    class: mantra
-    room_fit: [release]
-    proposed_life_context_bias: [health_energy]
-    proposed_exclude_from_contexts: [purpose_direction]
-    density_class: sparse
-    rationale: Tryambakam healing register; body-grief primary.
-    CURATOR_GATE: false
+  # mantra.shiva_om_tryambakam_healing STRIPPED — not in master_mantras.json (Wave 3 P0 hygiene 2026-04-21)
 
   - row_id: mantra.asato_ma
     class: mantra
@@ -223,14 +216,7 @@ mantras:
     rationale: Saraswati wisdom — study/decision-making register.
     CURATOR_GATE: false
 
-  - row_id: mantra.saraswati_om_saraswati_wisdom
-    class: mantra
-    room_fit: [clarity]
-    proposed_life_context_bias: [work_career, purpose_direction]
-    proposed_exclude_from_contexts: []
-    density_class: sparse
-    rationale: Paired Saraswati variant; tilts purpose_direction.
-    CURATOR_GATE: true
+  # mantra.saraswati_om_saraswati_wisdom STRIPPED — not in master_mantras.json (Wave 3 P0 hygiene 2026-04-21)
 
   - row_id: mantra.ganesha_om_gam_clarity
     class: mantra
@@ -241,14 +227,7 @@ mantras:
     rationale: Ganesha obstacle-removal — work/daily hurdles.
     CURATOR_GATE: false
 
-  - row_id: mantra.ganesha_om_gam_new_direction
-    class: mantra
-    room_fit: [clarity]
-    proposed_life_context_bias: [purpose_direction, work_career]
-    proposed_exclude_from_contexts: []
-    density_class: sparse
-    rationale: Ganesha new-direction variant — transitions/vocation.
-    CURATOR_GATE: false
+  # mantra.ganesha_om_gam_new_direction STRIPPED — not in master_mantras.json (Wave 3 P0 hygiene 2026-04-21)
 
   - row_id: mantra.pavamana_asato_ma
     class: mantra
@@ -333,23 +312,9 @@ mantras:
     rationale: Universal-well-being prayer — relational + body blessing.
     CURATOR_GATE: false
 
-  - row_id: mantra.krishna_govinda_joy
-    class: mantra
-    room_fit: [joy]
-    proposed_life_context_bias: [self, daily_life]
-    proposed_exclude_from_contexts: [money_security]
-    density_class: sparse
-    rationale: Krishna-govinda joy variant; bhakti-rasa self + daily.
-    CURATOR_GATE: false
+  # mantra.krishna_govinda_joy STRIPPED — not in master_mantras.json (Wave 3 P0 hygiene 2026-04-21)
 
-  - row_id: mantra.krishna_govinda_gratitude
-    class: mantra
-    room_fit: [joy]
-    proposed_life_context_bias: [relationships, daily_life]
-    proposed_exclude_from_contexts: [money_security]
-    density_class: sparse
-    rationale: Gratitude bhakti-rasa; relational-daily.
-    CURATOR_GATE: false
+  # mantra.krishna_govinda_gratitude STRIPPED — not in master_mantras.json (Wave 3 P0 hygiene 2026-04-21)
 
   - row_id: mantra.lakshmi_om_shri_joy
     class: mantra

@@ -23,6 +23,7 @@
  * handler (actionExecutor.ts) before the container is even mounted.
  */
 
+import { useFocusEffect } from "@react-navigation/native";
 import React, { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 import api from "../Networks/axios";
@@ -141,8 +142,18 @@ const RoomContainer: React.FC<Props> = () => {
   const currentStateId = useScreenStore(
     (s: any) => s.screen?.currentStateId ?? s.currentStateId ?? "render",
   );
-  const loadScreen = useScreenStore((s: any) => s.loadScreen);
-  const goBack = useScreenStore((s: any) => s.goBack);
+  const updateBackground = useScreenStore((s: any) => s.updateBackground);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      updateBackground(require("../../assets/rooms_bg.jpg"));
+      return () => {
+        updateBackground(null);
+      };
+    }, [updateBackground]),
+  );
+
+  const { loadScreen, goBack } = useScreenStore();
 
   const roomId: RoomId | undefined = (screenData as any)?.room_id;
   const lifeContext: LifeContext | null =
@@ -337,7 +348,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "transparent",
   },
 });
 

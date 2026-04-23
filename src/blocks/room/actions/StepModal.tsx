@@ -21,6 +21,7 @@
  */
 
 import { BlurView } from "expo-blur";
+import LottieView from "lottie-react-native";
 import React, {
   useCallback,
   useEffect,
@@ -215,6 +216,9 @@ function defaultInstruction(kind: TimerBodyProps["kind"]): string {
   return "Sit quietly.";
 }
 
+const WALK_ANIMATION_END_FRAME = 68;
+const WALK_PERSON_COLOR = "#4A3B2F";
+
 const BreathingOrb: React.FC<{
   running: boolean;
   inhaleMs: number;
@@ -355,6 +359,18 @@ const TimerBody: React.FC<TimerBodyProps> = ({ kind, stepPayload, onDone }) => {
   const [remaining, setRemaining] = useState<number>(totalSec);
   const [running, setRunning] = useState<boolean>(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lottieRef = useRef<LottieView>(null);
+  const atZero = remaining <= 0;
+
+  useEffect(() => {
+    if (kind !== "timer_walk") return;
+    if (running && !atZero) {
+      // The source JSON has trailing empty frames; play only the active range.
+      lottieRef.current?.play(0, WALK_ANIMATION_END_FRAME);
+      return;
+    }
+    lottieRef.current?.pause();
+  }, [running, atZero, kind]);
 
   useEffect(() => {
     if (!running) return;
@@ -372,7 +388,10 @@ const TimerBody: React.FC<TimerBodyProps> = ({ kind, stepPayload, onDone }) => {
     };
   }, [running]);
 
-  const atZero = remaining <= 0;
+  useEffect(() => {
+    if (atZero) setRunning(false);
+  }, [atZero]);
+
   const mm = Math.floor(remaining / 60);
   const ss = remaining % 60;
   const timeLabel = `${mm.toString().padStart(1, "0")}:${ss
@@ -391,6 +410,26 @@ const TimerBody: React.FC<TimerBodyProps> = ({ kind, stepPayload, onDone }) => {
           inhaleMs={(stepPayload?.step_config?.inhale ?? 0) * 1000}
           exhaleMs={(stepPayload?.step_config?.exhale ?? 0) * 1000}
         />
+      )}
+      {kind === "timer_walk" && (
+        <View style={styles.walkingAnimationContainer}>
+          <LottieView
+            ref={lottieRef}
+            source={require("../../../../assets/Walking Animation.json")}
+            autoPlay={false}
+            loop={false}
+            style={styles.walkingAnimation}
+            colorFilters={[
+              { keypath: "Fill 1", color: WALK_PERSON_COLOR },
+              { keypath: "**.Fill 1", color: WALK_PERSON_COLOR },
+            ]}
+            onAnimationFinish={() => {
+              if (running && !atZero) {
+                lottieRef.current?.play(0, WALK_ANIMATION_END_FRAME);
+              }
+            }}
+          />
+        </View>
       )}
 
       <Text style={styles.timerDigits} testID="step_modal_timer_digits">
@@ -1089,6 +1128,17 @@ const styles = StyleSheet.create({
   reachOutActions: {
     gap: 10,
     marginBottom: 24,
+  },
+  walkingAnimationContainer: {
+    width: 200,
+    height: 200,
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  walkingAnimation: {
+    width: "100%",
+    height: "100%",
   },
 });
 

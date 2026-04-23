@@ -19,20 +19,11 @@
  */
 
 import React, { useState } from "react";
-import {
-  Alert,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-} from "react-native";
+import { Alert, StyleSheet, Text, TouchableOpacity } from "react-native";
 
 import { executeAction } from "../../../engine/actionExecutor";
 import { useScreenStore } from "../../../engine/useScreenBridge";
-import type {
-  ActionEnvelope,
-  InquiryCategory,
-  RoomRenderV1,
-} from "../types";
+import type { ActionEnvelope, InquiryCategory, RoomRenderV1 } from "../types";
 import { buildActionCtx } from "./actionContextHelper";
 import InquiryModal from "./InquiryModal";
 
@@ -136,7 +127,10 @@ const RoomActionInquiryPill: React.FC<Props> = ({ action, envelope }) => {
       setModalVisible(true);
     } catch {
       // Fall back to v1 Alert stub so telemetry still fires.
-      const labels = ip.categories.map((c) => c.label).slice(0, 8).join("\n");
+      const labels = ip.categories
+        .map((c) => c.label)
+        .slice(0, 8)
+        .join("\n");
       try {
         Alert.alert(
           action.label || "Inquiry",
@@ -158,10 +152,7 @@ const RoomActionInquiryPill: React.FC<Props> = ({ action, envelope }) => {
     dispatchStepFromInquiry(category, templateId);
   };
 
-  const handleSubmitJournal = (
-    category: InquiryCategory,
-    text: string,
-  ) => {
+  const handleSubmitJournal = (category: InquiryCategory, text: string) => {
     setModalVisible(false);
     dispatchStepFromInquiry(category, "step_journal_inquiry", { text });
   };
@@ -193,16 +184,24 @@ const RoomActionInquiryPill: React.FC<Props> = ({ action, envelope }) => {
 
 const styles = StyleSheet.create({
   pill: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: "#D8D8D8",
-    marginVertical: 4,
+    backgroundColor: "#FBF5F5",
+    borderColor: "#9f9f9f",
+    borderWidth: 0.3,
+    borderRadius: 15,
+    padding: 15,
+    elevation: 6,
+    marginTop: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    marginBottom: 10,
   },
   label: {
     fontSize: 15,
-    color: "#1C1C1E",
+    color: "#432104",
+    alignSelf: "center",
+    textAlign: "center",
   },
 });
 

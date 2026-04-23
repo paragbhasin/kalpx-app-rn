@@ -467,7 +467,7 @@ const TextInputBody: React.FC<TextInputBodyProps> = ({
         multiline
         textAlignVertical="top"
         style={styles.textInput}
-        placeholder="..."
+        placeholder="Type what you feel.."
         placeholderTextColor="#B0B0B5"
         testID="step_modal_text_input"
         maxLength={MAX_TEXT}
@@ -532,7 +532,7 @@ const GroundingBody: React.FC<{ onDone: (extra: StepModalResult) => void }> = ({
         multiline
         textAlignVertical="top"
         style={styles.textInput}
-        placeholder="..."
+        placeholder="Type what you feel.."
         placeholderTextColor="#B0B0B5"
         testID="step_modal_grounding_input"
         maxLength={MAX_TEXT}

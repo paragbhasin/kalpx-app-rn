@@ -16,9 +16,18 @@
  * the room chooser; this is a narrower decision surface).
  */
 
-import React, { useEffect } from "react";
-import { BackHandler, Modal, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import React, { useEffect } from "react";
+import {
+  BackHandler,
+  ImageBackground,
+  Modal,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
@@ -43,13 +52,37 @@ interface LifeContextOption {
  * Note: slug `self` renders as label "Myself".
  */
 const LIFE_CONTEXT_OPTIONS: LifeContextOption[] = [
-  { slug: "work_career", label: "Work & career", testID: "life_context_picker_work_career" },
-  { slug: "relationships", label: "Relationships", testID: "life_context_picker_relationships" },
+  {
+    slug: "work_career",
+    label: "Work & career",
+    testID: "life_context_picker_work_career",
+  },
+  {
+    slug: "relationships",
+    label: "Relationships",
+    testID: "life_context_picker_relationships",
+  },
   { slug: "self", label: "Myself", testID: "life_context_picker_self" },
-  { slug: "health_energy", label: "Health & energy", testID: "life_context_picker_health_energy" },
-  { slug: "money_security", label: "Money & security", testID: "life_context_picker_money_security" },
-  { slug: "purpose_direction", label: "Purpose & direction", testID: "life_context_picker_purpose_direction" },
-  { slug: "daily_life", label: "Daily life", testID: "life_context_picker_daily_life" },
+  {
+    slug: "health_energy",
+    label: "Health & energy",
+    testID: "life_context_picker_health_energy",
+  },
+  {
+    slug: "money_security",
+    label: "Money & security",
+    testID: "life_context_picker_money_security",
+  },
+  {
+    slug: "purpose_direction",
+    label: "Purpose & direction",
+    testID: "life_context_picker_purpose_direction",
+  },
+  {
+    slug: "daily_life",
+    label: "Daily life",
+    testID: "life_context_picker_daily_life",
+  },
 ];
 
 export interface LifeContextPickerSheetProps {
@@ -116,52 +149,60 @@ const LifeContextPickerSheet: React.FC<LifeContextPickerSheetProps> = ({
           importantForAccessibility="no"
           testID="life_context_picker_sheet"
         >
-          <View style={styles.handle} />
-          <Text style={styles.header} testID="life_context_picker_header">
-            What part of life is this touching most right now?
-          </Text>
+          <ImageBackground
+            source={require("../../../assets/beige_bg.png")}
+            style={styles.sheetBackground}
+            imageStyle={styles.sheetImage}
+          >
+            <View style={styles.sheetContent}>
+              <View style={styles.handle} />
+              <Text style={styles.header} testID="life_context_picker_header">
+                What part of life is this touching most right now?
+              </Text>
 
-          <View style={styles.optionsBlock}>
-            {options.map((opt) => (
+              <View style={styles.optionsBlock}>
+                {options.map((opt) => (
+                  <TouchableOpacity
+                    key={opt.slug}
+                    style={styles.row}
+                    activeOpacity={0.85}
+                    onPress={() => onPick(opt.slug)}
+                    testID={opt.testID}
+                    accessible={true}
+                    accessibilityRole="button"
+                    accessibilityLabel={opt.label}
+                  >
+                    <Text
+                      style={styles.rowLabel}
+                      accessible={false}
+                      importantForAccessibility="no"
+                    >
+                      {opt.label}
+                    </Text>
+                    <Ionicons
+                      name="chevron-forward"
+                      size={18}
+                      color={Colors.brownMuted}
+                    />
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              <View style={styles.divider} />
+
               <TouchableOpacity
-                key={opt.slug}
-                style={styles.row}
-                activeOpacity={0.85}
-                onPress={() => onPick(opt.slug)}
-                testID={opt.testID}
+                style={styles.skipRow}
+                activeOpacity={0.7}
+                onPress={onSkip}
+                testID="life_context_picker_skip"
                 accessible={true}
                 accessibilityRole="button"
-                accessibilityLabel={opt.label}
+                accessibilityLabel="Skip for now"
               >
-                <Text
-                  style={styles.rowLabel}
-                  accessible={false}
-                  importantForAccessibility="no"
-                >
-                  {opt.label}
-                </Text>
-                <Ionicons
-                  name="chevron-forward"
-                  size={18}
-                  color={Colors.brownMuted}
-                />
+                <Text style={styles.skipLabel}>Skip for now</Text>
               </TouchableOpacity>
-            ))}
-          </View>
-
-          <View style={styles.divider} />
-
-          <TouchableOpacity
-            style={styles.skipRow}
-            activeOpacity={0.7}
-            onPress={onSkip}
-            testID="life_context_picker_skip"
-            accessible={true}
-            accessibilityRole="button"
-            accessibilityLabel="Skip for now"
-          >
-            <Text style={styles.skipLabel}>Skip for now</Text>
-          </TouchableOpacity>
+            </View>
+          </ImageBackground>
         </View>
       </View>
     </Modal>
@@ -178,6 +219,16 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.cream,
     borderTopLeftRadius: 22,
     borderTopRightRadius: 22,
+    overflow: "hidden",
+  },
+  sheetBackground: {
+    width: "100%",
+  },
+  sheetImage: {
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
+  },
+  sheetContent: {
     paddingHorizontal: 22,
     paddingTop: 14,
     paddingBottom: 28,
@@ -204,11 +255,12 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",
-    height: 56,
+    height: 50,
     paddingHorizontal: 14,
     marginBottom: 6,
     borderRadius: 12,
-    backgroundColor: Colors.parchment,
+    borderColor: "#c89a47",
+    borderWidth: 0.4,
   },
   rowLabel: {
     flex: 1,

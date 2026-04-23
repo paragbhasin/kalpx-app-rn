@@ -572,26 +572,44 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
           }) as any,
         );
       } else {
-        // continue_same or deepen: stash new cycle payload, show finale ceremony
-        if (nv.payload && Object.keys(nv.payload).length > 0) {
-          store.dispatch(
-            screenActions.setScreenValue({
-              key: "_pending_daily_view",
-              value: nv.payload,
-            }),
+        // continue_same or deepen: apply new cycle payload and route to dashboard immediately
+        let pendingPayload = nv.payload;
+        if (pendingPayload && Object.keys(pendingPayload).length > 0) {
+          // FIX-6: strip the transient arc_complete=true that the BE inlines in the
+          // decision response. Prevents duplicate finale/checkpoint triggers.
+          if ((pendingPayload as any)?.arc_state?.arc_complete) {
+            pendingPayload = {
+              ...pendingPayload,
+              arc_state: {
+                ...(pendingPayload as any).arc_state,
+                arc_complete: false,
+              },
+            };
+          }
+          const flat = ingestDailyView(pendingPayload as any);
+          for (const [k, v] of Object.entries(flat)) {
+            if (v !== undefined) {
+              store.dispatch(screenActions.setScreenValue({ key: k, value: v }));
+            }
+          }
+        }
+        // FIX-8: surface carryover count to user before navigating away
+        const carriedCount = (env as any)?.carried_items_count ?? 0;
+        if (carriedCount > 0) {
+          showToast(
+            carriedCount === 1
+              ? "1 item carried forward to your new cycle."
+              : `${carriedCount} items carried forward to your new cycle.`,
+            4000,
+            "info",
           );
         }
-        // FIX-8: carried_items_count is top-level on env, not inside nv.payload — stash separately
-        const carriedCount14 = (env as any)?.carried_items_count ?? 0;
-        if (carriedCount14 > 0) {
-          store.dispatch(
-            screenActions.setScreenValue({
-              key: "_pending_carried_count",
-              value: carriedCount14,
-            }),
-          );
-        }
-        setShowFinale(true);
+        store.dispatch(
+          loadScreenWithData({
+            containerId: "companion_dashboard_v3",
+            stateId: "day_active",
+          }) as any,
+        );
       }
     } catch (err: any) {
       console.warn(`[CycleReflectionBlock] day14 submit failed:`, err.message);
@@ -603,15 +621,12 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
     setShowJourneyInvite(true);
   };
   const onSkipJourney = () => {
+    setShowIntro(false);
+    setIntroShown(true);
     setShowJourneyInvite(false);
-    const hasPractice = ss.checkpoint_engagement_level !== "near_zero";
-    // Also clear feelings state if it was pre-set
-    store.dispatch(
-      screenActions.setScreenValue({
-        key: "checkpoint_show_feelings",
-        value: hasPractice,
-      }),
-    );
+    if (is14DayCycle) {
+      setShowDecisions(true);
+    }
   };
 
   const trendGraph = useMemo(() => {

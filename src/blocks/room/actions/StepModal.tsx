@@ -20,8 +20,16 @@
  * Not a dependency addition — uses react-native stdlib Modal + TextInput.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { BlurView } from "expo-blur";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
+  Animated,
   Clipboard,
   ImageBackground,
   KeyboardAvoidingView,
@@ -207,6 +215,121 @@ function defaultInstruction(kind: TimerBodyProps["kind"]): string {
   return "Sit quietly.";
 }
 
+const BreathingOrb: React.FC<{
+  running: boolean;
+  inhaleMs: number;
+  exhaleMs: number;
+}> = ({ running, inhaleMs, exhaleMs }) => {
+  const scale = useRef(new Animated.Value(1)).current;
+  const [phase, setPhase] = useState("Inhale");
+  const animationRef = useRef<Animated.CompositeAnimation | null>(null);
+  const phaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearPhaseTimer = useCallback(() => {
+    if (!phaseTimerRef.current) return;
+    clearTimeout(phaseTimerRef.current);
+    phaseTimerRef.current = null;
+  }, []);
+
+  const stopBreathingLoop = useCallback(() => {
+    animationRef.current?.stop();
+    animationRef.current = null;
+  }, []);
+
+  useEffect(() => {
+    const inhaleDuration = inhaleMs > 0 ? inhaleMs : 4000;
+    const exhaleDuration = exhaleMs > 0 ? exhaleMs : 6000;
+    let cancelled = false;
+
+    const schedulePhaseCycle = () => {
+      if (cancelled) return;
+      setPhase("Inhale");
+      phaseTimerRef.current = setTimeout(() => {
+        if (cancelled) return;
+        setPhase("Exhale");
+        phaseTimerRef.current = setTimeout(() => {
+          schedulePhaseCycle();
+        }, exhaleDuration);
+      }, inhaleDuration);
+    };
+
+    stopBreathingLoop();
+    clearPhaseTimer();
+
+    if (running) {
+      const loop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(scale, {
+            toValue: 1.3,
+            duration: inhaleDuration,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scale, {
+            toValue: 1,
+            duration: exhaleDuration,
+            useNativeDriver: true,
+          }),
+        ]),
+      );
+      animationRef.current = loop;
+      loop.start();
+      schedulePhaseCycle();
+    } else {
+      stopBreathingLoop();
+      clearPhaseTimer();
+      Animated.spring(scale, {
+        toValue: 1,
+        useNativeDriver: true,
+      }).start();
+      setPhase("Inhale");
+    }
+
+    return () => {
+      cancelled = true;
+      stopBreathingLoop();
+      clearPhaseTimer();
+    };
+  }, [running, inhaleMs, exhaleMs, stopBreathingLoop, clearPhaseTimer, scale]);
+
+  return (
+    <View style={styles.orbContainer}>
+      {/* Outer glow/soft shadow layer */}
+      <Animated.View
+        style={[
+          styles.orbGlow,
+          {
+            transform: [{ scale }],
+            opacity: scale.interpolate({
+              inputRange: [1, 1.3],
+              outputRange: [0.3, 0.6],
+            }),
+          },
+        ]}
+      />
+
+      <Animated.View
+        style={[
+          styles.circle,
+          {
+            transform: [{ scale }],
+          },
+        ]}
+      >
+        <BlurView
+          intensity={Platform.OS === "ios" ? 40 : 80}
+          style={styles.blurWrapper}
+        >
+          <View style={styles.innerGlass}>
+            {/* Top highlight for 3D effect */}
+            {/* <View style={styles.orbHighlight} /> */}
+            <Text style={styles.circleText}>{phase}</Text>
+          </View>
+        </BlurView>
+      </Animated.View>
+    </View>
+  );
+};
+
 const TimerBody: React.FC<TimerBodyProps> = ({ kind, stepPayload, onDone }) => {
   const totalSec = useMemo(() => {
     const raw = stepPayload?.duration_sec;
@@ -261,6 +384,15 @@ const TimerBody: React.FC<TimerBodyProps> = ({ kind, stepPayload, onDone }) => {
       <Text style={styles.timerCue} testID="step_modal_timer_cue">
         {cueText}
       </Text>
+
+      {kind === "timer_breathe" && (
+        <BreathingOrb
+          running={running}
+          inhaleMs={(stepPayload?.step_config?.inhale ?? 0) * 1000}
+          exhaleMs={(stepPayload?.step_config?.exhale ?? 0) * 1000}
+        />
+      )}
+
       <Text style={styles.timerDigits} testID="step_modal_timer_digits">
         {timeLabel}
       </Text>
@@ -757,6 +889,68 @@ const styles = StyleSheet.create({
     fontVariant: ["tabular-nums"],
     color: "#1C1C1E",
     marginBottom: 32,
+    marginTop: 24,
+  },
+  circle: {
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    borderWidth: 1.5,
+    borderColor: "rgba(230, 211, 163, 0.6)",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    overflow: "hidden", // Important for BlurView
+    // Glass shadow
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  blurWrapper: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  innerGlass: {
+    flex: 1,
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+  },
+  orbContainer: {
+    width: 280,
+    height: 280,
+    alignItems: "center",
+    justifyContent: "center",
+    marginVertical: 10,
+  },
+  orbGlow: {
+    position: "absolute",
+    width: 210,
+    height: 210,
+    borderRadius: 105,
+    backgroundColor: "#E6D3A3",
+  },
+  orbHighlight: {
+    position: "absolute",
+    top: 20,
+    left: 40,
+    width: 60,
+    height: 30,
+    borderRadius: 30,
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    transform: [{ rotate: "-25deg" }],
+  },
+  circleText: {
+    fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
+    fontSize: 24,
+    fontWeight: "500",
+    color: "#4A3B2F",
+    letterSpacing: 0.5,
+    textShadowColor: "rgba(255, 255, 255, 0.5)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   timerControls: {
     flexDirection: "row",
@@ -805,21 +999,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: "#D8D8D8",
+    borderColor: "#1C1C1E",
     alignItems: "center",
     justifyContent: "center",
     minWidth: 92,
   },
   ctrlBtnLabel: {
     fontSize: 15,
-    color: "#1C1C1E",
+    color: "#432104",
   },
   ctrlDone: {
-    backgroundColor: "#1C1C1E",
-    borderColor: "#1C1C1E",
+    backgroundColor: "#FBF5F5",
+    borderColor: "#D8D8D8",
   },
   ctrlDoneLabel: {
-    color: "#FFFFFF",
+    color: "#432104",
   },
   primaryActionWrapper: {
     width: "100%",

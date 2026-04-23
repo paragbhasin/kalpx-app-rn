@@ -3,12 +3,10 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
-  Image,
   Modal,
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -22,17 +20,20 @@ import {
   mitraJourneyDay7View,
 } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
-import { ingestDailyView, ingestDay14View, ingestDay7View } from "../engine/v3Ingest";
+import {
+  ingestDailyView,
+  ingestDay14View,
+  ingestDay7View,
+} from "../engine/v3Ingest";
 import store from "../store";
 import { loadScreenWithData, screenActions } from "../store/screenSlice";
 import { Fonts } from "../theme/fonts";
 
 // Assets (imported as components via react-native-svg-transformer)
-import Day14Lotus from "../../assets/14_day_lotus.svg";
 
 // Raster assets
-const Day14Bg = require("../../assets/14_day_bg.jpg");
-const Day7Bg = require("../../assets/7day_screen.png");
+const Day14Bg = require("../../assets/14day_updated.png");
+const Day7Bg = require("../../assets/7daybg.png");
 const BeigeBg = require("../../assets/beige_bg.png");
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -107,7 +108,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   const screenBackground = useMemo(() => {
     const rawDay = resolvedCycleDay;
     if (showJourneyInvite) {
-      return Day14Bg;
+      return BeigeBg;
     }
     if (showIntro) {
       if (rawDay === 14 || is14DayCycle) return Day14Bg;
@@ -250,7 +251,9 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   useEffect(() => {
     if (!showJourneyView) return;
     mitraFetchProgress()
-      .then((res) => { if (res) setProgressData(res); })
+      .then((res) => {
+        if (res) setProgressData(res);
+      })
       .catch(() => {});
   }, [showJourneyView]);
 
@@ -259,7 +262,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   const journeyData = useMemo(() => {
     const log = ss.journey_log || {};
     const currentDay = ss.day_number || 1;
-    const beTrend = progressData?.weeklyTrend as Array<any> | undefined;
+    const beTrend = progressData?.weeklyTrend as any[] | undefined;
 
     let checkinCount = 0,
       triggerCount = 0,
@@ -334,7 +337,11 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
       coreCount: 0,
     };
     for (let d = 1; d <= milestoneDayCount; d++) {
-      let dc = 0, dt = 0, dm = 0, ds = 0, dcore = 0;
+      let dc = 0,
+        dt = 0,
+        dm = 0,
+        ds = 0,
+        dcore = 0;
       if (beTrend && beTrend[d - 1]) {
         const t = beTrend[d - 1];
         dm = t.mantraSessions || 0;
@@ -438,27 +445,48 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
     };
 
     try {
-      const env = await mitraJourneyDay7Decision(body as any, String(uuidv4.v4()));
+      const env = await mitraJourneyDay7Decision(
+        body as any,
+        String(uuidv4.v4()),
+      );
       store.dispatch(
-        screenActions.setScreenValue({ key: "checkpoint_completed", value: true }),
+        screenActions.setScreenValue({
+          key: "checkpoint_completed",
+          value: true,
+        }),
       );
       const nv = env?.next_view ?? { view_key: "", payload: {} };
       if (nv.view_key === "onboarding_start") {
-        for (const k of ["journey_id", "day_number", "total_days", "arc_state", "continuity"]) {
+        for (const k of [
+          "journey_id",
+          "day_number",
+          "total_days",
+          "arc_state",
+          "continuity",
+        ]) {
           store.dispatch(screenActions.setScreenValue({ key: k, value: null }));
         }
         store.dispatch(
-          loadScreenWithData({ containerId: "welcome_onboarding", stateId: "turn_1" }) as any,
+          loadScreenWithData({
+            containerId: "welcome_onboarding",
+            stateId: "turn_1",
+          }) as any,
         );
       } else {
         if (nv.payload && Object.keys(nv.payload).length > 0) {
           const flat = ingestDailyView(nv.payload as any);
           for (const [k, v] of Object.entries(flat)) {
-            if (v !== undefined) store.dispatch(screenActions.setScreenValue({ key: k, value: v }));
+            if (v !== undefined)
+              store.dispatch(
+                screenActions.setScreenValue({ key: k, value: v }),
+              );
           }
         }
         store.dispatch(
-          loadScreenWithData({ containerId: "companion_dashboard_v3", stateId: "day_active" }) as any,
+          loadScreenWithData({
+            containerId: "companion_dashboard_v3",
+            stateId: "day_active",
+          }) as any,
         );
       }
     } catch (err: any) {
@@ -477,10 +505,16 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
       change_focus: "ready",
     };
     store.dispatch(
-      screenActions.setScreenValue({ key: "checkpoint_decision", value: decision }),
+      screenActions.setScreenValue({
+        key: "checkpoint_decision",
+        value: decision,
+      }),
     );
     store.dispatch(
-      screenActions.setScreenValue({ key: "checkpoint_feeling", value: decision }),
+      screenActions.setScreenValue({
+        key: "checkpoint_feeling",
+        value: decision,
+      }),
     );
     store.dispatch(
       screenActions.setScreenValue({
@@ -501,22 +535,42 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
     }
 
     try {
-      const env = await mitraJourneyDay14Decision(body as any, String(uuidv4.v4()));
+      const env = await mitraJourneyDay14Decision(
+        body as any,
+        String(uuidv4.v4()),
+      );
       store.dispatch(
-        screenActions.setScreenValue({ key: "checkpoint_completed", value: true }),
+        screenActions.setScreenValue({
+          key: "checkpoint_completed",
+          value: true,
+        }),
       );
       const nv = env?.next_view ?? { view_key: "", payload: {} };
       if (decision === "change_focus" || nv.view_key === "onboarding_start") {
-        for (const k of ["journey_id", "day_number", "total_days", "arc_state", "continuity"]) {
+        for (const k of [
+          "journey_id",
+          "day_number",
+          "total_days",
+          "arc_state",
+          "continuity",
+        ]) {
           store.dispatch(screenActions.setScreenValue({ key: k, value: null }));
         }
         store.dispatch(
-          loadScreenWithData({ containerId: "welcome_onboarding", stateId: "turn_1" }) as any,
+          loadScreenWithData({
+            containerId: "welcome_onboarding",
+            stateId: "turn_1",
+          }) as any,
         );
       } else {
         // continue_same or deepen: stash new cycle payload, show finale ceremony
         if (nv.payload && Object.keys(nv.payload).length > 0) {
-          store.dispatch(screenActions.setScreenValue({ key: "_pending_daily_view", value: nv.payload }));
+          store.dispatch(
+            screenActions.setScreenValue({
+              key: "_pending_daily_view",
+              value: nv.payload,
+            }),
+          );
         }
         setShowFinale(true);
       }
@@ -555,7 +609,8 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
     [trendGraph.engaged],
   );
   const completedTotal = useMemo(
-    () => trendGraph.fully_completed.reduce((acc: number, v: number) => acc + v, 0),
+    () =>
+      trendGraph.fully_completed.reduce((acc: number, v: number) => acc + v, 0),
     [trendGraph.fully_completed],
   );
 
@@ -575,14 +630,18 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
 
   const d7 = (ss.checkpoint_day_7 || {}) as Record<string, any>;
   const d14 = (ss.checkpoint_day_14 || {}) as Record<string, any>;
-  const decisionsAvailable: string[] = ss.day_7_decisions_available || ["continue"];
+  const decisionsAvailable: string[] = ss.day_7_decisions_available || [
+    "continue",
+  ];
   const strongestType: string = ss.checkpoint_strongest_type || "";
   const mitraReflection: string = ss.checkpoint_mitra_reflection || "";
   const decisionFraming: string = ss.checkpoint_decision_framing || "";
   const classifHeadline: string = ss.checkpoint_classification_headline || "";
   const classifBody: string = ss.checkpoint_classification_body || "";
-  const deepenSuggestion: Record<string, any> | null = ss.checkpoint_deepen_suggestion || null;
-  const decisionLayout: string = ss.checkpoint_decision_layout || "continue_first";
+  const deepenSuggestion: Record<string, any> | null =
+    ss.checkpoint_deepen_suggestion || null;
+  const decisionLayout: string =
+    ss.checkpoint_decision_layout || "continue_first";
 
   if (showIntro && is7DayCycle) {
     const introHeadline = d7.intro_headline || "A Week Into Your Journey";
@@ -593,13 +652,21 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
           <View style={{ marginTop: 30, alignSelf: "center" }}>
             <Text style={styles.introTitleSpecial}>{introHeadline}</Text>
             <Text style={styles.introSubtitle}>
-              {d7.body || "A week ago, you began this journey with a simple intention."}
+              {d7.body ||
+                "A week ago, you began this journey with a simple intention."}
             </Text>
+            <View style={styles.day14DividerRow}>
+              <View style={styles.day14DividerLine} />
+              <Text style={styles.day14DividerDiamond}>◆</Text>
+              <View style={styles.day14DividerLine} />
+            </View>
             <Text style={styles.intro7daytitle}>
-              {d7.framing || "Through Sankalp • Mantra • Practice, you have taken the first step inward."}
+              {d7.framing ||
+                "Through Sankalp • Mantra • Practice, you have taken the first step inward."}
             </Text>
           </View>
-          <View style={styles.bottomGroup}>
+          {/* <Image source={require("../../assets/new_home_lotus.png")} /> */}
+          <View style={[styles.bottomGroup, { marginTop: 15 }]}>
             <TouchableOpacity
               style={styles.primaryBtn}
               onPress={onReflectJourney}
@@ -613,17 +680,23 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   }
 
   if (showIntro && is14DayCycle) {
-    const intro14Headline = day14Intro.title || d14.intro_headline || "You've completed 14 days";
-    const intro14Body1 = day14Intro.bodyLine1 || d14.intro_body || "You stayed with it.";
-    const intro14Body2 = day14Intro.bodyLine2 || "Even on the days it felt quiet or uncertain.";
-    const intro14Closing = day14Intro.closing || "Something within you has begun to shift — and it will continue, gently.";
-    const intro14Cta = day14Intro.ctaLabel || d14.intro_cta_label || "Reflect on My Journey";
+    const intro14Headline =
+      day14Intro.title || d14.intro_headline || "You've completed 14 days";
+    const intro14Body1 =
+      day14Intro.bodyLine1 || d14.intro_body || "You stayed with it.";
+    const intro14Body2 =
+      day14Intro.bodyLine2 || "Even on the days it felt quiet or uncertain.";
+    const intro14Closing =
+      day14Intro.closing ||
+      "Something within you has begun to shift — and it will continue, gently.";
+    const intro14Cta =
+      day14Intro.ctaLabel || d14.intro_cta_label || "Reflect on My Journey";
     return (
       <View style={styles.introContainer}>
         <View style={styles.introOverlay14Day}>
           <View style={styles.introTopCluster}>
             <Text style={styles.overlayTitleDark}>{intro14Headline}</Text>
-            <Day14Lotus width={600} />
+            {/* <Day14Lotus width={600} /> */}
           </View>
           <View style={styles.day14Body}>
             <Text style={styles.day14BodyText}>{intro14Body1}</Text>
@@ -649,7 +722,12 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   }
 
   // --- Consolidated Reflection View (Matches Images) ---
-  if (!showJourneyInvite && !showIntro && !showDecisions && (is7DayCycle || is14DayCycle)) {
+  if (
+    !showJourneyInvite &&
+    !showIntro &&
+    !showDecisions &&
+    (is7DayCycle || is14DayCycle)
+  ) {
     return (
       <ScrollView showsVerticalScrollIndicator={false} style={{ padding: 10 }}>
         {is7DayCycle && (
@@ -680,11 +758,15 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
           <View style={styles.statsRow}>
             <View style={styles.statBox}>
               <Text style={styles.statLabel}>Days Engaged</Text>
-              <Text style={styles.statValue}>{engagedTotal} / {milestoneDayCount}</Text>
+              <Text style={styles.statValue}>
+                {engagedTotal} / {milestoneDayCount}
+              </Text>
             </View>
             <View style={styles.statBox}>
               <Text style={styles.statLabel}>Fully Completed</Text>
-              <Text style={styles.statValue}>{completedTotal} / {milestoneDayCount}</Text>
+              <Text style={styles.statValue}>
+                {completedTotal} / {milestoneDayCount}
+              </Text>
             </View>
           </View>
         )}
@@ -800,12 +882,8 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
           </View>
         </View>
 
-        {is7DayCycle && !!decisionFraming && (
-          <Text style={styles.footerSummaryText}>{decisionFraming}</Text>
-        )}
-
         {/* Day 7 — reflection input (BUG-4) */}
-        {is7DayCycle && (
+        {/* {is7DayCycle && (
           <View style={{ marginTop: 16 }}>
             <Text style={[styles.microLabel, { marginBottom: 8 }]}>
               {d7.reflection_prompt_label || "WHAT DO YOU CARRY FORWARD?"}
@@ -815,7 +893,10 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
                 style={styles.inputField}
                 value={day7ReflectionText}
                 onChangeText={setDay7ReflectionText}
-                placeholder={d7.reflection_placeholder || "What from this week feels worth continuing?"}
+                placeholder={
+                  d7.reflection_placeholder ||
+                  "What from this week feels worth continuing?"
+                }
                 placeholderTextColor="#b8a898"
                 multiline
                 numberOfLines={3}
@@ -825,7 +906,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
               />
             </View>
           </View>
-        )}
+        )} */}
 
         {/* Day 7 — decision buttons inline, driven by BE decisions_available */}
         {is7DayCycle && (
@@ -860,6 +941,9 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
             )}
           </View>
         )}
+        {is7DayCycle && !!decisionFraming && (
+          <Text style={styles.footerSummaryText}>{decisionFraming}</Text>
+        )}
 
         {/* Day 14 — navigate to classification + decision screen (Screen 4) */}
         {is14DayCycle && (
@@ -888,12 +972,20 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
     const showDeepen =
       !!deepenSuggestion &&
       (ss.day_14_decisions_available || []).includes("deepen") &&
-      (decisionLayout === "deepen_first" || decisionLayout === "continue_first");
+      (decisionLayout === "deepen_first" ||
+        decisionLayout === "continue_first");
     const showRestart = decisionLayout === "restart_rhythm";
     const deepenFirst = decisionLayout === "deepen_first";
+    const deepenSuggestionTitle = String(deepenSuggestion?.title || "").trim();
+    const deepenCtaLabel = deepenSuggestionTitle
+      ? `${d14.deepen_practice_cta || "Deepen  Practice"}: ${deepenSuggestionTitle}`
+      : d14.deepen_practice_cta || "Deepen  Practice";
 
     return (
-      <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 20, paddingBottom: 60 }}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ padding: 20, paddingBottom: 60 }}
+      >
         {/* Classification verdict card */}
         {!!classifHeadline && (
           <View style={styles.classificationCard}>
@@ -912,7 +1004,12 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
         {/* Deepen preview card — shown if suggestion is available and user hasn't confirmed yet */}
         {showDeepen && deepenSuggestion && !deepenConfirmed && (
           <View style={styles.deepenPreviewCard}>
-            <View style={[styles.pill, { backgroundColor: "#ede4f7", alignSelf: "flex-start" }]}>
+            <View
+              style={[
+                styles.pill,
+                { backgroundColor: "#ede4f7", alignSelf: "flex-start" },
+              ]}
+            >
               <Text style={[styles.pillText, { color: "#9067C6" }]}>
                 {deepenSuggestion.item_type || "practice"}
               </Text>
@@ -921,13 +1018,21 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
               <Text style={styles.deepenTitle}>{deepenSuggestion.title}</Text>
             )}
             {!!deepenSuggestion.preview && (
-              <Text style={styles.deepenPreview}>{deepenSuggestion.preview}</Text>
+              <Text style={styles.deepenPreview}>
+                {deepenSuggestion.preview}
+              </Text>
+            )}
+            {!!deepenSuggestionTitle && (
+              <Text style={styles.deepenHint}>
+                Choosing ‘Deepen Practice’ gently begins the{" "}
+                {deepenSuggestionTitle}
+              </Text>
             )}
           </View>
         )}
 
         {/* Seal This Cycle input */}
-        <Text style={[styles.microLabel, { marginBottom: 8 }]}>
+        {/* <Text style={[styles.microLabel, { marginBottom: 8 }]}>
           {d14.seal_cycle_label || "SEAL THIS CYCLE"}
         </Text>
         <View style={styles.inputWrap}>
@@ -935,7 +1040,9 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
             style={styles.inputField}
             value={sealRitualText}
             onChangeText={setSealRitualText}
-            placeholder={d14.seal_input_placeholder || "What deserves to be remembered?"}
+            placeholder={
+              d14.seal_input_placeholder || "What deserves to be remembered?"
+            }
             placeholderTextColor="#b8a898"
             multiline
             numberOfLines={3}
@@ -945,7 +1052,6 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
           />
         </View>
 
-        {/* Carry forward reflection input */}
         <Text style={[styles.microLabel, { marginBottom: 8, marginTop: 16 }]}>
           {d14.carry_label || "CARRY FORWARD"}
         </Text>
@@ -954,13 +1060,15 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
             style={styles.inputField}
             value={carryReflection}
             onChangeText={setCarryReflection}
-            placeholder={d14.carry_input_placeholder || "How will you continue?"}
+            placeholder={
+              d14.carry_input_placeholder || "How will you continue?"
+            }
             placeholderTextColor="#b8a898"
             multiline
             numberOfLines={4}
             textAlignVertical="top"
           />
-        </View>
+        </View> */}
 
         {/* Decision buttons */}
         <View style={{ gap: 12, marginTop: 20 }}>
@@ -988,7 +1096,10 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
 
           {!showRestart && (
             <TouchableOpacity
-              style={[styles.primaryBtn, deepenFirst && { backgroundColor: "#c8a97a" }]}
+              style={[
+                styles.primaryBtn,
+                deepenFirst && { backgroundColor: "#c8a97a" },
+              ]}
               onPress={() => handleDecision14("continue_same", carryReflection)}
             >
               <Text style={styles.primaryBtnText}>
@@ -1002,9 +1113,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
               style={[styles.primaryBtn, { backgroundColor: "#c8a97a" }]}
               onPress={() => handleDecision14("deepen", carryReflection, true)}
             >
-              <Text style={styles.primaryBtnText}>
-                {d14.deepen_practice_cta || "Deepen Practice"}
-              </Text>
+              <Text style={styles.primaryBtnText}>{deepenCtaLabel}</Text>
             </TouchableOpacity>
           )}
 
@@ -1026,7 +1135,8 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   if (showFinale && is14DayCycle) {
     const ceremony = ss.completion_ceremony || {};
     const m25 = ss.m25_narrative || {};
-    const finaleHeadline = m25.intro_headline || ceremony.sovereignty_line || "A new cycle begins.";
+    const finaleHeadline =
+      m25.intro_headline || ceremony.sovereignty_line || "A new cycle begins.";
     const finaleNarrative =
       typeof m25.narrative_template === "string" && m25.narrative_template
         ? m25.narrative_template
@@ -1039,12 +1149,21 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
       if (pendingPayload && Object.keys(pendingPayload).length > 0) {
         const flat = ingestDailyView(pendingPayload as any);
         for (const [k, v] of Object.entries(flat)) {
-          if (v !== undefined) store.dispatch(screenActions.setScreenValue({ key: k, value: v }));
+          if (v !== undefined)
+            store.dispatch(screenActions.setScreenValue({ key: k, value: v }));
         }
       }
-      store.dispatch(screenActions.setScreenValue({ key: "_pending_daily_view", value: null }));
       store.dispatch(
-        loadScreenWithData({ containerId: "companion_dashboard_v3", stateId: "day_active" }) as any,
+        screenActions.setScreenValue({
+          key: "_pending_daily_view",
+          value: null,
+        }),
+      );
+      store.dispatch(
+        loadScreenWithData({
+          containerId: "companion_dashboard_v3",
+          stateId: "day_active",
+        }) as any,
       );
     };
     return (
@@ -1052,7 +1171,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
         <View style={styles.introOverlay14Day}>
           <View style={styles.introTopCluster}>
             <Text style={styles.overlayTitleDark}>{finaleHeadline}</Text>
-            <Day14Lotus width={600} />
+            {/* <Day14Lotus width={600} /> */}
           </View>
           <View style={styles.day14Body}>
             {!!finaleNarrative && (
@@ -1065,12 +1184,17 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
                   <Text style={styles.day14DividerDiamond}>◆</Text>
                   <View style={styles.day14DividerLine} />
                 </View>
-                <Text style={[styles.day14BodyText, { fontStyle: "italic" }]}>{finaleSovereignty}</Text>
+                <Text style={[styles.day14BodyText, { fontStyle: "italic" }]}>
+                  {finaleSovereignty}
+                </Text>
               </>
             )}
           </View>
           <View style={styles.day14ButtonWrap}>
-            <TouchableOpacity style={styles.primaryBtn} onPress={handleFinaleContinue}>
+            <TouchableOpacity
+              style={styles.primaryBtn}
+              onPress={handleFinaleContinue}
+            >
               <Text style={styles.primaryBtnText}>
                 {d14.begin_cycle_cta || "Begin Cycle 2"}
               </Text>
@@ -1094,10 +1218,10 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
             </Text>
           </View>
           <View style={styles.weeksWrapper}>
-            <Day14Lotus style={styles.lotus} />
+            {/* <Day14Lotus style={styles.lotus} /> */}
             <View style={styles.weeksContainer}>
               {(() => {
-                const dailyRhythm: Array<{ day: number; state: string }> =
+                const dailyRhythm: { day: number; state: string }[] =
                   ss.today?.cycle_metrics?.daily_rhythm || [];
                 return [1, 2].map(
                   (w) =>
@@ -1112,7 +1236,8 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
                         <View style={styles.daysGrid}>
                           {[1, 2, 3, 4, 5, 6, 7].map((d) => {
                             const dayNum = (w - 1) * 7 + d;
-                            const isLocked = dayNum > journeyData.maxUnlockedDay;
+                            const isLocked =
+                              dayNum > journeyData.maxUnlockedDay;
                             const isToday = dayNum === ss.day_number;
                             const dayState = !isLocked
                               ? dailyRhythm.find((r) => r.day === dayNum)?.state
@@ -1136,7 +1261,8 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
                                     styles.dayCircle,
                                     isLocked && styles.dayCircleLocked,
                                     dayState === "done" && styles.dayCircleDone,
-                                    dayState === "missed" && styles.dayCircleMissed,
+                                    dayState === "missed" &&
+                                      styles.dayCircleMissed,
                                   ]}
                                 >
                                   {!isLocked ? (
@@ -1325,7 +1451,7 @@ const DecisionBtn = ({ label, id, onPress, isPrimary, isSecondary }: any) => (
 const styles = StyleSheet.create({
   introContainer: { flex: 1 },
   introOverlay: {
-    flex: 1,
+    // flex: 1,
     // paddingHorizontal: 28,
     // paddingTop: 72,
     // paddingBottom: 48,
@@ -1341,7 +1467,7 @@ const styles = StyleSheet.create({
   introTopCluster: {
     alignItems: "center",
     gap: 20,
-    // marginTop: 28,
+    marginTop: 40,
   },
   visualHeader7Day: { marginTop: 100 },
   introTitleSpecial: {
@@ -1353,17 +1479,18 @@ const styles = StyleSheet.create({
   },
   introSubtitle: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 16,
+    fontSize: 18,
     color: "#5e4533",
     alignSelf: "center",
     textAlign: "center",
-    paddingHorizontal: 10,
+    paddingHorizontal: 15,
+    marginTop: 10,
   },
   intro7daytitle: {
     fontFamily: Fonts.serif.regular,
     paddingHorizontal: 10,
     marginTop: 10,
-    fontSize: 15,
+    fontSize: 16,
     color: "#5e4533",
     alignSelf: "center",
     textAlign: "center",
@@ -1384,7 +1511,7 @@ const styles = StyleSheet.create({
   day14Body: {
     alignItems: "center",
     gap: 10,
-    marginTop: -100,
+    marginTop: -150,
     // maxWidth: 320,
   },
   day14BodyText: {
@@ -1399,6 +1526,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
     marginVertical: 8,
+    alignSelf: "center",
   },
   day14DividerLine: {
     width: 64,
@@ -1470,7 +1598,7 @@ const styles = StyleSheet.create({
 
     // Glass border
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.3)",
+    borderColor: "#D9A557",
 
     // Shadow (depth)
     shadowColor: "#000",
@@ -1516,7 +1644,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   dayCircleLocked: { backgroundColor: "#f0f0f0", borderColor: "#ccc" },
-  dayCircleDone: { backgroundColor: "#e8f4e8", borderColor: "#2d7a5f", borderWidth: 2 },
+  dayCircleDone: {
+    backgroundColor: "#e8f4e8",
+    borderColor: "#2d7a5f",
+    borderWidth: 2,
+  },
   dayCircleMissed: { backgroundColor: "#f5f5f5", borderColor: "#c9b19a" },
   dayNum: { fontFamily: Fonts.sans.bold, fontSize: 14, color: "#432104" },
   dayText: {
@@ -1841,7 +1973,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: "#8c7355",
     textAlign: "center",
-    marginVertical: 30,
+    // marginVertical: 30,
     paddingHorizontal: 20,
     lineHeight: 22,
   },
@@ -1902,6 +2034,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#6b4c35",
     lineHeight: 22,
+  },
+  deepenHint: {
+    marginTop: 10,
+    fontFamily: Fonts.sans.medium,
+    fontSize: 12,
+    color: "#5b3c7e",
   },
   inputWrap: {
     backgroundColor: "#fafaf8",

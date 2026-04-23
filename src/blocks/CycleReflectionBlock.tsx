@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 import uuidv4 from "react-native-uuid";
+import { useToast } from "../context/ToastContext";
 import {
   mitraFetchProgress,
   mitraJourneyDay14Decision,
@@ -54,6 +55,7 @@ const METRIC_ALLOWLIST: Record<string, string> = {
 
 const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   const { screenData, currentStateId } = useScreenStore();
+  const { showToast } = useToast();
   const ss = screenData as Record<string, any>;
   const checkpointDayNum = Number(ss.checkpoint_day || 0);
   const dayNumberNum = Number(ss.day_number || 0);
@@ -482,6 +484,13 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
               );
           }
         }
+        // FIX-2: lighten confirmation — key off persisted cycle_burden_level, not transient flag
+        if (
+          decision === "lighten" &&
+          (nv.payload as any)?.arc_state?.cycle_burden_level === "L0"
+        ) {
+          showToast("Your path has been lightened.", 4000, "info");
+        }
         store.dispatch(
           loadScreenWithData({
             containerId: "companion_dashboard_v3",
@@ -569,6 +578,16 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
             screenActions.setScreenValue({
               key: "_pending_daily_view",
               value: nv.payload,
+            }),
+          );
+        }
+        // FIX-8: carried_items_count is top-level on env, not inside nv.payload — stash separately
+        const carriedCount14 = (env as any)?.carried_items_count ?? 0;
+        if (carriedCount14 > 0) {
+          store.dispatch(
+            screenActions.setScreenValue({
+              key: "_pending_carried_count",
+              value: carriedCount14,
             }),
           );
         }
@@ -1145,14 +1164,49 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
         : "";
     const finaleSovereignty = ceremony.sovereignty_line || "";
     const handleFinaleContinue = () => {
-      const pendingPayload = ss._pending_daily_view;
+      let pendingPayload = ss._pending_daily_view;
       if (pendingPayload && Object.keys(pendingPayload).length > 0) {
+        // FIX-6: strip the transient arc_complete=true that the BE inlines in the
+        // decision response. The finale already consumed this signal; the next
+        // daily-view GET will return false. Prevents duplicate finale on re-open.
+        if ((pendingPayload as any)?.arc_state?.arc_complete) {
+          pendingPayload = {
+            ...pendingPayload,
+            arc_state: {
+              ...(pendingPayload as any).arc_state,
+              arc_complete: false,
+            },
+          };
+        }
         const flat = ingestDailyView(pendingPayload as any);
         for (const [k, v] of Object.entries(flat)) {
           if (v !== undefined)
             store.dispatch(screenActions.setScreenValue({ key: k, value: v }));
         }
       }
+      store.dispatch(
+        screenActions.setScreenValue({
+          key: "_pending_daily_view",
+          value: null,
+        }),
+      );
+      // FIX-8: surface carryover count to user before navigating away
+      const carriedCount = ss._pending_carried_count ?? 0;
+      if (carriedCount > 0) {
+        showToast(
+          carriedCount === 1
+            ? "1 item carried forward to your new cycle."
+            : `${carriedCount} items carried forward to your new cycle.`,
+          4000,
+          "info",
+        );
+      }
+      store.dispatch(
+        screenActions.setScreenValue({
+          key: "_pending_carried_count",
+          value: null,
+        }),
+      );
       store.dispatch(
         screenActions.setScreenValue({
           key: "_pending_daily_view",

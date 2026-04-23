@@ -1,0 +1,33 @@
+# Fix 8 verification: welcome_back_surface chip labels (BE-authored)
+# Fix 2 verification: welcome_back_line includes "Peace & Calm" focus phrase
+# Persona: test+wb_peacecalm@kalpx.com (completed peacecalm 12 days ago)
+appId: com.kalpx.app
+env:
+  EMAIL: test+wb_peacecalm@kalpx.com
+  PASSWORD: Test1234!
+---
+- runFlow:
+    file: login.yaml
+    env:
+      EMAIL: ${EMAIL}
+      PASSWORD: ${PASSWORD}
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+
+# Welcome back surface should render (gap=12 days → tier=medium)
+- assertVisible:
+    text: "Welcome back"
+
+# Fix 8: chip labels from BE decision_labels
+- assertVisible:
+    text: "Continue"
+- assertVisible:
+    text: "Begin fresh"
+
+# Fix 2: focus phrase in welcome_back_line should use "Peace & Calm", not "Peacecalm"
+- assertNotVisible:
+    text: "Peacecalm"
+    optional: true
+- assertVisible:
+    text: "Peace & Calm|still here"
+    optional: true

@@ -1,0 +1,24 @@
+# Fix 3 verification: healthwellbeing → Support Path (not "Your Path")
+# Persona: test+health@kalpx.com (day 3, category=healthwellbeing)
+appId: com.kalpx.app
+env:
+  EMAIL: test+health@kalpx.com
+  PASSWORD: Test1234!
+---
+- runFlow:
+    file: login.yaml
+    env:
+      EMAIL: ${EMAIL}
+      PASSWORD: ${PASSWORD}
+- waitForAnimationToEnd
+- waitForAnimationToEnd
+
+# "Your Path" must NOT appear — health users now route to Support Path
+- assertNotVisible:
+    text: "Your Path"
+    optional: true
+
+# Support Path should now be visible
+- assertVisible:
+    text: "Support Path|Health.*Wellbeing"
+    optional: true

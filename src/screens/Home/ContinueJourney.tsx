@@ -35,6 +35,7 @@ import {
 } from "react-native";
 import uuidv4 from "react-native-uuid";
 import { useDispatch } from "react-redux";
+import { useToast } from "../../context/ToastContext";
 import { executeAction } from "../../engine/actionExecutor";
 import {
   mitraJourneyEntryView,
@@ -156,6 +157,7 @@ export default function ContinueJourney({
   const screenBridge = useScreenStore();
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
+  const { showToast } = useToast();
 
   // Active-user path state.
   const [home, setHome] = useState<HomeResponse | null>(null);
@@ -440,6 +442,17 @@ export default function ContinueJourney({
             if (v !== undefined) {
               dispatch(screenActions.setScreenValue({ key: k, value: v }));
             }
+          }
+          // FIX-8: surface carryover count so user knows items persisted
+          const carriedCount = (env as any).carried_items_count ?? 0;
+          if (carriedCount > 0) {
+            showToast(
+              carriedCount === 1
+                ? "1 item carried forward to your new cycle."
+                : `${carriedCount} items carried forward to your new cycle.`,
+              4000,
+              "info",
+            );
           }
           routedRef.current = true;
           dispatch(

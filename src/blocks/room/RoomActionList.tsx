@@ -72,6 +72,9 @@ function renderActionComponent(
       );
     default:
       // Unknown action_type — self-hide per sovereignty fallback (§I-6).
+      if (__DEV__) {
+        console.warn(`[RoomActionList] unknown action_type "${action.action_type}" — action silently skipped`);
+      }
       return null;
   }
 }

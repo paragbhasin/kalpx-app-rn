@@ -70,6 +70,7 @@ export const CLEANUP_FIELDS: Record<string, string[]> = {
     'checkpoint_day',
     'checkpoint_completed',
     '_pending_daily_view',
+    '_pending_carried_count',
   ],
 };
 

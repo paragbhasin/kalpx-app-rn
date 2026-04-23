@@ -12,6 +12,7 @@
 import React, { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
+import { Fonts } from "../../theme/fonts";
 import type { RoomRenderV1 } from "./types";
 
 interface Props {
@@ -44,24 +45,26 @@ const RoomOpeningExperience: React.FC<Props> = ({ envelope, onReveal }) => {
 
 const styles = StyleSheet.create({
   wrap: {
-    paddingVertical: 24,
-    paddingHorizontal: 24,
+    // paddingVertical: 24,
+    // paddingHorizontal: 24,
+    marginTop: 35,
     alignItems: "center",
     justifyContent: "center",
   },
   openingLine: {
+    fontFamily: Fonts.sans.bold,
     fontSize: 20,
     lineHeight: 28,
     textAlign: "center",
-    color: "#1C1C1E",
+    color: "#432104",
     marginBottom: 8,
   },
   secondBeat: {
     fontSize: 16,
     lineHeight: 22,
     textAlign: "center",
-    color: "#4A4A4A",
-    marginBottom: 12,
+    color: "#432104",
+    // marginBottom: 12,
   },
 });
 

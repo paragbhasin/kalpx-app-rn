@@ -33,7 +33,10 @@ const RoomActionRunnerPill: React.FC<Props> = ({ action, envelope }) => {
   const onPress = () => {
     const rp = action.runner_payload;
     if (!rp) {
-      console.warn("[RoomActionRunnerPill] missing runner_payload", action.action_id);
+      console.warn(
+        "[RoomActionRunnerPill] missing runner_payload",
+        action.action_id,
+      );
       return;
     }
     const ctx = buildActionCtx({ loadScreen, goBack });
@@ -78,12 +81,18 @@ const RoomActionRunnerPill: React.FC<Props> = ({ action, envelope }) => {
 
 const styles = StyleSheet.create({
   pill: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: "#D8D8D8",
-    marginVertical: 4,
+    backgroundColor: "#FBF5F5",
+    borderColor: "#9f9f9f",
+    borderWidth: 0.3,
+    borderRadius: 15,
+    padding: 15,
+    elevation: 6,
+    marginBottom: 10,
+
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   inner: {
     flexDirection: "row",
@@ -92,7 +101,9 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 15,
-    color: "#1C1C1E",
+    color: "#432104",
+    alignSelf: "center",
+    textAlign: "center",
   },
 });
 

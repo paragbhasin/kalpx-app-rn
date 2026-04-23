@@ -93,8 +93,8 @@ const LifeContextPickerSheet: React.FC<LifeContextPickerSheetProps> = ({
     <Modal
       visible={visible}
       animationType="slide"
-      transparent={Platform.OS !== "ios"}
-      presentationStyle={Platform.OS === "ios" ? "pageSheet" : "overFullScreen"}
+      transparent
+      presentationStyle="overFullScreen"
       onRequestClose={onBack}
     >
       <View
@@ -102,6 +102,14 @@ const LifeContextPickerSheet: React.FC<LifeContextPickerSheetProps> = ({
         accessible={false}
         importantForAccessibility="no"
       >
+        <TouchableOpacity
+          style={StyleSheet.absoluteFill}
+          activeOpacity={1}
+          onPress={onBack}
+          accessible={false}
+          importantForAccessibility="no-hide-descendants"
+          testID="life_context_picker_scrim"
+        />
         <View
           style={styles.sheet}
           accessible={false}
@@ -163,7 +171,7 @@ const LifeContextPickerSheet: React.FC<LifeContextPickerSheetProps> = ({
 const styles = StyleSheet.create({
   scrim: {
     flex: 1,
-    backgroundColor: Platform.OS === "ios" ? Colors.cream : "rgba(0,0,0,0.35)",
+    backgroundColor: "rgba(0,0,0,0.35)",
     justifyContent: "flex-end",
   },
   sheet: {

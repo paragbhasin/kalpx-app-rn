@@ -23,6 +23,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Clipboard,
+  ImageBackground,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -111,65 +112,75 @@ const StepModal: React.FC<Props> = ({
     <Modal
       visible={visible}
       animationType="slide"
-      presentationStyle={Platform.OS === "ios" ? "pageSheet" : "fullScreen"}
+      presentationStyle="overFullScreen"
       onRequestClose={onCancel}
-      transparent={false}
+      transparent
     >
-      <KeyboardAvoidingView
-        style={styles.root}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={onCancel}
-            accessibilityRole="button"
-            accessibilityLabel="Cancel"
-            testID="step_modal_cancel"
+      <View style={styles.scrim}>
+        <TouchableOpacity
+          style={StyleSheet.absoluteFill}
+          activeOpacity={1}
+          onPress={onCancel}
+        />
+        <View style={styles.sheet}>
+          <ImageBackground
+            source={require("../../../../assets/beige_bg.png")}
+            style={styles.sheetBackground}
+            imageStyle={styles.sheetImage}
           >
-            <Text style={styles.headerCancel}>Cancel</Text>
-          </TouchableOpacity>
-          <Text style={styles.headerTitle} numberOfLines={1}>
-            {label}
-          </Text>
-          <View style={styles.headerSpacer} />
+            <KeyboardAvoidingView
+              behavior={Platform.OS === "ios" ? "padding" : undefined}
+            >
+              <View style={styles.handle} />
+              <View style={styles.header}>
+                <TouchableOpacity
+                  onPress={onCancel}
+                  accessibilityRole="button"
+                  accessibilityLabel="Cancel"
+                  testID="step_modal_cancel"
+                >
+                  <Text style={styles.headerCancel}>Cancel</Text>
+                </TouchableOpacity>
+                <Text style={styles.headerTitle} numberOfLines={1}>
+                  {label}
+                </Text>
+                <View style={styles.headerSpacer} />
+              </View>
+
+              <View style={styles.body} testID="step_modal_body">
+                {kind === "timer_breathe" ||
+                kind === "timer_walk" ||
+                kind === "timer_sit" ||
+                kind === "timer_heart" ? (
+                  <TimerBody
+                    kind={kind}
+                    stepPayload={stepPayload}
+                    onDone={onDone}
+                  />
+                ) : null}
+
+                {kind === "text_input" ? (
+                  <TextInputBody stepPayload={stepPayload} onDone={onDone} />
+                ) : null}
+
+                {kind === "grounding" ? (
+                  <GroundingBody onDone={onDone} />
+                ) : null}
+
+                {kind === "voice_note" ? (
+                  <VoiceNoteBody stepPayload={stepPayload} onDone={onDone} />
+                ) : null}
+
+                {kind === "reach_out" ? (
+                  <ReachOutBody stepPayload={stepPayload} onDone={onDone} />
+                ) : null}
+
+                {kind === "unknown" ? <UnknownBody onDone={onDone} /> : null}
+              </View>
+            </KeyboardAvoidingView>
+          </ImageBackground>
         </View>
-
-        <View style={styles.body} testID="step_modal_body">
-          {kind === "timer_breathe" ||
-          kind === "timer_walk" ||
-          kind === "timer_sit" ||
-          kind === "timer_heart" ? (
-            <TimerBody
-              kind={kind}
-              stepPayload={stepPayload}
-              onDone={onDone}
-            />
-          ) : null}
-
-          {kind === "text_input" ? (
-            <TextInputBody
-              stepPayload={stepPayload}
-              onDone={onDone}
-            />
-          ) : null}
-
-          {kind === "grounding" ? (
-            <GroundingBody onDone={onDone} />
-          ) : null}
-
-          {kind === "voice_note" ? (
-            <VoiceNoteBody stepPayload={stepPayload} onDone={onDone} />
-          ) : null}
-
-          {kind === "reach_out" ? (
-            <ReachOutBody stepPayload={stepPayload} onDone={onDone} />
-          ) : null}
-
-          {kind === "unknown" ? (
-            <UnknownBody onDone={onDone} />
-          ) : null}
-        </View>
-      </KeyboardAvoidingView>
+      </View>
     </Modal>
   );
 };
@@ -196,11 +207,7 @@ function defaultInstruction(kind: TimerBodyProps["kind"]): string {
   return "Sit quietly.";
 }
 
-const TimerBody: React.FC<TimerBodyProps> = ({
-  kind,
-  stepPayload,
-  onDone,
-}) => {
+const TimerBody: React.FC<TimerBodyProps> = ({ kind, stepPayload, onDone }) => {
   const totalSec = useMemo(() => {
     const raw = stepPayload?.duration_sec;
     if (typeof raw === "number" && raw > 0 && raw <= 60 * 60) return raw;
@@ -282,7 +289,7 @@ const TimerBody: React.FC<TimerBodyProps> = ({
           testID="step_modal_timer_done"
           accessibilityState={{ disabled: false }}
         >
-          <Text style={[styles.ctrlBtnLabel, atZero ? styles.ctrlDoneLabel : null]}>
+          <Text style={[styles.primaryActionLabel, { fontSize: 15 }]}>
             Done
           </Text>
         </TouchableOpacity>
@@ -337,14 +344,12 @@ const TextInputBody: React.FC<TextInputBodyProps> = ({
         {text.length} / {MAX_TEXT}
       </Text>
       <TouchableOpacity
-        style={[styles.ctrlBtn, styles.ctrlDone, !enabled ? styles.ctrlDisabled : null]}
+        style={[styles.primaryAction, !enabled ? styles.ctrlDisabled : null]}
         disabled={!enabled}
         onPress={() => onDone({ text: trimmed })}
         testID="step_modal_text_done"
       >
-        <Text style={[styles.ctrlBtnLabel, enabled ? styles.ctrlDoneLabel : null]}>
-          Done
-        </Text>
+        <Text style={styles.primaryActionLabel}>Done</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -382,7 +387,10 @@ const GroundingBody: React.FC<{ onDone: (extra: StepModalResult) => void }> = ({
 
   return (
     <ScrollView style={styles.textRoot} keyboardShouldPersistTaps="handled">
-      <Text style={styles.groundingProgress} testID="step_modal_grounding_progress">
+      <Text
+        style={styles.groundingProgress}
+        testID="step_modal_grounding_progress"
+      >
         {index + 1} of {GROUNDING_PROMPTS.length}
       </Text>
       <Text style={styles.textPrompt}>{prompt}</Text>
@@ -398,12 +406,14 @@ const GroundingBody: React.FC<{ onDone: (extra: StepModalResult) => void }> = ({
         maxLength={MAX_TEXT}
       />
       <TouchableOpacity
-        style={[styles.ctrlBtn, styles.ctrlDone, !enabled ? styles.ctrlDisabled : null]}
+        style={[styles.primaryAction, !enabled ? styles.ctrlDisabled : null]}
         disabled={!enabled}
         onPress={handleNext}
-        testID={isLast ? "step_modal_grounding_done" : "step_modal_grounding_next"}
+        testID={
+          isLast ? "step_modal_grounding_done" : "step_modal_grounding_next"
+        }
       >
-        <Text style={[styles.ctrlBtnLabel, enabled ? styles.ctrlDoneLabel : null]}>
+        <Text style={styles.primaryActionLabel}>
           {isLast ? "Done" : "Next"}
         </Text>
       </TouchableOpacity>
@@ -525,25 +535,17 @@ const VoiceNoteBody: React.FC<VoiceNoteBodyProps> = ({
         />
       </TouchableOpacity>
 
-      <View style={styles.timerControls}>
+      <View style={styles.primaryActionWrapper}>
         <TouchableOpacity
           style={[
-            styles.ctrlBtn,
-            styles.ctrlDone,
+            styles.primaryAction,
             !doneEnabled ? styles.ctrlDisabled : null,
           ]}
           disabled={!doneEnabled}
           onPress={handleDone}
           testID="step_modal_voice_note_done"
         >
-          <Text
-            style={[
-              styles.ctrlBtnLabel,
-              doneEnabled ? styles.ctrlDoneLabel : null,
-            ]}
-          >
-            Done
-          </Text>
+          <Text style={styles.primaryActionLabel}>Done</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -566,10 +568,7 @@ interface ReachOutBodyProps {
 const MAX_CONTACT = 40;
 const MAX_REACH_OUT = 280;
 
-const ReachOutBody: React.FC<ReachOutBodyProps> = ({
-  stepPayload,
-  onDone,
-}) => {
+const ReachOutBody: React.FC<ReachOutBodyProps> = ({ stepPayload, onDone }) => {
   const prompt =
     (stepPayload?.prompt && String(stepPayload.prompt)) ||
     "Reach out — a short message to someone who matters.";
@@ -640,25 +639,14 @@ const ReachOutBody: React.FC<ReachOutBodyProps> = ({
         {message.length} / {MAX_REACH_OUT}
       </Text>
 
-      <View style={styles.reachOutActions}>
+      <View style={styles.primaryActionWrapper}>
         <TouchableOpacity
-          style={[
-            styles.ctrlBtn,
-            styles.ctrlDone,
-            !enabled ? styles.ctrlDisabled : null,
-          ]}
+          style={[styles.primaryAction, !enabled ? styles.ctrlDisabled : null]}
           disabled={!enabled}
           onPress={handleCopyAndClose}
           testID="step_modal_reach_out_copy_done"
         >
-          <Text
-            style={[
-              styles.ctrlBtnLabel,
-              enabled ? styles.ctrlDoneLabel : null,
-            ]}
-          >
-            Copy and close
-          </Text>
+          <Text style={styles.primaryActionLabel}>Copy and close</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -689,7 +677,7 @@ const UnknownBody: React.FC<{ onDone: (extra: StepModalResult) => void }> = ({
         onPress={() => onDone({})}
         testID="step_modal_unknown_done"
       >
-        <Text style={[styles.ctrlBtnLabel, styles.ctrlDoneLabel]}>Done</Text>
+        <Text style={[styles.primaryActionLabel, { fontSize: 15 }]}>Done</Text>
       </TouchableOpacity>
     </View>
   );
@@ -698,17 +686,39 @@ const UnknownBody: React.FC<{ onDone: (extra: StepModalResult) => void }> = ({
 // ─── Styles ──────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  root: {
+  scrim: {
     flex: 1,
+    backgroundColor: "rgba(0,0,0,0.35)",
+    justifyContent: "flex-end",
+  },
+  sheet: {
     backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    overflow: "hidden",
+    maxHeight: "90%",
+  },
+  sheetBackground: {
+    width: "100%",
+  },
+  sheetImage: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+  },
+  handle: {
+    alignSelf: "center",
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#E0E0E2",
+    marginTop: 12,
   },
   header: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
     paddingVertical: 14,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#E0E0E2",
+    backgroundColor: "transparent",
   },
   headerCancel: {
     fontSize: 15,
@@ -718,24 +728,23 @@ const styles = StyleSheet.create({
     flex: 1,
     textAlign: "center",
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: "600",
     color: "#1C1C1E",
   },
   headerSpacer: {
     width: 50,
   },
   body: {
-    flex: 1,
     paddingHorizontal: 24,
-    paddingTop: 24,
+    paddingTop: 12,
+    paddingBottom: Platform.OS === "ios" ? 34 : 24,
   },
 
   // Timer
   timerRoot: {
-    flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingBottom: 40,
+    paddingVertical: 20,
   },
   timerCue: {
     fontSize: 16,
@@ -756,7 +765,7 @@ const styles = StyleSheet.create({
 
   // Text input
   textRoot: {
-    flex: 1,
+    width: "100%",
   },
   textPrompt: {
     fontSize: 16,
@@ -765,13 +774,14 @@ const styles = StyleSheet.create({
     lineHeight: 22,
   },
   textInput: {
-    minHeight: 140,
+    minHeight: 160, // Increased minHeight
     borderWidth: 1,
     borderColor: "#D8D8D8",
     borderRadius: 12,
     padding: 12,
     fontSize: 15,
     color: "#1C1C1E",
+    backgroundColor: "rgba(255,255,255,0.5)", // Slight backing for readability
   },
   textCounter: {
     fontSize: 12,
@@ -811,8 +821,29 @@ const styles = StyleSheet.create({
   ctrlDoneLabel: {
     color: "#FFFFFF",
   },
+  primaryActionWrapper: {
+    width: "100%",
+    paddingHorizontal: 0,
+  },
   ctrlDisabled: {
     opacity: 0.35,
+  },
+  primaryAction: {
+    height: 40,
+    backgroundColor: "#FBF5F5",
+    borderRadius: 28,
+    borderColor: "#9f9f9f",
+    borderWidth: 0.3,
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    marginTop: 20,
+  },
+  primaryActionLabel: {
+    fontFamily: Platform.OS === "ios" ? "System" : "sans-serif",
+    fontSize: 17,
+    fontWeight: "600",
+    color: "#432104",
   },
 
   // Voice note

@@ -1431,7 +1431,9 @@ export async function getRecommendedAdditional(): Promise<any> {
     const res = await api.get("mitra/recommended-additional/", {
       params: { tz: getTz() },
     });
-    return res.data;
+    // API returns { items: [...], strategy_context: {...} }
+    // Card reads item-level fields directly, so return first item only.
+    return res.data?.items?.[0] ?? null;
   } catch (err: any) {
     if (
       err?.response?.status &&

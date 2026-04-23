@@ -38,6 +38,7 @@ import type {
 import { executeAction } from "../engine/actionExecutor";
 import { mitraTrackEvent } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
+import { useToast } from "../context/ToastContext";
 
 interface Props {
   schema?: any;
@@ -251,6 +252,7 @@ const RoomRenderBranch: React.FC<RenderBranchProps> = ({
   const [envelope, setEnvelope] = useState<RoomRenderV1 | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const fetchedRef = useRef<string | null>(null);
+  const { showToast } = useToast();
 
   useEffect(() => {
     if (!roomId) {
@@ -282,6 +284,14 @@ const RoomRenderBranch: React.FC<RenderBranchProps> = ({
           throw new Error("envelope_malformed");
         }
         setEnvelope(data as RoomRenderV1);
+        // FIX-4: surface life_context selection outcome when user chose a context
+        if (lifeContext && data.provenance) {
+          if (data.provenance.life_context_skipped) {
+            showToast("Showing general guidance.", 3000, "info");
+          } else if (data.provenance.life_context_applied) {
+            showToast("Personalized for your context.", 2500, "info");
+          }
+        }
       } catch (err: any) {
         if (__DEV__) {
           console.warn(

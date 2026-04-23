@@ -11,12 +11,18 @@
  */
 
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View, ScrollView } from "react-native";
-import { Fonts } from "../theme/fonts";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { executeAction } from "../engine/actionExecutor";
 import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
+import { Fonts } from "../theme/fonts";
 
 const VALID_INFO_TYPES = ["mantra", "sankalp", "practice"] as const;
 
@@ -50,9 +56,8 @@ const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
   // understanding"). If a future principle authors a linked_item_type +
   // linked_item_id pair, the CTA re-surfaces automatically and routes to
   // view_info instead of the retired open_why_this_l3 drill-down.
-  const linkedType: string = typeof p.linked_item_type === "string"
-    ? p.linked_item_type
-    : "";
+  const linkedType: string =
+    typeof p.linked_item_type === "string" ? p.linked_item_type : "";
   const canGoDeeper =
     (VALID_INFO_TYPES as readonly string[]).includes(linkedType) &&
     !!sd[`master_${linkedType}`];
@@ -109,7 +114,6 @@ const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
 
 const styles = StyleSheet.create({
   sheet: {
-    backgroundColor: "#fffdf9",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 22,
@@ -130,6 +134,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1.6,
     color: "#8b7a55",
     marginBottom: 10,
+    textAlign: "center",
   },
   name: {
     fontFamily: Fonts.serif.bold,
@@ -137,6 +142,7 @@ const styles = StyleSheet.create({
     color: "#432104",
     marginBottom: 10,
     lineHeight: 32,
+    textAlign: "center",
   },
   essence: {
     fontFamily: Fonts.sans.regular,
@@ -144,6 +150,7 @@ const styles = StyleSheet.create({
     color: "#4a3a20",
     lineHeight: 22,
     marginBottom: 14,
+    textAlign: "center",
   },
   contextWrap: {
     maxHeight: 180,
@@ -154,6 +161,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#6b5a45",
     lineHeight: 21,
+    textAlign: "center",
   },
   deeper: {
     alignSelf: "flex-start",

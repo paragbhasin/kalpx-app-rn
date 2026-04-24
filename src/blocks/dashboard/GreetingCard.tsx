@@ -72,7 +72,9 @@ const GreetingCard: React.FC<Props> = ({ screenData }) => {
         <View style={styles.leftAccent} />
         <View style={styles.body}>
           <Text style={styles.name}>Welcome, {displayName}.</Text>
-          {!!displayContext && <Text style={styles.context}>{displayContext}</Text>}
+          {!!displayContext && (
+            <Text style={styles.context}>{displayContext}</Text>
+          )}
           {!!tone && <Text style={styles.tone}>{tone}</Text>}
         </View>
         <View style={styles.mandalaWrap} accessibilityElementsHidden>
@@ -122,7 +124,7 @@ const styles = StyleSheet.create({
   },
   context: {
     fontFamily: Fonts.sans.regular,
-    fontSize: 14,
+    fontSize: 12,
     color: Colors.textSoft,
     lineHeight: 20,
   },

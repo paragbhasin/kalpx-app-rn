@@ -155,9 +155,9 @@ const WhyThisModal: React.FC<Props> = ({ visible, onClose, screenData }) => {
                             />
                           )}
                           {type === "practice" && (
-                            <MaterialCommunityIcons
-                              name="bow-arrow"
-                              size={22}
+                            <Ionicons
+                              name="leaf-outline"
+                              size={20}
                               color="#9A7548"
                             />
                           )}

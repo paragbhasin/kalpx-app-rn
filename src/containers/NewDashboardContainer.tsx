@@ -28,7 +28,14 @@
 
 import { useFocusEffect } from "@react-navigation/native";
 import React, { useCallback, useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { executeAction } from "../engine/actionExecutor";
 import { mitraJourneyDailyView } from "../engine/mitraApi";
@@ -92,6 +99,7 @@ const NewDashboardContainer: React.FC<Props> = () => {
   } = useScreenStore();
   const sd = (screenData ?? {}) as Record<string, any>;
   const [whyOpen, setWhyOpen] = useState(false);
+  const [isHydrating, setIsHydrating] = useState(false);
 
   useEffect(() => {
     updateBackground(require("../../assets/beige_bg.png"));
@@ -120,7 +128,9 @@ const NewDashboardContainer: React.FC<Props> = () => {
 
   useFocusEffect(
     useCallback(() => {
+      let active = true;
       (async () => {
+        if (active) setIsHydrating(true);
         try {
           const result = await mitraJourneyDailyView(dailyViewEtagRef.current);
           if (result.etag) dailyViewEtagRef.current = result.etag;
@@ -136,8 +146,13 @@ const NewDashboardContainer: React.FC<Props> = () => {
             "[NewDashboard] v3 daily-view hydrate failed:",
             err?.message,
           );
+        } finally {
+          if (active) setIsHydrating(false);
         }
       })();
+      return () => {
+        active = false;
+      };
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []),
   );
@@ -257,6 +272,12 @@ const NewDashboardContainer: React.FC<Props> = () => {
              while M30 authoring continues. See docs/ADDITIONAL_ITEMS_DISPOSITION.md. */}
         <AdditionalItemsSectionBlock screenData={sd} />
       </ScrollView>
+
+      {isHydrating ? (
+        <View style={styles.fullLoaderOverlay} pointerEvents="auto">
+          <ActivityIndicator size="large" color={Colors.goldBright} />
+        </View>
+      ) : null}
 
     </View>
   );
@@ -383,6 +404,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.parchment,
     borderTopWidth: 1,
     borderTopColor: Colors.borderCream,
+  },
+  fullLoaderOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(250, 247, 242, 0.92)",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 1000,
   },
 });
 

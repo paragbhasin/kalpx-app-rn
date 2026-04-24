@@ -11,9 +11,10 @@
  * Sovereignty: each text node renders only when non-empty.
  */
 
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import React from "react";
 import {
+  Image,
   ImageBackground,
   Modal,
   Pressable,
@@ -83,7 +84,7 @@ const WhyThisModal: React.FC<Props> = ({ visible, onClose, screenData }) => {
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 accessibilityLabel="close_why_this"
               >
-                <Ionicons name="close" size={20} color={Colors.brownMuted} />
+                <Ionicons name="close" size={22} color={Colors.brownMuted} />
               </TouchableOpacity>
             </View>
 
@@ -97,47 +98,85 @@ const WhyThisModal: React.FC<Props> = ({ visible, onClose, screenData }) => {
             >
               {/* ── Section 1: THE PRINCIPLE ── */}
               {hasPrinciple && (
-                <>
-                  {hasItems && (
-                    <Text style={styles.sectionLabel}>THE PRINCIPLE</Text>
-                  )}
+                <View style={styles.principleSection}>
+                  <Text style={styles.sectionLabel}>THE PRINCIPLE</Text>
                   {!!level1 && <Text style={styles.l1}>{level1}</Text>}
-                  {!!level2 && (
-                    <Text style={[styles.l2, !!level1 && styles.mt14]}>
-                      {level2}
-                    </Text>
-                  )}
-                  {!!(level2 && level3) && <View style={styles.divider} />}
-                  {!!level3 && <Text style={styles.l3}>{level3}</Text>}
-                </>
-              )}
+                  {!!level2 && <Text style={styles.l2}>{level2}</Text>}
 
-              {/* ── Section separator ── */}
-              {hasPrinciple && hasItems && (
-                <View style={styles.sectionSeparator} />
+                  {/* Lotus Divider */}
+                  <View style={styles.lotusDivider}>
+                    <View style={styles.dividerLine} />
+                    <Image
+                      source={require("../../../assets/lotus_icon.png")}
+                      style={styles.lotusIcon}
+                    />
+                    <View style={styles.dividerLine} />
+                  </View>
+
+                  {/* Level 3 Quote Block */}
+                  {!!level3 && (
+                    <View style={styles.quoteBlock}>
+                      <View style={styles.quoteIndicator} />
+                      <View style={styles.quoteContent}>
+                        <MaterialCommunityIcons
+                          name="format-quote-open"
+                          size={24}
+                          color="#D4B68C"
+                          style={styles.quoteIcon}
+                        />
+                        <Text style={styles.l3}>{level3}</Text>
+                      </View>
+                    </View>
+                  )}
+                </View>
               )}
 
               {/* ── Section 2: YOUR PATH ITEMS ── */}
               {hasItems && (
-                <>
+                <View style={styles.itemsSection}>
                   <Text style={styles.sectionLabel}>YOUR PATH ITEMS</Text>
-                  {items.map((item, idx) => (
-                    <View
-                      key={item.id}
-                      style={[styles.itemRow, idx > 0 && styles.itemRowTop]}
-                    >
-                      <Text style={styles.itemEyebrow}>
-                        {item.id.toUpperCase()}
-                      </Text>
-                      {!!itemNameMap[item.id] && (
-                        <Text style={styles.itemName}>
-                          {itemNameMap[item.id]}
-                        </Text>
-                      )}
-                      <Text style={styles.itemLabel}>{item.label}</Text>
-                    </View>
-                  ))}
-                </>
+                  {items.map((item, idx) => {
+                    const type = item.id.toLowerCase();
+                    return (
+                      <View key={item.id} style={styles.itemRow}>
+                        <View style={styles.itemIconContainer}>
+                          {type === "mantra" && (
+                            <MaterialCommunityIcons
+                              name="om"
+                              size={20}
+                              color="#9A7548"
+                            />
+                          )}
+                          {type === "sankalp" && (
+                            <Ionicons
+                              name="heart-outline"
+                              size={20}
+                              color="#9A7548"
+                            />
+                          )}
+                          {type === "practice" && (
+                            <MaterialCommunityIcons
+                              name="bow-arrow"
+                              size={22}
+                              color="#9A7548"
+                            />
+                          )}
+                        </View>
+                        <View style={styles.itemContent}>
+                          <Text style={styles.itemEyebrow}>
+                            {item.id.toUpperCase()}
+                          </Text>
+                          {!!itemNameMap[item.id] && (
+                            <Text style={styles.itemName}>
+                              {itemNameMap[item.id]}
+                            </Text>
+                          )}
+                          <Text style={styles.itemLabel}>{item.label}</Text>
+                        </View>
+                      </View>
+                    );
+                  })}
+                </View>
               )}
             </ScrollView>
           </ImageBackground>
@@ -185,84 +224,143 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   eyebrow: {
-    fontFamily: Fonts.sans.medium,
-    fontSize: 11,
-    letterSpacing: 1.3,
+    fontFamily: Fonts.cinzel.bold,
+    fontSize: 12,
+    letterSpacing: 1.5,
     color: Colors.gold,
   },
   headerSeparator: {
     borderBottomWidth: 1,
     borderBottomColor: Colors.goldHairline,
-    marginHorizontal: 20,
+    marginHorizontal: 24,
+    opacity: 0.5,
   },
   body: {
     flexShrink: 1,
   },
   bodyContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingTop: 20,
-    paddingBottom: 36,
+    paddingBottom: 40,
+  },
+  mandalaWrapper: {
+    position: "absolute",
+    bottom: -50,
+    right: -50,
+    opacity: 0.15,
+  },
+  mandalaImage: {
+    width: 300,
+    height: 300,
   },
   sectionLabel: {
+    marginTop: -10,
     fontFamily: Fonts.sans.medium,
     fontSize: 10,
     letterSpacing: 1.5,
     color: Colors.brownMuted,
-    marginBottom: 12,
+    marginBottom: 15,
+    opacity: 0.8,
+  },
+  principleSection: {
+    marginBottom: 32,
   },
   l1: {
     fontFamily: Fonts.serif.bold,
-    fontSize: 17,
+    fontSize: 22,
     color: Colors.brownDeep,
-    lineHeight: 24,
+    lineHeight: 28,
+    marginBottom: 12,
   },
   l2: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 15,
+    fontSize: 16,
     color: Colors.textSoft,
-    lineHeight: 23,
+    lineHeight: 24,
   },
-  mt14: {
-    marginTop: 14,
+  lotusDivider: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 10,
   },
-  divider: {
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.goldHairline,
-    marginVertical: 18,
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.goldHairline,
+    opacity: 0.4,
+  },
+  lotusIcon: {
+    width: 20,
+    height: 16,
+    marginHorizontal: 12,
+    tintColor: Colors.gold,
+    opacity: 0.6,
+  },
+  quoteBlock: {
+    flexDirection: "row",
+    paddingLeft: 4,
+  },
+  quoteIndicator: {
+    width: 2,
+    backgroundColor: "#D4B68C",
+    borderRadius: 1,
+  },
+  quoteContent: {
+    flex: 1,
+    paddingLeft: 16,
+  },
+  quoteIcon: {
+    marginBottom: 4,
+    marginLeft: -4,
   },
   l3: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 13,
-    color: Colors.brownMuted,
-    lineHeight: 20,
+    fontSize: 15,
+    color: "#5C4A33",
+    lineHeight: 24,
+    fontStyle: "italic",
   },
-  sectionSeparator: {
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.borderCream,
-    marginVertical: 24,
+  itemsSection: {
+    // marginBottom: 4,
   },
   itemRow: {
-    gap: 3,
+    flexDirection: "row",
+    marginBottom: 24,
   },
-  itemRowTop: {
-    marginTop: 18,
+  itemIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(154, 117, 72, 0.08)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 16,
+    borderWidth: 1,
+    borderColor: "rgba(154, 117, 72, 0.15)",
+  },
+  itemContent: {
+    flex: 1,
+    justifyContent: "center",
   },
   itemEyebrow: {
     fontFamily: Fonts.sans.medium,
     fontSize: 10,
     letterSpacing: 1.1,
     color: Colors.gold,
+    marginBottom: 2,
   },
   itemName: {
-    fontFamily: Fonts.sans.medium,
-    fontSize: 14,
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 15,
     color: Colors.brownDeep,
+    marginBottom: 2,
   },
   itemLabel: {
     fontFamily: Fonts.serif.regular,
     fontSize: 13,
     color: Colors.textSoft,
-    lineHeight: 19,
+    lineHeight: 18,
+    opacity: 0.9,
   },
 });
 

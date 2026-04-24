@@ -374,12 +374,14 @@ export default function ContinueJourney({
   // ── Mount effect ─────────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false;
-    let prehydrateTimer: ReturnType<typeof setTimeout> | null = null;
 
     if (routedRef.current) return;
 
     if (hasActiveJourney) {
-      // Active-user path: journey/home/ with optional generate_companion prehydration.
+      // Active-user path: journey/home/ dispatches on response_type.
+      // generate_companion prehydrate removed: the action handler was
+      // retired in v3 (no-op). Active users are fully handled by
+      // route_to_moment (milestone/care-room) or render_home (ground state).
       (async () => {
         const res = await fetchHome();
         if (cancelled || !res || routedRef.current) return;
@@ -389,21 +391,6 @@ export default function ContinueJourney({
           await executeAction(res.action as any, buildActionContext() as any);
           return;
         }
-        prehydrateTimer = setTimeout(() => {
-          if (cancelled || routedRef.current) return;
-          executeAction(
-            {
-              type: "generate_companion",
-              payload: { skipReveal: true, use_journey_companion: true },
-            } as any,
-            buildActionContext() as any,
-          ).catch((err) => {
-            console.debug(
-              "[ContinueJourney] generate_companion prehydrate failed:",
-              err?.message,
-            );
-          });
-        }, 1500);
       })();
     } else {
       // Returning-user path: entry-view.
@@ -415,7 +402,6 @@ export default function ContinueJourney({
 
     return () => {
       cancelled = true;
-      if (prehydrateTimer) clearTimeout(prehydrateTimer);
     };
   }, [hasActiveJourney, fetchHome, fetchEntryView, buildActionContext]);
 

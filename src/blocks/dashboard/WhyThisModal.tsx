@@ -273,9 +273,9 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   l2: {
-    fontFamily: Fonts.serif.regular,
-    fontSize: 16,
-    color: Colors.textSoft,
+    fontFamily: Fonts.sans.regular,
+    fontSize: 14,
+    color: "#564B42",
     lineHeight: 24,
   },
   lotusDivider: {
@@ -314,9 +314,9 @@ const styles = StyleSheet.create({
     marginLeft: -4,
   },
   l3: {
-    fontFamily: Fonts.serif.regular,
-    fontSize: 15,
-    color: "#5C4A33",
+    fontFamily: Fonts.sans.regular,
+    fontSize: 14,
+    color: "#564B42",
     lineHeight: 24,
     fontStyle: "italic",
   },
@@ -356,11 +356,10 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   itemLabel: {
-    fontFamily: Fonts.serif.regular,
+    fontFamily: Fonts.sans.regular,
     fontSize: 13,
     color: Colors.textSoft,
     lineHeight: 18,
-    opacity: 0.9,
   },
 });
 

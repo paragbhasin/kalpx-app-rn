@@ -16,7 +16,7 @@
 import React from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 import { Colors } from "../../theme/colors";
-
+import { Fonts } from "../../theme/fonts";
 import RoomActionList from "./RoomActionList";
 import RoomOpeningExperience from "./RoomOpeningExperience";
 import RoomPrincipleBanner from "./RoomPrincipleBanner";
@@ -123,7 +123,8 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 12,
     color: "#8A7968",
-    fontStyle: "italic",
+    fontFamily: Fonts.sans.medium,
+
     lineHeight: 17,
     textAlign: "center",
   },

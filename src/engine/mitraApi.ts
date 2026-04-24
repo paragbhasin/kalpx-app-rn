@@ -961,6 +961,8 @@ export interface V3Continuity {
   /** Null when sankalp has no linked principle; FE self-hides WhyThis surfaces on null. */
   why_this: V3WhyThis | null;
   why_this_l1_items: { id: string; label: string }[];
+  /** First-paint gate only — full PostConflictGentlenessCard content still via FCI. */
+  post_conflict?: boolean;
 }
 
 export interface V3TriadItem {
@@ -1009,6 +1011,8 @@ export interface V3Today {
   quick_support_labels: V3QuickSupportLabels;
   /** Null on no active journey; FE CycleProgressBlock self-hides. */
   cycle_metrics: V3CycleMetrics | null;
+  /** Classifier result; DayTypeChip self-hides when null. day_type_copy is BE-emitted only — not ingested. */
+  day_type?: string | null;
 }
 
 export interface V3Insights {

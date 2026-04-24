@@ -85,6 +85,8 @@ export function ingestDailyView(env: V3DailyViewEnvelope | null): V3FlatIngest {
     ],
     why_this_l1_items: cont.why_this_l1_items ?? [],
     why_this: cont.why_this ?? null,
+    // First-paint gate only — full PostConflictGentlenessCard content still via FCI
+    post_conflict: env.continuity?.post_conflict ?? false,
     journey_path: arc.journey_path ?? "",
     sankalp_how_to_live: Array.isArray(sankalp?.how_to_live)
       ? sankalp.how_to_live
@@ -104,6 +106,8 @@ export function ingestDailyView(env: V3DailyViewEnvelope | null): V3FlatIngest {
     voice_placeholder: greet.voice_placeholder ?? "",
     journey_path_label: arc.journey_path_label ?? "",
     focus_phrase: today.focus_phrase ?? "",
+    // DayTypeChip reads sd.day_type — live consumer (day_type_copy emit-only on BE, not ingested yet)
+    day_type: env.today?.day_type ?? null,
 
     // card_* fallbacks for TriadCardsRow
     card_mantra_title: mantra?.title || _humanizeId(mantra?.item_id) || "",

@@ -27,8 +27,9 @@
  */
 
 import { useFocusEffect } from "@react-navigation/native";
-import React, { useCallback, useEffect } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { executeAction } from "../engine/actionExecutor";
 import { mitraJourneyDailyView } from "../engine/mitraApi";
 import { ingestDailyView } from "../engine/v3Ingest";
@@ -46,7 +47,8 @@ import PathChip from "../blocks/dashboard/PathChip";
 import QuickSupportBlock from "../blocks/dashboard/QuickSupportBlock";
 import SankalpCarryBlock from "../blocks/dashboard/SankalpCarryBlock";
 import TriadCardsRow from "../blocks/dashboard/TriadCardsRow";
-import WhyThisL1Strip from "../blocks/dashboard/WhyThisL1Strip";
+import WhyThisModal from "../blocks/dashboard/WhyThisModal";
+import { extractWhyThis } from "../blocks/dashboard/whyThisUtils";
 
 // ── Registered moment blocks (Phase 3 re-uses existing scaffolds) ─────────
 // DayTypeChip removed 2026-04-18 per founder call — kept scaffold in
@@ -89,6 +91,7 @@ const NewDashboardContainer: React.FC<Props> = () => {
     updateHeaderHidden,
   } = useScreenStore();
   const sd = (screenData ?? {}) as Record<string, any>;
+  const [whyOpen, setWhyOpen] = useState(false);
 
   useEffect(() => {
     updateBackground(require("../../assets/beige_bg.png"));
@@ -163,9 +166,25 @@ const NewDashboardContainer: React.FC<Props> = () => {
           </View>
         </View>
 
-        {/* 3. Triad + why_this_l1 strip */}
+        {/* 3. Triad + why this was chosen link */}
         <TriadCardsRow />
-        <WhyThisL1Strip screenData={sd} />
+        {extractWhyThis(sd).hasContent && (
+          <>
+            <TouchableOpacity
+              onPress={() => setWhyOpen(true)}
+              style={styles.whyLink}
+              accessibilityLabel="why_this_link"
+            >
+              <Text style={styles.whyLinkText}>Why this was chosen</Text>
+              <Ionicons name="arrow-forward" size={13} color={Colors.gold} />
+            </TouchableOpacity>
+            <WhyThisModal
+              visible={whyOpen}
+              onClose={() => setWhyOpen(false)}
+              screenData={sd}
+            />
+          </>
+        )}
 
         {/* 5. Cycle progress (collapsible, default closed) */}
         <CycleProgressBlock screenData={sd} />
@@ -333,6 +352,19 @@ const styles = StyleSheet.create({
   },
   phraseRightWrap: {
     marginLeft: 8,
+  },
+
+  whyLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    paddingVertical: 8,
+    alignSelf: "flex-start",
+  },
+  whyLinkText: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 13,
+    color: Colors.gold,
   },
 
   // Voice bar — the NewDashboardContainer is rendered INSIDE the tab

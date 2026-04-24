@@ -25,9 +25,10 @@ interface Props {
   action: ActionEnvelope;
   index: number;
   envelope?: RoomRenderV1;
+  kindLabel?: string;
 }
 
-const RoomActionRunnerPill: React.FC<Props> = ({ action, envelope }) => {
+const RoomActionRunnerPill: React.FC<Props> = ({ action, envelope, kindLabel }) => {
   const { loadScreen, goBack } = useScreenStore();
 
   const onPress = () => {
@@ -64,6 +65,13 @@ const RoomActionRunnerPill: React.FC<Props> = ({ action, envelope }) => {
     });
   };
 
+  const isMantra = action.action_type === "runner_mantra";
+  const mainLabel = isMantra
+    ? (action.display?.display_title ?? action.runner_payload?.title ?? action.label)
+    : action.label;
+  const transliteration = isMantra ? (action.runner_payload?.title ?? null) : null;
+  const displaySubtitle = isMantra ? (action.display?.display_subtitle ?? null) : null;
+
   return (
     <TouchableOpacity
       testID={action.testID}
@@ -73,7 +81,16 @@ const RoomActionRunnerPill: React.FC<Props> = ({ action, envelope }) => {
       onPress={onPress}
     >
       <View style={styles.inner}>
-        <Text style={styles.label}>{action.label}</Text>
+        <View>
+          {kindLabel ? <Text style={styles.kindLabel}>{kindLabel}</Text> : null}
+          <Text style={styles.label}>{mainLabel}</Text>
+          {transliteration ? (
+            <Text style={styles.transliteration}>{transliteration}</Text>
+          ) : null}
+          {displaySubtitle ? (
+            <Text style={styles.displaySubtitle}>{displaySubtitle}</Text>
+          ) : null}
+        </View>
       </View>
     </TouchableOpacity>
   );
@@ -99,11 +116,29 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  kindLabel: {
+    fontSize: 10,
+    color: "#9f9f9f",
+    textAlign: "center",
+    marginBottom: 2,
+  },
   label: {
     fontSize: 15,
     color: "#432104",
     alignSelf: "center",
     textAlign: "center",
+  },
+  transliteration: {
+    fontSize: 12,
+    color: "#9f9f9f",
+    textAlign: "center",
+    marginTop: 3,
+  },
+  displaySubtitle: {
+    fontSize: 11,
+    color: "#b0b0b0",
+    textAlign: "center",
+    marginTop: 2,
   },
 });
 

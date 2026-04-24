@@ -23,7 +23,10 @@ interface Props {
 const RoomActionBannerScalar: React.FC<Props> = ({ banner, testID }) => {
   return (
     <View style={styles.wrap} testID={testID ?? "room_principle_banner"}>
-      <Text style={styles.line}>{banner.wisdom_anchor_line}</Text>
+      <View style={styles.card}>
+        <Text style={styles.cardLabel}>{"A teaching for you"}</Text>
+        <Text style={styles.line}>{banner.wisdom_anchor_line}</Text>
+      </View>
     </View>
   );
 };
@@ -33,12 +36,24 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 16,
   },
+  card: {
+    backgroundColor: "#FAF6F0",
+    borderColor: "#E8D8C4",
+    borderWidth: 0.5,
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+  },
+  cardLabel: {
+    fontSize: 11,
+    color: "#9f9f9f",
+    marginBottom: 4,
+  },
   line: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 16,
+    lineHeight: 22,
     color: "#4A4A4A",
-    fontStyle: "italic",
-    textAlign: "center",
+    textAlign: "left",
   },
 });
 

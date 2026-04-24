@@ -14,11 +14,12 @@
  */
 
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 import RoomActionList from "./RoomActionList";
 import RoomOpeningExperience from "./RoomOpeningExperience";
 import RoomPrincipleBanner from "./RoomPrincipleBanner";
+import { LIFE_CONTEXT_LABELS, ROOM_DISPLAY_NAMES } from "./roomConstants";
 import type { RoomRendererProps } from "./types";
 
 function isFlagOn(): boolean {
@@ -36,8 +37,21 @@ const RoomRenderer: React.FC<RoomRendererProps> = ({
   // HARD GATE: flag off → render nothing. No side effects, no subtree.
   if (!flagOn) return null;
 
+  const roomDisplayName = ROOM_DISPLAY_NAMES[envelope.room_id];
+  const lifeContextLabel = envelope.life_context
+    ? LIFE_CONTEXT_LABELS[envelope.life_context]
+    : null;
+
   return (
     <View style={styles.root} testID={`room_renderer_${envelope.room_id}`}>
+      <View style={styles.header}>
+        {roomDisplayName ? (
+          <Text style={styles.roomName}>{roomDisplayName}</Text>
+        ) : null}
+        {lifeContextLabel ? (
+          <Text style={styles.lifeContext}>{"You chose: " + lifeContextLabel}</Text>
+        ) : null}
+      </View>
       <RoomOpeningExperience envelope={envelope} />
       {envelope.principle_banner ? (
         <RoomPrincipleBanner banner={envelope.principle_banner} />
@@ -50,6 +64,21 @@ const RoomRenderer: React.FC<RoomRendererProps> = ({
 const styles = StyleSheet.create({
   root: {
     flex: 1,
+  },
+  header: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 4,
+  },
+  roomName: {
+    fontSize: 18,
+    color: "#432104",
+    fontWeight: "600",
+  },
+  lifeContext: {
+    fontSize: 12,
+    color: "#9f9f9f",
+    marginTop: 2,
   },
 });
 

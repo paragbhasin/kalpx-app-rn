@@ -12,7 +12,7 @@
  */
 
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { executeAction } from "../../../engine/actionExecutor";
 import { useScreenStore } from "../../../engine/useScreenBridge";
@@ -23,9 +23,10 @@ interface Props {
   action: ActionEnvelope;
   index: number;
   envelope?: RoomRenderV1;
+  kindLabel?: string;
 }
 
-const RoomActionTeachingPill: React.FC<Props> = ({ action }) => {
+const RoomActionTeachingPill: React.FC<Props> = ({ action, kindLabel }) => {
   const { loadScreen, goBack } = useScreenStore();
 
   const onPress = () => {
@@ -76,7 +77,10 @@ const RoomActionTeachingPill: React.FC<Props> = ({ action }) => {
       style={styles.pill}
       onPress={onPress}
     >
-      <Text style={styles.label}>{action.label}</Text>
+      <View>
+        {kindLabel ? <Text style={styles.kindLabel}>{kindLabel}</Text> : null}
+        <Text style={styles.label}>{action.label}</Text>
+      </View>
     </TouchableOpacity>
   );
 };
@@ -95,6 +99,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     marginBottom: 10,
+  },
+  kindLabel: {
+    fontSize: 10,
+    color: "#9f9f9f",
+    textAlign: "center",
+    marginBottom: 2,
   },
   label: {
     fontSize: 15,

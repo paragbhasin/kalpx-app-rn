@@ -250,6 +250,11 @@ export interface ActionVisibilityGate {
   feature_flag?: string | null;
 }
 
+export interface ActionDisplay {
+  display_title?: string | null;
+  display_subtitle?: string | null;
+}
+
 /**
  * Polymorphic Action shape per §7.2. One action envelope — payload fields
  * populated according to `action_type`.
@@ -260,6 +265,7 @@ export interface ActionEnvelope {
   action_type: ActionType;
   action_family: ActionFamily;
 
+  display?: ActionDisplay | null;
   runner_payload: CanonicalRichRunnerPayloadV1 | null;
   teaching_payload: TeachingPayload | null;
   inquiry_payload: InquiryPayload | null;

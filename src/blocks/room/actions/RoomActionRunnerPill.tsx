@@ -42,7 +42,12 @@ interface Props {
   isPrimary?: boolean;
 }
 
-const RoomActionRunnerPill: React.FC<Props> = ({ action, envelope, kindLabel, isPrimary = false }) => {
+const RoomActionRunnerPill: React.FC<Props> = ({
+  action,
+  envelope,
+  kindLabel,
+  isPrimary = false,
+}) => {
   const { loadScreen, goBack } = useScreenStore();
 
   const onPress = () => {
@@ -91,11 +96,12 @@ const RoomActionRunnerPill: React.FC<Props> = ({ action, envelope, kindLabel, is
     : action.label;
 
   // Transliteration: only shown when it adds new information (different from mainLabel after normalization).
-  const transliteration = isMantra && normalize(rawTitle) !== normalize(mainLabel)
-    ? rawTitle
-    : null;
+  const transliteration =
+    isMantra && normalize(rawTitle) !== normalize(mainLabel) ? rawTitle : null;
 
-  const displaySubtitle = isMantra ? (action.display?.display_subtitle ?? null) : null;
+  const displaySubtitle = isMantra
+    ? (action.display?.display_subtitle ?? null)
+    : null;
 
   // why_for_you: FE-ready slot — renders on primary action only when BE starts populating display.why_for_you.
   const whyForYou = isPrimary ? (action.display?.why_for_you ?? null) : null;
@@ -118,9 +124,7 @@ const RoomActionRunnerPill: React.FC<Props> = ({ action, envelope, kindLabel, is
           {displaySubtitle ? (
             <Text style={styles.displaySubtitle}>{displaySubtitle}</Text>
           ) : null}
-          {whyForYou ? (
-            <Text style={styles.whyForYou}>{whyForYou}</Text>
-          ) : null}
+          {whyForYou ? <Text style={styles.whyForYou}>{whyForYou}</Text> : null}
         </View>
       </View>
     </TouchableOpacity>
@@ -143,7 +147,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   pillPrimary: {
-    borderColor: "#b89674",
+    borderColor: "#D4A017",
     borderWidth: 1.4,
     shadowOpacity: 0.28,
     shadowRadius: 5,
@@ -154,8 +158,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   kindLabel: {
-    fontSize: 10,
-    color: "#9f9f9f",
+    fontSize: 12,
+    color: "#D4A017",
     textAlign: "center",
     marginBottom: 2,
   },

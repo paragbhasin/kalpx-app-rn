@@ -34,7 +34,12 @@ interface Props {
   isPrimary?: boolean;
 }
 
-const RoomActionCarryPill: React.FC<Props> = ({ action, envelope, kindLabel, isPrimary = false }) => {
+const RoomActionCarryPill: React.FC<Props> = ({
+  action,
+  envelope,
+  kindLabel,
+  isPrimary = false,
+}) => {
   const { loadScreen, goBack } = useScreenStore();
 
   const onPress = async () => {
@@ -146,8 +151,8 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
   },
   kindLabel: {
-    fontSize: 10,
-    color: "#9f9f9f",
+    fontSize: 12,
+    color: "#D4A017",
     textAlign: "center",
     marginBottom: 2,
   },

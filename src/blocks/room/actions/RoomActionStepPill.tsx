@@ -33,7 +33,12 @@ interface Props {
   isPrimary?: boolean;
 }
 
-const RoomActionStepPill: React.FC<Props> = ({ action, envelope, kindLabel, isPrimary = false }) => {
+const RoomActionStepPill: React.FC<Props> = ({
+  action,
+  envelope,
+  kindLabel,
+  isPrimary = false,
+}) => {
   const { loadScreen, goBack } = useScreenStore();
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
@@ -139,8 +144,8 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
   },
   kindLabel: {
-    fontSize: 10,
-    color: "#9f9f9f",
+    fontSize: 12,
+    color: "#D4A017",
     textAlign: "center",
     marginBottom: 2,
   },

@@ -25,7 +25,7 @@
 
 import { useFocusEffect } from "@react-navigation/native";
 import React, { useEffect, useRef, useState } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import api from "../Networks/axios";
 import LifeContextPickerSheet, {
   type LifeContext,
@@ -340,10 +340,24 @@ const RoomRenderBranch: React.FC<RenderBranchProps> = ({
     );
   }
 
-  return <RoomRenderer envelope={envelope} />;
+  return (
+    <ScrollView
+      style={styles.scrollRoot}
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+    >
+      <RoomRenderer envelope={envelope} />
+    </ScrollView>
+  );
 };
 
 const styles = StyleSheet.create({
+  scrollRoot: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 40, // Space for the last action pill
+  },
   loading: {
     flex: 1,
     justifyContent: "center",

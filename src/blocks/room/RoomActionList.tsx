@@ -10,7 +10,6 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-import type { ActionEnvelope, RoomRenderV1 } from "./types";
 import {
   RoomActionCarryPill,
   RoomActionExitPill,
@@ -20,6 +19,7 @@ import {
   RoomActionTeachingPill,
 } from "./actions";
 import { ACTION_KIND_LABELS } from "./roomConstants";
+import type { ActionEnvelope, RoomRenderV1 } from "./types";
 
 interface Props {
   envelope: RoomRenderV1;
@@ -44,7 +44,12 @@ const RoomActionList: React.FC<Props> = ({ envelope }) => {
           {action.primary_recommendation && index === 0 ? (
             <Text style={styles.startHereLabel}>Start here</Text>
           ) : null}
-          {renderActionComponent(action, index, envelope, action.primary_recommendation === true)}
+          {renderActionComponent(
+            action,
+            index,
+            envelope,
+            action.primary_recommendation === true,
+          )}
         </View>
       ))}
     </View>
@@ -58,30 +63,61 @@ function renderActionComponent(
   isPrimary: boolean,
 ) {
   const kindLabelValue = ACTION_KIND_LABELS[action.action_type];
-  const kindLabel = kindLabelValue && kindLabelValue.length > 0 ? kindLabelValue : undefined;
+  const kindLabel =
+    kindLabelValue && kindLabelValue.length > 0 ? kindLabelValue : undefined;
 
   switch (action.action_type) {
     case "runner_mantra":
     case "runner_sankalp":
     case "runner_practice":
       return (
-        <RoomActionRunnerPill action={action} index={index} envelope={envelope} kindLabel={kindLabel} isPrimary={isPrimary} />
+        <RoomActionRunnerPill
+          action={action}
+          index={index}
+          envelope={envelope}
+          kindLabel={kindLabel}
+          isPrimary={isPrimary}
+        />
       );
     case "teaching":
       return (
-        <RoomActionTeachingPill action={action} index={index} envelope={envelope} kindLabel={kindLabel} isPrimary={isPrimary} />
+        <RoomActionTeachingPill
+          action={action}
+          index={index}
+          envelope={envelope}
+          kindLabel={kindLabel}
+          isPrimary={isPrimary}
+        />
       );
     case "inquiry":
       return (
-        <RoomActionInquiryPill action={action} index={index} envelope={envelope} kindLabel={kindLabel} isPrimary={isPrimary} />
+        <RoomActionInquiryPill
+          action={action}
+          index={index}
+          envelope={envelope}
+          kindLabel={kindLabel}
+          isPrimary={isPrimary}
+        />
       );
     case "in_room_step":
       return (
-        <RoomActionStepPill action={action} index={index} envelope={envelope} kindLabel={kindLabel} isPrimary={isPrimary} />
+        <RoomActionStepPill
+          action={action}
+          index={index}
+          envelope={envelope}
+          kindLabel={kindLabel}
+          isPrimary={isPrimary}
+        />
       );
     case "in_room_carry":
       return (
-        <RoomActionCarryPill action={action} index={index} envelope={envelope} kindLabel={kindLabel} isPrimary={isPrimary} />
+        <RoomActionCarryPill
+          action={action}
+          index={index}
+          envelope={envelope}
+          kindLabel={kindLabel}
+          isPrimary={isPrimary}
+        />
       );
     case "exit":
       return (
@@ -90,7 +126,9 @@ function renderActionComponent(
     default:
       // Unknown action_type — self-hide per sovereignty fallback (§I-6).
       if (__DEV__) {
-        console.warn(`[RoomActionList] unknown action_type "${action.action_type}" — action silently skipped`);
+        console.warn(
+          `[RoomActionList] unknown action_type "${action.action_type}" — action silently skipped`,
+        );
       }
       return null;
   }
@@ -105,8 +143,9 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   startHereLabel: {
-    fontSize: 10,
-    color: "#9f9f9f",
+    fontSize: 12,
+    color: "#D4A017",
+
     marginBottom: 4,
     letterSpacing: 0.3,
   },

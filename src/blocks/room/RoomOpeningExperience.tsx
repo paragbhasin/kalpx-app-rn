@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
   wrap: {
     // paddingVertical: 24,
     // paddingHorizontal: 24,
-    marginTop: 35,
+    // marginTop: 35,
     alignItems: "center",
     justifyContent: "center",
   },

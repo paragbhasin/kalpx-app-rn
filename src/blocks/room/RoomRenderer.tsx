@@ -14,7 +14,8 @@
  */
 
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
+import { Colors } from "../../theme/colors";
 
 import RoomActionList from "./RoomActionList";
 import RoomOpeningExperience from "./RoomOpeningExperience";
@@ -50,14 +51,26 @@ const RoomRenderer: React.FC<RoomRendererProps> = ({
           <Text style={styles.roomName}>{roomDisplayName}</Text>
         ) : null}
         {lifeContextLabel ? (
-          <Text style={styles.lifeContext}>{"You chose: " + lifeContextLabel}</Text>
+          <Text style={styles.lifeContext}>
+            {"You chose: " + lifeContextLabel}
+          </Text>
         ) : null}
         {ctx?.sanatan_insight_line ? (
           <View style={styles.sanatanInsightRow}>
             <View style={styles.sanatanAccent} />
-            <Text style={styles.sanatanInsight}>{ctx.sanatan_insight_line}</Text>
+            <Text style={styles.sanatanInsight}>
+              {ctx.sanatan_insight_line}
+            </Text>
           </View>
         ) : null}
+        <View style={styles.lotusDivider}>
+          <View style={styles.dividerLine} />
+          <Image
+            source={require("../../../assets/lotus_icon.png")}
+            style={styles.lotusIcon}
+          />
+          <View style={styles.dividerLine} />
+        </View>
         {ctx?.why_this_room_line ? (
           <Text style={styles.whyThisRoom}>{ctx.why_this_room_line}</Text>
         ) : null}
@@ -84,11 +97,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#432104",
     fontWeight: "600",
+    textAlign: "center",
+    marginTop: 10,
   },
   lifeContext: {
     fontSize: 12,
     color: "#9f9f9f",
     marginTop: 2,
+    textAlign: "center",
   },
   sanatanInsightRow: {
     flexDirection: "row",
@@ -109,12 +125,33 @@ const styles = StyleSheet.create({
     color: "#8A7968",
     fontStyle: "italic",
     lineHeight: 17,
+    textAlign: "center",
   },
   whyThisRoom: {
     fontSize: 12,
     color: "#9f9f9f",
     marginTop: 6,
     lineHeight: 17,
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  lotusDivider: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 10,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.goldHairline,
+    opacity: 0.4,
+  },
+  lotusIcon: {
+    width: 20,
+    height: 16,
+    marginHorizontal: 12,
+    tintColor: Colors.gold,
+    opacity: 0.6,
   },
 });
 

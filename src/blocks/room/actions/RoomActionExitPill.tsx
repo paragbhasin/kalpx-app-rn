@@ -46,10 +46,9 @@ const RoomActionExitPill: React.FC<Props> = ({ action, envelope }) => {
       testID={action.testID}
       accessibilityRole="button"
       accessibilityLabel={action.label}
-      style={styles.pill}
       onPress={onPress}
     >
-      <Text style={styles.label}>{action.label}</Text>
+      <Text style={styles.label}>{action.label || "I'll go now"}</Text>
     </TouchableOpacity>
   );
 };
@@ -73,8 +72,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   label: {
+    marginVertical: 4,
     fontSize: 15,
-    color: "#6E6E73",
+    color: "#432104",
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    textDecorationLine: "underline",
   },
 });
 

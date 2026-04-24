@@ -652,10 +652,91 @@ export default function ContinueJourney({
   const rEntry = reentry!;
   const displayName = rEntry.user_name || userName || "friend";
   const headline = (rEntry.headline || "").replace("{userName}", displayName);
+  const continueChip = rEntry.chips.find((c) => c.id === "reentry_continue");
+  const freshChip = rEntry.chips.find((c) => c.id === "reentry_fresh");
+  const hasClassicReentryOptions =
+    !!continueChip &&
+    !!freshChip &&
+    rEntry.chips.length === 2 &&
+    rEntry.chips.every(
+      (c) => c.id === "reentry_continue" || c.id === "reentry_fresh",
+    );
   const isDeepTier =
     rEntry.tier === "medium" ||
     rEntry.tier === "long" ||
     rEntry.tier === "very_long";
+
+  if (hasClassicReentryOptions) {
+    const cont = continueChip!;
+    const fresh = freshChip!;
+    return (
+      <SafeAreaView style={{ flex: 1 }}>
+        <ScrollView
+          contentContainerStyle={styles.reentryScrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.reentryHeader}>
+            {!!headline && <Text style={styles.reentryTitle}>{headline}</Text>}
+            {rEntry.body_lines.map((line, i) => (
+              <Text key={i} style={styles.reentrySubtitle}>
+                {line}
+              </Text>
+            ))}
+          </View>
+
+          <View style={styles.reentryDividerContainer}>
+            <View style={styles.reentryDividerLine} />
+            <Ionicons name="flower-outline" size={24} color="#C79A2B" />
+            <View style={styles.reentryDividerLine} />
+          </View>
+
+          <View style={styles.reentryOptionsWrap}>
+            <TouchableOpacity
+              testID={cont.id}
+              style={[styles.reentryOptionCard, styles.reentryOptionPrimary]}
+              activeOpacity={0.8}
+              disabled={submittingReentry}
+              onPress={() => handleReentryChip(cont.id)}
+            >
+              <View style={styles.reentryOptionIconWrap}>
+                <Ionicons name="heart-outline" size={20} color="#C79A2B" />
+              </View>
+              <View style={styles.reentryOptionTextWrap}>
+                <Text style={styles.reentryOptionTitle}>{cont.label}</Text>
+                <Text style={styles.reentryOptionSub}>Resume your journey</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#C79A2B" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              testID={fresh.id}
+              style={styles.reentryOptionCard}
+              activeOpacity={0.8}
+              disabled={submittingReentry}
+              onPress={() => handleReentryChip(fresh.id)}
+            >
+              <View style={styles.reentryOptionIconWrap}>
+                <Ionicons name="leaf-outline" size={20} color="#C79A2B" />
+              </View>
+              <View style={styles.reentryOptionTextWrap}>
+                <Text style={styles.reentryOptionTitle}>{fresh.label}</Text>
+                <Text style={styles.reentryOptionSub}>Start a new journey</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#C79A2B" />
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+
+        <View style={styles.lotusContainer} pointerEvents="none">
+          <Image
+            source={require("../../../assets/new_home_lotus.png")}
+            style={styles.lotusImage}
+            resizeMode="contain"
+          />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   // For medium/long/very_long: show dedicated emotional card with earned context.
   // For short (3-7 day gap): keep inline chip layout.
@@ -664,8 +745,6 @@ export default function ContinueJourney({
     const freshFirst =
       rEntry.fresh_restart_suggested ||
       rEntry.primary_recommendation === "fresh";
-    const continueChip = rEntry.chips.find((c) => c.id === "reentry_continue");
-    const freshChip = rEntry.chips.find((c) => c.id === "reentry_fresh");
     const primaryChip = freshFirst ? freshChip : continueChip;
     const secondaryChip = freshFirst ? continueChip : freshChip;
     const ec = rEntry.earned_context;
@@ -1033,5 +1112,91 @@ const styles = StyleSheet.create({
   lotusImage: {
     width: SCREEN_HEIGHT * 0.25,
     height: SCREEN_HEIGHT * 0.3,
+  },
+  reentryScrollContent: {
+    paddingHorizontal: 24,
+    paddingTop: 84,
+    paddingBottom: 220,
+    alignItems: "center",
+  },
+  reentryHeader: {
+    alignItems: "center",
+    marginBottom: 18,
+    width: "100%",
+  },
+  reentryTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 22,
+    color: "#2D1407",
+    textAlign: "center",
+    marginBottom: 14,
+    lineHeight: 30,
+  },
+  reentrySubtitle: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 14,
+    color: "#7A6A59",
+    textAlign: "center",
+    lineHeight: 24,
+  },
+  reentryDividerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "72%",
+    marginTop: 10,
+    marginBottom: 26,
+  },
+  reentryDividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "rgba(199, 154, 43, 0.55)",
+    marginHorizontal: 16,
+  },
+  reentryOptionsWrap: {
+    width: "100%",
+    gap: 14,
+  },
+  reentryOptionCard: {
+    width: "100%",
+    borderRadius: 22,
+    borderWidth: 1,
+    padding: 10,
+    borderColor: "rgba(210, 200, 184, 0.65)",
+    backgroundColor: "rgba(255, 255, 255, 0.72)",
+    // paddingHorizontal: 18,
+    // paddingVertical: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    // minHeight: 122,
+  },
+  reentryOptionPrimary: {
+    borderColor: "rgba(199, 154, 43, 0.55)",
+    backgroundColor: "rgba(254, 247, 233, 0.85)",
+  },
+  reentryOptionIconWrap: {
+    width: 45,
+    height: 45,
+    borderRadius: 43,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(238, 229, 216, 0.45)",
+    marginRight: 16,
+  },
+  reentryOptionTextWrap: {
+    flex: 1,
+    paddingRight: 8,
+  },
+  reentryOptionTitle: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 18,
+    color: "#2D1407",
+    lineHeight: 26,
+    marginBottom: 4,
+  },
+  reentryOptionSub: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 12,
+    color: "#7A6A59",
+    lineHeight: 22,
   },
 });

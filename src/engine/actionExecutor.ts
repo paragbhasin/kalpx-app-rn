@@ -4551,6 +4551,22 @@ export async function executeAction(
             },
           });
         }
+        const stepText = (payload?.text || "").trim();
+        if (stepText) {
+          const tid: string = templateId ?? "";
+          const signalType =
+            tid.startsWith("step_grounding")
+              ? "room_grounding"
+              : tid === "step_journal_inquiry"
+              ? "room_inquiry"
+              : "room_reflection";
+          await postGratitudeLedger({
+            signal_type: signalType,
+            text: stepText,
+            meta: { template_id: tid, room_id: roomId },
+            logged_at: new Date().toISOString(),
+          });
+        }
         break;
       }
 
@@ -4671,12 +4687,24 @@ export async function executeAction(
       }
 
       case "grief_voice_note_submitted": {
+        const griefText = (payload?.text || "").trim();
+        if (griefText) {
+          await postGratitudeLedger({
+            signal_type: "room_reflection",
+            text: griefText,
+            meta: {
+              journey_id: screenState.journey_id,
+              source: "grief_room_venting",
+            },
+            logged_at: new Date().toISOString(),
+          });
+        }
         mitraTrackEvent("grief_voice_note_submitted", {
           journeyId: screenState.journey_id,
           dayNumber: screenState.day_number || 1,
-          meta: { 
+          meta: {
             duration_sec: payload?.duration_sec,
-            length_chars: payload?.length_chars 
+            length_chars: payload?.length_chars
           },
         });
         break;
@@ -4915,6 +4943,25 @@ export async function executeAction(
           container_id: "companion_dashboard",
           state_id: "day_active",
         } as any);
+        break;
+      }
+
+      case "growth_journal_submitted": {
+        const text = (payload?.text || "").trim();
+        const category = payload?.category || "general";
+        if (text) {
+          await postGratitudeLedger({
+            signal_type: "growth_journal",
+            text,
+            meta: { category, length_chars: payload?.length_chars ?? text.length },
+            logged_at: new Date().toISOString(),
+          });
+        }
+        mitraTrackEvent("growth_journal_submitted", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { category, length_chars: payload?.length_chars ?? text.length },
+        });
         break;
       }
 

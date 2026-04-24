@@ -19,7 +19,6 @@
  */
 
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -192,7 +191,12 @@ export default function ContinueJourney({
       },
       currentScreen: screenBridge.currentScreen,
     };
-  }, [screenBridge.screenData, screenBridge.currentScreen, dispatch, navigation]);
+  }, [
+    screenBridge.screenData,
+    screenBridge.currentScreen,
+    dispatch,
+    navigation,
+  ]);
 
   // ── Active-user path: fetchHome ──────────────────────────────────
   const fetchHome = useCallback(async (forceRefresh = false) => {
@@ -214,7 +218,9 @@ export default function ContinueJourney({
     } catch {
       deviceTz = undefined;
     }
-    const res = (await mitraJourneyHome({ tz: deviceTz })) as HomeResponse | null;
+    const res = (await mitraJourneyHome({
+      tz: deviceTz,
+    })) as HomeResponse | null;
     if (res) {
       _homeCache = { response: res, ts: Date.now() };
       setHome(res);
@@ -254,7 +260,9 @@ export default function ContinueJourney({
         const { ingestDay7View } = require("../../engine/v3Ingest");
         writeAll(ingestDay7View(payload as any));
         // Also write checkpoint_day so CycleReflectionBlock can detect the cycle
-        dispatch(screenActions.setScreenValue({ key: "checkpoint_day", value: 7 }));
+        dispatch(
+          screenActions.setScreenValue({ key: "checkpoint_day", value: 7 }),
+        );
         routedRef.current = true;
         dispatch(
           loadScreenWithData({
@@ -269,7 +277,9 @@ export default function ContinueJourney({
         const { ingestDay14View } = require("../../engine/v3Ingest");
         writeAll(ingestDay14View(payload as any));
         // Also write checkpoint_day so CycleReflectionBlock can detect the cycle
-        dispatch(screenActions.setScreenValue({ key: "checkpoint_day", value: 14 }));
+        dispatch(
+          screenActions.setScreenValue({ key: "checkpoint_day", value: 14 }),
+        );
         routedRef.current = true;
         dispatch(
           loadScreenWithData({
@@ -283,7 +293,10 @@ export default function ContinueJourney({
       if (viewKey === "crisis_view") {
         routedRef.current = true;
         dispatch(
-          loadScreenWithData({ containerId: "safety", stateId: "crisis" }) as any,
+          loadScreenWithData({
+            containerId: "safety",
+            stateId: "crisis",
+          }) as any,
         );
         navigation.navigate("DynamicEngine");
         return null;
@@ -291,7 +304,10 @@ export default function ContinueJourney({
       if (viewKey === "grief_room") {
         routedRef.current = true;
         dispatch(
-          loadScreenWithData({ containerId: "companion_dashboard", stateId: "grief_room" }) as any,
+          loadScreenWithData({
+            containerId: "companion_dashboard",
+            stateId: "grief_room",
+          }) as any,
         );
         navigation.navigate("DynamicEngine");
         return null;
@@ -299,7 +315,10 @@ export default function ContinueJourney({
       if (viewKey === "loneliness_room") {
         routedRef.current = true;
         dispatch(
-          loadScreenWithData({ containerId: "companion_dashboard", stateId: "loneliness_room" }) as any,
+          loadScreenWithData({
+            containerId: "companion_dashboard",
+            stateId: "loneliness_room",
+          }) as any,
         );
         navigation.navigate("DynamicEngine");
         return null;
@@ -342,7 +361,8 @@ export default function ContinueJourney({
         earned_context: cont.earned_context ?? undefined,
         fresh_restart_suggested: cont.fresh_restart_suggested ?? false,
         fresh_reason_label: cont.fresh_reason_label || "",
-        primary_recommendation: (cont.primary_recommendation as "continue" | "fresh") || "continue",
+        primary_recommendation:
+          (cont.primary_recommendation as "continue" | "fresh") || "continue",
       };
     },
     [dispatch, navigation, userName],
@@ -450,9 +470,17 @@ export default function ContinueJourney({
           navigation.navigate("DynamicEngine");
         } else if (nv.view_key === "onboarding_start") {
           const clearKeys = [
-            "journey_id", "day_number", "total_days", "path_cycle_number",
-            "cycle_metrics", "continuity", "today", "arc_state", "insights",
-            "identity", "greeting",
+            "journey_id",
+            "day_number",
+            "total_days",
+            "path_cycle_number",
+            "cycle_metrics",
+            "continuity",
+            "today",
+            "arc_state",
+            "insights",
+            "identity",
+            "greeting",
           ];
           for (const k of clearKeys) {
             dispatch(screenActions.setScreenValue({ key: k, value: null }));
@@ -497,7 +525,10 @@ export default function ContinueJourney({
       return null;
     }
 
-    const headline = (home.headline || "").replace("{userName}", userName || "friend");
+    const headline = (home.headline || "").replace(
+      "{userName}",
+      userName || "friend",
+    );
     const bodyLines = home.body_lines || [];
     const layout = home.layout || "minimal_care";
     const chips = home.chips || [];
@@ -523,7 +554,9 @@ export default function ContinueJourney({
           <View style={styles.header}>
             {!!headline && <Text style={styles.welcomeText}>{headline}</Text>}
             {bodyLines.map((line, i) => (
-              <Text key={i} style={styles.subtext}>{line}</Text>
+              <Text key={i} style={styles.subtext}>
+                {line}
+              </Text>
             ))}
           </View>
 
@@ -541,18 +574,24 @@ export default function ContinueJourney({
               activeOpacity={0.85}
               onPress={() => handleAction(primaryCta.action)}
             >
-              <LinearGradient
-                colors={["#C08B31", "#D3A44D", "#B57C26"]}
-                start={{ x: 0, y: 0.5 }}
-                end={{ x: 1, y: 0.5 }}
-                style={styles.primaryCtaGradient}
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
               >
                 <Text style={styles.primaryCtaLabel}>{primaryCta.label}</Text>
-                <Ionicons name="arrow-forward" size={22} color="#FFF8E7" />
-              </LinearGradient>
+
+                <Ionicons
+                  name="arrow-forward"
+                  size={22}
+                  color="#ffffff"
+                  style={{ marginLeft: 8 }}
+                />
+              </View>
             </TouchableOpacity>
           )}
-
           <View style={styles.actionGroup}>
             {chips.map((chip, idx) => {
               const isLastWithArrow =
@@ -575,7 +614,11 @@ export default function ContinueJourney({
                       <Text style={styles.btnText}>{chip.label}</Text>
                     </View>
                     {isLastWithArrow && (
-                      <Ionicons name="arrow-forward" size={22} color="#432104" />
+                      <Ionicons
+                        name="arrow-forward"
+                        size={22}
+                        color="#432104"
+                      />
                     )}
                   </View>
                 </TouchableOpacity>
@@ -610,13 +653,17 @@ export default function ContinueJourney({
   const displayName = rEntry.user_name || userName || "friend";
   const headline = (rEntry.headline || "").replace("{userName}", displayName);
   const isDeepTier =
-    rEntry.tier === "medium" || rEntry.tier === "long" || rEntry.tier === "very_long";
+    rEntry.tier === "medium" ||
+    rEntry.tier === "long" ||
+    rEntry.tier === "very_long";
 
   // For medium/long/very_long: show dedicated emotional card with earned context.
   // For short (3-7 day gap): keep inline chip layout.
   if (isDeepTier) {
     // BE controls button order via primary_recommendation.
-    const freshFirst = rEntry.fresh_restart_suggested || rEntry.primary_recommendation === "fresh";
+    const freshFirst =
+      rEntry.fresh_restart_suggested ||
+      rEntry.primary_recommendation === "fresh";
     const continueChip = rEntry.chips.find((c) => c.id === "reentry_continue");
     const freshChip = rEntry.chips.find((c) => c.id === "reentry_fresh");
     const primaryChip = freshFirst ? freshChip : continueChip;
@@ -633,13 +680,17 @@ export default function ContinueJourney({
           <View style={styles.header}>
             {!!headline && <Text style={styles.welcomeText}>{headline}</Text>}
             {rEntry.body_lines.map((line, i) => (
-              <Text key={i} style={styles.subtext}>{line}</Text>
+              <Text key={i} style={styles.subtext}>
+                {line}
+              </Text>
             ))}
           </View>
 
           {/* Welcome back context line */}
           {!!rEntry.welcome_back_line && (
-            <Text style={styles.welcomeBackLine}>{rEntry.welcome_back_line}</Text>
+            <Text style={styles.welcomeBackLine}>
+              {rEntry.welcome_back_line}
+            </Text>
           )}
 
           <View style={styles.dividerContainer}>
@@ -657,12 +708,13 @@ export default function ContinueJourney({
                   <Text style={styles.earnedVal}>{ec.days_practiced}</Text>
                 </View>
               )}
-              {typeof rEntry.cycle_count === "number" && rEntry.cycle_count > 0 && (
-                <View style={styles.earnedRow}>
-                  <Text style={styles.earnedKey}>Full cycles</Text>
-                  <Text style={styles.earnedVal}>{rEntry.cycle_count}</Text>
-                </View>
-              )}
+              {typeof rEntry.cycle_count === "number" &&
+                rEntry.cycle_count > 0 && (
+                  <View style={styles.earnedRow}>
+                    <Text style={styles.earnedKey}>Full cycles</Text>
+                    <Text style={styles.earnedVal}>{rEntry.cycle_count}</Text>
+                  </View>
+                )}
               {!!ec.strongest_anchor && (
                 <View style={styles.earnedRow}>
                   <Text style={styles.earnedKey}>Strongest anchor</Text>
@@ -674,7 +726,9 @@ export default function ContinueJourney({
 
           {/* very_long tier: fresh reason nudge */}
           {!!rEntry.fresh_reason_label && (
-            <Text style={styles.freshReasonLabel}>{rEntry.fresh_reason_label}</Text>
+            <Text style={styles.freshReasonLabel}>
+              {rEntry.fresh_reason_label}
+            </Text>
           )}
 
           {/* Decision buttons */}
@@ -682,25 +736,18 @@ export default function ContinueJourney({
             {primaryChip && (
               <TouchableOpacity
                 testID={primaryChip.id}
-                style={[styles.actionButton, submittingReentry && { opacity: 0.5 }]}
+                style={[styles.actionButton]}
                 activeOpacity={0.7}
                 disabled={submittingReentry}
                 onPress={() => handleReentryChip(primaryChip.id)}
               >
-                <LinearGradient
-                  colors={["#C08B31", "#D3A44D", "#B57C26"]}
-                  start={{ x: 0, y: 0.5 }}
-                  end={{ x: 1, y: 0.5 }}
-                  style={styles.primaryCtaGradient}
-                >
-                  <Text style={styles.primaryCtaLabel}>{primaryChip.label}</Text>
-                </LinearGradient>
+                <Text style={styles.primaryCtaLabel}>{primaryChip.label}</Text>
               </TouchableOpacity>
             )}
             {secondaryChip && (
               <TouchableOpacity
                 testID={secondaryChip.id}
-                style={[styles.actionButton, submittingReentry && { opacity: 0.5 }]}
+                style={[styles.actionButton]}
                 activeOpacity={0.7}
                 disabled={submittingReentry}
                 onPress={() => handleReentryChip(secondaryChip.id)}
@@ -739,7 +786,9 @@ export default function ContinueJourney({
             <Text style={styles.earnedLine}>{rEntry.welcome_back_line}</Text>
           )}
           {rEntry.body_lines.map((line, i) => (
-            <Text key={i} style={styles.subtext}>{line}</Text>
+            <Text key={i} style={styles.subtext}>
+              {line}
+            </Text>
           ))}
         </View>
 
@@ -898,8 +947,19 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   primaryCtaWrap: {
-    width: "100%",
-    marginBottom: 12,
+    backgroundColor: "#D4A017",
+    borderColor: "#9f9f9f",
+    borderWidth: 0.3,
+    borderRadius: 15,
+    padding: 10,
+    elevation: 6,
+    marginTop: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    marginBottom: 10,
+    display: "flex",
   },
   primaryCtaGradient: {
     borderRadius: 30,
@@ -914,21 +974,25 @@ const styles = StyleSheet.create({
   primaryCtaLabel: {
     fontFamily: Fonts.serif.bold,
     fontSize: 18,
-    color: "#FFF8E7",
+    color: "#ffffff",
   },
   actionGroup: {
     width: "100%",
-    gap: 12,
+    gap: 2,
   },
   actionButton: {
-    width: "100%",
-    padding: 10,
-    borderRadius: 30,
-    borderWidth: 1,
-    borderColor: "rgba(107, 77, 40, 0.15)",
-    backgroundColor: "rgba(255, 252, 246, 0.5)",
-    justifyContent: "center",
-    paddingHorizontal: 20,
+    backgroundColor: "#FBF5F5",
+    borderColor: "#9f9f9f",
+    borderWidth: 0.3,
+    borderRadius: 15,
+    padding: 15,
+    elevation: 6,
+    marginTop: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    marginBottom: 10,
   },
   btnContent: {
     flexDirection: "row",

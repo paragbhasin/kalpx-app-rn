@@ -90,14 +90,17 @@ const RoomActionRunnerPill: React.FC<Props> = ({
   const displayTitle = action.display?.display_title ?? null;
   const mapLabel = MANTRA_ANCHOR_LABELS[itemId] ?? null;
 
-  // Label priority: BE display_title > map label > raw runner title.
+  // Label priority: BE display_title > local map > BE short label > full runner title.
   const mainLabel = isMantra
-    ? (displayTitle ?? mapLabel ?? rawTitle)
+    ? (displayTitle ?? mapLabel ?? action.label ?? rawTitle)
     : action.label;
 
-  // Transliteration: only shown when it adds new information (different from mainLabel after normalization).
-  const transliteration =
-    isMantra && normalize(rawTitle) !== normalize(mainLabel) ? rawTitle : null;
+  // Transliteration only shown when display_title is the main label and rawTitle
+  // differs (i.e. non-Roman script label + romanized secondary). Not shown when
+  // mainLabel comes from action.label or rawTitle.
+  const transliteration = isMantra && displayTitle != null && normalize(rawTitle) !== normalize(mainLabel)
+    ? rawTitle
+    : null;
 
   const displaySubtitle = isMantra
     ? (action.display?.display_subtitle ?? null)

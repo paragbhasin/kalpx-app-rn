@@ -34,9 +34,9 @@ import { Fonts } from "../theme/fonts";
 
 // Raster assets
 // TODO: replace with assets/14day_updated.png once Pavani pushes the file
-const Day14Bg = require("../../assets/beige_bg.png");
+const Day14Bg = require("../../assets/14day_updated.png");
 // TODO: replace with assets/7daybg.png once Pavani pushes the file
-const Day7Bg = require("../../assets/beige_bg.png");
+const Day7Bg = require("../../assets/7daybg.png");
 const BeigeBg = require("../../assets/beige_bg.png");
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -591,7 +591,9 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
           const flat = ingestDailyView(pendingPayload as any);
           for (const [k, v] of Object.entries(flat)) {
             if (v !== undefined) {
-              store.dispatch(screenActions.setScreenValue({ key: k, value: v }));
+              store.dispatch(
+                screenActions.setScreenValue({ key: k, value: v }),
+              );
             }
           }
         }

@@ -8,7 +8,7 @@
  */
 
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 import type { ActionEnvelope, RoomRenderV1 } from "./types";
 import {
@@ -29,6 +29,9 @@ const RoomActionList: React.FC<Props> = ({ envelope }) => {
   const { actions } = envelope;
 
   const sortedActions = [...actions].sort((a, b) => {
+    const aPrimary = a.primary_recommendation ? 1 : 0;
+    const bPrimary = b.primary_recommendation ? 1 : 0;
+    if (aPrimary !== bPrimary) return bPrimary - aPrimary;
     if (a.action_type === "exit" && b.action_type !== "exit") return 1;
     if (a.action_type !== "exit" && b.action_type === "exit") return -1;
     return 0;
@@ -38,6 +41,9 @@ const RoomActionList: React.FC<Props> = ({ envelope }) => {
     <View style={styles.list} testID="room_action_list">
       {sortedActions.map((action, index) => (
         <View key={action.action_id} style={styles.row}>
+          {action.primary_recommendation && index === 0 ? (
+            <Text style={styles.startHereLabel}>Start here</Text>
+          ) : null}
           {renderActionComponent(action, index, envelope)}
         </View>
       ))}
@@ -96,6 +102,12 @@ const styles = StyleSheet.create({
   },
   row: {
     width: "100%",
+  },
+  startHereLabel: {
+    fontSize: 10,
+    color: "#9f9f9f",
+    marginBottom: 4,
+    letterSpacing: 0.3,
   },
 });
 

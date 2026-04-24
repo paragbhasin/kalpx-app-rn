@@ -290,6 +290,7 @@ export interface ActionEnvelope {
     writes_event: string | null;
     persists_across_sessions: boolean;
   };
+  primary_recommendation?: boolean;
 }
 
 // ───────────────────────────────────────────────────────────────────────────
@@ -377,6 +378,13 @@ export interface RoomFallbacks {
   >;
 }
 
+// Wave 4 (2026-04-23): 3-layer context surface under room header.
+export interface RoomContext {
+  room_purpose_line?: string | null;
+  sanatan_insight_line?: string | null;
+  why_this_room_line?: string | null;
+}
+
 export interface RoomRenderV1 {
   schema_version: "room.render.v1";
   room_id: RoomId;
@@ -391,6 +399,9 @@ export interface RoomRenderV1 {
 
   /** L1 wisdom surface — scalar, never a carousel (§5.7.2 I-10). */
   principle_banner: PrincipleBanner | null;
+
+  /** Wave 4: optional 3-layer context surface. Null when no context slots authored. */
+  room_context?: RoomContext | null;
 
   opening_experience: OpeningExperience;
 

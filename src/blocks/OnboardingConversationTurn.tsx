@@ -196,12 +196,8 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
       )}
       <View style={{ marginTop: 10 }}>
         <VoiceTextInput
-          voiceAvailable={block.voice_available}
-          placeholder={
-            showHeroMeta
-              ? "Type Or say it in your words..."
-              : "Type Or say it in your words..."
-          }
+          voiceAvailable={false} // launch-gate: restore block.voice_available when conversational tier ships
+          placeholder="Share your reflection"
           onSend={(val, type) => {
             if (type === "text") {
               fire({ freeform_text: val, response_type: "text" });
@@ -213,23 +209,12 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
       </View>
 
       {showHeroMeta && (
-        <>
-          <View style={styles.turnOneHintRow}>
-            <Text style={styles.turnOneHintText}>Write</Text>
-            <View style={styles.turnOneOrPill}>
-              <Text style={styles.turnOneOrPillText}>or</Text>
-            </View>
-            <Text style={styles.turnOneHintText}>speak</Text>
-            <Ionicons name="mic-outline" size={16} color="#7a6031" />
-          </View>
-
-          <View style={styles.turnOnePrivacyRow}>
-            <Ionicons name="lock-closed-outline" size={16} color="#7a6031" />
-            <Text style={styles.turnOnePrivacyText}>
-              Your thoughts are private and safe with Mitra.
-            </Text>
-          </View>
-        </>
+        <View style={styles.turnOnePrivacyRow}>
+          <Ionicons name="lock-closed-outline" size={16} color="#7a6031" />
+          <Text style={styles.turnOnePrivacyText}>
+            Your thoughts are private and safe with Mitra.
+          </Text>
+        </View>
       )}
     </>
   );

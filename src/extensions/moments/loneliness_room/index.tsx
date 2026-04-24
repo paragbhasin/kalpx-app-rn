@@ -92,9 +92,9 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
   );
   const ss = screenData as Record<string, any>;
 
-  const [step, setStep] = useState<"opening" | "options" | "input" | "walk">(
-    "opening",
-  );
+  const [step, setStep] = useState<
+    "opening" | "options" | "input" | "walk" | "named_confirmation"
+  >("opening");
   const [timerSeconds, setTimerSeconds] = useState(600); // default 10 min
   const [inputType, setInputType] = useState<"naming" | "person">("naming");
   const [inputValue, setInputValue] = useState("");
@@ -269,11 +269,13 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
   const handleInputSubmit = () => {
     if (inputType === "naming") {
       dispatch("loneliness_named", { text: inputValue });
+      setInputValue("");
+      setStep("named_confirmation");
     } else {
       dispatch("loneliness_person_named", { text: inputValue });
+      setInputValue("");
+      setStep("options");
     }
-    setInputValue("");
-    setStep("options");
   };
 
   // Hydrate a support mantra from the library and route through the same
@@ -449,6 +451,25 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
     );
   };
 
+  const renderNamedConfirmation = () => {
+    const confirmLine =
+      readSlot(ss, "input_named_confirmation_line") ||
+      "Your love is real. Let that hold you.";
+    const continueLabel =
+      readSlot(ss, "input_continue_label") || "Continue";
+    return (
+      <Animated.View style={[styles.optionsStack, { opacity: fade2 }]}>
+        <Text style={styles.confirmationLine}>{confirmLine}</Text>
+        <TouchableOpacity
+          style={styles.pill}
+          onPress={() => routeSupportMantra("bhakti_mantra_item_id", 27)}
+        >
+          <Text style={styles.pillText}>{continueLabel}</Text>
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  };
+
   return (
     <View style={styles.root}>
       {/* Always-visible back affordance. Walk screen hides it (owns its
@@ -483,6 +504,7 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
 
         {step === "options" && renderOptions()}
         {step === "input" && renderInput()}
+        {step === "named_confirmation" && renderNamedConfirmation()}
         {step === "walk" && renderWalk()}
       </ScrollView>
     </View>
@@ -697,6 +719,14 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.regular,
     fontSize: 14,
     color: "#8a7d6b",
+  },
+  confirmationLine: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 18,
+    color: "#564B42",
+    textAlign: "center",
+    lineHeight: 26,
+    marginBottom: 20,
   },
 });
 

@@ -24,7 +24,7 @@ import Svg, { Path } from "react-native-svg";
 import MantraLotus3d from "../../assets/mantra-lotus-3d.svg";
 import { VoiceTextInput } from "../components/VoiceTextInput";
 import { executeAction } from "../engine/actionExecutor";
-import { mitraTrackEvent } from "../engine/mitraApi";
+import { mitraTrackEvent, postGratitudeLedger } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { readMomentSlot, useContentSlots } from "../hooks/useContentSlots";
 import { Fonts } from "../theme/fonts";
@@ -230,6 +230,15 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
         text: reflectionText.trim().slice(0, 120),
         response_type: responseType,
       },
+    }).catch(() => {});
+    postGratitudeLedger({
+      signal_type: "post_completion_reflection",
+      text: reflectionText.trim(),
+      meta: {
+        item_type: resolvedVariant,
+        item_id: screenData.runner_active_item?.item_id ?? null,
+      },
+      logged_at: new Date().toISOString(),
     }).catch(() => {});
     handleReturnHome(true);
   };

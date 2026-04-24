@@ -23,9 +23,10 @@ import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { executeAction } from "../../../engine/actionExecutor";
 import { useScreenStore } from "../../../engine/useScreenBridge";
-import type { ActionEnvelope, InquiryCategory, RoomRenderV1 } from "../types";
+import type { ActionEnvelope, InquiryCategory, RoomRenderV1, StepPayload } from "../types";
 import { buildActionCtx } from "./actionContextHelper";
 import InquiryModal from "./InquiryModal";
+import StepModal, { type StepModalResult } from "./StepModal";
 
 interface Props {
   action: ActionEnvelope;
@@ -43,6 +44,10 @@ const RoomActionInquiryPill: React.FC<Props> = ({
 }) => {
   const { loadScreen, goBack } = useScreenStore();
   const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [stepModalVisible, setStepModalVisible] = useState<boolean>(false);
+  const [stepModalPayload, setStepModalPayload] = useState<StepPayload | null>(null);
+  const [stepModalLabel, setStepModalLabel] = useState<string>("");
+  const [pendingCategory, setPendingCategory] = useState<InquiryCategory | null>(null);
 
   const dispatchOpened = () => {
     const ctx = buildActionCtx({ loadScreen, goBack });
@@ -156,12 +161,31 @@ const RoomActionInquiryPill: React.FC<Props> = ({
     templateId: string,
   ) => {
     setModalVisible(false);
-    dispatchStepFromInquiry(category, templateId);
+    setPendingCategory(category);
+    // Parse duration from template_id name (e.g. "step_walk_timer_5min" → 300s)
+    // so TimerBody shows the authored duration rather than the 60s default.
+    const durationMatch = templateId.match(/_(\d+)min$/);
+    const duration_sec = durationMatch ? parseInt(durationMatch[1], 10) * 60 : null;
+    setStepModalPayload({ template_id: templateId, step_config: {}, input_slots: [], duration_sec });
+    setStepModalLabel(category.label || templateId);
+    setStepModalVisible(true);
   };
 
   const handleSubmitJournal = (category: InquiryCategory, text: string) => {
     setModalVisible(false);
     dispatchStepFromInquiry(category, "step_journal_inquiry", { text });
+  };
+
+  const handleStepDone = (extra: StepModalResult) => {
+    setStepModalVisible(false);
+    if (!pendingCategory || !stepModalPayload) return;
+    dispatchStepFromInquiry(
+      pendingCategory,
+      stepModalPayload.template_id as string,
+      extra.text ? { text: extra.text } : {},
+    );
+    setStepModalPayload(null);
+    setPendingCategory(null);
   };
 
   return (
@@ -187,6 +211,17 @@ const RoomActionInquiryPill: React.FC<Props> = ({
         onLaunchPractice={handleLaunchPractice}
         onSubmitJournal={handleSubmitJournal}
         onCancel={() => setModalVisible(false)}
+      />
+      <StepModal
+        visible={stepModalVisible}
+        stepPayload={stepModalPayload}
+        label={stepModalLabel}
+        onCancel={() => {
+          setStepModalVisible(false);
+          setStepModalPayload(null);
+          setPendingCategory(null);
+        }}
+        onDone={handleStepDone}
       />
     </>
   );

@@ -99,7 +99,7 @@ const JoyRoomContainer: React.FC<Props> = () => {
   const ss = screenData as Record<string, any>;
 
   const [step, setStep] = useState<
-    "opening" | "options" | "input" | "walk" | "sit"
+    "opening" | "options" | "input" | "walk" | "sit" | "carried"
   >("opening");
   const [timerSeconds, setTimerSeconds] = useState(600);
   const [inputValue, setInputValue] = useState("");
@@ -436,7 +436,7 @@ You’re exactly where you need to be right now.`;
           style={styles.pill}
           onPress={() => {
             dispatch("carry_joy_forward", null, { label: pillCarryLabel });
-            setStep("options");
+            setStep("carried");
           }}
         >
           <Text style={styles.pillText}>{pillCarryLabel}</Text>
@@ -556,6 +556,30 @@ You’re exactly where you need to be right now.`;
     </View>
   );
 
+  const renderCarried = () => {
+    const confirmLine =
+      readSlot(ss, "carry_confirm_line") || "Joy carried.";
+    const confirmSub =
+      readSlot(ss, "carry_confirm_subline") ||
+      "Take this with you into the rest of your day.";
+    return (
+      <Animated.View style={[styles.optionsStack, { opacity: fade2 }]}>
+        <Text style={styles.confirmLine}>{confirmLine}</Text>
+        <Text style={styles.confirmSub}>{confirmSub}</Text>
+        {!!pillExitLabel && (
+          <TouchableOpacity
+            style={styles.exitBtn}
+            onPress={() =>
+              dispatch("exit_joy_room", null, { actions_used: actionsUsed })
+            }
+          >
+            <Text style={styles.exitText}>{pillExitLabel}</Text>
+          </TouchableOpacity>
+        )}
+      </Animated.View>
+    );
+  };
+
   return (
     <View style={styles.root}>
       {/* Always-visible back link (pre-options-reveal safety net) */}
@@ -593,6 +617,7 @@ You’re exactly where you need to be right now.`;
         {step === "input" && renderInput()}
         {step === "walk" && renderWalk()}
         {step === "sit" && renderSit()}
+        {step === "carried" && renderCarried()}
       </ScrollView>
     </View>
   );
@@ -851,6 +876,22 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#564B42",
     textDecorationLine: "underline",
+  },
+  confirmLine: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 20,
+    color: "#432104",
+    textAlign: "center",
+    lineHeight: 28,
+    marginBottom: 10,
+  },
+  confirmSub: {
+    fontFamily: Fonts.sans.regular,
+    fontSize: 14,
+    color: "#564B42",
+    textAlign: "center",
+    lineHeight: 22,
+    marginBottom: 20,
   },
 });
 

@@ -745,8 +745,10 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
   // audio load needed here.
 
   const isAckScreen = stateId === "quick_checkin_ack";
+  const conversationalTierEnabled = false; // launch-gate: set true when chat/voice tier ships
   const showVoiceInput =
-    stateId === "quick_checkin" || stateId === "quick_checkin_ack";
+    conversationalTierEnabled &&
+    (stateId === "quick_checkin" || stateId === "quick_checkin_ack");
   const isCheckpointReflectionState =
     stateId === "checkpoint_day_7" || stateId === "checkpoint_day_14";
 

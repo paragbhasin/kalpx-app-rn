@@ -87,6 +87,9 @@ export function ingestDailyView(env: V3DailyViewEnvelope | null): V3FlatIngest {
     why_this: cont.why_this ?? null,
     // First-paint gate only — full PostConflictGentlenessCard content still via FCI
     post_conflict: env.continuity?.post_conflict ?? false,
+    // Explicitly null on every daily-view load to prevent a stale Redux value
+    // left by a prior FCI call that the new response does not repeat.
+    post_conflict_pending: env.continuity?.post_conflict_pending ?? null,
     journey_path: arc.journey_path ?? "",
     sankalp_how_to_live: Array.isArray(sankalp?.how_to_live)
       ? sankalp.how_to_live

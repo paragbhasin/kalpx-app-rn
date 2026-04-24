@@ -32,9 +32,10 @@ interface Props {
   index: number;
   envelope?: RoomRenderV1;
   kindLabel?: string;
+  isPrimary?: boolean;
 }
 
-const RoomActionInquiryPill: React.FC<Props> = ({ action, envelope, kindLabel }) => {
+const RoomActionInquiryPill: React.FC<Props> = ({ action, envelope, kindLabel, isPrimary = false }) => {
   const { loadScreen, goBack } = useScreenStore();
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
@@ -164,7 +165,7 @@ const RoomActionInquiryPill: React.FC<Props> = ({ action, envelope, kindLabel })
         testID={action.testID}
         accessibilityRole="button"
         accessibilityLabel={action.label}
-        style={styles.pill}
+        style={[styles.pill, isPrimary ? styles.pillPrimary : null]}
         onPress={onPress}
       >
         <View>
@@ -200,6 +201,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 4,
     marginBottom: 10,
+  },
+  pillPrimary: {
+    borderColor: "#b89674",
+    borderWidth: 1.4,
+    shadowOpacity: 0.28,
+    shadowRadius: 5,
   },
   kindLabel: {
     fontSize: 10,

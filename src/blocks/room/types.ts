@@ -253,6 +253,7 @@ export interface ActionVisibilityGate {
 export interface ActionDisplay {
   display_title?: string | null;
   display_subtitle?: string | null;
+  why_for_you?: string | null;
 }
 
 /**

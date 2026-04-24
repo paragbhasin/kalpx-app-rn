@@ -52,11 +52,11 @@ const RoomRenderer: React.FC<RoomRendererProps> = ({
         {lifeContextLabel ? (
           <Text style={styles.lifeContext}>{"You chose: " + lifeContextLabel}</Text>
         ) : null}
-        {ctx?.room_purpose_line ? (
-          <Text style={styles.roomPurpose}>{ctx.room_purpose_line}</Text>
-        ) : null}
         {ctx?.sanatan_insight_line ? (
-          <Text style={styles.sanatanInsight}>{ctx.sanatan_insight_line}</Text>
+          <View style={styles.sanatanInsightRow}>
+            <View style={styles.sanatanAccent} />
+            <Text style={styles.sanatanInsight}>{ctx.sanatan_insight_line}</Text>
+          </View>
         ) : null}
         {ctx?.why_this_room_line ? (
           <Text style={styles.whyThisRoom}>{ctx.why_this_room_line}</Text>
@@ -90,23 +90,30 @@ const styles = StyleSheet.create({
     color: "#9f9f9f",
     marginTop: 2,
   },
-  roomPurpose: {
-    fontSize: 13,
-    color: "#6B6B6B",
-    marginTop: 6,
-    lineHeight: 18,
+  sanatanInsightRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginTop: 8,
+    marginBottom: 2,
+  },
+  sanatanAccent: {
+    width: 2,
+    alignSelf: "stretch",
+    backgroundColor: "#c8b49a",
+    marginRight: 8,
+    borderRadius: 1,
   },
   sanatanInsight: {
+    flex: 1,
     fontSize: 12,
     color: "#8A7968",
     fontStyle: "italic",
-    marginTop: 4,
     lineHeight: 17,
   },
   whyThisRoom: {
     fontSize: 12,
     color: "#9f9f9f",
-    marginTop: 4,
+    marginTop: 6,
     lineHeight: 17,
   },
 });

@@ -24,7 +24,7 @@ const RoomActionBannerScalar: React.FC<Props> = ({ banner, testID }) => {
   return (
     <View style={styles.wrap} testID={testID ?? "room_principle_banner"}>
       <View style={styles.card}>
-        <Text style={styles.cardLabel}>{"A teaching for you"}</Text>
+        <Text style={styles.cardLabel}>{"A teaching"}</Text>
         <Text style={styles.line}>{banner.wisdom_anchor_line}</Text>
       </View>
     </View>

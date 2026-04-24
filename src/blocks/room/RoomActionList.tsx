@@ -44,7 +44,7 @@ const RoomActionList: React.FC<Props> = ({ envelope }) => {
           {action.primary_recommendation && index === 0 ? (
             <Text style={styles.startHereLabel}>Start here</Text>
           ) : null}
-          {renderActionComponent(action, index, envelope)}
+          {renderActionComponent(action, index, envelope, action.primary_recommendation === true)}
         </View>
       ))}
     </View>
@@ -55,6 +55,7 @@ function renderActionComponent(
   action: ActionEnvelope,
   index: number,
   envelope: RoomRenderV1,
+  isPrimary: boolean,
 ) {
   const kindLabelValue = ACTION_KIND_LABELS[action.action_type];
   const kindLabel = kindLabelValue && kindLabelValue.length > 0 ? kindLabelValue : undefined;
@@ -64,23 +65,23 @@ function renderActionComponent(
     case "runner_sankalp":
     case "runner_practice":
       return (
-        <RoomActionRunnerPill action={action} index={index} envelope={envelope} kindLabel={kindLabel} />
+        <RoomActionRunnerPill action={action} index={index} envelope={envelope} kindLabel={kindLabel} isPrimary={isPrimary} />
       );
     case "teaching":
       return (
-        <RoomActionTeachingPill action={action} index={index} envelope={envelope} kindLabel={kindLabel} />
+        <RoomActionTeachingPill action={action} index={index} envelope={envelope} kindLabel={kindLabel} isPrimary={isPrimary} />
       );
     case "inquiry":
       return (
-        <RoomActionInquiryPill action={action} index={index} envelope={envelope} kindLabel={kindLabel} />
+        <RoomActionInquiryPill action={action} index={index} envelope={envelope} kindLabel={kindLabel} isPrimary={isPrimary} />
       );
     case "in_room_step":
       return (
-        <RoomActionStepPill action={action} index={index} envelope={envelope} kindLabel={kindLabel} />
+        <RoomActionStepPill action={action} index={index} envelope={envelope} kindLabel={kindLabel} isPrimary={isPrimary} />
       );
     case "in_room_carry":
       return (
-        <RoomActionCarryPill action={action} index={index} envelope={envelope} kindLabel={kindLabel} />
+        <RoomActionCarryPill action={action} index={index} envelope={envelope} kindLabel={kindLabel} isPrimary={isPrimary} />
       );
     case "exit":
       return (

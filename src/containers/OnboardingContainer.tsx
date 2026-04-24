@@ -67,6 +67,9 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
   }, [turn]);
 
   const blocks = schema?.blocks || [];
+  const hasGuidanceModePicker = blocks.some(
+    (b: any) => b.type === "guidance_mode_picker",
+  );
 
   // Find headline/subtext/recognition to inject into conversation turn blocks for layout.
   const headlineBlock = blocks.find((b: any) => b.type === "headline");
@@ -95,6 +98,7 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
           subtext: dynamicData?.sub_prompt || subtextBlock?.content || b.subtext,
           headline: dynamicData?.mitra_message || headlineBlock?.content || b.headline,
           recognition: recognitionBlock,
+          guidanceModeTurn: turn === 5 && hasGuidanceModePicker,
           open_input: dynamicData?.open_input 
             ? { ...b.open_input, ...dynamicData.open_input, enabled: true } 
             : b.open_input,

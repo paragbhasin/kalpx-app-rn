@@ -58,6 +58,7 @@ interface Props {
     on_response?: any; // base action object; { chip_id } or { freeform_text } merged into payload
     recognition?: any;
     isTurn7?: boolean;
+    guidanceModeTurn?: boolean;
   };
 }
 
@@ -112,8 +113,9 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
       ? _rawTurn
       : typeof _rawTurn === "string"
         ? Number((_rawTurn.match(/\d+/) || ["1"])[0])
-        : 1;
+      : 1;
   const isIntroTurn = turn === 1;
+  const isGuidanceModeTurn = !!block.guidanceModeTurn;
 
   useEffect(() => {
     Animated.sequence([
@@ -466,21 +468,47 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
       testID={rootTestID}
       accessibilityLabel={rootTestID}
     >
-      <View style={styles.fullCard}>
+      <View
+        style={[
+          styles.fullCard,
+          isGuidanceModeTurn ? styles.guidanceHeaderCard : null,
+        ]}
+      >
+        {isGuidanceModeTurn ? (
+          <View style={styles.guidanceBadgeWrap}>
+            <View style={styles.guidanceBadgeCircle}>
+              <Ionicons name="flower-outline" size={34} color="#C79A2B" />
+            </View>
+          </View>
+        ) : null}
         {block.headline && (
           <>
-            <Text style={styles.unifiedHeadline}>
+            <Text
+              style={[
+                styles.unifiedHeadline,
+                isGuidanceModeTurn ? styles.guidanceHeadline : null,
+              ]}
+            >
               {headlineLines.join("\n")}
             </Text>
 
             <View style={styles.turnOneHeadlineDivider}>
               <View style={styles.turnOneDividerLine} />
-              <Ionicons name="diamond" size={10} color="#c7a258" />
+              <Ionicons
+                name={isGuidanceModeTurn ? "flower-outline" : "diamond"}
+                size={isGuidanceModeTurn ? 16 : 10}
+                color="#c7a258"
+              />
               <View style={styles.turnOneDividerLine} />
             </View>
 
             {block.subtext && (
-              <Text style={styles.unifiedSubtext}>
+              <Text
+                style={[
+                  styles.unifiedSubtext,
+                  isGuidanceModeTurn ? styles.guidanceSubtext : null,
+                ]}
+              >
                 {interpolate(block.subtext, screenData)}
               </Text>
             )}
@@ -982,6 +1010,31 @@ const styles = StyleSheet.create({
     elevation: 4,
     marginTop: -15,
   },
+  guidanceHeaderCard: {
+    borderColor: "rgba(226, 208, 174, 0.95)",
+    borderRadius: 28,
+    paddingTop: 64,
+    paddingBottom: 24,
+    overflow: "visible",
+  },
+  guidanceBadgeWrap: {
+    position: "absolute",
+    top: -46,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    zIndex: 3,
+  },
+  guidanceBadgeCircle: {
+    width: 104,
+    height: 104,
+    borderRadius: 52,
+    backgroundColor: "#FBF4E8",
+    borderWidth: 1.2,
+    borderColor: "rgba(226, 208, 174, 0.95)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
   unifiedHeadline: {
     fontFamily: Fonts.serif.bold,
@@ -990,6 +1043,18 @@ const styles = StyleSheet.create({
     color: "#3f2810",
     textAlign: "center",
     marginBottom: 10,
+  },
+  guidanceHeadline: {
+    fontSize: 22,
+    lineHeight: 34,
+    marginBottom: 2,
+  },
+  guidanceSubtext: {
+    fontSize: 14,
+    lineHeight: 22,
+    maxWidth: 330,
+    alignSelf: "center",
+    color: "#635442",
   },
   recognitionCard: {
     borderRadius: 25,

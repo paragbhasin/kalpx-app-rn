@@ -70,6 +70,7 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
   const hasGuidanceModePicker = blocks.some(
     (b: any) => b.type === "guidance_mode_picker",
   );
+  const hasPathEmerges = blocks.some((b: any) => b.type === "path_emerges");
 
   // Find headline/subtext/recognition to inject into conversation turn blocks for layout.
   const headlineBlock = blocks.find((b: any) => b.type === "headline");
@@ -99,6 +100,9 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
           headline: dynamicData?.mitra_message || headlineBlock?.content || b.headline,
           recognition: recognitionBlock,
           guidanceModeTurn: turn === 5 && hasGuidanceModePicker,
+          // Do not hardcode turn index here; some flows still emit the
+          // path-emerges screen as turn_7 while others use turn_8.
+          pathEmergesTurn: hasPathEmerges,
           open_input: dynamicData?.open_input 
             ? { ...b.open_input, ...dynamicData.open_input, enabled: true } 
             : b.open_input,

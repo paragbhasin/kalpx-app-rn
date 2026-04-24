@@ -33,8 +33,10 @@ import { Fonts } from "../theme/fonts";
 // Assets (imported as components via react-native-svg-transformer)
 
 // Raster assets
-const Day14Bg = require("../../assets/14day_updated.png");
-const Day7Bg = require("../../assets/7daybg.png");
+// TODO: replace with assets/14day_updated.png once Pavani pushes the file
+const Day14Bg = require("../../assets/beige_bg.png");
+// TODO: replace with assets/7daybg.png once Pavani pushes the file
+const Day7Bg = require("../../assets/beige_bg.png");
 const BeigeBg = require("../../assets/beige_bg.png");
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");

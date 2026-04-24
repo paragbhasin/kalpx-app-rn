@@ -58,6 +58,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#432104",
     marginBottom: 8,
+    paddingHorizontal: 24,
+    // paddingVertical: 24,
   },
   secondBeat: {
     fontSize: 16,

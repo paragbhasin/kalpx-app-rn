@@ -24,7 +24,8 @@
  */
 
 import { useFocusEffect } from "@react-navigation/native";
-import React, { useEffect, useRef, useState } from "react";
+import { Audio } from "expo-av";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
 import api from "../Networks/axios";
 import LifeContextPickerSheet, {
@@ -135,6 +136,8 @@ function buildExitOnlyFallback(roomId: RoomId): RoomRenderV1 {
   };
 }
 
+const ROOM_AMBIENT_TRACK = require("../../assets/sounds/Audio-calmmusic.mp3");
+
 const RoomContainer: React.FC<Props> = () => {
   const screenData = useScreenStore(
     (s: any) => s.screen?.screenData ?? s.screenData ?? {},
@@ -143,23 +146,114 @@ const RoomContainer: React.FC<Props> = () => {
     (s: any) => s.screen?.currentStateId ?? s.currentStateId ?? "render",
   );
   const updateBackground = useScreenStore((s: any) => s.updateBackground);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      updateBackground(require("../../assets/rooms_bg.jpg"));
-      return () => {
-        updateBackground(null);
-      };
-    }, [updateBackground]),
-  );
-
-  const { loadScreen, goBack } = useScreenStore();
-
   const roomId: RoomId | undefined = (screenData as any)?.room_id;
   const lifeContext: LifeContext | null =
     ((screenData as any)?.life_context as LifeContext | null) || null;
   const allowedContexts: LifeContext[] | null =
     ((screenData as any)?.life_context_allowed as LifeContext[] | null) || null;
+
+  const calmMusicRef = useRef<Audio.Sound | null>(null);
+  const isPlayingRef = useRef(false);
+  const initPromiseRef = useRef<Promise<Audio.Sound> | null>(null);
+
+  const initCalmAudio = useCallback(async () => {
+    if (calmMusicRef.current) return calmMusicRef.current;
+    if (initPromiseRef.current) return initPromiseRef.current;
+    initPromiseRef.current = (async () => {
+      await Audio.setIsEnabledAsync(true);
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+        shouldDuckAndroid: true,
+      });
+
+      const { sound } = await Audio.Sound.createAsync(ROOM_AMBIENT_TRACK, {
+        isLooping: true,
+        volume: 0.5,
+      });
+      calmMusicRef.current = sound;
+      isPlayingRef.current = false;
+      return sound;
+    })();
+    try {
+      return await initPromiseRef.current;
+    } finally {
+      initPromiseRef.current = null;
+    }
+  }, []);
+
+  const ensureCalmAudioPlaying = useCallback(async () => {
+    const playWithRecovery = async (sound: Audio.Sound) => {
+      try {
+        await sound.setPositionAsync(0);
+        await sound.playAsync();
+        isPlayingRef.current = true;
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
+    const existing = calmMusicRef.current;
+    if (existing) {
+      const ok = await playWithRecovery(existing);
+      if (ok) return;
+      await existing.stopAsync().catch(() => {});
+      await existing.unloadAsync().catch(() => {});
+      calmMusicRef.current = null;
+      isPlayingRef.current = false;
+    }
+
+    const fresh = await initCalmAudio();
+    await playWithRecovery(fresh);
+  }, [initCalmAudio]);
+
+  // 1. Handle Background Image (Focus-linked)
+  useFocusEffect(
+    React.useCallback(() => {
+      updateBackground(require("../../assets/rooms_bg.jpg"));
+      return () => updateBackground(null);
+    }, [updateBackground]),
+  );
+
+  // 2. Handle Audio Lifecycle (Unmount-linked)
+  useEffect(() => {
+    return () => {
+      if (calmMusicRef.current) {
+        const s = calmMusicRef.current;
+        calmMusicRef.current = null;
+        isPlayingRef.current = false;
+        s.stopAsync()
+          .catch(() => {})
+          .then(() => s.unloadAsync().catch(() => {}));
+      }
+    };
+  }, []);
+
+  // 3. Rendering-linked: whenever room container is actively rendering a room
+  // state, force ambient audio to be alive and playing.
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      if (cancelled) return;
+      try {
+        await ensureCalmAudioPlaying();
+      } catch (err) {
+        if (__DEV__) {
+          console.debug("[RoomContainer] ensure play failed:", err);
+        }
+      }
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [roomId, currentStateId, ensureCalmAudioPlaying]);
+
+  // Audio policy: if RoomContainer is mounted, ambient should be playing.
+  // We intentionally do not pause on blur; only unmount stops/unloads.
+
+  const { loadScreen, goBack } = useScreenStore();
 
   // ── Wisdom overlay branch ──────────────────────────────────────────
   // open_why_this_l2 routes to room/why_this_l2 when currentContainerId is

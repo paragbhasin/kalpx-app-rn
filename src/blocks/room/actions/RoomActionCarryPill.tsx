@@ -17,7 +17,7 @@
  * The tap returns the user to the room per INLINE_STEP contract — no nav.
  */
 
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import api from "../../../Networks/axios";
@@ -25,6 +25,14 @@ import { executeAction } from "../../../engine/actionExecutor";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 import type { ActionEnvelope, RoomRenderV1 } from "../types";
 import { buildActionCtx } from "./actionContextHelper";
+import StepModal, { type StepModalResult } from "./StepModal";
+
+const INPUT_TEMPLATE: Record<string, string> = {
+  growth_journal: "step_journal_growth",
+  connection_reach_out: "step_reach_out_connection",
+};
+
+const NAVIGATE_AFTER = new Set(["joy_carry", "joy_named", "stillness_named"]);
 
 interface Props {
   action: ActionEnvelope;
@@ -41,19 +49,24 @@ const RoomActionCarryPill: React.FC<Props> = ({
   isPrimary = false,
 }) => {
   const { loadScreen, goBack } = useScreenStore();
+  const [modalVisible, setModalVisible] = useState(false);
 
-  const onPress = async () => {
+  const writesEvent =
+    action.carry_payload?.writes_event ??
+    action.persistence?.writes_event ??
+    "joy_carry";
+  const roomId = envelope?.room_id ?? null;
+  const needsInput = writesEvent in INPUT_TEMPLATE;
+
+  const dashboardContainer =
+    process.env.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
+      ? "companion_dashboard_v3"
+      : "companion_dashboard";
+
+  const doCarryWrite = async (extra?: StepModalResult) => {
     const ctx = buildActionCtx({ loadScreen, goBack });
-    const writesEvent =
-      action.carry_payload?.writes_event ??
-      action.persistence?.writes_event ??
-      "joy_carry";
-    const roomId = envelope?.room_id ?? null;
     const capturedAt = Date.now();
 
-    // Phase 4 BE sacred-write. Dual-write pattern: attempt POST first,
-    // then always write the Redux session-trace regardless of outcome so
-    // the dashboard carry-chip has a same-session preview.
     let sacredWriteOk = false;
     if (roomId) {
       try {
@@ -63,6 +76,9 @@ const RoomActionCarryPill: React.FC<Props> = ({
           action_id: action.action_id,
           analytics_key: action.analytics_key,
           captured_at: capturedAt,
+          ...(extra?.text ? { text: extra.text } : {}),
+          ...(extra?.contact_hint ? { contact_hint: extra.contact_hint } : {}),
+          ...(extra?.message ? { message: extra.message } : {}),
         });
         const status = res?.status ?? 0;
         sacredWriteOk = status >= 200 && status < 300;
@@ -81,8 +97,6 @@ const RoomActionCarryPill: React.FC<Props> = ({
       );
     }
 
-    // Session-scoped Redux trace — mirrors carry_joy_forward pattern.
-    // Bucketed by event_type so the dashboard carry-chip reads it by key.
     ctx.setScreenValue(
       {
         captured_at: capturedAt,
@@ -113,19 +127,51 @@ const RoomActionCarryPill: React.FC<Props> = ({
     });
   };
 
+  const onPress = async () => {
+    if (needsInput) {
+      setModalVisible(true);
+      return;
+    }
+    await doCarryWrite();
+    if (NAVIGATE_AFTER.has(writesEvent)) {
+      loadScreen({ container_id: dashboardContainer, state_id: "day_active" } as any);
+    }
+  };
+
+  const handleModalDone = async (extra: StepModalResult) => {
+    setModalVisible(false);
+    await doCarryWrite(extra);
+    loadScreen({ container_id: dashboardContainer, state_id: "day_active" } as any);
+  };
+
   return (
-    <TouchableOpacity
-      testID={action.testID}
-      accessibilityRole="button"
-      accessibilityLabel={action.label}
-      style={[styles.pill, isPrimary ? styles.pillPrimary : null]}
-      onPress={onPress}
-    >
-      <View>
-        {kindLabel ? <Text style={styles.kindLabel}>{kindLabel}</Text> : null}
-        <Text style={styles.label}>{action.label}</Text>
-      </View>
-    </TouchableOpacity>
+    <>
+      <TouchableOpacity
+        testID={action.testID}
+        accessibilityRole="button"
+        accessibilityLabel={action.label}
+        style={[styles.pill, isPrimary ? styles.pillPrimary : null]}
+        onPress={onPress}
+      >
+        <View>
+          {kindLabel ? <Text style={styles.kindLabel}>{kindLabel}</Text> : null}
+          <Text style={styles.label}>{action.label}</Text>
+        </View>
+      </TouchableOpacity>
+      {needsInput && (
+        <StepModal
+          visible={modalVisible}
+          stepPayload={{
+            template_id: INPUT_TEMPLATE[writesEvent]!,
+            step_config: {},
+            input_slots: [],
+          }}
+          label={action.label}
+          onCancel={() => setModalVisible(false)}
+          onDone={handleModalDone}
+        />
+      )}
+    </>
   );
 };
 

@@ -857,6 +857,35 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     }
   };
 
+  const resetAllRunnerAudio = async () => {
+    await stopTriggerAudio();
+    await stopCalmMusic();
+
+    const oneShots = [
+      prepAudioRef.current,
+      embodyAudioRef.current,
+      sankalpOmRef.current,
+    ];
+    prepAudioRef.current = null;
+    embodyAudioRef.current = null;
+    sankalpOmRef.current = null;
+
+    for (const sound of oneShots) {
+      if (!sound) continue;
+      await sound.stopAsync().catch(() => {});
+      await sound.unloadAsync().catch(() => {});
+    }
+
+    // Force expo-av to drop any orphaned playback session left behind by a
+    // fast same-container transition (mantra -> practice -> mantra).
+    try {
+      await Audio.setIsEnabledAsync(false);
+      await Audio.setIsEnabledAsync(true);
+    } catch (err) {
+      console.warn("[RUNNER_AUDIO] global reset failed:", err);
+    }
+  };
+
   const applyMuteState = async (muted: boolean) => {
     const volume = muted ? 0 : 1;
     const sounds = [
@@ -984,11 +1013,11 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
 
       if (!isTriggerOmChantScreen) {
         console.log("[TRIGGER_AUDIO] Not a trigger chanting screen. Stopping.");
-        await stopTriggerAudio();
+        await resetAllRunnerAudio();
         return;
       }
 
-      await stopTriggerAudio();
+      await resetAllRunnerAudio();
 
       // Delay slightly to ensure component is settled
       await new Promise((resolve) => setTimeout(resolve, 300));
@@ -1114,7 +1143,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
       if (triggerAudioRunIdRef.current === runId) {
         triggerAudioRunIdRef.current += 1;
       }
-      stopTriggerAudio().catch(() => {});
+      resetAllRunnerAudio().catch(() => {});
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isTriggerOmChantScreen, mantraAudioUrl]); // Removed mediaMuted to avoid restart on mute toggle

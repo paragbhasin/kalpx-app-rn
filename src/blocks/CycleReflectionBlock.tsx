@@ -673,6 +673,11 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   ];
   const strongestType: string = ss.checkpoint_strongest_type || "";
   const mitraReflection: string = ss.checkpoint_mitra_reflection || "";
+  const completionRatesRaw = (ss.checkpoint_completion_rates || {}) as Record<string, number>;
+  const rateVals = Object.values(completionRatesRaw);
+  const consistencyPct: number | null = rateVals.length
+    ? Math.round((rateVals.reduce((a, b) => a + b, 0) / rateVals.length) * 100)
+    : null;
   const decisionFraming: string = ss.checkpoint_decision_framing || "";
   const classifHeadline: string = ss.checkpoint_classification_headline || "";
   const classifBody: string = ss.checkpoint_classification_body || "";
@@ -872,18 +877,18 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
             <View style={styles.comparisonArea}>
               <ComparisonRow
                 label="Days Engaged"
-                thenVal="2/10"
-                nowVal="2/10"
+                thenVal="–"
+                nowVal={`${engagedTotal}/${milestoneDayCount}`}
               />
               <ComparisonRow
                 label="Fully Completed"
-                thenVal="0/10"
-                nowVal="0/10"
+                thenVal="–"
+                nowVal={`${completedTotal}/${milestoneDayCount}`}
               />
               <ComparisonRow
                 label="Total Days"
-                thenVal="14/10"
-                nowVal="14/10"
+                thenVal="–"
+                nowVal={`${milestoneDayCount}/${milestoneDayCount}`}
               />
             </View>
           </View>
@@ -893,11 +898,13 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
           <View style={styles.statsRow}>
             <View style={styles.statBox}>
               <Text style={styles.statLabel}>Strongest Area</Text>
-              <Text style={styles.statValue}>Mantra</Text>
+              <Text style={styles.statValue}>{strongestType || "–"}</Text>
             </View>
             <View style={styles.statBox}>
               <Text style={styles.statLabel}>Consistency Score</Text>
-              <Text style={styles.statValue}>0%</Text>
+              <Text style={styles.statValue}>
+                {consistencyPct != null ? `${consistencyPct}%` : "–"}
+              </Text>
             </View>
           </View>
         )}

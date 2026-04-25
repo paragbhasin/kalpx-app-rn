@@ -56,6 +56,11 @@ interface Props {
   screenData?: any;
 }
 
+const humanizeId = (id: string): string => {
+  const base = id.split(".").pop() || id;
+  return base.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+};
+
 const AdditionalItemsSectionBlock: React.FC<Props> = ({ block }) => {
   const blockSafe = block ?? {};
   const { screenData, updateScreenData, loadScreen, currentScreen, goBack } =
@@ -291,7 +296,9 @@ const AdditionalItemsSectionBlock: React.FC<Props> = ({ block }) => {
                     </View>
                   )}
                 </View>
-                <Text style={styles.title}>{item.title}</Text>
+                <Text style={styles.title}>
+                  {item.title || (item.itemId ? humanizeId(item.itemId) : "")}
+                </Text>
                 {!!item.subtitle && (
                   <Text style={styles.subtitle}>{item.subtitle}</Text>
                 )}

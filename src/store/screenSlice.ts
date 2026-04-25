@@ -209,14 +209,17 @@ export const loadScreenWithData = createAsyncThunk(
     { containerId, stateId }: { containerId: string; stateId: string },
     { dispatch },
   ) => {
-    // 1. Update navigation state immediately (uses the action creator exported below)
-    dispatch({ type: 'screen/loadScreen', payload: { containerId, stateId } });
-
-    // 2. Resolve the screen schema
+    // Resolve the schema first, then atomically update nav + schema in one
+    // dispatch so ScreenRenderer never sees a null currentScreen gap.
     const screenSchema = await getScreen(containerId, stateId);
     if (screenSchema) {
-      dispatch({ type: 'screen/setCurrentScreen', payload: screenSchema });
+      dispatch({
+        type: 'screen/loadScreenWithSchema',
+        payload: { containerId, stateId, schema: screenSchema },
+      });
     } else {
+      // Schema unavailable — fall back to the old clear-then-navigate path.
+      dispatch({ type: 'screen/loadScreen', payload: { containerId, stateId } });
       console.warn(
         `[SCREEN_SLICE] No schema found for ${containerId}/${stateId}`,
       );
@@ -229,17 +232,22 @@ export const loadScreenWithData = createAsyncThunk(
 export const goBackWithData = createAsyncThunk(
   'screen/goBackWithData',
   async (_, { getState, dispatch }) => {
-    dispatch({ type: 'screen/goBack' });
-
     const { screen } = getState() as { screen: ScreenState };
-    const { currentContainerId, currentStateId } = screen;
-    const screenSchema = await getScreen(currentContainerId, currentStateId);
+    if (screen.history.length === 0) return null;
+
+    const previous = screen.history[screen.history.length - 1];
+    const screenSchema = await getScreen(previous.containerId, previous.stateId);
 
     if (screenSchema) {
-      dispatch({ type: 'screen/setCurrentScreen', payload: screenSchema });
+      dispatch({
+        type: 'screen/goBackWithSchema',
+        payload: { schema: screenSchema },
+      });
     } else {
+      // Schema unavailable — fall back to clear-then-navigate.
+      dispatch({ type: 'screen/goBack' });
       console.warn(
-        `[SCREEN_SLICE] No schema found for back target ${currentContainerId}/${currentStateId}`,
+        `[SCREEN_SLICE] No schema found for back target ${previous.containerId}/${previous.stateId}`,
       );
     }
 
@@ -271,6 +279,24 @@ const screenSlice = createSlice({
       state.currentScreen = null;
     },
 
+    // Atomic forward navigation: push history, set new IDs, and set new schema
+    // in one dispatch so ScreenRenderer never sees a null gap.
+    loadScreenWithSchema(
+      state,
+      action: PayloadAction<{ containerId: string; stateId: string; schema: any }>,
+    ) {
+      const { containerId, stateId, schema } = action.payload;
+      if (state.currentContainerId && state.currentStateId) {
+        state.history.push({
+          containerId: state.currentContainerId,
+          stateId: state.currentStateId,
+        });
+      }
+      state.currentContainerId = containerId;
+      state.currentStateId = stateId;
+      state.currentScreen = schema;
+    },
+
     goBack(state) {
       if (state.history.length === 0) return;
       const previous = state.history[state.history.length - 1];
@@ -281,6 +307,17 @@ const screenSlice = createSlice({
       // mounting the parent container with the child screen's schema while
       // the parent schema is being resolved asynchronously.
       state.currentScreen = null;
+    },
+
+    // Atomic back navigation: pop history, set previous IDs, and set schema
+    // in one dispatch so ScreenRenderer never sees a null gap.
+    goBackWithSchema(state, action: PayloadAction<{ schema: any }>) {
+      if (state.history.length === 0) return;
+      const previous = state.history[state.history.length - 1];
+      state.history = state.history.slice(0, -1);
+      state.currentContainerId = previous.containerId;
+      state.currentStateId = previous.stateId;
+      state.currentScreen = action.payload.schema;
     },
 
     setScreenValue(state, action: PayloadAction<{ key: string; value: any }>) {

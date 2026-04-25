@@ -552,9 +552,12 @@ const GrowthRoomContainer: React.FC<Props> = () => {
           <Text style={styles.reflectivePrompt}>{reflectivePrompt}</Text>
         )}
         {!!practiceLabel && (
-          <View style={styles.practiceBox}>
+          <TouchableOpacity
+            style={styles.practiceBox}
+            onPress={() => setStep("journal")}
+          >
             <Text style={styles.practiceLabel}>{practiceLabel}</Text>
-          </View>
+          </TouchableOpacity>
         )}
         <View style={styles.seatActions}>
           {!!journalCta && (

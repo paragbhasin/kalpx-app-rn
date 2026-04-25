@@ -62,9 +62,11 @@ export function useScreenStore(selector?: (state: any) => any) {
 
   const updateBackground = useCallback(
     (bg: any) => {
-      dispatch(screenActions.setBackground(bg));
+      if (screenState.currentBackground !== bg) {
+        dispatch(screenActions.setBackground(bg));
+      }
     },
-    [dispatch],
+    [dispatch, screenState.currentBackground],
   );
 
   const updateHeaderHidden = useCallback(

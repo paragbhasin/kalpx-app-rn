@@ -421,7 +421,9 @@ export default function ContinueJourney({
         }
 
         if (cancelled || routedRef.current) return;
-        await fetchEntryView();
+        if (!res || res.response_type !== "render_home") {
+          await fetchEntryView();
+        }
       })();
     } else {
       // Returning-user path: entry-view.

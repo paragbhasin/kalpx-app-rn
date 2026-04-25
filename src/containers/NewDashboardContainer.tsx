@@ -53,6 +53,7 @@ import GreetingCard from "../blocks/dashboard/GreetingCard";
 import PathChip from "../blocks/dashboard/PathChip";
 import QuickSupportBlock from "../blocks/dashboard/QuickSupportBlock";
 import SankalpCarryBlock from "../blocks/dashboard/SankalpCarryBlock";
+import SupportReturnModal from "../blocks/dashboard/SupportReturnModal";
 import TriadCardsRow from "../blocks/dashboard/TriadCardsRow";
 import WhyThisModal from "../blocks/dashboard/WhyThisModal";
 import { extractWhyThis } from "../blocks/dashboard/whyThisUtils";
@@ -100,6 +101,16 @@ const NewDashboardContainer: React.FC<Props> = () => {
   const sd = (screenData ?? {}) as Record<string, any>;
   const [whyOpen, setWhyOpen] = useState(false);
   const [isHydrating, setIsHydrating] = useState(false);
+  const returnModal = sd.dashboard_return_modal;
+
+  const closeReturnModal = useCallback(() => {
+    store.dispatch(
+      screenActions.setScreenValue({
+        key: "dashboard_return_modal",
+        value: null,
+      }),
+    );
+  }, []);
 
   useEffect(() => {
     updateBackground(require("../../assets/beige_bg.png"));
@@ -278,6 +289,12 @@ const NewDashboardContainer: React.FC<Props> = () => {
           <ActivityIndicator size="large" color={Colors.goldBright} />
         </View>
       ) : null}
+
+      <SupportReturnModal
+        visible={!!returnModal}
+        payload={returnModal}
+        onClose={closeReturnModal}
+      />
 
     </View>
   );

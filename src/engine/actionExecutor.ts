@@ -1713,6 +1713,17 @@ export async function executeAction(
 
         setScreenValue(
           {
+            title: "Carry this steadiness",
+            body: [
+              "You returned to your center.",
+              "Keep one simple anchor close as you move through the rest of your day.",
+            ],
+            cta_label: "Close",
+          },
+          "dashboard_return_modal",
+        );
+        setScreenValue(
+          {
             message:
               "You returned to your center. Carry this steadiness with you.",
             type: "calmer",
@@ -1921,6 +1932,29 @@ export async function executeAction(
             },
           });
 
+          const finalModal =
+            stillFeeling === "agitated"
+              ? {
+                  title: "Stay with your breath",
+                  body: ["A softer rhythm may help your system settle."],
+                  cta_label: "Close",
+                }
+              : stillFeeling === "drained"
+                ? {
+                    title: "Stay with gentle steadiness",
+                    body: ["You may need softness more than force right now."],
+                    cta_label: "Close",
+                  }
+                : {
+                    title: "Stay with your Sankalp",
+                    body: [
+                      "Small steps with sincerity create deep change.",
+                      "Your Sankalp is your inner compass.",
+                      "Stay consistent, it will help.",
+                    ],
+                    cta_label: "Close",
+                  };
+          setScreenValue(finalModal, "dashboard_return_modal");
           setScreenValue(
             {
               message:

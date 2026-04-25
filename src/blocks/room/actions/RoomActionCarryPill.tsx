@@ -23,6 +23,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import api from "../../../Networks/axios";
 import { executeAction } from "../../../engine/actionExecutor";
 import { useScreenStore } from "../../../engine/useScreenBridge";
+import { useToast } from "../../../context/ToastContext";
 import type { ActionEnvelope, RoomRenderV1 } from "../types";
 import { buildActionCtx } from "./actionContextHelper";
 import StepModal, { type StepModalResult } from "./StepModal";
@@ -33,6 +34,18 @@ const INPUT_TEMPLATE: Record<string, string> = {
 };
 
 const NAVIGATE_AFTER = new Set(["joy_carry", "joy_named", "stillness_named", "connection_named"]);
+
+const CARRY_TOAST_COPY: Record<string, string> = {
+  joy_carry:            "Saved. Carry this joy into your day.",
+  joy_named:            "Saved. Carry this joy into your day.",
+  connection_named:     "Saved. Carry this connection with you.",
+  stillness_named:      "Saved. Return with this stillness.",
+  growth_journal:       "Saved. Let this insight walk with you.",
+  connection_reach_out: "Saved. Carry this connection with you.",
+  clarity_journal:      "Saved. Keep this question close.",
+};
+const CARRY_TOAST_FALLBACK = "Saved to your path.";
+const CARRY_TOAST_ERROR    = "Couldn't save. Please try again.";
 
 interface Props {
   action: ActionEnvelope;
@@ -49,7 +62,10 @@ const RoomActionCarryPill: React.FC<Props> = ({
   isPrimary = false,
 }) => {
   const { loadScreen, goBack } = useScreenStore();
+  const { showToast } = useToast();
   const [modalVisible, setModalVisible] = useState(false);
+  const [modalError, setModalError] = useState<string | null>(null);
+  const [modalSubmitting, setModalSubmitting] = useState(false);
 
   const writesEvent =
     action.carry_payload?.writes_event ??
@@ -58,90 +74,125 @@ const RoomActionCarryPill: React.FC<Props> = ({
   const roomId = envelope?.room_id ?? null;
   const needsInput = writesEvent in INPUT_TEMPLATE;
 
+  // Stub action: no real audio capture yet. Hide pill until recorder is wired.
+  if (writesEvent === "release_voice_note") return null;
+
   const dashboardContainer =
     process.env.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
       ? "companion_dashboard_v3"
       : "companion_dashboard";
 
-  const doCarryWrite = async (extra?: StepModalResult) => {
-    const ctx = buildActionCtx({ loadScreen, goBack });
-    const capturedAt = Date.now();
-
+  const doCarryWrite = async (extra?: StepModalResult): Promise<boolean> => {
+    // sacredWriteOk is declared outside the outer try so the inner sacred-POST
+    // catch can set it true/false independently of post-POST errors.
+    // Outer catch guards setScreenValue/executeAction/buildActionCtx failures
+    // and must not reset sacredWriteOk — a successful sacred POST must stay true.
     let sacredWriteOk = false;
-    if (roomId) {
-      try {
-        const res = await api.post(`mitra/rooms/${roomId}/sacred/`, {
-          writes_event: writesEvent,
-          label: action.label,
-          action_id: action.action_id,
-          analytics_key: action.analytics_key,
-          captured_at: capturedAt,
-          ...(extra?.text ? { text: extra.text } : {}),
-          ...(extra?.contact_hint ? { contact_hint: extra.contact_hint } : {}),
-          ...(extra?.message ? { message: extra.message } : {}),
-        });
-        const status = res?.status ?? 0;
-        sacredWriteOk = status >= 200 && status < 300;
-      } catch (err: any) {
-        sacredWriteOk = false;
-        if (__DEV__) {
-          console.warn(
-            "[RoomActionCarryPill] sacred POST failed; falling back to Redux-only",
-            err?.response?.status || err?.message,
-          );
+    try {
+      const ctx = buildActionCtx({ loadScreen, goBack });
+      const capturedAt = Date.now();
+
+      if (roomId) {
+        try {
+          const res = await api.post(`mitra/rooms/${roomId}/sacred/`, {
+            writes_event: writesEvent,
+            label: action.label,
+            action_id: action.action_id,
+            analytics_key: action.analytics_key,
+            captured_at: capturedAt,
+            ...(extra?.text ? { text: extra.text } : {}),
+            ...(extra?.contact_hint ? { contact_hint: extra.contact_hint } : {}),
+            ...(extra?.message ? { message: extra.message } : {}),
+          });
+          const status = res?.status ?? 0;
+          sacredWriteOk = status >= 200 && status < 300;
+        } catch (err: any) {
+          sacredWriteOk = false;
+          if (__DEV__) {
+            console.warn(
+              "[RoomActionCarryPill] sacred POST failed; falling back to Redux-only",
+              err?.response?.status || err?.message,
+            );
+          }
         }
+      } else if (__DEV__) {
+        console.warn(
+          "[RoomActionCarryPill] missing room_id on envelope; skipping BE POST",
+        );
       }
-    } else if (__DEV__) {
-      console.warn(
-        "[RoomActionCarryPill] missing room_id on envelope; skipping BE POST",
-      );
-    }
 
-    ctx.setScreenValue(
-      {
-        captured_at: capturedAt,
-        label: action.label,
-        room_id: roomId,
-        writes_event: writesEvent,
-        sacred_write_ok: sacredWriteOk,
-      },
-      writesEvent,
-    );
-
-    executeAction(
-      {
-        type: "room_carry_captured",
-        payload: {
+      ctx.setScreenValue(
+        {
+          captured_at: capturedAt,
+          label: action.label,
           room_id: roomId,
           writes_event: writesEvent,
-          label: action.label,
-          analytics_key: action.analytics_key,
           sacred_write_ok: sacredWriteOk,
         },
-      } as any,
-      ctx,
-    ).catch((err) => {
+        writesEvent,
+      );
+
+      executeAction(
+        {
+          type: "room_carry_captured",
+          payload: {
+            room_id: roomId,
+            writes_event: writesEvent,
+            label: action.label,
+            analytics_key: action.analytics_key,
+            sacred_write_ok: sacredWriteOk,
+          },
+        } as any,
+        ctx,
+      ).catch((err) => {
+        if (__DEV__) {
+          console.warn("[RoomActionCarryPill] dispatch failed:", err);
+        }
+      });
+    } catch (err: any) {
       if (__DEV__) {
-        console.warn("[RoomActionCarryPill] dispatch failed:", err);
+        console.warn("[RoomActionCarryPill] doCarryWrite unexpected error:", err);
       }
-    });
+    }
+    return sacredWriteOk;
   };
 
   const onPress = async () => {
     if (needsInput) {
+      setModalError(null);
+      setModalSubmitting(false);
       setModalVisible(true);
       return;
     }
-    await doCarryWrite();
-    if (NAVIGATE_AFTER.has(writesEvent)) {
-      loadScreen({ container_id: dashboardContainer, state_id: "day_active" } as any);
+    const ok = await doCarryWrite();
+    if (ok) {
+      showToast(CARRY_TOAST_COPY[writesEvent] ?? CARRY_TOAST_FALLBACK, 3000, "success");
+      if (NAVIGATE_AFTER.has(writesEvent)) {
+        loadScreen({ container_id: dashboardContainer, state_id: "day_active" } as any);
+      }
+    } else {
+      showToast(CARRY_TOAST_ERROR, 4000, "error");
     }
   };
 
   const handleModalDone = async (extra: StepModalResult) => {
-    setModalVisible(false);
-    await doCarryWrite(extra);
-    loadScreen({ container_id: dashboardContainer, state_id: "day_active" } as any);
+    if (modalSubmitting) return;
+    setModalSubmitting(true);
+    setModalError(null);
+    let ok = false;
+    try {
+      ok = await doCarryWrite(extra);
+    } finally {
+      setModalSubmitting(false);
+    }
+    if (ok) {
+      setModalVisible(false);
+      setModalError(null);
+      showToast(CARRY_TOAST_COPY[writesEvent] ?? CARRY_TOAST_FALLBACK, 3000, "success");
+      loadScreen({ container_id: dashboardContainer, state_id: "day_active" } as any);
+    } else {
+      setModalError(CARRY_TOAST_ERROR);
+    }
   };
 
   return (
@@ -167,8 +218,14 @@ const RoomActionCarryPill: React.FC<Props> = ({
             input_slots: [],
           }}
           label={action.label}
-          onCancel={() => setModalVisible(false)}
+          onCancel={() => {
+            setModalVisible(false);
+            setModalError(null);
+            setModalSubmitting(false);
+          }}
           onDone={handleModalDone}
+          errorMessage={modalError}
+          isSubmitting={modalSubmitting}
         />
       )}
     </>

@@ -78,6 +78,8 @@ interface Props {
   label: string;
   onCancel: () => void;
   onDone: (extra: StepModalResult) => void;
+  errorMessage?: string | null;
+  isSubmitting?: boolean;
 }
 
 /** Derive the UI kind from the template_id prefix. */
@@ -111,6 +113,8 @@ const StepModal: React.FC<Props> = ({
   label,
   onCancel,
   onDone,
+  errorMessage,
+  isSubmitting = false,
 }) => {
   const kind = useMemo(
     () => classifyStep(stepPayload?.template_id),
@@ -156,7 +160,11 @@ const StepModal: React.FC<Props> = ({
                 <View style={styles.headerSpacer} />
               </View>
 
-              <View style={styles.body} testID="step_modal_body">
+              <View
+                style={[styles.body, isSubmitting && styles.bodySubmitting]}
+                testID="step_modal_body"
+                pointerEvents={isSubmitting ? "none" : "auto"}
+              >
                 {kind === "timer_breathe" ||
                 kind === "timer_walk" ||
                 kind === "timer_sit" ||
@@ -186,6 +194,11 @@ const StepModal: React.FC<Props> = ({
 
                 {kind === "unknown" ? <UnknownBody onDone={onDone} /> : null}
               </View>
+              {!!errorMessage && (
+                <Text style={styles.modalError} testID="step_modal_error">
+                  {errorMessage}
+                </Text>
+              )}
             </KeyboardAvoidingView>
           </ImageBackground>
         </View>
@@ -1139,6 +1152,17 @@ const styles = StyleSheet.create({
   walkingAnimation: {
     width: "100%",
     height: "100%",
+  },
+  bodySubmitting: {
+    opacity: 0.55,
+  },
+  modalError: {
+    color: "#C0392B",
+    fontSize: 13,
+    textAlign: "center",
+    marginTop: 4,
+    marginBottom: 12,
+    paddingHorizontal: 16,
   },
 });
 

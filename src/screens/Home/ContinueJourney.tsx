@@ -402,15 +402,22 @@ export default function ContinueJourney({
       // generate_companion prehydrate removed: the action handler was
       // retired in v3 (no-op). Active users are fully handled by
       // route_to_moment (milestone/care-room) or render_home (ground state).
+      // Fallback: if journey/home does not produce a route (null, 429, or
+      // non-route_to_moment), call entry-view which handles Day 7/14
+      // checkpoint detection for active journeys (routing safety fallback —
+      // not final routing architecture, pending journey/home audit).
       (async () => {
         const res = await fetchHome();
-        if (cancelled || !res || routedRef.current) return;
+        if (cancelled || routedRef.current) return;
 
-        if (res.response_type === "route_to_moment" && res.action) {
+        if (res?.response_type === "route_to_moment" && res.action) {
           routedRef.current = true;
           await executeAction(res.action as any, buildActionContext() as any);
           return;
         }
+
+        if (cancelled || routedRef.current) return;
+        await fetchEntryView();
       })();
     } else {
       // Returning-user path: entry-view.

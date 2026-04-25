@@ -329,10 +329,12 @@ const screenSlice = createSlice({
     },
 
     setBackground(state, action: PayloadAction<any>) {
+      if (state.currentBackground === action.payload) return;
       state.currentBackground = action.payload;
     },
 
     setHeaderHidden(state, action: PayloadAction<boolean>) {
+      if (state.isHeaderHidden === action.payload) return;
       state.isHeaderHidden = action.payload;
     },
 

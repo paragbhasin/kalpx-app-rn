@@ -107,6 +107,8 @@ const ScreenRenderer: React.FC = () => {
   const currentContainerId = useScreenStore(
     (state) => state.currentContainerId,
   );
+  const currentBackground = useScreenStore((state) => state.currentBackground);
+  const updateBackground = useScreenStore((state) => state.updateBackground);
   const { currentOverlayData, setOverlayData } = useScreenStore();
 
   const user = useSelector(
@@ -130,6 +132,12 @@ const ScreenRenderer: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [currentScreen, isLoggedIn, navigation]);
+
+  useEffect(() => {
+    if (!currentScreen) return;
+    if (currentBackground) return;
+    updateBackground(require("../../assets/beige_bg.png"));
+  }, [currentBackground, currentScreen, updateBackground]);
 
   if (__DEV__) {
     console.log(

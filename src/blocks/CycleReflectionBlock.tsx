@@ -67,7 +67,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
     return 0;
   }, [currentStateId]);
   const resolvedCycleDay = Number(
-    dayNumberNum || checkpointDayNum || routeCycleDay || 0,
+    routeCycleDay || checkpointDayNum || dayNumberNum || 0,
   );
 
   const is14DayCycle = useMemo(() => {
@@ -673,7 +673,10 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   ];
   const strongestType: string = ss.checkpoint_strongest_type || "";
   const mitraReflection: string = ss.checkpoint_mitra_reflection || "";
-  const completionRatesRaw = (ss.checkpoint_completion_rates || {}) as Record<string, number>;
+  const completionRatesRaw = (ss.checkpoint_completion_rates || {}) as Record<
+    string,
+    number
+  >;
   const rateVals = Object.values(completionRatesRaw);
   const consistencyPct: number | null = rateVals.length
     ? Math.round((rateVals.reduce((a, b) => a + b, 0) / rateVals.length) * 100)
@@ -1558,12 +1561,13 @@ const styles = StyleSheet.create({
     // marginBottom: 20,
   },
   introSubtitle: {
-    fontFamily: Fonts.serif.regular,
-    fontSize: 18,
+    fontFamily: Fonts.sans.regular,
+    fontSize: 14,
     color: "#5e4533",
     alignSelf: "center",
     textAlign: "center",
     paddingHorizontal: 15,
+    lineHeight: 22,
     marginTop: 10,
   },
   intro7daytitle: {

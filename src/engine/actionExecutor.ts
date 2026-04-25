@@ -169,12 +169,7 @@ function _omTextForTrack(url: string) {
 
 function _triggerNegativeLabel(feeling: string, step: number): string {
   if (step <= 2) return "Try another way";
-  const labels: Record<string, string> = {
-    triggered: "I still feel triggered",
-    agitated: "I still feel agitated",
-    drained: "I still feel drained",
-  };
-  return labels[feeling] || "I still feel unsettled";
+  return "Return to my path";
 }
 
 function _mitraTz(): string {
@@ -1911,11 +1906,11 @@ export async function executeAction(
           }
         } else {
           // Final escalation: Return to Dashboard with encouragement
-          mitraTrackEvent("trigger_still_feeling_final", {
+          mitraTrackEvent("trigger_support_closed_after_round2", {
             journeyId: screenState.journey_id,
             dayNumber: screenState.day_number || 1,
             meta: {
-              step: 3,
+              step: stillStep,
               feeling: stillFeeling,
               resolution: "encourage_core",
             },

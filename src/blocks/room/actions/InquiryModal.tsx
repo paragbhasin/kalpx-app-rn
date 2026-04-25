@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
   },
 
   anchorLine: {
-    fontSize: 18,
+    fontSize: 16,
     color: "#432104",
     textAlign: "center",
     lineHeight: 28,

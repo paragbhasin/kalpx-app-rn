@@ -650,8 +650,13 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     const isCheckpointReflectionState =
       stateId === "checkpoint_day_7" || stateId === "checkpoint_day_14";
 
-    // Let CycleReflectionBlock own the checkpoint backgrounds (Day-7/Day-14).
-    if (!isCheckpointReflectionState) {
+    if (isCheckpointReflectionState) {
+      // CycleReflectionBlock fully owns the background for checkpoint screens.
+      // Do NOT call updateBackground here — the cleanup below also skips null-
+      // clearing so that when screenData changes (e.g. handleDecision dispatches
+      // checkpoint_decision / checkpoint_feeling), this effect re-runs but does
+      // NOT wipe the BeigeBg that CycleReflectionBlock correctly set.
+    } else {
       updateBackground(require("../../assets/beige_bg.png"));
     }
     updateHeaderHidden(false);
@@ -675,7 +680,13 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     }
 
     return () => {
-      updateBackground(null);
+      // Only clear the background if we set it. For checkpoint states we never
+      // set it — CycleReflectionBlock owns it. Calling updateBackground(null)
+      // here on every screenData re-run would wipe the child's BeigeBg and
+      // expose the stale Day7Bg that was last set on the previous mount.
+      if (!isCheckpointReflectionState) {
+        updateBackground(null);
+      }
     };
   }, [updateBackground, updateHeaderHidden, currentType, screenData, stateId]);
 

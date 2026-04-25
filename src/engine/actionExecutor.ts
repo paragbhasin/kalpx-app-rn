@@ -2024,14 +2024,13 @@ export async function executeAction(
 
         // Check for checkpoints (Day 7 / Day 14)
         if (currentDay === 6 || currentDay === 14) {
-          const checkpointId =
-            currentDay === 6 ? "checkpoint_day_7" : "checkpoint_day_14";
+          const checkpointStateId = currentDay === 6 ? "day_7" : "day_14";
           console.log(
-            `[MITRA] Checkpoint Day ${currentDay === 6 ? 7 : 14} routing to ${checkpointId}`,
+            `[MITRA] Checkpoint Day ${currentDay === 6 ? 7 : 14} routing to ${checkpointStateId}`,
           );
           loadScreen({
-            container_id: "cycle_transitions",
-            state_id: checkpointId,
+            container_id: "checkpoint_reflection",
+            state_id: checkpointStateId,
           });
         } else {
           loadScreen({

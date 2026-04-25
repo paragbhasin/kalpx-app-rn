@@ -107,6 +107,7 @@ const ScreenRenderer: React.FC = () => {
   const currentContainerId = useScreenStore(
     (state) => state.currentContainerId,
   );
+  const currentStateId = useScreenStore((state) => state.currentStateId);
   const currentBackground = useScreenStore((state) => state.currentBackground);
   const updateBackground = useScreenStore((state) => state.updateBackground);
   const { currentOverlayData, setOverlayData } = useScreenStore();
@@ -136,8 +137,19 @@ const ScreenRenderer: React.FC = () => {
   useEffect(() => {
     if (!currentScreen) return;
     if (currentBackground) return;
+    // RACE GUARD: React runs child effects before parent effects. CycleReflectionBlock
+    // (a deep child) sets Day7Bg/Day14Bg in its own useEffect, but by the time THIS
+    // parent effect runs, currentBackground was captured at render-time (still null).
+    // Explicitly skip the beige fallback for checkpoint screens so we don't overwrite
+    // the period-specific background that CycleReflectionBlock or ContinueJourney
+    // pre-dispatched.
+    const isCheckpointScreen =
+      currentContainerId === 'checkpoint_reflection' ||
+      currentStateId === 'checkpoint_day_7' ||
+      currentStateId === 'checkpoint_day_14';
+    if (isCheckpointScreen) return;
     updateBackground(require("../../assets/beige_bg.png"));
-  }, [currentBackground, currentScreen, updateBackground]);
+  }, [currentBackground, currentScreen, currentContainerId, currentStateId, updateBackground]);
 
   if (__DEV__) {
     console.log(

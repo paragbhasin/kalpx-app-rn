@@ -64,6 +64,8 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   const routeCycleDay = useMemo(() => {
     if (currentStateId === "checkpoint_day_7") return 7;
     if (currentStateId === "checkpoint_day_14") return 14;
+    if (currentStateId === "day_7") return 7;
+    if (currentStateId === "day_14") return 14;
     return 0;
   }, [currentStateId]);
   const resolvedCycleDay = Number(
@@ -104,19 +106,37 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   const updateHeaderHidden = useScreenStore(
     (state) => state.updateHeaderHidden,
   );
+  const isCheckpointRoute = useMemo(
+    () =>
+      currentStateId === "checkpoint_day_7" ||
+      currentStateId === "checkpoint_day_14" ||
+      currentStateId === "day_7" ||
+      currentStateId === "day_14",
+    [currentStateId],
+  );
+  const checkpointPayloadReady = useMemo(() => {
+    if (!isCheckpointRoute) return true;
+    if (routeCycleDay === 7) return !!ss.checkpoint_day_7;
+    if (routeCycleDay === 14) return !!ss.checkpoint_day_14;
+    return true;
+  }, [
+    isCheckpointRoute,
+    routeCycleDay,
+    ss.checkpoint_day_7,
+    ss.checkpoint_day_14,
+  ]);
 
   // Compute background directly from raw day number so it is set correctly
   // on the FIRST render — before is7DayCycle/is14DayCycle memos have a chance
   // to trigger a re-render. checkpoint_day is written to the store BEFORE
   // navigation so it is always available at mount time.
   const screenBackground = useMemo(() => {
-    const rawDay = resolvedCycleDay;
     if (showJourneyInvite) {
       return BeigeBg;
     }
     if (showIntro) {
-      if (rawDay === 14 || is14DayCycle) return Day14Bg;
-      if (rawDay === 7 || is7DayCycle) return Day7Bg;
+      if (resolvedCycleDay === 14 || is14DayCycle) return Day14Bg;
+      if (resolvedCycleDay === 7 || is7DayCycle) return Day7Bg;
     }
     return BeigeBg;
   }, [
@@ -693,6 +713,14 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
     ss.checkpoint_deepen_suggestion || null;
   const decisionLayout: string =
     ss.checkpoint_decision_layout || "continue_first";
+
+  if (isCheckpointRoute && !checkpointPayloadReady) {
+    return (
+      <View style={styles.checkpointLoaderWrap}>
+        <ActivityIndicator size="large" color="#D9A557" />
+      </View>
+    );
+  }
 
   if (showIntro && is7DayCycle) {
     const introHeadline = d7.intro_headline || "A Week Into Your Journey";
@@ -1554,6 +1582,11 @@ const DecisionBtn = ({ label, id, onPress, isPrimary, isSecondary }: any) => (
 
 const styles = StyleSheet.create({
   introContainer: { flex: 1 },
+  checkpointLoaderWrap: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   introOverlay: {
     // flex: 1,
     // paddingHorizontal: 28,

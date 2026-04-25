@@ -27,7 +27,11 @@ interface Props {
   isPrimary?: boolean;
 }
 
-const RoomActionTeachingPill: React.FC<Props> = ({ action, kindLabel, isPrimary = false }) => {
+const RoomActionTeachingPill: React.FC<Props> = ({
+  action,
+  kindLabel,
+  isPrimary = false,
+}) => {
   const { loadScreen, goBack } = useScreenStore();
 
   const onPress = () => {
@@ -108,8 +112,8 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
   },
   kindLabel: {
-    fontSize: 10,
-    color: "#9f9f9f",
+    fontSize: 12,
+    color: "#D4A017",
     textAlign: "center",
     marginBottom: 2,
   },

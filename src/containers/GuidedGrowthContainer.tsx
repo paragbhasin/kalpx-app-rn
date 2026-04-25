@@ -94,21 +94,28 @@ export default function GuidedGrowthContainer() {
     (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
   );
   const isLoggedIn = !!user;
+  const journeyCheckRef = useRef(false);
 
   const GUIDED_BG = require("../../assets/guided_bg.png");
 
   // Parity with Vue's onMounted / Home.tsx behavior
   useFocusEffect(
     React.useCallback(() => {
+      let cancelled = false;
       // Reset loading gate on every focus — prevents the page flashing
       // briefly before the journey-status redirect on re-entry.
       setCheckingJourney(true);
 
       const checkJourney = async () => {
         if (!isLoggedIn) {
-          setCheckingJourney(false);
+          if (!cancelled) setCheckingJourney(false);
           return;
         }
+        if (journeyCheckRef.current) {
+          if (!cancelled) setCheckingJourney(false);
+          return;
+        }
+        journeyCheckRef.current = true;
         try {
           const res = await api.get("mitra/journey/status/");
           const data = res.data;
@@ -128,7 +135,8 @@ export default function GuidedGrowthContainer() {
         } catch (e) {
           // Silently fail
         } finally {
-          setCheckingJourney(false);
+          if (!cancelled) setCheckingJourney(false);
+          journeyCheckRef.current = false;
         }
       };
 
@@ -136,6 +144,7 @@ export default function GuidedGrowthContainer() {
       checkJourney();
 
       return () => {
+        cancelled = true;
         updateBackground(null);
       };
     }, [isLoggedIn, navigation, updateBackground, GUIDED_BG]),

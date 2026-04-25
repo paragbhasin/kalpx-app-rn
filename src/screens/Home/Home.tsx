@@ -90,6 +90,8 @@ export default function Home() {
   const [checkingJourney, setCheckingJourney] = useState(false);
   // Mitra v3 — guard auto-route so we don't re-navigate on every Home focus.
   const v3AutoRoutedRef = useRef(false);
+  const profileFetchingRef = useRef(false);
+  const journeyStatusRef = useRef(false);
   const [profileNameFromStorage, setProfileNameFromStorage] = useState<
     string | null
   >(null);
@@ -155,11 +157,15 @@ export default function Home() {
   // Check journey status on focus (matches web's onMounted behavior)
   useFocusEffect(
     React.useCallback(() => {
+      let cancelled = false;
+
       const checkJourney = async () => {
         if (!isLoggedIn) {
           setMitraJourneyId(null);
           return;
         }
+        if (journeyStatusRef.current) return;
+        journeyStatusRef.current = true;
         setCheckingJourney(true);
         try {
           const res = await api.get("mitra/journey/status/");
@@ -192,13 +198,30 @@ export default function Home() {
         } catch (err) {
           console.debug("[HOME] journey/status failed:", (err as any).message);
         } finally {
-          setCheckingJourney(false);
+          if (!cancelled) setCheckingJourney(false);
+          journeyStatusRef.current = false;
         }
       };
-      if (isLoggedIn) {
-        dispatch(fetchProfileDetails(() => {}));
+
+      if (isLoggedIn && !profileFetchingRef.current) {
+        profileFetchingRef.current = true;
+        let settled = false;
+        const resetProfileGuard = () => {
+          if (!settled) {
+            settled = true;
+            profileFetchingRef.current = false;
+          }
+        };
+        try {
+          dispatch(fetchProfileDetails(resetProfileGuard));
+        } catch (e) {
+          resetProfileGuard();
+        }
       }
+
       checkJourney();
+
+      return () => { cancelled = true; };
     }, [isLoggedIn, navigation, dispatch]),
   );
 

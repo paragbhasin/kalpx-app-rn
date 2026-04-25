@@ -32,7 +32,7 @@ const INPUT_TEMPLATE: Record<string, string> = {
   connection_reach_out: "step_reach_out_connection",
 };
 
-const NAVIGATE_AFTER = new Set(["joy_carry", "joy_named", "stillness_named"]);
+const NAVIGATE_AFTER = new Set(["joy_carry", "joy_named", "stillness_named", "connection_named"]);
 
 interface Props {
   action: ActionEnvelope;

@@ -1158,11 +1158,20 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
             <TouchableOpacity
               style={[
                 styles.primaryBtn,
-                deepenFirst && { backgroundColor: "#c8a97a" },
+                deepenFirst && {
+                  backgroundColor: "#FBF5F5",
+                  borderColor: "#D4A017",
+                  borderWidth: 1,
+                },
               ]}
               onPress={() => handleDecision14("continue_same", carryReflection)}
             >
-              <Text style={styles.primaryBtnText}>
+              <Text
+                style={[
+                  styles.primaryBtnText,
+                  deepenFirst && { color: "#000000" },
+                ]}
+              >
                 {d14.continue_path_cta || "Continue Same Path"}
               </Text>
             </TouchableOpacity>
@@ -1656,7 +1665,11 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     minWidth: 250,
   },
-  primaryBtnText: { fontFamily: Fonts.sans.bold, fontSize: 16, color: "#fff" },
+  primaryBtnText: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 16,
+    color: "#fff",
+  },
   bottomGroup: { marginBottom: 40 },
 
   journeyContent: {},
@@ -1799,7 +1812,7 @@ const styles = StyleSheet.create({
   skipBtnText: {
     fontFamily: Fonts.sans.medium,
     fontSize: 16,
-    color: "#8c7355",
+    color: "#432104",
     textDecorationLine: "underline",
   },
 

@@ -289,7 +289,6 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
               the backing principle_id when present. */}
           {!!wisdomAnchorLine && (
             <View style={styles.wisdomAnchorCard}>
-              {/* <View style={styles.wisdomDivider} /> */}
               <Text
                 style={styles.wisdomAnchorText}
                 testID="completion_wisdom_anchor_line"
@@ -326,9 +325,9 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
                     ).catch(() => {});
                   }}
                 >
-                  <Text style={styles.readMoreText}>
+                  {/* <Text style={styles.readMoreText}>
                     {slot("read_more_label")}
-                  </Text>
+                  </Text> */}
                 </TouchableOpacity>
               )}
             </View>

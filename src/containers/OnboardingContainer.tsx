@@ -23,7 +23,12 @@
  */
 
 import React, { useEffect } from "react";
-import { BackHandler, ScrollView, StyleSheet } from "react-native";
+import {
+  BackHandler,
+  InteractionManager,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
 import BlockRenderer from "../engine/BlockRenderer";
 import { useScreenStore } from "../engine/useScreenBridge";
 
@@ -39,6 +44,7 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
     (state: any) => state.updateHeaderHidden,
   );
   const screenData = useScreenStore((state: any) => state.screenData);
+  const currentStateId = useScreenStore((state: any) => state.currentStateId);
   const _rawTurn = screenData.onboarding_turn;
   const turn =
     typeof _rawTurn === "number"
@@ -46,16 +52,31 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
       : typeof _rawTurn === "string"
         ? Number((_rawTurn.match(/\d+/) || ["1"])[0])
         : 1;
+  const activeStateId = schema?.state_id || currentStateId || "";
+  const isIntroState =
+    activeStateId === "turn_1" ||
+    activeStateId === "turn_2" ||
+    turn === 1 ||
+    turn === 2;
+  const backgroundSource = isIntroState
+    ? require("../../assets/new_home.png")
+    : require("../../assets/beige_bg.png");
 
   useEffect(() => {
-    const isIntro = turn === 1 || turn === 2;
-    const updatedBackground = isIntro
-      ? require("../../assets/new_home.png")
-      : require("../../assets/beige_bg.png");
-    updateBackground(updatedBackground);
+    updateBackground(backgroundSource);
+    const frameId = requestAnimationFrame(() => {
+      updateBackground(backgroundSource);
+    });
+    const interactionTask = InteractionManager.runAfterInteractions(() => {
+      updateBackground(backgroundSource);
+    });
     updateHeaderHidden(false);
-    return () => updateHeaderHidden(false);
-  }, [updateBackground, updateHeaderHidden, turn]);
+    return () => {
+      cancelAnimationFrame(frameId);
+      interactionTask.cancel?.();
+      updateHeaderHidden(false);
+    };
+  }, [backgroundSource, updateBackground, updateHeaderHidden]);
 
   // Disable Android back on Intro turns (INV-equivalent: onboarding root cannot go back).
   useEffect(() => {

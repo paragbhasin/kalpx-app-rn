@@ -1137,7 +1137,7 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
           {currentType === "sankalp" && (
             <View style={styles.combinedSankalpFlow}>
               <View style={styles.mantraInfoCard}>
-                <Text style={styles.deityTitle}>
+                <Text style={styles.sankalpTitle}>
                   {info.title || "Intention"}
                 </Text>
                 {shouldShowSankalpBody && (
@@ -2346,7 +2346,7 @@ const styles = StyleSheet.create({
   combinedSankalpFlow: {
     width: "100%",
     alignItems: "center",
-    paddingTop: 50,
+    paddingTop: 30,
   },
   mantraInfoCard: {
     width: "100%",
@@ -2355,14 +2355,23 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 8,
   },
+  sankalpTitle: {
+    fontSize: 24,
+    lineHeight: 34,
+    fontFamily: Fonts.serif.bold,
+    color: BROWN,
+    textAlign: "center",
+    paddingHorizontal: 12,
+    marginTop: -12,
+    marginBottom: 10,
+  },
   sankalpMainTextInline: {
     fontSize: 16,
+    lineHeight: 24,
     fontFamily: Fonts.serif.regular,
     color: "#432104",
     textAlign: "center",
-    // lineHeight: 38,
-    // marginTop: 10,
-    // paddingHorizontal: 12,
+    paddingHorizontal: 8,
   },
   embodySection: {
     width: "100%",

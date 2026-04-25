@@ -17,6 +17,8 @@ import {
 const Tab = createBottomTabNavigator();
 import { useScreenStore } from "../../engine/useScreenBridge";
 
+const NullComponent = () => null;
+
 const BottomMenuContent = () => {
   const { t } = useTranslation();
   const navigation = useNavigation();
@@ -110,7 +112,7 @@ const BottomMenuContent = () => {
         />
         <Tab.Screen
           name="Menu"
-          component={() => null}
+          component={NullComponent}
           listeners={{
             tabPress: (e) => {
               e.preventDefault();

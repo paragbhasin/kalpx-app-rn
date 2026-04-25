@@ -251,6 +251,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   // Day 7 reflection text (BUG-4)
   const [day7ReflectionText, setDay7ReflectionText] = useState("");
   const [progressData, setProgressData] = useState<any>(null);
+  const [isSubmittingDay7, setIsSubmittingDay7] = useState(false);
 
   useEffect(() => {
     if (!showJourneyView) return;
@@ -416,6 +417,8 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   }, [ss.checkpoint_metrics]);
 
   const handleDecision = async (decision: string) => {
+    if (isSubmittingDay7) return;
+    setIsSubmittingDay7(true);
     const feelingMap: Record<string, string> = {
       continue_same: "steady",
       deepen: "strong",
@@ -502,6 +505,8 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
       }
     } catch (err: any) {
       console.warn(`[CycleReflectionBlock] day7 submit failed:`, err.message);
+    } finally {
+      setIsSubmittingDay7(false);
     }
   };
 
@@ -962,15 +967,21 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
             <TouchableOpacity
               style={styles.primaryBtn}
               onPress={() => handleDecision("continue")}
+              disabled={isSubmittingDay7}
             >
-              <Text style={styles.primaryBtnText}>
-                {d7.cta_continue_label || "Continue My Path"}
-              </Text>
+              {isSubmittingDay7 ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={styles.primaryBtnText}>
+                  {d7.cta_continue_label || "Continue My Path"}
+                </Text>
+              )}
             </TouchableOpacity>
             {decisionsAvailable.includes("lighten") && (
               <TouchableOpacity
                 style={[styles.primaryBtn, { backgroundColor: "#c8a97a" }]}
                 onPress={() => handleDecision("lighten")}
+                disabled={isSubmittingDay7}
               >
                 <Text style={styles.primaryBtnText}>
                   {d7.cta_lighten_label || "Lighten"}
@@ -981,6 +992,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
               <TouchableOpacity
                 style={styles.skipBtn}
                 onPress={() => handleDecision("reset")}
+                disabled={isSubmittingDay7}
               >
                 <Text style={styles.skipBtnText}>
                   {d7.cta_start_fresh_label || "Start Fresh"}

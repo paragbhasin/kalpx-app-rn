@@ -36,6 +36,7 @@ import store, { RootState } from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
 import ContinueJourney from "./ContinueJourney";
+import { traceRender, traceEffect } from "../../utils/loopTracer";
 // Legacy WelcomeBack screen removed 2026-04-18 — all returning users
 // (3d+, including 30+d) now flow through ContinueJourney →
 // GET /api/mitra/journey/home/ which resolves to M12 (short-gap or
@@ -68,6 +69,9 @@ const FEATURE_ITEMS = [
 export const collapseControl = { avoidCollapse: false };
 
 export default function Home() {
+  // ── LOOP TRACER ────────────────────────────────────────────────────────────
+  if (__DEV__) traceRender('Home');
+  // ── END LOOP TRACER ────────────────────────────────────────────────────────
   const navigation: any = useNavigation();
   const dispatch = useDispatch();
   const user = useSelector(
@@ -105,9 +109,11 @@ export default function Home() {
 
   useFocusEffect(
     React.useCallback(() => {
+      if (__DEV__) traceEffect('Home.focusEffect1.body', { mitraJourneyId, bg: typeof HOME_BACKGROUND });
       updateBackground(mitraJourneyId ? CONTINUE_BG : HOME_BACKGROUND);
       updateHeaderHidden(false);
       return () => {
+        if (__DEV__) traceEffect('Home.focusEffect1.cleanup', { mitraJourneyId });
         updateBackground(null);
         updateHeaderHidden(false);
       };

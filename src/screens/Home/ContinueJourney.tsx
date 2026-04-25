@@ -153,6 +153,11 @@ export default function ContinueJourney({
   userName = "friend",
   hasActiveJourney = false,
 }: ContinueJourneyProps) {
+  // ── LOOP TRACER — if this logs at all for a non-logged-in user, ContinueJourney is being mounted unexpectedly ──
+  if (__DEV__) {
+    // eslint-disable-next-line no-console
+    console.log('[TRACE ContinueJourney] MOUNTED — hasActiveJourney:', hasActiveJourney, 'userName:', userName);
+  }
   const screenBridge = useScreenStore();
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();

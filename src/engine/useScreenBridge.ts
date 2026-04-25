@@ -16,6 +16,7 @@ import {
   screenActions,
   persistState,
 } from '../store/screenSlice';
+import { traceDispatch } from '../utils/loopTracer';
 
 /** Hook that provides the same interface as the old Zustand useScreenStore */
 export function useScreenStore(selector?: (state: any) => any) {
@@ -67,7 +68,10 @@ export function useScreenStore(selector?: (state: any) => any) {
 
   const updateBackground = useCallback(
     (bg: any) => {
-      if (currentBackgroundRef.current !== bg) {
+      const old = currentBackgroundRef.current;
+      const skipped = old === bg;
+      if (__DEV__) traceDispatch('updateBackground', typeof old === 'number' ? `num:${old}` : old, typeof bg === 'number' ? `num:${bg}` : bg, skipped);
+      if (!skipped) {
         currentBackgroundRef.current = bg;
         dispatch(screenActions.setBackground(bg));
       }
@@ -82,7 +86,10 @@ export function useScreenStore(selector?: (state: any) => any) {
 
   const updateHeaderHidden = useCallback(
     (hidden: boolean) => {
-      if (headerHiddenRef.current !== hidden) {
+      const old = headerHiddenRef.current;
+      const skipped = old === hidden;
+      if (__DEV__) traceDispatch('updateHeaderHidden', old, hidden, skipped);
+      if (!skipped) {
         headerHiddenRef.current = hidden;
         dispatch(screenActions.setHeaderHidden(hidden));
       }

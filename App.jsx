@@ -28,6 +28,7 @@ if (__DEV__) {
   ]);
 }
 import { useScreenStore } from "./src/engine/useScreenBridge";
+import { traceRender, traceDispatch } from "./src/utils/loopTracer";
 import "react-native-get-random-values";
 import { MenuProvider } from "react-native-popup-menu";
 import { Provider, useDispatch, useSelector } from "react-redux";
@@ -91,6 +92,22 @@ function SnackBarContainer() {
 function AppInner({ initialRoute, navigationRef }) {
   const currentBackground = useScreenStore((state) => state.currentBackground);
   const dispatch = useDispatch();
+
+  // ── LOOP TRACER ──────────────────────────────────────────────────────────
+  const _prevBg = useRef(undefined);
+  if (__DEV__) {
+    traceRender('AppInner', { bg: typeof currentBackground === 'number' ? `num:${currentBackground}` : currentBackground });
+    if (_prevBg.current !== currentBackground) {
+      // eslint-disable-next-line no-console
+      console.log(
+        '[TRACE AppInner] currentBackground CHANGED',
+        `old=${JSON.stringify(_prevBg.current)} new=${JSON.stringify(typeof currentBackground === 'number' ? `num:${currentBackground}` : currentBackground)}`,
+        '→ Routes will UNMOUNT+REMOUNT if branch flips (null↔truthy)',
+      );
+      _prevBg.current = currentBackground;
+    }
+  }
+  // ── END LOOP TRACER ───────────────────────────────────────────────────────
 
   // Hydrate the login user from AsyncStorage on app boot.
   // The login flow already persists access_token + refresh_token + user_id to

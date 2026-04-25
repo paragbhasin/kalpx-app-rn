@@ -1,10 +1,14 @@
 import React, { createContext, useCallback, useContext, useRef, useState } from 'react';
 import { Animated, Platform, Dimensions } from 'react-native';
 import FontSize from '../components/FontSize';
+import { traceRender, traceDispatch } from '../utils/loopTracer';
 
 const ScrollContext = createContext<any>(null);
 
 export const ScrollProvider = ({ children }: any) => {
+    // ── LOOP TRACER ─────────────────────────────────────────────────────────
+    if (__DEV__) traceRender('ScrollProvider');
+    // ── END LOOP TRACER ─────────────────────────────────────────────────────
     const [lastOffset, setLastOffset] = useState(0);
     const [isVisible, setIsVisible] = useState(true);
     const scrollAnim = useRef(new Animated.Value(0)).current; // 0 = visible, 1 = hidden
@@ -12,7 +16,9 @@ export const ScrollProvider = ({ children }: any) => {
     const isHeaderVisible = useRef(true);
 
     const toggleVisibility = useCallback((visible: boolean) => {
-        if (isHeaderVisible.current === visible) return;
+        const skipped = isHeaderVisible.current === visible;
+        if (__DEV__) traceDispatch('toggleVisibility', isHeaderVisible.current, visible, skipped);
+        if (skipped) return;
         isHeaderVisible.current = visible;
         setIsVisible(visible);
 

@@ -1,4 +1,5 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import { loopTracerMiddleware } from "../utils/loopTracer";
 import {
   cancelBookingReducer,
   classesBookingsReducer,
@@ -100,7 +101,7 @@ export const store = configureStore({
     getDefaultMiddleware({
       thunk: true, // ✅ RTK includes redux-thunk by default
       serializableCheck: false, // ✅ disable serializable warnings
-    }),
+    }).concat(loopTracerMiddleware),
 });
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

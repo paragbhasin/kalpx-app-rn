@@ -18,6 +18,7 @@ const Tab = createBottomTabNavigator();
 import { useScreenStore } from "../../engine/useScreenBridge";
 
 const NullComponent = () => null;
+const TabBarButton = (props) => <TouchableOpacity {...props} activeOpacity={0.7} />;
 
 const BottomMenuContent = () => {
   const { t } = useTranslation();
@@ -49,9 +50,7 @@ const BottomMenuContent = () => {
             fontSize: 12,
             // marginBottom: 5,
           },
-          tabBarButton: (props) => (
-            <TouchableOpacity {...props} activeOpacity={0.7} />
-          ),
+          tabBarButton: TabBarButton,
         }}
       >
         <Tab.Screen

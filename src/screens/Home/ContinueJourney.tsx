@@ -168,9 +168,18 @@ export default function ContinueJourney({
   const routedRef = useRef(false);
 
   // ── Active-user path: buildActionContext ─────────────────────────
+  // Use a ref so buildActionContext reads the latest screenBridge values at
+  // call time without including them in useCallback deps. If screenData or
+  // currentScreen were in the deps, buildActionContext would change on every
+  // dispatch, making the mount effect re-run after every API response → loop.
+  const screenBridgeRef = useRef(screenBridge);
+  useEffect(() => {
+    screenBridgeRef.current = screenBridge;
+  });
+
   const buildActionContext = useCallback(() => {
     return {
-      screenState: screenBridge.screenData || {},
+      screenState: screenBridgeRef.current.screenData || {},
       setScreenValue: (value: any, key: string) => {
         dispatch(screenActions.setScreenValue({ key, value }));
       },
@@ -189,14 +198,9 @@ export default function ContinueJourney({
       goBack: () => {
         dispatch(goBackWithData() as any);
       },
-      currentScreen: screenBridge.currentScreen,
+      currentScreen: screenBridgeRef.current.currentScreen,
     };
-  }, [
-    screenBridge.screenData,
-    screenBridge.currentScreen,
-    dispatch,
-    navigation,
-  ]);
+  }, [dispatch, navigation]);
 
   // ── Active-user path: fetchHome ──────────────────────────────────
   const fetchHome = useCallback(async (forceRefresh = false) => {

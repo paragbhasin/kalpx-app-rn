@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useRef, useState } from 'react';
+import React, { createContext, useCallback, useContext, useRef, useState } from 'react';
 import { Animated, Platform, Dimensions } from 'react-native';
 import FontSize from '../components/FontSize';
 
@@ -11,7 +11,7 @@ export const ScrollProvider = ({ children }: any) => {
     const scrollY = useRef(new Animated.Value(0)).current;   // raw scroll offset
     const isHeaderVisible = useRef(true);
 
-    const toggleVisibility = (visible: boolean) => {
+    const toggleVisibility = useCallback((visible: boolean) => {
         if (isHeaderVisible.current === visible) return;
         isHeaderVisible.current = visible;
         setIsVisible(visible);
@@ -21,7 +21,7 @@ export const ScrollProvider = ({ children }: any) => {
             duration: 300,
             useNativeDriver: true,
         }).start();
-    };
+    }, [scrollAnim]);
 
     const handleScroll = (event: any) => {
         const currentOffset = event.nativeEvent.contentOffset.y;

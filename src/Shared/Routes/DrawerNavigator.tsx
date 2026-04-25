@@ -22,15 +22,11 @@ import TextComponent from "../../components/TextComponent";
 import store, { RootState } from "../../store";
 import { screenActions } from "../../store/screenSlice";
 import BottomMenu from "./BottomMenu";
-import { traceRender, traceEffect } from "../../utils/loopTracer";
 
 const Drawer = createDrawerNavigator();
 const { width } = Dimensions.get("window");
 
 export default function AppDrawerNavigator() {
-  // ── LOOP TRACER ───────────────────────────────────────────────────────────
-  if (__DEV__) traceRender('AppDrawerNavigator');
-  // ── END LOOP TRACER ───────────────────────────────────────────────────────
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "transparent" }}>
       <Drawer.Navigator
@@ -67,19 +63,13 @@ const CustomDrawerContent = (props) => {
   const [isLoggedIn, setIsLoggedIn] = React.useState(!!user);
   // Old tracker API removed — Mitra engine uses journey/status API instead
 
-  // ── LOOP TRACER ─────────────────────────────────────────────────────────
-  if (__DEV__) traceRender('CustomDrawerContent', { isLoggedIn });
-  // ── END LOOP TRACER ─────────────────────────────────────────────────────
-
   React.useEffect(() => {
-    if (__DEV__) traceEffect('Drawer.syncUser', { user: !!user });
     setIsLoggedIn(!!user);
   }, [user]);
 
   React.useEffect(() => {
     const checkLogin = async () => {
       const token = await AsyncStorage.getItem("access_token");
-      if (__DEV__) traceEffect('Drawer.checkLogin', { hasToken: !!token, isLoggedIn });
       if (token && !isLoggedIn) {
         setIsLoggedIn(true);
       }

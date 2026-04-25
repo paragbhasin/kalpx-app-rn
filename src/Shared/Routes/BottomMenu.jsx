@@ -8,7 +8,6 @@ import Icon from "react-native-vector-icons/Ionicons";
 import FontSize from "../../components/FontSize";
 import GlobalScrollLayout from "../../components/GlobalScrollLayout";
 import { ScrollProvider, useScrollContext } from "../../context/ScrollContext";
-import { traceRender } from "../../utils/loopTracer";
 import {
   HomeStackNavigator,
   NotificationStackNavigator,
@@ -26,9 +25,6 @@ const BottomMenuContent = () => {
   const navigation = useNavigation();
   const { isVisible } = useScrollContext();
   const currentBackground = useScreenStore((state) => state.currentBackground);
-  // ── LOOP TRACER ─────────────────────────────────────────────────────────
-  if (__DEV__) traceRender('BottomMenuContent', { isVisible, hasBg: !!currentBackground });
-  // ── END LOOP TRACER ─────────────────────────────────────────────────────
 
   return (
     <GlobalScrollLayout>

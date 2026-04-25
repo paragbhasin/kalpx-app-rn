@@ -1,6 +1,5 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import React from "react";
-import { traceRender } from "../../utils/loopTracer";
 import ScreenRenderer from "../../engine/ScreenRenderer";
 import MitraPhilosophy from "../../screens/MitraPhilosophy/MitraPhilosophy";
 import ClassBookingScreen from "../../screens/Classes/ClassBookingScreen";
@@ -38,9 +37,6 @@ import AppDrawerNavigator from "./DrawerNavigator";
 const Stack: any = createNativeStackNavigator();
 
 const Routes = ({ initialRouteName = "AppDrawer" }) => {
-  // ── LOOP TRACER ───────────────────────────────────────────────────────────
-  if (__DEV__) traceRender('Routes', { initialRouteName });
-  // ── END LOOP TRACER ───────────────────────────────────────────────────────
   return (
     <Stack.Navigator 
       initialRouteName={initialRouteName} 

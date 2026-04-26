@@ -33,6 +33,7 @@ import Language from "../screens/Profile/Language";
 import Privacy from "../screens/Profile/Privacy";
 import Profile from "../screens/Profile/Profile";
 import ProfileDetails from "../screens/Profile/ProfileDetails";
+import RoomMemoryScreen from "../screens/Room/RoomMemoryScreen";
 import Sankalp from "../screens/Sankalp";
 import SocialExplore from "../screens/Social/SocialExplore";
 import CommunityLanding from "../screens/Social/CommunityLanding";
@@ -296,6 +297,11 @@ export const ProfileStackNavigator = () => (
     <Stack.Screen
       name="Privacy"
       component={Privacy}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="RoomMemoryScreen"
+      component={RoomMemoryScreen}
       options={{ headerShown: false }}
     />
   </Stack.Navigator>

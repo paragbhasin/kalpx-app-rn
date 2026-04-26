@@ -252,6 +252,7 @@
     "menu": {
       "login": "Login",
       "myProfile": "My Profile",
+      "savedReflections": "Saved reflections",
       "setReminders": "Set Reminders",
       "myPractices": "My Practices",
       "notifications": "Notifications",

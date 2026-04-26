@@ -81,6 +81,7 @@ const Profile = () => {
 
   const loggedInItems = [
     { key: "myProfile", icon: "person-outline", route: "ProfileDetails" },
+    { key: "savedReflections", icon: "bookmark-outline", route: "RoomMemoryScreen" },
     { key: "language", icon: "globe-outline", route: "Language" },
     { key: "privacy", icon: "key-outline", route: "Privacy" },
     {

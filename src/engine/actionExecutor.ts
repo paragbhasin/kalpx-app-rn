@@ -457,9 +457,11 @@ export async function executeAction(
 
   // ── Duplicate-submission guard ──
   if (GUARDED_ACTIONS.has(type) && _actionInFlight) {
-    console.log(
-      `[GUARD] Action "${type}" blocked — previous action still in flight`,
-    );
+    if (__DEV__) {
+      console.log(
+        `[GUARD] Action "${type}" blocked — previous action still in flight`,
+      );
+    }
     return;
   }
   if (GUARDED_ACTIONS.has(type)) {
@@ -471,7 +473,7 @@ export async function executeAction(
     // Log action for journey tracking
     _logJourneyAction(action, context);
 
-    console.log(`[ACTION] Executing: ${type}`, action);
+    if (__DEV__) console.log(`[ACTION] Executing: ${type}`, action);
 
     switch (type) {
       // ================================================================
@@ -492,7 +494,7 @@ export async function executeAction(
       // generate_companion happens on ContinueJourney mount — not on
       // chip tap — so these handlers stay fast and synchronous.
       case "continue_practice": {
-        console.log("[actionExecutor] continue_practice: entering");
+        if (__DEV__) console.log("[actionExecutor] continue_practice: entering");
         const target = {
           container_id:
             (process as any).env?.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
@@ -500,14 +502,14 @@ export async function executeAction(
               : "companion_dashboard",
           state_id: "day_active",
         };
-        console.log(
+        if (__DEV__) console.log(
           "[actionExecutor] continue_practice: loadScreen ->",
           target,
           "typeof loadScreen:",
           typeof loadScreen,
         );
         loadScreen(target);
-        console.log(
+        if (__DEV__) console.log(
           "[actionExecutor] continue_practice: rootNavigate DynamicEngine",
         );
         rootNavigate("DynamicEngine");
@@ -515,7 +517,7 @@ export async function executeAction(
         break;
       }
       case "start_checkin": {
-        console.log("[actionExecutor] start_checkin: entering");
+        if (__DEV__) console.log("[actionExecutor] start_checkin: entering");
         loadScreen({
           container_id: "cycle_transitions",
           state_id: "quick_checkin",
@@ -525,7 +527,7 @@ export async function executeAction(
         break;
       }
       case "start_support": {
-        console.log("[actionExecutor] start_support: entering");
+        if (__DEV__) console.log("[actionExecutor] start_support: entering");
         // "I need some support today" — same entry as dashboard
         // "I Feel Triggered" button. Previously we re-dispatched
         // initiate_trigger via a nested executeAction call, but that

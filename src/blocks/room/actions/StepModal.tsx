@@ -419,8 +419,8 @@ const TimerBody: React.FC<TimerBodyProps> = ({ kind, stepPayload, onDone }) => {
       {kind === "timer_breathe" && (
         <BreathingOrb
           running={running}
-          inhaleMs={(stepPayload?.step_config?.inhale ?? 0) * 1000}
-          exhaleMs={(stepPayload?.step_config?.exhale ?? 0) * 1000}
+          inhaleMs={Number(stepPayload?.step_config?.inhale ?? 0) * 1000}
+          exhaleMs={Number(stepPayload?.step_config?.exhale ?? 0) * 1000}
         />
       )}
       {kind === "timer_walk" && (

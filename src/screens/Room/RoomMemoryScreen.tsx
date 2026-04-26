@@ -49,7 +49,7 @@ const ROOM_BADGE_COLOR: Record<string, string> = {
 
 const EVENT_LABELS: Record<string, string> = {
   joy_named:            "What felt good",
-  joy_carry:            "Carried joy",
+  joy_carry:            "Held joy",
   connection_named:     "Named connection",
   connection_reach_out: "Message drafted",
   growth_journal:       "Growth note",

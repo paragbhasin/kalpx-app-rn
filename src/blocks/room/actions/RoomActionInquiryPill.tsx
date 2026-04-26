@@ -155,10 +155,12 @@ const RoomActionInquiryPill: React.FC<Props> = ({
   const onPress = () => {
     const ip = action.inquiry_payload;
     if (!ip || !Array.isArray(ip.categories) || ip.categories.length === 0) {
-      console.warn(
-        "[RoomActionInquiryPill] missing inquiry_payload.categories",
-        action.action_id,
-      );
+      if (__DEV__) {
+        console.warn(
+          "[RoomActionInquiryPill] missing inquiry_payload.categories",
+          action.action_id,
+        );
+      }
       return;
     }
 

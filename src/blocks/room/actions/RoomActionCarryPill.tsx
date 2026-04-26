@@ -34,7 +34,6 @@ const INPUT_TEMPLATE: Record<string, string> = {
   connection_named:     "step_text_input_connection_named",
   joy_named:            "step_text_input_joy_named",
   release_named:        "step_text_input_release_named",
-  // Pre-wired — PARKED (never emitted by BE seed); activate in Batch 2:
   stillness_named:      "step_text_input_stillness_named",
   clarity_journal:      "step_text_input_clarity_journal",
 };
@@ -252,7 +251,6 @@ const CARRY_MEMORY_MODAL: Record<string, NonNullable<StepPayload["memory_modal"]
     confirmation:      "Saved. You set it down.",
     add_another_label: "Name another",
   },
-  // PARKED — pre-wired, not currently emitted by BE:
   stillness_named: {
     title:             "Write what became still",
     sanatan_context:   "Stillness begins when attention returns to one steady anchor.",

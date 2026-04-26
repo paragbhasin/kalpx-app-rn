@@ -4491,9 +4491,9 @@ export async function executeAction(
           setScreenValue(false, "context_skipped");
 
           // Per-room picker contract (live pool– and API-verified 2026-04-21).
-          // Each context list is derived from RoomContentPool rotation_refs
-          // that have matching life_context_bias AND produce visibly different
-          // API output (principle_banner or teaching chip changes on selection).
+          // "Honest picker" rule: context list must produce visibly different
+          // API output. Differentiation can come from pool bias (chip items change)
+          // OR from why_this_room_* copy (header line changes). Either is sufficient.
           //
           // room_clarity — all 7 incl. self: principle pool (33 self-refs),
           //   wisdom_teaching pool (5 self-refs) — live-verified different items
@@ -4507,7 +4507,10 @@ export async function executeAction(
           // room_release — 5 contexts: wisdom_banner pool (10 biased items) incl.
           //   self (7 refs). work_career live-verified → ayur_pause_before_decision.
           //   No purpose_direction/daily_life bias in pool.
-          // room_joy, room_stillness — universal by design, no picker.
+          // room_stillness — 6 contexts: pool chips are universal (no bias tags) but
+          //   why_this_room_* copy differentiates meaningfully per context. daily_life
+          //   excluded — slot in schema but copy not authored.
+          // room_joy — universal by design, no picker.
           const ROOM_PICKER_CONFIG: Record<string, string[]> = {
             room_clarity: [
               "work_career",
@@ -4534,9 +4537,24 @@ export async function executeAction(
               "health_energy",
               "money_security",
             ],
+            room_stillness: [
+              "work_career",
+              "relationships",
+              "self",
+              "health_energy",
+              "money_security",
+              "purpose_direction",
+            ],
           };
           const allowedContexts = ROOM_PICKER_CONFIG[roomId] ?? null;
           setScreenValue(allowedContexts, "life_context_allowed");
+          // For rooms without a picker (currently room_joy), clear any stale
+          // life_context that may have been set by a previous room session.
+          // Without this, entering joy after clarity would inherit the prior
+          // context and send it to the render API, producing false "You chose: X".
+          if (!allowedContexts) {
+            setScreenValue(null, "life_context");
+          }
           // Stamp "room" explicitly so open_why_this_l2 routes to room/why_this_l2.
           // The handler reads _overlay_parent_container from screenData (not the
           // screen store's currentContainerId field), so the value must be set —

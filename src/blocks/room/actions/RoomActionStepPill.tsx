@@ -19,6 +19,7 @@
 import React, { useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
+import api from "../../../Networks/axios";
 import { executeAction } from "../../../engine/actionExecutor";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 import type { ActionEnvelope, RoomRenderV1 } from "../types";
@@ -39,7 +40,7 @@ const RoomActionStepPill: React.FC<Props> = ({
   kindLabel,
   isPrimary = false,
 }) => {
-  const { loadScreen, goBack } = useScreenStore();
+  const { loadScreen, goBack, screenData } = useScreenStore();
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
   const templateId = action.step_payload?.template_id ?? "unknown";
@@ -88,9 +89,39 @@ const RoomActionStepPill: React.FC<Props> = ({
     }
   };
 
+  const fireSacredPost = (writesEvent: string, text: string) => {
+    const roomId = envelope?.room_id ?? null;
+    if (!roomId) return;
+    api
+      .post(`mitra/rooms/${roomId}/sacred/`, {
+        writes_event: writesEvent,
+        label: action.label,
+        action_id: action.action_id,
+        analytics_key: action.analytics_key,
+        captured_at: Date.now(),
+        text,
+        life_context: envelope?.life_context ?? null,
+        journey_id: (screenData as any)?.journey_id ?? null,
+        day_number: (screenData as any)?.day_number ?? null,
+        source_surface: "step_pill",
+      })
+      .catch((err: any) => {
+        if (__DEV__) {
+          console.warn(
+            "[RoomActionStepPill] sacred POST failed (non-blocking):",
+            err?.response?.status || err?.message,
+          );
+        }
+      });
+  };
+
   const handleDone = (extra: StepModalResult) => {
     setModalVisible(false);
     dispatchCompletion(extra);
+    const writesEvent = action.persistence?.writes_event ?? null;
+    if (extra.text && extra.text.trim().length > 0 && writesEvent) {
+      fireSacredPost(writesEvent, extra.text.trim());
+    }
   };
 
   const handleCancel = () => {

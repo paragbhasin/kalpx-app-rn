@@ -161,7 +161,7 @@ const RoomActionCarryPill: React.FC<Props> = ({
   kindLabel,
   isPrimary = false,
 }) => {
-  const { loadScreen, goBack } = useScreenStore();
+  const { loadScreen, goBack, screenData } = useScreenStore();
   const { showToast } = useToast();
   const [modalVisible, setModalVisible] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
@@ -204,6 +204,10 @@ const RoomActionCarryPill: React.FC<Props> = ({
             ...(extra?.text ? { text: extra.text } : {}),
             ...(extra?.contact_hint ? { contact_hint: extra.contact_hint } : {}),
             ...(extra?.message ? { message: extra.message } : {}),
+            life_context: envelope?.life_context ?? null,
+            journey_id: (screenData as any)?.journey_id ?? null,
+            day_number: (screenData as any)?.day_number ?? null,
+            source_surface: "carry_pill",
           });
           const status = res?.status ?? 0;
           sacredWriteOk = status >= 200 && status < 300;

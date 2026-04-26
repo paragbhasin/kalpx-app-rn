@@ -304,6 +304,7 @@ export interface ActionEnvelope {
     persists_across_sessions: boolean;
   };
   primary_recommendation?: boolean;
+  helper_line?: string | null;
 }
 
 // ───────────────────────────────────────────────────────────────────────────

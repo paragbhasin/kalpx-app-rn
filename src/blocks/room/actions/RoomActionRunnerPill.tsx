@@ -127,6 +127,11 @@ const RoomActionRunnerPill: React.FC<Props> = ({
           {displaySubtitle ? (
             <Text style={styles.displaySubtitle}>{displaySubtitle}</Text>
           ) : null}
+          {action.helper_line && !displaySubtitle ? (
+            <Text style={styles.helperLine} numberOfLines={1} ellipsizeMode="tail">
+              {action.helper_line}
+            </Text>
+          ) : null}
           {whyForYou ? <Text style={styles.whyForYou}>{whyForYou}</Text> : null}
         </View>
       </View>
@@ -183,6 +188,12 @@ const styles = StyleSheet.create({
     color: "#b0b0b0",
     textAlign: "center",
     marginTop: 2,
+  },
+  helperLine: {
+    fontSize: 13,
+    color: "#8F8378",
+    textAlign: "center",
+    marginTop: 4,
   },
   whyForYou: {
     fontSize: 11,

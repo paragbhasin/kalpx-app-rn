@@ -484,6 +484,11 @@ const RoomActionCarryPill: React.FC<Props> = ({
           <View>
             {kindLabel ? <Text style={styles.kindLabel}>{kindLabel}</Text> : null}
             <Text style={styles.label}>{action.label}</Text>
+            {action.helper_line ? (
+              <Text style={styles.helperLine} numberOfLines={1} ellipsizeMode="tail">
+                {action.helper_line}
+              </Text>
+            ) : null}
           </View>
         </TouchableOpacity>
       )}
@@ -543,6 +548,12 @@ const styles = StyleSheet.create({
     color: "#432104",
     alignSelf: "center",
     textAlign: "center",
+  },
+  helperLine: {
+    fontSize: 13,
+    color: "#8F8378",
+    textAlign: "center",
+    marginTop: 4,
   },
   confirmedText: {
     fontSize: 14,

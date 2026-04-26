@@ -176,7 +176,7 @@ export interface TeachingPayload {
   principle_id: string;
   principle_name: string;
   body: string;
-  sources: string[];
+  sources: Array<{ text: string; citation: string }>;
 }
 
 export interface InquiryCategory {

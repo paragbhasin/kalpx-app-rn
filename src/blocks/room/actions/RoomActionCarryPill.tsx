@@ -73,6 +73,134 @@ const CONFIRMED_ADD_LABEL: Record<string, string> = {
   release_named:        "Name another",
 };
 
+// Life-context-specific modal copy keyed [writes_event][life_context].
+// getCarryModal() falls back to CARRY_MEMORY_MODAL when no context match exists.
+const CARRY_MODAL_BY_CONTEXT: Record<string, Record<string, NonNullable<StepPayload["memory_modal"]>>> = {
+  clarity_journal: {
+    money_security: {
+      title:             "Write the money question clearly",
+      sanatan_context:   "Naming the question is itself the first act of clarity.",
+      why_we_ask:        "Money confusion often comes from too many questions tangled together. Writing one separates it from the rest.",
+      prompt:            "What is the actual money question you are holding?",
+      placeholder:       "Write one clear question…",
+      primary_label:     "Save this question",
+      confirmation:      "Saved. You can write another.",
+      add_another_label: "Write another",
+    },
+    work_career: {
+      title:             "Write what your work is actually asking",
+      sanatan_context:   "When action and dharma align, clarity follows. First, see what is actually being asked.",
+      why_we_ask:        "Work often has one real question underneath the noise. Writing it down reveals what actually needs answering.",
+      prompt:            "What is your work actually asking of you right now?",
+      placeholder:       "Write the real question…",
+      primary_label:     "Save this",
+      confirmation:      "Saved. You can write another.",
+      add_another_label: "Write another",
+    },
+  },
+  connection_named: {
+    relationships: {
+      title:             "Name the person you want to return to",
+      sanatan_context:   "Sambandha says a bond held in memory is a bond that continues to care.",
+      why_we_ask:        "When a relationship feels far or strained, naming the person keeps the thread alive.",
+      prompt:            "Who is the person you want to stay close to?",
+      placeholder:       "Write a name or a few words…",
+      primary_label:     "Save this connection",
+      confirmation:      "Saved. You can name another.",
+      add_another_label: "Name another",
+    },
+    health_energy: {
+      title:             "Name someone who is close to you now",
+      sanatan_context:   "Caring company is itself a form of medicine. Even naming who is close changes something.",
+      why_we_ask:        "When the body is struggling, naming who is close to you brings real comfort.",
+      prompt:            "Who is with you in this, even from a distance?",
+      placeholder:       "Write a name or a few words…",
+      primary_label:     "Save this connection",
+      confirmation:      "Saved. You can name another.",
+      add_another_label: "Name another",
+    },
+  },
+  growth_journal: {
+    work_career: {
+      title:             "Write the next work step",
+      sanatan_context:   "Action done with attention, not speed, is what ripens into real growth.",
+      why_we_ask:        "At work, the next right step is often smaller than we think. Writing it makes it real.",
+      prompt:            "What is the one next step your work is asking for?",
+      placeholder:       "Write one clear step…",
+      primary_label:     "Save this step",
+      confirmation:      "Saved. You can write another.",
+      add_another_label: "Write another",
+    },
+    purpose_direction: {
+      title:             "Write what is yours to do next",
+      sanatan_context:   "Dharma is not a life plan — it is the next right action, done faithfully.",
+      why_we_ask:        "When the path is unclear, writing what feels yours to do next is the act of listening.",
+      prompt:            "What feels like yours to do, even if the whole path is not yet clear?",
+      placeholder:       "Write what comes…",
+      primary_label:     "Save this",
+      confirmation:      "Saved. You can write another.",
+      add_another_label: "Write another",
+    },
+  },
+  release_named: {
+    money_security: {
+      title:             "Name what you are setting down for now",
+      sanatan_context:   "The weight grows heavier only when we forget we can set it down.",
+      why_we_ask:        "Money worry often locks in the body. Naming what you are setting down, even for a moment, loosens the grip.",
+      prompt:            "What money worry is ready to be set down for now?",
+      placeholder:       "Write one word or a few lines…",
+      primary_label:     "Save this release",
+      confirmation:      "Saved. You set it down.",
+      add_another_label: "Name another",
+    },
+    relationships: {
+      title:             "Name what you are releasing in this relationship",
+      sanatan_context:   "Letting go of what we expect from others is itself a form of love.",
+      why_we_ask:        "In a relationship, naming what you are releasing helps you separate from what you cannot control.",
+      prompt:            "What are you ready to release in this relationship for now?",
+      placeholder:       "Write one word or a few lines…",
+      primary_label:     "Save this release",
+      confirmation:      "Saved. You set it down.",
+      add_another_label: "Name another",
+    },
+  },
+  joy_named: {
+    health_energy: {
+      title:             "Write one good thing from today's body",
+      sanatan_context:   "The body is a gift. Gratitude for it, even small, returns something.",
+      why_we_ask:        "When the body feels difficult, finding one good thing in it is a gentle act of care.",
+      prompt:            "What is one thing your body is doing well or feeling right now?",
+      placeholder:       "Write one good thing…",
+      primary_label:     "Save this joy",
+      confirmation:      "Saved. You can write another.",
+      add_another_label: "Write another",
+    },
+  },
+  stillness_named: {
+    money_security: {
+      title:             "Write what became quiet beneath the worry",
+      sanatan_context:   "What is underneath the noise has always been quiet. It is still there.",
+      why_we_ask:        "Money pressure is loud. Writing what stayed quiet beneath it helps you locate your steadiness.",
+      prompt:            "Beneath the money worry, what feels quiet or steady, even a little?",
+      placeholder:       "Write one word or a few lines…",
+      primary_label:     "Save this stillness",
+      confirmation:      "Saved.",
+      add_another_label: "Write another",
+    },
+  },
+};
+
+function getCarryModal(
+  writesEvent: string,
+  lifeContext: string | null | undefined,
+): NonNullable<StepPayload["memory_modal"]> | undefined {
+  if (lifeContext) {
+    const ctx = CARRY_MODAL_BY_CONTEXT[writesEvent]?.[lifeContext];
+    if (ctx) return ctx;
+  }
+  return CARRY_MEMORY_MODAL[writesEvent];
+}
+
 const CARRY_MEMORY_MODAL: Record<string, NonNullable<StepPayload["memory_modal"]>> = {
   connection_named: {
     title:             "Name someone who matters",
@@ -174,6 +302,7 @@ const RoomActionCarryPill: React.FC<Props> = ({
     "joy_carry";
   const roomId = envelope?.room_id ?? null;
   const needsInput = writesEvent in INPUT_TEMPLATE;
+  const activeModal = getCarryModal(writesEvent, envelope?.life_context);
 
   // Stub action: no real audio capture yet. Hide pill until recorder is wired.
   if (writesEvent === "release_voice_note") return null;
@@ -308,7 +437,7 @@ const RoomActionCarryPill: React.FC<Props> = ({
         <View style={[styles.pill, isPrimary ? styles.pillPrimary : null]}>
           {kindLabel ? <Text style={styles.kindLabel}>{kindLabel}</Text> : null}
           <Text style={styles.confirmedText}>
-            {CARRY_MEMORY_MODAL[writesEvent]?.confirmation
+            {activeModal?.confirmation
               ?? CARRY_CONFIRM_COPY[writesEvent]
               ?? CARRY_TOAST_FALLBACK}
           </Text>
@@ -318,13 +447,13 @@ const RoomActionCarryPill: React.FC<Props> = ({
               onPress={() => setConfirmed(false)}
               accessibilityRole="button"
               accessibilityLabel={
-                CARRY_MEMORY_MODAL[writesEvent]?.add_another_label
+                activeModal?.add_another_label
                   ?? CONFIRMED_ADD_LABEL[writesEvent]
                   ?? "Add another"
               }
             >
               <Text style={styles.confirmedBtnLabel}>
-                {CARRY_MEMORY_MODAL[writesEvent]?.add_another_label
+                {activeModal?.add_another_label
                   ?? CONFIRMED_ADD_LABEL[writesEvent]
                   ?? "Add another"}
               </Text>
@@ -358,12 +487,12 @@ const RoomActionCarryPill: React.FC<Props> = ({
       {needsInput && (
         <StepModal
           visible={modalVisible}
-          label={CARRY_MEMORY_MODAL[writesEvent]?.title ?? action.label}
+          label={activeModal?.title ?? action.label}
           stepPayload={{
             template_id: INPUT_TEMPLATE[writesEvent]!,
             step_config: {},
             input_slots: [],
-            memory_modal: CARRY_MEMORY_MODAL[writesEvent] ?? null,
+            memory_modal: activeModal ?? null,
           }}
           onCancel={() => {
             setModalVisible(false);

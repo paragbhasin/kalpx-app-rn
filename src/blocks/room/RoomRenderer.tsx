@@ -50,6 +50,9 @@ const RoomRenderer: React.FC<RoomRendererProps> = ({
         {roomDisplayName ? (
           <Text style={styles.roomName}>{roomDisplayName}</Text>
         ) : null}
+        {ctx?.room_purpose_line ? (
+          <Text style={styles.roomPurpose}>{ctx.room_purpose_line}</Text>
+        ) : null}
         {lifeContextLabel ? (
           <Text style={styles.lifeContext}>
             {"You chose: " + lifeContextLabel}
@@ -78,6 +81,9 @@ const RoomRenderer: React.FC<RoomRendererProps> = ({
       <RoomOpeningExperience envelope={envelope} />
       {envelope.principle_banner ? (
         <RoomPrincipleBanner banner={envelope.principle_banner} />
+      ) : null}
+      {ctx?.bridge_line ? (
+        <Text style={styles.bridgeLine}>{ctx.bridge_line}</Text>
       ) : null}
       <RoomActionList envelope={envelope} />
     </View>
@@ -135,6 +141,25 @@ const styles = StyleSheet.create({
     lineHeight: 17,
     textAlign: "center",
     marginBottom: 10,
+  },
+  roomPurpose: {
+    fontSize: 13,
+    color: "#8A7968",
+    textAlign: "center",
+    marginTop: 4,
+    marginBottom: 2,
+    lineHeight: 18,
+    paddingHorizontal: 16,
+  },
+  bridgeLine: {
+    fontSize: 13,
+    color: "#8A7968",
+    fontStyle: "italic",
+    textAlign: "center",
+    marginTop: 8,
+    marginBottom: 4,
+    lineHeight: 19,
+    paddingHorizontal: 28,
   },
   lotusDivider: {
     flexDirection: "row",

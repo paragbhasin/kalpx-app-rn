@@ -395,6 +395,8 @@ export interface RoomContext {
   room_purpose_line?: string | null;
   sanatan_insight_line?: string | null;
   why_this_room_line?: string | null;
+  /** Batch 4C: gentle connective line between wisdom banner and action list. */
+  bridge_line?: string | null;
 }
 
 export interface RoomRenderV1 {

@@ -21,6 +21,7 @@
 import React, { useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
+import api from "../../../Networks/axios";
 import { executeAction } from "../../../engine/actionExecutor";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 import type { ActionEnvelope, InquiryCategory, RoomRenderV1, StepPayload } from "../types";
@@ -42,12 +43,38 @@ const RoomActionInquiryPill: React.FC<Props> = ({
   kindLabel,
   isPrimary = false,
 }) => {
-  const { loadScreen, goBack } = useScreenStore();
+  const { loadScreen, goBack, screenData } = useScreenStore();
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [stepModalVisible, setStepModalVisible] = useState<boolean>(false);
   const [stepModalPayload, setStepModalPayload] = useState<StepPayload | null>(null);
   const [stepModalLabel, setStepModalLabel] = useState<string>("");
   const [pendingCategory, setPendingCategory] = useState<InquiryCategory | null>(null);
+
+  const fireSacredPost = (writesEvent: string, text: string) => {
+    const roomId = envelope?.room_id ?? null;
+    if (!roomId) return;
+    api
+      .post(`mitra/rooms/${roomId}/sacred/`, {
+        writes_event: writesEvent,
+        label: action.label,
+        action_id: action.action_id,
+        analytics_key: action.analytics_key,
+        captured_at: Date.now(),
+        text,
+        life_context: envelope?.life_context ?? null,
+        journey_id: (screenData as any)?.journey_id ?? null,
+        day_number: (screenData as any)?.day_number ?? null,
+        source_surface: "inquiry",
+      })
+      .catch((err: any) => {
+        if (__DEV__) {
+          console.warn(
+            "[RoomActionInquiryPill] sacred POST failed (non-blocking):",
+            err?.response?.status || err?.message,
+          );
+        }
+      });
+  };
 
   const dispatchOpened = () => {
     const ctx = buildActionCtx({ loadScreen, goBack });
@@ -174,6 +201,10 @@ const RoomActionInquiryPill: React.FC<Props> = ({
   const handleSubmitJournal = (category: InquiryCategory, text: string) => {
     setModalVisible(false);
     dispatchStepFromInquiry(category, "step_journal_inquiry", { text });
+    const writesEvent = action.persistence?.writes_event ?? null;
+    if (text.trim().length > 0 && writesEvent) {
+      fireSacredPost(writesEvent, text.trim());
+    }
   };
 
   const handleStepDone = (extra: StepModalResult) => {

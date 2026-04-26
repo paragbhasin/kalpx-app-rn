@@ -82,6 +82,15 @@ const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
       <Text style={styles.label}>WHY THIS</Text>
       <Text style={styles.name}>{p.name || p.title}</Text>
       {p.essence ? <Text style={styles.essence}>{p.essence}</Text> : null}
+      {p.tradition_family ? (
+        <Text
+          style={styles.tradition}
+          testID="why_this_l2_tradition"
+          accessibilityLabel="Tradition"
+        >
+          {p.tradition_family}
+        </Text>
+      ) : null}
       {p.context ? (
         <ScrollView style={styles.contextWrap}>
           <Text style={styles.context}>{p.context}</Text>
@@ -151,6 +160,15 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: 14,
     textAlign: "center",
+  },
+  tradition: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 10,
+    letterSpacing: 1.4,
+    color: "#8b7a55",
+    opacity: 0.7,
+    textAlign: "center",
+    marginBottom: 14,
   },
   contextWrap: {
     maxHeight: 180,

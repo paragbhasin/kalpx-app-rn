@@ -49,6 +49,7 @@ const RoomActionInquiryPill: React.FC<Props> = ({
   const [stepModalPayload, setStepModalPayload] = useState<StepPayload | null>(null);
   const [stepModalLabel, setStepModalLabel] = useState<string>("");
   const [pendingCategory, setPendingCategory] = useState<InquiryCategory | null>(null);
+  const [confirmed, setConfirmed] = useState(false);
 
   const fireSacredPost = (writesEvent: string, text: string) => {
     const roomId = envelope?.room_id ?? null;
@@ -219,6 +220,7 @@ const RoomActionInquiryPill: React.FC<Props> = ({
     if (text.trim().length > 0 && writesEvent) {
       fireSacredPost(writesEvent, text.trim());
     }
+    setConfirmed(true);
   };
 
   const handleStepDone = (extra: StepModalResult) => {
@@ -231,22 +233,30 @@ const RoomActionInquiryPill: React.FC<Props> = ({
     );
     setStepModalPayload(null);
     setPendingCategory(null);
+    setConfirmed(true);
   };
 
   return (
     <>
-      <TouchableOpacity
-        testID={action.testID}
-        accessibilityRole="button"
-        accessibilityLabel={action.label}
-        style={[styles.pill, isPrimary ? styles.pillPrimary : null]}
-        onPress={onPress}
-      >
-        <View>
+      {confirmed ? (
+        <View style={[styles.pill, isPrimary ? styles.pillPrimary : null]}>
           {kindLabel ? <Text style={styles.kindLabel}>{kindLabel}</Text> : null}
-          <Text style={styles.label}>{action.label}</Text>
+          <Text style={styles.confirmedText}>Noted.</Text>
         </View>
-      </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          testID={action.testID}
+          accessibilityRole="button"
+          accessibilityLabel={action.label}
+          style={[styles.pill, isPrimary ? styles.pillPrimary : null]}
+          onPress={onPress}
+        >
+          <View>
+            {kindLabel ? <Text style={styles.kindLabel}>{kindLabel}</Text> : null}
+            <Text style={styles.label}>{action.label}</Text>
+          </View>
+        </TouchableOpacity>
+      )}
       <InquiryModal
         visible={modalVisible}
         label={action.label || "Inquiry"}
@@ -304,6 +314,12 @@ const styles = StyleSheet.create({
     color: "#432104",
     alignSelf: "center",
     textAlign: "center",
+  },
+  confirmedText: {
+    fontSize: 14,
+    color: "#432104",
+    textAlign: "center",
+    fontStyle: "italic",
   },
 });
 

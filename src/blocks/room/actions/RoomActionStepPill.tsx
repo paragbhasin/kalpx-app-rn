@@ -42,6 +42,7 @@ const RoomActionStepPill: React.FC<Props> = ({
 }) => {
   const { loadScreen, goBack, screenData } = useScreenStore();
   const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [confirmed, setConfirmed] = useState(false);
 
   const templateId = action.step_payload?.template_id ?? "unknown";
 
@@ -122,6 +123,7 @@ const RoomActionStepPill: React.FC<Props> = ({
     if (extra.text && extra.text.trim().length > 0 && writesEvent) {
       fireSacredPost(writesEvent, extra.text.trim());
     }
+    setConfirmed(true);
   };
 
   const handleCancel = () => {
@@ -130,18 +132,25 @@ const RoomActionStepPill: React.FC<Props> = ({
 
   return (
     <>
-      <TouchableOpacity
-        testID={action.testID}
-        accessibilityRole="button"
-        accessibilityLabel={action.label}
-        style={[styles.pill, isPrimary ? styles.pillPrimary : null]}
-        onPress={onPress}
-      >
-        <View>
+      {confirmed ? (
+        <View style={[styles.pill, isPrimary ? styles.pillPrimary : null]}>
           {kindLabel ? <Text style={styles.kindLabel}>{kindLabel}</Text> : null}
-          <Text style={styles.label}>{action.label}</Text>
+          <Text style={styles.confirmedText}>Noted.</Text>
         </View>
-      </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          testID={action.testID}
+          accessibilityRole="button"
+          accessibilityLabel={action.label}
+          style={[styles.pill, isPrimary ? styles.pillPrimary : null]}
+          onPress={onPress}
+        >
+          <View>
+            {kindLabel ? <Text style={styles.kindLabel}>{kindLabel}</Text> : null}
+            <Text style={styles.label}>{action.label}</Text>
+          </View>
+        </TouchableOpacity>
+      )}
       <StepModal
         visible={modalVisible}
         stepPayload={action.step_payload}
@@ -185,6 +194,12 @@ const styles = StyleSheet.create({
     color: "#432104",
     alignSelf: "center",
     textAlign: "center",
+  },
+  confirmedText: {
+    fontSize: 14,
+    color: "#432104",
+    textAlign: "center",
+    fontStyle: "italic",
   },
 });
 

@@ -21,7 +21,7 @@ interface Props {
 }
 
 const RoomOpeningExperience: React.FC<Props> = ({ envelope, onReveal }) => {
-  const { opening_line, second_beat_line } = envelope;
+  const { opening_line, second_beat_line, memory_echo_line } = envelope;
 
   useEffect(() => {
     onReveal?.();
@@ -37,6 +37,11 @@ const RoomOpeningExperience: React.FC<Props> = ({ envelope, onReveal }) => {
       {second_beat_line ? (
         <Text style={styles.secondBeat} testID="room_second_beat_line">
           {second_beat_line}
+        </Text>
+      ) : null}
+      {memory_echo_line ? (
+        <Text style={styles.memoryEchoLine} testID="room_memory_echo_line">
+          {memory_echo_line}
         </Text>
       ) : null}
     </View>
@@ -68,6 +73,16 @@ const styles = StyleSheet.create({
     color: "#432104",
     paddingHorizontal: 24,
     marginBottom: 12,
+  },
+  memoryEchoLine: {
+    fontSize: 13,
+    lineHeight: 19,
+    textAlign: "center",
+    color: "#8B6914",
+    fontStyle: "italic",
+    paddingHorizontal: 28,
+    marginTop: 6,
+    marginBottom: 4,
   },
 });
 

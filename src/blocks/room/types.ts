@@ -430,6 +430,14 @@ export interface RoomRenderV1 {
   // ─────────────────────────────────────────────────────────────────────
   life_context?: LifeContext | null;
   visit_state?: VisitState | null;
+
+  /**
+   * Batch 4B: optional welcome-back echo line. Present only when
+   * MITRA_ROOM_MEMORY_ECHO flag is ON and the user has a prior memory for
+   * this room. Never contains the user's own text — only a type-level
+   * reference ("Last time, you named someone who matters.").
+   */
+  memory_echo_line?: string | null;
 }
 
 // ───────────────────────────────────────────────────────────────────────────

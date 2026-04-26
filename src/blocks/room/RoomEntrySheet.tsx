@@ -15,7 +15,7 @@
  *   2. room_connection — "I feel alone"
  *   3. room_release    — "Something is heavy"
  *   4. room_clarity    — "I'm not sure / I want clarity"
- *   5. room_growth     — "I want to go deeper"
+ *   5. room_growth     — "I want to grow as a person"
  *   6. room_joy        — "I'm in a good place"
  *
  * Styling intent (§14.7):
@@ -106,7 +106,7 @@ const ROOM_ROWS: SheetRow[] = [
   },
   {
     room_id: "room_growth",
-    label: "I want to go deeper",
+    label: "I want to grow as a person",
     testID: "room_entry_sheet_growth",
     accent: "#9C7F5A",
     backing: "#F4EDE2",

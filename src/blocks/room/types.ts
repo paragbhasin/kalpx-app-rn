@@ -216,6 +216,16 @@ export interface StepPayload {
   duration_sec?: number | null;
   cue_text?: string | null;
   prompt?: string | null;
+  memory_modal?: {
+    title?: string;
+    sanatan_context?: string;
+    why_we_ask?: string;
+    prompt?: string;
+    placeholder?: string;
+    primary_label?: string;
+    confirmation?: string;       // overrides CARRY_CONFIRM_COPY in confirmed state
+    add_another_label?: string;  // overrides CONFIRMED_ADD_LABEL in confirmed state
+  } | null;
 }
 
 export interface CarryPayload {
@@ -223,6 +233,7 @@ export interface CarryPayload {
     | "joy_carry"
     | "joy_named"
     | "release_voice_note"
+    | "release_named"
     | "connection_named"
     | "connection_reach_out"
     | "growth_journal"

@@ -24,16 +24,22 @@ import api from "../../../Networks/axios";
 import { executeAction } from "../../../engine/actionExecutor";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 import { useToast } from "../../../context/ToastContext";
-import type { ActionEnvelope, RoomRenderV1 } from "../types";
+import type { ActionEnvelope, RoomRenderV1, StepPayload } from "../types";
 import { buildActionCtx } from "./actionContextHelper";
 import StepModal, { type StepModalResult } from "./StepModal";
 
 const INPUT_TEMPLATE: Record<string, string> = {
-  growth_journal: "step_journal_growth",
+  growth_journal:       "step_journal_growth",
   connection_reach_out: "step_reach_out_connection",
+  connection_named:     "step_text_input_connection_named",
+  joy_named:            "step_text_input_joy_named",
+  release_named:        "step_text_input_release_named",
+  // Pre-wired — PARKED (never emitted by BE seed); activate in Batch 2:
+  stillness_named:      "step_text_input_stillness_named",
+  clarity_journal:      "step_text_input_clarity_journal",
 };
 
-const NAVIGATE_AFTER = new Set(["joy_carry", "joy_named", "stillness_named", "connection_named"]);
+const NAVIGATE_AFTER = new Set(["joy_carry"]);
 
 const CARRY_TOAST_COPY: Record<string, string> = {
   joy_carry:            "Saved. Carry this joy into your day.",
@@ -46,6 +52,100 @@ const CARRY_TOAST_COPY: Record<string, string> = {
 };
 const CARRY_TOAST_FALLBACK = "Saved to your path.";
 const CARRY_TOAST_ERROR    = "Couldn't save. Please try again.";
+
+const CARRY_CONFIRM_COPY: Record<string, string> = {
+  joy_named:            "Saved. You can write another.",
+  connection_named:     "Saved. You can name another.",
+  growth_journal:       "Saved. You can write another.",
+  connection_reach_out: "Saved. You can add another.",
+  release_named:        "Saved. You set it down.",
+  stillness_named:      "Saved.",
+  clarity_journal:      "Saved. You can write another.",
+};
+
+const CONFIRMED_ADD_LABEL: Record<string, string> = {
+  connection_named:     "Name another",
+  joy_named:            "Write another",
+  growth_journal:       "Write another",
+  clarity_journal:      "Write another",
+  stillness_named:      "Write another",
+  connection_reach_out: "Add another",
+  release_named:        "Name another",
+};
+
+const CARRY_MEMORY_MODAL: Record<string, NonNullable<StepPayload["memory_modal"]>> = {
+  connection_named: {
+    title:             "Name someone who matters",
+    sanatan_context:   "Sambandha reminds us that even one true bond can hold us.",
+    why_we_ask:        "Naming someone helps you return from feeling alone to one thread of care.",
+    prompt:            "Who is close to your heart right now?",
+    placeholder:       "Write a name, relationship, or a few words…",
+    primary_label:     "Save this connection",
+    confirmation:      "Saved. You can name another.",
+    add_another_label: "Name another",
+  },
+  joy_named: {
+    title:             "Write what’s good right now",
+    sanatan_context:   "Santosha begins by noticing what is already enough.",
+    why_we_ask:        "Writing one good thing helps the mind stay with it instead of rushing past it.",
+    prompt:            "What feels good, steady, or quietly enough right now?",
+    placeholder:       "Write one good thing…",
+    primary_label:     "Save this joy",
+    confirmation:      "Saved. You can write another.",
+    add_another_label: "Write another",
+  },
+  growth_journal: {
+    title:             "Write what you noticed",
+    sanatan_context:   "Growth ripens through one right action, not speed.",
+    why_we_ask:        "Naming what you noticed turns observation into the seed of a next step.",
+    prompt:            "What did you notice, or what is forming?",
+    placeholder:       "Write what came up…",
+    primary_label:     "Save this",
+    confirmation:      "Saved. You can write another.",
+    add_another_label: "Write another",
+  },
+  connection_reach_out: {
+    title:             "Reach out to one person",
+    sanatan_context:   "A short act of reaching is itself the practice of sambandha.",
+    why_we_ask:        "Writing the message — even without sending — brings the connection closer.",
+    prompt:            "Write a short message to someone who matters.",
+    placeholder:       "Your message…",
+    primary_label:     "Save and copy message",
+    confirmation:      "Saved. You can add another.",
+    add_another_label: "Add another",
+  },
+  release_named: {
+    title:             "Name what you’re setting down",
+    sanatan_context:   "Letting go is not giving up. It is loosening the grip so life can move again.",
+    why_we_ask:        "Naming the weight helps you separate yourself from what you are carrying.",
+    prompt:            "What is ready to be set down for now?",
+    placeholder:       "Write one word or a few lines…",
+    primary_label:     "Save this release",
+    confirmation:      "Saved. You set it down.",
+    add_another_label: "Name another",
+  },
+  // PARKED — pre-wired, not currently emitted by BE:
+  stillness_named: {
+    title:             "Write what became still",
+    sanatan_context:   "Stillness begins when attention returns to one steady anchor.",
+    why_we_ask:        "Naming what settled helps you recognize the ground beneath the noise.",
+    prompt:            "What feels quieter now?",
+    placeholder:       "Write one word or a few lines…",
+    primary_label:     "Save this stillness",
+    confirmation:      "Saved.",
+    add_another_label: "Write another",
+  },
+  clarity_journal: {
+    title:             "Write one honest question",
+    sanatan_context:   "Clarity comes when we stop obeying confusion and look at what is actually here.",
+    why_we_ask:        "Writing the question separates the real decision from the noise around it.",
+    prompt:            "What is the question you are actually sitting with?",
+    placeholder:       "Write your honest question…",
+    primary_label:     "Save this question",
+    confirmation:      "Saved. You can write another.",
+    add_another_label: "Write another",
+  },
+};
 
 interface Props {
   action: ActionEnvelope;
@@ -66,6 +166,7 @@ const RoomActionCarryPill: React.FC<Props> = ({
   const [modalVisible, setModalVisible] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
   const [modalSubmitting, setModalSubmitting] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
 
   const writesEvent =
     action.carry_payload?.writes_event ??
@@ -159,6 +260,7 @@ const RoomActionCarryPill: React.FC<Props> = ({
 
   const onPress = async () => {
     if (needsInput) {
+      setConfirmed(false);
       setModalError(null);
       setModalSubmitting(false);
       setModalVisible(true);
@@ -166,9 +268,11 @@ const RoomActionCarryPill: React.FC<Props> = ({
     }
     const ok = await doCarryWrite();
     if (ok) {
-      showToast(CARRY_TOAST_COPY[writesEvent] ?? CARRY_TOAST_FALLBACK, 3000, "success");
       if (NAVIGATE_AFTER.has(writesEvent)) {
+        showToast(CARRY_TOAST_COPY[writesEvent] ?? CARRY_TOAST_FALLBACK, 3000, "success");
         loadScreen({ container_id: dashboardContainer, state_id: "day_active" } as any);
+      } else {
+        setConfirmed(true);
       }
     } else {
       showToast(CARRY_TOAST_ERROR, 4000, "error");
@@ -188,8 +292,7 @@ const RoomActionCarryPill: React.FC<Props> = ({
     if (ok) {
       setModalVisible(false);
       setModalError(null);
-      showToast(CARRY_TOAST_COPY[writesEvent] ?? CARRY_TOAST_FALLBACK, 3000, "success");
-      loadScreen({ container_id: dashboardContainer, state_id: "day_active" } as any);
+      setConfirmed(true);
     } else {
       setModalError(CARRY_TOAST_ERROR);
     }
@@ -197,27 +300,67 @@ const RoomActionCarryPill: React.FC<Props> = ({
 
   return (
     <>
-      <TouchableOpacity
-        testID={action.testID}
-        accessibilityRole="button"
-        accessibilityLabel={action.label}
-        style={[styles.pill, isPrimary ? styles.pillPrimary : null]}
-        onPress={onPress}
-      >
-        <View>
+      {confirmed ? (
+        <View style={[styles.pill, isPrimary ? styles.pillPrimary : null]}>
           {kindLabel ? <Text style={styles.kindLabel}>{kindLabel}</Text> : null}
-          <Text style={styles.label}>{action.label}</Text>
+          <Text style={styles.confirmedText}>
+            {CARRY_MEMORY_MODAL[writesEvent]?.confirmation
+              ?? CARRY_CONFIRM_COPY[writesEvent]
+              ?? CARRY_TOAST_FALLBACK}
+          </Text>
+          <View style={styles.confirmedActions}>
+            <TouchableOpacity
+              style={styles.confirmedBtn}
+              onPress={() => setConfirmed(false)}
+              accessibilityRole="button"
+              accessibilityLabel={
+                CARRY_MEMORY_MODAL[writesEvent]?.add_another_label
+                  ?? CONFIRMED_ADD_LABEL[writesEvent]
+                  ?? "Add another"
+              }
+            >
+              <Text style={styles.confirmedBtnLabel}>
+                {CARRY_MEMORY_MODAL[writesEvent]?.add_another_label
+                  ?? CONFIRMED_ADD_LABEL[writesEvent]
+                  ?? "Add another"}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.confirmedBtn, styles.confirmedBtnHome]}
+              onPress={() =>
+                loadScreen({ container_id: dashboardContainer, state_id: "day_active" } as any)
+              }
+              accessibilityRole="button"
+              accessibilityLabel="Return home"
+            >
+              <Text style={styles.confirmedBtnLabel}>Return home</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          testID={action.testID}
+          accessibilityRole="button"
+          accessibilityLabel={action.label}
+          style={[styles.pill, isPrimary ? styles.pillPrimary : null]}
+          onPress={onPress}
+        >
+          <View>
+            {kindLabel ? <Text style={styles.kindLabel}>{kindLabel}</Text> : null}
+            <Text style={styles.label}>{action.label}</Text>
+          </View>
+        </TouchableOpacity>
+      )}
       {needsInput && (
         <StepModal
           visible={modalVisible}
+          label={CARRY_MEMORY_MODAL[writesEvent]?.title ?? action.label}
           stepPayload={{
             template_id: INPUT_TEMPLATE[writesEvent]!,
             step_config: {},
             input_slots: [],
+            memory_modal: CARRY_MEMORY_MODAL[writesEvent] ?? null,
           }}
-          label={action.label}
           onCancel={() => {
             setModalVisible(false);
             setModalError(null);
@@ -264,6 +407,31 @@ const styles = StyleSheet.create({
     color: "#432104",
     alignSelf: "center",
     textAlign: "center",
+  },
+  confirmedText: {
+    fontSize: 14,
+    color: "#432104",
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  confirmedActions: {
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: 10,
+  },
+  confirmedBtn: {
+    paddingVertical: 7,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    borderWidth: 0.5,
+    borderColor: "#9f9f9f",
+  },
+  confirmedBtnHome: {
+    borderColor: "#b89674",
+  },
+  confirmedBtnLabel: {
+    fontSize: 13,
+    color: "#432104",
   },
 });
 

@@ -500,26 +500,36 @@ const TextInputBody: React.FC<TextInputBodyProps> = ({
   stepPayload,
   onDone,
 }) => {
+  const mm = stepPayload?.memory_modal;
   const [text, setText] = useState<string>("");
   const promptSlot = stepPayload?.step_config?.prompt_slot;
-  const placeholder =
+  const promptText =
+    mm?.prompt ||
     (stepPayload?.prompt && String(stepPayload.prompt)) ||
     (typeof promptSlot === "string" && PROMPT_SLOT_TEXT[promptSlot]) ||
     "Take a moment and write what comes.";
+  const placeholderText = mm?.placeholder || "Type what you feel..";
+  const doneLabel = mm?.primary_label || "Done";
 
   const trimmed = text.trim();
   const enabled = trimmed.length >= 1;
 
   return (
     <ScrollView style={styles.textRoot} keyboardShouldPersistTaps="handled">
-      <Text style={styles.textPrompt}>{placeholder}</Text>
+      {!!mm?.sanatan_context && (
+        <Text style={styles.modalSanatanContext}>{mm.sanatan_context}</Text>
+      )}
+      {!!mm?.why_we_ask && (
+        <Text style={styles.modalWhyWeAsk}>{mm.why_we_ask}</Text>
+      )}
+      <Text style={styles.textPrompt}>{promptText}</Text>
       <TextInput
         value={text}
         onChangeText={(v) => setText(v.slice(0, MAX_TEXT))}
         multiline
         textAlignVertical="top"
         style={styles.textInput}
-        placeholder="Type what you feel.."
+        placeholder={placeholderText}
         placeholderTextColor="#B0B0B5"
         testID="step_modal_text_input"
         maxLength={MAX_TEXT}
@@ -533,7 +543,7 @@ const TextInputBody: React.FC<TextInputBodyProps> = ({
         onPress={() => onDone({ text: trimmed })}
         testID="step_modal_text_done"
       >
-        <Text style={styles.primaryActionLabel}>Done</Text>
+        <Text style={styles.primaryActionLabel}>{doneLabel}</Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -753,9 +763,11 @@ const MAX_CONTACT = 40;
 const MAX_REACH_OUT = 280;
 
 const ReachOutBody: React.FC<ReachOutBodyProps> = ({ stepPayload, onDone }) => {
+  const mm = stepPayload?.memory_modal;
   const prompt =
     (stepPayload?.prompt && String(stepPayload.prompt)) ||
     "Reach out — a short message to someone who matters.";
+  const primaryLabel = mm?.primary_label || "Copy and close";
 
   const [contact, setContact] = useState<string>("");
   const [message, setMessage] = useState<string>("");
@@ -796,6 +808,12 @@ const ReachOutBody: React.FC<ReachOutBodyProps> = ({ stepPayload, onDone }) => {
 
   return (
     <ScrollView style={styles.textRoot} keyboardShouldPersistTaps="handled">
+      {!!mm?.sanatan_context && (
+        <Text style={styles.modalSanatanContext}>{mm.sanatan_context}</Text>
+      )}
+      {!!mm?.why_we_ask && (
+        <Text style={styles.modalWhyWeAsk}>{mm.why_we_ask}</Text>
+      )}
       <Text style={styles.textPrompt}>{prompt}</Text>
 
       <TextInput
@@ -830,7 +848,7 @@ const ReachOutBody: React.FC<ReachOutBodyProps> = ({ stepPayload, onDone }) => {
           onPress={handleCopyAndClose}
           testID="step_modal_reach_out_copy_done"
         >
-          <Text style={styles.primaryActionLabel}>Copy and close</Text>
+          <Text style={styles.primaryActionLabel}>{primaryLabel}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -839,7 +857,7 @@ const ReachOutBody: React.FC<ReachOutBodyProps> = ({ stepPayload, onDone }) => {
           onPress={handleDoneWithoutCopy}
           testID="step_modal_reach_out_done"
         >
-          <Text style={styles.ctrlBtnLabel}>Done without copying</Text>
+          <Text style={styles.ctrlBtnLabel}>Save without copying</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -1009,6 +1027,23 @@ const styles = StyleSheet.create({
     gap: 12,
   },
 
+  modalSanatanContext: {
+    fontSize: 13,
+    color: "#8B6914",
+    fontStyle: "italic",
+    textAlign: "center",
+    marginBottom: 6,
+    lineHeight: 19,
+    paddingHorizontal: 4,
+  },
+  modalWhyWeAsk: {
+    fontSize: 13,
+    color: "#5C5C5C",
+    textAlign: "center",
+    marginBottom: 14,
+    lineHeight: 19,
+    paddingHorizontal: 4,
+  },
   // Text input
   textRoot: {
     width: "100%",

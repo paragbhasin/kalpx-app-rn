@@ -189,12 +189,26 @@ const RoomActionInquiryPill: React.FC<Props> = ({
   ) => {
     setModalVisible(false);
     setPendingCategory(category);
-    // Parse duration from template_id name (e.g. "step_walk_timer_5min" → 300s)
-    // so TimerBody shows the authored duration rather than the 60s default.
     const durationMatch = templateId.match(/_(\d+)min$/);
     const duration_sec = durationMatch ? parseInt(durationMatch[1], 10) * 60 : null;
-    setStepModalPayload({ template_id: templateId, step_config: {}, input_slots: [], duration_sec });
-    setStepModalLabel(category.label || templateId);
+    const practicePrompt = category.reflective_prompt || category.prompt || null;
+    setStepModalPayload({
+      template_id: templateId,
+      step_config: {},
+      input_slots: [],
+      duration_sec,
+      memory_modal: practicePrompt
+        ? {
+            title: category.suggested_practice_label || category.practice_label || undefined,
+            prompt: practicePrompt,
+            placeholder: "Write what comes...",
+            primary_label: "Done",
+          }
+        : null,
+    });
+    setStepModalLabel(
+      category.suggested_practice_label || category.practice_label || category.label || templateId,
+    );
     setStepModalVisible(true);
   };
 

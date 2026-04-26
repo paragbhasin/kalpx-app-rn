@@ -192,6 +192,7 @@ export interface InquiryCategory {
   // lets the inquiry detail launch a step directly (InquiryModal Phase 6).
   reflective_prompt?: string | null;
   suggested_practice_template_id?: string | null;
+  suggested_practice_label?: string | null;
 }
 
 export interface InquiryPayload {

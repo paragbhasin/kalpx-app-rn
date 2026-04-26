@@ -1,0 +1,22 @@
+# Subflow: open_room_entry_sheet
+# Opens the RoomEntrySheet from the home screen.
+# Env: ROOM_LABEL — the row's accessibilityLabel to tap (e.g. "I feel alone")
+# Pre-condition: home screen at day-active state
+# Notes:
+#   - quick_support_more_ways is below fold when cycle_progress_block is expanded.
+#   - tapOn: id: auto-scrolls to find the element without a separate scrollUntilVisible.
+#     scrollUntilVisible + waitForAnimationToEnd had a stale-coordinates bug: after
+#     scrolling, the element ends up at y≈778 (bottom of content area) which overlaps
+#     with the Profile tab at y=778, causing a Profile tab tap instead of the button tap.
+#   - Using plain tapOn: id: avoids this because Maestro uses fresh element bounds.
+appId: com.kalpx.app
+---
+- tapOn:
+    id: "quick_support_more_ways"
+- extendedWaitUntil:
+    visible:
+      id: "room_entry_sheet_header"
+    timeout: 10000
+- tapOn:
+    text: ${ROOM_LABEL}
+- waitForAnimationToEnd

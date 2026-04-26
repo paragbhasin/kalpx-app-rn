@@ -1,0 +1,76 @@
+# Flow 68: growth inquiry — "next step" category → authored reflective prompt visible.
+# Validates: InquiryModal opens with growth categories, tapping "What's the next clean step?"
+# shows the non-generic authored anchor_line and reflective_prompt (not generic copy).
+# Pre-condition: test+day3@kalpx.com (repeat state).
+appId: com.kalpx.app
+env:
+  EMAIL: test+day3@kalpx.com
+  PASSWORD: Test1234!
+---
+- runFlow:
+    file: login.yaml
+    env:
+      EMAIL: test+day3@kalpx.com
+      PASSWORD: Test1234!
+- waitForAnimationToEnd
+
+# Navigate to day-active if on welcome-back screen (render_home state)
+- runFlow:
+    file: navigate_to_day_active.yaml
+
+
+- tapOn:
+    id: "quick_support_more_ways"
+- waitForAnimationToEnd
+
+- tapOn:
+    id: "room_entry_sheet_growth"
+- waitForAnimationToEnd
+
+- runFlow:
+    when:
+      visible:
+        id: "life_context_picker_sheet"
+    commands:
+      - tapOn:
+          id: "life_context_picker_skip"
+      - waitForAnimationToEnd
+
+- assertVisible:
+    id: "room_renderer_room_growth"
+
+- tapOn:
+    text: "Sit with the question"
+- waitForAnimationToEnd
+
+- assertVisible:
+    id: "inquiry_modal_category_list"
+
+# Tap "What's the next clean step?" category (category id = "next_step")
+- tapOn:
+    text: "What's the next clean step?"
+- waitForAnimationToEnd
+
+- assertVisible:
+    id: "inquiry_modal_category_detail"
+
+# Authored anchor line — not the generic "Take a moment" copy
+- assertVisible:
+    text: "Start from what is already in your hands"
+
+# Authored reflective prompt
+- assertVisible:
+    text: "What is one small, right step"
+
+# Generic fallback copy must NOT appear
+- assertNotVisible:
+    text: "Take a moment and write what comes"
+
+# Close modal
+- tapOn:
+    id: "inquiry_modal_back"
+    optional: true
+- tapOn:
+    id: "inquiry_modal_cancel"
+    optional: true
+- waitForAnimationToEnd

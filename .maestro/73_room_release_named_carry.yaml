@@ -1,0 +1,91 @@
+# Flow 73: release_named carry modal — save → confirmed state "Saved. You set it down."
+# Validates: new release_named event (migration 0152), memory_modal title
+# "Name what you're setting down", Sanatan context "Letting go",
+# primary_label "Save this release", confirmed "Saved. You set it down.", stays in room.
+# Pre-condition: test+day3@kalpx.com (repeat state for room_release).
+# Migration 0152 (release_named carry pool) must be applied on dev.
+appId: com.kalpx.app
+env:
+  EMAIL: test+day3@kalpx.com
+  PASSWORD: Test1234!
+---
+# Close any modal left open from a prior test run
+- runFlow:
+    when:
+      visible:
+        id: "step_modal_body"
+    commands:
+      - tapOn:
+          id: "step_modal_cancel"
+      - waitForAnimationToEnd
+
+- runFlow:
+    file: login_preserve_session.yaml
+    env:
+      EMAIL: test+day3@kalpx.com
+      PASSWORD: Test1234!
+- waitForAnimationToEnd
+
+- runFlow:
+    file: navigate_to_day_active.yaml
+
+- runFlow:
+    file: open_room_entry_sheet.yaml
+    env:
+      ROOM_LABEL: "Something is heavy"
+
+- runFlow:
+    when:
+      visible:
+        id: "life_context_picker_sheet"
+    commands:
+      - tapOn:
+          id: "life_context_picker_skip"
+      - waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible:
+      id: "room_renderer_room_release"
+    timeout: 35000
+
+# Reset confirmed state if carry was already saved in a prior run
+- runFlow:
+    when:
+      visible:
+        text: "Name another"
+    commands:
+      - tapOn:
+          text: "Name another"
+      - waitForAnimationToEnd
+
+# Tap release_named carry pill (stable testID)
+- tapOn:
+    id: "room_carry_release_named"
+- waitForAnimationToEnd
+
+# Modal opens — sanatan context and prompt
+- assertVisible:
+    text: "Name what you're setting down"
+- assertVisible:
+    text: "Letting go is not giving up. It is loosening the grip so life can move again."
+- assertVisible:
+    text: "What is ready to be set down for now?"
+
+# Type and save — tap sanatan context to dismiss keyboard first
+- tapOn:
+    id: "step_modal_text_input"
+- inputText: "The argument I keep replaying"
+- tapOn:
+    text: "Letting go is not giving up. It is loosening the grip so life can move again."
+- waitForAnimationToEnd
+- tapOn:
+    id: "step_modal_text_done"
+- waitForAnimationToEnd
+
+# Confirmed — unique copy "Saved. You set it down."
+- assertNotVisible:
+    id: "step_modal_body"
+- assertVisible:
+    text: "Saved. You set it down."
+- assertVisible:
+    id: "room_renderer_room_release"

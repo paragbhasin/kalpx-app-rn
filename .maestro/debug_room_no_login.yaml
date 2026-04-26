@@ -1,0 +1,61 @@
+appId: com.kalpx.app
+---
+# Start from any screen — navigate to Home tab
+- tapOn:
+    text: "Home, tab, 1 of 4"
+- waitForAnimationToEnd
+
+# Handle welcome-back if needed
+- runFlow:
+    when:
+      notVisible:
+        id: "quick_support_more_ways"
+    commands:
+      - tapOn:
+          id: "home_continue_cta"
+          optional: true
+      - waitForAnimationToEnd
+
+# Open room entry sheet
+- scrollUntilVisible:
+    element:
+      id: "quick_support_more_ways"
+    direction: DOWN
+    timeout: 8000
+- waitForAnimationToEnd
+- tapOn:
+    id: "quick_support_more_ways"
+- extendedWaitUntil:
+    visible:
+      id: "room_entry_sheet_header"
+    timeout: 6000
+- tapOn:
+    text: "I feel alone"
+- waitForAnimationToEnd
+
+# Life context picker guard
+- runFlow:
+    when:
+      visible:
+        id: "life_context_picker_sheet"
+    commands:
+      - tapOn:
+          id: "life_context_picker_skip"
+      - waitForAnimationToEnd
+
+# Room renders — wait for carry pill
+- extendedWaitUntil:
+    visible:
+      id: "room_renderer_room_connection"
+    timeout: 10000
+- extendedWaitUntil:
+    visible:
+      text: "Name someone who matters"
+    timeout: 10000
+
+# Carry pill found — tap it and verify modal
+- tapOn:
+    text: "Name someone who matters"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Who is close to your heart right now?"

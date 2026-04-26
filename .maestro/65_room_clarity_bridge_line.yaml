@@ -1,0 +1,46 @@
+# Flow 65: clarity room — bridge line visible between wisdom banner and action chips.
+# Validates: room_context.bridge_line text renders when MITRA_ROOM_BRIDGE_LINE=1 (ON on dev).
+# Asserts on testID "room_bridge_line" added to RoomRenderer.tsx.
+# Pre-condition: test+day3@kalpx.com (repeat state). MITRA_ROOM_BRIDGE_LINE must be 1.
+appId: com.kalpx.app
+env:
+  EMAIL: test+day3@kalpx.com
+  PASSWORD: Test1234!
+---
+- runFlow:
+    file: login.yaml
+    env:
+      EMAIL: test+day3@kalpx.com
+      PASSWORD: Test1234!
+- waitForAnimationToEnd
+
+# Navigate to day-active if on welcome-back screen (render_home state)
+- runFlow:
+    file: navigate_to_day_active.yaml
+
+
+- tapOn:
+    id: "quick_support_more_ways"
+- waitForAnimationToEnd
+
+- tapOn:
+    id: "room_entry_sheet_clarity"
+- waitForAnimationToEnd
+
+# Skip picker
+- runFlow:
+    when:
+      visible:
+        id: "life_context_picker_sheet"
+    commands:
+      - tapOn:
+          id: "life_context_picker_skip"
+      - waitForAnimationToEnd
+
+# Room renders
+- assertVisible:
+    id: "room_renderer_room_clarity"
+
+# Bridge line element must be present (testID added in RoomRenderer.tsx)
+- assertVisible:
+    id: "room_bridge_line"

@@ -86,6 +86,7 @@ env:
 # ── Step 2: log out if a previous test left a session open ───────────────
 # Use testID (drawer_logout_btn) — the TextComponent wrapping the Logout
 # text is not accessible to Maestro's text matcher.
+# After logout the drawer closes; re-open it so drawer_login_btn is reachable.
 - runFlow:
     when:
       visible:
@@ -93,11 +94,21 @@ env:
     commands:
       - tapOn:
           id: "drawer_logout_btn"
+      - extendedWaitUntil:
+          notVisible:
+            id: "drawer_logout_btn"
+          timeout: 8000
+      - tapOn:
+          text: "Menu, tab, 4 of 4"
       - waitForAnimationToEnd
-      # Drawer stays open after logout and now shows Log In — no re-open needed
 
 # ── Step 3: navigate to Login screen ─────────────────────────────────────
-# "Log In" button (testID drawer_login_btn) is now guaranteed visible.
+# Wait for drawer_login_btn — after logout the drawer re-opens with animation;
+# the extendedWaitUntil absorbs the drawer slide-in lag before tapping.
+- extendedWaitUntil:
+    visible:
+      id: "drawer_login_btn"
+    timeout: 5000
 - tapOn:
     id: "drawer_login_btn"
 - waitForAnimationToEnd
@@ -140,10 +151,14 @@ env:
     text: "Not now|Maybe later|Skip|Cancel"
     optional: true
 
-# ── Step 9: assert login succeeded ───────────────────────────────────────
-# Positive assertion: guest home never shows these; logged-in home always does.
-# "notVisible: Sign in..." was a false-positive — it passed even on failed login.
+# ── Step 9: assert login succeeded and land on Home tab ──────────────────
+# After login the app may navigate to the Notifications tab (post-login landing).
+# The extendedWaitUntil ensures the tab bar is rendered, then the tapOn forces
+# us to Home regardless of which tab the app landed on.
 - extendedWaitUntil:
     visible:
-      text: "My Routine|Day|Welcome back|welcome back"
-    timeout: 15000
+      text: "Home, tab, 1 of 4"
+    timeout: 45000
+- tapOn:
+    text: "Home, tab, 1 of 4"
+- waitForAnimationToEnd

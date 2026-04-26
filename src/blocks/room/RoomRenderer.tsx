@@ -83,7 +83,7 @@ const RoomRenderer: React.FC<RoomRendererProps> = ({
         <RoomPrincipleBanner banner={envelope.principle_banner} />
       ) : null}
       {ctx?.bridge_line ? (
-        <Text style={styles.bridgeLine}>{ctx.bridge_line}</Text>
+        <Text style={styles.bridgeLine} testID="room_bridge_line">{ctx.bridge_line}</Text>
       ) : null}
       <RoomActionList envelope={envelope} />
     </View>

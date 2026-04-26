@@ -432,7 +432,10 @@ const RoomActionCarryPill: React.FC<Props> = ({
   return (
     <>
       {confirmed ? (
-        <View style={[styles.pill, isPrimary ? styles.pillPrimary : null]}>
+        <View
+          style={[styles.pill, isPrimary ? styles.pillPrimary : null]}
+          testID={`room_carry_${writesEvent}_confirmed`}
+        >
           {kindLabel ? <Text style={styles.kindLabel}>{kindLabel}</Text> : null}
           <Text style={styles.confirmedText}>
             {activeModal?.confirmation
@@ -449,6 +452,7 @@ const RoomActionCarryPill: React.FC<Props> = ({
                   ?? CONFIRMED_ADD_LABEL[writesEvent]
                   ?? "Add another"
               }
+              testID={`room_carry_${writesEvent}_add_another`}
             >
               <Text style={styles.confirmedBtnLabel}>
                 {activeModal?.add_another_label
@@ -463,6 +467,7 @@ const RoomActionCarryPill: React.FC<Props> = ({
               }
               accessibilityRole="button"
               accessibilityLabel="Return home"
+              testID={`room_carry_${writesEvent}_return_home`}
             >
               <Text style={styles.confirmedBtnLabel}>Return home</Text>
             </TouchableOpacity>
@@ -470,7 +475,7 @@ const RoomActionCarryPill: React.FC<Props> = ({
         </View>
       ) : (
         <TouchableOpacity
-          testID={action.testID}
+          testID={`room_carry_${writesEvent}`}
           accessibilityRole="button"
           accessibilityLabel={action.label}
           style={[styles.pill, isPrimary ? styles.pillPrimary : null]}

@@ -583,6 +583,7 @@ export default function ContinueJourney({
 
           {primaryCta && (
             <TouchableOpacity
+              testID="home_continue_cta"
               style={styles.primaryCtaWrap}
               activeOpacity={0.85}
               onPress={() => handleAction(primaryCta.action)}
@@ -612,6 +613,7 @@ export default function ContinueJourney({
               return (
                 <TouchableOpacity
                   key={chip.id || `chip_${idx}`}
+                  testID={chip.id || undefined}
                   style={styles.actionButton}
                   activeOpacity={0.7}
                   onPress={() => handleAction(chip.action)}

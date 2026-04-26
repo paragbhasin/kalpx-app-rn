@@ -331,20 +331,36 @@ const RoomContainer: React.FC<Props> = () => {
       });
     };
 
+    const persistLifeContext = (slug: LifeContext) => {
+      const { store: _store } = require("../store");
+      const _auth =
+        _store.getState().login || _store.getState().socialLoginReducer || {};
+      const _isAuthed = !!(
+        _auth.user?.id || _auth.user?.email || _auth.user?.token
+      );
+      if (!_isAuthed) return;
+      const { setLifeContext: _setLc } = require("../store/companionStateSlice");
+      _store.dispatch(_setLc(slug));
+      api.patch("mitra/companion-state/", { life_context: slug }).catch(() => {});
+    };
+
     return (
       <LifeContextPickerSheet
         visible={true}
         allowedContexts={allowedContexts ?? undefined}
+        defaultValue={lifeContext}
         onPick={(slug) => {
           setScreenValue(slug, "life_context");
           setScreenValue(false, "context_skipped");
           dispatchTelemetry("context_picked", slug);
+          persistLifeContext(slug);
           navToRender();
         }}
         onSkip={() => {
           setScreenValue(null, "life_context");
           setScreenValue(true, "context_skipped");
           dispatchTelemetry("context_skipped", null);
+          // Do NOT persist on skip — stored preference stays unchanged.
           navToRender();
         }}
         onBack={() => {
@@ -468,7 +484,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 40, // Space for the last action pill
+    paddingBottom: 100,
   },
   loading: {
     flex: 1,

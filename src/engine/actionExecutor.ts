@@ -4483,9 +4483,11 @@ export async function executeAction(
           // RoomContainer (which reads screenData.room_id on mount) has
           // the identifier available.
           setScreenValue(roomId, "room_id");
-          // Clear any stale life_context from a prior room visit — the
-          // picker is the sole source of truth for this field.
-          setScreenValue(null, "life_context");
+          // Pre-stamp stored life_context preference so picker can pre-fill
+          // the user's last explicit choice. null when no preference stored.
+          const { store: _lcStore } = require("../store");
+          const _storedLc = (_lcStore.getState()?.companionState as any)?.life_context ?? null;
+          setScreenValue(_storedLc, "life_context");
           setScreenValue(false, "context_skipped");
 
           // Per-room picker contract (live pool– and API-verified 2026-04-21).

@@ -145,7 +145,7 @@ const StepModal: React.FC<Props> = ({
               behavior={Platform.OS === "ios" ? "padding" : undefined}
             >
               <View style={styles.handle} />
-              <View style={styles.header}>
+              <View style={styles.headerCancelRow}>
                 <TouchableOpacity
                   onPress={onCancel}
                   accessibilityRole="button"
@@ -154,11 +154,10 @@ const StepModal: React.FC<Props> = ({
                 >
                   <Text style={styles.headerCancel}>Cancel</Text>
                 </TouchableOpacity>
-                <Text style={styles.headerTitle} numberOfLines={1}>
-                  {label}
-                </Text>
-                <View style={styles.headerSpacer} />
               </View>
+              <Text style={styles.headerTitle} numberOfLines={2}>
+                {label}
+              </Text>
 
               <View
                 style={[styles.body, isSubmitting && styles.bodySubmitting]}
@@ -915,26 +914,24 @@ const styles = StyleSheet.create({
     backgroundColor: "#E0E0E2",
     marginTop: 12,
   },
-  header: {
+  headerCancelRow: {
     flexDirection: "row",
-    alignItems: "center",
     paddingHorizontal: 16,
-    paddingVertical: 14,
-    backgroundColor: "transparent",
+    paddingTop: 14,
+    paddingBottom: 4,
   },
   headerCancel: {
     fontSize: 15,
     color: "#6E6E73",
   },
   headerTitle: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "600",
     color: "#1C1C1E",
-  },
-  headerSpacer: {
-    width: 50,
+    textAlign: "center",
+    paddingHorizontal: 20,
+    paddingBottom: 12,
+    lineHeight: 21,
   },
   body: {
     paddingHorizontal: 24,

@@ -100,6 +100,11 @@ export interface LifeContextPickerSheetProps {
    * When omitted, all options are shown.
    */
   allowedContexts?: LifeContext[];
+  /**
+   * When provided, shows a checkmark on the matching row — pre-fills
+   * the user's last stored choice. User must still tap to confirm.
+   */
+  defaultValue?: LifeContext | null;
 }
 
 const LifeContextPickerSheet: React.FC<LifeContextPickerSheetProps> = ({
@@ -108,6 +113,7 @@ const LifeContextPickerSheet: React.FC<LifeContextPickerSheetProps> = ({
   onSkip,
   onBack,
   allowedContexts,
+  defaultValue,
 }) => {
   const options = allowedContexts
     ? LIFE_CONTEXT_OPTIONS.filter((o) => allowedContexts.includes(o.slug))
@@ -180,9 +186,9 @@ const LifeContextPickerSheet: React.FC<LifeContextPickerSheetProps> = ({
                       {opt.label}
                     </Text>
                     <Ionicons
-                      name="chevron-forward"
+                      name={opt.slug === defaultValue ? "checkmark" : "chevron-forward"}
                       size={18}
-                      color={Colors.brownMuted}
+                      color={opt.slug === defaultValue ? "#c89a47" : Colors.brownMuted}
                     />
                   </TouchableOpacity>
                 ))}

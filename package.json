@@ -3,6 +3,9 @@
   "private": true,
   "scripts": {
     "mobile": "cd apps/mobile && npx expo start",
+    "web:dev": "pnpm --filter @kalpx/web dev",
+    "web:build": "pnpm --filter @kalpx/web build",
+    "web:typecheck": "pnpm --filter @kalpx/web typecheck",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
     "test": "turbo run test"
@@ -15,7 +18,8 @@
       "@firebase/util",
       "postinstall-postinstall",
       "protobufjs",
-      "unrs-resolver"
+      "unrs-resolver",
+      "esbuild"
     ]
   }
 }

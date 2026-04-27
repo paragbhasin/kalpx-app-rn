@@ -1,4 +1,16 @@
 export type JourneyStatus = {
+  // camelCase (actual wire format from backend)
+  hasActiveJourney?: boolean;
+  journeyId?: number | string;
+  dayNumber?: number;
+  pathCycleNumber?: number;
+  daysPastEnd?: number;
+  focus?: string;
+  subfocus?: string;
+  checkpointPending?: boolean;
+  reentryTarget?: string;
+  welcomeBack?: boolean;
+  // snake_case aliases (kept for compatibility)
   journey_id?: number | string;
   active_journey?: boolean;
   has_active_journey?: boolean;
@@ -15,10 +27,12 @@ export type JourneyStatus = {
 export function normalizeJourneyStatus(data: JourneyStatus | null | undefined): boolean {
   if (!data) return false;
   return Boolean(
-    data.active_journey ||
+    data.hasActiveJourney ||
+      data.active_journey ||
       data.has_active_journey ||
       data.journey?.status === 'active' ||
       data.status === 'active' ||
-      (data.journey_id != null && data.status !== 'ended'),
+      (data.journey_id != null && data.status !== 'ended') ||
+      (data.journeyId != null && data.daysPastEnd === 0),
   );
 }

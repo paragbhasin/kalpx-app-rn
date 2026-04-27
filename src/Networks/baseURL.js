@@ -3,8 +3,8 @@
 // const BASE_URL = "https://dev.kalpx.com/api"; // change as needed
 // export default BASE_URL;
 
-// MANUAL SWITCH — set to "dev" during development, "prod" for release builds
-const ENV = "dev";
+// Auto-switch: __DEV__ is true in Expo Go / debug builds, false in production EAS builds
+const ENV = __DEV__ ? "dev" : "prod";
 
 // API URLs
 const DEV_URL = "https://dev.kalpx.com/api";

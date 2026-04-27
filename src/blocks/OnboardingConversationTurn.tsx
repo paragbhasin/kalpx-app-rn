@@ -8,7 +8,9 @@
  * Regression cases guarded:
  *   - REG-001: state cleanup on next-turn transition (we do not persist draft inside block state)
  *   - REG-015: no auto-completion when user has not tapped (only action.type=onboarding_turn_response)
- *   - REG-016: input placeholder shown only when block.open_input.enabled (turns 4/5 are binary)
+ *   - REG-016: turns 3–5 are chip-choice only; freeform text is intentionally disabled until the
+ *     backend defines a typed-answer contract (typed input → "selected_via_text" degrades chip
+ *     fetching and completion quality)
  *
  * Tone rules: no exclamations, no "Great!", no emoji, no streak language.
  */

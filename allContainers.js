@@ -6721,7 +6721,7 @@ export const ContainerRegistry = {
 // Spec: docs/specs/mitra-v3-experience/screens/route_welcome_onboarding.md §1, §6
 // Regression cases guarded: REG-001 (draft cleanup on completion in
 //   actionExecutor onboarding_turn_response), REG-015 (no auto-advance), REG-016
-//   (turns 4 & 5 have no open_input).
+//   Turns 1–5 are chip-only; open_input disabled until backend supports typed answers.
 // =============================================================================
 
 const _onResp = { type: "onboarding_turn_response" };
@@ -6772,12 +6772,7 @@ export const WelcomeOnboardingContainer = {
               style: "secondary",
             },
           ],
-          open_input: {
-            enabled: true,
-            placeholder: "Or tell me why you're here...",
-            max_length: 400,
-          },
-          voice_available: true,
+          open_input: { enabled: false },
           on_response: _onResp,
         },
       ],
@@ -6845,12 +6840,7 @@ export const WelcomeOnboardingContainer = {
               style: "secondary",
             },
           ],
-          open_input: {
-            enabled: true,
-            placeholder: "Type Or say it in your words",
-            max_length: 400,
-          },
-          voice_available: true,
+          open_input: { enabled: false },
           on_response: _onResp,
         },
       ],
@@ -6894,12 +6884,7 @@ export const WelcomeOnboardingContainer = {
               style: "secondary",
             },
           ],
-          open_input: {
-            enabled: true,
-            placeholder: "Type Or say it in your words",
-            max_length: 400,
-          },
-          voice_available: true,
+          open_input: { enabled: false },
           on_response: _onResp,
         },
       ],
@@ -6944,12 +6929,7 @@ export const WelcomeOnboardingContainer = {
               style: "secondary",
             },
           ],
-          open_input: {
-            enabled: true,
-            placeholder: "Type Or say it in your words",
-            max_length: 400,
-          },
-          voice_available: true,
+          open_input: { enabled: false },
           on_response: _onResp,
         },
       ],
@@ -6981,12 +6961,7 @@ export const WelcomeOnboardingContainer = {
             { id: "purpose", label: "More purpose", style: "secondary" },
             { id: "steadiness", label: "More steadiness", style: "secondary" },
           ],
-          open_input: {
-            enabled: true,
-            placeholder: "Type Or say it in your words",
-            max_length: 400,
-          },
-          voice_available: true,
+          open_input: { enabled: false },
           on_response: _onResp,
         },
       ],
@@ -7026,12 +7001,7 @@ export const WelcomeOnboardingContainer = {
             { id: "confusion", label: "Confusion", style: "secondary" },
             { id: "not_sure", label: "I'm not sure", style: "secondary" },
           ],
-          open_input: {
-            enabled: true,
-            placeholder: "Type Or say it in your words",
-            max_length: 400,
-          },
-          voice_available: true,
+          open_input: { enabled: false },
           on_response: _onResp,
         },
       ],
@@ -7083,12 +7053,7 @@ export const WelcomeOnboardingContainer = {
               style: "secondary",
             },
           ],
-          open_input: {
-            enabled: true,
-            placeholder: "Type Or say it in your words",
-            max_length: 400,
-          },
-          voice_available: true,
+          open_input: { enabled: false },
           on_response: _onResp,
         },
       ],

@@ -167,8 +167,8 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
         </Animated.View>
       </Animated.View>
 
-      {/* Lotus image at the bottom */}
-      <View style={styles.lotusWrap}>
+      {/* Lotus image at the bottom — purely decorative, must not intercept chip taps */}
+      <View style={styles.lotusWrap} pointerEvents="none">
         <Image
           source={require("../../assets/new_home_lotus.png")}
           style={styles.lotus}
@@ -176,19 +176,6 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
         />
       </View>
 
-      <View style={styles.fixedInputArea}>
-        <VoiceTextInput
-          voiceAvailable={true}
-          placeholder="How can I help you?"
-          onSend={(val, type) => {
-            if (type === "text") {
-              fire({ freeform_text: val, response_type: "text" });
-            } else {
-              fire({ response_type: "voice_requested" });
-            }
-          }}
-        />
-      </View>
     </View>
   );
 };

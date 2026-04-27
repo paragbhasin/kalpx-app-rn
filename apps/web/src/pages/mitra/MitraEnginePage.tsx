@@ -6,6 +6,7 @@ import { ScreenRenderer } from '../../engine/ScreenRenderer';
 import { useScreenState } from '../../store/screenSlice';
 import { loadScreenWithData } from '../../store/screenSlice';
 import { executeAction } from '../../engine/actionExecutor';
+import { webNavigate } from '../../lib/webRouter';
 import type { AppDispatch } from '../../store';
 
 export function MitraEnginePage() {
@@ -48,6 +49,33 @@ export function MitraEnginePage() {
   };
 
   const isRunnerContainer = containerId === 'practice_runner';
+
+  // Fallback — missing params with no Redux state → never show blank screen
+  if (!containerId || !stateId) {
+    return (
+      <PageShell>
+        <div style={{ maxWidth: 480, margin: '0 auto', padding: 32, textAlign: 'center' }}>
+          <p style={{ color: '#9A8C78', marginBottom: 16 }} data-testid="engine-not-found">
+            This screen is not available.
+          </p>
+          <button
+            onClick={() => webNavigate('/en/mitra/dashboard')}
+            data-testid="engine-return-btn"
+            style={{
+              padding: '10px 24px',
+              borderRadius: 8,
+              background: '#C9A84C',
+              color: '#fff',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            Return to dashboard
+          </button>
+        </div>
+      </PageShell>
+    );
+  }
 
   return (
     <PageShell>

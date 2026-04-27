@@ -7,20 +7,40 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { ScreenRenderer } from '../../engine/ScreenRenderer';
 import { useScreenState, loadScreenWithData } from '../../store/screenSlice';
 import { executeAction } from '../../engine/actionExecutor';
 import { useGuestIdentity } from '../../hooks/useGuestIdentity';
+import { useJourneyStatus } from '../../hooks/useJourneyStatus';
 import type { AppDispatch } from '../../store';
 
 export function OnboardingPage() {
   useGuestIdentity();
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const screenState = useScreenState();
   const [resolving, setResolving] = useState(false);
+
+  const { loading: statusLoading, hasActiveJourney } = useJourneyStatus();
+
+  // Active journey users must not re-run onboarding — duplicate journey risk
+  useEffect(() => {
+    if (statusLoading) return;
+    if (hasActiveJourney === true) {
+      navigate('/en/mitra/dashboard', { replace: true });
+    }
+  }, [statusLoading, hasActiveJourney, navigate]);
+
+  if (statusLoading) {
+    return (
+      <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fdf8ef' }}>
+        <p style={{ color: '#888', fontSize: 14 }}>Loading…</p>
+      </div>
+    );
+  }
 
   // stateId drives which turn to show; default to turn_1 if missing
   const stateId: string =

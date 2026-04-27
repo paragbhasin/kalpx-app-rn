@@ -7,6 +7,8 @@ import { api } from '../lib/api';
 import { getApiErrorMessage } from '../lib/apiErrors';
 import { useAppDispatch } from '../store/hooks';
 import { showSnackBar } from '../store/snackBarSlice';
+import { store, resetStore } from '../store';
+import { invalidateJourneyStatusCache } from './useJourneyStatus';
 import type { LoginRequest, LoginResponse, SignupRegisterRequest, SignupStep1Request, SignupOtpVerifyRequest, ForgotPasswordRequest } from '../types/auth';
 
 // Dev reCAPTCHA bypass — backend accepts any token value in dev/debug mode
@@ -34,6 +36,7 @@ export function useAuth() {
         }
 
         await storeTokens(webStorage, { accessToken, refreshToken });
+        invalidateJourneyStatusCache();
         navigate('/en/mitra');
         return { success: true };
       } catch (err) {
@@ -47,6 +50,8 @@ export function useAuth() {
     await webStorage.removeItem(AUTH_KEYS.accessToken);
     await webStorage.removeItem(AUTH_KEYS.refreshToken);
     // Keep guestUUID — guest identity survives logout
+    invalidateJourneyStatusCache();
+    store.dispatch(resetStore());
     navigate('/login');
   }, [navigate]);
 

@@ -12,6 +12,7 @@ import {
   onboardingComplete,
   startJourneyV3,
   getDailyView,
+  getDashboardView,
 } from './mitraApi';
 import { ingestDailyView } from './v3Ingest';
 import { webNavigate } from '../lib/webRouter';
@@ -261,6 +262,153 @@ export async function executeAction(action: any, context: ActionContext): Promis
         webNavigate('/en/mitra/dashboard');
       } finally {
         dispatch(setSubmitting(false));
+      }
+      break;
+    }
+
+    // ----------------------------------------------------------------
+    // START_RUNNER — Phase 7: set runner context, route to offering_reveal.
+    // Full PracticeRunnerContainer is Phase 8.
+    // ----------------------------------------------------------------
+    case 'start_runner': {
+      const p = action.payload || action;
+      const variant: string = p.variant || p.item_type || 'mantra';
+      const source: string = p.source || 'core';
+      const item = p.item || {};
+
+      if (!item.item_id && !item.id) {
+        if (WEB_ENV.isDev) console.warn('[actionExecutor] start_runner: missing item_id', action);
+        break;
+      }
+
+      dispatch(setSubmitting(true));
+      try {
+        // Stamp runner context into screenData
+        dispatch(updateScreenData({
+          runner_active_item: item,
+          runner_variant: variant,
+          runner_source: source,
+          runner_step_index: 0,
+          runner_reps_completed: 0,
+          // info context for offering_reveal interpolation
+          info: {
+            title: item.title || item.item_id,
+            subtitle: item.subtitle || '',
+            description: item.subtitle || item.description || '',
+            item_id: item.item_id || item.id,
+            item_type: variant,
+          },
+          info_start_label: 'Begin',
+          info_start_action: { type: 'info_start_click' },
+        }));
+        void apiTrackEvent('offering_reveal_viewed', {
+          journey_id: screenData.journey_id,
+          day_number: screenData.day_number || 1,
+          item_id: item.item_id || item.id,
+          source,
+          variant,
+        });
+        dispatch(loadScreen({ containerId: 'cycle_transitions', stateId: 'offering_reveal' }));
+        webNavigate(_containerToPath('cycle_transitions', 'offering_reveal'));
+      } finally {
+        dispatch(setSubmitting(false));
+      }
+      break;
+    }
+
+    // ----------------------------------------------------------------
+    // VIEW_INFO — show offering_reveal info screen for a triad item.
+    // ----------------------------------------------------------------
+    case 'view_info': {
+      const p = action.payload || action;
+      const item = p.manualData || {};
+      const itemType: string = p.type || p.item_type || 'mantra';
+
+      dispatch(setSubmitting(true));
+      try {
+        dispatch(updateScreenData({
+          info: {
+            title: item.title || item.name || '',
+            subtitle: item.subtitle || '',
+            description: item.subtitle || item.description || '',
+            item_id: item.item_id || item.id,
+            item_type: itemType,
+          },
+          info_start_label: 'Begin',
+          info_start_action: { type: 'info_start_click' },
+        }));
+        dispatch(loadScreen({ containerId: 'cycle_transitions', stateId: 'offering_reveal' }));
+        webNavigate(_containerToPath('cycle_transitions', 'offering_reveal'));
+      } finally {
+        dispatch(setSubmitting(false));
+      }
+      break;
+    }
+
+    // ----------------------------------------------------------------
+    // INITIATE_TRIGGER — route to trigger support flow.
+    // ----------------------------------------------------------------
+    case 'initiate_trigger': {
+      void apiTrackEvent('trigger_initiated', {
+        journey_id: screenData.journey_id,
+        day_number: screenData.day_number || 1,
+      });
+      webNavigate('/en/mitra/trigger');
+      break;
+    }
+
+    // ----------------------------------------------------------------
+    // START_CHECKIN — route to quick check-in flow.
+    // ----------------------------------------------------------------
+    case 'start_checkin': {
+      void apiTrackEvent('checkin_started', {
+        journey_id: screenData.journey_id,
+        day_number: screenData.day_number || 1,
+      });
+      webNavigate('/en/mitra/checkin');
+      break;
+    }
+
+    // ----------------------------------------------------------------
+    // ENTER_ROOM — navigate to a support room.
+    // Full RoomContainer is Phase 8/9.
+    // ----------------------------------------------------------------
+    case 'enter_room': {
+      const p = action.payload || action;
+      const roomId: string = p.room_id || '';
+      if (!roomId) {
+        if (WEB_ENV.isDev) console.warn('[actionExecutor] enter_room: missing room_id', action);
+        break;
+      }
+      dispatch(setScreenValue({ key: 'active_room_id', value: roomId }));
+      dispatch(setScreenValue({ key: 'room_source', value: p.source || 'dashboard' }));
+      void apiTrackEvent('room_entered', {
+        journey_id: screenData.journey_id,
+        day_number: screenData.day_number || 1,
+        room_id: roomId,
+        source: p.source || 'dashboard',
+      });
+      webNavigate(`/en/mitra/room/${roomId}`);
+      break;
+    }
+
+    // ----------------------------------------------------------------
+    // DASHBOARD_LOAD — re-hydrate dashboard data.
+    // Simplified vs RN (no briefing/resilience/entity fetches in Phase 7).
+    // ----------------------------------------------------------------
+    case 'dashboard_load': {
+      try {
+        const envelope = await getDashboardView();
+        if (envelope) {
+          const { ingestDailyView } = await import('./v3Ingest');
+          const flat = ingestDailyView(envelope);
+          dispatch(updateScreenData(flat));
+          if (WEB_ENV.isDev) {
+            console.log(`[actionExecutor] dashboard_load: ${Object.keys(flat).length} keys`);
+          }
+        }
+      } catch (e) {
+        if (WEB_ENV.isDev) console.warn('[actionExecutor] dashboard_load failed:', e);
       }
       break;
     }

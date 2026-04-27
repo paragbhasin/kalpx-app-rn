@@ -1,205 +1,215 @@
+/**
+ * DashboardPage — Phase 7.
+ * Fetches GET /api/mitra/v3/journey/daily-view/ (fallback: mitra/today/),
+ * runs ingestDailyView(), dispatches to Redux, loads companion_dashboard_v3/day_active
+ * through ScreenRenderer + NewDashboardBodyBlock.
+ *
+ * Active journey gate handled by RequiresJourney in routes.tsx.
+ */
+
 import React, { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { PageShell } from '../../components/PageShell';
-import { useScreenState } from '../../store/screenSlice';
-import { updateScreenData, setScreenValue } from '../../store/screenSlice';
-import { getDailyView } from '../../engine/mitraApi';
+import { ScreenRenderer } from '../../engine/ScreenRenderer';
+import { useScreenState, updateScreenData, loadScreenWithData } from '../../store/screenSlice';
+import { getDashboardView } from '../../engine/mitraApi';
 import { ingestDailyView } from '../../engine/v3Ingest';
-import { buildDashboardProofViewModel } from '../../features/mitra/dashboard/buildDashboardProofViewModel';
 import { executeAction } from '../../engine/actionExecutor';
-import type { AppDispatch } from '../../store';
+import { useGuestIdentity } from '../../hooks/useGuestIdentity';
 import { WEB_ENV } from '../../lib/env';
+import type { AppDispatch } from '../../store';
 
 export function DashboardPage() {
+  useGuestIdentity();
   const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate();
   const screenState = useScreenState();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [debugOpen, setDebugOpen] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      setLoading(true);
-      setError(null);
-      try {
-        const envelope = await getDailyView();
-        if (cancelled) return;
-        const flat = ingestDailyView(envelope);
-        const keyCount = Object.keys(flat).length;
-        if (WEB_ENV.isDev) {
-          console.log(`[Dashboard] ingestDailyView produced ${keyCount} keys`);
-          console.log('[Dashboard] triad:', flat.today?.triad);
-          console.log('[Dashboard] screenData.greeting_headline:', flat.greeting_headline);
-        }
-        dispatch(updateScreenData(flat));
-      } catch (err: any) {
-        if (!cancelled) {
-          const msg = err?.response?.data?.detail || err?.message || 'Failed to load today';
-          setError(msg);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const envelope = await getDashboardView();
+
+      if (!envelope) {
+        setError('Your path is preparing — try again in a moment.');
+        return;
       }
+
+      const flat = ingestDailyView(envelope);
+
+      if (WEB_ENV.isDev) {
+        console.log(`[Dashboard] ingestDailyView → ${Object.keys(flat).length} keys`);
+        console.log('[Dashboard] greeting:', flat.greeting);
+        console.log('[Dashboard] today.triad:', flat.today?.triad);
+        console.log('[Dashboard] continuity tier:', flat.continuity?.tier);
+      }
+
+      dispatch(updateScreenData(flat));
+
+      // Load companion_dashboard_v3/day_active schema from contracts
+      await dispatch(loadScreenWithData({ containerId: 'companion_dashboard_v3', stateId: 'day_active' }));
+
+    } catch (err: any) {
+      const msg = err?.response?.data?.detail || err?.message || 'Could not load your practice.';
+      if (WEB_ENV.isDev) console.error('[Dashboard] load error:', err);
+      setError(msg);
+    } finally {
+      setLoading(false);
     }
-    void load();
-    return () => { cancelled = true; };
   }, [dispatch]);
 
-  const handleTriadTap = useCallback(
-    async (card: any) => {
-      if (screenState._isSubmitting) return;
-      // Set info context so offering_reveal can interpolate {{info.title}}
-      dispatch(setScreenValue({
-        key: 'info',
-        value: {
-          title: card.title,
-          subtitle: card.subtitle,
-          description: card.subtitle,
-          item_id: card.itemId,
-          item_type: card.type,
-        },
-      }));
-      dispatch(setScreenValue({ key: 'info_start_label', value: 'Begin' }));
-      await executeAction(card.tapAction, { dispatch, screenData: screenState.screenData });
-      // Navigate is handled inside executeAction
-    },
-    [dispatch, navigate, screenState],
-  );
+  useEffect(() => {
+    void load();
+  }, [load]);
 
-  const vm = buildDashboardProofViewModel(screenState.screenData);
+  const actionContext = {
+    dispatch,
+    screenData: screenState.screenData,
+    currentStateId: 'day_active',
+  };
 
   return (
-    <PageShell>
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: '24px 16px' }}>
-        {loading && (
-          <div style={{ textAlign: 'center', padding: 48, color: '#888' }}>
-            Loading your practice…
-          </div>
-        )}
+    <div style={{ minHeight: '100dvh', background: '#FFF8EF' }}>
+      <div style={{ maxWidth: 480, margin: '0 auto' }}>
 
-        {error && (
-          <div style={{ padding: 16, background: '#fee', borderRadius: 8, color: '#c00', marginBottom: 16 }}>
-            {error}
-            <button
-              onClick={() => window.location.reload()}
-              style={{ marginLeft: 12, cursor: 'pointer', color: '#c00', textDecoration: 'underline', background: 'none', border: 'none' }}
+        {/* ── Loading skeleton ── */}
+        {loading && <DashboardSkeleton />}
+
+        {/* ── Error state ── */}
+        {!loading && error && (
+          <div style={{ padding: 24 }}>
+            <div
+              style={{
+                padding: '16px 20px',
+                borderRadius: 12,
+                background: '#fff1f0',
+                border: '1px solid #fca5a5',
+                marginBottom: 12,
+              }}
             >
-              Retry
-            </button>
+              <p style={{ color: '#b91c1c', fontSize: 14, marginBottom: 8 }}>{error}</p>
+              <button
+                onClick={() => void load()}
+                style={{
+                  padding: '8px 20px',
+                  borderRadius: 8,
+                  background: '#b91c1c',
+                  color: '#fff',
+                  border: 'none',
+                  fontSize: 13,
+                  cursor: 'pointer',
+                }}
+              >
+                Retry
+              </button>
+            </div>
           </div>
         )}
 
+        {/* ── Dashboard via ScreenRenderer ── */}
         {!loading && !error && (
-          <>
-            {/* Greeting */}
-            <div style={{ marginBottom: 28 }}>
-              <h1 style={{ fontSize: 22, fontWeight: 600, color: '#1a1a1a', margin: 0 }}>
-                {vm.greeting.headline}
-              </h1>
-              {vm.greeting.subtitle && (
-                <p style={{ fontSize: 14, color: '#666', marginTop: 6 }}>{vm.greeting.subtitle}</p>
-              )}
-            </div>
+          <ScreenRenderer
+            schema={screenState.currentScreen}
+            screenData={screenState.screenData}
+            onAction={(action) => void executeAction(action, actionContext)}
+          />
+        )}
 
-            {/* Triad cards */}
-            {vm.triadCards.length > 0 && (
-              <div style={{ marginBottom: 24 }}>
-                <p style={{ fontSize: 12, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 12 }}>
-                  Today's Practice
-                </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {vm.triadCards.map((card) => (
-                    <button
-                      key={card.id}
-                      data-testid={`triad-card-${card.type}`}
-                      onClick={() => void handleTriadTap(card)}
-                      disabled={screenState._isSubmitting}
-                      style={{
-                        width: '100%',
-                        textAlign: 'left',
-                        padding: '14px 16px',
-                        borderRadius: 10,
-                        border: '1px solid',
-                        borderColor: card.completed ? '#c8e6c9' : '#e0d4b8',
-                        background: card.completed ? '#f1f8f2' : '#fdf8ef',
-                        cursor: 'pointer',
-                        opacity: screenState._isSubmitting ? 0.6 : 1,
-                      }}
-                    >
-                      <div style={{ fontSize: 11, color: '#999', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 4 }}>
-                        {card.type}{card.completed ? ' ✓' : ''}
-                      </div>
-                      <div style={{ fontSize: 15, fontWeight: 600, color: '#2a1a0a' }}>{card.title}</div>
-                      {card.subtitle && (
-                        <div style={{ fontSize: 13, color: '#666', marginTop: 4 }}>{card.subtitle}</div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
+        {/* ── Dev debug panel ── */}
+        {WEB_ENV.isDev && (
+          <div style={{ borderTop: '1px solid #eee', padding: '12px 16px', marginTop: 16 }}>
+            <button
+              onClick={() => setDebugOpen(!debugOpen)}
+              style={{ fontSize: 11, color: '#aaa', background: 'none', border: 'none', cursor: 'pointer' }}
+            >
+              {debugOpen ? '▼' : '▶'} screenData debug
+            </button>
+            {debugOpen && (
+              <pre
+                style={{
+                  fontSize: 10,
+                  color: '#555',
+                  overflow: 'auto',
+                  maxHeight: 400,
+                  marginTop: 8,
+                  background: '#f8f8f8',
+                  borderRadius: 6,
+                  padding: 8,
+                }}
+              >
+                {JSON.stringify(screenState.screenData, null, 2)}
+              </pre>
             )}
-
-            {vm.triadCards.length === 0 && (
-              <div style={{ padding: 24, textAlign: 'center', color: '#888', border: '1px dashed #ddd', borderRadius: 10 }}>
-                No practice data. Check backend response.
-              </div>
-            )}
-
-            {/* Support chips */}
-            {vm.supportChips.length > 0 && (
-              <div>
-                <p style={{ fontSize: 12, color: '#888', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1, marginBottom: 10 }}>
-                  Support
-                </p>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                  {vm.supportChips.map((chip) => (
-                    <button
-                      key={chip.id}
-                      data-testid={`support-chip-${chip.id}`}
-                      style={{
-                        padding: '7px 14px',
-                        borderRadius: 20,
-                        border: '1px solid #d4b16a',
-                        background: '#fdf8ef',
-                        fontSize: 13,
-                        cursor: 'pointer',
-                        color: '#6b4c1a',
-                      }}
-                      onClick={() => {
-                        if (chip.action) {
-                          void executeAction(chip.action, { dispatch, screenData: screenState.screenData });
-                        }
-                      }}
-                    >
-                      {chip.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* DEV debug panel */}
-            {WEB_ENV.isDev && (
-              <div style={{ marginTop: 32, borderTop: '1px solid #eee', paddingTop: 16 }}>
-                <button
-                  onClick={() => setDebugOpen(!debugOpen)}
-                  style={{ fontSize: 11, color: '#aaa', background: 'none', border: 'none', cursor: 'pointer' }}
-                >
-                  {debugOpen ? '▼' : '▶'} screenData debug
-                </button>
-                {debugOpen && (
-                  <pre style={{ fontSize: 10, color: '#666', overflow: 'auto', maxHeight: 300, marginTop: 8 }}>
-                    {JSON.stringify(screenState.screenData, null, 2)}
-                  </pre>
-                )}
-              </div>
-            )}
-          </>
+          </div>
         )}
       </div>
-    </PageShell>
+    </div>
+  );
+}
+
+// ─── Skeleton ───────────────────────────────────────────────────────────────
+
+function SkeletonLine({ w = '100%', h = 16, mb = 8 }: { w?: string | number; h?: number; mb?: number }) {
+  return (
+    <div
+      style={{
+        width: w,
+        height: h,
+        borderRadius: 6,
+        background: '#f0e8d8',
+        marginBottom: mb,
+        animation: 'pulse 1.5s ease-in-out infinite',
+      }}
+    />
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div style={{ padding: '28px 16px' }}>
+      {/* Greeting skeleton */}
+      <SkeletonLine w="40%" h={12} mb={6} />
+      <SkeletonLine w="80%" h={28} mb={6} />
+      <SkeletonLine w="60%" h={16} mb={28} />
+
+      {/* Triad skeleton */}
+      <SkeletonLine w="30%" h={11} mb={10} />
+      {['mantra', 'sankalp', 'practice'].map((s) => (
+        <div
+          key={s}
+          style={{
+            padding: 16,
+            borderRadius: 12,
+            border: '1px solid #f0e8d8',
+            background: '#fdf8ef',
+            marginBottom: 10,
+          }}
+        >
+          <SkeletonLine w="25%" h={10} mb={6} />
+          <SkeletonLine w="70%" h={18} mb={0} />
+        </div>
+      ))}
+
+      {/* Support skeleton */}
+      <div style={{ marginTop: 20 }}>
+        <SkeletonLine w="30%" h={11} mb={10} />
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            style={{
+              padding: 12,
+              borderRadius: 10,
+              border: '1px solid #f0e8d8',
+              background: '#fdf8ef',
+              marginBottom: 8,
+            }}
+          >
+            <SkeletonLine w="55%" h={14} mb={0} />
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }

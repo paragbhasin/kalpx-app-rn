@@ -13,6 +13,7 @@ import { OnboardingIntroHeroBlock } from '../components/blocks/OnboardingIntroHe
 import { GuidanceModePickerBlock } from '../components/blocks/GuidanceModePickerBlock';
 import { FirstRecognitionBlock } from '../components/blocks/FirstRecognitionBlock';
 import { PathEmergesBlock } from '../components/blocks/PathEmergesBlock';
+import { NewDashboardBodyBlock } from '../components/blocks/NewDashboardBodyBlock';
 import { UnimplementedBlock } from '../components/blocks/UnimplementedBlock';
 
 interface BlockRendererProps {
@@ -58,6 +59,8 @@ export function BlockRenderer({ block, screenData, onAction }: BlockRendererProp
       return <FirstRecognitionBlock block={block} screenData={screenData} />;
     case 'path_emerges':
       return <PathEmergesBlock block={block} screenData={screenData} />;
+    case 'new_dashboard_body':
+      return <NewDashboardBodyBlock block={block} screenData={screenData} onAction={onAction} />;
     default:
       return <UnimplementedBlock block={block} />;
   }

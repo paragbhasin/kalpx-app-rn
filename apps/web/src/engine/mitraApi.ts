@@ -39,6 +39,23 @@ export async function getDailyView(): Promise<any> {
   return res.data;
 }
 
+/**
+ * GET /api/mitra/v3/journey/daily-view/ — V3 daily view envelope used by RN dashboard.
+ * Falls back to mitra/today/ for compatibility if v3 endpoint returns 404.
+ */
+export async function getDashboardView(): Promise<any> {
+  try {
+    const res = await api.get('mitra/v3/journey/daily-view/');
+    return res.data;
+  } catch (err: any) {
+    if (err?.response?.status === 404) {
+      const res = await api.get('mitra/today/');
+      return res.data;
+    }
+    throw err;
+  }
+}
+
 export async function getDay7View(): Promise<any> {
   const res = await api.get('mitra/checkpoint/day-7/');
   return res.data;

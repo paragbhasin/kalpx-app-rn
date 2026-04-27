@@ -9,7 +9,8 @@ import { useAppDispatch } from '../store/hooks';
 import { showSnackBar } from '../store/snackBarSlice';
 import { store, resetStore } from '../store';
 import { invalidateJourneyStatusCache } from './useJourneyStatus';
-import type { LoginRequest, LoginResponse, SignupRegisterRequest, SignupStep1Request, SignupOtpVerifyRequest, ForgotPasswordRequest } from '../types/auth';
+import type { LoginRequest, LoginResponse, SignupRegisterRequest, SignupStep1Request, SignupOtpVerifyRequest, ForgotPasswordRequest, ResetPasswordRequest } from '../types/auth';
+import { claimGuestJourney } from '../engine/mitraApi';
 
 // Dev reCAPTCHA bypass — backend accepts any token value in dev/debug mode
 const DEV_RECAPTCHA_TOKEN = 'dev-bypass-token';
@@ -36,6 +37,9 @@ export function useAuth() {
         }
 
         await storeTokens(webStorage, { accessToken, refreshToken });
+        invalidateJourneyStatusCache();
+        // Attempt guest journey claim (best-effort — failure must not break login)
+        try { await claimGuestJourney(); } catch { /* swallow */ }
         invalidateJourneyStatusCache();
         navigate('/en/mitra');
         return { success: true };
@@ -107,6 +111,10 @@ export function useAuth() {
 
         if (accessToken && refreshToken) {
           await storeTokens(webStorage, { accessToken, refreshToken });
+          invalidateJourneyStatusCache();
+          // Attempt guest journey claim (best-effort)
+          try { await claimGuestJourney(); } catch { /* swallow */ }
+          invalidateJourneyStatusCache();
           navigate('/en/mitra/start');
         } else {
           // Backend may not return tokens on register — navigate to login
@@ -135,6 +143,29 @@ export function useAuth() {
     [],
   );
 
+  const resetPassword = useCallback(
+    async (
+      email: string,
+      otp: string,
+      newPassword: string,
+    ): Promise<{ success: boolean; error?: string }> => {
+      try {
+        const payload: ResetPasswordRequest = {
+          email,
+          otp,
+          new_password: newPassword,
+          recaptcha_token: getRecaptchaToken(),
+          recaptcha_action: 'reset_password',
+        };
+        await api.post('users/reset_password/', payload);
+        return { success: true };
+      } catch (err) {
+        return { success: false, error: getApiErrorMessage(err, 'Password reset failed. Please check the code and try again.') };
+      }
+    },
+    [],
+  );
+
   const getAccessToken = useCallback(() => webStorage.getItem(AUTH_KEYS.accessToken), []);
 
   const checkIsAuthenticated = useCallback(() => isAuthenticated(webStorage), []);
@@ -146,6 +177,7 @@ export function useAuth() {
     verifyOtp,
     registerUser,
     forgotPassword,
+    resetPassword,
     getAccessToken,
     isAuthenticated: checkIsAuthenticated,
   };

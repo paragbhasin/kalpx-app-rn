@@ -50,3 +50,21 @@ export type SignupRegisterRequest = {
 export type ForgotPasswordRequest = {
   email: string;
 };
+
+export type ResetPasswordRequest = {
+  email: string;
+  otp: string;
+  new_password: string;
+  recaptcha_token: string;
+  recaptcha_action?: string;
+};
+
+export type UserProfile = {
+  id: number;
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  username?: string;
+  profile_name?: string;
+  [key: string]: unknown;
+};

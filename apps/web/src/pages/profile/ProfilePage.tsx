@@ -5,7 +5,6 @@
  */
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Header } from '../../components/layout/Header';
 import { useAuth } from '../../hooks/useAuth';
 import { getUserProfile } from '../../lib/userApi';
 import { getUserPreferences } from '../../engine/mitraApi';
@@ -53,8 +52,6 @@ export function ProfilePage() {
 
   return (
     <AppShell>
-      <Header />
-
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '32px 20px 80px' }}>
         {/* Identity */}
         <SectionCard data-testid="profile-identity">

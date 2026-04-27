@@ -92,3 +92,48 @@ button {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* ── Responsive nav utilities ── */
+
+/* Desktop nav: shown ≥768px, hidden below */
+.kalpx-desktop-nav {
+  display: flex !important;
+}
+@media (max-width: 767px) {
+  .kalpx-desktop-nav {
+    display: none !important;
+  }
+}
+
+/* kalpx-desktop-only: visible ≥768px only (footer, desktop-only elements) */
+.kalpx-desktop-only {
+  display: flex;
+}
+@media (max-width: 767px) {
+  .kalpx-desktop-only {
+    display: none !important;
+  }
+}
+
+/* kalpx-mobile-only: visible <768px only (hamburger, bottom nav) */
+.kalpx-mobile-only {
+  display: flex !important;
+}
+@media (min-width: 768px) {
+  .kalpx-mobile-only {
+    display: none !important;
+  }
+}
+
+/* Sidebar slide-in from right */
+@keyframes kalpx-slide-in-right {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+/* Bottom nav page padding: prevent content hiding under fixed bottom nav on mobile */
+@media (max-width: 767px) {
+  .kalpx-shell-main {
+    padding-bottom: calc(56px + env(safe-area-inset-bottom));
+  }
+}

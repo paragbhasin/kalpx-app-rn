@@ -6,6 +6,7 @@ import { AppRoutes } from './routes';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { SnackBar } from './components/SnackBar';
 import { setWebNavigate } from './lib/webRouter';
+import { AppLayout } from './components/layout/AppLayout';
 
 function NavigateInjector() {
   const navigate = useNavigate();
@@ -21,7 +22,9 @@ export function App() {
       <Provider store={store}>
         <BrowserRouter>
           <NavigateInjector />
-          <AppRoutes />
+          <AppLayout>
+            <AppRoutes />
+          </AppLayout>
           <SnackBar />
         </BrowserRouter>
       </Provider>

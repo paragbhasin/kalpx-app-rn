@@ -5,7 +5,6 @@ import { getClasses } from '../../engine/classApi';
 import type { ClassListing } from '@kalpx/types';
 import { WEB_ENV } from '../../lib/env';
 import { AppShell, PageContainer, EmptyState } from '../../components/ui';
-import { Header } from '../../components/layout/Header';
 
 export function ClassListingPage() {
   const [classes, setClasses] = useState<ClassListing[]>([]);
@@ -30,7 +29,6 @@ export function ClassListingPage() {
 
   return (
     <AppShell>
-      <Header />
       <PageContainer mode="wide" pt={28} pb={40} px={16}>
         {/* Header */}
         <div style={{ paddingBottom: 16 }}>

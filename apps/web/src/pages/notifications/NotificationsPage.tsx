@@ -52,7 +52,7 @@ export function NotificationsPage() {
         {/* Header */}
         <div style={{ marginBottom: 24 }}>
           <button
-            onClick={() => navigate('/en/mitra/dashboard')}
+            onClick={() => navigate(-1)}
             style={{
               background: 'none',
               border: 'none',

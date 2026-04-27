@@ -31,7 +31,6 @@ const DEFAULT_CTAS: Cta[] = [
   { id: "start_today", label: "Start today" },
   { id: "review", label: "Review" },
   { id: "reflect", label: "Reflect" },
-  { id: "ask_mitra", label: "Ask Mitra" },
 ];
 
 const PersonalGreetingCard: React.FC<Props> = ({

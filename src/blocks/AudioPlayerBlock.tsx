@@ -191,7 +191,9 @@ const AudioPlayerBlock: React.FC<AudioPlayerBlockProps> = ({ block }) => {
             onSlidingComplete={seek}
             minimumTrackTintColor="#E2C18D"
             maximumTrackTintColor="rgba(226, 193, 141, 0.2)"
-            thumbImage={{ uri: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH5AgKDA8Ym9iRDAAAADRJREFUOMtjYBgFgwEMDAwMDP///z9A+P///w8Q/v///x8g/P///z9A+P///w8Q/v///x8gGAUAAC4QCAbB7AEYAAAAAElFTkSuQmCC' }}
+            thumbImage={{
+              uri: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH5AgKDA8Ym9iRDAAAADRJREFUOMtjYBgFgwEMDAwMDP///z9A+P///w8Q/v///x8g/P///z9A+P///w8Q/v///x8gGAUAAC4QCAbB7AEYAAAAAElFTkSuQmCC",
+            }}
           />
         </View>
         <Text style={styles.timeText}>{formatTime(duration)}</Text>
@@ -243,7 +245,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 15,
-    opacity: 0.8,
+    // opacity: 0.8,
+    alignSelf: "center",
   },
   headerLine: {
     flex: 1,

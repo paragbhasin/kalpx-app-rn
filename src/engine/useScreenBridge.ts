@@ -9,7 +9,7 @@
  * The old ScreenStore.ts can be deleted once all imports are switched.
  */
 
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import type { RootState, AppDispatch } from '../store';
 import {
@@ -60,16 +60,32 @@ export function useScreenStore(selector?: (state: any) => any) {
     [dispatch],
   );
 
+  const currentBackgroundRef = useRef(screenState.currentBackground);
+  useEffect(() => {
+    currentBackgroundRef.current = screenState.currentBackground;
+  }, [screenState.currentBackground]);
+
   const updateBackground = useCallback(
     (bg: any) => {
-      dispatch(screenActions.setBackground(bg));
+      if (currentBackgroundRef.current !== bg) {
+        currentBackgroundRef.current = bg;
+        dispatch(screenActions.setBackground(bg));
+      }
     },
     [dispatch],
   );
 
+  const headerHiddenRef = useRef(screenState.isHeaderHidden);
+  useEffect(() => {
+    headerHiddenRef.current = screenState.isHeaderHidden;
+  }, [screenState.isHeaderHidden]);
+
   const updateHeaderHidden = useCallback(
     (hidden: boolean) => {
-      dispatch(screenActions.setHeaderHidden(hidden));
+      if (headerHiddenRef.current !== hidden) {
+        headerHiddenRef.current = hidden;
+        dispatch(screenActions.setHeaderHidden(hidden));
+      }
     },
     [dispatch],
   );

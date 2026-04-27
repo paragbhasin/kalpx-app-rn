@@ -1,169 +1,164 @@
 # Flow: log in as a test persona via the real login UI.
 #
-# Works on release APKs on both Android and iOS — no `adb run-as`, no deep
-# links, no debuggable build needed. This is the Option A alternative to
-# PEND-07 (iOS deep-link code 115) and PEND-12 (Android release-APK JWT
-# injection) from ~/kalpx-app-rn/ISSUES.md.
+# RELIABLE LOGIN — key learnings baked in:
 #
-# What it does:
-#   1. Clear state + launch fresh (guest)
-#   2. Scroll Home to the "Sign in to save your journey" CTA
-#   3. Tap it → Login screen
-#   4. Fill email + password
-#   5. Tap LOGIN → invisible reCAPTCHA v3 runs → login API call
-#   6. Wait for the "Signing in..." overlay to disappear
-#   7. Dismiss the one-shot location-confirm prompt if it appears
-#   8. Assert we're back on Home WITHOUT the guest sign-in CTA
+#   1. NO clearState / clearKeychain — those trigger the Expo dev menu via
+#      the Maestro driver shake gesture. The dev menu opens before the YAML
+#      starts, so no guards inside the YAML can catch it.
+#
+#   2. Navigate Home → Menu → Log In to get a FRESHLY MOUNTED login screen.
+#      React Native unmounts the screen on navigate-away, so Formik state
+#      resets and the fields are empty on re-entry. inputText then types
+#      into an empty field (no append problem).
+#
+#   3. NO hideKeyboard — this app uses a custom keyboard dismiss that Maestro
+#      cannot trigger. Just tap the next field; focus moves and keyboard follows.
+#
+#   4. LOGIN button uses exact regex "^LOGIN$" to avoid fuzzy-matching
+#      "Login With Google" (which sits above it and has "login" in the label).
+#
+#   5. Conditional logout: if a previous test left the user logged in, the
+#      drawer shows "Log Out" not "Log In". The runFlow guard below logs out
+#      first so the drawer always reaches "Log In".
 #
 # Usage (standalone, default persona test+day3@kalpx.com):
 #   maestro test .maestro/login.yaml
 #
 # Usage (override persona via env):
-#   maestro test -e EMAIL=test+day7_medium@kalpx.com \
+#   maestro test -e EMAIL=test+wb@kalpx.com \
 #                -e PASSWORD=Test1234! \
 #                .maestro/login.yaml
 #
-# Usage (as a prerequisite step in a persona walker flow):
-#   # e.g. .maestro/30_day_7_checkpoint_full.yaml
+# Usage (as a subflow in a multi-case runner):
 #   - runFlow:
 #       file: login.yaml
 #       env:
-#         EMAIL: test+day7_medium@kalpx.com
+#         EMAIL: test+wb@kalpx.com
 #         PASSWORD: Test1234!
 #   - waitForAnimationToEnd
-#   # now proceed with the flow's own steps...
+#
+# Pre-condition: app is running, Expo dev menu is NOT open, Metro is connected.
+# If the dev menu is open, dismiss it manually (tap Dismiss or Reload) before
+# running this flow.
 #
 # Notes:
-# - `clearState: true` wipes AsyncStorage and Redux on every run so the login
-#   is deterministic. Use `runFlow` inclusion only at the START of a test.
-# - reCAPTCHA v3 is invisible. It resolves in <2s on a real browser engine;
-#   the 30s extendedWaitUntil below is a generous ceiling, not a target.
-# - Test users must have `soft_verified=True` on dev (SSH fix applied
-#   2026-04-11; Pavani's seed script should preserve this going forward).
-# - Passwords for all test personas are `Test1234!` per seed_test_journey.py.
+# - Test users must have soft_verified=True on dev backend.
+# - Passwords for all test personas are Test1234! per seed_test_journey.py.
+# - reCAPTCHA v3 is bypassed in __DEV__ builds: LoginScreen.tsx:512 calls
+#   handleRecaptchaToken("dev-bypass-token") directly. No Google dialog appears.
 
 appId: com.kalpx.app
 env:
   EMAIL: test+day3@kalpx.com
   PASSWORD: Test1234!
 ---
-- launchApp:
-    clearState: true
-    clearKeychain: true
-- waitForAnimationToEnd
 
-# ── Step 0a: dev-client launcher tap-through ────────────────────────────
-# Debug APKs built with `expo-dev-client` (i.e. `npx expo run:android`)
-# always boot to a "Development servers" picker before loading the real JS
-# bundle. Release APKs (EAS preview/production) skip this entirely, so
-# this step is wrapped in a `when: visible` guard — it runs on debug
-# builds and is a no-op on release.
+# ── Step 0a: escape Login screen if already there ────────────────────────
+# If a prior test left the app stuck on the Login screen the tab bar is
+# inaccessible. Tap "Skip" (bottom link) to return to guest home first.
 - runFlow:
     when:
-      visible: "Development servers"
+      visible: "Connect to Your Roots"
     commands:
-      # Emulator uses http://10.0.2.2:8081, real devices use the Metro host's
-      # LAN IP (e.g., http://192.168.1.x:8081). Regex matches both.
       - tapOn:
-          text: "http://.*:8081.*"
+          text: "Skip"
+      - waitForAnimationToEnd
+
+# ── Step 0b: dismiss any open drawer ─────────────────────────────────────
+# Unconditional: tap the left-edge overlay area (15%, 50%).
+# If a drawer is open (slides in from right), this taps the dimmed backdrop
+# and closes it. If no drawer is open, this taps the Home screen content
+# area which is harmless.
+- tapOn:
+    point: "15%, 50%"
+- waitForAnimationToEnd
+
+# ── Step 0c: land on Home tab ────────────────────────────────────────────
+- tapOn:
+    text: "Home, tab, 1 of 4"
+- waitForAnimationToEnd
+
+# ── Step 1: open the Menu drawer ─────────────────────────────────────────
+- tapOn:
+    text: "Menu, tab, 4 of 4"
+- waitForAnimationToEnd
+
+# ── Step 2: log out if a previous test left a session open ───────────────
+# Use testID (drawer_logout_btn) — the TextComponent wrapping the Logout
+# text is not accessible to Maestro's text matcher.
+# After logout the drawer closes; re-open it so drawer_login_btn is reachable.
+- runFlow:
+    when:
+      visible:
+        id: "drawer_logout_btn"
+    commands:
+      - tapOn:
+          id: "drawer_logout_btn"
       - extendedWaitUntil:
-          notVisible: "Development servers"
-          timeout: 90000
+          notVisible:
+            id: "drawer_logout_btn"
+          timeout: 8000
+      - tapOn:
+          text: "Menu, tab, 4 of 4"
       - waitForAnimationToEnd
 
-# ── Step 0b: Expo first-run dev-menu tutorial overlay ───────────────────
-# After the JS bundle loads, expo-dev-client shows a one-time tutorial
-# overlay with a Continue button. clearState:true wipes the "seen" flag
-# so this re-appears on every fresh launch under Maestro. The overlay
-# renders ~500ms to ~2s after the bundle loads, so we do multiple
-# passes with waitForAnimationToEnd between each — covers the race
-# where the tutorial hasn't rendered yet at the time of the check.
-# All passes are guarded by `when: visible` so they're no-ops on
-# release builds (where the tutorial never appears).
-- waitForAnimationToEnd
-- runFlow:
-    when:
-      visible: "Continue"
-    commands:
-      - tapOn: "Continue"
-      - waitForAnimationToEnd
-- waitForAnimationToEnd
-- runFlow:
-    when:
-      visible: "Continue"
-    commands:
-      - tapOn: "Continue"
-      - waitForAnimationToEnd
-- waitForAnimationToEnd
-- runFlow:
-    when:
-      visible: "Continue"
-    commands:
-      - tapOn: "Continue"
-      - waitForAnimationToEnd
-
-# ── Step 1: reach the Login screen via the Menu drawer ──────────────────
-# Tapping "Menu" in the bottom nav opens a right-side drawer
-# (DrawerNavigator.tsx) which contains a "Log In" item when !isLoggedIn
-# (DrawerNavigator.tsx:304-320, calls navigation.navigate("Login")).
-#
-# Using the drawer instead of scrolling to the "Sign in to save your
-# journey" CTA on Home.tsx is more robust — Home.tsx has nested
-# ScrollViews that scrollUntilVisible picks inconsistently between runs.
-- tapOn: "Menu"
-- waitForAnimationToEnd
-- tapOn: "Log In"
+# ── Step 3: navigate to Login screen ─────────────────────────────────────
+# Wait for drawer_login_btn — after logout the drawer re-opens with animation;
+# the extendedWaitUntil absorbs the drawer slide-in lag before tapping.
+- extendedWaitUntil:
+    visible:
+      id: "drawer_login_btn"
+    timeout: 5000
+- tapOn:
+    id: "drawer_login_btn"
 - waitForAnimationToEnd
 
-# ── Step 2: confirm we landed on LoginScreen.tsx ─────────────────────────
-# These three strings are stable i18n keys in config/locales/en.json:
-#   login.heading        → "Connect to Your Roots"
-#   login.loginBtn       → "LOGIN"
+# ── Step 4: confirm we landed on LoginScreen.tsx ─────────────────────────
 - assertVisible: "Connect to Your Roots"
-- assertVisible: "LOGIN"
 
-# ── Step 3: fill credentials ─────────────────────────────────────────────
-# The TextInputs use placeholders ("Username", "Password") from en.json —
-# placeholders surface as the accessible label when the field is empty, so
-# tapOn by text works on both platforms.
+# ── Step 5: fill credentials ─────────────────────────────────────────────
+# testID="login_email_input" / "login_password_input" added to LoginScreen.tsx.
+# eraseText: 100 defensive-clears any stale content (no-op on a fresh empty field).
+# Works reliably when Login screen is freshly mounted (normal case via drawer).
 - tapOn:
-    text: "Username"
+    id: "login_email_input"
+- eraseText: 100
 - inputText: ${EMAIL}
-- hideKeyboard
 
 - tapOn:
-    text: "Password"
+    id: "login_password_input"
+- eraseText: 100
 - inputText: ${PASSWORD}
-- hideKeyboard
 
-# ── Step 4: submit ───────────────────────────────────────────────────────
-# Tapping LOGIN triggers:
-#   1. Formik validation → requestNewToken() on the invisible ReCaptchaRuntime
-#   2. onToken callback → POST /api/users/login/ with email + password + token
-#   3. On 200: AsyncStorage writes + navigation.navigate("AppDrawer")
-# LoadingOverlay shows "Signing in..." for the duration.
-- tapOn: "LOGIN"
+# ── Step 6: dismiss keyboard then submit ─────────────────────────────────
+# MUST dismiss keyboard before tapping LOGIN. With the keyboard open, the
+# y-key sits at ~(215,591) which overlaps the LOGIN button's scrolled position,
+# causing Maestro to accidentally press "y" before tapping LOGIN.
+# Tapping the top logo area (50%,10%) is always safe and dismisses the keyboard.
+- tapOn:
+    point: "50%, 10%"
+- waitForAnimationToEnd
+- tapOn:
+    text: "^LOGIN$"
 
-# ── Step 5: wait for the overlay to clear ────────────────────────────────
-# If this times out, either reCAPTCHA failed to get a token (network / key
-# rotation) or the backend returned an error (check soft_verified, check
-# credentials, check dev.kalpx.com reachability).
+# ── Step 7: wait for the overlay to clear ────────────────────────────────
 - extendedWaitUntil:
     notVisible: "Signing in..."
     timeout: 30000
 
-# ── Step 6: dismiss the one-shot location-confirm overlay if present ─────
-# LoginScreen.tsx:403 sets showLocationConfirm=true on first successful
-# login. If the prompt renders, dismiss it — exact copy varies, so match
-# any of the common cancel phrasings.
+# ── Step 8: dismiss the one-shot location-confirm overlay if present ─────
 - tapOn:
     text: "Not now|Maybe later|Skip|Cancel"
     optional: true
 
-# ── Step 7: assert login succeeded ───────────────────────────────────────
-# Proof is the absence of the guest CTA — only renders when `!isLoggedIn`
-# (Home.tsx:517). If this still shows, the login failed silently and we
-# bounced back to the guest Home.
+# ── Step 9: assert login succeeded and land on Home tab ──────────────────
+# After login the app may navigate to the Notifications tab (post-login landing).
+# The extendedWaitUntil ensures the tab bar is rendered, then the tapOn forces
+# us to Home regardless of which tab the app landed on.
 - extendedWaitUntil:
-    notVisible: "Sign in to save your journey"
-    timeout: 10000
+    visible:
+      text: "Home, tab, 1 of 4"
+    timeout: 45000
+- tapOn:
+    text: "Home, tab, 1 of 4"
+- waitForAnimationToEnd

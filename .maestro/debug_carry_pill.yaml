@@ -1,0 +1,15 @@
+appId: com.kalpx.app
+---
+- extendedWaitUntil:
+    visible:
+      id: "room_renderer_room_connection"
+    timeout: 5000
+- extendedWaitUntil:
+    visible:
+      text: "Name someone who matters"
+    timeout: 5000
+- tapOn:
+    text: "Name someone who matters"
+- waitForAnimationToEnd
+- assertVisible:
+    text: "Who is close to your heart right now?"

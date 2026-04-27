@@ -31,7 +31,8 @@ const CONFIDENCE_THRESHOLD = 0.7;
 
 const EntityRecognitionCard: React.FC<Props> = ({ screenData }) => {
   const sd = screenData ?? {};
-  const payload = sd.entity_card ?? null;
+  // v3 journey: insights.entity_card (namespaced). Fallback flat.
+  const payload = sd.insights?.entity_card ?? sd.entity_card ?? null;
   if (!payload || typeof payload !== "object") return null;
 
   const summary: string =

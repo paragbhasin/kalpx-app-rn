@@ -32,7 +32,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchProfileDetails } from "../Profile/actions";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import api from "../../Networks/axios";
-import store, { RootState } from "../../store";
+import store, { AppDispatch, RootState } from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
 import ContinueJourney from "./ContinueJourney";
@@ -69,7 +69,7 @@ export const collapseControl = { avoidCollapse: false };
 
 export default function Home() {
   const navigation: any = useNavigation();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const user = useSelector(
     (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
   );
@@ -85,10 +85,13 @@ export default function Home() {
   );
 
   const [mitraJourneyId, setMitraJourneyId] = useState<string | null>(null);
+  const [hasActiveJourney, setHasActiveJourney] = useState(false);
   const [journeyDay, setJourneyDay] = useState<number>(1);
   const [checkingJourney, setCheckingJourney] = useState(false);
   // Mitra v3 — guard auto-route so we don't re-navigate on every Home focus.
   const v3AutoRoutedRef = useRef(false);
+  const profileFetchingRef = useRef(false);
+  const journeyStatusRef = useRef(false);
   const [profileNameFromStorage, setProfileNameFromStorage] = useState<
     string | null
   >(null);
@@ -154,11 +157,15 @@ export default function Home() {
   // Check journey status on focus (matches web's onMounted behavior)
   useFocusEffect(
     React.useCallback(() => {
+      let cancelled = false;
+
       const checkJourney = async () => {
         if (!isLoggedIn) {
           setMitraJourneyId(null);
           return;
         }
+        if (journeyStatusRef.current) return;
+        journeyStatusRef.current = true;
         setCheckingJourney(true);
         try {
           const res = await api.get("mitra/journey/status/");
@@ -170,13 +177,18 @@ export default function Home() {
           // resolve the right M12 variant (short-gap vs long-absence
           // vs momentum). Legacy 30+d WelcomeBack path deleted.
           if (data?.journeyId) {
+            // Returning-user case (active or inactive journey).
+            // ContinueJourney handles both: hasActiveJourney=true → journey/home/,
+            // hasActiveJourney=false → entry-view → welcome_back_surface chips.
             setMitraJourneyId(data.journeyId);
+            setHasActiveJourney(!!data.hasActiveJourney);
             setJourneyDay(data.dayNumber || 1);
             if (data?.hasActiveJourney) {
               seedJourneyStatus(data);
             }
           } else {
             setMitraJourneyId(null);
+            setHasActiveJourney(false);
             // Authed user with no journey → welcome_onboarding turn_1.
             if (!v3AutoRoutedRef.current) {
               v3AutoRoutedRef.current = true;
@@ -186,13 +198,30 @@ export default function Home() {
         } catch (err) {
           console.debug("[HOME] journey/status failed:", (err as any).message);
         } finally {
-          setCheckingJourney(false);
+          if (!cancelled) setCheckingJourney(false);
+          journeyStatusRef.current = false;
         }
       };
-      if (isLoggedIn) {
-        dispatch(fetchProfileDetails(() => {}));
+
+      if (isLoggedIn && !profileFetchingRef.current) {
+        profileFetchingRef.current = true;
+        let settled = false;
+        const resetProfileGuard = () => {
+          if (!settled) {
+            settled = true;
+            profileFetchingRef.current = false;
+          }
+        };
+        try {
+          dispatch(fetchProfileDetails(resetProfileGuard));
+        } catch (e) {
+          resetProfileGuard();
+        }
       }
+
       checkJourney();
+
+      return () => { cancelled = true; };
     }, [isLoggedIn, navigation, dispatch]),
   );
 
@@ -208,7 +237,8 @@ export default function Home() {
     hasJourney: boolean,
     initialTarget?: { containerId: string; stateId: string },
   ) => {
-    if (hasJourney) {
+    const stashedInference = store.getState().screen.screenData.stashed_inference_state;
+    if (hasJourney || stashedInference) {
       setIsProcessing(true);
       try {
         // ... (rest of the logic remains same, just using initialTarget at the end)
@@ -413,41 +443,37 @@ export default function Home() {
             // swallow — router is shadow mode only, never blocks resume
           }
 
-          // Audit fix F4 (2026-04-13, revised) — resume dispatches the same
-          // generate_companion action handler with use_journey_companion=true,
-          // which swaps the API call to read-only /journey/companion/ but
-          // reuses the full (~50-field) population logic. Fixes regression
-          // where CoreItemsList read empty card_mantra_title / master_mantra
-          // on resume and dashboard triad showed placeholders + view_info
-          // couldn't open info reveal.
+          // v3 journey: post-resume hydrate from daily-view envelope.
+          // Replaces the legacy generate_companion action dispatch.
           console.log(
-            "📡 Calling: generate_companion via journey/companion (resume)",
+            "📡 Calling: v3/journey/daily-view (resume hydrate)",
           );
-          const { executeAction } = require("../../engine/actionExecutor");
-          await executeAction(
-            {
-              type: "generate_companion",
-              payload: { use_journey_companion: true },
-            },
-            {
-              screenState: store.getState().screen.screenData,
-              loadScreen: (target: any) => {
-                const containerId =
-                  target?.container_id || target?.containerId || "generic";
-                const stateId =
-                  target?.state_id || target?.stateId || target || "";
-                store.dispatch(loadScreenWithData({ containerId, stateId }));
-              },
-              goBack: () => {
-                const { goBackWithData } = require("../../store/screenSlice");
-                store.dispatch(goBackWithData());
-              },
-              setScreenValue: (value: any, key: string) => {
-                store.dispatch(screenActions.setScreenValue({ key, value }));
-              },
-            },
-          );
+          try {
+            const { mitraJourneyDailyView } = require("../../engine/mitraApi");
+            const { ingestDailyView } = require("../../engine/v3Ingest");
+            const result = await mitraJourneyDailyView(null);
+            if (result?.envelope) {
+              for (const [k, v] of Object.entries(
+                ingestDailyView(result.envelope),
+              )) {
+                if (v !== undefined) {
+                  store.dispatch(screenActions.setScreenValue({ key: k, value: v }));
+                }
+              }
+            }
+          } catch (_err: any) {
+            console.warn("[Home] v3 daily-view resume hydrate failed:", _err?.message);
+          }
           console.log("✅ resume companion data loaded");
+
+          // v3 journey: skip manual auto-routing. We let ContinueJourney
+          // handle the entry-view decision (Wait-Back vs. Dashboard vs.
+          // Checkpoint) to ensure the target screen is hydrated with its
+          // correct v3 envelope data.
+          if (process.env.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1") {
+            console.log("[Home] v3 detected: delegating entry route to ContinueJourney");
+            return;
+          }
 
           // Auto-route to checkpoint screens on day 7 / day 14 if not yet completed
           const dayNumber = status.dayNumber || 1;
@@ -458,7 +484,11 @@ export default function Home() {
           // (daily_insight_14 is the pre-checkpoint milestone splash and is
           // reached separately from the milestone view, not auto-routed.)
           const checkpointStateId =
-            dayNumber === 7 || dayNumber === 14 ? "weekly_checkpoint" : null;
+            dayNumber === 7
+              ? "checkpoint_day_7"
+              : dayNumber === 14
+                ? "checkpoint_day_14"
+                : null;
 
           // P1-6 — AsyncStorage checkpoint guard (Day-14 audit).
           // The BE's journey_status now returns checkpointPending=true +
@@ -510,10 +540,13 @@ export default function Home() {
                 }),
               );
             }
+            // Route to thin checkpoint_reflection container — renders
+            // CycleReflectionBlock directly without any container
+            // background override (was: cycle_transitions/checkpoint_day_7).
             store.dispatch(
               loadScreenWithData({
-                containerId: "cycle_transitions",
-                stateId: checkpointStateId,
+                containerId: "checkpoint_reflection",
+                stateId: dayNumber === 14 ? "day_14" : "day_7",
               }),
             );
           } else {
@@ -762,6 +795,7 @@ export default function Home() {
         // screen deleted 2026-04-18. See JOURNEY_HOME_CONTRACT_V1.md
         // + M12_LONG_ABSENCE_DRAFT.md.
         <ContinueJourney
+          hasActiveJourney={hasActiveJourney}
           userName={
             profileNameFromRedux ||
             profileNameFromStorage ||

@@ -24,7 +24,7 @@ import Svg, { Path } from "react-native-svg";
 import MantraLotus3d from "../../assets/mantra-lotus-3d.svg";
 import { VoiceTextInput } from "../components/VoiceTextInput";
 import { executeAction } from "../engine/actionExecutor";
-import { mitraTrackEvent } from "../engine/mitraApi";
+import { mitraTrackEvent, postGratitudeLedger } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { readMomentSlot, useContentSlots } from "../hooks/useContentSlots";
 import { Fonts } from "../theme/fonts";
@@ -175,6 +175,11 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
       "support_loneliness",
       "support_joy",
       "support_growth",
+      // Canonical v3.1 rooms — BE stamps `runner_source: "support_room"` on
+      // every runner whose pill was dispatched from a canonical Room (A0
+      // finding 2026-04-20). Without this, completion falls through to
+      // dashboard instead of looping back into the room.
+      "support_room",
     ]);
     const isSupportSource = SUPPORT_SOURCES.has(
       String(screenData.runner_source || ""),
@@ -190,15 +195,12 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
             state_id: "day_active",
           },
         };
-    executeAction(
-      { ...action, currentScreen } as any,
-      {
-        loadScreen,
-        goBack,
-        setScreenValue: (value: any, key: string) => setScreenValue(key, value),
-        screenState: { ...screenData },
-      },
-    ).catch(() => {});
+    executeAction({ ...action, currentScreen } as any, {
+      loadScreen,
+      goBack,
+      setScreenValue: (value: any, key: string) => setScreenValue(key, value),
+      screenState: { ...screenData },
+    }).catch(() => {});
   };
 
   const handleRepeat = () => {
@@ -228,6 +230,15 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
         text: reflectionText.trim().slice(0, 120),
         response_type: responseType,
       },
+    }).catch(() => {});
+    postGratitudeLedger({
+      signal_type: "post_completion_reflection",
+      text: reflectionText.trim(),
+      meta: {
+        item_type: resolvedVariant,
+        item_id: screenData.runner_active_item?.item_id ?? null,
+      },
+      logged_at: new Date().toISOString(),
     }).catch(() => {});
     handleReturnHome(true);
   };
@@ -278,7 +289,6 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
               the backing principle_id when present. */}
           {!!wisdomAnchorLine && (
             <View style={styles.wisdomAnchorCard}>
-              <View style={styles.wisdomDivider} />
               <Text
                 style={styles.wisdomAnchorText}
                 testID="completion_wisdom_anchor_line"
@@ -315,7 +325,9 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
                     ).catch(() => {});
                   }}
                 >
-                  <Text style={styles.readMoreText}>{slot("read_more_label")}</Text>
+                  {/* <Text style={styles.readMoreText}>
+                    {slot("read_more_label")}
+                  </Text> */}
                 </TouchableOpacity>
               )}
             </View>

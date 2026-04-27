@@ -1,0 +1,94 @@
+# Flow 71: joy_named carry modal — save → confirmed state → stays in room.
+# Validates: memory_modal title "Write what's good right now", Sanatan context
+# "Santosha", primary_label "Save this joy", confirmed "Saved. You can write another.",
+# room visible after save (NOT navigated to dashboard).
+# Pre-condition: test+day3@kalpx.com (repeat state for room_joy).
+appId: com.kalpx.app
+env:
+  EMAIL: test+day3@kalpx.com
+  PASSWORD: Test1234!
+---
+# Close any modal left open from a prior test run
+- runFlow:
+    when:
+      visible:
+        id: "step_modal_body"
+    commands:
+      - tapOn:
+          id: "step_modal_cancel"
+      - waitForAnimationToEnd
+
+- runFlow:
+    file: login_preserve_session.yaml
+    env:
+      EMAIL: test+day3@kalpx.com
+      PASSWORD: Test1234!
+- waitForAnimationToEnd
+
+- runFlow:
+    file: navigate_to_day_active.yaml
+
+- runFlow:
+    file: open_room_entry_sheet.yaml
+    env:
+      ROOM_LABEL: "I'm in a good place"
+
+- runFlow:
+    when:
+      visible:
+        id: "life_context_picker_sheet"
+    commands:
+      - tapOn:
+          id: "life_context_picker_skip"
+      - waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible:
+      id: "room_renderer_room_joy"
+    timeout: 35000
+
+# Reset confirmed state if carry was already saved in a prior run
+- runFlow:
+    when:
+      visible:
+        text: "Write another"
+    commands:
+      - tapOn:
+          text: "Write another"
+      - waitForAnimationToEnd
+
+# Tap joy_named carry pill (stable testID)
+- tapOn:
+    id: "room_carry_joy_named"
+- waitForAnimationToEnd
+
+# Modal opens — title, sanatan context, prompt
+- assertVisible:
+    text: "Write what's good right now"
+- assertVisible:
+    text: "Santosha begins by noticing what is already enough."
+- assertVisible:
+    text: "What feels good, steady, or quietly enough right now?"
+
+# Type and save — tap sanatan context to dismiss keyboard first
+- tapOn:
+    id: "step_modal_text_input"
+- inputText: "Morning light through the window"
+- tapOn:
+    text: "Santosha begins by noticing what is already enough."
+- waitForAnimationToEnd
+- tapOn:
+    id: "step_modal_text_done"
+- waitForAnimationToEnd
+
+# Confirmed state — still in room (NOT dashboard)
+- assertNotVisible:
+    id: "step_modal_body"
+- assertVisible:
+    text: "Saved. You can write another."
+- assertVisible:
+    id: "room_renderer_room_joy"
+
+# NOT navigated to dashboard
+- assertNotVisible:
+    text: "My Routine"

@@ -5,6 +5,9 @@ interface MitraState {
   isLoading: boolean;
   error: string | null;
   aiReasoning: string | null;
+  // Incremented after every core triad completion so ProgressSectionBlock
+  // can watch this and re-fetch without polling.
+  completionVersion: number;
 }
 
 const initialState: MitraState = {
@@ -12,6 +15,7 @@ const initialState: MitraState = {
   isLoading: false,
   error: null,
   aiReasoning: null,
+  completionVersion: 0,
 };
 
 const mitraSlice = createSlice({
@@ -23,8 +27,11 @@ const mitraSlice = createSlice({
       state.aiReasoning = null;
       state.error = null;
     },
+    recordCoreCompletion: (state) => {
+      state.completionVersion += 1;
+    },
   },
 });
 
-export const { clearMitraData } = mitraSlice.actions;
+export const { clearMitraData, recordCoreCompletion } = mitraSlice.actions;
 export default mitraSlice.reducer;

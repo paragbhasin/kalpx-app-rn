@@ -542,6 +542,7 @@ if (key === "pending_classes_data") {
                       value={values.username.normalize("NFC")} // ✅ normalize Unicode rendering
                       onChangeText={handleChange("username")}
                       onBlur={handleBlur("username")}
+                      testID="login_email_input"
                     />
                     {errors.username && touched.username && (
                       <TextComponent type="mediumText" style={styles.error}>
@@ -577,6 +578,7 @@ if (key === "pending_classes_data") {
                         value={values.password.normalize("NFC")}
                         onChangeText={handleChange("password")}
                         onBlur={handleBlur("password")}
+                        testID="login_password_input"
                       />
 
                       <TouchableOpacity

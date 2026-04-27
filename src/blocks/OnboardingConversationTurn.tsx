@@ -58,6 +58,8 @@ interface Props {
     on_response?: any; // base action object; { chip_id } or { freeform_text } merged into payload
     recognition?: any;
     isTurn7?: boolean;
+    guidanceModeTurn?: boolean;
+    pathEmergesTurn?: boolean;
   };
 }
 
@@ -114,6 +116,24 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
         ? Number((_rawTurn.match(/\d+/) || ["1"])[0])
         : 1;
   const isIntroTurn = turn === 1;
+  const isGuidanceModeTurn = !!block.guidanceModeTurn;
+  const isPathEmergesTurn = !!block.pathEmergesTurn;
+  const hasHeadline = !!(block.headline && String(block.headline).trim());
+  const hasReplyChips =
+    Array.isArray(block.reply_chips) && block.reply_chips.length > 0;
+  const messages = Array.isArray(block.mitra_message)
+    ? block.mitra_message
+    : [block.mitra_message || ""];
+  const firstMessage =
+    (messages.find((m) => String(m || "").trim().length > 0) as string) || "";
+  const hasPathHeaderCopy =
+    hasHeadline || String(firstMessage).trim().length > 0;
+  const isPathHeaderBlock =
+    isPathEmergesTurn && hasPathHeaderCopy && !hasReplyChips;
+  const isPathButtonBlock = isPathEmergesTurn && !hasHeadline && hasReplyChips;
+  const pathHeaderText = hasHeadline
+    ? block.headline || ""
+    : String(firstMessage || "");
 
   useEffect(() => {
     Animated.sequence([
@@ -130,9 +150,6 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
     ]).start();
   }, [fadeAnim, replyAnim]);
 
-  const messages = Array.isArray(block.mitra_message)
-    ? block.mitra_message
-    : [block.mitra_message || ""];
   const inlineImageSource = resolveBlockImage(block.image?.url);
   const headlineLines = (block.headline || "").split("\n").filter(Boolean);
   const featureMessages = messages.slice(0, 3);
@@ -179,12 +196,8 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
       )}
       <View style={{ marginTop: 10 }}>
         <VoiceTextInput
-          voiceAvailable={block.voice_available}
-          placeholder={
-            showHeroMeta
-              ? "Type Or say it in your words..."
-              : "Type Or say it in your words..."
-          }
+          voiceAvailable={false} // launch-gate: restore block.voice_available when conversational tier ships
+          placeholder="Share your reflection"
           onSend={(val, type) => {
             if (type === "text") {
               fire({ freeform_text: val, response_type: "text" });
@@ -196,23 +209,12 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
       </View>
 
       {showHeroMeta && (
-        <>
-          <View style={styles.turnOneHintRow}>
-            <Text style={styles.turnOneHintText}>Write</Text>
-            <View style={styles.turnOneOrPill}>
-              <Text style={styles.turnOneOrPillText}>or</Text>
-            </View>
-            <Text style={styles.turnOneHintText}>speak</Text>
-            <Ionicons name="mic-outline" size={16} color="#7a6031" />
-          </View>
-
-          <View style={styles.turnOnePrivacyRow}>
-            <Ionicons name="lock-closed-outline" size={16} color="#7a6031" />
-            <Text style={styles.turnOnePrivacyText}>
-              Your thoughts are private and safe with Mitra.
-            </Text>
-          </View>
-        </>
+        <View style={styles.turnOnePrivacyRow}>
+          <Ionicons name="lock-closed-outline" size={16} color="#7a6031" />
+          <Text style={styles.turnOnePrivacyText}>
+            Your thoughts are private and safe with Mitra.
+          </Text>
+        </View>
       )}
     </>
   );
@@ -466,41 +468,76 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
       testID={rootTestID}
       accessibilityLabel={rootTestID}
     >
-      <View style={styles.fullCard}>
-        {block.headline && (
+      <View
+        style={[
+          isPathButtonBlock ? styles.pathButtonPlainWrap : styles.fullCard,
+          isGuidanceModeTurn ? styles.guidanceHeaderCard : null,
+          isPathHeaderBlock ? styles.pathEmergesHeaderCard : null,
+        ]}
+      >
+        {isGuidanceModeTurn ? (
+          <View style={styles.guidanceBadgeWrap}>
+            <View style={styles.guidanceBadgeCircle}>
+              <Ionicons name="flower-outline" size={34} color="#C79A2B" />
+            </View>
+          </View>
+        ) : null}
+
+        {isPathHeaderBlock ? (
+          <Text style={[styles.unifiedHeadline, styles.pathEmergesHeadline]}>
+            {interpolate(pathHeaderText, screenData)}
+          </Text>
+        ) : block.headline ? (
           <>
-            <Text style={styles.unifiedHeadline}>
+            <Text
+              style={[
+                styles.unifiedHeadline,
+                isGuidanceModeTurn ? styles.guidanceHeadline : null,
+              ]}
+            >
               {headlineLines.join("\n")}
             </Text>
 
-            <View style={styles.turnOneHeadlineDivider}>
-              <View style={styles.turnOneDividerLine} />
-              <Ionicons name="diamond" size={10} color="#c7a258" />
-              <View style={styles.turnOneDividerLine} />
-            </View>
+            {!isPathHeaderBlock ? (
+              <View style={styles.turnOneHeadlineDivider}>
+                <View style={styles.turnOneDividerLine} />
+                <Ionicons
+                  name={isGuidanceModeTurn ? "flower-outline" : "diamond"}
+                  size={isGuidanceModeTurn ? 16 : 10}
+                  color="#c7a258"
+                />
+                <View style={styles.turnOneDividerLine} />
+              </View>
+            ) : null}
 
-            {block.subtext && (
-              <Text style={styles.unifiedSubtext}>
+            {block.subtext && !isPathHeaderBlock && (
+              <Text
+                style={[
+                  styles.unifiedSubtext,
+                  isGuidanceModeTurn ? styles.guidanceSubtext : null,
+                ]}
+              >
                 {interpolate(block.subtext, screenData)}
               </Text>
             )}
           </>
-        )}
+        ) : null}
 
-        {messages.some((m) => m && String(m).trim().length > 0) && (
-          <Animated.View style={[styles.mitraMsgCard, { opacity: fadeAnim }]}>
-            {messages.map((para, i) =>
-              para && String(para).trim().length > 0 ? (
-                <Text
-                  key={i}
-                  style={[styles.mitraMsg, i > 0 && { marginTop: 12 }]}
-                >
-                  {interpolate(para, screenData)}
-                </Text>
-              ) : null,
-            )}
-          </Animated.View>
-        )}
+        {!isPathHeaderBlock &&
+          messages.some((m) => m && String(m).trim().length > 0) && (
+            <Animated.View style={[styles.mitraMsgCard, { opacity: fadeAnim }]}>
+              {messages.map((para, i) =>
+                para && String(para).trim().length > 0 ? (
+                  <Text
+                    key={i}
+                    style={[styles.mitraMsg, i > 0 && { marginTop: 12 }]}
+                  >
+                    {interpolate(para, screenData)}
+                  </Text>
+                ) : null,
+              )}
+            </Animated.View>
+          )}
 
         <Animated.View style={{ opacity: replyAnim }}>
           {isIntroTurn && inlineImageSource && (
@@ -539,8 +576,7 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
             // Turn 1 "Yes, let's begin" primary chip also carries a stable
             // semantic testID in addition to the turn-scoped one.
             const isYesLetsBegin =
-              chip.style === "primary" &&
-              /yes.*(let|begin)/i.test(chip.label);
+              chip.style === "primary" && /yes.*(let|begin)/i.test(chip.label);
             // Turn 8 triad-reveal "Begin my journey" primary chip is the
             // onboarding terminator — stable semantic testID.
             const isBeginMyJourney =
@@ -563,7 +599,12 @@ const OnboardingConversationTurn: React.FC<Props> = ({ block }) => {
                 testID={stableTestID || chipTestID}
                 accessibilityLabel={stableTestID || chipTestID}
               >
-                {isIntroTurn && chip.style !== "primary" ? (
+                {isPathButtonBlock && chip.style === "primary" ? (
+                  <View style={styles.pathBeginButton}>
+                    <View style={styles.pathBeginLeaf}></View>
+                    <Text style={styles.pathBeginLabel}>{chip.label}</Text>
+                  </View>
+                ) : isIntroTurn && chip.style !== "primary" ? (
                   <LinearGradient
                     colors={["#E5D4CA", "#F5EDEA"]}
                     start={{ x: 0, y: 0 }}
@@ -982,6 +1023,31 @@ const styles = StyleSheet.create({
     elevation: 4,
     marginTop: -15,
   },
+  guidanceHeaderCard: {
+    borderColor: "rgba(226, 208, 174, 0.95)",
+    borderRadius: 28,
+    paddingTop: 64,
+    paddingBottom: 24,
+    overflow: "visible",
+  },
+  guidanceBadgeWrap: {
+    position: "absolute",
+    top: -46,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    zIndex: 3,
+  },
+  guidanceBadgeCircle: {
+    width: 104,
+    height: 104,
+    borderRadius: 52,
+    backgroundColor: "#FBF4E8",
+    borderWidth: 1.2,
+    borderColor: "rgba(226, 208, 174, 0.95)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
   unifiedHeadline: {
     fontFamily: Fonts.serif.bold,
@@ -990,6 +1056,85 @@ const styles = StyleSheet.create({
     color: "#3f2810",
     textAlign: "center",
     marginBottom: 10,
+  },
+  guidanceHeadline: {
+    fontSize: 22,
+    lineHeight: 34,
+    marginBottom: 2,
+  },
+  guidanceSubtext: {
+    fontSize: 14,
+    lineHeight: 22,
+    maxWidth: 330,
+    alignSelf: "center",
+    color: "#635442",
+  },
+  pathEmergesHeaderCard: {
+    minHeight: 50,
+    borderRadius: 28,
+    borderColor: "rgba(226, 208, 174, 0.95)",
+    backgroundColor: "rgba(255, 252, 246, 0.98)",
+    // paddingTop: 22,
+    // paddingBottom: 22,
+
+    marginBottom: 2,
+    overflow: "hidden",
+  },
+  pathEmergesSparkle: {
+    marginLeft: 4,
+    marginBottom: 8,
+  },
+  pathEmergesHeadline: {
+    textAlign: "left",
+    fontSize: 20,
+    // lineHeight: 42,
+    marginBottom: 0,
+  },
+  pathEmergesLotus: {
+    position: "absolute",
+    right: -26,
+    // bottom: -34,
+    width: 200,
+    height: 200,
+    opacity: 0.75,
+    // opacity: 0.,
+  },
+  pathButtonPlainWrap: {
+    marginTop: 6,
+    paddingHorizontal: 0,
+    paddingVertical: 0,
+    borderWidth: 0,
+    backgroundColor: "transparent",
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  pathBeginButton: {
+    // minHeight: 64,
+    padding: 10,
+    borderRadius: 36,
+    backgroundColor: "#C89A47",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingLeft: 14,
+    paddingRight: 20,
+    marginBottom: 8,
+  },
+  pathBeginLeaf: {
+    width: 28,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  pathBeginLabel: {
+    flex: 1,
+    textAlign: "center",
+    fontFamily: Fonts.serif.bold,
+    fontSize: 22,
+    color: "#FFF8EA",
+    marginHorizontal: 8,
+  },
+  pathBeginArrow: {
+    marginLeft: 8,
   },
   recognitionCard: {
     borderRadius: 25,

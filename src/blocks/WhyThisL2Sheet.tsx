@@ -11,12 +11,18 @@
  */
 
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View, ScrollView } from "react-native";
-import { Fonts } from "../theme/fonts";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { executeAction } from "../engine/actionExecutor";
 import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
+import { Fonts } from "../theme/fonts";
 
 const VALID_INFO_TYPES = ["mantra", "sankalp", "practice"] as const;
 
@@ -50,9 +56,8 @@ const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
   // understanding"). If a future principle authors a linked_item_type +
   // linked_item_id pair, the CTA re-surfaces automatically and routes to
   // view_info instead of the retired open_why_this_l3 drill-down.
-  const linkedType: string = typeof p.linked_item_type === "string"
-    ? p.linked_item_type
-    : "";
+  const linkedType: string =
+    typeof p.linked_item_type === "string" ? p.linked_item_type : "";
   const canGoDeeper =
     (VALID_INFO_TYPES as readonly string[]).includes(linkedType) &&
     !!sd[`master_${linkedType}`];
@@ -77,6 +82,15 @@ const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
       <Text style={styles.label}>WHY THIS</Text>
       <Text style={styles.name}>{p.name || p.title}</Text>
       {p.essence ? <Text style={styles.essence}>{p.essence}</Text> : null}
+      {p.tradition_family ? (
+        <Text
+          style={styles.tradition}
+          testID="why_this_l2_tradition"
+          accessibilityLabel="Tradition"
+        >
+          {p.tradition_family}
+        </Text>
+      ) : null}
       {p.context ? (
         <ScrollView style={styles.contextWrap}>
           <Text style={styles.context}>{p.context}</Text>
@@ -109,7 +123,6 @@ const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
 
 const styles = StyleSheet.create({
   sheet: {
-    backgroundColor: "#fffdf9",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 22,
@@ -130,6 +143,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1.6,
     color: "#8b7a55",
     marginBottom: 10,
+    textAlign: "center",
   },
   name: {
     fontFamily: Fonts.serif.bold,
@@ -137,12 +151,23 @@ const styles = StyleSheet.create({
     color: "#432104",
     marginBottom: 10,
     lineHeight: 32,
+    textAlign: "center",
   },
   essence: {
     fontFamily: Fonts.sans.regular,
     fontSize: 15,
     color: "#4a3a20",
     lineHeight: 22,
+    marginBottom: 14,
+    textAlign: "center",
+  },
+  tradition: {
+    fontFamily: Fonts.sans.semiBold,
+    fontSize: 10,
+    letterSpacing: 1.4,
+    color: "#8b7a55",
+    opacity: 0.7,
+    textAlign: "center",
     marginBottom: 14,
   },
   contextWrap: {
@@ -154,6 +179,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#6b5a45",
     lineHeight: 21,
+    textAlign: "center",
   },
   deeper: {
     alignSelf: "flex-start",

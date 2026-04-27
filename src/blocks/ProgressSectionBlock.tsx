@@ -11,6 +11,7 @@ import {
   UIManager,
   View,
 } from "react-native";
+import { useSelector } from "react-redux";
 import { mitraFetchProgress } from "../engine/mitraApi";
 import { Fonts } from "../theme/fonts";
 
@@ -53,6 +54,9 @@ const ProgressSectionBlock: React.FC = () => {
   const [expanded, setExpanded] = useState(true);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<ProgressData | null>(null);
+  const completionVersion = useSelector(
+    (state: any) => state.mitra?.completionVersion ?? 0,
+  );
 
   const fetchProgress = async () => {
     setLoading(true);
@@ -71,6 +75,14 @@ const ProgressSectionBlock: React.FC = () => {
   useEffect(() => {
     fetchProgress();
   }, []);
+
+  // Re-fetch whenever a core triad item is completed so Days Engaged /
+  // Fully Completed update immediately without needing a screen remount.
+  useEffect(() => {
+    if (completionVersion > 0) {
+      fetchProgress();
+    }
+  }, [completionVersion]);
 
   const toggle = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);

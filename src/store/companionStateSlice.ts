@@ -31,6 +31,7 @@ export interface CompanionStateSlice {
   mood: string; // 'steady' | 'tender' | 'volatile' | etc
   dissonance_threads: DissonanceThread[];
   last_updated: number; // epoch ms
+  life_context: string | null; // last explicit picker selection; null = no stored preference
 }
 
 const initialState: CompanionStateSlice = {
@@ -38,6 +39,7 @@ const initialState: CompanionStateSlice = {
   mood: 'steady',
   dissonance_threads: [],
   last_updated: 0,
+  life_context: null,
 };
 
 // ---------------------------------------------------------------------------
@@ -48,7 +50,7 @@ export const fetchCompanionState = createAsyncThunk(
   'companionState/fetch',
   async (_, { rejectWithValue }) => {
     try {
-      const res = await api.get('/api/mitra/companion-state/');
+      const res = await api.get('mitra/companion-state/');
       return res.data;
     } catch (err: any) {
       // 404-tolerant: endpoint may not exist yet
@@ -132,6 +134,10 @@ const companionStateSlice = createSlice({
       );
       state.last_updated = Date.now();
     },
+    setLifeContext(state, action: PayloadAction<string | null>) {
+      state.life_context = action.payload;
+      state.last_updated = Date.now();
+    },
     resetCompanionState() {
       return { ...initialState };
     },
@@ -145,6 +151,10 @@ const companionStateSlice = createSlice({
         if (typeof data.mood === 'string') state.mood = data.mood;
         if (Array.isArray(data.dissonance_threads)) {
           state.dissonance_threads = data.dissonance_threads;
+        }
+        // Hydrate stored life_context preference from BE (null if never set).
+        if ('life_context' in data) {
+          state.life_context = data.life_context ?? null;
         }
         state.last_updated = Date.now();
       })
@@ -160,6 +170,7 @@ export const {
   setMood,
   upsertDissonanceThread,
   removeDissonanceThread,
+  setLifeContext,
   resetCompanionState,
 } = companionStateSlice.actions;
 

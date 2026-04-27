@@ -16,7 +16,12 @@ const FocusPhraseLine: React.FC<Props> = ({ block, screenData }) => {
   // cleanly when BE has not seeded a value rather than leaking hardcoded
   // English. Per standing baseline Rule 3 (sovereignty) + Rule 6 (unread
   // field closure): the pill is a "render only if present" surface.
-  const value = block?.value ?? screenData?.focus_phrase ?? null;
+  // v3 journey: today.focus_phrase (namespaced). Fallback to flat.
+  const value =
+    block?.value ??
+    screenData?.today?.focus_phrase ??
+    screenData?.focus_phrase ??
+    null;
   const display = typeof value === "string" ? value : "";
   if (!display) return null;
   return (

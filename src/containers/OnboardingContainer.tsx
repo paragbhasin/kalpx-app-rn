@@ -23,7 +23,12 @@
  */
 
 import React, { useEffect } from "react";
-import { BackHandler, ScrollView, StyleSheet } from "react-native";
+import {
+  BackHandler,
+  InteractionManager,
+  ScrollView,
+  StyleSheet,
+} from "react-native";
 import BlockRenderer from "../engine/BlockRenderer";
 import { useScreenStore } from "../engine/useScreenBridge";
 
@@ -39,17 +44,39 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
     (state: any) => state.updateHeaderHidden,
   );
   const screenData = useScreenStore((state: any) => state.screenData);
-  const turn = Number(screenData.onboarding_turn || 1);
+  const currentStateId = useScreenStore((state: any) => state.currentStateId);
+  const _rawTurn = screenData.onboarding_turn;
+  const turn =
+    typeof _rawTurn === "number"
+      ? _rawTurn
+      : typeof _rawTurn === "string"
+        ? Number((_rawTurn.match(/\d+/) || ["1"])[0])
+        : 1;
+  const activeStateId = schema?.state_id || currentStateId || "";
+  const isIntroState =
+    activeStateId === "turn_1" ||
+    activeStateId === "turn_2" ||
+    turn === 1 ||
+    turn === 2;
+  const backgroundSource = isIntroState
+    ? require("../../assets/new_home.png")
+    : require("../../assets/beige_bg.png");
 
   useEffect(() => {
-    const isIntro = turn === 1 || turn === 2;
-    const updatedBackground = isIntro
-      ? require("../../assets/new_home.png")
-      : require("../../assets/beige_bg.png");
-    updateBackground(updatedBackground);
+    updateBackground(backgroundSource);
+    const frameId = requestAnimationFrame(() => {
+      updateBackground(backgroundSource);
+    });
+    const interactionTask = InteractionManager.runAfterInteractions(() => {
+      updateBackground(backgroundSource);
+    });
     updateHeaderHidden(false);
-    return () => updateHeaderHidden(false);
-  }, [updateBackground, updateHeaderHidden, turn]);
+    return () => {
+      cancelAnimationFrame(frameId);
+      interactionTask.cancel?.();
+      updateHeaderHidden(false);
+    };
+  }, [backgroundSource, updateBackground, updateHeaderHidden]);
 
   // Disable Android back on Intro turns (INV-equivalent: onboarding root cannot go back).
   useEffect(() => {
@@ -61,6 +88,10 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
   }, [turn]);
 
   const blocks = schema?.blocks || [];
+  const hasGuidanceModePicker = blocks.some(
+    (b: any) => b.type === "guidance_mode_picker",
+  );
+  const hasPathEmerges = blocks.some((b: any) => b.type === "path_emerges");
 
   // Find headline/subtext/recognition to inject into conversation turn blocks for layout.
   const headlineBlock = blocks.find((b: any) => b.type === "headline");
@@ -89,6 +120,10 @@ const OnboardingContainer: React.FC<Props> = ({ schema }) => {
           subtext: dynamicData?.sub_prompt || subtextBlock?.content || b.subtext,
           headline: dynamicData?.mitra_message || headlineBlock?.content || b.headline,
           recognition: recognitionBlock,
+          guidanceModeTurn: turn === 5 && hasGuidanceModePicker,
+          // Do not hardcode turn index here; some flows still emit the
+          // path-emerges screen as turn_7 while others use turn_8.
+          pathEmergesTurn: hasPathEmerges,
           open_input: dynamicData?.open_input 
             ? { ...b.open_input, ...dynamicData.open_input, enabled: true } 
             : b.open_input,

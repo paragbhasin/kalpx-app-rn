@@ -90,6 +90,7 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({
   );
   const currentStateId = useScreenStore((state) => state.currentStateId);
 
+  const journeyCheckRef = useRef(false);
   const videoRef = useRef<Video>(null);
   const step = screenState.insight_step || 0;
 
@@ -102,51 +103,56 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({
     const checkActiveJourney = async () => {
       // 1. Only check if logged in
       if (!isLoggedIn) return;
-
-      // RED-012: Check for pending induction progress from guest session
+      if (journeyCheckRef.current) return;
+      journeyCheckRef.current = true;
       try {
-        const pendingStr = await AsyncStorage.getItem("kalpx_pending_induction");
-        if (pendingStr) {
-          const pendingData = JSON.parse(pendingStr);
-          // Restore progress
-          updateScreenData("insight_step", 1); // Directly to step 1 as requested
-          if (pendingData) {
-            // Merge other stored data (active_focus, etc.)
-            Object.entries(pendingData).forEach(([key, val]) => {
-              if (val !== undefined) updateScreenData(key, val);
+        // RED-012: Check for pending induction progress from guest session
+        try {
+          const pendingStr = await AsyncStorage.getItem("kalpx_pending_induction");
+          if (pendingStr) {
+            const pendingData = JSON.parse(pendingStr);
+            // Restore progress
+            updateScreenData("insight_step", 1); // Directly to step 1 as requested
+            if (pendingData) {
+              // Merge other stored data (active_focus, etc.)
+              Object.entries(pendingData).forEach(([key, val]) => {
+                if (val !== undefined) updateScreenData(key, val);
+              });
+            }
+            // Clear storage
+            await AsyncStorage.removeItem("kalpx_pending_induction");
+            return; // Skip active journey check if we just restored a pending one
+          }
+        } catch (e) {
+          console.warn("[InsightSummary] Recovery check failed:", e);
+        }
+
+        // 2. If already at Step 2+, assume user is intentional.
+        //    Only redirect if they are at the START of induction (Step 0).
+        if (step > 0) return;
+
+        try {
+          const res = await api.get("mitra/journey/status/");
+          if (res.data?.hasActiveJourney) {
+            // RED-012: Discard induction progress for existing users
+            updateScreenData("insight_step", 0);
+            updateScreenData("active_focus", null);
+            updateScreenData("scan_focus", null);
+            updateScreenData("prana_baseline_selection", null);
+
+            // Redirect to Companion Dashboard
+            loadScreen({
+              container_id: "companion_dashboard",
+              state_id: "day_active",
             });
           }
-          // Clear storage
-          await AsyncStorage.removeItem("kalpx_pending_induction");
-          return; // Skip active journey check if we just restored a pending one
+        } catch (e) {
+          // Advisory — if this fails we stay on Step 0 induction. User
+          // can navigate manually if they already have an active journey.
+          console.warn("[InsightSummary] Journey check failed:", e);
         }
-      } catch (e) {
-        console.warn("[InsightSummary] Recovery check failed:", e);
-      }
-
-      // 2. If already at Step 2+, assume user is intentional. 
-      //    Only redirect if they are at the START of induction (Step 0).
-      if (step > 0) return;
-
-      try {
-        const res = await api.get("mitra/journey/status/");
-        if (res.data?.hasActiveJourney) {
-          // RED-012: Discard induction progress for existing users
-          updateScreenData("insight_step", 0);
-          updateScreenData("active_focus", null);
-          updateScreenData("scan_focus", null);
-          updateScreenData("prana_baseline_selection", null);
-
-          // Redirect to Companion Dashboard
-          loadScreen({
-            container_id: "companion_dashboard",
-            state_id: "day_active",
-          });
-        }
-      } catch (e) {
-        // Advisory — if this fails we stay on Step 0 induction. User
-        // can navigate manually if they already have an active journey.
-        console.warn("[InsightSummary] Journey check failed:", e);
+      } finally {
+        journeyCheckRef.current = false;
       }
     };
 

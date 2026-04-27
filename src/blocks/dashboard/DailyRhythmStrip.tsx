@@ -51,7 +51,8 @@ const colorForState = (state?: string): string => {
 const DailyRhythmStrip: React.FC<Props> = ({ screenData }) => {
   const sd = screenData ?? {};
   const { loadScreen, goBack } = useScreenStore();
-  const metrics = sd.cycle_metrics ?? null;
+  // v3 journey: cycle_metrics lives under today namespace.
+  const metrics = sd.today?.cycle_metrics ?? sd.cycle_metrics ?? null;
   const rhythm: RhythmDot[] = Array.isArray(metrics?.daily_rhythm)
     ? metrics.daily_rhythm
     : [];

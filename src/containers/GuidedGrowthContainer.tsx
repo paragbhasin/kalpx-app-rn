@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   Dimensions,
   FlatList,
-  Image,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -19,15 +18,15 @@ import { useSelector } from "react-redux";
 import { useScreenStore } from "../engine/useScreenBridge";
 import api from "../Networks/axios";
 import store, { RootState } from "../store";
-import { loadScreenWithData } from "../store/screenSlice";
+import { loadScreenWithData, screenActions } from "../store/screenSlice";
 import { Fonts } from "../theme/fonts";
 
 // SVGs
 import CheckInIcon from "../../assets/1_min_checkin.svg";
-import SankalpIcon from "../../assets/sankalp.svg";
-import MantraIcon from "../../assets/mantra.svg";
-import WisdomIcon from "../../assets/wisdom.svg";
 import GuidedMobileIcon from "../../assets/guided_mobile.svg";
+import MantraIcon from "../../assets/mantra.svg";
+import SankalpIcon from "../../assets/sankalp.svg";
+import WisdomIcon from "../../assets/wisdom.svg";
 
 const { width } = Dimensions.get("window");
 
@@ -87,6 +86,7 @@ export default function GuidedGrowthContainer() {
   const navigation: any = useNavigation();
   const [activeIndex, setActiveIndex] = useState(0);
   const [checkingJourney, setCheckingJourney] = useState(true);
+  const [isReentry, setIsReentry] = useState(false);
   const flatListRef = useRef<FlatList>(null);
 
   const updateBackground = useScreenStore((state) => state.updateBackground);
@@ -94,38 +94,49 @@ export default function GuidedGrowthContainer() {
     (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
   );
   const isLoggedIn = !!user;
+  const journeyCheckRef = useRef(false);
 
   const GUIDED_BG = require("../../assets/guided_bg.png");
 
   // Parity with Vue's onMounted / Home.tsx behavior
   useFocusEffect(
     React.useCallback(() => {
+      let cancelled = false;
       // Reset loading gate on every focus — prevents the page flashing
       // briefly before the journey-status redirect on re-entry.
       setCheckingJourney(true);
 
       const checkJourney = async () => {
         if (!isLoggedIn) {
-          setCheckingJourney(false);
+          if (!cancelled) setCheckingJourney(false);
           return;
         }
+        if (journeyCheckRef.current) {
+          if (!cancelled) setCheckingJourney(false);
+          return;
+        }
+        journeyCheckRef.current = true;
         try {
           const res = await api.get("mitra/journey/status/");
-          if (res.data?.hasActiveJourney) {
+          const data = res.data;
+          if (data?.hasActiveJourney) {
             // Redirect to dashboard if already has active journey
             store.dispatch(
               loadScreenWithData({
-                containerId: "companion_dashboard",
+                containerId: "companion_dashboard_v3",
                 stateId: "day_active",
               }),
             );
             navigation.navigate("DynamicEngine");
             return;
+          } else if (data?.journeyId) {
+            setIsReentry(true);
           }
         } catch (e) {
           // Silently fail
         } finally {
-          setCheckingJourney(false);
+          if (!cancelled) setCheckingJourney(false);
+          journeyCheckRef.current = false;
         }
       };
 
@@ -133,6 +144,7 @@ export default function GuidedGrowthContainer() {
       checkJourney();
 
       return () => {
+        cancelled = true;
         updateBackground(null);
       };
     }, [isLoggedIn, navigation, updateBackground, GUIDED_BG]),
@@ -163,6 +175,49 @@ export default function GuidedGrowthContainer() {
     navigation.navigate("DynamicEngine");
   };
 
+  const handleStartFresh = () => {
+    // Clear prior journey state
+    const clearKeys = [
+      "journey_id",
+      "day_number",
+      "total_days",
+      "path_cycle_number",
+      "cycle_metrics",
+      "continuity",
+      "today",
+      "arc_state",
+      "insights",
+      "identity",
+      "greeting",
+    ];
+    for (const k of clearKeys) {
+      store.dispatch(screenActions.setScreenValue({ key: k, value: null }));
+    }
+
+    // Explicitly set turn_2 for the onboarding block
+    store.dispatch(
+      screenActions.setScreenValue({ key: "onboarding_turn", value: "turn_1" }),
+    );
+
+    store.dispatch(
+      loadScreenWithData({
+        containerId: "welcome_onboarding",
+        stateId: "turn_2",
+      }),
+    );
+    navigation.navigate("DynamicEngine");
+  };
+
+  const handleContinueSame = () => {
+    store.dispatch(
+      loadScreenWithData({
+        containerId: "companion_dashboard_v3",
+        stateId: "day_active",
+      }),
+    );
+    navigation.navigate("DynamicEngine");
+  };
+
   if (checkingJourney) {
     return (
       <View style={styles.loadingContainer}>
@@ -179,28 +234,66 @@ export default function GuidedGrowthContainer() {
       >
         {/* Hero Section */}
         <View style={styles.heroSection}>
-          <Text style={styles.heroTitle}>Guided growth for real life</Text>
+          <Text style={styles.heroTitle}>
+            {isReentry ? "Welcome back." : "Guided growth for real life"}
+          </Text>
           <Text style={styles.heroSubtitle}>
-            Helping you navigate life’s challenges with clarity, balance, and
-            Sanatan wisdom.
+            {isReentry
+              ? "Your path is waiting. Would you like to continue from where you left off, or start a new cycle?"
+              : "Helping you navigate life’s challenges with clarity, balance, and Sanatan wisdom."}
           </Text>
 
-          <TouchableOpacity onPress={handleStartJourney}>
-            <LinearGradient
-              colors={["#f3e8dd", "#e6d6c8"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.ctaButton}
-            >
-              <Text style={styles.ctaText}>Start Your Journey</Text>
-              <Ionicons
-                name="arrow-forward"
-                size={18}
-                color="#4a3f35"
-                style={{ marginLeft: 8 }}
-              />
-            </LinearGradient>
-          </TouchableOpacity>
+          {isReentry ? (
+            <View style={styles.reentryButtonContainer}>
+              <TouchableOpacity
+                onPress={handleContinueSame}
+                style={styles.chipSecondary}
+              >
+                <Ionicons
+                  name="heart-outline"
+                  size={20}
+                  color="#4a3f35"
+                  style={{ marginRight: 8 }}
+                />
+                <Text style={styles.ctaText}>Continue Same</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={handleStartFresh}>
+                <View
+                  style={[
+                    styles.ctaButton,
+                    {
+                      backgroundColor: "transparent",
+                      borderColor: "rgba(74, 63, 53, 0.3)",
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[styles.ctaText, { color: "#4a3f35", opacity: 0.8 }]}
+                  >
+                    Start Fresh
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <TouchableOpacity onPress={handleStartJourney}>
+              <LinearGradient
+                colors={["#f3e8dd", "#e6d6c8"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.ctaButton}
+              >
+                <Text style={styles.ctaText}>Start Your Journey</Text>
+                <Ionicons
+                  name="arrow-forward"
+                  size={18}
+                  color="#4a3f35"
+                  style={{ marginLeft: 8 }}
+                />
+              </LinearGradient>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Path Section */}
@@ -215,10 +308,7 @@ export default function GuidedGrowthContainer() {
             </Text>
           </View>
           <View style={styles.mockupContainer}>
-            <GuidedMobileIcon
-              width={160}
-              height={300}
-            />
+            <GuidedMobileIcon width={160} height={300} />
           </View>
         </View>
 
@@ -258,7 +348,11 @@ export default function GuidedGrowthContainer() {
                 style={styles.featureCardSmall}
               >
                 {feature.Icon && (
-                  <feature.Icon width={34} height={34} style={styles.smallIcon} />
+                  <feature.Icon
+                    width={34}
+                    height={34}
+                    style={styles.smallIcon}
+                  />
                 )}
                 <Text style={styles.featureTitleTextSmall}>
                   {feature.title}
@@ -323,6 +417,10 @@ const styles = StyleSheet.create({
     marginTop: 40,
     marginBottom: 40,
   },
+  reentryButtonContainer: {
+    width: "100%",
+    alignItems: "center",
+  },
   heroTitle: {
     fontFamily: Fonts.serif.bold,
     fontSize: 32,
@@ -343,9 +441,10 @@ const styles = StyleSheet.create({
   ctaButton: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 14,
+    // paddingVertical: 14,
     paddingHorizontal: 32,
-    borderRadius: 99,
+    padding: 10,
+    borderRadius: 28,
     borderWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.5)",
     shadowColor: "#000",
@@ -353,6 +452,23 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 4,
+  },
+  chipSecondary: {
+    backgroundColor: "#FBF5F5",
+    borderColor: "#9f9f9f",
+    borderWidth: 0.3,
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 24,
+    elevation: 6,
+    padding: 10,
+    marginBottom: 12,
+
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   ctaText: {
     fontFamily: Fonts.serif.bold,

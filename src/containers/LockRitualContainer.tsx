@@ -18,7 +18,6 @@ import SigninPopup from '../components/SigninPopup';
 import BlockRenderer from '../engine/BlockRenderer';
 import { useScreenStore } from '../engine/useScreenBridge';
 import { executeAction } from '../engine/actionExecutor';
-import { mitraJourneyCompanion } from '../engine/mitraApi';
 import { screenActions } from '../store/screenSlice';
 import Header from '../components/Header';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -124,14 +123,8 @@ const LockRitualContainer: React.FC<LockRitualContainerProps> = ({ schema }) => 
         dispatch(screenActions.setScreenValue({ key, value }));
       });
 
-      // Hydrate dashboard from v3 journey/companion/ (read-only). The
-      // dashboard containers also refetch on mount so this is redundant
-      // but harmless — it smooths the first render.
-      try {
-        await mitraJourneyCompanion();
-      } catch (_err) {
-        // Non-fatal — dashboard will refetch on mount.
-      }
+      // v3 journey: dashboard container hydrates itself via
+      // mitraJourneyDailyView on focus. Legacy pre-hydrate removed.
       loadScreen({ container_id: 'companion_dashboard', state_id: 'day_active' });
     } catch (e) {
       console.error('[LockRitual] Post-login flow failed:', e);

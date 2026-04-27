@@ -92,6 +92,7 @@ function AppInner({ initialRoute, navigationRef }) {
   const currentBackground = useScreenStore((state) => state.currentBackground);
   const dispatch = useDispatch();
 
+
   // Hydrate the login user from AsyncStorage on app boot.
   // The login flow already persists access_token + refresh_token + user_id to
   // AsyncStorage, but the Redux state.login.user was being lost on restart.
@@ -146,20 +147,30 @@ function AppInner({ initialRoute, navigationRef }) {
         translucent={!!currentBackground}
         backgroundColor="transparent"
       />
+      {/*
+       * Background image sits absolutely-positioned BEHIND NavigationContainer.
+       * Previously this used a conditional {bg ? <ImageBackground><Routes/> : <View><Routes/>}
+       * which caused React to unmount+remount Routes on every currentBackground change
+       * (different component types at the same tree position → full subtree remount).
+       * That remount fired the useFocusEffect cleanup in Home → updateBackground(null)
+       * → branch flipped back → remount again → infinite loop / max update depth crash.
+       *
+       * Fix: Routes is always in the same position (inside NavigationContainer).
+       * The background layer is an absolute sibling that appears/disappears without
+       * affecting the position index of NavigationContainer or anything inside it.
+       */}
+      {currentBackground && (
+        <ImageBackground
+          source={currentBackground}
+          style={StyleSheet.absoluteFillObject}
+          resizeMode="cover"
+        />
+      )}
       <NavigationContainer ref={navigationRef} theme={TransparentTheme}>
-        {currentBackground ? (
-          <ImageBackground source={currentBackground} style={{ flex: 1 }} resizeMode="cover">
-            <View style={{ flex: 1, backgroundColor: 'transparent' }}>
-              <Routes initialRouteName={initialRoute} />
-              <SnackBarContainer />
-            </View>
-          </ImageBackground>
-        ) : (
-          <View style={{ flex: 1, backgroundColor: '#FFF' }}>
-            <Routes initialRouteName={initialRoute} />
-            <SnackBarContainer />
-          </View>
-        )}
+        <View style={{ flex: 1, backgroundColor: 'transparent' }}>
+          <Routes initialRouteName={initialRoute} />
+          <SnackBarContainer />
+        </View>
       </NavigationContainer>
       <ToastHost />
     </View>

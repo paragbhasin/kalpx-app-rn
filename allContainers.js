@@ -5225,7 +5225,7 @@ export const CycleTransitionsContainer = {
     // Spec: route_checkpoint_day_7.md. New v3 block variant; legacy
     // weekly_checkpoint (cycle_reflection block) is preserved below for
     // back-compat — callers may route to either.
-    day_7: {
+    checkpoint_day_7: {
       tone: { theme: "light_sandal", mood: "reflective" },
       blocks: [{ type: "checkpoint_day_7" }],
     },
@@ -5233,9 +5233,17 @@ export const CycleTransitionsContainer = {
     // Week 5 — Mitra v3 Moment 25 (Day 14 Evolution).
     // Spec: route_checkpoint_day_14.md. New v3 block variant alongside the
     // legacy weekly_checkpoint state.
-    day_14: {
+    checkpoint_day_14: {
       tone: { theme: "light_sandal", mood: "reflective" },
       blocks: [{ type: "checkpoint_day_14" }],
+    },
+
+    // v3 journey: arc_complete transient moment rendered after POST
+    // /api/mitra/v3/journey/day-14-decision/ returns daily_view.
+    // Auto-advances to cycle-2 dashboard after ~6s dwell.
+    day_14_finale: {
+      tone: { theme: "light_sandal", mood: "reflective" },
+      blocks: [{ type: "checkpoint_day_14_finale" }],
     },
 
     weekly_checkpoint: {
@@ -6485,6 +6493,40 @@ export const SupportGrowthContainer = {
   },
 };
 
+// Phase 5 Stage 2 — canonical v3.1 room container. Mounted by
+// RoomContainer (src/containers/RoomContainer.tsx). No block list — the
+// container fetches the RoomRenderV1 envelope from
+// GET /api/mitra/rooms/{room_id}/render/ and mounts RoomRenderer directly.
+// `room_id` is read from screenData (stamped by enter_room handler).
+//
+// `context_picker` state (2026-04-20) — 2-step UX interstitial mounted
+// between the RoomEntrySheet tap and the /render/ fetch. RoomContainer
+// branches on currentStateId and mounts LifeContextPickerSheet.
+//
+// `why_this_l2` state — wisdom overlay hosted directly within the room
+// container so open_why_this_l2 can resolve without navigating to
+// companion_dashboard. RoomContainer branches on currentStateId and mounts
+// WhyThisL2Sheet. goBack() returns to room/render naturally.
+export const RoomRenderContainer = {
+  container_id: "room",
+  states: {
+    context_picker: {
+      tone: { theme: "warm_cream", mood: "inviting" },
+      meta: { variant: "life_context_picker" },
+      blocks: [],
+    },
+    render: {
+      tone: { theme: "warm_cream", mood: "steady" },
+      meta: { variant: "room_render_v1" },
+      blocks: [],
+    },
+  },
+};
+
+// Host why-this states under room so open_why_this_l2 can resolve without
+// navigating to companion_dashboard. Assigned after WhyThisOverlayContainer
+// is defined below.
+
 export const WhyThisOverlayContainer = {
   container_id: "why_this_overlay",
   states: {
@@ -6503,11 +6545,19 @@ export const WhyThisOverlayContainer = {
   },
 };
 
-// Host why-this states under companion_dashboard as well so open_why_this_l2
-// can load without changing containerId.
+// Host why-this states under companion_dashboard so open_why_this_l2
+// can load without changing containerId when on the dashboard.
 CompanionDashboardContainer.states.why_this_l2 =
   WhyThisOverlayContainer.states.why_this_l2;
 CompanionDashboardContainer.states.why_this_l3 =
+  WhyThisOverlayContainer.states.why_this_l3;
+
+// Host why-this states under room so wisdom taps from within a room resolve
+// to room/why_this_l2 — RoomContainer branches on currentStateId and mounts
+// WhyThisL2Sheet directly. goBack() returns to room/render.
+RoomRenderContainer.states.why_this_l2 =
+  WhyThisOverlayContainer.states.why_this_l2;
+RoomRenderContainer.states.why_this_l3 =
   WhyThisOverlayContainer.states.why_this_l3;
 
 export const ContainerRegistry = {
@@ -6544,6 +6594,8 @@ export const ContainerRegistry = {
   support_joy: SupportJoyContainer,
   support_growth: SupportGrowthContainer,
   why_this_overlay: WhyThisOverlayContainer,
+  // Phase 5 Stage 2 — canonical v3.1 room render surface.
+  room: RoomRenderContainer,
   demo_container: {
     container_id: "demo_container",
     states: {

@@ -1,29 +1,26 @@
 /**
- * QuickSupportBlock — four primary support CTAs + "More support ›" link
- * that opens MoreSupportSheet.
+ * QuickSupportBlock — dashboard §14 quick-support surface.
  *
- * Spec: docs/NEW_DASHBOARD_V1_SPEC.md §2 #10 + Track 1 dashboard additive
- * expansion (WISDOM_FOUNDER_DECISIONS_LOG §Track 1 review locks).
+ * Spec: docs/ROOM_SYSTEM_V3_1_ARCHITECTURE.md §14 (v3.1.1-wisdom — founder
+ * approved 2026-04-20) + docs/room_system_v31/ROOM_CHIP_CONTRACT_V1_1.md.
  *
- * Primary actions:
- *   - `initiate_trigger`  — opens trigger-reset flow (mantra / reset suggest).
- *   - `start_checkin`     — opens the single-screen dashboard quick check-in
- *                           at `cycle_transitions/quick_checkin` (matches the
- *                           legacy CompanionDashboardContainer flow).
- *                           Do NOT dispatch `open_check_in` here —
- *                           that routes to the separate 3-step support
- *                           check-in (notice → name → settle) which is a
- *                           different surface.
- *   - `enter_joy_room`    — Track 1 first-class Joy path (M48).
- *   - `enter_growth_room` — Track 1 first-class Growth path (M49).
+ * Primary row (§14.1) — always visible, exactly 3 chips in this order:
+ *   1. "I Feel Triggered"       → `initiate_trigger`        (existing trigger flow)
+ *   2. "Quick Check-in"         → `start_checkin`           (cycle_transitions/quick_checkin)
+ *   3. "I'm in a good place"    → `enter_room {room_id:"room_joy"}`
  *
- * Labels come from screenData.quick_support_labels:
- *   { triggered_label, checkin_label, joy_label, growth_label, more_label }
+ * Footer link (§14.2):
+ *   "More ways to be supported →" → opens RoomEntrySheet (6 canonical rooms).
  *
- * Sovereignty rule: triggered + checkin + more_label have structural English
- * fallbacks (pre-Track 1 legacy). joy_label + growth_label are Track 1
- * additions; sovereignty-strict — chip renders ONLY when backend provides
- * the label. Deploy order: backend seeds labels first, chips appear.
+ * Prior chip set (Track 1 joy_chip / growth_chip primary placements) is
+ * retired per §14.5. Joy retains dual entry (primary chip + sheet row).
+ * Growth moves exclusively to the sheet. The legacy MoreSupportSheet
+ * (grief + loneliness only) is deprecated — RoomEntrySheet supersedes.
+ *
+ * Sovereignty: these chips are factual UI labels (not emotional prose).
+ * Structural English is approved per §14 founder sign-off. Labels here are
+ * load-bearing copy from the architecture, not backend-seeded text —
+ * deviating from them breaks the Chip Contract v1.1.
  */
 
 import React, { useState } from "react";
@@ -40,7 +37,8 @@ import store from "../../store";
 import { screenActions } from "../../store/screenSlice";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
-import MoreSupportSheet from "./MoreSupportSheet";
+import RoomEntrySheet from "../room/RoomEntrySheet";
+import type { RoomId } from "../room/types";
 
 type Props = {
   screenData?: Record<string, any>;
@@ -48,24 +46,13 @@ type Props = {
 
 const QuickSupportBlock: React.FC<Props> = ({ screenData }) => {
   const sd = screenData ?? {};
-  const labels = (sd.quick_support_labels ?? {}) as Record<string, string>;
-  // Always-visible core block — support must always be reachable. CTAs
-  // are factual UI labels (not emotional prose), so structural English
-  // fallbacks are acceptable per the sovereignty contract.
-  const triggeredLabel: string = labels.triggered_label || "I Feel Triggered";
-  const checkinLabel: string = labels.checkin_label || "Quick Check-in";
-  // Track 1 — sovereignty-strict. No TSX English fallback. Chip renders only
-  // when backend seeds the label (otherwise chip is invisible, no broken UI).
-  const joyLabel: string = labels.joy_label || "";
-  const growthLabel: string = labels.growth_label || "";
-  const moreLabel: string = labels.more_label || "More support";
 
   const [sheetVisible, setSheetVisible] = useState(false);
   const { loadScreen, goBack } = useScreenStore();
 
-  const dispatchAction = (type: string) => {
+  const dispatchAction = (type: string, payload?: Record<string, any>) => {
     executeAction(
-      { type },
+      payload ? ({ type, payload } as any) : ({ type } as any),
       {
         loadScreen,
         goBack,
@@ -76,8 +63,13 @@ const QuickSupportBlock: React.FC<Props> = ({ screenData }) => {
     ).catch(() => {});
   };
 
+  const handleRoomEntry = (room_id: RoomId) => {
+    dispatchAction("enter_room", { room_id, source: "room_entry_sheet" });
+  };
+
   return (
     <View style={styles.wrap} accessibilityLabel="quick_support_block">
+      {/* §14.1 Chip 1 — I Feel Triggered */}
       <TouchableOpacity
         style={styles.primary}
         activeOpacity={0.88}
@@ -90,9 +82,10 @@ const QuickSupportBlock: React.FC<Props> = ({ screenData }) => {
           color={Colors.brownDeep}
           style={styles.primaryIcon}
         />
-        <Text style={styles.primaryText}>{triggeredLabel}</Text>
+        <Text style={styles.primaryText}>I Feel Triggered</Text>
       </TouchableOpacity>
 
+      {/* §14.1 Chip 2 — Quick Check-in */}
       <TouchableOpacity
         style={[styles.primary, styles.primaryBordered]}
         activeOpacity={0.88}
@@ -105,65 +98,51 @@ const QuickSupportBlock: React.FC<Props> = ({ screenData }) => {
           color={Colors.brownDeep}
           style={styles.primaryIcon}
         />
-        <Text style={styles.primaryText}>{checkinLabel}</Text>
+        <Text style={styles.primaryText}>Quick Check-in</Text>
       </TouchableOpacity>
 
-      {/* Track 1 — Joy primary chip. Only renders when backend seeded. */}
-      {!!joyLabel && (
-        <TouchableOpacity
-          style={[styles.primary, styles.primaryBordered]}
-          activeOpacity={0.88}
-          onPress={() => dispatchAction("enter_joy_room")}
-          accessibilityLabel="joy_room_chip"
-          testID="quick_support_joy_chip"
-        >
-          <Ionicons
-            name="sunny-outline"
-            size={16}
-            color={Colors.brownDeep}
-            style={styles.primaryIcon}
-          />
-          <Text style={styles.primaryText}>{joyLabel}</Text>
-        </TouchableOpacity>
-      )}
+      {/* §14.1 Chip 3 — I'm in a good place → enter_room room_joy */}
+      <TouchableOpacity
+        style={[styles.primary, styles.primaryBordered]}
+        activeOpacity={0.88}
+        onPress={() =>
+          dispatchAction("enter_room", {
+            room_id: "room_joy",
+            source: "quick_support_good_place",
+          })
+        }
+        accessibilityLabel="good_place_chip"
+        testID="quick_support_good_place"
+      >
+        <Ionicons
+          name="sunny-outline"
+          size={16}
+          color={Colors.brownDeep}
+          style={styles.primaryIcon}
+        />
+        <Text style={styles.primaryText}>I'm in a good place</Text>
+      </TouchableOpacity>
 
-      {/* Track 1 — Growth primary chip. Only renders when backend seeded. */}
-      {!!growthLabel && (
-        <TouchableOpacity
-          style={[styles.primary, styles.primaryBordered]}
-          activeOpacity={0.88}
-          onPress={() => dispatchAction("enter_growth_room")}
-          accessibilityLabel="growth_room_chip"
-          testID="quick_support_growth_chip"
-        >
-          <Ionicons
-            name="leaf-outline"
-            size={16}
-            color={Colors.brownDeep}
-            style={styles.primaryIcon}
-          />
-          <Text style={styles.primaryText}>{growthLabel}</Text>
-        </TouchableOpacity>
-      )}
-
+      {/* §14.2 Footer link — opens RoomEntrySheet */}
       <TouchableOpacity
         style={styles.more}
         activeOpacity={0.7}
         onPress={() => setSheetVisible(true)}
-        testID="quick_support_more_label"
+        testID="quick_support_more_ways"
       >
-        <Text style={styles.moreText}>{moreLabel}</Text>
+        <Text style={styles.moreText}>More ways to be supported</Text>
         <Ionicons
-          name="chevron-forward"
+          name="arrow-forward"
           size={14}
           color={Colors.brownMuted}
+          style={styles.moreArrow}
         />
       </TouchableOpacity>
 
-      <MoreSupportSheet
+      <RoomEntrySheet
         visible={sheetVisible}
-        onClose={() => setSheetVisible(false)}
-        screenData={sd}
+        onDismiss={() => setSheetVisible(false)}
+        onRoomEntry={handleRoomEntry}
       />
     </View>
   );
@@ -208,6 +187,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.brownMuted,
     marginRight: 4,
+  },
+  moreArrow: {
+    marginLeft: 2,
   },
 });
 

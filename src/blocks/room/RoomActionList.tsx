@@ -1,10 +1,6 @@
 /**
  * RoomActionList — iterates `envelope.actions[]` and delegates to sub-components
- * by `action_type`. Honors reveal stagger per `pacing_ms.pills_reveal_stagger`.
- *
- * Stub behavior: reveal delay is computed but no animation driver is wired
- * yet (scaffolding). When flag flips, RoomRenderer mounts this only under
- * EXPO_PUBLIC_MITRA_V3_ROOMS === "1".
+ * by `action_type`. Renders immediately — no stagger, no animation.
  *
  * Invariant I-1 (§4): exit is always present. This component does not
  * enforce I-1 — that's Agent 5 CI's job. If malformed envelope arrives
@@ -12,9 +8,8 @@
  */
 
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
-import type { ActionEnvelope, RoomRenderV1 } from "./types";
 import {
   RoomActionCarryPill,
   RoomActionExitPill,
@@ -23,52 +18,118 @@ import {
   RoomActionStepPill,
   RoomActionTeachingPill,
 } from "./actions";
+import { ACTION_KIND_LABELS } from "./roomConstants";
+import type { ActionEnvelope, RoomRenderV1 } from "./types";
 
 interface Props {
   envelope: RoomRenderV1;
-  reduceMotion: boolean;
 }
 
-const RoomActionList: React.FC<Props> = ({ envelope, reduceMotion }) => {
-  const { actions, opening_experience } = envelope;
-  const stagger = opening_experience.pacing_ms.pills_reveal_stagger;
+const RoomActionList: React.FC<Props> = ({ envelope }) => {
+  const { actions } = envelope;
+
+  const sortedActions = [...actions].sort((a, b) => {
+    const aPrimary = a.primary_recommendation ? 1 : 0;
+    const bPrimary = b.primary_recommendation ? 1 : 0;
+    if (aPrimary !== bPrimary) return bPrimary - aPrimary;
+    if (a.action_type === "exit" && b.action_type !== "exit") return 1;
+    if (a.action_type !== "exit" && b.action_type === "exit") return -1;
+    return 0;
+  });
 
   return (
     <View style={styles.list} testID="room_action_list">
-      {actions.map((action, index) => {
-        // staggerDelay reserved for future animation driver.
-        // When reduceMotion=true, stagger collapses to 0 and we rely on
-        // opacity-only fades per §6 accessibility invariants.
-        const _staggerDelay = reduceMotion ? 0 : index * stagger;
-        void _staggerDelay;
-        return (
-          <View key={action.action_id} style={styles.row}>
-            {renderActionComponent(action, index)}
-          </View>
-        );
-      })}
+      {sortedActions.map((action, index) => (
+        <View key={action.action_id} style={styles.row}>
+          {action.primary_recommendation && index === 0 ? (
+            <Text style={styles.startHereLabel}>Start here</Text>
+          ) : null}
+          {renderActionComponent(
+            action,
+            index,
+            envelope,
+            action.primary_recommendation === true,
+          )}
+        </View>
+      ))}
     </View>
   );
 };
 
-function renderActionComponent(action: ActionEnvelope, index: number) {
+function renderActionComponent(
+  action: ActionEnvelope,
+  index: number,
+  envelope: RoomRenderV1,
+  isPrimary: boolean,
+) {
+  const kindLabelValue = ACTION_KIND_LABELS[action.action_type];
+  const kindLabel =
+    kindLabelValue && kindLabelValue.length > 0 ? kindLabelValue : undefined;
+
   switch (action.action_type) {
     case "runner_mantra":
     case "runner_sankalp":
     case "runner_practice":
-      return <RoomActionRunnerPill action={action} index={index} />;
+      return (
+        <RoomActionRunnerPill
+          action={action}
+          index={index}
+          envelope={envelope}
+          kindLabel={kindLabel}
+          isPrimary={isPrimary}
+        />
+      );
     case "teaching":
-      return <RoomActionTeachingPill action={action} index={index} />;
+      return (
+        <RoomActionTeachingPill
+          action={action}
+          index={index}
+          envelope={envelope}
+          kindLabel={kindLabel}
+          isPrimary={isPrimary}
+        />
+      );
     case "inquiry":
-      return <RoomActionInquiryPill action={action} index={index} />;
+      return (
+        <RoomActionInquiryPill
+          action={action}
+          index={index}
+          envelope={envelope}
+          kindLabel={kindLabel}
+          isPrimary={isPrimary}
+        />
+      );
     case "in_room_step":
-      return <RoomActionStepPill action={action} index={index} />;
-    case "carry":
-      return <RoomActionCarryPill action={action} index={index} />;
+      return (
+        <RoomActionStepPill
+          action={action}
+          index={index}
+          envelope={envelope}
+          kindLabel={kindLabel}
+          isPrimary={isPrimary}
+        />
+      );
+    case "in_room_carry":
+      return (
+        <RoomActionCarryPill
+          action={action}
+          index={index}
+          envelope={envelope}
+          kindLabel={kindLabel}
+          isPrimary={isPrimary}
+        />
+      );
     case "exit":
-      return <RoomActionExitPill action={action} index={index} />;
+      return (
+        <RoomActionExitPill action={action} index={index} envelope={envelope} />
+      );
     default:
       // Unknown action_type — self-hide per sovereignty fallback (§I-6).
+      if (__DEV__) {
+        console.warn(
+          `[RoomActionList] unknown action_type "${action.action_type}" — action silently skipped`,
+        );
+      }
       return null;
   }
 }
@@ -80,6 +141,13 @@ const styles = StyleSheet.create({
   },
   row: {
     width: "100%",
+  },
+  startHereLabel: {
+    fontSize: 12,
+    color: "#D4A017",
+
+    marginBottom: 4,
+    letterSpacing: 0.3,
   },
 });
 

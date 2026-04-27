@@ -16,7 +16,6 @@
  */
 
 import React from "react";
-// @ts-expect-error — package installed once Jest + RTL are wired in Phase 5.
 import { render } from "@testing-library/react-native";
 
 import RoomRenderer from "../RoomRenderer";
@@ -73,7 +72,7 @@ function fixtureEnvelope(): RoomRenderV1 {
     }),
     makeAction({
       action_id: "a1",
-      action_type: "carry",
+      action_type: "in_room_carry",
       action_family: "offering",
       testID: "room_joy_carry_1",
       carry_payload: { writes_event: "joy_carry", persists: true },
@@ -89,7 +88,6 @@ function fixtureEnvelope(): RoomRenderV1 {
   return {
     schema_version: "room.render.v1",
     room_id: "room_joy",
-    room_identity: { purpose_line: "Honor fullness.", stance_tag: "expand" },
     opening_line: "You arrive bright.",
     second_beat_line: "Breathe the fullness in.",
     ready_hint: "Tap when you're ready",
@@ -127,6 +125,10 @@ function fixtureEnvelope(): RoomRenderV1 {
       selection_service_version: "1.0.0",
       render_id: "uuid-x",
       active_rotation_window_days: 7,
+      visit_number: 1,
+      render_phase: "standard",
+      life_context_applied: false,
+      life_context_skipped: false,
     },
     fallbacks: {
       hide_if_empty: ["second_beat_line", "principle_banner"],

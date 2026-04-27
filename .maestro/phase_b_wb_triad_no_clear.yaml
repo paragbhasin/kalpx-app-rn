@@ -1,0 +1,70 @@
+# Phase B — Welcome Back Triad Diagnostic (no clearState)
+# Pre-condition: app is already in guest state (state cleared by prior run)
+# Tests: after Continue on WB surface, new cycle daily_view has full triad.
+
+appId: com.kalpx.app
+---
+- waitForAnimationToEnd
+
+# ── Login via Menu drawer ─────────────────────────────────────────────────
+- tapOn: "Menu"
+- waitForAnimationToEnd
+- tapOn: "Log In"
+- waitForAnimationToEnd
+- assertVisible: "Connect to Your Roots"
+
+- tapOn:
+    text: "Username"
+- inputText: "test+welcomeback@kalpx.com"
+- hideKeyboard
+
+- tapOn:
+    text: "Password"
+- inputText: "Test1234!"
+- hideKeyboard
+
+- tapOn: "LOGIN"
+- extendedWaitUntil:
+    notVisible: "Signing in..."
+    timeout: 30000
+- tapOn:
+    text: "Not now|Maybe later|Skip|Cancel"
+    optional: true
+- extendedWaitUntil:
+    notVisible: "Sign in to save your journey"
+    timeout: 10000
+- waitForAnimationToEnd
+
+- takeScreenshot: phase_b_01_after_login
+
+# ── B-1: Welcome Back surface ────────────────────────────────────────────
+- assertVisible:
+    text: "Welcome back|welcome back|Continue|Spiritual"
+- takeScreenshot: phase_b_02_welcome_back_surface
+
+# ── B-2: Tap Continue ────────────────────────────────────────────────────
+- tapOn:
+    text: "Continue"
+- waitForAnimationToEnd
+- extendedWaitUntil:
+    visible:
+      text: "Day|Mitra|My Routine|Quick"
+    timeout: 20000
+- takeScreenshot: phase_b_03_after_continue
+
+# ── B-3: Triad must have real titles ────────────────────────────────────
+# Proof: if triad reuse worked, Anahata mantra title must be visible.
+# If reuse failed, the triad rows are blank/missing.
+- scrollUntilVisible:
+    element:
+      text: "Anahata|Humming|forgive"
+    direction: DOWN
+    timeout: 15000
+- assertVisible:
+    text: "Anahata|Humming|forgive"
+- takeScreenshot: phase_b_04_triad_titles_visible
+
+# ── B-4: Day number is Day 1 of new cycle ───────────────────────────────
+- assertVisible:
+    text: "Day 1"
+- takeScreenshot: phase_b_05_day_number

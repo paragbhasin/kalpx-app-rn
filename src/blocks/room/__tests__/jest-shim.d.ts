@@ -17,6 +17,20 @@ declare const jest: {
   requireMock: (moduleName: string) => any;
 };
 
+// Minimal fireEvent surface used by the sheet/dashboard tests.
+declare module "@testing-library/react-native" {
+  export const fireEvent: {
+    press: (node: any) => void;
+    changeText: (node: any, text: string) => void;
+  };
+  export function render(element: any): {
+    getByTestId: (id: string) => any;
+    queryByTestId: (id: string) => any;
+    toJSON: () => any;
+    unmount: () => void;
+  };
+}
+
 declare function describe(name: string, fn: () => void): void;
 declare function beforeEach(fn: () => void): void;
 declare function afterEach(fn: () => void): void;
@@ -28,4 +42,11 @@ declare function expect(value: any): {
   toBeTruthy: () => void;
   toBeNull: () => void;
   toMatch: (re: RegExp) => void;
+  toHaveBeenCalledTimes: (n: number) => void;
+  toHaveBeenCalledWith: (...args: any[]) => void;
+  not: {
+    toHaveBeenCalled: () => void;
+  };
+  toEqual: (other: any) => void;
+  toBe: (other: any) => void;
 };

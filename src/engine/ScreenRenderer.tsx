@@ -10,7 +10,6 @@ import type { RootState } from "../store";
 import PracticeDetailOverlay from "../components/PracticeDetailOverlay";
 import AwarenessTriggerContainer from "../containers/AwarenessTriggerContainer";
 import ChoiceStackContainer from "../containers/ChoiceStackContainer";
-import CompanionDashboardContainer from "../containers/CompanionDashboardContainer";
 import ComposerContainer from "../containers/ComposerContainer";
 import CycleTransitionsContainer from "../containers/CycleTransitionsContainer";
 import EmbodimentChallengeRunnerContainer from "../containers/EmbodimentChallengeRunnerContainer";
@@ -39,6 +38,12 @@ import JoyRoomContainer from "../extensions/moments/joy_room";
 import GrowthRoomContainer from "../extensions/moments/growth_room";
 // T3A-3 — Crisis safety surface
 import CrisisRoomContainer from "../containers/CrisisRoomContainer";
+// Checkpoint reflection — thin container that renders CycleReflectionBlock directly.
+// Avoids CycleTransitionsContainer background interference.
+import CheckpointReflectionContainer from "../containers/CheckpointReflectionContainer";
+// Phase 5 Stage 2 — Canonical v3.1 room renderer (flag-gated at RoomRenderer).
+// Fetches GET /api/mitra/rooms/{room_id}/render/ and mounts <RoomRenderer />.
+import RoomContainer from "../containers/RoomContainer";
 // Phase 3 — Mitra v3 new dashboard shell (11 required components).
 // Registered under `companion_dashboard_v3` so Home.tsx can route to it
 // when the flag flips. Gated behind EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD=1;
@@ -54,16 +59,10 @@ const containerMap: Record<string, React.ComponentType<any>> = {
   lock_ritual_overlay: LockRitualContainer,
   lock_ritual: LockRitualContainer,
   insight_summary: InsightSummaryContainer,
-  // When EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD=1, every `companion_dashboard`
-  // route — including hardcoded redirects from InsightSummaryContainer,
-  // LockRitualContainer, PracticeRunnerContainer, etc. (40+ callsites) —
-  // resolves to the new dashboard shell. Flag=0 keeps the legacy
-  // CompanionDashboardContainer. This is the cleanest single-flip for
-  // Phase 5 without touching every hardcoded nav call.
-  companion_dashboard:
-    process.env.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
-      ? NewDashboardContainer
-      : CompanionDashboardContainer,
+  // Legacy `companion_dashboard` route now resolves to the v3
+  // NewDashboardContainer unconditionally. The legacy
+  // CompanionDashboardContainer was deleted in journey-v3-fe Step 5.
+  companion_dashboard: NewDashboardContainer,
   practice_runner: PracticeRunnerContainer,
   awareness_trigger: AwarenessTriggerContainer,
   composer: ComposerContainer,
@@ -88,10 +87,18 @@ const containerMap: Record<string, React.ComponentType<any>> = {
   support_growth: GrowthRoomContainer,
   // T3A-3 — Crisis safety surface
   crisis_room: CrisisRoomContainer,
+  // Day 7 / Day 14 checkpoint — renders CycleReflectionBlock directly.
+  checkpoint_reflection: CheckpointReflectionContainer,
   // Phase 3 — Mitra v3 new dashboard. Active only when Home.tsx routes
   // here (EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD=1). Coexists with
   // companion_dashboard until Phase 5 cutover.
   companion_dashboard_v3: NewDashboardContainer,
+  // Phase 5 Stage 2 — Canonical room container. Mounted via
+  // loadScreen({ container_id: "room", state_id: "render" }) from the
+  // enter_room handler when EXPO_PUBLIC_MITRA_V3_ROOMS=1 AND the per-room
+  // flag EXPO_PUBLIC_MITRA_ROOM_<UPPER>=1 are both on. room_id is read
+  // from screenData (stamped pre-nav by enter_room).
+  room: RoomContainer,
 };
 
 const ScreenRenderer: React.FC = () => {
@@ -100,6 +107,9 @@ const ScreenRenderer: React.FC = () => {
   const currentContainerId = useScreenStore(
     (state) => state.currentContainerId,
   );
+  const currentStateId = useScreenStore((state) => state.currentStateId);
+  const currentBackground = useScreenStore((state) => state.currentBackground);
+  const updateBackground = useScreenStore((state) => state.updateBackground);
   const { currentOverlayData, setOverlayData } = useScreenStore();
 
   const user = useSelector(
@@ -123,6 +133,23 @@ const ScreenRenderer: React.FC = () => {
       return () => clearTimeout(timer);
     }
   }, [currentScreen, isLoggedIn, navigation]);
+
+  useEffect(() => {
+    if (!currentScreen) return;
+    if (currentBackground) return;
+    // RACE GUARD: React runs child effects before parent effects. CycleReflectionBlock
+    // (a deep child) sets Day7Bg/Day14Bg in its own useEffect, but by the time THIS
+    // parent effect runs, currentBackground was captured at render-time (still null).
+    // Explicitly skip the beige fallback for checkpoint screens so we don't overwrite
+    // the period-specific background that CycleReflectionBlock or ContinueJourney
+    // pre-dispatched.
+    const isCheckpointScreen =
+      currentContainerId === 'checkpoint_reflection' ||
+      currentStateId === 'checkpoint_day_7' ||
+      currentStateId === 'checkpoint_day_14';
+    if (isCheckpointScreen) return;
+    updateBackground(require("../../assets/beige_bg.png"));
+  }, [currentBackground, currentScreen, currentContainerId, currentStateId, updateBackground]);
 
   if (__DEV__) {
     console.log(

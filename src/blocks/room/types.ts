@@ -23,6 +23,26 @@ export type RoomId =
   | "room_growth"
   | "room_joy";
 
+/**
+ * 2-step UX life-context slugs (founder-locked 2026-04-20).
+ * Picked by `LifeContextPickerSheet` and passed as `?life_context=<slug>`
+ * on the /render/ fetch. `self` renders as "Myself" in the picker UI.
+ */
+export type LifeContext =
+  | "work_career"
+  | "relationships"
+  | "self"
+  | "health_energy"
+  | "money_security"
+  | "purpose_direction"
+  | "daily_life";
+
+/**
+ * Room visit state (B1 provenance addition). BE may omit; FE treats as
+ * optional.
+ */
+export type VisitState = "cold_start" | "repeat" | "seasoned";
+
 export type ActionType =
   | "runner_mantra"
   | "runner_sankalp"
@@ -30,7 +50,7 @@ export type ActionType =
   | "teaching"
   | "inquiry"
   | "in_room_step"
-  | "carry"
+  | "in_room_carry"
   | "exit";
 
 export type ActionFamily =
@@ -156,7 +176,7 @@ export interface TeachingPayload {
   principle_id: string;
   principle_name: string;
   body: string;
-  sources: string[];
+  sources: Array<{ text: string; citation: string }>;
 }
 
 export interface InquiryCategory {
@@ -166,6 +186,13 @@ export interface InquiryCategory {
   prompt: string;
   practice_label: string;
   principle_id: string;
+
+  // Phase 6 optional additions — founder spec fields. `reflective_prompt`
+  // supersedes `prompt` when present; `suggested_practice_template_id`
+  // lets the inquiry detail launch a step directly (InquiryModal Phase 6).
+  reflective_prompt?: string | null;
+  suggested_practice_template_id?: string | null;
+  suggested_practice_label?: string | null;
 }
 
 export interface InquiryPayload {
@@ -183,6 +210,23 @@ export interface StepPayload {
   template_id: StepTemplateId | string;
   step_config: Record<string, unknown>;
   input_slots: string[];
+
+  // Phase 6 optional additions — surfaced by StepModal. When BE starts
+  // emitting these they populate the modal; otherwise sensible defaults
+  // per template category apply (60s timer, generic placeholders).
+  duration_sec?: number | null;
+  cue_text?: string | null;
+  prompt?: string | null;
+  memory_modal?: {
+    title?: string;
+    sanatan_context?: string;
+    why_we_ask?: string;
+    prompt?: string;
+    placeholder?: string;
+    primary_label?: string;
+    confirmation?: string;       // overrides CARRY_CONFIRM_COPY in confirmed state
+    add_another_label?: string;  // overrides CONFIRMED_ADD_LABEL in confirmed state
+  } | null;
 }
 
 export interface CarryPayload {
@@ -190,6 +234,7 @@ export interface CarryPayload {
     | "joy_carry"
     | "joy_named"
     | "release_voice_note"
+    | "release_named"
     | "connection_named"
     | "connection_reach_out"
     | "growth_journal"
@@ -217,6 +262,12 @@ export interface ActionVisibilityGate {
   feature_flag?: string | null;
 }
 
+export interface ActionDisplay {
+  display_title?: string | null;
+  display_subtitle?: string | null;
+  why_for_you?: string | null;
+}
+
 /**
  * Polymorphic Action shape per §7.2. One action envelope — payload fields
  * populated according to `action_type`.
@@ -227,6 +278,7 @@ export interface ActionEnvelope {
   action_type: ActionType;
   action_family: ActionFamily;
 
+  display?: ActionDisplay | null;
   runner_payload: CanonicalRichRunnerPayloadV1 | null;
   teaching_payload: TeachingPayload | null;
   inquiry_payload: InquiryPayload | null;
@@ -251,6 +303,8 @@ export interface ActionEnvelope {
     writes_event: string | null;
     persists_across_sessions: boolean;
   };
+  primary_recommendation?: boolean;
+  helper_line?: string | null;
 }
 
 // ───────────────────────────────────────────────────────────────────────────
@@ -319,17 +373,16 @@ export interface PrincipleBanner {
 // Top-level envelope (§7.1)
 // ───────────────────────────────────────────────────────────────────────────
 
-export interface RoomIdentity {
-  purpose_line: string;
-  stance_tag: string;
-}
-
 export interface RoomProvenance {
   pool_id: string;
   pool_version: string;
   selection_service_version: string;
   render_id: string;
   active_rotation_window_days: number;
+  visit_number: number;
+  render_phase: string;
+  life_context_applied: boolean;
+  life_context_skipped: boolean;
 }
 
 export interface RoomFallbacks {
@@ -339,10 +392,18 @@ export interface RoomFallbacks {
   >;
 }
 
+// Wave 4 (2026-04-23): 3-layer context surface under room header.
+export interface RoomContext {
+  room_purpose_line?: string | null;
+  sanatan_insight_line?: string | null;
+  why_this_room_line?: string | null;
+  /** Batch 4C: gentle connective line between wisdom banner and action list. */
+  bridge_line?: string | null;
+}
+
 export interface RoomRenderV1 {
   schema_version: "room.render.v1";
   room_id: RoomId;
-  room_identity: RoomIdentity;
 
   opening_line: string;
   second_beat_line: string | null;
@@ -355,12 +416,32 @@ export interface RoomRenderV1 {
   /** L1 wisdom surface — scalar, never a carousel (§5.7.2 I-10). */
   principle_banner: PrincipleBanner | null;
 
+  /** Wave 4: optional 3-layer context surface. Null when no context slots authored. */
+  room_context?: RoomContext | null;
+
   opening_experience: OpeningExperience;
 
   actions: ActionEnvelope[];
 
   provenance: RoomProvenance;
   fallbacks: RoomFallbacks;
+
+  // ─────────────────────────────────────────────────────────────────────
+  // 2-step UX additions (founder-locked 2026-04-20). BE stamps these on
+  // /render/ responses when the FE passes `?life_context=<slug>`.
+  // Visit-state is provenance-only on the BE side; FE treats both fields
+  // as informational and tolerates their absence.
+  // ─────────────────────────────────────────────────────────────────────
+  life_context?: LifeContext | null;
+  visit_state?: VisitState | null;
+
+  /**
+   * Batch 4B: optional welcome-back echo line. Present only when
+   * MITRA_ROOM_MEMORY_ECHO flag is ON and the user has a prior memory for
+   * this room. Never contains the user's own text — only a type-level
+   * reference ("Last time, you named someone who matters.").
+   */
+  memory_echo_line?: string | null;
 }
 
 // ───────────────────────────────────────────────────────────────────────────

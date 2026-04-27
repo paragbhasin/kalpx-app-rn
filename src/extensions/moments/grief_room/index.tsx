@@ -54,7 +54,11 @@ import {
   View,
 } from "react-native";
 import { executeAction } from "../../../engine/actionExecutor";
-import { mitraLibrarySearch, mitraResolveMoment } from "../../../engine/mitraApi";
+import {
+  mitraLibrarySearch,
+  mitraResolveMoment,
+  mitraTrackEvent,
+} from "../../../engine/mitraApi";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 import store from "../../../store";
 import { screenActions } from "../../../store/screenSlice";
@@ -112,11 +116,22 @@ const GriefRoomContainer: React.FC<Props> = () => {
   // --- Ours: Phase C M46 pilot — resolve grief_room content slots on mount ---
   useEffect(() => {
     if (resolveFiredRef.current) return;
+    resolveFiredRef.current = true;
+
+    // Telemetry — Step 4a: Room entered
+    const parentSource =
+      typeof ss._entered_via === "string" && ss._entered_via
+        ? ss._entered_via
+        : "dashboard";
+    mitraTrackEvent("grief_session_opened", {
+      journeyId: ss.journey_id,
+      dayNumber: ss.day_number || 1,
+      meta: { parent_source: parentSource },
+    });
+
     if (ss.grief_room && typeof ss.grief_room === "object") {
-      resolveFiredRef.current = true;
       return;
     }
-    resolveFiredRef.current = true;
     const cycleId =
       typeof ss.journey_id === "string" && ss.journey_id
         ? ss.journey_id
@@ -133,10 +148,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
       user_attention_state: "grieving_shut_down",
       emotional_weight: "maximum" as const,
       cycle_day: Number(ss.day_number) || 0,
-      entered_via:
-        typeof ss._entered_via === "string" && ss._entered_via
-          ? ss._entered_via
-          : "check_in_anandamaya_klesha_asmita",
+      entered_via: parentSource,
       stage_signals: {},
       today_layer: {
         today_kosha: ss.today_kosha || "anandamaya",
@@ -248,10 +260,9 @@ const GriefRoomContainer: React.FC<Props> = () => {
       const playSound = async () => {
         try {
           // Prefer slot-resolved audio URL; fall back to local Om asset
-          const audioSource =
-            (ss as any).grief_mantra?.audio_url
-              ? { uri: (ss as any).grief_mantra.audio_url }
-              : require("../../../../assets/sounds/Om.mp4");
+          const audioSource = (ss as any).grief_mantra?.audio_url
+            ? { uri: (ss as any).grief_mantra.audio_url }
+            : require("../../../../assets/sounds/Om.mp4");
           const { sound } = await Audio.Sound.createAsync(audioSource, {
             isLooping: true,
             shouldPlay: true,
@@ -407,17 +418,11 @@ const GriefRoomContainer: React.FC<Props> = () => {
     <Animated.View style={[styles.optionsStack, { opacity: fade2 }]}>
       <Text style={styles.secondBeat}>{secondBeatLine}</Text>
 
-      <TouchableOpacity
-        style={styles.pill}
-        onPress={() => setStep("breath")}
-      >
+      <TouchableOpacity style={styles.pill} onPress={() => setStep("breath")}>
         <Text style={styles.pillText}>{pillBreatheLabel}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.pill}
-        onPress={() => setStep("input")}
-      >
+      <TouchableOpacity style={styles.pill} onPress={() => setStep("input")}>
         <Text style={styles.pillText}>{pillSpeakLabel}</Text>
       </TouchableOpacity>
 
@@ -432,10 +437,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
         </TouchableOpacity>
       )}
 
-      <TouchableOpacity
-        style={styles.pill}
-        onPress={() => setStep("stay")}
-      >
+      <TouchableOpacity style={styles.pill} onPress={() => setStep("stay")}>
         <Text style={styles.pillText}>{pillStayLabel}</Text>
       </TouchableOpacity>
 
@@ -465,10 +467,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
             style={[styles.orbWrapper, { transform: [{ scale: dotScale }] }]}
           >
             <LinearGradient
-              colors={[
-                "rgba(255, 255, 255, 0.45)",
-                "rgba(235, 215, 190, 0.2)",
-              ]}
+              colors={["rgba(255, 255, 255, 0.45)", "rgba(235, 215, 190, 0.2)"]}
               style={styles.orbGradient}
             >
               <Text style={styles.breathActionText}>{breathText}</Text>
@@ -521,7 +520,12 @@ const GriefRoomContainer: React.FC<Props> = () => {
           resizeMode="contain"
         />
 
-        <Text style={styles.stayQuote}>{stayQuote}</Text>
+        <Text style={styles.stayQuote}>
+          {stayQuote ||
+            `Come, let’s sit together in this quiet.
+There’s nothing for you to do.
+You’re exactly where you need to be right now.`}
+        </Text>
       </View>
 
       <View style={styles.stayFooter}>
@@ -582,7 +586,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
               dispatch("exit_grief_room", null, { actions_used: actionsUsed });
             }}
           >
-            <Text style={styles.topBackText}>{pillExitLabel}</Text>
+            {/* <Text style={styles.topBackText}>{pillExitLabel}</Text> */}
           </TouchableOpacity>
         </View>
       )}

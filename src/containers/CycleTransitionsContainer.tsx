@@ -33,6 +33,7 @@ import Animated, {
 import Svg, { Circle, Path } from "react-native-svg";
 import RudrakshSvg from "../../assets/rudraksh.svg";
 import AudioPlayerBlock from "../blocks/AudioPlayerBlock";
+import CycleReflectionBlock from "../blocks/CycleReflectionBlock";
 import { VoiceTextInput } from "../components/VoiceTextInput";
 import BlockRenderer from "../engine/BlockRenderer";
 import { executeAction } from "../engine/actionExecutor";
@@ -75,6 +76,13 @@ const hasContent = (val: any): boolean => {
   if (Array.isArray(val)) return val.length > 0;
   if (typeof val === "object") return Object.keys(val).length > 0;
   return true;
+};
+
+const normalizeComparableText = (val: any): string => {
+  return String(val || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
 };
 
 // ---------------------------------------------------------------------------
@@ -478,10 +486,30 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     () => screenData?.info || screenData?.runner_active_item || {},
     [screenData],
   );
+  const sankalpBodyText = useMemo(
+    () =>
+      interpolate(
+        info.line || info.subtitle || info.iast || info.meaning || info.summary,
+        { ...screenData, ...info },
+      ),
+    [info, screenData],
+  );
+  const shouldShowSankalpBody = useMemo(() => {
+    if (!hasContent(sankalpBodyText)) return false;
+    return (
+      normalizeComparableText(sankalpBodyText) !==
+      normalizeComparableText(info.title || "Intention")
+    );
+  }, [sankalpBodyText, info.title]);
   const stateId = currentStateId || "";
 
   const currentType: ActivityType = useMemo(() => {
-    const rawType = (info?.type || info?.item_type || "").toLowerCase();
+    const rawType = (
+      info?.type ||
+      info?.item_type ||
+      info?.itemType ||
+      ""
+    ).toLowerCase();
 
     // 1. Check direct info type
     if (rawType === "mantra") return "mantra";
@@ -493,21 +521,24 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
       screenData?.info_is_mantra ||
       screenData?.runner_variant === "mantra" ||
       screenData?.runner_active_item?.type === "mantra" ||
-      screenData?.runner_active_item?.item_type === "mantra"
+      screenData?.runner_active_item?.item_type === "mantra" ||
+      screenData?.runner_active_item?.itemType === "mantra"
     )
       return "mantra";
     if (
       screenData?.info_is_sankalp ||
       screenData?.runner_variant === "sankalp" ||
       screenData?.runner_active_item?.type === "sankalp" ||
-      screenData?.runner_active_item?.item_type === "sankalp"
+      screenData?.runner_active_item?.item_type === "sankalp" ||
+      screenData?.runner_active_item?.itemType === "sankalp"
     )
       return "sankalp";
     if (
       screenData?.info_is_practice ||
       screenData?.runner_variant === "practice" ||
       screenData?.runner_active_item?.type === "practice" ||
-      screenData?.runner_active_item?.item_type === "practice"
+      screenData?.runner_active_item?.item_type === "practice" ||
+      screenData?.runner_active_item?.itemType === "practice"
     )
       return "practice";
 
@@ -616,7 +647,18 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
   };
 
   React.useEffect(() => {
-    updateBackground(require("../../assets/beige_bg.png"));
+    const isCheckpointReflectionState =
+      stateId === "checkpoint_day_7" || stateId === "checkpoint_day_14";
+
+    if (isCheckpointReflectionState) {
+      // CycleReflectionBlock fully owns the background for checkpoint screens.
+      // Do NOT call updateBackground here — the cleanup below also skips null-
+      // clearing so that when screenData changes (e.g. handleDecision dispatches
+      // checkpoint_decision / checkpoint_feeling), this effect re-runs but does
+      // NOT wipe the BeigeBg that CycleReflectionBlock correctly set.
+    } else {
+      updateBackground(require("../../assets/beige_bg.png"));
+    }
     updateHeaderHidden(false);
 
     // Initialize runner fields for merged info flows so complete_runner can
@@ -638,9 +680,15 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     }
 
     return () => {
-      updateBackground(null);
+      // Only clear the background if we set it. For checkpoint states we never
+      // set it — CycleReflectionBlock owns it. Calling updateBackground(null)
+      // here on every screenData re-run would wipe the child's BeigeBg and
+      // expose the stale Day7Bg that was last set on the previous mount.
+      if (!isCheckpointReflectionState) {
+        updateBackground(null);
+      }
     };
-  }, [updateBackground, updateHeaderHidden, currentType, screenData]);
+  }, [updateBackground, updateHeaderHidden, currentType, screenData, stateId]);
 
   React.useEffect(() => {
     return () => {
@@ -708,8 +756,20 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
   // audio load needed here.
 
   const isAckScreen = stateId === "quick_checkin_ack";
+  const conversationalTierEnabled = false; // launch-gate: set true when chat/voice tier ships
   const showVoiceInput =
-    stateId === "quick_checkin" || stateId === "quick_checkin_ack";
+    conversationalTierEnabled &&
+    (stateId === "quick_checkin" || stateId === "quick_checkin_ack");
+  const isCheckpointReflectionState =
+    stateId === "checkpoint_day_7" || stateId === "checkpoint_day_14";
+
+  if (isCheckpointReflectionState) {
+    return (
+      <View style={styles.container}>
+        <CycleReflectionBlock />
+      </View>
+    );
+  }
 
   const blocks = schema?.blocks || [];
   const footerBlocks = useMemo(
@@ -1088,19 +1148,14 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
           {currentType === "sankalp" && (
             <View style={styles.combinedSankalpFlow}>
               <View style={styles.mantraInfoCard}>
-                <Text style={styles.deityTitle}>
+                <Text style={styles.sankalpTitle}>
                   {info.title || "Intention"}
                 </Text>
-                <Text style={styles.sankalpMainTextInline}>
-                  {interpolate(
-                    info.line ||
-                      info.subtitle ||
-                      info.iast ||
-                      info.meaning ||
-                      info.summary,
-                    { ...screenData, ...info },
-                  )}
-                </Text>
+                {shouldShowSankalpBody && (
+                  <Text style={styles.sankalpMainTextInline}>
+                    {sankalpBodyText}
+                  </Text>
+                )}
               </View>
 
               {/* How To Live — stays visible as a MAIN section (founder
@@ -1115,16 +1170,14 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                   <View style={{ marginTop: 12 }}>
                     {Array.isArray(info.how_to_live) ? (
                       <View style={styles.howToLiveList}>
-                        {info.how_to_live.map(
-                          (line: string, index: number) => (
-                            <Text
-                              key={`${line}-${index}`}
-                              style={styles.howToLiveText}
-                            >
-                              {line}
-                            </Text>
-                          ),
-                        )}
+                        {info.how_to_live.map((line: string, index: number) => (
+                          <Text
+                            key={`${line}-${index}`}
+                            style={styles.howToLiveText}
+                          >
+                            {line}
+                          </Text>
+                        ))}
                       </View>
                     ) : (
                       <Text style={styles.howToLiveText}>
@@ -1558,7 +1611,12 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                     type: "dashboard_query",
                     payload: { text, response_type: type },
                   },
-                  { screenState: screenData },
+                  {
+                    screenState: screenData,
+                    loadScreen,
+                    goBack,
+                    setScreenValue: (val: any, k: string) => updateScreenData(k, val),
+                  },
                 );
               }}
             />
@@ -1595,7 +1653,12 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                   type: "dashboard_query",
                   payload: { text, response_type: type },
                 },
-                { screenState: screenData },
+                {
+                  screenState: screenData,
+                  loadScreen,
+                  goBack,
+                  setScreenValue: (val: any, k: string) => updateScreenData(k, val),
+                },
               );
             }}
           />
@@ -1971,10 +2034,10 @@ const styles = StyleSheet.create({
   },
   sankalpMainText: {
     fontSize: 24,
-    fontFamily: Fonts.serif.bold,
+    fontFamily: Fonts.serif.regular,
     color: "#432104",
     textAlign: "center",
-    lineHeight: 34,
+    // lineHeight: 34,
     marginTop: -30,
     paddingHorizontal: 5,
   },
@@ -2304,7 +2367,7 @@ const styles = StyleSheet.create({
   combinedSankalpFlow: {
     width: "100%",
     alignItems: "center",
-    paddingTop: 50,
+    paddingTop: 30,
   },
   mantraInfoCard: {
     width: "100%",
@@ -2313,14 +2376,23 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 8,
   },
+  sankalpTitle: {
+    fontSize: 24,
+    lineHeight: 34,
+    fontFamily: Fonts.serif.bold,
+    color: BROWN,
+    textAlign: "center",
+    paddingHorizontal: 12,
+    marginTop: -12,
+    marginBottom: 10,
+  },
   sankalpMainTextInline: {
     fontSize: 16,
+    lineHeight: 24,
     fontFamily: Fonts.serif.regular,
     color: "#432104",
     textAlign: "center",
-    // lineHeight: 38,
-    // marginTop: 10,
-    // paddingHorizontal: 12,
+    paddingHorizontal: 8,
   },
   embodySection: {
     width: "100%",

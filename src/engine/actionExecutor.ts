@@ -15,58 +15,49 @@
  */
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Linking } from "react-native";
+import { Alert, Linking } from "react-native";
 import api from "../Networks/axios";
 import { navigate as rootNavigate } from "../Shared/Routes/NavigationService";
 import { cleanupFlowState, GUARDED_ACTIONS } from "./cleanupFields";
 import {
+  // Audit fix F1/F2/F3/F9 (2026-04-13) — wrappers for dashboard_load orchestration
+  getBriefingToday,
+  getClearWindow,
+  getGriefContext,
+  getJoySignal,
+  getLonelinessContext,
+  // 2026-04-13 backend B2/B3 wiring
+  getPanchangToday,
+  getPostConflictContext,
+  getPredictiveAlerts,
+  // Week 6 — Companion Intelligence
+  getPrepContext,
+  // Week 7 — Why-This + Personas
+  getPrinciple,
+  getPrincipleSource,
+  getRecommendedAdditional,
+  getResilienceLedger,
+  // Week 5 — Reflection + Checkpoints
+  getResilienceNarrative,
+  getVoiceNoteInterpretation,
   mitraAlterPractice,
-  mitraCheckpoint,
   mitraCompleteOnboarding,
+  mitraFetchAdditionalItems,
   mitraFetchOnboardingChips,
   mitraHelpMeChoose,
-  mitraOnboardingRecognition,
   mitraPathEvolution,
   mitraPranaAcknowledge,
   mitraStartJourney,
-  mitraSubmitCheckpoint,
   mitraTrackCompletion,
   mitraTrackEvent,
   mitraTriggerMantras,
   patchCompanionState,
-  patchUserPreferences,
-  getClearWindow,
-  postVoiceNote,
-  getVoiceNoteInterpretation,
-  postInterpretIntent,
-  // Week 5 — Reflection + Checkpoints
-  getResilienceNarrative,
-  postGratitudeLedger,
-  // Week 6 — Companion Intelligence
-  getPrepContext,
-  getPredictiveAlerts,
-  getRecommendedAdditional,
-  getPostConflictContext,
-  patchEntity,
-  // Week 7 — Why-This + Personas
-  getPrinciple,
-  getPrincipleSource,
-  getGriefContext,
-  getLonelinessContext,
-  getJoySignal,
-  // Audit fix F1/F2/F3/F9 (2026-04-13) — wrappers for dashboard_load orchestration
-  getBriefingToday,
-  getResilienceLedger,
-  mitraFetchAdditionalItems,
-  mitraJourneyCompanion,
-  getDeepenPreview,
-  dismissPredictiveAlert,
-  mutePredictiveAlertEntity,
-  // 2026-04-13 backend B2/B3 wiring
-  getPanchangToday,
   patchDissonanceThread,
-  // 2026-04-18 M12 long-absence unification (Phase 2)
-  mitraJourneyWelcomeBack,
+  patchEntity,
+  patchUserPreferences,
+  postGratitudeLedger,
+  postInterpretIntent,
+  postVoiceNote,
 } from "./mitraApi";
 
 // Audit fix F6 (2026-04-13) — dispatch fetchCompanionState via Redux store
@@ -79,6 +70,15 @@ async function dispatchFetchCompanionState(): Promise<any> {
   } catch (err) {
     return null;
   }
+}
+
+// Notify ProgressSectionBlock to re-fetch after a core triad item completes.
+function dispatchCoreCompletion(): void {
+  try {
+    const { store } = require("../store");
+    const { recordCoreCompletion } = require("../store/mitraSlice");
+    store.dispatch(recordCoreCompletion());
+  } catch (_) {}
 }
 
 // Week 1 — friction chip → focus mapping. Web parity: actionExecutor.js FRICTION_MAP.
@@ -174,6 +174,21 @@ function _triggerNegativeLabel(feeling: string, step: number): string {
 
 function _mitraTz(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata";
+}
+
+function _normalizeRunnerItem(item: any): any {
+  if (!item || typeof item !== "object") return item;
+  const itemType = item.item_type || item.itemType || item.type || null;
+  const itemId = item.item_id || item.itemId || item.id || null;
+  const normalized: any = {
+    ...item,
+    ...(itemType ? { item_type: itemType, itemType, type: itemType } : {}),
+    ...(itemId ? { item_id: itemId, itemId, id: itemId } : {}),
+  };
+  if (item.core && typeof item.core === "object") {
+    normalized.core = _normalizeRunnerItem(item.core);
+  }
+  return normalized;
 }
 
 // ---------------------------------------------------------------------------
@@ -442,9 +457,11 @@ export async function executeAction(
 
   // ── Duplicate-submission guard ──
   if (GUARDED_ACTIONS.has(type) && _actionInFlight) {
-    console.log(
-      `[GUARD] Action "${type}" blocked — previous action still in flight`,
-    );
+    if (__DEV__) {
+      console.log(
+        `[GUARD] Action "${type}" blocked — previous action still in flight`,
+      );
+    }
     return;
   }
   if (GUARDED_ACTIONS.has(type)) {
@@ -456,7 +473,7 @@ export async function executeAction(
     // Log action for journey tracking
     _logJourneyAction(action, context);
 
-    console.log(`[ACTION] Executing: ${type}`, action);
+    if (__DEV__) console.log(`[ACTION] Executing: ${type}`, action);
 
     switch (type) {
       // ================================================================
@@ -477,7 +494,7 @@ export async function executeAction(
       // generate_companion happens on ContinueJourney mount — not on
       // chip tap — so these handlers stay fast and synchronous.
       case "continue_practice": {
-        console.log("[actionExecutor] continue_practice: entering");
+        if (__DEV__) console.log("[actionExecutor] continue_practice: entering");
         const target = {
           container_id:
             (process as any).env?.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
@@ -485,15 +502,22 @@ export async function executeAction(
               : "companion_dashboard",
           state_id: "day_active",
         };
-        console.log("[actionExecutor] continue_practice: loadScreen ->", target, "typeof loadScreen:", typeof loadScreen);
+        if (__DEV__) console.log(
+          "[actionExecutor] continue_practice: loadScreen ->",
+          target,
+          "typeof loadScreen:",
+          typeof loadScreen,
+        );
         loadScreen(target);
-        console.log("[actionExecutor] continue_practice: rootNavigate DynamicEngine");
+        if (__DEV__) console.log(
+          "[actionExecutor] continue_practice: rootNavigate DynamicEngine",
+        );
         rootNavigate("DynamicEngine");
         _actionInFlight = false;
         break;
       }
       case "start_checkin": {
-        console.log("[actionExecutor] start_checkin: entering");
+        if (__DEV__) console.log("[actionExecutor] start_checkin: entering");
         loadScreen({
           container_id: "cycle_transitions",
           state_id: "quick_checkin",
@@ -503,7 +527,7 @@ export async function executeAction(
         break;
       }
       case "start_support": {
-        console.log("[actionExecutor] start_support: entering");
+        if (__DEV__) console.log("[actionExecutor] start_support: entering");
         // "I need some support today" — same entry as dashboard
         // "I Feel Triggered" button. Previously we re-dispatched
         // initiate_trigger via a nested executeAction call, but that
@@ -567,61 +591,9 @@ export async function executeAction(
       //                 previous_journey=<old> automatically.
       // Legacy WelcomeBack.tsx + custom telemetry event superseded.
       // ================================================================
-      case "welcome_back_continue": {
-        console.log("[actionExecutor] welcome_back_continue: entering");
-        try {
-          const res = await mitraJourneyWelcomeBack("continue");
-          if (res && res.status === "ok" && res.newJourneyId) {
-            // Seed triad + focus into screenData so dashboard mount
-            // doesn't need a second round-trip.
-            setScreenValue(res.newJourneyId, "journey_id");
-            if (res.focus) setScreenValue(res.focus, "active_focus");
-            if (res.subfocus) setScreenValue(res.subfocus, "prana_baseline_selection");
-          }
-        } catch (err: any) {
-          console.warn("[actionExecutor] welcome_back_continue failed:", err?.message);
-        }
-        loadScreen({
-          container_id:
-            (process as any).env?.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
-              ? "companion_dashboard_v3"
-              : "companion_dashboard",
-          state_id: "day_active",
-        });
-        rootNavigate("DynamicEngine");
-        _actionInFlight = false;
-        break;
-      }
-      case "welcome_back_fresh": {
-        console.log("[actionExecutor] welcome_back_fresh: entering");
-        try {
-          await mitraJourneyWelcomeBack("fresh");
-        } catch (err: any) {
-          console.warn("[actionExecutor] welcome_back_fresh failed:", err?.message);
-        }
-        // Scoped reset — clear journey-scoped redux keys only, NOT full
-        // resetState (which would wipe profile/guidance prefs etc.).
-        // Lineage is preserved server-side; user's earlier cycles stay
-        // linked via previous_journey when onboarding creates the new row.
-        setScreenValue(null, "journey_id");
-        setScreenValue(null, "active_focus");
-        setScreenValue(null, "prana_baseline_selection");
-        setScreenValue(null, "scan_focus");
-        setScreenValue(null, "insight_step");
-        setScreenValue(null, "mantra_text");
-        setScreenValue(null, "sankalp_text");
-        setScreenValue(null, "practice_title");
-        setScreenValue(false, "practice_chant");
-        setScreenValue(false, "practice_embody");
-        setScreenValue(false, "practice_act");
-        loadScreen({
-          container_id: "welcome_onboarding",
-          state_id: "turn_1",
-        });
-        rootNavigate("DynamicEngine");
-        _actionInFlight = false;
-        break;
-      }
+      // welcome_back_continue / welcome_back_fresh cases retired per v3
+      // journey migration (journey-v3-fe Step 7). Reentry is now owned
+      // by ContinueJourney.tsx via mitraJourneyReentryDecision POST.
 
       // ================================================================
       // NAVIGATE — the most common action
@@ -829,6 +801,7 @@ export async function executeAction(
               dayNumber: screenState.day_number || 1,
               meta,
             });
+            if (source === "core") dispatchCoreCompletion();
 
             // Web parity (actionExecutor.js:1113-1127): when a support item
             // completes inside a check-in flow, fire checkin_support_completed
@@ -1073,6 +1046,7 @@ export async function executeAction(
             dayNumber: screenState.day_number || 1,
             meta,
           });
+          if (source === "core") dispatchCoreCompletion();
 
           if (useSupportItem) {
             setScreenValue(null, "_active_support_item");
@@ -1292,16 +1266,13 @@ export async function executeAction(
             {
               ...manualData,
               id: manualData.id || manualData.item_id || masterData.id,
-              item_id:
-                manualData.item_id || manualData.id || masterData.id,
+              item_id: manualData.item_id || manualData.id || masterData.id,
               item_type: manualData.item_type || infoType,
               source: resolvedSource,
               title: manualData.title || masterData.title || "",
               iast: manualData.iast || masterData.iast || "",
-              devanagari:
-                manualData.devanagari || masterData.devanagari || "",
-              audio_url:
-                manualData.audio_url || masterData.audio_url || "",
+              devanagari: manualData.devanagari || masterData.devanagari || "",
+              audio_url: manualData.audio_url || masterData.audio_url || "",
               steps: manualData.steps || masterData.steps || [],
             },
             "runner_active_item",
@@ -1314,7 +1285,8 @@ export async function executeAction(
         // screenState.master_mantra which was populated by the companion
         // response (core.audio_url from MasterMantra DB lookup).
         if (infoType === "mantra") {
-          const infoAudioUrl = masterData.audio_url || masterData.core?.audio_url || "";
+          const infoAudioUrl =
+            masterData.audio_url || masterData.core?.audio_url || "";
           if (infoAudioUrl) {
             setScreenValue(infoAudioUrl, "mantra_audio_url");
           }
@@ -1527,311 +1499,12 @@ export async function executeAction(
       // ================================================================
       // GENERATE_COMPANION — call Mitra API, unpack response into screenState
       // ================================================================
-      case "generate_companion": {
-        // 2026-04-19: legacy /generate-companion/ side-effect journey
-        // creation is retired on FE. This action now ALWAYS calls the
-        // v3 read-only /journey/companion/ endpoint. Journey creation
-        // runs through POST /journey/start-v3/ (mitraStartJourney) at
-        // onboarding turn_7. If no active journey exists, this returns
-        // null — callers are responsible for routing to onboarding.
-        // Kept the action name for caller compatibility; consider
-        // renaming to `fetch_companion` in a follow-up.
-        const inputData = {
-          focus:
-            screenState.scan_focus ||
-            screenState.suggested_focus ||
-            "peacecalm",
-          sub_focus: screenState.prana_baseline_selection,
-          depth:
-            screenState.routine_depth ||
-            screenState.routine_setup ||
-            "standard",
-          day_number: screenState.day_number || 1,
-        };
-
-        const data = await mitraJourneyCompanion();
-        if (!data) {
-          console.warn(
-            "[ENGINE] journey/companion returned no data — skipping companion seed",
-          );
-          setScreenValue(false, "_isSubmitting");
-          return;
-        }
-
-        // Capture journey status and ID
-        const previousJourneyId = screenState.journey_id;
-        if (data.journey?.id) setScreenValue(data.journey.id, "journey_id");
-
-        // REG-010 / Rule 12 (STATE_OWNERSHIP_MATRIX): Checkpoint context guard.
-        // If a checkpoint is currently in flight (checkpoint_headline set),
-        // do NOT overwrite day_number / identity_label / path_context — those
-        // belong to the checkpoint screen, not the upcoming companion data.
-        const _checkpointActive = !!screenState.checkpoint_headline;
-
-        if (data.journey?.dayNumber && !_checkpointActive)
-          setScreenValue(data.journey.dayNumber, "day_number");
-        if (data.journey?.totalDays)
-          setScreenValue(data.journey.totalDays, "total_days");
-
-        // Track journey_started on new journey
-        if (data.journey?.id && data.journey.id !== previousJourneyId) {
-          mitraTrackEvent("journey_started", {
-            journeyId: data.journey.id,
-            dayNumber: data.journey.dayNumber || 1,
-            meta: {
-              focus: inputData.focus,
-              subFocus: inputData.sub_focus,
-              depth: inputData.depth,
-              totalDays: data.journey.totalDays,
-            },
-          });
-        }
-
-        if (data.journey?.isLightened !== undefined) {
-          setScreenValue(data.journey.isLightened, "journey_is_lightened");
-        }
-
-        // Identity and path lifecycle — guarded by checkpoint context (REG-010)
-        if (!_checkpointActive) {
-          setScreenValue(data.identityLabel || "", "identity_label");
-          setScreenValue(data.pathContext || {}, "path_context");
-          setScreenValue(data.pathMilestone || null, "path_milestone");
-        }
-
-        // Cycle item IDs (authoritative)
-        if (data.journey?.cycleItems) {
-          const ci = data.journey.cycleItems;
-          if (ci.mantraId) setScreenValue(ci.mantraId, "cycle_mantra_id");
-          if (ci.sankalpId) setScreenValue(ci.sankalpId, "cycle_sankalp_id");
-          if (ci.practiceId) setScreenValue(ci.practiceId, "cycle_practice_id");
-        }
-
-        // Extract and reveal companion data
-        const companion = data.companion || data;
-
-        // Intro and analysis metadata
-        if (data.intro) setScreenValue(data.intro, "analysis_intro");
-        if (data.metricsSummary)
-          setScreenValue(data.metricsSummary, "analysis_metrics");
-        if (data.insightText)
-          setScreenValue(data.insightText, "analysis_insight");
-
-        // Practice / Ritual
-        if (companion.practice || companion.ritual) {
-          const p = companion.practice || companion.ritual;
-          setScreenValue(p.ui?.card_title || p.title, "card_ritual_title");
-          setScreenValue(
-            p.ui?.card_subtitle || p.description || p.core?.summary,
-            "card_ritual_description",
-          );
-          setScreenValue(p.ui?.card_meta || p.meta, "card_ritual_meta");
-          setScreenValue(p.core?.title || p.title, "practice_title");
-          setScreenValue(
-            p.ui?.card_meta || p.meta || p.core?.duration,
-            "practice_meta",
-          );
-        }
-
-        // Sankalpa
-        if (companion.sankalp || companion.sankalpa) {
-          const s = companion.sankalp || companion.sankalpa;
-          setScreenValue(
-            s.ui?.card_title || s.core?.title || "",
-            "card_sankalpa_title",
-          );
-          setScreenValue(
-            s.ui?.card_subtitle || s.description || s.core?.line,
-            "card_sankalpa_description",
-          );
-          setScreenValue(s.ui?.card_meta || s.meta, "card_sankalpa_meta");
-          setScreenValue(s.core?.line || s.line, "sankalp_text");
-          setScreenValue(s.core?.title || s.line, "sankalp_title");
-        }
-
-        // Mantra
-        if (companion.mantra) {
-          const m = companion.mantra;
-          setScreenValue(m.ui?.card_title || m.title, "card_mantra_title");
-          setScreenValue(
-            m.ui?.card_subtitle || m.description || m.core?.devanagari,
-            "card_mantra_description",
-          );
-          setScreenValue(m.ui?.card_meta || m.meta, "card_mantra_meta");
-          setScreenValue(m.core?.title || m.line || m.title, "mantra_text");
-          setScreenValue(m.core?.iast || m.iast, "mantra_iast");
-          setScreenValue(
-            m.core?.devanagari || m.devanagari || "",
-            "mantra_devanagari",
-          );
-          setScreenValue(m.core?.title || m.title || m.iast, "mantra_title");
-          setScreenValue(m.core?.audio_url || m.audio_url || "", "mantra_audio_url");
-
-          const resolvedMantraId =
-            m.core?.item_id || m.core?.id || m.item_id || m.id;
-          if (resolvedMantraId) setScreenValue(resolvedMantraId, "mantra_id");
-          if (m.ui?.deity_display)
-            setScreenValue(m.ui.deity_display, "mantra_deity_display");
-        }
-
-        setScreenValue(inputData.day_number, "day_number");
-        setScreenValue(inputData.focus, "active_focus");
-        setScreenValue(data.focusName || companion.focus_name, "focus_name");
-        setScreenValue(27, "reps_total");
-        setScreenValue(0, "insight_step");
-
-        // Extract Mitra IDs
-        const getMitraId = (item: any) =>
-          item?.core?.item_id || item?.core?.id || item?.item_id || item?.id;
-
-        if (companion.mantra) {
-          const mid = getMitraId(companion.mantra);
-          if (mid) setScreenValue(mid, "mantra_id");
-        }
-        if (companion.sankalp || companion.sankalpa) {
-          const sid = getMitraId(companion.sankalp || companion.sankalpa);
-          if (sid) setScreenValue(sid, "sankalp_id");
-        }
-        if (companion.practice) {
-          const pid = getMitraId(companion.practice);
-          if (pid) setScreenValue(pid, "practice_id");
-        }
-
-        // Save master data for info screens
-        setScreenValue(
-          companion.mantra
-            ? {
-                ...companion.mantra.core,
-                id: getMitraId(companion.mantra),
-                wisdom: companion.mantra.context,
-                type: "mantra",
-              }
-            : data.masterData?.selectedMantra,
-          "master_mantra",
-        );
-        setScreenValue(
-          companion.sankalp || companion.sankalpa
-            ? {
-                ...(companion.sankalp || companion.sankalpa).core,
-                id: getMitraId(companion.sankalp || companion.sankalpa),
-                wisdom: (companion.sankalp || companion.sankalpa).context,
-                type: "sankalp",
-              }
-            : data.masterData?.selectedSankalp,
-          "master_sankalp",
-        );
-        setScreenValue(
-          companion.practice
-            ? {
-                ...companion.practice.core,
-                id: getMitraId(companion.practice),
-                wisdom: companion.practice.context,
-                type: "practice",
-              }
-            : data.masterData?.selectedPractice,
-          "master_practice",
-        );
-
-        // Sankalp how_to_live
-        if (companion.sankalp?.core?.how_to_live) {
-          setScreenValue(
-            companion.sankalp.core.how_to_live,
-            "sankalp_how_to_live",
-          );
-        }
-        // Practice benefit preview
-        if (companion.practice?.ui?.benefit_preview) {
-          setScreenValue(
-            companion.practice.ui.benefit_preview,
-            "practice_benefit_preview",
-          );
-        }
-        // AI reasoning
-        if (data.aiReasoning) {
-          setScreenValue(data.aiReasoning, "ai_reasoning");
-        }
-
-        // Dashboard enrichment
-        const hub = data.hub || data.dashboard;
-        if (hub) {
-          if (hub.shift_message)
-            setScreenValue(hub.shift_message, "daily_shift_message");
-          if (hub.streak_display)
-            setScreenValue(hub.streak_display, "streak_display");
-          if (hub.completed_days !== undefined)
-            setScreenValue(hub.completed_days, "completed_days");
-          if (hub.festival_today)
-            setScreenValue(hub.festival_today, "festival_today");
-          if (hub.days_since_last_practice !== undefined) {
-            setScreenValue(
-              hub.days_since_last_practice,
-              "days_since_last_practice",
-            );
-          }
-        }
-
-        // CTA
-        if (data.cta) setScreenValue(data.cta, "contextual_cta");
-
-        // ----------------------------------------------------------------
-        // Week 2 — Day Active Dashboard enrichment (Moments 8-15, 40, 41, 43).
-        // Spec: route_dashboard_day_active.md §2, §6. Populate briefing,
-        // focus phrase, cycle_day, checkpoint_due, clear_window from the
-        // generate-companion envelope (+ side-call to /clear-window/).
-        // ----------------------------------------------------------------
-        const briefing = data.briefing || data.morningBriefing || null;
-        if (briefing) {
-          setScreenValue(true, "briefing_available");
-          setScreenValue(briefing.audio_url || briefing.audioUrl || "", "briefing_audio_url");
-          setScreenValue(
-            briefing.summary || briefing.opening_line || briefing.script?.slice(0, 140) || "",
-            "briefing_summary",
-          );
-          setScreenValue(briefing.script || briefing.transcript || "", "briefing_transcript");
-          setScreenValue(briefing.voice_preset || "anchor", "briefing_voice_preset");
-        } else {
-          setScreenValue(false, "briefing_available");
-        }
-
-        // Focus phrase — Phase 1.5 expansive phrase; fall back to dayType sub-header.
-        const focusPhrase =
-          data.focus_phrase || data.focusPhrase || data.dayTypeCopy?.subHeader || "";
-        if (focusPhrase) setScreenValue(focusPhrase, "focus_phrase");
-
-        // cycle_day — distinct screenData copy so the signal bar can read it
-        // without stomping on day_number (which checkpoint logic also owns).
-        if (data.journey?.dayNumber) {
-          setScreenValue(data.journey.dayNumber, "cycle_day");
-        }
-
-        // Checkpoint-due enum (for variant selection)
-        const dn = data.journey?.dayNumber;
-        if (dn === 7) setScreenValue("day_7", "checkpoint_due");
-        else if (dn === 14) setScreenValue("day_14", "checkpoint_due");
-        else setScreenValue(null, "checkpoint_due");
-
-        // Dashboard variant resolver — minimal shape; refined by server later.
-        let variant: string = "standard";
-        if (dn === 1) variant = "first_day";
-        if (dn === 7) variant = "checkpoint_pending_day_7";
-        if (dn === 14) variant = "checkpoint_pending_day_14";
-        if (data.postConflict || data.dayType === "post_conflict_morning") {
-          variant = "post_conflict_morning";
-        }
-
-        // Clear-window (Moment 43) was dropped per backend B4 decision
-        // (2026-04-13 audit). Slot reserved if revisited post-soak.
-        setScreenValue(null, "clear_window");
-        setScreenValue(variant, "dashboard_variant");
-
-        // Navigate to the post-lock summary reveal (unless skipReveal)
-        if (!payload?.skipReveal) {
-          loadScreen({
-            container_id: "insight_summary",
-            state_id: "path_reveal",
-          });
-        }
-        break;
-      }
+      // generate_companion case retired per v3 journey migration
+      // (journey-v3-fe Step 8). Callers now fetch v3 daily-view
+      // envelope directly via mitraJourneyDailyView + ingestDailyView.
+      // The dashboard container itself hydrates on focus; other
+      // historical prehydrate call sites (Home resume, alter-practices,
+      // onboarding complete) have been inlined to v3 direct fetch.
 
       // ================================================================
       // INITIATE_TRIGGER — start OM chanting session (Flow 3, Step 1)
@@ -2042,6 +1715,17 @@ export async function executeAction(
 
         setScreenValue(
           {
+            title: "Carry this steadiness",
+            body: [
+              "You returned to your center.",
+              "Keep one simple anchor close as you move through the rest of your day.",
+            ],
+            cta_label: "Close",
+          },
+          "dashboard_return_modal",
+        );
+        setScreenValue(
+          {
             message:
               "You returned to your center. Carry this steadiness with you.",
             type: "calmer",
@@ -2250,6 +1934,29 @@ export async function executeAction(
             },
           });
 
+          const finalModal =
+            stillFeeling === "agitated"
+              ? {
+                  title: "Stay with your breath",
+                  body: ["A softer rhythm may help your system settle."],
+                  cta_label: "Close",
+                }
+              : stillFeeling === "drained"
+                ? {
+                    title: "Stay with gentle steadiness",
+                    body: ["You may need softness more than force right now."],
+                    cta_label: "Close",
+                  }
+                : {
+                    title: "Stay with your Sankalp",
+                    body: [
+                      "Small steps with sincerity create deep change.",
+                      "Your Sankalp is your inner compass.",
+                      "Stay consistent, it will help.",
+                    ],
+                    cta_label: "Close",
+                  };
+          setScreenValue(finalModal, "dashboard_return_modal");
           setScreenValue(
             {
               message:
@@ -2319,13 +2026,13 @@ export async function executeAction(
 
         // Check for checkpoints (Day 7 / Day 14)
         if (currentDay === 6 || currentDay === 14) {
-          // Checkpoint will be handled when checkpoint actions are implemented
+          const checkpointStateId = currentDay === 6 ? "day_7" : "day_14";
           console.log(
-            `[MITRA] Checkpoint Day ${currentDay === 6 ? 7 : 14} — checkpoint handling TBD`,
+            `[MITRA] Checkpoint Day ${currentDay === 6 ? 7 : 14} routing to ${checkpointStateId}`,
           );
           loadScreen({
-            container_id: "cycle_transitions",
-            state_id: "weekly_checkpoint",
+            container_id: "checkpoint_reflection",
+            state_id: checkpointStateId,
           });
         } else {
           loadScreen({
@@ -2536,7 +2243,11 @@ export async function executeAction(
           setScreenValue(ftcFocus, "suggested_focus");
         }
 
-        const ftcData = await mitraJourneyCompanion();
+        // fast_track_companion was backed by legacy /journey/companion/.
+        // Orphaned after v3 journey migration (journey-v3-fe Step 8):
+        // no remaining callers; v3 daily-view shape is incompatible
+        // with the fields below. Case retained as a no-op for safety.
+        const ftcData: any = null;
         if (!ftcData) break;
 
         if (ftcData.intro) setScreenValue(ftcData.intro, "analysis_intro");
@@ -2633,233 +2344,38 @@ export async function executeAction(
             );
           }
 
-          // Regenerate companion with new locked items
-          await executeAction({ type: "generate_companion" }, context);
+          // v3 journey: hydrate from daily-view after alter-practices.
+          try {
+            const { mitraJourneyDailyView } = require("./mitraApi");
+            const { ingestDailyView } = require("./v3Ingest");
+            const result = await mitraJourneyDailyView(null);
+            if (result?.envelope) {
+              for (const [k, v] of Object.entries(
+                ingestDailyView(result.envelope),
+              )) {
+                if (v !== undefined) setScreenValue(v, k);
+              }
+            }
+          } catch (_err: any) {
+            // non-fatal
+          }
         } catch (apErr: any) {
           console.warn("[MITRA] alter-practice failed:", apErr.message);
           // Fallback to local alter
           setScreenValue(true, "alter_practices_mode");
           setScreenValue(1, "day_number");
           setScreenValue({}, "journey_log");
-          await executeAction({ type: "generate_companion" }, context);
         }
         break;
       }
 
-      // ================================================================
-      // ENSURE_CHECKPOINT_DATA — fetch checkpoint data into screen state.
-      // Idempotent: skips fetch if checkpoint_original_data is already populated.
-      // ================================================================
-      case "ensure_checkpoint_data": {
-        const cpDay =
-          payload?.day || screenState.checkpoint_day || screenState.day_number || 7;
-        if (screenState.checkpoint_original_data) {
-          break;
-        }
-        const cpData = await mitraCheckpoint(screenState, cpDay);
-        if (!cpData) break;
-        setScreenValue(cpData.headline, "checkpoint_headline");
-        setScreenValue(cpData.subtext, "checkpoint_subtext");
-        setScreenValue(cpData.question, "checkpoint_question");
-        setScreenValue(cpData.options || [], "checkpoint_options");
-        setScreenValue(cpData.metrics || {}, "checkpoint_metrics");
-        setScreenValue(cpData.originalData || null, "checkpoint_original_data");
-        setScreenValue(cpData.day || cpDay, "checkpoint_day");
-        setScreenValue(cpData.type || "", "checkpoint_type");
-        setScreenValue(cpData.engagementLevel || "", "checkpoint_engagement_level");
-        setScreenValue(cpData.trendGraph || {}, "checkpoint_trend_graph");
-        setScreenValue(cpData.strongestArea || "", "strongest_area");
-        setScreenValue(cpData.observation || "", "milestone_reflection");
-        setScreenValue(cpData.daysEngaged || 0, "checkpoint_days_engaged");
-        setScreenValue(
-          cpData.daysFullyCompleted || 0,
-          "checkpoint_days_fully_completed",
-        );
-        setScreenValue(cpData.totalDays || cpDay, "checkpoint_total_days");
-        setScreenValue(
-          cpData.recommendationAction || "",
-          "checkpoint_recommendation",
-        );
-        setScreenValue(
-          cpData.deepenSuggestion || null,
-          "checkpoint_deepen_suggestion",
-        );
-        if (cpData.framing) {
-          setScreenValue(cpData.framing, "checkpoint_framing");
-        }
-
-        // Match web actionExecutor.js:2795 — fire checkpoint_viewed once
-        // when the milestone screen successfully loads its data.
-        mitraTrackEvent("checkpoint_viewed", {
-          journeyId: screenState.journey_id,
-          dayNumber: cpDay,
-          meta: {
-            engagement_level: cpData.engagementLevel || "",
-            day: cpDay,
-          },
-        });
-        break;
-      }
-
-      // ================================================================
-      // CHECKPOINT_SUBMIT — submit Day 7 / Day 14 reflection.
-      // Mirrors web actionExecutor.js:2512-2645.
-      // ================================================================
-      case "checkpoint_submit": {
-        const csDay =
-          screenState.checkpoint_day || screenState.day_number || 7;
-        const csDecision =
-          payload?.decision ||
-          screenState.checkpoint_decision ||
-          screenState.checkpoint_feeling ||
-          screenState.checkpoint_options?.[0]?.id ||
-          "continue";
-
-        // P1-7 — capture pre-submit triad IDs for post-submit validation.
-        // continue_same / deepen MUST preserve item identity per the
-        // Day-14 contract; if BE silently regenerates, we want a
-        // warning in dev logs (not user-facing failure).
-        const preSubmitTriadIds = {
-          mantra:   screenState?.cycle_mantra_id || screenState?.companion?.mantra?.core?.id,
-          sankalp:  screenState?.cycle_sankalp_id || screenState?.companion?.sankalp?.core?.id,
-          practice: screenState?.cycle_practice_id || screenState?.companion?.practice?.core?.id,
-        };
-
-        const csPayload: any = {
-          decision: csDecision,
-          reflection: screenState.checkpoint_user_reflection || "",
-        };
-
-        if (csDay === 14) {
-          const impliedFeelingMap: Record<string, string> = {
-            continue_same: "steady",
-            deepen: "strong",
-            change_focus: "ready",
-          };
-          csPayload.feeling =
-            screenState.checkpoint_feeling_simple ||
-            screenState.checkpoint_feeling ||
-            impliedFeelingMap[csDecision] ||
-            "steady";
-
-          if (csDecision === "deepen") {
-            const ds = screenState.checkpoint_deepen_suggestion;
-            csPayload.deepenAccepted = true;
-            if (ds?.itemType) csPayload.deepenItemType = ds.itemType;
-            if (ds?.itemId) csPayload.deepenItemId = ds.itemId;
-          }
-        }
-
-        const csRes = await mitraSubmitCheckpoint(csDay, csPayload);
-
-        if (!csRes || csRes.status !== "ok") {
-          console.warn("[CHECKPOINT_SUBMIT] backend returned error:", csRes);
-          // Still mark completed locally so the user isn't stuck
-          setScreenValue(true, "checkpoint_completed");
-          setScreenValue(csDecision, "checkpoint_completed_decision");
-          loadScreen({
-            container_id: "cycle_transitions",
-            state_id: "checkpoint_results",
-          });
-          break;
-        }
-
-        setScreenValue(true, "checkpoint_completed");
-        setScreenValue(csDecision, "checkpoint_completed_decision");
-
-        // Match web actionExecutor.js:2566 payload exactly:
-        // includes reflection_length, drops redundant `day` field.
-        mitraTrackEvent("checkpoint_completed", {
-          journeyId: screenState.journey_id,
-          dayNumber: csDay,
-          meta: {
-            decision: csDecision,
-            reflection_length: (screenState.checkpoint_user_reflection || "").length,
-          },
-        });
-
-        if (csDay === 14) {
-          // Match web actionExecutor.js:2578 payload — include total_days +
-          // path_cycle_number for analytics parity.
-          mitraTrackEvent("cycle_completed", {
-            journeyId: screenState.journey_id,
-            dayNumber: csDay,
-            meta: {
-              decision: csDecision,
-              total_days: csDay,
-              path_cycle_number:
-                screenState.path_context?.pathCycleNumber || 1,
-            },
-          });
-        }
-
-        // Apply backend-driven side effects: new journey id, day reset, etc.
-        if (csRes.newJourneyId) {
-          setScreenValue(csRes.newJourneyId, "journey_id");
-        }
-        if (csRes.resetDay || csDay === 14) {
-          setScreenValue(1, "day_number");
-        }
-
-        // P1-6 — clear the AsyncStorage day14 pending flag on success.
-        // Any future mid-flow crash before navigation completes won't
-        // re-surface this now-resolved checkpoint.
-        if (csDay === 14) {
-          try {
-            const AsyncStorage =
-              require("@react-native-async-storage/async-storage").default;
-            await AsyncStorage.removeItem("kalpx_day14_pending");
-          } catch (_err) {
-            // non-fatal
-          }
-        }
-
-        // P1-7 — triad-identity validation for continue_same / deepen.
-        // Dev-only log; warns if BE silently regenerated an item ID.
-        // continue_same and deepen MUST keep the same mantra/sankalp/
-        // practice IDs; change_focus is expected to change them.
-        if (
-          csDay === 14 &&
-          (csDecision === "continue_same" || csDecision === "deepen") &&
-          __DEV__
-        ) {
-          try {
-            const { mitraJourneyCompanion } = require("./mitraApi");
-            const companion = await mitraJourneyCompanion();
-            const post = {
-              mantra:   companion?.companion?.mantra?.core?.id,
-              sankalp:  companion?.companion?.sankalp?.core?.id,
-              practice: companion?.companion?.practice?.core?.id,
-            };
-            const drifted: string[] = [];
-            for (const k of ["mantra", "sankalp", "practice"] as const) {
-              if (preSubmitTriadIds[k] && post[k] &&
-                  preSubmitTriadIds[k] !== post[k]) {
-                drifted.push(
-                  `${k}: ${preSubmitTriadIds[k]} → ${post[k]}`,
-                );
-              }
-            }
-            if (drifted.length > 0) {
-              console.warn(
-                "[CHECKPOINT_SUBMIT] triad-identity drift on " +
-                  csDecision +
-                  " — IDs changed silently:",
-                drifted,
-              );
-            }
-          } catch (_err) {
-            // non-fatal — validation failure doesn't block navigation
-          }
-        }
-
-        // Navigate to results screen
-        loadScreen({
-          container_id: "cycle_transitions",
-          state_id: "checkpoint_results",
-        });
-        break;
-      }
+      // ensure_checkpoint_data + checkpoint_submit cases retired per
+      // v3 journey migration (journey-v3-fe Step 6). Checkpoint data
+      // is now fetched directly by CheckpointDay7Block /
+      // CheckpointDay14Block via mitraJourneyDay7View /
+      // mitraJourneyDay14View (ETag-aware). Submissions owned by the
+      // blocks via mitraJourneyDay7Decision / mitraJourneyDay14Decision
+      // POSTs with next_view.payload hydrated inline.
 
       // ================================================================
       // RECORD_PAUSE — track pause/victory counters
@@ -3335,18 +2851,30 @@ export async function executeAction(
       // ================================================================
       case "track_completion": {
         const p = payload || {};
-        const activeItem = screenState.runner_active_item || {};
+        const activeItem = _normalizeRunnerItem(
+          screenState.runner_active_item || {},
+        );
         const resolvedItemType =
-          p.itemType || activeItem.item_type || screenState.runner_variant;
+          p.itemType ||
+          p.item_type ||
+          activeItem.item_type ||
+          activeItem.itemType ||
+          screenState.runner_variant;
         const resolvedItemId =
-          p.itemId || activeItem.item_id || activeItem.id;
+          p.itemId ||
+          p.item_id ||
+          activeItem.item_id ||
+          activeItem.itemId ||
+          activeItem.id;
         const resolvedSource = p.source || screenState.runner_source;
         const resolvedDuration =
           p.duration_sec ?? screenState.runner_duration_actual_sec;
         const resolvedVariant = p.variant || screenState.runner_variant;
         const resolvedMeta = {
           ...(p.meta || {}),
-          ...(resolvedDuration != null ? { actual_seconds: resolvedDuration } : {}),
+          ...(resolvedDuration != null
+            ? { actual_seconds: resolvedDuration }
+            : {}),
           ...(resolvedVariant ? { variant: resolvedVariant } : {}),
           ...(screenState.runner_reps_completed != null
             ? { reps_completed: screenState.runner_reps_completed }
@@ -3362,6 +2890,7 @@ export async function executeAction(
             dayNumber: screenState.day_number || 1,
             meta: resolvedMeta,
           });
+          if (resolvedSource === "core") dispatchCoreCompletion();
         } else {
           console.warn(
             "[track_completion] missing itemType or itemId — skipped",
@@ -3405,9 +2934,11 @@ export async function executeAction(
           console.warn("[start_runner] missing variant");
           break;
         }
+        const normalizedItem = _normalizeRunnerItem(sp.item || null);
+
         setScreenValue(sp.variant, "runner_variant");
         setScreenValue(sp.source, "runner_source");
-        setScreenValue(sp.item || null, "runner_active_item");
+        setScreenValue(normalizedItem, "runner_active_item");
         setScreenValue(Date.now(), "runner_start_time");
         setScreenValue(0, "runner_reps_completed");
         setScreenValue(0, "runner_step_index");
@@ -3419,13 +2950,14 @@ export async function executeAction(
         // tapped mantra triad card), the stale item renders instead of the
         // current runner's item. Always overwrite `info` with the current
         // item so the rich surface aligns with the active runner.
-        if (sp.item) {
-          setScreenValue(sp.item, "info");
+        if (normalizedItem) {
+          setScreenValue(normalizedItem, "info");
         }
         // Seed audio_url for MantraRunnerDisplay — it reads from
         // screenData.mantra_audio_url, not runner_active_item.
-        if (sp.variant === "mantra" && sp.item) {
-          const itemAudio = sp.item.audio_url || sp.item.core?.audio_url || "";
+        if (sp.variant === "mantra" && normalizedItem) {
+          const itemAudio =
+            normalizedItem.audio_url || normalizedItem.core?.audio_url || "";
           if (itemAudio) {
             setScreenValue(itemAudio, "mantra_audio_url");
           }
@@ -3469,7 +3001,9 @@ export async function executeAction(
       // on the completion_return transient.
       // ================================================================
       case "complete_runner": {
-        const activeItem = screenState.runner_active_item || {};
+        const activeItem = _normalizeRunnerItem(
+          screenState.runner_active_item || {},
+        );
         const variant = screenState.runner_variant;
         const source = screenState.runner_source;
         const durationSec =
@@ -3478,10 +3012,13 @@ export async function executeAction(
             ? Math.round((Date.now() - screenState.runner_start_time) / 1000)
             : 0);
 
-        if (activeItem.item_type && activeItem.item_id && source) {
+        const resolvedItemType = activeItem.item_type || activeItem.itemType;
+        const resolvedItemId = activeItem.item_id || activeItem.itemId;
+        if (resolvedItemType && source) {
+          // BE call — item_id may be empty for some mantras; BE accepts it.
           await mitraTrackCompletion({
-            itemType: activeItem.item_type,
-            itemId: activeItem.item_id,
+            itemType: resolvedItemType,
+            itemId: resolvedItemId || "",
             source,
             journeyId: screenState.journey_id,
             dayNumber: screenState.day_number || 1,
@@ -3493,29 +3030,27 @@ export async function executeAction(
                 : {}),
             },
           });
+          if (source === "core") dispatchCoreCompletion();
 
-          // Local engagement flag update — dashboard ring depends on
-          // practice_chant / practice_embody / practice_act (+ practice_deepen
-          // when a 4th deepen item is chosen). BE persists the JourneyActivity
-          // but does not return engagement state, and /journey/home/ is not
-          // re-fetched on dashboard return, so the flags must flip locally.
-          // Scoped to source === "core" so support/additional completions do
-          // not falsely flip the core triad progress.
+          // Local engagement flag — always flip regardless of item_id so the
+          // ✓ indicator shows on all 3 triad cards after completion.
+          // NewDashboardContainer re-fetches daily-view on focus and confirms
+          // via completed_today[], but the local flag gives immediate feedback.
           if (source === "core") {
             const isDeepenCompletion =
               !!screenState.cycle_deepen_item_id &&
-              activeItem.item_id === screenState.cycle_deepen_item_id;
+              resolvedItemId === screenState.cycle_deepen_item_id;
             if (isDeepenCompletion) {
               setScreenValue(true, "practice_deepen");
             } else {
               const flagKey =
-                activeItem.item_type === "mantra"
+                resolvedItemType === "mantra"
                   ? "practice_chant"
-                  : activeItem.item_type === "sankalp"
-                  ? "practice_embody"
-                  : activeItem.item_type === "practice"
-                  ? "practice_act"
-                  : null;
+                  : resolvedItemType === "sankalp"
+                    ? "practice_embody"
+                    : resolvedItemType === "practice"
+                      ? "practice_act"
+                      : null;
               if (flagKey) setScreenValue(true, flagKey);
             }
           }
@@ -3546,7 +3081,10 @@ export async function executeAction(
         try {
           const ack = await mitraPranaAcknowledge({
             pranaType: pranaState,
-            focus: screenState.scan_focus || screenState.suggested_focus || "peacecalm",
+            focus:
+              screenState.scan_focus ||
+              screenState.suggested_focus ||
+              "peacecalm",
             locale: "en",
             journeyId: screenState.journey_id,
             dayNumber: screenState.day_number || 1,
@@ -3618,10 +3156,10 @@ export async function executeAction(
       case "onboarding_turn_response": {
         // Sadhana Yatra 4-stage flow (2026-04-14). State-id driven rather than
         // numeric-turn driven — path-aware branching requires named states.
-        const currentStateId = 
+        const currentStateId =
           action.currentScreen?.state_id ||
-          (typeof screenState.onboarding_turn === "string" 
-            ? screenState.onboarding_turn 
+          (typeof screenState.onboarding_turn === "string"
+            ? screenState.onboarding_turn
             : `turn_${screenState.onboarding_turn || 1}`);
         const draft = { ...(screenState.onboarding_draft_state || {}) };
         const p = action.payload || {};
@@ -3668,7 +3206,8 @@ export async function executeAction(
             const path = p.chip_id === "growth" ? "growth" : "support";
             draft.path = path;
             draft.stage0_choice = path;
-            nextStateId = path === "growth" ? "turn_3_growth" : "turn_3_support";
+            nextStateId =
+              path === "growth" ? "turn_3_growth" : "turn_3_support";
 
             // Fetch Stage 1 chips
             const stage1 = await mitraFetchOnboardingChips({
@@ -3683,9 +3222,13 @@ export async function executeAction(
           ) {
             // Stage 1 chip pick
             draft.stage1_choice = p.chip_id || "selected_via_text";
-            nextStateId = draft.path === "growth" ? "turn_4_growth" : "turn_4_support";
+            nextStateId =
+              draft.path === "growth" ? "turn_4_growth" : "turn_4_support";
             if (p.freeform_text) {
-              draft.freeforms = { ...(draft.freeforms || {}), stage1: p.freeform_text };
+              draft.freeforms = {
+                ...(draft.freeforms || {}),
+                stage1: p.freeform_text,
+              };
             }
 
             // Fetch Stage 2 chips
@@ -3702,9 +3245,13 @@ export async function executeAction(
           ) {
             // Stage 2 chip pick
             draft.stage2_choice = p.chip_id || "selected_via_text";
-            nextStateId = draft.path === "growth" ? "turn_5_growth" : "turn_5_support";
+            nextStateId =
+              draft.path === "growth" ? "turn_5_growth" : "turn_5_support";
             if (p.freeform_text) {
-              draft.freeforms = { ...(draft.freeforms || {}), stage2: p.freeform_text };
+              draft.freeforms = {
+                ...(draft.freeforms || {}),
+                stage2: p.freeform_text,
+              };
             }
 
             // Fetch Stage 3 chips (Help styles)
@@ -3723,7 +3270,10 @@ export async function executeAction(
             // Stage 3 chip pick
             draft.stage3_choice = p.chip_id || "selected_via_text";
             if (p.freeform_text) {
-              draft.freeforms = { ...(draft.freeforms || {}), stage3: p.freeform_text };
+              draft.freeforms = {
+                ...(draft.freeforms || {}),
+                stage3: p.freeform_text,
+              };
             }
             nextStateId = "turn_6";
           } else if (currentStateId === "turn_6") {
@@ -3757,11 +3307,20 @@ export async function executeAction(
               );
               setScreenValue(complete, "onboarding_complete_data");
               // Use labels for triad templating
-              setScreenValue(complete.triad_labels?.sankalp || "SANKALP", "sankalp_label");
-              setScreenValue(complete.triad_labels?.mantra || "MANTRA", "mantra_label");
-              setScreenValue(complete.triad_labels?.practice || "PRACTICE", "practice_label");
+              setScreenValue(
+                complete.triad_labels?.sankalp || "SANKALP",
+                "sankalp_label",
+              );
+              setScreenValue(
+                complete.triad_labels?.mantra || "MANTRA",
+                "mantra_label",
+              );
+              setScreenValue(
+                complete.triad_labels?.practice || "PRACTICE",
+                "practice_label",
+              );
               setScreenValue(complete.sankalp_prefix_line, "sankalp_prefix");
-              
+
               // Store inference fields for triad call
               draft.inference = complete.inference;
             }
@@ -3776,8 +3335,15 @@ export async function executeAction(
 
             // Check auth state
             const _store = require("../store").default;
-            const authState = _store.getState().login || _store.getState().socialLoginReducer || {};
-            const isAuthed = !!(authState.user?.id || authState.user?.email || authState.user?.token);
+            const authState =
+              _store.getState().login ||
+              _store.getState().socialLoginReducer ||
+              {};
+            const isAuthed = !!(
+              authState.user?.id ||
+              authState.user?.email ||
+              authState.user?.token
+            );
 
             if (!isAuthed) {
               // Guest — stash inference + onboarding state, redirect to Login.
@@ -3786,7 +3352,10 @@ export async function executeAction(
               //   2. Seeds triad into screenData
               //   3. Navigates to welcome_onboarding/turn_8 (triad reveal)
               setScreenValue(inf, "stashed_inference_state");
-              setScreenValue(draft.guidance_mode || "hybrid", "stashed_guidance_mode");
+              setScreenValue(
+                draft.guidance_mode || "hybrid",
+                "stashed_guidance_mode",
+              );
               setScreenValue(draft, "onboarding_draft_state");
               setScreenValue("turn_7_awaiting_auth", "onboarding_turn");
 
@@ -3797,7 +3366,9 @@ export async function executeAction(
               // different approach. Use the navigation service.
               try {
                 const { CommonActions } = require("@react-navigation/native");
-                const { navigationRef } = require("../Shared/Routes/NavigationService");
+                const {
+                  navigationRef,
+                } = require("../Shared/Routes/NavigationService");
                 if (navigationRef?.isReady()) {
                   (navigationRef.navigate as any)("Login");
                 } else {
@@ -3805,17 +3376,20 @@ export async function executeAction(
                   // The RN app's StackNavigator has "Login" as a screen.
                   // Force a re-render of Home which will detect isLoggedIn=false
                   // and show the login prompt.
-                  if (__DEV__) console.log("[ONBOARDING] No nav ref — user must tap Login from menu");
+                  if (__DEV__)
+                    console.log(
+                      "[ONBOARDING] No nav ref — user must tap Login from menu",
+                    );
                 }
               } catch (_navErr) {
-                if (__DEV__) console.warn("[ONBOARDING] Login redirect failed:", _navErr);
+                if (__DEV__)
+                  console.warn("[ONBOARDING] Login redirect failed:", _navErr);
               }
               // Don't advance to turn_8 yet — wait for auth
               break;
             }
 
             // Authenticated — generate triad via v3
-            nextStateId = "turn_8";
             const start = await mitraStartJourney({
               inference_state: {
                 lane: inf.lane || draft.path || "support",
@@ -3832,7 +3406,9 @@ export async function executeAction(
               },
               guidance_mode: draft.guidance_mode || "hybrid",
               locale: "en",
-              tz: Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Kolkata",
+              tz:
+                Intl.DateTimeFormat().resolvedOptions().timeZone ||
+                "Asia/Kolkata",
               stage0_choice: draft.stage0_choice || draft.path,
               stage1_choice: draft.stage1_choice,
               stage2_choice: draft.stage2_choice,
@@ -3840,6 +3416,7 @@ export async function executeAction(
             });
 
             if (start) {
+              setScreenValue(false, "v3_start_failed");
               const t = start.triad || {};
               setScreenValue(t.mantra?.title, "mantra_text");
               setScreenValue(t.mantra?.title, "companion_mantra_title");
@@ -3859,9 +3436,15 @@ export async function executeAction(
               if (start.journey_id) {
                 setScreenValue(start.journey_id, "journey_id");
               }
+              nextStateId = "turn_8";
+            } else {
+              setScreenValue(true, "v3_start_failed");
+              nextStateId = "turn_7";
+              if (__DEV__)
+                console.warn(
+                  "[ONBOARDING] start-v3 returned null — staying on turn_7 for retry",
+                );
             }
-
-            nextStateId = "turn_8";
           } else if (currentStateId === "turn_8") {
             // Completion — "Begin my journey" tapped. Before navigating
             // to the dashboard, call generate_companion (via journey/
@@ -3886,32 +3469,41 @@ export async function executeAction(
                 : null,
             });
 
-            // Seed full companion enrichment from the journey companion
-            // endpoint. This populates how_to_live, recommended_posture,
-            // focus_name, one_line, reasoning, shift messages, etc.
+            // v3 journey: hydrate from daily-view after onboarding
+            // completion so dashboard renders triad + continuity +
+            // insights on first navigation (no mount-time blank state).
             try {
               const _store = require("../store").default;
-              const _screenActions = require("../store/screenSlice").screenActions;
-              await executeAction(
-                {
-                  type: "generate_companion",
-                  payload: { use_journey_companion: true },
-                },
-                {
-                  screenState: _store.getState().screen.screenData,
-                  loadScreen: () => {},
-                  goBack: () => {},
-                  setScreenValue: (value: any, key: string) =>
-                    _store.dispatch(_screenActions.setScreenValue({ key, value })),
-                },
-              );
+              const _screenActions =
+                require("../store/screenSlice").screenActions;
+              const { mitraJourneyDailyView } = require("./mitraApi");
+              const { ingestDailyView } = require("./v3Ingest");
+              const result = await mitraJourneyDailyView(null);
+              if (result?.envelope) {
+                for (const [k, v] of Object.entries(
+                  ingestDailyView(result.envelope),
+                )) {
+                  if (v !== undefined) {
+                    _store.dispatch(
+                      _screenActions.setScreenValue({ key: k, value: v }),
+                    );
+                  }
+                }
+              }
             } catch (_err) {
-              if (__DEV__) console.warn("[ONBOARDING] companion enrichment failed:", _err);
+              if (__DEV__)
+                console.warn(
+                  "[ONBOARDING] v3 daily-view hydrate failed:",
+                  _err,
+                );
             }
 
             setScreenValue(null, "onboarding_draft_state");
             setScreenValue(null, "onboarding_turn");
-            loadScreen({ container_id: "companion_dashboard", state_id: "day_active" });
+            loadScreen({
+              container_id: "companion_dashboard",
+              state_id: "day_active",
+            });
             break;
           }
 
@@ -3925,7 +3517,10 @@ export async function executeAction(
 
           setScreenValue(draft, "onboarding_draft_state");
           setScreenValue(nextStateId, "onboarding_turn");
-          loadScreen({ container_id: "welcome_onboarding", state_id: nextStateId });
+          loadScreen({
+            container_id: "welcome_onboarding",
+            state_id: nextStateId,
+          });
         } catch (err) {
           console.error("[onboarding_turn_response] failed:", err);
         }
@@ -4014,9 +3609,13 @@ export async function executeAction(
           },
         });
 
-        if (context.startFlowInstance) context.startFlowInstance("support_trigger");
+        if (context.startFlowInstance)
+          context.startFlowInstance("support_trigger");
 
-        loadScreen({ container_id: "support_trigger", state_id: "sound_bridge" });
+        loadScreen({
+          container_id: "support_trigger",
+          state_id: "sound_bridge",
+        });
         break;
       }
 
@@ -4329,7 +3928,10 @@ export async function executeAction(
           if (startFlowInstance) startFlowInstance("support");
 
           const destination = payload?.destination || "practice_step_runner";
-          loadScreen({ container_id: destination, state_id: payload?.destination_state || "active" });
+          loadScreen({
+            container_id: destination,
+            state_id: payload?.destination_state || "active",
+          });
         } catch (err) {
           console.error("[start_gentle] failed:", err);
         }
@@ -4377,19 +3979,31 @@ export async function executeAction(
         if (briefing) {
           setScreenValue(true, "briefing_available");
           setScreenValue(briefing.audio_url || null, "briefing_audio_url");
-          setScreenValue(briefing.script || briefing.transcript || null, "briefing_transcript");
-          setScreenValue(briefing.script || briefing.summary || null, "briefing_summary");
-          setScreenValue(briefing.voice_preset || null, "briefing_voice_preset");
+          setScreenValue(
+            briefing.script || briefing.transcript || null,
+            "briefing_transcript",
+          );
+          setScreenValue(
+            briefing.script || briefing.summary || null,
+            "briefing_summary",
+          );
+          setScreenValue(
+            briefing.voice_preset || null,
+            "briefing_voice_preset",
+          );
           setScreenValue(briefing.duration_ms || null, "briefing_duration_ms");
         } else {
           setScreenValue(false, "briefing_available");
         }
 
-        if (resilienceLedger) setScreenValue(resilienceLedger, "resilience_ledger");
-        if (additional?.items) setScreenValue(additional.items, "additional_items");
+        if (resilienceLedger)
+          setScreenValue(resilienceLedger, "resilience_ledger");
+        if (additional?.items)
+          setScreenValue(additional.items, "additional_items");
         if (joy) setScreenValue(joy, "joy_signal");
         // Backend B2 — only show season banner when ritu changed today
-        if (panchang?.ritu_changed_today) setScreenValue(panchang, "season_signal");
+        if (panchang?.ritu_changed_today)
+          setScreenValue(panchang, "season_signal");
         else setScreenValue(null, "season_signal");
 
         // Backend B4-v2 (2026-04-13) — clear_window payload only non-null when
@@ -4416,26 +4030,18 @@ export async function executeAction(
           r.status === "fulfilled" ? r.value : null,
         );
 
-        // predictive_alert: pick highest-confidence, not-dismissed-today, not muted.
-        const dismissedAt =
-          screenState.predictive_alert_dismissed_at || 0;
-        const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
-        const withinCooldown =
-          dismissedAt && Date.now() - dismissedAt < sevenDaysMs;
-        let topAlert = null;
-        if (alerts && Array.isArray(alerts.alerts)) {
-          topAlert = alerts.alerts
-            .filter((a: any) => (a.confidence ?? 0) >= 0.6)
-            .filter((a: any) => a.entity?.status !== "muted")
-            .sort((a: any, b: any) => (b.confidence || 0) - (a.confidence || 0))[0] || null;
-        }
+        // predictive_alert retired per v3 journey migration (PredictiveAlertCard deleted).
         setScreenValue(prep || null, "prep_context");
-        setScreenValue(withinCooldown ? null : topAlert, "predictive_alert");
         setScreenValue(rec || null, "recommended_additional");
         setScreenValue(postConflict || null, "post_conflict_pending");
 
         // Provisional entity: first eligible. (Endpoint returns {entities:[...]})
-        if (alerts === null && rec === null && prep === null && postConflict === null) {
+        if (
+          alerts === null &&
+          rec === null &&
+          prep === null &&
+          postConflict === null
+        ) {
           // All flags off — nothing to do further.
         }
         break;
@@ -4473,18 +4079,8 @@ export async function executeAction(
         break;
       }
 
-      // dismiss_predictive_alert — Moment 28 "Later" tap. Cools 7d.
-      case "dismiss_predictive_alert": {
-        setScreenValue(null, "predictive_alert");
-        setScreenValue(Date.now(), "predictive_alert_dismissed_at");
-        // Fire-and-forget track-event. No PATCH needed (dismissal is local).
-        mitraTrackEvent("predictive_alert_dismissed", {
-          journeyId: screenState.journey_id,
-          dayNumber: screenState.day_number || 1,
-          meta: { id: payload?.id, reason: "not_this_time" },
-        });
-        break;
-      }
+      // dismiss_predictive_alert case retired per v3 journey migration
+      // (PredictiveAlertCard deleted).
 
       // confirm_entity — Moment 29 "Yes that's them".
       case "confirm_entity": {
@@ -4640,11 +4236,19 @@ export async function executeAction(
           break;
         }
         const principle = await getPrinciple(principleId);
-        setScreenValue(principle, "why_this_principle");
+        // Only overwrite why_this_principle if the fetch succeeded.
+        // The caller (RoomActionTeachingPill, RoomPrincipleBanner) stamps a
+        // placeholder from the action payload before dispatching — preserve it
+        // when WisdomPrinciple has no row for this asset_id.
+        if (principle !== null) {
+          setScreenValue(principle, "why_this_principle");
+        }
         setScreenValue(null, "why_this_source");
         loadScreen({
-          container_id: (screenState._overlay_parent_container as string) ||
-            screenState.currentContainerId || "companion_dashboard",
+          container_id:
+            (screenState._overlay_parent_container as string) ||
+            screenState.currentContainerId ||
+            "companion_dashboard",
           state_id: "why_this_l2",
         } as any);
         mitraTrackEvent("why_this_l2_opened", {
@@ -4666,7 +4270,8 @@ export async function executeAction(
         const source = await getPrincipleSource(principleId);
         setScreenValue(source, "why_this_source");
         loadScreen({
-          container_id: (screenState.currentContainerId as string) || "companion_dashboard",
+          container_id:
+            (screenState.currentContainerId as string) || "companion_dashboard",
           state_id: "why_this_l3",
         } as any);
         mitraTrackEvent("why_this_l3_opened", {
@@ -4735,16 +4340,33 @@ export async function executeAction(
           if (__DEV__) console.log("[RESET] Journey reset:", res?.status);
 
           const clearKeys = [
-            "journey_id", "day_number", "total_days", "mantra_text",
-            "sankalp_text", "practice_title", "companion_mantra_id",
-            "companion_sankalp_id", "companion_practice_id",
-            "companion_mantra_title", "companion_sankalp_line",
-            "companion_practice_title", "path_intent", "scan_focus",
-            "cycle_id", "onboarding_draft_state", "onboarding_turn",
-            "practice_chant", "practice_embody", "practice_act",
-            "sankalp_how_to_live", "master_mantra", "master_sankalp",
-            "master_practice", "stashed_inference_state",
-            "stashed_guidance_mode", "checkpoint_completed",
+            "journey_id",
+            "day_number",
+            "total_days",
+            "mantra_text",
+            "sankalp_text",
+            "practice_title",
+            "companion_mantra_id",
+            "companion_sankalp_id",
+            "companion_practice_id",
+            "companion_mantra_title",
+            "companion_sankalp_line",
+            "companion_practice_title",
+            "path_intent",
+            "scan_focus",
+            "cycle_id",
+            "onboarding_draft_state",
+            "onboarding_turn",
+            "practice_chant",
+            "practice_embody",
+            "practice_act",
+            "sankalp_how_to_live",
+            "master_mantra",
+            "master_sankalp",
+            "master_practice",
+            "stashed_inference_state",
+            "stashed_guidance_mode",
+            "checkpoint_completed",
           ];
           for (const key of clearKeys) {
             setScreenValue(null, key);
@@ -4795,6 +4417,390 @@ export async function executeAction(
         break;
       }
 
+      // ================================================================
+      // v3.1.1-wisdom §14 — canonical room entry dispatch.
+      //
+      // Spec: docs/ROOM_SYSTEM_V3_1_ARCHITECTURE.md §14.1 / §14.3.
+      //
+      // Dispatched by the §14.1 "I'm in a good place" primary chip and
+      // by every RoomEntrySheet row (§14.3). Payload shape:
+      //   { room_id: RoomId, source?: string }
+      //
+      // Routing policy (Phase 5 — flag OFF default):
+      //   - EXPO_PUBLIC_MITRA_V3_ROOMS === "1" → route to the v3.1
+      //     RoomRenderer surface ({container_id:"room", state_id:"render",
+      //     meta:{room_id}}). NOT wired into allContainers yet; that
+      //     mounting lands in Phase 6 per-room flips.
+      //   - Flag OFF → map canonical room_id onto the legacy support_*
+      //     container when one exists (room_release→support_grief,
+      //     room_connection→support_loneliness, room_joy→support_joy,
+      //     room_growth→support_growth). Rooms without a legacy
+      //     container (room_stillness, room_clarity) show a "Coming
+      //     soon" toast until Phase 6.
+      //
+      // This handler intentionally does NOT clear runner_* state: each
+      // downstream legacy enter_* case already handles that, and the
+      // flag-ON RoomRenderer path owns its own state via envelope.
+      // ================================================================
+      case "enter_room": {
+        const roomId: string = payload?.room_id || "";
+        const source: string = payload?.source || "quick_support_block";
+        if (!roomId) {
+          console.warn("[actionExecutor] enter_room: missing room_id");
+          break;
+        }
+
+        mitraTrackEvent("room_entry_dispatched", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { room_id: roomId, source },
+        });
+
+        // Defensive audio kill — global static expo-av audio mode reset
+        // in case a prior runner / room session left audio playing
+        // without unloading. Quiet-by-default on every room entry; the
+        // user can re-enable per the §6 Opening Experience policy.
+        try {
+          const { Audio } = require("expo-av");
+          await Audio.setIsEnabledAsync(false);
+          await Audio.setIsEnabledAsync(true);
+        } catch {
+          // expo-av not loaded or platform doesn't support — noop.
+        }
+
+        // Phase 5 Stage 2 (revised) — single global flag gate. When ON,
+        // ALL six rooms route to the canonical RoomContainer (which fetches
+        // the RoomRenderV1 envelope from /api/mitra/rooms/{id}/render/).
+        // The BE has its own per-room flag (MITRA_ROOM_<ID>) and returns
+        // 404 if a specific room is disabled — RoomContainer handles that
+        // gracefully with the synthesized exit-only fallback.
+        //
+        // Per-room env var checks at FE-build-time were removed — they
+        // required setting all 6 EXPO_PUBLIC_MITRA_ROOM_* flags, which is
+        // operationally fragile (each Expo build bakes env at bundle
+        // time). Single global flag is the cleaner gate.
+        const globalFlagOn = process.env.EXPO_PUBLIC_MITRA_V3_ROOMS === "1";
+        if (globalFlagOn) {
+          // Stamp room_id into screenData BEFORE navigation so the
+          // RoomContainer (which reads screenData.room_id on mount) has
+          // the identifier available.
+          setScreenValue(roomId, "room_id");
+          // Pre-stamp stored life_context preference so picker can pre-fill
+          // the user's last explicit choice. null when no preference stored.
+          const { store: _lcStore } = require("../store");
+          const _storedLc = (_lcStore.getState()?.companionState as any)?.life_context ?? null;
+          setScreenValue(_storedLc, "life_context");
+          setScreenValue(false, "context_skipped");
+
+          // Per-room picker contract (live pool– and API-verified 2026-04-21).
+          // "Honest picker" rule: context list must produce visibly different
+          // API output. Differentiation can come from pool bias (chip items change)
+          // OR from why_this_room_* copy (header line changes). Either is sufficient.
+          //
+          // room_clarity — all 7 incl. self: principle pool (33 self-refs),
+          //   wisdom_teaching pool (5 self-refs) — live-verified different items
+          //   returned for self vs work_career.
+          // room_growth  — all 7 incl. self: principle pool (29 self-refs),
+          //   wisdom_banner pool (4 self-refs) — different principle per context.
+          // room_connection — EXCLUDED: all 15 wisdom_banner items have
+          //   banner_eligible=False; principle_banner is null for every context;
+          //   API returns identical 4 actions regardless of context selection.
+          //   Adding it would be a dishonest picker — no visible differentiation.
+          // room_release — 5 contexts: wisdom_banner pool (10 biased items) incl.
+          //   self (7 refs). work_career live-verified → ayur_pause_before_decision.
+          //   No purpose_direction/daily_life bias in pool.
+          // room_stillness — 6 contexts: pool chips are universal (no bias tags) but
+          //   why_this_room_* copy differentiates meaningfully per context. daily_life
+          //   excluded — slot in schema but copy not authored.
+          // room_joy — universal by design, no picker.
+          const ROOM_PICKER_CONFIG: Record<string, string[]> = {
+            room_clarity: [
+              "work_career",
+              "relationships",
+              "self",
+              "health_energy",
+              "money_security",
+              "purpose_direction",
+              "daily_life",
+            ],
+            room_growth: [
+              "work_career",
+              "relationships",
+              "self",
+              "health_energy",
+              "money_security",
+              "purpose_direction",
+              "daily_life",
+            ],
+            room_release: [
+              "work_career",
+              "relationships",
+              "self",
+              "health_energy",
+              "money_security",
+            ],
+            room_stillness: [
+              "work_career",
+              "relationships",
+              "self",
+              "health_energy",
+              "money_security",
+              "purpose_direction",
+            ],
+          };
+          const allowedContexts = ROOM_PICKER_CONFIG[roomId] ?? null;
+          setScreenValue(allowedContexts, "life_context_allowed");
+          // For rooms without a picker (currently room_joy), clear any stale
+          // life_context that may have been set by a previous room session.
+          // Without this, entering joy after clarity would inherit the prior
+          // context and send it to the render API, producing false "You chose: X".
+          if (!allowedContexts) {
+            setScreenValue(null, "life_context");
+          }
+          // Stamp "room" explicitly so open_why_this_l2 routes to room/why_this_l2.
+          // The handler reads _overlay_parent_container from screenData (not the
+          // screen store's currentContainerId field), so the value must be set —
+          // null falls through to the hardcoded "companion_dashboard" default and
+          // renders the full dashboard UI instead of the sheet within the room.
+          setScreenValue("room", "_overlay_parent_container");
+          loadScreen({
+            container_id: "room",
+            state_id: allowedContexts ? "context_picker" : "render",
+          } as any);
+          break;
+        }
+
+        // Flag OFF — legacy dev-bridge mapping. Reuse the existing
+        // support_* enter_* handlers so session state, context fetches,
+        // and telemetry continue to match the legacy flow contract.
+        const legacyActionMap: Record<string, string> = {
+          room_joy: "enter_joy_room",
+          room_growth: "enter_growth_room",
+          room_release: "enter_grief_room",
+          room_connection: "enter_loneliness_room",
+        };
+        const legacyAction = legacyActionMap[roomId];
+        if (legacyAction) {
+          await executeAction(
+            { type: legacyAction, payload: { source } },
+            context,
+          );
+          break;
+        }
+
+        // room_stillness + room_clarity have no legacy container.
+        // Surface a Coming-Soon acknowledgement until Phase 6 ships
+        // the RoomRenderer flip for these rooms.
+        try {
+          Alert.alert(
+            "Coming soon",
+            "This room is on the way. Your path is held.",
+          );
+        } catch {
+          // Alert can fail in test harness; swallow.
+        }
+        mitraTrackEvent("room_entry_coming_soon", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: { room_id: roomId, source },
+        });
+        break;
+      }
+
+      // ================================================================
+      // ROOM_EXIT — Phase 5 Stage 2 canonical room exit dispatcher.
+      // Called by RoomActionExitPill on tap. Always navigates back to
+      // the v3 dashboard, fires telemetry, and clears room_id from
+      // screenData so a subsequent enter_room can re-stamp cleanly.
+      // ================================================================
+      case "room_exit": {
+        const roomId = payload?.room_id || screenState.room_id || null;
+        mitraTrackEvent("room_exit_dispatched", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            room_id: roomId,
+            source: "room_renderer",
+          },
+        });
+        // Clear room-scoped screenData so stale state doesn't bleed into
+        // a subsequent room entry.
+        setScreenValue(null, "room_id");
+        // Route to the v3 dashboard when the new-dashboard flag is on,
+        // otherwise legacy. Mirrors continue_practice handler at line
+        // ~494 of this file.
+        const dashboardContainer =
+          process.env.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
+            ? "companion_dashboard_v3"
+            : "companion_dashboard";
+        loadScreen({
+          container_id: dashboardContainer,
+          state_id: "day_active",
+        } as any);
+        break;
+      }
+
+      // ================================================================
+      // ROOM_TELEMETRY — 2-step UX picker telemetry (founder-locked
+      // 2026-04-20). Dispatched by LifeContextPickerSheet on option tap
+      // (`context_picked`) and on skip (`context_skipped`).
+      //
+      // Endpoint: POST /api/mitra/rooms/telemetry/ (owned by agent B3).
+      // Safe-to-dispatch even if the endpoint isn't live yet — 404 /
+      // network errors are swallowed with a __DEV__ warn. Non-critical
+      // telemetry; never blocks the picker → render transition.
+      //
+      // Payload shape (caller-supplied):
+      //   { event_type: "context_picked" | "context_skipped",
+      //     room_id: RoomId,
+      //     life_context?: LifeContext }
+      // ================================================================
+      case "room_telemetry": {
+        const body = {
+          event_type: payload?.event_type || null,
+          room_id: payload?.room_id || screenState.room_id || null,
+          life_context: payload?.life_context ?? null,
+          ts: Date.now(),
+        };
+        try {
+          await api.post("mitra/rooms/telemetry/", body);
+        } catch (err: any) {
+          if (__DEV__) {
+            console.warn(
+              "[actionExecutor] room_telemetry post failed (non-critical):",
+              err?.response?.status || err?.message,
+            );
+          }
+          // Swallow — telemetry is best-effort.
+        }
+        break;
+      }
+
+      // ================================================================
+      // ROOM_STEP_COMPLETED — Stage 2 v1 telemetry-only handler for
+      // in_room_step taps. Writes telemetry so BE can observe step
+      // completion; when step_payload.persistence.writes_event is
+      // non-null, also fires a sacred-trace event name so the resilience
+      // ledger / JourneyActivity pipeline can pick it up.
+      //
+      // Phase 6 replaces the Alert-stub pill UX with real inline panels;
+      // the telemetry contract here stays stable.
+      // ================================================================
+      case "room_step_completed": {
+        const roomId = payload?.room_id || screenState.room_id || null;
+        const templateId = payload?.template_id || null;
+        const writesEvent = payload?.writes_event || null;
+        mitraTrackEvent("room_step_completed", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            room_id: roomId,
+            template_id: templateId,
+            action_id: payload?.action_id || null,
+            analytics_key: payload?.analytics_key || null,
+          },
+        });
+        if (writesEvent) {
+          mitraTrackEvent(writesEvent, {
+            journeyId: screenState.journey_id,
+            dayNumber: screenState.day_number || 1,
+            meta: {
+              room_id: roomId,
+              template_id: templateId,
+              source: "room_step",
+            },
+          });
+        }
+        const stepText = (payload?.text || "").trim();
+        if (stepText) {
+          const tid: string = templateId ?? "";
+          const signalType = tid.startsWith("step_grounding")
+            ? "room_grounding"
+            : tid === "step_journal_inquiry"
+              ? "room_inquiry"
+              : "room_reflection";
+          await postGratitudeLedger({
+            signal_type: signalType,
+            text: stepText,
+            meta: { template_id: tid, room_id: roomId },
+            logged_at: new Date().toISOString(),
+          });
+        }
+        break;
+      }
+
+      // ================================================================
+      // ROOM_INQUIRY_OPENED — Stage 2 v1 telemetry-only handler for the
+      // inquiry pill. Phase 6 replaces the Alert-stub with a real
+      // category picker + routing into suggested_practice_template_id.
+      // ================================================================
+      case "room_inquiry_opened": {
+        mitraTrackEvent("room_inquiry_opened", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            room_id: payload?.room_id || screenState.room_id || null,
+            action_id: payload?.action_id || null,
+            analytics_key: payload?.analytics_key || null,
+            category_count: payload?.category_count ?? 0,
+          },
+        });
+        break;
+      }
+
+      // ================================================================
+      // ROOM_INQUIRY_CATEGORY_SELECTED — Phase 6 telemetry stub. Fires
+      // when the user taps a category row inside InquiryModal. Real
+      // persistence (per-category aggregate counters) lands in a later
+      // phase; for now we log + emit a tracking event so the funnel
+      // from open → category-tap → practice/journal is observable.
+      // ================================================================
+      case "room_inquiry_category_selected": {
+        if (__DEV__) {
+          console.log("[actionExecutor] room_inquiry_category_selected", {
+            room_id: payload?.room_id || screenState.room_id || null,
+            category_id: payload?.category_id || null,
+          });
+        }
+        mitraTrackEvent("room_inquiry_category_selected", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            room_id: payload?.room_id || screenState.room_id || null,
+            category_id: payload?.category_id || null,
+            action_id: payload?.action_id || null,
+            analytics_key: payload?.analytics_key || null,
+          },
+        });
+        break;
+      }
+
+      // ================================================================
+      // ROOM_CARRY_CAPTURED — Stage 2 v1 handler for carry pills. The
+      // pill writes the Redux session trace inline (matches existing
+      // carry_joy_forward pattern); this case fires telemetry only.
+      // Phase 4 extends with a BE sacred-write endpoint.
+      // ================================================================
+      case "room_carry_captured": {
+        mitraTrackEvent("room_carry_captured", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            room_id: payload?.room_id || screenState.room_id || null,
+            writes_event: payload?.writes_event || null,
+            label: payload?.label || "",
+            analytics_key: payload?.analytics_key || null,
+            // Phase 6 addition — Phase 4 sacred-write outcome so Phase 7
+            // can measure delivery rate from the client perspective.
+            sacred_write_ok:
+              typeof payload?.sacred_write_ok === "boolean"
+                ? payload.sacred_write_ok
+                : null,
+          },
+        });
+        break;
+      }
+
       // WEEK 7 — Grief room enter/exit.
       // Spec: route_support_grief.md.
       // REG-015: clears runner_* so grief never overlaps with a practice
@@ -4817,11 +4823,6 @@ export async function executeAction(
         if (ctx) setScreenValue(ctx, "grief_context");
 
         loadScreen({ container_id: "support_grief", state_id: "room" } as any);
-        mitraTrackEvent("grief_session_opened", {
-          journeyId: screenState.journey_id,
-          dayNumber: screenState.day_number || 1,
-          meta: { parent_source: payload?.source },
-        });
         break;
       }
 
@@ -4832,9 +4833,10 @@ export async function executeAction(
         mitraTrackEvent("grief_session_ended", {
           journeyId: screenState.journey_id,
           dayNumber: screenState.day_number || 1,
-          meta: { 
-            duration_sec: (Date.now() - (screenState.grief_session_start || 0)) / 1000,
-            actions_used: payload?.actions_used || []
+          meta: {
+            duration_sec:
+              (Date.now() - (screenState.grief_session_start || 0)) / 1000,
+            actions_used: payload?.actions_used || [],
           },
         });
         loadScreen({
@@ -4845,12 +4847,24 @@ export async function executeAction(
       }
 
       case "grief_voice_note_submitted": {
+        const griefText = (payload?.text || "").trim();
+        if (griefText) {
+          await postGratitudeLedger({
+            signal_type: "room_reflection",
+            text: griefText,
+            meta: {
+              journey_id: screenState.journey_id,
+              source: "grief_room_venting",
+            },
+            logged_at: new Date().toISOString(),
+          });
+        }
         mitraTrackEvent("grief_voice_note_submitted", {
           journeyId: screenState.journey_id,
           dayNumber: screenState.day_number || 1,
-          meta: { 
+          meta: {
             duration_sec: payload?.duration_sec,
-            length_chars: payload?.length_chars 
+            length_chars: payload?.length_chars,
           },
         });
         break;
@@ -4909,11 +4923,6 @@ export async function executeAction(
           container_id: "support_loneliness",
           state_id: "room",
         } as any);
-        mitraTrackEvent("loneliness_room_entered", {
-          journeyId: screenState.journey_id,
-          dayNumber: screenState.day_number || 1,
-          meta: {},
-        });
         break;
       }
 
@@ -4924,7 +4933,10 @@ export async function executeAction(
         mitraTrackEvent("loneliness_session_ended", {
           journeyId: screenState.journey_id,
           dayNumber: screenState.day_number || 1,
-          meta: { duration_sec: (Date.now() - (screenState.loneliness_session_start || 0)) / 1000 },
+          meta: {
+            duration_sec:
+              (Date.now() - (screenState.loneliness_session_start || 0)) / 1000,
+          },
         });
         loadScreen({
           container_id: "companion_dashboard",
@@ -4954,11 +4966,6 @@ export async function executeAction(
           container_id: "support_joy",
           state_id: "room",
         } as any);
-        mitraTrackEvent("joy_room_entered", {
-          journeyId: screenState.journey_id,
-          dayNumber: screenState.day_number || 1,
-          meta: { parent_source: payload?.source },
-        });
         break;
       }
 
@@ -4969,7 +4976,8 @@ export async function executeAction(
           journeyId: screenState.journey_id,
           dayNumber: screenState.day_number || 1,
           meta: {
-            duration_sec: (Date.now() - (screenState.joy_session_start || 0)) / 1000,
+            duration_sec:
+              (Date.now() - (screenState.joy_session_start || 0)) / 1000,
             actions_used: payload?.actions_used || [],
           },
         });
@@ -5013,6 +5021,52 @@ export async function executeAction(
         break;
       }
 
+      case "joy_named": {
+        mitraTrackEvent("joy_named", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            text: payload?.text || "",
+            length_chars: payload?.length_chars ?? (payload?.text || "").length,
+          },
+        });
+        break;
+      }
+
+      case "joy_offering_noted": {
+        mitraTrackEvent("joy_offering_noted", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            label: payload?.label || "",
+          },
+        });
+        break;
+      }
+
+      case "joy_walk_started": {
+        mitraTrackEvent("joy_walk_started", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            duration_min: payload?.duration_min ?? null,
+            label: payload?.label || "",
+          },
+        });
+        break;
+      }
+
+      case "joy_sit_started": {
+        mitraTrackEvent("joy_sit_started", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            label: payload?.label || "",
+          },
+        });
+        break;
+      }
+
       // ================================================================
       // TRACK 1 — Growth room enter/exit. Symmetric to grief/loneliness.
       // Moment M49 + M49_inquiry_seeds. Seeded-inquiry sub-flow lives
@@ -5035,11 +5089,6 @@ export async function executeAction(
           container_id: "support_growth",
           state_id: "room",
         } as any);
-        mitraTrackEvent("growth_room_entered", {
-          journeyId: screenState.journey_id,
-          dayNumber: screenState.day_number || 1,
-          meta: { parent_source: payload?.source },
-        });
         break;
       }
 
@@ -5050,7 +5099,8 @@ export async function executeAction(
           journeyId: screenState.journey_id,
           dayNumber: screenState.day_number || 1,
           meta: {
-            duration_sec: (Date.now() - (screenState.growth_session_start || 0)) / 1000,
+            duration_sec:
+              (Date.now() - (screenState.growth_session_start || 0)) / 1000,
             actions_used: payload?.actions_used || [],
           },
         });
@@ -5061,6 +5111,31 @@ export async function executeAction(
         break;
       }
 
+      case "growth_journal_submitted": {
+        const text = (payload?.text || "").trim();
+        const category = payload?.category || "general";
+        if (text) {
+          await postGratitudeLedger({
+            signal_type: "growth_journal",
+            text,
+            meta: {
+              category,
+              length_chars: payload?.length_chars ?? text.length,
+            },
+            logged_at: new Date().toISOString(),
+          });
+        }
+        mitraTrackEvent("growth_journal_submitted", {
+          journeyId: screenState.journey_id,
+          dayNumber: screenState.day_number || 1,
+          meta: {
+            category,
+            length_chars: payload?.length_chars ?? text.length,
+          },
+        });
+        break;
+      }
+
       // Generic return-to-source: reads runner_source (stamped by
       // start_runner from a support room) and navigates back to that
       // container so mantra completion loops back to the room, not
@@ -5068,19 +5143,29 @@ export async function executeAction(
       // (return_action slot). Falls back to dashboard if source unknown.
       case "return_to_source": {
         const source = screenState.runner_source;
-        const map: Record<
-          string,
-          { container_id: string; state_id: string }
-        > = {
-          support_grief: { container_id: "support_grief", state_id: "room" },
-          support_loneliness: {
-            container_id: "support_loneliness",
-            state_id: "room",
-          },
-          // Track 1 — Joy + Growth first-class support rooms.
-          support_joy: { container_id: "support_joy", state_id: "room" },
-          support_growth: { container_id: "support_growth", state_id: "room" },
-        };
+        // A0 finding 2026-04-20: BE stamps `runner_source: "support_room"`
+        // on every canonical v3.1 room runner. Map it back to the `room`
+        // container + `render` state so completion loops the user into
+        // the room they came from. The RoomContainer reads screenData.room_id
+        // (stamped by RoomActionRunnerPill.tsx on runner start).
+        const map: Record<string, { container_id: string; state_id: string }> =
+          {
+            support_grief: { container_id: "support_grief", state_id: "room" },
+            support_loneliness: {
+              container_id: "support_loneliness",
+              state_id: "room",
+            },
+            // Track 1 — Joy + Growth first-class support rooms.
+            support_joy: { container_id: "support_joy", state_id: "room" },
+            support_growth: {
+              container_id: "support_growth",
+              state_id: "room",
+            },
+            // Canonical v3.1 rooms — single canonical source string for all
+            // six rooms. room_id is read from screenState at nav time (see
+            // below).
+            support_room: { container_id: "room", state_id: "render" },
+          };
         const target = map[source as string];
         // Clear runner state BEFORE nav so the room remounts clean.
         setScreenValue(null, "runner_variant");
@@ -5089,7 +5174,23 @@ export async function executeAction(
         setScreenValue(null, "runner_start_time");
         setScreenValue(0, "runner_reps_completed");
         if (target) {
-          loadScreen(target as any);
+          // For canonical v3.1 rooms we need a room_id in screenData to
+          // drive the /render/ fetch. If missing (unexpected — pill
+          // stamps it on start), fall back to dashboard rather than
+          // strand the user in an exit-only fallback.
+          if (source === "support_room" && !screenState.room_id) {
+            if (__DEV__) {
+              console.warn(
+                "[actionExecutor] return_to_source: support_room with no room_id — falling back to dashboard",
+              );
+            }
+            loadScreen({
+              container_id: "companion_dashboard",
+              state_id: "day_active",
+            } as any);
+          } else {
+            loadScreen(target as any);
+          }
         } else {
           loadScreen({
             container_id: "companion_dashboard",

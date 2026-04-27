@@ -34,7 +34,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
-  Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -48,6 +47,7 @@ import { executeAction } from "../../../engine/actionExecutor";
 import {
   mitraLibrarySearch,
   mitraResolveMoment,
+  mitraTrackEvent,
 } from "../../../engine/mitraApi";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 import store from "../../../store";
@@ -60,6 +60,22 @@ const readSlot = (ss: Record<string, any>, key: string): string => {
     return moment[key];
   }
   return "";
+};
+
+const WALK_FALLBACKS = {
+  walk_quote:
+    "Step outside into the fresh air.\n\nWalk for 10 minutes, no need to rush.\n\nTake any path that feels right, and let your body move naturally.",
+  walk_holding_line: "I’ll be here, holding this quiet space for you.",
+  walk_action_label: "Time to walk",
+  walk_end_return_label: "End walk and return",
+} as const;
+
+const readWalkSlot = (
+  ss: Record<string, any>,
+  key: keyof typeof WALK_FALLBACKS,
+): string => {
+  const value = readSlot(ss, key);
+  return value || WALK_FALLBACKS[key];
 };
 
 interface Props {
@@ -76,9 +92,9 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
   );
   const ss = screenData as Record<string, any>;
 
-  const [step, setStep] = useState<"opening" | "options" | "input" | "walk">(
-    "opening",
-  );
+  const [step, setStep] = useState<
+    "opening" | "options" | "input" | "walk" | "named_confirmation"
+  >("opening");
   const [timerSeconds, setTimerSeconds] = useState(600); // default 10 min
   const [inputType, setInputType] = useState<"naming" | "person">("naming");
   const [inputValue, setInputValue] = useState("");
@@ -98,11 +114,22 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
   // --- Ours: Phase C Tier 1 — resolve loneliness_room slots on mount ---
   useEffect(() => {
     if (resolveFiredRef.current) return;
+    resolveFiredRef.current = true;
+
+    // Telemetry — Step 4a: Room entered
+    const parentSource =
+      typeof ss._entered_via === "string" && ss._entered_via
+        ? ss._entered_via
+        : "dashboard";
+    mitraTrackEvent("loneliness_session_opened", {
+      journeyId: ss.journey_id,
+      dayNumber: ss.day_number || 1,
+      meta: { parent_source: parentSource },
+    });
+
     if (ss.loneliness_room && typeof ss.loneliness_room === "object") {
-      resolveFiredRef.current = true;
       return;
     }
-    resolveFiredRef.current = true;
     const cycleId =
       typeof ss.journey_id === "string" && ss.journey_id
         ? ss.journey_id
@@ -119,10 +146,7 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
       user_attention_state: "grieving_shut_down",
       emotional_weight: "heavy" as const,
       cycle_day: Number(ss.day_number) || 0,
-      entered_via:
-        typeof ss._entered_via === "string" && ss._entered_via
-          ? ss._entered_via
-          : "check_in_anandamaya_klesha_asmita_isolation",
+      entered_via: parentSource,
       stage_signals: {},
       today_layer: {
         today_kosha: ss.today_kosha || "anandamaya",
@@ -183,10 +207,10 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
   const inputPlaceholder = readSlot(ss, "input_placeholder");
   const inputSubmitLabel = readSlot(ss, "input_submit_label");
   const inputCancelLabel = readSlot(ss, "input_cancel_label");
-  const walkQuote = readSlot(ss, "walk_quote");
-  const walkHoldingLine = readSlot(ss, "walk_holding_line");
-  const walkActionLabel = readSlot(ss, "walk_action_label");
-  const walkEndReturnLabel = readSlot(ss, "walk_end_return_label");
+  const walkQuote = readWalkSlot(ss, "walk_quote");
+  const walkHoldingLine = readWalkSlot(ss, "walk_holding_line");
+  const walkActionLabel = readWalkSlot(ss, "walk_action_label");
+  const walkEndReturnLabel = readWalkSlot(ss, "walk_end_return_label");
 
   const revealOptions = () => {
     setStep("options");
@@ -245,11 +269,13 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
   const handleInputSubmit = () => {
     if (inputType === "naming") {
       dispatch("loneliness_named", { text: inputValue });
+      setInputValue("");
+      setStep("named_confirmation");
     } else {
       dispatch("loneliness_person_named", { text: inputValue });
+      setInputValue("");
+      setStep("options");
     }
-    setInputValue("");
-    setStep("options");
   };
 
   // Hydrate a support mantra from the library and route through the same
@@ -262,9 +288,7 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
   ) => {
     const itemId = readSlot(ss, itemIdSlot);
     if (!itemId) {
-      console.warn(
-        `[loneliness_room] ${itemIdSlot} missing from slots`,
-      );
+      console.warn(`[loneliness_room] ${itemIdSlot} missing from slots`);
       return;
     }
     try {
@@ -273,10 +297,7 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
         (r: any) => (r?.itemId ?? r?.item_id) === itemId,
       );
       if (!mantra) {
-        console.warn(
-          "[loneliness_room] mantra not found in library:",
-          itemId,
-        );
+        console.warn("[loneliness_room] mantra not found in library:", itemId);
         return;
       }
       store.dispatch(
@@ -304,7 +325,8 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
   };
 
   const handleBhaktiTap = () => routeSupportMantra("bhakti_mantra_item_id", 27);
-  const handleChantTap = () => routeSupportMantra("companioned_chant_item_id", 11);
+  const handleChantTap = () =>
+    routeSupportMantra("companioned_chant_item_id", 11);
 
   const renderOptions = () => (
     <Animated.View style={[styles.optionsStack, { opacity: fade2 }]}>
@@ -352,10 +374,7 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
         <Text style={styles.pillText}>{pillReachOutLabel}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.pill}
-        onPress={() => setStep("walk")}
-      >
+      <TouchableOpacity style={styles.pill} onPress={() => setStep("walk")}>
         <Text style={styles.pillText}>{pillWalkLabel}</Text>
       </TouchableOpacity>
 
@@ -432,6 +451,25 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
     );
   };
 
+  const renderNamedConfirmation = () => {
+    const confirmLine =
+      readSlot(ss, "input_named_confirmation_line") ||
+      "Your love is real. Let that hold you.";
+    const continueLabel =
+      readSlot(ss, "input_continue_label") || "Continue";
+    return (
+      <Animated.View style={[styles.optionsStack, { opacity: fade2 }]}>
+        <Text style={styles.confirmationLine}>{confirmLine}</Text>
+        <TouchableOpacity
+          style={styles.pill}
+          onPress={() => routeSupportMantra("bhakti_mantra_item_id", 27)}
+        >
+          <Text style={styles.pillText}>{continueLabel}</Text>
+        </TouchableOpacity>
+      </Animated.View>
+    );
+  };
+
   return (
     <View style={styles.root}>
       {/* Always-visible back affordance. Walk screen hides it (owns its
@@ -444,7 +482,7 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
             activeOpacity={0.7}
             onPress={() => dispatch("exit_loneliness_room")}
           >
-            <Text style={styles.topBackText}>{pillExitLabel}</Text>
+            {/* <Text style={styles.topBackText}>{pillExitLabel}</Text> */}
           </TouchableOpacity>
         </View>
       )}
@@ -466,6 +504,7 @@ const LonelinessRoomContainer: React.FC<Props> = () => {
 
         {step === "options" && renderOptions()}
         {step === "input" && renderInput()}
+        {step === "named_confirmation" && renderNamedConfirmation()}
         {step === "walk" && renderWalk()}
       </ScrollView>
     </View>
@@ -680,6 +719,14 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.sans.regular,
     fontSize: 14,
     color: "#8a7d6b",
+  },
+  confirmationLine: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 18,
+    color: "#564B42",
+    textAlign: "center",
+    lineHeight: 26,
+    marginBottom: 20,
   },
 });
 

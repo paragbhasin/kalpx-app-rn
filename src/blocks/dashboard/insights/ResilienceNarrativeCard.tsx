@@ -28,7 +28,8 @@ type Props = {
 
 const ResilienceNarrativeCard: React.FC<Props> = ({ screenData }) => {
   const sd = screenData ?? {};
-  const payload = sd.resilience_narrative ?? null;
+  // v3 journey: insights.resilience_narrative (namespaced). Fallback flat.
+  const payload = sd.insights?.resilience_narrative ?? sd.resilience_narrative ?? null;
   if (!payload || typeof payload !== "object") return null;
 
   const summary: string =
@@ -59,18 +60,27 @@ const ResilienceNarrativeCard: React.FC<Props> = ({ screenData }) => {
       accessibilityLabel="resilience_narrative_card"
       testID="resilience_narrative_card"
     >
-      <View style={styles.headerRow}>
-        <View style={styles.eyebrowWrap}>
+      <View style={styles.mainRow}>
+        {/* Left: Strength Dot and optional eyebrow label */}
+        <View style={styles.leftCol}>
           <View style={[styles.strengthDot, { backgroundColor: strengthDot }]} />
-          {!!eyebrowLabel && <Text style={styles.eyebrow}>{eyebrowLabel}</Text>}
+          {!!eyebrowLabel && (
+            <Text style={styles.eyebrow} numberOfLines={1}>
+              {eyebrowLabel}
+            </Text>
+          )}
         </View>
-        <Ionicons
-          name="leaf-outline"
-          size={15}
-          color={Colors.brownMuted}
-        />
+
+        {/* Center: Narrative summary text (flexible) */}
+        <View style={styles.centerCol}>
+          <Text style={styles.body}>{summary}</Text>
+        </View>
+
+        {/* Right: Icon */}
+        <View style={styles.rightCol}>
+          <Ionicons name="leaf-outline" size={15} color={Colors.brownMuted} />
+        </View>
       </View>
-      <Text style={styles.body}>{summary}</Text>
     </View>
   );
 };
@@ -80,36 +90,43 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.goldHairline,
     borderRadius: 14,
-    padding: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     marginVertical: 8,
     backgroundColor: Colors.cream,
   },
-  headerRow: {
+  mainRow: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 8,
+    alignItems: "flex-start",
+    gap: 10,
   },
-  eyebrowWrap: {
+  leftCol: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 7,
+    paddingTop: 5, // align with first line cap-height
+    gap: 6,
+  },
+  centerCol: {
+    flex: 1,
+  },
+  rightCol: {
+    paddingTop: 4,
   },
   strengthDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
   },
   eyebrow: {
     fontFamily: Fonts.sans.medium,
-    fontSize: 10,
-    letterSpacing: 1.3,
+    fontSize: 9,
+    letterSpacing: 1.1,
     color: Colors.brownMuted,
   },
   body: {
     fontFamily: Fonts.serif.regular,
     fontSize: 14,
-    lineHeight: 21,
+    lineHeight: 20,
     color: Colors.brownDeep,
   },
 });

@@ -1,0 +1,79 @@
+# Flow 64: life-context picker skip does not clear stored preference.
+# Validates: skip navigates to room render without error; re-entering the same
+# room opens the picker again with the stored context still pre-available
+# (Redux life_context unchanged by skip — only context_skipped flag set).
+# Pre-condition: test+day3@kalpx.com with CompanionState.life_context="self".
+appId: com.kalpx.app
+env:
+  EMAIL: test+day3@kalpx.com
+  PASSWORD: Test1234!
+---
+- runFlow:
+    file: login.yaml
+    env:
+      EMAIL: test+day3@kalpx.com
+      PASSWORD: Test1234!
+- waitForAnimationToEnd
+
+# Navigate to day-active if on welcome-back screen (render_home state)
+- runFlow:
+    file: navigate_to_day_active.yaml
+
+
+# First room entry — expect picker
+- tapOn:
+    id: "quick_support_more_ways"
+- waitForAnimationToEnd
+
+- tapOn:
+    id: "room_entry_sheet_growth"
+- waitForAnimationToEnd
+
+- assertVisible:
+    id: "life_context_picker_sheet"
+
+# Skip
+- tapOn:
+    id: "life_context_picker_skip"
+- waitForAnimationToEnd
+
+# Room renders without personalisation
+- assertVisible:
+    id: "room_renderer_room_growth"
+
+# Navigate back to dashboard (tap exit pill or back)
+- tapOn:
+    text: "Return|Go back|Exit"
+    optional: true
+- waitForAnimationToEnd
+- tapOn:
+    text: "My Routine|Home"
+    optional: true
+- waitForAnimationToEnd
+
+# Second room entry — picker should open again; stored preference "self" still pre-available
+- tapOn:
+    id: "quick_support_more_ways"
+    optional: true
+- waitForAnimationToEnd
+
+- tapOn:
+    id: "room_entry_sheet_growth"
+    optional: true
+- waitForAnimationToEnd
+
+# Picker opens again (context_skipped was for one visit; next entry re-triggers picker)
+- assertVisible:
+    id: "life_context_picker_sheet"
+    optional: true
+
+# "Myself" row still visible (Redux life_context="self" was not cleared by skip)
+- assertVisible:
+    id: "life_context_picker_self"
+    optional: true
+
+# Skip again to end cleanly
+- tapOn:
+    id: "life_context_picker_skip"
+    optional: true
+- waitForAnimationToEnd

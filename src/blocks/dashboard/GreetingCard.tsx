@@ -64,9 +64,7 @@ const GreetingCard: React.FC<Props> = ({ screenData }) => {
     typeof joyCarry.captured_at === "number" &&
     isSameCalendarDay(joyCarry.captured_at, Date.now());
   const carryLabel: string =
-    typeof joyCarry?.label === "string" && joyCarry.label
-      ? joyCarry.label
-      : "";
+    typeof joyCarry?.label === "string" && joyCarry.label ? joyCarry.label : "";
 
   return (
     <View>
@@ -74,7 +72,9 @@ const GreetingCard: React.FC<Props> = ({ screenData }) => {
         <View style={styles.leftAccent} />
         <View style={styles.body}>
           <Text style={styles.name}>Welcome, {displayName}.</Text>
-          {!!displayContext && <Text style={styles.context}>{displayContext}</Text>}
+          {!!displayContext && (
+            <Text style={styles.context}>{displayContext}</Text>
+          )}
           {!!tone && <Text style={styles.tone}>{tone}</Text>}
         </View>
         <View style={styles.mandalaWrap} accessibilityElementsHidden>
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   },
   context: {
     fontFamily: Fonts.sans.regular,
-    fontSize: 14,
+    fontSize: 12,
     color: Colors.textSoft,
     lineHeight: 20,
   },
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     marginTop: -4,
     marginBottom: 6,
-    marginLeft: 18,
+    // marginLeft: 18,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,

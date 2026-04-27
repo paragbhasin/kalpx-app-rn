@@ -10,9 +10,9 @@ appId: com.kalpx.app
 - runFlow: common/login_as_smoke_persona.yaml
 - runFlow: common/wait_for_dashboard.yaml
 - extendedWaitUntil:
-    visible: ".*I want to go deeper.*"
+    visible: ".*I want to grow as a person.*"
     timeout: 10000
-- tapOn: ".*I want to go deeper.*"
+- tapOn: ".*I want to grow as a person.*"
 - waitForAnimationToEnd:
     timeout: 8000
 - tapOn:

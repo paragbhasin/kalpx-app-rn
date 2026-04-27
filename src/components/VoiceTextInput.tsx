@@ -93,7 +93,8 @@ export const VoiceModal: React.FC<VoiceModalProps> = ({
   };
 
   const handleFinalConfirm = () => {
-    onSend("Voice summary confirmed.", "voice");
+    // Voice transcription not implemented — do not persist placeholder text.
+    // Close without sending.
     onClose();
   };
 

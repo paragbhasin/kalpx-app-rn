@@ -60,6 +60,7 @@ import { executeAction } from "../../../engine/actionExecutor";
 import {
   mitraLibrarySearch,
   mitraResolveMoment,
+  mitraTrackEvent,
 } from "../../../engine/mitraApi";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 import store from "../../../store";
@@ -149,11 +150,22 @@ const GrowthRoomContainer: React.FC<Props> = () => {
   // Resolve M49_growth_room slots on mount
   useEffect(() => {
     if (resolveFiredRef.current) return;
+    resolveFiredRef.current = true;
+
+    // Telemetry — Step 4a: Room entered
+    const parentSource =
+      typeof ss._entered_via === "string" && ss._entered_via
+        ? ss._entered_via
+        : "dashboard";
+    mitraTrackEvent("growth_room_entered", {
+      journeyId: ss.journey_id,
+      dayNumber: ss.day_number || 1,
+      meta: { parent_source: parentSource },
+    });
+
     if (ss.growth_room && typeof ss.growth_room === "object") {
-      resolveFiredRef.current = true;
       return;
     }
-    resolveFiredRef.current = true;
     const cycleId =
       typeof ss.journey_id === "string" && ss.journey_id
         ? ss.journey_id
@@ -170,10 +182,7 @@ const GrowthRoomContainer: React.FC<Props> = () => {
       user_attention_state: "reflective_open",
       emotional_weight: "moderate" as const,
       cycle_day: Number(ss.day_number) || 0,
-      entered_via:
-        typeof ss._entered_via === "string" && ss._entered_via
-          ? ss._entered_via
-          : "check_in_vijnanamaya_question_forming",
+      entered_via: parentSource,
       stage_signals: {},
       today_layer: {
         today_kosha: ss.today_kosha || "vijnanamaya",
@@ -260,7 +269,7 @@ const GrowthRoomContainer: React.FC<Props> = () => {
     }).start(() => {
       const timer = setTimeout(() => {
         revealOptions();
-      }, 10000);
+      }, 2000);
       return () => clearTimeout(timer);
     });
   }, [fade1]);
@@ -281,6 +290,7 @@ const GrowthRoomContainer: React.FC<Props> = () => {
   const inputSubmitLabel = readSlot(ss, "input_submit_label");
   const inputCancelLabel = readSlot(ss, "input_cancel_label");
   const seededPrincipleId = readSlot(ss, "seeded_principle_id");
+  const inquiryCategoriesPrompt = inputInquiryPrompt || pillInquiryLabel;
   // Null-asset render guards (founder adjustment #4, 2026-04-19): hide
   // runner-launching pills if their item_id slot is missing.
   const growthMantraItemId = readSlot(ss, "growth_mantra_item_id");
@@ -487,6 +497,9 @@ const GrowthRoomContainer: React.FC<Props> = () => {
 
   const renderInquiryCategories = () => (
     <View style={styles.categoriesStack}>
+      {!!inquiryCategoriesPrompt && (
+        <Text style={styles.categoriesPrompt}>{inquiryCategoriesPrompt}</Text>
+      )}
       {INQUIRY_CATEGORIES.map((cat) => {
         const label = readSeedSlot(ss, cat, "category_label");
         if (!label) return null;
@@ -529,11 +542,7 @@ const GrowthRoomContainer: React.FC<Props> = () => {
       "suggested_practice_label",
     );
     const journalCta = readSeedSlot(ss, selectedCategory, "journal_cta");
-    const carryCta = readSeedSlot(
-      ss,
-      selectedCategory,
-      "carry_forward_cta",
-    );
+    const carryCta = readSeedSlot(ss, selectedCategory, "carry_forward_cta");
     return (
       <View style={styles.inquirySeatWrap}>
         {!!principleAnchor && (
@@ -543,9 +552,12 @@ const GrowthRoomContainer: React.FC<Props> = () => {
           <Text style={styles.reflectivePrompt}>{reflectivePrompt}</Text>
         )}
         {!!practiceLabel && (
-          <View style={styles.practiceBox}>
+          <TouchableOpacity
+            style={styles.practiceBox}
+            onPress={() => setStep("journal")}
+          >
             <Text style={styles.practiceLabel}>{practiceLabel}</Text>
-          </View>
+          </TouchableOpacity>
         )}
         <View style={styles.seatActions}>
           {!!journalCta && (
@@ -628,7 +640,7 @@ const GrowthRoomContainer: React.FC<Props> = () => {
               })
             }
           >
-            <Text style={styles.topBackText}>{pillExitLabel}</Text>
+            {/* <Text style={styles.topBackText}>{pillExitLabel}</Text> */}
           </TouchableOpacity>
         </View>
       )}
@@ -709,6 +721,16 @@ const styles = StyleSheet.create({
   },
   optionsStack: { width: "100%", gap: 12 },
   categoriesStack: { width: "100%", gap: 12 },
+  categoriesPrompt: {
+    fontFamily: Fonts.sans.medium,
+    fontSize: 22,
+    color: "#432104",
+    textAlign: "center",
+    lineHeight: 30,
+    marginTop: 56,
+    marginBottom: 18,
+    paddingHorizontal: 8,
+  },
   pill: {
     backgroundColor: "#FBF5F5",
     borderColor: "#c89a47",

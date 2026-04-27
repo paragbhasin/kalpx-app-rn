@@ -61,8 +61,10 @@ interface ScreenState {
 //   block to render inside PracticeRunnerContainer's v3 immersive chrome, and
 //   which message to show in the completion_return transient.
 // - runner_source: 'core' | 'additional_recommended' | 'additional_library' |
-//   'additional_custom' | 'support_trigger' | 'support_checkin' — must be
-//   explicitly set by the entry action (start_runner). Never inferred.
+//   'additional_custom' | 'support_trigger' | 'support_checkin' |
+//   'support_grief' | 'support_loneliness' | 'support_joy' |
+//   'support_growth' — must be explicitly set by the entry action
+//   (start_runner). Never inferred.
 //   Used by track_completion to log the correct `source` (REG-015 guard).
 // - runner_active_item: { item_type, item_id, title } — the master mantra /
 //   sankalp / practice being run.
@@ -109,7 +111,11 @@ export type RunnerSource =
   | 'additional_library'
   | 'additional_custom'
   | 'support_trigger'
-  | 'support_checkin';
+  | 'support_checkin'
+  | 'support_grief'
+  | 'support_loneliness'
+  | 'support_joy'
+  | 'support_growth';
 
 // Week 4 — Support Path (Mitra v3 Moments 20, 21, 22, 31, 38, 42).
 // voice_consent_given, voice_note_*, trigger_round, trigger_mantra_text,
@@ -203,14 +209,17 @@ export const loadScreenWithData = createAsyncThunk(
     { containerId, stateId }: { containerId: string; stateId: string },
     { dispatch },
   ) => {
-    // 1. Update navigation state immediately (uses the action creator exported below)
-    dispatch({ type: 'screen/loadScreen', payload: { containerId, stateId } });
-
-    // 2. Resolve the screen schema
+    // Resolve the schema first, then atomically update nav + schema in one
+    // dispatch so ScreenRenderer never sees a null currentScreen gap.
     const screenSchema = await getScreen(containerId, stateId);
     if (screenSchema) {
-      dispatch({ type: 'screen/setCurrentScreen', payload: screenSchema });
+      dispatch({
+        type: 'screen/loadScreenWithSchema',
+        payload: { containerId, stateId, schema: screenSchema },
+      });
     } else {
+      // Schema unavailable — fall back to the old clear-then-navigate path.
+      dispatch({ type: 'screen/loadScreen', payload: { containerId, stateId } });
       console.warn(
         `[SCREEN_SLICE] No schema found for ${containerId}/${stateId}`,
       );
@@ -223,17 +232,22 @@ export const loadScreenWithData = createAsyncThunk(
 export const goBackWithData = createAsyncThunk(
   'screen/goBackWithData',
   async (_, { getState, dispatch }) => {
-    dispatch({ type: 'screen/goBack' });
-
     const { screen } = getState() as { screen: ScreenState };
-    const { currentContainerId, currentStateId } = screen;
-    const screenSchema = await getScreen(currentContainerId, currentStateId);
+    if (screen.history.length === 0) return null;
+
+    const previous = screen.history[screen.history.length - 1];
+    const screenSchema = await getScreen(previous.containerId, previous.stateId);
 
     if (screenSchema) {
-      dispatch({ type: 'screen/setCurrentScreen', payload: screenSchema });
+      dispatch({
+        type: 'screen/goBackWithSchema',
+        payload: { schema: screenSchema },
+      });
     } else {
+      // Schema unavailable — fall back to clear-then-navigate.
+      dispatch({ type: 'screen/goBack' });
       console.warn(
-        `[SCREEN_SLICE] No schema found for back target ${currentContainerId}/${currentStateId}`,
+        `[SCREEN_SLICE] No schema found for back target ${previous.containerId}/${previous.stateId}`,
       );
     }
 
@@ -265,6 +279,24 @@ const screenSlice = createSlice({
       state.currentScreen = null;
     },
 
+    // Atomic forward navigation: push history, set new IDs, and set new schema
+    // in one dispatch so ScreenRenderer never sees a null gap.
+    loadScreenWithSchema(
+      state,
+      action: PayloadAction<{ containerId: string; stateId: string; schema: any }>,
+    ) {
+      const { containerId, stateId, schema } = action.payload;
+      if (state.currentContainerId && state.currentStateId) {
+        state.history.push({
+          containerId: state.currentContainerId,
+          stateId: state.currentStateId,
+        });
+      }
+      state.currentContainerId = containerId;
+      state.currentStateId = stateId;
+      state.currentScreen = schema;
+    },
+
     goBack(state) {
       if (state.history.length === 0) return;
       const previous = state.history[state.history.length - 1];
@@ -277,6 +309,17 @@ const screenSlice = createSlice({
       state.currentScreen = null;
     },
 
+    // Atomic back navigation: pop history, set previous IDs, and set schema
+    // in one dispatch so ScreenRenderer never sees a null gap.
+    goBackWithSchema(state, action: PayloadAction<{ schema: any }>) {
+      if (state.history.length === 0) return;
+      const previous = state.history[state.history.length - 1];
+      state.history = state.history.slice(0, -1);
+      state.currentContainerId = previous.containerId;
+      state.currentStateId = previous.stateId;
+      state.currentScreen = action.payload.schema;
+    },
+
     setScreenValue(state, action: PayloadAction<{ key: string; value: any }>) {
       state.screenData[action.payload.key] = action.payload.value;
     },
@@ -286,10 +329,12 @@ const screenSlice = createSlice({
     },
 
     setBackground(state, action: PayloadAction<any>) {
+      if (state.currentBackground === action.payload) return;
       state.currentBackground = action.payload;
     },
 
     setHeaderHidden(state, action: PayloadAction<boolean>) {
+      if (state.isHeaderHidden === action.payload) return;
       state.isHeaderHidden = action.payload;
     },
 

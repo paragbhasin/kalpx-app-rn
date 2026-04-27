@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "800459558908-mu0jm9924n53ghcjdjb3mhb4vo25jj0h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kalpx.app",
+            "certificate_hash": "e8110efae8743d8d56881902b7fa051bcad8f927"
+          }
+        },
+        {
           "client_id": "800459558908-nid7a89ip65me4330ebn8jg36804n39o.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -35,6 +43,14 @@
           "android_info": {
             "package_name": "com.kalpx.app",
             "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "800459558908-sdrt38sqrbi6gbc8695urmcs3rqvhp92.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kalpx.app",
+            "certificate_hash": "5c97e08f4dd7015c8e153fb785cfd29ddbb02d14"
           }
         },
         {

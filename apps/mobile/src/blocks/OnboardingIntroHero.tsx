@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   Animated,
   Image,
@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { VoiceTextInput } from "../components/VoiceTextInput";
 import { executeAction } from "../engine/actionExecutor";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { interpolate } from "../engine/utils/interpolation";
@@ -35,8 +34,6 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
   const { screenData, loadScreen, goBack, currentScreen } = useScreenStore();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const replyAnim = useRef(new Animated.Value(0)).current;
-  const [voiceModalVisible, setVoiceModalVisible] = useState(false);
-
   const updateBackground = useScreenStore(
     (state: any) => state.updateBackground,
   );
@@ -167,8 +164,8 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
         </Animated.View>
       </Animated.View>
 
-      {/* Lotus image at the bottom */}
-      <View style={styles.lotusWrap}>
+      {/* Lotus image at the bottom — purely decorative, must not intercept chip taps */}
+      <View style={styles.lotusWrap} pointerEvents="none">
         <Image
           source={require("../../assets/new_home_lotus.png")}
           style={styles.lotus}
@@ -176,19 +173,6 @@ const OnboardingIntroHero: React.FC<Props> = ({ block }) => {
         />
       </View>
 
-      <View style={styles.fixedInputArea}>
-        <VoiceTextInput
-          voiceAvailable={true}
-          placeholder="How can I help you?"
-          onSend={(val, type) => {
-            if (type === "text") {
-              fire({ freeform_text: val, response_type: "text" });
-            } else {
-              fire({ response_type: "voice_requested" });
-            }
-          }}
-        />
-      </View>
     </View>
   );
 };
@@ -267,14 +251,6 @@ const styles = StyleSheet.create({
   lotus: {
     width: 340,
     height: 340,
-  },
-  fixedInputArea: {
-    position: "absolute",
-    padding: 5,
-    bottom: -60,
-    left: 0,
-    right: 0,
-    // backgroundColor: "#fef8f5",
   },
 });
 

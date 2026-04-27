@@ -56,7 +56,9 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
   const isRootScreen =
     currentContainerId === "companion_dashboard" ||
     currentContainerId === "continue_journey" ||
-    currentScreen?.state_id === "discipline_select";
+    currentScreen?.state_id === "discipline_select" ||
+    (currentContainerId === "welcome_onboarding" &&
+      (currentStateId === "turn_1" || currentStateId === "turn_2"));
 
   const showBackButton =
     !currentScreen?.overlay && history.length > 0 && !isRootScreen;

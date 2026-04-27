@@ -1,11 +1,13 @@
 {
   "cli": {
-    "version": ">= 0.53.0"
+    "version": ">= 16.28.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "production": {
       "environment": "production",
       "env": {
+        "EXPO_PUBLIC_API_ENV": "prod",
         "EXPO_UPDATES_DISABLED": "1",
         "EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD": "1",
         "EXPO_PUBLIC_MITRA_V3_ROOMS": "1",
@@ -16,7 +18,7 @@
       },
       "ios": {
         "buildConfiguration": "Release",
-        "image": "macos-sequoia-156-xcode-262-latest-sdk-55"
+        "image": "macos-sequoia-15.6-xcode-26.2"
       }
     },
     "preview": {
@@ -31,14 +33,21 @@
     },
     "simulator": {
       "extends": "preview",
+      "env": {
+        "EXPO_PUBLIC_API_ENV": "dev"
+      },
       "ios": {
-        "simulator": true
+        "simulator": true,
+        "image": "latest"
       }
     },
     "development": {
       "extends": "preview",
       "developmentClient": true,
       "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_ENV": "dev"
+      },
       "android": {
         "buildType": "apk"
       }

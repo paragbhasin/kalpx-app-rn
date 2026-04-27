@@ -7,6 +7,9 @@
 #
 # Without this file the upload was ~523MB. With it it should drop to ~50MB.
 
+# Monorepo copy (apps/ holds the entire app duplicated for the monorepo branch)
+apps/
+
 # Native build outputs — EAS rebuilds these
 android/
 ios/

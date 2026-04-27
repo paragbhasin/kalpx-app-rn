@@ -41,8 +41,9 @@ android/
 
 app-example
 
-# Google Services files
-google-services.json
+# Google Services files — tracked in git so EAS Build can access them.
+# These files contain public Firebase project config (not secrets).
+# GoogleService-Info.plist is provided at build time via GOOGLE_SERVICES_PLIST env var.
 GoogleService-Info.plist
 
 # Build artifacts

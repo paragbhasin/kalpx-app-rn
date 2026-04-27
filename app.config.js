@@ -18,7 +18,7 @@ module.exports = {
       usesAppleSignIn: true,
       appleTeamId: "9G5NZ5LBRU",
       googleServicesFile: process.env.GOOGLE_SERVICES_PLIST || "./GoogleService-Info.plist",
-      buildNumber: "41",
+      buildNumber: "42",
       entitlements: {
         "aps-environment": "production",
       },

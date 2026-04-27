@@ -1,18 +1,20 @@
 /**
- * ScreenRenderer — Phase 3 scaffold.
- * Dispatches container_type → placeholder container.
- * Real containers are ported in Phases 5–9.
+ * ScreenRenderer — Phase 5.
+ * Resolves block list from schema and dispatches to BlockRenderer.
+ * onAction is threaded through to block-level interactive elements.
  */
 
 import React from 'react';
 import { BlockRenderer } from './BlockRenderer';
+import { interpolate } from './interpolation';
 
 interface ScreenRendererProps {
   schema: any;
   screenData?: Record<string, any>;
+  onAction?: (action: any) => void;
 }
 
-export function ScreenRenderer({ schema, screenData }: ScreenRendererProps) {
+export function ScreenRenderer({ schema, screenData = {}, onAction }: ScreenRendererProps) {
   if (!schema) {
     return (
       <div style={{ padding: 24, color: '#888', textAlign: 'center' }}>
@@ -21,18 +23,30 @@ export function ScreenRenderer({ schema, screenData }: ScreenRendererProps) {
     );
   }
 
-  const blocks: any[] = schema.blocks ?? [];
+  // Interpolate the entire schema with screenData so {{tokens}} resolve in blocks
+  const resolved = interpolate(schema, screenData);
+  const blocks: any[] = resolved.blocks ?? [];
 
   return (
     <div style={{ padding: 16 }}>
-      <div style={{ fontSize: 11, color: '#666', marginBottom: 12, fontFamily: 'monospace' }}>
-        {schema.container_id}/{schema.state_id} [{schema.container_type ?? 'unknown'}]
-      </div>
+      {/* Dev-only container label */}
+      {import.meta.env.DEV && (
+        <div style={{ fontSize: 10, color: '#bbb', marginBottom: 8, fontFamily: 'monospace' }}>
+          {schema.container_id}/{schema.state_id}
+        </div>
+      )}
       {blocks.map((block: any, i: number) => (
-        <BlockRenderer key={i} block={block} screenData={screenData} />
+        <BlockRenderer
+          key={block.id ?? i}
+          block={block}
+          screenData={screenData}
+          onAction={onAction}
+        />
       ))}
       {blocks.length === 0 && (
-        <div style={{ color: '#666', fontSize: 13 }}>No blocks in this schema.</div>
+        <div style={{ color: '#666', fontSize: 13, padding: 24, textAlign: 'center' }}>
+          No blocks in this schema.
+        </div>
       )}
     </div>
   );

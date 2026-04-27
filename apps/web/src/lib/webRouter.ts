@@ -1,18 +1,26 @@
 import type { RouterAdapter } from '@kalpx/api-client';
 
-// Lazily resolved — allows the adapter to be created before BrowserRouter mounts.
-let _navigate: ((path: string) => void) | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyNavigate = (...args: any[]) => void;
 
-export function setWebNavigate(navigate: (path: string) => void) {
+// Lazily resolved — allows the adapter to be created before BrowserRouter mounts.
+let _navigate: AnyNavigate | null = null;
+
+export function setWebNavigate(navigate: AnyNavigate) {
   _navigate = navigate;
 }
 
-export const webRouter: RouterAdapter = {
-  navigateToLogin: () => {
-    if (_navigate) {
-      _navigate('/login');
-    } else {
-      window.location.href = '/login';
+/** Imperative navigation for use outside React components (e.g. actionExecutor). */
+export function webNavigate(path: string | number, opts?: any) {
+  if (_navigate) {
+    _navigate(path, opts);
+  } else {
+    if (typeof path === 'string') {
+      window.location.href = path;
     }
-  },
+  }
+}
+
+export const webRouter: RouterAdapter = {
+  navigateToLogin: () => webNavigate('/login'),
 };

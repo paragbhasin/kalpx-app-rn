@@ -50,6 +50,8 @@ import {
   screenActions,
 } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
+import RoomEntrySheet from "../../blocks/room/RoomEntrySheet";
+import type { RoomId } from "../../blocks/room/types";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -59,6 +61,7 @@ interface ActionSpec {
     | "navigate"
     | "load_screen"
     | "open_mitra_chat"
+    | "open_support_path"
     | "start_checkin"
     | "start_support"
     | "continue_practice"
@@ -165,6 +168,7 @@ export default function ContinueJourney({
   // Shared.
   const [loading, setLoading] = useState(true);
   const [submittingReentry, setSubmittingReentry] = useState(false);
+  const [roomSheetVisible, setRoomSheetVisible] = useState(false);
   const routedRef = useRef(false);
 
   // ── Active-user path: buildActionContext ─────────────────────────
@@ -551,10 +555,26 @@ export default function ContinueJourney({
 
     const handleAction = async (action: ActionSpec | undefined) => {
       if (!action) return;
+      if ((action as any).type === "open_support_path") {
+        setRoomSheetVisible(true);
+        return;
+      }
       try {
         await executeAction(action as any, buildActionContext() as any);
       } catch (err: any) {
         console.warn("[ContinueJourney] executeAction threw:", err?.message);
+      }
+    };
+
+    const handleRoomEntry = async (room_id: RoomId) => {
+      setRoomSheetVisible(false);
+      try {
+        await executeAction(
+          { type: "enter_room", payload: { room_id, source: "home_support_path" } } as any,
+          buildActionContext() as any,
+        );
+      } catch (err: any) {
+        console.warn("[ContinueJourney] room entry failed:", err?.message);
       }
     };
 
@@ -659,6 +679,12 @@ export default function ContinueJourney({
             resizeMode="contain"
           />
         </View>
+
+        <RoomEntrySheet
+          visible={roomSheetVisible}
+          onDismiss={() => setRoomSheetVisible(false)}
+          onRoomEntry={handleRoomEntry}
+        />
       </SafeAreaView>
     );
   }

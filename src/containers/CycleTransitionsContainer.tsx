@@ -8,7 +8,7 @@ import {
   Plus,
   RefreshCw,
 } from "lucide-react-native";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Dimensions,
   Image,
@@ -40,6 +40,7 @@ import { executeAction } from "../engine/actionExecutor";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { interpolate } from "../engine/utils/interpolation";
 import { Fonts } from "../theme/fonts";
+import { stopRoomAmbientAudio } from "./RoomContainer";
 
 // SVGs / Assets
 import { SvgUri } from "react-native-svg";
@@ -502,6 +503,20 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     );
   }, [sankalpBodyText, info.title]);
   const stateId = currentStateId || "";
+
+  // Stop room ambient calm music the moment a mantra audio screen appears.
+  useEffect(() => {
+    const hasMantraAudio =
+      stateId === "offering_reveal" &&
+      !!(
+        screenData?.mantra_audio_url ||
+        screenData?.master_mantra?.audio_url ||
+        screenData?.runner_active_item?.audio_url
+      );
+    if (hasMantraAudio) {
+      stopRoomAmbientAudio().catch(() => {});
+    }
+  }, [stateId, screenData]);
 
   const currentType: ActivityType = useMemo(() => {
     const rawType = (

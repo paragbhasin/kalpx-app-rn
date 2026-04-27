@@ -7,7 +7,9 @@
       "environment": "production",
       "env": {
         "EXPO_UPDATES_DISABLED": "1",
-        "EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD": "0"
+        "EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD": "1",
+        "EXPO_PUBLIC_MITRA_V3_ROOMS": "1",
+        "EXPO_PUBLIC_MITRA_V3_RECOGNITION_BACKEND": "1"
       },
       "android": {
         "buildType": "app-bundle"
@@ -45,6 +47,11 @@
     "production": {
       "android": {
         "track": "production"
+      },
+      "ios": {
+        "appleId": "paragbhasin@gmail.com",
+        "ascAppId": "6755144623",
+        "appleTeamId": "9G5NZ5LBRU"
       }
     }
   }

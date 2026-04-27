@@ -47,9 +47,31 @@ export function MitraEnginePage() {
     currentStateId: screenState.currentStateId,
   };
 
+  const isRunnerContainer = containerId === 'practice_runner';
+
   return (
     <PageShell>
       <div style={{ maxWidth: 480, margin: '0 auto', paddingBottom: 48 }}>
+        {/* Runner exit strip — always visible for practice_runner screens */}
+        {isRunnerContainer && !resolving && stateId !== 'completion_return' && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '12px 16px 0' }}>
+            <button
+              onClick={() => void executeAction({ type: 'runner_exit' }, actionContext)}
+              data-testid="runner-exit-btn"
+              aria-label="Exit runner"
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: 13,
+                color: '#9A8C78',
+                padding: '4px 8px',
+              }}
+            >
+              ✕ Exit
+            </button>
+          </div>
+        )}
         {resolving && (
           <div style={{ textAlign: 'center', padding: 48, color: '#888' }}>
             Loading screen…

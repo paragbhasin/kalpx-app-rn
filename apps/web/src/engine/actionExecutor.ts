@@ -267,8 +267,10 @@ export async function executeAction(action: any, context: ActionContext): Promis
     }
 
     // ----------------------------------------------------------------
-    // START_RUNNER — Phase 7: set runner context, route to offering_reveal.
-    // Full PracticeRunnerContainer is Phase 8.
+    // START_RUNNER — Phase 8: resolve variant → practice_runner state.
+    // mantra  → free_mantra_chanting
+    // sankalp → sankalp_embody
+    // practice → practice_step_runner
     // ----------------------------------------------------------------
     case 'start_runner': {
       const p = action.payload || action;
@@ -283,36 +285,146 @@ export async function executeAction(action: any, context: ActionContext): Promis
 
       dispatch(setSubmitting(true));
       try {
-        // Stamp runner context into screenData
+        const itemId: string = item.item_id || item.id || '';
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
+
         dispatch(updateScreenData({
           runner_active_item: item,
           runner_variant: variant,
           runner_source: source,
           runner_step_index: 0,
           runner_reps_completed: 0,
-          // info context for offering_reveal interpolation
-          info: {
-            title: item.title || item.item_id,
-            subtitle: item.subtitle || '',
-            description: item.subtitle || item.description || '',
-            item_id: item.item_id || item.id,
-            item_type: variant,
-          },
-          info_start_label: 'Begin',
-          info_start_action: { type: 'info_start_click' },
+          runner_start_time: Date.now(),
+          runner_duration_actual_sec: 0,
+          runner_tz: tz,
+          // Populate runner-specific display keys
+          mantra_text: variant === 'mantra' ? (item.title || '') : screenData.mantra_text,
+          mantra_devanagari: variant === 'mantra' ? (item.devanagari || '') : screenData.mantra_devanagari,
+          mantra_audio_url: variant === 'mantra' ? (item.audio_url || '') : screenData.mantra_audio_url,
+          reps_total: item.reps_total || screenData.reps_total || 108,
+          practice_duration_seconds: variant === 'practice' ? (item.duration_seconds || screenData.practice_duration_seconds || 300) : screenData.practice_duration_seconds,
+          practice_steps: variant === 'practice' ? (item.steps || screenData.practice_steps || []) : screenData.practice_steps,
         }));
-        void apiTrackEvent('offering_reveal_viewed', {
+
+        void apiTrackEvent('runner_started', {
           journey_id: screenData.journey_id,
           day_number: screenData.day_number || 1,
-          item_id: item.item_id || item.id,
+          item_id: itemId,
           source,
           variant,
         });
-        dispatch(loadScreen({ containerId: 'cycle_transitions', stateId: 'offering_reveal' }));
-        webNavigate(_containerToPath('cycle_transitions', 'offering_reveal'));
+
+        const stateId =
+          variant === 'sankalp' ? 'sankalp_embody'
+          : variant === 'practice' ? 'practice_step_runner'
+          : 'free_mantra_chanting';
+
+        dispatch(loadScreen({ containerId: 'practice_runner', stateId }));
+        webNavigate(_containerToPath('practice_runner', stateId));
       } finally {
         dispatch(setSubmitting(false));
       }
+      break;
+    }
+
+    // ----------------------------------------------------------------
+    // COMPLETE_RUNNER — track completion, navigate to completion_return.
+    // ----------------------------------------------------------------
+    case 'complete_runner': {
+      dispatch(setSubmitting(true));
+      try {
+        const item = (screenData.runner_active_item || {}) as Record<string, any>;
+        const variant: string = (screenData.runner_variant as string) || 'mantra';
+        const source: string = (screenData.runner_source as string) || 'core';
+        const itemId: string = item.item_id || item.id || '';
+        const startTime: number = (screenData.runner_start_time as number) || Date.now();
+        const actualSeconds = Math.round((Date.now() - startTime) / 1000);
+        const repsCompleted: number = (screenData.runner_reps_completed as number) || 0;
+        const tz: string = (screenData.runner_tz as string) || Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
+
+        if (itemId) {
+          const meta: Record<string, any> = { variant, actual_seconds: actualSeconds };
+          if (variant === 'mantra') meta.reps_completed = repsCompleted;
+
+          await apiTrackCompletion({
+            item_type: variant,
+            item_id: itemId,
+            source,
+            journey_id: screenData.journey_id,
+            day_number: screenData.day_number || 1,
+            tz,
+            meta,
+          });
+        }
+
+        dispatch(updateScreenData({ runner_duration_actual_sec: actualSeconds }));
+        dispatch(loadScreen({ containerId: 'practice_runner', stateId: 'completion_return' }));
+        webNavigate(_containerToPath('practice_runner', 'completion_return'));
+      } finally {
+        dispatch(setSubmitting(false));
+      }
+      break;
+    }
+
+    // ----------------------------------------------------------------
+    // REPEAT_RUNNER — reset counters, re-enter same runner state.
+    // ----------------------------------------------------------------
+    case 'repeat_runner': {
+      const variant: string = (screenData.runner_variant as string) || 'mantra';
+      dispatch(updateScreenData({
+        runner_reps_completed: 0,
+        runner_step_index: 0,
+        runner_start_time: Date.now(),
+        runner_duration_actual_sec: 0,
+      }));
+      const stateId =
+        variant === 'sankalp' ? 'sankalp_embody'
+        : variant === 'practice' ? 'practice_step_runner'
+        : 'free_mantra_chanting';
+      dispatch(loadScreen({ containerId: 'practice_runner', stateId }));
+      webNavigate(_containerToPath('practice_runner', stateId));
+      break;
+    }
+
+    // ----------------------------------------------------------------
+    // NEXT_PRACTICE_STEP — advance step index.
+    // ----------------------------------------------------------------
+    case 'next_practice_step': {
+      const current: number = (screenData.runner_step_index as number) || 0;
+      const steps: any[] = Array.isArray(screenData.practice_steps) ? screenData.practice_steps : [];
+      const next = current + 1;
+      dispatch(setScreenValue({ key: 'runner_step_index', value: next }));
+      if (next >= steps.length && steps.length > 0) {
+        await executeAction({ type: 'complete_runner' }, context);
+      }
+      break;
+    }
+
+    // ----------------------------------------------------------------
+    // RUNNER_EXIT / RUNNER_BACK — clear runner state, go to dashboard.
+    // ----------------------------------------------------------------
+    case 'runner_exit':
+    case 'runner_back': {
+      const runnerKeys = ['runner_active_item', 'runner_source', 'runner_variant', 'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec', 'runner_start_time', 'runner_tz'];
+      runnerKeys.forEach(k => dispatch(setScreenValue({ key: k, value: null })));
+      webNavigate('/en/mitra/dashboard');
+      break;
+    }
+
+    // ----------------------------------------------------------------
+    // RETURN_TO_DASHBOARD — clear runner state, reload dashboard.
+    // ----------------------------------------------------------------
+    case 'return_to_dashboard': {
+      const runnerClearKeys = ['runner_active_item', 'runner_source', 'runner_variant', 'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec', 'runner_start_time', 'runner_tz'];
+      runnerClearKeys.forEach(k => dispatch(setScreenValue({ key: k, value: null })));
+      // Refresh dashboard data non-blocking
+      try {
+        const envelope = await getDashboardView();
+        if (envelope) {
+          dispatch(updateScreenData(ingestDailyView(envelope)));
+        }
+      } catch { /* non-blocking — navigate regardless */ }
+      webNavigate('/en/mitra/dashboard');
       break;
     }
 
@@ -400,7 +512,6 @@ export async function executeAction(action: any, context: ActionContext): Promis
       try {
         const envelope = await getDashboardView();
         if (envelope) {
-          const { ingestDailyView } = await import('./v3Ingest');
           const flat = ingestDailyView(envelope);
           dispatch(updateScreenData(flat));
           if (WEB_ENV.isDev) {

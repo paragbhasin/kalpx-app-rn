@@ -1,6 +1,6 @@
 /**
- * BlockRenderer — Phase 5 + Phase 6 (onboarding blocks).
- * Real implementations for proof + onboarding blocks.
+ * BlockRenderer — Phase 5 + Phase 6 (onboarding) + Phase 7 (dashboard) + Phase 8 (runner).
+ * Real implementations for proof + onboarding + dashboard + triad runner blocks.
  * Everything else renders UnimplementedBlock with visible type label.
  */
 
@@ -14,6 +14,12 @@ import { GuidanceModePickerBlock } from '../components/blocks/GuidanceModePicker
 import { FirstRecognitionBlock } from '../components/blocks/FirstRecognitionBlock';
 import { PathEmergesBlock } from '../components/blocks/PathEmergesBlock';
 import { NewDashboardBodyBlock } from '../components/blocks/NewDashboardBodyBlock';
+import { MantraDisplayBlock } from '../components/blocks/MantraDisplayBlock';
+import { RepCounterBlock } from '../components/blocks/RepCounterBlock';
+import { AudioPlayerBlock } from '../components/blocks/AudioPlayerBlock';
+import { SankalpHoldBlock } from '../components/blocks/SankalpHoldBlock';
+import { PracticeTimerBlock } from '../components/blocks/PracticeTimerBlock';
+import { CompletionReturnBlock } from '../components/blocks/CompletionReturnBlock';
 import { UnimplementedBlock } from '../components/blocks/UnimplementedBlock';
 
 interface BlockRendererProps {
@@ -61,6 +67,22 @@ export function BlockRenderer({ block, screenData, onAction }: BlockRendererProp
       return <PathEmergesBlock block={block} screenData={screenData} />;
     case 'new_dashboard_body':
       return <NewDashboardBodyBlock block={block} screenData={screenData} onAction={onAction} />;
+
+    // ── Phase 8: Runner blocks ────────────────────────────────────────
+    case 'mantra_display':
+    case 'mantra_runner_display':
+      return <MantraDisplayBlock block={block} screenData={screenData} />;
+    case 'rep_counter':
+      return <RepCounterBlock block={block} screenData={screenData} onAction={onAction} />;
+    case 'audio_player':
+      return <AudioPlayerBlock block={block} screenData={screenData} />;
+    case 'sankalp_hold':
+      return <SankalpHoldBlock block={block} screenData={screenData} onAction={onAction} />;
+    case 'practice_timer':
+      return <PracticeTimerBlock block={block} screenData={screenData} onAction={onAction} />;
+    case 'completion_return':
+      return <CompletionReturnBlock block={block} screenData={screenData} onAction={onAction} />;
+
     default:
       return <UnimplementedBlock block={block} />;
   }

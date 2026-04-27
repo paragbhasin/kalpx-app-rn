@@ -42,7 +42,7 @@ beforeEach(() => {
 });
 
 describe('start_runner', () => {
-  it('navigates to offering_reveal with runner context set', async () => {
+  it('navigates to practice_runner (free_mantra_chanting) for mantra variant', async () => {
     const ctx = makeContext({ journey_id: 1, day_number: 3 });
     await executeAction(
       {
@@ -55,7 +55,7 @@ describe('start_runner', () => {
       },
       ctx,
     );
-    expect(webNavigate).toHaveBeenCalledWith(expect.stringContaining('offering_reveal'));
+    expect(webNavigate).toHaveBeenCalledWith(expect.stringContaining('free_mantra_chanting'));
   });
 
   it('does not navigate when item_id is missing', async () => {

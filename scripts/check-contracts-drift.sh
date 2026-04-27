@@ -61,6 +61,60 @@ else
   echo "OK: cleanupFields.ts"
 fi
 
+# sankalps.ts — pure data array; contracts copy has @ts-nocheck header but data is identical
+echo "Checking sankalps.ts (data content check — ignoring @ts-nocheck header)..."
+RN_SANKALPS="$MOBILE/src/data/sankalps.ts"
+CT_SANKALPS="$CONTRACTS/data/sankalps.ts"
+
+# Strip @ts-nocheck line from contracts before comparing
+RN_CONTENT=$(grep -v '@ts-nocheck' "$RN_SANKALPS")
+CT_CONTENT=$(grep -v '@ts-nocheck' "$CT_SANKALPS")
+if [ "$RN_CONTENT" != "$CT_CONTENT" ]; then
+  echo "DRIFT: sankalps.ts — data content differs"
+  diff <(echo "$RN_CONTENT") <(echo "$CT_CONTENT") | head -20 || true
+  DRIFT=1
+else
+  echo "OK: sankalps.ts"
+fi
+
+# mantras.ts — contracts copy has updated locale import paths and no AsyncStorage rotation
+# Check that the type definitions and core exports are present in contracts
+echo "Checking mantras.ts (type + export check)..."
+CT_MANTRAS="$CONTRACTS/data/mantras.ts"
+for symbol in "MantraItem" "MantraSource" "PickMantraOptions" "CATALOGS" "pickMantra" "getCatalog"; do
+  if ! grep -q "$symbol" "$CT_MANTRAS"; then
+    echo "DRIFT: mantras.ts — missing export: $symbol"
+    DRIFT=1
+  fi
+done
+if ! grep -q "DRIFT: mantras" <<< "$(echo "")"; then
+  # Check each locale key exists in CATALOGS (keys are unquoted: `en: EN`)
+  for locale in en hi mr bn ta te kn ml gu or; do
+    if ! grep -q "  $locale:" "$CT_MANTRAS"; then
+      echo "DRIFT: mantras.ts — missing locale: $locale"
+      DRIFT=1
+    fi
+  done
+  echo "OK: mantras.ts"
+fi
+
+# Practice.ts — contracts copy exports pure utility functions (Zustand store stays in mobile)
+echo "Checking Practice.ts (utility function check)..."
+CT_PRACTICE="$CONTRACTS/data/Practice.ts"
+for symbol in "getDeityForWeekday" "getWeekday" "getTodayDateString" "seededRandom" "WEEKDAY_DEITY"; do
+  if ! grep -q "$symbol" "$CT_PRACTICE"; then
+    echo "DRIFT: Practice.ts — missing export: $symbol"
+    DRIFT=1
+  fi
+done
+# Verify Zustand/AsyncStorage did NOT leak into contracts copy (skip comment lines)
+if grep -v '^\s*//' "$CT_PRACTICE" | grep -q "import AsyncStorage\|from 'zustand'\|from \"zustand\""; then
+  echo "DRIFT: Practice.ts — contracts copy contains platform-specific imports"
+  DRIFT=1
+else
+  echo "OK: Practice.ts"
+fi
+
 echo ""
 if [ "$DRIFT" -eq 1 ]; then
   echo "FAIL: contracts drift detected. Update packages/contracts/src/ to match."

@@ -2,5 +2,7 @@
 export * from './allContainers.js';
 export * from './cleanupFields';
 export * from './containerRegistry';
-// data/mantras.ts, sankalps.ts, Practice.ts deferred — contain AsyncStorage
-// helpers that need to be separated from pure data before they can be shared.
+export * from './blockTypeRegistry';
+export * from './data/sankalps';
+export * from './data/mantras';
+export * from './data/Practice';

@@ -54,3 +54,14 @@ export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>;
 export type ClassBookingInput = z.infer<typeof classBookingSchema>;
 export type CommunityPostInput = z.infer<typeof communityPostSchema>;
 export type CommunityCommentInput = z.infer<typeof communityCommentSchema>;
+
+// Wire: POST /interests/ with type: "retreats"
+export const retreatInterestSchema = z.object({
+  interests: z.array(z.string()).min(1, 'Select at least one interest'),
+  locations: z.array(z.string()).min(1, 'Select at least one location'),
+  userCity: z.string().optional(),
+  duration: z.enum(['3_days', '7_days', '10_plus_days']),
+  experience: z.enum(['essencial', 'comfort', 'premium']),
+  spiritualIntent: z.string().max(500).optional(),
+});
+export type RetreatsInterestInput = z.infer<typeof retreatInterestSchema>;

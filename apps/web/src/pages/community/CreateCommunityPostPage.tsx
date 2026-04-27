@@ -61,7 +61,7 @@ export function CreateCommunityPostPage() {
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '24px 16px 60px' }}>
         <button
           onClick={() => navigate('/en/community')}
-          style={{ background: 'none', border: 'none', color: '#b06840', fontSize: 14, cursor: 'pointer', padding: 0, marginBottom: 20 }}
+          style={{ background: 'none', border: 'none', color: 'var(--kalpx-cta)', fontSize: 14, cursor: 'pointer', padding: 0, marginBottom: 20 }}
         >
           ← Community
         </button>
@@ -115,7 +115,7 @@ export function CreateCommunityPostPage() {
             disabled={submitting || !content.trim()}
             style={{
               padding: '14px', borderRadius: 12,
-              background: submitting || !content.trim() ? '#c0a07a' : '#b06840',
+              background: submitting || !content.trim() ? 'var(--kalpx-cta-dark)' : 'var(--kalpx-cta)',
               color: '#fff', border: 'none', fontSize: 15, fontWeight: 600,
               cursor: submitting || !content.trim() ? 'not-allowed' : 'pointer',
             }}
@@ -131,8 +131,8 @@ export function CreateCommunityPostPage() {
 const inputStyle: React.CSSProperties = {
   width: '100%', boxSizing: 'border-box',
   padding: '11px 14px', borderRadius: 10,
-  border: '1.5px solid #f0e8d8', background: '#fff',
-  fontSize: 14, color: '#2d1a0e', outline: 'none',
+  border: '1.5px solid var(--kalpx-border-gold)', background: 'var(--kalpx-card-bg)',
+  fontSize: 14, color: 'var(--kalpx-text)', outline: 'none',
 };
 
 const errorStyle: React.CSSProperties = {

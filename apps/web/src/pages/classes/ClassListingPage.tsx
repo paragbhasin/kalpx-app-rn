@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { ClassCard } from '../../components/classes/ClassCard';
 import { ClassCardSkeleton } from '../../components/classes/ClassLoadingSkeleton';
-import { ClassEmptyState } from '../../components/classes/ClassEmptyState';
 import { getClasses } from '../../engine/classApi';
 import type { ClassListing } from '@kalpx/types';
 import { WEB_ENV } from '../../lib/env';
+import { AppShell, PageContainer, EmptyState } from '../../components/ui';
+import { Header } from '../../components/layout/Header';
 
 export function ClassListingPage() {
   const [classes, setClasses] = useState<ClassListing[]>([]);
@@ -28,17 +29,18 @@ export function ClassListingPage() {
   }, []);
 
   return (
-    <div style={{ minHeight: '100dvh', background: '#FFF8EF' }}>
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: '0 0 40px' }}>
+    <AppShell>
+      <Header />
+      <PageContainer mode="wide" pt={28} pb={40} px={16}>
         {/* Header */}
-        <div style={{ padding: '28px 16px 16px' }}>
-          <p style={{ fontSize: 13, color: '#b06840', fontWeight: 600, marginBottom: 4 }}>KalpX</p>
-          <h1 style={{ fontSize: 26, fontWeight: 800, color: '#2d1a0e', marginBottom: 4 }}>Classes</h1>
-          <p style={{ fontSize: 14, color: '#7a5c3a' }}>Learn with experienced teachers</p>
+        <div style={{ paddingBottom: 16 }}>
+          <p style={{ fontSize: 13, color: 'var(--kalpx-cta)', fontWeight: 600, marginBottom: 4 }}>KalpX</p>
+          <h1 style={{ fontSize: 26, fontWeight: 800, color: 'var(--kalpx-text)', marginBottom: 4 }}>Classes</h1>
+          <p style={{ fontSize: 14, color: 'var(--kalpx-text-soft)' }}>Learn with experienced teachers</p>
         </div>
 
         {/* Content */}
-        <div style={{ padding: '0 16px' }}>
+        <div>
           {loading && (
             <>
               <ClassCardSkeleton />
@@ -48,28 +50,18 @@ export function ClassListingPage() {
           )}
 
           {!loading && error && (
-            <div
-              style={{
-                padding: '16px 20px',
-                borderRadius: 12,
-                background: '#fff1f0',
-                border: '1px solid #fca5a5',
-                marginBottom: 12,
-              }}
-            >
-              <p style={{ color: '#b91c1c', fontSize: 14 }}>{error}</p>
-            </div>
+            <EmptyState icon="⚠️" message={error} />
           )}
 
           {!loading && !error && classes.length === 0 && (
-            <ClassEmptyState />
+            <EmptyState icon="🪔" message="No classes available right now." />
           )}
 
           {!loading && !error && classes.map((cls) => (
             <ClassCard key={cls.id} cls={cls} />
           ))}
         </div>
-      </div>
-    </div>
+      </PageContainer>
+    </AppShell>
   );
 }

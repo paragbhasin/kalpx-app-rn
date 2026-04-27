@@ -143,7 +143,7 @@ export function ClassBookingPage() {
             style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               background: trialSelected ? '#fdf1e3' : '#fff',
-              border: `1.5px solid ${trialSelected ? '#b06840' : '#f0e8d8'}`,
+              border: `1.5px solid ${trialSelected ? 'var(--kalpx-cta)' : 'var(--kalpx-border-gold)'}`,
               borderRadius: 12, padding: '14px 16px', marginBottom: 20, cursor: 'pointer',
             }}
           >
@@ -156,7 +156,7 @@ export function ClassBookingPage() {
             </div>
             <div style={{
               width: 22, height: 22, borderRadius: 11,
-              background: trialSelected ? '#b06840' : '#f0e8d8',
+              background: trialSelected ? 'var(--kalpx-cta)' : 'var(--kalpx-border-gold)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               {trialSelected && <span style={{ color: '#fff', fontSize: 13, lineHeight: 1 }}>✓</span>}
@@ -177,7 +177,7 @@ export function ClassBookingPage() {
                   onClick={() => setSelectedSlot(slot)}
                   style={{
                     padding: '12px 16px', borderRadius: 10, cursor: 'pointer',
-                    border: `1.5px solid ${selectedSlot?.start_utc === slot.start_utc ? '#b06840' : '#f0e8d8'}`,
+                    border: `1.5px solid ${selectedSlot?.start_utc === slot.start_utc ? 'var(--kalpx-cta)' : 'var(--kalpx-border-gold)'}`,
                     background: selectedSlot?.start_utc === slot.start_utc ? '#fdf1e3' : '#fff',
                     fontSize: 14, color: '#2d1a0e', fontWeight: selectedSlot?.start_utc === slot.start_utc ? 600 : 400,
                   }}
@@ -203,7 +203,7 @@ export function ClassBookingPage() {
             style={{
               width: '100%', boxSizing: 'border-box',
               padding: '10px 14px', borderRadius: 10,
-              border: '1.5px solid #f0e8d8', background: '#fff',
+              border: '1.5px solid var(--kalpx-border-gold)', background: '#fff',
               fontSize: 14, color: '#2d1a0e', resize: 'vertical', outline: 'none',
             }}
           />
@@ -220,7 +220,7 @@ export function ClassBookingPage() {
       <div style={{
         position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
         width: '100%', maxWidth: 480,
-        background: '#fff', borderTop: '1px solid #f0e8d8',
+        background: '#fff', borderTop: '1px solid var(--kalpx-border-gold)',
         padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         zIndex: 100,
       }}>
@@ -230,7 +230,7 @@ export function ClassBookingPage() {
           disabled={!selectedSlot || submitting}
           style={{
             padding: '12px 24px', borderRadius: 12,
-            background: !selectedSlot || submitting ? '#c0a07a' : '#b06840',
+            background: !selectedSlot || submitting ? 'var(--kalpx-cta-dark)' : 'var(--kalpx-cta)',
             color: '#fff', border: 'none',
             fontSize: 15, fontWeight: 600,
             cursor: !selectedSlot || submitting ? 'not-allowed' : 'pointer',
@@ -245,6 +245,6 @@ export function ClassBookingPage() {
 }
 
 const backBtn: React.CSSProperties = {
-  background: 'none', border: 'none', color: '#b06840',
+  background: 'none', border: 'none', color: 'var(--kalpx-cta)',
   fontSize: 14, cursor: 'pointer', padding: 0,
 };

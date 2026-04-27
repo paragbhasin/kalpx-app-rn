@@ -11,6 +11,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthLayout } from '../../components/AuthLayout';
 import { useAuth } from '../../hooks/useAuth';
+import { KalpXButton } from '../../components/ui';
 
 type Step = 'email' | 'otp' | 'register';
 
@@ -72,9 +73,9 @@ export function SignupPage() {
         <form onSubmit={handleStep1} style={formStyle}>
           <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" style={inputStyle} />
           {error && <p style={errorStyle}>{error}</p>}
-          <button type="submit" disabled={loading} style={btnStyle(loading)}>
-            {loading ? 'Sending…' : 'Continue'}
-          </button>
+          <KalpXButton type="submit" disabled={loading} loading={loading} loadingText="Sending…" fullWidth>
+            Continue
+          </KalpXButton>
           <div style={linkRow}>
             Already have an account? <Link to="/login" style={linkStyle}>Sign in</Link>
           </div>
@@ -83,7 +84,7 @@ export function SignupPage() {
 
       {step === 'otp' && (
         <form onSubmit={handleStep2} style={formStyle}>
-          <p style={{ color: '#888', fontSize: 14, margin: 0 }}>Enter the code sent to <strong>{email}</strong></p>
+          <p style={{ color: 'var(--kalpx-text-soft)', fontSize: 14, margin: 0 }}>Enter the code sent to <strong>{email}</strong></p>
           <input
             type="text"
             inputMode="numeric"
@@ -95,10 +96,10 @@ export function SignupPage() {
             autoFocus
           />
           {error && <p style={errorStyle}>{error}</p>}
-          <button type="submit" disabled={loading} style={btnStyle(loading)}>
-            {loading ? 'Verifying…' : 'Verify'}
-          </button>
-          <button type="button" onClick={() => { setStep('email'); setOtp(''); setError(''); }} style={{ background: 'none', color: '#888', fontSize: 13, padding: '8px 0' }}>
+          <KalpXButton type="submit" disabled={loading} loading={loading} loadingText="Verifying…" fullWidth>
+            Verify
+          </KalpXButton>
+          <button type="button" onClick={() => { setStep('email'); setOtp(''); setError(''); }} style={{ background: 'none', color: 'var(--kalpx-text-muted)', fontSize: 13, padding: '8px 0' }}>
             ← Change email
           </button>
         </form>
@@ -113,9 +114,9 @@ export function SignupPage() {
           <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" style={inputStyle} />
           <input type="password" placeholder="Confirm password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} autoComplete="new-password" style={inputStyle} />
           {error && <p style={errorStyle}>{error}</p>}
-          <button type="submit" disabled={loading} style={btnStyle(loading)}>
-            {loading ? 'Creating account…' : 'Create account'}
-          </button>
+          <KalpXButton type="submit" disabled={loading} loading={loading} loadingText="Creating account…" fullWidth>
+            Create account
+          </KalpXButton>
         </form>
       )}
     </AuthLayout>
@@ -123,8 +124,7 @@ export function SignupPage() {
 }
 
 const formStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: 16 };
-const inputStyle: React.CSSProperties = { width: '100%', padding: '12px 16px', background: '#1a1a1a', border: '1px solid #333', borderRadius: 8, color: '#f0ede8', fontSize: 16, outline: 'none', boxSizing: 'border-box' };
-const errorStyle: React.CSSProperties = { color: '#e06060', fontSize: 12, marginTop: 0 };
-const linkRow: React.CSSProperties = { textAlign: 'center', fontSize: 14, color: '#888' };
-const linkStyle: React.CSSProperties = { color: '#c9a96e' };
-const btnStyle = (loading: boolean): React.CSSProperties => ({ padding: '14px', background: loading ? '#7a6640' : '#c9a96e', color: '#0a0a0a', borderRadius: 8, fontWeight: 600, fontSize: 16 });
+const inputStyle: React.CSSProperties = { width: '100%', padding: '12px 16px', background: 'var(--kalpx-bg)', border: '1px solid var(--kalpx-border)', borderRadius: 8, color: 'var(--kalpx-text)', fontSize: 16, outline: 'none', boxSizing: 'border-box' };
+const errorStyle: React.CSSProperties = { color: '#c0392b', fontSize: 12, marginTop: 0 };
+const linkRow: React.CSSProperties = { textAlign: 'center', fontSize: 14, color: 'var(--kalpx-text-muted)' };
+const linkStyle: React.CSSProperties = { color: 'var(--kalpx-cta)' };

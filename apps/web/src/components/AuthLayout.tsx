@@ -13,14 +13,43 @@ export function AuthLayout({ children, title }: Props) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#0a0a0a',
-        color: '#f0ede8',
+        background: 'var(--kalpx-bg)',
+        color: 'var(--kalpx-text)',
       }}
     >
-      <div style={{ width: '100%', maxWidth: 400, padding: '32px 24px' }}>
+      <div
+        style={{
+          width: '100%',
+          maxWidth: 400,
+          padding: '32px 24px',
+          boxSizing: 'border-box',
+        }}
+      >
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <span style={{ fontSize: 20, letterSpacing: 3, color: '#c9a96e' }}>KALPX</span>
-          <h2 style={{ fontWeight: 300, fontSize: 22, marginTop: 8, marginBottom: 0 }}>{title}</h2>
+          <span
+            style={{
+              fontSize: 14,
+              letterSpacing: 4,
+              color: 'var(--kalpx-gold)',
+              fontWeight: 700,
+              fontFamily: 'var(--kalpx-font-sans)',
+              textTransform: 'uppercase',
+            }}
+          >
+            KALPX
+          </span>
+          <h2
+            style={{
+              fontFamily: 'var(--kalpx-font-serif)',
+              fontWeight: 400,
+              fontSize: 24,
+              color: 'var(--kalpx-text)',
+              marginTop: 8,
+              marginBottom: 0,
+            }}
+          >
+            {title}
+          </h2>
         </div>
         {children}
       </div>

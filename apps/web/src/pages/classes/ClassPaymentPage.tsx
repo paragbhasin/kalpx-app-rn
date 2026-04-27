@@ -62,7 +62,7 @@ export function ClassPaymentPage() {
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '28px 16px 60px' }}>
         <button
           onClick={() => navigate(`/en/classes/${slug}/book`)}
-          style={{ background: 'none', border: 'none', color: '#b06840', fontSize: 14, cursor: 'pointer', padding: 0, marginBottom: 24 }}
+          style={{ background: 'none', border: 'none', color: 'var(--kalpx-cta)', fontSize: 14, cursor: 'pointer', padding: 0, marginBottom: 24 }}
         >
           ← Back
         </button>
@@ -89,7 +89,7 @@ export function ClassPaymentPage() {
         )}
 
         {!loading && !error && clientSecret && (
-          <div style={{ background: '#fff', borderRadius: 14, padding: '20px 16px', border: '1px solid #f0e8d8' }}>
+          <div style={{ background: 'var(--kalpx-card-bg)', borderRadius: 14, padding: '20px 16px', border: '1px solid var(--kalpx-border-gold)' }}>
             <Elements
               stripe={stripePromise}
               options={{
@@ -97,7 +97,7 @@ export function ClassPaymentPage() {
                 appearance: {
                   theme: 'stripe',
                   variables: {
-                    colorPrimary: '#b06840',
+                    colorPrimary: '#c89a47',
                     borderRadius: '8px',
                     fontFamily: 'system-ui, sans-serif',
                   },

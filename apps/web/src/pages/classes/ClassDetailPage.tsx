@@ -50,7 +50,7 @@ export function ClassDetailPage() {
         <div style={{ maxWidth: 480, margin: '0 auto', padding: '28px 16px' }}>
           <button
             onClick={() => navigate('/en/classes')}
-            style={{ background: 'none', border: 'none', color: '#b06840', fontSize: 14, cursor: 'pointer', padding: 0, marginBottom: 16 }}
+            style={{ background: 'none', border: 'none', color: 'var(--kalpx-cta)', fontSize: 14, cursor: 'pointer', padding: 0, marginBottom: 16 }}
           >
             ← Back to Classes
           </button>
@@ -90,14 +90,14 @@ export function ClassDetailPage() {
           {!cls.cover_media?.url && (
             <button
               onClick={() => navigate('/en/classes')}
-              style={{ background: 'none', border: 'none', color: '#b06840', fontSize: 14, cursor: 'pointer', padding: 0, marginBottom: 12 }}
+              style={{ background: 'none', border: 'none', color: 'var(--kalpx-cta)', fontSize: 14, cursor: 'pointer', padding: 0, marginBottom: 12 }}
             >
               ← Back to Classes
             </button>
           )}
 
           {cls.category && (
-            <p style={{ fontSize: 11, color: '#b06840', fontWeight: 600, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+            <p style={{ fontSize: 11, color: 'var(--kalpx-cta)', fontWeight: 600, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
               {cls.category}
             </p>
           )}
@@ -159,7 +159,7 @@ export function ClassDetailPage() {
               <p style={{ fontSize: 13, fontWeight: 700, color: '#2d1a0e', marginBottom: 8 }}>What you'll learn</p>
               {cls.learning_outcomes.map((o, i) => (
                 <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 4 }}>
-                  <span style={{ color: '#b06840', flexShrink: 0 }}>✓</span>
+                  <span style={{ color: 'var(--kalpx-cta)', flexShrink: 0 }}>✓</span>
                   <p style={{ fontSize: 13, color: '#3a2010', lineHeight: 1.5 }}>{o}</p>
                 </div>
               ))}
@@ -167,7 +167,7 @@ export function ClassDetailPage() {
           )}
 
           {cls.tutor?.bio && (
-            <div style={{ background: '#fdf8ef', borderRadius: 12, padding: '14px 16px', marginBottom: 20 }}>
+            <div style={{ background: 'var(--kalpx-chip-bg)', borderRadius: 12, padding: '14px 16px', marginBottom: 20 }}>
               <p style={{ fontSize: 13, fontWeight: 700, color: '#2d1a0e', marginBottom: 6 }}>About the teacher</p>
               <p style={{ fontSize: 13, color: '#7a5c3a', lineHeight: 1.6 }}>{cls.tutor.bio}</p>
             </div>
@@ -191,7 +191,7 @@ export function ClassDetailPage() {
               style={{
                 padding: '12px 24px',
                 borderRadius: 12,
-                background: '#b06840',
+                background: 'var(--kalpx-cta)',
                 color: '#fff',
                 border: 'none',
                 fontSize: 15,

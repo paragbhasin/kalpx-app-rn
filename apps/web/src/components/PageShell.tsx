@@ -1,4 +1,5 @@
 import React from 'react';
+import { AppShell } from './ui/AppShell';
 
 interface PageShellProps {
   children: React.ReactNode;
@@ -7,18 +8,13 @@ interface PageShellProps {
 
 export function PageShell({ children, centered = false }: PageShellProps) {
   return (
-    <div
+    <AppShell
       style={{
-        minHeight: '100dvh',
-        display: 'flex',
-        flexDirection: 'column',
         alignItems: centered ? 'center' : undefined,
         justifyContent: centered ? 'center' : undefined,
-        background: '#0a0a0a',
-        color: '#f0ede8',
       }}
     >
       {children}
-    </div>
+    </AppShell>
   );
 }

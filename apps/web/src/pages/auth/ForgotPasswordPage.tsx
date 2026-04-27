@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthLayout } from '../../components/AuthLayout';
 import { useAuth } from '../../hooks/useAuth';
+import { KalpXButton } from '../../components/ui';
 
 export function ForgotPasswordPage() {
   const { forgotPassword } = useAuth();
@@ -30,7 +31,7 @@ export function ForgotPasswordPage() {
   return (
     <AuthLayout title="Reset password">
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <p style={{ color: '#888', fontSize: 14, margin: 0, lineHeight: 1.6 }}>
+        <p style={{ color: 'var(--kalpx-text-soft)', fontSize: 14, margin: 0, lineHeight: 1.6 }}>
           Enter your email and we'll send you a reset code.
         </p>
         <input
@@ -41,23 +42,12 @@ export function ForgotPasswordPage() {
           autoComplete="email"
           style={inputStyle}
         />
-        {error && <p style={{ color: '#e06060', fontSize: 12 }}>{error}</p>}
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            padding: '14px',
-            background: loading ? '#7a6640' : '#c9a96e',
-            color: '#0a0a0a',
-            borderRadius: 8,
-            fontWeight: 600,
-            fontSize: 16,
-          }}
-        >
-          {loading ? 'Sending…' : 'Send reset code'}
-        </button>
+        {error && <p style={{ color: '#c0392b', fontSize: 12 }}>{error}</p>}
+        <KalpXButton type="submit" disabled={loading} loading={loading} loadingText="Sending…" fullWidth>
+          Send reset code
+        </KalpXButton>
         <div style={{ textAlign: 'center', fontSize: 14 }}>
-          <Link to="/login" style={{ color: '#c9a96e' }}>← Back to sign in</Link>
+          <Link to="/login" style={{ color: 'var(--kalpx-cta)' }}>← Back to sign in</Link>
         </div>
       </form>
     </AuthLayout>
@@ -67,10 +57,10 @@ export function ForgotPasswordPage() {
 const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '12px 16px',
-  background: '#1a1a1a',
-  border: '1px solid #333',
+  background: 'var(--kalpx-bg)',
+  border: '1px solid var(--kalpx-border)',
   borderRadius: 8,
-  color: '#f0ede8',
+  color: 'var(--kalpx-text)',
   fontSize: 16,
   outline: 'none',
   boxSizing: 'border-box',

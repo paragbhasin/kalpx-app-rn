@@ -90,7 +90,7 @@ export function CommunityPostDetailPage() {
           <CommunityAuthorRow author={author} timestamp={post.created_at} />
 
           {post.community_name && (
-            <p style={{ fontSize: 11, color: '#b06840', fontWeight: 600, marginTop: 8 }}>
+            <p style={{ fontSize: 11, color: 'var(--kalpx-cta)', fontWeight: 600, marginTop: 8 }}>
               {post.community_name}
             </p>
           )}
@@ -147,6 +147,6 @@ export function CommunityPostDetailPage() {
 }
 
 const backBtn: React.CSSProperties = {
-  background: 'none', border: 'none', color: '#b06840',
+  background: 'none', border: 'none', color: 'var(--kalpx-cta)',
   fontSize: 14, cursor: 'pointer', padding: 0,
 };

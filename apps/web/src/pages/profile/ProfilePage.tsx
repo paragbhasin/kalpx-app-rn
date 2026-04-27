@@ -11,6 +11,7 @@ import { getUserProfile } from '../../lib/userApi';
 import { getUserPreferences } from '../../engine/mitraApi';
 import { WEB_ENV } from '../../lib/env';
 import type { UserProfile } from '../../types/auth';
+import { AppShell, SectionCard, KalpXButton } from '../../components/ui';
 
 const GUIDANCE_MODE_LABELS: Record<string, string> = {
   guided: 'Guided',
@@ -51,122 +52,80 @@ export function ProfilePage() {
     : null;
 
   return (
-    <div style={{ minHeight: '100dvh', background: '#fdf8ef', color: '#1a1a0a' }}>
+    <AppShell>
       <Header />
 
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '32px 20px 80px' }}>
         {/* Identity */}
-        <section
-          data-testid="profile-identity"
-          style={{
-            background: '#fff',
-            borderRadius: 12,
-            padding: '20px',
-            border: '1px solid #e8d5a0',
-            marginBottom: 16,
-          }}
-        >
+        <SectionCard data-testid="profile-identity">
           {loadingProfile ? (
-            <p style={{ color: '#9A8C78', fontSize: 14 }}>Loading profile…</p>
+            <p style={{ color: 'var(--kalpx-text-muted)', fontSize: 14 }}>Loading profile…</p>
           ) : profile ? (
             <>
-              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#b08840', textTransform: 'uppercase', marginBottom: 8 }}>
+              <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'var(--kalpx-gold)', textTransform: 'uppercase', marginBottom: 8 }}>
                 Account
               </p>
               {displayName && (
-                <p style={{ fontSize: 18, fontWeight: 700, color: '#1a1a0a', marginBottom: 4 }} data-testid="profile-name">
+                <p style={{ fontSize: 18, fontWeight: 700, color: 'var(--kalpx-text)', marginBottom: 4 }} data-testid="profile-name">
                   {displayName}
                 </p>
               )}
-              <p style={{ fontSize: 14, color: '#9A8C78' }} data-testid="profile-email">
+              <p style={{ fontSize: 14, color: 'var(--kalpx-text-muted)' }} data-testid="profile-email">
                 {profile.email}
               </p>
             </>
           ) : (
-            <p style={{ color: '#9A8C78', fontSize: 14 }}>Could not load profile.</p>
+            <p style={{ color: 'var(--kalpx-text-muted)', fontSize: 14 }}>Could not load profile.</p>
           )}
-        </section>
+        </SectionCard>
 
         {/* Preferences */}
         {prefs && (
-          <section
-            data-testid="profile-preferences"
-            style={{
-              background: '#fff',
-              borderRadius: 12,
-              padding: '20px',
-              border: '1px solid #e8d5a0',
-              marginBottom: 16,
-            }}
-          >
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#b08840', textTransform: 'uppercase', marginBottom: 12 }}>
+          <SectionCard data-testid="profile-preferences">
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'var(--kalpx-gold)', textTransform: 'uppercase', marginBottom: 12 }}>
               Mitra Preferences
             </p>
             {prefs.guidance_mode && (
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                <p style={{ fontSize: 14, color: '#4a3318' }}>Guidance mode</p>
-                <p style={{ fontSize: 14, fontWeight: 600, color: '#1a1a0a' }} data-testid="profile-guidance-mode">
+                <p style={{ fontSize: 14, color: 'var(--kalpx-text-soft)' }}>Guidance mode</p>
+                <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--kalpx-text)' }} data-testid="profile-guidance-mode">
                   {GUIDANCE_MODE_LABELS[prefs.guidance_mode] ?? prefs.guidance_mode}
                 </p>
               </div>
             )}
             {typeof prefs.voice_consent_given === 'boolean' && (
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
-                <p style={{ fontSize: 14, color: '#4a3318' }}>Voice notes</p>
-                <p style={{ fontSize: 14, fontWeight: 600, color: '#1a1a0a' }} data-testid="profile-voice-consent">
+                <p style={{ fontSize: 14, color: 'var(--kalpx-text-soft)' }}>Voice notes</p>
+                <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--kalpx-text)' }} data-testid="profile-voice-consent">
                   {prefs.voice_consent_given ? 'Enabled' : 'Disabled'}
                 </p>
               </div>
             )}
-          </section>
+          </SectionCard>
         )}
 
         {/* Navigation */}
-        <section
-          style={{
-            background: '#fff',
-            borderRadius: 12,
-            padding: '16px 20px',
-            border: '1px solid #e8d5a0',
-            marginBottom: 16,
-          }}
-        >
+        <SectionCard p={16}>
           <Link
             to="/en/mitra/dashboard"
             data-testid="profile-dashboard-link"
-            style={{ display: 'block', fontSize: 15, color: '#4a3318', padding: '8px 0', textDecoration: 'none' }}
+            style={{ display: 'block', fontSize: 15, color: 'var(--kalpx-text-soft)', padding: '8px 0', textDecoration: 'none' }}
           >
             ← Back to Mitra
           </Link>
-        </section>
+        </SectionCard>
 
         {/* Logout */}
-        <section
-          style={{
-            background: '#fff',
-            borderRadius: 12,
-            padding: '16px 20px',
-            border: '1px solid #e8d5a0',
-          }}
-        >
-          <button
+        <SectionCard p={16} mb={0}>
+          <KalpXButton
+            variant="destructive"
+            fullWidth
             data-testid="profile-logout-btn"
             onClick={handleLogout}
-            style={{
-              width: '100%',
-              padding: '12px',
-              background: 'none',
-              border: '1px solid #e8d5a0',
-              borderRadius: 8,
-              fontSize: 15,
-              color: '#c0392b',
-              cursor: 'pointer',
-              fontWeight: 600,
-            }}
           >
             Sign out
-          </button>
-        </section>
+          </KalpXButton>
+        </SectionCard>
 
         {/* Dev-only guest UUID debug */}
         {WEB_ENV.isDev && guestUUID && (
@@ -175,6 +134,6 @@ export function ProfilePage() {
           </p>
         )}
       </div>
-    </div>
+    </AppShell>
   );
 }

@@ -5,6 +5,7 @@ import companionStateReducer from './companionStateSlice';
 import preferencesReducer from './preferencesSlice';
 import notificationsReducer from './notificationsSlice';
 import snackBarReducer from './snackBarSlice';
+import notificationsInboxReducer from './notificationsInboxSlice';
 
 export const resetStore = createAction('store/reset');
 
@@ -15,6 +16,7 @@ const combinedReducer = combineReducers({
   preferences: preferencesReducer,
   notifications: notificationsReducer,
   snackBar: snackBarReducer,
+  notificationsInbox: notificationsInboxReducer,
 });
 
 type CombinedState = ReturnType<typeof combinedReducer>;

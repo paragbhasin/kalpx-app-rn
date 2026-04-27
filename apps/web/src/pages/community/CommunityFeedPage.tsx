@@ -48,14 +48,14 @@ export function CommunityFeedPage() {
         {/* Header */}
         <div style={{ padding: '28px 16px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <p style={{ fontSize: 13, color: '#b06840', fontWeight: 600, marginBottom: 2 }}>KalpX</p>
+            <p style={{ fontSize: 13, color: 'var(--kalpx-cta)', fontWeight: 600, marginBottom: 2 }}>KalpX</p>
             <h1 style={{ fontSize: 26, fontWeight: 800, color: '#2d1a0e' }}>Community</h1>
           </div>
           <button
             onClick={() => navigate('/en/community/new')}
             style={{
               padding: '9px 18px', borderRadius: 10,
-              background: '#b06840', color: '#fff',
+              background: 'var(--kalpx-cta)', color: '#fff',
               border: 'none', fontSize: 14, fontWeight: 600, cursor: 'pointer',
             }}
           >

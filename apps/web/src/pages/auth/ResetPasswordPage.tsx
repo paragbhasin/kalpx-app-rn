@@ -7,6 +7,7 @@ import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthLayout } from '../../components/AuthLayout';
 import { useAuth } from '../../hooks/useAuth';
+import { KalpXButton } from '../../components/ui';
 
 export function ResetPasswordPage() {
   const { resetPassword } = useAuth();
@@ -45,22 +46,12 @@ export function ResetPasswordPage() {
     return (
       <AuthLayout title="Password reset">
         <div style={{ textAlign: 'center' }}>
-          <p style={{ color: '#aaa', marginBottom: 24, lineHeight: 1.6 }}>
+          <p style={{ color: 'var(--kalpx-text-soft)', marginBottom: 24, lineHeight: 1.6 }}>
             Your password has been reset successfully.
           </p>
-          <button
-            onClick={() => navigate('/login')}
-            style={{
-              padding: '14px 28px',
-              background: '#c9a96e',
-              color: '#0a0a0a',
-              borderRadius: 8,
-              fontWeight: 600,
-              fontSize: 16,
-            }}
-          >
+          <KalpXButton onClick={() => navigate('/login')}>
             Sign in
-          </button>
+          </KalpXButton>
         </div>
       </AuthLayout>
     );
@@ -69,7 +60,7 @@ export function ResetPasswordPage() {
   return (
     <AuthLayout title="Enter reset code">
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <p style={{ color: '#888', fontSize: 14, margin: 0, lineHeight: 1.6 }}>
+        <p style={{ color: 'var(--kalpx-text-soft)', fontSize: 14, margin: 0, lineHeight: 1.6 }}>
           Enter the code we sent to your email and choose a new password.
         </p>
 
@@ -115,28 +106,23 @@ export function ResetPasswordPage() {
           data-testid="reset-confirm-password"
         />
 
-        {error && <p style={{ color: '#e06060', fontSize: 12 }} data-testid="reset-error">{error}</p>}
+        {error && <p style={{ color: '#c0392b', fontSize: 12 }} data-testid="reset-error">{error}</p>}
 
-        <button
+        <KalpXButton
           type="submit"
           disabled={loading}
+          loading={loading}
+          loadingText="Resetting…"
+          fullWidth
           data-testid="reset-submit-btn"
-          style={{
-            padding: '14px',
-            background: loading ? '#7a6640' : '#c9a96e',
-            color: '#0a0a0a',
-            borderRadius: 8,
-            fontWeight: 600,
-            fontSize: 16,
-          }}
         >
-          {loading ? 'Resetting…' : 'Reset password'}
-        </button>
+          Reset password
+        </KalpXButton>
 
         <div style={{ textAlign: 'center', fontSize: 14, display: 'flex', justifyContent: 'center', gap: 12 }}>
-          <Link to="/forgot-password" style={{ color: '#c9a96e' }}>Resend code</Link>
-          <span style={{ color: '#444' }}>·</span>
-          <Link to="/login" style={{ color: '#c9a96e' }}>Sign in</Link>
+          <Link to="/forgot-password" style={{ color: 'var(--kalpx-cta)' }}>Resend code</Link>
+          <span style={{ color: 'var(--kalpx-text-muted)' }}>·</span>
+          <Link to="/login" style={{ color: 'var(--kalpx-cta)' }}>Sign in</Link>
         </div>
       </form>
     </AuthLayout>
@@ -146,10 +132,10 @@ export function ResetPasswordPage() {
 const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '12px 16px',
-  background: '#1a1a1a',
-  border: '1px solid #333',
+  background: 'var(--kalpx-bg)',
+  border: '1px solid var(--kalpx-border)',
   borderRadius: 8,
-  color: '#f0ede8',
+  color: 'var(--kalpx-text)',
   fontSize: 16,
   outline: 'none',
   boxSizing: 'border-box',

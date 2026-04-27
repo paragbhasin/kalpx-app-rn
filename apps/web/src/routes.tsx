@@ -25,6 +25,8 @@ import { CommunityFeedPage } from './pages/community/CommunityFeedPage';
 import { CommunityPostDetailPage } from './pages/community/CommunityPostDetailPage';
 import { CreateCommunityPostPage } from './pages/community/CreateCommunityPostPage';
 import { ProfilePage } from './pages/profile/ProfilePage';
+import { RetreatsInterestPage } from './pages/retreats/RetreatsInterestPage';
+import { NotificationsPage } from './pages/notifications/NotificationsPage';
 import { RequiresJourney } from './components/RequiresJourney';
 import { RequiresAuth } from './components/RequiresAuth';
 
@@ -84,6 +86,12 @@ export function AppRoutes() {
       <Route path="/en/community/new" element={<CreateCommunityPostPage />} />
       <Route path="/en/community/:postId" element={<CommunityPostDetailPage />} />
       <Route path="/en/profile" element={<RequiresAuth><ProfilePage /></RequiresAuth>} />
+
+      {/* Retreats vertical */}
+      <Route path="/en/retreats" element={<RetreatsInterestPage />} />
+
+      {/* Notifications inbox */}
+      <Route path="/en/notifications" element={<RequiresAuth><NotificationsPage /></RequiresAuth>} />
 
       <Route path="*" element={<Navigate to="/en" replace />} />
     </Routes>

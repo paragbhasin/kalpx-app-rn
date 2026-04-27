@@ -4,18 +4,66 @@
   box-sizing: border-box;
 }
 
+/* ── KalpX Design Tokens as CSS Custom Properties ── */
+:root {
+  /* Backgrounds */
+  --kalpx-bg:            #FFF8EF;
+  --kalpx-card-bg:       #FFFDF7;
+  --kalpx-chip-bg:       #FFF7E8;
+  --kalpx-dark-bg:       #1a1a1a;
+  --kalpx-parchment:     #FAF7F2;
+
+  /* Text */
+  --kalpx-text:          #432104;
+  --kalpx-text-soft:     #6B6155;
+  --kalpx-text-muted:    #8A7D6B;
+  --kalpx-text-faint:    #9A9A9A;
+
+  /* Accents */
+  --kalpx-gold:          #C9A84C;
+  --kalpx-gold-hairline: rgba(212, 160, 23, 0.25);
+  --kalpx-cta:           #c89a47;
+  --kalpx-cta-dark:      #a87a2f;
+  --kalpx-cta-text:      #ffffff;
+
+  /* Borders */
+  --kalpx-border:        #EDE1D3;
+  --kalpx-border-gold:   #eddeb4;
+
+  /* Radius */
+  --kalpx-r-sm:    4px;
+  --kalpx-r-md:    8px;
+  --kalpx-r-lg:    12px;
+  --kalpx-r-xl:    16px;
+  --kalpx-r-2xl:   20px;
+  --kalpx-r-pill:  9999px;
+
+  /* Shadows */
+  --kalpx-shadow-card:   0 1px 4px rgba(67, 33, 4, 0.06);
+  --kalpx-shadow-sheet:  0 -4px 24px rgba(67, 33, 4, 0.12);
+
+  /* Fonts */
+  --kalpx-font-serif: 'Cormorant Garamond', Georgia, serif;
+  --kalpx-font-sans:  'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Spacing */
+  --kalpx-page-px:   16px;
+  --kalpx-page-top:  28px;
+}
+
 html, body {
   margin: 0;
   padding: 0;
-  background: #0a0a0a;
-  color: #f0ede8;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--kalpx-bg);
+  color: var(--kalpx-text);
+  font-family: var(--kalpx-font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
   min-height: 100dvh;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 a {
@@ -29,4 +77,18 @@ button {
   background: none;
   font: inherit;
   color: inherit;
+}
+
+/* Utility classes */
+.font-serif {
+  font-family: var(--kalpx-font-serif);
+}
+.font-sans {
+  font-family: var(--kalpx-font-sans);
+}
+
+/* Shimmer animation for loading skeletons */
+@keyframes kalpx-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }

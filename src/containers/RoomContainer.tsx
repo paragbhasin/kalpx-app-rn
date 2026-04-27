@@ -143,6 +143,16 @@ let roomAmbientRunId = 0;
 let roomContainerLiveCount = 0;
 let pendingRoomAmbientStopTimer: ReturnType<typeof setTimeout> | null = null;
 
+export async function stopRoomAmbientAudio() {
+  roomAmbientRunId += 1;
+  const s = roomAmbientSound;
+  roomAmbientSound = null;
+  roomAmbientIsPlaying = false;
+  if (!s) return;
+  await s.stopAsync().catch(() => {});
+  await s.unloadAsync().catch(() => {});
+}
+
 const RoomContainer: React.FC<Props> = () => {
   const screenData = useScreenStore(
     (s: any) => s.screen?.screenData ?? s.screenData ?? {},

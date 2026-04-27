@@ -26,6 +26,11 @@ import { CheckInRegulationBlock } from '../components/blocks/CheckInRegulationBl
 import { BalancedAckOverlayBlock } from '../components/blocks/BalancedAckOverlayBlock';
 import { VoiceConsentSheetBlock } from '../components/blocks/VoiceConsentSheetBlock';
 import { VoiceNoteSheetBlock } from '../components/blocks/VoiceNoteSheetBlock';
+import { WhyThisL2SheetBlock } from '../components/blocks/WhyThisL2SheetBlock';
+import { WhyThisL3SheetBlock } from '../components/blocks/WhyThisL3SheetBlock';
+import { CheckpointDay7Block } from '../components/blocks/CheckpointDay7Block';
+import { CheckpointDay14Block } from '../components/blocks/CheckpointDay14Block';
+import { CheckpointDay14FinaleBlock } from '../components/blocks/CheckpointDay14FinaleBlock';
 import { UnimplementedBlock } from '../components/blocks/UnimplementedBlock';
 
 interface BlockRendererProps {
@@ -102,6 +107,23 @@ export function BlockRenderer({ block, screenData, onAction }: BlockRendererProp
       return <VoiceConsentSheetBlock block={block} screenData={screenData} onAction={onAction} />;
     case 'voice_note_sheet':
       return <VoiceNoteSheetBlock block={block} screenData={screenData} onAction={onAction} />;
+
+    // ── Phase 10: WhyThis overlays ────────────────────────────────────
+    case 'why_this_l2':
+    case 'why_this_l2_sheet':
+      return <WhyThisL2SheetBlock block={block} screenData={screenData} onAction={onAction} />;
+    case 'why_this_l3':
+    case 'why_this_l3_sheet':
+      return <WhyThisL3SheetBlock block={block} screenData={screenData} onAction={onAction} />;
+
+    // ── Phase 10: Checkpoint blocks ───────────────────────────────────
+    case 'checkpoint_day_7':
+      return <CheckpointDay7Block block={block} screenData={screenData} onAction={onAction} />;
+    case 'checkpoint_day_14':
+      return <CheckpointDay14Block block={block} screenData={screenData} onAction={onAction} />;
+    case 'checkpoint_day_14_finale':
+    case 'cycle_reflection':
+      return <CheckpointDay14FinaleBlock block={block} screenData={screenData} onAction={onAction} />;
 
     default:
       return <UnimplementedBlock block={block} />;

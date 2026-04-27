@@ -18,8 +18,14 @@ import {
   postRoomSacred,
   postTriggerMantras,
   postPranaAcknowledge,
+  getPrinciple,
+  getPrincipleSource,
+  mitraJourneyDay7View,
+  mitraJourneyDay14View,
+  mitraJourneyDay7Decision,
+  mitraJourneyDay14Decision,
 } from './mitraApi';
-import { ingestDailyView } from './v3Ingest';
+import { ingestDailyView, ingestDay7View, ingestDay14View } from './v3Ingest';
 import { webNavigate } from '../lib/webRouter';
 import { WEB_ENV } from '../lib/env';
 
@@ -952,6 +958,143 @@ export async function executeAction(action: any, context: ActionContext): Promis
         room_id: null, room_render_payload: null, room_life_context: null, room_selected_action: null,
       }));
       webNavigate('/en/mitra/dashboard');
+      break;
+    }
+
+    // ================================================================
+    // WHY THIS — L2 / L3 principle overlays
+    // ================================================================
+
+    // OPEN_WHY_THIS_L2 — fetch principle detail, show L2 overlay.
+    case 'open_why_this_l2': {
+      const principleId = action.payload?.principle_id ?? action.principle_id ?? screenData.why_this?.principle_id;
+      if (!principleId) {
+        if (WEB_ENV.isDev) console.warn('[actionExecutor] open_why_this_l2: no principle_id', action);
+        break;
+      }
+      dispatch(setSubmitting(true));
+      try {
+        void apiTrackEvent('why_this_l2_opened', {
+          journey_id: screenData.journey_id,
+          day_number: screenData.day_number || 1,
+          meta: { principle_id: principleId },
+        });
+        const principle = await getPrinciple(principleId);
+        if (principle) {
+          dispatch(updateScreenData({
+            why_this_principle: principle,
+            why_this_overlay_level: 'l2',
+          }));
+        }
+      } finally {
+        dispatch(setSubmitting(false));
+      }
+      break;
+    }
+
+    // OPEN_WHY_THIS_L3 — fetch principle source, show L3 overlay.
+    case 'open_why_this_l3': {
+      const principleId = action.payload?.principle_id ?? action.principle_id ?? screenData.why_this?.principle_id;
+      if (!principleId) {
+        if (WEB_ENV.isDev) console.warn('[actionExecutor] open_why_this_l3: no principle_id', action);
+        break;
+      }
+      dispatch(setSubmitting(true));
+      try {
+        void apiTrackEvent('why_this_l3_opened', {
+          journey_id: screenData.journey_id,
+          day_number: screenData.day_number || 1,
+          meta: { principle_id: principleId },
+        });
+        const source = await getPrincipleSource(principleId);
+        if (source) {
+          dispatch(updateScreenData({
+            why_this_source: source,
+            why_this_overlay_level: 'l3',
+          }));
+        }
+      } finally {
+        dispatch(setSubmitting(false));
+      }
+      break;
+    }
+
+    // DISMISS_WHY_THIS — clear overlay levels and principle data.
+    case 'dismiss_why_this': {
+      dispatch(updateScreenData({
+        why_this_overlay_level: null,
+        why_this_principle: null,
+        why_this_source: null,
+      }));
+      break;
+    }
+
+    // ================================================================
+    // CHECKPOINTS — Day 7 / Day 14 decisions
+    // ================================================================
+
+    // SUBMIT_CHECKPOINT_DECISION — submit day 7 or day 14 decision.
+    // Detected from currentStateId: checkpoint_day_7 → day7 API; checkpoint_day_14 → day14 API.
+    case 'submit_checkpoint_decision': {
+      const p = action.payload || action;
+      const decision: string = p.decision || '';
+      const day: number = p.day || (currentStateId === 'checkpoint_day_7' ? 7 : 14);
+      const idempotencyKey = `checkpoint_${day}_${decision}_${screenData.journey_id || ''}_${Date.now()}`;
+
+      if (!decision) {
+        if (WEB_ENV.isDev) console.warn('[actionExecutor] submit_checkpoint_decision: missing decision', action);
+        break;
+      }
+
+      dispatch(setSubmitting(true));
+      try {
+        void apiTrackEvent('checkpoint_completed', {
+          journey_id: screenData.journey_id,
+          day_number: screenData.day_number || day,
+          meta: { decision, day },
+        });
+
+        let nextView: any = null;
+        if (day === 7) {
+          const result = await mitraJourneyDay7Decision({ decision }, idempotencyKey);
+          nextView = result?.next_view;
+        } else {
+          const result = await mitraJourneyDay14Decision({ decision }, idempotencyKey);
+          nextView = result?.next_view;
+        }
+
+        // Day 14 "change_focus" always re-enters onboarding
+        if (day === 14 && decision === 'change_focus') {
+          dispatch(updateScreenData({ journey_id: null }));
+          _navigateToOnboarding(dispatch, 'turn_1');
+          return;
+        }
+
+        if (nextView?.view_key === 'onboarding_start') {
+          dispatch(updateScreenData({ journey_id: null }));
+          _navigateToOnboarding(dispatch, 'turn_1');
+          return;
+        }
+
+        if (nextView?.payload) {
+          const flat = ingestDailyView(nextView.payload);
+          dispatch(updateScreenData(flat));
+        }
+
+        // day_14 "deepen" goes to deepen_confirmation; otherwise dashboard
+        if (day === 14 && decision === 'deepen') {
+          dispatch(loadScreen({ containerId: 'cycle_transitions', stateId: 'deepen_confirmation' }));
+          webNavigate(_containerToPath('cycle_transitions', 'deepen_confirmation'));
+        } else {
+          webNavigate('/en/mitra/dashboard');
+        }
+      } catch (err) {
+        if (WEB_ENV.isDev) console.error('[actionExecutor] submit_checkpoint_decision failed:', err);
+        // Keep user on checkpoint page — error handled by block
+        dispatch(updateScreenData({ checkpoint_submit_error: true }));
+      } finally {
+        dispatch(setSubmitting(false));
+      }
       break;
     }
 

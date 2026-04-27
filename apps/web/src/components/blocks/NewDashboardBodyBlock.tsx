@@ -58,7 +58,7 @@ export function NewDashboardBodyBlock({ screenData, onAction }: Props) {
       )}
 
       {whyThisOpen && (
-        <WhyThisSheet sd={sd} onClose={() => setWhyThisOpen(false)} />
+        <WhyThisSheet sd={sd} onClose={() => setWhyThisOpen(false)} onAction={onAction} />
       )}
     </div>
   );

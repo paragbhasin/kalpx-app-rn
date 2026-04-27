@@ -266,3 +266,94 @@ export async function postPranaAcknowledge(payload: {
     return null;
   }
 }
+
+// ─── WhyThis Principles ───────────────────────────────────────────────────────
+
+/**
+ * GET /api/mitra/principles/{id}/ — Principle detail for WhyThis L2 overlay.
+ * Returns null on 404 (principle removed); caller hides "Go deeper" button.
+ */
+export async function getPrinciple(id: string | number): Promise<any> {
+  try {
+    const res = await api.get(`mitra/principles/${encodeURIComponent(String(id))}/`);
+    return res.data;
+  } catch (err: any) {
+    if (err?.response?.status === 404) return null;
+    console.warn('[mitraApi] getPrinciple failed:', err?.message);
+    return null;
+  }
+}
+
+/**
+ * GET /api/mitra/principles/{id}/sources/ — Source attribution for WhyThis L3.
+ * Returns null on 404; caller hides source attribution section.
+ */
+export async function getPrincipleSource(id: string | number): Promise<any> {
+  try {
+    const res = await api.get(`mitra/principles/${encodeURIComponent(String(id))}/sources/`);
+    return res.data;
+  } catch (err: any) {
+    if (err?.response?.status === 404) return null;
+    console.warn('[mitraApi] getPrincipleSource failed:', err?.message);
+    return null;
+  }
+}
+
+// ─── Checkpoints ──────────────────────────────────────────────────────────────
+
+/**
+ * GET /api/mitra/v3/journey/day-7-view/ — Day 7 checkpoint view envelope.
+ * Returns null on 404 (not yet day 7); caller shows "not ready" card.
+ */
+export async function mitraJourneyDay7View(): Promise<any> {
+  try {
+    const res = await api.get('mitra/v3/journey/day-7-view/');
+    return res.data;
+  } catch (err: any) {
+    if (err?.response?.status === 404) return null;
+    throw err;
+  }
+}
+
+/**
+ * GET /api/mitra/v3/journey/day-14-view/ — Day 14 checkpoint view envelope.
+ * Returns null on 404 (not yet day 14); caller shows "not ready" card.
+ */
+export async function mitraJourneyDay14View(): Promise<any> {
+  try {
+    const res = await api.get('mitra/v3/journey/day-14-view/');
+    return res.data;
+  } catch (err: any) {
+    if (err?.response?.status === 404) return null;
+    throw err;
+  }
+}
+
+/**
+ * POST /api/mitra/v3/journey/day-7-decision/ — Submit Day 7 decision.
+ * decisions: 'continue' | 'lighten' | 'reset'
+ * Idempotency-Key header prevents double submission on retry.
+ */
+export async function mitraJourneyDay7Decision(
+  payload: { decision: string; [key: string]: any },
+  idempotencyKey: string,
+): Promise<any> {
+  const res = await api.post('mitra/v3/journey/day-7-decision/', payload, {
+    headers: { 'Idempotency-Key': idempotencyKey },
+  });
+  return res.data;
+}
+
+/**
+ * POST /api/mitra/v3/journey/day-14-decision/ — Submit Day 14 decision.
+ * decisions: 'continue_same' | 'deepen' | 'change_focus'
+ */
+export async function mitraJourneyDay14Decision(
+  payload: { decision: string; [key: string]: any },
+  idempotencyKey: string,
+): Promise<any> {
+  const res = await api.post('mitra/v3/journey/day-14-decision/', payload, {
+    headers: { 'Idempotency-Key': idempotencyKey },
+  });
+  return res.data;
+}

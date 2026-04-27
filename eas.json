@@ -6,6 +6,7 @@
     "production": {
       "environment": "production",
       "env": {
+        "EXPO_PUBLIC_API_ENV": "prod",
         "EXPO_UPDATES_DISABLED": "1",
         "EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD": "1",
         "EXPO_PUBLIC_MITRA_V3_ROOMS": "1",
@@ -31,6 +32,9 @@
     },
     "simulator": {
       "extends": "preview",
+      "env": {
+        "EXPO_PUBLIC_API_ENV": "dev"
+      },
       "ios": {
         "simulator": true
       }
@@ -39,6 +43,9 @@
       "extends": "preview",
       "developmentClient": true,
       "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_ENV": "dev"
+      },
       "android": {
         "buildType": "apk"
       }

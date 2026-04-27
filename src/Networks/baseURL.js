@@ -3,8 +3,9 @@
 // const BASE_URL = "https://dev.kalpx.com/api"; // change as needed
 // export default BASE_URL;
 
-// Auto-switch: __DEV__ is true in Expo Go / debug builds, false in production EAS builds
-const ENV = __DEV__ ? "dev" : "prod";
+// EXPO_PUBLIC_API_ENV is baked in at EAS build time per-profile (see eas.json).
+// Falls back to __DEV__ only for local metro runs (expo start / Expo Go).
+const ENV = process.env.EXPO_PUBLIC_API_ENV || (__DEV__ ? "dev" : "prod");
 
 // API URLs
 const DEV_URL = "https://dev.kalpx.com/api";

@@ -1,8 +1,11 @@
 /**
  * LifeContextPickerSheet — 2-step context picker before room render.
  * Does not block room entry if user skips.
+ *
+ * Web renders as a full page (not a modal) — intentional for web UX.
+ * Browser back is guarded: popstate listener redirects to dashboard.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { LIFE_CONTEXT_OPTIONS, ROOM_DISPLAY_NAMES } from './roomConstants';
 
 interface Props {
@@ -18,6 +21,16 @@ export function LifeContextPickerSheet({ roomId, allowedContexts, onPick, onSkip
   const options = allowedContexts
     ? LIFE_CONTEXT_OPTIONS.filter((o) => allowedContexts.includes(o.id))
     : LIFE_CONTEXT_OPTIONS;
+
+  // Guard browser back — redirect to dashboard instead of popping state
+  useEffect(() => {
+    const handler = (e: PopStateEvent) => {
+      e.preventDefault();
+      onBack();
+    };
+    window.addEventListener('popstate', handler);
+    return () => window.removeEventListener('popstate', handler);
+  }, [onBack]);
 
   return (
     <div
@@ -69,7 +82,7 @@ export function LifeContextPickerSheet({ roomId, allowedContexts, onPick, onSkip
         data-testid="context-picker-skip"
         style={{ background: 'none', border: 'none', color: '#9A8C78', fontSize: 13, cursor: 'pointer', padding: '16px 0 0', textAlign: 'center' }}
       >
-        Skip — show general guidance
+        Skip
       </button>
     </div>
   );

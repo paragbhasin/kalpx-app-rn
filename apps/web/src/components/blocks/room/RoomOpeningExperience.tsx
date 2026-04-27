@@ -6,6 +6,7 @@ interface Props {
     second_beat_line?: string | null;
     ready_hint?: string;
     section_prompt?: string;
+    memory_echo_line?: string | null;
     room_id?: string;
   };
   roomName?: string;
@@ -21,12 +22,22 @@ export function RoomOpeningExperience({ envelope, roomName, lifeContextLabel }: 
           {lifeContextLabel ? ` · ${lifeContextLabel}` : ''}
         </p>
       )}
+      {/* RN: opening_line is bold 20px, NOT italic */}
       {envelope.opening_line && (
         <p
-          style={{ fontSize: 18, color: '#2C2A26', lineHeight: 1.6, fontStyle: 'italic', marginBottom: 10 }}
+          style={{ fontSize: 20, fontWeight: 700, color: '#2C2A26', lineHeight: 1.5, marginBottom: 10 }}
           data-testid="room-opening-line"
         >
           {envelope.opening_line}
+        </p>
+      )}
+      {/* memory_echo_line: present in RN, was missing on web */}
+      {envelope.memory_echo_line && (
+        <p
+          style={{ fontSize: 13, color: '#9A8C78', fontStyle: 'italic', lineHeight: 1.6, marginBottom: 10 }}
+          data-testid="room-memory-echo-line"
+        >
+          {envelope.memory_echo_line}
         </p>
       )}
       {envelope.second_beat_line && (
@@ -34,17 +45,9 @@ export function RoomOpeningExperience({ envelope, roomName, lifeContextLabel }: 
           {envelope.second_beat_line}
         </p>
       )}
-      {envelope.ready_hint && (
-        <p style={{ fontSize: 13, color: '#9A8C78', lineHeight: 1.5, marginBottom: 16 }}>
-          {envelope.ready_hint}
-        </p>
-      )}
-      {envelope.section_prompt && (
-        <p style={{ fontSize: 12, color: '#C9A84C', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 20 }}>
-          {envelope.section_prompt}
-        </p>
-      )}
-      <div style={{ width: 40, height: 1, background: '#E8DCC8', margin: '0 auto 20px' }} />
+      {/* RN explicitly does NOT render ready_hint (comment in RN source: "// don't render ready_hint") */}
+      {/* RN does NOT render section_prompt */}
+      {/* RN does NOT have a divider line */}
     </div>
   );
 }

@@ -65,19 +65,24 @@ export function WhyThisSheet({ sd, onClose, onAction }: Props) {
           overflowY: 'auto',
         }}
       >
-        {/* Handle + close */}
+        {/* Handle bar */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+          <div style={{ width: 40, height: 4, borderRadius: 2, background: '#e8d5b0' }} />
+        </div>
+
+        {/* Eyebrow + close */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
           {overlayLevel && overlayLevel !== 'l1' ? (
             <button
               data-testid="why-this-back"
               onClick={handleBackToL1}
-              style={{ background: 'none', border: 'none', fontSize: 13, color: '#b08840', cursor: 'pointer', padding: '0 4px', fontWeight: 600 }}
+              style={{ background: 'none', border: 'none', fontSize: 13, color: '#C9A84C', cursor: 'pointer', padding: '0 4px', fontWeight: 600 }}
             >
               ← Back
             </button>
           ) : (
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#b08840', textTransform: 'uppercase', margin: 0 }}>
-              Why This?
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#C9A84C', textTransform: 'uppercase', margin: 0 }}>
+              WHY THIS
             </p>
           )}
           <button

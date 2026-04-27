@@ -3,7 +3,7 @@
  * Reads roomId from URL params, dispatches enter_room if needed,
  * handles context_picker state → RoomRenderer with live RoomRenderV1 envelope.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useScreenState, updateScreenData } from '../../store/screenSlice';
@@ -84,14 +84,23 @@ export function RoomPage() {
 
   const roomName = ROOM_DISPLAY_NAMES[fullRoomId] || fullRoomId;
 
+  // Guard browser back: intercept popstate and navigate to dashboard instead
+  const handleActionRef = useRef<(action: any) => void>(() => {});
+
   const handleAction = (action: any) => {
-    // Handle room-specific special actions at page level
-    if (action.type === 'room_exit') {
-      void executeAction(action, actionContext);
-      return;
-    }
     void executeAction(action, actionContext);
   };
+
+  handleActionRef.current = handleAction;
+
+  useEffect(() => {
+    if (phase !== 'render') return;
+    const handler = () => {
+      handleActionRef.current({ type: 'room_exit', payload: { room_id: fullRoomId } });
+    };
+    window.addEventListener('popstate', handler);
+    return () => window.removeEventListener('popstate', handler);
+  }, [phase, fullRoomId]);
 
   if (phase === 'picker') {
     return (

@@ -9,6 +9,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
+import { useLocation } from 'react-router-dom';
 import { ScreenRenderer } from '../../engine/ScreenRenderer';
 import { useScreenState, updateScreenData, loadScreenWithData } from '../../store/screenSlice';
 import { getDashboardView } from '../../engine/mitraApi';
@@ -22,6 +23,7 @@ export function DashboardPage() {
   useGuestIdentity();
   const dispatch = useDispatch<AppDispatch>();
   const screenState = useScreenState();
+  const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [debugOpen, setDebugOpen] = useState(false);
@@ -67,9 +69,11 @@ export function DashboardPage() {
     }
   }, [dispatch]);
 
+  // Refetch on every navigation return (location.key changes on each push).
+  // This ensures completion state is never stale when returning from a runner.
   useEffect(() => {
     void load();
-  }, [load]);
+  }, [load, location.key]);
 
   const actionContext = {
     dispatch,

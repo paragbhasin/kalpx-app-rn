@@ -24,6 +24,13 @@ const SLOT_MASTER_KEY: Record<string, string> = {
   practice: 'master_practice',
 };
 
+// Unicode icons for each slot (gold, no external lib)
+const SLOT_ICONS: Record<string, string> = {
+  mantra: '♪',
+  sankalp: '❧',
+  practice: '✿',
+};
+
 interface Props {
   sd: Record<string, any>;
   onAction?: (action: any) => void;
@@ -55,43 +62,41 @@ export function TriadCardsRow({ sd, onAction }: Props) {
   });
 
   const visible = items.filter((i) => !!i.title);
+
+  // RN sovereignty: return null when no triad data (not an empty state message)
   if (!visible.length) {
-    return (
-      <div
-        style={{
-          padding: 24,
-          borderRadius: 12,
-          border: '1px dashed #e0d4b8',
-          textAlign: 'center',
-          color: '#aaa',
-          fontSize: 14,
-          marginBottom: 20,
-        }}
-      >
-        Your path is preparing…
-      </div>
-    );
+    return null;
   }
 
   return (
     <div style={{ marginBottom: 24 }}>
-      <p
+      {/* Horizontal 3-card row — matches RN layout */}
+      <div
         style={{
-          fontSize: 11,
-          fontWeight: 700,
-          letterSpacing: 2,
-          color: '#b08840',
-          textTransform: 'uppercase',
-          marginBottom: 10,
+          display: 'flex',
+          flexDirection: 'row',
+          gap: 8,
+          overflowX: 'auto',
+          paddingBottom: 4,
         }}
       >
-        Today's Practice
-      </p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {visible.map((item) => (
-          <button
+          <div
             key={item.slot}
             data-testid={`triad-card-${item.slot}`}
+            style={{
+              flex: 1,
+              minWidth: 100,
+              minHeight: 150,
+              background: '#fdf8ef',
+              borderRadius: 14,
+              border: '1px solid #e8d5b0',
+              padding: 12,
+              position: 'relative',
+              display: 'flex',
+              flexDirection: 'column',
+              cursor: 'pointer',
+            }}
             onClick={() => {
               if (!onAction) return;
               void onAction({
@@ -103,40 +108,137 @@ export function TriadCardsRow({ sd, onAction }: Props) {
                 },
               });
             }}
-            style={{
-              width: '100%',
-              textAlign: 'left',
-              padding: '14px 16px',
-              borderRadius: 12,
-              border: `1px solid ${item.completed ? '#86efac' : '#e0d4b8'}`,
-              background: item.completed ? '#f0fdf4' : '#fdf8ef',
-              cursor: 'pointer',
-            }}
           >
+            {/* Icon circle */}
             <div
               style={{
-                fontSize: 11,
-                fontWeight: 700,
-                letterSpacing: 1.5,
-                color: item.completed ? '#15803d' : '#b08840',
-                textTransform: 'uppercase',
-                marginBottom: 4,
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                background: 'rgba(201,168,76,0.1)',
                 display: 'flex',
-                justifyContent: 'space-between',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginBottom: 8,
+                fontSize: 16,
+                color: '#C9A84C',
+                flexShrink: 0,
               }}
             >
-              <span>{SLOT_LABELS[item.slot]}</span>
-              {item.completed && <span>✓</span>}
+              {SLOT_ICONS[item.slot] || '·'}
             </div>
-            <div style={{ fontSize: 16, fontWeight: 600, color: '#1a1a0a', lineHeight: 1.3 }}>
+
+            {/* Info button — top-right */}
+            <button
+              data-testid={`triad-info-${item.slot}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                onAction?.({
+                  type: 'view_info',
+                  payload: {
+                    type: item.slot,
+                    manualData: item.master,
+                  },
+                });
+              }}
+              style={{
+                position: 'absolute',
+                top: 8,
+                right: 8,
+                background: 'none',
+                border: 'none',
+                fontSize: 14,
+                color: '#C9A84C',
+                cursor: 'pointer',
+                lineHeight: 1,
+                padding: 2,
+              }}
+              aria-label="More info"
+            >
+              ⓘ
+            </button>
+
+            {/* UPPERCASE micro label */}
+            <p
+              style={{
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: 1.2,
+                color: item.completed ? '#15803d' : '#C9A84C',
+                textTransform: 'uppercase',
+                margin: '0 0 4px',
+                lineHeight: 1.2,
+              }}
+            >
+              {SLOT_LABELS[item.slot]}
+            </p>
+
+            {/* Serif bold title */}
+            <p
+              style={{
+                fontSize: 14,
+                fontWeight: 600,
+                fontFamily: 'Georgia, "Times New Roman", serif',
+                color: '#2C2A26',
+                lineHeight: 1.3,
+                margin: '0 0 4px',
+                flex: 1,
+              }}
+            >
               {item.title}
-            </div>
+            </p>
+
+            {/* Sub */}
             {item.subtitle && (
-              <div style={{ fontSize: 13, color: '#6b4c1a', marginTop: 4, lineHeight: 1.4 }}>
+              <p
+                style={{
+                  fontSize: 11,
+                  color: '#6B6356',
+                  lineHeight: 1.4,
+                  margin: '0 0 8px',
+                }}
+              >
                 {item.subtitle}
-              </div>
+              </p>
             )}
-          </button>
+
+            {/* Completion indicator — bottom right */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'auto' }}>
+              {item.completed ? (
+                /* Green circle with checkmark */
+                <div
+                  data-testid={`triad-complete-${item.slot}`}
+                  style={{
+                    width: 18,
+                    height: 18,
+                    borderRadius: 9,
+                    background: '#16a34a',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: 10,
+                    color: '#fff',
+                    flexShrink: 0,
+                  }}
+                >
+                  ✓
+                </div>
+              ) : (
+                /* Tan ring */
+                <div
+                  data-testid={`triad-incomplete-${item.slot}`}
+                  style={{
+                    width: 18,
+                    height: 18,
+                    borderRadius: 9,
+                    border: '1.5px solid #c4a97a',
+                    background: 'transparent',
+                    flexShrink: 0,
+                  }}
+                />
+              )}
+            </div>
+          </div>
         ))}
       </div>
     </div>

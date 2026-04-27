@@ -28,7 +28,7 @@ export function RoomRenderer({ envelope, screenData, onAction }: Props) {
         lifeContextLabel={lifeContextLabel}
       />
       {envelope.principle_banner && (
-        <RoomPrincipleBanner banner={envelope.principle_banner} />
+        <RoomPrincipleBanner banner={envelope.principle_banner} onAction={onAction} />
       )}
       <RoomActionList
         envelope={envelope}

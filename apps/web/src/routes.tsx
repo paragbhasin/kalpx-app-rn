@@ -22,6 +22,8 @@ import { ClassBookingPage } from './pages/classes/ClassBookingPage';
 import { ClassPaymentPage } from './pages/classes/ClassPaymentPage';
 import { ClassBookingSuccessPage } from './pages/classes/ClassBookingSuccessPage';
 import { CommunityFeedPage } from './pages/community/CommunityFeedPage';
+import { CommunityPostDetailPage } from './pages/community/CommunityPostDetailPage';
+import { CreateCommunityPostPage } from './pages/community/CreateCommunityPostPage';
 import { ProfilePage } from './pages/profile/ProfilePage';
 import { RequiresJourney } from './components/RequiresJourney';
 import { RequiresAuth } from './components/RequiresAuth';
@@ -77,8 +79,10 @@ export function AppRoutes() {
       <Route path="/en/classes/:slug/book" element={<ClassBookingPage />} />
       <Route path="/en/classes/:slug/pay" element={<ClassPaymentPage />} />
 
-      {/* Communities — scaffold */}
+      {/* Communities vertical */}
       <Route path="/en/community" element={<CommunityFeedPage />} />
+      <Route path="/en/community/new" element={<CreateCommunityPostPage />} />
+      <Route path="/en/community/:postId" element={<CommunityPostDetailPage />} />
       <Route path="/en/profile" element={<RequiresAuth><ProfilePage /></RequiresAuth>} />
 
       <Route path="*" element={<Navigate to="/en" replace />} />

@@ -5,3 +5,4 @@
 // All platform behavior must be injected via adapters from ./types.
 export * from './types';
 export * from './classes/useClassBookingController';
+export * from './community/useCommunityFeedController';

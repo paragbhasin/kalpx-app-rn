@@ -34,8 +34,23 @@ export const classBookingSchema = z.object({
   trial_selected: z.boolean().optional(),
 });
 
+// Wire: POST /posts/ — content field (not body); community slug optional on web
+export const communityPostSchema = z.object({
+  content: z.string().trim().min(1, 'Post cannot be empty').max(2000, 'Post is too long (max 2000 characters)'),
+  title: z.string().trim().max(120, 'Title is too long (max 120 characters)').optional(),
+  community: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+});
+
+// Wire: POST /comments/ — content field (not body)
+export const communityCommentSchema = z.object({
+  content: z.string().trim().min(1, 'Comment cannot be empty').max(1000, 'Comment is too long (max 1000 characters)'),
+});
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type SignupInput = z.infer<typeof signupSchema>;
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
 export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>;
 export type ClassBookingInput = z.infer<typeof classBookingSchema>;
+export type CommunityPostInput = z.infer<typeof communityPostSchema>;
+export type CommunityCommentInput = z.infer<typeof communityCommentSchema>;

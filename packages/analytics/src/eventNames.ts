@@ -55,6 +55,18 @@ export const EVENT_NAMES = {
   // Auth / session
   DAY_ACTIVE: 'day_active',
 
+  // Community / Social Feed
+  COMMUNITY_FEED_VIEWED: 'community_feed_viewed',
+  COMMUNITY_POST_VIEWED: 'community_post_viewed',
+  COMMUNITY_POST_CREATED: 'community_post_created',
+  COMMUNITY_POST_LIKED: 'community_post_liked',
+  COMMUNITY_POST_UNLIKED: 'community_post_unliked',
+  COMMUNITY_COMMENT_CREATED: 'community_comment_created',
+  COMMUNITY_AUTH_GATE_SHOWN: 'community_auth_gate_shown',
+  COMMUNITY_MEDIA_UPLOAD_STARTED: 'community_media_upload_started',
+  COMMUNITY_MEDIA_UPLOAD_COMPLETED: 'community_media_upload_completed',
+  COMMUNITY_ERROR_SHOWN: 'community_error_shown',
+
   // Classes + Booking + Payments
   CLASS_LIST_VIEWED: 'class_list_viewed',
   CLASS_DETAIL_VIEWED: 'class_detail_viewed',

@@ -17,7 +17,7 @@
       },
       "ios": {
         "buildConfiguration": "Release",
-        "image": "macos-sequoia-156-xcode-262-latest-sdk-55"
+        "image": "macos-sequoia-15.6-xcode-26.2"
       }
     },
     "preview": {
@@ -36,7 +36,8 @@
         "EXPO_PUBLIC_API_ENV": "dev"
       },
       "ios": {
-        "simulator": true
+        "simulator": true,
+        "image": "latest"
       }
     },
     "development": {

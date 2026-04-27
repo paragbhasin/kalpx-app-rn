@@ -44,6 +44,7 @@ export function MitraEnginePage() {
   const actionContext = {
     dispatch,
     screenData: screenState.screenData,
+    currentStateId: screenState.currentStateId,
   };
 
   return (

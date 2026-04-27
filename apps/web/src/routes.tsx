@@ -7,6 +7,7 @@ import { SignupPage } from './pages/auth/SignupPage';
 import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
 import { LogoutPage } from './pages/auth/LogoutPage';
 import { MitraHomePage } from './pages/mitra/MitraHomePage';
+import { MitraStartPage } from './pages/mitra/MitraStartPage';
 import { MitraEnginePage } from './pages/mitra/MitraEnginePage';
 import { DashboardPage } from './pages/mitra/DashboardPage';
 import { OnboardingPage } from './pages/mitra/OnboardingPage';
@@ -33,7 +34,8 @@ export function AppRoutes() {
 
       {/* Mitra — home is an open routing hub */}
       <Route path="/en/mitra" element={<MitraHomePage />} />
-      <Route path="/en/mitra/start" element={<OnboardingPage />} />
+      <Route path="/en/mitra/start" element={<MitraStartPage />} />
+      <Route path="/en/mitra/onboarding" element={<OnboardingPage />} />
 
       {/* Journey-gated Mitra routes */}
       <Route

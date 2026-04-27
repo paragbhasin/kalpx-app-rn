@@ -1,6 +1,6 @@
 /**
- * BlockRenderer — Phase 5.
- * Real implementations for the blocks needed in the vertical-slice proof.
+ * BlockRenderer — Phase 5 + Phase 6 (onboarding blocks).
+ * Real implementations for proof + onboarding blocks.
  * Everything else renders UnimplementedBlock with visible type label.
  */
 
@@ -8,6 +8,11 @@ import React from 'react';
 import { HeadlineBlock } from '../components/blocks/HeadlineBlock';
 import { SubtextBlock } from '../components/blocks/SubtextBlock';
 import { PrimaryButtonBlock } from '../components/blocks/PrimaryButtonBlock';
+import { OnboardingConversationTurnBlock } from '../components/blocks/OnboardingConversationTurnBlock';
+import { OnboardingIntroHeroBlock } from '../components/blocks/OnboardingIntroHeroBlock';
+import { GuidanceModePickerBlock } from '../components/blocks/GuidanceModePickerBlock';
+import { FirstRecognitionBlock } from '../components/blocks/FirstRecognitionBlock';
+import { PathEmergesBlock } from '../components/blocks/PathEmergesBlock';
 import { UnimplementedBlock } from '../components/blocks/UnimplementedBlock';
 
 interface BlockRendererProps {
@@ -37,6 +42,22 @@ export function BlockRenderer({ block, screenData, onAction }: BlockRendererProp
       return <SubtextBlock block={block} onAction={onAction} />;
     case 'primary_button':
       return <PrimaryButtonBlock block={block} onAction={onAction} />;
+    case 'onboarding_conversation_turn':
+      return (
+        <OnboardingConversationTurnBlock
+          block={block}
+          screenData={screenData}
+          onAction={onAction}
+        />
+      );
+    case 'onboarding_intro_hero':
+      return <OnboardingIntroHeroBlock block={block} onAction={onAction} />;
+    case 'guidance_mode_picker':
+      return <GuidanceModePickerBlock block={block} onAction={onAction} />;
+    case 'first_recognition':
+      return <FirstRecognitionBlock block={block} screenData={screenData} />;
+    case 'path_emerges':
+      return <PathEmergesBlock block={block} screenData={screenData} />;
     default:
       return <UnimplementedBlock block={block} />;
   }

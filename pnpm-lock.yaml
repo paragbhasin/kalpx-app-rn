@@ -59,6 +59,9 @@ importers:
       '@kalpx/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts
+      '@kalpx/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@react-native-async-storage/async-storage':
         specifier: 2.1.2
         version: 2.1.2(react-native@0.79.6(@babel/core@7.29.0)(@react-native-community/cli@20.1.3(typescript@5.8.3))(@types/react@19.0.14)(react@19.0.0))
@@ -364,7 +367,11 @@ importers:
 
   packages/state: {}
 
-  packages/types: {}
+  packages/types:
+    devDependencies:
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
 
   packages/validation: {}
 

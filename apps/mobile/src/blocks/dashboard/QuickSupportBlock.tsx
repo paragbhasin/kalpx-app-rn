@@ -38,7 +38,7 @@ import { screenActions } from "../../store/screenSlice";
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import RoomEntrySheet from "../room/RoomEntrySheet";
-import type { RoomId } from "../room/types";
+import type { RoomId } from "@kalpx/types";
 
 type Props = {
   screenData?: Record<string, any>;

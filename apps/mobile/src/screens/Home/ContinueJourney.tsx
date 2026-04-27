@@ -51,7 +51,7 @@ import {
 } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
 import RoomEntrySheet from "../../blocks/room/RoomEntrySheet";
-import type { RoomId } from "../../blocks/room/types";
+import type { RoomId } from "@kalpx/types";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 

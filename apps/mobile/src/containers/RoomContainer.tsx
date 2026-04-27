@@ -36,7 +36,7 @@ import RoomRenderer from "../blocks/room/RoomRenderer";
 import type {
   RoomId,
   RoomRenderV1,
-} from "../blocks/room/types";
+} from "@kalpx/types";
 import { executeAction } from "../engine/actionExecutor";
 import { mitraTrackEvent } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";

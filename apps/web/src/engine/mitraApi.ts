@@ -56,16 +56,6 @@ export async function getDashboardView(): Promise<any> {
   }
 }
 
-export async function getDay7View(): Promise<any> {
-  const res = await api.get('mitra/checkpoint/day-7/');
-  return res.data;
-}
-
-export async function getDay14View(): Promise<any> {
-  const res = await api.get('mitra/checkpoint/day-14/');
-  return res.data;
-}
-
 export async function getJourneyStatus(): Promise<any> {
   try {
     const res = await api.get('mitra/journey/status/');
@@ -75,16 +65,47 @@ export async function getJourneyStatus(): Promise<any> {
   }
 }
 
+// ─── Telemetry — camelCase to match mobile wire format ────────────────────────
+
+function getTz(): string {
+  try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return 'UTC'; }
+}
+
+/**
+ * POST /api/mitra/track-event/ — Backend accepts camelCase (matching mobile).
+ * Normalises snake_case keys from call sites for backwards compatibility.
+ */
 export async function trackEvent(eventName: string, properties?: Record<string, any>): Promise<void> {
   try {
-    await api.post('mitra/track-event/', { event_name: eventName, ...properties });
+    const p = properties ?? {};
+    await api.post('mitra/track-event/', {
+      eventName,
+      journeyId: p.journeyId ?? p.journey_id ?? null,
+      dayNumber: p.dayNumber ?? p.day_number ?? 1,
+      locale: 'en',
+      tz: getTz(),
+      meta: p.meta ?? {},
+    });
   } catch {
     // swallow — telemetry must never break product flow
   }
 }
 
+/**
+ * POST /api/mitra/track-completion/ — Backend accepts camelCase (matching mobile).
+ * Normalises snake_case keys from call sites for backwards compatibility.
+ */
 export async function trackCompletion(payload: Record<string, any>): Promise<void> {
-  await api.post('mitra/track-completion/', payload);
+  const p = payload;
+  await api.post('mitra/track-completion/', {
+    itemType: p.itemType ?? p.item_type,
+    itemId: p.itemId ?? p.item_id,
+    source: p.source ?? null,
+    journeyId: p.journeyId ?? p.journey_id ?? null,
+    dayNumber: p.dayNumber ?? p.day_number ?? 1,
+    tz: getTz(),
+    meta: p.meta ?? {},
+  });
 }
 
 // ─── Onboarding ──────────────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 /**
- * Phase 9.5 routing audit — unit tests.
- * Covers: normalizeJourneyStatus, resetStore, journey status cache invalidation.
+ * Phase 9.5 + Phase 11.5 routing audit — unit tests.
+ * Covers: normalizeJourneyStatus (camelCase + snake_case), resetStore, journey status cache.
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
@@ -42,6 +42,53 @@ describe('normalizeJourneyStatus', () => {
 
   it('returns false for empty object', () => {
     expect(normalizeJourneyStatus({})).toBe(false);
+  });
+
+  // ── Regression: actual backend wire shape (camelCase) ──────────────────────
+  // Backend GET /api/mitra/journey/status/ returns camelCase, not snake_case.
+  // Captured response: { hasActiveJourney: true, journeyId: 4014, dayNumber: 8,
+  //   pathCycleNumber: 1, daysPastEnd: 0, focus: "peacecalm", subfocus: "" }
+
+  it('REGRESSION: returns true for actual backend wire shape (camelCase hasActiveJourney)', () => {
+    expect(normalizeJourneyStatus({
+      hasActiveJourney: true,
+      journeyId: 4014,
+      focus: 'peacecalm',
+      subfocus: '',
+      dayNumber: 8,
+      pathCycleNumber: 1,
+      daysPastEnd: 0,
+    })).toBe(true);
+  });
+
+  it('returns false when hasActiveJourney=false (no journey)', () => {
+    expect(normalizeJourneyStatus({
+      hasActiveJourney: false,
+      journeyId: undefined,
+      dayNumber: 0,
+    })).toBe(false);
+  });
+
+  it('returns false when hasActiveJourney absent and no other matching field', () => {
+    expect(normalizeJourneyStatus({
+      journeyId: 4014,
+      daysPastEnd: 5,
+    })).toBe(false);
+  });
+
+  it('returns true when journeyId present and daysPastEnd=0 (active user, no hasActiveJourney field)', () => {
+    expect(normalizeJourneyStatus({
+      journeyId: 99,
+      daysPastEnd: 0,
+    })).toBe(true);
+  });
+
+  it('does NOT route to dashboard when hasActiveJourney=false even with journeyId present', () => {
+    expect(normalizeJourneyStatus({
+      hasActiveJourney: false,
+      journeyId: 4014,
+      dayNumber: 8,
+    })).toBe(false);
   });
 });
 

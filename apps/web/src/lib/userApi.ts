@@ -12,8 +12,11 @@ import type { UserProfile } from '../types/auth';
  */
 export async function getUserProfile(): Promise<UserProfile | null> {
   try {
-    const res = await api.get<UserProfile>('users/profile/profile_details/');
-    return res.data;
+    const res = await api.get('users/profile/profile_details/');
+    // Backend may return { profile: { ... } } (nested) or flat { email, ... }.
+    // Mobile reads res.data?.profile?.profile_name, implying nested shape is possible.
+    const raw = res.data;
+    return (raw?.profile ?? raw) as UserProfile;
   } catch (err: any) {
     if (err?.response?.status === 401) return null;
     console.warn('[userApi] getUserProfile failed:', err?.message);

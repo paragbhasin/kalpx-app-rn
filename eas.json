@@ -15,7 +15,8 @@
         "buildType": "app-bundle"
       },
       "ios": {
-        "buildConfiguration": "Release"
+        "buildConfiguration": "Release",
+        "image": "macos-sequoia-156-xcode-262-latest-sdk-55"
       }
     },
     "preview": {

@@ -25,7 +25,7 @@ export function useAuth() {
   const dispatch = useAppDispatch();
 
   const login = useCallback(
-    async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    async (email: string, password: string, returnTo?: string): Promise<{ success: boolean; error?: string }> => {
       try {
         const res = await api.post<LoginResponse>('users/login/', { email, password } satisfies LoginRequest);
         const data = res.data;
@@ -41,7 +41,7 @@ export function useAuth() {
         // Attempt guest journey claim (best-effort — failure must not break login)
         try { await claimGuestJourney(); } catch { /* swallow */ }
         invalidateJourneyStatusCache();
-        navigate('/en/mitra');
+        navigate(returnTo ?? '/en/mitra');
         return { success: true };
       } catch (err) {
         return { success: false, error: getApiErrorMessage(err, 'Login failed. Please check your credentials.') };

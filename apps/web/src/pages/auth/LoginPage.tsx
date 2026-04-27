@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { AuthLayout } from '../../components/AuthLayout';
 import { useAuth } from '../../hooks/useAuth';
 import { useGuestIdentity } from '../../hooks/useGuestIdentity';
@@ -8,6 +8,8 @@ import { loginSchema } from '@kalpx/validation';
 export function LoginPage() {
   useGuestIdentity();
   const { login } = useAuth();
+  const [searchParams] = useSearchParams();
+  const returnTo = searchParams.get('returnTo') ?? undefined;
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,7 +33,7 @@ export function LoginPage() {
     }
 
     setLoading(true);
-    const { success, error } = await login(email, password);
+    const { success, error } = await login(email, password, returnTo);
     setLoading(false);
 
     if (!success && error) setGlobalError(error);

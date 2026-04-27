@@ -55,6 +55,17 @@ export const EVENT_NAMES = {
   // Auth / session
   DAY_ACTIVE: 'day_active',
 
+  // Classes + Booking + Payments
+  CLASS_LIST_VIEWED: 'class_list_viewed',
+  CLASS_DETAIL_VIEWED: 'class_detail_viewed',
+  CLASS_BOOKING_STARTED: 'class_booking_started',
+  CLASS_BOOKING_CREATED: 'class_booking_created',
+  CLASS_PAYMENT_STARTED: 'class_payment_started',
+  CLASS_PAYMENT_SUCCEEDED: 'class_payment_succeeded',
+  CLASS_PAYMENT_FAILED: 'class_payment_failed',
+  CLASS_BOOKING_COMPLETED: 'class_booking_completed',
+  CLASS_BOOKING_ABANDONED: 'class_booking_abandoned',
+
   // Backend API event types (passed as event_name to /mitra/track-event/)
   API_TRACK_EVENT: 'track_event',
   API_TRACK_COMPLETION: 'track_completion',

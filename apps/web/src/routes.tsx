@@ -17,6 +17,10 @@ import { CheckpointPage } from './pages/mitra/CheckpointPage';
 import { TriggerPage } from './pages/mitra/TriggerPage';
 import { CheckinPage } from './pages/mitra/CheckinPage';
 import { ClassListingPage } from './pages/classes/ClassListingPage';
+import { ClassDetailPage } from './pages/classes/ClassDetailPage';
+import { ClassBookingPage } from './pages/classes/ClassBookingPage';
+import { ClassPaymentPage } from './pages/classes/ClassPaymentPage';
+import { ClassBookingSuccessPage } from './pages/classes/ClassBookingSuccessPage';
 import { CommunityFeedPage } from './pages/community/CommunityFeedPage';
 import { ProfilePage } from './pages/profile/ProfilePage';
 import { RequiresJourney } from './components/RequiresJourney';
@@ -66,8 +70,14 @@ export function AppRoutes() {
         element={<RequiresJourney><CheckinPage /></RequiresJourney>}
       />
 
-      {/* Other verticals — scaffolds */}
+      {/* Classes vertical */}
       <Route path="/en/classes" element={<ClassListingPage />} />
+      <Route path="/en/classes/success" element={<ClassBookingSuccessPage />} />
+      <Route path="/en/classes/:slug" element={<ClassDetailPage />} />
+      <Route path="/en/classes/:slug/book" element={<ClassBookingPage />} />
+      <Route path="/en/classes/:slug/pay" element={<ClassPaymentPage />} />
+
+      {/* Communities — scaffold */}
       <Route path="/en/community" element={<CommunityFeedPage />} />
       <Route path="/en/profile" element={<RequiresAuth><ProfilePage /></RequiresAuth>} />
 

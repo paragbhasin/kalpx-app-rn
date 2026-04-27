@@ -4,3 +4,4 @@
 // AsyncStorage, localStorage, expo-*, Stripe SDKs.
 // All platform behavior must be injected via adapters from ./types.
 export * from './types';
+export * from './classes/useClassBookingController';

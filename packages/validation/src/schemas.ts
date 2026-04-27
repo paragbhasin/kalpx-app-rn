@@ -24,11 +24,14 @@ export const profileUpdateSchema = z.object({
   language: z.string().optional(),
 });
 
-// Placeholder — filled when Classes vertical is built
+// Wire format matches BookingCreateRequest: POST public/bookings/create/
 export const classBookingSchema = z.object({
-  class_id: z.string().min(1),
-  attendee_name: z.string().min(1),
-  attendee_email: z.string().email(),
+  offering_id: z.number().int().positive(),
+  scheduled_at: z.string().min(1, 'Select a time slot'),
+  user_timezone: z.string().min(1),
+  tutor_timezone: z.string().min(1),
+  note: z.string().max(500).optional(),
+  trial_selected: z.boolean().optional(),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;

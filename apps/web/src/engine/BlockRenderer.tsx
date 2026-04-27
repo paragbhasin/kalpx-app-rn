@@ -20,6 +20,12 @@ import { AudioPlayerBlock } from '../components/blocks/AudioPlayerBlock';
 import { SankalpHoldBlock } from '../components/blocks/SankalpHoldBlock';
 import { PracticeTimerBlock } from '../components/blocks/PracticeTimerBlock';
 import { CompletionReturnBlock } from '../components/blocks/CompletionReturnBlock';
+import { TriggerEntryBlock } from '../components/blocks/TriggerEntryBlock';
+import { SoundBridgeTransientBlock } from '../components/blocks/SoundBridgeTransientBlock';
+import { CheckInRegulationBlock } from '../components/blocks/CheckInRegulationBlock';
+import { BalancedAckOverlayBlock } from '../components/blocks/BalancedAckOverlayBlock';
+import { VoiceConsentSheetBlock } from '../components/blocks/VoiceConsentSheetBlock';
+import { VoiceNoteSheetBlock } from '../components/blocks/VoiceNoteSheetBlock';
 import { UnimplementedBlock } from '../components/blocks/UnimplementedBlock';
 
 interface BlockRendererProps {
@@ -82,6 +88,20 @@ export function BlockRenderer({ block, screenData, onAction }: BlockRendererProp
       return <PracticeTimerBlock block={block} screenData={screenData} onAction={onAction} />;
     case 'completion_return':
       return <CompletionReturnBlock block={block} screenData={screenData} onAction={onAction} />;
+
+    // ── Phase 9: Support blocks ───────────────────────────────────────
+    case 'trigger_entry':
+      return <TriggerEntryBlock block={block} onAction={onAction} />;
+    case 'sound_bridge_transient':
+      return <SoundBridgeTransientBlock block={block} screenData={screenData} onAction={onAction} />;
+    case 'checkin_regulation':
+      return <CheckInRegulationBlock block={block} screenData={screenData} onAction={onAction} />;
+    case 'balanced_ack_overlay':
+      return <BalancedAckOverlayBlock block={block} screenData={screenData} onAction={onAction} />;
+    case 'voice_consent_sheet':
+      return <VoiceConsentSheetBlock block={block} screenData={screenData} onAction={onAction} />;
+    case 'voice_note_sheet':
+      return <VoiceNoteSheetBlock block={block} screenData={screenData} onAction={onAction} />;
 
     default:
       return <UnimplementedBlock block={block} />;

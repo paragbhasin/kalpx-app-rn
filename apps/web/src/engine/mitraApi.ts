@@ -177,3 +177,92 @@ export async function claimGuestJourney(): Promise<any> {
     return null;
   }
 }
+
+// ─── Support: Trigger / Check-In / Rooms ─────────────────────────────────────
+
+/**
+ * GET /api/mitra/rooms/{room_id}/render/ — RoomRenderV1 envelope.
+ * Returns null on 404/403 (flag off); caller shows unavailable state.
+ */
+export async function getRoomRender(
+  roomId: string,
+  params?: { life_context?: string | null },
+): Promise<any> {
+  try {
+    const url = params?.life_context
+      ? `mitra/rooms/${encodeURIComponent(roomId)}/render/?life_context=${encodeURIComponent(params.life_context)}`
+      : `mitra/rooms/${encodeURIComponent(roomId)}/render/`;
+    const res = await api.get(url);
+    const data = res?.data;
+    if (!data || typeof data !== 'object' || !Array.isArray(data.actions)) return null;
+    return data;
+  } catch (err: any) {
+    const s = err?.response?.status;
+    if (s === 404 || s === 403) return null;
+    console.warn('[mitraApi] getRoomRender failed:', err?.message);
+    return null;
+  }
+}
+
+/**
+ * POST /api/mitra/rooms/telemetry/ — Context picker telemetry (non-blocking).
+ */
+export async function postRoomTelemetry(payload: {
+  event_type: 'context_picked' | 'context_skipped';
+  room_id: string;
+  life_context?: string | null;
+  ts: number;
+}): Promise<void> {
+  try {
+    await api.post('mitra/rooms/telemetry/', payload);
+  } catch {
+    // best-effort — swallow
+  }
+}
+
+/**
+ * POST /api/mitra/rooms/{room_id}/sacred/ — Sacred carry write.
+ * Returns null on failure (non-blocking).
+ */
+export async function postRoomSacred(roomId: string, payload: Record<string, any>): Promise<any> {
+  try {
+    const res = await api.post(`mitra/rooms/${encodeURIComponent(roomId)}/sacred/`, payload);
+    return res.data;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * POST /api/mitra/trigger-mantras/ — Trigger mantra suggestions.
+ * Returns null on failure (caller shows gentle fallback).
+ */
+export async function postTriggerMantras(payload: {
+  feeling?: string;
+  locale?: string;
+}): Promise<any> {
+  try {
+    const res = await api.post('mitra/trigger-mantras/', payload);
+    return res.data;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * POST /api/mitra/prana-acknowledge/ — Prana check-in acknowledgement.
+ * Returns null on failure; caller shows fallback ack.
+ */
+export async function postPranaAcknowledge(payload: {
+  pranaType?: string;
+  focus?: string;
+  locale?: string;
+  [key: string]: any;
+}): Promise<any> {
+  try {
+    const res = await api.post('mitra/prana-acknowledge/', payload);
+    return res.data;
+  } catch {
+    return null;
+  }
+}

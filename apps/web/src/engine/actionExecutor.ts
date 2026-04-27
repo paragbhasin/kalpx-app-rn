@@ -13,6 +13,11 @@ import {
   startJourneyV3,
   getDailyView,
   getDashboardView,
+  getRoomRender,
+  postRoomTelemetry,
+  postRoomSacred,
+  postTriggerMantras,
+  postPranaAcknowledge,
 } from './mitraApi';
 import { ingestDailyView } from './v3Ingest';
 import { webNavigate } from '../lib/webRouter';
@@ -482,8 +487,8 @@ export async function executeAction(action: any, context: ActionContext): Promis
     }
 
     // ----------------------------------------------------------------
-    // ENTER_ROOM — navigate to a support room.
-    // Full RoomContainer is Phase 8/9.
+    // ENTER_ROOM — navigate to a support room. Phase 9: stamps full
+    // room context into screenData so RoomPage can read it.
     // ----------------------------------------------------------------
     case 'enter_room': {
       const p = action.payload || action;
@@ -492,8 +497,18 @@ export async function executeAction(action: any, context: ActionContext): Promis
         if (WEB_ENV.isDev) console.warn('[actionExecutor] enter_room: missing room_id', action);
         break;
       }
-      dispatch(setScreenValue({ key: 'active_room_id', value: roomId }));
-      dispatch(setScreenValue({ key: 'room_source', value: p.source || 'dashboard' }));
+      // Clear stale room state before entering
+      dispatch(updateScreenData({
+        room_id: roomId,
+        room_source: p.source || 'dashboard',
+        room_render_payload: null,
+        room_life_context: null,
+        room_selected_action: null,
+        // life_context_allowed — rooms that support picker
+        life_context_allowed: ['clarity', 'growth'].includes(roomId.replace('room_', ''))
+          ? ['work_career', 'relationships', 'self', 'health_energy', 'money_security', 'purpose_direction', 'daily_life']
+          : null,
+      }));
       void apiTrackEvent('room_entered', {
         journey_id: screenData.journey_id,
         day_number: screenData.day_number || 1,
@@ -722,6 +737,221 @@ export async function executeAction(action: any, context: ActionContext): Promis
       } finally {
         dispatch(setSubmitting(false));
       }
+      break;
+    }
+
+    // ================================================================
+    // TRIGGER SUPPORT
+    // ================================================================
+
+    // INITIATE_TRIGGER_SUPPORT — clears stale trigger state, seeds OM audio,
+    // routes to support_trigger/sound_bridge.
+    case 'initiate_trigger_support': {
+      const prevRound = Number(screenData.trigger_round || 0);
+      // REG-002: clear trigger-owned fields before new round
+      dispatch(updateScreenData({
+        trigger_mantra_text: null,
+        trigger_mantra_devanagari: null,
+        trigger_round: prevRound + 1,
+        om_audio_url: null,
+      }));
+      void apiTrackEvent('trigger_session_started', {
+        journey_id: screenData.journey_id,
+        day_number: screenData.day_number || 1,
+        meta: { source_surface: 'dashboard', round: prevRound + 1 },
+      });
+      dispatch(loadScreen({ containerId: 'support_trigger', stateId: 'sound_bridge' }));
+      webNavigate(_containerToPath('support_trigger', 'sound_bridge'));
+      break;
+    }
+
+    // ADVANCE_SOUND_BRIDGE — exits OM sound bridge, starts mantra runner
+    // with runner_source="support_trigger".
+    case 'advance_sound_bridge': {
+      const exitType = action.payload?.exit_type || 'tap';
+      void apiTrackEvent('sound_bridge_exited', {
+        journey_id: screenData.journey_id,
+        day_number: screenData.day_number || 1,
+        meta: { exit_type: exitType, parent: 'trigger' },
+      });
+      const triggerItem = {
+        item_type: 'mantra',
+        item_id: (screenData.support_mantra_id as string) || 'om_support',
+        title: (screenData.trigger_mantra_text as string) || 'OM',
+        devanagari: (screenData.trigger_mantra_devanagari as string) || 'ॐ',
+        audio_url: (screenData.om_audio_url as string) || '',
+      };
+      dispatch(updateScreenData({
+        runner_variant: 'mantra',
+        runner_source: 'support_trigger',
+        runner_active_item: triggerItem,
+        runner_start_time: Date.now(),
+        runner_reps_completed: 0,
+        runner_duration_actual_sec: 0,
+        mantra_text: triggerItem.title,
+        mantra_devanagari: triggerItem.devanagari,
+        mantra_audio_url: triggerItem.audio_url,
+        reps_total: -1, // unlimited for support
+      }));
+      dispatch(loadScreen({ containerId: 'practice_runner', stateId: 'free_mantra_chanting' }));
+      webNavigate(_containerToPath('practice_runner', 'free_mantra_chanting'));
+      break;
+    }
+
+    // ================================================================
+    // CHECK-IN SUPPORT
+    // ================================================================
+
+    // ADVANCE_CHECKIN_STEP — notice → name → settle
+    case 'advance_checkin_step': {
+      const from: string = action.payload?.from || 'notice';
+      const value: string = action.payload?.value || '';
+      const draft = { ...(screenData.checkin_draft || {}) } as Record<string, string>;
+      if (from === 'notice') draft.noticed = value;
+      else if (from === 'name') draft.named = value;
+      dispatch(updateScreenData({ checkin_draft: draft }));
+      const next: Record<string, string> = { notice: 'name', name: 'settle' };
+      const nextStep = next[from];
+      if (nextStep) {
+        dispatch(setScreenValue({ key: 'checkin_step', value: nextStep }));
+        dispatch(loadScreen({ containerId: 'support_checkin', stateId: nextStep }));
+        webNavigate(_containerToPath('support_checkin', nextStep));
+      }
+      break;
+    }
+
+    // SUBMIT_CHECKIN — finalize, show balanced_ack overlay.
+    case 'submit_checkin': {
+      const draft = { ...(screenData.checkin_draft || {}) } as Record<string, string>;
+      if (action.payload?.final) draft.settled = action.payload.final;
+      dispatch(updateScreenData({ checkin_draft: draft, checkin_ack_variant: 'balanced' }));
+      void apiTrackEvent('checkin_regulation_completed', {
+        journey_id: screenData.journey_id,
+        day_number: screenData.day_number || 1,
+        meta: { noticed: draft.noticed, named: draft.named, settled: draft.settled },
+      });
+      // Best-effort prana acknowledge
+      void postPranaAcknowledge({ pranaType: draft.named, focus: draft.noticed, locale: 'en' });
+      dispatch(loadScreen({ containerId: 'support_checkin', stateId: 'balanced_ack' }));
+      webNavigate(_containerToPath('support_checkin', 'balanced_ack'));
+      break;
+    }
+
+    // CHECKIN_COMPLETE — clear checkin state, return to dashboard.
+    case 'checkin_complete': {
+      // REG-015: clear checkin-only state
+      dispatch(updateScreenData({ checkin_step: null, checkin_draft: null, checkin_ack_variant: null }));
+      webNavigate('/en/mitra/dashboard');
+      break;
+    }
+
+    // ================================================================
+    // ROOM ACTIONS
+    // ================================================================
+
+    // ROOM_TELEMETRY — context picker telemetry (non-blocking).
+    case 'room_telemetry': {
+      const body = {
+        event_type: action.payload?.event_type || null,
+        room_id: action.payload?.room_id || screenData.room_id || null,
+        life_context: action.payload?.life_context ?? null,
+        ts: Date.now(),
+      };
+      void postRoomTelemetry(body as any);
+      break;
+    }
+
+    // ROOM_EXIT — clear room state, return to dashboard.
+    case 'room_exit': {
+      const rId = action.payload?.room_id || screenData.room_id || null;
+      void apiTrackEvent('room_exit_dispatched', {
+        journey_id: screenData.journey_id,
+        day_number: screenData.day_number || 1,
+        meta: { room_id: rId, source: 'room_renderer' },
+      });
+      dispatch(updateScreenData({
+        room_id: null,
+        room_render_payload: null,
+        room_life_context: null,
+        room_selected_action: null,
+      }));
+      webNavigate('/en/mitra/dashboard');
+      break;
+    }
+
+    // ROOM_STEP_COMPLETED — telemetry only.
+    case 'room_step_completed': {
+      void apiTrackEvent('room_step_completed', {
+        journey_id: screenData.journey_id,
+        day_number: screenData.day_number || 1,
+        meta: {
+          room_id: action.payload?.room_id || screenData.room_id || null,
+          template_id: action.payload?.template_id || null,
+          action_id: action.payload?.action_id || null,
+          analytics_key: action.payload?.analytics_key || null,
+        },
+      });
+      break;
+    }
+
+    // ROOM_INQUIRY_OPENED / ROOM_INQUIRY_CATEGORY_SELECTED — telemetry only.
+    case 'room_inquiry_opened': {
+      void apiTrackEvent('room_inquiry_opened', {
+        journey_id: screenData.journey_id,
+        day_number: screenData.day_number || 1,
+        meta: {
+          room_id: action.payload?.room_id || screenData.room_id || null,
+          action_id: action.payload?.action_id || null,
+          analytics_key: action.payload?.analytics_key || null,
+        },
+      });
+      break;
+    }
+    case 'room_inquiry_category_selected': {
+      void apiTrackEvent('room_inquiry_category_selected', {
+        journey_id: screenData.journey_id,
+        day_number: screenData.day_number || 1,
+        meta: {
+          room_id: action.payload?.room_id || screenData.room_id || null,
+          category_id: action.payload?.category_id || null,
+          action_id: action.payload?.action_id || null,
+        },
+      });
+      break;
+    }
+
+    // ROOM_CARRY_CAPTURED — telemetry + optional sacred write.
+    case 'room_carry_captured': {
+      const rId = action.payload?.room_id || screenData.room_id || null;
+      void apiTrackEvent('room_carry_captured', {
+        journey_id: screenData.journey_id,
+        day_number: screenData.day_number || 1,
+        meta: {
+          room_id: rId,
+          writes_event: action.payload?.writes_event || null,
+          label: action.payload?.label || '',
+          analytics_key: action.payload?.analytics_key || null,
+        },
+      });
+      if (rId && action.payload?.carry_text) {
+        void postRoomSacred(rId, {
+          text: action.payload.carry_text,
+          action_id: action.payload?.action_id,
+          analytics_key: action.payload?.analytics_key,
+        });
+      }
+      break;
+    }
+
+    // SUPPORT_EXIT — safe escape from any support surface.
+    case 'support_exit': {
+      // Clear all support state
+      dispatch(updateScreenData({
+        trigger_mantra_text: null, trigger_mantra_devanagari: null, om_audio_url: null,
+        checkin_step: null, checkin_draft: null, checkin_ack_variant: null,
+        room_id: null, room_render_payload: null, room_life_context: null, room_selected_action: null,
+      }));
+      webNavigate('/en/mitra/dashboard');
       break;
     }
 

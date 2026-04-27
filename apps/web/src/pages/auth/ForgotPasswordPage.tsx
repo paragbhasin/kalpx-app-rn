@@ -1,91 +1,75 @@
+/**
+ * ForgotPasswordPage — POST users/reset_password/ (confirmed from apps/mobile/src/screens/Signup/actions.ts)
+ */
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { PageShell } from '../../components/PageShell';
-import { forgotPasswordSchema } from '@kalpx/validation';
-import { api } from '../../lib/api';
-import { useAppDispatch } from '../../store/hooks';
-import { showSnackBar } from '../../store/snackBarSlice';
+import { AuthLayout } from '../../components/AuthLayout';
+import { useAuth } from '../../hooks/useAuth';
 
 export function ForgotPasswordPage() {
-  const dispatch = useAppDispatch();
+  const { forgotPassword } = useAuth();
   const [email, setEmail] = useState('');
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setErrors({});
-
-    const result = forgotPasswordSchema.safeParse({ email });
-    if (!result.success) {
-      const fieldErrors: Record<string, string> = {};
-      result.error.errors.forEach((err) => {
-        if (err.path[0]) fieldErrors[String(err.path[0])] = err.message;
-      });
-      setErrors(fieldErrors);
-      return;
-    }
+    setError('');
+    if (!email) { setError('Email is required.'); return; }
 
     setLoading(true);
-    try {
-      await api.post('auth/password-reset/', { email });
-      setSent(true);
-    } catch (err: any) {
-      const msg = err?.response?.data?.detail ?? 'Request failed. Please try again.';
-      dispatch(showSnackBar(msg));
-    } finally {
-      setLoading(false);
-    }
-  }
+    const result = await forgotPassword(email);
+    setLoading(false);
 
-  if (sent) {
-    return (
-      <PageShell centered>
-        <div style={{ textAlign: 'center', padding: 32 }}>
-          <p style={{ marginBottom: 16 }}>Check your email for a reset link.</p>
-          <Link to="/login" style={{ color: '#c9a96e' }}>Back to sign in</Link>
-        </div>
-      </PageShell>
-    );
+    if (result.success) {
+      setSent(true);
+    } else {
+      // Show success anyway — don't reveal whether email exists
+      setSent(true);
+    }
   }
 
   return (
-    <PageShell centered>
-      <div style={{ width: '100%', maxWidth: 400, padding: 32 }}>
-        <h2 style={{ fontWeight: 300, marginBottom: 32, textAlign: 'center' }}>Reset password</h2>
+    <AuthLayout title="Reset password">
+      {sent ? (
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ color: '#aaa', marginBottom: 24, lineHeight: 1.6 }}>
+            If an account exists for <strong>{email}</strong>, you'll receive a reset link shortly.
+          </p>
+          <Link to="/login" style={{ color: '#c9a96e', fontSize: 14 }}>← Back to sign in</Link>
+        </div>
+      ) : (
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div>
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={inputStyle}
-            />
-            {errors.email && <p style={errorStyle}>{errors.email}</p>}
-          </div>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+            style={inputStyle}
+          />
+          {error && <p style={{ color: '#e06060', fontSize: 12 }}>{error}</p>}
           <button
             type="submit"
             disabled={loading}
             style={{
               padding: '14px',
-              background: '#c9a96e',
+              background: loading ? '#7a6640' : '#c9a96e',
               color: '#0a0a0a',
               borderRadius: 8,
               fontWeight: 600,
               fontSize: 16,
-              opacity: loading ? 0.6 : 1,
             }}
           >
             {loading ? 'Sending…' : 'Send reset link'}
           </button>
+          <div style={{ textAlign: 'center', fontSize: 14 }}>
+            <Link to="/login" style={{ color: '#c9a96e' }}>← Back to sign in</Link>
+          </div>
         </form>
-        <div style={{ marginTop: 24, textAlign: 'center', fontSize: 14 }}>
-          <Link to="/login" style={{ color: '#c9a96e' }}>Back to sign in</Link>
-        </div>
-      </div>
-    </PageShell>
+      )}
+    </AuthLayout>
   );
 }
 
@@ -98,10 +82,5 @@ const inputStyle: React.CSSProperties = {
   color: '#f0ede8',
   fontSize: 16,
   outline: 'none',
-};
-
-const errorStyle: React.CSSProperties = {
-  color: '#cc4444',
-  fontSize: 12,
-  marginTop: 4,
+  boxSizing: 'border-box',
 };

@@ -1,12 +1,12 @@
 import { createApiClient } from '@kalpx/api-client';
+import { WEB_ENV } from './env';
 import { webStorage } from './webStorage';
 import { webRouter } from './webRouter';
-import { env } from './env';
 
 export const api = createApiClient({
-  baseURL: env.apiBaseUrl,
+  baseURL: WEB_ENV.apiBaseUrl,
   timeout: 30000,
   storage: webStorage,
   router: webRouter,
-  isDev: env.isDev,
+  isDev: WEB_ENV.isDev,
 });

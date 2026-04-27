@@ -1,99 +1,95 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { PageShell } from '../../components/PageShell';
+import { Link } from 'react-router-dom';
+import { AuthLayout } from '../../components/AuthLayout';
+import { useAuth } from '../../hooks/useAuth';
+import { useGuestIdentity } from '../../hooks/useGuestIdentity';
 import { loginSchema } from '@kalpx/validation';
-import { storeTokens } from '@kalpx/auth';
-import { webStorage } from '../../lib/webStorage';
-import { api } from '../../lib/api';
-import { useAppDispatch } from '../../store/hooks';
-import { showSnackBar } from '../../store/snackBarSlice';
 
 export function LoginPage() {
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
+  useGuestIdentity();
+  const { login } = useAuth();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [globalError, setGlobalError] = useState('');
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setErrors({});
+    setFieldErrors({});
+    setGlobalError('');
 
     const result = loginSchema.safeParse({ email, password });
     if (!result.success) {
-      const fieldErrors: Record<string, string> = {};
+      const errs: Record<string, string> = {};
       result.error.errors.forEach((err) => {
-        if (err.path[0]) fieldErrors[String(err.path[0])] = err.message;
+        if (err.path[0]) errs[String(err.path[0])] = err.message;
       });
-      setErrors(fieldErrors);
+      setFieldErrors(errs);
       return;
     }
 
     setLoading(true);
-    try {
-      const res = await api.post('auth/login/', { email, password });
-      await storeTokens(webStorage, {
-        accessToken: res.data.access,
-        refreshToken: res.data.refresh,
-      });
-      navigate('/en/mitra');
-    } catch (err: any) {
-      const msg = err?.response?.data?.detail ?? 'Login failed. Please try again.';
-      dispatch(showSnackBar(msg));
-    } finally {
-      setLoading(false);
-    }
+    const { success, error } = await login(email, password);
+    setLoading(false);
+
+    if (!success && error) setGlobalError(error);
   }
 
   return (
-    <PageShell centered>
-      <div style={{ width: '100%', maxWidth: 400, padding: 32 }}>
-        <h2 style={{ fontWeight: 300, marginBottom: 32, textAlign: 'center' }}>Sign in</h2>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div>
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={inputStyle}
-            />
-            {errors.email && <p style={errorStyle}>{errors.email}</p>}
-          </div>
-          <div>
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={inputStyle}
-            />
-            {errors.password && <p style={errorStyle}>{errors.password}</p>}
-          </div>
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              padding: '14px',
-              background: '#c9a96e',
-              color: '#0a0a0a',
-              borderRadius: 8,
-              fontWeight: 600,
-              fontSize: 16,
-              opacity: loading ? 0.6 : 1,
-            }}
-          >
-            {loading ? 'Signing in…' : 'Sign in'}
-          </button>
-        </form>
-        <div style={{ marginTop: 24, textAlign: 'center', fontSize: 14, color: '#888' }}>
-          <Link to="/forgot-password" style={{ color: '#c9a96e' }}>Forgot password?</Link>
-          {' · '}
-          <Link to="/signup" style={{ color: '#c9a96e' }}>Create account</Link>
+    <AuthLayout title="Sign in">
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+            style={inputStyle}
+          />
+          {fieldErrors.email && <p style={errorStyle}>{fieldErrors.email}</p>}
         </div>
+        <div>
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            autoComplete="current-password"
+            style={inputStyle}
+          />
+          {fieldErrors.password && <p style={errorStyle}>{fieldErrors.password}</p>}
+        </div>
+        {globalError && (
+          <p style={{ ...errorStyle, textAlign: 'center', padding: '8px 12px', background: '#2a1010', borderRadius: 6 }}>
+            {globalError}
+          </p>
+        )}
+        <button
+          type="submit"
+          disabled={loading}
+          style={{
+            padding: '14px',
+            background: loading ? '#7a6640' : '#c9a96e',
+            color: '#0a0a0a',
+            borderRadius: 8,
+            fontWeight: 600,
+            fontSize: 16,
+            transition: 'background 0.2s',
+          }}
+        >
+          {loading ? 'Signing in…' : 'Sign in'}
+        </button>
+      </form>
+
+      <div style={{ marginTop: 24, textAlign: 'center', fontSize: 14, color: '#888', display: 'flex', justifyContent: 'center', gap: 16 }}>
+        <Link to="/forgot-password" style={{ color: '#c9a96e' }}>Forgot password?</Link>
+        <span>·</span>
+        <Link to="/signup" style={{ color: '#c9a96e' }}>Create account</Link>
       </div>
-    </PageShell>
+    </AuthLayout>
   );
 }
 
@@ -106,10 +102,11 @@ const inputStyle: React.CSSProperties = {
   color: '#f0ede8',
   fontSize: 16,
   outline: 'none',
+  boxSizing: 'border-box',
 };
 
 const errorStyle: React.CSSProperties = {
-  color: '#cc4444',
+  color: '#e06060',
   fontSize: 12,
   marginTop: 4,
 };

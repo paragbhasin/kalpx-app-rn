@@ -1,6 +1,6 @@
 import type { AnalyticsAdapter } from '@kalpx/analytics';
 import { api } from './api';
-import { env } from './env';
+import { WEB_ENV } from './env';
 
 declare global {
   interface Window {
@@ -9,7 +9,7 @@ declare global {
 }
 
 function firePixel(eventName: string, properties?: Record<string, any>) {
-  if (env.metaPixelId && window.fbq) {
+  if (WEB_ENV.metaPixelId && window.fbq) {
     window.fbq('track', eventName, properties);
   }
 }

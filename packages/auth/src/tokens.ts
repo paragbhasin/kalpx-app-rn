@@ -30,7 +30,14 @@ export function isTokenExpired(token: string): boolean {
   try {
     const payloadB64 = token.split('.')[1];
     if (!payloadB64) return true;
-    const payload = JSON.parse(atob(payloadB64.replace(/-/g, '+').replace(/_/g, '/'))) as { exp?: number };
+    // Convert base64url → standard base64 → JSON
+    // Use Buffer when available (Node/React Native), fall back to atob (browser)
+    const std = payloadB64.replace(/-/g, '+').replace(/_/g, '/');
+    const decoded =
+      typeof Buffer !== 'undefined'
+        ? Buffer.from(std, 'base64').toString('utf8')
+        : atob(std.padEnd(std.length + (4 - (std.length % 4)) % 4, '='));
+    const payload = JSON.parse(decoded) as { exp?: number };
     if (typeof payload.exp !== 'number') return true;
     return payload.exp * 1000 < Date.now();
   } catch {

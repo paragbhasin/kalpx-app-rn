@@ -5,6 +5,7 @@ import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/auth/LoginPage';
 import { SignupPage } from './pages/auth/SignupPage';
 import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
+import { LogoutPage } from './pages/auth/LogoutPage';
 import { MitraHomePage } from './pages/mitra/MitraHomePage';
 import { MitraEnginePage } from './pages/mitra/MitraEnginePage';
 import { DashboardPage } from './pages/mitra/DashboardPage';
@@ -16,6 +17,7 @@ import { CheckinPage } from './pages/mitra/CheckinPage';
 import { ClassListingPage } from './pages/classes/ClassListingPage';
 import { CommunityFeedPage } from './pages/community/CommunityFeedPage';
 import { ProfilePage } from './pages/profile/ProfilePage';
+import { RequiresJourney } from './components/RequiresJourney';
 
 export function AppRoutes() {
   return (
@@ -27,23 +29,43 @@ export function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/logout" element={<LogoutPage />} />
 
-      {/* Mitra */}
+      {/* Mitra — home is an open routing hub */}
       <Route path="/en/mitra" element={<MitraHomePage />} />
       <Route path="/en/mitra/start" element={<OnboardingPage />} />
-      <Route path="/en/mitra/engine" element={<MitraEnginePage />} />
-      <Route path="/en/mitra/dashboard" element={<DashboardPage />} />
-      <Route path="/en/mitra/room/:roomId" element={<RoomPage />} />
-      <Route path="/en/mitra/checkpoint/:day" element={<CheckpointPage />} />
-      <Route path="/en/mitra/trigger" element={<TriggerPage />} />
-      <Route path="/en/mitra/checkin" element={<CheckinPage />} />
+
+      {/* Journey-gated Mitra routes */}
+      <Route
+        path="/en/mitra/engine"
+        element={<RequiresJourney><MitraEnginePage /></RequiresJourney>}
+      />
+      <Route
+        path="/en/mitra/dashboard"
+        element={<RequiresJourney><DashboardPage /></RequiresJourney>}
+      />
+      <Route
+        path="/en/mitra/room/:roomId"
+        element={<RequiresJourney><RoomPage /></RequiresJourney>}
+      />
+      <Route
+        path="/en/mitra/checkpoint/:day"
+        element={<RequiresJourney><CheckpointPage /></RequiresJourney>}
+      />
+      <Route
+        path="/en/mitra/trigger"
+        element={<RequiresJourney><TriggerPage /></RequiresJourney>}
+      />
+      <Route
+        path="/en/mitra/checkin"
+        element={<RequiresJourney><CheckinPage /></RequiresJourney>}
+      />
 
       {/* Other verticals — scaffolds */}
       <Route path="/en/classes" element={<ClassListingPage />} />
       <Route path="/en/community" element={<CommunityFeedPage />} />
       <Route path="/en/profile" element={<ProfilePage />} />
 
-      {/* Fallback */}
       <Route path="*" element={<Navigate to="/en" replace />} />
     </Routes>
   );

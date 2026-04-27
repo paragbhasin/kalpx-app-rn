@@ -1,9 +1,0 @@
-appId: com.kalpx.app
----
-# Test exact vs partial matching on visible modal
-- assertVisible:
-    text: "Sambandha reminds us that even one true bond can hold us."
-- assertVisible:
-    text: "Naming someone helps you return from feeling alone to one thread of care."
-- assertVisible:
-    text: "Who is close to your heart right now?"

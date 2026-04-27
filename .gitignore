@@ -46,6 +46,12 @@ app-example
 # GoogleService-Info.plist is provided at build time via GOOGLE_SERVICES_PLIST env var.
 GoogleService-Info.plist
 
+# Non-build directories — large test/doc artifacts not needed by EAS
+screenshots/
+docs/
+.maestro/
+tests/
+
 # Build artifacts
 build-extract/
 build.ipa

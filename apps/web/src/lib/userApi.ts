@@ -16,6 +16,9 @@ export async function getUserProfile(): Promise<UserProfile | null> {
     // Backend may return { profile: { ... } } (nested) or flat { email, ... }.
     // Mobile reads res.data?.profile?.profile_name, implying nested shape is possible.
     const raw = res.data;
+    if (import.meta.env.DEV) {
+      console.log('[userApi] profile_details raw shape:', JSON.stringify(raw)?.slice(0, 300));
+    }
     return (raw?.profile ?? raw) as UserProfile;
   } catch (err: any) {
     if (err?.response?.status === 401) return null;

@@ -41,7 +41,8 @@ export async function getDailyView(): Promise<any> {
 
 /**
  * GET /api/mitra/v3/journey/daily-view/ — V3 daily view envelope used by RN dashboard.
- * Falls back to mitra/today/ for compatibility if v3 endpoint returns 404.
+ * Falls back to mitra/today/ ONLY on 404 (feature flag off).
+ * The today/ response is NOT v3Ingest-compatible; caller must handle _isLegacyFallback.
  */
 export async function getDashboardView(): Promise<any> {
   try {
@@ -49,8 +50,10 @@ export async function getDashboardView(): Promise<any> {
     return res.data;
   } catch (err: any) {
     if (err?.response?.status === 404) {
+      console.warn('[mitraApi] v3/journey/daily-view/ returned 404 — falling back to mitra/today/. v3Ingest will produce empty keys; dashboard may be degraded.');
       const res = await api.get('mitra/today/');
-      return res.data;
+      // Tag so callers can show a safe fallback state rather than trying v3Ingest
+      return { ...(res.data ?? {}), _isLegacyFallback: true };
     }
     throw err;
   }
@@ -297,6 +300,9 @@ export async function postPranaAcknowledge(payload: {
 export async function getPrinciple(id: string | number): Promise<any> {
   try {
     const res = await api.get(`mitra/principles/${encodeURIComponent(String(id))}/`);
+    if (import.meta.env.DEV) {
+      console.log(`[mitraApi] principles/${id}/ shape:`, JSON.stringify(res.data)?.slice(0, 200));
+    }
     return res.data;
   } catch (err: any) {
     if (err?.response?.status === 404) return null;
@@ -312,6 +318,9 @@ export async function getPrinciple(id: string | number): Promise<any> {
 export async function getPrincipleSource(id: string | number): Promise<any> {
   try {
     const res = await api.get(`mitra/principles/${encodeURIComponent(String(id))}/sources/`);
+    if (import.meta.env.DEV) {
+      console.log(`[mitraApi] principles/${id}/sources/ shape:`, JSON.stringify(res.data)?.slice(0, 200));
+    }
     return res.data;
   } catch (err: any) {
     if (err?.response?.status === 404) return null;

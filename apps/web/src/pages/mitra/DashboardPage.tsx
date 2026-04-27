@@ -37,6 +37,13 @@ export function DashboardPage() {
         return;
       }
 
+      // Legacy fallback: v3 endpoint returned 404 (feature flag off).
+      // mitra/today/ response is not v3Ingest-compatible; show safe error.
+      if (envelope._isLegacyFallback) {
+        setError('Dashboard is updating — please try again shortly.');
+        return;
+      }
+
       const flat = ingestDailyView(envelope);
 
       if (WEB_ENV.isDev) {

@@ -21,7 +21,7 @@
  */
 
 import { fetchAllScreens, preloadScreens } from './screenApi';
-import * as LocalContainers from '../../allContainers';
+import * as LocalContainers from '@kalpx/contracts';
 
 // ---------------------------------------------------------------------------
 // Types

@@ -18,7 +18,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert, Linking } from "react-native";
 import api from "../Networks/axios";
 import { navigate as rootNavigate } from "../Shared/Routes/NavigationService";
-import { cleanupFlowState, GUARDED_ACTIONS } from "./cleanupFields";
+import { cleanupFlowState, GUARDED_ACTIONS } from "@kalpx/contracts";
 import {
   // Audit fix F1/F2/F3/F9 (2026-04-13) — wrappers for dashboard_load orchestration
   getBriefingToday,

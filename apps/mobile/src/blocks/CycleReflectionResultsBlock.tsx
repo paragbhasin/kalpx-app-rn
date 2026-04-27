@@ -20,7 +20,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { cleanupFlowState } from "../engine/cleanupFields";
+import { cleanupFlowState } from "@kalpx/contracts";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { readMomentSlot, useContentSlots } from "../hooks/useContentSlots";
 import store from "../store";

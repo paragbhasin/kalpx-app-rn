@@ -17,6 +17,7 @@
     "lint": "expo lint"
   },
   "dependencies": {
+    "@kalpx/contracts": "workspace:*",
     "@expo-google-fonts/cinzel": "^0.4.2",
     "@expo-google-fonts/cormorant-garamond": "^0.4.1",
     "@expo-google-fonts/inter": "^0.4.2",

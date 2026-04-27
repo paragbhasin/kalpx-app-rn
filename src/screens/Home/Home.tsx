@@ -32,7 +32,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchProfileDetails } from "../Profile/actions";
 import { useScreenStore } from "../../engine/useScreenBridge";
 import api from "../../Networks/axios";
-import store, { RootState } from "../../store";
+import store, { AppDispatch, RootState } from "../../store";
 import { loadScreenWithData, screenActions } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
 import ContinueJourney from "./ContinueJourney";
@@ -69,7 +69,7 @@ export const collapseControl = { avoidCollapse: false };
 
 export default function Home() {
   const navigation: any = useNavigation();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const user = useSelector(
     (state: RootState) => state.login?.user || state.socialLoginReducer?.user,
   );

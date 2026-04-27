@@ -1611,7 +1611,12 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                     type: "dashboard_query",
                     payload: { text, response_type: type },
                   },
-                  { screenState: screenData },
+                  {
+                    screenState: screenData,
+                    loadScreen,
+                    goBack,
+                    setScreenValue: (val: any, k: string) => updateScreenData(k, val),
+                  },
                 );
               }}
             />
@@ -1648,7 +1653,12 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                   type: "dashboard_query",
                   payload: { text, response_type: type },
                 },
-                { screenState: screenData },
+                {
+                  screenState: screenData,
+                  loadScreen,
+                  goBack,
+                  setScreenValue: (val: any, k: string) => updateScreenData(k, val),
+                },
               );
             }}
           />

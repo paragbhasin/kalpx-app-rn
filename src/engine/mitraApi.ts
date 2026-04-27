@@ -963,6 +963,7 @@ export interface V3Continuity {
   why_this_l1_items: { id: string; label: string }[];
   /** First-paint gate only — full PostConflictGentlenessCard content still via FCI. */
   post_conflict?: boolean;
+  post_conflict_pending?: boolean | null;
 }
 
 export interface V3TriadItem {

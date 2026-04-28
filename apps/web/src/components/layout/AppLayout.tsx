@@ -24,7 +24,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   const isImmersive = IMMERSIVE_PREFIXES.some((p) => pathname.startsWith(p));
   const isAuth = AUTH_ROUTES.some((p) => pathname === p || pathname.startsWith(p + '?'));
-  const isMitraHome = pathname === '/en/mitra';
+  const isMitraHome = pathname === '/en' || pathname === '/en/mitra';
 
   if (isImmersive || isAuth || isMitraHome) {
     return <>{children}</>;

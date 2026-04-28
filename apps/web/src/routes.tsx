@@ -1,41 +1,39 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Navigate, Route, Routes } from "react-router-dom";
 
-import { LandingPage } from './pages/LandingPage';
-import { LoginPage } from './pages/auth/LoginPage';
-import { SignupPage } from './pages/auth/SignupPage';
-import { ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
-import { ResetPasswordPage } from './pages/auth/ResetPasswordPage';
-import { LogoutPage } from './pages/auth/LogoutPage';
-import { MitraHomePage } from './pages/mitra/MitraHomePage';
-import { MitraStartPage } from './pages/mitra/MitraStartPage';
-import { MitraEnginePage } from './pages/mitra/MitraEnginePage';
-import { DashboardPage } from './pages/mitra/DashboardPage';
-import { OnboardingPage } from './pages/mitra/OnboardingPage';
-import { RoomPage } from './pages/mitra/RoomPage';
-import { CheckpointPage } from './pages/mitra/CheckpointPage';
-import { TriggerPage } from './pages/mitra/TriggerPage';
-import { CheckinPage } from './pages/mitra/CheckinPage';
-import { WelcomeBackPage } from './pages/mitra/WelcomeBackPage';
-import { ClassListingPage } from './pages/classes/ClassListingPage';
-import { ClassDetailPage } from './pages/classes/ClassDetailPage';
-import { ClassBookingPage } from './pages/classes/ClassBookingPage';
-import { ClassPaymentPage } from './pages/classes/ClassPaymentPage';
-import { ClassBookingSuccessPage } from './pages/classes/ClassBookingSuccessPage';
-import { CommunityFeedPage } from './pages/community/CommunityFeedPage';
-import { CommunityPostDetailPage } from './pages/community/CommunityPostDetailPage';
-import { CreateCommunityPostPage } from './pages/community/CreateCommunityPostPage';
-import { ProfilePage } from './pages/profile/ProfilePage';
-import { RetreatsInterestPage } from './pages/retreats/RetreatsInterestPage';
-import { NotificationsPage } from './pages/notifications/NotificationsPage';
-import { RequiresJourney } from './components/RequiresJourney';
-import { RequiresAuth } from './components/RequiresAuth';
+import { RequiresAuth } from "./components/RequiresAuth";
+import { RequiresJourney } from "./components/RequiresJourney";
+import { ForgotPasswordPage } from "./pages/auth/ForgotPasswordPage";
+import { LoginPage } from "./pages/auth/LoginPage";
+import { LogoutPage } from "./pages/auth/LogoutPage";
+import { ResetPasswordPage } from "./pages/auth/ResetPasswordPage";
+import { SignupPage } from "./pages/auth/SignupPage";
+import { ClassBookingPage } from "./pages/classes/ClassBookingPage";
+import { ClassBookingSuccessPage } from "./pages/classes/ClassBookingSuccessPage";
+import { ClassDetailPage } from "./pages/classes/ClassDetailPage";
+import { ClassListingPage } from "./pages/classes/ClassListingPage";
+import { ClassPaymentPage } from "./pages/classes/ClassPaymentPage";
+import { CommunityFeedPage } from "./pages/community/CommunityFeedPage";
+import { CommunityPostDetailPage } from "./pages/community/CommunityPostDetailPage";
+import { CreateCommunityPostPage } from "./pages/community/CreateCommunityPostPage";
+import { CheckinPage } from "./pages/mitra/CheckinPage";
+import { CheckpointPage } from "./pages/mitra/CheckpointPage";
+import { DashboardPage } from "./pages/mitra/DashboardPage";
+import { MitraEnginePage } from "./pages/mitra/MitraEnginePage";
+import { MitraHomePage } from "./pages/mitra/MitraHomePage";
+import { MitraStartPage } from "./pages/mitra/MitraStartPage";
+import { OnboardingPage } from "./pages/mitra/OnboardingPage";
+import { RoomPage } from "./pages/mitra/RoomPage";
+import { TriggerPage } from "./pages/mitra/TriggerPage";
+import { WelcomeBackPage } from "./pages/mitra/WelcomeBackPage";
+import { NotificationsPage } from "./pages/notifications/NotificationsPage";
+import { ProfilePage } from "./pages/profile/ProfilePage";
+import { RetreatsInterestPage } from "./pages/retreats/RetreatsInterestPage";
 
 export function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/en" replace />} />
-      <Route path="/en" element={<LandingPage />} />
+      <Route path="/en" element={<MitraHomePage />} />
 
       {/* Auth */}
       <Route path="/login" element={<LoginPage />} />
@@ -52,31 +50,59 @@ export function AppRoutes() {
       {/* Journey-gated Mitra routes */}
       <Route
         path="/en/mitra/engine"
-        element={<RequiresJourney><MitraEnginePage /></RequiresJourney>}
+        element={
+          <RequiresJourney>
+            <MitraEnginePage />
+          </RequiresJourney>
+        }
       />
       <Route
         path="/en/mitra/dashboard"
-        element={<RequiresJourney><DashboardPage /></RequiresJourney>}
+        element={
+          <RequiresJourney>
+            <DashboardPage />
+          </RequiresJourney>
+        }
       />
       <Route
         path="/en/mitra/room/:roomId"
-        element={<RequiresJourney><RoomPage /></RequiresJourney>}
+        element={
+          <RequiresJourney>
+            <RoomPage />
+          </RequiresJourney>
+        }
       />
       <Route
         path="/en/mitra/checkpoint/:day"
-        element={<RequiresJourney><CheckpointPage /></RequiresJourney>}
+        element={
+          <RequiresJourney>
+            <CheckpointPage />
+          </RequiresJourney>
+        }
       />
       <Route
         path="/en/mitra/trigger"
-        element={<RequiresJourney><TriggerPage /></RequiresJourney>}
+        element={
+          <RequiresJourney>
+            <TriggerPage />
+          </RequiresJourney>
+        }
       />
       <Route
         path="/en/mitra/checkin"
-        element={<RequiresJourney><CheckinPage /></RequiresJourney>}
+        element={
+          <RequiresJourney>
+            <CheckinPage />
+          </RequiresJourney>
+        }
       />
       <Route
         path="/en/mitra/welcome-back"
-        element={<RequiresAuth><WelcomeBackPage /></RequiresAuth>}
+        element={
+          <RequiresAuth>
+            <WelcomeBackPage />
+          </RequiresAuth>
+        }
       />
 
       {/* Classes vertical */}
@@ -89,14 +115,31 @@ export function AppRoutes() {
       {/* Communities vertical */}
       <Route path="/en/community" element={<CommunityFeedPage />} />
       <Route path="/en/community/new" element={<CreateCommunityPostPage />} />
-      <Route path="/en/community/:postId" element={<CommunityPostDetailPage />} />
-      <Route path="/en/profile" element={<RequiresAuth><ProfilePage /></RequiresAuth>} />
+      <Route
+        path="/en/community/:postId"
+        element={<CommunityPostDetailPage />}
+      />
+      <Route
+        path="/en/profile"
+        element={
+          <RequiresAuth>
+            <ProfilePage />
+          </RequiresAuth>
+        }
+      />
 
       {/* Retreats vertical */}
       <Route path="/en/retreats" element={<RetreatsInterestPage />} />
 
       {/* Notifications inbox */}
-      <Route path="/en/notifications" element={<RequiresAuth><NotificationsPage /></RequiresAuth>} />
+      <Route
+        path="/en/notifications"
+        element={
+          <RequiresAuth>
+            <NotificationsPage />
+          </RequiresAuth>
+        }
+      />
 
       <Route path="*" element={<Navigate to="/en" replace />} />
     </Routes>

@@ -12,6 +12,7 @@ interface Props {
 
 export function MitraMobileShell({ children, hideBottomNav, hideTopBar, backgroundImage }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const transparentChrome = !!backgroundImage;
 
   return (
     <div
@@ -23,11 +24,11 @@ export function MitraMobileShell({ children, hideBottomNav, hideTopBar, backgrou
       }}
     >
       <div style={{ maxWidth: 480, margin: '0 auto', height: '100dvh', display: 'flex', flexDirection: 'column' }}>
-        {!hideTopBar && <MitraTopBar />}
+        {!hideTopBar && <MitraTopBar transparent={transparentChrome} />}
         <main style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
           {children}
         </main>
-        {!hideBottomNav && <MitraBottomNav4Tab onMenuOpen={() => setMenuOpen(true)} />}
+        {!hideBottomNav && <MitraBottomNav4Tab transparent={transparentChrome} onMenuOpen={() => setMenuOpen(true)} />}
       </div>
       {menuOpen && <MitraMenuDrawer onClose={() => setMenuOpen(false)} />}
     </div>

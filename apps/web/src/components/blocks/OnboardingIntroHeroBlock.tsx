@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from "react";
 
 interface Chip {
   id: string;
@@ -35,98 +35,113 @@ export function OnboardingIntroHeroBlock({ block, onAction }: Props) {
   return (
     <div
       style={{
-        minHeight: '100dvh',
-        backgroundImage: 'url(/new_home.png)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        padding: '0 24px calc(48px + env(safe-area-inset-bottom))',
-        position: 'relative',
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: 10,
+        position: "relative",
       }}
     >
-      {/* Lotus overlay — bottom decorative */}
-      <img
-        src="/new_home_lotus.png"
-        alt=""
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '40vw',
-          maxWidth: 200,
-          opacity: 0.7,
-          pointerEvents: 'none',
-        }}
-      />
+      <div style={{ flex: 1 }} />
 
-      {/* Text stack */}
-      <div style={{ textAlign: 'center', marginBottom: 24, position: 'relative', zIndex: 1 }}>
+      <div
+        style={{
+          textAlign: "center",
+          width: "100%",
+          maxWidth: 360,
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
         {block.headline && (
           <h2
             style={{
-              fontSize: 28,
+              fontSize: 31,
               fontWeight: 700,
-              color: 'var(--kalpx-text)',
-              lineHeight: 1.3,
-              marginBottom: 12,
-              fontFamily: 'var(--kalpx-font-serif)',
+              color: "var(--kalpx-text)",
+              lineHeight: 1.34,
+              marginBottom: 10,
+              fontFamily: "var(--kalpx-font-serif)",
+              textAlign: "center",
             }}
           >
             {block.headline}
           </h2>
         )}
         {block.subtext && (
-          <p style={{ fontSize: 16, color: 'var(--kalpx-text-soft)', marginBottom: 20, lineHeight: 1.5 }}>
+          <p
+            style={{
+              fontSize: 20,
+              color: "var(--kalpx-text)",
+              opacity: 0.78,
+              margin: "0 auto",
+              lineHeight: 1.45,
+              maxWidth: 310,
+              marginBottom: 30,
+              fontFamily: "var(--kalpx-font-serif)",
+              textAlign: "center",
+            }}
+          >
             {block.subtext}
           </p>
         )}
       </div>
 
-      {/* Chips — vertical column, pill-shaped frosted cards */}
-      {chips.length > 0 && (
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 12,
-            width: '100%',
-            maxWidth: 360,
-            position: 'relative',
-            zIndex: 1,
-          }}
-        >
-          {chips.map((chip) => (
-            <button
-              key={chip.id}
-              data-testid={`chip-${chip.id}`}
-              disabled={busy}
-              onClick={() => void handleChip(chip)}
-              style={{
-                padding: '16px 20px',
-                borderRadius: 24,
-                border: `1px solid var(--kalpx-border-gold)`,
-                background: 'var(--kalpx-chip-bg)',
-                color: 'var(--kalpx-text)',
-                fontSize: 16,
-                fontWeight: 500,
-                cursor: busy ? 'not-allowed' : 'pointer',
-                opacity: busy ? 0.7 : 1,
-                textAlign: 'left',
-                lineHeight: 1.4,
-                backdropFilter: 'blur(4px)',
-                WebkitBackdropFilter: 'blur(4px)',
-                touchAction: 'manipulation',
-              }}
-            >
-              {chip.label}
-            </button>
-          ))}
-        </div>
-      )}
+      <div style={{ flex: 1 }} />
+
+      <div
+        style={{
+          width: "100%",
+          maxWidth: 360,
+          position: "relative",
+          zIndex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 16,
+        }}
+      >
+        {chips.length > 0 && (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 14,
+              width: "100%",
+            }}
+          >
+            {chips.map((chip) => (
+              <button
+                key={chip.id}
+                data-testid={`chip-${chip.id}`}
+                disabled={busy}
+                onClick={() => void handleChip(chip)}
+                style={{
+                  // minHeight: 74,
+                  padding: "14px 24px",
+                  borderRadius: 28,
+                  border: "1px solid rgba(201, 168, 76, 0.42)",
+                  background: "rgba(255, 253, 247, 0.82)",
+                  color: "var(--kalpx-text)",
+                  fontSize: 16,
+                  fontWeight: 500,
+                  cursor: busy ? "not-allowed" : "pointer",
+                  opacity: busy ? 0.7 : 1,
+                  textAlign: "center",
+                  lineHeight: 1.15,
+                  boxShadow: "0 10px 22px rgba(67,33,4,0.12)",
+                  backdropFilter: "blur(4px)",
+                  WebkitBackdropFilter: "blur(4px)",
+                  touchAction: "manipulation",
+                }}
+              >
+                {chip.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

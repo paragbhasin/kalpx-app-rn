@@ -159,7 +159,7 @@ export function OnboardingPage() {
   };
 
   const isHeroTurn = stateId === 'turn_1' || stateId === 'turn_2';
-  const backgroundImage = stateId === 'turn_1' ? '/14day_updated.png' : undefined;
+  const backgroundImage = isHeroTurn ? '/14day_updated.png' : undefined;
 
   return (
     <MitraMobileShell backgroundImage={backgroundImage}>

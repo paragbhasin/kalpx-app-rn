@@ -10,6 +10,7 @@ const LINK_TABS = [
 
 interface Props {
   onMenuOpen: () => void;
+  transparent?: boolean;
 }
 
 const tabStyle: React.CSSProperties = {
@@ -28,7 +29,7 @@ const tabStyle: React.CSSProperties = {
   padding: 0,
 };
 
-export function MitraBottomNav4Tab({ onMenuOpen }: Props) {
+export function MitraBottomNav4Tab({ onMenuOpen, transparent = false }: Props) {
   return (
     <nav
       style={{
@@ -37,9 +38,9 @@ export function MitraBottomNav4Tab({ onMenuOpen }: Props) {
         height: 'calc(56px + env(safe-area-inset-bottom))',
         paddingBottom: 'env(safe-area-inset-bottom)',
         borderTop: '1px solid var(--kalpx-border-gold)',
-        background: 'rgba(255,248,239,0.92)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
+        background: transparent ? 'transparent' : 'rgba(255,248,239,0.92)',
+        backdropFilter: transparent ? undefined : 'blur(8px)',
+        WebkitBackdropFilter: transparent ? undefined : 'blur(8px)',
         flexShrink: 0,
       }}
     >

@@ -1,7 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-export function MitraTopBar() {
+interface Props {
+  transparent?: boolean;
+}
+
+export function MitraTopBar({ transparent = false }: Props) {
   return (
     <div
       style={{
@@ -13,9 +17,9 @@ export function MitraTopBar() {
         paddingRight: 18,
         flexShrink: 0,
         borderBottom: '1px solid var(--kalpx-border-gold)',
-        background: 'rgba(255,248,239,0.88)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
+        background: transparent ? 'transparent' : 'rgba(255,248,239,0.88)',
+        backdropFilter: transparent ? undefined : 'blur(8px)',
+        WebkitBackdropFilter: transparent ? undefined : 'blur(8px)',
         position: 'sticky',
         top: 0,
         zIndex: 20,

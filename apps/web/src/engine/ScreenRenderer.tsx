@@ -25,7 +25,10 @@ export function ScreenRenderer({ schema, screenData = {}, onAction }: ScreenRend
 
   // Interpolate the entire schema with screenData so {{tokens}} resolve in blocks
   const resolved = interpolate(schema, screenData);
-  const blocks: any[] = resolved.blocks ?? [];
+  const rawBlocks: any[] = resolved.blocks ?? [];
+  const blocks: any[] = resolved.container_id === 'welcome_onboarding'
+    ? enrichOnboardingBlocks(rawBlocks)
+    : rawBlocks;
 
   return (
     <div style={{ padding: 16 }}>
@@ -50,4 +53,26 @@ export function ScreenRenderer({ schema, screenData = {}, onAction }: ScreenRend
       )}
     </div>
   );
+}
+
+function enrichOnboardingBlocks(blocks: any[]) {
+  const headlineBlock = blocks.find((block) => block.type === 'headline');
+  const subtextBlock = blocks.find((block) => block.type === 'subtext');
+
+  return blocks
+    .map((block) => {
+      if ((block.block_type || block.type) !== 'onboarding_conversation_turn') {
+        return block;
+      }
+
+      return {
+        ...block,
+        headline: block.headline ?? headlineBlock?.content,
+        subtext: block.subtext ?? subtextBlock?.content,
+      };
+    })
+    .filter((block) => {
+      const type = block.block_type || block.type;
+      return type !== 'headline' && type !== 'subtext';
+    });
 }

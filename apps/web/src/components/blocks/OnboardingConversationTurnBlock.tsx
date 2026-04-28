@@ -1,5 +1,6 @@
 import { ArrowRight, Cloud, Leaf, Sparkles, Sun } from "lucide-react";
 import { useState } from "react";
+import { VoiceTextInput } from "../VoiceTextInput";
 
 interface Chip {
   id: string;
@@ -144,7 +145,7 @@ export function OnboardingConversationTurnBlock({ block, onAction }: Props) {
           </div>
         </div>
 
-        {/* <div
+        <div
           style={{
             display: "flex",
             justifyContent: "center",
@@ -154,21 +155,21 @@ export function OnboardingConversationTurnBlock({ block, onAction }: Props) {
           <img
             src="/new_home_lotus.png"
             alt=""
-            style={{ width: "56%", maxWidth: 260, pointerEvents: "none" }}
+            style={{ width: "52%", maxWidth: 260, pointerEvents: "none" }}
           />
-        </div> */}
+        </div>
 
         {chips.length > 0 && (
           <div
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: 12,
+              gap: 14,
               width: "100%",
               marginTop: "auto",
             }}
           >
-            {chips.map((chip, index) => {
+            {chips.map((chip) => {
               const primary = chip.style === "primary";
               return (
                 <button
@@ -182,24 +183,25 @@ export function OnboardingConversationTurnBlock({ block, onAction }: Props) {
                     })
                   }
                   style={{
-                    padding: 10,
-                    borderRadius: 34,
-                    border: primary ? "none" : "2px solid var(--kalpx-gold)",
+                    padding: "10px",
+                    borderRadius: 999,
+                    border: primary
+                      ? "1px solid rgba(186, 132, 34, 0.7)"
+                      : "1px solid rgba(201, 168, 76, 0.7)",
                     background: primary
-                      ? "var(--kalpx-gold)"
-                      : "rgba(255, 253, 247, 0.5)",
-                    color: primary ? "#fff" : "var(--kalpx-text)",
-                    fontSize: primary ? 18 : 16,
+                      ? "linear-gradient(90deg, #c18a2b 0%, #d4a13b 50%, #bf8523 100%)"
+                      : "rgba(255, 252, 246, 0.94)",
+                    color: primary ? "#fff9ec" : "var(--kalpx-text)",
+                    fontSize: 17,
                     fontWeight: primary ? 700 : 600,
                     cursor: busy ? "not-allowed" : "pointer",
                     opacity: busy ? 0.7 : 1,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "space-between",
-
                     boxShadow: primary
-                      ? "0 10px 24px rgba(201, 168, 76, 0.22)"
-                      : "none",
+                      ? "0 12px 28px rgba(201, 168, 76, 0.28)"
+                      : "0 8px 22px rgba(67,33,4,0.08)",
                     backdropFilter: primary ? undefined : "blur(4px)",
                     WebkitBackdropFilter: primary ? undefined : "blur(4px)",
                   }}
@@ -212,12 +214,14 @@ export function OnboardingConversationTurnBlock({ block, onAction }: Props) {
                     }}
                   >
                     {primary ? (
-                      <Sparkles size={20} strokeWidth={2} />
+                      <Sparkles size={20} strokeWidth={2.2} />
                     ) : (
                       <span />
                     )}
                   </span>
-                  <span>{chip.label}</span>
+                  <span>
+                    {primary ? chip.label.replace(" →", "") : chip.label}
+                  </span>
                   <span
                     style={{
                       width: 26,
@@ -236,6 +240,29 @@ export function OnboardingConversationTurnBlock({ block, onAction }: Props) {
             })}
           </div>
         )}
+
+        {inputEnabled && (
+          <div style={{ marginTop: 18 }}>
+            <VoiceTextInput
+              placeholder={
+                block.open_input?.placeholder || "Share your reflection"
+              }
+              voiceAvailable={false}
+              disabled={busy}
+              onTextChange={setText}
+              onSend={(value, type) => {
+                if (type === "text") {
+                  void fireResponse({
+                    freeform_text: value,
+                    response_type: "text",
+                  });
+                } else {
+                  void fireResponse({ response_type: "voice_requested" });
+                }
+              }}
+            />
+          </div>
+        )}
       </div>
     );
   }
@@ -243,12 +270,17 @@ export function OnboardingConversationTurnBlock({ block, onAction }: Props) {
   return (
     <div
       style={{
-        borderRadius: 20,
-        background: "var(--kalpx-card-bg)",
+        borderRadius: 28,
+        background: "rgba(255, 253, 247, 0.88)",
         border: "1px solid var(--kalpx-border-gold)",
-        boxShadow: "var(--kalpx-shadow-card-lift)",
-        padding: 20,
+        boxShadow: "0 16px 34px rgba(67, 33, 4, 0.08)",
+        backdropFilter: "blur(6px)",
+        WebkitBackdropFilter: "blur(6px)",
+        padding: "20px 14px 14px",
         marginBottom: 24,
+        maxWidth: 520,
+        marginLeft: "auto",
+        marginRight: "auto",
       }}
     >
       {/* Headline + gold divider */}
@@ -256,26 +288,57 @@ export function OnboardingConversationTurnBlock({ block, onAction }: Props) {
         <>
           <h2
             style={{
-              fontSize: 22,
+              fontSize: 30,
               fontFamily: "var(--kalpx-font-serif)",
               fontWeight: 700,
               textAlign: "center",
               color: "var(--kalpx-text)",
-              marginBottom: 8,
-              lineHeight: 1.35,
+              margin: "0 0 6px",
+              lineHeight: 1.2,
             }}
           >
             {block.headline}
           </h2>
           <div
             style={{
-              width: 44,
-              height: 1,
-              background: "var(--kalpx-border-gold)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 12,
               margin: "0 auto 16px",
             }}
-          />
+          >
+            <div
+              style={{
+                width: 74,
+                height: 1,
+                background: "var(--kalpx-border-gold)",
+              }}
+            />
+            <span style={{ color: "var(--kalpx-gold)", fontSize: 13 }}>◈</span>
+            <div
+              style={{
+                width: 74,
+                height: 1,
+                background: "var(--kalpx-border-gold)",
+              }}
+            />
+          </div>
         </>
+      )}
+
+      {block.subtext && (
+        <p
+          style={{
+            margin: "0 0 16px",
+            textAlign: "center",
+            fontSize: 16,
+            lineHeight: 1.45,
+            color: "var(--kalpx-text-soft)",
+          }}
+        >
+          {block.subtext}
+        </p>
       )}
 
       {/* Mitra messages */}
@@ -300,8 +363,8 @@ export function OnboardingConversationTurnBlock({ block, onAction }: Props) {
           style={{
             display: "flex",
             flexDirection: "column",
-            gap: 10,
-            marginTop: 16,
+            gap: 12,
+            marginTop: messages.length ? 12 : 0,
           }}
         >
           {chips.map((chip) => (
@@ -316,26 +379,27 @@ export function OnboardingConversationTurnBlock({ block, onAction }: Props) {
                 })
               }
               style={{
-                padding: "13px 18px",
-                minHeight: 48,
-                borderRadius: 24,
+                padding: "10px",
+
+                borderRadius: 999,
                 border:
                   chip.style === "primary"
                     ? "none"
                     : `1px solid var(--kalpx-border-gold)`,
                 background:
                   chip.style === "primary"
-                    ? "var(--kalpx-gold)"
-                    : "var(--kalpx-bg)",
+                    ? "rgba(201, 168, 76, 0.14)"
+                    : "rgba(255, 250, 243, 0.88)",
                 color:
                   chip.style === "primary"
-                    ? "#ffffff"
+                    ? "var(--kalpx-text)"
                     : "var(--kalpx-text-soft)",
-                fontSize: 15,
-                fontWeight: chip.style === "primary" ? 600 : 400,
+                fontSize: 17,
+                fontWeight: chip.style === "primary" ? 700 : 500,
                 cursor: busy ? "not-allowed" : "pointer",
                 opacity: busy ? 0.7 : 1,
-                textAlign: "left",
+                textAlign: "center",
+                boxShadow: "0 8px 20px rgba(67,33,4,0.09)",
               }}
             >
               {chip.label}
@@ -344,47 +408,29 @@ export function OnboardingConversationTurnBlock({ block, onAction }: Props) {
         </div>
       )}
 
-      {/* Optional freeform text input */}
       {inputEnabled && (
         <div style={{ marginTop: 14 }}>
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder={block.open_input?.placeholder || "Type your response…"}
-            rows={3}
-            style={{
-              width: "100%",
-              padding: "10px 14px",
-              borderRadius: 8,
-              border: `1px solid var(--kalpx-border-gold)`,
-              fontSize: 15,
-              color: "var(--kalpx-text)",
-              background: "var(--kalpx-bg)",
-              resize: "none",
-              boxSizing: "border-box",
+          <VoiceTextInput
+            initialValue={text}
+            placeholder={
+              block.open_input?.placeholder || "Share your reflection"
+            }
+            voiceAvailable={false}
+            disabled={busy}
+            onTextChange={setText}
+            onSend={(value, type) => {
+              if (type === "text") {
+                setText(value);
+                void fireResponse({
+                  freeform_text: value,
+                  response_type: "text",
+                });
+                return;
+              }
+
+              void fireResponse({ response_type: "voice_requested" });
             }}
           />
-          {text.trim() && onResponse && (
-            <button
-              disabled={busy}
-              onClick={() => void fireResponse({ freeform_text: text })}
-              style={{
-                marginTop: 10,
-                padding: "12px 24px",
-                minHeight: 48,
-                borderRadius: 24,
-                border: "none",
-                background: "var(--kalpx-gold)",
-                color: "#ffffff",
-                fontWeight: 600,
-                fontSize: 15,
-                cursor: busy ? "not-allowed" : "pointer",
-                opacity: busy ? 0.7 : 1,
-              }}
-            >
-              {busy ? "…" : "Continue"}
-            </button>
-          )}
         </div>
       )}
     </div>

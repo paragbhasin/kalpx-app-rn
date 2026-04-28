@@ -38,13 +38,11 @@ export function OnboardingIntroHeroBlock({ block, onAction }: Props) {
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "space-between",
-        padding: 10,
+        justifyContent: "flex-start",
+        padding: "24px 10px 18px",
         position: "relative",
       }}
     >
-      <div style={{ flex: 1 }} />
-
       <div
         style={{
           textAlign: "center",
@@ -57,13 +55,14 @@ export function OnboardingIntroHeroBlock({ block, onAction }: Props) {
         {block.headline && (
           <h2
             style={{
-              fontSize: 31,
+              fontSize: 28,
               fontWeight: 700,
               color: "var(--kalpx-text)",
-              lineHeight: 1.34,
-              marginBottom: 10,
+              lineHeight: 1.12,
+              marginBottom: 14,
               fontFamily: "var(--kalpx-font-serif)",
               textAlign: "center",
+              textShadow: "0 8px 26px rgba(255,255,255,0.4)",
             }}
           >
             {block.headline}
@@ -72,14 +71,14 @@ export function OnboardingIntroHeroBlock({ block, onAction }: Props) {
         {block.subtext && (
           <p
             style={{
-              fontSize: 20,
+              fontSize: 17,
               color: "var(--kalpx-text)",
-              opacity: 0.78,
+              opacity: 0.8,
               margin: "0 auto",
-              lineHeight: 1.45,
-              maxWidth: 310,
-              marginBottom: 30,
-              fontFamily: "var(--kalpx-font-serif)",
+              lineHeight: 1.5,
+              maxWidth: 320,
+              marginBottom: 34,
+              fontFamily: "var(--kalpx-font-sans)",
               textAlign: "center",
             }}
           >
@@ -87,8 +86,6 @@ export function OnboardingIntroHeroBlock({ block, onAction }: Props) {
           </p>
         )}
       </div>
-
-      <div style={{ flex: 1 }} />
 
       <div
         style={{
@@ -100,6 +97,7 @@ export function OnboardingIntroHeroBlock({ block, onAction }: Props) {
           flexDirection: "column",
           alignItems: "center",
           gap: 16,
+          marginTop: 18,
         }}
       >
         {chips.length > 0 && (
@@ -107,7 +105,7 @@ export function OnboardingIntroHeroBlock({ block, onAction }: Props) {
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: 14,
+              gap: 16,
               width: "100%",
             }}
           >
@@ -118,21 +116,19 @@ export function OnboardingIntroHeroBlock({ block, onAction }: Props) {
                 disabled={busy}
                 onClick={() => void handleChip(chip)}
                 style={{
-                  // minHeight: 74,
-                  padding: "14px 24px",
-                  borderRadius: 28,
+                  padding: "16px 24px",
+                  borderRadius: 999,
                   border: "1px solid rgba(201, 168, 76, 0.42)",
-                  background: "rgba(255, 253, 247, 0.82)",
+                  background: "rgba(255, 252, 246, 0.88)",
                   color: "var(--kalpx-text)",
-                  fontSize: 16,
-                  fontWeight: 500,
+                  fontSize: 17,
                   cursor: busy ? "not-allowed" : "pointer",
                   opacity: busy ? 0.7 : 1,
                   textAlign: "center",
-                  lineHeight: 1.15,
-                  boxShadow: "0 10px 22px rgba(67,33,4,0.12)",
-                  backdropFilter: "blur(4px)",
-                  WebkitBackdropFilter: "blur(4px)",
+                  lineHeight: 1.2,
+                  boxShadow: "0 10px 24px rgba(67,33,4,0.12)",
+                  backdropFilter: "blur(6px)",
+                  WebkitBackdropFilter: "blur(6px)",
                   touchAction: "manipulation",
                 }}
               >

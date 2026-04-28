@@ -88,7 +88,19 @@ export function RoomActionPill({ action, roomId, screenData = {}, onAction }: Pr
       const variant = action.action_type === 'runner_mantra' ? 'mantra'
         : action.action_type === 'runner_sankalp' ? 'sankalp'
         : 'practice';
-      const item = rp.item || rp.offering || {};
+      // canonical_rich_runner.v1 sends item fields at runner_payload root (not nested under `item`/`offering`).
+      // Normalize to the flat item shape that actionExecutor.start_runner expects.
+      const item = rp.item || rp.offering || (rp.item_id ? {
+        item_id: rp.item_id,
+        id: rp.item_id,
+        item_type: variant,
+        title: rp.title || '',
+        devanagari: rp.devanagari || '',
+        audio_url: rp.audio_url || '',
+        reps_total: rp.reps_default_selection || rp.reps_target || null,
+        duration_seconds: rp.duration_min ? Math.round(rp.duration_min * 60) : null,
+        steps: rp.steps || [],
+      } : {});
       // G17 Fix 1: use BE-provided runner_source so track-completion records a valid source.
       // 'support_room' is the canonical fallback (matches RN VALID_SOURCE_SURFACES).
       onAction?.({

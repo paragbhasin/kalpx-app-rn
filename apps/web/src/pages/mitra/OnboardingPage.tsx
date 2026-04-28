@@ -14,6 +14,7 @@ import { useScreenState, loadScreenWithData } from '../../store/screenSlice';
 import { executeAction } from '../../engine/actionExecutor';
 import { useGuestIdentity } from '../../hooks/useGuestIdentity';
 import { useJourneyStatus } from '../../hooks/useJourneyStatus';
+import { MitraMobileShell } from '../../components/layout/MitraMobileShell';
 import type { AppDispatch } from '../../store';
 
 export function OnboardingPage() {
@@ -56,9 +57,11 @@ export function OnboardingPage() {
 
   if (statusLoading) {
     return (
-      <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fdf8ef' }}>
-        <p style={{ color: '#888', fontSize: 14 }}>Loading…</p>
-      </div>
+      <MitraMobileShell>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 24px' }}>
+          <p style={{ color: 'var(--kalpx-text-muted)', fontSize: 14 }}>Loading…</p>
+        </div>
+      </MitraMobileShell>
     );
   }
 
@@ -69,23 +72,10 @@ export function OnboardingPage() {
   };
 
   return (
-    <div
-      style={{
-        minHeight: '100dvh',
-        background: '#fdf8ef',
-        display: 'flex',
-        justifyContent: 'center',
-      }}
-    >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: 480,
-          padding: '48px 24px 80px',
-        }}
-      >
+    <MitraMobileShell>
+      <div style={{ padding: '16px 24px 80px' }}>
         {resolving && (
-          <div style={{ textAlign: 'center', paddingTop: 80, color: '#888' }}>
+          <div style={{ textAlign: 'center', paddingTop: 80, color: 'var(--kalpx-text-muted)' }}>
             Loading…
           </div>
         )}
@@ -97,6 +87,6 @@ export function OnboardingPage() {
           />
         )}
       </div>
-    </div>
+    </MitraMobileShell>
   );
 }

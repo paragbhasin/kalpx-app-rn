@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 
 interface Props {
   block: {
@@ -16,6 +16,8 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
 
   const initialReps = (screenData['runner_reps_completed'] as number) || 0;
   const [reps, setReps] = useState(initialReps);
+  const [pressed, setPressed] = useState(false);
+  const pressedRef = useRef(false);
 
   const increment = useCallback(() => {
     const next = reps + 1;
@@ -26,6 +28,17 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
       onAction?.({ type: 'complete_runner' });
     }
   }, [reps, unlimited, total, onAction]);
+
+  const handlePointerDown = useCallback(() => {
+    pressedRef.current = true;
+    setPressed(true);
+  }, []);
+
+  const handlePointerUp = useCallback(() => {
+    if (!pressedRef.current) return;
+    pressedRef.current = false;
+    setPressed(false);
+  }, []);
 
   const progress = unlimited ? null : Math.min(reps / total, 1);
 
@@ -63,6 +76,9 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
         ) : null}
         <button
           onClick={increment}
+          onPointerDown={handlePointerDown}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerUp}
           data-testid="rep-tap-target"
           style={{
             position: 'absolute',
@@ -77,9 +93,11 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
             alignItems: 'center',
             justifyContent: 'center',
             gap: 2,
+            transform: pressed ? 'scale(0.93)' : 'scale(1)',
+            transition: 'transform 200ms ease',
           }}
         >
-          <span style={{ fontSize: 40, fontWeight: 300, color: 'var(--kalpx-text)', lineHeight: 1 }}>
+          <span style={{ fontSize: 48, fontWeight: 300, color: 'var(--kalpx-text)', lineHeight: 1 }}>
             {reps}
           </span>
           {!unlimited ? (

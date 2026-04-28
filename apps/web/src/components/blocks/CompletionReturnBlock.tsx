@@ -36,6 +36,10 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
   const item = screenData['runner_active_item'] as Record<string, any> | null;
   const title = item?.title || '';
 
+  // G17: room-sourced completions return to room. G24/G27 extend this in their own audits.
+  const returnSource: string = (screenData['runner_source'] as string) || 'core';
+  const returnAction = returnSource === 'support_room' ? 'return_to_source' : 'return_to_dashboard';
+
   return (
     <div
       style={{
@@ -50,7 +54,13 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
       }}
       data-testid="completion-return-block"
     >
-      {/* Gold checkmark */}
+      {/* Animated gold checkmark — stroke draws in 600ms (L5) */}
+      <style>{`
+        @keyframes checkDraw {
+          from { stroke-dashoffset: 50; }
+          to   { stroke-dashoffset: 0; }
+        }
+      `}</style>
       <div
         style={{
           width: 80,
@@ -64,7 +74,15 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
         }}
       >
         <svg width={36} height={36} viewBox="0 0 36 36" fill="none">
-          <path d="M7 18l7 7 15-15" stroke="var(--kalpx-gold)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M7 18l7 7 15-15"
+            stroke="var(--kalpx-gold)"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeDasharray={50}
+            style={{ animation: 'checkDraw 600ms ease forwards' }}
+          />
         </svg>
       </div>
 
@@ -87,7 +105,7 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%', maxWidth: 280, marginTop: 8 }}>
         <button
-          onClick={() => onAction?.({ type: 'return_to_dashboard' })}
+          onClick={() => onAction?.({ type: returnAction })}
           data-testid="return-to-dashboard-btn"
           style={{
             padding: '14px 24px',

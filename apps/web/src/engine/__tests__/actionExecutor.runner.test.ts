@@ -117,6 +117,48 @@ describe('start_runner', () => {
     // dispatch should have been called with updateScreenData containing runner keys
     expect(dispatch).toHaveBeenCalled();
   });
+
+  // G13: sankalp_audio_url seeding
+  it('seeds sankalp_audio_url from item.audio_url when variant=sankalp', async () => {
+    const dispatch = makeDispatch();
+    const ctx: ActionContext = { dispatch: dispatch as any, screenData: { journey_id: 1 } };
+    await executeAction(
+      {
+        type: 'start_runner',
+        payload: {
+          source: 'core',
+          variant: 'sankalp',
+          item: { item_id: 'sankalp.peace', title: 'I am at peace', audio_url: 'https://cdn.kalpx.com/sankalp.mp3' },
+        },
+      },
+      ctx,
+    );
+    const updateCall = (dispatch as any).mock.calls.find((args: any[]) =>
+      args[0]?.payload?.sankalp_audio_url !== undefined
+    );
+    expect(updateCall?.[0]?.payload?.sankalp_audio_url).toBe('https://cdn.kalpx.com/sankalp.mp3');
+  });
+
+  it('does not seed sankalp_audio_url from item when variant=mantra', async () => {
+    const dispatch = makeDispatch();
+    const ctx: ActionContext = { dispatch: dispatch as any, screenData: { journey_id: 1, sankalp_audio_url: 'existing.mp3' } };
+    await executeAction(
+      {
+        type: 'start_runner',
+        payload: {
+          source: 'core',
+          variant: 'mantra',
+          item: { item_id: 'mantra.om', title: 'Om', audio_url: 'https://cdn.kalpx.com/mantra.mp3' },
+        },
+      },
+      ctx,
+    );
+    // For mantra variant, sankalp_audio_url should preserve existing screenData value
+    const updateCall = (dispatch as any).mock.calls.find((args: any[]) =>
+      args[0]?.payload?.sankalp_audio_url !== undefined
+    );
+    expect(updateCall?.[0]?.payload?.sankalp_audio_url).toBe('existing.mp3');
+  });
 });
 
 describe('complete_runner', () => {
@@ -170,10 +212,65 @@ describe('repeat_runner', () => {
 });
 
 describe('runner_exit', () => {
-  it('navigates to dashboard and clears runner state', async () => {
-    const ctx = makeContext({ runner_variant: 'mantra', runner_active_item: { item_id: 'x' } });
+  it('navigates to dashboard and clears runner state for core source', async () => {
+    const ctx = makeContext({ runner_variant: 'mantra', runner_source: 'core', runner_active_item: { item_id: 'x' } });
     await executeAction({ type: 'runner_exit' }, ctx);
     expect(webNavigate).toHaveBeenCalledWith('/en/mitra/dashboard');
+  });
+
+  // G17: room-aware exit
+  it('navigates back to room when runner_source=support_room and room_id is set', async () => {
+    const ctx = makeContext({ runner_source: 'support_room', room_id: 'room_clarity', runner_active_item: { item_id: 'x' } });
+    await executeAction({ type: 'runner_exit' }, ctx);
+    expect(webNavigate).toHaveBeenCalledWith('/en/mitra/room/clarity');
+  });
+
+  it('navigates to dashboard when runner_source=support_room but room_id is absent', async () => {
+    const ctx = makeContext({ runner_source: 'support_room', runner_active_item: { item_id: 'x' } });
+    await executeAction({ type: 'runner_exit' }, ctx);
+    expect(webNavigate).toHaveBeenCalledWith('/en/mitra/dashboard');
+  });
+
+  it('runner_back also navigates to room when support_room + room_id set', async () => {
+    const ctx = makeContext({ runner_source: 'support_room', room_id: 'room_growth', runner_active_item: { item_id: 'x' } });
+    await executeAction({ type: 'runner_back' }, ctx);
+    expect(webNavigate).toHaveBeenCalledWith('/en/mitra/room/growth');
+  });
+
+  it('non-room source returns to dashboard (additional/checkin/trigger-like)', async () => {
+    for (const src of ['additional_mantra', 'support_checkin', 'support_trigger']) {
+      vi.clearAllMocks();
+      const ctx = makeContext({ runner_source: src, room_id: null, runner_active_item: { item_id: 'x' } });
+      await executeAction({ type: 'runner_exit' }, ctx);
+      expect(webNavigate).toHaveBeenCalledWith('/en/mitra/dashboard');
+    }
+  });
+});
+
+describe('return_to_source', () => {
+  // G17: room-sourced completion return
+  it('navigates to room when room_id is set', async () => {
+    const ctx = makeContext({ room_id: 'room_clarity', runner_source: 'support_room' });
+    await executeAction({ type: 'return_to_source' }, ctx);
+    expect(webNavigate).toHaveBeenCalledWith('/en/mitra/room/clarity');
+  });
+
+  it('falls back to dashboard when room_id is absent', async () => {
+    const ctx = makeContext({ runner_source: 'support_room' });
+    await executeAction({ type: 'return_to_source' }, ctx);
+    expect(webNavigate).toHaveBeenCalledWith('/en/mitra/dashboard');
+  });
+
+  it('clears all runner keys', async () => {
+    const dispatch = makeDispatch();
+    const ctx: ActionContext = {
+      dispatch: dispatch as any,
+      screenData: { room_id: 'room_clarity', runner_source: 'support_room', runner_active_item: { item_id: 'x' }, runner_variant: 'mantra' },
+    };
+    await executeAction({ type: 'return_to_source' }, ctx);
+    // dispatch called at least once for clearing keys
+    expect(dispatch).toHaveBeenCalled();
+    expect(webNavigate).toHaveBeenCalledWith('/en/mitra/room/clarity');
   });
 });
 

@@ -313,6 +313,8 @@ export async function executeAction(action: any, context: ActionContext): Promis
           mantra_text: variant === 'mantra' ? (item.title || '') : screenData.mantra_text,
           mantra_devanagari: variant === 'mantra' ? (item.devanagari || '') : screenData.mantra_devanagari,
           mantra_audio_url: variant === 'mantra' ? (item.audio_url || '') : screenData.mantra_audio_url,
+          // G13: seed sankalp audio for SankalpHoldBlock — silent without this
+          sankalp_audio_url: variant === 'sankalp' ? (item.audio_url || '') : (screenData.sankalp_audio_url ?? ''),
           reps_total: item.reps_total || screenData.reps_total || 108,
           practice_duration_seconds: variant === 'practice' ? (item.duration_seconds || screenData.practice_duration_seconds || 300) : screenData.practice_duration_seconds,
           practice_steps: variant === 'practice' ? (item.steps || screenData.practice_steps || []) : screenData.practice_steps,
@@ -413,13 +415,21 @@ export async function executeAction(action: any, context: ActionContext): Promis
     }
 
     // ----------------------------------------------------------------
-    // RUNNER_EXIT / RUNNER_BACK — clear runner state, go to dashboard.
+    // RUNNER_EXIT / RUNNER_BACK — clear runner state, return to origin.
+    // G17: room-sourced exit returns to room. G24/G27 extend in their own audits.
+    // Read source/roomId BEFORE clearing keys.
     // ----------------------------------------------------------------
     case 'runner_exit':
     case 'runner_back': {
+      const exitSource = screenData.runner_source as string | null;
+      const exitRoomId = screenData.room_id as string | null;
       const runnerKeys = ['runner_active_item', 'runner_source', 'runner_variant', 'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec', 'runner_start_time', 'runner_tz'];
       runnerKeys.forEach(k => dispatch(setScreenValue({ key: k, value: null })));
-      webNavigate('/en/mitra/dashboard');
+      if (exitSource === 'support_room' && exitRoomId) {
+        webNavigate(`/en/mitra/room/${exitRoomId.replace(/^room_/, '')}`);
+      } else {
+        webNavigate('/en/mitra/dashboard');
+      }
       break;
     }
 
@@ -437,6 +447,24 @@ export async function executeAction(action: any, context: ActionContext): Promis
         }
       } catch { /* non-blocking — navigate regardless */ }
       webNavigate('/en/mitra/dashboard');
+      break;
+    }
+
+    // ----------------------------------------------------------------
+    // RETURN_TO_SOURCE — clear runner state, navigate back to origin room.
+    // G17 scope: dispatched only when runner_source === 'support_room' (Fix 3 in CompletionReturnBlock).
+    // G24/G27 will extend the dispatch condition in their own audits.
+    // Falls back to dashboard if room_id is absent (non-room contexts, safe no-op).
+    // ----------------------------------------------------------------
+    case 'return_to_source': {
+      const roomId = (screenData.room_id as string | null) || null;
+      const runnerClearKeys = ['runner_active_item', 'runner_source', 'runner_variant', 'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec', 'runner_start_time', 'runner_tz'];
+      runnerClearKeys.forEach(k => dispatch(setScreenValue({ key: k, value: null })));
+      if (roomId) {
+        webNavigate(`/en/mitra/room/${roomId.replace(/^room_/, '')}`);
+      } else {
+        webNavigate('/en/mitra/dashboard');
+      }
       break;
     }
 

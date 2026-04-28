@@ -49,11 +49,13 @@ export function MantraDisplayBlock({ block, screenData = {} }: Props) {
       {displayText ? (
         <p
           style={{
-            fontFamily: 'var(--kalpx-font-serif)',
-            fontSize: 18,
-            fontStyle: 'italic',
+            fontFamily: devanagari ? undefined : 'var(--kalpx-font-serif)',
+            fontSize: devanagari ? 16 : 18,
+            fontStyle: 'normal',
+            textTransform: devanagari ? 'uppercase' : undefined,
+            letterSpacing: devanagari ? 2 : undefined,
             lineHeight: 1.6,
-            color: 'var(--kalpx-text)',
+            color: 'var(--kalpx-text-muted)',
             marginBottom: 4,
           }}
         >

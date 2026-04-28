@@ -86,9 +86,11 @@ export function RoomActionPill({ action, roomId, screenData = {}, onAction }: Pr
         : action.action_type === 'runner_sankalp' ? 'sankalp'
         : 'practice';
       const item = rp.item || rp.offering || {};
+      // G17 Fix 1: use BE-provided runner_source so track-completion records a valid source.
+      // 'support_room' is the canonical fallback (matches RN VALID_SOURCE_SURFACES).
       onAction?.({
         type: 'start_runner',
-        payload: { source: `room_${roomId}`, variant, item },
+        payload: { source: rp.runner_source || 'support_room', variant, item },
       });
       return;
     }
@@ -162,7 +164,7 @@ export function RoomActionPill({ action, roomId, screenData = {}, onAction }: Pr
   const pillStyle: React.CSSProperties = {
     width: '100%',
     padding: '16px 20px',
-    borderRadius: 15,
+    borderRadius: 22,
     border: isExit
       ? '1px solid var(--kalpx-border-gold)'
       : action.primary_recommendation && !done
@@ -205,7 +207,7 @@ export function RoomActionPill({ action, roomId, screenData = {}, onAction }: Pr
         )}
 
         {/* Main label */}
-        <span style={{ textAlign: 'center', fontWeight: action.primary_recommendation ? 600 : 400 }}>
+        <span style={{ textAlign: 'center', fontWeight: action.primary_recommendation ? 600 : 500 }}>
           {action.label}{done ? ' ✓' : ''}
         </span>
 
@@ -229,7 +231,7 @@ export function RoomActionPill({ action, roomId, screenData = {}, onAction }: Pr
         {/* Primary recommendation badge */}
         {action.primary_recommendation && !done && (
           <span style={{ fontSize: 10, color: '#C9A84C', letterSpacing: 1, textTransform: 'uppercase', textAlign: 'center' }}>
-            Start here
+            Start here →
           </span>
         )}
       </button>

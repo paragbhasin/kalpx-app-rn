@@ -83,6 +83,28 @@ export function MitraEnginePage() {
     );
   }
 
+  // ── G12-completion-light-mode: completion_return renders in beige shell (matches RN) ──
+  if (isRunnerContainer && stateId === 'completion_return') {
+    return (
+      <MitraMobileShell>
+        <div style={{ maxWidth: 480, margin: '0 auto', paddingBottom: 48 }}>
+          {resolving ? (
+            <div style={{ textAlign: 'center', padding: 80 }}>
+              <div style={{ width: 28, height: 28, border: '2px solid var(--kalpx-cta)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto' }} />
+              <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+            </div>
+          ) : (
+            <ScreenRenderer
+              schema={screenState.currentScreen}
+              screenData={screenState.screenData}
+              onAction={(action) => executeAction(action, actionContext)}
+            />
+          )}
+        </div>
+      </MitraMobileShell>
+    );
+  }
+
   // ── Practice runner: dark immersive chrome, no shell ────────────────
   if (isRunnerContainer) {
     return (

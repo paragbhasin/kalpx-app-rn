@@ -120,7 +120,7 @@ export function PracticeTimerBlock({ block, screenData = {}, onAction }: Props) 
           <span style={{ fontSize: 32, fontWeight: 300, color: isFinal10 ? '#C9A84C' : '#2C2A26', transition: 'color 0.5s' }}>
             {formatTime(timeLeft)}
           </span>
-          <span style={{ fontSize: 11, color: '#9A8C78', letterSpacing: 1 }}>
+          <span style={{ fontSize: 11, color: 'var(--kalpx-text-muted)', letterSpacing: 1 }}>
             {running ? 'TAP TO PAUSE' : done ? 'DONE' : 'TAP TO START'}
           </span>
         </div>
@@ -138,12 +138,12 @@ export function PracticeTimerBlock({ block, screenData = {}, onAction }: Props) 
       {/* Current step */}
       {steps.length > 0 && stepIndex < steps.length ? (
         <div style={{ maxWidth: 320, textAlign: 'center' }}>
-          <p style={{ fontSize: 11, color: '#9A8C78', letterSpacing: 1, marginBottom: 8 }}>
+          <p style={{ fontSize: 11, color: 'var(--kalpx-text-muted)', letterSpacing: 1, marginBottom: 8 }}>
             STEP {stepIndex + 1} OF {steps.length}
           </p>
           <p
             className="timer-step-text"
-            style={{ fontSize: 17, color: '#3D3930', lineHeight: 1.6, fontStyle: 'italic', marginBottom: 16, opacity: stepVisible ? 1 : 0 }}
+            style={{ fontSize: 17, color: 'var(--kalpx-text)', lineHeight: 1.6, fontStyle: 'italic', marginBottom: 16, opacity: stepVisible ? 1 : 0 }}
           >
             {steps[stepIndex]}
           </p>

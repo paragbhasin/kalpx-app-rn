@@ -10,7 +10,7 @@ export function HeadlineBlock({ block }: Props) {
       style={{
         fontSize: 20,
         fontWeight: 600,
-        color: '#1a1a1a',
+        color: 'var(--kalpx-text)',
         margin: '16px 0 8px',
         lineHeight: 1.3,
       }}

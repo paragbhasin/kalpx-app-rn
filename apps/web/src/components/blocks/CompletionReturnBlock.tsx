@@ -70,17 +70,17 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
 
       <div style={{ maxWidth: 300 }}>
         {title ? (
-          <p style={{ fontSize: 12, color: '#9A8C78', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12 }}>
+          <p style={{ fontSize: 12, color: 'var(--kalpx-text-muted)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 12 }}>
             {title}
           </p>
         ) : null}
         <h2
-          style={{ fontSize: 22, fontWeight: 400, color: '#2C2A26', lineHeight: 1.4, marginBottom: 10 }}
+          style={{ fontSize: 22, fontWeight: 400, color: 'var(--kalpx-text)', lineHeight: 1.4, marginBottom: 10, fontFamily: 'var(--kalpx-font-serif)' }}
           data-testid="completion-headline"
         >
           {msg.headline}
         </h2>
-        <p style={{ fontSize: 15, color: '#6B6356', lineHeight: 1.6 }}>
+        <p style={{ fontSize: 15, color: 'var(--kalpx-text-soft)', lineHeight: 1.6 }}>
           {msg.body}
         </p>
       </div>
@@ -93,7 +93,7 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
             padding: '14px 24px',
             borderRadius: 12,
             border: 'none',
-            background: '#C9A84C',
+            background: 'var(--kalpx-cta)',
             color: '#fff',
             fontSize: 15,
             fontWeight: 500,

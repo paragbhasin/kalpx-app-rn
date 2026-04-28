@@ -13,7 +13,7 @@ export function AuthLayout({ children, title }: Props) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'var(--kalpx-bg)',
+        background: 'url(/beige_bg.png) center/cover fixed, var(--kalpx-bg)',
         color: 'var(--kalpx-text)',
       }}
     >
@@ -26,18 +26,7 @@ export function AuthLayout({ children, title }: Props) {
         }}
       >
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <span
-            style={{
-              fontSize: 14,
-              letterSpacing: 4,
-              color: 'var(--kalpx-gold)',
-              fontWeight: 700,
-              fontFamily: 'var(--kalpx-font-sans)',
-              textTransform: 'uppercase',
-            }}
-          >
-            KALPX
-          </span>
+          <img src="/kalpx-logo.png" alt="KalpX" style={{ height: 32 }} />
           <h2
             style={{
               fontFamily: 'var(--kalpx-font-serif)',

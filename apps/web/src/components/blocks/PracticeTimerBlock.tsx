@@ -82,19 +82,19 @@ export function PracticeTimerBlock({ block, screenData = {}, onAction }: Props) 
     >
       {/* Timer circle */}
       <div
-        style={{ position: 'relative', width: 160, height: 160, cursor: 'pointer' }}
+        style={{ position: 'relative', width: 200, height: 200, cursor: 'pointer' }}
         onClick={toggleTimer}
         data-testid="timer-circle"
       >
-        <svg width={160} height={160} style={{ position: 'absolute', inset: 0 }}>
-          <circle cx={80} cy={80} r={70} fill="none" stroke="#F0E8D8" strokeWidth={8} />
+        <svg width={200} height={200} style={{ position: 'absolute', inset: 0 }}>
+          <circle cx={100} cy={100} r={90} fill="none" stroke="#F0E8D8" strokeWidth={8} />
           <circle
-            cx={80} cy={80} r={70}
+            cx={100} cy={100} r={90}
             fill="none" stroke="#C9A84C" strokeWidth={8}
-            strokeDasharray={2 * Math.PI * 70}
-            strokeDashoffset={2 * Math.PI * 70 * (1 - progress)}
+            strokeDasharray={2 * Math.PI * 90}
+            strokeDashoffset={2 * Math.PI * 90 * (1 - progress)}
             strokeLinecap="round"
-            style={{ transform: 'rotate(-90deg)', transformOrigin: '80px 80px', transition: 'stroke-dashoffset 1s linear' }}
+            style={{ transform: 'rotate(-90deg)', transformOrigin: '100px 100px', transition: 'stroke-dashoffset 1s linear' }}
           />
         </svg>
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>

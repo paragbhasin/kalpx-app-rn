@@ -16,11 +16,13 @@ export function ClassCard({ cls }: ClassCardProps) {
       onClick={() => navigate(`/en/classes/${cls.slug}`)}
       style={{
         background: '#fff',
-        border: '1px solid #f0e8d8',
+        border: '1px solid var(--kalpx-border-gold)',
         borderRadius: 14,
         overflow: 'hidden',
         cursor: 'pointer',
         marginBottom: 14,
+        boxShadow: 'var(--kalpx-shadow-card-lift)',
+        touchAction: 'manipulation',
         transition: 'box-shadow 0.15s',
       }}
     >

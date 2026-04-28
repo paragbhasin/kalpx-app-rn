@@ -29,8 +29,8 @@ export function ScreenRenderer({ schema, screenData = {}, onAction }: ScreenRend
 
   return (
     <div style={{ padding: 16 }}>
-      {/* Dev-only container label */}
-      {import.meta.env.DEV && (
+      {/* Dev-only container label — only with ?debug in URL */}
+      {import.meta.env.DEV && typeof window !== 'undefined' && window.location.search.includes('debug') && (
         <div style={{ fontSize: 10, color: '#bbb', marginBottom: 8, fontFamily: 'monospace' }}>
           {schema.container_id}/{schema.state_id}
         </div>

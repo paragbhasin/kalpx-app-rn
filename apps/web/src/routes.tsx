@@ -16,6 +16,7 @@ import { RoomPage } from './pages/mitra/RoomPage';
 import { CheckpointPage } from './pages/mitra/CheckpointPage';
 import { TriggerPage } from './pages/mitra/TriggerPage';
 import { CheckinPage } from './pages/mitra/CheckinPage';
+import { WelcomeBackPage } from './pages/mitra/WelcomeBackPage';
 import { ClassListingPage } from './pages/classes/ClassListingPage';
 import { ClassDetailPage } from './pages/classes/ClassDetailPage';
 import { ClassBookingPage } from './pages/classes/ClassBookingPage';
@@ -72,6 +73,10 @@ export function AppRoutes() {
       <Route
         path="/en/mitra/checkin"
         element={<RequiresJourney><CheckinPage /></RequiresJourney>}
+      />
+      <Route
+        path="/en/mitra/welcome-back"
+        element={<RequiresAuth><WelcomeBackPage /></RequiresAuth>}
       />
 
       {/* Classes vertical */}

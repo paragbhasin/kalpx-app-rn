@@ -87,15 +87,17 @@ export function TriadCardsRow({ sd, onAction }: Props) {
             style={{
               flex: 1,
               minWidth: 100,
-              minHeight: 150,
-              background: '#fdf8ef',
+              minHeight: 160,
+              background: 'var(--kalpx-card-bg)',
               borderRadius: 14,
-              border: '1px solid #e8d5b0',
+              border: '1px solid var(--kalpx-border-gold)',
+              boxShadow: 'var(--kalpx-shadow-card)',
               padding: 12,
               position: 'relative',
               display: 'flex',
               flexDirection: 'column',
               cursor: 'pointer',
+              touchAction: 'manipulation',
             }}
             onClick={() => {
               if (!onAction) return;
@@ -164,7 +166,7 @@ export function TriadCardsRow({ sd, onAction }: Props) {
                 fontSize: 10,
                 fontWeight: 700,
                 letterSpacing: 1.2,
-                color: item.completed ? '#15803d' : '#C9A84C',
+                color: item.completed ? 'var(--kalpx-gold)' : 'var(--kalpx-gold)',
                 textTransform: 'uppercase',
                 margin: '0 0 4px',
                 lineHeight: 1.2,
@@ -178,8 +180,8 @@ export function TriadCardsRow({ sd, onAction }: Props) {
               style={{
                 fontSize: 14,
                 fontWeight: 600,
-                fontFamily: 'Georgia, "Times New Roman", serif',
-                color: '#2C2A26',
+                fontFamily: 'var(--kalpx-font-serif)',
+                color: 'var(--kalpx-text)',
                 lineHeight: 1.3,
                 margin: '0 0 4px',
                 flex: 1,
@@ -193,7 +195,7 @@ export function TriadCardsRow({ sd, onAction }: Props) {
               <p
                 style={{
                   fontSize: 11,
-                  color: '#6B6356',
+                  color: 'var(--kalpx-text-soft)',
                   lineHeight: 1.4,
                   margin: '0 0 8px',
                 }}
@@ -231,7 +233,7 @@ export function TriadCardsRow({ sd, onAction }: Props) {
                     width: 18,
                     height: 18,
                     borderRadius: 9,
-                    border: '1.5px solid #c4a97a',
+                    border: '1.5px solid var(--kalpx-gold)',
                     background: 'transparent',
                     flexShrink: 0,
                   }}

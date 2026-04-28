@@ -22,13 +22,15 @@ export function QuickSupportBlock({ onAction }: Props) {
             padding: '14px 16px',
             borderRadius: 28,
             border: 'none',
-            background: 'rgba(201,168,76,0.12)',
-            color: '#2C2A26',
+            background: '#F5EDEA',
+            color: 'var(--kalpx-text)',
             fontSize: 15,
             fontWeight: 600,
             cursor: 'pointer',
             textAlign: 'center',
             width: '100%',
+            minHeight: 48,
+            touchAction: 'manipulation',
           }}
         >
           ⚡ I Feel Triggered
@@ -43,15 +45,17 @@ export function QuickSupportBlock({ onAction }: Props) {
             borderRadius: 28,
             border: '1px solid rgba(201,168,76,0.4)',
             background: 'transparent',
-            color: '#2C2A26',
+            color: 'var(--kalpx-text)',
             fontSize: 15,
             fontWeight: 500,
             cursor: 'pointer',
             textAlign: 'center',
             width: '100%',
+            minHeight: 48,
+            touchAction: 'manipulation',
           }}
         >
-          🧘 Quick Check-in
+          Quick Check-in
         </button>
 
         {/* Chip 3 — transparent gold border */}
@@ -63,15 +67,17 @@ export function QuickSupportBlock({ onAction }: Props) {
             borderRadius: 28,
             border: '1px solid rgba(201,168,76,0.4)',
             background: 'transparent',
-            color: '#2C2A26',
+            color: 'var(--kalpx-text)',
             fontSize: 15,
             fontWeight: 500,
             cursor: 'pointer',
             textAlign: 'center',
             width: '100%',
+            minHeight: 48,
+            touchAction: 'manipulation',
           }}
         >
-          ✨ I'm in a good place
+          I'm in a good place
         </button>
       </div>
 

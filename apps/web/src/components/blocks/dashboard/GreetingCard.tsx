@@ -28,15 +28,16 @@ export function GreetingCard({ sd }: Props) {
       style={{
         marginBottom: 28,
         borderRadius: 14,
-        border: '1px solid #e8d5b0',
-        background: '#fdf8ef',
+        border: '1px solid var(--kalpx-border-gold)',
+        background: 'var(--kalpx-card-bg)',
+        boxShadow: 'var(--kalpx-shadow-card)',
         display: 'flex',
         flexDirection: 'row',
         overflow: 'hidden',
       }}
     >
       {/* Gold left-accent bar */}
-      <div style={{ width: 4, background: '#C9A84C', flexShrink: 0 }} />
+      <div style={{ width: 4, background: 'var(--kalpx-gold)', flexShrink: 0 }} />
 
       {/* Body */}
       <div style={{ flex: 1, padding: '16px 14px' }}>
@@ -44,8 +45,8 @@ export function GreetingCard({ sd }: Props) {
           style={{
             fontSize: 18,
             fontWeight: 700,
-            fontFamily: 'Georgia, "Times New Roman", serif',
-            color: '#2C2A26',
+            fontFamily: 'var(--kalpx-font-serif)',
+            color: 'var(--kalpx-text)',
             lineHeight: 1.3,
             margin: '0 0 4px',
           }}
@@ -53,12 +54,12 @@ export function GreetingCard({ sd }: Props) {
           Welcome, {displayName}.
         </h1>
         {context && (
-          <p style={{ fontSize: 13, color: '#6B6356', margin: '0 0 4px', lineHeight: 1.5 }}>
+          <p style={{ fontSize: 13, color: 'var(--kalpx-text-soft)', margin: '0 0 4px', lineHeight: 1.5 }}>
             {context}
           </p>
         )}
         {tone && (
-          <p style={{ fontSize: 12, color: '#9A8C78', fontStyle: 'italic', margin: 0, lineHeight: 1.5 }}>
+          <p style={{ fontSize: 12, color: 'var(--kalpx-text-muted)', fontStyle: 'italic', margin: 0, lineHeight: 1.5 }}>
             {tone}
           </p>
         )}
@@ -70,9 +71,9 @@ export function GreetingCard({ sd }: Props) {
               padding: '6px 12px',
               borderRadius: 12,
               background: 'rgba(201,168,76,0.06)',
-              border: '1px solid rgba(201,168,76,0.25)',
+              border: '1px solid var(--kalpx-gold-hairline)',
               fontSize: 12,
-              color: '#2C2A26',
+              color: 'var(--kalpx-text)',
               display: 'inline-block',
             }}
           >

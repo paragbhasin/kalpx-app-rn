@@ -8,6 +8,7 @@ import { useLocation, useSearchParams } from 'react-router-dom';
 import { ScreenRenderer } from '../../engine/ScreenRenderer';
 import { loadScreenWithData, useScreenState } from '../../store/screenSlice';
 import { executeAction } from '../../engine/actionExecutor';
+import { MitraMobileShell } from '../../components/layout/MitraMobileShell';
 import type { AppDispatch } from '../../store';
 
 export function TriggerPage() {
@@ -45,30 +46,30 @@ export function TriggerPage() {
   const isSoundBridge = stateId === 'sound_bridge';
 
   return (
-    <div
-      style={{
-        minHeight: '100dvh',
-        background: isSoundBridge ? '#0a0a0a' : '#FFF8EF',
-        maxWidth: 480,
-        margin: '0 auto',
-      }}
-    >
-      {!isSoundBridge && (
-        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '12px 16px 0' }}>
-          <button
-            onClick={() => void executeAction({ type: 'support_exit' }, actionContext)}
-            data-testid="trigger-exit-btn"
-            style={{ background: 'none', border: 'none', color: '#9A8C78', fontSize: 13, cursor: 'pointer' }}
-          >
-            ✕ Return home
-          </button>
-        </div>
-      )}
-      <ScreenRenderer
-        schema={screenState.currentScreen}
-        screenData={screenState.screenData}
-        onAction={(action) => void executeAction(action, actionContext)}
-      />
-    </div>
+    <MitraMobileShell>
+      <div
+        style={isSoundBridge ? {
+          minHeight: '100%',
+          background: 'linear-gradient(180deg, #0a0a0a 0%, #1a1209 100%)',
+        } : undefined}
+      >
+        {!isSoundBridge && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '12px 16px 0' }}>
+            <button
+              onClick={() => void executeAction({ type: 'support_exit' }, actionContext)}
+              data-testid="trigger-exit-btn"
+              style={{ background: 'none', border: 'none', color: 'var(--kalpx-text-muted)', fontSize: 13, cursor: 'pointer' }}
+            >
+              ✕ Return home
+            </button>
+          </div>
+        )}
+        <ScreenRenderer
+          schema={screenState.currentScreen}
+          screenData={screenState.screenData}
+          onAction={(action) => void executeAction(action, actionContext)}
+        />
+      </div>
+    </MitraMobileShell>
   );
 }

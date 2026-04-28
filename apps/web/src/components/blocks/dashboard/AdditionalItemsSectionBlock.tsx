@@ -28,7 +28,7 @@ export function AdditionalItemsSectionBlock({ sd, onAction }: Props) {
           fontSize: 11,
           fontWeight: 700,
           letterSpacing: 2,
-          color: '#b08840',
+          color: 'var(--kalpx-cta)',
           textTransform: 'uppercase',
           marginBottom: 10,
         }}
@@ -56,9 +56,11 @@ export function AdditionalItemsSectionBlock({ sd, onAction }: Props) {
               textAlign: 'left',
               padding: '12px 14px',
               borderRadius: 10,
-              border: '1px solid #e0d4b8',
-              background: '#fdf8ef',
+              border: '1px solid var(--kalpx-border-gold)',
+              background: 'var(--kalpx-card-bg)',
+              boxShadow: 'var(--kalpx-shadow-card)',
               cursor: 'pointer',
+              touchAction: 'manipulation',
             }}
           >
             {item.item_type && (
@@ -67,7 +69,7 @@ export function AdditionalItemsSectionBlock({ sd, onAction }: Props) {
                   fontSize: 10,
                   fontWeight: 700,
                   letterSpacing: 1.5,
-                  color: '#b08840',
+                  color: 'var(--kalpx-cta)',
                   textTransform: 'uppercase',
                   display: 'block',
                   marginBottom: 3,
@@ -76,11 +78,11 @@ export function AdditionalItemsSectionBlock({ sd, onAction }: Props) {
                 {item.item_type}
               </span>
             )}
-            <span style={{ fontSize: 15, fontWeight: 500, color: '#1a1a0a' }}>
+            <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--kalpx-text)' }}>
               {item.title || item.item_id || 'Practice item'}
             </span>
             {item.subtitle && (
-              <span style={{ display: 'block', fontSize: 12, color: '#6b4c1a', marginTop: 2 }}>
+              <span style={{ display: 'block', fontSize: 12, color: 'var(--kalpx-text-soft)', marginTop: 2 }}>
                 {item.subtitle}
               </span>
             )}

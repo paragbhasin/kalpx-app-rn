@@ -15,8 +15,13 @@ export function MitraHomePage() {
     if (loading) return;
     if (hasActiveJourney === true) {
       navigate('/en/mitra/dashboard', { replace: true });
+      return;
     }
-    // else: hasActiveJourney = false or null (error) — stay on this page
+    // hasActiveJourney === false + authenticated user → returning user, go to welcome-back
+    if (hasActiveJourney === false && typeof localStorage !== 'undefined' && !!localStorage.getItem(AUTH_KEYS.accessToken)) {
+      navigate('/en/mitra/welcome-back', { replace: true });
+    }
+    // else: not authenticated — stay on this page (show Begin/Sign in)
   }, [loading, hasActiveJourney, navigate]);
 
   if (loading) {

@@ -8,6 +8,7 @@ import { useLocation, useSearchParams } from 'react-router-dom';
 import { ScreenRenderer } from '../../engine/ScreenRenderer';
 import { loadScreenWithData, useScreenState } from '../../store/screenSlice';
 import { executeAction } from '../../engine/actionExecutor';
+import { MitraMobileShell } from '../../components/layout/MitraMobileShell';
 import type { AppDispatch } from '../../store';
 
 export function CheckinPage() {
@@ -45,13 +46,13 @@ export function CheckinPage() {
   const isAck = stateId === 'balanced_ack';
 
   return (
-    <div style={{ minHeight: '100dvh', background: '#FFF8EF', maxWidth: 480, margin: '0 auto' }}>
+    <MitraMobileShell>
       {!isAck && (
         <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '12px 16px 0' }}>
           <button
             onClick={() => void executeAction({ type: 'support_exit' }, actionContext)}
             data-testid="checkin-exit-btn"
-            style={{ background: 'none', border: 'none', color: '#9A8C78', fontSize: 13, cursor: 'pointer' }}
+            style={{ background: 'none', border: 'none', color: 'var(--kalpx-text-muted)', fontSize: 13, cursor: 'pointer' }}
           >
             ✕ Return home
           </button>
@@ -62,6 +63,6 @@ export function CheckinPage() {
         screenData={screenState.screenData}
         onAction={(action) => void executeAction(action, actionContext)}
       />
-    </div>
+    </MitraMobileShell>
   );
 }

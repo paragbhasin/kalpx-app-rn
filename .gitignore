@@ -65,6 +65,7 @@ screenshots/mitra-v3/
 *.png
 !assets/**/*.png
 !apps/web/public/*.png
+!apps/web/public/*.jpg
 !screenshots/comparison.html
 !screenshots/flow_*/
 !screenshots/persona_*/

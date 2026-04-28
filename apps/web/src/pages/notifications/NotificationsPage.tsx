@@ -116,6 +116,8 @@ export function NotificationsPage() {
               padding: 14,
               marginBottom: 8,
               cursor: 'pointer',
+              boxShadow: 'var(--kalpx-shadow-card)',
+              touchAction: 'manipulation',
             }}
           >
             {/* Unread indicator */}

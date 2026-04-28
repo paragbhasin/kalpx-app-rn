@@ -17,15 +17,15 @@ export function RoomOpeningExperience({ envelope, roomName, lifeContextLabel }: 
   return (
     <div style={{ padding: '24px 20px 0', textAlign: 'center' }}>
       {roomName && (
-        <p style={{ fontSize: 11, color: '#9A8C78', letterSpacing: 2, marginBottom: 12, textTransform: 'uppercase' }}>
+        <p style={{ fontSize: 11, color: 'var(--kalpx-text-muted)', letterSpacing: 2, marginBottom: 12, textTransform: 'uppercase' }}>
           {roomName}
           {lifeContextLabel ? ` · ${lifeContextLabel}` : ''}
         </p>
       )}
-      {/* RN: opening_line is bold 20px, NOT italic */}
+      {/* RN: opening_line is bold 20px, serif, NOT italic */}
       {envelope.opening_line && (
         <p
-          style={{ fontSize: 20, fontWeight: 700, color: '#2C2A26', lineHeight: 1.5, marginBottom: 10 }}
+          style={{ fontSize: 20, fontWeight: 700, fontFamily: 'var(--kalpx-font-serif)', color: 'var(--kalpx-text)', lineHeight: 1.5, marginBottom: 10 }}
           data-testid="room-opening-line"
         >
           {envelope.opening_line}
@@ -34,14 +34,14 @@ export function RoomOpeningExperience({ envelope, roomName, lifeContextLabel }: 
       {/* memory_echo_line: present in RN, was missing on web */}
       {envelope.memory_echo_line && (
         <p
-          style={{ fontSize: 13, color: '#9A8C78', fontStyle: 'italic', lineHeight: 1.6, marginBottom: 10 }}
+          style={{ fontSize: 13, color: 'var(--kalpx-text-muted)', fontStyle: 'italic', lineHeight: 1.6, marginBottom: 10 }}
           data-testid="room-memory-echo-line"
         >
           {envelope.memory_echo_line}
         </p>
       )}
       {envelope.second_beat_line && (
-        <p style={{ fontSize: 15, color: '#6B6356', lineHeight: 1.6, marginBottom: 10 }}>
+        <p style={{ fontSize: 15, color: 'var(--kalpx-text-soft)', lineHeight: 1.6, marginBottom: 10 }}>
           {envelope.second_beat_line}
         </p>
       )}

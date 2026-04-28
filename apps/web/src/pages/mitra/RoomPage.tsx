@@ -129,11 +129,20 @@ export function RoomPage() {
     );
   }
 
+  const roomBgStyle: React.CSSProperties = {
+    minHeight: '100dvh',
+    background: '#FFF8EF',
+    backgroundImage: 'url(/rooms_bg.jpg)',
+    backgroundSize: 'cover',
+    backgroundRepeat: 'no-repeat',
+    backgroundAttachment: 'fixed',
+  };
+
   if (phase === 'loading') {
     return (
-      <div style={{ minHeight: '100dvh', background: '#FFF8EF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ textAlign: 'center', color: '#9A8C78' }}>
-          <div style={{ width: 32, height: 32, border: '2px solid #C9A84C', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 12px' }} />
+      <div style={{ ...roomBgStyle, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center', color: 'var(--kalpx-text-muted)' }}>
+          <div style={{ width: 32, height: 32, border: '2px solid var(--kalpx-cta)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite', margin: '0 auto 12px' }} />
           <p style={{ fontSize: 13 }}>Entering {roomName}…</p>
           <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
         </div>
@@ -142,13 +151,23 @@ export function RoomPage() {
   }
 
   return (
-    <div style={{ minHeight: '100dvh', background: '#FFF8EF', maxWidth: 480, margin: '0 auto' }}>
-      {/* Always-visible exit strip */}
+    <div style={{ ...roomBgStyle, maxWidth: 480, margin: '0 auto' }}>
+      {/* Frosted exit pill — top-right, immersive */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '12px 16px 0' }} data-testid="room-exit-strip">
         <button
           onClick={() => handleAction({ type: 'room_exit', payload: { room_id: fullRoomId } })}
           data-testid="room-exit-btn"
-          style={{ background: 'none', border: 'none', color: '#9A8C78', fontSize: 13, cursor: 'pointer' }}
+          style={{
+            background: 'rgba(250,247,242,0.85)',
+            border: '1px solid var(--kalpx-border-gold)',
+            borderRadius: 20,
+            padding: '5px 14px',
+            backdropFilter: 'blur(4px)',
+            WebkitBackdropFilter: 'blur(4px)',
+            fontSize: 13,
+            color: 'var(--kalpx-text-muted)',
+            cursor: 'pointer',
+          }}
         >
           ✕ Leave room
         </button>
@@ -162,10 +181,10 @@ export function RoomPage() {
         />
       ) : (
         <div style={{ padding: 24, textAlign: 'center' }}>
-          <p style={{ color: '#9A8C78' }}>This space is not available right now.</p>
+          <p style={{ color: 'var(--kalpx-text-muted)' }}>This space is not available right now.</p>
           <button
             onClick={() => handleAction({ type: 'room_exit', payload: { room_id: fullRoomId } })}
-            style={{ marginTop: 16, padding: '10px 24px', borderRadius: 8, background: '#C9A84C', color: '#fff', border: 'none', cursor: 'pointer' }}
+            style={{ marginTop: 16, padding: '10px 24px', borderRadius: 8, background: 'var(--kalpx-cta)', color: '#fff', border: 'none', cursor: 'pointer' }}
             data-testid="room-unavailable-return"
           >
             Return to dashboard

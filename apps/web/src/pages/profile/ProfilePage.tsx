@@ -52,7 +52,7 @@ export function ProfilePage() {
 
   return (
     <AppShell>
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: '32px 20px 80px' }}>
+      <div style={{ maxWidth: 480, margin: '0 auto', padding: '32px 20px', paddingBottom: 'calc(80px + env(safe-area-inset-bottom))' }}>
         {/* Identity */}
         <SectionCard data-testid="profile-identity">
           {loadingProfile ? (

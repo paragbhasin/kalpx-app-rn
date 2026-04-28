@@ -21,11 +21,13 @@ export function CommunityPostCard({ post, onUpvote, isUpvoting = false }: Commun
     <div
       style={{
         background: '#fff',
-        border: '1px solid #f0e8d8',
+        border: '1px solid var(--kalpx-border-gold)',
         borderRadius: 14,
         padding: '14px 16px',
         marginBottom: 12,
+        boxShadow: 'var(--kalpx-shadow-card-lift)',
         cursor: 'pointer',
+        touchAction: 'manipulation',
       }}
       onClick={() => navigate(`/en/community/${post.id}`)}
     >

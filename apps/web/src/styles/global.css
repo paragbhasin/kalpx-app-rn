@@ -39,8 +39,10 @@
   --kalpx-r-pill:  9999px;
 
   /* Shadows */
-  --kalpx-shadow-card:   0 1px 4px rgba(67, 33, 4, 0.06);
-  --kalpx-shadow-sheet:  0 -4px 24px rgba(67, 33, 4, 0.12);
+  --kalpx-shadow-card:      0 1px 4px rgba(67, 33, 4, 0.06);
+  --kalpx-shadow-card-lift: 0 3px 8px rgba(67, 33, 4, 0.10);
+  --kalpx-shadow-pill:      0 3px 6px rgba(67, 33, 4, 0.15);
+  --kalpx-shadow-sheet:     0 -4px 24px rgba(67, 33, 4, 0.12);
 
   /* Fonts */
   --kalpx-font-serif: 'Cormorant Garamond', Georgia, serif;
@@ -136,4 +138,15 @@ button {
   .kalpx-shell-main {
     padding-bottom: calc(56px + env(safe-area-inset-bottom));
   }
+}
+
+/* Touch optimisation */
+.kalpx-touch {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Mitra shell body lock (when sidebar open) */
+.kalpx-scroll-lock {
+  overflow: hidden;
 }

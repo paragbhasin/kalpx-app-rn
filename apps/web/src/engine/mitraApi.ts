@@ -387,3 +387,45 @@ export async function mitraJourneyDay14Decision(
   });
   return res.data;
 }
+
+/**
+ * GET /api/mitra/v3/journey/entry-view/ — Returns view routing envelope.
+ * Supports ETag / If-None-Match for 304 not-modified handling.
+ */
+export async function mitraJourneyEntryView(etag?: string | null): Promise<{
+  envelope: any | null;
+  etag: string | null;
+  notModified: boolean;
+}> {
+  try {
+    const headers: Record<string, string> = {};
+    if (etag) headers['If-None-Match'] = etag;
+    const res = await api.get('mitra/v3/journey/entry-view/', { headers });
+    return {
+      envelope: res.data,
+      etag: (res.headers as any)['etag'] ?? null,
+      notModified: false,
+    };
+  } catch (err: any) {
+    if (err?.response?.status === 304) {
+      return { envelope: null, etag: etag ?? null, notModified: true };
+    }
+    throw err;
+  }
+}
+
+/**
+ * POST /api/mitra/v3/journey/reentry-decision/ — Submit welcome-back decision.
+ * decision: 'continue' | 'fresh'
+ */
+export async function mitraJourneyReentryDecision(
+  decision: 'continue' | 'fresh',
+  idempotencyKey: string,
+): Promise<any> {
+  const res = await api.post(
+    'mitra/v3/journey/reentry-decision/',
+    { decision },
+    { headers: { 'Idempotency-Key': idempotencyKey } },
+  );
+  return res.data;
+}

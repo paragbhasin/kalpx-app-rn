@@ -31,8 +31,9 @@ export function RoomPrincipleBanner({ banner, onAction }: Props) {
         margin: '0 20px 20px',
         padding: '20px 18px',
         borderRadius: 12,
-        background: 'rgba(201,168,76,0.06)',
-        border: '1px solid rgba(201,168,76,0.2)',
+        background: 'var(--kalpx-card-bg)',
+        border: '1px solid #D4A017',
+        boxShadow: 'var(--kalpx-shadow-card)',
         cursor: isTappable ? 'pointer' : 'default',
         position: 'relative',
       }}
@@ -43,22 +44,22 @@ export function RoomPrincipleBanner({ banner, onAction }: Props) {
       onKeyDown={(e) => isTappable && e.key === 'Enter' && handleTap()}
     >
       {banner.source_line && (
-        <p style={{ fontSize: 11, color: '#C9A84C', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 8 }}>
+        <p style={{ fontSize: 11, color: '#D4A017', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 8 }}>
           {banner.source_line}
         </p>
       )}
       {banner.principle_text && (
-        <p style={{ fontSize: 16, color: '#2C2A26', lineHeight: 1.6, fontStyle: 'italic', marginBottom: banner.helper_line ? 10 : 0 }}>
+        <p style={{ fontSize: 16, fontFamily: 'var(--kalpx-font-serif)', color: 'var(--kalpx-text)', lineHeight: 1.6, marginBottom: banner.helper_line ? 10 : 0 }}>
           "{banner.principle_text}"
         </p>
       )}
       {banner.helper_line && (
-        <p style={{ fontSize: 13, color: '#6B6356', lineHeight: 1.5 }}>
+        <p style={{ fontSize: 13, color: 'var(--kalpx-text-soft)', lineHeight: 1.5 }}>
           {banner.helper_line}
         </p>
       )}
       {banner.tradition_tag && (
-        <p style={{ fontSize: 11, color: '#9A8C78', marginTop: 8 }}>
+        <p style={{ fontSize: 11, color: 'var(--kalpx-text-muted)', marginTop: 8 }}>
           — {banner.tradition_tag}
         </p>
       )}

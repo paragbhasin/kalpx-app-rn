@@ -7,7 +7,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { PageShell } from '../../components/PageShell';
+import { MitraMobileShell } from '../../components/layout/MitraMobileShell';
 import { ScreenRenderer } from '../../engine/ScreenRenderer';
 import { loadScreenWithData } from '../../store/screenSlice';
 import { useScreenState } from '../../store/screenSlice';
@@ -83,17 +83,17 @@ export function CheckpointPage() {
 
   if (loadState === 'loading') {
     return (
-      <PageShell>
+      <MitraMobileShell>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60dvh' }}>
           <p style={{ color: '#9A8C78', fontSize: 14 }}>Loading your checkpoint…</p>
         </div>
-      </PageShell>
+      </MitraMobileShell>
     );
   }
 
   if (loadState === 'not_ready') {
     return (
-      <PageShell>
+      <MitraMobileShell>
         <div
           data-testid="checkpoint-not-ready"
           style={{ maxWidth: 480, margin: '0 auto', padding: '48px 24px', textAlign: 'center' }}
@@ -121,13 +121,13 @@ export function CheckpointPage() {
             Back to Dashboard
           </button>
         </div>
-      </PageShell>
+      </MitraMobileShell>
     );
   }
 
   if (loadState === 'error') {
     return (
-      <PageShell>
+      <MitraMobileShell>
         <div
           data-testid="checkpoint-error"
           style={{ maxWidth: 480, margin: '0 auto', padding: '48px 24px', textAlign: 'center' }}
@@ -170,12 +170,12 @@ export function CheckpointPage() {
             Back to Dashboard
           </button>
         </div>
-      </PageShell>
+      </MitraMobileShell>
     );
   }
 
   return (
-    <PageShell>
+    <MitraMobileShell>
       <div style={{ maxWidth: 480, margin: '0 auto' }}>
         <ScreenRenderer
           schema={screenState.currentScreen}
@@ -183,6 +183,6 @@ export function CheckpointPage() {
           onAction={(action) => executeAction(action, actionContext)}
         />
       </div>
-    </PageShell>
+    </MitraMobileShell>
   );
 }

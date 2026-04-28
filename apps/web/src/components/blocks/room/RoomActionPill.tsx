@@ -163,20 +163,25 @@ export function RoomActionPill({ action, roomId, screenData = {}, onAction }: Pr
     width: '100%',
     padding: '16px 20px',
     borderRadius: 15,
-    border: isExit ? '1px solid #E8DCC8' : '1px solid rgba(159,159,159,0.3)',
+    border: isExit
+      ? '1px solid var(--kalpx-border-gold)'
+      : action.primary_recommendation && !done
+      ? '1.4px solid #D4A017'
+      : '1px solid rgba(159,159,159,0.3)',
     background: isExit
-      ? 'transparent'
+      ? 'rgba(255,248,239,0.6)'
       : done
       ? 'rgba(201,168,76,0.06)'
       : '#FBF5F5',
-    color: isExit ? '#9A8C78' : done ? '#9A8C78' : '#432104',
+    color: isExit ? 'var(--kalpx-text-muted)' : done ? 'var(--kalpx-text-muted)' : 'var(--kalpx-text)',
     fontSize: 15,
     textAlign: 'center' as const,
     cursor: 'pointer',
     display: 'flex',
     flexDirection: 'column' as const,
     gap: 4,
-    boxShadow: isExit ? 'none' : '0 3px 8px rgba(0,0,0,0.1)',
+    boxShadow: isExit ? 'none' : 'var(--kalpx-shadow-pill)',
+    touchAction: 'manipulation' as const,
   };
 
   const expandableContent =

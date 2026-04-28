@@ -17,6 +17,7 @@ import { ingestDailyView } from '../../engine/v3Ingest';
 import { executeAction } from '../../engine/actionExecutor';
 import { useGuestIdentity } from '../../hooks/useGuestIdentity';
 import { WEB_ENV } from '../../lib/env';
+import { MitraMobileShell } from '../../components/layout/MitraMobileShell';
 import type { AppDispatch } from '../../store';
 
 export function DashboardPage() {
@@ -82,8 +83,8 @@ export function DashboardPage() {
   };
 
   return (
-    <div style={{ minHeight: '100dvh', background: '#FFF8EF' }}>
-      <div style={{ maxWidth: 480, margin: '0 auto' }}>
+    <MitraMobileShell>
+      <div style={{ padding: '0 0 32px' }}>
 
         {/* ── Loading skeleton ── */}
         {loading && <DashboardSkeleton />}
@@ -95,18 +96,18 @@ export function DashboardPage() {
               style={{
                 padding: '16px 20px',
                 borderRadius: 12,
-                background: '#fff1f0',
-                border: '1px solid #fca5a5',
+                background: 'var(--kalpx-chip-bg)',
+                border: '1px solid var(--kalpx-border-gold)',
                 marginBottom: 12,
               }}
             >
-              <p style={{ color: '#b91c1c', fontSize: 14, marginBottom: 8 }}>{error}</p>
+              <p style={{ color: 'var(--kalpx-text)', fontSize: 14, marginBottom: 8 }}>{error}</p>
               <button
                 onClick={() => void load()}
                 style={{
                   padding: '8px 20px',
                   borderRadius: 8,
-                  background: '#b91c1c',
+                  background: 'var(--kalpx-cta)',
                   color: '#fff',
                   border: 'none',
                   fontSize: 13,
@@ -128,8 +129,8 @@ export function DashboardPage() {
           />
         )}
 
-        {/* ── Dev debug panel ── */}
-        {WEB_ENV.isDev && (
+        {/* ── Dev debug panel (only with ?debug in URL) ── */}
+        {WEB_ENV.isDev && typeof window !== 'undefined' && window.location.search.includes('debug') && (
           <div style={{ borderTop: '1px solid #eee', padding: '12px 16px', marginTop: 16 }}>
             <button
               onClick={() => setDebugOpen(!debugOpen)}
@@ -156,7 +157,7 @@ export function DashboardPage() {
           </div>
         )}
       </div>
-    </div>
+    </MitraMobileShell>
   );
 }
 

@@ -1,10 +1,12 @@
 import { clearTokens } from "@kalpx/auth";
+import { ChevronDown, Menu, User, X } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { webStorage } from "../../lib/webStorage";
 
 const NAV_LINKS = [
+  { to: "/en", label: "Home", match: "/en", mobileOnly: true },
   { to: "/en/mitra", label: "Mitra", match: "/en/mitra" },
   { to: "/en/classes", label: "Classes", match: "/en/classes" },
   { to: "/en/community", label: "Community", match: "/en/community" },
@@ -67,6 +69,7 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
         style={{
           width: "100%",
           height: 56,
+          marginTop: 10,
           background: transparent
             ? "rgba(255, 248, 239, 0.18)"
             : "var(--kalpx-bg)",
@@ -95,7 +98,7 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
           <img
             src="/kalpx-logo.png"
             alt="KalpX"
-            style={{ height: 32, width: "auto" }}
+            style={{ height: 44, width: "auto" }}
           />
         </Link>
 
@@ -232,22 +235,51 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
         </nav>
 
         {/* Mobile hamburger — hidden on desktop via CSS class */}
-        <button
+        <div
           className="kalpx-mobile-only"
-          onClick={() => setSidebarOpen(true)}
-          aria-label="Open menu"
-          data-testid="header-hamburger-btn"
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            fontSize: 22,
-            color: "var(--kalpx-text)",
-            padding: "4px 8px",
-          }}
+          style={{ alignItems: "center", gap: 10 }}
         >
-          ☰
-        </button>
+          <button
+            aria-label="Language: English"
+            style={{
+              height: 44,
+              padding: "0 14px",
+              borderRadius: 14,
+              border: "1px solid rgba(198, 186, 180, 0.95)",
+              background: "rgba(255,255,255,0.72)",
+              boxShadow: "0 6px 16px rgba(67, 33, 4, 0.06)",
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              color: "var(--kalpx-text)",
+              fontSize: 12,
+              fontWeight: 500,
+              fontFamily: "inherit",
+            }}
+          >
+            <span>English</span>
+            <ChevronDown size={18} strokeWidth={1.8} color="#a89d93" />
+          </button>
+          <button
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open menu"
+            data-testid="header-hamburger-btn"
+            style={{
+              width: 38,
+              height: 38,
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              color: "var(--kalpx-text)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: 0,
+            }}
+          >
+            <Menu size={34} strokeWidth={2.2} />
+          </button>
+        </div>
       </header>
 
       {/* Mobile sidebar */}
@@ -268,213 +300,243 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
           <div
             style={{
               position: "fixed",
-              top: 0,
+              top: 14,
               right: 0,
-              bottom: 0,
-              width: 260,
-              background: "#fff",
-              boxShadow: "-4px 0 24px rgba(67,33,4,0.12)",
+              bottom: 14,
+              width: "min(456px, calc(100vw - 80px))",
+              background: "#ffffff",
+              borderRadius: "42px 0 0 0",
+              boxShadow: "-12px 0 30px rgba(67,33,4,0.14)",
               zIndex: 90,
               display: "flex",
               flexDirection: "column",
               animation: "kalpx-slide-in-right 0.22s ease-out",
+              overflow: "hidden",
             }}
           >
-            {/* Sidebar header */}
             <div
               style={{
-                background: "var(--kalpx-cta)",
-                padding: "16px 20px",
+                background: "#d9a40c",
+                padding: "15px 20px",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
               }}
             >
-              {authed ? (
-                <div
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: "50%",
-                    background: "#fff",
-                    color: "var(--kalpx-cta)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: 16,
-                    fontWeight: 700,
-                  }}
-                >
-                  {userInitial}
-                </div>
-              ) : (
-                <img
-                  src="/kalpx-logo.png"
-                  alt="KalpX"
-                  style={{ height: 28, width: "auto" }}
-                />
-              )}
-              <button
-                onClick={() => setSidebarOpen(false)}
+              <div
                 style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: 22,
-                  color: "#fff",
-                  lineHeight: 1,
+                  width: 40,
+                  height: 40,
+                  borderRadius: "50%",
+                  background: "#fff",
+                  color: "#d9a40c",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 8px 18px rgba(67,33,4,0.08)",
+                  fontSize: 20,
+                  fontWeight: 700,
                 }}
               >
-                ×
+                {authed ? (
+                  userInitial
+                ) : (
+                  <User size={28} strokeWidth={2.2} color="#d9a40c" />
+                )}
+              </div>
+              <button
+                onClick={() => setSidebarOpen(false)}
+                aria-label="Close menu"
+                style={{
+                  width: 24,
+                  height: 24,
+                  borderRadius: "50%",
+                  background: "#fff",
+                  border: "none",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#2b2b2b",
+                }}
+              >
+                <X size={18} strokeWidth={2.2} />
               </button>
             </div>
 
-            {/* Nav links */}
-            <nav style={{ flex: 1, overflowY: "auto", padding: "8px 0" }}>
-              {NAV_LINKS.map(({ to, label }) => (
-                <NavLink
-                  key={to}
-                  to={to}
-                  onClick={() => setSidebarOpen(false)}
-                  style={({ isActive }) => ({
-                    display: "block",
-                    padding: "14px 24px",
-                    fontSize: 16,
-                    fontWeight: isActive ? 700 : 500,
-                    color: isActive ? "var(--kalpx-cta)" : "var(--kalpx-text)",
-                    textDecoration: "none",
-                    borderBottom: "1px solid var(--kalpx-border-gold)",
-                  })}
-                >
-                  {label}
-                </NavLink>
-              ))}
-
-              {authed && (
-                <>
-                  <NavLink
-                    to="/en/notifications"
-                    onClick={() => setSidebarOpen(false)}
-                    style={({ isActive }) => ({
-                      display: "block",
-                      padding: "14px 24px",
-                      fontSize: 16,
-                      fontWeight: isActive ? 700 : 500,
-                      color: isActive
-                        ? "var(--kalpx-cta)"
-                        : "var(--kalpx-text)",
-                      textDecoration: "none",
-                      borderBottom: "1px solid var(--kalpx-border-gold)",
-                    })}
-                  >
-                    Notifications
-                  </NavLink>
-                  <NavLink
-                    to="/en/profile"
-                    onClick={() => setSidebarOpen(false)}
-                    style={({ isActive }) => ({
-                      display: "block",
-                      padding: "14px 24px",
-                      fontSize: 16,
-                      fontWeight: isActive ? 700 : 500,
-                      color: isActive
-                        ? "var(--kalpx-cta)"
-                        : "var(--kalpx-text)",
-                      textDecoration: "none",
-                      borderBottom: "1px solid var(--kalpx-border-gold)",
-                    })}
-                  >
-                    Profile
-                  </NavLink>
-                </>
-              )}
-            </nav>
-
-            {/* Auth action */}
             <div
               style={{
-                padding: "16px 24px",
-                borderTop: "1px solid var(--kalpx-border-gold)",
+                flex: 1,
+                overflowY: "auto",
+                padding: "34px 42px 0",
               }}
             >
-              {authed ? (
-                <button
-                  onClick={handleLogout}
-                  style={{
-                    width: "100%",
-                    padding: "12px",
-                    borderRadius: "var(--kalpx-r-lg)",
-                    background: "none",
-                    border: "1px solid var(--kalpx-border)",
-                    color: "#c0392b",
-                    fontSize: 14,
-                    fontWeight: 600,
-                    cursor: "pointer",
-                  }}
-                >
-                  Logout
-                </button>
-              ) : (
-                <Link
-                  to="/login"
-                  onClick={() => setSidebarOpen(false)}
-                  style={{
-                    display: "block",
-                    textAlign: "center",
-                    padding: "12px",
-                    borderRadius: "var(--kalpx-r-lg)",
-                    background: "var(--kalpx-cta)",
-                    color: "#fff",
-                    fontSize: 14,
-                    fontWeight: 600,
-                    textDecoration: "none",
-                  }}
-                >
-                  Sign in
-                </Link>
-              )}
-            </div>
-
-            {/* Social / app download */}
-            <div style={{ padding: "12px 24px 20px", textAlign: "center" }}>
-              <p
+              <nav
                 style={{
-                  fontSize: 12,
-                  color: "var(--kalpx-text-muted)",
-                  marginBottom: 8,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 28,
                 }}
               >
-                Follow us
-              </p>
+                {NAV_LINKS.map(({ to, label }) => (
+                  <NavLink
+                    key={to}
+                    to={to}
+                    onClick={() => setSidebarOpen(false)}
+                    style={({ isActive }) => ({
+                      fontSize: 18,
+                      fontWeight: 600,
+                      color: "#2f3135",
+                      textDecoration: "none",
+                      lineHeight: 1.1,
+                    })}
+                  >
+                    {label}
+                  </NavLink>
+                ))}
+              </nav>
+
+              <div style={{ marginTop: 20 }}>
+                <button
+                  aria-label="Language: English"
+                  style={{
+                    // height: 52,
+                    minWidth: 170,
+                    padding: "8px",
+                    borderRadius: 10,
+                    border: "1px solid rgba(198, 206, 218, 0.95)",
+                    background: "#fff",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 18,
+                    color: "#1f2a3a",
+                    fontSize: 16,
+                    fontWeight: 600,
+                    boxShadow: "0 2px 8px rgba(67,33,4,0.04)",
+                  }}
+                >
+                  <span>English</span>
+                  <ChevronDown size={20} strokeWidth={1.8} color="#9ba4b5" />
+                </button>
+              </div>
+
+              <div style={{ marginTop: 20 }}>
+                {authed ? (
+                  <button
+                    onClick={handleLogout}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      padding: 0,
+                      color: "var(--kalpx-cta)",
+                      fontSize: 18,
+                      fontWeight: 700,
+                      cursor: "pointer",
+                    }}
+                  >
+                    Logout
+                  </button>
+                ) : (
+                  <Link
+                    to="/login"
+                    onClick={() => setSidebarOpen(false)}
+                    style={{
+                      color: "var(--kalpx-cta)",
+                      fontSize: 18,
+                      fontWeight: 700,
+                      textDecoration: "none",
+                    }}
+                  >
+                    Login
+                  </Link>
+                )}
+              </div>
+
               <div
-                style={{ display: "flex", gap: 12, justifyContent: "center" }}
+                style={{
+                  marginTop: 28,
+                  borderTop: "1px solid #d9d9d9",
+                  paddingTop: 34,
+                  textAlign: "center",
+                }}
               >
-                <a
-                  href="https://www.instagram.com/kalpxofficial"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <p
                   style={{
-                    fontSize: 12,
-                    color: "var(--kalpx-cta)",
-                    textDecoration: "none",
-                    fontWeight: 600,
+                    margin: "0 0 20px",
+                    fontSize: 16,
+                    fontWeight: 700,
+                    color: "#2f3135",
                   }}
                 >
-                  Instagram
-                </a>
+                  Download App now
+                </p>
                 <a
-                  href="https://www.facebook.com/kalpxofficial"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="#"
                   style={{
-                    fontSize: 12,
-                    color: "var(--kalpx-cta)",
+                    width: 45,
+                    height: 45,
+                    borderRadius: 10,
+                    background: "#fff",
+                    boxShadow: "0 14px 24px rgba(67,33,4,0.12)",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#2f3135",
                     textDecoration: "none",
-                    fontWeight: 600,
                   }}
                 >
-                  Facebook
+                  <img
+                    src="/apple-black.svg"
+                    width={28}
+                    height={33}
+                    alt=""
+                    aria-hidden="true"
+                  />
                 </a>
+              </div>
+
+              <div
+                style={{
+                  marginTop: 42,
+                  borderTop: "1px solid #d9d9d9",
+                  paddingTop: 30,
+                  paddingBottom: 28,
+                  textAlign: "center",
+                }}
+              >
+                <p
+                  style={{
+                    margin: "0 0 16px",
+                    fontSize: 16,
+                    fontWeight: 600,
+                    color: "#3b3d42",
+                  }}
+                >
+                  Follow Us
+                </p>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    gap: 18,
+                  }}
+                >
+                  <img
+                    src="/facebook-icon.svg"
+                    width={28}
+                    height={28}
+                    alt=""
+                    aria-hidden="true"
+                  />
+                  <img
+                    src="/insta.svg"
+                    width={25}
+                    height={25}
+                    alt=""
+                    aria-hidden="true"
+                  />
+                </div>
               </div>
             </div>
           </div>

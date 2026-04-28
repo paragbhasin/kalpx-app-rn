@@ -7,7 +7,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useScreenState, updateScreenData } from '../../store/screenSlice';
-import { getRoomRender } from '../../engine/mitraApi';
+import { getRoomRender, trackEvent } from '../../engine/mitraApi';
 import { executeAction } from '../../engine/actionExecutor';
 import { LifeContextPickerSheet } from '../../components/blocks/room/LifeContextPickerSheet';
 import { RoomRenderer } from '../../components/blocks/room/RoomRenderer';
@@ -85,6 +85,7 @@ export function RoomPage() {
       dispatch(updateScreenData({ room_id: fullRoomId, room_render_payload: data }));
       setPhase('render');
     } catch {
+      void trackEvent('room_render_fetch_failed', { room_id: fullRoomId });
       setEnvelope(buildExitOnlyFallback(fullRoomId));
       setPhase('render');
     }

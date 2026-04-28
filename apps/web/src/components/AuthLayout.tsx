@@ -13,7 +13,7 @@ export function AuthLayout({ children, title }: Props) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'url(/beige_bg.png) center/cover fixed, var(--kalpx-bg)',
+        background: 'url(/hoomepagebg.jpg) center/cover fixed, var(--kalpx-bg)',
         color: 'var(--kalpx-text)',
       }}
     >
@@ -23,6 +23,10 @@ export function AuthLayout({ children, title }: Props) {
           maxWidth: 400,
           padding: '32px 24px',
           boxSizing: 'border-box',
+          background: 'var(--kalpx-card-bg)',
+          borderRadius: 20,
+          boxShadow: 'var(--kalpx-shadow-card-lift)',
+          marginBottom: 40,
         }}
       >
         <div style={{ textAlign: 'center', marginBottom: 32 }}>

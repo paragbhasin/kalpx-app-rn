@@ -1,4 +1,9 @@
 import React from 'react';
+import { Music, Leaf, Flower2 } from 'lucide-react';
+// Icon mapping (matches RN Ionicons):
+//   musical-notes → Music
+//   leaf         → Leaf
+//   flower       → Flower2 (closest lotus/petal shape in lucide)
 
 const SLOT_LABELS: Record<string, string> = {
   mantra: 'MANTRA',
@@ -24,11 +29,10 @@ const SLOT_MASTER_KEY: Record<string, string> = {
   practice: 'master_practice',
 };
 
-// Unicode icons for each slot (gold, no external lib)
-const SLOT_ICONS: Record<string, string> = {
-  mantra: '♪',
-  sankalp: '❧',
-  practice: '✿',
+const SLOT_ICON_COMPONENTS: Record<string, React.ComponentType<{ size?: number; strokeWidth?: number; color?: string }>> = {
+  mantra: Music,
+  sankalp: Leaf,
+  practice: Flower2,
 };
 
 interface Props {
@@ -122,12 +126,14 @@ export function TriadCardsRow({ sd, onAction }: Props) {
                 alignItems: 'center',
                 justifyContent: 'center',
                 marginBottom: 8,
-                fontSize: 16,
                 color: '#C9A84C',
                 flexShrink: 0,
               }}
             >
-              {SLOT_ICONS[item.slot] || '·'}
+              {(() => {
+                const Icon = SLOT_ICON_COMPONENTS[item.slot];
+                return Icon ? <Icon size={16} strokeWidth={1.8} color="#C9A84C" /> : <span style={{ fontSize: 16 }}>·</span>;
+              })()}
             </div>
 
             {/* Info button — top-right */}

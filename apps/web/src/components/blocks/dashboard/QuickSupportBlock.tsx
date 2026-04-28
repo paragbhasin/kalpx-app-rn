@@ -1,4 +1,9 @@
 import React, { useState } from 'react';
+import { AlertCircle, CheckCircle2, Sun } from 'lucide-react';
+// Icon mapping (matches RN Ionicons):
+//   alert-circle-outline → AlertCircle
+//   checkmark-circle-outline → CheckCircle2
+//   sunny-outline → Sun
 import { RoomEntrySheet } from '../room/RoomEntrySheet';
 
 interface Props {
@@ -14,7 +19,7 @@ export function QuickSupportBlock({ onAction }: Props) {
         Quick Support
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {/* Chip 1 — primary (filled lotusPeach) */}
+        {/* Chip 1 — primary (filled lotusPeach) — alert-circle-outline → AlertCircle */}
         <button
           data-testid="support-chip-triggered"
           onClick={() => onAction && void onAction({ type: 'initiate_trigger' })}
@@ -27,16 +32,20 @@ export function QuickSupportBlock({ onAction }: Props) {
             fontSize: 15,
             fontWeight: 600,
             cursor: 'pointer',
-            textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
             width: '100%',
             minHeight: 48,
             touchAction: 'manipulation',
           }}
         >
-          ⚡ I Feel Triggered
+          <AlertCircle size={18} strokeWidth={1.6} />
+          I Feel Triggered
         </button>
 
-        {/* Chip 2 — transparent gold border */}
+        {/* Chip 2 — checkmark-circle-outline → CheckCircle2 */}
         <button
           data-testid="support-chip-checkin"
           onClick={() => onAction && void onAction({ type: 'start_checkin' })}
@@ -49,16 +58,20 @@ export function QuickSupportBlock({ onAction }: Props) {
             fontSize: 15,
             fontWeight: 500,
             cursor: 'pointer',
-            textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
             width: '100%',
             minHeight: 48,
             touchAction: 'manipulation',
           }}
         >
+          <CheckCircle2 size={18} strokeWidth={1.6} />
           Quick Check-in
         </button>
 
-        {/* Chip 3 — transparent gold border */}
+        {/* Chip 3 — sunny-outline → Sun */}
         <button
           data-testid="support-chip-good_place"
           onClick={() => onAction && void onAction({ type: 'enter_room', payload: { room_id: 'room_joy', source: 'quick_support_good_place' } })}
@@ -71,12 +84,16 @@ export function QuickSupportBlock({ onAction }: Props) {
             fontSize: 15,
             fontWeight: 500,
             cursor: 'pointer',
-            textAlign: 'center',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
             width: '100%',
             minHeight: 48,
             touchAction: 'manipulation',
           }}
         >
+          <Sun size={18} strokeWidth={1.6} />
           I'm in a good place
         </button>
       </div>

@@ -17,7 +17,8 @@ module.exports = {
       bundleIdentifier: "com.kalpx.app",
       usesAppleSignIn: true,
       appleTeamId: "9G5NZ5LBRU",
-      googleServicesFile: process.env.GOOGLE_SERVICES_PLIST || "./GoogleService-Info.plist",
+      googleServicesFile:
+        process.env.GOOGLE_SERVICES_PLIST || "../../GoogleService-Info.plist",
       buildNumber: "42",
       entitlements: {
         "aps-environment": "production",
@@ -45,7 +46,8 @@ module.exports = {
       },
 
       edgeToEdgeEnabled: true,
-      googleServicesFile: process.env.GOOGLE_SERVICES_JSON || "./google-services.json",
+      googleServicesFile:
+        process.env.GOOGLE_SERVICES_JSON || "./google-services.json",
     },
     web: {
       bundler: "metro",
@@ -53,6 +55,7 @@ module.exports = {
     },
     plugins: [
       "./plugins/withAbiSplits",
+      "./plugins/withModularHeaders",
       "expo-font",
       "@react-native-firebase/app",
       "@react-native-firebase/messaging",
@@ -65,8 +68,6 @@ module.exports = {
           backgroundColor: "#F6F0DD",
         },
       ],
-      // Removed ./plugins/withModularHeaders as static frameworks are now enabled below
-
       [
         "expo-build-properties",
         {

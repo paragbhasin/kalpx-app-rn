@@ -20,11 +20,11 @@ export function CommunityPostCard({ post, onUpvote, isUpvoting = false }: Commun
   return (
     <div
       style={{
-        background: '#fff',
+        background: 'var(--kalpx-card-bg)',
         border: '1px solid var(--kalpx-border-gold)',
         borderRadius: 14,
         padding: '14px 16px',
-        marginBottom: 12,
+        marginBottom: 0,
         boxShadow: 'var(--kalpx-shadow-card-lift)',
         cursor: 'pointer',
         touchAction: 'manipulation',
@@ -34,13 +34,13 @@ export function CommunityPostCard({ post, onUpvote, isUpvoting = false }: Commun
       <CommunityAuthorRow author={author} timestamp={post.created_at} />
 
       {post.community_name && (
-        <p style={{ fontSize: 11, color: '#b06840', fontWeight: 600, marginTop: 6, marginBottom: 0 }}>
+        <p style={{ fontSize: 11, color: 'var(--kalpx-cta)', fontWeight: 600, marginTop: 6, marginBottom: 0 }}>
           {post.community_name}
         </p>
       )}
 
       {post.title && (
-        <p style={{ fontSize: 16, fontWeight: 700, color: '#2d1a0e', marginTop: 6, marginBottom: 0, lineHeight: 1.35 }}>
+        <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--kalpx-text)', marginTop: 6, marginBottom: 0, lineHeight: 1.35 }}>
           {post.title}
         </p>
       )}
@@ -48,7 +48,7 @@ export function CommunityPostCard({ post, onUpvote, isUpvoting = false }: Commun
       {text && (
         <p
           style={{
-            fontSize: 14, color: '#3a2010', marginTop: 6, lineHeight: 1.55,
+            fontSize: 14, color: 'var(--kalpx-text-soft)', marginTop: 6, lineHeight: 1.55,
             overflow: 'hidden',
             display: '-webkit-box',
             WebkitBoxOrient: 'vertical' as any,

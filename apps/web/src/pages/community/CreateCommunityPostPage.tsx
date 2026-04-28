@@ -57,7 +57,7 @@ export function CreateCommunityPostPage() {
   }
 
   return (
-    <div style={{ minHeight: '100dvh', background: '#FFF8EF' }}>
+    <div style={{ minHeight: '100dvh', background: 'var(--kalpx-bg)' }}>
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '24px 16px 60px' }}>
         <button
           onClick={() => navigate('/en/community')}
@@ -66,12 +66,12 @@ export function CreateCommunityPostPage() {
           ← Community
         </button>
 
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: '#2d1a0e', marginBottom: 24 }}>Create post</h1>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--kalpx-text)', marginBottom: 24 }}>Create post</h1>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {/* Title (optional) */}
           <div>
-            <label style={{ fontSize: 13, fontWeight: 600, color: '#2d1a0e', display: 'block', marginBottom: 6 }}>
+            <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--kalpx-text)', display: 'block', marginBottom: 6 }}>
               Title <span style={{ color: '#999', fontWeight: 400 }}>(optional)</span>
             </label>
             <input
@@ -87,7 +87,7 @@ export function CreateCommunityPostPage() {
 
           {/* Content */}
           <div>
-            <label style={{ fontSize: 13, fontWeight: 600, color: '#2d1a0e', display: 'block', marginBottom: 6 }}>
+            <label style={{ fontSize: 13, fontWeight: 600, color: 'var(--kalpx-text)', display: 'block', marginBottom: 6 }}>
               What's on your mind?
             </label>
             <textarea

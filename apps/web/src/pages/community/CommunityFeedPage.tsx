@@ -43,13 +43,13 @@ export function CommunityFeedPage() {
   }, []);
 
   return (
-    <div style={{ minHeight: '100dvh', background: '#FFF8EF' }}>
+    <div style={{ minHeight: '100dvh', background: 'var(--kalpx-bg)' }}>
       <div style={{ maxWidth: 480, margin: '0 auto', paddingBottom: 40 }}>
         {/* Header */}
         <div style={{ padding: '28px 16px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
             <p style={{ fontSize: 13, color: 'var(--kalpx-cta)', fontWeight: 600, marginBottom: 2 }}>KalpX</p>
-            <h1 style={{ fontSize: 26, fontWeight: 800, color: '#2d1a0e' }}>Community</h1>
+            <h1 style={{ fontSize: 26, fontWeight: 800, color: 'var(--kalpx-text)' }}>Community</h1>
           </div>
           <button
             onClick={() => navigate('/en/community/new')}
@@ -74,14 +74,16 @@ export function CommunityFeedPage() {
             <CommunityEmptyState showCreateCta />
           )}
 
-          {ctrl.posts.map((post) => (
-            <CommunityPostCard
-              key={post.id}
-              post={post}
-              onUpvote={(id) => void ctrl.upvotePost(id, `/en/community/${id}`)}
-              isUpvoting={ctrl.upvotingId === post.id}
-            />
-          ))}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            {ctrl.posts.map((post) => (
+              <CommunityPostCard
+                key={post.id}
+                post={post}
+                onUpvote={(id) => void ctrl.upvotePost(id, `/en/community/${id}`)}
+                isUpvoting={ctrl.upvotingId === post.id}
+              />
+            ))}
+          </div>
 
           {ctrl.hasMore && !ctrl.feedLoading && (
             <div style={{ textAlign: 'center', padding: '12px 0' }}>
@@ -89,7 +91,7 @@ export function CommunityFeedPage() {
                 onClick={() => void ctrl.loadMore()}
                 style={{
                   padding: '10px 28px', borderRadius: 10,
-                  background: '#f0e8d8', color: '#2d1a0e',
+                  background: 'var(--kalpx-chip-bg)', color: 'var(--kalpx-text)',
                   border: 'none', fontSize: 14, fontWeight: 600, cursor: 'pointer',
                 }}
               >

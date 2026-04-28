@@ -85,7 +85,7 @@ export function CheckpointPage() {
     return (
       <MitraMobileShell>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60dvh' }}>
-          <p style={{ color: '#9A8C78', fontSize: 14 }}>Loading your checkpoint…</p>
+          <p style={{ color: 'var(--kalpx-text-muted)', fontSize: 14 }}>Loading your checkpoint…</p>
         </div>
       </MitraMobileShell>
     );
@@ -98,10 +98,10 @@ export function CheckpointPage() {
           data-testid="checkpoint-not-ready"
           style={{ maxWidth: 480, margin: '0 auto', padding: '48px 24px', textAlign: 'center' }}
         >
-          <p style={{ fontSize: 18, fontWeight: 700, color: '#1a1a0a', marginBottom: 12 }}>
+          <p style={{ fontSize: 18, fontWeight: 700, color: 'var(--kalpx-text)', marginBottom: 12 }}>
             Not yet
           </p>
-          <p style={{ fontSize: 15, color: '#9A8C78', marginBottom: 32, lineHeight: 1.6 }}>
+          <p style={{ fontSize: 15, color: 'var(--kalpx-text-muted)', marginBottom: 32, lineHeight: 1.6 }}>
             Your Day {dayNum} checkpoint isn't ready yet. Keep your practice going.
           </p>
           <button
@@ -109,7 +109,7 @@ export function CheckpointPage() {
             onClick={() => navigate('/en/mitra/dashboard', { replace: true })}
             style={{
               padding: '12px 28px',
-              background: '#C9A84C',
+              background: 'var(--kalpx-cta)',
               color: '#fff',
               border: 'none',
               borderRadius: 10,
@@ -132,10 +132,10 @@ export function CheckpointPage() {
           data-testid="checkpoint-error"
           style={{ maxWidth: 480, margin: '0 auto', padding: '48px 24px', textAlign: 'center' }}
         >
-          <p style={{ fontSize: 18, fontWeight: 700, color: '#1a1a0a', marginBottom: 12 }}>
+          <p style={{ fontSize: 18, fontWeight: 700, color: 'var(--kalpx-text)', marginBottom: 12 }}>
             Something went wrong
           </p>
-          <p style={{ fontSize: 15, color: '#9A8C78', marginBottom: 32 }}>
+          <p style={{ fontSize: 15, color: 'var(--kalpx-text-muted)', marginBottom: 32 }}>
             Could not load your checkpoint. Please try again.
           </p>
           <button
@@ -143,7 +143,7 @@ export function CheckpointPage() {
             onClick={() => setLoadState('loading')}
             style={{
               padding: '12px 28px',
-              background: '#C9A84C',
+              background: 'var(--kalpx-cta)',
               color: '#fff',
               border: 'none',
               borderRadius: 10,
@@ -160,8 +160,8 @@ export function CheckpointPage() {
             style={{
               padding: '12px 28px',
               background: 'none',
-              color: '#9A8C78',
-              border: '1px solid #e8d5a0',
+              color: 'var(--kalpx-text-muted)',
+              border: '1px solid var(--kalpx-chip-bg)',
               borderRadius: 10,
               fontSize: 15,
               cursor: 'pointer',

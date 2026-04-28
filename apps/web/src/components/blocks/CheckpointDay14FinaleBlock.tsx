@@ -35,15 +35,15 @@ export function CheckpointDay14FinaleBlock({ screenData, onAction }: Props) {
       data-testid="checkpoint-day14-finale"
       style={{ padding: '48px 24px 80px', maxWidth: 480, margin: '0 auto', textAlign: 'center' }}
     >
-      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#b08840', textTransform: 'uppercase', marginBottom: 20 }}>
+      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'var(--kalpx-gold)', textTransform: 'uppercase', marginBottom: 20 }}>
         {m25.eyebrow || 'Cycle Complete'}
       </p>
 
-      <p style={{ fontSize: 28, fontWeight: 700, color: '#1a1a0a', lineHeight: 1.3, marginBottom: 16 }}>
+      <p style={{ fontSize: 28, fontWeight: 700, color: 'var(--kalpx-text)', fontFamily: 'var(--kalpx-font-serif)', lineHeight: 1.3, marginBottom: 16 }}>
         {headline}
       </p>
 
-      <p style={{ fontSize: 16, color: '#4a3318', lineHeight: 1.7, marginBottom: 32 }}>
+      <p style={{ fontSize: 16, color: 'var(--kalpx-text-soft)', lineHeight: 1.7, marginBottom: 32 }}>
         {body}
       </p>
 
@@ -57,9 +57,9 @@ export function CheckpointDay14FinaleBlock({ screenData, onAction }: Props) {
                 width: 24,
                 height: 24,
                 borderRadius: '50%',
-                background: status === 'completed' ? '#C9A84C' : '#e8d5a0',
+                background: status === 'completed' ? 'var(--kalpx-gold)' : 'var(--kalpx-chip-bg)',
                 fontSize: 9,
-                color: status === 'completed' ? '#fff' : '#9A8C78',
+                color: status === 'completed' ? '#fff' : 'var(--kalpx-text-muted)',
                 fontWeight: 700,
                 display: 'flex',
                 alignItems: 'center',
@@ -76,14 +76,14 @@ export function CheckpointDay14FinaleBlock({ screenData, onAction }: Props) {
         <div
           style={{
             padding: '16px',
-            background: '#fffbf0',
+            background: 'var(--kalpx-bg)',
             borderRadius: 12,
-            border: '1px solid #e8d5a0',
+            border: '1px solid var(--kalpx-chip-bg)',
             marginBottom: 32,
             textAlign: 'left',
           }}
         >
-          <p style={{ fontSize: 14, color: '#6b4c1a', lineHeight: 1.6, fontStyle: 'italic', margin: 0 }}>
+          <p style={{ fontSize: 14, color: 'var(--kalpx-text-soft)', lineHeight: 1.6, fontStyle: 'italic', margin: 0 }}>
             {ceremony.seal_message}
           </p>
         </div>
@@ -95,7 +95,7 @@ export function CheckpointDay14FinaleBlock({ screenData, onAction }: Props) {
         style={{
           width: '100%',
           padding: '16px 24px',
-          background: '#C9A84C',
+          background: 'var(--kalpx-cta)',
           color: '#fff',
           border: 'none',
           borderRadius: 12,

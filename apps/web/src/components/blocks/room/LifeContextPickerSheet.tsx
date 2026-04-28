@@ -34,24 +34,24 @@ export function LifeContextPickerSheet({ roomId, allowedContexts, onPick, onSkip
 
   return (
     <div
-      style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh', background: '#FFF8EF', padding: '24px 20px' }}
+      style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh', background: 'var(--kalpx-bg)', padding: '24px 20px' }}
       data-testid="life-context-picker"
     >
       <button
         onClick={onBack}
         data-testid="context-picker-back"
-        style={{ alignSelf: 'flex-start', background: 'none', border: 'none', color: '#9A8C78', fontSize: 13, cursor: 'pointer', padding: 0, marginBottom: 32 }}
+        style={{ alignSelf: 'flex-start', background: 'none', border: 'none', color: 'var(--kalpx-text-muted)', fontSize: 13, cursor: 'pointer', padding: 0, marginBottom: 32 }}
       >
         ← Back
       </button>
 
-      <p style={{ fontSize: 11, color: '#9A8C78', letterSpacing: 2, marginBottom: 8, textTransform: 'uppercase' }}>
+      <p style={{ fontSize: 11, color: 'var(--kalpx-text-muted)', letterSpacing: 2, marginBottom: 8, textTransform: 'uppercase' }}>
         {roomName} Room
       </p>
-      <h2 style={{ fontSize: 20, fontWeight: 400, color: '#2C2A26', marginBottom: 6, lineHeight: 1.4 }}>
+      <h2 style={{ fontSize: 20, fontWeight: 400, color: 'var(--kalpx-text)', marginBottom: 6, lineHeight: 1.4 }}>
         What kind of support would help right now?
       </h2>
-      <p style={{ fontSize: 14, color: '#6B6356', lineHeight: 1.6, marginBottom: 28 }}>
+      <p style={{ fontSize: 14, color: 'var(--kalpx-text-soft)', lineHeight: 1.6, marginBottom: 28 }}>
         This helps Mitra bring what's most useful for you.
       </p>
 
@@ -64,9 +64,9 @@ export function LifeContextPickerSheet({ roomId, allowedContexts, onPick, onSkip
             style={{
               padding: '14px 20px',
               borderRadius: 12,
-              border: '1px solid #E8DCC8',
-              background: '#fff',
-              color: '#2C2A26',
+              border: `1px solid var(--kalpx-border-gold)`,
+              background: 'var(--kalpx-card-bg)',
+              color: 'var(--kalpx-text)',
               fontSize: 15,
               textAlign: 'left',
               cursor: 'pointer',
@@ -80,7 +80,7 @@ export function LifeContextPickerSheet({ roomId, allowedContexts, onPick, onSkip
       <button
         onClick={onSkip}
         data-testid="context-picker-skip"
-        style={{ background: 'none', border: 'none', color: '#9A8C78', fontSize: 13, cursor: 'pointer', padding: '16px 0 0', textAlign: 'center' }}
+        style={{ background: 'none', border: 'none', color: 'var(--kalpx-text-muted)', fontSize: 13, cursor: 'pointer', padding: '16px 0 0', textAlign: 'center' }}
       >
         Skip
       </button>

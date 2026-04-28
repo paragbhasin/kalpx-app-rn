@@ -32,7 +32,7 @@ export function RoomPrincipleBanner({ banner, onAction }: Props) {
         padding: '20px 18px',
         borderRadius: 12,
         background: 'var(--kalpx-card-bg)',
-        border: '1px solid #D4A017',
+        border: `1px solid var(--kalpx-cta)`,
         boxShadow: 'var(--kalpx-shadow-card)',
         cursor: isTappable ? 'pointer' : 'default',
         position: 'relative',
@@ -44,7 +44,7 @@ export function RoomPrincipleBanner({ banner, onAction }: Props) {
       onKeyDown={(e) => isTappable && e.key === 'Enter' && handleTap()}
     >
       {banner.source_line && (
-        <p style={{ fontSize: 11, color: '#D4A017', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 8 }}>
+        <p style={{ fontSize: 11, color: 'var(--kalpx-cta)', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 8 }}>
           {banner.source_line}
         </p>
       )}
@@ -71,7 +71,7 @@ export function RoomPrincipleBanner({ banner, onAction }: Props) {
             bottom: 12,
             right: 14,
             fontSize: 16,
-            color: '#C9A84C',
+            color: 'var(--kalpx-gold)',
           }}
           data-testid="room-principle-banner-chevron"
         >

@@ -3,21 +3,24 @@
  * Room order is locked per RN ROOM_ROWS order.
  */
 import React, { useEffect } from 'react';
+import { ChevronRight } from 'lucide-react';
 
 interface RoomRow {
   room_id: string;
   name: string;
   label: string;
+  accent: string;
+  backing: string;
 }
 
-// Order-locked per RN spec
+// Order-locked per RN spec (§14.3). Colors match RN ROOM_ROWS exactly.
 const ROOM_ROWS: RoomRow[] = [
-  { room_id: 'room_stillness',  name: 'Find Calm',           label: "I'm overwhelmed" },
-  { room_id: 'room_connection', name: 'Feel Connected',       label: "I feel alone" },
-  { room_id: 'room_release',    name: 'Set It Down',          label: "Something is heavy" },
-  { room_id: 'room_clarity',    name: 'Find Clarity',         label: "I'm not sure / I want clarity" },
-  { room_id: 'room_growth',     name: 'Take the Next Step',   label: "I want to grow as a person" },
-  { room_id: 'room_joy',        name: "Notice What's Good",   label: "I'm in a good place" },
+  { room_id: 'room_stillness',  name: 'Find Calm',           label: "I'm overwhelmed",            accent: '#B9A98D', backing: '#F6F2EA' },
+  { room_id: 'room_connection', name: 'Feel Connected',       label: "I feel alone",               accent: '#C8A698', backing: '#F7EFEB' },
+  { room_id: 'room_release',    name: 'Set It Down',          label: "Something is heavy",         accent: '#9A9A9A', backing: '#F1F0EE' },
+  { room_id: 'room_clarity',    name: 'Find Clarity',         label: "I'm not sure / I want clarity", accent: '#A9B2B6', backing: '#F0F2F3' },
+  { room_id: 'room_growth',     name: 'Take the Next Step',   label: "I want to grow as a person", accent: '#9C7F5A', backing: '#F4EDE2' },
+  { room_id: 'room_joy',        name: "Notice What's Good",   label: "I'm in a good place",        accent: '#C9A84C', backing: '#FBF4DC' },
 ];
 
 interface Props {
@@ -26,7 +29,6 @@ interface Props {
 }
 
 export function RoomEntrySheet({ onEnterRoom, onClose }: Props) {
-  // Close on Escape
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -41,7 +43,7 @@ export function RoomEntrySheet({ onEnterRoom, onClose }: Props) {
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'rgba(0,0,0,0.45)',
+        background: 'rgba(0,0,0,0.35)',
         zIndex: 200,
         display: 'flex',
         alignItems: 'flex-end',
@@ -54,23 +56,30 @@ export function RoomEntrySheet({ onEnterRoom, onClose }: Props) {
         style={{
           width: '100%',
           maxWidth: 480,
-          background: '#fdf8ef',
-          borderRadius: '16px 16px 0 0',
-          padding: '20px 20px 40px',
+          background: 'var(--kalpx-card-bg)',
+          borderRadius: '22px 22px 0 0',
+          padding: '12px 18px 28px',
           maxHeight: '80dvh',
           overflowY: 'auto',
         }}
       >
         {/* Handle */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
-          <div style={{ width: 40, height: 4, borderRadius: 2, background: '#e8d5b0' }} />
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
+          <div style={{ width: 40, height: 4, borderRadius: 2, background: 'var(--kalpx-chip-bg)' }} />
         </div>
 
-        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#C9A84C', textTransform: 'uppercase', marginBottom: 16, textAlign: 'center' }}>
-          Choose a Space
+        <p style={{
+          fontFamily: 'var(--kalpx-font-serif)',
+          fontWeight: 700,
+          fontSize: 18,
+          color: 'var(--kalpx-text)',
+          letterSpacing: 0.2,
+          marginBottom: 14,
+        }}>
+          More ways to be supported
         </p>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {ROOM_ROWS.map((room) => (
             <button
               key={room.room_id}
@@ -78,20 +87,27 @@ export function RoomEntrySheet({ onEnterRoom, onClose }: Props) {
               onClick={() => onEnterRoom(room.room_id)}
               style={{
                 width: '100%',
-                padding: '14px 16px',
-                borderRadius: 12,
-                border: '1px solid rgba(201,168,76,0.25)',
-                background: '#fff',
+                minHeight: 72,
+                padding: '0 16px',
+                borderRadius: 14,
+                border: 'none',
+                background: room.backing,
                 cursor: 'pointer',
-                textAlign: 'left',
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
               }}
             >
-              <p style={{ fontSize: 15, fontWeight: 600, color: '#2C2A26', margin: '0 0 2px' }}>
-                {room.name}
-              </p>
-              <p style={{ fontSize: 13, color: '#9A8C78', margin: 0 }}>
-                {room.label}
-              </p>
+              <div style={{ width: 4, height: 36, borderRadius: 2, marginRight: 14, background: room.accent, flexShrink: 0 }} />
+              <div style={{ flex: 1, textAlign: 'left' }}>
+                <p style={{ fontFamily: 'var(--kalpx-font-serif)', fontWeight: 700, fontSize: 16, color: 'var(--kalpx-text)', letterSpacing: 0.15, margin: '0 0 2px' }}>
+                  {room.name}
+                </p>
+                <p style={{ fontSize: 13, color: 'var(--kalpx-text-muted)', margin: 0 }}>
+                  {room.label}
+                </p>
+              </div>
+              <ChevronRight size={18} strokeWidth={1.6} color="var(--kalpx-text-muted)" style={{ flexShrink: 0 }} />
             </button>
           ))}
         </div>
@@ -106,7 +122,7 @@ export function RoomEntrySheet({ onEnterRoom, onClose }: Props) {
             background: 'none',
             border: 'none',
             fontSize: 13,
-            color: '#9A8C78',
+            color: 'var(--kalpx-text-muted)',
             cursor: 'pointer',
             textAlign: 'center',
             padding: '8px 0',

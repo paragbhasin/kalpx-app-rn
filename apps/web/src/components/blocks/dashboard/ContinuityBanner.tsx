@@ -4,6 +4,30 @@ interface Props {
   sd: Record<string, any>;
 }
 
+const CARD_STYLE: React.CSSProperties = {
+  marginBottom: 20,
+  padding: '14px 16px',
+  borderRadius: 12,
+  background: 'var(--kalpx-card-bg)',
+  border: '1px solid #E8DFCD',
+  boxShadow: 'var(--kalpx-shadow-card)',
+};
+
+const TITLE_STYLE: React.CSSProperties = {
+  fontSize: 15,
+  fontWeight: 600,
+  color: 'var(--kalpx-text)',
+  marginBottom: 4,
+  margin: '0 0 4px',
+};
+
+const BODY_STYLE: React.CSSProperties = {
+  fontSize: 14,
+  color: 'var(--kalpx-text-soft)',
+  lineHeight: 1.43,
+  margin: 0,
+};
+
 export function ContinuityBanner({ sd }: Props) {
   const cont = sd.continuity || {};
   const tier: string = cont.tier || 'none';
@@ -12,25 +36,9 @@ export function ContinuityBanner({ sd }: Props) {
   const clearWindowActive = sd.clear_window_active === true;
   if (clearWindowActive) {
     return (
-      <div
-        data-testid="clear-window-banner"
-        style={{
-          marginBottom: 20,
-          padding: '14px 16px',
-          borderRadius: 12,
-          background: 'var(--kalpx-chip-bg)',
-          border: '1px solid var(--kalpx-border-gold)',
-          boxShadow: 'var(--kalpx-shadow-card)',
-        }}
-      >
-        <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--kalpx-text)', marginBottom: 4, fontFamily: 'var(--kalpx-font-serif)' }}>
-          {sd.clear_window_headline || 'A moment of stillness'}
-        </p>
-        {sd.clear_window_body && (
-          <p style={{ fontSize: 13, color: 'var(--kalpx-text-soft)', lineHeight: 1.5 }}>
-            {sd.clear_window_body}
-          </p>
-        )}
+      <div data-testid="clear-window-banner" style={CARD_STYLE}>
+        <p style={TITLE_STYLE}>{sd.clear_window_headline || 'A moment of stillness'}</p>
+        {sd.clear_window_body && <p style={BODY_STYLE}>{sd.clear_window_body}</p>}
       </div>
     );
   }
@@ -38,25 +46,9 @@ export function ContinuityBanner({ sd }: Props) {
   if (tier === 'none' || !cont.headline) return null;
 
   return (
-    <div
-      data-testid="continuity-banner"
-      style={{
-        marginBottom: 20,
-        padding: '14px 16px',
-        borderRadius: 12,
-        background: 'var(--kalpx-chip-bg)',
-        border: '1px solid var(--kalpx-border-gold)',
-        boxShadow: 'var(--kalpx-shadow-card)',
-      }}
-    >
-      <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--kalpx-text)', marginBottom: 4, fontFamily: 'var(--kalpx-font-serif)' }}>
-        {cont.headline}
-      </p>
-      {cont.body && (
-        <p style={{ fontSize: 13, color: 'var(--kalpx-text-soft)', lineHeight: 1.5 }}>
-          {cont.body}
-        </p>
-      )}
+    <div data-testid="continuity-banner" style={CARD_STYLE}>
+      <p style={TITLE_STYLE}>{cont.headline}</p>
+      {cont.body && <p style={BODY_STYLE}>{cont.body}</p>}
     </div>
   );
 }

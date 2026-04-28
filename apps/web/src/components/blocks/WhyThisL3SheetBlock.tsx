@@ -58,6 +58,16 @@ export function WhyThisL3SheetBlock({ screenData, onAction }: Props) {
 
         {source && (
           <>
+            {source.sanskrit && (
+              <p style={{ fontFamily: '"Noto Sans Devanagari", sans-serif', fontSize: 22, color: '#432104', lineHeight: 1.5, textAlign: 'center', marginBottom: 10 }}>
+                {source.sanskrit}
+              </p>
+            )}
+            {source.transliteration && (
+              <p style={{ fontSize: 15, fontStyle: 'italic', color: '#6a5830', lineHeight: 1.6, textAlign: 'center', marginBottom: 14 }}>
+                {source.transliteration}
+              </p>
+            )}
             {source.text && (
               <div
                 style={{

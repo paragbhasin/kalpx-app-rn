@@ -20,7 +20,7 @@ export function App() {
   return (
     <ErrorBoundary>
       <Provider store={store}>
-        <BrowserRouter>
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <NavigateInjector />
           <AppLayout>
             <AppRoutes />

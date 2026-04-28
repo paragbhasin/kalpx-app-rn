@@ -1,8 +1,3 @@
-/**
- * OnboardingIntroHeroBlock — new_home.png full-page hero background.
- * Chips float over the hero image matching RN onboarding intro.
- */
-
 import React, { useState } from 'react';
 
 interface Chip {
@@ -75,7 +70,7 @@ export function OnboardingIntroHeroBlock({ block, onAction }: Props) {
             style={{
               fontSize: 28,
               fontWeight: 700,
-              color: '#432104',
+              color: 'var(--kalpx-text)',
               lineHeight: 1.3,
               marginBottom: 12,
               fontFamily: 'var(--kalpx-font-serif)',
@@ -85,13 +80,13 @@ export function OnboardingIntroHeroBlock({ block, onAction }: Props) {
           </h2>
         )}
         {block.subtext && (
-          <p style={{ fontSize: 16, color: '#6b4c1a', marginBottom: 20, lineHeight: 1.5 }}>
+          <p style={{ fontSize: 16, color: 'var(--kalpx-text-soft)', marginBottom: 20, lineHeight: 1.5 }}>
             {block.subtext}
           </p>
         )}
       </div>
 
-      {/* Chips — vertical column with warm frosted cards */}
+      {/* Chips — vertical column, pill-shaped frosted cards */}
       {chips.length > 0 && (
         <div
           style={{
@@ -112,10 +107,10 @@ export function OnboardingIntroHeroBlock({ block, onAction }: Props) {
               onClick={() => void handleChip(chip)}
               style={{
                 padding: '16px 20px',
-                borderRadius: 12,
-                border: '1px solid rgba(212,160,23,0.4)',
-                background: 'rgba(251,245,245,0.92)',
-                color: '#432104',
+                borderRadius: 24,
+                border: `1px solid var(--kalpx-border-gold)`,
+                background: 'var(--kalpx-chip-bg)',
+                color: 'var(--kalpx-text)',
                 fontSize: 16,
                 fontWeight: 500,
                 cursor: busy ? 'not-allowed' : 'pointer',

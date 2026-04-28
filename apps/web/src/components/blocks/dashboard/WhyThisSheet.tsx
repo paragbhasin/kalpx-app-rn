@@ -4,9 +4,10 @@ interface Props {
   sd: Record<string, any>;
   onClose: () => void;
   onAction?: (action: any) => void;
+  onBackFromL3?: () => void;
 }
 
-export function WhyThisSheet({ sd, onClose, onAction }: Props) {
+export function WhyThisSheet({ sd, onClose, onAction, onBackFromL3 }: Props) {
   const whyThis = sd.why_this || {};
   const items: { id: string; label: string }[] = Array.isArray(sd.why_this_l1_items) ? sd.why_this_l1_items : [];
   const overlayLevel: string | null = sd.why_this_overlay_level || null;
@@ -24,8 +25,12 @@ export function WhyThisSheet({ sd, onClose, onAction }: Props) {
     onClose();
   }
 
-  function handleBackToL1() {
-    if (onAction) onAction({ type: 'dismiss_why_this' });
+  function handleBack() {
+    if (overlayLevel === 'l3' && onBackFromL3) {
+      onBackFromL3();
+    } else if (onAction) {
+      onAction({ type: 'dismiss_why_this' });
+    }
   }
 
   function handleGoL2() {
@@ -59,7 +64,7 @@ export function WhyThisSheet({ sd, onClose, onAction }: Props) {
           width: '100%',
           maxWidth: 480,
           background: 'var(--kalpx-bg)',
-          borderRadius: '16px 16px 0 0',
+          borderRadius: '20px 20px 0 0',
           padding: '24px 20px 40px',
           maxHeight: '80dvh',
           overflowY: 'auto',
@@ -75,7 +80,7 @@ export function WhyThisSheet({ sd, onClose, onAction }: Props) {
           {overlayLevel && overlayLevel !== 'l1' ? (
             <button
               data-testid="why-this-back"
-              onClick={handleBackToL1}
+              onClick={handleBack}
               style={{ background: 'none', border: 'none', fontSize: 13, color: 'var(--kalpx-gold)', cursor: 'pointer', padding: '0 4px', fontWeight: 600 }}
             >
               ← Back
@@ -97,9 +102,19 @@ export function WhyThisSheet({ sd, onClose, onAction }: Props) {
         {/* L3 — Source attribution */}
         {overlayLevel === 'l3' && source && (
           <div>
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'var(--kalpx-text-muted)', textTransform: 'uppercase', marginBottom: 12 }}>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'var(--kalpx-text-muted)', textTransform: 'uppercase', marginBottom: 16 }}>
               The Source
             </p>
+            {source.sanskrit && (
+              <p style={{ fontFamily: '"Noto Sans Devanagari", sans-serif', fontSize: 22, color: 'var(--kalpx-text)', lineHeight: 1.5, textAlign: 'center', marginBottom: 10 }}>
+                {source.sanskrit}
+              </p>
+            )}
+            {source.transliteration && (
+              <p style={{ fontSize: 15, fontStyle: 'italic', color: '#6a5830', lineHeight: 1.6, textAlign: 'center', marginBottom: 14 }}>
+                {source.transliteration}
+              </p>
+            )}
             {source.text && (
               <div
                 style={{
@@ -135,13 +150,18 @@ export function WhyThisSheet({ sd, onClose, onAction }: Props) {
               The Principle
             </p>
             {principle.title && (
-              <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--kalpx-text)', marginBottom: 10 }}>
+              <p style={{ fontSize: 20, fontWeight: 700, fontFamily: 'var(--kalpx-font-serif)', color: 'var(--kalpx-text)', marginBottom: 10, lineHeight: 1.3 }}>
                 {principle.title}
               </p>
             )}
             {principle.description && (
-              <p style={{ fontSize: 15, color: 'var(--kalpx-text-soft)', lineHeight: 1.7, marginBottom: 16 }}>
+              <p style={{ fontSize: 15, color: 'var(--kalpx-text-soft)', lineHeight: 1.7, marginBottom: 12 }}>
                 {principle.description}
+              </p>
+            )}
+            {(principle.tradition_family || principle.tradition) && (
+              <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1.4, color: '#8b7a55', opacity: 0.7, textTransform: 'uppercase', marginBottom: 16 }}>
+                {principle.tradition_family || principle.tradition}
               </p>
             )}
             {principleId && (

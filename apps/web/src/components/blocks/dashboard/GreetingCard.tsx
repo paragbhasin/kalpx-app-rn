@@ -14,6 +14,12 @@ interface Props {
   sd: Record<string, any>;
 }
 
+function isSameCalendarDay(tsMs: number, nowMs: number): boolean {
+  const a = new Date(tsMs);
+  const b = new Date(nowMs);
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
 export function GreetingCard({ sd }: Props) {
   const greet = sd.greeting || {};
   const userName: string = greet.user_name || sd.user_name || '';
@@ -21,6 +27,12 @@ export function GreetingCard({ sd }: Props) {
   const context: string = greet.supporting_line || sd.greeting_context || '';
   const tone: string = greet.tone_line || sd.tone_line || '';
   const joyCarry = sd.joy_carry;
+  const carryIsToday =
+    joyCarry &&
+    typeof joyCarry.captured_at === 'number' &&
+    isSameCalendarDay(joyCarry.captured_at, Date.now());
+  const carryLabel: string =
+    typeof joyCarry?.label === 'string' && joyCarry.label ? joyCarry.label : '';
 
   return (
     <div
@@ -54,7 +66,7 @@ export function GreetingCard({ sd }: Props) {
           Welcome, {displayName}.
         </h1>
         {context && (
-          <p style={{ fontSize: 13, color: 'var(--kalpx-text-soft)', margin: '0 0 4px', lineHeight: 1.5 }}>
+          <p style={{ fontSize: 12, color: 'var(--kalpx-text-soft)', margin: '0 0 4px', lineHeight: 1.6 }}>
             {context}
           </p>
         )}
@@ -63,34 +75,35 @@ export function GreetingCard({ sd }: Props) {
             {tone}
           </p>
         )}
-        {joyCarry?.label && (
+        {carryIsToday && carryLabel && (
           <div
             data-testid="greeting-joy-carry"
             style={{
               marginTop: 10,
-              padding: '6px 12px',
+              padding: '4px 10px',
               borderRadius: 12,
-              background: 'rgba(201,168,76,0.06)',
+              background: 'var(--kalpx-card-bg)',
               border: '1px solid var(--kalpx-gold-hairline)',
-              fontSize: 12,
+              fontSize: 11,
               color: 'var(--kalpx-text)',
               display: 'inline-block',
+              letterSpacing: '0.2px',
             }}
           >
-            {joyCarry.label}
+            {carryLabel} — held today
           </div>
         )}
       </div>
 
-      {/* Mandala / lotus */}
+      {/* Mandala / lotus — 56px container matches RN MantraLotus3d width */}
       <div
         style={{
           flexShrink: 0,
-          width: 64,
+          width: 56,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '12px 12px 12px 4px',
+          padding: '12px 10px 12px 4px',
         }}
       >
         {LOTUS_SVG}

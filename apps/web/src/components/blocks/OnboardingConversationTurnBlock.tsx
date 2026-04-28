@@ -1,10 +1,3 @@
-/**
- * OnboardingConversationTurnBlock — Phase 6.
- * Core interactive block for welcome_onboarding turns 1, 3-8.
- * Renders Mitra message, chip options, and optional text input.
- * Fires on_response action when chip is selected or text is submitted.
- */
-
 import React, { useState } from 'react';
 
 interface Chip {
@@ -16,6 +9,7 @@ interface Chip {
 interface Props {
   block: {
     id?: string;
+    headline?: string;
     mitra_message?: string | string[];
     reply_chips?: Chip[];
     open_input?: { enabled: boolean; placeholder?: string };
@@ -53,17 +47,53 @@ export function OnboardingConversationTurnBlock({ block, onAction }: Props) {
   if (!messages.length && !chips.length && !inputEnabled) return null;
 
   return (
-    <div style={{ marginBottom: 24 }}>
+    <div
+      style={{
+        borderRadius: 20,
+        background: 'var(--kalpx-card-bg)',
+        border: '1px solid var(--kalpx-border-gold)',
+        boxShadow: 'var(--kalpx-shadow-card-lift)',
+        padding: 20,
+        marginBottom: 24,
+      }}
+    >
+      {/* Headline + gold divider */}
+      {block.headline && (
+        <>
+          <h2
+            style={{
+              fontSize: 22,
+              fontFamily: 'var(--kalpx-font-serif)',
+              fontWeight: 700,
+              textAlign: 'center',
+              color: 'var(--kalpx-text)',
+              marginBottom: 8,
+              lineHeight: 1.35,
+            }}
+          >
+            {block.headline}
+          </h2>
+          <div
+            style={{
+              width: 44,
+              height: 1,
+              background: 'var(--kalpx-border-gold)',
+              margin: '0 auto 16px',
+            }}
+          />
+        </>
+      )}
+
       {/* Mitra messages */}
       {messages.map((msg, i) => (
         <p
           key={i}
           style={{
-            fontSize: 16,
+            fontSize: 18,
+            fontFamily: 'var(--kalpx-font-serif)',
             color: 'var(--kalpx-text)',
             lineHeight: 1.6,
             marginBottom: 10,
-            fontStyle: 'italic',
           }}
         >
           {msg}
@@ -81,10 +111,11 @@ export function OnboardingConversationTurnBlock({ block, onAction }: Props) {
               onClick={() => void fireResponse({ chip_id: chip.id, freeform_text: text || undefined })}
               style={{
                 padding: '13px 18px',
-                borderRadius: 10,
+                minHeight: 48,
+                borderRadius: 24,
                 border: chip.style === 'primary' ? 'none' : `1px solid var(--kalpx-border-gold)`,
                 background: chip.style === 'primary' ? 'var(--kalpx-gold)' : 'var(--kalpx-bg)',
-                color: chip.style === 'primary' ? 'var(--kalpx-text)' : 'var(--kalpx-text-soft)',
+                color: chip.style === 'primary' ? '#ffffff' : 'var(--kalpx-text-soft)',
                 fontSize: 15,
                 fontWeight: chip.style === 'primary' ? 600 : 400,
                 cursor: busy ? 'not-allowed' : 'pointer',
@@ -125,10 +156,11 @@ export function OnboardingConversationTurnBlock({ block, onAction }: Props) {
               style={{
                 marginTop: 10,
                 padding: '12px 24px',
-                borderRadius: 10,
+                minHeight: 48,
+                borderRadius: 24,
                 border: 'none',
                 background: 'var(--kalpx-gold)',
-                color: 'var(--kalpx-text)',
+                color: '#ffffff',
                 fontWeight: 600,
                 fontSize: 15,
                 cursor: busy ? 'not-allowed' : 'pointer',

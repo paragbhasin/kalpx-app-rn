@@ -5,7 +5,10 @@
  * Manages WhyThis sheet open/close state locally.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import { useDispatch } from 'react-redux';
+import { updateScreenData } from '../../store/screenSlice';
+import type { AppDispatch } from '../../store';
 import { GreetingCard } from './dashboard/GreetingCard';
 import { PathChip } from './dashboard/PathChip';
 import { TriadCardsRow } from './dashboard/TriadCardsRow';
@@ -24,8 +27,13 @@ interface Props {
 }
 
 export function NewDashboardBodyBlock({ screenData, onAction }: Props) {
+  const dispatch = useDispatch<AppDispatch>();
   const [whyThisOpen, setWhyThisOpen] = useState(false);
   const sd = screenData || {};
+
+  const handleBackFromL3 = useCallback(() => {
+    dispatch(updateScreenData({ why_this_overlay_level: 'l2', why_this_source: null }));
+  }, [dispatch]);
 
   const hasWhyThis =
     (Array.isArray(sd.why_this_l1_items) && sd.why_this_l1_items.length > 0) ||
@@ -58,7 +66,7 @@ export function NewDashboardBodyBlock({ screenData, onAction }: Props) {
       )}
 
       {whyThisOpen && (
-        <WhyThisSheet sd={sd} onClose={() => setWhyThisOpen(false)} onAction={onAction} />
+        <WhyThisSheet sd={sd} onClose={() => setWhyThisOpen(false)} onAction={onAction} onBackFromL3={handleBackFromL3} />
       )}
     </div>
   );

@@ -115,28 +115,27 @@ export function TriadCardsRow({ sd, onAction }: Props) {
               });
             }}
           >
-            {/* Icon circle */}
+            {/* Icon circle — #F7EED1 solid bg matches RN Colors.goldPale */}
             <div
               style={{
                 width: 32,
                 height: 32,
                 borderRadius: 16,
-                background: 'rgba(201,168,76,0.1)',
+                background: '#F7EED1',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 marginBottom: 8,
-                color: 'var(--kalpx-gold)',
                 flexShrink: 0,
               }}
             >
               {(() => {
                 const Icon = SLOT_ICON_COMPONENTS[item.slot];
-                return Icon ? <Icon size={16} strokeWidth={1.8} color="var(--kalpx-gold)" /> : <span style={{ fontSize: 16 }}>·</span>;
+                return Icon ? <Icon size={18} strokeWidth={1.8} color="var(--kalpx-gold)" /> : <span style={{ fontSize: 18 }}>·</span>;
               })()}
             </div>
 
-            {/* Info button — top-right */}
+            {/* Info button — top-right, 6px padding for 40px+ touch target */}
             <button
               data-testid={`triad-info-${item.slot}`}
               onClick={(e) => {
@@ -156,10 +155,11 @@ export function TriadCardsRow({ sd, onAction }: Props) {
                 background: 'none',
                 border: 'none',
                 fontSize: 14,
-                color: 'var(--kalpx-gold)',
+                color: 'var(--kalpx-text-muted)',
                 cursor: 'pointer',
                 lineHeight: 1,
-                padding: 2,
+                padding: 6,
+                opacity: 0.7,
               }}
               aria-label="More info"
             >
@@ -213,14 +213,14 @@ export function TriadCardsRow({ sd, onAction }: Props) {
             {/* Completion indicator — bottom right */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'auto' }}>
               {item.completed ? (
-                /* Green circle with checkmark */
+                /* Done dot — #10B981 matches RN Colors.successGreen */
                 <div
                   data-testid={`triad-complete-${item.slot}`}
                   style={{
                     width: 18,
                     height: 18,
                     borderRadius: 9,
-                    background: '#16a34a',
+                    background: '#10B981',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -232,14 +232,14 @@ export function TriadCardsRow({ sd, onAction }: Props) {
                   ✓
                 </div>
               ) : (
-                /* Tan ring */
+                /* Open dot — #BFA58A border matches RN Colors.ringTan */
                 <div
                   data-testid={`triad-incomplete-${item.slot}`}
                   style={{
                     width: 18,
                     height: 18,
                     borderRadius: 9,
-                    border: '1.5px solid var(--kalpx-gold)',
+                    border: '1.5px solid #BFA58A',
                     background: 'transparent',
                     flexShrink: 0,
                   }}

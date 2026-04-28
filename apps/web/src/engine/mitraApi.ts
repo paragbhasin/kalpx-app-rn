@@ -429,3 +429,32 @@ export async function mitraJourneyReentryDecision(
   );
   return res.data;
 }
+
+// ─── Additional Items ─────────────────────────────────────────────────────────
+
+export async function fetchAdditionalItems(): Promise<{ items: any[]; uiHints: { shouldCollapse?: boolean } }> {
+  try {
+    const res = await api.get('mitra/journey/additional/list/', { params: { tz: getTz() } });
+    return res.data;
+  } catch {
+    return { items: [], uiHints: {} };
+  }
+}
+
+export async function removeAdditionalItem(id: string | number): Promise<void> {
+  await api.delete(`mitra/journey/additional/${id}/`);
+}
+
+export async function addAdditionalItem(itemId: string, itemType: string): Promise<any> {
+  const res = await api.post('mitra/journey/additional/', { itemId, itemType, source: 'additional_library' });
+  return res.data;
+}
+
+export async function searchLibraryItems(q: string): Promise<{ results: any[] }> {
+  try {
+    const res = await api.get('mitra/library/search/', { params: { q, limit: 10 } });
+    return res.data;
+  } catch {
+    return { results: [] };
+  }
+}

@@ -46,13 +46,13 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
       >
         {progress !== null ? (
           <svg width={160} height={160} style={{ position: 'absolute', top: 0, left: 0 }}>
-            <circle cx={80} cy={80} r={70} fill="none" stroke="#F0E8D8" strokeWidth={8} />
+            <circle cx={80} cy={80} r={70} fill="none" stroke="var(--kalpx-chip-bg)" strokeWidth={8} />
             <circle
               cx={80}
               cy={80}
               r={70}
               fill="none"
-              stroke="#C9A84C"
+              stroke="var(--kalpx-gold)"
               strokeWidth={8}
               strokeDasharray={2 * Math.PI * 70}
               strokeDashoffset={2 * Math.PI * 70 * (1 - progress)}
@@ -68,8 +68,9 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
             position: 'absolute',
             inset: 0,
             borderRadius: '50%',
-            border: '2px solid #C9A84C',
+            border: `2px solid var(--kalpx-gold)`,
             background: 'rgba(201,168,76,0.08)',
+            boxShadow: '0 0 0 4px rgba(201,168,76,0.15), 0 4px 16px rgba(0,0,0,0.12)',
             cursor: 'pointer',
             display: 'flex',
             flexDirection: 'column',
@@ -78,19 +79,22 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
             gap: 2,
           }}
         >
-          <span style={{ fontSize: 40, fontWeight: 300, color: '#2C2A26', lineHeight: 1 }}>
+          <span style={{ fontSize: 40, fontWeight: 300, color: 'var(--kalpx-text)', lineHeight: 1 }}>
             {reps}
           </span>
           {!unlimited ? (
-            <span style={{ fontSize: 13, color: '#9A8C78' }}>/ {total}</span>
+            <span style={{ fontSize: 13, color: 'var(--kalpx-text-muted)' }}>/ {total}</span>
           ) : (
-            <span style={{ fontSize: 12, color: '#9A8C78', letterSpacing: 1 }}>TAP</span>
+            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+              <span style={{ fontSize: 14, color: 'var(--kalpx-text-muted)', letterSpacing: 2 }}>TAP</span>
+              <span style={{ fontSize: 10, color: 'var(--kalpx-text-muted)', letterSpacing: 2, marginTop: 2 }}>THE BEAD</span>
+            </span>
           )}
         </button>
       </div>
 
-      <p style={{ fontSize: 13, color: '#9A8C78', letterSpacing: 1, textAlign: 'center' }}>
-        {unlimited ? 'Tap with each repetition' : `${total - reps} remaining`}
+      <p style={{ fontSize: 13, color: 'var(--kalpx-text-muted)', letterSpacing: 1, textAlign: 'center', textTransform: unlimited ? 'uppercase' : 'none' }}>
+        {unlimited ? 'TAP THE BEAD AFTER EACH MANTRA.' : `${total - reps} remaining`}
       </p>
     </div>
   );

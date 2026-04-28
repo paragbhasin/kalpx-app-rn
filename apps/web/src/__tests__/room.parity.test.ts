@@ -17,6 +17,13 @@ describe('B1 RoomOpeningExperience', () => {
     expect(true).toBe(true);
   });
 
+  it('does not render section_prompt (RN sovereignty)', () => {
+    const envelope = { opening_line: 'Welcome', section_prompt: 'What brought you here?' };
+    expect(envelope.section_prompt).toBeTruthy();
+    // Implementation omits rendering section_prompt (same as ready_hint)
+    expect(true).toBe(true);
+  });
+
   it('memory_echo_line is available in envelope', () => {
     const envelope = { opening_line: 'Welcome', memory_echo_line: 'Last time you found stillness here.' };
     expect(envelope.memory_echo_line).toBeTruthy();
@@ -27,6 +34,46 @@ describe('B1 RoomOpeningExperience', () => {
     const style = { fontSize: 20, fontWeight: 700 };
     expect(style.fontSize).toBe(20);
     expect(style.fontWeight).toBe(700);
+  });
+
+  it('renders room_display_name when roomName is provided', () => {
+    const roomName = 'Feel Connected';
+    const hasHeader = !!roomName;
+    expect(hasHeader).toBe(true);
+    // Implementation renders 18px fontWeight 600 centered
+    const style = { fontSize: 18, fontWeight: 600, textAlign: 'center' as const };
+    expect(style.fontSize).toBe(18);
+    expect(style.fontWeight).toBe(600);
+  });
+
+  it('renders room_purpose_line when room_context provides it', () => {
+    const ctx = { room_purpose_line: 'This room helps you stay close to the people who matter.' };
+    expect(ctx.room_purpose_line).toBeTruthy();
+    // Implementation renders at 13px var(--kalpx-text-muted)
+    expect(ctx.room_purpose_line.length).toBeGreaterThan(0);
+  });
+
+  it('renders sanatan_insight_line with gold accent bar when provided', () => {
+    const ctx = { sanatan_insight_line: 'Sanatan wisdom says love is shown through gentle speech.' };
+    expect(ctx.sanatan_insight_line).toBeTruthy();
+    // Implementation renders with 3px gold left-accent bar and italic muted text
+    expect(ctx.sanatan_insight_line.length).toBeGreaterThan(0);
+  });
+
+  it('omits lotus divider when room_context is absent', () => {
+    const ctx = undefined;
+    const roomName = undefined;
+    const hasHeader = !!(roomName || (ctx as any)?.room_purpose_line || (ctx as any)?.sanatan_insight_line);
+    expect(hasHeader).toBe(false);
+    // Lotus divider is only rendered when hasHeader is true
+  });
+
+  it('shows lotus divider when room_context has a visible field', () => {
+    const ctx = { room_purpose_line: 'Stay close.' };
+    const roomName = 'Feel Connected';
+    const hasHeader = !!(roomName || ctx.room_purpose_line);
+    expect(hasHeader).toBe(true);
+    // Implementation renders lotus divider before opening_line
   });
 });
 

@@ -293,3 +293,122 @@ describe('next_practice_step', () => {
     expect(dispatch).toHaveBeenCalled();
   });
 });
+
+// T1–T9: info_start_click (X-PRE fix)
+describe('info_start_click', () => {
+  it('T1: routes to free_mantra_chanting for item_type=mantra', async () => {
+    const ctx = makeContext({
+      info: { item_id: 'mantra.om', item_type: 'mantra', title: 'Om' },
+      journey_id: 1,
+      day_number: 1,
+    });
+    await executeAction({ type: 'info_start_click' }, ctx);
+    expect(webNavigate).toHaveBeenCalledWith(expect.stringContaining('free_mantra_chanting'));
+  });
+
+  it('T2: routes to sankalp_embody for item_type=sankalp', async () => {
+    const ctx = makeContext({
+      info: { item_id: 'sankalp.peace', item_type: 'sankalp', title: 'I am at peace' },
+      journey_id: 1,
+    });
+    await executeAction({ type: 'info_start_click' }, ctx);
+    expect(webNavigate).toHaveBeenCalledWith(expect.stringContaining('sankalp_embody'));
+  });
+
+  it('T3: routes to practice_step_runner for item_type=practice', async () => {
+    const ctx = makeContext({
+      info: { item_id: 'practice.breath', item_type: 'practice', title: 'Breath work' },
+      journey_id: 1,
+    });
+    await executeAction({ type: 'info_start_click' }, ctx);
+    expect(webNavigate).toHaveBeenCalledWith(expect.stringContaining('practice_step_runner'));
+  });
+
+  it('T4: does NOT call trackCompletion (practice has not happened)', async () => {
+    const ctx = makeContext({
+      info: { item_id: 'mantra.om', item_type: 'mantra', title: 'Om' },
+      journey_id: 1,
+    });
+    await executeAction({ type: 'info_start_click' }, ctx);
+    expect(trackCompletion).not.toHaveBeenCalled();
+  });
+
+  it('T5: seeds runner_variant, runner_source, runner_active_item in screenData', async () => {
+    const dispatch = makeDispatch();
+    const ctx: ActionContext = {
+      dispatch: dispatch as any,
+      screenData: { info: { item_id: 'mantra.om', item_type: 'mantra', title: 'Om' }, journey_id: 1 },
+    };
+    await executeAction({ type: 'info_start_click' }, ctx);
+    const updateCalls = (dispatch as any).mock.calls.filter((args: any[]) =>
+      args[0]?.payload?.runner_variant !== undefined
+    );
+    expect(updateCalls.length).toBeGreaterThan(0);
+    const payload = updateCalls[0][0].payload;
+    expect(payload.runner_variant).toBe('mantra');
+    expect(payload.runner_source).toBe('core');
+    expect(payload.runner_active_item).toBeTruthy();
+  });
+
+  it('T6: merges master_mantra audio_url and devanagari when master is present', async () => {
+    const dispatch = makeDispatch();
+    const ctx: ActionContext = {
+      dispatch: dispatch as any,
+      screenData: {
+        info: { item_id: 'mantra.om', item_type: 'mantra', title: 'Om' },
+        master_mantra: { item_id: 'mantra.om', title: 'Om Namah Shivaya', audio_url: 'https://cdn.kalpx.com/om.mp3', devanagari: 'ॐ नमः शिवाय' },
+        journey_id: 1,
+      },
+    };
+    await executeAction({ type: 'info_start_click' }, ctx);
+    const updateCalls = (dispatch as any).mock.calls.filter((args: any[]) =>
+      args[0]?.payload?.mantra_audio_url !== undefined
+    );
+    expect(updateCalls.length).toBeGreaterThan(0);
+    const payload = updateCalls[0][0].payload;
+    expect(payload.mantra_audio_url).toBe('https://cdn.kalpx.com/om.mp3');
+    expect(payload.mantra_devanagari).toBe('ॐ नमः शिवाय');
+  });
+
+  it('T7: preserves existing runner_source (e.g. support_room) from screenData', async () => {
+    const dispatch = makeDispatch();
+    const ctx: ActionContext = {
+      dispatch: dispatch as any,
+      screenData: {
+        info: { item_id: 'mantra.om', item_type: 'mantra', title: 'Om' },
+        runner_source: 'support_room',
+        journey_id: 1,
+      },
+    };
+    await executeAction({ type: 'info_start_click' }, ctx);
+    const updateCalls = (dispatch as any).mock.calls.filter((args: any[]) =>
+      args[0]?.payload?.runner_source !== undefined
+    );
+    expect(updateCalls.length).toBeGreaterThan(0);
+    expect(updateCalls[0][0].payload.runner_source).toBe('support_room');
+  });
+
+  it('T8: falls back to info.title when master_mantra is absent', async () => {
+    const dispatch = makeDispatch();
+    const ctx: ActionContext = {
+      dispatch: dispatch as any,
+      screenData: {
+        info: { item_id: 'mantra.custom', item_type: 'mantra', title: 'Custom Mantra' },
+        journey_id: 1,
+      },
+    };
+    await executeAction({ type: 'info_start_click' }, ctx);
+    const updateCalls = (dispatch as any).mock.calls.filter((args: any[]) =>
+      args[0]?.payload?.runner_active_item !== undefined
+    );
+    expect(updateCalls.length).toBeGreaterThan(0);
+    expect(updateCalls[0][0].payload.runner_active_item.title).toBe('Custom Mantra');
+  });
+
+  it('T9: no-op when screenData.info is null', async () => {
+    const ctx = makeContext({ info: null, journey_id: 1 });
+    await executeAction({ type: 'info_start_click' }, ctx);
+    expect(webNavigate).not.toHaveBeenCalled();
+    expect(trackCompletion).not.toHaveBeenCalled();
+  });
+});

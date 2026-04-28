@@ -105,10 +105,20 @@ export function MitraEnginePage() {
     );
   }
 
-  // ── Practice runner: dark immersive chrome, no shell ────────────────
+  // ── Practice runner: warm per-variant backgrounds, no shell ─────────
   if (isRunnerContainer) {
+    const runnerVariant = screenState.screenData?.runner_variant as string | null;
+    const runnerBg =
+      runnerVariant === 'sankalp'
+        ? 'url(/Sankalpbg.png) center/cover fixed, #FBF5F5'
+        : runnerVariant === 'practice'
+        ? 'url(/guided_bg.png) center/cover fixed, #F5F0E5'
+        : 'url(/mantra3.png) center/cover fixed, #2a1a0a'; // mantra: dark amber
+    const exitBtnColor = runnerVariant === 'mantra' ? '#f5e8c3' : 'var(--kalpx-text-muted)';
+    const exitBtnBg = runnerVariant === 'mantra' ? 'rgba(255,255,255,0.08)' : 'rgba(255,248,239,0.7)';
+    const exitBtnBorder = runnerVariant === 'mantra' ? '1px solid rgba(201,168,76,0.3)' : '1px solid var(--kalpx-border-gold)';
     return (
-      <div className="kalpx-runner-dark" style={{ position: 'relative' }}>
+      <div style={{ position: 'relative', minHeight: '100dvh', background: runnerBg }}>
         {!resolving && stateId !== 'completion_return' && (
           <div style={{ position: 'absolute', top: 12, right: 16, zIndex: 10 }}>
             <button
@@ -116,12 +126,12 @@ export function MitraEnginePage() {
               data-testid="runner-exit-btn"
               aria-label="Exit runner"
               style={{
-                background: 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(201,168,76,0.3)',
+                background: exitBtnBg,
+                border: exitBtnBorder,
                 borderRadius: 20,
                 cursor: 'pointer',
                 fontSize: 12,
-                color: '#bfa58a',
+                color: exitBtnColor,
                 padding: '5px 14px',
                 backdropFilter: 'blur(4px)',
               }}

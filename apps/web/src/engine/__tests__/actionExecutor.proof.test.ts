@@ -123,7 +123,7 @@ describe('actionExecutor — Phase 5 proof subset', () => {
     warnSpy.mockRestore();
   });
 
-  it('info_start_click with info in screenData fires trackEvent + trackCompletion + navigate dashboard', async () => {
+  it('info_start_click with info in screenData fires trackEvent, does NOT call trackCompletion, navigates to runner', async () => {
     const ctx = makeContext({
       journey_id: 10,
       day_number: 5,
@@ -131,8 +131,10 @@ describe('actionExecutor — Phase 5 proof subset', () => {
     });
     await executeAction({ type: 'info_start_click' }, ctx);
     expect(trackEvent).toHaveBeenCalledWith('mantra_offering_viewed', expect.any(Object));
-    expect(trackCompletion).toHaveBeenCalledWith(expect.objectContaining({ item_id: 'so_hum', item_type: 'mantra' }));
-    expect(webNavigate).toHaveBeenCalledWith('/en/mitra/dashboard');
+    // X-PRE fix: trackCompletion must NOT be called — the practice has not happened yet
+    expect(trackCompletion).not.toHaveBeenCalled();
+    // Routes to runner, not dashboard
+    expect(webNavigate).toHaveBeenCalledWith(expect.stringContaining('free_mantra_chanting'));
   });
 
   it('info_start_click without info in screenData warns and no-ops', async () => {

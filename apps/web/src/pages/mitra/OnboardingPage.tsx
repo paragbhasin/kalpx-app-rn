@@ -159,9 +159,10 @@ export function OnboardingPage() {
   };
 
   const isHeroTurn = stateId === 'turn_1' || stateId === 'turn_2';
+  const backgroundImage = stateId === 'turn_1' ? '/14day_updated.png' : undefined;
 
   return (
-    <MitraMobileShell>
+    <MitraMobileShell backgroundImage={backgroundImage}>
       <div style={isHeroTurn ? {} : { padding: '16px 24px 80px' }}>
         {resolving && (
           <div style={{ textAlign: 'center', paddingTop: 80, color: 'var(--kalpx-text-muted)' }}>

@@ -7,13 +7,21 @@ interface Props {
   children: React.ReactNode;
   hideBottomNav?: boolean;
   hideTopBar?: boolean;
+  backgroundImage?: string;
 }
 
-export function MitraMobileShell({ children, hideBottomNav, hideTopBar }: Props) {
+export function MitraMobileShell({ children, hideBottomNav, hideTopBar, backgroundImage }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <div style={{ minHeight: '100dvh', background: `url(/beige_bg.png) center/cover fixed, var(--kalpx-bg)` }}>
+    <div
+      style={{
+        minHeight: '100dvh',
+        background: backgroundImage
+          ? `url(${backgroundImage}) center/cover fixed, var(--kalpx-bg)`
+          : `url(/beige_bg.png) center/cover fixed, var(--kalpx-bg)`,
+      }}
+    >
       <div style={{ maxWidth: 480, margin: '0 auto', height: '100dvh', display: 'flex', flexDirection: 'column' }}>
         {!hideTopBar && <MitraTopBar />}
         <main style={{ flex: 1, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>

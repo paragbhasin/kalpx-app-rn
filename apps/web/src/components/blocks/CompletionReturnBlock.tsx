@@ -36,9 +36,10 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
   const item = screenData['runner_active_item'] as Record<string, any> | null;
   const title = item?.title || '';
 
-  // G17: room-sourced completions return to room. G24/G27 extend this in their own audits.
+  // G17: room → return_to_source. G27: trigger → return_to_source. All others → return_to_dashboard.
   const returnSource: string = (screenData['runner_source'] as string) || 'core';
-  const returnAction = returnSource === 'support_room' ? 'return_to_source' : 'return_to_dashboard';
+  const RETURN_TO_SOURCE_SOURCES = new Set(['support_room', 'support_trigger']);
+  const returnAction = RETURN_TO_SOURCE_SOURCES.has(returnSource) ? 'return_to_source' : 'return_to_dashboard';
 
   return (
     <div

@@ -470,7 +470,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
 
     // ----------------------------------------------------------------
     // RUNNER_EXIT / RUNNER_BACK — clear runner state, return to origin.
-    // G17: room-sourced exit returns to room. G24/G27 extend in their own audits.
+    // G17: room-sourced exit returns to room. G27: trigger-sourced returns to /trigger.
     // Read source/roomId BEFORE clearing keys.
     // ----------------------------------------------------------------
     case 'runner_exit':
@@ -481,6 +481,8 @@ export async function executeAction(action: any, context: ActionContext): Promis
       runnerKeys.forEach(k => dispatch(setScreenValue({ key: k, value: null })));
       if (exitSource === 'support_room' && exitRoomId) {
         webNavigate(`/en/mitra/room/${exitRoomId.replace(/^room_/, '')}`);
+      } else if (exitSource === 'support_trigger') {
+        webNavigate('/en/mitra/trigger');
       } else {
         webNavigate('/en/mitra/dashboard');
       }
@@ -505,17 +507,19 @@ export async function executeAction(action: any, context: ActionContext): Promis
     }
 
     // ----------------------------------------------------------------
-    // RETURN_TO_SOURCE — clear runner state, navigate back to origin room.
-    // G17 scope: dispatched only when runner_source === 'support_room' (Fix 3 in CompletionReturnBlock).
-    // G24/G27 will extend the dispatch condition in their own audits.
-    // Falls back to dashboard if room_id is absent (non-room contexts, safe no-op).
+    // RETURN_TO_SOURCE — clear runner state, navigate back to origin surface.
+    // G17: support_room → originating room. G27: support_trigger → /en/mitra/trigger.
+    // Falls back to dashboard for all other sources (safe no-op).
     // ----------------------------------------------------------------
     case 'return_to_source': {
       const roomId = (screenData.room_id as string | null) || null;
+      const returnSrc = (screenData.runner_source as string | null) || null;
       const runnerClearKeys = ['runner_active_item', 'runner_source', 'runner_variant', 'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec', 'runner_start_time', 'runner_tz'];
       runnerClearKeys.forEach(k => dispatch(setScreenValue({ key: k, value: null })));
-      if (roomId) {
+      if (returnSrc === 'support_room' && roomId) {
         webNavigate(`/en/mitra/room/${roomId.replace(/^room_/, '')}`);
+      } else if (returnSrc === 'support_trigger') {
+        webNavigate('/en/mitra/trigger');
       } else {
         webNavigate('/en/mitra/dashboard');
       }

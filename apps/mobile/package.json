@@ -1,6 +1,6 @@
 {
   "name": "kalpax",
-  "main": "expo/AppEntry.js",
+  "main": "./AppEntry.js",
   "version": "1.0.1",
   "android": {
     "package": "com.kalpx.app"

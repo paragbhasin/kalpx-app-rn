@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { googleLogout } from '@react-oauth/google';
 import { AUTH_KEYS } from '@kalpx/api-client';
 import { storeTokens, clearTokens, isAuthenticated } from '@kalpx/auth';
 import { webStorage } from '../lib/webStorage';
@@ -51,6 +52,7 @@ export function useAuth() {
   );
 
   const logout = useCallback(async () => {
+    if (typeof window !== 'undefined') googleLogout(); // revoke Google OAuth session if active (no-op for email logins)
     await webStorage.removeItem(AUTH_KEYS.accessToken);
     await webStorage.removeItem(AUTH_KEYS.refreshToken);
     // Keep guestUUID — guest identity survives logout
@@ -58,6 +60,34 @@ export function useAuth() {
     store.dispatch(resetStore());
     navigate('/login');
   }, [navigate]);
+
+  const socialLoginGoogle = useCallback(
+    async (accessToken: string, returnTo?: string): Promise<{ success: boolean; error?: string }> => {
+      try {
+        const res = await api.post<LoginResponse>('users/social_login/', {
+          provider: 'google',
+          access_token: accessToken,
+        });
+        const data = res.data;
+        const at = data.access_token ?? data.access;
+        const rt = data.refresh_token ?? data.refresh;
+
+        if (!at || !rt) {
+          return { success: false, error: 'Google login succeeded but tokens were missing in response.' };
+        }
+
+        await storeTokens(webStorage, { accessToken: at, refreshToken: rt });
+        invalidateJourneyStatusCache();
+        try { await claimGuestJourney(); } catch { /* swallow */ }
+        invalidateJourneyStatusCache();
+        navigate(returnTo ?? '/en/mitra');
+        return { success: true };
+      } catch (err) {
+        return { success: false, error: getApiErrorMessage(err, 'Google sign-in failed. Please try again.') };
+      }
+    },
+    [navigate],
+  );
 
   const generateOtp = useCallback(
     async (email: string): Promise<{ success: boolean; error?: string }> => {
@@ -173,6 +203,7 @@ export function useAuth() {
   return {
     login,
     logout,
+    socialLoginGoogle,
     generateOtp,
     verifyOtp,
     registerUser,

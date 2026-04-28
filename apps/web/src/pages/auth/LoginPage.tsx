@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
+import { useGoogleLogin } from '@react-oauth/google';
 import { AuthLayout } from '../../components/AuthLayout';
 import { useAuth } from '../../hooks/useAuth';
 import { useGuestIdentity } from '../../hooks/useGuestIdentity';
+import { useAppDispatch } from '../../store/hooks';
+import { showSnackBar } from '../../store/snackBarSlice';
 import { loginSchema } from '@kalpx/validation';
 
 export function LoginPage() {
   useGuestIdentity();
-  const { login } = useAuth();
+  const { login, socialLoginGoogle } = useAuth();
+  const dispatch = useAppDispatch();
   const [searchParams] = useSearchParams();
   const returnTo = searchParams.get('returnTo') ?? undefined;
 
@@ -17,6 +21,20 @@ export function LoginPage() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [globalError, setGlobalError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const handleGoogleLogin = useGoogleLogin({
+    flow: 'implicit',
+    onSuccess: async (tokenResponse) => {
+      setGoogleLoading(true);
+      const { success, error } = await socialLoginGoogle(tokenResponse.access_token, returnTo);
+      setGoogleLoading(false);
+      if (!success && error) dispatch(showSnackBar(error));
+    },
+    onError: () => {
+      dispatch(showSnackBar('Google sign-in was cancelled or failed. Please try again.'));
+    },
+  });
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -40,8 +58,52 @@ export function LoginPage() {
     if (!success && error) setGlobalError(error);
   }
 
+  const isAnyLoading = loading || googleLoading;
+
   return (
     <AuthLayout title="Sign in">
+      <button
+        type="button"
+        onClick={() => handleGoogleLogin()}
+        disabled={isAnyLoading}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 10,
+          padding: '11px 16px',
+          background: '#fff',
+          border: '1px solid var(--kalpx-border-gold)',
+          borderRadius: 8,
+          fontSize: 15,
+          fontWeight: 500,
+          color: '#3c3c3c',
+          cursor: isAnyLoading ? 'not-allowed' : 'pointer',
+          opacity: isAnyLoading ? 0.6 : 1,
+          transition: 'opacity 0.2s',
+        }}
+      >
+        {googleLoading ? (
+          <span style={{ fontSize: 14, color: 'var(--kalpx-text-muted)' }}>Signing in…</span>
+        ) : (
+          <>
+            <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+              <path fill="none" d="M0 0h48v48H0z"/>
+            </svg>
+            Continue with Google
+          </>
+        )}
+      </button>
+
+      <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--kalpx-text-muted)', margin: '12px 0' }}>
+        — or —
+      </div>
+
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <div>
           <label htmlFor="login-email" className="sr-only">Email</label>
@@ -121,17 +183,17 @@ export function LoginPage() {
         )}
         <button
           type="submit"
-          disabled={loading}
+          disabled={isAnyLoading}
           style={{
             padding: '14px',
-            background: loading ? 'var(--kalpx-text-muted)' : 'var(--kalpx-cta)',
+            background: isAnyLoading ? 'var(--kalpx-text-muted)' : 'var(--kalpx-cta)',
             color: 'var(--kalpx-cta-text)',
             borderRadius: 8,
             fontWeight: 600,
             fontSize: 16,
             transition: 'background 0.2s',
             border: 'none',
-            cursor: loading ? 'not-allowed' : 'pointer',
+            cursor: isAnyLoading ? 'not-allowed' : 'pointer',
           }}
         >
           {loading ? 'Signing in…' : 'Sign in'}

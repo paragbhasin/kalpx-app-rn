@@ -22,6 +22,7 @@
     "@kalpx/state": "workspace:*",
     "@kalpx/types": "workspace:*",
     "@kalpx/validation": "workspace:*",
+    "@react-oauth/google": "^0.13.5",
     "@reduxjs/toolkit": "^2.5.1",
     "@stripe/react-stripe-js": "^3.7.0",
     "@stripe/stripe-js": "^5.7.0",

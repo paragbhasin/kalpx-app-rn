@@ -10,6 +10,7 @@ vi.mock('../mitraApi', () => ({
 vi.mock('../../lib/webRouter', () => ({
   webNavigate: vi.fn(),
 }));
+vi.mock('../../hooks/useJourneyStatus', () => ({ invalidateJourneyStatusCache: vi.fn() }));
 
 // Mock WEB_ENV
 vi.mock('../../lib/env', () => ({

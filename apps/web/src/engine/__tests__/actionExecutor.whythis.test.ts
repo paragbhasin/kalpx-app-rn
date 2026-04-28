@@ -30,6 +30,7 @@ vi.mock('../mitraApi', () => ({
 }));
 
 vi.mock('../../lib/webRouter', () => ({ webNavigate: vi.fn() }));
+vi.mock('../../hooks/useJourneyStatus', () => ({ invalidateJourneyStatusCache: vi.fn() }));
 
 import * as mitraApi from '../mitraApi';
 import { webNavigate } from '../../lib/webRouter';

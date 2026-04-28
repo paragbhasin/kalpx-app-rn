@@ -27,6 +27,7 @@ import {
 } from './mitraApi';
 import { ingestDailyView, ingestDay7View, ingestDay14View } from './v3Ingest';
 import { webNavigate } from '../lib/webRouter';
+import { invalidateJourneyStatusCache } from '../hooks/useJourneyStatus';
 import { WEB_ENV } from '../lib/env';
 
 export interface ActionContext {
@@ -653,7 +654,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
             _setKey(dispatch, 'stashed_guidance_mode', draft.guidance_mode || 'hybrid');
             _setKey(dispatch, 'onboarding_draft_state', draft);
             _setKey(dispatch, 'onboarding_turn', 'turn_7_awaiting_auth');
-            webNavigate('/login?returnTo=/en/mitra/onboarding&resume=turn_7');
+            webNavigate('/login?returnTo=' + encodeURIComponent('/en/mitra/onboarding?stateId=turn_7'));
             return;
           }
 
@@ -726,6 +727,9 @@ export async function executeAction(action: any, context: ActionContext): Promis
             onboarding_draft_state: null,
             onboarding_turn: null,
           }));
+          // Journey was created at turn_7 but the 60s cache still has hasActiveJourney=false
+          // from the start of onboarding. RequiresJourney must re-fetch to get the real value.
+          invalidateJourneyStatusCache();
           webNavigate('/en/mitra/dashboard');
           return;
         } else {

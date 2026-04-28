@@ -40,7 +40,13 @@ vi.mock('../../lib/webRouter', () => ({
   webNavigate: vi.fn(),
 }));
 
+// Mock useJourneyStatus — only invalidateJourneyStatusCache is used by actionExecutor
+vi.mock('../../hooks/useJourneyStatus', () => ({
+  invalidateJourneyStatusCache: vi.fn(),
+}));
+
 import { webNavigate } from '../../lib/webRouter';
+import { invalidateJourneyStatusCache } from '../../hooks/useJourneyStatus';
 
 function makeDispatch() {
   const calls: any[] = [];
@@ -146,8 +152,11 @@ describe('onboarding_turn_response', () => {
     expect(webNavigate).toHaveBeenCalledWith(expect.stringContaining('turn_7'));
   });
 
-  it('turn_7 unauthenticated → stashes state and redirects to login', async () => {
+  it('turn_7 unauthenticated → stashes state and redirects to login with encoded returnTo', async () => {
     // localStorage has no token → unauthenticated
+    // After login, LoginPage resolves searchParams.get('returnTo') to:
+    //   '/en/mitra/onboarding?stateId=turn_7'
+    // which lands the user directly on turn_7, not turn_1 or turn_6.
     const draft = { path: 'support', inference: {}, guidance_mode: 'hybrid' };
     const ctx = makeContext({ onboarding_draft_state: draft }, 'turn_7');
     await executeAction(
@@ -155,7 +164,7 @@ describe('onboarding_turn_response', () => {
       ctx,
     );
     expect(webNavigate).toHaveBeenCalledWith(
-      expect.stringContaining('/login'),
+      '/login?returnTo=%2Fen%2Fmitra%2Fonboarding%3FstateId%3Dturn_7',
     );
   });
 
@@ -188,6 +197,20 @@ describe('onboarding_turn_response', () => {
       ctx,
     );
     expect(webNavigate).toHaveBeenCalledWith('/en/mitra/dashboard');
+  });
+
+  it('turn_8 → invalidates journey status cache before navigating to dashboard', async () => {
+    const draft = { path: 'support', guidance_mode: 'hybrid' };
+    const ctx = makeContext({ onboarding_draft_state: draft }, 'turn_8');
+    await executeAction(
+      { type: 'onboarding_turn_response', payload: { chip_id: 'ready' } },
+      ctx,
+    );
+    expect(invalidateJourneyStatusCache).toHaveBeenCalled();
+    // Cache must be cleared before navigation so RequiresJourney re-fetches fresh state
+    const cacheOrder = vi.mocked(invalidateJourneyStatusCache).mock.invocationCallOrder[0];
+    const navigateOrder = vi.mocked(webNavigate).mock.invocationCallOrder[0];
+    expect(cacheOrder).toBeLessThan(navigateOrder);
   });
 });
 

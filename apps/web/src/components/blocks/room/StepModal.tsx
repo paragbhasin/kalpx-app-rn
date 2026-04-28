@@ -138,7 +138,13 @@ export function StepModal({ visible, stepPayload, label, onCancel, onDone, error
           {kind === 'grounding' && (
             <GroundingBody onDone={onDone} />
           )}
-          {(kind === 'voice_note' || kind === 'reach_out' || kind === 'unknown') && (
+          {kind === 'voice_note' && (
+            <VoiceNoteBody onDone={onDone} />
+          )}
+          {kind === 'reach_out' && (
+            <ReachOutBody onDone={onDone} />
+          )}
+          {kind === 'unknown' && (
             <UnknownBody onDone={onDone} />
           )}
         </div>
@@ -397,6 +403,70 @@ function GroundingBody({ onDone }: { onDone: (extra: StepModalResult) => void })
         }}
       >
         {isLast ? 'Done' : 'Next'}
+      </button>
+    </div>
+  );
+}
+
+// ── Voice note stub body ──────────────────────────────────────────────────────
+
+function VoiceNoteBody({ onDone }: { onDone: (extra: StepModalResult) => void }) {
+  return (
+    <div style={{ textAlign: 'center', paddingTop: 20 }}>
+      <p style={{ fontSize: 24, marginBottom: 12 }}>🎙</p>
+      <p style={{ fontSize: 15, color: '#3C3C43', marginBottom: 8, lineHeight: 1.5 }}>
+        Speaking it aloud can help.
+      </p>
+      <p style={{ fontSize: 13, color: '#8E8E93', marginBottom: 28, lineHeight: 1.4 }}>
+        Voice recording will be available in a future update.
+      </p>
+      <button
+        data-testid="step-modal-voice-note-done"
+        onClick={() => onDone({ source: 'voice_note', stub: true })}
+        style={{
+          padding: '12px 20px',
+          borderRadius: 24,
+          border: '1px solid #D8D8D8',
+          background: '#FBF5F5',
+          fontSize: 15,
+          fontWeight: 600,
+          color: '#432104',
+          cursor: 'pointer',
+        }}
+      >
+        Done
+      </button>
+    </div>
+  );
+}
+
+// ── Reach out stub body ───────────────────────────────────────────────────────
+
+function ReachOutBody({ onDone }: { onDone: (extra: StepModalResult) => void }) {
+  return (
+    <div style={{ textAlign: 'center', paddingTop: 20 }}>
+      <p style={{ fontSize: 24, marginBottom: 12 }}>🤝</p>
+      <p style={{ fontSize: 15, color: '#3C3C43', marginBottom: 8, lineHeight: 1.5 }}>
+        Reaching out to someone you trust is a meaningful step.
+      </p>
+      <p style={{ fontSize: 13, color: '#8E8E93', marginBottom: 28, lineHeight: 1.4 }}>
+        Contact suggestions will be available in a future update.
+      </p>
+      <button
+        data-testid="step-modal-reach-out-done"
+        onClick={() => onDone({ source: 'reach_out', stub: true })}
+        style={{
+          padding: '12px 20px',
+          borderRadius: 24,
+          border: '1px solid #D8D8D8',
+          background: '#FBF5F5',
+          fontSize: 15,
+          fontWeight: 600,
+          color: '#432104',
+          cursor: 'pointer',
+        }}
+      >
+        Done
       </button>
     </div>
   );

@@ -10,6 +10,7 @@ import { StepModal, classifyStep } from './StepModal';
 import type { StepModalResult } from './StepModal';
 import { InquiryModal } from './InquiryModal';
 import { CarryCaptureModal } from './CarryCaptureModal';
+import { postRoomSacred } from '../../../engine/mitraApi';
 
 interface RoomAction {
   action_id: string;
@@ -53,6 +54,8 @@ export function RoomActionPill({ action, roomId, screenData = {}, onAction }: Pr
   const [stepModalVisible, setStepModalVisible] = useState(false);
   const [inquiryModalVisible, setInquiryModalVisible] = useState(false);
   const [carryModalVisible, setCarryModalVisible] = useState(false);
+  // Active step payload — either action.step_payload (normal tap) or synthesized from inquiry practice launch
+  const [activeStepPayload, setActiveStepPayload] = useState<any>(null);
 
   const isExit = action.action_type === 'exit';
   const isRunner = action.action_type.startsWith('runner_');
@@ -96,6 +99,8 @@ export function RoomActionPill({ action, roomId, screenData = {}, onAction }: Pr
     }
 
     if (isTeaching) {
+      // R2c: Teaching expands inline (approved web divergence — RN navigates to WhyThisL2Sheet).
+      // Dispatch is room_step_completed, NOT open_why_this_l2. This is intentional.
       setExpanded(!expanded);
       if (!expanded) {
         onAction?.({
@@ -121,6 +126,7 @@ export function RoomActionPill({ action, roomId, screenData = {}, onAction }: Pr
     if (isStep) {
       const kind = classifyStep(action.step_payload?.template_id);
       if (kind !== 'unknown') {
+        setActiveStepPayload(action.step_payload);
         setStepModalVisible(true);
       } else if (!done) {
         // Unknown template: complete immediately
@@ -255,20 +261,40 @@ export function RoomActionPill({ action, roomId, screenData = {}, onAction }: Pr
       {/* Step Modal */}
       <StepModal
         visible={stepModalVisible}
-        stepPayload={action.step_payload}
+        stepPayload={activeStepPayload ?? action.step_payload}
         label={action.label}
-        onCancel={() => setStepModalVisible(false)}
-        onDone={(extra: StepModalResult) => {
+        onCancel={() => {
           setStepModalVisible(false);
+          setActiveStepPayload(null);
+        }}
+        onDone={(extra: StepModalResult) => {
+          const stepPl = activeStepPayload ?? action.step_payload;
+          setStepModalVisible(false);
+          setActiveStepPayload(null);
           setDone(true);
+          // R2a: fire-and-forget sacred POST for text/grounding steps
+          if (extra.text || extra.grounding) {
+            postRoomSacred(roomId, {
+              writes_event: stepPl?.persistence?.writes_event ?? action.persistence?.writes_event ?? null,
+              label: action.label,
+              action_id: action.action_id,
+              analytics_key: action.analytics_key ?? null,
+              captured_at: Date.now(),
+              text: extra.text ?? null,
+              life_context: screenData.room_life_context ?? null,
+              journey_id: screenData.journey_id ?? null,
+              day_number: screenData.day_number ?? null,
+              source_surface: 'step_pill',
+            });
+          }
           onAction?.({
             type: 'room_step_completed',
             payload: {
               room_id: roomId,
               action_id: action.action_id,
               analytics_key: action.analytics_key,
-              template_id: action.step_payload?.template_id,
-              writes_event: action.step_payload?.persistence?.writes_event ?? action.persistence?.writes_event,
+              template_id: stepPl?.template_id,
+              writes_event: stepPl?.persistence?.writes_event ?? action.persistence?.writes_event,
               ...(extra.text ? { text: extra.text } : {}),
               ...(extra.grounding ? { grounding: extra.grounding } : {}),
             },
@@ -295,16 +321,27 @@ export function RoomActionPill({ action, roomId, screenData = {}, onAction }: Pr
           })
         }
         onLaunchPractice={(_cat, templateId) => {
+          // R2b Option A: synthesize step payload from category and open StepModal (matches RN).
           setInquiryModalVisible(false);
-          setDone(true);
-          onAction?.({
-            type: 'room_step_completed',
-            payload: { room_id: roomId, action_id: action.action_id, analytics_key: action.analytics_key, template_id: templateId },
-          });
+          setActiveStepPayload({ template_id: templateId });
+          setStepModalVisible(true);
         }}
         onSubmitJournal={(cat, text) => {
           setInquiryModalVisible(false);
           setDone(true);
+          // R2b: fire-and-forget sacred POST for inquiry journal submission
+          postRoomSacred(roomId, {
+            writes_event: 'inquiry_journal',
+            label: action.label,
+            action_id: action.action_id,
+            analytics_key: action.analytics_key ?? null,
+            captured_at: Date.now(),
+            text,
+            life_context: screenData.room_life_context ?? null,
+            journey_id: screenData.journey_id ?? null,
+            day_number: screenData.day_number ?? null,
+            source_surface: 'inquiry_pill',
+          });
           onAction?.({
             type: 'room_step_completed',
             payload: {
@@ -333,7 +370,7 @@ export function RoomActionPill({ action, roomId, screenData = {}, onAction }: Pr
           lifeContext={screenData.room_life_context ?? null}
           journeyId={screenData.journey_id ?? null}
           dayNumber={screenData.day_number ?? null}
-          onSave={(text) => {
+          onSave={(text, sacredWriteOk) => {
             setDone(true);
             onAction?.({
               type: 'room_carry_captured',
@@ -344,6 +381,7 @@ export function RoomActionPill({ action, roomId, screenData = {}, onAction }: Pr
                 label: action.label,
                 writes_event: writesEvent,
                 carry_text: text,
+                sacred_write_ok: sacredWriteOk,
               },
             });
           }}
@@ -362,4 +400,3 @@ export function RoomActionPill({ action, roomId, screenData = {}, onAction }: Pr
     </div>
   );
 }
-

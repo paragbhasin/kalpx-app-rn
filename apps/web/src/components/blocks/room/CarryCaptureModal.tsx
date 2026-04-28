@@ -73,7 +73,7 @@ interface Props {
   lifeContext?: string | null;
   journeyId?: string | null;
   dayNumber?: number | null;
-  onSave: (text: string) => void;
+  onSave: (text: string, sacredWriteOk: boolean) => void;
   onCancel: () => void;
   onAddAnother?: () => void;
   onReturnHome?: () => void;
@@ -128,26 +128,27 @@ export function CarryCaptureModal({
     if (!enabled) return;
     setIsSubmitting(true);
     setError(null);
-    try {
-      // Call sacred API
-      await postRoomSacred(roomId, {
-        writes_event: writesEvent,
-        label,
-        action_id: actionId,
-        analytics_key: analyticsKey,
-        captured_at: Date.now(),
-        text: trimmed,
-        life_context: lifeContext ?? null,
-        journey_id: journeyId ?? null,
-        day_number: dayNumber ?? null,
-        source_surface: 'carry_pill',
-      });
-      onSave(trimmed);
+    // postRoomSacred catches internally — returns data or null; never throws
+    const sacredResult = await postRoomSacred(roomId, {
+      writes_event: writesEvent,
+      label,
+      action_id: actionId,
+      analytics_key: analyticsKey,
+      captured_at: Date.now(),
+      text: trimmed,
+      life_context: lifeContext ?? null,
+      journey_id: journeyId ?? null,
+      day_number: dayNumber ?? null,
+      source_surface: 'carry_pill',
+    });
+    setIsSubmitting(false);
+    const sacredWriteOk = sacredResult !== null;
+    onSave(trimmed, sacredWriteOk);
+    // R2d: joy_carry auto-navigates to dashboard (matches RN) — skip confirmation screen
+    if (isJoyCarry) {
+      onReturnHome?.();
+    } else {
       setConfirmation({ visible: true });
-    } catch {
-      setError('Could not save — please try again.');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 

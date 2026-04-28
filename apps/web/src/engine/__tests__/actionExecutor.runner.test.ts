@@ -237,25 +237,38 @@ describe('runner_exit', () => {
     expect(webNavigate).toHaveBeenCalledWith('/en/mitra/room/growth');
   });
 
-  it('non-room source returns to dashboard (additional/checkin/trigger-like)', async () => {
-    for (const src of ['additional_mantra', 'support_checkin', 'support_trigger']) {
+  it('non-room/non-trigger source returns to dashboard (additional/checkin)', async () => {
+    for (const src of ['additional_mantra', 'support_checkin']) {
       vi.clearAllMocks();
       const ctx = makeContext({ runner_source: src, room_id: null, runner_active_item: { item_id: 'x' } });
       await executeAction({ type: 'runner_exit' }, ctx);
       expect(webNavigate).toHaveBeenCalledWith('/en/mitra/dashboard');
     }
   });
+
+  // G27: trigger-sourced exit
+  it('navigates to /en/mitra/trigger when runner_source=support_trigger', async () => {
+    const ctx = makeContext({ runner_source: 'support_trigger', runner_active_item: { item_id: 'x' } });
+    await executeAction({ type: 'runner_exit' }, ctx);
+    expect(webNavigate).toHaveBeenCalledWith('/en/mitra/trigger');
+  });
+
+  it('runner_back also navigates to trigger when support_trigger', async () => {
+    const ctx = makeContext({ runner_source: 'support_trigger', runner_active_item: { item_id: 'x' } });
+    await executeAction({ type: 'runner_back' }, ctx);
+    expect(webNavigate).toHaveBeenCalledWith('/en/mitra/trigger');
+  });
 });
 
 describe('return_to_source', () => {
   // G17: room-sourced completion return
-  it('navigates to room when room_id is set', async () => {
+  it('navigates to room when runner_source=support_room and room_id is set', async () => {
     const ctx = makeContext({ room_id: 'room_clarity', runner_source: 'support_room' });
     await executeAction({ type: 'return_to_source' }, ctx);
     expect(webNavigate).toHaveBeenCalledWith('/en/mitra/room/clarity');
   });
 
-  it('falls back to dashboard when room_id is absent', async () => {
+  it('falls back to dashboard when runner_source=support_room but room_id is absent', async () => {
     const ctx = makeContext({ runner_source: 'support_room' });
     await executeAction({ type: 'return_to_source' }, ctx);
     expect(webNavigate).toHaveBeenCalledWith('/en/mitra/dashboard');
@@ -268,9 +281,27 @@ describe('return_to_source', () => {
       screenData: { room_id: 'room_clarity', runner_source: 'support_room', runner_active_item: { item_id: 'x' }, runner_variant: 'mantra' },
     };
     await executeAction({ type: 'return_to_source' }, ctx);
-    // dispatch called at least once for clearing keys
     expect(dispatch).toHaveBeenCalled();
     expect(webNavigate).toHaveBeenCalledWith('/en/mitra/room/clarity');
+  });
+
+  // G27: trigger-sourced completion return
+  it('navigates to /en/mitra/trigger when runner_source=support_trigger', async () => {
+    const ctx = makeContext({ runner_source: 'support_trigger' });
+    await executeAction({ type: 'return_to_source' }, ctx);
+    expect(webNavigate).toHaveBeenCalledWith('/en/mitra/trigger');
+  });
+
+  it('support_trigger does not require room_id to navigate correctly', async () => {
+    const ctx = makeContext({ runner_source: 'support_trigger', room_id: null });
+    await executeAction({ type: 'return_to_source' }, ctx);
+    expect(webNavigate).toHaveBeenCalledWith('/en/mitra/trigger');
+  });
+
+  it('falls back to dashboard for unknown source', async () => {
+    const ctx = makeContext({ runner_source: 'additional_mantra' });
+    await executeAction({ type: 'return_to_source' }, ctx);
+    expect(webNavigate).toHaveBeenCalledWith('/en/mitra/dashboard');
   });
 });
 

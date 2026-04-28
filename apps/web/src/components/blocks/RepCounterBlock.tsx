@@ -67,8 +67,10 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
+        justifyContent: 'center',
         padding: '32px 16px',
         gap: 12,
+        minHeight: '100dvh',
       }}
     >
       {/* Title + deity — conditional on item fields being present */}

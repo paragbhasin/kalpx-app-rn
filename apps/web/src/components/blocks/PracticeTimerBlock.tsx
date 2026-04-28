@@ -88,7 +88,7 @@ export function PracticeTimerBlock({ block, screenData = {}, onAction }: Props) 
 
   return (
     <div
-      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 16px', gap: 20 }}
+      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px 16px', gap: 20, minHeight: '100dvh' }}
       data-testid="practice-timer-block"
     >
       {/* Timer circle — 240px matches RN */}

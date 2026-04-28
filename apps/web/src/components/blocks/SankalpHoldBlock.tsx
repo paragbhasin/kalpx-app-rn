@@ -81,7 +81,7 @@ export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
 
   if (complete) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 16px', gap: 16 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 16px', gap: 16, minHeight: '100dvh' }}>
         <div style={{ width: 144, height: 144, borderRadius: '50%', background: 'var(--kalpx-cta)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <svg width={40} height={40} viewBox="0 0 40 40" fill="none">
             <path d="M8 20l8 8 16-16" stroke="#fff" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" />
@@ -94,7 +94,7 @@ export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
 
   return (
     <div
-      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '32px 16px', gap: 24 }}
+      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 16px', gap: 24, minHeight: '100dvh' }}
       data-testid="sankalp-hold-block"
     >
       {sankalpText ? (

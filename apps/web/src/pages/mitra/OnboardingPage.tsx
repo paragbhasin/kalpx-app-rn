@@ -26,6 +26,12 @@ export function OnboardingPage() {
 
   const { loading: statusLoading, hasActiveJourney } = useJourneyStatus();
 
+  // stateId drives which turn to show; default to turn_1 if missing
+  const stateId: string =
+    searchParams.get('stateId') ||
+    screenState.currentStateId ||
+    'turn_1';
+
   // Active journey users must not re-run onboarding — duplicate journey risk
   useEffect(() => {
     if (statusLoading) return;
@@ -33,20 +39,6 @@ export function OnboardingPage() {
       navigate('/en/mitra/dashboard', { replace: true });
     }
   }, [statusLoading, hasActiveJourney, navigate]);
-
-  if (statusLoading) {
-    return (
-      <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fdf8ef' }}>
-        <p style={{ color: '#888', fontSize: 14 }}>Loading…</p>
-      </div>
-    );
-  }
-
-  // stateId drives which turn to show; default to turn_1 if missing
-  const stateId: string =
-    searchParams.get('stateId') ||
-    screenState.currentStateId ||
-    'turn_1';
 
   useEffect(() => {
     if (
@@ -61,6 +53,14 @@ export function OnboardingPage() {
       setResolving(false),
     );
   }, [stateId, dispatch]);
+
+  if (statusLoading) {
+    return (
+      <div style={{ minHeight: '100dvh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fdf8ef' }}>
+        <p style={{ color: '#888', fontSize: 14 }}>Loading…</p>
+      </div>
+    );
+  }
 
   const actionContext = {
     dispatch,

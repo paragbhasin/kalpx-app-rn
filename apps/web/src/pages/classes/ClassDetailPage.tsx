@@ -36,7 +36,7 @@ export function ClassDetailPage() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100dvh', background: '#FFF8EF' }}>
+      <div style={{ minHeight: '100dvh', background: 'var(--kalpx-bg)' }}>
         <div style={{ maxWidth: 480, margin: '0 auto' }}>
           <ClassDetailSkeleton />
         </div>
@@ -46,7 +46,7 @@ export function ClassDetailPage() {
 
   if (error || !cls) {
     return (
-      <div style={{ minHeight: '100dvh', background: '#FFF8EF' }}>
+      <div style={{ minHeight: '100dvh', background: 'var(--kalpx-bg)' }}>
         <div style={{ maxWidth: 480, margin: '0 auto', padding: '28px 16px' }}>
           <button
             onClick={() => navigate('/en/classes')}
@@ -63,7 +63,7 @@ export function ClassDetailPage() {
   const canBook = cls.status !== 'inactive' && cls.status !== 'draft';
 
   return (
-    <div style={{ minHeight: '100dvh', background: '#FFF8EF' }}>
+    <div style={{ minHeight: '100dvh', background: 'var(--kalpx-bg)' }}>
       <div style={{ maxWidth: 480, margin: '0 auto', paddingBottom: 80 }}>
         {/* Cover */}
         {cls.cover_media?.url && (
@@ -102,7 +102,7 @@ export function ClassDetailPage() {
             </p>
           )}
 
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: '#2d1a0e', marginBottom: 8, lineHeight: 1.3 }}>
+          <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--kalpx-text)', marginBottom: 8, lineHeight: 1.3 }}>
             {cls.title}
           </h1>
 
@@ -116,7 +116,7 @@ export function ClassDetailPage() {
                 />
               )}
               <div>
-                <p style={{ fontSize: 14, fontWeight: 600, color: '#2d1a0e' }}>{cls.tutor.name}</p>
+                <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--kalpx-text)' }}>{cls.tutor.name}</p>
                 {cls.tutor.timezone && (
                   <p style={{ fontSize: 12, color: '#999' }}>{cls.tutor.timezone}</p>
                 )}
@@ -126,41 +126,41 @@ export function ClassDetailPage() {
 
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
             {cls.duration_minutes && (
-              <span style={{ fontSize: 12, color: '#7a5c3a', background: '#f0e8d8', borderRadius: 6, padding: '3px 10px' }}>
+              <span style={{ fontSize: 12, color: 'var(--kalpx-text-soft)', background: 'var(--kalpx-chip-bg)', borderRadius: 6, padding: '3px 10px' }}>
                 {cls.duration_minutes} min
               </span>
             )}
             {cls.skill_level && (
-              <span style={{ fontSize: 12, color: '#7a5c3a', background: '#f0e8d8', borderRadius: 6, padding: '3px 10px' }}>
+              <span style={{ fontSize: 12, color: 'var(--kalpx-text-soft)', background: 'var(--kalpx-chip-bg)', borderRadius: 6, padding: '3px 10px' }}>
                 {cls.skill_level}
               </span>
             )}
             {cls.language && (
-              <span style={{ fontSize: 12, color: '#7a5c3a', background: '#f0e8d8', borderRadius: 6, padding: '3px 10px' }}>
+              <span style={{ fontSize: 12, color: 'var(--kalpx-text-soft)', background: 'var(--kalpx-chip-bg)', borderRadius: 6, padding: '3px 10px' }}>
                 {cls.language}
               </span>
             )}
           </div>
 
           {cls.description && (
-            <p style={{ fontSize: 15, color: '#3a2010', lineHeight: 1.6, marginBottom: 16 }}>
+            <p style={{ fontSize: 15, color: 'var(--kalpx-text)', lineHeight: 1.6, marginBottom: 16 }}>
               {cls.description}
             </p>
           )}
 
           {cls.long_description && (
-            <p style={{ fontSize: 14, color: '#7a5c3a', lineHeight: 1.65, marginBottom: 20 }}>
+            <p style={{ fontSize: 14, color: 'var(--kalpx-text-soft)', lineHeight: 1.65, marginBottom: 20 }}>
               {cls.long_description}
             </p>
           )}
 
           {cls.learning_outcomes && cls.learning_outcomes.length > 0 && (
             <div style={{ marginBottom: 20 }}>
-              <p style={{ fontSize: 13, fontWeight: 700, color: '#2d1a0e', marginBottom: 8 }}>What you'll learn</p>
+              <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--kalpx-text)', marginBottom: 8 }}>What you'll learn</p>
               {cls.learning_outcomes.map((o, i) => (
                 <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 4 }}>
                   <span style={{ color: 'var(--kalpx-cta)', flexShrink: 0 }}>✓</span>
-                  <p style={{ fontSize: 13, color: '#3a2010', lineHeight: 1.5 }}>{o}</p>
+                  <p style={{ fontSize: 13, color: 'var(--kalpx-text)', lineHeight: 1.5 }}>{o}</p>
                 </div>
               ))}
             </div>
@@ -168,8 +168,8 @@ export function ClassDetailPage() {
 
           {cls.tutor?.bio && (
             <div style={{ background: 'var(--kalpx-chip-bg)', borderRadius: 12, padding: '14px 16px', marginBottom: 20 }}>
-              <p style={{ fontSize: 13, fontWeight: 700, color: '#2d1a0e', marginBottom: 6 }}>About the teacher</p>
-              <p style={{ fontSize: 13, color: '#7a5c3a', lineHeight: 1.6 }}>{cls.tutor.bio}</p>
+              <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--kalpx-text)', marginBottom: 6 }}>About the teacher</p>
+              <p style={{ fontSize: 13, color: 'var(--kalpx-text-soft)', lineHeight: 1.6 }}>{cls.tutor.bio}</p>
             </div>
           )}
         </div>
@@ -179,8 +179,8 @@ export function ClassDetailPage() {
           style={{
             position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
             width: '100%', maxWidth: 480,
-            background: '#fff', borderTop: '1px solid #f0e8d8',
-            padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            background: 'var(--kalpx-card-bg)', borderTop: '1px solid var(--kalpx-border-gold)',
+            padding: '12px 16px calc(12px + env(safe-area-inset-bottom))', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             zIndex: 100,
           }}
         >

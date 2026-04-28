@@ -15,7 +15,7 @@ export function ClassCard({ cls }: ClassCardProps) {
     <div
       onClick={() => navigate(`/en/classes/${cls.slug}`)}
       style={{
-        background: '#fff',
+        background: 'var(--kalpx-card-bg)',
         border: '1px solid var(--kalpx-border-gold)',
         borderRadius: 14,
         overflow: 'hidden',
@@ -35,15 +35,15 @@ export function ClassCard({ cls }: ClassCardProps) {
       )}
       <div style={{ padding: '12px 16px 16px' }}>
         {cls.category && (
-          <p style={{ fontSize: 11, color: '#b06840', fontWeight: 600, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+          <p style={{ fontSize: 11, color: 'var(--kalpx-cta)', fontWeight: 600, marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
             {cls.category}
           </p>
         )}
-        <p style={{ fontSize: 17, fontWeight: 700, color: '#2d1a0e', marginBottom: 4, lineHeight: 1.3 }}>
+        <p style={{ fontSize: 17, fontWeight: 700, color: 'var(--kalpx-text)', marginBottom: 4, lineHeight: 1.3 }}>
           {cls.title}
         </p>
         {cls.tutor?.name && (
-          <p style={{ fontSize: 13, color: '#7a5c3a', marginBottom: 8 }}>
+          <p style={{ fontSize: 13, color: 'var(--kalpx-text-soft)', marginBottom: 8 }}>
             with {cls.tutor.name}
           </p>
         )}
@@ -61,13 +61,13 @@ export function ClassCard({ cls }: ClassCardProps) {
             )}
           </div>
           {price != null && (
-            <p style={{ fontSize: 14, fontWeight: 700, color: '#2d1a0e' }}>
+            <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--kalpx-text)' }}>
               {currency} {price}
             </p>
           )}
         </div>
         {cls.pricing?.trial?.enabled && cls.pricing.trial.amount != null && (
-          <p style={{ fontSize: 12, color: '#b06840', marginTop: 6 }}>
+          <p style={{ fontSize: 12, color: 'var(--kalpx-cta)', marginTop: 6 }}>
             Trial available: {currency} {cls.pricing.trial.amount}
           </p>
         )}

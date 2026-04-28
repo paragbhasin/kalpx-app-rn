@@ -105,15 +105,15 @@ export function ClassBookingPage() {
 
   if (loading) {
     return (
-      <div style={{ minHeight: '100dvh', background: '#FFF8EF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: '#7a5c3a' }}>Loading…</p>
+      <div style={{ minHeight: '100dvh', background: 'var(--kalpx-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ color: 'var(--kalpx-text-soft)' }}>Loading…</p>
       </div>
     );
   }
 
   if (error && !cls) {
     return (
-      <div style={{ minHeight: '100dvh', background: '#FFF8EF' }}>
+      <div style={{ minHeight: '100dvh', background: 'var(--kalpx-bg)' }}>
         <div style={{ maxWidth: 480, margin: '0 auto', padding: '28px 16px' }}>
           <button onClick={() => navigate(`/en/classes/${slug}`)} style={backBtn}>← Back</button>
           <p style={{ color: '#b91c1c', fontSize: 14 }}>{error}</p>
@@ -125,14 +125,14 @@ export function ClassBookingPage() {
   const hasTrial = cls?.pricing?.trial?.enabled && cls.pricing.trial.amount != null;
 
   return (
-    <div style={{ minHeight: '100dvh', background: '#FFF8EF' }}>
+    <div style={{ minHeight: '100dvh', background: 'var(--kalpx-bg)' }}>
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '24px 16px 100px' }}>
         <button onClick={() => navigate(`/en/classes/${slug}`)} style={backBtn}>← {cls?.title}</button>
 
-        <h2 style={{ fontSize: 22, fontWeight: 800, color: '#2d1a0e', marginBottom: 4, marginTop: 16 }}>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--kalpx-text)', marginBottom: 4, marginTop: 16 }}>
           Book a session
         </h2>
-        <p style={{ fontSize: 14, color: '#7a5c3a', marginBottom: 24 }}>
+        <p style={{ fontSize: 14, color: 'var(--kalpx-text-soft)', marginBottom: 24 }}>
           with {cls?.tutor?.name ?? 'teacher'}
         </p>
 
@@ -148,8 +148,8 @@ export function ClassBookingPage() {
             }}
           >
             <div>
-              <p style={{ fontSize: 14, fontWeight: 600, color: '#2d1a0e' }}>Trial session</p>
-              <p style={{ fontSize: 12, color: '#7a5c3a' }}>
+              <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--kalpx-text)' }}>Trial session</p>
+              <p style={{ fontSize: 12, color: 'var(--kalpx-text-soft)' }}>
                 {cls!.pricing!.currency ?? 'INR'} {cls!.pricing!.trial!.amount}
                 {cls!.pricing!.trial!.session_length_min ? ` · ${cls!.pricing!.trial!.session_length_min} min` : ''}
               </p>
@@ -166,7 +166,7 @@ export function ClassBookingPage() {
 
         {/* Slot picker */}
         <div style={{ marginBottom: 24 }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: '#2d1a0e', marginBottom: 10 }}>Choose a time</p>
+          <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--kalpx-text)', marginBottom: 10 }}>Choose a time</p>
           {slots.length === 0 ? (
             <p style={{ fontSize: 13, color: '#999' }}>No available slots right now.</p>
           ) : (
@@ -179,7 +179,7 @@ export function ClassBookingPage() {
                     padding: '12px 16px', borderRadius: 10, cursor: 'pointer',
                     border: `1.5px solid ${selectedSlot?.start_utc === slot.start_utc ? 'var(--kalpx-cta)' : 'var(--kalpx-border-gold)'}`,
                     background: selectedSlot?.start_utc === slot.start_utc ? '#fdf1e3' : '#fff',
-                    fontSize: 14, color: '#2d1a0e', fontWeight: selectedSlot?.start_utc === slot.start_utc ? 600 : 400,
+                    fontSize: 14, color: 'var(--kalpx-text)', fontWeight: selectedSlot?.start_utc === slot.start_utc ? 600 : 400,
                   }}
                 >
                   {formatSlotTime(slot.start_utc)}
@@ -191,7 +191,7 @@ export function ClassBookingPage() {
 
         {/* Note */}
         <div style={{ marginBottom: 24 }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: '#2d1a0e', marginBottom: 8 }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--kalpx-text)', marginBottom: 8 }}>
             Note to teacher <span style={{ fontWeight: 400, color: '#999' }}>(optional)</span>
           </p>
           <textarea
@@ -204,7 +204,7 @@ export function ClassBookingPage() {
               width: '100%', boxSizing: 'border-box',
               padding: '10px 14px', borderRadius: 10,
               border: '1.5px solid var(--kalpx-border-gold)', background: '#fff',
-              fontSize: 14, color: '#2d1a0e', resize: 'vertical', outline: 'none',
+              fontSize: 14, color: 'var(--kalpx-text)', resize: 'vertical', outline: 'none',
             }}
           />
         </div>
@@ -220,8 +220,8 @@ export function ClassBookingPage() {
       <div style={{
         position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)',
         width: '100%', maxWidth: 480,
-        background: '#fff', borderTop: '1px solid var(--kalpx-border-gold)',
-        padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        background: 'var(--kalpx-card-bg)', borderTop: '1px solid var(--kalpx-border-gold)',
+        padding: '12px 16px calc(12px + env(safe-area-inset-bottom))', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         zIndex: 100,
       }}>
         <ClassPrice pricing={cls?.pricing} showTrial={trialSelected} />

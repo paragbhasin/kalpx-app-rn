@@ -58,12 +58,23 @@ export function ScreenRenderer({ schema, screenData = {}, onAction }: ScreenRend
 function enrichOnboardingBlocks(blocks: any[]) {
   const headlineBlock = blocks.find((block) => block.type === 'headline');
   const subtextBlock = blocks.find((block) => block.type === 'subtext');
+  const recognitionBlock = blocks.find((block) => block.type === 'first_recognition');
 
   return blocks
     .map((block) => {
       const type = block.block_type || block.type;
 
-      if (type === 'onboarding_conversation_turn' || type === 'guidance_mode_picker') {
+      if (type === 'onboarding_conversation_turn') {
+        return {
+          ...block,
+          headline: block.headline ?? headlineBlock?.content,
+          subtext: block.subtext ?? subtextBlock?.content,
+          recognition: block.id === 'turn7' ? recognitionBlock : block.recognition,
+          isTurn7: block.id === 'turn7' || block.isTurn7 === true,
+        };
+      }
+
+      if (type === 'guidance_mode_picker') {
         return {
           ...block,
           headline: block.headline ?? headlineBlock?.content,
@@ -75,6 +86,6 @@ function enrichOnboardingBlocks(blocks: any[]) {
     })
     .filter((block) => {
       const type = block.block_type || block.type;
-      return type !== 'headline' && type !== 'subtext';
+      return type !== 'headline' && type !== 'subtext' && type !== 'first_recognition';
     });
 }

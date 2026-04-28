@@ -20,25 +20,30 @@ export function FirstRecognitionBlock({ block, screenData }: Props) {
   return (
     <div
       style={{
-        background: '#fffdf9',
-        border: '1px solid rgba(199,154,43,0.35)',
-        borderRadius: 20,
-        padding: '24px 20px',
-        marginBottom: 24,
-        boxShadow: '0 2px 8px rgba(67,33,4,0.07)',
+        background: 'rgba(255, 252, 246, 0.86)',
+        border: '1px solid rgba(226, 196, 126, 0.72)',
+        borderRadius: 34,
+        padding: '38px 28px 34px',
+        marginBottom: 28,
+        boxShadow: '0 18px 38px rgba(179, 140, 54, 0.12)',
+        backdropFilter: 'blur(2px)',
+        WebkitBackdropFilter: 'blur(2px)',
         textAlign: 'center',
+        maxWidth: 560,
+        marginLeft: 'auto',
+        marginRight: 'auto',
       }}
     >
       {block.label && (
         <>
           <p
             style={{
-              fontSize: 11,
+              fontSize: 14,
               fontWeight: 700,
-              letterSpacing: '2.5px',
+              letterSpacing: '4px',
               color: 'var(--kalpx-gold)',
               textTransform: 'uppercase',
-              margin: '0 0 12px',
+              margin: '0 0 18px',
             }}
           >
             {block.label}
@@ -48,13 +53,13 @@ export function FirstRecognitionBlock({ block, screenData }: Props) {
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: 8,
-              marginBottom: 18,
+              gap: 12,
+              marginBottom: 34,
             }}
           >
-            <div style={{ width: 44, height: 1, background: 'rgba(199,154,43,0.4)' }} />
+            <div style={{ width: 66, height: 1, background: 'rgba(226, 196, 126, 0.9)' }} />
             <span style={{ fontSize: 10, color: 'var(--kalpx-gold)' }}>◆</span>
-            <div style={{ width: 44, height: 1, background: 'rgba(199,154,43,0.4)' }} />
+            <div style={{ width: 66, height: 1, background: 'rgba(226, 196, 126, 0.9)' }} />
           </div>
         </>
       )}
@@ -63,10 +68,11 @@ export function FirstRecognitionBlock({ block, screenData }: Props) {
           style={{
             fontFamily: 'var(--kalpx-font-serif)',
             fontWeight: 700,
-            fontSize: 22,
-            lineHeight: 1.4,
+            fontSize: 'clamp(22px, 5.8vw, 30px)',
+            lineHeight: 1.55,
             color: 'var(--kalpx-text)',
-            margin: '0 0 20px',
+            margin: '0 0 30px',
+            textWrap: 'balance',
           }}
         >
           {emphasizedLine}
@@ -77,10 +83,11 @@ export function FirstRecognitionBlock({ block, screenData }: Props) {
           key={i}
           style={{
             fontFamily: 'var(--kalpx-font-serif)',
-            fontSize: 17,
-            lineHeight: 1.65,
+            fontSize: i === 0 ? 'clamp(19px, 4.8vw, 22px)' : 'clamp(16px, 4.4vw, 18px)',
+            lineHeight: i === 0 ? 1.5 : 1.6,
             color: 'var(--kalpx-text-soft)',
-            margin: i === bodyLines.length - 1 ? 0 : '0 0 10px',
+            margin: i === bodyLines.length - 1 ? 0 : '0 0 18px',
+            textWrap: 'balance',
           }}
         >
           {line}

@@ -12,6 +12,13 @@ interface Props {
   block: {
     id?: string;
     headline?: string;
+    recognition?: {
+      label?: string;
+      emphasized_line?: string;
+      body_paragraphs?: string[];
+      body_lines?: string[];
+    };
+    isTurn7?: boolean;
     mitra_message?: string | string[];
     reply_chips?: Chip[];
     open_input?: { enabled: boolean; placeholder?: string };
@@ -22,7 +29,11 @@ interface Props {
   onAction?: (action: any) => void;
 }
 
-export function OnboardingConversationTurnBlock({ block, onAction }: Props) {
+export function OnboardingConversationTurnBlock({
+  block,
+  screenData,
+  onAction,
+}: Props) {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -267,6 +278,212 @@ export function OnboardingConversationTurnBlock({ block, onAction }: Props) {
     );
   }
 
+  if (block.isTurn7) {
+    const recognition = block.recognition || {};
+    const completeRecognition =
+      screenData?.onboarding_complete_data?.recognition;
+    const emphasizedLine =
+      screenData?.recognition_line ||
+      completeRecognition?.line ||
+      recognition.emphasized_line ||
+      "";
+    const bodySource =
+      screenData?.recognition_body_lines ||
+      completeRecognition?.body_lines ||
+      recognition.body_paragraphs ||
+      recognition.body_lines ||
+      [];
+    const bodyLines = Array.isArray(bodySource) ? bodySource : [];
+    const cta = chips[0];
+
+    return (
+      <div
+        data-testid="onboarding_recognition_root"
+        style={{
+          maxWidth: 560,
+          margin: "0 auto 24px",
+        }}
+      >
+        <div
+          style={{
+            borderRadius: 28,
+            background: "rgba(255, 252, 246, 0.96)",
+            border: "1px solid rgba(226, 208, 174, 0.9)",
+            boxShadow: "0 12px 28px rgba(217, 191, 143, 0.16)",
+            padding: "15px",
+            textAlign: "center",
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: "0.22em",
+              color: "#6b5a45",
+              textTransform: "uppercase",
+            }}
+          >
+            {recognition.label || "RECOGNITION"}
+          </p>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 12,
+              margin: "18px 0 26px",
+            }}
+          >
+            <div
+              style={{
+                width: 74,
+                height: 1,
+                background: "var(--kalpx-border-gold)",
+              }}
+            />
+            <span style={{ color: "var(--kalpx-gold)", fontSize: 13 }}>◈</span>
+            <div
+              style={{
+                width: 74,
+                height: 1,
+                background: "var(--kalpx-border-gold)",
+              }}
+            />
+          </div>
+
+          {emphasizedLine && (
+            <p
+              style={{
+                margin: "0 0 26px",
+                fontFamily: "var(--kalpx-font-serif)",
+                fontWeight: 700,
+                fontSize: 23,
+                lineHeight: 1.55,
+                color: "#432104",
+              }}
+            >
+              {emphasizedLine}
+            </p>
+          )}
+
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+            }}
+          >
+            {bodyLines.map((line, index) => (
+              <p
+                key={index}
+                style={{
+                  margin: 0,
+                  fontFamily: "var(--kalpx-font-serif)",
+                  fontSize: 18,
+                  lineHeight: 1.55,
+                  color: "#6f614f",
+                }}
+              >
+                {line}
+              </p>
+            ))}
+          </div>
+
+          {cta && (
+            <button
+              data-testid="onboarding_recognition_continue"
+              disabled={busy}
+              onClick={() =>
+                void fireResponse({
+                  chip_id: cta.id,
+                  response_type: "chip",
+                })
+              }
+              style={{
+                marginTop: 28,
+                // minHeight: 74,
+
+                padding: "10px 25px",
+                // padding: "18px 30px",
+                borderRadius: 999,
+                border: "1px solid rgba(186, 132, 34, 0.7)",
+                background:
+                  "linear-gradient(90deg, #c18a2b 0%, #d4a13b 50%, #bf8523 100%)",
+                color: "#fff9ec",
+                fontSize: 17,
+                fontWeight: 700,
+                boxShadow: "0 12px 28px rgba(201, 168, 76, 0.28)",
+              }}
+            >
+              {cta.label}
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (block.id === "turn7") {
+    return (
+      <div
+        style={{
+          maxWidth: 560,
+          margin: "0 auto 24px",
+          padding: "0 0 6px",
+        }}
+      >
+        {chips.length > 0 && (
+          <div
+            style={{
+              borderRadius: 32,
+              border: "1px solid rgba(226, 196, 126, 0.72)",
+              background: "rgba(255, 252, 246, 0.76)",
+              boxShadow: "0 16px 34px rgba(179, 140, 54, 0.11)",
+              padding: 20,
+              backdropFilter: "blur(2px)",
+              WebkitBackdropFilter: "blur(2px)",
+            }}
+          >
+            {chips.map((chip) => (
+              <button
+                key={chip.id}
+                data-testid={`chip-${chip.id}`}
+                disabled={busy}
+                onClick={() =>
+                  void fireResponse({
+                    chip_id: chip.id,
+                    freeform_text: text || undefined,
+                  })
+                }
+                style={{
+                  width: "100%",
+                  minHeight: 66,
+                  padding: "16px 24px",
+                  borderRadius: 999,
+                  border: "none",
+                  background:
+                    "linear-gradient(180deg, rgba(246, 238, 203, 0.98) 0%, rgba(244, 233, 197, 0.95) 100%)",
+                  color: "var(--kalpx-text)",
+                  fontSize: "clamp(18px, 4.8vw, 22px)",
+                  fontWeight: 700,
+                  cursor: busy ? "not-allowed" : "pointer",
+                  opacity: busy ? 0.7 : 1,
+                  textAlign: "center",
+                  boxShadow:
+                    "inset 0 1px 0 rgba(255,255,255,0.78), 0 10px 20px rgba(179, 140, 54, 0.12)",
+                }}
+              >
+                {chip.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div
       style={{
@@ -304,7 +521,7 @@ export function OnboardingConversationTurnBlock({ block, onAction }: Props) {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: 12,
+              gap: 5,
               margin: "0 auto 16px",
             }}
           >

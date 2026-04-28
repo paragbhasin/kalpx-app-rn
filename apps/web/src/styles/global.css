@@ -151,22 +151,6 @@ button {
   overflow: hidden;
 }
 
-/* ── Practice runner dark chrome ─────────────────────────────────── */
-/* Wrap practice_runner content in .kalpx-runner-dark to invert tokens */
-.kalpx-runner-dark {
-  --kalpx-bg:          #0a0a0a;
-  --kalpx-card-bg:     #141414;
-  --kalpx-text:        #eddeb4;
-  --kalpx-text-soft:   #c9b48e;
-  --kalpx-text-muted:  #bfa58a;
-  --kalpx-border-gold: rgba(201,168,76,0.25);
-  --kalpx-chip-bg:     rgba(201,168,76,0.08);
-  --kalpx-gold:        #C9A84C;
-  --kalpx-cta:         #C9A84C;
-  background: #0a0a0a;
-  color: #eddeb4;
-  min-height: 100dvh;
-}
 
 /* ── Accessibility utilities ─────────────────────────────────────── */
 .sr-only {

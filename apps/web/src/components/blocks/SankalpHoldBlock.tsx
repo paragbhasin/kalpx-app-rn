@@ -102,7 +102,7 @@ export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
           style={{
             fontFamily: 'var(--kalpx-font-serif)',
             fontSize: 22,
-            fontStyle: 'italic',
+            fontWeight: 600,
             lineHeight: 1.5,
             textAlign: 'center',
             color: 'var(--kalpx-text)',
@@ -114,7 +114,7 @@ export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
       ) : null}
 
       <p style={{ fontSize: 13, color: 'var(--kalpx-text-muted)', textAlign: 'center', transition: 'opacity 1.5s', opacity: progress > 0.5 ? 0 : 1 }}>
-        Hold here. Breathe once, and let your sankalp anchor within you.
+        {progress > 0 ? 'Holding…' : 'Tap to embody your intention'}
       </p>
 
       {/* Hold circle — 160px matches RN, with SVG defs for gradient */}
@@ -164,9 +164,14 @@ export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
             background: progress > 0 ? 'rgba(201,168,76,0.1)' : 'transparent',
           }}
         >
-          <span style={{ fontSize: 12, color: 'var(--kalpx-text-muted)', letterSpacing: 2, textTransform: 'uppercase' }}>
-            {progress > 0.8 ? 'Steady…' : progress > 0 ? 'Holding…' : 'Hold'}
-          </span>
+          <img
+            src="/sankalp_centered.svg"
+            width={60}
+            height={60}
+            alt=""
+            aria-hidden="true"
+            style={{ opacity: progress > 0 ? 1 : 0.8 }}
+          />
         </div>
       </div>
     </div>

@@ -246,35 +246,89 @@ export async function executeAction(action: any, context: ActionContext): Promis
     }
 
     // ----------------------------------------------------------------
-    // INFO_START_CLICK — Phase 5 proof + Phase 6 compatible
+    // INFO_START_CLICK — offering_reveal "Begin" → start the runner.
+    // X-PRE: removes false apiTrackCompletion; recovers master item fields;
+    //        seeds runner state (same pattern as start_runner); routes to
+    //        practice_runner/{stateId}. Core context ONLY — Room/Additional
+    //        dispatch start_runner directly (no offering_reveal path).
     // ----------------------------------------------------------------
     case 'info_start_click': {
-      const info = screenData.info;
+      const info = screenData.info as any;
       if (!info) {
         if (WEB_ENV.isDev) console.warn('[actionExecutor] info_start_click: no info in screenData');
         break;
       }
-      dispatch(setSubmitting(true));
-      try {
-        await apiTrackEvent('mantra_offering_viewed', {
-          journey_id: screenData.journey_id,
-          day_number: screenData.day_number || 1,
-          item_id: info.item_id,
-        });
-        if (info.item_id) {
-          await apiTrackCompletion({
-            item_type: info.item_type || 'mantra',
-            item_id: info.item_id,
-            source: 'core',
-            journey_id: screenData.journey_id,
-            day_number: screenData.day_number || 1,
-          });
-        }
-        dispatch(updateScreenData({ info: null, info_start_action: null, info_start_label: null }));
-        webNavigate('/en/mitra/dashboard');
-      } finally {
-        dispatch(setSubmitting(false));
-      }
+
+      const itemType: string = info.item_type || info.type || 'mantra';
+      const variant: 'mantra' | 'sankalp' | 'practice' =
+        itemType === 'sankalp' ? 'sankalp'
+        : itemType === 'practice' ? 'practice'
+        : 'mantra';
+
+      // Recover full item fields from master items already in Redux (daily-view ingest).
+      // screenData.info only has { title, subtitle, item_id, item_type } — master has audio_url, devanagari, steps, etc.
+      const masterKey = variant === 'sankalp' ? 'master_sankalp'
+        : variant === 'practice' ? 'master_practice'
+        : 'master_mantra';
+      const masterItem = (screenData[masterKey] || {}) as Record<string, any>;
+      const item: Record<string, any> = {
+        item_id: info.item_id || masterItem.item_id || '',
+        item_type: variant,
+        title: masterItem.title || info.title || '',
+        devanagari: masterItem.devanagari || '',
+        audio_url: masterItem.audio_url || '',
+        reps_total: masterItem.reps_total ?? null,
+        duration_seconds: masterItem.duration_seconds ?? null,
+        steps: masterItem.steps || [],
+      };
+
+      void apiTrackEvent('mantra_offering_viewed', {
+        journey_id: screenData.journey_id,
+        day_number: screenData.day_number || 1,
+        item_id: item.item_id,
+      });
+
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
+      const preservedSource = (screenData.runner_source as string) || 'core';
+
+      dispatch(updateScreenData({
+        runner_variant: variant,
+        runner_source: preservedSource,
+        runner_active_item: item,
+        runner_step_index: 0,
+        runner_reps_completed: 0,
+        runner_start_time: Date.now(),
+        runner_duration_actual_sec: 0,
+        runner_tz: tz,
+        mantra_text: variant === 'mantra' ? (item.title || '') : screenData.mantra_text,
+        mantra_devanagari: variant === 'mantra' ? (item.devanagari || '') : screenData.mantra_devanagari,
+        mantra_audio_url: variant === 'mantra' ? (item.audio_url || '') : screenData.mantra_audio_url,
+        sankalp_audio_url: variant === 'sankalp' ? (item.audio_url || '') : (screenData.sankalp_audio_url ?? ''),
+        reps_total: item.reps_total || screenData.reps_total || 108,
+        practice_duration_seconds: variant === 'practice'
+          ? (item.duration_seconds || screenData.practice_duration_seconds || 300)
+          : screenData.practice_duration_seconds,
+        practice_steps: variant === 'practice' ? (item.steps || screenData.practice_steps || []) : screenData.practice_steps,
+        info: null,
+        info_start_action: null,
+        info_start_label: null,
+      }));
+
+      void apiTrackEvent('runner_started', {
+        journey_id: screenData.journey_id,
+        day_number: screenData.day_number || 1,
+        item_id: item.item_id,
+        source: preservedSource,
+        variant,
+      });
+
+      const stateId =
+        variant === 'sankalp' ? 'sankalp_embody'
+        : variant === 'practice' ? 'practice_step_runner'
+        : 'free_mantra_chanting';
+
+      dispatch(loadScreen({ containerId: 'practice_runner', stateId }));
+      webNavigate(_containerToPath('practice_runner', stateId));
       break;
     }
 

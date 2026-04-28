@@ -15,7 +15,7 @@ export function QuickSupportBlock({ onAction }: Props) {
 
   return (
     <div data-testid="quick-support-block" style={{ marginBottom: 24 }}>
-      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#C9A84C', textTransform: 'uppercase', marginBottom: 10 }}>
+      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'var(--kalpx-gold)', textTransform: 'uppercase', marginBottom: 10 }}>
         Quick Support
       </p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -27,7 +27,7 @@ export function QuickSupportBlock({ onAction }: Props) {
             padding: '14px 16px',
             borderRadius: 28,
             border: 'none',
-            background: '#F5EDEA',
+            background: 'var(--kalpx-chip-bg)',
             color: 'var(--kalpx-text)',
             fontSize: 15,
             fontWeight: 600,
@@ -109,7 +109,7 @@ export function QuickSupportBlock({ onAction }: Props) {
           background: 'none',
           border: 'none',
           fontSize: 13,
-          color: '#9A8C78',
+          color: 'var(--kalpx-text-muted)',
           cursor: 'pointer',
           textAlign: 'center',
           padding: '4px 0',

@@ -58,7 +58,7 @@ export function WhyThisSheet({ sd, onClose, onAction }: Props) {
         style={{
           width: '100%',
           maxWidth: 480,
-          background: '#fdf8ef',
+          background: 'var(--kalpx-bg)',
           borderRadius: '16px 16px 0 0',
           padding: '24px 20px 40px',
           maxHeight: '80dvh',
@@ -67,7 +67,7 @@ export function WhyThisSheet({ sd, onClose, onAction }: Props) {
       >
         {/* Handle bar */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-          <div style={{ width: 40, height: 4, borderRadius: 2, background: '#e8d5b0' }} />
+          <div style={{ width: 40, height: 4, borderRadius: 2, background: 'var(--kalpx-chip-bg)' }} />
         </div>
 
         {/* Eyebrow + close */}
@@ -76,19 +76,19 @@ export function WhyThisSheet({ sd, onClose, onAction }: Props) {
             <button
               data-testid="why-this-back"
               onClick={handleBackToL1}
-              style={{ background: 'none', border: 'none', fontSize: 13, color: '#C9A84C', cursor: 'pointer', padding: '0 4px', fontWeight: 600 }}
+              style={{ background: 'none', border: 'none', fontSize: 13, color: 'var(--kalpx-gold)', cursor: 'pointer', padding: '0 4px', fontWeight: 600 }}
             >
               ← Back
             </button>
           ) : (
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#C9A84C', textTransform: 'uppercase', margin: 0 }}>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'var(--kalpx-gold)', textTransform: 'uppercase', margin: 0 }}>
               WHY THIS
             </p>
           )}
           <button
             data-testid="why-this-close"
             onClick={handleClose}
-            style={{ background: 'none', border: 'none', fontSize: 22, color: '#888', cursor: 'pointer', padding: '0 4px' }}
+            style={{ background: 'none', border: 'none', fontSize: 22, color: 'var(--kalpx-text-muted)', cursor: 'pointer', padding: '0 4px' }}
           >
             ×
           </button>
@@ -97,31 +97,31 @@ export function WhyThisSheet({ sd, onClose, onAction }: Props) {
         {/* L3 — Source attribution */}
         {overlayLevel === 'l3' && source && (
           <div>
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#888', textTransform: 'uppercase', marginBottom: 12 }}>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'var(--kalpx-text-muted)', textTransform: 'uppercase', marginBottom: 12 }}>
               The Source
             </p>
             {source.text && (
               <div
                 style={{
                   padding: '12px 16px',
-                  borderLeft: '3px solid #d4b16a',
-                  background: '#fffbf0',
+                  borderLeft: `3px solid var(--kalpx-border-gold)`,
+                  background: 'var(--kalpx-bg)',
                   borderRadius: '0 8px 8px 0',
                   marginBottom: 16,
                 }}
               >
-                <p style={{ fontSize: 15, fontStyle: 'italic', color: '#6b4c1a', lineHeight: 1.6, margin: 0 }}>
+                <p style={{ fontSize: 15, fontStyle: 'italic', color: 'var(--kalpx-text-soft)', lineHeight: 1.6, margin: 0 }}>
                   {source.text}
                 </p>
               </div>
             )}
             {source.attribution && (
-              <p style={{ fontSize: 12, color: '#9A8C78', marginBottom: 8 }}>
+              <p style={{ fontSize: 12, color: 'var(--kalpx-text-muted)', marginBottom: 8 }}>
                 — {source.attribution}
               </p>
             )}
             {source.tradition && (
-              <p style={{ fontSize: 12, color: '#b08840', fontWeight: 600 }}>
+              <p style={{ fontSize: 12, color: 'var(--kalpx-gold)', fontWeight: 600 }}>
                 {source.tradition}
               </p>
             )}
@@ -131,16 +131,16 @@ export function WhyThisSheet({ sd, onClose, onAction }: Props) {
         {/* L2 — Principle detail */}
         {overlayLevel === 'l2' && principle && (
           <div>
-            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#888', textTransform: 'uppercase', marginBottom: 12 }}>
+            <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'var(--kalpx-text-muted)', textTransform: 'uppercase', marginBottom: 12 }}>
               The Principle
             </p>
             {principle.title && (
-              <p style={{ fontSize: 20, fontWeight: 700, color: '#1a1a0a', marginBottom: 10 }}>
+              <p style={{ fontSize: 20, fontWeight: 700, color: 'var(--kalpx-text)', marginBottom: 10 }}>
                 {principle.title}
               </p>
             )}
             {principle.description && (
-              <p style={{ fontSize: 15, color: '#4a3318', lineHeight: 1.7, marginBottom: 16 }}>
+              <p style={{ fontSize: 15, color: 'var(--kalpx-text-soft)', lineHeight: 1.7, marginBottom: 16 }}>
                 {principle.description}
               </p>
             )}
@@ -151,9 +151,9 @@ export function WhyThisSheet({ sd, onClose, onAction }: Props) {
                 disabled={isSubmitting}
                 style={{
                   fontSize: 13,
-                  color: '#b08840',
+                  color: 'var(--kalpx-gold)',
                   background: 'none',
-                  border: '1px solid #e8d5a0',
+                  border: `1px solid var(--kalpx-chip-bg)`,
                   borderRadius: 8,
                   padding: '8px 16px',
                   cursor: isSubmitting ? 'default' : 'pointer',
@@ -175,16 +175,16 @@ export function WhyThisSheet({ sd, onClose, onAction }: Props) {
 
             {(whyThis.level1 || whyThis.level2) && (
               <div style={{ marginBottom: 20 }}>
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#888', textTransform: 'uppercase', marginBottom: 8 }}>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'var(--kalpx-text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>
                   The Principle
                 </p>
                 {whyThis.level1 && (
-                  <p style={{ fontSize: 18, fontWeight: 700, color: '#1a1a0a', marginBottom: 8 }}>
+                  <p style={{ fontSize: 18, fontWeight: 700, color: 'var(--kalpx-text)', marginBottom: 8 }}>
                     {whyThis.level1}
                   </p>
                 )}
                 {whyThis.level2 && (
-                  <p style={{ fontSize: 15, color: '#4a3318', lineHeight: 1.6, marginBottom: 12 }}>
+                  <p style={{ fontSize: 15, color: 'var(--kalpx-text-soft)', lineHeight: 1.6, marginBottom: 12 }}>
                     {whyThis.level2}
                   </p>
                 )}
@@ -195,9 +195,9 @@ export function WhyThisSheet({ sd, onClose, onAction }: Props) {
                     disabled={isSubmitting}
                     style={{
                       fontSize: 13,
-                      color: '#b08840',
+                      color: 'var(--kalpx-gold)',
                       background: 'none',
-                      border: '1px solid #e8d5a0',
+                      border: `1px solid var(--kalpx-chip-bg)`,
                       borderRadius: 8,
                       padding: '8px 16px',
                       cursor: isSubmitting ? 'default' : 'pointer',
@@ -214,13 +214,13 @@ export function WhyThisSheet({ sd, onClose, onAction }: Props) {
               <div
                 style={{
                   padding: '12px 16px',
-                  borderLeft: '3px solid #d4b16a',
-                  background: '#fffbf0',
+                  borderLeft: `3px solid var(--kalpx-border-gold)`,
+                  background: 'var(--kalpx-bg)',
                   borderRadius: '0 8px 8px 0',
                   marginBottom: 20,
                 }}
               >
-                <p style={{ fontSize: 14, fontStyle: 'italic', color: '#6b4c1a', lineHeight: 1.6, margin: 0 }}>
+                <p style={{ fontSize: 14, fontStyle: 'italic', color: 'var(--kalpx-text-soft)', lineHeight: 1.6, margin: 0 }}>
                   {whyThis.level3}
                 </p>
               </div>
@@ -228,7 +228,7 @@ export function WhyThisSheet({ sd, onClose, onAction }: Props) {
 
             {items.length > 0 && (
               <div>
-                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#888', textTransform: 'uppercase', marginBottom: 10 }}>
+                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'var(--kalpx-text-muted)', textTransform: 'uppercase', marginBottom: 10 }}>
                   Your Path Items
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -238,14 +238,14 @@ export function WhyThisSheet({ sd, onClose, onAction }: Props) {
                       style={{
                         padding: '10px 14px',
                         borderRadius: 8,
-                        background: '#fff',
-                        border: '1px solid #e8d5a0',
+                        background: 'var(--kalpx-card-bg)',
+                        border: `1px solid var(--kalpx-chip-bg)`,
                       }}
                     >
-                      <p style={{ fontSize: 11, fontWeight: 700, color: '#b08840', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 3 }}>
+                      <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--kalpx-gold)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 3 }}>
                         {item.id}
                       </p>
-                      <p style={{ fontSize: 14, color: '#2a1a0a' }}>{item.label}</p>
+                      <p style={{ fontSize: 14, color: 'var(--kalpx-text)' }}>{item.label}</p>
                     </div>
                   ))}
                 </div>

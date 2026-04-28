@@ -126,13 +126,13 @@ export function TriadCardsRow({ sd, onAction }: Props) {
                 alignItems: 'center',
                 justifyContent: 'center',
                 marginBottom: 8,
-                color: '#C9A84C',
+                color: 'var(--kalpx-gold)',
                 flexShrink: 0,
               }}
             >
               {(() => {
                 const Icon = SLOT_ICON_COMPONENTS[item.slot];
-                return Icon ? <Icon size={16} strokeWidth={1.8} color="#C9A84C" /> : <span style={{ fontSize: 16 }}>·</span>;
+                return Icon ? <Icon size={16} strokeWidth={1.8} color="var(--kalpx-gold)" /> : <span style={{ fontSize: 16 }}>·</span>;
               })()}
             </div>
 
@@ -156,7 +156,7 @@ export function TriadCardsRow({ sd, onAction }: Props) {
                 background: 'none',
                 border: 'none',
                 fontSize: 14,
-                color: '#C9A84C',
+                color: 'var(--kalpx-gold)',
                 cursor: 'pointer',
                 lineHeight: 1,
                 padding: 2,

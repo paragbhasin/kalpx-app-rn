@@ -26,7 +26,7 @@ export function SankalpCarryBlock({ sd }: Props) {
       </p>
       <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 6 }}>
         {items.map((item, i) => (
-          <li key={i} style={{ fontSize: 14, color: '#4a3318', lineHeight: 1.5, paddingLeft: 12, borderLeft: '2px solid #c4b5fd' }}>
+          <li key={i} style={{ fontSize: 14, color: 'var(--kalpx-text-soft)', lineHeight: 1.5, paddingLeft: 12, borderLeft: '2px solid #c4b5fd' }}>
             {item}
           </li>
         ))}

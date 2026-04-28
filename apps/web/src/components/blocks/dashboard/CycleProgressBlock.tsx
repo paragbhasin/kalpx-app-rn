@@ -38,17 +38,17 @@ export function CycleProgressBlock({ sd }: Props) {
         marginBottom: 24,
         padding: '16px',
         borderRadius: 12,
-        background: '#fff',
-        border: '1px solid #f0e8d0',
+        background: 'var(--kalpx-card-bg)',
+        border: `1px solid var(--kalpx-chip-bg)`,
       }}
     >
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#b08840', textTransform: 'uppercase', margin: 0 }}>
+        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'var(--kalpx-gold)', textTransform: 'uppercase', margin: 0 }}>
           {rhythmHeader}
         </p>
         {dayNumber > 0 && (
-          <span style={{ fontSize: 12, color: '#888' }}>Day {dayNumber}/{totalDays}</span>
+          <span style={{ fontSize: 12, color: 'var(--kalpx-text-muted)' }}>Day {dayNumber}/{totalDays}</span>
         )}
       </div>
 
@@ -97,7 +97,7 @@ export function CycleProgressBlock({ sd }: Props) {
       )}
 
       {summaryLabel && (
-        <p style={{ fontSize: 12, color: '#888', marginTop: 8 }}>{summaryLabel}</p>
+        <p style={{ fontSize: 12, color: 'var(--kalpx-text-muted)', marginTop: 8 }}>{summaryLabel}</p>
       )}
     </div>
   );
@@ -106,8 +106,8 @@ export function CycleProgressBlock({ sd }: Props) {
 function MetricItem({ label, value }: { label: string; value: number }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <span style={{ fontSize: 20, fontWeight: 700, color: '#1a1a0a' }}>{value}</span>
-      <span style={{ fontSize: 11, color: '#888', textAlign: 'center' }}>{label}</span>
+      <span style={{ fontSize: 20, fontWeight: 700, color: 'var(--kalpx-text)' }}>{value}</span>
+      <span style={{ fontSize: 11, color: 'var(--kalpx-text-muted)', textAlign: 'center' }}>{label}</span>
     </div>
   );
 }

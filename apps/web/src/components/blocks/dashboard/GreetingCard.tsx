@@ -2,11 +2,11 @@ import React from 'react';
 
 const LOTUS_SVG = (
   <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <ellipse cx="24" cy="12" rx="6" ry="10" fill="rgba(201,168,76,0.2)" stroke="#C9A84C" strokeWidth="1.2" />
-    <ellipse cx="24" cy="36" rx="6" ry="10" fill="rgba(201,168,76,0.2)" stroke="#C9A84C" strokeWidth="1.2" />
-    <ellipse cx="12" cy="24" rx="10" ry="6" fill="rgba(201,168,76,0.2)" stroke="#C9A84C" strokeWidth="1.2" />
-    <ellipse cx="36" cy="24" rx="10" ry="6" fill="rgba(201,168,76,0.2)" stroke="#C9A84C" strokeWidth="1.2" />
-    <circle cx="24" cy="24" r="4" fill="rgba(201,168,76,0.3)" stroke="#C9A84C" strokeWidth="1.2" />
+    <ellipse cx="24" cy="12" rx="6" ry="10" fill="rgba(201,168,76,0.2)" stroke="var(--kalpx-gold)" strokeWidth="1.2" />
+    <ellipse cx="24" cy="36" rx="6" ry="10" fill="rgba(201,168,76,0.2)" stroke="var(--kalpx-gold)" strokeWidth="1.2" />
+    <ellipse cx="12" cy="24" rx="10" ry="6" fill="rgba(201,168,76,0.2)" stroke="var(--kalpx-gold)" strokeWidth="1.2" />
+    <ellipse cx="36" cy="24" rx="10" ry="6" fill="rgba(201,168,76,0.2)" stroke="var(--kalpx-gold)" strokeWidth="1.2" />
+    <circle cx="24" cy="24" r="4" fill="rgba(201,168,76,0.3)" stroke="var(--kalpx-gold)" strokeWidth="1.2" />
   </svg>
 );
 

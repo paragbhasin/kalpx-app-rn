@@ -13,12 +13,35 @@ const NAV_LINKS = [
   { to: "/en/retreats", label: "Retreats", match: "/en/retreats" },
 ];
 
+const LANGUAGES = [
+  { label: "English", code: "en" },
+  { label: "Hindi", code: "hi" },
+  { label: "Telugu", code: "te" },
+  { label: "Tamil", code: "ta" },
+  { label: "Kannada", code: "kn" },
+  { label: "Malayalam", code: "ml" },
+  { label: "Marathi", code: "mr" },
+  { label: "Gujarati", code: "gu" },
+  { label: "Bengali", code: "bn" },
+] as const;
+
+const LANGUAGE_STORAGE_KEY = "kalpx_locale";
+
 export function Header({ transparent = false }: { transparent?: boolean }) {
   const navigate = useNavigate();
   const { authed, userInitial, refresh } = useCurrentUser();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [languageOpen, setLanguageOpen] = useState(false);
+  const [sidebarLanguageOpen, setSidebarLanguageOpen] = useState(false);
+  const [selectedLanguageCode, setSelectedLanguageCode] = useState("en");
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const languageRef = useRef<HTMLDivElement>(null);
+  const sidebarLanguageRef = useRef<HTMLDivElement>(null);
+
+  const selectedLanguage =
+    LANGUAGES.find((language) => language.code === selectedLanguageCode) ||
+    LANGUAGES[0];
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -29,9 +52,30 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
       ) {
         setDropdownOpen(false);
       }
+      if (
+        languageRef.current &&
+        !languageRef.current.contains(e.target as Node)
+      ) {
+        setLanguageOpen(false);
+      }
+      if (
+        sidebarLanguageRef.current &&
+        !sidebarLanguageRef.current.contains(e.target as Node)
+      ) {
+        setSidebarLanguageOpen(false);
+      }
     }
     document.addEventListener("mousedown", onClickOutside);
     return () => document.removeEventListener("mousedown", onClickOutside);
+  }, []);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+      if (stored && LANGUAGES.some((language) => language.code === stored)) {
+        setSelectedLanguageCode(stored);
+      }
+    } catch {}
   }, []);
 
   // Lock body scroll when sidebar open
@@ -48,6 +92,15 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
     await clearTokens(webStorage);
     refresh();
     navigate("/login");
+  }
+
+  function handleLanguageSelect(code: string) {
+    setSelectedLanguageCode(code);
+    setLanguageOpen(false);
+    setSidebarLanguageOpen(false);
+    try {
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, code);
+    } catch {}
   }
 
   const navItemStyle = (active: boolean): React.CSSProperties => ({
@@ -68,7 +121,7 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
         data-testid="app-header"
         style={{
           width: "100%",
-          height: 56,
+          height: 40,
           marginTop: 10,
           background: transparent
             ? "rgba(255, 248, 239, 0.18)"
@@ -98,7 +151,7 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
           <img
             src="/kalpx-logo.png"
             alt="KalpX"
-            style={{ height: 44, width: "auto" }}
+            style={{ height: 33, width: "auto" }}
           />
         </Link>
 
@@ -239,27 +292,76 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
           className="kalpx-mobile-only"
           style={{ alignItems: "center", gap: 10 }}
         >
-          <button
-            aria-label="Language: English"
-            style={{
-              height: 44,
-              padding: "0 14px",
-              borderRadius: 14,
-              border: "1px solid rgba(198, 186, 180, 0.95)",
-              background: "rgba(255,255,255,0.72)",
-              boxShadow: "0 6px 16px rgba(67, 33, 4, 0.06)",
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              color: "var(--kalpx-text)",
-              fontSize: 12,
-              fontWeight: 500,
-              fontFamily: "inherit",
-            }}
-          >
-            <span>English</span>
-            <ChevronDown size={18} strokeWidth={1.8} color="#a89d93" />
-          </button>
+          <div ref={languageRef} style={{ position: "relative" }}>
+            <button
+              aria-label={`Language: ${selectedLanguage.label}`}
+              onClick={() => setLanguageOpen((open) => !open)}
+              style={{
+                padding: "8px 15px",
+                borderRadius: 10,
+                border: "1px solid rgba(198, 186, 180, 0.95)",
+                background: "rgba(255,255,255,0.72)",
+                boxShadow: "0 6px 16px rgba(67, 33, 4, 0.06)",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                color: "var(--kalpx-text)",
+                fontSize: 12,
+                fontWeight: 500,
+                fontFamily: "inherit",
+              }}
+            >
+              <span>{selectedLanguage.label}</span>
+              <ChevronDown size={18} strokeWidth={1.8} color="#a89d93" />
+            </button>
+            {languageOpen && (
+              <div
+                style={{
+                  position: "absolute",
+
+                  width: 110,
+                  background: "#fff",
+                  border: "1px solid rgba(198, 186, 180, 0.95)",
+                  borderRadius: 10,
+                  boxShadow: "0 16px 30px rgba(67,33,4,0.12)",
+                  overflow: "hidden",
+                  zIndex: 80,
+                  height: "200px",
+                  overflowY: "auto",
+                  top: "40px",
+                  right: "-5px",
+                }}
+              >
+                {LANGUAGES.map((language) => (
+                  <button
+                    key={language.code}
+                    onClick={() => handleLanguageSelect(language.code)}
+                    style={{
+                      width: "100%",
+                      padding: "12px 14px",
+                      background:
+                        language.code === selectedLanguageCode
+                          ? "rgba(217, 164, 12, 0.08)"
+                          : "#fff",
+                      border: "none",
+                      borderBottom: "1px solid rgba(239, 232, 220, 0.9)",
+                      textAlign: "left",
+                      fontSize: 13,
+                      fontWeight:
+                        language.code === selectedLanguageCode ? 700 : 500,
+                      color:
+                        language.code === selectedLanguageCode
+                          ? "var(--kalpx-cta)"
+                          : "var(--kalpx-text)",
+                      cursor: "pointer",
+                    }}
+                  >
+                    {language.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <button
             onClick={() => setSidebarOpen(true)}
             aria-label="Open menu"
@@ -396,11 +498,14 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
                 ))}
               </nav>
 
-              <div style={{ marginTop: 20 }}>
+              <div
+                ref={sidebarLanguageRef}
+                style={{ marginTop: 20, position: "relative" }}
+              >
                 <button
-                  aria-label="Language: English"
+                  aria-label={`Language: ${selectedLanguage.label}`}
+                  onClick={() => setSidebarLanguageOpen((open) => !open)}
                   style={{
-                    // height: 52,
                     minWidth: 170,
                     padding: "8px",
                     borderRadius: 10,
@@ -416,9 +521,54 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
                     boxShadow: "0 2px 8px rgba(67,33,4,0.04)",
                   }}
                 >
-                  <span>English</span>
+                  <span>{selectedLanguage.label}</span>
                   <ChevronDown size={20} strokeWidth={1.8} color="#9ba4b5" />
                 </button>
+                {sidebarLanguageOpen && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: 52,
+                      left: 0,
+                      width: 170,
+                      maxHeight: 240,
+                      overflowY: "auto",
+                      background: "#fff",
+                      border: "1px solid rgba(198, 206, 218, 0.95)",
+                      borderRadius: 16,
+                      boxShadow: "0 16px 30px rgba(67,33,4,0.12)",
+                      zIndex: 4,
+                    }}
+                  >
+                    {LANGUAGES.map((language) => (
+                      <button
+                        key={language.code}
+                        onClick={() => handleLanguageSelect(language.code)}
+                        style={{
+                          width: "100%",
+                          padding: "12px 16px",
+                          background:
+                            language.code === selectedLanguageCode
+                              ? "rgba(217, 164, 12, 0.08)"
+                              : "#fff",
+                          border: "none",
+                          borderBottom: "1px solid rgba(239, 232, 220, 0.9)",
+                          textAlign: "left",
+                          fontSize: 13,
+                          fontWeight:
+                            language.code === selectedLanguageCode ? 700 : 500,
+                          color:
+                            language.code === selectedLanguageCode
+                              ? "var(--kalpx-cta)"
+                              : "var(--kalpx-text)",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {language.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div style={{ marginTop: 20 }}>

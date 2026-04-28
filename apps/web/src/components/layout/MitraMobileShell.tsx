@@ -1,7 +1,9 @@
-import React, { useState } from "react";
-import { MitraBottomNav4Tab } from "./MitraBottomNav4Tab";
-import { MitraMenuDrawer } from "./MitraMenuDrawer";
-import { MitraTopBar } from "./MitraTopBar";
+import React from "react";
+import { Header } from "./Header";
+import { MobileBottomNav } from "./MobileBottomNav";
+// import { MitraTopBar } from './MitraTopBar';
+// import { MitraBottomNav4Tab } from './MitraBottomNav4Tab';
+// import { MitraMenuDrawer } from './MitraMenuDrawer';
 
 interface Props {
   children: React.ReactNode;
@@ -16,7 +18,6 @@ export function MitraMobileShell({
   hideTopBar,
   backgroundImage,
 }: Props) {
-  const [menuOpen, setMenuOpen] = useState(false);
   const transparentChrome = !!backgroundImage;
 
   return (
@@ -37,7 +38,8 @@ export function MitraMobileShell({
           flexDirection: "column",
         }}
       >
-        {!hideTopBar && <MitraTopBar transparent={transparentChrome} />}
+        {/* {!hideTopBar && <MitraTopBar transparent={transparentChrome} />} */}
+        {!hideTopBar && <Header transparent={transparentChrome} />}
         <main
           style={{
             flex: 1,
@@ -47,14 +49,10 @@ export function MitraMobileShell({
         >
           {children}
         </main>
-        {!hideBottomNav && (
-          <MitraBottomNav4Tab
-            transparent={transparentChrome}
-            onMenuOpen={() => setMenuOpen(true)}
-          />
-        )}
+        {/* {!hideBottomNav && <MitraBottomNav4Tab transparent={transparentChrome} onMenuOpen={() => setMenuOpen(true)} />} */}
+        {!hideBottomNav && <MobileBottomNav transparent={transparentChrome} />}
       </div>
-      {menuOpen && <MitraMenuDrawer onClose={() => setMenuOpen(false)} />}
+      {/* {menuOpen && <MitraMenuDrawer onClose={() => setMenuOpen(false)} />} */}
     </div>
   );
 }

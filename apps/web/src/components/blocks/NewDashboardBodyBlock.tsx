@@ -12,7 +12,6 @@ import type { AppDispatch } from '../../store';
 import { GreetingCard } from './dashboard/GreetingCard';
 import { PathChip } from './dashboard/PathChip';
 import { TriadCardsRow } from './dashboard/TriadCardsRow';
-import { WhyThisL1Strip } from './dashboard/WhyThisL1Strip';
 import { WhyThisSheet } from './dashboard/WhyThisSheet';
 import { ContinuityBanner } from './dashboard/ContinuityBanner';
 import { CycleProgressBlock } from './dashboard/CycleProgressBlock';
@@ -46,11 +45,54 @@ export function NewDashboardBodyBlock({ screenData, onAction }: Props) {
   return (
     <div style={{ padding: '20px 16px 80px' }}>
       <GreetingCard sd={sd} />
-      <PathChip sd={sd} />
+
+      {/* Path chips row — focus phrase + journey path, mirrors RN */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+        {sd.focus_phrase && (
+          <span
+            data-testid="focus-phrase-chip"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              padding: '5px 14px',
+              borderRadius: 20,
+              border: '1px solid var(--kalpx-border-gold)',
+              fontSize: 13,
+              fontFamily: 'var(--kalpx-font-serif)',
+              fontStyle: 'italic',
+              color: 'var(--kalpx-text)',
+              background: 'transparent',
+            }}
+          >
+            {sd.focus_phrase as string}
+          </span>
+        )}
+        <PathChip sd={sd} />
+      </div>
+
       <TriadCardsRow sd={sd} onAction={onAction} />
 
+      {/* WHY THIS — simple text link matching RN; sheet opened below */}
       {hasWhyThis && (
-        <WhyThisL1Strip sd={sd} onOpen={() => setWhyThisOpen(true)} />
+        <button
+          onClick={() => setWhyThisOpen(true)}
+          data-testid="why-this-link"
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            color: 'var(--kalpx-cta)',
+            fontSize: 14,
+            fontFamily: 'var(--kalpx-font-serif)',
+            padding: '4px 0',
+            marginBottom: 16,
+          }}
+        >
+          Why this was chosen →
+        </button>
       )}
 
       {hasContinuity && <ContinuityBanner sd={sd} />}

@@ -1,0 +1,119 @@
+import React, { useState, useCallback, useRef } from 'react';
+
+interface Props {
+  block: {
+    unlimited?: boolean;
+    total?: number;
+    [key: string]: any;
+  };
+  screenData?: Record<string, any>;
+  onAction?: (action: any) => void;
+}
+
+export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
+  const total: number = block.total ?? (screenData['reps_total'] as number) ?? 108;
+  const unlimited = block.unlimited === true || total <= 0;
+
+  const initialReps = (screenData['runner_reps_completed'] as number) || 0;
+  const [reps, setReps] = useState(initialReps);
+  const [pressed, setPressed] = useState(false);
+  const pressedRef = useRef(false);
+
+  const increment = useCallback(() => {
+    const next = reps + 1;
+    setReps(next);
+    onAction?.({ type: 'set_screen_value', key: 'runner_reps_completed', value: next });
+
+    if (!unlimited && next >= total) {
+      onAction?.({ type: 'complete_runner' });
+    }
+  }, [reps, unlimited, total, onAction]);
+
+  const handlePointerDown = useCallback(() => {
+    pressedRef.current = true;
+    setPressed(true);
+  }, []);
+
+  const handlePointerUp = useCallback(() => {
+    if (!pressedRef.current) return;
+    pressedRef.current = false;
+    setPressed(false);
+  }, []);
+
+  const progress = unlimited ? null : Math.min(reps / total, 1);
+
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '32px 16px',
+        gap: 16,
+      }}
+    >
+      {/* Progress ring / counter */}
+      <div
+        style={{ position: 'relative', width: 160, height: 160 }}
+        data-testid="rep-counter"
+      >
+        {progress !== null ? (
+          <svg width={160} height={160} style={{ position: 'absolute', top: 0, left: 0 }}>
+            <circle cx={80} cy={80} r={70} fill="none" stroke="var(--kalpx-chip-bg)" strokeWidth={8} />
+            <circle
+              cx={80}
+              cy={80}
+              r={70}
+              fill="none"
+              stroke="var(--kalpx-gold)"
+              strokeWidth={8}
+              strokeDasharray={2 * Math.PI * 70}
+              strokeDashoffset={2 * Math.PI * 70 * (1 - progress)}
+              strokeLinecap="round"
+              style={{ transform: 'rotate(-90deg)', transformOrigin: '80px 80px', transition: 'stroke-dashoffset 0.3s ease' }}
+            />
+          </svg>
+        ) : null}
+        <button
+          onClick={increment}
+          onPointerDown={handlePointerDown}
+          onPointerUp={handlePointerUp}
+          onPointerLeave={handlePointerUp}
+          data-testid="rep-tap-target"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '50%',
+            border: `2px solid var(--kalpx-gold)`,
+            background: 'rgba(201,168,76,0.08)',
+            boxShadow: '0 0 0 4px rgba(201,168,76,0.15), 0 4px 16px rgba(0,0,0,0.12)',
+            cursor: 'pointer',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 2,
+            transform: pressed ? 'scale(0.93)' : 'scale(1)',
+            transition: 'transform 200ms ease',
+          }}
+        >
+          <span style={{ fontSize: 48, fontWeight: 300, color: 'var(--kalpx-text)', lineHeight: 1 }}>
+            {reps}
+          </span>
+          {!unlimited ? (
+            <span style={{ fontSize: 13, color: 'var(--kalpx-text-muted)' }}>/ {total}</span>
+          ) : (
+            <span style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+              <span style={{ fontSize: 14, color: 'var(--kalpx-text-muted)', letterSpacing: 2 }}>TAP</span>
+              <span style={{ fontSize: 10, color: 'var(--kalpx-text-muted)', letterSpacing: 2, marginTop: 2 }}>THE BEAD</span>
+            </span>
+          )}
+        </button>
+      </div>
+
+      <p style={{ fontSize: 13, color: 'var(--kalpx-text-muted)', letterSpacing: 1, textAlign: 'center', textTransform: unlimited ? 'uppercase' : 'none' }}>
+        {unlimited ? 'TAP THE BEAD AFTER EACH MANTRA.' : `${total - reps} remaining`}
+      </p>
+    </div>
+  );
+}

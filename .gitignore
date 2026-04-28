@@ -64,6 +64,10 @@ tests/unit/.compiled/
 screenshots/mitra-v3/
 *.png
 !assets/**/*.png
+!apps/web/public/*.png
+!apps/web/public/*.jpg
+!apps/web/public/*.jpeg
+!apps/web/public/*.svg
 !screenshots/comparison.html
 !screenshots/flow_*/
 !screenshots/persona_*/

@@ -1,0 +1,17 @@
+export const MitraPalette = {
+  BG_CREAM: '#FFF8EF',
+  CARD_CREAM: '#fffdf9',
+  CHIP_BG: '#FFF7E8',
+  DIVIDER: '#eadfc4',
+  TEXT_DEEP: '#432104',
+  TEXT_SUBTLE: '#6b5a45',
+  TEXT_MUTED: '#8a7a5a',
+  BORDER_GOLD: '#eddeb4',
+  ACCENT_GOLD: '#c9a84c',
+  CTA_AMBER: '#c89a47',
+  CTA_AMBER_DARK: '#a87a2f',
+  CTA_TEXT: '#ffffff',
+  SECONDARY_BORDER: '#c9a84c',
+  DARK_BG: '#1a1a1a',
+  DARK_BORDER_GOLD: '#eddeb4',
+} as const;

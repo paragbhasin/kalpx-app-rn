@@ -1,0 +1,202 @@
+@import "tailwindcss";
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* ── KalpX Design Tokens as CSS Custom Properties ── */
+:root {
+  /* Backgrounds */
+  --kalpx-bg:            #FFF8EF;
+  --kalpx-card-bg:       #FFFDF7;
+  --kalpx-chip-bg:       #FFF7E8;
+  --kalpx-dark-bg:       #1a1a1a;
+  --kalpx-parchment:     #FAF7F2;
+
+  /* Text */
+  --kalpx-text:          #432104;
+  --kalpx-text-soft:     #6B6155;
+  --kalpx-text-muted:    #8A7D6B;
+  --kalpx-text-faint:    #9A9A9A;
+
+  /* Accents */
+  --kalpx-gold:          #C9A84C;
+  --kalpx-gold-hairline: rgba(212, 160, 23, 0.25);
+  --kalpx-cta:           #c89a47;
+  --kalpx-cta-dark:      #a87a2f;
+  --kalpx-cta-text:      #ffffff;
+
+  /* Borders */
+  --kalpx-border:        #EDE1D3;
+  --kalpx-border-gold:   #eddeb4;
+
+  /* Radius */
+  --kalpx-r-sm:    4px;
+  --kalpx-r-md:    8px;
+  --kalpx-r-lg:    12px;
+  --kalpx-r-xl:    16px;
+  --kalpx-r-2xl:   20px;
+  --kalpx-r-pill:  9999px;
+
+  /* Shadows */
+  --kalpx-shadow-card:      0 1px 4px rgba(67, 33, 4, 0.06);
+  --kalpx-shadow-card-lift: 0 3px 8px rgba(67, 33, 4, 0.10);
+  --kalpx-shadow-pill:      0 3px 6px rgba(67, 33, 4, 0.15);
+  --kalpx-shadow-sheet:     0 -4px 24px rgba(67, 33, 4, 0.12);
+
+  /* Fonts */
+  --kalpx-font-serif: 'Cormorant Garamond', Georgia, serif;
+  --kalpx-font-sans:  'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Spacing */
+  --kalpx-page-px:   16px;
+  --kalpx-page-top:  28px;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--kalpx-bg);
+  color: var(--kalpx-text);
+  font-family: var(--kalpx-font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100dvh;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+}
+
+/* Utility classes */
+.font-serif {
+  font-family: var(--kalpx-font-serif);
+}
+.font-sans {
+  font-family: var(--kalpx-font-sans);
+}
+
+/* Shimmer animation for loading skeletons */
+@keyframes kalpx-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Responsive nav utilities ── */
+
+/* Desktop nav: shown ≥768px, hidden below */
+.kalpx-desktop-nav {
+  display: flex !important;
+}
+@media (max-width: 767px) {
+  .kalpx-desktop-nav {
+    display: none !important;
+  }
+}
+
+/* kalpx-desktop-only: visible ≥768px only (footer, desktop-only elements) */
+.kalpx-desktop-only {
+  display: flex;
+}
+@media (max-width: 767px) {
+  .kalpx-desktop-only {
+    display: none !important;
+  }
+}
+
+/* kalpx-mobile-only: visible <768px only (hamburger, bottom nav) */
+.kalpx-mobile-only {
+  display: flex !important;
+}
+@media (min-width: 768px) {
+  .kalpx-mobile-only {
+    display: none !important;
+  }
+}
+
+/* Sidebar slide-in from right */
+@keyframes kalpx-slide-in-right {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+/* Bottom nav page padding: prevent content hiding under fixed bottom nav on mobile */
+@media (max-width: 767px) {
+  .kalpx-shell-main {
+    padding-bottom: calc(56px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Touch optimisation */
+.kalpx-touch {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Mitra shell body lock (when sidebar open) */
+.kalpx-scroll-lock {
+  overflow: hidden;
+}
+
+/* ── Practice runner dark chrome ─────────────────────────────────── */
+/* Wrap practice_runner content in .kalpx-runner-dark to invert tokens */
+.kalpx-runner-dark {
+  --kalpx-bg:          #0a0a0a;
+  --kalpx-card-bg:     #141414;
+  --kalpx-text:        #eddeb4;
+  --kalpx-text-soft:   #c9b48e;
+  --kalpx-text-muted:  #bfa58a;
+  --kalpx-border-gold: rgba(201,168,76,0.25);
+  --kalpx-chip-bg:     rgba(201,168,76,0.08);
+  --kalpx-gold:        #C9A84C;
+  --kalpx-cta:         #C9A84C;
+  background: #0a0a0a;
+  color: #eddeb4;
+  min-height: 100dvh;
+}
+
+/* ── Accessibility utilities ─────────────────────────────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── Menu drawer overlay ──────────────────────────────────────────── */
+.kalpx-menu-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0,0,0,0.45);
+}
+.kalpx-menu-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(280px, 75vw);
+  background: #FFFDF7;
+  animation: kalpx-slide-in-right 0.22s ease;
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 env(safe-area-inset-bottom);
+}

@@ -145,7 +145,7 @@ export function OnboardingConversationTurnBlock({ block, onAction }: Props) {
           </div>
         </div>
 
-        <div
+        {/* <div
           style={{
             display: "flex",
             justifyContent: "center",
@@ -157,7 +157,7 @@ export function OnboardingConversationTurnBlock({ block, onAction }: Props) {
             alt=""
             style={{ width: "52%", maxWidth: 260, pointerEvents: "none" }}
           />
-        </div>
+        </div> */}
 
         {chips.length > 0 && (
           <div

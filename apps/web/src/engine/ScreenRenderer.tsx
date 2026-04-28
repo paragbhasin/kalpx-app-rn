@@ -61,15 +61,17 @@ function enrichOnboardingBlocks(blocks: any[]) {
 
   return blocks
     .map((block) => {
-      if ((block.block_type || block.type) !== 'onboarding_conversation_turn') {
-        return block;
+      const type = block.block_type || block.type;
+
+      if (type === 'onboarding_conversation_turn' || type === 'guidance_mode_picker') {
+        return {
+          ...block,
+          headline: block.headline ?? headlineBlock?.content,
+          subtext: block.subtext ?? subtextBlock?.content,
+        };
       }
 
-      return {
-        ...block,
-        headline: block.headline ?? headlineBlock?.content,
-        subtext: block.subtext ?? subtextBlock?.content,
-      };
+      return block;
     })
     .filter((block) => {
       const type = block.block_type || block.type;

@@ -22,9 +22,17 @@ export function MantraDisplayBlock({ block, screenData = {} }: Props) {
   const translit = sd[translitKey] || sd['runner_active_item']?.transliteration || '';
 
   const displayText = interpolate(text, sd);
+  const showLotus = block.show_lotus !== false;
 
   return (
     <div style={{ textAlign: 'center', padding: '24px 16px 16px' }}>
+      {showLotus && (
+        <img
+          src="/mantra-lotus-3d.svg"
+          alt=""
+          style={{ width: 80, height: 80, opacity: 0.75, margin: '0 auto 16px', display: 'block' }}
+        />
+      )}
       {devanagari ? (
         <p
           style={{

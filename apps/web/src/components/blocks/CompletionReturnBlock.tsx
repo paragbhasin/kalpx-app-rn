@@ -56,15 +56,15 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
           width: 80,
           height: 80,
           borderRadius: '50%',
-          background: 'rgba(201,168,76,0.12)',
-          border: '2px solid #C9A84C',
+          background: 'var(--kalpx-chip-bg)',
+          border: '2px solid var(--kalpx-gold)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
         <svg width={36} height={36} viewBox="0 0 36 36" fill="none">
-          <path d="M7 18l7 7 15-15" stroke="#C9A84C" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M7 18l7 7 15-15" stroke="var(--kalpx-gold)" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
 
@@ -109,9 +109,9 @@ export function CompletionReturnBlock({ block, screenData = {}, onAction }: Prop
           style={{
             padding: '12px 24px',
             borderRadius: 12,
-            border: '1px solid #C9A84C',
+            border: '1px solid var(--kalpx-gold)',
             background: 'transparent',
-            color: '#C9A84C',
+            color: 'var(--kalpx-gold)',
             fontSize: 14,
             cursor: 'pointer',
           }}

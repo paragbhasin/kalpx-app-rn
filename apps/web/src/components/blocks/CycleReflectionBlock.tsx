@@ -34,7 +34,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
     }
   }
 
-  // ── Intro ─────────────────────────────────────────────────────────
+  // ── Intro — hero background matching RN 7daybg.png / 14day_updated.png ──────
   if (phase === 'intro') {
     const eyebrow = cp.eyebrow || (day === 7 ? 'Day 7 Checkpoint' : 'Day 14 Checkpoint');
     const headline = cp.intro_headline || cp.headline || (day === 7 ? 'A Week Complete' : 'Two Weeks. Something Settled.');
@@ -44,15 +44,26 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
     return (
       <div
         data-testid="checkpoint-intro"
-        style={{ padding: '40px 24px 80px', maxWidth: 480, margin: '0 auto' }}
+        style={{
+          minHeight: '100dvh',
+          backgroundImage: day === 7 ? 'url(/7daybg.png)' : 'url(/14day_updated.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
+          padding: '40px 24px calc(64px + env(safe-area-inset-bottom))',
+          maxWidth: 480,
+          margin: '0 auto',
+        }}
       >
-        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#b08840', textTransform: 'uppercase', marginBottom: 16 }}>
+        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'var(--kalpx-gold)', textTransform: 'uppercase', marginBottom: 16 }}>
           {eyebrow}
         </p>
-        <p style={{ fontSize: 28, fontWeight: 700, color: '#1a1a0a', lineHeight: 1.3, marginBottom: 16 }}>
+        <p style={{ fontSize: 28, fontWeight: 700, fontFamily: 'var(--kalpx-font-serif)', color: 'var(--kalpx-text)', lineHeight: 1.3, marginBottom: 16 }}>
           {headline}
         </p>
-        <p style={{ fontSize: 16, color: '#4a3318', lineHeight: 1.7, marginBottom: 40 }}>
+        <p style={{ fontSize: 16, color: 'var(--kalpx-text-soft)', lineHeight: 1.7, marginBottom: 40 }}>
           {body}
         </p>
         <button
@@ -61,13 +72,14 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
           style={{
             width: '100%',
             padding: '16px 24px',
-            background: '#C9A84C',
+            background: 'var(--kalpx-cta)',
             color: '#fff',
             border: 'none',
             borderRadius: 12,
             fontSize: 16,
             fontWeight: 700,
             cursor: 'pointer',
+            touchAction: 'manipulation',
           }}
         >
           {ctaLabel}
@@ -97,7 +109,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
         data-testid="checkpoint-reflection"
         style={{ padding: '40px 24px 80px', maxWidth: 480, margin: '0 auto' }}
       >
-        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#b08840', textTransform: 'uppercase', marginBottom: 20 }}>
+        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'var(--kalpx-gold)', textTransform: 'uppercase', marginBottom: 20 }}>
           {day === 7 ? 'What Grew' : 'Your Journey'}
         </p>
 
@@ -114,12 +126,12 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                   width: 28,
                   height: 28,
                   borderRadius: '50%',
-                  background: status === 'completed' ? '#C9A84C' : '#e8d5a0',
+                  background: status === 'completed' ? 'var(--kalpx-gold)' : 'rgba(201,168,76,0.25)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   fontSize: 10,
-                  color: status === 'completed' ? '#fff' : '#9A8C78',
+                  color: status === 'completed' ? '#fff' : 'var(--kalpx-text-muted)',
                   fontWeight: 700,
                 }}
               >
@@ -132,27 +144,27 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
         <div
           style={{
             padding: '16px',
-            background: '#fffbf0',
+            background: 'var(--kalpx-card-bg)',
             borderRadius: 12,
-            border: '1px solid #e8d5a0',
+            border: '1px solid var(--kalpx-border-gold)',
             marginBottom: 32,
           }}
         >
-          <p style={{ fontSize: 15, color: '#4a3318', lineHeight: 1.7, margin: 0 }}>
+          <p style={{ fontSize: 15, color: 'var(--kalpx-text-soft)', lineHeight: 1.7, margin: 0 }}>
             {narrativeText}
           </p>
         </div>
 
         {day === 14 && sd.checkpoint_classification_headline && (
           <div style={{ marginBottom: 24 }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: '#b08840', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>
+            <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--kalpx-gold)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 6 }}>
               {sd.checkpoint_classification_label || 'Your Arc'}
             </p>
-            <p style={{ fontSize: 18, fontWeight: 700, color: '#1a1a0a', marginBottom: 8 }}>
+            <p style={{ fontSize: 18, fontWeight: 700, fontFamily: 'var(--kalpx-font-serif)', color: 'var(--kalpx-text)', marginBottom: 8 }}>
               {sd.checkpoint_classification_headline}
             </p>
             {sd.checkpoint_classification_body && (
-              <p style={{ fontSize: 14, color: '#4a3318', lineHeight: 1.6 }}>
+              <p style={{ fontSize: 14, color: 'var(--kalpx-text-soft)', lineHeight: 1.6 }}>
                 {sd.checkpoint_classification_body}
               </p>
             )}
@@ -165,13 +177,14 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
           style={{
             width: '100%',
             padding: '16px 24px',
-            background: '#C9A84C',
+            background: 'var(--kalpx-cta)',
             color: '#fff',
             border: 'none',
             borderRadius: 12,
             fontSize: 16,
             fontWeight: 700,
             cursor: 'pointer',
+            touchAction: 'manipulation',
           }}
         >
           {graphCta}
@@ -207,10 +220,10 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
       data-testid="checkpoint-decisions"
       style={{ padding: '40px 24px 80px', maxWidth: 480, margin: '0 auto' }}
     >
-      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: '#b08840', textTransform: 'uppercase', marginBottom: 16 }}>
+      <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'var(--kalpx-gold)', textTransform: 'uppercase', marginBottom: 16 }}>
         {day === 7 ? 'Your Next Week' : 'Your Next Cycle'}
       </p>
-      <p style={{ fontSize: 18, color: '#1a1a0a', lineHeight: 1.5, marginBottom: 32, fontWeight: 600 }}>
+      <p style={{ fontSize: 18, fontFamily: 'var(--kalpx-font-serif)', color: 'var(--kalpx-text)', lineHeight: 1.5, marginBottom: 32, fontWeight: 600 }}>
         {framing}
       </p>
 
@@ -232,20 +245,21 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
             disabled={isSubmitting}
             style={{
               padding: '16px 20px',
-              background: '#fff',
-              border: '1.5px solid #e8d5a0',
+              background: 'var(--kalpx-card-bg)',
+              border: '1.5px solid var(--kalpx-border-gold)',
               borderRadius: 12,
               textAlign: 'left',
               cursor: isSubmitting ? 'default' : 'pointer',
               opacity: isSubmitting ? 0.6 : 1,
-              transition: 'border-color 0.15s',
+              boxShadow: 'var(--kalpx-shadow-card)',
+              touchAction: 'manipulation',
             }}
           >
-            <p style={{ fontSize: 16, fontWeight: 700, color: '#1a1a0a', marginBottom: 4 }}>
+            <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--kalpx-text)', marginBottom: 4 }}>
               {decisionLabels[decision] || decision}
             </p>
             {decisionDescriptions[decision] && (
-              <p style={{ fontSize: 13, color: '#9A8C78', margin: 0 }}>
+              <p style={{ fontSize: 13, color: 'var(--kalpx-text-muted)', margin: 0 }}>
                 {decisionDescriptions[decision]}
               </p>
             )}

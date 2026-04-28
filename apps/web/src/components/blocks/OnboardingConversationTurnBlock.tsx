@@ -484,6 +484,93 @@ export function OnboardingConversationTurnBlock({
     );
   }
 
+  if (block.id === "turn8_msg") {
+    return (
+      <div
+        style={{
+          maxWidth: 560,
+          margin: "0 auto 24px",
+        }}
+      >
+        <div
+          style={{
+            borderRadius: 32,
+            border: "1px solid rgba(226, 196, 126, 0.82)",
+            background: "rgba(255, 252, 246, 0.9)",
+            boxShadow: "0 10px 22px rgba(179, 140, 54, 0.08)",
+            padding: "22px 24px",
+            textAlign: "center",
+          }}
+        >
+          {messages.map((msg, i) => (
+            <p
+              key={i}
+              style={{
+                margin: 0,
+                fontFamily: "var(--kalpx-font-serif)",
+                fontWeight: 700,
+                fontSize: "clamp(20px, 5.2vw, 24px)",
+                lineHeight: 1.4,
+                color: "var(--kalpx-text)",
+                textWrap: "balance",
+              }}
+            >
+              {msg}
+            </p>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (block.id === "turn8_cta") {
+    return (
+      <div
+        style={{
+          maxWidth: 560,
+          margin: "0 auto 24px",
+        }}
+      >
+        {chips.length > 0 && (
+          <div>
+            {chips.map((chip) => (
+              <button
+                key={chip.id}
+                data-testid={`chip-${chip.id}`}
+                disabled={busy}
+                onClick={() =>
+                  void fireResponse({
+                    chip_id: chip.id,
+                    freeform_text: text || undefined,
+                  })
+                }
+                style={{
+                  width: "100%",
+                  padding: 10,
+
+                  borderRadius: 999,
+                  border: "1px solid rgba(186, 132, 34, 0.72)",
+                  background:
+                    "linear-gradient(90deg, #c79532 0%, #d1a245 52%, #c79532 100%)",
+                  color: "#fff9ec",
+                  fontSize: "clamp(18px, 5vw, 21px)",
+                  fontWeight: 700,
+                  cursor: busy ? "not-allowed" : "pointer",
+                  opacity: busy ? 0.7 : 1,
+                  textAlign: "center",
+                  boxShadow: "0 12px 26px rgba(201, 168, 76, 0.24)",
+                  fontFamily: "var(--kalpx-font-serif)",
+                }}
+              >
+                {chip.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div
       style={{

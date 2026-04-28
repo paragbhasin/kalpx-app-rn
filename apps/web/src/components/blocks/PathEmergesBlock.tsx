@@ -16,6 +16,9 @@ interface TriadItem {
   label: string;
   content: string;
   prefix?: string;
+  icon: string;
+  iconBg: string;
+  labelColor: string;
 }
 
 export function PathEmergesBlock({ screenData }: Props) {
@@ -25,15 +28,24 @@ export function PathEmergesBlock({ screenData }: Props) {
     {
       label: sd.mantra_label || 'MANTRA',
       content: sd.mantra_text || sd.companion_mantra_title || '',
+      icon: 'ॐ',
+      iconBg: '#5E8D55',
+      labelColor: '#5E8D55',
     },
     {
       label: sd.sankalp_label || 'SANKALP',
       content: sd.sankalp_text || sd.companion_sankalp_line || '',
       prefix: sd.sankalp_prefix || '',
+      icon: '♡',
+      iconBg: '#8168AA',
+      labelColor: '#8168AA',
     },
     {
       label: sd.practice_label || 'PRACTICE',
       content: sd.practice_title || sd.companion_practice_title || '',
+      icon: '🧘',
+      iconBg: 'var(--kalpx-gold)',
+      labelColor: 'var(--kalpx-gold)',
     },
   ];
 
@@ -45,9 +57,9 @@ export function PathEmergesBlock({ screenData }: Props) {
         style={{
           padding: 20,
           borderRadius: 12,
-          border: '1px dashed #d4b16a',
+          border: '1px dashed var(--kalpx-border-gold)',
           textAlign: 'center',
-          color: '#6b4c1a',
+          color: 'var(--kalpx-text-soft)',
           fontSize: 14,
           marginBottom: 20,
         }}
@@ -67,32 +79,60 @@ export function PathEmergesBlock({ screenData }: Props) {
             style={{
               padding: '16px 20px',
               borderRadius: 12,
-              border: '1px solid #e8d5a0',
-              background: '#fdf8ef',
+              border: '1px solid var(--kalpx-chip-bg)',
+              background: 'var(--kalpx-bg)',
               marginBottom: 12,
+              display: 'flex',
+              gap: 14,
+              alignItems: 'flex-start',
             }}
           >
-            <p
+            <div
               style={{
-                fontSize: 11,
-                fontWeight: 700,
-                letterSpacing: 2,
-                color: '#d4b16a',
-                textTransform: 'uppercase',
-                marginBottom: 6,
+                width: 40,
+                height: 40,
+                borderRadius: '50%',
+                background: item.iconBg,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 18,
+                color: '#fff',
+                flexShrink: 0,
               }}
             >
-              {item.label}
-            </p>
-            {item.prefix && (
-              <p style={{ fontSize: 13, color: '#8a6030', marginBottom: 4 }}>{item.prefix}</p>
-            )}
-            <p style={{ fontSize: 17, fontWeight: 600, color: '#2a1a0a', lineHeight: 1.4 }}>
-              {item.content}
-            </p>
+              {item.icon}
+            </div>
+            <div style={{ flex: 1 }}>
+              <p
+                style={{
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: 1.5,
+                  color: item.labelColor,
+                  textTransform: 'uppercase',
+                  marginBottom: 4,
+                }}
+              >
+                {item.label}
+              </p>
+              {item.prefix && (
+                <p style={{ fontSize: 13, color: 'var(--kalpx-text-muted)', marginBottom: 4 }}>{item.prefix}</p>
+              )}
+              <p style={{ fontSize: 17, fontWeight: 600, color: 'var(--kalpx-text)', lineHeight: 1.4 }}>
+                {item.content}
+              </p>
+            </div>
           </div>
         ) : null,
       )}
+
+      <div style={{ textAlign: 'center', paddingTop: 8, paddingBottom: 4 }}>
+        <div style={{ width: 40, height: 1, background: 'var(--kalpx-border-gold)', margin: '0 auto 12px' }} />
+        <p style={{ fontSize: 13, color: 'var(--kalpx-text-muted)', fontStyle: 'italic', lineHeight: 1.6 }}>
+          This isn't homework. It's sadhana.
+        </p>
+      </div>
     </div>
   );
 }

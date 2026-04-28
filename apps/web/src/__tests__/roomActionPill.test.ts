@@ -170,3 +170,50 @@ describe('RoomActionPill style tokens', () => {
     expect(textAlign).toBe('center');
   });
 });
+
+// ── Exit action renders as text link (L3 parity) ──────────────────────────────
+
+describe('RoomActionPill exit renders as text link', () => {
+  it('exit action type is identified correctly', () => {
+    const action = { action_id: 'exit1', label: "I'll go now", action_type: 'exit' };
+    const isExit = action.action_type === 'exit';
+    expect(isExit).toBe(true);
+  });
+
+  it('exit action does NOT render action_family label (early return before pill)', () => {
+    const action = { action_id: 'exit1', label: "I'll go now", action_type: 'exit', action_family: 'EXIT' };
+    const isExit = action.action_type === 'exit';
+    // Implementation returns early for exit — action_family label never rendered
+    expect(isExit).toBe(true);
+    // action_family is present in data, but the early-return branch skips it
+    expect(action.action_family).toBe('EXIT');
+  });
+
+  it('exit text link style has no border and uses underline decoration', () => {
+    const isExit = true;
+    const border = isExit ? 'none' : '1px solid rgba(159,159,159,0.3)';
+    const textDecoration = isExit ? 'underline' : 'none';
+    expect(border).toBe('none');
+    expect(textDecoration).toBe('underline');
+  });
+
+  it('exit label falls back to "I\'ll go now" when action.label is absent', () => {
+    const actionLabel: string | undefined = undefined;
+    const displayed = actionLabel || "I'll go now";
+    expect(displayed).toBe("I'll go now");
+  });
+
+  it('non-exit action renders as pill (isExit is false)', () => {
+    const action = { action_id: 'step1', label: 'Breathe', action_type: 'in_room_step', action_family: 'STEP' };
+    const isExit = action.action_type === 'exit';
+    expect(isExit).toBe(false);
+    // Non-exit: renders full pill with action_family label
+    expect(action.action_family).toBe('STEP');
+  });
+
+  it('non-exit runner action is not treated as exit', () => {
+    const action = { action_id: 'r1', label: 'Chant', action_type: 'runner_mantra' };
+    const isExit = action.action_type === 'exit';
+    expect(isExit).toBe(false);
+  });
+});

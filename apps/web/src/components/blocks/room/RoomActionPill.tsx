@@ -202,6 +202,29 @@ export function RoomActionPill({ action, roomId, screenData = {}, onAction }: Pr
     ? (action.display?.transliteration || action.runner_payload?.transliteration || null)
     : null;
 
+  // Exit renders as a plain underlined text link — no pill wrapper, no action_family label (matches RN RoomActionExitPill)
+  if (isExit) {
+    return (
+      <div data-testid={`room-action-${action.action_id}`} style={{ textAlign: 'center', margin: '4px 0' }}>
+        <button
+          onClick={handleTap}
+          style={{
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: 15,
+            color: 'var(--kalpx-text)',
+            textDecoration: 'underline',
+            padding: '8px 0',
+          }}
+          data-testid={`room-action-exit-${action.action_id}`}
+        >
+          {action.label || "I'll go now"}
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div data-testid={`room-action-${action.action_id}`}>
       <button style={pillStyle} onClick={handleTap}>

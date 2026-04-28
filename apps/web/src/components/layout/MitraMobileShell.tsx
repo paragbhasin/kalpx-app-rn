@@ -24,9 +24,14 @@ export function MitraMobileShell({
     <div
       style={{
         minHeight: "100dvh",
-        background: backgroundImage
-          ? `url(${backgroundImage}) center/cover fixed, var(--kalpx-bg)`
-          : `url(/beige_bg.png) center/cover fixed, var(--kalpx-bg)`,
+
+        backgroundImage: backgroundImage
+          ? `url(${backgroundImage})`
+          : "url(/beige_bg.png)",
+        backgroundRepeat: "no-repeat",
+        backgroundSize: "cover",
+        backgroundPosition: "top 92%",
+        backgroundAttachment: "fixed",
       }}
     >
       <div

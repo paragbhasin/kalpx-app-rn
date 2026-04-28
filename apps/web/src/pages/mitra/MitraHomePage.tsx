@@ -209,7 +209,7 @@ export function MitraHomePage() {
             width: "100%",
             maxWidth: 360,
             marginTop: "auto",
-            marginBottom: 8,
+            marginBottom: 70,
             justifyContent: "center",
             alignItems: "center",
           }}
@@ -235,7 +235,7 @@ export function MitraHomePage() {
             Begin your journey →
           </Link>
 
-          <Link
+          {/* <Link
             to="/login"
             style={{
               display: "block",
@@ -252,7 +252,7 @@ export function MitraHomePage() {
             }}
           >
             Sign in
-          </Link>
+          </Link> */}
         </div>
 
         {WEB_ENV.isDev &&

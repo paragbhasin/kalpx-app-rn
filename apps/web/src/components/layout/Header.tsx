@@ -123,9 +123,7 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
           width: "100%",
           height: 40,
           marginTop: 10,
-          background: transparent
-            ? "rgba(255, 248, 239, 0.18)"
-            : "var(--kalpx-bg)",
+
           backdropFilter: transparent ? "blur(6px)" : undefined,
           WebkitBackdropFilter: transparent ? "blur(6px)" : undefined,
           display: "flex",

@@ -2,14 +2,33 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Home, Bell, User, Menu } from 'lucide-react';
 
-const TABS = [
-  { label: 'Home',          Icon: Home, to: '/en/mitra/dashboard' },
-  { label: 'Notifications', Icon: Bell, to: '/en/notifications' },
-  { label: 'Profile',       Icon: User, to: '/en/profile' },
-  { label: 'Menu',          Icon: Menu, to: '/en/classes' },
+const LINK_TABS = [
+  { label: 'Home',          Icon: Home, to: '/en/mitra/dashboard', end: true },
+  { label: 'Notifications', Icon: Bell, to: '/en/notifications',   end: false },
+  { label: 'Profile',       Icon: User, to: '/en/profile',         end: false },
 ] as const;
 
-export function MitraBottomNav4Tab() {
+interface Props {
+  onMenuOpen: () => void;
+}
+
+const tabStyle: React.CSSProperties = {
+  flex: 1,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: 3,
+  textDecoration: 'none',
+  fontSize: 10,
+  touchAction: 'manipulation',
+  background: 'none',
+  border: 'none',
+  cursor: 'pointer',
+  padding: 0,
+};
+
+export function MitraBottomNav4Tab({ onMenuOpen }: Props) {
   return (
     <nav
       style={{
@@ -24,23 +43,15 @@ export function MitraBottomNav4Tab() {
         flexShrink: 0,
       }}
     >
-      {TABS.map((tab) => (
+      {LINK_TABS.map((tab) => (
         <NavLink
           key={tab.to}
           to={tab.to}
-          end={tab.to === '/en/mitra/dashboard'}
+          end={tab.end}
           style={({ isActive }) => ({
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 3,
-            textDecoration: 'none',
+            ...tabStyle,
             color: isActive ? 'var(--kalpx-cta)' : 'var(--kalpx-text-muted)',
             fontWeight: isActive ? 700 : 400,
-            fontSize: 10,
-            touchAction: 'manipulation',
           })}
         >
           {({ isActive }) => (
@@ -51,6 +62,16 @@ export function MitraBottomNav4Tab() {
           )}
         </NavLink>
       ))}
+
+      {/* Menu tab — opens drawer instead of navigating */}
+      <button
+        onClick={onMenuOpen}
+        aria-label="Open menu"
+        style={{ ...tabStyle, color: 'var(--kalpx-text-muted)' }}
+      >
+        <Menu size={20} strokeWidth={1.8} />
+        Menu
+      </button>
     </nav>
   );
 }

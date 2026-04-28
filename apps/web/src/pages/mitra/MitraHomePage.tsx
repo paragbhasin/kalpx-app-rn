@@ -10,100 +10,116 @@ export function MitraHomePage() {
   const navigate = useNavigate();
   const { loading, error, hasActiveJourney, refetch } = useJourneyStatus();
 
-  // Redirect once status is known — no full-page guard needed here, just light routing
   useEffect(() => {
     if (loading) return;
     if (hasActiveJourney === true) {
       navigate('/en/mitra/dashboard', { replace: true });
       return;
     }
-    // hasActiveJourney === false + authenticated user → returning user, go to welcome-back
     if (hasActiveJourney === false && typeof localStorage !== 'undefined' && !!localStorage.getItem(AUTH_KEYS.accessToken)) {
       navigate('/en/mitra/welcome-back', { replace: true });
     }
-    // else: not authenticated — stay on this page (show Begin/Sign in)
   }, [loading, hasActiveJourney, navigate]);
 
   if (loading) {
     return (
-      <div style={centeredPage}>
-        <p style={{ color: '#888' }}>Loading…</p>
+      <div style={{ minHeight: '100dvh', background: '#FFF8EF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 28, height: 28, border: '2px solid var(--kalpx-cta)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
   return (
-    <div style={centeredPage}>
-      <div style={{ textAlign: 'center', maxWidth: 400, padding: 32 }}>
-        <p style={{ fontSize: 20, letterSpacing: 3, color: '#c9a96e', marginBottom: 8 }}>KALPX</p>
-        <h1 style={{ fontWeight: 300, fontSize: 28, marginBottom: 8 }}>Mitra</h1>
-        <p style={{ color: '#888', marginBottom: 40, lineHeight: 1.6 }}>Your spiritual companion</p>
-
-        {error && (
-          <div style={{ marginBottom: 24 }}>
-            <p style={{ color: '#e06060', fontSize: 14, marginBottom: 12 }}>Could not check journey status.</p>
-            <button onClick={refetch} style={secondaryBtn}>Retry</button>
-          </div>
-        )}
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <Link to="/en/mitra/start" style={primaryBtn}>
-            Begin journey
-          </Link>
-          <Link to="/login" style={secondaryBtnLink}>
-            Sign in
-          </Link>
+    <div
+      style={{
+        minHeight: '100dvh',
+        backgroundImage: 'url(/new_home.png)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        padding: '0 24px calc(56px + env(safe-area-inset-bottom))',
+      }}
+    >
+      <div style={{ textAlign: 'center', marginBottom: 32 }}>
+        {/* Diamond divider — matches RN Home.tsx */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center', marginBottom: 20 }}>
+          <div style={{ flex: 1, height: 1, background: 'rgba(199,162,88,0.4)', maxWidth: 60 }} />
+          <span style={{ fontSize: 10, color: '#c7a258' }}>◆</span>
+          <div style={{ flex: 1, height: 1, background: 'rgba(199,162,88,0.4)', maxWidth: 60 }} />
         </div>
 
-        {WEB_ENV.isDev && (
-          <div style={{ marginTop: 40, padding: '12px 16px', background: '#111', borderRadius: 8, fontSize: 11, fontFamily: 'monospace', color: '#666', textAlign: 'left' }}>
-            <div>API: {WEB_ENV.apiBaseUrl}</div>
-            <div>guestUUID: {localStorage.getItem(AUTH_KEYS.guestUUID) ?? 'none'}</div>
-            <div>access_token: {localStorage.getItem(AUTH_KEYS.accessToken) ? 'present' : 'none'}</div>
-          </div>
+        <h1 style={{ fontSize: 28, fontWeight: 300, color: '#432104', marginBottom: 8, fontFamily: 'var(--kalpx-font-serif)' }}>
+          KalpX Mitra
+        </h1>
+        <p style={{ color: '#6b4c1a', marginBottom: 8, lineHeight: 1.6 }}>
+          Your daily companion for life
+        </p>
+        <p style={{ color: '#6b4c1a', fontSize: 14, lineHeight: 1.6, maxWidth: 280, margin: '0 auto 32px' }}>
+          Grounded in timeless Sanatan wisdom.
+        </p>
+
+        <img src="/new_home_lotus.png" alt="" style={{ width: '40vw', maxWidth: 200, opacity: 0.7, marginBottom: 24 }} />
+
+        {error && (
+          <p style={{ color: '#e06060', fontSize: 13, marginBottom: 16 }}>
+            Could not check status.{' '}
+            <button onClick={refetch} style={{ background: 'none', border: 'none', color: '#c9a96e', cursor: 'pointer', fontSize: 13 }}>
+              Retry
+            </button>
+          </p>
         )}
       </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%', maxWidth: 360, marginBottom: 8 }}>
+        <Link
+          to="/en/mitra/start"
+          style={{
+            display: 'block',
+            padding: '16px 32px',
+            background: 'linear-gradient(to right, #E5D4CA, #F5EDEA)',
+            color: '#432104',
+            borderRadius: 28,
+            fontWeight: 600,
+            fontSize: 16,
+            textAlign: 'center',
+            textDecoration: 'none',
+            border: '1px solid rgba(199,162,88,0.3)',
+          }}
+        >
+          Begin your journey →
+        </Link>
+
+        <Link
+          to="/login"
+          style={{
+            display: 'block',
+            padding: '14px 32px',
+            border: '1px solid rgba(199,162,88,0.4)',
+            borderRadius: 28,
+            color: '#432104',
+            textAlign: 'center',
+            textDecoration: 'none',
+            fontSize: 14,
+            background: 'rgba(255,255,255,0.2)',
+            backdropFilter: 'blur(4px)',
+            WebkitBackdropFilter: 'blur(4px)',
+          }}
+        >
+          Sign in
+        </Link>
+      </div>
+
+      {WEB_ENV.isDev && typeof window !== 'undefined' && window.location.search.includes('debug') && (
+        <div style={{ margin: '16px 0', padding: '12px 16px', background: 'rgba(0,0,0,0.5)', borderRadius: 8, fontSize: 11, fontFamily: 'monospace', color: '#aaa', textAlign: 'left', width: '100%', maxWidth: 360 }}>
+          <div>API: {WEB_ENV.apiBaseUrl}</div>
+          <div>guestUUID: {localStorage.getItem(AUTH_KEYS.guestUUID) ?? 'none'}</div>
+          <div>access_token: {localStorage.getItem(AUTH_KEYS.accessToken) ? 'present' : 'none'}</div>
+        </div>
+      )}
     </div>
   );
 }
-
-const centeredPage: React.CSSProperties = {
-  minHeight: '100dvh',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  background: '#0a0a0a',
-  color: '#f0ede8',
-};
-
-const primaryBtn: React.CSSProperties = {
-  display: 'block',
-  padding: '14px 32px',
-  background: '#c9a96e',
-  color: '#0a0a0a',
-  borderRadius: 8,
-  fontWeight: 600,
-  fontSize: 16,
-  textAlign: 'center',
-  textDecoration: 'none',
-};
-
-const secondaryBtn: React.CSSProperties = {
-  padding: '10px 24px',
-  background: '#1a1a1a',
-  border: '1px solid #333',
-  borderRadius: 8,
-  color: '#f0ede8',
-  fontSize: 14,
-};
-
-const secondaryBtnLink: React.CSSProperties = {
-  display: 'block',
-  padding: '12px 32px',
-  border: '1px solid #333',
-  borderRadius: 8,
-  color: '#f0ede8',
-  textAlign: 'center',
-  textDecoration: 'none',
-  fontSize: 14,
-};

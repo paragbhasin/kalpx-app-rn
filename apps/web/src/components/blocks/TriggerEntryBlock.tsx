@@ -13,11 +13,11 @@ export function TriggerEntryBlock({ block, onAction }: Props) {
         onClick={() => onAction?.({ type: 'initiate_trigger_support', payload: {} })}
         data-testid="trigger-entry-btn"
         style={{
-          border: '1px solid #eddeb4',
+          border: '1px solid var(--kalpx-border-gold)',
           borderRadius: 999,
           padding: '12px 32px',
           background: 'transparent',
-          color: '#432104',
+          color: 'var(--kalpx-text)',
           fontSize: 15,
           letterSpacing: 0.4,
           cursor: 'pointer',

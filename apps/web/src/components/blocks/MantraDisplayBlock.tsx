@@ -31,7 +31,7 @@ export function MantraDisplayBlock({ block, screenData = {} }: Props) {
             fontFamily: "'Noto Serif Devanagari', serif",
             fontSize: 26,
             lineHeight: 1.6,
-            color: '#2C2A26',
+            color: 'var(--kalpx-text)',
             marginBottom: 8,
           }}
         >
@@ -41,11 +41,11 @@ export function MantraDisplayBlock({ block, screenData = {} }: Props) {
       {displayText ? (
         <p
           style={{
-            fontFamily: "'Roboto Serif', Georgia, serif",
+            fontFamily: 'var(--kalpx-font-serif)',
             fontSize: 18,
             fontStyle: 'italic',
             lineHeight: 1.6,
-            color: '#3D3930',
+            color: 'var(--kalpx-text)',
             marginBottom: 4,
           }}
         >
@@ -53,7 +53,7 @@ export function MantraDisplayBlock({ block, screenData = {} }: Props) {
         </p>
       ) : null}
       {translit ? (
-        <p style={{ fontSize: 13, color: '#9A8C78', letterSpacing: 1 }}>
+        <p style={{ fontSize: 13, color: 'var(--kalpx-text-muted)', letterSpacing: 1 }}>
           {translit}
         </p>
       ) : null}

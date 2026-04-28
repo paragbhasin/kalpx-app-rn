@@ -150,3 +150,40 @@ button {
 .kalpx-scroll-lock {
   overflow: hidden;
 }
+
+/* ── Practice runner dark chrome ─────────────────────────────────── */
+/* Wrap practice_runner content in .kalpx-runner-dark to invert tokens */
+.kalpx-runner-dark {
+  --kalpx-bg:          #0a0a0a;
+  --kalpx-card-bg:     #141414;
+  --kalpx-text:        #eddeb4;
+  --kalpx-text-soft:   #c9b48e;
+  --kalpx-text-muted:  #bfa58a;
+  --kalpx-border-gold: rgba(201,168,76,0.25);
+  --kalpx-chip-bg:     rgba(201,168,76,0.08);
+  --kalpx-gold:        #C9A84C;
+  --kalpx-cta:         #C9A84C;
+  background: #0a0a0a;
+  color: #eddeb4;
+  min-height: 100dvh;
+}
+
+/* ── Menu drawer overlay ──────────────────────────────────────────── */
+.kalpx-menu-drawer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0,0,0,0.45);
+}
+.kalpx-menu-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(280px, 75vw);
+  background: #FFFDF7;
+  animation: kalpx-slide-in-right 0.22s ease;
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 env(safe-area-inset-bottom);
+}

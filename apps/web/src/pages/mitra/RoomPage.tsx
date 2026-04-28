@@ -13,6 +13,8 @@ import { LifeContextPickerSheet } from '../../components/blocks/room/LifeContext
 import { RoomRenderer } from '../../components/blocks/room/RoomRenderer';
 import { ROOM_DISPLAY_NAMES } from '../../components/blocks/room/roomConstants';
 import { webNavigate } from '../../lib/webRouter';
+import { createRoomAmbient } from '../../lib/audio/calmMusic';
+import type { AudioHandle } from '../../lib/audio/howlerAudio';
 import type { AppDispatch } from '../../store';
 
 const ROOMS_WITH_CONTEXT_PICKER = ['room_clarity', 'room_growth'];
@@ -53,6 +55,21 @@ export function RoomPage() {
   const [lifeContext, setLifeContext] = useState<string | null>(
     (sd?.room_life_context as string | null) || null,
   );
+  const ambientAudioRef = useRef<AudioHandle | null>(null);
+
+  // Room ambient audio — start on render phase, stop on unmount (mirrors RoomContainer.tsx)
+  useEffect(() => {
+    if (phase !== 'render') return;
+    const handle = createRoomAmbient();
+    ambientAudioRef.current = handle;
+    const t = setTimeout(() => { try { handle.play(); } catch {} }, 300);
+    return () => {
+      clearTimeout(t);
+      handle.stop();
+      handle.unload();
+      ambientAudioRef.current = null;
+    };
+  }, [phase]);
 
   const actionContext = {
     dispatch,

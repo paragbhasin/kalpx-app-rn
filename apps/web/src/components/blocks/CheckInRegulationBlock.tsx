@@ -68,36 +68,34 @@ export function CheckInRegulationBlock({ screenData = {}, onAction }: Props) {
       data-testid="checkin-regulation-block"
     >
       <div>
-        <p style={{ fontSize: 11, color: '#9A8C78', letterSpacing: 2, marginBottom: 12, textTransform: 'uppercase' }}>
+        <p style={{ fontSize: 11, color: 'var(--kalpx-text-muted)', letterSpacing: 2, marginBottom: 12, textTransform: 'uppercase' }}>
           CHECK-IN
         </p>
-        <h2 style={{ fontSize: 20, fontWeight: 400, color: '#2C2A26', lineHeight: 1.4, marginBottom: 8 }}>
+        <h2 style={{ fontSize: 24, fontWeight: 400, fontFamily: 'var(--kalpx-font-serif)', color: 'var(--kalpx-text)', lineHeight: 1.4, marginBottom: 8 }}>
           {config.title}
         </h2>
-        <p style={{ fontSize: 14, color: '#6B6356', lineHeight: 1.6 }}>
+        <p style={{ fontSize: 14, color: 'var(--kalpx-text-soft)', lineHeight: 1.6 }}>
           {config.prompt}
         </p>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>
         {config.chips.map((chip) => (
           <button
             key={chip.id}
             onClick={() => onChip(chip.id)}
             data-testid={`checkin-chip-${chip.id}`}
             style={{
-              padding: '14px 20px',
+              padding: '12px 20px',
               borderRadius: 12,
-              border: '1px solid #E8DCC8',
-              background: '#fff',
-              color: '#2C2A26',
+              border: '1px solid var(--kalpx-border-gold)',
+              background: 'var(--kalpx-card-bg)',
+              color: 'var(--kalpx-text)',
               fontSize: 15,
               textAlign: 'left',
               cursor: 'pointer',
-              transition: 'border-color 0.15s',
+              touchAction: 'manipulation',
             }}
-            onMouseEnter={(e) => (e.currentTarget.style.borderColor = '#C9A84C')}
-            onMouseLeave={(e) => (e.currentTarget.style.borderColor = '#E8DCC8')}
           >
             {chip.label}
           </button>
@@ -111,7 +109,7 @@ export function CheckInRegulationBlock({ screenData = {}, onAction }: Props) {
           alignSelf: 'flex-start',
           background: 'none',
           border: 'none',
-          color: '#9A8C78',
+          color: 'var(--kalpx-text-muted)',
           fontSize: 13,
           cursor: 'pointer',
           padding: 0,

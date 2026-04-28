@@ -11,7 +11,7 @@ const NAV_LINKS = [
   { to: '/en/retreats', label: 'Retreats', match: '/en/retreats' },
 ];
 
-export function Header() {
+export function Header({ transparent = false }: { transparent?: boolean }) {
   const navigate = useNavigate();
   const { authed, userInitial, refresh } = useCurrentUser();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -60,8 +60,10 @@ export function Header() {
         style={{
           width: '100%',
           height: 56,
-          background: 'var(--kalpx-bg)',
-          borderBottom: '1px solid var(--kalpx-border-gold)',
+          background: transparent ? 'rgba(255, 248, 239, 0.18)' : 'var(--kalpx-bg)',
+          borderBottom: transparent ? '1px solid rgba(237, 222, 180, 0.45)' : '1px solid var(--kalpx-border-gold)',
+          backdropFilter: transparent ? 'blur(6px)' : undefined,
+          WebkitBackdropFilter: transparent ? 'blur(6px)' : undefined,
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',

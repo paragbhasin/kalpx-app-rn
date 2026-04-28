@@ -1,13 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-export function Footer() {
+export function Footer({ transparent = false }: { transparent?: boolean }) {
   return (
     <footer
       className="kalpx-desktop-only"
       style={{
-        background: 'var(--kalpx-bg)',
-        borderTop: '1px solid var(--kalpx-border-gold)',
+        background: transparent ? 'rgba(255, 248, 239, 0.18)' : 'var(--kalpx-bg)',
+        borderTop: transparent ? '1px solid rgba(237, 222, 180, 0.45)' : '1px solid var(--kalpx-border-gold)',
+        backdropFilter: transparent ? 'blur(6px)' : undefined,
+        WebkitBackdropFilter: transparent ? 'blur(6px)' : undefined,
         padding: '16px 24px',
         display: 'flex',
         alignItems: 'center',

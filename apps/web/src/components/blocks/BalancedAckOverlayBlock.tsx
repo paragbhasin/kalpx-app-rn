@@ -51,7 +51,7 @@ export function BalancedAckOverlayBlock({ onAction }: Props) {
           border: '1px solid rgba(201,168,76,0.2)',
         }}
       >
-        <p style={{ fontSize: 18, color: '#2C2A26', lineHeight: 1.6, fontStyle: 'italic' }}>
+        <p style={{ fontSize: 18, color: 'var(--kalpx-text)', lineHeight: 1.6, fontStyle: 'italic' }}>
           You named it. That's already part of settling.
         </p>
       </div>
@@ -63,7 +63,7 @@ export function BalancedAckOverlayBlock({ onAction }: Props) {
           padding: '14px 32px',
           borderRadius: 12,
           border: 'none',
-          background: '#C9A84C',
+          background: 'var(--kalpx-cta)',
           color: '#fff',
           fontSize: 15,
           fontWeight: 500,

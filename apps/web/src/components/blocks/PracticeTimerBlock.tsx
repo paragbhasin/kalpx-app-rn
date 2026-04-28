@@ -98,11 +98,11 @@ export function PracticeTimerBlock({ block, screenData = {}, onAction }: Props) 
         data-testid="timer-circle"
       >
         <svg width={RING_SIZE} height={RING_SIZE} style={{ position: 'absolute', inset: 0 }}>
-          <circle cx={RING_CENTER} cy={RING_CENTER} r={RING_R} fill="none" stroke="#F0E8D8" strokeWidth={8} />
+          <circle cx={RING_CENTER} cy={RING_CENTER} r={RING_R} fill="none" stroke="var(--kalpx-chip-bg)" strokeWidth={8} />
           <circle
             cx={RING_CENTER} cy={RING_CENTER} r={RING_R}
             fill="none"
-            stroke="#C9A84C"
+            stroke="var(--kalpx-gold)"
             strokeWidth={isFinal10 ? 10 : 8}
             strokeDasharray={2 * Math.PI * RING_R}
             strokeDashoffset={2 * Math.PI * RING_R * (1 - progress)}
@@ -117,7 +117,7 @@ export function PracticeTimerBlock({ block, screenData = {}, onAction }: Props) 
           />
         </svg>
         <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-          <span style={{ fontSize: 32, fontWeight: 300, color: isFinal10 ? '#C9A84C' : '#2C2A26', transition: 'color 0.5s' }}>
+          <span style={{ fontSize: 32, fontWeight: 300, color: isFinal10 ? 'var(--kalpx-gold)' : 'var(--kalpx-text)', transition: 'color 0.5s' }}>
             {formatTime(timeLeft)}
           </span>
           <span style={{ fontSize: 11, color: 'var(--kalpx-text-muted)', letterSpacing: 1 }}>
@@ -154,9 +154,9 @@ export function PracticeTimerBlock({ block, screenData = {}, onAction }: Props) 
               style={{
                 padding: '10px 24px',
                 borderRadius: 8,
-                border: '1px solid #C9A84C',
+                border: `1px solid var(--kalpx-gold)`,
                 background: 'transparent',
-                color: '#C9A84C',
+                color: 'var(--kalpx-gold)',
                 fontSize: 13,
                 cursor: 'pointer',
                 letterSpacing: 1,
@@ -172,7 +172,7 @@ export function PracticeTimerBlock({ block, screenData = {}, onAction }: Props) 
                 padding: '10px 24px',
                 borderRadius: 8,
                 border: 'none',
-                background: '#C9A84C',
+                background: 'var(--kalpx-cta)',
                 color: '#fff',
                 fontSize: 13,
                 cursor: 'pointer',

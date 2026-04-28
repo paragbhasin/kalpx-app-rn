@@ -29,7 +29,7 @@ export function FirstRecognitionBlock({ block, screenData }: Props) {
             fontSize: 11,
             fontWeight: 700,
             letterSpacing: 2,
-            color: '#d4b16a',
+            color: 'var(--kalpx-gold)',
             marginBottom: 12,
             textTransform: 'uppercase',
           }}
@@ -42,7 +42,7 @@ export function FirstRecognitionBlock({ block, screenData }: Props) {
           style={{
             fontSize: 22,
             fontWeight: 600,
-            color: '#2a1a0a',
+            color: 'var(--kalpx-text)',
             lineHeight: 1.4,
             marginBottom: 16,
           }}
@@ -55,7 +55,7 @@ export function FirstRecognitionBlock({ block, screenData }: Props) {
           key={i}
           style={{
             fontSize: 16,
-            color: '#4a3318',
+            color: 'var(--kalpx-text-soft)',
             lineHeight: 1.6,
             marginBottom: 8,
           }}

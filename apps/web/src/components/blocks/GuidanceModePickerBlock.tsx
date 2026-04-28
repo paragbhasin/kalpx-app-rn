@@ -64,9 +64,9 @@ export function GuidanceModePickerBlock({ block, onAction }: Props) {
             style={{
               padding: '16px 20px',
               borderRadius: 12,
-              border: isSelected ? '2px solid #d4b16a' : '1px solid #d0b890',
-              background: isSelected ? '#fdf0d0' : '#fdf8ef',
-              color: '#2a1a0a',
+              border: isSelected ? `2px solid var(--kalpx-border-gold)` : `1px solid var(--kalpx-border-gold)`,
+              background: isSelected ? 'var(--kalpx-chip-bg)' : 'var(--kalpx-bg)',
+              color: 'var(--kalpx-text)',
               fontSize: 15,
               cursor: busy ? 'not-allowed' : 'pointer',
               opacity: busy ? 0.7 : 1,
@@ -74,7 +74,7 @@ export function GuidanceModePickerBlock({ block, onAction }: Props) {
             }}
           >
             <div style={{ fontWeight: 600, marginBottom: 4 }}>{mode.label}</div>
-            <div style={{ fontSize: 13, color: '#6b4c1a' }}>{mode.description}</div>
+            <div style={{ fontSize: 13, color: 'var(--kalpx-text-soft)' }}>{mode.description}</div>
           </button>
         );
       })}

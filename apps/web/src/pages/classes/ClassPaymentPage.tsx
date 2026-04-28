@@ -51,14 +51,14 @@ export function ClassPaymentPage() {
 
   if (!stripePromise) {
     return (
-      <div style={{ minHeight: '100dvh', background: '#FFF8EF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ minHeight: '100dvh', background: 'var(--kalpx-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <p style={{ color: '#b91c1c', fontSize: 14 }}>Stripe is not configured. Please contact support.</p>
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: '100dvh', background: '#FFF8EF' }}>
+    <div style={{ minHeight: '100dvh', background: 'var(--kalpx-bg)' }}>
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '28px 16px 60px' }}>
         <button
           onClick={() => navigate(`/en/classes/${slug}/book`)}
@@ -67,12 +67,12 @@ export function ClassPaymentPage() {
           ← Back
         </button>
 
-        <h2 style={{ fontSize: 22, fontWeight: 800, color: '#2d1a0e', marginBottom: 4 }}>Complete payment</h2>
-        <p style={{ fontSize: 14, color: '#7a5c3a', marginBottom: 28 }}>Booking #{bookingId}</p>
+        <h2 style={{ fontSize: 22, fontWeight: 800, color: 'var(--kalpx-text)', marginBottom: 4 }}>Complete payment</h2>
+        <p style={{ fontSize: 14, color: 'var(--kalpx-text-soft)', marginBottom: 28 }}>Booking #{bookingId}</p>
 
         {loading && (
           <div style={{ textAlign: 'center', padding: '40px 0' }}>
-            <p style={{ color: '#7a5c3a', fontSize: 14 }}>Setting up payment…</p>
+            <p style={{ color: 'var(--kalpx-text-soft)', fontSize: 14 }}>Setting up payment…</p>
           </div>
         )}
 

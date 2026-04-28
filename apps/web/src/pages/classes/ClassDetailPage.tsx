@@ -118,7 +118,7 @@ export function ClassDetailPage() {
               <div>
                 <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--kalpx-text)' }}>{cls.tutor.name}</p>
                 {cls.tutor.timezone && (
-                  <p style={{ fontSize: 12, color: '#999' }}>{cls.tutor.timezone}</p>
+                  <p style={{ fontSize: 12, color: 'var(--kalpx-text-muted)' }}>{cls.tutor.timezone}</p>
                 )}
               </div>
             </div>

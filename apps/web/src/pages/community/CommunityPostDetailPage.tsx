@@ -59,11 +59,11 @@ export function CommunityPostDetailPage() {
 
   if (ctrl.postLoading) {
     return (
-      <div style={{ minHeight: '100dvh', background: '#FFF8EF' }}>
+      <div style={{ minHeight: '100dvh', background: 'var(--kalpx-bg)' }}>
         <div style={{ maxWidth: 480, margin: '0 auto', padding: '28px 16px' }}>
-          <div style={{ width: 60, height: 14, borderRadius: 4, background: '#f0e8d8', marginBottom: 24, animation: 'pulse 1.5s ease-in-out infinite' }} />
-          <div style={{ width: '85%', height: 22, borderRadius: 4, background: '#f0e8d8', marginBottom: 10, animation: 'pulse 1.5s ease-in-out infinite' }} />
-          <div style={{ width: '70%', height: 14, borderRadius: 4, background: '#f0e8d8', animation: 'pulse 1.5s ease-in-out infinite' }} />
+          <div style={{ width: 60, height: 14, borderRadius: 4, background: 'var(--kalpx-chip-bg)', marginBottom: 24, animation: 'pulse 1.5s ease-in-out infinite' }} />
+          <div style={{ width: '85%', height: 22, borderRadius: 4, background: 'var(--kalpx-chip-bg)', marginBottom: 10, animation: 'pulse 1.5s ease-in-out infinite' }} />
+          <div style={{ width: '70%', height: 14, borderRadius: 4, background: 'var(--kalpx-chip-bg)', animation: 'pulse 1.5s ease-in-out infinite' }} />
         </div>
       </div>
     );
@@ -71,7 +71,7 @@ export function CommunityPostDetailPage() {
 
   if (ctrl.postError || !post) {
     return (
-      <div style={{ minHeight: '100dvh', background: '#FFF8EF' }}>
+      <div style={{ minHeight: '100dvh', background: 'var(--kalpx-bg)' }}>
         <div style={{ maxWidth: 480, margin: '0 auto', padding: '28px 16px' }}>
           <button onClick={() => navigate('/en/community')} style={backBtn}>← Community</button>
           <CommunityErrorState message={ctrl.postError ?? 'Post not found.'} />
@@ -81,12 +81,12 @@ export function CommunityPostDetailPage() {
   }
 
   return (
-    <div style={{ minHeight: '100dvh', background: '#FFF8EF' }}>
+    <div style={{ minHeight: '100dvh', background: 'var(--kalpx-bg)' }}>
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 60px' }}>
         <button onClick={() => navigate('/en/community')} style={backBtn}>← Community</button>
 
         {/* Post */}
-        <div style={{ background: '#fff', border: '1px solid #f0e8d8', borderRadius: 14, padding: '16px', marginTop: 16, marginBottom: 20 }}>
+        <div style={{ background: 'var(--kalpx-card-bg)', border: `1px solid var(--kalpx-chip-bg)`, borderRadius: 14, padding: '16px', marginTop: 16, marginBottom: 20 }}>
           <CommunityAuthorRow author={author} timestamp={post.created_at} />
 
           {post.community_name && (
@@ -96,13 +96,13 @@ export function CommunityPostDetailPage() {
           )}
 
           {post.title && (
-            <h2 style={{ fontSize: 20, fontWeight: 700, color: '#2d1a0e', marginTop: 8, lineHeight: 1.35 }}>
+            <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--kalpx-text)', marginTop: 8, lineHeight: 1.35 }}>
               {post.title}
             </h2>
           )}
 
           {text && (
-            <p style={{ fontSize: 14, color: '#3a2010', lineHeight: 1.65, marginTop: 8 }}>
+            <p style={{ fontSize: 14, color: 'var(--kalpx-text-soft)', lineHeight: 1.65, marginTop: 8 }}>
               {text}
             </p>
           )}
@@ -119,7 +119,7 @@ export function CommunityPostDetailPage() {
 
         {/* Comments */}
         <div>
-          <p style={{ fontSize: 14, fontWeight: 700, color: '#2d1a0e', marginBottom: 12 }}>
+          <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--kalpx-text)', marginBottom: 12 }}>
             Comments {ctrl.comments.length > 0 ? `(${ctrl.comments.length})` : ''}
           </p>
 

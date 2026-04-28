@@ -168,7 +168,7 @@ export function ClassBookingPage() {
         <div style={{ marginBottom: 24 }}>
           <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--kalpx-text)', marginBottom: 10 }}>Choose a time</p>
           {slots.length === 0 ? (
-            <p style={{ fontSize: 13, color: '#999' }}>No available slots right now.</p>
+            <p style={{ fontSize: 13, color: 'var(--kalpx-text-muted)' }}>No available slots right now.</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {slots.map((slot, i) => (
@@ -192,7 +192,7 @@ export function ClassBookingPage() {
         {/* Note */}
         <div style={{ marginBottom: 24 }}>
           <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--kalpx-text)', marginBottom: 8 }}>
-            Note to teacher <span style={{ fontWeight: 400, color: '#999' }}>(optional)</span>
+            Note to teacher <span style={{ fontWeight: 400, color: 'var(--kalpx-text-muted)' }}>(optional)</span>
           </p>
           <textarea
             value={note}
@@ -203,7 +203,7 @@ export function ClassBookingPage() {
             style={{
               width: '100%', boxSizing: 'border-box',
               padding: '10px 14px', borderRadius: 10,
-              border: '1.5px solid var(--kalpx-border-gold)', background: '#fff',
+              border: '1.5px solid var(--kalpx-border-gold)', background: 'var(--kalpx-card-bg)',
               fontSize: 14, color: 'var(--kalpx-text)', resize: 'vertical', outline: 'none',
             }}
           />

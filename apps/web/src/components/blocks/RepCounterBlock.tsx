@@ -1,5 +1,6 @@
 import { Check, ChevronDown, ChevronUp } from "lucide-react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { AudioPlayerBlock } from "./AudioPlayerBlock";
 
 /* ── Constants ────────────────────────────────────────────────────── */
 const BEAD_COUNT = 18;
@@ -35,7 +36,7 @@ interface Props {
 }
 
 /* ── CollapsibleCard ──────────────────────────────────────────────── */
-function CollapsibleCard({
+export function CollapsibleCard({
   label,
   children,
   expanded,
@@ -104,7 +105,7 @@ function CollapsibleCard({
 }
 
 /* ── MantraTextCard (IAST / Devanagari) ──────────────────────────── */
-function MantraTextCard({
+export function MantraTextCard({
   text,
   isDevanagari,
   expanded,
@@ -316,7 +317,6 @@ function MalaBeadRing({
         ))}
       </div>
 
-      {/* ── Centre TAP button (not rotating) ── */}
       <button
         data-testid="rep-tap-target"
         onPointerDown={() => {
@@ -424,6 +424,9 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
   const essence: string = activeItem.essence || activeItem.insight || "";
   const audioUrl: string =
     activeItem.audio_url || screenData["mantra_audio_url"] || "";
+  const audioScreenData = audioUrl
+    ? { ...screenData, mantra_audio_url: audioUrl }
+    : screenData;
 
   /* ── Expand states ── */
   const [iastExp, setIastExp] = useState(false);
@@ -432,7 +435,9 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
   const [essExp, setEssExp] = useState(true); // open by default (matches mobile)
 
   /* ── Visual bead count ── */
-  const beadCount = Math.min(repsTotal, MAX_VISUAL_BEADS);
+  const beadCount = unlimited
+    ? MAX_VISUAL_BEADS
+    : Math.min(repsTotal, MAX_VISUAL_BEADS);
 
   /* ── Increment ── */
   const increment = useCallback(() => {
@@ -628,9 +633,9 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
       {/* 7 ── Audio player */}
       {audioUrl && (
         <div style={{ width: "100%", marginBottom: 24 }}>
-          <AudioPlayerInline
-            audioUrl={audioUrl}
-            label={title || "Mantra Audio"}
+          <AudioPlayerBlock
+            block={{ audio_key: "mantra_audio_url", loop: true }}
+            screenData={audioScreenData}
           />
         </div>
       )}
@@ -679,146 +684,6 @@ export function RepCounterBlock({ block, screenData = {}, onAction }: Props) {
       >
         Back
       </button>
-    </div>
-  );
-}
-
-/* ── Inline audio player ──────────────────────────────────────────── */
-function AudioPlayerInline({
-  audioUrl,
-  label,
-}: {
-  audioUrl: string;
-  label: string;
-}) {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [playing, setPlaying] = useState(false);
-  const [muted, setMuted] = useState(false);
-  const [progress, setProgress] = useState(0);
-
-  useEffect(() => {
-    const el = new Audio(audioUrl);
-    el.preload = "metadata";
-    el.loop = true;
-    el.volume = 0.8;
-    audioRef.current = el;
-
-    const timer = setTimeout(async () => {
-      try {
-        await el.play();
-        setPlaying(true);
-      } catch {}
-    }, 2000);
-
-    el.addEventListener("timeupdate", () => {
-      if (el.duration) setProgress(el.currentTime / el.duration);
-    });
-
-    return () => {
-      clearTimeout(timer);
-      el.pause();
-      el.src = "";
-      audioRef.current = null;
-    };
-  }, [audioUrl]);
-
-  async function togglePlay() {
-    const el = audioRef.current;
-    if (!el) return;
-    if (playing) {
-      el.pause();
-      setPlaying(false);
-    } else {
-      try {
-        await el.play();
-        setPlaying(true);
-      } catch {}
-    }
-  }
-
-  function toggleMute() {
-    const el = audioRef.current;
-    if (!el) return;
-    el.muted = !muted;
-    setMuted(!muted);
-  }
-
-  return (
-    <div
-      style={{
-        borderRadius: 14,
-        border: "1px solid rgba(184,148,80,0.28)",
-        background: "rgba(255,255,255,0.45)",
-        padding: "12px 16px",
-        display: "flex",
-        flexDirection: "column",
-        gap: 8,
-      }}
-    >
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <button
-          onClick={togglePlay}
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: "50%",
-            border: `1.5px solid ${GOLD}`,
-            background: "rgba(255,255,255,0.7)",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}
-          aria-label={playing ? "Pause" : "Play"}
-        >
-          <span style={{ fontSize: 13 }}>{playing ? "⏸" : "▶"}</span>
-        </button>
-        <span
-          style={{
-            flex: 1,
-            fontSize: 13,
-            color: BROWN,
-            fontFamily: "var(--kalpx-font-serif)",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {label}
-        </span>
-        <button
-          onClick={toggleMute}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            fontSize: 16,
-            padding: 4,
-          }}
-          aria-label={muted ? "Unmute" : "Mute"}
-        >
-          {muted ? "🔇" : "🔊"}
-        </button>
-      </div>
-      <div
-        style={{
-          height: 3,
-          borderRadius: 2,
-          background: "rgba(184,148,80,0.18)",
-          overflow: "hidden",
-        }}
-      >
-        <div
-          style={{
-            height: "100%",
-            width: `${progress * 100}%`,
-            background: GOLD,
-            borderRadius: 2,
-            transition: "width 0.5s linear",
-          }}
-        />
-      </div>
     </div>
   );
 }

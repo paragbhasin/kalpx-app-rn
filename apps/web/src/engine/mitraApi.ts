@@ -263,7 +263,12 @@ export async function postRoomSacred(roomId: string, payload: Record<string, any
  */
 export async function postTriggerMantras(payload: {
   feeling?: string;
+  focus?: string;
+  subFocus?: string;
+  depth?: string;
+  round?: number;
   locale?: string;
+  tz?: string;
 }): Promise<any> {
   try {
     const res = await api.post('mitra/trigger-mantras/', payload);

@@ -33,7 +33,7 @@ vi.mock('../../lib/webRouter', () => ({ webNavigate: vi.fn() }));
 vi.mock('../../hooks/useJourneyStatus', () => ({ invalidateJourneyStatusCache: vi.fn() }));
 
 import { webNavigate } from '../../lib/webRouter';
-import { postRoomTelemetry, postRoomSacred } from '../mitraApi';
+import { postPranaAcknowledge, postRoomTelemetry, postRoomSacred, postTriggerMantras } from '../mitraApi';
 
 function makeDispatch() {
   return vi.fn((action: any) => Promise.resolve(action));
@@ -60,6 +60,10 @@ describe('initiate_trigger_support', () => {
     });
     await executeAction({ type: 'initiate_trigger_support' }, ctx);
     expect(ctx.dispatch).toHaveBeenCalled();
+    const calls = (ctx.dispatch as any).mock.calls.map((c: any[]) => c[0]);
+    const update = calls.find((a: any) => a?.payload?.om_audio_url !== undefined);
+    expect(update?.payload?.om_audio_url).toContain('/om/');
+    expect(update?.payload?.trigger_mantra_text).toBeTruthy();
     expect(webNavigate).toHaveBeenCalledWith(expect.stringContaining('sound_bridge'));
   });
 
@@ -112,6 +116,79 @@ describe('advance_sound_bridge', () => {
     const calls = dispatch.mock.calls.map((c: any[]) => c[0]);
     const update = calls.find((a: any) => a?.payload?.runner_active_item !== undefined);
     expect(update?.payload?.runner_active_item?.title).toBe('Mahamrityunjaya');
+  });
+});
+
+describe('trigger_still_feeling', () => {
+  it('step 2 routes to post_trigger_mantra using prefetched mantra data', async () => {
+    const dispatch = makeDispatch();
+    const ctx: ActionContext = {
+      dispatch: dispatch as any,
+      screenData: {
+        trigger_step: 2,
+        trigger_feeling: 'triggered',
+        _trigger_mantra_data: {
+          title: 'Om Namah Shivaya',
+          iast: 'Om Namah Shivaya',
+          devanagari: 'ॐ नमः शिवाय',
+          audio_url: 'https://cdn.example.com/mantra.mp3',
+        },
+        journey_id: 1,
+        day_number: 4,
+      },
+    };
+    await executeAction({ type: 'trigger_still_feeling' }, ctx);
+    const calls = dispatch.mock.calls.map((c: any[]) => c[0]);
+    const update = calls.find((a: any) => a?.payload?.trigger_step === 3);
+    expect(update?.payload?.runner_source).toBe('support_trigger');
+    expect(update?.payload?.runner_active_item?.item_type).toBe('mantra');
+    expect(update?.payload?.runner_reps_completed).toBe(0);
+    expect(update?.payload?.mantra_text).toBe('Om Namah Shivaya');
+    expect(webNavigate).toHaveBeenCalledWith(expect.stringContaining('post_trigger_mantra'));
+  });
+
+  it('step 1 fetches suggestions and routes to trigger_practice_runner when practice exists', async () => {
+    vi.mocked(postTriggerMantras).mockResolvedValueOnce({
+      suggestions: [
+        {
+          type: 'practice',
+          item_id: 'practice_1',
+          context: 'Gentle grounding',
+          core: {
+            title: 'Ground your breath',
+            steps: ['Sit down', 'Lengthen exhale'],
+            benefits: ['Soothes the nervous system'],
+          },
+        },
+        {
+          type: 'mantra',
+          item_id: 'mantra_1',
+          context: 'Steady the mind',
+          core: {
+            title: 'Om Shanti',
+            devanagari: 'ॐ शान्तिः',
+          },
+        },
+      ],
+    });
+
+    const dispatch = makeDispatch();
+    const ctx: ActionContext = {
+      dispatch: dispatch as any,
+      screenData: {
+        trigger_step: 1,
+        trigger_feeling: 'anxious',
+        journey_id: 1,
+        day_number: 4,
+      },
+    };
+    await executeAction({ type: 'trigger_still_feeling' }, ctx);
+    const calls = dispatch.mock.calls.map((c: any[]) => c[0]);
+    const update = calls.find((a: any) => a?.payload?.runner_active_item?.item_type === 'practice');
+    expect(postTriggerMantras).toHaveBeenCalledWith(expect.objectContaining({ feeling: 'anxious', round: 1 }));
+    expect(update?.payload?.runner_source).toBe('support_trigger');
+    expect(update?.payload?.trigger_step).toBe(2);
+    expect(webNavigate).toHaveBeenCalledWith(expect.stringContaining('trigger_practice_runner'));
   });
 });
 
@@ -176,6 +253,45 @@ describe('submit_checkin', () => {
     const calls = dispatch.mock.calls.map((c: any[]) => c[0]);
     const update = calls.find((a: any) => a?.payload?.checkin_ack_variant !== undefined);
     expect(update?.payload?.checkin_ack_variant).toBe('balanced');
+  });
+});
+
+describe('submit quick_checkin prana_type', () => {
+  it('balanced routes to quick_checkin_ack and stores ack copy', async () => {
+    vi.mocked(postPranaAcknowledge).mockResolvedValueOnce({
+      insight: 'Stay with this steadiness.',
+      suggestions: [],
+    });
+    const dispatch = makeDispatch();
+    const ctx: ActionContext = {
+      dispatch: dispatch as any,
+      screenData: { journey_id: 1, day_number: 2 },
+    };
+    await executeAction({ type: 'submit', payload: { prana_type: 'balanced' } }, ctx);
+    const calls = dispatch.mock.calls.map((c: any[]) => c[0]);
+    const update = calls.find((a: any) => a?.payload?.current_prana_type === 'balanced');
+    expect(update?.payload?.checkin_ack_headline).toBe('You are exactly where you need to be.');
+    expect(webNavigate).toHaveBeenCalledWith(expect.stringContaining('stateId=quick_checkin_ack'));
+  });
+
+  it('agitated routes to checkin_breath_reset runner', async () => {
+    vi.mocked(postPranaAcknowledge).mockResolvedValueOnce({
+      insight: 'Take one calming breath.',
+      suggestions: [{ type: 'mantra', item_id: 'm1' }],
+    });
+    const dispatch = makeDispatch();
+    const ctx: ActionContext = {
+      dispatch: dispatch as any,
+      screenData: { journey_id: 1, day_number: 2 },
+    };
+    await executeAction({ type: 'submit', payload: { prana_type: 'agitated' } }, ctx);
+    const calls = dispatch.mock.calls.map((c: any[]) => c[0]);
+    const update = calls.find((a: any) => a?.payload?.runner_source === 'support_checkin');
+    expect(update?.payload?.trigger_feeling).toBe('agitated');
+    expect(update?.payload?.trigger_step).toBe(1);
+    expect(update?.payload?.mantra_audio_url).toContain('/om/');
+    expect(update?.payload?.checkin_mantra_text).toBeTruthy();
+    expect(webNavigate).toHaveBeenCalledWith(expect.stringContaining('stateId=checkin_breath_reset'));
   });
 });
 

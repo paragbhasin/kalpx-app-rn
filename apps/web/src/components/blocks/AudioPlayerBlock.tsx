@@ -39,9 +39,10 @@ export function AudioPlayerBlock({ block, screenData = {} }: Props) {
     };
   }, [src, loop]);
 
-  if (!src || error) return null;
+  if (!src) return null;
 
   const toggle = () => {
+    if (error) return;
     const h = handleRef.current;
     if (!h) return;
     if (playing) {
@@ -58,18 +59,20 @@ export function AudioPlayerBlock({ block, screenData = {} }: Props) {
       <button
         onClick={toggle}
         data-testid="audio-player-btn"
-        aria-label={playing ? 'Pause audio' : 'Play audio'}
+        aria-label={error ? 'Audio unavailable' : playing ? 'Pause audio' : 'Play audio'}
+        disabled={error}
         style={{
           width: 48,
           height: 48,
           borderRadius: '50%',
           border: '1.5px solid #C9A84C',
           background: playing ? '#C9A84C' : 'transparent',
-          cursor: 'pointer',
+          cursor: error ? 'not-allowed' : 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           transition: 'background 0.2s',
+          opacity: error ? 0.45 : 1,
         }}
       >
         {playing ? (

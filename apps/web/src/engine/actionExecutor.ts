@@ -78,6 +78,57 @@ function _isAuthenticated(): boolean {
   }
 }
 
+function _triggerNegativeLabel(feeling: string, step: number): string {
+  if (step <= 2) return 'Try another way';
+  const labels: Record<string, string> = {
+    triggered: 'I still feel triggered',
+    agitated: 'I still feel agitated',
+    drained: 'I still feel drained',
+    anxious: 'I still feel anxious',
+    restless: 'I still feel restless',
+    angry: 'I still feel angry',
+    overwhelmed: 'I still feel overwhelmed',
+    stuck: 'I still feel stuck',
+    uncertain: 'I still feel unsettled',
+  };
+  return labels[feeling] || 'I still feel unsettled';
+}
+
+const AUDIO_S3_BASE =
+  'https://kalpx-dev-website.s3.us-east-2.amazonaws.com/audio';
+
+const OM_AUDIO_LIBRARY = [
+  `${AUDIO_S3_BASE}/om/Om.mp4`,
+  `${AUDIO_S3_BASE}/om/Om Shanti.mp4`,
+  `${AUDIO_S3_BASE}/om/Hari Om -Female.mp4`,
+];
+
+function _rotateAudio(library: string[], storageKey: string): string {
+  let lastIdx = -1;
+  try {
+    const stored = localStorage.getItem(storageKey);
+    if (stored != null) lastIdx = parseInt(stored, 10);
+  } catch {}
+  const nextIdx = ((Number.isFinite(lastIdx) ? lastIdx : -1) + 1) % library.length;
+  try {
+    localStorage.setItem(storageKey, String(nextIdx));
+  } catch {}
+  return library[nextIdx];
+}
+
+function _omTextForTrack(url: string) {
+  if (url.includes('Hari Om')) {
+    return { label: 'Hari Om', devanagari: 'हरि ॐ' };
+  }
+  if (url.includes('Om Shanti')) {
+    return {
+      label: 'Om Shanti Shanti Shanti',
+      devanagari: 'ॐ शान्तिः शान्तिः शान्तिः',
+    };
+  }
+  return { label: 'OM', devanagari: 'ॐ' };
+}
+
 // ------------------------------------------------------------------
 // Main executor
 // ------------------------------------------------------------------
@@ -493,8 +544,10 @@ export async function executeAction(action: any, context: ActionContext): Promis
     // RETURN_TO_DASHBOARD — clear runner state, reload dashboard.
     // ----------------------------------------------------------------
     case 'return_to_dashboard': {
-      const runnerClearKeys = ['runner_active_item', 'runner_source', 'runner_variant', 'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec', 'runner_start_time', 'runner_tz'];
-      runnerClearKeys.forEach(k => dispatch(setScreenValue({ key: k, value: null })));
+      // Navigate first so support/mantra screens do not briefly re-render with
+      // partially-cleared runner state before the route transition completes.
+      webNavigate('/en/mitra/dashboard');
+
       // Refresh dashboard data non-blocking
       try {
         const envelope = await getDashboardView();
@@ -502,7 +555,6 @@ export async function executeAction(action: any, context: ActionContext): Promis
           dispatch(updateScreenData(ingestDailyView(envelope)));
         }
       } catch { /* non-blocking — navigate regardless */ }
-      webNavigate('/en/mitra/dashboard');
       break;
     }
 
@@ -556,14 +608,51 @@ export async function executeAction(action: any, context: ActionContext): Promis
     }
 
     // ----------------------------------------------------------------
-    // INITIATE_TRIGGER — route to trigger support flow.
+    // INITIATE_TRIGGER — mirror mobile dashboard quick-support behavior:
+    // seed an OM trigger session and enter the mantra runner directly.
     // ----------------------------------------------------------------
     case 'initiate_trigger': {
-      void apiTrackEvent('trigger_initiated', {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
+      const triggerOmAudio = _rotateAudio(OM_AUDIO_LIBRARY, '_kalpx_om_audio_idx');
+      const { label: trigLabel, devanagari: trigDev } = _omTextForTrack(triggerOmAudio);
+      const triggerItem = {
+        item_type: 'mantra',
+        item_id: 'om_support',
+        title: trigLabel,
+        devanagari: trigDev,
+        audio_url: triggerOmAudio,
+        source: 'support',
+      };
+
+      dispatch(updateScreenData({
+        runner_active_item: triggerItem,
+        runner_variant: 'mantra',
+        runner_source: 'core',
+        runner_step_index: 0,
+        runner_reps_completed: 0,
+        runner_start_time: Date.now(),
+        runner_duration_actual_sec: 0,
+        runner_tz: tz,
+        reps_total: -1,
+        trigger_cycle_count: 1,
+        trigger_feeling: 'triggered',
+        trigger_step: 1,
+        _selected_om_audio: triggerOmAudio,
+        om_audio_url: triggerOmAudio,
+        trigger_mantra_text: trigLabel,
+        trigger_mantra_devanagari: trigDev,
+        mantra_text: trigLabel,
+        mantra_devanagari: trigDev,
+        mantra_audio_url: triggerItem.audio_url,
+      }));
+
+      void apiTrackEvent('trigger_session_started', {
         journey_id: screenData.journey_id,
         day_number: screenData.day_number || 1,
       });
-      webNavigate('/en/mitra/trigger');
+
+      dispatch(loadScreen({ containerId: 'practice_runner', stateId: 'free_mantra_chanting' }));
+      webNavigate(_containerToPath('practice_runner', 'free_mantra_chanting'));
       break;
     }
 
@@ -575,7 +664,120 @@ export async function executeAction(action: any, context: ActionContext): Promis
         journey_id: screenData.journey_id,
         day_number: screenData.day_number || 1,
       });
-      webNavigate('/en/mitra/checkin');
+      dispatch(updateScreenData({
+        current_prana: null,
+        current_prana_type: null,
+        checkin_ack_headline: null,
+        checkin_ack_body: null,
+        checkin_ack_accent: null,
+        prana_ack_suggestions: null,
+      }));
+      dispatch(loadScreen({ containerId: 'cycle_transitions', stateId: 'quick_checkin' }));
+      webNavigate(_containerToPath('cycle_transitions', 'quick_checkin'));
+      break;
+    }
+
+    // SUBMIT — quick check-in prana selection parity with RN
+    case 'submit': {
+      const p = action.payload || {};
+
+      if (p.prana_type) {
+        const pranaType = String(p.prana_type);
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
+        const ackRes = await postPranaAcknowledge({
+          pranaType,
+          focus: (screenData.scan_focus as string) || (screenData.active_focus as string) || 'peacecalm',
+          subFocus: (screenData.prana_baseline_selection as string) || '',
+          depth: (screenData.routine_depth as string) || (screenData.routine_setup as string) || 'standard',
+          baselineMetrics: screenData.baseline_metrics || {},
+          dayNumber: screenData.day_number || 1,
+          journeyId: screenData.journey_id || null,
+          round: 2,
+          locale: (screenData.locale as string) || 'en',
+          tz,
+        });
+
+        const checkinAckCopy: Record<string, { headline: string; body: string; accent?: string }> = {
+          balanced: {
+            headline: 'You are exactly where you need to be.',
+            body: 'There is a quiet steadiness within you.\nStay here. Let it deepen.',
+            accent: 'Nothing needs to be changed right now.',
+          },
+          energized: {
+            headline: 'Your energy is present and alive.',
+            body: 'Move with this energy, not against it.\nLet it carry your intention forward.',
+            accent: 'This is a good moment to carry your sankalp forward.',
+          },
+          agitated: {
+            headline: 'A gentler next step may help settle this.',
+            body: 'You do not need to push through this state. Choose one small support that helps bring your energy back into steadiness.',
+            accent: '',
+          },
+          drained: {
+            headline: 'A nourishing next step may help restore you.',
+            body: 'You may not need more effort right now. Choose one small support that helps you return with more softness and steadiness.',
+            accent: '',
+          },
+        };
+        const ackCopy = checkinAckCopy[pranaType] || checkinAckCopy.balanced;
+
+        dispatch(updateScreenData({
+          current_prana: pranaType,
+          current_prana_type: pranaType,
+          checkin_ack_headline: ackCopy.headline,
+          checkin_ack_body: ackCopy.body,
+          checkin_ack_accent: ackCopy.accent || '',
+          prana_ack_insight: ackRes?.insight || null,
+          prana_ack_suggestions: Array.isArray(ackRes?.suggestions) ? ackRes.suggestions : null,
+        }));
+
+        const hasSuggestions = Array.isArray(ackRes?.suggestions) && ackRes.suggestions.length > 0;
+        void apiTrackEvent(hasSuggestions ? 'checkin_acknowledged' : 'checkin_ack_only', {
+          journey_id: screenData.journey_id,
+          day_number: screenData.day_number || 1,
+          prana_type: pranaType,
+        });
+
+        if (pranaType === 'agitated' || pranaType === 'drained') {
+          const checkinOmAudio = _rotateAudio(OM_AUDIO_LIBRARY, '_kalpx_om_audio_idx');
+          const { label, devanagari } = _omTextForTrack(checkinOmAudio);
+          dispatch(updateScreenData({
+            runner_variant: 'mantra',
+            runner_source: 'support_checkin',
+            runner_active_item: {
+              item_type: 'mantra',
+              item_id: 'checkin_breath_reset',
+              title: label,
+              devanagari,
+              audio_url: checkinOmAudio,
+              source: 'support',
+            },
+            runner_start_time: Date.now(),
+            runner_reps_completed: 0,
+            runner_duration_actual_sec: 0,
+            reps_total: -1,
+            _selected_om_audio: checkinOmAudio,
+            om_audio_url: checkinOmAudio,
+            checkin_mantra_text: label,
+            checkin_mantra_devanagari: devanagari,
+            mantra_text: label,
+            mantra_devanagari: devanagari,
+            mantra_audio_url: checkinOmAudio,
+            trigger_feeling: pranaType,
+            trigger_step: 1,
+            trigger_cycle_count: 2,
+          }));
+          dispatch(loadScreen({ containerId: 'practice_runner', stateId: 'checkin_breath_reset' }));
+          webNavigate(_containerToPath('practice_runner', 'checkin_breath_reset'));
+          break;
+        }
+
+        dispatch(loadScreen({ containerId: 'cycle_transitions', stateId: 'quick_checkin_ack' }));
+        webNavigate(_containerToPath('cycle_transitions', 'quick_checkin_ack'));
+        break;
+      }
+
+      if (WEB_ENV.isDev) console.warn('[actionExecutor] submit: unsupported payload', action);
       break;
     }
 
@@ -844,12 +1046,15 @@ export async function executeAction(action: any, context: ActionContext): Promis
     // routes to support_trigger/sound_bridge.
     case 'initiate_trigger_support': {
       const prevRound = Number(screenData.trigger_round || 0);
+      const omUrl = _rotateAudio(OM_AUDIO_LIBRARY, '_kalpx_om_audio_idx');
+      const omText = _omTextForTrack(omUrl);
       // REG-002: clear trigger-owned fields before new round
       dispatch(updateScreenData({
-        trigger_mantra_text: null,
-        trigger_mantra_devanagari: null,
+        trigger_mantra_text: omText.label,
+        trigger_mantra_devanagari: omText.devanagari,
         trigger_round: prevRound + 1,
-        om_audio_url: null,
+        _selected_om_audio: omUrl,
+        om_audio_url: omUrl,
       }));
       void apiTrackEvent('trigger_session_started', {
         journey_id: screenData.journey_id,
@@ -892,6 +1097,239 @@ export async function executeAction(action: any, context: ActionContext): Promis
       dispatch(loadScreen({ containerId: 'practice_runner', stateId: 'free_mantra_chanting' }));
       webNavigate(_containerToPath('practice_runner', 'free_mantra_chanting'));
       break;
+    }
+
+    case 'try_another_way':
+    case 'trigger_still_feeling': {
+      const stillStep = Number(screenData.trigger_step || 2);
+      const stillFeeling = (screenData.trigger_feeling as string) || 'triggered';
+      const locale = (screenData.locale as string) || 'en';
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
+
+      const fetchSuggestions = async (round: number) =>
+        await postTriggerMantras({
+          feeling: stillFeeling,
+          focus: (screenData.scan_focus as string) || (screenData.active_focus as string) || 'peacecalm',
+          subFocus: (screenData.prana_baseline_selection as string) || '',
+          depth: (screenData.routine_depth as string) || (screenData.routine_setup as string) || 'standard',
+          round,
+          locale,
+          tz,
+        });
+
+      const normalizePractice = (suggestion: any) => {
+        const core = suggestion?.core || {};
+        return {
+          ...core,
+          wisdom: suggestion?.context,
+          source: 'support',
+          is_trigger: true,
+          item_id: suggestion?.item_id || core.item_id || suggestion?.id || core.id,
+          item_type: 'practice',
+          steps_text: Array.isArray(core.steps)
+            ? core.steps.map((s: string, i: number) => `${i + 1}. ${s}`).join('\n')
+            : core.steps_text,
+          benefits_text: Array.isArray(core.benefits)
+            ? core.benefits.map((b: string) => `• ${b}`).join('\n')
+            : core.benefits_text,
+        };
+      };
+
+      const normalizeMantra = (suggestion: any) => {
+        const core = suggestion?.core || {};
+        return {
+          ...core,
+          wisdom: suggestion?.context,
+          source: 'support',
+          is_trigger: true,
+          item_id: suggestion?.item_id || core.item_id || suggestion?.id || core.id,
+          item_type: 'mantra',
+        };
+      };
+
+      if (stillStep <= 1) {
+        const res = await fetchSuggestions(1);
+        const suggestions = res?.suggestions || [];
+        const practiceSuggestion = suggestions.find((s: any) => s?.type === 'practice');
+        const mantraSuggestion = suggestions.find((s: any) => s?.type === 'mantra');
+
+        if (practiceSuggestion) {
+          const practiceData = normalizePractice(practiceSuggestion);
+          dispatch(updateScreenData({
+            _trigger_practice_data: {
+              ...(practiceSuggestion.core || {}),
+              wisdom: practiceSuggestion.context,
+              item_id: practiceSuggestion.item_id || practiceSuggestion.id,
+            },
+            ...(mantraSuggestion
+              ? {
+                  _trigger_mantra_data: {
+                    ...(mantraSuggestion.core || {}),
+                    wisdom: mantraSuggestion.context,
+                    item_id: mantraSuggestion.item_id || mantraSuggestion.id,
+                  },
+                }
+              : {}),
+            runner_active_item: practiceData,
+            runner_variant: 'practice',
+            runner_source: 'support_trigger',
+            trigger_step: 2,
+            _trigger_negative_label: _triggerNegativeLabel(stillFeeling, 2),
+          }));
+          webNavigate(_containerToPath('practice_runner', 'trigger_practice_runner'));
+          return;
+        }
+
+        if (mantraSuggestion) {
+          const mantraData = normalizeMantra(mantraSuggestion);
+          dispatch(updateScreenData({
+            _trigger_mantra_data: {
+              ...(mantraSuggestion.core || {}),
+              wisdom: mantraSuggestion.context,
+              item_id: mantraSuggestion.item_id || mantraSuggestion.id,
+            },
+            runner_active_item: mantraData,
+            runner_variant: 'mantra',
+            runner_source: 'support_trigger',
+            runner_reps_completed: 0,
+            runner_start_time: Date.now(),
+            runner_duration_actual_sec: 0,
+            mantra_text: mantraData.iast || mantraData.title || 'OM',
+            mantra_devanagari: mantraData.devanagari || 'ॐ',
+            mantra_audio_url: mantraData.audio_url || '',
+            trigger_mantra_text: mantraData.iast || mantraData.title || 'OM',
+            trigger_mantra_devanagari: mantraData.devanagari || 'ॐ',
+            trigger_step: 3,
+            _trigger_negative_label: _triggerNegativeLabel(stillFeeling, 3),
+          }));
+          webNavigate(_containerToPath('practice_runner', 'post_trigger_mantra'));
+          return;
+        }
+
+        webNavigate('/en/mitra/dashboard');
+        return;
+      }
+
+      if (stillStep === 2) {
+        let mantraData = screenData._trigger_mantra_data as Record<string, any> | null;
+
+        if (!mantraData) {
+          const res = await fetchSuggestions(2);
+          const mantraSuggestion = (res?.suggestions || []).find((s: any) => s?.type === 'mantra');
+          if (mantraSuggestion) {
+            mantraData = {
+              ...(mantraSuggestion.core || {}),
+              wisdom: mantraSuggestion.context,
+              item_id: mantraSuggestion.item_id || mantraSuggestion.id,
+            };
+          }
+        }
+
+        void apiTrackEvent('trigger_still_feeling', {
+          journey_id: screenData.journey_id,
+          day_number: screenData.day_number || 1,
+          step: 2,
+          feeling: stillFeeling,
+          next_step: 'mantra',
+        });
+
+        if (mantraData) {
+          dispatch(updateScreenData({
+            _trigger_mantra_data: mantraData,
+            runner_active_item: {
+              ...mantraData,
+              source: 'support',
+              is_trigger: true,
+              item_type: 'mantra',
+            },
+            runner_variant: 'mantra',
+            runner_source: 'support_trigger',
+            runner_reps_completed: 0,
+            runner_start_time: Date.now(),
+            runner_duration_actual_sec: 0,
+            mantra_text: mantraData.iast || mantraData.title || 'OM',
+            mantra_devanagari: mantraData.devanagari || 'ॐ',
+            mantra_audio_url: mantraData.audio_url || '',
+            trigger_mantra_text: mantraData.iast || mantraData.title || 'OM',
+            trigger_mantra_devanagari: mantraData.devanagari || 'ॐ',
+            trigger_step: 3,
+            _trigger_negative_label: _triggerNegativeLabel(stillFeeling, 3),
+          }));
+          webNavigate(_containerToPath('practice_runner', 'post_trigger_mantra'));
+        } else {
+          webNavigate('/en/mitra/dashboard');
+        }
+        return;
+      }
+
+      void apiTrackEvent('trigger_still_feeling_final', {
+        journey_id: screenData.journey_id,
+        day_number: screenData.day_number || 1,
+        feeling: stillFeeling,
+      });
+      dispatch(updateScreenData({
+        dashboard_return_modal:
+          stillFeeling === 'agitated'
+            ? {
+                title: 'Stay with your breath',
+                body: ['A softer rhythm may help your system settle.'],
+                cta_label: 'Close',
+              }
+            : stillFeeling === 'drained'
+              ? {
+                  title: 'Stay with gentle steadiness',
+                  body: ['You may need softness more than force right now.'],
+                  cta_label: 'Close',
+                }
+              : {
+                  title: 'Stay with your Sankalp',
+                  body: [
+                    'Small steps with sincerity create deep change.',
+                    'Your Sankalp is your inner compass.',
+                    'Stay consistent, it will help.',
+                  ],
+                  cta_label: 'Close',
+                },
+        trigger_mantra_text: null,
+        trigger_mantra_devanagari: null,
+      }));
+      webNavigate('/en/mitra/dashboard');
+      return;
+    }
+
+    case 'trigger_calmer_now': {
+      const calmerStep = Number(screenData.trigger_step || 1);
+      const calmerFeeling = (screenData.trigger_feeling as string) || 'triggered';
+
+      void apiTrackEvent('trigger_resolved', {
+        journey_id: screenData.journey_id,
+        day_number: screenData.day_number || 1,
+        step: calmerStep,
+        feeling: calmerFeeling,
+      });
+
+      dispatch(updateScreenData({
+        dashboard_return_modal: {
+          title: 'Carry this steadiness',
+          body: [
+            'You returned to your center.',
+            'Keep one simple anchor close as you move through the rest of your day.',
+          ],
+          cta_label: 'Close',
+        },
+        runner_active_item: null,
+        runner_source: null,
+        runner_variant: null,
+        runner_reps_completed: null,
+        runner_step_index: null,
+        runner_duration_actual_sec: null,
+        runner_start_time: null,
+        runner_tz: null,
+        trigger_mantra_text: null,
+        trigger_mantra_devanagari: null,
+      }));
+      webNavigate('/en/mitra/dashboard');
+      return;
     }
 
     // ================================================================

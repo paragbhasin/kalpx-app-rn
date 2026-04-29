@@ -84,16 +84,31 @@ describe('view_info', () => {
 });
 
 describe('initiate_trigger', () => {
-  it('navigates to /en/mitra/trigger', async () => {
-    await executeAction({ type: 'initiate_trigger' }, makeContext({}));
-    expect(webNavigate).toHaveBeenCalledWith('/en/mitra/trigger');
+  it('seeds a trigger mantra runner and navigates to free_mantra_chanting', async () => {
+    const dispatch = makeDispatch();
+    const ctx: ActionContext = {
+      dispatch: dispatch as any,
+      screenData: { journey_id: 1, day_number: 3 },
+    };
+
+    await executeAction({ type: 'initiate_trigger' }, ctx);
+
+    const calls = dispatch.mock.calls.map((c: any[]) => c[0]);
+    const update = calls.find((a: any) => a?.payload?.runner_active_item !== undefined);
+    expect(update?.payload?.runner_active_item?.item_id).toBe('om_support');
+    expect(update?.payload?.trigger_step).toBe(1);
+    expect(update?.payload?.reps_total).toBe(-1);
+    expect(update?.payload?.mantra_audio_url).toContain('/om/');
+    expect(update?.payload?._selected_om_audio).toContain('/om/');
+    expect(webNavigate).toHaveBeenCalledWith(expect.stringContaining('free_mantra_chanting'));
   });
 });
 
 describe('start_checkin', () => {
-  it('navigates to /en/mitra/checkin', async () => {
+  it('navigates to cycle_transitions/quick_checkin', async () => {
     await executeAction({ type: 'start_checkin' }, makeContext({}));
-    expect(webNavigate).toHaveBeenCalledWith('/en/mitra/checkin');
+    expect(webNavigate).toHaveBeenCalledWith(expect.stringContaining('containerId=cycle_transitions'));
+    expect(webNavigate).toHaveBeenCalledWith(expect.stringContaining('stateId=quick_checkin'));
   });
 });
 

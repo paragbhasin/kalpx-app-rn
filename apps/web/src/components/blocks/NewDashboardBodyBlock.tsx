@@ -16,6 +16,7 @@ import { GreetingCard } from "./dashboard/GreetingCard";
 import { PathChip } from "./dashboard/PathChip";
 import { QuickSupportBlock } from "./dashboard/QuickSupportBlock";
 import { SankalpCarryBlock } from "./dashboard/SankalpCarryBlock";
+import { SupportReturnModal } from "./dashboard/SupportReturnModal";
 import { TriadCardsRow } from "./dashboard/TriadCardsRow";
 import { WhyThisSheet } from "./dashboard/WhyThisSheet";
 
@@ -45,6 +46,7 @@ export function NewDashboardBodyBlock({ screenData, onAction }: Props) {
     Array.isArray(sd.sankalp_how_to_live) && sd.sankalp_how_to_live.length > 0;
   const hasAdditional =
     Array.isArray(sd.additional_items) && sd.additional_items.length > 0;
+  const returnModal = sd.dashboard_return_modal;
 
   return (
     <div>
@@ -126,6 +128,15 @@ export function NewDashboardBodyBlock({ screenData, onAction }: Props) {
           onClose={() => setWhyThisOpen(false)}
           onAction={onAction}
           onBackFromL3={handleBackFromL3}
+        />
+      )}
+
+      {returnModal && (
+        <SupportReturnModal
+          payload={returnModal}
+          onClose={() =>
+            dispatch(updateScreenData({ dashboard_return_modal: null }))
+          }
         />
       )}
     </div>

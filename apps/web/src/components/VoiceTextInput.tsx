@@ -1,6 +1,6 @@
 import { Mic, SendHorizontal } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const EXPANDED_HEIGHT_THRESHOLD = 42;
 
@@ -36,7 +36,9 @@ export function VoiceTextInput({
     input.style.height = "0px";
     const nextHeight = input.scrollHeight;
     input.style.height = `${nextHeight}px`;
-    setIsExpanded(text.includes("\n") || nextHeight > EXPANDED_HEIGHT_THRESHOLD);
+    setIsExpanded(
+      text.includes("\n") || nextHeight > EXPANDED_HEIGHT_THRESHOLD,
+    );
   }, [text]);
 
   useEffect(() => {
@@ -101,8 +103,7 @@ export function VoiceTextInput({
             onKeyDown={handleKeyDown}
             style={{
               width: "100%",
-              minHeight: 24,
-              maxHeight: 120,
+
               padding: 0,
               margin: 0,
               border: "none",
@@ -111,7 +112,7 @@ export function VoiceTextInput({
               overflowY: isExpanded ? "auto" : "hidden",
               background: "transparent",
               color: "var(--kalpx-text)",
-              fontSize: 16,
+              fontSize: 14,
               lineHeight: 1.5,
               fontFamily: "var(--kalpx-font-sans)",
             }}

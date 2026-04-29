@@ -81,8 +81,9 @@ export function BlockRenderer({ block, screenData, onAction }: BlockRendererProp
 
     // ── Phase 8: Runner blocks ────────────────────────────────────────
     case 'mantra_display':
-    case 'mantra_runner_display':
       return <MantraDisplayBlock block={block} screenData={screenData} />;
+    case 'mantra_runner_display':
+      return <RepCounterBlock block={block} screenData={screenData} onAction={onAction} />;
     case 'rep_counter':
       return <RepCounterBlock block={block} screenData={screenData} onAction={onAction} />;
     case 'audio_player':

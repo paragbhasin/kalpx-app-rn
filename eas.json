@@ -1,0 +1,68 @@
+{
+  "cli": {
+    "version": ">= 16.28.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "production": {
+      "environment": "production",
+      "env": {
+        "EXPO_PUBLIC_API_ENV": "prod",
+        "EXPO_UPDATES_DISABLED": "1",
+        "EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD": "1",
+        "EXPO_PUBLIC_MITRA_V3_ROOMS": "1",
+        "EXPO_PUBLIC_MITRA_V3_RECOGNITION_BACKEND": "1"
+      },
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "ios": {
+        "buildConfiguration": "Release",
+        "image": "macos-sequoia-15.6-xcode-26.2"
+      }
+    },
+    "preview": {
+      "extends": "production",
+      "environment": "preview",
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "simulator": false
+      }
+    },
+    "simulator": {
+      "extends": "preview",
+      "env": {
+        "EXPO_PUBLIC_API_ENV": "dev"
+      },
+      "ios": {
+        "simulator": true,
+        "image": "latest"
+      }
+    },
+    "development": {
+      "extends": "preview",
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_API_ENV": "dev"
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "android": {
+        "track": "production"
+      },
+      "ios": {
+        "appleId": "paragbhasin@gmail.com",
+        "ascAppId": "6755144623",
+        "appleTeamId": "9G5NZ5LBRU"
+      }
+    }
+  }
+}

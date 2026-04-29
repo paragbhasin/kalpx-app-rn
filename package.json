@@ -1,6 +1,7 @@
 {
   "name": "kalpx-monorepo",
   "private": true,
+  "main": "./apps/mobile/AppEntry.js",
   "scripts": {
     "mobile": "cd apps/mobile && npx expo start",
     "web:dev": "pnpm --filter @kalpx/web dev",

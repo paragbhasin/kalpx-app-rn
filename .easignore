@@ -38,8 +38,8 @@ apps/mobile/.expo/
 .idea/
 
 # Root-level Maestro screenshots and debug PNGs
-*.png
-*.PNG
+/*.png
+/*.PNG
 
 # OS
 .DS_Store

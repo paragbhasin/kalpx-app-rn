@@ -1,129 +1,242 @@
-import React, { useState } from 'react';
+import { useMemo, useState } from "react";
 
-type DayState = 'done' | 'missed' | 'pending' | string;
+type DayState = "done" | "missed" | "pending" | string;
 
 interface DayDot {
   day?: number;
   day_number?: number;
-  state: DayState;
+  state?: DayState;
 }
 
 interface Props {
   sd: Record<string, any>;
 }
 
-export function CycleProgressBlock({ sd }: Props) {
-  const [expanded, setExpanded] = useState(false);
+function Metric({ value, label }: { value: number; label: string }) {
+  return (
+    <div
+      style={{
+        flex: 1,
+        minWidth: 0,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        textAlign: "center",
+      }}
+    >
+      <div
+        style={{
+          fontFamily: "var(--kalpx-font-serif)",
+          fontSize: 26,
+          fontWeight: 700,
+          color: "#432104",
+          lineHeight: 1,
+          marginBottom: 6,
+        }}
+      >
+        {value}
+      </div>
+      <div
+        style={{
+          fontSize: 11,
+          color: "#746657",
+          lineHeight: 1.3,
+        }}
+      >
+        {label}
+      </div>
+    </div>
+  );
+}
 
-  const metrics = sd.today?.cycle_metrics || sd.cycle_metrics;
-  const dayNumber: number = sd.identity?.day_number ?? sd.day_number ?? 0;
+function dotStyles(state?: string) {
+  if (state === "done") {
+    return {
+      background: "#1DBA7A",
+      border: "1.5px solid #1DBA7A",
+    };
+  }
+  if (state === "missed") {
+    return {
+      background: "transparent",
+      border: "1.5px solid #C8A57C",
+    };
+  }
+  return {
+    background: "transparent",
+    border: "1.5px solid rgba(226, 209, 186, 0.95)",
+  };
+}
+
+export function CycleProgressBlock({ sd }: Props) {
+  const [expanded, setExpanded] = useState(true);
+
+  const metrics = sd.today?.cycle_metrics || sd.cycle_metrics || {};
+  const dayNumber: number = sd.identity?.day_number ?? sd.day_number ?? 1;
   const totalDays: number = sd.identity?.total_days ?? sd.total_days ?? 14;
 
-  if (!metrics && !dayNumber) return null;
+  const daysEngaged: number =
+    typeof metrics.days_engaged === "number" ? metrics.days_engaged : 0;
+  const daysComplete: number =
+    typeof metrics.days_fully_completed === "number"
+      ? metrics.days_fully_completed
+      : 0;
+  const triggerSessions: number =
+    typeof metrics.trigger_sessions === "number" ? metrics.trigger_sessions : 0;
+  const rhythm: DayDot[] = Array.isArray(metrics.daily_rhythm)
+    ? metrics.daily_rhythm
+    : [];
 
-  const rhythm: DayDot[] = metrics?.daily_rhythm || [];
-  const daysEngaged: number = metrics?.days_engaged ?? 0;
-  const daysComplete: number = metrics?.days_fully_completed ?? 0;
-  const triggerSessions: number = metrics?.trigger_sessions ?? 0;
-  const summaryLabel: string = metrics?.summary_label || '';
-  const rhythmHeader: string = metrics?.rhythm_header_label || 'Daily Rhythm';
+  const summaryLine =
+    metrics.summary_label || `Day ${dayNumber} of ${totalDays}`;
+  const rhythmHeader = metrics.rhythm_header_label || "Daily Rhythm";
 
-  const showMetrics = daysEngaged > 0 || daysComplete > 0;
-  const showRhythm = rhythm.length > 0;
+  const visibleRhythm = useMemo(() => {
+    if (rhythm.length > 0) return rhythm;
+    return Array.from({ length: totalDays }, (_, index) => ({
+      day_number: index + 1,
+      state: index + 1 < dayNumber ? "missed" : "pending",
+    }));
+  }, [rhythm, totalDays, dayNumber]);
 
-  if (!showMetrics && !showRhythm && !dayNumber) return null;
-
-  const summaryLine = dayNumber > 0
-    ? `Day ${dayNumber} of ${totalDays}`
-    : summaryLabel || rhythmHeader;
+  if (!summaryLine && visibleRhythm.length === 0) return null;
 
   return (
     <div
       data-testid="cycle-progress-block"
       style={{
         marginBottom: 24,
+        background: "rgba(255, 252, 246, 0.94)",
         borderRadius: 12,
-        background: 'var(--kalpx-card-bg)',
-        border: '1px solid var(--kalpx-chip-bg)',
-        overflow: 'hidden',
+        border: "1px solid rgba(223, 205, 181, 0.95)",
+        boxShadow: "0 10px 24px rgba(127,90,34,0.06)",
+        padding: "10px",
       }}
     >
-      {/* Accordion header — always visible */}
       <button
-        onClick={() => setExpanded(e => !e)}
+        onClick={() => setExpanded((value) => !value)}
         aria-expanded={expanded}
-        aria-controls="cycle-progress-body"
         data-testid="cycle-progress-header"
         style={{
-          width: '100%',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '14px 16px',
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          textAlign: 'left',
+          width: "100%",
+          background: "none",
+          border: "none",
+          padding: 0,
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          textAlign: "left",
         }}
       >
-        <span style={{ fontSize: 14, color: 'var(--kalpx-text)', fontFamily: 'var(--kalpx-font-serif)' }}>
+        <span
+          style={{
+            fontSize: 15,
+            fontWeight: 700,
+            color: "#432104",
+          }}
+        >
           {summaryLine}
         </span>
         <svg
-          width="16" height="16" viewBox="0 0 16 16" fill="none"
-          style={{ transition: 'transform 200ms', transform: expanded ? 'rotate(180deg)' : 'none', flexShrink: 0 }}
+          width="18"
+          height="18"
+          viewBox="0 0 18 18"
+          fill="none"
           aria-hidden="true"
+          style={{
+            transform: expanded ? "rotate(180deg)" : "none",
+            transition: "transform 180ms ease",
+            flexShrink: 0,
+          }}
         >
-          <path d="M4 6l4 4 4-4" stroke="var(--kalpx-text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M4.5 7l4.5 4.5L13.5 7"
+            stroke="#8B7864"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </button>
 
-      {/* Expandable body — dots + metrics */}
       {expanded && (
-        <div id="cycle-progress-body" style={{ padding: '0 16px 16px' }}>
-          {/* Daily rhythm dots */}
-          {showRhythm && (
-            <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginBottom: 12 }}>
-              {rhythm.map((dot, i) => {
-                const day = dot.day_number ?? dot.day ?? i + 1;
-                const s = dot.state;
-                const bg = s === 'done' ? '#4ade80' : s === 'missed' ? '#fca5a5' : '#e5e7eb';
-                return (
-                  <div
-                    key={i}
-                    title={`Day ${day}: ${s}`}
-                    style={{ width: 12, height: 12, borderRadius: '50%', background: bg, flexShrink: 0 }}
-                  />
-                );
-              })}
-            </div>
-          )}
+        <div style={{ marginTop: 22 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+              gap: 10,
+              marginBottom: 24,
+            }}
+          >
+            <Metric
+              value={daysEngaged}
+              label={metrics.days_engaged_label || "Days engaged"}
+            />
+            <Metric
+              value={daysComplete}
+              label={metrics.days_complete_label || "Fully completed"}
+            />
+            <Metric
+              value={triggerSessions}
+              label={metrics.trigger_sessions_label || "Trigger sessions"}
+            />
+          </div>
 
-          {/* Metrics row */}
-          {showMetrics && (
-            <div style={{ display: 'flex', gap: 16 }}>
-              <MetricItem label={metrics?.days_engaged_label || 'Days engaged'} value={daysEngaged} />
-              <MetricItem label={metrics?.days_complete_label || 'Fully completed'} value={daysComplete} />
-              {triggerSessions > 0 && (
-                <MetricItem label={metrics?.trigger_sessions_label || 'Trigger sessions'} value={triggerSessions} />
-              )}
-            </div>
-          )}
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: 2,
+              textTransform: "uppercase",
+              color: "#8B7864",
+              marginBottom: 16,
+            }}
+          >
+            {rhythmHeader}
+          </div>
 
-          {summaryLabel && (
-            <p style={{ fontSize: 12, color: 'var(--kalpx-text-muted)', marginTop: 8 }}>{summaryLabel}</p>
-          )}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 6,
+            }}
+          >
+            {visibleRhythm.map((dot, index) => {
+              const day = dot.day_number ?? dot.day ?? index + 1;
+              const isCheckpoint = day === 7 || day === 14;
+              const styles = dotStyles(dot.state);
+
+              return (
+                <div
+                  key={`rhythm-${day}-${index}`}
+                  title={`Day ${day}: ${dot.state || "pending"}`}
+                  style={{
+                    width: isCheckpoint ? 18 : 13,
+                    height: isCheckpoint ? 18 : 13,
+                    minWidth: isCheckpoint ? 18 : 13,
+                    borderRadius: 999,
+                    ...styles,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxSizing: "border-box",
+                    fontSize: 10,
+                    fontWeight: 700,
+                    color: "#7A5A37",
+                  }}
+                >
+                  {isCheckpoint ? day : null}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
-    </div>
-  );
-}
-
-function MetricItem({ label, value }: { label: string; value: number }) {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <span style={{ fontSize: 20, fontWeight: 700, color: 'var(--kalpx-text)' }}>{value}</span>
-      <span style={{ fontSize: 11, color: 'var(--kalpx-text-muted)', textAlign: 'center' }}>{label}</span>
     </div>
   );
 }

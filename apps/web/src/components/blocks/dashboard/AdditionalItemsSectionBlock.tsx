@@ -1,7 +1,11 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Trash2 } from 'lucide-react';
-import { fetchAdditionalItems, removeAdditionalItem } from '../../../engine/mitraApi';
-import { LibrarySearchModal } from './LibrarySearchModal';
+import { Trash2 } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import {
+  fetchAdditionalItems,
+  removeAdditionalItem,
+  searchLibraryItems,
+} from "../../../engine/mitraApi";
+import { LibrarySearchModal } from "./LibrarySearchModal";
 
 interface AdditionalItem {
   id?: string | number;
@@ -21,10 +25,30 @@ interface Props {
   onAction?: (action: any) => void;
 }
 
+function resolveItemType(item?: AdditionalItem): string {
+  return String(item?.item_type || item?.itemType || item?.type || "").toLowerCase();
+}
+
+function resolveItemId(item?: AdditionalItem): string {
+  return String(item?.item_id || item?.itemId || item?.id || "");
+}
+
+function normalizeAdditionalItem(item: AdditionalItem): AdditionalItem {
+  const itemType = resolveItemType(item);
+  const itemId = resolveItemId(item);
+  return {
+    ...item,
+    id: item.id ?? itemId,
+    item_id: itemId,
+    item_type: itemType,
+    itemType: itemType,
+  };
+}
+
 function actionLabel(itemType?: string): string {
-  if (itemType === 'mantra') return 'Chant';
-  if (itemType === 'sankalp' || itemType === 'sankalpa') return 'Embody';
-  return 'Practice';
+  if (itemType === "mantra") return "Chant";
+  if (itemType === "sankalp" || itemType === "sankalpa") return "Embody";
+  return "Practice";
 }
 
 export function AdditionalItemsSectionBlock({ sd, onAction }: Props) {
@@ -40,44 +64,114 @@ export function AdditionalItemsSectionBlock({ sd, onAction }: Props) {
     fetchAdditionalItems().then((data) => {
       if (cancelled) return;
       if (data.items.length > 0 || Array.isArray(sd.additional_items)) {
-        setItems(data.items.length > 0 ? data.items : (sd.additional_items ?? []));
+        setItems(
+          (data.items.length > 0 ? data.items : (sd.additional_items ?? [])).map(normalizeAdditionalItem),
+        );
       }
       if (data.uiHints?.shouldCollapse === true) setCollapsed(true);
       else setCollapsed(false);
     });
-    return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const refreshItems = useCallback(() => {
-    fetchAdditionalItems().then((data) => setItems(data.items));
+    fetchAdditionalItems().then((data) => {
+      setItems((data.items || []).map(normalizeAdditionalItem));
+      if (data.uiHints?.shouldCollapse === true) setCollapsed(true);
+      else setCollapsed(false);
+    });
   }, []);
 
-  const handleRemove = useCallback(async (item: AdditionalItem) => {
-    const id = item.id ?? item.item_id;
-    if (!id || removingId) return;
-    setRemovingId(String(id));
-    try {
-      await removeAdditionalItem(id);
-      setItems((prev) => prev.filter((i) => (i.id ?? i.item_id) !== id));
-    } catch {
-      // best-effort
-    } finally {
-      setRemovingId(null);
-    }
-  }, [removingId]);
+  const handleRemove = useCallback(
+    async (item: AdditionalItem) => {
+      const id = item.id ?? item.item_id;
+      if (!id || removingId) return;
+      setRemovingId(String(id));
+      try {
+        await removeAdditionalItem(id);
+        setItems((prev) => prev.filter((i) => (i.id ?? i.item_id) !== id));
+      } catch {
+        // best-effort
+      } finally {
+        setRemovingId(null);
+      }
+    },
+    [removingId],
+  );
 
-  const handleLaunch = useCallback((item: AdditionalItem) => {
-    if (!onAction) return;
-    onAction({
-      type: 'start_runner',
-      payload: {
-        source: item.source || `additional_${item.item_type || 'recommended'}`,
-        variant: item.item_type || 'mantra',
-        item,
-      },
-    });
-  }, [onAction]);
+  const handleLaunch = useCallback(
+    async (item: AdditionalItem) => {
+      if (!onAction) return;
+
+      const normalizedItem = normalizeAdditionalItem(item);
+      const itemType = resolveItemType(normalizedItem) || "mantra";
+      const resolvedSource =
+        normalizedItem.source || `additional_${itemType || "recommended"}`;
+      const isCustom = resolvedSource === "additional_custom";
+      const baseManualData = {
+        ...normalizedItem,
+        id: normalizedItem.id ?? normalizedItem.item_id,
+        item_id: normalizedItem.item_id ?? normalizedItem.id,
+        item_type: itemType,
+        itemType,
+        source: resolvedSource,
+      };
+
+      let manualData: Record<string, any> = baseManualData;
+      if (!isCustom) {
+        try {
+          const query = String(normalizedItem.item_id || normalizedItem.title || "").trim();
+          if (query) {
+            const searchRes = await searchLibraryItems(query, itemType);
+            const fullData =
+              searchRes?.results?.find(
+                (result: any) =>
+                  String(result.itemId ?? result.item_id ?? result.id) ===
+                  String(baseManualData.item_id),
+              ) || searchRes?.results?.[0];
+            if (fullData) {
+              manualData = {
+                ...baseManualData,
+                ...fullData,
+                id:
+                  fullData.id ??
+                  fullData.itemId ??
+                  fullData.item_id ??
+                  baseManualData.id,
+                item_id:
+                  fullData.item_id ??
+                  fullData.itemId ??
+                  fullData.id ??
+                  baseManualData.item_id,
+                item_type: String(
+                  fullData.item_type || fullData.itemType || itemType,
+                ).toLowerCase(),
+                itemType: String(
+                  fullData.item_type || fullData.itemType || itemType,
+                ).toLowerCase(),
+                source: resolvedSource,
+              };
+            }
+          }
+        } catch {
+          // best-effort — reveal flow can still render with base dashboard data
+        }
+      }
+
+      onAction({
+        type: "start_runner",
+        payload: {
+          source: resolvedSource,
+          variant: manualData.item_type || itemType,
+          item: manualData,
+        },
+      });
+    },
+    [onAction],
+  );
 
   if (!items.length && !showLibrary) {
     // Still render the section header + add button even when empty
@@ -85,7 +179,7 @@ export function AdditionalItemsSectionBlock({ sd, onAction }: Props) {
 
   const hasMore = items.length > 2;
   const visibleItems = collapsed ? items.slice(0, 2) : items;
-  const existingItemIds = items.map((i) => String(i.id ?? i.item_id ?? ''));
+  const existingItemIds = items.map((i) => String(i.id ?? i.item_id ?? ""));
 
   return (
     <>
@@ -94,28 +188,53 @@ export function AdditionalItemsSectionBlock({ sd, onAction }: Props) {
         style={{
           marginBottom: 24,
           borderRadius: 15,
-          border: '1px solid rgba(192,145,61,0.4)',
-          boxShadow: '0 4px 20px rgba(127,90,34,0.10)',
-          padding: '16px 16px 12px',
+          border: "1px solid rgba(192,145,61,0.4)",
+          boxShadow: "0 4px 20px rgba(127,90,34,0.10)",
+          padding: "16px 16px 12px",
         }}
       >
         {/* Section header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-          <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'var(--kalpx-text-muted)', textTransform: 'uppercase', margin: 0 }}>
-            {sd.additional_items_label || 'Additional Practices'}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 10,
+          }}
+        >
+          <p
+            style={{
+              fontSize: 14,
+              fontWeight: 700,
+
+              color: "var(--kalpx-text-muted)",
+              textTransform: "uppercase",
+              margin: 0,
+            }}
+          >
+            {sd.additional_items_label || "Additional Practices"}
           </p>
           <button
             data-testid="additional-items-add-library"
             onClick={() => setShowLibrary(true)}
-            style={{ background: 'none', border: 'none', fontFamily: 'var(--kalpx-font-serif)', fontWeight: 700, fontSize: 13, color: 'var(--kalpx-gold)', cursor: 'pointer', padding: '0 2px' }}
+            style={{
+              background: "none",
+              border: "none",
+              fontFamily: "var(--kalpx-font-serif)",
+              fontWeight: 700,
+              fontSize: 15,
+              color: "var(--kalpx-gold)",
+              cursor: "pointer",
+              padding: "0 2px",
+            }}
           >
-            + Add
+            + Add from library
           </button>
         </div>
 
         {/* Item list */}
         {items.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {visibleItems.map((item, i) => {
               const id = String(item.id ?? item.item_id ?? i);
               const isRemoving = removingId === id;
@@ -124,75 +243,151 @@ export function AdditionalItemsSectionBlock({ sd, onAction }: Props) {
                   key={id}
                   data-testid={`additional-item-${item.item_id ?? i}`}
                   style={{
-                    padding: '12px 14px',
+                    padding: "12px 14px",
                     borderRadius: 20,
                     border: item.completedToday
-                      ? '1px solid rgba(16,185,129,0.15)'
-                      : '1px solid rgba(228,197,145,0.8)',
-                    background: item.completedToday ? 'rgba(16,185,129,0.02)' : '#ffffff',
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'flex-start',
+                      ? "1px solid rgba(16,185,129,0.15)"
+                      : "1px solid rgba(228,197,145,0.8)",
+                    background: item.completedToday
+                      ? "rgba(16,185,129,0.02)"
+                      : "#ffffff",
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "flex-start",
                     gap: 10,
                   }}
                 >
                   {/* Info column */}
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4, flexWrap: 'wrap' }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                        marginBottom: 4,
+                        flexWrap: "wrap",
+                      }}
+                    >
                       {item.item_type && (
-                        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, color: 'var(--kalpx-text-muted)', textTransform: 'uppercase', background: '#F5F0E0', borderRadius: 6, padding: '3px 8px', display: 'inline-block' }}>
-                          {item.item_type}
-                        </span>
-                      )}
+                        <span
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 700,
+                            letterSpacing: 1.5,
+                            color: "var(--kalpx-text-muted)",
+                            textTransform: "uppercase",
+                            background: "#F5F0E0",
+                            borderRadius: 6,
+                            padding: "3px 8px",
+                            display: "inline-block",
+                          }}
+                      >
+                        {resolveItemType(item)}
+                      </span>
+                    )}
                       {item.completedToday && (
-                        <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1, color: '#10b981', textTransform: 'uppercase', background: 'rgba(16,185,129,0.1)', borderRadius: 6, padding: '3px 8px', display: 'inline-block' }}>
+                        <span
+                          style={{
+                            fontSize: 10,
+                            fontWeight: 700,
+                            letterSpacing: 1,
+                            color: "#10b981",
+                            textTransform: "uppercase",
+                            background: "rgba(16,185,129,0.1)",
+                            borderRadius: 6,
+                            padding: "3px 8px",
+                            display: "inline-block",
+                          }}
+                        >
                           Done
                         </span>
                       )}
                     </div>
-                    <p style={{ fontFamily: 'var(--kalpx-font-serif)', fontSize: 17, fontWeight: 700, color: 'var(--kalpx-text)', margin: '0 0 2px', lineHeight: 1.3 }}>
-                      {item.title || item.item_id || 'Practice item'}
+                    <p
+                      style={{
+                        fontFamily: "var(--kalpx-font-serif)",
+                        fontSize: 17,
+                        fontWeight: 700,
+                        color: "var(--kalpx-text)",
+                        margin: "0 0 2px",
+                        lineHeight: 1.3,
+                      }}
+                      >
+                      {item.title || resolveItemId(item) || "Practice item"}
                     </p>
                     {item.subtitle && (
-                      <p style={{ fontFamily: 'var(--kalpx-font-serif)', fontSize: 14, color: 'var(--kalpx-text-soft)', margin: '0 0 2px', lineHeight: 1.4 }}>
+                      <p
+                        style={{
+                          fontFamily: "var(--kalpx-font-serif)",
+                          fontSize: 14,
+                          color: "var(--kalpx-text-soft)",
+                          margin: "0 0 2px",
+                          lineHeight: 1.4,
+                        }}
+                      >
                         {item.subtitle}
                       </p>
                     )}
                     {!!item.sessionsCount && (
-                      <p style={{ fontSize: 11, color: 'var(--kalpx-text-muted)', margin: 0 }}>
-                        {item.sessionsCount} {item.sessionsCount === 1 ? 'session' : 'sessions'}
+                      <p
+                        style={{
+                          fontSize: 11,
+                          color: "var(--kalpx-text-muted)",
+                          margin: 0,
+                        }}
+                      >
+                        {item.sessionsCount}{" "}
+                        {item.sessionsCount === 1 ? "session" : "sessions"}
                       </p>
                     )}
                   </div>
 
                   {/* Action column */}
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "flex-end",
+                      gap: 8,
+                      flexShrink: 0,
+                    }}
+                  >
                     {!item.completedToday && (
                       <button
                         data-testid={`additional-item-launch-${id}`}
                         onClick={() => handleLaunch(item)}
                         style={{
-                          padding: '7px 16px',
+                          padding: "7px 16px",
                           borderRadius: 20,
-                          border: 'none',
-                          background: 'linear-gradient(135deg, #c9a84c, #a8873a)',
-                          color: '#fff',
-                          fontFamily: 'var(--kalpx-font-serif)',
+                          border: "none",
+                          background:
+                            "linear-gradient(135deg, #c9a84c, #a8873a)",
+                          color: "#fff",
+                          fontFamily: "var(--kalpx-font-serif)",
                           fontWeight: 700,
                           fontSize: 14,
-                          cursor: 'pointer',
+                          cursor: "pointer",
                           minWidth: 72,
-                          whiteSpace: 'nowrap',
+                          whiteSpace: "nowrap",
                         }}
                       >
-                        {actionLabel(item.item_type)}
+                        {actionLabel(resolveItemType(item))}
                       </button>
                     )}
                     <button
                       data-testid={`additional-item-remove-${id}`}
                       disabled={!!removingId}
                       onClick={() => handleRemove(item)}
-                      style={{ background: 'none', border: 'none', cursor: removingId ? 'default' : 'pointer', padding: 4, color: isRemoving ? 'var(--kalpx-gold)' : 'var(--kalpx-text-muted)', opacity: isRemoving ? 0.5 : 1 }}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: removingId ? "default" : "pointer",
+                        padding: 4,
+                        color: isRemoving
+                          ? "var(--kalpx-gold)"
+                          : "var(--kalpx-text-muted)",
+                        opacity: isRemoving ? 0.5 : 1,
+                      }}
                     >
                       <Trash2 size={16} strokeWidth={1.6} />
                     </button>
@@ -208,9 +403,19 @@ export function AdditionalItemsSectionBlock({ sd, onAction }: Props) {
           <button
             data-testid="additional-items-toggle"
             onClick={() => setCollapsed((c) => !c)}
-            style={{ background: 'none', border: 'none', fontSize: 13, color: 'var(--kalpx-gold)', cursor: 'pointer', marginTop: 8, padding: '4px 0', width: '100%', textAlign: 'center' }}
+            style={{
+              background: "none",
+              border: "none",
+              fontSize: 13,
+              color: "var(--kalpx-gold)",
+              cursor: "pointer",
+              marginTop: 8,
+              padding: "4px 0",
+              width: "100%",
+              textAlign: "center",
+            }}
           >
-            {collapsed ? `See all (${items.length})` : 'Show less'}
+            {collapsed ? `See all (${items.length})` : "Show less"}
           </button>
         )}
       </div>

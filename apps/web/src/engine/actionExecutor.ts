@@ -305,6 +305,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
     // ----------------------------------------------------------------
     case 'info_start_click': {
       const info = screenData.info as any;
+      const manualInfoItem = (screenData._info_manual_data || {}) as Record<string, any>;
       if (!info) {
         if (WEB_ENV.isDev) console.warn('[actionExecutor] info_start_click: no info in screenData');
         break;
@@ -322,15 +323,19 @@ export async function executeAction(action: any, context: ActionContext): Promis
         : variant === 'practice' ? 'master_practice'
         : 'master_mantra';
       const masterItem = (screenData[masterKey] || {}) as Record<string, any>;
+      const baseItem = Object.keys(manualInfoItem).length > 0 ? manualInfoItem : masterItem;
       const item: Record<string, any> = {
-        item_id: info.item_id || masterItem.item_id || '',
+        ...baseItem,
+        item_id: info.item_id || manualInfoItem.item_id || manualInfoItem.itemId || masterItem.item_id || '',
         item_type: variant,
-        title: masterItem.title || info.title || '',
-        devanagari: masterItem.devanagari || '',
-        audio_url: masterItem.audio_url || '',
-        reps_total: masterItem.reps_total ?? null,
-        duration_seconds: masterItem.duration_seconds ?? null,
-        steps: masterItem.steps || [],
+        itemType: variant,
+        title: manualInfoItem.title || masterItem.title || info.title || '',
+        subtitle: manualInfoItem.subtitle || masterItem.subtitle || info.subtitle || '',
+        devanagari: manualInfoItem.devanagari || masterItem.devanagari || '',
+        audio_url: manualInfoItem.audio_url || masterItem.audio_url || '',
+        reps_total: manualInfoItem.reps_total ?? masterItem.reps_total ?? null,
+        duration_seconds: manualInfoItem.duration_seconds ?? masterItem.duration_seconds ?? null,
+        steps: manualInfoItem.steps || masterItem.steps || [],
       };
 
       void apiTrackEvent('mantra_offering_viewed', {
@@ -361,6 +366,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
           : screenData.practice_duration_seconds,
         practice_steps: variant === 'practice' ? (item.steps || screenData.practice_steps || []) : screenData.practice_steps,
         info: null,
+        _info_manual_data: null,
         info_start_action: null,
         info_start_label: null,
       }));
@@ -585,15 +591,18 @@ export async function executeAction(action: any, context: ActionContext): Promis
       const p = action.payload || action;
       const item = p.manualData || {};
       const itemType: string = p.type || p.item_type || 'mantra';
+      const itemSource: string = item.source || (screenData.runner_source as string) || 'core';
 
       dispatch(setSubmitting(true));
       try {
         dispatch(updateScreenData({
+          runner_source: itemSource,
+          _info_manual_data: item,
           info: {
             title: item.title || item.name || '',
             subtitle: item.subtitle || '',
             description: item.subtitle || item.description || '',
-            item_id: item.item_id || item.id,
+            item_id: item.item_id || item.itemId || item.id,
             item_type: itemType,
           },
           info_start_label: 'Begin',

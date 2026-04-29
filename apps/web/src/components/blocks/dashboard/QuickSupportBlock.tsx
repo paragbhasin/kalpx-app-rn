@@ -15,7 +15,7 @@ export function QuickSupportBlock({ onAction }: Props) {
 
   return (
     <div data-testid="quick-support-block" style={{ marginBottom: 24 }}>
-      <p
+      {/* <p
         style={{
           fontSize: 11,
           fontWeight: 700,
@@ -26,7 +26,7 @@ export function QuickSupportBlock({ onAction }: Props) {
         }}
       >
         Quick Support
-      </p>
+      </p> */}
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {/* Chip 1 — primary (filled lotusPeach) — alert-circle-outline → AlertCircle */}
         <button

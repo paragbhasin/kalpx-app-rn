@@ -197,26 +197,35 @@ describe('AdditionalItemsSectionBlock — add/remove (T6–T10)', () => {
 // ─── handleLaunch source computation ─────────────────────────────────────────
 
 describe('AdditionalItemsSectionBlock — handleLaunch source (T11)', () => {
-  it('T11: start_runner dispatched with item.source when present, else derived', () => {
+  it('T11: start_runner dispatched with normalized source and variant', () => {
     const dispatched: any[] = [];
     const onAction = (action: any) => dispatched.push(action);
 
     const handleLaunch = (item: any) => {
+      const itemType = item.item_type || 'mantra';
+      const resolvedSource = item.source || `additional_${item.item_type || 'recommended'}`;
       onAction({
         type: 'start_runner',
         payload: {
-          source: item.source || `additional_${item.item_type || 'recommended'}`,
-          variant: item.item_type || 'mantra',
-          item,
+          source: resolvedSource,
+          variant: itemType,
+          item: {
+            ...item,
+            item_type: itemType,
+            source: resolvedSource,
+          },
         },
       });
     };
 
     handleLaunch({ item_id: 'x', item_type: 'mantra', source: 'additional_library' });
+    expect(dispatched[0].type).toBe('start_runner');
     expect(dispatched[0].payload.source).toBe('additional_library');
+    expect(dispatched[0].payload.variant).toBe('mantra');
 
     handleLaunch({ item_id: 'y', item_type: 'sankalp' });
     expect(dispatched[1].payload.source).toBe('additional_sankalp');
+    expect(dispatched[1].payload.variant).toBe('sankalp');
 
     handleLaunch({ item_id: 'z' });
     expect(dispatched[2].payload.source).toBe('additional_recommended');

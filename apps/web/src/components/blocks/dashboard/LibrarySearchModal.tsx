@@ -29,6 +29,10 @@ export function LibrarySearchModal({ onClose, onItemAdded, existingItemIds }: Pr
   }, []);
 
   useEffect(() => {
+    setAddedIds(new Set(existingItemIds));
+  }, [existingItemIds]);
+
+  useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (query.trim().length < 2) {
       setResults([]);
@@ -36,19 +40,41 @@ export function LibrarySearchModal({ onClose, onItemAdded, existingItemIds }: Pr
     }
     debounceRef.current = setTimeout(async () => {
       setSearching(true);
-      const data = await searchLibraryItems(query.trim());
-      setResults(data.results || []);
-      setSearching(false);
+      try {
+        const types = ['mantra', 'sankalp', 'practice'];
+        const responses = await Promise.all(
+          types.map((type) => searchLibraryItems(query.trim(), type)),
+        );
+        const mergedResults = responses.flatMap((data, index) =>
+          (data.results || []).map((item: any) => ({
+            ...item,
+            _type: types[index],
+          })),
+        );
+        setResults(mergedResults);
+      } finally {
+        setSearching(false);
+      }
     }, 350);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [query]);
 
   const handleAdd = useCallback(async (item: any) => {
-    const id = item.item_id || item.id;
-    if (!id || addingId || addedIds.has(String(id))) return;
+    const id = item.itemId || item.item_id || item.id;
+    if (!id || item.alreadyInCore || item.alreadyAdded || addingId || addedIds.has(String(id))) return;
     setAddingId(String(id));
     try {
-      await addAdditionalItem(String(id), item.item_type || item.type || 'practice');
+      await addAdditionalItem(
+        String(id),
+        item._type || item.itemType || item.item_type || item.type || 'practice',
+      );
+      setResults((prev) =>
+        prev.map((result) =>
+          String(result.itemId || result.item_id || result.id || '') === String(id)
+            ? { ...result, alreadyAdded: true }
+            : result,
+        ),
+      );
       setAddedIds((prev) => new Set([...prev, String(id)]));
       onItemAdded();
     } catch {
@@ -63,7 +89,8 @@ export function LibrarySearchModal({ onClose, onItemAdded, existingItemIds }: Pr
   };
 
   const typeLabel = (item: any) =>
-    TYPE_LABELS[(item.item_type || item.type || '').toLowerCase()] || (item.item_type || item.type || '').toUpperCase();
+    TYPE_LABELS[(item._type || item.itemType || item.item_type || item.type || '').toLowerCase()] ||
+    (item._type || item.itemType || item.item_type || item.type || '').toUpperCase();
 
   return (
     <div
@@ -134,8 +161,9 @@ export function LibrarySearchModal({ onClose, onItemAdded, existingItemIds }: Pr
           )}
 
           {results.map((item) => {
-            const id = String(item.item_id || item.id || '');
-            const isAdded = addedIds.has(id);
+            const id = String(item.itemId || item.item_id || item.id || '');
+            const isInCore = Boolean(item.alreadyInCore);
+            const isAdded = Boolean(item.alreadyAdded) || addedIds.has(id);
             const isAdding = addingId === id;
             return (
               <div
@@ -146,11 +174,11 @@ export function LibrarySearchModal({ onClose, onItemAdded, existingItemIds }: Pr
                   alignItems: 'center',
                   padding: '12px 0',
                   borderBottom: '1px solid var(--kalpx-gold-hairline)',
-                  opacity: isAdded ? 0.5 : 1,
+                  opacity: isInCore || isAdded ? 0.5 : 1,
                 }}
               >
                 <div style={{ flex: 1 }}>
-                  {item.item_type && (
+                  {(item._type || item.itemType || item.item_type || item.type) && (
                     <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.5, color: 'var(--kalpx-text-muted)', textTransform: 'uppercase', background: '#F5F0E0', borderRadius: 6, padding: '2px 6px', display: 'inline-block', marginBottom: 4 }}>
                       {typeLabel(item)}
                     </span>
@@ -164,26 +192,56 @@ export function LibrarySearchModal({ onClose, onItemAdded, existingItemIds }: Pr
                     </p>
                   )}
                 </div>
-                <button
-                  data-testid={`library-add-${id}`}
-                  disabled={isAdded || !!addingId}
-                  onClick={() => handleAdd(item)}
-                  style={{
-                    marginLeft: 12,
-                    padding: '6px 14px',
-                    borderRadius: 20,
-                    border: 'none',
-                    background: isAdded ? 'rgba(16,185,129,0.1)' : 'var(--kalpx-gold)',
-                    color: isAdded ? '#10b981' : '#fff',
-                    fontSize: 13,
-                    fontWeight: 600,
-                    cursor: isAdded || addingId ? 'default' : 'pointer',
-                    minWidth: 60,
-                    flexShrink: 0,
-                  }}
-                >
-                  {isAdding ? '…' : isAdded ? 'Added' : 'Add'}
-                </button>
+                {isInCore ? (
+                  <span
+                    style={{
+                      marginLeft: 12,
+                      color: 'var(--kalpx-text-muted)',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      minWidth: 60,
+                      textAlign: 'right',
+                      flexShrink: 0,
+                    }}
+                  >
+                    In core
+                  </span>
+                ) : isAdded ? (
+                  <span
+                    style={{
+                      marginLeft: 12,
+                      color: '#10b981',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      minWidth: 60,
+                      textAlign: 'right',
+                      flexShrink: 0,
+                    }}
+                  >
+                    Added
+                  </span>
+                ) : (
+                  <button
+                    data-testid={`library-add-${id}`}
+                    disabled={!!addingId}
+                    onClick={() => handleAdd(item)}
+                    style={{
+                      marginLeft: 12,
+                      padding: '6px 14px',
+                      borderRadius: 20,
+                      border: 'none',
+                      background: 'var(--kalpx-gold)',
+                      color: '#fff',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      cursor: addingId ? 'default' : 'pointer',
+                      minWidth: 60,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {isAdding ? '…' : 'Add'}
+                  </button>
+                )}
               </div>
             );
           })}

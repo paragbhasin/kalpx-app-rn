@@ -22,9 +22,9 @@ export function MitraMobileShell({
 
   return (
     <div
+      className="kalpx-mitra-shell"
       style={{
         minHeight: "100dvh",
-
         backgroundImage: backgroundImage
           ? `url(${backgroundImage})`
           : "url(/beige_bg.png)",
@@ -35,10 +35,8 @@ export function MitraMobileShell({
       }}
     >
       <div
+        className="kalpx-mitra-shell-frame"
         style={{
-          maxWidth: 480,
-          margin: "0 auto",
-          height: "100dvh",
           display: "flex",
           flexDirection: "column",
         }}
@@ -46,6 +44,7 @@ export function MitraMobileShell({
         {/* {!hideTopBar && <MitraTopBar transparent={transparentChrome} />} */}
         {!hideTopBar && <Header transparent={transparentChrome} />}
         <main
+          className="kalpx-shell-main kalpx-mitra-shell-main"
           style={{
             flex: 1,
             overflowY: "auto",

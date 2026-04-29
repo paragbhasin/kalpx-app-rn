@@ -127,6 +127,35 @@ button {
   }
 }
 
+.kalpx-mitra-shell {
+  min-height: 100dvh;
+}
+
+.kalpx-mitra-shell-frame {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+.kalpx-mitra-shell-main {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (min-width: 768px) {
+  .kalpx-mitra-shell-frame {
+    max-width: 700px;
+  }
+
+  .kalpx-mitra-shell-main {
+    overflow-y: visible;
+  }
+}
+
 /* Sidebar slide-in from right */
 @keyframes kalpx-slide-in-right {
   from { transform: translateX(100%); }

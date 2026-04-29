@@ -455,11 +455,23 @@ export async function addAdditionalItem(itemId: string, itemType: string): Promi
   return res.data;
 }
 
-export async function searchLibraryItems(q: string): Promise<{ results: any[] }> {
+export async function searchLibraryItems(
+  query: string,
+  itemType?: string,
+): Promise<{ results: any[] }> {
   try {
-    const res = await api.get('mitra/library/search/', { params: { q, limit: 10 } });
-    return res.data;
-  } catch {
+    const res = await api.get('mitra/library/search/', {
+      params: { q: query, itemType, limit: 5 },
+    });
+    const data = res.data;
+    if (Array.isArray(data)) return { results: data };
+    return data || { results: [] };
+  } catch (err: any) {
+    console.error(
+      '[mitraApi] library search failed:',
+      err?.response?.status,
+      err?.response?.data || err?.message,
+    );
     return { results: [] };
   }
 }

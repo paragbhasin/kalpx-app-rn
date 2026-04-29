@@ -44,8 +44,6 @@ export function NewDashboardBodyBlock({ screenData, onAction }: Props) {
   const hasContinuity = sd.continuity?.tier && sd.continuity.tier !== "none";
   const hasSankalpCarry =
     Array.isArray(sd.sankalp_how_to_live) && sd.sankalp_how_to_live.length > 0;
-  const hasAdditional =
-    Array.isArray(sd.additional_items) && sd.additional_items.length > 0;
   const returnModal = sd.dashboard_return_modal;
 
   return (
@@ -118,9 +116,7 @@ export function NewDashboardBodyBlock({ screenData, onAction }: Props) {
 
       <QuickSupportBlock onAction={onAction} />
 
-      {hasAdditional && (
-        <AdditionalItemsSectionBlock sd={sd} onAction={onAction} />
-      )}
+      <AdditionalItemsSectionBlock sd={sd} onAction={onAction} />
 
       {whyThisOpen && (
         <WhyThisSheet

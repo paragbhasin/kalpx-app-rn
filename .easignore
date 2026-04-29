@@ -37,6 +37,10 @@ apps/mobile/.expo/
 .vscode/
 .idea/
 
+# Root-level Maestro screenshots and debug PNGs
+*.png
+*.PNG
+
 # OS
 .DS_Store
 Thumbs.db

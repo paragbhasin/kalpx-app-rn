@@ -43,6 +43,17 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
     LANGUAGES.find((language) => language.code === selectedLanguageCode) ||
     LANGUAGES[0];
 
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll(); // Initial check
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   // Close dropdown on outside click
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
@@ -121,11 +132,10 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
         data-testid="app-header"
         style={{
           width: "100%",
-          height: 40,
-          marginTop: 10,
-
-          backdropFilter: transparent ? "blur(6px)" : undefined,
-          WebkitBackdropFilter: transparent ? "blur(6px)" : undefined,
+          height: 60,
+          background: isScrolled ? "rgba(255, 255, 255, 0.2)" : "transparent",
+          backdropFilter: isScrolled ? "blur(12px)" : "none",
+          WebkitBackdropFilter: isScrolled ? "blur(12px)" : "none",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -134,6 +144,11 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
           position: "sticky",
           top: 0,
           zIndex: 60,
+          transition:
+            "background 0.3s, backdrop-filter 0.3s, border-color 0.3s",
+          borderBottom: isScrolled
+            ? "1px solid rgba(199, 162, 88, 0.08)"
+            : "none",
         }}
       >
         {/* Logo */}
@@ -172,7 +187,7 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
           {authed ? (
             <>
               {/* Notifications bell */}
-              <Link
+              {/* <Link
                 to="/en/notifications"
                 data-testid="header-notifications-link"
                 style={{
@@ -184,7 +199,7 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
                 title="Notifications"
               >
                 🔔
-              </Link>
+              </Link> */}
 
               {/* Avatar dropdown */}
               <div ref={dropdownRef} style={{ position: "relative" }}>

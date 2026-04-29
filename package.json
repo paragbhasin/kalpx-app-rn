@@ -14,14 +14,5 @@
   },
   "devDependencies": {
     "turbo": "^2.5.4"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@firebase/util",
-      "postinstall-postinstall",
-      "protobufjs",
-      "unrs-resolver",
-      "esbuild"
-    ]
   }
 }

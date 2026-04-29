@@ -3,6 +3,7 @@
   "private": true,
   "packageManager": "pnpm@10.33.2",
   "scripts": {
+    "eas-build-pre-install": "corepack enable && corepack prepare pnpm@10.33.2 --activate && pnpm --version",
     "mobile": "cd apps/mobile && npx expo start",
     "web:dev": "pnpm --filter @kalpx/web dev",
     "web:build": "pnpm --filter @kalpx/web build",

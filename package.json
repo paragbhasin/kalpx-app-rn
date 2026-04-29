@@ -1,7 +1,10 @@
 {
   "name": "kalpx-monorepo",
   "private": true,
+  "packageManager": "pnpm@10.33.2",
+  "main": "./apps/mobile/AppEntry.js",
   "scripts": {
+    "eas-build-pre-install": "corepack enable && corepack prepare pnpm@10.33.2 --activate && pnpm --version",
     "mobile": "cd apps/mobile && npx expo start",
     "web:dev": "pnpm --filter @kalpx/web dev",
     "web:build": "pnpm --filter @kalpx/web build",
@@ -12,14 +15,5 @@
   },
   "devDependencies": {
     "turbo": "^2.5.4"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@firebase/util",
-      "postinstall-postinstall",
-      "protobufjs",
-      "unrs-resolver",
-      "esbuild"
-    ]
   }
 }

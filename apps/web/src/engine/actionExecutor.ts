@@ -30,6 +30,7 @@ import { ensureRoomAmbientPlaying } from '../lib/audio/calmMusic';
 import { webNavigate } from '../lib/webRouter';
 import { invalidateJourneyStatusCache } from '../hooks/useJourneyStatus';
 import { WEB_ENV } from '../lib/env';
+const CHECKPOINT_BYPASS_KEY = 'kalpx_checkpoint_redirect_bypass_until';
 
 export interface ActionContext {
   dispatch: AppDispatch;
@@ -99,6 +100,19 @@ function _triggerNegativeLabel(feeling: string, step: number): string {
     uncertain: 'I still feel unsettled',
   };
   return labels[feeling] || 'I still feel unsettled';
+}
+
+function _resolveMitraTz(): string {
+  const raw = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
+  return raw === 'Asia/Calcutta' ? 'Asia/Kolkata' : raw;
+}
+
+function _setCheckpointRedirectBypass(msFromNow = 30_000): void {
+  try {
+    sessionStorage.setItem(CHECKPOINT_BYPASS_KEY, String(Date.now() + msFromNow));
+  } catch {
+    // best effort
+  }
 }
 
 const AUDIO_S3_BASE =
@@ -1601,6 +1615,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
       }
 
       dispatch(setSubmitting(true));
+      dispatch(updateScreenData({ checkpoint_submit_error: null }));
       try {
         void apiTrackEvent('checkpoint_completed', {
           journey_id: screenData.journey_id,
@@ -1608,7 +1623,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
           meta: { decision, day },
         });
 
-        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
+        const tz = _resolveMitraTz();
         let nextView: any = null;
         if (day === 7) {
           const day7FeelingMap: Record<string, string> = { continue: 'steady', lighten: 'heavy', reset: 'ready' };
@@ -1620,25 +1635,53 @@ export async function executeAction(action: any, context: ActionContext): Promis
         } else {
           const day14FeelingMap: Record<string, string> = { continue_same: 'steady', deepen: 'strong', change_focus: 'ready' };
           const deepenSuggestion = screenData.checkpoint_deepen_suggestion as any;
+          const reflection = p.reflection ?? screenData.checkpoint_user_reflection ?? '';
+          const sealRitual = p.sealRitual ?? '';
           const deepenFields = decision === 'deepen' && deepenSuggestion?.item_id
             ? { deepenItemType: deepenSuggestion.item_type, deepenItemId: deepenSuggestion.item_id, deepenAccepted: true }
             : {};
           const result = await mitraJourneyDay14Decision(
-            { decision, feeling: day14FeelingMap[decision] || '', tz, ...deepenFields },
+            {
+              decision,
+              feeling: day14FeelingMap[decision] || '',
+              reflection,
+              sealRitual,
+              tz,
+              ...deepenFields,
+            },
             idempotencyKey,
           );
           nextView = result?.next_view;
+          dispatch(updateScreenData({ checkpoint_completed: true }));
         }
 
         // Day 14 "change_focus" always re-enters onboarding
         if (day === 14 && decision === 'change_focus') {
-          dispatch(updateScreenData({ journey_id: null }));
+          invalidateJourneyStatusCache();
+          dispatch(updateScreenData({
+            journey_id: null,
+            day_number: null,
+            total_days: null,
+            path_cycle_number: null,
+            arc_state: nextView?.payload?.arc_state ?? null,
+            continuity: null,
+            checkpoint_completed: true,
+          }));
           _navigateToOnboarding(dispatch, 'turn_1');
           return;
         }
 
         if (nextView?.view_key === 'onboarding_start') {
-          dispatch(updateScreenData({ journey_id: null }));
+          invalidateJourneyStatusCache();
+          dispatch(updateScreenData({
+            journey_id: null,
+            day_number: null,
+            total_days: null,
+            path_cycle_number: null,
+            arc_state: nextView?.payload?.arc_state ?? null,
+            continuity: null,
+            checkpoint_completed: true,
+          }));
           _navigateToOnboarding(dispatch, 'turn_1');
           return;
         }
@@ -1648,14 +1691,12 @@ export async function executeAction(action: any, context: ActionContext): Promis
           dispatch(updateScreenData(flat));
         }
 
-        // Day 14 routing: deepen → deepen_confirmation; continue_same → day_14_finale ceremony; else → dashboard
-        if (day === 14 && decision === 'deepen') {
-          dispatch(loadScreen({ containerId: 'cycle_transitions', stateId: 'deepen_confirmation' }));
-          webNavigate(_containerToPath('cycle_transitions', 'deepen_confirmation'));
-        } else if (day === 14 && decision === 'continue_same') {
-          // G33 F1: route to ceremony screen before dashboard
-          dispatch(loadScreen({ containerId: 'cycle_transitions', stateId: 'day_14_finale' }));
-          webNavigate(_containerToPath('cycle_transitions', 'day_14_finale'));
+        // Mobile parity: day 14 continue_same/deepen both hydrate next cycle payload
+        // and return directly to dashboard. change_focus already routed above.
+        if (day === 14) {
+          invalidateJourneyStatusCache();
+          _setCheckpointRedirectBypass();
+          webNavigate('/en/mitra/dashboard');
         } else {
           webNavigate('/en/mitra/dashboard');
         }

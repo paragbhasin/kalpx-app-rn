@@ -373,9 +373,8 @@ export async function mitraJourneyDay7Decision(
   payload: { decision: string; [key: string]: any },
   idempotencyKey: string,
 ): Promise<any> {
-  const res = await api.post('mitra/v3/journey/day-7-decision/', payload, {
-    headers: { 'Idempotency-Key': idempotencyKey },
-  });
+  void idempotencyKey;
+  const res = await api.post('mitra/v3/journey/day-7-decision/', payload);
   return res.data;
 }
 
@@ -387,9 +386,8 @@ export async function mitraJourneyDay14Decision(
   payload: { decision: string; [key: string]: any },
   idempotencyKey: string,
 ): Promise<any> {
-  const res = await api.post('mitra/v3/journey/day-14-decision/', payload, {
-    headers: { 'Idempotency-Key': idempotencyKey },
-  });
+  void idempotencyKey;
+  const res = await api.post('mitra/v3/journey/day-14-decision/', payload);
   return res.data;
 }
 

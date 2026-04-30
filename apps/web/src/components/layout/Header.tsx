@@ -133,13 +133,21 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
         style={{
           width: "100%",
           height: 60,
-          background: isScrolled
-            ? "rgba(255, 255, 255, 0.2)"
-            : transparent
-              ? "transparent"
+          background: transparent
+            ? "transparent"
+            : isScrolled
+              ? "rgba(255, 255, 255, 0.2)"
               : "var(--kalpx-bg)",
-          backdropFilter: isScrolled || transparent ? "blur(12px)" : "none",
-          WebkitBackdropFilter: isScrolled || transparent ? "blur(12px)" : "none",
+          backdropFilter: transparent
+            ? "none"
+            : isScrolled
+              ? "blur(12px)"
+              : "none",
+          WebkitBackdropFilter: transparent
+            ? "none"
+            : isScrolled
+              ? "blur(12px)"
+              : "none",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -150,11 +158,11 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
           zIndex: 60,
           transition:
             "background 0.3s, backdrop-filter 0.3s, border-color 0.3s",
-          borderBottom: isScrolled
-            ? "1px solid rgba(199, 162, 88, 0.08)"
-            : transparent
-              ? "1px solid rgba(199, 162, 88, 0.06)"
-            : "none",
+          borderBottom: transparent
+            ? "none"
+            : isScrolled
+              ? "1px solid rgba(199, 162, 88, 0.08)"
+              : "none",
         }}
       >
         {/* Logo */}

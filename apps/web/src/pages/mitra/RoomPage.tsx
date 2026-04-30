@@ -11,7 +11,10 @@ import { RoomRenderer } from "../../components/blocks/room/RoomRenderer";
 import { ROOM_DISPLAY_NAMES } from "../../components/blocks/room/roomConstants";
 import { executeAction } from "../../engine/actionExecutor";
 import { getRoomRender, trackEvent } from "../../engine/mitraApi";
-import { ensureRoomAmbientPlaying, stopRoomAmbient } from "../../lib/audio/calmMusic";
+import {
+  ensureRoomAmbientPlaying,
+  stopRoomAmbient,
+} from "../../lib/audio/calmMusic";
 import { webNavigate } from "../../lib/webRouter";
 import type { AppDispatch } from "../../store";
 import { updateScreenData, useScreenState } from "../../store/screenSlice";

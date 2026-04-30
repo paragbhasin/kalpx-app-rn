@@ -29,9 +29,13 @@ export function ScreenRenderer({ schema, screenData = {}, onAction }: ScreenRend
   const blocks: any[] = resolved.container_id === 'welcome_onboarding'
     ? enrichOnboardingBlocks(rawBlocks)
     : rawBlocks;
+  const isCheckpointScreen =
+    resolved.state_id === 'checkpoint_day_7' ||
+    resolved.state_id === 'checkpoint_day_14' ||
+    resolved.state_id === 'day_14_finale';
 
   return (
-    <div style={{ padding: 16 }}>
+    <div style={{ padding: isCheckpointScreen ? 0 : 16 }}>
       {/* Dev-only container label — only with ?debug in URL */}
       {import.meta.env.DEV && typeof window !== 'undefined' && window.location.search.includes('debug') && (
         <div style={{ fontSize: 10, color: '#bbb', marginBottom: 8, fontFamily: 'monospace' }}>

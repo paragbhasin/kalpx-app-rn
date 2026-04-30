@@ -1,5 +1,5 @@
 import { clearTokens } from "@kalpx/auth";
-import { ChevronDown, Menu, User, X } from "lucide-react";
+import { Menu, User, X } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
@@ -305,7 +305,7 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
           className="kalpx-mobile-only"
           style={{ alignItems: "center", gap: 10 }}
         >
-          <div ref={languageRef} style={{ position: "relative" }}>
+          {/* <div ref={languageRef} style={{ position: "relative" }}>
             <button
               aria-label={`Language: ${selectedLanguage.label}`}
               onClick={() => setLanguageOpen((open) => !open)}
@@ -374,7 +374,7 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
                 ))}
               </div>
             )}
-          </div>
+          </div> */}
           <button
             onClick={() => setSidebarOpen(true)}
             aria-label="Open menu"
@@ -511,7 +511,7 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
                 ))}
               </nav>
 
-              <div
+              {/* <div
                 ref={sidebarLanguageRef}
                 style={{ marginTop: 20, position: "relative" }}
               >
@@ -582,7 +582,7 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
                     ))}
                   </div>
                 )}
-              </div>
+              </div> */}
 
               <div style={{ marginTop: 20 }}>
                 {authed ? (

@@ -29,8 +29,12 @@ export function RequiresJourney({ children }: Props) {
   const bypassCheckpointRedirect = hasCheckpointRedirectBypass();
 
   const rawDayNumber = Number(rawStatus?.dayNumber ?? rawStatus?.day_number ?? 0);
-  const checkpointDay = hasActiveJourney && (rawDayNumber === 7 || rawDayNumber === 14)
-    ? rawDayNumber
+  const checkpointDay = hasActiveJourney
+    ? rawDayNumber === 8
+      ? 7
+      : rawDayNumber === 7 || rawDayNumber === 14
+        ? rawDayNumber
+        : null
     : null;
 
   if (loading) {

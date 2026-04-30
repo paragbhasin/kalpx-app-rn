@@ -1698,6 +1698,8 @@ export async function executeAction(action: any, context: ActionContext): Promis
           _setCheckpointRedirectBypass();
           webNavigate('/en/mitra/dashboard');
         } else {
+          invalidateJourneyStatusCache();
+          _setCheckpointRedirectBypass();
           webNavigate('/en/mitra/dashboard');
         }
       } catch (err) {

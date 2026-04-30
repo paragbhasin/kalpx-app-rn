@@ -2,12 +2,12 @@
  * CycleReflectionBlock — Phase 10B.
  * Handles Day 7 and Day 14 checkpoint display + decision submission.
  * Data is pre-loaded into screenData by CheckpointPage before this block renders.
- * Internal phase: intro → reflection → decisions.
+ * Internal phase: intro → reflection → summary → decisions.
  */
 
 import { useEffect, useMemo, useState } from "react";
 
-type Phase = "intro" | "reflection" | "decisions";
+type Phase = "intro" | "reflection" | "summary" | "decisions";
 
 interface Props {
   block?: Record<string, any>;
@@ -75,28 +75,57 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
   const completionRates = sd.checkpoint_completion_rates || {};
   const completedCount = dayStatuses.filter((s) => s === "completed").length;
   const totalDays = dayStatuses.length || day;
+  const engagedTotal = trendGraph.engaged.reduce(
+    (sum: number, value: number) => sum + Number(value || 0),
+    0,
+  );
+  const completedTotal = trendGraph.fully_completed.reduce(
+    (sum: number, value: number) => sum + Number(value || 0),
+    0,
+  );
+  const strongestType: string = sd.checkpoint_strongest_type || "";
   const introBg = day === 14 ? "/14day_updated.png" : "/7daybg.png";
+  const introBgPosition = day === 7 ? "center bottom" : "top 92%";
+  const introBgAttachment = day === 7 ? "scroll" : "fixed";
+  const introBottomOffset = day === 7 ? -51 : 30;
 
   useEffect(() => {
-    const shell = document.querySelector(".kalpx-mitra-shell") as HTMLElement | null;
+    const shell = document.querySelector(
+      ".kalpx-mitra-shell",
+    ) as HTMLElement | null;
+    const shellMain = document.querySelector(
+      ".kalpx-mitra-shell-main",
+    ) as HTMLElement | null;
     if (!shell) return;
     shell.style.backgroundImage =
       phase === "intro" ? `url(${introBg})` : "url(/beige_bg.png)";
     shell.style.backgroundRepeat = "no-repeat";
     shell.style.backgroundSize = "cover";
-    shell.style.backgroundPosition = "top 92%";
+    shell.style.backgroundPosition =
+      phase === "intro" ? introBgPosition : "top 92%";
+    shell.style.backgroundAttachment =
+      phase === "intro" ? introBgAttachment : "fixed";
+    if (shellMain) {
+      shellMain.style.overflowY = phase === "intro" ? "hidden" : "auto";
+    }
     return () => {
       shell.style.backgroundImage = "url(/beige_bg.png)";
       shell.style.backgroundRepeat = "no-repeat";
       shell.style.backgroundSize = "cover";
       shell.style.backgroundPosition = "top 92%";
+      shell.style.backgroundAttachment = "fixed";
+      if (shellMain) {
+        shellMain.style.overflowY = "auto";
+      }
     };
-  }, [phase, introBg]);
+  }, [phase, introBg, introBgAttachment, introBgPosition]);
 
   const weeklyGroups = useMemo(
     () => [
       { label: "Week 1", days: [1, 2, 3, 4, 5, 6, 7] },
-      ...(totalDays > 7 ? [{ label: "Week 2", days: [8, 9, 10, 11, 12, 13, 14] }] : []),
+      ...(totalDays > 7
+        ? [{ label: "Week 2", days: [8, 9, 10, 11, 12, 13, 14] }]
+        : []),
     ],
     [totalDays],
   );
@@ -164,7 +193,8 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
           0,
         );
         const completed = dayIndexes.reduce(
-          (sum, index) => sum + Number(trendGraph.fully_completed?.[index] ?? 0),
+          (sum, index) =>
+            sum + Number(trendGraph.fully_completed?.[index] ?? 0),
           0,
         );
         return { ...week, engaged, completed };
@@ -200,10 +230,12 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
       <div
         data-testid="checkpoint-intro"
         style={{
-          minHeight: "calc(100dvh - 102px)",
+          height: "calc(100dvh - 122px - env(safe-area-inset-bottom))",
+          boxSizing: "border-box",
+          overflow: "hidden",
           display: "flex",
           flexDirection: "column",
-          padding: "24px 24px calc(30px + 62px + env(safe-area-inset-bottom))",
+          padding: `24px 24px calc(${introBottomOffset}px + 62px + env(safe-area-inset-bottom))`,
         }}
       >
         <div
@@ -212,7 +244,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-start",
-            paddingTop: "12vh",
+            paddingTop: day === 7 ? "" : "12vh",
           }}
         >
           <p
@@ -277,7 +309,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
   }
 
   // ── Reflection ────────────────────────────────────────────────────
-  if (phase === "reflection") {
+  if (phase === "reflection" || phase === "summary") {
     const graphCta = cp.graph_cta || "Continue to Choices";
 
     let narrativeText = mitraReflection;
@@ -290,12 +322,16 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
       narrativeText = `${completedCount} of ${totalDays} days held with intention.`;
     }
 
-    if (day === 14) {
+    if (phase === "reflection" && day === 14) {
       return (
         <>
           <div
             data-testid="checkpoint-reflection"
-            style={{ padding: "36px 24px 100px", maxWidth: 480, margin: "0 auto" }}
+            style={{
+              padding: "36px 24px 100px",
+              maxWidth: 480,
+              margin: "0 auto",
+            }}
           >
             <div style={{ textAlign: "center", marginBottom: 28 }}>
               <p
@@ -413,7 +449,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
 
             <button
               data-testid="checkpoint-reflection-cta"
-              onClick={() => setPhase("decisions")}
+              onClick={() => setPhase("summary")}
               style={{
                 marginTop: 26,
                 width: "100%",
@@ -558,7 +594,13 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                       </svg>
                     </div>
 
-                    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 14,
+                      }}
+                    >
                       {[
                         {
                           label: "Engaged",
@@ -586,7 +628,15 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                           value: dayActivity.practice,
                         },
                       ].map((item) => (
-                        <div key={item.label} style={{ display: "grid", gridTemplateColumns: "24px 1fr 24px", alignItems: "center", gap: 10 }}>
+                        <div
+                          key={item.label}
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "24px 1fr 24px",
+                            alignItems: "center",
+                            gap: 10,
+                          }}
+                        >
                           <div
                             style={{
                               width: 12,
@@ -630,7 +680,13 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                     </div>
                   </>
                 ) : (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 16,
+                    }}
+                  >
                     {weeklyStats.map((week) => (
                       <div
                         key={week.label}
@@ -651,13 +707,32 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                         >
                           {week.label}
                         </p>
-                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: "var(--kalpx-text-soft)" }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            fontSize: 14,
+                            color: "var(--kalpx-text-soft)",
+                          }}
+                        >
                           <span>Engaged</span>
-                          <strong style={{ color: "var(--kalpx-text)" }}>{week.engaged}</strong>
+                          <strong style={{ color: "var(--kalpx-text)" }}>
+                            {week.engaged}
+                          </strong>
                         </div>
-                        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: "var(--kalpx-text-soft)", marginTop: 8 }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            fontSize: 14,
+                            color: "var(--kalpx-text-soft)",
+                            marginTop: 8,
+                          }}
+                        >
                           <span>Fully Completed</span>
-                          <strong style={{ color: "var(--kalpx-text)" }}>{week.completed}</strong>
+                          <strong style={{ color: "var(--kalpx-text)" }}>
+                            {week.completed}
+                          </strong>
                         </div>
                       </div>
                     ))}
@@ -667,6 +742,870 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
             </div>
           )}
         </>
+      );
+    }
+
+    if (phase === "reflection" && day === 7) {
+      return (
+        <>
+          <div
+            data-testid="checkpoint-reflection"
+            style={{
+              padding: "36px 24px 100px",
+              maxWidth: 480,
+              margin: "0 auto",
+            }}
+          >
+            <div style={{ textAlign: "center", marginBottom: 28 }}>
+              <p
+                style={{
+                  fontSize: 18,
+                  fontFamily: "var(--kalpx-font-serif)",
+                  color: "var(--kalpx-text)",
+                  lineHeight: 1.4,
+                  marginBottom: 10,
+                  fontWeight: 700,
+                }}
+              >
+                {cp.day_picker_title || "Your 7-Day Journey"}
+              </p>
+              <p
+                style={{
+                  fontSize: 14,
+                  color: "var(--kalpx-text-soft)",
+                  lineHeight: 1.6,
+                }}
+              >
+                {cp.day_picker_subtitle || "Tap a day to see your progress"}
+              </p>
+            </div>
+
+            <div
+              style={{
+                border: "1.5px solid rgba(212,160,23,0.75)",
+                borderRadius: 28,
+                background: "rgba(255,250,244,0.72)",
+                padding: "22px 20px 26px",
+              }}
+            >
+              <p
+                style={{
+                  fontSize: 18,
+                  fontWeight: 700,
+                  color: "var(--kalpx-text)",
+                  marginBottom: 20,
+                }}
+              >
+                Week 1
+              </p>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+                  rowGap: 20,
+                  columnGap: 12,
+                }}
+              >
+                {weeklyGroups[0].days.map((dayNum) => {
+                  const status = dayStatuses[dayNum - 1] || "pending";
+                  const isSelected = selectedDay === dayNum;
+                  return (
+                    <button
+                      key={dayNum}
+                      onClick={() => {
+                        setSelectedDay(dayNum);
+                        setShowJourneyView(true);
+                      }}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        padding: 0,
+                        cursor: "pointer",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        gap: 8,
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 58,
+                          height: 58,
+                          borderRadius: "50%",
+                          border: `2px solid ${
+                            isSelected
+                              ? "var(--kalpx-cta)"
+                              : "rgba(212,160,23,0.8)"
+                          }`,
+                          background:
+                            status === "completed"
+                              ? "rgba(212,160,23,0.12)"
+                              : "#fff",
+                          color: "var(--kalpx-text)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          fontSize: 18,
+                          fontWeight: 700,
+                        }}
+                      >
+                        {dayNum}
+                      </div>
+                      <span
+                        style={{
+                          fontSize: 12,
+                          color: "var(--kalpx-text-soft)",
+                        }}
+                      >
+                        Day {dayNum}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <button
+              data-testid="checkpoint-reflection-cta"
+              onClick={() => setPhase("summary")}
+              style={{
+                marginTop: 26,
+                width: "100%",
+                background: "none",
+                border: "none",
+                color: "var(--kalpx-text)",
+                textDecoration: "underline",
+                fontSize: 16,
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              Skip
+            </button>
+          </div>
+
+          {showJourneyView && (
+            <div
+              onClick={() => setShowJourneyView(false)}
+              style={{
+                position: "fixed",
+                inset: 0,
+                background: "rgba(30,20,10,0.35)",
+                zIndex: 120,
+                display: "flex",
+                alignItems: "flex-end",
+                justifyContent: "center",
+              }}
+            >
+              <div
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  width: "100%",
+                  maxWidth: 480,
+                  background: "#fffaf4",
+                  borderRadius: "28px 28px 0 0",
+                  padding: "22px 22px 34px",
+                  maxHeight: "78dvh",
+                  overflowY: "auto",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginBottom: 18,
+                  }}
+                >
+                  <div style={{ display: "flex", gap: 26 }}>
+                    {(["day", "weekly"] as const).map((tab) => (
+                      <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          borderBottom:
+                            activeTab === tab
+                              ? "3px solid rgba(212,160,23,0.85)"
+                              : "3px solid transparent",
+                          color:
+                            activeTab === tab
+                              ? "var(--kalpx-text)"
+                              : "var(--kalpx-text-soft)",
+                          fontSize: 16,
+                          fontWeight: 600,
+                          padding: "0 0 10px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {tab === "day" ? "Day" : "Weekly"}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => setShowJourneyView(false)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "var(--kalpx-text-soft)",
+                      fontSize: 22,
+                      cursor: "pointer",
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+
+                {activeTab === "day" ? (
+                  <>
+                    <div
+                      style={{
+                        background: "#fff",
+                        borderRadius: 24,
+                        padding: "20px 16px 16px",
+                        boxShadow: "0 8px 24px rgba(67,33,4,0.05)",
+                        marginBottom: 22,
+                      }}
+                    >
+                      <p
+                        style={{
+                          textAlign: "center",
+                          fontSize: 18,
+                          fontWeight: 700,
+                          color: "var(--kalpx-text)",
+                          marginBottom: 12,
+                        }}
+                      >
+                        Growth Trend
+                      </p>
+                      <svg width="100%" height="170" viewBox="0 0 260 120">
+                        <path
+                          d={dayTrendPoints.engagedPath}
+                          stroke="#2D7A5F"
+                          strokeWidth="4"
+                          fill="none"
+                        />
+                        <path
+                          d={dayTrendPoints.completedPath}
+                          stroke="#D9A557"
+                          strokeWidth="4"
+                          fill="none"
+                          strokeDasharray="6 6"
+                        />
+                        <circle
+                          cx={dayTrendPoints.currentAX}
+                          cy={dayTrendPoints.currentAY}
+                          r="6"
+                          fill="#fff"
+                          stroke="#2D7A5F"
+                          strokeWidth="3"
+                        />
+                        <circle
+                          cx={dayTrendPoints.currentBX}
+                          cy={dayTrendPoints.currentBY}
+                          r="6"
+                          fill="#fff"
+                          stroke="#D9A557"
+                          strokeWidth="3"
+                        />
+                      </svg>
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 14,
+                      }}
+                    >
+                      {[
+                        {
+                          label: "Engaged",
+                          color: "#2D7A5F",
+                          value: dayActivity.engaged,
+                        },
+                        {
+                          label: "Fully Completed",
+                          color: "#D9A557",
+                          value: dayActivity.completed,
+                        },
+                        {
+                          label: "Mantra",
+                          color: "#8B6BCB",
+                          value: dayActivity.mantra,
+                        },
+                        {
+                          label: "Sankalp",
+                          color: "#2D7A5F",
+                          value: dayActivity.sankalp,
+                        },
+                        {
+                          label: "Core",
+                          color: "#E7774E",
+                          value: dayActivity.practice,
+                        },
+                      ].map((item) => (
+                        <div
+                          key={item.label}
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "24px 1fr 24px",
+                            alignItems: "center",
+                            gap: 10,
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: 12,
+                              height: 12,
+                              borderRadius: "50%",
+                              background: item.color,
+                              justifySelf: "center",
+                            }}
+                          />
+                          <div>
+                            <div
+                              style={{
+                                fontSize: 14,
+                                color: "var(--kalpx-text)",
+                                marginBottom: 6,
+                              }}
+                            >
+                              {item.label}
+                            </div>
+                            <div
+                              style={{
+                                width: "100%",
+                                height: 6,
+                                borderRadius: 999,
+                                background: "#efe7dd",
+                              }}
+                            />
+                          </div>
+                          <div
+                            style={{
+                              fontSize: 14,
+                              color: "var(--kalpx-text)",
+                              fontWeight: 700,
+                              textAlign: "right",
+                            }}
+                          >
+                            {item.value}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 16,
+                    }}
+                  >
+                    {weeklyStats.map((week) => (
+                      <div
+                        key={week.label}
+                        style={{
+                          borderRadius: 20,
+                          background: "#fff",
+                          padding: "16px 18px",
+                          boxShadow: "0 8px 24px rgba(67,33,4,0.05)",
+                        }}
+                      >
+                        <p
+                          style={{
+                            fontSize: 16,
+                            fontWeight: 700,
+                            color: "var(--kalpx-text)",
+                            marginBottom: 12,
+                          }}
+                        >
+                          {week.label}
+                        </p>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            fontSize: 14,
+                            color: "var(--kalpx-text-soft)",
+                          }}
+                        >
+                          <span>Engaged</span>
+                          <strong style={{ color: "var(--kalpx-text)" }}>
+                            {week.engaged}
+                          </strong>
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            fontSize: 14,
+                            color: "var(--kalpx-text-soft)",
+                            marginTop: 8,
+                          }}
+                        >
+                          <span>Fully Completed</span>
+                          <strong style={{ color: "var(--kalpx-text)" }}>
+                            {week.completed}
+                          </strong>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </>
+      );
+    }
+
+    if (phase === "summary") {
+      const summaryTagline =
+        day === 7
+          ? cp.surface_label || "DAY 7 • MIDPOINT"
+          : cp.surface_label || "DAY 14 • EVOLUTION PIVOT";
+      const summaryTitle =
+        day === 7 ? "Day 7 Reflection" : cp.summary_label || "What Has Grown";
+      const continuityTitle =
+        day === 7 ? "7-Day Continuity Mirror" : "14-Day Progress Graph";
+      const continuitySubtitle =
+        day === 7
+          ? "Your engagement over the last 7 days"
+          : "Engaged and fully completed across the full cycle";
+      const summaryBody =
+        mitraReflection ||
+        cp.body_narrative ||
+        cp.journey_narrative ||
+        cp.narrative_template ||
+        "";
+      const avgCompletionRate = Object.values(completionRates).length
+        ? Math.round(
+            (Object.values(completionRates).reduce(
+              (sum, value) => sum + Number(value || 0),
+              0,
+            ) /
+              Object.values(completionRates).length) *
+              100,
+          )
+        : null;
+
+      return (
+        <div
+          data-testid="checkpoint-summary"
+          style={{ padding: "24px 24px 100px", maxWidth: 480, margin: "0 auto" }}
+        >
+          <div style={{ marginBottom: 22 }}>
+            <p
+              style={{
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: 1.8,
+                color: "#9b7b53",
+                textTransform: "uppercase",
+                marginBottom: 10,
+                textAlign: day === 7 ? "left" : "center",
+              }}
+            >
+              {summaryTagline}
+            </p>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 12,
+              }}
+            >
+              <p
+                style={{
+                  fontSize: 26,
+                  fontWeight: 700,
+                  fontFamily: "var(--kalpx-font-serif)",
+                  color: "var(--kalpx-text)",
+                  lineHeight: 1.25,
+                  margin: 0,
+                }}
+              >
+                {summaryTitle}
+              </p>
+              {day === 7 && (
+                <div
+                  style={{
+                    padding: "10px 16px",
+                    borderRadius: 999,
+                    background: "rgba(240,225,206,0.9)",
+                    color: "#a0783b",
+                    fontSize: 14,
+                    fontWeight: 700,
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  Engaged
+                </div>
+              )}
+            </div>
+          </div>
+
+          {day === 7 && (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 14,
+                marginBottom: 22,
+              }}
+            >
+              {[
+                { label: "Days Engaged", value: `${engagedTotal} / ${totalDays}` },
+                { label: "Fully Completed", value: `${completedTotal} / ${totalDays}` },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  style={{
+                    background: "rgba(255,252,247,0.82)",
+                    border: "1px solid rgba(212,160,23,0.26)",
+                    borderRadius: 22,
+                    padding: "22px 18px",
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: 14,
+                      color: "#8c6f50",
+                      marginBottom: 18,
+                    }}
+                  >
+                    {item.label}
+                  </p>
+                  <p
+                    style={{
+                      fontSize: 26,
+                      color: "var(--kalpx-text)",
+                      fontFamily: "var(--kalpx-font-serif)",
+                      margin: 0,
+                    }}
+                  >
+                    {item.value}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div
+            style={{
+              background: "rgba(255,252,247,0.82)",
+              border: "1px solid rgba(212,160,23,0.26)",
+              borderRadius: 28,
+              padding: "22px 18px 26px",
+              marginBottom: 22,
+            }}
+          >
+            <p
+              style={{
+                fontSize: 18,
+                fontWeight: 700,
+                fontFamily: "var(--kalpx-font-serif)",
+                color: "var(--kalpx-text)",
+                marginBottom: 6,
+              }}
+            >
+              {continuityTitle}
+            </p>
+            <p
+              style={{
+                fontSize: 14,
+                color: "var(--kalpx-text-soft)",
+                marginBottom: 18,
+              }}
+            >
+              {continuitySubtitle}
+            </p>
+
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 8,
+                marginBottom: 18,
+              }}
+            >
+              {[
+                { label: "Engaged", color: "#432104" },
+                { label: "Completed", color: "#D9914A" },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  style={{ display: "flex", alignItems: "center", gap: 10 }}
+                >
+                  <span
+                    style={{
+                      width: 12,
+                      height: 12,
+                      borderRadius: "50%",
+                      background: item.color,
+                      display: "inline-block",
+                    }}
+                  />
+                  <span style={{ fontSize: 14, color: "var(--kalpx-text)" }}>
+                    {item.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: `repeat(${totalDays}, minmax(0, 1fr))`,
+                gap: 6,
+                alignItems: "end",
+              }}
+            >
+              {Array.from({ length: totalDays }, (_, index) => index + 1).map(
+                (dayNum) => (
+                  <div
+                    key={dayNum}
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 6,
+                      alignItems: "center",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "100%",
+                        minWidth: 14,
+                        height: 12,
+                        borderRadius: 3,
+                        background: trendGraph.engaged?.[dayNum - 1]
+                          ? "#e8d8c3"
+                          : "#f1f1f1",
+                      }}
+                    />
+                    <div
+                      style={{
+                        width: "100%",
+                        minWidth: 14,
+                        height: 12,
+                        borderRadius: 3,
+                        background: trendGraph.fully_completed?.[dayNum - 1]
+                          ? "#D9914A"
+                          : "#f1f1f1",
+                      }}
+                    />
+                  </div>
+                ),
+              )}
+            </div>
+          </div>
+
+          {day === 14 && (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 14,
+                marginBottom: 22,
+              }}
+            >
+              {[
+                { label: "Strongest Area", value: strongestType || "–" },
+                {
+                  label: "Consistency Score",
+                  value: avgCompletionRate != null ? `${avgCompletionRate}%` : "–",
+                },
+              ].map((item) => (
+                <div
+                  key={item.label}
+                  style={{
+                    background: "rgba(255,252,247,0.82)",
+                    border: "1px solid rgba(212,160,23,0.26)",
+                    borderRadius: 22,
+                    padding: "22px 18px",
+                  }}
+                >
+                  <p
+                    style={{
+                      fontSize: 14,
+                      color: "#8c6f50",
+                      marginBottom: 18,
+                    }}
+                  >
+                    {item.label}
+                  </p>
+                  <p
+                    style={{
+                      fontSize: 22,
+                      color: "var(--kalpx-text)",
+                      fontFamily: "var(--kalpx-font-serif)",
+                      margin: 0,
+                    }}
+                  >
+                    {item.value}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div
+            style={{
+              position: "relative",
+              background: "rgba(255,252,247,0.9)",
+              borderRadius: 28,
+              padding: "26px 20px 24px",
+              marginBottom: 24,
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                top: -14,
+                right: 18,
+                background: "var(--kalpx-cta)",
+                color: "#fff",
+                borderRadius: 999,
+                padding: "9px 16px",
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: 0.6,
+              }}
+            >
+              MITRA REFLECTION
+            </div>
+            {!!strongestType && (
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  borderRadius: 999,
+                  background: "#eaf4e9",
+                  color: "#2D7A5F",
+                  padding: "10px 16px",
+                  fontWeight: 700,
+                  marginBottom: 18,
+                }}
+              >
+                Strongest area: {strongestType}
+              </div>
+            )}
+            {!!summaryBody && (
+              <p
+                style={{
+                  fontSize: 17,
+                  lineHeight: 1.65,
+                  color: "var(--kalpx-text)",
+                  fontFamily: "var(--kalpx-font-serif)",
+                  margin: 0,
+                }}
+              >
+                {summaryBody}
+              </p>
+            )}
+          </div>
+
+          {day === 7 ? (
+            <>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <button
+                  onClick={() => submitDecision("continue")}
+                  disabled={isSubmitting}
+                  style={{
+                    width: "100%",
+                    padding: "18px 24px",
+                    background: "var(--kalpx-cta)",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: 999,
+                    fontSize: 16,
+                    fontWeight: 700,
+                    cursor: isSubmitting ? "default" : "pointer",
+                  }}
+                >
+                  <ButtonLoadingLabel
+                    loading={isSubmitting}
+                    label={cp.cta_continue_label || "Continue My Path"}
+                  />
+                </button>
+                {decisionsAvailable.includes("lighten") && (
+                  <button
+                    onClick={() => submitDecision("lighten")}
+                    disabled={isSubmitting}
+                    style={{
+                      width: "100%",
+                      padding: "18px 24px",
+                      background: "#c8a97a",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: 999,
+                      fontSize: 16,
+                      fontWeight: 700,
+                      cursor: isSubmitting ? "default" : "pointer",
+                    }}
+                  >
+                    <ButtonLoadingLabel
+                      loading={isSubmitting}
+                      label={cp.cta_lighten_label || "Lighten"}
+                    />
+                  </button>
+                )}
+                {decisionsAvailable.includes("reset") && (
+                  <button
+                    onClick={() => submitDecision("reset")}
+                    disabled={isSubmitting}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "var(--kalpx-text)",
+                      textDecoration: "underline",
+                      fontSize: 16,
+                      fontWeight: 600,
+                      cursor: isSubmitting ? "default" : "pointer",
+                    }}
+                  >
+                    {cp.cta_start_fresh_label || "Start Fresh"}
+                  </button>
+                )}
+              </div>
+              {!!sd.checkpoint_decision_framing && (
+                <p
+                  style={{
+                    marginTop: 12,
+                    textAlign: "center",
+                    fontSize: 15,
+                    color: "var(--kalpx-text-soft)",
+                  }}
+                >
+                  {sd.checkpoint_decision_framing}
+                </p>
+              )}
+            </>
+          ) : (
+            <button
+              data-testid="checkpoint-summary-cta"
+              onClick={() => setPhase("decisions")}
+              style={{
+                width: "100%",
+                padding: "18px 24px",
+                background: "var(--kalpx-cta)",
+                color: "#fff",
+                border: "none",
+                borderRadius: 999,
+                fontSize: 16,
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              {cp.graph_cta || "Continue to Choices"}
+            </button>
+          )}
+        </div>
       );
     }
 
@@ -685,45 +1624,8 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
             marginBottom: 20,
           }}
         >
-          {day === 7 ? "What Grew" : "Your Journey"}
+          Your Journey
         </p>
-
-        {/* Day dot timeline */}
-        {dayStatuses.length > 0 && (
-          <div
-            data-testid="checkpoint-day-dots"
-            style={{
-              display: "flex",
-              gap: 6,
-              flexWrap: "wrap",
-              marginBottom: 24,
-            }}
-          >
-            {dayStatuses.map((status, i) => (
-              <div
-                key={i}
-                style={{
-                  width: 28,
-                  height: 28,
-                  borderRadius: "50%",
-                  background:
-                    status === "completed"
-                      ? "var(--kalpx-gold)"
-                      : "rgba(201,168,76,0.25)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 10,
-                  color:
-                    status === "completed" ? "#fff" : "var(--kalpx-text-muted)",
-                  fontWeight: 700,
-                }}
-              >
-                {i + 1}
-              </div>
-            ))}
-          </div>
-        )}
 
         <div
           style={{
@@ -746,7 +1648,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
           </p>
         </div>
 
-        {day === 14 && sd.checkpoint_classification_headline && (
+        {sd.checkpoint_classification_headline && (
           <div style={{ marginBottom: 24 }}>
             <p
               style={{
@@ -820,7 +1722,8 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
     "continue_first";
   const deepenSuggestion: Record<string, any> | null =
     sd.checkpoint_deepen_suggestion || null;
-  const classificationHeadline: string = sd.checkpoint_classification_headline || "";
+  const classificationHeadline: string =
+    sd.checkpoint_classification_headline || "";
   const classificationBody: string = sd.checkpoint_classification_body || "";
 
   const decisionLabels: Record<string, string> = {
@@ -833,7 +1736,10 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
       dc.continue_same_cta ||
       "Continue Same Path",
     deepen:
-      cp.deepen_practice_cta || cp.cta_deepen || dc.deepen_cta || "Deepen Practice",
+      cp.deepen_practice_cta ||
+      cp.cta_deepen ||
+      dc.deepen_cta ||
+      "Deepen Practice",
     change_focus:
       cp.change_focus_cta ||
       cp.cta_change_focus ||
@@ -927,9 +1833,29 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                 marginBottom: 22,
               }}
             >
-              <div style={{ width: 106, height: 1, background: "rgba(201,168,76,0.7)" }} />
-              <div style={{ color: "var(--kalpx-gold)", fontSize: 16, lineHeight: 1 }}>◆</div>
-              <div style={{ width: 106, height: 1, background: "rgba(201,168,76,0.7)" }} />
+              <div
+                style={{
+                  width: 106,
+                  height: 1,
+                  background: "rgba(201,168,76,0.7)",
+                }}
+              />
+              <div
+                style={{
+                  color: "var(--kalpx-gold)",
+                  fontSize: 16,
+                  lineHeight: 1,
+                }}
+              >
+                ◆
+              </div>
+              <div
+                style={{
+                  width: 106,
+                  height: 1,
+                  background: "rgba(201,168,76,0.7)",
+                }}
+              />
             </div>
             {!!classificationBody && (
               <p
@@ -949,7 +1875,12 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
         {submitError && (
           <p
             data-testid="checkpoint-submit-error"
-            style={{ fontSize: 13, color: "#c0392b", textAlign: "center", marginBottom: 16 }}
+            style={{
+              fontSize: 13,
+              color: "#c0392b",
+              textAlign: "center",
+              marginBottom: 16,
+            }}
           >
             Something went wrong. Please try again.
           </p>
@@ -1025,7 +1956,9 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
         >
           <ButtonLoadingLabel
             loading={isSubmitting}
-            label={dc.restart_cta || cp.restart_cta || "Start a New 14-Day Rhythm"}
+            label={
+              dc.restart_cta || cp.restart_cta || "Start a New 14-Day Rhythm"
+            }
           />
         </button>
 
@@ -1049,7 +1982,10 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
               boxShadow: "0 8px 24px rgba(67,33,4,0.05)",
             }}
           >
-            <ButtonLoadingLabel loading={isSubmitting} label={decisionLabels.deepen} />
+            <ButtonLoadingLabel
+              loading={isSubmitting}
+              label={decisionLabels.deepen}
+            />
           </button>
         )}
 
@@ -1069,17 +2005,25 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
             opacity: isSubmitting ? 0.6 : 1,
           }}
         >
-          <ButtonLoadingLabel loading={isSubmitting} label={decisionLabels.change_focus} />
+          <ButtonLoadingLabel
+            loading={isSubmitting}
+            label={decisionLabels.change_focus}
+          />
         </button>
       </div>
     );
   }
 
-  if (day === 14 && (decisionLayout === "deepen_first" || decisionLayout === "continue_first")) {
+  if (
+    day === 14 &&
+    (decisionLayout === "deepen_first" || decisionLayout === "continue_first")
+  ) {
     const deepenTitle = String(deepenSuggestion?.title || "").trim();
     const deepenDescription =
       deepenSuggestion?.preview ||
-      (deepenTitle ? `${decisionDescriptions.deepen} ${deepenTitle}.` : decisionDescriptions.deepen);
+      (deepenTitle
+        ? `${decisionDescriptions.deepen} ${deepenTitle}.`
+        : decisionDescriptions.deepen);
     const deepenFirst = decisionLayout === "deepen_first";
     const deepenHint = deepenTitle
       ? `Choosing '${decisionLabels.deepen}' gently begins the ${deepenTitle}`
@@ -1121,9 +2065,29 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                 marginBottom: 22,
               }}
             >
-              <div style={{ width: 106, height: 1, background: "rgba(201,168,76,0.7)" }} />
-              <div style={{ color: "var(--kalpx-gold)", fontSize: 16, lineHeight: 1 }}>◆</div>
-              <div style={{ width: 106, height: 1, background: "rgba(201,168,76,0.7)" }} />
+              <div
+                style={{
+                  width: 106,
+                  height: 1,
+                  background: "rgba(201,168,76,0.7)",
+                }}
+              />
+              <div
+                style={{
+                  color: "var(--kalpx-gold)",
+                  fontSize: 16,
+                  lineHeight: 1,
+                }}
+              >
+                ◆
+              </div>
+              <div
+                style={{
+                  width: 106,
+                  height: 1,
+                  background: "rgba(201,168,76,0.7)",
+                }}
+              />
             </div>
             {!!classificationBody && (
               <p
@@ -1143,7 +2107,12 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
         {submitError && (
           <p
             data-testid="checkpoint-submit-error"
-            style={{ fontSize: 13, color: "#c0392b", textAlign: "center", marginBottom: 16 }}
+            style={{
+              fontSize: 13,
+              color: "#c0392b",
+              textAlign: "center",
+              marginBottom: 16,
+            }}
           >
             Something went wrong. Please try again.
           </p>
@@ -1233,10 +2202,13 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                 fontSize: 16,
                 fontWeight: 700,
                 cursor: isSubmitting ? "default" : "pointer",
-              opacity: isSubmitting ? 0.6 : 1,
-            }}
-          >
-              <ButtonLoadingLabel loading={isSubmitting} label={decisionLabels.deepen} />
+                opacity: isSubmitting ? 0.6 : 1,
+              }}
+            >
+              <ButtonLoadingLabel
+                loading={isSubmitting}
+                label={decisionLabels.deepen}
+              />
             </button>
           )}
 
@@ -1258,7 +2230,10 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
               boxShadow: "0 8px 24px rgba(67,33,4,0.05)",
             }}
           >
-            <ButtonLoadingLabel loading={isSubmitting} label={decisionLabels.continue_same} />
+            <ButtonLoadingLabel
+              loading={isSubmitting}
+              label={decisionLabels.continue_same}
+            />
           </button>
 
           {!deepenFirst && decisionsAvailable.includes("deepen") && (
@@ -1268,10 +2243,26 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
               disabled={isSubmitting}
               style={getDecisionButtonStyle("deepen")}
             >
-              <p style={{ fontSize: 16, fontWeight: 700, color: "var(--kalpx-text)", marginBottom: 6 }}>
-                <ButtonLoadingLabel loading={isSubmitting} label={decisionLabels.deepen} />
+              <p
+                style={{
+                  fontSize: 16,
+                  fontWeight: 700,
+                  color: "var(--kalpx-text)",
+                  marginBottom: 6,
+                }}
+              >
+                <ButtonLoadingLabel
+                  loading={isSubmitting}
+                  label={decisionLabels.deepen}
+                />
               </p>
-              <p style={{ fontSize: 14, color: "var(--kalpx-text-muted)", lineHeight: 1.6 }}>
+              <p
+                style={{
+                  fontSize: 14,
+                  color: "var(--kalpx-text-muted)",
+                  lineHeight: 1.6,
+                }}
+              >
                 {deepenDescription}
               </p>
             </button>
@@ -1294,7 +2285,10 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
               paddingTop: 4,
             }}
           >
-            <ButtonLoadingLabel loading={isSubmitting} label={decisionLabels.change_focus} />
+            <ButtonLoadingLabel
+              loading={isSubmitting}
+              label={decisionLabels.change_focus}
+            />
           </button>
         </div>
       </div>
@@ -1362,7 +2356,10 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                 marginBottom: 4,
               }}
             >
-              <ButtonLoadingLabel loading={isSubmitting} label={decisionLabels[decision] || decision} />
+              <ButtonLoadingLabel
+                loading={isSubmitting}
+                label={decisionLabels[decision] || decision}
+              />
             </p>
             {decisionDescriptions[decision] && (
               <p

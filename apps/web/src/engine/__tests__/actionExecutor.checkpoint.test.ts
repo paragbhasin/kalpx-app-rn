@@ -54,9 +54,36 @@ describe('submit_checkpoint_decision — Day 7', () => {
     const ctx = makeContext({}, 'checkpoint_day_7');
     await executeAction({ type: 'submit_checkpoint_decision', payload: { decision: 'continue', day: 7 } }, ctx);
     expect(mitraApi.mitraJourneyDay7Decision).toHaveBeenCalledWith(
-      { decision: 'continue' },
+      expect.objectContaining({ decision: 'continue', feeling: 'steady', tz: expect.any(String) }),
       expect.stringContaining('checkpoint_7_continue'),
     );
+  });
+
+  it('day 7 continue includes feeling steady', async () => {
+    (mitraApi.mitraJourneyDay7Decision as any).mockResolvedValue({ next_view: null });
+    const ctx = makeContext({}, 'checkpoint_day_7');
+    await executeAction({ type: 'submit_checkpoint_decision', payload: { decision: 'continue', day: 7 } }, ctx);
+    const call = (mitraApi.mitraJourneyDay7Decision as any).mock.calls[0][0];
+    expect(call.feeling).toBe('steady');
+    expect(call.tz).toBeTruthy();
+  });
+
+  it('day 7 lighten includes feeling heavy', async () => {
+    (mitraApi.mitraJourneyDay7Decision as any).mockResolvedValue({ next_view: null });
+    const ctx = makeContext({}, 'checkpoint_day_7');
+    await executeAction({ type: 'submit_checkpoint_decision', payload: { decision: 'lighten', day: 7 } }, ctx);
+    const call = (mitraApi.mitraJourneyDay7Decision as any).mock.calls[0][0];
+    expect(call.feeling).toBe('heavy');
+    expect(call.tz).toBeTruthy();
+  });
+
+  it('day 7 reset includes feeling ready', async () => {
+    (mitraApi.mitraJourneyDay7Decision as any).mockResolvedValue({ next_view: { view_key: 'onboarding_start' } });
+    const ctx = makeContext({}, 'checkpoint_day_7');
+    await executeAction({ type: 'submit_checkpoint_decision', payload: { decision: 'reset', day: 7 } }, ctx);
+    const call = (mitraApi.mitraJourneyDay7Decision as any).mock.calls[0][0];
+    expect(call.feeling).toBe('ready');
+    expect(call.tz).toBeTruthy();
   });
 
   it('navigates to dashboard after day 7 decision', async () => {
@@ -90,9 +117,55 @@ describe('submit_checkpoint_decision — Day 14', () => {
     const ctx = makeContext({}, 'checkpoint_day_14');
     await executeAction({ type: 'submit_checkpoint_decision', payload: { decision: 'continue_same', day: 14 } }, ctx);
     expect(mitraApi.mitraJourneyDay14Decision).toHaveBeenCalledWith(
-      { decision: 'continue_same' },
+      expect.objectContaining({ decision: 'continue_same', feeling: 'steady', tz: expect.any(String) }),
       expect.stringContaining('checkpoint_14_continue_same'),
     );
+  });
+
+  it('day 14 deepen includes feeling strong', async () => {
+    (mitraApi.mitraJourneyDay14Decision as any).mockResolvedValue({ next_view: null });
+    const ctx = makeContext({}, 'checkpoint_day_14');
+    await executeAction({ type: 'submit_checkpoint_decision', payload: { decision: 'deepen', day: 14 } }, ctx);
+    const call = (mitraApi.mitraJourneyDay14Decision as any).mock.calls[0][0];
+    expect(call.feeling).toBe('strong');
+    expect(call.tz).toBeTruthy();
+  });
+
+  it('day 14 change_focus includes feeling ready', async () => {
+    (mitraApi.mitraJourneyDay14Decision as any).mockResolvedValue({ next_view: null });
+    const ctx = makeContext({}, 'checkpoint_day_14');
+    await executeAction({ type: 'submit_checkpoint_decision', payload: { decision: 'change_focus', day: 14 } }, ctx);
+    const call = (mitraApi.mitraJourneyDay14Decision as any).mock.calls[0][0];
+    expect(call.feeling).toBe('ready');
+    expect(call.tz).toBeTruthy();
+  });
+
+  it('day 14 deepen with deepenSuggestion includes deepen item fields', async () => {
+    (mitraApi.mitraJourneyDay14Decision as any).mockResolvedValue({ next_view: null });
+    const ctx = makeContext({
+      checkpoint_deepen_suggestion: { item_id: 'mantra_42', item_type: 'mantra' },
+    }, 'checkpoint_day_14');
+    await executeAction({ type: 'submit_checkpoint_decision', payload: { decision: 'deepen', day: 14 } }, ctx);
+    const call = (mitraApi.mitraJourneyDay14Decision as any).mock.calls[0][0];
+    expect(call.deepenItemType).toBe('mantra');
+    expect(call.deepenItemId).toBe('mantra_42');
+    expect(call.deepenAccepted).toBe(true);
+  });
+
+  it('day 14 deepen without deepenSuggestion omits deepen item fields', async () => {
+    (mitraApi.mitraJourneyDay14Decision as any).mockResolvedValue({ next_view: null });
+    const ctx = makeContext({}, 'checkpoint_day_14');
+    await executeAction({ type: 'submit_checkpoint_decision', payload: { decision: 'deepen', day: 14 } }, ctx);
+    const call = (mitraApi.mitraJourneyDay14Decision as any).mock.calls[0][0];
+    expect(call.deepenItemType).toBeUndefined();
+    expect(call.deepenItemId).toBeUndefined();
+  });
+
+  it('day 14 continue_same routes to day_14_finale', async () => {
+    (mitraApi.mitraJourneyDay14Decision as any).mockResolvedValue({ next_view: null });
+    const ctx = makeContext({}, 'checkpoint_day_14');
+    await executeAction({ type: 'submit_checkpoint_decision', payload: { decision: 'continue_same', day: 14 } }, ctx);
+    expect(webNavigate).toHaveBeenCalledWith(expect.stringContaining('day_14_finale'));
   });
 
   it('always routes change_focus to onboarding', async () => {

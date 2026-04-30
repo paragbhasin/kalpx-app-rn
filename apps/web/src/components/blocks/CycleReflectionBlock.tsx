@@ -215,6 +215,25 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
     change_focus: 'Choose a different focus for your next cycle.',
   };
 
+  // Day 7 decision buttons use RN color hierarchy; Day 14 uses equal-weight cards (approved web divergence)
+  function getDecisionButtonStyle(dec: string) {
+    const base = {
+      padding: '16px 20px', borderRadius: 12, textAlign: 'left' as const,
+      cursor: isSubmitting ? 'default' : 'pointer', opacity: isSubmitting ? 0.6 : 1,
+      boxShadow: 'var(--kalpx-shadow-card)', touchAction: 'manipulation' as const,
+    };
+    if (day !== 7) return { ...base, background: 'var(--kalpx-card-bg)', border: '1.5px solid var(--kalpx-border-gold)' };
+    if (dec === 'continue') return { ...base, background: 'var(--kalpx-cta)', border: 'none' };
+    if (dec === 'lighten') return { ...base, background: 'rgba(200,169,122,0.55)', border: '1.5px solid rgba(200,169,122,0.8)' };
+    return { ...base, background: 'var(--kalpx-card-bg)', border: '1.5px solid var(--kalpx-border-gold)' };
+  }
+  function getDecisionLabelColor(dec: string) {
+    return day === 7 && dec === 'continue' ? '#fff' : 'var(--kalpx-text)';
+  }
+  function getDecisionDescColor(dec: string) {
+    return day === 7 && dec === 'continue' ? 'rgba(255,255,255,0.75)' : 'var(--kalpx-text-muted)';
+  }
+
   return (
     <div
       data-testid="checkpoint-decisions"
@@ -243,23 +262,13 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
             data-testid={`checkpoint-decision-${decision}`}
             onClick={() => !isSubmitting && submitDecision(decision)}
             disabled={isSubmitting}
-            style={{
-              padding: '16px 20px',
-              background: 'var(--kalpx-card-bg)',
-              border: '1.5px solid var(--kalpx-border-gold)',
-              borderRadius: 12,
-              textAlign: 'left',
-              cursor: isSubmitting ? 'default' : 'pointer',
-              opacity: isSubmitting ? 0.6 : 1,
-              boxShadow: 'var(--kalpx-shadow-card)',
-              touchAction: 'manipulation',
-            }}
+            style={getDecisionButtonStyle(decision)}
           >
-            <p style={{ fontSize: 16, fontWeight: 700, color: 'var(--kalpx-text)', marginBottom: 4 }}>
+            <p style={{ fontSize: 16, fontWeight: 700, color: getDecisionLabelColor(decision), marginBottom: 4 }}>
               {decisionLabels[decision] || decision}
             </p>
             {decisionDescriptions[decision] && (
-              <p style={{ fontSize: 13, color: 'var(--kalpx-text-muted)', margin: 0 }}>
+              <p style={{ fontSize: 13, color: getDecisionDescColor(decision), margin: 0 }}>
                 {decisionDescriptions[decision]}
               </p>
             )}

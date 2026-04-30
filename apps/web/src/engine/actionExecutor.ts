@@ -1608,12 +1608,25 @@ export async function executeAction(action: any, context: ActionContext): Promis
           meta: { decision, day },
         });
 
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Kolkata';
         let nextView: any = null;
         if (day === 7) {
-          const result = await mitraJourneyDay7Decision({ decision }, idempotencyKey);
+          const day7FeelingMap: Record<string, string> = { continue: 'steady', lighten: 'heavy', reset: 'ready' };
+          const result = await mitraJourneyDay7Decision(
+            { decision, feeling: day7FeelingMap[decision] || '', tz },
+            idempotencyKey,
+          );
           nextView = result?.next_view;
         } else {
-          const result = await mitraJourneyDay14Decision({ decision }, idempotencyKey);
+          const day14FeelingMap: Record<string, string> = { continue_same: 'steady', deepen: 'strong', change_focus: 'ready' };
+          const deepenSuggestion = screenData.checkpoint_deepen_suggestion as any;
+          const deepenFields = decision === 'deepen' && deepenSuggestion?.item_id
+            ? { deepenItemType: deepenSuggestion.item_type, deepenItemId: deepenSuggestion.item_id, deepenAccepted: true }
+            : {};
+          const result = await mitraJourneyDay14Decision(
+            { decision, feeling: day14FeelingMap[decision] || '', tz, ...deepenFields },
+            idempotencyKey,
+          );
           nextView = result?.next_view;
         }
 
@@ -1635,10 +1648,14 @@ export async function executeAction(action: any, context: ActionContext): Promis
           dispatch(updateScreenData(flat));
         }
 
-        // day_14 "deepen" goes to deepen_confirmation; otherwise dashboard
+        // Day 14 routing: deepen → deepen_confirmation; continue_same → day_14_finale ceremony; else → dashboard
         if (day === 14 && decision === 'deepen') {
           dispatch(loadScreen({ containerId: 'cycle_transitions', stateId: 'deepen_confirmation' }));
           webNavigate(_containerToPath('cycle_transitions', 'deepen_confirmation'));
+        } else if (day === 14 && decision === 'continue_same') {
+          // G33 F1: route to ceremony screen before dashboard
+          dispatch(loadScreen({ containerId: 'cycle_transitions', stateId: 'day_14_finale' }));
+          webNavigate(_containerToPath('cycle_transitions', 'day_14_finale'));
         } else {
           webNavigate('/en/mitra/dashboard');
         }

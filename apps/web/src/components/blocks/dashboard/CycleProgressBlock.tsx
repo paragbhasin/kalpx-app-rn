@@ -93,7 +93,7 @@ export function CycleProgressBlock({ sd }: Props) {
 
   const visibleRhythm = useMemo(() => {
     if (rhythm.length > 0) return rhythm;
-    return Array.from({ length: totalDays }, (_, index) => ({
+    return Array.from({ length: totalDays }, (_, index): DayDot => ({
       day_number: index + 1,
       state: index + 1 < dayNumber ? "missed" : "pending",
     }));

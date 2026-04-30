@@ -26,6 +26,7 @@ import {
   mitraJourneyDay14Decision,
 } from './mitraApi';
 import { ingestDailyView, ingestDay7View, ingestDay14View } from './v3Ingest';
+import { ensureRoomAmbientPlaying } from '../lib/audio/calmMusic';
 import { webNavigate } from '../lib/webRouter';
 import { invalidateJourneyStatusCache } from '../hooks/useJourneyStatus';
 import { WEB_ENV } from '../lib/env';
@@ -43,6 +44,12 @@ export interface ActionContext {
 
 function _containerToPath(containerId: string, stateId: string): string {
   return `/en/mitra/engine?containerId=${encodeURIComponent(containerId)}&stateId=${encodeURIComponent(stateId)}`;
+}
+
+function _normalizeCompletionSource(source: string | null | undefined): string | null {
+  if (!source) return null;
+  if (source === 'support_room') return 'support';
+  return source;
 }
 
 function _onboardingPath(stateId: string): string {
@@ -275,7 +282,9 @@ export async function executeAction(action: any, context: ActionContext): Promis
         const p = action.payload || action;
         const itemType = p.itemType || p.item_type || screenData.runner_variant;
         const itemId = p.itemId || p.item_id;
-        const source = p.source || screenData.runner_source;
+        const source = _normalizeCompletionSource(
+          (p.source || screenData.runner_source) as string | null | undefined
+        );
         if (!itemType || !itemId) {
           if (WEB_ENV.isDev) console.warn('[actionExecutor] track_completion: missing itemType/itemId', { itemType, itemId });
           break;
@@ -460,7 +469,8 @@ export async function executeAction(action: any, context: ActionContext): Promis
       try {
         const item = (screenData.runner_active_item || {}) as Record<string, any>;
         const variant: string = (screenData.runner_variant as string) || 'mantra';
-        const source: string = (screenData.runner_source as string) || 'core';
+        const source: string =
+          _normalizeCompletionSource(screenData.runner_source as string | null | undefined) || 'core';
         const itemId: string = item.item_id || item.id || '';
         const startTime: number = (screenData.runner_start_time as number) || Date.now();
         const actualSeconds = Math.round((Date.now() - startTime) / 1000);
@@ -537,6 +547,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
       const runnerKeys = ['runner_active_item', 'runner_source', 'runner_variant', 'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec', 'runner_start_time', 'runner_tz'];
       runnerKeys.forEach(k => dispatch(setScreenValue({ key: k, value: null })));
       if (exitSource === 'support_room' && exitRoomId) {
+        ensureRoomAmbientPlaying();
         webNavigate(`/en/mitra/room/${exitRoomId.replace(/^room_/, '')}`);
       } else if (exitSource === 'support_trigger') {
         webNavigate('/en/mitra/trigger');
@@ -575,6 +586,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
       const runnerClearKeys = ['runner_active_item', 'runner_source', 'runner_variant', 'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec', 'runner_start_time', 'runner_tz'];
       runnerClearKeys.forEach(k => dispatch(setScreenValue({ key: k, value: null })));
       if (returnSrc === 'support_room' && roomId) {
+        ensureRoomAmbientPlaying();
         webNavigate(`/en/mitra/room/${roomId.replace(/^room_/, '')}`);
       } else if (returnSrc === 'support_trigger') {
         webNavigate('/en/mitra/trigger');
@@ -801,6 +813,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
         if (WEB_ENV.isDev) console.warn('[actionExecutor] enter_room: missing room_id', action);
         break;
       }
+      ensureRoomAmbientPlaying();
       // Clear stale room state before entering
       dispatch(updateScreenData({
         room_id: roomId,

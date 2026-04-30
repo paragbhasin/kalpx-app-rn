@@ -11,8 +11,7 @@ import { RoomRenderer } from "../../components/blocks/room/RoomRenderer";
 import { ROOM_DISPLAY_NAMES } from "../../components/blocks/room/roomConstants";
 import { executeAction } from "../../engine/actionExecutor";
 import { getRoomRender, trackEvent } from "../../engine/mitraApi";
-import { createRoomAmbient } from "../../lib/audio/calmMusic";
-import type { AudioHandle } from "../../lib/audio/howlerAudio";
+import { ensureRoomAmbientPlaying, stopRoomAmbient } from "../../lib/audio/calmMusic";
 import { webNavigate } from "../../lib/webRouter";
 import type { AppDispatch } from "../../store";
 import { updateScreenData, useScreenState } from "../../store/screenSlice";
@@ -57,30 +56,30 @@ export function RoomPage() {
     ? roomId
     : `room_${roomId || ""}`;
 
+  const storedEnvelope =
+    sd?.room_render_payload &&
+    (sd.room_render_payload as any).room_id === fullRoomId
+      ? (sd.room_render_payload as any)
+      : null;
+
   const [phase, setPhase] = useState<"picker" | "loading" | "render" | "error">(
-    ROOMS_WITH_CONTEXT_PICKER.includes(fullRoomId) ? "picker" : "loading",
+    storedEnvelope
+      ? "render"
+      : ROOMS_WITH_CONTEXT_PICKER.includes(fullRoomId)
+        ? "picker"
+        : "loading",
   );
-  const [envelope, setEnvelope] = useState<any>(null);
+  const [envelope, setEnvelope] = useState<any>(storedEnvelope);
   const [lifeContext, setLifeContext] = useState<string | null>(
     (sd?.room_life_context as string | null) || null,
   );
-  const ambientAudioRef = useRef<AudioHandle | null>(null);
 
   // Room ambient audio — start on render phase, stop on unmount (mirrors RoomContainer.tsx)
   useEffect(() => {
     if (phase !== "render") return;
-    const handle = createRoomAmbient();
-    ambientAudioRef.current = handle;
-    const t = setTimeout(() => {
-      try {
-        handle.play();
-      } catch {}
-    }, 300);
+    ensureRoomAmbientPlaying();
     return () => {
-      clearTimeout(t);
-      handle.stop();
-      handle.unload();
-      ambientAudioRef.current = null;
+      stopRoomAmbient();
     };
   }, [phase]);
 
@@ -110,13 +109,17 @@ export function RoomPage() {
   };
 
   useEffect(() => {
-    // If room has no picker, fetch immediately
-    if (!ROOMS_WITH_CONTEXT_PICKER.includes(fullRoomId)) {
+    // If we already have the live room render in store, restore it directly.
+    if (storedEnvelope) {
+      setEnvelope(storedEnvelope);
+      setPhase("render");
+    } else if (!ROOMS_WITH_CONTEXT_PICKER.includes(fullRoomId)) {
+      // If room has no picker, fetch immediately
       void fetchRender(lifeContext);
     }
     // Stamp room_id into store
     dispatch(updateScreenData({ room_id: fullRoomId }));
-  }, [fullRoomId]);
+  }, [fullRoomId, storedEnvelope]);
 
   const roomName = ROOM_DISPLAY_NAMES[fullRoomId] || fullRoomId;
 
@@ -164,6 +167,7 @@ export function RoomPage() {
         }}
         onSkip={() => {
           setLifeContext(null);
+          dispatch(updateScreenData({ room_life_context: null }));
           void executeAction(
             {
               type: "room_telemetry",

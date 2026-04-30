@@ -139,7 +139,8 @@ export function PracticeTimerBlock({
   const info: any = activeItem;
 
   const title: string = info.title || screenData["practice_title"] || "";
-  const summary: string = info.summary || info.subtitle || info.line || "";
+  const summary: string =
+    info.summary || info.subtitle_or_line || info.subtitle || info.line || "";
   const duration: string = info.duration || "";
   const steps: string[] = Array.isArray(info.steps) ? info.steps : [];
   const benefits: any = info.benefits || null;

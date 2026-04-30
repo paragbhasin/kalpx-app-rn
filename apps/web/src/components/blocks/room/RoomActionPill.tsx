@@ -117,26 +117,45 @@ export function RoomActionPill({
           : action.action_type === "runner_sankalp"
             ? "sankalp"
             : "practice";
-      // canonical_rich_runner.v1 sends item fields at runner_payload root (not nested under `item`/`offering`).
-      // Normalize to the flat item shape that actionExecutor.start_runner expects.
-      const item =
-        rp.item ||
-        rp.offering ||
-        (rp.item_id
-          ? {
-              item_id: rp.item_id,
-              id: rp.item_id,
-              item_type: variant,
-              title: rp.title || "",
-              devanagari: rp.devanagari || "",
-              audio_url: rp.audio_url || "",
-              reps_total: rp.reps_default_selection || rp.reps_target || null,
-              duration_seconds: rp.duration_min
-                ? Math.round(rp.duration_min * 60)
-                : null,
-              steps: rp.steps || [],
-            }
-          : {});
+      // canonical_rich_runner.v1 sends the authored runner fields at the
+      // runner_payload root. Preserve the full payload so runner screens can
+      // render insight/how_to_live/benefits/meaning/etc. instead of losing
+      // detail during launch from rooms.
+      const item = {
+        ...(rp.item || rp.offering || rp),
+        item_id: rp.item_id || rp.item?.item_id || rp.offering?.item_id,
+        id: rp.item_id || rp.item?.id || rp.offering?.id || rp.item?.item_id || rp.offering?.item_id,
+        item_type:
+          rp.item_type || rp.item?.item_type || rp.offering?.item_type || variant,
+        title: rp.title || rp.item?.title || rp.offering?.title || "",
+        subtitle: rp.subtitle || rp.subtitle_or_line || rp.item?.subtitle || rp.offering?.subtitle || "",
+        subtitle_or_line:
+          rp.subtitle_or_line ||
+          rp.subtitle ||
+          rp.item?.subtitle_or_line ||
+          rp.offering?.subtitle_or_line ||
+          "",
+        line:
+          rp.line ||
+          rp.subtitle_or_line ||
+          rp.item?.line ||
+          rp.offering?.line ||
+          "",
+        devanagari:
+          rp.devanagari || rp.item?.devanagari || rp.offering?.devanagari || "",
+        audio_url: rp.audio_url || rp.item?.audio_url || rp.offering?.audio_url || "",
+        reps_total:
+          rp.reps_default_selection ||
+          rp.reps_target ||
+          rp.item?.reps_total ||
+          rp.offering?.reps_total ||
+          null,
+        duration_seconds:
+          rp.duration_min != null
+            ? Math.round(rp.duration_min * 60)
+            : rp.item?.duration_seconds || rp.offering?.duration_seconds || null,
+        steps: rp.steps || rp.item?.steps || rp.offering?.steps || [],
+      };
       // G17 Fix 1: use BE-provided runner_source so track-completion records a valid source.
       // 'support_room' is the canonical fallback (matches RN VALID_SOURCE_SURFACES).
       onAction?.({

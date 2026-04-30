@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import { MobileBottomNav } from './MobileBottomNav';
+import { stopRoomAmbient } from '../../lib/audio/calmMusic';
 
 // Routes that are full-screen immersive — no header/footer/bottom-nav
 const IMMERSIVE_PREFIXES = [
@@ -25,6 +26,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const isAuth = AUTH_ROUTES.some((p) => pathname === p || pathname.startsWith(p + '?'));
   const isMitraHome = pathname === '/en' || pathname === '/en/mitra';
   const isRoomRoute = pathname.startsWith('/en/mitra/room/');
+
+  useEffect(() => {
+    if (!isRoomRoute) stopRoomAmbient();
+  }, [isRoomRoute]);
 
   if (isImmersive || isAuth || isMitraHome) {
     return <>{children}</>;

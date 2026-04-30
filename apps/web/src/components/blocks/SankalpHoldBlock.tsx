@@ -112,6 +112,7 @@ export function SankalpHoldBlock({ block, screenData = {}, onAction }: Props) {
 
   const title: string = info.title || screenData["sankalp_text"] || "Intention";
   const bodyText: string =
+    info.subtitle_or_line ||
     info.subtitle ||
     info.body ||
     info.line ||

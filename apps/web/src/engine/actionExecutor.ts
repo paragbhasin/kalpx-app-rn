@@ -808,10 +808,14 @@ export async function executeAction(action: any, context: ActionContext): Promis
         room_render_payload: null,
         room_life_context: null,
         room_selected_action: null,
-        // life_context_allowed — rooms that support picker
-        life_context_allowed: ['clarity', 'growth'].includes(roomId.replace('room_', ''))
-          ? ['work_career', 'relationships', 'self', 'health_energy', 'money_security', 'purpose_direction', 'daily_life']
-          : null,
+        // Match mobile picker contract: only rooms with visibly differentiated
+        // context-aware content should offer the life-context tray.
+        life_context_allowed: ({
+          room_clarity: ['work_career', 'relationships', 'self', 'health_energy', 'money_security', 'purpose_direction', 'daily_life'],
+          room_growth: ['work_career', 'relationships', 'self', 'health_energy', 'money_security', 'purpose_direction', 'daily_life'],
+          room_release: ['work_career', 'relationships', 'self', 'health_energy', 'money_security'],
+          room_stillness: ['work_career', 'relationships', 'self', 'health_energy', 'money_security', 'purpose_direction'],
+        } as Record<string, string[] | null>)[roomId] ?? null,
       }));
       void apiTrackEvent('room_entered', {
         journey_id: screenData.journey_id,

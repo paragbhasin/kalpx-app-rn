@@ -1,12 +1,12 @@
 export const ROOM_DISPLAY_NAMES: Record<string, string> = {
-  room_joy: 'Joy',
+  room_stillness: 'Find Calm',
+  room_clarity: 'Find Clarity',
+  room_release: 'Set It Down',
+  room_connection: 'Feel Connected',
+  room_growth: 'Take the Next Step',
+  room_joy: "Notice What's Good",
   room_grief: 'Grief',
-  room_growth: 'Growth',
   room_loneliness: 'Loneliness',
-  room_clarity: 'Clarity',
-  room_release: 'Release',
-  room_stillness: 'Stillness',
-  room_connection: 'Connection',
 };
 
 export const ROOM_THEME_COLORS: Record<string, { bg: string; accent: string }> = {
@@ -21,12 +21,12 @@ export const ROOM_THEME_COLORS: Record<string, { bg: string; accent: string }> =
 };
 
 export const LIFE_CONTEXT_LABELS: Record<string, string> = {
-  work_career: 'Work & Career',
-  relationships: 'Relationships',
-  self: 'Self',
-  health_energy: 'Health & Energy',
-  money_security: 'Money & Security',
-  purpose_direction: 'Purpose & Direction',
+  work_career: 'Work or career',
+  relationships: 'A relationship',
+  self: 'Yourself',
+  health_energy: 'Health or energy',
+  money_security: 'Money or finances',
+  purpose_direction: 'Your direction',
   daily_life: 'Daily Life',
 };
 

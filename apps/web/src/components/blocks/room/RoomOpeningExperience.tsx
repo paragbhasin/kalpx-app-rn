@@ -1,8 +1,8 @@
-import React from 'react';
-
 interface RoomContext {
   room_purpose_line?: string | null;
   sanatan_insight_line?: string | null;
+  why_this_room_line?: string | null;
+  bridge_line?: string | null;
 }
 
 interface Props {
@@ -19,33 +19,61 @@ interface Props {
   lifeContextLabel?: string | null;
 }
 
-export function RoomOpeningExperience({ envelope, roomName, lifeContextLabel }: Props) {
+export function RoomOpeningExperience({
+  envelope,
+  roomName,
+  lifeContextLabel,
+}: Props) {
   const ctx = envelope.room_context;
-  const hasHeader = !!(roomName || ctx?.room_purpose_line || ctx?.sanatan_insight_line);
+  const hasHeader = !!(
+    roomName ||
+    ctx?.room_purpose_line ||
+    lifeContextLabel ||
+    ctx?.sanatan_insight_line
+  );
 
   return (
-    <div style={{ padding: '24px 20px 0', textAlign: 'center' }}>
-      {/* Room header section — matches RN RoomRenderer header block */}
+    <div style={{ paddingTop: 10, padding: 10, textAlign: "center" }}>
       {roomName && (
         <p
           data-testid="room-display-name"
-          style={{ fontSize: 18, fontWeight: 600, color: 'var(--kalpx-text)', marginBottom: 6 }}
+          style={{
+            fontSize: 18,
+            fontWeight: 700,
+            color: "#432104",
+            margin: "10px 0 6px",
+            lineHeight: 1.25,
+          }}
         >
           {roomName}
-          {lifeContextLabel && (
-            <span style={{ fontSize: 12, color: 'var(--kalpx-text-muted)', fontWeight: 400, marginLeft: 6 }}>
-              · {lifeContextLabel}
-            </span>
-          )}
         </p>
       )}
 
       {ctx?.room_purpose_line && (
         <p
           data-testid="room-purpose-line"
-          style={{ fontSize: 13, color: 'var(--kalpx-text-muted)', lineHeight: 1.6, marginBottom: 8 }}
+          style={{
+            fontSize: 15,
+            color: "#8A7968",
+            lineHeight: 1.45,
+            fontWeight: 300,
+          }}
         >
           {ctx.room_purpose_line}
+        </p>
+      )}
+
+      {lifeContextLabel && (
+        <p
+          data-testid="room-life-context"
+          style={{
+            fontSize: 14,
+            color: "#9f9f9f",
+            lineHeight: 1.35,
+            marginTop: 10,
+          }}
+        >
+          {`You chose: ${lifeContextLabel}`}
         </p>
       )}
 
@@ -53,53 +81,133 @@ export function RoomOpeningExperience({ envelope, roomName, lifeContextLabel }: 
         <div
           data-testid="room-sanatan-insight"
           style={{
-            display: 'flex',
-            alignItems: 'flex-start',
+            display: "flex",
+            alignItems: "flex-start",
             gap: 10,
-            textAlign: 'left',
-            margin: '8px 0',
-            padding: '4px 0',
+            textAlign: "left",
+            margin: "8px 0 2px",
+            padding: "4px 0",
           }}
         >
-          <div style={{ width: 3, minHeight: 32, borderRadius: 2, background: 'var(--kalpx-gold)', flexShrink: 0, marginTop: 2 }} />
-          <p style={{ fontSize: 13, color: 'var(--kalpx-text-muted)', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>
+          <div
+            style={{
+              width: 3,
+              minHeight: 36,
+              borderRadius: 2,
+              background: "#c8b49a",
+
+              marginTop: 2,
+            }}
+          />
+          <p
+            style={{
+              flex: 1,
+              fontSize: 12,
+              color: "#8A7968",
+              lineHeight: 1.45,
+              margin: 0,
+              textAlign: "center",
+            }}
+          >
             {ctx.sanatan_insight_line}
           </p>
         </div>
       )}
 
-      {/* Lotus divider — shown when header has at least one visible field, before opening_line */}
-      {hasHeader && envelope.opening_line && (
-        <div style={{ display: 'flex', justifyContent: 'center', margin: '10px 0' }}>
-          <img src="/new_home_lotus.png" width={20} height={16} alt="" aria-hidden="true" style={{ opacity: 0.5 }} />
+      {hasHeader && (envelope.opening_line || ctx?.why_this_room_line) && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 12,
+            margin: "10px 0 12px",
+          }}
+        >
+          <div
+            style={{
+              flex: 1,
+              height: 1,
+              background: "rgba(201, 168, 76, 0.35)",
+            }}
+          />
+          <img
+            src="/lotus_icon.png"
+            width={20}
+            height={16}
+            alt=""
+            aria-hidden="true"
+            style={{ opacity: 0.6, objectFit: "contain", display: "block" }}
+          />
+          <div
+            style={{
+              flex: 1,
+              height: 1,
+              background: "rgba(201, 168, 76, 0.35)",
+            }}
+          />
         </div>
       )}
 
-      {/* RN: opening_line is bold 20px, serif, NOT italic */}
+      {ctx?.why_this_room_line && (
+        <p
+          data-testid="room-why-this-room-line"
+          style={{
+            fontSize: 13,
+            color: "#9f9f9f",
+            lineHeight: 1.45,
+            marginBottom: 10,
+          }}
+        >
+          {ctx.why_this_room_line}
+        </p>
+      )}
+
       {envelope.opening_line && (
         <p
-          style={{ fontSize: 20, fontWeight: 700, fontFamily: 'var(--kalpx-font-serif)', color: 'var(--kalpx-text)', lineHeight: 1.5, marginBottom: 10 }}
+          style={{
+            fontSize: 20,
+            fontWeight: 700,
+            color: "#432104",
+            lineHeight: 1.4,
+            margin: "0 auto 8px",
+            maxWidth: 560,
+            padding: "0 24px",
+          }}
           data-testid="room-opening-line"
         >
           {envelope.opening_line}
         </p>
       )}
-      {/* memory_echo_line: present in RN, was missing on web */}
+
       {envelope.memory_echo_line && (
         <p
-          style={{ fontSize: 13, color: 'var(--kalpx-text-muted)', fontStyle: 'italic', lineHeight: 1.6, marginBottom: 10 }}
+          style={{
+            fontSize: 13,
+            color: "#8B6914",
+            fontStyle: "italic",
+            lineHeight: 1.45,
+            marginBottom: 10,
+            padding: "0 28px",
+          }}
           data-testid="room-memory-echo-line"
         >
           {envelope.memory_echo_line}
         </p>
       )}
       {envelope.second_beat_line && (
-        <p style={{ fontSize: 15, color: 'var(--kalpx-text-soft)', lineHeight: 1.6, marginBottom: 10 }}>
+        <p
+          style={{
+            fontSize: 16,
+            color: "#432104",
+            lineHeight: 1.45,
+            maxWidth: 560,
+            padding: "0 24px",
+          }}
+        >
           {envelope.second_beat_line}
         </p>
       )}
-      {/* RN explicitly does NOT render ready_hint (comment in RN source: "// don't render ready_hint") */}
-      {/* RN does NOT render section_prompt */}
     </div>
   );
 }

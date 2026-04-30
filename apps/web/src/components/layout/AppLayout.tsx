@@ -8,7 +8,6 @@ import { MobileBottomNav } from './MobileBottomNav';
 const IMMERSIVE_PREFIXES = [
   '/en/mitra/dashboard',
   '/en/mitra/engine',
-  '/en/mitra/room/',
   '/en/mitra/checkpoint/',
   '/en/mitra/trigger',
   '/en/mitra/checkin',
@@ -25,14 +24,26 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const isImmersive = IMMERSIVE_PREFIXES.some((p) => pathname.startsWith(p));
   const isAuth = AUTH_ROUTES.some((p) => pathname === p || pathname.startsWith(p + '?'));
   const isMitraHome = pathname === '/en' || pathname === '/en/mitra';
+  const isRoomRoute = pathname.startsWith('/en/mitra/room/');
 
   if (isImmersive || isAuth || isMitraHome) {
     return <>{children}</>;
   }
 
   return (
-    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
-      <Header />
+    <div
+      style={{
+        minHeight: '100dvh',
+        display: 'flex',
+        flexDirection: 'column',
+        background: isRoomRoute ? '#FFF8EF' : undefined,
+        backgroundImage: isRoomRoute ? 'url(/rooms_bg.jpg)' : undefined,
+        backgroundSize: isRoomRoute ? 'cover' : undefined,
+        backgroundRepeat: isRoomRoute ? 'no-repeat' : undefined,
+        backgroundAttachment: isRoomRoute ? 'fixed' : undefined,
+      }}
+    >
+      <Header transparent={isRoomRoute} />
       <main style={{ flex: 1 }}>
         {children}
       </main>

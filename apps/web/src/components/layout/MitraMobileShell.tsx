@@ -18,7 +18,10 @@ export function MitraMobileShell({
   hideTopBar,
   backgroundImage,
 }: Props) {
-  const transparentChrome = !!backgroundImage;
+  // This shell always paints a background image, even when callers omit one
+  // and we fall back to /beige_bg.png. Keep chrome transparent so the
+  // Mitra surfaces show that background consistently.
+  const transparentChrome = true;
 
   return (
     <div

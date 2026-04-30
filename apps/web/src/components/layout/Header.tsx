@@ -133,9 +133,13 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
         style={{
           width: "100%",
           height: 60,
-          background: isScrolled ? "rgba(255, 255, 255, 0.2)" : "transparent",
-          backdropFilter: isScrolled ? "blur(12px)" : "none",
-          WebkitBackdropFilter: isScrolled ? "blur(12px)" : "none",
+          background: isScrolled
+            ? "rgba(255, 255, 255, 0.2)"
+            : transparent
+              ? "transparent"
+              : "var(--kalpx-bg)",
+          backdropFilter: isScrolled || transparent ? "blur(12px)" : "none",
+          WebkitBackdropFilter: isScrolled || transparent ? "blur(12px)" : "none",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -148,6 +152,8 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
             "background 0.3s, backdrop-filter 0.3s, border-color 0.3s",
           borderBottom: isScrolled
             ? "1px solid rgba(199, 162, 88, 0.08)"
+            : transparent
+              ? "1px solid rgba(199, 162, 88, 0.06)"
             : "none",
         }}
       >

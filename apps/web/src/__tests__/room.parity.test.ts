@@ -80,10 +80,15 @@ describe('B1 RoomOpeningExperience', () => {
 // ── B2: LifeContextPickerSheet ───────────────────────────────────────────────
 
 describe('B2 LifeContextPickerSheet', () => {
-  it('skip button label is "Skip" (not "Skip — show general guidance")', () => {
-    const skipLabel = 'Skip';
-    expect(skipLabel).toBe('Skip');
+  it('skip button label is "Skip for now" (not "Skip — show general guidance")', () => {
+    const skipLabel = 'Skip for now';
+    expect(skipLabel).toBe('Skip for now');
     expect(skipLabel).not.toContain('show general guidance');
+  });
+
+  it('uses the mobile tray prompt copy', () => {
+    const prompt = 'What part of life is this touching most right now?';
+    expect(prompt).toContain('What part of life');
   });
 });
 

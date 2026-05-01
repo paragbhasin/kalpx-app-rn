@@ -4,6 +4,8 @@
 apps/web/
 
 # Native build outputs — EAS rebuilds these from scratch
+android/
+ios/
 apps/mobile/android/
 apps/mobile/ios/
 

@@ -191,26 +191,25 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
                       overflow: "hidden",
                     }}
                   >
-                    {[
-                      { label: "Profile", to: "/en/profile" },
-                      { label: "Notifications", to: "/en/notifications" },
-                    ].map(({ label, to }) => (
-                      <Link
-                        key={to}
-                        to={to}
-                        onClick={() => setDropdownOpen(false)}
-                        style={{
-                          display: "block",
-                          padding: "12px 16px",
-                          fontSize: 13,
-                          color: "var(--kalpx-text)",
-                          textDecoration: "none",
-                          borderBottom: "1px solid var(--kalpx-border-gold)",
-                        }}
-                      >
-                        {label}
-                      </Link>
-                    ))}
+                    {[{ label: "Profile", to: "/en/profile" }].map(
+                      ({ label, to }) => (
+                        <Link
+                          key={to}
+                          to={to}
+                          onClick={() => setDropdownOpen(false)}
+                          style={{
+                            display: "block",
+                            padding: "12px 16px",
+                            fontSize: 13,
+                            color: "var(--kalpx-text)",
+                            textDecoration: "none",
+                            borderBottom: "1px solid var(--kalpx-border-gold)",
+                          }}
+                        >
+                          {label}
+                        </Link>
+                      ),
+                    )}
                     <button
                       onClick={handleLogout}
                       data-testid="header-logout-btn"

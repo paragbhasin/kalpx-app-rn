@@ -1,10 +1,22 @@
 import { useState, useEffect, useCallback } from 'react';
+import { AUTH_KEYS } from '@kalpx/api-client';
 import { isAuthenticated } from '@kalpx/auth';
 import { webStorage } from '../lib/webStorage';
 
 export interface CurrentUser {
   authed: boolean;
   userInitial: string;
+}
+
+function readStoredAccessToken(): string | null {
+  try {
+    return (
+      localStorage.getItem(AUTH_KEYS.accessToken) ||
+      localStorage.getItem('access_token')
+    );
+  } catch {
+    return null;
+  }
 }
 
 function decodeJwtInitial(token: string): string {
@@ -19,18 +31,31 @@ function decodeJwtInitial(token: string): string {
 }
 
 export function useCurrentUser(): CurrentUser & { refresh: () => void } {
-  const [state, setState] = useState<CurrentUser>({ authed: false, userInitial: 'U' });
+  const [state, setState] = useState<CurrentUser>(() => {
+    const token = readStoredAccessToken();
+    return token
+      ? { authed: true, userInitial: decodeJwtInitial(token) }
+      : { authed: false, userInitial: 'U' };
+  });
+
+  const syncState = useCallback((next: CurrentUser) => {
+    setState((prev) =>
+      prev.authed === next.authed && prev.userInitial === next.userInitial
+        ? prev
+        : next,
+    );
+  }, []);
 
   const check = useCallback(async () => {
     const ok = await isAuthenticated(webStorage);
     if (!ok) {
-      setState({ authed: false, userInitial: 'U' });
+      syncState({ authed: false, userInitial: 'U' });
       return;
     }
-    const token = localStorage.getItem('access_token');
+    const token = readStoredAccessToken();
     const userInitial = token ? decodeJwtInitial(token) : 'U';
-    setState({ authed: true, userInitial });
-  }, []);
+    syncState({ authed: true, userInitial });
+  }, [syncState]);
 
   useEffect(() => { void check(); }, [check]);
 

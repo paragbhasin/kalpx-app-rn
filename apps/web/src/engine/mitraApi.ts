@@ -1,5 +1,26 @@
 import { api } from '../lib/api';
 
+const DASHBOARD_VIEW_TTL_MS = 30_000;
+const ADDITIONAL_ITEMS_TTL_MS = 30_000;
+
+let _dashboardViewCache: { data: any; ts: number } | null = null;
+let _dashboardViewInflight: Promise<any> | null = null;
+
+let _additionalItemsCache:
+  | { data: { items: any[]; uiHints: { shouldCollapse?: boolean } }; ts: number }
+  | null = null;
+let _additionalItemsInflight: Promise<{ items: any[]; uiHints: { shouldCollapse?: boolean } }> | null = null;
+
+export function invalidateDashboardViewCache(): void {
+  _dashboardViewCache = null;
+  _dashboardViewInflight = null;
+}
+
+export function invalidateAdditionalItemsCache(): void {
+  _additionalItemsCache = null;
+  _additionalItemsInflight = null;
+}
+
 export async function getUserPreferences(): Promise<any> {
   try {
     const res = await api.get('mitra/user-preferences/');
@@ -45,18 +66,30 @@ export async function getDailyView(): Promise<any> {
  * The today/ response is NOT v3Ingest-compatible; caller must handle _isLegacyFallback.
  */
 export async function getDashboardView(): Promise<any> {
-  try {
-    const res = await api.get('mitra/v3/journey/daily-view/');
-    return res.data;
-  } catch (err: any) {
-    if (err?.response?.status === 404) {
-      console.warn('[mitraApi] v3/journey/daily-view/ returned 404 — falling back to mitra/today/. v3Ingest will produce empty keys; dashboard may be degraded.');
-      const res = await api.get('mitra/today/');
-      // Tag so callers can show a safe fallback state rather than trying v3Ingest
-      return { ...(res.data ?? {}), _isLegacyFallback: true };
-    }
-    throw err;
+  if (_dashboardViewCache && Date.now() - _dashboardViewCache.ts < DASHBOARD_VIEW_TTL_MS) {
+    return _dashboardViewCache.data;
   }
+
+  const request = _dashboardViewInflight ?? (async () => {
+    try {
+      const res = await api.get('mitra/v3/journey/daily-view/');
+      return res.data;
+    } catch (err: any) {
+      if (err?.response?.status === 404) {
+        console.warn('[mitraApi] v3/journey/daily-view/ returned 404 — falling back to mitra/today/. v3Ingest will produce empty keys; dashboard may be degraded.');
+        const res = await api.get('mitra/today/');
+        return { ...(res.data ?? {}), _isLegacyFallback: true };
+      }
+      throw err;
+    } finally {
+      _dashboardViewInflight = null;
+    }
+  })();
+
+  _dashboardViewInflight = request;
+  const data = await request;
+  _dashboardViewCache = { data, ts: Date.now() };
+  return data;
 }
 
 export async function getJourneyStatus(): Promise<any> {
@@ -374,7 +407,10 @@ export async function mitraJourneyDay7Decision(
   idempotencyKey: string,
 ): Promise<any> {
   void idempotencyKey;
-  const res = await api.post('mitra/v3/journey/day-7-decision/', payload);
+  const res = await api.post('mitra/v3/journey/day-7-decision/', {
+    ...payload,
+    tz: payload.tz ?? getTz(),
+  });
   return res.data;
 }
 
@@ -387,7 +423,10 @@ export async function mitraJourneyDay14Decision(
   idempotencyKey: string,
 ): Promise<any> {
   void idempotencyKey;
-  const res = await api.post('mitra/v3/journey/day-14-decision/', payload);
+  const res = await api.post('mitra/v3/journey/day-14-decision/', {
+    ...payload,
+    tz: payload.tz ?? getTz(),
+  });
   return res.data;
 }
 
@@ -425,31 +464,46 @@ export async function mitraJourneyReentryDecision(
   decision: 'continue' | 'fresh',
   idempotencyKey: string,
 ): Promise<any> {
-  const res = await api.post(
-    'mitra/v3/journey/reentry-decision/',
-    { decision },
-    { headers: { 'Idempotency-Key': idempotencyKey } },
-  );
+  void idempotencyKey;
+  const res = await api.post('mitra/v3/journey/reentry-decision/', {
+    decision,
+    tz: getTz(),
+  });
   return res.data;
 }
 
 // ─── Additional Items ─────────────────────────────────────────────────────────
 
 export async function fetchAdditionalItems(): Promise<{ items: any[]; uiHints: { shouldCollapse?: boolean } }> {
-  try {
-    const res = await api.get('mitra/journey/additional/list/', { params: { tz: getTz() } });
-    return res.data;
-  } catch {
-    return { items: [], uiHints: {} };
+  if (_additionalItemsCache && Date.now() - _additionalItemsCache.ts < ADDITIONAL_ITEMS_TTL_MS) {
+    return _additionalItemsCache.data;
   }
+
+  const request = _additionalItemsInflight ?? (async () => {
+    try {
+      const res = await api.get('mitra/journey/additional/list/', { params: { tz: getTz() } });
+      return res.data;
+    } catch {
+      return { items: [], uiHints: {} };
+    } finally {
+      _additionalItemsInflight = null;
+    }
+  })();
+
+  _additionalItemsInflight = request;
+  const data = await request;
+  _additionalItemsCache = { data, ts: Date.now() };
+  return data;
 }
 
 export async function removeAdditionalItem(id: string | number): Promise<void> {
   await api.delete(`mitra/journey/additional/${id}/`);
+  invalidateAdditionalItemsCache();
 }
 
 export async function addAdditionalItem(itemId: string, itemType: string): Promise<any> {
   const res = await api.post('mitra/journey/additional/', { itemId, itemType, source: 'additional_library' });
+  invalidateAdditionalItemsCache();
   return res.data;
 }
 

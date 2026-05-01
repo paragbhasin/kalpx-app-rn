@@ -18,6 +18,13 @@ import { updateScreenData } from '../../store/screenSlice';
 import type { AppDispatch } from '../../store';
 
 type LoadState = 'loading' | 'not_ready' | 'error' | 'ready';
+type CheckpointLoadResult = {
+  flat: Record<string, any>;
+  stateId: string;
+  notReady: boolean;
+};
+
+const checkpointLoadCache = new Map<number, Promise<CheckpointLoadResult>>();
 
 export function CheckpointPage() {
   const { day } = useParams<{ day: string }>();
@@ -33,28 +40,46 @@ export function CheckpointPage() {
     async function load() {
       setLoadState('loading');
       try {
-        let flat: Record<string, any> = {};
-        let stateId: string;
-
-        if (dayNum === 7) {
-          const env = await mitraJourneyDay7View();
-          if (!env) {
-            if (!cancelled) setLoadState('not_ready');
-            return;
+        const existing = checkpointLoadCache.get(dayNum);
+        const request = existing ?? (async (): Promise<CheckpointLoadResult> => {
+          if (dayNum === 7) {
+            const env = await mitraJourneyDay7View();
+            if (!env) {
+              return { flat: {}, stateId: 'checkpoint_day_7', notReady: true };
+            }
+            return {
+              flat: ingestDay7View(env),
+              stateId: 'checkpoint_day_7',
+              notReady: false,
+            };
           }
-          flat = ingestDay7View(env);
-          stateId = 'checkpoint_day_7';
-        } else {
+
           const env = await mitraJourneyDay14View();
           if (!env) {
-            if (!cancelled) setLoadState('not_ready');
-            return;
+            return { flat: {}, stateId: 'checkpoint_day_14', notReady: true };
           }
-          flat = ingestDay14View(env);
-          stateId = 'checkpoint_day_14';
+          return {
+            flat: ingestDay14View(env),
+            stateId: 'checkpoint_day_14',
+            notReady: false,
+          };
+        })();
+
+        if (!existing) {
+          checkpointLoadCache.set(dayNum, request);
+          request.finally(() => {
+            checkpointLoadCache.delete(dayNum);
+          });
         }
 
+        const { flat, stateId, notReady } = await request;
+
         if (cancelled) return;
+
+        if (notReady) {
+          setLoadState('not_ready');
+          return;
+        }
 
         dispatch(updateScreenData(flat));
         await dispatch(loadScreenWithData({ containerId: 'cycle_transitions', stateId }));

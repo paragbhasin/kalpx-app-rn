@@ -240,7 +240,6 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
       >
         <div
           style={{
-            flex: 1,
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-start",
@@ -289,8 +288,10 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
           data-testid="checkpoint-intro-cta"
           onClick={() => setPhase("reflection")}
           style={{
-            width: "100%",
-            padding: "16px 24px",
+            width: "60%",
+            marginTop: 20,
+            margin: "10px auto",
+            padding: "10px",
             background: "var(--kalpx-cta)",
             color: "#fff",
             border: "none",
@@ -298,6 +299,9 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
             fontSize: 16,
             fontWeight: 700,
             cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             touchAction: "manipulation",
           }}
         >
@@ -409,8 +413,8 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                         >
                           <div
                             style={{
-                              width: 58,
-                              height: 58,
+                              width: 30,
+                              height: 30,
                               borderRadius: "50%",
                               border: `2px solid ${
                                 isSelected
@@ -425,7 +429,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "center",
-                              fontSize: 18,
+                              fontSize: 14,
                               fontWeight: 700,
                             }}
                           >
@@ -1196,7 +1200,11 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
       return (
         <div
           data-testid="checkpoint-summary"
-          style={{ padding: "24px 24px 100px", maxWidth: 480, margin: "0 auto" }}
+          style={{
+            padding: "24px 24px 100px",
+            maxWidth: 480,
+            margin: "0 auto",
+          }}
         >
           <div style={{ marginBottom: 22 }}>
             <p
@@ -1260,8 +1268,14 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
               }}
             >
               {[
-                { label: "Days Engaged", value: `${engagedTotal} / ${totalDays}` },
-                { label: "Fully Completed", value: `${completedTotal} / ${totalDays}` },
+                {
+                  label: "Days Engaged",
+                  value: `${engagedTotal} / ${totalDays}`,
+                },
+                {
+                  label: "Fully Completed",
+                  value: `${completedTotal} / ${totalDays}`,
+                },
               ].map((item) => (
                 <div
                   key={item.label}
@@ -1418,7 +1432,8 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                 { label: "Strongest Area", value: strongestType || "–" },
                 {
                   label: "Consistency Score",
-                  value: avgCompletionRate != null ? `${avgCompletionRate}%` : "–",
+                  value:
+                    avgCompletionRate != null ? `${avgCompletionRate}%` : "–",
                 },
               ].map((item) => (
                 <div
@@ -1426,15 +1441,15 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                   style={{
                     background: "rgba(255,252,247,0.82)",
                     border: "1px solid rgba(212,160,23,0.26)",
-                    borderRadius: 22,
-                    padding: "22px 18px",
+                    borderRadius: 15,
+                    padding: "10px 18px",
                   }}
                 >
                   <p
                     style={{
                       fontSize: 14,
                       color: "#8c6f50",
-                      marginBottom: 18,
+                      marginBottom: 5,
                     }}
                   >
                     {item.label}
@@ -1471,8 +1486,9 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                 background: "var(--kalpx-cta)",
                 color: "#fff",
                 borderRadius: 999,
-                padding: "9px 16px",
-                fontSize: 12,
+                padding: 5,
+
+                fontSize: 9,
                 fontWeight: 700,
                 letterSpacing: 0.6,
               }}
@@ -1487,9 +1503,10 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                   borderRadius: 999,
                   background: "#eaf4e9",
                   color: "#2D7A5F",
-                  padding: "10px 16px",
+                  padding: "10px",
                   fontWeight: 700,
                   marginBottom: 18,
+                  fontSize: 13,
                 }}
               >
                 Strongest area: {strongestType}
@@ -1512,7 +1529,9 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
 
           {day === 7 ? (
             <>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 10 }}
+              >
                 <button
                   onClick={() => submitDecision("continue")}
                   disabled={isSubmitting}
@@ -1591,8 +1610,10 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
               data-testid="checkpoint-summary-cta"
               onClick={() => setPhase("decisions")}
               style={{
-                width: "100%",
-                padding: "18px 24px",
+                width: "60%",
+
+                margin: "10px auto",
+                padding: "10px",
                 background: "var(--kalpx-cta)",
                 color: "#fff",
                 border: "none",
@@ -1600,6 +1621,11 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
                 fontSize: 16,
                 fontWeight: 700,
                 cursor: "pointer",
+                display: "flex",
+
+                alignItems: "center",
+
+                justifyContent: "center",
               }}
             >
               {cp.graph_cta || "Continue to Choices"}
@@ -1969,7 +1995,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
             disabled={isSubmitting}
             style={{
               width: "100%",
-              padding: "18px 22px",
+              padding: "10px",
               background: "rgba(255,255,255,0.82)",
               color: "var(--kalpx-text)",
               border: "1.5px solid rgba(212,160,23,0.55)",
@@ -2194,7 +2220,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
               disabled={isSubmitting}
               style={{
                 width: "100%",
-                padding: "18px 22px",
+                padding: "10px",
                 background: "var(--kalpx-cta)",
                 color: "#fff",
                 border: "none",
@@ -2218,7 +2244,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
             disabled={isSubmitting}
             style={{
               width: "100%",
-              padding: "18px 22px",
+              padding: "10px",
               background: "rgba(255,255,255,0.84)",
               color: deepenFirst ? "#000" : "var(--kalpx-text)",
               border: "1.5px solid rgba(212,160,23,0.85)",

@@ -1,5 +1,4 @@
 import { clearTokens } from "@kalpx/auth";
-import { Menu, User, X } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
@@ -13,35 +12,11 @@ const NAV_LINKS = [
   // { to: "/en/retreats", label: "Retreats", match: "/en/retreats" },
 ];
 
-const LANGUAGES = [
-  { label: "English", code: "en" },
-  { label: "Hindi", code: "hi" },
-  { label: "Telugu", code: "te" },
-  { label: "Tamil", code: "ta" },
-  { label: "Kannada", code: "kn" },
-  { label: "Malayalam", code: "ml" },
-  { label: "Marathi", code: "mr" },
-  { label: "Gujarati", code: "gu" },
-  { label: "Bengali", code: "bn" },
-] as const;
-
-const LANGUAGE_STORAGE_KEY = "kalpx_locale";
-
 export function Header({ transparent = false }: { transparent?: boolean }) {
   const navigate = useNavigate();
   const { authed, userInitial, refresh } = useCurrentUser();
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [languageOpen, setLanguageOpen] = useState(false);
-  const [sidebarLanguageOpen, setSidebarLanguageOpen] = useState(false);
-  const [selectedLanguageCode, setSelectedLanguageCode] = useState("en");
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const languageRef = useRef<HTMLDivElement>(null);
-  const sidebarLanguageRef = useRef<HTMLDivElement>(null);
-
-  const selectedLanguage =
-    LANGUAGES.find((language) => language.code === selectedLanguageCode) ||
-    LANGUAGES[0];
 
   const [isScrolled, setIsScrolled] = useState(false);
   const useTransparentChrome = transparent && !isScrolled;
@@ -64,55 +39,16 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
       ) {
         setDropdownOpen(false);
       }
-      if (
-        languageRef.current &&
-        !languageRef.current.contains(e.target as Node)
-      ) {
-        setLanguageOpen(false);
-      }
-      if (
-        sidebarLanguageRef.current &&
-        !sidebarLanguageRef.current.contains(e.target as Node)
-      ) {
-        setSidebarLanguageOpen(false);
-      }
     }
     document.addEventListener("mousedown", onClickOutside);
     return () => document.removeEventListener("mousedown", onClickOutside);
   }, []);
 
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
-      if (stored && LANGUAGES.some((language) => language.code === stored)) {
-        setSelectedLanguageCode(stored);
-      }
-    } catch {}
-  }, []);
-
-  // Lock body scroll when sidebar open
-  useEffect(() => {
-    document.body.style.overflow = sidebarOpen ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [sidebarOpen]);
-
   async function handleLogout() {
     setDropdownOpen(false);
-    setSidebarOpen(false);
     await clearTokens(webStorage);
     refresh();
     navigate("/login");
-  }
-
-  function handleLanguageSelect(code: string) {
-    setSelectedLanguageCode(code);
-    setLanguageOpen(false);
-    setSidebarLanguageOpen(false);
-    try {
-      localStorage.setItem(LANGUAGE_STORAGE_KEY, code);
-    } catch {}
   }
 
   const navItemStyle = (active: boolean): React.CSSProperties => ({
@@ -315,411 +251,35 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
           )}
         </nav>
 
-        {/* Mobile hamburger — hidden on desktop via CSS class */}
-        <div
-          className="kalpx-mobile-only"
-          style={{ alignItems: "center", gap: 10 }}
-        >
-          {/* <div ref={languageRef} style={{ position: "relative" }}>
+        {false && (
+          <div
+            className="kalpx-mobile-only"
+            style={{ alignItems: "center", gap: 10 }}
+          >
             <button
-              aria-label={`Language: ${selectedLanguage.label}`}
-              onClick={() => setLanguageOpen((open) => !open)}
+              onClick={() => {}}
+              aria-label="Open menu"
+              data-testid="header-hamburger-btn"
               style={{
-                padding: "8px 15px",
-                borderRadius: 10,
-                border: "1px solid rgba(198, 186, 180, 0.95)",
-                background: "rgba(255,255,255,0.72)",
-                boxShadow: "0 6px 16px rgba(67, 33, 4, 0.06)",
+                width: 38,
+                height: 38,
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                color: "var(--kalpx-text)",
                 display: "flex",
                 alignItems: "center",
-                gap: 10,
-                color: "var(--kalpx-text)",
-                fontSize: 12,
-                fontWeight: 500,
-                fontFamily: "inherit",
+                justifyContent: "center",
+                padding: 0,
               }}
             >
-              <span>{selectedLanguage.label}</span>
-              <ChevronDown size={18} strokeWidth={1.8} color="#a89d93" />
+              <span />
             </button>
-            {languageOpen && (
-              <div
-                style={{
-                  position: "absolute",
-
-                  width: 110,
-                  background: "#fff",
-                  border: "1px solid rgba(198, 186, 180, 0.95)",
-                  borderRadius: 10,
-                  boxShadow: "0 16px 30px rgba(67,33,4,0.12)",
-                  overflow: "hidden",
-                  zIndex: 80,
-                  height: "200px",
-                  overflowY: "auto",
-                  top: "40px",
-                  right: "-5px",
-                }}
-              >
-                {LANGUAGES.map((language) => (
-                  <button
-                    key={language.code}
-                    onClick={() => handleLanguageSelect(language.code)}
-                    style={{
-                      width: "100%",
-                      padding: "12px 14px",
-                      background:
-                        language.code === selectedLanguageCode
-                          ? "rgba(217, 164, 12, 0.08)"
-                          : "#fff",
-                      border: "none",
-                      borderBottom: "1px solid rgba(239, 232, 220, 0.9)",
-                      textAlign: "left",
-                      fontSize: 13,
-                      fontWeight:
-                        language.code === selectedLanguageCode ? 700 : 500,
-                      color:
-                        language.code === selectedLanguageCode
-                          ? "var(--kalpx-cta)"
-                          : "var(--kalpx-text)",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {language.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div> */}
-          <button
-            onClick={() => setSidebarOpen(true)}
-            aria-label="Open menu"
-            data-testid="header-hamburger-btn"
-            style={{
-              width: 38,
-              height: 38,
-              background: "transparent",
-              border: "none",
-              cursor: "pointer",
-              color: "var(--kalpx-text)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: 0,
-            }}
-          >
-            <Menu size={34} strokeWidth={2.2} />
-          </button>
-        </div>
+          </div>
+        )}
       </header>
 
-      {/* Mobile sidebar */}
-      {sidebarOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            onClick={() => setSidebarOpen(false)}
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(0,0,0,0.45)",
-              zIndex: 80,
-            }}
-          />
-
-          {/* Sidebar panel */}
-          <div
-            style={{
-              position: "fixed",
-              top: 14,
-              right: 0,
-              bottom: 14,
-              width: "min(456px, calc(100vw - 80px))",
-              background: "#ffffff",
-              borderRadius: "42px 0 0 0",
-              boxShadow: "-12px 0 30px rgba(67,33,4,0.14)",
-              zIndex: 90,
-              display: "flex",
-              flexDirection: "column",
-              animation: "kalpx-slide-in-right 0.22s ease-out",
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                background: "#d9a40c",
-                padding: "15px 20px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: "50%",
-                  background: "#fff",
-                  color: "#d9a40c",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  boxShadow: "0 8px 18px rgba(67,33,4,0.08)",
-                  fontSize: 20,
-                  fontWeight: 700,
-                }}
-              >
-                {authed ? (
-                  userInitial
-                ) : (
-                  <User size={28} strokeWidth={2.2} color="#d9a40c" />
-                )}
-              </div>
-              <button
-                onClick={() => setSidebarOpen(false)}
-                aria-label="Close menu"
-                style={{
-                  width: 24,
-                  height: 24,
-                  borderRadius: "50%",
-                  background: "#fff",
-                  border: "none",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "#2b2b2b",
-                }}
-              >
-                <X size={18} strokeWidth={2.2} />
-              </button>
-            </div>
-
-            <div
-              style={{
-                flex: 1,
-                overflowY: "auto",
-                padding: "34px 42px 0",
-              }}
-            >
-              <nav
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 28,
-                }}
-              >
-                {NAV_LINKS.map(({ to, label }) => (
-                  <NavLink
-                    key={to}
-                    to={to}
-                    onClick={() => setSidebarOpen(false)}
-                    style={({ isActive }) => ({
-                      fontSize: 18,
-                      fontWeight: 600,
-                      color: "#2f3135",
-                      textDecoration: "none",
-                      lineHeight: 1.1,
-                    })}
-                  >
-                    {label}
-                  </NavLink>
-                ))}
-              </nav>
-
-              {/* <div
-                ref={sidebarLanguageRef}
-                style={{ marginTop: 20, position: "relative" }}
-              >
-                <button
-                  aria-label={`Language: ${selectedLanguage.label}`}
-                  onClick={() => setSidebarLanguageOpen((open) => !open)}
-                  style={{
-                    minWidth: 170,
-                    padding: "8px",
-                    borderRadius: 10,
-                    border: "1px solid rgba(198, 206, 218, 0.95)",
-                    background: "#fff",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 18,
-                    color: "#1f2a3a",
-                    fontSize: 16,
-                    fontWeight: 600,
-                    boxShadow: "0 2px 8px rgba(67,33,4,0.04)",
-                  }}
-                >
-                  <span>{selectedLanguage.label}</span>
-                  <ChevronDown size={20} strokeWidth={1.8} color="#9ba4b5" />
-                </button>
-                {sidebarLanguageOpen && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: 52,
-                      left: 0,
-                      width: 170,
-                      maxHeight: 240,
-                      overflowY: "auto",
-                      background: "#fff",
-                      border: "1px solid rgba(198, 206, 218, 0.95)",
-                      borderRadius: 16,
-                      boxShadow: "0 16px 30px rgba(67,33,4,0.12)",
-                      zIndex: 4,
-                    }}
-                  >
-                    {LANGUAGES.map((language) => (
-                      <button
-                        key={language.code}
-                        onClick={() => handleLanguageSelect(language.code)}
-                        style={{
-                          width: "100%",
-                          padding: "12px 16px",
-                          background:
-                            language.code === selectedLanguageCode
-                              ? "rgba(217, 164, 12, 0.08)"
-                              : "#fff",
-                          border: "none",
-                          borderBottom: "1px solid rgba(239, 232, 220, 0.9)",
-                          textAlign: "left",
-                          fontSize: 13,
-                          fontWeight:
-                            language.code === selectedLanguageCode ? 700 : 500,
-                          color:
-                            language.code === selectedLanguageCode
-                              ? "var(--kalpx-cta)"
-                              : "var(--kalpx-text)",
-                          cursor: "pointer",
-                        }}
-                      >
-                        {language.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div> */}
-
-              <div style={{ marginTop: 20 }}>
-                {authed ? (
-                  <button
-                    onClick={handleLogout}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      padding: 0,
-                      color: "var(--kalpx-cta)",
-                      fontSize: 18,
-                      fontWeight: 700,
-                      cursor: "pointer",
-                    }}
-                  >
-                    Logout
-                  </button>
-                ) : (
-                  <Link
-                    to="/login"
-                    onClick={() => setSidebarOpen(false)}
-                    style={{
-                      color: "var(--kalpx-cta)",
-                      fontSize: 18,
-                      fontWeight: 700,
-                      textDecoration: "none",
-                    }}
-                  >
-                    Login
-                  </Link>
-                )}
-              </div>
-
-              <div
-                style={{
-                  marginTop: 28,
-                  borderTop: "1px solid #d9d9d9",
-                  paddingTop: 34,
-                  textAlign: "center",
-                }}
-              >
-                <p
-                  style={{
-                    margin: "0 0 20px",
-                    fontSize: 16,
-                    fontWeight: 700,
-                    color: "#2f3135",
-                  }}
-                >
-                  Download App now
-                </p>
-                <a
-                  href="#"
-                  style={{
-                    width: 45,
-                    height: 45,
-                    borderRadius: 10,
-                    background: "#fff",
-                    boxShadow: "0 14px 24px rgba(67,33,4,0.12)",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    color: "#2f3135",
-                    textDecoration: "none",
-                  }}
-                >
-                  <img
-                    src="/apple-black.svg"
-                    width={28}
-                    height={33}
-                    alt=""
-                    aria-hidden="true"
-                  />
-                </a>
-              </div>
-
-              <div
-                style={{
-                  marginTop: 42,
-                  borderTop: "1px solid #d9d9d9",
-                  paddingTop: 30,
-                  paddingBottom: 28,
-                  textAlign: "center",
-                }}
-              >
-                <p
-                  style={{
-                    margin: "0 0 16px",
-                    fontSize: 16,
-                    fontWeight: 600,
-                    color: "#3b3d42",
-                  }}
-                >
-                  Follow Us
-                </p>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    gap: 18,
-                  }}
-                >
-                  <img
-                    src="/facebook-icon.svg"
-                    width={28}
-                    height={28}
-                    alt=""
-                    aria-hidden="true"
-                  />
-                  <img
-                    src="/insta.svg"
-                    width={25}
-                    height={25}
-                    alt=""
-                    aria-hidden="true"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
+      {false && <div />}
     </>
   );
 }

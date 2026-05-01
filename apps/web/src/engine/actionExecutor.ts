@@ -29,6 +29,7 @@ import { ingestDailyView, ingestDay7View, ingestDay14View } from './v3Ingest';
 import { ensureRoomAmbientPlaying } from '../lib/audio/calmMusic';
 import { webNavigate } from '../lib/webRouter';
 import { invalidateJourneyStatusCache } from '../hooks/useJourneyStatus';
+import { invalidateJourneyEntryViewCache } from '../hooks/useJourneyEntryView';
 import { WEB_ENV } from '../lib/env';
 const CHECKPOINT_BYPASS_KEY = 'kalpx_checkpoint_redirect_bypass_until';
 
@@ -80,7 +81,10 @@ function _navigateToOnboarding(dispatch: AppDispatch, stateId: string) {
 
 function _isAuthenticated(): boolean {
   try {
-    return !!localStorage.getItem('access_token');
+    return !!(
+      localStorage.getItem('access_token') ||
+      localStorage.getItem('accessToken')
+    );
   } catch {
     return false;
   }
@@ -1658,6 +1662,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
         // Day 14 "change_focus" always re-enters onboarding
         if (day === 14 && decision === 'change_focus') {
           invalidateJourneyStatusCache();
+          invalidateJourneyEntryViewCache();
           dispatch(updateScreenData({
             journey_id: null,
             day_number: null,
@@ -1673,6 +1678,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
 
         if (nextView?.view_key === 'onboarding_start') {
           invalidateJourneyStatusCache();
+          invalidateJourneyEntryViewCache();
           dispatch(updateScreenData({
             journey_id: null,
             day_number: null,
@@ -1695,10 +1701,12 @@ export async function executeAction(action: any, context: ActionContext): Promis
         // and return directly to dashboard. change_focus already routed above.
         if (day === 14) {
           invalidateJourneyStatusCache();
+          invalidateJourneyEntryViewCache();
           _setCheckpointRedirectBypass();
           webNavigate('/en/mitra/dashboard');
         } else {
           invalidateJourneyStatusCache();
+          invalidateJourneyEntryViewCache();
           _setCheckpointRedirectBypass();
           webNavigate('/en/mitra/dashboard');
         }

@@ -4,26 +4,25 @@
  * Active journey → dashboard. No journey → /en/mitra/onboarding.
  */
 
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { Navigate } from 'react-router-dom';
 import { useGuestIdentity } from '../../hooks/useGuestIdentity';
 import { useJourneyStatus } from '../../hooks/useJourneyStatus';
 
 export function MitraStartPage() {
   useGuestIdentity();
-  const navigate = useNavigate();
   const { loading, hasActiveJourney } = useJourneyStatus();
 
-  useEffect(() => {
-    if (loading) return;
-    if (hasActiveJourney === true) {
-      navigate('/en/mitra/dashboard', { replace: true });
-    } else {
-      navigate('/en/mitra/onboarding?containerId=welcome_onboarding&stateId=turn_1', {
-        replace: true,
-      });
-    }
-  }, [loading, hasActiveJourney, navigate]);
+  if (!loading) {
+    return hasActiveJourney === true ? (
+      <Navigate to="/en/mitra/dashboard" replace />
+    ) : (
+      <Navigate
+        to="/en/mitra/onboarding?containerId=welcome_onboarding&stateId=turn_1"
+        replace
+      />
+    );
+  }
 
   return (
     <div

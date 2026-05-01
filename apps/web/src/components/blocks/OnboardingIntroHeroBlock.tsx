@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useCurrentUser } from "../../hooks/useCurrentUser";
 
 interface Chip {
   id: string;
@@ -18,11 +17,19 @@ interface Props {
   onAction?: (action: any) => void;
 }
 
+function isReturningChip(chip: Chip): boolean {
+  const label = chip.label.trim().toLowerCase();
+  return (
+    chip.id === "returning" ||
+    label === "i'm returning" ||
+    label === "i’m returning"
+  );
+}
+
 export function OnboardingIntroHeroBlock({ block, onAction }: Props) {
   const [busy, setBusy] = useState(false);
-  const { authed } = useCurrentUser();
   const chips: Chip[] = (block.reply_chips || []).filter(
-    (chip) => !(authed && chip.id === "returning"),
+    (chip) => !isReturningChip(chip),
   );
   const onResponse = block.on_response;
 

@@ -11,6 +11,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { mitraJourneyEntryView, mitraJourneyReentryDecision } from '../../engine/mitraApi';
+import { invalidateJourneyEntryViewCache, mapJourneyEntryViewPath } from '../../hooks/useJourneyEntryView';
+import { invalidateJourneyStatusCache } from '../../hooks/useJourneyStatus';
 import { MitraMobileShell } from '../../components/layout/MitraMobileShell';
 
 type ChipKey = 'reentry_continue' | 'reentry_fresh';
@@ -99,7 +101,7 @@ export function WelcomeBackPage() {
         }
         if (viewKey === 'onboarding_start') {
           routedRef.current = true;
-          navigate('/en/mitra/onboarding', { replace: true });
+          navigate(mapJourneyEntryViewPath('onboarding_start'), { replace: true });
           return;
         }
         setReentry(parseReentryData(result.envelope));
@@ -121,11 +123,13 @@ export function WelcomeBackPage() {
     const idempotencyKey = crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
     try {
       const env = await mitraJourneyReentryDecision(decision, idempotencyKey);
+      invalidateJourneyEntryViewCache();
+      invalidateJourneyStatusCache();
       const nv = env?.next_view ?? { view_key: '' };
       if (nv.view_key === 'daily_view') {
         navigate('/en/mitra/dashboard', { replace: true });
       } else if (nv.view_key === 'onboarding_start') {
-        navigate('/en/mitra/onboarding', { replace: true });
+        navigate(mapJourneyEntryViewPath('onboarding_start'), { replace: true });
       } else {
         navigate('/en/mitra/dashboard', { replace: true });
       }

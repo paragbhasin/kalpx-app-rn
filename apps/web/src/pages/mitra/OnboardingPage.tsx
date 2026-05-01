@@ -6,6 +6,7 @@
  * Does NOT require an active journey — onboarding creates the journey.
  */
 
+import { AUTH_KEYS } from "@kalpx/api-client";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -65,7 +66,10 @@ export function OnboardingPage() {
     const sd = screenState.screenData;
     const isAuthed = (() => {
       try {
-        return !!localStorage.getItem("access_token");
+        return !!(
+          localStorage.getItem(AUTH_KEYS.accessToken) ||
+          localStorage.getItem("access_token")
+        );
       } catch {
         return false;
       }

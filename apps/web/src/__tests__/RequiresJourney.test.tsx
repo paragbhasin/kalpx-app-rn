@@ -7,7 +7,26 @@ vi.mock('../hooks/useJourneyStatus', () => ({
   useJourneyStatus: vi.fn(),
 }));
 
+vi.mock('../hooks/useJourneyEntryView', () => ({
+  useJourneyEntryView: vi.fn(),
+  mapJourneyEntryViewPath: (viewKey: string) => {
+    switch (viewKey) {
+      case 'day_7_view':
+        return '/en/mitra/checkpoint/7';
+      case 'day_14_view':
+        return '/en/mitra/checkpoint/14';
+      case 'welcome_back_surface':
+        return '/en/mitra/welcome-back';
+      case 'onboarding_start':
+        return '/en/mitra/onboarding';
+      default:
+        return '/en/mitra/dashboard';
+    }
+  },
+}));
+
 import { useJourneyStatus } from '../hooks/useJourneyStatus';
+import { useJourneyEntryView } from '../hooks/useJourneyEntryView';
 import { RequiresJourney } from '../components/RequiresJourney';
 
 function renderGuard(initialEntry = '/en/mitra/dashboard') {
@@ -17,6 +36,8 @@ function renderGuard(initialEntry = '/en/mitra/dashboard') {
         <Route path="/en/mitra/start" element={<div data-testid="start-page">start</div>} />
         <Route path="/en/mitra/checkpoint/7" element={<div data-testid="checkpoint-7">checkpoint-7</div>} />
         <Route path="/en/mitra/checkpoint/14" element={<div data-testid="checkpoint-14">checkpoint-14</div>} />
+        <Route path="/en/mitra/welcome-back" element={<div data-testid="welcome-back">welcome-back</div>} />
+        <Route path="/en/mitra/onboarding" element={<div data-testid="onboarding">onboarding</div>} />
         <Route
           path="*"
           element={(
@@ -33,6 +54,12 @@ function renderGuard(initialEntry = '/en/mitra/dashboard') {
 describe('RequiresJourney', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    (useJourneyEntryView as any).mockReturnValue({
+      loading: false,
+      error: null,
+      viewKey: 'daily_view',
+      refetch: vi.fn(),
+    });
   });
 
   afterEach(() => {
@@ -44,7 +71,7 @@ describe('RequiresJourney', () => {
       loading: false,
       error: null,
       hasActiveJourney: true,
-      rawStatus: { hasActiveJourney: true, dayNumber: 8 },
+      rawStatus: { hasActiveJourney: true, dayNumber: 7 },
       refetch: vi.fn(),
     });
 
@@ -53,12 +80,18 @@ describe('RequiresJourney', () => {
     expect(screen.getByTestId('protected')).toBeTruthy();
   });
 
-  it('redirects active journey users on day 7 to the checkpoint route', () => {
+  it('redirects active journey users to day 7 when entry-view says day_7_view', () => {
     (useJourneyStatus as any).mockReturnValue({
       loading: false,
       error: null,
       hasActiveJourney: true,
-      rawStatus: { hasActiveJourney: true, dayNumber: 7 },
+      rawStatus: { hasActiveJourney: true, dayNumber: 8 },
+      refetch: vi.fn(),
+    });
+    (useJourneyEntryView as any).mockReturnValue({
+      loading: false,
+      error: null,
+      viewKey: 'day_7_view',
       refetch: vi.fn(),
     });
 
@@ -68,12 +101,18 @@ describe('RequiresJourney', () => {
     expect(screen.queryByTestId('protected')).toBeNull();
   });
 
-  it('redirects active journey users on day 14 to the checkpoint route', () => {
+  it('redirects active journey users to day 14 when entry-view says day_14_view', () => {
     (useJourneyStatus as any).mockReturnValue({
       loading: false,
       error: null,
       hasActiveJourney: true,
-      rawStatus: { hasActiveJourney: true, dayNumber: 14, daysPastEnd: 2 },
+      rawStatus: { hasActiveJourney: true, dayNumber: 15, daysPastEnd: 2, checkpointPending: true },
+      refetch: vi.fn(),
+    });
+    (useJourneyEntryView as any).mockReturnValue({
+      loading: false,
+      error: null,
+      viewKey: 'day_14_view',
       refetch: vi.fn(),
     });
 
@@ -83,12 +122,58 @@ describe('RequiresJourney', () => {
     expect(screen.queryByTestId('protected')).toBeNull();
   });
 
+  it('redirects stale active journeys to welcome-back', () => {
+    (useJourneyStatus as any).mockReturnValue({
+      loading: false,
+      error: null,
+      hasActiveJourney: true,
+      rawStatus: { hasActiveJourney: true, dayNumber: 4, welcomeBack: true },
+      refetch: vi.fn(),
+    });
+    (useJourneyEntryView as any).mockReturnValue({
+      loading: false,
+      error: null,
+      viewKey: 'welcome_back_surface',
+      refetch: vi.fn(),
+    });
+
+    renderGuard('/en/mitra/dashboard');
+
+    expect(screen.getByTestId('welcome-back')).toBeTruthy();
+  });
+
+  it('redirects onboarding-bound active journeys to onboarding', () => {
+    (useJourneyStatus as any).mockReturnValue({
+      loading: false,
+      error: null,
+      hasActiveJourney: true,
+      rawStatus: { hasActiveJourney: true, dayNumber: 14 },
+      refetch: vi.fn(),
+    });
+    (useJourneyEntryView as any).mockReturnValue({
+      loading: false,
+      error: null,
+      viewKey: 'onboarding_start',
+      refetch: vi.fn(),
+    });
+
+    renderGuard('/en/mitra/dashboard');
+
+    expect(screen.getByTestId('onboarding')).toBeTruthy();
+  });
+
   it('does not re-redirect when already on the matching checkpoint route', () => {
     (useJourneyStatus as any).mockReturnValue({
       loading: false,
       error: null,
       hasActiveJourney: true,
       rawStatus: { hasActiveJourney: true, dayNumber: 14 },
+      refetch: vi.fn(),
+    });
+    (useJourneyEntryView as any).mockReturnValue({
+      loading: false,
+      error: null,
+      viewKey: 'day_14_view',
       refetch: vi.fn(),
     });
 

@@ -14,6 +14,7 @@ const IMMERSIVE_PREFIXES = [
   '/en/mitra/checkin',
   '/en/mitra/start',
   '/en/mitra/onboarding',
+  '/en/mitra/welcome-back',
 ];
 
 // Routes that use AuthLayout — also no shell

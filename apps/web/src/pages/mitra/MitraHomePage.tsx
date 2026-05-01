@@ -11,22 +11,17 @@ import { WEB_ENV } from "../../lib/env";
 export function MitraHomePage() {
   useGuestIdentity();
   const navigate = useNavigate();
-  const { loading, error, hasActiveJourney, refetch } = useJourneyStatus();
+  const { loading, error, refetch } = useJourneyStatus();
 
   useEffect(() => {
     if (loading) return;
-    if (hasActiveJourney === true) {
-      navigate("/en/mitra/dashboard", { replace: true });
-      return;
-    }
     if (
-      hasActiveJourney === false &&
       typeof localStorage !== "undefined" &&
       !!localStorage.getItem(AUTH_KEYS.accessToken)
     ) {
       navigate("/en/mitra/welcome-back", { replace: true });
     }
-  }, [loading, hasActiveJourney, navigate]);
+  }, [loading, navigate]);
 
   if (loading) {
     return (

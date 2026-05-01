@@ -1,11 +1,6 @@
 import { Link } from "react-router-dom";
 
 export function Footer({ transparent = false }: { transparent?: boolean }) {
-  void transparent;
-
-  return null;
-
-  /*
   return (
     <footer
       className="kalpx-desktop-only"
@@ -86,5 +81,4 @@ export function Footer({ transparent = false }: { transparent?: boolean }) {
       </div>
     </footer>
   );
-  */
 }

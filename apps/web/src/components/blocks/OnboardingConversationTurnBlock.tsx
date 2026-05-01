@@ -8,6 +8,15 @@ interface Chip {
   style?: string;
 }
 
+function isReturningChip(chip: Chip): boolean {
+  const label = chip.label.trim().toLowerCase();
+  return (
+    chip.id === 'returning' ||
+    label === "i'm returning" ||
+    label === 'i’m returning'
+  );
+}
+
 interface Props {
   block: {
     id?: string;
@@ -43,7 +52,9 @@ export function OnboardingConversationTurnBlock({
       ? [block.mitra_message]
       : [];
 
-  const chips: Chip[] = block.reply_chips || [];
+  const chips: Chip[] = (block.reply_chips || []).filter(
+    (chip) => !isReturningChip(chip),
+  );
   const inputEnabled = block.open_input?.enabled === true;
   const onResponse = block.on_response;
 

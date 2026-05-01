@@ -15,9 +15,11 @@ type UseJourneyStatusResult = {
 // Avoids one API call per guarded route mount (dashboard → room → trigger = 3 calls → 1).
 const STATUS_TTL_MS = 60_000;
 let _cache: { value: boolean | null; raw: JourneyStatus | null; ts: number } | null = null;
+let _inflight: Promise<{ value: boolean; raw: JourneyStatus | null }> | null = null;
 
 export function invalidateJourneyStatusCache(): void {
   _cache = null;
+  _inflight = null;
 }
 
 export function useJourneyStatus(): UseJourneyStatusResult {
@@ -47,29 +49,36 @@ export function useJourneyStatus(): UseJourneyStatusResult {
     setLoading(true);
     setError(null);
 
-    (async () => {
+    const request = _inflight ?? (async () => {
       try {
         await ensureGuestIdentity();
         const res = await api.get<JourneyStatus>('mitra/journey/status/');
-        if (cancelled) return;
         const normalized = normalizeJourneyStatus(res.data);
-        _cache = { value: normalized, raw: res.data, ts: Date.now() };
-        setRawStatus(res.data);
-        setHasActiveJourney(normalized);
+        return { value: normalized, raw: res.data };
       } catch (err: any) {
-        if (cancelled) return;
         if (err?.response?.status === 404) {
-          _cache = { value: false, raw: null, ts: Date.now() };
-          setHasActiveJourney(false);
-          setRawStatus(null);
-        } else {
-          setError(err?.message ?? 'Could not load journey status.');
-          setHasActiveJourney(null);
+          return { value: false, raw: null };
         }
+        throw err;
       } finally {
-        if (!cancelled) setLoading(false);
+        _inflight = null;
       }
     })();
+
+    _inflight = request;
+
+    request.then(({ value, raw }) => {
+      if (cancelled) return;
+      _cache = { value, raw, ts: Date.now() };
+      setRawStatus(raw);
+      setHasActiveJourney(value);
+    }).catch((err: any) => {
+      if (cancelled) return;
+      setError(err?.message ?? 'Could not load journey status.');
+      setHasActiveJourney(null);
+    }).finally(() => {
+      if (!cancelled) setLoading(false);
+    });
 
     return () => { cancelled = true; };
   }, [tick]);

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useJourneyStatus } from '../hooks/useJourneyStatus';
+import { mapJourneyEntryViewPath, useJourneyEntryView } from '../hooks/useJourneyEntryView';
 
 interface Props {
   children: React.ReactNode;
@@ -25,19 +26,16 @@ function hasCheckpointRedirectBypass(): boolean {
 
 export function RequiresJourney({ children }: Props) {
   const location = useLocation();
-  const { loading, error, hasActiveJourney, rawStatus, refetch } = useJourneyStatus();
+  const { loading, error, hasActiveJourney, refetch } = useJourneyStatus();
   const bypassCheckpointRedirect = hasCheckpointRedirectBypass();
+  const {
+    loading: entryLoading,
+    error: entryError,
+    viewKey,
+    refetch: refetchEntryView,
+  } = useJourneyEntryView(hasActiveJourney === true);
 
-  const rawDayNumber = Number(rawStatus?.dayNumber ?? rawStatus?.day_number ?? 0);
-  const checkpointDay = hasActiveJourney
-    ? rawDayNumber === 8
-      ? 7
-      : rawDayNumber === 7 || rawDayNumber === 14
-        ? rawDayNumber
-        : null
-    : null;
-
-  if (loading) {
+  if (loading || (hasActiveJourney === true && entryLoading)) {
     return (
       <div
         style={{
@@ -54,7 +52,7 @@ export function RequiresJourney({ children }: Props) {
     );
   }
 
-  if (error) {
+  if (error || entryError) {
     return (
       <div
         style={{
@@ -70,7 +68,10 @@ export function RequiresJourney({ children }: Props) {
       >
         <p style={{ color: '#888' }}>Could not verify journey status.</p>
         <button
-          onClick={refetch}
+          onClick={() => {
+            refetch();
+            refetchEntryView();
+          }}
           style={{
             padding: '10px 24px',
             background: '#2a2a2a',
@@ -86,12 +87,23 @@ export function RequiresJourney({ children }: Props) {
 
   if (!hasActiveJourney) return <Navigate to="/en/mitra/start" replace />;
 
-  if (
-    checkpointDay != null &&
+  const targetPath = viewKey ? mapJourneyEntryViewPath(viewKey) : null;
+  const shouldRedirectToCheckpoint =
+    viewKey != null &&
+    (viewKey === 'day_7_view' || viewKey === 'day_14_view') &&
     !bypassCheckpointRedirect &&
-    location.pathname !== `/en/mitra/checkpoint/${checkpointDay}`
-  ) {
-    return <Navigate to={`/en/mitra/checkpoint/${checkpointDay}`} replace />;
+    targetPath !== location.pathname;
+
+  if (shouldRedirectToCheckpoint) {
+    return <Navigate to={targetPath!} replace />;
+  }
+
+  if (viewKey === 'welcome_back_surface' && location.pathname !== targetPath) {
+    return <Navigate to={targetPath!} replace />;
+  }
+
+  if (viewKey === 'onboarding_start' && location.pathname !== targetPath) {
+    return <Navigate to={targetPath!} replace />;
   }
 
   return <>{children}</>;

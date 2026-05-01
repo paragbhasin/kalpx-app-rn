@@ -10,6 +10,7 @@ import { useAppDispatch } from '../store/hooks';
 import { showSnackBar } from '../store/snackBarSlice';
 import { store, resetStore } from '../store';
 import { invalidateJourneyStatusCache } from './useJourneyStatus';
+import { invalidateJourneyEntryViewCache } from './useJourneyEntryView';
 import type { LoginRequest, LoginResponse, SignupRegisterRequest, SignupStep1Request, SignupOtpVerifyRequest, ForgotPasswordRequest, ResetPasswordRequest } from '../types/auth';
 import { claimGuestJourney } from '../engine/mitraApi';
 
@@ -39,9 +40,11 @@ export function useAuth() {
 
         await storeTokens(webStorage, { accessToken, refreshToken });
         invalidateJourneyStatusCache();
+        invalidateJourneyEntryViewCache();
         // Attempt guest journey claim (best-effort — failure must not break login)
         try { await claimGuestJourney(); } catch { /* swallow */ }
         invalidateJourneyStatusCache();
+        invalidateJourneyEntryViewCache();
         navigate(returnTo ?? '/en/mitra');
         return { success: true };
       } catch (err) {
@@ -57,6 +60,7 @@ export function useAuth() {
     await webStorage.removeItem(AUTH_KEYS.refreshToken);
     // Keep guestUUID — guest identity survives logout
     invalidateJourneyStatusCache();
+    invalidateJourneyEntryViewCache();
     store.dispatch(resetStore());
     navigate('/login');
   }, [navigate]);
@@ -78,8 +82,10 @@ export function useAuth() {
 
         await storeTokens(webStorage, { accessToken: at, refreshToken: rt });
         invalidateJourneyStatusCache();
+        invalidateJourneyEntryViewCache();
         try { await claimGuestJourney(); } catch { /* swallow */ }
         invalidateJourneyStatusCache();
+        invalidateJourneyEntryViewCache();
         navigate(returnTo ?? '/en/mitra');
         return { success: true };
       } catch (err) {
@@ -144,9 +150,11 @@ export function useAuth() {
         if (accessToken && refreshToken) {
           await storeTokens(webStorage, { accessToken, refreshToken });
           invalidateJourneyStatusCache();
+          invalidateJourneyEntryViewCache();
           // Attempt guest journey claim (best-effort)
           try { await claimGuestJourney(); } catch { /* swallow */ }
           invalidateJourneyStatusCache();
+          invalidateJourneyEntryViewCache();
           navigate('/en/mitra/start');
         } else {
           // Backend may not return tokens on register — navigate to login

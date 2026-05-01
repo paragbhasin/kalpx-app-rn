@@ -10,6 +10,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { api } from "../../lib/api";
+import { getRecaptchaToken } from "../../lib/recaptcha";
 import { useAppDispatch } from "../../store/hooks";
 import { showSnackBar } from "../../store/snackBarSlice";
 import "./Auth.css";
@@ -114,11 +115,9 @@ export function SignupPage() {
     const timer = setTimeout(async () => {
       setUsernameLoading(true);
       try {
-        const recaptchaToken = "dev-bypass-token";
-
         const response = await api.post("users/check_username/", {
           username: username,
-          recaptcha_token: recaptchaToken,
+          recaptcha_token: await getRecaptchaToken("check_username"),
           recaptcha_action: "check_username",
         });
 
@@ -147,8 +146,7 @@ export function SignupPage() {
     }
     setOtpLoading(true);
     setError("");
-    const recaptchaToken = "dev-bypass-token";
-    const result = await generateOtp(email, recaptchaToken);
+    const result = await generateOtp(email);
     setOtpLoading(false);
     if (result.success) {
       setOtpSent(true);
@@ -166,8 +164,7 @@ export function SignupPage() {
     }
     setOtpLoading(true);
     setError("");
-    const recaptchaToken = "dev-bypass-token";
-    const result = await verifyOtp(email, otp, recaptchaToken);
+    const result = await verifyOtp(email, otp);
     setOtpLoading(false);
     if (result.success) {
       setOtpVerified(true);
@@ -191,16 +188,12 @@ export function SignupPage() {
 
     setLoading(true);
     setError("");
-    const recaptchaToken = "dev-bypass-token";
-    const result = await registerUser(
-      {
-        email,
-        password,
-        confirm_password: confirmPassword,
-        first_name: username,
-      } as any,
-      recaptchaToken,
-    );
+    const result = await registerUser({
+      email,
+      password,
+      confirm_password: confirmPassword,
+      first_name: username,
+    } as any);
     setLoading(false);
 
     if (result.success) {

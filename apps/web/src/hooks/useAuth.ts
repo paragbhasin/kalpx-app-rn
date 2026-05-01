@@ -14,8 +14,21 @@ import { invalidateJourneyEntryViewCache } from './useJourneyEntryView';
 import type { LoginRequest, LoginResponse, SignupRegisterRequest, SignupStep1Request, SignupOtpVerifyRequest, ResetPasswordRequest } from '../types/auth';
 import { claimGuestJourney } from '../engine/mitraApi';
 
-// Dev reCAPTCHA bypass — backend accepts any token value in dev/debug mode
 const DEV_RECAPTCHA_TOKEN = 'dev-bypass-token';
+const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY as string | undefined;
+
+async function getRecaptchaToken(action: string): Promise<string> {
+  if (!RECAPTCHA_SITE_KEY) return DEV_RECAPTCHA_TOKEN;
+  try {
+    const gr = (window as any).grecaptcha;
+    if (!gr) return DEV_RECAPTCHA_TOKEN;
+    return await new Promise<string>((resolve, reject) => {
+      gr.ready(() => gr.execute(RECAPTCHA_SITE_KEY, { action }).then(resolve).catch(reject));
+    });
+  } catch {
+    return DEV_RECAPTCHA_TOKEN;
+  }
+}
 
 function shouldAttemptGuestJourneyClaim(): boolean {
   try {
@@ -29,11 +42,6 @@ function shouldAttemptGuestJourneyClaim(): boolean {
   } catch {
     return false;
   }
-}
-
-function getRecaptchaToken(): string {
-  // Phase 4: always use dev bypass. Phase 5+ will integrate the real widget.
-  return DEV_RECAPTCHA_TOKEN;
 }
 
 export function useAuth() {
@@ -118,7 +126,7 @@ export function useAuth() {
       try {
         const payload: SignupStep1Request = {
           email,
-          recaptcha_token: recaptchaToken || getRecaptchaToken(),
+          recaptcha_token: recaptchaToken || await getRecaptchaToken('generate_otp'),
           recaptcha_action: 'generate_otp',
           context: 'registration',
         };
@@ -137,7 +145,7 @@ export function useAuth() {
         const payload: SignupOtpVerifyRequest = {
           email,
           otp,
-          recaptcha_token: recaptchaToken || getRecaptchaToken(),
+          recaptcha_token: recaptchaToken || await getRecaptchaToken('verify_otp'),
           recaptcha_action: 'verify_otp',
         };
         await api.post('users/verify_otp/', payload);
@@ -157,7 +165,7 @@ export function useAuth() {
       try {
         const body: SignupRegisterRequest = {
           ...payload,
-          recaptcha_token: recaptchaToken || getRecaptchaToken(),
+          recaptcha_token: recaptchaToken || await getRecaptchaToken('register'),
           recaptcha_action: 'register',
         };
         const res = await api.post<LoginResponse>('users/register/', body);
@@ -194,7 +202,7 @@ export function useAuth() {
       try {
         await api.post('users/generate_otp/', {
           email,
-          recaptcha_token: getRecaptchaToken(),
+          recaptcha_token: await getRecaptchaToken('generate_otp'),
           recaptcha_action: 'generate_otp',
           context: 'password_reset',
         });
@@ -217,7 +225,7 @@ export function useAuth() {
           email,
           otp,
           new_password: newPassword,
-          recaptcha_token: getRecaptchaToken(),
+          recaptcha_token: await getRecaptchaToken('reset_password'),
           recaptcha_action: 'reset_password',
         };
         await api.post('users/reset_password/', payload);

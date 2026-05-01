@@ -2,6 +2,7 @@
   "name": "kalpax",
   "main": "./AppEntry.js",
   "version": "1.0.1",
+  "packageManager": "pnpm@10.33.2",
   "android": {
     "package": "com.kalpx.app"
   },
@@ -9,6 +10,7 @@
     "bundleIdentifier": "com.kalpx.app"
   },
   "scripts": {
+    "eas-build-pre-install": "corepack enable && corepack prepare pnpm@10.33.2 --activate && pnpm --version",
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",

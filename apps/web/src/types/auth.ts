@@ -1,6 +1,7 @@
 export type LoginRequest = {
   email: string;
   password: string;
+  recaptcha_token?: string;
 };
 
 export type TokenPair = {

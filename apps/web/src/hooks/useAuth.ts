@@ -36,7 +36,8 @@ export function useAuth() {
   const login = useCallback(
     async (email: string, password: string, returnTo?: string): Promise<{ success: boolean; error?: string }> => {
       try {
-        const res = await api.post<LoginResponse>('users/login/', { email, password } satisfies LoginRequest);
+        const recaptchaToken = await getRecaptchaToken('login');
+        const res = await api.post<LoginResponse>('users/login/', { email, password, recaptcha_token: recaptchaToken } satisfies LoginRequest);
         const data = res.data;
         const accessToken = data.access_token ?? data.access;
         const refreshToken = data.refresh_token ?? data.refresh;

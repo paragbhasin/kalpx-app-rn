@@ -28,6 +28,9 @@ import { TriggerPage } from "./pages/mitra/TriggerPage";
 import { WelcomeBackPage } from "./pages/mitra/WelcomeBackPage";
 import { NotificationsPage } from "./pages/notifications/NotificationsPage";
 import { ProfilePage } from "./pages/profile/ProfilePage";
+import { PrivacyPage } from "./pages/legal/PrivacyPage";
+import { TermsPage } from "./pages/legal/TermsPage";
+import { DataDeletionPage } from "./pages/legal/DataDeletionPage";
 import { RetreatsInterestPage } from "./pages/retreats/RetreatsInterestPage";
 
 export function AppRoutes() {
@@ -129,6 +132,9 @@ export function AppRoutes() {
           </RequiresAuth>
         }
       />
+      <Route path="/en/privacy" element={<PrivacyPage />} />
+      <Route path="/en/terms" element={<TermsPage />} />
+      <Route path="/en/data-deletion" element={<DataDeletionPage />} />
 
       {/* Retreats vertical */}
       <Route path="/en/retreats" element={<RetreatsInterestPage />} />

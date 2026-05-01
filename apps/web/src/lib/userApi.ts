@@ -94,3 +94,22 @@ export async function updateUserProfile(patch: Partial<UserProfile>): Promise<Us
     return null;
   }
 }
+
+/**
+ * POST users/delete_account/ — delete current user's account.
+ */
+export async function deleteUserAccount(): Promise<{ success: boolean; error?: string }> {
+  try {
+    const res = await api.post('users/delete_account/', { confirm_deletion: true, force: true });
+    return { success: true };
+  } catch (err: any) {
+    const errorMsg =
+      err?.response?.data?.error ||
+      err?.response?.data?.message ||
+      err?.message ||
+      "Failed to delete account.";
+    console.warn('[userApi] deleteUserAccount failed:', errorMsg);
+    return { success: false, error: errorMsg };
+  }
+}
+

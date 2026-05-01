@@ -3,6 +3,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  FileText,
   KeyRound,
   LogOut,
   Trash2,
@@ -18,6 +19,7 @@ import {
   getUserProfile,
   getUserProfileOptions,
   updateUserProfile,
+  deleteUserAccount,
   type ProfileOptionItem,
   type SavedReflection,
   type UserProfileOptions,
@@ -150,6 +152,7 @@ export function ProfilePage() {
   );
   const [savingProfile, setSavingProfile] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [form, setForm] = useState<ProfileFormState>(getInitialForm(null));
 
   useEffect(() => {
@@ -170,6 +173,16 @@ export function ProfilePage() {
 
   async function handleLogout() {
     await logout();
+  }
+
+  async function handleDeleteAccount() {
+    const res = await deleteUserAccount();
+    if (res.success) {
+      await logout();
+      alert("Account deleted successfully!");
+    } else {
+      alert(res.error || "Failed to delete account.");
+    }
   }
 
   async function loadSavedReflections() {
@@ -313,12 +326,25 @@ export function ProfilePage() {
         key: "privacy",
         label: "Privacy Policy",
         icon: KeyRound,
-        onClick: () =>
-          window.open(
-            "https://kalpx.com/en/privacy",
-            "_blank",
-            "noopener,noreferrer",
-          ),
+        onClick: () => navigate("/en/privacy"),
+      },
+      {
+        key: "terms",
+        label: "Terms of Service",
+        icon: FileText,
+        onClick: () => navigate("/en/terms"),
+      },
+      {
+        key: "data-deletion",
+        label: "Data Deletion",
+        icon: Trash2,
+        onClick: () => navigate("/en/data-deletion"),
+      },
+      {
+        key: "delete-account",
+        label: "Delete Account",
+        icon: Trash2,
+        onClick: () => setDeleteOpen(true),
       },
       {
         key: "logout",
@@ -624,6 +650,40 @@ export function ProfilePage() {
             onClick={() => void handleLogout()}
           >
             Yes
+          </KalpXButton>
+        </div>
+      </ModalSheet>
+
+      <ModalSheet
+        isOpen={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        title="Delete Account"
+        height="auto"
+      >
+        <p
+          style={{
+            margin: "0 0 18px",
+            fontSize: 15,
+            lineHeight: 1.7,
+            color: "var(--kalpx-text-soft)",
+          }}
+        >
+          This action is permanent. Do you really want to delete your account?
+        </p>
+        <div style={{ display: "flex", gap: 12 }}>
+          <KalpXButton
+            variant="secondary"
+            fullWidth
+            onClick={() => setDeleteOpen(false)}
+          >
+            Cancel
+          </KalpXButton>
+          <KalpXButton
+            variant="destructive"
+            fullWidth
+            onClick={() => void handleDeleteAccount()}
+          >
+            Delete
           </KalpXButton>
         </div>
       </ModalSheet>

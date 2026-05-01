@@ -1189,7 +1189,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
       const avgCompletionRate = Object.values(completionRates).length
         ? Math.round(
             (Object.values(completionRates).reduce(
-              (sum, value) => sum + Number(value || 0),
+              (sum: number, value: unknown) => sum + Number(value || 0),
               0,
             ) /
               Object.values(completionRates).length) *

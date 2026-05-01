@@ -520,6 +520,9 @@ importers:
         specifier: '>=18'
         version: 19.0.0
     devDependencies:
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.0.14
       typescript:
         specifier: ~5.8.3
         version: 5.8.3

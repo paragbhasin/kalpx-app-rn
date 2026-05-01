@@ -11,7 +11,7 @@ import { showSnackBar } from '../store/snackBarSlice';
 import { store, resetStore } from '../store';
 import { invalidateJourneyStatusCache } from './useJourneyStatus';
 import { invalidateJourneyEntryViewCache } from './useJourneyEntryView';
-import type { LoginRequest, LoginResponse, SignupRegisterRequest, SignupStep1Request, SignupOtpVerifyRequest, ForgotPasswordRequest, ResetPasswordRequest } from '../types/auth';
+import type { LoginRequest, LoginResponse, SignupRegisterRequest, SignupStep1Request, SignupOtpVerifyRequest, ResetPasswordRequest } from '../types/auth';
 import { claimGuestJourney } from '../engine/mitraApi';
 
 // Dev reCAPTCHA bypass — backend accepts any token value in dev/debug mode
@@ -192,9 +192,12 @@ export function useAuth() {
   const forgotPassword = useCallback(
     async (email: string): Promise<{ success: boolean; error?: string }> => {
       try {
-        const payload: ForgotPasswordRequest = { email };
-        // Endpoint: POST users/reset_password/ (confirmed from apps/mobile/src/screens/Signup/actions.ts)
-        await api.post('users/reset_password/', payload);
+        await api.post('users/generate_otp/', {
+          email,
+          recaptcha_token: getRecaptchaToken(),
+          recaptcha_action: 'generate_otp',
+          context: 'password_reset',
+        });
         return { success: true };
       } catch (err) {
         return { success: false, error: getApiErrorMessage(err, 'Could not send reset email. Please try again.') };

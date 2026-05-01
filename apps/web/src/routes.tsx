@@ -7,6 +7,7 @@ import { LoginPage } from "./pages/auth/LoginPage";
 import { LogoutPage } from "./pages/auth/LogoutPage";
 import { ResetPasswordPage } from "./pages/auth/ResetPasswordPage";
 import { SignupPage } from "./pages/auth/SignupPage";
+import { VerifyPage } from "./pages/auth/VerifyPage";
 import { ClassBookingPage } from "./pages/classes/ClassBookingPage";
 import { ClassBookingSuccessPage } from "./pages/classes/ClassBookingSuccessPage";
 import { ClassDetailPage } from "./pages/classes/ClassDetailPage";
@@ -38,6 +39,7 @@ export function AppRoutes() {
       {/* Auth */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
+      <Route path="/verify" element={<VerifyPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route path="/logout" element={<LogoutPage />} />

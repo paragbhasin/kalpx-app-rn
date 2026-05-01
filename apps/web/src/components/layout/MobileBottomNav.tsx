@@ -44,8 +44,13 @@ export function MobileBottomNav({
 }: {
   transparent?: boolean;
 }) {
+  void transparent;
+
   useCurrentUser();
 
+  return null;
+
+  /*
   return (
     <nav
       className="kalpx-mobile-only"
@@ -102,4 +107,5 @@ export function MobileBottomNav({
       })}
     </nav>
   );
+  */
 }

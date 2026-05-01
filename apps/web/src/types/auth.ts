@@ -28,6 +28,7 @@ export type SignupStep1Request = {
   email: string;
   recaptcha_token: string;
   recaptcha_action?: string;
+  context?: string;
 };
 
 export type SignupOtpVerifyRequest = {

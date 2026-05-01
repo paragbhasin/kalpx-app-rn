@@ -7,10 +7,10 @@ import { webStorage } from "../../lib/webStorage";
 
 const NAV_LINKS = [
   { to: "/en", label: "Home", match: "/en", mobileOnly: true },
-  { to: "/en/mitra", label: "Mitra", match: "/en/mitra" },
-  { to: "/en/classes", label: "Classes", match: "/en/classes" },
-  { to: "/en/community", label: "Community", match: "/en/community" },
-  { to: "/en/retreats", label: "Retreats", match: "/en/retreats" },
+  // { to: "/en/mitra", label: "Mitra", match: "/en/mitra" },
+  // { to: "/en/classes", label: "Classes", match: "/en/classes" },
+  // { to: "/en/community", label: "Community", match: "/en/community" },
+  // { to: "/en/retreats", label: "Retreats", match: "/en/retreats" },
 ];
 
 const LANGUAGES = [
@@ -44,6 +44,7 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
     LANGUAGES[0];
 
   const [isScrolled, setIsScrolled] = useState(false);
+  const useTransparentChrome = transparent && !isScrolled;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -133,17 +134,17 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
         style={{
           width: "100%",
           height: 60,
-          background: transparent
+          background: useTransparentChrome
             ? "transparent"
             : isScrolled
-              ? "rgba(255, 255, 255, 0.2)"
+              ? "rgba(255, 248, 239, 0.88)"
               : "var(--kalpx-bg)",
-          backdropFilter: transparent
+          backdropFilter: useTransparentChrome
             ? "none"
             : isScrolled
               ? "blur(12px)"
               : "none",
-          WebkitBackdropFilter: transparent
+          WebkitBackdropFilter: useTransparentChrome
             ? "none"
             : isScrolled
               ? "blur(12px)"
@@ -158,10 +159,10 @@ export function Header({ transparent = false }: { transparent?: boolean }) {
           zIndex: 60,
           transition:
             "background 0.3s, backdrop-filter 0.3s, border-color 0.3s",
-          borderBottom: transparent
+          borderBottom: useTransparentChrome
             ? "none"
             : isScrolled
-              ? "1px solid rgba(199, 162, 88, 0.08)"
+              ? "1px solid rgba(199, 162, 88, 0.16)"
               : "none",
         }}
       >

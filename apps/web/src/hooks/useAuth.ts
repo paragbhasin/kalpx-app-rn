@@ -90,12 +90,13 @@ export function useAuth() {
   );
 
   const generateOtp = useCallback(
-    async (email: string): Promise<{ success: boolean; error?: string }> => {
+    async (email: string, recaptchaToken?: string): Promise<{ success: boolean; error?: string }> => {
       try {
         const payload: SignupStep1Request = {
           email,
-          recaptcha_token: getRecaptchaToken(),
-          recaptcha_action: 'request_otp',
+          recaptcha_token: recaptchaToken || getRecaptchaToken(),
+          recaptcha_action: 'generate_otp',
+          context: 'registration',
         };
         await api.post('users/generate_otp/', payload);
         return { success: true };
@@ -107,12 +108,12 @@ export function useAuth() {
   );
 
   const verifyOtp = useCallback(
-    async (email: string, otp: string): Promise<{ success: boolean; error?: string }> => {
+    async (email: string, otp: string, recaptchaToken?: string): Promise<{ success: boolean; error?: string }> => {
       try {
         const payload: SignupOtpVerifyRequest = {
           email,
           otp,
-          recaptcha_token: getRecaptchaToken(),
+          recaptcha_token: recaptchaToken || getRecaptchaToken(),
           recaptcha_action: 'verify_otp',
         };
         await api.post('users/verify_otp/', payload);
@@ -127,11 +128,12 @@ export function useAuth() {
   const registerUser = useCallback(
     async (
       payload: Omit<SignupRegisterRequest, 'recaptcha_token' | 'recaptcha_action'>,
+      recaptchaToken?: string,
     ): Promise<{ success: boolean; error?: string }> => {
       try {
         const body: SignupRegisterRequest = {
           ...payload,
-          recaptcha_token: getRecaptchaToken(),
+          recaptcha_token: recaptchaToken || getRecaptchaToken(),
           recaptcha_action: 'register',
         };
         const res = await api.post<LoginResponse>('users/register/', body);

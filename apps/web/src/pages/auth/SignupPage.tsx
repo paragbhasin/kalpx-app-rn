@@ -9,6 +9,7 @@ import {
 import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { useRecaptcha } from "../../hooks/useRecaptcha";
 import { api } from "../../lib/api";
 import { getRecaptchaToken } from "../../lib/recaptcha";
 import { useAppDispatch } from "../../store/hooks";
@@ -26,6 +27,7 @@ import "./Auth.css";
  */
 
 export function SignupPage() {
+  useRecaptcha();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [searchParams] = useSearchParams();
@@ -190,9 +192,9 @@ export function SignupPage() {
     setError("");
     const result = await registerUser({
       email,
-      password,
-      confirm_password: confirmPassword,
-      first_name: username,
+      password1: password,
+      password2: confirmPassword,
+      username,
     } as any);
     setLoading(false);
 

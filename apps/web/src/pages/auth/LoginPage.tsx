@@ -3,6 +3,7 @@ import { Eye, EyeOff, Info, Loader2, Lock, Mail } from "lucide-react";
 import React, { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { useRecaptcha } from "../../hooks/useRecaptcha";
 import { useAppDispatch } from "../../store/hooks";
 import { showSnackBar } from "../../store/snackBarSlice";
 import "./Auth.css";
@@ -18,6 +19,7 @@ import "./Auth.css";
  */
 
 export function LoginPage() {
+  useRecaptcha();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [searchParams] = useSearchParams();

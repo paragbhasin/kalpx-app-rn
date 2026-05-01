@@ -1,4 +1,5 @@
 import React from 'react';
+import { useRecaptcha } from '../hooks/useRecaptcha';
 
 interface Props {
   children: React.ReactNode;
@@ -6,6 +7,7 @@ interface Props {
 }
 
 export function AuthLayout({ children, title }: Props) {
+  useRecaptcha();
   return (
     <div
       style={{

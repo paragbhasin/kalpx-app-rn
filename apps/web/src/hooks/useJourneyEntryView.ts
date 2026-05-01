@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { invalidateEntryViewApiCache, mitraJourneyEntryView } from '../engine/mitraApi';
+import { invalidateEntryViewApiCache, mitraJourneyEntryView, seedDashboardViewFromEntryPayload } from '../engine/mitraApi';
 
 export type JourneyEntryViewKey =
   | 'daily_view'
@@ -89,7 +89,12 @@ export function useJourneyEntryView(enabled: boolean): UseJourneyEntryViewResult
     const request = _inflight ?? (async () => {
       try {
         const result = await mitraJourneyEntryView();
-        return normalizeEntryViewKey(result.envelope?.target?.view_key);
+        const viewKey = normalizeEntryViewKey(result.envelope?.target?.view_key);
+        if (viewKey === 'daily_view') {
+          const payload = result.envelope?.target?.payload;
+          if (payload) seedDashboardViewFromEntryPayload(payload);
+        }
+        return viewKey;
       } catch (err: any) {
         throw err;
       } finally {

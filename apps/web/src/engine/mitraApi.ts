@@ -33,6 +33,11 @@ export function invalidateDashboardViewCache(): void {
   _dashboardViewInflight = null;
 }
 
+export function seedDashboardViewFromEntryPayload(payload: any): void {
+  if (!payload || typeof payload !== 'object') return;
+  _dashboardViewCache = { data: payload, ts: Date.now() };
+}
+
 export function invalidateAdditionalItemsCache(): void {
   _additionalItemsCache = null;
   _additionalItemsInflight = null;

@@ -35,7 +35,7 @@ export function RequiresJourney({ children }: Props) {
     refetch: refetchEntryView,
   } = useJourneyEntryView(hasActiveJourney === true);
 
-  if (loading || (hasActiveJourney === true && entryLoading)) {
+  if (loading || (hasActiveJourney === true && (entryLoading || (viewKey === null && !entryError)))) {
     return (
       <div
         style={{

@@ -12,7 +12,7 @@ import { store, resetStore } from '../store';
 import { invalidateJourneyStatusCache } from './useJourneyStatus';
 import { invalidateJourneyEntryViewCache } from './useJourneyEntryView';
 import type { LoginRequest, LoginResponse, SignupRegisterRequest, SignupStep1Request, SignupOtpVerifyRequest, ResetPasswordRequest } from '../types/auth';
-import { claimGuestJourney } from '../engine/mitraApi';
+import { claimGuestJourney, invalidateDashboardViewCache } from '../engine/mitraApi';
 import { getRecaptchaToken } from '../lib/recaptcha';
 
 function shouldAttemptGuestJourneyClaim(): boolean {
@@ -70,6 +70,7 @@ export function useAuth() {
     await webStorage.removeItem(AUTH_KEYS.refreshToken);
     // Keep guestUUID — guest identity survives logout
     invalidateJourneyStatusCache();
+    invalidateDashboardViewCache();
     invalidateJourneyEntryViewCache();
     store.dispatch(resetStore());
     navigate('/login');

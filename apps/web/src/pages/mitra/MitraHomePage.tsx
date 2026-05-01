@@ -1,6 +1,4 @@
-import { AUTH_KEYS } from "@kalpx/api-client";
-import { useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { Footer } from "../../components/layout/Footer";
 import { Header } from "../../components/layout/Header";
 import { MobileBottomNav } from "../../components/layout/MobileBottomNav";
@@ -10,18 +8,7 @@ import { WEB_ENV } from "../../lib/env";
 
 export function MitraHomePage() {
   useGuestIdentity();
-  const navigate = useNavigate();
-  const { loading, error, refetch } = useJourneyStatus();
-
-  useEffect(() => {
-    if (loading) return;
-    if (
-      typeof localStorage !== "undefined" &&
-      !!localStorage.getItem(AUTH_KEYS.accessToken)
-    ) {
-      navigate("/en/mitra/welcome-back", { replace: true });
-    }
-  }, [loading, navigate]);
+  const { loading, error, hasActiveJourney, rawStatus, refetch } = useJourneyStatus();
 
   if (loading) {
     return (
@@ -47,6 +34,19 @@ export function MitraHomePage() {
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
+  }
+
+  if (hasActiveJourney === true) {
+    return <Navigate to="/en/mitra/dashboard" replace />;
+  }
+
+  if (
+    rawStatus?.hasReentryPath === true ||
+    rawStatus?.has_reentry_path === true ||
+    rawStatus?.welcomeBack === true ||
+    rawStatus?.reentryTarget === "welcome_back_surface"
+  ) {
+    return <Navigate to="/en/mitra/welcome-back" replace />;
   }
 
   return (

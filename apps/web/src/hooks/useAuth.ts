@@ -17,6 +17,20 @@ import { claimGuestJourney } from '../engine/mitraApi';
 // Dev reCAPTCHA bypass — backend accepts any token value in dev/debug mode
 const DEV_RECAPTCHA_TOKEN = 'dev-bypass-token';
 
+function shouldAttemptGuestJourneyClaim(): boolean {
+  try {
+    const raw = localStorage.getItem('kalpx_journey_state');
+    if (!raw) return false;
+    const data = JSON.parse(raw) as Record<string, any>;
+    return Boolean(
+      data?.stashed_inference_state ||
+      data?.onboarding_turn === 'turn_7_awaiting_auth',
+    );
+  } catch {
+    return false;
+  }
+}
+
 function getRecaptchaToken(): string {
   // Phase 4: always use dev bypass. Phase 5+ will integrate the real widget.
   return DEV_RECAPTCHA_TOKEN;
@@ -42,7 +56,9 @@ export function useAuth() {
         invalidateJourneyStatusCache();
         invalidateJourneyEntryViewCache();
         // Attempt guest journey claim (best-effort — failure must not break login)
-        try { await claimGuestJourney(); } catch { /* swallow */ }
+        if (shouldAttemptGuestJourneyClaim()) {
+          try { await claimGuestJourney(); } catch { /* swallow */ }
+        }
         invalidateJourneyStatusCache();
         invalidateJourneyEntryViewCache();
         navigate(returnTo ?? '/en/mitra');
@@ -83,7 +99,9 @@ export function useAuth() {
         await storeTokens(webStorage, { accessToken: at, refreshToken: rt });
         invalidateJourneyStatusCache();
         invalidateJourneyEntryViewCache();
-        try { await claimGuestJourney(); } catch { /* swallow */ }
+        if (shouldAttemptGuestJourneyClaim()) {
+          try { await claimGuestJourney(); } catch { /* swallow */ }
+        }
         invalidateJourneyStatusCache();
         invalidateJourneyEntryViewCache();
         navigate(returnTo ?? '/en/mitra');
@@ -152,7 +170,9 @@ export function useAuth() {
           invalidateJourneyStatusCache();
           invalidateJourneyEntryViewCache();
           // Attempt guest journey claim (best-effort)
-          try { await claimGuestJourney(); } catch { /* swallow */ }
+          if (shouldAttemptGuestJourneyClaim()) {
+            try { await claimGuestJourney(); } catch { /* swallow */ }
+          }
           invalidateJourneyStatusCache();
           invalidateJourneyEntryViewCache();
           navigate('/en/mitra/start');

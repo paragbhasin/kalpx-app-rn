@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { mitraJourneyEntryView } from '../engine/mitraApi';
+import { invalidateEntryViewApiCache, mitraJourneyEntryView } from '../engine/mitraApi';
 
 export type JourneyEntryViewKey =
   | 'daily_view'
@@ -23,6 +23,7 @@ let _inflight: Promise<JourneyEntryViewKey> | null = null;
 export function invalidateJourneyEntryViewCache(): void {
   _cache = null;
   _inflight = null;
+  invalidateEntryViewApiCache();
 }
 
 function normalizeEntryViewKey(value: unknown): JourneyEntryViewKey {

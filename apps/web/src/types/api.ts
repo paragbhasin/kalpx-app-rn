@@ -8,12 +8,14 @@ export type JourneyStatus = {
   focus?: string;
   subfocus?: string;
   checkpointPending?: boolean;
+  hasReentryPath?: boolean;
   reentryTarget?: string;
   welcomeBack?: boolean;
   // snake_case aliases (kept for compatibility)
   journey_id?: number | string;
   active_journey?: boolean;
   has_active_journey?: boolean;
+  has_reentry_path?: boolean;
   status?: string;
   journey?: {
     status?: string;

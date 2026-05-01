@@ -2,6 +2,7 @@ import { api } from '../lib/api';
 
 const DASHBOARD_VIEW_TTL_MS = 30_000;
 const ADDITIONAL_ITEMS_TTL_MS = 30_000;
+const ENTRY_VIEW_TTL_MS = 30_000;
 
 let _dashboardViewCache: { data: any; ts: number } | null = null;
 let _dashboardViewInflight: Promise<any> | null = null;
@@ -11,6 +12,22 @@ let _additionalItemsCache:
   | null = null;
 let _additionalItemsInflight: Promise<{ items: any[]; uiHints: { shouldCollapse?: boolean } }> | null = null;
 
+let _entryViewCache:
+  | {
+      data: {
+        envelope: any | null;
+        etag: string | null;
+        notModified: boolean;
+      };
+      ts: number;
+    }
+  | null = null;
+let _entryViewInflight: Promise<{
+  envelope: any | null;
+  etag: string | null;
+  notModified: boolean;
+}> | null = null;
+
 export function invalidateDashboardViewCache(): void {
   _dashboardViewCache = null;
   _dashboardViewInflight = null;
@@ -19,6 +36,11 @@ export function invalidateDashboardViewCache(): void {
 export function invalidateAdditionalItemsCache(): void {
   _additionalItemsCache = null;
   _additionalItemsInflight = null;
+}
+
+export function invalidateEntryViewApiCache(): void {
+  _entryViewCache = null;
+  _entryViewInflight = null;
 }
 
 export async function getUserPreferences(): Promise<any> {
@@ -439,21 +461,36 @@ export async function mitraJourneyEntryView(etag?: string | null): Promise<{
   etag: string | null;
   notModified: boolean;
 }> {
-  try {
-    const headers: Record<string, string> = {};
-    if (etag) headers['If-None-Match'] = etag;
-    const res = await api.get('mitra/v3/journey/entry-view/', { headers });
-    return {
-      envelope: res.data,
-      etag: (res.headers as any)['etag'] ?? null,
-      notModified: false,
-    };
-  } catch (err: any) {
-    if (err?.response?.status === 304) {
-      return { envelope: null, etag: etag ?? null, notModified: true };
-    }
-    throw err;
+  if (!etag && _entryViewCache && Date.now() - _entryViewCache.ts < ENTRY_VIEW_TTL_MS) {
+    return _entryViewCache.data;
   }
+
+  const request = _entryViewInflight ?? (async () => {
+    try {
+      const headers: Record<string, string> = {};
+      if (etag) headers['If-None-Match'] = etag;
+      const res = await api.get('mitra/v3/journey/entry-view/', { headers });
+      return {
+        envelope: res.data,
+        etag: (res.headers as any)['etag'] ?? null,
+        notModified: false,
+      };
+    } catch (err: any) {
+      if (err?.response?.status === 304) {
+        return { envelope: null, etag: etag ?? null, notModified: true };
+      }
+      throw err;
+    } finally {
+      _entryViewInflight = null;
+    }
+  })();
+
+  _entryViewInflight = request;
+  const data = await request;
+  if (!etag) {
+    _entryViewCache = { data, ts: Date.now() };
+  }
+  return data;
 }
 
 /**

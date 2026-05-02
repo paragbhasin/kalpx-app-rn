@@ -142,7 +142,10 @@ export function MitraHomePage() {
     })
       .then(async (result) => {
         if (cancelled) return;
-        if (result?.response_type === "route_to_moment" && result.action?.type) {
+        if (
+          result?.response_type === "route_to_moment" &&
+          result.action?.type
+        ) {
           await handleJourneyHomeAction(result.action);
           return;
         }
@@ -166,7 +169,10 @@ export function MitraHomePage() {
     return <LoadingScreen />;
   }
 
-  if (hasActiveJourney === true && journeyHome?.response_type === "render_home") {
+  if (
+    hasActiveJourney === true &&
+    journeyHome?.response_type === "render_home"
+  ) {
     const headline = journeyHome.headline || "Welcome back.";
     const bodyLines = journeyHome.body_lines || [];
     const prompt = journeyHome.h2_prompt || "";
@@ -177,7 +183,7 @@ export function MitraHomePage() {
       <div
         style={{
           minHeight: "100dvh",
-          backgroundImage: "url(/14day_updated.png)",
+          backgroundImage: "url(/new_home.png)",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
@@ -349,10 +355,7 @@ export function MitraHomePage() {
 
   if (hasActiveJourney === true) {
     return (
-      <Navigate
-        to={mapJourneyEntryViewPath(viewKey || "daily_view")}
-        replace
-      />
+      <Navigate to={mapJourneyEntryViewPath(viewKey || "daily_view")} replace />
     );
   }
 
@@ -369,7 +372,7 @@ export function MitraHomePage() {
     <div
       style={{
         minHeight: "100dvh",
-        backgroundImage: "url(/14day_updated.png)",
+        backgroundImage: "url(/new_home.png)",
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundRepeat: "no-repeat",
@@ -402,26 +405,6 @@ export function MitraHomePage() {
         >
           <div
             style={{
-              color: "#432104",
-              fontSize: 20,
-              fontWeight: 300,
-              fontFamily: "var(--kalpx-font-serif)",
-            }}
-          >
-            "In this path, no effort is ever lost."
-          </div>
-          <div
-            style={{
-              color: "#432104",
-              fontSize: 16,
-              fontWeight: 300,
-              fontFamily: "var(--kalpx-font-serif)",
-            }}
-          >
-            — Bhagavad Gita 6.5
-          </div>
-          <div
-            style={{
               width: "100%",
               display: "flex",
               flexDirection: "column",
@@ -429,10 +412,29 @@ export function MitraHomePage() {
               justifyContent: "flex-start",
               flex: 1,
               minHeight: 0,
-              paddingTop: 96,
-              paddingBottom: 24,
+              paddingBottom: 20,
             }}
           >
+            <div
+              style={{
+                color: "#432104",
+                fontSize: 20,
+                fontWeight: 300,
+                fontFamily: "var(--kalpx-font-serif)",
+              }}
+            >
+              "In this path, no effort is ever lost."
+            </div>
+            <div
+              style={{
+                color: "#432104",
+                fontSize: 16,
+                fontWeight: 300,
+                fontFamily: "var(--kalpx-font-serif)",
+              }}
+            >
+              — Bhagavad Gita 6.5
+            </div>
             <div
               style={{
                 display: "flex",
@@ -467,7 +469,6 @@ export function MitraHomePage() {
                 fontWeight: 600,
                 color: "#432104",
                 marginBottom: 8,
-                marginTop: 36,
                 fontFamily: "var(--kalpx-font-serif)",
               }}
             >
@@ -499,6 +500,7 @@ export function MitraHomePage() {
                 fontSize: 18,
                 lineHeight: 1.6,
                 marginTop: 12,
+                marginBottom: 0,
               }}
             >
               A calmer, clearer way to navigate life - one day at a time.
@@ -533,18 +535,29 @@ export function MitraHomePage() {
             style={{
               display: "flex",
               flexDirection: "column",
-              gap: 12,
+              gap: 14,
               width: "100%",
               alignItems: "center",
-              paddingTop: 24,
-              paddingBottom: 70,
+              marginTop: "auto",
+              paddingTop: 8,
+              paddingBottom: 94,
             }}
           >
+            <img
+              src="/new_home_lotus.png"
+              alt=""
+              style={{
+                width: "62%",
+                maxWidth: 270,
+                pointerEvents: "none",
+                userSelect: "none",
+              }}
+            />
             <Link
               to="/en/mitra/start"
               style={{
                 display: "block",
-                padding: "16px 32px",
+                padding: "10px",
                 background: "linear-gradient(to right, #E5D4CA, #F5EDEA)",
                 color: "#432104",
                 borderRadius: 28,

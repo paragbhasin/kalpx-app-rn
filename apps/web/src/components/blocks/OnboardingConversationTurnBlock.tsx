@@ -166,19 +166,25 @@ export function OnboardingConversationTurnBlock({
             </div>
           </div>
 
-          {/* <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            marginBottom: 18,
-          }}
-        >
-          <img
-            src="/new_home_lotus.png"
-            alt=""
-            style={{ width: "52%", maxWidth: 260, pointerEvents: "none" }}
-          />
-        </div> */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginBottom: 18,
+              marginTop: "auto",
+            }}
+          >
+            <img
+              src="/new_home_lotus.png"
+              alt=""
+              style={{
+                width: "56%",
+                maxWidth: 272,
+                pointerEvents: "none",
+                userSelect: "none",
+              }}
+            />
+          </div>
 
           {chips.length > 0 && (
             <div
@@ -187,7 +193,7 @@ export function OnboardingConversationTurnBlock({
                 flexDirection: "column",
                 gap: 14,
                 width: "100%",
-                marginTop: "auto",
+                marginTop: 0,
               }}
             >
               {chips.map((chip) => {

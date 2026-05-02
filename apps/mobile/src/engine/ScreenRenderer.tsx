@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { ActivityIndicator, SafeAreaView, StyleSheet, View } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useSelector } from "react-redux";
 import EngineErrorBoundary from "./ErrorBoundary";
 import { useScreenStore } from "./useScreenBridge";
@@ -44,6 +44,7 @@ import CheckpointReflectionContainer from "../containers/CheckpointReflectionCon
 // Phase 5 Stage 2 — Canonical v3.1 room renderer (flag-gated at RoomRenderer).
 // Fetches GET /api/mitra/rooms/{room_id}/render/ and mounts <RoomRenderer />.
 import RoomContainer from "../containers/RoomContainer";
+import { stopRoomAmbientAudio } from "../containers/RoomContainer";
 // Phase 3 — Mitra v3 new dashboard shell (11 required components).
 // Registered under `companion_dashboard_v3` so Home.tsx can route to it
 // when the flag flips. Gated behind EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD=1;
@@ -150,6 +151,18 @@ const ScreenRenderer: React.FC = () => {
     if (isCheckpointScreen) return;
     updateBackground(require("../../assets/beige_bg.png"));
   }, [currentBackground, currentScreen, currentContainerId, currentStateId, updateBackground]);
+
+  // Room ambient audio belongs to the DynamicEngine screen focus, not to
+  // RoomContainer unmount. The Home stack preserves DynamicEngine when the
+  // user leaves via tabs/drawer/sidebar, so room components can stay mounted
+  // while the screen is blurred. Stop ambient on screen blur universally.
+  useFocusEffect(
+    React.useCallback(() => {
+      return () => {
+        stopRoomAmbientAudio().catch(() => {});
+      };
+    }, []),
+  );
 
   if (__DEV__) {
     console.log(

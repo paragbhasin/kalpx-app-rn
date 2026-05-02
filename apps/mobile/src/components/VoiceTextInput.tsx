@@ -191,14 +191,14 @@ export const VoiceModal: React.FC<VoiceModalProps> = ({
                   <Text style={styles.timer}>{formatTime(timer)}</Text>
 
                   <View style={styles.voiceActions}>
-                    {/* {voiceState === "idle" && (
+                    {voiceState === "idle" && (
                       <TouchableOpacity
                         style={styles.voiceMainBtn}
                         onPress={startVoice}
                       >
                         <Ionicons name="mic" size={40} color="#c89a47" />
                       </TouchableOpacity>
-                    )} */}
+                    )}
                     {voiceState === "listening" && (
                       <TouchableOpacity
                         style={styles.voiceStopBtn}
@@ -307,14 +307,14 @@ export const VoiceTextInput: React.FC<VoiceTextInputProps> = ({
             blurOnSubmit={false}
           />
 
-          {voiceAvailable && (
+          {/* {voiceAvailable && (
             <TouchableOpacity
               style={styles.micButton}
               onPress={() => setModalVisible(true)}
             >
               <Ionicons name="mic" size={22} color="#b9892f" />
             </TouchableOpacity>
-          )}
+          )} */}
         </Pressable>
 
         <TouchableOpacity

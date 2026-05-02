@@ -715,6 +715,31 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     [schema.blocks],
   );
 
+  const logAudioDebug = (
+    event: string,
+    extra?: Record<string, unknown>,
+  ) => {
+    if (!__DEV__) return;
+    console.log("[RUNNER_AUDIO]", {
+      event,
+      stateId: currentStateId || "",
+      variant: currentVariant || "",
+      activeItemId:
+        screenState?.runner_active_item?.item_id ||
+        screenState?.runner_active_item?.id ||
+        "",
+      activeItemType: screenState?.runner_active_item?.item_type || "",
+      mantraAudioUrl: mantraAudioUrl || "",
+      selectedOmAudio: screenState?._selected_om_audio || "",
+      isTriggerOmChantScreen,
+      isSupportPractice,
+      isSacredPause,
+      isTimerStarted,
+      mediaMuted,
+      ...extra,
+    });
+  };
+
   const runnerHeadline = useMemo(() => {
     if (currentStateId === "checkin_breath_reset") {
       return "Pause and breathe.";
@@ -843,6 +868,12 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     const currentInFlight = Array.from(inFlightSounds.current);
     inFlightSounds.current.clear();
 
+    logAudioDebug("stop_trigger_audio", {
+      hadIntro: !!intro,
+      hadMantra: !!mantra,
+      clearedInFlightCount: currentInFlight.length,
+    });
+
     if (intro) {
       await intro.stopAsync().catch(() => {});
       await intro.unloadAsync().catch(() => {});
@@ -860,6 +891,12 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
   };
 
   const resetAllRunnerAudio = async () => {
+    logAudioDebug("reset_all_runner_audio:start", {
+      hasPrepAudio: !!prepAudioRef.current,
+      hasEmbodyAudio: !!embodyAudioRef.current,
+      hasSankalpOm: !!sankalpOmRef.current,
+      hasCalmMusic: !!calmMusicRef.current,
+    });
     await stopTriggerAudio();
     await stopCalmMusic();
 
@@ -877,6 +914,8 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
       await sound.stopAsync().catch(() => {});
       await sound.unloadAsync().catch(() => {});
     }
+
+    logAudioDebug("reset_all_runner_audio:done");
   };
 
   const applyMuteState = async (muted: boolean) => {
@@ -904,6 +943,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
 
   const startCalmMusic = async () => {
     try {
+      logAudioDebug("calm_music:start_requested");
       if (calmMusicRef.current) {
         await calmMusicRef.current.unloadAsync().catch(() => {});
         calmMusicRef.current = null;
@@ -920,6 +960,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
 
       // If we unmounted or changed state while loading, unload immediately
       if (!isSupportPractice && !isSacredPause) {
+        logAudioDebug("calm_music:start_aborted_after_load");
         await sound.unloadAsync().catch(() => {});
         return;
       }
@@ -927,6 +968,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
       inFlightSounds.current.add(sound);
       calmMusicRef.current = sound;
       inFlightSounds.current.delete(sound);
+      logAudioDebug("calm_music:started");
     } catch (err) {
       console.warn("[CALM_MUSIC] play failed:", err);
     }
@@ -936,8 +978,10 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     if (calmMusicRef.current) {
       const sound = calmMusicRef.current;
       calmMusicRef.current = null;
+      logAudioDebug("calm_music:stopping");
       await sound.stopAsync().catch(() => {});
       await sound.unloadAsync().catch(() => {});
+      logAudioDebug("calm_music:stopped");
     }
   };
 
@@ -964,6 +1008,11 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
 
     const shouldPlay =
       (isSupportPractice && !isMantra) || (isSacredPause && isTimerStarted);
+
+    logAudioDebug("calm_music:evaluate", {
+      shouldPlay,
+      isMantra,
+    });
 
     if (shouldPlay) {
       console.log("[CALM_MUSIC] Play condition met.");
@@ -999,22 +1048,32 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     const runId = ++triggerAudioRunIdRef.current;
 
     const startTriggerAudioSequence = async () => {
+      logAudioDebug("trigger_sequence:start", { runId });
       console.log(
         "[TRIGGER_AUDIO] startTriggerAudioSequence triggered. Mode:",
         currentStateId,
       );
 
       if (!isTriggerOmChantScreen) {
+        logAudioDebug("trigger_sequence:skip_non_trigger", { runId });
         console.log("[TRIGGER_AUDIO] Not a trigger chanting screen. Stopping.");
         await resetAllRunnerAudio();
         return;
       }
 
       await resetAllRunnerAudio();
+      logAudioDebug("trigger_sequence:after_reset", { runId });
 
       // Delay slightly to ensure component is settled
       await new Promise((resolve) => setTimeout(resolve, 300));
-      if (isCancelled || triggerAudioRunIdRef.current !== runId) return;
+      if (isCancelled || triggerAudioRunIdRef.current !== runId) {
+        logAudioDebug("trigger_sequence:cancelled_before_intro", {
+          runId,
+          isCancelled,
+          latestRunId: triggerAudioRunIdRef.current,
+        });
+        return;
+      }
 
       // Always start with the bundled "Be still" intro on trigger/check-in
       // mantra screens. The remote mantra can be slow or fail, but that must
@@ -1029,6 +1088,9 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
         });
 
         if (isCancelled || triggerAudioRunIdRef.current !== runId) {
+          logAudioDebug("trigger_sequence:intro_discarded_after_load", {
+            runId,
+          });
           await intro.unloadAsync().catch(() => {});
           return;
         }
@@ -1036,6 +1098,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
         inFlightSounds.current.add(intro);
         introLoopAudioRef.current = intro;
         inFlightSounds.current.delete(intro);
+        logAudioDebug("trigger_sequence:intro_loaded", { runId });
       } catch (introErr) {
         console.warn(
           "[TRIGGER_AUDIO] Intro load failed — skipping:",
@@ -1049,6 +1112,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
       const intro = introLoopAudioRef.current;
       if (intro) {
         try {
+          logAudioDebug("trigger_sequence:intro_play", { runId });
           console.log("[TRIGGER_AUDIO] Playing intro");
           await intro.playAsync();
         } catch (err) {
@@ -1063,6 +1127,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
       // cannot suppress the bundled intro audio.
       let mantra: Audio.Sound | null = null;
       try {
+        logAudioDebug("trigger_sequence:mantra_load_requested", { runId });
         console.log("[TRIGGER_AUDIO] Loading Mantra Source:", mantraAudioUrl);
         const mantraSource = resolveAudioSource(mantraAudioUrl);
         const result = await Audio.Sound.createAsync(mantraSource, {
@@ -1072,6 +1137,13 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
           volume: mediaMuted ? 0 : 1,
         });
         mantra = result.sound;
+        logAudioDebug("trigger_sequence:mantra_loaded", {
+          runId,
+          sourceKind:
+            typeof mantraSource === "object" && mantraSource && "uri" in mantraSource
+              ? "remote"
+              : "local",
+        });
       } catch (mantraErr) {
         console.warn(
           "[TRIGGER_AUDIO] Mantra load failed:",
@@ -1079,6 +1151,9 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
         );
         // Fallback: try the local bundled Om.mp4
         try {
+          logAudioDebug("trigger_sequence:mantra_fallback_requested", {
+            runId,
+          });
           const fallbackSource = require("../../assets/sounds/Om.mp4");
           const result = await Audio.Sound.createAsync(fallbackSource, {
             shouldPlay: false,
@@ -1087,6 +1162,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
             volume: mediaMuted ? 0 : 1,
           });
           mantra = result.sound;
+          logAudioDebug("trigger_sequence:mantra_fallback_loaded", { runId });
         } catch (fallbackErr) {
           console.error(
             "[TRIGGER_AUDIO] Fallback also failed:",
@@ -1097,6 +1173,12 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
       }
 
       if (isCancelled || triggerAudioRunIdRef.current !== runId || !mantra) {
+        logAudioDebug("trigger_sequence:mantra_discarded_after_load", {
+          runId,
+          isCancelled,
+          latestRunId: triggerAudioRunIdRef.current,
+          hasMantra: !!mantra,
+        });
         if (mantra) await mantra.unloadAsync().catch(() => {});
         return;
       }
@@ -1116,6 +1198,9 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
             (introStatus.positionMillis || 0) >=
               (introStatus.durationMillis || Number.MAX_SAFE_INTEGER)
           ) {
+            logAudioDebug("trigger_sequence:intro_already_finished_play_mantra", {
+              runId,
+            });
             console.log(
               "[TRIGGER_AUDIO] Intro already ended -> Playing Mantra",
             );
@@ -1132,6 +1217,9 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
               triggerAudioRunIdRef.current === runId &&
               mantra
             ) {
+              logAudioDebug("trigger_sequence:intro_finished_play_mantra", {
+                runId,
+              });
               console.log("[TRIGGER_AUDIO] Intro finished -> Playing Mantra");
               mantra
                 .playAsync()
@@ -1145,6 +1233,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
           });
         } else {
           // No intro — play mantra directly
+          logAudioDebug("trigger_sequence:no_intro_play_mantra", { runId });
           console.log("[TRIGGER_AUDIO] No intro — playing mantra directly");
           if (!isCancelled && triggerAudioRunIdRef.current === runId) {
             await mantra.playAsync();
@@ -1159,6 +1248,10 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
 
     return () => {
       isCancelled = true;
+      logAudioDebug("trigger_sequence:cleanup", {
+        runId,
+        latestRunIdBeforeCleanup: triggerAudioRunIdRef.current,
+      });
       if (triggerAudioRunIdRef.current === runId) {
         triggerAudioRunIdRef.current += 1;
       }

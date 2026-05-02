@@ -814,8 +814,11 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
 
   const resolveAudioSource = (url?: string) => {
     if (!url) return require("../../assets/sounds/Om.mp4");
-    if (url.includes("Audio_Be_still.mp4")) {
-      return require("../../assets/sounds/Audio_Be_still.mp4");
+    if (
+      url.includes("Audio_Be_still.mp4") ||
+      url.includes("Audio_Be_still.m4a")
+    ) {
+      return require("../../assets/sounds/Audio_Be_still.m4a");
     }
     if (url.includes("Hari Om")) {
       return require("../../assets/sounds/Hari Om -Female.mp4");
@@ -874,15 +877,6 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
       if (!sound) continue;
       await sound.stopAsync().catch(() => {});
       await sound.unloadAsync().catch(() => {});
-    }
-
-    // Force expo-av to drop any orphaned playback session left behind by a
-    // fast same-container transition (mantra -> practice -> mantra).
-    try {
-      await Audio.setIsEnabledAsync(false);
-      await Audio.setIsEnabledAsync(true);
-    } catch (err) {
-      console.warn("[RUNNER_AUDIO] global reset failed:", err);
     }
   };
 
@@ -1023,13 +1017,12 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
       await new Promise((resolve) => setTimeout(resolve, 300));
       if (isCancelled || triggerAudioRunIdRef.current !== runId) return;
 
-      // Try to load the intro bell (Audio_Be_still) — but it's optional.
-      // The file is actually an .m4a container with a .mp4 extension, which
-      // occasionally trips expo-asset's downloadAsync pipeline on fresh
-      // launches. If it fails, we skip it and play the mantra directly.
+      // Always start with the bundled "Be still" intro on trigger/check-in
+      // mantra screens. The remote mantra can be slow or fail, but that must
+      // not block the local intro from playing first.
       try {
-        console.log("[TRIGGER_AUDIO] Loading Intro: Audio_Be_still.mp4");
-        const introSource = require("../../assets/sounds/Audio_Be_still.mp4");
+        console.log("[TRIGGER_AUDIO] Loading Intro: Audio_Be_still.m4a");
+        const introSource = require("../../assets/sounds/Audio_Be_still.m4a");
         const { sound: intro } = await Audio.Sound.createAsync(introSource, {
           shouldPlay: false,
           isMuted: mediaMuted,
@@ -1054,7 +1047,21 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
 
       if (isCancelled || triggerAudioRunIdRef.current !== runId) return;
 
-      // Load the mantra loop (REQUIRED — this is the primary audio)
+      const intro = introLoopAudioRef.current;
+      if (intro) {
+        try {
+          console.log("[TRIGGER_AUDIO] Playing intro");
+          await intro.playAsync();
+        } catch (err) {
+          console.warn(
+            "[TRIGGER_AUDIO] Intro play failed:",
+            (err as any)?.message,
+          );
+        }
+      }
+
+      // Load the mantra loop after intro has started, so a slow S3 load
+      // cannot suppress the bundled intro audio.
       let mantra: Audio.Sound | null = null;
       try {
         console.log("[TRIGGER_AUDIO] Loading Mantra Source:", mantraAudioUrl);
@@ -1099,9 +1106,24 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
       mantraLoopAudioRef.current = mantra;
       inFlightSounds.current.delete(mantra);
 
-      const intro = introLoopAudioRef.current;
       try {
         if (intro) {
+          const introStatus = await intro.getStatusAsync().catch(() => null);
+          if (
+            !introStatus ||
+            !("isLoaded" in introStatus) ||
+            !introStatus.isLoaded ||
+            introStatus.didJustFinish ||
+            (introStatus.positionMillis || 0) >=
+              (introStatus.durationMillis || Number.MAX_SAFE_INTEGER)
+          ) {
+            console.log(
+              "[TRIGGER_AUDIO] Intro already ended -> Playing Mantra",
+            );
+            await mantra.playAsync();
+            return;
+          }
+
           // Transition: intro → mantra
           intro.setOnPlaybackStatusUpdate((status) => {
             if (
@@ -1122,8 +1144,6 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
                 );
             }
           });
-          console.log("[TRIGGER_AUDIO] Playing intro");
-          await intro.playAsync();
         } else {
           // No intro — play mantra directly
           console.log("[TRIGGER_AUDIO] No intro — playing mantra directly");
@@ -1226,7 +1246,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
       }
 
       const { sound } = await Audio.Sound.createAsync(
-        require("../../assets/sounds/Audio_Be_still.mp4"),
+        require("../../assets/sounds/Audio_Be_still.m4a"),
         { shouldPlay: true, isLooping: false, volume: 1 },
       );
 

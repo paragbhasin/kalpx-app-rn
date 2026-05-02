@@ -26,7 +26,13 @@
 import { useFocusEffect } from "@react-navigation/native";
 import { Audio } from "expo-av";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, ScrollView, StyleSheet, View } from "react-native";
+import {
+  ActivityIndicator,
+  AppState,
+  ScrollView,
+  StyleSheet,
+  View,
+} from "react-native";
 import api from "../Networks/axios";
 import LifeContextPickerSheet, {
   type LifeContext,
@@ -255,6 +261,26 @@ const RoomContainer: React.FC<Props> = () => {
       return () => updateBackground(null);
     }, [updateBackground]),
   );
+
+  // Ambient audio belongs only to the focused room screen. If the user
+  // leaves via tab navigation, home button, app switch, etc, stop it
+  // immediately even if this container stays mounted in navigation state.
+  useFocusEffect(
+    React.useCallback(() => {
+      return () => {
+        stopAndUnloadCalmAudio();
+      };
+    }, [stopAndUnloadCalmAudio]),
+  );
+
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (nextState) => {
+      if (nextState !== "active") {
+        stopAndUnloadCalmAudio();
+      }
+    });
+    return () => sub.remove();
+  }, [stopAndUnloadCalmAudio]);
 
   // 2. Audio ownership:
   // Keep room ambient alive only while app container is `room`.

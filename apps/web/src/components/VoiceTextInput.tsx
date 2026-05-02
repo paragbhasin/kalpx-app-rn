@@ -1,4 +1,4 @@
-import { Mic, SendHorizontal } from "lucide-react";
+import { SendHorizontal } from "lucide-react";
 import type { KeyboardEvent } from "react";
 import { useEffect, useRef, useState } from "react";
 
@@ -118,7 +118,7 @@ export function VoiceTextInput({
             }}
           />
 
-          {voiceAvailable && (
+          {/* {voiceAvailable && (
             <button
               type="button"
               onClick={handleVoiceClick}
@@ -142,7 +142,7 @@ export function VoiceTextInput({
             >
               <Mic size={18} strokeWidth={1.9} />
             </button>
-          )}
+          )} */}
         </div>
 
         <button

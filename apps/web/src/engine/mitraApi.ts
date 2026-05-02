@@ -28,6 +28,9 @@ let _entryViewInflight: Promise<{
   notModified: boolean;
 }> | null = null;
 
+let _journeyHomeCache: { data: any; ts: number } | null = null;
+let _journeyHomeInflight: Promise<any | null> | null = null;
+
 export function invalidateDashboardViewCache(): void {
   _dashboardViewCache = null;
   _dashboardViewInflight = null;
@@ -46,6 +49,11 @@ export function invalidateAdditionalItemsCache(): void {
 export function invalidateEntryViewApiCache(): void {
   _entryViewCache = null;
   _entryViewInflight = null;
+}
+
+export function invalidateJourneyHomeCache(): void {
+  _journeyHomeCache = null;
+  _journeyHomeInflight = null;
 }
 
 export async function getUserPreferences(): Promise<any> {
@@ -126,6 +134,39 @@ export async function getJourneyStatus(): Promise<any> {
   } catch {
     return null;
   }
+}
+
+export async function getJourneyHome(params: {
+  tz?: string;
+  locale?: string;
+  guidance_mode?: string;
+  crisis?: string;
+  grief?: string;
+  loneliness?: string;
+} = {}): Promise<any | null> {
+  if (
+    _journeyHomeCache &&
+    Date.now() - _journeyHomeCache.ts < ENTRY_VIEW_TTL_MS
+  ) {
+    return _journeyHomeCache.data;
+  }
+
+  const request = _journeyHomeInflight ?? (async () => {
+    try {
+      const res = await api.get('mitra/journey/home/', { params });
+      return res.data;
+    } catch (err: any) {
+      console.warn('[mitraApi] journey/home failed:', err?.message);
+      return null;
+    } finally {
+      _journeyHomeInflight = null;
+    }
+  })();
+
+  _journeyHomeInflight = request;
+  const data = await request;
+  _journeyHomeCache = { data, ts: Date.now() };
+  return data;
 }
 
 // ─── Telemetry — camelCase to match mobile wire format ────────────────────────

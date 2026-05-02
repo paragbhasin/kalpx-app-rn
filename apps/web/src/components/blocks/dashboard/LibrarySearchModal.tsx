@@ -25,7 +25,12 @@ export function LibrarySearchModal({ onClose, onItemAdded, existingItemIds }: Pr
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    inputRef.current?.focus();
+    if (typeof window === 'undefined') return;
+    const prefersTouch =
+      'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (!prefersTouch) {
+      inputRef.current?.focus();
+    }
   }, []);
 
   useEffect(() => {
@@ -139,7 +144,7 @@ export function LibrarySearchModal({ onClose, onItemAdded, existingItemIds }: Pr
               border: '1px solid var(--kalpx-border-gold)',
               background: 'var(--kalpx-bg)',
               color: 'var(--kalpx-text)',
-              fontSize: 14,
+              fontSize: 16,
               outline: 'none',
               boxSizing: 'border-box',
             }}

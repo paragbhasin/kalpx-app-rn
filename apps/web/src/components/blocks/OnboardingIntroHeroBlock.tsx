@@ -17,20 +17,9 @@ interface Props {
   onAction?: (action: any) => void;
 }
 
-function isReturningChip(chip: Chip): boolean {
-  const label = chip.label.trim().toLowerCase();
-  return (
-    chip.id === "returning" ||
-    label === "i'm returning" ||
-    label === "i’m returning"
-  );
-}
-
 export function OnboardingIntroHeroBlock({ block, onAction }: Props) {
   const [busy, setBusy] = useState(false);
-  const chips: Chip[] = (block.reply_chips || []).filter(
-    (chip) => !isReturningChip(chip),
-  );
+  const chips: Chip[] = block.reply_chips || [];
   const onResponse = block.on_response;
 
   async function handleChip(chip: Chip) {

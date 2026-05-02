@@ -8,15 +8,6 @@ interface Chip {
   style?: string;
 }
 
-function isReturningChip(chip: Chip): boolean {
-  const label = chip.label.trim().toLowerCase();
-  return (
-    chip.id === 'returning' ||
-    label === "i'm returning" ||
-    label === 'i’m returning'
-  );
-}
-
 interface Props {
   block: {
     id?: string;
@@ -52,9 +43,7 @@ export function OnboardingConversationTurnBlock({
       ? [block.mitra_message]
       : [];
 
-  const chips: Chip[] = (block.reply_chips || []).filter(
-    (chip) => !isReturningChip(chip),
-  );
+  const chips: Chip[] = block.reply_chips || [];
   const inputEnabled = block.open_input?.enabled === true;
   const onResponse = block.on_response;
 
@@ -79,95 +68,105 @@ export function OnboardingConversationTurnBlock({
           minHeight: "calc(100dvh - 140px)",
           display: "flex",
           flexDirection: "column",
-          paddingBottom: "calc(24px + env(safe-area-inset-bottom))",
+          alignItems: "center",
+          padding: "10px 0 calc(24px + env(safe-area-inset-bottom))",
         }}
       >
         <div
           style={{
-            borderRadius: 28,
-            background: "rgba(255, 253, 247, 0.9)",
-            border: "1px solid var(--kalpx-border-gold)",
-            boxShadow: "var(--kalpx-shadow-card-lift)",
-            padding: "26px 18px 22px",
-            marginBottom: 18,
-            backdropFilter: "blur(4px)",
-            WebkitBackdropFilter: "blur(4px)",
+            width: "100%",
+            maxWidth: 392,
+            display: "flex",
+            flexDirection: "column",
+            flex: 1,
           }}
         >
           <div
             style={{
-              textAlign: "center",
-              fontSize: 32,
-              lineHeight: 1.28,
-              color: "var(--kalpx-text)",
-              fontWeight: 700,
-              fontFamily: "var(--kalpx-font-serif)",
-              marginBottom: 18,
-              whiteSpace: "pre-line",
-            }}
-          >
-            {"I'm Mitra.\nI'm here with you."}
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 14,
-              marginBottom: 24,
+              borderRadius: 28,
+              background: "rgba(255, 253, 247, 0.9)",
+              border: "1px solid var(--kalpx-border-gold)",
+              boxShadow: "var(--kalpx-shadow-card-lift)",
+              padding: "26px 18px 22px",
+              marginBottom: 16,
+              backdropFilter: "blur(4px)",
+              WebkitBackdropFilter: "blur(4px)",
             }}
           >
             <div
               style={{
-                width: 74,
-                height: 1,
-                background: "var(--kalpx-border-gold)",
+                textAlign: "center",
+                fontSize: 32,
+                lineHeight: 1.28,
+                color: "var(--kalpx-text)",
+                fontWeight: 700,
+                fontFamily: "var(--kalpx-font-serif)",
+                marginBottom: 18,
+                whiteSpace: "pre-line",
               }}
-            />
-            <span style={{ color: "var(--kalpx-gold)", fontSize: 14 }}>◈</span>
+            >
+              {"I'm Mitra.\nI'm here with you."}
+            </div>
+
             <div
               style={{
-                width: 74,
-                height: 1,
-                background: "var(--kalpx-border-gold)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 14,
+                marginBottom: 24,
               }}
-            />
-          </div>
+            >
+              <div
+                style={{
+                  width: 74,
+                  height: 1,
+                  background: "var(--kalpx-border-gold)",
+                }}
+              />
+              <span style={{ color: "var(--kalpx-gold)", fontSize: 14 }}>◈</span>
+              <div
+                style={{
+                  width: 74,
+                  height: 1,
+                  background: "var(--kalpx-border-gold)",
+                }}
+              />
+            </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-            {messages.map((msg, i) => {
-              const Icon = rowIcons[i] || Sun;
-              return (
-                <div
-                  key={i}
-                  style={{ display: "flex", alignItems: "flex-start", gap: 14 }}
-                >
-                  <div>
-                    <Icon
-                      size={22}
-                      strokeWidth={1.8}
-                      color="var(--kalpx-gold)"
-                    />
-                  </div>
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: 18,
-                      fontFamily: "var(--kalpx-font-serif)",
-                      color: "var(--kalpx-text)",
-                      lineHeight: 1.45,
-                    }}
+            <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
+              {messages.map((msg, i) => {
+                const Icon = rowIcons[i] || Sun;
+                return (
+                  <div
+                    key={i}
+                    style={{ display: "flex", alignItems: "flex-start", gap: 14 }}
                   >
-                    {msg}
-                  </p>
-                </div>
-              );
-            })}
+                    <div>
+                      <Icon
+                        size={22}
+                        strokeWidth={1.8}
+                        color="var(--kalpx-gold)"
+                      />
+                    </div>
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: 18,
+                        fontFamily: "var(--kalpx-font-serif)",
+                        color: "var(--kalpx-text)",
+                        lineHeight: 1.45,
+                      }}
+                    >
+                      {msg}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
 
-        {/* <div
+          {/* <div
           style={{
             display: "flex",
             justifyContent: "center",
@@ -181,87 +180,88 @@ export function OnboardingConversationTurnBlock({
           />
         </div> */}
 
-        {chips.length > 0 && (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 14,
-              width: "100%",
-              marginTop: "auto",
-            }}
-          >
-            {chips.map((chip) => {
-              const primary = chip.style === "primary";
-              return (
-                <button
-                  key={chip.id}
-                  data-testid={`chip-${chip.id}`}
-                  disabled={busy}
-                  onClick={() =>
-                    void fireResponse({
-                      chip_id: chip.id,
-                      freeform_text: text || undefined,
-                    })
-                  }
-                  style={{
-                    padding: "10px",
-                    borderRadius: 999,
-                    border: primary
-                      ? "1px solid rgba(186, 132, 34, 0.7)"
-                      : "1px solid rgba(201, 168, 76, 0.7)",
-                    background: primary
-                      ? "linear-gradient(90deg, #c18a2b 0%, #d4a13b 50%, #bf8523 100%)"
-                      : "rgba(255, 252, 246, 0.94)",
-                    color: primary ? "#fff9ec" : "var(--kalpx-text)",
-                    fontSize: 17,
-                    fontWeight: primary ? 700 : 600,
-                    cursor: busy ? "not-allowed" : "pointer",
-                    opacity: busy ? 0.7 : 1,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    boxShadow: primary
-                      ? "0 12px 28px rgba(201, 168, 76, 0.28)"
-                      : "0 8px 22px rgba(67,33,4,0.08)",
-                    backdropFilter: primary ? undefined : "blur(4px)",
-                    WebkitBackdropFilter: primary ? undefined : "blur(4px)",
-                  }}
-                >
-                  <span
+          {chips.length > 0 && (
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 14,
+                width: "100%",
+                marginTop: "auto",
+              }}
+            >
+              {chips.map((chip) => {
+                const primary = chip.style === "primary";
+                return (
+                  <button
+                    key={chip.id}
+                    data-testid={`chip-${chip.id}`}
+                    disabled={busy}
+                    onClick={() =>
+                      void fireResponse({
+                        chip_id: chip.id,
+                        freeform_text: text || undefined,
+                      })
+                    }
                     style={{
-                      width: 26,
+                      padding: "10px",
+                      borderRadius: 999,
+                      border: primary
+                        ? "1px solid rgba(186, 132, 34, 0.7)"
+                        : "1px solid rgba(201, 168, 76, 0.7)",
+                      background: primary
+                        ? "linear-gradient(90deg, #c18a2b 0%, #d4a13b 50%, #bf8523 100%)"
+                        : "rgba(255, 252, 246, 0.94)",
+                      color: primary ? "#fff9ec" : "var(--kalpx-text)",
+                      fontSize: 17,
+                      fontWeight: primary ? 700 : 600,
+                      cursor: busy ? "not-allowed" : "pointer",
+                      opacity: busy ? 0.7 : 1,
                       display: "flex",
-                      justifyContent: "center",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      boxShadow: primary
+                        ? "0 12px 28px rgba(201, 168, 76, 0.28)"
+                        : "0 8px 22px rgba(67,33,4,0.08)",
+                      backdropFilter: primary ? undefined : "blur(4px)",
+                      WebkitBackdropFilter: primary ? undefined : "blur(4px)",
                     }}
                   >
-                    {primary ? (
-                      <Sparkles size={20} strokeWidth={2.2} />
-                    ) : (
-                      <span />
-                    )}
-                  </span>
-                  <span>
-                    {primary ? chip.label.replace(" →", "") : chip.label}
-                  </span>
-                  <span
-                    style={{
-                      width: 26,
-                      display: "flex",
-                      justifyContent: "center",
-                    }}
-                  >
-                    {primary ? (
-                      <ArrowRight size={24} strokeWidth={2.4} />
-                    ) : (
-                      <span />
-                    )}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        )}
+                    <span
+                      style={{
+                        width: 26,
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {primary ? (
+                        <Sparkles size={20} strokeWidth={2.2} />
+                      ) : (
+                        <span />
+                      )}
+                    </span>
+                    <span>
+                      {primary ? chip.label.replace(" →", "") : chip.label}
+                    </span>
+                    <span
+                      style={{
+                        width: 26,
+                        display: "flex",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {primary ? (
+                        <ArrowRight size={24} strokeWidth={2.4} />
+                      ) : (
+                        <span />
+                      )}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
         {inputEnabled && (
           <div style={{ marginTop: 18 }}>

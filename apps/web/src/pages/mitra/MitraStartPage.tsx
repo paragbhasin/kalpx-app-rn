@@ -15,7 +15,7 @@ export function MitraStartPage() {
 
   if (!loading) {
     return hasActiveJourney === true ? (
-      <Navigate to="/en/mitra/dashboard" replace />
+      <Navigate to="/en/mitra" replace />
     ) : (
       <Navigate
         to="/en/mitra/onboarding?containerId=welcome_onboarding&stateId=turn_1"

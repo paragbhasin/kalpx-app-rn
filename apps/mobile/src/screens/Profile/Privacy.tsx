@@ -11,7 +11,6 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Colors from "../../components/Colors";
 import FontSize from "../../components/FontSize";
-import Header from "../../components/Header";
 import TextComponent from "../../components/TextComponent";
 
 const Privacy = ({ onClose }) => {
@@ -41,8 +40,6 @@ const Privacy = ({ onClose }) => {
 
   return (
       <View style={{ flex: 1, backgroundColor: "#fff" }}>
-        {/* Header */}
-        <Header/>
         <View
           style={{
             flexDirection: "row",

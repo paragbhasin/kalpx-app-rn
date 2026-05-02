@@ -119,13 +119,11 @@ function _setCheckpointRedirectBypass(msFromNow = 30_000): void {
   }
 }
 
-const AUDIO_S3_BASE =
-  'https://kalpx-dev-website.s3.us-east-2.amazonaws.com/audio';
-
+// Om audio served via kalpx.com CloudFront (s3://kalpx-website/audio/)
 const OM_AUDIO_LIBRARY = [
-  `${AUDIO_S3_BASE}/om/Om.mp4`,
-  `${AUDIO_S3_BASE}/om/Om Shanti.mp4`,
-  `${AUDIO_S3_BASE}/om/Hari Om -Female.mp4`,
+  'https://kalpx.com/audio/Om.mp4',
+  'https://kalpx.com/audio/Om%20Shanti.mp4',
+  'https://kalpx.com/audio/Hari%20Om%20-Female.mp4',
 ];
 
 function _rotateAudio(library: string[], storageKey: string): string {

@@ -1,10 +1,12 @@
 import type { AudioHandle } from './howlerAudio';
 
+// Served via kalpx.com CloudFront (s3://kalpx-website/audio/) — must not be relative paths
+// to survive web build --delete S3 sync
 const CALM_TRACKS = [
-  '/Audio-calmmusic.mp3',
-  '/Audio1.mpeg',
-  '/Audio9.mpeg',
-  '/Audio6.mpeg',
+  'https://kalpx.com/audio/Audio-calmmusic.mp3',
+  'https://kalpx.com/audio/Audio1.mpeg',
+  'https://kalpx.com/audio/Audio9.mpeg',
+  'https://kalpx.com/audio/Audio6.mpeg',
 ];
 const CALM_IDX_KEY = '_kalpx_room_calm_music_idx';
 

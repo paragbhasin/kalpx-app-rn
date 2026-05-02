@@ -106,22 +106,20 @@ const STATE_LABEL_MAP: Record<string, string> = {
 // Audio Rotation
 // ---------------------------------------------------------------------------
 
-const AUDIO_S3_BASE =
-  "https://kalpx-dev-website.s3.us-east-2.amazonaws.com/audio";
-
+// Audio served via kalpx.com CloudFront (s3://kalpx-website/audio/)
 /** OM audio library — add new files here as they're uploaded to S3 */
 const OM_AUDIO_LIBRARY = [
-  `${AUDIO_S3_BASE}/om/Om.mp4`,
-  `${AUDIO_S3_BASE}/om/Om Shanti.mp4`,
-  `${AUDIO_S3_BASE}/om/Hari Om -Female.mp4`,
+  "https://kalpx.com/audio/Om.mp4",
+  "https://kalpx.com/audio/Om%20Shanti.mp4",
+  "https://kalpx.com/audio/Hari%20Om%20-Female.mp4",
 ];
 
 /** Calming practice music library — add new files here */
 export const CALM_MUSIC_LIBRARY = [
-  `${AUDIO_S3_BASE}/calm/Audio-calmmusic.mp3`,
-  `${AUDIO_S3_BASE}/calm/Audio1.mpeg`,
-  `${AUDIO_S3_BASE}/calm/Audio9.mpeg`,
-  `${AUDIO_S3_BASE}/calm/Audio6.mpeg`,
+  "https://kalpx.com/audio/Audio-calmmusic.mp3",
+  "https://kalpx.com/audio/Audio1.mpeg",
+  "https://kalpx.com/audio/Audio9.mpeg",
+  "https://kalpx.com/audio/Audio6.mpeg",
 ];
 
 /**

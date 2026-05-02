@@ -33,7 +33,8 @@ import {
   Animated,
   Clipboard,
   ImageBackground,
-  KeyboardAvoidingView,
+  Keyboard,
+  LayoutChangeEvent,
   Modal,
   Platform,
   ScrollView,
@@ -41,8 +42,10 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import type { StepPayload } from "../types";
 
@@ -116,10 +119,55 @@ const StepModal: React.FC<Props> = ({
   errorMessage,
   isSubmitting = false,
 }) => {
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [sheetHeight, setSheetHeight] = useState(0);
+  const { height: windowHeight } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const kind = useMemo(
     () => classifyStep(stepPayload?.template_id),
     [stepPayload?.template_id],
   );
+
+  const handleSheetLayout = useCallback((event: LayoutChangeEvent) => {
+    const nextHeight = event.nativeEvent.layout.height || 0;
+    setSheetHeight((prev) =>
+      Math.abs(prev - nextHeight) > 1 ? nextHeight : prev,
+    );
+  }, []);
+
+  const topSafeGap = insets.top + 20;
+  const maxKeyboardLift =
+    sheetHeight > 0
+      ? Math.max(0, windowHeight - topSafeGap - sheetHeight)
+      : Number.MAX_SAFE_INTEGER;
+  const keyboardLift =
+    keyboardHeight > 0
+      ? Math.min(Math.max(0, keyboardHeight - 18), maxKeyboardLift)
+      : 0;
+
+  useEffect(() => {
+    if (!visible) {
+      setKeyboardHeight(0);
+      return;
+    }
+
+    const showEvent =
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent =
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const showSub = Keyboard.addListener(showEvent, (event) => {
+      setKeyboardHeight(event.endCoordinates?.height || 0);
+    });
+    const hideSub = Keyboard.addListener(hideEvent, () => {
+      setKeyboardHeight(0);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, [visible]);
 
   return (
     <Modal
@@ -135,15 +183,19 @@ const StepModal: React.FC<Props> = ({
           activeOpacity={1}
           onPress={onCancel}
         />
-        <View style={styles.sheet}>
+        <View
+          onLayout={handleSheetLayout}
+          style={[
+            styles.sheet,
+            keyboardLift > 0 && { marginBottom: keyboardLift },
+          ]}
+        >
           <ImageBackground
             source={require("../../../../assets/beige_bg.png")}
             style={styles.sheetBackground}
             imageStyle={styles.sheetImage}
           >
-            <KeyboardAvoidingView
-              behavior={Platform.OS === "ios" ? "padding" : undefined}
-            >
+            <View style={styles.keyboardAvoid}>
               <View style={styles.handle} />
               <View style={styles.headerCancelRow}>
                 <TouchableOpacity
@@ -198,7 +250,7 @@ const StepModal: React.FC<Props> = ({
                   {errorMessage}
                 </Text>
               )}
-            </KeyboardAvoidingView>
+            </View>
           </ImageBackground>
         </View>
       </View>
@@ -905,6 +957,9 @@ const styles = StyleSheet.create({
   sheetImage: {
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
+  },
+  keyboardAvoid: {
+    flexShrink: 1,
   },
   handle: {
     alignSelf: "center",

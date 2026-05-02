@@ -276,7 +276,6 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
   // cycle_transitions/offering_reveal.
   useEffect(() => {
     if (__DEV__) {
-      // eslint-disable-next-line no-console
       console.warn(
         "[DEPRECATED] PracticeRunnerContainer rendered (legacy branch) — canonical runner is cycle_transitions/offering_reveal. Trace the caller.",
       );
@@ -3237,11 +3236,11 @@ const styles = StyleSheet.create({
   },
   card: {
     width: "100%",
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: "#E8C587",
     padding: 12,
     backgroundColor: "rgba(255, 255, 255, 0.4)",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(184, 148, 80, 0.1)",
     marginBottom: 12,
   },
   cardExpanded: {

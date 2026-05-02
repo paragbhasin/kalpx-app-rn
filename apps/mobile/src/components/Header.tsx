@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Image, StyleSheet, View } from "react-native";
-import { Dropdown } from "react-native-element-dropdown";
 import Colors from "./Colors";
 
 interface HeaderProps {
@@ -12,19 +11,18 @@ const Header: React.FC<HeaderProps> = ({ isTransparent }) => {
   const { i18n } = useTranslation();
   const [selectedLang, setSelectedLang] = useState(i18n.language);
 
-const languages = [
-  { label: "English", value: "en" },
-  { label: "हिन्दी", value: "hi" },
-  { label: "ગુજરાતી", value: "gu" },
-  { label: "मराठी", value: "mr" },
-  { label: "বাংলা", value: "bn" },
-  { label: "ಕನ್ನಡ", value: "kn" },
-  { label: "മലയാളം", value: "ml" },
-  { label: "தமிழ்", value: "ta" },
- 
-  { label: "తెలుగు", value: "te" }
-];
+  const languages = [
+    { label: "English", value: "en" },
+    { label: "हिन्दी", value: "hi" },
+    { label: "ગુજરાતી", value: "gu" },
+    { label: "मराठी", value: "mr" },
+    { label: "বাংলা", value: "bn" },
+    { label: "ಕನ್ನಡ", value: "kn" },
+    { label: "മലയാളം", value: "ml" },
+    { label: "தமிழ்", value: "ta" },
 
+    { label: "తెలుగు", value: "te" },
+  ];
 
   const changeLanguage = (code: string) => {
     setSelectedLang(code);
@@ -36,7 +34,12 @@ const languages = [
   }, [i18n.language]);
 
   return (
-    <View style={[styles.sectionWrap, isTransparent && { backgroundColor: 'transparent' }]}>
+    <View
+      style={[
+        styles.sectionWrap,
+        isTransparent && { backgroundColor: "transparent" },
+      ]}
+    >
       {/* Left logo */}
       <Image
         source={require("../../assets/KalpXlogo.png")}
@@ -45,7 +48,7 @@ const languages = [
       />
 
       {/* Language Dropdown */}
-      <View style={styles.dropdownContainer}>
+      {/* <View style={styles.dropdownContainer}>
         <Dropdown
           selectedTextProps={{ allowFontScaling: false }}
           data={languages}
@@ -62,7 +65,7 @@ const languages = [
   // itemTextStyle={styles.dropdownItemText}
   containerStyle={styles.dropdownContainer}
         />
-      </View>
+      </View> */}
     </View>
   );
 };
@@ -90,7 +93,7 @@ const styles = StyleSheet.create({
     borderWidth: 0.6,
     borderRadius: 6,
     paddingHorizontal: 6,
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    backgroundColor: "rgba(255, 255, 255, 0.5)",
   },
   selectedText: {
     color: "#000000",
@@ -105,9 +108,9 @@ const styles = StyleSheet.create({
     color: "#000",
   },
   dropdownItemText: {
-  color: "#000000", // color of list items
-  fontSize: 16,
-},
+    color: "#000000", // color of list items
+    fontSize: 16,
+  },
 });
 
 export default Header;

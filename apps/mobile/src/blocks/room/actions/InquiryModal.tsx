@@ -129,7 +129,9 @@ const InquiryModal: React.FC<Props> = ({
             imageStyle={styles.sheetImage}
           >
             <KeyboardAvoidingView
+              style={styles.keyboardAvoid}
               behavior={Platform.OS === "ios" ? "padding" : undefined}
+              keyboardVerticalOffset={Platform.OS === "ios" ? 24 : 0}
             >
               <View style={styles.handle} />
               <View style={styles.header}>
@@ -283,6 +285,9 @@ const styles = StyleSheet.create({
   sheetImage: {
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
+  },
+  keyboardAvoid: {
+    flexShrink: 1,
   },
   handle: {
     alignSelf: "center",

@@ -54,6 +54,14 @@
           }
         },
         {
+          "client_id": "800459558908-urgksgejn18gama2hhvn2kint892jd2m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.kalpx.app",
+            "certificate_hash": "306a4099aaa56c9231c3a1de750051b05bd52088"
+          }
+        },
+        {
           "client_id": "800459558908-gi4poj40ulaoc3a0gkc3rbaevfubt4vm.apps.googleusercontent.com",
           "client_type": 3
         }

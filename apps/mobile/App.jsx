@@ -52,6 +52,7 @@ import { navigationRef } from "./src/Shared/Routes/NavigationService";
 import Routes from "./src/Shared/Routes/Routes";
 import { store } from "./src/store";
 import { hideSnackBar } from "./src/store/snackBarSlice";
+import { screenActions } from "./src/store/screenSlice";
 import {
   setPreference,
   restorePreferences,
@@ -104,10 +105,21 @@ function SnackBarContainer() {
   return <SnackBar visible={visible} message={message} />;
 }
 
+function isMitraRouteName(routeName) {
+  return (
+    routeName === "Home" ||
+    routeName === "DynamicEngine" ||
+    routeName === "MitraEngine" ||
+    routeName === "GuidedGrowth" ||
+    routeName === "MitraPhilosophy"
+  );
+}
+
 // Inner component that has access to Redux Provider
 function AppInner({ initialRoute, navigationRef }) {
   const currentBackground = useScreenStore((state) => state.currentBackground);
   const dispatch = useDispatch();
+  const [activeRouteName, setActiveRouteName] = useState(null);
 
 
   // Hydrate the login user from AsyncStorage on app boot.
@@ -157,11 +169,26 @@ function AppInner({ initialRoute, navigationRef }) {
     };
   }, [dispatch]);
 
+  useEffect(() => {
+    if (!activeRouteName) return;
+    if (isMitraRouteName(activeRouteName)) return;
+    if (!currentBackground) return;
+    dispatch(screenActions.setBackground(null));
+  }, [activeRouteName, currentBackground, dispatch]);
+
+  const shouldShowMitraBackground =
+    !!currentBackground && isMitraRouteName(activeRouteName);
+
   return (
-    <View style={{ flex: 1, backgroundColor: currentBackground ? 'transparent' : '#FFF' }}>
+    <View
+      style={{
+        flex: 1,
+        backgroundColor: shouldShowMitraBackground ? "transparent" : "#FFF",
+      }}
+    >
       <StatusBar
-        barStyle={currentBackground ? "light-content" : "dark-content"}
-        translucent={!!currentBackground}
+        barStyle={shouldShowMitraBackground ? "light-content" : "dark-content"}
+        translucent={!!shouldShowMitraBackground}
         backgroundColor="transparent"
       />
       {/*
@@ -176,14 +203,23 @@ function AppInner({ initialRoute, navigationRef }) {
        * The background layer is an absolute sibling that appears/disappears without
        * affecting the position index of NavigationContainer or anything inside it.
        */}
-      {currentBackground && (
+      {shouldShowMitraBackground && (
         <ImageBackground
           source={currentBackground}
           style={StyleSheet.absoluteFillObject}
           resizeMode="cover"
         />
       )}
-      <NavigationContainer ref={navigationRef} theme={TransparentTheme}>
+      <NavigationContainer
+        ref={navigationRef}
+        theme={TransparentTheme}
+        onReady={() => {
+          setActiveRouteName(navigationRef?.getCurrentRoute?.()?.name || null);
+        }}
+        onStateChange={() => {
+          setActiveRouteName(navigationRef?.getCurrentRoute?.()?.name || null);
+        }}
+      >
         <View style={{ flex: 1, backgroundColor: 'transparent' }}>
           <Routes initialRouteName={initialRoute} />
           <SnackBarContainer />

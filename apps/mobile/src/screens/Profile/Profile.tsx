@@ -9,20 +9,19 @@ import {
   Linking,
   ScrollView,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useDispatch } from "react-redux";
 import { ThunkDispatch } from "redux-thunk";
-import Header from "../../components/Header";
 import LogoutPopup from "../../components/LogoutPopup";
 import TextComponent from "../../components/TextComponent";
+import { useScrollContext } from "../../context/ScrollContext";
 import store, { RootState } from "../../store";
-import unregisterDeviceFromBackend from '../../utils/unregisterDevice';
+import unregisterDeviceFromBackend from "../../utils/unregisterDevice";
 import { deleteUserAccount } from "./actions";
 import Privacy from "./Privacy";
 import styles from "./styles";
-import { useScrollContext } from "../../context/ScrollContext";
 
 const Profile = () => {
   const { handleScroll } = useScrollContext();
@@ -59,30 +58,40 @@ const Profile = () => {
     });
   };
 
-
   const handleDelete = () => {
     dispatch(
-      deleteUserAccount({ confirm_deletion: true, force: true }, async (res) => {
-        console.log("res delete>>>>>>>>>>", JSON.stringify(res));
-        console.log("✅ Response full object >>>>>>>>>>>");
-        console.log("Status:", res.status);
-        console.log("Headers:", JSON.stringify(res.headers, null, 2));
-        console.log("Data:", JSON.stringify(res.data, null, 2));
-        if (res.success) {
-          await unregisterDeviceFromBackend();
-          handleLogout();
-          Alert.alert("✅ Account deleted successfully!");
-        } else {
-          Alert.alert("❌ Failed", res.error);
-        }
-      })
+      deleteUserAccount(
+        { confirm_deletion: true, force: true },
+        async (res) => {
+          console.log("res delete>>>>>>>>>>", JSON.stringify(res));
+          console.log("✅ Response full object >>>>>>>>>>>");
+          console.log("Status:", res.status);
+          console.log("Headers:", JSON.stringify(res.headers, null, 2));
+          console.log("Data:", JSON.stringify(res.data, null, 2));
+          if (res.success) {
+            await unregisterDeviceFromBackend();
+            handleLogout();
+            Alert.alert("✅ Account deleted successfully!");
+          } else {
+            Alert.alert("❌ Failed", res.error);
+          }
+        },
+      ),
     );
   };
 
   const loggedInItems = [
     { key: "myProfile", icon: "person-outline", route: "ProfileDetails" },
-    { key: "savedReflections", icon: "bookmark-outline", route: "RoomMemoryScreen" },
-    { key: "notificationPreferences", icon: "notifications-outline", route: "NotificationPreferences" },
+    {
+      key: "savedReflections",
+      icon: "bookmark-outline",
+      route: "RoomMemoryScreen",
+    },
+    {
+      key: "notificationPreferences",
+      icon: "notifications-outline",
+      route: "NotificationPreferences",
+    },
     { key: "language", icon: "globe-outline", route: "Language" },
     { key: "privacy", icon: "key-outline", route: "Privacy" },
     {
@@ -107,9 +116,7 @@ const Profile = () => {
     { key: "privacy", icon: "key-outline", route: "Privacy" },
   ];
 
-  const menuItems = isLoggedIn
-    ? [...loggedInItems]
-    : [...guestItems];
+  const menuItems = isLoggedIn ? [...loggedInItems] : [...guestItems];
 
   const getMenuLabel = (key: string) => {
     if (key === "notificationPreferences") {
@@ -119,8 +126,6 @@ const Profile = () => {
     }
     return t(`profile.menu.${key}`);
   };
-
-
 
   return (
     <View style={{ flex: 1, backgroundColor: "#fffaf5" }}>
@@ -132,11 +137,13 @@ const Profile = () => {
         showsVerticalScrollIndicator={false}
       >
         {/* Header */}
-        <View style={styles.header}>
+        <View style={[styles.header, { marginTop: -50 }]}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
             <Ionicons name="arrow-back" size={24} color="#000" />
           </TouchableOpacity>
-          <TextComponent type="headerText" style={styles.headerText}>{t("profile.title")}</TextComponent>
+          <TextComponent type="headerText" style={styles.headerText}>
+            {t("profile.title")}
+          </TextComponent>
           <View style={{ width: 24 }} />
         </View>
         <View style={styles.menu}>
@@ -166,7 +173,7 @@ const Profile = () => {
           headerText={t("profile.menu.logout")}
           subText={t(
             "profile.menu.logoutConfirm",
-            "Are you sure you want to log out of your account?"
+            "Are you sure you want to log out of your account?",
           )}
           cancelText={t("common.cancel", "Cancel")}
           confirmText={t("common.yes", "Yes")}
@@ -183,7 +190,7 @@ const Profile = () => {
           headerText={t("profile.menu.deleteAccount")}
           subText={t(
             "profile.menu.deleteAccountConfirm",
-            "This action is permanent. Do you really want to delete your account?"
+            "This action is permanent. Do you really want to delete your account?",
           )}
           cancelText={t("common.cancel", "Cancel")}
           confirmText={t("common.delete", "Delete")}
@@ -198,7 +205,13 @@ const Profile = () => {
         {showPrivacy && <Privacy onClose={() => setShowPrivacy(false)} />}
       </ScrollView>
       {/* Follow Us Section */}
-      <View style={{ marginBottom: 50, alignItems: "center", backgroundColor: "#fffaf5" }}>
+      <View
+        style={{
+          marginBottom: 50,
+          alignItems: "center",
+          backgroundColor: "#fffaf5",
+        }}
+      >
         <View style={{ flexDirection: "row", gap: 25, alignItems: "center" }}>
           <TextComponent
             type="streakSadanaText"
@@ -209,14 +222,18 @@ const Profile = () => {
 
           {/* Facebook */}
           <TouchableOpacity
-            onPress={() => Linking.openURL("https://www.facebook.com/KalpxOfficial/")}
+            onPress={() =>
+              Linking.openURL("https://www.facebook.com/KalpxOfficial/")
+            }
           >
             <Ionicons name="logo-facebook" size={34} color="#4267B2" />
           </TouchableOpacity>
 
           {/* Instagram */}
           <TouchableOpacity
-            onPress={() => Linking.openURL("https://www.instagram.com/kalpxofficial")}
+            onPress={() =>
+              Linking.openURL("https://www.instagram.com/kalpxofficial")
+            }
           >
             <Ionicons name="logo-instagram" size={34} color="#C13584" />
           </TouchableOpacity>
@@ -224,7 +241,6 @@ const Profile = () => {
       </View>
     </View>
   );
-}
+};
 
 export default Profile;
-

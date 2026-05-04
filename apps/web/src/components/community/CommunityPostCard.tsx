@@ -18,7 +18,10 @@ import {
   saveCommunityPost,
   unsaveCommunityPost,
 } from "../../engine/communityApi";
+import { executeAction } from "../../engine/actionExecutor";
+import { addAdditionalItem } from "../../engine/mitraApi";
 import { WEB_ENV } from "../../lib/env";
+import { store } from "../../store";
 import { webStorage } from "../../lib/webStorage";
 import { CommunityReactionBar } from "./CommunityReactionBar";
 
@@ -65,6 +68,21 @@ function inferMediaType(value?: string | null): "image" | "video" {
   return /\.(mp4|mov|webm|m4v)$/i.test(value) ? "video" : "image";
 }
 
+function resolveLinkedItemType(
+  linkedItem?: CommunityPost["linked_item"],
+): "mantra" | "sankalp" | "practice" | null {
+  if (!linkedItem?.id) return null;
+  if (linkedItem.id.startsWith("mantra.")) return "mantra";
+  if (linkedItem.id.startsWith("sankalp.")) return "sankalp";
+  if (linkedItem.id.startsWith("practice.")) return "practice";
+
+  const rawType = String(linkedItem.type || "").split(":")[1]?.trim().toLowerCase();
+  if (rawType === "mantra" || rawType === "sankalp" || rawType === "practice") {
+    return rawType;
+  }
+  return null;
+}
+
 export function CommunityPostCard({
   post,
   onUpvote,
@@ -82,6 +100,7 @@ export function CommunityPostCard({
   const [isHidden, setIsHidden] = useState(!!post.is_hidden);
   const [menuOpen, setMenuOpen] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  const [isLaunchingLinkedItem, setIsLaunchingLinkedItem] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const resolveMediaUrl = (value?: string | null) => {
@@ -202,6 +221,7 @@ export function CommunityPostCard({
     !shouldTruncate || isExpanded ? text : `${text.slice(0, 180).trimEnd()}...`;
   const linkedItemTitle = post.linked_item?.name?.trim() || "";
   const linkedItemSubtitle = getLinkedItemSubtitle(post.linked_item);
+  const linkedItemType = resolveLinkedItemType(post.linked_item);
   const handleCardNavigate = () => {
     if (detailMode) return;
     navigate(`/en/community/${post.id}`);
@@ -273,6 +293,48 @@ export function CommunityPostCard({
       if (typeof window !== "undefined") {
         window.alert("Reported. Thank you for flagging this post.");
       }
+    }
+  };
+
+  const handleLinkedItemClick = async () => {
+    const linkedItemId = post.linked_item?.id;
+    if (!linkedItemId || !linkedItemType || isLaunchingLinkedItem) return;
+
+    const ok = await ensureAuthed();
+    if (!ok) return;
+
+    setIsLaunchingLinkedItem(true);
+    try {
+      await addAdditionalItem(linkedItemId, linkedItemType);
+
+      const item = {
+        id: linkedItemId,
+        item_id: linkedItemId,
+        item_type: linkedItemType,
+        itemType: linkedItemType,
+        source: "additional_library",
+        title: linkedItemTitle,
+        name: linkedItemTitle,
+      };
+
+      const state = store.getState();
+      await executeAction(
+        {
+          type: "start_runner",
+          payload: {
+            source: "additional_library",
+            variant: linkedItemType,
+            item,
+          },
+        },
+        {
+          dispatch: store.dispatch,
+          screenData: state.screen.screenData,
+          currentStateId: state.screen.currentStateId,
+        },
+      );
+    } finally {
+      setIsLaunchingLinkedItem(false);
     }
   };
 
@@ -744,8 +806,13 @@ export function CommunityPostCard({
             borderRadius: 10,
             border: "1.5px solid #d9a32d",
             background: "#fff9ec",
+            cursor: linkedItemType ? "pointer" : "default",
+            opacity: isLaunchingLinkedItem ? 0.75 : 1,
           }}
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            void handleLinkedItemClick();
+          }}
         >
           <div
             style={{

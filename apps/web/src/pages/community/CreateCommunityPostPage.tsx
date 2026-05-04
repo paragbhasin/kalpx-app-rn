@@ -4,6 +4,7 @@ import { isAuthenticated } from '@kalpx/auth';
 import { webStorage } from '../../lib/webStorage';
 import { createCommunityPost } from '../../engine/communityApi';
 import { communityPostSchema } from '@kalpx/validation';
+import { CommunityTopBar } from '../../components/community/CommunityTopBar';
 
 export function CreateCommunityPostPage() {
   const navigate = useNavigate();
@@ -58,14 +59,8 @@ export function CreateCommunityPostPage() {
 
   return (
     <div style={{ minHeight: '100dvh', background: 'var(--kalpx-bg)' }}>
+      <CommunityTopBar />
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '24px 16px 60px' }}>
-        <button
-          onClick={() => navigate('/en/community')}
-          style={{ background: 'none', border: 'none', color: 'var(--kalpx-cta)', fontSize: 14, cursor: 'pointer', padding: 0, marginBottom: 20 }}
-        >
-          ← Community
-        </button>
-
         <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--kalpx-text)', marginBottom: 24 }}>Create post</h1>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

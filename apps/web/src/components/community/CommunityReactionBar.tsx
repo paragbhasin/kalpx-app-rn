@@ -1,52 +1,146 @@
-import React from 'react';
+import {
+  ArrowBigDown,
+  ArrowBigUp,
+  CircleHelp,
+  MessageCircle,
+  Reply,
+} from "lucide-react";
+import React from "react";
 
 interface CommunityReactionBarProps {
   upvoteCount?: number;
   commentCount?: number;
+  shareCount?: number;
   isUpvoting?: boolean;
   onUpvote?: () => void;
   onComment?: () => void;
+  onShare?: () => void;
+  onAskQuestion?: () => void;
+  userVote?: -1 | 0 | 1 | null;
   compact?: boolean;
 }
 
 export function CommunityReactionBar({
   upvoteCount = 0,
   commentCount = 0,
+  shareCount = 0,
   isUpvoting = false,
   onUpvote,
   onComment,
+  onShare,
+  onAskQuestion,
+  userVote = null,
   compact = false,
 }: CommunityReactionBarProps) {
-  const iconSize = compact ? 14 : 16;
-  const fontSize = compact ? 12 : 13;
+  const iconSize = compact ? 18 : 20;
+  const fontSize = compact ? 16 : 17;
+  const pillStyle: React.CSSProperties = {
+    borderRadius: 8,
+    border: "1px solid #d7d1c7",
+    padding: 5,
+    background: "#fff",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#312c27",
+    cursor: "pointer",
+
+    boxSizing: "border-box",
+    flexShrink: 0,
+  };
+  const wrapClick =
+    (handler?: () => void) => (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      handler?.();
+    };
 
   return (
-    <div style={{ display: 'flex', gap: compact ? 12 : 16, alignItems: 'center', marginTop: compact ? 6 : 10 }}>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        flexWrap: "nowrap",
+        marginTop: compact ? 8 : 12,
+        gap: 8,
+        width: "100%",
+      }}
+    >
       <button
-        onClick={onUpvote}
+        onClick={wrapClick(onUpvote)}
         disabled={isUpvoting}
         style={{
-          background: 'none', border: 'none', cursor: onUpvote ? 'pointer' : 'default',
-          display: 'flex', alignItems: 'center', gap: 4, padding: 0,
-          color: '#7a5c3a', fontSize, opacity: isUpvoting ? 0.6 : 1,
+          ...pillStyle,
+          cursor: onUpvote ? "pointer" : "default",
+          opacity: isUpvoting ? 0.6 : 1,
+          gap: 4,
+
+          minWidth: 0,
+          justifyContent: "space-between",
+          padding: "8px",
         }}
         aria-label={`Upvote (${upvoteCount})`}
       >
-        <span style={{ fontSize: iconSize }}>▲</span>
-        <span>{upvoteCount}</span>
+        <ArrowBigUp
+          size={iconSize}
+          color={userVote === 1 ? "var(--kalpx-cta)" : "#5d5650"}
+          fill={userVote === 1 ? "var(--kalpx-cta)" : "none"}
+        />
+        <span style={{ fontSize, fontWeight: 600, lineHeight: 1 }}>
+          {upvoteCount}
+        </span>
+        <ArrowBigDown size={iconSize} color="#5d5650" />
       </button>
 
       <button
-        onClick={onComment}
+        onClick={wrapClick(onComment)}
         style={{
-          background: 'none', border: 'none', cursor: onComment ? 'pointer' : 'default',
-          display: 'flex', alignItems: 'center', gap: 4, padding: 0,
-          color: '#7a5c3a', fontSize,
+          ...pillStyle,
+          cursor: onComment ? "pointer" : "default",
+          gap: 8,
+          width: "13%",
+          minWidth: 0,
         }}
         aria-label={`Comments (${commentCount})`}
       >
-        <span style={{ fontSize: iconSize }}>💬</span>
-        <span>{commentCount}</span>
+        <MessageCircle size={iconSize} />
+        <span style={{ fontSize, fontWeight: 500, lineHeight: 1 }}>
+          {commentCount}
+        </span>
+      </button>
+
+      <button
+        onClick={wrapClick(onShare)}
+        style={{
+          ...pillStyle,
+          cursor: onShare ? "pointer" : "default",
+          gap: 8,
+          width: "13%",
+          minWidth: 0,
+        }}
+        aria-label={`Shares (${shareCount})`}
+      >
+        <Reply size={iconSize} />
+        <span style={{ fontSize, fontWeight: 500, lineHeight: 1 }}>
+          {shareCount}
+        </span>
+      </button>
+
+      <button
+        onClick={wrapClick(onAskQuestion)}
+        style={{
+          ...pillStyle,
+          cursor: onAskQuestion ? "pointer" : "default",
+          gap: 8,
+          width: "40%",
+          minWidth: 0,
+          justifyContent: "flex-start",
+        }}
+        aria-label="Ask question"
+      >
+        <CircleHelp size={iconSize} />
+        <span style={{ fontSize, fontWeight: 500, lineHeight: 1 }}>
+          Ask question
+        </span>
       </button>
     </div>
   );

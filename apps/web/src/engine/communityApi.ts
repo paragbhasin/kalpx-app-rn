@@ -18,6 +18,7 @@ import type {
   CreateCommentRequest,
   UpvoteResponse,
 } from '@kalpx/types';
+import type { UserProfile } from '../types/auth';
 
 /** Normalise any feed response shape into a canonical CommunityFeedResponse. */
 function normaliseFeedResponse(data: any): CommunityFeedResponse {
@@ -54,7 +55,7 @@ export async function getCommunityFeed(params?: {
   lang?: string;
 }): Promise<CommunityFeedResponse> {
   try {
-    const res = await api.get('posts/', {
+    const res = await api.get('posts/personalized_feed/', {
       params: { sort: 'hot', page_size: 10, ...params, t: Date.now() },
     });
     return normaliseFeedResponse(res.data);
@@ -113,6 +114,56 @@ export async function upvotePost(postId: number | string): Promise<UpvoteRespons
   }
 }
 
+export async function saveCommunityPost(postId: number | string): Promise<boolean> {
+  try {
+    await api.post(`posts/${encodeURIComponent(String(postId))}/save/`, {});
+    return true;
+  } catch (err: any) {
+    console.warn('[communityApi] saveCommunityPost failed:', err?.message);
+    return false;
+  }
+}
+
+export async function unsaveCommunityPost(postId: number | string): Promise<boolean> {
+  try {
+    await api.post(`posts/${encodeURIComponent(String(postId))}/unsave/`, {});
+    return true;
+  } catch (err: any) {
+    console.warn('[communityApi] unsaveCommunityPost failed:', err?.message);
+    return false;
+  }
+}
+
+export async function hideCommunityPost(postId: number | string): Promise<boolean> {
+  try {
+    await api.post(`posts/${encodeURIComponent(String(postId))}/hide/`, {});
+    return true;
+  } catch (err: any) {
+    console.warn('[communityApi] hideCommunityPost failed:', err?.message);
+    return false;
+  }
+}
+
+export async function reportCommunityContent(
+  contentType: 'post' | 'comment',
+  contentId: number | string,
+  reason: string,
+  details = '',
+): Promise<boolean> {
+  try {
+    await api.post('reports/', {
+      content_type: contentType,
+      content_id: contentId,
+      reason,
+      details,
+    });
+    return true;
+  } catch (err: any) {
+    console.warn('[communityApi] reportCommunityContent failed:', err?.message);
+    return false;
+  }
+}
+
 // ── Comments ──────────────────────────────────────────────────────────────────
 
 export async function getCommunityComments(
@@ -139,5 +190,42 @@ export async function createCommunityComment(
   } catch (err: any) {
     console.warn('[communityApi] createCommunityComment failed:', err?.message);
     throw err;
+  }
+}
+
+export async function updateCommunityComment(
+  commentId: number | string,
+  content: string,
+): Promise<CommunityComment | null> {
+  try {
+    const res = await api.patch(`comments/${encodeURIComponent(String(commentId))}/`, {
+      content,
+    });
+    return res.data as CommunityComment;
+  } catch (err: any) {
+    console.warn('[communityApi] updateCommunityComment failed:', err?.message);
+    throw err;
+  }
+}
+
+export async function deleteCommunityComment(
+  commentId: number | string,
+): Promise<boolean> {
+  try {
+    await api.delete(`comments/${encodeURIComponent(String(commentId))}/`);
+    return true;
+  } catch (err: any) {
+    console.warn('[communityApi] deleteCommunityComment failed:', err?.message);
+    throw err;
+  }
+}
+
+export async function getCommunityCurrentUser(): Promise<UserProfile | null> {
+  try {
+    const res = await api.get('me/');
+    return res.data as UserProfile;
+  } catch (err: any) {
+    console.warn('[communityApi] getCommunityCurrentUser failed:', err?.message);
+    return null;
   }
 }

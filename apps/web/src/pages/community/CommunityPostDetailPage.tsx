@@ -1,23 +1,26 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { isAuthenticated as checkAuth } from '@kalpx/auth';
-import { webStorage } from '../../lib/webStorage';
-import { useCommunityFeedController } from '@kalpx/feature-flows';
+import { isAuthenticated as checkAuth } from "@kalpx/auth";
+import { useCommunityFeedController } from "@kalpx/feature-flows";
+import type { CommunityComment } from "@kalpx/types";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { CommunityCommentComposer } from "../../components/community/CommunityCommentComposer";
+import { CommunityCommentList } from "../../components/community/CommunityCommentList";
+import { CommunityErrorState } from "../../components/community/CommunityErrorState";
+import { CommunityPostCard } from "../../components/community/CommunityPostCard";
+import { CommunityTopBar } from "../../components/community/CommunityTopBar";
 import {
+  createCommunityComment,
+  createCommunityPost,
+  deleteCommunityComment,
+  getCommunityComments,
+  getCommunityCurrentUser,
   getCommunityFeed,
   getCommunityPost,
-  getCommunityComments,
-  createCommunityComment,
+  reportCommunityContent,
+  updateCommunityComment,
   upvotePost,
-  createCommunityPost,
-} from '../../engine/communityApi';
-import { getPostText, getPostAuthor } from '@kalpx/types';
-import { CommunityAuthorRow } from '../../components/community/CommunityAuthorRow';
-import { CommunityMediaGrid } from '../../components/community/CommunityMediaGrid';
-import { CommunityReactionBar } from '../../components/community/CommunityReactionBar';
-import { CommunityCommentList } from '../../components/community/CommunityCommentList';
-import { CommunityCommentComposer } from '../../components/community/CommunityCommentComposer';
-import { CommunityErrorState } from '../../components/community/CommunityErrorState';
+} from "../../engine/communityApi";
+import { webStorage } from "../../lib/webStorage";
 
 const communityApi = {
   getFeed: getCommunityFeed,
@@ -32,9 +35,33 @@ export function CommunityPostDetailPage() {
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
   const [authed, setAuthed] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<number | string | null>(
+    null,
+  );
+  const [replyingTo, setReplyingTo] = useState<CommunityComment | null>(null);
+  const [commentSubmitting, setCommentSubmitting] = useState(false);
+  const [commentError, setCommentError] = useState<string | null>(null);
+  const [commentActionLoadingId, setCommentActionLoadingId] = useState<
+    number | string | null
+  >(null);
 
   useEffect(() => {
-    checkAuth(webStorage).then(setAuthed);
+    let mounted = true;
+    (async () => {
+      const ok = await checkAuth(webStorage);
+      if (!mounted) return;
+      setAuthed(ok);
+      if (!ok) {
+        setCurrentUserId(null);
+        return;
+      }
+      const me = await getCommunityCurrentUser();
+      if (!mounted) return;
+      setCurrentUserId(me?.id ?? null);
+    })();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const ctrl = useCommunityFeedController({
@@ -54,16 +81,115 @@ export function CommunityPostDetailPage() {
   }, [postId]);
 
   const post = ctrl.post;
-  const text = post ? getPostText(post) : '';
-  const author = post ? getPostAuthor(post) : undefined;
+  const totalCommentCount = countComments(ctrl.comments);
+
+  const requireAuth = () => {
+    const to = encodeURIComponent(`/en/community/${postId}`);
+    navigate(`/login?returnTo=${to}`);
+  };
+
+  const refreshComments = async () => {
+    if (!postId) return;
+    await ctrl.loadComments(postId);
+    await ctrl.loadPost(postId);
+  };
+
+  const handleSubmitComment = async (content: string) => {
+    if (!post) return;
+    setCommentSubmitting(true);
+    setCommentError(null);
+    try {
+      await createCommunityComment({
+        post: post.id,
+        content,
+        parent: replyingTo?.id,
+      });
+      setReplyingTo(null);
+      await refreshComments();
+    } catch (err: any) {
+      setCommentError(
+        err?.response?.data?.detail ??
+          err?.message ??
+          "Failed to post comment.",
+      );
+    } finally {
+      setCommentSubmitting(false);
+    }
+  };
+
+  const handleEditComment = async (
+    commentId: number | string,
+    content: string,
+  ) => {
+    setCommentActionLoadingId(commentId);
+    try {
+      await updateCommunityComment(commentId, content);
+      await refreshComments();
+    } finally {
+      setCommentActionLoadingId(null);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: number | string) => {
+    setCommentActionLoadingId(commentId);
+    try {
+      await deleteCommunityComment(commentId);
+      if (replyingTo?.id && String(replyingTo.id) === String(commentId)) {
+        setReplyingTo(null);
+      }
+      await refreshComments();
+    } finally {
+      setCommentActionLoadingId(null);
+    }
+  };
+
+  const handleReportComment = async (commentId: number | string) => {
+    setCommentActionLoadingId(commentId);
+    try {
+      await reportCommunityContent(
+        "comment",
+        commentId,
+        "spam",
+        "Reported from web community comment menu",
+      );
+    } finally {
+      setCommentActionLoadingId(null);
+    }
+  };
 
   if (ctrl.postLoading) {
     return (
-      <div style={{ minHeight: '100dvh', background: 'var(--kalpx-bg)' }}>
-        <div style={{ maxWidth: 480, margin: '0 auto', padding: '28px 16px' }}>
-          <div style={{ width: 60, height: 14, borderRadius: 4, background: 'var(--kalpx-chip-bg)', marginBottom: 24, animation: 'pulse 1.5s ease-in-out infinite' }} />
-          <div style={{ width: '85%', height: 22, borderRadius: 4, background: 'var(--kalpx-chip-bg)', marginBottom: 10, animation: 'pulse 1.5s ease-in-out infinite' }} />
-          <div style={{ width: '70%', height: 14, borderRadius: 4, background: 'var(--kalpx-chip-bg)', animation: 'pulse 1.5s ease-in-out infinite' }} />
+      <div style={{ minHeight: "100dvh", background: "var(--kalpx-bg)" }}>
+        <div style={{ maxWidth: 480, margin: "0 auto", padding: "28px 16px" }}>
+          <div
+            style={{
+              width: 60,
+              height: 14,
+              borderRadius: 4,
+              background: "var(--kalpx-chip-bg)",
+              marginBottom: 24,
+              animation: "pulse 1.5s ease-in-out infinite",
+            }}
+          />
+          <div
+            style={{
+              width: "85%",
+              height: 22,
+              borderRadius: 4,
+              background: "var(--kalpx-chip-bg)",
+              marginBottom: 10,
+              animation: "pulse 1.5s ease-in-out infinite",
+            }}
+          />
+          <div
+            style={{
+              width: "70%",
+              height: 14,
+              borderRadius: 4,
+              background: "var(--kalpx-chip-bg)",
+              animation: "pulse 1.5s ease-in-out infinite",
+            }}
+          />
         </div>
       </div>
     );
@@ -71,82 +197,151 @@ export function CommunityPostDetailPage() {
 
   if (ctrl.postError || !post) {
     return (
-      <div style={{ minHeight: '100dvh', background: 'var(--kalpx-bg)' }}>
-        <div style={{ maxWidth: 480, margin: '0 auto', padding: '28px 16px' }}>
-          <button onClick={() => navigate('/en/community')} style={backBtn}>← Community</button>
-          <CommunityErrorState message={ctrl.postError ?? 'Post not found.'} />
+      <div style={{ minHeight: "100dvh", background: "var(--kalpx-bg)" }}>
+        <CommunityTopBar />
+        <div style={{ maxWidth: 480, margin: "0 auto", padding: "28px 16px" }}>
+          <CommunityErrorState message={ctrl.postError ?? "Post not found."} />
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ minHeight: '100dvh', background: 'var(--kalpx-bg)' }}>
-      <div style={{ maxWidth: 480, margin: '0 auto', padding: '20px 16px 60px' }}>
-        <button onClick={() => navigate('/en/community')} style={backBtn}>← Community</button>
-
-        {/* Post */}
-        <div style={{ background: 'var(--kalpx-card-bg)', border: `1px solid var(--kalpx-chip-bg)`, borderRadius: 14, padding: '16px', marginTop: 16, marginBottom: 20 }}>
-          <CommunityAuthorRow author={author} timestamp={post.created_at} />
-
-          {post.community_name && (
-            <p style={{ fontSize: 11, color: 'var(--kalpx-cta)', fontWeight: 600, marginTop: 8 }}>
-              {post.community_name}
-            </p>
-          )}
-
-          {post.title && (
-            <h2 style={{ fontSize: 20, fontWeight: 700, color: 'var(--kalpx-text)', marginTop: 8, lineHeight: 1.35 }}>
-              {post.title}
-            </h2>
-          )}
-
-          {text && (
-            <p style={{ fontSize: 14, color: 'var(--kalpx-text-soft)', lineHeight: 1.65, marginTop: 8 }}>
-              {text}
-            </p>
-          )}
-
-          <CommunityMediaGrid mediaUrl={post.media_url} images={post.images} title={post.title} />
-
-          <CommunityReactionBar
-            upvoteCount={post.upvote_count ?? post.likes_count}
-            commentCount={post.comment_count ?? ctrl.comments.length}
+    <div style={{ minHeight: "100dvh", background: "var(--kalpx-bg)" }}>
+      <CommunityTopBar />
+      <div style={{ maxWidth: 480, margin: "0 auto" }}>
+        <div style={{ padding: 5 }}>
+          <CommunityPostCard
+            post={post}
+            detailMode
             isUpvoting={ctrl.upvotingId === post.id}
-            onUpvote={() => void ctrl.upvotePost(post.id, `/en/community/${post.id}`)}
+            onUpvote={() =>
+              void ctrl.upvotePost(post.id, `/en/community/${post.id}`)
+            }
+            onCommentClick={() => {
+              if (typeof window === "undefined") return;
+              const composer = document.getElementById(
+                "community-comment-composer",
+              );
+              composer?.scrollIntoView({ behavior: "smooth", block: "center" });
+            }}
           />
-        </div>
 
-        {/* Comments */}
-        <div>
-          <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--kalpx-text)', marginBottom: 12 }}>
-            Comments {ctrl.comments.length > 0 ? `(${ctrl.comments.length})` : ''}
-          </p>
-
-          <div style={{ marginBottom: 20 }}>
-            <CommunityCommentComposer
-              postId={post.id}
-              isAuthenticated={authed}
-              submitting={ctrl.commentSubmitting}
-              error={ctrl.commentError}
-              onSubmit={(content) => {
-                void ctrl.submitComment(post.id, content, `/en/community/${post.id}`);
-              }}
-              onRequireAuth={() => {
-                const to = encodeURIComponent(`/en/community/${post.id}`);
-                navigate(`/login?returnTo=${to}`);
-              }}
+          <div style={{ padding: "8px 14px 0" }}>
+            <div
+              style={{ height: 1, background: "#efe7d8", marginBottom: 22 }}
             />
           </div>
 
-          <CommunityCommentList comments={ctrl.comments} loading={ctrl.commentsLoading} />
+          <div style={{ padding: "0 14px 24px" }}>
+            <p
+              style={{
+                fontSize: 16,
+                fontWeight: 700,
+                color: "var(--kalpx-text)",
+                marginBottom: 18,
+              }}
+            >
+              Comments ({totalCommentCount})
+            </p>
+
+            {replyingTo && (
+              <div
+                style={{
+                  marginBottom: 12,
+                  padding: "10px 12px",
+                  borderRadius: 12,
+                  background: "#fff8eb",
+                  border: "1px solid #eddcb2",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 12,
+                }}
+              >
+                <p style={{ margin: 0, fontSize: 13, color: "#5e4b22" }}>
+                  Replying to <strong>{getReplyName(replyingTo)}</strong>
+                </p>
+                <button
+                  onClick={() => setReplyingTo(null)}
+                  style={{
+                    border: "none",
+                    background: "none",
+                    padding: 0,
+                    fontSize: 12,
+                    color: "#9a7b2f",
+                    cursor: "pointer",
+                    fontWeight: 700,
+                  }}
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+
+            <div id="community-comment-composer" style={{ marginBottom: 24 }}>
+              <CommunityCommentComposer
+                postId={post.id}
+                isAuthenticated={authed}
+                submitting={commentSubmitting}
+                error={commentError}
+                placeholder={
+                  replyingTo
+                    ? `Reply to ${getReplyName(replyingTo)}...`
+                    : "Join the conversation here....."
+                }
+                submitLabel={replyingTo ? "Reply" : "Post"}
+                onSubmit={(content) => {
+                  void handleSubmitComment(content);
+                }}
+                onRequireAuth={requireAuth}
+              />
+            </div>
+
+            <CommunityCommentList
+              comments={ctrl.comments}
+              loading={ctrl.commentsLoading}
+              currentUserId={currentUserId}
+              isAuthenticated={authed}
+              actionLoadingId={commentActionLoadingId}
+              onReply={(comment) => {
+                setReplyingTo(comment);
+                if (typeof window !== "undefined") {
+                  const composer = document.getElementById(
+                    "community-comment-composer",
+                  );
+                  composer?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
+                }
+              }}
+              onEdit={handleEditComment}
+              onDelete={handleDeleteComment}
+              onReport={handleReportComment}
+              onRequireAuth={requireAuth}
+            />
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-const backBtn: React.CSSProperties = {
-  background: 'none', border: 'none', color: 'var(--kalpx-cta)',
-  fontSize: 14, cursor: 'pointer', padding: 0,
-};
+function countComments(comments: CommunityComment[]): number {
+  return comments.reduce(
+    (total, comment) => total + 1 + countComments(comment.children ?? []),
+    0,
+  );
+}
+
+function getReplyName(comment: CommunityComment): string {
+  const creator = comment?.creator ?? comment?.author;
+  return (
+    creator?.profile_name ??
+    creator?.display_name ??
+    creator?.name ??
+    creator?.username ??
+    "Anonymous"
+  );
+}

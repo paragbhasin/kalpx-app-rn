@@ -8,6 +8,8 @@ interface CommunityCommentComposerProps {
   error?: string | null;
   onSubmit: (content: string) => void;
   onRequireAuth?: () => void;
+  placeholder?: string;
+  submitLabel?: string;
 }
 
 export function CommunityCommentComposer({
@@ -17,6 +19,8 @@ export function CommunityCommentComposer({
   error = null,
   onSubmit,
   onRequireAuth,
+  placeholder = 'Write a comment…',
+  submitLabel = 'Post',
 }: CommunityCommentComposerProps) {
   const [content, setContent] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -60,7 +64,7 @@ export function CommunityCommentComposer({
       <textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        placeholder="Write a comment…"
+        placeholder={placeholder}
         rows={3}
         maxLength={1000}
         style={{
@@ -85,7 +89,7 @@ export function CommunityCommentComposer({
             cursor: submitting || !content.trim() ? 'not-allowed' : 'pointer',
           }}
         >
-          {submitting ? 'Posting…' : 'Post'}
+          {submitting ? 'Posting…' : submitLabel}
         </button>
       </div>
     </form>

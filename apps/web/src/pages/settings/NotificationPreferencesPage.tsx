@@ -55,6 +55,12 @@ const COMPANION_CATEGORIES: CategoryConfig[] = [
 
 const OPTIONAL_CATEGORIES: CategoryConfig[] = [
   {
+    key: 'predictive_suggestions',
+    label: 'Mitra Suggestions',
+    description: "Mitra's gentle nudges when it notices something worth exploring.",
+    defaultOn: false,
+  },
+  {
     key: 'post_conflict_follow',
     label: 'After a Hard Moment',
     description: 'A gentle return after a heavy time. Off by default.',

@@ -630,3 +630,35 @@ export async function searchLibraryItems(
     return { results: [] };
   }
 }
+
+export async function getPredictiveAlerts(): Promise<any> {
+  try {
+    const res = await api.get('mitra/predictive/alerts/');
+    return res.data;
+  } catch (err: any) {
+    if (err?.response?.status !== 404 && err?.response?.status !== 502) {
+      console.warn('[mitraApi] predictive/alerts failed:', err?.message);
+    }
+    return null;
+  }
+}
+
+export async function dismissPredictiveAlert(id: string | number): Promise<any> {
+  try {
+    const res = await api.post(`mitra/predictive/alerts/${id}/dismiss/`);
+    return res.data;
+  } catch (err: any) {
+    console.warn('[mitraApi] predictive/alerts dismiss failed:', err?.message);
+    return null;
+  }
+}
+
+export async function acceptPredictiveAlert(id: string | number): Promise<any> {
+  try {
+    const res = await api.post(`mitra/predictive/alerts/${id}/accept/`);
+    return res.data;
+  } catch (err: any) {
+    console.warn('[mitraApi] predictive/alerts accept failed:', err?.message);
+    return null;
+  }
+}

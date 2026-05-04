@@ -38,7 +38,12 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { executeAction } from "../engine/actionExecutor";
-import { mitraJourneyDailyView } from "../engine/mitraApi";
+import {
+  mitraJourneyDailyView,
+  getPredictiveAlerts,
+  dismissPredictiveAlert,
+  acceptPredictiveAlert,
+} from "../engine/mitraApi";
 import { ingestDailyView } from "../engine/v3Ingest";
 import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
@@ -67,6 +72,7 @@ import FocusPhraseLine from "../extensions/moments/focus_phrase_line";
 // ── Conditional intelligence cards (Phase 5 — show when signal exists) ───
 import ClearWindowBanner from "../blocks/ClearWindowBanner";
 import EntityRecognitionCard from "../blocks/dashboard/insights/EntityRecognitionCard";
+import PredictiveAlertCard from "../blocks/dashboard/PredictiveAlertCard";
 import ResilienceNarrativeCard from "../blocks/dashboard/insights/ResilienceNarrativeCard";
 import ContinuityMirrorCard from "../extensions/moments/continuity_mirror_card";
 import PathMilestoneBanner from "../extensions/moments/path_milestone_banner";
@@ -101,7 +107,29 @@ const NewDashboardContainer: React.FC<Props> = () => {
   const sd = (screenData ?? {}) as Record<string, any>;
   const [whyOpen, setWhyOpen] = useState(false);
   const [isHydrating, setIsHydrating] = useState(false);
+  const [predictiveAlerts, setPredictiveAlerts] = useState<any[]>([]);
   const returnModal = sd.dashboard_return_modal;
+
+  useEffect(() => {
+    let active = true;
+    getPredictiveAlerts().then((data) => {
+      if (active && data?.alerts) setPredictiveAlerts(data.alerts);
+    });
+    return () => { active = false; };
+  }, []);
+
+  const handleDismissAlert = useCallback(async (alertId: string | number) => {
+    setPredictiveAlerts((prev) => prev.filter((a) => a.id !== alertId));
+    await dismissPredictiveAlert(alertId);
+  }, []);
+
+  const handleAcceptAlert = useCallback(async (alertId: string | number, prepContext?: string) => {
+    setPredictiveAlerts((prev) => prev.filter((a) => a.id !== alertId));
+    await acceptPredictiveAlert(alertId);
+    if (prepContext) {
+      await executeAction({ type: "open_prep_context", payload: { context_type: prepContext } });
+    }
+  }, []);
 
   const closeReturnModal = useCallback(() => {
     store.dispatch(
@@ -246,7 +274,7 @@ const NewDashboardContainer: React.FC<Props> = () => {
           ) : null;
 
           // Insight cards in priority order (max 2 shown).
-          // Retired: PredictiveAlertCard, GratitudeSignalCard, SeasonSignalCard.
+          // Retired: GratitudeSignalCard, SeasonSignalCard.
           const candidates: React.ReactNode[] = [];
           const ins = sd.insights ?? {};
           if (ins.path_milestone ?? sd.path_milestone) {
@@ -257,6 +285,19 @@ const NewDashboardContainer: React.FC<Props> = () => {
           if (ins.resilience_narrative ?? sd.resilience_narrative) {
             candidates.push(
               <ResilienceNarrativeCard key="rn" screenData={sd} />,
+            );
+          }
+          // Predictive alert (M28) — one card, first pending/shown alert.
+          // copy_text only; no internal labels.
+          const topAlert = predictiveAlerts[0] ?? null;
+          if (topAlert) {
+            candidates.push(
+              <PredictiveAlertCard
+                key={`pa-${topAlert.id}`}
+                alert={topAlert}
+                onDismiss={handleDismissAlert}
+                onAccept={handleAcceptAlert}
+              />,
             );
           }
           if (ins.entity_card ?? sd.entity_card) {

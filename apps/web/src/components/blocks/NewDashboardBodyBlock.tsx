@@ -5,12 +5,18 @@
  * Manages WhyThis sheet open/close state locally.
  */
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../store";
 import { updateScreenData } from "../../store/screenSlice";
+import {
+  getPredictiveAlerts,
+  dismissPredictiveAlert,
+  acceptPredictiveAlert,
+} from "../../engine/mitraApi";
 import { AdditionalItemsSectionBlock } from "./dashboard/AdditionalItemsSectionBlock";
 import { ContinuityBanner } from "./dashboard/ContinuityBanner";
+import { PredictiveAlertCard } from "./dashboard/PredictiveAlertCard";
 import { CycleProgressBlock } from "./dashboard/CycleProgressBlock";
 import { GreetingCard } from "./dashboard/GreetingCard";
 import { PathChip } from "./dashboard/PathChip";
@@ -45,6 +51,26 @@ export function NewDashboardBodyBlock({ screenData, onAction }: Props) {
   const hasSankalpCarry =
     Array.isArray(sd.sankalp_how_to_live) && sd.sankalp_how_to_live.length > 0;
   const returnModal = sd.dashboard_return_modal;
+
+  const [predictiveAlerts, setPredictiveAlerts] = useState<any[]>([]);
+
+  useEffect(() => {
+    let active = true;
+    getPredictiveAlerts().then((data) => {
+      if (active && data?.alerts) setPredictiveAlerts(data.alerts);
+    });
+    return () => { active = false; };
+  }, []);
+
+  const handleDismissAlert = useCallback(async (alertId: number | string) => {
+    setPredictiveAlerts((prev) => prev.filter((a) => a.id !== alertId));
+    await dismissPredictiveAlert(alertId);
+  }, []);
+
+  const handleAcceptAlert = useCallback(async (alertId: number | string, prepContext?: string) => {
+    setPredictiveAlerts((prev) => prev.filter((a) => a.id !== alertId));
+    await acceptPredictiveAlert(alertId);
+  }, []);
 
   return (
     <div>
@@ -109,6 +135,14 @@ export function NewDashboardBodyBlock({ screenData, onAction }: Props) {
       )}
 
       {hasContinuity && <ContinuityBanner sd={sd} />}
+
+      {predictiveAlerts[0] && (
+        <PredictiveAlertCard
+          alert={predictiveAlerts[0]}
+          onDismiss={handleDismissAlert}
+          onAccept={handleAcceptAlert}
+        />
+      )}
 
       <CycleProgressBlock sd={sd} />
 

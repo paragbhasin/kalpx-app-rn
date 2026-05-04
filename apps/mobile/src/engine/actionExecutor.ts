@@ -4077,8 +4077,23 @@ export async function executeAction(
         break;
       }
 
-      // dismiss_predictive_alert case retired per v3 journey migration
-      // (PredictiveAlertCard deleted).
+      case "dismiss_predictive_alert": {
+        const id = payload?.alert_id ?? payload?.id;
+        if (id) {
+          const { dismissPredictiveAlert: dismissAlert } = await import("./mitraApi");
+          await dismissAlert(id);
+        }
+        break;
+      }
+
+      case "accept_predictive_alert": {
+        const id = payload?.alert_id ?? payload?.id;
+        if (id) {
+          const { acceptPredictiveAlert: acceptAlert } = await import("./mitraApi");
+          await acceptAlert(id);
+        }
+        break;
+      }
 
       // confirm_entity — Moment 29 "Yes that's them".
       case "confirm_entity": {

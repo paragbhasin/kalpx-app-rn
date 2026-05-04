@@ -1369,6 +1369,22 @@ export async function mutePredictiveAlertEntity(
   }
 }
 
+/** POST mitra/predictive/alerts/<id>/accept/ — user acknowledged the suggestion. */
+export async function acceptPredictiveAlert(
+  alertId: string | number,
+): Promise<any> {
+  try {
+    const res = await api.post(`mitra/predictive/alerts/${alertId}/accept/`);
+    return res.data;
+  } catch (err: any) {
+    console.warn(
+      `[MITRA] predictive/alerts/${alertId}/accept failed:`,
+      err.message,
+    );
+    return null;
+  }
+}
+
 /** GET mitra/briefing/today/ — Moment 8/Dashboard morning briefing.
  *  Audit fix F2 (2026-04-13): added wrapper. Backend has it; spec dashboard §6
  *  step 4 declares it as a separate endpoint (not bundled in generate-companion).

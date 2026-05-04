@@ -19,6 +19,7 @@ import {
   fetchNotifications,
   markNotificationsRead,
 } from "./actions";
+import { mitraTrackEvent } from "../../engine/mitraApi";
 import styles from "./styles";
 import { useScrollContext } from "../../context/ScrollContext";
 
@@ -50,10 +51,13 @@ export default function Notifications() {
     }
   };
 
-  // 📌 Mark single notification read
+  // 📌 Mark single notification read + analytics
   const openNotification = (item) => {
     if (!item.read) {
       dispatch(markNotificationsRead([item.id]));
+      mitraTrackEvent('notification_marked_read', {
+        meta: { notification_id: item.id, event_type: item.event_type },
+      });
     }
   };
 

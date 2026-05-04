@@ -90,6 +90,26 @@ export async function patchNotificationPreferences(patch: Record<string, any>): 
   }
 }
 
+export async function getGlobalConsent(): Promise<{ receive_push_notifications: boolean; receive_emails: boolean } | null> {
+  try {
+    const res = await api.get('mitra/user-preferences/global-consent/');
+    return res.data;
+  } catch {
+    return null;
+  }
+}
+
+export async function patchGlobalConsent(
+  patch: Partial<{ receive_push_notifications: boolean; receive_emails: boolean }>,
+): Promise<{ receive_push_notifications: boolean; receive_emails: boolean } | null> {
+  try {
+    const res = await api.patch('mitra/user-preferences/global-consent/', patch);
+    return res.data;
+  } catch {
+    return null;
+  }
+}
+
 export async function getDailyView(): Promise<any> {
   const res = await api.get('mitra/today/');
   return res.data;

@@ -4,6 +4,9 @@ export interface NotificationItem {
   message: string;
   timestamp: string;
   read: boolean;
+  event_type?: string;
+  email_sent?: boolean;
+  push_sent?: boolean;
 }
 
 export interface NotificationsInboxState {

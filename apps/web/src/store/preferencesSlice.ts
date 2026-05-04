@@ -4,6 +4,8 @@ import {
   patchUserPreferences,
   getNotificationPreferences,
   patchNotificationPreferences,
+  getGlobalConsent,
+  patchGlobalConsent,
 } from '../engine/mitraApi';
 
 export const PREFERENCES_STORAGE_KEY = 'kalpx:preferences';
@@ -29,6 +31,11 @@ export interface NotificationPrefs {
   community_updates: boolean;
 }
 
+export interface GlobalConsent {
+  receive_push_notifications: boolean;
+  receive_emails: boolean;
+}
+
 export interface PreferencesSlice {
   reduced_motion: boolean;
   guidance_mode: GuidanceMode;
@@ -39,6 +46,7 @@ export interface PreferencesSlice {
   season_acknowledged_ritu: string | null;
   quiet_hours: QuietHours;
   notifications: NotificationPrefs;
+  global_consent: GlobalConsent;
   voice_consent_given: boolean;
   season_banner_dismissed_at: number | null;
   loaded: boolean;
@@ -63,6 +71,7 @@ const initialState: PreferencesSlice = {
     gentle_reengagement: false,
     community_updates: false,
   },
+  global_consent: { receive_push_notifications: true, receive_emails: true },
   voice_consent_given: false,
   season_banner_dismissed_at: null,
   loaded: false,
@@ -97,6 +106,22 @@ export const updateNotificationPref = createAsyncThunk(
   async ({ key, value }: { key: keyof NotificationPrefs; value: boolean }) => {
     await patchNotificationPreferences({ [key]: value });
     return { key, value };
+  },
+);
+
+export const fetchGlobalConsent = createAsyncThunk(
+  'preferences/fetchGlobalConsent',
+  async () => {
+    const data = await getGlobalConsent();
+    return data ?? null;
+  },
+);
+
+export const updateGlobalConsent = createAsyncThunk(
+  'preferences/updateGlobalConsent',
+  async (patch: Partial<GlobalConsent>) => {
+    const data = await patchGlobalConsent(patch);
+    return data ?? patch as GlobalConsent;
   },
 );
 
@@ -168,6 +193,16 @@ const preferencesSlice = createSlice({
       .addCase(updateNotificationPref.fulfilled, (state, action) => {
         const { key, value } = action.payload;
         state.notifications[key] = value;
+      })
+      .addCase(fetchGlobalConsent.fulfilled, (state, action) => {
+        if (action.payload) {
+          state.global_consent = { ...state.global_consent, ...action.payload };
+        }
+      })
+      .addCase(updateGlobalConsent.fulfilled, (state, action) => {
+        if (action.payload) {
+          state.global_consent = { ...state.global_consent, ...action.payload };
+        }
       })
       .addCase(restorePreferences.fulfilled, (state, action) => {
         if (!action.payload) {

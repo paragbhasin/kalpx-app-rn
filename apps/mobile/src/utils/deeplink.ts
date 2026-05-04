@@ -8,7 +8,7 @@
  *   - Manual testing via `xcrun simctl openurl booted "..."` / `adb shell am`
  *   - Future: push-notification deeplinks (payload signed + TTL, Phase D)
  *
- * __DEV__ gate: non-dev builds reject deeplinks. In dev, any kalpx://mitra/*
+ * Gate 3: deeplinks active in all builds. Any kalpx://mitra/*
  * URL that names a container+state in the registry navigates directly.
  *
  * Query-string `?` values are merged into `screenData` via setScreenValue
@@ -74,11 +74,6 @@ export function parseMitraDeepLink(url: string): ParsedMitraDeepLink | null {
  */
 export function handleMitraDeepLink(url: string | null | undefined): boolean {
   if (!url) return false;
-  if (!__DEV__) {
-    // Phase C pilot: dev-only. Phase D adds signed/TTL payload + prod routing.
-    console.warn("[deeplink] non-dev build; ignoring", url);
-    return false;
-  }
   const parsed = parseMitraDeepLink(url);
   if (!parsed) return false;
 

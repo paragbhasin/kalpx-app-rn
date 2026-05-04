@@ -15,9 +15,12 @@ import TextComponent from '../../components/TextComponent';
 import { AppDispatch, RootState } from '../../store';
 import {
   fetchNotificationPrefs,
+  fetchGlobalConsent,
   updateNotificationPref,
+  updateGlobalConsent,
   updatePreference,
   type NotificationPrefs,
+  type GlobalConsent,
 } from '../../store/preferencesSlice';
 
 const GOLD = '#b8864b';
@@ -103,6 +106,7 @@ const NotificationPreferences = () => {
   const notifications = useSelector((s: RootState) => s.preferences.notifications);
   const quietHours = useSelector((s: RootState) => s.preferences.quiet_hours);
   const frequency = useSelector((s: RootState) => s.preferences.recommended_frequency);
+  const globalConsent = useSelector((s: RootState) => s.preferences.global_consent);
   const loaded = useSelector((s: RootState) => s.preferences.loaded);
 
   const [quietStart, setQuietStart] = useState(quietHours.start);
@@ -113,12 +117,20 @@ const NotificationPreferences = () => {
 
   useEffect(() => {
     dispatch(fetchNotificationPrefs());
+    dispatch(fetchGlobalConsent());
   }, [dispatch]);
 
   useEffect(() => {
     setQuietStart(quietHours.start);
     setQuietEnd(quietHours.end);
   }, [quietHours.start, quietHours.end]);
+
+  const handleGlobalConsentToggle = useCallback(
+    (key: keyof GlobalConsent, value: boolean) => {
+      dispatch(updateGlobalConsent({ [key]: value }));
+    },
+    [dispatch],
+  );
 
   const handleToggle = useCallback(
     (key: keyof NotificationPrefs, value: boolean) => {
@@ -178,6 +190,26 @@ const NotificationPreferences = () => {
       </View>
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+
+        {/* Global consent */}
+        <View style={styles.section}>
+          <TextComponent type="headerText" style={styles.sectionTitle}>Notification Consent</TextComponent>
+          <TextComponent style={styles.sectionSubtitle}>
+            Master switches for all Mitra notifications.
+          </TextComponent>
+          <CategoryRow
+            label="Push Notifications"
+            description="Receive notifications on this device."
+            value={globalConsent.receive_push_notifications}
+            onToggle={(v) => handleGlobalConsentToggle('receive_push_notifications', v)}
+          />
+          <CategoryRow
+            label="Email Notifications"
+            description="Receive companion emails."
+            value={globalConsent.receive_emails}
+            onToggle={(v) => handleGlobalConsentToggle('receive_emails', v)}
+          />
+        </View>
 
         {/* Companion rhythm */}
         <View style={styles.section}>
@@ -291,7 +323,7 @@ const NotificationPreferences = () => {
 
         <View style={styles.footer}>
           <TextComponent style={styles.footerNote}>
-            Global notification consent can be changed in your device settings.
+            Push consent above overrides all category settings. Device-level permission can be managed in system settings.
           </TextComponent>
         </View>
       </ScrollView>

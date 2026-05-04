@@ -4,9 +4,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../store';
 import {
   fetchNotificationPrefs,
+  fetchGlobalConsent,
   updateNotificationPref,
+  updateGlobalConsent,
   updatePreference,
   type NotificationPrefs,
+  type GlobalConsent,
 } from '../../store/preferencesSlice';
 
 const PAGE_BG = '#fffaf5';
@@ -93,6 +96,7 @@ export function NotificationPreferencesPage() {
   const notifications = useSelector((s: RootState) => s.preferences.notifications);
   const quietHours = useSelector((s: RootState) => s.preferences.quiet_hours);
   const frequency = useSelector((s: RootState) => s.preferences.recommended_frequency);
+  const globalConsent = useSelector((s: RootState) => s.preferences.global_consent);
   const loaded = useSelector((s: RootState) => s.preferences.loaded);
 
   const [quietStart, setQuietStart] = useState(quietHours.start);
@@ -103,12 +107,17 @@ export function NotificationPreferencesPage() {
 
   useEffect(() => {
     dispatch(fetchNotificationPrefs());
+    dispatch(fetchGlobalConsent());
   }, [dispatch]);
 
   useEffect(() => {
     setQuietStart(quietHours.start);
     setQuietEnd(quietHours.end);
   }, [quietHours.start, quietHours.end]);
+
+  const handleGlobalConsentToggle = (key: keyof GlobalConsent, value: boolean) => {
+    dispatch(updateGlobalConsent({ [key]: value }));
+  };
 
   const handleToggle = (key: keyof NotificationPrefs, value: boolean) => {
     dispatch(updateNotificationPref({ key, value }));
@@ -166,6 +175,22 @@ export function NotificationPreferencesPage() {
         </div>
       ) : (
         <div style={{ maxWidth: 520, margin: '0 auto', padding: '16px 16px 48px' }}>
+
+          {/* Global consent */}
+          <Section title="Notification Consent" subtitle="Master switches for all Mitra notifications.">
+            <CategoryRow
+              label="Push Notifications"
+              description="Receive notifications on this device."
+              value={globalConsent.receive_push_notifications}
+              onToggle={(v) => handleGlobalConsentToggle('receive_push_notifications', v)}
+            />
+            <CategoryRow
+              label="Email Notifications"
+              description="Receive companion emails."
+              value={globalConsent.receive_emails}
+              onToggle={(v) => handleGlobalConsentToggle('receive_emails', v)}
+            />
+          </Section>
 
           {/* Companion rhythm */}
           <Section title="Companion Rhythm" subtitle="Core companion notifications. On by default.">
@@ -254,7 +279,7 @@ export function NotificationPreferencesPage() {
           </Section>
 
           <p style={{ textAlign: 'center', fontSize: 12, color: TEXT_SECONDARY, marginTop: 24 }}>
-            Global notification consent can be changed in your browser or device settings.
+            Push consent above overrides all category settings. Browser-level permission can be managed in browser settings.
           </p>
         </div>
       )}

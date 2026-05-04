@@ -1,6 +1,10 @@
 import messaging from '@react-native-firebase/messaging';
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
+import { handleMitraDeepLink } from '../utils/deeplink';
+import { markNotificationsRead } from '../screens/Notifications/actions';
+import { mitraTrackEvent } from '../engine/mitraApi';
+import store from '../store';
 
 // Ask for permission + get FCM token
 export async function requestPushPermission() {
@@ -66,28 +70,45 @@ export function foregroundNotificationListener() {
   });
 }
 
+function _handleTappedNotification(remoteMessage, source) {
+  if (!remoteMessage) return;
+  console.log(`📌 App opened from ${source}:`, remoteMessage.messageId);
+
+  const data = remoteMessage.data || {};
+  const deepLink = data.deep_link || data.url || null;
+  const notificationId = data.notification_id ? Number(data.notification_id) : null;
+  const category = data.category || null;
+
+  if (deepLink) {
+    handleMitraDeepLink(deepLink);
+  }
+
+  if (notificationId) {
+    store.dispatch(markNotificationsRead([notificationId]));
+  }
+
+  mitraTrackEvent('notification_tapped', {
+    meta: {
+      source,
+      notification_id: notificationId,
+      category,
+      deep_link: deepLink,
+    },
+  });
+}
+
 // When user taps notification
 export function notificationOpenListener() {
-  // Quit state
+  // Quit state — app opened from killed state via notification tap
   messaging()
     .getInitialNotification()
     .then((remoteMessage) => {
-      if (remoteMessage) {
-        console.log("📌 App opened from QUIT state:", remoteMessage);
-        // Alert.alert(
-        //   remoteMessage.notification?.title || "Opened Notification",
-        //   remoteMessage.notification?.body || ""
-        // );
-      }
+      _handleTappedNotification(remoteMessage, 'quit');
     });
 
-  // Background state
+  // Background state — app foregrounded via notification tap
   return messaging().onNotificationOpenedApp((remoteMessage) => {
-    console.log("📌 App opened from BACKGROUND:", remoteMessage);
-    // Alert.alert(
-    //   remoteMessage.notification?.title || "Opened Notification",
-    //   remoteMessage.notification?.body || ""
-    // );
+    _handleTappedNotification(remoteMessage, 'background');
   });
 }
 

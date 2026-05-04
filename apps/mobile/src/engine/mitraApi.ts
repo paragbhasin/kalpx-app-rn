@@ -1540,6 +1540,33 @@ export async function patchNotificationPreferences(
   }
 }
 
+/** GET mitra/user-preferences/global-consent/ — fetch push + email consent. */
+export async function getGlobalConsent(): Promise<{ receive_push_notifications: boolean; receive_emails: boolean } | null> {
+  try {
+    const res = await api.get("mitra/user-preferences/global-consent/");
+    return res.data;
+  } catch (err: any) {
+    if (err?.response?.status === 404) return null;
+    console.warn("[MITRA] global-consent GET failed:", err?.message);
+    return null;
+  }
+}
+
+/** PATCH mitra/user-preferences/global-consent/ — update push/email consent. */
+export async function patchGlobalConsent(
+  patch: Partial<{ receive_push_notifications: boolean; receive_emails: boolean }>,
+): Promise<{ receive_push_notifications: boolean; receive_emails: boolean } | null> {
+  try {
+    const res = await api.patch("mitra/user-preferences/global-consent/", patch);
+    return res.data;
+  } catch (err: any) {
+    if (err?.response?.status !== 404) {
+      console.warn("[MITRA] global-consent PATCH failed:", err?.message);
+    }
+    return null;
+  }
+}
+
 /** PATCH mitra/entities/<id>/ — Moment 29 confirm / dismiss / snooze / mute.
  *  Backend B5 shipped 2026-04-13: generic PATCH with {status, snooze_until}.
  *  status: 'confirmed' | 'dismissed' | 'snoozed' | 'muted'

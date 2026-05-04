@@ -8,6 +8,7 @@ import {
   resetNotificationsInbox,
 } from '../../store/notificationsInboxSlice';
 import { AppShell, LoadingState, EmptyState } from '../../components/ui';
+import { trackEvent } from '../../engine/mitraApi';
 
 function formatRelativeTime(timestamp: string): string {
   const now = Date.now();
@@ -31,9 +32,10 @@ export function NotificationsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.key]);
 
-  function handleItemClick(id: number, read: boolean) {
+  function handleItemClick(id: number, read: boolean, eventType?: string) {
     if (!read) {
       void dispatch(markRead([id]));
+      void trackEvent('notification_marked_read', { meta: { notification_id: id, event_type: eventType } });
     }
   }
 
@@ -105,7 +107,7 @@ export function NotificationsPage() {
         {state.data.map((item) => (
           <div
             key={item.id}
-            onClick={() => handleItemClick(item.id, item.read)}
+            onClick={() => handleItemClick(item.id, item.read, item.event_type)}
             style={{
               display: 'flex',
               alignItems: 'flex-start',

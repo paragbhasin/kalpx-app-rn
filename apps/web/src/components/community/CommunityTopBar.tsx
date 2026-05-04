@@ -1,8 +1,16 @@
 import { ChevronDown, ChevronUp, Plus, Search } from "lucide-react";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
-export function CommunityTopBar() {
+interface CommunityTopBarProps {
+  activeLabel?: "Home" | "Top" | "Popular" | "Explore";
+  rightSlot?: ReactNode;
+}
+
+export function CommunityTopBar({
+  activeLabel = "Home",
+  rightSlot,
+}: CommunityTopBarProps) {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [recentOpen, setRecentOpen] = useState(true);
@@ -40,6 +48,20 @@ export function CommunityTopBar() {
     "User Agreements",
     "Content Policy",
     "About Us",
+  ];
+
+  const resourceRoutes: Partial<Record<(typeof resources)[number], string>> = {
+    Communities: "/en/community/communities",
+  };
+
+  const primaryItems: Array<{
+    label: "Home" | "Top" | "Popular" | "Explore";
+    to: string;
+  }> = [
+    { label: "Home", to: "/en/community" },
+    { label: "Top", to: "/en/community/top" },
+    { label: "Popular", to: "/en/community/popular" },
+    { label: "Explore", to: "/en/community/explore" },
   ];
 
   return (
@@ -107,12 +129,12 @@ export function CommunityTopBar() {
               textUnderlineOffset: 2,
             }}
           >
-            <span>Home</span>
+            <span>{activeLabel}</span>
             {menuOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </button>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <button
             aria-label="Search community"
             onClick={(e) => {
@@ -130,7 +152,7 @@ export function CommunityTopBar() {
               color: "#2f2a25",
             }}
           >
-            <Search size={28} strokeWidth={1.9} />
+            <Search size={19} strokeWidth={1.9} />
           </button>
 
           <button
@@ -140,8 +162,8 @@ export function CommunityTopBar() {
             }}
             aria-label="Create post"
             style={{
-              width: 31,
-              height: 31,
+              width: 23,
+              height: 23,
               borderRadius: 4,
               background: "#fff",
               border: "1px solid #2f2a25",
@@ -153,8 +175,10 @@ export function CommunityTopBar() {
               color: "#2f2a25",
             }}
           >
-            <Plus size={24} strokeWidth={1.9} />
+            <Plus size={16} strokeWidth={1.9} />
           </button>
+
+          {rightSlot}
         </div>
       </div>
 
@@ -201,19 +225,20 @@ export function CommunityTopBar() {
               }}
             >
               <div style={{ padding: "8px 0" }}>
-                {["Home", "Top", "Popular", "Explore"].map((item) => (
+                {primaryItems.map((item) => (
                   <button
-                    key={item}
+                    key={item.label}
                     onClick={(e) => {
                       e.stopPropagation();
                       setMenuOpen(false);
-                      navigate("/en/community");
+                      navigate(item.to);
                     }}
-                    onMouseEnter={() => setHoveredItem(item)}
+                    onMouseEnter={() => setHoveredItem(item.label)}
                     onMouseLeave={() => setHoveredItem(null)}
                     style={{
                       width: "100%",
-                      background: hoveredItem === item ? "#f9fafb" : "none",
+                      background:
+                        hoveredItem === item.label ? "#f9fafb" : "none",
                       border: "none",
                       textAlign: "left",
                       padding: "12px 24px",
@@ -224,7 +249,7 @@ export function CommunityTopBar() {
                       transition: "background-color 0.2s",
                     }}
                   >
-                    {item}
+                    {item.label}
                   </button>
                 ))}
               </div>
@@ -332,6 +357,11 @@ export function CommunityTopBar() {
                         key={item}
                         onClick={(e) => {
                           e.stopPropagation();
+                          const route = resourceRoutes[item];
+                          if (route) {
+                            setMenuOpen(false);
+                            navigate(route);
+                          }
                         }}
                         onMouseEnter={() => setHoveredItem(item)}
                         onMouseLeave={() => setHoveredItem(null)}

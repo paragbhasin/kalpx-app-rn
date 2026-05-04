@@ -14,7 +14,11 @@ import { ClassDetailPage } from "./pages/classes/ClassDetailPage";
 import { ClassListingPage } from "./pages/classes/ClassListingPage";
 import { ClassPaymentPage } from "./pages/classes/ClassPaymentPage";
 import { CommunityFeedPage } from "./pages/community/CommunityFeedPage";
+import { CommunityExplorePage } from "./pages/community/CommunityExplorePage";
+import { CommunityPopularPage } from "./pages/community/CommunityPopularPage";
 import { CommunityPostDetailPage } from "./pages/community/CommunityPostDetailPage";
+import { CommunityTopCommunitiesPage } from "./pages/community/CommunityTopCommunitiesPage";
+import { CommunityTopPage } from "./pages/community/CommunityTopPage";
 import { CreateCommunityPostPage } from "./pages/community/CreateCommunityPostPage";
 import { CheckinPage } from "./pages/mitra/CheckinPage";
 import { CheckpointPage } from "./pages/mitra/CheckpointPage";
@@ -120,6 +124,13 @@ export function AppRoutes() {
 
       {/* Communities vertical */}
       <Route path="/en/community" element={<CommunityFeedPage />} />
+      <Route
+        path="/en/community/communities"
+        element={<CommunityTopCommunitiesPage />}
+      />
+      <Route path="/en/community/explore" element={<CommunityExplorePage />} />
+      <Route path="/en/community/popular" element={<CommunityPopularPage />} />
+      <Route path="/en/community/top" element={<CommunityTopPage />} />
       <Route path="/en/community/new" element={<CreateCommunityPostPage />} />
       <Route
         path="/en/community/:postId"

@@ -20,6 +20,23 @@ import type {
 } from '@kalpx/types';
 import type { UserProfile } from '../types/auth';
 
+export interface CommunityListItem {
+  id: number | string;
+  slug?: string;
+  name?: string;
+  description?: string;
+  weekly_visitors?: string | number;
+  is_followed?: boolean;
+  [key: string]: any;
+}
+
+export interface CommunityListResponse {
+  count: number;
+  next: string | null;
+  previous?: string | null;
+  results: CommunityListItem[];
+}
+
 /** Normalise any feed response shape into a canonical CommunityFeedResponse. */
 function normaliseFeedResponse(data: any): CommunityFeedResponse {
   if (!data) return { count: 0, next: null, results: [] };
@@ -45,6 +62,21 @@ function normaliseCommentsResponse(data: any): CommunityCommentsResponse {
   };
 }
 
+function normaliseCommunityListResponse(data: any): CommunityListResponse {
+  if (!data) return { count: 0, next: null, results: [] };
+  if (Array.isArray(data)) {
+    return { count: data.length, next: null, previous: null, results: data };
+  }
+  return {
+    count: data.count ?? data.results?.length ?? 0,
+    next: data.next ?? null,
+    previous: data.previous ?? null,
+    results: data.results ?? data.communities ?? [],
+  };
+}
+
+const explorePostsRequests = new Map<string, Promise<CommunityFeedResponse>>();
+
 // ── Feed ──────────────────────────────────────────────────────────────────────
 
 export async function getCommunityFeed(params?: {
@@ -65,14 +97,149 @@ export async function getCommunityFeed(params?: {
   }
 }
 
-export async function getExplorePosts(): Promise<CommunityFeedResponse> {
+export async function getPopularPosts(params?: {
+  sort?: 'hot' | 'new' | 'top';
+  page?: number;
+  page_size?: number;
+  community?: string;
+  lang?: string;
+}): Promise<CommunityFeedResponse> {
   try {
-    const res = await api.get('public/explore-posts/');
+    const res = await api.get('posts/', {
+      params: { sort: 'top', page: 1, page_size: 10, ...params, t: Date.now() },
+    });
+    return normaliseFeedResponse(res.data);
+  } catch (err: any) {
+    console.warn('[communityApi] getPopularPosts failed:', err?.message);
+    return { count: 0, next: null, results: [] };
+  }
+}
+
+export async function getCommunities(params?: {
+  page?: number;
+  page_size?: number;
+  q?: string;
+  lang?: string;
+}): Promise<CommunityListResponse> {
+  try {
+    const res = await api.get('communities/', {
+      params: { page: 1, page_size: 12, ...params, t: Date.now() },
+    });
+    return normaliseCommunityListResponse(res.data);
+  } catch (err: any) {
+    console.warn('[communityApi] getCommunities failed:', err?.message);
+    return { count: 0, next: null, results: [] };
+  }
+}
+
+export async function getTopCommunities(params?: {
+  page?: number;
+  page_size?: number;
+  lang?: string;
+}): Promise<CommunityListResponse> {
+  try {
+    const res = await api.get('communities/top/', {
+      params: { page: 1, page_size: 12, ...params, t: Date.now() },
+    });
+    const data = normaliseCommunityListResponse(res.data);
+    return {
+      ...data,
+      results: data.results.map((community, index) => ({
+        ...community,
+        rank: (Number(params?.page ?? 1) - 1) * Number(params?.page_size ?? 12) + index + 1,
+      })),
+    };
+  } catch (err: any) {
+    console.warn('[communityApi] getTopCommunities failed:', err?.message);
+    return { count: 0, next: null, results: [] };
+  }
+}
+
+export async function followCommunity(idOrSlug: number | string): Promise<boolean> {
+  try {
+    await api.post(`communities/${encodeURIComponent(String(idOrSlug))}/follow/`, {});
+    return true;
+  } catch (err: any) {
+    console.warn('[communityApi] followCommunity failed:', err?.message);
+    return false;
+  }
+}
+
+export async function unfollowCommunity(idOrSlug: number | string): Promise<boolean> {
+  try {
+    await api.post(`communities/${encodeURIComponent(String(idOrSlug))}/unfollow/`, {});
+    return true;
+  } catch (err: any) {
+    console.warn('[communityApi] unfollowCommunity failed:', err?.message);
+    return false;
+  }
+}
+
+export async function getFollowedCommunities(): Promise<CommunityListItem[]> {
+  try {
+    const res = await api.get('my/activity/followed_communities/');
+    const data = res.data?.results ?? res.data ?? [];
+    if (!Array.isArray(data)) return [];
+
+    return data
+      .map((item: any) => {
+        const community = item.community || item;
+        const slug =
+          community.slug ||
+          community.community_slug ||
+          (typeof item === 'string' ? item : null);
+        const id =
+          community.id ||
+          community.community_id ||
+          community.community;
+
+        if (!slug && !id) return null;
+        return {
+          ...community,
+          slug,
+          id: String(id ?? slug),
+          is_followed: true,
+        } as CommunityListItem;
+      })
+      .filter(Boolean) as CommunityListItem[];
+  } catch (err: any) {
+    console.warn('[communityApi] getFollowedCommunities failed:', err?.message);
+    return [];
+  }
+}
+
+export async function getExplorePosts(params?: {
+  page?: number;
+  page_size?: number;
+  lang?: string;
+  paginate?: boolean;
+}): Promise<CommunityFeedResponse> {
+  const requestParams = {
+    paginate: true,
+    page: 1,
+    page_size: 10,
+    ...params,
+  };
+  const requestKey = JSON.stringify(requestParams);
+  const inFlightRequest = explorePostsRequests.get(requestKey);
+  if (inFlightRequest) return inFlightRequest;
+
+  const request = (async () => {
+  try {
+    const res = await api.get('public/explore-posts/', {
+      params: requestParams,
+    });
     return normaliseFeedResponse(res.data);
   } catch (err: any) {
     console.warn('[communityApi] getExplorePosts failed:', err?.message);
     return { count: 0, next: null, results: [] };
+  } finally {
+    explorePostsRequests.delete(requestKey);
   }
+  })();
+
+  explorePostsRequests.set(requestKey, request);
+  return request;
 }
 
 // ── Post detail ───────────────────────────────────────────────────────────────

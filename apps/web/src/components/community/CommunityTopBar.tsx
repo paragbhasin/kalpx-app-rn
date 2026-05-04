@@ -46,8 +46,7 @@ export function CommunityTopBar({
     "KalpX Rules",
     "Privacy Policy",
     "User Agreements",
-    "Content Policy",
-    "About Us",
+    "About KalpX",
   ];
 
   const resourceRoutes: Partial<Record<(typeof resources)[number], string>> = {

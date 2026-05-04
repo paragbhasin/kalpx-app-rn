@@ -52,6 +52,12 @@ const COMPANION_CATEGORIES: CategoryConfig[] = [
     description: 'Day 7 and Day 14 checkpoints, and weekly reflections.',
     defaultOn: true,
   },
+  {
+    key: 'morning_briefing',
+    label: 'Morning Briefing',
+    description: 'A daily reflection and practice to begin your day with Mitra.',
+    defaultOn: true,
+  },
 ];
 
 const COMPANION_GUIDANCE_CATEGORIES: CategoryConfig[] = [
@@ -84,6 +90,12 @@ const COMPANION_GUIDANCE_CATEGORIES: CategoryConfig[] = [
     label: 'Community Updates',
     description: 'Updates from KalpX spaces and reflections.',
     defaultOn: true,
+  },
+  {
+    key: 'post_room_continuity',
+    label: 'After Room Sessions',
+    description: 'A gentle follow-up to help you carry practice forward.',
+    defaultOn: false,
   },
 ];
 

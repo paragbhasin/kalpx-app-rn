@@ -22,6 +22,7 @@ export interface QuietHours {
 
 export interface NotificationPrefs {
   morning_presence: boolean;
+  morning_briefing: boolean;
   prep_heads_up: boolean;
   post_conflict_follow: boolean;
   evening_reflection: boolean;
@@ -31,6 +32,7 @@ export interface NotificationPrefs {
   community_updates: boolean;
   milestone_reflections: boolean;
   predictive_suggestions: boolean;
+  post_room_continuity: boolean;
 }
 
 export interface GlobalConsent {
@@ -65,6 +67,7 @@ const initialState: PreferencesSlice = {
   quiet_hours: { start: '23:00', end: '05:00' },
   notifications: {
     morning_presence: true,
+    morning_briefing: true,
     prep_heads_up: true,
     post_conflict_follow: true,
     evening_reflection: true,
@@ -74,6 +77,7 @@ const initialState: PreferencesSlice = {
     community_updates: true,
     milestone_reflections: true,
     predictive_suggestions: true,
+    post_room_continuity: false,
   },
   global_consent: { receive_push_notifications: true, receive_emails: true },
   voice_consent_given: false,

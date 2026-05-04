@@ -120,7 +120,7 @@ function _setCheckpointRedirectBypass(msFromNow = 30_000): void {
   }
 }
 
-// Om audio served via kalpx.com CloudFront (s3://kalpx-website/audio/)
+// Om audio served via kalpx.com CloudFront (s3://kalpx-media/audio/)
 const OM_AUDIO_LIBRARY = [
   'https://kalpx.com/audio/Om.mp4',
   'https://kalpx.com/audio/Om%20Shanti.mp4',

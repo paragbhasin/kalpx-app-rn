@@ -106,7 +106,7 @@ const STATE_LABEL_MAP: Record<string, string> = {
 // Audio Rotation
 // ---------------------------------------------------------------------------
 
-// Audio served via kalpx.com CloudFront (s3://kalpx-website/audio/)
+// Audio served via kalpx.com CloudFront (s3://kalpx-media/audio/)
 /** OM audio library — add new files here as they're uploaded to S3 */
 const OM_AUDIO_LIBRARY = [
   "https://kalpx.com/audio/Om.mp4",

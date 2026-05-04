@@ -1989,3 +1989,25 @@ export async function mitraPickWisdom(
     if (timer) clearTimeout(timer);
   }
 }
+
+// ---------------------------------------------------------------------------
+// trackRoomTelemetry — Gate 6D room lifecycle events.
+//
+// Sends room_entered / exit_tapped to POST /api/mitra/rooms/telemetry/ so
+// the backend can create JourneyActivity rows for Gate 6D post-room
+// continuity push. Best-effort: try/catch ensures this never crashes room UX.
+//
+// Payload is deliberately minimal — only event_type, room_id, surface.
+// No session content, life_context, transcript, or user data.
+// ---------------------------------------------------------------------------
+export async function trackRoomTelemetry(payload: {
+  event_type: 'room_entered' | 'exit_tapped';
+  room_id: string;
+  surface: 'room';
+}): Promise<void> {
+  try {
+    await api.post('mitra/rooms/telemetry/', payload);
+  } catch {
+    // best-effort; never break room UX
+  }
+}

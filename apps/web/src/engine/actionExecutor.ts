@@ -15,6 +15,7 @@ import {
   getDashboardView,
   getRoomRender,
   postRoomTelemetry,
+  trackRoomTelemetry,
   postRoomSacred,
   postTriggerMantras,
   postPranaAcknowledge,
@@ -1445,6 +1446,10 @@ export async function executeAction(action: any, context: ActionContext): Promis
         day_number: screenData.day_number || 1,
         meta: { room_id: rId, source: 'room_renderer' },
       });
+      // Gate 6D — exit_tapped telemetry. Best-effort; fires before navigation.
+      if (rId) {
+        void trackRoomTelemetry({ event_type: 'exit_tapped', room_id: String(rId), surface: 'room' });
+      }
       dispatch(updateScreenData({
         room_id: null,
         room_render_payload: null,

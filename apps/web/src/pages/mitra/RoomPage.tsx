@@ -10,7 +10,7 @@ import { LifeContextPickerSheet } from "../../components/blocks/room/LifeContext
 import { RoomRenderer } from "../../components/blocks/room/RoomRenderer";
 import { ROOM_DISPLAY_NAMES } from "../../components/blocks/room/roomConstants";
 import { executeAction } from "../../engine/actionExecutor";
-import { getRoomRender, trackEvent } from "../../engine/mitraApi";
+import { getRoomRender, trackEvent, trackRoomTelemetry } from "../../engine/mitraApi";
 import {
   ensureRoomAmbientPlaying,
   stopRoomAmbient,
@@ -77,6 +77,9 @@ export function RoomPage() {
     (sd?.room_life_context as string | null) || null,
   );
 
+  // Gate 6D — dedupe guard: prevents double-fire of room_entered on re-renders.
+  const hasFiredEntry = useRef(false);
+
   // Room ambient audio — start on render phase, stop on unmount (mirrors RoomContainer.tsx)
   useEffect(() => {
     if (phase !== "render") return;
@@ -85,6 +88,16 @@ export function RoomPage() {
       stopRoomAmbient();
     };
   }, [phase]);
+
+  // Gate 6D — room_entered telemetry. Fires once when the room render phase
+  // begins. useRef guard prevents double-fire across re-renders / phase changes.
+  // Best-effort: try/catch is inside trackRoomTelemetry.
+  useEffect(() => {
+    if (phase === "render" && !hasFiredEntry.current && fullRoomId) {
+      hasFiredEntry.current = true;
+      void trackRoomTelemetry({ event_type: 'room_entered', room_id: fullRoomId, surface: 'room' });
+    }
+  }, [phase, fullRoomId]);
 
   const actionContext = {
     dispatch,

@@ -44,7 +44,7 @@ import type {
   RoomRenderV1,
 } from "@kalpx/types";
 import { executeAction } from "../engine/actionExecutor";
-import { mitraTrackEvent } from "../engine/mitraApi";
+import { mitraTrackEvent, trackRoomTelemetry } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { useToast } from "../context/ToastContext";
 
@@ -427,7 +427,18 @@ const RoomRenderBranch: React.FC<RenderBranchProps> = ({
   const [envelope, setEnvelope] = useState<RoomRenderV1 | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const fetchedRef = useRef<string | null>(null);
+  const hasFiredEntry = useRef(false);
   const { showToast } = useToast();
+
+  // Gate 6D — room_entered telemetry. useRef guard prevents double-fire on
+  // re-renders. Fires once per RoomRenderBranch mount when roomId is known.
+  // Best-effort: try/catch is inside trackRoomTelemetry.
+  useEffect(() => {
+    if (!hasFiredEntry.current && roomId) {
+      hasFiredEntry.current = true;
+      trackRoomTelemetry({ event_type: 'room_entered', room_id: String(roomId), surface: 'room' });
+    }
+  }, [roomId]);
 
   useEffect(() => {
     if (!roomId) {

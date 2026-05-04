@@ -14,6 +14,7 @@ import React from "react";
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
 
 import { executeAction } from "../../../engine/actionExecutor";
+import { trackRoomTelemetry } from "../../../engine/mitraApi";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 import type { ActionEnvelope, RoomRenderV1 } from "../types";
 import { buildActionCtx } from "./actionContextHelper";
@@ -30,6 +31,10 @@ const RoomActionExitPill: React.FC<Props> = ({ action, envelope }) => {
   const onPress = () => {
     const ctx = buildActionCtx({ loadScreen, goBack });
     const roomId = envelope?.room_id;
+    // Gate 6D — exit_tapped telemetry. Best-effort; never blocks navigation.
+    if (roomId) {
+      trackRoomTelemetry({ event_type: 'exit_tapped', room_id: String(roomId), surface: 'room' });
+    }
     executeAction(
       {
         type: "room_exit",

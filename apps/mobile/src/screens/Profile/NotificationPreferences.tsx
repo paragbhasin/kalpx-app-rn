@@ -55,6 +55,12 @@ const COMPANION_CATEGORIES: CategoryConfig[] = [
     description: 'A quiet close for the day.',
     defaultOn: true,
   },
+  {
+    key: 'milestone_reflections',
+    label: 'Journey Milestones',
+    description: 'Day 7 and Day 14 checkpoints, and weekly reflections.',
+    defaultOn: true,
+  },
 ];
 
 const OPTIONAL_CATEGORIES: CategoryConfig[] = [

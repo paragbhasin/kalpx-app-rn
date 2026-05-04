@@ -29,6 +29,7 @@ export interface NotificationPrefs {
   festival_ritucharya: boolean;
   gentle_reengagement: boolean;
   community_updates: boolean;
+  milestone_reflections: boolean;
 }
 
 export interface GlobalConsent {
@@ -70,6 +71,7 @@ const initialState: PreferencesSlice = {
     festival_ritucharya: false,
     gentle_reengagement: false,
     community_updates: false,
+    milestone_reflections: true,
   },
   global_consent: { receive_push_notifications: true, receive_emails: true },
   voice_consent_given: false,

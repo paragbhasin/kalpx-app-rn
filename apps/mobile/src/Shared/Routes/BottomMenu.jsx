@@ -1,5 +1,9 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { DrawerActions, useNavigation } from "@react-navigation/native";
+import {
+  DrawerActions,
+  getFocusedRouteNameFromRoute,
+  useNavigation,
+} from "@react-navigation/native";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Platform, TouchableOpacity } from "react-native";
@@ -20,6 +24,16 @@ import { useScreenStore } from "../../engine/useScreenBridge";
 const NullComponent = () => null;
 const TabBarButton = (props) => <TouchableOpacity {...props} activeOpacity={0.7} />;
 
+function isMitraRouteName(routeName) {
+  return (
+    routeName === "Home" ||
+    routeName === "DynamicEngine" ||
+    routeName === "MitraEngine" ||
+    routeName === "GuidedGrowth" ||
+    routeName === "MitraPhilosophy"
+  );
+}
+
 const BottomMenuContent = () => {
   const { t } = useTranslation();
   const navigation = useNavigation();
@@ -30,27 +44,34 @@ const BottomMenuContent = () => {
     <GlobalScrollLayout>
       <Tab.Navigator
         sceneContainerStyle={{ backgroundColor: "transparent" }}
-        screenOptions={{
-          headerShown: false,
-          tabBarStyle: {
-            display: isVisible ? "flex" : "none",
-            backgroundColor: currentBackground ? "transparent" : "#FFF",
-            borderTopWidth: currentBackground ? 0 : 0.5,
-            borderTopColor: "#d1d1d1",
-            elevation: 0,
-            shadowOpacity: 0,
-            height: FontSize.CONSTS.DEVICE_HEIGHT * 0.07,
-            paddingBottom: Platform.OS === "ios" ? 10 : 6,
-          },
-          tabBarActiveTintColor: "#8d5524",
-          tabBarInactiveTintColor: "#000",
-          tabBarAllowFontScaling: false,
+        screenOptions={({ route }) => {
+          const nestedRouteName =
+            route.name === "HomePage"
+              ? getFocusedRouteNameFromRoute(route) || "Home"
+              : route.name;
+          const shouldUseTransparentTabBar =
+            !!currentBackground && isMitraRouteName(nestedRouteName);
 
-          tabBarLabelStyle: {
-            fontSize: 12,
-            // marginBottom: 5,
-          },
-          tabBarButton: TabBarButton,
+          return {
+            headerShown: false,
+            tabBarStyle: {
+              display: isVisible ? "flex" : "none",
+              backgroundColor: shouldUseTransparentTabBar ? "transparent" : "#FFF",
+              borderTopWidth: shouldUseTransparentTabBar ? 0 : 0.5,
+              borderTopColor: "#d1d1d1",
+              elevation: 0,
+              shadowOpacity: 0,
+              height: FontSize.CONSTS.DEVICE_HEIGHT * 0.07,
+              paddingBottom: Platform.OS === "ios" ? 10 : 6,
+            },
+            tabBarActiveTintColor: "#8d5524",
+            tabBarInactiveTintColor: "#000",
+            tabBarAllowFontScaling: false,
+            tabBarLabelStyle: {
+              fontSize: 12,
+            },
+            tabBarButton: TabBarButton,
+          };
         }}
       >
         <Tab.Screen

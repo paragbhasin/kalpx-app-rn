@@ -52,7 +52,6 @@ import { navigationRef } from "./src/Shared/Routes/NavigationService";
 import Routes from "./src/Shared/Routes/Routes";
 import { store } from "./src/store";
 import { hideSnackBar } from "./src/store/snackBarSlice";
-import { screenActions } from "./src/store/screenSlice";
 import {
   setPreference,
   restorePreferences,
@@ -168,13 +167,6 @@ function AppInner({ initialRoute, navigationRef }) {
       cancelled = true;
     };
   }, [dispatch]);
-
-  useEffect(() => {
-    if (!activeRouteName) return;
-    if (isMitraRouteName(activeRouteName)) return;
-    if (!currentBackground) return;
-    dispatch(screenActions.setBackground(null));
-  }, [activeRouteName, currentBackground, dispatch]);
 
   const shouldShowMitraBackground =
     !!currentBackground && isMitraRouteName(activeRouteName);

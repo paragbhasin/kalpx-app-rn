@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import TextComponent from '../../components/TextComponent';
 import { AppDispatch, RootState } from '../../store';
 import {
+  fetchPreferences,
   fetchNotificationPrefs,
   fetchGlobalConsent,
   updateNotificationPref,
@@ -63,41 +64,44 @@ const COMPANION_CATEGORIES: CategoryConfig[] = [
   },
 ];
 
-const OPTIONAL_CATEGORIES: CategoryConfig[] = [
+const COMPANION_GUIDANCE_CATEGORIES: CategoryConfig[] = [
   {
     key: 'predictive_suggestions',
     label: 'Mitra Suggestions',
-    description: "Mitra's gentle nudges when it notices something worth exploring.",
-    defaultOn: false,
-  },
-  {
-    key: 'post_conflict_follow',
-    label: 'After a Hard Moment',
-    description: 'A gentle return after a heavy time. Off by default.',
-    defaultOn: false,
-  },
-  {
-    key: 'grief_follow',
-    label: 'Grief Companionship',
-    description: 'Still with you, when you want it. Off by default.',
-    defaultOn: false,
+    description: 'Gentle suggestions when Mitra finds a practice that may help today.',
+    defaultOn: true,
   },
   {
     key: 'festival_ritucharya',
     label: 'Festival & Season Rhythms',
-    description: 'Tithi and seasonal companions. Off by default.',
-    defaultOn: false,
+    description: 'Cultural and seasonal reflections woven into your practice.',
+    defaultOn: true,
   },
   {
     key: 'gentle_reengagement',
-    label: 'Re-engagement',
-    description: 'A soft return after a quiet period. Off by default.',
-    defaultOn: false,
+    label: 'Gentle Return',
+    description: "A quiet reminder when you've been away for a few days.",
+    defaultOn: true,
+  },
+  {
+    key: 'post_conflict_follow',
+    label: 'Quiet Reset',
+    description: 'A soft reminder to pause and return to your practice.',
+    defaultOn: true,
   },
   {
     key: 'community_updates',
-    label: 'Community',
-    description: 'Updates from the KalpX community. Off by default.',
+    label: 'Community Updates',
+    description: 'Updates from KalpX spaces and reflections.',
+    defaultOn: true,
+  },
+];
+
+const SENSITIVE_CATEGORIES: CategoryConfig[] = [
+  {
+    key: 'grief_follow',
+    label: 'Grief Companionship',
+    description: 'Very gentle support during tender times.',
     defaultOn: false,
   },
 ];
@@ -128,6 +132,7 @@ const NotificationPreferences = () => {
   const [quietSaved, setQuietSaved] = useState(false);
 
   useEffect(() => {
+    dispatch(fetchPreferences());
     dispatch(fetchNotificationPrefs());
     dispatch(fetchGlobalConsent());
   }, [dispatch]);
@@ -204,11 +209,7 @@ const NotificationPreferences = () => {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
         {/* Global consent */}
-        <View style={styles.section}>
-          <TextComponent type="headerText" style={styles.sectionTitle}>Notification Consent</TextComponent>
-          <TextComponent style={styles.sectionSubtitle}>
-            Master switches for all Mitra notifications.
-          </TextComponent>
+        <Section title="Notification Consent" subtitle="Master switches for all Mitra notifications.">
           <CategoryRow
             label="Push Notifications"
             description="Receive notifications on this device."
@@ -221,14 +222,10 @@ const NotificationPreferences = () => {
             value={globalConsent.receive_emails}
             onToggle={(v) => handleGlobalConsentToggle('receive_emails', v)}
           />
-        </View>
+        </Section>
 
-        {/* Companion rhythm */}
-        <View style={styles.section}>
-          <TextComponent type="headerText" style={styles.sectionTitle}>Companion Rhythm</TextComponent>
-          <TextComponent style={styles.sectionSubtitle}>
-            Core companion notifications. On by default.
-          </TextComponent>
+        {/* Core companion rhythm */}
+        <Section title="Companion Rhythm" subtitle="Core companion notifications.">
           {COMPANION_CATEGORIES.map((cat) => (
             <CategoryRow
               key={cat.key}
@@ -238,15 +235,14 @@ const NotificationPreferences = () => {
               onToggle={(v) => handleToggle(cat.key, v)}
             />
           ))}
-        </View>
+        </Section>
 
-        {/* Optional & sensitive */}
-        <View style={styles.section}>
-          <TextComponent type="headerText" style={styles.sectionTitle}>Optional — Off by Default</TextComponent>
-          <TextComponent style={styles.sectionSubtitle}>
-            These are more personal. Enable only what feels right for you.
-          </TextComponent>
-          {OPTIONAL_CATEGORIES.map((cat) => (
+        {/* Companion guidance */}
+        <Section
+          title="Companion Guidance"
+          subtitle="Helpful touchpoints from Mitra to support your practice, rhythm, and connection."
+        >
+          {COMPANION_GUIDANCE_CATEGORIES.map((cat) => (
             <CategoryRow
               key={cat.key}
               label={cat.label}
@@ -255,14 +251,26 @@ const NotificationPreferences = () => {
               onToggle={(v) => handleToggle(cat.key, v)}
             />
           ))}
-        </View>
+        </Section>
+
+        {/* Deeply personal */}
+        <Section
+          title="Deeply Personal Support"
+          subtitle="These are deeply personal. Turn them on only if you want Mitra to support you in these moments."
+        >
+          {SENSITIVE_CATEGORIES.map((cat) => (
+            <CategoryRow
+              key={cat.key}
+              label={cat.label}
+              description={cat.description}
+              value={notifications[cat.key] ?? cat.defaultOn}
+              onToggle={(v) => handleToggle(cat.key, v)}
+            />
+          ))}
+        </Section>
 
         {/* Quiet hours */}
-        <View style={styles.section}>
-          <TextComponent type="headerText" style={styles.sectionTitle}>Quiet Hours</TextComponent>
-          <TextComponent style={styles.sectionSubtitle}>
-            No notifications will be sent during this window. Default: 11 PM to 5 AM.
-          </TextComponent>
+        <Section title="Quiet Hours" subtitle="No notifications will be sent during this window. Default: 11 PM to 5 AM.">
           <View style={styles.quietRow}>
             <View style={styles.quietField}>
               <TextComponent style={styles.quietLabel}>From</TextComponent>
@@ -307,14 +315,10 @@ const NotificationPreferences = () => {
           {quietError ? (
             <TextComponent style={styles.errorText}>{quietError}</TextComponent>
           ) : null}
-        </View>
+        </Section>
 
         {/* Frequency */}
-        <View style={styles.section}>
-          <TextComponent type="headerText" style={styles.sectionTitle}>Frequency</TextComponent>
-          <TextComponent style={styles.sectionSubtitle}>
-            How often Mitra reaches out across all categories.
-          </TextComponent>
+        <Section title="Frequency" subtitle="How often Mitra reaches out across all categories.">
           <View style={styles.frequencyRow}>
             {FREQUENCY_OPTIONS.map((opt) => (
               <TouchableOpacity
@@ -331,7 +335,7 @@ const NotificationPreferences = () => {
               </TouchableOpacity>
             ))}
           </View>
-        </View>
+        </Section>
 
         <View style={styles.footer}>
           <TextComponent style={styles.footerNote}>
@@ -342,6 +346,16 @@ const NotificationPreferences = () => {
     </View>
   );
 };
+
+function Section({ title, subtitle, children }: { title: string; subtitle: string; children: React.ReactNode }) {
+  return (
+    <View style={styles.section}>
+      <TextComponent type="headerText" style={styles.sectionTitle}>{title}</TextComponent>
+      <TextComponent style={styles.sectionSubtitle}>{subtitle}</TextComponent>
+      {children}
+    </View>
+  );
+}
 
 function CategoryRow({
   label,

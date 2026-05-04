@@ -49,6 +49,7 @@ export interface NotificationPrefs {
   gentle_reengagement: boolean;
   community_updates: boolean;
   milestone_reflections: boolean;
+  predictive_suggestions: boolean;
 }
 
 export interface GlobalConsent {
@@ -90,13 +91,14 @@ const initialState: PreferencesSlice = {
   notifications: {
     morning_presence: true,
     prep_heads_up: true,
-    post_conflict_follow: false,
+    post_conflict_follow: true,
     evening_reflection: true,
     grief_follow: false,
-    festival_ritucharya: false,
-    gentle_reengagement: false,
-    community_updates: false,
+    festival_ritucharya: true,
+    gentle_reengagement: true,
+    community_updates: true,
     milestone_reflections: true,
+    predictive_suggestions: true,
   },
   global_consent: { receive_push_notifications: true, receive_emails: true },
   voice_consent_given: false,

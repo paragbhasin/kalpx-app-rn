@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { AppDispatch, RootState } from '../../store';
 import {
+  fetchPreferences,
   fetchNotificationPrefs,
   fetchGlobalConsent,
   updateNotificationPref,
@@ -53,41 +54,44 @@ const COMPANION_CATEGORIES: CategoryConfig[] = [
   },
 ];
 
-const OPTIONAL_CATEGORIES: CategoryConfig[] = [
+const COMPANION_GUIDANCE_CATEGORIES: CategoryConfig[] = [
   {
     key: 'predictive_suggestions',
     label: 'Mitra Suggestions',
-    description: "Mitra's gentle nudges when it notices something worth exploring.",
-    defaultOn: false,
-  },
-  {
-    key: 'post_conflict_follow',
-    label: 'After a Hard Moment',
-    description: 'A gentle return after a heavy time. Off by default.',
-    defaultOn: false,
-  },
-  {
-    key: 'grief_follow',
-    label: 'Grief Companionship',
-    description: 'Still with you, when you want it. Off by default.',
-    defaultOn: false,
+    description: 'Gentle suggestions when Mitra finds a practice that may help today.',
+    defaultOn: true,
   },
   {
     key: 'festival_ritucharya',
     label: 'Festival & Season Rhythms',
-    description: 'Tithi and seasonal companions. Off by default.',
-    defaultOn: false,
+    description: 'Cultural and seasonal reflections woven into your practice.',
+    defaultOn: true,
   },
   {
     key: 'gentle_reengagement',
-    label: 'Re-engagement',
-    description: 'A soft return after a quiet period. Off by default.',
-    defaultOn: false,
+    label: 'Gentle Return',
+    description: 'A quiet reminder when you\'ve been away for a few days.',
+    defaultOn: true,
+  },
+  {
+    key: 'post_conflict_follow',
+    label: 'Quiet Reset',
+    description: 'A soft reminder to pause and return to your practice.',
+    defaultOn: true,
   },
   {
     key: 'community_updates',
-    label: 'Community',
-    description: 'Updates from the KalpX community. Off by default.',
+    label: 'Community Updates',
+    description: 'Updates from KalpX spaces and reflections.',
+    defaultOn: true,
+  },
+];
+
+const SENSITIVE_CATEGORIES: CategoryConfig[] = [
+  {
+    key: 'grief_follow',
+    label: 'Grief Companionship',
+    description: 'Very gentle support during tender times.',
     defaultOn: false,
   },
 ];
@@ -118,6 +122,7 @@ export function NotificationPreferencesPage() {
   const [quietSaved, setQuietSaved] = useState(false);
 
   useEffect(() => {
+    dispatch(fetchPreferences());
     dispatch(fetchNotificationPrefs());
     dispatch(fetchGlobalConsent());
   }, [dispatch]);
@@ -204,8 +209,8 @@ export function NotificationPreferencesPage() {
             />
           </Section>
 
-          {/* Companion rhythm */}
-          <Section title="Companion Rhythm" subtitle="Core companion notifications. On by default.">
+          {/* Core companion rhythm */}
+          <Section title="Companion Rhythm" subtitle="Core companion notifications.">
             {COMPANION_CATEGORIES.map((cat) => (
               <CategoryRow
                 key={cat.key}
@@ -217,9 +222,28 @@ export function NotificationPreferencesPage() {
             ))}
           </Section>
 
-          {/* Optional */}
-          <Section title="Optional — Off by Default" subtitle="These are more personal. Enable only what feels right for you.">
-            {OPTIONAL_CATEGORIES.map((cat) => (
+          {/* Companion guidance */}
+          <Section
+            title="Companion Guidance"
+            subtitle="Helpful touchpoints from Mitra to support your practice, rhythm, and connection."
+          >
+            {COMPANION_GUIDANCE_CATEGORIES.map((cat) => (
+              <CategoryRow
+                key={cat.key}
+                label={cat.label}
+                description={cat.description}
+                value={notifications[cat.key] ?? cat.defaultOn}
+                onToggle={(v) => handleToggle(cat.key, v)}
+              />
+            ))}
+          </Section>
+
+          {/* Deeply personal */}
+          <Section
+            title="Deeply Personal Support"
+            subtitle="These are deeply personal. Turn them on only if you want Mitra to support you in these moments."
+          >
+            {SENSITIVE_CATEGORIES.map((cat) => (
               <CategoryRow
                 key={cat.key}
                 label={cat.label}

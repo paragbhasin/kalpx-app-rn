@@ -15,6 +15,7 @@ import {
   Animated,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -254,137 +255,142 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.overlay}
     >
-      <Animated.View style={[styles.content, { opacity: contentFade }]}>
-        <View style={styles.checkWrap}>
-          <Svg width={48} height={48} viewBox="0 0 48 48">
-            <AnimatedPath
-              d="M10 24 L20 34 L38 14"
-              fill="none"
-              stroke="#A68246"
-              strokeWidth={2.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeDasharray={`${checkPathLength}`}
-              strokeDashoffset={checkDashOffset as any}
-            />
-          </Svg>
-        </View>
-
-        <Animated.View
-          style={{
-            opacity: messageOpacity,
-            width: "100%",
-            alignItems: "center",
-          }}
-        >
-          <View style={styles.messageCard}>
-            <Text style={styles.messageText} testID="completion_message">
-              {message}
-            </Text>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Animated.View style={[styles.content, { opacity: contentFade }]}>
+          <View style={styles.checkWrap}>
+            <Svg width={48} height={48} viewBox="0 0 48 48">
+              <AnimatedPath
+                d="M10 24 L20 34 L38 14"
+                fill="none"
+                stroke="#A68246"
+                strokeWidth={2.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeDasharray={`${checkPathLength}`}
+                strokeDashoffset={checkDashOffset as any}
+              />
+            </Svg>
           </View>
 
-          {/* Track 1 — wisdom anchor (third beat). Renders only when the
-              resolved ContentPack variant authored a wisdom_anchor_line.
-              "Read more →" surfaces existing WhyThisSheet L2 seeded with
-              the backing principle_id when present. */}
-          {!!wisdomAnchorLine && (
-            <View style={styles.wisdomAnchorCard}>
-              <Text
-                style={styles.wisdomAnchorText}
-                testID="completion_wisdom_anchor_line"
-              >
-                {wisdomAnchorLine}
+          <Animated.View
+            style={{
+              opacity: messageOpacity,
+              width: "100%",
+              alignItems: "center",
+            }}
+          >
+            <View style={styles.messageCard}>
+              <Text style={styles.messageText} testID="completion_message">
+                {message}
               </Text>
-              {!!wisdomAnchorPrincipleId && (
-                <TouchableOpacity
-                  style={styles.readMoreBtn}
-                  activeOpacity={0.7}
-                  testID="completion_read_more"
-                  onPress={() => {
-                    const { screenActions } = require("../store/screenSlice");
-                    const { store } = require("../store");
-                    // Seed principle id + open WhyThisSheet L2
-                    store.dispatch(
-                      screenActions.setScreenValue({
-                        key: "why_this_principle_id",
-                        value: wisdomAnchorPrincipleId,
-                      }),
-                    );
-                    executeAction(
-                      {
-                        type: "open_why_this_l2",
-                        payload: { principle_id: wisdomAnchorPrincipleId },
-                      } as any,
-                      {
-                        loadScreen,
-                        goBack,
-                        setScreenValue: (value: any, key: string) =>
-                          setScreenValue(key, value),
-                        screenState: { ...screenData },
-                      },
-                    ).catch(() => {});
-                  }}
-                >
-                  {/* <Text style={styles.readMoreText}>
-                    {slot("read_more_label")}
-                  </Text> */}
-                </TouchableOpacity>
-              )}
             </View>
-          )}
 
-          <View
-            style={styles.voiceInputWrap}
-            testID="completion_reflection_placeholder"
-          >
-            {/* MDR-S1-12 — sovereignty-strict. Placeholder reads from slot
-                 only; dead English fallback dropped. Empty slot → blank
-                 placeholder (acceptable — input remains functional; missing
-                 content visible in QA + telemetry). */}
-            <VoiceTextInput
-              placeholder={slot("reflection_prompt")}
-              onSend={(text, type) => handleSubmitReflection(text, type)}
-            />
-          </View>
+            {!!wisdomAnchorLine && (
+              <View style={styles.wisdomAnchorCard}>
+                <Text
+                  style={styles.wisdomAnchorText}
+                  testID="completion_wisdom_anchor_line"
+                >
+                  {wisdomAnchorLine}
+                </Text>
+                {!!wisdomAnchorPrincipleId && (
+                  <TouchableOpacity
+                    style={styles.readMoreBtn}
+                    activeOpacity={0.7}
+                    testID="completion_read_more"
+                    onPress={() => {
+                      const { screenActions } = require("../store/screenSlice");
+                      const { store } = require("../store");
+                      store.dispatch(
+                        screenActions.setScreenValue({
+                          key: "why_this_principle_id",
+                          value: wisdomAnchorPrincipleId,
+                        }),
+                      );
+                      executeAction(
+                        {
+                          type: "open_why_this_l2",
+                          payload: { principle_id: wisdomAnchorPrincipleId },
+                        } as any,
+                        {
+                          loadScreen,
+                          goBack,
+                          setScreenValue: (value: any, key: string) =>
+                            setScreenValue(key, value),
+                          screenState: { ...screenData },
+                        },
+                      ).catch(() => {});
+                    }}
+                  >
+                    {/* <Text style={styles.readMoreText}>
+                      {slot("read_more_label")}
+                    </Text> */}
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
+
+            <View
+              style={styles.voiceInputWrap}
+              testID="completion_reflection_placeholder"
+            >
+              <VoiceTextInput
+                placeholder={slot("reflection_prompt")}
+                onSend={(text, type) => handleSubmitReflection(text, type)}
+              />
+            </View>
+          </Animated.View>
         </Animated.View>
-      </Animated.View>
 
-      <View style={styles.bottomSection}>
-        <View style={styles.lotusWrap}>
-          <MantraLotus3d width={180} height={140} opacity={0.65} />
+        <View style={styles.bottomSection}>
+          <View style={styles.lotusWrap}>
+            <MantraLotus3d width={180} height={140} opacity={0.65} />
+          </View>
+
+          <View style={styles.footer}>
+            <TouchableOpacity
+              style={styles.primaryCta}
+              onPress={() => handleReturnHome(true)}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.primaryCtaText}>{slot("return_home_cta")}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.secondaryCta}
+              onPress={handleRepeat}
+              activeOpacity={0.6}
+            >
+              <Text style={styles.secondaryCtaText}>{slot("repeat_cta")}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-
-        <View style={styles.footer}>
-          <TouchableOpacity
-            style={styles.primaryCta}
-            onPress={() => handleReturnHome(true)}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.primaryCtaText}>{slot("return_home_cta")}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.secondaryCta}
-            onPress={handleRepeat}
-            activeOpacity={0.6}
-          >
-            <Text style={styles.secondaryCtaText}>{slot("repeat_cta")}</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   overlay: {
-    // flex: 1,
+    flex: 1,
     width: "100%",
+  },
+  scroll: {
+    flex: 1,
+    width: "100%",
+  },
+  scrollContent: {
+    flexGrow: 1,
     alignItems: "center",
     justifyContent: "space-between",
-    // paddingTop: 80,
-    // paddingBottom: 48,
     paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 32,
   },
   content: {
     alignItems: "center",
@@ -395,7 +401,7 @@ const styles = StyleSheet.create({
     height: 64,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 48,
+    // marginBottom: 48,
   },
   messageCard: {
     borderLeftWidth: 2,

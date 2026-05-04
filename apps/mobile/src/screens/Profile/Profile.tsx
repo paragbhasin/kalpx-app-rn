@@ -111,6 +111,15 @@ const Profile = () => {
     ? [...loggedInItems]
     : [...guestItems];
 
+  const getMenuLabel = (key: string) => {
+    if (key === "notificationPreferences") {
+      return t("profile.menu.notificationPreferences", {
+        defaultValue: "Notification Preferences",
+      });
+    }
+    return t(`profile.menu.${key}`);
+  };
+
 
 
   return (
@@ -145,7 +154,7 @@ const Profile = () => {
               <View style={styles.menuLeft}>
                 <Ionicons name={item.icon} size={20} color="#a67c52" />
                 <TextComponent type="headerSubBoldText" style={styles.menuText}>
-                  {t(`profile.menu.${item.key}`)}
+                  {getMenuLabel(item.key)}
                 </TextComponent>
               </View>
               <Ionicons name="chevron-forward" size={20} color="#888" />
@@ -218,5 +227,4 @@ const Profile = () => {
 }
 
 export default Profile;
-
 

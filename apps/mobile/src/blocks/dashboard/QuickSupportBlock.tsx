@@ -25,6 +25,7 @@
 
 import React, { useState } from "react";
 import {
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -158,7 +159,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: Colors.lotusPeach,
     borderRadius: 28,
-    paddingVertical: 14,
+    paddingVertical: Platform.OS === "android" ? 11 : 14,
     marginBottom: 10,
   },
   primaryBordered: {

@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import LibrarySearchModal from "../components/LibrarySearchModal";
+import TextComponent from "../components/TextComponent";
 import { executeAction } from "../engine/actionExecutor";
 import {
   mitraCompleteAdditionalItem,
@@ -270,9 +271,9 @@ const AdditionalItemsSectionBlock: React.FC<Props> = ({ block }) => {
     <View style={styles.container} testID="additional_items_surface">
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.label}>
+        <TextComponent type="boldText" style={styles.label}>
           {blockSafe.label || "Additional Practices"}
-        </Text>
+        </TextComponent>
         <TouchableOpacity onPress={() => setShowLibrary(true)}>
           <Text style={styles.addBtn}>+ Add from Library </Text>
         </TouchableOpacity>
@@ -389,17 +390,12 @@ const AdditionalItemsSectionBlock: React.FC<Props> = ({ block }) => {
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 18,
-    // backgroundColor: "rgba(255, 253, 249, 0.9)",
-    borderRadius: 15,
+    marginVertical: Platform.OS === "android" ? 6 : 18,
+    backgroundColor: "transparent",
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: "rgba(192, 145, 61, 0.4)",
-    padding: 2,
-    shadowColor: "#7f5a22",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 20,
-    elevation: 5,
+    padding: Platform.OS === "android" ? 0 : 2,
   },
   loadingContainer: {
     padding: 30,
@@ -409,9 +405,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 15,
+    paddingHorizontal: Platform.OS === "android" ? 16 : 20,
+    paddingTop: Platform.OS === "android" ? 12 : 20,
+    paddingBottom: Platform.OS === "android" ? 8 : 15,
   },
   label: {
     fontSize: 14,
@@ -426,7 +422,7 @@ const styles = StyleSheet.create({
     color: "#bc8f36",
   },
   list: {
-    padding: 12,
+    padding: Platform.OS === "android" ? 8 : 12,
     gap: 12,
   },
   card: {

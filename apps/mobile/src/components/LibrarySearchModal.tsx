@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: Platform.OS === "android" ? 24 : 28,
     fontFamily: Fonts.serif.bold,
     color: "#4a2508",
     fontWeight: "700",
@@ -290,10 +290,10 @@ const styles = StyleSheet.create({
   },
   helpText: {
     fontFamily: Fonts.serif.regular,
-    fontSize: 14,
+    fontSize: Platform.OS === "android" ? 13 : 14,
     color: "#432104",
     paddingHorizontal: 38,
-    lineHeight: 20,
+    lineHeight: Platform.OS === "android" ? 18 : 20,
     marginTop: 4,
     // marginBottom: 10,
   },
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     height: 45,
-    fontSize: 20,
+    fontSize: Platform.OS === "android" ? 17 : 20,
     fontFamily: Fonts.serif.regular,
     color: "#4c2a0f",
   },
@@ -347,13 +347,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(227, 214, 196, 0.9)",
     borderRadius: 28,
-    padding: 24,
+    padding: Platform.OS === "android" ? 15 : 24,
     marginBottom: 14,
-    shadowColor: "#74542a",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.06,
-    shadowRadius: 22,
-    elevation: 3,
   },
   disabledCard: {
     opacity: 0.56,
@@ -368,7 +363,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   itemTypeBadge: {
-    fontSize: 12,
+    fontSize: Platform.OS === "android" ? 10 : 12,
     textTransform: "uppercase",
     color: "#8b6838",
     backgroundColor: "#f4ecdf",
@@ -379,7 +374,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   levelBadge: {
-    fontSize: 11,
+    fontSize: Platform.OS === "android" ? 10 : 11,
     textTransform: "uppercase",
     paddingHorizontal: 12,
     paddingVertical: 5,
@@ -389,18 +384,18 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   itemTitle: {
-    fontSize: 24,
+    fontSize: Platform.OS === "android" ? 18 : 24,
     fontFamily: Fonts.serif.bold,
     color: "#4b260a",
     fontWeight: "700",
-    lineHeight: 28,
+    lineHeight: Platform.OS === "android" ? 24 : 28,
   },
   itemSubtitle: {
-    fontSize: 16,
+    fontSize: Platform.OS === "android" ? 14 : 16,
     fontFamily: Fonts.serif.regular,
     color: "#7f756d",
     marginTop: 8,
-    lineHeight: 20,
+    lineHeight: Platform.OS === "android" ? 18 : 20,
   },
   tagRow: {
     flexDirection: "row",
@@ -409,7 +404,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   tag: {
-    fontSize: 12,
+    fontSize: Platform.OS === "android" ? 11 : 12,
     fontFamily: Fonts.serif.regular,
     color: "#84766a",
     backgroundColor: "rgba(232, 225, 217, 0.7)",
@@ -423,7 +418,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   statusText: {
-    fontSize: 15,
+    fontSize: Platform.OS === "android" ? 13 : 15,
     fontFamily: Fonts.serif.regular,
     color: "#8d8176",
   },
@@ -437,7 +432,7 @@ const styles = StyleSheet.create({
   },
   addBtnText: {
     color: "#d4a017",
-    fontSize: 13,
+    fontSize: Platform.OS === "android" ? 12 : 13,
     fontFamily: Fonts.sans.semiBold,
   },
 });

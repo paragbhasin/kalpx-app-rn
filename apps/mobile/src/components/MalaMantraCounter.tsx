@@ -39,6 +39,7 @@ interface MalaMantraCounterProps {
   mediaMuted?: boolean;
   onToggleMute?: () => void;
   footerContent?: React.ReactNode;
+  useBackgroundImage?: boolean;
   onIncrement: () => void;
   onExit: () => void;
 }
@@ -61,6 +62,7 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
   mediaMuted = false,
   onToggleMute,
   footerContent,
+  useBackgroundImage = true,
   onIncrement,
   onExit,
 }) => {
@@ -140,12 +142,8 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
     }
   };
 
-  return (
-    <ImageBackground
-      source={require("../../assets/mantra3.png")}
-      style={styles.container}
-      resizeMode="cover"
-    >
+  const content = (
+    <>
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.contentWrapper}
@@ -349,7 +347,19 @@ const MalaMantraCounter: React.FC<MalaMantraCounterProps> = ({
           <View style={styles.footerActions}>{footerContent}</View>
         )}
       </ScrollView>
+    </>
+  );
+
+  return useBackgroundImage ? (
+    <ImageBackground
+      source={require("../../assets/mantra3.png")}
+      style={styles.container}
+      resizeMode="cover"
+    >
+      {content}
     </ImageBackground>
+  ) : (
+    <View style={[styles.container, styles.transparentContainer]}>{content}</View>
   );
 };
 
@@ -358,6 +368,9 @@ const styles = StyleSheet.create({
     flex: 1,
     width: "100%",
     backgroundColor: "#fff",
+  },
+  transparentContainer: {
+    backgroundColor: "transparent",
   },
   scroll: {
     flex: 1,
@@ -489,10 +502,11 @@ const styles = StyleSheet.create({
     borderRadius: 86,
     borderWidth: 2,
     borderColor: "rgba(255, 200, 100, 0.4)",
-    shadowColor: "#FFB432",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 15,
+    shadowColor: Platform.OS === "ios" ? "#FFB432" : "transparent",
+    shadowOffset: Platform.OS === "ios" ? { width: 0, height: 0 } : { width: 0, height: 0 },
+    shadowOpacity: Platform.OS === "ios" ? 0.8 : 0,
+    shadowRadius: Platform.OS === "ios" ? 15 : 0,
+    elevation: Platform.OS === "android" ? 0 : undefined,
   },
   beadWrapper: {
     position: "absolute",
@@ -527,11 +541,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderWidth: 1.5,
     borderColor: "#e3b54c",
-    elevation: 8,
-    shadowColor: "#b89450",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
+    elevation: Platform.OS === "android" ? 0 : 8,
+    shadowColor: Platform.OS === "ios" ? "#b89450" : "transparent",
+    shadowOffset: Platform.OS === "ios" ? { width: 0, height: 4 } : { width: 0, height: 0 },
+    shadowOpacity: Platform.OS === "ios" ? 0.2 : 0,
+    shadowRadius: Platform.OS === "ios" ? 8 : 0,
     overflow: "hidden",
   },
   tapTouchable: {

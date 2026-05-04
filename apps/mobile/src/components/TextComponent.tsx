@@ -142,7 +142,7 @@ const TextComponent = (props: any) => {
     case "cardText":
       textStyle = styles.cardText;
       break;
-       case "semiBoldBlackText":
+    case "semiBoldBlackText":
       textStyle = styles.semiBoldBlackText;
       break;
     case "streakText":
@@ -157,46 +157,46 @@ const TextComponent = (props: any) => {
     case "streakSubText":
       textStyle = styles.streakSubText;
       break;
-          case "mediumBigText":
+    case "mediumBigText":
       textStyle = styles.mediumBigText;
       break;
-         case "loginHeaderText":
+    case "loginHeaderText":
       textStyle = styles.loginHeaderText;
       break;
-        case "headerIncreaseText":
+    case "headerIncreaseText":
       textStyle = styles.headerIncreaseText;
       break;
-         case "headerSubBoldText":
+    case "headerSubBoldText":
       textStyle = styles.headerSubBoldText;
       break;
-      case "cardSadanaText":
+    case "cardSadanaText":
       textStyle = styles.cardSadanaText;
       break;
-        case "streakSadanaText":
+    case "streakSadanaText":
       textStyle = styles.streakSadanaText;
       break;
-       case "cardHeaderText":
+    case "cardHeaderText":
       textStyle = styles.cardHeaderText;
       break;
     case "subScrollText":
       textStyle = styles.subScrollText;
       break;
-         case "DailyHeaderText":
+    case "DailyHeaderText":
       textStyle = styles.DailyHeaderText;
       break;
-           case "DailyDetailheaderText":
+    case "DailyDetailheaderText":
       textStyle = styles.DailyDetailheaderText;
       break;
-         case "subDailyText":
+    case "subDailyText":
       textStyle = styles.subDailyText;
       break;
-        case "DailyboldText":
+    case "DailyboldText":
       textStyle = styles.DailyboldText;
       break;
-         case "ButtonBottomText":
+    case "ButtonBottomText":
       textStyle = styles.ButtonBottomText;
       break;
-       case "cardSubTitleText":
+    case "cardSubTitleText":
       textStyle = styles.cardSubTitleText;
       break;
     default:
@@ -255,11 +255,13 @@ const TextComponent = (props: any) => {
   const adjustedFontSize =
     userLang === "hi" || userLang === "mr"
       ? textStyle.fontSize * 1.33
-      : userLang === "en"  ? textStyle.fontSize * 1.2: textStyle.fontSize;
+      : userLang === "en"
+        ? textStyle.fontSize * 1
+        : textStyle.fontSize;
 
   return (
     <Text
-    allowFontScaling={false}
+      allowFontScaling={false}
       {...props}
       style={[
         textStyle,
@@ -333,74 +335,74 @@ const styles = StyleSheet.create({
     fontSize: FontSize.CONSTS.FS_13,
     fontFamily: "Inter_500Medium",
   },
-    mediumBigText: {
+  mediumBigText: {
     color: Colors.Colors.Light_grey,
     fontSize: FontSize.CONSTS.FS_22,
     fontFamily: "Inter_500Medium",
   },
-    loginHeaderText: {
+  loginHeaderText: {
     color: Colors.Colors.Light_black,
     fontSize: FontSize.CONSTS.FS_20,
     fontFamily: "Inter_600SemiBold",
   },
-    headerIncreaseText: {
+  headerIncreaseText: {
     color: Colors.Colors.BLACK,
     fontSize: FontSize.CONSTS.FS_18,
     fontFamily: "Inter_600SemiBold",
   },
-    headerSubBoldText: {
+  headerSubBoldText: {
     color: Colors.Colors.Light_black,
     fontSize: FontSize.CONSTS.FS_14,
     fontFamily: "Inter_700Bold",
   },
-    cardSadanaText: {
+  cardSadanaText: {
     color: Colors.Colors.Light_black,
     fontSize: FontSize.CONSTS.FS_22,
     fontFamily: "Inter_600SemiBold",
   },
-    streakSadanaText: {
+  streakSadanaText: {
     color: Colors.Colors.BLACK,
     fontSize: FontSize.CONSTS.FS_14,
     fontFamily: "Inter_500Medium",
   },
-  cardHeaderText:{
+  cardHeaderText: {
     color: Colors.Colors.card_text,
     fontSize: FontSize.CONSTS.FS_18,
     fontFamily: "Inter_500Medium",
   },
-    subScrollText: {
+  subScrollText: {
     color: Colors.Colors.blue_text,
     fontSize: FontSize.CONSTS.FS_14,
     fontFamily: "Inter_400Regular",
   },
-    DailyHeaderText:{
+  DailyHeaderText: {
     color: Colors.Colors.Daily_black,
     fontSize: FontSize.CONSTS.FS_16,
     fontFamily: "Inter_500Medium",
   },
-      DailyDetailheaderText:{
+  DailyDetailheaderText: {
     color: Colors.Colors.Daily_black,
     fontSize: FontSize.CONSTS.FS_18,
     fontFamily: "Inter_500Medium",
   },
-    DailyboldText: {
+  DailyboldText: {
     color: Colors.Colors.Daily_black,
     fontSize: FontSize.CONSTS.FS_16,
     fontFamily: "Inter_700Bold",
   },
-      subDailyText: {
+  subDailyText: {
     color: Colors.Colors.Daily_black,
     fontSize: FontSize.CONSTS.FS_12,
     fontFamily: "Inter_400Regular",
   },
-     ButtonBottomText: {
+  ButtonBottomText: {
     color: Colors.Colors.BLACK,
     fontSize: FontSize.CONSTS.FS_10,
     fontFamily: "Inter_600SemiBold",
   },
-  cardSubTitleText :{
-      color: Colors.Colors.BLACK,
+  cardSubTitleText: {
+    color: Colors.Colors.BLACK,
     fontSize: FontSize.CONSTS.FS_14,
     fontFamily: "Inter_300Light_Italic",
-  }
+  },
 });

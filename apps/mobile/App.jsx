@@ -14,7 +14,18 @@ const TransparentTheme = {
 import * as Notifications from "expo-notifications";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState, useRef } from "react";
-import { Animated, LogBox, StyleSheet, View, Image, ImageBackground, StatusBar, AccessibilityInfo } from "react-native";
+import {
+  AccessibilityInfo,
+  Animated,
+  Image,
+  ImageBackground,
+  LogBox,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 
 // Silence benign dev-only noise that triggers LogBox overlay and blocks
 // Maestro automation. FB CAPI "Param event must be one of ..." error
@@ -73,6 +84,12 @@ Notifications.setNotificationHandler({
     shouldSetBadge: false,
   }),
 });
+
+Text.defaultProps = Text.defaultProps || {};
+Text.defaultProps.allowFontScaling = false;
+
+TextInput.defaultProps = TextInput.defaultProps || {};
+TextInput.defaultProps.allowFontScaling = false;
 
 function SnackBarContainer() {
   const dispatch = useDispatch();

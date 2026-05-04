@@ -12,7 +12,6 @@ import {
   Dimensions,
   Easing,
   Image,
-  ImageBackground,
   LayoutAnimation,
   Platform,
   Pressable,
@@ -1574,11 +1573,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     };
 
     return (
-      <ImageBackground
-        source={require("../../assets/beige_bg.png")}
-        style={styles.fullscreenBg}
-        resizeMode="cover"
-      >
+      <View style={styles.fullscreenBg}>
         <ScrollView
           contentContainerStyle={styles.repSelectionScroll}
           showsVerticalScrollIndicator={false}
@@ -1657,11 +1652,11 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
               })
             }
             activeOpacity={0.7}
-          >
-            <Text style={styles.returnLink}>Return to Mitra Home</Text>
-          </TouchableOpacity>
+        >
+          <Text style={styles.returnLink}>Return to Mitra Home</Text>
+        </TouchableOpacity>
         </ScrollView>
-      </ImageBackground>
+      </View>
     );
   }
 
@@ -1683,6 +1678,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
           hindiText={mantraHindi}
           targetCount={target}
           currentCount={count}
+          useBackgroundImage={false}
           onIncrement={() => {
             const next = count + 1;
             setCount(next);
@@ -1790,11 +1786,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
 
   if (isSupportPractice) {
     return (
-      <ImageBackground
-        source={require("../../assets/mantra3.png")}
-        style={styles.fullscreenBg}
-        resizeMode="cover"
-      >
+      <View style={styles.fullscreenBg}>
         <ScrollView
           contentContainerStyle={styles.supportPracticeScroll}
           showsVerticalScrollIndicator={false}
@@ -1913,7 +1905,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
             </CollapsibleCard>
           )}
         </ScrollView>
-      </ImageBackground>
+      </View>
     );
   }
 
@@ -1934,11 +1926,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     };
 
     return (
-      <ImageBackground
-        source={require("../../assets/mantra_relaxing.png")}
-        style={styles.fullscreenBg}
-        resizeMode="cover"
-      >
+      <View style={styles.fullscreenBg}>
         <SafeAreaView style={styles.safeArea}>
           <View style={styles.prepTopBar}>
             <TouchableOpacity
@@ -1974,7 +1962,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
             </Text>
           </View>
         </SafeAreaView>
-      </ImageBackground>
+      </View>
     );
   }
 
@@ -2209,11 +2197,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     const points = completionConfig.points || [];
 
     return (
-      <ImageBackground
-        source={require("../../assets/beige_bg.png")}
-        style={styles.fullscreenBg}
-        resizeMode="cover"
-      >
+      <View style={styles.fullscreenBg}>
         <ScrollView
           contentContainerStyle={styles.mantraCompleteScroll}
           showsVerticalScrollIndicator={false}
@@ -2322,7 +2306,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
             </Text>
           </TouchableOpacity>
         </ScrollView>
-      </ImageBackground>
+      </View>
     );
   }
 
@@ -2335,11 +2319,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     };
 
     return (
-      <ImageBackground
-        source={require("../../assets/beige_bg.png")}
-        style={styles.fullscreenBg}
-        resizeMode="cover"
-      >
+      <View style={styles.fullscreenBg}>
         <ScrollView
           contentContainerStyle={styles.sankalpConfirmScroll}
           showsVerticalScrollIndicator={false}
@@ -2405,7 +2385,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
             </Text>
           </TouchableOpacity>
         </ScrollView>
-      </ImageBackground>
+      </View>
     );
   }
 

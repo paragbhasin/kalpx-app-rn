@@ -383,16 +383,19 @@ const BreathingOrb: React.FC<{
           },
         ]}
       >
-        <BlurView
-          intensity={Platform.OS === "ios" ? 40 : 80}
-          style={styles.blurWrapper}
-        >
-          <View style={styles.innerGlass}>
-            {/* Top highlight for 3D effect */}
-            {/* <View style={styles.orbHighlight} /> */}
-            <Text style={styles.circleText}>{phase}</Text>
+        {Platform.OS === "ios" ? (
+          <BlurView intensity={40} style={styles.blurWrapper}>
+            <View style={styles.innerGlass}>
+              <Text style={styles.circleText}>{phase}</Text>
+            </View>
+          </BlurView>
+        ) : (
+          <View style={[styles.blurWrapper, styles.androidCircleFill]}>
+            <View style={styles.innerGlass}>
+              <Text style={styles.circleText}>{phase}</Text>
+            </View>
           </View>
-        </BlurView>
+        )}
       </Animated.View>
     </View>
   );
@@ -1021,17 +1024,19 @@ const styles = StyleSheet.create({
     borderColor: "rgba(230, 211, 163, 0.6)",
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     overflow: "hidden", // Important for BlurView
-    // Glass shadow
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 10,
+    shadowColor: Platform.OS === "ios" ? "#000" : "transparent",
+    shadowOffset: Platform.OS === "ios" ? { width: 0, height: 8 } : { width: 0, height: 0 },
+    shadowOpacity: Platform.OS === "ios" ? 0.15 : 0,
+    shadowRadius: Platform.OS === "ios" ? 16 : 0,
+    elevation: Platform.OS === "android" ? 0 : 10,
   },
   blurWrapper: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+  androidCircleFill: {
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
   },
   innerGlass: {
     flex: 1,

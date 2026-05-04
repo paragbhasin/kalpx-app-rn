@@ -19,6 +19,7 @@
  */
 
 import { Ionicons } from "@expo/vector-icons";
+import type { RoomId } from "@kalpx/types";
 import { useNavigation } from "@react-navigation/native";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -34,6 +35,7 @@ import {
 } from "react-native";
 import uuidv4 from "react-native-uuid";
 import { useDispatch } from "react-redux";
+import RoomEntrySheet from "../../blocks/room/RoomEntrySheet";
 import { useToast } from "../../context/ToastContext";
 import { executeAction } from "../../engine/actionExecutor";
 import {
@@ -50,8 +52,6 @@ import {
   screenActions,
 } from "../../store/screenSlice";
 import { Fonts } from "../../theme/fonts";
-import RoomEntrySheet from "../../blocks/room/RoomEntrySheet";
-import type { RoomId } from "@kalpx/types";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -570,7 +570,10 @@ export default function ContinueJourney({
       setRoomSheetVisible(false);
       try {
         await executeAction(
-          { type: "enter_room", payload: { room_id, source: "home_support_path" } } as any,
+          {
+            type: "enter_room",
+            payload: { room_id, source: "home_support_path" },
+          } as any,
           buildActionContext() as any,
         );
       } catch (err: any) {
@@ -672,13 +675,13 @@ export default function ContinueJourney({
           )}
         </ScrollView>
 
-        <View style={styles.lotusContainer} pointerEvents="none">
+        {/* <View style={styles.lotusContainer} pointerEvents="none">
           <Image
             source={require("../../../assets/new_home_lotus.png")}
             style={styles.lotusImage}
             resizeMode="contain"
           />
-        </View>
+        </View> */}
 
         <RoomEntrySheet
           visible={roomSheetVisible}

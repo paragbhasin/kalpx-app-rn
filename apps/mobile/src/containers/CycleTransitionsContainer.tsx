@@ -98,6 +98,10 @@ const CALM_MUSIC_TRACKS = [
   require("../../assets/sounds/Audio9.mpeg"),
   require("../../assets/sounds/Audio6.mpeg"),
 ];
+const PRACTICE_TIMER_SIZE = Platform.OS === "android" ? 216 : 232;
+const PRACTICE_TIMER_CENTER = PRACTICE_TIMER_SIZE / 2;
+const PRACTICE_TIMER_RADIUS = Platform.OS === "android" ? 88 : 96;
+const PRACTICE_TIMER_STROKE = Platform.OS === "android" ? 10 : 11;
 
 function formatTimer(seconds: number): string {
   const safe = Math.max(0, Math.floor(seconds));
@@ -1420,31 +1424,35 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                 ) : (
                   <>
                     <View style={styles.practiceTimerVisual}>
-                      <Svg width={260} height={260} viewBox="0 0 260 260">
+                      <Svg
+                        width={PRACTICE_TIMER_SIZE}
+                        height={PRACTICE_TIMER_SIZE}
+                        viewBox={`0 0 ${PRACTICE_TIMER_SIZE} ${PRACTICE_TIMER_SIZE}`}
+                      >
                         <Circle
-                          cx="130"
-                          cy="130"
-                          r="108"
+                          cx={PRACTICE_TIMER_CENTER}
+                          cy={PRACTICE_TIMER_CENTER}
+                          r={PRACTICE_TIMER_RADIUS}
                           stroke="rgba(212,160,23,0.2)"
-                          strokeWidth="12"
+                          strokeWidth={PRACTICE_TIMER_STROKE}
                           fill="none"
                         />
                         <Circle
-                          cx="130"
-                          cy="130"
-                          r="108"
+                          cx={PRACTICE_TIMER_CENTER}
+                          cy={PRACTICE_TIMER_CENTER}
+                          r={PRACTICE_TIMER_RADIUS}
                           stroke="#D4A017"
-                          strokeWidth="12"
+                          strokeWidth={PRACTICE_TIMER_STROKE}
                           fill="none"
-                          strokeDasharray={`${2 * Math.PI * 108}`}
+                          strokeDasharray={`${2 * Math.PI * PRACTICE_TIMER_RADIUS}`}
                           strokeDashoffset={
                             2 *
                             Math.PI *
-                            108 *
+                            PRACTICE_TIMER_RADIUS *
                             (1 - practiceTimeLeft / practiceInitialSeconds)
                           }
                           strokeLinecap="round"
-                          transform="rotate(-90 130 130)"
+                          transform={`rotate(-90 ${PRACTICE_TIMER_CENTER} ${PRACTICE_TIMER_CENTER})`}
                         />
                       </Svg>
                       <View style={styles.practiceTimerCenter}>
@@ -1474,7 +1482,10 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                           <MantraLotus3d
                             width={110}
                             height={80}
-                            style={{ marginBottom: -60 }}
+                            style={{
+                              marginBottom:
+                                Platform.OS === "android" ? -30 : -60,
+                            }}
                           />
                         )}
                       </View>
@@ -1630,7 +1641,8 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                     screenState: screenData,
                     loadScreen,
                     goBack,
-                    setScreenValue: (val: any, k: string) => updateScreenData(k, val),
+                    setScreenValue: (val: any, k: string) =>
+                      updateScreenData(k, val),
                   },
                 );
               }}
@@ -1672,7 +1684,8 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                   screenState: screenData,
                   loadScreen,
                   goBack,
-                  setScreenValue: (val: any, k: string) => updateScreenData(k, val),
+                  setScreenValue: (val: any, k: string) =>
+                    updateScreenData(k, val),
                 },
               );
             }}
@@ -1986,6 +1999,7 @@ const styles = StyleSheet.create({
   practiceTimerVisual: {
     width: 260,
     height: 260,
+
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 18,
@@ -1996,13 +2010,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   practiceTimerClock: {
-    fontSize: 54,
-    lineHeight: 60,
+    fontSize: Platform.OS === "android" ? 42 : 46,
+    lineHeight: Platform.OS === "android" ? 48 : 52,
     color: BROWN,
     fontFamily: Fonts.serif.bold,
   },
   practiceTimerSubtext: {
-    fontSize: 14,
+    fontSize: Platform.OS === "android" ? 13 : 14,
     color: "#7B6A55",
     fontFamily: Fonts.sans.regular,
     marginTop: 6,
@@ -2249,11 +2263,12 @@ const styles = StyleSheet.create({
     width: 180,
     height: 180,
     borderRadius: 90,
-    shadowColor: "#E8C587",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 20,
-    elevation: 8,
+    shadowColor: Platform.OS === "ios" ? "#E8C587" : "transparent",
+    shadowOffset:
+      Platform.OS === "ios" ? { width: 0, height: 0 } : { width: 0, height: 0 },
+    shadowOpacity: Platform.OS === "ios" ? 0.8 : 0,
+    shadowRadius: Platform.OS === "ios" ? 20 : 0,
+    elevation: Platform.OS === "android" ? 0 : 8,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -2262,11 +2277,12 @@ const styles = StyleSheet.create({
     height: 140,
     borderRadius: 70,
     backgroundColor: "rgba(255, 255, 255, 0.8)",
-    shadowColor: "#E8C587",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 20,
-    elevation: 8,
+    shadowColor: Platform.OS === "ios" ? "#E8C587" : "transparent",
+    shadowOffset:
+      Platform.OS === "ios" ? { width: 0, height: 0 } : { width: 0, height: 0 },
+    shadowOpacity: Platform.OS === "ios" ? 0.8 : 0,
+    shadowRadius: Platform.OS === "ios" ? 20 : 0,
+    elevation: Platform.OS === "android" ? 0 : 8,
   },
   beadsRing: {
     width: "100%",
@@ -2308,11 +2324,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#fffdf9",
     borderWidth: 1,
     borderColor: "#e8c587",
-    elevation: 4,
-    shadowColor: "#b89450",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
+    elevation: Platform.OS === "android" ? 0 : 4,
+    shadowColor: Platform.OS === "ios" ? "#b89450" : "transparent",
+    shadowOffset:
+      Platform.OS === "ios" ? { width: 0, height: 2 } : { width: 0, height: 0 },
+    shadowOpacity: Platform.OS === "ios" ? 0.1 : 0,
+    shadowRadius: Platform.OS === "ios" ? 6 : 0,
   },
   tapTouchable: {
     flex: 1,
@@ -2340,20 +2357,23 @@ const styles = StyleSheet.create({
   },
   repPillsContainer: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    gap: 10,
+    flexWrap: "nowrap",
+    justifyContent: "space-between",
+    gap: Platform.OS === "android" ? 6 : 10,
     marginTop: 20,
-    paddingHorizontal: 5,
+    width: "100%",
+    paddingHorizontal: Platform.OS === "android" ? 2 : 5,
     marginBottom: 25,
   },
   repPill: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    minWidth: Platform.OS === "android" ? 48 : 56,
+    paddingHorizontal: Platform.OS === "android" ? 10 : 16,
+    paddingVertical: Platform.OS === "android" ? 7 : 8,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: "#e8c587",
     backgroundColor: "transparent",
+    alignItems: "center",
   },
   repPillSelected: {
     backgroundColor: "#b89450",
@@ -2361,7 +2381,7 @@ const styles = StyleSheet.create({
   },
   repPillText: {
     fontFamily: Fonts.sans.medium,
-    fontSize: 14,
+    fontSize: Platform.OS === "android" ? 13 : 14,
     color: "#8a7a5a",
   },
   repPillTextSelected: {

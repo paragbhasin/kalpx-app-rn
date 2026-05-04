@@ -1,4 +1,5 @@
 import {
+  Bell,
   Bookmark,
   ChevronDown,
   ChevronLeft,
@@ -322,6 +323,12 @@ export function ProfilePage() {
       //   icon: Globe,
       //   onClick: () => setView("language"),
       // },
+      {
+        key: "notification-preferences",
+        label: "Notification Preferences",
+        icon: Bell,
+        onClick: () => navigate("/en/settings/notifications"),
+      },
       {
         key: "privacy",
         label: "Privacy Policy",

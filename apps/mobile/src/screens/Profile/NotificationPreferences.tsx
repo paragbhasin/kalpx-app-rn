@@ -1,0 +1,410 @@
+import { useNavigation } from '@react-navigation/native';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useDispatch, useSelector } from 'react-redux';
+import TextComponent from '../../components/TextComponent';
+import { AppDispatch, RootState } from '../../store';
+import {
+  fetchNotificationPrefs,
+  updateNotificationPref,
+  updatePreference,
+  type NotificationPrefs,
+} from '../../store/preferencesSlice';
+
+const GOLD = '#b8864b';
+const BORDER = 'rgba(184, 134, 75, 0.22)';
+const BG = '#fffaf5';
+const SECTION_BG = '#fff8f0';
+const TEXT_SECONDARY = '#7a6a58';
+
+type CategoryConfig = {
+  key: keyof NotificationPrefs;
+  label: string;
+  description: string;
+  defaultOn: boolean;
+};
+
+const COMPANION_CATEGORIES: CategoryConfig[] = [
+  {
+    key: 'morning_presence',
+    label: 'Morning Companion',
+    description: 'A gentle start before your day opens.',
+    defaultOn: true,
+  },
+  {
+    key: 'prep_heads_up',
+    label: 'Practice Reminders',
+    description: 'A nudge to return to your Sankalp or Mantra.',
+    defaultOn: true,
+  },
+  {
+    key: 'evening_reflection',
+    label: 'Evening Reflection',
+    description: 'A quiet close for the day.',
+    defaultOn: true,
+  },
+];
+
+const OPTIONAL_CATEGORIES: CategoryConfig[] = [
+  {
+    key: 'post_conflict_follow',
+    label: 'After a Hard Moment',
+    description: 'A gentle return after a heavy time. Off by default.',
+    defaultOn: false,
+  },
+  {
+    key: 'grief_follow',
+    label: 'Grief Companionship',
+    description: 'Still with you, when you want it. Off by default.',
+    defaultOn: false,
+  },
+  {
+    key: 'festival_ritucharya',
+    label: 'Festival & Season Rhythms',
+    description: 'Tithi and seasonal companions. Off by default.',
+    defaultOn: false,
+  },
+  {
+    key: 'gentle_reengagement',
+    label: 'Re-engagement',
+    description: 'A soft return after a quiet period. Off by default.',
+    defaultOn: false,
+  },
+  {
+    key: 'community_updates',
+    label: 'Community',
+    description: 'Updates from the KalpX community. Off by default.',
+    defaultOn: false,
+  },
+];
+
+const FREQUENCY_OPTIONS: { label: string; value: string; description: string }[] = [
+  { label: 'Normal', value: 'normal', description: 'Full companion rhythm' },
+  { label: 'Reduced', value: 'reduced', description: 'Fewer, more spaced' },
+  { label: 'Off', value: 'off', description: 'Pause all notifications' },
+];
+
+function isValidHHMM(val: string): boolean {
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(val);
+}
+
+const NotificationPreferences = () => {
+  const navigation: any = useNavigation();
+  const dispatch = useDispatch<AppDispatch>();
+  const notifications = useSelector((s: RootState) => s.preferences.notifications);
+  const quietHours = useSelector((s: RootState) => s.preferences.quiet_hours);
+  const frequency = useSelector((s: RootState) => s.preferences.recommended_frequency);
+  const loaded = useSelector((s: RootState) => s.preferences.loaded);
+
+  const [quietStart, setQuietStart] = useState(quietHours.start);
+  const [quietEnd, setQuietEnd] = useState(quietHours.end);
+  const [quietError, setQuietError] = useState('');
+  const [savingQuiet, setSavingQuiet] = useState(false);
+  const [quietSaved, setQuietSaved] = useState(false);
+
+  useEffect(() => {
+    dispatch(fetchNotificationPrefs());
+  }, [dispatch]);
+
+  useEffect(() => {
+    setQuietStart(quietHours.start);
+    setQuietEnd(quietHours.end);
+  }, [quietHours.start, quietHours.end]);
+
+  const handleToggle = useCallback(
+    (key: keyof NotificationPrefs, value: boolean) => {
+      dispatch(updateNotificationPref({ key, value }));
+    },
+    [dispatch],
+  );
+
+  const handleFrequency = useCallback(
+    (value: string) => {
+      dispatch(updatePreference({ key: 'recommended_frequency', value }));
+    },
+    [dispatch],
+  );
+
+  const handleSaveQuietHours = async () => {
+    if (!isValidHHMM(quietStart)) {
+      setQuietError('Start time must be HH:MM (e.g. 23:00)');
+      return;
+    }
+    if (!isValidHHMM(quietEnd)) {
+      setQuietError('End time must be HH:MM (e.g. 05:00)');
+      return;
+    }
+    setQuietError('');
+    setSavingQuiet(true);
+    try {
+      await dispatch(
+        updatePreference({ key: 'quiet_hours', value: { start: quietStart, end: quietEnd } }),
+      );
+      setQuietSaved(true);
+      setTimeout(() => setQuietSaved(false), 2000);
+    } finally {
+      setSavingQuiet(false);
+    }
+  };
+
+  if (!loaded) {
+    return (
+      <View style={[styles.container, styles.center]}>
+        <ActivityIndicator color={GOLD} size="large" />
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+          <Ionicons name="arrow-back" size={22} color="#3a2e24" />
+        </TouchableOpacity>
+        <TextComponent type="headerText" style={styles.headerText}>
+          Notification Preferences
+        </TextComponent>
+        <View style={{ width: 22 }} />
+      </View>
+
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+
+        {/* Companion rhythm */}
+        <View style={styles.section}>
+          <TextComponent type="headerText" style={styles.sectionTitle}>Companion Rhythm</TextComponent>
+          <TextComponent style={styles.sectionSubtitle}>
+            Core companion notifications. On by default.
+          </TextComponent>
+          {COMPANION_CATEGORIES.map((cat) => (
+            <CategoryRow
+              key={cat.key}
+              label={cat.label}
+              description={cat.description}
+              value={notifications[cat.key] ?? cat.defaultOn}
+              onToggle={(v) => handleToggle(cat.key, v)}
+            />
+          ))}
+        </View>
+
+        {/* Optional & sensitive */}
+        <View style={styles.section}>
+          <TextComponent type="headerText" style={styles.sectionTitle}>Optional — Off by Default</TextComponent>
+          <TextComponent style={styles.sectionSubtitle}>
+            These are more personal. Enable only what feels right for you.
+          </TextComponent>
+          {OPTIONAL_CATEGORIES.map((cat) => (
+            <CategoryRow
+              key={cat.key}
+              label={cat.label}
+              description={cat.description}
+              value={notifications[cat.key] ?? cat.defaultOn}
+              onToggle={(v) => handleToggle(cat.key, v)}
+            />
+          ))}
+        </View>
+
+        {/* Quiet hours */}
+        <View style={styles.section}>
+          <TextComponent type="headerText" style={styles.sectionTitle}>Quiet Hours</TextComponent>
+          <TextComponent style={styles.sectionSubtitle}>
+            No notifications will be sent during this window. Default: 11 PM to 5 AM.
+          </TextComponent>
+          <View style={styles.quietRow}>
+            <View style={styles.quietField}>
+              <TextComponent style={styles.quietLabel}>From</TextComponent>
+              <TextInput
+                style={styles.timeInput}
+                value={quietStart}
+                onChangeText={setQuietStart}
+                placeholder="23:00"
+                placeholderTextColor="#b0a090"
+                maxLength={5}
+                keyboardType="numbers-and-punctuation"
+                autoCorrect={false}
+              />
+            </View>
+            <View style={styles.quietField}>
+              <TextComponent style={styles.quietLabel}>Until</TextComponent>
+              <TextInput
+                style={styles.timeInput}
+                value={quietEnd}
+                onChangeText={setQuietEnd}
+                placeholder="05:00"
+                placeholderTextColor="#b0a090"
+                maxLength={5}
+                keyboardType="numbers-and-punctuation"
+                autoCorrect={false}
+              />
+            </View>
+            <TouchableOpacity
+              style={[styles.saveBtn, savingQuiet && styles.saveBtnDisabled]}
+              onPress={handleSaveQuietHours}
+              disabled={savingQuiet}
+            >
+              {savingQuiet ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <TextComponent style={styles.saveBtnText}>
+                  {quietSaved ? 'Saved' : 'Save'}
+                </TextComponent>
+              )}
+            </TouchableOpacity>
+          </View>
+          {quietError ? (
+            <TextComponent style={styles.errorText}>{quietError}</TextComponent>
+          ) : null}
+        </View>
+
+        {/* Frequency */}
+        <View style={styles.section}>
+          <TextComponent type="headerText" style={styles.sectionTitle}>Frequency</TextComponent>
+          <TextComponent style={styles.sectionSubtitle}>
+            How often Mitra reaches out across all categories.
+          </TextComponent>
+          <View style={styles.frequencyRow}>
+            {FREQUENCY_OPTIONS.map((opt) => (
+              <TouchableOpacity
+                key={opt.value}
+                style={[styles.freqOption, frequency === opt.value && styles.freqOptionSelected]}
+                onPress={() => handleFrequency(opt.value)}
+              >
+                <TextComponent
+                  style={[styles.freqLabel, frequency === opt.value && styles.freqLabelSelected]}
+                >
+                  {opt.label}
+                </TextComponent>
+                <TextComponent style={styles.freqDesc}>{opt.description}</TextComponent>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.footer}>
+          <TextComponent style={styles.footerNote}>
+            Global notification consent can be changed in your device settings.
+          </TextComponent>
+        </View>
+      </ScrollView>
+    </View>
+  );
+};
+
+function CategoryRow({
+  label,
+  description,
+  value,
+  onToggle,
+}: {
+  label: string;
+  description: string;
+  value: boolean;
+  onToggle: (v: boolean) => void;
+}) {
+  return (
+    <View style={styles.categoryRow}>
+      <View style={styles.categoryText}>
+        <TextComponent style={styles.categoryLabel}>{label}</TextComponent>
+        <TextComponent style={styles.categoryDesc}>{description}</TextComponent>
+      </View>
+      <Switch
+        value={value}
+        onValueChange={onToggle}
+        trackColor={{ false: '#e0d8cc', true: GOLD }}
+        thumbColor="#fff"
+        ios_backgroundColor="#e0d8cc"
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: BG },
+  center: { justifyContent: 'center', alignItems: 'center' },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: BORDER,
+    backgroundColor: BG,
+  },
+  headerText: { fontSize: 17, color: '#3a2e24' },
+  scroll: { paddingBottom: 40 },
+  section: {
+    marginTop: 20,
+    marginHorizontal: 16,
+    backgroundColor: SECTION_BG,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: BORDER,
+    padding: 16,
+  },
+  sectionTitle: { fontSize: 13, color: GOLD, textTransform: 'uppercase', letterSpacing: 0.6, marginBottom: 2 },
+  sectionSubtitle: { fontSize: 12, color: TEXT_SECONDARY, marginBottom: 14 },
+  categoryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: BORDER,
+  },
+  categoryText: { flex: 1, paddingRight: 12 },
+  categoryLabel: { fontSize: 14, color: '#3a2e24', fontWeight: '500' },
+  categoryDesc: { fontSize: 12, color: TEXT_SECONDARY, marginTop: 2 },
+  quietRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 10, marginTop: 4 },
+  quietField: { flex: 1 },
+  quietLabel: { fontSize: 12, color: TEXT_SECONDARY, marginBottom: 4 },
+  timeInput: {
+    borderWidth: 1,
+    borderColor: BORDER,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    fontSize: 15,
+    color: '#3a2e24',
+    backgroundColor: '#fff',
+  },
+  saveBtn: {
+    backgroundColor: GOLD,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  saveBtnDisabled: { opacity: 0.6 },
+  saveBtnText: { color: '#fff', fontSize: 14, fontWeight: '600' },
+  errorText: { color: '#c0392b', fontSize: 12, marginTop: 6 },
+  frequencyRow: { flexDirection: 'row', gap: 8, marginTop: 4, flexWrap: 'wrap' },
+  freqOption: {
+    flex: 1,
+    minWidth: 90,
+    borderWidth: 1,
+    borderColor: BORDER,
+    borderRadius: 10,
+    padding: 10,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+  },
+  freqOptionSelected: { backgroundColor: '#fff5e8', borderColor: GOLD },
+  freqLabel: { fontSize: 13, fontWeight: '600', color: '#3a2e24', marginBottom: 2 },
+  freqLabelSelected: { color: GOLD },
+  freqDesc: { fontSize: 11, color: TEXT_SECONDARY, textAlign: 'center' },
+  footer: { marginHorizontal: 16, marginTop: 24 },
+  footerNote: { fontSize: 12, color: TEXT_SECONDARY, textAlign: 'center' },
+});
+
+export default NotificationPreferences;

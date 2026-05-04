@@ -27,6 +27,7 @@ import { RoomPage } from "./pages/mitra/RoomPage";
 import { TriggerPage } from "./pages/mitra/TriggerPage";
 import { WelcomeBackPage } from "./pages/mitra/WelcomeBackPage";
 import { NotificationsPage } from "./pages/notifications/NotificationsPage";
+import { NotificationPreferencesPage } from "./pages/settings/NotificationPreferencesPage";
 import { ProfilePage } from "./pages/profile/ProfilePage";
 import { PrivacyPage } from "./pages/legal/PrivacyPage";
 import { TermsPage } from "./pages/legal/TermsPage";
@@ -145,6 +146,16 @@ export function AppRoutes() {
         element={
           <RequiresAuth>
             <NotificationsPage />
+          </RequiresAuth>
+        }
+      />
+
+      {/* Notification preferences */}
+      <Route
+        path="/en/settings/notifications"
+        element={
+          <RequiresAuth>
+            <NotificationPreferencesPage />
           </RequiresAuth>
         }
       />

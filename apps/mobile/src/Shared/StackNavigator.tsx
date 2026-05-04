@@ -30,6 +30,7 @@ import TravelPlannerScreen from "../screens/Home/TravelPlannerScreen";
 import Notifications from "../screens/Notifications/Notifications";
 import OnlineclassesScreen from "../screens/OnlineclassesScreen";
 import Language from "../screens/Profile/Language";
+import NotificationPreferences from "../screens/Profile/NotificationPreferences";
 import Privacy from "../screens/Profile/Privacy";
 import Profile from "../screens/Profile/Profile";
 import ProfileDetails from "../screens/Profile/ProfileDetails";
@@ -297,6 +298,11 @@ export const ProfileStackNavigator = () => (
     <Stack.Screen
       name="Privacy"
       component={Privacy}
+    />
+    <Stack.Screen
+      name="NotificationPreferences"
+      component={NotificationPreferences}
+      options={{ headerShown: false }}
       options={{ headerShown: false }}
     />
     <Stack.Screen

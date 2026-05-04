@@ -45,6 +45,7 @@ export interface NotificationPrefs {
   grief_follow: boolean;
   festival_ritucharya: boolean;
   gentle_reengagement: boolean;
+  community_updates: boolean;
 }
 
 export interface PreferencesSlice {
@@ -75,15 +76,16 @@ const initialState: PreferencesSlice = {
   retreat_mode: false,
   post_conflict_cards: true,
   season_acknowledged_ritu: null,
-  quiet_hours: { start: '22:00', end: '07:00' },
+  quiet_hours: { start: '23:00', end: '05:00' },
   notifications: {
     morning_presence: true,
     prep_heads_up: true,
-    post_conflict_follow: true,
+    post_conflict_follow: false,
     evening_reflection: true,
-    grief_follow: true,
-    festival_ritucharya: true,
+    grief_follow: false,
+    festival_ritucharya: false,
     gentle_reengagement: false,
+    community_updates: false,
   },
   voice_consent_given: false,
   season_banner_dismissed_at: null,

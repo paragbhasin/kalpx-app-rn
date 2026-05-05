@@ -64,6 +64,7 @@ tests/unit/.compiled/
 screenshots/mitra-v3/
 *.png
 !assets/**/*.png
+!apps/mobile/assets/**/*.png
 !apps/web/public/*.png
 !apps/web/public/*.jpg
 !apps/web/public/*.jpeg
@@ -88,4 +89,3 @@ screenshots/career_persona_*/
 .maestro/silk-integrity/.results/
 bridge_*.png
 silk_*.png
-

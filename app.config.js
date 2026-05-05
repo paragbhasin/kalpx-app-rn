@@ -7,7 +7,7 @@ module.exports = {
     slug: "kalpx",
     version: "1.1.34",
     orientation: "portrait",
-    icon: "./apps/mobile/assets/AppIconImg.png",
+    icon: "./apps/mobile/assets/new_logo.png",
     scheme: "kalpx",
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
@@ -15,7 +15,7 @@ module.exports = {
       enabled: false,
     },
     ios: {
-      icon: "./apps/mobile/assets/AppIconImg.png",
+      icon: "./apps/mobile/assets/new_logo.png",
       supportsTablet: true,
       bundleIdentifier: "com.kalpx.app",
       usesAppleSignIn: true,
@@ -44,7 +44,7 @@ module.exports = {
       versionCode: 43,
       package: "com.kalpx.app",
       adaptiveIcon: {
-        foregroundImage: "./apps/mobile/assets/AppIconImg.png",
+        foregroundImage: "./apps/mobile/assets/new_logo.png",
         backgroundColor: "#ffffff",
       },
       edgeToEdgeEnabled: true,

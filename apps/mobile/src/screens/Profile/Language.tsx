@@ -7,12 +7,16 @@ import Colors from "../../components/Colors";
 import TextComponent from "../../components/TextComponent";
 import styles from "./languageStyle";
 
+// Locales registered at startup. Mirror ENABLED_LOCALES in i18n.js.
+// To expose a language here, first add its imports and resource block there.
+const ENABLED_LOCALES = ["en"];
+
 const Language = () => {
   const navigation: any = useNavigation();
   const { i18n } = useTranslation();
 
-  // Available languages
-  const languages = [
+  // Full language registry — entries become available when added to ENABLED_LOCALES
+  const ALL_LANGUAGES = [
     { label: "English", value: "en" },
     { label: "हिन्दी", value: "hi" },
     { label: "ગુજરાતી", value: "gu" },
@@ -22,8 +26,10 @@ const Language = () => {
     { label: "മലയാളം", value: "ml" },
     { label: "தமிழ்", value: "ta" },
     { label: "ଓଡିଆ", value: "or" },
-    { label: "తెలుగు", value: "te" }
+    { label: "తెలుగు", value: "te" },
   ];
+
+  const languages = ALL_LANGUAGES.filter((l) => ENABLED_LOCALES.includes(l.value));
 
   const [selectedLang, setSelectedLang] = useState(i18n.language);
 

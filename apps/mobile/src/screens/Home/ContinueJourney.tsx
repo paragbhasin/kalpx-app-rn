@@ -152,6 +152,11 @@ let _homeCache: { response: HomeResponse; ts: number } | null = null;
 // Module-level ETag for entry-view (returning-user path).
 let _entryViewEtag: string | null = null;
 
+export function clearContinueJourneyHomeCache() {
+  _homeCache = null;
+  _entryViewEtag = null;
+}
+
 export default function ContinueJourney({
   userName = "friend",
   hasActiveJourney = false,

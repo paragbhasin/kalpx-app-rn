@@ -1,4 +1,5 @@
 import { BlurView } from "expo-blur";
+import { useNavigation } from "@react-navigation/native";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -28,6 +29,7 @@ import {
 } from "../engine/v3Ingest";
 import store from "../store";
 import { loadScreenWithData, screenActions } from "../store/screenSlice";
+import { clearContinueJourneyHomeCache } from "../screens/Home/ContinueJourney";
 import { Fonts } from "../theme/fonts";
 
 // Assets (imported as components via react-native-svg-transformer)
@@ -58,6 +60,7 @@ const METRIC_ALLOWLIST: Record<string, string> = {
 const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
   const { screenData, currentStateId } = useScreenStore();
   const { showToast } = useToast();
+  const navigation = useNavigation<any>();
   const ss = screenData as Record<string, any>;
   const checkpointDayNum = Number(ss.checkpoint_day || 0);
   const dayNumberNum = Number(ss.day_number || 0);
@@ -499,6 +502,8 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
             stateId: "turn_1",
           }) as any,
         );
+        // Branch A: user chose full restart — show onboarding immediately
+        navigation.navigate("DynamicEngine");
       } else {
         if (nv.payload && Object.keys(nv.payload).length > 0) {
           const flat = ingestDailyView(nv.payload as any);
@@ -522,6 +527,9 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
             stateId: "day_active",
           }) as any,
         );
+        // Branch B: checkpoint completed — return to Home for fresh ContinueJourney state
+        clearContinueJourneyHomeCache();
+        navigation.navigate("Home");
       }
     } catch (err: any) {
       console.warn(`[CycleReflectionBlock] day7 submit failed:`, err.message);
@@ -598,6 +606,7 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
             stateId: "turn_1",
           }) as any,
         );
+        navigation.navigate("DynamicEngine");
       } else {
         // continue_same or deepen: apply new cycle payload and route to dashboard immediately
         let pendingPayload = nv.payload;
@@ -639,6 +648,8 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
             stateId: "day_active",
           }) as any,
         );
+        clearContinueJourneyHomeCache();
+        navigation.navigate("Home");
       }
     } catch (err: any) {
       console.warn(`[CycleReflectionBlock] day14 submit failed:`, err.message);
@@ -1297,6 +1308,8 @@ const CycleReflectionBlock: React.FC<CycleReflectionBlockProps> = () => {
           stateId: "day_active",
         }) as any,
       );
+      clearContinueJourneyHomeCache();
+      navigation.navigate("Home");
     };
     return (
       <View style={styles.introContainer} testID="checkpoint_day_14_finale">

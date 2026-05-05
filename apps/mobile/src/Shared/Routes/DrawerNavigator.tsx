@@ -152,6 +152,14 @@ const CustomDrawerContent = (props) => {
 
   const categories = [
     {
+      id: "1",
+      name: "Mitra",
+      title: "GuidedGrowth", // Route to landing page
+      iconType: "image",
+      icon: require("../../../assets/Group.png"),
+      isMitra: true,
+    },
+    {
       id: "2",
       name: t("categories.explore"),
       title: "Explore",

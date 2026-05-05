@@ -1,9 +1,30 @@
-import { ChevronDown, ChevronUp, Plus, Search } from "lucide-react";
-import { useState, type ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import {
+  ArrowLeft,
+  ChevronDown,
+  ChevronUp,
+  Plus,
+  Search,
+  XCircle,
+} from "lucide-react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import {
+  getCommunityGlobalSearch,
+  type CommunityGlobalSearchResult,
+} from "../../engine/communityApi";
 
 interface CommunityTopBarProps {
-  activeLabel?: "Home" | "Top" | "Popular" | "Explore" | "Your Activity";
+  activeLabel?:
+    | "Home"
+    | "Top"
+    | "Popular"
+    | "Explore"
+    | "Your Activity"
+    | "Communities"
+    | "Privacy Policy"
+    | "User Agreements"
+    | "KalpX Rules"
+    | "About KalpX";
   rightSlot?: ReactNode;
 }
 
@@ -12,11 +33,23 @@ export function CommunityTopBar({
   rightSlot,
 }: CommunityTopBarProps) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [recentOpen, setRecentOpen] = useState(true);
   const [resourcesOpen, setResourcesOpen] = useState(true);
-
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [searchResults, setSearchResults] =
+    useState<CommunityGlobalSearchResult>({
+      communities: [],
+      posts: [],
+      users: [],
+    });
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const recentCommunities = [
     {
@@ -67,6 +100,123 @@ export function CommunityTopBar({
     { label: "Explore", to: "/en/community/explore" },
   ];
 
+  const resolvedActiveLabel = useMemo(() => {
+    const matchedResource = Object.entries(resourceRoutes).find(
+      ([, route]) => route === location.pathname,
+    )?.[0] as CommunityTopBarProps["activeLabel"] | undefined;
+
+    if (matchedResource) return matchedResource;
+    return activeLabel;
+  }, [activeLabel, location.pathname]);
+
+  useEffect(() => {
+    setIsSearching(false);
+    setSearchQuery("");
+    setSearchLoading(false);
+    setSearchError(null);
+    setSearchResults({ communities: [], posts: [], users: [] });
+    abortRef.current?.abort();
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (!isSearching) return;
+    const timer = window.setTimeout(() => {
+      inputRef.current?.focus();
+    }, 50);
+    return () => window.clearTimeout(timer);
+  }, [isSearching]);
+
+  useEffect(() => {
+    if (!isSearching) return;
+    if (!searchQuery.trim()) {
+      abortRef.current?.abort();
+      setSearchResults({ communities: [], posts: [], users: [] });
+      setSearchLoading(false);
+      setSearchError(null);
+      return;
+    }
+
+    const debounce = window.setTimeout(async () => {
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+      setSearchLoading(true);
+      setSearchError(null);
+
+      try {
+        const results = await getCommunityGlobalSearch(searchQuery, {
+          signal: controller.signal,
+        });
+        setSearchResults(results);
+      } catch (err: any) {
+        if (err?.name === "CanceledError" || err?.name === "AbortError") return;
+        setSearchError("Failed to perform search");
+        setSearchResults({ communities: [], posts: [], users: [] });
+      } finally {
+        if (abortRef.current === controller) {
+          setSearchLoading(false);
+        }
+      }
+    }, 500);
+
+    return () => window.clearTimeout(debounce);
+  }, [isSearching, searchQuery]);
+
+  const combinedResults = useMemo(() => {
+    return [
+      ...(searchResults.communities.length > 0
+        ? [
+            { type: "header", title: "Communities", id: "h-comm" },
+            ...searchResults.communities.map((item, index) => ({
+              ...item,
+              type: "community",
+              id: item.id || item.slug || `community-${index}`,
+            })),
+          ]
+        : []),
+      ...(searchResults.posts.length > 0
+        ? [
+            { type: "header", title: "Posts", id: "h-posts" },
+            ...searchResults.posts.map((item, index) => ({
+              ...item,
+              type: "post",
+              id: item.id || `post-${index}`,
+            })),
+          ]
+        : []),
+      ...(searchResults.users.length > 0
+        ? [
+            { type: "header", title: "Users", id: "h-users" },
+            ...searchResults.users.map((item, index) => ({
+              ...item,
+              type: "user",
+              id: item.id || item.username || `user-${index}`,
+            })),
+          ]
+        : []),
+    ];
+  }, [searchResults]);
+
+  const closeSearch = () => {
+    abortRef.current?.abort();
+    setIsSearching(false);
+    setSearchQuery("");
+    setSearchLoading(false);
+    setSearchError(null);
+    setSearchResults({ communities: [], posts: [], users: [] });
+  };
+
+  const handleResultClick = (item: any) => {
+    if (item.type === "post" && item.id) {
+      navigate(`/en/community/${item.id}`);
+      return;
+    }
+    if (item.type === "community") {
+      navigate("/en/community/communities");
+      return;
+    }
+  };
+
   return (
     <div
       style={{
@@ -89,101 +239,346 @@ export function CommunityTopBar({
           boxSizing: "border-box",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate("/en/community");
-            }}
+        {isSearching ? (
+          <div
             style={{
-              background: "none",
-              border: "none",
-              padding: 0,
-              margin: 0,
-              cursor: "pointer",
-              color: "#2a241e",
-              fontSize: 18,
-              fontWeight: 700,
-              fontFamily: "Georgia, serif",
-              lineHeight: 1,
-            }}
-          >
-            Community
-          </button>
-
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setMenuOpen((value) => !value);
-            }}
-            style={{
-              background: "none",
-              border: "none",
-              padding: 0,
-              margin: 0,
               display: "flex",
               alignItems: "center",
-              gap: 4,
-              cursor: "pointer",
-              color: "#2f2a25",
-              fontSize: 18,
-              fontWeight: 500,
-              textDecoration: "underline",
-              textUnderlineOffset: 2,
+              gap: 8,
+              width: "100%",
             }}
           >
-            <span>{activeLabel}</span>
-            {menuOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-          </button>
-        </div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                closeSearch();
+              }}
+              style={{
+                background: "none",
+                border: "none",
+                padding: 0,
+                margin: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                color: "#000",
+              }}
+              aria-label="Back"
+            >
+              <ArrowLeft size={22} />
+            </button>
+            <div
+              style={{
+                flex: 1,
+                display: "flex",
+                alignItems: "center",
+                background: "#f0f0f0",
+                borderRadius: 20,
+                padding: "0 12px",
+                height: 40,
+              }}
+            >
+              <input
+                ref={inputRef}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search communities, posts, users..."
+                style={{
+                  flex: 1,
+                  border: "none",
+                  outline: "none",
+                  background: "transparent",
+                  fontSize: 15,
+                  color: "#000",
+                }}
+              />
+              {searchQuery.length > 0 && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSearchQuery("");
+                  }}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    margin: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    color: "#999",
+                  }}
+                  aria-label="Clear search"
+                >
+                  <XCircle size={18} fill="currentColor" strokeWidth={0} />
+                </button>
+              )}
+            </div>
+          </div>
+        ) : (
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate("/en/community");
+                }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  margin: 0,
+                  cursor: "pointer",
+                  color: "#2a241e",
+                  fontSize: 18,
+                  fontWeight: 700,
+                  fontFamily: "Georgia, serif",
+                  lineHeight: 1,
+                }}
+              >
+                Community
+              </button>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <button
-            aria-label="Search community"
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-            style={{
-              background: "none",
-              border: "none",
-              padding: 0,
-              margin: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              color: "#2f2a25",
-            }}
-          >
-            <Search size={19} strokeWidth={1.9} />
-          </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMenuOpen((value) => !value);
+                }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  margin: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 4,
+                  cursor: "pointer",
+                  color: "#2f2a25",
+                  fontSize: 18,
+                  fontWeight: 500,
+                  textDecoration: "underline",
+                  textUnderlineOffset: 2,
+                }}
+              >
+                <span>{resolvedActiveLabel}</span>
+                {menuOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+              </button>
+            </div>
 
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate("/en/community/new");
-            }}
-            aria-label="Create post"
-            style={{
-              width: 23,
-              height: 23,
-              borderRadius: 4,
-              background: "#fff",
-              border: "1px solid #2f2a25",
-              padding: 0,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              color: "#2f2a25",
-            }}
-          >
-            <Plus size={16} strokeWidth={1.9} />
-          </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+              <button
+                aria-label="Search community"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMenuOpen(false);
+                  setIsSearching(true);
+                }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  margin: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  color: "#2f2a25",
+                }}
+              >
+                <Search size={19} strokeWidth={1.9} />
+              </button>
 
-          {rightSlot}
-        </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate("/en/community/new");
+                }}
+                aria-label="Create post"
+                style={{
+                  width: 23,
+                  height: 23,
+                  borderRadius: 4,
+                  background: "#fff",
+                  border: "1px solid #2f2a25",
+                  padding: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  color: "#2f2a25",
+                }}
+              >
+                <Plus size={16} strokeWidth={1.9} />
+              </button>
+
+              {rightSlot}
+            </div>
+          </>
+        )}
       </div>
+
+      {isSearching && (
+        <div
+          style={{
+            position: "absolute",
+            top: 48,
+            left: 0,
+            right: 0,
+            background: "#fff",
+            borderBottom: "1px solid #e9e5de",
+            boxShadow: "0 8px 20px rgba(0,0,0,0.06)",
+          }}
+        >
+          <div style={{ maxWidth: 620, margin: "0 auto", minHeight: 120 }}>
+            {searchLoading && searchQuery.length > 0 && (
+              <div style={{ padding: "20px 16px", color: "#7b7468" }}>
+                Loading search results...
+              </div>
+            )}
+
+            {!searchLoading && searchError && (
+              <div style={{ padding: "20px 16px", color: "#9f3a2f" }}>
+                {searchError}
+              </div>
+            )}
+
+            {!searchLoading && !searchError && searchQuery.length === 0 && (
+              <div
+                style={{
+                  padding: "36px 16px",
+                  textAlign: "center",
+                  color: "#999",
+                }}
+              >
+                <Search
+                  size={48}
+                  strokeWidth={1.4}
+                  style={{ margin: "0 auto 10px" }}
+                />
+                <div style={{ fontSize: 15 }}>
+                  Type to search communities, posts, and users
+                </div>
+              </div>
+            )}
+
+            {!searchLoading &&
+              !searchError &&
+              searchQuery.length > 0 &&
+              combinedResults.length === 0 && (
+                <div
+                  style={{
+                    padding: "36px 16px",
+                    textAlign: "center",
+                    color: "#999",
+                    fontSize: 15,
+                  }}
+                >
+                  No results found for "{searchQuery}"
+                </div>
+              )}
+
+            {!searchLoading && !searchError && combinedResults.length > 0 && (
+              <div style={{ paddingBottom: 10 }}>
+                {combinedResults.map((item) =>
+                  item.type === "header" ? (
+                    <div
+                      key={item.id}
+                      style={{
+                        background: "#f8f8f8",
+                        padding: "8px 16px",
+                        borderBottom: "1px solid #eee",
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: "#666",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {item.title}
+                    </div>
+                  ) : (
+                    <button
+                      key={`${item.type}-${item.id}`}
+                      onClick={() => handleResultClick(item)}
+                      style={{
+                        width: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 15,
+                        padding: 15,
+                        border: "none",
+                        borderBottom: "1px solid #f0f0f0",
+                        background: "#fff",
+                        textAlign: "left",
+                        cursor: item.type === "user" ? "default" : "pointer",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: 36,
+                          height: 36,
+                          borderRadius: 18,
+                          background: "#f9f9f9",
+                          border: "1px solid #eee",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "#D69E2E",
+                          flexShrink: 0,
+                        }}
+                      >
+                        {item.type === "community" ? (
+                          <span style={{ fontSize: 18 }}>👥</span>
+                        ) : item.type === "post" ? (
+                          <span style={{ fontSize: 18 }}>📄</span>
+                        ) : (
+                          <span style={{ fontSize: 18 }}>👤</span>
+                        )}
+                      </div>
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div
+                          style={{
+                            fontSize: 16,
+                            fontWeight: 500,
+                            color: "#333",
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item.name ||
+                            item.title ||
+                            item.content ||
+                            item.username ||
+                            item.display_name ||
+                            "Result"}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 13,
+                            color: "#888",
+                            marginTop: 2,
+                            whiteSpace: "nowrap",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item.type === "community"
+                            ? `${item.member_count || 0} members`
+                            : item.type === "post"
+                              ? `in ${item.community_name || "Community"}`
+                              : "User"}
+                        </div>
+                      </div>
+                    </button>
+                  ),
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {menuOpen && (
         <>
@@ -259,7 +654,7 @@ export function CommunityTopBar({
 
               <SectionDivider />
 
-              <div style={{ padding: "16px 0 8px" }}>
+              {/* <div style={{ padding: "16px 0 8px" }}>
                 <SectionHeader
                   title="RECENT"
                   open={recentOpen}
@@ -319,7 +714,7 @@ export function CommunityTopBar({
                     ))}
                   </div>
                 )}
-              </div>
+              </div> */}
 
               <SectionDivider />
 

@@ -37,6 +37,12 @@ export interface CommunityListResponse {
   results: CommunityListItem[];
 }
 
+export interface CommunityGlobalSearchResult {
+  communities: any[];
+  posts: any[];
+  users: any[];
+}
+
 export type CommunityActivityType =
   | 'upvotes'
   | 'downvotes'
@@ -283,6 +289,51 @@ export async function createCommunityPost(
   }
 }
 
+export async function updateCommunityPost(
+  postId: number | string,
+  payload: CreateCommunityPostRequest,
+): Promise<CommunityPost | null> {
+  try {
+    const res = await api.patch(`posts/${encodeURIComponent(String(postId))}/`, payload);
+    return res.data as CommunityPost;
+  } catch (err: any) {
+    console.warn('[communityApi] updateCommunityPost failed:', err?.message);
+    throw err;
+  }
+}
+
+export async function uploadCommunityMedia(file: {
+  name: string;
+  type: string;
+  size: number;
+  blob: File;
+}): Promise<{ publicUrl: string; key: string }> {
+  const presignRes = await api.post('media/presign/', {
+    type: 'post_gallery',
+    filename: file.name || `image_${Date.now()}.jpg`,
+    contentType: file.type || 'image/jpeg',
+    size: file.size || 0,
+  });
+
+  const { url, fields, publicUrl, key } = presignRes.data;
+  const formData = new FormData();
+  Object.entries(fields || {}).forEach(([k, v]) => {
+    formData.append(k, String(v));
+  });
+  formData.append('file', file.blob, file.name);
+
+  const response = await fetch(url, {
+    method: 'POST',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error('S3 Upload failed');
+  }
+
+  return { publicUrl, key };
+}
+
 // ── Upvote ────────────────────────────────────────────────────────────────────
 
 export async function upvotePost(postId: number | string): Promise<UpvoteResponse | null> {
@@ -325,6 +376,16 @@ export async function hideCommunityPost(postId: number | string): Promise<boolea
   }
 }
 
+export async function unhideCommunityPost(postId: number | string): Promise<boolean> {
+  try {
+    await api.post(`posts/${encodeURIComponent(String(postId))}/unhide/`, {});
+    return true;
+  } catch (err: any) {
+    console.warn('[communityApi] unhideCommunityPost failed:', err?.message);
+    return false;
+  }
+}
+
 export async function reportCommunityContent(
   contentType: 'post' | 'comment',
   contentId: number | string,
@@ -349,7 +410,7 @@ export async function reportCommunityContent(
 
 export async function getCommunityComments(
   postId: number | string,
-  params?: { page?: number; lang?: string },
+  params?: { page?: number; lang?: string; is_question?: boolean },
 ): Promise<CommunityCommentsResponse> {
   try {
     const res = await api.get('comments/', {
@@ -517,5 +578,36 @@ export async function getCommunityActivity(
   } catch (err: any) {
     console.warn(`[communityApi] getCommunityActivity(${type}) failed:`, err?.message);
     return [];
+  }
+}
+
+export async function getCommunityGlobalSearch(
+  query: string,
+  options?: { community?: string; signal?: AbortSignal },
+): Promise<CommunityGlobalSearchResult> {
+  if (!query.trim()) {
+    return { communities: [], posts: [], users: [] };
+  }
+
+  try {
+    const params: Record<string, string> = { q: query };
+    if (options?.community) params.community = options.community;
+
+    const res = await api.get('community-search/global_search/', {
+      params,
+      signal: options?.signal,
+    });
+
+    return {
+      communities: res.data?.communities || [],
+      posts: res.data?.posts || [],
+      users: res.data?.users || [],
+    };
+  } catch (err: any) {
+    if (err?.name === 'CanceledError' || err?.name === 'AbortError') {
+      throw err;
+    }
+    console.warn('[communityApi] getCommunityGlobalSearch failed:', err?.message);
+    return { communities: [], posts: [], users: [] };
   }
 }

@@ -1,8 +1,9 @@
 import { isAuthenticated as checkAuth } from "@kalpx/auth";
 import { useCommunityFeedController } from "@kalpx/feature-flows";
 import type { CommunityComment } from "@kalpx/types";
+import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { CommunityCommentComposer } from "../../components/community/CommunityCommentComposer";
 import { CommunityCommentList } from "../../components/community/CommunityCommentList";
 import { CommunityErrorState } from "../../components/community/CommunityErrorState";
@@ -13,9 +14,9 @@ import {
   createCommunityPost,
   deleteCommunityComment,
   getCommunityComments,
-  getCommunityCurrentUser,
   getCommunityFeed,
   getCommunityPost,
+  getCommunityProfileDetails,
   reportCommunityContent,
   updateCommunityComment,
   upvotePost,
@@ -34,10 +35,13 @@ const communityApi = {
 export function CommunityPostDetailPage() {
   const { postId } = useParams<{ postId: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [authed, setAuthed] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<number | string | null>(
     null,
   );
+  const [currentUserEmail, setCurrentUserEmail] = useState<string | null>(null);
+  const [currentUsername, setCurrentUsername] = useState<string | null>(null);
   const [replyingTo, setReplyingTo] = useState<CommunityComment | null>(null);
   const [commentSubmitting, setCommentSubmitting] = useState(false);
   const [commentError, setCommentError] = useState<string | null>(null);
@@ -53,11 +57,24 @@ export function CommunityPostDetailPage() {
       setAuthed(ok);
       if (!ok) {
         setCurrentUserId(null);
+        setCurrentUserEmail(null);
+        setCurrentUsername(null);
         return;
       }
-      const me = await getCommunityCurrentUser();
+      const profile = await getCommunityProfileDetails();
       if (!mounted) return;
+      const me =
+        profile?.profile?.user ??
+        profile?.data?.profile?.user ??
+        profile?.user ??
+        profile?.profile ??
+        profile?.data?.user ??
+        profile?.data ??
+        profile ??
+        null;
       setCurrentUserId(me?.id ?? null);
+      setCurrentUserEmail(me?.email ?? null);
+      setCurrentUsername(me?.username ?? null);
     })();
     return () => {
       mounted = false;
@@ -72,13 +89,14 @@ export function CommunityPostDetailPage() {
       navigate(`/login?returnTo=${to}`);
     },
   });
+  const isQuestionMode = searchParams.get("mode") === "questions";
 
   useEffect(() => {
     if (!postId) return;
     void ctrl.loadPost(postId);
-    void ctrl.loadComments(postId);
+    void ctrl.loadComments(postId, { is_question: isQuestionMode });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [postId]);
+  }, [postId, isQuestionMode]);
 
   const post = ctrl.post;
   const totalCommentCount = countComments(ctrl.comments);
@@ -88,10 +106,35 @@ export function CommunityPostDetailPage() {
     navigate(`/login?returnTo=${to}`);
   };
 
+  const handleBack = () => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+    navigate("/en/community");
+  };
+
+  const openCommentMode = () => {
+    const next = new URLSearchParams(searchParams);
+    next.delete("mode");
+    setSearchParams(next, { replace: true });
+    if (typeof window === "undefined") return;
+    const composer = document.getElementById("community-comment-composer");
+    composer?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
+  const openQuestionMode = () => {
+    const next = new URLSearchParams(searchParams);
+    next.set("mode", "questions");
+    setSearchParams(next, { replace: true });
+    if (typeof window === "undefined") return;
+    const composer = document.getElementById("community-comment-composer");
+    composer?.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
+
   const refreshComments = async () => {
     if (!postId) return;
-    await ctrl.loadComments(postId);
-    await ctrl.loadPost(postId);
+    await ctrl.loadComments(postId, { is_question: isQuestionMode });
   };
 
   const handleSubmitComment = async (content: string) => {
@@ -103,6 +146,7 @@ export function CommunityPostDetailPage() {
         post: post.id,
         content,
         parent: replyingTo?.id,
+        ...(isQuestionMode ? { is_question: true } : {}),
       });
       setReplyingTo(null);
       await refreshComments();
@@ -211,19 +255,37 @@ export function CommunityPostDetailPage() {
       <CommunityTopBar />
       <div style={{ maxWidth: 480, margin: "0 auto" }}>
         <div style={{ padding: 5 }}>
+          <button
+            onClick={handleBack}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              background: "none",
+              border: "none",
+              padding: "6px 8px 10px",
+              color: "#2d1a0e",
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            <ChevronLeft size={18} />
+            Back
+          </button>
           <CommunityPostCard
             post={post}
+            commentCountOverride={totalCommentCount}
             detailMode
             isUpvoting={ctrl.upvotingId === post.id}
             onUpvote={() =>
               void ctrl.upvotePost(post.id, `/en/community/${post.id}`)
             }
             onCommentClick={() => {
-              if (typeof window === "undefined") return;
-              const composer = document.getElementById(
-                "community-comment-composer",
-              );
-              composer?.scrollIntoView({ behavior: "smooth", block: "center" });
+              openCommentMode();
+            }}
+            onAskQuestionClick={() => {
+              openQuestionMode();
             }}
           />
 
@@ -242,42 +304,10 @@ export function CommunityPostDetailPage() {
                 marginBottom: 18,
               }}
             >
-              Comments ({totalCommentCount})
+              {isQuestionMode
+                ? `Questions (${totalCommentCount})`
+                : `Comments (${totalCommentCount})`}
             </p>
-
-            {replyingTo && (
-              <div
-                style={{
-                  marginBottom: 12,
-                  padding: "10px 12px",
-                  borderRadius: 12,
-                  background: "#fff8eb",
-                  border: "1px solid #eddcb2",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 12,
-                }}
-              >
-                <p style={{ margin: 0, fontSize: 13, color: "#5e4b22" }}>
-                  Replying to <strong>{getReplyName(replyingTo)}</strong>
-                </p>
-                <button
-                  onClick={() => setReplyingTo(null)}
-                  style={{
-                    border: "none",
-                    background: "none",
-                    padding: 0,
-                    fontSize: 12,
-                    color: "#9a7b2f",
-                    cursor: "pointer",
-                    fontWeight: 700,
-                  }}
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
 
             <div id="community-comment-composer" style={{ marginBottom: 24 }}>
               <CommunityCommentComposer
@@ -286,11 +316,12 @@ export function CommunityPostDetailPage() {
                 submitting={commentSubmitting}
                 error={commentError}
                 placeholder={
-                  replyingTo
-                    ? `Reply to ${getReplyName(replyingTo)}...`
-                    : "Join the conversation here....."
+                  isQuestionMode
+                    ? "Ask a question..."
+                    : "Join the conversation here...."
                 }
-                submitLabel={replyingTo ? "Reply" : "Post"}
+                submitLabel="Post"
+                leadingAvatarLabel="K"
                 onSubmit={(content) => {
                   void handleSubmitComment(content);
                 }}
@@ -302,6 +333,8 @@ export function CommunityPostDetailPage() {
               comments={ctrl.comments}
               loading={ctrl.commentsLoading}
               currentUserId={currentUserId}
+              currentUserEmail={currentUserEmail}
+              currentUsername={currentUsername}
               isAuthenticated={authed}
               actionLoadingId={commentActionLoadingId}
               onReply={(comment) => {
@@ -320,6 +353,13 @@ export function CommunityPostDetailPage() {
               onDelete={handleDeleteComment}
               onReport={handleReportComment}
               onRequireAuth={requireAuth}
+              replyingToId={replyingTo?.id ?? null}
+              replySubmitting={commentSubmitting}
+              replyError={commentError}
+              onCancelReply={() => setReplyingTo(null)}
+              onSubmitReply={(content) => {
+                void handleSubmitComment(content);
+              }}
             />
           </div>
         </div>
@@ -332,16 +372,5 @@ function countComments(comments: CommunityComment[]): number {
   return comments.reduce(
     (total, comment) => total + 1 + countComments(comment.children ?? []),
     0,
-  );
-}
-
-function getReplyName(comment: CommunityComment): string {
-  const creator = comment?.creator ?? comment?.author;
-  return (
-    creator?.profile_name ??
-    creator?.display_name ??
-    creator?.name ??
-    creator?.username ??
-    "Anonymous"
   );
 }

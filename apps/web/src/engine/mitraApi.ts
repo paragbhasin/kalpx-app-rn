@@ -604,8 +604,42 @@ export async function removeAdditionalItem(id: string | number): Promise<void> {
   invalidateAdditionalItemsCache();
 }
 
-export async function addAdditionalItem(itemId: string, itemType: string): Promise<any> {
-  const res = await api.post('mitra/journey/additional/', { itemId, itemType, source: 'additional_library' });
+export async function fetchLibraryItem(
+  itemType: string,
+  itemId: string,
+): Promise<any | null> {
+  try {
+    const res = await api.get('mitra/library/item/', {
+      params: { type: itemType, id: itemId },
+    });
+    return res.data?.item ?? res.data ?? null;
+  } catch (err: any) {
+    console.warn('[mitraApi] fetchLibraryItem failed:', err?.message);
+    return null;
+  }
+}
+
+export async function addAdditionalItem(
+  itemId: string,
+  itemType: string,
+  source = 'additional_library',
+): Promise<any> {
+  const res = await api.post('mitra/journey/additional/', {
+    itemId,
+    itemType,
+    source,
+  });
+  invalidateAdditionalItemsCache();
+  return res.data;
+}
+
+export async function completeAdditionalItem(
+  additionalItemId: string | number,
+): Promise<any> {
+  const res = await api.post(
+    `mitra/journey/additional/${additionalItemId}/complete/`,
+    {},
+  );
   invalidateAdditionalItemsCache();
   return res.data;
 }

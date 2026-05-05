@@ -87,7 +87,7 @@ export function CommunityUserActivityPage() {
 
   useEffect(() => {
     const type = TAB_TO_TYPE[activeTab];
-    if (!type || activity[type]?.data) return;
+    if (!type || activity[type]) return;
 
     let mounted = true;
     setActivity((prev) => ({
@@ -106,7 +106,7 @@ export function CommunityUserActivityPage() {
     return () => {
       mounted = false;
     };
-  }, [activeTab, activity]);
+  }, [activeTab]);
 
   const activeType = TAB_TO_TYPE[activeTab];
   const activeState = activity[activeType];
@@ -117,20 +117,23 @@ export function CommunityUserActivityPage() {
   const mergedData = useMemo(
     () =>
       data.map((item) => {
+        const basePost =
+          item.post || item.comment?.post || item.community_post || item;
+
         const isJoined =
-          item.is_joined ||
+          basePost.is_joined ||
           followedCommunities.some((community: any) => {
             const communitySlug = community.slug?.toLowerCase();
             const itemSlug = (
-              item.community_slug ||
-              item.community?.slug ||
-              item.slug
+              basePost.community_slug ||
+              basePost.community?.slug ||
+              basePost.slug
             )?.toLowerCase();
             const communityId = community.id?.toString();
             const itemId = (
-              item.community_id ||
-              item.community?.id ||
-              item.community
+              basePost.community_id ||
+              basePost.community?.id ||
+              basePost.community
             )?.toString();
             return (
               (communitySlug && itemSlug && communitySlug === itemSlug) ||
@@ -138,7 +141,18 @@ export function CommunityUserActivityPage() {
             );
           });
 
-        return { ...item, is_joined: isJoined };
+        return {
+          ...basePost,
+          _activity_id: item._activity_id || item.id,
+          comment: item.comment,
+          is_saved: item.is_saved ?? basePost.is_saved,
+          is_hidden: item.is_hidden ?? basePost.is_hidden,
+          is_useful_mark: item.is_useful_mark ?? false,
+          marked_useful_at: item.marked_useful_at || item.created_at,
+          saved_at: item.saved_at || item.created_at,
+          hidden_at: item.hidden_at || item.created_at,
+          is_joined: isJoined,
+        };
       }),
     [data, followedCommunities],
   );
@@ -292,13 +306,13 @@ export function CommunityUserActivityPage() {
           mergedData.map((item, index) => (
             <div
               key={`${item._activity_id || item.id || "activity"}-${index}`}
-              style={{ marginBottom: 16 }}
+              style={{ marginBottom: 16, padding: "0 5px" }}
             >
               {item.is_useful_mark && (
                 <div
                   style={{
                     background: "#FFF9E6",
-                    margin: "0 16px -12px",
+                    margin: "0 0 -12px",
                     padding: 12,
                     borderRadius: 8,
                     border: "1px solid #FFE082",
@@ -346,6 +360,26 @@ export function CommunityUserActivityPage() {
                 post={item as CommunityPost}
                 onUpvote={() => {
                   void upvotePost(item.id);
+                }}
+                showHiddenPost={activeTab === "hidden"}
+                onVisibilityChange={(postId, isHidden) => {
+                  if (activeTab !== "hidden" || isHidden) return;
+                  setActivity((prev) => {
+                    const current = prev.hidden_posts;
+                    if (!current) return prev;
+                    return {
+                      ...prev,
+                      hidden_posts: {
+                        ...current,
+                        data: current.data.filter(
+                          (entry: any) =>
+                            String(entry.id) !== String(postId) &&
+                            String(entry.post?.id) !== String(postId) &&
+                            String(entry._activity_id) !== String(postId),
+                        ),
+                      },
+                    };
+                  });
                 }}
               />
             </div>

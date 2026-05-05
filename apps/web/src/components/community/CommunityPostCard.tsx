@@ -10,27 +10,210 @@ import {
   Flag,
   Play,
 } from "lucide-react";
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { executeAction } from "../../engine/actionExecutor";
 import {
+  followCommunity,
+  getFollowedCommunities,
   hideCommunityPost,
   reportCommunityContent,
   saveCommunityPost,
+  unfollowCommunity,
+  unhideCommunityPost,
   unsaveCommunityPost,
 } from "../../engine/communityApi";
-import { executeAction } from "../../engine/actionExecutor";
-import { addAdditionalItem } from "../../engine/mitraApi";
+import { fetchLibraryItem } from "../../engine/mitraApi";
 import { WEB_ENV } from "../../lib/env";
-import { store } from "../../store";
 import { webStorage } from "../../lib/webStorage";
+import { store } from "../../store";
 import { CommunityReactionBar } from "./CommunityReactionBar";
+import { CommunityReportModal } from "./CommunityReportModal";
+
+const COMMUNITY_BACKGROUNDS: Record<string, string> = {
+  "daily-dharma-reflections": new URL(
+    "../../../../mobile/assets/community-bg/daily-dharma-reflections.jpeg",
+    import.meta.url,
+  ).href,
+  "festivals-rituals": new URL(
+    "../../../../mobile/assets/community-bg/festival.jpeg",
+    import.meta.url,
+  ).href,
+  "mantra-chanting-circle": new URL(
+    "../../../../mobile/assets/community-bg/mantraandchanting.jpeg",
+    import.meta.url,
+  ).href,
+  "yoga-pranayama": new URL(
+    "../../../../mobile/assets/community-bg/yoga-pranaya.jpeg",
+    import.meta.url,
+  ).href,
+  "meditation-mindfulness": new URL(
+    "../../../../mobile/assets/community-bg/meditationanmindfulness.jpeg",
+    import.meta.url,
+  ).href,
+  "ayurveda-healing": new URL(
+    "../../../../mobile/assets/community-bg/ayurveda-healing.jpeg",
+    import.meta.url,
+  ).href,
+  "dance-as-devotion": new URL(
+    "../../../../mobile/assets/community-bg/dance-devotion.jpeg",
+    import.meta.url,
+  ).href,
+  "music-bhajans": new URL(
+    "../../../../mobile/assets/community-bg/music-bhajans.jpeg",
+    import.meta.url,
+  ).href,
+  "ramayana-insights": new URL(
+    "../../../../mobile/assets/community-bg/ramayana-insights.jpeg",
+    import.meta.url,
+  ).href,
+  "mahabharata-dialogues": new URL(
+    "../../../../mobile/assets/community-bg/mahabharatadialogues.jpeg",
+    import.meta.url,
+  ).href,
+  "bhakti-devotion": new URL(
+    "../../../../mobile/assets/community-bg/bhakthianddevotion.jpeg",
+    import.meta.url,
+  ).href,
+  "children-dharma": new URL(
+    "../../../../mobile/assets/community-bg/children-dharma.jpeg",
+    import.meta.url,
+  ).href,
+  "sacred-stories": new URL(
+    "../../../../mobile/assets/community-bg/sacred-stories.jpeg",
+    import.meta.url,
+  ).href,
+  "sanatan-modern-life": new URL(
+    "../../../../mobile/assets/community-bg/sanatan-modernlife.jpeg",
+    import.meta.url,
+  ).href,
+  "sanatan-science-philosophy": new URL(
+    "../../../../mobile/assets/community-bg/sanatan-science-philosophy.jpeg",
+    import.meta.url,
+  ).href,
+  "spiritual-travel": new URL(
+    "../../../../mobile/assets/community-bg/spiritual-travel.jpeg",
+    import.meta.url,
+  ).href,
+  "temple-experiences": new URL(
+    "../../../../mobile/assets/community-bg/temple-experiences.jpeg",
+    import.meta.url,
+  ).href,
+  "women-in-sanatan-dharma": new URL(
+    "../../../../mobile/assets/community-bg/women-in-santandharma.jpeg",
+    import.meta.url,
+  ).href,
+  "yoga-pranaya": new URL(
+    "../../../../mobile/assets/community-bg/yoga-pranaya.jpeg",
+    import.meta.url,
+  ).href,
+  "bhakthi-devotion": new URL(
+    "../../../../mobile/assets/community-bg/bhakthianddevotion.jpeg",
+    import.meta.url,
+  ).href,
+  festival: new URL(
+    "../../../../mobile/assets/community-bg/festival.jpeg",
+    import.meta.url,
+  ).href,
+  "mantra-chanting": new URL(
+    "../../../../mobile/assets/community-bg/mantraandchanting.jpeg",
+    import.meta.url,
+  ).href,
+  "sanatan-modernlife": new URL(
+    "../../../../mobile/assets/community-bg/sanatan-modernlife.jpeg",
+    import.meta.url,
+  ).href,
+  "mahabharata-dialog": new URL(
+    "../../../../mobile/assets/community-bg/mahabharatadialogues.jpeg",
+    import.meta.url,
+  ).href,
+  "meditation-and-mindfulness": new URL(
+    "../../../../mobile/assets/community-bg/meditationanmindfulness.jpeg",
+    import.meta.url,
+  ).href,
+  "1": new URL(
+    "../../../../mobile/assets/community-bg/daily-dharma-reflections.jpeg",
+    import.meta.url,
+  ).href,
+  "2": new URL(
+    "../../../../mobile/assets/community-bg/festival.jpeg",
+    import.meta.url,
+  ).href,
+  "3": new URL(
+    "../../../../mobile/assets/community-bg/mantraandchanting.jpeg",
+    import.meta.url,
+  ).href,
+  "4": new URL(
+    "../../../../mobile/assets/community-bg/yoga-pranaya.jpeg",
+    import.meta.url,
+  ).href,
+  "5": new URL(
+    "../../../../mobile/assets/community-bg/meditationanmindfulness.jpeg",
+    import.meta.url,
+  ).href,
+  "6": new URL(
+    "../../../../mobile/assets/community-bg/ayurveda-healing.jpeg",
+    import.meta.url,
+  ).href,
+  "7": new URL(
+    "../../../../mobile/assets/community-bg/dance-devotion.jpeg",
+    import.meta.url,
+  ).href,
+  "8": new URL(
+    "../../../../mobile/assets/community-bg/music-bhajans.jpeg",
+    import.meta.url,
+  ).href,
+  "9": new URL(
+    "../../../../mobile/assets/community-bg/ramayana-insights.jpeg",
+    import.meta.url,
+  ).href,
+  "10": new URL(
+    "../../../../mobile/assets/community-bg/mahabharatadialogues.jpeg",
+    import.meta.url,
+  ).href,
+  "11": new URL(
+    "../../../../mobile/assets/community-bg/bhakthianddevotion.jpeg",
+    import.meta.url,
+  ).href,
+  "12": new URL(
+    "../../../../mobile/assets/community-bg/children-dharma.jpeg",
+    import.meta.url,
+  ).href,
+};
+
+const DEFAULT_COMMUNITY_IMAGE = new URL(
+  "../../../../mobile/assets/community-bg/daily-dharma-reflections.jpeg",
+  import.meta.url,
+).href;
+
+let followedCommunitiesCache: any[] | null = null;
+let followedCommunitiesRequest: Promise<any[]> | null = null;
+
+async function loadFollowedCommunitiesCached(): Promise<any[]> {
+  if (followedCommunitiesCache) return followedCommunitiesCache;
+  if (!followedCommunitiesRequest) {
+    followedCommunitiesRequest = getFollowedCommunities()
+      .then((data) => {
+        followedCommunitiesCache = data;
+        return data;
+      })
+      .finally(() => {
+        followedCommunitiesRequest = null;
+      });
+  }
+  return followedCommunitiesRequest;
+}
 
 interface CommunityPostCardProps {
   post: CommunityPost;
   onUpvote?: (postId: number | string) => void;
   isUpvoting?: boolean;
+  commentCountOverride?: number;
   detailMode?: boolean;
   onCommentClick?: () => void;
+  onAskQuestionClick?: () => void;
+  showHiddenPost?: boolean;
+  onVisibilityChange?: (postId: number | string, isHidden: boolean) => void;
 }
 
 function getLinkedItemSubtitle(
@@ -72,23 +255,93 @@ function resolveLinkedItemType(
   linkedItem?: CommunityPost["linked_item"],
 ): "mantra" | "sankalp" | "practice" | null {
   if (!linkedItem?.id) return null;
-  if (linkedItem.id.startsWith("mantra.")) return "mantra";
-  if (linkedItem.id.startsWith("sankalp.")) return "sankalp";
-  if (linkedItem.id.startsWith("practice.")) return "practice";
+  const linkedItemId = String(linkedItem.id);
+  if (linkedItemId.startsWith("mantra.")) return "mantra";
+  if (linkedItemId.startsWith("sankalp.")) return "sankalp";
+  if (linkedItemId.startsWith("practice.")) return "practice";
 
-  const rawType = String(linkedItem.type || "").split(":")[1]?.trim().toLowerCase();
+  const rawType = String(linkedItem.type || "")
+    .split(":")[1]
+    ?.trim()
+    .toLowerCase();
   if (rawType === "mantra" || rawType === "sankalp" || rawType === "practice") {
     return rawType;
   }
   return null;
 }
 
+function normalizeLinkedItemType(
+  rawType?: string | null,
+  itemId?: string | null,
+): "mantra" | "sankalp" | "practice" | null {
+  const normalized = String(rawType || "")
+    .split(":")
+    .pop()
+    ?.trim()
+    .toLowerCase();
+
+  if (normalized === "sankalp" || normalized === "sankalpa") return "sankalp";
+  if (normalized === "mantra") return "mantra";
+  if (normalized === "practice") return "practice";
+
+  const id = String(itemId || "");
+  if (id.startsWith("sankalp.")) return "sankalp";
+  if (id.startsWith("mantra.")) return "mantra";
+  if (id.startsWith("practice.")) return "practice";
+  return null;
+}
+
+function mapRunnerItem(
+  item: any,
+  itemType: "mantra" | "sankalp" | "practice",
+  fallbackTitle: string,
+) {
+  if (itemType === "mantra") {
+    return {
+      ...item,
+      id: item.itemId || item.item_id || item.id,
+      item_id: item.itemId || item.item_id || item.id,
+      item_type: "mantra",
+      title: item.title || item.name || fallbackTitle,
+      devanagari: item.devanagari || item.text || "",
+      source: item.source || item.tradition || "",
+    };
+  }
+
+  if (itemType === "sankalp") {
+    return {
+      ...item,
+      id: item.itemId || item.item_id || item.id,
+      item_id: item.itemId || item.item_id || item.id,
+      item_type: "sankalp",
+      title: item.short_text || item.title || item.name || fallbackTitle,
+      insight: item.insight || "",
+      how_to_live: item.how_to_live || [],
+    };
+  }
+
+  return {
+    ...item,
+    id: item.itemId || item.item_id || item.id,
+    item_id: item.itemId || item.item_id || item.id,
+    item_type: "practice",
+    title: item.title || item.name || fallbackTitle,
+    summary: item.summary || item.description || "",
+    steps: Array.isArray(item.steps) ? item.steps : [],
+    benefits: Array.isArray(item.benefits) ? item.benefits : [],
+  };
+}
+
 export function CommunityPostCard({
   post,
   onUpvote,
   isUpvoting = false,
+  commentCountOverride,
   detailMode = false,
   onCommentClick,
+  onAskQuestionClick,
+  showHiddenPost = false,
+  onVisibilityChange,
 }: CommunityPostCardProps) {
   const navigate = useNavigate();
   const text = getPostText(post);
@@ -99,9 +352,21 @@ export function CommunityPostCard({
   const [isSaved, setIsSaved] = useState(!!post.is_saved);
   const [isHidden, setIsHidden] = useState(!!post.is_hidden);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [joinLoading, setJoinLoading] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isLaunchingLinkedItem, setIsLaunchingLinkedItem] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  const communityJoinKey = useMemo(
+    () => ({
+      slug: String(
+        post.community_slug || (post as any).community?.slug || "",
+      ).toLowerCase(),
+      id: String(post.community_id || (post as any).community?.id || ""),
+    }),
+    [post],
+  );
 
   const resolveMediaUrl = (value?: string | null) => {
     if (!value) return "";
@@ -110,11 +375,68 @@ export function CommunityPostCard({
     return `${WEB_ENV.imageBaseUrl}${value.startsWith("/") ? "" : "/"}${value}`;
   };
 
+  const resolveCommunityImage = () => {
+    const community = (post as any).community ?? {};
+    const remoteImage =
+      resolveMediaUrl((post as any).community_media_url) ||
+      resolveMediaUrl(community.media_url) ||
+      resolveMediaUrl(community.image_url) ||
+      resolveMediaUrl(community.icon);
+
+    if (remoteImage) return remoteImage;
+
+    return (
+      COMMUNITY_BACKGROUNDS[
+        String(post.community_slug || community.slug || "")
+      ] ||
+      COMMUNITY_BACKGROUNDS[String(post.community_id || community.id || "")] ||
+      DEFAULT_COMMUNITY_IMAGE
+    );
+  };
+
   const communityAvatar =
-    (post as any).community?.icon ||
+    resolveCommunityImage() ||
     author?.avatar_url ||
     author?.profile_pic ||
     "/lotus_icon.png";
+
+  useEffect(() => {
+    setIsJoined(!!(post as any).is_joined);
+  }, [post]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const syncJoinedState = async () => {
+      const ok = await isAuthenticated(webStorage);
+      if (!ok || (!communityJoinKey.slug && !communityJoinKey.id)) return;
+
+      const followed = await loadFollowedCommunitiesCached();
+      if (!mounted) return;
+
+      const matched = followed.some((community: any) => {
+        const slug = String(
+          community.slug || community.community_slug || "",
+        ).toLowerCase();
+        const id = String(
+          community.id || community.community_id || community.community || "",
+        );
+        return (
+          (!!communityJoinKey.slug && slug === communityJoinKey.slug) ||
+          (!!communityJoinKey.id && id === communityJoinKey.id)
+        );
+      });
+
+      if (matched) {
+        setIsJoined(true);
+      }
+    };
+
+    void syncJoinedState();
+    return () => {
+      mounted = false;
+    };
+  }, [communityJoinKey.id, communityJoinKey.slug]);
   const timeAgo = useMemo(() => {
     if (!post.created_at) return "";
     try {
@@ -221,7 +543,10 @@ export function CommunityPostCard({
     !shouldTruncate || isExpanded ? text : `${text.slice(0, 180).trimEnd()}...`;
   const linkedItemTitle = post.linked_item?.name?.trim() || "";
   const linkedItemSubtitle = getLinkedItemSubtitle(post.linked_item);
-  const linkedItemType = resolveLinkedItemType(post.linked_item);
+  const linkedItemType = normalizeLinkedItemType(
+    post.linked_item?.type,
+    String(post.linked_item?.id || ""),
+  );
   const handleCardNavigate = () => {
     if (detailMode) return;
     navigate(`/en/community/${post.id}`);
@@ -276,20 +601,87 @@ export function CommunityPostCard({
     if (success) {
       setIsHidden(true);
       setMenuOpen(false);
+      onVisibilityChange?.(post.id, true);
     }
   };
 
-  const handleReport = async () => {
+  const handleUnhide = async () => {
+    const ok = await ensureAuthed();
+    if (!ok) return;
+    const success = await unhideCommunityPost(post.id);
+    if (success) {
+      setIsHidden(false);
+      setMenuOpen(false);
+      onVisibilityChange?.(post.id, false);
+    }
+  };
+
+  const handleJoinToggle = async () => {
+    const ok = await ensureAuthed();
+    if (!ok || joinLoading) return;
+
+    const communityIdOrSlug =
+      post.community_slug ||
+      (post as any).community?.slug ||
+      post.community_id ||
+      (post as any).community?.id;
+
+    if (!communityIdOrSlug) return;
+
+    setJoinLoading(true);
+    try {
+      const success = isJoined
+        ? await unfollowCommunity(communityIdOrSlug)
+        : await followCommunity(communityIdOrSlug);
+
+      if (success) {
+        setIsJoined((value) => !value);
+        if (followedCommunitiesCache) {
+          if (isJoined) {
+            followedCommunitiesCache = followedCommunitiesCache.filter(
+              (community: any) => {
+                const slug = String(
+                  community.slug || community.community_slug || "",
+                ).toLowerCase();
+                const id = String(
+                  community.id ||
+                    community.community_id ||
+                    community.community ||
+                    "",
+                );
+                return (
+                  slug !== communityJoinKey.slug && id !== communityJoinKey.id
+                );
+              },
+            );
+          } else {
+            followedCommunitiesCache = [
+              ...followedCommunitiesCache,
+              {
+                slug: communityJoinKey.slug || undefined,
+                id: communityJoinKey.id || communityJoinKey.slug,
+              },
+            ];
+          }
+        }
+      }
+    } finally {
+      setJoinLoading(false);
+    }
+  };
+
+  const handleReport = async (reason: string, details: string) => {
     const ok = await ensureAuthed();
     if (!ok) return;
     const success = await reportCommunityContent(
       "post",
       post.id,
-      "inappropriate",
-      "Reported from web community card menu",
+      reason,
+      details,
     );
     if (success) {
       setMenuOpen(false);
+      setReportOpen(false);
       if (typeof window !== "undefined") {
         window.alert("Reported. Thank you for flagging this post.");
       }
@@ -305,24 +697,27 @@ export function CommunityPostCard({
 
     setIsLaunchingLinkedItem(true);
     try {
-      await addAdditionalItem(linkedItemId, linkedItemType);
+      const shouldHydrate =
+        String(linkedItemId).startsWith("mantra.") ||
+        String(linkedItemId).startsWith("sankalp.") ||
+        String(linkedItemId).startsWith("practice.");
 
-      const item = {
-        id: linkedItemId,
-        item_id: linkedItemId,
-        item_type: linkedItemType,
-        itemType: linkedItemType,
-        source: "additional_library",
-        title: linkedItemTitle,
-        name: linkedItemTitle,
-      };
+      const fetched = shouldHydrate
+        ? await fetchLibraryItem(linkedItemType, String(linkedItemId))
+        : null;
+
+      const item = mapRunnerItem(
+        fetched || post.linked_item || {},
+        linkedItemType,
+        linkedItemTitle,
+      );
 
       const state = store.getState();
       await executeAction(
         {
           type: "start_runner",
           payload: {
-            source: "additional_library",
+            source: "community",
             variant: linkedItemType,
             item,
           },
@@ -338,7 +733,7 @@ export function CommunityPostCard({
     }
   };
 
-  if (isHidden) return null;
+  if (isHidden && !showHiddenPost) return null;
 
   return (
     <div
@@ -389,8 +784,8 @@ export function CommunityPostCard({
               src={communityAvatar}
               alt={post.community_name ?? "Community"}
               style={{
-                width: 24,
-                height: 24,
+                width: 32,
+                height: 32,
                 borderRadius: 12,
                 objectFit: "cover",
                 display: "block",
@@ -436,7 +831,7 @@ export function CommunityPostCard({
           <button
             onClick={(e) => {
               e.stopPropagation();
-              setIsJoined((value) => !value);
+              void handleJoinToggle();
             }}
             style={{
               background: isJoined ? "#EDEFF1" : "#D69E2E",
@@ -449,9 +844,11 @@ export function CommunityPostCard({
               fontWeight: 700,
               fontSize: 14,
               lineHeight: 1.4,
+              opacity: joinLoading ? 0.7 : 1,
             }}
+            disabled={joinLoading}
           >
-            {isJoined ? "Joined" : "Join"}
+            {joinLoading ? "..." : isJoined ? "Joined" : "Join"}
           </button>
           <button
             onClick={(e) => {
@@ -523,17 +920,18 @@ export function CommunityPostCard({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                void handleHide();
+                void (showHiddenPost ? handleUnhide() : handleHide());
               }}
               style={{ ...menuItemStyle, borderTop: "1px solid #f2f2f2" }}
             >
               <EyeOff size={21} color="#333" />
-              <span>Hide</span>
+              <span>{showHiddenPost ? "Unhide" : "Hide"}</span>
             </button>
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                void handleReport();
+                setMenuOpen(false);
+                setReportOpen(true);
               }}
               style={{
                 ...menuItemStyle,
@@ -547,6 +945,15 @@ export function CommunityPostCard({
           </div>
         </>
       )}
+
+      <CommunityReportModal
+        open={reportOpen}
+        title="Report Post"
+        onClose={() => setReportOpen(false)}
+        onSubmit={async (reason, details) => {
+          await handleReport(reason, details);
+        }}
+      />
 
       {post.title && (
         <p
@@ -780,7 +1187,7 @@ export function CommunityPostCard({
 
       <CommunityReactionBar
         upvoteCount={post.upvote_count ?? post.likes_count}
-        commentCount={post.comment_count}
+        commentCount={commentCountOverride ?? post.comment_count}
         shareCount={post.share_count}
         userVote={post.user_vote}
         isUpvoting={isUpvoting}
@@ -792,7 +1199,11 @@ export function CommunityPostCard({
           detailMode ? onCommentClick?.() : navigate(`/en/community/${post.id}`)
         }
         onShare={() => {}}
-        onAskQuestion={() => {}}
+        onAskQuestion={() =>
+          detailMode
+            ? onAskQuestionClick?.()
+            : navigate(`/en/community/${post.id}?mode=questions`)
+        }
       />
 
       {linkedItemTitle && (

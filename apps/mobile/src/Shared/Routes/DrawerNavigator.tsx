@@ -154,7 +154,7 @@ const CustomDrawerContent = (props) => {
     {
       id: "1",
       name: "Mitra",
-      title: "GuidedGrowth", // Route to landing page
+      title: "Home",
       iconType: "image",
       icon: require("../../../assets/Group.png"),
       isMitra: true,

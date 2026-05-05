@@ -33,6 +33,7 @@
 
 import { Audio } from "expo-av";
 import { Volume2, VolumeX } from "lucide-react-native";
+import { REMOTE_AUDIO_SOURCES } from "../../../config/audioAssets";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -224,7 +225,7 @@ const JoyRoomContainer: React.FC<Props> = () => {
       try {
         const audioSource = readSlot(ss, "joy_sit_audio_url")
           ? { uri: readSlot(ss, "joy_sit_audio_url") }
-          : require("../../../../assets/sounds/Om.mp4");
+          : REMOTE_AUDIO_SOURCES.OM;
         const { sound } = await Audio.Sound.createAsync(audioSource, {
           isLooping: true,
           shouldPlay: true,

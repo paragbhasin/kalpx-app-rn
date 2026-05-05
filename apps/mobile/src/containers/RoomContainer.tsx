@@ -24,6 +24,7 @@
  */
 
 import { useFocusEffect } from "@react-navigation/native";
+import { REMOTE_AUDIO_SOURCES } from "../config/audioAssets";
 import { Audio } from "expo-av";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -142,7 +143,7 @@ function buildExitOnlyFallback(roomId: RoomId): RoomRenderV1 {
   };
 }
 
-const ROOM_AMBIENT_TRACK = require("../../assets/sounds/Audio-calmmusic.mp3");
+const ROOM_AMBIENT_TRACK = REMOTE_AUDIO_SOURCES.CALM_MUSIC;
 let roomAmbientSound: Audio.Sound | null = null;
 let roomAmbientIsPlaying = false;
 let roomAmbientRunId = 0;

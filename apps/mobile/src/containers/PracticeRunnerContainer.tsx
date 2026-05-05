@@ -1,4 +1,5 @@
 import Slider from "@react-native-community/slider";
+import { REMOTE_AUDIO_SOURCES } from "../config/audioAssets";
 import { Audio } from "expo-av";
 import {
   Check,
@@ -836,22 +837,13 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
   );
 
   const resolveAudioSource = (url?: string) => {
-    if (!url) return require("../../assets/sounds/Om.mp4");
-    if (
-      url.includes("Audio_Be_still.mp4") ||
-      url.includes("Audio_Be_still.m4a")
-    ) {
-      return require("../../assets/sounds/Audio_Be_still.m4a");
+    if (!url) return REMOTE_AUDIO_SOURCES.OM;
+    if (url.includes("Audio_Be_still.mp4") || url.includes("Audio_Be_still.m4a")) {
+      return REMOTE_AUDIO_SOURCES.BE_STILL;
     }
-    if (url.includes("Hari Om")) {
-      return require("../../assets/sounds/Hari Om -Female.mp4");
-    }
-    if (url.includes("Om Shanti")) {
-      return require("../../assets/sounds/Om Shanti.mp4");
-    }
-    if (url.includes("Om.mp4")) {
-      return require("../../assets/sounds/Om.mp4");
-    }
+    if (url.includes("Hari Om")) return REMOTE_AUDIO_SOURCES.HARI_OM;
+    if (url.includes("Om Shanti")) return REMOTE_AUDIO_SOURCES.OM_SHANTI;
+    if (url.includes("Om.mp4")) return REMOTE_AUDIO_SOURCES.OM;
     return { uri: url };
   };
 
@@ -948,7 +940,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
         calmMusicRef.current = null;
       }
       const { sound } = await Audio.Sound.createAsync(
-        require("../../assets/sounds/Audio-calmmusic.mp3"),
+        REMOTE_AUDIO_SOURCES.CALM_MUSIC,
         {
           shouldPlay: true,
           isLooping: true,
@@ -1078,8 +1070,8 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
       // mantra screens. The remote mantra can be slow or fail, but that must
       // not block the local intro from playing first.
       try {
-        console.log("[TRIGGER_AUDIO] Loading Intro: Audio_Be_still.m4a");
-        const introSource = require("../../assets/sounds/Audio_Be_still.m4a");
+        console.log("[TRIGGER_AUDIO] Loading Intro: Audio_Be_still.mp4 (remote)");
+        const introSource = REMOTE_AUDIO_SOURCES.BE_STILL;
         const { sound: intro } = await Audio.Sound.createAsync(introSource, {
           shouldPlay: false,
           isMuted: mediaMuted,
@@ -1148,12 +1140,12 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
           "[TRIGGER_AUDIO] Mantra load failed:",
           (mantraErr as any)?.message,
         );
-        // Fallback: try the local bundled Om.mp4
+        // Fallback: try remote Om.mp4
         try {
           logAudioDebug("trigger_sequence:mantra_fallback_requested", {
             runId,
           });
-          const fallbackSource = require("../../assets/sounds/Om.mp4");
+          const fallbackSource = REMOTE_AUDIO_SOURCES.OM;
           const result = await Audio.Sound.createAsync(fallbackSource, {
             shouldPlay: false,
             isLooping: true,
@@ -1337,7 +1329,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
       }
 
       const { sound } = await Audio.Sound.createAsync(
-        require("../../assets/sounds/Audio_Be_still.m4a"),
+        REMOTE_AUDIO_SOURCES.BE_STILL,
         { shouldPlay: true, isLooping: false, volume: 1 },
       );
 
@@ -1491,7 +1483,7 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
       }
 
       const { sound } = await Audio.Sound.createAsync(
-        require("../../assets/sounds/sankalp_om.mp3"),
+        REMOTE_AUDIO_SOURCES.SANKALP_OM,
         { shouldPlay: false, isLooping: false, volume: 1 },
       );
 

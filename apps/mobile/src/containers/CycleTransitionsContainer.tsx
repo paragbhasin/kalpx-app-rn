@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { REMOTE_AUDIO_SOURCES } from "../config/audioAssets";
 import Slider from "@react-native-community/slider";
 import { Audio } from "expo-av";
 import {
@@ -93,10 +94,10 @@ const normalizeComparableText = (val: any): string => {
 const MAX_VISUAL_BEADS = 18;
 const CALM_MUSIC_INDEX_KEY = "_kalpx_calm_music_idx";
 const CALM_MUSIC_TRACKS = [
-  require("../../assets/sounds/Audio-calmmusic.mp3"),
-  require("../../assets/sounds/Audio1.mpeg"),
-  require("../../assets/sounds/Audio9.mpeg"),
-  require("../../assets/sounds/Audio6.mpeg"),
+  REMOTE_AUDIO_SOURCES.CALM_MUSIC,
+  REMOTE_AUDIO_SOURCES.CALM_MUSIC_1,
+  REMOTE_AUDIO_SOURCES.CALM_MUSIC_9,
+  REMOTE_AUDIO_SOURCES.CALM_MUSIC_6,
 ];
 const PRACTICE_TIMER_SIZE = Platform.OS === "android" ? 216 : 232;
 const PRACTICE_TIMER_CENTER = PRACTICE_TIMER_SIZE / 2;
@@ -322,7 +323,7 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
       }
 
       const { sound } = await Audio.Sound.createAsync(
-        require("../../assets/sounds/sankalp_om.mp3"),
+        REMOTE_AUDIO_SOURCES.SANKALP_OM,
         { shouldPlay: false, isLooping: false, volume: 1 },
       );
 
@@ -406,24 +407,7 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
       await sound.playAsync();
       calmMusicRef.current = sound;
     } catch (err) {
-      console.warn("[PRACTICE_TIMER] calm music failed, falling back:", err);
-      try {
-        const { sound } = await Audio.Sound.createAsync(
-          require("../../assets/sounds/Audio-calmmusic.mp3"),
-          {
-            shouldPlay: false,
-            isLooping: true,
-            volume: 0.15,
-          },
-        );
-        await sound.playAsync();
-        calmMusicRef.current = sound;
-      } catch (fallbackErr) {
-        console.warn(
-          "[PRACTICE_TIMER] calm music fallback failed:",
-          fallbackErr,
-        );
-      }
+      console.warn("[PRACTICE_TIMER] calm music failed:", err);
     }
   };
 

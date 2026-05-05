@@ -38,6 +38,7 @@
 
 import { Audio } from "expo-av";
 import { LinearGradient } from "expo-linear-gradient";
+import { REMOTE_AUDIO_SOURCES } from "../../../config/audioAssets";
 import { Volume2, VolumeX } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -262,7 +263,7 @@ const GriefRoomContainer: React.FC<Props> = () => {
           // Prefer slot-resolved audio URL; fall back to local Om asset
           const audioSource = (ss as any).grief_mantra?.audio_url
             ? { uri: (ss as any).grief_mantra.audio_url }
-            : require("../../../../assets/sounds/Om.mp4");
+            : REMOTE_AUDIO_SOURCES.OM;
           const { sound } = await Audio.Sound.createAsync(audioSource, {
             isLooping: true,
             shouldPlay: true,

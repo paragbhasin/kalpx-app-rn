@@ -16,9 +16,11 @@ import { ClassPaymentPage } from "./pages/classes/ClassPaymentPage";
 import { CommunityFeedPage } from "./pages/community/CommunityFeedPage";
 import { CommunityExplorePage } from "./pages/community/CommunityExplorePage";
 import { CommunityPopularPage } from "./pages/community/CommunityPopularPage";
+import { CommunityPrivacyPolicyPage } from "./pages/community/CommunityPrivacyPolicyPage";
 import { CommunityPostDetailPage } from "./pages/community/CommunityPostDetailPage";
 import { CommunityTopCommunitiesPage } from "./pages/community/CommunityTopCommunitiesPage";
 import { CommunityTopPage } from "./pages/community/CommunityTopPage";
+import { CommunityUserAgreementsPage } from "./pages/community/CommunityUserAgreementsPage";
 import { CreateCommunityPostPage } from "./pages/community/CreateCommunityPostPage";
 import { CheckinPage } from "./pages/mitra/CheckinPage";
 import { CheckpointPage } from "./pages/mitra/CheckpointPage";
@@ -130,7 +132,15 @@ export function AppRoutes() {
       />
       <Route path="/en/community/explore" element={<CommunityExplorePage />} />
       <Route path="/en/community/popular" element={<CommunityPopularPage />} />
+      <Route
+        path="/en/community/privacy-policy"
+        element={<CommunityPrivacyPolicyPage />}
+      />
       <Route path="/en/community/top" element={<CommunityTopPage />} />
+      <Route
+        path="/en/community/user-agreements"
+        element={<CommunityUserAgreementsPage />}
+      />
       <Route path="/en/community/new" element={<CreateCommunityPostPage />} />
       <Route
         path="/en/community/:postId"

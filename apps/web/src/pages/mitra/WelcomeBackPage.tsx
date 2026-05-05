@@ -521,7 +521,7 @@ export function WelcomeBackPage() {
         </div>
 
         {/* Lotus decoration — bottom-right, decorative */}
-        <div
+        {/* <div
           style={{
             position: "fixed",
             bottom: -60,
@@ -543,7 +543,7 @@ export function WelcomeBackPage() {
               objectFit: "contain",
             }}
           />
-        </div>
+        </div> */}
       </MitraMobileShell>
     );
   }

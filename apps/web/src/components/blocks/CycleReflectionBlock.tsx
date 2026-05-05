@@ -84,10 +84,10 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
     0,
   );
   const strongestType: string = sd.checkpoint_strongest_type || "";
-  const introBg = day === 14 ? "/14day_updated.png" : "/7daybg.png";
-  const introBgPosition = day === 7 ? "center bottom" : "top 92%";
-  const introBgAttachment = day === 7 ? "scroll" : "fixed";
-  const introBottomOffset = day === 7 ? -51 : 30;
+  const introBg = day === 14 ? "/14day_updated.png" : "/beige_bg.png";
+  const introBgPosition = day === 7 ? "center center" : "top 92%";
+  const introBgAttachment = "fixed";
+  const introBottomOffset = day === 7 ? 24 : 30;
 
   useEffect(() => {
     const shell = document.querySelector(
@@ -235,6 +235,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
           overflow: "hidden",
           display: "flex",
           flexDirection: "column",
+          justifyContent: day === 7 ? "center" : "space-between",
           padding: `24px 24px calc(${introBottomOffset}px + 62px + env(safe-area-inset-bottom))`,
         }}
       >
@@ -243,7 +244,12 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
             display: "flex",
             flexDirection: "column",
             justifyContent: "flex-start",
-            paddingTop: day === 7 ? "" : "12vh",
+            width: "100%",
+            maxWidth: day === 7 ? 720 : 640,
+            margin: day === 7 ? "0 auto" : undefined,
+            padding: day === 7 ? "36px 32px" : undefined,
+
+            paddingTop: day === 7 ? undefined : "12vh",
           }}
         >
           <p
@@ -261,7 +267,7 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
           </p>
           <p
             style={{
-              fontSize: 32,
+              fontSize: day === 7 ? "clamp(34px, 2vw, 48px)" : 32,
               fontWeight: 700,
               fontFamily: "var(--kalpx-font-serif)",
               color: "var(--kalpx-text)",
@@ -274,11 +280,13 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
           </p>
           <p
             style={{
-              fontSize: 19,
+              fontSize: day === 7 ? 20 : 19,
               color: "var(--kalpx-text-soft)",
-              lineHeight: 1.7,
+              lineHeight: 1.75,
               marginBottom: 0,
               textAlign: "center",
+              maxWidth: day === 7 ? 580 : undefined,
+              margin: day === 7 ? "0 auto" : undefined,
             }}
           >
             {body}
@@ -288,15 +296,16 @@ export function CycleReflectionBlock({ screenData, onAction, day }: Props) {
           data-testid="checkpoint-intro-cta"
           onClick={() => setPhase("reflection")}
           style={{
-            width: "60%",
-            marginTop: 20,
-            margin: "10px auto",
-            padding: "10px",
+            width: "100%",
+            maxWidth: day === 7 ? 360 : 420,
+            marginTop: day === 7 ? 28 : 20,
+            margin: "10px auto 0",
+            padding: day === 7 ? "16px 24px" : "10px",
             background: "var(--kalpx-cta)",
             color: "#fff",
             border: "none",
-            borderRadius: 12,
-            fontSize: 16,
+            borderRadius: 16,
+            fontSize: 18,
             fontWeight: 700,
             cursor: "pointer",
             display: "flex",

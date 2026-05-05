@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { communityCommentSchema } from '@kalpx/validation';
+import { communityCommentSchema } from "@kalpx/validation";
+import { Send } from "lucide-react";
+import React, { useState } from "react";
 
 interface CommunityCommentComposerProps {
   postId: number | string;
@@ -8,6 +9,12 @@ interface CommunityCommentComposerProps {
   error?: string | null;
   onSubmit: (content: string) => void;
   onRequireAuth?: () => void;
+  placeholder?: string;
+  submitLabel?: string;
+  variant?: "default" | "inline";
+  autoFocus?: boolean;
+  leadingAvatarSrc?: string;
+  leadingAvatarLabel?: string;
 }
 
 export function CommunityCommentComposer({
@@ -17,8 +24,14 @@ export function CommunityCommentComposer({
   error = null,
   onSubmit,
   onRequireAuth,
+  placeholder = "Write a comment…",
+  submitLabel = "Post",
+  variant = "default",
+  autoFocus = false,
+  leadingAvatarSrc,
+  leadingAvatarLabel = "K",
 }: CommunityCommentComposerProps) {
-  const [content, setContent] = useState('');
+  const [content, setContent] = useState("");
   const [validationError, setValidationError] = useState<string | null>(null);
 
   function handleSubmit(e: React.FormEvent) {
@@ -29,24 +42,28 @@ export function CommunityCommentComposer({
     }
     const result = communityCommentSchema.safeParse({ content });
     if (!result.success) {
-      setValidationError(result.error.errors[0]?.message ?? 'Invalid comment');
+      setValidationError(result.error.errors[0]?.message ?? "Invalid comment");
       return;
     }
     setValidationError(null);
     onSubmit(content.trim());
-    setContent('');
+    setContent("");
   }
 
   if (!isAuthenticated) {
     return (
       <div
         style={{
-          padding: '12px 16px', borderRadius: 10, background: '#fdf8ef',
-          border: '1.5px solid #f0e8d8', cursor: 'pointer', textAlign: 'center',
+          padding: "12px 16px",
+          borderRadius: 10,
+          background: "#fdf8ef",
+          border: "1.5px solid #f0e8d8",
+          cursor: "pointer",
+          textAlign: "center",
         }}
         onClick={onRequireAuth}
       >
-        <p style={{ fontSize: 13, color: '#b06840', margin: 0 }}>
+        <p style={{ fontSize: 13, color: "#b06840", margin: 0 }}>
           Sign in to leave a comment
         </p>
       </div>
@@ -55,39 +72,157 @@ export function CommunityCommentComposer({
 
   const displayError = validationError ?? error;
 
-  return (
-    <form onSubmit={handleSubmit}>
-      <textarea
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        placeholder="Write a comment…"
-        rows={3}
-        maxLength={1000}
-        style={{
-          width: '100%', boxSizing: 'border-box',
-          padding: '10px 14px', borderRadius: 10,
-          border: `1.5px solid ${displayError ? '#fca5a5' : '#f0e8d8'}`,
-          background: '#fff', fontSize: 14, color: '#2d1a0e',
-          resize: 'vertical', outline: 'none', fontFamily: 'inherit',
-        }}
-      />
-      {displayError && (
-        <p style={{ fontSize: 12, color: '#b91c1c', marginTop: 4 }}>{displayError}</p>
-      )}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 8 }}>
-        <button
-          type="submit"
-          disabled={submitting || !content.trim()}
+  if (variant === "inline") {
+    return (
+      <form onSubmit={handleSubmit}>
+        <div
           style={{
-            padding: '9px 20px', borderRadius: 8,
-            background: submitting || !content.trim() ? '#c0a07a' : '#b06840',
-            color: '#fff', border: 'none', fontSize: 14, fontWeight: 600,
-            cursor: submitting || !content.trim() ? 'not-allowed' : 'pointer',
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            borderRadius: 16,
+            border: `1.5px solid ${displayError ? "#fca5a5" : "#e1c48d"}`,
+            background: "#fff",
+            padding: "8px 8px 8px 14px",
+            marginBottom: 50,
           }}
         >
-          {submitting ? 'Posting…' : 'Post'}
-        </button>
+          <input
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder={placeholder}
+            maxLength={1000}
+            autoFocus={autoFocus}
+            style={{
+              flex: 1,
+              border: "none",
+              outline: "none",
+              background: "transparent",
+              fontSize: 14,
+              color: "#2d1a0e",
+              fontFamily: "inherit",
+            }}
+          />
+          <button
+            type="submit"
+            disabled={submitting || !content.trim()}
+            style={{
+              width: 25,
+              height: 25,
+              borderRadius: "50%",
+              border: "none",
+              background: submitting || !content.trim() ? "#ead39a" : "#e8c66c",
+              color: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: submitting || !content.trim() ? "not-allowed" : "pointer",
+              flexShrink: 0,
+            }}
+            aria-label={submitLabel}
+          >
+            <Send size={15} fill="currentColor" />
+          </button>
+        </div>
+        {displayError && (
+          <p style={{ fontSize: 12, color: "#b91c1c", marginTop: 6 }}>
+            {displayError}
+          </p>
+        )}
+      </form>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        {leadingAvatarSrc ? (
+          <img
+            src={leadingAvatarSrc}
+            alt="Your avatar"
+            style={{
+              width: 25,
+              height: 25,
+              borderRadius: "50%",
+              objectFit: "cover",
+              flexShrink: 0,
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              width: 25,
+              height: 25,
+              borderRadius: "50%",
+              background: "#f3e8cf",
+              color: "#9c7b2f",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 16,
+              fontWeight: 700,
+              flexShrink: 0,
+            }}
+          >
+            {leadingAvatarLabel.slice(0, 1).toUpperCase()}
+          </div>
+        )}
+
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            borderRadius: 16,
+            border: `1.5px solid ${displayError ? "#fca5a5" : "#d8dee8"}`,
+            background: "#fff",
+            padding: "8px 8px 8px 16px",
+          }}
+        >
+          <input
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder={placeholder}
+            maxLength={1000}
+            autoFocus={autoFocus}
+            style={{
+              flex: 1,
+              border: "none",
+              outline: "none",
+              background: "transparent",
+              fontSize: 16,
+              color: "#2d1a0e",
+              fontFamily: "inherit",
+            }}
+          />
+          <button
+            type="submit"
+            disabled={submitting || !content.trim()}
+            style={{
+              width: 25,
+              height: 25,
+              borderRadius: "50%",
+              border: "none",
+              background: submitting || !content.trim() ? "#ead39a" : "#e8c66c",
+              color: "#fff",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: submitting || !content.trim() ? "not-allowed" : "pointer",
+              flexShrink: 0,
+            }}
+            aria-label={submitLabel}
+          >
+            <Send size={15} fill="currentColor" />
+          </button>
+        </div>
       </div>
+      {displayError && (
+        <p style={{ fontSize: 12, color: "#b91c1c", marginTop: 6 }}>
+          {displayError}
+        </p>
+      )}
     </form>
   );
 }

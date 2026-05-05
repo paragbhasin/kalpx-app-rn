@@ -37,6 +37,12 @@ export interface CommunityPost {
   media_url?: string | null;
   images?: string[];
   media?: CommunityMedia[];
+  slide_layouts?: Array<{
+    image?: string;
+    video?: string;
+    thumbnail?: string;
+    type?: 'image' | 'video';
+  }>;
   // Wire field is "creator"; author is a defensive fallback
   creator?: CommunityCreator;
   author?: CommunityCreator;
@@ -49,9 +55,16 @@ export interface CommunityPost {
   share_count?: number;
   is_saved?: boolean;
   is_hidden?: boolean;
+  user_vote?: -1 | 0 | 1 | null;
   tags?: string[];
   category?: string;
   visibility?: string;
+  linked_item?: {
+    id?: string | number;
+    name?: string;
+    type?: string;
+    category?: string;
+  } | null;
   // Phase 12-era field names kept defensive
   likes_count?: number;
   is_liked?: boolean;

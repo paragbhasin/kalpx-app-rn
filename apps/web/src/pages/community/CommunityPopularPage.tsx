@@ -2,23 +2,22 @@ import { isAuthenticated } from "@kalpx/auth";
 import { useCommunityFeedController } from "@kalpx/feature-flows";
 import { useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { CommunityEmptyState } from "../../components/community/CommunityEmptyState";
+import { CommunityErrorState } from "../../components/community/CommunityErrorState";
+import { CommunityFeedSkeleton } from "../../components/community/CommunityFeedSkeleton";
 import { CommunityPostCard } from "../../components/community/CommunityPostCard";
+import { CommunityTopBar } from "../../components/community/CommunityTopBar";
 import {
   createCommunityComment,
   createCommunityPost,
   getCommunityComments,
-  getCommunityFeed,
   getCommunityPost,
+  getPopularPosts,
   upvotePost,
 } from "../../engine/communityApi";
 import { webStorage } from "../../lib/webStorage";
 
-import { CommunityEmptyState } from "../../components/community/CommunityEmptyState";
-import { CommunityErrorState } from "../../components/community/CommunityErrorState";
-import { CommunityFeedSkeleton } from "../../components/community/CommunityFeedSkeleton";
-import { CommunityTopBar } from "../../components/community/CommunityTopBar";
-
-export function CommunityFeedPage() {
+export function CommunityPopularPage() {
   const navigate = useNavigate();
   const didInitialLoadRef = useRef(false);
   const lang =
@@ -29,7 +28,7 @@ export function CommunityFeedPage() {
   const communityApi = useMemo(
     () => ({
       getFeed: (params?: Record<string, any>) =>
-        getCommunityFeed({ ...params, lang }),
+        getPopularPosts({ ...params, lang, sort: "top" }),
       getPost: getCommunityPost,
       getComments: (postId: number | string, params?: Record<string, any>) =>
         getCommunityComments(postId, { ...params, lang }),
@@ -44,7 +43,7 @@ export function CommunityFeedPage() {
     api: communityApi,
     isAuthenticated: () => isAuthenticated(webStorage),
     onRequireAuth: (returnPath) => {
-      const to = encodeURIComponent(returnPath ?? "/en/community");
+      const to = encodeURIComponent(returnPath ?? "/en/community/popular");
       navigate(`/login?returnTo=${to}`);
     },
   });
@@ -53,12 +52,11 @@ export function CommunityFeedPage() {
     if (didInitialLoadRef.current) return;
     didInitialLoadRef.current = true;
     void ctrl.loadFeed(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ctrl, lang]);
 
   return (
     <div style={{ minHeight: "100dvh", background: "var(--kalpx-bg)" }}>
-      <CommunityTopBar />
+      <CommunityTopBar activeLabel="Popular" />
       <div style={{ maxWidth: 620, margin: "0 auto", paddingBottom: 40 }}>
         <div style={{ padding: "5px" }}>
           {ctrl.feedLoading && <CommunityFeedSkeleton />}
@@ -94,7 +92,6 @@ export function CommunityFeedPage() {
                 style={{
                   padding: "10px 28px",
                   borderRadius: 10,
-
                   color: "var(--kalpx-text)",
                   border: "none",
                   fontSize: 14,

@@ -17,12 +17,57 @@ import { SankalpHoldBlock } from "../../components/blocks/SankalpHoldBlock";
 import { TriggerPracticeRunnerBlock } from "../../components/blocks/TriggerPracticeRunnerBlock";
 import { MitraMobileShell } from "../../components/layout/MitraMobileShell";
 import { executeAction } from "../../engine/actionExecutor";
+import { addAdditionalItem } from "../../engine/mitraApi";
 import { ScreenRenderer } from "../../engine/ScreenRenderer";
 import { createCalmAudio } from "../../lib/audio/calmMusic";
 import type { AudioHandle } from "../../lib/audio/howlerAudio";
 import { webNavigate } from "../../lib/webRouter";
 import type { AppDispatch } from "../../store";
-import { loadScreenWithData, useScreenState } from "../../store/screenSlice";
+import {
+  loadScreenWithData,
+  updateScreenData,
+  useScreenState,
+} from "../../store/screenSlice";
+import { showSnackBar } from "../../store/snackBarSlice";
+
+function CommunityRunnerActionBar({
+  addLoading,
+  onAdd,
+}: {
+  addLoading: boolean;
+  onAdd: () => void;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        gap: 10,
+        padding: "8px 16px 24px",
+        marginTop: -100,
+      }}
+    >
+      <button
+        onClick={onAdd}
+        disabled={addLoading}
+        style={{
+          flex: 1,
+
+          borderRadius: 12,
+          border: "1px solid var(--kalpx-border-gold)",
+          background: "rgba(255,248,239,0.92)",
+          color: "var(--kalpx-cta)",
+          fontSize: 14,
+          fontWeight: 700,
+          padding: "12px 14px",
+          cursor: addLoading ? "not-allowed" : "pointer",
+          opacity: addLoading ? 0.65 : 1,
+        }}
+      >
+        {addLoading ? "Adding..." : "Add to My Practice"}
+      </button>
+    </div>
+  );
+}
 
 const TRIGGER_BROWN = "#432104";
 const TRIGGER_GOLD = "#C7A048";
@@ -810,6 +855,7 @@ export function MitraEnginePage() {
   const location = useLocation();
   const screenState = useScreenState();
   const [resolving, setResolving] = useState(false);
+  const [communityAddLoading, setCommunityAddLoading] = useState(false);
   const calmAudioRef = useRef<AudioHandle | null>(null);
 
   const containerId: string =
@@ -836,11 +882,36 @@ export function MitraEnginePage() {
     isRunnerContainer &&
     stateId === "checkin_breath_reset" &&
     screenState.screenData?.runner_source === "support_checkin";
+  const isDashboardPracticeRunner =
+    isRunnerContainer &&
+    stateId === "practice_step_runner" &&
+    !(
+      screenState.screenData?.runner_source === "support_trigger" ||
+      screenState.screenData?.runner_source === "support_checkin" ||
+      screenState.screenData?.runner_source === "community"
+    );
+  const isCommunityRunner =
+    screenState.screenData?.runner_source === "community";
+  const activeRunnerItem: any =
+    screenState.screenData?.runner_active_item || {};
+  const activeRunnerItemId = String(
+    activeRunnerItem.item_id ||
+      activeRunnerItem.itemId ||
+      activeRunnerItem.id ||
+      "",
+  );
+  const activeRunnerType = String(
+    screenState.screenData?.runner_variant ||
+      activeRunnerItem.item_type ||
+      activeRunnerItem.itemType ||
+      "",
+  );
+  const activeAdditionalItemId =
+    screenState.screenData?.runner_additional_item_id ?? null;
 
-  // Calm music: play on runner mount, stop on unmount
+  // Calm music should layer only for the dashboard practice runner.
   useEffect(() => {
-    if (!isRunnerContainer || isTriggerSupportMantra || isCheckinSupportMantra)
-      return;
+    if (!isDashboardPracticeRunner) return;
     const handle = createCalmAudio();
     calmAudioRef.current = handle;
     const t = setTimeout(() => {
@@ -854,7 +925,7 @@ export function MitraEnginePage() {
       handle.unload();
       calmAudioRef.current = null;
     };
-  }, [isRunnerContainer, isTriggerSupportMantra, isCheckinSupportMantra]);
+  }, [isDashboardPracticeRunner]);
 
   useEffect(() => {
     if (!containerId || !stateId) return;
@@ -875,6 +946,51 @@ export function MitraEnginePage() {
     dispatch,
     screenData: screenState.screenData,
     currentStateId: screenState.currentStateId,
+  };
+
+  const ensureCommunityAdditionalItem = async () => {
+    if (!activeRunnerItemId || !activeRunnerType) return null;
+    if (activeAdditionalItemId) {
+      return { additionalItem: { id: activeAdditionalItemId }, created: false };
+    }
+
+    const res = await addAdditionalItem(
+      activeRunnerItemId,
+      activeRunnerType,
+      "community",
+    );
+    const nextId = res?.additionalItem?.id ?? res?.additional_item?.id ?? null;
+    if (nextId != null) {
+      dispatch(
+        updateScreenData({
+          runner_additional_item_id: nextId,
+        }),
+      );
+    }
+    dispatch(
+      showSnackBar(
+        res?.created
+          ? "Added to your Mitra practice."
+          : "Already in your Mitra practice.",
+      ),
+    );
+    return res;
+  };
+
+  const handleCommunityAdd = async () => {
+    if (communityAddLoading) return;
+    if (!activeRunnerItemId || !activeRunnerType) {
+      dispatch(showSnackBar("Could not add this item right now."));
+      return;
+    }
+    setCommunityAddLoading(true);
+    try {
+      await ensureCommunityAdditionalItem();
+    } catch {
+      dispatch(showSnackBar("Could not add this item right now."));
+    } finally {
+      setCommunityAddLoading(false);
+    }
   };
 
   if (!containerId || !stateId) {
@@ -1037,20 +1153,27 @@ export function MitraEnginePage() {
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </div>
         ) : (
-          // RepCounterBlock rendered directly — bypasses ScreenRenderer so only
-          // the mantra runner UI shows; no schema footer/button blocks rendered.
-          <RepCounterBlock
-            block={{
-              // reps_total from screenData wins; master_mantra.reps_total is the
-              // authoritative backend value seeded by start_runner action.
-              total:
-                (screenState.screenData["reps_total"] as number) ??
-                (screenState.screenData["master_mantra"] as any)?.reps_total ??
-                27,
-            }}
-            screenData={screenState.screenData}
-            onAction={(action) => executeAction(action, actionContext)}
-          />
+          <>
+            <RepCounterBlock
+              block={{
+                total:
+                  (screenState.screenData["reps_total"] as number) ??
+                  (screenState.screenData["master_mantra"] as any)
+                    ?.reps_total ??
+                  27,
+              }}
+              screenData={screenState.screenData}
+              onAction={(action) => executeAction(action, actionContext)}
+            />
+            {isCommunityRunner && (
+              <CommunityRunnerActionBar
+                addLoading={communityAddLoading}
+                onAdd={() => {
+                  void handleCommunityAdd();
+                }}
+              />
+            )}
+          </>
         )}
       </MitraMobileShell>
     );
@@ -1072,6 +1195,39 @@ export function MitraEnginePage() {
             screenData={screenState.screenData}
             onAction={(action) => executeAction(action, actionContext)}
           />
+          {isCommunityRunner && (
+            <div
+              style={{
+                position: "relative",
+                zIndex: 2,
+                padding: "0 20px 28px",
+                marginTop: 0,
+                transform: "translateY(-149px)",
+                pointerEvents: "auto",
+              }}
+            >
+              <button
+                onClick={() => {
+                  void handleCommunityAdd();
+                }}
+                disabled={communityAddLoading}
+                style={{
+                  width: "100%",
+                  borderRadius: 12,
+                  border: "1px solid var(--kalpx-border-gold)",
+                  background: "rgba(255,248,239,0.92)",
+                  color: "var(--kalpx-cta)",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  padding: "12px 14px",
+                  cursor: communityAddLoading ? "not-allowed" : "pointer",
+                  opacity: communityAddLoading ? 0.65 : 1,
+                }}
+              >
+                {communityAddLoading ? "Adding..." : "Add to My Practice"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -1100,11 +1256,21 @@ export function MitraEnginePage() {
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </div>
         ) : (
-          <SankalpHoldBlock
-            block={{}}
-            screenData={screenState.screenData}
-            onAction={(action) => executeAction(action, actionContext)}
-          />
+          <>
+            <SankalpHoldBlock
+              block={{}}
+              screenData={screenState.screenData}
+              onAction={(action) => executeAction(action, actionContext)}
+            />
+            {isCommunityRunner && (
+              <CommunityRunnerActionBar
+                addLoading={communityAddLoading}
+                onAdd={() => {
+                  void handleCommunityAdd();
+                }}
+              />
+            )}
+          </>
         )}
       </MitraMobileShell>
     );
@@ -1134,11 +1300,21 @@ export function MitraEnginePage() {
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
           </div>
         ) : (
-          <PracticeTimerBlock
-            block={{}}
-            screenData={screenState.screenData}
-            onAction={(action) => executeAction(action, actionContext)}
-          />
+          <>
+            <PracticeTimerBlock
+              block={{}}
+              screenData={screenState.screenData}
+              onAction={(action) => executeAction(action, actionContext)}
+            />
+            {isCommunityRunner && (
+              <CommunityRunnerActionBar
+                addLoading={communityAddLoading}
+                onAdd={() => {
+                  void handleCommunityAdd();
+                }}
+              />
+            )}
+          </>
         )}
       </MitraMobileShell>
     );
@@ -1253,6 +1429,14 @@ export function MitraEnginePage() {
               screenData={screenState.screenData}
               onAction={(action) => executeAction(action, actionContext)}
             />
+            {isCommunityRunner && stateId !== "completion_return" && (
+              <CommunityRunnerActionBar
+                addLoading={communityAddLoading}
+                onAdd={() => {
+                  void handleCommunityAdd();
+                }}
+              />
+            )}
           </div>
         )}
       </div>

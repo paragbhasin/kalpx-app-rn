@@ -14,7 +14,16 @@ import { ClassDetailPage } from "./pages/classes/ClassDetailPage";
 import { ClassListingPage } from "./pages/classes/ClassListingPage";
 import { ClassPaymentPage } from "./pages/classes/ClassPaymentPage";
 import { CommunityFeedPage } from "./pages/community/CommunityFeedPage";
+import { CommunityExplorePage } from "./pages/community/CommunityExplorePage";
+import { CommunityAboutKalpxPage } from "./pages/community/CommunityAboutKalpxPage";
+import { CommunityKalpxRulesPage } from "./pages/community/CommunityKalpxRulesPage";
+import { CommunityPopularPage } from "./pages/community/CommunityPopularPage";
+import { CommunityPrivacyPolicyPage } from "./pages/community/CommunityPrivacyPolicyPage";
 import { CommunityPostDetailPage } from "./pages/community/CommunityPostDetailPage";
+import { CommunityTopCommunitiesPage } from "./pages/community/CommunityTopCommunitiesPage";
+import { CommunityTopPage } from "./pages/community/CommunityTopPage";
+import { CommunityUserActivityPage } from "./pages/community/CommunityUserActivityPage";
+import { CommunityUserAgreementsPage } from "./pages/community/CommunityUserAgreementsPage";
 import { CreateCommunityPostPage } from "./pages/community/CreateCommunityPostPage";
 import { CheckinPage } from "./pages/mitra/CheckinPage";
 import { CheckpointPage } from "./pages/mitra/CheckpointPage";
@@ -120,6 +129,33 @@ export function AppRoutes() {
 
       {/* Communities vertical */}
       <Route path="/en/community" element={<CommunityFeedPage />} />
+      <Route
+        path="/en/community/communities"
+        element={<CommunityTopCommunitiesPage />}
+      />
+      <Route path="/en/community/explore" element={<CommunityExplorePage />} />
+      <Route
+        path="/en/community/about-kalpx"
+        element={<CommunityAboutKalpxPage />}
+      />
+      <Route
+        path="/en/community/kalpx-rules"
+        element={<CommunityKalpxRulesPage />}
+      />
+      <Route path="/en/community/popular" element={<CommunityPopularPage />} />
+      <Route
+        path="/en/community/privacy-policy"
+        element={<CommunityPrivacyPolicyPage />}
+      />
+      <Route path="/en/community/top" element={<CommunityTopPage />} />
+      <Route
+        path="/en/community/activity"
+        element={<CommunityUserActivityPage />}
+      />
+      <Route
+        path="/en/community/user-agreements"
+        element={<CommunityUserAgreementsPage />}
+      />
       <Route path="/en/community/new" element={<CreateCommunityPostPage />} />
       <Route
         path="/en/community/:postId"

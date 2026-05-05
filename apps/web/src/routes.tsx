@@ -22,6 +22,7 @@ import { CommunityPrivacyPolicyPage } from "./pages/community/CommunityPrivacyPo
 import { CommunityPostDetailPage } from "./pages/community/CommunityPostDetailPage";
 import { CommunityTopCommunitiesPage } from "./pages/community/CommunityTopCommunitiesPage";
 import { CommunityTopPage } from "./pages/community/CommunityTopPage";
+import { CommunityUserActivityPage } from "./pages/community/CommunityUserActivityPage";
 import { CommunityUserAgreementsPage } from "./pages/community/CommunityUserAgreementsPage";
 import { CreateCommunityPostPage } from "./pages/community/CreateCommunityPostPage";
 import { CheckinPage } from "./pages/mitra/CheckinPage";
@@ -147,6 +148,10 @@ export function AppRoutes() {
         element={<CommunityPrivacyPolicyPage />}
       />
       <Route path="/en/community/top" element={<CommunityTopPage />} />
+      <Route
+        path="/en/community/activity"
+        element={<CommunityUserActivityPage />}
+      />
       <Route
         path="/en/community/user-agreements"
         element={<CommunityUserAgreementsPage />}

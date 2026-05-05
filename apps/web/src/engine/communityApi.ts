@@ -37,6 +37,20 @@ export interface CommunityListResponse {
   results: CommunityListItem[];
 }
 
+export type CommunityActivityType =
+  | 'upvotes'
+  | 'downvotes'
+  | 'my_posts'
+  | 'my_questions'
+  | 'my_comments'
+  | 'followed_communities'
+  | 'explore_posts'
+  | 'feed'
+  | 'saved_posts'
+  | 'hidden_posts'
+  | 'useful_marks'
+  | 'stats';
+
 /** Normalise any feed response shape into a canonical CommunityFeedResponse. */
 function normaliseFeedResponse(data: any): CommunityFeedResponse {
   if (!data) return { count: 0, next: null, results: [] };
@@ -394,5 +408,114 @@ export async function getCommunityCurrentUser(): Promise<UserProfile | null> {
   } catch (err: any) {
     console.warn('[communityApi] getCommunityCurrentUser failed:', err?.message);
     return null;
+  }
+}
+
+export async function getCommunityProfileDetails(): Promise<any | null> {
+  try {
+    const res = await api.get('users/profile/profile_details/');
+    return res.data?.data ?? res.data ?? null;
+  } catch (err: any) {
+    console.warn('[communityApi] getCommunityProfileDetails failed:', err?.message);
+    return null;
+  }
+}
+
+export async function getCommunityActivity(
+  type: CommunityActivityType,
+): Promise<any[]> {
+  try {
+    const endpointMap: Record<CommunityActivityType, string> = {
+      upvotes: 'my/activity/upvotes/',
+      downvotes: 'my/activity/downvotes/',
+      my_posts: 'my/activity/my_posts/',
+      my_questions: 'my/activity/my_questions/',
+      my_comments: 'my/activity/my_comments/',
+      followed_communities: 'my/activity/followed_communities/',
+      explore_posts: 'my/activity/explore_posts/',
+      feed: 'my/activity/feed/',
+      saved_posts: 'my/activity/saved_posts/',
+      hidden_posts: 'my/activity/hidden_posts/',
+      useful_marks: 'my/activity/useful_marks/',
+      stats: 'my/activity/stats/',
+    };
+
+    const res = await api.get(endpointMap[type]);
+    let data = res.data?.results ?? res.data ?? [];
+
+    if (type === 'my_comments' && Array.isArray(data)) {
+      data = data
+        .filter(
+          (item: any) =>
+            item.is_question === false || item.comment?.is_question === false,
+        )
+        .map((item: any) => {
+          const post = item.post || item.comment?.post;
+          if (!post) return item;
+          return {
+            ...post,
+            _activity_id: item.id,
+            comment: item.comment || item,
+            commented_at: item.created_at,
+            is_comment_activity: true,
+          };
+        });
+    } else if (type === 'followed_communities' && Array.isArray(data)) {
+      data = data
+        .map((item: any) => {
+          const community = item.community || item;
+          const slug =
+            community.slug ||
+            community.community_slug ||
+            (typeof item === 'string' ? item : null);
+          const id =
+            community.id || community.community_id || community.community;
+
+          if (slug || id) {
+            return { ...community, slug, id: String(id ?? slug) };
+          }
+          return null;
+        })
+        .filter(Boolean);
+    } else if (type === 'saved_posts' && Array.isArray(data)) {
+      data = data.map((item: any) =>
+        item.post
+          ? {
+              ...item.post,
+              _activity_id: item.id,
+              saved_at: item.created_at,
+              is_saved: true,
+            }
+          : item,
+      );
+    } else if (type === 'hidden_posts' && Array.isArray(data)) {
+      data = data.map((item: any) =>
+        item.post
+          ? {
+              ...item.post,
+              _activity_id: item.id,
+              hidden_at: item.created_at,
+              is_hidden: true,
+            }
+          : item,
+      );
+    } else if (type === 'useful_marks' && Array.isArray(data)) {
+      data = data.map((item: any) =>
+        item.comment?.post
+          ? {
+              ...item.comment.post,
+              _activity_id: item.id,
+              comment: item.comment,
+              marked_useful_at: item.created_at,
+              is_useful_mark: true,
+            }
+          : item,
+      );
+    }
+
+    return Array.isArray(data) ? data : [data];
+  } catch (err: any) {
+    console.warn(`[communityApi] getCommunityActivity(${type}) failed:`, err?.message);
+    return [];
   }
 }

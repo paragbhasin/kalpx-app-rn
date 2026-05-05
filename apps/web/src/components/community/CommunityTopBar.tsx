@@ -3,7 +3,7 @@ import { useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface CommunityTopBarProps {
-  activeLabel?: "Home" | "Top" | "Popular" | "Explore";
+  activeLabel?: "Home" | "Top" | "Popular" | "Explore" | "Your Activity";
   rightSlot?: ReactNode;
 }
 
@@ -326,6 +326,8 @@ export function CommunityTopBar({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
+                  setMenuOpen(false);
+                  navigate("/en/community/activity");
                 }}
                 onMouseEnter={() => setHoveredItem("activity")}
                 onMouseLeave={() => setHoveredItem(null)}

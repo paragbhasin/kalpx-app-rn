@@ -275,6 +275,4 @@ const preferencesSlice = createSlice({
 export const { setPreference, setAllPreferences, resetPreferences } =
   preferencesSlice.actions;
 
-export type { GlobalConsent };
-
 export default preferencesSlice.reducer;

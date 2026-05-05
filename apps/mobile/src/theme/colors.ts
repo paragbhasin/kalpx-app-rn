@@ -90,6 +90,7 @@ export const Colors = {
 
   // Misc retained for migration; prefer semantic names above
   borderCream: "#EDE1D3",
+  white: "#FFFFFF",
 } as const;
 
 export type ColorToken = keyof typeof Colors;

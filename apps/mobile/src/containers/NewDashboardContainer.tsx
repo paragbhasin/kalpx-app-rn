@@ -127,7 +127,17 @@ const NewDashboardContainer: React.FC<Props> = () => {
     setPredictiveAlerts((prev) => prev.filter((a) => a.id !== alertId));
     await acceptPredictiveAlert(alertId);
     if (prepContext) {
-      await executeAction({ type: "open_prep_context", payload: { context_type: prepContext } });
+      await executeAction(
+        { type: "open_prep_context", payload: { context_type: prepContext } },
+        {
+          loadScreen,
+          goBack,
+          setScreenValue: (value: any, key: string) => {
+            store.dispatch(screenActions.setScreenValue({ key, value }));
+          },
+          screenState: { ...sd },
+        },
+      );
     }
   }, []);
 

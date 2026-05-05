@@ -303,7 +303,6 @@ export const ProfileStackNavigator = () => (
       name="NotificationPreferences"
       component={NotificationPreferences}
       options={{ headerShown: false }}
-      options={{ headerShown: false }}
     />
     <Stack.Screen
       name="RoomMemoryScreen"

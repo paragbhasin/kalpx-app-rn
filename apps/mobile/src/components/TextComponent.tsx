@@ -16,55 +16,6 @@ import {
   useFonts as useHindiFonts,
 } from "@expo-google-fonts/noto-sans-devanagari";
 
-// Telugu
-import {
-  NotoSansTelugu_400Regular,
-  NotoSansTelugu_700Bold,
-  useFonts as useTeluguFonts,
-} from "@expo-google-fonts/noto-sans-telugu";
-
-// Tamil
-import {
-  NotoSansTamil_400Regular,
-  NotoSansTamil_700Bold,
-  useFonts as useTamilFonts,
-} from "@expo-google-fonts/noto-sans-tamil";
-
-// Kannada
-import {
-  NotoSansKannada_400Regular,
-  NotoSansKannada_700Bold,
-  useFonts as useKannadaFonts,
-} from "@expo-google-fonts/noto-sans-kannada";
-
-// Gujarati
-import {
-  NotoSansGujarati_400Regular,
-  NotoSansGujarati_700Bold,
-  useFonts as useGujaratiFonts,
-} from "@expo-google-fonts/noto-sans-gujarati";
-
-// Odia
-import {
-  NotoSansOriya_400Regular,
-  NotoSansOriya_700Bold,
-  useFonts as useOdiaFonts,
-} from "@expo-google-fonts/noto-sans-oriya";
-
-// Malayalam
-import {
-  NotoSansMalayalam_400Regular,
-  NotoSansMalayalam_700Bold,
-  useFonts as useMalayalamFonts,
-} from "@expo-google-fonts/noto-sans-malayalam";
-
-// Bengali
-import {
-  NotoSansBengali_400Regular,
-  NotoSansBengali_700Bold,
-  useFonts as useBengaliFonts,
-} from "@expo-google-fonts/noto-sans-bengali";
-
 const TextComponent = (props: any) => {
   const [interLoaded] = useInterFonts(InterFonts);
   const [hindiLoaded] = useHindiFonts({
@@ -72,50 +23,11 @@ const TextComponent = (props: any) => {
     NotoSansDevanagari_500Medium,
     NotoSansDevanagari_700Bold,
   });
-  const [teluguLoaded] = useTeluguFonts({
-    NotoSansTelugu_400Regular,
-    NotoSansTelugu_700Bold,
-  });
-  const [tamilLoaded] = useTamilFonts({
-    NotoSansTamil_400Regular,
-    NotoSansTamil_700Bold,
-  });
-  const [kannadaLoaded] = useKannadaFonts({
-    NotoSansKannada_400Regular,
-    NotoSansKannada_700Bold,
-  });
-  const [gujaratiLoaded] = useGujaratiFonts({
-    NotoSansGujarati_400Regular,
-    NotoSansGujarati_700Bold,
-  });
-  const [odiaLoaded] = useOdiaFonts({
-    NotoSansOriya_400Regular,
-    NotoSansOriya_700Bold,
-  });
-  const [malayalamLoaded] = useMalayalamFonts({
-    NotoSansMalayalam_400Regular,
-    NotoSansMalayalam_700Bold,
-  });
-  const [bengaliLoaded] = useBengaliFonts({
-    NotoSansBengali_400Regular,
-    NotoSansBengali_700Bold,
-  });
 
   const { i18n } = useTranslation();
   const userLang = i18n.language.split("-")[0]; // e.g. "hi-IN" → "hi"
 
-  if (
-    !interLoaded ||
-    !hindiLoaded ||
-    !teluguLoaded ||
-    !tamilLoaded ||
-    !kannadaLoaded ||
-    !gujaratiLoaded ||
-    !odiaLoaded ||
-    !malayalamLoaded ||
-    !bengaliLoaded
-  )
-    return null;
+  if (!interLoaded || !hindiLoaded) return null;
 
   const fallbackFont = Platform.select({
     ios: "System",
@@ -205,7 +117,7 @@ const TextComponent = (props: any) => {
 
   const weight = textStyle.fontFamily.match(/(\d+)/)?.[0] || "400";
 
-  // ✅ Language-based font family mapping
+  // Language-based font family mapping
   const getFontFamily = () => {
     if (userLang === "en") return textStyle.fontFamily;
 
@@ -216,34 +128,6 @@ const TextComponent = (props: any) => {
         if (weight >= "500") return "NotoSansDevanagari_500Medium";
         return "NotoSansDevanagari_400Regular";
 
-      case "te":
-        return weight >= "600"
-          ? "NotoSansTelugu_700Bold"
-          : "NotoSansTelugu_400Regular";
-      case "ta":
-        return weight >= "600"
-          ? "NotoSansTamil_700Bold"
-          : "NotoSansTamil_400Regular";
-      case "kn":
-        return weight >= "600"
-          ? "NotoSansKannada_700Bold"
-          : "NotoSansKannada_400Regular";
-      case "gu":
-        return weight >= "600"
-          ? "NotoSansGujarati_700Bold"
-          : "NotoSansGujarati_400Regular";
-      case "or":
-        return weight >= "600"
-          ? "NotoSansOriya_700Bold"
-          : "NotoSansOriya_400Regular";
-      case "ml":
-        return weight >= "600"
-          ? "NotoSansMalayalam_700Bold"
-          : "NotoSansMalayalam_400Regular";
-      case "bn":
-        return weight >= "600"
-          ? "NotoSansBengali_700Bold"
-          : "NotoSansBengali_400Regular";
       default:
         return fallbackFont;
     }
@@ -251,7 +135,7 @@ const TextComponent = (props: any) => {
 
   const fontFamily = getFontFamily();
 
-  // ✅ Slightly increase font size only for Hindi/Marathi
+  // Slightly increase font size only for Hindi/Marathi
   const adjustedFontSize =
     userLang === "hi" || userLang === "mr"
       ? textStyle.fontSize * 1.33

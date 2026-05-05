@@ -515,7 +515,7 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({
       <View style={styles.videoContainer}>
         <Video
           ref={videoRef}
-          source={require("../../assets/videos/kalpx_way.mp4")}
+          source={{ uri: "https://kalpx.com/video/kalpx_way.mp4" }}
           style={styles.fullVideo}
           resizeMode={ResizeMode.COVER}
           shouldPlay
@@ -523,6 +523,10 @@ const InsightSummaryContainer: React.FC<InsightSummaryContainerProps> = ({
             if (status.isLoaded && status.didJustFinish) {
               updateScreenData("insight_step", 2);
             }
+          }}
+          onError={() => {
+            console.warn("[INSIGHT_VIDEO] Remote video failed — skipping to step 2");
+            updateScreenData("insight_step", 2);
           }}
         />
       </View>

@@ -18,7 +18,6 @@ import {
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useDispatch, useSelector } from "react-redux";
-import Header from "../../components/Header";
 import SocialPostCard from "../../components/SocialPostCard";
 import {
   createComment,
@@ -500,14 +499,13 @@ export default function SocialPostDetailScreen() {
       style={{ flex: 1, backgroundColor: "#fff" }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <Header />
-
       {/* Back Header */}
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
-          padding: 6,
+          paddingHorizontal: 12,
+          paddingVertical: 10,
           borderBottomWidth: 1,
           borderBottomColor: "#eee",
         }}
@@ -521,6 +519,7 @@ export default function SocialPostDetailScreen() {
       </View>
 
       <FlatList
+        style={{ flex: 1 }}
         data={comments}
         keyExtractor={(item) => item.id.toString()}
         ListHeaderComponent={
@@ -608,6 +607,7 @@ export default function SocialPostDetailScreen() {
             <ActivityIndicator style={{ padding: 40 }} color="#D69E2E" />
           )
         }
+        keyboardShouldPersistTaps="handled"
         contentContainerStyle={{ paddingBottom: 100 }}
       />
 

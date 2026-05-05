@@ -1,12 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  Image,
-} from "react-native";
+import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
 
 const UserAgreements = ({ onScroll }: { onScroll?: (event: any) => void }) => {
   const { t } = useTranslation();
@@ -16,43 +10,55 @@ const UserAgreements = ({ onScroll }: { onScroll?: (event: any) => void }) => {
       showsVerticalScrollIndicator={false}
       onScroll={onScroll}
       scrollEventThrottle={16}
-      contentContainerStyle={{ paddingBottom: 40, paddingTop: 80 }}
+      contentContainerStyle={{ paddingBottom: 40, paddingTop: 40 }}
     >
       <View style={styles.contentWrapper}>
         {/* LEFT CONTENT */}
         <View style={styles.leftContent}>
-          <Text style={styles.mainHeading}>{t("community.agreements.title")}</Text>
+          <Text style={styles.mainHeading}>
+            {t("community.agreements.title")}
+          </Text>
 
           <View style={styles.section}>
-            <Text style={styles.title}>{t("community.agreements.section1.title")}</Text>
+            <Text style={styles.title}>
+              {t("community.agreements.section1.title")}
+            </Text>
             <Text style={styles.text}>
               {t("community.agreements.section1.text")}
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.title}>{t("community.agreements.section2.title")}</Text>
+            <Text style={styles.title}>
+              {t("community.agreements.section2.title")}
+            </Text>
             <Text style={styles.text}>
               {t("community.agreements.section2.text")}
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.title}>{t("community.agreements.section3.title")}</Text>
+            <Text style={styles.title}>
+              {t("community.agreements.section3.title")}
+            </Text>
             <Text style={styles.text}>
               {t("community.agreements.section3.text")}
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.title}>{t("community.agreements.section4.title")}</Text>
+            <Text style={styles.title}>
+              {t("community.agreements.section4.title")}
+            </Text>
             <Text style={styles.text}>
               {t("community.agreements.section4.text")}
             </Text>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.title}>{t("community.agreements.section5.title")}</Text>
+            <Text style={styles.title}>
+              {t("community.agreements.section5.title")}
+            </Text>
             <Text style={styles.text}>
               {t("community.agreements.section5.text")}
             </Text>

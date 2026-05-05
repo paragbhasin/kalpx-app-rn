@@ -202,6 +202,7 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen
       name="SocialPostDetailScreen"
       component={SocialPostDetailScreen}
+      options={{ headerShown: false }}
     />
     <Stack.Screen
       name="CreateSocialPost"

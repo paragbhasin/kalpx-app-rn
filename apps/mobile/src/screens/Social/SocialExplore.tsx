@@ -1,8 +1,12 @@
 import { useNavigation } from "@react-navigation/native";
+import { ResizeMode, Video } from "expo-av";
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  ActivityIndicator,
+  Alert,
   Dimensions,
+  FlatList,
   Image,
   ScrollView,
   Text,
@@ -10,19 +14,22 @@ import {
   View,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { useDispatch, useSelector } from "react-redux";
 import Header from "../../components/Header";
 import LoadingOverlay from "../../components/LoadingOverlay";
-import api from "../../Networks/axios";
-import SocialPostCard from "../../components/SocialPostCard";
 import ShimmerPlaceholder from "../../components/ShimmerPlaceholder";
-import { FlatList, ActivityIndicator, Alert } from "react-native";
-import { Video, ResizeMode } from 'expo-av';
-import { useDispatch, useSelector } from "react-redux";
+import SocialPostCard from "../../components/SocialPostCard";
+import api from "../../Networks/axios";
+import {
+  hidePostDetail,
+  reportContent,
+  savePostDetail,
+  unsavePostDetail,
+  votePostDetail,
+} from "../PostDetail/actions";
 import { fetchUserActivity } from "../UserActivity/actions";
-import { followCommunity, unfollowCommunity, deletePost } from "./actions";
-import { votePostDetail, savePostDetail, unsavePostDetail, hidePostDetail, reportContent } from "../PostDetail/actions";
+import { deletePost, followCommunity, unfollowCommunity } from "./actions";
 import styles from "./SocialExplorestyles";
-
 
 const screenWidth = Dimensions.get("window").width;
 const COLUMN_WIDTH = screenWidth / 2 - 20;
@@ -34,11 +41,17 @@ interface SocialExploreProps {
   headerComponent?: React.ReactElement;
 }
 
-export default function SocialExplore({ showHeader = true, viewMode = "grid", onScroll, headerComponent }: SocialExploreProps) {
+export default function SocialExplore({
+  showHeader = true,
+  viewMode = "grid",
+  onScroll,
+  headerComponent,
+}: SocialExploreProps) {
   const { t, i18n } = useTranslation();
   const navigation: any = useNavigation();
   const dispatch = useDispatch();
-  const { handleScroll: contextHandleScroll } = require("../../context/ScrollContext").useScrollContext();
+  const { handleScroll: contextHandleScroll } =
+    require("../../context/ScrollContext").useScrollContext();
   const activeHandleScroll = onScroll || contextHandleScroll;
   const [items, setItems] = useState([]);
 
@@ -47,9 +60,10 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
 
-  const { followed_communities } = useSelector((state: any) => state.userActivity);
+  const { followed_communities } = useSelector(
+    (state: any) => state.userActivity,
+  );
   const [viewableItems, setViewableItems] = useState<any>({});
-
 
   const fetchExplore = async (pageNo = 1) => {
     try {
@@ -60,7 +74,9 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
       }
 
       // construct URL with pagination
-      const res = await api.get(`/public/explore-posts/?paginate=true&page=${pageNo}&page_size=10&lang=${i18n.language}`);
+      const res = await api.get(
+        `/public/explore-posts/?paginate=true&page=${pageNo}&page_size=10&lang=${i18n.language}`,
+      );
       let result = res.data || [];
 
       // Handle paginated response or wrapped data
@@ -85,10 +101,13 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
           (item) =>
             new Promise((resolve) => {
               const hookImage = item.hook_image;
-              const isVideo = hookImage?.toLowerCase().endsWith('.mp4') || hookImage?.toLowerCase().endsWith('.mov');
+              const isVideo =
+                hookImage?.toLowerCase().endsWith(".mp4") ||
+                hookImage?.toLowerCase().endsWith(".mov");
 
               const getAspectRatioFromLayout = () => {
-                const ratioStr = item.layout?.aspect_ratio ||
+                const ratioStr =
+                  item.layout?.aspect_ratio ||
                   item.slides?.[0]?.layout?.aspect_ratio ||
                   item.slide_layouts?.[0]?.layout?.aspect_ratio ||
                   item.resolved_slide_layouts?.[0]?.layout?.aspect_ratio;
@@ -103,16 +122,17 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
                 Image.getSize(
                   hookImage,
                   (w, h) => resolve({ ...item, aspect: w / h }),
-                  () => resolve({ ...item, aspect: getAspectRatioFromLayout() })
+                  () =>
+                    resolve({ ...item, aspect: getAspectRatioFromLayout() }),
                 );
               } else {
                 resolve({ ...item, aspect: getAspectRatioFromLayout() });
               }
-            })
-        )
+            }),
+        ),
       );
 
-      setItems(prev => pageNo === 1 ? mapped : [...prev, ...mapped]);
+      setItems((prev) => (pageNo === 1 ? mapped : [...prev, ...mapped]));
     } catch (e) {
       console.log("❌ Fetch Explore Error:", e);
     } finally {
@@ -132,7 +152,6 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
     dispatch(fetchUserActivity("followed_communities") as any);
   }, [i18n.language]);
 
-
   const handleLoadMore = () => {
     if (!loading && !isFetchingMore && hasMore) {
       const nextPage = page + 1;
@@ -142,12 +161,18 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
   };
 
   const handleInteraction = (type: string, post: any) => {
-    if (type === 'comment') {
-      navigation.navigate('SocialPostDetailScreen', { post: post });
-    } else if (type === 'askQuestion') {
-      navigation.navigate('SocialPostDetailScreen', { post: post, isQuestion: true });
-    } else if (type === 'followToggle') {
-      const communityId = post.community?.slug || post.community_slug || post.community?.id?.toString();
+    if (type === "comment") {
+      navigation.navigate("SocialPostDetailScreen", { post: post });
+    } else if (type === "askQuestion") {
+      navigation.navigate("SocialPostDetailScreen", {
+        post: post,
+        isQuestion: true,
+      });
+    } else if (type === "followToggle") {
+      const communityId =
+        post.community?.slug ||
+        post.community_slug ||
+        post.community?.id?.toString();
       if (communityId) {
         if (post.is_joined) {
           dispatch(unfollowCommunity(communityId) as any);
@@ -155,67 +180,79 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
           dispatch(followCommunity(communityId) as any);
         }
       }
-    } else if (type === 'upvote' || type === 'downvote' || type === 'save' || type === 'unsave') {
+    } else if (
+      type === "upvote" ||
+      type === "downvote" ||
+      type === "save" ||
+      type === "unsave"
+    ) {
       // Optimistic local update for SocialExplore's local items state
       const interaction = type;
-      setItems(prevItems => prevItems.map(item => {
-        const mergedPostId = item.community_post?.id || item.id;
-        if (mergedPostId !== post.id) return item;
+      setItems((prevItems) =>
+        prevItems.map((item) => {
+          const mergedPostId = item.community_post?.id || item.id;
+          if (mergedPostId !== post.id) return item;
 
-        let updatedItem = { ...item };
-        let updatedPost = { ...(item.community_post || {}), ...item }; // handle both structures
+          let updatedItem = { ...item };
+          let updatedPost = { ...(item.community_post || {}), ...item }; // handle both structures
 
-        if (interaction === 'upvote') {
-          const userVote = updatedPost.user_vote || 0;
-          if (userVote === 1) {
-            updatedPost.score = (updatedPost.score || 0) - 1;
-            updatedPost.user_vote = 0;
-          } else if (userVote === -1) {
-            updatedPost.score = (updatedPost.score || 0) + 2;
-            updatedPost.user_vote = 1;
-          } else {
-            updatedPost.score = (updatedPost.score || 0) + 1;
-            updatedPost.user_vote = 1;
+          if (interaction === "upvote") {
+            const userVote = updatedPost.user_vote || 0;
+            if (userVote === 1) {
+              updatedPost.score = (updatedPost.score || 0) - 1;
+              updatedPost.user_vote = 0;
+            } else if (userVote === -1) {
+              updatedPost.score = (updatedPost.score || 0) + 2;
+              updatedPost.user_vote = 1;
+            } else {
+              updatedPost.score = (updatedPost.score || 0) + 1;
+              updatedPost.user_vote = 1;
+            }
+          } else if (interaction === "downvote") {
+            const userVote = updatedPost.user_vote || 0;
+            if (userVote === -1) {
+              updatedPost.score = (updatedPost.score || 0) + 1;
+              updatedPost.user_vote = 0;
+            } else if (userVote === 1) {
+              updatedPost.score = (updatedPost.score || 0) - 2;
+              updatedPost.user_vote = -1;
+            } else {
+              updatedPost.score = (updatedPost.score || 0) - 1;
+              updatedPost.user_vote = -1;
+            }
+          } else if (interaction === "save") {
+            updatedPost.is_saved = true;
+          } else if (interaction === "unsave") {
+            updatedPost.is_saved = false;
           }
-        } else if (interaction === 'downvote') {
-          const userVote = updatedPost.user_vote || 0;
-          if (userVote === -1) {
-            updatedPost.score = (updatedPost.score || 0) + 1;
-            updatedPost.user_vote = 0;
-          } else if (userVote === 1) {
-            updatedPost.score = (updatedPost.score || 0) - 2;
-            updatedPost.user_vote = -1;
-          } else {
-            updatedPost.score = (updatedPost.score || 0) - 1;
-            updatedPost.user_vote = -1;
-          }
-        } else if (interaction === 'save') {
-          updatedPost.is_saved = true;
-        } else if (interaction === 'unsave') {
-          updatedPost.is_saved = false;
-        }
 
-        // Sync back to the specific structure
-        if (updatedItem.community_post) {
-          updatedItem.community_post = { ...updatedItem.community_post, ...updatedPost };
-        } else {
-          updatedItem = { ...updatedItem, ...updatedPost };
-        }
-        return updatedItem;
-      }));
+          // Sync back to the specific structure
+          if (updatedItem.community_post) {
+            updatedItem.community_post = {
+              ...updatedItem.community_post,
+              ...updatedPost,
+            };
+          } else {
+            updatedItem = { ...updatedItem, ...updatedPost };
+          }
+          return updatedItem;
+        }),
+      );
 
       // Dispatch Redux action for backend sync and other components
-      if (type === 'upvote') dispatch(votePostDetail(post.id, 'upvote') as any);
-      else if (type === 'downvote') dispatch(votePostDetail(post.id, 'downvote') as any);
-      else if (type === 'save') dispatch(savePostDetail(post.id) as any);
-      else if (type === 'unsave') dispatch(unsavePostDetail(post.id) as any);
-
-    } else if (type === 'hide') {
-      setItems(prev => prev.filter(item => (item.community_post?.id || item.id) !== post.id));
+      if (type === "upvote") dispatch(votePostDetail(post.id, "upvote") as any);
+      else if (type === "downvote")
+        dispatch(votePostDetail(post.id, "downvote") as any);
+      else if (type === "save") dispatch(savePostDetail(post.id) as any);
+      else if (type === "unsave") dispatch(unsavePostDetail(post.id) as any);
+    } else if (type === "hide") {
+      setItems((prev) =>
+        prev.filter((item) => (item.community_post?.id || item.id) !== post.id),
+      );
       dispatch(hidePostDetail(post.id) as any);
-    } else if (type === 'edit') {
-      navigation.navigate('CreateSocialPost', { post });
-    } else if (type === 'delete') {
+    } else if (type === "edit") {
+      navigation.navigate("CreateSocialPost", { post });
+    } else if (type === "delete") {
       Alert.alert("Delete Post", "Are you sure you want to delete this post?", [
         { text: "Cancel", style: "cancel" },
         {
@@ -224,25 +261,29 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
           onPress: async () => {
             const res: any = await dispatch(deletePost(post.id) as any);
             if (res.success) {
-              setItems(prev => prev.filter(item => (item.community_post?.id || item.id) !== post.id));
+              setItems((prev) =>
+                prev.filter(
+                  (item) => (item.community_post?.id || item.id) !== post.id,
+                ),
+              );
             } else {
               Alert.alert("Error", res.error || "Failed to delete post");
             }
-          }
-        }
+          },
+        },
       ]);
     }
   };
 
-
-
-  const onViewableItemsChanged = React.useRef(({ viewableItems: currentlyViewable }: any) => {
-    const viewableMap = {};
-    currentlyViewable.forEach((item: any) => {
-      viewableMap[item.key] = true;
-    });
-    setViewableItems(viewableMap);
-  }).current;
+  const onViewableItemsChanged = React.useRef(
+    ({ viewableItems: currentlyViewable }: any) => {
+      const viewableMap = {};
+      currentlyViewable.forEach((item: any) => {
+        viewableMap[item.key] = true;
+      });
+      setViewableItems(viewableMap);
+    },
+  ).current;
 
   const viewabilityConfig = React.useRef({
     itemVisiblePercentThreshold: 50,
@@ -267,7 +308,9 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
   });
 
   const renderItem = (item: any) => {
-    const isVideo = item.hook_image?.toLowerCase().endsWith('.mp4') || item.hook_image?.toLowerCase().endsWith('.mov');
+    const isVideo =
+      item.hook_image?.toLowerCase().endsWith(".mp4") ||
+      item.hook_image?.toLowerCase().endsWith(".mov");
     const isVisible = item.isVisible || viewableItems[item.id.toString()];
 
     return (
@@ -277,17 +320,23 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
           marginBottom: 12,
           borderRadius: 12,
           overflow: "hidden",
-          backgroundColor: '#f0f0f0', // Placeholder color
+          backgroundColor: "#f0f0f0", // Placeholder color
         }}
         onPress={() => {
           const mergedPost = {
             ...item,
             ...(item.community_post || {}),
-            content: item.community_post?.content || item.base_text || item.summary,
+            content:
+              item.community_post?.content || item.base_text || item.summary,
             images: item.community_post?.images?.length
               ? item.community_post.images
-              : (item.slides?.map((s: any) => ({ image: s.image_url })) || [{ image: item.hook_image }]),
-            community_name: item.community_name || item.community_post?.community_name || "Community",
+              : item.slides?.map((s: any) => ({ image: s.image_url })) || [
+                  { image: item.hook_image },
+                ],
+            community_name:
+              item.community_name ||
+              item.community_post?.community_name ||
+              "Community",
           };
           navigation.navigate("SocialPostDetailScreen", {
             post: mergedPost,
@@ -308,27 +357,31 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
               isMuted={true}
               isLooping={true}
             />
-            <View style={{
-              position: 'absolute',
-              top: 8,
-              left: 8,
-              backgroundColor: 'rgba(0,0,0,0.4)',
-              borderRadius: 4,
-              padding: 4,
-              zIndex: 2
-            }}>
+            <View
+              style={{
+                position: "absolute",
+                top: 8,
+                left: 8,
+                backgroundColor: "rgba(0,0,0,0.4)",
+                borderRadius: 4,
+                padding: 4,
+                zIndex: 2,
+              }}
+            >
               <Ionicons name="videocam" size={14} color="white" />
             </View>
             {!isVisible && (
-              <View style={{
-                position: 'absolute',
-                top: 10,
-                right: 10,
-                backgroundColor: 'rgba(0,0,0,0.5)',
-                borderRadius: 12,
-                padding: 4,
-                zIndex: 1
-              }}>
+              <View
+                style={{
+                  position: "absolute",
+                  top: 10,
+                  right: 10,
+                  backgroundColor: "rgba(0,0,0,0.5)",
+                  borderRadius: 12,
+                  padding: 4,
+                  zIndex: 1,
+                }}
+              >
                 <Ionicons name="play" size={16} color="white" />
               </View>
             )}
@@ -358,18 +411,36 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
       content: item.community_post?.content || item.base_text || item.summary,
       images: item.community_post?.images?.length
         ? item.community_post.images
-        : (item.slides?.map((s: any) => ({ image: s.image_url })) || [{ image: item.hook_image }]),
-      community_name: item.community_name || item.community_post?.community_name || "Community",
+        : item.slides?.map((s: any) => ({ image: s.image_url })) || [
+            { image: item.hook_image },
+          ],
+      community_name:
+        item.community_name ||
+        item.community_post?.community_name ||
+        "Community",
     };
 
-    const isJoined = mergedPost.is_joined ||
+    const isJoined =
+      mergedPost.is_joined ||
       followed_communities.data.some((c: any) => {
         const cSlug = c.slug?.toLowerCase();
-        const itemSlug = (mergedPost.community_slug || mergedPost.community?.slug || mergedPost.slug)?.toLowerCase();
+        const itemSlug = (
+          mergedPost.community_slug ||
+          mergedPost.community?.slug ||
+          mergedPost.slug
+        )?.toLowerCase();
         const cId = c.id?.toString();
-        const itemId = (mergedPost.community_id || mergedPost.community?.id || mergedPost.community || mergedPost.id)?.toString();
+        const itemId = (
+          mergedPost.community_id ||
+          mergedPost.community?.id ||
+          mergedPost.community ||
+          mergedPost.id
+        )?.toString();
 
-        return (cSlug && itemSlug && cSlug === itemSlug) || (cId && itemId && cId === itemId);
+        return (
+          (cSlug && itemSlug && cSlug === itemSlug) ||
+          (cId && itemId && cId === itemId)
+        );
       });
 
     const isVisible = viewableItems[item.id.toString()];
@@ -377,26 +448,35 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
     return (
       <SocialPostCard
         post={{ ...mergedPost, is_joined: isJoined }}
-        onComment={() => handleInteraction('comment', mergedPost)}
-        onAskQuestion={() => handleInteraction('askQuestion', mergedPost)}
-        onJoin={() => handleInteraction('followToggle', { ...mergedPost, is_joined: isJoined })}
-        onUpvote={() => handleInteraction('upvote', mergedPost)}
-        onDownvote={() => handleInteraction('downvote', mergedPost)}
-        onSave={() => handleInteraction('save', mergedPost)}
-        onUnsave={() => handleInteraction('unsave', mergedPost)}
-        onHide={() => handleInteraction('hide', mergedPost)}
+        onComment={() => handleInteraction("comment", mergedPost)}
+        onAskQuestion={() => handleInteraction("askQuestion", mergedPost)}
+        onJoin={() =>
+          handleInteraction("followToggle", {
+            ...mergedPost,
+            is_joined: isJoined,
+          })
+        }
+        onUpvote={() => handleInteraction("upvote", mergedPost)}
+        onDownvote={() => handleInteraction("downvote", mergedPost)}
+        onSave={() => handleInteraction("save", mergedPost)}
+        onUnsave={() => handleInteraction("unsave", mergedPost)}
+        onHide={() => handleInteraction("hide", mergedPost)}
         onReport={(reason, details) => {
-          dispatch(reportContent('post', mergedPost.id, reason, details) as any);
-          Alert.alert(t("community.reportedTitle"), t("community.reportedMessage"));
+          dispatch(
+            reportContent("post", mergedPost.id, reason, details) as any,
+          );
+          Alert.alert(
+            t("community.reportedTitle"),
+            t("community.reportedMessage"),
+          );
         }}
-        onEdit={() => handleInteraction('edit', mergedPost)}
-        onDelete={() => handleInteraction('delete', mergedPost)}
-        onUserPress={() => { }} // Handle if needed
+        onEdit={() => handleInteraction("edit", mergedPost)}
+        onDelete={() => handleInteraction("delete", mergedPost)}
+        onUserPress={() => {}} // Handle if needed
         isVisible={isVisible}
       />
     );
   };
-
 
   const renderShimmer = (height: number) => (
     <View
@@ -407,16 +487,32 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
         width: COLUMN_WIDTH,
       }}
     >
-      <ShimmerPlaceholder width={COLUMN_WIDTH} height={height} style={{ borderRadius: 12 }} />
+      <ShimmerPlaceholder
+        width={COLUMN_WIDTH}
+        height={height}
+        style={{ borderRadius: 12 }}
+      />
     </View>
   );
 
   const renderListShimmer = () => (
     <View style={{ marginBottom: 20 }}>
-      <ShimmerPlaceholder width="100%" height={250} style={{ borderRadius: 12 }} />
+      <ShimmerPlaceholder
+        width="100%"
+        height={250}
+        style={{ borderRadius: 12 }}
+      />
       <View style={{ padding: 15 }}>
-        <ShimmerPlaceholder width="60%" height={20} style={{ marginBottom: 10 }} />
-        <ShimmerPlaceholder width="90%" height={16} style={{ marginBottom: 6 }} />
+        <ShimmerPlaceholder
+          width="60%"
+          height={20}
+          style={{ marginBottom: 10 }}
+        />
+        <ShimmerPlaceholder
+          width="90%"
+          height={16}
+          style={{ marginBottom: 6 }}
+        />
         <ShimmerPlaceholder width="40%" height={16} />
       </View>
     </View>
@@ -427,7 +523,6 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
   return (
     <View style={styles.container}>
       {showHeader && <Header />}
-
 
       {loading && items.length === 0 ? (
         viewMode === "grid" ? (
@@ -440,10 +535,14 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
             }}
           >
             <View style={{ width: COLUMN_WIDTH }}>
-              {[200, 250, 180].map((h, i) => <View key={i}>{renderShimmer(h)}</View>)}
+              {[200, 250, 180].map((h, i) => (
+                <View key={i}>{renderShimmer(h)}</View>
+              ))}
             </View>
             <View style={{ width: COLUMN_WIDTH }}>
-              {[240, 190, 220].map((h, i) => <View key={i}>{renderShimmer(h)}</View>)}
+              {[240, 190, 220].map((h, i) => (
+                <View key={i}>{renderShimmer(h)}</View>
+              ))}
             </View>
           </View>
         ) : (
@@ -465,7 +564,8 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
 
             // Simple viewability logic for ScrollView grid
             const viewportTop = scrollY;
-            const viewportBottom = scrollY + e.nativeEvent.layoutMeasurement.height;
+            const viewportBottom =
+              scrollY + e.nativeEvent.layoutMeasurement.height;
 
             const newVisibleItems = { ...viewableItems };
             items.forEach((item: any) => {
@@ -477,14 +577,17 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
             });
 
             const paddingToBottom = 20;
-            const isBottom = e.nativeEvent.layoutMeasurement.height + e.nativeEvent.contentOffset.y >= e.nativeEvent.contentSize.height - paddingToBottom;
+            const isBottom =
+              e.nativeEvent.layoutMeasurement.height +
+                e.nativeEvent.contentOffset.y >=
+              e.nativeEvent.contentSize.height - paddingToBottom;
 
             if (isBottom) {
               handleLoadMore();
             }
           }}
           scrollEventThrottle={16}
-          contentContainerStyle={{ paddingTop: 110 }}
+          contentContainerStyle={{ paddingTop: 60 }}
         >
           <View
             style={{
@@ -496,11 +599,15 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
             }}
           >
             <View style={{ width: COLUMN_WIDTH }}>
-              {leftColumn.map((item) => renderItem({ ...item, isVisible: true }))}
+              {leftColumn.map((item) =>
+                renderItem({ ...item, isVisible: true }),
+              )}
             </View>
 
             <View style={{ width: COLUMN_WIDTH }}>
-              {rightColumn.map((item) => renderItem({ ...item, isVisible: true }))}
+              {rightColumn.map((item) =>
+                renderItem({ ...item, isVisible: true }),
+              )}
             </View>
           </View>
         </ScrollView>
@@ -515,25 +622,31 @@ export default function SocialExplore({ showHeader = true, viewMode = "grid", on
           scrollEventThrottle={16}
           onViewableItemsChanged={onViewableItemsChanged}
           viewabilityConfig={viewabilityConfig}
-          contentContainerStyle={{ paddingTop: 110 }}
+          contentContainerStyle={{ paddingTop: 68 }}
           removeClippedSubviews={false}
           maintainVisibleContentPosition={null}
           ListHeaderComponent={headerComponent}
           ListFooterComponent={() =>
             isFetchingMore ? (
-              <View style={{ padding: 20, alignItems: 'center' }}>
+              <View style={{ padding: 20, alignItems: "center" }}>
                 <ActivityIndicator size="small" color="#D69E2E" />
-                <Text style={{ marginTop: 10 }}>{t("community.loadingMore")}</Text>
+                <Text style={{ marginTop: 10 }}>
+                  {t("community.loadingMore")}
+                </Text>
               </View>
-            ) : <View style={{ height: 20 }} />
+            ) : (
+              <View style={{ height: 20 }} />
+            )
           }
           showsVerticalScrollIndicator={false}
         />
       )}
 
-      {loading && <LoadingOverlay visible={true} text={t("community.loadingExplore")} />}
+      {loading && (
+        <LoadingOverlay visible={true} text={t("community.loadingExplore")} />
+      )}
       {isFetchingMore && (
-        <View style={{ padding: 20, alignItems: 'center' }}>
+        <View style={{ padding: 20, alignItems: "center" }}>
           <LoadingOverlay visible={false} text="" />
 
           <Text>{t("community.loadingMore")}</Text>

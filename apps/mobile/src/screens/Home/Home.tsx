@@ -41,28 +41,6 @@ import ContinueJourney from "./ContinueJourney";
 // GET /api/mitra/journey/home/ which resolves to M12 (short-gap or
 // long-absence variant). See M12_LONG_ABSENCE_DRAFT.md.
 
-const FEATURE_ITEMS = [
-  {
-    icon: require("../../../assets/guided-growth.png"),
-    title: "KalpX Mitra",
-    text: "Your daily companion.",
-  },
-  {
-    icon: require("../../../assets/daily-consistency.png"),
-    title: "Support When Triggered",
-    text: "Calm guidance in difficult moments.",
-  },
-  {
-    icon: require("../../../assets/self-reflection.png"),
-    title: "Quick Check-In",
-    text: "Pause and reflect.",
-  },
-  {
-    icon: require("../../../assets/sanatan-wisdom.png"),
-    title: "Core Practice",
-    text: "Daily mantras, sankalps, and guidance.",
-  },
-];
 
 // Legacy export for RelatedVideosScreen compatibility
 export const collapseControl = { avoidCollapse: false };

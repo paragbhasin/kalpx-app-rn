@@ -253,11 +253,6 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
       component={ScreenRenderer}
       options={{ headerShown: false }}
     />
-    <Stack.Screen
-      name="GuidedGrowth"
-      component={require("../containers/GuidedGrowthContainer").default}
-      options={{ headerShown: false }}
-    />
   </Stack.Navigator>
 );
 

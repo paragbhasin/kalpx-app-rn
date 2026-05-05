@@ -10,7 +10,7 @@
  */
 
 import * as Haptics from "expo-haptics";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   KeyboardAvoidingView,
@@ -25,9 +25,16 @@ import Svg, { Path } from "react-native-svg";
 import MantraLotus3d from "../../assets/mantra-lotus-3d.svg";
 import { VoiceTextInput } from "../components/VoiceTextInput";
 import { executeAction } from "../engine/actionExecutor";
-import { mitraTrackEvent, postGratitudeLedger } from "../engine/mitraApi";
+import {
+  mitraAddAdditionalItem,
+  mitraTrackEvent,
+  postGratitudeLedger,
+} from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { readMomentSlot, useContentSlots } from "../hooks/useContentSlots";
+import { store } from "../store";
+import { screenActions } from "../store/screenSlice";
+import { showSnackBar } from "../store/snackBarSlice";
 import { Fonts } from "../theme/fonts";
 
 // Phase E — variant-specific completion messages now served from the
@@ -104,10 +111,24 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
   const contentFade = useRef(new Animated.Value(0)).current;
   const checkProgress = useRef(new Animated.Value(0)).current;
   const messageOpacity = useRef(new Animated.Value(0)).current;
+  const [communityAddLoading, setCommunityAddLoading] = useState(false);
+
+  const isCommunityRunner = screenData.runner_source === "community";
+  const activeRunnerItem = screenData.runner_active_item || {};
+  const activeRunnerItemId = String(
+    activeRunnerItem.item_id || activeRunnerItem.itemId || activeRunnerItem.id || "",
+  );
+  const activeRunnerType = String(
+    screenData.runner_variant ||
+      activeRunnerItem.item_type ||
+      activeRunnerItem.itemType ||
+      activeRunnerItem.type ||
+      "",
+  );
+  const activeAdditionalItemId =
+    screenData.runner_additional_item_id ?? null;
 
   const setScreenValue = (key: string, value: any) => {
-    const { screenActions } = require("../store/screenSlice");
-    const { store } = require("../store");
     store.dispatch(screenActions.setScreenValue({ key, value }));
   };
 
@@ -116,6 +137,52 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
     setScreenValue("runner_source", null);
     setScreenValue("runner_start_time", null);
     setScreenValue("runner_variant", null);
+  };
+
+  const ensureCommunityAdditionalItem = async () => {
+    if (!activeRunnerItemId || !activeRunnerType) return null;
+    if (activeAdditionalItemId) {
+      return { additionalItem: { id: activeAdditionalItemId }, created: false };
+    }
+
+    const res = await mitraAddAdditionalItem(
+      activeRunnerItemId,
+      activeRunnerType,
+      "community",
+    );
+    const nextId = res?.additionalItem?.id ?? res?.additional_item?.id ?? null;
+    if (nextId != null) {
+      store.dispatch(
+        screenActions.setScreenValue({
+          key: "runner_additional_item_id",
+          value: nextId,
+        }),
+      );
+    }
+    store.dispatch(
+      showSnackBar(
+        res?.created
+          ? "Added to your Mitra practice."
+          : "Already in your Mitra practice.",
+      ),
+    );
+    return res;
+  };
+
+  const handleCommunityAdd = async () => {
+    if (communityAddLoading) return;
+    if (!activeRunnerItemId || !activeRunnerType) {
+      store.dispatch(showSnackBar("Could not add this item right now."));
+      return;
+    }
+    setCommunityAddLoading(true);
+    try {
+      await ensureCommunityAdditionalItem();
+    } catch (_) {
+      store.dispatch(showSnackBar("Could not add this item right now."));
+    } finally {
+      setCommunityAddLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -353,6 +420,24 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
           </View>
 
           <View style={styles.footer}>
+            {isCommunityRunner && (
+              <TouchableOpacity
+                style={[
+                  styles.communityAddCta,
+                  communityAddLoading && styles.communityAddCtaDisabled,
+                ]}
+                onPress={() => {
+                  void handleCommunityAdd();
+                }}
+                activeOpacity={0.8}
+                disabled={communityAddLoading}
+              >
+                <Text style={styles.communityAddCtaText}>
+                  {communityAddLoading ? "Adding..." : "Add to My Practice"}
+                </Text>
+              </TouchableOpacity>
+            )}
+
             <TouchableOpacity
               style={styles.primaryCta}
               onPress={() => handleReturnHome(true)}
@@ -467,6 +552,28 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     // gap: 16,
+  },
+  communityAddCta: {
+    backgroundColor: "rgba(255,248,239,0.92)",
+    paddingVertical: 14,
+    paddingHorizontal: 40,
+    borderRadius: 16,
+    width: "100%",
+    maxWidth: 280,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#DAC28E",
+    marginBottom: 12,
+  },
+  communityAddCtaDisabled: {
+    opacity: 0.65,
+  },
+  communityAddCtaText: {
+    fontFamily: Fonts.serif.bold,
+    fontSize: 14,
+    color: "#B88413",
+    letterSpacing: 0.2,
   },
   primaryCta: {
     backgroundColor: "#FBF5F5",

@@ -1,5 +1,4 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { REMOTE_AUDIO_SOURCES } from "../config/audioAssets";
 import Slider from "@react-native-community/slider";
 import { Audio } from "expo-av";
 import {
@@ -36,10 +35,14 @@ import RudrakshSvg from "../../assets/rudraksh.svg";
 import AudioPlayerBlock from "../blocks/AudioPlayerBlock";
 import CycleReflectionBlock from "../blocks/CycleReflectionBlock";
 import { VoiceTextInput } from "../components/VoiceTextInput";
+import { REMOTE_AUDIO_SOURCES } from "../config/audioAssets";
 import BlockRenderer from "../engine/BlockRenderer";
 import { executeAction } from "../engine/actionExecutor";
+import { mitraAddAdditionalItem } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { interpolate } from "../engine/utils/interpolation";
+import { store } from "../store";
+import { showSnackBar } from "../store/snackBarSlice";
 import { Fonts } from "../theme/fonts";
 import { stopRoomAmbientAudio } from "./RoomContainer";
 
@@ -134,6 +137,27 @@ const SectionHeader: React.FC<{ label: string }> = ({ label }) => (
     <View style={styles.dividerLine} />
     <Text style={styles.sectionLabel}>{label}</Text>
     <View style={styles.dividerLine} />
+  </View>
+);
+
+const CommunityRunnerActionBar: React.FC<{
+  addLoading: boolean;
+  onAdd: () => void;
+}> = ({ addLoading, onAdd }) => (
+  <View style={styles.communityActionBar}>
+    <TouchableOpacity
+      onPress={onAdd}
+      disabled={addLoading}
+      activeOpacity={0.85}
+      style={[
+        styles.communityAddButton,
+        addLoading && styles.communityAddButtonDisabled,
+      ]}
+    >
+      <Text style={styles.communityAddButtonText}>
+        {addLoading ? "Adding..." : "Add to My Practice"}
+      </Text>
+    </TouchableOpacity>
   </View>
 );
 
@@ -242,6 +266,7 @@ const MantraTextCard: React.FC<MantraTextCardProps> = ({
 const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
   schema,
 }) => {
+  const dispatch = store.dispatch as any;
   const {
     updateBackground,
     updateHeaderHidden,
@@ -278,6 +303,7 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
   const [practiceTimeLeft, setPracticeTimeLeft] = useState(180);
   const [practiceInitialSeconds, setPracticeInitialSeconds] = useState(180);
   const [isPracticeTimerRunning, setIsPracticeTimerRunning] = useState(false);
+  const [communityAddLoading, setCommunityAddLoading] = useState(false);
 
   const sankalpOmRef = useRef<Audio.Sound | null>(null);
   const calmMusicRef = useRef<Audio.Sound | null>(null);
@@ -491,6 +517,63 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     );
   }, [sankalpBodyText, info.title]);
   const stateId = currentStateId || "";
+  const isCommunityRunner = screenData?.runner_source === "community";
+  const activeRunnerItem = screenData?.runner_active_item || {};
+  const activeRunnerItemId = String(
+    activeRunnerItem.item_id ||
+      activeRunnerItem.itemId ||
+      activeRunnerItem.id ||
+      "",
+  );
+  const activeRunnerType = String(
+    screenData?.runner_variant ||
+      activeRunnerItem.item_type ||
+      activeRunnerItem.itemType ||
+      activeRunnerItem.type ||
+      "",
+  );
+  const activeAdditionalItemId = screenData?.runner_additional_item_id ?? null;
+
+  const ensureCommunityAdditionalItem = async () => {
+    if (!activeRunnerItemId || !activeRunnerType) return null;
+    if (activeAdditionalItemId) {
+      return { additionalItem: { id: activeAdditionalItemId }, created: false };
+    }
+
+    const res = await mitraAddAdditionalItem(
+      activeRunnerItemId,
+      activeRunnerType,
+      "community",
+    );
+    const nextId = res?.additionalItem?.id ?? res?.additional_item?.id ?? null;
+    if (nextId != null) {
+      updateScreenData("runner_additional_item_id", nextId);
+    }
+    dispatch(
+      showSnackBar(
+        res?.created
+          ? "Added to your Mitra practice."
+          : "Already in your Mitra practice.",
+      ),
+    );
+    return res;
+  };
+
+  const handleCommunityAdd = async () => {
+    if (communityAddLoading) return;
+    if (!activeRunnerItemId || !activeRunnerType) {
+      dispatch(showSnackBar("Could not add this item right now."));
+      return;
+    }
+    setCommunityAddLoading(true);
+    try {
+      await ensureCommunityAdditionalItem();
+    } catch (_) {
+      dispatch(showSnackBar("Could not add this item right now."));
+    } finally {
+      setCommunityAddLoading(false);
+    }
+  };
 
   // Stop room ambient calm music the moment a mantra audio screen appears.
   useEffect(() => {
@@ -662,7 +745,7 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
     } else {
       updateBackground(require("../../assets/beige_bg.png"));
     }
-    updateHeaderHidden(false);
+    updateHeaderHidden(isCommunityRunner);
 
     // Initialize runner fields for merged info flows so complete_runner can
     // attribute completions correctly even when we stay inside this container.
@@ -690,8 +773,16 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
       if (!isCheckpointReflectionState) {
         updateBackground(null);
       }
+      updateHeaderHidden(false);
     };
-  }, [updateBackground, updateHeaderHidden, currentType, screenData, stateId]);
+  }, [
+    updateBackground,
+    updateHeaderHidden,
+    currentType,
+    screenData,
+    stateId,
+    isCommunityRunner,
+  ]);
 
   React.useEffect(() => {
     return () => {
@@ -1141,6 +1232,15 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                 ) : null}
               </View>
 
+              {isCommunityRunner && (
+                <CommunityRunnerActionBar
+                  addLoading={communityAddLoading}
+                  onAdd={() => {
+                    void handleCommunityAdd();
+                  }}
+                />
+              )}
+
               <TouchableOpacity onPress={handleBack} style={styles.backLink}>
                 <Text style={styles.backLinkText}>Back</Text>
               </TouchableOpacity>
@@ -1279,6 +1379,15 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                   </CollapsibleCard>
                 )}
               </View>
+
+              {isCommunityRunner && (
+                <CommunityRunnerActionBar
+                  addLoading={communityAddLoading}
+                  onAdd={() => {
+                    void handleCommunityAdd();
+                  }}
+                />
+              )}
             </View>
           )}
 
@@ -1545,6 +1654,15 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                     </Text>
                   </CollapsibleCard>
                 </>
+              )}
+
+              {isCommunityRunner && (
+                <CommunityRunnerActionBar
+                  addLoading={communityAddLoading}
+                  onAdd={() => {
+                    void handleCommunityAdd();
+                  }}
+                />
               )}
 
               <TouchableOpacity
@@ -2145,6 +2263,31 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif.regular,
     color: BROWN,
     textDecorationLine: "underline",
+  },
+  communityActionBar: {
+    width: "100%",
+    // marginTop: 18,
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  communityAddButton: {
+    width: "100%",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#D9BC76",
+    backgroundColor: "rgba(255,248,239,0.92)",
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  communityAddButtonDisabled: {
+    opacity: 0.65,
+  },
+  communityAddButtonText: {
+    color: "#B88413",
+    fontFamily: Fonts.sans.bold,
+    fontSize: 14,
   },
   ackContent: {
     alignItems: "center",

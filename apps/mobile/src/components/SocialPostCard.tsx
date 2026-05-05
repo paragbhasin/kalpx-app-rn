@@ -20,13 +20,16 @@ import {
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import { useDispatch, useSelector } from "react-redux";
+import { executeAction } from "../engine/actionExecutor";
+import { mitraLibrarySearch } from "../engine/mitraApi";
 import {
   completeMantra,
   getPracticeStreaks,
   getPracticeToday,
   startMantraPractice,
 } from "../screens/Home/actions";
-import { RootState } from "../store";
+import { RootState, store } from "../store";
+import { loadScreenWithData, screenActions } from "../store/screenSlice";
 import { COMMUNITY_BACKGROUNDS } from "../utils/CommunityAssets";
 import { getRawPracticeObject } from "../utils/getPracticeObjectById";
 import { getTranslatedPractice } from "../utils/getTranslatedPractice";
@@ -90,6 +93,74 @@ const getLinkedItemText = (linkedItem: any, t: any) => {
   return t("community.post.linkedPracticeSpecific");
 };
 
+const normalizeLinkedItemType = (
+  rawType?: string | null,
+  itemId?: string | null,
+): "mantra" | "sankalp" | "practice" | null => {
+  const normalized = String(rawType || "")
+    .split(":")
+    .pop()
+    ?.trim()
+    .toLowerCase();
+
+  if (normalized === "sankalp" || normalized === "sankalpa") return "sankalp";
+  if (normalized === "mantra") return "mantra";
+  if (normalized === "practice") return "practice";
+
+  const id = String(itemId || "");
+  if (id.startsWith("sankalp.")) return "sankalp";
+  if (id.startsWith("mantra.")) return "mantra";
+  if (id.startsWith("practice.")) return "practice";
+  return null;
+};
+
+const mapRunnerItem = (
+  item: any,
+  itemType: "mantra" | "sankalp" | "practice",
+  fallbackTitle: string,
+) => {
+  if (itemType === "mantra") {
+    return {
+      ...item,
+      id: item.itemId || item.item_id || item.id,
+      item_id: item.itemId || item.item_id || item.id,
+      item_type: "mantra",
+      itemType: "mantra",
+      type: "mantra",
+      title: item.title || item.name || fallbackTitle,
+      devanagari: item.devanagari || item.text || "",
+      source: item.source || item.tradition || "",
+    };
+  }
+
+  if (itemType === "sankalp") {
+    return {
+      ...item,
+      id: item.itemId || item.item_id || item.id,
+      item_id: item.itemId || item.item_id || item.id,
+      item_type: "sankalp",
+      itemType: "sankalp",
+      type: "sankalp",
+      title: item.short_text || item.title || item.name || fallbackTitle,
+      insight: item.insight || "",
+      how_to_live: item.how_to_live || [],
+    };
+  }
+
+  return {
+    ...item,
+    id: item.itemId || item.item_id || item.id,
+    item_id: item.itemId || item.item_id || item.id,
+    item_type: "practice",
+    itemType: "practice",
+    type: "practice",
+    title: item.title || item.name || fallbackTitle,
+    summary: item.summary || item.description || "",
+    steps: Array.isArray(item.steps) ? item.steps : [],
+    benefits: Array.isArray(item.benefits) ? item.benefits : [],
+  };
+};
+
 const SocialPostCard: React.FC<SocialPostCardProps> = ({
   post,
   onUpvote,
@@ -135,6 +206,14 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
     const translated = getTranslatedPractice(practiceData, t);
     return translated.name;
   }, [post.linked_item, t]);
+  const linkedItemType = useMemo(
+    () =>
+      normalizeLinkedItemType(
+        post.linked_item?.type,
+        String(post.linked_item?.id || ""),
+      ),
+    [post.linked_item?.id, post.linked_item?.type],
+  );
 
   const [isExpanded, setIsExpanded] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -433,17 +512,69 @@ const SocialPostCard: React.FC<SocialPostCardProps> = ({
   };
 
   const handleLinkedItemPress = () => {
-    if (!post.linked_item || !post.linked_item.id) return;
+    handleProtectedAction(
+      async () => {
+        const linkedItemId = post.linked_item?.id;
+        if (!linkedItemId || !linkedItemType) return;
 
-    const { id } = post.linked_item;
-    const { data: practiceData, type: resolvedType } = getRawPracticeObject(
-      id,
-      post.linked_item,
+        let hydratedItem: any = null;
+        try {
+          const resp = await mitraLibrarySearch(String(linkedItemId), linkedItemType);
+          hydratedItem = (resp?.results || []).find((result: any) => {
+            const resultId = result?.itemId ?? result?.item_id ?? result?.id;
+            return String(resultId || "") === String(linkedItemId);
+          }) || null;
+        } catch (err) {
+          console.warn("[SocialPostCard] linked item hydrate failed:", err);
+        }
+
+        const { data: localPracticeData, type: localType } = getRawPracticeObject(
+          String(linkedItemId),
+          post.linked_item,
+        );
+        const resolvedType = linkedItemType || localType;
+        const runnerItem = mapRunnerItem(
+          hydratedItem || localPracticeData || post.linked_item || {},
+          resolvedType,
+          translatedLinkedItemName || post.linked_item?.name || "",
+        );
+        const payloadItem =
+          resolvedType === "mantra"
+            ? { ...runnerItem, core: runnerItem }
+            : runnerItem;
+
+        await executeAction(
+          {
+            type: "start_runner",
+            payload: {
+              source: "community",
+              variant: resolvedType,
+              item: payloadItem,
+            },
+          },
+          {
+            loadScreen: (target: any) => {
+              const containerId =
+                target?.container_id || target?.containerId || "generic";
+              const stateId = target?.state_id || target?.stateId || "";
+              store.dispatch(loadScreenWithData({ containerId, stateId }) as any);
+            },
+            goBack: () => {},
+            setScreenValue: (value: any, key: string) => {
+              store.dispatch(screenActions.setScreenValue({ key, value }));
+            },
+            screenState: { ...(store.getState() as any).screen?.screenData },
+          } as any,
+        );
+
+        navigation.navigate("DynamicEngine");
+      },
+      {
+        title: t("communityAuth.title"),
+        description: t("communityAuth.description"),
+        intent: "general",
+      },
     );
-
-    setSelectedLinkedPractice(practiceData);
-    setLinkedCardType(resolvedType);
-    setShowLinkedDetail(true);
   };
 
   const handleAddToMyPractice = (practice: any, type: string) => {

@@ -5,9 +5,10 @@ import Colors from "./Colors";
 
 interface HeaderProps {
   isTransparent?: boolean;
+  backgroundColor?: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ isTransparent }) => {
+const Header: React.FC<HeaderProps> = ({ isTransparent, backgroundColor }) => {
   const { i18n } = useTranslation();
   const [selectedLang, setSelectedLang] = useState(i18n.language);
 
@@ -37,6 +38,7 @@ const Header: React.FC<HeaderProps> = ({ isTransparent }) => {
     <View
       style={[
         styles.sectionWrap,
+        backgroundColor ? { backgroundColor } : null,
         isTransparent && { backgroundColor: "transparent" },
       ]}
     >

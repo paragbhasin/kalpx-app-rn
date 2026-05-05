@@ -68,7 +68,13 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
     if (!showBackButton) {
       toggleVisibility(true);
     }
-  }, [showBackButton, toggleVisibility]);
+  }, [
+    showBackButton,
+    toggleVisibility,
+    currentContainerId,
+    currentStateId,
+    currentScreen?.state_id,
+  ]);
 
   // Prevent rapid double-taps from popping the history stack twice.
   const isNavigatingBack = React.useRef(false);
@@ -108,8 +114,7 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
     return () => sub.remove();
   }, [handleBack, isRootScreen]);
 
-  // For screens without a background image, always show solid white header
-  // For screens with a background, use scroll-driven glass overlay
+  // Background-driven Mitra screens should not get any forced header fill.
   const hasBg = !!currentBackground;
   const backArrowColor = hasBg ? "#432104" : "#432104";
 
@@ -127,22 +132,9 @@ const GlobalScrollLayout = ({ children }: { children: React.ReactNode }) => {
           style={[
             styles.headerContainer,
             { transform: [{ translateY: headerY }] },
-            // Solid white on plain screens (no background image)
             !hasBg && styles.headerSolid,
           ]}
         >
-          {/* Scroll-driven glass overlay — only visible when user has scrolled */}
-          {hasBg && (
-            <Animated.View
-              style={[
-                StyleSheet.absoluteFill,
-                styles.headerGlassOverlay,
-                { opacity: headerBgOpacity },
-              ]}
-              pointerEvents="none"
-            />
-          )}
-
           {/* Back button + Header in one row. */}
           <View style={styles.headerRow}>
             {showBackButton ? (
@@ -188,12 +180,6 @@ const styles = StyleSheet.create({
   // Solid white — used when no background image is present
   headerSolid: {
     backgroundColor: "#FFF",
-  },
-  // Glassmorphic overlay — rendered on top of content, driven by scroll opacity
-  headerGlassOverlay: {
-    backgroundColor: "rgba(0, 0, 0, 0.35)",
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "rgba(255, 255, 255, 0.15)",
   },
   // Back arrow + Header logo/dropdown in a single row
   headerRow: {

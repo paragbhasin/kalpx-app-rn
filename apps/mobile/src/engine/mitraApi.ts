@@ -470,6 +470,25 @@ export async function mitraFetchAdditionalItems(): Promise<any> {
   }
 }
 
+/** POST mitra/journey/additional/ — Add a practice to the user's Mitra list. */
+export async function mitraAddAdditionalItem(
+  itemId: string,
+  itemType: string,
+  source = "additional_library",
+): Promise<any> {
+  try {
+    const res = await api.post("mitra/journey/additional/", {
+      itemId,
+      itemType,
+      source,
+    });
+    return res.data;
+  } catch (err: any) {
+    console.error("[MITRA] add additional item failed:", err.message);
+    throw err;
+  }
+}
+
 /** POST mitra/journey/additional/{id}/complete/ — Mark additional practice as complete. */
 export async function mitraCompleteAdditionalItem(
   itemId: string | number,

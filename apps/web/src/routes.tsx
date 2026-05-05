@@ -15,6 +15,8 @@ import { ClassListingPage } from "./pages/classes/ClassListingPage";
 import { ClassPaymentPage } from "./pages/classes/ClassPaymentPage";
 import { CommunityFeedPage } from "./pages/community/CommunityFeedPage";
 import { CommunityExplorePage } from "./pages/community/CommunityExplorePage";
+import { CommunityAboutKalpxPage } from "./pages/community/CommunityAboutKalpxPage";
+import { CommunityKalpxRulesPage } from "./pages/community/CommunityKalpxRulesPage";
 import { CommunityPopularPage } from "./pages/community/CommunityPopularPage";
 import { CommunityPrivacyPolicyPage } from "./pages/community/CommunityPrivacyPolicyPage";
 import { CommunityPostDetailPage } from "./pages/community/CommunityPostDetailPage";
@@ -131,6 +133,14 @@ export function AppRoutes() {
         element={<CommunityTopCommunitiesPage />}
       />
       <Route path="/en/community/explore" element={<CommunityExplorePage />} />
+      <Route
+        path="/en/community/about-kalpx"
+        element={<CommunityAboutKalpxPage />}
+      />
+      <Route
+        path="/en/community/kalpx-rules"
+        element={<CommunityKalpxRulesPage />}
+      />
       <Route path="/en/community/popular" element={<CommunityPopularPage />} />
       <Route
         path="/en/community/privacy-policy"

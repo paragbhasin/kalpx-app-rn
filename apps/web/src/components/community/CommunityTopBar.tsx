@@ -53,6 +53,8 @@ export function CommunityTopBar({
     Communities: "/en/community/communities",
     "Privacy Policy": "/en/community/privacy-policy",
     "User Agreements": "/en/community/user-agreements",
+    "KalpX Rules": "/en/community/kalpx-rules",
+    "About KalpX": "/en/community/about-kalpx",
   };
 
   const primaryItems: Array<{

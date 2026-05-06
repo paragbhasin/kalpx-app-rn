@@ -363,7 +363,7 @@ export function CommunityPostCard({
       slug: String(
         post.community_slug || (post as any).community?.slug || "",
       ).toLowerCase(),
-      id: String(post.community_id || (post as any).community?.id || ""),
+      id: String((post as any).community_id || (post as any).community?.id || ""),
     }),
     [post],
   );
@@ -389,7 +389,7 @@ export function CommunityPostCard({
       COMMUNITY_BACKGROUNDS[
         String(post.community_slug || community.slug || "")
       ] ||
-      COMMUNITY_BACKGROUNDS[String(post.community_id || community.id || "")] ||
+      COMMUNITY_BACKGROUNDS[String((post as any).community_id || community.id || "")] ||
       DEFAULT_COMMUNITY_IMAGE
     );
   };
@@ -399,6 +399,9 @@ export function CommunityPostCard({
     author?.avatar_url ||
     author?.profile_pic ||
     "/lotus_icon.png";
+  const communityDetailPath = communityJoinKey.slug
+    ? `/en/community/communities/${communityJoinKey.slug}`
+    : null;
 
   useEffect(() => {
     setIsJoined(!!(post as any).is_joined);
@@ -623,7 +626,7 @@ export function CommunityPostCard({
     const communityIdOrSlug =
       post.community_slug ||
       (post as any).community?.slug ||
-      post.community_id ||
+      (post as any).community_id ||
       (post as any).community?.id;
 
     if (!communityIdOrSlug) return;
@@ -757,12 +760,23 @@ export function CommunityPostCard({
           marginBottom: 4,
         }}
       >
-        <div
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (communityDetailPath) navigate(communityDetailPath);
+          }}
           style={{
             display: "flex",
             alignItems: "center",
             flex: 1,
             minWidth: 0,
+            border: "none",
+            background: "transparent",
+            padding: 0,
+            margin: 0,
+            textAlign: "left",
+            cursor: communityDetailPath ? "pointer" : "default",
           }}
         >
           <div
@@ -817,7 +831,7 @@ export function CommunityPostCard({
               {timeAgo}
             </div>
           </div>
-        </div>
+        </button>
 
         <div
           style={{

@@ -175,6 +175,46 @@ export async function getTopCommunities(params?: {
   }
 }
 
+export async function getCommunityDetail(
+  slug: string,
+  params?: { lang?: string },
+): Promise<CommunityListItem | null> {
+  try {
+    const res = await api.get(`communities/${encodeURIComponent(slug)}/`, {
+      params: { ...params, t: Date.now() },
+    });
+    return (res.data ?? null) as CommunityListItem | null;
+  } catch (err: any) {
+    if (err?.response?.status === 404) return null;
+    console.warn('[communityApi] getCommunityDetail failed:', err?.message);
+    return null;
+  }
+}
+
+export async function getCommunityPosts(params?: {
+  page?: number;
+  page_size?: number;
+  community: string;
+  sort?: 'hot' | 'new' | 'top';
+  lang?: string;
+}): Promise<CommunityFeedResponse> {
+  try {
+    const res = await api.get('posts/', {
+      params: {
+        page: 1,
+        page_size: 10,
+        sort: 'new',
+        ...params,
+        t: Date.now(),
+      },
+    });
+    return normaliseFeedResponse(res.data);
+  } catch (err: any) {
+    console.warn('[communityApi] getCommunityPosts failed:', err?.message);
+    return { count: 0, next: null, results: [] };
+  }
+}
+
 export async function followCommunity(idOrSlug: number | string): Promise<boolean> {
   try {
     await api.post(`communities/${encodeURIComponent(String(idOrSlug))}/follow/`, {});

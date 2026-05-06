@@ -94,7 +94,7 @@ export function CommunityPostDetailPage() {
   useEffect(() => {
     if (!postId) return;
     void ctrl.loadPost(postId);
-    void ctrl.loadComments(postId, { is_question: isQuestionMode });
+    void ctrl.loadComments(postId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [postId, isQuestionMode]);
 
@@ -134,7 +134,7 @@ export function CommunityPostDetailPage() {
 
   const refreshComments = async () => {
     if (!postId) return;
-    await ctrl.loadComments(postId, { is_question: isQuestionMode });
+    await ctrl.loadComments(postId);
   };
 
   const handleSubmitComment = async (content: string) => {

@@ -212,6 +212,11 @@ export function CommunityTopBar({
       return;
     }
     if (item.type === "community") {
+      const communitySlug = item.slug || item.community_slug;
+      if (communitySlug) {
+        navigate(`/en/community/communities/${communitySlug}`);
+        return;
+      }
       navigate("/en/community/communities");
       return;
     }

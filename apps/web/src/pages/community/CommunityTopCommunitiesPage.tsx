@@ -17,11 +17,24 @@ export function CommunityTopCommunitiesPage() {
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(max-width: 767px)").matches;
+  });
 
   const lang =
     typeof window !== "undefined"
       ? window.location.pathname.split("/")[1] || "en"
       : "en";
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+    const sync = () => setIsMobile(mediaQuery.matches);
+    sync();
+    mediaQuery.addEventListener("change", sync);
+    return () => mediaQuery.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
     const loadTopCommunities = async () => {
@@ -57,7 +70,7 @@ export function CommunityTopCommunitiesPage() {
       centerWidth={1400}
       hideRightRail
     >
-      <div style={pageWrapStyle}>
+      <div style={isMobile ? mobilePageWrapStyle : pageWrapStyle}>
         <header style={headerStyle}>
           <h1 style={titleStyle}>Top Communities</h1>
           <p style={subtitleStyle}>Browse KalpX largest communities</p>
@@ -73,7 +86,7 @@ export function CommunityTopCommunitiesPage() {
 
         {!error ? (
           <>
-            <div style={gridStyle}>
+            <div style={isMobile ? mobileGridStyle : gridStyle}>
               {communities.map((community) => (
                 <button
                   key={String(community.id || community.slug)}
@@ -137,6 +150,11 @@ export function CommunityTopCommunitiesPage() {
 
 const pageWrapStyle = {} as const;
 
+const mobilePageWrapStyle = {
+  paddingLeft: 12,
+  paddingRight: 12,
+} as const;
+
 const headerStyle = {
   padding: "14px 0 16px",
   borderBottom: "1px solid #ece8de",
@@ -171,6 +189,12 @@ const gridStyle = {
   gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
   columnGap: 56,
   rowGap: 34,
+} as const;
+
+const mobileGridStyle = {
+  display: "grid",
+  gridTemplateColumns: "minmax(0, 1fr)",
+  rowGap: 22,
 } as const;
 
 function communityRowStyle(clickable: boolean) {

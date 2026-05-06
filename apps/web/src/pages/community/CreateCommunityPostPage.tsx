@@ -3,12 +3,10 @@ import type { CommunityPost } from "@kalpx/types";
 import { communityPostSchema } from "@kalpx/validation";
 import {
   ChevronDown,
-  Image,
   Mic,
   Play,
   UploadCloud,
-  Video,
-  XCircle,
+  XCircle
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
@@ -395,7 +393,9 @@ export function CreateCommunityPostPage() {
           <div style={{ padding: "24px 0", color: "#666" }}>Loading...</div>
         ) : (
           <>
-            <div style={{ position: "relative", marginBottom: 22, maxWidth: 292 }}>
+            <div
+              style={{ position: "relative", marginBottom: 22, maxWidth: 292 }}
+            >
               <button
                 onClick={() => setCommunityMenuOpen((value) => !value)}
                 style={{
@@ -580,7 +580,9 @@ export function CreateCommunityPostPage() {
             )}
 
             {mediaFiles.length > 0 && (
-              <div style={{ marginTop: 18, paddingBottom: 8, overflowX: "auto" }}>
+              <div
+                style={{ marginTop: 18, paddingBottom: 8, overflowX: "auto" }}
+              >
                 <div
                   style={{
                     display: "flex",
@@ -678,17 +680,13 @@ export function CreateCommunityPostPage() {
                       )}
 
                       {item.status === "uploading" && (
-                        <div
-                          style={mediaOverlayStyle("rgba(0,0,0,0.3)")}
-                        >
+                        <div style={mediaOverlayStyle("rgba(0,0,0,0.3)")}>
                           Uploading...
                         </div>
                       )}
 
                       {item.status === "error" && (
-                        <div
-                          style={mediaOverlayStyle("rgba(255,0,0,0.35)")}
-                        >
+                        <div style={mediaOverlayStyle("rgba(255,0,0,0.35)")}>
                           Failed
                         </div>
                       )}
@@ -709,7 +707,11 @@ export function CreateCommunityPostPage() {
                         }}
                         aria-label="Remove media"
                       >
-                        <XCircle size={24} fill="currentColor" strokeWidth={0} />
+                        <XCircle
+                          size={24}
+                          fill="currentColor"
+                          strokeWidth={0}
+                        />
                       </button>
                     </div>
                   ))}
@@ -825,7 +827,7 @@ function composeTabStyle(active: boolean) {
     borderBottom: active ? "3px solid #d1a02d" : "3px solid transparent",
     padding: "12px 18px 18px",
     marginBottom: -1,
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: 700,
     cursor: "pointer",
   } as const;

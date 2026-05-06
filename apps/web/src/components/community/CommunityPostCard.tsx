@@ -359,6 +359,7 @@ export function CommunityPostCard({
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isLaunchingLinkedItem, setIsLaunchingLinkedItem] = useState(false);
   const [isDesktopViewport, setIsDesktopViewport] = useState(false);
+  const [shareCount, setShareCount] = useState(Number(post.share_count ?? 0));
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const communityJoinKey = useMemo(
@@ -409,10 +410,15 @@ export function CommunityPostCard({
   const communityDetailPath = communityJoinKey.slug
     ? `/en/community/communities/${communityJoinKey.slug}`
     : null;
+  const postDetailPath = `/en/community/${post.id}`;
 
   useEffect(() => {
     setIsJoined(!!(post as any).is_joined);
   }, [post]);
+
+  useEffect(() => {
+    setShareCount(Number(post.share_count ?? 0));
+  }, [post.share_count]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -458,6 +464,85 @@ export function CommunityPostCard({
       mounted = false;
     };
   }, [communityJoinKey.id, communityJoinKey.slug]);
+
+  const buildShareUrl = () => {
+    const origin =
+      typeof window === "undefined"
+        ? "https://kalpx.com"
+        : window.location.origin;
+
+    if ((post as any).explore_post_id) {
+      return `${origin}/og/render?path=/explore/${(post as any).explore_post_id}`;
+    }
+
+    const communitySlug =
+      post.community_slug ||
+      (post as any).community?.slug ||
+      (post as any).slug;
+    const currentView = "home";
+
+    if (!communitySlug) {
+      return `${origin}${postDetailPath}`;
+    }
+
+    return `${origin}/og/render?path=/community/${communitySlug}/post/${post.id}?view=${currentView}`;
+  };
+
+  const buildShareText = () => {
+    const title = String((post as any).title || "KalpX Community Post");
+    const content = String(post.content || text || "").trim();
+    if (!content) return title;
+    const preview =
+      content.length > 100 ? `${content.slice(0, 100)}...` : content;
+    return `${title} - ${preview}`;
+  };
+
+  const handleShare = async () => {
+    const shareUrl = buildShareUrl();
+    const shareTitle = String((post as any).title || "KalpX Community Post");
+    const shareText = buildShareText();
+
+    try {
+      let copiedToClipboard = false;
+
+      if (
+        typeof navigator !== "undefined" &&
+        navigator.clipboard &&
+        typeof navigator.clipboard.writeText === "function"
+      ) {
+        await navigator.clipboard.writeText(shareUrl);
+        copiedToClipboard = true;
+      }
+
+      if (
+        typeof navigator !== "undefined" &&
+        typeof navigator.share === "function"
+      ) {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl,
+        });
+        setShareCount((prev) => prev + 1);
+        if (copiedToClipboard) {
+          window.alert("Post link copied.");
+        }
+        return;
+      }
+
+      if (copiedToClipboard) {
+        setShareCount((prev) => prev + 1);
+        window.alert("Post link copied.");
+        return;
+      }
+
+      window.prompt("Copy this link:", shareUrl);
+    } catch (error: any) {
+      if (error?.name === "AbortError") return;
+      console.error("Share failed:", error?.message || error);
+    }
+  };
+
   const timeAgo = useMemo(() => {
     if (!post.created_at) return "";
     try {
@@ -560,7 +645,9 @@ export function CommunityPostCard({
     return `${w} / ${h}`;
   }, [activeSlide]);
   const mediaBackdropUrl = activeSlide?.thumbnail || activeSlide?.src || "";
-  const mediaStageAspectRatio = isDesktopViewport ? "16 / 10" : activeAspectRatio;
+  const mediaStageAspectRatio = isDesktopViewport
+    ? "16 / 10"
+    : activeAspectRatio;
   const shouldTruncate = text.length > 180;
   const previewText =
     !shouldTruncate || isExpanded ? text : `${text.slice(0, 180).trimEnd()}...`;
@@ -1228,8 +1315,8 @@ export function CommunityPostCard({
                       left: isDesktopViewport ? 14 : 20,
                       top: "50%",
                       transform: "translateY(-50%)",
-                      width: isDesktopViewport ? 40 : 48,
-                      height: isDesktopViewport ? 40 : 48,
+                      width: isDesktopViewport ? 40 : 28,
+                      height: isDesktopViewport ? 40 : 28,
                       borderRadius: "50%",
 
                       background: isDesktopViewport
@@ -1247,7 +1334,7 @@ export function CommunityPostCard({
                     }}
                   >
                     <ChevronLeft
-                      size={isDesktopViewport ? 24 : 32}
+                      size={isDesktopViewport ? 24 : 18}
                       color="#ffffff"
                       strokeWidth={2.5}
                     />
@@ -1263,9 +1350,9 @@ export function CommunityPostCard({
                       right: isDesktopViewport ? 14 : 20,
                       top: "50%",
                       transform: "translateY(-50%)",
-                      width: isDesktopViewport ? 40 : 48,
-                      height: isDesktopViewport ? 40 : 48,
-
+                      width: isDesktopViewport ? 40 : 28,
+                      height: isDesktopViewport ? 40 : 28,
+                      borderRadius: "50%",
                       background: isDesktopViewport
                         ? "rgba(24, 24, 27, 0.72)"
                         : "rgba(0, 0, 0, 0.7)",
@@ -1281,7 +1368,7 @@ export function CommunityPostCard({
                     }}
                   >
                     <ChevronRight
-                      size={isDesktopViewport ? 24 : 32}
+                      size={isDesktopViewport ? 24 : 18}
                       color="#ffffff"
                       strokeWidth={2.5}
                     />
@@ -1387,7 +1474,7 @@ export function CommunityPostCard({
       <CommunityReactionBar
         upvoteCount={post.upvote_count ?? post.likes_count}
         commentCount={commentCountOverride ?? post.comment_count}
-        shareCount={post.share_count}
+        shareCount={shareCount}
         userVote={post.user_vote}
         isUpvoting={isUpvoting}
         onUpvote={(e?: any) => {
@@ -1401,7 +1488,9 @@ export function CommunityPostCard({
         onComment={() =>
           detailMode ? onCommentClick?.() : navigate(`/en/community/${post.id}`)
         }
-        onShare={() => {}}
+        onShare={() => {
+          void handleShare();
+        }}
         onAskQuestion={() =>
           detailMode
             ? onAskQuestionClick?.()

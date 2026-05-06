@@ -1,4 +1,5 @@
 import { ArrowDown, ArrowUp } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 
 const heroImage = new URL(
@@ -15,14 +16,29 @@ const commentImage = new URL(
 ).href;
 
 export function CommunityAboutKalpxContent() {
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(max-width: 767px)").matches;
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mediaQuery = window.matchMedia("(max-width: 767px)");
+    const sync = () => setIsMobile(mediaQuery.matches);
+    sync();
+    mediaQuery.addEventListener("change", sync);
+    return () => mediaQuery.removeEventListener("change", sync);
+  }, []);
+
   return (
     <div style={pageWrapStyle}>
-      <HeroSection />
+      <HeroSection isMobile={isMobile} />
 
       <FeatureSection
         title="Post"
         text="The Community can share content by posting stories, links, image, and Videos."
         mediaPosition="right"
+        isMobile={isMobile}
       >
         <PostPreview />
       </FeatureSection>
@@ -31,6 +47,7 @@ export function CommunityAboutKalpxContent() {
         title="Comment"
         text="The Community can share content by posting stories, links, images, and videos."
         mediaPosition="left"
+        isMobile={isMobile}
       >
         <CommentPreview />
       </FeatureSection>
@@ -39,6 +56,7 @@ export function CommunityAboutKalpxContent() {
         title="Vote"
         text="Components & posts can be Upvoted or downvoted. The most interesting content rises to the top."
         mediaPosition="right"
+        isMobile={isMobile}
       >
         <VotePreview />
       </FeatureSection>
@@ -46,12 +64,14 @@ export function CommunityAboutKalpxContent() {
   );
 }
 
-function HeroSection() {
+function HeroSection({ isMobile }: { isMobile: boolean }) {
   return (
-    <section style={heroGridStyle}>
-      <div style={heroTextStyle}>
-        <h1 style={heroTitleStyle}>The heart of your inner journey</h1>
-        <p style={heroBodyStyle}>
+    <section style={isMobile ? heroGridMobileStyle : heroGridStyle}>
+      <div style={isMobile ? heroTextMobileStyle : heroTextStyle}>
+        <h1 style={isMobile ? heroTitleMobileStyle : heroTitleStyle}>
+          The heart of your inner journey
+        </h1>
+        <p style={isMobile ? heroBodyMobileStyle : heroBodyStyle}>
           KalpX is home to countless paths for personal growth, mindful
           practices, and genuine self-discovery. Whether you're exploring
           meditation, building inner resilience, seeking clarity in your career,
@@ -72,22 +92,26 @@ function FeatureSection({
   text,
   children,
   mediaPosition,
+  isMobile,
 }: {
   title: string;
   text: string;
   children: ReactNode;
   mediaPosition: "left" | "right";
+  isMobile: boolean;
 }) {
   const media = <div style={visualPanelStyle}>{children}</div>;
   const copy = (
-    <div style={featureCopyStyle}>
-      <h2 style={featureTitleStyle}>{title}</h2>
-      <p style={featureTextStyle}>{text}</p>
+    <div style={isMobile ? featureCopyMobileStyle : featureCopyStyle}>
+      <h2 style={isMobile ? featureTitleMobileStyle : featureTitleStyle}>
+        {title}
+      </h2>
+      <p style={isMobile ? featureTextMobileStyle : featureTextStyle}>{text}</p>
     </div>
   );
 
   return (
-    <section style={featureRowStyle}>
+    <section style={isMobile ? featureRowMobileStyle : featureRowStyle}>
       {mediaPosition === "left" ? media : copy}
       {mediaPosition === "left" ? copy : media}
     </section>
@@ -152,10 +176,24 @@ const heroGridStyle = {
   columnGap: 72,
 } as const;
 
+const heroGridMobileStyle = {
+  display: "grid",
+  gridTemplateColumns: "minmax(0, 1fr)",
+  rowGap: 28,
+  alignItems: "start",
+} as const;
+
 const heroTextStyle = {
   maxWidth: 720,
   textAlign: "center",
   justifySelf: "center",
+} as const;
+
+const heroTextMobileStyle = {
+  width: "100%",
+  maxWidth: "100%",
+  textAlign: "left",
+  justifySelf: "stretch",
 } as const;
 
 const heroTitleStyle = {
@@ -167,12 +205,27 @@ const heroTitleStyle = {
   letterSpacing: "-0.04em",
 } as const;
 
+const heroTitleMobileStyle = {
+  ...heroTitleStyle,
+  fontSize: 32,
+  lineHeight: 1.06,
+} as const;
+
 const heroBodyStyle = {
   margin: "36px auto 0",
   maxWidth: 760,
   color: "#3f4248",
   fontSize: 18,
   lineHeight: 1.45,
+  fontWeight: 400,
+} as const;
+
+const heroBodyMobileStyle = {
+  margin: "24px 0 0",
+  maxWidth: "100%",
+  color: "#3f4248",
+  fontSize: 16,
+  lineHeight: 1.55,
   fontWeight: 400,
 } as const;
 
@@ -197,8 +250,20 @@ const featureRowStyle = {
   minHeight: 440,
 } as const;
 
+const featureRowMobileStyle = {
+  display: "grid",
+  gridTemplateColumns: "minmax(0, 1fr)",
+  rowGap: 24,
+  alignItems: "start",
+} as const;
+
 const featureCopyStyle = {
   maxWidth: 640,
+} as const;
+
+const featureCopyMobileStyle = {
+  width: "100%",
+  maxWidth: "100%",
 } as const;
 
 const featureTitleStyle = {
@@ -210,11 +275,25 @@ const featureTitleStyle = {
   letterSpacing: "-0.04em",
 } as const;
 
+const featureTitleMobileStyle = {
+  ...featureTitleStyle,
+  fontSize: 32,
+  lineHeight: 1.08,
+} as const;
+
 const featureTextStyle = {
   margin: "34px 0 0",
   color: "#3f4248",
   fontSize: 18,
   lineHeight: 1.45,
+  fontWeight: 400,
+} as const;
+
+const featureTextMobileStyle = {
+  margin: "18px 0 0",
+  color: "#3f4248",
+  fontSize: 16,
+  lineHeight: 1.55,
   fontWeight: 400,
 } as const;
 

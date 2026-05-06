@@ -95,7 +95,62 @@ function normaliseCommunityListResponse(data: any): CommunityListResponse {
   };
 }
 
+function mergeCommunityMetadata(
+  primary: CommunityListItem[],
+  fallback: CommunityListItem[],
+): CommunityListItem[] {
+  if (!primary.length || !fallback.length) return primary;
+
+  const fallbackByKey = new Map<string, CommunityListItem>();
+  for (const community of fallback) {
+    fallbackByKey.set(String(community.id), community);
+    if (community.slug) {
+      fallbackByKey.set(`slug:${String(community.slug).toLowerCase()}`, community);
+    }
+  }
+
+  return primary.map((community) => {
+    const fallbackMatch =
+      fallbackByKey.get(String(community.id)) ||
+      (community.slug
+        ? fallbackByKey.get(`slug:${String(community.slug).toLowerCase()}`)
+        : undefined);
+
+    if (!fallbackMatch) return community;
+
+    return {
+      ...fallbackMatch,
+      ...community,
+      description: community.description || fallbackMatch.description,
+      media_url: community.media_url || fallbackMatch.media_url,
+      follower_count:
+        community.follower_count ??
+        fallbackMatch.follower_count ??
+        fallbackMatch.followers?.length,
+      post_count: community.post_count ?? fallbackMatch.post_count,
+    };
+  });
+}
+
 const explorePostsRequests = new Map<string, Promise<CommunityFeedResponse>>();
+const TOP_COMMUNITIES_TTL_MS = 5 * 60 * 1000;
+const topCommunitiesCache = new Map<
+  string,
+  { ts: number; value: CommunityListResponse }
+>();
+const topCommunitiesRequests = new Map<string, Promise<CommunityListResponse>>();
+
+function getTopCommunitiesCacheKey(params?: {
+  page?: number;
+  page_size?: number;
+  lang?: string;
+}) {
+  return JSON.stringify({
+    page: Number(params?.page ?? 1),
+    page_size: Number(params?.page_size ?? 12),
+    lang: params?.lang || "en",
+  });
+}
 
 // ── Feed ──────────────────────────────────────────────────────────────────────
 
@@ -157,22 +212,55 @@ export async function getTopCommunities(params?: {
   page_size?: number;
   lang?: string;
 }): Promise<CommunityListResponse> {
-  try {
-    const res = await api.get('communities/top/', {
-      params: { page: 1, page_size: 12, ...params, t: Date.now() },
-    });
-    const data = normaliseCommunityListResponse(res.data);
-    return {
-      ...data,
-      results: data.results.map((community, index) => ({
-        ...community,
-        rank: (Number(params?.page ?? 1) - 1) * Number(params?.page_size ?? 12) + index + 1,
-      })),
-    };
-  } catch (err: any) {
-    console.warn('[communityApi] getTopCommunities failed:', err?.message);
-    return { count: 0, next: null, results: [] };
+  const cacheKey = getTopCommunitiesCacheKey(params);
+  const cached = topCommunitiesCache.get(cacheKey);
+  if (cached && Date.now() - cached.ts < TOP_COMMUNITIES_TTL_MS) {
+    return cached.value;
   }
+
+  const inFlight = topCommunitiesRequests.get(cacheKey);
+  if (inFlight) return inFlight;
+
+  const request = (async () => {
+  try {
+      const res = await api.get('communities/top/', {
+        params: { page: 1, page_size: 12, ...params, t: Date.now() },
+      });
+      const data = normaliseCommunityListResponse(res.data);
+      let results = data.results;
+
+      if (results.some((community) => !community.description || !community.media_url)) {
+        const allCommunities = await getCommunities({
+          page: Number(params?.page ?? 1),
+          page_size: Number(params?.page_size ?? 12),
+          lang: params?.lang,
+        });
+        results = mergeCommunityMetadata(results, allCommunities.results);
+      }
+
+      const value = {
+        ...data,
+        results: results.map((community, index) => ({
+          ...community,
+          rank:
+            (Number(params?.page ?? 1) - 1) *
+              Number(params?.page_size ?? 12) +
+            index +
+            1,
+        })),
+      };
+      topCommunitiesCache.set(cacheKey, { ts: Date.now(), value });
+      return value;
+  } catch (err: any) {
+      console.warn('[communityApi] getTopCommunities failed:', err?.message);
+      return { count: 0, next: null, results: [] };
+    } finally {
+      topCommunitiesRequests.delete(cacheKey);
+    }
+  })();
+
+  topCommunitiesRequests.set(cacheKey, request);
+  return request;
 }
 
 export async function getCommunityDetail(

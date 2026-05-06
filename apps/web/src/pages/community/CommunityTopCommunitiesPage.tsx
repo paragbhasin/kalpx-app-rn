@@ -1,7 +1,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CommunityTopBar } from "../../components/community/CommunityTopBar";
+import { CommunityWebLayout } from "../../components/community/CommunityWebLayout";
 import {
   getTopCommunities,
   type CommunityListItem,
@@ -48,11 +48,8 @@ export function CommunityTopCommunitiesPage() {
   );
 
   return (
-    <div style={{ minHeight: "100dvh", background: "var(--kalpx-bg)" }}>
-      <CommunityTopBar activeLabel="Explore" />
-
-      <div style={{ maxWidth: 620, margin: "0 auto", paddingBottom: 40 }}>
-        <div style={{ padding: "12px 20px 40px" }}>
+    <CommunityWebLayout activeLabel="Communities" centerWidth={920}>
+      <div style={{ padding: "12px 20px 40px" }}>
           {loading && communities.length === 0 && (
             <div
               style={{
@@ -184,9 +181,8 @@ export function CommunityTopCommunitiesPage() {
               )}
             </div>
           )}
-        </div>
       </div>
-    </div>
+    </CommunityWebLayout>
   );
 }
 

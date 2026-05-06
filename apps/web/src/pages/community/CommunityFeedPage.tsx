@@ -16,7 +16,7 @@ import { webStorage } from "../../lib/webStorage";
 import { CommunityEmptyState } from "../../components/community/CommunityEmptyState";
 import { CommunityErrorState } from "../../components/community/CommunityErrorState";
 import { CommunityFeedSkeleton } from "../../components/community/CommunityFeedSkeleton";
-import { CommunityTopBar } from "../../components/community/CommunityTopBar";
+import { CommunityWebLayout } from "../../components/community/CommunityWebLayout";
 
 export function CommunityFeedPage() {
   const navigate = useNavigate();
@@ -57,10 +57,8 @@ export function CommunityFeedPage() {
   }, [ctrl, lang]);
 
   return (
-    <div style={{ minHeight: "100dvh", background: "var(--kalpx-bg)" }}>
-      <CommunityTopBar />
-      <div style={{ maxWidth: 620, margin: "0 auto", paddingBottom: 40 }}>
-        <div style={{ padding: "5px" }}>
+    <CommunityWebLayout activeLabel="Home" centerWidth={920}>
+      <div style={{ padding: "5px" }}>
           {ctrl.feedLoading && <CommunityFeedSkeleton />}
 
           {!ctrl.feedLoading && ctrl.feedError && (
@@ -106,8 +104,7 @@ export function CommunityFeedPage() {
               </button>
             </div>
           )}
-        </div>
       </div>
-    </div>
+    </CommunityWebLayout>
   );
 }

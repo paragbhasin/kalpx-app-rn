@@ -37,7 +37,7 @@ export function CommunityReactionBar({
   const pillStyle: React.CSSProperties = {
     borderRadius: 8,
     border: "1px solid #d7d1c7",
-    padding: 5,
+    padding: "8px 14px",
     background: "#fff",
     display: "inline-flex",
     alignItems: "center",
@@ -66,6 +66,7 @@ export function CommunityReactionBar({
       }}
     >
       <button
+        type="button"
         onClick={wrapClick(onUpvote)}
         disabled={isUpvoting}
         style={{
@@ -73,10 +74,8 @@ export function CommunityReactionBar({
           cursor: onUpvote ? "pointer" : "default",
           opacity: isUpvoting ? 0.6 : 1,
           gap: 4,
-
-          minWidth: 0,
+          minWidth: 108,
           justifyContent: "space-between",
-          padding: "8px",
         }}
         aria-label={`Upvote (${upvoteCount})`}
       >
@@ -92,13 +91,13 @@ export function CommunityReactionBar({
       </button>
 
       <button
+        type="button"
         onClick={wrapClick(onComment)}
         style={{
           ...pillStyle,
           cursor: onComment ? "pointer" : "default",
           gap: 8,
-          width: "13%",
-          minWidth: 0,
+          minWidth: 98,
         }}
         aria-label={`Comments (${commentCount})`}
       >
@@ -109,13 +108,13 @@ export function CommunityReactionBar({
       </button>
 
       <button
+        type="button"
         onClick={wrapClick(onShare)}
         style={{
           ...pillStyle,
           cursor: onShare ? "pointer" : "default",
           gap: 8,
-          width: "13%",
-          minWidth: 0,
+          minWidth: 98,
         }}
         aria-label={`Shares (${shareCount})`}
       >
@@ -126,13 +125,13 @@ export function CommunityReactionBar({
       </button>
 
       <button
+        type="button"
         onClick={wrapClick(onAskQuestion)}
         style={{
           ...pillStyle,
           cursor: onAskQuestion ? "pointer" : "default",
           gap: 8,
-          width: "40%",
-          minWidth: 0,
+          minWidth: "fit-content",
           justifyContent: "flex-start",
         }}
         aria-label="Ask question"

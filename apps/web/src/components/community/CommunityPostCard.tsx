@@ -356,6 +356,7 @@ export function CommunityPostCard({
   const [joinLoading, setJoinLoading] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isLaunchingLinkedItem, setIsLaunchingLinkedItem] = useState(false);
+  const [isDesktopViewport, setIsDesktopViewport] = useState(false);
   const videoRef = useRef<HTMLVideoElement | null>(null);
 
   const communityJoinKey = useMemo(
@@ -363,7 +364,9 @@ export function CommunityPostCard({
       slug: String(
         post.community_slug || (post as any).community?.slug || "",
       ).toLowerCase(),
-      id: String((post as any).community_id || (post as any).community?.id || ""),
+      id: String(
+        (post as any).community_id || (post as any).community?.id || "",
+      ),
     }),
     [post],
   );
@@ -389,7 +392,9 @@ export function CommunityPostCard({
       COMMUNITY_BACKGROUNDS[
         String(post.community_slug || community.slug || "")
       ] ||
-      COMMUNITY_BACKGROUNDS[String((post as any).community_id || community.id || "")] ||
+      COMMUNITY_BACKGROUNDS[
+        String((post as any).community_id || community.id || "")
+      ] ||
       DEFAULT_COMMUNITY_IMAGE
     );
   };
@@ -406,6 +411,17 @@ export function CommunityPostCard({
   useEffect(() => {
     setIsJoined(!!(post as any).is_joined);
   }, [post]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mediaQuery = window.matchMedia("(min-width: 1024px)");
+    const applyViewport = () => setIsDesktopViewport(mediaQuery.matches);
+    applyViewport();
+
+    mediaQuery.addEventListener("change", applyViewport);
+    return () => mediaQuery.removeEventListener("change", applyViewport);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -541,6 +557,8 @@ export function CommunityPostCard({
     if (!w || !h) return "4 / 5";
     return `${w} / ${h}`;
   }, [activeSlide]);
+  const mediaBackdropUrl = activeSlide?.thumbnail || activeSlide?.src || "";
+  const mediaStageAspectRatio = isDesktopViewport ? "16 / 10" : activeAspectRatio;
   const shouldTruncate = text.length > 180;
   const previewText =
     !shouldTruncate || isExpanded ? text : `${text.slice(0, 180).trimEnd()}...`;
@@ -557,12 +575,12 @@ export function CommunityPostCard({
 
   const goPrev = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setActiveIndex((idx) => (idx === 0 ? slides.length - 1 : idx - 1));
+    setActiveIndex((idx) => Math.max(0, idx - 1));
   };
 
   const goNext = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setActiveIndex((idx) => (idx === slides.length - 1 ? 0 : idx + 1));
+    setActiveIndex((idx) => Math.min(slides.length - 1, idx + 1));
   };
 
   const toggleVideoPlayback = (e: React.MouseEvent) => {
@@ -742,12 +760,19 @@ export function CommunityPostCard({
     <div
       style={{
         position: "relative",
-        marginBottom: 0,
+        marginBottom: isDesktopViewport ? 8 : 0,
         cursor: detailMode ? "default" : "pointer",
         touchAction: "manipulation",
         overflow: "hidden",
-        borderBottom: detailMode ? "none" : "1px solid #F0F2F5",
-        paddingBottom: detailMode ? 0 : 4,
+
+        borderBottom: isDesktopViewport
+          ? "1px solid #e8e0d2"
+          : detailMode
+            ? "none"
+            : "1px solid #F0F2F5",
+        borderRadius: isDesktopViewport ? 18 : 0,
+
+        paddingBottom: detailMode ? 0 : isDesktopViewport ? 10 : 4,
       }}
       onClick={handleCardNavigate}
     >
@@ -806,30 +831,76 @@ export function CommunityPostCard({
               }}
             />
           </div>
-          <div style={{ minWidth: 0 }}>
-            <div
-              style={{
-                fontSize: 15,
-                fontWeight: 700,
-                color: "#1c1c1c",
-                lineHeight: 1.2,
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
-              {post.community_name || "Community"}
-            </div>
-            <div
-              style={{
-                fontSize: 12,
-                color: "#7c7c7c",
-                lineHeight: 1.2,
-                marginTop: 2,
-              }}
-            >
-              {timeAgo}
-            </div>
+          <div
+            style={{
+              minWidth: 0,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              gap: isDesktopViewport ? 0 : 4,
+            }}
+          >
+            {isDesktopViewport && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 6,
+                  minWidth: 0,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 17,
+                    fontWeight: 700,
+                    color: "#1c1c1c",
+                    lineHeight: 1.2,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {post.community_name || "Community"}
+                </div>
+                <span style={{ color: "#7c7c7c", fontSize: 14 }}>•</span>
+                <div
+                  style={{
+                    fontSize: 13,
+                    color: "#7c7c7c",
+                    lineHeight: 1.2,
+                    fontWeight: 500,
+                  }}
+                >
+                  {timeAgo}
+                </div>
+              </div>
+            )}
+            {!isDesktopViewport && (
+              <>
+                <div
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 700,
+                    color: "#1c1c1c",
+                    lineHeight: 1.2,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {post.community_name || "Community"}
+                </div>
+                <div
+                  style={{
+                    fontSize: 12,
+                    color: "#7c7c7c",
+                    lineHeight: 1.2,
+                  }}
+                >
+                  {timeAgo}
+                </div>
+              </>
+            )}
           </div>
         </button>
 
@@ -843,14 +914,15 @@ export function CommunityPostCard({
           onClick={(e) => e.stopPropagation()}
         >
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               void handleJoinToggle();
             }}
             style={{
               background: isJoined ? "#EDEFF1" : "#D69E2E",
-              padding: "4px 16px",
-              borderRadius: 20,
+              padding: isDesktopViewport ? "6px 20px" : "4px 16px",
+              borderRadius: isDesktopViewport ? 8 : 20,
               marginRight: 8,
               border: "none",
               cursor: "pointer",
@@ -865,6 +937,7 @@ export function CommunityPostCard({
             {joinLoading ? "..." : isJoined ? "Joined" : "Join"}
           </button>
           <button
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               setMenuOpen((value) => !value);
@@ -889,6 +962,7 @@ export function CommunityPostCard({
       {menuOpen && (
         <>
           <button
+            type="button"
             aria-label="Close menu"
             onClick={(e) => {
               e.stopPropagation();
@@ -922,6 +996,7 @@ export function CommunityPostCard({
             onClick={(e) => e.stopPropagation()}
           >
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 void handleSaveToggle();
@@ -932,6 +1007,7 @@ export function CommunityPostCard({
               <span>{isSaved ? "Unsave" : "Save"}</span>
             </button>
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 void (showHiddenPost ? handleUnhide() : handleHide());
@@ -942,6 +1018,7 @@ export function CommunityPostCard({
               <span>{showHiddenPost ? "Unhide" : "Hide"}</span>
             </button>
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 setMenuOpen(false);
@@ -970,163 +1047,267 @@ export function CommunityPostCard({
       />
 
       {post.title && (
-        <p
+        <h2
           style={{
-            fontSize: 15,
-            fontWeight: 600,
-            color: "#4a280d",
-            marginTop: 12,
-            marginBottom: 0,
-
+            fontSize: isDesktopViewport ? 20 : 15,
+            fontWeight: 800,
+            color: "#1c1c1c",
+            marginTop: isDesktopViewport ? 16 : 12,
+            marginBottom: isDesktopViewport ? 12 : 0,
             marginLeft: 12,
             marginRight: 12,
+            lineHeight: 1.3,
+            letterSpacing: "-0.01em",
           }}
         >
           {post.title}
-        </p>
+        </h2>
       )}
 
       {activeSlide && (
         <div
           style={{
             position: "relative",
-            marginTop: 5,
-            borderRadius: 10,
-            overflow: "hidden",
-            background: "#f4eadb",
-            aspectRatio: activeAspectRatio,
+            width: isDesktopViewport ? "calc(100% - 24px)" : "100%",
+            margin: isDesktopViewport ? "0 auto" : "0",
           }}
-          onClick={(e) => e.stopPropagation()}
         >
-          {activeSlide.type === "video" ? (
-            <div
-              style={{
-                position: "relative",
-                width: "100%",
-                height: "100%",
-                cursor: "pointer",
-              }}
-              onClick={toggleVideoPlayback}
-            >
-              <video
-                ref={videoRef}
-                src={activeSlide.src}
-                poster={activeSlide.thumbnail}
-                controls
-                playsInline
-                preload="metadata"
-                controlsList="nodownload noplaybackrate"
-                disablePictureInPicture
-                onPlay={() => setIsVideoPlaying(true)}
-                onPause={() => setIsVideoPlaying(false)}
-                onEnded={() => setIsVideoPlaying(false)}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  display: "block",
-                }}
-              />
-              <button
-                onClick={toggleVideoPlayback}
-                aria-label={isVideoPlaying ? "Pause video" : "Play video"}
+          <div
+            style={{
+              position: "relative",
+              marginTop: 5,
+              borderRadius: isDesktopViewport ? 18 : 10,
+              overflow: "hidden",
+              background: "#000000",
+              aspectRatio: mediaStageAspectRatio,
+              minHeight: isDesktopViewport ? 520 : undefined,
+              maxHeight: isDesktopViewport ? "78vh" : undefined,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 1,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {mediaBackdropUrl && (
+              <div
+                aria-hidden="true"
                 style={{
                   position: "absolute",
                   inset: 0,
-                  border: "none",
-                  background: "transparent",
-                  padding: 0,
-                  margin: 0,
-                  cursor: "pointer",
+                  backgroundImage: `url(${mediaBackdropUrl})`,
+                  backgroundPosition: "center",
+                  backgroundSize: "cover",
+                  filter: "blur(28px)",
+                  transform: "scale(1.08)",
+                  opacity: 0.34,
                 }}
               />
-              {!isVideoPlaying && (
-                <button
-                  onClick={toggleVideoPlayback}
-                  aria-label="Play video"
-                  style={{
-                    position: "absolute",
-                    left: "50%",
-                    top: "50%",
-                    transform: "translate(-50%, -50%)",
-                    width: 72,
-                    height: 72,
-                    borderRadius: "50%",
-                    border: "none",
-                    background: "rgba(71, 48, 18, 0.72)",
-                    color: "#fff",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    boxShadow: "0 10px 24px rgba(0,0,0,0.18)",
-                  }}
-                >
-                  <Play size={28} fill="currentColor" />
-                </button>
-              )}
-            </div>
-          ) : (
-            <img
-              src={activeSlide.src}
-              alt={post.title ?? "Community post"}
+            )}
+            <div
+              aria-hidden="true"
               style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                display: "block",
+                position: "absolute",
+                inset: 0,
+                background:
+                  "linear-gradient(180deg, rgba(10,12,16,0.18), rgba(10,12,16,0.52))",
               }}
             />
-          )}
+            {activeSlide.type === "video" ? (
+              <div
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  height: "100%",
+                  zIndex: 1,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                onClick={toggleVideoPlayback}
+              >
+                <video
+                  ref={videoRef}
+                  src={activeSlide.src}
+                  poster={activeSlide.thumbnail}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  controlsList="nodownload noplaybackrate"
+                  disablePictureInPicture
+                  onPlay={() => setIsVideoPlaying(true)}
+                  onPause={() => setIsVideoPlaying(false)}
+                  onEnded={() => setIsVideoPlaying(false)}
+                  style={{
+                    maxWidth: "100%",
+                    maxHeight: "100%",
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "contain",
+                    display: "block",
+                    background: "#0f1115",
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={toggleVideoPlayback}
+                  aria-label={isVideoPlaying ? "Pause video" : "Play video"}
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    border: "none",
+                    background: "transparent",
+                    padding: 0,
+                    margin: 0,
+                    cursor: "pointer",
+                  }}
+                />
+                {!isVideoPlaying && (
+                  <button
+                    type="button"
+                    onClick={toggleVideoPlayback}
+                    aria-label="Play video"
+                    style={{
+                      position: "absolute",
+                      left: "50%",
+                      top: "50%",
+                      transform: "translate(-50%, -50%)",
+                      width: 72,
+                      height: 72,
+                      borderRadius: "50%",
+                      border: "none",
+                      background: "rgba(71, 48, 18, 0.72)",
+                      color: "#fff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      boxShadow: "0 10px 24px rgba(0,0,0,0.18)",
+                    }}
+                  >
+                    <Play size={28} fill="currentColor" />
+                  </button>
+                )}
+              </div>
+            ) : (
+              <img
+                src={activeSlide.src}
+                alt={post.title ?? "Community post"}
+                style={{
+                  position: "relative",
+                  zIndex: 1,
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "contain",
+                  display: "block",
+                  background: "#0f1115",
+                }}
+              />
+            )}
+            {slides.length > 1 && (
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  pointerEvents: "none",
+                  zIndex: 100,
+                }}
+              >
+                {activeIndex > 0 && (
+                  <button
+                    type="button"
+                    onClick={goPrev}
+                    aria-label="Previous slide"
+                    style={{
+                      position: "absolute",
+                      left: isDesktopViewport ? 14 : 20,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      width: isDesktopViewport ? 40 : 48,
+                      height: isDesktopViewport ? 40 : 48,
+                      borderRadius: "50%",
 
-          {slides.length > 1 && (
-            <>
-              <button
-                onClick={goPrev}
-                aria-label="Previous slide"
-                style={{
-                  position: "absolute",
-                  left: 12,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  width: 25,
-                  height: 25,
-                  borderRadius: "50%",
-                  border: "none",
-                  background: "rgb(0 0 0 / 0.5)",
-                  color: "#4a280d",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                }}
-              >
-                <ChevronLeft size={20} color="#fff" />
-              </button>
-              <button
-                onClick={goNext}
-                aria-label="Next slide"
-                style={{
-                  position: "absolute",
-                  right: 12,
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  width: 25,
-                  height: 25,
-                  borderRadius: "50%",
-                  border: "none",
-                  background: "rgb(0 0 0 / 0.5)",
-                  color: "#4a280d",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                }}
-              >
-                <ChevronRight size={20} color="#fff" />
-              </button>
-            </>
-          )}
+                      background: isDesktopViewport
+                        ? "rgba(24, 24, 27, 0.72)"
+                        : "rgba(0, 0, 0, 0.7)",
+                      color: "#ffffff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      pointerEvents: "auto",
+                      transition: "all 0.2s ease",
+                      padding: 0,
+                      boxShadow: "0 4px 15px rgba(0,0,0,0.28)",
+                    }}
+                  >
+                    <ChevronLeft
+                      size={isDesktopViewport ? 24 : 32}
+                      color="#ffffff"
+                      strokeWidth={2.5}
+                    />
+                  </button>
+                )}
+                {activeIndex < slides.length - 1 && (
+                  <button
+                    type="button"
+                    onClick={goNext}
+                    aria-label="Next slide"
+                    style={{
+                      position: "absolute",
+                      right: isDesktopViewport ? 14 : 20,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      width: isDesktopViewport ? 40 : 48,
+                      height: isDesktopViewport ? 40 : 48,
+
+                      background: isDesktopViewport
+                        ? "rgba(24, 24, 27, 0.72)"
+                        : "rgba(0, 0, 0, 0.7)",
+                      color: "#ffffff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      pointerEvents: "auto",
+                      transition: "all 0.2s ease",
+                      padding: 0,
+                      boxShadow: "0 4px 15px rgba(0,0,0,0.28)",
+                    }}
+                  >
+                    <ChevronRight
+                      size={isDesktopViewport ? 24 : 32}
+                      color="#ffffff"
+                      strokeWidth={2.5}
+                    />
+                  </button>
+                )}
+
+                <div
+                  style={{
+                    position: "absolute",
+                    top: isDesktopViewport ? 14 : undefined,
+                    bottom: isDesktopViewport ? undefined : 20,
+                    right: isDesktopViewport ? 14 : 20,
+                    background: "rgba(24, 24, 27, 0.82)",
+                    color: "#ffffff",
+                    padding: isDesktopViewport ? "7px 11px" : "6px 14px",
+                    borderRadius: 999,
+                    fontSize: isDesktopViewport ? 12 : 13,
+                    fontWeight: 800,
+                    pointerEvents: "none",
+                    letterSpacing: "0.02em",
+                    boxShadow: "0 2px 10px rgba(0,0,0,0.24)",
+                  }}
+                >
+                  {activeIndex + 1}/{slides.length}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
       {slides.length > 1 && (
@@ -1135,13 +1316,15 @@ export function CommunityPostCard({
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            gap: 8,
-            marginTop: 10,
+            gap: 6,
+            marginTop: 12,
+            marginBottom: 4,
           }}
           onClick={(e) => e.stopPropagation()}
         >
           {slides.map((slide, index) => (
             <button
+              type="button"
               key={slide.id}
               onClick={(e) => {
                 e.stopPropagation();
@@ -1149,16 +1332,15 @@ export function CommunityPostCard({
               }}
               aria-label={`Go to slide ${index + 1}`}
               style={{
-                width: index === activeIndex ? 22 : 8,
-                height: 8,
-                borderRadius: 999,
+                width: index === activeIndex ? 8 : 6,
+                height: index === activeIndex ? 8 : 6,
+                borderRadius: "50%",
                 border: "none",
                 background:
-                  index === activeIndex
-                    ? "var(--kalpx-cta)"
-                    : "rgba(201, 168, 76, 0.28)",
+                  index === activeIndex ? "#3B82F6" : "rgba(0, 0, 0, 0.15)",
                 cursor: "pointer",
-                transition: "all 0.18s ease",
+                transition: "all 0.2s ease",
+                padding: 0,
               }}
             />
           ))}
@@ -1178,6 +1360,7 @@ export function CommunityPostCard({
           </p>
           {shouldTruncate && (
             <button
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 setIsExpanded((value) => !value);

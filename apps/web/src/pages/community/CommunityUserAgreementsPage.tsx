@@ -1,4 +1,4 @@
-import { CommunityTopBar } from "../../components/community/CommunityTopBar";
+import { CommunityWebLayout } from "../../components/community/CommunityWebLayout";
 
 const agreementImage = new URL(
   "../../../../mobile/assets/user-agreement.png",
@@ -30,11 +30,8 @@ const sections = [
 
 export function CommunityUserAgreementsPage() {
   return (
-    <div style={{ minHeight: "100dvh", background: "#fff" }}>
-      <CommunityTopBar activeLabel="Explore" />
-      <div
-        style={{ maxWidth: 620, margin: "0 auto", padding: "10px 20px 40px" }}
-      >
+    <CommunityWebLayout activeLabel="User Agreements" centerWidth={920}>
+      <div style={{ padding: "10px 20px 40px" }}>
         <div>
           <h1
             style={{
@@ -89,6 +86,6 @@ export function CommunityUserAgreementsPage() {
           </div>
         </div>
       </div>
-    </div>
+    </CommunityWebLayout>
   );
 }

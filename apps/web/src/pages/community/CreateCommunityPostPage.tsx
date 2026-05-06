@@ -1,10 +1,18 @@
 import { isAuthenticated } from "@kalpx/auth";
 import type { CommunityPost } from "@kalpx/types";
 import { communityPostSchema } from "@kalpx/validation";
-import { Image, Mic, Play, Video, X, XCircle } from "lucide-react";
+import {
+  ChevronDown,
+  Image,
+  Mic,
+  Play,
+  UploadCloud,
+  Video,
+  XCircle,
+} from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { CommunityTopBar } from "../../components/community/CommunityTopBar";
+import { CommunityWebLayout } from "../../components/community/CommunityWebLayout";
 import {
   createCommunityPost,
   getCommunities,
@@ -113,6 +121,7 @@ export function CreateCommunityPostPage() {
   const [isBootstrapping, setIsBootstrapping] = useState(true);
   const [postError, setPostError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [composeTab, setComposeTab] = useState<"text" | "media">("text");
 
   const isEditing = Boolean(editPostId);
 
@@ -177,7 +186,7 @@ export function CreateCommunityPostPage() {
 
   const selectedCommunityLabel =
     communities.find((community) => community.slug === selectedCommunity)
-      ?.name || "Choose a community";
+      ?.name || "Select a community";
 
   const isPostDisabled =
     !selectedCommunity ||
@@ -345,472 +354,441 @@ export function CreateCommunityPostPage() {
   };
 
   return (
-    <div style={{ minHeight: "100dvh", background: "#fff" }}>
-      <CommunityTopBar />
-      <div style={{ maxWidth: 620, margin: "0 auto", paddingTop: 5 }}>
+    <CommunityWebLayout activeLabel="Home" centerWidth={1280}>
+      <div style={{ padding: "28px 28px 44px" }}>
         <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            padding: "12px 16px",
-            borderBottom: "1px solid #EEE",
+            gap: 16,
+            paddingBottom: 18,
+            borderBottom: "1px solid #e6e8ed",
+            marginBottom: 26,
           }}
         >
-          <button
-            onClick={() => navigate(-1)}
+          <h1
             style={{
-              background: "none",
-              border: "none",
-              padding: 4,
               margin: 0,
-              cursor: "pointer",
-              color: "#000",
-            }}
-            aria-label="Close"
-          >
-            <X size={26} />
-          </button>
-          <div style={{ fontSize: 16, fontWeight: 700, color: "#000" }}>
-            {isEditing ? "Edit Post" : "Create Post"}
-          </div>
-          <button
-            onClick={() => void handlePost()}
-            disabled={isPostDisabled}
-            style={{
-              background: isPostDisabled ? "#F0F0F0" : "#007AFF",
-              color: isPostDisabled ? "#999" : "#FFF",
-              border: "none",
-              borderRadius: 20,
-              minWidth: 70,
-              height: 32,
-              padding: "0 16px",
+              color: "#2a241e",
+              fontSize: 24,
+              lineHeight: 1.1,
               fontWeight: 700,
-              fontSize: 14,
-              cursor: isPostDisabled ? "not-allowed" : "pointer",
+              fontFamily: "Georgia, serif",
             }}
           >
-            {isLoading ? "..." : "Post"}
-          </button>
+            {isEditing ? "Edit Post" : "Create Post"}
+          </h1>
+          <div
+            style={{
+              color: "#7b8090",
+              fontSize: 16,
+              fontWeight: 800,
+              letterSpacing: "0.03em",
+            }}
+          >
+            DRAFT
+          </div>
         </div>
 
-        <div style={{ padding: 16, paddingBottom: 90 }}>
-          {isBootstrapping ? (
-            <div style={{ padding: "24px 0", color: "#666" }}>Loading...</div>
-          ) : (
-            <>
-              <div style={{ position: "relative", marginBottom: 20 }}>
-                <button
-                  onClick={() => setCommunityMenuOpen((value) => !value)}
-                  style={{
-                    width: "100%",
-                    height: 40,
-                    background: "#F6F7F8",
-                    borderRadius: 20,
-                    padding: "0 12px",
-                    border: "none",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    fontSize: 14,
-                    fontWeight: 500,
-                    color: "#1a1a1b",
-                    cursor: "pointer",
-                    textAlign: "left",
-                  }}
-                >
-                  <span
-                    style={{
-                      color: "#666",
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Image size={18} />
-                  </span>
-                  <span
-                    style={{
-                      flex: 1,
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {selectedCommunityLabel}
-                  </span>
-                </button>
-
-                {communityMenuOpen && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      top: 46,
-                      left: 0,
-                      right: 0,
-                      zIndex: 10,
-                      background: "#fff",
-                      border: "1px solid #EEE",
-                      borderRadius: 12,
-                      boxShadow: "0 12px 24px rgba(0,0,0,0.08)",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <div
-                      style={{ padding: 10, borderBottom: "1px solid #EEE" }}
-                    >
-                      <input
-                        value={communitySearch}
-                        onChange={(e) => setCommunitySearch(e.target.value)}
-                        placeholder="Search communities..."
-                        style={{
-                          width: "100%",
-                          height: 38,
-                          borderRadius: 10,
-                          border: "1px solid #EEE",
-                          padding: "0 12px",
-                          fontSize: 14,
-                          outline: "none",
-                          boxSizing: "border-box",
-                        }}
-                      />
-                    </div>
-                    <div style={{ maxHeight: 300, overflowY: "auto" }}>
-                      {filteredCommunities.map((community) => (
-                        <button
-                          key={String(community.id)}
-                          onClick={() => {
-                            setSelectedCommunity(String(community.slug || ""));
-                            setCommunityMenuOpen(false);
-                            setCommunitySearch("");
-                          }}
-                          style={{
-                            width: "100%",
-                            border: "none",
-                            background: "#fff",
-                            padding: "12px 14px",
-                            textAlign: "left",
-                            cursor: "pointer",
-                            fontSize: 14,
-                            color: "#1a1a1b",
-                          }}
-                        >
-                          {community.name || community.slug}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <textarea
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Title"
-                rows={2}
+        {isBootstrapping ? (
+          <div style={{ padding: "24px 0", color: "#666" }}>Loading...</div>
+        ) : (
+          <>
+            <div style={{ position: "relative", marginBottom: 22, maxWidth: 292 }}>
+              <button
+                onClick={() => setCommunityMenuOpen((value) => !value)}
                 style={{
                   width: "100%",
+                  height: 56,
+                  background: "#e8edf3",
+                  borderRadius: 999,
+                  padding: "0 24px",
                   border: "none",
-                  outline: "none",
-                  resize: "none",
-                  padding: 0,
-                  marginBottom: 16,
-                  fontSize: 20,
-                  fontWeight: 700,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  fontSize: 18,
+                  fontWeight: 500,
                   color: "#1a1a1b",
-                  fontFamily: "inherit",
-                  boxSizing: "border-box",
+                  cursor: "pointer",
+                  textAlign: "left",
                 }}
-              />
+              >
+                <span
+                  style={{
+                    flex: 1,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {selectedCommunityLabel}
+                </span>
+                <ChevronDown size={26} color="#2f3440" />
+              </button>
 
+              {communityMenuOpen && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: 62,
+                    left: 0,
+                    right: 0,
+                    zIndex: 10,
+                    background: "#fff",
+                    border: "1px solid #EEE",
+                    borderRadius: 12,
+                    boxShadow: "0 12px 24px rgba(0,0,0,0.08)",
+                    overflow: "hidden",
+                  }}
+                >
+                  <div style={{ padding: 10, borderBottom: "1px solid #EEE" }}>
+                    <input
+                      value={communitySearch}
+                      onChange={(e) => setCommunitySearch(e.target.value)}
+                      placeholder="Search communities..."
+                      style={{
+                        width: "100%",
+                        height: 42,
+                        borderRadius: 10,
+                        border: "1px solid #EEE",
+                        padding: "0 12px",
+                        fontSize: 14,
+                        outline: "none",
+                        boxSizing: "border-box",
+                      }}
+                    />
+                  </div>
+                  <div style={{ maxHeight: 300, overflowY: "auto" }}>
+                    {filteredCommunities.map((community) => (
+                      <button
+                        key={String(community.id)}
+                        onClick={() => {
+                          setSelectedCommunity(String(community.slug || ""));
+                          setCommunityMenuOpen(false);
+                          setCommunitySearch("");
+                        }}
+                        style={{
+                          width: "100%",
+                          border: "none",
+                          background: "#fff",
+                          padding: "12px 14px",
+                          textAlign: "left",
+                          cursor: "pointer",
+                          fontSize: 14,
+                          color: "#1a1a1b",
+                        }}
+                      >
+                        {community.name || community.slug}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div
+              style={{
+                width: "100%",
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                borderBottom: "1px solid #e4e7ec",
+                marginBottom: 14,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => setComposeTab("text")}
+                style={composeTabStyle(composeTab === "text")}
+              >
+                Text
+              </button>
+              <button
+                type="button"
+                onClick={() => setComposeTab("media")}
+                style={composeTabStyle(composeTab === "media")}
+              >
+                Images & Video
+              </button>
+            </div>
+
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Title*"
+              style={{
+                width: "100%",
+                height: 60,
+                borderRadius: 10,
+                border: "1px solid #e0e4ea",
+                padding: "0 16px",
+                marginBottom: 18,
+                fontSize: 18,
+                fontWeight: 500,
+                color: "#1a1a1b",
+                fontFamily: "inherit",
+                boxSizing: "border-box",
+                outline: "none",
+              }}
+            />
+
+            {composeTab === "text" ? (
               <textarea
                 value={body}
                 onChange={(e) => setBody(e.target.value)}
-                placeholder="Body text (optional)"
-                rows={8}
+                placeholder="Body Text (optional)"
+                rows={10}
                 style={{
                   width: "100%",
-                  border: "none",
+                  minHeight: 340,
+                  borderRadius: 12,
+                  border: "1px solid #e0e4ea",
                   outline: "none",
                   resize: "vertical",
-                  padding: 0,
-                  minHeight: 150,
-                  fontSize: 15,
+                  padding: "18px 20px",
+                  fontSize: 16,
                   color: "#1a1a1b",
-                  lineHeight: 1.5,
+                  lineHeight: 1.6,
                   fontFamily: "inherit",
                   boxSizing: "border-box",
                 }}
               />
+            ) : (
+              <button
+                type="button"
+                onClick={() => imageInputRef.current?.click()}
+                style={{
+                  width: "100%",
+                  minHeight: 156,
+                  borderRadius: 14,
+                  border: "2px dashed #d9dee7",
+                  background: "#fff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 16,
+                  color: "#7b8496",
+                  fontSize: 18,
+                  fontWeight: 500,
+                  cursor: "pointer",
+                }}
+              >
+                <span>Drag and drop or upload media</span>
+                <UploadCloud size={36} color="#b8b0b0" />
+              </button>
+            )}
 
-              {mediaFiles.length > 0 && (
+            {mediaFiles.length > 0 && (
+              <div style={{ marginTop: 18, paddingBottom: 8, overflowX: "auto" }}>
                 <div
-                  style={{ marginTop: 16, paddingBottom: 8, overflowX: "auto" }}
+                  style={{
+                    display: "flex",
+                    gap: 12,
+                    minWidth: "max-content",
+                  }}
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: 12,
-                      minWidth: "max-content",
-                    }}
-                  >
-                    {mediaFiles.map((item) => (
-                      <div key={item.id} style={{ position: "relative" }}>
-                        {item.type.startsWith("video/") ? (
-                          <div
-                            style={{
-                              width: 120,
-                              height: 120,
-                              borderRadius: 8,
-                              background: "#111",
-                              position: "relative",
-                              overflow: "hidden",
-                            }}
-                          >
-                            <video
-                              src={item.uri}
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                              }}
-                            />
-                            <div
-                              style={{
-                                position: "absolute",
-                                inset: 0,
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                background: "rgba(0,0,0,0.2)",
-                              }}
-                            >
-                              <Play size={40} color="#FFF" />
-                            </div>
-                          </div>
-                        ) : item.type.startsWith("audio/") ? (
-                          <div
-                            style={{
-                              width: 120,
-                              height: 120,
-                              borderRadius: 8,
-                              background: "#F6F7F8",
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              padding: 10,
-                              boxSizing: "border-box",
-                            }}
-                          >
-                            <Mic size={30} color="#007AFF" />
-                            <div
-                              style={{
-                                marginTop: 8,
-                                fontSize: 11,
-                                color: "#555",
-                                textAlign: "center",
-                                width: "100%",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              {item.name || "Audio"}
-                            </div>
-                            <audio
-                              controls
-                              src={item.uri}
-                              style={{
-                                width: "100%",
-                                marginTop: 8,
-                                height: 30,
-                              }}
-                            />
-                          </div>
-                        ) : (
-                          <img
-                            src={item.uri}
-                            alt="Selected media"
-                            style={{
-                              width: 120,
-                              height: 120,
-                              borderRadius: 8,
-                              objectFit: "cover",
-                              background: "#F0F0F0",
-                              display: "block",
-                            }}
-                          />
-                        )}
-
-                        {item.status === "uploading" && (
-                          <div
-                            style={{
-                              position: "absolute",
-                              inset: 0,
-                              borderRadius: 8,
-                              background: "rgba(0,0,0,0.3)",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              color: "#FFF",
-                              fontSize: 12,
-                              fontWeight: 600,
-                            }}
-                          >
-                            Uploading...
-                          </div>
-                        )}
-
-                        {item.status === "error" && (
-                          <div
-                            style={{
-                              position: "absolute",
-                              inset: 0,
-                              borderRadius: 8,
-                              background: "rgba(255,0,0,0.35)",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              color: "#FFF",
-                              fontSize: 12,
-                              fontWeight: 600,
-                            }}
-                          >
-                            Failed
-                          </div>
-                        )}
-
-                        <button
-                          onClick={() => removeMedia(item.id)}
+                  {mediaFiles.map((item) => (
+                    <div key={item.id} style={{ position: "relative" }}>
+                      {item.type.startsWith("video/") ? (
+                        <div
                           style={{
-                            position: "absolute",
-                            top: -8,
-                            right: -8,
-                            background: "#FFF",
-                            borderRadius: 999,
-                            border: "none",
-                            padding: 0,
-                            display: "flex",
-                            cursor: "pointer",
-                            color: "rgba(0,0,0,0.6)",
+                            width: 120,
+                            height: 120,
+                            borderRadius: 8,
+                            background: "#111",
+                            position: "relative",
+                            overflow: "hidden",
                           }}
-                          aria-label="Remove media"
                         >
-                          <XCircle
-                            size={24}
-                            fill="currentColor"
-                            strokeWidth={0}
+                          <video
+                            src={item.uri}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
                           />
-                        </button>
-                      </div>
-                    ))}
+                          <div
+                            style={{
+                              position: "absolute",
+                              inset: 0,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              background: "rgba(0,0,0,0.2)",
+                            }}
+                          >
+                            <Play size={40} color="#FFF" />
+                          </div>
+                        </div>
+                      ) : item.type.startsWith("audio/") ? (
+                        <div
+                          style={{
+                            width: 120,
+                            height: 120,
+                            borderRadius: 8,
+                            background: "#F6F7F8",
+                            display: "flex",
+                            flexDirection: "column",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            padding: 10,
+                            boxSizing: "border-box",
+                          }}
+                        >
+                          <Mic size={30} color="#007AFF" />
+                          <div
+                            style={{
+                              marginTop: 8,
+                              fontSize: 11,
+                              color: "#555",
+                              textAlign: "center",
+                              width: "100%",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {item.name || "Audio"}
+                          </div>
+                          <audio
+                            controls
+                            src={item.uri}
+                            style={{
+                              width: "100%",
+                              marginTop: 8,
+                              height: 30,
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <img
+                          src={item.uri}
+                          alt="Selected media"
+                          style={{
+                            width: 120,
+                            height: 120,
+                            borderRadius: 8,
+                            objectFit: "cover",
+                            background: "#F0F0F0",
+                            display: "block",
+                          }}
+                        />
+                      )}
 
-                    <button
-                      onClick={() => imageInputRef.current?.click()}
-                      style={{
-                        width: 120,
-                        height: 120,
-                        borderRadius: 8,
-                        border: "2px dashed #EEE",
-                        background: "#fff",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
-                        color: "#666",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <span style={{ fontSize: 32, lineHeight: 1 }}>+</span>
-                    </button>
-                  </div>
+                      {item.status === "uploading" && (
+                        <div
+                          style={mediaOverlayStyle("rgba(0,0,0,0.3)")}
+                        >
+                          Uploading...
+                        </div>
+                      )}
+
+                      {item.status === "error" && (
+                        <div
+                          style={mediaOverlayStyle("rgba(255,0,0,0.35)")}
+                        >
+                          Failed
+                        </div>
+                      )}
+
+                      <button
+                        onClick={() => removeMedia(item.id)}
+                        style={{
+                          position: "absolute",
+                          top: -8,
+                          right: -8,
+                          background: "#FFF",
+                          borderRadius: 999,
+                          border: "none",
+                          padding: 0,
+                          display: "flex",
+                          cursor: "pointer",
+                          color: "rgba(0,0,0,0.6)",
+                        }}
+                        aria-label="Remove media"
+                      >
+                        <XCircle size={24} fill="currentColor" strokeWidth={0} />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              )}
+              </div>
+            )}
 
-              {fieldErrors.content && (
-                <div
-                  style={{
-                    color: "#FF3B30",
-                    fontSize: 12,
-                    marginTop: 8,
-                    textAlign: "center",
-                  }}
-                >
-                  {fieldErrors.content}
-                </div>
-              )}
+            {fieldErrors.content && (
+              <div
+                style={{
+                  color: "#FF3B30",
+                  fontSize: 12,
+                  marginTop: 8,
+                  textAlign: "center",
+                }}
+              >
+                {fieldErrors.content}
+              </div>
+            )}
 
-              {postError && (
-                <div
-                  style={{
-                    color: "#FF3B30",
-                    fontSize: 12,
-                    marginTop: 8,
-                    textAlign: "center",
-                  }}
-                >
-                  {postError}
-                </div>
-              )}
-            </>
-          )}
-        </div>
+            {postError && (
+              <div
+                style={{
+                  color: "#FF3B30",
+                  fontSize: 12,
+                  marginTop: 8,
+                  textAlign: "center",
+                }}
+              >
+                {postError}
+              </div>
+            )}
 
-        <div
-          style={{
-            position: "fixed",
-            left: 0,
-            right: 0,
-            bottom: 60,
-            borderTop: "1px solid #EEE",
-            background: "#FFF",
-            boxShadow: "0 -6px 20px rgba(0,0,0,0.06)",
-            zIndex: 30,
-          }}
-        >
-          <div
-            style={{
-              maxWidth: 620,
-              margin: "0 auto",
-              display: "flex",
-              alignItems: "center",
-              gap: 24,
-              justifyContent: "flex-start",
-              padding: "10px 16px",
-            }}
-          >
-            <button
-              onClick={() => imageInputRef.current?.click()}
+            <div
               style={{
-                cursor: "pointer",
-                color: "#007AFF",
                 display: "flex",
+                justifyContent: "flex-end",
                 alignItems: "center",
-                gap: 10,
-                fontWeight: 600,
-                fontSize: 14,
+                gap: 18,
+                marginTop: 28,
               }}
-              aria-label="Upload image"
             >
-              <Image size={24} />
-            </button>
-            <button
-              onClick={() => videoInputRef.current?.click()}
-              style={{
-                cursor: "pointer",
-                color: "#007AFF",
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                fontWeight: 600,
-                fontSize: 14,
-              }}
-              aria-label="Upload video"
-            >
-              <Video size={28} />
-            </button>
-          </div>
-        </div>
+              <button
+                type="button"
+                style={{
+                  minWidth: 184,
+                  height: 46,
+                  borderRadius: 14,
+                  border: "1px solid #d0a12f",
+                  background: "#fff",
+                  color: "#111",
+                  fontSize: 16,
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                Save Draft
+              </button>
+              <button
+                onClick={() => void handlePost()}
+                disabled={isPostDisabled}
+                style={{
+                  minWidth: 126,
+                  height: 46,
+                  borderRadius: 14,
+                  border: "none",
+                  background: isPostDisabled ? "#ecd297" : "#e2bf6f",
+                  color: "#fff",
+                  fontSize: 16,
+                  fontWeight: 800,
+                  cursor: isPostDisabled ? "not-allowed" : "pointer",
+                  opacity: isPostDisabled ? 0.7 : 1,
+                }}
+              >
+                {isLoading ? "..." : "Post"}
+              </button>
+            </div>
+          </>
+        )}
 
         <input
           ref={imageInputRef}
@@ -835,6 +813,35 @@ export function CreateCommunityPostPage() {
           style={{ display: "none" }}
         />
       </div>
-    </div>
+    </CommunityWebLayout>
   );
+}
+
+function composeTabStyle(active: boolean) {
+  return {
+    border: "none",
+    background: "transparent",
+    color: active ? "#d1a02d" : "#111",
+    borderBottom: active ? "3px solid #d1a02d" : "3px solid transparent",
+    padding: "12px 18px 18px",
+    marginBottom: -1,
+    fontSize: 18,
+    fontWeight: 700,
+    cursor: "pointer",
+  } as const;
+}
+
+function mediaOverlayStyle(background: string) {
+  return {
+    position: "absolute",
+    inset: 0,
+    borderRadius: 8,
+    background,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#FFF",
+    fontSize: 12,
+    fontWeight: 600,
+  } as const;
 }

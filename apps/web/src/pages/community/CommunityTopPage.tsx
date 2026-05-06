@@ -4,7 +4,7 @@ import { Image as ImageIcon, LayoutGrid, List } from "lucide-react";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useNavigate } from "react-router-dom";
 import { CommunityPostCard } from "../../components/community/CommunityPostCard";
-import { CommunityTopBar } from "../../components/community/CommunityTopBar";
+import { CommunityWebLayout } from "../../components/community/CommunityWebLayout";
 import { getExplorePosts, upvotePost } from "../../engine/communityApi";
 import { WEB_ENV } from "../../lib/env";
 import { webStorage } from "../../lib/webStorage";
@@ -169,9 +169,7 @@ function ExploreTile({
 export function CommunityTopPage() {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
-  const [selectedPostId, setSelectedPostId] = useState<number | string | null>(
-    null,
-  );
+  const [isDesktop, setIsDesktop] = useState(false);
   const [items, setItems] = useState<ExploreItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -184,6 +182,15 @@ export function CommunityTopPage() {
     typeof window !== "undefined"
       ? window.location.pathname.split("/")[1] || "en"
       : "en";
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mediaQuery = window.matchMedia("(min-width: 1280px)");
+    const sync = () => setIsDesktop(mediaQuery.matches);
+    sync();
+    mediaQuery.addEventListener("change", sync);
+    return () => mediaQuery.removeEventListener("change", sync);
+  }, []);
 
   const fetchPage = async (pageNumber: number, reset = false) => {
     try {
@@ -211,46 +218,19 @@ export function CommunityTopPage() {
     void fetchPage(1, true);
   }, [lang]);
 
-  useEffect(() => {
-    if (viewMode !== "list" || selectedPostId == null || loading || !!error)
-      return;
-
-    const frame = window.requestAnimationFrame(() => {
-      const element = document.getElementById(
-        `community-top-post-${String(selectedPostId)}`,
-      );
-      element?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
-
-    return () => window.cancelAnimationFrame(frame);
-  }, [error, loading, selectedPostId, viewMode]);
-
-  const gridColumns = useMemo(() => {
-    const left: Array<ExploreItem & { tileAspectRatio: number }> = [];
-    const right: Array<ExploreItem & { tileAspectRatio: number }> = [];
-    let leftHeight = 0;
-    let rightHeight = 0;
-
-    items.forEach((item) => {
-      const aspect = getAspectRatioValue(item) || 4 / 5;
-      const payload = { ...item, tileAspectRatio: aspect };
-      if (leftHeight <= rightHeight) {
-        left.push(payload);
-        leftHeight += 1 / aspect;
-      } else {
-        right.push(payload);
-        rightHeight += 1 / aspect;
-      }
-    });
-
-    return { left, right };
-  }, [items]);
+  const gridItems = useMemo(
+    () =>
+      items.map((item) => ({
+        ...item,
+        tileAspectRatio: isDesktop ? 4 / 5 : getAspectRatioValue(item) || 4 / 5,
+      })),
+    [isDesktop, items],
+  );
 
   const posts = useMemo(() => items.map(mapExploreItemToPost), [items]);
 
   const handleGridPostClick = (postId: number | string) => {
-    setSelectedPostId(postId);
-    setViewMode("list");
+    navigate(`/en/community/${postId}`);
   };
 
   const handleUpvote = async (postId: number | string) => {
@@ -282,52 +262,43 @@ export function CommunityTopPage() {
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100dvh",
-        background: "var(--kalpx-bg)",
-        overflowX: "hidden",
-      }}
-    >
-      <CommunityTopBar
-        activeLabel="Top"
-        rightSlot={
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-
-              borderRadius: 6,
-              background: "#F7F0DD",
+    <CommunityWebLayout
+      activeLabel="Top"
+      centerWidth={920}
+      topBarRightSlot={
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            borderRadius: 6,
+            background: "#F7F0DD",
+          }}
+        >
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setViewMode("grid");
             }}
+            aria-label="Grid view"
+            style={toggleButtonStyle(viewMode === "grid")}
           >
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setViewMode("grid");
-              }}
-              aria-label="Grid view"
-              style={toggleButtonStyle(viewMode === "grid")}
-            >
-              <LayoutGrid size={19} />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setViewMode("list");
-              }}
-              aria-label="List view"
-              style={toggleButtonStyle(viewMode === "list")}
-            >
-              <List size={24} />
-            </button>
-          </div>
-        }
-      />
-
-      <div style={{ maxWidth: 620, margin: "0 auto", paddingBottom: 40 }}>
-        <div style={{ padding: "12px 10px 0" }}>
+            <LayoutGrid size={19} />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setViewMode("list");
+            }}
+            aria-label="List view"
+            style={toggleButtonStyle(viewMode === "list")}
+          >
+            <List size={24} />
+          </button>
+        </div>
+      }
+    >
+      <div style={{ padding: "12px 10px 0" }}>
           {loading && (
             <div style={{ padding: "24px 8px", color: "#6f655a" }}>
               Loading top posts...
@@ -341,36 +312,23 @@ export function CommunityTopPage() {
           {!loading && !error && viewMode === "grid" && (
             <div
               style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                gap: 6,
-                width: "100%",
-                overflow: "hidden",
+                display: "grid",
+                gridTemplateColumns: isDesktop
+                  ? "repeat(3, minmax(0, 1fr))"
+                  : "repeat(2, minmax(0, 1fr))",
+                gap: isDesktop ? 18 : 12,
+                alignItems: "start",
               }}
             >
-              <div style={{ width: `calc(50% - 3px)` }}>
-                {gridColumns.left.map((item) => (
-                  <div key={String(item.id)} style={{ marginBottom: 12 }}>
-                    <ExploreTile
-                      item={item}
-                      aspectRatio={item.tileAspectRatio}
-                      onClick={() => handleGridPostClick(item.id)}
-                    />
-                  </div>
-                ))}
-              </div>
-              <div style={{ width: `calc(50% - 3px)` }}>
-                {gridColumns.right.map((item) => (
-                  <div key={String(item.id)} style={{ marginBottom: 12 }}>
-                    <ExploreTile
-                      item={item}
-                      aspectRatio={item.tileAspectRatio}
-                      onClick={() => handleGridPostClick(item.id)}
-                    />
-                  </div>
-                ))}
-              </div>
+              {gridItems.map((item) => (
+                <div key={String(item.id)}>
+                  <ExploreTile
+                    item={item}
+                    aspectRatio={item.tileAspectRatio}
+                    onClick={() => handleGridPostClick(item.id)}
+                  />
+                </div>
+              ))}
             </div>
           )}
 
@@ -408,9 +366,8 @@ export function CommunityTopPage() {
               </button>
             </div>
           )}
-        </div>
       </div>
-    </div>
+    </CommunityWebLayout>
   );
 }
 

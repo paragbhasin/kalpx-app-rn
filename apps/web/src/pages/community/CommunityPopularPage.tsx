@@ -6,7 +6,7 @@ import { CommunityEmptyState } from "../../components/community/CommunityEmptySt
 import { CommunityErrorState } from "../../components/community/CommunityErrorState";
 import { CommunityFeedSkeleton } from "../../components/community/CommunityFeedSkeleton";
 import { CommunityPostCard } from "../../components/community/CommunityPostCard";
-import { CommunityTopBar } from "../../components/community/CommunityTopBar";
+import { CommunityWebLayout } from "../../components/community/CommunityWebLayout";
 import {
   createCommunityComment,
   createCommunityPost,
@@ -55,10 +55,8 @@ export function CommunityPopularPage() {
   }, [ctrl, lang]);
 
   return (
-    <div style={{ minHeight: "100dvh", background: "var(--kalpx-bg)" }}>
-      <CommunityTopBar activeLabel="Popular" />
-      <div style={{ maxWidth: 620, margin: "0 auto", paddingBottom: 40 }}>
-        <div style={{ padding: "5px" }}>
+    <CommunityWebLayout activeLabel="Popular" centerWidth={920}>
+      <div style={{ padding: "5px" }}>
           {ctrl.feedLoading && <CommunityFeedSkeleton />}
 
           {!ctrl.feedLoading && ctrl.feedError && (
@@ -103,8 +101,7 @@ export function CommunityPopularPage() {
               </button>
             </div>
           )}
-        </div>
       </div>
-    </div>
+    </CommunityWebLayout>
   );
 }

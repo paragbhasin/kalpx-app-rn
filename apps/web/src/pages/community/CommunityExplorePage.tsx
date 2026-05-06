@@ -1,7 +1,7 @@
 import { isAuthenticated } from "@kalpx/auth";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CommunityTopBar } from "../../components/community/CommunityTopBar";
+import { CommunityWebLayout } from "../../components/community/CommunityWebLayout";
 import {
   followCommunity,
   getFollowedCommunities,
@@ -142,11 +142,8 @@ export function CommunityExplorePage() {
   };
 
   return (
-    <div style={{ minHeight: "100dvh", background: "var(--kalpx-bg)" }}>
-      <CommunityTopBar activeLabel="Explore" />
-
-      <div style={{ maxWidth: 620, margin: "0 auto", paddingBottom: 40 }}>
-        <div style={{ padding: "10px" }}>
+    <CommunityWebLayout activeLabel="Explore" centerWidth={920}>
+      <div style={{ padding: "10px" }}>
           <h1
             style={{
               margin: 0,
@@ -336,9 +333,8 @@ export function CommunityExplorePage() {
               </button>
             </div>
           )}
-        </div>
       </div>
-    </div>
+    </CommunityWebLayout>
   );
 }
 

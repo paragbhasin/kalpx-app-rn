@@ -1,4 +1,4 @@
-import { CommunityTopBar } from "../../components/community/CommunityTopBar";
+import { CommunityWebLayout } from "../../components/community/CommunityWebLayout";
 
 const sections = [
   {
@@ -25,11 +25,8 @@ const sections = [
 
 export function CommunityPrivacyPolicyPage() {
   return (
-    <div style={{ minHeight: "100dvh", background: "#fff" }}>
-      <CommunityTopBar activeLabel="Explore" />
-      <div
-        style={{ maxWidth: 620, margin: "0 auto", padding: "10px 20px 40px" }}
-      >
+    <CommunityWebLayout activeLabel="Privacy Policy" centerWidth={920}>
+      <div style={{ padding: "10px 20px 40px" }}>
         <h1
           style={{
             margin: "0 0 24px",
@@ -68,6 +65,6 @@ export function CommunityPrivacyPolicyPage() {
           </section>
         ))}
       </div>
-    </div>
+    </CommunityWebLayout>
   );
 }

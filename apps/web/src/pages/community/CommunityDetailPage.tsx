@@ -1,13 +1,20 @@
 import { isAuthenticated } from "@kalpx/auth";
 import type { CommunityPost } from "@kalpx/types";
-import { ChevronDown, ChevronLeft, ChevronUp, Filter } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronUp,
+  FilePlus2,
+  Globe,
+  Plus,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { CommunityEmptyState } from "../../components/community/CommunityEmptyState";
 import { CommunityErrorState } from "../../components/community/CommunityErrorState";
 import { CommunityFeedSkeleton } from "../../components/community/CommunityFeedSkeleton";
 import { CommunityPostCard } from "../../components/community/CommunityPostCard";
-import { CommunityTopBar } from "../../components/community/CommunityTopBar";
+import { CommunityWebLayout } from "../../components/community/CommunityWebLayout";
 import {
   followCommunity,
   getCommunityDetail,
@@ -49,6 +56,22 @@ function getLangFromPath() {
   return window.location.pathname.split("/")[1] || "en";
 }
 
+function getCommunityCreatedLabel(value: unknown) {
+  if (!value) return "Recently";
+  const createdAt = new Date(String(value));
+  if (Number.isNaN(createdAt.getTime())) return "Recently";
+
+  const diffMs = Date.now() - createdAt.getTime();
+  const diffDays = Math.max(0, Math.floor(diffMs / 86400000));
+  if (diffDays < 30) return `${Math.max(1, diffDays)} d ago`;
+
+  const diffMonths = Math.floor(diffDays / 30);
+  if (diffMonths < 12) return `${diffMonths} mo ago`;
+
+  const diffYears = Math.floor(diffMonths / 12);
+  return `${diffYears} yr ago`;
+}
+
 export function CommunityDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
@@ -69,8 +92,17 @@ export function CommunityDetailPage() {
   const [joined, setJoined] = useState(false);
   const [joinLoading, setJoinLoading] = useState(false);
   const [expandedRules, setExpandedRules] = useState<number[]>([]);
-  const [showSortMenu, setShowSortMenu] = useState(false);
   const [upvotingId, setUpvotingId] = useState<number | string | null>(null);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mediaQuery = window.matchMedia("(min-width: 1280px)");
+    const sync = () => setIsDesktop(mediaQuery.matches);
+    sync();
+    mediaQuery.addEventListener("change", sync);
+    return () => mediaQuery.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -276,327 +308,398 @@ export function CommunityDetailPage() {
 
   if (loadingCommunity && !community) {
     return (
-      <div style={{ minHeight: "100dvh", background: "var(--kalpx-bg)" }}>
-        <CommunityTopBar />
-        <div
-          style={{ maxWidth: 620, margin: "0 auto", padding: "16px 12px 40px" }}
-        >
+      <CommunityWebLayout activeLabel="Communities" centerWidth={920}>
+        <div style={{ padding: "16px 12px 40px" }}>
           <CommunityFeedSkeleton />
         </div>
-      </div>
+      </CommunityWebLayout>
     );
   }
 
   if (communityError || !community) {
     return (
-      <div style={{ minHeight: "100dvh", background: "var(--kalpx-bg)" }}>
-        <CommunityTopBar />
-        <div
-          style={{ maxWidth: 620, margin: "0 auto", padding: "20px 12px 40px" }}
-        >
+      <CommunityWebLayout activeLabel="Communities" centerWidth={920}>
+        <div style={{ padding: "20px 12px 40px" }}>
           <CommunityErrorState
             message={communityError ?? "Community not found."}
           />
         </div>
-      </div>
+      </CommunityWebLayout>
     );
   }
 
-  return (
-    <div style={{ minHeight: "100dvh", background: "var(--kalpx-bg)" }}>
-      <CommunityTopBar activeLabel="Explore" />
+  const desktopRightRail = isDesktop ? (
+    <div style={{ display: "grid", gap: 26 }}>
+      <section style={desktopSideCardStyle}>
+        <h2 style={desktopSideTitleStyle}>About Community</h2>
+        <div
+          style={{
+            display: "flex",
+            gap: 16,
+            alignItems: "center",
+            marginTop: 10,
+          }}
+        >
+          <img
+            src={resolveCommunityImage(community)}
+            alt={community.name || "Community"}
+            style={desktopSideAvatarStyle}
+          />
+          <div style={{ minWidth: 0 }}>
+            <div style={desktopSideCommunityNameStyle}>
+              {community.name || "Community"}
+            </div>
+          </div>
+        </div>
 
-      <div style={{ maxWidth: 620, margin: "0 auto", paddingBottom: 40 }}>
-        <div style={{ padding: "8px 10px 40px" }}>
+        <p style={desktopSideDescriptionStyle}>
+          {community.description ||
+            "Methods, challenges, and small wins in stillness and awareness."}
+        </p>
+
+        <div style={desktopSideMetaWrapStyle}>
+          <div style={desktopSideMetaRowStyle}>
+            <FilePlus2 size={20} />
+            <span>
+              Created {getCommunityCreatedLabel(community.created_at)}
+            </span>
+          </div>
+          <div style={desktopSideMetaRowStyle}>
+            <Globe size={20} />
+            <span>Public</span>
+          </div>
+        </div>
+
+        <div style={desktopStatsGridStyle}>
+          <div>
+            <div style={desktopStatValueStyle}>
+              {stableStats.weeklyVisitors}
+            </div>
+            <div style={desktopStatLabelStyle}>Weekly Visitors</div>
+          </div>
+          <div>
+            <div style={desktopStatValueStyle}>
+              {stableStats.weeklyContribution}
+            </div>
+            <div style={desktopStatLabelStyle}>Contributions</div>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => void handleJoinToggle()}
+          disabled={joinLoading}
+          style={desktopSideJoinButtonStyle(joined, joinLoading)}
+        >
+          {joined ? "Joined" : "Join"}
+        </button>
+      </section>
+
+      <section style={desktopSideCardStyle}>
+        <h3 style={desktopRulesTitleStyle}>
+          {(community.name || "Community") + " Rules"}
+        </h3>
+        <div style={{ display: "grid", gap: 18 }}>
+          {ABOUT_RULES.map((rule, index) => (
+            <div key={rule.title}>
+              <div style={desktopRuleHeadingStyle}>
+                {index + 1}. {rule.title}
+              </div>
+              <div style={desktopRuleContentStyle}>{rule.content}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  ) : null;
+
+  return (
+    <CommunityWebLayout
+      activeLabel="Communities"
+      centerWidth={isDesktop ? 1120 : 920}
+      rightRailSlot={desktopRightRail}
+      showCreateButton={!isDesktop}
+    >
+      <div style={{ padding: "8px 10px 40px" }}>
+        {!isDesktop ? (
           <button type="button" onClick={handleBack} style={backButtonStyle}>
             <ChevronLeft size={18} />
           </button>
+        ) : null}
 
-          <section>
-            <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
-              <img
-                src={resolveCommunityImage(community)}
-                alt={community.name || "Community"}
-                style={{
-                  width: 92,
-                  height: 92,
-                  borderRadius: 24,
-                  objectFit: "cover",
-                  flexShrink: 0,
-                  boxShadow: "0 10px 28px rgba(61, 44, 18, 0.12)",
-                }}
-              />
-
-              <div style={{ minWidth: 0, flex: 1 }}>
-                <h1
-                  style={{
-                    margin: 0,
-                    color: "#2b241d",
-                    fontSize: 24,
-                    lineHeight: 1.1,
-                    fontWeight: 700,
-                    fontFamily: "Georgia, serif",
-                  }}
-                >
-                  {community.name || "Community"}
-                </h1>
-
-                <div
-                  style={{
-                    marginTop: 10,
-                    display: "flex",
-                    gap: 16,
-                    flexWrap: "wrap",
-                    color: "#6c6254",
-                    fontSize: 14,
-                    fontWeight: 600,
-                  }}
-                >
-                  <span>
-                    Followers: {Number(community.follower_count ?? 0)}
-                  </span>
-                  <span>Posts: {Number(community.post_count ?? 0)}</span>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => void handleJoinToggle()}
-                  disabled={joinLoading}
-                  style={{
-                    marginTop: 14,
-                    border: "none",
-                    borderRadius: 999,
-                    background: joined ? "#efe7d8" : "#d69e2e",
-                    color: joined ? "#6b5a3b" : "#fff",
-                    padding: "9px 18px",
-                    fontSize: 14,
-                    fontWeight: 700,
-                    cursor: joinLoading ? "default" : "pointer",
-                    opacity: joinLoading ? 0.7 : 1,
-                  }}
-                >
-                  {joined ? "Joined" : "Join"}
-                </button>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => void handleCreatePost()}
-              style={createPostButtonStyle}
-            >
-              Create post
-            </button>
-
-            <div
+        <section style={isDesktop ? desktopHeaderSectionStyle : undefined}>
+          <div
+            style={{
+              display: "flex",
+              gap: isDesktop ? 18 : 14,
+              alignItems: "center",
+            }}
+          >
+            <img
+              src={resolveCommunityImage(community)}
+              alt={community.name || "Community"}
               style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                marginTop: 18,
-                borderTop: "1px solid rgba(176, 146, 103, 0.22)",
-                paddingTop: 14,
+                width: isDesktop ? 88 : 92,
+                height: isDesktop ? 88 : 92,
+                borderRadius: 999,
+                objectFit: "cover",
+                flexShrink: 0,
+                boxShadow: "0 10px 28px rgba(61, 44, 18, 0.12)",
               }}
-            >
-              <button
-                type="button"
-                onClick={() => setActiveTab("Feed")}
-                style={tabButtonStyle(activeTab === "Feed")}
-              >
-                Feed
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("About")}
-                style={tabButtonStyle(activeTab === "About")}
-              >
-                About
-              </button>
-              <div style={{ flex: 1 }} />
-              {activeTab === "Feed" && (
-                <div style={{ position: "relative" }}>
-                  <button
-                    type="button"
-                    onClick={() => setShowSortMenu((value) => !value)}
-                    style={filterButtonStyle}
-                  >
-                    <Filter size={16} />
-                  </button>
-                  {showSortMenu && (
-                    <div style={sortMenuStyle}>
-                      {(["new", "top", "hot"] as SortOption[]).map((option) => (
-                        <button
-                          key={option}
-                          type="button"
-                          onClick={() => {
-                            setSortBy(option);
-                            setShowSortMenu(false);
-                          }}
-                          style={sortMenuItemStyle(sortBy === option)}
-                        >
-                          {option[0].toUpperCase() + option.slice(1)}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </section>
+            />
 
-          {activeTab === "About" ? (
-            <section style={aboutCardStyle}>
-              <h2
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <h1
                 style={{
                   margin: 0,
-                  fontSize: 24,
                   color: "#2b241d",
-                  lineHeight: 1.1,
-                  fontWeight: 700,
+                  fontSize: isDesktop ? 20 : 16,
+
+                  fontWeight: 800,
                   fontFamily: "Georgia, serif",
                 }}
               >
                 {community.name || "Community"}
-              </h2>
-
-              <p
-                style={{
-                  margin: "12px 0 0",
-                  color: "#4f463c",
-                  fontSize: 15,
-                  lineHeight: 1.7,
-                }}
-              >
-                {community.description || "No description available."}
-              </p>
+              </h1>
 
               <div
                 style={{
-                  marginTop: 20,
-                  display: "grid",
-                  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                  gap: 12,
+                  marginTop: 10,
+                  display: "flex",
+                  gap: isDesktop ? 18 : 16,
+                  flexWrap: "wrap",
+                  color: "#6e7482",
+                  fontSize: isDesktop ? 15 : 14,
+                  fontWeight: 700,
                 }}
               >
-                <div style={metricCardStyle}>
-                  <div style={metricValueStyle}>
-                    {stableStats.weeklyVisitors}
-                  </div>
-                  <div style={metricLabelStyle}>Weekly Visitors</div>
-                </div>
-                <div style={metricCardStyle}>
-                  <div style={metricValueStyle}>
-                    {stableStats.weeklyContribution}
-                  </div>
-                  <div style={metricLabelStyle}>Weekly Contribution</div>
-                </div>
+                <span>
+                  Followers : {Number(community.follower_count ?? 0)}{" "}
+                </span>
+                <span> Posts : {Number(community.post_count ?? 0)} </span>
               </div>
 
-              <div style={{ marginTop: 28 }}>
-                <h3
-                  style={{
-                    margin: 0,
-                    fontSize: 18,
-                    fontWeight: 700,
-                    color: "#2b241d",
-                    fontFamily: "Georgia, serif",
-                  }}
-                >
-                  {(community.name || "Community") + " Rules"}
-                </h3>
+              <button
+                type="button"
+                onClick={() => void handleJoinToggle()}
+                disabled={joinLoading}
+                style={{
+                  marginTop: 14,
+                  border: "none",
+                  borderRadius: 10,
+                  background: joined ? "#e3e5ea" : "#d69e2e",
+                  color: joined ? "#495366" : "#fff",
+                  padding: "6px 20px",
+                  minWidth: isDesktop ? 204 : undefined,
+                  fontSize: isDesktop ? 17 : 14,
+                  fontWeight: 700,
+                  cursor: joinLoading ? "default" : "pointer",
+                  opacity: joinLoading ? 0.7 : 1,
+                }}
+              >
+                {joined ? "Joined" : "Join"}
+              </button>
+            </div>
+          </div>
 
-                <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
-                  {ABOUT_RULES.map((rule, index) => {
-                    const expanded = expandedRules.includes(index);
-                    return (
-                      <div key={rule.title} style={ruleCardStyle}>
-                        <button
-                          type="button"
-                          onClick={() => toggleRule(index)}
-                          style={ruleHeaderStyle}
-                        >
-                          <span style={{ fontWeight: 700, color: "#32291f" }}>
-                            {index + 1}. {rule.title}
-                          </span>
-                          {expanded ? (
-                            <ChevronUp size={18} />
-                          ) : (
-                            <ChevronDown size={18} />
-                          )}
-                        </button>
-                        {expanded && (
-                          <p
-                            style={{
-                              margin: "10px 0 0",
-                              color: "#5d5247",
-                              fontSize: 14,
-                              lineHeight: 1.6,
-                            }}
-                          >
-                            {rule.content}
-                          </p>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </section>
+          {isDesktop ? (
+            <button
+              type="button"
+              onClick={() => void handleCreatePost()}
+              style={desktopCreatePostButtonStyle}
+            >
+              <Plus size={18} />
+              <span>Create post</span>
+            </button>
           ) : (
             <>
-              {loadingPosts && <CommunityFeedSkeleton />}
-
-              {!loadingPosts && postsError && (
-                <CommunityErrorState
-                  message={postsError}
-                  onRetry={() => setPostsReloadKey((value) => value + 1)}
-                />
-              )}
-
-              {!loadingPosts && !postsError && posts.length === 0 && (
-                <CommunityEmptyState showCreateCta />
-              )}
+              <button
+                type="button"
+                onClick={() => void handleCreatePost()}
+                style={createPostButtonStyle}
+              >
+                + Create post
+              </button>
 
               <div
-                style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                  marginTop: 18,
+                  borderTop: "1px solid rgba(176, 146, 103, 0.22)",
+                  paddingTop: 14,
+                }}
               >
-                {posts.map((post) => (
-                  <CommunityPostCard
-                    key={post.id}
-                    post={post}
-                    onUpvote={(id) => void handleUpvote(id)}
-                    isUpvoting={upvotingId === post.id}
-                  />
-                ))}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("Feed")}
+                  style={tabButtonStyle(activeTab === "Feed")}
+                >
+                  Feed
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("About")}
+                  style={tabButtonStyle(activeTab === "About")}
+                >
+                  About
+                </button>
               </div>
-
-              {hasMore && !loadingPosts && !postsError && (
-                <div style={{ textAlign: "center", padding: "14px 0 0" }}>
-                  <button
-                    type="button"
-                    onClick={() => void handleLoadMore()}
-                    disabled={loadingMore}
-                    style={{
-                      border: "none",
-                      borderRadius: 12,
-                      background: "#efe7d8",
-                      color: "#3f3425",
-                      padding: "10px 22px",
-                      fontSize: 14,
-                      fontWeight: 700,
-                      cursor: loadingMore ? "default" : "pointer",
-                      opacity: loadingMore ? 0.75 : 1,
-                    }}
-                  >
-                    {loadingMore ? "Loading..." : "Load more"}
-                  </button>
-                </div>
-              )}
             </>
           )}
-        </div>
+        </section>
+
+        {!isDesktop && activeTab === "About" ? (
+          <section style={aboutCardStyle}>
+            <h2
+              style={{
+                margin: 0,
+                fontSize: 24,
+                color: "#2b241d",
+                lineHeight: 1.1,
+                fontWeight: 700,
+                fontFamily: "Georgia, serif",
+              }}
+            >
+              {community.name || "Community"}
+            </h2>
+
+            <p
+              style={{
+                margin: "12px 0 0",
+                color: "#4f463c",
+                fontSize: 15,
+                lineHeight: 1.7,
+              }}
+            >
+              {community.description || "No description available."}
+            </p>
+
+            <div
+              style={{
+                marginTop: 20,
+                display: "grid",
+                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                gap: 12,
+              }}
+            >
+              <div style={metricCardStyle}>
+                <div style={metricValueStyle}>{stableStats.weeklyVisitors}</div>
+                <div style={metricLabelStyle}>Weekly Visitors</div>
+              </div>
+              <div style={metricCardStyle}>
+                <div style={metricValueStyle}>
+                  {stableStats.weeklyContribution}
+                </div>
+                <div style={metricLabelStyle}>Weekly Contribution</div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: 28 }}>
+              <h3
+                style={{
+                  margin: 0,
+                  fontSize: 18,
+                  fontWeight: 700,
+                  color: "#2b241d",
+                  fontFamily: "Georgia, serif",
+                }}
+              >
+                {(community.name || "Community") + " Rules"}
+              </h3>
+
+              <div style={{ marginTop: 14, display: "grid", gap: 10 }}>
+                {ABOUT_RULES.map((rule, index) => {
+                  const expanded = expandedRules.includes(index);
+                  return (
+                    <div key={rule.title} style={ruleCardStyle}>
+                      <button
+                        type="button"
+                        onClick={() => toggleRule(index)}
+                        style={ruleHeaderStyle}
+                      >
+                        <span style={{ fontWeight: 700, color: "#32291f" }}>
+                          {index + 1}. {rule.title}
+                        </span>
+                        {expanded ? (
+                          <ChevronUp size={18} />
+                        ) : (
+                          <ChevronDown size={18} />
+                        )}
+                      </button>
+                      {expanded && (
+                        <p
+                          style={{
+                            margin: "10px 0 0",
+                            color: "#5d5247",
+                            fontSize: 14,
+                            lineHeight: 1.6,
+                          }}
+                        >
+                          {rule.content}
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </section>
+        ) : (
+          <>
+            {loadingPosts && <CommunityFeedSkeleton />}
+
+            {!loadingPosts && postsError && (
+              <CommunityErrorState
+                message={postsError}
+                onRetry={() => setPostsReloadKey((value) => value + 1)}
+              />
+            )}
+
+            {!loadingPosts && !postsError && posts.length === 0 && (
+              <CommunityEmptyState showCreateCta />
+            )}
+
+            <div
+              style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }}
+            >
+              {posts.map((post) => (
+                <CommunityPostCard
+                  key={post.id}
+                  post={post}
+                  onUpvote={(id) => void handleUpvote(id)}
+                  isUpvoting={upvotingId === post.id}
+                />
+              ))}
+            </div>
+
+            {hasMore && !loadingPosts && !postsError && (
+              <div style={{ textAlign: "center", padding: "14px 0 0" }}>
+                <button
+                  type="button"
+                  onClick={() => void handleLoadMore()}
+                  disabled={loadingMore}
+                  style={{
+                    border: "none",
+                    borderRadius: 12,
+                    background: "#efe7d8",
+                    color: "#3f3425",
+                    padding: "10px 22px",
+                    fontSize: 14,
+                    fontWeight: 700,
+                    cursor: loadingMore ? "default" : "pointer",
+                    opacity: loadingMore ? 0.75 : 1,
+                  }}
+                >
+                  {loadingMore ? "Loading..." : "Load more"}
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </div>
-    </div>
+    </CommunityWebLayout>
   );
 }
 
@@ -610,40 +713,43 @@ const backButtonStyle = {
   cursor: "pointer",
 } as const;
 
-const headerCardStyle = {
-  background:
-    "linear-gradient(180deg, rgba(255,250,241,0.96) 0%, rgba(247,239,221,0.96) 100%)",
-  border: "1px solid rgba(208, 180, 132, 0.4)",
-  borderRadius: 24,
-  padding: 18,
-  boxShadow: "0 16px 40px rgba(123, 93, 45, 0.08)",
+const desktopHeaderSectionStyle = {
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: 24,
+  padding: "8px 4px 30px",
+  borderBottom: "1px solid rgba(176, 146, 103, 0.22)",
 } as const;
 
 const createPostButtonStyle = {
   marginTop: 18,
   width: "100%",
-  border: "none",
+
   borderRadius: 16,
-  background: "#D4A017",
+  border: "1px solid #d59d19",
+
   color: "#2b241d",
-  padding: "12px 16px",
+  padding: "10px",
   fontSize: 15,
   fontWeight: 700,
-  textTransform: "lowercase",
+
   cursor: "pointer",
 } as const;
 
-const filterButtonStyle = {
-  width: 36,
-  height: 36,
-  border: "1px solid #e3d5bc",
-  borderRadius: 12,
-  background: "#fffaf1",
-  color: "#2b241d",
+const desktopCreatePostButtonStyle = {
+  border: "1px solid #d59d19",
+  borderRadius: 999,
+  background: "#fff",
+  color: "#1d1b17",
+  padding: "12px 24px",
+  fontSize: 16,
+  fontWeight: 700,
+  cursor: "pointer",
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  cursor: "pointer",
+  gap: 10,
 } as const;
 
 const aboutCardStyle = {
@@ -697,43 +803,134 @@ const ruleHeaderStyle = {
   textAlign: "left",
 } as const;
 
-const sortMenuStyle = {
-  position: "absolute",
-  top: "calc(100% + 8px)",
-  right: 0,
-  minWidth: 120,
-  background: "#fff",
-  border: "1px solid #eadcc3",
-  borderRadius: 14,
-  boxShadow: "0 18px 36px rgba(70, 50, 20, 0.12)",
-  padding: 6,
-  zIndex: 5,
-} as const;
-
-function sortMenuItemStyle(active: boolean) {
+function tabButtonStyle(active: boolean) {
   return {
-    width: "100%",
-    border: "none",
-    background: active ? "#fbf4e5" : "transparent",
-    borderRadius: 10,
-    padding: "10px 12px",
-    textAlign: "left",
-    color: active ? "#2b241d" : "#655949",
+    border: active ? " 2px solid #f7e7bc" : "transparent",
+
+    color: active ? "#2b241d" : "#7d725f",
+    borderRadius: 20,
+    padding: "5px 25px",
     fontSize: 14,
     fontWeight: active ? 700 : 600,
     cursor: "pointer",
   } as const;
 }
 
-function tabButtonStyle(active: boolean) {
+const desktopSideCardStyle = {
+  border: "1px solid #e3e0da",
+  borderRadius: 22,
+  background: "#fff",
+  padding: 15,
+  boxShadow: "0 8px 22px rgba(41, 33, 20, 0.04)",
+} as const;
+
+const desktopSideTitleStyle = {
+  margin: 0,
+  color: "#2d261f",
+  fontSize: 20,
+  lineHeight: 1.1,
+  fontWeight: 700,
+  fontFamily: "Georgia, serif",
+} as const;
+
+const desktopSideAvatarStyle = {
+  width: 55,
+  height: 55,
+  borderRadius: 999,
+  objectFit: "cover",
+  flexShrink: 0,
+} as const;
+
+const desktopSideCommunityNameStyle = {
+  color: "#2f2c2b",
+  fontSize: 18,
+
+  fontWeight: 800,
+} as const;
+
+const desktopSideDescriptionStyle = {
+  paddingTop: 10,
+  color: "#4f5b6c",
+  fontSize: 14,
+  lineHeight: 1.55,
+} as const;
+
+const desktopSideMetaWrapStyle = {
+  marginTop: 24,
+  paddingTop: 24,
+  borderTop: "1px solid #ece8e0",
+  display: "grid",
+  gap: 18,
+} as const;
+
+const desktopSideMetaRowStyle = {
+  display: "flex",
+  alignItems: "center",
+  gap: 16,
+  color: "#4f5b6c",
+  fontSize: 16,
+  fontWeight: 500,
+} as const;
+
+const desktopStatsGridStyle = {
+  marginTop: 28,
+  paddingTop: 28,
+  borderTop: "1px solid #ece8e0",
+  display: "grid",
+  gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+  gap: 16,
+} as const;
+
+const desktopStatValueStyle = {
+  color: "#2a2a30",
+  fontSize: 16,
+  lineHeight: 1.05,
+  fontWeight: 800,
+} as const;
+
+const desktopStatLabelStyle = {
+  marginTop: 6,
+  color: "#98a0ad",
+  fontSize: 14,
+  lineHeight: 1.25,
+  fontWeight: 500,
+} as const;
+
+function desktopSideJoinButtonStyle(joined: boolean, loading: boolean) {
   return {
+    width: "100%",
+    marginTop: 28,
     border: "none",
-    background: active ? "#f7e7bc" : "transparent",
-    color: active ? "#2b241d" : "#7d725f",
-    borderRadius: 999,
-    padding: "8px 16px",
+    borderRadius: 16,
+    background: joined ? "#e3e5ea" : "#d69e2e",
+    color: joined ? "#4a5568" : "#fff",
+    padding: "10px",
     fontSize: 14,
-    fontWeight: 700,
-    cursor: "pointer",
+    fontWeight: 800,
+    cursor: loading ? "default" : "pointer",
+    opacity: loading ? 0.7 : 1,
   } as const;
 }
+
+const desktopRulesTitleStyle = {
+  color: "#2d261f",
+  fontSize: 16,
+  lineHeight: 1.2,
+  fontWeight: 700,
+  paddingBottom: 10,
+  fontFamily: "Georgia, serif",
+} as const;
+
+const desktopRuleHeadingStyle = {
+  color: "#30323a",
+  fontSize: 14,
+  lineHeight: 1.35,
+  fontWeight: 700,
+} as const;
+
+const desktopRuleContentStyle = {
+  marginTop: 8,
+  color: "#5b6574",
+  fontSize: 15,
+  lineHeight: 1.6,
+} as const;

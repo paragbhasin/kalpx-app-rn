@@ -1,11 +1,10 @@
 import { CommunityKalpxRulesContent } from "../../components/community/CommunityKalpxRulesContent";
-import { CommunityTopBar } from "../../components/community/CommunityTopBar";
+import { CommunityWebLayout } from "../../components/community/CommunityWebLayout";
 
 export function CommunityKalpxRulesPage() {
   return (
-    <div style={{ minHeight: "100dvh", background: "#fff" }}>
-      <CommunityTopBar activeLabel="Explore" />
+    <CommunityWebLayout activeLabel="KalpX Rules" centerWidth={920}>
       <CommunityKalpxRulesContent />
-    </div>
+    </CommunityWebLayout>
   );
 }

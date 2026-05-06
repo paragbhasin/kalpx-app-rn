@@ -15,11 +15,27 @@ export type LoginResponse = {
   refresh_token?: string;
   access?: string;
   refresh?: string;
+  role?: string;
   user?: {
     id: number;
     email: string;
     first_name?: string;
     last_name?: string;
+    role?: string;
+    [key: string]: unknown;
+  };
+  profile?: {
+    user?: {
+      role?: string;
+      [key: string]: unknown;
+    };
+    [key: string]: unknown;
+  };
+  creator_profile?: {
+    user?: {
+      role?: string;
+      [key: string]: unknown;
+    };
     [key: string]: unknown;
   };
   message?: string;

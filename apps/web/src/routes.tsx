@@ -26,6 +26,9 @@ import { CommunityTopPage } from "./pages/community/CommunityTopPage";
 import { CommunityUserActivityPage } from "./pages/community/CommunityUserActivityPage";
 import { CommunityUserAgreementsPage } from "./pages/community/CommunityUserAgreementsPage";
 import { CreateCommunityPostPage } from "./pages/community/CreateCommunityPostPage";
+import { CreatorPostEditorPage } from "./pages/creator/CreatorPostEditorPage";
+import { CreatorPostsPage } from "./pages/creator/CreatorPostsPage";
+import { CreatorSimplePostEditorPage } from "./pages/creator/CreatorSimplePostEditorPage";
 import { CheckinPage } from "./pages/mitra/CheckinPage";
 import { CheckpointPage } from "./pages/mitra/CheckpointPage";
 import { DashboardPage } from "./pages/mitra/DashboardPage";
@@ -165,6 +168,46 @@ export function AppRoutes() {
       <Route
         path="/en/community/:postId"
         element={<CommunityPostDetailPage />}
+      />
+      <Route
+        path="/en/creator/posts"
+        element={
+          <RequiresAuth>
+            <CreatorPostsPage />
+          </RequiresAuth>
+        }
+      />
+      <Route
+        path="/en/creator/posts/new"
+        element={
+          <RequiresAuth>
+            <CreatorPostEditorPage />
+          </RequiresAuth>
+        }
+      />
+      <Route
+        path="/en/creator/posts/new-simple"
+        element={
+          <RequiresAuth>
+            <CreatorSimplePostEditorPage />
+          </RequiresAuth>
+        }
+      />
+      <Route
+        path="/en/creator/posts/:id/edit"
+        element={
+          <RequiresAuth>
+            <CreatorPostEditorPage />
+          </RequiresAuth>
+        }
+      />
+      <Route
+        path="/en/creator/posts/:id/edit-simple"
+        element={
+          <RequiresAuth>
+            <CreatorSimplePostEditorPage />
+          </RequiresAuth>
+        }
       />
       <Route
         path="/en/profile"

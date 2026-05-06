@@ -15,6 +15,8 @@ import type { LoginRequest, LoginResponse, SignupRegisterRequest, SignupStep1Req
 import { claimGuestJourney, invalidateDashboardViewCache } from '../engine/mitraApi';
 import { getRecaptchaToken } from '../lib/recaptcha';
 
+const AUTH_SNAPSHOT_KEY = 'kalpx_auth_snapshot';
+
 function shouldAttemptGuestJourneyClaim(): boolean {
   try {
     const raw = localStorage.getItem('kalpx_journey_state');
@@ -26,6 +28,43 @@ function shouldAttemptGuestJourneyClaim(): boolean {
     );
   } catch {
     return false;
+  }
+}
+
+function getPostLoginPath(
+  data: LoginResponse,
+  returnTo?: string,
+): string {
+  const role =
+    data.role ??
+    (typeof data.user?.role === 'string' ? data.user.role : undefined) ??
+    (typeof data.profile?.user?.role === 'string'
+      ? data.profile.user.role
+      : undefined) ??
+    (typeof data.creator_profile?.user?.role === 'string'
+      ? data.creator_profile.user.role
+      : undefined);
+
+  if (role === 'creator') {
+    return '/en/creator/posts';
+  }
+
+  return returnTo ?? '/en/mitra';
+}
+
+function persistAuthSnapshot(data: LoginResponse) {
+  try {
+    localStorage.setItem(
+      AUTH_SNAPSHOT_KEY,
+      JSON.stringify({
+        role: data.role,
+        user: data.user,
+        profile: data.profile,
+        creator_profile: data.creator_profile,
+      }),
+    );
+  } catch {
+    // no-op
   }
 }
 
@@ -47,6 +86,7 @@ export function useAuth() {
         }
 
         await storeTokens(webStorage, { accessToken, refreshToken });
+        persistAuthSnapshot(data);
         invalidateJourneyStatusCache();
         invalidateJourneyEntryViewCache();
         // Attempt guest journey claim (best-effort — failure must not break login)
@@ -55,7 +95,7 @@ export function useAuth() {
         }
         invalidateJourneyStatusCache();
         invalidateJourneyEntryViewCache();
-        navigate(returnTo ?? '/en/mitra');
+        navigate(getPostLoginPath(data, returnTo));
         return { success: true };
       } catch (err) {
         return { success: false, error: getApiErrorMessage(err, 'Login failed. Please check your credentials.') };
@@ -68,6 +108,11 @@ export function useAuth() {
     if (typeof window !== 'undefined') googleLogout(); // revoke Google OAuth session if active (no-op for email logins)
     await webStorage.removeItem(AUTH_KEYS.accessToken);
     await webStorage.removeItem(AUTH_KEYS.refreshToken);
+    try {
+      localStorage.removeItem(AUTH_SNAPSHOT_KEY);
+    } catch {
+      // no-op
+    }
     // Keep guestUUID — guest identity survives logout
     invalidateJourneyStatusCache();
     invalidateDashboardViewCache();
@@ -92,6 +137,7 @@ export function useAuth() {
         }
 
         await storeTokens(webStorage, { accessToken: at, refreshToken: rt });
+        persistAuthSnapshot(data);
         invalidateJourneyStatusCache();
         invalidateJourneyEntryViewCache();
         if (shouldAttemptGuestJourneyClaim()) {
@@ -99,7 +145,7 @@ export function useAuth() {
         }
         invalidateJourneyStatusCache();
         invalidateJourneyEntryViewCache();
-        navigate(returnTo ?? '/en/mitra');
+        navigate(getPostLoginPath(data, returnTo));
         return { success: true };
       } catch (err) {
         return { success: false, error: getApiErrorMessage(err, 'Google sign-in failed. Please try again.') };

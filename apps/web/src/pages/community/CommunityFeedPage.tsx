@@ -6,6 +6,7 @@ import { CommunityPostCard } from "../../components/community/CommunityPostCard"
 import {
   createCommunityComment,
   createCommunityPost,
+  downvotePost,
   getCommunityComments,
   getCommunityFeed,
   getCommunityPost,
@@ -35,6 +36,7 @@ export function CommunityFeedPage() {
         getCommunityComments(postId, { ...params, lang }),
       createComment: createCommunityComment,
       upvotePost,
+      downvotePost,
       createPost: createCommunityPost,
     }),
     [lang],
@@ -79,6 +81,9 @@ export function CommunityFeedPage() {
                 post={post}
                 onUpvote={(id) =>
                   void ctrl.upvotePost(id, `/en/community/${id}`)
+                }
+                onDownvote={(id) =>
+                  void ctrl.downvotePost(id, `/en/community/${id}`)
                 }
                 isUpvoting={ctrl.upvotingId === post.id}
               />

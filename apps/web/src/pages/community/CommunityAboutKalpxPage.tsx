@@ -3,7 +3,12 @@ import { CommunityWebLayout } from "../../components/community/CommunityWebLayou
 
 export function CommunityAboutKalpxPage() {
   return (
-    <CommunityWebLayout activeLabel="About KalpX" centerWidth={920}>
+    <CommunityWebLayout
+      activeLabel="About KalpX"
+      centerWidth={1400}
+      hideRightRail
+      hideDesktopTopBar
+    >
       <CommunityAboutKalpxContent />
     </CommunityWebLayout>
   );

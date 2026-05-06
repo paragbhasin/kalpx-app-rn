@@ -10,6 +10,7 @@ import { CommunityWebLayout } from "../../components/community/CommunityWebLayou
 import {
   createCommunityComment,
   createCommunityPost,
+  downvotePost,
   getCommunityComments,
   getCommunityPost,
   getPopularPosts,
@@ -34,6 +35,7 @@ export function CommunityPopularPage() {
         getCommunityComments(postId, { ...params, lang }),
       createComment: createCommunityComment,
       upvotePost,
+      downvotePost,
       createPost: createCommunityPost,
     }),
     [lang],
@@ -77,6 +79,9 @@ export function CommunityPopularPage() {
                 post={post}
                 onUpvote={(id) =>
                   void ctrl.upvotePost(id, `/en/community/${id}`)
+                }
+                onDownvote={(id) =>
+                  void ctrl.downvotePost(id, `/en/community/${id}`)
                 }
                 isUpvoting={ctrl.upvotingId === post.id}
               />

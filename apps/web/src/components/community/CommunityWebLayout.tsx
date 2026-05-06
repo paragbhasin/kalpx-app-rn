@@ -27,6 +27,8 @@ interface CommunityWebLayoutProps {
   centerWidth?: number;
   topBarRightSlot?: ReactNode;
   rightRailSlot?: ReactNode;
+  hideRightRail?: boolean;
+  hideDesktopTopBar?: boolean;
   showCreateButton?: boolean;
 }
 
@@ -62,6 +64,8 @@ export function CommunityWebLayout({
   centerWidth = 920,
   topBarRightSlot,
   rightRailSlot,
+  hideRightRail = false,
+  hideDesktopTopBar = false,
   showCreateButton = true,
 }: CommunityWebLayoutProps) {
   const navigate = useNavigate();
@@ -382,7 +386,9 @@ export function CommunityWebLayout({
           maxWidth: 1840,
           margin: "0 auto",
           display: "grid",
-          gridTemplateColumns: "200px minmax(0, 1fr) 340px",
+          gridTemplateColumns: hideRightRail
+            ? "200px minmax(0, 1fr)"
+            : "200px minmax(0, 1fr) 340px",
           gap: 0,
           alignItems: "start",
         }}
@@ -397,61 +403,63 @@ export function CommunityWebLayout({
           }}
         >
           <div style={{ padding: "10px 20px ", position: "relative" }}>
-            <div style={centerTopBarStyle}>
-              {isSearching ? (
-                <div style={desktopSearchInputWrapStyle}>
-                  <Search size={20} color="#6b7280" />
-                  <input
-                    ref={inputRef}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search communities, posts, users..."
-                    style={desktopSearchInputStyle}
-                  />
-                  {searchQuery.length > 0 ? (
+            {!hideDesktopTopBar ? (
+              <div style={centerTopBarStyle}>
+                {isSearching ? (
+                  <div style={desktopSearchInputWrapStyle}>
+                    <Search size={20} color="#6b7280" />
+                    <input
+                      ref={inputRef}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search communities, posts, users..."
+                      style={desktopSearchInputStyle}
+                    />
+                    {searchQuery.length > 0 ? (
+                      <button
+                        type="button"
+                        onClick={() => setSearchQuery("")}
+                        aria-label="Clear search"
+                        style={desktopSearchIconButtonStyle}
+                      >
+                        <XCircle size={18} color="#6b7280" />
+                      </button>
+                    ) : null}
                     <button
                       type="button"
-                      onClick={() => setSearchQuery("")}
-                      aria-label="Clear search"
-                      style={desktopSearchIconButtonStyle}
+                      onClick={closeSearch}
+                      style={desktopSearchCloseButtonStyle}
                     >
-                      <XCircle size={18} color="#6b7280" />
+                      Cancel
                     </button>
-                  ) : null}
+                  </div>
+                ) : (
                   <button
                     type="button"
-                    onClick={closeSearch}
-                    style={desktopSearchCloseButtonStyle}
+                    onClick={() => setIsSearching(true)}
+                    style={searchButtonStyle}
                   >
-                    Cancel
+                    <Search size={18} color="#25211b" />
+                    <span>Search ...</span>
                   </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setIsSearching(true)}
-                  style={searchButtonStyle}
-                >
-                  <Search size={18} color="#25211b" />
-                  <span>Search ...</span>
-                </button>
-              )}
-              {showCreateButton ? (
-                <button
-                  type="button"
-                  onClick={() => navigate("/en/community/new")}
-                  style={createButtonStyle}
-                >
-                  <div style={createIconBoxStyle}>
-                    <Plus size={18} />
-                  </div>
-                  <span>Create</span>
-                </button>
-              ) : null}
-              {topBarRightSlot}
-            </div>
+                )}
+                {showCreateButton ? (
+                  <button
+                    type="button"
+                    onClick={() => navigate("/en/community/new")}
+                    style={createButtonStyle}
+                  >
+                    <div style={createIconBoxStyle}>
+                      <Plus size={18} />
+                    </div>
+                    <span>Create</span>
+                  </button>
+                ) : null}
+                {topBarRightSlot}
+              </div>
+            ) : null}
 
-            {isSearching ? (
+            {!hideDesktopTopBar && isSearching ? (
               <div style={desktopSearchResultsPanelStyle}>
                 {searchLoading && searchQuery.length > 0 ? (
                   <div style={desktopSearchStatusStyle}>
@@ -541,7 +549,9 @@ export function CommunityWebLayout({
           </div>
         </main>
 
-        <div style={railWrapperStyle}>{rightRail}</div>
+        {!hideRightRail ? (
+          <div style={railWrapperStyle}>{rightRail}</div>
+        ) : null}
       </div>
     </div>
   );
@@ -757,7 +767,7 @@ function primaryNavItemStyle(active: boolean) {
     width: "100%",
     border: "none",
     borderRadius: 14,
-    background: active ? "#f5e5b3" : "transparent",
+    background: active ? "rgb(255, 249, 236)" : "transparent",
     color: "#1d1b17",
     textAlign: "left",
     padding: "14px 22px",

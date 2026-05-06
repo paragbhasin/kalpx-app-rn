@@ -28,97 +28,114 @@ const rules = [
 
 export function CommunityKalpxRulesContent() {
   return (
-    <div
-      style={{
-        maxWidth: 620,
-        margin: "0 auto",
-        padding: "10px 20px 40px",
-        display: "grid",
-        gap: 28,
-      }}
-    >
-      <div>
-        <h1
-          style={{
-            margin: "0 0 24px",
-            fontSize: 20,
-            fontWeight: 700,
-            color: "#1a1a1b",
-            fontFamily: "Georgia, serif",
-          }}
-        >
-          KalpX Community Rules
-        </h1>
+    <div style={pageWrapStyle}>
+      <div style={contentGridStyle}>
+        <section>
+          <h1 style={titleStyle}>KalpX Community Rules</h1>
 
-        {rules.map((rule) => (
-          <section key={rule.title} style={{ marginBottom: 28 }}>
-            <h2
-              style={{
-                margin: "0 0 8px",
-                fontSize: 16,
-                fontWeight: 700,
-                color: "#1a1a1b",
-                fontFamily: "Georgia, serif",
-              }}
-            >
-              {rule.title}
-            </h2>
-            <p
-              style={{
-                margin: 0,
-                fontSize: 15,
-                lineHeight: "24px",
-                color: "#4a4a4a",
-              }}
-            >
-              {rule.text}
-            </p>
-          </section>
-        ))}
-      </div>
+          <div style={rulesListStyle}>
+            {rules.map((rule) => (
+              <section key={rule.title} style={ruleSectionStyle}>
+                <h2 style={ruleTitleStyle}>{rule.title}</h2>
+                <p style={ruleTextStyle}>{rule.text}</p>
+              </section>
+            ))}
+          </div>
+        </section>
 
-      <div
-        style={{
-          border: "1px solid #ece5d8",
-          borderRadius: 20,
-          background: "#fdfaf2",
-          padding: 24,
-          textAlign: "center",
-        }}
-      >
-        <img
-          src={quoteImage}
-          alt="KalpX rules illustration"
-          style={{
-            width: "100%",
-            maxWidth: 340,
-            height: "auto",
-            objectFit: "contain",
-            marginBottom: 18,
-          }}
-        />
-        <p
-          style={{
-            margin: "0 0 8px",
-            fontSize: 24,
-            fontWeight: 700,
-            color: "#1a1a1b",
-            fontFamily: "Georgia, serif",
-          }}
-        >
-          "Dharmo Rakshati Rakshitah"
-        </p>
-        <p
-          style={{
-            margin: 0,
-            fontSize: 15,
-            lineHeight: "24px",
-            color: "#6b6257",
-          }}
-        >
-          Dharma protects those who protect it.
-        </p>
+        <aside style={quoteCardStyle}>
+          <img
+            src={quoteImage}
+            alt="KalpX rules illustration"
+            style={quoteImageStyle}
+          />
+          <p style={quoteStyle}>"Dharmo Rakshati Rakshitah"</p>
+          <p style={quoteSubtextStyle}>Dharma protects those who protect it.</p>
+        </aside>
       </div>
     </div>
   );
 }
+
+const pageWrapStyle = {
+  padding: "26px 22px 40px",
+} as const;
+
+const contentGridStyle = {
+  display: "grid",
+  gridTemplateColumns: "minmax(0, 1fr) 490px",
+  columnGap: 56,
+  alignItems: "start",
+} as const;
+
+const titleStyle = {
+  margin: "0 0 36px",
+  color: "#1f1f23",
+  fontSize: 25,
+  lineHeight: 1.02,
+  fontWeight: 700,
+  fontFamily: "Georgia, Times New Roman, serif",
+  letterSpacing: "-0.03em",
+} as const;
+
+const rulesListStyle = {
+  display: "grid",
+  gap: 50,
+  paddingRight: 12,
+} as const;
+
+const ruleSectionStyle = {
+  display: "grid",
+  gap: 10,
+} as const;
+
+const ruleTitleStyle = {
+  margin: 0,
+  color: "#303238",
+  fontSize: 18,
+  lineHeight: 1.25,
+  fontWeight: 700,
+  fontFamily: "Georgia, Times New Roman, serif",
+} as const;
+
+const ruleTextStyle = {
+  margin: 0,
+  color: "#4e5157",
+  fontSize: 14,
+  lineHeight: 1.55,
+  fontWeight: 400,
+} as const;
+
+const quoteCardStyle = {
+  marginTop: 120,
+  borderRadius: 28,
+  background: "#fbf6ea",
+  padding: "42px 34px 40px",
+  textAlign: "center",
+} as const;
+
+const quoteImageStyle = {
+  width: "100%",
+  maxWidth: 340,
+  height: "auto",
+  objectFit: "contain",
+  margin: "0 auto 26px",
+  display: "block",
+} as const;
+
+const quoteStyle = {
+  margin: "0 0 10px",
+  color: "#384056",
+  fontSize: 26,
+  lineHeight: 1.3,
+  fontStyle: "italic",
+  fontFamily: "Georgia, Times New Roman, serif",
+} as const;
+
+const quoteSubtextStyle = {
+  margin: 0,
+  color: "#687186",
+  fontSize: 18,
+  lineHeight: 1.5,
+  fontFamily: "Georgia, Times New Roman, serif",
+} as const;

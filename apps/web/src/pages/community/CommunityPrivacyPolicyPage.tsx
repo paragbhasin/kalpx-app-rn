@@ -25,7 +25,12 @@ const sections = [
 
 export function CommunityPrivacyPolicyPage() {
   return (
-    <CommunityWebLayout activeLabel="Privacy Policy" centerWidth={920}>
+    <CommunityWebLayout
+      activeLabel="Privacy Policy"
+      centerWidth={920}
+      hideRightRail
+      hideDesktopTopBar
+    >
       <div style={{ padding: "10px 20px 40px" }}>
         <h1
           style={{

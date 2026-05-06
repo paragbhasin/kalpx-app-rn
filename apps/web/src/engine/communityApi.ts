@@ -474,6 +474,16 @@ export async function upvotePost(postId: number | string): Promise<UpvoteRespons
   }
 }
 
+export async function downvotePost(postId: number | string): Promise<UpvoteResponse | null> {
+  try {
+    const res = await api.post(`posts/${encodeURIComponent(String(postId))}/downvote/`, {});
+    return res.data as UpvoteResponse;
+  } catch (err: any) {
+    console.warn('[communityApi] downvotePost failed:', err?.message);
+    return null;
+  }
+}
+
 export async function saveCommunityPost(postId: number | string): Promise<boolean> {
   try {
     await api.post(`posts/${encodeURIComponent(String(postId))}/save/`, {});

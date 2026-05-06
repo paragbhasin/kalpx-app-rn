@@ -14,6 +14,7 @@ import {
   createCommunityComment,
   createCommunityPost,
   deleteCommunityComment,
+  downvotePost,
   getCommunityComments,
   getCommunityFeed,
   getCommunityPost,
@@ -30,6 +31,7 @@ const communityApi = {
   getComments: getCommunityComments,
   createComment: createCommunityComment,
   upvotePost,
+  downvotePost,
   createPost: createCommunityPost,
 };
 
@@ -301,6 +303,9 @@ export function CommunityPostDetailPage() {
         detailMode
         isUpvoting={ctrl.upvotingId === post.id}
         onUpvote={() => void ctrl.upvotePost(post.id, `/en/community/${post.id}`)}
+        onDownvote={() =>
+          void ctrl.downvotePost(post.id, `/en/community/${post.id}`)
+        }
         onCommentClick={() => {
           openCommentMode();
         }}

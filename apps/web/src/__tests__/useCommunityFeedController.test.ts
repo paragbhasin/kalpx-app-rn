@@ -31,6 +31,7 @@ function makeApi(overrides?: Partial<CommunityApiAdapter>): CommunityApiAdapter 
     getComments: vi.fn().mockResolvedValue({ count: 1, next: null, results: [mockComment] }),
     createComment: vi.fn().mockResolvedValue(mockComment),
     upvotePost: vi.fn().mockResolvedValue({ detail: 'Upvoted' }),
+    downvotePost: vi.fn().mockResolvedValue({ detail: 'Downvoted' }),
     createPost: vi.fn().mockResolvedValue({ ...mockPost, id: 99 }),
     ...overrides,
   };
@@ -133,6 +134,83 @@ describe('upvotePost (auth-gated)', () => {
     });
     const updatedPost = result.current.posts.find((p) => p.id === 1);
     expect(updatedPost?.upvote_count).toBe(4); // was 3
+  });
+
+  it('toggles an existing upvote off', async () => {
+    const api = makeApi({
+      getFeed: vi.fn().mockResolvedValue({
+        count: 1,
+        next: null,
+        results: [{ ...mockPost, user_vote: 1 }],
+      }),
+    });
+    const { result } = renderHook(() => useCommunityFeedController({ api }));
+    await act(async () => {
+      await result.current.loadFeed();
+      await result.current.upvotePost(1);
+    });
+    const updatedPost = result.current.posts.find((p) => p.id === 1);
+    expect(updatedPost?.user_vote).toBe(0);
+    expect(updatedPost?.upvote_count).toBe(2);
+  });
+});
+
+describe('downvotePost (auth-gated)', () => {
+  it('calls API when authenticated', async () => {
+    const api = makeApi();
+    const isAuthenticated = vi.fn().mockResolvedValue(true);
+    const { result } = renderHook(() =>
+      useCommunityFeedController({ api, isAuthenticated }),
+    );
+    await act(async () => {
+      await result.current.loadFeed();
+      await result.current.downvotePost(1);
+    });
+    expect((api.downvotePost as any)).toHaveBeenCalledWith(1);
+  });
+
+  it('calls onRequireAuth when not authenticated', async () => {
+    const api = makeApi();
+    const isAuthenticated = vi.fn().mockResolvedValue(false);
+    const onRequireAuth = vi.fn();
+    const { result } = renderHook(() =>
+      useCommunityFeedController({ api, isAuthenticated, onRequireAuth }),
+    );
+    await act(async () => {
+      await result.current.downvotePost(1, '/en/community/1');
+    });
+    expect(onRequireAuth).toHaveBeenCalledWith('/en/community/1');
+    expect((api.downvotePost as any)).not.toHaveBeenCalled();
+  });
+
+  it('optimistically decrements upvote_count and sets user_vote', async () => {
+    const api = makeApi();
+    const { result } = renderHook(() => useCommunityFeedController({ api }));
+    await act(async () => {
+      await result.current.loadFeed();
+      await result.current.downvotePost(1);
+    });
+    const updatedPost = result.current.posts.find((p) => p.id === 1);
+    expect(updatedPost?.user_vote).toBe(-1);
+    expect(updatedPost?.upvote_count).toBe(2);
+  });
+
+  it('switches from upvote to downvote', async () => {
+    const api = makeApi({
+      getFeed: vi.fn().mockResolvedValue({
+        count: 1,
+        next: null,
+        results: [{ ...mockPost, user_vote: 1 }],
+      }),
+    });
+    const { result } = renderHook(() => useCommunityFeedController({ api }));
+    await act(async () => {
+      await result.current.loadFeed();
+      await result.current.downvotePost(1);
+    });
+    const updatedPost = result.current.posts.find((p) => p.id === 1);
+    expect(updatedPost?.user_vote).toBe(-1);
+    expect(updatedPost?.upvote_count).toBe(1);
   });
 });
 

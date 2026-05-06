@@ -16,6 +16,7 @@ import { CommunityFeedSkeleton } from "../../components/community/CommunityFeedS
 import { CommunityPostCard } from "../../components/community/CommunityPostCard";
 import { CommunityWebLayout } from "../../components/community/CommunityWebLayout";
 import {
+  downvotePost,
   followCommunity,
   getCommunityDetail,
   getCommunityPosts,
@@ -70,6 +71,43 @@ function getCommunityCreatedLabel(value: unknown) {
 
   const diffYears = Math.floor(diffMonths / 12);
   return `${diffYears} yr ago`;
+}
+
+function applyVoteChange<T extends { user_vote?: number | null; upvote_count?: number | null }>(
+  target: T,
+  voteType: "upvote" | "downvote",
+): T {
+  const currentVote = target.user_vote ?? 0;
+  let nextVote: -1 | 0 | 1 = 0;
+  let countChange = 0;
+
+  if (voteType === "upvote") {
+    if (currentVote === 1) {
+      nextVote = 0;
+      countChange = -1;
+    } else if (currentVote === -1) {
+      nextVote = 1;
+      countChange = 2;
+    } else {
+      nextVote = 1;
+      countChange = 1;
+    }
+  } else if (currentVote === -1) {
+    nextVote = 0;
+    countChange = 1;
+  } else if (currentVote === 1) {
+    nextVote = -1;
+    countChange = -2;
+  } else {
+    nextVote = -1;
+    countChange = -1;
+  }
+
+  return {
+    ...target,
+    user_vote: nextVote,
+    upvote_count: Math.max(0, Number(target.upvote_count ?? 0) + countChange),
+  };
 }
 
 export function CommunityDetailPage() {
@@ -285,11 +323,42 @@ export function CommunityDetailPage() {
       setPosts((current) =>
         current.map((post) =>
           String(post.id) === String(postId)
-            ? {
-                ...post,
-                upvote_count:
-                  Number(post.upvote_count ?? post.likes_count ?? 0) + 1,
-              }
+            ? applyVoteChange(
+                {
+                  ...post,
+                  upvote_count: Number(post.upvote_count ?? post.likes_count ?? 0),
+                },
+                "upvote",
+              )
+            : post,
+        ),
+      );
+    } finally {
+      setUpvotingId(null);
+    }
+  };
+
+  const handleDownvote = async (postId: number | string) => {
+    if (!slug) return;
+    if (!(await isAuthenticated(webStorage))) {
+      const to = encodeURIComponent(`/en/community/communities/${slug}`);
+      navigate(`/login?returnTo=${to}`);
+      return;
+    }
+
+    setUpvotingId(postId);
+    try {
+      await downvotePost(postId);
+      setPosts((current) =>
+        current.map((post) =>
+          String(post.id) === String(postId)
+            ? applyVoteChange(
+                {
+                  ...post,
+                  upvote_count: Number(post.upvote_count ?? post.likes_count ?? 0),
+                },
+                "downvote",
+              )
             : post,
         ),
       );
@@ -669,6 +738,7 @@ export function CommunityDetailPage() {
                   key={post.id}
                   post={post}
                   onUpvote={(id) => void handleUpvote(id)}
+                  onDownvote={(id) => void handleDownvote(id)}
                   isUpvoting={upvotingId === post.id}
                 />
               ))}

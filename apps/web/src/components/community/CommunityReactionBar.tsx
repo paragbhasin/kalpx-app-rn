@@ -13,6 +13,7 @@ interface CommunityReactionBarProps {
   shareCount?: number;
   isUpvoting?: boolean;
   onUpvote?: () => void;
+  onDownvote?: () => void;
   onComment?: () => void;
   onShare?: () => void;
   onAskQuestion?: () => void;
@@ -26,6 +27,7 @@ export function CommunityReactionBar({
   shareCount = 0,
   isUpvoting = false,
   onUpvote,
+  onDownvote,
   onComment,
   onShare,
   onAskQuestion,
@@ -65,30 +67,61 @@ export function CommunityReactionBar({
         width: "100%",
       }}
     >
-      <button
-        type="button"
-        onClick={wrapClick(onUpvote)}
-        disabled={isUpvoting}
+      <div
         style={{
           ...pillStyle,
-          cursor: onUpvote ? "pointer" : "default",
           opacity: isUpvoting ? 0.6 : 1,
           gap: 4,
           minWidth: 108,
           justifyContent: "space-between",
         }}
-        aria-label={`Upvote (${upvoteCount})`}
       >
-        <ArrowBigUp
-          size={iconSize}
-          color={userVote === 1 ? "var(--kalpx-cta)" : "#5d5650"}
-          fill={userVote === 1 ? "var(--kalpx-cta)" : "none"}
-        />
+        <button
+          type="button"
+          onClick={wrapClick(onUpvote)}
+          disabled={isUpvoting}
+          style={{
+            border: "none",
+            background: "transparent",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 0,
+            cursor: onUpvote ? "pointer" : "default",
+          }}
+          aria-label={`Upvote (${upvoteCount})`}
+        >
+          <ArrowBigUp
+            size={iconSize}
+            color={userVote === 1 ? "var(--kalpx-cta)" : "#5d5650"}
+            fill={userVote === 1 ? "var(--kalpx-cta)" : "none"}
+          />
+        </button>
         <span style={{ fontSize, fontWeight: 600, lineHeight: 1 }}>
           {upvoteCount}
         </span>
-        <ArrowBigDown size={iconSize} color="#5d5650" />
-      </button>
+        <button
+          type="button"
+          onClick={wrapClick(onDownvote)}
+          disabled={isUpvoting}
+          style={{
+            border: "none",
+            background: "transparent",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 0,
+            cursor: onDownvote ? "pointer" : "default",
+          }}
+          aria-label={`Downvote (${upvoteCount})`}
+        >
+          <ArrowBigDown
+            size={iconSize}
+            color={userVote === -1 ? "var(--kalpx-cta)" : "#5d5650"}
+            fill={userVote === -1 ? "var(--kalpx-cta)" : "none"}
+          />
+        </button>
+      </div>
 
       <button
         type="button"

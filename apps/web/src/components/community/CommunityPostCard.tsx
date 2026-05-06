@@ -207,6 +207,7 @@ async function loadFollowedCommunitiesCached(): Promise<any[]> {
 interface CommunityPostCardProps {
   post: CommunityPost;
   onUpvote?: (postId: number | string) => void;
+  onDownvote?: (postId: number | string) => void;
   isUpvoting?: boolean;
   commentCountOverride?: number;
   detailMode?: boolean;
@@ -335,6 +336,7 @@ function mapRunnerItem(
 export function CommunityPostCard({
   post,
   onUpvote,
+  onDownvote,
   isUpvoting = false,
   commentCountOverride,
   detailMode = false,
@@ -1391,6 +1393,10 @@ export function CommunityPostCard({
         onUpvote={(e?: any) => {
           e?.stopPropagation?.();
           onUpvote?.(post.id);
+        }}
+        onDownvote={(e?: any) => {
+          e?.stopPropagation?.();
+          onDownvote?.(post.id);
         }}
         onComment={() =>
           detailMode ? onCommentClick?.() : navigate(`/en/community/${post.id}`)

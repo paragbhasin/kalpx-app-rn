@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { CommunityPostCard } from "../../components/community/CommunityPostCard";
 import { CommunityWebLayout } from "../../components/community/CommunityWebLayout";
 import {
+  downvotePost,
   getCommunityActivity,
   getCommunityProfileDetails,
   getFollowedCommunities,
@@ -359,6 +360,9 @@ export function CommunityUserActivityPage() {
                 post={item as CommunityPost}
                 onUpvote={() => {
                   void upvotePost(item.id);
+                }}
+                onDownvote={() => {
+                  void downvotePost(item.id);
                 }}
                 showHiddenPost={activeTab === "hidden"}
                 onVisibilityChange={(postId, isHidden) => {

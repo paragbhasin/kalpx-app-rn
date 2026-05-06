@@ -30,7 +30,12 @@ const sections = [
 
 export function CommunityUserAgreementsPage() {
   return (
-    <CommunityWebLayout activeLabel="User Agreements" centerWidth={920}>
+    <CommunityWebLayout
+      activeLabel="User Agreements"
+      centerWidth={920}
+      hideRightRail
+      hideDesktopTopBar
+    >
       <div style={{ padding: "10px 20px 40px" }}>
         <div>
           <h1

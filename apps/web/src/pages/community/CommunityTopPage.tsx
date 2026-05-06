@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useNavigate } from "react-router-dom";
 import { CommunityPostCard } from "../../components/community/CommunityPostCard";
 import { CommunityWebLayout } from "../../components/community/CommunityWebLayout";
-import { getExplorePosts, upvotePost } from "../../engine/communityApi";
+import { downvotePost, getExplorePosts, upvotePost } from "../../engine/communityApi";
 import { WEB_ENV } from "../../lib/env";
 import { webStorage } from "../../lib/webStorage";
 
@@ -74,6 +74,43 @@ function mapExploreItemToPost(item: ExploreItem): CommunityPost {
 
 function isVideoAsset(value?: string | null): boolean {
   return !!value && /\.(mp4|mov|webm|m4v)$/i.test(value);
+}
+
+function applyVoteChange<T extends { user_vote?: number | null; upvote_count?: number | null }>(
+  target: T,
+  voteType: "upvote" | "downvote",
+): T {
+  const currentVote = target.user_vote ?? 0;
+  let nextVote: -1 | 0 | 1 = 0;
+  let countChange = 0;
+
+  if (voteType === "upvote") {
+    if (currentVote === 1) {
+      nextVote = 0;
+      countChange = -1;
+    } else if (currentVote === -1) {
+      nextVote = 1;
+      countChange = 2;
+    } else {
+      nextVote = 1;
+      countChange = 1;
+    }
+  } else if (currentVote === -1) {
+    nextVote = 0;
+    countChange = 1;
+  } else if (currentVote === 1) {
+    nextVote = -1;
+    countChange = -2;
+  } else {
+    nextVote = -1;
+    countChange = -1;
+  }
+
+  return {
+    ...target,
+    user_vote: nextVote,
+    upvote_count: Math.max(0, Number(target.upvote_count ?? 0) + countChange),
+  };
 }
 
 function ExploreTile({
@@ -185,7 +222,7 @@ export function CommunityTopPage() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    const mediaQuery = window.matchMedia("(min-width: 1280px)");
+    const mediaQuery = window.matchMedia("(min-width: 1024px)");
     const sync = () => setIsDesktop(mediaQuery.matches);
     sync();
     mediaQuery.addEventListener("change", sync);
@@ -222,10 +259,31 @@ export function CommunityTopPage() {
     () =>
       items.map((item) => ({
         ...item,
-        tileAspectRatio: isDesktop ? 4 / 5 : getAspectRatioValue(item) || 4 / 5,
+        tileAspectRatio: getAspectRatioValue(item) || 4 / 5,
       })),
-    [isDesktop, items],
+    [items],
   );
+
+  const masonryColumns = useMemo(() => {
+    const colCount = isDesktop ? 3 : 2;
+    const cols: any[][] = Array.from({ length: colCount }, () => []);
+    const colHeights = Array(colCount).fill(0);
+
+    gridItems.forEach((item) => {
+      // Find the column with the minimum estimated height
+      let minIdx = 0;
+      for (let i = 1; i < colCount; i++) {
+        if (colHeights[i] < colHeights[minIdx]) {
+          minIdx = i;
+        }
+      }
+      cols[minIdx].push(item);
+      // Estimate height based on aspect ratio (1/ratio)
+      colHeights[minIdx] += 1 / item.tileAspectRatio;
+    });
+
+    return cols;
+  }, [gridItems, isDesktop]);
 
   const posts = useMemo(() => items.map(mapExploreItemToPost), [items]);
 
@@ -250,8 +308,46 @@ export function CommunityTopPage() {
             ...item,
             community_post: {
               ...(item.community_post || {}),
-              ...post,
-              upvote_count: (post.upvote_count ?? post.likes_count ?? 0) + 1,
+              ...applyVoteChange(
+                {
+                  ...post,
+                  upvote_count: Number(post.upvote_count ?? post.likes_count ?? 0),
+                },
+                "upvote",
+              ),
+            },
+          };
+        }),
+      );
+    } finally {
+      setUpvotingId(null);
+    }
+  };
+
+  const handleDownvote = async (postId: number | string) => {
+    if (!(await isAuthenticated(webStorage))) {
+      const to = encodeURIComponent(`/en/community/top`);
+      navigate(`/login?returnTo=${to}`);
+      return;
+    }
+    setUpvotingId(postId);
+    try {
+      await downvotePost(postId);
+      setItems((prev) =>
+        prev.map((item) => {
+          const post = mapExploreItemToPost(item);
+          if (String(post.id) !== String(postId)) return item;
+          return {
+            ...item,
+            community_post: {
+              ...(item.community_post || {}),
+              ...applyVoteChange(
+                {
+                  ...post,
+                  upvote_count: Number(post.upvote_count ?? post.likes_count ?? 0),
+                },
+                "downvote",
+              ),
             },
           };
         }),
@@ -312,21 +408,31 @@ export function CommunityTopPage() {
           {!loading && !error && viewMode === "grid" && (
             <div
               style={{
-                display: "grid",
-                gridTemplateColumns: isDesktop
-                  ? "repeat(3, minmax(0, 1fr))"
-                  : "repeat(2, minmax(0, 1fr))",
+                display: "flex",
                 gap: isDesktop ? 18 : 12,
-                alignItems: "start",
+                alignItems: "flex-start",
               }}
             >
-              {gridItems.map((item) => (
-                <div key={String(item.id)}>
-                  <ExploreTile
-                    item={item}
-                    aspectRatio={item.tileAspectRatio}
-                    onClick={() => handleGridPostClick(item.id)}
-                  />
+              {masonryColumns.map((col, colIdx) => (
+                <div
+                  key={`col-${colIdx}`}
+                  style={{
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: isDesktop ? 18 : 12,
+                    minWidth: 0,
+                  }}
+                >
+                  {col.map((item: any) => (
+                    <div key={String(item.id)}>
+                      <ExploreTile
+                        item={item}
+                        aspectRatio={item.tileAspectRatio}
+                        onClick={() => handleGridPostClick(item.id)}
+                      />
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>
@@ -341,6 +447,7 @@ export function CommunityTopPage() {
                   <CommunityPostCard
                     post={post}
                     onUpvote={(id) => void handleUpvote(id)}
+                    onDownvote={(id) => void handleDownvote(id)}
                     isUpvoting={upvotingId === post.id}
                   />
                 </div>

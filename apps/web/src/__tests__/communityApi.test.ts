@@ -10,7 +10,7 @@ vi.mock('../lib/api', () => ({
   api: { get: vi.fn(), post: vi.fn() },
 }));
 
-import { getCommunityFeed, getCommunityPost, getCommunityComments, createCommunityComment, upvotePost } from '../engine/communityApi';
+import { getCommunityFeed, getCommunityPost, getCommunityComments, createCommunityComment, upvotePost, downvotePost } from '../engine/communityApi';
 import { api } from '../lib/api';
 
 const mockPost = {
@@ -57,10 +57,10 @@ describe('getCommunityFeed', () => {
     expect(result.count).toBe(0);
   });
 
-  it('calls posts/ endpoint with sort=hot', async () => {
+  it('calls personalized feed endpoint with sort=hot', async () => {
     (api.get as any).mockResolvedValueOnce({ data: { count: 0, next: null, results: [] } });
     await getCommunityFeed({ sort: 'hot' });
-    expect((api.get as any).mock.calls[0][0]).toBe('posts/');
+    expect((api.get as any).mock.calls[0][0]).toBe('posts/personalized_feed/');
     expect((api.get as any).mock.calls[0][1].params.sort).toBe('hot');
   });
 });
@@ -124,6 +124,21 @@ describe('upvotePost', () => {
   it('returns null on error (non-throwing)', async () => {
     (api.post as any).mockRejectedValueOnce(new Error('net'));
     const result = await upvotePost(1);
+    expect(result).toBeNull();
+  });
+});
+
+describe('downvotePost', () => {
+  it('calls posts/:id/downvote/', async () => {
+    (api.post as any).mockResolvedValueOnce({ data: { detail: 'Downvoted' } });
+    const result = await downvotePost(1);
+    expect((api.post as any).mock.calls[0][0]).toBe('posts/1/downvote/');
+    expect(result?.detail).toBe('Downvoted');
+  });
+
+  it('returns null on error (non-throwing)', async () => {
+    (api.post as any).mockRejectedValueOnce(new Error('net'));
+    const result = await downvotePost(1);
     expect(result).toBeNull();
   });
 });

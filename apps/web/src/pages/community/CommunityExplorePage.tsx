@@ -1,7 +1,7 @@
 import { isAuthenticated } from "@kalpx/auth";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { CommunityTopBar } from "../../components/community/CommunityTopBar";
+import { CommunityWebLayout } from "../../components/community/CommunityWebLayout";
 import {
   followCommunity,
   getFollowedCommunities,
@@ -10,25 +10,9 @@ import {
   type CommunityListItem,
 } from "../../engine/communityApi";
 import { webStorage } from "../../lib/webStorage";
+import { getConsistentCommunityStats } from "./communityVisuals";
 
 type ExploreTab = "all" | "followed";
-
-function getConsistentCommunityStats(communityIdOrSlug: string | number) {
-  const idStr = communityIdOrSlug.toString();
-  let hash = 0;
-  for (let index = 0; index < idStr.length; index += 1) {
-    hash = (hash << 5) - hash + idStr.charCodeAt(index);
-    hash |= 0;
-  }
-
-  const seed = Math.abs(hash);
-  const pseudoRandom = (seed * 9301 + 49297) % 233280;
-  const ratio = pseudoRandom / 233280;
-
-  return {
-    weeklyVisitors: `${Math.floor(ratio * 200) + 50}k`,
-  };
-}
 
 function formatWeeklyVisitors(community: CommunityListItem): string {
   if (community.weekly_visitors != null && community.weekly_visitors !== "") {
@@ -158,11 +142,8 @@ export function CommunityExplorePage() {
   };
 
   return (
-    <div style={{ minHeight: "100dvh", background: "var(--kalpx-bg)" }}>
-      <CommunityTopBar activeLabel="Explore" />
-
-      <div style={{ maxWidth: 620, margin: "0 auto", paddingBottom: 40 }}>
-        <div style={{ padding: "10px" }}>
+    <CommunityWebLayout activeLabel="Explore" centerWidth={920}>
+      <div style={{ padding: "10px" }}>
           <h1
             style={{
               margin: 0,
@@ -262,7 +243,25 @@ export function CommunityExplorePage() {
                           fontFamily: "Georgia, serif",
                         }}
                       >
-                        {community.name || "Community"}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (!community.slug) return;
+                            navigate(`/en/community/communities/${community.slug}`);
+                          }}
+                          style={{
+                            border: "none",
+                            background: "transparent",
+                            padding: 0,
+                            margin: 0,
+                            color: "inherit",
+                            font: "inherit",
+                            cursor: community.slug ? "pointer" : "default",
+                            textAlign: "left",
+                          }}
+                        >
+                          {community.name || "Community"}
+                        </button>
                       </div>
                       <div
                         style={{
@@ -334,9 +333,8 @@ export function CommunityExplorePage() {
               </button>
             </div>
           )}
-        </div>
       </div>
-    </div>
+    </CommunityWebLayout>
   );
 }
 

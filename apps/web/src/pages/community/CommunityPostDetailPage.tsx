@@ -9,10 +9,12 @@ import { CommunityCommentList } from "../../components/community/CommunityCommen
 import { CommunityErrorState } from "../../components/community/CommunityErrorState";
 import { CommunityPostCard } from "../../components/community/CommunityPostCard";
 import { CommunityTopBar } from "../../components/community/CommunityTopBar";
+import { CommunityWebLayout } from "../../components/community/CommunityWebLayout";
 import {
   createCommunityComment,
   createCommunityPost,
   deleteCommunityComment,
+  downvotePost,
   getCommunityComments,
   getCommunityFeed,
   getCommunityPost,
@@ -29,6 +31,7 @@ const communityApi = {
   getComments: getCommunityComments,
   createComment: createCommunityComment,
   upvotePost,
+  downvotePost,
   createPost: createCommunityPost,
 };
 
@@ -48,6 +51,19 @@ export function CommunityPostDetailPage() {
   const [commentActionLoadingId, setCommentActionLoadingId] = useState<
     number | string | null
   >(null);
+  const [isDesktop, setIsDesktop] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.matchMedia("(min-width: 1280px)").matches;
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mediaQuery = window.matchMedia("(min-width: 1280px)");
+    const sync = () => setIsDesktop(mediaQuery.matches);
+    sync();
+    mediaQuery.addEventListener("change", sync);
+    return () => mediaQuery.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -94,9 +110,9 @@ export function CommunityPostDetailPage() {
   useEffect(() => {
     if (!postId) return;
     void ctrl.loadPost(postId);
-    void ctrl.loadComments(postId, { is_question: isQuestionMode });
+    void ctrl.loadComments(postId);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [postId, isQuestionMode]);
+  }, [postId]);
 
   const post = ctrl.post;
   const totalCommentCount = countComments(ctrl.comments);
@@ -134,7 +150,7 @@ export function CommunityPostDetailPage() {
 
   const refreshComments = async () => {
     if (!postId) return;
-    await ctrl.loadComments(postId, { is_question: isQuestionMode });
+    await ctrl.loadComments(postId);
   };
 
   const handleSubmitComment = async (content: string) => {
@@ -240,6 +256,16 @@ export function CommunityPostDetailPage() {
   }
 
   if (ctrl.postError || !post) {
+    if (isDesktop) {
+      return (
+        <CommunityWebLayout activeLabel="Home" centerWidth={920}>
+          <div style={{ maxWidth: 920, margin: "0 auto", padding: "28px 16px" }}>
+            <CommunityErrorState message={ctrl.postError ?? "Post not found."} />
+          </div>
+        </CommunityWebLayout>
+      );
+    }
+
     return (
       <div style={{ minHeight: "100dvh", background: "var(--kalpx-bg)" }}>
         <CommunityTopBar />
@@ -250,119 +276,131 @@ export function CommunityPostDetailPage() {
     );
   }
 
+  const detailContent = (
+    <div style={{ padding: isDesktop ? "0 12px 24px" : 5 }}>
+      <button
+        type="button"
+        onClick={handleBack}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+          background: "none",
+          border: "none",
+          padding: isDesktop ? "4px 0 16px" : "6px 8px 10px",
+          color: "#2d1a0e",
+          fontSize: isDesktop ? 16 : 14,
+          fontWeight: 600,
+          cursor: "pointer",
+        }}
+      >
+        <ChevronLeft size={18} />
+        Back
+      </button>
+      <CommunityPostCard
+        post={post}
+        commentCountOverride={totalCommentCount}
+        detailMode
+        isUpvoting={ctrl.upvotingId === post.id}
+        onUpvote={() => void ctrl.upvotePost(post.id, `/en/community/${post.id}`)}
+        onDownvote={() =>
+          void ctrl.downvotePost(post.id, `/en/community/${post.id}`)
+        }
+        onCommentClick={() => {
+          openCommentMode();
+        }}
+        onAskQuestionClick={() => {
+          openQuestionMode();
+        }}
+      />
+
+      <div style={{ padding: isDesktop ? "8px 0 0" : "8px 14px 0" }}>
+        <div style={{ height: 1, background: "#efe7d8", marginBottom: 22 }} />
+      </div>
+
+      <div style={{ padding: isDesktop ? "0 0 24px" : "0 14px 24px" }}>
+        <p
+          style={{
+            fontSize: 16,
+            fontWeight: 700,
+            color: "var(--kalpx-text)",
+            marginBottom: 18,
+          }}
+        >
+          {isQuestionMode
+            ? `Questions (${totalCommentCount})`
+            : `Comments (${totalCommentCount})`}
+        </p>
+
+        <div id="community-comment-composer" style={{ marginBottom: 24 }}>
+          <CommunityCommentComposer
+            postId={post.id}
+            isAuthenticated={authed}
+            submitting={commentSubmitting}
+            error={commentError}
+            placeholder={
+              isQuestionMode
+                ? "Ask a question..."
+                : "Join the conversation here...."
+            }
+            submitLabel="Post"
+            leadingAvatarLabel="K"
+            onSubmit={(content) => {
+              void handleSubmitComment(content);
+            }}
+            onRequireAuth={requireAuth}
+          />
+        </div>
+
+        <CommunityCommentList
+          comments={ctrl.comments}
+          loading={ctrl.commentsLoading}
+          currentUserId={currentUserId}
+          currentUserEmail={currentUserEmail}
+          currentUsername={currentUsername}
+          isAuthenticated={authed}
+          actionLoadingId={commentActionLoadingId}
+          onReply={(comment) => {
+            setReplyingTo(comment);
+            if (typeof window !== "undefined") {
+              const composer = document.getElementById(
+                "community-comment-composer",
+              );
+              composer?.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+            }
+          }}
+          onEdit={handleEditComment}
+          onDelete={handleDeleteComment}
+          onReport={handleReportComment}
+          onRequireAuth={requireAuth}
+          replyingToId={replyingTo?.id ?? null}
+          replySubmitting={commentSubmitting}
+          replyError={commentError}
+          onCancelReply={() => setReplyingTo(null)}
+          onSubmitReply={(content) => {
+            void handleSubmitComment(content);
+          }}
+        />
+      </div>
+    </div>
+  );
+
+  if (isDesktop) {
+    return (
+      <CommunityWebLayout activeLabel="Home" centerWidth={920}>
+        <div style={{ maxWidth: 920, margin: "0 auto" }}>{detailContent}</div>
+      </CommunityWebLayout>
+    );
+  }
+
   return (
     <div style={{ minHeight: "100dvh", background: "var(--kalpx-bg)" }}>
       <CommunityTopBar />
       <div style={{ maxWidth: 480, margin: "0 auto" }}>
-        <div style={{ padding: 5 }}>
-          <button
-            onClick={handleBack}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              background: "none",
-              border: "none",
-              padding: "6px 8px 10px",
-              color: "#2d1a0e",
-              fontSize: 14,
-              fontWeight: 600,
-              cursor: "pointer",
-            }}
-          >
-            <ChevronLeft size={18} />
-            Back
-          </button>
-          <CommunityPostCard
-            post={post}
-            commentCountOverride={totalCommentCount}
-            detailMode
-            isUpvoting={ctrl.upvotingId === post.id}
-            onUpvote={() =>
-              void ctrl.upvotePost(post.id, `/en/community/${post.id}`)
-            }
-            onCommentClick={() => {
-              openCommentMode();
-            }}
-            onAskQuestionClick={() => {
-              openQuestionMode();
-            }}
-          />
-
-          <div style={{ padding: "8px 14px 0" }}>
-            <div
-              style={{ height: 1, background: "#efe7d8", marginBottom: 22 }}
-            />
-          </div>
-
-          <div style={{ padding: "0 14px 24px" }}>
-            <p
-              style={{
-                fontSize: 16,
-                fontWeight: 700,
-                color: "var(--kalpx-text)",
-                marginBottom: 18,
-              }}
-            >
-              {isQuestionMode
-                ? `Questions (${totalCommentCount})`
-                : `Comments (${totalCommentCount})`}
-            </p>
-
-            <div id="community-comment-composer" style={{ marginBottom: 24 }}>
-              <CommunityCommentComposer
-                postId={post.id}
-                isAuthenticated={authed}
-                submitting={commentSubmitting}
-                error={commentError}
-                placeholder={
-                  isQuestionMode
-                    ? "Ask a question..."
-                    : "Join the conversation here...."
-                }
-                submitLabel="Post"
-                leadingAvatarLabel="K"
-                onSubmit={(content) => {
-                  void handleSubmitComment(content);
-                }}
-                onRequireAuth={requireAuth}
-              />
-            </div>
-
-            <CommunityCommentList
-              comments={ctrl.comments}
-              loading={ctrl.commentsLoading}
-              currentUserId={currentUserId}
-              currentUserEmail={currentUserEmail}
-              currentUsername={currentUsername}
-              isAuthenticated={authed}
-              actionLoadingId={commentActionLoadingId}
-              onReply={(comment) => {
-                setReplyingTo(comment);
-                if (typeof window !== "undefined") {
-                  const composer = document.getElementById(
-                    "community-comment-composer",
-                  );
-                  composer?.scrollIntoView({
-                    behavior: "smooth",
-                    block: "center",
-                  });
-                }
-              }}
-              onEdit={handleEditComment}
-              onDelete={handleDeleteComment}
-              onReport={handleReportComment}
-              onRequireAuth={requireAuth}
-              replyingToId={replyingTo?.id ?? null}
-              replySubmitting={commentSubmitting}
-              replyError={commentError}
-              onCancelReply={() => setReplyingTo(null)}
-              onSubmitReply={(content) => {
-                void handleSubmitComment(content);
-              }}
-            />
-          </div>
-        </div>
+        {detailContent}
       </div>
     </div>
   );

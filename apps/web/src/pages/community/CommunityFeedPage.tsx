@@ -6,6 +6,7 @@ import { CommunityPostCard } from "../../components/community/CommunityPostCard"
 import {
   createCommunityComment,
   createCommunityPost,
+  downvotePost,
   getCommunityComments,
   getCommunityFeed,
   getCommunityPost,
@@ -16,7 +17,7 @@ import { webStorage } from "../../lib/webStorage";
 import { CommunityEmptyState } from "../../components/community/CommunityEmptyState";
 import { CommunityErrorState } from "../../components/community/CommunityErrorState";
 import { CommunityFeedSkeleton } from "../../components/community/CommunityFeedSkeleton";
-import { CommunityTopBar } from "../../components/community/CommunityTopBar";
+import { CommunityWebLayout } from "../../components/community/CommunityWebLayout";
 
 export function CommunityFeedPage() {
   const navigate = useNavigate();
@@ -35,6 +36,7 @@ export function CommunityFeedPage() {
         getCommunityComments(postId, { ...params, lang }),
       createComment: createCommunityComment,
       upvotePost,
+      downvotePost,
       createPost: createCommunityPost,
     }),
     [lang],
@@ -57,10 +59,8 @@ export function CommunityFeedPage() {
   }, [ctrl, lang]);
 
   return (
-    <div style={{ minHeight: "100dvh", background: "var(--kalpx-bg)" }}>
-      <CommunityTopBar />
-      <div style={{ maxWidth: 620, margin: "0 auto", paddingBottom: 40 }}>
-        <div style={{ padding: "5px" }}>
+    <CommunityWebLayout activeLabel="Home" centerWidth={920}>
+      <div style={{ padding: "5px" }}>
           {ctrl.feedLoading && <CommunityFeedSkeleton />}
 
           {!ctrl.feedLoading && ctrl.feedError && (
@@ -81,6 +81,9 @@ export function CommunityFeedPage() {
                 post={post}
                 onUpvote={(id) =>
                   void ctrl.upvotePost(id, `/en/community/${id}`)
+                }
+                onDownvote={(id) =>
+                  void ctrl.downvotePost(id, `/en/community/${id}`)
                 }
                 isUpvoting={ctrl.upvotingId === post.id}
               />
@@ -106,8 +109,7 @@ export function CommunityFeedPage() {
               </button>
             </div>
           )}
-        </div>
       </div>
-    </div>
+    </CommunityWebLayout>
   );
 }

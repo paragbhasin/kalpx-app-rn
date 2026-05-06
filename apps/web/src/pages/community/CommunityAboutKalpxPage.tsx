@@ -1,11 +1,15 @@
 import { CommunityAboutKalpxContent } from "../../components/community/CommunityAboutKalpxContent";
-import { CommunityTopBar } from "../../components/community/CommunityTopBar";
+import { CommunityWebLayout } from "../../components/community/CommunityWebLayout";
 
 export function CommunityAboutKalpxPage() {
   return (
-    <div style={{ minHeight: "100dvh", background: "#fff" }}>
-      <CommunityTopBar activeLabel="Explore" />
+    <CommunityWebLayout
+      activeLabel="About KalpX"
+      centerWidth={1400}
+      hideRightRail
+      hideDesktopTopBar
+    >
       <CommunityAboutKalpxContent />
-    </div>
+    </CommunityWebLayout>
   );
 }

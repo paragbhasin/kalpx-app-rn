@@ -3,8 +3,9 @@ import type { CommunityPost } from "@kalpx/types";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CommunityPostCard } from "../../components/community/CommunityPostCard";
-import { CommunityTopBar } from "../../components/community/CommunityTopBar";
+import { CommunityWebLayout } from "../../components/community/CommunityWebLayout";
 import {
+  downvotePost,
   getCommunityActivity,
   getCommunityProfileDetails,
   getFollowedCommunities,
@@ -158,9 +159,8 @@ export function CommunityUserActivityPage() {
   );
 
   return (
-    <div style={{ minHeight: "100dvh", background: "#fff" }}>
-      <CommunityTopBar activeLabel="Your Activity" />
-      <div style={{ maxWidth: 620, margin: "0 auto", padding: "10px 0 24px" }}>
+    <CommunityWebLayout activeLabel="Your Activity" centerWidth={920}>
+      <div style={{ padding: "10px 0 24px" }}>
         <div style={{ padding: "0 16px", marginBottom: 8 }}>
           <div
             style={{
@@ -361,6 +361,9 @@ export function CommunityUserActivityPage() {
                 onUpvote={() => {
                   void upvotePost(item.id);
                 }}
+                onDownvote={() => {
+                  void downvotePost(item.id);
+                }}
                 showHiddenPost={activeTab === "hidden"}
                 onVisibilityChange={(postId, isHidden) => {
                   if (activeTab !== "hidden" || isHidden) return;
@@ -386,7 +389,7 @@ export function CommunityUserActivityPage() {
           ))
         )}
       </div>
-    </div>
+    </CommunityWebLayout>
   );
 }
 

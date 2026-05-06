@@ -95,7 +95,7 @@ function CommentItem({
   const [draft, setDraft] = useState(text);
   const creator = comment.creator ?? comment.author ?? null;
   const creatorId = creator?.id ?? null;
-  const creatorEmail = creator?.email ?? null;
+  const creatorEmail = (creator as any)?.email ?? null;
   const creatorUsername = creator?.username ?? null;
   const normalizedCurrentEmail = currentUserEmail?.trim().toLowerCase() ?? null;
   const normalizedCreatorEmail = creatorEmail?.trim().toLowerCase() ?? null;

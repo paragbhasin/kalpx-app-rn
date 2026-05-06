@@ -6,10 +6,11 @@ import { CommunityEmptyState } from "../../components/community/CommunityEmptySt
 import { CommunityErrorState } from "../../components/community/CommunityErrorState";
 import { CommunityFeedSkeleton } from "../../components/community/CommunityFeedSkeleton";
 import { CommunityPostCard } from "../../components/community/CommunityPostCard";
-import { CommunityTopBar } from "../../components/community/CommunityTopBar";
+import { CommunityWebLayout } from "../../components/community/CommunityWebLayout";
 import {
   createCommunityComment,
   createCommunityPost,
+  downvotePost,
   getCommunityComments,
   getCommunityPost,
   getPopularPosts,
@@ -34,6 +35,7 @@ export function CommunityPopularPage() {
         getCommunityComments(postId, { ...params, lang }),
       createComment: createCommunityComment,
       upvotePost,
+      downvotePost,
       createPost: createCommunityPost,
     }),
     [lang],
@@ -55,10 +57,8 @@ export function CommunityPopularPage() {
   }, [ctrl, lang]);
 
   return (
-    <div style={{ minHeight: "100dvh", background: "var(--kalpx-bg)" }}>
-      <CommunityTopBar activeLabel="Popular" />
-      <div style={{ maxWidth: 620, margin: "0 auto", paddingBottom: 40 }}>
-        <div style={{ padding: "5px" }}>
+    <CommunityWebLayout activeLabel="Popular" centerWidth={920}>
+      <div style={{ padding: "5px" }}>
           {ctrl.feedLoading && <CommunityFeedSkeleton />}
 
           {!ctrl.feedLoading && ctrl.feedError && (
@@ -79,6 +79,9 @@ export function CommunityPopularPage() {
                 post={post}
                 onUpvote={(id) =>
                   void ctrl.upvotePost(id, `/en/community/${id}`)
+                }
+                onDownvote={(id) =>
+                  void ctrl.downvotePost(id, `/en/community/${id}`)
                 }
                 isUpvoting={ctrl.upvotingId === post.id}
               />
@@ -103,8 +106,7 @@ export function CommunityPopularPage() {
               </button>
             </div>
           )}
-        </div>
       </div>
-    </div>
+    </CommunityWebLayout>
   );
 }

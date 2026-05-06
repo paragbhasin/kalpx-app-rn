@@ -13,6 +13,7 @@ interface CommunityReactionBarProps {
   shareCount?: number;
   isUpvoting?: boolean;
   onUpvote?: () => void;
+  onDownvote?: () => void;
   onComment?: () => void;
   onShare?: () => void;
   onAskQuestion?: () => void;
@@ -26,6 +27,7 @@ export function CommunityReactionBar({
   shareCount = 0,
   isUpvoting = false,
   onUpvote,
+  onDownvote,
   onComment,
   onShare,
   onAskQuestion,
@@ -37,7 +39,7 @@ export function CommunityReactionBar({
   const pillStyle: React.CSSProperties = {
     borderRadius: 8,
     border: "1px solid #d7d1c7",
-    padding: 5,
+    padding: "8px 14px",
     background: "#fff",
     display: "inline-flex",
     alignItems: "center",
@@ -65,40 +67,70 @@ export function CommunityReactionBar({
         width: "100%",
       }}
     >
-      <button
-        onClick={wrapClick(onUpvote)}
-        disabled={isUpvoting}
+      <div
         style={{
           ...pillStyle,
-          cursor: onUpvote ? "pointer" : "default",
           opacity: isUpvoting ? 0.6 : 1,
           gap: 4,
-
-          minWidth: 0,
+          minWidth: 108,
           justifyContent: "space-between",
-          padding: "8px",
         }}
-        aria-label={`Upvote (${upvoteCount})`}
       >
-        <ArrowBigUp
-          size={iconSize}
-          color={userVote === 1 ? "var(--kalpx-cta)" : "#5d5650"}
-          fill={userVote === 1 ? "var(--kalpx-cta)" : "none"}
-        />
+        <button
+          type="button"
+          onClick={wrapClick(onUpvote)}
+          disabled={isUpvoting}
+          style={{
+            border: "none",
+            background: "transparent",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 0,
+            cursor: onUpvote ? "pointer" : "default",
+          }}
+          aria-label={`Upvote (${upvoteCount})`}
+        >
+          <ArrowBigUp
+            size={iconSize}
+            color={userVote === 1 ? "var(--kalpx-cta)" : "#5d5650"}
+            fill={userVote === 1 ? "var(--kalpx-cta)" : "none"}
+          />
+        </button>
         <span style={{ fontSize, fontWeight: 600, lineHeight: 1 }}>
           {upvoteCount}
         </span>
-        <ArrowBigDown size={iconSize} color="#5d5650" />
-      </button>
+        <button
+          type="button"
+          onClick={wrapClick(onDownvote)}
+          disabled={isUpvoting}
+          style={{
+            border: "none",
+            background: "transparent",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 0,
+            cursor: onDownvote ? "pointer" : "default",
+          }}
+          aria-label={`Downvote (${upvoteCount})`}
+        >
+          <ArrowBigDown
+            size={iconSize}
+            color={userVote === -1 ? "var(--kalpx-cta)" : "#5d5650"}
+            fill={userVote === -1 ? "var(--kalpx-cta)" : "none"}
+          />
+        </button>
+      </div>
 
       <button
+        type="button"
         onClick={wrapClick(onComment)}
         style={{
           ...pillStyle,
           cursor: onComment ? "pointer" : "default",
           gap: 8,
-          width: "13%",
-          minWidth: 0,
+          minWidth: 98,
         }}
         aria-label={`Comments (${commentCount})`}
       >
@@ -109,13 +141,13 @@ export function CommunityReactionBar({
       </button>
 
       <button
+        type="button"
         onClick={wrapClick(onShare)}
         style={{
           ...pillStyle,
           cursor: onShare ? "pointer" : "default",
           gap: 8,
-          width: "13%",
-          minWidth: 0,
+          minWidth: 98,
         }}
         aria-label={`Shares (${shareCount})`}
       >
@@ -126,13 +158,13 @@ export function CommunityReactionBar({
       </button>
 
       <button
+        type="button"
         onClick={wrapClick(onAskQuestion)}
         style={{
           ...pillStyle,
           cursor: onAskQuestion ? "pointer" : "default",
           gap: 8,
-          width: "40%",
-          minWidth: 0,
+          minWidth: "fit-content",
           justifyContent: "flex-start",
         }}
         aria-label="Ask question"

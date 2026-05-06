@@ -4,8 +4,8 @@ import { Image as ImageIcon, LayoutGrid, List } from "lucide-react";
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { useNavigate } from "react-router-dom";
 import { CommunityPostCard } from "../../components/community/CommunityPostCard";
-import { CommunityTopBar } from "../../components/community/CommunityTopBar";
-import { getExplorePosts, upvotePost } from "../../engine/communityApi";
+import { CommunityWebLayout } from "../../components/community/CommunityWebLayout";
+import { downvotePost, getExplorePosts, upvotePost } from "../../engine/communityApi";
 import { WEB_ENV } from "../../lib/env";
 import { webStorage } from "../../lib/webStorage";
 
@@ -74,6 +74,43 @@ function mapExploreItemToPost(item: ExploreItem): CommunityPost {
 
 function isVideoAsset(value?: string | null): boolean {
   return !!value && /\.(mp4|mov|webm|m4v)$/i.test(value);
+}
+
+function applyVoteChange<T extends { user_vote?: number | null; upvote_count?: number | null }>(
+  target: T,
+  voteType: "upvote" | "downvote",
+): T {
+  const currentVote = target.user_vote ?? 0;
+  let nextVote: -1 | 0 | 1 = 0;
+  let countChange = 0;
+
+  if (voteType === "upvote") {
+    if (currentVote === 1) {
+      nextVote = 0;
+      countChange = -1;
+    } else if (currentVote === -1) {
+      nextVote = 1;
+      countChange = 2;
+    } else {
+      nextVote = 1;
+      countChange = 1;
+    }
+  } else if (currentVote === -1) {
+    nextVote = 0;
+    countChange = 1;
+  } else if (currentVote === 1) {
+    nextVote = -1;
+    countChange = -2;
+  } else {
+    nextVote = -1;
+    countChange = -1;
+  }
+
+  return {
+    ...target,
+    user_vote: nextVote,
+    upvote_count: Math.max(0, Number(target.upvote_count ?? 0) + countChange),
+  };
 }
 
 function ExploreTile({
@@ -169,9 +206,7 @@ function ExploreTile({
 export function CommunityTopPage() {
   const navigate = useNavigate();
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
-  const [selectedPostId, setSelectedPostId] = useState<number | string | null>(
-    null,
-  );
+  const [isDesktop, setIsDesktop] = useState(false);
   const [items, setItems] = useState<ExploreItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -184,6 +219,15 @@ export function CommunityTopPage() {
     typeof window !== "undefined"
       ? window.location.pathname.split("/")[1] || "en"
       : "en";
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mediaQuery = window.matchMedia("(min-width: 1024px)");
+    const sync = () => setIsDesktop(mediaQuery.matches);
+    sync();
+    mediaQuery.addEventListener("change", sync);
+    return () => mediaQuery.removeEventListener("change", sync);
+  }, []);
 
   const fetchPage = async (pageNumber: number, reset = false) => {
     try {
@@ -211,46 +255,40 @@ export function CommunityTopPage() {
     void fetchPage(1, true);
   }, [lang]);
 
-  useEffect(() => {
-    if (viewMode !== "list" || selectedPostId == null || loading || !!error)
-      return;
+  const gridItems = useMemo(
+    () =>
+      items.map((item) => ({
+        ...item,
+        tileAspectRatio: getAspectRatioValue(item) || 4 / 5,
+      })),
+    [items],
+  );
 
-    const frame = window.requestAnimationFrame(() => {
-      const element = document.getElementById(
-        `community-top-post-${String(selectedPostId)}`,
-      );
-      element?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+  const masonryColumns = useMemo(() => {
+    const colCount = isDesktop ? 3 : 2;
+    const cols: any[][] = Array.from({ length: colCount }, () => []);
+    const colHeights = Array(colCount).fill(0);
 
-    return () => window.cancelAnimationFrame(frame);
-  }, [error, loading, selectedPostId, viewMode]);
-
-  const gridColumns = useMemo(() => {
-    const left: Array<ExploreItem & { tileAspectRatio: number }> = [];
-    const right: Array<ExploreItem & { tileAspectRatio: number }> = [];
-    let leftHeight = 0;
-    let rightHeight = 0;
-
-    items.forEach((item) => {
-      const aspect = getAspectRatioValue(item) || 4 / 5;
-      const payload = { ...item, tileAspectRatio: aspect };
-      if (leftHeight <= rightHeight) {
-        left.push(payload);
-        leftHeight += 1 / aspect;
-      } else {
-        right.push(payload);
-        rightHeight += 1 / aspect;
+    gridItems.forEach((item) => {
+      // Find the column with the minimum estimated height
+      let minIdx = 0;
+      for (let i = 1; i < colCount; i++) {
+        if (colHeights[i] < colHeights[minIdx]) {
+          minIdx = i;
+        }
       }
+      cols[minIdx].push(item);
+      // Estimate height based on aspect ratio (1/ratio)
+      colHeights[minIdx] += 1 / item.tileAspectRatio;
     });
 
-    return { left, right };
-  }, [items]);
+    return cols;
+  }, [gridItems, isDesktop]);
 
   const posts = useMemo(() => items.map(mapExploreItemToPost), [items]);
 
   const handleGridPostClick = (postId: number | string) => {
-    setSelectedPostId(postId);
-    setViewMode("list");
+    navigate(`/en/community/${postId}`);
   };
 
   const handleUpvote = async (postId: number | string) => {
@@ -270,8 +308,46 @@ export function CommunityTopPage() {
             ...item,
             community_post: {
               ...(item.community_post || {}),
-              ...post,
-              upvote_count: (post.upvote_count ?? post.likes_count ?? 0) + 1,
+              ...applyVoteChange(
+                {
+                  ...post,
+                  upvote_count: Number(post.upvote_count ?? post.likes_count ?? 0),
+                },
+                "upvote",
+              ),
+            },
+          };
+        }),
+      );
+    } finally {
+      setUpvotingId(null);
+    }
+  };
+
+  const handleDownvote = async (postId: number | string) => {
+    if (!(await isAuthenticated(webStorage))) {
+      const to = encodeURIComponent(`/en/community/top`);
+      navigate(`/login?returnTo=${to}`);
+      return;
+    }
+    setUpvotingId(postId);
+    try {
+      await downvotePost(postId);
+      setItems((prev) =>
+        prev.map((item) => {
+          const post = mapExploreItemToPost(item);
+          if (String(post.id) !== String(postId)) return item;
+          return {
+            ...item,
+            community_post: {
+              ...(item.community_post || {}),
+              ...applyVoteChange(
+                {
+                  ...post,
+                  upvote_count: Number(post.upvote_count ?? post.likes_count ?? 0),
+                },
+                "downvote",
+              ),
             },
           };
         }),
@@ -282,52 +358,43 @@ export function CommunityTopPage() {
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100dvh",
-        background: "var(--kalpx-bg)",
-        overflowX: "hidden",
-      }}
-    >
-      <CommunityTopBar
-        activeLabel="Top"
-        rightSlot={
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-
-              borderRadius: 6,
-              background: "#F7F0DD",
+    <CommunityWebLayout
+      activeLabel="Top"
+      centerWidth={920}
+      topBarRightSlot={
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            borderRadius: 6,
+            background: "#F7F0DD",
+          }}
+        >
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setViewMode("grid");
             }}
+            aria-label="Grid view"
+            style={toggleButtonStyle(viewMode === "grid")}
           >
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setViewMode("grid");
-              }}
-              aria-label="Grid view"
-              style={toggleButtonStyle(viewMode === "grid")}
-            >
-              <LayoutGrid size={19} />
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setViewMode("list");
-              }}
-              aria-label="List view"
-              style={toggleButtonStyle(viewMode === "list")}
-            >
-              <List size={24} />
-            </button>
-          </div>
-        }
-      />
-
-      <div style={{ maxWidth: 620, margin: "0 auto", paddingBottom: 40 }}>
-        <div style={{ padding: "12px 10px 0" }}>
+            <LayoutGrid size={19} />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setViewMode("list");
+            }}
+            aria-label="List view"
+            style={toggleButtonStyle(viewMode === "list")}
+          >
+            <List size={24} />
+          </button>
+        </div>
+      }
+    >
+      <div style={{ padding: "12px 10px 0" }}>
           {loading && (
             <div style={{ padding: "24px 8px", color: "#6f655a" }}>
               Loading top posts...
@@ -342,35 +409,32 @@ export function CommunityTopPage() {
             <div
               style={{
                 display: "flex",
-                justifyContent: "space-between",
+                gap: isDesktop ? 18 : 12,
                 alignItems: "flex-start",
-                gap: 6,
-                width: "100%",
-                overflow: "hidden",
               }}
             >
-              <div style={{ width: `calc(50% - 3px)` }}>
-                {gridColumns.left.map((item) => (
-                  <div key={String(item.id)} style={{ marginBottom: 12 }}>
-                    <ExploreTile
-                      item={item}
-                      aspectRatio={item.tileAspectRatio}
-                      onClick={() => handleGridPostClick(item.id)}
-                    />
-                  </div>
-                ))}
-              </div>
-              <div style={{ width: `calc(50% - 3px)` }}>
-                {gridColumns.right.map((item) => (
-                  <div key={String(item.id)} style={{ marginBottom: 12 }}>
-                    <ExploreTile
-                      item={item}
-                      aspectRatio={item.tileAspectRatio}
-                      onClick={() => handleGridPostClick(item.id)}
-                    />
-                  </div>
-                ))}
-              </div>
+              {masonryColumns.map((col, colIdx) => (
+                <div
+                  key={`col-${colIdx}`}
+                  style={{
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: isDesktop ? 18 : 12,
+                    minWidth: 0,
+                  }}
+                >
+                  {col.map((item: any) => (
+                    <div key={String(item.id)}>
+                      <ExploreTile
+                        item={item}
+                        aspectRatio={item.tileAspectRatio}
+                        onClick={() => handleGridPostClick(item.id)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              ))}
             </div>
           )}
 
@@ -383,6 +447,7 @@ export function CommunityTopPage() {
                   <CommunityPostCard
                     post={post}
                     onUpvote={(id) => void handleUpvote(id)}
+                    onDownvote={(id) => void handleDownvote(id)}
                     isUpvoting={upvotingId === post.id}
                   />
                 </div>
@@ -408,9 +473,8 @@ export function CommunityTopPage() {
               </button>
             </div>
           )}
-        </div>
       </div>
-    </div>
+    </CommunityWebLayout>
   );
 }
 

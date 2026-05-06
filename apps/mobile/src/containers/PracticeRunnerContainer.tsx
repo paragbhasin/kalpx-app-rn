@@ -706,6 +706,13 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
     }
     return item?.audio_url || screenState.master_mantra?.audio_url || "";
   }, [screenState, currentStateId, _isTriggerScreen, _isCheckinSupportScreen]);
+
+  const runnerAudioUrl =
+    typeof activeItem?.audio_url === "string" && activeItem.audio_url.trim().length > 0
+      ? activeItem.audio_url.trim()
+      : "";
+  const hasRunnerAudio = runnerAudioUrl.length > 0;
+
   const mantraRunnerFooterBlocks = useMemo(
     () =>
       (schema.blocks || []).filter(
@@ -1697,15 +1704,13 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
           onToggleMute={toggleTriggerMute}
           footerContent={
             <View style={styles.runnerFooterExtra}>
-              {/* Mantra Audio Player - Only for core journey or library mantras */}
-              {activeItem?.audio_url &&
-              (activeItem.source === "core" ||
-                activeItem.source === "additional") ? (
+              {/* Mantra Audio Player - source-independent, item-specific */}
+              {hasRunnerAudio ? (
                 <View style={{ marginBottom: 20 }}>
                   <AudioPlayerBlock
                     block={{
-                      audio_url: activeItem.audio_url,
-                      label: activeItem.title || "Mantra Audio",
+                      audio_url: runnerAudioUrl,
+                      label: activeItem?.title || "Mantra Audio",
                     }}
                   />
                 </View>
@@ -1811,18 +1816,15 @@ const PracticeRunnerContainer: React.FC<PracticeRunnerContainerProps> = ({
             ))}
           </View>
 
-          {/* Practice Audio Player - Only for core journey or library practices */}
-          {screenState.runner_active_item?.audio_url &&
-          (screenState.runner_active_item.source === "core" ||
-            screenState.runner_active_item.source === "additional") ? (
+          {/* Practice Audio Player - source-independent, item-specific */}
+          {hasRunnerAudio ? (
             <View
               style={{ paddingHorizontal: 20, width: "100%", marginBottom: 30 }}
             >
               <AudioPlayerBlock
                 block={{
-                  audio_url: screenState.runner_active_item.audio_url,
-                  label:
-                    screenState.runner_active_item.title || "Practice Audio",
+                  audio_url: runnerAudioUrl,
+                  label: activeItem?.title || "Practice Audio",
                 }}
               />
             </View>

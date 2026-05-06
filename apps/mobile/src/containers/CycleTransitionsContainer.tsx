@@ -1173,19 +1173,21 @@ const CycleTransitionsContainer: React.FC<CycleTransitionsContainerProps> = ({
                 })}
               </View>
 
-              {/* Audio Player — show whenever an audio URL is present
-                  regardless of source. Earlier gate required source ∈
-                  {"core","additional"} but view_info doesn't always set
-                  a source tag (e.g. when masterData path runs without
-                  the manualData branch). Falling back to master_mantra
-                  URL keeps the player visible on the core mantra
-                  runner even if runner_active_item.audio_url is empty. */}
+              {/* Audio Player — source-independent, item-specific.
+                  Derives URL from info.audio_url (set by view_info from
+                  manualData) or runner_active_item.audio_url. Never falls
+                  back to master_mantra or mantra_audio_url — those can
+                  belong to a different (core) item and would play the
+                  wrong audio for additional/custom/community items. */}
               {(() => {
                 const audioUrl =
-                  info?.audio_url ||
-                  screenData?.mantra_audio_url ||
-                  screenData?.master_mantra?.audio_url ||
-                  "";
+                  (typeof info?.audio_url === "string" && info.audio_url.trim().length > 0
+                    ? info.audio_url.trim()
+                    : null) ??
+                  (typeof screenData?.runner_active_item?.audio_url === "string" &&
+                   screenData.runner_active_item.audio_url.trim().length > 0
+                    ? screenData.runner_active_item.audio_url.trim()
+                    : "");
                 if (!audioUrl) return null;
                 return (
                   <View

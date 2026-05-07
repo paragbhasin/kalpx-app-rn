@@ -1163,201 +1163,561 @@ export function ClassListingPage() {
       <div
         style={{
           width: "100%",
-          maxWidth: 960,
+          maxWidth: isMobile ? 960 : 1920,
           margin: "0 auto",
-          padding: "5px",
+          padding: isMobile ? "5px" : "10px",
+          paddingRight: !isMobile ? 20 : "",
         }}
       >
         <div>
           <div
             style={{
               display: "flex",
-              borderBottom: "1px solid var(--kalpx-border-gold)",
-              margin: "0 18px",
+              borderBottom: isMobile
+                ? "1px solid var(--kalpx-border-gold)"
+                : "none",
+              margin: isMobile ? "0 18px" : "0 0 22px",
+              width: isMobile ? undefined : "fit-content",
+              background: isMobile ? "transparent" : "#f1f2f5",
+              borderRadius: isMobile ? 0 : 8,
+              padding: isMobile ? 0 : 5,
+              gap: isMobile ? 0 : "",
             }}
           >
             <button
-              style={tabStyle(tab === "explore")}
+              style={
+                isMobile
+                  ? tabStyle(tab === "explore")
+                  : {
+                      padding: "8px",
+                      borderRadius: 8,
+                      border: "none",
+                      background:
+                        tab === "explore" ? "var(--kalpx-cta)" : "transparent",
+                      color: tab === "explore" ? "#fff" : "#2f2f2f",
+                      fontSize: isMobile ? 20 : 16,
+                      fontWeight: 700,
+                    }
+              }
               onClick={() => setTab("explore")}
             >
-              Explore
+              {isMobile ? "Explore" : "Explore Classes"}
             </button>
             {authed && (
               <button
-                style={tabStyle(tab === "bookings")}
+                style={
+                  isMobile
+                    ? tabStyle(tab === "bookings")
+                    : {
+                        padding: "8px",
+                        borderRadius: 8,
+                        border: "none",
+                        background:
+                          tab === "bookings"
+                            ? "var(--kalpx-cta)"
+                            : "transparent",
+                        color: tab === "bookings" ? "#fff" : "#2f2f2f",
+                        fontSize: isMobile ? 20 : 16,
+                        fontWeight: 700,
+                      }
+                }
                 onClick={() => setTab("bookings")}
               >
-                My Bookings
+                {isMobile ? "My Bookings" : "My bookings"}
               </button>
             )}
           </div>
 
           {tab === "explore" && (
             <div style={{ padding: "0 0 20px" }}>
-              <div
-                style={{
-                  position: "sticky",
-                  top: 0,
-                  zIndex: 20,
-                  background: "#fff",
-                  padding: "10px",
-                  borderBottom: "1px solid rgba(67, 33, 4, 0.06)",
-                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ position: "relative", flex: 1 }}>
-                    <Search
-                      size={18}
+              {isMobile ? (
+                <>
+                  <div
+                    style={{
+                      position: "sticky",
+                      top: 0,
+                      zIndex: 20,
+                      background: "#fff",
+                      padding: "10px",
+                      borderBottom: "1px solid rgba(67, 33, 4, 0.06)",
+                      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)",
+                    }}
+                  >
+                    <div
+                      style={{ display: "flex", alignItems: "center", gap: 12 }}
+                    >
+                      <div style={{ position: "relative", flex: 1 }}>
+                        <Search
+                          size={18}
+                          style={{
+                            position: "absolute",
+                            left: 12,
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            color: "#9ca3af",
+                          }}
+                        />
+                        <input
+                          value={query}
+                          onChange={(e) => setQuery(e.target.value)}
+                          placeholder="Search by tag, title, Tutor.."
+                          style={{
+                            width: "100%",
+                            borderRadius: 10,
+                            background: "#f3f4f6",
+                            padding: "10px 12px 10px 40px",
+                            fontSize: 16,
+                            border: "none",
+                            outline: "none",
+                          }}
+                        />
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setFilterOpen(true)}
+                        aria-label="Open filters"
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: 24,
+                          height: 24,
+                        }}
+                      >
+                        <Filter size={22} />
+                      </button>
+                    </div>
+
+                    <div
                       style={{
-                        position: "absolute",
-                        left: 12,
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        color: "#9ca3af",
+                        display: "flex",
+                        gap: 8,
+                        marginTop: 12,
+                        paddingBottom: 8,
+                        overflowX: "auto",
+                        scrollbarWidth: "none",
                       }}
-                    />
-                    <input
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      placeholder="Search by tag, title, Tutor.."
+                    >
+                      {SUBJECT_OPTIONS.map((option) => (
+                        <Chip
+                          key={option.value || "all"}
+                          label={option.label}
+                          selected={subject === option.value}
+                          size="sm"
+                          onToggle={() => {
+                            setSubject(option.value);
+                            void loadClasses(1, "replace", {
+                              subject: option.value,
+                            });
+                          }}
+                          style={{
+                            flexShrink: 0,
+                            whiteSpace: "nowrap",
+                            color:
+                              subject === option.value && option.value
+                                ? "#000"
+                                : undefined,
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {visibleClasses.length > 0 && (
+                    <div
                       style={{
-                        width: "100%",
-                        borderRadius: 10,
-                        background: "#f3f4f6",
-                        padding: "10px 12px 10px 40px",
                         fontSize: 16,
-                        border: "none",
-                        outline: "none",
+                        fontWeight: 700,
+                        color: "#111827",
+                        padding: "12px 18px 6px",
                       }}
-                    />
-                  </div>
+                    >
+                      Explore Classes
+                    </div>
+                  )}
 
-                  <button
-                    type="button"
-                    onClick={() => setFilterOpen(true)}
-                    aria-label="Open filters"
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: 24,
-                      height: 24,
-                    }}
-                  >
-                    <Filter size={22} />
-                  </button>
-                </div>
-
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 8,
-                    marginTop: 12,
-                    paddingBottom: 8,
-                    overflowX: "auto",
-                    scrollbarWidth: "none",
-                  }}
-                >
-                  {SUBJECT_OPTIONS.map((option) => (
-                    <Chip
-                      key={option.value || "all"}
-                      label={option.label}
-                      selected={subject === option.value}
-                      size="sm"
-                      onToggle={() => {
-                        setSubject(option.value);
-                        void loadClasses(1, "replace", {
-                          subject: option.value,
-                        });
-                      }}
-                      style={{
-                        flexShrink: 0,
-                        whiteSpace: "nowrap",
-                        color:
-                          subject === option.value && option.value
-                            ? "#000"
-                            : undefined,
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {visibleClasses.length > 0 && (
-                <div
-                  style={{
-                    fontSize: 16,
-                    fontWeight: 700,
-                    color: "#111827",
-                    padding: "12px 18px 6px",
-                  }}
-                >
-                  Explore Classes
-                </div>
-              )}
-
-              {classesLoading ? (
-                <div style={{ padding: "0 18px" }}>
-                  <ClassCardSkeleton />
-                  <ClassCardSkeleton />
-                  <ClassCardSkeleton />
-                </div>
-              ) : classesError ? (
-                <div style={{ padding: "24px 18px 0" }}>
-                  <EmptyState icon="⚠️" message={classesError} />
-                </div>
-              ) : visibleClasses.length === 0 ? (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    textAlign: "center",
-                    padding: "48px 18px",
-                    color: "#64748b",
-                  }}
-                >
-                  <div
-                    style={{ fontSize: 16, fontWeight: 700, color: "#6b7280" }}
-                  >
-                    Oops! No classes found.
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 12,
-                      color: "#6b7280",
-                      fontWeight: 500,
-                      marginTop: 8,
-                    }}
-                  >
-                    No classes were found based on the selected filters.
-                  </div>
-                </div>
-              ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-
-                    padding: "5px",
-                  }}
-                >
-                  {visibleClasses.map((cls) => (
-                    <ClassCard key={cls.id} cls={cls} />
-                  ))}
-                  {loadingMore && (
-                    <div style={{ paddingTop: 4 }}>
+                  {classesLoading ? (
+                    <div style={{ padding: "0 18px" }}>
                       <ClassCardSkeleton />
                       <ClassCardSkeleton />
                       <ClassCardSkeleton />
                     </div>
+                  ) : classesError ? (
+                    <div style={{ padding: "24px 18px 0" }}>
+                      <EmptyState icon="⚠️" message={classesError} />
+                    </div>
+                  ) : visibleClasses.length === 0 ? (
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        textAlign: "center",
+                        padding: "48px 18px",
+                        color: "#64748b",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 16,
+                          fontWeight: 700,
+                          color: "#6b7280",
+                        }}
+                      >
+                        Oops! No classes found.
+                      </div>
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: "#6b7280",
+                          fontWeight: 500,
+                          marginTop: 8,
+                        }}
+                      >
+                        No classes were found based on the selected filters.
+                      </div>
+                    </div>
+                  ) : (
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        padding: "5px",
+                      }}
+                    >
+                      {visibleClasses.map((cls) => (
+                        <ClassCard key={cls.id} cls={cls} />
+                      ))}
+                      {loadingMore && (
+                        <div style={{ paddingTop: 4 }}>
+                          <ClassCardSkeleton />
+                          <ClassCardSkeleton />
+                          <ClassCardSkeleton />
+                        </div>
+                      )}
+                      <div
+                        ref={loadMoreRef}
+                        style={{ height: 48, width: "100%" }}
+                      />
+                    </div>
                   )}
+                </>
+              ) : (
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "450px minmax(0, 1fr)",
+                    gap: 5,
+                    alignItems: "start",
+                    height: "calc(100dvh - 135px)",
+                    overflow: "hidden",
+                  }}
+                >
+                  <aside
+                    style={{
+                      background: "#f5f6f8",
+                      borderRadius: 0,
+                      padding: "15px",
+                      height: "100%",
+                      overflowY: "auto",
+                      overflowX: "hidden",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 12,
+                        marginBottom: 34,
+                        overflowX: "auto",
+                        overflowY: "hidden",
+                        scrollbarWidth: "none",
+                        whiteSpace: "nowrap",
+                        paddingBottom: 4,
+                      }}
+                    >
+                      {SUBJECT_OPTIONS.map((option) => (
+                        <Chip
+                          key={option.value || "all-desktop"}
+                          label={option.label}
+                          selected={subject === option.value}
+                          size="sm"
+                          onToggle={() => setSubject(option.value)}
+                          style={{
+                            flexShrink: 0,
+                            whiteSpace: "nowrap",
+                            fontSize: 14,
+                            padding: option.value ? "5px 20px" : "5px 20px",
+                            color:
+                              subject === option.value && option.value
+                                ? "#263248"
+                                : undefined,
+                          }}
+                        />
+                      ))}
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        marginBottom: 10,
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 16,
+                          fontWeight: 700,
+                          color: "#475569",
+                        }}
+                      >
+                        Filters
+                      </div>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 14,
+                        }}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setQuery("");
+                            setSubject("");
+                            resetFilters();
+                          }}
+                          style={{
+                            background: "none",
+                            border: "none",
+                            color: "var(--kalpx-cta)",
+                            fontSize: 16,
+                            fontWeight: 700,
+                            cursor: "pointer",
+                          }}
+                        >
+                          Clear All
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void loadClasses(1, "replace")}
+                          style={{
+                            borderRadius: 9,
+                            border: "none",
+                            background: "var(--kalpx-cta)",
+                            color: "#fff",
+                            padding: "5px 10px",
+                            fontSize: 16,
+                            fontWeight: 700,
+                            cursor: "pointer",
+                          }}
+                        >
+                          Apply
+                        </button>
+                      </div>
+                    </div>
+
+                    <div style={{ position: "relative", marginBottom: 34 }}>
+                      <Search
+                        size={15}
+                        style={{
+                          position: "absolute",
+                          left: 18,
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          color: "#666",
+                        }}
+                      />
+                      <input
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="Search by tag, title, Tutor.."
+                        style={{
+                          width: "100%",
+                          borderRadius: 9,
+                          border: "1px solid #cad0d8",
+                          background: "#fff",
+                          padding: "10px 50px",
+                          fontSize: 16,
+                          color: "#334155",
+                          outline: "none",
+                          boxSizing: "border-box",
+                        }}
+                      />
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 28,
+                      }}
+                    >
+                      <SelectField
+                        label="Skill Level"
+                        value={skillLevel}
+                        onChange={setSkillLevel}
+                        options={SKILL_OPTIONS}
+                      />
+                      <SelectField
+                        label="Class Type"
+                        value={classType}
+                        onChange={setClassType}
+                        options={TYPE_OPTIONS}
+                      />
+                      <SelectField
+                        label="Select Schedule"
+                        value={scheduleType}
+                        onChange={setScheduleType}
+                        options={SCHEDULE_OPTIONS}
+                      />
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "1fr 1fr",
+                          gap: 16,
+                        }}
+                      >
+                        <label
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 8,
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: 14,
+                              fontWeight: 500,
+                              color: "#303030",
+                            }}
+                          >
+                            Min Price
+                          </span>
+                          <input
+                            value={priceMin}
+                            onChange={(e) => setPriceMin(e.target.value)}
+                            type="number"
+                            placeholder="Min"
+                            style={desktopTextInputStyle}
+                          />
+                        </label>
+                        <label
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 8,
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: 14,
+                              fontWeight: 500,
+                              color: "#303030",
+                            }}
+                          >
+                            Max Price
+                          </span>
+                          <input
+                            value={priceMax}
+                            onChange={(e) => setPriceMax(e.target.value)}
+                            type="number"
+                            placeholder="Max"
+                            style={desktopTextInputStyle}
+                          />
+                        </label>
+                      </div>
+                      <SelectField
+                        label="Sort"
+                        value={sort}
+                        onChange={setSort}
+                        options={SORT_OPTIONS}
+                      />
+                    </div>
+                  </aside>
+
                   <div
-                    ref={loadMoreRef}
-                    style={{ height: 48, width: "100%" }}
-                  />
+                    style={{
+                      height: "100%",
+                      overflowY: "auto",
+                      overflowX: "hidden",
+                      paddingRight: 8,
+                    }}
+                  >
+                    {classesLoading ? (
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "1fr 1fr",
+                          gap: 26,
+                        }}
+                      >
+                        <ClassCardSkeleton />
+                        <ClassCardSkeleton />
+                        <ClassCardSkeleton />
+                        <ClassCardSkeleton />
+                      </div>
+                    ) : classesError ? (
+                      <EmptyState icon="⚠️" message={classesError} />
+                    ) : visibleClasses.length === 0 ? (
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          textAlign: "center",
+                          padding: "48px 18px",
+                          color: "#64748b",
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontSize: 22,
+                            fontWeight: 700,
+                            color: "#6b7280",
+                          }}
+                        >
+                          Oops! No classes found.
+                        </div>
+                        <div
+                          style={{
+                            fontSize: 14,
+                            color: "#6b7280",
+                            fontWeight: 500,
+                            marginTop: 8,
+                          }}
+                        >
+                          No classes were found based on the selected filters.
+                        </div>
+                      </div>
+                    ) : (
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "1fr 1fr",
+                          gap: 8,
+                          alignItems: "start",
+                        }}
+                      >
+                        {visibleClasses.map((cls) => (
+                          <ClassCard key={cls.id} cls={cls} />
+                        ))}
+                        {loadingMore && (
+                          <>
+                            <ClassCardSkeleton />
+                            <ClassCardSkeleton />
+                          </>
+                        )}
+                      </div>
+                    )}
+                    <div
+                      ref={loadMoreRef}
+                      style={{ height: 48, width: "100%" }}
+                    />
+                  </div>
                 </div>
               )}
             </div>
@@ -1432,6 +1792,7 @@ export function ClassListingPage() {
                               background: "#F3F3F3",
                               width: "100%",
                               borderRadius: 10,
+
                               border: "1px solid #ddd6c8",
                               padding: "10px 12px",
                             }}
@@ -2092,6 +2453,18 @@ const bookingSelectStyle: React.CSSProperties = {
   background: "#fff",
   color: "var(--kalpx-text)",
   fontSize: 14,
+};
+
+const desktopTextInputStyle: React.CSSProperties = {
+  width: "100%",
+  borderRadius: 11,
+  border: "1px solid #cad0d8",
+  background: "#fff",
+  padding: "10px",
+  fontSize: 14,
+  color: "#334155",
+  outline: "none",
+  boxSizing: "border-box",
 };
 
 const bookingMenuItemStyle: React.CSSProperties = {

@@ -49,6 +49,65 @@ function getPriceBits(cls: ClassDetail | null) {
   };
 }
 
+function startOfMonth(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function isSameDate(a: Date | null, b: Date | null) {
+  return !!a && !!b && a.toDateString() === b.toDateString();
+}
+
+function formatDateLocal(date: Date) {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function formatTimeLabel(slot: any) {
+  try {
+    const src = slot.start_user || slot.start_utc;
+    const date = new Date(src);
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const h12 = hours % 12 || 12;
+    return `${h12}:${`${minutes}`.padStart(2, "0")} ${ampm}`;
+  } catch {
+    return slot.start_utc || "";
+  }
+}
+
+function buildMonthGrid(month: Date, availableSlots: any[]) {
+  const firstDay = new Date(month.getFullYear(), month.getMonth(), 1);
+  const lastDay = new Date(month.getFullYear(), month.getMonth() + 1, 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const days: Array<null | {
+    date: Date;
+    hasSlots: boolean;
+    selectable: boolean;
+  }> = [];
+
+  for (let i = 0; i < firstDay.getDay(); i += 1) days.push(null);
+
+  for (let d = 1; d <= lastDay.getDate(); d += 1) {
+    const date = new Date(month.getFullYear(), month.getMonth(), d);
+    date.setHours(0, 0, 0, 0);
+    const dateStr = formatDateLocal(date);
+    const daySlots = availableSlots.find((slot) => slot.date === dateStr);
+    const hasSlots = Boolean(daySlots?.slots?.length);
+    days.push({
+      date,
+      hasSlots,
+      selectable: hasSlots && date >= today,
+    });
+  }
+
+  return days;
+}
+
 export function ClassDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
@@ -63,6 +122,14 @@ export function ClassDetailPage() {
   const [shareFeedback, setShareFeedback] = useState<string | null>(null);
   const [descExpanded, setDescExpanded] = useState(false);
   const [tutorDescExpanded, setTutorDescExpanded] = useState(false);
+  const [monthCursor, setMonthCursor] = useState(startOfMonth(new Date()));
+  const [pickedDate, setPickedDate] = useState<Date | null>(null);
+  const [selectedSlot, setSelectedSlot] = useState<any | null>(null);
+  const [note, setNote] = useState("");
+  const [trialSelected, setTrialSelected] = useState(false);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 768 : true,
+  );
 
   async function loadTutorClasses(
     creatorId: number,
@@ -100,7 +167,14 @@ export function ClassDetailPage() {
       setRelatedLoadingMore(false);
     }
   }
+  useEffect(() => {
+    function onResize() {
+      setIsMobile(window.innerWidth < 768);
+    }
 
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
   useEffect(() => {
     if (!slug) return;
     void (async () => {
@@ -113,6 +187,13 @@ export function ClassDetailPage() {
           return;
         }
         setCls(data);
+        const firstDate = data.available_slots?.[0]?.date
+          ? new Date(data.available_slots[0].date)
+          : new Date();
+        firstDate.setHours(0, 0, 0, 0);
+        setMonthCursor(startOfMonth(firstDate));
+        setPickedDate(firstDate);
+        setSelectedSlot(null);
         setRelatedClasses([]);
         setRelatedPage(1);
         setRelatedHasMore(false);
@@ -161,6 +242,18 @@ export function ClassDetailPage() {
     cls?.tutor_bio ||
     "";
   const canBook = cls?.status !== "inactive" && cls?.status !== "draft";
+  const availableSlots = cls?.available_slots ?? [];
+  const monthDays = useMemo(
+    () => buildMonthGrid(monthCursor, availableSlots),
+    [monthCursor, availableSlots],
+  );
+  const slotTimes = useMemo(() => {
+    if (!pickedDate) return [];
+    const daySlots = availableSlots.find(
+      (slot) => slot.date === formatDateLocal(pickedDate),
+    );
+    return daySlots?.slots ?? [];
+  }, [availableSlots, pickedDate]);
   const classIntroVideo = resolveMediaUrl((cls as any)?.intro_media);
   const classCoverImage = resolveMediaUrl((cls?.cover_media as any) ?? null);
   const tutorIntroVideo = resolveMediaUrl((cls?.tutor as any)?.intro_video);
@@ -195,6 +288,18 @@ export function ClassDetailPage() {
     }
   }
 
+  function shiftMonth(delta: number) {
+    setSelectedSlot(null);
+    const next = new Date(monthCursor);
+    next.setMonth(next.getMonth() + delta, 1);
+    const nextCursor = startOfMonth(next);
+    setMonthCursor(nextCursor);
+    const nextDays = buildMonthGrid(nextCursor, availableSlots);
+    const nextSelectable =
+      nextDays.find((day) => day?.selectable)?.date ?? null;
+    setPickedDate(nextSelectable);
+  }
+
   if (loading) {
     return (
       <div
@@ -225,14 +330,23 @@ export function ClassDetailPage() {
   }
 
   return (
-    <div style={{ minHeight: "100dvh", background: "var(--kalpx-parchment)" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "10px" }}>
-        <button onClick={() => navigate("/en/classes")} style={backBtn}>
-          ← Back
-        </button>
+    <div style={{ minHeight: "100dvh" }}>
+      <div
+        className="kalpx-detail-page"
+        style={{ maxWidth: 1700, margin: "0 auto", padding: "10px" }}
+      >
+        {isMobile && (
+          <button onClick={() => navigate("/en/classes")} style={backBtn}>
+            ← Back
+          </button>
+        )}
 
-        <div style={{ display: "grid", gap: 24, marginTop: 18 }}>
+        <div
+          className="kalpx-detail-page-body"
+          style={{ display: "grid", gap: 24, marginTop: 18 }}
+        >
           <section
+            className="kalpx-detail-page-section"
             style={{
               display: "grid",
               gap: 24,
@@ -241,28 +355,378 @@ export function ClassDetailPage() {
           >
             <style>{`
               @media (min-width: 1024px) {
+                .kalpx-detail-page {
+                  height: 100dvh;
+                  overflow: hidden;
+                  display: flex;
+                  flex-direction: column;
+                }
+                .kalpx-detail-page-body {
+                  flex: 1;
+                  min-height: 0;
+                }
+                .kalpx-detail-page-section {
+                  height: 100%;
+                  min-height: 0;
+                }
                 .kalpx-class-detail-top {
                   grid-template-columns: minmax(320px, 40%) minmax(0, 1fr);
                 }
+                .kalpx-related-classes-grid {
+                  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                  gap: 20px !important;
+                }
+                .kalpx-detail-shell {
+                  height: 100%;
+                  min-height: 0;
+                  overflow: hidden;
+                }
                 .kalpx-class-detail-grid {
-                  grid-template-columns: minmax(0, 1fr) minmax(340px, 30vw);
+                  grid-template-columns: 415px minmax(0, 1fr);
                   align-items: start;
+                  height: 100%;
+                  min-height: 0;
                 }
                 .kalpx-detail-aside {
-                  position: sticky;
-                  top: 88px;
+                  display: flex !important;
+                  flex-direction: column;
+                  height: 100%;
+                  min-height: 0;
+                  overflow-y: auto;
+                }
+                .kalpx-detail-main {
+                  order: 2;
+                  height: 100%;
+                  min-height: 0;
+                  overflow-y: auto;
+                  padding-right: 8px;
+                }
+                .kalpx-detail-sidebar {
+                  order: 1;
+                  padding-right: 28px;
+                  border-right: 1px solid #d9d9d9;
+                  min-height: 0;
                 }
               }
             `}</style>
 
             <div
-              className="kalpx-class-detail-grid"
+              className="kalpx-detail-shell kalpx-class-detail-grid"
               style={{ display: "grid", gap: 24 }}
             >
-              <div>
+              <aside
+                className="kalpx-detail-aside kalpx-detail-sidebar"
+                style={{ display: "none", gap: 22 }}
+              >
+                <button
+                  onClick={() => navigate("/en/classes")}
+                  style={desktopBackBtn}
+                >
+                  ↩
+                </button>
+                <div
+                  style={{
+                    fontSize: 18,
+                    fontWeight: 700,
+                    color: "#2f2f2f",
+                  }}
+                >
+                  Tutor Availability
+                </div>
+
+                <div
+                  style={{
+                    border: "1px solid #d9d9d9",
+                    background: "#f0f0f0",
+                    borderRadius: 25,
+                    padding: 14,
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      marginBottom: 12,
+                    }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => shiftMonth(-1)}
+                      style={calendarArrowBtn}
+                    >
+                      ‹
+                    </button>
+                    <div
+                      style={{ fontSize: 16, fontWeight: 700, color: "#111" }}
+                    >
+                      {monthCursor.toLocaleString([], {
+                        month: "long",
+                        year: "numeric",
+                      })}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => shiftMonth(1)}
+                      style={calendarArrowBtn}
+                    >
+                      ›
+                    </button>
+                  </div>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(7, 1fr)",
+                      textAlign: "center",
+                      fontSize: 16,
+                      fontWeight: 700,
+                      color: "#2f2f2f",
+                    }}
+                  >
+                    {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
+                      <div key={day}>{day}</div>
+                    ))}
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 8,
+                      display: "grid",
+                      gridTemplateColumns: "repeat(7, 1fr)",
+                      gap: 4,
+                    }}
+                  >
+                    {monthDays.map((day, idx) => (
+                      <div key={idx} style={{ aspectRatio: "1 / 1" }}>
+                        {day ? (
+                          <button
+                            type="button"
+                            disabled={!day.selectable}
+                            onClick={() => {
+                              setPickedDate(day.date);
+                              setSelectedSlot(null);
+                            }}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              border: "none",
+                              background: isSameDate(day.date, pickedDate)
+                                ? "var(--kalpx-cta)"
+                                : "transparent",
+                              color: isSameDate(day.date, pickedDate)
+                                ? "#fff"
+                                : day.hasSlots
+                                  ? "#111"
+                                  : "#b8c0cf",
+                              borderRadius: isSameDate(day.date, pickedDate)
+                                ? 14
+                                : 0,
+                              fontSize: 15,
+                              fontWeight: 700,
+                              cursor: day.selectable
+                                ? "pointer"
+                                : "not-allowed",
+                              opacity: day.selectable ? 1 : 0.4,
+                            }}
+                          >
+                            {day.date.getDate()}
+                          </button>
+                        ) : null}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 12 }}
+                >
+                  <div
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 700,
+                      color: "#2f2f2f",
+                    }}
+                  >
+                    Available Slots
+                  </div>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                      gap: 12,
+                    }}
+                  >
+                    {slotTimes.map((slot, idx) => (
+                      <button
+                        key={`${slot.start_utc}-${idx}`}
+                        type="button"
+                        onClick={() => setSelectedSlot(slot)}
+                        style={{
+                          border: "none",
+                          borderRadius: 8,
+                          background:
+                            selectedSlot?.start_utc === slot.start_utc
+                              ? "var(--kalpx-cta)"
+                              : "#f3f4f6",
+                          color:
+                            selectedSlot?.start_utc === slot.start_utc
+                              ? "#fff"
+                              : "#2f2f2f",
+                          padding: "10px 12px",
+                          fontSize: 16,
+                          fontWeight: 700,
+                          cursor: "pointer",
+                        }}
+                      >
+                        {formatTimeLabel(slot)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => navigate(`/en/classes/${cls.slug}/book`)}
+                  disabled={!canBook}
+                  style={{
+                    ...bookNowBtnDesktop,
+                    opacity: canBook ? 1 : 0.5,
+                    cursor: canBook ? "pointer" : "not-allowed",
+                    justifyContent: "center",
+                    width: "fit-content",
+                  }}
+                >
+                  Book Now ↗
+                </button>
+
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    fontSize: 14,
+                  }}
+                >
+                  <span style={{ color: "#6b7280", fontWeight: 500 }}>
+                    Duration :
+                  </span>
+                  <span style={{ color: "#111", fontWeight: 700 }}>
+                    {priceBits.time}
+                  </span>
+                </div>
+                <div>
+                  <span
+                    style={{
+                      color: "var(--kalpx-cta)",
+                      fontSize: 22,
+                      fontWeight: 800,
+                    }}
+                  >
+                    {priceBits.amount}
+                  </span>
+                  <span
+                    style={{ color: "#111", fontSize: 14, fontWeight: 500 }}
+                  >
+                    {" "}
+                    / {priceBits.type}
+                  </span>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 14,
+                    fontSize: 13,
+                  }}
+                >
+                  <div>
+                    <span style={{ color: "#6b7280", fontWeight: 500 }}>
+                      Tutor TZ :{" "}
+                    </span>
+                    <span style={{ color: "#111", fontWeight: 700 }}>
+                      {cls?.class_availability?.timezone ||
+                        cls?.tutor?.timezone ||
+                        "Asia/Kolkata"}
+                    </span>
+                  </div>
+                  <div>
+                    <span style={{ color: "#6b7280", fontWeight: 500 }}>
+                      Your TZ :{" "}
+                    </span>
+                    <span style={{ color: "#111", fontWeight: 700 }}>
+                      {Intl.DateTimeFormat().resolvedOptions().timeZone ||
+                        "Local"}
+                    </span>
+                  </div>
+                </div>
+                {cls?.pricing?.trial?.enabled && (
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      cursor: "pointer",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={trialSelected}
+                      onChange={(e) => setTrialSelected(e.target.checked)}
+                      style={{ width: 16, height: 16 }}
+                    />
+                    <span style={{ fontSize: 14, color: "#475569" }}>
+                      Trial at{" "}
+                      <strong style={{ color: "#111" }}>
+                        {new Intl.NumberFormat(undefined, {
+                          style: "currency",
+                          currency: cls?.pricing?.currency || "INR",
+                          maximumFractionDigits: 2,
+                        }).format(cls?.pricing?.trial?.amount || 0)}
+                      </strong>
+                    </span>
+                  </label>
+                )}
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 10 }}
+                >
+                  <label
+                    htmlFor="desktop-note"
+                    style={{ fontSize: 16, fontWeight: 700, color: "#111" }}
+                  >
+                    Note to tutor{" "}
+                    <span style={{ color: "#6b7280", fontWeight: 500 }}>
+                      (Optional)
+                    </span>
+                  </label>
+                  <textarea
+                    id="desktop-note"
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    rows={5}
+                    placeholder="Enter a comment"
+                    style={{
+                      width: "100%",
+                      borderRadius: 14,
+                      border: "2px solid #111",
+                      padding: "16px 18px",
+                      resize: "vertical",
+                      fontSize: 16,
+                      outline: "none",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                </div>
+              </aside>
+
+              <div className="kalpx-detail-main">
                 <div
                   className="kalpx-class-detail-top"
-                  style={{ display: "grid", gap: 24 }}
+                  style={{
+                    display: "grid",
+                    gap: 24,
+                    border: "1px solid #e1e5ee",
+                    borderRadius: 24,
+                    padding: 20,
+                    background: "#fff",
+                  }}
                 >
                   <div
                     style={{
@@ -398,16 +862,6 @@ export function ClassDetailPage() {
                               {priceBits.type}
                             </span>
                           </div>
-                          {canBook && (
-                            <button
-                              onClick={() =>
-                                navigate(`/en/classes/${cls.slug}/book`)
-                              }
-                              style={bookNowBtnMobile}
-                            >
-                              Book Now →
-                            </button>
-                          )}
                         </div>
                       </section>
 
@@ -438,14 +892,33 @@ export function ClassDetailPage() {
                         </section>
                       )}
                     </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        marginTop: 20,
+                      }}
+                    >
+                      {canBook && (
+                        <button
+                          onClick={() => navigate(`/en/classes/${cls.slug}/book`)}
+                          style={bookNowBtnDesktop}
+                        >
+                          Book Now →
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
 
                 <section
                   style={{
                     marginTop: 24,
-
-                    padding: 6,
+                    border: "1px solid #e1e5ee",
+                    borderRadius: 24,
+                    padding: 26,
+                    background: "#fff",
                   }}
                 >
                   <div
@@ -609,7 +1082,7 @@ export function ClassDetailPage() {
                   <div
                     style={{
                       marginBottom: 12,
-                      fontSize: 18,
+                      fontSize: 24,
                       fontWeight: 700,
                       color: "#0f172a",
                     }}
@@ -618,11 +1091,12 @@ export function ClassDetailPage() {
                   </div>
                   {relatedClasses.length > 0 ? (
                     <div
+                      className="kalpx-related-classes-grid"
                       style={{
                         display: "grid",
                         gridTemplateColumns:
                           "repeat(auto-fit, minmax(280px, 1fr))",
-
+                        gap: 20,
                         marginBottom: 40,
                       }}
                     >
@@ -648,6 +1122,7 @@ export function ClassDetailPage() {
                     </div>
                   ) : (
                     <div
+                      className="kalpx-related-classes-grid"
                       style={{
                         display: "grid",
                         gridTemplateColumns:
@@ -675,6 +1150,27 @@ const backBtn: React.CSSProperties = {
   fontSize: 14,
   cursor: "pointer",
   padding: 0,
+};
+
+const desktopBackBtn: React.CSSProperties = {
+  background: "none",
+  border: "none",
+  color: "#2f2f2f",
+  fontSize: 28,
+  cursor: "pointer",
+  padding: 0,
+  width: "fit-content",
+};
+
+const calendarArrowBtn: React.CSSProperties = {
+  background: "none",
+  border: "none",
+  fontSize: 28,
+  fontWeight: 700,
+  lineHeight: 1,
+  padding: 0,
+  color: "#111",
+  cursor: "pointer",
 };
 
 const toggleBtn: React.CSSProperties = {

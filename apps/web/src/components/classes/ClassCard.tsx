@@ -59,7 +59,7 @@ export function ClassCard({ cls }: ClassCardProps) {
         borderRadius: 16,
         cursor: "pointer",
         marginBottom: 16,
-        boxShadow: "0 4px 35px rgba(0, 0, 0, 0.15)",
+        boxShadow: "0 4px 15px rgba(0, 0, 0, 0.15)",
         touchAction: "manipulation",
         transition: "transform 0.15s, box-shadow 0.15s",
         overflow: "hidden",

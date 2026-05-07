@@ -185,6 +185,9 @@ export function ClassBookingPage() {
   const [pickedDate, setPickedDate] = useState<Date | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<ClassSlot | null>(null);
   const [slotTimes, setSlotTimes] = useState<ClassSlot[]>([]);
+  const [isDesktop, setIsDesktop] = useState(
+    typeof window !== "undefined" ? window.innerWidth >= 1024 : false,
+  );
 
   const userTz = useMemo(() => getTz(), []);
   const tutorTz = useMemo(
@@ -271,6 +274,14 @@ export function ClassBookingPage() {
     const timer = window.setTimeout(() => setToastMessage(null), 3000);
     return () => window.clearTimeout(timer);
   }, [toastMessage]);
+
+  useEffect(() => {
+    function onResize() {
+      setIsDesktop(window.innerWidth >= 1024);
+    }
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
 
   function shiftMonth(delta: number) {
     setSelectedSlot(null);
@@ -455,329 +466,1022 @@ export function ClassBookingPage() {
         }
       `}</style>
 
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "10px" }}>
-        <button onClick={() => navigate(`/en/classes/${slug}`)} style={backBtn}>
-          ← Back
-        </button>
-
-        <div
-          className="kalpx-booking-shell"
-          style={{ display: "grid", gap: 24 }}
-        >
+      <div
+        style={{
+          maxWidth: isDesktop ? "100%" : 1200,
+          margin: "0 auto",
+          padding: isDesktop ? "0" : "10px",
+        }}
+      >
+        {isDesktop ? (
           <div
             style={{
-              padding: 20,
+              display: "grid",
+              gridTemplateColumns: "415px minmax(0, 1fr)",
+              minHeight: "calc(100dvh - 72px)",
             }}
           >
-            <div
+            <aside
               style={{
+                padding: "40px 36px 48px 52px",
+                borderRight: "1px solid #d7d7d7",
                 display: "flex",
                 flexDirection: "column",
-                gap: 6,
-                marginBottom: 18,
+                gap: 34,
               }}
             >
-              <h1
-                style={{
-                  margin: 0,
-                  fontSize: 18,
-                  fontWeight: 800,
-                  color: "#1f2a44",
-                }}
-              >
-                Book a session
-              </h1>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 10,
-                marginBottom: 24,
-              }}
-            >
-              <h2
-                style={{
-                  margin: 0,
-                  fontSize: 16,
-                  fontWeight: 800,
-                  color: "#1f2a44",
-                }}
-              >
-                {cls?.title || "Untitled Class"}
-              </h2>
-              {cls?.subtitle ? (
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: 16,
-                    color: "#6b7280",
-                  }}
-                >
-                  {cls.subtitle}
-                </p>
-              ) : null}
-
               <div
                 style={{
                   display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  fontSize: 16,
-                }}
-              >
-                <span style={{ color: "#6b7280", fontWeight: 500 }}>
-                  Duration :
-                </span>
-                <span style={{ color: "#111", fontWeight: 700 }}>
-                  {priceLabel.time}
-                </span>
-              </div>
-
-              <div>
-                <span
-                  style={{
-                    color: "var(--kalpx-cta)",
-                    fontSize: 28,
-                    fontWeight: 800,
-                  }}
-                >
-                  {priceLabel.amount}
-                </span>
-                <span style={{ color: "#111", fontSize: 16, fontWeight: 500 }}>
-                  {" "}
-                  / {priceLabel.type}
-                </span>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => navigate(`/en/classes/${slug}`)}
-                style={{
-                  alignSelf: "flex-start",
-                  background: "none",
-                  border: "none",
-                  padding: 0,
-                  color: "var(--kalpx-cta)",
-                  fontSize: 16,
-                  fontWeight: 500,
-                  cursor: "pointer",
-                }}
-              >
-                View more details
-              </button>
-            </div>
-
-            <div
-              className="kalpx-booking-main-grid"
-              style={{ display: "flex", flexDirection: "column", gap: 24 }}
-            >
-              <div
-                style={{
-                  border: "1px solid #d9d9d9",
-                  background: "#f0f0f0",
-                  borderRadius: 25,
-                  padding: 14,
-                  width: "100%",
-
-                  flexShrink: 0,
+                  alignItems: "flex-start",
+                  justifyContent: "space-between",
+                  gap: 16,
                 }}
               >
                 <div
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "space-between",
-                    marginBottom: 12,
+                    gap: 14,
+                    flex: 1,
                   }}
                 >
-                  <button
-                    type="button"
-                    onClick={() => shiftMonth(-1)}
-                    style={monthArrowBtn}
-                  >
-                    ‹
-                  </button>
-                  <div style={{ fontSize: 16, fontWeight: 700, color: "#111" }}>
-                    {monthCursor.toLocaleString([], {
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => shiftMonth(1)}
-                    style={monthArrowBtn}
-                  >
-                    ›
-                  </button>
-                </div>
-
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(7, 1fr)",
-                    textAlign: "center",
-                    fontSize: 16,
-                    fontWeight: 700,
-                    color: "#222",
-                  }}
-                >
-                  {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
-                    <div key={day}>{day}</div>
-                  ))}
-                </div>
-
-                <div
-                  style={{
-                    marginTop: 8,
-                    display: "grid",
-                    gridTemplateColumns: "repeat(7, 1fr)",
-                    gap: 4,
-                  }}
-                >
-                  {monthDays.map((day, idx) => (
-                    <div key={idx} style={{ aspectRatio: "1 / 1" }}>
-                      {day ? (
-                        <button
-                          type="button"
-                          disabled={!day.selectable || !day.hasSlots}
-                          onClick={() => {
-                            setPickedDate(day.date);
-                            setSelectedSlot(null);
-                          }}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            border: "none",
-                            background: isSameDate(day.date, pickedDate)
-                              ? "var(--kalpx-cta)"
-                              : "transparent",
-                            color: isSameDate(day.date, pickedDate)
-                              ? "#fff"
-                              : day.hasSlots
-                                ? "#111"
-                                : "#94a3b8",
-                            borderRadius: isSameDate(day.date, pickedDate)
-                              ? 14
-                              : 0,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontSize: 16,
-                            fontWeight: 700,
-                            cursor:
-                              day.selectable && day.hasSlots
-                                ? "pointer"
-                                : "not-allowed",
-                            opacity: day.selectable && day.hasSlots ? 1 : 0.4,
-                          }}
-                        >
-                          {day.date.getDate()}
-                        </button>
-                      ) : null}
-                    </div>
-                  ))}
+                  <div style={stepActiveStyle}>1</div>
+                  <div style={stepLineStyle} />
+                  <div style={stepInactiveStyle}>2</div>
                 </div>
               </div>
 
               <div
                 style={{
                   display: "flex",
-                  flexDirection: "column",
-                  gap: 16,
-                  flex: 1,
+                  justifyContent: "space-between",
+                  marginTop: -14,
                 }}
               >
-                <h4
-                  style={{
-                    margin: 0,
-                    fontSize: 18,
-                    fontWeight: 700,
-                    color: "#111",
-                  }}
+                <div
+                  style={{ fontSize: 18, fontWeight: 700, color: "#2f2f2f" }}
                 >
-                  Available Slots
-                </h4>
+                  Slot Booking
+                </div>
+                <div
+                  style={{ fontSize: 18, fontWeight: 700, color: "#2f2f2f" }}
+                >
+                  Payment
+                </div>
+              </div>
 
-                {pickedDate ? (
-                  loadingSlots ? (
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "repeat(3, minmax(0, 110px))",
-                        gap: 12,
-                      }}
-                    >
-                      {Array.from({ length: 6 }).map((_, idx) => (
-                        <div
-                          key={idx}
-                          style={{
-                            width: 110,
-                            height: 31,
-                            borderRadius: 6,
-                            background: "#d1d5db",
-                            opacity: 0.75,
-                          }}
-                        />
-                      ))}
-                    </div>
-                  ) : slotTimes.length ? (
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns:
-                          "repeat(auto-fit, minmax(110px, 110px))",
-                        gap: 16,
-                      }}
-                    >
-                      {slotTimes.map((slot, idx) => (
-                        <button
-                          key={`${slot.start_utc}-${idx}`}
-                          type="button"
-                          onClick={() => setSelectedSlot(slot)}
-                          style={{
-                            width: 110,
-                            height: 31,
-                            border: "none",
-                            borderRadius: 6,
-                            background: isSameMinute(
-                              selectedSlot?.start_utc,
-                              slot.start_utc,
-                            )
-                              ? "var(--kalpx-cta)"
-                              : "#f3f3f4",
-                            color: isSameMinute(
-                              selectedSlot?.start_utc,
-                              slot.start_utc,
-                            )
-                              ? "#fff"
-                              : "#111",
-                            fontSize: 16,
-                            fontWeight: 700,
-                            cursor: "pointer",
-                          }}
-                        >
-                          {formatTimeLabel(slot)}
-                        </button>
-                      ))}
-                    </div>
-                  ) : (
-                    <div style={{ fontSize: 16, color: "#64748b" }}>
-                      No times on this day.
-                    </div>
-                  )
-                ) : (
-                  <div style={{ fontSize: 16, color: "#64748b" }}>
-                    Select a date.
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: 14 }}
+              >
+                <div
+                  style={{ fontSize: 18, fontWeight: 800, color: "#1f2a44" }}
+                >
+                  {cls?.title || "Untitled Class"}
+                </div>
+                {cls?.subtitle ? (
+                  <div style={{ fontSize: 16, color: "#6b7280" }}>
+                    {cls.subtitle}
                   </div>
-                )}
+                ) : null}
                 <div
                   style={{
                     display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    fontSize: 16,
+                  }}
+                >
+                  <span style={{ color: "#6b7280", fontWeight: 500 }}>
+                    Duration :
+                  </span>
+                  <span style={{ color: "#111", fontWeight: 700 }}>
+                    {priceLabel.time}
+                  </span>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "baseline",
+                    gap: 8,
                     flexWrap: "wrap",
-                    gap: 16,
+                  }}
+                >
+                  <span
+                    style={{
+                      color: "var(--kalpx-cta)",
+                      fontSize: 28,
+                      fontWeight: 800,
+                    }}
+                  >
+                    {priceLabel.amount}
+                  </span>
+                  <span
+                    style={{ color: "#111", fontSize: 16, fontWeight: 500 }}
+                  >
+                    / {priceLabel.type}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/en/classes/${slug}`)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      padding: 0,
+                      color: "var(--kalpx-cta)",
+                      fontSize: 16,
+                      fontWeight: 500,
+                      cursor: "pointer",
+                    }}
+                  >
+                    View more details
+                  </button>
+                </div>
+                {cls?.description ? (
+                  <div
+                    style={{ fontSize: 16, color: "#303030", lineHeight: 1.5 }}
+                  >
+                    {cls.description}
+                  </div>
+                ) : null}
+              </div>
+            </aside>
+
+            <section style={{ padding: "52px 52px 40px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 20,
+                  marginBottom: 30,
+                }}
+              >
+                <h1
+                  style={{
+                    margin: 0,
+                    fontSize: 24,
+                    fontWeight: 800,
+                    color: "#2f2f2f",
+                  }}
+                >
+                  Slot Booking
+                </h1>
+
+                <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/en/classes/${slug}`)}
+                    style={desktopHeaderBtn}
+                  >
+                    Back
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleBook}
+                    disabled={!selectedSlot || submitting}
+                    style={{
+                      ...desktopHeaderBtn,
+                      minWidth: 116,
+                      border: "none",
+                      background: "#d4a017",
+                      color: "#2f2f2f",
+                      opacity: !selectedSlot || submitting ? 0.75 : 1,
+                      cursor:
+                        !selectedSlot || submitting ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    {submitting ? "Requesting..." : "Next"}
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gap: 28 }}>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "300px minmax(0, 1fr)",
+                    gap: 42,
+                    alignItems: "start",
+                  }}
+                >
+                  <div
+                    style={{
+                      border: "1px solid #d9d9d9",
+                      background: "#f0f0f0",
+                      borderRadius: 28,
+                      padding: 16,
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        marginBottom: 14,
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => shiftMonth(-1)}
+                        style={monthArrowBtn}
+                      >
+                        ‹
+                      </button>
+                      <div
+                        style={{ fontSize: 18, fontWeight: 700, color: "#111" }}
+                      >
+                        {monthCursor.toLocaleString([], {
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => shiftMonth(1)}
+                        style={monthArrowBtn}
+                      >
+                        ›
+                      </button>
+                    </div>
+
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(7, 1fr)",
+                        textAlign: "center",
+                        fontSize: 16,
+                        fontWeight: 700,
+                        color: "#222",
+                      }}
+                    >
+                      {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
+                        <div key={day}>{day}</div>
+                      ))}
+                    </div>
+
+                    <div
+                      style={{
+                        marginTop: 10,
+                        display: "grid",
+                        gridTemplateColumns: "repeat(7, 1fr)",
+                        gap: 6,
+                      }}
+                    >
+                      {monthDays.map((day, idx) => (
+                        <div key={idx} style={{ aspectRatio: "1 / 1" }}>
+                          {day ? (
+                            <button
+                              type="button"
+                              disabled={!day.selectable || !day.hasSlots}
+                              onClick={() => {
+                                setPickedDate(day.date);
+                                setSelectedSlot(null);
+                              }}
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                border: "none",
+                                background: isSameDate(day.date, pickedDate)
+                                  ? "var(--kalpx-cta)"
+                                  : "transparent",
+                                color: isSameDate(day.date, pickedDate)
+                                  ? "#fff"
+                                  : day.hasSlots
+                                    ? "#111"
+                                    : "#b8c0cf",
+                                borderRadius: isSameDate(day.date, pickedDate)
+                                  ? 16
+                                  : 0,
+                                fontSize: 18,
+                                fontWeight: 700,
+                                cursor:
+                                  day.selectable && day.hasSlots
+                                    ? "pointer"
+                                    : "not-allowed",
+                                opacity:
+                                  day.selectable && day.hasSlots ? 1 : 0.4,
+                              }}
+                            >
+                              {day.date.getDate()}
+                            </button>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 26,
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontSize: 18,
+                        fontWeight: 800,
+                        color: "#2f2f2f",
+                      }}
+                    >
+                      Available Slots
+                    </div>
+
+                    {pickedDate ? (
+                      loadingSlots ? (
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(3, minmax(0, 156px))",
+                            gap: 26,
+                          }}
+                        >
+                          {Array.from({ length: 4 }).map((_, idx) => (
+                            <div
+                              key={idx}
+                              style={{
+                                width: 156,
+                                height: 42,
+                                borderRadius: 10,
+                                background: "#d1d5db",
+                                opacity: 0.75,
+                              }}
+                            />
+                          ))}
+                        </div>
+                      ) : slotTimes.length ? (
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(3, minmax(0, 156px))",
+                            gap: 26,
+                          }}
+                        >
+                          {slotTimes.map((slot, idx) => (
+                            <button
+                              key={`${slot.start_utc}-${idx}`}
+                              type="button"
+                              onClick={() => setSelectedSlot(slot)}
+                              style={{
+                                width: 156,
+                                height: 42,
+                                border: "none",
+                                borderRadius: 10,
+                                background: isSameMinute(
+                                  selectedSlot?.start_utc,
+                                  slot.start_utc,
+                                )
+                                  ? "var(--kalpx-cta)"
+                                  : "#f3f3f4",
+                                color: isSameMinute(
+                                  selectedSlot?.start_utc,
+                                  slot.start_utc,
+                                )
+                                  ? "#fff"
+                                  : "#2f2f2f",
+                                fontSize: 16,
+                                fontWeight: 700,
+                                cursor: "pointer",
+                              }}
+                            >
+                              {formatTimeLabel(slot)}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: 16, color: "#64748b" }}>
+                          No times on this day.
+                        </div>
+                      )
+                    ) : (
+                      <div style={{ fontSize: 16, color: "#64748b" }}>
+                        Select a date.
+                      </div>
+                    )}
+
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 30,
+                        fontSize: 14,
+                      }}
+                    >
+                      <div>
+                        <span style={{ color: "#6b7280", fontWeight: 500 }}>
+                          Tutor TZ :{" "}
+                        </span>
+                        <span style={{ color: "#111", fontWeight: 700 }}>
+                          {tutorTz}
+                        </span>
+                      </div>
+                      <div>
+                        <span style={{ color: "#6b7280", fontWeight: 500 }}>
+                          Your TZ :{" "}
+                        </span>
+                        <span style={{ color: "#111", fontWeight: 700 }}>
+                          {userTz}
+                        </span>
+                      </div>
+                    </div>
+
+                    {hasTrial && (
+                      <label
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 10,
+                          cursor: "pointer",
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={trialSelected}
+                          onChange={(e) => setTrialSelected(e.target.checked)}
+                          style={{ width: 16, height: 16 }}
+                        />
+                        <span style={{ fontSize: 14, color: "#475569" }}>
+                          Trial at{" "}
+                          <strong style={{ color: "#111" }}>
+                            {formatCurrency(
+                              cls?.pricing?.currency || "INR",
+                              cls?.pricing?.trial?.amount || 0,
+                            )}
+                          </strong>
+                        </span>
+                      </label>
+                    )}
+                  </div>
+                </div>
+
+                <div
+                  style={{ display: "flex", flexDirection: "column", gap: 14 }}
+                >
+                  <label
+                    htmlFor="booking-note-desktop"
+                    style={{ fontSize: 16, fontWeight: 800, color: "#111" }}
+                  >
+                    Note to tutor{" "}
+                    <span style={{ color: "#6b7280", fontWeight: 500 }}>
+                      (Optional)
+                    </span>
+                  </label>
+                  <textarea
+                    id="booking-note-desktop"
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    rows={3}
+                    maxLength={500}
+                    placeholder="Enter a comment"
+                    style={{
+                      width: "100%",
+                      borderRadius: 16,
+                      padding: "18px 20px",
+                      resize: "vertical",
+                      border: "2px solid #111",
+                      fontSize: 18,
+                      outline: "none",
+                      boxSizing: "border-box",
+                      minHeight: 92,
+                    }}
+                  />
+                </div>
+              </div>
+            </section>
+          </div>
+        ) : (
+          <>
+            <button
+              onClick={() => navigate(`/en/classes/${slug}`)}
+              style={backBtn}
+            >
+              ← Back
+            </button>
+
+            <div
+              className="kalpx-booking-shell"
+              style={{ display: "grid", gap: 24 }}
+            >
+              <div
+                style={{
+                  padding: 20,
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 6,
+                    marginBottom: 18,
+                  }}
+                >
+                  <h1
+                    style={{
+                      margin: 0,
+                      fontSize: 18,
+                      fontWeight: 800,
+                      color: "#1f2a44",
+                    }}
+                  >
+                    Book a session
+                  </h1>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 10,
+                    marginBottom: 24,
+                  }}
+                >
+                  <h2
+                    style={{
+                      margin: 0,
+                      fontSize: 16,
+                      fontWeight: 800,
+                      color: "#1f2a44",
+                    }}
+                  >
+                    {cls?.title || "Untitled Class"}
+                  </h2>
+                  {cls?.subtitle ? (
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: 16,
+                        color: "#6b7280",
+                      }}
+                    >
+                      {cls.subtitle}
+                    </p>
+                  ) : null}
+
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      fontSize: 16,
+                    }}
+                  >
+                    <span style={{ color: "#6b7280", fontWeight: 500 }}>
+                      Duration :
+                    </span>
+                    <span style={{ color: "#111", fontWeight: 700 }}>
+                      {priceLabel.time}
+                    </span>
+                  </div>
+
+                  <div>
+                    <span
+                      style={{
+                        color: "var(--kalpx-cta)",
+                        fontSize: 28,
+                        fontWeight: 800,
+                      }}
+                    >
+                      {priceLabel.amount}
+                    </span>
+                    <span
+                      style={{ color: "#111", fontSize: 16, fontWeight: 500 }}
+                    >
+                      {" "}
+                      / {priceLabel.type}
+                    </span>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => navigate(`/en/classes/${slug}`)}
+                    style={{
+                      alignSelf: "flex-start",
+                      background: "none",
+                      border: "none",
+                      padding: 0,
+                      color: "var(--kalpx-cta)",
+                      fontSize: 16,
+                      fontWeight: 500,
+                      cursor: "pointer",
+                    }}
+                  >
+                    View more details
+                  </button>
+                </div>
+
+                <div
+                  className="kalpx-booking-main-grid"
+                  style={{ display: "flex", flexDirection: "column", gap: 24 }}
+                >
+                  <div
+                    style={{
+                      border: "1px solid #d9d9d9",
+                      background: "#f0f0f0",
+                      borderRadius: 25,
+                      padding: 14,
+                      width: "100%",
+
+                      flexShrink: 0,
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        marginBottom: 12,
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => shiftMonth(-1)}
+                        style={monthArrowBtn}
+                      >
+                        ‹
+                      </button>
+                      <div
+                        style={{ fontSize: 16, fontWeight: 700, color: "#111" }}
+                      >
+                        {monthCursor.toLocaleString([], {
+                          month: "long",
+                          year: "numeric",
+                        })}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => shiftMonth(1)}
+                        style={monthArrowBtn}
+                      >
+                        ›
+                      </button>
+                    </div>
+
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(7, 1fr)",
+                        textAlign: "center",
+                        fontSize: 16,
+                        fontWeight: 700,
+                        color: "#222",
+                      }}
+                    >
+                      {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
+                        <div key={day}>{day}</div>
+                      ))}
+                    </div>
+
+                    <div
+                      style={{
+                        marginTop: 8,
+                        display: "grid",
+                        gridTemplateColumns: "repeat(7, 1fr)",
+                        gap: 4,
+                      }}
+                    >
+                      {monthDays.map((day, idx) => (
+                        <div key={idx} style={{ aspectRatio: "1 / 1" }}>
+                          {day ? (
+                            <button
+                              type="button"
+                              disabled={!day.selectable || !day.hasSlots}
+                              onClick={() => {
+                                setPickedDate(day.date);
+                                setSelectedSlot(null);
+                              }}
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                border: "none",
+                                background: isSameDate(day.date, pickedDate)
+                                  ? "var(--kalpx-cta)"
+                                  : "transparent",
+                                color: isSameDate(day.date, pickedDate)
+                                  ? "#fff"
+                                  : day.hasSlots
+                                    ? "#111"
+                                    : "#94a3b8",
+                                borderRadius: isSameDate(day.date, pickedDate)
+                                  ? 14
+                                  : 0,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                fontSize: 16,
+                                fontWeight: 700,
+                                cursor:
+                                  day.selectable && day.hasSlots
+                                    ? "pointer"
+                                    : "not-allowed",
+                                opacity:
+                                  day.selectable && day.hasSlots ? 1 : 0.4,
+                              }}
+                            >
+                              {day.date.getDate()}
+                            </button>
+                          ) : null}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 16,
+                      flex: 1,
+                    }}
+                  >
+                    <h4
+                      style={{
+                        margin: 0,
+                        fontSize: 18,
+                        fontWeight: 700,
+                        color: "#111",
+                      }}
+                    >
+                      Available Slots
+                    </h4>
+
+                    {pickedDate ? (
+                      loadingSlots ? (
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(3, minmax(0, 110px))",
+                            gap: 12,
+                          }}
+                        >
+                          {Array.from({ length: 6 }).map((_, idx) => (
+                            <div
+                              key={idx}
+                              style={{
+                                width: 110,
+                                height: 31,
+                                borderRadius: 6,
+                                background: "#d1d5db",
+                                opacity: 0.75,
+                              }}
+                            />
+                          ))}
+                        </div>
+                      ) : slotTimes.length ? (
+                        <div
+                          style={{
+                            display: "grid",
+                            gridTemplateColumns:
+                              "repeat(auto-fit, minmax(110px, 110px))",
+                            gap: 16,
+                          }}
+                        >
+                          {slotTimes.map((slot, idx) => (
+                            <button
+                              key={`${slot.start_utc}-${idx}`}
+                              type="button"
+                              onClick={() => setSelectedSlot(slot)}
+                              style={{
+                                width: 110,
+                                height: 31,
+                                border: "none",
+                                borderRadius: 6,
+                                background: isSameMinute(
+                                  selectedSlot?.start_utc,
+                                  slot.start_utc,
+                                )
+                                  ? "var(--kalpx-cta)"
+                                  : "#f3f3f4",
+                                color: isSameMinute(
+                                  selectedSlot?.start_utc,
+                                  slot.start_utc,
+                                )
+                                  ? "#fff"
+                                  : "#111",
+                                fontSize: 16,
+                                fontWeight: 700,
+                                cursor: "pointer",
+                              }}
+                            >
+                              {formatTimeLabel(slot)}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div style={{ fontSize: 16, color: "#64748b" }}>
+                          No times on this day.
+                        </div>
+                      )
+                    ) : (
+                      <div style={{ fontSize: 16, color: "#64748b" }}>
+                        Select a date.
+                      </div>
+                    )}
+                    <div
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 16,
+                        fontSize: 14,
+                      }}
+                    >
+                      <div>
+                        <span style={{ color: "#6b7280", fontWeight: 500 }}>
+                          Tutor TZ :{" "}
+                        </span>
+                        <span style={{ color: "#111", fontWeight: 700 }}>
+                          {tutorTz}
+                        </span>
+                      </div>
+                      <div>
+                        <span style={{ color: "#6b7280", fontWeight: 500 }}>
+                          Your TZ :{" "}
+                        </span>
+                        <span style={{ color: "#111", fontWeight: 700 }}>
+                          {userTz}
+                        </span>
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 12,
+                        padding: 8,
+                      }}
+                    >
+                      {hasTrial && (
+                        <label
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                            cursor: "pointer",
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={trialSelected}
+                            onChange={(e) => setTrialSelected(e.target.checked)}
+                            style={{ width: 16, height: 16 }}
+                          />
+                          <span style={{ fontSize: 14, color: "#475569" }}>
+                            Trial at{" "}
+                            <strong style={{ color: "#111" }}>
+                              {formatCurrency(
+                                cls?.pricing?.currency || "INR",
+                                cls?.pricing?.trial?.amount || 0,
+                              )}
+                            </strong>
+                          </span>
+                        </label>
+                      )}
+                      <button
+                        className="kalpx-booking-mobile-cta"
+                        onClick={handleBook}
+                        disabled={!selectedSlot || submitting}
+                        style={{
+                          marginLeft: "auto",
+                          borderRadius: 10,
+                          background: "var(--kalpx-cta)",
+                          color: selectedSlot ? "#fff" : "#111",
+                          padding: "10px 25px",
+                          fontSize: 15,
+                          fontWeight: 700,
+                          opacity: !selectedSlot || submitting ? 0.5 : 1,
+                          cursor:
+                            !selectedSlot || submitting
+                              ? "not-allowed"
+                              : "pointer",
+                        }}
+                      >
+                        {submitting ? "Requesting..." : "Next"}
+                      </button>
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 14,
+                      }}
+                    >
+                      <label
+                        htmlFor="booking-note"
+                        style={{ fontSize: 16, fontWeight: 700, color: "#111" }}
+                      >
+                        Note to tutor{" "}
+                        <span style={{ color: "#6b7280", fontWeight: 500 }}>
+                          (Optional)
+                        </span>
+                      </label>
+                      <textarea
+                        id="booking-note"
+                        value={note}
+                        onChange={(e) => setNote(e.target.value)}
+                        rows={3}
+                        maxLength={500}
+                        placeholder="Enter comment"
+                        style={{
+                          width: "100%",
+                          borderRadius: 10,
+                          padding: "12px 14px",
+                          resize: "vertical",
+                          border: "1.5px solid #111",
+                          fontSize: 14,
+                          outline: "none",
+                          boxSizing: "border-box",
+                          marginBottom: 70,
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <aside
+                className="kalpx-booking-sidebar"
+                style={{
+                  display: "none",
+                  flexDirection: "column",
+                  gap: 16,
+                  background: "#fff",
+                  border: "1px solid rgba(112,112,112,0.18)",
+                  borderRadius: 16,
+                  padding: 20,
+                  boxShadow: "0 8px 28px rgba(0,0,0,0.05)",
+                }}
+              >
+                <div style={{ fontSize: 18, fontWeight: 700, color: "#111" }}>
+                  Tutor Availability
+                </div>
+
+                {hasTrial && (
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      cursor: "pointer",
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={trialSelected}
+                      onChange={(e) => setTrialSelected(e.target.checked)}
+                      style={{ width: 16, height: 16 }}
+                    />
+                    <span style={{ fontSize: 14, color: "#475569" }}>
+                      Trial at{" "}
+                      <strong style={{ color: "#111" }}>
+                        {formatCurrency(
+                          cls?.pricing?.currency || "INR",
+                          cls?.pricing?.trial?.amount || 0,
+                        )}
+                      </strong>
+                    </span>
+                  </label>
+                )}
+
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    fontSize: 14,
+                  }}
+                >
+                  <span style={{ color: "#6b7280", fontWeight: 500 }}>
+                    Duration :
+                  </span>
+                  <span style={{ color: "#111", fontWeight: 600 }}>
+                    {priceLabel.time}
+                  </span>
+                </div>
+
+                <div>
+                  <span
+                    style={{
+                      color: "var(--kalpx-cta)",
+                      fontSize: 18,
+                      fontWeight: 800,
+                    }}
+                  >
+                    {priceLabel.amount}
+                  </span>
+                  <span
+                    style={{ color: "#111", fontSize: 16, fontWeight: 500 }}
+                  >
+                    {" "}
+                    / {priceLabel.type}
+                  </span>
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
                     fontSize: 14,
                   }}
                 >
@@ -798,215 +1502,28 @@ export function ClassBookingPage() {
                     </span>
                   </div>
                 </div>
-                <div
+
+                <button
+                  onClick={handleBook}
+                  disabled={!selectedSlot || submitting}
                   style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: 12,
-                    padding: 8,
+                    borderRadius: 10,
+                    background: "var(--kalpx-cta)",
+                    color: "#111",
+                    padding: "14px 18px",
+                    fontSize: 15,
+                    fontWeight: 700,
+                    opacity: !selectedSlot || submitting ? 0.5 : 1,
+                    cursor:
+                      !selectedSlot || submitting ? "not-allowed" : "pointer",
                   }}
                 >
-                  {hasTrial && (
-                    <label
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 10,
-                        cursor: "pointer",
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={trialSelected}
-                        onChange={(e) => setTrialSelected(e.target.checked)}
-                        style={{ width: 16, height: 16 }}
-                      />
-                      <span style={{ fontSize: 14, color: "#475569" }}>
-                        Trial at{" "}
-                        <strong style={{ color: "#111" }}>
-                          {formatCurrency(
-                            cls?.pricing?.currency || "INR",
-                            cls?.pricing?.trial?.amount || 0,
-                          )}
-                        </strong>
-                      </span>
-                    </label>
-                  )}
-                  <button
-                    className="kalpx-booking-mobile-cta"
-                    onClick={handleBook}
-                    disabled={!selectedSlot || submitting}
-                    style={{
-                      marginLeft: "auto",
-                      borderRadius: 10,
-                      background: "var(--kalpx-cta)",
-                      color: selectedSlot ? "#fff" : "#111",
-                      padding: "10px 25px",
-                      fontSize: 15,
-                      fontWeight: 700,
-                      opacity: !selectedSlot || submitting ? 0.5 : 1,
-                      cursor:
-                        !selectedSlot || submitting ? "not-allowed" : "pointer",
-                    }}
-                  >
-                    {submitting ? "Requesting..." : "Next"}
-                  </button>
-                </div>
-                <div
-                  style={{ display: "flex", flexDirection: "column", gap: 14 }}
-                >
-                  <label
-                    htmlFor="booking-note"
-                    style={{ fontSize: 16, fontWeight: 700, color: "#111" }}
-                  >
-                    Note to tutor{" "}
-                    <span style={{ color: "#6b7280", fontWeight: 500 }}>
-                      (Optional)
-                    </span>
-                  </label>
-                  <textarea
-                    id="booking-note"
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    rows={3}
-                    maxLength={500}
-                    placeholder="Enter comment"
-                    style={{
-                      width: "100%",
-                      borderRadius: 10,
-                      padding: "12px 14px",
-                      resize: "vertical",
-                      border: "1.5px solid #111",
-                      fontSize: 14,
-                      outline: "none",
-                      boxSizing: "border-box",
-                      marginBottom: 70,
-                    }}
-                  />
-                </div>
-              </div>
+                  {submitting ? "Requesting..." : "Book Now"}
+                </button>
+              </aside>
             </div>
-          </div>
-
-          <aside
-            className="kalpx-booking-sidebar"
-            style={{
-              display: "none",
-              flexDirection: "column",
-              gap: 16,
-              background: "#fff",
-              border: "1px solid rgba(112,112,112,0.18)",
-              borderRadius: 16,
-              padding: 20,
-              boxShadow: "0 8px 28px rgba(0,0,0,0.05)",
-            }}
-          >
-            <div style={{ fontSize: 18, fontWeight: 700, color: "#111" }}>
-              Tutor Availability
-            </div>
-
-            {hasTrial && (
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 10,
-                  cursor: "pointer",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={trialSelected}
-                  onChange={(e) => setTrialSelected(e.target.checked)}
-                  style={{ width: 16, height: 16 }}
-                />
-                <span style={{ fontSize: 14, color: "#475569" }}>
-                  Trial at{" "}
-                  <strong style={{ color: "#111" }}>
-                    {formatCurrency(
-                      cls?.pricing?.currency || "INR",
-                      cls?.pricing?.trial?.amount || 0,
-                    )}
-                  </strong>
-                </span>
-              </label>
-            )}
-
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                fontSize: 14,
-              }}
-            >
-              <span style={{ color: "#6b7280", fontWeight: 500 }}>
-                Duration :
-              </span>
-              <span style={{ color: "#111", fontWeight: 600 }}>
-                {priceLabel.time}
-              </span>
-            </div>
-
-            <div>
-              <span
-                style={{
-                  color: "var(--kalpx-cta)",
-                  fontSize: 18,
-                  fontWeight: 800,
-                }}
-              >
-                {priceLabel.amount}
-              </span>
-              <span style={{ color: "#111", fontSize: 16, fontWeight: 500 }}>
-                {" "}
-                / {priceLabel.type}
-              </span>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 8,
-                fontSize: 14,
-              }}
-            >
-              <div>
-                <span style={{ color: "#6b7280", fontWeight: 500 }}>
-                  Tutor TZ :{" "}
-                </span>
-                <span style={{ color: "#111", fontWeight: 700 }}>
-                  {tutorTz}
-                </span>
-              </div>
-              <div>
-                <span style={{ color: "#6b7280", fontWeight: 500 }}>
-                  Your TZ :{" "}
-                </span>
-                <span style={{ color: "#111", fontWeight: 700 }}>{userTz}</span>
-              </div>
-            </div>
-
-            <button
-              onClick={handleBook}
-              disabled={!selectedSlot || submitting}
-              style={{
-                borderRadius: 10,
-                background: "var(--kalpx-cta)",
-                color: "#111",
-                padding: "14px 18px",
-                fontSize: 15,
-                fontWeight: 700,
-                opacity: !selectedSlot || submitting ? 0.5 : 1,
-                cursor: !selectedSlot || submitting ? "not-allowed" : "pointer",
-              }}
-            >
-              {submitting ? "Requesting..." : "Book Now"}
-            </button>
-          </aside>
-        </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -1029,5 +1546,51 @@ const monthArrowBtn: React.CSSProperties = {
   lineHeight: 1,
   padding: 0,
   color: "#111",
+  cursor: "pointer",
+};
+
+const stepActiveStyle: React.CSSProperties = {
+  width: 50,
+  height: 50,
+  minWidth: 50,
+  borderRadius: "50%",
+  background: "var(--kalpx-cta)",
+  color: "#2f2f2f",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: 26,
+  fontWeight: 800,
+};
+
+const stepInactiveStyle: React.CSSProperties = {
+  width: 50,
+  height: 50,
+  minWidth: 50,
+  borderRadius: "50%",
+  background: "#dedede",
+  color: "#2f2f2f",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: 26,
+  fontWeight: 800,
+};
+
+const stepLineStyle: React.CSSProperties = {
+  height: 2,
+  background: "#d9d9d9",
+  flex: 1,
+  minWidth: 60,
+};
+
+const desktopHeaderBtn: React.CSSProperties = {
+  borderRadius: 8,
+  border: "1px solid #2f2f2f",
+  background: "#fff",
+  color: "#2f2f2f",
+  padding: "5px 15px",
+  fontSize: 16,
+  fontWeight: 700,
   cursor: "pointer",
 };

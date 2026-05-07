@@ -17,15 +17,24 @@ function SkeletonBox({ w = '100%', h = 16, mb = 8, radius = 6 }: { w?: string | 
 
 export function ClassCardSkeleton() {
   return (
-    <div style={{ background: '#fff', border: '1px solid #f0e8d8', borderRadius: 14, overflow: 'hidden', marginBottom: 14 }}>
-      <SkeletonBox h={160} mb={0} radius={0} />
-      <div style={{ padding: '12px 16px 16px' }}>
-        <SkeletonBox w="30%" h={11} mb={6} />
-        <SkeletonBox w="80%" h={20} mb={6} />
-        <SkeletonBox w="40%" h={14} mb={12} />
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <SkeletonBox w="25%" h={12} />
-          <SkeletonBox w="20%" h={16} />
+    <div
+      style={{
+        background: 'var(--kalpx-card-bg)',
+        border: '1px solid var(--kalpx-border-gold)',
+        borderRadius: 22,
+        marginBottom: 22,
+        boxShadow: '0 10px 22px rgba(67, 33, 4, 0.08)',
+        padding: '22px 24px',
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 20 }}>
+        <div style={{ flex: 1 }}>
+          <SkeletonBox w="68%" h={24} mb={12} radius={8} />
+          <SkeletonBox w="22%" h={28} mb={12} radius={10} />
+          <SkeletonBox w="44%" h={16} mb={0} radius={8} />
+        </div>
+        <div style={{ width: 110, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <SkeletonBox w="80%" h={22} mb={0} radius={8} />
         </div>
       </div>
     </div>

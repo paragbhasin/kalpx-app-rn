@@ -9,9 +9,15 @@ interface StripePaymentFormProps {
   onSuccess: () => void;
   onError: (message: string) => void;
   returnUrl: string;
+  submitLabel?: string;
 }
 
-export function StripePaymentForm({ onSuccess, onError, returnUrl }: StripePaymentFormProps) {
+export function StripePaymentForm({
+  onSuccess,
+  onError,
+  returnUrl,
+  submitLabel = "Pay now",
+}: StripePaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [submitting, setSubmitting] = useState(false);
@@ -56,15 +62,15 @@ export function StripePaymentForm({ onSuccess, onError, returnUrl }: StripePayme
           width: '100%',
           padding: '14px 24px',
           borderRadius: 12,
-          background: submitting ? '#c0a07a' : '#b06840',
+          background: submitting ? '#d1a646' : '#e0a90c',
           color: '#fff',
           border: 'none',
-          fontSize: 15,
-          fontWeight: 600,
+          fontSize: 16,
+          fontWeight: 700,
           cursor: submitting ? 'not-allowed' : 'pointer',
         }}
       >
-        {submitting ? 'Processing...' : 'Pay now'}
+        {submitting ? 'Processing...' : submitLabel}
       </button>
     </form>
   );

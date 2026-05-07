@@ -57,7 +57,10 @@ export async function getClassDetail(slug: string): Promise<ClassDetail | null> 
 
 export async function getClassSlots(params: {
   offering_id: number;
-  timezone: string;
+  timezone?: string;
+  date?: string;
+  user_timezone?: string;
+  tutor_timezone?: string;
   start_date?: string;
 }): Promise<ClassSlotsResponse | null> {
   try {

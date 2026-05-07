@@ -2,7 +2,12 @@ import { isAuthenticated } from "@kalpx/auth";
 import type { ClassDaySlots, ClassDetail, ClassSlot } from "@kalpx/types";
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { createBooking, getClassDetail } from "../../engine/classApi";
+import {
+  createBooking,
+  createPaymentIntent,
+  getClassDetail,
+  getClassSlots,
+} from "../../engine/classApi";
 import { WEB_ENV } from "../../lib/env";
 import { webStorage } from "../../lib/webStorage";
 
@@ -172,6 +177,7 @@ export function ClassBookingPage() {
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [note, setNote] = useState("");
   const [trialSelected, setTrialSelected] = useState(false);
 
@@ -181,9 +187,14 @@ export function ClassBookingPage() {
   const [slotTimes, setSlotTimes] = useState<ClassSlot[]>([]);
 
   const userTz = useMemo(() => getTz(), []);
-  const tutorTz =
-    cls?.class_availability?.timezone || cls?.tutor?.timezone || "Asia/Kolkata";
-  const availableSlots = cls?.available_slots ?? [];
+  const tutorTz = useMemo(
+    () =>
+      cls?.class_availability?.timezone ||
+      cls?.tutor?.timezone ||
+      "Asia/Kolkata",
+    [cls],
+  );
+  const availableSlots = useMemo(() => cls?.available_slots ?? [], [cls]);
   const priceLabel = useMemo(
     () => getPriceLabel(cls, trialSelected),
     [cls, trialSelected],
@@ -255,6 +266,12 @@ export function ClassBookingPage() {
     return () => window.clearTimeout(timer);
   }, [availableSlots, pickedDate]);
 
+  useEffect(() => {
+    if (!toastMessage) return;
+    const timer = window.setTimeout(() => setToastMessage(null), 3000);
+    return () => window.clearTimeout(timer);
+  }, [toastMessage]);
+
   function shiftMonth(delta: number) {
     setSelectedSlot(null);
     setSlotTimes([]);
@@ -275,6 +292,33 @@ export function ClassBookingPage() {
     setError(null);
 
     try {
+      const selectedDate = pickedDate
+        ? formatDateLocal(pickedDate)
+        : formatDateLocal(new Date(selectedSlot.start_utc));
+      const slotsResponse = await getClassSlots({
+        offering_id: cls.id,
+        date: selectedDate,
+        user_timezone: userTz,
+        tutor_timezone: tutorTz,
+      });
+
+      const liveSlots = slotsResponse?.slots ?? [];
+      const slotStillAvailable = liveSlots.some(
+        (slot) =>
+          slot.start_utc === selectedSlot.start_utc ||
+          slot.start_user === selectedSlot.start_utc,
+      );
+
+      if (!slotStillAvailable) {
+        setSelectedSlot(null);
+        setSlotTimes(liveSlots);
+        setToastMessage(
+          "Selected slot is no longer available. Please choose another slot.",
+        );
+        setError(null);
+        return;
+      }
+
       const result = await createBooking({
         offering_id: cls.id,
         scheduled_at: selectedSlot.start_utc,
@@ -286,7 +330,26 @@ export function ClassBookingPage() {
 
       const bookingId = result?.data?.booking_id ?? result?.booking_id;
       if (!bookingId) {
-        setError("Booking failed. Please try again.");
+        setToastMessage("Booking failed. Please try again.");
+        return;
+      }
+
+      const requiresPayment =
+        (result as any)?.data?.requires_payment ??
+        (result as any)?.requires_payment ??
+        true;
+
+      if (!requiresPayment) {
+        navigate(`/en/classes/success?slug=${slug}&booking_id=${bookingId}`);
+        return;
+      }
+
+      const paymentIntent = await createPaymentIntent({
+        booking_id: bookingId,
+      });
+      const clientSecret = paymentIntent?.client_secret;
+      if (!clientSecret) {
+        setToastMessage("Could not start payment. Please try again.");
         return;
       }
 
@@ -297,6 +360,7 @@ export function ClassBookingPage() {
         amount: priceLabel.amount,
         title: cls.title || "Class",
         type: priceLabel.type,
+        cs: clientSecret,
       });
       navigate(`/en/classes/${slug}/pay?${paymentParams.toString()}`);
     } catch (err: any) {
@@ -305,7 +369,8 @@ export function ClassBookingPage() {
         err?.response?.data?.error ||
         err?.message ||
         "Booking failed.";
-      setError(msg);
+      setError(null);
+      setToastMessage(msg);
     } finally {
       setSubmitting(false);
     }
@@ -345,6 +410,28 @@ export function ClassBookingPage() {
 
   return (
     <div style={{ minHeight: "100dvh", background: "#fffff" }}>
+      {toastMessage && (
+        <div
+          style={{
+            position: "fixed",
+            left: "50%",
+            bottom: 24,
+            transform: "translateX(-50%)",
+            zIndex: 1200,
+            background: "#2f2418",
+            color: "#fff",
+            borderRadius: 12,
+            padding: "12px 16px",
+            fontSize: 14,
+            fontWeight: 600,
+            boxShadow: "0 12px 28px rgba(0,0,0,0.24)",
+            maxWidth: "calc(100vw - 32px)",
+            textAlign: "center",
+          }}
+        >
+          {toastMessage}
+        </div>
+      )}
       <style>{`
         @media (min-width: 1024px) {
           .kalpx-booking-shell {
@@ -375,7 +462,7 @@ export function ClassBookingPage() {
 
         <div
           className="kalpx-booking-shell"
-          style={{ display: "grid", gap: 24, marginTop: 18 }}
+          style={{ display: "grid", gap: 24 }}
         >
           <div
             style={{
@@ -401,22 +488,6 @@ export function ClassBookingPage() {
                 Book a session
               </h1>
             </div>
-
-            {error && (
-              <div
-                style={{
-                  marginBottom: 16,
-                  padding: "12px 14px",
-                  borderRadius: 10,
-                  background: "#fff1f0",
-                  border: "1px solid #fca5a5",
-                }}
-              >
-                <p style={{ margin: 0, color: "#b91c1c", fontSize: 13 }}>
-                  {error}
-                </p>
-              </div>
-            )}
 
             <div
               style={{
@@ -496,31 +567,6 @@ export function ClassBookingPage() {
               >
                 View more details
               </button>
-
-              {cls?.description ? (
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: 16,
-                    color: "#303030",
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {cls.description}
-                </p>
-              ) : null}
-
-              {selectedSlot ? (
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: 15,
-                    color: "#6b7280",
-                  }}
-                >
-                  Selected: {formatDateRange(selectedSlot.start_utc, priceLabel.time)}
-                </p>
-              ) : null}
             </div>
 
             <div
@@ -752,7 +798,15 @@ export function ClassBookingPage() {
                     </span>
                   </div>
                 </div>
-                <div className="flex justify-between p-2">
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 12,
+                    padding: 8,
+                  }}
+                >
                   {hasTrial && (
                     <label
                       style={{
@@ -784,7 +838,7 @@ export function ClassBookingPage() {
                     onClick={handleBook}
                     disabled={!selectedSlot || submitting}
                     style={{
-                      alignSelf: "flex-start",
+                      marginLeft: "auto",
                       borderRadius: 10,
                       background: "var(--kalpx-cta)",
                       color: selectedSlot ? "#fff" : "#111",

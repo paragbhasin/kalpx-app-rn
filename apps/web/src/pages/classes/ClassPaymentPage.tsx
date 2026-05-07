@@ -57,6 +57,7 @@ export function ClassPaymentPage() {
   const [searchParams] = useSearchParams();
 
   const bookingId = Number(searchParams.get("booking_id"));
+  const clientSecretFromQuery = searchParams.get("cs");
   const scheduledAt = searchParams.get("scheduled_at");
   const duration = searchParams.get("duration");
   const amount = searchParams.get("amount");
@@ -77,8 +78,13 @@ export function ClassPaymentPage() {
 
     void (async () => {
       try {
+        setLoading(true);
+        setError(null);
+        setClientSecret(clientSecretFromQuery ?? null);
         const [paymentResult, classResult] = await Promise.all([
-          createPaymentIntent({ booking_id: bookingId }),
+          clientSecretFromQuery
+            ? Promise.resolve({ client_secret: clientSecretFromQuery })
+            : createPaymentIntent({ booking_id: bookingId }),
           slug ? getClassDetail(slug) : Promise.resolve(null),
         ]);
 
@@ -99,7 +105,7 @@ export function ClassPaymentPage() {
         setLoading(false);
       }
     })();
-  }, [bookingId, slug]);
+  }, [bookingId, slug, clientSecretFromQuery]);
 
   useEffect(() => {
     if (loading || error) return;
@@ -350,6 +356,7 @@ export function ClassPaymentPage() {
                 }}
               >
                 <Elements
+                  key={clientSecret}
                   stripe={stripePromise}
                   options={{
                     clientSecret,

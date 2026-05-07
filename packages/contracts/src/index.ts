@@ -6,3 +6,4 @@ export * from './blockTypeRegistry';
 export * from './data/sankalps';
 export * from './data/mantras';
 export * from './data/Practice';
+export * from './curatedWhyThis';

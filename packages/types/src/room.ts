@@ -370,6 +370,23 @@ export interface PrincipleBanner {
 }
 
 // ───────────────────────────────────────────────────────────────────────────
+// Stage 1 Curated Intelligence — room selection (MITRA_CURATED_ROOMS=1)
+// ───────────────────────────────────────────────────────────────────────────
+
+/** Populated only when show_room_why_this=true (curated_success path). */
+export interface RoomSelectedItem {
+  item_id: string;
+  item_type: string;
+  title: string;
+  short_label: string;
+  room_support_line: string;
+  why_this_short: string;
+  freshness_group: string;
+  semantic_family: string;
+  source_family: string;
+}
+
+// ───────────────────────────────────────────────────────────────────────────
 // Top-level envelope (§7.1)
 // ───────────────────────────────────────────────────────────────────────────
 
@@ -442,6 +459,16 @@ export interface RoomRenderV1 {
    * reference ("Last time, you named someone who matters.").
    */
   memory_echo_line?: string | null;
+
+  // ─────────────────────────────────────────────────────────────────────
+  // Stage 1 Curated Intelligence fields — present only when
+  // MITRA_CURATED_ROOMS=1. Absent on flag=0 responses.
+  // ─────────────────────────────────────────────────────────────────────
+  show_room_why_this?: boolean | null;
+  /** Populated only on curated_success (show_room_why_this=true + pool hit). */
+  selected_item?: RoomSelectedItem | null;
+  condition_key?: string | null;
+  selection_source?: string | null;
 }
 
 // ───────────────────────────────────────────────────────────────────────────

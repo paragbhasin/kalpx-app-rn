@@ -1,4 +1,5 @@
 import React from 'react';
+import type { RoomWhyThisState } from '@kalpx/contracts';
 
 interface PrincipleBanner {
   source_line?: string | null;
@@ -11,16 +12,29 @@ interface PrincipleBanner {
 
 interface Props {
   banner: PrincipleBanner;
+  screenData?: Record<string, any>;
   onAction?: (action: any) => void;
 }
 
-export function RoomPrincipleBanner({ banner, onAction }: Props) {
+export function RoomPrincipleBanner({ banner, screenData, onAction }: Props) {
   if (!banner.principle_text && !banner.source_line) return null;
 
-  const isTappable = !!banner.principle_id && !!onAction;
+  const whyThisState = screenData?.room_why_this_state as RoomWhyThisState | undefined;
+  const shouldSuppressTap = whyThisState?.shouldSuppressTap === true;
+  const isCuratedSuccess = whyThisState?.mode === 'curated_success';
+  const isTappable = !shouldSuppressTap && !!banner.principle_id && !!onAction;
+  const cardLabel = isCuratedSuccess
+    ? (whyThisState!.selectedItem?.short_label ?? 'A teaching')
+    : 'A teaching';
 
   const handleTap = () => {
-    if (isTappable) {
+    if (!isTappable) return;
+    if (isCuratedSuccess && whyThisState?.selectedItem) {
+      onAction?.({
+        type: 'open_why_this_l2',
+        payload: { curated_content: whyThisState.selectedItem },
+      });
+    } else {
       onAction?.({ type: 'open_why_this_l2', principle_id: banner.principle_id });
     }
   };
@@ -43,6 +57,9 @@ export function RoomPrincipleBanner({ banner, onAction }: Props) {
       tabIndex={isTappable ? 0 : undefined}
       onKeyDown={(e) => isTappable && e.key === 'Enter' && handleTap()}
     >
+      <p style={{ fontSize: 11, color: 'var(--kalpx-cta)', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 8 }}>
+        {cardLabel}
+      </p>
       {banner.source_line && (
         <p style={{ fontSize: 11, color: 'var(--kalpx-cta)', letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 8 }}>
           {banner.source_line}
@@ -63,7 +80,6 @@ export function RoomPrincipleBanner({ banner, onAction }: Props) {
           — {banner.tradition_tag}
         </p>
       )}
-      {/* Chevron visible when principle_id is present */}
       {isTappable && (
         <span
           style={{

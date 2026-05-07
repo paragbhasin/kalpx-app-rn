@@ -4243,6 +4243,22 @@ export async function executeAction(
       }
 
       case "open_why_this_l2": {
+        // Curated room path — content already in hand, skip getPrinciple() API call.
+        const curatedContent = payload?.curated_content;
+        if (curatedContent) {
+          const { buildMobileCuratedRoomL2Payload } = await import("@kalpx/contracts");
+          setScreenValue(buildMobileCuratedRoomL2Payload(curatedContent), "why_this_principle");
+          setScreenValue(null, "why_this_source");
+          loadScreen({
+            container_id:
+              (screenState._overlay_parent_container as string) ||
+              screenState.currentContainerId ||
+              "companion_dashboard",
+            state_id: "why_this_l2",
+          } as any);
+          break;
+        }
+        // Legacy path — fetch principle by ID.
         const principleId = payload?.principle_id;
         if (!principleId) {
           console.warn("[open_why_this_l2] missing principle_id");
@@ -4639,6 +4655,7 @@ export async function executeAction(
         // Clear room-scoped screenData so stale state doesn't bleed into
         // a subsequent room entry.
         setScreenValue(null, "room_id");
+        setScreenValue(null, "_overlay_parent_container");
         // Route to the v3 dashboard when the new-dashboard flag is on,
         // otherwise legacy. Mirrors continue_practice handler at line
         // ~494 of this file.

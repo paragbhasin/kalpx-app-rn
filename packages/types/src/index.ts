@@ -5,3 +5,4 @@ export * from './classes';
 export * from './community';
 export * from './retreats';
 export * from './notifications';
+export * from './whyThis';

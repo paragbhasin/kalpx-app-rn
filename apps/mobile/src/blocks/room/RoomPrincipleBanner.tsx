@@ -5,9 +5,10 @@
  * array, no tap-to-expand inline (I-10). Null self-hides per I-6 sovereignty
  * fallback — no English placeholder leakage.
  *
- * Tap opens WhyThisL2Sheet via open_why_this_l2 dispatch. wisdom_anchor_line
- * is stamped as the immediate body placeholder; the handler overwrites with
- * a full principle fetch using principle_id.
+ * Tap opens WhyThisL2Sheet via open_why_this_l2 dispatch. Curated path
+ * dispatches curated_content; legacy path fetches via principle_id.
+ * Tap is suppressed when room_why_this_state.shouldSuppressTap=true
+ * (curated_fallback mode — no valid selection was made).
  */
 
 import React from "react";
@@ -18,43 +19,67 @@ import { useScreenStore } from "../../engine/useScreenBridge";
 import { RoomActionBannerScalar } from "./actions";
 import { buildActionCtx } from "./actions/actionContextHelper";
 import type { PrincipleBanner } from "./types";
+import type { RoomWhyThisState } from "@kalpx/contracts";
 
 interface Props {
   banner: PrincipleBanner | null;
 }
 
 const RoomPrincipleBanner: React.FC<Props> = ({ banner }) => {
-  const { loadScreen, goBack } = useScreenStore();
+  const { screenData, loadScreen, goBack } = useScreenStore();
 
-  // §I-6 sovereignty: null self-hides.
   if (!banner) return null;
+
+  const whyThisState = (screenData as any)?.room_why_this_state as
+    | RoomWhyThisState
+    | undefined;
+  const shouldSuppressTap = whyThisState?.shouldSuppressTap === true;
+  const isCuratedSuccess = whyThisState?.mode === "curated_success";
+  const cardLabel = isCuratedSuccess
+    ? (whyThisState!.selectedItem?.short_label ?? undefined)
+    : undefined;
 
   const onPress = () => {
     const ctx = buildActionCtx({ loadScreen, goBack });
-    // Stamp wisdom_anchor_line as placeholder body so the sheet renders
-    // immediately while the handler fetches the full principle body.
-    ctx.setScreenValue(
-      {
-        id: banner.principle_id,
-        name: banner.principle_name,
-        principle_name: banner.principle_name,
-        body: banner.wisdom_anchor_line,
-        // WhyThisL2Sheet renders p.essence — use wisdom_anchor_line as the
-        // immediate placeholder so the sheet shows text while the handler
-        // fetches the full principle body via principle_id.
-        essence: banner.wisdom_anchor_line,
-        sources: [],
-      },
-      "why_this_principle",
-    );
-    executeAction(
-      {
-        type: "open_why_this_l2",
-        payload: { principle_id: banner.principle_id },
-      } as any,
-      ctx,
-    ).catch(() => {});
+    if (isCuratedSuccess && whyThisState?.selectedItem) {
+      executeAction(
+        {
+          type: "open_why_this_l2",
+          payload: { curated_content: whyThisState.selectedItem },
+        } as any,
+        ctx,
+      ).catch(() => {});
+    } else {
+      ctx.setScreenValue(
+        {
+          id: banner.principle_id,
+          name: banner.principle_name,
+          principle_name: banner.principle_name,
+          body: banner.wisdom_anchor_line,
+          essence: banner.wisdom_anchor_line,
+          sources: [],
+        },
+        "why_this_principle",
+      );
+      executeAction(
+        {
+          type: "open_why_this_l2",
+          payload: { principle_id: banner.principle_id },
+        } as any,
+        ctx,
+      ).catch(() => {});
+    }
   };
+
+  const inner = (
+    <View>
+      <RoomActionBannerScalar banner={banner} cardLabel={cardLabel} />
+    </View>
+  );
+
+  if (shouldSuppressTap) {
+    return <View style={styles.wrap}>{inner}</View>;
+  }
 
   return (
     <TouchableOpacity
@@ -64,9 +89,7 @@ const RoomPrincipleBanner: React.FC<Props> = ({ banner }) => {
       activeOpacity={0.7}
       onPress={onPress}
     >
-      <View>
-        <RoomActionBannerScalar banner={banner} />
-      </View>
+      {inner}
     </TouchableOpacity>
   );
 };

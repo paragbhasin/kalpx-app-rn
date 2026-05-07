@@ -23,6 +23,7 @@ import { useScreenStore } from "../engine/useScreenBridge";
 import store from "../store";
 import { screenActions } from "../store/screenSlice";
 import { Fonts } from "../theme/fonts";
+import { isRoomWhyThisContext } from "@kalpx/contracts";
 
 const VALID_INFO_TYPES = ["mantra", "sankalp", "practice"] as const;
 
@@ -30,6 +31,7 @@ const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
   const { screenData, loadScreen, goBack } = useScreenStore();
   const sd = screenData as any;
   const p = sd.why_this_principle;
+  const isRoomCtx = isRoomWhyThisContext(sd);
 
   // Flag-off / 404 tolerance — render a minimal placeholder and a Got it exit.
   if (!p) {
@@ -49,16 +51,11 @@ const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
     );
   }
 
-  // Founder adjustment #1 (2026-04-19): "Go deeper" is only visible when
-  // a linked item type + data is resolvable. Principles today ship without
-  // item bindings, so this gate almost always hides the CTA — which is
-  // the correct behavior ("sheet = interpretation, info screen =
-  // understanding"). If a future principle authors a linked_item_type +
-  // linked_item_id pair, the CTA re-surfaces automatically and routes to
-  // view_info instead of the retired open_why_this_l3 drill-down.
+  // "Go deeper" only in non-room contexts with a resolvable linked item.
   const linkedType: string =
     typeof p.linked_item_type === "string" ? p.linked_item_type : "";
   const canGoDeeper =
+    !isRoomCtx &&
     (VALID_INFO_TYPES as readonly string[]).includes(linkedType) &&
     !!sd[`master_${linkedType}`];
 
@@ -76,13 +73,17 @@ const WhyThisL2Sheet: React.FC<{ block?: any }> = () => {
     );
   };
 
+  const headerLabel = isRoomCtx ? "WHY THIS MAY HELP" : "WHY THIS";
+
   return (
     <View style={styles.sheet}>
       <View style={styles.handle} />
-      <Text style={styles.label}>WHY THIS</Text>
-      <Text style={styles.name}>{p.name || p.title}</Text>
+      <Text style={styles.label}>{headerLabel}</Text>
+      {!isRoomCtx && (p.name || p.title) ? (
+        <Text style={styles.name}>{p.name || p.title}</Text>
+      ) : null}
       {p.essence ? <Text style={styles.essence}>{p.essence}</Text> : null}
-      {p.tradition_family ? (
+      {!isRoomCtx && p.tradition_family ? (
         <Text
           style={styles.tradition}
           testID="why_this_l2_tradition"

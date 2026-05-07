@@ -25,6 +25,8 @@ import { SankalpCarryBlock } from "./dashboard/SankalpCarryBlock";
 import { SupportReturnModal } from "./dashboard/SupportReturnModal";
 import { TriadCardsRow } from "./dashboard/TriadCardsRow";
 import { WhyThisSheet } from "./dashboard/WhyThisSheet";
+import { normalizeDashboardWhyThisState } from "@kalpx/contracts";
+import type { DashboardWhyThis } from "@kalpx/types";
 
 interface Props {
   block?: Record<string, any>;
@@ -43,9 +45,9 @@ export function NewDashboardBodyBlock({ screenData, onAction }: Props) {
     );
   }, [dispatch]);
 
-  const hasWhyThis =
-    (Array.isArray(sd.why_this_l1_items) && sd.why_this_l1_items.length > 0) ||
-    !!sd.why_this?.level1;
+  const hasWhyThis = normalizeDashboardWhyThisState(
+    sd.why_this as DashboardWhyThis | undefined,
+  ).canOpenWhyThis;
 
   const hasContinuity = sd.continuity?.tier && sd.continuity.tier !== "none";
   const hasSankalpCarry =

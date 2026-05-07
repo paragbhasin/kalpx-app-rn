@@ -44,10 +44,13 @@ import type {
   RoomId,
   RoomRenderV1,
 } from "@kalpx/types";
+import { normalizeRoomWhyThisState } from "@kalpx/contracts";
 import { executeAction } from "../engine/actionExecutor";
 import { mitraTrackEvent, trackRoomTelemetry } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
 import { useToast } from "../context/ToastContext";
+import store from "../store";
+import { screenActions } from "../store/screenSlice";
 
 interface Props {
   schema?: any;
@@ -471,6 +474,12 @@ const RoomRenderBranch: React.FC<RenderBranchProps> = ({
           throw new Error("envelope_malformed");
         }
         setEnvelope(data as RoomRenderV1);
+        store.dispatch(
+          screenActions.setScreenValue({
+            key: 'room_why_this_state',
+            value: normalizeRoomWhyThisState(data as RoomRenderV1),
+          }),
+        );
         // FIX-4: surface life_context selection outcome when user chose a context
         if (lifeContext && data.provenance) {
           if (data.provenance.life_context_skipped) {

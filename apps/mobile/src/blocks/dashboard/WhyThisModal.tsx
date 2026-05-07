@@ -27,6 +27,8 @@ import {
 import { Colors } from "../../theme/colors";
 import { Fonts } from "../../theme/fonts";
 import { extractWhyThis } from "./whyThisUtils";
+import { normalizeDashboardWhyThisState } from "@kalpx/contracts";
+import type { DashboardWhyThis } from "@kalpx/types";
 
 const BeigeBg = require("../../../assets/beige_bg.png");
 
@@ -37,22 +39,29 @@ type Props = {
 };
 
 const WhyThisModal: React.FC<Props> = ({ visible, onClose, screenData }) => {
+  const whyThisState = normalizeDashboardWhyThisState(
+    screenData?.why_this as DashboardWhyThis | undefined,
+  );
+
+  if (!whyThisState.canOpenWhyThis) return null;
+
   const { level1, level2, level3 } = extractWhyThis(screenData);
   const hasPrinciple = !!(level1 || level2 || level3);
+
+  const eyebrow = whyThisState.label?.toUpperCase() ?? "WHY THIS WAS CHOSEN";
 
   const rawItems: { id: string; label: string }[] = Array.isArray(
     screenData?.why_this_l1_items,
   )
     ? screenData.why_this_l1_items
     : [];
-  // Exclude the "principle" synthetic item — that content is the principle section above.
   const items = rawItems.filter((i) => i?.id !== "principle" && !!i?.label);
   const itemNameMap: Record<string, string> = {
     mantra: screenData?.card_mantra_title || "",
     sankalp: screenData?.card_sankalpa_title || "",
     practice: screenData?.card_ritual_title || "",
   };
-  const hasItems = items.length > 0;
+  const hasItems = whyThisState.showPathItems && items.length > 0;
 
   return (
     <Modal
@@ -77,7 +86,7 @@ const WhyThisModal: React.FC<Props> = ({ visible, onClose, screenData }) => {
 
             {/* Pinned header */}
             <View style={styles.header}>
-              <Text style={styles.eyebrow}>WHY THIS WAS CHOSEN</Text>
+              <Text style={styles.eyebrow}>{eyebrow}</Text>
               <TouchableOpacity
                 onPress={onClose}
                 activeOpacity={0.7}
@@ -171,7 +180,9 @@ const WhyThisModal: React.FC<Props> = ({ visible, onClose, screenData }) => {
                               {itemNameMap[item.id]}
                             </Text>
                           )}
-                          <Text style={styles.itemLabel}>{item.label}</Text>
+                          <Text style={styles.itemLabel}>
+                            {whyThisState.itemSpecificLines[item.id] ?? item.label}
+                          </Text>
                         </View>
                       </View>
                     );

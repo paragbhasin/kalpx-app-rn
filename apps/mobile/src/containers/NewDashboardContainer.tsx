@@ -61,7 +61,8 @@ import SankalpCarryBlock from "../blocks/dashboard/SankalpCarryBlock";
 import SupportReturnModal from "../blocks/dashboard/SupportReturnModal";
 import TriadCardsRow from "../blocks/dashboard/TriadCardsRow";
 import WhyThisModal from "../blocks/dashboard/WhyThisModal";
-import { extractWhyThis } from "../blocks/dashboard/whyThisUtils";
+import { normalizeDashboardWhyThisState } from "@kalpx/contracts";
+import type { DashboardWhyThis } from "@kalpx/types";
 
 // ── Registered moment blocks (Phase 3 re-uses existing scaffolds) ─────────
 // DayTypeChip removed 2026-04-18 per founder call — kept scaffold in
@@ -232,7 +233,7 @@ const NewDashboardContainer: React.FC<Props> = () => {
 
         {/* 3. Triad + why this was chosen link */}
         <TriadCardsRow />
-        {extractWhyThis(sd).hasContent && (
+        {normalizeDashboardWhyThisState(sd?.why_this as DashboardWhyThis | undefined).canOpenWhyThis && (
           <>
             <TouchableOpacity
               onPress={() => setWhyOpen(true)}

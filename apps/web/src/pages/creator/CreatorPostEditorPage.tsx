@@ -9,6 +9,7 @@ import {
   type MouseEvent as ReactMouseEvent,
 } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { formatPracticeTypeLabel } from "../../data/creatorPracticeCatalog";
 import {
   getCommunities,
   uploadCommunityMedia,
@@ -128,6 +129,16 @@ function buildLinkedItemType(category: unknown, type: unknown) {
     ? cleanType.split(":").pop()
     : cleanType;
   return `${cleanCategory}:${finalType}`;
+}
+
+function toMaybePostId(id?: string) {
+  return id || null;
+}
+
+function readCategoryFromLinkedType(type: unknown) {
+  const value = String(type || "").trim();
+  if (!value.includes(":")) return undefined;
+  return value.split(":")[0];
 }
 
 function defaultSlide(aspectRatio: string): EditorSlide {
@@ -686,10 +697,54 @@ export function CreatorPostEditorPage() {
         if (!mounted) return;
         setCommunities(communityRes.results || []);
 
-        const selectedPracticeData = sessionStorage.getItem("selectedPractice");
-        if (selectedPracticeData) {
-          setSelectedPractice(JSON.parse(selectedPracticeData));
+        const tempDataRaw = sessionStorage.getItem("postEditor.tempData");
+        const returnedPracticeRaw = sessionStorage.getItem("selectedPractice");
+        const returnedPractice = returnedPracticeRaw
+          ? (JSON.parse(returnedPracticeRaw) as SelectedPractice)
+          : null;
+
+        if (returnedPracticeRaw) {
           sessionStorage.removeItem("selectedPractice");
+        }
+
+        if (tempDataRaw) {
+          const tempData = JSON.parse(tempDataRaw) as {
+            postId: string | null;
+            postTitle?: string;
+            baseLanguage?: string;
+            aspectRatio?: string;
+            baseCaption?: string;
+            communitySlug?: string;
+            selectedPractice?: SelectedPractice | null;
+            slides?: EditorSlide[];
+          };
+
+          if (tempData.postId === toMaybePostId(id)) {
+            setPostTitle(tempData.postTitle || "");
+            setBaseLanguage(tempData.baseLanguage || "en");
+            setAspectRatio(tempData.aspectRatio || "1:1");
+            setBaseCaption(tempData.baseCaption || "");
+            setCommunitySlug(tempData.communitySlug || "");
+            setSelectedPractice(
+              returnedPractice || tempData.selectedPractice || null,
+            );
+            setSlides(
+              tempData.slides?.length
+                ? tempData.slides.map((slide) => ({
+                    ...slide,
+                    layout: normalizeLayout(
+                      slide.layout,
+                      tempData.aspectRatio || "1:1",
+                    ),
+                  }))
+                : [defaultSlide(tempData.aspectRatio || "1:1")],
+            );
+            sessionStorage.removeItem("postEditor.tempData");
+            setBootstrapping(false);
+            return;
+          }
+
+          sessionStorage.removeItem("postEditor.tempData");
         }
 
         if (postRes?.data) {
@@ -709,10 +764,18 @@ export function CreatorPostEditorPage() {
           );
 
           if (post.community_post?.linked_item) {
-            setSelectedPractice(post.community_post.linked_item);
+            setSelectedPractice({
+              ...post.community_post.linked_item,
+              category: readCategoryFromLinkedType(
+                post.community_post.linked_item.type,
+              ),
+            });
+          } else if (returnedPractice) {
+            setSelectedPractice(returnedPractice);
           }
         } else {
           setSlides([defaultSlide("1:1")]);
+          if (returnedPractice) setSelectedPractice(returnedPractice);
         }
       } catch (error) {
         console.error("Failed to bootstrap creator post editor:", error);
@@ -851,12 +914,19 @@ export function CreatorPostEditorPage() {
     sessionStorage.setItem(
       "postEditor.tempData",
       JSON.stringify({
-        postId: id,
+        postId: toMaybePostId(id),
+        postTitle,
+        baseLanguage,
+        aspectRatio,
+        baseCaption,
+        communitySlug,
+        selectedPractice,
         slides,
         isEdit,
-        returnTo: "postEditor",
+        returnToPath: window.location.pathname,
       }),
     );
+    navigate("/en/creator/posts/select-practice");
   };
 
   const savePost = async (publish = false) => {
@@ -1052,7 +1122,7 @@ export function CreatorPostEditorPage() {
                     {selectedPractice.name || selectedPractice.title}
                   </div>
                   <div style={{ fontSize: 13, color: "#059669" }}>
-                    {selectedPractice.type}
+                    {formatPracticeTypeLabel(selectedPractice.type)}
                   </div>
                 </div>
                 <button

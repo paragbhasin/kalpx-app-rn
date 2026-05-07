@@ -8,6 +8,7 @@ import {
   type CSSProperties,
 } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { formatPracticeTypeLabel } from "../../data/creatorPracticeCatalog";
 import {
   getCommunities,
   uploadCommunityMedia,
@@ -106,6 +107,12 @@ function buildLinkedItemType(category: unknown, type: unknown) {
     ? cleanType.split(":").pop()
     : cleanType;
   return `${cleanCategory}:${finalType}`;
+}
+
+function readCategoryFromLinkedType(type: unknown) {
+  const value = String(type || "").trim();
+  if (!value.includes(":")) return undefined;
+  return value.split(":")[0];
 }
 
 function toMaybePostId(id?: string) {
@@ -251,6 +258,9 @@ export function CreatorSimplePostEditorPage() {
               name: post.community_post.linked_item.name,
               type: post.community_post.linked_item.type,
               id: post.community_post.linked_item.id,
+              category: readCategoryFromLinkedType(
+                post.community_post.linked_item.type,
+              ),
             });
           } else if (post.associated_practice) {
             setSelectedPractice(post.associated_practice);
@@ -408,9 +418,10 @@ export function CreatorSimplePostEditorPage() {
         selectedCommunity,
         selectedPractice,
         isEdit,
-        returnTo: "postEditorSimple",
+        returnToPath: window.location.pathname,
       }),
     );
+    navigate("/en/creator/posts/select-practice");
   };
 
   const savePost = async (publish = false) => {
@@ -603,14 +614,14 @@ export function CreatorSimplePostEditorPage() {
           <label style={labelStyle}>Associated Practice (Optional)</label>
           {selectedPractice ? (
             <div style={practiceSelectedStyle}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontWeight: 500, color: "#166534" }}>
-                  {selectedPractice.name || selectedPractice.title}
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 500, color: "#166534" }}>
+                    {selectedPractice.name || selectedPractice.title}
+                  </div>
+                  <div style={{ fontSize: 13, color: "#059669" }}>
+                    {formatPracticeTypeLabel(selectedPractice.type)}
+                  </div>
                 </div>
-                <div style={{ fontSize: 13, color: "#059669" }}>
-                  {selectedPractice.type}
-                </div>
-              </div>
               <button
                 type="button"
                 style={clearPracticeButtonStyle}

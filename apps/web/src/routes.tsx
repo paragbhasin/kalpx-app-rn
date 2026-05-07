@@ -27,6 +27,7 @@ import { CommunityUserActivityPage } from "./pages/community/CommunityUserActivi
 import { CommunityUserAgreementsPage } from "./pages/community/CommunityUserAgreementsPage";
 import { CreateCommunityPostPage } from "./pages/community/CreateCommunityPostPage";
 import { CreatorPostEditorPage } from "./pages/creator/CreatorPostEditorPage";
+import { CreatorPracticeLibraryPage } from "./pages/creator/CreatorPracticeLibraryPage";
 import { CreatorPostsPage } from "./pages/creator/CreatorPostsPage";
 import { CreatorSimplePostEditorPage } from "./pages/creator/CreatorSimplePostEditorPage";
 import { CheckinPage } from "./pages/mitra/CheckinPage";
@@ -190,6 +191,14 @@ export function AppRoutes() {
         element={
           <RequiresAuth>
             <CreatorSimplePostEditorPage />
+          </RequiresAuth>
+        }
+      />
+      <Route
+        path="/en/creator/posts/select-practice"
+        element={
+          <RequiresAuth>
+            <CreatorPracticeLibraryPage />
           </RequiresAuth>
         }
       />

@@ -18,6 +18,7 @@ import { executeAction } from "../../../engine/actionExecutor";
 import { useScreenStore } from "../../../engine/useScreenBridge";
 import type { ActionEnvelope, RoomRenderV1 } from "../types";
 import { buildActionCtx } from "./actionContextHelper";
+import type { RoomWhyThisState } from "@kalpx/contracts";
 
 interface Props {
   action: ActionEnvelope;
@@ -32,7 +33,11 @@ const RoomActionTeachingPill: React.FC<Props> = ({
   kindLabel,
   isPrimary = false,
 }) => {
-  const { loadScreen, goBack } = useScreenStore();
+  const { screenData, loadScreen, goBack } = useScreenStore();
+  const whyThisState = (screenData as any)?.room_why_this_state as
+    | RoomWhyThisState
+    | undefined;
+  const shouldSuppressTap = whyThisState?.shouldSuppressTap === true;
 
   const onPress = () => {
     const tp = action.teaching_payload;
@@ -74,6 +79,29 @@ const RoomActionTeachingPill: React.FC<Props> = ({
     });
   };
 
+  const pillContent = (
+    <View>
+      {kindLabel ? <Text style={styles.kindLabel}>{kindLabel}</Text> : null}
+      <Text style={styles.label}>{action.label}</Text>
+      {action.helper_line ? (
+        <Text style={styles.helperLine} numberOfLines={1} ellipsizeMode="tail">
+          {action.helper_line}
+        </Text>
+      ) : null}
+    </View>
+  );
+
+  if (shouldSuppressTap) {
+    return (
+      <View
+        testID={action.testID}
+        style={[styles.pill, isPrimary ? styles.pillPrimary : null]}
+      >
+        {pillContent}
+      </View>
+    );
+  }
+
   return (
     <TouchableOpacity
       testID={action.testID}
@@ -82,15 +110,7 @@ const RoomActionTeachingPill: React.FC<Props> = ({
       style={[styles.pill, isPrimary ? styles.pillPrimary : null]}
       onPress={onPress}
     >
-      <View>
-        {kindLabel ? <Text style={styles.kindLabel}>{kindLabel}</Text> : null}
-        <Text style={styles.label}>{action.label}</Text>
-        {action.helper_line ? (
-          <Text style={styles.helperLine} numberOfLines={1} ellipsizeMode="tail">
-            {action.helper_line}
-          </Text>
-        ) : null}
-      </View>
+      {pillContent}
     </TouchableOpacity>
   );
 };

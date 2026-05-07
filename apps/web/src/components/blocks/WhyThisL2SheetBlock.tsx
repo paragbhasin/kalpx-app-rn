@@ -1,4 +1,5 @@
 import React from 'react';
+import { isRoomWhyThisContext } from '@kalpx/contracts';
 
 interface Props {
   block?: Record<string, any>;
@@ -14,6 +15,8 @@ export function WhyThisL2SheetBlock({ screenData, onAction }: Props) {
   const principleId = sd.why_this?.principle_id ?? null;
   const linkedType: string | null = sd.why_this?.linked_item_type ?? null;
   const isSubmitting = !!sd._isSubmitting;
+  const isRoomCtx = isRoomWhyThisContext(sd);
+  const headerLabel = isRoomCtx ? 'Why This May Help' : 'Why This';
 
   function handleDismiss() {
     onAction?.({ type: 'dismiss_why_this' });
@@ -25,7 +28,7 @@ export function WhyThisL2SheetBlock({ screenData, onAction }: Props) {
     }
   }
 
-  const showGoDeeper = !!(linkedType && GO_DEEPER_TYPES.includes(linkedType) && sd[`master_${linkedType}`]);
+  const showGoDeeper = !isRoomCtx && !!(linkedType && GO_DEEPER_TYPES.includes(linkedType) && sd[`master_${linkedType}`]);
 
   const backdrop = (
     <div
@@ -80,27 +83,27 @@ export function WhyThisL2SheetBlock({ screenData, onAction }: Props) {
           {/* Handle bar — matches RN 44x4 #d9cfb8 */}
           <div style={{ width: 44, height: 4, borderRadius: 2, background: '#d9cfb8', margin: '0 auto 20px' }} />
 
-          {/* "WHY THIS" micro label */}
+          {/* Header label — "Why This May Help" in room context */}
           <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1.6, color: '#8b7a55', textTransform: 'uppercase', textAlign: 'center', marginBottom: 10 }}>
-            Why This
+            {headerLabel}
           </p>
 
-          {/* Principle title — 26px serif */}
-          {principle.title && (
+          {/* Principle title — hidden in room context (curated payload has no title) */}
+          {!isRoomCtx && principle.title && (
             <p style={{ fontSize: 26, fontWeight: 700, color: 'var(--kalpx-text)', lineHeight: 1.3, textAlign: 'center', marginBottom: 10, fontFamily: 'var(--kalpx-font-serif)' }}>
               {principle.title}
             </p>
           )}
 
-          {/* Essence */}
+          {/* Essence — description = room_support_line in curated room context */}
           {principle.description && (
             <p style={{ fontSize: 15, color: 'var(--kalpx-text-soft)', lineHeight: 1.6, textAlign: 'center', marginBottom: 14 }}>
               {principle.description}
             </p>
           )}
 
-          {/* Tradition */}
-          {principle.tradition && (
+          {/* Tradition — hidden in room context */}
+          {!isRoomCtx && principle.tradition && (
             <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: 1.4, color: '#8b7a55', textAlign: 'center', opacity: 0.7, marginBottom: 14, textTransform: 'uppercase' }}>
               {principle.tradition}
             </p>

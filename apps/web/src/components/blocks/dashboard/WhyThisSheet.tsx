@@ -1,4 +1,6 @@
 import React from 'react';
+import { normalizeDashboardWhyThisState } from '@kalpx/contracts';
+import type { DashboardWhyThis } from '@kalpx/types';
 
 interface Props {
   sd: Record<string, any>;
@@ -8,13 +10,21 @@ interface Props {
 }
 
 export function WhyThisSheet({ sd, onClose, onAction, onBackFromL3 }: Props) {
+  const whyThisState = normalizeDashboardWhyThisState(
+    sd.why_this as DashboardWhyThis | undefined,
+  );
+
+  if (!whyThisState.canOpenWhyThis) return null;
+
   const whyThis = sd.why_this || {};
-  const items: { id: string; label: string }[] = Array.isArray(sd.why_this_l1_items) ? sd.why_this_l1_items : [];
+  const rawItems: { id: string; label: string }[] = Array.isArray(sd.why_this_l1_items) ? sd.why_this_l1_items : [];
+  const items = whyThisState.showPathItems ? rawItems : [];
   const overlayLevel: string | null = sd.why_this_overlay_level || null;
   const principle = sd.why_this_principle || null;
   const source = sd.why_this_source || null;
   const principleId = whyThis.principle_id ?? null;
   const isSubmitting = !!sd._isSubmitting;
+  const eyebrowLabel = whyThisState.label?.toUpperCase() ?? 'WHY THIS';
 
   const hasContent = whyThis.level1 || whyThis.level2 || items.length > 0;
 
@@ -87,7 +97,7 @@ export function WhyThisSheet({ sd, onClose, onAction, onBackFromL3 }: Props) {
             </button>
           ) : (
             <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 2, color: 'var(--kalpx-gold)', textTransform: 'uppercase', margin: 0 }}>
-              WHY THIS
+              {eyebrowLabel}
             </p>
           )}
           <button
@@ -265,7 +275,9 @@ export function WhyThisSheet({ sd, onClose, onAction, onBackFromL3 }: Props) {
                       <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--kalpx-gold)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 3 }}>
                         {item.id}
                       </p>
-                      <p style={{ fontSize: 14, color: 'var(--kalpx-text)' }}>{item.label}</p>
+                      <p style={{ fontSize: 14, color: 'var(--kalpx-text)' }}>
+                        {whyThisState.itemSpecificLines[item.id] ?? item.label}
+                      </p>
                     </div>
                   ))}
                 </div>

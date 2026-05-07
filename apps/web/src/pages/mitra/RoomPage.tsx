@@ -11,6 +11,7 @@ import { RoomRenderer } from "../../components/blocks/room/RoomRenderer";
 import { ROOM_DISPLAY_NAMES } from "../../components/blocks/room/roomConstants";
 import { executeAction } from "../../engine/actionExecutor";
 import { getRoomRender, trackEvent, trackRoomTelemetry } from "../../engine/mitraApi";
+import { normalizeRoomWhyThisState } from "@kalpx/contracts";
 import {
   ensureRoomAmbientPlaying,
   stopRoomAmbient,
@@ -114,7 +115,11 @@ export function RoomPage() {
       if (!data) throw new Error("no_data");
       setEnvelope(data);
       dispatch(
-        updateScreenData({ room_id: fullRoomId, room_render_payload: data }),
+        updateScreenData({
+          room_id: fullRoomId,
+          room_render_payload: data,
+          room_why_this_state: normalizeRoomWhyThisState(data as any),
+        }),
       );
       setPhase("render");
     } catch {

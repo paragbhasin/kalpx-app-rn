@@ -838,6 +838,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
         room_render_payload: null,
         room_life_context: null,
         room_selected_action: null,
+        _overlay_parent_container: 'room',
         // Match mobile picker contract: only rooms with visibly differentiated
         // context-aware content should offer the life-context tray.
         life_context_allowed: ({
@@ -1455,6 +1456,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
         room_render_payload: null,
         room_life_context: null,
         room_selected_action: null,
+        _overlay_parent_container: null,
       }));
       webNavigate('/en/mitra/dashboard');
       break;
@@ -1542,6 +1544,17 @@ export async function executeAction(action: any, context: ActionContext): Promis
 
     // OPEN_WHY_THIS_L2 — fetch principle detail, show L2 overlay.
     case 'open_why_this_l2': {
+      // Curated room path — content already in hand, skip getPrinciple() API call.
+      const curatedContent = action.payload?.curated_content ?? action.curated_content;
+      if (curatedContent) {
+        const { buildWebCuratedRoomL2Payload } = await import('@kalpx/contracts');
+        dispatch(updateScreenData({
+          why_this_principle: buildWebCuratedRoomL2Payload(curatedContent),
+          why_this_overlay_level: 'l2',
+        }));
+        break;
+      }
+      // Legacy path — fetch principle by ID.
       const principleId = action.payload?.principle_id ?? action.principle_id ?? screenData.why_this?.principle_id;
       if (!principleId) {
         if (WEB_ENV.isDev) console.warn('[actionExecutor] open_why_this_l2: no principle_id', action);

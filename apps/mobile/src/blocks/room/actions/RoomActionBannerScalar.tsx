@@ -17,14 +17,15 @@ import type { PrincipleBanner } from "../types";
 
 interface Props {
   banner: PrincipleBanner;
+  cardLabel?: string;
   testID?: string;
 }
 
-const RoomActionBannerScalar: React.FC<Props> = ({ banner, testID }) => {
+const RoomActionBannerScalar: React.FC<Props> = ({ banner, cardLabel, testID }) => {
   return (
     <View style={styles.wrap} testID={testID ?? "room_principle_banner"}>
       <View style={styles.card}>
-        <Text style={styles.cardLabel}>{"A teaching"}</Text>
+        <Text style={styles.cardLabel}>{cardLabel ?? "A teaching"}</Text>
         <Text style={styles.line}>{banner.wisdom_anchor_line}</Text>
       </View>
     </View>

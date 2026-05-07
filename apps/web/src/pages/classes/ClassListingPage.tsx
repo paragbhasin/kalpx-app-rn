@@ -328,6 +328,119 @@ function SelectField({
   );
 }
 
+function BookingToolbarSelect({
+  value,
+  onChange,
+  options,
+  width,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  options: ReadonlyArray<{ value: string; label: string }>;
+  width: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const selectedLabel =
+    options.find((option) => option.value === value)?.label ??
+    options[0]?.label ??
+    "Select";
+
+  useEffect(() => {
+    if (!open) return;
+    function handlePointerDown(event: MouseEvent) {
+      if (!wrapRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handlePointerDown);
+    return () => document.removeEventListener("mousedown", handlePointerDown);
+  }, [open]);
+
+  return (
+    <div ref={wrapRef} style={{ width, position: "relative" }}>
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        style={{
+          width: "100%",
+          borderRadius: 8,
+          border: "1px solid #ddd6c8",
+          padding: "10px",
+          background: "#fff",
+          color: "#3f230c",
+          fontSize: 18,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          textAlign: "left",
+          cursor: "pointer",
+        }}
+      >
+        <span>{selectedLabel}</span>
+        <ChevronDown
+          size={20}
+          style={{
+            color: "#5b3716",
+            transform: open ? "rotate(180deg)" : "rotate(0deg)",
+            transition: "transform 120ms ease",
+            flexShrink: 0,
+          }}
+        />
+      </button>
+
+      {open && (
+        <div
+          style={{
+            position: "absolute",
+            top: "calc(100% + 8px)",
+            left: 0,
+            right: 0,
+            zIndex: 30,
+            borderRadius: 16,
+            border: "1px solid #e5dccf",
+            background: "#fffdfa",
+            boxShadow: "0 14px 28px rgba(0,0,0,0.12)",
+            overflow: "hidden",
+          }}
+        >
+          {options.map((option) => {
+            const selected = option.value === value;
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => {
+                  onChange(option.value);
+                  setOpen(false);
+                }}
+                style={{
+                  width: "100%",
+                  border: "none",
+                  background: selected ? "rgba(212,160,23,0.12)" : "#fffdfa",
+                  color: "#2f2418",
+                  padding: "14px 18px",
+                  fontSize: 18,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  cursor: "pointer",
+                  textAlign: "left",
+                }}
+              >
+                <span>{option.label}</span>
+                {selected ? (
+                  <Check size={18} style={{ color: "#c58c18" }} />
+                ) : null}
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function BookingCard({
   booking,
   onNavigate,
@@ -553,11 +666,11 @@ function BookingDesktopRow({
       style={{
         display: "flex",
         alignItems: "center",
-        background: "rgba(247, 240, 221, 0.65)",
-        boxShadow: "0 4px 4px 1px rgba(0,0,0,0.12)",
-        borderRadius: 10,
-        padding: "14px 16px",
-        gap: 12,
+        background: "#f8f1df",
+        boxShadow: "0 6px 18px rgba(17, 24, 39, 0.08)",
+        borderRadius: 18,
+        padding: "12px 14px",
+        gap: 14,
       }}
     >
       <div style={{ flexBasis: "40%", minWidth: 0 }}>
@@ -567,7 +680,7 @@ function BookingDesktopRow({
               width: 60,
               height: 60,
               minWidth: 60,
-              borderRadius: 8,
+              borderRadius: 10,
               overflow: "hidden",
               background: "#f1eadf",
               display: "flex",
@@ -587,10 +700,10 @@ function BookingDesktopRow({
             )}
           </div>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#111827" }}>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "#111827" }}>
               {offering?.title ?? "Session"}
             </div>
-            <div style={{ marginTop: 4, fontSize: 13, color: "#6b7280" }}>
+            <div style={{ marginTop: 6, fontSize: 14, color: "#64748b" }}>
               {scheduleSummary}
             </div>
           </div>
@@ -630,25 +743,33 @@ function BookingDesktopRow({
           )}
         </div>
       </div>
-      <div style={{ flexBasis: "16%", fontSize: 14, color: "#111827" }}>
+      <div
+        style={{
+          flexBasis: "16%",
+          fontSize: 15,
+          color: "#334155",
+          fontWeight: 500,
+        }}
+      >
         {formatPrice(booking)}
       </div>
       <div style={{ flexBasis: "12%" }}>
         <span
           style={{
-            fontSize: 11,
+            fontSize: 13,
             fontWeight: 700,
             color: badge.color,
             background: badge.bg,
             borderRadius: 999,
-            padding: "4px 10px",
+            border: "1px solid rgba(212, 160, 23, 0.16)",
+            padding: "6px 14px",
             display: "inline-flex",
           }}
         >
           {badge.label}
         </span>
       </div>
-      <div style={{ flexBasis: "18%", fontSize: 13, color: "#6b7280" }}>
+      <div style={{ flexBasis: "18%", fontSize: 14, color: "#475569" }}>
         {(booking as any)?.updated_at
           ? formatDateTime((booking as any).updated_at)
           : "—"}
@@ -659,11 +780,12 @@ function BookingDesktopRow({
             type="button"
             onClick={() => onToggleMenu(booking.id)}
             style={{
-              background: "none",
-              border: "none",
+              background: "#fff",
+              border: "2px solid #c8c1b5",
+              borderRadius: 18,
               padding: 0,
-              width: 20,
-              height: 20,
+              width: 56,
+              height: 56,
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
@@ -768,6 +890,24 @@ export function ClassListingPage() {
       ? (item as any).available_slots.length > 0
       : true,
   );
+
+  function toggleDesktopBookingStatus(statusValue: string) {
+    const nextSelected = bookingsSelectedStatuses.includes(statusValue)
+      ? bookingsSelectedStatuses.filter((value) => value !== statusValue)
+      : [...bookingsSelectedStatuses, statusValue];
+
+    setBookingsSelectedStatuses(nextSelected);
+    if (nextSelected.length === 1) {
+      setBookingsStatus(nextSelected[0]);
+      void loadBookings(1, "replace", { status: nextSelected[0] });
+    } else if (nextSelected.length === 0) {
+      setBookingsStatus("");
+      void loadBookings(1, "replace", { status: "" });
+    } else {
+      setBookingsStatus("");
+      void loadBookings(1, "replace", { status: "" });
+    }
+  }
 
   const tabStyle = (active: boolean): React.CSSProperties => ({
     flex: 1,
@@ -1173,58 +1313,103 @@ export function ClassListingPage() {
           <div
             style={{
               display: "flex",
-              borderBottom: isMobile
-                ? "1px solid var(--kalpx-border-gold)"
-                : "none",
-              margin: isMobile ? "0 18px" : "0 0 22px",
-              width: isMobile ? undefined : "fit-content",
-              background: isMobile ? "transparent" : "#f1f2f5",
-              borderRadius: isMobile ? 0 : 8,
-              padding: isMobile ? 0 : 5,
-              gap: isMobile ? 0 : "",
+              alignItems: isMobile ? undefined : "center",
+              justifyContent:
+                !isMobile && authed && tab === "bookings"
+                  ? "space-between"
+                  : undefined,
+              gap: !isMobile && authed && tab === "bookings" ? 24 : undefined,
+              margin: isMobile ? undefined : "0 0 22px",
             }}
           >
-            <button
-              style={
-                isMobile
-                  ? tabStyle(tab === "explore")
-                  : {
-                      padding: "8px",
-                      borderRadius: 8,
-                      border: "none",
-                      background:
-                        tab === "explore" ? "var(--kalpx-cta)" : "transparent",
-                      color: tab === "explore" ? "#fff" : "#2f2f2f",
-                      fontSize: isMobile ? 20 : 16,
-                      fontWeight: 700,
-                    }
-              }
-              onClick={() => setTab("explore")}
+            <div
+              style={{
+                display: "flex",
+                borderBottom: isMobile
+                  ? "1px solid var(--kalpx-border-gold)"
+                  : "none",
+                margin: isMobile ? "0 18px" : 0,
+                width: isMobile ? undefined : "fit-content",
+                background: isMobile ? "transparent" : "#f1f2f5",
+                borderRadius: isMobile ? 0 : 8,
+                padding: isMobile ? 0 : 5,
+                gap: isMobile ? 0 : "",
+              }}
             >
-              {isMobile ? "Explore" : "Explore Classes"}
-            </button>
-            {authed && (
               <button
                 style={
                   isMobile
-                    ? tabStyle(tab === "bookings")
+                    ? tabStyle(tab === "explore")
                     : {
                         padding: "8px",
                         borderRadius: 8,
                         border: "none",
                         background:
-                          tab === "bookings"
+                          tab === "explore"
                             ? "var(--kalpx-cta)"
                             : "transparent",
-                        color: tab === "bookings" ? "#fff" : "#2f2f2f",
+                        color: tab === "explore" ? "#fff" : "#2f2f2f",
                         fontSize: isMobile ? 20 : 16,
                         fontWeight: 700,
                       }
                 }
-                onClick={() => setTab("bookings")}
+                onClick={() => setTab("explore")}
               >
-                {isMobile ? "My Bookings" : "My bookings"}
+                {isMobile ? "Explore" : "Explore Classes"}
               </button>
+              {authed && (
+                <button
+                  style={
+                    isMobile
+                      ? tabStyle(tab === "bookings")
+                      : {
+                          padding: "8px",
+                          borderRadius: 8,
+                          border: "none",
+                          background:
+                            tab === "bookings"
+                              ? "var(--kalpx-cta)"
+                              : "transparent",
+                          color: tab === "bookings" ? "#fff" : "#2f2f2f",
+                          fontSize: isMobile ? 20 : 16,
+                          fontWeight: 700,
+                        }
+                  }
+                  onClick={() => setTab("bookings")}
+                >
+                  {isMobile ? "My Bookings" : "My bookings"}
+                </button>
+              )}
+            </div>
+
+            {!isMobile && authed && tab === "bookings" && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  gap: 12,
+                  flexWrap: "wrap",
+                  flex: 1,
+                }}
+              >
+                {BOOKING_STATUS_CHIPS.map((option) => (
+                  <Chip
+                    key={option.value}
+                    label={option.label}
+                    selected={bookingsSelectedStatuses.includes(option.value)}
+                    size="md"
+                    onToggle={() => toggleDesktopBookingStatus(option.value)}
+                    style={{
+                      borderRadius: 999,
+                      paddingInline: 18,
+                      minHeight: 52,
+                      fontSize: 16,
+                      fontWeight: 700,
+                      whiteSpace: "nowrap",
+                    }}
+                  />
+                ))}
+              </div>
             )}
           </div>
 
@@ -1753,109 +1938,99 @@ export function ClassListingPage() {
               {authed && (
                 <>
                   {!isMobile && (
-                    <div
-                      style={{
-                        marginBottom: 16,
-                        display: "flex",
-                        width: "100%",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        gap: 16,
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontWeight: 700,
-                          fontSize: 20,
-                          whiteSpace: "nowrap",
-                          minWidth: 140,
-                        }}
-                      >
-                        My bookings
-                      </div>
-
+                    <div style={{ marginBottom: 20, display: "grid", gap: 28 }}>
                       <div
                         style={{
                           display: "flex",
+                          width: "100%",
                           alignItems: "center",
+                          justifyContent: "space-between",
                           gap: 16,
-                          flexWrap: "wrap",
-                          justifyContent: "flex-end",
                         }}
                       >
-                        <div style={{ width: 320 }}>
-                          <input
-                            value={bookingsQuery}
-                            onChange={(e) => setBookingsQuery(e.target.value)}
-                            placeholder="Search by class or tutor…"
-                            style={{
-                              background: "#F3F3F3",
-                              width: "100%",
-                              borderRadius: 10,
-
-                              border: "1px solid #ddd6c8",
-                              padding: "10px 12px",
-                            }}
-                          />
-                        </div>
-                        <div style={{ width: 140 }}>
-                          <select
-                            value={bookingsWhen}
-                            onChange={(e) => {
-                              setBookingsWhen(e.target.value);
-                              void loadBookings(1, "replace", {
-                                when: e.target.value,
-                              });
-                            }}
-                            style={bookingSelectStyle}
-                          >
-                            {BOOKING_WHEN_OPTIONS.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <div style={{ width: 160 }}>
-                          <select
-                            value={bookingsSort}
-                            onChange={(e) => {
-                              setBookingsSort(e.target.value);
-                              void loadBookings(1, "replace", {
-                                sort: e.target.value,
-                              });
-                            }}
-                            style={bookingSelectStyle}
-                          >
-                            {BOOKING_SORT_OPTIONS.map((option) => (
-                              <option key={option.value} value={option.value}>
-                                {option.label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            resetBookingFilters();
-                            void loadBookings(1, "replace", {
-                              q: "",
-                              status: "",
-                              when: "all",
-                              sort: "-updated_at",
-                            });
-                          }}
+                        <div
                           style={{
-                            border: "1px solid var(--kalpx-cta)",
-                            borderRadius: 10,
-                            color: "var(--kalpx-cta)",
-                            padding: "10px 14px",
-                            fontSize: 16,
+                            fontWeight: 800,
+                            fontSize: 28,
                             whiteSpace: "nowrap",
+                            minWidth: 180,
+                            color: "#2f2f2f",
                           }}
                         >
-                          Reset
-                        </button>
+                          My bookings
+                        </div>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 12,
+                            flexWrap: "wrap",
+                            justifyContent: "flex-end",
+                          }}
+                        >
+                          <div style={{ width: 350 }}>
+                            <input
+                              value={bookingsQuery}
+                              onChange={(e) => setBookingsQuery(e.target.value)}
+                              placeholder="Search by class or tutor…"
+                              style={{
+                                background: "#fff",
+                                width: "100%",
+                                borderRadius: 9,
+                                border: "1px solid #ddd6c8",
+                                padding: "10px",
+                                fontSize: 18,
+                                color: "#0f172a",
+                              }}
+                            />
+                          </div>
+                          <BookingToolbarSelect
+                            width={124}
+                            value={bookingsWhen}
+                            onChange={(value) => {
+                              setBookingsWhen(value);
+                              void loadBookings(1, "replace", {
+                                when: value,
+                              });
+                            }}
+                            options={BOOKING_WHEN_OPTIONS}
+                          />
+                          <BookingToolbarSelect
+                            width={172}
+                            value={bookingsSort}
+                            onChange={(value) => {
+                              setBookingsSort(value);
+                              void loadBookings(1, "replace", {
+                                sort: value,
+                              });
+                            }}
+                            options={BOOKING_SORT_OPTIONS}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              resetBookingFilters();
+                              void loadBookings(1, "replace", {
+                                q: "",
+                                status: "",
+                                when: "all",
+                                sort: "-updated_at",
+                              });
+                            }}
+                            style={{
+                              border: "1px solid var(--kalpx-cta)",
+                              borderRadius: 8,
+                              color: "var(--kalpx-cta)",
+                              background: "#fff",
+                              padding: "10px",
+                              fontSize: 15,
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            Reset
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -2009,28 +2184,28 @@ export function ClassListingPage() {
                               display: "flex",
                               background: "#D4A017",
                               textAlign: "left",
-                              fontSize: 14,
-                              color: "#475569",
-                              fontWeight: 700,
-                              borderRadius: 10,
+                              fontSize: 18,
+                              color: "#334155",
+                              fontWeight: 800,
+                              borderRadius: 16,
                             }}
                           >
-                            <div style={{ flexBasis: "40%", padding: 12 }}>
+                            <div style={{ flexBasis: "40%", padding: "20px" }}>
                               Class Name
                             </div>
-                            <div style={{ flexBasis: "26%", padding: 12 }}>
+                            <div style={{ flexBasis: "26%", padding: "20px" }}>
                               Class URL
                             </div>
-                            <div style={{ flexBasis: "16%", padding: 12 }}>
+                            <div style={{ flexBasis: "16%", padding: "20px" }}>
                               Price
                             </div>
-                            <div style={{ flexBasis: "12%", padding: 12 }}>
+                            <div style={{ flexBasis: "12%", padding: "20px" }}>
                               Status
                             </div>
-                            <div style={{ flexBasis: "18%", padding: 12 }}>
+                            <div style={{ flexBasis: "18%", padding: "20px" }}>
                               Last Updated
                             </div>
-                            <div style={{ flexBasis: "14%", padding: 12 }}>
+                            <div style={{ flexBasis: "14%", padding: "20px" }}>
                               Actions
                             </div>
                           </div>

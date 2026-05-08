@@ -43,8 +43,9 @@ import RoomRenderer from "../blocks/room/RoomRenderer";
 import type {
   RoomId,
   RoomRenderV1,
+  TellMitraRoomEntryContext,
 } from "@kalpx/types";
-import { normalizeRoomWhyThisState } from "@kalpx/contracts";
+import { normalizeRoomWhyThisState, getRoomRenderParamsFromEntryContext } from "@kalpx/contracts";
 import { executeAction } from "../engine/actionExecutor";
 import { mitraTrackEvent, trackRoomTelemetry } from "../engine/mitraApi";
 import { useScreenStore } from "../engine/useScreenBridge";
@@ -179,6 +180,8 @@ const RoomContainer: React.FC<Props> = () => {
     ((screenData as any)?.life_context as LifeContext | null) || null;
   const allowedContexts: LifeContext[] | null =
     ((screenData as any)?.life_context_allowed as LifeContext[] | null) || null;
+  const roomEntryContext: TellMitraRoomEntryContext | null =
+    ((screenData as any)?.room_entry_context as TellMitraRoomEntryContext | null) ?? null;
 
   const stopAndUnloadCalmAudio = useCallback(async () => {
     roomAmbientRunId += 1;
@@ -415,6 +418,7 @@ const RoomContainer: React.FC<Props> = () => {
     <RoomRenderBranch
       roomId={roomId}
       lifeContext={lifeContext}
+      entryContext={roomEntryContext}
     />
   );
 };
@@ -422,11 +426,13 @@ const RoomContainer: React.FC<Props> = () => {
 interface RenderBranchProps {
   roomId: RoomId | undefined;
   lifeContext: LifeContext | null;
+  entryContext: TellMitraRoomEntryContext | null;
 }
 
 const RoomRenderBranch: React.FC<RenderBranchProps> = ({
   roomId,
   lifeContext,
+  entryContext,
 }) => {
   const [envelope, setEnvelope] = useState<RoomRenderV1 | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -451,8 +457,8 @@ const RoomRenderBranch: React.FC<RenderBranchProps> = ({
       setLoading(false);
       return;
     }
-    // Fetch key includes life_context so switching context re-fetches.
-    const fetchKey = `${roomId}::${lifeContext || ""}`;
+    // Fetch key includes life_context + intent_type so switching context re-fetches.
+    const fetchKey = `${roomId}::${lifeContext || ""}::${entryContext?.situation?.intent_type || ""}`;
     if (fetchedRef.current === fetchKey) return;
     fetchedRef.current = fetchKey;
 
@@ -460,13 +466,16 @@ const RoomRenderBranch: React.FC<RenderBranchProps> = ({
     setLoading(true);
     (async () => {
       try {
-        // Append life_context as a query param when present; omit when
-        // the user skipped (null). BE is expected to default gracefully.
-        const url = lifeContext
-          ? `mitra/rooms/${roomId}/render/?life_context=${encodeURIComponent(
-              lifeContext,
-            )}`
-          : `mitra/rooms/${roomId}/render/`;
+        // Build query params: life_context + entry context params (with mismatch guard).
+        const ecParams = getRoomRenderParamsFromEntryContext(entryContext, roomId as string);
+        const qp = new URLSearchParams();
+        if (lifeContext)                       qp.set('life_context',        lifeContext);
+        if (ecParams.intent_type)              qp.set('intent_type',         ecParams.intent_type);
+        if (ecParams.source_surface)           qp.set('source_surface',      ecParams.source_surface);
+        if (ecParams.tell_mitra_event_id != null)
+          qp.set('tell_mitra_event_id', String(ecParams.tell_mitra_event_id));
+        const qs = qp.toString();
+        const url = `mitra/rooms/${roomId}/render/${qs ? `?${qs}` : ''}`;
         const res = await api.get(url);
         if (!active) return;
         const data = res?.data;

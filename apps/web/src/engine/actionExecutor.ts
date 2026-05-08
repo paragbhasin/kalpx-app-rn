@@ -831,12 +831,18 @@ export async function executeAction(action: any, context: ActionContext): Promis
     case 'enter_room': {
       const p = action.payload || action;
       const roomId: string = p.room_id || '';
+      const roomEntryContext = p.room_entry_context ?? null;
       if (!roomId) {
         if (WEB_ENV.isDev) console.warn('[actionExecutor] enter_room: missing room_id', action);
         break;
       }
+      // Guard: bypass picker only when this is a real Tell Mitra intent entry
+      const hasTellMitraRoomContext =
+        roomEntryContext?.source_surface === "tell_mitra" &&
+        !!roomEntryContext?.situation?.intent_type;
       ensureRoomAmbientPlaying();
-      // Clear stale room state before entering
+      // Clear stale room state before entering; always write room_entry_context
+      // (null for normal entries explicitly clears any stale Tell Mitra context)
       dispatch(updateScreenData({
         room_id: roomId,
         room_source: p.source || 'dashboard',
@@ -844,14 +850,18 @@ export async function executeAction(action: any, context: ActionContext): Promis
         room_life_context: null,
         room_selected_action: null,
         _overlay_parent_container: 'room',
+        room_entry_context: roomEntryContext,
         // Match mobile picker contract: only rooms with visibly differentiated
         // context-aware content should offer the life-context tray.
-        life_context_allowed: ({
-          room_clarity: ['work_career', 'relationships', 'self', 'health_energy', 'money_security', 'purpose_direction', 'daily_life'],
-          room_growth: ['work_career', 'relationships', 'self', 'health_energy', 'money_security', 'purpose_direction', 'daily_life'],
-          room_release: ['work_career', 'relationships', 'self', 'health_energy', 'money_security'],
-          room_stillness: ['work_career', 'relationships', 'self', 'health_energy', 'money_security', 'purpose_direction'],
-        } as Record<string, string[] | null>)[roomId] ?? null,
+        // Suppressed when Tell Mitra provided intent_type — picker not needed.
+        life_context_allowed: hasTellMitraRoomContext
+          ? null
+          : ({
+              room_clarity:   ['work_career', 'relationships', 'self', 'health_energy', 'money_security', 'purpose_direction', 'daily_life'],
+              room_growth:    ['work_career', 'relationships', 'self', 'health_energy', 'money_security', 'purpose_direction', 'daily_life'],
+              room_release:   ['work_career', 'relationships', 'self', 'health_energy', 'money_security'],
+              room_stillness: ['work_career', 'relationships', 'self', 'health_energy', 'money_security', 'purpose_direction'],
+            } as Record<string, string[] | null>)[roomId] ?? null,
       }));
       void apiTrackEvent('room_entered', {
         journey_id: screenData.journey_id,

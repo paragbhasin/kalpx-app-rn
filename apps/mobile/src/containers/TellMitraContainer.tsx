@@ -115,6 +115,7 @@ export default function TellMitraContainer() {
               payload: {
                 room_id: result.suggested_room_id,
                 source: 'tell_mitra_door',
+                room_entry_context: result.room_entry_context,
               },
             } as any,
             buildActionContext() as any,

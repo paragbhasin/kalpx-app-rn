@@ -409,3 +409,59 @@ describe('support_exit', () => {
     expect(update?.payload).not.toHaveProperty('runner_active_item');
   });
 });
+
+// ── S17-C: enter_room — room_entry_context threading ─────────────────────────
+
+const VALID_ROOM_ENTRY_CTX = {
+  source_surface: "tell_mitra",
+  tell_mitra_event_id: "db08ca38-0000-0000-0000-000000000001",
+  situation: { intent_type: "distress_acute", state_tags: [], energy_state: "", life_context: "", prior_context_used: false },
+  decision: { routing_type: "navigate_to_room", suggested_room_id: "room_stillness", confidence: 0.95, source: "internal_rule" },
+  learning: { eligible_for_learning: true, feedback_pending: true },
+};
+
+describe('enter_room — S17-C room_entry_context', () => {
+  it('stamps room_entry_context into screenData and suppresses picker for Tell Mitra entry', async () => {
+    const ctx = makeContext({});
+    await executeAction(
+      { type: 'enter_room', payload: { room_id: 'room_stillness', source: 'tell_mitra', room_entry_context: VALID_ROOM_ENTRY_CTX } },
+      ctx,
+    );
+    const calls = (ctx.dispatch as any).mock.calls.map((c: any[]) => c[0]);
+    const update = calls.find((a: any) => a?.payload?.room_id === 'room_stillness');
+    expect(update?.payload?.room_entry_context).toEqual(VALID_ROOM_ENTRY_CTX);
+    expect(update?.payload?.life_context_allowed).toBeNull();
+  });
+
+  it('restores life_context_allowed for normal (non-Tell Mitra) room entry', async () => {
+    const ctx = makeContext({});
+    await executeAction(
+      { type: 'enter_room', payload: { room_id: 'room_stillness', source: 'dashboard' } },
+      ctx,
+    );
+    const calls = (ctx.dispatch as any).mock.calls.map((c: any[]) => c[0]);
+    const update = calls.find((a: any) => a?.payload?.room_id === 'room_stillness');
+    expect(update?.payload?.room_entry_context).toBeNull();
+    expect(Array.isArray(update?.payload?.life_context_allowed)).toBe(true);
+    expect(update?.payload?.life_context_allowed).toContain('work_career');
+  });
+
+  it('stale-context regression: second normal entry clears room_entry_context', async () => {
+    const ctx1 = makeContext({});
+    // First entry: Tell Mitra with context
+    await executeAction(
+      { type: 'enter_room', payload: { room_id: 'room_stillness', source: 'tell_mitra', room_entry_context: VALID_ROOM_ENTRY_CTX } },
+      ctx1,
+    );
+    // Second entry: normal dashboard entry (no entry context)
+    const ctx2 = makeContext({});
+    await executeAction(
+      { type: 'enter_room', payload: { room_id: 'room_stillness', source: 'dashboard' } },
+      ctx2,
+    );
+    const calls2 = (ctx2.dispatch as any).mock.calls.map((c: any[]) => c[0]);
+    const update2 = calls2.find((a: any) => a?.payload?.room_id === 'room_stillness');
+    expect(update2?.payload?.room_entry_context).toBeNull();
+    expect(Array.isArray(update2?.payload?.life_context_allowed)).toBe(true);
+  });
+});

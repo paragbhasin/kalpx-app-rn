@@ -11,7 +11,8 @@ import { RoomRenderer } from "../../components/blocks/room/RoomRenderer";
 import { ROOM_DISPLAY_NAMES } from "../../components/blocks/room/roomConstants";
 import { executeAction } from "../../engine/actionExecutor";
 import { getRoomRender, trackEvent, trackRoomTelemetry } from "../../engine/mitraApi";
-import { normalizeRoomWhyThisState } from "@kalpx/contracts";
+import { normalizeRoomWhyThisState, getRoomRenderParamsFromEntryContext } from "@kalpx/contracts";
+import type { TellMitraRoomEntryContext } from "@kalpx/types";
 import {
   ensureRoomAmbientPlaying,
   stopRoomAmbient,
@@ -66,10 +67,16 @@ export function RoomPage() {
       ? (sd.room_render_payload as any)
       : null;
 
+  const roomEntryContext = (sd?.room_entry_context as TellMitraRoomEntryContext | null) ?? null;
+  // Guard: bypass picker only when this is a real Tell Mitra intent entry
+  const hasTellMitraRoomContext =
+    roomEntryContext?.source_surface === "tell_mitra" &&
+    !!roomEntryContext?.situation?.intent_type;
+
   const [phase, setPhase] = useState<"picker" | "loading" | "render" | "error">(
     storedEnvelope
       ? "render"
-      : ROOMS_WITH_CONTEXT_PICKER.includes(fullRoomId)
+      : (ROOMS_WITH_CONTEXT_PICKER.includes(fullRoomId) && !hasTellMitraRoomContext)
         ? "picker"
         : "loading",
   );
@@ -105,12 +112,15 @@ export function RoomPage() {
     screenData: screenState.screenData,
   };
 
-  const fetchRender = async (ctx: string | null) => {
+  const fetchRender = async (ctx: string | null, entryCtx?: TellMitraRoomEntryContext | null) => {
     setPhase("loading");
     try {
+      // Mismatch guard is applied inside getRoomRenderParamsFromEntryContext
+      const ecParams = getRoomRenderParamsFromEntryContext(entryCtx, fullRoomId);
+      const hasParams = ctx || Object.keys(ecParams).length > 0;
       const data = await getRoomRender(
         fullRoomId,
-        ctx ? { life_context: ctx } : undefined,
+        hasParams ? { life_context: ctx ?? undefined, ...ecParams } : undefined,
       );
       if (!data) throw new Error("no_data");
       setEnvelope(data);
@@ -134,13 +144,13 @@ export function RoomPage() {
     if (storedEnvelope) {
       setEnvelope(storedEnvelope);
       setPhase("render");
-    } else if (!ROOMS_WITH_CONTEXT_PICKER.includes(fullRoomId)) {
-      // If room has no picker, fetch immediately
-      void fetchRender(lifeContext);
+    } else if (!ROOMS_WITH_CONTEXT_PICKER.includes(fullRoomId) || hasTellMitraRoomContext) {
+      // Bypass picker for rooms without picker support, or when Tell Mitra context is present
+      void fetchRender(lifeContext, roomEntryContext);
     }
     // Stamp room_id into store
     dispatch(updateScreenData({ room_id: fullRoomId }));
-  }, [fullRoomId, storedEnvelope]);
+  }, [fullRoomId, storedEnvelope, hasTellMitraRoomContext]);
 
   const roomName = ROOM_DISPLAY_NAMES[fullRoomId] || fullRoomId;
 

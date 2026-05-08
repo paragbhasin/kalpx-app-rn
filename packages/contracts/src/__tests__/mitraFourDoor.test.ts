@@ -6,12 +6,13 @@ import {
   getRoomDescription,
   getDoorLabel,
   normalizeTellMitraResult,
+  getRoomRenderParamsFromEntryContext,
   ROOM_LABELS,
   DOOR_LABELS,
   VALID_ROOM_IDS,
   VALID_DOOR_IDS,
 } from '../mitraFourDoor';
-import type { TellMitraV3Response } from '@kalpx/types';
+import type { TellMitraV3Response, TellMitraRoomEntryContext } from '@kalpx/types';
 
 // ── isValidRoomId ─────────────────────────────────────────────────────────────
 
@@ -111,6 +112,14 @@ const VALID_FULL_RESPONSE: TellMitraV3Response = {
   response_copy: "I hear you.",
   state_tags: ["triggered"],
   companion_state_written: false,
+  safety_flag: false,
+  prior_context_used: false,
+  prior_context_summary: null,
+  prior_suggested_room_id: null,
+  prior_suggested_room_label: null,
+  next_options: [],
+  tell_mitra_event_id: null,
+  room_entry_context: null,
 };
 
 describe('normalizeTellMitraResult', () => {
@@ -174,5 +183,100 @@ describe('coverage assertions', () => {
   });
   it('VALID_DOOR_IDS has 4 entries', () => {
     expect(VALID_DOOR_IDS.length).toBe(4);
+  });
+});
+
+// ── S17-C: normalizeTellMitraResult — new fields ──────────────────────────────
+
+const VALID_ROOM_ENTRY_CONTEXT: TellMitraRoomEntryContext = {
+  source_surface: "tell_mitra",
+  tell_mitra_event_id: "db08ca38-0000-0000-0000-000000000001",
+  situation: {
+    intent_type: "distress_acute",
+    state_tags: ["overwhelmed"],
+    energy_state: "drained",
+    life_context: "work_career",
+    prior_context_used: false,
+  },
+  decision: {
+    routing_type: "navigate_to_room",
+    suggested_room_id: "room_stillness",
+    confidence: 0.95,
+    source: "internal_rule",
+  },
+  learning: {
+    eligible_for_learning: true,
+    feedback_pending: true,
+  },
+};
+
+describe('S17-C normalizeTellMitraResult — tell_mitra_event_id + room_entry_context', () => {
+  it('passes through tell_mitra_event_id (UUID string)', () => {
+    const result = normalizeTellMitraResult({
+      ...VALID_FULL_RESPONSE,
+      tell_mitra_event_id: "db08ca38-0000-0000-0000-000000000001",
+    });
+    expect(result.tell_mitra_event_id).toBe("db08ca38-0000-0000-0000-000000000001");
+  });
+
+  it('passes through full room_entry_context block with correct shape', () => {
+    const result = normalizeTellMitraResult({
+      ...VALID_FULL_RESPONSE,
+      room_entry_context: VALID_ROOM_ENTRY_CONTEXT,
+    });
+    expect(result.room_entry_context).toEqual(VALID_ROOM_ENTRY_CONTEXT);
+    expect(result.room_entry_context?.situation.intent_type).toBe("distress_acute");
+    expect(result.room_entry_context?.decision.suggested_room_id).toBe("room_stillness");
+  });
+
+  it('returns room_entry_context: null when absent in raw response', () => {
+    const result = normalizeTellMitraResult({ ...VALID_FULL_RESPONSE });
+    expect(result.room_entry_context).toBeNull();
+  });
+
+  it('returns room_entry_context: null when situation is missing (defensive normalization)', () => {
+    const result = normalizeTellMitraResult({
+      ...VALID_FULL_RESPONSE,
+      room_entry_context: { source_surface: "tell_mitra", decision: { suggested_room_id: "room_stillness" } },
+    });
+    expect(result.room_entry_context).toBeNull();
+  });
+});
+
+// ── S17-C: getRoomRenderParamsFromEntryContext ────────────────────────────────
+
+describe('S17-C getRoomRenderParamsFromEntryContext', () => {
+  it('null input → {}', () => {
+    expect(getRoomRenderParamsFromEntryContext(null)).toEqual({});
+  });
+
+  it('undefined input → {}', () => {
+    expect(getRoomRenderParamsFromEntryContext(undefined)).toEqual({});
+  });
+
+  it('matching roomId → returns all three params', () => {
+    const result = getRoomRenderParamsFromEntryContext(VALID_ROOM_ENTRY_CONTEXT, "room_stillness");
+    expect(result.intent_type).toBe("distress_acute");
+    expect(result.source_surface).toBe("tell_mitra");
+    expect(result.tell_mitra_event_id).toBe("db08ca38-0000-0000-0000-000000000001");
+  });
+
+  it('mismatch roomId → {} (prevents copy bleed)', () => {
+    const result = getRoomRenderParamsFromEntryContext(VALID_ROOM_ENTRY_CONTEXT, "room_release");
+    expect(result).toEqual({});
+  });
+
+  it('no roomId supplied → returns params without mismatch guard', () => {
+    const result = getRoomRenderParamsFromEntryContext(VALID_ROOM_ENTRY_CONTEXT);
+    expect(result.intent_type).toBe("distress_acute");
+  });
+
+  it('null tell_mitra_event_id → omitted from params', () => {
+    const ctxNullId: TellMitraRoomEntryContext = {
+      ...VALID_ROOM_ENTRY_CONTEXT,
+      tell_mitra_event_id: null,
+    };
+    const result = getRoomRenderParamsFromEntryContext(ctxNullId, "room_stillness");
+    expect('tell_mitra_event_id' in result).toBe(false);
   });
 });

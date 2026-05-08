@@ -238,7 +238,7 @@ export function TellMitraPage() {
               </div>
               <button
                 onClick={() => void executeAction(
-                  { type: 'enter_room', payload: { room_id: result.suggested_room_id, source: 'tell_mitra' } },
+                  { type: 'enter_room', payload: { room_id: result.suggested_room_id, source: 'tell_mitra', room_entry_context: result.room_entry_context } },
                   { dispatch, screenData: screenState.screenData, currentStateId: 'tell_mitra' }
                 )}
                 style={GOLD_BTN}

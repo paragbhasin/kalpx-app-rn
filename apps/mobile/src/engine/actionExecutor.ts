@@ -4478,10 +4478,16 @@ export async function executeAction(
       case "enter_room": {
         const roomId: string = payload?.room_id || "";
         const source: string = payload?.source || "quick_support_block";
+        const roomEntryContext = payload?.room_entry_context ?? null;
         if (!roomId) {
           console.warn("[actionExecutor] enter_room: missing room_id");
           break;
         }
+
+        // Guard: bypass picker only when this is a real Tell Mitra intent entry
+        const hasTellMitraRoomContext =
+          roomEntryContext?.source_surface === "tell_mitra" &&
+          !!roomEntryContext?.situation?.intent_type;
 
         mitraTrackEvent("room_entry_dispatched", {
           journeyId: screenState.journey_id,
@@ -4524,6 +4530,9 @@ export async function executeAction(
           const _storedLc = (_lcStore.getState()?.companionState as any)?.life_context ?? null;
           setScreenValue(_storedLc, "life_context");
           setScreenValue(false, "context_skipped");
+          // Always write room_entry_context — null for normal entries explicitly
+          // clears any stale Tell Mitra context from a prior session.
+          setScreenValue(roomEntryContext, "room_entry_context");
 
           // Per-room picker contract (live pool– and API-verified 2026-04-21).
           // "Honest picker" rule: context list must produce visibly different
@@ -4581,7 +4590,11 @@ export async function executeAction(
               "purpose_direction",
             ],
           };
-          const allowedContexts = ROOM_PICKER_CONFIG[roomId] ?? null;
+          // Suppress picker when Tell Mitra provided a real intent_type.
+          // Normal entries and malformed contexts still show the picker.
+          const allowedContexts = hasTellMitraRoomContext
+            ? null
+            : (ROOM_PICKER_CONFIG[roomId] ?? null);
           setScreenValue(allowedContexts, "life_context_allowed");
           // For rooms without a picker (currently room_joy), clear any stale
           // life_context that may have been set by a previous room session.

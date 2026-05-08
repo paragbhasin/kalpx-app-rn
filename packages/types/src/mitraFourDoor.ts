@@ -233,6 +233,34 @@ export interface TellMitraNextOption {
   door: DoorId | null;
 }
 
+export interface TellMitraRoomEntrySituation {
+  intent_type: string;
+  state_tags: string[];
+  energy_state: string;
+  life_context: string;
+  prior_context_used: boolean;
+}
+
+export interface TellMitraRoomEntryDecision {
+  routing_type: string;
+  suggested_room_id: string;
+  confidence: number;
+  source: string;
+}
+
+export interface TellMitraRoomEntryLearning {
+  eligible_for_learning: boolean;
+  feedback_pending: boolean;
+}
+
+export interface TellMitraRoomEntryContext {
+  source_surface: string;
+  tell_mitra_event_id: string | number | null;
+  situation: TellMitraRoomEntrySituation;
+  decision: TellMitraRoomEntryDecision;
+  learning: TellMitraRoomEntryLearning;
+}
+
 export interface TellMitraV3Response {
   intent_matched: boolean;
   intent_type: string | null;
@@ -253,4 +281,6 @@ export interface TellMitraV3Response {
   prior_suggested_room_id: VerifiedRoomId | null;
   prior_suggested_room_label: string | null;
   next_options: TellMitraNextOption[];
+  tell_mitra_event_id: string | number | null;
+  room_entry_context: TellMitraRoomEntryContext | null;
 }

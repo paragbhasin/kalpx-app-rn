@@ -5,6 +5,7 @@ import type {
   VerifiedRoomId,
   TellMitraV3Response,
   TellMitraNextOption,
+  TellMitraRoomEntryContext,
   RhythmTimeBand,
   RhythmItemType,
   RhythmItemSource,
@@ -115,6 +116,26 @@ export function getRoomLabel(roomId: VerifiedRoomId): string {
 
 export function getRoomDescription(roomId: VerifiedRoomId): string {
   return ROOM_DESCRIPTIONS[roomId] ?? "";
+}
+
+/**
+ * Flattens a TellMitraRoomEntryContext into query params for getRoomRender.
+ * If roomId is supplied and does not match ctx.decision.suggested_room_id, returns {}
+ * to prevent copy bleed (e.g. distress_acute context applied to room_release).
+ */
+export function getRoomRenderParamsFromEntryContext(
+  ctx: TellMitraRoomEntryContext | null | undefined,
+  roomId?: string,
+): { intent_type?: string; source_surface?: string; tell_mitra_event_id?: string | number } {
+  if (!ctx) return {};
+  if (roomId && ctx.decision?.suggested_room_id && ctx.decision.suggested_room_id !== roomId) {
+    return {};
+  }
+  const result: { intent_type?: string; source_surface?: string; tell_mitra_event_id?: string | number } = {};
+  if (ctx.situation?.intent_type)      result.intent_type = ctx.situation.intent_type;
+  if (ctx.source_surface)              result.source_surface = ctx.source_surface;
+  if (ctx.tell_mitra_event_id != null) result.tell_mitra_event_id = ctx.tell_mitra_event_id;
+  return result;
 }
 
 export function getDoorLabel(doorId: DoorId): string {
@@ -250,6 +271,9 @@ export function normalizeTellMitraResult(raw: unknown): TellMitraV3Response {
     prior_suggested_room_id:    isValidRoomId(r["prior_suggested_room_id"]) ? r["prior_suggested_room_id"] : null,
     prior_suggested_room_label: typeof r["prior_suggested_room_label"] === "string" ? r["prior_suggested_room_label"] : null,
     next_options:               Array.isArray(r["next_options"]) ? r["next_options"] as TellMitraNextOption[] : [],
+    tell_mitra_event_id: (typeof r["tell_mitra_event_id"] === "string" || typeof r["tell_mitra_event_id"] === "number")
+      ? r["tell_mitra_event_id"] as string | number : null,
+    room_entry_context: _normalizeRoomEntryContext(r["room_entry_context"]),
   };
 }
 
@@ -264,6 +288,8 @@ function _safeTellMitraResponse(): TellMitraV3Response {
     prior_context_used: false, prior_context_summary: null,
     prior_suggested_room_id: null, prior_suggested_room_label: null,
     next_options: [],
+    tell_mitra_event_id: null,
+    room_entry_context: null,
   };
 }
 
@@ -275,4 +301,41 @@ function _coerceRoutingType(v: unknown): TellMitraV3Response["suggested_action"]
   return typeof v === "string" && _VALID_ROUTING_TYPES.has(v)
     ? (v as TellMitraV3Response["suggested_action"])
     : "none";
+}
+
+function _normalizeRoomEntryContext(raw: unknown): TellMitraRoomEntryContext | null {
+  if (raw === null || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  const sit = (typeof r["situation"] === "object" && r["situation"] !== null)
+    ? (r["situation"] as Record<string, unknown>) : null;
+  const dec = (typeof r["decision"] === "object" && r["decision"] !== null)
+    ? (r["decision"] as Record<string, unknown>) : null;
+  const lrn = (typeof r["learning"] === "object" && r["learning"] !== null)
+    ? (r["learning"] as Record<string, unknown>) : {};
+  // Require minimum usable fields; return null rather than a mostly empty object
+  if (!sit || !dec) return null;
+  if (!sit["intent_type"] || !dec["suggested_room_id"]) return null;
+  return {
+    source_surface: typeof r["source_surface"] === "string" ? r["source_surface"] : "",
+    tell_mitra_event_id: (typeof r["tell_mitra_event_id"] === "string" || typeof r["tell_mitra_event_id"] === "number")
+      ? r["tell_mitra_event_id"] : null,
+    situation: {
+      intent_type:        sit["intent_type"] as string,
+      state_tags:         Array.isArray(sit["state_tags"])
+        ? sit["state_tags"].filter((t): t is string => typeof t === "string") : [],
+      energy_state:       typeof sit["energy_state"] === "string"  ? sit["energy_state"] : "",
+      life_context:       typeof sit["life_context"] === "string"  ? sit["life_context"] : "",
+      prior_context_used: typeof sit["prior_context_used"] === "boolean" ? sit["prior_context_used"] : false,
+    },
+    decision: {
+      routing_type:      typeof dec["routing_type"] === "string"      ? dec["routing_type"] : "",
+      suggested_room_id: dec["suggested_room_id"] as string,
+      confidence:        typeof dec["confidence"] === "number"        ? dec["confidence"] : 0,
+      source:            typeof dec["source"] === "string"            ? dec["source"] : "",
+    },
+    learning: {
+      eligible_for_learning: typeof lrn["eligible_for_learning"] === "boolean" ? lrn["eligible_for_learning"] : false,
+      feedback_pending:      typeof lrn["feedback_pending"] === "boolean"      ? lrn["feedback_pending"] : false,
+    },
+  };
 }

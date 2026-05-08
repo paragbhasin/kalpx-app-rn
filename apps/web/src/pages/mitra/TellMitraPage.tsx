@@ -1,5 +1,5 @@
 import { getDoorLabel, isValidRoomId } from "@kalpx/contracts";
-import type { TellMitraV3Response } from "@kalpx/types";
+import type { TellMitraNextOption, TellMitraV3Response } from "@kalpx/types";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -91,6 +91,60 @@ export function TellMitraPage() {
     cursor: "pointer",
   };
 
+  const PRIOR_CONTEXT_CARD: React.CSSProperties = {
+    background: "rgba(201,168,76,0.06)",
+    border: "1px solid rgba(201,168,76,0.18)",
+    borderRadius: 10,
+    padding: "10px 14px",
+    marginBottom: 14,
+    fontSize: 13,
+    color: "#7B6550",
+    fontStyle: "italic",
+  };
+
+  function PriorContextCard() {
+    if (!result?.prior_context_used || !result?.prior_context_summary) return null;
+    return (
+      <div style={PRIOR_CONTEXT_CARD}>
+        {result.prior_context_summary}
+        {result.prior_suggested_room_label && (
+          <div style={{ marginTop: 4, fontWeight: 600, color: "#432104", fontStyle: "normal" }}>
+            {result.prior_suggested_room_label}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  function NextOptionsTiles() {
+    if (!result?.next_options?.length) return null;
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
+        <div style={{ fontSize: 12, color: "#A08060", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" as const, marginBottom: 2 }}>
+          Or try
+        </div>
+        {result.next_options.map((opt: TellMitraNextOption, i: number) => (
+          <button
+            key={i}
+            onClick={() => {
+              if (opt.action_type === "navigate_to_room" && opt.room_id) {
+                void executeAction(
+                  { type: "enter_room", payload: { room_id: opt.room_id, source: "tell_mitra_next_option" } },
+                  { dispatch, screenData: screenState.screenData, currentStateId: "tell_mitra" }
+                );
+              } else if (opt.action_type === "navigate_to_door" && opt.door) {
+                navigate(DOOR_ROUTES[opt.door] ?? "/en/mitra");
+              }
+            }}
+            style={{ ...GHOST_BTN, textAlign: "left" as const, padding: "10px 14px" }}
+          >
+            {opt.label} — {opt.description}
+          </button>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div style={{ minHeight: "100dvh", background: "#FFF8EF", display: "flex", flexDirection: "column" }}>
       <main style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 16px calc(92px + env(safe-area-inset-bottom))" }}>
@@ -157,6 +211,7 @@ export function TellMitraPage() {
               <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 18, color: "#C99317", marginBottom: 16 }}>
                 Mitra heard you.
               </div>
+              <PriorContextCard />
               {result.response_copy && (
                 <div style={{
                   background: "rgba(255,253,250,0.96)",
@@ -213,6 +268,7 @@ export function TellMitraPage() {
               <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 18, color: "#C99317", marginBottom: 16 }}>
                 Mitra heard you.
               </div>
+              <PriorContextCard />
               {result.response_copy && (
                 <div style={{
                   background: "rgba(255,253,250,0.96)",
@@ -258,6 +314,7 @@ export function TellMitraPage() {
               <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 18, color: "#C99317", marginBottom: 16 }}>
                 Mitra heard you.
               </div>
+              <PriorContextCard />
               <div style={{
                 background: "rgba(255,253,250,0.96)",
                 borderLeft: "3px solid rgba(201,168,76,0.6)",
@@ -272,20 +329,7 @@ export function TellMitraPage() {
               }}>
                 {result.response_copy}
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
-                <div style={{ fontSize: 12, color: "#A08060", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" as const, marginBottom: 2 }}>
-                  Or try
-                </div>
-                <button onClick={() => navigate("/en/mitra/checkin-quick")} style={{ ...GHOST_BTN, textAlign: "left" as const, padding: "10px 14px" }}>
-                  Quick Check-in — share how your energy feels
-                </button>
-                <button onClick={() => navigate("/en/mitra/quick-reset")} style={{ ...GHOST_BTN, textAlign: "left" as const, padding: "10px 14px" }}>
-                  Quick Reset — one calm mantra with beads
-                </button>
-                <button onClick={() => navigate("/en/mitra/rooms")} style={{ ...GHOST_BTN, textAlign: "left" as const, padding: "10px 14px" }}>
-                  Browse Rooms — find the right space
-                </button>
-              </div>
+              <NextOptionsTiles />
               <button onClick={() => { setScreen("none"); setText(""); }} style={GOLD_BTN}>
                 Tell Mitra more
               </button>
@@ -319,6 +363,7 @@ export function TellMitraPage() {
               <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 18, color: "#C99317", marginBottom: 16 }}>
                 Mitra heard you.
               </div>
+              <PriorContextCard />
               {result.response_copy ? (
                 <div style={{
                   background: "rgba(255,253,250,0.96)",
@@ -339,20 +384,7 @@ export function TellMitraPage() {
                   I'm here with you. Let me help you find where to go next.
                 </p>
               )}
-              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
-                <div style={{ fontSize: 12, color: "#A08060", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" as const, marginBottom: 2 }}>
-                  Or try
-                </div>
-                <button onClick={() => navigate("/en/mitra/checkin-quick")} style={{ ...GHOST_BTN, textAlign: "left" as const, padding: "10px 14px" }}>
-                  Quick Check-in — share how your energy feels
-                </button>
-                <button onClick={() => navigate("/en/mitra/quick-reset")} style={{ ...GHOST_BTN, textAlign: "left" as const, padding: "10px 14px" }}>
-                  Quick Reset — one calm mantra with beads
-                </button>
-                <button onClick={() => navigate("/en/mitra/rooms")} style={{ ...GHOST_BTN, textAlign: "left" as const, padding: "10px 14px" }}>
-                  Browse Rooms — find the right space
-                </button>
-              </div>
+              <NextOptionsTiles />
               <button onClick={() => { setScreen("none"); setText(""); }} style={GOLD_BTN}>
                 Tell Mitra more
               </button>

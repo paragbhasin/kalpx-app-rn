@@ -154,6 +154,14 @@ export type TellMitraRoutingType =
   | "navigate_to_door"
   | "provide_wisdom_inline";
 
+export interface TellMitraNextOption {
+  label: string;
+  description: string;
+  action_type: "navigate_to_room" | "navigate_to_door";
+  room_id: VerifiedRoomId | null;
+  door: DoorId | null;
+}
+
 export interface TellMitraV3Response {
   intent_matched: boolean;
   intent_type: string | null;
@@ -169,4 +177,9 @@ export interface TellMitraV3Response {
   state_tags: string[];
   companion_state_written: boolean;
   safety_flag: boolean;
+  prior_context_used: boolean;
+  prior_context_summary: string | null;
+  prior_suggested_room_id: VerifiedRoomId | null;
+  prior_suggested_room_label: string | null;
+  next_options: TellMitraNextOption[];
 }

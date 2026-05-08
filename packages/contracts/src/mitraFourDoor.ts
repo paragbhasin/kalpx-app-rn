@@ -4,6 +4,7 @@ import type {
   DoorId,
   VerifiedRoomId,
   TellMitraV3Response,
+  TellMitraNextOption,
   RhythmTimeBand,
   RhythmItemType,
   RhythmItemSource,
@@ -147,6 +148,11 @@ export function normalizeTellMitraResult(raw: unknown): TellMitraV3Response {
                                   : [],
     companion_state_written:    typeof r["companion_state_written"] === "boolean" ? r["companion_state_written"] : false,
     safety_flag:                typeof r["safety_flag"] === "boolean" ? r["safety_flag"] : false,
+    prior_context_used:         typeof r["prior_context_used"] === "boolean" ? r["prior_context_used"] : false,
+    prior_context_summary:      typeof r["prior_context_summary"] === "string" ? r["prior_context_summary"] : null,
+    prior_suggested_room_id:    isValidRoomId(r["prior_suggested_room_id"]) ? r["prior_suggested_room_id"] : null,
+    prior_suggested_room_label: typeof r["prior_suggested_room_label"] === "string" ? r["prior_suggested_room_label"] : null,
+    next_options:               Array.isArray(r["next_options"]) ? r["next_options"] as TellMitraNextOption[] : [],
   };
 }
 
@@ -158,6 +164,9 @@ function _safeTellMitraResponse(): TellMitraV3Response {
     suggested_room_label: null, suggested_room_description: null,
     door: null, response_copy: "", state_tags: [],
     companion_state_written: false, safety_flag: false,
+    prior_context_used: false, prior_context_summary: null,
+    prior_suggested_room_id: null, prior_suggested_room_label: null,
+    next_options: [],
   };
 }
 

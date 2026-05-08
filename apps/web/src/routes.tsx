@@ -57,6 +57,11 @@ import { KalpxHaatProductDetailPage } from "./pages/haat/KalpxHaatProductDetailP
 import { KalpxHaatStoreDetailPage } from "./pages/haat/KalpxHaatStoreDetailPage";
 import { KalpxHaatServiceCheckoutPage } from "./pages/haat/KalpxHaatServiceCheckoutPage";
 import { KalpxHaatServiceDetailPage } from "./pages/haat/KalpxHaatServiceDetailPage";
+import { RetreatBookingDetailsPage } from "./pages/retreats/RetreatBookingDetailsPage";
+import { RetreatBookingPage } from "./pages/retreats/RetreatBookingPage";
+import { RetreatCancellationPage } from "./pages/retreats/RetreatCancellationPage";
+import { RetreatDetailsPage } from "./pages/retreats/RetreatDetailsPage";
+import { RetreatPackageDetailsPage } from "./pages/retreats/RetreatPackageDetailsPage";
 import { RetreatsInterestPage } from "./pages/retreats/RetreatsInterestPage";
 
 export function AppRoutes() {
@@ -162,6 +167,7 @@ export function AppRoutes() {
         element={<KalpxHaatServiceCheckoutPage />}
       />
 
+      {/* Retreats vertical */}
       {/* Classes vertical */}
       <Route path="/en/classes" element={<ClassListingPage />} />
       <Route path="/en/classes/success" element={<ClassBookingSuccessPage />} />
@@ -269,6 +275,20 @@ export function AppRoutes() {
 
       {/* Retreats vertical */}
       <Route path="/en/retreats" element={<RetreatsInterestPage />} />
+      <Route path="/en/retreats/:slug" element={<RetreatDetailsPage />} />
+      <Route
+        path="/en/retreats/:slug/package/:packageId"
+        element={<RetreatPackageDetailsPage />}
+      />
+      <Route path="/en/retreats/:slug/book" element={<RetreatBookingPage />} />
+      <Route
+        path="/en/retreats/bookings/:bookingId"
+        element={<RetreatBookingDetailsPage />}
+      />
+      <Route
+        path="/en/retreats/cancellation/:bookingId"
+        element={<RetreatCancellationPage />}
+      />
 
       {/* Notifications inbox */}
       <Route

@@ -117,8 +117,11 @@ export const store = configureStore({
     }),
 });
 export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch
+export type AppDispatch = typeof store.dispatch;
+
+let _lastCompanionState: any = null;
 let _lastPreferences: any = null;
+
 store.subscribe(() => {
   const s: any = store.getState();
   if (s.companionState !== _lastCompanionState) {

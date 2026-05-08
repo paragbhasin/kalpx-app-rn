@@ -23,6 +23,7 @@ import LearnMore from "../screens/Home/LearnMore";
 import MySadana from "../screens/Home/MySadana";
 import PoojaScreen from "../screens/Home/PoojaScreen";
 import RelatedVideosScreen from "../screens/Home/RelatedVideosScreen";
+import RetreatsScreen from "../components/Retreats/RetreatsScreen";
 import RetreatDetailsScreen from "../screens/Home/RetreatDetailsScreen";
 import RetreatPackageScreen from "../screens/Home/RetreatPackageScreen";
 import RetreatBookingScreen from "../screens/Home/RetreatBookingScreen";
@@ -91,6 +92,11 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen
       name="Pooja"
       component={PoojaScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="RetreatsScreen"
+      component={RetreatsScreen}
       options={{ headerShown: false }}
     />
     <Stack.Screen

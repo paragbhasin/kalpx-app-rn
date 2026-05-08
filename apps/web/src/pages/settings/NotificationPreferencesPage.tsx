@@ -95,7 +95,7 @@ const COMPANION_GUIDANCE_CATEGORIES: CategoryConfig[] = [
     key: 'post_room_continuity',
     label: 'After Room Sessions',
     description: 'A gentle follow-up to help you carry practice forward.',
-    defaultOn: false,
+    defaultOn: true,
   },
 ];
 

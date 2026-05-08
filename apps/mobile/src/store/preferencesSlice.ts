@@ -102,7 +102,7 @@ const initialState: PreferencesSlice = {
     community_updates: true,
     milestone_reflections: true,
     predictive_suggestions: true,
-    post_room_continuity: false,
+    post_room_continuity: true,
   },
   global_consent: { receive_push_notifications: true, receive_emails: true },
   voice_consent_given: false,

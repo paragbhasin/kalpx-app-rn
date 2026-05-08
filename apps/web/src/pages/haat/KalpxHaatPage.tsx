@@ -658,7 +658,7 @@ function ServiceSection({
         actionLabel="View all"
         onAction={() => navigate("/en/haat/browse?type=service")}
       />
-      <HaatServiceGrid services={items} stores={trustedServiceStores} />
+      <HaatServiceGrid services={items} />
     </section>
   );
 }

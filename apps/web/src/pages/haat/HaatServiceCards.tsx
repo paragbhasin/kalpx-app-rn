@@ -1,14 +1,12 @@
 import { Star } from "lucide-react";
 import type { CSSProperties } from "react";
 import { useNavigate } from "react-router-dom";
-import type { HaatService, HaatStore } from "./haatData";
+import type { HaatService } from "./haatData";
 
 export function HaatServiceGrid({
   services,
-  stores,
 }: {
   services: HaatService[];
-  stores: HaatStore[];
 }) {
   const navigate = useNavigate();
 
@@ -21,16 +19,11 @@ export function HaatServiceGrid({
       }}
     >
       {services.map((service) => {
-        const store = stores.find(
-          (item) => item.store_name === service.provider,
-        );
         return (
           <article
             key={service.id}
             style={serviceCardStyle}
-            onClick={() =>
-              navigate(`/en/haat/store/${store?.id ?? 4}?type=service`)
-            }
+            onClick={() => navigate(`/en/haat/service/${service.id}`)}
           >
             <div style={serviceImageWrapStyle}>
               <img
@@ -56,21 +49,21 @@ export function HaatServiceGrid({
               </div>
 
               <div style={serviceActionRowStyle}>
-                {/* <button
-                  type="button"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    navigate(`/en/haat/store/${store?.id ?? 4}?type=service`);
-                  }}
-                  style={viewDetailsButtonStyle}
-                >
-                  View Details
-                </button> */}
                 <button
                   type="button"
                   onClick={(event) => {
                     event.stopPropagation();
-                    navigate(`/en/haat/store/${store?.id ?? 4}?type=service`);
+                    navigate(`/en/haat/service/${service.id}`);
+                  }}
+                  style={viewDetailsButtonStyle}
+                >
+                  View Details
+                </button>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    navigate(`/en/haat/service/${service.id}`);
                   }}
                   style={bookNowButtonStyle}
                 >

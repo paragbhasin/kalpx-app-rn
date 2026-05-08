@@ -52,8 +52,11 @@ import { KalpxHaatBrowsePage } from "./pages/haat/KalpxHaatBrowsePage";
 import { KalpxHaatCartPage } from "./pages/haat/KalpxHaatCartPage";
 import { KalpxHaatPage } from "./pages/haat/KalpxHaatPage";
 import { KalpxHaatPaymentPage } from "./pages/haat/KalpxHaatPaymentPage";
+import { KalpxHaatPackageDetailPage } from "./pages/haat/KalpxHaatPackageDetailPage";
 import { KalpxHaatProductDetailPage } from "./pages/haat/KalpxHaatProductDetailPage";
 import { KalpxHaatStoreDetailPage } from "./pages/haat/KalpxHaatStoreDetailPage";
+import { KalpxHaatServiceCheckoutPage } from "./pages/haat/KalpxHaatServiceCheckoutPage";
+import { KalpxHaatServiceDetailPage } from "./pages/haat/KalpxHaatServiceDetailPage";
 import { RetreatsInterestPage } from "./pages/retreats/RetreatsInterestPage";
 
 export function AppRoutes() {
@@ -148,6 +151,15 @@ export function AppRoutes() {
       <Route
         path="/en/haat/product/:id"
         element={<KalpxHaatProductDetailPage />}
+      />
+      <Route path="/en/haat/service/:id" element={<KalpxHaatServiceDetailPage />} />
+      <Route
+        path="/en/haat/service/:id/package/:packageId"
+        element={<KalpxHaatPackageDetailPage />}
+      />
+      <Route
+        path="/en/haat/service/:id/checkout"
+        element={<KalpxHaatServiceCheckoutPage />}
       />
 
       {/* Classes vertical */}

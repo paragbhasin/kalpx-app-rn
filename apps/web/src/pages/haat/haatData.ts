@@ -29,6 +29,30 @@ export type HaatService = {
   image: string;
   provider: string;
   price: string;
+  rating?: number;
+  description?: string;
+  location?: string;
+  details?: Record<string, string>;
+};
+
+export type HaatServicePackage = {
+  id: number;
+  serviceId: number;
+  name: string;
+  price: number;
+  deposit: number;
+  badge?: string;
+  features: string[];
+  included: string[];
+  excluded: string[];
+  addOns: {
+    name: string;
+    desc: string;
+    price: number;
+    selected?: boolean;
+  }[];
+  highlights: string[];
+  slots: string[];
 };
 
 export type HaatOrder = {
@@ -198,25 +222,156 @@ export const haatProducts: HaatProduct[] = [
 export const haatServices: HaatService[] = [
   {
     id: 1,
-    name: "Pandit Booking for Home Pooja",
-    image:
-      "https://images.unsplash.com/photo-1604608672516-f1b6bb27f5c2?q=80&w=1200&auto=format&fit=crop",
-    provider: "Om Pandit Seva Kendra",
-    price: "Starts at ₹1499",
+    name: "Diwali Decoration",
+    image: "/haat-assets/service-card.png",
+    provider: "Divine Floral Decoration Service",
+    price: "Starting from 10,000",
+    rating: 4,
+    location: "Chennai",
+    description:
+      "Festive Diwali decoration with lights, floral arrangements, rangoli, and traditional decor to create an auspicious atmosphere at home or temple.",
+    details: {
+      "Setup Time": "2-3 Hours",
+      "Service Mode": "At Your Location",
+      "Team Size": "2 Members",
+      "Cleanup Included": "Yes",
+    },
   },
   {
     id: 2,
-    name: "Festival Floral Decoration",
-    image: "",
-    provider: "Divine Floral Decoration Service",
-    price: "Starts at ₹2499",
+    name: "Pandit Booking for Home Pooja",
+    image: "/haat-assets/service2.png",
+    provider: "Om Pandit Seva Kendra",
+    price: "Starting from 4,999",
+    rating: 4.5,
+    location: "Chennai",
+    description:
+      "Experienced pandits offering guided rituals, sankalpam, and complete pooja assistance at your location.",
+    details: {
+      "Setup Time": "1-2 Hours",
+      "Service Mode": "At Your Location",
+      "Team Size": "1 Pandit",
+      "Cleanup Included": "No",
+    },
   },
   {
     id: 3,
     name: "Temple Offering Assistance",
-    image: "",
+    image: "/haat-assets/service3.png",
     provider: "MA Decoration Service",
-    price: "Starts at ₹999",
+    price: "Starting from 2,999",
+    rating: 4.5,
+    location: "Chennai",
+    description:
+      "Complete offering support for temple visits, festive rituals, and doorstep arrangement of offerings.",
+    details: {
+      "Setup Time": "1 Hour",
+      "Service Mode": "Temple / Doorstep",
+      "Team Size": "2 Members",
+      "Cleanup Included": "Yes",
+    },
+  },
+];
+
+export const haatServicePackages: HaatServicePackage[] = [
+  {
+    id: 1,
+    serviceId: 1,
+    name: "Basic Package",
+    price: 12000,
+    deposit: 2000,
+    features: [
+      "Traditional theme setup",
+      "LED string lighting & diyas",
+      "Entrance toran & backdrop",
+      "On-site setup and cleanup",
+    ],
+    included: [
+      "Traditional theme setup",
+      "LED string lighting & diyas",
+      "Entrance toran & backdrop",
+    ],
+    excluded: [
+      "Floral rangoli setup at entrance",
+      "Setup & takedown assistance",
+      "Personal Expenses",
+    ],
+    addOns: [
+      {
+        name: "Extra rose flower",
+        desc: "Extra rose Flower",
+        price: 200,
+        selected: true,
+      },
+      {
+        name: "Extra Lighting",
+        desc: "Extra Lighting",
+        price: 1000,
+      },
+    ],
+    highlights: [
+      "Elegant, minimal Diwali-themed setup",
+      "Quick 1-hour installation",
+      "Ideal for home or small gatherings",
+      "Traditional aesthetic with floral and diya elements",
+      "Budget-friendly festive makeover",
+      "Free cancellation up to 24 hours before service",
+    ],
+    slots: [
+      "6.00 AM - 8.00 AM",
+      "6.00 PM - 8.00 PM",
+      "10.00 PM - 12.00 PM",
+      "02.00 PM - 4.00 PM",
+    ],
+  },
+  {
+    id: 2,
+    serviceId: 1,
+    name: "Advance Package",
+    price: 20000,
+    deposit: 5000,
+    badge: "PremiumPackage",
+    features: [
+      "Premium Diwali theme setup",
+      "LED lights, lanterns, and diyas",
+      "Floral entrance arch & stage backdrop",
+      "Cleanup and material pickup included",
+    ],
+    included: [
+      "Premium Diwali theme setup",
+      "LED lights, lanterns, and diyas",
+      "Floral entrance arch & stage backdrop",
+    ],
+    excluded: [
+      "Personal shopping for external decor",
+      "Live artist arrangements",
+      "Personal Expenses",
+    ],
+    addOns: [
+      {
+        name: "Fresh marigold garlands",
+        desc: "Stage and entrance upgrade",
+        price: 1200,
+        selected: true,
+      },
+      {
+        name: "Extra diya lighting",
+        desc: "100 additional diyas",
+        price: 800,
+      },
+    ],
+    highlights: [
+      "Premium festive look for family events",
+      "Floral and light styling included",
+      "Best for larger home celebrations",
+      "Cleanup handled by service team",
+    ],
+    slots: [
+      "8.00 AM - 10.00 AM",
+      "12.00 PM - 2.00 PM",
+      "4.00 PM - 6.00 PM",
+      "7.00 PM - 9.00 PM",
+    ],
   },
 ];
 
@@ -256,4 +411,16 @@ export function getHaatStoreById(id: number) {
       (item) => item.id === id,
     ) ?? trustedServiceStores[0]
   );
+}
+
+export function getHaatServiceById(id: number) {
+  return haatServices.find((item) => item.id === id) ?? haatServices[0];
+}
+
+export function getHaatServicePackages(serviceId: number) {
+  return haatServicePackages.filter((item) => item.serviceId === serviceId);
+}
+
+export function getHaatServicePackageById(packageId: number) {
+  return haatServicePackages.find((item) => item.id === packageId) ?? haatServicePackages[0];
 }

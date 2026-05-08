@@ -14,7 +14,7 @@ import { showSnackBar } from "../../store/snackBarSlice";
 import { HaatProductGrid } from "./HaatProductCards";
 import { HaatServiceGrid } from "./HaatServiceCards";
 import { useHaatCatalog } from "./haatCatalog";
-import { haatServices, trustedServiceStores } from "./haatData";
+import { haatServices } from "./haatData";
 import { addProductToCart, getCartCount, useHaatState } from "./haatState";
 
 type BrowseType = "product" | "service";
@@ -228,7 +228,7 @@ export function KalpxHaatBrowsePage() {
               }}
             />
           ) : (
-            <HaatServiceGrid services={filteredServices} stores={trustedServiceStores} />
+            <HaatServiceGrid services={filteredServices} />
           )}
         </section>
       </div>

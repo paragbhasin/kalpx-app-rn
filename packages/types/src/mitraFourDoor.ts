@@ -149,6 +149,77 @@ export interface MitraHomeV3Response {
   [key: string]: unknown;
 }
 
+// ── Rhythm Suggest (wizard Step 3) ──────────────────────────────────────────
+
+export type RhythmSuggestSource =
+  | "internal_rule"
+  | "internal_personalized"
+  | "ai_fallback"
+  | "safe_fallback";
+
+export type RhythmSuggestReasoningCode =
+  | "purpose_band_fit"
+  | "personalized_context_fit"
+  | "ai_candidate_selection"
+  | "safe_default";
+
+export interface RhythmSuggestRequest {
+  selected_moments: RhythmTimeBand[];
+  purposes: Partial<Record<RhythmTimeBand, string>>;
+  user_intent_text?: string;
+  tz?: string;
+  locale?: string;
+  source_surface?: string;
+}
+
+export interface RhythmSuggestItem {
+  slot: RhythmTimeBand;
+  sort_order: number;
+  item_type: RhythmItemType;
+  item_id: string;
+  title_snapshot: string;
+  description_snapshot: string | null;
+  why_this: string;
+  source: "mitra_suggested";
+  suggestion_source: RhythmSuggestSource;
+  confidence: number;
+  reasoning_code: RhythmSuggestReasoningCode;
+  suggestion_request_id: string;
+  reminder_enabled: boolean;
+  reminder_time: string | null;
+}
+
+export interface RhythmSuggestResponse {
+  suggestion_request_id: string;
+  status: "ok" | "partial" | "error";
+  source: RhythmSuggestSource | "mixed" | "error";
+  confidence: number;
+  items: RhythmSuggestItem[];
+  reasoning: Partial<Record<RhythmTimeBand, string>>;
+  fallback_used: boolean;
+  missing_slots: RhythmTimeBand[];
+  warnings: string[];
+}
+
+/** Local wizard state item: RhythmSuggestItem fields + optional provenance. */
+export interface RhythmWizardLocalItem {
+  slot: RhythmTimeBand;
+  item_type: RhythmItemType;
+  item_id: string;
+  title_snapshot: string;
+  description_snapshot: string | null;
+  source: RhythmItemSource;
+  sort_order: number;
+  reminder_enabled: boolean;
+  reminder_time: string | null;
+  // Provenance — present when item came from /rhythm/suggest/; absent on user-chosen items
+  why_this?: string;
+  suggestion_source?: RhythmSuggestSource;
+  confidence?: number;
+  reasoning_code?: RhythmSuggestReasoningCode;
+  suggestion_request_id?: string;
+}
+
 export type TellMitraRoutingType =
   | "navigate_to_room"
   | "navigate_to_door"

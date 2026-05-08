@@ -1,10 +1,16 @@
-import type { RhythmTimeBand } from "@kalpx/types";
+import type { RhythmTimeBand, RhythmWizardLocalItem } from "@kalpx/types";
+import {
+  RHYTHM_SUGGEST_COPY,
+  rhythmSuggestItemToLocalItem,
+  toRhythmSetupPayloadItems,
+  getMissingSuggestionSlots,
+} from "@kalpx/contracts";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { RhythmLibraryPickerModal } from "../../components/mitra/RhythmLibraryPickerModal";
 import { executeAction } from "../../engine/actionExecutor";
-import { getMitraHomeV3, postRhythmSetup } from "../../engine/mitraApi";
+import { getMitraHomeV3, postRhythmSetup, postRhythmSuggest } from "../../engine/mitraApi";
 import type { AppDispatch, RootState } from "../../store";
 import { clearDoorState, setHomeData } from "../../store/doorSlice";
 import { useScreenState } from "../../store/screenSlice";
@@ -12,20 +18,6 @@ import { useScreenState } from "../../store/screenSlice";
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type WizardStep = "moments" | "purpose" | "suggestion" | "reminders" | "confirmation";
-
-type LocalItem = {
-  slot: RhythmTimeBand;
-  item_type: "mantra" | "sankalp" | "practice" | "reflection" | "library";
-  item_id: string;
-  title_snapshot: string;
-  description_snapshot: string | null;
-  source: "mitra_suggested" | "user_chosen" | "library";
-  sort_order: number;
-  reminder_enabled: boolean;
-  reminder_time: string | null;
-};
-
-type SuggestionSeed = Pick<LocalItem, "item_id" | "item_type" | "title_snapshot" | "description_snapshot" | "source">;
 
 // ─── Content maps ─────────────────────────────────────────────────────────────
 
@@ -64,34 +56,6 @@ const PURPOSE_OPTIONS: Record<RhythmTimeBand, { value: string; label: string; de
   ],
 };
 
-// All item IDs verified live against dev.kalpx.com library search (2026-05-08)
-const SUGGESTION_MAP: Record<RhythmTimeBand, Record<string, SuggestionSeed>> = {
-  morning: {
-    calm_start:  { item_id: "mantra.soham",                        item_type: "mantra",   title_snapshot: "Soham",                           description_snapshot: "Breathe with this mantra.",              source: "mitra_suggested" },
-    focus:       { item_id: "mantra.focus.2",                      item_type: "mantra",   title_snapshot: "Gayatri Mantra",                   description_snapshot: "Awaken the light of discernment.",       source: "mitra_suggested" },
-    devotion:    { item_id: "mantra.peace_calm.om_namah_shivaya",  item_type: "mantra",   title_snapshot: "Om Namah Shivaya",                 description_snapshot: "Surrender to what is sacred within.",    source: "mitra_suggested" },
-    discipline:  { item_id: "sankalp.focus.discipline",            item_type: "sankalp",  title_snapshot: "Discipline is My Strength.",       description_snapshot: "A sincere commitment to begin.",         source: "mitra_suggested" },
-    gratitude:   { item_id: "sankalp.live_in_gratitude",           item_type: "sankalp",  title_snapshot: "Choose gratitude today",           description_snapshot: "Begin with what is already given.",      source: "mitra_suggested" },
-    clarity:     { item_id: "mantra.asato_ma",                     item_type: "mantra",   title_snapshot: "Asato Ma Sadgamaya",               description_snapshot: "Lead me from confusion to clarity.",     source: "mitra_suggested" },
-  },
-  afternoon: {
-    reset:             { item_id: "practice.belly_breathing",          item_type: "practice", title_snapshot: "Belly Breathing",                  description_snapshot: "Soften and return to the breath.",        source: "mitra_suggested" },
-    patience:          { item_id: "choose_patience",                   item_type: "sankalp",  title_snapshot: "I will choose patience.",           description_snapshot: "Steady the response to friction.",       source: "mitra_suggested" },
-    sankalp_reminder:  { item_id: "sankalp.choose_santosha",           item_type: "sankalp",  title_snapshot: "I choose Santosha.",                description_snapshot: "Return to sacred contentment.",          source: "mitra_suggested" },
-    energy_check:      { item_id: "practice.anulom_vilom_basic",       item_type: "practice", title_snapshot: "Anulom Vilom",                     description_snapshot: "Restore prana for the second half.",     source: "mitra_suggested" },
-    mindful_action:    { item_id: "sankalp.do_not_rush_the_ripening",  item_type: "sankalp",  title_snapshot: "I do not rush what must ripen.",   description_snapshot: "Act from intention, not reaction.",      source: "mitra_suggested" },
-    emotional_balance: { item_id: "practice.shanti_breath_cycle",      item_type: "practice", title_snapshot: "Shanti Breath Cycle",              description_snapshot: "Settle what is stirred.",                source: "mitra_suggested" },
-  },
-  night: {
-    release:     { item_id: "practice.shanti_shoulder_release",  item_type: "practice", title_snapshot: "Shoulder Release",                  description_snapshot: "Release what the day placed on you.",    source: "mitra_suggested" },
-    gratitude:   { item_id: "evening_gratitude_reflection",       item_type: "practice", title_snapshot: "Evening Gratitude & Reflection",    description_snapshot: "Close with what was given.",             source: "mitra_suggested" },
-    reflection:  { item_id: "practice.santosha_reflection",       item_type: "practice", title_snapshot: "Santosha Reflection",               description_snapshot: "See the day clearly before rest.",       source: "mitra_suggested" },
-    forgiveness: { item_id: "kshama_practice",                    item_type: "practice", title_snapshot: "Practicing Kshama (Forgiveness)",   description_snapshot: "Dissolve what you are still carrying.",  source: "mitra_suggested" },
-    sleep_calm:  { item_id: "practice.bhramari",                  item_type: "practice", title_snapshot: "Bhramari (Humming Breath)",          description_snapshot: "Steady the mind for deep rest.",         source: "mitra_suggested" },
-    self_review: { item_id: "svadhyaya_daily",                    item_type: "practice", title_snapshot: "Svadhyaya (Self-Study)",             description_snapshot: "Study what the day is teaching.",        source: "mitra_suggested" },
-  },
-};
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function getRhythmTimeBand(): RhythmTimeBand {
@@ -99,11 +63,6 @@ function getRhythmTimeBand(): RhythmTimeBand {
   if (h >= 5 && h < 12) return "morning";
   if (h >= 12 && h < 17) return "afternoon";
   return "night";
-}
-
-function makeSuggestion(band: RhythmTimeBand, purpose: string, sortOrder: number): LocalItem {
-  const seed = SUGGESTION_MAP[band][purpose] ?? SUGGESTION_MAP[band]["calm_start"];
-  return { ...seed, slot: band, sort_order: sortOrder, reminder_enabled: false, reminder_time: null };
 }
 
 function itemTypeLabel(t: string): string {
@@ -166,12 +125,15 @@ export function RhythmWizardPage() {
   const [step, setStep] = useState<WizardStep>(isEditMode ? "suggestion" : "moments");
   const [selectedMoments, setSelectedMoments] = useState<RhythmTimeBand[]>([]);
   const [purposes, setPurposes] = useState<Partial<Record<RhythmTimeBand, string>>>({});
-  const [items, setItems] = useState<Partial<Record<RhythmTimeBand, LocalItem>>>({});
+  const [items, setItems] = useState<Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>>>({});
   const [reminderPref, setReminderPref] = useState<"yes" | "no" | "later">("later");
   const [bandTimes, setBandTimes] = useState<Partial<Record<RhythmTimeBand, string>>>({});
   const [pickerBand, setPickerBand] = useState<RhythmTimeBand | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [suggestLoading, setSuggestLoading] = useState(false);
+  const [suggestError, setSuggestError] = useState<string | null>(null);
+  const [suggestionsLoaded, setSuggestionsLoaded] = useState(false);
 
   // Pre-populate from existing rhythm when in edit mode
   useEffect(() => {
@@ -179,7 +141,7 @@ export function RhythmWizardPage() {
     const cr = homeData?.companion_rhythm;
     if (!cr?.has_rhythm) return;
     const moments: RhythmTimeBand[] = [];
-    const seedItems: Partial<Record<RhythmTimeBand, LocalItem>> = {};
+    const seedItems: Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>> = {};
     BANDS.forEach((band, idx) => {
       const slot = cr[band];
       if (slot?.items?.length) {
@@ -187,11 +149,11 @@ export function RhythmWizardPage() {
         const itm = slot.items[0];
         seedItems[band] = {
           slot: band,
-          item_type: itm.item_type as LocalItem["item_type"],
+          item_type: itm.item_type as RhythmWizardLocalItem["item_type"],
           item_id: itm.item_id,
           title_snapshot: itm.title_snapshot,
           description_snapshot: itm.description_snapshot ?? null,
-          source: (itm.source as LocalItem["source"]) ?? "user_chosen",
+          source: (itm.source as RhythmWizardLocalItem["source"]) ?? "user_chosen",
           sort_order: itm.sort_order ?? idx,
           reminder_enabled: itm.reminder_enabled ?? false,
           reminder_time: itm.reminder_time ?? null,
@@ -201,6 +163,21 @@ export function RhythmWizardPage() {
     setSelectedMoments(moments);
     setItems(seedItems);
   }, [isEditMode, homeData]);
+
+  // Reload guard: reset stale suggestions when moments or purposes change
+  useEffect(() => {
+    if (isEditMode) return;
+    setItems({});
+    setSuggestError(null);
+    setSuggestionsLoaded(false);
+  }, [selectedMoments, purposes]);
+
+  // Load suggestions once when entering suggestion step
+  useEffect(() => {
+    if (step === "suggestion" && !isEditMode && !suggestionsLoaded) {
+      void loadSuggestions();
+    }
+  }, [step, suggestionsLoaded]);
 
   // ── Navigation helpers ───────────────────────────────────────────────────────
 
@@ -218,17 +195,38 @@ export function RhythmWizardPage() {
     setStep("purpose");
   }
 
+  async function loadSuggestions() {
+    setSuggestLoading(true);
+    setSuggestError(null);
+    try {
+      const resp = await postRhythmSuggest({
+        selected_moments: selectedMoments,
+        purposes,
+        tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        locale: "en",
+        source_surface: "rhythm_wizard",
+      });
+      const newItems: Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>> = {};
+      resp.items.forEach((it, idx) => {
+        newItems[it.slot] = { ...rhythmSuggestItemToLocalItem(it), sort_order: idx };
+      });
+      setItems(newItems);
+      setSuggestionsLoaded(true);
+      if (resp.status === "partial" && resp.missing_slots?.length) {
+        setSuggestError(`Mitra could not suggest a practice for: ${resp.missing_slots.join(", ")}.`);
+      }
+    } catch {
+      setSuggestError(RHYTHM_SUGGEST_COPY.error);
+    } finally {
+      setSuggestLoading(false);
+    }
+  }
+
   function advancePurposeToSuggestion() {
-    const newItems: Partial<Record<RhythmTimeBand, LocalItem>> = {};
-    selectedMoments.forEach((band, idx) => {
-      const purpose = purposes[band];
-      if (purpose) newItems[band] = makeSuggestion(band, purpose, idx);
-    });
-    setItems(newItems);
     setStep("suggestion");
   }
 
-  function replaceItem(band: RhythmTimeBand, picked: LocalItem) {
+  function replaceItem(band: RhythmTimeBand, picked: RhythmWizardLocalItem) {
     setItems(prev => ({ ...prev, [band]: { ...picked, slot: band } }));
   }
 
@@ -236,19 +234,14 @@ export function RhythmWizardPage() {
     setSaving(true);
     setError(null);
     try {
-      const itemsArr = BANDS
-        .filter(b => items[b])
-        .map((b, idx) => {
-          const item = items[b]!;
-          const t = bandTimes[b];
-          return {
-            ...item,
-            sort_order: idx,
-            reminder_enabled: reminderPref === "yes" && !!t,
-            reminder_time: reminderPref === "yes" ? (t ?? null) : null,
-          };
-        });
-      await postRhythmSetup({ items: itemsArr, reminder_preference: reminderPref });
+      const localItems = BANDS.filter(b => items[b]).map((b, idx) => ({
+        ...items[b]!,
+        sort_order: idx,
+        reminder_enabled: reminderPref === "yes" && !!bandTimes[b],
+        reminder_time: reminderPref === "yes" ? (bandTimes[b] ?? null) : null,
+      }));
+      const itemsArr = toRhythmSetupPayloadItems(localItems);
+      await postRhythmSetup({ items: itemsArr as any[], reminder_preference: reminderPref });
       const newHome = await getMitraHomeV3();
       dispatch(setHomeData(newHome));
       dispatch(clearDoorState());
@@ -454,75 +447,104 @@ export function RhythmWizardPage() {
           )}
 
           {/* ── Step 3: Mitra Suggests ─────────────────────────────────── */}
-          {step === "suggestion" && (
-            <>
-              <h2 style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 26, color: DARK, margin: "0 0 8px" }}>
-                {isEditMode ? "Your Rhythm" : "Mitra suggests this for you."}
-              </h2>
-              <p style={{ color: MID, fontSize: 15, marginBottom: 28, lineHeight: 1.6 }}>
-                {isEditMode
-                  ? "Change any item or keep it as it is."
-                  : "Each practice fits the purpose you chose. You can change any of them."}
-              </p>
+          {step === "suggestion" && (() => {
+            const missingSlots = getMissingSuggestionSlots(selectedMoments, items);
+            const acceptDisabled = suggestLoading || saving || missingSlots.length > 0;
+            return (
+              <>
+                <h2 style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 26, color: DARK, margin: "0 0 8px" }}>
+                  {isEditMode ? "Your Rhythm" : "Mitra suggests this for you."}
+                </h2>
+                <p style={{ color: MID, fontSize: 15, marginBottom: 28, lineHeight: 1.6 }}>
+                  {isEditMode
+                    ? "Change any item or keep it as it is."
+                    : "Each practice fits the purpose you chose. You can change any of them."}
+                </p>
 
-              {BANDS.filter(b => items[b]).map(band => {
-                const item = items[band]!;
-                return (
-                  <div
-                    key={band}
-                    style={{
-                      border: `1px solid ${BORDER}`, borderRadius: 16,
-                      background: CARD_BG, padding: "16px 18px", marginBottom: 14,
-                    }}
-                  >
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                      <div style={{ flex: 1, marginRight: 10 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                          <span style={{
-                            fontSize: 10, fontWeight: 700, letterSpacing: 1.4,
-                            color: "#8B6914", textTransform: "uppercase",
-                            background: "#F5F0E0", borderRadius: 6, padding: "2px 8px",
-                          }}>
-                            {itemTypeLabel(item.item_type)}
-                          </span>
-                          <span style={{ fontSize: 12, color: LIGHT }}>{MOMENT_COPY[band].label}</span>
-                        </div>
-                        <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 16, color: DARK, marginBottom: 4 }}>
-                          {item.title_snapshot}
-                        </div>
-                        {item.description_snapshot && (
-                          <div style={{ fontSize: 13, color: MID, lineHeight: 1.5 }}>
-                            {item.description_snapshot}
-                          </div>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => setPickerBand(band)}
-                        style={{
-                          background: "none", border: `1px solid rgba(201,168,76,0.4)`,
-                          color: GOLD, borderRadius: 8, padding: "5px 10px",
-                          fontSize: 13, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0,
-                        }}
-                      >
-                        Change
-                      </button>
-                    </div>
+                {suggestLoading && (
+                  <div style={{ textAlign: "center", padding: "32px 0", color: MID, fontSize: 15 }}>
+                    {RHYTHM_SUGGEST_COPY.loading}
                   </div>
-                );
-              })}
+                )}
 
-              {error && <p style={{ color: "#e06060", fontSize: 14, textAlign: "center" }}>{error}</p>}
+                {!suggestLoading && suggestError && (
+                  <div style={{ textAlign: "center", padding: "16px 0" }}>
+                    <p style={{ color: "#c0392b", fontSize: 14, marginBottom: 12 }}>{suggestError}</p>
+                    <button
+                      onClick={() => { setSuggestionsLoaded(false); setItems({}); }}
+                      style={{ ...goldBtn, display: "inline-block", width: "auto", padding: "8px 20px", marginBottom: 8 }}
+                    >
+                      {RHYTHM_SUGGEST_COPY.tryAgain}
+                    </button>
+                    <button onClick={() => navigate("/en/mitra/rhythm/edit")} style={ghostBtn}>
+                      {RHYTHM_SUGGEST_COPY.chooseFromLibrary}
+                    </button>
+                  </div>
+                )}
 
-              <button onClick={() => setStep("reminders")} style={{ ...goldBtn, marginTop: 8 }}>
-                Accept Rhythm →
-              </button>
-              {!isEditMode && (
-                <button onClick={() => navigate("/en/mitra/rhythm/edit")} style={ghostBtn}>
-                  Choose My Own
+                {!suggestLoading && selectedMoments.map(band => {
+                  const item = items[band];
+                  if (!item) {
+                    return (
+                      <div key={band} style={{ border: "1px solid rgba(201,100,76,0.3)", borderRadius: 12, background: "rgba(255,245,245,0.9)", padding: "14px 18px", marginBottom: 14 }}>
+                        <p style={{ color: "#9b4e4e", fontSize: 14, margin: "0 0 10px" }}>
+                          Mitra could not suggest a {MOMENT_COPY[band].label.toLowerCase()} practice.
+                        </p>
+                        <button onClick={() => setPickerBand(band)} style={{ background: "none", border: `1px solid rgba(201,168,76,0.4)`, color: GOLD, borderRadius: 8, padding: "5px 10px", fontSize: 13, cursor: "pointer" }}>
+                          {RHYTHM_SUGGEST_COPY.chooseFromLibrary}
+                        </button>
+                      </div>
+                    );
+                  }
+                  return (
+                    <div key={band} style={{ border: `1px solid ${BORDER}`, borderRadius: 16, background: CARD_BG, padding: "16px 18px", marginBottom: 14 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                        <div style={{ flex: 1, marginRight: 10 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: 1.4, color: "#8B6914", textTransform: "uppercase", background: "#F5F0E0", borderRadius: 6, padding: "2px 8px" }}>
+                              {itemTypeLabel(item.item_type)}
+                            </span>
+                            <span style={{ fontSize: 12, color: LIGHT }}>{MOMENT_COPY[band].label}</span>
+                          </div>
+                          <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 16, color: DARK, marginBottom: 4 }}>
+                            {item.title_snapshot}
+                          </div>
+                          {item.why_this && (
+                            <div style={{ fontSize: 13, color: "#8B6914", lineHeight: 1.5, fontStyle: "italic", marginBottom: 4 }}>
+                              {item.why_this}
+                            </div>
+                          )}
+                          {!item.why_this && item.description_snapshot && (
+                            <div style={{ fontSize: 13, color: MID, lineHeight: 1.5 }}>
+                              {item.description_snapshot}
+                            </div>
+                          )}
+                        </div>
+                        <button onClick={() => setPickerBand(band)} style={{ background: "none", border: `1px solid rgba(201,168,76,0.4)`, color: GOLD, borderRadius: 8, padding: "5px 10px", fontSize: 13, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}>
+                          Change
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {error && <p style={{ color: "#e06060", fontSize: 14, textAlign: "center" }}>{error}</p>}
+
+                <button
+                  onClick={() => setStep("reminders")}
+                  style={{ ...goldBtn, marginTop: 8, opacity: acceptDisabled ? 0.45 : 1, cursor: acceptDisabled ? "not-allowed" : "pointer" }}
+                  disabled={acceptDisabled}
+                >
+                  Accept Rhythm →
                 </button>
-              )}
-            </>
-          )}
+                {!isEditMode && (
+                  <button onClick={() => navigate("/en/mitra/rhythm/edit")} style={ghostBtn}>
+                    Choose My Own
+                  </button>
+                )}
+              </>
+            );
+          })()}
 
           {/* ── Step 4: Reminders ──────────────────────────────────────── */}
           {step === "reminders" && (
@@ -663,7 +685,7 @@ export function RhythmWizardPage() {
       {pickerBand && (
         <RhythmLibraryPickerModal
           band={pickerBand}
-          onPick={picked => { replaceItem(pickerBand, picked as unknown as LocalItem); setPickerBand(null); }}
+          onPick={picked => { replaceItem(pickerBand, { ...picked, reminder_time: null }); setPickerBand(null); }}
           onClose={() => setPickerBand(null)}
           nextSortOrder={0}
         />

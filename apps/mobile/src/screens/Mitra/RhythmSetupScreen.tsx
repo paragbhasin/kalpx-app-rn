@@ -21,12 +21,16 @@ import { useNavigation } from '@react-navigation/native';
 import {
   RHYTHM_BAND_LABELS,
   RHYTHM_BAND_SUBTITLES,
+  RHYTHM_SUGGEST_COPY,
+  rhythmSuggestItemToLocalItem,
+  toRhythmSetupPayloadItems,
+  getMissingSuggestionSlots,
 } from '@kalpx/contracts';
-import type { RhythmTimeBand } from '@kalpx/types';
+import type { RhythmTimeBand, RhythmWizardLocalItem } from '@kalpx/types';
 import LibrarySearchModal, { LibrarySearchItem } from '../../components/LibrarySearchModal';
 import { executeAction } from '../../engine/actionExecutor';
 import { useScreenStore } from '../../engine/useScreenBridge';
-import { mitraJourneyHomeV3, postRhythmSetup } from '../../engine/mitraApi';
+import { mitraJourneyHomeV3, postRhythmSetup, postRhythmSuggest } from '../../engine/mitraApi';
 import { clearDoorState, setHomeData } from '../../store/doorSlice';
 import { screenActions, loadScreenWithData, goBackWithData } from '../../store/screenSlice';
 import { Fonts } from '../../theme/fonts';
@@ -34,18 +38,6 @@ import { Fonts } from '../../theme/fonts';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type WizardStep = 'moments' | 'purpose' | 'suggestion' | 'reminders' | 'confirmation';
-
-interface LocalItem {
-  slot: RhythmTimeBand;
-  item_type: string;
-  item_id: string;
-  title_snapshot: string;
-  description_snapshot: string | null;
-  source: 'mitra_suggested' | 'user_chosen' | 'library';
-  sort_order: number;
-  reminder_enabled: boolean;
-  reminder_time: string | null;
-}
 
 interface BandItem {
   item_id: string;
@@ -93,34 +85,6 @@ const PURPOSE_OPTIONS: Record<RhythmTimeBand, { value: string; label: string; de
   ],
 };
 
-type SuggestionSeed = Omit<LocalItem, 'slot' | 'sort_order'>;
-
-const SUGGESTION_MAP: Record<RhythmTimeBand, Record<string, SuggestionSeed>> = {
-  morning: {
-    calm_start:  { item_id: 'mantra.soham',                      item_type: 'mantra',   title_snapshot: 'Soham',                          description_snapshot: 'Breathe with this mantra.',           source: 'mitra_suggested', reminder_enabled: false, reminder_time: null },
-    focus:       { item_id: 'mantra.focus.2',                    item_type: 'mantra',   title_snapshot: 'Gayatri Mantra',                  description_snapshot: 'Awaken the light of discernment.',    source: 'mitra_suggested', reminder_enabled: false, reminder_time: null },
-    devotion:    { item_id: 'mantra.peace_calm.om_namah_shivaya', item_type: 'mantra',  title_snapshot: 'Om Namah Shivaya',                description_snapshot: 'Surrender to what is sacred within.', source: 'mitra_suggested', reminder_enabled: false, reminder_time: null },
-    discipline:  { item_id: 'sankalp.focus.discipline',          item_type: 'sankalp',  title_snapshot: 'Discipline is My Strength.',      description_snapshot: 'A sincere commitment to begin.',      source: 'mitra_suggested', reminder_enabled: false, reminder_time: null },
-    gratitude:   { item_id: 'sankalp.live_in_gratitude',         item_type: 'sankalp',  title_snapshot: 'Choose gratitude today',          description_snapshot: 'Begin with what is already given.',   source: 'mitra_suggested', reminder_enabled: false, reminder_time: null },
-    clarity:     { item_id: 'mantra.asato_ma',                   item_type: 'mantra',   title_snapshot: 'Asato Ma Sadgamaya',              description_snapshot: 'Lead me from confusion to clarity.',  source: 'mitra_suggested', reminder_enabled: false, reminder_time: null },
-  },
-  afternoon: {
-    reset:             { item_id: 'practice.belly_breathing',         item_type: 'practice', title_snapshot: 'Belly Breathing',               description_snapshot: 'Soften and return to the breath.',     source: 'mitra_suggested', reminder_enabled: false, reminder_time: null },
-    patience:          { item_id: 'choose_patience',                  item_type: 'sankalp',  title_snapshot: 'I will choose patience.',         description_snapshot: 'Steady the response to friction.',    source: 'mitra_suggested', reminder_enabled: false, reminder_time: null },
-    sankalp_reminder:  { item_id: 'sankalp.choose_santosha',          item_type: 'sankalp',  title_snapshot: 'I choose Santosha.',              description_snapshot: 'Return to sacred contentment.',       source: 'mitra_suggested', reminder_enabled: false, reminder_time: null },
-    energy_check:      { item_id: 'practice.anulom_vilom_basic',      item_type: 'practice', title_snapshot: 'Anulom Vilom',                    description_snapshot: 'Restore prana for the second half.',  source: 'mitra_suggested', reminder_enabled: false, reminder_time: null },
-    mindful_action:    { item_id: 'sankalp.do_not_rush_the_ripening', item_type: 'sankalp',  title_snapshot: 'I do not rush what must ripen.',  description_snapshot: 'Act from intention, not reaction.',   source: 'mitra_suggested', reminder_enabled: false, reminder_time: null },
-    emotional_balance: { item_id: 'practice.shanti_breath_cycle',     item_type: 'practice', title_snapshot: 'Shanti Breath Cycle',             description_snapshot: 'Settle what is stirred.',             source: 'mitra_suggested', reminder_enabled: false, reminder_time: null },
-  },
-  night: {
-    release:     { item_id: 'practice.shanti_shoulder_release', item_type: 'practice', title_snapshot: 'Shoulder Release',                description_snapshot: 'Release what the day placed on you.', source: 'mitra_suggested', reminder_enabled: false, reminder_time: null },
-    gratitude:   { item_id: 'evening_gratitude_reflection',     item_type: 'practice', title_snapshot: 'Evening Gratitude & Reflection',  description_snapshot: 'Close with what was given.',           source: 'mitra_suggested', reminder_enabled: false, reminder_time: null },
-    reflection:  { item_id: 'practice.santosha_reflection',     item_type: 'practice', title_snapshot: 'Santosha Reflection',             description_snapshot: 'See the day clearly before rest.',    source: 'mitra_suggested', reminder_enabled: false, reminder_time: null },
-    forgiveness: { item_id: 'kshama_practice',                  item_type: 'practice', title_snapshot: 'Practicing Kshama (Forgiveness)', description_snapshot: 'Dissolve what you are still carrying.', source: 'mitra_suggested', reminder_enabled: false, reminder_time: null },
-    sleep_calm:  { item_id: 'practice.bhramari',                item_type: 'practice', title_snapshot: 'Bhramari (Humming Breath)',       description_snapshot: 'Steady the mind for deep rest.',      source: 'mitra_suggested', reminder_enabled: false, reminder_time: null },
-    self_review: { item_id: 'svadhyaya_daily',                  item_type: 'practice', title_snapshot: 'Svadhyaya (Self-Study)',           description_snapshot: 'Study what the day is teaching.',     source: 'mitra_suggested', reminder_enabled: false, reminder_time: null },
-  },
-};
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -156,11 +120,14 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
   const [wizardStep, setWizardStep] = useState<WizardStep | null>(editMode ? null : 'moments');
   const [selectedMoments, setSelectedMoments] = useState<RhythmTimeBand[]>([]);
   const [purposes, setPurposes] = useState<Partial<Record<RhythmTimeBand, string>>>({});
-  const [wizardItems, setWizardItems] = useState<Partial<Record<RhythmTimeBand, LocalItem>>>({});
+  const [wizardItems, setWizardItems] = useState<Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>>>({});
   const [wizardReminderPref, setWizardReminderPref] = useState<'yes' | 'no' | 'later'>('later');
   const [wizardPickerBand, setWizardPickerBand] = useState<RhythmTimeBand | null>(null);
   const [wizardSaving, setWizardSaving] = useState(false);
   const [wizardError, setWizardError] = useState('');
+  const [suggestLoading, setSuggestLoading] = useState(false);
+  const [suggestError, setSuggestError] = useState<string | null>(null);
+  const [suggestionsLoaded, setSuggestionsLoaded] = useState(false);
 
   // ── Accordion state (edit mode) ───────────────────────────────────────────────
   const seedBand = (band: RhythmTimeBand): BandItem[] => {
@@ -193,15 +160,48 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
     );
   };
 
-  const advanceToSuggestion = () => {
-    const newItems: Partial<Record<RhythmTimeBand, LocalItem>> = {};
-    selectedMoments.forEach((band, idx) => {
-      const purpose = purposes[band];
-      if (purpose && SUGGESTION_MAP[band][purpose]) {
-        newItems[band] = { ...SUGGESTION_MAP[band][purpose], slot: band, sort_order: idx };
+  // Reload guard: reset stale suggestions when moments or purposes change
+  useEffect(() => {
+    setWizardItems({});
+    setSuggestError(null);
+    setSuggestionsLoaded(false);
+  }, [selectedMoments, purposes]);
+
+  // Load suggestions once when entering suggestion step
+  useEffect(() => {
+    if (wizardStep === 'suggestion' && !editMode && !suggestionsLoaded) {
+      void loadSuggestions();
+    }
+  }, [wizardStep, suggestionsLoaded]);
+
+  const loadSuggestions = async () => {
+    setSuggestLoading(true);
+    setSuggestError(null);
+    try {
+      const resp = await postRhythmSuggest({
+        selected_moments: selectedMoments,
+        purposes,
+        tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        locale: 'en',
+        source_surface: 'rhythm_wizard',
+      });
+      const newItems: Partial<Record<RhythmTimeBand, RhythmWizardLocalItem>> = {};
+      resp.items.forEach((it, idx) => {
+        newItems[it.slot] = { ...rhythmSuggestItemToLocalItem(it), sort_order: idx };
+      });
+      setWizardItems(newItems);
+      setSuggestionsLoaded(true);
+      if (resp.status === 'partial' && resp.missing_slots?.length) {
+        setSuggestError(`Mitra could not suggest a practice for: ${resp.missing_slots.join(', ')}.`);
       }
-    });
-    setWizardItems(newItems);
+    } catch {
+      setSuggestError(RHYTHM_SUGGEST_COPY.error);
+    } finally {
+      setSuggestLoading(false);
+    }
+  };
+
+  const advanceToSuggestion = () => {
     setWizardStep('suggestion');
   };
 
@@ -230,17 +230,8 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
     setWizardSaving(true);
     setWizardError('');
     try {
-      const items = Object.values(wizardItems).map((item) => ({
-        slot: item!.slot,
-        item_type: item!.item_type as any,
-        item_id: item!.item_id,
-        title_snapshot: item!.title_snapshot,
-        description_snapshot: item!.description_snapshot,
-        source: item!.source,
-        sort_order: item!.sort_order,
-        reminder_enabled: false,
-        reminder_time: null,
-      }));
+      const localItems = BANDS.filter((b) => wizardItems[b]).map((b) => wizardItems[b]!);
+      const items = toRhythmSetupPayloadItems(localItems) as any[];
       await postRhythmSetup({ items, reminder_preference: wizardReminderPref });
       const newHomeData = await mitraJourneyHomeV3();
       dispatch(setHomeData(newHomeData));
@@ -437,66 +428,119 @@ export default function RhythmSetupScreen({ editMode = false }: { editMode?: boo
     </SafeAreaView>
   );
 
-  const renderSuggestionStep = () => (
-    <SafeAreaView style={wStyles.safe}>
-      <ScrollView contentContainerStyle={wStyles.scroll} showsVerticalScrollIndicator={false}>
-        <TouchableOpacity onPress={() => setWizardStep('purpose')} style={wStyles.backRow}>
-          <Text style={wStyles.backText}>{'< Back'}</Text>
-        </TouchableOpacity>
-        {renderStepDots('suggestion')}
-        <Text style={wStyles.heading}>Mitra Suggests</Text>
-        <Text style={wStyles.subheading}>These practices match your intentions.</Text>
+  const renderSuggestionStep = () => {
+    const missingSlots = getMissingSuggestionSlots(selectedMoments, wizardItems);
+    const acceptDisabled = suggestLoading || missingSlots.length > 0;
+    return (
+      <SafeAreaView style={wStyles.safe}>
+        <ScrollView contentContainerStyle={wStyles.scroll} showsVerticalScrollIndicator={false}>
+          <TouchableOpacity onPress={() => setWizardStep('purpose')} style={wStyles.backRow}>
+            <Text style={wStyles.backText}>{'< Back'}</Text>
+          </TouchableOpacity>
+          {renderStepDots('suggestion')}
+          <Text style={wStyles.heading}>Mitra Suggests</Text>
+          <Text style={wStyles.subheading}>These practices match your intentions.</Text>
 
-        {selectedMoments.map((band) => {
-          const item = wizardItems[band];
-          if (!item) return null;
-          return (
-            <View key={band} style={wStyles.suggestionCard}>
-              <View style={wStyles.suggestionCardHeader}>
-                <Text style={wStyles.suggestionBandLabel}>{MOMENT_COPY[band].label}</Text>
-                <Text style={wStyles.suggestionTypeBadge}>{item.item_type}</Text>
-              </View>
-              <Text style={wStyles.suggestionTitle}>{item.title_snapshot}</Text>
-              {!!item.description_snapshot && (
-                <Text style={wStyles.suggestionDesc}>{item.description_snapshot}</Text>
-              )}
+          {suggestLoading && (
+            <View style={wStyles.loadingRow}>
+              <ActivityIndicator color="#C99317" />
+              <Text style={wStyles.loadingText}>{RHYTHM_SUGGEST_COPY.loading}</Text>
+            </View>
+          )}
+
+          {!suggestLoading && suggestError && (
+            <View style={wStyles.errorBox}>
+              <Text style={wStyles.errorText}>{suggestError}</Text>
               <TouchableOpacity
-                style={wStyles.changeBtn}
-                onPress={() => setWizardPickerBand(band)}
-                activeOpacity={0.7}
+                style={wStyles.retryBtn}
+                onPress={() => {
+                  setSuggestionsLoaded(false);
+                  setWizardItems({});
+                }}
+                activeOpacity={0.8}
               >
-                <Text style={wStyles.changeBtnText}>Change</Text>
+                <Text style={wStyles.retryBtnText}>{RHYTHM_SUGGEST_COPY.tryAgain}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setWizardStep(null)}
+                activeOpacity={0.7}
+                style={wStyles.secondaryLinkRow}
+              >
+                <Text style={wStyles.secondaryLink}>{RHYTHM_SUGGEST_COPY.chooseFromLibrary}</Text>
               </TouchableOpacity>
             </View>
-          );
-        })}
+          )}
 
-        <TouchableOpacity
-          style={wStyles.primaryBtn}
-          onPress={() => setWizardStep('reminders')}
-          activeOpacity={0.8}
-        >
-          <Text style={wStyles.primaryBtnText}>Accept Rhythm →</Text>
-        </TouchableOpacity>
+          {!suggestLoading && selectedMoments.map((band) => {
+            const item = wizardItems[band];
+            if (!item) {
+              return (
+                <View key={band} style={wStyles.missingSlotBox}>
+                  <Text style={wStyles.missingSlotText}>
+                    Mitra could not suggest a {MOMENT_COPY[band].label.toLowerCase()} practice.
+                  </Text>
+                  <TouchableOpacity
+                    style={wStyles.changeBtn}
+                    onPress={() => setWizardPickerBand(band)}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={wStyles.changeBtnText}>{RHYTHM_SUGGEST_COPY.chooseFromLibrary}</Text>
+                  </TouchableOpacity>
+                </View>
+              );
+            }
+            return (
+              <View key={band} style={wStyles.suggestionCard}>
+                <View style={wStyles.suggestionCardHeader}>
+                  <Text style={wStyles.suggestionBandLabel}>{MOMENT_COPY[band].label}</Text>
+                  <Text style={wStyles.suggestionTypeBadge}>{item.item_type}</Text>
+                </View>
+                <Text style={wStyles.suggestionTitle}>{item.title_snapshot}</Text>
+                {!!item.why_this && (
+                  <Text style={wStyles.suggestionWhyThis}>{item.why_this}</Text>
+                )}
+                {!!item.description_snapshot && !item.why_this && (
+                  <Text style={wStyles.suggestionDesc}>{item.description_snapshot}</Text>
+                )}
+                <TouchableOpacity
+                  style={wStyles.changeBtn}
+                  onPress={() => setWizardPickerBand(band)}
+                  activeOpacity={0.7}
+                >
+                  <Text style={wStyles.changeBtnText}>Change</Text>
+                </TouchableOpacity>
+              </View>
+            );
+          })}
 
-        <TouchableOpacity
-          onPress={() => { setWizardStep(null); }}
-          activeOpacity={0.7}
-          style={wStyles.secondaryLinkRow}
-        >
-          <Text style={wStyles.secondaryLink}>Choose My Own</Text>
-        </TouchableOpacity>
-      </ScrollView>
+          <TouchableOpacity
+            style={[wStyles.primaryBtn, acceptDisabled && wStyles.primaryBtnDisabled]}
+            onPress={() => setWizardStep('reminders')}
+            activeOpacity={0.8}
+            disabled={acceptDisabled}
+          >
+            <Text style={wStyles.primaryBtnText}>Accept Rhythm →</Text>
+          </TouchableOpacity>
 
-      <LibrarySearchModal
-        isVisible={wizardPickerBand !== null}
-        onClose={() => setWizardPickerBand(null)}
-        onItemAdded={() => {}}
-        mode="select_for_rhythm"
-        onItemSelected={handleWizardPickerSelect}
-      />
-    </SafeAreaView>
-  );
+          <TouchableOpacity
+            onPress={() => { setWizardStep(null); }}
+            activeOpacity={0.7}
+            style={wStyles.secondaryLinkRow}
+          >
+            <Text style={wStyles.secondaryLink}>Choose My Own</Text>
+          </TouchableOpacity>
+        </ScrollView>
+
+        <LibrarySearchModal
+          isVisible={wizardPickerBand !== null}
+          onClose={() => setWizardPickerBand(null)}
+          onItemAdded={() => {}}
+          mode="select_for_rhythm"
+          onItemSelected={handleWizardPickerSelect}
+        />
+      </SafeAreaView>
+    );
+  };
 
   const renderRemindersStep = () => (
     <SafeAreaView style={wStyles.safe}>
@@ -757,6 +801,14 @@ const wStyles = StyleSheet.create({
   suggestionTypeBadge: { fontSize: 11, color: '#8b6838', fontFamily: Fonts.sans.semiBold, textTransform: 'uppercase' },
   suggestionTitle: { fontFamily: Fonts.serif.bold, fontSize: 17, color: '#432104', fontWeight: '600', marginBottom: 4 },
   suggestionDesc: { fontSize: 13, color: '#7B6550', fontFamily: Fonts.sans.regular, marginBottom: 10 },
+  suggestionWhyThis: { fontSize: 13, color: '#8B6914', fontFamily: Fonts.sans.regular, fontStyle: 'italic', marginBottom: 10 },
+  loadingRow: { alignItems: 'center', paddingVertical: 24, gap: 12 },
+  loadingText: { fontSize: 14, color: '#7B6550', fontFamily: Fonts.sans.regular, textAlign: 'center' },
+  errorBox: { alignItems: 'center', paddingVertical: 16, gap: 10 },
+  retryBtn: { backgroundColor: '#C99317', borderRadius: 10, paddingHorizontal: 20, paddingVertical: 10 },
+  retryBtnText: { fontSize: 14, color: '#fff', fontFamily: Fonts.sans.semiBold },
+  missingSlotBox: { padding: 16, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(201,100,76,0.3)', backgroundColor: 'rgba(255,245,245,0.9)', marginBottom: 12, gap: 10 },
+  missingSlotText: { fontSize: 14, color: '#9B4E4E', fontFamily: Fonts.sans.regular },
   changeBtn: { alignSelf: 'flex-start', paddingVertical: 4, paddingHorizontal: 10, borderRadius: 8, borderWidth: 1, borderColor: 'rgba(201,168,76,0.4)' },
   changeBtnText: { fontSize: 13, color: '#C99317', fontFamily: Fonts.sans.medium },
   pillRow: { flexDirection: 'row', gap: 8, marginBottom: 24 },

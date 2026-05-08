@@ -9,6 +9,9 @@ import type {
   RhythmItemType,
   RhythmItemSource,
   RhythmReminderPreference,
+  RhythmSuggestItem,
+  RhythmSuggestResponse,
+  RhythmWizardLocalItem,
 } from '@kalpx/types';
 
 // ── Rhythm setup contracts ───────────────────────────────────────────────────
@@ -117,6 +120,100 @@ export function getRoomDescription(roomId: VerifiedRoomId): string {
 export function getDoorLabel(doorId: DoorId): string {
   return DOOR_LABELS[doorId] ?? doorId;
 }
+
+// ── Rhythm suggest helpers ───────────────────────────────────────────────────
+
+export const RHYTHM_SUGGEST_COPY = {
+  loading:          "Mitra is shaping your rhythm…",
+  error:            "Mitra couldn’t shape this automatically right now.",
+  tryAgain:         "Try Again",
+  chooseFromLibrary: "Choose from Library",
+  signInRequired:   "Sign in to let Mitra shape your rhythm.",
+  signIn:           "Sign in",
+} as const;
+
+/**
+ * Coerces the raw /rhythm/suggest/ response into a typed RhythmSuggestResponse with safe defaults.
+ */
+export function normalizeRhythmSuggestResponse(raw: unknown): RhythmSuggestResponse {
+  if (raw === null || typeof raw !== "object") {
+    return {
+      suggestion_request_id: "", status: "error", source: "error",
+      confidence: 0, items: [], reasoning: {}, fallback_used: false,
+      missing_slots: [], warnings: [],
+    };
+  }
+  const r = raw as Record<string, unknown>;
+  return {
+    suggestion_request_id: typeof r["suggestion_request_id"] === "string" ? r["suggestion_request_id"] : "",
+    status: (r["status"] === "ok" || r["status"] === "partial" || r["status"] === "error")
+      ? (r["status"] as "ok" | "partial" | "error") : "error",
+    source: typeof r["source"] === "string" ? (r["source"] as RhythmSuggestResponse["source"]) : "error",
+    confidence: typeof r["confidence"] === "number" ? r["confidence"] : 0,
+    items: Array.isArray(r["items"]) ? (r["items"] as RhythmSuggestItem[]) : [],
+    reasoning: (typeof r["reasoning"] === "object" && r["reasoning"] !== null)
+      ? (r["reasoning"] as Partial<Record<RhythmTimeBand, string>>) : {},
+    fallback_used: typeof r["fallback_used"] === "boolean" ? r["fallback_used"] : false,
+    missing_slots: Array.isArray(r["missing_slots"]) ? (r["missing_slots"] as RhythmTimeBand[]) : [],
+    warnings: Array.isArray(r["warnings"]) ? (r["warnings"] as string[]) : [],
+  };
+}
+
+/**
+ * Converts a RhythmSuggestItem from the backend to a RhythmWizardLocalItem for wizard state.
+ * Preserves all provenance fields for display (why_this etc.) without any unsafe cast.
+ */
+export function rhythmSuggestItemToLocalItem(it: RhythmSuggestItem): RhythmWizardLocalItem {
+  return {
+    slot:                 it.slot,
+    item_type:            it.item_type,
+    item_id:              it.item_id,
+    title_snapshot:       it.title_snapshot,
+    description_snapshot: it.description_snapshot,
+    source:               it.source,
+    sort_order:           it.sort_order,
+    reminder_enabled:     it.reminder_enabled,
+    reminder_time:        it.reminder_time,
+    why_this:             it.why_this,
+    suggestion_source:    it.suggestion_source,
+    confidence:           it.confidence,
+    reasoning_code:       it.reasoning_code,
+    suggestion_request_id: it.suggestion_request_id,
+  };
+}
+
+/**
+ * Strips provenance fields before POSTing to /rhythm/setup/.
+ * Accepts RhythmWizardLocalItem[] so library-chosen items (without provenance) also work.
+ */
+export function toRhythmSetupPayloadItems(items: RhythmWizardLocalItem[]): RhythmSetupItem[] {
+  return items.map(({ slot, sort_order, item_type, item_id, title_snapshot,
+                      description_snapshot, source, reminder_enabled, reminder_time }) => ({
+    slot,
+    sort_order,
+    item_type,
+    item_id,
+    title_snapshot,
+    description_snapshot: description_snapshot ?? undefined,
+    source,
+    reminder_enabled,
+    reminder_time: reminder_time ?? undefined,
+  }));
+}
+
+/**
+ * Returns bands that have a selected moment but no item in the wizard state.
+ * Used to gate the "Accept Rhythm" button.
+ */
+export function getMissingSuggestionSlots(
+  selectedMoments: RhythmTimeBand[],
+  items: Partial<Record<RhythmTimeBand, unknown>>,
+): RhythmTimeBand[] {
+  return selectedMoments.filter((band) => !items[band]);
+}
+
+// Re-export for convenience so callers only need @kalpx/contracts
+export type { RhythmSuggestItem, RhythmSuggestResponse, RhythmWizardLocalItem };
 
 // ── normalizeTellMitraResult ─────────────────────────────────────────────────
 //

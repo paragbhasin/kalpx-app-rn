@@ -8,9 +8,9 @@
  */
 
 import api from "../Networks/axios";
-import type { MitraHomeV3Response, TellMitraV3Response, MitraHomeV3CompanionRhythm, QuickCheckinEnergyState, QuickCheckinResponse } from '@kalpx/types';
+import type { MitraHomeV3Response, TellMitraV3Response, MitraHomeV3CompanionRhythm, QuickCheckinEnergyState, QuickCheckinResponse, RhythmSuggestRequest, RhythmSuggestResponse } from '@kalpx/types';
 import type { RhythmSetupPayload } from '@kalpx/contracts';
-import { normalizeTellMitraResult } from '@kalpx/contracts';
+import { normalizeTellMitraResult, normalizeRhythmSuggestResponse } from '@kalpx/contracts';
 
 // ---------------------------------------------------------------------------
 // Offline fallbacks — used when backend is unreachable (dev 502, airplane
@@ -2061,6 +2061,11 @@ export async function postTellMitraV3(payload: TellMitraV3Payload): Promise<Tell
 export async function postRhythmSetup(payload: RhythmSetupPayload): Promise<MitraHomeV3CompanionRhythm> {
   const resp = await api.post<MitraHomeV3CompanionRhythm>('/api/mitra/v3/rhythm/setup/', payload);
   return resp.data;
+}
+
+export async function postRhythmSuggest(payload: RhythmSuggestRequest): Promise<RhythmSuggestResponse> {
+  const resp = await api.post<unknown>('/api/mitra/v3/rhythm/suggest/', payload);
+  return normalizeRhythmSuggestResponse(resp.data);
 }
 
 export async function postQuickCheckin(energy_state: QuickCheckinEnergyState): Promise<QuickCheckinResponse> {

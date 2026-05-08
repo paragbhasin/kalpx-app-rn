@@ -47,6 +47,7 @@ import TrackerEdit from "../screens/Tracker/TrackerEdit";
 import TrackerProgress from "../screens/Tracker/TrackerProgress";
 import TrackerScreen from "../screens/Tracker/TrackerScreen";
 import GlobalSearchScreen from "../screens/Social/GlobalSearchScreen";
+import RhythmEditScreen from "../screens/Mitra/RhythmEditScreen";
 import RhythmHomeScreen from "../screens/Mitra/RhythmHomeScreen";
 import RhythmSetupScreen from "../screens/Mitra/RhythmSetupScreen";
 import QuickResetScreen from "../screens/Mitra/QuickResetScreen";
@@ -268,6 +269,7 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     />
     <Stack.Screen name="RhythmHome" component={RhythmHomeScreen} options={{ headerShown: false }} />
     <Stack.Screen name="RhythmSetup" component={RhythmSetupScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="RhythmEdit" component={RhythmEditScreen} options={{ headerShown: false }} />
     <Stack.Screen name="QuickReset" component={QuickResetScreen} options={{ headerShown: false }} />
     <Stack.Screen name="QuickCheckin" component={QuickCheckinScreen} options={{ headerShown: false }} />
     <Stack.Screen name="BrowseRooms" component={BrowseRoomsScreen} options={{ headerShown: false }} />

@@ -509,7 +509,9 @@ export async function executeAction(action: any, context: ActionContext): Promis
           });
         }
 
-        dispatch(updateScreenData({ runner_duration_actual_sec: actualSeconds }));
+        const rawSource: string = (screenData.runner_source as string) || '';
+        const completionReturnPath = rawSource === 'rhythm_daily' ? '/en/mitra/rhythm' : '/en/mitra/dashboard';
+        dispatch(updateScreenData({ runner_duration_actual_sec: actualSeconds, completion_return_path: completionReturnPath }));
         dispatch(loadScreen({ containerId: 'practice_runner', stateId: 'completion_return' }));
         webNavigate(_containerToPath('practice_runner', 'completion_return'));
       } finally {
@@ -578,17 +580,20 @@ export async function executeAction(action: any, context: ActionContext): Promis
     // RETURN_TO_DASHBOARD — clear runner state, reload dashboard.
     // ----------------------------------------------------------------
     case 'return_to_dashboard': {
+      const returnPath: string = (screenData.completion_return_path as string) || '/en/mitra/dashboard';
       // Navigate first so support/mantra screens do not briefly re-render with
       // partially-cleared runner state before the route transition completes.
-      webNavigate('/en/mitra/dashboard');
+      webNavigate(returnPath);
 
-      // Refresh dashboard data non-blocking
-      try {
-        const envelope = await getDashboardView();
-        if (envelope) {
-          dispatch(updateScreenData(ingestDailyView(envelope)));
-        }
-      } catch { /* non-blocking — navigate regardless */ }
+      // Refresh dashboard data only when returning to the dashboard
+      if (returnPath === '/en/mitra/dashboard') {
+        try {
+          const envelope = await getDashboardView();
+          if (envelope) {
+            dispatch(updateScreenData(ingestDailyView(envelope)));
+          }
+        } catch { /* non-blocking — navigate regardless */ }
+      }
       break;
     }
 

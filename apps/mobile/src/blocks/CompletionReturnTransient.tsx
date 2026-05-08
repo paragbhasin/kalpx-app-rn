@@ -237,6 +237,15 @@ const CompletionReturnTransient: React.FC<CompletionReturnTransientProps> = ({
     // and runner_source is a known support source, we default to return_to_source
     // so completion consistently loops back to grief/loneliness/joy/growth rooms.
     // Core / additional / trigger sources fall through to dashboard (§A.9, §A.10).
+    if (String(screenData.runner_source || '') === 'rhythm_daily') {
+      executeAction({ type: 'return_to_rhythm_home', currentScreen } as any, {
+        loadScreen,
+        goBack,
+        setScreenValue: (value: any, key: string) => setScreenValue(key, value),
+        screenState: { ...screenData },
+      }).catch(() => {});
+      return;
+    }
     const returnAction = slot("return_action");
     const SUPPORT_SOURCES = new Set([
       "support_grief",

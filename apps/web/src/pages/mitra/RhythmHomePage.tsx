@@ -267,7 +267,7 @@ export function RhythmHomePage() {
                 onItemAction={handleItemAction}
               />
               <button
-                onClick={() => navigate("/en/mitra/rhythm/setup")}
+                onClick={() => navigate("/en/mitra/rhythm/edit")}
                 style={{
                   width: "100%",
                   padding: "12px 0",

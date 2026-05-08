@@ -5234,6 +5234,13 @@ export async function executeAction(
         break;
       }
 
+      case "return_to_rhythm_home": {
+        const runnerClearKeysRhythm = ['runner_active_item', 'runner_source', 'runner_variant', 'runner_reps_completed', 'runner_step_index', 'runner_duration_actual_sec', 'runner_start_time', 'runner_tz', 'completion_return_screen'];
+        runnerClearKeysRhythm.forEach(k => setScreenValue(null, k));
+        rootNavigate('RhythmHome');
+        break;
+      }
+
       case "loneliness_named": {
         mitraTrackEvent("loneliness_named", {
           journeyId: screenState.journey_id,

@@ -139,7 +139,7 @@ export default function RhythmHomeScreen() {
         <Text style={styles.headerTitle}>My Rhythm</Text>
         {hasRhythm && (
           <TouchableOpacity
-            onPress={() => navigation.navigate('RhythmSetup' as any)}
+            onPress={() => navigation.navigate('RhythmEdit' as any)}
             activeOpacity={0.7}
             style={styles.editBtn}
           >

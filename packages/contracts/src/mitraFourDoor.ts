@@ -1,6 +1,56 @@
 // API calls (getMitraHomeV3, postTellMitraV3) are app-local in mitraApi.ts — see S08 decision.
 
-import type { DoorId, VerifiedRoomId, TellMitraV3Response } from '@kalpx/types';
+import type {
+  DoorId,
+  VerifiedRoomId,
+  TellMitraV3Response,
+  RhythmTimeBand,
+  RhythmItemType,
+  RhythmItemSource,
+  RhythmReminderPreference,
+} from '@kalpx/types';
+
+// ── Rhythm setup contracts ───────────────────────────────────────────────────
+
+export interface RhythmSetupItem {
+  slot: RhythmTimeBand;
+  item_type: RhythmItemType;
+  item_id: string;
+  title_snapshot: string;
+  description_snapshot?: string | null;
+  purpose?: string | null;
+  source: RhythmItemSource;
+  sort_order: number;
+  reminder_enabled: boolean;
+  reminder_time?: string | null;
+}
+
+export interface RhythmSetupPayload {
+  reminder_preference?: RhythmReminderPreference;
+  items: RhythmSetupItem[];
+}
+
+export const RHYTHM_TIME_BANDS: RhythmTimeBand[] = ["morning", "afternoon", "night"];
+
+export const RHYTHM_BAND_LABELS: Record<RhythmTimeBand, string> = {
+  morning:   "Morning",
+  afternoon: "Afternoon",
+  night:     "Night",
+};
+
+export const RHYTHM_BAND_SUBTITLES: Record<RhythmTimeBand, string> = {
+  morning:   "Start with intention",
+  afternoon: "Steady the middle",
+  night:     "Close with care",
+};
+
+export const RHYTHM_ITEM_TYPE_LABELS: Record<RhythmItemType, string> = {
+  mantra:     "Mantra",
+  sankalp:    "Sankalp",
+  practice:   "Practice",
+  reflection: "Reflection",
+  library:    "Library",
+};
 
 // ── Door constants ──────────────────────────────────────────────────────────
 

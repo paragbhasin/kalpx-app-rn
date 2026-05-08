@@ -944,6 +944,10 @@ export async function executeAction(action: any, context: ActionContext): Promis
         } else if (stateId === 'turn_5_support' || stateId === 'turn_5_growth') {
           draft.stage3_choice = p.chip_id || 'selected_via_text';
           if (p.freeform_text) draft.freeforms = { ...(draft.freeforms || {}), stage3: p.freeform_text };
+          nextStateId = 'turn_5_life_context';
+
+        } else if (stateId === 'turn_5_life_context') {
+          draft.life_context = p.chip_id || null;
           nextStateId = 'turn_6';
 
         } else if (stateId === 'turn_6') {
@@ -957,6 +961,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
             stage2_choice: draft.stage2_choice || '',
             stage3_choice: draft.stage3_choice || '',
             guidance_mode: mode,
+            life_context: draft.life_context || null,
             freeforms: {
               stage1: draft.freeforms?.stage1 || null,
               stage2: draft.freeforms?.stage2 || null,

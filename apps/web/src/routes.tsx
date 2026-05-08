@@ -30,6 +30,7 @@ import { CreatorPostEditorPage } from "./pages/creator/CreatorPostEditorPage";
 import { CreatorPracticeLibraryPage } from "./pages/creator/CreatorPracticeLibraryPage";
 import { CreatorPostsPage } from "./pages/creator/CreatorPostsPage";
 import { CreatorSimplePostEditorPage } from "./pages/creator/CreatorSimplePostEditorPage";
+import { BrowseRoomsPage } from "./pages/mitra/BrowseRoomsPage";
 import { CheckinPage } from "./pages/mitra/CheckinPage";
 import { CheckpointPage } from "./pages/mitra/CheckpointPage";
 import { DashboardPage } from "./pages/mitra/DashboardPage";
@@ -38,7 +39,12 @@ import { MitraEnginePage } from "./pages/mitra/MitraEnginePage";
 import { MitraHomePage } from "./pages/mitra/MitraHomePage";
 import { MitraStartPage } from "./pages/mitra/MitraStartPage";
 import { OnboardingPage } from "./pages/mitra/OnboardingPage";
+import { QuickCheckinPage } from "./pages/mitra/QuickCheckinPage";
+import { QuickResetPage } from "./pages/mitra/QuickResetPage";
+import { RhythmHomePage } from "./pages/mitra/RhythmHomePage";
+import { RhythmSetupPage } from "./pages/mitra/RhythmSetupPage";
 import { RoomPage } from "./pages/mitra/RoomPage";
+import { TellMitraPage } from "./pages/mitra/TellMitraPage";
 import { TriggerPage } from "./pages/mitra/TriggerPage";
 import { WelcomeBackPage } from "./pages/mitra/WelcomeBackPage";
 import { NotificationsPage } from "./pages/notifications/NotificationsPage";
@@ -68,6 +74,12 @@ export function AppRoutes() {
       <Route path="/en/mitra/start" element={<MitraStartPage />} />
       <Route path="/en/mitra/onboarding" element={<OnboardingPage />} />
       <Route path="/en/mitra/inner-path" element={<InnerPathStubPage />} />
+      <Route path="/en/mitra/rhythm" element={<RhythmHomePage />} />
+      <Route path="/en/mitra/rhythm/setup" element={<RhythmSetupPage />} />
+      <Route path="/en/mitra/quick-reset" element={<QuickResetPage />} />
+      <Route path="/en/mitra/tell-mitra" element={<TellMitraPage />} />
+      <Route path="/en/mitra/checkin-quick" element={<QuickCheckinPage />} />
+      <Route path="/en/mitra/rooms" element={<BrowseRoomsPage />} />
 
       {/* Journey-gated Mitra routes */}
       <Route

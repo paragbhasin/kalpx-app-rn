@@ -2,6 +2,76 @@ import type { RoomId } from './room';
 
 export type DoorId = "my_rhythm" | "inner_path" | "quick_reset" | "tell_mitra";
 
+// ── Rhythm ──────────────────────────────────────────────────────────────────
+
+export type RhythmTimeBand = "morning" | "afternoon" | "night";
+
+export type RhythmItemType =
+  | "mantra"
+  | "sankalp"
+  | "practice"
+  | "reflection"
+  | "library";
+
+export type RhythmItemSource =
+  | "mitra_suggested"
+  | "user_chosen"
+  | "library";
+
+export type RhythmReminderPreference = "yes" | "no" | "later";
+
+export interface RhythmItem {
+  id: number;
+  slot: RhythmTimeBand;
+  item_type: RhythmItemType;
+  item_id: string;
+  title_snapshot: string;
+  description_snapshot: string | null;
+  purpose: string | null;
+  source: RhythmItemSource;
+  sort_order: number;
+  reminder_enabled: boolean;
+  reminder_time: string | null;
+}
+
+export interface RhythmSlot {
+  items: RhythmItem[];
+}
+
+// ── Quick Check-in ───────────────────────────────────────────────────────────
+
+export type QuickCheckinEnergyState =
+  | "energized"
+  | "balanced"
+  | "agitated"
+  | "drained";
+
+export type QuickCheckinAction =
+  | "navigate_to_door"
+  | "navigate_to_room"
+  | "return_home";
+
+export interface QuickCheckinResponse {
+  energy_state: QuickCheckinEnergyState;
+  suggested_action: QuickCheckinAction;
+  suggested_door: string | null;
+  suggested_room_id: string | null;
+  copy: string;
+}
+
+// ── Home Response Additions ──────────────────────────────────────────────────
+
+export interface MitraHomeV3Greeting {
+  headline: string;
+  subtext: string | null;
+}
+
+export interface MitraHomeV3MyRhythmSummary {
+  has_rhythm: boolean;
+  item_count: number;
+  next_slot: RhythmTimeBand | null;
+}
+
 // VerifiedRoomId is a named alias for RoomId.
 // Callers use this type to document "this value must be a known room ID."
 export type VerifiedRoomId = RoomId;
@@ -33,9 +103,10 @@ export interface MitraHomeV3InnerPathSummary {
 
 export interface MitraHomeV3CompanionRhythm {
   has_rhythm: boolean;
-  morning: unknown | null;    // Phase 2: always null
-  afternoon: unknown | null;
-  night: unknown | null;
+  reminder_preference?: RhythmReminderPreference;
+  morning: RhythmSlot | null;
+  afternoon: RhythmSlot | null;
+  night: RhythmSlot | null;
 }
 
 export interface MitraHomeV3QuickResetSummary {
@@ -72,7 +143,8 @@ export interface MitraHomeV3Response {
   tell_mitra_summary: MitraHomeV3TellMitraSummary;
   additional_items_placement: MitraHomeV3AdditionalItemsPlacement;
   reminder_summary: MitraHomeV3ReminderSummary;
-  // Allow envelope + greeting + my_rhythm_summary to coexist untyped
+  greeting?: MitraHomeV3Greeting;
+  my_rhythm_summary?: MitraHomeV3MyRhythmSummary;
   [key: string]: unknown;
 }
 

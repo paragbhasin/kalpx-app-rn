@@ -1,12 +1,19 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useJourneyStatus } from "../../hooks/useJourneyStatus";
 
 export default function InnerPathStubPage() {
   const navigate = useNavigate();
-  return (
-    <div style={{ padding: '2rem', textAlign: 'center' }}>
-      <h2>Inner Path — Coming Soon</h2>
-      <button onClick={() => navigate('/en/mitra')}>Back</button>
-    </div>
-  );
+  const { loading, hasActiveJourney } = useJourneyStatus();
+
+  useEffect(() => {
+    if (loading) return;
+    if (hasActiveJourney) {
+      navigate("/en/mitra/dashboard", { replace: true });
+    } else {
+      navigate("/en/mitra/onboarding", { replace: true });
+    }
+  }, [loading, hasActiveJourney, navigate]);
+
+  return null;
 }

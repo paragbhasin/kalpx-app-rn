@@ -54,13 +54,28 @@ export function InnerPathPage() {
           return;
         }
 
-        const envelope = await getDashboardView();
-        if (cancelled) return;
+        const entryPayload = result.envelope?.target?.payload;
+        const isDailyViewPayload =
+          result.envelope?.target?.view_key === "daily_view" &&
+          entryPayload?.identity != null &&
+          entryPayload?.today != null;
 
-        if (!envelope || envelope._isLegacyFallback) {
-          setError("Your path is preparing — try again in a moment.");
-          setLoading(false);
-          return;
+        let envelope: any;
+        if (isDailyViewPayload) {
+          envelope = entryPayload;
+        } else {
+          if (process.env.NODE_ENV !== "production") {
+            console.warn(
+              "[InnerPath] entry-view payload absent or mismatched — falling back to daily-view call",
+            );
+          }
+          envelope = await getDashboardView();
+          if (cancelled) return;
+          if (!envelope || envelope._isLegacyFallback) {
+            setError("Your path is preparing — try again in a moment.");
+            setLoading(false);
+            return;
+          }
         }
 
         const flat = ingestDailyView(envelope);

@@ -114,17 +114,32 @@ export default function InnerPathScreen() {
           return;
         }
 
-        // daily_view — fetch and ingest daily data.
-        const dailyResult = await mitraJourneyDailyView(null);
-        if (cancelled) return;
+        // daily_view — use entry-view payload directly if valid, else fall back.
+        const isDailyViewPayload =
+          viewKey === "daily_view" &&
+          payload?.identity != null &&
+          payload?.today != null;
 
-        if (dailyResult.notModified || !dailyResult.envelope) {
-          setError("Your path is preparing — try again in a moment.");
-          setLoading(false);
-          return;
+        let dailyEnvelope: any;
+        if (isDailyViewPayload) {
+          dailyEnvelope = payload;
+        } else {
+          if (__DEV__) {
+            console.warn(
+              "[InnerPathScreen] entry-view payload absent or mismatched — falling back to daily-view call",
+            );
+          }
+          const dailyResult = await mitraJourneyDailyView(null);
+          if (cancelled) return;
+          if (dailyResult.notModified || !dailyResult.envelope) {
+            setError("Your path is preparing — try again in a moment.");
+            setLoading(false);
+            return;
+          }
+          dailyEnvelope = dailyResult.envelope;
         }
 
-        const flat = ingestDailyView(dailyResult.envelope);
+        const flat = ingestDailyView(dailyEnvelope);
         writeAll(flat);
 
         // Arm the runner-container watcher only after data is safely in Redux.

@@ -57,6 +57,7 @@ export function RhythmSetupPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [reminderPref, setReminderPref] = useState<"yes" | "no" | "later">("later");
+  const [bandTimes, setBandTimes] = useState<Partial<Record<RhythmTimeBand, string>>>({});
 
   function addItem(item: LocalItem) {
     setItems((prev) => [...prev, item]);
@@ -74,7 +75,10 @@ export function RhythmSetupPage() {
     setSaving(true);
     setError(null);
     try {
-      const mappedItems = items.map((it) => ({ ...it }));
+      const mappedItems = items.map((it) => {
+        const t = bandTimes[it.slot];
+        return { ...it, reminder_enabled: !!t, reminder_time: t ?? null };
+      });
       await postRhythmSetup({ items: mappedItems, reminder_preference: reminderPref });
       const homeData = await getMitraHomeV3();
       dispatch(setHomeData(homeData));
@@ -172,6 +176,17 @@ export function RhythmSetupPage() {
                   >
                     + Add from library
                   </button>
+                  {reminderPref === "yes" && bandItems(band).length > 0 && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10, padding: "8px 14px", background: "rgba(201,168,76,0.06)", borderRadius: 10, border: "1px solid rgba(201,168,76,0.2)" }}>
+                      <span style={{ fontSize: 13, color: "#7B6550", flex: 1 }}>Reminder time</span>
+                      <input
+                        type="time"
+                        value={bandTimes[band] ?? ""}
+                        onChange={(e) => setBandTimes((prev) => ({ ...prev, [band]: e.target.value || undefined }))}
+                        style={{ border: "1px solid rgba(201,168,76,0.3)", borderRadius: 8, padding: "4px 8px", fontSize: 13, color: "#432104", background: "#fff", outline: "none" }}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </div>

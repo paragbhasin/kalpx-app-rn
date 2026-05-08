@@ -204,6 +204,7 @@ export function MitraHomePage() {
   if (hasActiveJourney === true && (homeData || fourDoorError !== null)) {
     const doorStates = homeData?.door_states;
     const innerPathSummary = homeData?.inner_path_summary;
+    const greeting = homeData?.greeting;
 
     return (
       <div
@@ -232,6 +233,20 @@ export function MitraHomePage() {
               <p style={{ color: "#e06060", textAlign: "center", marginBottom: 16, fontSize: 15 }}>
                 {fourDoorError}
               </p>
+            )}
+
+            {/* Greeting */}
+            {greeting && (
+              <div style={{ marginBottom: 24, textAlign: "center" }}>
+                <h1 style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 26, color: "#432104", margin: "0 0 4px" }}>
+                  {greeting.headline}
+                </h1>
+                {greeting.subtext && (
+                  <p style={{ fontFamily: "var(--kalpx-font-serif)", fontSize: 15, color: "#7B6550", margin: 0 }}>
+                    {greeting.subtext}
+                  </p>
+                )}
+              </div>
             )}
 
             {/* Four Door Cards */}

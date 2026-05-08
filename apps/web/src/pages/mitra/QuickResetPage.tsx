@@ -1,8 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Footer } from "../../components/layout/Footer";
-import { Header } from "../../components/layout/Header";
-import { MobileBottomNav } from "../../components/layout/MobileBottomNav";
 
 const DURATIONS = [
   { label: "1 min", seconds: 60 },
@@ -59,7 +56,7 @@ function BeadRing({ breathCount, onTap }: { breathCount: number; onTap: () => vo
             justifyContent: "center",
           }}
         >
-          <span style={{ color: "#fff", fontSize: 13, fontWeight: 600 }}>TAP</span>
+          <span style={{ color: "#fff", fontSize: 11, fontWeight: 600, textAlign: "center", lineHeight: 1.2 }}>TAP<br />HERE</span>
         </button>
       </div>
       <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 32, color: "#432104", textAlign: "center", marginTop: 8 }}>
@@ -117,7 +114,6 @@ export function QuickResetPage() {
 
   return (
     <div style={{ minHeight: "100dvh", background: "#FFF8EF", display: "flex", flexDirection: "column" }}>
-      <Header transparent />
       <main style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px 16px calc(92px + env(safe-area-inset-bottom))" }}>
         <div style={{ width: "100%", maxWidth: 360, textAlign: "center" }}>
 
@@ -177,18 +173,44 @@ export function QuickResetPage() {
 
           {phase === "running" && (
             <>
-              <div style={{ marginBottom: 12, color: "#A08060", fontSize: 15 }}>
+              <h2 style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 26, color: "#C99317", marginBottom: 4, marginTop: 0 }}>
+                Pause and breathe.
+              </h2>
+              <div style={{ fontFamily: "var(--kalpx-font-serif)", fontSize: 36, fontWeight: 700, color: "#432104", marginBottom: 4 }}>
+                {breaths}
+              </div>
+              <div style={{ color: "#A08060", fontSize: 13, marginBottom: 16 }}>
                 {formatTime(remaining)} remaining
               </div>
               <BeadRing breathCount={breaths} onTap={() => setBreaths((b) => b + 1)} />
-              <p style={{ color: "#7B6550", fontSize: 15 }}>
-                Tap after each breath
-              </p>
               <button
                 onClick={() => { clearInterval(intervalRef.current!); setPhase("done"); }}
-                style={{ marginTop: 24, background: "none", border: "none", color: "#A08060", fontSize: 13, cursor: "pointer" }}
+                style={{
+                  marginTop: 20,
+                  width: "100%",
+                  padding: "13px 0",
+                  borderRadius: 12,
+                  border: "1px solid rgba(201,168,76,0.45)",
+                  background: "transparent",
+                  color: "#7B6550",
+                  fontFamily: "var(--kalpx-font-serif)",
+                  fontSize: 16,
+                  cursor: "pointer",
+                }}
               >
-                End early
+                I feel calmer now
+              </button>
+              <button
+                onClick={() => { clearInterval(intervalRef.current!); navigate("/en/mitra/tell-mitra"); }}
+                style={{ marginTop: 12, background: "none", border: "none", color: "#A08060", fontSize: 13, cursor: "pointer" }}
+              >
+                Try another way
+              </button>
+              <button
+                onClick={() => { clearInterval(intervalRef.current!); navigate("/en/mitra"); }}
+                style={{ marginTop: 6, background: "none", border: "none", color: "#A08060", fontSize: 13, cursor: "pointer" }}
+              >
+                Return to Mitra Home
               </button>
             </>
           )}
@@ -227,8 +249,6 @@ export function QuickResetPage() {
           )}
         </div>
       </main>
-      <Footer transparent />
-      <MobileBottomNav transparent />
     </div>
   );
 }

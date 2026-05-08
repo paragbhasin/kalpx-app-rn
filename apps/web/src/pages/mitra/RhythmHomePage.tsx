@@ -1,11 +1,8 @@
 import { RHYTHM_BAND_LABELS } from "@kalpx/contracts";
 import type { RhythmItem, RhythmSlot, RhythmTimeBand } from "@kalpx/types";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { Footer } from "../../components/layout/Footer";
-import { Header } from "../../components/layout/Header";
-import { MobileBottomNav } from "../../components/layout/MobileBottomNav";
 import { executeAction } from "../../engine/actionExecutor";
 import { getMitraHomeV3 } from "../../engine/mitraApi";
 import type { AppDispatch, RootState } from "../../store";
@@ -182,7 +179,6 @@ export function RhythmHomePage() {
 
   return (
     <div style={SHELL_STYLE}>
-      <Header transparent />
       <main
         style={{
           flex: 1,
@@ -290,8 +286,6 @@ export function RhythmHomePage() {
           )}
         </div>
       </main>
-      <Footer transparent />
-      <MobileBottomNav transparent />
     </div>
   );
 }

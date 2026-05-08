@@ -4,9 +4,6 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RhythmLibraryPickerModal } from "../../components/mitra/RhythmLibraryPickerModal";
-import { Footer } from "../../components/layout/Footer";
-import { Header } from "../../components/layout/Header";
-import { MobileBottomNav } from "../../components/layout/MobileBottomNav";
 import { getMitraHomeV3, postRhythmSetup } from "../../engine/mitraApi";
 import type { AppDispatch, RootState } from "../../store";
 import { clearDoorState, setHomeData } from "../../store/doorSlice";
@@ -92,7 +89,6 @@ export function RhythmSetupPage() {
 
   return (
     <div style={{ minHeight: "100dvh", background: "#FFF8EF", display: "flex", flexDirection: "column" }}>
-      <Header transparent />
       <main style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 16px calc(92px + env(safe-area-inset-bottom))" }}>
         <div style={{ width: "100%", maxWidth: 420 }}>
           <button
@@ -237,8 +233,6 @@ export function RhythmSetupPage() {
           </button>
         </div>
       </main>
-      <Footer transparent />
-      <MobileBottomNav transparent />
 
       {pickerBand && (
         <RhythmLibraryPickerModal

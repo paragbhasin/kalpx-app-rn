@@ -1,11 +1,8 @@
 import { getDoorLabel, isValidRoomId } from "@kalpx/contracts";
 import type { TellMitraV3Response } from "@kalpx/types";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { Footer } from "../../components/layout/Footer";
-import { Header } from "../../components/layout/Header";
-import { MobileBottomNav } from "../../components/layout/MobileBottomNav";
 import { executeAction } from "../../engine/actionExecutor";
 import { postTellMitraV3 } from "../../engine/mitraApi";
 import type { AppDispatch } from "../../store";
@@ -94,7 +91,6 @@ export function TellMitraPage() {
 
   return (
     <div style={{ minHeight: "100dvh", background: "#FFF8EF", display: "flex", flexDirection: "column" }}>
-      <Header transparent />
       <main style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 16px calc(92px + env(safe-area-inset-bottom))" }}>
         <div style={{ width: "100%", maxWidth: 420 }}>
           <button
@@ -156,6 +152,9 @@ export function TellMitraPage() {
           {/* navigate_to_room */}
           {screen === "navigate_to_room" && result && (
             <div style={CARD}>
+              <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 18, color: "#C99317", marginBottom: 16 }}>
+                Mitra heard you.
+              </div>
               {result.response_copy && (
                 <div style={{
                   background: "rgba(255,253,250,0.96)",
@@ -190,7 +189,18 @@ export function TellMitraPage() {
                 Go to {result.suggested_room_label || "Room"}
               </button>
               <button onClick={() => { setScreen("none"); setText(""); }} style={{ ...GHOST_BTN, marginTop: 10 }}>
-                Ask something else
+                Tell Mitra more
+              </button>
+              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                <button onClick={() => navigate("/en/mitra/checkin-quick")} style={{ ...GHOST_BTN, fontSize: 13 }}>
+                  Quick Check-in
+                </button>
+                <button onClick={() => navigate("/en/mitra/quick-reset")} style={{ ...GHOST_BTN, fontSize: 13 }}>
+                  Quick Reset
+                </button>
+              </div>
+              <button onClick={() => navigate("/en/mitra")} style={{ background: "none", border: "none", color: "#A08060", fontSize: 13, cursor: "pointer", marginTop: 10, width: "100%" }}>
+                Return Home
               </button>
             </div>
           )}
@@ -198,6 +208,9 @@ export function TellMitraPage() {
           {/* navigate_to_door */}
           {screen === "navigate_to_door" && result && (
             <div style={CARD}>
+              <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 18, color: "#C99317", marginBottom: 16 }}>
+                Mitra heard you.
+              </div>
               {result.response_copy && (
                 <div style={{
                   background: "rgba(255,253,250,0.96)",
@@ -221,7 +234,18 @@ export function TellMitraPage() {
                 Open {result.door ? getDoorLabel(result.door) : "Door"}
               </button>
               <button onClick={() => { setScreen("none"); setText(""); }} style={{ ...GHOST_BTN, marginTop: 10 }}>
-                Ask something else
+                Tell Mitra more
+              </button>
+              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                <button onClick={() => navigate("/en/mitra/checkin-quick")} style={{ ...GHOST_BTN, fontSize: 13 }}>
+                  Quick Check-in
+                </button>
+                <button onClick={() => navigate("/en/mitra/quick-reset")} style={{ ...GHOST_BTN, fontSize: 13 }}>
+                  Quick Reset
+                </button>
+              </div>
+              <button onClick={() => navigate("/en/mitra")} style={{ background: "none", border: "none", color: "#A08060", fontSize: 13, cursor: "pointer", marginTop: 10, width: "100%" }}>
+                Return Home
               </button>
             </div>
           )}
@@ -229,6 +253,9 @@ export function TellMitraPage() {
           {/* provide_wisdom_inline */}
           {screen === "provide_wisdom_inline" && result && (
             <div style={CARD}>
+              <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 18, color: "#C99317", marginBottom: 16 }}>
+                Mitra heard you.
+              </div>
               <div style={{
                 background: "rgba(255,253,250,0.96)",
                 borderLeft: "3px solid rgba(201,168,76,0.6)",
@@ -247,14 +274,25 @@ export function TellMitraPage() {
                 Return Home
               </button>
               <button onClick={() => { setScreen("none"); setText(""); }} style={{ ...GHOST_BTN, marginTop: 10 }}>
-                Ask something else
+                Tell Mitra more
               </button>
+              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                <button onClick={() => navigate("/en/mitra/checkin-quick")} style={{ ...GHOST_BTN, fontSize: 13 }}>
+                  Quick Check-in
+                </button>
+                <button onClick={() => navigate("/en/mitra/quick-reset")} style={{ ...GHOST_BTN, fontSize: 13 }}>
+                  Quick Reset
+                </button>
+              </div>
             </div>
           )}
 
           {/* fallback / none */}
           {screen === "fallback" && result && (
             <div style={CARD}>
+              <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 18, color: "#C99317", marginBottom: 16 }}>
+                Mitra heard you.
+              </div>
               {result.response_copy ? (
                 <div style={{
                   background: "rgba(255,253,250,0.96)",
@@ -271,7 +309,7 @@ export function TellMitraPage() {
                   {result.response_copy}
                 </div>
               ) : (
-                <p style={{ fontSize: 15, color: "#7B6550", marginBottom: 16 }}>
+                <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, color: "#432104", fontStyle: "italic", marginBottom: 24, lineHeight: 1.7 }}>
                   I'm here with you. Let me help you find where to go next.
                 </p>
               )}
@@ -279,14 +317,20 @@ export function TellMitraPage() {
                 Return Home
               </button>
               <button onClick={() => { setScreen("none"); setText(""); }} style={{ ...GHOST_BTN, marginTop: 10 }}>
-                Try again
+                Tell Mitra more
               </button>
+              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                <button onClick={() => navigate("/en/mitra/checkin-quick")} style={{ ...GHOST_BTN, fontSize: 13 }}>
+                  Quick Check-in
+                </button>
+                <button onClick={() => navigate("/en/mitra/quick-reset")} style={{ ...GHOST_BTN, fontSize: 13 }}>
+                  Quick Reset
+                </button>
+              </div>
             </div>
           )}
         </div>
       </main>
-      <Footer transparent />
-      <MobileBottomNav transparent />
     </div>
   );
 }

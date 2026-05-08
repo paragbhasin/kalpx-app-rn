@@ -1,8 +1,5 @@
 import { ROOM_DESCRIPTIONS, ROOM_LABELS } from "@kalpx/contracts";
 import { useNavigate } from "react-router-dom";
-import { Footer } from "../../components/layout/Footer";
-import { Header } from "../../components/layout/Header";
-import { MobileBottomNav } from "../../components/layout/MobileBottomNav";
 import { useJourneyStatus } from "../../hooks/useJourneyStatus";
 
 const ROOM_GROUPS = [
@@ -34,7 +31,6 @@ export function BrowseRoomsPage() {
 
   return (
     <div style={{ minHeight: "100dvh", background: "#FFF8EF", display: "flex", flexDirection: "column" }}>
-      <Header transparent />
       <main style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 16px calc(92px + env(safe-area-inset-bottom))" }}>
         <div style={{ width: "100%", maxWidth: 420 }}>
           <button
@@ -81,8 +77,6 @@ export function BrowseRoomsPage() {
           ))}
         </div>
       </main>
-      <Footer transparent />
-      <MobileBottomNav transparent />
     </div>
   );
 }

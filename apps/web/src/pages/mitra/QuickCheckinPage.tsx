@@ -1,9 +1,6 @@
 import type { QuickCheckinEnergyState, QuickCheckinResponse } from "@kalpx/types";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Footer } from "../../components/layout/Footer";
-import { Header } from "../../components/layout/Header";
-import { MobileBottomNav } from "../../components/layout/MobileBottomNav";
 import { postQuickCheckin } from "../../engine/mitraApi";
 
 const ENERGY_OPTIONS: { label: string; value: QuickCheckinEnergyState; desc: string; symbol: string }[] = [
@@ -62,7 +59,6 @@ export function QuickCheckinPage() {
 
   return (
     <div style={{ minHeight: "100dvh", background: "#FFF8EF", display: "flex", flexDirection: "column" }}>
-      <Header transparent />
       <main style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px 16px calc(92px + env(safe-area-inset-bottom))" }}>
         <div style={{ width: "100%", maxWidth: 400, textAlign: "center" }}>
           <button
@@ -179,8 +175,6 @@ export function QuickCheckinPage() {
           )}
         </div>
       </main>
-      <Footer transparent />
-      <MobileBottomNav transparent />
     </div>
   );
 }

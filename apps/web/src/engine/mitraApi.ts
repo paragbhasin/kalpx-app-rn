@@ -1,4 +1,6 @@
 import { api } from '../lib/api';
+import type { MitraHomeV3Response, TellMitraV3Response } from '@kalpx/types';
+import { normalizeTellMitraResult } from '@kalpx/contracts';
 
 const DASHBOARD_VIEW_TTL_MS = 30_000;
 const ADDITIONAL_ITEMS_TTL_MS = 30_000;
@@ -717,4 +719,31 @@ export async function acceptPredictiveAlert(id: string | number): Promise<any> {
     console.warn('[mitraApi] predictive/alerts accept failed:', err?.message);
     return null;
   }
+}
+
+// ─── Four-Door V3 ─────────────────────────────────────────────────────────────
+
+/**
+ * GET /api/mitra/v3/journey/home/ — Four-Door home envelope (S03).
+ * Returns MitraHomeV3Response with door_states, inner_path_summary, etc.
+ */
+export async function getMitraHomeV3(): Promise<MitraHomeV3Response> {
+  const resp = await api.get<MitraHomeV3Response>('/api/mitra/v3/journey/home/');
+  return resp.data;
+}
+
+export interface TellMitraV3Payload {
+  text: string;
+  energy_state?: string;
+  tz?: string;
+  source_surface?: string;
+}
+
+/**
+ * POST /api/mitra/v3/tell-mitra/ — Tell Mitra routing endpoint (S03).
+ * Raw response is normalized via normalizeTellMitraResult before returning.
+ */
+export async function postTellMitraV3(payload: TellMitraV3Payload): Promise<TellMitraV3Response> {
+  const resp = await api.post<unknown>('/api/mitra/v3/tell-mitra/', payload);
+  return normalizeTellMitraResult(resp.data);
 }

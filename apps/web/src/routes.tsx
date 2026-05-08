@@ -33,6 +33,7 @@ import { CreatorSimplePostEditorPage } from "./pages/creator/CreatorSimplePostEd
 import { CheckinPage } from "./pages/mitra/CheckinPage";
 import { CheckpointPage } from "./pages/mitra/CheckpointPage";
 import { DashboardPage } from "./pages/mitra/DashboardPage";
+import InnerPathStubPage from "./pages/mitra/InnerPathStubPage";
 import { MitraEnginePage } from "./pages/mitra/MitraEnginePage";
 import { MitraHomePage } from "./pages/mitra/MitraHomePage";
 import { MitraStartPage } from "./pages/mitra/MitraStartPage";
@@ -66,6 +67,7 @@ export function AppRoutes() {
       <Route path="/en/mitra" element={<MitraHomePage />} />
       <Route path="/en/mitra/start" element={<MitraStartPage />} />
       <Route path="/en/mitra/onboarding" element={<OnboardingPage />} />
+      <Route path="/en/mitra/inner-path" element={<InnerPathStubPage />} />
 
       {/* Journey-gated Mitra routes */}
       <Route

@@ -1,14 +1,15 @@
 import { AUTH_KEYS } from "@kalpx/api-client";
+import { DOOR_LABELS, getDoorLabel, isValidRoomId } from "@kalpx/contracts";
 import { Heart, MessageCircle, MoveRight } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useDispatch } from "react-redux";
-import { Link, Navigate } from "react-router-dom";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { RoomEntrySheet } from "../../components/blocks/room/RoomEntrySheet";
 import { Footer } from "../../components/layout/Footer";
 import { Header } from "../../components/layout/Header";
 import { MobileBottomNav } from "../../components/layout/MobileBottomNav";
 import { executeAction } from "../../engine/actionExecutor";
-import { getJourneyHome } from "../../engine/mitraApi";
+import { getJourneyHome, getMitraHomeV3, postTellMitraV3 } from "../../engine/mitraApi";
 import { useGuestIdentity } from "../../hooks/useGuestIdentity";
 import {
   mapJourneyEntryViewPath,
@@ -17,7 +18,8 @@ import {
 import { useJourneyStatus } from "../../hooks/useJourneyStatus";
 import { WEB_ENV } from "../../lib/env";
 import { webNavigate } from "../../lib/webRouter";
-import type { AppDispatch } from "../../store";
+import type { AppDispatch, RootState } from "../../store";
+import { setHomeData } from "../../store/doorSlice";
 import { useScreenState } from "../../store/screenSlice";
 
 type JourneyHomeAction = {
@@ -84,6 +86,7 @@ function LoadingScreen() {
 export function MitraHomePage() {
   useGuestIdentity();
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const screenState = useScreenState();
   const { loading, error, hasActiveJourney, rawStatus, refetch } =
     useJourneyStatus();
@@ -97,6 +100,19 @@ export function MitraHomePage() {
   );
   const [journeyHomeLoading, setJourneyHomeLoading] = useState(false);
   const [roomSheetOpen, setRoomSheetOpen] = useState(false);
+
+  // Four-Door V3 state
+  const homeData = useSelector((s: RootState) => s.door.homeData);
+  const [fourDoorLoading, setFourDoorLoading] = useState(false);
+  const [fourDoorError, setFourDoorError] = useState<string | null>(null);
+
+  // Tell Mitra input state
+  const [inputText, setInputText] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [tellMitraError, setTellMitraError] = useState<string | null>(null);
+  const [resultCopy, setResultCopy] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const actionContext = useMemo(
     () => ({
@@ -126,6 +142,72 @@ export function MitraHomePage() {
     },
     [actionContext],
   );
+
+  // Helper: show a brief toast message
+  const showToast = useCallback((msg: string) => {
+    setToastMessage(msg);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => setToastMessage(null), 3000);
+  }, []);
+
+  // Four-Door V3 fetch
+  useEffect(() => {
+    let cancelled = false;
+    if (hasActiveJourney !== true) return;
+    if (homeData) return; // already hydrated
+
+    setFourDoorLoading(true);
+    setFourDoorError(null);
+    void getMitraHomeV3()
+      .then((data) => {
+        if (cancelled) return;
+        dispatch(setHomeData(data));
+      })
+      .catch(() => {
+        if (!cancelled) setFourDoorError("Could not load your home. Please try again.");
+      })
+      .finally(() => {
+        if (!cancelled) setFourDoorLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [hasActiveJourney, homeData, dispatch]);
+
+  // Tell Mitra submit
+  const handleTellMitraSubmit = useCallback(async () => {
+    const text = inputText.trim();
+    if (!text) {
+      setTellMitraError("Please share what's on your mind");
+      return;
+    }
+    if (text.length > 1000) {
+      setTellMitraError("Please keep it under 1000 characters");
+      return;
+    }
+    setTellMitraError(null);
+    setResultCopy(null);
+    setIsSubmitting(true);
+    try {
+      const resp = await postTellMitraV3({
+        text,
+        tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        source_surface: "tell_mitra_web",
+      });
+      if (resp.response_copy) {
+        setResultCopy(resp.response_copy);
+      }
+      if (resp.suggested_action === "navigate_to_room" && isValidRoomId(resp.suggested_room_id)) {
+        navigate(`/en/mitra/room/${resp.suggested_room_id}`);
+      } else if (resp.suggested_action === "navigate_to_door" && resp.door) {
+        showToast(getDoorLabel(resp.door));
+      }
+      // provide_wisdom_inline: resultCopy already set above
+    } catch {
+      setTellMitraError("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [inputText, navigate, showToast]);
 
   useEffect(() => {
     let cancelled = false;
@@ -162,11 +244,266 @@ export function MitraHomePage() {
 
   if (
     loading ||
-    (hasActiveJourney === true && journeyHomeLoading) ||
+    (hasActiveJourney === true && (journeyHomeLoading || fourDoorLoading)) ||
     (hasActiveJourney === true &&
       (entryLoading || (viewKey === null && !entryError)))
   ) {
     return <LoadingScreen />;
+  }
+
+  // ── Four-Door Home (S03) ─────────────────────────────────────────────────
+  if (hasActiveJourney === true && (homeData || fourDoorError !== null)) {
+    const doorStates = homeData?.door_states;
+    const innerPathSummary = homeData?.inner_path_summary;
+
+    return (
+      <div
+        style={{
+          minHeight: "100dvh",
+          backgroundImage: "url(/new_home.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <Header transparent />
+        {/* Toast */}
+        {toastMessage && (
+          <div
+            style={{
+              position: "fixed",
+              top: 80,
+              left: "50%",
+              transform: "translateX(-50%)",
+              background: "rgba(67,33,4,0.92)",
+              color: "#fff",
+              padding: "10px 20px",
+              borderRadius: 12,
+              zIndex: 9999,
+              fontSize: 15,
+              fontFamily: "var(--kalpx-font-serif)",
+            }}
+          >
+            {toastMessage}
+          </div>
+        )}
+        <main
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            padding: "24px 16px calc(92px + env(safe-area-inset-bottom))",
+          }}
+        >
+          <div style={{ width: "100%", maxWidth: 420 }}>
+            {fourDoorError && (
+              <p style={{ color: "#e06060", textAlign: "center", marginBottom: 16, fontSize: 15 }}>
+                {fourDoorError}
+              </p>
+            )}
+
+            {/* Four Door Cards */}
+            {doorStates && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 28 }}>
+                {/* My Rhythm */}
+                <button
+                  onClick={() => showToast("Coming in next phase")}
+                  style={{
+                    width: "100%",
+                    border: "1px solid rgba(201,168,76,0.22)",
+                    borderRadius: 18,
+                    background: "rgba(250,245,240,0.92)",
+                    padding: "18px 22px",
+                    boxShadow: "0 12px 24px rgba(67,33,4,0.10)",
+                    textAlign: "left",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 17, color: "#432104", marginBottom: 4 }}>
+                    {DOOR_LABELS.my_rhythm}
+                  </div>
+                  {doorStates.my_rhythm?.state === "no_rhythm" ? (
+                    <div style={{ color: "#7B6550", fontSize: 14 }}>{doorStates.my_rhythm.cta}</div>
+                  ) : (
+                    <div style={{ color: "#7B6550", fontSize: 14 }}>{doorStates.my_rhythm?.subtitle}</div>
+                  )}
+                </button>
+
+                {/* Inner Path */}
+                <button
+                  onClick={() => showToast("Coming in next phase")}
+                  style={{
+                    width: "100%",
+                    border: "1px solid rgba(201,168,76,0.22)",
+                    borderRadius: 18,
+                    background: "rgba(250,245,240,0.92)",
+                    padding: "18px 22px",
+                    boxShadow: "0 12px 24px rgba(67,33,4,0.10)",
+                    textAlign: "left",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 17, color: "#432104", marginBottom: 4 }}>
+                    {DOOR_LABELS.inner_path}
+                  </div>
+                  {innerPathSummary?.has_active_path ? (
+                    <div style={{ color: "#7B6550", fontSize: 14 }}>{innerPathSummary.path_title ?? doorStates.inner_path?.cta}</div>
+                  ) : (
+                    <div style={{ color: "#7B6550", fontSize: 14 }}>{doorStates.inner_path?.subtitle}</div>
+                  )}
+                </button>
+
+                {/* Quick Reset */}
+                <button
+                  onClick={() => showToast("Coming in next phase")}
+                  style={{
+                    width: "100%",
+                    border: "1px solid rgba(201,168,76,0.22)",
+                    borderRadius: 18,
+                    background: "rgba(250,245,240,0.92)",
+                    padding: "18px 22px",
+                    boxShadow: "0 12px 24px rgba(67,33,4,0.10)",
+                    textAlign: "left",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 17, color: "#432104", marginBottom: 4 }}>
+                    {DOOR_LABELS.quick_reset}
+                  </div>
+                  <div style={{ color: "#7B6550", fontSize: 14 }}>{doorStates.quick_reset?.subtitle}</div>
+                </button>
+
+                {/* Tell Mitra — header card only; input surface rendered below */}
+                <div
+                  style={{
+                    width: "100%",
+                    border: "1px solid rgba(201,168,76,0.22)",
+                    borderRadius: 18,
+                    background: "rgba(250,245,240,0.92)",
+                    padding: "18px 22px",
+                    boxShadow: "0 12px 24px rgba(67,33,4,0.10)",
+                    textAlign: "left",
+                  }}
+                >
+                  <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 17, color: "#432104" }}>
+                    {DOOR_LABELS.tell_mitra}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Tell Mitra Input Surface (always visible) */}
+            <div
+              style={{
+                background: "rgba(250,245,240,0.95)",
+                border: "1px solid rgba(201,168,76,0.25)",
+                borderRadius: 18,
+                padding: "20px 18px",
+                boxShadow: "0 8px 20px rgba(67,33,4,0.08)",
+                marginBottom: 16,
+              }}
+            >
+              <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 600, fontSize: 16, color: "#432104", marginBottom: 12 }}>
+                What's on your mind?
+              </div>
+              <textarea
+                value={inputText}
+                onChange={(e) => {
+                  setInputText(e.target.value);
+                  if (tellMitraError) setTellMitraError(null);
+                }}
+                maxLength={1000}
+                rows={4}
+                placeholder="Share what you're carrying right now…"
+                style={{
+                  width: "100%",
+                  boxSizing: "border-box",
+                  border: "1px solid rgba(201,168,76,0.3)",
+                  borderRadius: 10,
+                  padding: "12px 14px",
+                  fontSize: 15,
+                  fontFamily: "var(--kalpx-font-serif)",
+                  color: "#432104",
+                  background: "rgba(255,252,248,0.9)",
+                  resize: "vertical",
+                  outline: "none",
+                }}
+              />
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 6, marginBottom: 10 }}>
+                <div style={{ fontSize: 12, color: "#A08060" }}>
+                  {inputText.length} / 1000
+                </div>
+                {tellMitraError && (
+                  <div style={{ fontSize: 13, color: "#e06060" }}>{tellMitraError}</div>
+                )}
+              </div>
+              <button
+                onClick={() => void handleTellMitraSubmit()}
+                disabled={isSubmitting}
+                style={{
+                  width: "100%",
+                  border: "none",
+                  borderRadius: 14,
+                  padding: "14px 20px",
+                  background: isSubmitting
+                    ? "rgba(201,147,23,0.5)"
+                    : "linear-gradient(90deg, #C99317 0%, #E0AE21 50%, #C99317 100%)",
+                  color: "#fff",
+                  fontSize: 16,
+                  fontWeight: 700,
+                  cursor: isSubmitting ? "not-allowed" : "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                }}
+              >
+                {isSubmitting ? (
+                  <>
+                    <span
+                      style={{
+                        width: 16,
+                        height: 16,
+                        border: "2px solid rgba(255,255,255,0.5)",
+                        borderTopColor: "#fff",
+                        borderRadius: "50%",
+                        animation: "spin 1s linear infinite",
+                        display: "inline-block",
+                      }}
+                    />
+                    <span>Sending…</span>
+                  </>
+                ) : (
+                  <span>Tell Mitra</span>
+                )}
+              </button>
+              {resultCopy && (
+                <div
+                  style={{
+                    marginTop: 14,
+                    padding: "14px 16px",
+                    background: "rgba(201,168,76,0.08)",
+                    border: "1px solid rgba(201,168,76,0.2)",
+                    borderRadius: 12,
+                    color: "#5A3515",
+                    fontFamily: "var(--kalpx-font-serif)",
+                    fontSize: 15,
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {resultCopy}
+                </div>
+              )}
+            </div>
+          </div>
+        </main>
+        <Footer transparent />
+        <MobileBottomNav transparent />
+      </div>
+    );
   }
 
   if (

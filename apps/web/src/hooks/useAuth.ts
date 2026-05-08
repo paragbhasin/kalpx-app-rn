@@ -9,6 +9,7 @@ import { getApiErrorMessage } from '../lib/apiErrors';
 import { useAppDispatch } from '../store/hooks';
 import { showSnackBar } from '../store/snackBarSlice';
 import { store, resetStore } from '../store';
+import { clearDoorState } from '../store/doorSlice';
 import { invalidateJourneyStatusCache } from './useJourneyStatus';
 import { invalidateJourneyEntryViewCache } from './useJourneyEntryView';
 import type { LoginRequest, LoginResponse, SignupRegisterRequest, SignupStep1Request, SignupOtpVerifyRequest, ResetPasswordRequest } from '../types/auth';
@@ -117,6 +118,7 @@ export function useAuth() {
     invalidateJourneyStatusCache();
     invalidateDashboardViewCache();
     invalidateJourneyEntryViewCache();
+    store.dispatch(clearDoorState());
     store.dispatch(resetStore());
     navigate('/login');
   }, [navigate]);

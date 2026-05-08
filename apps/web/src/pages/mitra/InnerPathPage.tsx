@@ -101,6 +101,13 @@ export function InnerPathPage() {
 
   const hasContinuity = sd.continuity?.tier && sd.continuity.tier !== "none";
 
+  const l1Items = Array.isArray(sd.why_this_l1_items)
+    ? (sd.why_this_l1_items as Array<{ id: string; label: string }>).filter(
+        (it) => it?.label && it.label.trim().length > 0,
+      )
+    : [];
+  const L1_DISPLAY_LABELS: Record<string, string> = { mantra: "Mantra", sankalp: "Sankalp", practice: "Practice" };
+
   if (loading) {
     return (
       <MitraMobileShell>
@@ -213,7 +220,46 @@ export function InnerPathPage() {
         {/* Sankalp carry-over */}
         {hasSankalpCarry && <SankalpCarryBlock sd={sd} />}
 
-        {/* Why this was chosen */}
+        {/* Per-item transformation labels */}
+        {l1Items.length > 0 && (
+          <div style={{ marginBottom: 20 }}>
+            <p style={{
+              fontFamily: "var(--kalpx-font-sans)",
+              fontSize: 11, fontWeight: 600, letterSpacing: 1.2,
+              textTransform: "uppercase", color: "var(--kalpx-text-muted)",
+              margin: "0 0 10px",
+            }}>
+              Why these were chosen
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {l1Items.map((it) => (
+                <div key={it.id} style={{
+                  borderLeft: "3px solid var(--kalpx-cta)",
+                  paddingLeft: 12,
+                  paddingTop: 2, paddingBottom: 2,
+                }}>
+                  <p style={{
+                    fontFamily: "var(--kalpx-font-sans)",
+                    fontSize: 11, fontWeight: 600, letterSpacing: 0.8,
+                    textTransform: "uppercase", color: "var(--kalpx-cta)",
+                    margin: "0 0 2px",
+                  }}>
+                    {L1_DISPLAY_LABELS[it.id] ?? it.id}
+                  </p>
+                  <p style={{
+                    fontFamily: "var(--kalpx-font-serif)",
+                    fontSize: 14, color: "var(--kalpx-text-soft)",
+                    margin: 0, lineHeight: 1.5,
+                  }}>
+                    {it.label}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Why this was chosen — principle-level sheet */}
         {hasWhyThis && (
           <button
             onClick={() => setWhyThisOpen(true)}

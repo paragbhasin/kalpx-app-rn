@@ -6,7 +6,7 @@
  * If has_rhythm === true: morning/afternoon/night band cards.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -15,159 +15,56 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { RHYTHM_BAND_LABELS, RHYTHM_BAND_SUBTITLES } from '@kalpx/contracts';
 import type { RhythmTimeBand, RhythmItem } from '@kalpx/types';
 import { Fonts } from '../../theme/fonts';
+import { executeAction } from '../../engine/actionExecutor';
+import { useScreenStore } from '../../engine/useScreenBridge';
+import { screenActions, loadScreenWithData, goBackWithData } from '../../store/screenSlice';
 
-const MANTRA_COUNT_OPTIONS = [9, 27, 54, 108];
-
-function MantraItem({ item }: { item: RhythmItem }) {
-  const [selectedCount, setSelectedCount] = useState(9);
-  const [done, setDone] = useState(false);
-
-  return (
-    <View style={styles.itemCard}>
-      <Text style={styles.itemTypeBadge}>Mantra</Text>
-      <Text style={styles.itemTitle}>{item.title_snapshot}</Text>
-      {item.description_snapshot ? (
-        <Text style={styles.itemDescription}>{item.description_snapshot}</Text>
-      ) : null}
-      {!done ? (
-        <>
-          <View style={styles.countRow}>
-            {MANTRA_COUNT_OPTIONS.map((count) => (
-              <TouchableOpacity
-                key={count}
-                style={[
-                  styles.countOption,
-                  selectedCount === count && styles.countOptionSelected,
-                ]}
-                onPress={() => setSelectedCount(count)}
-                activeOpacity={0.7}
-              >
-                <Text
-                  style={[
-                    styles.countOptionText,
-                    selectedCount === count && styles.countOptionTextSelected,
-                  ]}
-                >
-                  {count}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-          <TouchableOpacity
-            style={styles.actionBtn}
-            onPress={() => setDone(true)}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.actionBtnText}>
-              Begin — {selectedCount} repetitions
-            </Text>
-          </TouchableOpacity>
-        </>
-      ) : (
-        <View style={styles.doneRow}>
-          <Text style={styles.doneText}>Completed {selectedCount} times</Text>
-        </View>
-      )}
-    </View>
-  );
+function actionLabel(itemType: string): string {
+  if (itemType === 'mantra') return 'Chant';
+  if (itemType === 'sankalp') return 'Embody';
+  return 'Practice';
 }
 
-function SankalpItem({ item }: { item: RhythmItem }) {
-  const [timerState, setTimerState] = useState<'idle' | 'running' | 'done'>('idle');
-  const [secondsLeft, setSecondsLeft] = useState(30);
-  const intervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const startTimer = () => {
-    setTimerState('running');
-    setSecondsLeft(30);
-    intervalRef.current = setInterval(() => {
-      setSecondsLeft((s) => {
-        if (s <= 1) {
-          clearInterval(intervalRef.current!);
-          setTimerState('done');
-          return 0;
-        }
-        return s - 1;
-      });
-    }, 1000);
-  };
-
-  React.useEffect(() => {
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, []);
-
+function RhythmItemCard({ item, onAction }: { item: RhythmItem; onAction: () => void }) {
   return (
     <View style={styles.itemCard}>
-      <Text style={styles.itemTypeBadge}>Sankalp</Text>
+      <View style={styles.badgeRow}>
+        <Text style={styles.itemTypeBadge}>{item.item_type.toUpperCase()}</Text>
+      </View>
       <Text style={styles.itemTitle}>{item.title_snapshot}</Text>
       {item.description_snapshot ? (
         <Text style={styles.itemDescription}>{item.description_snapshot}</Text>
       ) : null}
-      {timerState === 'idle' && (
-        <TouchableOpacity style={styles.actionBtn} onPress={startTimer} activeOpacity={0.8}>
-          <Text style={styles.actionBtnText}>Hold for 30 seconds</Text>
+      <View style={styles.actionRow}>
+        <TouchableOpacity style={styles.actionBtn} onPress={onAction} activeOpacity={0.8}>
+          <Text style={styles.actionBtnText}>{actionLabel(item.item_type)}</Text>
         </TouchableOpacity>
-      )}
-      {timerState === 'running' && (
-        <View style={styles.doneRow}>
-          <Text style={styles.timerText}>{secondsLeft}s remaining</Text>
-        </View>
-      )}
-      {timerState === 'done' && (
-        <View style={styles.doneRow}>
-          <Text style={styles.doneText}>Done</Text>
-        </View>
-      )}
+      </View>
     </View>
   );
 }
 
-function GenericItem({ item }: { item: RhythmItem }) {
-  const [done, setDone] = useState(false);
-  const label =
-    item.item_type === 'practice'
-      ? 'Practice'
-      : item.item_type === 'reflection'
-        ? 'Reflection'
-        : 'Library';
-
-  return (
-    <View style={styles.itemCard}>
-      <Text style={styles.itemTypeBadge}>{label}</Text>
-      <Text style={styles.itemTitle}>{item.title_snapshot}</Text>
-      {item.description_snapshot ? (
-        <Text style={styles.itemDescription}>{item.description_snapshot}</Text>
-      ) : null}
-      {!done ? (
-        <TouchableOpacity style={styles.actionBtn} onPress={() => setDone(true)} activeOpacity={0.8}>
-          <Text style={styles.actionBtnText}>Mark Complete</Text>
-        </TouchableOpacity>
-      ) : (
-        <View style={styles.doneRow}>
-          <Text style={styles.doneText}>Complete</Text>
-        </View>
-      )}
-    </View>
-  );
-}
-
-function RhythmBand({ band, items }: { band: RhythmTimeBand; items: RhythmItem[] }) {
+function RhythmBand({
+  band,
+  items,
+  onItemAction,
+}: {
+  band: RhythmTimeBand;
+  items: RhythmItem[];
+  onItemAction: (item: RhythmItem) => void;
+}) {
   return (
     <View style={styles.band}>
       <Text style={styles.bandLabel}>{RHYTHM_BAND_LABELS[band]}</Text>
       <Text style={styles.bandSubtitle}>{RHYTHM_BAND_SUBTITLES[band]}</Text>
-      {items.map((item) => {
-        if (item.item_type === 'mantra') return <MantraItem key={item.id} item={item} />;
-        if (item.item_type === 'sankalp') return <SankalpItem key={item.id} item={item} />;
-        return <GenericItem key={item.id} item={item} />;
-      })}
+      {items.map((item) => (
+        <RhythmItemCard key={item.id} item={item} onAction={() => onItemAction(item)} />
+      ))}
       {items.length === 0 && (
         <Text style={styles.emptyBand}>No items in this band yet.</Text>
       )}
@@ -176,15 +73,65 @@ function RhythmBand({ band, items }: { band: RhythmTimeBand; items: RhythmItem[]
 }
 
 export default function RhythmHomeScreen() {
+  const dispatch = useDispatch();
   const navigation = useNavigation<any>();
   const homeData = useSelector((state: any) => state.door?.homeData);
   const rhythm = homeData?.companion_rhythm;
 
   const hasRhythm = rhythm?.has_rhythm === true;
 
+  const screenBridge = useScreenStore();
+  const screenBridgeRef = useRef(screenBridge);
+  useEffect(() => {
+    screenBridgeRef.current = screenBridge;
+  });
+
+  const buildActionContext = useCallback(() => {
+    return {
+      screenState: screenBridgeRef.current.screenData || {},
+      setScreenValue: (value: any, key: string) => {
+        dispatch(screenActions.setScreenValue({ key, value }));
+      },
+      loadScreen: (target: any) => {
+        const containerId =
+          typeof target === 'string'
+            ? 'generic'
+            : target?.container_id || target?.containerId || 'generic';
+        const stateId =
+          typeof target === 'string'
+            ? target
+            : target?.state_id || target?.stateId || '';
+        dispatch(loadScreenWithData({ containerId, stateId }) as any);
+        navigation.navigate('DynamicEngine');
+      },
+      goBack: () => {
+        dispatch(goBackWithData() as any);
+      },
+      currentScreen: screenBridgeRef.current.currentScreen,
+    };
+  }, [dispatch, navigation]);
+
+  function handleItemAction(item: RhythmItem) {
+    void executeAction(
+      {
+        type: 'start_runner',
+        payload: {
+          source: 'rhythm_daily',
+          variant: item.item_type,
+          item: {
+            item_id: item.item_id,
+            title_snapshot: item.title_snapshot,
+            description_snapshot: item.description_snapshot ?? '',
+            item_type: item.item_type,
+          },
+        },
+      } as any,
+      buildActionContext() as any,
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7} style={styles.backBtn}>
           <Text style={styles.backBtnText}>{'< Back'}</Text>
@@ -223,6 +170,7 @@ export default function RhythmHomeScreen() {
               key={band}
               band={band}
               items={rhythm?.[band]?.items ?? []}
+              onItemAction={handleItemAction}
             />
           ))}
         </ScrollView>
@@ -331,87 +279,56 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
   },
   itemCard: {
-    backgroundColor: '#FBF5F5',
-    borderRadius: 15,
+    backgroundColor: '#ffffff',
+    borderRadius: 20,
     padding: 16,
-    borderWidth: 0.5,
-    borderColor: '#DAC28E',
-    gap: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(228,197,145,0.8)',
+    marginBottom: 12,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    marginBottom: 6,
   },
   itemTypeBadge: {
-    fontSize: 11,
+    fontSize: 10,
     fontFamily: Fonts.sans.semiBold,
-    color: '#8b6838',
-    backgroundColor: '#f4ecdf',
+    color: '#8B6914',
+    backgroundColor: '#F5F0E0',
     alignSelf: 'flex-start',
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
     overflow: 'hidden',
-    textTransform: 'uppercase',
+    letterSpacing: 1.5,
   },
   itemTitle: {
     fontSize: 18,
     fontFamily: Fonts.serif.bold,
     color: '#432104',
     fontWeight: '700',
+    marginBottom: 4,
   },
   itemDescription: {
-    fontSize: 14,
-    fontFamily: Fonts.serif.regular,
+    fontSize: 13,
+    fontFamily: Fonts.sans.regular,
     color: '#7B6550',
-    lineHeight: 20,
+    lineHeight: 19,
+    marginBottom: 8,
   },
-  countRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginTop: 4,
-  },
-  countOption: {
-    borderWidth: 1,
-    borderColor: '#DAC28E',
-    borderRadius: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    backgroundColor: '#FFF8EF',
-  },
-  countOptionSelected: {
-    backgroundColor: '#C99317',
-    borderColor: '#C99317',
-  },
-  countOptionText: {
-    fontSize: 15,
-    fontFamily: Fonts.sans.medium,
-    color: '#7B6550',
-  },
-  countOptionTextSelected: {
-    color: '#fff',
+  actionRow: {
+    alignItems: 'flex-end',
   },
   actionBtn: {
     backgroundColor: '#C99317',
-    borderRadius: 15,
-    paddingVertical: 12,
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  actionBtnText: {
-    fontSize: 15,
-    fontFamily: Fonts.sans.semiBold,
-    color: '#fff',
-  },
-  doneRow: {
-    alignItems: 'center',
+    borderRadius: 20,
+    paddingHorizontal: 16,
     paddingVertical: 8,
   },
-  doneText: {
-    fontSize: 15,
+  actionBtnText: {
+    fontSize: 14,
     fontFamily: Fonts.sans.semiBold,
-    color: '#C99317',
-  },
-  timerText: {
-    fontSize: 22,
-    fontFamily: Fonts.serif.bold,
-    color: '#432104',
-    fontWeight: '700',
+    color: '#fff',
+    fontWeight: '600',
   },
 });

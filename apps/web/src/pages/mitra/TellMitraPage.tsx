@@ -1,11 +1,15 @@
 import { getDoorLabel, isValidRoomId } from "@kalpx/contracts";
 import type { TellMitraV3Response } from "@kalpx/types";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { Footer } from "../../components/layout/Footer";
 import { Header } from "../../components/layout/Header";
 import { MobileBottomNav } from "../../components/layout/MobileBottomNav";
+import { executeAction } from "../../engine/actionExecutor";
 import { postTellMitraV3 } from "../../engine/mitraApi";
+import type { AppDispatch } from "../../store";
+import { useScreenState } from "../../store/screenSlice";
 
 const DOOR_ROUTES: Record<string, string> = {
   my_rhythm: "/en/mitra/rhythm",
@@ -18,6 +22,8 @@ type ResultScreen = "none" | "navigate_to_room" | "navigate_to_door" | "provide_
 
 export function TellMitraPage() {
   const navigate = useNavigate();
+  const dispatch = useDispatch<AppDispatch>();
+  const screenState = useScreenState();
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -151,9 +157,20 @@ export function TellMitraPage() {
           {screen === "navigate_to_room" && result && (
             <div style={CARD}>
               {result.response_copy && (
-                <p style={{ fontFamily: "var(--kalpx-font-serif)", fontSize: 16, color: "#432104", lineHeight: 1.6, marginBottom: 16 }}>
+                <div style={{
+                  background: "rgba(255,253,250,0.96)",
+                  borderLeft: "3px solid rgba(201,168,76,0.6)",
+                  borderRadius: "0 12px 12px 0",
+                  padding: "20px 24px",
+                  marginBottom: 24,
+                  fontFamily: "'Cormorant Garamond', serif",
+                  fontSize: 20,
+                  lineHeight: 1.7,
+                  color: "#432104",
+                  fontStyle: "italic",
+                }}>
                   {result.response_copy}
-                </p>
+                </div>
               )}
               <div style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.2)", borderRadius: 12, padding: "14px 16px", marginBottom: 16 }}>
                 <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 16, color: "#432104" }}>
@@ -164,7 +181,10 @@ export function TellMitraPage() {
                 )}
               </div>
               <button
-                onClick={() => navigate(`/en/mitra/room/${result.suggested_room_id}`)}
+                onClick={() => void executeAction(
+                  { type: 'enter_room', payload: { room_id: result.suggested_room_id, source: 'tell_mitra' } },
+                  { dispatch, screenData: screenState.screenData, currentStateId: 'tell_mitra' }
+                )}
                 style={GOLD_BTN}
               >
                 Go to {result.suggested_room_label || "Room"}
@@ -179,9 +199,20 @@ export function TellMitraPage() {
           {screen === "navigate_to_door" && result && (
             <div style={CARD}>
               {result.response_copy && (
-                <p style={{ fontFamily: "var(--kalpx-font-serif)", fontSize: 16, color: "#432104", lineHeight: 1.6, marginBottom: 16 }}>
+                <div style={{
+                  background: "rgba(255,253,250,0.96)",
+                  borderLeft: "3px solid rgba(201,168,76,0.6)",
+                  borderRadius: "0 12px 12px 0",
+                  padding: "20px 24px",
+                  marginBottom: 24,
+                  fontFamily: "'Cormorant Garamond', serif",
+                  fontSize: 20,
+                  lineHeight: 1.7,
+                  color: "#432104",
+                  fontStyle: "italic",
+                }}>
                   {result.response_copy}
-                </p>
+                </div>
               )}
               <button
                 onClick={() => { if (result.door) navigate(DOOR_ROUTES[result.door] ?? "/en/mitra"); }}
@@ -198,9 +229,20 @@ export function TellMitraPage() {
           {/* provide_wisdom_inline */}
           {screen === "provide_wisdom_inline" && result && (
             <div style={CARD}>
-              <p style={{ fontFamily: "var(--kalpx-font-serif)", fontSize: 16, color: "#432104", lineHeight: 1.7, marginBottom: 16 }}>
+              <div style={{
+                background: "rgba(255,253,250,0.96)",
+                borderLeft: "3px solid rgba(201,168,76,0.6)",
+                borderRadius: "0 12px 12px 0",
+                padding: "20px 24px",
+                marginBottom: 24,
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: 20,
+                lineHeight: 1.7,
+                color: "#432104",
+                fontStyle: "italic",
+              }}>
                 {result.response_copy}
-              </p>
+              </div>
               <button onClick={() => navigate("/en/mitra")} style={GOLD_BTN}>
                 Return Home
               </button>
@@ -214,9 +256,20 @@ export function TellMitraPage() {
           {screen === "fallback" && result && (
             <div style={CARD}>
               {result.response_copy ? (
-                <p style={{ fontFamily: "var(--kalpx-font-serif)", fontSize: 16, color: "#432104", lineHeight: 1.6, marginBottom: 16 }}>
+                <div style={{
+                  background: "rgba(255,253,250,0.96)",
+                  borderLeft: "3px solid rgba(201,168,76,0.6)",
+                  borderRadius: "0 12px 12px 0",
+                  padding: "20px 24px",
+                  marginBottom: 24,
+                  fontFamily: "'Cormorant Garamond', serif",
+                  fontSize: 20,
+                  lineHeight: 1.7,
+                  color: "#432104",
+                  fontStyle: "italic",
+                }}>
                   {result.response_copy}
-                </p>
+                </div>
               ) : (
                 <p style={{ fontSize: 15, color: "#7B6550", marginBottom: 16 }}>
                   I'm here with you. Let me help you find where to go next.

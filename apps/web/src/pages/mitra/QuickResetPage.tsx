@@ -19,6 +19,57 @@ const COMPLETION_OPTIONS = [
 
 type Phase = "select" | "running" | "done";
 
+function BeadRing({ breathCount, onTap }: { breathCount: number; onTap: () => void }) {
+  const beads = Array.from({ length: 18 }, (_, i) => {
+    const angle = (i / 18) * 2 * Math.PI - Math.PI / 2;
+    const cx = 115 + Math.cos(angle) * 86;
+    const cy = 115 + Math.sin(angle) * 86;
+    return { cx, cy, i };
+  });
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: 16 }}>
+      <div style={{ position: "relative", width: 230, height: 230 }}>
+        {beads.map(({ cx, cy, i }) => (
+          <img
+            key={i}
+            src="/rudraksh.svg"
+            width={28}
+            height={28}
+            alt=""
+            draggable={false}
+            style={{ position: "absolute", left: cx - 14, top: cy - 14, userSelect: "none", pointerEvents: "none" }}
+          />
+        ))}
+        <button
+          onClick={onTap}
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 72,
+            height: 72,
+            borderRadius: "50%",
+            backgroundColor: "#C99317",
+            border: "none",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <span style={{ color: "#fff", fontSize: 13, fontWeight: 600 }}>TAP</span>
+        </button>
+      </div>
+      <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 32, color: "#432104", textAlign: "center", marginTop: 8 }}>
+        OM
+      </div>
+      <div style={{ fontSize: 22, color: "#8B6914", textAlign: "center" }}>ॐ</div>
+    </div>
+  );
+}
+
 export function QuickResetPage() {
   const navigate = useNavigate();
   const [durIdx, setDurIdx] = useState(1);
@@ -129,27 +180,7 @@ export function QuickResetPage() {
               <div style={{ marginBottom: 12, color: "#A08060", fontSize: 15 }}>
                 {formatTime(remaining)} remaining
               </div>
-              <button
-                onClick={() => setBreaths((b) => b + 1)}
-                style={{
-                  width: 140,
-                  height: 140,
-                  borderRadius: "50%",
-                  border: "3px solid rgba(201,168,76,0.5)",
-                  background: "rgba(201,168,76,0.08)",
-                  cursor: "pointer",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  margin: "0 auto 20px",
-                }}
-              >
-                <div style={{ fontFamily: "var(--kalpx-font-serif)", fontSize: 32, color: "#C99317", fontWeight: 700 }}>
-                  {breaths}
-                </div>
-                <div style={{ fontSize: 12, color: "#7B6550", marginTop: 4 }}>breaths</div>
-              </button>
+              <BeadRing breathCount={breaths} onTap={() => setBreaths((b) => b + 1)} />
               <p style={{ color: "#7B6550", fontSize: 15 }}>
                 Tap after each breath
               </p>

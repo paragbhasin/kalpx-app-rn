@@ -3,9 +3,9 @@ import { useCallback, useState } from "react";
 import { searchLibraryItems } from "../../engine/mitraApi";
 
 interface LibraryItem {
-  item_id: string;
+  itemId: string;
   title: string;
-  description?: string | null;
+  subtitle?: string | null;
   item_type?: string;
 }
 
@@ -56,9 +56,9 @@ export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder 
     onPick({
       slot: band,
       item_type: typeFilter,
-      item_id: item.item_id,
+      item_id: item.itemId,
       title_snapshot: item.title,
-      description_snapshot: item.description ?? null,
+      description_snapshot: item.subtitle ?? null,
       source: "library",
       sort_order: nextSortOrder,
       reminder_enabled: false,
@@ -160,7 +160,7 @@ export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder 
 
         {results.map((item) => (
           <div
-            key={item.item_id}
+            key={item.itemId}
             onClick={() => pick(item)}
             style={{
               border: "1px solid rgba(201,168,76,0.2)",
@@ -174,8 +174,8 @@ export function RhythmLibraryPickerModal({ band, onPick, onClose, nextSortOrder 
             <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 15, color: "#432104" }}>
               {item.title}
             </div>
-            {item.description && (
-              <div style={{ fontSize: 13, color: "#7B6550", marginTop: 4 }}>{item.description}</div>
+            {item.subtitle && (
+              <div style={{ fontSize: 13, color: "#7B6550", marginTop: 4 }}>{item.subtitle}</div>
             )}
           </div>
         ))}

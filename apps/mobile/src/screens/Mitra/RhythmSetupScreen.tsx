@@ -24,8 +24,8 @@ import {
 } from '@kalpx/contracts';
 import type { RhythmTimeBand } from '@kalpx/types';
 import LibrarySearchModal, { LibrarySearchItem } from '../../components/LibrarySearchModal';
-import { postRhythmSetup } from '../../engine/mitraApi';
-import { clearDoorState } from '../../store/doorSlice';
+import { mitraJourneyHomeV3, postRhythmSetup } from '../../engine/mitraApi';
+import { clearDoorState, setHomeData } from '../../store/doorSlice';
 import { Fonts } from '../../theme/fonts';
 
 interface BandItem {
@@ -64,6 +64,7 @@ export default function RhythmSetupScreen() {
   const [libraryBand, setLibraryBand] = useState<RhythmTimeBand | null>(null);
   const [saving, setSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [reminderPref, setReminderPref] = useState<'yes' | 'no' | 'later'>('later');
 
   const openLibrary = (band: RhythmTimeBand) => setLibraryBand(band);
   const closeLibrary = () => setLibraryBand(null);
@@ -116,7 +117,9 @@ export default function RhythmSetupScreen() {
     setSaving(true);
     setErrorMsg('');
     try {
-      await postRhythmSetup({ items: allItems });
+      await postRhythmSetup({ items: allItems, reminder_preference: reminderPref });
+      const homeData = await mitraJourneyHomeV3();
+      dispatch(setHomeData(homeData));
       dispatch(clearDoorState());
       navigation.navigate('RhythmHome' as any);
     } catch {
@@ -186,6 +189,38 @@ export default function RhythmSetupScreen() {
             </View>
           );
         })}
+
+        <View style={styles.reminderSection}>
+          <Text style={styles.reminderLabel}>Reminder preference</Text>
+          <View style={styles.reminderPills}>
+            {(
+              [
+                { label: 'Yes please', value: 'yes' },
+                { label: 'No thanks', value: 'no' },
+                { label: 'Remind me later', value: 'later' },
+              ] as { label: string; value: 'yes' | 'no' | 'later' }[]
+            ).map((opt) => (
+              <TouchableOpacity
+                key={opt.value}
+                onPress={() => setReminderPref(opt.value)}
+                activeOpacity={0.7}
+                style={[
+                  styles.reminderPill,
+                  reminderPref === opt.value && styles.reminderPillSelected,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.reminderPillText,
+                    reminderPref === opt.value && styles.reminderPillTextSelected,
+                  ]}
+                >
+                  {opt.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
 
         {!!errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
 
@@ -343,6 +378,42 @@ const styles = StyleSheet.create({
   saveBtnText: {
     fontSize: 17,
     fontFamily: Fonts.sans.semiBold,
+    color: '#fff',
+  },
+  reminderSection: {
+    marginTop: 8,
+  },
+  reminderLabel: {
+    fontSize: 13,
+    color: '#7B6550',
+    fontFamily: Fonts.sans.medium,
+    marginBottom: 8,
+  },
+  reminderPills: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  reminderPill: {
+    flex: 1,
+    borderWidth: 1.5,
+    borderColor: '#DAC28E',
+    borderRadius: 15,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    alignItems: 'center',
+    backgroundColor: '#FBF5F5',
+  },
+  reminderPillSelected: {
+    backgroundColor: '#C99317',
+    borderColor: '#C99317',
+  },
+  reminderPillText: {
+    fontSize: 13,
+    color: '#7B6550',
+    fontFamily: Fonts.sans.medium,
+    textAlign: 'center',
+  },
+  reminderPillTextSelected: {
     color: '#fff',
   },
 });

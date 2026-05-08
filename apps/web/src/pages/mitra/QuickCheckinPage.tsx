@@ -6,11 +6,11 @@ import { Header } from "../../components/layout/Header";
 import { MobileBottomNav } from "../../components/layout/MobileBottomNav";
 import { postQuickCheckin } from "../../engine/mitraApi";
 
-const ENERGY_OPTIONS: { label: string; value: QuickCheckinEnergyState; desc: string }[] = [
-  { label: "Energized", value: "energized", desc: "Ready and moving" },
-  { label: "Balanced", value: "balanced", desc: "Steady and clear" },
-  { label: "Agitated", value: "agitated", desc: "Restless or tense" },
-  { label: "Drained", value: "drained", desc: "Low or heavy" },
+const ENERGY_OPTIONS: { label: string; value: QuickCheckinEnergyState; desc: string; symbol: string }[] = [
+  { label: "Energized", value: "energized", desc: "Ready and moving", symbol: "☀️" },
+  { label: "Balanced", value: "balanced", desc: "Steady and clear", symbol: "⚖️" },
+  { label: "Agitated", value: "agitated", desc: "Restless or tense", symbol: "🌧️" },
+  { label: "Drained", value: "drained", desc: "Low or heavy", symbol: "↓" },
 ];
 
 const DOOR_ROUTES: Record<string, string> = {
@@ -25,12 +25,14 @@ export function QuickCheckinPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<QuickCheckinResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<QuickCheckinEnergyState | null>(null);
 
-  async function checkin(state: QuickCheckinEnergyState) {
+  async function handleProceed() {
+    if (!selected) return;
     setLoading(true);
     setError(null);
     try {
-      const res = await postQuickCheckin(state);
+      const res = await postQuickCheckin(selected);
       setResult(res);
     } catch {
       setError("Something went wrong. Please try again.");
@@ -76,33 +78,55 @@ export function QuickCheckinPage() {
                 Quick Check-in
               </h2>
               <p style={{ color: "#7B6550", fontSize: 15, marginBottom: 28 }}>
-                How are you feeling right now?
+                How is your energy right now?
               </p>
 
               {loading ? (
                 <p style={{ color: "#A08060" }}>Checking in…</p>
               ) : (
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                  {ENERGY_OPTIONS.map((opt) => (
+                <>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                    {ENERGY_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.value}
+                        onClick={() => setSelected(opt.value)}
+                        style={{
+                          padding: "20px 14px",
+                          borderRadius: 16,
+                          border: selected === opt.value ? "2px solid #C99317" : "1px solid rgba(218,194,142,0.5)",
+                          background: selected === opt.value ? "rgba(201,147,23,0.08)" : "#ffffff",
+                          cursor: "pointer",
+                          textAlign: "center",
+                        }}
+                      >
+                        <span style={{ fontSize: 24, display: "block", textAlign: "center", marginBottom: 6 }}>{opt.symbol}</span>
+                        <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 16, color: "#432104", marginBottom: 4 }}>
+                          {opt.label}
+                        </div>
+                        <div style={{ fontSize: 13, color: "#7B6550" }}>{opt.desc}</div>
+                      </button>
+                    ))}
+                  </div>
+                  <div style={{ marginTop: 24, textAlign: "center" }}>
                     <button
-                      key={opt.value}
-                      onClick={() => void checkin(opt.value)}
+                      onClick={() => void handleProceed()}
+                      disabled={selected === null}
                       style={{
-                        padding: "20px 14px",
-                        borderRadius: 16,
-                        border: "1px solid rgba(201,168,76,0.3)",
-                        background: "rgba(250,245,240,0.92)",
-                        cursor: "pointer",
-                        textAlign: "center",
+                        backgroundColor: "#C99317",
+                        color: "#fff",
+                        borderRadius: 20,
+                        padding: "12px 36px",
+                        fontSize: 16,
+                        fontWeight: 600,
+                        border: "none",
+                        cursor: selected === null ? "not-allowed" : "pointer",
+                        opacity: selected === null ? 0.4 : 1,
                       }}
                     >
-                      <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 16, color: "#432104", marginBottom: 4 }}>
-                        {opt.label}
-                      </div>
-                      <div style={{ fontSize: 13, color: "#7B6550" }}>{opt.desc}</div>
+                      Proceed →
                     </button>
-                  ))}
-                </div>
+                  </div>
+                </>
               )}
 
               {error && <p style={{ color: "#e06060", marginTop: 16, fontSize: 14 }}>{error}</p>}

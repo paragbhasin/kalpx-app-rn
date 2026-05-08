@@ -1,4 +1,4 @@
-import { RHYTHM_BAND_LABELS, RHYTHM_ITEM_TYPE_LABELS } from "@kalpx/contracts";
+import { RHYTHM_BAND_LABELS } from "@kalpx/contracts";
 import type { RhythmItem, RhythmSlot, RhythmTimeBand } from "@kalpx/types";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -6,196 +6,118 @@ import { useNavigate } from "react-router-dom";
 import { Footer } from "../../components/layout/Footer";
 import { Header } from "../../components/layout/Header";
 import { MobileBottomNav } from "../../components/layout/MobileBottomNav";
+import { executeAction } from "../../engine/actionExecutor";
 import { getMitraHomeV3 } from "../../engine/mitraApi";
 import type { AppDispatch, RootState } from "../../store";
 import { setHomeData } from "../../store/doorSlice";
+import { useScreenState } from "../../store/screenSlice";
 
-const MANTRA_COUNT_OPTIONS = [9, 27, 54, 108];
-
-function MantraRunner({ item }: { item: RhythmItem }) {
-  const [selected, setSelected] = useState(9);
-  const [count, setCount] = useState(0);
-  const [done, setDone] = useState(false);
-
-  function tap() {
-    if (done) return;
-    const next = count + 1;
-    setCount(next);
-    if (next >= selected) setDone(true);
-  }
-
-  return (
-    <div style={{ marginTop: 10 }}>
-      {!done ? (
-        <>
-          <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
-            {MANTRA_COUNT_OPTIONS.map((n) => (
-              <button
-                key={n}
-                onClick={() => { setSelected(n); setCount(0); setDone(false); }}
-                style={{
-                  padding: "4px 10px",
-                  borderRadius: 20,
-                  border: "1px solid rgba(201,168,76,0.5)",
-                  background: selected === n ? "rgba(201,168,76,0.18)" : "transparent",
-                  color: "#432104",
-                  fontSize: 13,
-                  cursor: "pointer",
-                }}
-              >
-                {n}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={tap}
-            style={{
-              width: "100%",
-              padding: "12px 0",
-              borderRadius: 12,
-              border: "1px solid rgba(201,168,76,0.4)",
-              background: "rgba(201,168,76,0.08)",
-              color: "#432104",
-              fontFamily: "var(--kalpx-font-serif)",
-              fontSize: 15,
-              cursor: "pointer",
-            }}
-          >
-            Tap — {count} / {selected}
-          </button>
-        </>
-      ) : (
-        <div style={{ color: "#7B6550", fontSize: 14, textAlign: "center", paddingTop: 6 }}>
-          ✓ Complete — {selected} repetitions
-        </div>
-      )}
-    </div>
-  );
+function actionLabel(itemType: string): string {
+  if (itemType === "mantra") return "Chant";
+  if (itemType === "sankalp") return "Embody";
+  return "Practice";
 }
 
-function SankalpRunner() {
-  const DURATION = 30;
-  const [active, setActive] = useState(false);
-  const [remaining, setRemaining] = useState(DURATION);
-  const [done, setDone] = useState(false);
-
-  useEffect(() => {
-    if (!active || done) return;
-    if (remaining <= 0) { setDone(true); setActive(false); return; }
-    const t = setTimeout(() => setRemaining((r) => r - 1), 1000);
-    return () => clearTimeout(t);
-  }, [active, remaining, done]);
-
-  return (
-    <div style={{ marginTop: 10 }}>
-      {done ? (
-        <div style={{ color: "#7B6550", fontSize: 14, textAlign: "center" }}>✓ 30-second hold complete</div>
-      ) : (
-        <button
-          onClick={() => setActive(true)}
-          disabled={active}
-          style={{
-            width: "100%",
-            padding: "12px 0",
-            borderRadius: 12,
-            border: "1px solid rgba(201,168,76,0.4)",
-            background: active ? "rgba(201,168,76,0.15)" : "rgba(201,168,76,0.08)",
-            color: "#432104",
-            fontFamily: "var(--kalpx-font-serif)",
-            fontSize: 15,
-            cursor: active ? "default" : "pointer",
-          }}
-        >
-          {active ? `Hold… ${remaining}s` : "Begin 30-second hold"}
-        </button>
-      )}
-    </div>
-  );
-}
-
-function GenericRunner({ item }: { item: RhythmItem }) {
-  const [done, setDone] = useState(false);
-  return (
-    <div style={{ marginTop: 10 }}>
-      {item.description_snapshot && (
-        <p style={{ color: "#7B6550", fontSize: 14, margin: "0 0 8px", lineHeight: 1.5 }}>
-          {item.description_snapshot}
-        </p>
-      )}
-      {done ? (
-        <div style={{ color: "#7B6550", fontSize: 14 }}>✓ Marked complete</div>
-      ) : (
-        <button
-          onClick={() => setDone(true)}
-          style={{
-            padding: "8px 20px",
-            borderRadius: 10,
-            border: "1px solid rgba(201,168,76,0.4)",
-            background: "rgba(201,168,76,0.08)",
-            color: "#432104",
-            fontSize: 14,
-            cursor: "pointer",
-          }}
-        >
-          Mark Complete
-        </button>
-      )}
-    </div>
-  );
-}
-
-function ItemCard({ item }: { item: RhythmItem }) {
-  const [expanded, setExpanded] = useState(false);
+function RhythmItemCard({ item, onAction }: { item: RhythmItem; onAction: () => void }) {
   return (
     <div
       style={{
-        border: "1px solid rgba(201,168,76,0.2)",
-        borderRadius: 12,
-        padding: "14px 16px",
-        marginBottom: 10,
-        background: "rgba(255,252,248,0.9)",
+        border: "1px solid rgba(228,197,145,0.8)",
+        borderRadius: 20,
+        background: "#ffffff",
+        padding: 16,
+        marginBottom: 12,
       }}
     >
-      <button
-        onClick={() => setExpanded((e) => !e)}
+      <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 6, flexWrap: "wrap" }}>
+        <span
+          style={{
+            fontSize: 10,
+            fontWeight: "700",
+            letterSpacing: 1.5,
+            color: "#8B6914",
+            textTransform: "uppercase",
+            background: "#F5F0E0",
+            borderRadius: 6,
+            padding: "2px 8px",
+            display: "inline-block",
+          }}
+        >
+          {item.item_type}
+        </span>
+      </div>
+      <p
         style={{
-          width: "100%",
-          background: "none",
-          border: "none",
-          padding: 0,
-          textAlign: "left",
-          cursor: "pointer",
+          fontFamily: "var(--kalpx-font-serif)",
+          fontSize: 18,
+          fontWeight: "700",
+          color: "#432104",
+          margin: "0 0 4px",
+          lineHeight: 1.3,
         }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
-            <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 15, color: "#432104" }}>
-              {item.title_snapshot}
-            </div>
-            <div style={{ fontSize: 12, color: "#A08060", marginTop: 2 }}>
-              {RHYTHM_ITEM_TYPE_LABELS[item.item_type] ?? item.item_type}
-            </div>
-          </div>
-          <span style={{ color: "#C99317", fontSize: 16 }}>{expanded ? "▲" : "▼"}</span>
-        </div>
-      </button>
-      {expanded && (
-        item.item_type === "mantra" ? <MantraRunner item={item} /> :
-        item.item_type === "sankalp" ? <SankalpRunner /> :
-        <GenericRunner item={item} />
+        {item.title_snapshot}
+      </p>
+      {item.description_snapshot && (
+        <p
+          style={{
+            fontFamily: "var(--kalpx-font-sans, Inter, sans-serif)",
+            fontSize: 13,
+            color: "#7B6550",
+            margin: "0 0 12px",
+            lineHeight: 1.5,
+          }}
+        >
+          {item.description_snapshot}
+        </p>
       )}
+      <div style={{ display: "flex", justifyContent: "flex-end" }}>
+        <button
+          onClick={onAction}
+          style={{
+            padding: "7px 16px",
+            borderRadius: 20,
+            border: "none",
+            background: "linear-gradient(135deg, #c9a84c, #a8873a)",
+            color: "#fff",
+            fontSize: 14,
+            fontWeight: "600",
+            cursor: "pointer",
+          }}
+        >
+          {actionLabel(item.item_type)}
+        </button>
+      </div>
     </div>
   );
 }
 
-function BandSection({ band, slot }: { band: RhythmTimeBand; slot: RhythmSlot | null }) {
+function BandSection({
+  band,
+  slot,
+  onItemAction,
+}: {
+  band: RhythmTimeBand;
+  slot: RhythmSlot | null;
+  onItemAction: (item: RhythmItem) => void;
+}) {
   if (!slot || slot.items.length === 0) return null;
   return (
     <div style={{ marginBottom: 24 }}>
-      <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 17, color: "#432104", marginBottom: 10 }}>
+      <div
+        style={{
+          fontFamily: "var(--kalpx-font-serif)",
+          fontWeight: 700,
+          fontSize: 17,
+          color: "#432104",
+          marginBottom: 10,
+        }}
+      >
         {RHYTHM_BAND_LABELS[band]}
       </div>
-      {slot.items.map((item) => <ItemCard key={item.id} item={item} />)}
+      {slot.items.map((item) => (
+        <RhythmItemCard key={item.id} item={item} onAction={() => onItemAction(item)} />
+      ))}
     </div>
   );
 }
@@ -218,6 +140,7 @@ export function RhythmHomePage() {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const homeData = useSelector((s: RootState) => s.door.homeData);
+  const screenState = useScreenState();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -232,18 +155,67 @@ export function RhythmHomePage() {
 
   const rhythm = homeData?.companion_rhythm;
 
+  const actionContext = {
+    dispatch,
+    screenData: screenState.screenData,
+    currentStateId: "rhythm_daily",
+  };
+
+  function handleItemAction(item: RhythmItem) {
+    void executeAction(
+      {
+        type: "start_runner",
+        payload: {
+          source: "rhythm_daily",
+          variant: item.item_type,
+          item: {
+            item_id: item.item_id,
+            title_snapshot: item.title_snapshot,
+            description_snapshot: item.description_snapshot ?? "",
+            item_type: item.item_type,
+          },
+        },
+      },
+      actionContext,
+    );
+  }
+
   return (
     <div style={SHELL_STYLE}>
       <Header transparent />
-      <main style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 16px calc(92px + env(safe-area-inset-bottom))" }}>
+      <main
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          padding: "24px 16px calc(92px + env(safe-area-inset-bottom))",
+        }}
+      >
         <div style={{ width: "100%", maxWidth: 420 }}>
           <button
             onClick={() => navigate("/en/mitra")}
-            style={{ background: "none", border: "none", color: "#C99317", fontSize: 14, cursor: "pointer", marginBottom: 16, padding: 0 }}
+            style={{
+              background: "none",
+              border: "none",
+              color: "#C99317",
+              fontSize: 14,
+              cursor: "pointer",
+              marginBottom: 16,
+              padding: 0,
+            }}
           >
             ← Back
           </button>
-          <h2 style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 24, color: "#432104", margin: "0 0 20px" }}>
+          <h2
+            style={{
+              fontFamily: "var(--kalpx-font-serif)",
+              fontWeight: 700,
+              fontSize: 24,
+              color: "#432104",
+              margin: "0 0 20px",
+            }}
+          >
             My Rhythm
           </h2>
 
@@ -252,7 +224,14 @@ export function RhythmHomePage() {
 
           {!loading && rhythm && !rhythm.has_rhythm && (
             <div style={CARD_STYLE}>
-              <p style={{ fontFamily: "var(--kalpx-font-serif)", fontSize: 17, color: "#432104", marginBottom: 20 }}>
+              <p
+                style={{
+                  fontFamily: "var(--kalpx-font-serif)",
+                  fontSize: 17,
+                  color: "#432104",
+                  marginBottom: 20,
+                }}
+              >
                 You haven't set up your rhythm yet.
               </p>
               <button
@@ -276,9 +255,21 @@ export function RhythmHomePage() {
 
           {!loading && rhythm && rhythm.has_rhythm && (
             <>
-              <BandSection band="morning" slot={rhythm.morning} />
-              <BandSection band="afternoon" slot={rhythm.afternoon} />
-              <BandSection band="night" slot={rhythm.night} />
+              <BandSection
+                band="morning"
+                slot={rhythm.morning}
+                onItemAction={handleItemAction}
+              />
+              <BandSection
+                band="afternoon"
+                slot={rhythm.afternoon}
+                onItemAction={handleItemAction}
+              />
+              <BandSection
+                band="night"
+                slot={rhythm.night}
+                onItemAction={handleItemAction}
+              />
               <button
                 onClick={() => navigate("/en/mitra/rhythm/setup")}
                 style={{

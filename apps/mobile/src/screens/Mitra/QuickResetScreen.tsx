@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Fonts } from '../../theme/fonts';
+import MalaMantraCounter from '../../components/MalaMantraCounter';
 
 type Phase = 'select' | 'running' | 'done';
 
@@ -115,14 +116,18 @@ export default function QuickResetScreen() {
       {phase === 'running' && (
         <View style={styles.centerContent}>
           <Text style={styles.timerText}>{formatTime(secondsLeft)}</Text>
-          <TouchableOpacity
-            style={styles.breathCircle}
-            onPress={() => setBreathCount((c) => c + 1)}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.breathCircleLabel}>Tap</Text>
-            <Text style={styles.breathCircleCount}>{breathCount}</Text>
-          </TouchableOpacity>
+          <MalaMantraCounter
+            targetCount={-1}
+            currentCount={breathCount}
+            onIncrement={() => setBreathCount((c) => c + 1)}
+            onExit={endEarly}
+            useBackgroundImage={false}
+            tapLabel="TAP"
+            subTapLabel=""
+            hintText=""
+          />
+          <Text style={styles.omText}>OM</Text>
+          <Text style={styles.omDevanagari}>ॐ</Text>
           <Text style={styles.breathHint}>Tap with each breath</Text>
           <TouchableOpacity onPress={endEarly} activeOpacity={0.7} style={styles.endEarlyBtn}>
             <Text style={styles.endEarlyText}>End early</Text>
@@ -282,6 +287,20 @@ const styles = StyleSheet.create({
     fontFamily: Fonts.serif.bold,
     color: '#fff',
     fontWeight: '700',
+  },
+  omText: {
+    fontSize: 28,
+    fontFamily: Fonts.serif.bold,
+    color: '#432104',
+    fontWeight: '700',
+    textAlign: 'center',
+    marginTop: 12,
+  },
+  omDevanagari: {
+    fontSize: 20,
+    color: '#8B6914',
+    fontFamily: Fonts.sans.regular,
+    textAlign: 'center',
   },
   breathHint: {
     fontSize: 14,

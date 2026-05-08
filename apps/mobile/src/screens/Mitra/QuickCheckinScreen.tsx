@@ -25,11 +25,15 @@ interface EnergyOption {
   description: string;
 }
 
-const ENERGY_OPTIONS: EnergyOption[] = [
-  { value: 'energized', label: 'Energized', description: 'Ready and alive' },
-  { value: 'balanced', label: 'Balanced', description: 'Steady and clear' },
-  { value: 'agitated', label: 'Agitated', description: 'Restless or tense' },
-  { value: 'drained', label: 'Drained', description: 'Heavy or depleted' },
+interface EnergyOptionWithSymbol extends EnergyOption {
+  symbol: string;
+}
+
+const ENERGY_OPTIONS: EnergyOptionWithSymbol[] = [
+  { value: 'energized', label: 'Energized', description: 'Ready and moving', symbol: '☀️' },
+  { value: 'balanced', label: 'Balanced', description: 'Steady and clear', symbol: '⚖️' },
+  { value: 'agitated', label: 'Agitated', description: 'Restless or tense', symbol: '🌧️' },
+  { value: 'drained', label: 'Drained', description: 'Low or heavy', symbol: '↓' },
 ];
 
 export default function QuickCheckinScreen() {
@@ -37,13 +41,14 @@ export default function QuickCheckinScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<QuickCheckinResponse | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
+  const [selected, setSelected] = useState<QuickCheckinEnergyState | null>(null);
 
-  const handleTap = async (value: QuickCheckinEnergyState) => {
-    if (submitting) return;
+  const handleProceed = async () => {
+    if (!selected || submitting) return;
     setSubmitting(true);
     setErrorMsg('');
     try {
-      const res = await postQuickCheckin(value);
+      const res = await postQuickCheckin(selected);
       setResult(res);
     } catch {
       setErrorMsg('Something went wrong. Please try again.');
@@ -54,10 +59,19 @@ export default function QuickCheckinScreen() {
 
   const handleCta = () => {
     if (!result) return;
-    if (result.suggested_action === 'navigate_to_room') {
-      navigation.navigate('DynamicEngine' as any);
-    } else if (result.suggested_action === 'navigate_to_door') {
-      navigation.navigate('DynamicEngine' as any);
+    if (result.suggested_action === 'navigate_to_room' && result.suggested_room_id) {
+      navigation.navigate('DynamicEngine' as any, { room_id: result.suggested_room_id });
+    } else if (result.suggested_action === 'navigate_to_door' && result.suggested_door) {
+      const door = result.suggested_door;
+      if (door === 'my_rhythm') {
+        navigation.navigate('RhythmHome' as any);
+      } else if (door === 'inner_path') {
+        navigation.navigate('DynamicEngine' as any);
+      } else if (door === 'quick_reset') {
+        navigation.navigate('QuickReset' as any);
+      } else {
+        navigation.goBack();
+      }
     } else {
       navigation.goBack();
     }
@@ -76,23 +90,39 @@ export default function QuickCheckinScreen() {
 
       {!result ? (
         <View style={styles.content}>
-          <Text style={styles.prompt}>How are you right now?</Text>
+          <Text style={styles.prompt}>How is your energy right now?</Text>
           {submitting ? (
             <ActivityIndicator size="large" color="#C99317" style={{ marginTop: 40 }} />
           ) : (
-            <View style={styles.grid}>
-              {ENERGY_OPTIONS.map((opt) => (
-                <TouchableOpacity
-                  key={opt.value}
-                  style={styles.gridOption}
-                  onPress={() => handleTap(opt.value)}
-                  activeOpacity={0.8}
-                >
-                  <Text style={styles.gridOptionLabel}>{opt.label}</Text>
-                  <Text style={styles.gridOptionDesc}>{opt.description}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+            <>
+              <View style={styles.grid}>
+                {ENERGY_OPTIONS.map((opt) => (
+                  <TouchableOpacity
+                    key={opt.value}
+                    style={[
+                      styles.gridOption,
+                      selected === opt.value
+                        ? { borderWidth: 2, borderColor: '#C99317', backgroundColor: 'rgba(201,147,23,0.08)' }
+                        : { borderWidth: 0.5, borderColor: '#DAC28E', backgroundColor: '#FBF5F5' },
+                    ]}
+                    onPress={() => setSelected(opt.value)}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={{ fontSize: 28, textAlign: 'center', marginBottom: 6 }}>{opt.symbol}</Text>
+                    <Text style={styles.gridOptionLabel}>{opt.label}</Text>
+                    <Text style={styles.gridOptionDesc}>{opt.description}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+              <TouchableOpacity
+                style={[styles.ctaBtn, selected === null && { opacity: 0.4 }]}
+                onPress={handleProceed}
+                disabled={selected === null}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.ctaBtnText}>Proceed →</Text>
+              </TouchableOpacity>
+            </>
           )}
           {!!errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
         </View>

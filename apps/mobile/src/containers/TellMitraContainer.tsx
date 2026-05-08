@@ -20,6 +20,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Fonts } from '../theme/fonts';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { isValidRoomId } from '@kalpx/contracts';
@@ -147,7 +148,11 @@ export default function TellMitraContainer() {
         {draft.length} / {MAX_CHARS}
       </Text>
       {!!errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
-      {!!resultCopy && <Text style={styles.resultCopy}>{resultCopy}</Text>}
+      {!!resultCopy && (
+        <View style={styles.resultCard}>
+          <Text style={styles.resultCardText}>{resultCopy}</Text>
+        </View>
+      )}
       <TouchableOpacity
         style={[styles.submitBtn, isSubmitting && styles.submitBtnDisabled]}
         onPress={handleSubmit}
@@ -186,10 +191,19 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#c0392b',
   },
-  resultCopy: {
-    fontSize: 15,
+  resultCard: {
+    backgroundColor: 'rgba(255,253,250,0.96)',
+    borderLeftWidth: 3,
+    borderLeftColor: 'rgba(201,168,76,0.6)',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 24,
+  },
+  resultCardText: {
+    fontFamily: Fonts.serif.regular,
+    fontSize: 20,
+    lineHeight: 34,
     color: '#432104',
-    lineHeight: 24,
     fontStyle: 'italic',
   },
   submitBtn: {

@@ -7,9 +7,9 @@ import { RhythmLibraryPickerModal } from "../../components/mitra/RhythmLibraryPi
 import { Footer } from "../../components/layout/Footer";
 import { Header } from "../../components/layout/Header";
 import { MobileBottomNav } from "../../components/layout/MobileBottomNav";
-import { postRhythmSetup } from "../../engine/mitraApi";
+import { getMitraHomeV3, postRhythmSetup } from "../../engine/mitraApi";
 import type { AppDispatch, RootState } from "../../store";
-import { clearDoorState } from "../../store/doorSlice";
+import { clearDoorState, setHomeData } from "../../store/doorSlice";
 
 type LocalItem = {
   slot: RhythmTimeBand;
@@ -59,6 +59,7 @@ export function RhythmSetupPage() {
   const [pickerBand, setPickerBand] = useState<RhythmTimeBand | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [reminderPref, setReminderPref] = useState<"yes" | "no" | "later">("later");
 
   function addItem(item: LocalItem) {
     setItems((prev) => [...prev, item]);
@@ -76,7 +77,10 @@ export function RhythmSetupPage() {
     setSaving(true);
     setError(null);
     try {
-      await postRhythmSetup({ items });
+      const mappedItems = items.map((it) => ({ ...it }));
+      await postRhythmSetup({ items: mappedItems, reminder_preference: reminderPref });
+      const homeData = await getMitraHomeV3();
+      dispatch(setHomeData(homeData));
       dispatch(clearDoorState());
       navigate("/en/mitra/rhythm");
     } catch {
@@ -176,6 +180,37 @@ export function RhythmSetupPage() {
               )}
             </div>
           ))}
+
+          <div style={{ marginTop: 20 }}>
+            <div style={{ fontSize: 14, color: "#7B6550", marginBottom: 10 }}>Reminder preference</div>
+            <div style={{ display: "flex", gap: 8 }}>
+              {(
+                [
+                  { label: "Yes please", value: "yes" },
+                  { label: "No thanks", value: "no" },
+                  { label: "Remind me later", value: "later" },
+                ] as { label: string; value: "yes" | "no" | "later" }[]
+              ).map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setReminderPref(opt.value)}
+                  style={{
+                    flex: 1,
+                    padding: "8px 4px",
+                    borderRadius: 20,
+                    border: reminderPref === opt.value ? "1px solid #C99317" : "1px solid rgba(201,168,76,0.4)",
+                    background: reminderPref === opt.value ? "#C99317" : "transparent",
+                    color: reminderPref === opt.value ? "#fff" : "#7B6550",
+                    fontSize: 13,
+                    cursor: "pointer",
+                    fontFamily: "var(--kalpx-font-serif)",
+                  }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
           {error && <p style={{ color: "#e06060", textAlign: "center", fontSize: 14 }}>{error}</p>}
 

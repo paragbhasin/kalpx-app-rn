@@ -335,12 +335,21 @@ export async function claimGuestJourney(): Promise<any> {
  */
 export async function getRoomRender(
   roomId: string,
-  params?: { life_context?: string | null },
+  params?: {
+    life_context?: string | null;
+    intent_type?: string;
+    source_surface?: string;
+    tell_mitra_event_id?: string | number | null;
+  },
 ): Promise<any> {
   try {
-    const url = params?.life_context
-      ? `mitra/rooms/${encodeURIComponent(roomId)}/render/?life_context=${encodeURIComponent(params.life_context)}`
-      : `mitra/rooms/${encodeURIComponent(roomId)}/render/`;
+    const qp = new URLSearchParams();
+    if (params?.life_context)                qp.set('life_context',        params.life_context);
+    if (params?.intent_type)                 qp.set('intent_type',         params.intent_type);
+    if (params?.source_surface)              qp.set('source_surface',      params.source_surface);
+    if (params?.tell_mitra_event_id != null) qp.set('tell_mitra_event_id', String(params.tell_mitra_event_id));
+    const qs = qp.toString();
+    const url = `mitra/rooms/${encodeURIComponent(roomId)}/render/${qs ? `?${qs}` : ''}`;
     const res = await api.get(url);
     const data = res?.data;
     if (!data || typeof data !== 'object' || !Array.isArray(data.actions)) return null;
@@ -539,7 +548,7 @@ export async function mitraJourneyEntryView(etag?: string | null): Promise<{
     try {
       const headers: Record<string, string> = {};
       if (etag) headers['If-None-Match'] = etag;
-      const res = await api.get('mitra/v3/journey/entry-view/', { headers });
+      const res = await api.get('mitra/v3/journey/entry-view/', { headers, params: { tz: getTz() } });
       return {
         envelope: res.data,
         etag: (res.headers as any)['etag'] ?? null,
@@ -730,7 +739,9 @@ export async function acceptPredictiveAlert(id: string | number): Promise<any> {
  * Returns MitraHomeV3Response with door_states, inner_path_summary, etc.
  */
 export async function getMitraHomeV3(): Promise<MitraHomeV3Response> {
-  const resp = await api.get<MitraHomeV3Response>('mitra/v3/journey/home/');
+  const resp = await api.get<MitraHomeV3Response>('mitra/v3/journey/home/', {
+    params: { tz: getTz() },
+  });
   return resp.data;
 }
 

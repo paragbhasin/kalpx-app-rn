@@ -1190,11 +1190,11 @@ export function mitraJourneyEntryView(
   etag: string | null = null,
   signals?: { crisis?: boolean; grief?: boolean; loneliness?: boolean },
 ): Promise<V3GetResult<V3EntryViewEnvelope>> {
-  const params: Record<string, string> = {};
+  const params: Record<string, string> = { tz: getTz() };
   if (signals?.crisis) params.crisis = "1";
   if (signals?.grief) params.grief = "1";
   if (signals?.loneliness) params.loneliness = "1";
-  return v3Get<V3EntryViewEnvelope>("mitra/v3/journey/entry-view/", etag, Object.keys(params).length ? params : undefined);
+  return v3Get<V3EntryViewEnvelope>("mitra/v3/journey/entry-view/", etag, params);
 }
 
 export async function mitraJourneyHome(params: {
@@ -2039,7 +2039,9 @@ export async function trackRoomTelemetry(payload: {
 // mitraJourneyHomeV3 — GET /api/mitra/v3/journey/home/ (S04 FourDoor surface)
 // ---------------------------------------------------------------------------
 export async function mitraJourneyHomeV3(): Promise<MitraHomeV3Response> {
-  const resp = await api.get<MitraHomeV3Response>('/api/mitra/v3/journey/home/');
+  const resp = await api.get<MitraHomeV3Response>('/api/mitra/v3/journey/home/', {
+    params: { tz: getTz() },
+  });
   return resp.data;
 }
 

@@ -46,6 +46,13 @@ import { ProfilePage } from "./pages/profile/ProfilePage";
 import { PrivacyPage } from "./pages/legal/PrivacyPage";
 import { TermsPage } from "./pages/legal/TermsPage";
 import { DataDeletionPage } from "./pages/legal/DataDeletionPage";
+import { KalpxHaatAddressFormPage } from "./pages/haat/KalpxHaatAddressFormPage";
+import { KalpxHaatAddressListPage } from "./pages/haat/KalpxHaatAddressListPage";
+import { KalpxHaatCartPage } from "./pages/haat/KalpxHaatCartPage";
+import { KalpxHaatPage } from "./pages/haat/KalpxHaatPage";
+import { KalpxHaatPaymentPage } from "./pages/haat/KalpxHaatPaymentPage";
+import { KalpxHaatProductDetailPage } from "./pages/haat/KalpxHaatProductDetailPage";
+import { KalpxHaatStoreDetailPage } from "./pages/haat/KalpxHaatStoreDetailPage";
 import { RetreatsInterestPage } from "./pages/retreats/RetreatsInterestPage";
 
 export function AppRoutes() {
@@ -123,6 +130,22 @@ export function AppRoutes() {
             <WelcomeBackPage />
           </RequiresAuth>
         }
+      />
+
+      {/* Haat vertical */}
+      <Route path="/en/haat" element={<KalpxHaatPage />} />
+      <Route path="/en/haat/cart" element={<KalpxHaatCartPage />} />
+      <Route path="/en/haat/payment" element={<KalpxHaatPaymentPage />} />
+      <Route path="/en/haat/addresses" element={<KalpxHaatAddressListPage />} />
+      <Route path="/en/haat/addresses/new" element={<KalpxHaatAddressFormPage />} />
+      <Route
+        path="/en/haat/addresses/:id/edit"
+        element={<KalpxHaatAddressFormPage />}
+      />
+      <Route path="/en/haat/store/:id" element={<KalpxHaatStoreDetailPage />} />
+      <Route
+        path="/en/haat/product/:id"
+        element={<KalpxHaatProductDetailPage />}
       />
 
       {/* Classes vertical */}

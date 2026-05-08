@@ -7,6 +7,7 @@ import { webStorage } from "../../lib/webStorage";
 const NAV_LINKS = [
   { to: "/en", label: "Home", match: "/en", mobileOnly: true },
   // { to: "/en/mitra", label: "Mitra", match: "/en/mitra" },
+  { to: "/en/haat", label: "Kalpx Haat", match: "/en/haat" },
   { to: "/en/classes", label: "Classes", match: "/en/classes" },
   { to: "/en/community", label: "Community", match: "/en/community" },
   // { to: "/en/retreats", label: "Retreats", match: "/en/retreats" },

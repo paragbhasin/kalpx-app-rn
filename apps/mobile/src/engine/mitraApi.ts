@@ -2064,6 +2064,10 @@ export async function postRhythmSetup(payload: RhythmSetupPayload): Promise<Mitr
 }
 
 export async function postQuickCheckin(energy_state: QuickCheckinEnergyState): Promise<QuickCheckinResponse> {
-  const resp = await api.post<QuickCheckinResponse>('/api/mitra/v3/checkin/', { energy_state });
+  const resp = await api.post<QuickCheckinResponse>('/api/mitra/v3/checkin/', {
+    energy_state,
+    tz: getTz(),
+    source_surface: 'quick_checkin_screen_mobile',
+  });
   return resp.data;
 }

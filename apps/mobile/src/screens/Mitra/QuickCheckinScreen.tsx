@@ -25,16 +25,28 @@ interface EnergyOption {
   description: string;
 }
 
-interface EnergyOptionWithSymbol extends EnergyOption {
-  symbol: string;
-}
-
-const ENERGY_OPTIONS: EnergyOptionWithSymbol[] = [
-  { value: 'energized', label: 'Energized', description: 'Ready and moving', symbol: '☀️' },
-  { value: 'balanced', label: 'Balanced', description: 'Steady and clear', symbol: '⚖️' },
-  { value: 'agitated', label: 'Agitated', description: 'Restless or tense', symbol: '🌧️' },
-  { value: 'drained', label: 'Drained', description: 'Low or heavy', symbol: '↓' },
+const ENERGY_OPTIONS: EnergyOption[] = [
+  { value: 'energized', label: 'Energized', description: 'Ready and moving' },
+  { value: 'balanced', label: 'Balanced', description: 'Steady and clear' },
+  { value: 'agitated', label: 'Agitated', description: 'Restless or tense' },
+  { value: 'drained', label: 'Drained', description: 'Low or heavy' },
 ];
+
+const ROOM_CTA_LABELS: Record<string, string> = {
+  room_stillness: 'Go to Find Calm',
+  room_release: 'Set It Down',
+  room_joy: 'Notice What\'s Good',
+  room_growth: 'Take the Next Step',
+  room_clarity: 'Find Clarity',
+  room_connection: 'Open Connection',
+};
+
+const DOOR_CTA_LABELS: Record<string, string> = {
+  my_rhythm: 'Go to My Rhythm',
+  inner_path: 'Continue Your Path',
+  quick_reset: 'Start Quick Reset',
+  tell_mitra: 'Share with Mitra',
+};
 
 export default function QuickCheckinScreen() {
   const navigation = useNavigation<any>();
@@ -57,6 +69,17 @@ export default function QuickCheckinScreen() {
     }
   };
 
+  const getCTALabel = (): string => {
+    if (!result) return 'Continue';
+    if (result.suggested_action === 'navigate_to_room' && result.suggested_room_id) {
+      return ROOM_CTA_LABELS[result.suggested_room_id] ?? 'Go to Practice';
+    }
+    if (result.suggested_action === 'navigate_to_door' && result.suggested_door) {
+      return DOOR_CTA_LABELS[result.suggested_door] ?? 'Continue';
+    }
+    return 'Return Home';
+  };
+
   const handleCta = () => {
     if (!result) return;
     if (result.suggested_action === 'navigate_to_room' && result.suggested_room_id) {
@@ -66,7 +89,7 @@ export default function QuickCheckinScreen() {
       if (door === 'my_rhythm') {
         navigation.navigate('RhythmHome' as any);
       } else if (door === 'inner_path') {
-        navigation.navigate('DynamicEngine' as any);
+        navigation.navigate('InnerPath' as any);
       } else if (door === 'quick_reset') {
         navigation.navigate('QuickReset' as any);
       } else {
@@ -84,13 +107,14 @@ export default function QuickCheckinScreen() {
         <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7}>
           <Text style={styles.backBtnText}>{'< Back'}</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Check In</Text>
+        <Text style={styles.headerTitle}>Quick Check-in</Text>
         <View style={{ width: 50 }} />
       </View>
 
       {!result ? (
         <View style={styles.content}>
           <Text style={styles.prompt}>How is your energy right now?</Text>
+          <Text style={styles.subtitle}>Share how you're feeling. Mitra will find a practice that fits.</Text>
           {submitting ? (
             <ActivityIndicator size="large" color="#C99317" style={{ marginTop: 40 }} />
           ) : (
@@ -102,18 +126,20 @@ export default function QuickCheckinScreen() {
                     style={[
                       styles.gridOption,
                       selected === opt.value
-                        ? { borderWidth: 2, borderColor: '#C99317', backgroundColor: 'rgba(201,147,23,0.08)' }
-                        : { borderWidth: 0.5, borderColor: '#DAC28E', backgroundColor: '#FBF5F5' },
+                        ? styles.gridOptionSelected
+                        : styles.gridOptionUnselected,
                     ]}
                     onPress={() => setSelected(opt.value)}
                     activeOpacity={0.8}
                   >
-                    <Text style={{ fontSize: 28, textAlign: 'center', marginBottom: 6 }}>{opt.symbol}</Text>
                     <Text style={styles.gridOptionLabel}>{opt.label}</Text>
                     <Text style={styles.gridOptionDesc}>{opt.description}</Text>
                   </TouchableOpacity>
                 ))}
               </View>
+              {selected === null && (
+                <Text style={styles.disabledHint}>Select your energy to continue.</Text>
+              )}
               <TouchableOpacity
                 style={[styles.ctaBtn, selected === null && { opacity: 0.4 }]}
                 onPress={handleProceed}
@@ -128,14 +154,15 @@ export default function QuickCheckinScreen() {
         </View>
       ) : (
         <View style={styles.resultContent}>
-          <Text style={styles.resultCopy}>{result.copy}</Text>
+          <Text style={styles.resultHeading}>Mitra heard you.</Text>
+          <View style={styles.resultCopyBlock}>
+            <Text style={styles.resultCopy}>{result.copy}</Text>
+          </View>
           <TouchableOpacity style={styles.ctaBtn} onPress={handleCta} activeOpacity={0.8}>
-            <Text style={styles.ctaBtnText}>
-              {result.suggested_action === 'return_home' ? 'Back to Home' : 'Continue'}
-            </Text>
+            <Text style={styles.ctaBtnText}>{getCTALabel()}</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => navigation.goBack()} activeOpacity={0.7} style={styles.skipBtn}>
-            <Text style={styles.skipBtnText}>Go back</Text>
+            <Text style={styles.skipBtnText}>Return Home</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -174,7 +201,7 @@ const styles = StyleSheet.create({
     padding: 24,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 24,
+    gap: 16,
   },
   prompt: {
     fontSize: 24,
@@ -182,6 +209,13 @@ const styles = StyleSheet.create({
     color: '#432104',
     fontWeight: '700',
     textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 14,
+    fontFamily: Fonts.sans.regular,
+    color: '#7B6550',
+    textAlign: 'center',
+    lineHeight: 20,
   },
   grid: {
     flexDirection: 'row',
@@ -192,11 +226,8 @@ const styles = StyleSheet.create({
   },
   gridOption: {
     width: '46%',
-    backgroundColor: '#FBF5F5',
     borderRadius: 15,
     padding: 20,
-    borderWidth: 0.5,
-    borderColor: '#DAC28E',
     alignItems: 'center',
     gap: 6,
     elevation: 2,
@@ -204,6 +235,20 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
     shadowRadius: 3,
+  },
+  gridOptionSelected: {
+    borderWidth: 3,
+    borderColor: '#C99317',
+    backgroundColor: 'rgba(201,147,23,0.08)',
+    shadowColor: '#C99317',
+    shadowOpacity: 0.22,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  gridOptionUnselected: {
+    borderWidth: 0.5,
+    borderColor: '#DAC28E',
+    backgroundColor: '#FBF5F5',
   },
   gridOptionLabel: {
     fontSize: 18,
@@ -217,6 +262,12 @@ const styles = StyleSheet.create({
     color: '#7B6550',
     textAlign: 'center',
   },
+  disabledHint: {
+    fontSize: 13,
+    color: '#A08060',
+    fontFamily: Fonts.sans.regular,
+    textAlign: 'center',
+  },
   errorText: {
     fontSize: 14,
     color: '#c0392b',
@@ -225,16 +276,28 @@ const styles = StyleSheet.create({
   resultContent: {
     flex: 1,
     padding: 28,
-    alignItems: 'center',
+    alignItems: 'stretch',
     justifyContent: 'center',
-    gap: 28,
+    gap: 0,
+  },
+  resultHeading: {
+    fontSize: 18,
+    fontFamily: Fonts.serif.bold,
+    color: '#C99317',
+    fontWeight: '700',
+    marginBottom: 16,
+  },
+  resultCopyBlock: {
+    borderLeftWidth: 3,
+    borderLeftColor: 'rgba(201,147,23,0.5)',
+    paddingLeft: 14,
+    marginBottom: 28,
   },
   resultCopy: {
-    fontSize: 18,
+    fontSize: 17,
     fontFamily: Fonts.serif.regular,
     color: '#432104',
-    textAlign: 'center',
-    lineHeight: 28,
+    lineHeight: 26,
     fontStyle: 'italic',
   },
   ctaBtn: {
@@ -242,6 +305,8 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     paddingHorizontal: 36,
     paddingVertical: 14,
+    alignItems: 'center',
+    marginBottom: 12,
   },
   ctaBtnText: {
     fontSize: 17,
@@ -250,6 +315,7 @@ const styles = StyleSheet.create({
   },
   skipBtn: {
     paddingVertical: 8,
+    alignItems: 'center',
   },
   skipBtnText: {
     fontSize: 15,

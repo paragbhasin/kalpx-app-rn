@@ -153,6 +153,15 @@ export default function TellMitraContainer() {
           <Text style={styles.resultCardText}>{resultCopy}</Text>
         </View>
       )}
+      {!!resultCopy && (
+        <TouchableOpacity
+          onPress={() => navigation.navigate('QuickCheckin' as any)}
+          activeOpacity={0.7}
+          style={styles.ghostLink}
+        >
+          <Text style={styles.ghostLinkText}>Try Quick Check-in instead</Text>
+        </TouchableOpacity>
+      )}
       <TouchableOpacity
         style={[styles.submitBtn, isSubmitting && styles.submitBtnDisabled]}
         onPress={handleSubmit}
@@ -219,5 +228,15 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  ghostLink: {
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  ghostLinkText: {
+    fontSize: 14,
+    color: '#9b8b77',
+    fontFamily: Fonts.sans.regular,
+    textDecorationLine: 'underline',
   },
 });

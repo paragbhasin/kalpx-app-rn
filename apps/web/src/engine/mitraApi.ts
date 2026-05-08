@@ -756,6 +756,10 @@ export async function postRhythmSetup(payload: RhythmSetupPayload): Promise<{ st
 }
 
 export async function postQuickCheckin(energy_state: QuickCheckinEnergyState): Promise<QuickCheckinResponse> {
-  const resp = await api.post<QuickCheckinResponse>('mitra/v3/checkin/', { energy_state });
+  const resp = await api.post<QuickCheckinResponse>('mitra/v3/checkin/', {
+    energy_state,
+    tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    source_surface: 'quick_checkin_page_web',
+  });
   return resp.data;
 }

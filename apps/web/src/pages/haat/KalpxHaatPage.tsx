@@ -486,7 +486,7 @@ function TrustedStores({
 
   return (
     <section style={sectionStyle(0.2)}>
-      <SectionHeader title={title} actionLabel="View all" />
+      <SectionHeader title={title} />
       <div style={scrollRowStyle}>
         {trustedStores.map((store) => (
           <article
@@ -576,9 +576,15 @@ function ProductSection({
   items: HaatProduct[];
   onAddToCart: (name: string) => void;
 }) {
+  const navigate = useNavigate();
+
   return (
     <section style={sectionStyle(0.3)}>
-      <SectionHeader title={title} actionLabel="View all" />
+      <SectionHeader
+        title={title}
+        actionLabel="View all"
+        onAction={() => navigate("/en/haat/browse?type=product")}
+      />
       <ProductCard products={items} onAddToCart={onAddToCart} />
     </section>
   );
@@ -591,9 +597,15 @@ function ServiceSection({
   title: string;
   items: HaatService[];
 }) {
+  const navigate = useNavigate();
+
   return (
     <section style={sectionStyle(0.4)}>
-      <SectionHeader title={title} actionLabel="View all" />
+      <SectionHeader
+        title={title}
+        actionLabel="View all"
+        onAction={() => navigate("/en/haat/browse?type=service")}
+      />
       <div style={cardGridStyle}>
         {items.map((item) => (
           <article key={item.id} style={productCardStyle}>
@@ -671,9 +683,11 @@ function ServiceSection({
 function SectionHeader({
   title,
   actionLabel,
+  onAction,
 }: {
   title: string;
   actionLabel?: string;
+  onAction?: () => void;
 }) {
   return (
     <div
@@ -698,6 +712,7 @@ function SectionHeader({
       {actionLabel ? (
         <button
           type="button"
+          onClick={onAction}
           style={{
             fontSize: 12,
             fontWeight: 700,

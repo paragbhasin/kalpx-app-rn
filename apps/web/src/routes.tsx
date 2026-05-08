@@ -48,6 +48,7 @@ import { TermsPage } from "./pages/legal/TermsPage";
 import { DataDeletionPage } from "./pages/legal/DataDeletionPage";
 import { KalpxHaatAddressFormPage } from "./pages/haat/KalpxHaatAddressFormPage";
 import { KalpxHaatAddressListPage } from "./pages/haat/KalpxHaatAddressListPage";
+import { KalpxHaatBrowsePage } from "./pages/haat/KalpxHaatBrowsePage";
 import { KalpxHaatCartPage } from "./pages/haat/KalpxHaatCartPage";
 import { KalpxHaatPage } from "./pages/haat/KalpxHaatPage";
 import { KalpxHaatPaymentPage } from "./pages/haat/KalpxHaatPaymentPage";
@@ -134,6 +135,7 @@ export function AppRoutes() {
 
       {/* Haat vertical */}
       <Route path="/en/haat" element={<KalpxHaatPage />} />
+      <Route path="/en/haat/browse" element={<KalpxHaatBrowsePage />} />
       <Route path="/en/haat/cart" element={<KalpxHaatCartPage />} />
       <Route path="/en/haat/payment" element={<KalpxHaatPaymentPage />} />
       <Route path="/en/haat/addresses" element={<KalpxHaatAddressListPage />} />

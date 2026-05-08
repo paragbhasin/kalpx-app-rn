@@ -23,7 +23,10 @@ const AUTH_ROUTES = ['/login', '/signup', '/forgot-password', '/reset-password',
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation();
 
-  const isImmersive = IMMERSIVE_PREFIXES.some((p) => pathname.startsWith(p));
+  const isImmersive = IMMERSIVE_PREFIXES.some((p) => {
+    const prefix = p.endsWith('/') ? p : p + '/';
+    return pathname === p || pathname.startsWith(prefix);
+  });
   const isAuth = AUTH_ROUTES.some((p) => pathname === p || pathname.startsWith(p + '?'));
   const isMitraHome = pathname === '/en' || pathname === '/en/mitra';
   const isRoomRoute = pathname.startsWith('/en/mitra/room/');

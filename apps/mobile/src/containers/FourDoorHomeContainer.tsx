@@ -5,7 +5,7 @@
  *
  * Fetches GET /api/mitra/v3/journey/home/ on first mount (skips if already
  * hydrated in store). Renders four door panels using DOOR_LABELS from
- * @kalpx/contracts. my_rhythm→RhythmHome, inner_path→DynamicEngine,
+ * @kalpx/contracts. my_rhythm→RhythmHome, inner_path→InnerPath,
  * quick_reset→QuickReset screen, tell_mitra inline.
  */
 
@@ -80,7 +80,7 @@ export default function FourDoorHomeContainer() {
       <TouchableOpacity
         style={styles.doorCard}
         activeOpacity={0.8}
-        onPress={() => navigation.navigate("DynamicEngine" as any)}
+        onPress={() => navigation.navigate("InnerPath" as any)}
       >
         <Text style={styles.doorLabel}>{DOOR_LABELS.inner_path}</Text>
         <Text style={styles.doorSubtitle}>

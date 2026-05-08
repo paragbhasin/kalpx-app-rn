@@ -52,6 +52,7 @@ import RhythmSetupScreen from "../screens/Mitra/RhythmSetupScreen";
 import QuickResetScreen from "../screens/Mitra/QuickResetScreen";
 import QuickCheckinScreen from "../screens/Mitra/QuickCheckinScreen";
 import BrowseRoomsScreen from "../screens/Mitra/BrowseRoomsScreen";
+import InnerPathScreen from "../screens/Mitra/InnerPathScreen";
 import TellMitraScreen from "../screens/Mitra/TellMitraScreen";
 
 const Stack: any = createNativeStackNavigator();
@@ -270,6 +271,7 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen name="QuickReset" component={QuickResetScreen} options={{ headerShown: false }} />
     <Stack.Screen name="QuickCheckin" component={QuickCheckinScreen} options={{ headerShown: false }} />
     <Stack.Screen name="BrowseRooms" component={BrowseRoomsScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="InnerPath" component={InnerPathScreen} options={{ headerShown: false }} />
     <Stack.Screen name="TellMitra" component={TellMitraScreen} options={{ headerShown: false }} />
   </Stack.Navigator>
 );

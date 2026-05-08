@@ -34,7 +34,7 @@ import { BrowseRoomsPage } from "./pages/mitra/BrowseRoomsPage";
 import { CheckinPage } from "./pages/mitra/CheckinPage";
 import { CheckpointPage } from "./pages/mitra/CheckpointPage";
 import { DashboardPage } from "./pages/mitra/DashboardPage";
-import InnerPathStubPage from "./pages/mitra/InnerPathStubPage";
+import { InnerPathPage } from "./pages/mitra/InnerPathPage";
 import { MitraEnginePage } from "./pages/mitra/MitraEnginePage";
 import { MitraHomePage } from "./pages/mitra/MitraHomePage";
 import { MitraStartPage } from "./pages/mitra/MitraStartPage";
@@ -73,7 +73,14 @@ export function AppRoutes() {
       <Route path="/en/mitra" element={<MitraHomePage />} />
       <Route path="/en/mitra/start" element={<MitraStartPage />} />
       <Route path="/en/mitra/onboarding" element={<OnboardingPage />} />
-      <Route path="/en/mitra/inner-path" element={<InnerPathStubPage />} />
+      <Route
+        path="/en/mitra/inner-path"
+        element={
+          <RequiresAuth>
+            <InnerPathPage />
+          </RequiresAuth>
+        }
+      />
       <Route path="/en/mitra/rhythm" element={<RhythmHomePage />} />
       <Route path="/en/mitra/rhythm/setup" element={<RhythmSetupPage />} />
       <Route path="/en/mitra/quick-reset" element={<QuickResetPage />} />

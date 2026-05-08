@@ -146,6 +146,7 @@ export function normalizeTellMitraResult(raw: unknown): TellMitraV3Response {
                                   ? r["state_tags"].filter((t): t is string => typeof t === "string")
                                   : [],
     companion_state_written:    typeof r["companion_state_written"] === "boolean" ? r["companion_state_written"] : false,
+    safety_flag:                typeof r["safety_flag"] === "boolean" ? r["safety_flag"] : false,
   };
 }
 
@@ -156,7 +157,7 @@ function _safeTellMitraResponse(): TellMitraV3Response {
     suggested_action: "none", suggested_room_id: null,
     suggested_room_label: null, suggested_room_description: null,
     door: null, response_copy: "", state_tags: [],
-    companion_state_written: false,
+    companion_state_written: false, safety_flag: false,
   };
 }
 

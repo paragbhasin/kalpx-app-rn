@@ -168,4 +168,5 @@ export interface TellMitraV3Response {
   response_copy: string;
   state_tags: string[];
   companion_state_written: boolean;
+  safety_flag: boolean;
 }

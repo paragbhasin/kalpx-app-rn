@@ -15,7 +15,7 @@ const DOOR_ROUTES: Record<string, string> = {
   tell_mitra: "/en/mitra/tell-mitra",
 };
 
-type ResultScreen = "none" | "navigate_to_room" | "navigate_to_door" | "provide_wisdom_inline" | "fallback";
+type ResultScreen = "none" | "navigate_to_room" | "navigate_to_door" | "provide_wisdom_inline" | "fallback" | "safety";
 
 export function TellMitraPage() {
   const navigate = useNavigate();
@@ -40,7 +40,9 @@ export function TellMitraPage() {
         source_surface: "tell_mitra_page_web",
       });
       setResult(resp);
-      if (resp.suggested_action === "navigate_to_room" && isValidRoomId(resp.suggested_room_id)) {
+      if (resp.safety_flag === true) {
+        setScreen("safety");
+      } else if (resp.suggested_action === "navigate_to_room" && isValidRoomId(resp.suggested_room_id)) {
         setScreen("navigate_to_room");
       } else if (resp.suggested_action === "navigate_to_door" && resp.door) {
         setScreen("navigate_to_door");
@@ -135,8 +137,8 @@ export function TellMitraPage() {
               </div>
               <button
                 onClick={() => void submit()}
-                disabled={submitting}
-                style={{ ...GOLD_BTN, opacity: submitting ? 0.6 : 1, cursor: submitting ? "not-allowed" : "pointer" }}
+                disabled={submitting || !text.trim()}
+                style={{ ...GOLD_BTN, opacity: (submitting || !text.trim()) ? 0.5 : 1, cursor: (submitting || !text.trim()) ? "not-allowed" : "pointer" }}
               >
                 {submitting ? "Sending…" : "Tell Mitra"}
               </button>
@@ -261,7 +263,7 @@ export function TellMitraPage() {
                 borderLeft: "3px solid rgba(201,168,76,0.6)",
                 borderRadius: "0 12px 12px 0",
                 padding: "20px 24px",
-                marginBottom: 24,
+                marginBottom: 20,
                 fontFamily: "'Cormorant Garamond', serif",
                 fontSize: 20,
                 lineHeight: 1.7,
@@ -270,24 +272,48 @@ export function TellMitraPage() {
               }}>
                 {result.response_copy}
               </div>
-              <button onClick={() => navigate("/en/mitra")} style={GOLD_BTN}>
-                Return Home
-              </button>
-              <button onClick={() => { setScreen("none"); setText(""); }} style={{ ...GHOST_BTN, marginTop: 10 }}>
-                Tell Mitra more
-              </button>
-              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-                <button onClick={() => navigate("/en/mitra/checkin-quick")} style={{ ...GHOST_BTN, fontSize: 13 }}>
-                  Quick Check-in
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
+                <div style={{ fontSize: 12, color: "#A08060", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" as const, marginBottom: 2 }}>
+                  Or try
+                </div>
+                <button onClick={() => navigate("/en/mitra/checkin-quick")} style={{ ...GHOST_BTN, textAlign: "left" as const, padding: "10px 14px" }}>
+                  Quick Check-in — share how your energy feels
                 </button>
-                <button onClick={() => navigate("/en/mitra/quick-reset")} style={{ ...GHOST_BTN, fontSize: 13 }}>
-                  Quick Reset
+                <button onClick={() => navigate("/en/mitra/quick-reset")} style={{ ...GHOST_BTN, textAlign: "left" as const, padding: "10px 14px" }}>
+                  Quick Reset — one calm mantra with beads
+                </button>
+                <button onClick={() => navigate("/en/mitra/rooms")} style={{ ...GHOST_BTN, textAlign: "left" as const, padding: "10px 14px" }}>
+                  Browse Rooms — find the right space
                 </button>
               </div>
+              <button onClick={() => { setScreen("none"); setText(""); }} style={GOLD_BTN}>
+                Tell Mitra more
+              </button>
+              <button onClick={() => navigate("/en/mitra")} style={{ ...GHOST_BTN, marginTop: 8 }}>
+                Return Home
+              </button>
             </div>
           )}
 
-          {/* fallback / none */}
+          {/* safety */}
+          {screen === "safety" && result && (
+            <div style={CARD}>
+              <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 18, color: "#432104", marginBottom: 16 }}>
+                Mitra hears you.
+              </div>
+              <div style={{ fontSize: 16, lineHeight: 1.8, color: "#432104", marginBottom: 24 }}>
+                {result.response_copy || "You are not alone. Please speak to someone you trust right now."}
+              </div>
+              <button onClick={() => { setScreen("none"); setText(""); }} style={GOLD_BTN}>
+                Tell Mitra more
+              </button>
+              <button onClick={() => navigate("/en/mitra")} style={{ ...GHOST_BTN, marginTop: 10 }}>
+                Return Home
+              </button>
+            </div>
+          )}
+
+          {/* fallback */}
           {screen === "fallback" && result && (
             <div style={CARD}>
               <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 18, color: "#C99317", marginBottom: 16 }}>
@@ -299,7 +325,7 @@ export function TellMitraPage() {
                   borderLeft: "3px solid rgba(201,168,76,0.6)",
                   borderRadius: "0 12px 12px 0",
                   padding: "20px 24px",
-                  marginBottom: 24,
+                  marginBottom: 20,
                   fontFamily: "'Cormorant Garamond', serif",
                   fontSize: 20,
                   lineHeight: 1.7,
@@ -309,24 +335,30 @@ export function TellMitraPage() {
                   {result.response_copy}
                 </div>
               ) : (
-                <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, color: "#432104", fontStyle: "italic", marginBottom: 24, lineHeight: 1.7 }}>
+                <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 20, color: "#432104", fontStyle: "italic", marginBottom: 20, lineHeight: 1.7 }}>
                   I'm here with you. Let me help you find where to go next.
                 </p>
               )}
-              <button onClick={() => navigate("/en/mitra")} style={GOLD_BTN}>
-                Return Home
-              </button>
-              <button onClick={() => { setScreen("none"); setText(""); }} style={{ ...GHOST_BTN, marginTop: 10 }}>
-                Tell Mitra more
-              </button>
-              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-                <button onClick={() => navigate("/en/mitra/checkin-quick")} style={{ ...GHOST_BTN, fontSize: 13 }}>
-                  Quick Check-in
+              <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 14 }}>
+                <div style={{ fontSize: 12, color: "#A08060", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" as const, marginBottom: 2 }}>
+                  Or try
+                </div>
+                <button onClick={() => navigate("/en/mitra/checkin-quick")} style={{ ...GHOST_BTN, textAlign: "left" as const, padding: "10px 14px" }}>
+                  Quick Check-in — share how your energy feels
                 </button>
-                <button onClick={() => navigate("/en/mitra/quick-reset")} style={{ ...GHOST_BTN, fontSize: 13 }}>
-                  Quick Reset
+                <button onClick={() => navigate("/en/mitra/quick-reset")} style={{ ...GHOST_BTN, textAlign: "left" as const, padding: "10px 14px" }}>
+                  Quick Reset — one calm mantra with beads
+                </button>
+                <button onClick={() => navigate("/en/mitra/rooms")} style={{ ...GHOST_BTN, textAlign: "left" as const, padding: "10px 14px" }}>
+                  Browse Rooms — find the right space
                 </button>
               </div>
+              <button onClick={() => { setScreen("none"); setText(""); }} style={GOLD_BTN}>
+                Tell Mitra more
+              </button>
+              <button onClick={() => navigate("/en/mitra")} style={{ ...GHOST_BTN, marginTop: 8 }}>
+                Return Home
+              </button>
             </div>
           )}
         </div>

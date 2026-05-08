@@ -1,5 +1,5 @@
 import { api } from '../lib/api';
-import type { MitraHomeV3Response, TellMitraV3Response, MitraHomeV3CompanionRhythm, QuickCheckinEnergyState, QuickCheckinResponse } from '@kalpx/types';
+import type { MitraHomeV3Response, TellMitraV3Response, QuickCheckinEnergyState, QuickCheckinResponse } from '@kalpx/types';
 import { normalizeTellMitraResult } from '@kalpx/contracts';
 import type { RhythmSetupPayload } from '@kalpx/contracts';
 
@@ -750,8 +750,8 @@ export async function postTellMitraV3(payload: TellMitraV3Payload): Promise<Tell
   return normalizeTellMitraResult(resp.data);
 }
 
-export async function postRhythmSetup(payload: RhythmSetupPayload): Promise<MitraHomeV3CompanionRhythm> {
-  const resp = await api.post<MitraHomeV3CompanionRhythm>('mitra/v3/rhythm/setup/', payload);
+export async function postRhythmSetup(payload: RhythmSetupPayload): Promise<{ status: string; reminder_preference: string; slots_set: string[]; item_count: number }> {
+  const resp = await api.post<{ status: string; reminder_preference: string; slots_set: string[]; item_count: number }>('mitra/v3/rhythm/setup/', payload);
   return resp.data;
 }
 

@@ -68,8 +68,9 @@ export interface MitraHomeV3Greeting {
 
 export interface MitraHomeV3MyRhythmSummary {
   has_rhythm: boolean;
-  item_count: number;
-  next_slot: RhythmTimeBand | null;
+  briefing_status: string;
+  next_practice_label: string | null;
+  next_practice_time_band: string | null;
 }
 
 // VerifiedRoomId is a named alias for RoomId.

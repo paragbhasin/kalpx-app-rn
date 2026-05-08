@@ -27,11 +27,15 @@ interface LibraryItem {
   subtitle?: string;
 }
 
+export type LibrarySearchItem = LibraryItem;
+
 interface LibrarySearchModalProps {
   isVisible: boolean;
   onClose: () => void;
   onItemAdded: () => void;
   journeyId?: string | number;
+  mode?: "add_to_journey" | "select_for_rhythm";
+  onItemSelected?: (item: LibrarySearchItem) => void;
 }
 
 const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
@@ -39,6 +43,8 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
   onClose,
   onItemAdded,
   journeyId,
+  mode,
+  onItemSelected,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState<LibraryItem[]>([]);
@@ -83,6 +89,10 @@ const LibrarySearchModal: React.FC<LibrarySearchModalProps> = ({
   }, [searchQuery]);
 
   const handleAddItem = async (item: any) => {
+    if (mode === "select_for_rhythm" && onItemSelected) {
+      onItemSelected(item as LibrarySearchItem);
+      return;
+    }
     if (item.alreadyInCore || item.alreadyAdded || addingId !== null) return;
 
     const itemId = item.itemId || item.item_id;

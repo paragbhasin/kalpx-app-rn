@@ -47,6 +47,12 @@ import TrackerEdit from "../screens/Tracker/TrackerEdit";
 import TrackerProgress from "../screens/Tracker/TrackerProgress";
 import TrackerScreen from "../screens/Tracker/TrackerScreen";
 import GlobalSearchScreen from "../screens/Social/GlobalSearchScreen";
+import RhythmHomeScreen from "../screens/Mitra/RhythmHomeScreen";
+import RhythmSetupScreen from "../screens/Mitra/RhythmSetupScreen";
+import QuickResetScreen from "../screens/Mitra/QuickResetScreen";
+import QuickCheckinScreen from "../screens/Mitra/QuickCheckinScreen";
+import BrowseRoomsScreen from "../screens/Mitra/BrowseRoomsScreen";
+import TellMitraScreen from "../screens/Mitra/TellMitraScreen";
 
 const Stack: any = createNativeStackNavigator();
 
@@ -259,6 +265,12 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
       component={require("../containers/GuidedGrowthContainer").default}
       options={{ headerShown: false }}
     />
+    <Stack.Screen name="RhythmHome" component={RhythmHomeScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="RhythmSetup" component={RhythmSetupScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="QuickReset" component={QuickResetScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="QuickCheckin" component={QuickCheckinScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="BrowseRooms" component={BrowseRoomsScreen} options={{ headerShown: false }} />
+    <Stack.Screen name="TellMitra" component={TellMitraScreen} options={{ headerShown: false }} />
   </Stack.Navigator>
 );
 

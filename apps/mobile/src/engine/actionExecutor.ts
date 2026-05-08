@@ -3273,6 +3273,9 @@ export async function executeAction(
                 stage3: p.freeform_text,
               };
             }
+            nextStateId = "turn_5_life_context";
+          } else if (currentStateId === "turn_5_life_context") {
+            draft.life_context = p.chip_id || null;
             nextStateId = "turn_6";
           } else if (currentStateId === "turn_6") {
             // Mode picker
@@ -3287,6 +3290,7 @@ export async function executeAction(
               stage2_choice: draft.stage2_choice,
               stage3_choice: draft.stage3_choice,
               guidance_mode: mode,
+              life_context: draft.life_context || null,
               freeforms: {
                 stage1: draft.freeforms?.stage1 || null,
                 stage2: draft.freeforms?.stage2 || null,

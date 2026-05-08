@@ -8,7 +8,8 @@
  */
 
 import api from "../Networks/axios";
-import type { MitraHomeV3Response, TellMitraV3Response } from '@kalpx/types';
+import type { MitraHomeV3Response, TellMitraV3Response, MitraHomeV3CompanionRhythm, QuickCheckinEnergyState, QuickCheckinResponse } from '@kalpx/types';
+import type { RhythmSetupPayload } from '@kalpx/contracts';
 import { normalizeTellMitraResult } from '@kalpx/contracts';
 
 // ---------------------------------------------------------------------------
@@ -336,6 +337,7 @@ export async function mitraCompleteOnboarding(payload: {
   stage2_choice: string;
   stage3_choice: string;
   guidance_mode: string;
+  life_context?: string | null;
   freeforms: Record<string, string | null>;
 }): Promise<any> {
   try {
@@ -2054,4 +2056,14 @@ export interface TellMitraV3Payload {
 export async function postTellMitraV3(payload: TellMitraV3Payload): Promise<TellMitraV3Response> {
   const resp = await api.post<unknown>('/api/mitra/v3/tell-mitra/', payload);
   return normalizeTellMitraResult(resp.data);
+}
+
+export async function postRhythmSetup(payload: RhythmSetupPayload): Promise<MitraHomeV3CompanionRhythm> {
+  const resp = await api.post<MitraHomeV3CompanionRhythm>('/api/mitra/v3/rhythm/setup/', payload);
+  return resp.data;
+}
+
+export async function postQuickCheckin(energy_state: QuickCheckinEnergyState): Promise<QuickCheckinResponse> {
+  const resp = await api.post<QuickCheckinResponse>('/api/mitra/v3/checkin/', { energy_state });
+  return resp.data;
 }

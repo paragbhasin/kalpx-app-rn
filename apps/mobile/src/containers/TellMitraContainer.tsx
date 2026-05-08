@@ -5,7 +5,7 @@
  * Submits user text to POST /api/mitra/v3/tell-mitra/ and routes based on
  * the normalized suggested_action:
  *   - navigate_to_room  → enter_room via executeAction
- *   - navigate_to_door  → Alert with door label
+ *   - navigate_to_door  → navigate to DynamicEngine (FourDoor home)
  *   - provide_wisdom_inline → display response_copy inline
  *
  * Privacy: inputDraft is cleared via setTellMitraResult (reducer sets it to "")
@@ -14,7 +14,6 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  Alert,
   StyleSheet,
   Text,
   TextInput,
@@ -23,7 +22,7 @@ import {
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
-import { getDoorLabel, isValidRoomId } from '@kalpx/contracts';
+import { isValidRoomId } from '@kalpx/contracts';
 import { postTellMitraV3 } from '../engine/mitraApi';
 import { executeAction } from '../engine/actionExecutor';
 import { useScreenStore } from '../engine/useScreenBridge';
@@ -123,7 +122,7 @@ export default function TellMitraContainer() {
           console.warn('[TellMitraContainer] room nav failed:', navErr?.message);
         }
       } else if (result.suggested_action === 'navigate_to_door' && result.door) {
-        Alert.alert(getDoorLabel(result.door));
+        navigation.navigate("DynamicEngine" as any); // returns user to FourDoor home which has TellMitra visible
       }
       // provide_wisdom_inline: resultCopy already set above
     } catch {

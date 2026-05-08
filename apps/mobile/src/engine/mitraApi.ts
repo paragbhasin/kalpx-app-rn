@@ -8,6 +8,8 @@
  */
 
 import api from "../Networks/axios";
+import type { MitraHomeV3Response, TellMitraV3Response } from '@kalpx/types';
+import { normalizeTellMitraResult } from '@kalpx/contracts';
 
 // ---------------------------------------------------------------------------
 // Offline fallbacks — used when backend is unreachable (dev 502, airplane
@@ -2029,4 +2031,27 @@ export async function trackRoomTelemetry(payload: {
   } catch {
     // best-effort; never break room UX
   }
+}
+
+// ---------------------------------------------------------------------------
+// mitraJourneyHomeV3 — GET /api/mitra/v3/journey/home/ (S04 FourDoor surface)
+// ---------------------------------------------------------------------------
+export async function mitraJourneyHomeV3(): Promise<MitraHomeV3Response> {
+  const resp = await api.get<MitraHomeV3Response>('/api/mitra/v3/journey/home/');
+  return resp.data;
+}
+
+// ---------------------------------------------------------------------------
+// postTellMitraV3 — POST /api/mitra/v3/tell-mitra/ (S04 Tell Mitra door)
+// ---------------------------------------------------------------------------
+export interface TellMitraV3Payload {
+  text: string;
+  energy_state?: string;
+  tz?: string;
+  source_surface?: string;
+}
+
+export async function postTellMitraV3(payload: TellMitraV3Payload): Promise<TellMitraV3Response> {
+  const resp = await api.post<unknown>('/api/mitra/v3/tell-mitra/', payload);
+  return normalizeTellMitraResult(resp.data);
 }

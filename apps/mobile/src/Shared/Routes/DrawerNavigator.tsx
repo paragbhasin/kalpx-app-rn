@@ -21,6 +21,7 @@ import TextComponent from "../../components/TextComponent";
 // Old tracker import removed — Mitra engine manages journey state
 import store, { RootState } from "../../store";
 import { screenActions } from "../../store/screenSlice";
+import { clearDoorState } from "../../store/doorSlice";
 import BottomMenu from "./BottomMenu";
 
 const Drawer = createDrawerNavigator();
@@ -79,6 +80,7 @@ const CustomDrawerContent = (props) => {
 
   const handleLogout = async () => {
     await AsyncStorage.clear();
+    store.dispatch(clearDoorState());
     store.dispatch({ type: "RESET_APP" });
 
     try {

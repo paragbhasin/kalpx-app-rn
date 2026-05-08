@@ -45,6 +45,7 @@ import screenReducer from "./screenSlice";
 import companionStateReducer from "./companionStateSlice";
 import preferencesReducer from "./preferencesSlice";
 import notificationsReducer2 from "./notificationsSlice";
+import doorReducer from "./doorSlice";
 
 const appReducer = combineReducers({
   login: loginReducer,
@@ -54,6 +55,7 @@ const appReducer = combineReducers({
   companionState: companionStateReducer,
   preferences: preferencesReducer,
   notifications: notificationsReducer2,
+  door: doorReducer,
   classesExploreReducer,
   classesBookingsReducer,
   classesFilterExploreReducer,

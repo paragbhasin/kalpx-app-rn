@@ -24,6 +24,13 @@ import { mitraJourneyHomeV3 } from '../engine/mitraApi';
 import { setHomeData } from '../store/doorSlice';
 import TellMitraContainer from './TellMitraContainer';
 
+function getRhythmTimeBand(): 'morning' | 'afternoon' | 'night' {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'morning';
+  if (hour < 18) return 'afternoon';
+  return 'night';
+}
+
 export default function FourDoorHomeContainer() {
   const dispatch = useDispatch();
   const navigation = useNavigation<any>();
@@ -63,9 +70,37 @@ export default function FourDoorHomeContainer() {
 
   const ds = homeData.door_states;
   const ips = homeData.inner_path_summary;
+  const greeting = homeData.greeting;
+
+  // My Rhythm: prefer backend summary label, then first item in current time-band slot, then door state
+  const rhythmBand = getRhythmTimeBand();
+  const rhythmSlot = homeData.companion_rhythm?.[rhythmBand];
+  const rhythmSubtitle =
+    homeData.my_rhythm_summary?.next_practice_label ??
+    rhythmSlot?.items?.[0]?.title_snapshot ??
+    ds.my_rhythm?.subtitle ??
+    ds.my_rhythm?.cta ??
+    '';
+
+  // Inner Path: prefer Day X of Y when path is active, fallback to path_title or door subtitle
+  const innerPathSubtitle = ips?.has_active_path
+    ? `Day ${ips.day_number} of ${ips.total_days}`
+    : (ips?.path_title ?? ds.inner_path?.subtitle ?? '');
 
   return (
     <View style={styles.root}>
+      {/* Greeting */}
+      {(greeting?.headline || greeting?.subtext) && (
+        <View style={styles.greetingBlock}>
+          {!!greeting.headline && (
+            <Text style={styles.greetingHeadline}>{greeting.headline}</Text>
+          )}
+          {!!greeting.subtext && (
+            <Text style={styles.greetingSubtext}>{greeting.subtext}</Text>
+          )}
+        </View>
+      )}
+
       {/* my_rhythm door */}
       <TouchableOpacity
         style={styles.doorCard}
@@ -73,7 +108,7 @@ export default function FourDoorHomeContainer() {
         onPress={() => navigation.navigate("RhythmHome" as any)}
       >
         <Text style={styles.doorLabel}>{DOOR_LABELS.my_rhythm}</Text>
-        <Text style={styles.doorSubtitle}>{ds.my_rhythm?.cta ?? ''}</Text>
+        <Text style={styles.doorSubtitle}>{rhythmSubtitle}</Text>
       </TouchableOpacity>
 
       {/* inner_path door */}
@@ -84,9 +119,7 @@ export default function FourDoorHomeContainer() {
       >
         <Text style={styles.doorLabel}>{DOOR_LABELS.inner_path}</Text>
         <Text style={styles.doorSubtitle}>
-          {ips?.has_active_path
-            ? (ips.path_title ?? '')
-            : (ds.inner_path?.subtitle ?? '')}
+          {innerPathSubtitle}
         </Text>
       </TouchableOpacity>
 
@@ -146,6 +179,23 @@ const styles = StyleSheet.create({
   doorSubtitle: {
     fontSize: 14,
     color: '#6b5a45',
+  },
+  greetingBlock: {
+    paddingHorizontal: 4,
+    paddingBottom: 8,
+  },
+  greetingHeadline: {
+    fontFamily: 'serif',
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#432104',
+    marginBottom: 4,
+  },
+  greetingSubtext: {
+    fontFamily: 'serif',
+    fontSize: 15,
+    color: '#7B6550',
+    lineHeight: 22,
   },
   tellMitraWrap: {
     backgroundColor: '#FBF5F5',

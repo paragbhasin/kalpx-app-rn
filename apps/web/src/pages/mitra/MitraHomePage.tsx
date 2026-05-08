@@ -49,6 +49,13 @@ type JourneyHomeResponse = {
   action?: JourneyHomeAction;
 };
 
+function getRhythmTimeBand(): 'morning' | 'afternoon' | 'night' {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'morning';
+  if (hour < 18) return 'afternoon';
+  return 'night';
+}
+
 function iconForHomeChip(icon?: string | null) {
   if (icon === "chat") return <MessageCircle size={22} strokeWidth={1.9} />;
   if (icon === "heart" || icon === "hands_heart") {
@@ -206,6 +213,21 @@ export function MitraHomePage() {
     const innerPathSummary = homeData?.inner_path_summary;
     const greeting = homeData?.greeting;
 
+    // My Rhythm: prefer backend summary label, then first item in current time-band slot, then door state
+    const rhythmBand = getRhythmTimeBand();
+    const rhythmSlot = homeData?.companion_rhythm?.[rhythmBand];
+    const rhythmSubtitle =
+      homeData?.my_rhythm_summary?.next_practice_label ??
+      rhythmSlot?.items?.[0]?.title_snapshot ??
+      doorStates?.my_rhythm?.subtitle ??
+      doorStates?.my_rhythm?.cta ??
+      '';
+
+    // Inner Path: prefer Day X of Y when path is active, fallback to path_title or door subtitle
+    const innerPathSubtitle = innerPathSummary?.has_active_path
+      ? `Day ${innerPathSummary.day_number} of ${innerPathSummary.total_days}`
+      : (innerPathSummary?.path_title ?? doorStates?.inner_path?.subtitle ?? '');
+
     return (
       <div
         style={{
@@ -269,11 +291,7 @@ export function MitraHomePage() {
                   <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 17, color: "#432104", marginBottom: 4 }}>
                     {DOOR_LABELS.my_rhythm}
                   </div>
-                  {doorStates.my_rhythm?.state === "no_rhythm" ? (
-                    <div style={{ color: "#7B6550", fontSize: 14 }}>{doorStates.my_rhythm.cta}</div>
-                  ) : (
-                    <div style={{ color: "#7B6550", fontSize: 14 }}>{doorStates.my_rhythm?.subtitle}</div>
-                  )}
+                  <div style={{ color: "#7B6550", fontSize: 14 }}>{rhythmSubtitle}</div>
                 </button>
 
                 {/* Inner Path */}
@@ -293,11 +311,7 @@ export function MitraHomePage() {
                   <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 17, color: "#432104", marginBottom: 4 }}>
                     {DOOR_LABELS.inner_path}
                   </div>
-                  {innerPathSummary?.has_active_path ? (
-                    <div style={{ color: "#7B6550", fontSize: 14 }}>{innerPathSummary.path_title ?? doorStates.inner_path?.cta}</div>
-                  ) : (
-                    <div style={{ color: "#7B6550", fontSize: 14 }}>{doorStates.inner_path?.subtitle}</div>
-                  )}
+                  <div style={{ color: "#7B6550", fontSize: 14 }}>{innerPathSubtitle}</div>
                 </button>
 
                 {/* Quick Reset */}

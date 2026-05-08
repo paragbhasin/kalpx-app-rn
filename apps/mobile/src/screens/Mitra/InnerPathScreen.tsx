@@ -33,6 +33,9 @@ import {
   View,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
+import CycleProgressBlock from "../../blocks/dashboard/CycleProgressBlock";
+import PathChip from "../../blocks/dashboard/PathChip";
+import SankalpCarryBlock from "../../blocks/dashboard/SankalpCarryBlock";
 import TriadCardsRow from "../../blocks/dashboard/TriadCardsRow";
 import { mitraJourneyDailyView, mitraJourneyEntryView } from "../../engine/mitraApi";
 import { ingestDay14View, ingestDay7View, ingestDailyView } from "../../engine/v3Ingest";
@@ -195,6 +198,15 @@ export default function InnerPathScreen() {
 
         {/* Triad — mantra / sankalp / practice */}
         <TriadCardsRow />
+
+        {/* Path identity chip */}
+        <PathChip screenData={sd} />
+
+        {/* Cycle / day progress */}
+        <CycleProgressBlock screenData={sd} />
+
+        {/* Sankalp carry-over */}
+        <SankalpCarryBlock screenData={sd} />
       </ScrollView>
     </SafeAreaView>
   );

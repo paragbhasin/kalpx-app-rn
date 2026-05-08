@@ -4,6 +4,9 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { ContinuityBanner } from "../../components/blocks/dashboard/ContinuityBanner";
+import { CycleProgressBlock } from "../../components/blocks/dashboard/CycleProgressBlock";
+import { PathChip } from "../../components/blocks/dashboard/PathChip";
+import { SankalpCarryBlock } from "../../components/blocks/dashboard/SankalpCarryBlock";
 import { TriadCardsRow } from "../../components/blocks/dashboard/TriadCardsRow";
 import { WhyThisSheet } from "../../components/blocks/dashboard/WhyThisSheet";
 import { MitraMobileShell } from "../../components/layout/MitraMobileShell";
@@ -76,6 +79,7 @@ export function InnerPathPage() {
   }, [navigate, dispatch]);
 
   const sd = screenState.screenData;
+  const hasSankalpCarry = Array.isArray(sd.sankalp_how_to_live) && sd.sankalp_how_to_live.length > 0;
 
   const handleAction = useCallback(
     (action: any) =>
@@ -142,7 +146,7 @@ export function InnerPathPage() {
 
   return (
     <MitraMobileShell>
-      <div style={{ maxWidth: 480, margin: "0 auto", padding: "0 20px 120px" }}>
+      <div style={{ maxWidth: 480, margin: "0 auto", padding: "84px 20px 120px" }}>
 
         <button
           onClick={() => navigate("/en/mitra")}
@@ -199,6 +203,15 @@ export function InnerPathPage() {
 
         {/* Triad — mantra, sankalp, practice */}
         <TriadCardsRow sd={sd} onAction={handleAction} />
+
+        {/* Path identity chip */}
+        <PathChip sd={sd} />
+
+        {/* Cycle / day progress */}
+        <CycleProgressBlock sd={sd} />
+
+        {/* Sankalp carry-over */}
+        {hasSankalpCarry && <SankalpCarryBlock sd={sd} />}
 
         {/* Why this was chosen */}
         {hasWhyThis && (

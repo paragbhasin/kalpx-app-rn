@@ -95,9 +95,9 @@ export function InnerPathPage() {
     dispatch(updateScreenData({ why_this_overlay_level: "l2", why_this_source: null }));
   }, [dispatch]);
 
-  const hasWhyThis = normalizeDashboardWhyThisState(
-    sd.why_this as DashboardWhyThis | undefined,
-  ).canOpenWhyThis;
+  const hasWhyThis =
+    normalizeDashboardWhyThisState(sd.why_this as DashboardWhyThis | undefined).canOpenWhyThis ||
+    (Array.isArray(sd.why_this_l1_items) && sd.why_this_l1_items.length > 0);
 
   const hasContinuity = sd.continuity?.tier && sd.continuity.tier !== "none";
 
@@ -145,8 +145,8 @@ export function InnerPathPage() {
   }
 
   return (
-    <MitraMobileShell>
-      <div style={{ maxWidth: 480, margin: "0 auto", padding: "84px 20px 120px" }}>
+    <MitraMobileShell hideTopBar>
+      <div style={{ maxWidth: 480, margin: "0 auto", padding: "0 20px 120px" }}>
 
         <button
           onClick={() => navigate("/en/mitra")}

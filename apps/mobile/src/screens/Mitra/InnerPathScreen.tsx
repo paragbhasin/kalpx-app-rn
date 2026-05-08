@@ -37,6 +37,7 @@ import CycleProgressBlock from "../../blocks/dashboard/CycleProgressBlock";
 import PathChip from "../../blocks/dashboard/PathChip";
 import SankalpCarryBlock from "../../blocks/dashboard/SankalpCarryBlock";
 import TriadCardsRow from "../../blocks/dashboard/TriadCardsRow";
+import WhyThisL1Strip from "../../blocks/dashboard/WhyThisL1Strip";
 import { mitraJourneyDailyView, mitraJourneyEntryView } from "../../engine/mitraApi";
 import { ingestDay14View, ingestDay7View, ingestDailyView } from "../../engine/v3Ingest";
 import type { RootState } from "../../store";
@@ -207,6 +208,9 @@ export default function InnerPathScreen() {
 
         {/* Sankalp carry-over */}
         <SankalpCarryBlock screenData={sd} />
+
+        {/* Why this triad was chosen */}
+        <WhyThisL1Strip screenData={sd} />
       </ScrollView>
     </SafeAreaView>
   );

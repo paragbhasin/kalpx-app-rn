@@ -37,6 +37,8 @@ function sameIds(left: number[], right: number[]) {
 export function KalpxHaatCartPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const isDesktop =
+    typeof window === "undefined" ? true : window.innerWidth >= 1024;
   const tab = getTab(searchParams.get("tab"));
   const [orderFilter, setOrderFilter] = useState<OrderFilter>("all");
   const haatState = useHaatState();
@@ -112,12 +114,29 @@ export function KalpxHaatCartPage() {
         </div>
 
         {tab === "cart" && (
-          <div style={twoColumnLayoutStyle}>
+          <div
+            style={{
+              ...twoColumnLayoutStyle,
+              gridTemplateColumns: isDesktop ? "minmax(0, 1.45fr) minmax(300px, 1fr)" : "1fr",
+              gap: isDesktop ? 18 : 14,
+            }}
+          >
             <div>
               {cartItems.length ? (
                 <>
-                  <div style={selectionBarStyle}>
-                    <label style={selectionToggleStyle}>
+                  <div
+                    style={{
+                      ...selectionBarStyle,
+                      flexWrap: isDesktop ? "nowrap" : "wrap",
+                      alignItems: isDesktop ? "center" : "flex-start",
+                    }}
+                  >
+                    <label
+                      style={{
+                        ...selectionToggleStyle,
+                        width: isDesktop ? "auto" : "100%",
+                      }}
+                    >
                       <input
                         type="checkbox"
                         checked={allSelected}
@@ -132,15 +151,38 @@ export function KalpxHaatCartPage() {
                         {allSelected ? "Unselect all" : "Select all"}
                       </span>
                     </label>
-                    <span style={selectionCountStyle}>
+                    <span
+                      style={{
+                        ...selectionCountStyle,
+                        width: isDesktop ? "auto" : "100%",
+                        paddingLeft: isDesktop ? 0 : 28,
+                      }}
+                    >
                       {selectedCartItems.length} of {cartItems.length} selected
                     </span>
                   </div>
 
                   <div style={{ display: "grid", gap: 18 }}>
                     {cartItems.map(({ product, quantity }) => (
-                      <article key={product.id} style={cartCardStyle}>
-                        <label style={checkboxWrapperStyle}>
+                      <article
+                        key={product.id}
+                        style={{
+                          ...cartCardStyle,
+                          flexDirection: isDesktop ? "row" : "column",
+                          gap: isDesktop ? 18 : 14,
+                          position: "relative",
+                          paddingLeft: isDesktop ? 14 : 46,
+                        }}
+                      >
+                        <label
+                          style={{
+                            ...checkboxWrapperStyle,
+                            position: isDesktop ? "static" : "absolute",
+                            top: isDesktop ? undefined : 14,
+                            left: isDesktop ? undefined : 14,
+                            marginTop: 0,
+                          }}
+                        >
                           <input
                             type="checkbox"
                             checked={selectedProductIds.includes(product.id)}
@@ -162,7 +204,11 @@ export function KalpxHaatCartPage() {
                         <img
                           src={product.images[0]?.url}
                           alt={product.name}
-                          style={cartImageStyle}
+                          style={{
+                            ...cartImageStyle,
+                            width: isDesktop ? 240 : "100%",
+                            height: isDesktop ? 146 : 180,
+                          }}
                         />
                         <div style={{ flex: 1 }}>
                           <div style={cartCardTopRowStyle}>
@@ -216,6 +262,8 @@ export function KalpxHaatCartPage() {
                       onClick={() => navigate("/en/haat/payment")}
                       style={{
                         ...primaryCtaStyle,
+                        width: isDesktop ? "auto" : "100%",
+                        minWidth: isDesktop ? 340 : 0,
                         opacity: selectedCartItems.length ? 1 : 0.55,
                         cursor: selectedCartItems.length ? "pointer" : "not-allowed",
                       }}
@@ -235,7 +283,13 @@ export function KalpxHaatCartPage() {
               )}
             </div>
 
-            <aside style={{ display: "grid", gap: 18 }}>
+            <aside
+              style={{
+                display: "grid",
+                gap: 18,
+                order: isDesktop ? 0 : -1,
+              }}
+            >
               <div>
                 <div style={sideSectionHeaderStyle}>
                   <h2 style={sideSectionTitleStyle}>Coupon & bank offer</h2>

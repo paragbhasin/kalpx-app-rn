@@ -207,16 +207,14 @@ export const haatServices: HaatService[] = [
   {
     id: 2,
     name: "Festival Floral Decoration",
-    image:
-      "https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=1200&auto=format&fit=crop",
+    image: "",
     provider: "Divine Floral Decoration Service",
     price: "Starts at ₹2499",
   },
   {
     id: 3,
     name: "Temple Offering Assistance",
-    image:
-      "https://images.unsplash.com/photo-1508672019048-805c876b67e2?q=80&w=1200&auto=format&fit=crop",
+    image: "",
     provider: "MA Decoration Service",
     price: "Starts at ₹999",
   },
@@ -253,7 +251,9 @@ export function getHaatProductById(id: number) {
 }
 
 export function getHaatStoreById(id: number) {
-  return [...trustedProductStores, ...trustedServiceStores].find(
-    (item) => item.id === id,
-  ) ?? trustedServiceStores[0];
+  return (
+    [...trustedProductStores, ...trustedServiceStores].find(
+      (item) => item.id === id,
+    ) ?? trustedServiceStores[0]
+  );
 }

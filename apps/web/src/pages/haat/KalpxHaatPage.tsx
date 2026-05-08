@@ -1,7 +1,7 @@
 import {
-  Heart,
   Check,
   Clock3,
+  Heart,
   Minus,
   Package,
   Plus,
@@ -10,16 +10,18 @@ import {
   SlidersHorizontal,
   Star,
   Store,
-  X,
   Wrench,
+  X,
 } from "lucide-react";
 import type { CSSProperties, ReactNode } from "react";
 import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useAppDispatch } from "../../store/hooks";
+import { showSnackBar } from "../../store/snackBarSlice";
+import { HaatProductGrid } from "./HaatProductCards";
+import { useHaatCatalog } from "./haatCatalog";
 import {
-  haatProducts,
   haatServices,
-  trustedProductStores,
   trustedServiceStores,
   type HaatProduct,
   type HaatService,
@@ -34,8 +36,6 @@ import {
   toggleWishlist,
   useHaatState,
 } from "./haatState";
-import { useAppDispatch } from "../../store/hooks";
-import { showSnackBar } from "../../store/snackBarSlice";
 
 type HaatTab = "product" | "service";
 
@@ -67,13 +67,41 @@ export function KalpxHaatPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchValue, setSearchValue] = useState("");
   const haatState = useHaatState();
+  const { stores, products } = useHaatCatalog();
   const activeType = getTabFromQuery(searchParams.get("type"));
   const cartCount = getCartCount(haatState);
+  const normalizedSearch = searchValue.trim().toLowerCase();
+
+  const filteredProductStores = useMemo(
+    () =>
+      stores.filter(
+        (store) =>
+          !normalizedSearch ||
+          store.store_name.toLowerCase().includes(normalizedSearch) ||
+          (store.location ?? "").toLowerCase().includes(normalizedSearch),
+      ),
+    [normalizedSearch, stores],
+  );
+
+  const filteredProducts = useMemo(
+    () =>
+      products.filter(
+        (item) =>
+          !normalizedSearch ||
+          item.name.toLowerCase().includes(normalizedSearch) ||
+          item.store.store_name.toLowerCase().includes(normalizedSearch) ||
+          item.description.toLowerCase().includes(normalizedSearch),
+      ),
+    [normalizedSearch, products],
+  );
 
   const heroBackground = useMemo<CSSProperties>(
     () => ({
-      background:
-        "radial-gradient(circle at top left, rgba(255,233,184,0.72), transparent 38%), linear-gradient(180deg, #f8ece2 0%, #fdf8f2 100%)",
+      backgroundImage: "url('/haat-bg.png')",
+      backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
+      backgroundSize: "cover",
+      backgroundColor: "#f8ece2",
       borderBottom: "1px solid rgba(212, 160, 23, 0.12)",
     }),
     [],
@@ -128,8 +156,6 @@ export function KalpxHaatPage() {
           >
             <div
               style={{
-                maxWidth: 760,
-                margin: "20px auto 0",
                 position: "relative",
               }}
             >
@@ -193,7 +219,13 @@ export function KalpxHaatPage() {
         }}
       >
         {activeType === "product" ? (
-          <SelectProductView onAddToCart={(name) => dispatch(showSnackBar(`${name} added to cart`))} />
+          <SelectProductView
+            trustedStores={filteredProductStores}
+            items={filteredProducts}
+            onAddToCart={(name) =>
+              dispatch(showSnackBar(`${name} added to cart`))
+            }
+          />
         ) : (
           <SelectServiceView />
         )}
@@ -376,20 +408,31 @@ function TabButton({
 }
 
 function SelectProductView({
+  trustedStores,
+  items,
   onAddToCart,
 }: {
+  trustedStores: HaatStore[];
+  items: HaatProduct[];
   onAddToCart: (name: string) => void;
 }) {
   return (
     <main>
       <CategorySection title="Categories" categories={productCategories} />
-      <TrustedStores title="Trusted store near you" trustedStores={trustedProductStores} />
+      <TrustedStores
+        title="Trusted store near you"
+        trustedStores={trustedStores}
+      />
       <ProductSection
         title="New Arrivals on Kalpx Haat"
-        items={haatProducts}
+        items={items}
         onAddToCart={onAddToCart}
       />
-      <ProductSection title="Top product near you" items={haatProducts} onAddToCart={onAddToCart} />
+      <ProductSection
+        title="Top product near you"
+        items={items}
+        onAddToCart={onAddToCart}
+      />
     </main>
   );
 }
@@ -554,7 +597,9 @@ function TrustedStores({
               >
                 <Clock3 size={12} />
                 <span>{store.time}</span>
-                <span style={{ color: "#16a34a", fontWeight: 700 }}>• Open</span>
+                <span style={{ color: "#16a34a", fontWeight: 700 }}>
+                  • Open
+                </span>
               </div>
               <p style={{ margin: "6px 0 0", fontSize: 11, color: "#9ca3af" }}>
                 {store.distance}
@@ -585,7 +630,13 @@ function ProductSection({
         actionLabel="View all"
         onAction={() => navigate("/en/haat/browse?type=product")}
       />
-      <ProductCard products={items} onAddToCart={onAddToCart} />
+      <HaatProductGrid
+        products={items}
+        onAddToCart={(name, productId) => {
+          addProductToCart(productId);
+          onAddToCart(name);
+        }}
+      />
     </section>
   );
 }
@@ -665,10 +716,7 @@ function ServiceSection({
                 >
                   {item.price}
                 </span>
-                <button
-                  type="button"
-                  style={actionButtonStyle}
-                >
+                <button type="button" style={actionButtonStyle}>
                   Book
                 </button>
               </div>
@@ -764,7 +812,9 @@ function ProductCard({
           fromOrder={fromOrder}
           isWishlisted={isWishlisted(haatState, item.id)}
           onAddToCart={onAddToCart}
-          onOpenDetails={() => navigate(`/en/haat/product/${item.id}?type=${type}`)}
+          onOpenDetails={() =>
+            navigate(`/en/haat/product/${item.id}?type=${type}`)
+          }
         />
       ))}
     </div>
@@ -789,7 +839,9 @@ function SingleProductCard({
   onOpenDetails: () => void;
 }) {
   const haatState = useHaatState();
-  const cartEntry = haatState.cart.find((item) => item.productId === product.id);
+  const cartEntry = haatState.cart.find(
+    (item) => item.productId === product.id,
+  );
   const itemQuantity = cartEntry?.quantity ?? 1;
 
   return (
@@ -952,7 +1004,9 @@ function SingleProductCard({
               >
                 <Minus size={12} />
               </button>
-              <span style={{ padding: "0 12px", fontSize: 14 }}>{itemQuantity}</span>
+              <span style={{ padding: "0 12px", fontSize: 14 }}>
+                {itemQuantity}
+              </span>
               <button
                 type="button"
                 onClick={(event) => {
@@ -995,7 +1049,14 @@ function SingleProductCard({
           ) : null}
 
           {!fromOrder ? (
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                marginBottom: 8,
+              }}
+            >
               <span
                 style={{
                   background: "#15803d",
@@ -1024,20 +1085,6 @@ function SingleProductCard({
 
           {!fromCart ? (
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              <button
-                type="button"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  onOpenDetails();
-                }}
-                style={{
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: "#d4a017",
-                }}
-              >
-                View Details
-              </button>
               <button
                 type="button"
                 onClick={(event) => {
@@ -1071,7 +1118,7 @@ function SingleProductCard({
                 }}
                 style={miniAddButtonStyle}
               >
-                Add
+                Add to cart
               </button>
             </div>
           ) : null}
@@ -1087,8 +1134,7 @@ function SingleProductCard({
                 color: "#111827",
               }}
             >
-              <Check size={14} color="#16a34a" />
-              7 days return available
+              <Check size={14} color="#16a34a" />7 days return available
             </span>
           ) : null}
         </div>
@@ -1181,10 +1227,10 @@ const actionButtonStyle: CSSProperties = {
 };
 
 const miniAddButtonStyle: CSSProperties = {
-  padding: "8px 12px",
-  borderRadius: 999,
-  background: "#fff6de",
-  color: "#8d6517",
+  padding: "5px 10px",
+  borderRadius: 10,
+  background: "#d4a017",
+  color: "#ffff",
   fontSize: 12,
   fontWeight: 700,
 };

@@ -5,12 +5,11 @@ import {
   ShoppingCart,
   Star,
 } from "lucide-react";
-import { useMemo } from "react";
 import type { CSSProperties } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { getHaatProductById } from "./haatData";
 import { useAppDispatch } from "../../store/hooks";
 import { showSnackBar } from "../../store/snackBarSlice";
+import { useHaatProductDetail } from "./haatCatalog";
 import {
   addProductToCart,
   getCartCount,
@@ -55,8 +54,7 @@ export function KalpxHaatProductDetailPage() {
   const dispatch = useAppDispatch();
   const { id } = useParams();
   const haatState = useHaatState();
-
-  const product = useMemo(() => getHaatProductById(Number(id)), [id]);
+  const product = useHaatProductDetail(Number(id));
   const wishlisted = isWishlisted(haatState, product.id);
   const cartCount = getCartCount(haatState);
 

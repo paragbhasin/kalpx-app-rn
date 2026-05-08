@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import { getHaatProductById } from "./haatData";
+import { getCachedHaatProductById } from "./haatCatalog";
 
 const STORAGE_KEY = "kalpx.haat.state.v1";
 const EVENT_NAME = "kalpx-haat-state-change";
@@ -178,12 +178,12 @@ export function getCartCount(state: HaatState) {
 export function getCartItemsDetailed(state: HaatState) {
   return state.cart.map((entry) => ({
     ...entry,
-    product: getHaatProductById(entry.productId),
+    product: getCachedHaatProductById(entry.productId),
   }));
 }
 
 export function getWishlistProducts(state: HaatState) {
-  return state.wishlist.map((id) => getHaatProductById(id));
+  return state.wishlist.map((id) => getCachedHaatProductById(id));
 }
 
 export function isWishlisted(state: HaatState, productId: number) {

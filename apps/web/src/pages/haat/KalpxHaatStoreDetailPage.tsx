@@ -8,175 +8,44 @@ import {
   Star,
   User,
 } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-
-type StoreItem = {
-  id: number;
-  name: string;
-  image: string;
-  rating: string | number;
-  time?: string;
-  distance?: string;
-  location: string;
-  description: string;
-  open: string;
-  close: string;
-  phoenNumber: string;
-};
-
-type ProductItem = {
-  id: number;
-  name: string;
-  price_minor: number;
-  images: { url: string }[];
-};
-
-type ServiceItem = {
-  id: number;
-  name: string;
-  price: string;
-  image: string;
-};
-
-const stores: StoreItem[] = [
-  {
-    id: 1,
-    name: "Swami Sughandhlay",
-    image:
-      "https://images.unsplash.com/photo-1620619767323-b95a89183081?q=80&w=1200&h=800&auto=format&fit=crop",
-    rating: 4.5,
-    time: "40-50 min",
-    distance: "900m away",
-    location: "Chennai",
-    description: "High quality brass diyas perfect for festivals.",
-    open: "9:00 AM",
-    close: "9:00 PM",
-    phoenNumber: "9876543210",
-  },
-  {
-    id: 2,
-    name: "Vedic Vibes",
-    image:
-      "https://images.unsplash.com/photo-1602928321679-560bb453f190?q=80&w=1200&h=800&auto=format&fit=crop",
-    rating: 4.2,
-    time: "30-40 min",
-    distance: "1.2km away",
-    location: "Chennai",
-    description: "Elegant brass diyas to light up your celebrations.",
-    open: "9:00 AM",
-    close: "9:00 PM",
-    phoenNumber: "9876543210",
-  },
-  {
-    id: 4,
-    name: "OM Pooja Bhandar",
-    image:
-      "https://images.unsplash.com/photo-1620619767323-b95a89183081?q=80&w=1200&h=800&auto=format&fit=crop",
-    rating: "4.0+",
-    time: "40-50 min",
-    distance: "900m away",
-    location: "123 Main Bazar",
-    description:
-      "Professional festive and ceremonial decoration services for puja, weddings, and special occasions.",
-    open: "8 am",
-    close: "11 pm",
-    phoenNumber: "982345672",
-  },
-  {
-    id: 5,
-    name: "Om Pandit Seva Kendrs",
-    image: "/haat-assets/service2.png",
-    rating: "4.7",
-    time: "30-40 min",
-    distance: "1.2km away",
-    location: "Chennai",
-    description:
-      "Experienced pandits offering a wide range of religious services and rituals for all occasions.",
-    open: "9:00 AM",
-    close: "9:00 PM",
-    phoenNumber: "9876543210",
-  },
-  {
-    id: 6,
-    name: "MA Decoration Service",
-    image: "/haat-assets/service3.png",
-    rating: "4.7",
-    time: "30-40 min",
-    distance: "1.2km away",
-    location: "Chennai",
-    description:
-      "Expert decoration services for festivals, weddings, and special events with a focus on quality and creativity.",
-    open: "9:00 AM",
-    close: "9:00 PM",
-    phoenNumber: "9876543210",
-  },
-];
-
-const products: ProductItem[] = [
-  {
-    id: 1,
-    name: "Brass Diya Set",
-    price_minor: 499,
-    images: [
-      {
-        url: "https://images.unsplash.com/photo-1607344645866-009c320c5ab8?q=80&w=1200&auto=format&fit=crop",
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: "Premium Pooja Kit",
-    price_minor: 899,
-    images: [
-      {
-        url: "https://images.unsplash.com/photo-1516632664305-eda5d0702cfd?q=80&w=1200&auto=format&fit=crop",
-      },
-    ],
-  },
-  {
-    id: 3,
-    name: "Essential Oil Combo",
-    price_minor: 649,
-    images: [
-      {
-        url: "https://images.unsplash.com/photo-1611071536594-7f4f3fe46d63?q=80&w=1200&auto=format&fit=crop",
-      },
-    ],
-  },
-];
-
-const services: ServiceItem[] = [
-  {
-    id: 1,
-    name: "Festival Decoration",
-    price: "₹10,000/-",
-    image: "/haat-assets/service1.png",
-  },
-  {
-    id: 2,
-    name: "Pandit Booking",
-    price: "₹4,999/-",
-    image: "/haat-assets/service2.png",
-  },
-  {
-    id: 3,
-    name: "Temple Offering",
-    price: "₹2,999/-",
-    image: "/haat-assets/service3.png",
-  },
-];
+import { haatServices } from "./haatData";
+import { useHaatCatalog, useHaatStoreDetail } from "./haatCatalog";
 
 export function KalpxHaatStoreDetailPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
+  const [searchValue, setSearchValue] = useState("");
+  const { products } = useHaatCatalog();
   const type = searchParams.get("type") === "service" ? "service" : "product";
-
-  const store = useMemo(
-    () => stores.find((item) => item.id === Number(id)) ?? stores[2],
-    [id],
+  const store = useHaatStoreDetail(id ?? "");
+  const filteredProducts = useMemo(
+    () =>
+      products.filter((item) => {
+        const matchesStore = !store.id || item.store.id === store.id;
+        const query = searchValue.trim().toLowerCase();
+        const matchesSearch =
+          !query ||
+          item.name.toLowerCase().includes(query) ||
+          item.store.store_name.toLowerCase().includes(query);
+        return matchesStore && matchesSearch;
+      }),
+    [products, searchValue, store.id],
+  );
+  const filteredServices = useMemo(
+    () =>
+      haatServices.filter((item) => {
+        const query = searchValue.trim().toLowerCase();
+        return (
+          !query ||
+          item.name.toLowerCase().includes(query) ||
+          item.provider.toLowerCase().includes(query)
+        );
+      }),
+    [searchValue],
   );
 
   return (
@@ -211,7 +80,7 @@ export function KalpxHaatStoreDetailPage() {
             >
               <img
                 src={store.image || "/haat-assets/default-store.png"}
-                alt={store.name}
+                alt={store.store_name}
                 style={{
                   width: "100%",
                   height: 400,
@@ -268,17 +137,17 @@ export function KalpxHaatStoreDetailPage() {
                   color: "#111827",
                 }}
               >
-                {store.name}
+                {store.store_name}
               </h1>
 
               <div style={{ display: "grid", gap: 16 }}>
                 <StoreMetaRow
                   icon={<MapPin size={16} color="#6b7280" />}
-                  primary={`${store.location}, New Delhi`}
+                  primary={store.location || "New Delhi"}
                 />
                 <StoreMetaRow
                   icon={<Phone size={16} color="#6b7280" />}
-                  primary={`+91 ${store.phoenNumber}`}
+                  primary={store.phoenNumber ? `+91 ${store.phoenNumber}` : "Not available"}
                 />
                 <StoreMetaRow
                   icon={<Clock3 size={16} color="#6b7280" />}
@@ -332,6 +201,8 @@ export function KalpxHaatStoreDetailPage() {
                 />
                 <input
                   type="text"
+                  value={searchValue}
+                  onChange={(event) => setSearchValue(event.target.value)}
                   placeholder="Search by product, shop or service"
                   style={sidebarInputStyle}
                 />
@@ -360,7 +231,7 @@ export function KalpxHaatStoreDetailPage() {
               }}
             >
               {type === "product"
-                ? products.map((item) => (
+                ? filteredProducts.map((item) => (
                     <button
                       key={item.id}
                       type="button"
@@ -378,7 +249,9 @@ export function KalpxHaatStoreDetailPage() {
                         <h3 style={sidebarCardTitleStyle}>{item.name}</h3>
                         <div style={ratingRowStyle}>
                           <Star size={12} fill="#eab308" color="#eab308" />
-                          <span style={{ color: "#1f2937" }}>4.5</span>
+                          <span style={{ color: "#1f2937" }}>
+                            {item.rating.toFixed(1)}
+                          </span>
                           <span style={reviewTextStyle}>(132 reviews)</span>
                         </div>
                         <span style={offerChipStyle}>62% off</span>
@@ -387,7 +260,7 @@ export function KalpxHaatStoreDetailPage() {
                       </div>
                     </button>
                   ))
-                : services.map((item) => (
+                : filteredServices.map((item) => (
                     <div key={item.id} style={sidebarCardStyle}>
                       <img src={item.image} alt={item.name} style={sidebarImageStyle} />
                       <div style={{ textAlign: "left" }}>

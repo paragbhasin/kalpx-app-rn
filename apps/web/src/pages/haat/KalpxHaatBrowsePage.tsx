@@ -1,30 +1,21 @@
 import {
   ArrowLeft,
-  Heart,
+  Check,
+  ChevronDown,
   Search,
   ShoppingCart,
   SlidersHorizontal,
-  Star,
   Store,
 } from "lucide-react";
 import type { CSSProperties } from "react";
 import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import {
-  haatProducts,
-  haatServices,
-  trustedProductStores,
-  trustedServiceStores,
-} from "./haatData";
-import {
-  addProductToCart,
-  getCartCount,
-  isWishlisted,
-  toggleWishlist,
-  useHaatState,
-} from "./haatState";
 import { useAppDispatch } from "../../store/hooks";
 import { showSnackBar } from "../../store/snackBarSlice";
+import { HaatProductGrid } from "./HaatProductCards";
+import { useHaatCatalog } from "./haatCatalog";
+import { haatServices, trustedServiceStores } from "./haatData";
+import { addProductToCart, getCartCount, useHaatState } from "./haatState";
 
 type BrowseType = "product" | "service";
 type ProductSort = "featured" | "low_to_high" | "high_to_low" | "rating";
@@ -38,312 +29,260 @@ export function KalpxHaatBrowsePage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [searchParams] = useSearchParams();
-  const [searchValue, setSearchValue] = useState(searchParams.get("search") ?? "");
+  const isDesktop =
+    typeof window === "undefined" ? true : window.innerWidth >= 1024;
+  const [searchValue, setSearchValue] = useState(
+    searchParams.get("search") ?? "",
+  );
   const [productSort, setProductSort] = useState<ProductSort>("featured");
   const [serviceSort, setServiceSort] = useState<ServiceSort>("featured");
+  const [sortMenuOpen, setSortMenuOpen] = useState(false);
   const haatState = useHaatState();
+  const { products } = useHaatCatalog();
 
   const type = getBrowseType(searchParams.get("type"));
   const cartCount = getCartCount(haatState);
-  const productStores = trustedProductStores.map((item) => item.store_name);
-  const serviceProviders = trustedServiceStores.map((item) => item.store_name);
-  const [selectedProductStore, setSelectedProductStore] = useState<string>("All");
-  const [selectedServiceProvider, setSelectedServiceProvider] = useState<string>("All");
-
+  const currentSort = type === "product" ? productSort : serviceSort;
+  const sortOptions =
+    type === "product"
+      ? [
+          { value: "featured", label: "Featured" },
+          { value: "rating", label: "Top Rated" },
+          { value: "low_to_high", label: "Price: Low to High" },
+          { value: "high_to_low", label: "Price: High to Low" },
+        ]
+      : [
+          { value: "featured", label: "Featured" },
+          { value: "provider", label: "Provider A-Z" },
+          { value: "price", label: "Price Label" },
+        ];
   const filteredProducts = useMemo(() => {
     const query = searchValue.trim().toLowerCase();
-    const base = haatProducts.filter((item) => {
-      const matchesStore =
-        selectedProductStore === "All" || item.store.store_name === selectedProductStore;
-      const matchesQuery =
+    const base = products.filter(
+      (item) =>
         !query ||
         item.name.toLowerCase().includes(query) ||
         item.store.store_name.toLowerCase().includes(query) ||
-        item.description.toLowerCase().includes(query);
-      return matchesStore && matchesQuery;
-    });
+        item.description.toLowerCase().includes(query),
+    );
 
     if (productSort === "low_to_high") {
-      return [...base].sort((left, right) => left.price_minor - right.price_minor);
+      return [...base].sort(
+        (left, right) => left.price_minor - right.price_minor,
+      );
     }
     if (productSort === "high_to_low") {
-      return [...base].sort((left, right) => right.price_minor - left.price_minor);
+      return [...base].sort(
+        (left, right) => right.price_minor - left.price_minor,
+      );
     }
     if (productSort === "rating") {
       return [...base].sort((left, right) => right.rating - left.rating);
     }
     return base;
-  }, [productSort, searchValue, selectedProductStore]);
+  }, [productSort, products, searchValue]);
 
   const filteredServices = useMemo(() => {
     const query = searchValue.trim().toLowerCase();
-    const base = haatServices.filter((item) => {
-      const matchesProvider =
-        selectedServiceProvider === "All" || item.provider === selectedServiceProvider;
-      const matchesQuery =
+    const base = haatServices.filter(
+      (item) =>
         !query ||
         item.name.toLowerCase().includes(query) ||
         item.provider.toLowerCase().includes(query) ||
-        item.price.toLowerCase().includes(query);
-      return matchesProvider && matchesQuery;
-    });
+        item.price.toLowerCase().includes(query),
+    );
 
     if (serviceSort === "provider") {
-      return [...base].sort((left, right) => left.provider.localeCompare(right.provider));
+      return [...base].sort((left, right) =>
+        left.provider.localeCompare(right.provider),
+      );
     }
     if (serviceSort === "price") {
-      return [...base].sort((left, right) => left.price.localeCompare(right.price));
+      return [...base].sort((left, right) =>
+        left.price.localeCompare(right.price),
+      );
     }
     return base;
-  }, [searchValue, selectedServiceProvider, serviceSort]);
+  }, [searchValue, serviceSort]);
 
   return (
-    <main style={{ minHeight: "100dvh", background: "#fcfaf6" }}>
-      <div style={{ maxWidth: 1240, margin: "0 auto", padding: "18px 14px 40px" }}>
+    <main style={{ minHeight: "100dvh" }}>
+      <div style={{ margin: "0 auto", padding: "18px 14px 40px" }}>
         <header style={headerStyle}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <button type="button" onClick={() => navigate(-1)} style={iconButtonStyle}>
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              style={iconButtonStyle}
+            >
               <ArrowLeft size={20} />
             </button>
             <div>
-              <p style={eyebrowStyle}>KalpX Haat</p>
               <h1 style={titleStyle}>
                 {type === "product" ? "All Products" : "All Services"}
               </h1>
             </div>
           </div>
-          <button type="button" onClick={() => navigate("/en/haat/cart")} style={cartButtonStyle}>
+          <button
+            type="button"
+            onClick={() => navigate("/en/haat/cart")}
+            style={cartButtonStyle}
+          >
             <ShoppingCart size={18} />
             <span style={cartCountStyle}>{cartCount}</span>
           </button>
         </header>
 
         <div style={heroCardStyle}>
-          <div style={searchBarStyle}>
-            <Search size={18} style={{ color: "#8d8378" }} />
-            <input
-              value={searchValue}
-              onChange={(event) => setSearchValue(event.target.value)}
-              placeholder={
-                type === "product"
-                  ? "Search by product or store"
-                  : "Search by service or provider"
-              }
-              style={searchInputStyle}
-            />
-          </div>
-          <div style={toolbarStyle}>
+          <div
+            style={{
+              ...toolbarStyle,
+              flexWrap: isDesktop ? "nowrap" : "wrap",
+              alignItems: isDesktop ? "center" : "stretch",
+            }}
+          >
+            <div
+              style={{
+                ...searchBarStyle,
+                flexBasis: isDesktop ? "auto" : "100%",
+              }}
+            >
+              <Search size={18} style={{ color: "#8d8378" }} />
+              <input
+                value={searchValue}
+                onChange={(event) => setSearchValue(event.target.value)}
+                placeholder={
+                  type === "product"
+                    ? "Search by product or store"
+                    : "Search by service or provider"
+                }
+                style={searchInputStyle}
+              />
+            </div>
             <div style={filterHeaderStyle}>
               <SlidersHorizontal size={16} />
               Filters
             </div>
-            <select
-              value={type === "product" ? productSort : serviceSort}
-              onChange={(event) =>
-                type === "product"
-                  ? setProductSort(event.target.value as ProductSort)
-                  : setServiceSort(event.target.value as ServiceSort)
-              }
-              style={selectStyle}
+            <div
+              style={{
+                position: "relative",
+                width: isDesktop ? 220 : "100%",
+                minWidth: isDesktop ? 220 : 0,
+                flexShrink: 0,
+              }}
             >
-              {type === "product" ? (
-                <>
-                  <option value="featured">Featured</option>
-                  <option value="rating">Top Rated</option>
-                  <option value="low_to_high">Price: Low to High</option>
-                  <option value="high_to_low">Price: High to Low</option>
-                </>
-              ) : (
-                <>
-                  <option value="featured">Featured</option>
-                  <option value="provider">Provider A-Z</option>
-                  <option value="price">Price Label</option>
-                </>
-              )}
-            </select>
+              <button
+                type="button"
+                onClick={() => setSortMenuOpen((current) => !current)}
+                style={{
+                  ...selectStyle,
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span>
+                  {sortOptions.find((option) => option.value === currentSort)?.label}
+                </span>
+                <ChevronDown size={18} />
+              </button>
+
+              {sortMenuOpen ? (
+                <div style={sortMenuStyle}>
+                  {sortOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => {
+                        if (type === "product") {
+                          setProductSort(option.value as ProductSort);
+                        } else {
+                          setServiceSort(option.value as ServiceSort);
+                        }
+                        setSortMenuOpen(false);
+                      }}
+                      style={{
+                        ...sortOptionStyle,
+                        background:
+                          currentSort === option.value ? "#f7f2e8" : "transparent",
+                      }}
+                    >
+                      <span>{option.label}</span>
+                      {currentSort === option.value ? <Check size={16} /> : null}
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
 
-        <div style={layoutStyle}>
-          <aside style={sidebarStyle}>
-            <div style={sidebarCardStyle}>
-              <h2 style={sidebarTitleStyle}>{type === "product" ? "Stores" : "Providers"}</h2>
-              <div style={chipListStyle}>
-                <FilterChip
-                  active={
-                    type === "product"
-                      ? selectedProductStore === "All"
-                      : selectedServiceProvider === "All"
-                  }
-                  label="All"
-                  onClick={() =>
-                    type === "product"
-                      ? setSelectedProductStore("All")
-                      : setSelectedServiceProvider("All")
-                  }
-                />
-                {(type === "product" ? productStores : serviceProviders).map((item) => (
-                  <FilterChip
-                    key={item}
-                    active={
-                      type === "product"
-                        ? selectedProductStore === item
-                        : selectedServiceProvider === item
-                    }
-                    label={item}
-                    onClick={() =>
-                      type === "product"
-                        ? setSelectedProductStore(item)
-                        : setSelectedServiceProvider(item)
-                    }
-                  />
-                ))}
-              </div>
-            </div>
-          </aside>
-
-          <section>
-            <div style={resultHeaderStyle}>
-              <div>
-                <h2 style={resultTitleStyle}>
-                  {type === "product" ? "Marketplace products" : "Marketplace services"}
-                </h2>
-                <p style={resultMetaStyle}>
-                  {type === "product" ? filteredProducts.length : filteredServices.length} items
-                </p>
-              </div>
-            </div>
-
-            {type === "product" ? (
-              <div style={gridStyle}>
-                {filteredProducts.map((product) => (
-                  <article key={product.id} style={listingCardStyle}>
-                    <button
-                      type="button"
-                      onClick={() => toggleWishlist(product.id)}
-                      style={{
-                        ...wishlistButtonStyle,
-                        color: isWishlisted(haatState, product.id) ? "#e11d48" : "#6b7280",
-                        background: isWishlisted(haatState, product.id) ? "#fff1f2" : "#fff",
-                      }}
-                    >
-                      <Heart
-                        size={16}
-                        fill={isWishlisted(haatState, product.id) ? "currentColor" : "none"}
-                      />
-                    </button>
-                    <div
-                      onClick={() => navigate(`/en/haat/product/${product.id}?type=product`)}
-                      style={{ cursor: "pointer" }}
-                    >
-                      <img src={product.images[0]?.url} alt={product.name} style={listingImageStyle} />
-                    </div>
-                    <div style={{ padding: 18 }}>
-                      <div style={ratingPillStyle}>
-                        <Star size={12} fill="currentColor" />
-                        {product.rating.toFixed(1)}
+        <section>
+          {type === "product" ? (
+            <HaatProductGrid
+              products={filteredProducts}
+              onAddToCart={(name, productId) => {
+                addProductToCart(productId);
+                dispatch(showSnackBar(`${name} added to cart`));
+              }}
+            />
+          ) : (
+            <div style={listStyle}>
+              {filteredServices.map((service) => {
+                const store = trustedServiceStores.find(
+                  (item) => item.store_name === service.provider,
+                );
+                return (
+                  <article key={service.id} style={compactCardStyle}>
+                    <img
+                      src={service.image}
+                      alt={service.name}
+                      style={compactImageStyle}
+                    />
+                    <div style={compactContentStyle}>
+                      <div style={serviceProviderBadgeStyle}>
+                        <Store size={12} />
+                        {service.provider}
                       </div>
-                      <h3 style={listingTitleStyle}>{product.name}</h3>
-                      <p style={listingStoreStyle}>{product.store.store_name}</p>
-                      <p style={listingPriceStyle}>₹{product.price_minor}/-</p>
-                      <div style={listingActionsStyle}>
+                      <h3 style={listingTitleStyle}>{service.name}</h3>
+                      <p style={listingStoreStyle}>
+                        Trusted ritual support and doorstep help
+                      </p>
+                      <p style={listingPriceStyle}>{service.price}</p>
+                      <div style={compactActionsStyle}>
                         <button
                           type="button"
-                          onClick={() => navigate(`/en/haat/product/${product.id}?type=product`)}
+                          onClick={() =>
+                            navigate(
+                              `/en/haat/store/${store?.id ?? 4}?type=service`,
+                            )
+                          }
                           style={secondaryButtonStyle}
                         >
                           View
                         </button>
                         <button
                           type="button"
-                          onClick={() => {
-                            addProductToCart(product.id);
-                            dispatch(showSnackBar(`${product.name} added to cart`));
-                          }}
+                          onClick={() =>
+                            navigate(
+                              `/en/haat/store/${store?.id ?? 4}?type=service`,
+                            )
+                          }
                           style={primaryButtonStyle}
                         >
-                          Add to Cart
+                          Book Now
                         </button>
                       </div>
                     </div>
                   </article>
-                ))}
-              </div>
-            ) : (
-              <div style={gridStyle}>
-                {filteredServices.map((service) => {
-                  const store = trustedServiceStores.find(
-                    (item) => item.store_name === service.provider,
-                  );
-                  return (
-                    <article key={service.id} style={listingCardStyle}>
-                      <img src={service.image} alt={service.name} style={listingImageStyle} />
-                      <div style={{ padding: 18 }}>
-                        <div style={serviceProviderBadgeStyle}>
-                          <Store size={12} />
-                          {service.provider}
-                        </div>
-                        <h3 style={listingTitleStyle}>{service.name}</h3>
-                        <p style={listingStoreStyle}>Trusted ritual support and doorstep help</p>
-                        <p style={listingPriceStyle}>{service.price}</p>
-                        <div style={listingActionsStyle}>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              navigate(`/en/haat/store/${store?.id ?? 4}?type=service`)
-                            }
-                            style={secondaryButtonStyle}
-                          >
-                            View
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              navigate(`/en/haat/store/${store?.id ?? 4}?type=service`)
-                            }
-                            style={primaryButtonStyle}
-                          >
-                            Book Now
-                          </button>
-                        </div>
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            )}
-          </section>
-        </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
       </div>
     </main>
-  );
-}
-
-function FilterChip({
-  active,
-  label,
-  onClick,
-}: {
-  active: boolean;
-  label: string;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      style={{
-        borderRadius: 999,
-        padding: "10px 14px",
-        textAlign: "left",
-        background: active ? "#2f261d" : "#f5efe6",
-        color: active ? "#fff" : "#4b5563",
-        fontSize: 13,
-        fontWeight: 700,
-      }}
-    >
-      {label}
-    </button>
   );
 }
 
@@ -352,7 +291,6 @@ const headerStyle: CSSProperties = {
   alignItems: "center",
   justifyContent: "space-between",
   gap: 20,
-  marginBottom: 20,
 };
 
 const eyebrowStyle: CSSProperties = {
@@ -366,7 +304,7 @@ const eyebrowStyle: CSSProperties = {
 
 const titleStyle: CSSProperties = {
   margin: 0,
-  fontSize: 30,
+  fontSize: 18,
   fontWeight: 800,
   color: "#2f261d",
 };
@@ -375,8 +313,7 @@ const iconButtonStyle: CSSProperties = {
   width: 40,
   height: 40,
   borderRadius: 12,
-  background: "#fff",
-  border: "1px solid #eee4d6",
+
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
@@ -415,13 +352,8 @@ const cartCountStyle: CSSProperties = {
 };
 
 const heroCardStyle: CSSProperties = {
-  display: "grid",
-  gap: 14,
   padding: 18,
   borderRadius: 24,
-  background: "linear-gradient(135deg, #fbf5ea 0%, #fff 100%)",
-  border: "1px solid #efe3d1",
-  marginBottom: 20,
 };
 
 const searchBarStyle: CSSProperties = {
@@ -432,6 +364,8 @@ const searchBarStyle: CSSProperties = {
   borderRadius: 18,
   background: "#fff",
   border: "1px solid #eee4d6",
+  flex: 1,
+  minWidth: 0,
 };
 
 const searchInputStyle: CSSProperties = {
@@ -447,7 +381,7 @@ const toolbarStyle: CSSProperties = {
   alignItems: "center",
   justifyContent: "space-between",
   gap: 12,
-  flexWrap: "wrap",
+  flexWrap: "nowrap",
 };
 
 const filterHeaderStyle: CSSProperties = {
@@ -457,6 +391,8 @@ const filterHeaderStyle: CSSProperties = {
   fontSize: 14,
   fontWeight: 700,
   color: "#5f5140",
+  whiteSpace: "nowrap",
+  flexShrink: 0,
 };
 
 const selectStyle: CSSProperties = {
@@ -467,38 +403,31 @@ const selectStyle: CSSProperties = {
   fontSize: 13,
   color: "#3f3528",
   minWidth: 190,
+  flexShrink: 0,
 };
 
-const layoutStyle: CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "280px minmax(0, 1fr)",
-  gap: 20,
-  alignItems: "start",
-};
-
-const sidebarStyle: CSSProperties = {
-  position: "sticky",
-  top: 16,
-};
-
-const sidebarCardStyle: CSSProperties = {
-  borderRadius: 20,
+const sortMenuStyle: CSSProperties = {
+  position: "absolute",
+  top: "calc(100% + 8px)",
+  right: 0,
+  zIndex: 20,
+  width: "100%",
+  borderRadius: 14,
+  border: "1px solid #e7dbc9",
   background: "#fff",
-  border: "1px solid #eee4d6",
-  padding: 18,
+  boxShadow: "0 16px 36px rgba(55, 37, 12, 0.14)",
+  overflow: "hidden",
 };
 
-const sidebarTitleStyle: CSSProperties = {
-  margin: "0 0 14px",
-  fontSize: 18,
-  fontWeight: 800,
-  color: "#2f261d",
-};
-
-const chipListStyle: CSSProperties = {
+const sortOptionStyle: CSSProperties = {
+  width: "100%",
   display: "flex",
-  flexWrap: "wrap",
-  gap: 10,
+  alignItems: "center",
+  justifyContent: "space-between",
+  padding: "12px 14px",
+  fontSize: 14,
+  color: "#3f3528",
+  textAlign: "left",
 };
 
 const resultHeaderStyle: CSSProperties = {
@@ -522,33 +451,42 @@ const resultMetaStyle: CSSProperties = {
   color: "#7a6d5d",
 };
 
-const gridStyle: CSSProperties = {
+const listStyle: CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+  gridTemplateColumns: "1fr",
   gap: 18,
 };
 
-const listingCardStyle: CSSProperties = {
+const compactCardStyle: CSSProperties = {
   position: "relative",
-  overflow: "hidden",
   borderRadius: 22,
   background: "#fff",
   border: "1px solid #eee4d6",
   boxShadow: "0 12px 28px rgba(55, 37, 12, 0.06)",
+  display: "flex",
+  gap: 18,
+  padding: 16,
+  alignItems: "center",
 };
 
-const listingImageStyle: CSSProperties = {
-  width: "100%",
-  aspectRatio: "1 / 1",
+const compactMediaWrapStyle: CSSProperties = {
+  cursor: "pointer",
+  flexShrink: 0,
+};
+
+const compactImageStyle: CSSProperties = {
+  width: 148,
+  height: 148,
   objectFit: "cover",
   display: "block",
+  borderRadius: 18,
+  flexShrink: 0,
 };
 
-const wishlistButtonStyle: CSSProperties = {
+const compactWishlistButtonStyle: CSSProperties = {
   position: "absolute",
-  top: 14,
-  right: 14,
-  zIndex: 1,
+  top: 16,
+  right: 16,
   width: 34,
   height: 34,
   borderRadius: "50%",
@@ -556,6 +494,12 @@ const wishlistButtonStyle: CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
   boxShadow: "0 8px 18px rgba(0,0,0,0.08)",
+};
+
+const compactContentStyle: CSSProperties = {
+  flex: 1,
+  minWidth: 0,
+  paddingRight: 64,
 };
 
 const ratingPillStyle: CSSProperties = {
@@ -605,10 +549,11 @@ const listingPriceStyle: CSSProperties = {
   color: "#23180e",
 };
 
-const listingActionsStyle: CSSProperties = {
+const compactActionsStyle: CSSProperties = {
   display: "grid",
   gridTemplateColumns: "1fr 1fr",
   gap: 10,
+  maxWidth: 320,
 };
 
 const primaryButtonStyle: CSSProperties = {

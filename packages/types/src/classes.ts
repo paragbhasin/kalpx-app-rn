@@ -12,6 +12,8 @@ export interface ClassPricingAmount {
 
 export interface ClassPricingTier {
   amount?: ClassPricingAmount;
+  session_length_min?: number;
+  total_sessions?: number;
 }
 
 export interface ClassTrial {
@@ -21,16 +23,18 @@ export interface ClassTrial {
 }
 
 export interface ClassPricing {
-  type?: 'per_person' | 'per_group' | string;
+  type?: 'per_person' | 'per_group' | 'course' | string;
   currency?: string;
   per_person?: ClassPricingTier;
   per_group?: ClassPricingTier;
+  course?: ClassPricingTier;
   trial?: ClassTrial;
 }
 
 export interface ClassTutor {
   id: number;
   name?: string;
+  profile_name?: string;
   timezone?: string;
   bio?: string;
   avatar_url?: string;
@@ -47,6 +51,7 @@ export interface ClassListing {
   id: number;
   slug: string;
   title: string;
+  subtitle?: string;
   description?: string;
   category?: string;
   subject?: string;
@@ -88,12 +93,18 @@ export interface ClassSlotsResponse {
 
 // ── Class detail (with available_slots) ──────────────────────────────────────
 
+export interface ClassAvailability {
+  timezone?: string;
+  [key: string]: unknown;
+}
+
 export interface ClassDetail extends ClassListing {
   long_description?: string;
   learning_outcomes?: string[];
   requirements?: string[];
   available_slots?: ClassDaySlots[];
   tutor_bio?: string;
+  class_availability?: ClassAvailability;
 }
 
 // ── Booking ───────────────────────────────────────────────────────────────────

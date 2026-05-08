@@ -961,7 +961,7 @@ export function ClassDetailPage() {
                       ) : tutorAvatar ? (
                         <img
                           src={tutorAvatar}
-                          alt={cls.tutor.name || "Tutor"}
+                          alt={cls.tutor?.name || "Tutor"}
                           style={{
                             width: "100%",
                             height: "100%",

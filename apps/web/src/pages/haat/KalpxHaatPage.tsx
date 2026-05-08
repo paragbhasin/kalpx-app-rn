@@ -19,6 +19,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAppDispatch } from "../../store/hooks";
 import { showSnackBar } from "../../store/snackBarSlice";
 import { HaatProductGrid } from "./HaatProductCards";
+import { HaatServiceGrid } from "./HaatServiceCards";
 import { useHaatCatalog } from "./haatCatalog";
 import {
   haatServices,
@@ -657,73 +658,7 @@ function ServiceSection({
         actionLabel="View all"
         onAction={() => navigate("/en/haat/browse?type=service")}
       />
-      <div style={cardGridStyle}>
-        {items.map((item) => (
-          <article key={item.id} style={productCardStyle}>
-            <img
-              src={item.image}
-              alt={item.name}
-              style={{
-                width: "100%",
-                height: 190,
-                objectFit: "cover",
-                display: "block",
-              }}
-            />
-            <div style={{ padding: 16 }}>
-              <div
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 6,
-                  marginBottom: 8,
-                  padding: "5px 10px",
-                  borderRadius: 999,
-                  background: "#fff6de",
-                  color: "#8d6517",
-                  fontSize: 12,
-                  fontWeight: 700,
-                }}
-              >
-                <Store size={12} strokeWidth={2} />
-                {item.provider}
-              </div>
-              <h3
-                style={{
-                  margin: "0 0 10px",
-                  fontSize: 17,
-                  fontWeight: 700,
-                  lineHeight: 1.3,
-                  color: "#2d261f",
-                }}
-              >
-                {item.name}
-              </h3>
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 12,
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: 16,
-                    fontWeight: 800,
-                    color: "#3f2b12",
-                  }}
-                >
-                  {item.price}
-                </span>
-                <button type="button" style={actionButtonStyle}>
-                  Book
-                </button>
-              </div>
-            </div>
-          </article>
-        ))}
-      </div>
+      <HaatServiceGrid services={items} stores={trustedServiceStores} />
     </section>
   );
 }

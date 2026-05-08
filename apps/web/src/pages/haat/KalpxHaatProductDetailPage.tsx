@@ -542,10 +542,10 @@ function ReviewRatings() {
 
 function overlayIconButton(side: "left") {
   return {
+    ...overlaySquareButton,
     position: "absolute" as const,
     top: 16,
     [side]: 16,
-    ...overlaySquareButton,
   };
 }
 

@@ -5,7 +5,6 @@ import {
   Search,
   ShoppingCart,
   SlidersHorizontal,
-  Store,
 } from "lucide-react";
 import type { CSSProperties } from "react";
 import { useMemo, useState } from "react";
@@ -13,6 +12,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAppDispatch } from "../../store/hooks";
 import { showSnackBar } from "../../store/snackBarSlice";
 import { HaatProductGrid } from "./HaatProductCards";
+import { HaatServiceGrid } from "./HaatServiceCards";
 import { useHaatCatalog } from "./haatCatalog";
 import { haatServices, trustedServiceStores } from "./haatData";
 import { addProductToCart, getCartCount, useHaatState } from "./haatState";
@@ -228,57 +228,7 @@ export function KalpxHaatBrowsePage() {
               }}
             />
           ) : (
-            <div style={listStyle}>
-              {filteredServices.map((service) => {
-                const store = trustedServiceStores.find(
-                  (item) => item.store_name === service.provider,
-                );
-                return (
-                  <article key={service.id} style={compactCardStyle}>
-                    <img
-                      src={service.image}
-                      alt={service.name}
-                      style={compactImageStyle}
-                    />
-                    <div style={compactContentStyle}>
-                      <div style={serviceProviderBadgeStyle}>
-                        <Store size={12} />
-                        {service.provider}
-                      </div>
-                      <h3 style={listingTitleStyle}>{service.name}</h3>
-                      <p style={listingStoreStyle}>
-                        Trusted ritual support and doorstep help
-                      </p>
-                      <p style={listingPriceStyle}>{service.price}</p>
-                      <div style={compactActionsStyle}>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            navigate(
-                              `/en/haat/store/${store?.id ?? 4}?type=service`,
-                            )
-                          }
-                          style={secondaryButtonStyle}
-                        >
-                          View
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            navigate(
-                              `/en/haat/store/${store?.id ?? 4}?type=service`,
-                            )
-                          }
-                          style={primaryButtonStyle}
-                        >
-                          Book Now
-                        </button>
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </div>
+            <HaatServiceGrid services={filteredServices} stores={trustedServiceStores} />
           )}
         </section>
       </div>

@@ -34,9 +34,10 @@ export function HaatProductGrid({
         display: "grid",
         gridTemplateColumns:
           !fromOrder && !isSidebar
-            ? "repeat(auto-fit, minmax(300px, 1fr))"
+            ? "repeat(auto-fit, minmax(320px, 420px))"
             : "1fr",
         gap: fromOrder ? 24 : 16,
+        justifyContent: !fromOrder && !isSidebar ? "start" : undefined,
       }}
     >
       {products.map((item, index) => (
@@ -85,6 +86,8 @@ function HaatSingleProductCard({
         ...productCardStyle,
         cursor: !fromCart ? "pointer" : "default",
         padding: fromOrder ? 0 : 12,
+        maxWidth: !fromOrder ? 420 : undefined,
+        width: "100%",
       }}
     >
       {fromOrder ? (

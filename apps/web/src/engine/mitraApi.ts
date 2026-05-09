@@ -1,5 +1,5 @@
 import { api } from '../lib/api';
-import type { MitraHomeV3Response, TellMitraV3Response, QuickCheckinEnergyState, QuickCheckinResponse, RhythmSuggestRequest, RhythmSuggestResponse } from '@kalpx/types';
+import type { MitraHomeV3Response, TellMitraV3Response, QuickCheckinEnergyState, QuickCheckinResponse, RhythmSuggestRequest, RhythmSuggestResponse, TellMitraFollowupMeta } from '@kalpx/types';
 import { normalizeTellMitraResult, normalizeRhythmSuggestResponse } from '@kalpx/contracts';
 import type { RhythmSetupPayload } from '@kalpx/contracts';
 
@@ -750,6 +750,7 @@ export interface TellMitraV3Payload {
   energy_state?: string;
   tz?: string;
   source_surface?: string;
+  followup?: TellMitraFollowupMeta;
 }
 
 /**

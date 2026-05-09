@@ -1,5 +1,5 @@
 import { getDoorLabel, isValidRoomId } from "@kalpx/contracts";
-import type { TellMitraNextOption, TellMitraV3Response } from "@kalpx/types";
+import type { TellMitraFollowupMeta, TellMitraFollowupOption, TellMitraNextOption, TellMitraV3Response } from "@kalpx/types";
 import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +15,22 @@ const DOOR_ROUTES: Record<string, string> = {
   tell_mitra: "/en/mitra/tell-mitra",
 };
 
+const CHIP_SUBMIT_TEXT: Record<string, string> = {
+  workload:             "It is the workload that is overwhelming me",
+  people:               "It is the people at work that is getting to me",
+  pressure:             "I am feeling the pressure of expectations",
+  fear_falling_behind:  "I am afraid of falling behind",
+  physical_tired:       "I am physically exhausted",
+  emotional_empty:      "I feel emotionally empty",
+  no_motivation:        "I have no motivation to continue",
+  vent:                 "I need to express what I am feeling",
+  disconnected:         "I am feeling disconnected from everyone",
+  conflict:             "I am in a conflict with someone close to me",
+  immediate_worry:      "I have an immediate financial worry",
+  ongoing_stress:       "I am dealing with ongoing financial stress",
+  future_uncertainty:   "I feel uncertain about my financial future",
+};
+
 type ResultScreen = "none" | "navigate_to_room" | "navigate_to_door" | "provide_wisdom_inline" | "fallback" | "safety";
 
 export function TellMitraPage() {
@@ -27,17 +43,23 @@ export function TellMitraPage() {
   const [result, setResult] = useState<TellMitraV3Response | null>(null);
   const [screen, setScreen] = useState<ResultScreen>("none");
 
-  async function submit() {
-    const trimmed = text.trim();
-    if (!trimmed) { setError("Please share what's on your mind"); return; }
-    if (trimmed.length > 1000) { setError("Please keep it under 1000 characters"); return; }
+  async function submit(override?: {
+    text?: string;
+    sourceSurface?: string;
+    followup?: TellMitraFollowupMeta;
+  }) {
+    const inputText = (override?.text ?? text).trim();
+    const inputSource = override?.sourceSurface ?? "tell_mitra_page_web";
+    if (!inputText) { setError("Please share what's on your mind"); return; }
+    if (inputText.length > 1000) { setError("Please keep it under 1000 characters"); return; }
     setError(null);
     setSubmitting(true);
     try {
       const resp = await postTellMitraV3({
-        text: trimmed,
+        text: inputText,
         tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        source_surface: "tell_mitra_page_web",
+        source_surface: inputSource,
+        ...(override?.followup ? { followup: override.followup } : {}),
       });
       setResult(resp);
       if (resp.safety_flag === true) {
@@ -55,6 +77,34 @@ export function TellMitraPage() {
       setError("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  function handleChipClick(opt: TellMitraFollowupOption) {
+    if (opt.value === "calm_now") {
+      if (result?.suggested_room_id) {
+        void executeAction(
+          { type: "enter_room", payload: {
+              room_id: result.suggested_room_id,
+              source: "tell_mitra_followup_calm_now",
+              room_entry_context: result.room_entry_context,
+          }},
+          { dispatch, screenData: screenState.screenData, currentStateId: "tell_mitra" }
+        );
+      }
+    } else {
+      const submitText = CHIP_SUBMIT_TEXT[opt.value] ?? opt.label;
+      void submit({
+        text: submitText,
+        sourceSurface: "tell_mitra_followup_chip",
+        followup: {
+          prompt_id: null,
+          selected_value: opt.value,
+          selected_label: opt.label,
+          parent_tell_mitra_event_id: result?.tell_mitra_event_id ?? null,
+          parent_intent_type: result?.intent_type ?? null,
+        },
+      });
     }
   }
 
@@ -112,6 +162,47 @@ export function TellMitraPage() {
             {result.prior_suggested_room_label}
           </div>
         )}
+      </div>
+    );
+  }
+
+  function ConversationSummary() {
+    if (!result?.conversation_context?.summary) return null;
+    return (
+      <div style={{ fontSize: 13, color: "#7B6550", fontStyle: "italic", marginBottom: 12 }}>
+        {result.conversation_context.summary}
+      </div>
+    );
+  }
+
+  function FollowupChips() {
+    if (result?.support_depth !== "room_with_followup" || !result?.followup_question) return null;
+    return (
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ fontSize: 13, color: "#7B6550", marginBottom: 8 }}>
+          Want to help Mitra understand what feels heaviest?
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+          {result.followup_question.options.map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => handleChipClick(opt)}
+              disabled={submitting}
+              style={{
+                padding: "7px 14px",
+                borderRadius: 20,
+                border: "1px solid rgba(201,168,76,0.35)",
+                background: "transparent",
+                color: "#7B6550",
+                fontSize: 13,
+                cursor: submitting ? "not-allowed" : "pointer",
+                opacity: submitting ? 0.6 : 1,
+              }}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
       </div>
     );
   }
@@ -211,6 +302,7 @@ export function TellMitraPage() {
               <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 18, color: "#C99317", marginBottom: 16 }}>
                 Mitra heard you.
               </div>
+              <ConversationSummary />
               <PriorContextCard />
               {result.response_copy && (
                 <div style={{
@@ -228,6 +320,7 @@ export function TellMitraPage() {
                   {result.response_copy}
                 </div>
               )}
+              <FollowupChips />
               <div style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.2)", borderRadius: 12, padding: "14px 16px", marginBottom: 16 }}>
                 <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 16, color: "#432104" }}>
                   {result.suggested_room_label}
@@ -241,9 +334,9 @@ export function TellMitraPage() {
                   { type: 'enter_room', payload: { room_id: result.suggested_room_id, source: 'tell_mitra', room_entry_context: result.room_entry_context } },
                   { dispatch, screenData: screenState.screenData, currentStateId: 'tell_mitra' }
                 )}
-                style={GOLD_BTN}
+                style={{ ...GOLD_BTN, opacity: submitting ? 0.6 : 1 }}
               >
-                Go to {result.suggested_room_label || "Room"}
+                {submitting ? "Sending…" : `Go to ${result.suggested_room_label || "Room"}`}
               </button>
               <button onClick={() => { setScreen("none"); setText(""); }} style={{ ...GHOST_BTN, marginTop: 10 }}>
                 Tell Mitra more
@@ -268,6 +361,7 @@ export function TellMitraPage() {
               <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 18, color: "#C99317", marginBottom: 16 }}>
                 Mitra heard you.
               </div>
+              <ConversationSummary />
               <PriorContextCard />
               {result.response_copy && (
                 <div style={{
@@ -314,6 +408,7 @@ export function TellMitraPage() {
               <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 18, color: "#C99317", marginBottom: 16 }}>
                 Mitra heard you.
               </div>
+              <ConversationSummary />
               <PriorContextCard />
               <div style={{
                 background: "rgba(255,253,250,0.96)",
@@ -363,6 +458,7 @@ export function TellMitraPage() {
               <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 18, color: "#C99317", marginBottom: 16 }}>
                 Mitra heard you.
               </div>
+              <ConversationSummary />
               <PriorContextCard />
               {result.response_copy ? (
                 <div style={{

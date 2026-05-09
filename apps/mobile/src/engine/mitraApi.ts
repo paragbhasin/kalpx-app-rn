@@ -8,7 +8,7 @@
  */
 
 import api from "../Networks/axios";
-import type { MitraHomeV3Response, TellMitraV3Response, MitraHomeV3CompanionRhythm, QuickCheckinEnergyState, QuickCheckinResponse, RhythmSuggestRequest, RhythmSuggestResponse } from '@kalpx/types';
+import type { MitraHomeV3Response, TellMitraV3Response, MitraHomeV3CompanionRhythm, QuickCheckinEnergyState, QuickCheckinResponse, RhythmSuggestRequest, RhythmSuggestResponse, TellMitraFollowupMeta } from '@kalpx/types';
 import type { RhythmSetupPayload } from '@kalpx/contracts';
 import { normalizeTellMitraResult, normalizeRhythmSuggestResponse } from '@kalpx/contracts';
 
@@ -2053,6 +2053,7 @@ export interface TellMitraV3Payload {
   energy_state?: string;
   tz?: string;
   source_surface?: string;
+  followup?: TellMitraFollowupMeta;
 }
 
 export async function postTellMitraV3(payload: TellMitraV3Payload): Promise<TellMitraV3Response> {

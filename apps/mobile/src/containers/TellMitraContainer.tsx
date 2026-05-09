@@ -24,6 +24,13 @@ import { Fonts } from '../theme/fonts';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { isValidRoomId } from '@kalpx/contracts';
+import type {
+  TellMitraFollowupMeta,
+  TellMitraFollowupOption,
+  TellMitraFollowupQuestion,
+  TellMitraRoomEntryContext,
+  TellMitraSupportDepth,
+} from '@kalpx/types';
 import { postTellMitraV3 } from '../engine/mitraApi';
 import { executeAction } from '../engine/actionExecutor';
 import { useScreenStore } from '../engine/useScreenBridge';
@@ -31,6 +38,22 @@ import { setTellMitraDraft, setTellMitraResult } from '../store/doorSlice';
 import { screenActions, loadScreenWithData, goBackWithData } from '../store/screenSlice';
 
 const MAX_CHARS = 1000;
+
+const CHIP_SUBMIT_TEXT: Record<string, string> = {
+  workload:             "It is the workload that is overwhelming me",
+  people:               "It is the people at work that is getting to me",
+  pressure:             "I am feeling the pressure of expectations",
+  fear_falling_behind:  "I am afraid of falling behind",
+  physical_tired:       "I am physically exhausted",
+  emotional_empty:      "I feel emotionally empty",
+  no_motivation:        "I have no motivation to continue",
+  vent:                 "I need to express what I am feeling",
+  disconnected:         "I am feeling disconnected from everyone",
+  conflict:             "I am in a conflict with someone close to me",
+  immediate_worry:      "I have an immediate financial worry",
+  ongoing_stress:       "I am dealing with ongoing financial stress",
+  future_uncertainty:   "I feel uncertain about my financial future",
+};
 
 export default function TellMitraContainer() {
   const dispatch = useDispatch();
@@ -41,6 +64,15 @@ export default function TellMitraContainer() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [resultCopy, setResultCopy] = useState('');
+
+  // S17-D0: conversational continuity state
+  const [suggestedRoomId, setSuggestedRoomId] = useState<string | null>(null);
+  const [roomEntryCtx, setRoomEntryCtx] = useState<TellMitraRoomEntryContext | null>(null);
+  const [conversationSummary, setConversationSummary] = useState<string | null>(null);
+  const [followupQuestion, setFollowupQuestion] = useState<TellMitraFollowupQuestion | null>(null);
+  const [supportDepth, setSupportDepth] = useState<TellMitraSupportDepth>("direct_room");
+  const [parentEventId, setParentEventId] = useState<string | number | null>(null);
+  const [parentIntentType, setParentIntentType] = useState<string | null>(null);
 
   // Mirror the buildActionContext pattern from ContinueJourney.tsx so
   // enter_room can resolve screenState, setScreenValue, loadScreen, goBack.
@@ -75,12 +107,17 @@ export default function TellMitraContainer() {
     };
   }, [dispatch, navigation]);
 
-  const handleSubmit = async () => {
-    if (!draft.trim()) {
+  const handleSubmit = async (override?: {
+    text?: string;
+    sourceSurface?: string;
+    followup?: TellMitraFollowupMeta;
+  }) => {
+    const inputText = override?.text ?? draft;
+    if (!inputText.trim()) {
       setErrorMsg("Please share what's on your mind");
       return;
     }
-    if (draft.length > MAX_CHARS) {
+    if (inputText.length > MAX_CHARS) {
       setErrorMsg('Please keep it under 1000 characters');
       return;
     }
@@ -88,9 +125,10 @@ export default function TellMitraContainer() {
     setIsSubmitting(true);
     try {
       const result = await postTellMitraV3({
-        text: draft,
+        text: inputText,
         tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
-        source_surface: 'tell_mitra_door',
+        source_surface: override?.sourceSurface ?? 'tell_mitra_door',
+        ...(override?.followup ? { followup: override.followup } : {}),
       });
       // clearDoorState clears inputDraft — no raw text persists after submit
       dispatch(
@@ -104,6 +142,16 @@ export default function TellMitraContainer() {
       if (result.response_copy) {
         setResultCopy(result.response_copy);
       }
+
+      // S17-D0: populate continuity state
+      setSuggestedRoomId(result.suggested_room_id ?? null);
+      setRoomEntryCtx(result.room_entry_context ?? null);
+      setConversationSummary(result.conversation_context?.summary ?? null);
+      setFollowupQuestion(result.followup_question ?? null);
+      setSupportDepth(result.support_depth ?? "direct_room");
+      setParentEventId(result.tell_mitra_event_id ?? null);
+      setParentIntentType(result.intent_type ?? null);
+
       if (
         result.suggested_action === 'navigate_to_room' &&
         isValidRoomId(result.suggested_room_id)
@@ -134,6 +182,35 @@ export default function TellMitraContainer() {
     }
   };
 
+  const handleChipClick = (opt: TellMitraFollowupOption) => {
+    if (opt.value === 'calm_now' && suggestedRoomId) {
+      executeAction(
+        {
+          type: 'enter_room',
+          payload: {
+            room_id: suggestedRoomId,
+            source: 'tell_mitra_followup_calm_now',
+            room_entry_context: roomEntryCtx,
+          },
+        } as any,
+        buildActionContext() as any,
+      );
+    } else {
+      const submitText = CHIP_SUBMIT_TEXT[opt.value] ?? opt.label;
+      void handleSubmit({
+        text: submitText,
+        sourceSurface: 'tell_mitra_followup_chip',
+        followup: {
+          prompt_id: null,
+          selected_value: opt.value,
+          selected_label: opt.label,
+          parent_tell_mitra_event_id: parentEventId,
+          parent_intent_type: parentIntentType,
+        },
+      });
+    }
+  };
+
   return (
     <View style={styles.root}>
       <TextInput
@@ -149,9 +226,30 @@ export default function TellMitraContainer() {
         {draft.length} / {MAX_CHARS}
       </Text>
       {!!errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
+      {!!conversationSummary && (
+        <Text style={styles.contextSummary}>{conversationSummary}</Text>
+      )}
       {!!resultCopy && (
         <View style={styles.resultCard}>
           <Text style={styles.resultCardText}>{resultCopy}</Text>
+        </View>
+      )}
+      {supportDepth === 'room_with_followup' && !!followupQuestion && (
+        <View style={styles.chipsContainer}>
+          <Text style={styles.chipsPrompt}>Want to help Mitra understand what feels heaviest?</Text>
+          <View style={styles.chipsRow}>
+            {followupQuestion.options.map((opt) => (
+              <TouchableOpacity
+                key={opt.value}
+                onPress={() => handleChipClick(opt)}
+                disabled={isSubmitting}
+                style={[styles.chip, isSubmitting && styles.chipDisabled]}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.chipText}>{opt.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
       )}
       {!!resultCopy && (
@@ -165,7 +263,7 @@ export default function TellMitraContainer() {
       )}
       <TouchableOpacity
         style={[styles.submitBtn, isSubmitting && styles.submitBtnDisabled]}
-        onPress={handleSubmit}
+        onPress={() => void handleSubmit()}
         disabled={isSubmitting}
         activeOpacity={0.8}
       >
@@ -201,6 +299,12 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#c0392b',
   },
+  contextSummary: {
+    fontSize: 13,
+    color: '#9b8b77',
+    fontStyle: 'italic',
+    marginBottom: 8,
+  },
   resultCard: {
     backgroundColor: 'rgba(255,253,250,0.96)',
     borderLeftWidth: 3,
@@ -215,6 +319,35 @@ const styles = StyleSheet.create({
     lineHeight: 34,
     color: '#432104',
     fontStyle: 'italic',
+  },
+  chipsContainer: {
+    marginBottom: 12,
+  },
+  chipsPrompt: {
+    fontSize: 13,
+    color: '#7B6550',
+    marginBottom: 8,
+    fontFamily: Fonts.sans.regular,
+  },
+  chipsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  chip: {
+    borderWidth: 1,
+    borderColor: 'rgba(201,168,76,0.35)',
+    borderRadius: 20,
+    paddingVertical: 7,
+    paddingHorizontal: 14,
+  },
+  chipDisabled: {
+    opacity: 0.6,
+  },
+  chipText: {
+    fontSize: 13,
+    color: '#7B6550',
+    fontFamily: Fonts.sans.regular,
   },
   submitBtn: {
     backgroundColor: '#D4A017',

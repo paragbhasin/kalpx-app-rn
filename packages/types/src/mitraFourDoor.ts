@@ -336,3 +336,40 @@ export interface TellMitraV3Response {
   support_need: string;
   secondary_room_id: string | null;
 }
+
+// ── Tell Mitra Conversation Thread (S17-D4B) ──────────────────────────────────
+// Local-only frontend conversation model. Never persisted to backend.
+
+export type TellMitraConversationItem =
+  | { id: string; type: "user_message"; text: string; created_at: string }
+  | { id: string; type: "user_chip"; label: string; value: string; created_at: string }
+  | {
+      id: string; type: "mitra_response";
+      response_copy: string;
+      prior_context_summary?: string | null;
+      conversation_stage?: string;
+      support_depth?: string;
+      created_at: string;
+    }
+  | {
+      id: string; type: "followup_chips";
+      prompt: string;
+      options: TellMitraFollowupOption[];
+      parent_tell_mitra_event_id?: string | number | null;
+      parent_intent_type?: string | null;
+      disabled?: boolean;
+    }
+  | {
+      id: string; type: "room_recommendation";
+      room_id: string;
+      room_label: string;
+      room_description?: string | null;
+      secondary_room_id?: string | null;
+      tell_mitra_event_id: string | number | null;
+      room_entry_context: TellMitraRoomEntryContext | null;
+      response_copy?: string | null;
+    }
+  | { id: string; type: "wisdom_options"; next_options: TellMitraNextOption[] }
+  | { id: string; type: "safety"; response_copy: string }
+  | { id: string; type: "loading" }
+  | { id: string; type: "error"; message: string };

@@ -375,6 +375,61 @@ function _normalizeFollowupQuestion(raw: unknown): TellMitraFollowupQuestion | n
   return { prompt, options };
 }
 
+// ── Tell Mitra chip submission text (S17-D4B) ─────────────────────────────────
+// Single source of truth for chip value → free-text submission mapping.
+// Used by both web TellMitraPage and mobile TellMitraContainer.
+// If a value is missing, callers fall back to opt.label and emit a dev warning.
+
+export const CHIP_SUBMIT_TEXT: Readonly<Record<string, string>> = {
+  // Pre-S17-D1 work chips
+  workload:             "It is the workload that is overwhelming me",
+  people:               "It is the people at work that is getting to me",
+  pressure:             "I am feeling the pressure of expectations",
+  fear_falling_behind:  "I am afraid of falling behind",
+  physical_tired:       "I am physically exhausted",
+  emotional_empty:      "I feel emotionally empty",
+  no_motivation:        "I have no motivation to continue",
+  vent:                 "I need to express what I am feeling",
+  disconnected:         "I am feeling disconnected from everyone",
+  conflict:             "I am in a conflict with someone close to me",
+  immediate_worry:      "I have an immediate financial worry",
+  ongoing_stress:       "I am dealing with ongoing financial stress",
+  future_uncertainty:   "I feel uncertain about my financial future",
+  // S17-D1 broad life-context chips
+  work_career:          "Work and my career is where most of this weight is coming from",
+  relationships:        "My relationships are where most of this weight is coming from",
+  health_energy:        "My body and health is where most of this weight is coming from",
+  money_security:       "Money and financial security is weighing on me the most",
+  family:               "Family is where most of this weight is coming from",
+  purpose_direction:    "Feeling lost or without direction is what is weighing on me",
+  not_sure:             "I am not sure where this is coming from",
+  // S17-D1 health context chips
+  sleep:                "I can't sleep and it is wearing me down",
+  physical_exhausted:   "I am physically exhausted and depleted",
+  physical_concern:     "Something feels physically wrong and it is concerning me",
+  pain:                 "I am in physical pain right now",
+  // S17-D1 purpose context chips
+  no_direction:         "I have no clear direction and do not know which way to go",
+  no_meaning:           "Nothing feels meaningful right now",
+  wrong_path:           "I feel like I am on the wrong path or in the wrong place",
+  questioning:          "I am questioning everything right now",
+  // S17-D1 growth chips
+  daily_practice:       "I want to build a daily practice and create consistency",
+  focus_clarity:        "I need more focus and clarity in my life",
+  inner_steadiness:     "I want more inner steadiness and groundedness",
+  facing_hard:          "I am facing something hard and need support moving through it",
+  spiritual_deepening:  "I want to deepen my spiritual practice",
+  // S17-D1 grief / loneliness chips
+  loss_person:          "I have lost someone and I am grieving",
+  relationship_ending:  "A relationship has ended and I am struggling with it",
+  cut_off:              "I am feeling cut off from people I care about",
+  lingering_hurt:       "There is hurt that stays with me and I cannot let it go",
+  far_from_loved:       "I am far from the people I love and miss them",
+  around_not_felt:      "I am around people but still feel completely alone",
+  unseen:               "No one really knows me and I feel unseen",
+  after_conflict:       "Something happened between me and someone and now I feel alone",
+};
+
 function _normalizeRoomEntryContext(raw: unknown): TellMitraRoomEntryContext | null {
   if (raw === null || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;

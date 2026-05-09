@@ -1,12 +1,14 @@
-import { getDoorLabel, getRoomLabel, isValidRoomId } from "@kalpx/contracts";
-import type { TellMitraFollowupMeta, TellMitraFollowupOption, TellMitraNextOption, TellMitraV3Response } from "@kalpx/types";
-import React, { useState } from "react";
+import { CHIP_SUBMIT_TEXT, getDoorLabel, getRoomLabel, isValidRoomId } from "@kalpx/contracts";
+import type { TellMitraConversationItem, TellMitraFollowupMeta, TellMitraFollowupOption, TellMitraNextOption, TellMitraV3Response } from "@kalpx/types";
+import React, { useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { executeAction } from "../../engine/actionExecutor";
 import { postTellMitraV3 } from "../../engine/mitraApi";
 import type { AppDispatch } from "../../store";
 import { useScreenState } from "../../store/screenSlice";
+
+const THREAD_UI_ENABLED = ((import.meta.env as Record<string, string>)["VITE_MITRA_TELL_MITRA_THREAD_UI"] ?? "0") === "1";
 
 const DOOR_ROUTES: Record<string, string> = {
   my_rhythm: "/en/mitra/rhythm",
@@ -15,68 +17,31 @@ const DOOR_ROUTES: Record<string, string> = {
   tell_mitra: "/en/mitra/tell-mitra",
 };
 
-const CHIP_SUBMIT_TEXT: Record<string, string> = {
-  // Pre-S17-D1 work chips
-  workload:             "It is the workload that is overwhelming me",
-  people:               "It is the people at work that is getting to me",
-  pressure:             "I am feeling the pressure of expectations",
-  fear_falling_behind:  "I am afraid of falling behind",
-  physical_tired:       "I am physically exhausted",
-  emotional_empty:      "I feel emotionally empty",
-  no_motivation:        "I have no motivation to continue",
-  vent:                 "I need to express what I am feeling",
-  disconnected:         "I am feeling disconnected from everyone",
-  conflict:             "I am in a conflict with someone close to me",
-  immediate_worry:      "I have an immediate financial worry",
-  ongoing_stress:       "I am dealing with ongoing financial stress",
-  future_uncertainty:   "I feel uncertain about my financial future",
-  // S17-D1 broad life-context chips
-  work_career:          "Work and my career is where most of this weight is coming from",
-  relationships:        "My relationships are where most of this weight is coming from",
-  health_energy:        "My body and health is where most of this weight is coming from",
-  money_security:       "Money and financial security is weighing on me the most",
-  family:               "Family is where most of this weight is coming from",
-  purpose_direction:    "Feeling lost or without direction is what is weighing on me",
-  not_sure:             "I am not sure where this is coming from",
-  // S17-D1 health context chips
-  sleep:                "I can't sleep and it is wearing me down",
-  physical_exhausted:   "I am physically exhausted and depleted",
-  physical_concern:     "Something feels physically wrong and it is concerning me",
-  pain:                 "I am in physical pain right now",
-  // S17-D1 purpose context chips
-  no_direction:         "I have no clear direction and do not know which way to go",
-  no_meaning:           "Nothing feels meaningful right now",
-  wrong_path:           "I feel like I am on the wrong path or in the wrong place",
-  questioning:          "I am questioning everything right now",
-  // S17-D1 growth chips
-  daily_practice:       "I want to build a daily practice and create consistency",
-  focus_clarity:        "I need more focus and clarity in my life",
-  inner_steadiness:     "I want more inner steadiness and groundedness",
-  facing_hard:          "I am facing something hard and need support moving through it",
-  spiritual_deepening:  "I want to deepen my spiritual practice",
-  // S17-D1 grief / loneliness chips
-  loss_person:          "I have lost someone and I am grieving",
-  relationship_ending:  "A relationship has ended and I am struggling with it",
-  cut_off:              "I am feeling cut off from people I care about",
-  lingering_hurt:       "There is hurt that stays with me and I cannot let it go",
-  far_from_loved:       "I am far from the people I love and miss them",
-  around_not_felt:      "I am around people but still feel completely alone",
-  unseen:               "No one really knows me and I feel unseen",
-  after_conflict:       "Something happened between me and someone and now I feel alone",
-};
-
 type ResultScreen = "none" | "navigate_to_room" | "navigate_to_door" | "provide_wisdom_inline" | "fallback" | "safety" | "ask_followup";
+
+function _id() { return `${Date.now()}_${Math.random().toString(36).slice(2, 7)}`; }
 
 export function TellMitraPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
   const screenState = useScreenState();
+
+  // ── Shared state (used by both flag-off and flag-on paths) ────────────────
   const [text, setText] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // ── Flag-off state ────────────────────────────────────────────────────────
   const [result, setResult] = useState<TellMitraV3Response | null>(null);
   const [screen, setScreen] = useState<ResultScreen>("none");
 
+  // ── Flag-on state ─────────────────────────────────────────────────────────
+  const [conversation, setConversation] = useState<TellMitraConversationItem[]>([]);
+  const [composerPlaceholder, setComposerPlaceholder] = useState("What's on your mind…");
+  const composerRef = useRef<HTMLTextAreaElement>(null);
+  const threadBottomRef = useRef<HTMLDivElement>(null);
+
+  // ── Flag-off: original submit ─────────────────────────────────────────────
   async function submit(override?: {
     text?: string;
     sourceSurface?: string;
@@ -116,6 +81,7 @@ export function TellMitraPage() {
     }
   }
 
+  // ── Flag-off: original chip click ─────────────────────────────────────────
   function handleChipClick(opt: TellMitraFollowupOption) {
     if (opt.value === "let_me_tell") {
       setScreen("none");
@@ -150,6 +116,122 @@ export function TellMitraPage() {
     });
   }
 
+  // ── Flag-on: thread submit ────────────────────────────────────────────────
+  // Caller must append user_message/user_chip BEFORE calling this.
+  // This function appends: loading → mitra_response + followup/room/wisdom.
+  async function submitThread(
+    inputText: string,
+    sourceSurface: string,
+    followupMeta?: TellMitraFollowupMeta,
+  ) {
+    const loadingId = _id();
+    const now = new Date().toISOString();
+    setConversation(prev => [...prev, { id: loadingId, type: "loading" }]);
+    setSubmitting(true);
+    setTimeout(() => threadBottomRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
+    try {
+      const resp = await postTellMitraV3({
+        text: inputText.trim(),
+        tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        source_surface: sourceSurface,
+        ...(followupMeta ? { followup: followupMeta } : {}),
+      });
+      const newItems: TellMitraConversationItem[] = [];
+      if (resp.safety_flag) {
+        newItems.push({
+          id: _id(), type: "safety",
+          response_copy: resp.response_copy || "You are not alone. Please speak to someone you trust right now.",
+        });
+      } else {
+        newItems.push({
+          id: _id(), type: "mitra_response",
+          response_copy: resp.response_copy,
+          prior_context_summary: resp.prior_context_summary,
+          conversation_stage: resp.conversation_stage,
+          support_depth: resp.support_depth,
+          created_at: now,
+        });
+        if (resp.followup_question) {
+          newItems.push({
+            id: _id(), type: "followup_chips",
+            prompt: resp.followup_question.prompt,
+            options: resp.followup_question.options,
+            parent_tell_mitra_event_id: resp.tell_mitra_event_id,
+            parent_intent_type: resp.intent_type,
+            disabled: false,
+          });
+        } else if (resp.suggested_action === "navigate_to_room" && isValidRoomId(resp.suggested_room_id)) {
+          newItems.push({
+            id: _id(), type: "room_recommendation",
+            room_id: resp.suggested_room_id,
+            room_label: resp.suggested_room_label ?? getRoomLabel(resp.suggested_room_id),
+            room_description: resp.suggested_room_description,
+            secondary_room_id: resp.secondary_room_id,
+            tell_mitra_event_id: resp.tell_mitra_event_id,
+            room_entry_context: resp.room_entry_context,
+            response_copy: resp.response_copy,
+          });
+        } else if (resp.next_options.length > 0) {
+          newItems.push({ id: _id(), type: "wisdom_options", next_options: resp.next_options });
+        }
+      }
+      setConversation(prev => [...prev.filter(i => i.id !== loadingId), ...newItems]);
+    } catch {
+      setConversation(prev => [
+        ...prev.filter(i => i.id !== loadingId),
+        { id: _id(), type: "error", message: "Something went wrong. Please try again." },
+      ]);
+    } finally {
+      setSubmitting(false);
+      setTimeout(() => threadBottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+    }
+  }
+
+  // ── Flag-on: chip click ───────────────────────────────────────────────────
+  function handleChipClickThread(opt: TellMitraFollowupOption, chipGroupId: string) {
+    const chipGroup = conversation.find(
+      (item): item is Extract<TellMitraConversationItem, { type: "followup_chips" }> =>
+        item.id === chipGroupId && item.type === "followup_chips"
+    );
+    if (opt.value === "let_me_tell") {
+      setConversation(prev =>
+        prev.map(item => item.id === chipGroupId ? { ...item, disabled: true } as TellMitraConversationItem : item)
+      );
+      setComposerPlaceholder("What would you like Mitra to know?");
+      setTimeout(() => composerRef.current?.focus(), 50);
+      return;
+    }
+    const userChip: TellMitraConversationItem = {
+      id: _id(), type: "user_chip",
+      label: opt.label, value: opt.value,
+      created_at: new Date().toISOString(),
+    };
+    setConversation(prev => [
+      ...prev.map(item => item.id === chipGroupId ? { ...item, disabled: true } as TellMitraConversationItem : item),
+      userChip,
+    ]);
+    const mappedText = CHIP_SUBMIT_TEXT[opt.value];
+    if (!mappedText) console.warn("[TellMitra] Missing CHIP_SUBMIT_TEXT mapping", opt.value);
+    const followupMeta: TellMitraFollowupMeta = {
+      prompt_id: null,
+      selected_value: opt.value,
+      selected_label: opt.label,
+      parent_tell_mitra_event_id: chipGroup?.parent_tell_mitra_event_id ?? null,
+      parent_intent_type: chipGroup?.parent_intent_type ?? null,
+    };
+    if (opt.value === "calm_now") {
+      void submitThread("Just help me calm down", "tell_mitra_followup_calm_now", followupMeta);
+    } else {
+      void submitThread(mappedText ?? opt.label, "tell_mitra_followup_chip", followupMeta);
+    }
+  }
+
+  function handleTellMitraMoreThread() {
+    setComposerPlaceholder("Add anything else Mitra should understand…");
+    setTimeout(() => composerRef.current?.focus(), 50);
+  }
+
+  // ── Styles (shared between both paths) ───────────────────────────────────
   const CARD: React.CSSProperties = {
     border: "1px solid rgba(201,168,76,0.22)",
     borderRadius: 18,
@@ -194,6 +276,7 @@ export function TellMitraPage() {
     fontStyle: "italic",
   };
 
+  // ── Flag-off sub-components ───────────────────────────────────────────────
   function PriorContextCard() {
     if (!result?.prior_context_used || !result?.prior_context_summary) return null;
     return (
@@ -278,6 +361,290 @@ export function TellMitraPage() {
     );
   }
 
+  // ── Flag-on: thread UI ────────────────────────────────────────────────────
+  if (THREAD_UI_ENABLED) {
+    function renderThreadItem(item: TellMitraConversationItem) {
+      if (item.type === "user_message") {
+        return (
+          <div key={item.id} style={{ display: "flex", justifyContent: "flex-end", marginBottom: 14 }}>
+            <div style={{
+              background: "linear-gradient(135deg, #F5E9C8 0%, #EDD98A 100%)",
+              borderRadius: "18px 18px 4px 18px",
+              padding: "10px 16px",
+              maxWidth: "75%",
+              fontSize: 15,
+              color: "#432104",
+              lineHeight: 1.6,
+            }}>
+              {item.text}
+            </div>
+          </div>
+        );
+      }
+      if (item.type === "user_chip") {
+        return (
+          <div key={item.id} style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
+            <div style={{
+              background: "rgba(201,168,76,0.1)",
+              border: "1px solid rgba(201,168,76,0.35)",
+              borderRadius: "16px 16px 4px 16px",
+              padding: "6px 14px",
+              fontSize: 13,
+              color: "#7B6550",
+              fontStyle: "italic",
+            }}>
+              {item.label}
+            </div>
+          </div>
+        );
+      }
+      if (item.type === "mitra_response") {
+        return (
+          <div key={item.id} style={{ marginBottom: 16, maxWidth: "85%" }}>
+            <div style={{ fontSize: 11, color: "#A08060", marginBottom: 6, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase" as const }}>
+              MITRA
+            </div>
+            {item.prior_context_summary && (
+              <div style={{ fontSize: 12, color: "#7B6550", fontStyle: "italic", marginBottom: 8, padding: "6px 10px", background: "rgba(201,168,76,0.05)", borderRadius: 6 }}>
+                {item.prior_context_summary}
+              </div>
+            )}
+            <div style={{ fontSize: 16, lineHeight: 1.75, color: "#432104", fontFamily: "var(--kalpx-font-serif, serif)" }}>
+              {item.response_copy}
+            </div>
+          </div>
+        );
+      }
+      if (item.type === "followup_chips") {
+        return (
+          <div key={item.id} style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 13, color: "#7B6550", marginBottom: 8 }}>{item.prompt}</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {item.options.map(opt => (
+                <button
+                  key={opt.value}
+                  onClick={() => { if (!item.disabled && !submitting) handleChipClickThread(opt, item.id); }}
+                  disabled={item.disabled || submitting}
+                  style={{
+                    padding: "7px 14px", borderRadius: 20,
+                    border: "1px solid rgba(201,168,76,0.35)",
+                    background: item.disabled ? "rgba(0,0,0,0.02)" : "transparent",
+                    color: item.disabled ? "#BBAA99" : "#7B6550",
+                    fontSize: 13,
+                    cursor: (item.disabled || submitting) ? "not-allowed" : "pointer",
+                    opacity: (item.disabled || submitting) ? 0.45 : 1,
+                    transition: "opacity 0.15s",
+                  }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      }
+      if (item.type === "room_recommendation") {
+        return (
+          <div key={item.id} style={{ marginBottom: 16 }}>
+            <div style={{
+              border: "1px solid rgba(201,168,76,0.22)",
+              borderRadius: 16,
+              background: "rgba(255,252,248,0.98)",
+              padding: "18px 20px",
+              boxShadow: "0 4px 16px rgba(67,33,4,0.06)",
+            }}>
+              <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 17, color: "#432104", marginBottom: 4 }}>
+                {item.room_label}
+              </div>
+              {item.room_description && (
+                <div style={{ fontSize: 14, color: "#7B6550", marginBottom: 12 }}>{item.room_description}</div>
+              )}
+              <button
+                onClick={() => void executeAction(
+                  { type: "enter_room", payload: { room_id: item.room_id, source: "tell_mitra", room_entry_context: item.room_entry_context } },
+                  { dispatch, screenData: screenState.screenData, currentStateId: "tell_mitra" }
+                )}
+                style={{ ...GOLD_BTN, marginBottom: 8 }}
+              >
+                Enter {item.room_label}
+              </button>
+              <button onClick={handleTellMitraMoreThread} style={GHOST_BTN}>
+                Tell Mitra more
+              </button>
+              {item.secondary_room_id && item.secondary_room_id !== item.room_id && (
+                <button
+                  onClick={() => void executeAction(
+                    { type: "enter_room", payload: { room_id: item.secondary_room_id!, source: "tell_mitra_secondary" } },
+                    { dispatch, screenData: screenState.screenData, currentStateId: "tell_mitra" }
+                  )}
+                  style={{ background: "none", border: "none", color: "#9B7B55", fontSize: 13, cursor: "pointer", marginTop: 8, width: "100%" }}
+                >
+                  Or try {getRoomLabel(item.secondary_room_id as any)} →
+                </button>
+              )}
+            </div>
+          </div>
+        );
+      }
+      if (item.type === "wisdom_options") {
+        return (
+          <div key={item.id} style={{ marginBottom: 16 }}>
+            <div style={{ fontSize: 12, color: "#A08060", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" as const, marginBottom: 8 }}>
+              Or try
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {item.next_options.map((opt, i) => (
+                <button
+                  key={i}
+                  onClick={() => {
+                    if (opt.action_type === "navigate_to_room" && opt.room_id) {
+                      void executeAction(
+                        { type: "enter_room", payload: { room_id: opt.room_id, source: "tell_mitra_next_option" } },
+                        { dispatch, screenData: screenState.screenData, currentStateId: "tell_mitra" }
+                      );
+                    } else if (opt.action_type === "navigate_to_door" && opt.door) {
+                      navigate(DOOR_ROUTES[opt.door] ?? "/en/mitra");
+                    }
+                  }}
+                  style={{ ...GHOST_BTN, textAlign: "left" as const, padding: "10px 14px" }}
+                >
+                  {opt.label} — {opt.description}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      }
+      if (item.type === "safety") {
+        return (
+          <div key={item.id} style={{ background: "rgba(240,235,230,0.85)", border: "1px solid rgba(201,168,76,0.2)", borderRadius: 12, padding: "16px 18px", marginBottom: 16 }}>
+            <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 16, color: "#432104", marginBottom: 8 }}>Mitra hears you.</div>
+            <div style={{ fontSize: 15, lineHeight: 1.8, color: "#432104" }}>{item.response_copy}</div>
+          </div>
+        );
+      }
+      if (item.type === "loading") {
+        return (
+          <div key={item.id} style={{ marginBottom: 12, maxWidth: "85%" }}>
+            <div style={{ fontSize: 11, color: "#A08060", marginBottom: 6, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase" as const }}>MITRA</div>
+            <div style={{ fontSize: 22, color: "#C9A84C", letterSpacing: 4 }}>…</div>
+          </div>
+        );
+      }
+      if (item.type === "error") {
+        return (
+          <div key={item.id} style={{ color: "#c0392b", fontSize: 13, marginBottom: 12, padding: "8px 10px", background: "rgba(220,50,50,0.04)", borderRadius: 8, border: "1px solid rgba(220,50,50,0.15)" }}>
+            {item.message}
+          </div>
+        );
+      }
+      return null;
+    }
+
+    return (
+      <div style={{ minHeight: "100dvh", background: "#FFF8EF", display: "flex", flexDirection: "column" }}>
+        <main style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 16px 0" }}>
+          <div style={{ width: "100%", maxWidth: 720 }}>
+            <button
+              onClick={() => navigate("/en/mitra")}
+              style={{ background: "none", border: "none", color: "#C99317", fontSize: 14, cursor: "pointer", marginBottom: 16, padding: 0 }}
+            >
+              ← Back
+            </button>
+          </div>
+          <div style={{
+            width: "100%", maxWidth: 720, flex: 1,
+            display: "flex", flexDirection: "column",
+            background: "#FAF7F2",
+            borderRadius: "20px 20px 0 0",
+            border: "1px solid rgba(201,168,76,0.15)",
+            borderBottom: "none",
+            boxShadow: "0 -4px 24px rgba(67,33,4,0.06)",
+            overflow: "hidden",
+            minHeight: "calc(100dvh - 100px)",
+          }}>
+            {/* Scrollable thread */}
+            <div style={{ flex: 1, overflowY: "auto", padding: "24px 24px 8px", display: "flex", flexDirection: "column" }}>
+              {conversation.length === 0 && (
+                <div style={{ textAlign: "center", paddingTop: 60 }}>
+                  <div style={{ fontFamily: "var(--kalpx-font-serif)", fontSize: 22, fontWeight: 700, color: "#432104", marginBottom: 8 }}>Tell Mitra</div>
+                  <div style={{ fontSize: 15, color: "#7B6550" }}>Share what you're carrying right now.</div>
+                </div>
+              )}
+              {conversation.map(item => renderThreadItem(item))}
+              <div ref={threadBottomRef} style={{ height: 1 }} />
+            </div>
+            {/* Sticky composer */}
+            <div style={{
+              borderTop: "1px solid rgba(201,168,76,0.18)",
+              background: "#FAF7F2",
+              padding: "14px 20px calc(14px + env(safe-area-inset-bottom))",
+              flexShrink: 0,
+            }}>
+              {error && <div style={{ fontSize: 13, color: "#e06060", marginBottom: 6 }}>{error}</div>}
+              <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
+                <textarea
+                  ref={composerRef}
+                  value={text}
+                  onChange={e => { setText(e.target.value); if (error) setError(null); }}
+                  placeholder={composerPlaceholder}
+                  maxLength={1000}
+                  rows={2}
+                  style={{
+                    flex: 1, boxSizing: "border-box",
+                    border: "1px solid rgba(201,168,76,0.3)", borderRadius: 12,
+                    padding: "10px 14px", fontSize: 15,
+                    fontFamily: "var(--kalpx-font-serif, serif)", color: "#432104",
+                    background: "rgba(255,252,248,0.95)", resize: "none", outline: "none",
+                  }}
+                  onKeyDown={e => {
+                    if (e.key === "Enter" && !e.shiftKey && !submitting && text.trim()) {
+                      e.preventDefault();
+                      const input = text.trim();
+                      setText("");
+                      setConversation(prev => [...prev, { id: _id(), type: "user_message", text: input, created_at: new Date().toISOString() }]);
+                      void submitThread(input, "tell_mitra_page_web");
+                    }
+                  }}
+                />
+                <button
+                  onClick={() => {
+                    if (submitting || !text.trim()) return;
+                    const input = text.trim();
+                    setText("");
+                    setConversation(prev => [...prev, { id: _id(), type: "user_message", text: input, created_at: new Date().toISOString() }]);
+                    void submitThread(input, "tell_mitra_page_web");
+                  }}
+                  disabled={submitting || !text.trim()}
+                  style={{
+                    ...GOLD_BTN,
+                    width: "auto",
+                    padding: "10px 20px",
+                    opacity: (submitting || !text.trim()) ? 0.5 : 1,
+                    cursor: (submitting || !text.trim()) ? "not-allowed" : "pointer",
+                    flexShrink: 0,
+                    fontSize: 14,
+                  }}
+                >
+                  {submitting ? "…" : "Send"}
+                </button>
+              </div>
+              <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
+                <button onClick={() => navigate("/en/mitra/checkin-quick")} style={{ ...GHOST_BTN, fontSize: 12, padding: "7px 0" }}>
+                  Quick Check-in
+                </button>
+                <button onClick={() => navigate("/en/mitra/quick-reset")} style={{ ...GHOST_BTN, fontSize: 12, padding: "7px 0" }}>
+                  Quick Reset
+                </button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  // ── Flag-off: original UI (completely unchanged) ──────────────────────────
   return (
     <div style={{ minHeight: "100dvh", background: "#FFF8EF", display: "flex", flexDirection: "column" }}>
       <main style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 16px calc(92px + env(safe-area-inset-bottom))" }}>

@@ -17,11 +17,11 @@ import { WEB_ENV } from "../../lib/env";
 import type { AppDispatch, RootState } from "../../store";
 import { setHomeData } from "../../store/doorSlice";
 
-function getRhythmTimeBand(): 'morning' | 'afternoon' | 'night' {
+function getRhythmTimeBand(): "morning" | "afternoon" | "night" {
   const hour = new Date().getHours();
-  if (hour < 12) return 'morning';
-  if (hour < 18) return 'afternoon';
-  return 'night';
+  if (hour < 12) return "morning";
+  if (hour < 18) return "afternoon";
+  return "night";
 }
 
 function LoadingScreen() {
@@ -81,13 +81,16 @@ export function MitraHomePage() {
         dispatch(setHomeData(data));
       })
       .catch(() => {
-        if (!cancelled) setFourDoorError("Could not load your home. Please try again.");
+        if (!cancelled)
+          setFourDoorError("Could not load your home. Please try again.");
       })
       .finally(() => {
         setFourDoorLoading(false);
       });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [hasActiveJourney, homeData, dispatch]);
 
   if (
@@ -113,18 +116,20 @@ export function MitraHomePage() {
       rhythmSlot?.items?.[0]?.title_snapshot ??
       doorStates?.my_rhythm?.subtitle ??
       doorStates?.my_rhythm?.cta ??
-      '';
+      "";
 
     // Inner Path: prefer Day X of Y when path is active, fallback to path_title or door subtitle
     const innerPathSubtitle = innerPathSummary?.has_active_path
       ? `Day ${innerPathSummary.day_number} of ${innerPathSummary.total_days}`
-      : (innerPathSummary?.path_title ?? doorStates?.inner_path?.subtitle ?? '');
+      : (innerPathSummary?.path_title ??
+        doorStates?.inner_path?.subtitle ??
+        "");
 
     return (
       <div
         style={{
           minHeight: "100dvh",
-          backgroundImage: "url(/new_home.png)",
+          backgroundImage: "url(/beige_bg.png)",
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
@@ -139,33 +144,152 @@ export function MitraHomePage() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            padding: "24px 16px calc(92px + env(safe-area-inset-bottom))",
+            width: "100%",
+            paddingBottom: "calc(92px + env(safe-area-inset-bottom))",
           }}
         >
-          <div style={{ width: "100%", maxWidth: 420 }}>
+          {greeting && (
+            <div
+              style={{
+                width: "100%",
+                position: "relative",
+                marginTop: -60, // Overlap header
+
+                overflow: "hidden",
+
+                marginBottom: 24,
+              }}
+            >
+              <img
+                src="/imgsun.png"
+                alt=""
+                style={{
+                  width: "100%",
+
+                  objectFit: "cover",
+                  position: "absolute",
+                  inset: 0,
+                }}
+              />
+              <div
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  height: "100%",
+                  minHeight: 190,
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "flex-end",
+                  alignItems: "center", // Center the content container
+                }}
+              >
+                <div
+                  style={{
+                    width: "100%",
+                    maxWidth: 420,
+                    padding: "0 24px 32px",
+                    textAlign: "left",
+                  }}
+                >
+                  <h1
+                    style={{
+                      fontFamily: "var(--kalpx-font-serif)",
+                      fontWeight: 700,
+                      fontSize: 28,
+                      color: "#432104",
+                      margin: "0 0 -2px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 12,
+                    }}
+                  >
+                    {greeting.headline}
+                  </h1>
+
+                  {greeting.subtext && (
+                    <>
+                      <p
+                        style={{
+                          fontFamily: "var(--kalpx-font-serif)",
+                          fontSize: 17,
+                          color: "#432104", // Softer color
+                          margin: 0,
+                        }}
+                      >
+                        {greeting.subtext}
+                      </p>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 12,
+                          marginTop: 5,
+                          width: "100%",
+                          maxWidth: 180,
+                        }}
+                      >
+                        <div
+                          style={{
+                            height: 1,
+                            flex: 1,
+                            background:
+                              "linear-gradient(to right, transparent, rgba(201,168,76,0.4))",
+                          }}
+                        />
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            color: "#C9A84C",
+                            fontSize: 14,
+                            gap: 2,
+                          }}
+                        >
+                          <span style={{ fontSize: 8 }}>◇</span>
+                          <span style={{ fontSize: 14 }}>◈</span>
+                          <span style={{ fontSize: 8 }}>◇</span>
+                        </div>
+                        <div
+                          style={{
+                            height: 1,
+                            flex: 1,
+                            background:
+                              "linear-gradient(to left, transparent, rgba(201,168,76,0.4))",
+                          }}
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div style={{ width: "100%", maxWidth: 420, padding: "0 16px" }}>
             {fourDoorError && (
-              <p style={{ color: "#e06060", textAlign: "center", marginBottom: 16, fontSize: 15 }}>
+              <p
+                style={{
+                  color: "#e06060",
+                  textAlign: "center",
+                  marginBottom: 16,
+                  fontSize: 15,
+                }}
+              >
                 {fourDoorError}
               </p>
             )}
 
-            {/* Greeting */}
-            {greeting && (
-              <div style={{ marginBottom: 24, textAlign: "center" }}>
-                <h1 style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 26, color: "#432104", margin: "0 0 4px" }}>
-                  {greeting.headline}
-                </h1>
-                {greeting.subtext && (
-                  <p style={{ fontFamily: "var(--kalpx-font-serif)", fontSize: 15, color: "#7B6550", margin: 0 }}>
-                    {greeting.subtext}
-                  </p>
-                )}
-              </div>
-            )}
-
             {/* Four Door Cards */}
             {doorStates && (
-              <div style={{ display: "flex", flexDirection: "column", gap: 14, marginBottom: 28 }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 14,
+                  marginBottom: 28,
+                }}
+              >
                 {/* My Rhythm */}
                 <button
                   onClick={() => navigate("/en/mitra/rhythm")}
@@ -180,10 +304,20 @@ export function MitraHomePage() {
                     cursor: "pointer",
                   }}
                 >
-                  <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 17, color: "#432104", marginBottom: 4 }}>
+                  <div
+                    style={{
+                      fontFamily: "var(--kalpx-font-serif)",
+                      fontWeight: 700,
+                      fontSize: 17,
+                      color: "#432104",
+                      marginBottom: 4,
+                    }}
+                  >
                     {DOOR_LABELS.my_rhythm}
                   </div>
-                  <div style={{ color: "#7B6550", fontSize: 14 }}>{rhythmSubtitle}</div>
+                  <div style={{ color: "#7B6550", fontSize: 14 }}>
+                    {rhythmSubtitle}
+                  </div>
                 </button>
 
                 {/* Inner Path */}
@@ -200,10 +334,20 @@ export function MitraHomePage() {
                     cursor: "pointer",
                   }}
                 >
-                  <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 17, color: "#432104", marginBottom: 4 }}>
+                  <div
+                    style={{
+                      fontFamily: "var(--kalpx-font-serif)",
+                      fontWeight: 700,
+                      fontSize: 17,
+                      color: "#432104",
+                      marginBottom: 4,
+                    }}
+                  >
                     {DOOR_LABELS.inner_path}
                   </div>
-                  <div style={{ color: "#7B6550", fontSize: 14 }}>{innerPathSubtitle}</div>
+                  <div style={{ color: "#7B6550", fontSize: 14 }}>
+                    {innerPathSubtitle}
+                  </div>
                 </button>
 
                 {/* Quick Reset */}
@@ -220,10 +364,20 @@ export function MitraHomePage() {
                     cursor: "pointer",
                   }}
                 >
-                  <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 17, color: "#432104", marginBottom: 4 }}>
+                  <div
+                    style={{
+                      fontFamily: "var(--kalpx-font-serif)",
+                      fontWeight: 700,
+                      fontSize: 17,
+                      color: "#432104",
+                      marginBottom: 4,
+                    }}
+                  >
                     {DOOR_LABELS.quick_reset}
                   </div>
-                  <div style={{ color: "#7B6550", fontSize: 14 }}>{doorStates.quick_reset?.subtitle}</div>
+                  <div style={{ color: "#7B6550", fontSize: 14 }}>
+                    {doorStates.quick_reset?.subtitle}
+                  </div>
                 </button>
 
                 {/* Tell Mitra */}
@@ -240,10 +394,20 @@ export function MitraHomePage() {
                     cursor: "pointer",
                   }}
                 >
-                  <div style={{ fontFamily: "var(--kalpx-font-serif)", fontWeight: 700, fontSize: 17, color: "#432104", marginBottom: 4 }}>
+                  <div
+                    style={{
+                      fontFamily: "var(--kalpx-font-serif)",
+                      fontWeight: 700,
+                      fontSize: 17,
+                      color: "#432104",
+                      marginBottom: 4,
+                    }}
+                  >
                     {DOOR_LABELS.tell_mitra}
                   </div>
-                  <div style={{ color: "#7B6550", fontSize: 14 }}>{doorStates.tell_mitra?.subtitle}</div>
+                  <div style={{ color: "#7B6550", fontSize: 14 }}>
+                    {doorStates.tell_mitra?.subtitle}
+                  </div>
                 </button>
               </div>
             )}

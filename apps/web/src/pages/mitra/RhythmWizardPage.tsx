@@ -51,6 +51,12 @@ const MOMENT_ART: Record<RhythmTimeBand, string> = {
   night: "/night1.svg",
 };
 
+const PURPOSE_ART: Record<RhythmTimeBand, string[]> = {
+  morning: ["/m3.svg", "/m5.svg", "/m1.svg", "/m4.svg", "/m2.svg", "/m6.svg"],
+  afternoon: ["/a5.svg", "/a1.svg", "/a4.svg", "/a2.svg", "/a6.svg", "/a3.svg"],
+  night: ["/n4.svg", "/n2.svg", "/n5.svg", "/n1.svg", "/n6.svg", "/n3.svg"],
+};
+
 const PURPOSE_OPTIONS: Record<
   RhythmTimeBand,
   { value: string; label: string; desc: string }[]
@@ -659,6 +665,20 @@ export function RhythmWizardPage() {
           {/* ── Step 2: Choose Purpose ─────────────────────────────────── */}
           {step === "purpose" && (
             <>
+              <img
+                src="/leaves-bird.png"
+                alt=""
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  top: -168,
+                  right: -22,
+                  width: 245,
+                  pointerEvents: "none",
+                  userSelect: "none",
+                  opacity: 0.5,
+                }}
+              />
               <h2
                 style={{
                   fontFamily: SERIF,
@@ -666,6 +686,7 @@ export function RhythmWizardPage() {
                   fontSize: 26,
                   color: DARK,
                   margin: "0 0 8px",
+                  maxWidth: 200,
                 }}
               >
                 What should each moment give you?
@@ -685,14 +706,40 @@ export function RhythmWizardPage() {
                 <div key={band} style={{ marginBottom: 28 }}>
                   <div
                     style={{
-                      fontFamily: SERIF,
-                      fontWeight: 700,
-                      fontSize: 16,
-                      color: DARK,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
                       marginBottom: 12,
                     }}
                   >
-                    {MOMENT_COPY[band].label}
+                    <img
+                      src={MOMENT_ART[band]}
+                      alt=""
+                      aria-hidden="true"
+                      style={{
+                        width: 60,
+                        height: 60,
+                        objectFit: "contain",
+                        flexShrink: 0,
+                      }}
+                    />
+                    <div
+                      style={{
+                        fontFamily: SERIF,
+                        fontWeight: 700,
+                        fontSize: 16,
+                        color: DARK,
+                      }}
+                    >
+                      {MOMENT_COPY[band].label}
+                    </div>
+                    <div
+                      style={{
+                        flex: 1,
+                        height: 1,
+                        background: "rgba(201,168,76,0.22)",
+                      }}
+                    />
                   </div>
                   <div
                     style={{
@@ -701,40 +748,77 @@ export function RhythmWizardPage() {
                       gap: 8,
                     }}
                   >
-                    {PURPOSE_OPTIONS[band].map((opt) => {
+                    {PURPOSE_OPTIONS[band].map((opt, idx) => {
                       const sel = purposes[band] === opt.value;
+                      const purposeIcon =
+                        PURPOSE_ART[band][idx] ?? MOMENT_ART[band];
                       return (
                         <button
                           key={opt.value}
                           onClick={() => setPurpose(band, opt.value)}
                           style={{
-                            padding: "12px 10px",
-                            borderRadius: 12,
+                            padding: "14px 12px",
+                            borderRadius: 16,
                             textAlign: "left",
-                            border: `2px solid ${sel ? BORDER_ACTIVE : "rgba(201,168,76,0.25)"}`,
-                            background: sel ? SELECTED_BG : CARD_BG,
+                            border: `1.5px solid ${sel ? BORDER_ACTIVE : "rgba(201,168,76,0.22)"}`,
+                            background: sel
+                              ? "rgba(255,251,244,0.98)"
+                              : CARD_BG,
                             cursor: "pointer",
+                            minHeight: 92,
+                            boxShadow: sel
+                              ? "0 12px 24px rgba(222,184,97,0.14)"
+                              : "0 6px 18px rgba(67,33,4,0.05)",
+                            display: "flex",
+                            alignItems: "flex-start",
+                            gap: 10,
                           }}
                         >
                           <div
                             style={{
-                              fontFamily: SERIF,
-                              fontWeight: 600,
-                              fontSize: 14,
-                              color: DARK,
-                              marginBottom: 2,
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              flexShrink: 0,
                             }}
                           >
-                            {opt.label}
+                            <img
+                              src={purposeIcon}
+                              alt=""
+                              aria-hidden="true"
+                              style={{
+                                width: 42,
+                                height: 42,
+                                objectFit: "contain",
+                              }}
+                            />
                           </div>
                           <div
                             style={{
-                              fontSize: 12,
-                              color: LIGHT,
-                              lineHeight: 1.4,
+                              flex: 1,
                             }}
                           >
-                            {opt.desc}
+                            <div
+                              style={{
+                                fontFamily: SERIF,
+                                fontWeight: 600,
+                                fontSize: 13,
+                                color: DARK,
+                                marginBottom: 4,
+                                lineHeight: 1.2,
+                              }}
+                            >
+                              {opt.label}
+                            </div>
+                            <div
+                              style={{
+                                fontSize: 12,
+                                color: LIGHT,
+                                fontWeight: 600,
+                              }}
+                            >
+                              {opt.desc}
+                            </div>
                           </div>
                         </button>
                       );

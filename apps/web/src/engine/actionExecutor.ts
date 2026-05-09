@@ -806,6 +806,111 @@ export async function executeAction(action: any, context: ActionContext): Promis
         });
 
         if (pranaType === 'agitated' || pranaType === 'drained') {
+          const triggerRes = await postTriggerMantras({
+            feeling: pranaType,
+            focus: (screenData.scan_focus as string) || (screenData.active_focus as string) || 'peacecalm',
+            subFocus: (screenData.prana_baseline_selection as string) || '',
+            depth: (screenData.routine_depth as string) || (screenData.routine_setup as string) || 'standard',
+            round: 1,
+            locale: (screenData.locale as string) || 'en',
+            tz,
+          });
+          const suggestions = triggerRes?.suggestions || [];
+          const practiceSuggestion = suggestions.find((s: any) => s?.type === 'practice');
+          const mantraSuggestion = suggestions.find((s: any) => s?.type === 'mantra');
+
+          const normalizePractice = (suggestion: any) => {
+            const core = suggestion?.core || {};
+            return {
+              ...core,
+              wisdom: suggestion?.context,
+              source: 'support',
+              is_trigger: true,
+              item_id: suggestion?.item_id || core.item_id || suggestion?.id || core.id,
+              item_type: 'practice',
+              steps_text: Array.isArray(core.steps)
+                ? core.steps.map((s: string, i: number) => `${i + 1}. ${s}`).join('\n')
+                : core.steps_text,
+              benefits_text: Array.isArray(core.benefits)
+                ? core.benefits.map((b: string) => `• ${b}`).join('\n')
+                : core.benefits_text,
+            };
+          };
+
+          const normalizeMantra = (suggestion: any) => {
+            const core = suggestion?.core || {};
+            return {
+              ...core,
+              wisdom: suggestion?.context,
+              source: 'support',
+              is_trigger: true,
+              item_id: suggestion?.item_id || core.item_id || suggestion?.id || core.id,
+              item_type: 'mantra',
+            };
+          };
+
+          if (practiceSuggestion) {
+            const practiceData = normalizePractice(practiceSuggestion);
+            dispatch(updateScreenData({
+              _trigger_practice_data: {
+                ...(practiceSuggestion.core || {}),
+                wisdom: practiceSuggestion.context,
+                item_id: practiceSuggestion.item_id || practiceSuggestion.id,
+              },
+              ...(mantraSuggestion
+                ? {
+                    _trigger_mantra_data: {
+                      ...(mantraSuggestion.core || {}),
+                      wisdom: mantraSuggestion.context,
+                      item_id: mantraSuggestion.item_id || mantraSuggestion.id,
+                    },
+                  }
+                : {}),
+              runner_active_item: practiceData,
+              runner_variant: 'practice',
+              runner_source: 'support_checkin',
+              trigger_feeling: pranaType,
+              trigger_step: 2,
+              trigger_cycle_count: 1,
+              _trigger_negative_label: 'Try another way',
+              completion_return_path: '/en/mitra',
+            }));
+            dispatch(loadScreen({ containerId: 'practice_runner', stateId: 'trigger_practice_runner' }));
+            webNavigate(_containerToPath('practice_runner', 'trigger_practice_runner'));
+            break;
+          }
+
+          if (mantraSuggestion) {
+            const mantraData = normalizeMantra(mantraSuggestion);
+            dispatch(updateScreenData({
+              _trigger_mantra_data: {
+                ...(mantraSuggestion.core || {}),
+                wisdom: mantraSuggestion.context,
+                item_id: mantraSuggestion.item_id || mantraSuggestion.id,
+              },
+              runner_active_item: mantraData,
+              runner_variant: 'mantra',
+              runner_source: 'support_checkin',
+              runner_reps_completed: 0,
+              runner_start_time: Date.now(),
+              runner_duration_actual_sec: 0,
+              mantra_text: mantraData.iast || mantraData.title || 'OM',
+              mantra_devanagari: mantraData.devanagari || 'ॐ',
+              mantra_audio_url: mantraData.audio_url || '',
+              trigger_mantra_text: mantraData.iast || mantraData.title || 'OM',
+              trigger_mantra_devanagari: mantraData.devanagari || 'ॐ',
+              trigger_feeling: pranaType,
+              trigger_step: 3,
+              trigger_cycle_count: 1,
+              _trigger_negative_label: 'Try another way',
+              completion_return_path: '/en/mitra',
+            }));
+            dispatch(loadScreen({ containerId: 'practice_runner', stateId: 'post_trigger_mantra' }));
+            webNavigate(_containerToPath('practice_runner', 'post_trigger_mantra'));
+            break;
+          }
+
+          // Fallback: keep the older OM breath-reset path when no suggestion is available.
           const checkinOmAudio = _rotateAudio(OM_AUDIO_LIBRARY, '_kalpx_om_audio_idx');
           const { label, devanagari } = _omTextForTrack(checkinOmAudio);
           dispatch(updateScreenData({
@@ -833,6 +938,7 @@ export async function executeAction(action: any, context: ActionContext): Promis
             trigger_feeling: pranaType,
             trigger_step: 1,
             trigger_cycle_count: 2,
+            completion_return_path: '/en/mitra',
           }));
           dispatch(loadScreen({ containerId: 'practice_runner', stateId: 'checkin_breath_reset' }));
           webNavigate(_containerToPath('practice_runner', 'checkin_breath_reset'));

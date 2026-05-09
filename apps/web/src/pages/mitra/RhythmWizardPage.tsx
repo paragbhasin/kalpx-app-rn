@@ -5,6 +5,7 @@ import {
   toRhythmSetupPayloadItems,
 } from "@kalpx/contracts";
 import type { RhythmTimeBand, RhythmWizardLocalItem } from "@kalpx/types";
+import { Pencil } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -450,13 +451,13 @@ export function RhythmWizardPage() {
   };
   const goldBtn: React.CSSProperties = {
     width: "100%",
-    padding: "14px 0",
-    borderRadius: 14,
+    padding: "10px",
+    borderRadius: 11,
     border: "none",
     background: GOLD_BTN,
     color: "#fff",
     fontFamily: SERIF,
-    fontSize: 16,
+    fontSize: 22,
     fontWeight: 700,
     cursor: "pointer",
   };
@@ -857,6 +858,20 @@ export function RhythmWizardPage() {
                 suggestLoading || saving || missingSlots.length > 0;
               return (
                 <>
+                  <img
+                    src="/leaves-bird.png"
+                    alt=""
+                    aria-hidden="true"
+                    style={{
+                      position: "absolute",
+                      top: -180,
+                      right: -22,
+                      width: 245,
+                      pointerEvents: "none",
+                      userSelect: "none",
+                      opacity: 0.5,
+                    }}
+                  />
                   <h2
                     style={{
                       fontFamily: SERIF,
@@ -977,100 +992,127 @@ export function RhythmWizardPage() {
                         <div
                           key={band}
                           style={{
-                            border: `1px solid ${BORDER}`,
-                            borderRadius: 16,
-                            background: CARD_BG,
-                            padding: "16px 18px",
-                            marginBottom: 14,
+                            border: `1.5px solid ${BORDER}`,
+                            borderRadius: 26,
+                            background: "rgba(255,251,244,0.95)",
+                            padding: "15px",
+                            marginBottom: 18,
+                            boxShadow: "0 14px 32px rgba(67,33,4,0.06)",
                           }}
                         >
                           <div
                             style={{
                               display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "flex-start",
+                              alignItems: "center",
+                              gap: 10,
+                              marginBottom: 18,
                             }}
                           >
-                            <div style={{ flex: 1, marginRight: 10 }}>
-                              <div
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: 8,
-                                  marginBottom: 6,
-                                }}
-                              >
-                                <span
-                                  style={{
-                                    fontSize: 10,
-                                    fontWeight: 700,
-                                    letterSpacing: 1.4,
-                                    color: "#8B6914",
-                                    textTransform: "uppercase",
-                                    background: "#F5F0E0",
-                                    borderRadius: 6,
-                                    padding: "2px 8px",
-                                  }}
-                                >
-                                  {itemTypeLabel(item.item_type)}
-                                </span>
-                                <span style={{ fontSize: 12, color: LIGHT }}>
-                                  {MOMENT_COPY[band].label}
-                                </span>
-                              </div>
-                              <div
-                                style={{
-                                  fontFamily: SERIF,
-                                  fontWeight: 700,
-                                  fontSize: 16,
-                                  color: DARK,
-                                  marginBottom: 4,
-                                }}
-                              >
-                                {item.title_snapshot}
-                              </div>
-                              {item.why_this && (
-                                <div
-                                  style={{
-                                    fontSize: 13,
-                                    color: "#8B6914",
-                                    lineHeight: 1.5,
-                                    fontStyle: "italic",
-                                    marginBottom: 4,
-                                  }}
-                                >
-                                  {item.why_this}
-                                </div>
-                              )}
-                              {!item.why_this && item.description_snapshot && (
-                                <div
-                                  style={{
-                                    fontSize: 13,
-                                    color: MID,
-                                    lineHeight: 1.5,
-                                  }}
-                                >
-                                  {item.description_snapshot}
-                                </div>
-                              )}
-                            </div>
+                            <span
+                              style={{
+                                fontSize: 11,
+                                fontWeight: 700,
+                                letterSpacing: 2,
+                                color: "#8B6914",
+                                textTransform: "uppercase",
+                                background:
+                                  "linear-gradient(180deg, #F8F0D8 0%, #FDF8EC 100%)",
+                                borderRadius: 10,
+                                padding: "6px 12px",
+                              }}
+                            >
+                              {itemTypeLabel(item.item_type)}
+                            </span>
+                            <span style={{ fontSize: 13, color: LIGHT }}>
+                              {MOMENT_COPY[band].label}
+                            </span>
                             <button
                               onClick={() => setPickerBand(band)}
                               style={{
                                 background: "none",
                                 border: `1px solid rgba(201,168,76,0.4)`,
                                 color: GOLD,
-                                borderRadius: 8,
-                                padding: "5px 10px",
+                                borderRadius: 16,
+                                padding: "10px 18px",
                                 fontSize: 13,
                                 cursor: "pointer",
                                 whiteSpace: "nowrap",
                                 flexShrink: 0,
+                                minWidth: 106,
+                                marginLeft: "auto",
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: 8,
                               }}
                             >
+                              <Pencil size={14} strokeWidth={1.8} />
                               Change
                             </button>
                           </div>
+                          <div
+                            style={{
+                              fontFamily: SERIF,
+                              fontWeight: 700,
+                              fontSize: 18,
+                              color: DARK,
+                              marginBottom: 14,
+                              lineHeight: 1.45,
+                            }}
+                          >
+                            {item.title_snapshot}
+                          </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 8,
+                              marginBottom: 14,
+                              color: "#E4B44F",
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: 86,
+                                height: 1,
+                                background: "rgba(228,180,79,0.4)",
+                              }}
+                            />
+                            <span style={{ fontSize: 13, lineHeight: 1 }}>
+                              ✦
+                            </span>
+                            <div
+                              style={{
+                                width: 118,
+                                height: 1,
+                                background: "rgba(228,180,79,0.4)",
+                              }}
+                            />
+                          </div>
+                          {item.why_this && (
+                            <div
+                              style={{
+                                fontSize: 14,
+                                color: "#8B6914",
+                                lineHeight: 1.6,
+                                fontStyle: "italic",
+                              }}
+                            >
+                              {item.why_this}
+                            </div>
+                          )}
+                          {!item.why_this && item.description_snapshot && (
+                            <div
+                              style={{
+                                fontSize: 14,
+                                color: "#8B6914",
+                                lineHeight: 1.6,
+                                fontStyle: "italic",
+                              }}
+                            >
+                              {item.description_snapshot}
+                            </div>
+                          )}
                         </div>
                       );
                     })}
@@ -1091,9 +1133,12 @@ export function RhythmWizardPage() {
                     onClick={() => setStep("reminders")}
                     style={{
                       ...goldBtn,
-                      marginTop: 8,
+                      marginTop: 20,
                       opacity: acceptDisabled ? 0.45 : 1,
                       cursor: acceptDisabled ? "not-allowed" : "pointer",
+
+                      borderRadius: 11,
+                      boxShadow: "0 16px 34px rgba(222,184,97,0.22)",
                     }}
                     disabled={acceptDisabled}
                   >
@@ -1102,7 +1147,17 @@ export function RhythmWizardPage() {
                   {!isEditMode && (
                     <button
                       onClick={() => navigate("/en/mitra/rhythm/edit")}
-                      style={ghostBtn}
+                      style={{
+                        ...ghostBtn,
+                        marginTop: 18,
+
+                        borderRadius: 11,
+                        border: "1.5px solid rgba(201,168,76,0.45)",
+                        background: "rgba(255,251,244,0.72)",
+                        fontFamily: SERIF,
+                        fontSize: 18,
+                        color: "#8B6914",
+                      }}
                     >
                       Choose My Own
                     </button>

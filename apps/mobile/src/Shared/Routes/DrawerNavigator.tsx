@@ -170,11 +170,25 @@ const CustomDrawerContent = (props) => {
     },
     {
       id: "3",
+      name: "KalpXHaat",
+      title: "HaatLandingView",
+      iconType: "image",
+      icon: require("../../../assets/marketplace.png"),
+    },
+    {
+      id: "4",
       name: t("drawer.community"),
       title: "CommunityLanding",
       iconType: "vector",
       icon: "people-outline",
       activeIcon: "people",
+    },
+    {
+      id: "5",
+      name: "Retreats",
+      title: "RetreatsScreen",
+      iconType: "image",
+      icon: require("../../../assets/yoga.png"),
     },
     {
       id: "6",

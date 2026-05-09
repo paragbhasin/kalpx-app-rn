@@ -1,6 +1,14 @@
 import { AUTH_KEYS } from "@kalpx/api-client";
 import { clearTokens } from "@kalpx/auth";
-import { BookOpen, LayoutDashboard, User, Users, X } from "lucide-react";
+import {
+  BookOpen,
+  LayoutDashboard,
+  Mountain,
+  ShoppingBag,
+  User,
+  Users,
+  X,
+} from "lucide-react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { webStorage } from "../../lib/webStorage";
@@ -11,6 +19,8 @@ interface Props {
 
 const NAV_ITEMS = [
   { label: "Mitra", Icon: LayoutDashboard, to: "/en/mitra/dashboard" },
+  { label: "Kalpx Haat", Icon: ShoppingBag, to: "/en/haat" },
+  { label: "Retreats", Icon: Mountain, to: "/en/retreats" },
   { label: "Community", Icon: Users, to: "/en/community" },
   { label: "Classes", Icon: BookOpen, to: "/en/classes" },
   { label: "Profile", Icon: User, to: "/en/profile" },

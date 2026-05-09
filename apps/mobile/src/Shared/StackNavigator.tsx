@@ -23,10 +23,26 @@ import LearnMore from "../screens/Home/LearnMore";
 import MySadana from "../screens/Home/MySadana";
 import PoojaScreen from "../screens/Home/PoojaScreen";
 import RelatedVideosScreen from "../screens/Home/RelatedVideosScreen";
-import RetreatsScreen from "../screens/Home/RetreatsScreen";
+import RetreatsScreen from "../components/Retreats/RetreatsScreen";
+import RetreatDetailsScreen from "../screens/Home/RetreatDetailsScreen";
+import RetreatPackageScreen from "../screens/Home/RetreatPackageScreen";
+import RetreatBookingScreen from "../screens/Home/RetreatBookingScreen";
+import RetreatBookingDetailsScreen from "../screens/Home/RetreatBookingDetailsScreen";
+import RetreatPaymentScreen from "../screens/Home/RetreatPaymentScreen";
+import RetreatCancellationScreen from "../screens/Home/RetreatCancellationScreen";
 import SadanaTrackerScreen from "../screens/Home/SadanaTrackerScreen";
 import SubmitMantraScreen from "../screens/Home/SubmitMantraScreen";
 import TravelPlannerScreen from "../screens/Home/TravelPlannerScreen";
+import HaatLandingView from "../screens/KalpXHaat/HaatLandingView";
+import StoreDetailView from "../screens/KalpXHaat/StoreDetailView";
+import ProductDetails from "../screens/KalpXHaat/ProductDetails";
+import ServiceDetails from "../screens/KalpXHaat/ServiceDetails";
+import HaatCart from "../screens/KalpXHaat/HaatCart";
+import PaymentDetails from "../screens/KalpXHaat/PaymentDetails";
+import AddressListView from "../screens/KalpXHaat/AddressListView";
+import AddNewAddress from "../screens/KalpXHaat/AddNewAddress";
+import PackageDetails from "../screens/KalpXHaat/PackageDetails";
+import ServiceCheckout from "../screens/KalpXHaat/ServiceCheckout";
 import Notifications from "../screens/Notifications/Notifications";
 import OnlineclassesScreen from "../screens/OnlineclassesScreen";
 import Language from "../screens/Profile/Language";
@@ -36,17 +52,17 @@ import Profile from "../screens/Profile/Profile";
 import ProfileDetails from "../screens/Profile/ProfileDetails";
 import RoomMemoryScreen from "../screens/Room/RoomMemoryScreen";
 import Sankalp from "../screens/Sankalp";
-import SocialExplore from "../screens/Social/SocialExplore";
-import CommunityLanding from "../screens/Social/CommunityLanding";
 import CommunityDetail from "../screens/Social/CommunityDetail";
-import SocialPostDetailScreen from "../screens/Social/SocialPostDetailScreen";
+import CommunityLanding from "../screens/Social/CommunityLanding";
 import CreateSocialPost from "../screens/Social/CreateSocialPost";
+import GlobalSearchScreen from "../screens/Social/GlobalSearchScreen";
+import SocialExplore from "../screens/Social/SocialExplore";
+import SocialPostDetailScreen from "../screens/Social/SocialPostDetailScreen";
 import StreakScreen from "../screens/Streak/StreakScreen";
 import TopTabsNavigator from "../screens/Tracker/TopTabsNavigator";
 import TrackerEdit from "../screens/Tracker/TrackerEdit";
 import TrackerProgress from "../screens/Tracker/TrackerProgress";
 import TrackerScreen from "../screens/Tracker/TrackerScreen";
-import GlobalSearchScreen from "../screens/Social/GlobalSearchScreen";
 import RhythmEditScreen from "../screens/Mitra/RhythmEditScreen";
 import RhythmHomeScreen from "../screens/Mitra/RhythmHomeScreen";
 import RhythmSetupScreen from "../screens/Mitra/RhythmSetupScreen";
@@ -61,7 +77,7 @@ const Stack: any = createNativeStackNavigator();
 export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
   <Stack.Navigator
     initialRouteName={initialRouteName}
-    screenOptions={{ 
+    screenOptions={{
       headerShown: false,
       contentStyle: { backgroundColor: 'transparent' }
     }}
@@ -87,8 +103,38 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
       options={{ headerShown: false }}
     />
     <Stack.Screen
-      name="Retreat"
+      name="RetreatsScreen"
       component={RetreatsScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="RetreatDetails"
+      component={RetreatDetailsScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="RetreatPackage"
+      component={RetreatPackageScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="RetreatBooking"
+      component={RetreatBookingScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="RetreatBookingDetails"
+      component={RetreatBookingDetailsScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="RetreatPayment"
+      component={RetreatPaymentScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="RetreatCancellation"
+      component={RetreatCancellationScreen}
       options={{ headerShown: false }}
     />
     <Stack.Screen
@@ -104,6 +150,56 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
     <Stack.Screen
       name="ClassesScreen"
       component={ClassesScreen}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="HaatLandingView"
+      component={HaatLandingView}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="StoreDetailView"
+      component={StoreDetailView}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="ProductDetails"
+      component={ProductDetails}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="ServiceDetails"
+      component={ServiceDetails}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="HaatCart"
+      component={HaatCart}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="PaymentDetails"
+      component={PaymentDetails}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="AddressListView"
+      component={AddressListView}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="AddNewAddress"
+      component={AddNewAddress}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="PackageDetails"
+      component={PackageDetails}
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen
+      name="ServiceCheckout"
+      component={ServiceCheckout}
       options={{ headerShown: false }}
     />
     <Stack.Screen
@@ -279,7 +375,7 @@ export const HomeStackNavigator = ({ initialRouteName = "Home" }) => (
 );
 
 export const NotificationStackNavigator = () => (
-  <Stack.Navigator screenOptions={{ 
+  <Stack.Navigator screenOptions={{
     headerShown: false,
     contentStyle: { backgroundColor: 'transparent' }
   }}>
@@ -293,7 +389,7 @@ export const NotificationStackNavigator = () => (
 );
 
 export const ProfileStackNavigator = () => (
-  <Stack.Navigator screenOptions={{ 
+  <Stack.Navigator screenOptions={{
     headerShown: false,
     contentStyle: { backgroundColor: 'transparent' }
   }}>

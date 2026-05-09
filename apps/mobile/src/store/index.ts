@@ -12,6 +12,7 @@ import {
   searchClassesReducer,
   slotsListReducer,
 } from "../screens/Classes/reducers";
+import { feedReducer } from "../screens/Feed/reducers";
 import {
   completeMantraReducer,
   dailyDharmaTrackerReducer,
@@ -25,29 +26,42 @@ import {
 } from "../screens/Home/reducers";
 import { loginReducer, socialLoginReducer } from "../screens/Login/reducers";
 import { notificationsReducer } from "../screens/Notifications/reducers";
+import { postDetailReducer } from "../screens/PostDetail/reducers";
 import {
   deleteAccountReducer,
   profileDetailsReducer,
   profileOptionsReducer,
   updateProfileReducer,
 } from "../screens/Profile/reducers";
-import { socialExploreReducer, communitiesReducer } from "../screens/Social/reducers";
+import {
+  communitiesReducer,
+  socialExploreReducer,
+} from "../screens/Social/reducers";
 import {
   dailyPracticeReducer,
   practiceReducer,
 } from "../screens/Streak/reducers";
 import { userActivityReducer } from "../screens/UserActivity/reducers";
-import { feedReducer } from "../screens/Feed/reducers";
-import { postDetailReducer } from "../screens/PostDetail/reducers";
-import snackBarReducer from "./snackBarSlice";
-import mitraReducer from "./mitraSlice";
-import screenReducer from "./screenSlice";
+import haatReducer from "../service/haatSlice";
 import companionStateReducer from "./companionStateSlice";
-import preferencesReducer from "./preferencesSlice";
-import notificationsReducer2 from "./notificationsSlice";
 import doorReducer from "./doorSlice";
+import mitraReducer from "./mitraSlice";
+import notificationsReducer2 from "./notificationsSlice";
+import preferencesReducer, { persistPreferences } from "./preferencesSlice";
+import screenReducer from "./screenSlice";
+import snackBarReducer from "./snackBarSlice";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Cross-cutting persistence wiring (companionState + preferences).
+// Persist on every change (cheap — slices are small). Use persist thunks so
+// versioning/serialization live in the slice.
+// ─────────────────────────────────────────────────────────────────────────────
+import {
+  persistCompanionState,
+} from "./companionStateSlice";
 
 const appReducer = combineReducers({
+  haat: haatReducer,
   login: loginReducer,
   snackBar: snackBarReducer,
   mitra: mitraReducer,
@@ -107,18 +121,9 @@ export const store = configureStore({
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Cross-cutting persistence wiring (companionState + preferences).
-// Persist on every change (cheap — slices are small). Use persist thunks so
-// versioning/serialization live in the slice.
-// ─────────────────────────────────────────────────────────────────────────────
-import {
-  persistCompanionState,
-} from "./companionStateSlice";
-import { persistPreferences } from "./preferencesSlice";
-
 let _lastCompanionState: any = null;
 let _lastPreferences: any = null;
+
 store.subscribe(() => {
   const s: any = store.getState();
   if (s.companionState !== _lastCompanionState) {

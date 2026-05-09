@@ -24,6 +24,13 @@ function getRhythmTimeBand(): "morning" | "afternoon" | "night" {
   return "night";
 }
 
+const FEELING_OPTIONS = [
+  "Agitated",
+  "Drained",
+  "Energised",
+  "Balanced",
+] as const;
+
 function LoadingScreen() {
   return (
     <div
@@ -54,6 +61,9 @@ export function MitraHomePage() {
   useGuestIdentity();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const [selectedFeeling, setSelectedFeeling] = useState<
+    (typeof FEELING_OPTIONS)[number] | null
+  >(null);
   const { loading, error, hasActiveJourney, rawStatus, refetch } =
     useJourneyStatus();
   const {
@@ -107,6 +117,10 @@ export function MitraHomePage() {
     const doorStates = homeData?.door_states;
     const innerPathSummary = homeData?.inner_path_summary;
     const greeting = homeData?.greeting;
+    const hasRhythm = homeData?.companion_rhythm?.has_rhythm === true;
+    const myRhythmTarget = hasRhythm
+      ? "/en/mitra/rhythm"
+      : "/en/mitra/rhythm/setup";
 
     // My Rhythm: prefer backend summary label, then first item in current time-band slot, then door state
     const rhythmBand = getRhythmTimeBand();
@@ -165,7 +179,6 @@ export function MitraHomePage() {
                 alt=""
                 style={{
                   width: "100%",
-
                   objectFit: "cover",
                   position: "absolute",
                   inset: 0,
@@ -187,7 +200,7 @@ export function MitraHomePage() {
                   style={{
                     width: "100%",
                     maxWidth: 420,
-                    padding: "0 24px 32px",
+                    padding: "0px 17px 6px",
                     textAlign: "left",
                   }}
                 >
@@ -292,31 +305,59 @@ export function MitraHomePage() {
               >
                 {/* My Rhythm */}
                 <button
-                  onClick={() => navigate("/en/mitra/rhythm")}
+                  onClick={() => navigate(myRhythmTarget)}
                   style={{
                     width: "100%",
-                    border: "1px solid rgba(201,168,76,0.22)",
-                    borderRadius: 18,
-                    background: "rgba(250,245,240,0.92)",
-                    padding: "18px 22px",
-                    boxShadow: "0 12px 24px rgba(67,33,4,0.10)",
+                    border: "1px solid rgba(201,168,76,0.28)",
+                    borderRadius: 20,
+
+                    padding: "10px",
+                    boxShadow: "0 10px 25px rgba(67,33,4,0.08)",
                     textAlign: "left",
                     cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 18,
+                    position: "relative",
+                    overflow: "hidden",
                   }}
                 >
                   <div
                     style={{
-                      fontFamily: "var(--kalpx-font-serif)",
-                      fontWeight: 700,
-                      fontSize: 17,
-                      color: "#432104",
-                      marginBottom: 4,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
                     }}
                   >
-                    {DOOR_LABELS.my_rhythm}
+                    <img
+                      src="/mitra1.svg"
+                      alt=""
+                      style={{
+                        width: 48,
+                        height: 48,
+                      }}
+                    />
                   </div>
-                  <div style={{ color: "#7B6550", fontSize: 14 }}>
-                    {rhythmSubtitle}
+                  <div style={{ flex: 1 }}>
+                    <div
+                      style={{
+                        fontFamily: "var(--kalpx-font-serif)",
+                        fontWeight: 700,
+                        fontSize: 18,
+                        color: "#432104",
+                        marginBottom: 4,
+                      }}
+                    >
+                      {DOOR_LABELS.my_rhythm}
+                    </div>
+                    <div
+                      style={{ color: "rgba(67, 33, 4, 0.6)", fontSize: 14 }}
+                    >
+                      {rhythmSubtitle}
+                    </div>
+                  </div>
+                  <div style={{ color: "#C9A84C", opacity: 0.5, fontSize: 18 }}>
+                    →
                   </div>
                 </button>
 
@@ -325,28 +366,55 @@ export function MitraHomePage() {
                   onClick={() => navigate("/en/mitra/inner-path")}
                   style={{
                     width: "100%",
-                    border: "1px solid rgba(201,168,76,0.22)",
-                    borderRadius: 18,
-                    background: "rgba(250,245,240,0.92)",
-                    padding: "18px 22px",
-                    boxShadow: "0 12px 24px rgba(67,33,4,0.10)",
+                    border: "1px solid rgba(201,168,76,0.28)",
+                    borderRadius: 20,
+
+                    padding: "10px",
+                    boxShadow: "0 10px 25px rgba(67,33,4,0.08)",
                     textAlign: "left",
                     cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 18,
+                    position: "relative",
                   }}
                 >
                   <div
                     style={{
-                      fontFamily: "var(--kalpx-font-serif)",
-                      fontWeight: 700,
-                      fontSize: 17,
-                      color: "#432104",
-                      marginBottom: 4,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
                     }}
                   >
-                    {DOOR_LABELS.inner_path}
+                    <img
+                      src="/mitra2.svg"
+                      alt=""
+                      style={{
+                        width: 48,
+                        height: 48,
+                      }}
+                    />
                   </div>
-                  <div style={{ color: "#7B6550", fontSize: 14 }}>
-                    {innerPathSubtitle}
+                  <div style={{ flex: 1 }}>
+                    <div
+                      style={{
+                        fontFamily: "var(--kalpx-font-serif)",
+                        fontWeight: 700,
+                        fontSize: 18,
+                        color: "#432104",
+                        marginBottom: 4,
+                      }}
+                    >
+                      {DOOR_LABELS.inner_path}
+                    </div>
+                    <div
+                      style={{ color: "rgba(67, 33, 4, 0.6)", fontSize: 14 }}
+                    >
+                      {innerPathSubtitle}
+                    </div>
+                  </div>
+                  <div style={{ color: "#C9A84C", opacity: 0.5, fontSize: 18 }}>
+                    →
                   </div>
                 </button>
 
@@ -355,28 +423,55 @@ export function MitraHomePage() {
                   onClick={() => navigate("/en/mitra/quick-reset")}
                   style={{
                     width: "100%",
-                    border: "1px solid rgba(201,168,76,0.22)",
-                    borderRadius: 18,
-                    background: "rgba(250,245,240,0.92)",
-                    padding: "18px 22px",
-                    boxShadow: "0 12px 24px rgba(67,33,4,0.10)",
+                    border: "1px solid rgba(201,168,76,0.28)",
+                    borderRadius: 20,
+
+                    padding: "10px",
+                    boxShadow: "0 10px 25px rgba(67,33,4,0.08)",
                     textAlign: "left",
                     cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 18,
+                    position: "relative",
                   }}
                 >
                   <div
                     style={{
-                      fontFamily: "var(--kalpx-font-serif)",
-                      fontWeight: 700,
-                      fontSize: 17,
-                      color: "#432104",
-                      marginBottom: 4,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
                     }}
                   >
-                    {DOOR_LABELS.quick_reset}
+                    <img
+                      src="/mitra3.svg"
+                      alt=""
+                      style={{
+                        width: 48,
+                        height: 48,
+                      }}
+                    />
                   </div>
-                  <div style={{ color: "#7B6550", fontSize: 14 }}>
-                    {doorStates.quick_reset?.subtitle}
+                  <div style={{ flex: 1 }}>
+                    <div
+                      style={{
+                        fontFamily: "var(--kalpx-font-serif)",
+                        fontWeight: 700,
+                        fontSize: 18,
+                        color: "#432104",
+                        marginBottom: 4,
+                      }}
+                    >
+                      {DOOR_LABELS.quick_reset}
+                    </div>
+                    <div
+                      style={{ color: "rgba(67, 33, 4, 0.6)", fontSize: 14 }}
+                    >
+                      {doorStates.quick_reset?.subtitle}
+                    </div>
+                  </div>
+                  <div style={{ color: "#C9A84C", opacity: 0.5, fontSize: 18 }}>
+                    →
                   </div>
                 </button>
 
@@ -385,30 +480,131 @@ export function MitraHomePage() {
                   onClick={() => navigate("/en/mitra/tell-mitra")}
                   style={{
                     width: "100%",
-                    border: "1px solid rgba(201,168,76,0.22)",
-                    borderRadius: 18,
-                    background: "rgba(250,245,240,0.92)",
-                    padding: "18px 22px",
-                    boxShadow: "0 12px 24px rgba(67,33,4,0.10)",
+                    border: "1px solid rgba(201,168,76,0.28)",
+                    borderRadius: 20,
+
+                    padding: "10px",
+                    boxShadow: "0 10px 25px rgba(67,33,4,0.08)",
                     textAlign: "left",
                     cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 18,
+                    position: "relative",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <img
+                      src="/mitra4.svg"
+                      alt=""
+                      style={{
+                        width: 48,
+                        height: 48,
+                      }}
+                    />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div
+                      style={{
+                        fontFamily: "var(--kalpx-font-serif)",
+                        fontWeight: 700,
+                        fontSize: 18,
+                        color: "#432104",
+                        marginBottom: 4,
+                      }}
+                    >
+                      {DOOR_LABELS.tell_mitra}
+                    </div>
+                    <div
+                      style={{ color: "rgba(67, 33, 4, 0.6)", fontSize: 14 }}
+                    >
+                      {doorStates.tell_mitra?.subtitle}
+                    </div>
+                  </div>
+                  <div style={{ color: "#C9A84C", opacity: 0.5, fontSize: 18 }}>
+                    →
+                  </div>
+                </button>
+
+                <div
+                  style={{
+                    width: "100%",
+                    border: "1px solid rgba(201,168,76,0.28)",
+                    borderRadius: 20,
+                    padding: "16px 18px 18px",
+                    boxShadow: "0 10px 25px rgba(67,33,4,0.08)",
+                    background:
+                      "linear-gradient(180deg, rgba(255,255,255,0.78) 0%, rgba(255,250,243,0.9) 100%)",
                   }}
                 >
                   <div
                     style={{
                       fontFamily: "var(--kalpx-font-serif)",
                       fontWeight: 700,
-                      fontSize: 17,
+                      fontSize: 18,
                       color: "#432104",
-                      marginBottom: 4,
+                      marginBottom: 6,
                     }}
                   >
-                    {DOOR_LABELS.tell_mitra}
+                    How are you feeling today?
                   </div>
-                  <div style={{ color: "#7B6550", fontSize: 14 }}>
-                    {doorStates.tell_mitra?.subtitle}
+                  <div
+                    style={{
+                      color: "rgba(67, 33, 4, 0.62)",
+                      fontSize: 14,
+                      lineHeight: 1.5,
+                      marginBottom: 14,
+                    }}
+                  >
+                    Choose what best matches your energy right now.
                   </div>
-                </button>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                      gap: 10,
+                    }}
+                  >
+                    {FEELING_OPTIONS.map((feeling) => {
+                      const isSelected = selectedFeeling === feeling;
+                      return (
+                        <button
+                          key={feeling}
+                          type="button"
+                          onClick={() => setSelectedFeeling(feeling)}
+                          aria-pressed={isSelected}
+                          style={{
+                            width: "100%",
+                            border: isSelected
+                              ? "1px solid rgba(201,168,76,0.85)"
+                              : "1px solid rgba(201,168,76,0.38)",
+                            background: isSelected
+                              ? "linear-gradient(135deg, rgba(243,220,168,0.95), rgba(255,247,230,0.98))"
+                              : "rgba(255,255,255,0.78)",
+                            color: "#432104",
+                            borderRadius: 999,
+                            padding: "10px 14px",
+                            fontSize: 14,
+                            fontWeight: isSelected ? 700 : 500,
+                            cursor: "pointer",
+                            boxShadow: isSelected
+                              ? "0 6px 14px rgba(201,168,76,0.18)"
+                              : "none",
+                            transition: "all 160ms ease",
+                          }}
+                        >
+                          {feeling}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             )}
           </div>

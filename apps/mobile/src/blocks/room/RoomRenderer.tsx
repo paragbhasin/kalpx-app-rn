@@ -20,6 +20,7 @@ import { Fonts } from "../../theme/fonts";
 import RoomActionList from "./RoomActionList";
 import RoomOpeningExperience from "./RoomOpeningExperience";
 import RoomPrincipleBanner from "./RoomPrincipleBanner";
+import RoomGuidedSection from "./RoomGuidedSection";
 import { LIFE_CONTEXT_LABELS, ROOM_DISPLAY_NAMES } from "./roomConstants";
 import type { RoomRendererProps } from "./types";
 
@@ -43,6 +44,7 @@ const RoomRenderer: React.FC<RoomRendererProps> = ({
     ? LIFE_CONTEXT_LABELS[envelope.life_context]
     : null;
   const ctx = envelope.room_context;
+  const isGuided = !!(ctx?.entry_context?.recommended_first_action_id);
 
   return (
     <View style={styles.root} testID={`room_renderer_${envelope.room_id}`}>
@@ -56,6 +58,11 @@ const RoomRenderer: React.FC<RoomRendererProps> = ({
         {lifeContextLabel ? (
           <Text style={styles.lifeContext}>
             {"You chose: " + lifeContextLabel}
+          </Text>
+        ) : null}
+        {ctx?.situation_acknowledgement_line ? (
+          <Text style={styles.situationAck} testID="room_situation_ack">
+            {ctx.situation_acknowledgement_line}
           </Text>
         ) : null}
         {ctx?.sanatan_insight_line ? (
@@ -85,7 +92,11 @@ const RoomRenderer: React.FC<RoomRendererProps> = ({
       {ctx?.bridge_line ? (
         <Text style={styles.bridgeLine} testID="room_bridge_line">{ctx.bridge_line}</Text>
       ) : null}
-      <RoomActionList envelope={envelope} />
+      {isGuided ? (
+        <RoomGuidedSection envelope={envelope} />
+      ) : (
+        <RoomActionList envelope={envelope} />
+      )}
     </View>
   );
 };
@@ -141,6 +152,16 @@ const styles = StyleSheet.create({
     lineHeight: 17,
     textAlign: "center",
     marginBottom: 10,
+  },
+  situationAck: {
+    fontSize: 14,
+    color: "#6B5E4E",
+    fontStyle: "italic",
+    textAlign: "center",
+    marginTop: 6,
+    marginBottom: 2,
+    lineHeight: 20,
+    paddingHorizontal: 20,
   },
   roomPurpose: {
     fontSize: 13,

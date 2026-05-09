@@ -40,6 +40,7 @@ import LifeContextPickerSheet, {
 } from "../blocks/room/LifeContextPickerSheet";
 import WhyThisL2Sheet from "../blocks/WhyThisL2Sheet";
 import RoomRenderer from "../blocks/room/RoomRenderer";
+import RoomReflectionSheet from "../blocks/room/RoomReflectionSheet";
 import type {
   RoomId,
   RoomRenderV1,
@@ -439,6 +440,14 @@ const RoomRenderBranch: React.FC<RenderBranchProps> = ({
   const fetchedRef = useRef<string | null>(null);
   const hasFiredEntry = useRef(false);
   const { showToast } = useToast();
+  const { loadScreen, goBack } = useScreenStore();
+
+  const showReflection = useScreenStore(
+    (s: any) => !!(s.screen?.screenData?.show_room_reflection ?? s.screenData?.show_room_reflection),
+  );
+  const renderPayload = useScreenStore(
+    (s: any) => s.screen?.screenData?.room_render_payload ?? s.screenData?.room_render_payload ?? null,
+  );
 
   // Gate 6D — room_entered telemetry. useRef guard prevents double-fire on
   // re-renders. Fires once per RoomRenderBranch mount when roomId is known.
@@ -483,6 +492,7 @@ const RoomRenderBranch: React.FC<RenderBranchProps> = ({
           throw new Error("envelope_malformed");
         }
         setEnvelope(data as RoomRenderV1);
+        store.dispatch(screenActions.setScreenValue({ key: 'room_render_payload', value: data }));
         store.dispatch(
           screenActions.setScreenValue({
             key: 'room_why_this_state',
@@ -534,14 +544,53 @@ const RoomRenderBranch: React.FC<RenderBranchProps> = ({
     );
   }
 
+  function closeReflection() {
+    store.dispatch(screenActions.setScreenValue({ key: "show_room_reflection", value: false }));
+  }
+
+  function navigateTellMitra() {
+    closeReflection();
+    const { buildActionCtx } = require("../blocks/room/actions/actionContextHelper");
+    void executeAction(
+      { type: "tell_mitra_navigate" } as any,
+      buildActionCtx({ loadScreen, goBack }),
+    );
+  }
+
+  function returnHome() {
+    closeReflection();
+    const dashContainer =
+      process.env.EXPO_PUBLIC_MITRA_V3_NEW_DASHBOARD === "1"
+        ? "companion_dashboard_v3"
+        : "companion_dashboard";
+    loadScreen({ container_id: dashContainer, state_id: "day_active" } as any);
+  }
+
+  const envelopeOrPayload: RoomRenderV1 | null = envelope ?? (renderPayload as RoomRenderV1 | null);
+  const effectiveRoomId = String(roomId || "");
+  const renderId = (envelopeOrPayload as any)?.provenance?.render_id ?? null;
+  const tellMitraEventId = (envelopeOrPayload as any)?.room_context?.entry_context?.tell_mitra_event_id ?? null;
+
   return (
-    <ScrollView
-      style={styles.scrollRoot}
-      contentContainerStyle={styles.scrollContent}
-      showsVerticalScrollIndicator={false}
-    >
-      <RoomRenderer envelope={envelope} />
-    </ScrollView>
+    <>
+      <ScrollView
+        style={styles.scrollRoot}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <RoomRenderer envelope={envelope} />
+      </ScrollView>
+      {showReflection && effectiveRoomId ? (
+        <RoomReflectionSheet
+          roomId={effectiveRoomId}
+          renderId={renderId}
+          tellMitraEventId={tellMitraEventId}
+          onClose={closeReflection}
+          onNavigateTellMitra={navigateTellMitra}
+          onReturnHome={returnHome}
+        />
+      ) : null}
+    </>
   );
 };
 

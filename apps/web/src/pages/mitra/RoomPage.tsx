@@ -8,6 +8,7 @@ import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
 import { LifeContextPickerSheet } from "../../components/blocks/room/LifeContextPickerSheet";
 import { RoomRenderer } from "../../components/blocks/room/RoomRenderer";
+import { RoomReflectionSheet } from "../../components/blocks/room/RoomReflectionSheet";
 import { ROOM_DISPLAY_NAMES } from "../../components/blocks/room/roomConstants";
 import { executeAction } from "../../engine/actionExecutor";
 import { getRoomRender, trackEvent, trackRoomTelemetry } from "../../engine/mitraApi";
@@ -255,6 +256,22 @@ export function RoomPage() {
     );
   }
 
+  const showReflection = !!(sd?.show_room_reflection);
+
+  function handleCloseReflection() {
+    dispatch(updateScreenData({ show_room_reflection: false }));
+  }
+
+  function handleReflectionNavigateTellMitra() {
+    dispatch(updateScreenData({ show_room_reflection: false }));
+    webNavigate("/en/mitra/tell-mitra");
+  }
+
+  function handleReflectionViewAllSteps() {
+    dispatch(updateScreenData({ show_room_reflection: false }));
+    // The guided section's "View all steps" is within RoomRenderer — just close reflection
+  }
+
   return (
     <div style={{ ...roomBgStyle, maxWidth: 480, margin: "0 auto" }}>
       {envelope ? (
@@ -289,6 +306,17 @@ export function RoomPage() {
             Return to dashboard
           </button>
         </div>
+      )}
+      {showReflection && envelope && (
+        <RoomReflectionSheet
+          roomId={fullRoomId}
+          renderId={(envelope as any).provenance?.render_id ?? null}
+          tellMitraEventId={(envelope as any).room_context?.entry_context?.tell_mitra_event_id ?? null}
+          onClose={handleCloseReflection}
+          onNavigateTellMitra={handleReflectionNavigateTellMitra}
+          onViewAllSteps={handleReflectionViewAllSteps}
+          onReturnHome={() => { dispatch(updateScreenData({ show_room_reflection: false })); webNavigate("/en/mitra/dashboard"); }}
+        />
       )}
     </div>
   );

@@ -409,6 +409,40 @@ export interface RoomFallbacks {
   >;
 }
 
+// S17-D4A: typed entry_context for guided room experience.
+export interface RoomEntryContext {
+  tell_mitra_event_id?:                  string | number | null;
+  life_context?:                         string | null;
+  specific_contexts?:                    string[];
+  primary_specific_context?:             string | null;
+  support_need?:                         string | null;
+  pattern_key?:                          string | null;
+  recommended_first_action_id?:          string | null;
+  recommended_first_action_title?:       string | null;
+  recommended_first_action_description?: string | null;
+  secondary_room_id?:                    string | null;
+  // routing provenance (from S17-D2)
+  intent_type?:                          string | null;
+  suggested_room_id?:                    string | null;
+}
+
+// S17-D4A: lightweight action summary for "View all steps".
+export interface RoomStep {
+  step_number:    number;
+  action_id:      string;
+  label:          string;
+  action_type:    ActionType;
+  action_family:  ActionFamily;
+  is_recommended: boolean;
+}
+
+// S17-D4A: per-room reflection option shown in "What shifted a little?" sheet.
+export interface RoomReflectionOption {
+  code:                 string;
+  label:                string;
+  is_tell_mitra_bridge?: boolean;
+}
+
 // Wave 4 (2026-04-23): 3-layer context surface under room header.
 export interface RoomContext {
   room_purpose_line?: string | null;
@@ -416,6 +450,10 @@ export interface RoomContext {
   why_this_room_line?: string | null;
   /** Batch 4C: gentle connective line between wisdom banner and action list. */
   bridge_line?: string | null;
+  /** S17-D4A: Tell Mitra-specific (or generic direct-entry) acknowledgement. */
+  situation_acknowledgement_line?: string | null;
+  /** S17-D4A: typed entry context (was untyped before). */
+  entry_context?: RoomEntryContext | null;
 }
 
 export interface RoomRenderV1 {
@@ -435,6 +473,9 @@ export interface RoomRenderV1 {
 
   /** Wave 4: optional 3-layer context surface. Null when no context slots authored. */
   room_context?: RoomContext | null;
+
+  /** S17-D4A: non-exit action summaries for "View all steps". Null when flag off. */
+  room_steps?: RoomStep[] | null;
 
   opening_experience: OpeningExperience;
 

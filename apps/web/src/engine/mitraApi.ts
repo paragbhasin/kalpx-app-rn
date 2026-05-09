@@ -379,6 +379,23 @@ export async function postRoomTelemetry(payload: {
 }
 
 /**
+ * POST /api/mitra/rooms/{room_id}/reflect/ — Guided room reflection (S17-D4A).
+ * Best-effort — errors swallowed silently.
+ */
+export async function postRoomReflection(
+  roomId: string,
+  payload: {
+    response_code: string;
+    render_id?: string | null;
+    tell_mitra_event_id?: string | number | null;
+  }
+): Promise<void> {
+  try {
+    await api.post(`mitra/rooms/${encodeURIComponent(roomId)}/reflect/`, payload);
+  } catch { /* best-effort */ }
+}
+
+/**
  * POST /api/mitra/rooms/{room_id}/sacred/ — Sacred carry write.
  * Returns null on failure (non-blocking).
  */

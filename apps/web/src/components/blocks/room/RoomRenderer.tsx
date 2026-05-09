@@ -1,11 +1,13 @@
 /**
  * RoomRenderer — top-level room render from RoomRenderV1 envelope.
- * Render order: RoomOpeningExperience → RoomPrincipleBanner (optional) → RoomActionList.
+ * S17-D4A: when guided mode is on (entry_context.recommended_first_action_id present),
+ * renders RoomGuidedSection instead of RoomActionList. Flag off → existing flat list.
  */
 import React from 'react';
 import { RoomOpeningExperience } from './RoomOpeningExperience';
 import { RoomPrincipleBanner } from './RoomPrincipleBanner';
 import { RoomActionList } from './RoomActionList';
+import { RoomGuidedSection } from './RoomGuidedSection';
 import { ROOM_DISPLAY_NAMES, LIFE_CONTEXT_LABELS } from './roomConstants';
 
 interface Props {
@@ -20,6 +22,8 @@ export function RoomRenderer({ envelope, screenData, onAction }: Props) {
     ? LIFE_CONTEXT_LABELS[envelope.life_context] || envelope.life_context
     : null;
 
+  const isGuided = !!(envelope.room_context?.entry_context?.recommended_first_action_id);
+
   return (
     <div style={{ paddingBottom: 40 }} data-testid={`room-renderer-${envelope.room_id}`}>
       <RoomOpeningExperience
@@ -30,11 +34,19 @@ export function RoomRenderer({ envelope, screenData, onAction }: Props) {
       {envelope.principle_banner && (
         <RoomPrincipleBanner banner={envelope.principle_banner} screenData={screenData} onAction={onAction} />
       )}
-      <RoomActionList
-        envelope={envelope}
-        screenData={screenData}
-        onAction={onAction}
-      />
+      {isGuided ? (
+        <RoomGuidedSection
+          envelope={envelope}
+          screenData={screenData}
+          onAction={onAction}
+        />
+      ) : (
+        <RoomActionList
+          envelope={envelope}
+          screenData={screenData}
+          onAction={onAction}
+        />
+      )}
     </div>
   );
 }

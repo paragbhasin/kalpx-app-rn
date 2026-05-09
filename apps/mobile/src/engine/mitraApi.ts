@@ -2036,6 +2036,23 @@ export async function trackRoomTelemetry(payload: {
 }
 
 // ---------------------------------------------------------------------------
+// postRoomReflection — POST /api/mitra/rooms/{room_id}/reflect/ (S17-D4A)
+// Best-effort — errors swallowed silently; never breaks room UX.
+// ---------------------------------------------------------------------------
+export async function postRoomReflection(
+  roomId: string,
+  payload: {
+    response_code: string;
+    render_id?: string | null;
+    tell_mitra_event_id?: string | number | null;
+  }
+): Promise<void> {
+  try {
+    await api.post(`mitra/rooms/${encodeURIComponent(roomId)}/reflect/`, payload);
+  } catch { /* best-effort */ }
+}
+
+// ---------------------------------------------------------------------------
 // mitraJourneyHomeV3 — GET /api/mitra/v3/journey/home/ (S04 FourDoor surface)
 // ---------------------------------------------------------------------------
 export async function mitraJourneyHomeV3(): Promise<MitraHomeV3Response> {

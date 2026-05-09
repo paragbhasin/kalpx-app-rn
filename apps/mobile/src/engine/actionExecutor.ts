@@ -58,6 +58,7 @@ import {
   postGratitudeLedger,
   postInterpretIntent,
   postVoiceNote,
+  trackRoomTelemetry,
 } from "./mitraApi";
 
 // Audit fix F6 (2026-04-13) — dispatch fetchCompanionState via Redux store
@@ -2936,6 +2937,7 @@ export async function executeAction(
 
         setScreenValue(sp.variant, "runner_variant");
         setScreenValue(sp.source, "runner_source");
+        setScreenValue((sp.action_id as string | null) ?? null, "runner_action_id");  // S17-D4A
         setScreenValue(normalizedItem, "runner_active_item");
         setScreenValue(Date.now(), "runner_start_time");
         setScreenValue(0, "runner_reps_completed");
@@ -3059,10 +3061,31 @@ export async function executeAction(
           );
         }
 
-        loadScreen({
-          container_id: "practice_runner",
-          state_id: "completion_return",
-        });
+        // S17-D4A: if this was the recommended room action, navigate back to
+        // the room with show_room_reflection=true instead of completion_return.
+        const _runnerActionId = (screenState.runner_action_id as string | null) ?? null;
+        const _renderPayload = (screenState as any).room_render_payload;
+        const _recId = _renderPayload?.room_context?.entry_context?.recommended_first_action_id ?? null;
+        const _roomId = (screenState as any).room_id as string | null;
+        const _isGuidedCompletion = !!(
+          _runnerActionId && _recId && _runnerActionId === _recId && source === "support_room" && _roomId
+        );
+
+        if (_isGuidedCompletion) {
+          void trackRoomTelemetry({
+            event_type: 'recommended_action_completed' as any,
+            room_id: String(_roomId),
+            surface: 'room',
+          });
+          setScreenValue(true, "show_room_reflection");
+          setScreenValue(null, "runner_action_id");
+          loadScreen({ container_id: "room", state_id: "render" });
+        } else {
+          loadScreen({
+            container_id: "practice_runner",
+            state_id: "completion_return",
+          });
+        }
         break;
       }
 

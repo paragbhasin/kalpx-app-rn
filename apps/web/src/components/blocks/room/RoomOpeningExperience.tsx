@@ -3,6 +3,7 @@ interface RoomContext {
   sanatan_insight_line?: string | null;
   why_this_room_line?: string | null;
   bridge_line?: string | null;
+  situation_acknowledgement_line?: string | null;
 }
 
 interface Props {
@@ -46,6 +47,22 @@ export function RoomOpeningExperience({
           }}
         >
           {roomName}
+        </p>
+      )}
+
+      {ctx?.situation_acknowledgement_line && (
+        <p
+          data-testid="room-situation-ack"
+          style={{
+            fontSize: 14,
+            color: "#6B5E4E",
+            fontStyle: "italic",
+            lineHeight: 1.5,
+            margin: "6px 0",
+            padding: "0 24px",
+          }}
+        >
+          {ctx.situation_acknowledgement_line}
         </p>
       )}
 

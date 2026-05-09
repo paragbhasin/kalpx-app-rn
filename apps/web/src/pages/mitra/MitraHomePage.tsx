@@ -21,7 +21,11 @@ import { WEB_ENV } from "../../lib/env";
 import { webNavigate } from "../../lib/webRouter";
 import type { AppDispatch, RootState } from "../../store";
 import { setHomeData } from "../../store/doorSlice";
-import { loadScreen, updateScreenData, useScreenState } from "../../store/screenSlice";
+import {
+  loadScreen,
+  updateScreenData,
+  useScreenState,
+} from "../../store/screenSlice";
 
 function getRhythmTimeBand(): "morning" | "afternoon" | "night" {
   const hour = new Date().getHours();
@@ -225,8 +229,12 @@ export function MitraHomePage() {
       });
 
       const suggestions = triggerRes?.suggestions || [];
-      const practiceSuggestion = suggestions.find((s: any) => s?.type === "practice");
-      const mantraSuggestion = suggestions.find((s: any) => s?.type === "mantra");
+      const practiceSuggestion = suggestions.find(
+        (s: any) => s?.type === "practice",
+      );
+      const mantraSuggestion = suggestions.find(
+        (s: any) => s?.type === "mantra",
+      );
 
       const nextCache: HomeFeelingSupportCache | null = practiceSuggestion
         ? {
@@ -252,16 +260,14 @@ export function MitraHomePage() {
               _trigger_practice_data: {
                 ...(practiceSuggestion.core || {}),
                 wisdom: practiceSuggestion.context,
-                item_id:
-                  practiceSuggestion.item_id || practiceSuggestion.id,
+                item_id: practiceSuggestion.item_id || practiceSuggestion.id,
               },
               ...(mantraSuggestion
                 ? {
                     _trigger_mantra_data: {
                       ...(mantraSuggestion.core || {}),
                       wisdom: mantraSuggestion.context,
-                      item_id:
-                        mantraSuggestion.item_id || mantraSuggestion.id,
+                      item_id: mantraSuggestion.item_id || mantraSuggestion.id,
                     },
                   }
                 : {}),
@@ -305,10 +311,8 @@ export function MitraHomePage() {
                   mantraSuggestion?.core?.iast ||
                   mantraSuggestion?.core?.title ||
                   "OM",
-                mantra_devanagari:
-                  mantraSuggestion?.core?.devanagari || "ॐ",
-                mantra_audio_url:
-                  mantraSuggestion?.core?.audio_url || "",
+                mantra_devanagari: mantraSuggestion?.core?.devanagari || "ॐ",
+                mantra_audio_url: mantraSuggestion?.core?.audio_url || "",
                 trigger_mantra_text:
                   mantraSuggestion?.core?.iast ||
                   mantraSuggestion?.core?.title ||
@@ -335,7 +339,12 @@ export function MitraHomePage() {
   function startFeelingSupportPractice() {
     if (!feelingSupport) return;
     dispatch(updateScreenData(feelingSupport.screenDataPatch));
-    dispatch(loadScreen({ containerId: "practice_runner", stateId: feelingSupport.stateId }));
+    dispatch(
+      loadScreen({
+        containerId: "practice_runner",
+        stateId: feelingSupport.stateId,
+      }),
+    );
     webNavigate(
       `/en/mitra/engine?containerId=practice_runner&stateId=${feelingSupport.stateId}`,
     );
@@ -362,6 +371,12 @@ export function MitraHomePage() {
 
     // My Rhythm: prefer backend summary label, then first item in current time-band slot, then door state
     const rhythmBand = getRhythmTimeBand();
+    const isNightGreeting =
+      /night/i.test(greeting?.headline || "") || rhythmBand === "night";
+    const greetingImageSrc = isNightGreeting
+      ? "/night-home.png"
+      : "/imgsun.png";
+    const greetingTextColor = isNightGreeting ? "#FFFFFF" : "#432104";
     const rhythmSlot = homeData?.companion_rhythm?.[rhythmBand];
     const rhythmSubtitle =
       homeData?.my_rhythm_summary?.next_practice_label ??
@@ -413,7 +428,7 @@ export function MitraHomePage() {
               }}
             >
               <img
-                src="/imgsun.png"
+                src={greetingImageSrc}
                 alt=""
                 style={{
                   width: "100%",
@@ -427,7 +442,7 @@ export function MitraHomePage() {
                   position: "relative",
                   width: "100%",
                   height: "100%",
-                  minHeight: 190,
+                  minHeight: isNightGreeting ? 230 : 190,
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "flex-end",
@@ -447,7 +462,7 @@ export function MitraHomePage() {
                       fontFamily: "var(--kalpx-font-serif)",
                       fontWeight: 700,
                       fontSize: 28,
-                      color: "#432104",
+                      color: greetingTextColor,
                       margin: "0 0 -2px",
                       display: "flex",
                       alignItems: "center",
@@ -463,7 +478,7 @@ export function MitraHomePage() {
                         style={{
                           fontFamily: "var(--kalpx-font-serif)",
                           fontSize: 17,
-                          color: "#432104", // Softer color
+                          color: greetingTextColor,
                           margin: 0,
                         }}
                       >
@@ -833,7 +848,9 @@ export function MitraHomePage() {
                       >
                         {feelingSupport.title}
                       </div>
-                      <div style={{ fontSize: 13, color: "rgba(67,33,4,0.62)" }}>
+                      <div
+                        style={{ fontSize: 13, color: "rgba(67,33,4,0.62)" }}
+                      >
                         Start now
                       </div>
                     </button>
@@ -867,7 +884,9 @@ export function MitraHomePage() {
                               padding: "10px 14px",
                               fontSize: 14,
                               fontWeight: isSelected ? 700 : 500,
-                              cursor: feelingLoading ? "not-allowed" : "pointer",
+                              cursor: feelingLoading
+                                ? "not-allowed"
+                                : "pointer",
                               boxShadow: isSelected
                                 ? "0 6px 14px rgba(201,168,76,0.18)"
                                 : "none",

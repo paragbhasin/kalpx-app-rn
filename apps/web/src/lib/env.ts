@@ -6,4 +6,5 @@ export const WEB_ENV = {
   stripePublishableKey: (import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY as string | undefined) ?? '',
   googleClientId: (import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined) ?? '',
   isDev: import.meta.env.DEV as boolean,
+  tellMitraThreadUi: (import.meta.env.VITE_MITRA_TELL_MITRA_THREAD_UI as string | undefined) ?? '0',
 } as const;

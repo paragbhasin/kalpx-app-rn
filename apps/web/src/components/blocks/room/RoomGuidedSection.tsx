@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import { ROOM_GUIDED_COPY } from '@kalpx/contracts';
 import { postRoomTelemetry } from '../../../engine/mitraApi';
+import { WEB_ENV } from '../../../lib/env';
 
 interface Props {
   envelope: any;
@@ -33,18 +34,50 @@ export function RoomGuidedSection({ envelope, screenData, onAction }: Props) {
   const [stepsOpen, setStepsOpen] = useState(false);
 
   function handleBegin() {
+    if (WEB_ENV.isDev) console.log('[S17-D4B] handleBegin', {
+      recId,
+      recAction_found: !!recAction,
+      recAction_type: (recAction as any)?.action_type,
+      runner_payload_present: !!(recAction as any)?.runner_payload,
+      inquiry_payload_present: !!(recAction as any)?.inquiry_payload,
+      actions_count: (envelope.actions as any[]).length,
+      action_ids: (envelope.actions as any[]).map((a: any) => a.action_id),
+      render_id: renderId,
+    });
     if (!recAction) return;
-    void postRoomTelemetry({ room_id: roomId, event_type: 'recommended_action_started', render_id: renderId } as any);
-    if (onAction) {
-      const variant = recAction.action_type?.replace('runner_', '') ?? 'mantra';
-      const item = recAction.runner_payload ?? {};
+    void postRoomTelemetry({
+      room_id: roomId,
+      event_type: 'recommended_action_started',
+      render_id: renderId,
+      action_id: recAction.action_id,
+    } as any);
+    if (!onAction) return;
+    const actionId: string = recAction.action_id;
+    const actionType: string = recAction.action_type ?? '';
+    if (actionType === 'inquiry') {
+      const ip = (recAction as any).inquiry_payload;
+      if (!ip) return;
+      onAction({
+        type: 'room_inquiry_opened',
+        payload: { inquiry_payload: ip, action_id: actionId, room_id: roomId, render_id: renderId },
+      });
+    } else {
+      const rp = recAction.runner_payload;
+      if (!rp) {
+        if (WEB_ENV.isDev) console.warn('[S17-D4B] handleBegin: runner_payload missing for', actionType);
+        return;
+      }
+      const variant: string =
+        rp.runner_kind ||
+        (actionType.startsWith('runner_') ? actionType.replace('runner_', '') : actionType) ||
+        'mantra';
       onAction({
         type: 'start_runner',
         payload: {
-          source: recAction.runner_payload?.runner_source ?? 'support_room',
+          source: rp.runner_source ?? 'support_room',
           variant,
-          item,
-          action_id: recAction.action_id,
+          item: rp,
+          action_id: actionId,
         },
       });
     }

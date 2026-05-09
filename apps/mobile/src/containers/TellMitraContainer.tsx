@@ -273,12 +273,25 @@ export default function TellMitraContainer() {
     setConversation(prev => [...prev, { id: loadingId, type: 'loading' }]);
     setIsSubmitting(true);
     try {
+      if (__DEV__) console.log('[S17-D4B] chip payload', {
+        text: inputText.trim(),
+        source_surface: effectiveSource,
+        reset_context: isReset,
+        followup: followupMeta,
+      });
       const result = await postTellMitraV3({
         text: inputText.trim(),
         tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
         source_surface: effectiveSource,
         ...(followupMeta ? { followup: followupMeta } : {}),
         ...(isReset ? { reset_context: true } : {}),
+      });
+      if (__DEV__) console.log('[S17-D4B] tell_mitra response', {
+        suggested_action: result.suggested_action,
+        suggested_room_id: result.suggested_room_id,
+        followup_question_prompt: result.followup_question?.prompt,
+        tell_mitra_event_id: result.tell_mitra_event_id,
+        room_entry_context: result.room_entry_context,
       });
       // Update active context from response
       activeContextRef.current = {

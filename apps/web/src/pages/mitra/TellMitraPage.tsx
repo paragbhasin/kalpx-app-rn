@@ -6,10 +6,11 @@ import { useNavigate } from "react-router-dom";
 import { TellMitraThreadView } from "../../components/mitra/TellMitraThreadView";
 import { executeAction } from "../../engine/actionExecutor";
 import { postTellMitraV3 } from "../../engine/mitraApi";
+import { WEB_ENV } from "../../lib/env";
 import type { AppDispatch } from "../../store";
 import { useScreenState } from "../../store/screenSlice";
 
-const THREAD_UI_ENABLED = ((import.meta.env as Record<string, string>)["VITE_MITRA_TELL_MITRA_THREAD_UI"] ?? "0") === "1";
+const THREAD_UI_ENABLED = WEB_ENV.tellMitraThreadUi === "1";
 
 const THREAD_STORAGE_KEY = "tell_mitra_thread_v1";
 const RETURN_ROOM_KEY    = "tell_mitra_return_room_v1";
@@ -192,12 +193,25 @@ export function TellMitraPage() {
     setSubmitting(true);
     setTimeout(() => threadBottomRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
     try {
+      if (WEB_ENV.isDev) console.log('[S17-D4B] chip payload', {
+        text: inputText.trim(),
+        source_surface: effectiveSource,
+        reset_context: isReset,
+        followup: followupMeta,
+      });
       const resp = await postTellMitraV3({
         text: inputText.trim(),
         tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
         source_surface: effectiveSource,
         ...(followupMeta ? { followup: followupMeta } : {}),
         ...(isReset ? { reset_context: true } : {}),
+      });
+      if (WEB_ENV.isDev) console.log('[S17-D4B] tell_mitra response', {
+        suggested_action: resp.suggested_action,
+        suggested_room_id: resp.suggested_room_id,
+        followup_question_prompt: resp.followup_question?.prompt,
+        tell_mitra_event_id: resp.tell_mitra_event_id,
+        room_entry_context: resp.room_entry_context,
       });
       // Update active context from response
       activeContextRef.current = {
@@ -358,6 +372,11 @@ export function TellMitraPage() {
   function handleEnterRoom(item: Extract<TellMitraConversationItem, { type: "room_recommendation" }>) {
     const returnKey = `return_card:${item.room_id}:${item.tell_mitra_event_id ?? Math.floor(Date.now() / 60000)}`;
     try {
+      if (WEB_ENV.isDev) console.log('[S17-D4B] enter_room payload', {
+        room_id: item.room_id,
+        tell_mitra_event_id: item.tell_mitra_event_id,
+        room_entry_context: item.room_entry_context,
+      });
       sessionStorage.setItem(RETURN_ROOM_KEY, JSON.stringify({
         room_id: item.room_id,
         room_label: item.room_label,

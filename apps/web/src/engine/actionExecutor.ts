@@ -427,6 +427,12 @@ export async function executeAction(action: any, context: ActionContext): Promis
       const source: string = p.source || 'core';
       const item = p.item || {};
 
+      if (WEB_ENV.isDev) console.log('[S17-D4B] start_runner', {
+        variant,
+        has_item: !!p.item && Object.keys(p.item).length > 0,
+        action_id: p.action_id,
+      });
+
       if (!item.item_id && !item.id) {
         if (WEB_ENV.isDev) console.warn('[actionExecutor] start_runner: missing item_id', action);
         break;

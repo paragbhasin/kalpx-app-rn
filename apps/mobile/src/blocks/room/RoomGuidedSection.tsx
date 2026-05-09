@@ -43,26 +43,60 @@ const RoomGuidedSection: React.FC<Props> = ({ envelope }) => {
   const { loadScreen, goBack } = useScreenStore();
 
   function handleBegin() {
+    if (__DEV__) console.log('[S17-D4B] handleBegin', {
+      recId,
+      recAction_found: !!recAction,
+      recAction_type: (recAction as any)?.action_type,
+      runner_payload_present: !!(recAction as any)?.runner_payload,
+      inquiry_payload_present: !!(recAction as any)?.inquiry_payload,
+      actions_count: envelope.actions.length,
+      action_ids: envelope.actions.map((a: any) => a.action_id),
+      render_id: renderId,
+    });
     if (!recAction) return;
-    const rp = (recAction as any).runner_payload;
-    if (!rp) return;
-    void trackRoomTelemetry({ event_type: 'recommended_action_started' as any, room_id: roomId, surface: 'room' });
     const actionCtx = buildActionCtx({ loadScreen, goBack });
     if (envelope.room_id) {
       actionCtx.setScreenValue(envelope.room_id, "room_id");
     }
-    void executeAction(
-      {
-        type: "start_runner",
-        payload: {
-          source: rp.runner_source ?? "support_room",
-          variant: rp.runner_kind ?? "mantra",
-          item: rp,
-          action_id: (recAction as any).action_id,
-        },
-      } as any,
-      actionCtx,
-    );
+    const actionId = (recAction as any).action_id;
+    const actionType: string = (recAction as any).action_type ?? "";
+    // trackRoomTelemetry type is narrow (room_entered|exit_tapped); cast until telemetry helper is widened.
+    void (trackRoomTelemetry as any)({
+      event_type: "recommended_action_started",
+      room_id: roomId,
+      render_id: renderId,
+      action_id: actionId,
+      surface: "room",
+    });
+    if (actionType === "inquiry") {
+      const ip = (recAction as any).inquiry_payload;
+      if (!ip) return;
+      void executeAction(
+        {
+          type: "room_inquiry_opened",
+          payload: { inquiry_payload: ip, action_id: actionId, room_id: roomId, render_id: renderId },
+        } as any,
+        actionCtx,
+      );
+    } else {
+      const rp = (recAction as any).runner_payload;
+      if (!rp) {
+        if (__DEV__) console.warn("[S17-D4B] handleBegin: runner_payload missing for", actionType);
+        return;
+      }
+      void executeAction(
+        {
+          type: "start_runner",
+          payload: {
+            source: rp.runner_source ?? "support_room",
+            variant: (rp.runner_kind ?? actionType.replace("runner_", "")) || "mantra",
+            item: rp,
+            action_id: actionId,
+          },
+        } as any,
+        actionCtx,
+      );
+    }
   }
 
   function handleExit() {

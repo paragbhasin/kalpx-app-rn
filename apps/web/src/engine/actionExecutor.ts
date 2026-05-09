@@ -1496,7 +1496,11 @@ export async function executeAction(action: any, context: ActionContext): Promis
         room_selected_action: null,
         _overlay_parent_container: null,
       }));
-      webNavigate('/en/mitra/dashboard');
+      if (screenData.room_source === 'tell_mitra') {
+        webNavigate('/en/mitra/tell-mitra');
+      } else {
+        webNavigate('/en/mitra/dashboard');
+      }
       break;
     }
 

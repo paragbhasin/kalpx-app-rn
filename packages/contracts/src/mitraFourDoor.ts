@@ -428,6 +428,11 @@ export const CHIP_SUBMIT_TEXT: Readonly<Record<string, string>> = {
   around_not_felt:      "I am around people but still feel completely alone",
   unseen:               "No one really knows me and I feel unseen",
   after_conflict:       "Something happened between me and someone and now I feel alone",
+  // Quick-start + return card chips
+  overwhelmed:          "I am feeling overwhelmed right now",
+  need_clarity:         "I need more clarity and direction right now",
+  more_steady:          "I am feeling more steady now",
+  still_heavy:          "I still feel heavy and weighed down",
 };
 
 function _normalizeRoomEntryContext(raw: unknown): TellMitraRoomEntryContext | null {

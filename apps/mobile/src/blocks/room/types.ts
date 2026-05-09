@@ -399,6 +399,10 @@ export interface RoomContext {
   why_this_room_line?: string | null;
   /** Batch 4C: gentle connective line between wisdom banner and action list. */
   bridge_line?: string | null;
+  /** S17-D4A: Tell Mitra-specific (or generic direct-entry) acknowledgement. */
+  situation_acknowledgement_line?: string | null;
+  /** S17-D4A: typed entry context. */
+  entry_context?: import("@kalpx/types").RoomEntryContext | null;
 }
 
 export interface RoomRenderV1 {

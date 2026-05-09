@@ -16,9 +16,6 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -27,8 +24,9 @@ import {
 } from 'react-native';
 import { Fonts } from '../theme/fonts';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { CHIP_SUBMIT_TEXT, getRoomLabel, isValidRoomId } from '@kalpx/contracts';
+import TellMitraThreadView from '../components/mitra/TellMitraThreadView';
 import type {
   TellMitraConversationItem,
   TellMitraFollowupMeta,
@@ -74,8 +72,9 @@ export default function TellMitraContainer() {
   const [conversation, setConversation] = useState<TellMitraConversationItem[]>([]);
   const [threadDraft, setThreadDraft] = useState('');
   const [composerPlaceholder, setComposerPlaceholder] = useState("What's on your mind?");
-  const scrollViewRef = useRef<ScrollView>(null);
+  const scrollViewRef = useRef<any>(null);
   const composerInputRef = useRef<TextInput>(null);
+  const pendingTellMitraReturnRef = useRef<{ room_id: string; room_label: string } | null>(null);
 
   const screenBridge = useScreenStore();
   const screenBridgeRef = React.useRef(screenBridge);
@@ -107,6 +106,24 @@ export default function TellMitraContainer() {
       currentScreen: screenBridgeRef.current.currentScreen,
     };
   }, [dispatch, navigation]);
+
+  // ── Flag-on: return-from-room detection ───────────────────────────────────
+  useFocusEffect(
+    React.useCallback(() => {
+      if (!THREAD_UI_ENABLED) return;
+      const pending = pendingTellMitraReturnRef.current;
+      if (pending) {
+        pendingTellMitraReturnRef.current = null;
+        setConversation(prev => {
+          const alreadyHasReturn = prev.some(
+            item => item.type === 'return_card' && item.room_id === pending.room_id
+          );
+          if (alreadyHasReturn) return prev;
+          return [...prev, { id: genId(), type: 'return_card', room_id: pending.room_id, room_label: pending.room_label }];
+        });
+      }
+    }, [])
+  );
 
   // ── Flag-off: original submit ─────────────────────────────────────────────
   const handleSubmit = async (override?: {
@@ -338,196 +355,64 @@ export default function TellMitraContainer() {
     composerInputRef.current?.focus();
   };
 
+  const handleQuickStartChipThread = (value: string, label: string) => {
+    const apiText = value === 'calm_now'
+      ? 'Just help me calm down'
+      : (CHIP_SUBMIT_TEXT[value] ?? label);
+    setConversation(prev => [...prev, { id: genId(), type: 'user_message', text: label, created_at: new Date().toISOString() }]);
+    void submitThread(apiText, 'tell_mitra_quick_start');
+  };
+
+  const handleEnterRoomThread = (item: Extract<TellMitraConversationItem, { type: 'room_recommendation' }>) => {
+    pendingTellMitraReturnRef.current = { room_id: item.room_id, room_label: item.room_label };
+    void executeAction(
+      {
+        type: 'enter_room',
+        payload: {
+          room_id: item.room_id,
+          source: 'tell_mitra',
+          tell_mitra_event_id: item.tell_mitra_event_id,
+          room_entry_context: item.room_entry_context,
+        },
+      } as any,
+      buildActionContext() as any,
+    );
+  };
+
   // ── Flag-on: thread render ────────────────────────────────────────────────
   if (THREAD_UI_ENABLED) {
     return (
-      <View style={threadStyles.root}>
-        <ScrollView
-          ref={scrollViewRef}
-          style={threadStyles.scrollArea}
-          contentContainerStyle={threadStyles.scrollContent}
-          nestedScrollEnabled
-          keyboardShouldPersistTaps="handled"
-        >
-          {conversation.length === 0 && (
-            <View style={threadStyles.emptyState}>
-              <Text style={threadStyles.emptyTitle}>Tell Mitra</Text>
-              <Text style={threadStyles.emptySubtitle}>Share what you're carrying right now.</Text>
-            </View>
-          )}
-          {conversation.map(item => {
-            if (item.type === 'user_message') {
-              return (
-                <View key={item.id} style={threadStyles.userRow}>
-                  <View style={threadStyles.userBubble}>
-                    <Text style={threadStyles.userBubbleText}>{item.text}</Text>
-                  </View>
-                </View>
-              );
-            }
-            if (item.type === 'user_chip') {
-              return (
-                <View key={item.id} style={threadStyles.userRow}>
-                  <View style={threadStyles.userChipBubble}>
-                    <Text style={threadStyles.userChipText}>{item.label}</Text>
-                  </View>
-                </View>
-              );
-            }
-            if (item.type === 'mitra_response') {
-              return (
-                <View key={item.id} style={threadStyles.mitraBlock}>
-                  <Text style={threadStyles.mitraLabel}>MITRA</Text>
-                  {item.prior_context_summary ? (
-                    <Text style={threadStyles.priorContextText}>{item.prior_context_summary}</Text>
-                  ) : null}
-                  <Text style={threadStyles.mitraResponseText}>{item.response_copy}</Text>
-                </View>
-              );
-            }
-            if (item.type === 'followup_chips') {
-              return (
-                <View key={item.id} style={threadStyles.chipsBlock}>
-                  <Text style={threadStyles.chipsPrompt}>{item.prompt}</Text>
-                  <View style={threadStyles.chipsWrap}>
-                    {item.options.map(opt => (
-                      <TouchableOpacity
-                        key={opt.value}
-                        onPress={() => { if (!item.disabled && !isSubmitting) handleChipClickThread(opt, item.id); }}
-                        disabled={item.disabled || isSubmitting}
-                        style={[threadStyles.chip, (item.disabled || isSubmitting) && threadStyles.chipDisabled]}
-                        activeOpacity={0.7}
-                      >
-                        <Text style={[threadStyles.chipText, item.disabled ? threadStyles.chipTextDisabled : undefined]}>
-                          {opt.label}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                </View>
-              );
-            }
-            if (item.type === 'room_recommendation') {
-              return (
-                <View key={item.id} style={threadStyles.roomCard}>
-                  <Text style={threadStyles.roomCardTitle}>{item.room_label}</Text>
-                  {item.room_description ? (
-                    <Text style={threadStyles.roomCardDesc}>{item.room_description}</Text>
-                  ) : null}
-                  <TouchableOpacity
-                    style={threadStyles.goldBtn}
-                    onPress={() => void executeAction(
-                      { type: 'enter_room', payload: { room_id: item.room_id, source: 'tell_mitra', room_entry_context: item.room_entry_context } } as any,
-                      buildActionContext() as any,
-                    )}
-                    activeOpacity={0.8}
-                  >
-                    <Text style={threadStyles.goldBtnText}>Enter {item.room_label}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity style={threadStyles.ghostLink} onPress={handleTellMitraMoreThread} activeOpacity={0.7}>
-                    <Text style={threadStyles.ghostLinkText}>Tell Mitra more</Text>
-                  </TouchableOpacity>
-                  {item.secondary_room_id && item.secondary_room_id !== item.room_id ? (
-                    <TouchableOpacity
-                      style={threadStyles.ghostLink}
-                      onPress={() => void executeAction(
-                        { type: 'enter_room', payload: { room_id: item.secondary_room_id!, source: 'tell_mitra_secondary' } } as any,
-                        buildActionContext() as any,
-                      )}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={threadStyles.ghostLinkText}>
-                        Or try {getRoomLabel(item.secondary_room_id as any)} →
-                      </Text>
-                    </TouchableOpacity>
-                  ) : null}
-                </View>
-              );
-            }
-            if (item.type === 'wisdom_options') {
-              return (
-                <View key={item.id} style={threadStyles.wisdomBlock}>
-                  <Text style={threadStyles.wisdomLabel}>OR TRY</Text>
-                  {item.next_options.map((opt, i) => (
-                    <TouchableOpacity
-                      key={i}
-                      style={threadStyles.ghostBtn}
-                      onPress={() => {
-                        if (opt.action_type === 'navigate_to_room' && opt.room_id) {
-                          void executeAction(
-                            { type: 'enter_room', payload: { room_id: opt.room_id, source: 'tell_mitra_next_option' } } as any,
-                            buildActionContext() as any,
-                          );
-                        } else if (opt.action_type === 'navigate_to_door' && opt.door) {
-                          navigation.navigate('DynamicEngine' as any);
-                        }
-                      }}
-                      activeOpacity={0.7}
-                    >
-                      <Text style={threadStyles.ghostBtnText}>{opt.label} — {opt.description}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              );
-            }
-            if (item.type === 'safety') {
-              return (
-                <View key={item.id} style={threadStyles.safetyCard}>
-                  <Text style={threadStyles.safetyTitle}>Mitra hears you.</Text>
-                  <Text style={threadStyles.safetyText}>{item.response_copy}</Text>
-                </View>
-              );
-            }
-            if (item.type === 'loading') {
-              return (
-                <View key={item.id} style={threadStyles.mitraBlock}>
-                  <Text style={threadStyles.mitraLabel}>MITRA</Text>
-                  <Text style={threadStyles.loadingDots}>…</Text>
-                </View>
-              );
-            }
-            if (item.type === 'error') {
-              return (
-                <View key={item.id} style={threadStyles.errorCard}>
-                  <Text style={threadStyles.errorCardText}>{item.message}</Text>
-                </View>
-              );
-            }
-            return null;
-          })}
-        </ScrollView>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
-          {!!errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
-          <View style={threadStyles.composerRow}>
-            <TextInput
-              ref={composerInputRef}
-              style={threadStyles.composerInput}
-              value={threadDraft}
-              onChangeText={t => { setThreadDraft(t.slice(0, MAX_CHARS)); if (errorMsg) setErrorMsg(''); }}
-              multiline
-              placeholder={composerPlaceholder}
-              placeholderTextColor="#9b8b77"
-              maxLength={MAX_CHARS}
-            />
-            <TouchableOpacity
-              style={[threadStyles.sendBtn, (isSubmitting || !threadDraft.trim()) && threadStyles.sendBtnDisabled]}
-              onPress={() => {
-                if (isSubmitting || !threadDraft.trim()) return;
-                const input = threadDraft.trim();
-                setConversation(prev => [...prev, { id: genId(), type: 'user_message', text: input, created_at: new Date().toISOString() }]);
-                setThreadDraft('');
-                void submitThread(input, 'tell_mitra_door');
-              }}
-              disabled={isSubmitting || !threadDraft.trim()}
-              activeOpacity={0.8}
-            >
-              <Text style={threadStyles.sendBtnText}>{isSubmitting ? '…' : 'Send'}</Text>
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
-      </View>
+      <TellMitraThreadView
+        conversation={conversation}
+        submitting={isSubmitting}
+        draft={threadDraft}
+        composerPlaceholder={composerPlaceholder}
+        inputRef={composerInputRef}
+        scrollRef={scrollViewRef}
+        onDraftChange={t => { setThreadDraft(t.slice(0, MAX_CHARS)); if (errorMsg) setErrorMsg(''); }}
+        onSubmit={input => {
+          setConversation(prev => [...prev, { id: genId(), type: 'user_message', text: input, created_at: new Date().toISOString() }]);
+          setThreadDraft('');
+          void submitThread(input, 'tell_mitra_door');
+        }}
+        onChipClick={handleChipClickThread}
+        onEnterRoom={handleEnterRoomThread}
+        onTellMitraMore={handleTellMitraMoreThread}
+        onStartFresh={() => { setConversation([]); setThreadDraft(''); setComposerPlaceholder("What's on your mind?"); }}
+        onQuickStartChip={handleQuickStartChipThread}
+        onWisdomOptionPress={opt => {
+          if (opt.action_type === 'navigate_to_room' && opt.room_id) {
+            void executeAction(
+              { type: 'enter_room', payload: { room_id: opt.room_id, source: 'tell_mitra_next_option' } } as any,
+              buildActionContext() as any,
+            );
+          } else if (opt.action_type === 'navigate_to_door' && opt.door) {
+            navigation.navigate('DynamicEngine' as any);
+          }
+        }}
+        buildActionContext={buildActionContext}
+        errorMsg={errorMsg}
+      />
     );
   }
 
@@ -713,50 +598,3 @@ const styles = StyleSheet.create({
   },
 });
 
-// ── Flag-on styles (thread UI) ────────────────────────────────────────────────
-const threadStyles = StyleSheet.create({
-  root: { flex: 1 },
-  scrollArea: { flex: 1 },
-  scrollContent: { padding: 16, paddingBottom: 12 },
-  emptyState: { alignItems: 'center', paddingTop: 40 },
-  emptyTitle: { fontFamily: Fonts.serif.regular, fontSize: 22, fontWeight: '700', color: '#432104', marginBottom: 8 },
-  emptySubtitle: { fontSize: 15, color: '#7B6550' },
-  userRow: { alignItems: 'flex-end', marginBottom: 10 },
-  userBubble: { backgroundColor: '#F5E9C8', borderRadius: 18, borderBottomRightRadius: 4, paddingVertical: 10, paddingHorizontal: 14, maxWidth: '78%' },
-  userBubbleText: { fontSize: 15, color: '#432104', lineHeight: 22 },
-  userChipBubble: { backgroundColor: 'rgba(201,168,76,0.1)', borderWidth: 1, borderColor: 'rgba(201,168,76,0.35)', borderRadius: 16, borderBottomRightRadius: 4, paddingVertical: 6, paddingHorizontal: 12 },
-  userChipText: { fontSize: 13, color: '#7B6550', fontStyle: 'italic', fontFamily: Fonts.sans.regular },
-  mitraBlock: { marginBottom: 14 },
-  mitraLabel: { fontSize: 10, color: '#A08060', fontWeight: '700', letterSpacing: 0.8, marginBottom: 5, fontFamily: Fonts.sans.regular },
-  priorContextText: { fontSize: 12, color: '#7B6550', fontStyle: 'italic', marginBottom: 6, padding: 8, backgroundColor: 'rgba(201,168,76,0.05)', borderRadius: 6 },
-  mitraResponseText: { fontFamily: Fonts.serif.regular, fontSize: 17, lineHeight: 28, color: '#432104' },
-  loadingDots: { fontSize: 22, color: '#C9A84C', letterSpacing: 4 },
-  chipsBlock: { marginBottom: 14 },
-  chipsPrompt: { fontSize: 13, color: '#7B6550', marginBottom: 8, fontFamily: Fonts.sans.regular },
-  chipsWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { borderWidth: 1, borderColor: 'rgba(201,168,76,0.35)', borderRadius: 20, paddingVertical: 7, paddingHorizontal: 14 },
-  chipDisabled: { opacity: 0.45 },
-  chipText: { fontSize: 13, color: '#7B6550', fontFamily: Fonts.sans.regular },
-  chipTextDisabled: { color: '#BBAA99' },
-  roomCard: { borderWidth: 1, borderColor: 'rgba(201,168,76,0.22)', borderRadius: 16, backgroundColor: '#FFFCF8', padding: 16, marginBottom: 14 },
-  roomCardTitle: { fontFamily: Fonts.serif.regular, fontSize: 17, fontWeight: '700', color: '#432104', marginBottom: 4 },
-  roomCardDesc: { fontSize: 13, color: '#7B6550', marginBottom: 12 },
-  goldBtn: { backgroundColor: '#D4A017', borderRadius: 10, padding: 12, alignItems: 'center', marginBottom: 8 },
-  goldBtnText: { color: '#ffffff', fontSize: 15, fontWeight: '600' },
-  ghostLink: { paddingVertical: 8, alignItems: 'center' },
-  ghostLinkText: { fontSize: 13, color: '#9b8b77', fontFamily: Fonts.sans.regular, textDecorationLine: 'underline' },
-  wisdomBlock: { marginBottom: 14 },
-  wisdomLabel: { fontSize: 10, color: '#A08060', fontWeight: '700', letterSpacing: 0.8, marginBottom: 8, fontFamily: Fonts.sans.regular },
-  ghostBtn: { borderWidth: 1, borderColor: 'rgba(201,168,76,0.3)', borderRadius: 10, padding: 12, marginBottom: 6 },
-  ghostBtnText: { fontSize: 14, color: '#7B6550', fontFamily: Fonts.sans.regular },
-  safetyCard: { backgroundColor: 'rgba(240,235,230,0.85)', borderWidth: 1, borderColor: 'rgba(201,168,76,0.2)', borderRadius: 12, padding: 16, marginBottom: 14 },
-  safetyTitle: { fontFamily: Fonts.serif.regular, fontSize: 16, fontWeight: '700', color: '#432104', marginBottom: 8 },
-  safetyText: { fontSize: 15, lineHeight: 26, color: '#432104' },
-  errorCard: { backgroundColor: 'rgba(220,50,50,0.04)', borderWidth: 1, borderColor: 'rgba(220,50,50,0.15)', borderRadius: 8, padding: 10, marginBottom: 10 },
-  errorCardText: { fontSize: 13, color: '#c0392b' },
-  composerRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, borderTopWidth: 1, borderTopColor: 'rgba(201,168,76,0.18)', backgroundColor: '#FAF7F2', paddingTop: 10, paddingBottom: 10, paddingHorizontal: 12 },
-  composerInput: { flex: 1, borderWidth: 1, borderColor: '#DAC28E', borderRadius: 10, padding: 10, fontSize: 15, color: '#432104', minHeight: 44, maxHeight: 100, backgroundColor: '#FFFCF6', textAlignVertical: 'top' },
-  sendBtn: { backgroundColor: '#D4A017', borderRadius: 10, paddingVertical: 12, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center' },
-  sendBtnDisabled: { opacity: 0.5 },
-  sendBtnText: { color: '#ffffff', fontSize: 15, fontWeight: '600' },
-});
